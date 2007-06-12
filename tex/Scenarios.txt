@@ -1,0 +1,109 @@
+*****************************************************************
+*****  fastNLO - list of scenarios
+*****
+*****
+***** attention:
+*****   - in the transition from version 1 to 1c, the 
+*****     scenario fnt1001 (previously D0 & CDF) was
+*****     separated into two scenarios
+*****        fnt1001 (CDF only)
+*****        fnt1002 (D0 only)
+***** therefore in the new directory structure under "1c": 
+*****   - the previous scenario fnt1002 was moved to fnt1003
+*****   - the previous file fnt1001mid-ref.cc was moved to fnt1002mid-ref.cc
+*****
+*****************************************************************
+
+
+
+*****************************************************************
+***     HERA  
+FNH1001  H1 incl jets    hep-ex/0010054    
+FNH1002  ZEUS incl jets  hep-ex/0208037
+FNH1004  H1 dijets       hep-ex/0010054 
+
+*****************************************************************
+***     RHIC
+FNR0001   RHIC inclusive jets - for 3 algos (all ET-scheme)
+             kT D=0.7  cone R=0.7   cone R=1.0  (w/o Rsep)
+          --> not yet  --> better use only kT and in E-Scheme!!!!
+
+*****************************************************************
+***     Tevatron Run I 
+
+FNT1001   Tevatron Run I CDF inclusive jets w/ cone    (nb)
+          T. Affolder et al. (CDF Collaboration), hep-ph/0102074 
+                   Phys. Rev. D64, 032001 (2001).
+          two different tables:    (Rsep=1.3 algo)   (w/o Rsep: midp)
+	  33 bins /  mu at 45%
+
+
+FNT1002   Tevatron Run I D0 inclusive jets in eta bons w/ cone  (fb) 
+          B. Abbott et al. (D0 Collaboration), 
+                   Phys. Rev. Lett. {86} 1707 (2001).
+          two different tables:    (Rsep=1.3 algo)   (w/o Rsep: midp)
+	  90 bins /  mu at 45%
+
+FNT1003   CDF dijet cross section (ET,eta1,eta2)              (nb)
+          CDF Collaboration (T. Affolder et al.). 
+             Phys.Rev.D64:012001,2001, Erratum-ibid.D65:039902,2002
+             hep-ex/0012013
+          data:  durpdg.dur.ac.uk/cgi-hepdata/hepreac/4517016
+          two different tables:    (Rsep=1.3 algo)   (w/o Rsep: midp)
+	  51 bins /  mu at 45%
+
+FNT1004/FNT1005   
+          D0 RunI incl jets at 630GeV and scaled ratio 630/1800 (nb)
+          two tables:
+          D0 Run I 630 GeV incl jets (central)   -> FNT1004
+          D0 Run I 1800GeV incl jets (central)   -> FNT1005
+          both cases have 
+           - the cross section  (stored in the first rapidity bin)
+           - the ET^3/2pi weighted cross section, as used for the
+             ratio (stored in the second rapidity bin)
+          D0 Collaboration (B. Abbott et al.).
+          Phys.Rev.D64:032003,2001,  hep-ex/0012046
+          http://durpdg.dur.ac.uk/cgi-hepdata/hepreac/4529901
+          2*20 bins uneigted/weighted)  -   mu at 45%
+
+
+*****************************************************************
+       
+FNT2001  D0 Run II DeltaPhi_dijet                    ->>>>>> soon
+           two tables:
+           - 4 cross sections for normalization
+           - differential Delta Phi distributions
+
+
+FNT2002  CDF RunII central cone jets
+         hep-ex/0512020
+         two different tables:    (Rsep=1.3 algo)   (w/o Rsep: midp)
+	  20 bins /  mu at 45%
+
+
+FNT2003  CDF RunII central kT jets
+         hep-ex/0512062 
+	  17 bins /  mu at 45%
+
+FNT2003plus - same as FNT2003 - but with extended y/pT range
+	  116 bins /  mu at 45%
+
+FNT2004 CDF Run I jet shapes - if they converge ....
+          differental distributions
+         	  18*6=108 bins /  mu at 45%
+          normalization
+                  18 bins / mu at 45%
+
+---- for preliminary D0 results
+FNT200a  D0 prel. incl. jet x-sect  (flexible pT binning)
+           613 bins    - mu at 45%
+
+
+*****************************************************************
+FNL0001   LHC inclusive jets    kT D=0.7
+            6 rapidity ranges: 0.0-3.0 in 0.5
+           116 bins - mu at 45%
+
+FNL0002KT10 CMS LHC test scenario for kT incl. algo with D=1.0 in E-scheme
+            5 rapidity ranges: 0.0-0.75-1.5-2.5-3.0-5.0
+            pt bins: 35, 35, 32, 24, 16 --> 142 bins

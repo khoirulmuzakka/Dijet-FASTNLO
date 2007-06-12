@@ -1,0 +1,54 @@
+*************************************************************************
+*****  changelog for fastNLO - NLOJET++ user routine 
+*****       - starting from 05/11/02 with version 1 / new table-format
+*************************************************************************
+
+2005/12/07 MW
+ - the authorcode for all scenarios is updated according to the new
+   tableformat (incl. labels) and the new xlimit formula is 
+   implemented (incl. y integration):
+   fnt1001midp, fnt1001rsep, fnr0001, fnt200a, fnt1002-630, fnt1002-1800
+
+2005/12/07 TK
+ - add new tool: txt2raw
+
+2005/12/06 TK 
+ - fix nlofast-add / implement new table format incl. labels
+
+
+ ....   some undocumented changes
+ 
+2005/11/11
+- fixes in nlofast-add.cc, fnx9999.f, fnx9999.inc and fastnlod01.inc for the 
+  new table format
+- fix in ftn_gzio.c for gcc >3.5 (Oldrich Kepka)
+
+2005/11/04
+ - small changes in   fnt1001rsep.cc, fnt1001midp.cc
+   (scale variations were wrong)
+ - add test-version of  fnr0001.cc 
+   (limits still need to be optimized - test jobs are running)
+
+2005/11/02 MW
+ - create new directories   
+   /author1   (authorcode for version 1)
+    - author1 -> copy subdirectory common and all content
+              -> create new subdirectory "hadron" (instead of ppbar)
+   /user1     (usercode for version 1)
+      (still empty - will get new usercode)
+   /tex       (documentation)
+    - tableformat / more stuff in the future
+
+  /author1   (authorcode for version 1)
+    - copy subdirectory common and all content from old code
+    - add routine  fnt1001midp.cc   - new scenario fnt1001 (w/o rsep)
+      and routine  fnt1001rsep.cc   - new scenario fnt1001 (with rsep)
+      these routines are the best implementations of the current authorcode
+      -> changed bin center from 30% to 40% (can't compare with older jobs!!)
+
+   I have already changed all variable names in the write-table part 
+   in the author code / and I have set all table-header values correctly.
+   There was an error in the old LO table docu:               
+   the raw tables did not contain both: nevtlo and nevtnlo (only one nevt)
+   --> no further changes should be needed for new table-format - 
+        but please check!!!

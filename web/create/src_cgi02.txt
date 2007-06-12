@@ -1,0 +1,97 @@
+<body color="red" bgcolor=$bodycolor>
+
+
+
+
+<!-- ------------------------------------------------------- -->
+<!-- Main Table                                              -->
+<!-- ------------------------------------------------------- -->
+<table cellpadding=7 cellspacing=0 border=0 align=center width=$tablewidth
+       bgcolor=$tablecolor>
+
+<!-- ------------------------------------------------------- -->
+<!-- header                    ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr>  <td valign="top" align="center" colspan=4 bgcolor=$bodycolor>
+  <img src="http://hepforge.cedar.ac.uk/fastnlo/fastNLO01d.gif" alt="fastNLO"><br>
+  <font face=$textface size=2 color=$textcolor>
+  fast pQCD calculations for hadron-induced processes</font><br>
+</td>   </tr>
+
+<tr> <td valign="top" align="center" colspan=4 bgcolor=$bodycolor>
+
+<table valign="top" align="center" width=90%>
+
+<tr>
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="http://hepforge.cedar.ac.uk/fastnlo"><b>Home</b></a>
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="http://hepforge.cedar.ac.uk/fastnlo/news"><b>News</b></a>
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="http://hepforge.cedar.ac.uk/fastnlo/docs"><b>Documentation</b></a>
+   </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="http://hepforge.cedar.ac.uk/fastnlo/calculations"><b>Calculations</b></a> 
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="http://hepforge.cedar.ac.uk/fastnlo/links"><b>Links</b></a>
+  </font> </td>
+
+</tr> </table>
+</td> </tr>
+
+<!-- ------------------------------------------------------- -->
+<!-- Vertical Index Bar Begins ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr bgcolor="#d4d6aa">
+<!-- Index Bar Logo ------------------ --> 
+<td valign="top" width=200 rowspan=7>
+<br>
+
+<!-- Index Bar Items ----------------- -->
+<font face=$textface color=$textcolor size=3>
+<b>fastNLO Results</b></font><br>
+<br><br>
+<font face=$textface color=$textcolor size=2>
+<a href=http://hepforge.cedar.ac.uk/fastnlo/form>go back 
+to the <br> 
+fastNLO <br>
+web interface</a> </font>
+
+
+</td>  <!-- Vertical Index Bar Ends ------------------------ -->
+
+
+
+<!-- ------------------------------------------------------- -->
+<!-- Gutter, Do Not Delete --------------------------------- -->
+<!-- ------------------------------------------------------- -->
+<td valign="top" width=1 rowspan=7 height=$tableheight 
+bgcolor="#eeeecc">
+</td>
+
+</tr>  <!-- End First Row --------------------------------- -->
+
+
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+
+<b>your result:</b>

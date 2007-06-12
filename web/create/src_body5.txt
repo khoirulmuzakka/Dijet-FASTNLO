@@ -1,0 +1,50 @@
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+
+
+
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=2 color=$textcolor>
+  <br>
+
+  - home of <a href="http://hepforge.cedar.ac.uk/lhapdf/">LHAPDF</a> <br>
+
+  - PDF page at <a href="http://durpdg.dur.ac.uk/HEPDATA/PDF">Durham</a><br>
+
+  - the <a href="http://www.phys.psu.edu/~cteq/">CTEQ page</a> <br>
+
+  - PDFs from global fits from 
+    <a href"http://durpdg.dur.ac.uk/hepdata/mrs.html">MRST</a><br>
+
+  - PDFs from fits to DIS data from 
+     <a href"http://sirius.ihep.su/~alekhin/pdfa02/">S. Alekhin</a><br>
+
+
+  
+  <br>
+
+  - Interpolation techniques, used in fastNLO, are also
+    used in
+  <a target=new
+  href="http://www.path.unimelb.edu.au/~dersch/interpolator/interpolator.html">
+  digital imaging</a>
+     <br><br><br><br> <br><br><br><br> <br><br><br><br>
+  </font> </p>
+</td>
+</tr>
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+
+  </font> </p><br><br><br><br>
+</td>
+</tr>
+

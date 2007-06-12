@@ -1,0 +1,33 @@
+#!/bin/sh
+# This gets the environment
+. /etc/bashrc
+
+
+# - the absolute path for the webpages  
+path=http://hepforge.cedar.ac.uk/fastnlo
+#path=http://www-clued0.fnal.gov/~wobisch/fastNLO/cedar
+
+
+tablewidth=850
+tableheight=480
+
+textcolor='"#553322"'
+bodycolor='"#ffffff"'
+
+tablecolor='"#eeeecc"'
+indexbarcolor='"#d4d6aa"'
+textface='"Arial, Geneva"'
+
+
+
+# ---- for playing around ..............
+#textcolor='"#aa3322"'
+#bodycolor='"#f4f4f4"'
+#tablecolor='"#ee11cc"'
+#textface='"Times"'
+
+
+# make_page - A script to produce an HTML file
+cat << _EOF_
+
+

@@ -1,0 +1,106 @@
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=2 color=$textcolor>
+
+<!form action =" http://...../fn.cgi" method=get>
+<FORM ACTION="http://hepforge.cedar.ac.uk/fastnlo/form/cgi-bin/fn.cgi">
+
+
+<b>select Observable:</b><br>
+ <SELECT NAME="Scenario">
+         <OPTION value="fnt2003" SELECTED> fnt2003 - Tevatron Run II - CDF incl jets (kT - pT) - hep-ex-0512062
+         <OPTION value="fnt2002"> fnt2002 - Tevatron Run II - CDF incl jets (cone - pT) - hep-ex-0512020
+         <OPTION value="fnt1001"> fnt1001 - Tevatron Run I - CDF incl jets (cone - ET) - hep-ph/0102074
+         <OPTION value="fnt1002"> fnt1002 - Tevatron Run I - D0 incl jets (cone - ET, eta) - hep-ex/0011036
+         <OPTION value="fnt1003"> fnt1003 - Tevatron Run I - CDF dijets (cone - ET,eta1, eta2) - hep-ex/0012013
+         <OPTION value="fnt1004"> fnt1004 - Tevatron Run I @630GeV - D0 incl jets (cone - ET) - hep-ex/0012046
+         <OPTION value="fnt1007"> fnt1007 - Tevatron Run I - CDF dijets (cone - mass) - hep-ex/9912022
+         <OPTION value="fnt1008"> fnt1008 - Tevatron Run I - D0 dijets (cone - mass) - hep-ex/0012046
+         <OPTION value="fnh1001"> fnh1001 - HERA - DIS incl jets - H1 (kT - ET,Q2) - hep-ex/0010054
+         <OPTION value="fnh1002"> fnh1002 - HERA - DIS incl jets - ZEUS (kT - ET,Q2) - hep-ex/0208037
+         <OPTION value="fnh1004"> fnh1004 - HERA - DIS dijets - H1 (kT - ET,Q2) - hep-ex/0010054
+         <OPTION value="fnr0001"> fnr0001 - RHIC - incl jets (kT - pT, y) in pp at sqrt(s)=200GeV
+ </SELECT>
+<br>
+
+
+<br>
+<b>Proton PDFs:</b> &nbsp;
+<select name="ProtonPDF">
+
+        <option value="cteq61.LHgrid" selected> CTEQ6.1M - NLO
+        <option value="cteq5m1.LHgrid"> CTEQ5M1 - NLO
+        <option value="cteq4m.LHgrid"> CTEQ4M - NLO
+        <option value="MRST2004nnlo.LHgrid"> MRST2004 - NNLO
+        <option value="MRST2004nlo.LHgrid"> MRST2004 - NLO
+        <option value="MRST2002nnlo.LHgrid"> MRST2002 - NNLO
+        <option value="MRST2002nlo.LHgrid"> MRST2002 - NLO
+        <option value="MRST2003cnnlo.LHgrid"> MRST2003c - NNLO
+        <option value="MRST2003cnlo.LHgrid"> MRST2003c - NLO
+        <option value="a02m_nnlo.LHgrid"> Alekhin 2002 - NNLO
+        <option value="a02m_nlo.LHgrid"> Alekhin 2002 - NLO
+        <option value="ZEUS2005_ZJ.LHpdf"> ZEUS 2005 Jet Fit (ZJ) - NLO
+        <option value="H12000ms.LHgrid">H1 2000 MS-bar - NLO
+        <option value="Fermi2002_100.LHpdf"> FERMI 2002 - NLO
+        <option value="Botje_100.LHpdf"> Botje99 - NLO
+        </select>
+ <BR> <BR>
+
+<b>alpha-s(Mz): &nbsp; &nbsp;</b> 
+<input type="text" name="alpsmz" size=6 value="0.118"> 
+&nbsp; &nbsp; (used in the matrixelement)
+ <BR> <BR>
+
+factorization scale: &nbsp; &nbsp; &nbsp; &nbsp; muf=
+<select name="muf">
+        <option value="0.25"> 0.25
+        <option value="0.5"> 0.5
+        <option value="1.0" selected> 1
+        <option value="2.0"> 2
+</select> &nbsp;  * pT or ET &nbsp; (whatever was used in the jet definition) <BR> 
+
+renormalization scale: &nbsp; mur= <input type="text" name="mur" size=6 value="0.0"> &nbsp;
+ * pT or ET  &nbsp; (set to zero to get: mur=muf)  &nbsp; <br>
+(please note that for mur different from muf the threshold corrections for inclusive jets in pp are not available) <br>
+ <BR> <BR>
+
+
+
+if the observable uses a cone algorithm (no effect for kT algorithm):<br>
+<input type="radio" name="cone" value="midp" checked>use midpoint
+algorithm - as used in the measurements (recommended)
+ <br>
+<input type="radio" name="cone" value="rsep">use Rsep=1.3 (not recommended)<br>
+ <BR> 
+ <BR> 
+
+output: (so far only ASCII output is working) <br>
+<input type="radio" name="output" value="ascii" checked>ASCII<br>
+<input type="radio" name="output" value="plot">plot observable: data and theory <br>
+<input type="radio" name="output" value="ratio">plot ratio: data/theory
+ <BR> <BR>
+ <BR> <BR>
+
+
+
+
+<center>
+ <INPUT TYPE="submit" NAME="button" VALUE="do the calculation">
+</center>
+
+ </FORM>
+
+
+
+
+  </font> </p>
+</td>
+</tr>
+

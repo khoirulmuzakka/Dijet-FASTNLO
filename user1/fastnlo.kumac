@@ -1,0 +1,315 @@
+MACRO TEST
+
+close 0
+* Run I test (incl. PDF and alpha_s)
+*h/fil 1 path/fnrun1v00.hbk
+h/fil 1 path/fnrun1incl01.hbk
+
+
+
+*  Definitions for plots 
+ SET *
+ IGSET *
+      CLR
+      OPT NBOX
+      OPT NSTA       
+      set *
+      opt *
+      opt nbox
+      set stat 10
+      opt date
+      SET YMGU 2.2  | Y MarGin Up     2.00
+      SET YMGL 1.4 | Y Margin Low    2.00
+      SET XMGL 1.8   | X MarGin Left   2.00
+      SET XMGR 0.3   | X MarGin Right  2.00
+      SET XWIN 1.7         | 2.0
+      SET YWIN 1.5         | 2.0
+      SET GFON 40          | Global Title
+      SET GSIZ 0.5         |
+      SET YGTI 1.1         |
+      SET VSIZ 0.25        | Axis Values 0.28
+      SET VFON -40          | Font for Axis Values
+      SET XVAL 0.30        | y-axis to labels       0.40
+      SET YVAL 0.20        | y-axis to labels       0.20
+      SET YLAB 0.8         | dist X-axis to Labels (to atitle) 0.8
+      SET XLAB 1.3           |      Y-axis                       1.4
+      SET LFON -40         | Font for Axis Labels & comments   2.
+      SET ASIZ 0.28        | Axis Labels size                  0.28 
+      SET CSIZ 0.24        | Comment Size           0.28
+      SET CFON -40         | Font for Comments
+      SET TSIZ 0.24        | Histogram title size   
+      SET TFON -40        |
+      SET YHTI 0.8       | Y-Pos of histo title         1.2
+      SET BWID 3.          | Line width of histo-rounding box   1. (3.)
+      SET HWID 4.          | Histo-line-width                   1. (2.)
+      SET PWID 1.          | Page-line-width                    1.
+      SET FWID 2.          | Funct-line-width                   1.
+      SET LWID 2.          | Funct-line-width                   1.
+      SET XTIC 0.2         |                                    0.30
+      SET YTIC 0.2         |                                    0.30
+      SET PASS 1           | No of passes
+      SET CSHI 0.01        | shift between passes
+      SET SMGU 0.02        | 
+      SET SMGR 0.01         | 
+      SET NDVX 10510        |
+      SET NDVY 10510       |
+      SET DMOD 1       | lines
+      SET KSIZ 0.16        | Hershey charcter size           0.28
+      set mscf 1.5
+      IGSET MTYP 20             | Marker type in scatter plot         1
+      IGSET TXFP -40      |
+      IGSET CHHE 0.24      |      
+      set ncol 32 ; palette 1
+* modify colors
+/GRAPHICS/ATTRIBUTES/COLOR_TABLE 2 0.85 0.0 0.0
+/GRAPHICS/ATTRIBUTES/COLOR_TABLE 4 0.0 0.0 0.7
+
+
+
+
+FORTRAN/FILE 60 fastnlo.ps ; META -60 -111
+
+title 'fastNLO - NLO/LO/NLO-corr'
+size 18 24
+zone 2 3
+opt logy
+
+do i=100,600,100
+   set dmod 1 ; h/pl [i] chist
+   set dmod 2 ; h/pl 1000[i] schist
+   set dmod 3 ; h/pl 2000[i] schist
+enddo
+selnt 1 
+itx 15 6 'CDF'
+
+zone 1 2
+opt logx
+null 50 700 0.00001 20000
+set hcol 4
+do i=1,5
+   set dmod [i] ; h/pl [i]00 cshist
+enddo
+set hcol 2
+set dmod 1 ; h/pl 600 cshist
+
+atitle 'E?T! (GeV)' 'd^2![s]/dE?T!/d[c]  (pb/GeV)'
+opt linx
+
+
+set hcol 1
+
+* -------------------------------------------------------
+title 'fastNLO - subprocesses in LO, NLO'
+zone 2 3
+opt liny
+
+do i=1,6
+  h/copy [i]00 -999 ; h/op/reset -999
+  h/copy [i]00 -899 ; h/op/reset -899
+*  null 50 700 0. 1
+  max -999 1
+  h/pl -999
+
+  do j=1,7
+    h/op/add 10[j]0[i]00 -999 -999
+    h/op/div -999 1000[i]00 -998
+    set dmod 1 ; h/pl -998 schist 
+
+    h/op/add [j]0[i]00 -899 -899
+    h/op/div -899 [i]00 -898
+    set dmod 3 ; h/pl -898 schist 
+  enddo
+  h/del -999 ; h/del -998
+  h/del -899 ; h/del -898
+enddo	
+
+set dmod 0
+
+opt liny
+opt linx
+
+* -------------------------------------------------------
+title 'fastNLO - subprocess fractions ratio  NLO/LO'
+zone 2 3
+opt liny
+
+do i=1,6
+  h/copy [i]00 -999 ; h/op/reset -999
+  h/copy [i]00 -899 ; h/op/reset -899
+*  null 50 700 0. 1
+  min -999 0.7
+  max -999 1.5
+  h/pl -999
+
+ n = 0
+  do j=1,7
+    if ([j]=4 .or. [j]=5) then
+
+    elseif ([j]=3) then
+
+    elseif ([j]=2) then
+      n = [n]+1
+      h/op/add 1030[i]00 1020[i]00 -999
+      h/op/div -999 1000[i]00 -999
+      h/op/add 30[i]00 20[i]00 -899
+      h/op/div -899 [i]00 -899
+      h/op/div -899 -999 -998
+      h/op/smooth -998 1QN 1.5
+      set dmod [n] ; h/pl -998 schist 
+    else	
+      n = [n]+1
+      h/op/div 10[j]0[i]00 1000[i]00 -999
+      h/op/div [j]0[i]00 [i]00 -899
+      h/op/div -899 -999 -998
+      h/op/smooth -998 1QN 1.5
+      set dmod [n] ; h/pl -998 schist 
+    endif
+  enddo
+  h/del -999 ; h/del -998
+  h/del -899
+enddo	
+
+set dmod 0
+
+* -------------------------------------------------------
+title 'fastNLO - k-factors for subprocesses 0,1,23,6'
+zone 2 3
+opt liny
+
+opt liny
+opt logx
+opt linx
+
+do i=1,6
+  h/copy [i]00 -999 ; h/op/reset -999
+  min -999 0.7
+  max -999 2
+  h/pl -999
+  n=0
+  do j=0,7
+    if ([j]=0) then
+      set hcol 2
+    else
+      set hcol 1
+    endif 
+    if ([j]=4 .or. [j]=5 .or. [j]=3) then
+
+    elseif ([j]=2) then
+      n=[n]+1
+      h/op/add 20[i]00 30[i]00 -999
+      h/op/add 1020[i]00 1030[i]00 -998
+      h/op/div -999 -998 -999
+      h/op/smooth -999 1QN 1.5
+      set dmod [n] ; h/pl -999 shist ; h/del -999 ; h/del -998
+    else
+      n=[n]+1
+      h/op/div [j]0[i]00 10[j]0[i]00 -999
+      h/op/smooth -999 1QN 1.5
+      set dmod [n] ; h/pl -999 shist ; h/del -999
+    endif
+  enddo
+enddo
+
+atitle 'E?T! (GeV)' 'k-factor'
+opt linx
+
+* -------------------------------------------------------
+
+* 1        order:   0 total    1 LO   2 NLO-corr
+* 2        scale:   0 default  1-4 variations  1,2 mur  3,4 muf
+* 3        subproc: 0 total    1-7 subprocesses
+* 4,5      rapidity bin  1-99
+* 6,7      pT bin    0: pT spectrum (cross section result)
+*                   +i: x_max distribution in i-th pT bin
+*                   -i  x_min distribution in i-th pT bin
+
+* for Run II
+nb1 = 65
+nb2 = 55
+nb3 = 45
+nb4 = 35
+nb5 = 25
+
+*goto 123
+* for Run I
+nb1 = 24
+nb2 = 24
+nb3 = 19
+nb4 = 15
+nb5 = 8
+nb6 = 33 | CDF
+mess >>>>>>>>>>>> Run I scenario
+123:
+
+size 20 29
+opt nbox
+set ymgu 2.5
+set xmgr 0.2
+set xwin 1
+set ywin 1.3
+set yhti 999
+set hwid 4
+set bwid 3
+
+set hmax 0.15
+set hmax 0.57
+opt liny
+
+
+do isub=0,0 | 7
+do irap=1,6
+  zone 4 6
+  title1 = fastNLO - x-distribution - [c] bin [irap]
+  titlex = [title1] | subproc [isub]
+  title [titlex]  |[irap]]
+  do jpt=1,[nb[irap]],1      |,1 / ,3
+   pt= 40+10*[jpt]
+    hist = 1000000+100*[irap]+[jpt]+[isub]*10000
+    hisu = 2000000+100*[irap]+[jpt]+[isub]*10000
+    hisv =         100*[irap]+[jpt]+[isub]*10000
+*    mess [hist]
+set dmod 3
+set hcol 4 ;    h/pl -[hisv]          | total
+set hcol 2 ;    h/pl [hisv] s 
+set dmod 2
+set hcol 4 ;    h/pl -[hisu] s         | NLO correction
+set hcol 2 ;    h/pl [hisu] s  
+set dmod 1
+*set hcol 4 ;    h/pl -[hist] s        | LO
+*set hcol 2 ;    h/pl [hist] s 
+set dmod 4 ; line 45 -2 45 2
+set dmod 4 ; line 40 -2 40 2
+       leg = E?T!=[pt]GeV
+*       itx 0. 0. [leg]
+  enddo
+selnt 1
+itx 2 2 'these plots are not correct - these are bare coefficients'
+itx 2 1.5 'alphas and PDF information is not multiplied into the coeffcients'
+enddo
+enddo
+
+
+close 60 
+RETURN
+
+MACRO dzero
+selnt 1
+set chhe 0.33
+itx 8 15.2 'solid lines: LO'
+itx 8 14.6 'dashed lines: NLO correction'
+itx 8 14 'solid lines: total LO+NLO'
+
+itx 3 12 'current highest p?T! bins for Dzero:'
+itx 4 11 '0.0 \74 y \74 0.4     p?T!:  520 [-] 670 GeV'
+itx 4 10 '0.4 \74 y \74 0.8     p?T!:  470 [-] 620 GeV'
+itx 4 9 '1.6 \74 y \74 2.0     p?T!:  260 [-] 290 GeV'
+itx 4 8 '2.0 \74 y \74 2.4     p?T!:  170 [-] 200 GeV'
+
+itx 2 6.5 '[-] in these p?T! regions we never probe x-bins above No. 45 (lines in plots)'
+itx 2.5 6 '... and only small contributions come from x-bins above No. 40 (lines in plots)'
+itx 2 5.3 '[-] generally the forward region is most critical'
+itx 2.4 4.8 'because one x-value is much smaller than the other' 
+itx 2.4 4.3 'and the x-binning is not optimzed for both ranges simultaneously'
+
+close 60
+RETURN

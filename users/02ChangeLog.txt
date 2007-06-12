@@ -1,0 +1,171 @@
+****************************************************************
+****   ChangeLog for fastNLO standalone-usercode
+****************************************************************
+
+    
+
+****************************************************************
+ToDo:
+ - fix bug nlofast-add (core dump if more than one NLO table)
+
+****************************************************************
+
+******** changes on 07/09/05, revision 47 MW
+- example01.f 
+   -> strange: had to remove "RETURN" (at end)
+      otherwise it crashed with core dump
+- fastnlo00.inc
+  allow larger arrays
+    NRAPMAX=6  (for FNT1001)
+    NPTMAX=110 (LHC)  (77 for RHIC)
+    NRAPPT=240  (231 RHIC)   (210 LHC)
+    NSCALEMAX=5 (to reduce memory size)
+- fastnlo00.f
+    add output "in pb" for x-sections
+
+******** changes on 06/09/05, revision 42 MW
+- fastnlo00.f - removed "sqrt" from the scale variations
+  (not needed after Thomas' nlofast-add patch)
+
+******** changes on 02/09/05, revision 37 MW
+- fastnlo00.f modified for scale variations
+- example01.f slightly modified (dimension of array XST1001)
+-> first results for new scale scenario (0.5, 0.25,1,2) are very reasonable
+
+******** changes on 02/09/05, revision 36 TK
+* - bugfixes for yesterdays new features, seems to work now
+
+****** changes on 01/09/05 TK in ReV 35
+- read routines adjusted to new table format with flexible scale variations
+- MURSCALE and MUFSCALE are now arrays of size NSCALEMAX, see fastnlo00.inc
+
+****** changes on 26/08/05 MW in ReV 31
+- change coefficient array - memory usage can be reduced
+  to 30% if four dimensions are reduced to two:
+  - the two dimensions rapidity, pt are reduced to one dim
+    (reduces memory usage by 40%)
+  - the two dimensions xmax, xmin are reduced to one
+    (reduces memory usage by almost 50%)
+- modify result array (for multiple scales)
+- introduce new PDF array to save the PDF info 
+  intermediate storage of the PDFs makes it much easier to compute
+  arbitrary x-distributions at a late point
+- introduce new 'stripped-down' result array (w/o subproc)
+  which is directly returned as an argument from FNCALC
+
+- in detail:
+ change fastnlo00.inc
+   the idea is to remove empty spaces in the rap,pt dimensions
+   and also in the xmax,xmin dimensions. This saves 70% of the 
+   memory usage.
+    - old definitions:
+     +        array(NRAPMAX,NPTMAX,NXMAX,NXMAX,7,6),
+     +        result(NRAPMAX*NPTMAX,8,6)  
+    - new definitions:
+     +        array(NRAPPT,NXMAX,7,6),
+     +        pdf(NRAPPT,NXMAX,7),    ! new array for PDFs
+     +        result(NRAPPT,8,2,5),
+     +        xsect(NRAPPT,2,5)  ! new array directly returned as argument
+                    "2" for LO, NLO
+                    "5" for default plus four scale variations
+
+ modifications in fastnlo00.f
+   FNREAD (when reading "array")
+   FNOUT (when printing "result")
+   FNCALC   - completely rewrite: move code into FNGETPDF and FNMULT
+   FNGETPDF - new routine to read PDFs at all x-bins (with factor for mufscale)
+   FNMULT   - new routine to multiply coefficients and PDFs
+
+ minor modification in example01.f
+   - call FNCALC with more parameters
+   - declare array xst1001 (new output parameter)
+   - disable call to fastnlo00-hbook.f (due to bug - see below)
+
+ change fastnlo00-hbook.f
+   - adopt changes in array structure 
+   -> still has a bug - needs to be fixed!!!!!!!!!!!!!!!
+
+
+****** changes on 27/07/05 TK - in Rev 27
+- Bugfixes in nlofast-add, treatment of LO and NLO files was wrong
+
+
+****** changes on 26/07/05 MW - in Rev 25
+- implemented code for H1 jets for hep-ex/0010054
+  added new routine: tsh0001c.f  for Test-Scenario: "TSH0001" 
+- small change in fn-pdf.f: changed convention of Sigma/Delta
+    -> now consistent with Thomas:  0gluon - 1sigma - 2delta
+                  (or +1 in Fortran)
+- requires two table files: fnh0001dij.dat / fnh0001inc.dat
+   both available at:  www-clued0.fnal.gov/~wobisch/fastNLO/
+-> the output in the code has not yet been updated and the
+   names of the subroutines still need to be changed
+-> it works without crash - but it still produces nonsense
+-> added in Makefile and
+
+
+****** changes on 26/07/05 MW - in Rev 24
+- changed NPTMAX=80,NXMAX=100 to NPTMAX=33,NXMAX=50
+      in fastnlo00.inc  -> caused crash 
+- I splitted the routine fastnlo00.f into five routines:
+  *** the idea is to separate the following functionalities:
+    - scenario specific:
+         fastnlo00.f    (later renamed after scenario: "tst1001c.f")
+         fastnlo00-hbook.f (later renamed after scenario: "tst1001h.f")
+    - universal code
+         fn-pdf.f        (compute PDF linear combinations)
+         fn-interface.f  (user interface to PDFs/alpha_s)
+         fn-alphas-demo.f   (alpha_s routine for example)
+  *** in detail
+  * fastnlo00.f - contains
+      SUBROUTINE FNCALC(FILENAME)
+      SUBROUTINE FNREAD(FILENAME)
+      SUBROUTINE FNOUT
+  * fastnlo00-hbook.f 
+      SUBROUTINE FNHIST(filename)
+      SUBROUTINE FNHFILL
+      SUBROUTINE FNHBOOK(n,filename,m)
+  * fn-pdf.f    
+      SUBROUTINE FNPAPDF(X1,X2,MUF,PDF)   proton-antiproton
+      SUBROUTINE FNPPPDF(X1,X2,MUF,PDF)   proton-proton
+      SUBROUTINE FNEPPDF(X,MUF,PDF)       electron-proton
+  * fn-interface.f   
+      DOUBLE PRECISION FUNCTION FNALPHAS(MUR)
+      SUBROUTINE FNPDF(X,MUF,XPDF)
+  * fn-alphas-demo.f   
+      DOUBLE PRECISION FUNCTION ALPS_IT(MU,ALPSMZ,NLOOP)
+          DOUBLE PRECISION FUNCTION ALPS4_IT(MU,ALPSMZ,NLOOP)
+          DOUBLE PRECISION FUNCTION FBETA(ALPHAS)
+- made the corresponding changes in the Makefile
+
+
+****** changes on 25/07/05 MW - in Rev 23
+- merge four files:  gzclose.F gzfindl.F  gzopen.F  gzread.F
+    into single file gz.F  -> change Makefile accordingly
+    single files deleted
+- cp include-file gzio.inc into main directory -
+  change include statements - remove "include"-dir
+- changed pdf interface routine FNPDFCOMB to FNPAPDF
+  added two further pdf interfaces for different processes:
+     FNPAPDF   "PA" for proton-antiproton
+     FNPPPDF   "PP" for proton-proton
+     FNEPPDF   "EP" for electron-proton 
+
+
+****** changes on 21/07/05 MW - in Rev 22
+- modified example01.f (according to the changes below)
+- modified code for histogram filling
+  now only a single call is needed to book/fill/save histograms
+  (see example01.f how to call)
+- deleted Cteq61LHAPdf.f , int.f  (both not needed)
+  deleted fastnlo_hbook.f (is temporarily included in fastnlo00.f)
+- observe problem in fncalc:
+      do iord=1,2
+           ....
+         *as**(iord) ! multiply alphas
+        -> this is clearly the wrong order of alpha_s here
+           Thomas stated that the definition of iord has changed in 
+           the author code 
+        -> need to check this loop / the array index + alpha_s order
+
+   

@@ -1,0 +1,57 @@
+
+
+<!-------------------------------------------------------------->
+<!-- This file has been created automatically - do not edit   -->
+<!--                   the fastNLO team                       -->
+<!-------------------------------------------------------------->
+
+
+<body color="red" bgcolor=$bodycolor>
+
+<!-- ------------------------------------------------------- -->
+<!-- Main Table                                              -->
+<!-- ------------------------------------------------------- -->
+<table cellpadding=7 cellspacing=0 border=0 align=center width=$tablewidth
+       bgcolor=$tablecolor>
+
+<!-- ------------------------------------------------------- -->
+<!-- header                    ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr>  <td valign="top" align="center" colspan=4 bgcolor=$bodycolor>
+  <img src="$path/fastNLO01d.gif" alt="fastNLO"><br>
+  <font face=$textface size=2 color=$textcolor>
+  fast pQCD calculations for hadron-induced processes</font><br>
+</td>   </tr>
+
+<tr> <td valign="top" align="center" colspan=4 bgcolor=$bodycolor>
+
+<table valign="top" align="center" width=90%>
+
+<tr>
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="$path"><b>Home</b></a>
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="$path/news"><b>News</b></a>
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="$path/docs"><b>Documentation</b></a>
+   </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="$path/calculations"><b>Calculations</b></a> 
+  </font> </td>
+
+<td valign="top"  align="center">
+  <font face=$textface color=$textcolor size=3>
+  <a href="$path/links"><b>Links</b></a>
+  </font> </td>
+
+</tr> </table>
+</td> </tr>

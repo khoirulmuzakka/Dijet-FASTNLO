@@ -1,0 +1,37 @@
+<!-- ------------------------------------------------------- -->
+<!-- Vertical Index Bar Begins ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr bgcolor=$indexbarcolor>
+
+<!-- Index Bar Logo ------------------ --> 
+<td valign="top" width=200 rowspan=7>
+<br>
+
+<!-- Index Bar Items ----------------- --> 
+<font face=$textface color=$textcolor size=3>
+<b>Web Interface</b>  </font>
+
+<br><br>  
+<br><br>  
+<font face=$textface color=$textcolor size=2>
+Here you can compute the pQCD theory
+predictions in LO and NLO
+for all observables accessible in the
+pull down menu. 
+<br><br>
+For the inclusive jet cross section
+in hadron collisions also the
+NNLO-NLL threshold correction term 
+is computed 
+(restriction: the latter is available 
+only for mur=muf).
+</font>
+<br><br> 
+<br><br>  
+<br><br> 
+<br><br> 
+
+
+
+
+</td>  <!-- Vertical Index Bar Ends ------------------------ -->

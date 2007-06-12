@@ -1,0 +1,20 @@
+</font> </p>
+</td>  </tr>
+</table>
+
+
+<br>
+<center>
+
+<font face=$textface color=$textcolor size=2>
+<a href=http://hepforge.cedar.ac.uk/fastnlo/form>go back 
+to the fastNLO web interface</a> </font>
+
+<hr width=700>
+<font face=$textface size=2 color=$textcolor>
+Thomas Kluge, Klaus Rabbertz, Markus Wobisch <br>
+(send mail to the authors: fastnlo@cedar.ac.uk)</font>
+</center>
+
+</BODY>
+</HTML>

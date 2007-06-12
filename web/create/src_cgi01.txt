@@ -1,0 +1,48 @@
+#!/usr/bin/perl -w
+
+
+# ------------------------------------------------------------
+#                   fastNLO web interface
+# M. Wobisch 02/17/2006
+# ------------------------------------------------------------
+
+use CGI;
+$query = new CGI;
+
+$var_list = '';
+
+$if=0;
+foreach $field (sort ($query->param)) {
+    $fld[$if] = $field;
+    $iv = 0;
+    foreach $value ($query->param($field)) {
+        $val[$if][$iv] = $value;
+        $iv += 1;
+        $var_list .= "$field: $value \n";
+    }
+    $if += 1;
+}
+
+$fnscenario=$val[1][0];
+
+$fntable  = "../../tables/";
+$fntable .= $val[1][0];
+if ($fnscenario ne "fnt2003" && $fnscenario ne "fnr0001" && 
+  $fnscenario ne "fnh1001" && $fnscenario ne "fnh1002"&& 
+  $fnscenario ne "fnh1004") {
+    $fntable .=$val[4][0];  
+}
+$fntable .=".tab";
+
+$fnpdf  ="../lhapdfv4.2/share/lhapdf/PDFsets/";
+$fnpdf .= $val[0][0];
+
+$fnalpahs = $val[2][0];
+$fncone = $val[4][0];
+$fnmuf = $val[5][0];
+$fnmur = $val[6][0];
+
+
+
+print "Content-type: text/html\n\n";
+print <<"EOF";

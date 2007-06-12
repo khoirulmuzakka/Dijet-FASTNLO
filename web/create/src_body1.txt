@@ -1,0 +1,36 @@
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+
+
+
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+
+  - soon:  In March 2006 we will have the final release ready.
+           Please note that the final version will be faster by more 
+          than a factor of ten, as compared to the beta release. <br> <br>
+
+  - September 13, 2005: We announce the fastNLO beta release <br> <br>
+
+ <br><br><br><br>
+  </font> </p>
+</td>
+</tr>
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+  </font> </p>
+</td>
+</tr>
+
+
+

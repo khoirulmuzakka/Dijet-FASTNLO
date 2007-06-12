@@ -1,0 +1,49 @@
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+  The basic concept of fastNLO has been described in talks 
+  given at various occasions: </font></p>
+
+
+   <font face=$textface size=2 color=$textcolor>
+    - TeV4LHC meeting in April 2005 at CERN 
+       <a href="talk-050429tev4lhc.pdf">(slides)</a><br>
+
+     -  Frontiers of Contemporary Physics, Nashville, TN, May 2005 
+       <a href="050524FCPfastNLO.pdf">(slides)</a> <br>
+
+     -  TeV4LHC meeting in October 2005 at FNAL
+       <a href="051020Tev4LhcFastNLO.pdf">(slides)</a><br>
+       </font>
+ 
+<br><br>
+
+</td>
+</tr>
+
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+ A publication is currently in preparation.<br>
+ A detailed user manual will be provided soon.
+ <br><br><br><br> <br><br><br><br> <br><br>
+  </font> </p>
+</td>
+</tr>
+
+
+<tr>
+<td valign="top" colspan=2>
+<br><p> <font face=$textface size=3 color=$textcolor>
+
+</font></p>
+</td> </tr>
+

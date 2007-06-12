@@ -1,0 +1,150 @@
+**********************************************************************
+**********************************************************************
+**********   fastNLO  author's HowTo-Guide
+**********
+********** .... to avoid (to repeat) mistakes
+**********************************************************************
+**********************************************************************
+
+
+
+**********************************************************************
+**********************************************************************
+******* running jobs for an existing scenario   (e.g. fnt1002)
+
+***** first run 2 short jobs (10h each LO, NLO) incl. reference table
+*** edit authorcode:   set iref=1
+*** edit makefile: change name of output file by appending "ref"
+***                 e.g.:     -o fnt1002midpref
+*** > make fnt1002midp
+*** run jobs LO and NLO
+../bin/nlojet++ -P dipole --save-after 100000000 -cborn -n [tab-name]
+     -d /mypath/fastNLO/fnt1002/ -u fnt1002midpref.la
+../bin/nlojet++ -P dipole --save-after 10000000 -cnlo -n [tab-name]
+     -d /mypath/fastNLO/fnt1002/ -u fnt1002midpref.la 
+
+***** now run high statistics production
+*** edit authorcode:   set iref=0
+*** edit makefile: change back name of output file -> remove "ref"
+***                 e.g.:     -o fnt1002midp
+../bin/nlojet++ -P dipole --save-after 300000000 -cborn -n [tab-name]
+     -d /mypath/fastNLO/fnt1002/ -u fnt1002midp.la
+../bin/nlojet++ -P dipole --save-after 30000000 -cnlo -n [tab-name]
+     -d /mypath/fastNLO/fnt1002/ -u fnt1002midp.la 
+
+*** comments:
+ - jobs with reference table are much slower (PDF access!)
+   -> store results more frequent
+ - when the job starts: check the logfile that it does/does not 
+   contain the reference table (as desired)
+ - after 1-2h when the first tables are written out use nlofast-add
+   and the usercode to make sure that they make sense
+
+
+
+**********************************************************************
+**********************************************************************
+******* running the usercode
+
+ -> should be trivial / no advice here
+ -> except: if jobs crashes badly, make sure that array XST1001
+            is declared exactly as in  fnx9999.inc
+
+
+**********************************************************************
+**********************************************************************
+******* looking at the Histograms
+
+*** Histo Numbers have seven digits: 1234567
+
+digit    content
+1        order:   0 total  1 LO  2 LO+NLO-corr 3 LO+NLO-corr+NNLO-corr (->Nord)
+2        scale:   1-Nscalevar are the different variations 
+3        subproc: 0 total x-sect   1-Nsubproc  single subprocesses
+4,5      rapidity bin  1-Nrap
+6,7      pT bin   00: pT spectrum (cross section result)
+                  if x-Histograms were selected (not recommended - huge files)
+                  +i: x_max distribution in i-th pT bin
+                  -i  x_min distribution in i-th pT bin
+
+**** PDF uncertainties
+If the histograms have been filled using pdfuncertainty.f
+then the last to digits have the folowing meaning:
+6,7      00: pT spectrum (cross section result)
+         01: lower absolute x-section deviation
+	 02: upper absolute x-section deviation
+note: the deviations are avaliable for all orders (not very interesting...)
+      and also for all subprocesses. The latter allows to study the
+      true uncertainty contribution from different subprocesses!
+
+**** reference:
+>>> attention the histograms for the *reference results* are always stored
+    in scale bin No. 1
+
+example: if you want to check the precision for the different rapidity bins
+         for the D0 Run incl jet cros section, you have to compute the
+         following: 
+           (the reference was computed for the third scale variation)
+  
+                  fastNLO 
+                  approx. reference
+         h/op/div 0300100 0100600 901  ; h/pl 901   |<< ratio approx/ref
+         h/op/div 0300200 0100700 902  ; h/pl 902   |<< ratio approx/ref
+         h/op/div 0300300 0100800 903  ; h/pl 903   |<< ratio approx/ref
+         h/op/div 0300400 0100900 904  ; h/pl 904   |<< ratio approx/ref
+         h/op/div 0300500 0101000 905  ; h/pl 905   |<< ratio approx/ref
+                   ^  ^    ^  ^
+                   |  rap  |  |
+                 scale     | the reference is stored in rap-bin: rap+rapmax
+                           the reference is stored in the first scale bin
+
+
+
+**********************************************************************
+**********************************************************************
+******* how to implement a new scenario (almost) from scratch
+
+(1) start with a scenario that is very similar to what you want to
+    implement - criteria are:
+     - same basic observable (incl. jet / dijet)
+     - using rapidity or pseudorapidity
+     - jet algorithm in same recombination scheme
+
+    >> if any of these is different, make sure to implement the difference
+
+(2) implement the fundamental observable:
+     - the jet algorithm needs to be included in two places in authorcode
+       (include the .h file and set the class name)
+     - don't forget to change between "rapidity" and "pseudorapidity"
+       when filling the rapidity variable
+     - don't worry about pT vs. ET in the different schemes
+        -> this is correctly filled by the corresponding jet algorithms
+     - be careful with the x-Limit formula
+       - in the E-scheme the computed values should be fine
+          -> maybe add a little safety  ->  *0.96
+       - in the ET-scheme you need lots of additional safety
+          -> more in the forward region than in the central region
+          -> check e.g.:  fnt1002mid.cc
+
+(3) more detailed edits:
+     - edit the header of the routine, so it's clear what's computed
+     - edit the "cout" statement in the initialization (scenario name)
+     - set the "unitfactor" to the desired value (nb, pb, fb?)
+     - in the bottom where the table is written: edit all the fields
+       here - don't forget the field a little lower, how the scale is defined
+       >>> all the strings that are written into the table must not
+           contain one of the following: a SPACE, "/", empty line 
+        - reaction
+        - process
+        - strings for scenario description
+        - string for scale description
+        - strings describing the dimensions (rapidty, pT)
+        - and more, what I don't remember now....
+     - edit the No. of bins (y,pT) and the bin boundaries
+     - set the Xlimit values
+     - set the murval, mufval values
+     - set the No. of scale variations and the murscsale, mufscale values
+
+**********************************************************************
+**********************************************************************
+******* 

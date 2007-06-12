@@ -1,0 +1,56 @@
+<!-- ------------------------------------------------------- -->
+<!-- Primary page area begins                                -->
+<!-- ------------------------------------------------------- -->
+<!--Title Section ------- -->
+
+
+
+
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+  The fastNLO project provides computer code and tables of pre-computed 
+  perturbative coefficients for various observables in hadron-induced 
+  processes. 
+  This allows very fast computations of these observables for arbitrary PDFs 
+  and/or values of alpha_s(Mz) as e.g.
+  needed in PDF fits or in systematic studies.
+ <br><br><br><br>
+  </font> </p>
+</td>
+</tr>
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=3 color=$textcolor>
+  <br>
+  September 13, 2005: We announce 
+  <a href="betarelease/"> the fastNLO beta release</a> <br><br>
+  In March 2006 we will have the final release ready.<br>
+  Please note that the final version will be faster by more than a factor of
+  ten, as compared to the beta release.
+  </font> </p><br><br><br><br>
+</td>
+</tr>
+
+
+<tr>
+<td valign="top" colspan=2>
+  <p> <font face=$textface size=2 color=$textcolor>
+  <b> mailing list:</b><br>
+  If you want to receive information about future releases and updates, 
+  please join the fastNLO user mailing list by sending a mail including: <br>
+  "subscribe fastnlo-announce"<br> 
+  as the first and only line in the message body to 
+  "majordomo@cedar.ac.uk"
+  </font> </p>
+</td>
+
+</tr>
+
+
+
+

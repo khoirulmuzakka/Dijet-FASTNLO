@@ -1,0 +1,32 @@
+EOF
+
+
+print "<pre>";
+
+print "</pre>";
+
+
+
+print "<hr>";
+
+system("ps -u apache | grep fastnlo | wc -l");
+
+
+system <<END_SYSTEM;
+echo "<PRE>"
+
+echo ' ... fastNLO processes are already running on this server'
+
+date >> logfile.txt
+echo $fntable $fnpdf $fnalpahs $fnmuf $fnmur  >> logfile.txt
+
+date
+nice ./fastnlo1 $fntable $fnpdf $fnalpahs $fnmuf $fnmur 
+date
+echo "</PRE>"
+END_SYSTEM
+
+
+
+print <<"EOF";
+

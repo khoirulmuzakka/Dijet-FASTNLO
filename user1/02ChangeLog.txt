@@ -1,0 +1,12 @@
+****************************************************************
+****   ChangeLog for fastNLO standalone-usercode
+****   starting on Nov 02, 2005 - for version 1 (new tableformat)
+****************************************************************
+
+2005/11/03 TK .....  lots to do  :-)
+
+2005/11/02  MW:
+  copy all usercode from version 0 into new user directory "user1"
+  (except for directories beta,root - Thomas: check)
+    
+

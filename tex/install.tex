@@ -1,0 +1,94 @@
+{\small \footnotesize
+\begin{verbatim} 
+******************************************************************************
+*******          how to install and run fastNLO 
+******************************************************************************
+
+* ---------------------------------------------------------
+* step 1: installing a slightly modified NLOJET++ version
+* ---------------------------------------------------------
+To use all features of the new fastNLO code you need to
+install a slightly modified version of NLOJET++
+(includes only one small modification - see below):
+* create a new directory: NLOJET
+* get the code from Zoltan Nagy's webpage  
+  http://www.cpt.dur.ac.uk/~nagyz/nlo++/
+  (so far fastNLO is using NLOJET++ version 2.0.1)
+* copy the file nlojet++-2.0.1.tar.gz into the new directory NLOJET 
+  and unpack the code using:
+       tar -xzf nlojet++-2.0.1.tar.gz
+* 2 minor modifications of the NLOJET++ code are now needed:
+  - bugfix for DIS code
+    in the file:     include/bits/nlo-process_dis.h
+    change line 332 to:   for(unsigned int i = 0; i < 5; i++)
+  - patch needed for fastNLO
+     change line 40 in the file:  include/bits/nlo-basic_user.h
+     from:        void phys_output(const std::basic_..... 
+     to:          virtual void phys_output(const std::basic_..... 
+* compile NLOJET++ (may take 15 minutes) using:
+    1) cd nlojet++-2.0.1
+    2) aclocal
+    3) automake
+    4) autoconf
+    5) ./configure --prefix=[complete path of your NLOJET directory]
+    6) make
+    7) make install
+
+ .... or here are Zoltan's original instructions:
+       mkdir bld-nlojet 
+       cd bld-nlojet
+       ../nlojet++-2.0.1/configure --prefix [complete path of your NLOJET directory]
+       make install CFLAGS="-O3 -Wall" CXXFLAGS="-O3 -Wall"
+
+
+* ---------------------------------------------------------
+* step 2: installing and running the fastNLO author code
+* ---------------------------------------------------------
+
+* create a new subdirectory "fastNLO" in your NLOJET directory:
+       mkdir fastNLO
+* copy the authorcode code from SVN into the fastNLO directory
+* compile the fstNLO author code
+        make [.....]
+* then create a directory or a link "/path" to where your tables 
+  should be stored
+* then run:
+../bin/nlojet++ -A dipole --save-after 50000000 -cborn -n run1incl01a00 -d /path -u fnrun1incl01a.la
+../bin/nlojet++ -A dipole --save-after 5000000 -cnlo -n run1incl01a00 -d /path -u fnrun1incl01a.la
+
+(stores tables under /path)
+
+* comments: 
+  - please check the number of events after  --save-after  
+    in a testjob to make sure that you don't store your
+    tables too frequent or to infreqent. 1-2h makes sense
+
+* ---------------------------------------------------------
+* step 3: create fastNLO sum tables
+* ---------------------------------------------------------
+in directory /path: use nlofast-add
+
+./nlofast-add run1incl01a00-hhc-born-2jet.raw run1incl01a01-hhc-nlo-2jet.raw run1incl01.tab
+
+* ---------------------------------------------------------
+* step 4: run the fastNLO user code
+* ---------------------------------------------------------
+run user code (in SVN directory /user1c )
+set paths for CERNLIB and LHAPDF (v4.2) in makefile (or run source fastNLO.csh [user])
+in example01.f: set path to CTEQ6.1M grid in LHAPDF directory:
+    call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
+
+
+make -> then run: 
+./example /path/mytable.tab myhbookfile.hbk
+
+
+* ---------------------------------------------------------
+* step 5: plot histograms
+* ---------------------------------------------------------
+(example kumac is not up to date)
+
+\end{verbatim}
+}
+
+

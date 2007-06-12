@@ -1,0 +1,16 @@
+<!-- ------------------------------------------------------- -->
+<!-- Vertical Index Bar Begins ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr bgcolor=$indexbarcolor>
+
+<!-- Index Bar Logo ------------------ --> 
+<td valign="top" width=200 rowspan=7>
+<br>
+
+<!-- Index Bar Items ----------------- --> 
+<font face=$textface color=$textcolor size=3>
+<b>News</b></font><br>
+<br>  
+<br>  
+
+</td>  <!-- Vertical Index Bar Ends ------------------------ -->

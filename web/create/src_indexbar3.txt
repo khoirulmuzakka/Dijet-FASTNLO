@@ -1,0 +1,43 @@
+<!-- ------------------------------------------------------- -->
+<!-- Vertical Index Bar Begins ----------------------------- -->
+<!-- ------------------------------------------------------- -->
+<tr bgcolor=$indexbarcolor>
+
+<!-- Index Bar Logo ------------------ --> 
+<td valign="top" width=200 rowspan=7>
+<br>
+
+<!-- Index Bar Items ----------------- --> 
+<font face=$textface color=$textcolor size=3>
+<b>Calculations for measurements at</b>
+</font><br><br>
+
+
+<font face=$textface color=$textcolor size=3>
+<b>HERA</b><br>
+  <a href="./."> ep @ sqrt(s)=300GeV</a><br>
+  <a href="./."> ep @ sqrt(s)=320GeV</a><br></font>
+  <br>
+
+<font face=$textface color=$textcolor size=3>
+<b>RHIC</b><br>
+  <a href="./."> pp @ sqrt(s)=200GeV</a><br></font>
+  <br>
+
+<font face=$textface color=$textcolor size=3>
+<b>Tevatron</b><br>
+  <a href="./."> pp-bar @ sqrt(s)=0.63TeV</a><br>
+  <a href="./."> pp-bar @ sqrt(s)=1.80TeV</a><br>
+  <a href="./."> pp-bar @ sqrt(s)=1.96TeV</a><br></font>
+  <br>
+
+<font face=$textface color=$textcolor size=3>
+<b>LHC</b><br>
+  <a href="./."> pp @ sqrt(s)=14TeV</a><br></font>
+  <br>
+
+
+
+
+
+</td>  <!-- Vertical Index Bar Ends ------------------------ -->

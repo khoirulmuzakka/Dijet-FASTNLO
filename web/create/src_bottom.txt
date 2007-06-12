@@ -1,0 +1,9 @@
+
+</table>
+<br>
+<center>
+<hr width=700>
+<font face="Arial, Geneva" size=2 color="#553322">
+Thomas Kluge, Klaus Rabbertz, Markus Wobisch <br>
+(send mail to the authors: fastnlo@cedar.ac.uk)</font>
+</center>
