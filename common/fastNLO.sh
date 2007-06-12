@@ -10,6 +10,7 @@ if [ "$1" = "kr" -o "$1" = "grid" ] ; then
     export CXXFLAGS="-O3 -I ."
 fi
 if [ "$1" = "mw" ] ; then  
+    export SVN_EDITOR="emacs -nw"
     export CERNLIB=/usr/lib/cernlib/2005/lib
     export LHAPDF=/usr/local/lib
     export NLOJET=/home/wobisch/NLOJET
