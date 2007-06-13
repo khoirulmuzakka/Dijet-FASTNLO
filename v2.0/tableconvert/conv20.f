@@ -266,13 +266,13 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
          Endif
 
          If (ireaction.eq.1) then
-            IPDFcoeff = 100103        ! <<< modify for DIS 
+            IPDFcoeff = 1000103        ! <<< modify for DIS 
          elseif (ireaction.ge.2) then
-c            IPDFcoeff = 200102        ! <<< modify for pp
+c            IPDFcoeff = 2000102        ! <<< modify for pp
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
-               IPDFCoeff = 200101
+               IPDFCoeff = 2000101
             Elseif (n.eq.2) then ! ---- NLO
-               IPDFCoeff = 200102
+               IPDFCoeff = 2000102
             Else
                write(*,*) " strange: n outside 1,2,3 in pp table"
             Endif

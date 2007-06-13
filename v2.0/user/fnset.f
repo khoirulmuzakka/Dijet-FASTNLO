@@ -10,7 +10,7 @@
 **********************************************************************
       Subroutine fnset(var,ival)
       Implicit None
-      Character*24 var
+      Character*(*) var
       Integer ival
       Integer IFNfirst,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,

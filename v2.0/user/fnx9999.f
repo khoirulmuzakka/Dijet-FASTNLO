@@ -15,9 +15,25 @@
 *                   "R" RHIC
 *            "nnnn" is a scenario number
 *
+*--------- v2.0 routines - status --------------------------------
+*  fx9999cc     main routine - minimal content - calls other code
+*                               almost complete -> need cosmetics
+*  fx9999in     initialization:
+*                - reset arrays, first output, read table (all done)
+*                - check consistency of common block (to do)
+*                 - interpret contribution selection/consistency (advanced)
+*                 - maybe reorder contributions/optimize PDF access (not yet)
+*                 - check availability of the contributions (not yet)
+*                 - find pointer to scale for each contribution
+*  fx9999ct     find pointers to contributions / scale??  (not yet)
+*  fx9999mt     multiply coefficients and PDFs  (not yet)
+*  fx9999gp     get PDFs - missing details - missing full matrix treatment
+*  fx9999pl     compute PDF linear combinations (new numbering!!)
+*  fx9999pr     print results (not yet)
+*  fx9999rd     read table (all done)
+*  fxnnnnnf     print scenario information (physics & technical) (to do)
+*  fxnnnnnm     normalize distribution by its own integral  (to do)
 *
-*   xXnnnnIN        initialization 
-*   xXnnnnNF        print scenario information (physics & technical)
 *
 * -------------------- from v1.4 ------- (to be updated)
 * contains the following routines
@@ -91,7 +107,7 @@
 
 c === initialization: read table, set pointers to contributions
       call FX9999IN(Filename,IContFlag,xmur,xmuf)
-
+      write(*,*) ' after init ',icontrib
 c === loop over pointers to contributions
       Do i=1,IContrib
          write(*,*) "Ctrb",i,IContrPoint(i),IScalePoint(i),
@@ -204,6 +220,7 @@ c   -->  still need to implement test if and where available
          IContrib = 0
          If (PORDPTHY.ge.1) then ! LO contribution selected
             IContrib = IContrib+1
+c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
             IContrPoint(IContrib) = 1 ! <<< assumes that LO comes first
          Endif
          If (PORDPTHY.ge.2) then ! NLO contribution selected
@@ -293,39 +310,43 @@ c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
       Implicit None
       Include 'fnx9999.inc'
       Double Precision Xmuf, x, muf, 
-     +     tmppdf(-6:6), xpdf(MxNxTot,-6:6), H(7)
+     +     tmppdf(-6:6), xpdf1(MxNxTot,-6:6),xpdf2(MxNxTot,-6:6), H(10)
       Integer ic, i,j,k,l,m, nx, nx2limit
 
 c - temp variables for cross check
       Double Precision reweight
 
-
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
             muf = ScaleNode(ic,i,1,IScalePoint(ic),j)
             nx =0
-            Do k=1,NxTot(ic,1)
+            Do k=1,NxTot(ic,1)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
                Call FNPDF(x, muf, tmppdf)
 c - temporary - just to cross check old results
                reweight = 1d0
                reweight = sqrt(x)/(1d0-0.99d0*x)**3
-               do l=-6,6
-                  XPDF(j,l) = tmppdf(l) * reweight
+               do m=-6,6
+                  xpdf1(j,m) = tmppdf(m) * reweight
+                  xpdf2(j,m) = tmppdf(m) * reweight
                enddo
-
-               nx2limit = k
-c - find exact condition later
-c               if ( DIS: nx2limit=1
-c -------------- very different treatment for full matrix w/ diff dimensions
+            Enddo
+            If (NPDFdim(ic).eq.2) then ! --- fill second PDF
+               Do k=1,NxTot(ic,2)
+                  x = Xnode2(ic,i,l)
+                  Call FNPDF(x, muf, tmppdf)
+                  Do m=-6,6
+                     xpdf2(j,m) = tmppdf(m)
+                  Enddo
+               Enddo
+            Endif
+            Do k=1,NxTot(ic,1) ! --- build PDF1,2 linear combinations
+               If (NPDF(ic).eq.1) nx2limit = 1 !               1d case (DIS)
+               If (NPDFdim(ic).eq.1) nx2limit = k !            2d half matrix
+               If (NPDFdim(ic).eq.2) nx2limit = NxTot(ic,2) !  2d full matrix
                Do l=1,nx2limit
                   nx = nx+1
-c                  call fx9999pl(ireaction,k,l,XPDF,H)
-c --- Nsubproc is old -> problem: don't want to use real Nsubproc
-c           since for compatibility mode we may need more than actual Nsubproc 
-c                  Do m=1,Nsubproc
-c                     pdf(nbin,nx,m,p) = H(m)
-c                  Enddo
+                  call fx9999pl(iPDFcoeff(ic),k,l,xpdf1,xpdf2,H)
                Enddo            ! x2-loop
             Enddo               ! x1-loop
          Enddo                  ! ScaleNode-loop
@@ -333,6 +354,104 @@ c                  Enddo
 
       Return
       End
+
+*******************************************************************
+*******************************************************************
+      SUBROUTINE FX9999PL(icf,i,j,XPDF1,XPDF2,H)
+* ---------------------------------------------------------------
+* MW 06/13/07
+* compute PDF linear combinations - for different sets of subprocesses
+*
+* depending on IPDFcoeff, the product of the i-th and j-th entries
+* of the PDF array XPDF are multiplied into the relevant linear 
+* combinations in the array H
+*
+* input:
+*    ireact             flag for reaction (1:DIS, 2:pp-jets, 3:ppbar-jets)
+*    i                  x-index of first hadron        
+*    j                  x-index for second hadron (if two-hadron process)
+*    XPDF1(nxmax,-6:6)  PDF array for all x-bins
+*    XPDF2(nxmax,-6:6)  PDF array for all x-bins
+*
+* output:
+*    H(10)              PDF linear combinations
+* ---------------------------------------------------------------
+      Implicit None
+      INCLUDE 'fnx9999.inc'
+      Integer icf, i,j,k
+      Double Precision XPDF1(MxNxTot,-6:6),XPDF2(MxNxTot,-6:6), H(10),
+     +     G1, G2,              ! gluon densities from both hadrons
+     +     SumQ1, SumQ2,        ! sum of quark densities
+     +     SumQB1, SumQB2,      ! sum of anti-quark densities
+     +     Q1(6),Q2(6), QB1(6),QB2(6), ! arrays of 6 (anti-)quark densities
+     +     S,A                  ! products S,A
+
+c --- DIS: inclusive and jets
+      if (icf.ge.1000101 .and. icf.le.1000103) then 
+         H(1) = 0d0             ! Delta  at O(as^0)
+         do k=1,5,2
+            H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
+     +           4d0*(XPDF1(i,k+1)+XPDF1(i,-k-1)))/9d0
+         enddo
+         H(2) = XPDF1(i,0)       ! Gluon  at O(as^1)
+         H(3) = 0d0             ! Sigma  at O(as^2)
+         do k=1,6
+            H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
+         enddo
+
+c --- hadron-hadron: jets
+      elseif ((icf.ge.2000101 .and. icf.le.2000102).or.
+     +        (icf.ge.3000101 .and. icf.le.3000102)) then 
+         SumQ1  = 0d0
+         SumQB1 = 0d0
+         SumQ2  = 0d0
+         SumQB2 = 0d0
+         do k=1,6
+            Q1(k)  = XPDF1(i,k)  ! read 1st PDF at x1
+            QB1(k) = XPDF1(i,-k)
+            SumQ1  = SumQ1  + Q1(k)
+            SumQB1 = SumQB1 + QB1(k)
+            Q2(k)  = XPDF2(j,k)  ! read 2nd PDF at x2
+            QB2(k) = XPDF2(j,-k)
+            SumQ2  = SumQ2  + Q2(k)
+            SumQB2 = SumQB2 + QB2(k)
+         enddo
+         G1     = XPDF1(i,0)
+         G2     = XPDF1(j,0)
+c   - compute S,A
+         S = 0d0
+         A = 0d0
+         do k=1,6
+            S = S + (Q1(k)*Q2(k)) + (QB1(k)*QB2(k)) 
+            A = A + (Q1(k)*QB2(k)) + (QB1(k)*Q2(k)) 
+         enddo
+c   - compute seven combinations
+         H(1) = G1*G2
+         H(6) = (SumQ1+SumQB1)*G2
+         H(7) = G1*(SumQ2+SumQB2)
+c   - for pp
+         if (icf.ge.2000101 .and. icf.le.2000102) then
+            H(2) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
+            H(3) = S
+            H(4) = A
+            H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
+c   - for p-pbar: swap combinations 2<->5 and 3<->4
+         elseif (icf.ge.3000101 .and. icf.le.3000102) then
+            H(5) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
+            H(4) = S
+            H(3) = A
+            H(2) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
+         endif
+      else
+         write(*,*) '    IPDFCoeff =',icf
+         write(*,*) '    this IPDFCoeff is not yet defined'
+         stop
+      endif
+
+      RETURN 
+      END
+*******************************************************************
+
 
 *******************************************************************
 *******************************************************************
