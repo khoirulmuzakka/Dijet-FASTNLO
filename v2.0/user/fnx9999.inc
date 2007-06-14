@@ -54,7 +54,7 @@ c --- Block B
       Integer IRef(MxCtrb), IScaleDep(MxCtrb), Npow(MxCtrb), 
      +     NPDF(MxCtrb), NPDFPDG(MxCtrb,MxPDF),NPDFDim(MxCtrb),
      +     NFragFunc(MxCtrb), NFFPDG(MxCtrb,MxFF), NFFDim(MxCtrb),
-     +     NSubproc(MxCtrb), IPDFCoeff(MxCtrb),Nxtot(MxCtrb,2)
+     +     NSubproc(MxCtrb), IPDFdef(MxCtrb,3), Nxtot(MxCtrb,2)
       Double Precision XNode1(MxCtrb,MxObsBin,MxNxtot),
      +     XNode2(MxCtrb,MxObsBin,MxNxtot)
       Integer NScales(MxCtrb),NScaleDim(MxCtrb), IScale(MxCtrb,MxScales), 
@@ -90,7 +90,7 @@ c - int
      +     IContrFlag1, IContrFlag2, IContrFlag3, 
      +     NContrDescr, NCodeDescr, IRef, IScaleDep, Npow, 
      +     NPDF, NPDFPDG, NPDFDim,
-     +     NFragFunc, NFFPDG, NFFDim, NSubproc, IPDFCoeff, Nxtot,
+     +     NFragFunc, NFFPDG, NFFDim, NSubproc, IPDFdef, Nxtot,
      +     NScales, NScaleDim, IScale, NScaleDescript,
      +     NScaleVar, NScaleNode,
      +     IContrib, IContrPoint, IScalePoint,

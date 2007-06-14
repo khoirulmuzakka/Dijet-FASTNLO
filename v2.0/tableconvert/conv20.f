@@ -102,7 +102,8 @@ c - new variables that did not exist in v14
       Integer  Ncontrib, Ndim, IDiffBin(2), INormFlag, IDataFlag, IAddMultFlag,
      +     IContrFlag1,IContrFlag2,IContrFlag3, NcontrDescr, NCodeDescr,
      +     IScaleDep, NPDF, NPDFPDG(2), NPDFDim, NFragFunc, NSubpr,
-     +     IPDFCoeff, NScales, NScaleDim, nxall , nscaddr, nscvar
+     +     IPDFCoeff, IPDFdef1, IPDFdef2, IPDFdef3,
+     +     NScales, NScaleDim, nxall , nscaddr, nscvar
       Double Precision XNode, hxlim,hx,a
 
 c - Ncontrib
@@ -266,18 +267,26 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
          Endif
 
          If (ireaction.eq.1) then
-            IPDFcoeff = 1000103        ! <<< modify for DIS 
+            IPDFdef1 = 1
+            IPDFdef2 = 1
+            IPDFdef3 = 3        ! <<< make more flexible (2,3)
          elseif (ireaction.ge.2) then
-c            IPDFcoeff = 2000102        ! <<< modify for pp
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
+               IPDFdef1 = 2
+               IPDFdef2 = 1
+               IPDFdef3 = 1
                IPDFCoeff = 2000101
             Elseif (n.eq.2) then ! ---- NLO
-               IPDFCoeff = 2000102
+               IPDFdef1 = 2
+               IPDFdef2 = 1
+               IPDFdef3 = 2
             Else
                write(*,*) " strange: n outside 1,2,3 in pp table"
             Endif
          endif
-         WRITE(2,*) IPDFCoeff   ! IPDFCoeff
+         WRITE(2,*) IPDFdef1   ! IPDFdef1
+         WRITE(2,*) IPDFdef2   ! IPDFdef2
+         WRITE(2,*) IPDFdef3   ! IPDFdef3
 
          WRITE(2,*) Nxtot       ! Nxtot(1)
          i = 0

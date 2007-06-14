@@ -328,7 +328,7 @@ c - temporary - just to cross check old results
                reweight = sqrt(x)/(1d0-0.99d0*x)**3
                do m=-6,6
                   xpdf1(j,m) = tmppdf(m) * reweight
-                  xpdf2(j,m) = tmppdf(m) * reweight
+                  xpdf2(j,m) = tmppdf(m) * reweight ! << depending on hh/hhbar
                enddo
             Enddo
             If (NPDFdim(ic).eq.2) then ! --- fill second PDF
@@ -346,7 +346,8 @@ c - temporary - just to cross check old results
                If (NPDFdim(ic).eq.2) nx2limit = NxTot(ic,2) !  2d full matrix
                Do l=1,nx2limit
                   nx = nx+1
-                  call fx9999pl(iPDFcoeff(ic),k,l,xpdf1,xpdf2,H)
+                  call fx9999pl(IPDFdef(ic,1),IPDFdef(ic,2),
+     +                 IPDFdef(ic,3),k,l,xpdf1,xpdf2,H)
                Enddo            ! x2-loop
             Enddo               ! x1-loop
          Enddo                  ! ScaleNode-loop
@@ -357,12 +358,12 @@ c - temporary - just to cross check old results
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999PL(icf,i,j,XPDF1,XPDF2,H)
+      SUBROUTINE FX9999PL(icf1,icf2,icf3,i,j,XPDF1,XPDF2,H)
 * ---------------------------------------------------------------
 * MW 06/13/07
 * compute PDF linear combinations - for different sets of subprocesses
 *
-* depending on IPDFcoeff, the product of the i-th and j-th entries
+* depending on icf1,2,3, the product of the i-th and j-th entries
 * of the PDF array XPDF are multiplied into the relevant linear 
 * combinations in the array H
 *
@@ -378,7 +379,7 @@ c - temporary - just to cross check old results
 * ---------------------------------------------------------------
       Implicit None
       INCLUDE 'fnx9999.inc'
-      Integer icf, i,j,k
+      Integer icf1,icf2,icf3, i,j,k
       Double Precision XPDF1(MxNxTot,-6:6),XPDF2(MxNxTot,-6:6), H(10),
      +     G1, G2,              ! gluon densities from both hadrons
      +     SumQ1, SumQ2,        ! sum of quark densities
@@ -387,7 +388,7 @@ c - temporary - just to cross check old results
      +     S,A                  ! products S,A
 
 c --- DIS: inclusive and jets
-      if (icf.ge.1000101 .and. icf.le.1000103) then 
+      if (icf1.eq.1 .and. icf2.eq.1 .and.(icf3.ge.1.and.icf3.le.3)) then 
          H(1) = 0d0             ! Delta  at O(as^0)
          do k=1,5,2
             H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
@@ -400,8 +401,7 @@ c --- DIS: inclusive and jets
          enddo
 
 c --- hadron-hadron: jets
-      elseif ((icf.ge.2000101 .and. icf.le.2000102).or.
-     +        (icf.ge.3000101 .and. icf.le.3000102)) then 
+      elseif (icf1.eq.2.and.icf2.eq.1.and.(icf3.ge.1.and.icf3.le.2))then 
          SumQ1  = 0d0
          SumQB1 = 0d0
          SumQ2  = 0d0
@@ -430,21 +430,21 @@ c   - compute seven combinations
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
 c   - for pp
-         if (icf.ge.2000101 .and. icf.le.2000102) then
+         if (icf1.eq.2) then
             H(2) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
             H(3) = S
             H(4) = A
             H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
-c   - for p-pbar: swap combinations 2<->5 and 3<->4
-         elseif (icf.ge.3000101 .and. icf.le.3000102) then
+c   - for p-pbar: swap combinations 2<->5 and 3<->4     <<< swap before in PDF!
+         elseif (icf1.eq.3) then
             H(5) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
             H(4) = S
             H(3) = A
             H(2) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
          endif
       else
-         write(*,*) '    IPDFCoeff =',icf
-         write(*,*) '    this IPDFCoeff is not yet defined'
+         write(*,*) '    icf1,2,3 =',icf1,icf2,icf3
+         write(*,*) '    this combination is not yet defined'
          stop
       endif
 
@@ -600,10 +600,12 @@ c --- coefficient block
          Enddo
          Read(2,*) NFFDim(ic) 
          Read(2,*) NSubproc(ic)
-         Read(2,*) IPDFCoeff(ic)   
+         Read(2,*) IPDFdef(ic,1)   
+         Read(2,*) IPDFdef(ic,2)   
+         Read(2,*) IPDFdef(ic,3)   
 
-         IF (IPDFCoeff(ic).eq.0) then ! - no predefined set of PDF coefficients
-            write(*,*) " case IPDFCoeff=0 not yet implemented"
+         IF (IPDFdef(ic,1).eq.0) then ! - no predefined set of PDF coefficients
+            write(*,*) " case IPDFdef(1)=0 not yet implemented"
             STOP
          Endif
          If (NPDF(ic).gt.0) Then
