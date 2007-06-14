@@ -91,7 +91,7 @@ c      call CV20WRT('contrib3.txt',3) ! thresh-cor only
       integer Iflg
       CHARACTER*(*) filename
       CHARACTER*(33) label(0:2)
-      integer i,j,k,l,m,n,n1,o,p, nbin, i1,i2
+      integer i,j,k,l,m,n,n1,n2,o,p, nbin, i1,i2
       INCLUDE 'conv20.inc'
 
       Integer nctrmin,nctrmax, mmax
@@ -105,6 +105,10 @@ c - new variables that did not exist in v14
      +     IPDFCoeff, IPDFdef1, IPDFdef2, IPDFdef3,
      +     NScales, NScaleDim, nxall , nscaddr, nscvar
       Double Precision XNode, hxlim,hx,a
+
+c - pointer to subprocesses - new ordering
+      Integer ipppoint(7),idispoint(3)
+      Data ipppoint/1,4,5,6,7,2,3/, idispoint/3,1,2/
 
 c - Ncontrib
       Ncontrib = Nord
@@ -163,7 +167,7 @@ c ------------------------------------------------------------------
       WRITE(2,4999) 0        ! NData
 c ------------------------------------------------------------------
       WRITE(2,5001) Iseparator  ! ------------------- block A2 ------
-      WRITE(2,*) IXSECTUNITS    ! -> Ipublunits
+      WRITE(2,4999) IXSECTUNITS    ! -> Ipublunits
       WRITE(2,4999) 3           ! NScDescript 
       do i=1,3
          WRITE(2,5009) NAMELABEL(i) ! ScDescript(i)
@@ -214,7 +218,7 @@ c ------------------------------------------------------------------
       Endif
 c ------------------------------------------------------------------
       do n=nctrmin,nctrmax           ! loop over all contributions  B01...
-         WRITE(2,*) IXSECTUNITS      ! Ixsectunits (for each block)
+         WRITE(2,4999) IXSECTUNITS      ! Ixsectunits (for each block)
          WRITE(2,4999) IDataFlag     ! IDataFlag
          WRITE(2,4999) IAddMultFlag  ! IAddMultFlag
          If (n.le.2) then
@@ -244,32 +248,42 @@ c --- (here: neither data - nor multiplicative factors)
          If (n.eq.3) IScaleDep = 2   ! in v1.4 tables thresh always 3rd
          WRITE(2,4999) IScaleDep     ! IScaleDep
          WRITE(2,4998) Nevt(n)  ! Nevt
-         WRITE(2,*) Npow(n)  ! Npow
-         WRITE(2,*) NPDF     ! NPDF
+         WRITE(2,4999) Npow(n)  ! Npow
+         WRITE(2,4999) NPDF     ! NPDF
          do i=1,NPDF
-            WRITE(2,*) NPDFPDG(i)  ! NPDFPDG
+            WRITE(2,5000) NPDFPDG(i)  ! NPDFPDG
          enddo
-         WRITE(2,*) NPDFDim     ! NPDFdim
-         WRITE(2,*) NFragFunc   ! NFragFunc
-         WRITE(2,*) 0           ! NFragDim
+         WRITE(2,4999) NPDFDim     ! NPDFdim
+         WRITE(2,4999) NFragFunc   ! NFragFunc
+         WRITE(2,4999) 0           ! NFragDim
 
 c -   NSubProc
 c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
          If (NPDFDim.eq.0) then ! ---- DIS
-            WRITE(2,*) NSubpr   ! Nsubproc   <<< modify for DIS & pp
-
+            If (n.eq.1) then ! --- LO
+               WRITE(2,4999) 2
+            Elseif (n.eq.2) Then
+               WRITE(2,4999) 3
+            Endif
          ElseIf(NPDFDIm.eq.1) then ! --------- pp
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
-               WRITE(2,*) 6
+               WRITE(2,4999) 6
             Elseif (n.eq.2) then ! ---- NLO
-               Write(2,*) 7
+               Write(2,4999) 7
             Endif
          Endif
 
          If (ireaction.eq.1) then
             IPDFdef1 = 1
             IPDFdef2 = 1
-            IPDFdef3 = 3        ! <<< make more flexible (2,3)
+            If (n.eq.1) then
+               IPDFdef3 = 2     ! --- only Delta, G
+            Elseif (n.eq.2) then
+               IPDFdef3 = 3     ! --- Delta, G, Sigma
+            Else
+               write(*,*) 'DIS wrong n'
+               STOP
+            Endif
          elseif (ireaction.ge.2) then
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
                IPDFdef1 = 2
@@ -284,11 +298,11 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
                write(*,*) " strange: n outside 1,2,3 in pp table"
             Endif
          endif
-         WRITE(2,*) IPDFdef1   ! IPDFdef1
-         WRITE(2,*) IPDFdef2   ! IPDFdef2
-         WRITE(2,*) IPDFdef3   ! IPDFdef3
+         WRITE(2,5000) IPDFdef1   ! IPDFdef1
+         WRITE(2,5000) IPDFdef2   ! IPDFdef2
+         WRITE(2,5000) IPDFdef3   ! IPDFdef3
 
-         WRITE(2,*) Nxtot       ! Nxtot(1)
+         WRITE(2,5000) Nxtot       ! Nxtot(1)
          i = 0
          do i1=1,Nrapidity
             do i2=1,NPT(i1)
@@ -372,7 +386,11 @@ c - undo PDF reweighting -> compute factors
 c ---------- works only for standard fastNLO PDF weighting formula
                      w1= sqrt(xarray(i,j))/(1d0-0.99d0*xarray(i,j))**3
                      w2= sqrt(xarray(i,k))/(1d0-0.99d0*xarray(i,k))**3
-                     rewgt(i,m) = w1*w2 ! --- undo weighting
+                     If (NPDFdim.eq.0) Then ! --- DIS
+                        rewgt(i,m) = w1
+                     Elseif (NPDFdim.eq.1) Then ! --- pp / pp-bar
+                        rewgt(i,m) = w1*w2 ! --- undo weighting
+                     Endif
                   Enddo
                Enddo
             Enddo
@@ -389,29 +407,39 @@ c --- write SigmaTilde array
                         if (NPDFDim.eq.0) nxall=Nxtot
                         if (NPDFDim.eq.1) nxall=(Nxtot*Nxtot+Nxtot)/2
                         do m=1,nxall !            xbins
-                           do n1=1,Nsubproc !     subprocesses
+                           do n2=1,Nsubproc !     subprocesses
+c - reorder subprocesses - use pointer
+                              if (ireaction.eq.1) then ! DIS
+                                 n1 = idispoint(n2)
+                              else
+                                 n1 = ipppoint(n2)
+c                                 n1=n2
+                              endif
                               if (n.eq.1) then
                                  nscaddr = 1
                               else
                                  nscaddr = 1+k+(n-2)*nscalevar
                               endif
                               a = array(i,m,n1,nscaddr,l)
-c                              a = a*rewgt(i,m) ! --- PDF unweighting
- 
+                              a = a*rewgt(i,m) ! --- PDF unweighting
+
 c --- special cases: in pp in LO merge 2nd & 3rd subproc for pp/ppbar ---
 c ---                in DIS remove Sigma at LO
-c --- to do: divide by reweighting-factor(x)
 c --- to do: what is variable "n"? -> outermost loop: contributions
 
                               if (ireaction.eq.1) then ! --- DIS
-                                 if (a.eq.0d0) then
-                                    WRITE(2,5009) '0'
+                                 if (n.eq.1 .and. n1.eq.2) then
+                                    continue
                                  else
-                                    WRITE(2,5003) a
+                                    if (a.eq.0d0) then
+                                       WRITE(2,5009) '0'
+                                    else
+                                       WRITE(2,5003) a
+                                    endif
                                  endif
 
                               else ! ------- pp/ppbar
-                                 if ((n.eq.1 .or. n.eq.3).and. n1.eq.3) a =
+                                 if ((n.eq.1 .or. n.eq.3).and. n1.eq.3) a=
      +                                (array(i,m,n1-1,nscaddr,l)
      +                                +array(i,m,n1,  nscaddr,l))/2d0
                                  if ((n.eq.1 .or. n.eq.3) .and. n1.eq.2) then
