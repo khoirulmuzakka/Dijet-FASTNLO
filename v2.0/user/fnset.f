@@ -6,6 +6,13 @@
 * notice: any changes in the commonblock need to be copied into
 *         the include file fnx9999.inc 
 *
+*
+* question: how can we later determine if the usercode was called 
+*           earlier with exactly the same settings?
+* possible solution: increment a variable with each call (up to 37k)
+*                    if identical in a subsequent call, one can assume 
+*                    that FNSET was not called in between
+*                                  ? ? ? 
 * MW 06/11/2007
 **********************************************************************
       Subroutine fnset(var,ival)

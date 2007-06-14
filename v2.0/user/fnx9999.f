@@ -25,13 +25,13 @@
 *                 - maybe reorder contributions/optimize PDF access (not yet)
 *                 - check availability of the contributions (not yet)
 *                 - find pointer to scale for each contribution
-*  fx9999ct     find pointers to contributions / scale??  (not yet)
+*  fx9999pt     find pointers to contributions/scales
 *  fx9999mt     multiply coefficients and PDFs  (not yet)
 *  fx9999gp     get PDFs - missing details - missing full matrix treatment
-*  fx9999pl     compute PDF linear combinations (new numbering!!)
+*  fx9999pl     compute PDF linear combinations (done - cosmetics)
 *  fx9999pr     print results (not yet)
 *  fx9999rd     read table (all done)
-*  fxnnnnnf     print scenario information (physics & technical) (to do)
+*  fxnnnnnf     print scenario information (physics & technical) (o.k.)
 *  fxnnnnnm     normalize distribution by its own integral  (to do)
 *
 *
@@ -57,7 +57,7 @@
 
 
 *******************************************************************
-      Subroutine FX9999CC(FILENAME,IContFlag,XMUR,XMUF,IPRINTFLAG,XSECT)
+      Subroutine FX9999CC(FILENAME,XMUR,XMUF,IPRINTFLAG,XSECT)
 *-----------------------------------------------------------------
 * fastNLO user code v2.0 - main routine 
 *
@@ -94,34 +94,28 @@
       Implicit None
       Include 'fnx9999.inc'
       Integer IFILE, iord, isub, I,J,K,L,M, 
-     +     IContFlag,IPrintFlag,
-     +     ICtOld, 
-     +     maxscale, nbin,nx, ixmur,ixmuf
+     +     IPrintFlag,
+     +     maxscale, nbin,nx
       Character*(*) FILENAME
       Character*50 OLDFILENAME
-      Double Precision Xmur, Xmuf, XmurOld, XmufOld
+      Double Precision Xmur, Xmuf
       Data OLDFILENAME/'xxxx'/
       Save OLDFILENAME
-      Data ICtOld/-1/,XMurOld/0d0/,XmufOld/0d0/
-
 
 c === initialization: read table, set pointers to contributions
-      call FX9999IN(Filename,IContFlag,xmur,xmuf)
-      write(*,*) ' after init ',icontrib
+      call FX9999IN(Filename)
+c === determine pointers to contributions/scales
+      Call FX9999PT(xmur,xmuf)
+
 c === loop over pointers to contributions
       Do i=1,IContrib
          write(*,*) "Ctrb",i,IContrPoint(i),IScalePoint(i),
      +        NSubproc(IContrPoint(i))
-
 c - get PDFs
          call FX9999GP(i)
-
 c - multiply with perturbative coefficients and alphas
-         call FX9999MT(xmur,IScalePoint(i)) ! <<< need to think about argument
-
-c ----- maybe need no arguments at all? all info is known through commonblock
-
-c   - add up in small array
+         call FX9999MT(i,xmur,xmuf) ! <<< need to think about argument
+c - add up in small array
          Do j=1,NObsBin
             Do k=1,NSubProc(IContrPoint(i))
                xsect(j) = result(j,k,i)
@@ -154,28 +148,23 @@ c 5000 Format (A,A64)
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999IN(Filename,IContFlag,xmur,xmuf)
+      SUBROUTINE FX9999IN(Filename)
 *-----------------------------------------------------------------
 * MW 06/10/2007
 *
 * initialize fastNLO code
 * 
-* input:    IContFlag   defines which contributions shall be added
-*           Xmur        renormalization scale factor        
-*           Xmuf        factorization scale factor
+* input:    Filename of fastNLO table
 *
 * 06/11/2007 MW
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer IContFlag, ICtOld, i,j,k
-c      Double Precision Xmur, Xmuf
+      Integer i,j,k
       Character*(*) FILENAME
       Character*50 OLDFILENAME
-      Double Precision Xmur, Xmuf, XmurOld, XmufOld
       Data OLDFILENAME/'xxxx'/
       Save OLDFILENAME
-      Data ICtOld/-1/,XMurOld/0d0/,XmufOld/0d0/
 
 c === reset result arrays
       Do i=1,MxObsBin
@@ -200,76 +189,11 @@ c === in 1st scenario call: read fastNLO coefficient table
       If (FILENAME.ne.OLDFILENAME) Then
          Call FX9999RD(FILENAME)
          OLDFILENAME=FILENAME
-         ICtOld  = -1
-         XMurOld = 0d0
-         XmufOld = 0d0
 
 c   - check consistency of array dimensions / commonblock parameters
 c ----------> to be done
       Endif
 
-c === if new combination flag: check availability - set pointers to contrib.
-c === if new scale choice: check availability - set pointers to scale var.
-      If (IcontFlag.ne.ICtOld .or. Xmur.ne.XmurOld .or. Xmuf.ne.XmufOld) then
-         ICtOld = IContFlag
-         XmurOld = Xmur
-         XmufOld = Xmuf
-
-c === preliminary: assume fixed structure LO, NLO, threshcor
-c   -->  still need to implement test if and where available
-         IContrib = 0
-         If (PORDPTHY.ge.1) then ! LO contribution selected
-            IContrib = IContrib+1
-c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
-            IContrPoint(IContrib) = 1 ! <<< assumes that LO comes first
-         Endif
-         If (PORDPTHY.ge.2) then ! NLO contribution selected
-            IContrib = IContrib+1
-            IContrPoint(IContrib) = 2 ! <<< assumes that NLO comes second
-         Endif
-         If (PTHRESHCOR.eq.1) then ! 1-loop threshold corrections selected
-            If (PORDPTHY.lt.1) then
-               write(*,*)' inconsistent choice: 1-loop threshold corrections'
-               write(*,*)'                      need to be matched to LO'
-               Stop
-            Endif
-            If (PORDPTHY.ge.2) then
-               write(*,*)' inconsistent choice: NLO and 1-loop threshold'
-               write(*,*)'                     corrections are redundant'
-               Stop
-            Endif
-            IContrib = IContrib+1
-            IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
-         Endif
-         If (PTHRESHCOR.eq.2) then ! 2-loop threshold corrections selected
-            If (PORDPTHY.lt.2) then
-               write(*,*)' inconsistent choice: 2-loop threshold corrections'
-               write(*,*)'                      need to be matched to NLO'
-               Stop
-            Endif
-            If (PORDPTHY.ge.3) then
-               write(*,*)' inconsistent choice: NNLO and 2-loop threshold'
-               write(*,*)'                     corrections are redundant'
-               Stop
-            Endif
-            IContrib = IContrib+1
-            IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
-         Endif
-
-
-c ----- reorder, so that identical subprocesses are calculated in a row!!
-
-
-c - check availability of scale choice and assign pointer
-c     (based on fact scale since renorm scale flexible
-c       --- ecxept for threshold corrections ---
-
-c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
-         IScalePoint(1) = 1
-         If (IContrib.ge.2) IScalePoint(2) = 3
-         If (IContrib.ge.3) IScalePoint(3) = 3
-
-      Endif
 
  5000 Format (A,A64)
       Return 
@@ -277,20 +201,143 @@ c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999MT(xmur,ixmuf)
+      SUBROUTINE FX9999PT(xmur,xmuf)
+*-----------------------------------------------------------------
+* MW 06/14/2007
+*
+* determine pointer to contributions and to scales
+* 
+* input:    
+*           Xmur        renormalization scale factor        
+*           Xmuf        factorization scale factor
+*
+* 06/11/2007 MW
+*-----------------------------------------------------------------
+      Implicit None
+      Include 'fnx9999.inc'
+      Integer i,j,k
+      Double Precision Xmur, Xmuf, XmurOld, XmufOld
+      Data XMurOld/0d0/,XmufOld/0d0/
+
+c === preliminary: assume fixed table structure: LO, NLO, threshcor
+c   -->  still need to implement test if and where available
+      IContrib = 0
+      If (PORDPTHY.ge.1) then   ! LO contribution selected
+         IContrib = IContrib+1
+c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
+         IContrPoint(IContrib) = 1 ! <<< assumes that LO comes first
+      Endif
+      If (PORDPTHY.ge.2) then   ! NLO contribution selected
+         IContrib = IContrib+1
+         IContrPoint(IContrib) = 2 ! <<< assumes that NLO comes second
+      Endif
+      If (PTHRESHCOR.eq.1) then ! 1-loop threshold corrections selected
+         If (PORDPTHY.lt.1) then
+            write(*,*)' inconsistent choice: 1-loop threshold corrections'
+            write(*,*)'                      need to be matched to LO'
+            Stop
+         Endif
+         If (PORDPTHY.ge.2) then
+            write(*,*)' inconsistent choice: NLO and 1-loop threshold'
+            write(*,*)'                     corrections are redundant'
+            Stop
+         Endif
+         IContrib = IContrib+1
+         IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
+      Endif
+      If (PTHRESHCOR.eq.2) then ! 2-loop threshold corrections selected
+         If (PORDPTHY.lt.2) then
+            write(*,*)' inconsistent choice: 2-loop threshold corrections'
+            write(*,*)'                      need to be matched to NLO'
+            Stop
+         Endif
+         If (PORDPTHY.ge.3) then
+            write(*,*)' inconsistent choice: NNLO and 2-loop threshold'
+            write(*,*)'                     corrections are redundant'
+            Stop
+         Endif
+         IContrib = IContrib+1
+         IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
+      Endif
+
+c ----- reorder, so that identical subprocesses are calculated in a row!!
+      Do i=1,Icontrib
+         write(*,*) 'Pointer:',IcontrPoint(i)
+      Enddo
+
+
+
+c - check availability of scale choice and assign pointer
+c     (based on fact scale since renorm scale flexible
+c       --- ecxept for threshold corrections ---
+
+c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
+      IScalePoint(1) = 1
+      If (IContrib.ge.2) IScalePoint(2) = 3
+      If (IContrib.ge.3) IScalePoint(3) = 3
+      
+
+      Return
+      End
+*******************************************************************
+*******************************************************************
+      SUBROUTINE FX9999MT(ic,xmur,xmuf)
 *-----------------------------------------------------------------
 * MW 06/10/2007
 *
 * multiply the PDFs and the perturbative coefficients 
 * 
 * input:    XMUR  prefactor for nominal renormalization scale
-*           IXMUF No.of factorization scale setting (as stored in table) 
+*           XMUF  prefactor of nominal factorization scale setting
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER IXMUF, i,j,k,l,m,iord, jord,    nbin,nx
-      Double Precision xmur
+      INTEGER Ixmur,Ixmuf, ic, i,j,k,l,m,iord, jord,    nbin,nx
+      Double Precision xmur,xmuf
+c      Integer NF, CA
+      Double Precision logmu, scfac,scfac2a, scfac2b
+      Double Precision pi, beta0, beta1, NF,CA,CF
+      Parameter (PI=3.14159265358979323846, NF=5d0, CA=3d0, CF=4d0/3d0)
+      Parameter (beta0=(11d0*CA-2d0*NF)/3d0) 
+      Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
+c      Parameter (mu0scale=0.25)
+
+      ixmur = 1
+      ixmuf = 1
+c - get the absolute order in alpha_s of the LO contribution
+      jord = ILOord
+
+c - vary renormalization scale around the value used in orig. calculation
+c      logmu = log(xmur/murscale(ixmuf)) ! change w.r.t. orig. calculation
+      scfac  = dble(jord)  *beta0 *logmu          ! NLO contrib.
+      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
+      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
+     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
+
+c - MW:  maybe simpler if we make the mur-variation later
+c        for the whole contribution - instead of doing it for
+c        each array element.
+
+c - position of scale/order in array
+c      iposition(1) = 1
+c      iposition(2) = 1+ixmuf+(2-2)*nscalevar
+c      iposition(3) = 1+ixmuf+(3-2)*nscalevar
+c -> now in IScalePointer
+
+
+c - in progress
+
+c - loop over coefficient array - compar with order in table storage!!!!!!
+c loop: observable, scalebins,(get alphas), xbins,subproc
+      Do j=1,NObsBin
+        Do k=1,NScaleNode(ic,1)
+c - get alphas
+           Do m=1,NSubProc(IContrPoint(ic))
+              write(*,*) "mt ",j,k,m
+           Enddo
+         Enddo
+      Enddo
 
       Return 
       End
@@ -325,16 +372,32 @@ c - temp variables for cross check
                Call FNPDF(x, muf, tmppdf)
 c - temporary - just to cross check old results
                reweight = 1d0
-               reweight = sqrt(x)/(1d0-0.99d0*x)**3
+c               reweight = sqrt(x)/(1d0-0.99d0*x)**3
                do m=-6,6
                   xpdf1(j,m) = tmppdf(m) * reweight
-                  xpdf2(j,m) = tmppdf(m) * reweight ! << depending on hh/hhbar
+                  If (NPDF(ic).eq.1) Then ! DIS
+                     Continue   
+                  Elseif (NPDF(ic).eq.2) Then ! two hadrons
+                     If (NPDFPDG(ic,1).eq.NPDFPDG(ic,2)) Then ! identical
+                        xpdf2(j,m) = tmppdf(m) * reweight
+                     Elseif (NPDFPDG(ic,1).eq.-NPDFPDG(ic,2)) Then ! h anti-h
+                        xpdf2(j,-m) = tmppdf(m) * reweight
+                     Else
+                        Write(*,*) ' So far only the scattering of identical'
+                        Write(*,*) ' hadrons or hadron&anti-hadron is'
+                        Write(*,*) ' implemented -> gamma-p to be done...'
+                        Stop
+                     Endif
+                  Else
+                     write(*,*) ' neither one nor two hadrons...?'
+                     Stop
+                  Endif
                enddo
             Enddo
             If (NPDFdim(ic).eq.2) then ! --- fill second PDF
                Do k=1,NxTot(ic,2)
                   x = Xnode2(ic,i,l)
-                  Call FNPDF(x, muf, tmppdf)
+                  Call FNPDF(x, muf, tmppdf) ! < to be changed ->different PDF!
                   Do m=-6,6
                      xpdf2(j,m) = tmppdf(m)
                   Enddo
@@ -394,7 +457,7 @@ c --- DIS: inclusive and jets
             H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
      +           4d0*(XPDF1(i,k+1)+XPDF1(i,-k-1)))/9d0
          enddo
-         H(2) = XPDF1(i,0)       ! Gluon  at O(as^1)
+         H(2) = XPDF1(i,0)      ! Gluon  at O(as^1)
          H(3) = 0d0             ! Sigma  at O(as^2)
          do k=1,6
             H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
@@ -427,21 +490,12 @@ c   - compute S,A
          enddo
 c   - compute seven combinations
          H(1) = G1*G2
+         H(2) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
+         H(3) = S
+         H(4) = A
+         H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
-c   - for pp
-         if (icf1.eq.2) then
-            H(2) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
-            H(3) = S
-            H(4) = A
-            H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
-c   - for p-pbar: swap combinations 2<->5 and 3<->4     <<< swap before in PDF!
-         elseif (icf1.eq.3) then
-            H(5) = SumQ1*SumQ2 + SumQB1*SumQB2 - S
-            H(4) = S
-            H(3) = A
-            H(2) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
-         endif
       else
          write(*,*) '    icf1,2,3 =',icf1,icf2,icf3
          write(*,*) '    this combination is not yet defined'
@@ -705,5 +759,54 @@ c --- here we assume NFragFunc=0
 
  5000 FORMAT (A,I12,A,A64) 
       END
+
+*******************************************************************
+*******************************************************************
+      Subroutine FX9999NF
+*-----------------------------------------------------------------
+* fastNLO user code v2.0 - print scenario information
+*-----------------------------------------------------------------
+      Implicit None
+      Include 'fnx9999.inc'
+      Integer i,j
+
+      Write(*,*)
+      Write(*,*)' ######################################################'
+      Write(*,*)' #    information on fastNLO scenario: ',ScenName
+      Write(*,*)' #   ------------------------------------------'
+      Write(*,*)' # description:'
+      Do i=1,NScDescript
+         Write(*,*)' #   ',SCDescript(i)  
+      Enddo
+      Write(*,*)' # measured at at Ecms =',Ecms,' GeV'
+      Write(*,*)' #'
+      Write(*,*)' # tot. No. of Observable bins: ',NObsBin,' in ',Ndim,' dimensions'
+      Do i=1,NDim
+         Write(*,*)' # dimension ',i,':'
+         Write(*,*)' #        ',DimLabel(i)
+      Enddo
+      Write(*,*)' #'
+      Write(*,*)' # No. of contributions: ',Ncontrib
+      Do i=1,Ncontrib         
+         Write(*,*)' # - contribution',i,':'
+         Do j=1,NcontrDescr(i)
+            Write(*,*)' #     ',CtrbDescript(i,j)
+         Enddo
+         Write(*,*)' #     computed by:'
+         Do j=1,NcodeDescr(i)
+            Write(*,*)' #     ',CodeDescript(i,j)
+         Enddo
+         
+      Enddo
+      Write(*,*)' # No. of x bins in 1st contrib.:',Nxtot(1,1)
+      Write(*,*)' # No. of available scale variations/scale nodes:'
+      Do i=1,Ncontrib         
+         Write(*,*)' #   NscaleVar,NScaleNode:',NscaleVar(i,1),NScaleNode(i,1)
+      eNDDO
+      Write(*,*)' #'
+      Write(*,*)' ######################################################'
+
+      Return
+      End
 
 *******************************************************************
