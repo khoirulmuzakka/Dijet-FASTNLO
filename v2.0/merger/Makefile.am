@@ -4,10 +4,11 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = fnlo-merge
 
 # all source files which go into the main target
-fnlo_merge_SOURCES = main.cc fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc  
+fnlo_merge_SOURCES = main.cc fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h 
 
 # C++ compiler flags to be used for the main target
-AM_CPPLAGS = -O 
+AM_CXXFLAGS = -O 
 
 
 
