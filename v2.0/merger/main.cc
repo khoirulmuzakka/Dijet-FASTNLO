@@ -62,7 +62,17 @@ int main(int argc,void** argv)
         }
      }
 
-     // extract the contribution types from the tables
+     // extract the contribution types from all the block Bs of the tablefiles
+     for( table=table_list.begin(); table!=table_list.end();  table++){
+        fnloBlockA1 *blocka1 = (*table)->GetBlockA1();  
+        int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
+        for(int i=0;i<nblocks;i++){
+           fnloBlockB *blockb = (*table)->GetBlockB(i);
+           // Do something here.....
+        }
+     }
+     
+
   }
 
   //Write result

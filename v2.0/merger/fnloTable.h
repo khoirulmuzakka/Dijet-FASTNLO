@@ -5,6 +5,7 @@
 
 #include "fnloBlockA1.h"
 #include "fnloBlockA2.h"
+#include "fnloBlockB.h"
 
 class fnloTable{
  public:
@@ -18,6 +19,7 @@ class fnloTable{
    int ReadBlockA2(){return BlockA2.Read(ifilestream);}
    int WriteBlockA2(){return BlockA2.Write(ofilestream);}
    fnloBlockA2* GetBlockA2(){return &BlockA2;}
+   fnloBlockB* GetBlockB(int no){return &(BlockB[no]);}
    string GetFilename(){return filename;}
    void SetFilename(string name){filename=name;}
    
@@ -28,5 +30,6 @@ class fnloTable{
    ofstream *ofilestream;
    fnloBlockA1 BlockA1;
    fnloBlockA2 BlockA2;
+   vector < fnloBlockB > BlockB;
 };
 #endif
