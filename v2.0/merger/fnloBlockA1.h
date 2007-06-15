@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <math.h>
 
 #include "fnloconstants.h"
 

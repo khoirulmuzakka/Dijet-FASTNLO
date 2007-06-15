@@ -1,6 +1,7 @@
 #ifndef __fnloBlockA2__
 #define __fnloBlockA2__
 
+#include <math.h>
 #include <string>
 #include <fstream>
 #include <vector>
