@@ -160,7 +160,7 @@ c - normalization in last dimension?
       open(unit=2,file=filename,status='unknown')
 c ------------------------------------------------------------------
       WRITE(2,5001) Iseparator  ! ------------------- block A1 ------
-      WRITE(2,5000) 15000       ! Itabversion
+      WRITE(2,5000) 20000       ! Itabversion
       WRITE(2,5009) 'FNX9999'   ! ScenName
       WRITE(2,4999) Ncontrib        ! Ncontrib
       WRITE(2,4999) 0        ! NMult
@@ -357,7 +357,11 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
                do j=1,Nscaledim
                   do k=1,nscvar
                      do l=1,NscaleBin
-                        WRITE(2,*) MURVAL(i1,i2,l)*MURSCALE(k) !ScaleNode(ijkl)
+                        If (n.eq.1) Then
+                           WRITE(2,*)MURVAL(i1,i2,l) !ScaleNode(ijkl)
+                        Else
+                           WRITE(2,*)MURVAL(i1,i2,l)*MURSCALE(k)!ScaleNode(ijkl)
+                        Endif
                      enddo
                   enddo
                enddo
