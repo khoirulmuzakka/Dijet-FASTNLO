@@ -15,25 +15,29 @@
 *                   "R" RHIC
 *            "nnnn" is a scenario number
 *
+* ===================== ideas ============================
+* - propose to call main routine fnx9999 (just like scenario)
+*           -> any reasons not to?
+* - include table-checks into read routine - or separate check routine?
+*
+*
 *--------- v2.0 routines - status --------------------------------
-*  fx9999cc     main routine - minimal content - calls other code
+*  fx9999cc     main routine - minimal content - calls other code       (works)
 *                               almost complete -> need cosmetics
-*  fx9999in     initialization:
+*  fx9999in     initialization:                                         (works)
 *                - reset arrays, first output, read table (all done)
 *                - check consistency of common block (to do)
+*  fx9999pt     find pointers to contributions/scales                   (works)
 *                 - interpret contribution selection/consistency (advanced)
 *                 - maybe reorder contributions/optimize PDF access (not yet)
 *                 - check availability of the contributions (not yet)
-*                 - find pointer to scale for each contribution
-*  fx9999pt     find pointers to contributions/scales
+*  fx9999gp     get PDFs - missing details                              (works)
+*  fx9999pl     compute PDF linear combinations (done - cosmetics)      (works)
 *  fx9999mt     multiply coefficients and PDFs  (not yet)
-*  fx9999gp     get PDFs - missing details - missing full matrix treatment
-*  fx9999pl     compute PDF linear combinations (done - cosmetics)
-*  fx9999pr     print results (not yet)
-*  fx9999rd     read table (all done)
-*  fxnnnnnf     print scenario information (physics & technical) (o.k.)
-*  fxnnnnnm     normalize distribution by its own integral  (to do)
-*
+*  fx9999pr     print results (not yet)                           (to do)
+*  fx9999rd     read table                                           (complete)
+*  fxnnnnnf     print scenario information (physics & technical)        (works)
+*  fxnnnnnm     normalize distribution by its own integral        (to do)
 *
 * -------------------- from v1.4 ------- (to be updated)
 * contains the following routines
@@ -93,7 +97,7 @@
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer IFILE, iord, isub, I,J,K,L,M, 
+      Integer IFILE, ipoint, I,J,K,L,M, 
      +     IPrintFlag,
      +     maxscale, nbin,nx
       Character*(*) FILENAME
@@ -109,12 +113,13 @@ c === determine pointers to contributions/scales
 
 c === loop over pointers to contributions
       Do i=1,IContrib
+         Ipoint = IContrPoint(i)
          write(*,*) "Ctrb",i,IContrPoint(i),IScalePoint(i),
      +        NSubproc(IContrPoint(i))
 c - get PDFs
-         call FX9999GP(i)
+         call FX9999GP(Ipoint)
 c - multiply with perturbative coefficients and alphas
-         call FX9999MT(i,xmur,xmuf) ! <<< need to think about argument
+         call FX9999MT(Ipoint,xmur,xmuf) ! <<< need to think about argument
 c - add up in small array
          Do j=1,NObsBin
             Do k=1,NSubProc(IContrPoint(i))
@@ -215,7 +220,7 @@ c ----------> to be done
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer i,j,k
+      Integer i,j,k, i1
       Double Precision Xmur, Xmuf, XmurOld, XmufOld
       Data XMurOld/0d0/,XmufOld/0d0/
 
@@ -261,21 +266,58 @@ c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
       Endif
 
 c ----- reorder, so that identical subprocesses are calculated in a row!!
+c      Do i=1,Icontrib
+c         write(*,*) 'Pointer:',IcontrPoint(i)
+c      Enddo
+
+
+c - check availability of fact scale choice and assign pointer
+c    (based on fact scale since renorm scale is flexible
+c         --- ecxept for threshold corrections ---
       Do i=1,Icontrib
-         write(*,*) 'Pointer:',IcontrPoint(i)
+         i1 = IContrPoint(i)
+         IScalePoint(i) = 0
+         If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
+            If (NScaleVar(i1,1).ge.1) Then
+               IScalePoint(i) = 1
+            Else
+               Write(*,*) ' not a single scale variation in contrib.',i1
+               Stop
+            Endif
+            If (NScaleVar(i1,1).gt.1) write(*,*) " why more than one",
+     +           ' scale variation for Born-type contrib.',i1,'?'
+         Else                   ! no Born type contribution
+            Do j=1,NScaleVar(i1,1)
+               If (xmuf.eq.scalefac(i1,1,j)) IScalePoint(i)=j
+            Enddo
+         Endif
+         If (IScalePoint(i).eq.0) Then
+            Write(*,*)' In fastNLO scenario ',ScenName
+            Write(*,*)' the requested factorization scale xmuf of ',xmuf
+            Write(*,*)' is not available for the contribution:'
+            Do j=1,NContrDescr(i1)
+               Write(*,*) ' ',CtrbDescript(i1,j)
+            Enddo
+            Stop
+         Endif 
       Enddo
 
-
-
-c - check availability of scale choice and assign pointer
-c     (based on fact scale since renorm scale flexible
-c       --- ecxept for threshold corrections ---
-
-c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
-      IScalePoint(1) = 1
-      If (IContrib.ge.2) IScalePoint(2) = 3
-      If (IContrib.ge.3) IScalePoint(3) = 3
-      
+c - check if renormalization scale can be provided aposteriori if needed
+      If (xmur .ne. xmuf) Then
+         Do i=1,Icontrib
+            i1 = IContrPoint(i)
+            IF (IScaleDep(i1).eq.2) Then
+               Write(*,*)' In fastNLO scenario ',ScenName
+               Write(*,*)' the requested renormalization scale xmur of ',xmur
+               Write(*,*)' is not available for the contribution:'
+               Do j=1,NContrDescr(i1)
+                  Write(*,*) ' ',CtrbDescript(i1,j)
+               Enddo
+               Write(*,*) '      (only xmur=xmuf is possible)'
+               Stop
+            Endif
+         Enddo
+      Endif
 
       Return
       End
@@ -293,7 +335,7 @@ c  --->  preliminary choice:use 3rd scale (usually =pT for pp)
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER Ixmur,Ixmuf, ic, i,j,k,l,m,iord, jord,    nbin,nx
+      INTEGER Ixmur,Ixmuf, ic, i,j,k,l,m,n, nxmax
       Double Precision xmur,xmuf
 c      Integer NF, CA
       Double Precision logmu, scfac,scfac2a, scfac2b
@@ -303,17 +345,13 @@ c      Integer NF, CA
       Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
 c      Parameter (mu0scale=0.25)
 
-      ixmur = 1
-      ixmuf = 1
-c - get the absolute order in alpha_s of the LO contribution
-      jord = ILOord
-
+c - the absolute order in alpha_s of the LO contribution is in ILOord
 c - vary renormalization scale around the value used in orig. calculation
-c      logmu = log(xmur/murscale(ixmuf)) ! change w.r.t. orig. calculation
-      scfac  = dble(jord)  *beta0 *logmu          ! NLO contrib.
-      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
-      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
-     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
+      logmu = log(xmur/xmuf)    ! change w.r.t. orig. calculation
+      scfac  = dble(ILOord)  *beta0 *logmu          ! NLO contrib.
+      scfac2a= dble(ILOord+1)*beta0 *logmu          ! NNLO contrib.
+      scfac2b= dble(ILOord*(ILOord+1))/2d0*beta0*beta0*logmu*logmu  
+     +     + dble(ILOord)*beta1/2d0*logmu           ! NNLO contrib. continued
 
 c - MW:  maybe simpler if we make the mur-variation later
 c        for the whole contribution - instead of doing it for
@@ -328,15 +366,23 @@ c -> now in IScalePointer
 
 c - in progress
 
+      nxmax = (NxTot(ic,1)*NxTot(ic,1)+NxTot(ic,1))/2 !  different for DIS
+
 c - loop over coefficient array - compar with order in table storage!!!!!!
 c loop: observable, scalebins,(get alphas), xbins,subproc
       Do j=1,NObsBin
         Do k=1,NScaleNode(ic,1)
 c - get alphas
-           Do m=1,NSubProc(IContrPoint(ic))
-              write(*,*) "mt ",j,k,m
+           Do l=1,2             ! NxTot(ic)
+              Do m=1,nxmax
+                 Do n=1,NSubProc(IContrPoint(ic))
+c     write(*,*) "mt ",j,k,m
+                    result(j,n,ic) = result(j,n,ic) +
+     +                   SigmaTilde(ic,j,1,MxScaleVar,k,MxNxMax,n)
+                 Enddo
+              Enddo
            Enddo
-         Enddo
+        Enddo
       Enddo
 
       Return 

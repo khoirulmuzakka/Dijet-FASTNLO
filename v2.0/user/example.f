@@ -6,17 +6,16 @@
 *           using PDFs from LHAPDF
 *
 * -------------------------------------------------------------------
-      implicit none
-      CHARACTER*255 FILENAME
-      CHARACTER*255 HISTOFILE
-      integer i
+      Implicit None
+      CHARACTER*255 FILENAME, HISTOFILE
+      Integer i
 
 c - Attention!!! - this mus be declared consistent with its 
 c                  definition in the commonblock!!!!!
       double precision xst1001(200) 
 
 c --- parse command line
-      IF ( IARGC().LT.1)  FILENAME = 'table.txt.gz'
+      IF ( IARGC().LT.1)  FILENAME = 'table.tab'
       IF ( IARGC().LT.2)  HISTOFILE= 'fastnlo.hbk'
       IF ( IARGC().GT.0)  CALL GETARG(1,FILENAME)
       IF ( IARGC().GT.1)  CALL GETARG(2,HISTOFILE)
@@ -26,9 +25,9 @@ c --- parse command line
       ENDIF
 
 c - Initialize LHAPDF    - for CTEQ6.1M      MRST2004NLO:0.1205
-c      call InitPDFset('/usr/local/share/lhapdf/PDFsets/cteq65.LHgrid')
+      call InitPDFset('/usr/local/share/lhapdf/PDFsets/cteq65.LHgrid')
 c - initialize one member, 0=best fit member
-c      call InitPDF(0)
+      call InitPDF(0)
 
 c - compute the cross sections
       write(*,*) '     fastNLO: call user code'
