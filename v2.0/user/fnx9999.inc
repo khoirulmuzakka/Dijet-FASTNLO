@@ -71,7 +71,8 @@ c - output array
 
 c - internal variables
       Integer IContrib, IContrPoint(MxCtrb),IScalePoint(MxCtrb)
-      Double Precision result(MxObsBin,MxSubproc,MxCtrb)
+      Double Precision result(MxObsBin,MxSubproc,MxCtrb),
+     +        pdf(MxObsBin,MxScaleNode,MxNxMax,MxSubproc)
 
 
 c - put everything into common block
@@ -79,7 +80,7 @@ c - put everything into common block
 c - dbl 
      +     Ecms,LoBin,UpBin, XNode1, XNode2,
      +     ScaleFac, ScaleNode, SigmaTilde,
-     +     result,
+     +     result,pdf,
 c - int*8
      +     Nevt,
 c - int

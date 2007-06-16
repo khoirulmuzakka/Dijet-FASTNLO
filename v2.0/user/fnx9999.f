@@ -22,22 +22,19 @@
 *
 *
 *--------- v2.0 routines - status --------------------------------
-*  fx9999cc     main routine - minimal content - calls other code       (works)
-*                               almost complete -> need cosmetics
-*  fx9999in     initialization:                                         (works)
-*                - reset arrays, first output, read table (all done)
-*                - check consistency of common block (to do)
+*  fx9999cc     main routine - calls other code - need cosmetics        (works)
+*  fx9999in     initialization (to do: check consistency)               (works)
 *  fx9999pt     find pointers to contributions/scales                   (works)
 *                 - interpret contribution selection/consistency (advanced)
 *                 - maybe reorder contributions/optimize PDF access (not yet)
 *                 - check availability of the contributions (not yet)
-*  fx9999gp     get PDFs - missing details                              (works)
+*  fx9999gp     get PDFs      - missing details                         (works)
 *  fx9999pl     compute PDF linear combinations (done - cosmetics)      (works)
-*  fx9999mt     multiply coefficients and PDFs  (not yet)
-*  fx9999pr     print results (not yet)                           (to do)
+*  fx9999mt     multiply coefficients and PDFs                    (in progress)
+*  fx9999pr     print results                                           (works)
 *  fx9999rd     read table                                           (complete)
-*  fxnnnnnf     print scenario information (physics & technical)        (works)
-*  fxnnnnnm     normalize distribution by its own integral        (to do)
+*  fx9999nf     print scenario information (physics & technical)        (works)
+*  fx9999nm     normalize distribution by its own integral        (to do)
 *
 * -------------------- from v1.4 ------- (to be updated)
 * contains the following routines
@@ -122,8 +119,10 @@ c - multiply with perturbative coefficients and alphas
          call FX9999MT(Ipoint,xmur,xmuf) ! <<< need to think about argument
 c - add up in small array
          Do j=1,NObsBin
-            Do k=1,NSubProc(IContrPoint(i))
-               xsect(j) = result(j,k,i)
+            xsect(j) = 0d0
+            Do k=1,NSubProc(Ipoint)
+               xsect(j) = xsect(j)+result(j,k,Ipoint)
+c               write(*,*) 'result ',j,k,result(j,k,Ipoint)
             Enddo
          Enddo
       Enddo
@@ -328,17 +327,21 @@ c - check if renormalization scale can be provided aposteriori if needed
 * MW 06/10/2007
 *
 * multiply the PDFs and the perturbative coefficients 
+*
+*  question: give absolute contrib / or 'relative'
+*          IScalePoint only available for relative contrib.
 * 
-* input:    XMUR  prefactor for nominal renormalization scale
+* input:    IC    No. of contribution in table
+*           XMUR  prefactor for nominal renormalization scale
 *           XMUF  prefactor of nominal factorization scale setting
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
       INTEGER Ixmur,Ixmuf, ic, i,j,k,l,m,n, nxmax
-      Double Precision xmur,xmuf
+      Double Precision xmur,xmuf,mu, FNALPHAS
 c      Integer NF, CA
-      Double Precision logmu, scfac,scfac2a, scfac2b
+      Double Precision logmu, scfac,scfac2a, scfac2b, as(8),aspow(8)
       Double Precision pi, beta0, beta1, NF,CA,CF
       Parameter (PI=3.14159265358979323846, NF=5d0, CA=3d0, CF=4d0/3d0)
       Parameter (beta0=(11d0*CA-2d0*NF)/3d0) 
@@ -372,14 +375,23 @@ c - loop over coefficient array - compar with order in table storage!!!!!!
 c loop: observable, scalebins,(get alphas), xbins,subproc
       Do j=1,NObsBin
         Do k=1,NScaleNode(ic,1)
+           If (IScaleDep(ic).eq.0) Then ! no scale dep of coefficients
+              mu = ScaleNode(ic,j,1,1,k)
+           Else
+              mu = ScaleNode(ic,j,1,3,k) ! change 3" to actual scale
+           Endif
 c - get alphas
-           Do l=1,2             ! NxTot(ic)
-              Do m=1,nxmax
-                 Do n=1,NSubProc(IContrPoint(ic))
-c     write(*,*) "mt ",j,k,m
-                    result(j,n,ic) = result(j,n,ic) +
-     +                   SigmaTilde(ic,j,1,MxScaleVar,k,MxNxMax,n)
-                 Enddo
+           as(1) =  FNALPHAS(xmur * mu)
+           aspow(1) = as(1)**Npow(ic)
+           Do l=1,nxmax
+              Do m=1,NSubProc(ic)
+c              Do m=1,1 ! gg only
+                 result(j,m,ic) = result(j,m,ic) + 
+c     +                SigmaTilde(ic,j,1,3-pointer,k,l,m)
+c                   3-IScalePoint
+     +                SigmaTilde(ic,j,1,1,k,l,m)
+     +                * aspow(1)
+     +                * pdf(j,k,l,m)
               Enddo
            Enddo
         Enddo
@@ -406,9 +418,6 @@ c     write(*,*) "mt ",j,k,m
      +     tmppdf(-6:6), xpdf1(MxNxTot,-6:6),xpdf2(MxNxTot,-6:6), H(10)
       Integer ic, i,j,k,l,m, nx, nx2limit
 
-c - temp variables for cross check
-      Double Precision reweight
-
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
             muf = ScaleNode(ic,i,1,IScalePoint(ic),j)
@@ -416,18 +425,15 @@ c - temp variables for cross check
             Do k=1,NxTot(ic,1)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
                Call FNPDF(x, muf, tmppdf)
-c - temporary - just to cross check old results
-               reweight = 1d0
-c               reweight = sqrt(x)/(1d0-0.99d0*x)**3
-               do m=-6,6
-                  xpdf1(j,m) = tmppdf(m) * reweight
+               Do m=-6,6
+                  xpdf1(k,m) = tmppdf(m)
                   If (NPDF(ic).eq.1) Then ! DIS
                      Continue   
                   Elseif (NPDF(ic).eq.2) Then ! two hadrons
                      If (NPDFPDG(ic,1).eq.NPDFPDG(ic,2)) Then ! identical
-                        xpdf2(j,m) = tmppdf(m) * reweight
+                        xpdf2(k,m) = tmppdf(m)
                      Elseif (NPDFPDG(ic,1).eq.-NPDFPDG(ic,2)) Then ! h anti-h
-                        xpdf2(j,-m) = tmppdf(m) * reweight
+                        xpdf2(k,-m) = tmppdf(m)
                      Else
                         Write(*,*) ' So far only the scattering of identical'
                         Write(*,*) ' hadrons or hadron&anti-hadron is'
@@ -438,8 +444,8 @@ c               reweight = sqrt(x)/(1d0-0.99d0*x)**3
                      write(*,*) ' neither one nor two hadrons...?'
                      Stop
                   Endif
-               enddo
-            Enddo
+               Enddo            ! m
+            Enddo               ! k 
             If (NPDFdim(ic).eq.2) then ! --- fill second PDF
                Do k=1,NxTot(ic,2)
                   x = Xnode2(ic,i,l)
@@ -455,8 +461,11 @@ c               reweight = sqrt(x)/(1d0-0.99d0*x)**3
                If (NPDFdim(ic).eq.2) nx2limit = NxTot(ic,2) !  2d full matrix
                Do l=1,nx2limit
                   nx = nx+1
-                  call fx9999pl(IPDFdef(ic,1),IPDFdef(ic,2),
+                  Call fx9999pl(IPDFdef(ic,1),IPDFdef(ic,2),
      +                 IPDFdef(ic,3),k,l,xpdf1,xpdf2,H)
+                  Do m=1,NSubproc(ic)
+                     pdf(i,j,nx,m) = H(m)
+                  Enddo         ! m subproc
                Enddo            ! x2-loop
             Enddo               ! x1-loop
          Enddo                  ! ScaleNode-loop
@@ -564,11 +573,15 @@ c   - compute seven combinations
 *
 * MW 04/18/2005
 *-----------------------------------------------------------------
-      IMPLICIT NONE
-      INTEGER i,j
-      INCLUDE 'fnx9999.inc'
+      Implicit None
+      Include 'fnx9999.inc'
+      Integer i,j
 
       write(*,*) "fastNLO results:"
+
+      Do i=1,NObsBin
+         write(*,*) 'bin No/result ',i,'  ',xsect(i)
+      Enddo
 
       Return
       End
