@@ -19,6 +19,9 @@ class fnloBlockA1 {
    int GetNcontrib(){return Ncontrib;}
    int GetNmult(){return Nmult;}
    int GetNdata(){return Ndata;}
+   void SetNcontrib(int n){Ncontrib = n;}
+   void SetNmult(int n){Nmult = n;}
+   void SetNdata(int n){Ndata = n;}
  protected:
    int Itabversion;
    string ScenName;

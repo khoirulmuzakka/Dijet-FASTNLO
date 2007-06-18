@@ -119,7 +119,7 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
       printf("fnloBlockA2::IsCompatible: Differing ScDescript found.\n");
       return false;
    }  
-   if(Ecms != other->Ecms){
+   if(!cmp(Ecms,other->Ecms)){
       printf("fnloBlockA2::IsCompatible: Differing Ecms found: %f and %f.\n",Ecms,other->Ecms);
       return false;
    }  
@@ -143,11 +143,11 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
       printf("fnloBlockA2::IsCompatible: Differing IDiffBin found.\n");
       return false;
    }  
-   if(LoBin != other->LoBin){
+   if(!cmp(LoBin,other->LoBin)){
       printf("fnloBlockA2::IsCompatible: Differing LoBin found.\n");
       return false;
    }
-   if(UpBin != other->UpBin){
+   if(!cmp(UpBin,other->UpBin)){
       printf("fnloBlockA2::IsCompatible: Differing UpBin found.\n");
       return false;
    }
@@ -169,7 +169,7 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
    return true;
 };
 
-void fnloBlockA2::StripWhitespace(string &str){
+void fnloBlockA2::StripWhitespace(string &str) const{
    for(string::iterator achar = str.end(); achar>str.begin();achar--) {
       if (*achar==0x20 || *achar==0x00){
          str.erase(achar);
@@ -177,4 +177,30 @@ void fnloBlockA2::StripWhitespace(string &str){
          break;
       }
    }
+}
+
+bool fnloBlockA2::cmp(const double x1, const double x2) const{
+   double norm;
+   if (x1>0.){
+      norm = x1;
+   }else{
+      norm = 1.; // If x1 is 0, do not try to calculate relative deviation, use absolute
+   }
+   return((fabs(x1-x2)/norm)<1e-7);
+}
+
+bool fnloBlockA2::cmp(const vector < double > x1,const vector < double > x2) const{
+   bool result = true;
+   for(int i = 0; i<x1.size() ;i++ ){
+      result = result & cmp (x1[i],x2[i]);
+   }
+   return result;
+}
+
+bool fnloBlockA2::cmp(vector < vector < double > > x1,  vector < vector < double > > x2) const{
+   bool result = true;
+   for(int i = 0; i<x1.size() ;i++ ){
+      result = result & cmp (x1[i],x2[i]);
+   }
+   return result;
 }

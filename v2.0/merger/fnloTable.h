@@ -11,15 +11,20 @@ class fnloTable{
  public:
    fnloTable(string name){filename = name;}
    int OpenFileRead();
-   int OpenFileWrite();
-   void CloseFileWrite(){ofilestream->close();}
+   void RewindRead();
+   void SkipBlockA1A2();
+   ofstream *OpenFileWrite();
+   void CloseFileWrite();
    int ReadBlockA1(){return BlockA1.Read(ifilestream);}
    int WriteBlockA1(){return BlockA1.Write(ofilestream);}
    fnloBlockA1* GetBlockA1(){return &BlockA1;}
    int ReadBlockA2(){return BlockA2.Read(ifilestream);}
    int WriteBlockA2(){return BlockA2.Write(ofilestream);}
    fnloBlockA2* GetBlockA2(){return &BlockA2;}
-   fnloBlockB* GetBlockB(int no){return &(BlockB[no]);}
+   int ReadBlockB(int no);
+   int WriteBlockB(int no);
+   int WriteBlockB(int no,ofstream* outstream );
+   fnloBlockB* GetBlockB(int no){return BlockB[no];}
    string GetFilename(){return filename;}
    void SetFilename(string name){filename=name;}
    
@@ -30,6 +35,6 @@ class fnloTable{
    ofstream *ofilestream;
    fnloBlockA1 BlockA1;
    fnloBlockA2 BlockA2;
-   vector < fnloBlockB > BlockB;
+   vector < fnloBlockB* > BlockB;
 };
 #endif

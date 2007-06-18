@@ -7,17 +7,33 @@
 #include <vector>
 
 #include "fnloconstants.h"
+#include "fnloBlockA1.h"
+#include "fnloBlockA2.h"
 
 using namespace std;
 
 class fnloBlockB {
  public:
+   fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) : BlockA1(blocka1) ,  BlockA2(blocka2)   {;}
    int Read(istream *table);
    int Write(ostream *table);
    bool IsCompatible(fnloBlockB* other);
+   int GetIDataFlag(){return IDataFlag;}
+   int GetIAddMultFlag(){return IAddMultFlag;}
+   int GetIContrFlag1(){return IContrFlag1;}
+   int GetIContrFlag2(){return IContrFlag2;}
+   int GetIContrFlag3(){return IContrFlag3;}
+   int GetNpow(){return Npow;}
+   long long int GetNevt(){return Nevt;}
+   void Add(fnloBlockB* other);
+
+ private:
+   void StripWhitespace(string &str);
  protected:
+   fnloBlockA1 *BlockA1;
+   fnloBlockA2 *BlockA2;
    int IXsectUnits;
-   int IdataFlag;
+   int IDataFlag;
    int IAddMultFlag;
    int IContrFlag1;
    int IContrFlag2;
@@ -41,7 +57,7 @@ class fnloBlockB {
    vector < double > fact;
    int IRef;
    int IScaleDep;
-   long int Nevt;
+   unsigned long long int Nevt;
    int Npow;
    int NPDF;
    vector < int > NPDFPDG;
@@ -63,7 +79,7 @@ class fnloBlockB {
    int NScales;
    int NScaleDim;
    vector < int > Iscale;
-   vector < string > NscaleDescript;
+   vector < int > NscaleDescript;
    vector < vector < string > > ScaleDescript;
    vector < int > Nscalevar;
    vector < int > Nscalenode;

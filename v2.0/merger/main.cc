@@ -1,7 +1,9 @@
 #include "stdio.h"
 #include <vector>
 
+
 #include "fnloTable.h"
+#include "entry.h"
 
 using namespace std;
 
@@ -43,7 +45,12 @@ int main(int argc,void** argv)
   printf("Found %d table(s).\n",ntables);
   if(ntables<1) exit(1);
 
-  if(ntables>1){
+  Entry *oneentry;
+  vector <Entry*> entries;
+  TContrib contribution;
+  tableptr tablepointer;
+
+  if(ntables>0){
      // check for compatibility by looking at block A1 and A2
      vector <fnloTable*>::iterator table;
 
@@ -66,13 +73,49 @@ int main(int argc,void** argv)
      for( table=table_list.begin(); table!=table_list.end();  table++){
         fnloBlockA1 *blocka1 = (*table)->GetBlockA1();  
         int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
+        (*table)->RewindRead();
+        (*table)->SkipBlockA1A2();
         for(int i=0;i<nblocks;i++){
+           if((*table)->ReadBlockB(i)>0){
+              printf("main.cc: Bad format in a B block found, file %s. Stopping.\n",(*table)->GetFilename().c_str());
+              exit(1);
+           }
            fnloBlockB *blockb = (*table)->GetBlockB(i);
            // Do something here.....
+           tablepointer.table = table;
+           tablepointer.blockbno = i;
+           contribution.IDataFlag = blockb->GetIDataFlag();
+           contribution.IAddMultFlag = blockb->GetIAddMultFlag();
+           contribution.IContrFlag1 = blockb->GetIContrFlag1();
+           contribution.IContrFlag2 = blockb->GetIContrFlag2();
+           contribution.IContrFlag3 = blockb->GetIContrFlag3();
+           contribution.Npow = blockb->GetNpow();
+           bool newentry = true;
+           for(int j=0;j<entries.size();j++){
+              if(entries[j]->contribution==contribution){
+                 entries[j]->tables.push_back(tablepointer);
+                 newentry = false;
+                 break;
+              }
+           }
+           if(newentry){
+              oneentry = new Entry();
+              oneentry->contribution = contribution;
+              oneentry->tables.clear();
+              oneentry->tables.push_back(tablepointer);
+              entries.push_back(oneentry);
+           }
         }
      }
-     
-
+  }
+  printf("No of types of contributions: %d\n",entries.size());
+  int Ncontrib = 0;
+  int Nmult = 0;
+  int Ndata = 0;
+  for(int i=0;i<entries.size();i++){
+     Nmult += entries[i]->contribution.IAddMultFlag;
+     Ndata  += entries[i]->contribution.IDataFlag;
+     Ncontrib += entries[i]->contribution.IAddMultFlag + (entries[i]->contribution.IContrFlag1>0?1:0);
   }
 
   //Write result
@@ -80,9 +123,27 @@ int main(int argc,void** argv)
   const char* path=(char *)argv[nfiles];
   printf("Write merged results to file %s.\n",path);
   result->SetFilename(path);
-  result->OpenFileWrite();
+  ofstream *outstream = result->OpenFileWrite();
+  result->GetBlockA1()->SetNcontrib(Ncontrib);
+  result->GetBlockA1()->SetNmult(Nmult);
+  result->GetBlockA1()->SetNdata(Ndata);
   result->WriteBlockA1();
   result->WriteBlockA2();
+  int nblocks = entries.size();
+  for(int i=0;i<nblocks;i++){
+     vector <fnloTable*>::iterator table = entries[i]->tables[0].table;
+     printf(" %d file(s) containing",entries[i]->tables.size());
+     printf(" %s %s ",entries[i]->contribution.GetName1().c_str(),entries[i]->contribution.GetName2(table_list[0]->GetBlockA2()->GetILOord()).c_str());
+     // Addition 
+     for(int j=1;j<entries[i]->tables.size();j++){
+        fnloBlockB *otherblock = (*(entries[i]->tables[j].table))->GetBlockB(entries[i]->tables[j].blockbno);
+        (*table)->GetBlockB(entries[i]->tables[0].blockbno)->Add(otherblock);
+     }
+     (*table)->WriteBlockB(entries[i]->tables[0].blockbno,outstream);
+     long long int nevents = (*table)->GetBlockB(entries[i]->tables[0].blockbno)->GetNevt();
+     printf("  (%#4.2g events).\n",(double)nevents);
+     
+  }
   result->CloseFileWrite();
   printf("Done.\n");
 

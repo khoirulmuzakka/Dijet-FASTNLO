@@ -15,8 +15,14 @@ class fnloBlockA2 {
    int Read(istream *table);
    int Write(ostream *table);
    bool IsCompatible(fnloBlockA2* other);
+   int GetNObsBin(){return NObsBin;}
+   int GetILOord(){return ILOord;}
  private:
-   void StripWhitespace(string &str);
+   void StripWhitespace(string &str) const;
+   bool cmp(const double x1, const double x2) const;
+   bool cmp(const vector < double > x1, const vector < double > x2) const;
+   bool cmp(const vector < vector < double > > x1,const vector < vector < double > > x2) const;
+   
  protected:
    int Ipublunits;
    int NScDescript;

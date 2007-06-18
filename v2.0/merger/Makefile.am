@@ -8,7 +8,7 @@ fnlo_merge_SOURCES = main.cc fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBloc
   fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
 
 # C++ compiler flags to be used for the main target
-AM_CXXFLAGS = -O 
+AM_CXXFLAGS = 
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
