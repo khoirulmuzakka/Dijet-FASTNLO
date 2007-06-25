@@ -30,7 +30,7 @@
 *                 - check availability of the contributions (not yet)
 *  fx9999gp     get PDFs      - missing details                         (works)
 *  fx9999pl     compute PDF linear combinations (done - cosmetics)      (works)
-*  fx9999mt     multiply coefficients and PDFs                    (in progress)
+*  fx9999mt     multiply coefficients and PDFs                       (advanced)
 *  fx9999pr     print results                                           (works)
 *  fx9999rd     read table                                           (complete)
 *  fx9999nf     print scenario information (physics & technical)        (works)
@@ -114,9 +114,9 @@ c === loop over pointers to contributions
          write(*,*) "Ctrb",i,IContrPoint(i),IScalePoint(i),
      +        NSubproc(IContrPoint(i))
 c - get PDFs
-         call FX9999GP(Ipoint)
+         call FX9999GP(i)
 c - multiply with perturbative coefficients and alphas
-         call FX9999MT(Ipoint,xmur,xmuf) ! <<< need to think about argument
+         call FX9999MT(i,xmur,xmuf) ! <<< need to think about argument
 c - add up in small array
          Do j=1,NObsBin
             xsect(j) = 0d0
@@ -320,37 +320,41 @@ c - check if renormalization scale can be provided aposteriori if needed
 
       Return
       End
+
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999MT(ic,xmur,xmuf)
+      SUBROUTINE FX9999MT(in,xmur,xmuf)
 *-----------------------------------------------------------------
 * MW 06/10/2007
 *
 * multiply the PDFs and the perturbative coefficients 
 *
-*  question: give absolute contrib / or 'relative'
-*          IScalePoint only available for relative contrib.
+*  question: give 'relative' contribution
+*            IScalePoint only available for relative contrib.
 * 
-* input:    IC    No. of contribution in table
+* input:    IN    No. of contribution in present calculation
 *           XMUR  prefactor for nominal renormalization scale
 *           XMUF  prefactor of nominal factorization scale setting
 *
 *-----------------------------------------------------------------
-      IMPLICIT NONE
-      INCLUDE 'fnx9999.inc'
-      INTEGER Ixmur,Ixmuf, ic, i,j,k,l,m,n, nxmax
-      Double Precision xmur,xmuf,mu, FNALPHAS
-c      Integer NF, CA
+      Implicit None
+      Include 'fnx9999.inc'
+      Integer Ixmur,Ixmuf, in,ic,is, i,j,k,l,m,n, nxmax
+      Double Precision xmur,xmuf,mu, FNALPHAS, scf
       Double Precision logmu, scfac,scfac2a, scfac2b, as(8),aspow(8)
       Double Precision pi, beta0, beta1, NF,CA,CF
       Parameter (PI=3.14159265358979323846, NF=5d0, CA=3d0, CF=4d0/3d0)
       Parameter (beta0=(11d0*CA-2d0*NF)/3d0) 
       Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
-c      Parameter (mu0scale=0.25)
+
+c - set pointers to contribution in table and to scale variation
+      ic = IContrPoint(in)
+      is = IScalePoint(in)
 
 c - the absolute order in alpha_s of the LO contribution is in ILOord
 c - vary renormalization scale around the value used in orig. calculation
-      logmu = log(xmur/xmuf)    ! change w.r.t. orig. calculation
+c      logmu = log(xmur/xmuf)    ! aposteriori change w.r.t. orig. calculation
+      logmu = log(xmur/ScaleFac(ic,1,is)) ! aposteriori change wrt. orig. calc.
       scfac  = dble(ILOord)  *beta0 *logmu          ! NLO contrib.
       scfac2a= dble(ILOord+1)*beta0 *logmu          ! NNLO contrib.
       scfac2b= dble(ILOord*(ILOord+1))/2d0*beta0*beta0*logmu*logmu  
@@ -358,43 +362,52 @@ c - vary renormalization scale around the value used in orig. calculation
 
 c - MW:  maybe simpler if we make the mur-variation later
 c        for the whole contribution - instead of doing it for
-c        each array element.
-
-c - position of scale/order in array
-c      iposition(1) = 1
-c      iposition(2) = 1+ixmuf+(2-2)*nscalevar
-c      iposition(3) = 1+ixmuf+(3-2)*nscalevar
-c -> now in IScalePointer
+c        each array element??
 
 
-c - in progress
 
-      nxmax = (NxTot(ic,1)*NxTot(ic,1)+NxTot(ic,1))/2 !  different for DIS
+c - MW: strategy: - find scalevar for which muf corresponds to selected muf
+c                 - check mur-factor in this scalevar
+c                 - compute needed mur-variation = xmur/mur-factor
+c
+
+
 
 c - loop over coefficient array - compar with order in table storage!!!!!!
 c loop: observable, scalebins,(get alphas), xbins,subproc
       Do j=1,NObsBin
-        Do k=1,NScaleNode(ic,1)
-           If (IScaleDep(ic).eq.0) Then ! no scale dep of coefficients
-              mu = ScaleNode(ic,j,1,1,k)
-           Else
-              mu = ScaleNode(ic,j,1,3,k) ! change 3" to actual scale
-           Endif
-c - get alphas
-           as(1) =  FNALPHAS(xmur * mu)
-           aspow(1) = as(1)**Npow(ic)
-           Do l=1,nxmax
-              Do m=1,NSubProc(ic)
-c              Do m=1,1 ! gg only
-                 result(j,m,ic) = result(j,m,ic) + 
+
+         IF (NPDFdim(ic).eq.0) Then
+            nxmax =  NxTot(ic,1,j) ! 1d case (DIS)
+         Elseif (NPDFdim(ic).eq.1) Then
+            nxmax = (NxTot(ic,1,j)*NxTot(ic,1,j)+NxTot(ic,1,j))/2 ! 2d half mat
+         Elseif (NPDFdim(ic).eq.2) Then
+            Write(*,*) ' fx9999mt:   2d case not yet'
+            Stop
+         Endif
+         
+         Do k=1,NScaleNode(ic,1)
+            If (IScaleDep(ic).eq.0) Then ! no scale dep of coefficients
+               mu = ScaleNode(ic,j,1,1,k)
+            Else
+               mu = ScaleNode(ic,j,1,is,k) ! ???????
+            Endif
+c     - get alphas
+            write(*,*) 'xmur ',xmur,mu
+            as(1) =  FNALPHAS(xmur * mu) ! ??????????????
+            aspow(1) = as(1)**Npow(ic)
+            Do l=1,nxmax
+               Do m=1,NSubProc(ic)
+c               Do m=1,1 ! gg only
+                  result(j,m,ic) = result(j,m,ic) + 
 c     +                SigmaTilde(ic,j,1,3-pointer,k,l,m)
-c                   3-IScalePoint
-     +                SigmaTilde(ic,j,1,1,k,l,m)
-     +                * aspow(1)
-     +                * pdf(j,k,l,m)
-              Enddo
-           Enddo
-        Enddo
+c     3-IScalePoint
+     +                 SigmaTilde(ic,j,1,1,k,l,m)
+     +                 * aspow(1)
+     +                 * pdf(j,k,l,m)
+               Enddo
+            Enddo
+         Enddo
       Enddo
 
       Return 
@@ -402,7 +415,7 @@ c                   3-IScalePoint
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999GP(IC)
+      SUBROUTINE FX9999GP(in)
 *-----------------------------------------------------------------
 * MW 08/26/2005
 *
@@ -416,13 +429,18 @@ c                   3-IScalePoint
       Include 'fnx9999.inc'
       Double Precision Xmuf, x, muf, 
      +     tmppdf(-6:6), xpdf1(MxNxTot,-6:6),xpdf2(MxNxTot,-6:6), H(10)
-      Integer ic, i,j,k,l,m, nx, nx2limit
+      Integer in,ic,is, i,j,k,l,m, nx, nx2limit
+
+c - set pointers to contribution in table and to scale variation
+      ic = IContrPoint(in)
+      is = IScalePoint(in)
 
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
-            muf = ScaleNode(ic,i,1,IScalePoint(ic),j)
+            muf = ScaleNode(ic,i,1,is,j)
+            write(*,*) 'muf ',muf
             nx =0
-            Do k=1,NxTot(ic,1)  ! --- fill first PDF
+            Do k=1,NxTot(ic,1,i)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
                Call FNPDF(x, muf, tmppdf)
                Do m=-6,6
@@ -447,7 +465,7 @@ c                   3-IScalePoint
                Enddo            ! m
             Enddo               ! k 
             If (NPDFdim(ic).eq.2) then ! --- fill second PDF
-               Do k=1,NxTot(ic,2)
+               Do k=1,NxTot(ic,2,i)
                   x = Xnode2(ic,i,l)
                   Call FNPDF(x, muf, tmppdf) ! < to be changed ->different PDF!
                   Do m=-6,6
@@ -455,10 +473,10 @@ c                   3-IScalePoint
                   Enddo
                Enddo
             Endif
-            Do k=1,NxTot(ic,1) ! --- build PDF1,2 linear combinations
+            Do k=1,NxTot(ic,1,i) ! --- build PDF1,2 linear combinations
                If (NPDF(ic).eq.1) nx2limit = 1 !               1d case (DIS)
                If (NPDFdim(ic).eq.1) nx2limit = k !            2d half matrix
-               If (NPDFdim(ic).eq.2) nx2limit = NxTot(ic,2) !  2d full matrix
+               If (NPDFdim(ic).eq.2) nx2limit = NxTot(ic,2,i) !  2d full matrix
                Do l=1,nx2limit
                   nx = nx+1
                   Call fx9999pl(IPDFdef(ic,1),IPDFdef(ic,2),
@@ -722,16 +740,16 @@ c --- coefficient block
             STOP
          Endif
          If (NPDF(ic).gt.0) Then
-            Read(2,*) Nxtot(ic,1)
             Do i=1,NObsBin
-               Do j=1,Nxtot(ic,1)
+               Read(2,*) Nxtot(ic,1,i)
+               Do j=1,Nxtot(ic,1,i)
                   Read(2,*) XNode1(ic,i,j)
                Enddo
             Enddo 
             If (NPDFDim(ic).eq.2) Then
-               Read(2,*) Nxtot(ic,2)
                Do i=1,NObsBin
-                  Do j=1,Nxtot(ic,2)
+                  Read(2,*) Nxtot(ic,2,i)
+                  Do j=1,Nxtot(ic,2,i)
                      Read(2,*) XNode2(ic,i,j)
                   Enddo
                Enddo 
@@ -776,19 +794,30 @@ c --- coefficient block
             Do j=1,NScaleDim(ic)
                Do k=1,NScaleVar(ic,j)
                   Do l=1,NScaleNode(ic,j)
+c               Do k1=1,NScaleVar(ic,j)
+c                  Do l1=1,NScaleNode(ic,j)
+c               Do k2=1,NScaleVar(ic,j)
+c                  Do l2=1,NScaleNode(ic,j)
 c --- here we assume NFragFunc=0
                      If (NFragFunc(ic).gt.0) then
                         write(*,*) " NFragFunc>0 not yet implemented"
                         STOP
                      Endif
-                     IF (NPDFdim(ic).eq.0) nxmax = Nxtot(ic,1)
-                     IF (NPDFdim(ic).eq.1) nxmax = 
-     +                    (Nxtot(ic,1)**2+Nxtot(ic,1))/2
-                     IF (NPDFdim(ic).eq.2) nxmax = 
-     +                    Nxtot(ic,1)*Nxtot(ic,2)
+                     If (NPDFdim(ic).eq.0) Then
+                        nxmax = Nxtot(ic,1,i)
+                     Elseif (NPDFdim(ic).eq.1) Then
+                        nxmax = (Nxtot(ic,1,i)**2+Nxtot(ic,1,i))/2
+                     Elseif (NPDFdim(ic).eq.2) Then 
+                        nxmax = 
+     +                       Nxtot(ic,1,i)*Nxtot(ic,2,i)
+                     Else
+                        write(*,*) '  NPDFdim > 2 not enabled'
+                        Stop
+                     Endif
                      Do m=1,nxmax
                         Do n=1,NSubProc(ic)
                            Read(2,*) SigmaTilde(ic,i,j,k,l,m,n)
+c                           Read(2,*) SigmaTilde(ic,i,k1,l1,k2,l2,m,n)
                         Enddo
                      Enddo
                   Enddo
@@ -857,7 +886,7 @@ c --- here we assume NFragFunc=0
          Enddo
          
       Enddo
-      Write(*,*)' # No. of x bins in 1st contrib.:',Nxtot(1,1)
+      Write(*,*)' # No. of x bins in 1st contrib.:',Nxtot(1,1,1)
       Write(*,*)' # No. of available scale variations/scale nodes:'
       Do i=1,Ncontrib         
          Write(*,*)' #   NscaleVar,NScaleNode:',NscaleVar(i,1),NScaleNode(i,1)
