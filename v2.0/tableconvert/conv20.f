@@ -302,11 +302,12 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
          WRITE(2,5000) IPDFdef2   ! IPDFdef2
          WRITE(2,5000) IPDFdef3   ! IPDFdef3
 
-         WRITE(2,5000) Nxtot       ! Nxtot(1)
+c         WRITE(2,5000) Nxtot       ! Nxtot(1) - obsolete see below
          i = 0
          do i1=1,Nrapidity
             do i2=1,NPT(i1)
                i = i+1          ! --- bin counter -> linear bin numbering
+               WRITE(2,5000) Nxtot ! Nxtot(1) - new for each ObsBin
                do j=1,Nxtot
                   XNode = xlimit(i1,i2)
                   if (ixscheme.eq.2) then
