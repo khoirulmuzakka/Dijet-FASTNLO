@@ -159,30 +159,33 @@ int fnloBlockB::Read(istream *table){
             }
          }
       }
-      *table >> Nxtot;
+      Nxtot.resize(BlockA2->GetNObsBin());
       XNode1.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         XNode1[i].resize(Nxtot);
-         for(int j=0;j<Nxtot;j++){
+         *table >> Nxtot[i];
+         XNode1[i].resize(Nxtot[i]);
+         for(int j=0;j<Nxtot[i];j++){
             *table >> XNode1[i][j];
          }         
       }      
       if(NPDFDim==2){
-         *table >> Nxtot2;
+         Nxtot2.resize(BlockA2->GetNObsBin());
          XNode2.resize(BlockA2->GetNObsBin());
          for(int i=0;i<BlockA2->GetNObsBin();i++){
-            XNode2[i].resize(Nxtot);
-            for(int j=0;j<Nxtot2;j++){
+            *table >> Nxtot2[i];
+            XNode2[i].resize(Nxtot2[i]);
+            for(int j=0;j<Nxtot2[i];j++){
                *table >> XNode2[i][j];
             }         
          }      
       }
       if(NFragFunc>0){
-         *table >> Nztot;
+         Nztot.resize(BlockA2->GetNObsBin());
          ZNode.resize(BlockA2->GetNObsBin());
          for(int i=0;i<BlockA2->GetNObsBin();i++){
-            ZNode[i].resize(Nztot);
-            for(int j=0;j<Nztot;j++){
+            *table >> Nztot[i];
+            ZNode[i].resize(Nztot[i]);
+            for(int j=0;j<Nztot[i];j++){
                *table >> ZNode[i][j];
             }         
          }               
@@ -233,18 +236,18 @@ int fnloBlockB::Read(istream *table){
          }
       }
       
-      int nxmax =0;
-      switch (NPDFDim) {
-      case 0: nxmax = Nxtot;
-         break;
-      case 1: nxmax = ((int)pow((double)Nxtot,2)+Nxtot)/2;
-         break;
-      case 2: nxmax = Nxtot*Nxtot2;
-         break;
-      default: ;
-      }
       SigmaTilde.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
+         int nxmax =0;
+         switch (NPDFDim) {
+         case 0: nxmax = Nxtot[i];
+            break;
+         case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+            break;
+         case 2: nxmax = Nxtot[i]*Nxtot2[i];
+            break;
+         default: ;
+         }
          SigmaTilde[i].resize(NScaleDim);
          for(int j=0;j<NScaleDim;j++){
             SigmaTilde[i][j].resize(Nscalevar[j]);
@@ -375,24 +378,24 @@ int fnloBlockB::Write(ostream *table){
             }
          }
       }
-      *table << Nxtot << endl;
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         for(int j=0;j<Nxtot;j++){
+         *table << Nxtot[i] << endl;
+         for(int j=0;j<Nxtot[i];j++){
             *table << XNode1[i][j] << endl;
          }         
       }      
       if(NPDFDim==2){
-         *table << Nxtot2 << endl;
          for(int i=0;i<BlockA2->GetNObsBin();i++){
-            for(int j=0;j<Nxtot2;j++){
+            *table << Nxtot2[i] << endl;
+            for(int j=0;j<Nxtot2[i];j++){
                *table << XNode2[i][j] << endl;
             }         
          }      
       }
       if(NFragFunc>0){
-         *table << Nztot << endl;
          for(int i=0;i<BlockA2->GetNObsBin();i++){
-            for(int j=0;j<Nztot;j++){
+            *table << Nztot[i] << endl;
+            for(int j=0;j<Nztot[i];j++){
                *table << ZNode[i][j] << endl;
             }         
          }               
@@ -428,17 +431,17 @@ int fnloBlockB::Write(ostream *table){
          }
       }
       
-      int nxmax =0;
-      switch (NPDFDim) {
-      case 0: nxmax = Nxtot;
-         break;
-      case 1: nxmax = ((int)pow((double)Nxtot,2)+Nxtot)/2;
-         break;
-      case 2: nxmax = Nxtot*Nxtot2;
-         break;
-      default: ;
-      }
       for(int i=0;i<BlockA2->GetNObsBin();i++){
+         int nxmax =0;
+         switch (NPDFDim) {
+         case 0: nxmax = Nxtot[i];
+            break;
+         case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+            break;
+         case 2: nxmax = Nxtot[i]*Nxtot2[i];
+            break;
+         default: ;
+         }
          for(int j=0;j<NScaleDim;j++){
             for(int k=0;k<Nscalevar[j];k++){
                for(int l=0;l<Nscalenode[j];l++){
@@ -459,17 +462,17 @@ int fnloBlockB::Write(ostream *table){
 void fnloBlockB::Add(fnloBlockB* other){
    double w1 = (double)Nevt / (Nevt+other->Nevt);
    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
-   int nxmax =0;
-   switch (NPDFDim) {
-   case 0: nxmax = Nxtot;
-      break;
-   case 1: nxmax = ((int)pow((double)Nxtot,2)+Nxtot)/2;
-      break;
-   case 2: nxmax = Nxtot*Nxtot2;
-      break;
-   default: ;
-   }
    for(int i=0;i<BlockA2->GetNObsBin();i++){
+      int nxmax =0;
+      switch (NPDFDim) {
+      case 0: nxmax = Nxtot[i];
+         break;
+      case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+         break;
+      case 2: nxmax = Nxtot[i]*Nxtot2[i];
+         break;
+      default: ;
+      }
       for(int j=0;j<NScaleDim;j++){
          for(int k=0;k<Nscalevar[j];k++){
             for(int l=0;l<Nscalenode[j];l++){

@@ -30,8 +30,8 @@ int main(int argc,void** argv)
            delete thistable;
            break;
         }
-        if(thistable->GetBlockA1()->GetItabversion() != 15000){
-           printf("This Merger likes only tableformat V15.000, skipping %s.\n",path);      
+        if(thistable->GetBlockA1()->GetItabversion() != 20000){
+           printf("This Merger likes only tableformat V20.000, skipping %s.\n",path);      
            table_list.pop_back();
            delete thistable;
            break;

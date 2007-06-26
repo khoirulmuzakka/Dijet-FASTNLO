@@ -70,11 +70,11 @@ class fnloBlockB {
    int IPDFdef2;
    int IPDFdef3;
    // Missing: linear PDF combinations for IPDFdef1=0
-   int Nxtot;
+   vector < int > Nxtot;
    vector < vector < double > > XNode1;
-   int Nxtot2;
+   vector < int >  Nxtot2;
    vector < vector < double > > XNode2;
-   int Nztot;
+   vector < int > Nztot;
    vector < vector < double > > ZNode;
    int NScales;
    int NScaleDim;
