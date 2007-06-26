@@ -28,12 +28,20 @@
 *********************************************************************
       implicit none
       CHARACTER*255 FILENAME, FILENAME2
+      LOGICAL LHEADONLY
+      CHARACTER*4 SHEAD/'head'/
+      CHARACTER*255 BUFFER
+      
 
 c --- parse command line
       IF ( IARGC().LT.1)  FILENAME = 'intable.txt'
       IF ( IARGC().LT.2)  FILENAME2 = 'outtable.txt'
+      LHEADONLY = .false.
       IF ( IARGC().GT.0)  CALL GETARG(1,FILENAME)
       IF ( IARGC().GT.1)  CALL GETARG(2,FILENAME2)
+      IF ( IARGC().GT.2)  CALL GETARG(3,BUFFER)
+      
+      IF(INDEX(BUFFER,SHEAD).NE.0) LHEADONLY = .true.
 
       WRITE(*,*) ' '
       WRITE(*,*) ' '
@@ -60,12 +68,14 @@ c
       WRITE(*,*) ' '
       WRITE(*,*) ' writing v2.0 table(s) ***************'
 c --- write either header, single contributions, or whole table 
-c      call CV20WRT('head.txt',0) ! header only (one can add hadr-cor or data)
+      if (LHEADONLY) THEN
+         call CV20WRT(FILENAME2,0) ! header only (one can add hadr-cor or data)
+      else
+         call CV20WRT(FILENAME2,99) ! ------- all: v2.0 sum table
 c      call CV20WRT('contrib1.txt',1) ! LO contrib only
 c      call CV20WRT('contrib2.txt',2) ! NLO contrib only
 c      call CV20WRT('contrib3.txt',3) ! thresh-cor only
-      call CV20WRT(FILENAME2,99) ! ------- all: v2.0 sum table
-
+      endif
 
       RETURN
       END
