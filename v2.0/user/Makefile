@@ -9,7 +9,7 @@ NAME=example
 
 
 
-FFILES= example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f
+FFILES= example.f fnx9999.f fx9999rd.f fnset.f fn-alphas-demo.f fn-interface.f
 FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 # --- use -pg   for "gprof"

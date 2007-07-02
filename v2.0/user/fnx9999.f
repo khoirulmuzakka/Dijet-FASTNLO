@@ -393,18 +393,22 @@ c loop: observable, scalebins,(get alphas), xbins,subproc
                mu = ScaleNode(ic,j,1,is,k) ! ???????
             Endif
 c     - get alphas
-            write(*,*) 'xmur ',xmur,mu
+c            write(*,*) 'xmur ',xmur,mu
             as(1) =  FNALPHAS(xmur * mu) ! ??????????????
             aspow(1) = as(1)**Npow(ic)
             Do l=1,nxmax
-               Do m=1,NSubProc(ic)
+c               Do m=1,NSubProc(ic)
 c               Do m=1,1 ! gg only
+               Do m=2,3 ! 
+c               Do m=2,5 ! qq only
+c               Do m=6,6 ! qg only
+                  if (j.eq.1) write(*,*) l,SigmaTilde(ic,j,1,is,k,l,m)
                   result(j,m,ic) = result(j,m,ic) + 
 c     +                SigmaTilde(ic,j,1,3-pointer,k,l,m)
 c     3-IScalePoint
-     +                 SigmaTilde(ic,j,1,1,k,l,m)
+     +                 SigmaTilde(ic,j,1,is,k,l,m)
      +                 * aspow(1)
-     +                 * pdf(j,k,l,m)
+c     +                 * pdf(j,k,l,m)
                Enddo
             Enddo
          Enddo
@@ -438,7 +442,7 @@ c - set pointers to contribution in table and to scale variation
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
             muf = ScaleNode(ic,i,1,is,j)
-            write(*,*) 'muf ',muf
+c            write(*,*) 'muf ',muf
             nx =0
             Do k=1,NxTot(ic,1,i)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
@@ -569,6 +573,7 @@ c   - compute seven combinations
          H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
+c         H(6) = H(7) 
       else
          write(*,*) '    icf1,2,3 =',icf1,icf2,icf3
          write(*,*) '    this combination is not yet defined'
@@ -606,253 +611,9 @@ c   - compute seven combinations
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999RD(FILENAME,IFLG)
-*-----------------------------------------------------------------
-* M. Wobisch   read ASCII table of perturbative coefficients
-*
-* input: FILENAME  name of table
-*        IFLG =0 read header (A) 
-*             =1 read header plus LO contribution
-*             =2 read header plus LO plus NLO contribution
-*             =99 read whole table
-*
-* To Do:
-* - problem: Nevt too long?
-* - read data blocks
-* - read multiplicative factor-blocks
-*
-* MW 31/05/2007 completely rewritten for v1.5
-*-----------------------------------------------------------------
-      IMPLICIT NONE
-      CHARACTER*(*) FILENAME
-      CHARACTER*255 BUFFER
-      INTEGER IFLG, IFIRST, IFILE, IC,I,J,K,L,M,N,   nxmax
-      INCLUDE 'fnx9999.inc'
-
-      DATA IFIRST/0/
-      SAVE IFIRST
-
-      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
-      IF (IFILE .ne. 0) THEN
-         WRITE(*,*) '          fastNLO:  table file not found ',
-     +        '  -  IOSTAT = ',IFILE
-         STOP
-      ENDIF
-
-c ---------------------------- block A1
-      Read(2,*) i
-      If (i.ne.Iseparator) Goto 999
-      Read(2,*) Itabversion
-      Read(2,*) ScenName
-      Read(2,*) Ncontrib
-      Read(2,*) Nmult
-      Read(2,*) Ndata
-c ---------------------------- block A2
-      Read(2,*) i
-      If (i.ne.Iseparator) Goto 999
-      Read(2,*) IpublUnits
-      Read(2,*) NscDescript
-      If (NscDescript .gt. MxScDescript) then
-         write(*,*) ' NscDescript too large ',NscDescript,'<=',MXScDescript
-      Endif
-      Do i=1,NscDescript
-         Read(2,*) ScDescript(i)
-      Enddo
-      Read(2,*) Ecms
-      Read(2,*) ILOord
-      Read(2,*) NobsBin
-      Read(2,*) NDim
-      Do i=1,NDim
-         Read(2,*) DimLabel(i)
-      Enddo
-      Do i=1,NDim
-         Read(2,*) IDiffBin(i) 
-      Enddo
-      Do i=1,NObsBin
-         Do j=1,NDim
-            Read(2,*) LoBin(i,j)
-            If (IDiffBin(j).eq.2) Read(2,*) Upbin(i,j)
-         Enddo
-      Enddo
-      Read(2,*) INormFlag
-      If (INormFlag.gt.1) then
-         Read(2,*) DenomTable
-         Do i=1,NObsBin
-            Read(2,*) IDivPointer(i)
-         Enddo
-      Endif
-
-c ---------------------------- block B  <<<< need to read this multiple times
-      Do ic=1,NContrib
-         Read(2,*) i
-         If (i.ne.Iseparator) Goto 999
-         Read(2,*) IXsectUnits(ic)
-         Read(2,*) IDataFlag(ic)
-         Read(2,*) IAddMultFlag(ic)
-         Read(2,*) IContrFlag1(ic)
-         Read(2,*) IContrFlag2(ic)
-         Read(2,*) IContrFlag3(ic)
-         Read(2,*) NContrDescr(ic)
-         Do i=1,NContrDescr(ic)
-            Read(2,*) CtrbDescript(ic,i)
-         Enddo
-         Read(2,*) NCodeDescr(ic)
-         Do i=1,NCodeDescr(ic)
-            Read(2,*) CodeDescript(ic,i)
-         Enddo
-         
-c --------------------------- Idata ?????
-         If (IDataFlag(ic).eq.1) Then
-            Write(*,*) "   Data Blocks can not yet be read"
-            STOP
-            Goto 100
-         Endif
-
-c --------------------------- IAddMult ?????
-         If (IAddMultFlag(ic).eq.1) Then
-            Write(*,*) "   Multiplicative Blocks can not yet be read"
-            STOP
-            Goto 100
-         Endif
-      
-c --- coefficient block
-         Read(2,*) IRef(ic)
-         Read(2,*) IScaleDep(ic)
-         Read(2,*) Nevt(ic)
-         Read(2,*) Npow(ic)
-         Read(2,*) NPDF(ic)
-         Do i=1,NPDF(ic)
-            Read(2,*) NPDFPDG(ic,i)  
-         Enddo
-         Read(2,*) NPDFDim(ic)
-         Read(2,*) NFragFunc(ic)
-         Do i=1,NFragFunc(ic)
-            Read(2,*) NFFPDG(ic,i)
-         Enddo
-         Read(2,*) NFFDim(ic) 
-         Read(2,*) NSubproc(ic)
-         Read(2,*) IPDFdef(ic,1)   
-         Read(2,*) IPDFdef(ic,2)   
-         Read(2,*) IPDFdef(ic,3)   
-
-         IF (IPDFdef(ic,1).eq.0) then ! - no predefined set of PDF coefficients
-            write(*,*) " case IPDFdef(1)=0 not yet implemented"
-            STOP
-         Endif
-         If (NPDF(ic).gt.0) Then
-            Do i=1,NObsBin
-               Read(2,*) Nxtot(ic,1,i)
-               Do j=1,Nxtot(ic,1,i)
-                  Read(2,*) XNode1(ic,i,j)
-               Enddo
-            Enddo 
-            If (NPDFDim(ic).eq.2) Then
-               Do i=1,NObsBin
-                  Read(2,*) Nxtot(ic,2,i)
-                  Do j=1,Nxtot(ic,2,i)
-                     Read(2,*) XNode2(ic,i,j)
-                  Enddo
-               Enddo 
-            Endif
-         Endif
-         IF (NFragFunc(ic).gt.0) then ! - no FFs so far
-            write(*,*) " no FragFuncs so far"
-            STOP
-         Endif
-         Read(2,*) NScales(ic)
-         Read(2,*) NScaleDim(ic)
-         Do i=1,NScales(ic)
-            Read(2,*) IScale(ic,i)
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Read(2,*) NScaleDescript(ic,i)
-            Do j=1,NScaleDescript(ic,i)
-               Read(2,*) ScaleDescript(ic,i,j)
-            Enddo
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Read(2,*) NScaleVar(ic,i)
-            Read(2,*) NScaleNode(ic,i)
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Do j=1,NScaleVar(ic,i)
-               Read(2,*) ScaleFac(ic,i,j)
-            Enddo
-         Enddo
-
-         Do i=1,NObsBin
-            Do j=1,NScaleDim(ic)
-               Do k=1,NScaleVar(ic,j)
-                  Do l=1,NScaleNode(ic,j)
-                     Read(2,*)ScaleNode(ic,i,j,k,l)
-                  Enddo
-               Enddo
-            Enddo
-         Enddo
-
-         Do i=1,NObsBin
-            Do j=1,NScaleDim(ic)
-               Do k=1,NScaleVar(ic,j)
-                  Do l=1,NScaleNode(ic,j)
-c               Do k1=1,NScaleVar(ic,j)
-c                  Do l1=1,NScaleNode(ic,j)
-c               Do k2=1,NScaleVar(ic,j)
-c                  Do l2=1,NScaleNode(ic,j)
-c --- here we assume NFragFunc=0
-                     If (NFragFunc(ic).gt.0) then
-                        write(*,*) " NFragFunc>0 not yet implemented"
-                        STOP
-                     Endif
-                     If (NPDFdim(ic).eq.0) Then
-                        nxmax = Nxtot(ic,1,i)
-                     Elseif (NPDFdim(ic).eq.1) Then
-                        nxmax = (Nxtot(ic,1,i)**2+Nxtot(ic,1,i))/2
-                     Elseif (NPDFdim(ic).eq.2) Then 
-                        nxmax = 
-     +                       Nxtot(ic,1,i)*Nxtot(ic,2,i)
-                     Else
-                        write(*,*) '  NPDFdim > 2 not enabled'
-                        Stop
-                     Endif
-                     Do m=1,nxmax
-                        Do n=1,NSubProc(ic)
-                           Read(2,*) SigmaTilde(ic,i,j,k,l,m,n)
-c                           Read(2,*) SigmaTilde(ic,i,k1,l1,k2,l2,m,n)
-                        Enddo
-                     Enddo
-                  Enddo
-               Enddo
-            Enddo
-         Enddo
-
- 100     Continue
-      Enddo
-
-      Read(2,*) i
-      If (i.ne.Iseparator) Goto 999
-      Read(2,*) i
-      If (i.ne.Iseparator) Goto 999
-      CLOSE(2)
-
-
-      RETURN
- 999  continue
-
-      close (2) 
-      write(*,*) " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      write(*,*) " >>>>>   fastNLO error in table format "
-      write(*,*) " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      stop
-      RETURN
-
- 5000 FORMAT (A,I12,A,A64) 
-      END
-
-*******************************************************************
-*******************************************************************
       Subroutine FX9999NF
 *-----------------------------------------------------------------
-* fastNLO user code v2.0 - print scenario information
+* fastNLO user code v2.0 - print scenario iNFormation
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'

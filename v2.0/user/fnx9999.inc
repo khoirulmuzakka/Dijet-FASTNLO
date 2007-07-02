@@ -63,7 +63,7 @@ c --- Block B
       Integer NScaleVar(MxCtrb,MxScaleDim),NScaleNode(MxCtrb,MxScaleDim)
       Double Precision ScaleFac(MxCtrb,MxScaleDim,MxScaleVar),
      +     ScaleNode(MxCtrb,MxObsBin,MxScaleDim,MxScaleVar,MxScaleNode),
-     +     SigmaTilde(MxCtrb,MxObsBin,MxScaleDim,MxScaleVar,MxScaleNode,
+     +     SigmaTilde(MxCtrb,MxObsBin,1,MxScaleVar,MxScaleNode,
      +     MxNxMax,MxSubProc)
 
 c - output array
