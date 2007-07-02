@@ -76,7 +76,7 @@ my $sdir = getcwd();
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
-$install{lhapdf}[0]     = "lhapdf-4.2";
+$install{lhapdf}[0]     = "lhapdf-5.2.3";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
