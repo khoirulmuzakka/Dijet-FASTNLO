@@ -228,6 +228,7 @@ c   -->  still need to implement test if and where available
       IContrib = 0
       If (PORDPTHY.ge.1) then   ! LO contribution selected
          IContrib = IContrib+1
+c         IContrib = 2           ! test: run NLO correction only
 c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
          IContrPoint(IContrib) = 1 ! <<< assumes that LO comes first
       Endif
@@ -318,6 +319,11 @@ c - check if renormalization scale can be provided aposteriori if needed
          Enddo
       Endif
 
+c ----- test output
+      Do i=1,Icontrib
+         write(*,*) 'Pointer:',i,IcontrPoint(i),IScalePoint(i)
+      Enddo
+
       Return
       End
 
@@ -397,18 +403,12 @@ c            write(*,*) 'xmur ',xmur,mu
             as(1) =  FNALPHAS(xmur * mu) ! ??????????????
             aspow(1) = as(1)**Npow(ic)
             Do l=1,nxmax
-c               Do m=1,NSubProc(ic)
+               Do m=1,NSubProc(ic)
 c               Do m=1,1 ! gg only
-               Do m=2,3 ! 
-c               Do m=2,5 ! qq only
-c               Do m=6,6 ! qg only
-                  if (j.eq.1) write(*,*) l,SigmaTilde(ic,j,1,is,k,l,m)
                   result(j,m,ic) = result(j,m,ic) + 
-c     +                SigmaTilde(ic,j,1,3-pointer,k,l,m)
-c     3-IScalePoint
      +                 SigmaTilde(ic,j,1,is,k,l,m)
      +                 * aspow(1)
-c     +                 * pdf(j,k,l,m)
+     +                 * pdf(j,k,l,m)
                Enddo
             Enddo
          Enddo
@@ -463,7 +463,7 @@ c            write(*,*) 'muf ',muf
                         Stop
                      Endif
                   Else
-                     write(*,*) ' neither one nor two hadrons...?'
+                     write(*,*) ' neither one nor two hadrons...?',NPDF(ic)
                      Stop
                   Endif
                Enddo            ! m
@@ -573,7 +573,7 @@ c   - compute seven combinations
          H(5) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
-c         H(6) = H(7) 
+         if (icf3.eq.1) H(6) = H(6)+H(7) ! case: 6 subproc
       else
          write(*,*) '    icf1,2,3 =',icf1,icf2,icf3
          write(*,*) '    this combination is not yet defined'

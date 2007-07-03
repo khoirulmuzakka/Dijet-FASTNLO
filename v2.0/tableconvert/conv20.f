@@ -457,6 +457,7 @@ c --- to do: what is variable "n"? -> outermost loop: contributions
                                  if ((n.eq.1 .or. n.eq.3).and. n1.eq.3) a=
      +                                (array(i,m,n1-1,nscaddr,l)
      +                                +array(i,m,n1,  nscaddr,l))/2d0
+     +                                *rewgt(i,m)
                                  if ((n.eq.1 .or. n.eq.3) .and. n1.eq.2) then
 c                                    if (a.eq.0d0) then  ! --- remove later
 c                                       WRITE(2,5009) '0'

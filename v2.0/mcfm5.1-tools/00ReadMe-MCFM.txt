@@ -88,6 +88,7 @@ virt    11730783.538 +/- 11299.466 fb
 tota    11929392.742 +/- 11406.520 fb       = 11.9nb
 --> Sum of Virt & Real gives total 
  -> virtual includes LO 
+    (right: checked that a "tota" job does not call the LO code)
  -> how can we disentangle contributions with different orders in alphas?
-
-
+    (one way around: compute virt, subtract LO, divide by alphas)
+       ... cross check: compare scale dependence

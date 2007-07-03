@@ -44,7 +44,7 @@ c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
       call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-c      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
 c      call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
       call FX9999CC(FILENAME, 1.0d0 , 1.0d0, 1 , XST1001)
 c      call FX9999NF             ! print scenario info
