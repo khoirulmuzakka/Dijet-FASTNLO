@@ -34,7 +34,7 @@
 *  fx9999pr     print results                                           (works)
 *  fx9999rd     read table                                           (complete)
 *  fx9999nf     print scenario information (physics & technical)        (works)
-*  fx9999nm     normalize distribution by its own integral        (to do)
+*  fx9999nm     normalize distribution by its own integral              (to do)
 *
 * -------------------- from v1.4 ------- (to be updated)
 * contains the following routines
@@ -103,6 +103,11 @@
       Data OLDFILENAME/'xxxx'/
       Save OLDFILENAME
 
+c === reset output array
+      Do j=1,NObsBin
+         xsect(j) = 0d0
+      Enddo
+
 c === initialization: read table, set pointers to contributions
       call FX9999IN(Filename)
 c === determine pointers to contributions/scales
@@ -119,7 +124,6 @@ c - multiply with perturbative coefficients and alphas
          call FX9999MT(i,xmur,xmuf) ! <<< need to think about argument
 c - add up in small array
          Do j=1,NObsBin
-            xsect(j) = 0d0
             Do k=1,NSubProc(Ipoint)
                xsect(j) = xsect(j)+result(j,k,Ipoint)
 c               write(*,*) 'result ',j,k,result(j,k,Ipoint)
