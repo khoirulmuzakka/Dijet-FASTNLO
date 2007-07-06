@@ -115,6 +115,8 @@ c - new variables that did not exist in v14
      +     IPDFCoeff, IPDFdef1, IPDFdef2, IPDFdef3,
      +     NScales, NScaleDim, nxall , nscaddr, nscvar
       Double Precision XNode, hxlim,hx,a
+c - variables for diagonalization of Bernstein Scale Interpolation
+      Double Precision Bnst(4)
 
 c - pointer to subprocesses - new ordering
       Integer ipppoint(7),idispoint(3)
@@ -411,6 +413,62 @@ c ---------- works only for standard fastNLO PDF weighting formula
             Enddo
          Enddo
 
+
+c --- diagonalize Bernstein scale interpolation in v1.4 (not in v1.6)
+         If (ITabversion.eq.14000 .and. NScaleBin.gt.2) Then
+            i = 0
+            do i1=1,Nrapidity
+               do i2=1,NPT(i1)
+                  i = i+1       ! --- bin counter ObsBin
+                  do j=1,Nscaledim !                 scaledim
+                     do k=1,nscvar !                 scalevar
+c                        do l=1,NscaleBin !           scalebin
+                        if (NPDFDim.eq.0) nxall=Nxtot
+                        if (NPDFDim.eq.1) nxall=(Nxtot*Nxtot+Nxtot)/2
+                        do m=1,nxall !            xbins
+                           do n1=1,Nsubproc !     subprocesses
+                              If (n.eq.1) then
+                                 nscaddr = 1
+                              Else
+                                 nscaddr = 1+k+(n-2)*nscalevar
+                              Endif
+
+c >>>>>>>> TK: please implement the "anti-Bernstein" code here
+                              If (NScaleBin.eq.3) Then ! 3 Bernstein Scalebins
+                                 Bnst(1) = array(i,m,n1,nscaddr,1)
+                                 Bnst(2) = array(i,m,n1,nscaddr,2)
+                                 Bnst(3) = array(i,m,n1,nscaddr,3)
+                                 array(i,m,n1,nscaddr,1) = ! TK: enter
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
+                                 array(i,m,n1,nscaddr,2) = ! correct formulae
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
+                                 array(i,m,n1,nscaddr,3) = ! here
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
+                              Elseif (NScaleBin.eq.4) Then ! 4 Bernstein Scalebins
+                                 Bnst(1) = array(i,m,n1,nscaddr,1)
+                                 Bnst(2) = array(i,m,n1,nscaddr,2)
+                                 Bnst(3) = array(i,m,n1,nscaddr,3)
+                                 Bnst(4) = array(i,m,n1,nscaddr,4)
+                                 array(i,m,n1,nscaddr,1) = ! TK: enter
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+                                 array(i,m,n1,nscaddr,2) = ! correct formulae
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+                                 array(i,m,n1,nscaddr,3) = ! here
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+                                 array(i,m,n1,nscaddr,4) = 
+     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+                              Else
+                                 Write(*,*) 'not implemented: NScaleBin=',NScaleBin
+                                 Stop
+                              Endif
+                           enddo
+                        enddo
+                     enddo                     
+                  enddo
+               enddo
+            enddo
+         Endif                  ! Bernstein diagonalization
+
 c --- write SigmaTilde array
          i = 0
          do i1=1,Nrapidity
@@ -541,8 +599,8 @@ c ---------------------------------------------------------
       if (i.ne.iseparator) goto 999
       READ(2,*) ITABVERSION
       WRITE(*,*) "#       tableformat is version",real(itabversion)/10000d0
-      if (ITABVERSION.ne.14000) then
-         write(*,*) '#     => this conversion works only for version 1.4'
+      if (ITABVERSION.ne.14000 .and. ITABVERSION.ne.16000) then
+         write(*,*) '#     => this conversion works only for v1.4 and v1.6'
          stop
       endif
       READ(2,*) i
