@@ -176,6 +176,9 @@ our $lognam  = "${scen}${ref}_${order}.log";
 
 # Directories
 my $pwdir = getcwd();
+chdir $idir;
+my $aidir = getcwd();
+chdir $pwdir;
 
 # Define install hash
 my %install;
@@ -256,7 +259,7 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
-	system("./configure --prefix `pwd`");
+	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 	print "\nfastrun.pl: Making lhapdf ...\n";
 	system("make");
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
@@ -280,7 +283,7 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
-	system("./configure --prefix `pwd`");
+	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 	print "\nfastrun.pl: Making Nlojet++ ...\n";
 	system("make CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	print "\nfastrun.pl: Make install for Nlojet++ ...\n";
