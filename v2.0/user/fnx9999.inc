@@ -28,7 +28,7 @@ c - technical parameters
      +     MxCodeDescr, MxPDF, MxFF, MxScaleDim, MxScaleDescript,
      +     MxScaleVar
       Parameter (MxScDescript=5,MxDim=3,MxContrDescr=10,
-     +     MxCodeDescr=10,MxPDF=2,MxFF=0,MxScaleDim=1,MxScaleDescript=5,
+     +     MxCodeDescr=10,MxPDF=2,MxFF=1,MxScaleDim=1,MxScaleDescript=5,
      +     MxScaleVar=4)
 
 c --- Block A1 (header part 1)
