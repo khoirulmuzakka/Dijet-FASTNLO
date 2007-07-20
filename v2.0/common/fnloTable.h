@@ -21,6 +21,7 @@ class fnloTable{
    int ReadBlockA2(){return BlockA2.Read(ifilestream);}
    int WriteBlockA2(){return BlockA2.Write(ofilestream);}
    fnloBlockA2* GetBlockA2(){return &BlockA2;}
+   int CreateBlockB(int no);
    int ReadBlockB(int no);
    int WriteBlockB(int no);
    int WriteBlockB(int no,ofstream* outstream );

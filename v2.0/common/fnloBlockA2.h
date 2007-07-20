@@ -17,6 +17,7 @@ class fnloBlockA2 {
    bool IsCompatible(fnloBlockA2* other);
    int GetNObsBin(){return NObsBin;}
    int GetILOord(){return ILOord;}
+   void SetIpublunits(int unit){Ipublunits = unit;}
  private:
    void StripWhitespace(string &str) const;
    bool cmp(const double x1, const double x2) const;

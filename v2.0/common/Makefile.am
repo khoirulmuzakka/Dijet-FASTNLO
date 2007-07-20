@@ -1,10 +1,10 @@
 AUTOMAKE_OPTIONS = foreign
 
 # the main library with the fastNLO classes inside
-lib_LIBRARIES = libfastnlo.a
+lib_LIBRARIES = libfastnloAuthor.a
 
 # all source files which go into the main target
-libfastnlo_a_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc\
+libfastnloAuthor_a_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc\
   fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
 
 # C++ compiler flags to be used for the main target

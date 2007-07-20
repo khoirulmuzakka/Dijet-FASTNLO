@@ -50,12 +50,19 @@ void fnloTable::CloseFileWrite(){
 }
 
 int fnloTable::ReadBlockB(int no){
+   if( CreateBlockB(no) ){
+      printf("fnloTable::ReadBlockB: Cannot create block B #%d. Already existing blocks: %d. Stopping.\n",no,BlockB.size());
+   }
+   return BlockB[no]->Read(ifilestream);
+}
+
+int fnloTable::CreateBlockB(int no){
    fnloBlockB* blockb = new fnloBlockB(&BlockA1,&BlockA2);
    if((no+1)>BlockB.size()){
       BlockB.resize(no+1);
    }
    BlockB[no] = blockb;
-   return blockb->Read(ifilestream);
+   return 0;
 }
 
 int fnloTable::WriteBlockB(int no){

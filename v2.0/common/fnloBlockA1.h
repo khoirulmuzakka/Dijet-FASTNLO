@@ -11,6 +11,7 @@ using namespace std;
 
 class fnloBlockA1 {
  public:
+   fnloBlockA1(){Itabversion=tabversion;}
    int Read(istream *table);
    int Write(ostream *table);
    bool IsCompatible(fnloBlockA1* other);
@@ -19,6 +20,7 @@ class fnloBlockA1 {
    int GetNcontrib(){return Ncontrib;}
    int GetNmult(){return Nmult;}
    int GetNdata(){return Ndata;}
+   void SetScenName(string name){ScenName = name;}
    void SetNcontrib(int n){Ncontrib = n;}
    void SetNmult(int n){Nmult = n;}
    void SetNdata(int n){Ndata = n;}
