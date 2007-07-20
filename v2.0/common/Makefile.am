@@ -1,20 +1,14 @@
 AUTOMAKE_OPTIONS = foreign
 
-# the main target, i.e. the executable to build
-bin_PROGRAMS = fnlo-merge
+# the main library with the fastNLO classes inside
+lib_LIBRARIES = libfastnlo.a
 
 # all source files which go into the main target
-fnlo_merge_SOURCES = main.cc entry.h
-
-# libraries to be linked to the main target
-LDADD = ../common/libfastnlo.a
+libfastnlo_a_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc\
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 
-
-# Preprocessor flags
-AM_CPPFLAGS = -I$(srcdir)/../common
-
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
