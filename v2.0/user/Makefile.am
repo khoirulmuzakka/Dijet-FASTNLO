@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = example
 
 # all source files which go into the main target (and have to be distributed)
-example_SOURCES = example.f fnx9999.f fnx9999.inc fnio.f fnset.f fn-alphas-demo.f fn-interface.f  
+example_SOURCES = example.f fnx9999.f fnx9999.inc fx9999rw.f fnio.f fnset.f fn-alphas-demo.f fn-interface.f  
 
 # FORTRAN compiler flags to be used for the main target
 AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132

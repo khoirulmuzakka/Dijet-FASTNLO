@@ -38,7 +38,8 @@ c --- Block A1 (header part 1)
 
 c --- Block A2 (header part 2)
       Integer Ipublunits, NscDescript, ILOord, Nobsbin, NDim,
-     +     IDiffBin(MxDim), INormFlag, IDivPointer(MxObsBin)
+     +     IDiffBin(MxDim), INormFlag, 
+     +     IDivLoPointer(MxObsBin), IDivUpPointer(MxObsBin)
       Character*64 ScDescript(MxScDescript), DimLabel(MxDim),
      +     DenomTable
       Double Precision Ecms,LoBin(MxObsBin,MxDim),UpBin(MxObsBin,MxDim)
@@ -86,7 +87,7 @@ c - int*8
 c - int
      +     Itabversion, Ncontrib,Nmult,Ndata,
      +     Ipublunits, NscDescript, ILOord, Nobsbin, NDim,
-     +     IDiffBin, INormFlag, IDivPointer,
+     +     IDiffBin, INormFlag, IDivLoPointer, IDivUpPointer,
      +     IXsectUnits, IDataFlag, IAddMultFlag, 
      +     IContrFlag1, IContrFlag2, IContrFlag3, 
      +     NContrDescr, NCodeDescr, IRef, IScaleDep, Npow, 

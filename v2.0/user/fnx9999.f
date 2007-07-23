@@ -2,6 +2,7 @@
 *******************************************************************
 * fastNLO user code            T. Kluge, M. Wobisch v1.4 02/01/2006      
 *                                                   v1.5 31/05/2007  
+*                                                   v2.0 16/07/2007 
 *   >> this code should not be edited
 *   >> if you have questions, please contact 
 *      the authors at:  fastnlo@cedar.ac.uk
@@ -18,11 +19,12 @@
 * ===================== ideas ============================
 * - propose to call main routine fnx9999 (just like scenario)
 *           -> any reasons not to?
-* - include table-checks into read routine - or separate check routine?
+* - include table-checks into read/write routine - or separate check routine?
 *
 *
 *--------- v2.0 routines - status --------------------------------
 *  fx9999cc     main routine - calls other code - need cosmetics        (works)
+*                                                 -> need to linearize k1,k2 
 *  fx9999in     initialization (to do: check consistency)               (works)
 *  fx9999pt     find pointers to contributions/scales                   (works)
 *                 - interpret contribution selection/consistency (advanced)
@@ -32,18 +34,18 @@
 *  fx9999pl     compute PDF linear combinations (done - cosmetics)      (works)
 *  fx9999mt     multiply coefficients and PDFs                       (advanced)
 *  fx9999pr     print results                                           (works)
-*  fx9999rw     read (or write) table                                (complete)
 *  fx9999nf     print scenario information (physics & technical)        (works)
 *  fx9999nm     normalize distribution by its own integral              (to do)
 *
+* external:
+*  fx9999rw     read (or write) table -> external                    (complete)
+*  fnio.f (contains 5 routines for i/o)
 *
 * uses commonblock definitions in: fnXNNNN.inc
 *
 * needs the following routines from "fn-interface.f":
 *     FNALPHAS        alpha_s interface (double precision function)
 *     FNPDF           PDF interface
-*
-* also: package fnio.f (5 routines for i/o)
 *
 *******************************************************************
 *******************************************************************
@@ -130,11 +132,15 @@ c === normalization
       ElseIf (INormFlag.eq.1) Then
 c         Call FX9999NM          ! normalize by own integral
          continue
-c      ElseIf (INormFlag.eq.2 .or INormFlag.eq.3) Then ! get denominator, divide
+c      ElseIf (INormFlag.eq.2 .or INormFlag.eq.3) Then ! get denomin., divide
 c         Call DX9999CC(DenomTable,Xmur,Xmuf,0,Xsect2)
-         Do i=1,NObsBin
-c            Xsect(i) = Xsect(i)/Xsect2(IDivPointer(i))
-         EndDo
+c         Do i=1,NObsBin
+c            Sum = 0d0 
+c            Do j=IDivLoPointer(i),IDivUpPointer
+c            Sum=Sum+Xsect2(j)
+c         Enddo
+c         Xsect(i) = Xsect(i)/Sum
+c         EndDo
       EndIf
 
 c === print results - if requested
@@ -657,228 +663,3 @@ c   - compute seven combinations
       End
 
 *******************************************************************
-      Subroutine fx9999rw(crw,filename)
-* ------------------------------------------------------------
-*  fastNLO usercode v2.0 reads or writes a v2 table
-*
-*  MW 07/23/2007
-*
-*  character   crw:        'read' or 'write'
-*  character   filename:    name of table
-* ------------------------------------------------------------
-      Implicit None
-      Character*(*) crw,filename
-      Integer Nunit, Ifile,ic,i,j,k,l,n,m, nxmax
-      Include 'fnx9999.inc'
-
-      Nunit=2
-
-      If (crw.eq.'write') Then
-         Open(unit=Nunit,file=filename,status='unknown')
-      Else
-         Open(Nunit,Status='OLD',File=Filename,IOSTAT=Ifile)
-         If (Ifile .ne. 0) Then
-            Write(*,*) '          fastNLO:  table file not found ',
-     +           '  -  IOSTAT = ',Ifile
-            Stop
-         Endif
-      Endif
-
-c --- fastNLO table
-c - block A1
-      Call fnioisep(crw,nunit)
-      Call fnioint(crw,nunit, Itabversion)
-      Call fniochar(crw,nunit, ScenName)
-      Call fnioint(crw,nunit, Ncontrib)
-      Call fnioint(crw,nunit, Nmult)
-      Call fnioint(crw,nunit, Ndata)
-c - block A2
-      Call fnioisep(crw,nunit)
-      Call fnioint(crw,nunit, IpublUnits) 
-      Call fnioint(crw,nunit, NscDescript)
-      If (NscDescript .gt. MxScDescript) Then
-         Write(*,*) ' NscDescript too large ',NscDescript,'<=',MXScDescript
-      Endif
-      Do i=1,NscDescript
-        Call fniochar(crw,nunit, ScDescript(i))
-      Enddo
-      Call fniodbl(crw,nunit, Ecms)
-      Call fnioint(crw,nunit, ILOord)
-      Call fnioint(crw,nunit, NobsBin)
-      Call fnioint(crw,nunit, NDim)
-      Do i=1,NDim
-         Call fniochar(crw,nunit, DimLabel(i))
-      Enddo
-      Do i=1,NDim
-         Call fnioint(crw,nunit, IDiffBin(i))
-      Enddo
-      Do i=1,NObsBin
-         Do j=1,NDim
-            Call fniodbl(crw,nunit, LoBin(i,j))
-            If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
-         Enddo
-      Enddo
-      Call fnioint(crw,nunit, INormFlag)
-      If (INormFlag.gt.1) Then
-         Call fniochar(crw,nunit, DenomTable)
-         Do i=1,NObsBin
-            Call fnioint(crw,nunit, IDivPointer(i))
-         Enddo
-      Endif
-
-c - block B
-      Do ic=1,NContrib
-         Call fnioisep(crw,nunit)
-         Call fnioint(crw,nunit, IXsectUnits(ic))
-         Call fnioint(crw,nunit, IDataFlag(ic))
-         Call fnioint(crw,nunit, IAddMultFlag(ic))
-         Call fnioint(crw,nunit, IContrFlag1(ic))
-         Call fnioint(crw,nunit, IContrFlag2(ic))
-         Call fnioint(crw,nunit, IContrFlag3(ic))
-         Call fnioint(crw,nunit, NContrDescr(ic))
-         Do i=1,NContrDescr(ic)
-            Call fniochar(crw,nunit, CtrbDescript(ic,i))
-         Enddo
-         Call fnioint(crw,nunit, NCodeDescr(ic))
-         Do i=1,NCodeDescr(ic)
-            Call fniochar(crw,nunit, CodeDescript(ic,i))
-         Enddo
-
-c --------------------------- Idata ?????
-         If (IDataFlag(ic).eq.1) Then
-            Write(*,*) "   Data Blocks can not yet be read"
-            STOP
-            Goto 100
-         Endif
-
-c --------------------------- IAddMult ?????
-         If (IAddMultFlag(ic).eq.1) Then
-            Write(*,*) "   Multiplicative Blocks can not yet be read"
-            STOP
-            Goto 100
-         Endif
-
-c --- coefficient block
-      Call fnioint(crw,nunit, IRef(ic))
-      Call fnioint(crw,nunit, IScaleDep(ic))
-      Call fniolint(crw,nunit, Nevt(ic))
-      Call fnioint(crw,nunit, Npow(ic))
-      Call fnioint(crw,nunit, NPDF(ic))
-         Do i=1,NPDF(ic)
-            Call fnioint(crw,nunit, NPDFPDG(ic,i))
-         Enddo
-         Call fnioint(crw,nunit, NPDFDim(ic))
-         Call fnioint(crw,nunit, NFragFunc(ic))
-         Do i=1,NFragFunc(ic)
-            Call fnioint(crw,nunit, NFFPDG(ic,i))
-         Enddo
-         Call fnioint(crw,nunit, NFFDim(ic))
-         Call fnioint(crw,nunit, NSubproc(ic))
-         Call fnioint(crw,nunit, IPDFdef(ic,1))   
-         Call fnioint(crw,nunit, IPDFdef(ic,2))  
-         Call fnioint(crw,nunit, IPDFdef(ic,3))  
-
-         IF (IPDFdef(ic,1).eq.0) then ! - no predefined set of PDF coefficients
-            write(*,*) " case IPDFdef(1)=0 not yet implemented"
-            STOP
-         Endif
-         If (NPDF(ic).gt.0) Then
-            Do i=1,NObsBin
-               Call fnioint(crw,nunit, Nxtot(ic,1,i))
-               Do j=1,Nxtot(ic,1,i)
-                  Call fniodbl(crw,nunit, XNode1(ic,i,j))
-               Enddo
-            Enddo 
-            If (NPDFDim(ic).eq.2) Then
-               Do i=1,NObsBin
-                  Call fnioint(crw,nunit, Nxtot(ic,2,i))
-                  Do j=1,Nxtot(ic,2,i)
-                     Call fniodbl(crw,nunit, XNode2(ic,i,j))
-                  Enddo
-               Enddo 
-            Endif
-         Endif
-         IF (NFragFunc(ic).gt.0) then ! - no FFs so far
-            write(*,*) " fastNLO: no FragFuncs so far"
-            STOP
-         Endif
-
-         Call fnioint(crw,nunit, NScales(ic))
-         Call fnioint(crw,nunit, NScaleDim(ic))
-         Do i=1,NScales(ic)
-            Call fnioint(crw,nunit, IScale(ic,i))
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Call fnioint(crw,nunit, NScaleDescript(ic,i))
-            Do j=1,NScaleDescript(ic,i)
-               Call fniochar(crw,nunit, ScaleDescript(ic,i,j))
-            Enddo
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Call fnioint(crw,nunit, NScaleVar(ic,i))
-            Call fnioint(crw,nunit, NScaleNode(ic,i))
-         Enddo
-         Do i=1,NScaleDim(ic)
-            Do j=1,NScaleVar(ic,i)
-               Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
-            Enddo
-         Enddo
-
-         Do i=1,NObsBin
-            Do j=1,NScaleDim(ic)
-               Do k=1,NScaleVar(ic,j)
-                  Do l=1,NScaleNode(ic,j)
-                     Call fniodbl(crw,nunit, ScaleNode(ic,i,j,k,l))
-                  Enddo
-               Enddo
-            Enddo
-         Enddo
-
-         Do i=1,NObsBin
-            Do k=1,NScaleVar(ic,1)
-               Do l=1,NScaleNode(ic,1)
-c --- here we assume NFragFunc=0
-                  If (NFragFunc(ic).gt.0) then
-                     write(*,*) " NFragFunc>0 not yet implemented"
-                     STOP
-                  Endif
-                  If (NPDFdim(ic).eq.0) Then
-                     nxmax = Nxtot(ic,1,i)
-                  Elseif (NPDFdim(ic).eq.1) Then
-                     nxmax = (Nxtot(ic,1,i)**2+Nxtot(ic,1,i))/2
-                  Elseif (NPDFdim(ic).eq.2) Then 
-                     nxmax = 
-     +                    Nxtot(ic,1,i)*Nxtot(ic,2,i)
-                     write(*,*) '  NPDFdim = 2 not yet enabled'
-                     Stop
-                  Else
-                     write(*,*) '  NPDFdim > 2 not enabled'
-                     Stop
-                  Endif
-                  Do m=1,nxmax
-                     Do n=1,NSubProc(ic)
-                        Call fniodbl(crw,nunit, SigmaTilde(ic,i,1,k,l,m,n))
-                     Enddo
-                  Enddo
-               Enddo
-            Enddo
-         Enddo
-
-
-
- 100     Continue
-      Enddo
-
-c      Call fnioint(crw,nunit, )
-c      Call fniodbl(crw,nunit, )
-c      Call fniochar(crw,nunit, )
-
-
-
-c - end of table
-      Call fnioisep(crw,nunit)
-      Call fnioisep(crw,nunit)
-      Close(2)
-
-      Return
-      End
