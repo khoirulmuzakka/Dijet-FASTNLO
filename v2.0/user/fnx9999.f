@@ -103,13 +103,13 @@
       Data OLDFILENAME/'xxxx'/
       Save OLDFILENAME
 
+
+c === initialization: read table, set pointers to contributions
+      call FX9999IN(Filename)
 c === reset output array
       Do j=1,NObsBin
          xsect(j) = 0d0
       Enddo
-
-c === initialization: read table, set pointers to contributions
-      call FX9999IN(Filename)
 c === determine pointers to contributions/scales
       Call FX9999PT(xmur,xmuf)
 
