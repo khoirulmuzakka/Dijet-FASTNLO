@@ -51,11 +51,15 @@ int fnloBlockA2::Read(istream *table){
       }
    }
    *table >> INormFlag;
-   IDivPointer.resize(NObsBin);
    if(INormFlag>1){
       *table >> DenomTable;
+   }
+   if(INormFlag>0){
+      IDivLoPointer.resize(NObsBin);
+      IDivUpPointer.resize(NObsBin);
       for(int i=0;i<NObsBin;i++){
-         *table >> IDivPointer[i];
+         *table >> IDivLoPointer[i];
+         *table >> IDivUpPointer[i];
       }
    }
 
@@ -98,8 +102,11 @@ int fnloBlockA2::Write(ostream *table){
    *table << INormFlag << endl;
    if(INormFlag>1){
       *table << DenomTable << endl;
+   }
+   if(INormFlag>0){
       for(int i=0;i<NObsBin;i++){
-         *table << IDivPointer[i] << endl;
+         *table << IDivLoPointer[i] << endl;
+         *table << IDivUpPointer[i] << endl;
       }
    }
    return 0;
@@ -160,9 +167,17 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
          printf("fnloBlockA2::IsCompatible: Differing DenomTable found.\n");
          return false;
       }
-      if(IDivPointer != other->IDivPointer){
-         printf("fnloBlockA2::IsCompatible: Differing IDivPointer found.\n");
-         return false;
+   }
+   if(INormFlag>0){
+      for(int i=0;i<NObsBin;i++){
+         if(IDivLoPointer[i] != other->IDivLoPointer[i]){
+            printf("fnloBlockA2::IsCompatible: Differing IDivLoPointer[%d] found.\n",i);
+            return false;
+         }
+         if(IDivUpPointer[i] != other->IDivUpPointer[i]){
+            printf("fnloBlockA2::IsCompatible: Differing IDivUpPointer[%d] found.\n",i);
+            return false;
+         }
       }
    }  
    

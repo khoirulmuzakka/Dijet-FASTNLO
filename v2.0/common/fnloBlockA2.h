@@ -38,6 +38,7 @@ class fnloBlockA2 {
    vector < vector <double> > UpBin;
    int INormFlag;
    string DenomTable;
-   vector <int> IDivPointer;
+   vector <int> IDivLoPointer;
+   vector <int> IDivUpPointer;
 };
 #endif

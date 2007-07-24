@@ -117,6 +117,8 @@ c - new variables that did not exist in v14
       Double Precision XNode, hxlim,hx,a
 c - variables for diagonalization of Bernstein Scale Interpolation
       Double Precision Bnst(4)
+      Double Precision t1,t2
+      Double Precision Bnfactor
 
 c - pointer to subprocesses - new ordering
       Integer ipppoint(7),idispoint(3)
@@ -433,30 +435,46 @@ c                        do l=1,NscaleBin !           scalebin
                                  nscaddr = 1+k+(n-2)*nscalevar
                               Endif
 
-c >>>>>>>> TK: please implement the "anti-Bernstein" code here
                               If (NScaleBin.eq.3) Then ! 3 Bernstein Scalebins
+                                 t1 = 1./2.
+                                 Bnfactor =  1./(2.*(1.-t1)*t1)
                                  Bnst(1) = array(i,m,n1,nscaddr,1)
                                  Bnst(2) = array(i,m,n1,nscaddr,2)
                                  Bnst(3) = array(i,m,n1,nscaddr,3)
-                                 array(i,m,n1,nscaddr,1) = ! TK: enter
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
-                                 array(i,m,n1,nscaddr,2) = ! correct formulae
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
-                                 array(i,m,n1,nscaddr,3) = ! here
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)
+                                 array(i,m,n1,nscaddr,1) = 
+     +                                1d0*Bnst(1) - Bnfactor*(1.-t1)**2 *Bnst(2)             
+                                 array(i,m,n1,nscaddr,2) = 
+     +                                            + Bnfactor            *Bnst(2)             
+                                 array(i,m,n1,nscaddr,3) = 
+     +                                            - Bnfactor*(t1)**2    *Bnst(2)+ 1d0*Bnst(3)
+
                               Elseif (NScaleBin.eq.4) Then ! 4 Bernstein Scalebins
+                                 t1 = 1./3.
+                                 t2 = 2./3.
+                                 Bnfactor =  1./(3.*(1.-t1)**2*t1 * 3.*(1.-t2)*(t2)**2 - 3.*(1.-t2)**2*t2 * 3.*(1.-t1)*(t1)**2)
                                  Bnst(1) = array(i,m,n1,nscaddr,1)
                                  Bnst(2) = array(i,m,n1,nscaddr,2)
                                  Bnst(3) = array(i,m,n1,nscaddr,3)
                                  Bnst(4) = array(i,m,n1,nscaddr,4)
-                                 array(i,m,n1,nscaddr,1) = ! TK: enter
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
-                                 array(i,m,n1,nscaddr,2) = ! correct formulae
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
-                                 array(i,m,n1,nscaddr,3) = ! here
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+                                        
+                                 array(i,m,n1,nscaddr,1) = 
+     &                                1d0*Bnst(1)+
+     & Bnfactor* (-3.*(1.-t2)*(t2)**2*(1.-t1)**3+ 3.*(1.-t1)*(t1)**2*(1.-t2)**3) *Bnst(2)+ 
+     & Bnfactor* (-3.*(1.-t1)**2*(t1)*(1.-t2)**3+ 3.*(1.-t2)**2*(t2)* *(1.-t1)**3) *Bnst(3)
+
+                                 array(i,m,n1,nscaddr,2) = 
+     & Bnfactor*(3.*(1.-t2)*(t2)**2) *Bnst(2)+
+     & Bnfactor*(- 3.*(1.-t2)**2*(t2)) *Bnst(3)
+
+                                 array(i,m,n1,nscaddr,3) = 
+     & Bnfactor*(-3.*(1.-t1)*(t1)**2) *Bnst(2) +
+     & Bnfactor*(3.*(1.-t1)**2*(t1)) *Bnst(3)
+
                                  array(i,m,n1,nscaddr,4) = 
-     +                                1d0*Bnst(1)+1d0*Bnst(2)+1d0*Bnst(3)+1d0*Bnst(4)
+     & Bnfactor* (-3.*(1.-t2)*(t2)**2*(t1)**3+ 3.*(1.-t1)*(t1)**2*(t2)**3)  *Bnst(2) +
+     & Bnfactor* (-3.*(1.-t1)**2*(t1)*(t2)**3+ 3.*(1.-t2)**2*(t2)*(t1)**3)  *Bnst(3) +
+     & 1d0 *Bnst(4)
+ 
                               Else
                                  Write(*,*) 'not implemented: NScaleBin=',NScaleBin
                                  Stop
