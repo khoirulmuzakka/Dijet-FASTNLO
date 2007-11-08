@@ -280,10 +280,10 @@ fnl0004: links fnl0004.cc $(CommonPath)/kt2jet-e-07.cc \
 # ATLAS test scenario for dijet mass
 #
 fnl0005: links fnl0005.cc $(CommonPath)/kt2jet-e-07.cc \
-        $(cteq6pdf)
-        $(NLOJET)/bin/create-nlojet-user fnl0005.cc \
-        $(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
-        -o fnl0005ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0005.cc \
+	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
+	-o fnl0005ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====         FNL0006      ATLAS test   kT D=0.7  dijet chi  =========
@@ -292,10 +292,10 @@ fnl0005: links fnl0005.cc $(CommonPath)/kt2jet-e-07.cc \
 # ATLAS test scenario with realistic binning for chi distribution
 #
 fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
-        $(cteq6pdf)
-        $(NLOJET)/bin/create-nlojet-user fnl0006.cc \
-        $(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
-        -o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0006.cc \
+	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
+	-o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 #
 # ======================================================================
 # =====         FNR0001    RHIC test   kT D=0.7       =================
