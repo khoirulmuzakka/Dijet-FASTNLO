@@ -4,10 +4,11 @@
 # Location of CERNLIB, LHAPDF and NLOJET
 #
 if ( $1 == "kr" || $1 == "grid" ) then
-    setenv FASTNLO $HOME/local
-    setenv CERNLIB $FASTNLO/cernlib 
-    setenv LHAPDF  $FASTNLO/lhapdf/lib
-    setenv NLOJET  $FASTNLO/nlojet
+    setenv LOCAL   $HOME/local
+    setenv CERNLIB $LOCAL/cernlib 
+    setenv FASTNLO $LOCAL/fastNLO
+    setenv LHAPDF  $LOCAL/lhapdf/lib
+    setenv NLOJET  $LOCAL/nlojet
     setenv CXXFLAGS "-O3 -I ."
 endif
 if ( $1 == "mw" ) then  

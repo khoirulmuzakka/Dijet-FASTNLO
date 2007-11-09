@@ -302,6 +302,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
 #    system("rm -f $install{fastNLO}[1]");
+	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
 }
 
@@ -313,22 +314,26 @@ chomp $date;
 print "\nfastrun.pl: Setting environment for fastNLO: $date\n";
 chdir $idir;
 my $cwdir = getcwd();
-$ENV{CERNLIB}  = "$cwdir/$install{cernlib}[0]"; 
-$ENV{LHAPDF}   = "$cwdir/$install{lhapdf}[0]/lib";
-$ENV{NLOJET}   = "$cwdir/$install{nlojet}[0]";
-$ENV{fastNLO}  = "$cwdir/$install{fastNLO}[0]";
+#$ENV{CERNLIB}  = "$cwdir/$install{cernlib}[0]"; 
+#$ENV{fastNLO}  = "$cwdir/$install{fastNLO}[0]";
+#$ENV{LHAPDF}   = "$cwdir/$install{lhapdf}[0]/lib";
+#$ENV{NLOJET}   = "$cwdir/$install{nlojet}[0]";
+$ENV{CERNLIB}  = "$cwdir/cernlib"; 
+$ENV{FASTNLO}  = "$cwdir/fastNLO";
+$ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
+$ENV{NLOJET}   = "$cwdir/nlojet";
 $ENV{CXXFLAGS} = "-O3 -I .";
 print "CERNLIB: $ENV{CERNLIB}\n";
+print "FASTNLO: $ENV{FASTNLO}\n";
 print "LHAPDF: $ENV{LHAPDF}\n";
 print "NLOJET: $ENV{NLOJET}\n";
-print "fastNLO: $ENV{fastNLO}\n";
 print "CXXFLAGS: $ENV{CXXFLAGS}\n";
 # Structure change in fastNLO following change in revision 212!
 my $scendir;
 if ( $frev < 212 ) { 
-    $scendir = "$ENV{fastNLO}/author1c/hadron";
+    $scendir = "$ENV{FASTNLO}/author1c/hadron";
 } else {
-    $scendir = "$ENV{fastNLO}/trunk/v1.4/author1c/hadron";
+    $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
 }
 chdir "$scendir" or die
     "fastrun.pl: Could not cd to dir $scendir!\n";
