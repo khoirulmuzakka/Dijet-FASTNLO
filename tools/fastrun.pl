@@ -184,8 +184,7 @@ chdir $pwdir;
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
-#$install{lhapdf}[0]     = "lhapdf-4.2";
-$install{lhapdf}[0]     = "lhapdf-5.2.3";
+$install{lhapdf}[0]     = "lhapdf-5.3.0";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
@@ -259,7 +258,8 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
-	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+#	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+	system("./configure --prefix=`pwd`");
 	print "\nfastrun.pl: Making lhapdf ...\n";
 	system("make");
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
@@ -283,7 +283,8 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
-	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+#	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+	system("./configure --prefix=`pwd`");
 	print "\nfastrun.pl: Making Nlojet++ ...\n";
 	system("make CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	print "\nfastrun.pl: Make install for Nlojet++ ...\n";
@@ -322,11 +323,18 @@ print "LHAPDF: $ENV{LHAPDF}\n";
 print "NLOJET: $ENV{NLOJET}\n";
 print "fastNLO: $ENV{fastNLO}\n";
 print "CXXFLAGS: $ENV{CXXFLAGS}\n";
-chdir "$install{fastNLO}[0]/author1c/hadron";
+# Structure change in fastNLO following change in revision 212!
+my $scendir;
+if ( $frev < 212 ) { 
+    $scendir = "$ENV{fastNLO}/author1c/hadron";
+} else {
+    $scendir = "$ENV{fastNLO}/trunk/v1.4/author1c/hadron";
+}
+chdir "$scendir" or die
+    "fastrun.pl: Could not cd to dir $scendir!\n";
     
 if ( $mode == 0 || $mode == 2 ) {
 # Adapting scenario cc file for ref or noref calculation
-    my $scendir = "$ENV{fastNLO}/author1c/hadron";
     my $scenfil = "${scen}.cc";
     my $scenlib = "${scen}${ref}.la";
     my $deb = `pwd`;
@@ -414,6 +422,7 @@ if ( $mode == 0 || $mode == 2 ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
+	chdir $scendir;
 	system("make $scen");
     }
 }
@@ -421,6 +430,8 @@ if ( $mode == 0 || $mode == 2 ) {
 #
 # 6) Run fastNLO
 #
+chdir "$scendir" or die
+    "fastrun.pl: Could not cd to dir $scendir!\n";
 if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;

@@ -4,9 +4,10 @@
 # Location of CERNLIB, LHAPDF and NLOJET
 #
 if [ "$1" = "kr" -o "$1" = "grid" ] ; then
-    export CERNLIB=$HOME/cernlib 
-    export LHAPDF=$HOME/lhapdf/lib
-    export NLOJET=$HOME/nlojet
+    export FASTNLO=$HOME/local
+    export CERNLIB=$FASTNLO/cernlib 
+    export LHAPDF=$FASTNLO/lhapdf/lib
+    export NLOJET=$FASTNLO/nlojet
     export CXXFLAGS="-O3 -I ."
 fi
 if [ "$1" = "mw" ] ; then  
