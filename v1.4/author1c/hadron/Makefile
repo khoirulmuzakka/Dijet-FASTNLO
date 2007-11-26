@@ -296,6 +296,17 @@ fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl0006.cc \
 	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
 	-o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+# ======================================================================
+# =====         FNL0007      CMS incl. jets with kT D=0.6 ==============
+# ======================================================================
+# LHC scenario for CMS
+#
+fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0007.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl0007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
 #
 # ======================================================================
 # =====         FNR0001    RHIC test   kT D=0.7       =================
