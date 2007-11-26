@@ -9,7 +9,9 @@
       implicit none
       CHARACTER*255 FILENAME
       CHARACTER*255 HISTOFILE
+      CHARACTER*255 LHAPDF
       integer i,j,k,l1,l2,l3,l4, npdf
+      integer lenocc
       INCLUDE 'fnx9999.inc'
       double precision mur,muf, diff,
      +     res0(NBINTOTMAX,NMAXSUBPROC+1,3),
@@ -33,7 +35,15 @@ c --- parse command line
 
 
 c - Initialize LHAPDF    - for CTEQ6.1M   
-      call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
+      CALL GETENV('LHAPDF',LHAPDF)
+      IF (LENOCC(LHAPDF).EQ.0) THEN
+         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
+      ENDIF
+      write(*,*)"Looking for LHAPDF in directory "//
+     &     LHAPDF(1:LENOCC(LHAPDF))//"!"
+      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/PDFsets/cteq61.LHgrid')
+
+c      call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2001E.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2004nnlo.LHgrid')
