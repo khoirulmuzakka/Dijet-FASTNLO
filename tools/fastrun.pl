@@ -195,11 +195,20 @@ $install{lhapdf}[0]     = "lhapdf-5.3.0";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
+$install{gcccore}[0]    = "gcc-3.3.6";
+$install{gccgpp}[0]     = "gcc-3.3.6";
+$install{gccg77}[0]     = "gcc-3.3.6";
 # Second: Archive filenames 
 foreach my $comp ( keys %install ) {
     my $tmp = $install{$comp}[0].".tar.gz";
     if ( $comp eq "nlojetfix" ) {
 	$install{$comp}[1] = "nlojet++-2.0.1-fix.tar.gz";
+    } elsif ( $comp eq "gcccore" ) {
+	$install{$comp}[1] = "gcc-core-3.3.6.tar.gz";
+    } elsif ( $comp eq "gccgpp" ) {
+	$install{$comp}[1] = "gcc-g\+\+-3.3.6.tar.gz";
+    } elsif ( $comp eq "gccg77" ) {
+	$install{$comp}[1] = "gcc-g77-3.3.6.tar.gz";
     } else {
 	$install{$comp}[1] = $tmp;
     }
@@ -240,6 +249,47 @@ if ( $verb ) {
 }
 
 #
+# 0) Install gcc
+#
+if ( $mode == 0 || $mode == 1) {
+    unless ( -e "$idir/$install{gcccore}[0]" ) {
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[1]: $date\n";
+	system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
+	if ( -l "$idir/gcc" ) {system("rm -f $idir/gcc");}
+	system("ln -s $install{gcccore}[0] $idir/gcc");
+	chdir "$idir/gcc";
+	my $cmd = "./configure ".
+	    "--prefix=$aidir/gcc ".
+	    "--bindir=$aidir/bin ".
+	    "--libdir=$aidir/lib ".
+	    "--with-gxx-include-dir=$aidir/include";
+	print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
+# Bugfix gcc	
+	$ENV{SHELL} = "/bin/sh";
+	system("$cmd");
+	system("make -j2");
+	system("make install");
+	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+	    "$ENV{LD_LIBRARY_PATH}";
+	$ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
+	chdir "..";
+	print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
+	system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
+	system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
+	chdir "$idir/gcc";
+	system("make clean");
+	print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
+	system("$cmd");
+	system("make -j2");
+	system("make install");
+	chdir "$idir";
+    }
+}
+
+#
 # 1) Unpack CERN libraries
 #
 if ( $mode == 0 || $mode == 1) {
@@ -248,7 +298,7 @@ if ( $mode == 0 || $mode == 1) {
 	chomp $date;
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
 	system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
-#    system("rm -f $install{cernlib}[1]");
+	if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
 	system("ln -s $install{cernlib}[0] $idir/cernlib");
     }
 
@@ -261,7 +311,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[1]: $date\n";
 	print "\nfastrun.pl: Unpacking $install{lhapdf}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
-#    system("rm -f $install{lhapdf}[1]");
+	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
@@ -286,7 +336,7 @@ if ( $mode == 0 || $mode == 1) {
 #    system("rm -f $install{nlojet}[1]");
 	print "\nfastrun.pl: Unpacking fix for $install{nlojet}[1] ...\n";
 	system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
-#    system("rm -f $install{nlojetfix}[1]");
+	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
@@ -308,7 +358,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[1]: $date\n";
 	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
-#    system("rm -f $install{fastNLO}[1]");
+	if ( -l "$idir/fastNLO" ) {system("rm -f $idir/fastNLO");}
 	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
 }
@@ -463,7 +513,8 @@ if ( $batch eq "GRID" && $mode == 3 ) {
     $ENV{FASTNLO}  = "$cwdir/fastNLO";
     $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
     $ENV{NLOJET}   = "$cwdir/nlojet";
-    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
+    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
+	"$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
     $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
     print "CERNLIB: $ENV{CERNLIB}\n";
     print "FASTNLO: $ENV{FASTNLO}\n";
