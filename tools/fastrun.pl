@@ -32,18 +32,18 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LCG", ".", "0", "262", "", "0001",
+    ( "GRID", ".", "0", "187", "", "0001",
       "0", "LO", "CTEQ", "", ".", "", "" );
 getopts('b:d:e:f:hj:m:o:p:rs:t:v') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
-    print "  -b batch        Batch system used: LCG (def.) or PBS\n";
+    print "  -b batch        Batch system used: GRID (def.) or PBS\n";
     print "  -d dir          Installation directory (def.=.)\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
-    print "  -f rev          fastNLO revision to install (def.=262)\n";
+    print "  -f rev          fastNLO revision to use (def.=187)\n";
     print "  -h              Print this text\n";
-    print "  -j jobnr        Job number to attach\n";
+    print "  -j jobnr        Job number to attach (def.=0001)\n";
     print "  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only\n";
     print "  -o order        LO (def.) or NLO calculation\n";
     print "  -p pdf          CTEQ parton densities (def.) or LHAPDF\n";
@@ -52,11 +52,19 @@ if ( $opt_h ) {
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v              Switch verbose mode on\n\n";
+    print "  -v              Switch verbose mode on\n";
+    print "\n";
+    print "Examples:\n";
+    print "1) Install only (to install with LHAPDF use option -p):\n";
+    print "   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir]\n\n";
+    print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
+    print "   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
+    print "3) Run only (to run scenario in reference mode use option -r):\n";
+    print "   ./fastrun.pl [-b GRID|batch] [-d .|installdir] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
     exit;
 }
 
-unless ( $opt_b eq "LCG" || $opt_b eq "PBS" ) {
+unless ( $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fastrun.pl: Error! Illegal batch system: $opt_b, aborted.\n";
 }
 unless ( -d $opt_d ) {
@@ -93,23 +101,26 @@ my $mode  = $opt_m;
 my $order = $opt_o;
 my $pdf   = $opt_p;
 my $ref   = "";
+if ( $opt_r ) { $ref = "ref";}
 my $sdir  = $opt_s;
 my $verb  = "";
-print "fastrun.pl: Job mode is $mode\n";
-print "fastrun.pl: Using fastNLO revision $frev\n";
 print "fastrun.pl: Directory for/of installation is $idir\n";
+print "fastrun.pl: Using fastNLO revision $frev\n";
+print "fastrun.pl: Job mode is $mode\n";
 unless ( $mode == 1 || $mode == 2 ) {
     print "fastrun.pl: Running on batch system $batch\n";
+    print "fastrun.pl: Maximal event number: $nmax\n";
     print "fastrun.pl: Attaching job number $jobnr\n";
     print "fastrun.pl: Running in order $order\n";
-    print "fastrun.pl: Running with pdf $pdf\n";
-    print "fastrun.pl: Maximal event number: $nmax\n";
-}
-if ( $opt_r ) {
-    $ref = "ref";
-    unless ( $mode == 2 ) {
-	print "fastrun.pl: Making/running in reference mode.\n";
+    if ( $ref eq "ref" ) {
+	print "fastrun.pl: Running with pdf $pdf\n";
     }
+}
+if ( $mode != 1 && $ref ) {
+    print "fastrun.pl: Making/running in reference mode\n";
+}
+if ( $mode == 0 || $mode ==1 ) {
+    print "fastrun.pl: Looking for sources in $sdir\n";
 }
 if ( $opt_v ) {
     $verb = 1;
@@ -135,24 +146,23 @@ unless ( $mode == 1 || $mode == 2 ) {
 }
 
 #
-# Set signal traps to store output at end of allocated batch time
+# Set signal traps to store output table at end of allocated batch time
 #
-# LCG only for the moment
-if ( $batch eq "LCG" ) { 
-    $SIG{INT}  = \&grid_store;
-    $SIG{TERM} = \&grid_store;
-}
+# Optimize batch running time, does not work reliably!
+#if ( $batch eq "GRID" ) { 
+#    $SIG{INT}  = \&grid_storage;
+#    $SIG{TERM} = \&grid_storage;
+#}
 
 #
 # Initialization
 #
-# Global constants
 # Switches for scenario cc file
-our $refsw0 = " iref = 0"; 
-our $refsw1 = " iref = 1"; 
+my $refsw0 = " iref = 0"; 
+my $refsw1 = " iref = 1"; 
 # Makefile switches
-our $maksw0 = "-o $scen ";
-our $maksw1 = "-o ${scen}ref ";
+my $maksw0 = "-o ${scen} ";
+my $maksw1 = "-o ${scen}ref ";
 
 # Run mode settings: order, ordername, # events
 my %runmode;
@@ -168,11 +178,8 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
     $runmode{NLO}[1]  = "$nmax";
 }
 
-# Global vars for output storage on signal catch, jobnr not yet attached!
-our $tabdir  = "${scen}${ref}";
-our $tabnam0 = "${scen}${ref}-hhc-$runmode{$order}[0]-2jet";
-our $tabnam1 = "${tabnam0}.raw";
-our $lognam  = "${scen}${ref}_${order}.log";
+# NLOJET++ table name
+my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-2jet.raw";
 
 # Directories
 my $pwdir = getcwd();
@@ -242,7 +249,6 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
 	system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
 #    system("rm -f $install{cernlib}[1]");
-	if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
 	system("ln -s $install{cernlib}[0] $idir/cernlib");
     }
 
@@ -256,14 +262,13 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking $install{lhapdf}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
 #    system("rm -f $install{lhapdf}[1]");
-	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 	system("./configure --prefix=`pwd`");
 	print "\nfastrun.pl: Making lhapdf ...\n";
-	system("make");
+	system("make -j2");
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
 	system("make install");
 	chdir "$pwdir";
@@ -282,14 +287,13 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking fix for $install{nlojet}[1] ...\n";
 	system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
 #    system("rm -f $install{nlojetfix}[1]");
-	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 	system("./configure --prefix=`pwd`");
 	print "\nfastrun.pl: Making Nlojet++ ...\n";
-	system("make CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	print "\nfastrun.pl: Make install for Nlojet++ ...\n";
 	system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	chdir "$pwdir";
@@ -305,7 +309,6 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
 #    system("rm -f $install{fastNLO}[1]");
-	if ( -l "$idir/fastNLO" ) {system("rm -f $idir/fastNLO");}
 	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
 }
@@ -313,34 +316,33 @@ if ( $mode == 0 || $mode == 1) {
 #
 # 5) Make fastNLO scenario
 #
-$date = `date +%d%m%Y_%H%M%S`;
-chomp $date;
-print "\nfastrun.pl: Setting environment for fastNLO: $date\n";
-chdir $idir;
-my $cwdir = getcwd();
-#$ENV{CERNLIB}  = "$cwdir/$install{cernlib}[0]"; 
-#$ENV{fastNLO}  = "$cwdir/$install{fastNLO}[0]";
-#$ENV{LHAPDF}   = "$cwdir/$install{lhapdf}[0]/lib";
-#$ENV{NLOJET}   = "$cwdir/$install{nlojet}[0]";
-$ENV{CERNLIB}  = "$cwdir/cernlib"; 
-$ENV{FASTNLO}  = "$cwdir/fastNLO";
-$ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
-$ENV{NLOJET}   = "$cwdir/nlojet";
-$ENV{CXXFLAGS} = "-O3 -I .";
-print "CERNLIB: $ENV{CERNLIB}\n";
-print "FASTNLO: $ENV{FASTNLO}\n";
-print "LHAPDF: $ENV{LHAPDF}\n";
-print "NLOJET: $ENV{NLOJET}\n";
-print "CXXFLAGS: $ENV{CXXFLAGS}\n";
-# Structure change in fastNLO following change in revision 212!
-my $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
-if ( $frev < 212 ) { 
-    $scendir = "$ENV{FASTNLO}/author1c/hadron";
-}
-chdir "$scendir" or die
-    "fastrun.pl: Could not cd to dir $scendir!\n";
-    
+my $scendir;
 if ( $mode == 0 || $mode == 2 ) {
+    $date = `date +%d%m%Y_%H%M%S`;
+    chomp $date;
+    print "\nfastrun.pl: Making fastNLO scenario: $date\n";
+    print "\nfastrun.pl: Setting environment for fastNLO:\n";
+    chdir $idir;
+    my $cwdir = getcwd();
+    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
+    $ENV{FASTNLO}  = "$cwdir/fastNLO";
+    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
+    $ENV{NLOJET}   = "$cwdir/nlojet";
+    $ENV{CXXFLAGS} = "-O3 -I .";
+    print "CERNLIB: $ENV{CERNLIB}\n";
+    print "FASTNLO: $ENV{FASTNLO}\n";
+    print "LHAPDF: $ENV{LHAPDF}\n";
+    print "NLOJET: $ENV{NLOJET}\n";
+    print "CXXFLAGS: $ENV{CXXFLAGS}\n";
+# Structure change in fastNLO following change in revision 212!
+    if ( $frev < 212 ) { 
+	$scendir = "$ENV{FASTNLO}/author1c/hadron";
+    } else {
+	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+    }
+    chdir "$scendir" or die
+	"fastrun.pl: Could not cd to dir $scendir!\n";
+    
 # Adapting scenario cc file for ref or noref calculation
     my $scenfil = "${scen}.cc";
     my $scenlib = "${scen}${ref}.la";
@@ -430,15 +432,67 @@ if ( $mode == 0 || $mode == 2 ) {
 	chomp $date;
 	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
 	chdir $scendir;
-	system("make $scen");
+	system("make -j2 $scen");
     }
 }
     
 #
 # 6) Run fastNLO
 #
-chdir "$scendir" or die
-    "fastrun.pl: Could not cd to dir $scendir!\n";
+# a) Run on grid without complete installation by source
+if ( $batch eq "GRID" && $mode == 3 ) {
+    $date = `date +%d%m%Y_%H%M%S`;
+    chomp $date;
+    print "\nfastrun.pl: Running fastNLO scenario: $date\n";
+    
+# Fetching and unpacking of fastNLO binary archive
+    my $file = "fastNLO-bin.tgz";
+    if ( ! -f $file ) {
+	grid_storage("FETCH",$file);
+    }
+    if ( -f $file ) {
+	system ("tar xfz $file");
+    } else {
+	die "fastrun.pl: Could not find binary tgz of fastNLO $file, aborted!\n";
+    }
+    
+# Set environment    
+    print "\nfastrun.pl: Setting environment for fastNLO:\n";
+    my $cwdir = getcwd();
+    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
+    $ENV{FASTNLO}  = "$cwdir/fastNLO";
+    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
+    $ENV{NLOJET}   = "$cwdir/nlojet";
+    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
+    $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
+    print "CERNLIB: $ENV{CERNLIB}\n";
+    print "FASTNLO: $ENV{FASTNLO}\n";
+    print "LHAPDF: $ENV{LHAPDF}\n";
+    print "NLOJET: $ENV{NLOJET}\n";
+    print "LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}\n";
+    print "GCC_EXEC_PREFIX: $ENV{GCC_EXEC_PREFIX}\n";
+    
+# Structure change in fastNLO following change in revision 212!
+    if ( $frev < 212 ) { 
+	$scendir = "$ENV{FASTNLO}/author1c/hadron";
+    } else {
+	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+    }
+    chdir "$scendir" or die
+	"fastrun.pl: Could not cd to dir $scendir!\n";
+    
+    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
+    $ENV{FASTNLO}  = "$cwdir/fastNLO";
+    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
+    $ENV{NLOJET}   = "$cwdir/nlojet";
+
+    if ( $frev < 212 ) { 
+	$scendir = "$ENV{FASTNLO}/author1c/hadron";
+    } else {
+	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+    }
+}
+
 if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
@@ -450,7 +504,9 @@ if ( $mode == 0 || $mode == 3 ) {
 	"-n ${scen}${ref}_${jobnr} ".
 	"-u ${scen}${ref}.la ";
     if ( $nmax ) { $cmd .= "--max-event $nmax"; }
-    if ( $batch eq "LCG" ) {
+# Do not use yet
+#    if ( $batch eq "GRID" ) {
+    if ( $batch eq "Blafasel" ) {
 # Fork NLO calculation
 	print "fastrun.pl: Forking command $cmd in background\n";
 	system("$cmd &");
@@ -458,6 +514,9 @@ if ( $mode == 0 || $mode == 3 ) {
 # Run NLO calculation
 	print "fastrun.pl: Running command $cmd in foreground\n";
 	system("$cmd");
+# Copy to grid storage
+#	grid_storage("SAVE","${scendir}/\\${tdir}/${tabnam}","$scen$ref");
+	grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: fastNLO finished: $date\n";
@@ -487,12 +546,12 @@ if ( $mode == 0 || $mode == 3 ) {
 
     while ( 1 ) {
 #    while ( $fpid || $keep ) {
-	if ( $batch eq "LCG" ) {
+	if ( $batch eq "GRID" ) {
 	    sleep 1000;
 	    $date = `date +%d%m%Y_%H%M%S`;
 	    print "\nfastrun.pl: Saving table: $date\n";
 	    chomp $date;
-	    grid_store("SAVE");
+	    grid_storage("SAVE");
 	} else {
 	    sleep 500;
 	    if ( $keep ) {
@@ -530,30 +589,78 @@ exit 0;
 
 
 #
-# Signal handling: Save table and log file on grid storage
+# Signal handling and grid storage: Save table on grid storage
 #
-sub grid_store {
+# Original table naming example: fnl0002kt10_0001-hhc-born-2jet.raw
+# Grid table naming example:     fnl0002kt10-hhc-born-2jet_0000.raw
+#
+sub grid_storage {
     my $signam = shift;
+    my $trfile = shift;
+    my $tabdir = shift;
+    $trfile =~ s/\/\.\//\//g;
+    if ( $tabdir ) {
+	$tabdir =~ s/\/\.\//\//g;
+    } else {
+	$tabdir = "";
+    }
+    
+    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
+    my $sepath = "/wlcg/data/users/cms/rabbertz/";
+    my @files = ( "$trfile" );
+    
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
+    my $gjobnr = $ENV{MY_JOB};
     print "\nfastrun.pl: Received signal $signam: $date\n";
-    print "fastrun.pl: Saving table and log files for job nr. $jobnr\n";
+    unless ( $signam eq "FETCH" ) {
+	print "fastrun.pl: Saving table $trfile for\n";
+	print "fastrun.pl: fastNLO job no. $jobnr and\n";
+	print "fastrun.pl: grid-control job no. $gjobnr\n";
+    } else {
+	print "fastrun.pl: Fetching binary fastNLO archive $trfile from\n";
+	print "fastrun.pl: SE $sename in path $sepath\n";
+    }	
 
-    my $gcmd = "globus-url-copy file:`pwd`/${lognam}_${jobnr} ".
-	"gsiftp://ekp-lcg-se.physik.uni-karlsruhe.de/".
-	"grid/users/cms/cmssgm/${lognam}_${jobnr}";
-    print "Command $gcmd\n";
-    system("$gcmd");
-    my @files = ( "$tabnam0", "$tabnam1" );
     foreach my $file ( @files ) {
-#	my $lcmd = "lcg-cr --vo cms ".
-#	    "-l lfn:${file}_${jobnr} file:`pwd`/${file}"; 
-	if ( -f "${tabdir}/${file}" ) {
-	    my $gcmd = "globus-url-copy file:`pwd`/${tabdir}/${file} ".
-		"gsiftp://ekp-lcg-se.physik.uni-karlsruhe.de/".
-		"grid/users/cms/cmssgm/${file}_${jobnr}";
+	unless ( $signam eq "FETCH" ) {
+	    print "fastrun.pl: Trying to find table file $file ...\n";
+	    system("pwd");
+	    system("ls -la");
+	    if ( -f "${file}" ) {
+# Create target directory if necessary
+		my $gcmd = "edg-gridftp-mkdir ".
+		    "gsiftp://${sename}/${sepath}".
+		    "fastNLO_tables/${tabdir}";
+		print "Command $gcmd\n";
+		system("$gcmd");
+# Change job numbering according to grid-control
+
+		my $newnum = substr("0000$gjobnr",-4);	    
+		my @tmp = split("/",$file);
+		my $tabnam = pop(@tmp);
+		$tabnam =~ s/_0001//;
+		$tabnam =~ s/\.raw/_${newnum}\.raw/;
+		$gcmd = "globus-url-copy ".
+		    "file://${file} ".
+		    "gsiftp://${sename}/${sepath}".
+		    "fastNLO_tables/${tabdir}/${tabnam}";
+		print "Command $gcmd\n";
+		system("$gcmd");
+	    } else {
+		system("pwd");
+		system("ls -la");
+		die "fastrun.pl: Could not find table file $file\n";
+	    }
+	} else {
+	    print "fastrun.pl: Trying to fetch binary fastNLO archive $file on\n";
+	    print "fastrun.pl: SE $sename in path $sepath\n";
+	    my $gcmd = "globus-url-copy gsiftp://${sename}/${sepath}". 
+		"fastNLO_archives/${file} file://`pwd`/${file}";
 	    print "Command $gcmd\n";
 	    system("$gcmd");
+	    system("pwd");
+	    system("ls -la");
 	}
     }
     return 0;
