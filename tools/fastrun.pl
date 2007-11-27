@@ -32,7 +32,7 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LCG", ".", "0", "187", "", "0001",
+    ( "LCG", ".", "0", "262", "", "0001",
       "0", "LO", "CTEQ", "", ".", "", "" );
 getopts('b:d:e:f:hj:m:o:p:rs:t:v') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
@@ -41,7 +41,7 @@ if ( $opt_h ) {
     print "  -b batch        Batch system used: LCG (def.) or PBS\n";
     print "  -d dir          Installation directory (def.=.)\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
-    print "  -f rev          fastNLO revision to use (def.=187)\n";
+    print "  -f rev          fastNLO revision to install (def.=262)\n";
     print "  -h              Print this text\n";
     print "  -j jobnr        Job number to attach\n";
     print "  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only\n";
@@ -242,6 +242,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
 	system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
 #    system("rm -f $install{cernlib}[1]");
+	if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
 	system("ln -s $install{cernlib}[0] $idir/cernlib");
     }
 
@@ -255,6 +256,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking $install{lhapdf}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
 #    system("rm -f $install{lhapdf}[1]");
+	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
@@ -280,6 +282,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking fix for $install{nlojet}[1] ...\n";
 	system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
 #    system("rm -f $install{nlojetfix}[1]");
+	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
@@ -302,6 +305,7 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
 	system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
 #    system("rm -f $install{fastNLO}[1]");
+	if ( -l "$idir/fastNLO" ) {system("rm -f $idir/fastNLO");}
 	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
 }
@@ -329,11 +333,9 @@ print "LHAPDF: $ENV{LHAPDF}\n";
 print "NLOJET: $ENV{NLOJET}\n";
 print "CXXFLAGS: $ENV{CXXFLAGS}\n";
 # Structure change in fastNLO following change in revision 212!
-my $scendir;
+my $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
 if ( $frev < 212 ) { 
     $scendir = "$ENV{FASTNLO}/author1c/hadron";
-} else {
-    $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
 }
 chdir "$scendir" or die
     "fastrun.pl: Could not cd to dir $scendir!\n";
