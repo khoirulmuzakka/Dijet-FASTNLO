@@ -285,7 +285,7 @@ if ( $mode == 0 || $mode == 1) {
 	system("$cmd");
 	system("make -j2");
 	system("make install");
-	chdir "$idir";
+	chdir "$aidir";
     }
 }
 
