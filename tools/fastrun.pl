@@ -270,11 +270,11 @@ if ( $mode == 0 || $mode == 1) {
 # Bugfix gcc	
 	$ENV{SHELL} = "/bin/sh";
 	my $ret = system("$cmd");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 1. configure step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 1. configure step, aborted!\n";}
 	$ret = system("make -j2");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 1. make step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 1. make step, aborted!\n";}
 	$ret = system("make install");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 1. make install step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 1. make install step, aborted!\n";}
 #	my @acmd = split(" ",$cmd);
 #	system(@acmd);
 	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
@@ -289,11 +289,11 @@ if ( $mode == 0 || $mode == 1) {
 	system("make clean");
 	print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
 	$ret = system("$cmd");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 2. configure step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 2. configure step, aborted!\n";}
 	$ret = system("make -j2");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 2. make step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 2. make step, aborted!\n";}
 	$ret = system("make install");
-	if ( $ret ) {print "fastrun.pl: Error $ret in 3. make install step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: Error $ret in 3. make install step, aborted!\n";}
 	chdir "$aidir";
     }
 # Switch to proper gcc-3.3.6 compiler if not already done
