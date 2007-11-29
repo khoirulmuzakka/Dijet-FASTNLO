@@ -252,6 +252,7 @@ if ( $verb ) {
 # 0) Install gcc
 #
 if ( $mode == 0 || $mode == 1) {
+# Standard environment to use system compiler still
     unless ( -e "$idir/$install{gcccore}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
@@ -287,12 +288,16 @@ if ( $mode == 0 || $mode == 1) {
 	system("make install");
 	chdir "$aidir";
     }
-}
-
+# Switch to proper gcc-3.3.6 compiler if not already done
+    $ENV{SHELL} = "/bin/sh";
+    $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+	"$ENV{LD_LIBRARY_PATH}";
+    $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
+    
 #
 # 1) Unpack CERN libraries
 #
-if ( $mode == 0 || $mode == 1) {
     unless ( -e "$idir/$install{cernlib}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
@@ -362,6 +367,28 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
 }
+
+#
+# Set environment that is expected to have been set up!   
+#
+print "\nfastrun.pl: Setting environment for fastNLO:\n";
+my $cwdir = getcwd();
+$ENV{CERNLIB}  = "$cwdir/cernlib"; 
+$ENV{FASTNLO}  = "$cwdir/fastNLO";
+$ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
+$ENV{NLOJET}   = "$cwdir/nlojet";
+$ENV{PATH}     = "$cwdir/bin:$ENV{PATH}";
+$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
+    "$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
+$ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
+print "CERNLIB: $ENV{CERNLIB}\n";
+print "FASTNLO: $ENV{FASTNLO}\n";
+print "LHAPDF: $ENV{LHAPDF}\n";
+print "NLOJET: $ENV{NLOJET}\n";
+print "LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}\n";
+print "GCC_EXEC_PREFIX: $ENV{GCC_EXEC_PREFIX}\n";
+my $tmp = `which gcc`;
+print "gcc executables used: $tmp\n";
 
 #
 # 5) Make fastNLO scenario
