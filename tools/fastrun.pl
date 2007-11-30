@@ -329,11 +329,14 @@ if ( $mode == 0 || $mode == 1) {
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	system("./configure --prefix=`pwd`");
+	my $ret = system("./configure --prefix=`pwd`");
+	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
 	print "\nfastrun.pl: Making lhapdf ...\n";
-	system("make -j2");
+	$ret = system("make -j2");
+	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
-	system("make install");
+	$ret = system("make install");
+	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
 	chdir "$pwdir";
     }
 
@@ -354,11 +357,14 @@ if ( $mode == 0 || $mode == 1) {
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	system("./configure --prefix=`pwd`");
+	my $ret = system("./configure --prefix=`pwd`");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
 	print "\nfastrun.pl: Making Nlojet++ ...\n";
-	system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for Nlojet++ ...\n";
-	system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
 	chdir "$pwdir";
     }
 
@@ -517,7 +523,8 @@ if ( $mode == 0 || $mode == 2 ) {
 	chomp $date;
 	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
 	chdir $scendir;
-	system("make -j2 $scen");
+	my $ret = system("make -j2 $scen");
+	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
     }
 }
     
@@ -599,7 +606,8 @@ if ( $mode == 0 || $mode == 3 ) {
     } else {
 # Run NLO calculation
 	print "fastrun.pl: Running command $cmd in foreground\n";
-	system("$cmd");
+	my $ret = system("$cmd");
+	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO run step, aborted!\n";}
 # Copy to grid storage
 #	grid_storage("SAVE","${scendir}/\\${tdir}/${tabnam}","$scen$ref");
 	grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
