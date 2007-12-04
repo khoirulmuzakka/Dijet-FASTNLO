@@ -539,7 +539,7 @@ if ( $mode == 0 || $mode == 2 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
 	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
 	chdir $scendir;
-	my $ret = system("make -j2 $scen");
+	$ret = system("make -j2 $scen");
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
     }
 }
