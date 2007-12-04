@@ -30,28 +30,16 @@ print "##################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_d, $opt_f, $opt_h ) = ( ".", "187", "" );
-getopts('d:f:h') or die "fastadd.pl: Malformed option syntax!\n";
+our ( $opt_h, $opt_l, $opt_n ) = ( "", "", "" );
+getopts('hl:n:') or die "fastadd.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastadd.pl\n";
     print "Usage: fastadd.pl [switches/options] scenario\n";
-    print "  -d dir          Installation directory (def.=.)\n";
-    print "  -f rev          fastNLO revision to use (def.=187)\n";
-    print "  -h              Print this text\n\n";
+    print "  -h              Print this text\n";
+    print "  -l dir          Directory for LO tables, (def.=scenario_LO_tables)\n";
+    print "  -n dir          Directory for NLO tables, (def.=scenario_NLO_tables)\n\n";
     exit;
 }
-
-unless ( -d $opt_d ) {
-    die "fastadd.pl: Error! No such directory: $opt_d, aborted.\n";
-}
-unless ( $opt_f =~ m/\d+/ && $opt_f !~ m/\D+/ ) {
-    die "fastadd.pl: Error! Illegal fastNLO revision number: $opt_f, aborted.\n";
-}
-
-my $idir  = $opt_d;
-my $frev  = $opt_f;
-print "fastadd.pl: Installation directory $idir\n";
-print "fastadd.pl: Using fastNLO revision $frev\n";
 
 #
 # Parse arguments
@@ -65,66 +53,70 @@ my $scen   = shift;
 # Initialization
 #
 my $lodir   = "${scen}_LO_tables"; 
+if ( $opt_l ) {$lodir = $opt_l;}
 my $nlodir  = "${scen}_NLO_tables"; 
+if ( $opt_n ) {$nlodir = $opt_n;}
 my $loglob  = "${scen}*born*.raw*";
 my $nloglob = "${scen}*nlo*.raw*";
-
-# Directories
+# Directory
 my $sdir = getcwd();
 
-# Define install hash
-my %install;
-# First entry (index 0!): Subdirecory name into which the archive is unpacked!
-$install{cernlib}[0]    = "cernlib-2003";
-$install{lhapdf}[0]     = "lhapdf-5.2.3";
-$install{nlojet}[0]     = "nlojet++-2.0.1";
-$install{nlojetfix}[0]  = "nlojet++-2.0.1";
-$install{fastNLO}[0]    = "fastNLO-rev${frev}";
+#
+# Check on nlofast-add
+#
+my $cmd = `which nlofast-add`;
+chomp $cmd;
+unless ( $cmd ) {
+    if ( $ENV{NLOJET} ) {
+	if ( -f "$ENV{NLOJET}/bin/nlofast-add" ) {
+	    $cmd = "$ENV{NLOJET}/bin/nlofast-add";
+	} else {
+	    die "fastadd.pl: ERROR! nlofast-add command not found, ".
+		"neither via \`which\` nor in $ENV{NLOJET}/bin, aborted!\n";
+	}
+    } else {
+	die "fastadd.pl: ERROR! nlofast-add command not found ".
+	    "via \`which\` and \$NLOJET is not set, aborted!\n";
+    }
+}	
 
 #
 # Find LO tables
 #
-chdir "$lodir" or die "fastadd.pl: ERROR! Couldn't cd to $lodir\n";
-my @lotabs = glob $loglob;
-#print "fastadd.pl: DEBUG! lotabs @lotabs\n";
+my @lotabs;
+if ( -d "$lodir" ) {
+    chdir $lodir;
+    @lotabs = glob $loglob;
+    chdir $sdir;
+}
+unless ( @lotabs ) {
+    print "fastadd.pl: No LO table found in $lodir, now looking in $sdir ...\n";
+    $lodir  = ".";
+    @lotabs = glob $loglob;
+} 
+unless ( @lotabs ) {
+    die "fastadd.pl: ERROR! No LO table found, aborted!\n";
+}
+print "fastadd.pl: DEBUG! lotabs @lotabs\n";
 
 #
 # Find NLO tables
 #
-chdir "../${nlodir}" or die "fastadd.pl: ERROR! Couldn't cd to ../${nlodir}\n";
-my @nlotabs = glob $nloglob;
-#print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";
-chdir "..";
-
-#
-# Make fastNLO add
-#
-$date = `date +%d%m%Y_%H%M%S`;
-chomp $date;
-print "\nfastadd.pl: Setting environment for fastNLO: $date\n";
-chdir $idir;
-my $cwdir = getcwd();
-$ENV{CERNLIB}  = "$cwdir/$install{cernlib}[0]"; 
-$ENV{LHAPDF}   = "$cwdir/$install{lhapdf}[0]/lib";
-$ENV{NLOJET}   = "$cwdir/$install{nlojet}[0]";
-$ENV{fastNLO}  = "$cwdir/$install{fastNLO}[0]";
-$ENV{CXXFLAGS} = "-O3 -I .";
-print "CERNLIB: $ENV{CERNLIB}\n";
-print "LHAPDF: $ENV{LHAPDF}\n";
-print "NLOJET: $ENV{NLOJET}\n";
-print "fastNLO: $ENV{fastNLO}\n";
-print "CXXFLAGS: $ENV{CXXFLAGS}\n";
-chdir "$install{fastNLO}[0]/author1c/hadron";
-    
-my $deb = `pwd`;
-chomp $deb;
-print "fastadd.pl: DEBUG! Current directory to run NLOJET++: $deb\n";
-print "fastadd.pl: DEBUG! ls -la:\n\n";
-system("ls -la");
-$date = `date +%d%m%Y_%H%M%S`;
-chomp $date;
-print "\nfastadd.pl: Making nlofast-add: $date\n";
-system("make nlofast-add");
+my @nlotabs;
+if ( -d "$nlodir" ) {
+    chdir $nlodir;
+    @nlotabs = glob $nloglob;
+    chdir $sdir;
+}
+unless ( @nlotabs ) {
+    print "fastadd.pl: No NLO table found in $nlodir, now looking in $sdir ...\n";
+    $nlodir  = ".";
+    @nlotabs = glob $nloglob;
+} 
+unless ( @nlotabs ) {
+    die "fastadd.pl: ERROR! No NLO table found, aborted!\n";
+}
+print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";
 
 #
 # nlofast-add
@@ -132,15 +124,13 @@ system("make nlofast-add");
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\nfastadd.pl: nlofast-add: $date\n";
-chdir "$sdir";
-my $cmd = "$ENV{NLOJET}/bin/nlofast-add ";
 foreach my $lotab ( @lotabs ) {
-    $cmd .= "$lodir/$lotab ";
+    $cmd .= " $lodir/$lotab";
 }
 foreach my $nlotab ( @nlotabs ) {
-    $cmd .= "$nlodir/$nlotab ";
+    $cmd .= " $nlodir/$nlotab";
 }
-$cmd .= "$scen.tab";
+$cmd .= " $scen.tab";
 print "fastrun.pl: Running command $cmd\n";
 system("$cmd >& $scen.log");
 $date = `date +%d%m%Y_%H%M%S`;

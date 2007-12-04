@@ -3,7 +3,7 @@
 //         for kT algo with D=0.6 in E-scheme
 // 
 // last modification
-// 2007/11/26 KR - Chaneg kt -> 0.6 and put in place new y binning
+// 2007/11/26 KR - Change kt -> 0.6 and put in place new y binning
 // 2006/03/16 KR - Change pb to fb units
 // 2006/03/16 KR - Adapt binning at low p_T to CMS trigger thresholds
 // 2006/03/13 KR - Copy from fnl0001 adapted to CMS scenario

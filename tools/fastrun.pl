@@ -32,13 +32,13 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "GRID", ".", "0", "187", "", "0001",
+    ( "LOCAL", ".", "0", "187", "", "0001",
       "0", "LO", "CTEQ", "", ".", "", "" );
 getopts('b:d:e:f:hj:m:o:p:rs:t:v') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
-    print "  -b batch        Batch system used: GRID (def.) or PBS\n";
+    print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
     print "  -d dir          Installation directory (def.=.)\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -f rev          fastNLO revision to use (def.=187)\n";
@@ -60,11 +60,11 @@ if ( $opt_h ) {
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
     print "   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b GRID|batch] [-d .|installdir] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-d .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
     exit;
 }
 
-unless ( $opt_b eq "GRID" || $opt_b eq "PBS" ) {
+unless ( $opt_b eq "LOCAL" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fastrun.pl: Error! Illegal batch system: $opt_b, aborted.\n";
 }
 unless ( -d $opt_d ) {
@@ -191,7 +191,7 @@ chdir $pwdir;
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
-$install{lhapdf}[0]     = "lhapdf-5.3.0";
+$install{lhapdf}[0]     = "lhapdf-5.3.1";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
@@ -257,7 +257,9 @@ if ( $mode == 0 || $mode == 1) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[1]: $date\n";
-	system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
+	my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/gcc" ) {system("rm -f $idir/gcc");}
 	system("ln -s $install{gcccore}[0] $idir/gcc");
 	chdir "$idir/gcc";
@@ -269,12 +271,12 @@ if ( $mode == 0 || $mode == 1) {
 	print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
 # Bugfix gcc	
 	$ENV{SHELL} = "/bin/sh";
-	my $ret = system("$cmd");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 1. configure step, aborted!\n";}
+	$ret = system("$cmd");
+	if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
 	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 1. make step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
 	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 1. make install step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
 #	my @acmd = split(" ",$cmd);
 #	system(@acmd);
 	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
@@ -283,17 +285,21 @@ if ( $mode == 0 || $mode == 1) {
 	$ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
 	chdir "..";
 	print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
-	system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
-	system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
+	$ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	$ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	chdir "$idir/gcc";
 	system("make clean");
 	print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
 	$ret = system("$cmd");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 2. configure step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
 	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 2. make step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
 	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in 3. make install step, aborted!\n";}
+	if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
 	chdir "$aidir";
     }
 # Switch to proper gcc-3.3.6 compiler if not already done
@@ -310,7 +316,9 @@ if ( $mode == 0 || $mode == 1) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
+	my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
 	system("ln -s $install{cernlib}[0] $idir/cernlib");
     }
@@ -323,20 +331,26 @@ if ( $mode == 0 || $mode == 1) {
 	chomp $date;
 	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[1]: $date\n";
 	print "\nfastrun.pl: Unpacking $install{lhapdf}[1] ...\n";
-	system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
+	my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	my $ret = system("./configure --prefix=`pwd`");
+	$ret = system("./configure --prefix=`pwd`");
 	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
 	print "\nfastrun.pl: Making lhapdf ...\n";
-	$ret = system("make -j2");
+# At least until LHAPDF 5.3.1 a race condition spoils multithreaded make!
+#	$ret = system("make -j2");
+	$ret = system("make");
 	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
 	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
+# In addition, there is a double lhapdf-config creation => ignore this error
+#	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
+	if ( $ret ) {print "fastrun.pl: Error $ret in LHAPDF make install step ignored!\n";}
 	chdir "$pwdir";
     }
 
@@ -348,16 +362,19 @@ if ( $mode == 0 || $mode == 1) {
 	chomp $date;
 	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[1]: $date\n";
 	print "\nfastrun.pl: Unpacking $install{nlojet}[1] ...\n";
-	system("tar xz -C $idir -f $sdir/$install{nlojet}[1]");
-#    system("rm -f $install{nlojet}[1]");
+	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	print "\nfastrun.pl: Unpacking fix for $install{nlojet}[1] ...\n";
-	system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
+	$ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
 	chdir "$idir/$install{nlojet}[0]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	my $ret = system("./configure --prefix=`pwd`");
+	$ret = system("./configure --prefix=`pwd`");
 	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
 	print "\nfastrun.pl: Making Nlojet++ ...\n";
 	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
@@ -376,7 +393,9 @@ if ( $mode == 0 || $mode == 1) {
 	chomp $date;
 	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[1]: $date\n";
 	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
-	system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
+	my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/fastNLO" ) {system("rm -f $idir/fastNLO");}
 	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
     }
@@ -385,24 +404,30 @@ if ( $mode == 0 || $mode == 1) {
 #
 # Set environment that is expected to have been set up!   
 #
-print "\nfastrun.pl: Setting environment for fastNLO:\n";
+print "\nfastrun.pl: Setting environment variables for fastNLO:\n";
 my $cwdir = getcwd();
+print "fastrun.pl: fastNLO and gcc environment used with this installation:\n";
+print "setenv CERNLIB $cwdir/cernlib\n";
+print "setenv FASTNLO $cwdir/fastNLO\n";
+print "setenv LHAPDF  $cwdir/lhapdf/lib\n";
+print "setenv NLOJET  $cwdir/nlojet\n";
 $ENV{CERNLIB}  = "$cwdir/cernlib"; 
 $ENV{FASTNLO}  = "$cwdir/fastNLO";
 $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
-$ENV{PATH}     = "$cwdir/bin:$ENV{PATH}";
+print "setenv PATH $cwdir/bin:$ENV{NLOJET}/bin:\${PATH}\n";
+print "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:$ENV{NLOJET}/lib:\${LD_LIBRARY_PATH}\n";
+print "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
+print "setenv CXXFLAGS \"-O3 -I .\"\n";
+$ENV{PATH}            = "$cwdir/bin:$ENV{PATH}";
 $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
     "$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
-print "CERNLIB: $ENV{CERNLIB}\n";
-print "FASTNLO: $ENV{FASTNLO}\n";
-print "LHAPDF: $ENV{LHAPDF}\n";
-print "NLOJET: $ENV{NLOJET}\n";
-print "LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}\n";
-print "GCC_EXEC_PREFIX: $ENV{GCC_EXEC_PREFIX}\n";
-my $tmp = `which gcc`;
-print "gcc executables used: $tmp\n";
+$ENV{CXXFLAGS} = "-O3 -I .";
+if ( $verb ) {
+    my $tmp = `which gcc`;
+    print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
+}
 
 #
 # 5) Make fastNLO scenario
@@ -412,19 +437,7 @@ if ( $mode == 0 || $mode == 2 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Making fastNLO scenario: $date\n";
-    print "\nfastrun.pl: Setting environment for fastNLO:\n";
     chdir $idir;
-    my $cwdir = getcwd();
-    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
-    $ENV{FASTNLO}  = "$cwdir/fastNLO";
-    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
-    $ENV{NLOJET}   = "$cwdir/nlojet";
-    $ENV{CXXFLAGS} = "-O3 -I .";
-    print "CERNLIB: $ENV{CERNLIB}\n";
-    print "FASTNLO: $ENV{FASTNLO}\n";
-    print "LHAPDF: $ENV{LHAPDF}\n";
-    print "NLOJET: $ENV{NLOJET}\n";
-    print "CXXFLAGS: $ENV{CXXFLAGS}\n";
 # Structure change in fastNLO following change in revision 212!
     if ( $frev < 212 ) { 
 	$scendir = "$ENV{FASTNLO}/author1c/hadron";
@@ -521,6 +534,9 @@ if ( $mode == 0 || $mode == 2 ) {
 	}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
+	print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
+	my $ret = system("make -j2 nlofast-add");
+	if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
 	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
 	chdir $scendir;
 	my $ret = system("make -j2 $scen");
@@ -531,39 +547,24 @@ if ( $mode == 0 || $mode == 2 ) {
 #
 # 6) Run fastNLO
 #
-# a) Run on grid without complete installation by source
-if ( $batch eq "GRID" && $mode == 3 ) {
+if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
-    print "\nfastrun.pl: Running fastNLO scenario: $date\n";
+    print "\nfastrun.pl: Running fastNLO scenario on batch system $batch: $date\n";
     
+# a) Run on grid without complete installation by source
+    if ( $batch eq "GRID" && $mode == 3 ) {
 # Fetching and unpacking of fastNLO binary archive
-    my $file = "fastNLO-bin.tgz";
-    if ( ! -f $file ) {
-	grid_storage("FETCH",$file);
+	my $file = "fastNLO-bin.tgz";
+	if ( ! -f $file ) {
+	    grid_storage("FETCH",$file);
+	}
+	if ( -f $file ) {
+	    system ("tar xfz $file");
+	} else {
+	    die "fastrun.pl: Could not find binary tgz of fastNLO $file, aborted!\n";
+	}
     }
-    if ( -f $file ) {
-	system ("tar xfz $file");
-    } else {
-	die "fastrun.pl: Could not find binary tgz of fastNLO $file, aborted!\n";
-    }
-    
-# Set environment    
-    print "\nfastrun.pl: Setting environment for fastNLO:\n";
-    my $cwdir = getcwd();
-    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
-    $ENV{FASTNLO}  = "$cwdir/fastNLO";
-    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
-    $ENV{NLOJET}   = "$cwdir/nlojet";
-    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
-	"$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
-    $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
-    print "CERNLIB: $ENV{CERNLIB}\n";
-    print "FASTNLO: $ENV{FASTNLO}\n";
-    print "LHAPDF: $ENV{LHAPDF}\n";
-    print "NLOJET: $ENV{NLOJET}\n";
-    print "LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}\n";
-    print "GCC_EXEC_PREFIX: $ENV{GCC_EXEC_PREFIX}\n";
     
 # Structure change in fastNLO following change in revision 212!
     if ( $frev < 212 ) { 
@@ -574,19 +575,12 @@ if ( $batch eq "GRID" && $mode == 3 ) {
     chdir "$scendir" or die
 	"fastrun.pl: Could not cd to dir $scendir!\n";
     
-    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
-    $ENV{FASTNLO}  = "$cwdir/fastNLO";
-    $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
-    $ENV{NLOJET}   = "$cwdir/nlojet";
-
     if ( $frev < 212 ) { 
 	$scendir = "$ENV{FASTNLO}/author1c/hadron";
     } else {
 	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
     }
-}
 
-if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Running fastNLO: $date\n";
@@ -597,9 +591,8 @@ if ( $mode == 0 || $mode == 3 ) {
 	"-n ${scen}${ref}_${jobnr} ".
 	"-u ${scen}${ref}.la ";
     if ( $nmax ) { $cmd .= "--max-event $nmax"; }
-# Do not use yet
-#    if ( $batch eq "GRID" ) {
-    if ( $batch eq "Blafasel" ) {
+# Do not try to maximize CPU time yet, too unstable
+    if ( $batch eq "MAX" ) {
 # Fork NLO calculation
 	print "fastrun.pl: Forking command $cmd in background\n";
 	system("$cmd &");
@@ -608,9 +601,10 @@ if ( $mode == 0 || $mode == 3 ) {
 	print "fastrun.pl: Running command $cmd in foreground\n";
 	my $ret = system("$cmd");
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO run step, aborted!\n";}
-# Copy to grid storage
-#	grid_storage("SAVE","${scendir}/\\${tdir}/${tabnam}","$scen$ref");
-	grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
+# Copy table to grid storage
+	if ( $batch eq "GRID" ) {
+	    grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
+	}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: fastNLO finished: $date\n";
