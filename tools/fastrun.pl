@@ -734,7 +734,8 @@ sub grid_storage {
 		    "gsiftp://${sename}/${sepath}".
 		    "fastNLO_tables/${tabdir}/${tabnam}";
 		print "Command $gcmd\n";
-		system("$gcmd");
+		$ret = system("$gcmd");
+		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of table file failed: $ret!\n";}
 	    } else {
 		system("pwd");
 		system("ls -la");
