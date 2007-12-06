@@ -721,9 +721,9 @@ sub grid_storage {
 		    "gsiftp://${sename}/${sepath}".
 		    "fastNLO_tables/${tabdir}";
 		print "Command $gcmd\n";
-		system("$gcmd");
+		my $ret = system("$gcmd");
+		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
 # Change job numbering according to grid-control
-
 		my $newnum = substr("0000$gjobnr",-4);	    
 		my @tmp = split("/",$file);
 		my $tabnam = pop(@tmp);
