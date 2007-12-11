@@ -24,7 +24,7 @@ use warnings;
 my $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\n######################################\n";
-print "# fastrun.pl: Starting run of fastNLO: $date\n";
+print "# fastrun.pl: Starting run of fastNLO: FASTRUN0_$date\n";
 print "######################################\n\n";
 
 #
@@ -225,8 +225,9 @@ foreach my $comp ( keys %install ) {
 # Print system info
 #
 if ( $verb ) {
-    print "\nfastrun.pl: System information for debugging purposes:\n";
-    print "\n############################################################\n";
+    print "\n######################################################\n";
+    print "fastrun.pl: System information for debugging purposes:\n";
+    print "######################################################\n";
     my $host = `hostname`;
     chomp $host;
     print "fastrun.pl: The system's hostname is (hostname):\n$host\n\n"; 
@@ -245,7 +246,7 @@ if ( $verb ) {
     print "fastrun.pl: The available inode space is:\n$freenode\n";
 #print "fastrun.pl: Installation environment:\n";
 #system("printenv");
-    print "#**********************************************************#\n";
+    print "######################################################\n";
 }
 
 #
@@ -555,7 +556,11 @@ if ( $mode == 0 || $mode == 3 ) {
 # a) Run on grid without complete installation by source
     if ( $batch eq "GRID" && $mode == 3 ) {
 # Fetching and unpacking of fastNLO binary archive
-	my $file = "fastNLO-bin.tgz";
+	my $file = "fastNLO-bin";
+	if ( $ref ) {
+	    $file .= "-${pdf}";
+	}
+	$file .= ".tgz";
 	if ( ! -f $file ) {
 	    grid_storage("FETCH",$file);
 	}
@@ -598,16 +603,28 @@ if ( $mode == 0 || $mode == 3 ) {
 	system("$cmd &");
     } else {
 # Run NLO calculation
-	print "fastrun.pl: Running command $cmd in foreground\n";
-	my $ret = system("$cmd");
+	my $date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "fastrun.pl: Starting calculation: FASTCAL0_$date\n";
+	print "fastrun.pl: Running command (time $cmd) in foreground\n";
+#	my $res = `(time $cmd)`;
+	my $ret = system("(time $cmd)");
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO run step, aborted!\n";}
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "fastrun.pl: Calculation finished: FASTCAL1_$date\n";
 # Copy table to grid storage
 	if ( $batch eq "GRID" ) {
 	    grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
+	    my $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "fastrun.pl: Table stored: TABSTOR1_$date\n";
 	}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: fastNLO finished: $date\n";
+	print "\n###############################\n";
+	print "# fastrun.pl: fastNLO finished: FASTRUN1_$date\n";
+	print "###############################\n\n";
 	exit 0;
     }
 # Check on process before entering loop
@@ -693,14 +710,15 @@ sub grid_storage {
 	$tabdir = "";
     }
     
-    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
+#    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
+    my $sename = "ic-kit-lcgse.rz.uni-karlsruhe.de";
     my $sepath = "/wlcg/data/users/cms/rabbertz/";
     my @files = ( "$trfile" );
     
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     my $gjobnr = $ENV{MY_JOB};
-    print "\nfastrun.pl: Received signal $signam: $date\n";
+    print "\nfastrun.pl: Received signal $signam: TABSTOR0_$date\n";
     unless ( $signam eq "FETCH" ) {
 	print "fastrun.pl: Saving table $trfile for\n";
 	print "fastrun.pl: fastNLO job no. $jobnr and\n";
