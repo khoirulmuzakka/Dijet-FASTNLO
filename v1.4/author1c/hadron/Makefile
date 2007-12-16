@@ -20,6 +20,10 @@ searchcone = $(CommonPath)/MidPointAlgorithm.cc \
 	$(CommonPath)/ClusterComparisons.cc\
 	$(CommonPath)/Cluster.cc
 
+midpt_e_05 = $(CommonPath)/midpt-e-05.cc \
+             $(CommonPath)/px_interface.f \
+             $(CommonPath)/pxcone_mod_new.f
+
 midpt_e_07 = $(CommonPath)/midpt-e-07.cc \
              $(CommonPath)/px_interface.f \
              $(CommonPath)/pxcone_mod_new.f
@@ -297,7 +301,7 @@ fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
 	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
 	-o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 # ======================================================================
-# =====         FNL0007      CMS incl. jets with kT D=0.6 ==============
+# =====         FNL0007  LHC CMS incl. jets with kT D=0.6 ==============
 # ======================================================================
 # LHC scenario for CMS
 #
@@ -306,6 +310,17 @@ fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl0007.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
 	-o fnl0007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+# ======================================================================
+# =====         FNL0009  LHC CMS incl. jets with Midpoint R=0.5 ========
+# ======================================================================
+# LHC scenario for CMS
+#
+fnl0009: links fnl0009.cc $(CommonPath)/cone-e-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0009.cc \
+	$(CommonPath)/cone-e-05.cc $(cteq6pdf) \
+	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 #
 # ======================================================================
