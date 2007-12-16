@@ -209,6 +209,8 @@ c   -----------------------------------
                   do n=1,1+NSCALEVAR*(NORD-1) ! LO & NLO & w/ scale var
                      do l=1,NSCALEBIN ! No. of Subproc
                         READ(2,*) array(nbin,k,m,n,l)
+ckr                        write(*,*) "nbin,k,m,n,l",nbin,k,m,n,l,array
+ckr     &                              (nbin,k,m,n,l)
                      enddo
                   enddo
                enddo
@@ -265,16 +267,16 @@ c - define variables -> to select the bins that we want to keep
 C      nrapidity = 1
       nrapidity = 5
       NPTMIN(3) = 1
-      NPT(3) = 28
+      NPT(3) = 27
       NPTMIN(4) = 1
-      NPT(4) = 18
+      NPT(4) = 16
       NPTMIN(5) = 1
-      NPT(5) = 11
+      NPT(5) =  9
       noff(1) = 0
       noff(2) = 0
-      noff(3) = 0
-      noff(4) = 3
-      noff(5) = 5
+      noff(3) = 4
+      noff(4) = 7
+      noff(5) = 6
 
 c  - update NBINTOT info
       NBINTOT=0
