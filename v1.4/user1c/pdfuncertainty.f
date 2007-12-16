@@ -34,14 +34,15 @@ c --- parse command line
       ENDIF
 
 
-c - Initialize LHAPDF    - for CTEQ6.1M   
+c - Initialize LHAPDF
       CALL GETENV('LHAPDF',LHAPDF)
       IF (LENOCC(LHAPDF).EQ.0) THEN
          LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
       ENDIF
       write(*,*)"Looking for LHAPDF in directory "//
      &     LHAPDF(1:LENOCC(LHAPDF))//"!"
-      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/PDFsets/cteq61.LHgrid')
+ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/PDFsets/cteq61.LHgrid')
+      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq65.LHgrid')
 
 c      call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
