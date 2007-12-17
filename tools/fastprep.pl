@@ -50,6 +50,8 @@ if ( $pdf ) {
 #
 # Starting archive creation
 #
+if ( ! $ENV{FASTNLO} ) {die "fastprep.pl: ERROR! Environment variable ".
+			    "FASTNLO not set, aborted!\n";}
 print "fastprep.pl: Preparing fastNLO archive for submission in directory $ENV{FASTNLO}/..\n";
 print "fastprep.pl: Only hh collisions, no LHAPDF for now!\n";
 chdir "$ENV{FASTNLO}/.." or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}/..!\n";
