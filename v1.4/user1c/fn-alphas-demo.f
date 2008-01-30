@@ -1,6 +1,3 @@
-
-
-
 *******************************************************************
 * M. Wobisch  25/05/99
 *
@@ -21,7 +18,9 @@
       DOUBLE PRECISION B0, B1, B10 , PI4, F, FP,FM,
      +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
       INTEGER  NLOOP, NF, IFIRST, I
-      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
+ckr 30.01.2008: Initialize Z mass in double precision 
+ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
+      PARAMETER (ZMASS = 91.187D0)
       DATA IFIRST/0/, ONED/1.D0/, TWOD/2.D0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2
 
