@@ -66,11 +66,12 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER IFIRST, IFILE, iord, isub, I,J,K,L,M, 
+      INTEGER IFIRST, IFILE, iord, isub, lenocc, I,J,K,L,M, 
      +     IPRINTFLAG, INORMFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME
       CHARACTER*50 OLDFILENAME
+      CHARACTER*255 CSTRNG
       DOUBLE PRECISION xmur, xmuf, sum(3)
       DATA IFIRST/0/, OLDFILENAME/'xxxx'/
       SAVE IFIRST, OLDFILENAME
@@ -78,7 +79,8 @@
 c - output in first call
       if (IFIRST.EQ.0) then
          Do i=1,12
-            write(*,5000) " # ",CHEADER(i)
+            CSTRNG = CHEADER(I)
+            write(*,5000) " #",CSTRNG(1:LENOCC(CSTRNG))
          enddo
       endif
 
@@ -126,33 +128,47 @@ c - check consistency of array dimensions / commonblock parameters
 
 c - print further info
          write(*,*) "#      "
-         write(*,5000) " #      this table contains: ",NAMELABEL(1) 
-         write(*,5000) " #      as published in:     ",NAMELABEL(2)
-         write(*,5000) " #      by:                  ",NAMELABEL(3)
+         CSTRNG = NAMELABEL(1)
+         write(*,5000) " #      this table contains: ",CSTRNG(1:LENOCC(CSTRNG))
+         CSTRNG = NAMELABEL(2)
+         write(*,5000) " #      as published in:     ",CSTRNG(1:LENOCC(CSTRNG))
+         CSTRNG = NAMELABEL(3)
+         write(*,5000) " #      by:                  ",CSTRNG(1:LENOCC(CSTRNG))
          write(*,*) "#      "
-         write(*,*) "#      reaction: ",cireaction(ireaction)
-         write(*,*) "#      process:  ",ciproc(iproc)
-         write(*,*) "#      total No. of observable bins: ",Nbintot        
-         write(*,*) "#      jet algo: ",cialgo(ialgo)
-         write(*,*) "#         parameter 1:  ",cjetres1(ialgo),'=',jetres1
-         write(*,*) "#         parameter 2:  ",cjetres2(ialgo),'=',jetres2
+         CSTRNG = CIREACTION(IREACTION)
+         write(*,*) "#      reaction: ",CSTRNG(1:LENOCC(CSTRNG))
+         CSTRNG = CIPROC(IPROC)
+         write(*,*) "#      process: ",CSTRNG(1:LENOCC(CSTRNG))
+         write(*,*) "#      total No. of observable bins:",Nbintot        
+         CSTRNG = CIALGO(IALGO)
+         write(*,*) "#      jet algo: ",CSTRNG(1:LENOCC(CSTRNG))
+         CSTRNG = CJETRES1(IALGO)
+         write(*,FMT='(A,A,A,F6.4)')
+     &        " #         parameter 1: ",CSTRNG(1:LENOCC(CSTRNG)),' = ',jetres1
+         CSTRNG = CJETRES2(IALGO)
+         write(*,FMT='(A,A,A,F6.4)')
+     &        " #         parameter 2: ",CSTRNG(1:LENOCC(CSTRNG)),' = ',jetres2
          write(*,*) "#"
          write(*,*) "#"
          write(*,*) "#      the single contributions have been computed"
          write(*,*) "#      using the following codes:"
          do i=1,nord
-            write(*,5000) " #      ",powlabel(i)
-            write(*,5000) " #         by: ",codelabel(i)
+            CSTRNG = POWLABEL(I)
+            write(*,5000) " #      ",CSTRNG(1:LENOCC(CSTRNG))
+            CSTRNG = CODELABEL(I)
+            write(*,5000) " #      by: ",CSTRNG(1:LENOCC(CSTRNG))
          enddo
          write(*,*)"#"
          IF (nord.gt.0) then
             do i=1,4
-               write(*,5000) " # ",CNLOJET(i)
+               CSTRNG = CNLOJET(I)
+               write(*,5000) " # ",CSTRNG(1:LENOCC(CSTRNG))
             enddo
          endif 
          IF (nord.eq.3) then
             do i=1,5
-               write(*,5000) " # ",CTHRCOR(i)
+               CSTRNG = CTHRCOR(I)
+               write(*,5000) " # ",CSTRNG(1:LENOCC(CSTRNG))
             enddo
          endif 
 
@@ -161,19 +177,22 @@ c - print scale-variations available in the table
          write (*,*)
      +        "#   --- the renormalization and factorization scales mur, muf"
          write (*,*) "#       are proportional to"
-         write (*,5000) " #           mu0 = ",scalelabel
-         write (*,*) "#  "
+         CSTRNG = SCALELABEL
+         write (*,5000) " #           mu0 = ",CSTRNG(1:LENOCC(CSTRNG))
+         write (*,*) "#"
 
-         write (*,*) "#   --- available No. of scales",
-     +        " variations: ",nscalevar
+         write (*,*) "#   --- available No. of scale",
+     +        " variations:",nscalevar
          write (*,*) "#         available factorization scale settings:"
          do i=1,nscalevar
-            write (*,*) "#           ",i,"  (muf/mu0)",mufscale(i)
+            write (*,FMT='(A,I1,A,F6.4)')
+     &           " #           ",i,"  (muf/mu0) = ",mufscale(i)
          enddo
          write (*,*) "#"
          write (*,*) "#         available renormalization scale settings:"
          do i=1,nscalevar
-            write (*,*) "#           ",i,"  (mur/mu0)=",murscale(i)
+            write (*,FMT='(A,I1,A,F6.4)')
+     &           " #           ",i,"  (mur/mu0) = ",murscale(i)
          enddo
          write (*,*) "#         (in LO and NLO, the renormalization scale"
          write (*,*) "#          can be varied arbitrarily afterwards."
@@ -207,10 +226,10 @@ c - identify the scales chosen in this call
 
       if (IFIRST.EQ.0) then
          IFIRST = 1
-         write(*,*) "# "
+         write(*,*) "#"
          write(*,*) "#################################################",
      +        "#############"
-         write(*,*) " "
+         write(*,*) "#"
       endif
 
 
@@ -238,11 +257,14 @@ c - sum subprocesses / fill result array / fill 'XSECT' array
             result(nbin,(Nsubproc+1),iord) = 0d0
             xsect(nbin,iord) = 0d0
             do m=1,Nsubproc     ! No. of Subprocesses
-               result(nbin,m,iord) = result(nbin,m,iord)
+c               write(*,*)"nbin, iord, msub",nbin,iord,m
+c               result(nbin,m,iord) = result(nbin,m,iord)
                result(nbin,(Nsubproc+1),iord)=
      +              result(nbin,(Nsubproc+1),iord) + result(nbin,m,iord)
+c               write(*,*)"result",result(nbin,(Nsubproc+1),iord)
             enddo
             xsect(nbin,iord) = result(nbin,(Nsubproc+1),iord)
+c            write(*,*)"nbin,iord,xsect",nbin,iord,xsect(nbin,iord)
          enddo
       enddo
 
@@ -299,9 +321,9 @@ c - print results - if requested
 
       RETURN
 
- 5000 FORMAT (A,A64)
+ 5000 FORMAT (A,A)
  5001 FORMAT (A,A,A)
- 5002 FORMAT (A,F9.4,4X,A,F9.4)
+ 5002 FORMAT (A,F8.4,4X,A,F8.4)
  998  continue
       END
 
@@ -337,9 +359,10 @@ c - get the absolute order in alpha_s of the LO contribution
 c - vary renormalization scale around the value used in orig. calculation
       logmu = log(xmur/murscale(ixmuf)) ! change w.r.t. orig. calculation
       scfac  = dble(jord)  *beta0 *logmu          ! NLO contrib.
-      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
-      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
-     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
+c      write(*,*)"jord,logmu,scfac",jord,logmu,scfac
+c      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
+c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
+c     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
 
 
 c - MW:  we may save time if we make the mur-variation later
@@ -395,6 +418,7 @@ c - loop over coefficient array
                endif
                do iord=1,Nord
                   aspow(iord) = bweight **npow(iord)
+c                  write(*,*)"bweight,npow,aspow",bweight,npow(iord),aspow(iord)
                enddo
                do k=1,NXSUM     ! loop over all x bins
                   do m=1,Nsubproc ! loop over subprocesses
@@ -423,7 +447,13 @@ c     -           in other words: for  log(mur/muf)=0
                               coeff = 0d0
                            endif
                         endif
-
+c                        write(*,*)"nbin,k,m,ipo1,l",nbin,k,m,iposition(1),l
+c                        write(*,*)"nbin,k,m,ipo2,l",nbin,k,m,iposition(2),l
+c                        write(*,*)"nbin,k,m,ipo3,l",nbin,k,m,iposition(3),l
+c                        write(*,*)"ar1,ar2,ar3",
+c     &                       array(nbin,k,m,iposition(1),l),
+c     &                       array(nbin,k,m,iposition(2),l),
+c     &                       array(nbin,k,m,iposition(3),l)
 c - for 'standard' fastNLO tables 
                         if (iref.eq.0 .or. i.le.(nrapidity/2)) then 
                            result(nbin,m,iord) = result(nbin,m,iord)
@@ -437,6 +467,10 @@ c - only relevant for fastNLO authors -> for precision studies
                               result(nbin,m,iord) = result(nbin,m,iord) + coeff
                            endif
                         endif
+c                        write(*,*)"nbin,m,iord",nbin,m,iord
+c                        write(*,*)"result1",result(nbin,m,iord)
+c                        write(*,*)"coeff,aspow,pdf",coeff,aspow(iord)
+c     >                       ,pdf(nbin,k,m,l)
                      enddo      ! iord perturbative order
                   enddo         ! l scale-bins
                enddo            ! m subprocess
@@ -519,6 +553,8 @@ c                     x1 = hxinv3(hx)    ! inefficient: log10(1/x)+x-1
                   ENDIF
                   do l=-6,6
                      XPDF(k,l) = newpdf(l) * reweight
+c                     write(*,*)"k,l",k,l
+c                     write(*,*)"newpdf,reweight,xpdf",newpdf(l),reweight,xpdf(k,l)
                   enddo
                enddo  
 
@@ -532,6 +568,8 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
                      call fx9999pl(ireaction,k,l,XPDF,H)
                      do m=1,Nsubproc
                         pdf(nbin,nx,m,p) = H(m)
+c                        write(*,*)"nbin,nx,m,p",nbin,nx,m,p
+c                        write(*,*)"pdf",pdf(nbin,nx,m,p)
                      enddo
                   enddo
                enddo 
@@ -591,6 +629,7 @@ c --- for hadron-hadron ---
          SumQB1 = 0d0
          SumQ2  = 0d0
          SumQB2 = 0d0
+c         write(*,*)"i,j",i,j
          do k=1,6
             Q1(k)  = XPDF(i,k)  ! read x1
             QB1(k) = XPDF(i,-k)
@@ -603,6 +642,9 @@ c --- for hadron-hadron ---
          enddo
          G1     = XPDF(i,0)
          G2     = XPDF(j,0)
+c         write(*,*)"sumq1,sumqb1",sumq1,sumqb1
+c         write(*,*)"sumq2,sumqb2",sumq2,sumqb2
+c         write(*,*)"g1,g2",g1,g2
 c  -  compute S,A
          S = 0d0
          A = 0d0
@@ -632,6 +674,8 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
          write(*,*) ' this reaction is not yet defined'
          stop
       endif
+c      write(*,*)"h: 1-3",h(1),h(2),h(3)
+c      write(*,*)"h: 4-7",h(4),h(5),h(6),h(7)
 
       RETURN 
       END
@@ -702,7 +746,8 @@ c      nproc = 1                 ! print only gg->jets subprocess
       write(*,*) " "
 
       RETURN
- 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
+c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
+ 900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
  901  Format (A12,F8.2,"-",F8.2,":",4E13.4)
  5000 FORMAT (A,A64)
       END
@@ -720,8 +765,8 @@ c      nproc = 1                 ! print only gg->jets subprocess
 *-----------------------------------------------------------------
       IMPLICIT NONE
       CHARACTER*(*) FILENAME
-      CHARACTER*255 BUFFER
-      INTEGER IFIRST, IFILE, I,J,K,L,M,N,   NBIN,NX
+      CHARACTER*255 BUFFER,CSTRNG
+      INTEGER IFIRST, IFILE, LENOCC, I,J,K,L,M,N,   NBIN,NX
       INCLUDE 'fnx9999.inc'
 
       DATA IFIRST/0/
@@ -751,7 +796,7 @@ c  -----------------------------------
       READ(2,*) ECMS
       READ(2,*) IXSECTUNITS
       do i=1,5
-         READ(2,*) NAMELABEL(i)
+         READ(2,FMT='(A)') NAMELABEL(i)
       enddo
       READ(2,*) IPROC
       READ(2,*) IALGO
@@ -772,11 +817,12 @@ c   -----------------------------------
          READ(2,*) NEVT(i)
       enddo
       do i=1,nord
-         write(*,5000) ' #      ',NEVT(i),
-     +        ' events in ',POWLABEL(i)
+         CSTRNG = POWLABEL(I)
+         write(*,5000)
+     &        ' #      ',NEVT(i),' events in ',CSTRNG(1:LENOCC(CSTRNG))
       enddo
       READ(2,*) NXTOT
-      WRITE(*,*) "#           No. of x bins: ",NXTOT
+      WRITE(*,*) "#           No. of x bins:",NXTOT
       READ(2,*) IXSCHEME
       READ(2,*) IPDFWGT
       READ(2,*) IREF
@@ -862,6 +908,10 @@ c   -----------------------------------
                   do n=1,1+NSCALEVAR*(NORD-1) ! LO & NLO & w/ scale var
                      do l=1,NSCALEBIN ! No. of Bins in Scale
                         READ(2,*) array(nbin,k,m,n,l)
+c                        write(*,*)"nbin,k,m,n,l",nbin,k,m,n,l
+c                        write(*,*)"array",array(nbin,k,m,n,l)
+c                        write(*,123)"array",array(nbin,k,m,n,l)
+c 123                    format(A5,E45.32)
                      enddo
                   enddo
                enddo
@@ -882,7 +932,7 @@ c   -----------------------------------
       stop
       RETURN
 
- 5000 FORMAT (A,I12,A,A64) 
+ 5000 FORMAT (A,I12,A,A) 
       END
 
 *******************************************************************

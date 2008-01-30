@@ -7,11 +7,9 @@
 *
 * -------------------------------------------------------------------
       implicit none
-      CHARACTER*255 FILENAME
-      CHARACTER*255 HISTOFILE
-      CHARACTER*255 LHAPDF
-      integer i,j,k,l1,l2,l3,l4, npdf
-      integer lenocc
+      CHARACTER*255 FILENAME,HISTOFILE,PDFSET,LHAPDF
+      integer i,j,k,l1,l2,l3,l4,npdf
+      INTEGER LENOCC
       INCLUDE 'fnx9999.inc'
       double precision mur,muf, diff,
      +     res0(NBINTOTMAX,NMAXSUBPROC+1,3),
@@ -24,25 +22,59 @@ c                  definition in the commonblock!!!!!
 
 
 c --- parse command line
-      IF ( IARGC().LT.1)  FILENAME = 'table.txt.gz'
-      IF ( IARGC().LT.2)  HISTOFILE= 'fastnlo.hbk'
-      IF ( IARGC().GT.0)  CALL GETARG(1,FILENAME)
-      IF ( IARGC().GT.1)  CALL GETARG(2,HISTOFILE)
-      IF ( IARGC().GT.2)  THEN
-         write(*,*) 'fastNLO: too many arguments given. Stopping'
+ckr 30.01.2008: Some more checks on input arguments
+      IF (IARGC().LT.1) THEN
+         FILENAME = 'table.txt'
+         WRITE(*,*)
+     &        "\npdfunc: WARNING! No input table given, "//
+     &        "taking table.txt instead!"
+      ELSE
+         CALL GETARG(1,FILENAME)
+         WRITE(*,*)"\npdfunc: Using input table:",
+     &        FILENAME(1:LENOCC(FILENAME))
+      ENDIF
+      IF (IARGC().LT.2) THEN
+         HISTOFILE = 'fastnlo.hbk'
+         WRITE(*,*)
+     &        "\npdfunc: WARNING! No output filename given, "//
+     &        "taking fastnlo.hbk instead!"
+      ELSE
+         CALL GETARG(2,HISTOFILE)
+         WRITE(*,*)"\npdfunc: Creating output file:",
+     &        HISTOFILE(1:LENOCC(HISTOFILE))
+      ENDIF
+      IF (IARGC().LT.3) THEN
+         PDFSET = 'cteq65'
+         WRITE(*,*)
+     &        "\npdfunc: WARNING! No PDF set given, "//
+     &        "taking cteq65 instead!"
+      ELSE
+         CALL GETARG(3,PDFSET)
+         WRITE(*,*)"\npdfunc: Using PDF set:",
+     &        PDFSET(1:LENOCC(PDFSET))
+      ENDIF
+      IF (IARGC().GT.3) THEN
+         WRITE(*,*)"\npdfunc: ERROR! Too many arguments, aborting!"
          RETURN
       ENDIF
 
-
-c - Initialize LHAPDF
+c - Initialize path to LHAPDF libs
       CALL GETENV('LHAPDF',LHAPDF)
       IF (LENOCC(LHAPDF).EQ.0) THEN
-         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
+ckr         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
+         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/lib'
       ENDIF
-      write(*,*)"Looking for LHAPDF in directory "//
-     &     LHAPDF(1:LENOCC(LHAPDF))//"!"
-ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/PDFsets/cteq61.LHgrid')
-      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq65.LHgrid')
+      WRITE(*,*)"Looking for LHAPDF sets in directory "//
+     &     LHAPDF(1:LENOCC(LHAPDF))
+      PDFSET = LHAPDF(1:LENOCC(LHAPDF))//"/../PDFsets/"//
+     &     PDFSET//".LHgrid"
+      WRITE(*,*)"Taking PDF set "//
+     &     PDFSET(1:LENOCC(PDFSET))
+      
+      CALL InitPDFset(PDFSET(1:LENOCC(PDFSET)))
+
+ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq65.LHgrid')
+ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq61.LHgrid')
 
 c      call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
@@ -72,7 +104,7 @@ c         5th argument:  array to return results
 
 c -> compute PDF uncertainties for all available scales
       do i=1,Nscalevar
-         write(*,*) " now scale No.",i
+         write(*,*) "now scale No.",i
          call InitPDF(0)
          mur = murscale(i)
          muf = mufscale(i)
@@ -80,7 +112,7 @@ c -> compute PDF uncertainties for all available scales
 
 c -    save the result array from the first call (= central result)
 c      and reset result arrays   
-         write(*,*) " the observable has ",NBINTOT," bins  - ",NSUBPROC," subprocesses"
+         write(*,*) "the observable has",NBINTOT," bins -",NSUBPROC," subprocesses"
          do l1=1,NBINTOT
             do l2=1,(NSUBPROC+1)
                do l3=1,NORD
@@ -111,7 +143,7 @@ c - for all bins/subproc/orders: add negative/positive variations
                      else
                         res1lo(l1,l2,l3) = res1lo(l1,l2,l3)+diff*diff
                      endif
-                  enddo
+                   enddo
                enddo
             enddo
          enddo                  ! loop over bins
@@ -124,10 +156,12 @@ c - take square-root of sum of squares
                   res1lo(l1,l2,l3) = -sqrt(res1lo(l1,l2,l3))
                enddo
             enddo
-            WRITE(*,*) l1,res0(l1,NSUBPROC+1,NORD),
+ckr 30.01.2008: Change output format for better comparison with C++ version
+            WRITE(*,900) l1,res0(l1,NSUBPROC+1,NORD),
      +           res1lo(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD),
      +           res1hi(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD)
          enddo
+ 900     FORMAT(1P,I5,3(3X,E21.14))
 
 c - fill histograms
          call PDFFILL(i,res0,res1hi,res1lo)
@@ -162,7 +196,7 @@ c - HBOOK common
 
 c - open & book
       if (n.eq.1) then
-         write(*,*)' ----------- book histograms -------'
+         write(*,*)'----------- book histograms -------'
          CALL HLIMIT(NWPAWC)
          CALL HROPEN(11,'fastNLO',histofile,'N',1024,ISTAT2)
          if (ISTAT2.NE.0) then
