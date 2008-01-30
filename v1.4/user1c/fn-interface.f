@@ -27,15 +27,26 @@
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER nloop
+      INTEGER nloop,ifirst
       DOUBLE PRECISION MUR, ALPSMZ, PI
       DOUBLE PRECISION ALPS_IT 
 c      DOUBLE PRECISION MY_FAVOURITE-ALPHAS
-      PARAMETER (PI=3.1415927d0)
+ckr 30.01.2008: Initialize pi in double precision at first call like elsewhere
+ckr      PARAMETER (PI=3.1415927d0)
+
+      DATA IFIRST,PI/0,0.D0/
+      SAVE IFIRST,PI
+      
+      IF (IFIRST.EQ.0) THEN
+         IFIRST = 1
+         PI = 4D0 * ATAN(1D0)
+      ENDIF
 
 c === example: exact, iterative solution of the 2-loop RGE 
       nloop=2
-      alpsmz=0.118              ! set here the value of alpha_s(Mz)
+ckr 30.01.2008: Initialize alphas(M_Z) in double precision
+ckr      alpsmz=0.118              ! set here the value of alpha_s(Mz)
+      alpsmz=0.118d0              ! set here the value of alpha_s(Mz)
 c      alpsmz=0.1185              ! for H1-2000 MSbar
 c      alpsmz=0.1205             ! for MRST2004
       FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
