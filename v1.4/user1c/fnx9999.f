@@ -1,6 +1,7 @@
 *******************************************************************
 *******************************************************************
 * fastNLO user code                 T. Kluge, M. Wobisch 02/01/2006      
+* Some output modification:         K. Rabbertz          30/01/2008
 *                            
 *   >> this code should not be edited
 *   >> if you have questions, please contact 
@@ -66,11 +67,13 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
+ckr 30.01.2008: Use LENOCC string length function 
       INTEGER IFIRST, IFILE, iord, isub, lenocc, I,J,K,L,M, 
      +     IPRINTFLAG, INORMFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME
       CHARACTER*50 OLDFILENAME
+ckr 30.01.2008: Define temp. CSTRNG for output
       CHARACTER*255 CSTRNG
       DOUBLE PRECISION xmur, xmuf, sum(3)
       DATA IFIRST/0/, OLDFILENAME/'xxxx'/
@@ -79,6 +82,8 @@
 c - output in first call
       if (IFIRST.EQ.0) then
          Do i=1,12
+ckr 30.01.2008: Print strings only until end, not complete CHARACTER dimension
+ckr             Similar usage below with CSTRNG at many places
             CSTRNG = CHEADER(I)
             write(*,5000) " #",CSTRNG(1:LENOCC(CSTRNG))
          enddo
@@ -143,6 +148,7 @@ c - print further info
          CSTRNG = CIALGO(IALGO)
          write(*,*) "#      jet algo: ",CSTRNG(1:LENOCC(CSTRNG))
          CSTRNG = CJETRES1(IALGO)
+ckr 30.01.2008: Use explicit format for comparisons
          write(*,FMT='(A,A,A,F6.4)')
      &        " #         parameter 1: ",CSTRNG(1:LENOCC(CSTRNG)),' = ',jetres1
          CSTRNG = CJETRES2(IALGO)
@@ -257,14 +263,10 @@ c - sum subprocesses / fill result array / fill 'XSECT' array
             result(nbin,(Nsubproc+1),iord) = 0d0
             xsect(nbin,iord) = 0d0
             do m=1,Nsubproc     ! No. of Subprocesses
-c               write(*,*)"nbin, iord, msub",nbin,iord,m
-c               result(nbin,m,iord) = result(nbin,m,iord)
                result(nbin,(Nsubproc+1),iord)=
      +              result(nbin,(Nsubproc+1),iord) + result(nbin,m,iord)
-c               write(*,*)"result",result(nbin,(Nsubproc+1),iord)
             enddo
             xsect(nbin,iord) = result(nbin,(Nsubproc+1),iord)
-c            write(*,*)"nbin,iord,xsect",nbin,iord,xsect(nbin,iord)
          enddo
       enddo
 
@@ -321,6 +323,7 @@ c - print results - if requested
 
       RETURN
 
+ckr 30.01.2008: Use simple A format, string length via LENOCC
  5000 FORMAT (A,A)
  5001 FORMAT (A,A,A)
  5002 FORMAT (A,F8.4,4X,A,F8.4)
@@ -359,7 +362,7 @@ c - get the absolute order in alpha_s of the LO contribution
 c - vary renormalization scale around the value used in orig. calculation
       logmu = log(xmur/murscale(ixmuf)) ! change w.r.t. orig. calculation
       scfac  = dble(jord)  *beta0 *logmu          ! NLO contrib.
-c      write(*,*)"jord,logmu,scfac",jord,logmu,scfac
+ckr 30.01.2008: Comment unused defs
 c      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
 c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
 c     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
@@ -418,7 +421,6 @@ c - loop over coefficient array
                endif
                do iord=1,Nord
                   aspow(iord) = bweight **npow(iord)
-c                  write(*,*)"bweight,npow,aspow",bweight,npow(iord),aspow(iord)
                enddo
                do k=1,NXSUM     ! loop over all x bins
                   do m=1,Nsubproc ! loop over subprocesses
@@ -447,13 +449,7 @@ c     -           in other words: for  log(mur/muf)=0
                               coeff = 0d0
                            endif
                         endif
-c                        write(*,*)"nbin,k,m,ipo1,l",nbin,k,m,iposition(1),l
-c                        write(*,*)"nbin,k,m,ipo2,l",nbin,k,m,iposition(2),l
-c                        write(*,*)"nbin,k,m,ipo3,l",nbin,k,m,iposition(3),l
-c                        write(*,*)"ar1,ar2,ar3",
-c     &                       array(nbin,k,m,iposition(1),l),
-c     &                       array(nbin,k,m,iposition(2),l),
-c     &                       array(nbin,k,m,iposition(3),l)
+
 c - for 'standard' fastNLO tables 
                         if (iref.eq.0 .or. i.le.(nrapidity/2)) then 
                            result(nbin,m,iord) = result(nbin,m,iord)
@@ -467,10 +463,6 @@ c - only relevant for fastNLO authors -> for precision studies
                               result(nbin,m,iord) = result(nbin,m,iord) + coeff
                            endif
                         endif
-c                        write(*,*)"nbin,m,iord",nbin,m,iord
-c                        write(*,*)"result1",result(nbin,m,iord)
-c                        write(*,*)"coeff,aspow,pdf",coeff,aspow(iord)
-c     >                       ,pdf(nbin,k,m,l)
                      enddo      ! iord perturbative order
                   enddo         ! l scale-bins
                enddo            ! m subprocess
@@ -553,8 +545,6 @@ c                     x1 = hxinv3(hx)    ! inefficient: log10(1/x)+x-1
                   ENDIF
                   do l=-6,6
                      XPDF(k,l) = newpdf(l) * reweight
-c                     write(*,*)"k,l",k,l
-c                     write(*,*)"newpdf,reweight,xpdf",newpdf(l),reweight,xpdf(k,l)
                   enddo
                enddo  
 
@@ -568,8 +558,6 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
                      call fx9999pl(ireaction,k,l,XPDF,H)
                      do m=1,Nsubproc
                         pdf(nbin,nx,m,p) = H(m)
-c                        write(*,*)"nbin,nx,m,p",nbin,nx,m,p
-c                        write(*,*)"pdf",pdf(nbin,nx,m,p)
                      enddo
                   enddo
                enddo 
@@ -629,7 +617,6 @@ c --- for hadron-hadron ---
          SumQB1 = 0d0
          SumQ2  = 0d0
          SumQB2 = 0d0
-c         write(*,*)"i,j",i,j
          do k=1,6
             Q1(k)  = XPDF(i,k)  ! read x1
             QB1(k) = XPDF(i,-k)
@@ -642,9 +629,6 @@ c         write(*,*)"i,j",i,j
          enddo
          G1     = XPDF(i,0)
          G2     = XPDF(j,0)
-c         write(*,*)"sumq1,sumqb1",sumq1,sumqb1
-c         write(*,*)"sumq2,sumqb2",sumq2,sumqb2
-c         write(*,*)"g1,g2",g1,g2
 c  -  compute S,A
          S = 0d0
          A = 0d0
@@ -674,8 +658,6 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
          write(*,*) ' this reaction is not yet defined'
          stop
       endif
-c      write(*,*)"h: 1-3",h(1),h(2),h(3)
-c      write(*,*)"h: 4-7",h(4),h(5),h(6),h(7)
 
       RETURN 
       END
@@ -746,6 +728,7 @@ c      nproc = 1                 ! print only gg->jets subprocess
       write(*,*) " "
 
       RETURN
+ckr 30.01.2008: Change format for better comparison
 c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
  900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
  901  Format (A12,F8.2,"-",F8.2,":",4E13.4)
@@ -908,10 +891,6 @@ c   -----------------------------------
                   do n=1,1+NSCALEVAR*(NORD-1) ! LO & NLO & w/ scale var
                      do l=1,NSCALEBIN ! No. of Bins in Scale
                         READ(2,*) array(nbin,k,m,n,l)
-c                        write(*,*)"nbin,k,m,n,l",nbin,k,m,n,l
-c                        write(*,*)"array",array(nbin,k,m,n,l)
-c                        write(*,123)"array",array(nbin,k,m,n,l)
-c 123                    format(A5,E45.32)
                      enddo
                   enddo
                enddo
@@ -932,6 +911,7 @@ c 123                    format(A5,E45.32)
       stop
       RETURN
 
+ckr 30.01.2008: Use free format A, string length det. by LENOCC
  5000 FORMAT (A,I12,A,A) 
       END
 
