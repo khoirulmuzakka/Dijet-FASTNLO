@@ -30,7 +30,7 @@ ckr 30.01.2008: Some more checks on input arguments
      &        "taking table.txt instead!"
       ELSE
          CALL GETARG(1,FILENAME)
-         WRITE(*,*)"\npdfunc: Using input table:",
+         WRITE(*,*)"\npdfunc: Using input table: ",
      &        FILENAME(1:LENOCC(FILENAME))
       ENDIF
       IF (IARGC().LT.2) THEN
@@ -40,17 +40,17 @@ ckr 30.01.2008: Some more checks on input arguments
      &        "taking fastnlo.hbk instead!"
       ELSE
          CALL GETARG(2,HISTOFILE)
-         WRITE(*,*)"\npdfunc: Creating output file:",
+         WRITE(*,*)"\npdfunc: Creating output file: ",
      &        HISTOFILE(1:LENOCC(HISTOFILE))
       ENDIF
       IF (IARGC().LT.3) THEN
-         PDFSET = 'cteq65'
+         PDFSET = 'cteq65.LHgrid'
          WRITE(*,*)
      &        "\npdfunc: WARNING! No PDF set given, "//
-     &        "taking cteq65 instead!"
+     &        "taking cteq65.LHgrid instead!"
       ELSE
          CALL GETARG(3,PDFSET)
-         WRITE(*,*)"\npdfunc: Using PDF set:",
+         WRITE(*,*)"\npdfunc: Using PDF set: ",
      &        PDFSET(1:LENOCC(PDFSET))
       ENDIF
       IF (IARGC().GT.3) THEN
@@ -64,12 +64,11 @@ c - Initialize path to LHAPDF libs
 ckr         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
          LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/lib'
       ENDIF
-      WRITE(*,*)"Looking for LHAPDF sets in directory "//
-     &     LHAPDF(1:LENOCC(LHAPDF))
-      PDFSET = LHAPDF(1:LENOCC(LHAPDF))//"/../PDFsets/"//
-     &     PDFSET//".LHgrid"
-      WRITE(*,*)"Taking PDF set "//
-     &     PDFSET(1:LENOCC(PDFSET))
+      WRITE(*,*)"\n Looking for LHAPDF sets in directory "
+     &     //LHAPDF(1:LENOCC(LHAPDF))
+      PDFSET = LHAPDF(1:LENOCC(LHAPDF))//"/../PDFsets/"//PDFSET
+      WRITE(*,*)"Taking PDF set "
+     &     //PDFSET(1:LENOCC(PDFSET))
       
       CALL InitPDFset(PDFSET(1:LENOCC(PDFSET)))
 
