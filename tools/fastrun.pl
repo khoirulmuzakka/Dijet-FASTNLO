@@ -194,6 +194,8 @@ $install{cernlib}[0]    = "cernlib-2003";
 $install{lhapdf}[0]     = "lhapdf-5.3.1";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
+$install{mcfm}[0]       = "mcfm-5.1";
+$install{mcfmfix}[0]    = "mcfm-5.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
 $install{gcccore}[0]    = "gcc-3.3.6";
 $install{gccgpp}[0]     = "gcc-3.3.6";
@@ -203,6 +205,8 @@ foreach my $comp ( keys %install ) {
     my $tmp = $install{$comp}[0].".tar.gz";
     if ( $comp eq "nlojetfix" ) {
 	$install{$comp}[1] = "nlojet++-2.0.1-fix.tar.gz";
+    } elsif ( $comp eq "mcfmfix" ) {
+	$install{$comp}[1] = "mcfm-5.1-fix.tar.gz";
     } elsif ( $comp eq "gcccore" ) {
 	$install{$comp}[1] = "gcc-core-3.3.6.tar.gz";
     } elsif ( $comp eq "gccgpp" ) {
@@ -387,7 +391,34 @@ if ( $mode == 0 || $mode == 1) {
     }
 
 #
-# 4) Install fastNLO
+# 4) Install mcfm
+#
+    unless ( -e "$idir/$install{mcfm}[0]" ) {
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Installing mcfm from $install{mcfm}[1]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{mcfm}[1] ...\n";
+	system ("mkdir $idir/$install{mcfm}[0]");
+	my $ret = system("tar xz -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfm}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfm}[1] ".
+			 "in $idir/$install{mcfm}[0] failed: $ret, aborted!\n";}
+	print "\nfastrun.pl: Unpacking fix for $install{mcfm}[1] ...\n";
+	$ret = system("tar xzv -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfmfix}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfmfix}[1] ".
+			 "in $idir/$install{mcfm}[0] failed: $ret, aborted!\n";}
+	if ( -l "$idir/mcfm" ) {system("rm -f $idir/mcfm");}
+	system("ln -s  $install{mcfm}[0] $idir/mcfm");
+	chdir "$idir/$install{mcfm}[0]";
+	print "\nfastrun.pl: Configuring mcfm ...\n";
+	my $ret = system("./Install");
+	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
+	my $ret = system("make -j2");
+	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
+        chdir "..";
+    }
+
+#
+# 5) Install fastNLO
 #
     unless ( -e "$idir/$install{fastNLO}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
@@ -431,7 +462,7 @@ if ( $verb ) {
 }
 
 #
-# 5) Make fastNLO scenario
+# 6) Make fastNLO scenario
 #
 my $scendir;
 if ( $mode == 0 || $mode == 2 ) {
@@ -546,7 +577,7 @@ if ( $mode == 0 || $mode == 2 ) {
 }
     
 #
-# 6) Run fastNLO
+# 7) Run fastNLO
 #
 if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
