@@ -29,7 +29,9 @@ PDFFILES= pdfuncertainty.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
-FC=f77
+#FC=f77
+FC=g77
+#FC=gfortran
 
 SRCFILES = $(FFILES) $(FFILES2) $(CFILES)
 OBJFILES = $(FFILES:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
