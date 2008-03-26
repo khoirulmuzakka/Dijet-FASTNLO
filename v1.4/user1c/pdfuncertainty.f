@@ -160,7 +160,8 @@ ckr 30.01.2008: Change output format for better comparison with C++ version
      +           res1lo(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD),
      +           res1hi(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD)
          enddo
- 900     FORMAT(1P,I5,3(3X,E21.14))
+ckr 900     FORMAT(1P,I5,3(3X,E21.14))
+ 900     FORMAT(1P,I5,3(6X,E18.11))
 
 c - fill histograms
          call PDFFILL(i,res0,res1hi,res1lo)
