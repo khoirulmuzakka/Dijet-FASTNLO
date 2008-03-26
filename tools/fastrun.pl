@@ -448,12 +448,13 @@ $ENV{FASTNLO}  = "$cwdir/fastNLO";
 $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
 print "setenv PATH $cwdir/bin:$ENV{NLOJET}/bin:\${PATH}\n";
-print "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:$ENV{NLOJET}/lib:\${LD_LIBRARY_PATH}\n";
+print "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
 print "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
 print "setenv CXXFLAGS \"-O3 -I .\"\n";
-$ENV{PATH}            = "$cwdir/bin:$ENV{PATH}";
+$ENV{PATH}            = "$cwdir/bin:$ENV{NLOJET}/bin:$ENV{PATH}";
 $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
-    "$ENV{NLOJET}/lib:$ENV{LD_LIBRARY_PATH}";
+    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
 $ENV{CXXFLAGS} = "-O3 -I .";
 if ( $verb ) {
@@ -744,6 +745,8 @@ sub grid_storage {
 #    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
     my $sename = "ic-kit-lcgse.rz.uni-karlsruhe.de";
     my $sepath = "/wlcg/data/users/cms/rabbertz/";
+#    my $sename = "dcache-se-cms.desy.de";
+#    my $sepath = "/pnfs/desy.de/cms/analysis/qcd/rabbertz/";
     my @files = ( "$trfile" );
     
     $date = `date +%d%m%Y_%H%M%S`;
