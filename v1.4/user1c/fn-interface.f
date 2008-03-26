@@ -33,6 +33,10 @@
 c      DOUBLE PRECISION MY_FAVOURITE-ALPHAS
 ckr 30.01.2008: Initialize pi in double precision at first call like elsewhere
 ckr      PARAMETER (PI=3.1415927d0)
+      DOUBLE PRECISION ZMASS, RALPSL, RALPSM, A2PI1, A2PI2
+      PARAMETER (ZMASS = 91.187D0)
+      INTEGER NF
+      PARAMETER (NF = 5)
 
       DATA IFIRST,PI/0,0.D0/
       SAVE IFIRST,PI
@@ -46,16 +50,24 @@ c === example: exact, iterative solution of the 2-loop RGE
       nloop=2
 ckr 30.01.2008: Initialize alphas(M_Z) in double precision
 ckr      alpsmz=0.118              ! set here the value of alpha_s(Mz)
-      alpsmz=0.118d0              ! set here the value of alpha_s(Mz)
+ckr      alpsmz=0.118d0              ! set here the value of alpha_s(Mz)
+      alpsmz=0.125d0              ! set here the value of alpha_s(Mz)
 c      alpsmz=0.1185              ! for H1-2000 MSbar
 c      alpsmz=0.1205             ! for MRST2004
-      FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
+ckr      FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
+ckr      A2PI1 = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
 
 
 c - here you can call your own alpha_s code
 c           -> remember to divide by 2Pi
 c
-c     FNALPHAS = MY_FAVOURITE-ALPHAS(MUR)
+      nloop=1
+      alpsmz=0.25
+      FNALPHAS = RALPSL(MUR,ZMASS,ALPSMZ,NF,NLOOP)/2d0/PI
+ckr      FNALPHAS = RALPSM(MUR,ZMASS,ALPSMZ,NF,NLOOP)/2d0/PI
+ckr      A2PI2 = RALPSM(MUR,ZMASS,ALPSMZ,NF,NLOOP)/2d0/PI
+ckr      write(*,*)"d(A2PI) =",abs(a2pi2-a2pi1)/a2pi1
+ckr      FNALPHAS = A2PI2
 c
 
       RETURN
