@@ -25,7 +25,7 @@ FFILESCEDAR=example-cedar.f fnx9999.f fn-alphas-demo.f fn-interface-cedar.f
 # --- for reference -> use original CTEQ code - works now with v1.4
 REFFILES=example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f  fn-interface-cteq6.f Cteq61Pdf.f
 
-PDFFILES= pdfuncertainty.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f
+PDFFILES= pdfuncertainty.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f alphst.f 
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
