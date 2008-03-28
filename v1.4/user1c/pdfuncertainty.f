@@ -8,14 +8,15 @@
 * -------------------------------------------------------------------
       implicit none
       CHARACTER*255 FILENAME,HISTOFILE,PDFSET,LHAPDF
-      integer i,j,k,l1,l2,l3,l4,npdf
+      integer i,j,k,l1,l2,l3,l4,npdf,iopdf,ioas
       INTEGER LENOCC
       INCLUDE 'fnx9999.inc'
-      double precision mur,muf, diff,
+      double precision mur,muf,diff,qlam4,qlam5,
      +     res0(NBINTOTMAX,NMAXSUBPROC+1,3),
      +     res1hi(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     res1lo(NBINTOTMAX,NMAXSUBPROC+1,3)
-
+     +     res1lo(NBINTOTMAX,NMAXSUBPROC+1,3),
+     +     reslo,reshi
+      
 c - Attention!!! - this mus be declared consistent with the
 c                  definition in the commonblock!!!!!
       double precision xsect1(900,3),xsect0(900,3)
@@ -80,13 +81,22 @@ c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2001E.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2004nnlo.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/a02m_nlo.LHgrid')
-
-
 c      call InitPDFset('/h1/h1gen/lhapdf/LHAPDFv4/PDFsets/cteq61.LHgrid')
+
       call numberPDF(NPDF)
-      WRITE(*,*) "fastNLO:   the PDF set has ",NPDF," members"
+      call GetOrderPDF(IOPDF)
+      call GetOrderAs(IOAS)
+      call GetLam4(0,QLAM4)
+      call GetLam5(0,QLAM5)
+      WRITE(*,*) "fastNLO: The PDF set has",NPDF+1," members"
+      WRITE(*,*) "fastNLO: The PDF is of order",IOPDF+1
+      WRITE(*,*) "fastNLO: alpha_s was used in",IOAS+1,
+     >     "-loop order in the PDF"
+      WRITE(*,*) "fastNLO: The lamba_4 value for member 0 is",QLAM4
+      WRITE(*,*) "fastNLO: The lamba_5 value for member 0 is",QLAM5
 
 c - one initial call - to fill commonblock -> for histo-booking
+      call InitPDF(0)
       call FX9999CC(FILENAME, 1d0 , 1d0 , 0 , XSECT1)
       call PDFHIST(1,histofile)
 
@@ -111,7 +121,8 @@ c -> compute PDF uncertainties for all available scales
 
 c -    save the result array from the first call (= central result)
 c      and reset result arrays   
-         write(*,*) "the observable has",NBINTOT," bins -",NSUBPROC," subprocesses"
+         write(*,*) "the observable has",NBINTOT," bins -",NSUBPROC
+     >        ," subprocesses"
          do l1=1,NBINTOT
             do l2=1,(NSUBPROC+1)
                do l3=1,NORD
@@ -125,41 +136,52 @@ c      and reset result arrays
             enddo
          enddo
 
-         do j=1,NPDF
-            call InitPDF(j)
-            call FX9999CC(FILENAME, mur , muf, 0 , XSECT0)
-
+ckr Do loop runs once even if NPDF=0! => Avoid with IF statement         
+         if (npdf.gt.1) then
+            do j=1,NPDF
+               call InitPDF(j)
+               call FX9999CC(FILENAME,mur,muf,0,XSECT0)
+               
 c - for all bins/subproc/orders: add negative/positive variations
-            do l1=1,NBINTOT
-               do l2=1,(NSUBPROC+1)
-                  do l3=1,NORD
-                     diff = - res0(l1,l2,l3)
-                     do l4=1,l3
-                        diff = diff + result(l1,l2,l4) 
+               do l1=1,NBINTOT
+                  do l2=1,(NSUBPROC+1)
+                     do l3=1,NORD
+                        diff = - res0(l1,l2,l3)
+                        do l4=1,l3
+                           diff = diff + result(l1,l2,l4) 
+                        enddo
+                        if (diff .gt. 0d0) then
+                           res1hi(l1,l2,l3) = res1hi(l1,l2,l3)+diff*diff
+                        else
+                           res1lo(l1,l2,l3) = res1lo(l1,l2,l3)+diff*diff
+                        endif
                      enddo
-                     if (diff .gt. 0d0) then
-                        res1hi(l1,l2,l3) = res1hi(l1,l2,l3)+diff*diff
-                     else
-                        res1lo(l1,l2,l3) = res1lo(l1,l2,l3)+diff*diff
-                     endif
-                   enddo
+                  enddo
                enddo
-            enddo
-         enddo                  ! loop over bins
+            enddo               ! loop over bins
+         endif                  ! not done for npdf <= 1
 
 c - take square-root of sum of squares
          do l1=1,NBINTOT
-            do l2=1,(NSUBPROC+1)
-               do l3=1,NORD
-                  res1hi(l1,l2,l3) = sqrt(res1hi(l1,l2,l3))
-                  res1lo(l1,l2,l3) = -sqrt(res1lo(l1,l2,l3))
+            if (npdf.gt.1) then
+               do l2=1,(NSUBPROC+1)
+                  do l3=1,NORD
+                     res1hi(l1,l2,l3) = sqrt(res1hi(l1,l2,l3))
+                     res1lo(l1,l2,l3) = -sqrt(res1lo(l1,l2,l3))
+                  enddo
                enddo
-            enddo
+               reslo = res1lo(l1,NSUBPROC+1,NORD)/
+     >              res0(l1,NSUBPROC+1,NORD)
+               reshi = res1hi(l1,NSUBPROC+1,NORD)/
+     >              res0(l1,NSUBPROC+1,NORD)
 ckr 30.01.2008: Change output format for better comparison with C++ version
-            WRITE(*,900) l1,res0(l1,NSUBPROC+1,NORD),
-     +           res1lo(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD),
-     +           res1hi(l1,NSUBPROC+1,NORD)/res0(l1,NSUBPROC+1,NORD)
+            else
+               reslo = 0d0
+               reshi = 0d0
+            endif
+            WRITE(*,900) l1,res0(l1,NSUBPROC+1,NORD),reslo,reshi
          enddo
+
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
 
@@ -183,7 +205,7 @@ c ======================= do the histogramming =========================
       implicit none
       Character*(*) histofile
       INTEGER IFIRST, IFILE, J,N,istat2,icycle
-      Integer ix,iord,isub, iscale, irap, ihist
+      Integer ix,iord,isub, iscale, irap, ihist, nhist
       INCLUDE 'fnx9999.inc'
       real pt(nptmax)
 
@@ -203,6 +225,7 @@ c - open & book
             WRITE(*,*) ' FNHBOOK: could not open histofile ',istat2
          endif
          
+         nhist = 0
          do iord=0,Nord         ! order: tot, LO, NLO-corr, NNLO-corr -> Nord
             do iscale=1,NSCALEVAR ! scale variations
                do isub=0,Nsubproc      ! subprocess: 0 tot + 7 subproc
@@ -215,11 +238,12 @@ c - open & book
                      call hbookb(ihist,'p?T! (GeV)' , NPT(irap) ,PT ,0)
                      call hbookb(ihist+1,'p?T! (GeV)' , NPT(irap) ,PT ,0)
                      call hbookb(ihist+2,'p?T! (GeV)' , NPT(irap) ,PT ,0)
+                     nhist = nhist+3
                   enddo
                enddo
             enddo
          enddo        
-
+         write(*,*)"Number of histograms booked:",nhist
 
 c - close HBOOK file
       elseif (n.eq.2) then
