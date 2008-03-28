@@ -234,7 +234,7 @@ c - identify the scales chosen in this call
          IFIRST = 1
          write(*,*) "#"
          write(*,*) "#################################################",
-     +        "#############"
+     +        "################"
          write(*,*) "#"
       endif
 
