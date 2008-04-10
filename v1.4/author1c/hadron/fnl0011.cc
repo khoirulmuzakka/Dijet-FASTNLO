@@ -1,13 +1,9 @@
 //
-// fastNLO author code for fnl0007:
-//     CMS LHC test scenario, E_cms = 14 TeV
-//     for kT algo with D=0.6 in E-scheme
+// fastNLO author code for fnl0010 - CMS LHC test scenario
+//         for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
-// 2007/11/26 KR - Change kt -> 0.6 and put in place new y binning
-// 2006/03/16 KR - Change pb to fb units
-// 2006/03/16 KR - Adapt binning at low p_T to CMS trigger thresholds
-// 2006/03/13 KR - Copy from fnl0001 adapted to CMS scenario
+// 2008/04/10 KR - Implement fastjet for comparison with fnl0007
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -45,7 +41,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "kt-e-06.h"
+#include "fjkt.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -99,7 +95,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_06 jetclus;   // jet algorithm
+   fjkt jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -154,7 +150,7 @@ void UserHHC::initfunc(unsigned int)
    //unitfactor = 1.0;  // for nb     
 
    //Set up binning  
-   nrap   = 6;                 // No. of bins in rapidity
+   nrap   = 1;                 // No. of bins in rapidity
    if (iref==1) nrap=nrap*2;  // -> in reference mode: double No. rap bins
 
    raphigh = new double[nrap+1];  //----- array for rapidity boundaries
@@ -162,25 +158,15 @@ void UserHHC::initfunc(unsigned int)
 
    // flexible rap binning
    raphigh[0]=0.00;
-   raphigh[1]=0.55;
-   raphigh[2]=1.10;
-   raphigh[3]=1.70;
-   raphigh[4]=2.50;
-   raphigh[5]=3.20;
-   raphigh[6]=5.00;
+   raphigh[1]=1.00;
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 161 bins
-   npt[0]=34;
-   npt[1]=34;
-   npt[2]=34;
-   npt[3]=28;
-   npt[4]=20;
-   npt[5]=11;
+   //Define binning in pt: 79 bins
+   npt[0]=79;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -196,109 +182,10 @@ void UserHHC::initfunc(unsigned int)
      pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   //----- rap bins 1, 2 and 3, # = 34
-   for (int j=0; j<3; j++){
-     pthigh[j][0]  =   50.0;
-     pthigh[j][1]  =   60.0;
-     pthigh[j][2]  =   80.0;
-     pthigh[j][3]  =   95.0;
-     pthigh[j][4]  =  120.0;
-     pthigh[j][5]  =  145.0;
-     pthigh[j][6]  =  170.0;
-     pthigh[j][7]  =  195.0;
-     pthigh[j][8]  =  230.0;
-     pthigh[j][9]  =  250.0;
-     pthigh[j][10] =  300.0;
-     pthigh[j][11] =  335.0;
-     pthigh[j][12] =  380.0;
-     pthigh[j][13] =  425.0;
-     pthigh[j][14] =  470.0;
-     pthigh[j][15] =  520.0;
-     pthigh[j][16] =  600.0;
-     pthigh[j][17] =  700.0;
-     pthigh[j][18] =  800.0;
-     pthigh[j][19] =  900.0;
-     pthigh[j][20] = 1000.0;
-     pthigh[j][21] = 1200.0;
-     pthigh[j][22] = 1400.0;
-     pthigh[j][23] = 1600.0;
-     pthigh[j][24] = 1800.0;
-     pthigh[j][25] = 2000.0;
-     pthigh[j][26] = 2200.0;
-     pthigh[j][27] = 2400.0;
-     pthigh[j][28] = 2600.0;
-     pthigh[j][29] = 2800.0;
-     pthigh[j][30] = 3000.0;
-     pthigh[j][31] = 3250.0;
-     pthigh[j][32] = 3500.0;
-     pthigh[j][33] = 3750.0;
-     pthigh[j][34] = 4000.0;
+   //----- rap bins 1, # = 79
+   for (int j=0; j<79; j++) {
+     pthigh[0][j] = (j+1) * 50.0;
    }
-   //----- rap bin 4, # = 28
-   pthigh[3][0]  =   50.0;
-   pthigh[3][1]  =   60.0;
-   pthigh[3][2]  =   80.0;
-   pthigh[3][3]  =   95.0;
-   pthigh[3][4]  =  120.0;
-   pthigh[3][5]  =  145.0;
-   pthigh[3][6]  =  170.0;
-   pthigh[3][7]  =  195.0;
-   pthigh[3][8]  =  230.0;
-   pthigh[3][9]  =  250.0;
-   pthigh[3][10] =  300.0;
-   pthigh[3][11] =  335.0;
-   pthigh[3][12] =  380.0;
-   pthigh[3][13] =  425.0;
-   pthigh[3][14] =  470.0;
-   pthigh[3][15] =  520.0;
-   pthigh[3][16] =  600.0;
-   pthigh[3][17] =  700.0;
-   pthigh[3][18] =  800.0;
-   pthigh[3][19] =  900.0;
-   pthigh[3][20] = 1000.0;
-   pthigh[3][21] = 1200.0;
-   pthigh[3][22] = 1400.0;
-   pthigh[3][23] = 1600.0;
-   pthigh[3][24] = 1800.0;
-   pthigh[3][25] = 2000.0;
-   pthigh[3][26] = 2200.0;
-   pthigh[3][27] = 2400.0;
-   pthigh[3][28] = 2600.0;
-   //----- rap bin 5, # = 20
-   pthigh[4][0]  =   50.0;
-   pthigh[4][1]  =   60.0;
-   pthigh[4][2]  =   80.0;
-   pthigh[4][3]  =   95.0;
-   pthigh[4][4]  =  120.0;
-   pthigh[4][5]  =  145.0;
-   pthigh[4][6]  =  170.0;
-   pthigh[4][7]  =  195.0;
-   pthigh[4][8]  =  230.0;
-   pthigh[4][9]  =  250.0;
-   pthigh[4][10] =  300.0;
-   pthigh[4][11] =  335.0;
-   pthigh[4][12] =  380.0;
-   pthigh[4][13] =  425.0;
-   pthigh[4][14] =  470.0;
-   pthigh[4][15] =  520.0;
-   pthigh[4][16] =  600.0;
-   pthigh[4][17] =  700.0;
-   pthigh[4][18] =  800.0;
-   pthigh[4][19] =  900.0;
-   pthigh[4][20] = 1000.0;
-   //----- rap bin 6, # = 11
-   pthigh[5][0]  =   50.0;
-   pthigh[5][1]  =   60.0;
-   pthigh[5][2]  =   80.0;
-   pthigh[5][3]  =   95.0;
-   pthigh[5][4]  =  120.0;
-   pthigh[5][5]  =  145.0;
-   pthigh[5][6]  =  170.0;
-   pthigh[5][7]  =  195.0;
-   pthigh[5][8]  =  230.0;
-   pthigh[5][9]  =  250.0;
-   pthigh[5][10] =  300.0;
-   pthigh[5][11] =  335.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
    for(int i=0;i<nrap/2;i++){
@@ -409,20 +296,17 @@ void UserHHC::initfunc(unsigned int)
    if (tablefilename=="") tablefilename = "fastnlotable.raw";
 
    // Say Hello
-   cout << " " << endl;
-   cout << "   *******************************************" << endl;
-   cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0007:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.6 in E-scheme" << endl; 
-   cout << " " << endl;
-   cout << "        table file " << tablefilename << endl;
-   cout << "        store table after " << nwrite << " events" << endl;
-   cout << "        sqrt(s)= " << sqrt(s) << endl;
-   cout << "        No. x-bins: " << nxtot << endl;
-   cout << "        No. rapidity regions: " << nrap << endl;
-   cout << "        No. of pT bins in each rapidity region:" << endl;
-
+   cout<<"  "<<endl;
+   cout<<"   *******************************************"<<endl;
+   cout<<"    fastNLO    - initialization"<<endl;
+   cout<<"         *** scenario fnl0009 ***"<<endl;
+   cout<<" "<<endl;
+   cout<<"        table file "<<tablefilename<<endl;
+   cout<<"        store table after "<<nwrite<<" events"<<endl;
+   cout<<"        sqrt(s)= "<<sqrt(s)<<endl;
+   cout<<"        No. x-bins: "<<nxtot<<endl;
+   cout<<"        No. rapidity regions: "<<nrap<<endl;
+   cout<<"        No. of pT bins in each rapidity region:"<<endl;
    for( int j = 0; j < nrap; j++) {
       cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
@@ -778,8 +662,8 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "CMS LHC Test Scenario" << endl;
-   table << "-" << endl;
+   table << "to be published" << endl;
+   table << "CMS Physics Technical Design Report" << endl;
    table << "-" << endl;
    table << "-" << endl;
 
@@ -788,15 +672,15 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 1; // kT algo
+   int ialgo = 2; // midpoint cone algo
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.6;  // kT distance D
+   double JetResol1 = 0.5;  // midpoint cone: R_cone
    WRITE(JetResol1);
 
    //JetResol2
-   double JetResol2 = 0.0; // kT - no further parameter
+   double JetResol2 = 0.75; // midpoint cone: f_overlap (not effective up to NLO)
    WRITE(JetResol2);
 
    // relative order

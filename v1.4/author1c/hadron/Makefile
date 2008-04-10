@@ -322,6 +322,19 @@ fnl0009: links fnl0009.cc $(CommonPath)/cone-e-05.cc \
 	$(CommonPath)/cone-e-05.cc $(cteq6pdf) \
 	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
+# ======================================================================
+# =====         FNL0010  LHC CMS incl. jets with fastjet kT D=0.6 ======
+# ======================================================================
+# LHC scenario for CMS
+#
+fnl0010: links fnl0010.cc $(CommonPath)/fjkt.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0010.cc \
+	$(CommonPath)/fjkt.cc $(cteq6pdf) \
+	-o fnl0010 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L,"$(FASTJET)/lib -lfastjet" 
+
 #
 # ======================================================================
 # =====         FNR0001    RHIC test   kT D=0.7       =================

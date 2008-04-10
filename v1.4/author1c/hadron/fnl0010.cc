@@ -1,13 +1,10 @@
 //
-// fastNLO author code for fnl0007:
+// fastNLO author code for fnl0010:
 //     CMS LHC test scenario, E_cms = 14 TeV
-//     for kT algo with D=0.6 in E-scheme
+//     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
-// 2007/11/26 KR - Change kt -> 0.6 and put in place new y binning
-// 2006/03/16 KR - Change pb to fb units
-// 2006/03/16 KR - Adapt binning at low p_T to CMS trigger thresholds
-// 2006/03/13 KR - Copy from fnl0001 adapted to CMS scenario
+// 2008/04/10 KR - Implement fastjet for comparison with fnl0007
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -45,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "kt-e-06.h"
+#include "fjkt.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -99,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_06 jetclus;   // jet algorithm
+   fjkt jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -412,9 +409,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0007:" << endl;
+   cout << "    Scenario fnl0010:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.6 in E-scheme" << endl; 
+   cout << "      for fastjet kT algo with D=0.6 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
