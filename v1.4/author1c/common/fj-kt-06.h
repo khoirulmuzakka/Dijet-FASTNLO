@@ -1,5 +1,5 @@
-#ifndef __fjkt_h__
-#define __fjkt_h__ 1
+#ifndef __fj_kt_06_h__
+#define __fj_kt_06_h__ 1
 
 
 #include <event.h>
@@ -7,7 +7,7 @@
 using namespace std;
 using namespace nlo;
 
-class fjkt
+class fj_kt_06
 {
   
   //   private types
