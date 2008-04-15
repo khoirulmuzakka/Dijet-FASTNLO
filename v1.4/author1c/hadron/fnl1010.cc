@@ -1,10 +1,10 @@
 //
-// fastNLO author code for fnl0008:
-//     CMS LHC test scenario, E_cms = 14 TeV
-//     for fastjet SISCone algo with R=0.7 in E-scheme
+// fastNLO author code for fnl1010:
+//     CMS LHC test scenario, E_cms = 10 TeV
+//     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
-// 2008/04/13 KR - Implement SISCone from fastjet package
+// 2007/04/14 KR - Copy from fnl0010, change to new LHC start energy
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -42,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fjkt-sc-07.h"
+#include "fjkt.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fjkt_sc_07 jetclus;   // jet algorithm
+   fjkt jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -119,11 +119,12 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy square
-   //s = 40000;       // RHIC           200GeV   
-   //s = 3240000;     // TeV Run I     1800GeV
-   //s = 3841600;       // TeV Run II    1960GeV
-   s = 196000000;   // LHC          14000GeV
+   //  total c.m. energy squared
+   //s = 40000.;     // RHIC               200 GeV   
+   //s = 3240000.;   // TeV Run I         1800 GeV
+   //s = 3841600.;   // TeV Run II        1960 GeV
+   //s = 196000000.; // LHC              14000 GeV
+   s = 100000000.; // LHC Start-up Run   10000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -409,9 +410,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0008:" << endl;
+   cout << "    Scenario fnl1010:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for fastjet SISCone algo with R=0.7 in E-scheme" << endl; 
+   cout << "      for fastjet kT algo with D=0.6 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -785,15 +786,15 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 4; // SISCone
+   int ialgo = 1; // kT algo
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.7;  // Cone size R
+   double JetResol1 = 0.6;  // kT distance D
    WRITE(JetResol1);
 
    //JetResol2
-   double JetResol2 = 0.75; // Overlap threshold
+   double JetResol2 = 0.0; // kT - no further parameter
    WRITE(JetResol2);
 
    // relative order
