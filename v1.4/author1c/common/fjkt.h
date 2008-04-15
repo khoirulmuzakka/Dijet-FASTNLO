@@ -15,7 +15,7 @@ class fjkt
   
 public:
   //   do the clustering and return with the momenta of the jets
-  const bounded_vector<_Lv>& operator()(const event_hhc&, double = 0.5);
+  const bounded_vector<_Lv>& operator()(const event_hhc&, double = 0.6);
   
 private:
   //   private data members

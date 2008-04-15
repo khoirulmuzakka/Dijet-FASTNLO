@@ -7,8 +7,7 @@ using namespace std;
 const bounded_vector<lorentzvector<double> >&
 fjkt::operator()(const event_hhc& ev, double rcone)
 {
-  int merge = 0, nj = 0, np = 0, nt = ev.upper();
-  double dist;
+  int nt = ev.upper();
 
   //----- initialize the arrays -----
   _M_pj.resize(1,0); _M_p.resize(1, nt); 
@@ -20,44 +19,73 @@ fjkt::operator()(const event_hhc& ev, double rcone)
     const double py = ev[ip].Y();
     const double pz = ev[ip].Z();
     const double E  = ev[ip].T();
-    cout << "**************************\n";
-    cout << "Input objects:\n";
-    printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-	   ip, px, py, pz, E, nt);
-    cout << "**************************\n";
+//     cout << "**************************" << endl;
+//     cout << "Input objects:" << endl;
+//     printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
+// 	   ip, px, py, pz, E, nt);
+//     cout << "**************************" << endl;
+    //    if ( abs(E-abs(pz)) > 1.e-12 ) {
     input_objects.push_back(fastjet::PseudoJet(px,py,pz,E));
+    //    }
   }
+
   fastjet::Strategy strategy = fastjet::Best;
-  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, rcone, strategy);
+  double r2 = 0.6;
+  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, r2, strategy);
   fastjet::ClusterSequence clust_seq(input_objects, jet_def);
   
-  double ptmin = 0.0;
+  double ptmin = 1.0;
   vector<fastjet::PseudoJet> inclusive_jets = clust_seq.inclusive_jets(ptmin);
   
-  for (unsigned int i = 0; i < inclusive_jets.size(); i++) {
-    vector<fastjet::PseudoJet> constituents = clust_seq.constituents(inclusive_jets[i]);
+  unsigned int nj = inclusive_jets.size();
+  for (unsigned int i = 1; i <= nj; i++) {
+    //    cout << "i,nj " << i << ", " << nj << endl;
+    vector<fastjet::PseudoJet> constituents = clust_seq.constituents(inclusive_jets[i-1]);
+    const double px = inclusive_jets[i-1].px();
+    const double py = inclusive_jets[i-1].py();
+    const double pz = inclusive_jets[i-1].pz();
+    const double E  = inclusive_jets[i-1].E();
+    //    printf("%5u %15.8f %15.8f %15.8f %15.8f\n",
+    //	   i, px, py, pz, E );
+    //    cout << "test1" << endl;
+    _M_pj.push_back( _Lv(px, py, pz, E) );
+    //    bounded_vector<_Lv> _MyM_p;
+    //    cout << "test2" << endl;
+  }
+  //  cout << "test3" << endl;
 
-    //    printf("%5u %15.8f %15.8f %15.8f %8u\n",
-    //	   i, inclusive_jets[i].rap(),
-    //   inclusive_jets[i].phi(),
-    //   inclusive_jets[i].perp(),
-    //   constituents.size());
-    
-    const double px = inclusive_jets[i].px();
-    const double py = inclusive_jets[i].py();
-    const double pz = inclusive_jets[i].pz();
-    const double E  = inclusive_jets[i].E();
-    cout << "**************************\n";
-    cout << "Output jets:\n";
-    printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-	   i, px, py, pz, E, inclusive_jets.size());
-    cout << "**************************\n";
-    
-    _M_pj.push_back( _Lv() );
-    _M_pj[i].X() = px;
-    _M_pj[i].Y() = py;
-    _M_pj[i].Z() = pz;
-    _M_pj[i].T() = E;
+  double Emax1 = 0.;
+  double Emax2 = 0.;
+  unsigned int iord[] = {0,0,0}; 
+  for (unsigned int j = 1; j <= nj; j++) {
+    double E  = _M_pj[j].T();
+    if ( E > Emax1 ) {
+      Emax2 = Emax1;
+      Emax1 = E;
+      iord[2] = iord[1];
+      iord[1] = iord[0];
+      iord[0] = j;
+    } else if ( E > Emax2 ) {
+      Emax2 = E;
+      iord[2] = iord[1];
+      iord[1] = j;
+    } else {
+      iord[2] = j;
+    }
+  }
+  for (unsigned int j = 1; j <= nj; j++) {
+   if ( iord[j-1] > 0 ) {
+      double px = _M_pj[iord[j-1]].X();
+      double py = _M_pj[iord[j-1]].Y();
+      double pz = _M_pj[iord[j-1]].Z();
+      double E  = _M_pj[iord[j-1]].T();
+      double pt = sqrt(px*px + py*py);
+//       cout << "**************************" << endl;
+//       cout << "Output jets pt >= 1.0:" << endl;
+//       printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
+// 	     j, px, py, pz, E, pt);
+//       cout << "**************************" << endl;
+    }
   }
 
   return _M_pj;
