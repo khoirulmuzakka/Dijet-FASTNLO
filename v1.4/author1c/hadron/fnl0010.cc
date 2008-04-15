@@ -42,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fjkt.h"
+#include "fj-kt-06.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fjkt jetclus;   // jet algorithm
+   fj_kt_06 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
