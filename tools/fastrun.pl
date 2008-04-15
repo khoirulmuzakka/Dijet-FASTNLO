@@ -21,6 +21,20 @@ use warnings;
 #
 # Start
 #
+# Tee STDOUT and STDERR into file
+my $gjobnr = "";
+if ( defined $ENV{MY_JOB} ) {
+    $gjobnr = $ENV{MY_JOB};
+#    $gjobnr++;
+    $gjobnr = substr("0000$gjobnr",-4);	    
+    open STDOUT, "| tee fastrun_${gjobnr}.log" or die
+	"fastrun.pl: ERROR! Can't tee STDOUT.\n";
+    open STDERR, "| tee fastrun_${gjobnr}.err" or die
+	"fastrun.pl: ERROR! Can't tee STDERR.\n";
+#select STDERR; $| = 1;
+#select STDOUT; $| = 1;
+}
+
 my $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\n######################################\n";
@@ -192,6 +206,7 @@ my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
 $install{lhapdf}[0]     = "lhapdf-5.3.1";
+$install{fastjet}[0]    = "fastjet-2.3.2";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 $install{mcfm}[0]       = "mcfm-5.1";
@@ -360,7 +375,36 @@ if ( $mode == 0 || $mode == 1) {
     }
 
 #
-# 3) Install Nlojet++
+# 3) Install fastjet
+#
+    unless ( -e "$idir/$install{fastjet}[0]" ) {
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Installing fastjet from $install{fastjet}[1]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{fastjet}[1] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	if ( -l "$idir/fastjet" ) {system("rm -f $idir/fastjet");}
+	system("ln -s $install{fastjet}[0] $idir/fastjet");
+	chdir "$idir/$install{fastjet}[0]";
+	print "\nfastrun.pl: Configuring fastjet ...\n";
+	$ret = system("./configure --enable-shared --prefix=`pwd` --bindir=$aidir/bin");
+	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
+	print "\nfastrun.pl: Making fastjet ...\n";
+	$ret = system("make -j2");
+	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
+	print "\nfastrun.pl: Make install for fastjet ...\n";
+	$ret = system("make install");
+	if ( $ret ) {print "fastrun.pl: Error $ret in fastjet make install step ignored!\n";}
+	print "\nfastrun.pl: Checking fastjet ...\n";
+	$ret = system("make check");
+	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
+	chdir "$pwdir";
+    }
+
+#
+# 4) Install Nlojet++
 #
     unless ( -e "$idir/$install{nlojet}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
@@ -391,7 +435,7 @@ if ( $mode == 0 || $mode == 1) {
     }
 
 #
-# 4) Install mcfm
+# 5) Install mcfm
 #
     unless ( -e "$idir/$install{mcfm}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
@@ -410,15 +454,15 @@ if ( $mode == 0 || $mode == 1) {
 	system("ln -s  $install{mcfm}[0] $idir/mcfm");
 	chdir "$idir/$install{mcfm}[0]";
 	print "\nfastrun.pl: Configuring mcfm ...\n";
-	my $ret = system("./Install");
+	$ret = system("./Install");
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
-	my $ret = system("make -j2");
+	$ret = system("make -j2");
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
         chdir "..";
     }
 
 #
-# 5) Install fastNLO
+# 6) Install fastNLO
 #
     unless ( -e "$idir/$install{fastNLO}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
@@ -440,21 +484,25 @@ print "\nfastrun.pl: Setting environment variables for fastNLO:\n";
 my $cwdir = getcwd();
 print "fastrun.pl: fastNLO and gcc environment used with this installation:\n";
 print "setenv CERNLIB $cwdir/cernlib\n";
+print "setenv FASTJET $cwdir/fastjet\n";
 print "setenv FASTNLO $cwdir/fastNLO\n";
 print "setenv LHAPDF  $cwdir/lhapdf/lib\n";
 print "setenv NLOJET  $cwdir/nlojet\n";
 $ENV{CERNLIB}  = "$cwdir/cernlib"; 
+$ENV{FASTJET}  = "$cwdir/fastjet";
 $ENV{FASTNLO}  = "$cwdir/fastNLO";
 $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
-print "setenv PATH $cwdir/bin:$ENV{NLOJET}/bin:\${PATH}\n";
+print "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
+    "$ENV{NLOJET}/bin:\${PATH}\n";
 print "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
-    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+    "$ENV{FASTJET}/lib:$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
 print "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
 print "setenv CXXFLAGS \"-O3 -I .\"\n";
-$ENV{PATH}            = "$cwdir/bin:$ENV{NLOJET}/bin:$ENV{PATH}";
+$ENV{PATH}            = "$cwdir/bin:$ENV{FASTJET}:".
+    "$ENV{NLOJET}/bin:$ENV{PATH}";
 $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
-    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
+    "$ENV{FASTJET}/lib:$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
 $ENV{CXXFLAGS} = "-O3 -I .";
 if ( $verb ) {
@@ -463,7 +511,7 @@ if ( $verb ) {
 }
 
 #
-# 6) Make fastNLO scenario
+# 7) Make fastNLO scenario
 #
 my $scendir;
 if ( $mode == 0 || $mode == 2 ) {
@@ -578,7 +626,7 @@ if ( $mode == 0 || $mode == 2 ) {
 }
     
 #
-# 7) Run fastNLO
+# 8) Run fastNLO
 #
 if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
@@ -594,12 +642,12 @@ if ( $mode == 0 || $mode == 3 ) {
 	}
 	$file .= ".tgz";
 	if ( ! -f $file ) {
-	    grid_storage("FETCH",$file);
+	    grid_storage("FETCH","fastNLO_archives",$file,".",$file);
 	}
 	if ( -f $file ) {
 	    system ("tar xfz $file");
 	} else {
-	    die "fastrun.pl: Could not find binary tgz of fastNLO $file, aborted!\n";
+	    die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file, aborted!\n";
 	}
     }
     
@@ -610,14 +658,8 @@ if ( $mode == 0 || $mode == 3 ) {
 	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
     }
     chdir "$scendir" or die
-	"fastrun.pl: Could not cd to dir $scendir!\n";
+	"fastrun.pl: ERROR! Could not cd to dir $scendir!\n";
     
-    if ( $frev < 212 ) { 
-	$scendir = "$ENV{FASTNLO}/author1c/hadron";
-    } else {
-	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
-    }
-
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Running fastNLO: $date\n";
@@ -631,32 +673,60 @@ if ( $mode == 0 || $mode == 3 ) {
 # Do not try to maximize CPU time yet, too unstable
     if ( $batch eq "MAX" ) {
 # Fork NLO calculation
-	print "fastrun.pl: Forking command $cmd in background\n";
-	system("$cmd &");
+	print "fastrun.pl: Forking command ((time $cmd) 2>&1)& in background\n";
+	system("((time $cmd) 2>&1)&");
     } else {
 # Run NLO calculation
 	my $date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "fastrun.pl: Starting calculation: FASTCAL0_$date\n";
-	print "fastrun.pl: Running command (time $cmd) in foreground\n";
-#	my $res = `(time $cmd)`;
-	my $ret = system("(time $cmd)");
-	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO run step, aborted!\n";}
+	print "fastrun.pl: Running command (time $cmd) 2>&1 in foreground\n";
+	my $ret = system("(time $cmd) 2>&1");
+	if ( $ret ) {die "fastrun.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "fastrun.pl: Calculation finished: FASTCAL1_$date\n";
+	print "\nfastrun.pl: Calculation finished: FASTCAL1_$date\n";
 # Copy table to grid storage
 	if ( $batch eq "GRID" ) {
-	    grid_storage("SAVE","${scendir}/${tdir}/${tabnam}","$scen$ref");
+	    my $spath = "${scendir}/${tdir}";
+	    my $sfile = "${tabnam}";
+	    my $tpath = "fastNLO_tables/${scen}${ref}";
+	    if ( $tpath ) {
+		$tpath =~ s/\/\.\//\//g;
+	    } else {
+		$tpath = "";
+	    }
+# Change job numbering according to grid-control
+	    my $tfile  = $sfile;
+	    $tfile =~ s/_0001//;
+	    $tfile =~ s/\.raw/_${gjobnr}\.raw/;
+	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile");
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
-	    print "fastrun.pl: Table stored: TABSTOR1_$date\n";
+	    print "fastrun.pl: Table stored: TABSAV1_$date\n";
 	}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\n###############################\n";
 	print "# fastrun.pl: fastNLO finished: FASTRUN1_$date\n";
 	print "###############################\n\n";
+#	close STDERR;
+#	close STDOUT;
+# Copy log files to grid storage
+	if ( $batch eq "GRID" ) {
+	    my $tpath = "fastNLO_tables/${scen}${ref}";
+	    if ( $tpath ) {
+		$tpath =~ s/\/\.\//\//g;
+	    } else {
+		$tpath = "";
+	    }
+	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-2jet_${gjobnr}";
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err");
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log");
+	    my $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
+	}
 	exit 0;
     }
 # Check on process before entering loop
@@ -726,83 +796,107 @@ exit 0;
 
 
 #
-# Signal handling and grid storage: Save table on grid storage
+# Signal handling and grid storage: Save table and logs on grid storage
 #
 # Original table naming example: fnl0002kt10_0001-hhc-born-2jet.raw
 # Grid table naming example:     fnl0002kt10-hhc-born-2jet_0000.raw
 #
 sub grid_storage {
     my $signam = shift;
-    my $trfile = shift;
-    my $tabdir = shift;
-    $trfile =~ s/\/\.\//\//g;
-    if ( $tabdir ) {
-	$tabdir =~ s/\/\.\//\//g;
-    } else {
-	$tabdir = "";
-    }
-    
+    my $spath  = shift;
+    my $sfile  = shift;
+    my $tpath  = shift;
+    my $tfile  = shift;
+    print "fastrun.pl: spath $spath\n";
+    print "fastrun.pl: sfile $sfile\n";
+    print "fastrun.pl: tpath $tpath\n";
+    print "fastrun.pl: tfile $tfile\n";
+
 #    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
+#    my $sename = "dcache-se-cms.desy.de";
+#    my $sename = "dcache-door-cms02.desy.de";
+#    my $sepath = "/pnfs/desy.de/cms/analysis/qcd/rabbertz/";
     my $sename = "ic-kit-lcgse.rz.uni-karlsruhe.de";
     my $sepath = "/wlcg/data/users/cms/rabbertz/";
-#    my $sename = "dcache-se-cms.desy.de";
-#    my $sepath = "/pnfs/desy.de/cms/analysis/qcd/rabbertz/";
-    my @files = ( "$trfile" );
+    
+    my $source = "${spath}/${sfile}";
+    my $target = "${sepath}${tpath}/${tfile}";
+    if ( $signam eq "FETCH" ) {
+	$source = "${sepath}${spath}/${sfile}";
+	$target = "${tpath}/${tfile}";
+    }
+    $source =~ s/\/\.\//\//g;
+    $target =~ s/\/\.\//\//g;
+    
+    my $gjobnr = "";
+    if ( defined $ENV{MY_JOB} ) {
+	$gjobnr = $ENV{MY_JOB};
+#        $gjobnr++;
+	$gjobnr = substr("0000$gjobnr",-4);	    
+    }
     
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
-    my $gjobnr = $ENV{MY_JOB};
-    print "\nfastrun.pl: Received signal $signam: TABSTOR0_$date\n";
-    unless ( $signam eq "FETCH" ) {
-	print "fastrun.pl: Saving table $trfile for\n";
+    if ( $signam eq "TABSAV" || $signam eq "LOGSAV" ) {
+	print "\nfastrun.pl: Received signal $signam: ${signam}0_$date\n";
+	print "fastrun.pl: Saving source $source to\n";
+	print "fastrun.pl: target $target for\n";
 	print "fastrun.pl: fastNLO job no. $jobnr and\n";
 	print "fastrun.pl: grid-control job no. $gjobnr\n";
-    } else {
-	print "fastrun.pl: Fetching binary fastNLO archive $trfile from\n";
-	print "fastrun.pl: SE $sename in path $sepath\n";
-    }	
-
-    foreach my $file ( @files ) {
-	unless ( $signam eq "FETCH" ) {
-	    print "fastrun.pl: Trying to find table file $file ...\n";
-	    system("pwd");
-	    system("ls -la");
-	    if ( -f "${file}" ) {
-# Create target directory if necessary
-		my $gcmd = "edg-gridftp-mkdir ".
-		    "gsiftp://${sename}/${sepath}".
-		    "fastNLO_tables/${tabdir}";
-		print "Command $gcmd\n";
-		my $ret = system("$gcmd");
-		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
-# Change job numbering according to grid-control
-		my $newnum = substr("0000$gjobnr",-4);	    
-		my @tmp = split("/",$file);
-		my $tabnam = pop(@tmp);
-		$tabnam =~ s/_0001//;
-		$tabnam =~ s/\.raw/_${newnum}\.raw/;
-		$gcmd = "globus-url-copy ".
-		    "file://${file} ".
-		    "gsiftp://${sename}/${sepath}".
-		    "fastNLO_tables/${tabdir}/${tabnam}";
-		print "Command $gcmd\n";
-		$ret = system("$gcmd");
-		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of table file failed: $ret!\n";}
-	    } else {
-		system("pwd");
-		system("ls -la");
-		die "fastrun.pl: Could not find table file $file\n";
-	    }
-	} else {
-	    print "fastrun.pl: Trying to fetch binary fastNLO archive $file on\n";
-	    print "fastrun.pl: SE $sename in path $sepath\n";
-	    my $gcmd = "globus-url-copy gsiftp://${sename}/${sepath}". 
-		"fastNLO_archives/${file} file://`pwd`/${file}";
-	    print "Command $gcmd\n";
-	    system("$gcmd");
-	    system("pwd");
-	    system("ls -la");
+	print "fastrun.pl: Trying to find source $source ...\n";
+	system("pwd");
+	system("ls -la $spath");
+	unless ( -f "$source" ) {
+	    die "fastrun.pl: ERROR! Could not find source $source\n";
+	}		
+# Check globus-url-copy version
+	my $gcmd = "globus-url-copy -version 2>&1";
+	my $ret = `$gcmd`;
+	chomp $ret;
+	my @tmp = split(" ",$ret); 
+	my $guccmd = $tmp[0];
+	my $gucver = $tmp[1];
+	unless ( $gucver =~ m/\d*\.\d*/ ) {
+	    print "fastrun.pl: ERROR! ".
+		"globus-url-copy not found: $ret!\n";}
+	print "fastrun.pl: Found command $guccmd version $gucver\n";
+	my $gucopt = "-cd";
+	if ( $gucver <= 2.9 ) {
+	    print "fastrun.pl: WARNING! Version of globus-url-copy ".
+		"too old: $gucver. Cannot create directories on the fly!\n";
+	    $gucopt = "";
 	}
+# Create target directory if necessary
+# Deprecated due to grid chaos! What does work? srm? edg/glite-gridftp-mkdir?
+#		my $gcmd = "edg-gridftp-mkdir ".
+#		    "gsiftp://${sename}/${sepath}".
+#		    "fastNLO_tables/${tabdir}";
+#		print "Command $gcmd\n";
+#		my $ret = system("$gcmd");
+#		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
+# Create target directory directly with globus-url-copy if possible
+	$gcmd = "globus-url-copy $gucopt ".
+	    "file://${source} ".
+	    "gsiftp://${sename}/${target}";
+	print "Command $gcmd\n";
+	$ret = system("$gcmd");
+	if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+			 "source $source to target $target failed: $ret!\n";}
+    } elsif ( $signam eq "FETCH" ) {
+	print "fastrun.pl: Fetching binary fastNLO archive $sfile from\n";
+	print "fastrun.pl: SE $sename in path $sepath\n";
+	print "fastrun.pl: Trying to fetch binary fastNLO archive $source on\n";
+	print "fastrun.pl: SE $sename in path $sepath\n";
+	my $gcmd = "globus-url-copy ".
+	    "gsiftp://${sename}/${source} ". 
+	    "file://`pwd`/${target}";
+	print "Command $gcmd\n";
+	system("$gcmd");
+	system("pwd");
+	system("ls -la");
+    } else {
+	die "fastrun.pl: ERROR! Caught unsupported signal $signam, aborted!\n";
     }
+    
     return 0;
 }
