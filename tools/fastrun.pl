@@ -437,6 +437,10 @@ if ( $mode == 0 || $mode == 1) {
 #
 # 5) Install mcfm
 #
+# CERNLIB var already needed for mcfm    
+    print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm:\n";
+    my $cwdir = getcwd();
+    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
     unless ( -e "$idir/$install{mcfm}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
