@@ -33,7 +33,8 @@ our ( $opt_h, $opt_p ) = ( "", "" );
 getopts('hp:') or die "fastprep.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastprep.pl\n";
-    print "Usage: fastprep.pl [switches/options] scenario\n";
+#    print "Usage: fastprep.pl [switches/options] scenario\n";
+    print "Usage: fastprep.pl [switches/options]\n";
     print "  -h              Print this text\n";
     print "  -p pdf          Add CTEQ parton densities or LHAPDF\n\n";
     exit;
@@ -56,7 +57,10 @@ print "fastprep.pl: Preparing fastNLO archive for submission in directory $ENV{F
 print "fastprep.pl: Only hh collisions, no LHAPDF for now!\n";
 chdir "$ENV{FASTNLO}/.." or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}/..!\n";
 
-my $cmd = "tar cfz $arcname lib/lib*.so* lib64/lib*.so* nlojet/bin nlojet/lib fastNLO/trunk/common/* fastNLO/trunk/tools/* fastNLO/trunk/v1.4/author1c/hadron/*.la fastNLO/trunk/v1.4/author1c/hadron/.libs";
+my $cmd = "tar cfz $arcname lib/lib*.so* nlojet/bin nlojet/lib fastjet/lib fastjet/plugins/SISCone/lib* fastjet/plugins/SISCone/siscone/siscone/lib* fastNLO/trunk/common/* fastNLO/trunk/tools/* fastNLO/trunk/v1.4/author1c/hadron/*.la fastNLO/trunk/v1.4/author1c/hadron/.libs";
+if ( -d "lib64" ) {
+    $cmd .= " lib64/lib*.so*";
+}
 if ( $pdf eq "CTEQ" ) {
     $cmd .= " fastNLO/trunk/v1.4/author1c/common/ctq61.00.tbl".
 	" fastNLO/trunk/v1.4/author1c/hadron/common".
@@ -65,5 +69,5 @@ if ( $pdf eq "CTEQ" ) {
     $cmd .= " lhapdf/lib";
 }
 my $ret = system("$cmd");
-unless ( $ret ) {die "fastprep.pl: ERROR! Could not create archive fastNLO-bin.tgz: $ret\n";}
+if ( $ret ) {die "fastprep.pl: ERROR! Could not create archive fastNLO-bin.tgz: $ret\n";}
 exit 0;
