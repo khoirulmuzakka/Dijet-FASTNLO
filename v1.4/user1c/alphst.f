@@ -15,6 +15,7 @@
 * Original version by M. Wobisch, 21/06/97
 * Slightly modified by K. Rabbertz, 31/03/99
 * Modified and included in NLOLIB by K. Rabbertz, 30/03/2001
+* Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
       
@@ -23,9 +24,9 @@
       
       DOUBLE PRECISION BETA
 
-*---PDG 2000
+*---PDG 2006
       DOUBLE PRECISION ZMPDG
-      PARAMETER (ZMPDG = 91.1882D0)
+      PARAMETER (ZMPDG = 91.1876D0)
       
       DOUBLE PRECISION BPI(0:2),LFAC,LSCALE,PI
       
@@ -61,17 +62,22 @@
 
       IF (FIRST) THEN
          FIRST = .FALSE.
- 1001    FORMAT(A,F8.4,A)
-         WRITE(*,*)'  '
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  RALPSM: First call to alpha_s calculation: '
-         WRITE(*,*)'  '
-         WRITE(*,*)'  MZ =',ZMASS,' GeV, alpha_s(MZ) =',ALPSMZ
-         WRITE(*,*)'  NF =',NF,', NLOOP =',NLOOP
-         WRITE(*,*)'  alpha_s(MUR =',MUR,') =',RALPSM
-         WRITE(*,1001)'  Note: MZ PDG 2000 =',ZMPDG,' GeV'
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  '
+         WRITE(*,*)' '
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' RALPSM: First call to alpha_s calculation: '
+         WRITE(*,*)' '
+         WRITE(*,FMT='(A,F8.4,A,F7.4,A)')
+     &        '  MZ =',ZMASS,' GeV, alpha_s(MZ) =',ALPSMZ
+         WRITE(*,*)' NF =',NF,', NLOOP =',NLOOP
+         WRITE(*,FMT='(A,F5.1,A,F11.8)')
+     &        '  alpha_s(MUR =',MUR,') =',RALPSM
+         WRITE(*,FMT='(A,F8.4,A)')
+     &        '  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' '
+
+
+
       ENDIF
       
       RETURN
@@ -94,6 +100,7 @@
 *           NLOOP : loop order
 *
 * Included in NLOLIB by K. Rabbertz, 31/03/2001
+* Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
       
@@ -102,9 +109,9 @@
       
       DOUBLE PRECISION BETA
       
-*---PDG 2000
+*---PDG 2006
       DOUBLE PRECISION ZMPDG
-      PARAMETER (ZMPDG = 91.1882D0)
+      PARAMETER (ZMPDG = 91.1876D0)
 
       DOUBLE PRECISION LSCALE2,PI
       
@@ -134,17 +141,18 @@
       
       IF (FIRST) THEN
          FIRST = .FALSE.
- 1001    FORMAT(A,F8.4,A)
-         WRITE(*,*)'  '
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  RALPSL: First call to alpha_s calculation: '
-         WRITE(*,*)'  '
-         WRITE(*,*)'  MZ =',ZMASS,' GeV, Lambda =',LAMBDA,' GeV'
-         WRITE(*,*)'  NF =',NF,', NLOOP =',NLOOP
-         WRITE(*,*)'  alpha_s(MUR =',MUR,') =',RALPSL
-         WRITE(*,1001)'  Note: MZ PDG 2000 =',ZMPDG,' GeV'
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  '
+         WRITE(*,*)' '
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' RALPSL: First call to alpha_s calculation: '
+         WRITE(*,*)' '
+         WRITE(*,FMT='(A,F8.4,A,F8.4,A)')
+     &        ' MZ =',ZMASS,' GeV, Lambda =',LAMBDA,' GeV'
+         WRITE(*,*)' NF =',NF,', NLOOP =',NLOOP
+         WRITE(*,*)' alpha_s(MUR =',MUR,') =',RALPSL
+         WRITE(*,FMT='(A,F8.4,A)')
+     &        '  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' '
       ENDIF
 
       RETURN
@@ -166,6 +174,7 @@
 *           NLOOP : loop order
 *
 * Included in NLOLIB by K. Rabbertz, 02/04/2001
+* Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
       
@@ -174,9 +183,9 @@
       
       DOUBLE PRECISION BETA
 
-*---PDG 2000
+*---PDG 2006
       DOUBLE PRECISION ZMPDG
-      PARAMETER (ZMPDG = 91.1882D0)
+      PARAMETER (ZMPDG = 91.1876D0)
       
       DOUBLE PRECISION BFAC,BPRIM,EXPON,LFAC,PI
       
@@ -211,16 +220,16 @@
       IF (FIRST) THEN
          FIRST = .FALSE.
  1001    FORMAT(A,F8.4,A)
-         WRITE(*,*)'  '
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  LAMASZ: First call to Lambda(alpha_s(MZ)): '
-         WRITE(*,*)'  '
-         WRITE(*,*)'  MZ =',ZMASS,' GeV, alpha_s(MZ) =',ALPSMZ
-         WRITE(*,*)'  NF =',NF,', NLOOP =',NLOOP
-         WRITE(*,*)'  Lambda_5 =',LAMASZ
-         WRITE(*,1001)'  Note: MZ PDG 2000 =',ZMPDG,' GeV'
-         WRITE(*,*)' ********************************************'
-         WRITE(*,*)'  '
+         WRITE(*,*)' '
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' LAMASZ: First call to Lambda(alpha_s(MZ)): '
+         WRITE(*,*)' '
+         WRITE(*,*)' MZ =',ZMASS,' GeV, alpha_s(MZ) =',ALPSMZ
+         WRITE(*,*)' NF =',NF,', NLOOP =',NLOOP
+         WRITE(*,*)' Lambda_5 =',LAMASZ
+         WRITE(*,1001)'  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+         WRITE(*,*)'********************************************'
+         WRITE(*,*)' '
       ENDIF
 
       RETURN
