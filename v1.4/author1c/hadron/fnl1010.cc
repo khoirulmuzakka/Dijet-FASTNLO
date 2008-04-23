@@ -4,7 +4,8 @@
 //     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
-// 2007/04/14 KR - Copy from fnl0010, change to new LHC start energy
+// 2008/04/24 KR - Add protection against empty phase space bins in xlimit
+// 2008/04/14 KR - Copy from fnl0010, change to new LHC start energy
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -172,12 +173,12 @@ void UserHHC::initfunc(unsigned int)
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 161 bins
+   //Define binning in pt: 152 bins
    npt[0]=34;
    npt[1]=34;
-   npt[2]=34;
-   npt[3]=28;
-   npt[4]=20;
+   npt[2]=30;
+   npt[3]=24;
+   npt[4]=19;
    npt[5]=11;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
@@ -194,8 +195,8 @@ void UserHHC::initfunc(unsigned int)
      pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   //----- rap bins 1, 2 and 3, # = 34
-   for (int j=0; j<3; j++){
+   //----- rap bins 1 and 2, # = 34
+   for (int j=0; j<2; j++){
      pthigh[j][0]  =   50.0;
      pthigh[j][1]  =   60.0;
      pthigh[j][2]  =   80.0;
@@ -232,7 +233,39 @@ void UserHHC::initfunc(unsigned int)
      pthigh[j][33] = 3750.0;
      pthigh[j][34] = 4000.0;
    }
-   //----- rap bin 4, # = 28
+   //----- rap bin 3, # = 30
+   pthigh[2][0]  =   50.0;
+   pthigh[2][1]  =   60.0;
+   pthigh[2][2]  =   80.0;
+   pthigh[2][3]  =   95.0;
+   pthigh[2][4]  =  120.0;
+   pthigh[2][5]  =  145.0;
+   pthigh[2][6]  =  170.0;
+   pthigh[2][7]  =  195.0;
+   pthigh[2][8]  =  230.0;
+   pthigh[2][9]  =  250.0;
+   pthigh[2][10] =  300.0;
+   pthigh[2][11] =  335.0;
+   pthigh[2][12] =  380.0;
+   pthigh[2][13] =  425.0;
+   pthigh[2][14] =  470.0;
+   pthigh[2][15] =  520.0;
+   pthigh[2][16] =  600.0;
+   pthigh[2][17] =  700.0;
+   pthigh[2][18] =  800.0;
+   pthigh[2][19] =  900.0;
+   pthigh[2][20] = 1000.0;
+   pthigh[2][21] = 1200.0;
+   pthigh[2][22] = 1400.0;
+   pthigh[2][23] = 1600.0;
+   pthigh[2][24] = 1800.0;
+   pthigh[2][25] = 2000.0;
+   pthigh[2][26] = 2200.0;
+   pthigh[2][27] = 2400.0;
+   pthigh[2][28] = 2600.0;
+   pthigh[2][29] = 2800.0;
+   pthigh[2][30] = 3000.0;
+   //----- rap bin 4, # = 24
    pthigh[3][0]  =   50.0;
    pthigh[3][1]  =   60.0;
    pthigh[3][2]  =   80.0;
@@ -258,11 +291,7 @@ void UserHHC::initfunc(unsigned int)
    pthigh[3][22] = 1400.0;
    pthigh[3][23] = 1600.0;
    pthigh[3][24] = 1800.0;
-   pthigh[3][25] = 2000.0;
-   pthigh[3][26] = 2200.0;
-   pthigh[3][27] = 2400.0;
-   pthigh[3][28] = 2600.0;
-   //----- rap bin 5, # = 20
+   //----- rap bin 5, # = 19
    pthigh[4][0]  =   50.0;
    pthigh[4][1]  =   60.0;
    pthigh[4][2]  =   80.0;
@@ -283,7 +312,6 @@ void UserHHC::initfunc(unsigned int)
    pthigh[4][17] =  700.0;
    pthigh[4][18] =  800.0;
    pthigh[4][19] =  900.0;
-   pthigh[4][20] = 1000.0;
    //----- rap bin 6, # = 11
    pthigh[5][0]  =   50.0;
    pthigh[5][1]  =   60.0;
@@ -347,6 +375,18 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
 	 double ymin = raphigh[(j)];
+	 if (ymin > ymax ) {
+	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
+	     " and rapidity bin " << j << endl;
+	   cout << "The pt bin runs from " << pthigh[j][k] <<
+	     " to " << pthigh[j][k+1] << endl;
+	   cout << "The rapidity bin runs from " << raphigh[j] <<
+	     " to " << raphigh[j+1] << endl;
+	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
+	     ", " << ymin << ", " << ymax << endl;
+	   cout << "Remove empty bin!" << endl;
+	   exit(2);
+	 }
 
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
