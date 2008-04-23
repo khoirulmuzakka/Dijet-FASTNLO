@@ -42,8 +42,8 @@ fj_kt_06::operator()(const event_hhc& ev, double rcone)
     const double py = inclusive_jets[i-1].py();
     const double pz = inclusive_jets[i-1].pz();
     const double E  = inclusive_jets[i-1].E();
-    printf("%5u %15.8f %15.8f %15.8f %15.8f\n",
-    	   i, px, py, pz, E );
+    //    printf("%5u %15.8f %15.8f %15.8f %15.8f\n",
+    //    	   i, px, py, pz, E );
     _M_pj.push_back( _Lv(px, py, pz, E) );
   }
 
