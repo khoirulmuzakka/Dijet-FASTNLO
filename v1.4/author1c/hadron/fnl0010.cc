@@ -4,6 +4,7 @@
 //     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
+// 2008/04/24 KR - Add protection against empty phase space bins in xlimit
 // 2008/04/10 KR - Implement fastjet for comparison with fnl0007
 //
 //------ DON'T TOUCH THIS PART! ------
@@ -346,6 +347,18 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
 	 double ymin = raphigh[(j)];
+	 if (ymin > ymax ) {
+	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
+	     " and rapidity bin " << j << endl;
+	   cout << "The pt bin runs from " << pthigh[j][k] <<
+	     " to " << pthigh[j][k+1] << endl;
+	   cout << "The rapidity bin runs from " << raphigh[j] <<
+	     " to " << raphigh[j+1] << endl;
+	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
+	     ", " << ymin << ", " << ymax << endl;
+	   cout << "Remove empty bin!" << endl;
+	   exit(2);
+	 }
 
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
