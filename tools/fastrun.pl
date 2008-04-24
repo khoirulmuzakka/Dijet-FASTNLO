@@ -300,8 +300,12 @@ if ( $mode == 0 || $mode == 1) {
 #	my @acmd = split(" ",$cmd);
 #	system(@acmd);
 	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
-	    "$ENV{LD_LIBRARY_PATH}";
+	if ( $ENV{LD_LIBRARY_PATH} ) {
+	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+		"$ENV{LD_LIBRARY_PATH}";
+	} else {
+	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+	}
 	$ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
 	chdir "..";
 	print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
@@ -325,8 +329,12 @@ if ( $mode == 0 || $mode == 1) {
 # Switch to proper gcc-3.3.6 compiler if not already done
     $ENV{SHELL} = "/bin/sh";
     $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
-	"$ENV{LD_LIBRARY_PATH}";
+    if ( $ENV{LD_LIBRARY_PATH} ) {
+	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+	    "$ENV{LD_LIBRARY_PATH}";
+    } else {
+	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+    }
     $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
     
 #
@@ -507,16 +515,29 @@ $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
 print FILE "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
     "$ENV{NLOJET}/bin:\${PATH}\n";
-print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
-    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+if ( $ENV{LD_LIBRARY_PATH} ) {
+    print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
+	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
+} else {
+    print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{NLOJET}/lib:$ENV{LHAPDF}\n";
+    $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
+	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{NLOJET}/lib:$ENV{LHAPDF}";
+}
 print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
 print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
 $ENV{PATH}            = "$cwdir/bin:$ENV{FASTJET}:".
     "$ENV{NLOJET}/bin:$ENV{PATH}";
-$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
-    "$ENV{FASTJET}/lib:$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
 $ENV{CXXFLAGS} = "-O3 -I .";
 close (FILE);
