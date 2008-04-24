@@ -120,7 +120,6 @@ c remember to initialize the LHAPDF set first (in the main routine)
 c                                       -> see the fastNLO example
 c             call InitPDFset("cteq61.LHgrid")
 c             call InitPDF(0)
-      write(*,*)"hallo x",x
       call evolvePDF(X,MUF,XPDF)
 c
 
