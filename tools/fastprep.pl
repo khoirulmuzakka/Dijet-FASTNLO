@@ -57,7 +57,7 @@ print "fastprep.pl: Preparing fastNLO archive for submission in directory $ENV{F
 print "fastprep.pl: Only hh collisions, no LHAPDF for now!\n";
 chdir "$ENV{FASTNLO}/.." or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}/..!\n";
 
-my $cmd = "tar cfz $arcname lib/lib*.so* nlojet/bin nlojet/lib fastjet/lib fastjet/plugins/SISCone/lib* fastjet/plugins/SISCone/siscone/siscone/lib* fastNLO/trunk/common/* fastNLO/trunk/tools/* fastNLO/trunk/v1.4/author1c/hadron/*.la fastNLO/trunk/v1.4/author1c/hadron/.libs";
+my $cmd = "tar cfz $arcname lib/lib*.so* nlojet/bin nlojet/lib fastjet/lib fastjet/plugins/SISCone/.libs fastjet/plugins/SISCone/siscone/siscone/.libs fastNLO/trunk/common/* fastNLO/trunk/tools/* fastNLO/trunk/v1.4/author1c/hadron/*.la fastNLO/trunk/v1.4/author1c/hadron/.libs";
 if ( -d "lib64" ) {
     $cmd .= " lib64/lib*.so*";
 }

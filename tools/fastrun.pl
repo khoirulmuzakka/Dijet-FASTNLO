@@ -482,33 +482,44 @@ if ( $mode == 0 || $mode == 1) {
 }
 
 #
-# Set environment that is expected to have been set up!   
+# Set environment that is expected to have been set up and
+# save it to file fastnlo.(c)sh for later "source"ing.
 #
-print "\nfastrun.pl: Setting environment variables for fastNLO:\n";
+print "\nfastrun.pl: Setting fastNLO and gcc environment to be used ".
+    "with this installation!\n";
+print "fastrun.pl: Check fastNLO.(c)sh for reference and ".
+    "later \"source\"ing.\n";
+open (FILE,"> fastNLO.csh");
 my $cwdir = getcwd();
-print "fastrun.pl: fastNLO and gcc environment used with this installation:\n";
-print "setenv CERNLIB $cwdir/cernlib\n";
-print "setenv FASTJET $cwdir/fastjet\n";
-print "setenv FASTNLO $cwdir/fastNLO\n";
-print "setenv LHAPDF  $cwdir/lhapdf/lib\n";
-print "setenv NLOJET  $cwdir/nlojet\n";
+print FILE "#\n";
+print FILE "# fastrun.pl: Setting fastNLO and gcc environment to be used ".
+    "with this installation!\n";
+print FILE "#\n";
+print FILE "setenv CERNLIB $cwdir/cernlib\n";
+print FILE "setenv FASTJET $cwdir/fastjet\n";
+print FILE "setenv FASTNLO $cwdir/fastNLO\n";
+print FILE "setenv LHAPDF  $cwdir/lhapdf/lib\n";
+print FILE "setenv NLOJET  $cwdir/nlojet\n";
 $ENV{CERNLIB}  = "$cwdir/cernlib"; 
 $ENV{FASTJET}  = "$cwdir/fastjet";
 $ENV{FASTNLO}  = "$cwdir/fastNLO";
 $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
-print "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
+print FILE "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
     "$ENV{NLOJET}/bin:\${PATH}\n";
-print "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
-    "$ENV{FASTJET}/lib:$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
-print "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
-print "setenv CXXFLAGS \"-O3 -I .\"\n";
+print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+    "$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
+print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
 $ENV{PATH}            = "$cwdir/bin:$ENV{FASTJET}:".
     "$ENV{NLOJET}/bin:$ENV{PATH}";
 $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
     "$ENV{FASTJET}/lib:$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
 $ENV{CXXFLAGS} = "-O3 -I .";
+close (FILE);
 if ( $verb ) {
     my $tmp = `which gcc`;
     print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
