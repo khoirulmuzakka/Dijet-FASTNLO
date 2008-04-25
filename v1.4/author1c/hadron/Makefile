@@ -321,7 +321,7 @@ fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL0009: LHC CMS incl. jets with Midpoint R=0.5 ==============
+# =====   FNL0009: LHC CMS incl. jets with Midpoint R=0.7 ==============
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
@@ -343,6 +343,19 @@ fnl0010: links fnl0010.cc $(CommonPath)/fj-kt-06.cc \
 	-o fnl0010 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
+# =====   FNL0011: LHC CMS incl. jets with fastjet Midpoint R=0.7 ======
+# ======================================================================
+# LHC scenario for CMS @ 14 TeV
+#
+fnl0011: links fnl0011.cc $(CommonPath)/fj-mc-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0011.cc \
+	$(CommonPath)/fj-mc-07.cc $(cteq6pdf) \
+	-o fnl0011 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
 # =====   FNL1007: LHC CMS incl. jets with kT D=0.6 ====================
