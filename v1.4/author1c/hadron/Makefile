@@ -231,7 +231,7 @@ fnt200a: links fnt200a.cc $(CommonPath)/cone-e-07.cc \
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 #
 # ======================================================================
-# =====         FNL0001      LHC test   kT D=0.7       =================
+# =====   FNL0001: LHC test kT D=0.7 ===================================
 # ======================================================================
 # first LHC scenario with fine binning
 #
@@ -242,30 +242,29 @@ fnl0001: links fnl0001.cc $(CommonPath)/kt2jet-e-07.cc \
 	-o fnl0001 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL0002kt10  LHC CMS    kT D=1.0       =================
+# =====   FNL0002: LHC CMS incl. jets with kT D=1.0 ====================
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
-fnl0002kt10: links fnl0002kt10.cc $(CommonPath)/kt-e-10.cc \
+fnl0002: links fnl0002.cc $(CommonPath)/kt-e-10.cc \
 	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnl0002kt10.cc \
+	$(NLOJET)/bin/create-nlojet-user fnl0002.cc \
 	$(CommonPath)/kt-e-10.cc $(cteq6pdf) \
-	-o fnl0002kt10 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0002 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL0002mp07  LHC CMS Midpoint R=0.7    =================
+# =====   FNL0003: LHC CMS incl. jets with Midpoint R=0.7 ==============
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
-fnl0002mp07: links fnl0002mp07.cc $(CommonPath)/cone-e-07.cc \
+fnl0003: links fnl0003.cc $(CommonPath)/cone-e-07.cc \
 	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnl0002mp07.cc \
+	$(NLOJET)/bin/create-nlojet-user fnl0003.cc \
 	$(CommonPath)/cone-e-07.cc $(cteq6pdf) \
-	-o fnl0002mp07 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0003 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
-#
 # ======================================================================
-# =====         FNL0004      LHC -> ATLAS   kT D=0.7       =================
+# =====   FNL0004: LHC ATLAS test kT D=0.7 =============================
 # ======================================================================
 # ATLAS test scenario
 #
@@ -275,12 +274,9 @@ fnl0004: links fnl0004.cc $(CommonPath)/kt2jet-e-07.cc \
 	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
 	-o fnl0004 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
-#
-#
 # ======================================================================
-# =====         FNL0005      ATLAS test   kT D=0.7  dijet mass  =========
+# =====   FNL0005: LHC ATLAS test kT D=0.7 dijet mass ==================
 # ======================================================================
-#
 # ATLAS test scenario for dijet mass
 #
 fnl0005: links fnl0005.cc $(CommonPath)/kt2jet-e-07.cc \
@@ -290,9 +286,8 @@ fnl0005: links fnl0005.cc $(CommonPath)/kt2jet-e-07.cc \
 	-o fnl0005ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL0006      ATLAS test   kT D=0.7  dijet chi  =========
+# =====   FNL0006: LHC ATLAS test kT D=0.7 dijet chi ===================
 # ======================================================================
-#
 # ATLAS test scenario with realistic binning for chi distribution
 #
 fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
@@ -300,10 +295,11 @@ fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl0006.cc \
 	$(CommonPath)/kt2jet-e-07.cc $(cteq6pdf) \
 	-o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
 # ======================================================================
-# =====         FNL0007  LHC CMS incl. jets with kT D=0.6 ==============
+# =====   FNL0007: LHC CMS incl. jets with kT D=0.6 ====================
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
 fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
@@ -312,9 +308,9 @@ fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
 	-o fnl0007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL0008  LHC CMS incl. jets with fastjet SISCone R=0.7 =
+# =====   FNL0008: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
 fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
@@ -325,9 +321,9 @@ fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====         FNL0009  LHC CMS incl. jets with Midpoint R=0.5 ========
+# =====   FNL0009: LHC CMS incl. jets with Midpoint R=0.5 ==============
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
 fnl0009: links fnl0009.cc $(CommonPath)/cone-e-05.cc \
 	$(cteq6pdf)
@@ -336,9 +332,9 @@ fnl0009: links fnl0009.cc $(CommonPath)/cone-e-05.cc \
 	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL0010  LHC CMS incl. jets with fastjet kT D=0.6 ======
+# =====   FNL0010: LHC CMS incl. jets with fastjet kT D=0.6 ============
 # ======================================================================
-# LHC scenario for CMS
+# LHC scenario for CMS @ 14 TeV
 #
 fnl0010: links fnl0010.cc $(CommonPath)/fj-kt-06.cc \
 	$(cteq6pdf)
@@ -349,9 +345,9 @@ fnl0010: links fnl0010.cc $(CommonPath)/fj-kt-06.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
-# =====         FNL1007  LHC CMS incl. jets with kT D=0.6 ==============
+# =====   FNL1007: LHC CMS incl. jets with kT D=0.6 ====================
 # ======================================================================
-# LHC scenario for CMS @ 10 TeV
+# LHC scenario for CMS like 0007 @ 10 TeV
 #
 fnl1007: links fnl1007.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
@@ -360,9 +356,9 @@ fnl1007: links fnl1007.cc $(CommonPath)/kt-e-06.cc \
 	-o fnl1007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====         FNL1010  LHC CMS incl. jets with fastjet kT D=0.6 ======
+# =====   FNL1010: LHC CMS incl. jets with fastjet kT D=0.6 ============
 # ======================================================================
-# LHC scenario for CMS @ 10 TeV
+# LHC scenario for CMS like 0010 @ 10 TeV
 #
 fnl1010: links fnl1010.cc $(CommonPath)/fj-kt-06.cc \
 	$(cteq6pdf)
@@ -372,6 +368,12 @@ fnl1010: links fnl1010.cc $(CommonPath)/fj-kt-06.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 #
 # ======================================================================
 # =====         FNR0001    RHIC test   kT D=0.7       =================
