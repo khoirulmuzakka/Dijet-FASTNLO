@@ -423,9 +423,9 @@ void UserHHC::initfunc(unsigned int)
    if (tablefilename=="") tablefilename = "fastnlotable.raw";
 
    // Say Hello
-   cout << "  " << endl;
+   cout << " " << endl;
    cout << "   *******************************************" << endl;
-   cout << "    fastNLO    - initialization" << endl;
+   cout << "    fastNLO - initialization" << endl;
    cout << "    Scenario fnl0009:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
    cout << "      for kT algo with D=0.6 in E-scheme" << endl; 
@@ -436,15 +436,16 @@ void UserHHC::initfunc(unsigned int)
    cout << "        No. x-bins: " << nxtot << endl;
    cout << "        No. rapidity regions: " << nrap << endl;
    cout << "        No. of pT bins in each rapidity region:" << endl;
+
    for( int j = 0; j < nrap; j++) {
-      cout <<"          rap " <<j <<": " <<npt[j] << endl;
+      cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
-   cout <<"        No. of scale variations in NLO: "<<nscalevar<< endl;
+   cout<<"        No. of scale variations in NLO: "<<nscalevar<<endl;
    for( int j = 0; j < nscalevar; j++) {
      cout<<"          "<<j<<":   (mur/pT) "<<murscale[j]<<
-	"      (muf/pT) "<<mufscale[j]<< endl;
+	"      (muf/pT) "<<mufscale[j]<<endl;
    }
-   cout<<"  "<< endl;
+   cout<<"  "<<endl;
 
    if (iref==1) {     // -> in reference mode: make output
      cout<<"  "<<endl;

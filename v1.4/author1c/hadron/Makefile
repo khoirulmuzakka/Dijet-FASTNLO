@@ -325,10 +325,10 @@ fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
-fnl0009: links fnl0009.cc $(CommonPath)/cone-e-05.cc \
+fnl0009: links fnl0009.cc $(CommonPath)/cone-e-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0009.cc \
-	$(CommonPath)/cone-e-05.cc $(cteq6pdf) \
+	$(CommonPath)/cone-e-07.cc $(cteq6pdf) \
 	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
