@@ -1,6 +1,7 @@
 #include "cone-e-07.h"
 #include <cmath>
 
+
 const bounded_vector<lorentzvector<double> >&
 cone_e_07::operator()(const event_hhc& ev, double rcone)
 {
@@ -10,8 +11,19 @@ cone_e_07::operator()(const event_hhc& ev, double rcone)
   //----- initialize the arrays -----
   _M_pj.resize(1,0); _M_p.resize(1, nt); 
   _M_ax.resize(1,1);
-  for(int ip = 1; ip <= nt; ip++) 
-    if(ev[ip].perp2() > 1.0e-12) _M_p[++np] = ev[ip];
+
+  for(int ip = 1; ip <= nt; ip++) {
+    if (ev[ip].perp2() > 1.0e-12) _M_p[++np] = ev[ip];
+    const double px = ev[ip].X();
+    const double py = ev[ip].Y();
+    const double pz = ev[ip].Z();
+    const double E  = ev[ip].T();
+    cout << "**************************\n";
+    cout << "Input objects: ip, px, py, pz, E, np\n";
+    printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
+ 	   ip, px, py, pz, E, nt);
+    cout << "**************************\n";
+  }
 
   nj = np;
   for(int i = 1; i <= np; i++) {
@@ -28,6 +40,45 @@ cone_e_07::operator()(const event_hhc& ev, double rcone)
   // copy merged particles to jet array 
   for (int i = 1; i <=nj; i++) {
     _M_pj.push_back(_M_p[i]);
+  }
+
+  nj++;
+  double Emax1 = 0.;
+  double Emax2 = 0.;
+  unsigned int iord[] = {0,0,0}; 
+  for (unsigned int j = 1; j < nj; j++) {
+    double E  = _M_pj[j].T();
+    if ( E > Emax1 ) {
+      Emax2 = Emax1;
+      Emax1 = E;
+      iord[2] = iord[1];
+      iord[1] = iord[0];
+      iord[0] = j;
+    } else if ( E > Emax2 ) {
+      Emax2 = E;
+      iord[2] = iord[1];
+      iord[1] = j;
+    } else {
+      iord[2] = j;
+    }
+  }
+  unsigned int jp = 0;
+  for (unsigned int j = 1; j < nj; j++) {
+    if ( iord[j-1] > 0 ) {
+      double px = _M_pj[iord[j-1]].X();
+      double py = _M_pj[iord[j-1]].Y();
+      double pz = _M_pj[iord[j-1]].Z();
+      double E  = _M_pj[iord[j-1]].T();
+      double pt = sqrt(px*px + py*py);
+      if ( pt >= 1. ) {
+	jp++;
+ 	cout << "**************************\n";
+ 	cout << "Output jets pt >= 1.0: ijet, px, py, pz, E, pt\n";
+ 	printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
+ 	       jp, px, py, pz, E, pt);
+ 	cout << "**************************\n";
+      }
+    }
   }
 
   return _M_pj;
