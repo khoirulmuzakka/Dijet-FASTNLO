@@ -428,7 +428,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "    fastNLO - initialization" << endl;
    cout << "    Scenario fnl0009:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.6 in E-scheme" << endl; 
+   cout << "      for Midpoint algo with R=0.7 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
