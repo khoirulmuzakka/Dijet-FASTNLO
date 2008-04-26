@@ -354,8 +354,8 @@ fnl0011: links fnl0011.cc $(CommonPath)/fj-mc-07.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl0011.cc \
 	$(CommonPath)/fj-mc-07.cc $(cteq6pdf) \
 	-o fnl0011 -Wno-deprecated -Wf,-O3 \
-	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
-	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/CDFCones \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/CDFCones,-lCDFConesPlugin,-L$(FASTJET)/plugins/CDFCones/CDFCode,-lCDFCode
 
 # ======================================================================
 # =====   FNL1007: LHC CMS incl. jets with kT D=0.6 ====================

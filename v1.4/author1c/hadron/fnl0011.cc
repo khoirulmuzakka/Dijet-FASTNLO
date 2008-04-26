@@ -1,11 +1,10 @@
 //
-// fastNLO author code for fnl0008:
+// fastNLO author code for fnl0011:
 //     CMS LHC test scenario, E_cms = 14 TeV
-//     for fastjet SISCone algo with R=0.7 in E-scheme
+//     for fastjet CDFMidpoint algo with R=0.7 in E-scheme
 // 
 // last modification
-// 2008/04/24 KR - Add protection against empty phase space bins in xlimit
-// 2008/04/13 KR - Implement SISCone from fastjet package
+// 2008/04/26 KR - Implement CDFMidpoint from fastjet package
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -43,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fj-sc-07.h"
+#include "fj-mc-07.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -97,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fj_sc_07 jetclus;   // jet algorithm
+   fj_mc_07 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -422,9 +421,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0008:" << endl;
+   cout << "    Scenario fnl0011:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for fastjet SISCone algo with R=0.7 in E-scheme" << endl; 
+   cout << "      for fastjet CDFMidpoint algo with R=0.7 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -798,7 +797,7 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 4; // SISCone
+   int ialgo = 2; // Midpoint cone
    WRITE(ialgo);
 
    //JetResol1
