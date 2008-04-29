@@ -113,10 +113,10 @@ c         5th argument:  array to return results
 
 c -> compute PDF uncertainties for all available scales
       do i=1,Nscalevar
-         write(*,*) "now scale No.",i
          call InitPDF(0)
          mur = murscale(i)
          muf = mufscale(i)
+         write(*,*) "Now scale no.",i,"; mur, muf = ",mur,muf
          call FX9999CC(FILENAME, mur , muf, 0 , XSECT1)
 
 c -    save the result array from the first call (= central result)
