@@ -435,4 +435,4 @@ txt2raw: txt2raw.o
 
 
 clean:
-	rm -rf .libs .obj *~ *.la *.o $(CommonPath)/*.o ctq61.00.tbl ./common
+	rm -rf .libs .obj *~ *.la *.lo *.o $(CommonPath)/*.o $(CommonPath)/*.lo ctq61.00.tbl ./common
