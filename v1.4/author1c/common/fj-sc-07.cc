@@ -18,11 +18,11 @@ fj_sc_07::operator()(const event_hhc& ev, double rwhatfor)
     const double py = ev[ip].Y();
     const double pz = ev[ip].Z();
     const double E  = ev[ip].T();
-//     cout << "**************************" << endl;
-//     cout << "Input objects:" << endl;
+//     cout << "**************************\n";
+//     cout << "Input objects: ip, px, py, pz, E, np\n";
 //     printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-// 	   ip, px, py, pz, E, nt);
-//     cout << "**************************" << endl;
+//  	   ip, px, py, pz, E, nt);
+//     cout << "**************************\n";
     input_objects.push_back(fastjet::PseudoJet(px,py,pz,E));
   }
 
@@ -88,11 +88,11 @@ fj_sc_07::operator()(const event_hhc& ev, double rwhatfor)
 //       double pz = _M_pj[iord[j-1]].Z();
 //       double E  = _M_pj[iord[j-1]].T();
 //       double pt = sqrt(px*px + py*py);
-//       cout << "**************************" << endl;
-//       cout << "Output jets pt >= 1.0:" << endl;
+//       cout << "**************************\n";
+//       cout << "Output jets pt >= 1.0: ijet, px, py, pz, E, pt\n";
 //       printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
-// 	     j, px, py, pz, E, pt);
-//       cout << "**************************" << endl;
+// 	     jp, px, py, pz, E, pt);
+//       cout << "**************************\n";
 //     }
 //   }
 
