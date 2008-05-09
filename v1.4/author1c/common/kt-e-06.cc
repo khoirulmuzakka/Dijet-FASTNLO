@@ -61,43 +61,43 @@ kt_e_06::operator()(const event_hhc& ev, double r0)
   _M_pj.push_back(_M_p[1]);
   nj++;
   
-  double Emax1 = 0.;
-  double Emax2 = 0.;
-  unsigned int iord[] = {0,0,0}; 
-  for (unsigned int j = 1; j < nj; j++) {
-    double E  = _M_pj[j].T();
-    if ( E > Emax1 ) {
-      Emax2 = Emax1;
-      Emax1 = E;
-      iord[2] = iord[1];
-      iord[1] = iord[0];
-      iord[0] = j;
-    } else if ( E > Emax2 ) {
-      Emax2 = E;
-      iord[2] = iord[1];
-      iord[1] = j;
-    } else {
-      iord[2] = j;
-    }
-  }
-  unsigned int jp = 0;
-  for (unsigned int j = 1; j < nj; j++) {
-    if ( iord[j-1] > 0 ) {
-      double px = _M_pj[iord[j-1]].X();
-      double py = _M_pj[iord[j-1]].Y();
-      double pz = _M_pj[iord[j-1]].Z();
-      double E  = _M_pj[iord[j-1]].T();
-      double pt = sqrt(px*px + py*py);
-      if ( pt >= 1. ) {
-	jp++;
-// 	cout << "**************************\n";
-// 	cout << "Output jets pt >= 1.0:\n";
-// 	printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
-// 	       jp, px, py, pz, E, pt);
-// 	cout << "**************************\n";
-      }
-    }
-  }
+//   double Emax1 = 0.;
+//   double Emax2 = 0.;
+//   unsigned int iord[] = {0,0,0}; 
+//   for (unsigned int j = 1; j < nj; j++) {
+//     double E  = _M_pj[j].T();
+//     if ( E > Emax1 ) {
+//       Emax2 = Emax1;
+//       Emax1 = E;
+//       iord[2] = iord[1];
+//       iord[1] = iord[0];
+//       iord[0] = j;
+//     } else if ( E > Emax2 ) {
+//       Emax2 = E;
+//       iord[2] = iord[1];
+//       iord[1] = j;
+//     } else {
+//       iord[2] = j;
+//     }
+//   }
+//   unsigned int jp = 0;
+//   for (unsigned int j = 1; j < nj; j++) {
+//     if ( iord[j-1] > 0 ) {
+//       double px = _M_pj[iord[j-1]].X();
+//       double py = _M_pj[iord[j-1]].Y();
+//       double pz = _M_pj[iord[j-1]].Z();
+//       double E  = _M_pj[iord[j-1]].T();
+//       double pt = sqrt(px*px + py*py);
+//       if ( pt >= 1. ) {
+// 	jp++;
+//      cout << "**************************\n";
+//      cout << "Output jets pt >= 1.0: ijet, px, py, pz, E, pt\n";
+//      printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
+// 	    jp, px, py, pz, E, pt);
+//      cout << "**************************\n";
+//       }
+//     }
+//   }
 
   return _M_pj;
 }
@@ -108,17 +108,19 @@ double kt_e_06::_M_pair(int i, int j)
   static const double twopi = 6.28318530717958647692;
   
   //  double et2 = (_M_p[i].perp2() < _M_p[j].perp2() ? _M_p[i].perp2() : _M_p[j].perp2());
+  double ei   = _M_p[i].T();
+  double ej   = _M_p[j].T();
   double et2i = _M_p[i].perp2();
   double et2j = _M_p[j].perp2();
   double dist = 0.;
-  if ( et2i < 1.e-12 && et2j < 1.e-12 ) {
+  if ( et2i/ei/ei < 1.e-24 && et2j/ej/ej < 1.e-24 ) {
     // merge collinear particles in beam direction if both +z or -z
     if ( _M_p[i].Z() * _M_p[j].Z() > 0. ) { 
       dist = 0.;
     } else {
       dist = 1.e12;
     }
-  } else if ( et2i < 1.e-12 || et2j < 1.e-12 ) {
+  } else if ( et2i/ei/ei < 1.e-24 || et2j/ej/ej < 1.e-24 ) {
     // do not merge if only one particle in beam direction
     dist = 1.e12;
   } else {
