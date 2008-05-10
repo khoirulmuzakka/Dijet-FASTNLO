@@ -1,11 +1,14 @@
 //
-// fastNLO author code for fnl0010:
+// fastNLO author code for fnl0017:
 //     CMS LHC test scenario, E_cms = 14 TeV
-//     for fastjet kT algo with D=0.6 in E-scheme
+//     for kT algo with D=0.4 in E-scheme
 // 
 // last modification
 // 2008/04/24 KR - Add protection against empty phase space bins in xlimit
-// 2008/04/10 KR - Implement fastjet for comparison with fnl0007
+// 2007/11/26 KR - Change kt -> 0.6 and put in place new y binning
+// 2006/03/16 KR - Change pb to fb units
+// 2006/03/16 KR - Adapt binning at low p_T to CMS trigger thresholds
+// 2006/03/13 KR - Copy from fnl0001 adapted to CMS scenario
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -43,7 +46,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fj-kt-06.h"
+#include "kt-e-04.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -97,7 +100,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fj_kt_06 jetclus;   // jet algorithm
+   kt_e_04 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -422,9 +425,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0010:" << endl;
+   cout << "    Scenario fnl0017:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for fastjet kT algo with D=0.6 in E-scheme" << endl; 
+   cout << "      for kT algo with D=0.4 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -802,7 +805,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.6;  // kT distance D
+   double JetResol1 = 0.4;  // kT distance D
    WRITE(JetResol1);
 
    //JetResol2
