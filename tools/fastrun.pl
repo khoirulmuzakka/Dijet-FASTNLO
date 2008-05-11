@@ -519,19 +519,23 @@ if ( $ENV{LD_LIBRARY_PATH} ) {
     print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
 	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
     $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
 	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 } else {
     print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
 	"$ENV{NLOJET}/lib:$ENV{LHAPDF}\n";
     $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
 	"$ENV{NLOJET}/lib:$ENV{LHAPDF}";
 }
 print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
