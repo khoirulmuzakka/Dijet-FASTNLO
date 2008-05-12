@@ -3,8 +3,10 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <math.h>
 #include <vector>
+
 
 #include "fnloconstants.h"
 #include "fnloBlockA1.h"
@@ -14,10 +16,13 @@ using namespace std;
 
 class fnloBlockB {
  public:
+   fnloBlockB(){;}
    fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) : BlockA1(blocka1) ,  BlockA2(blocka2)   {;}
    int Read(istream *table);
-   int Write(ostream *table);
+   int Write(ostream *table, int option = 0);
+   int Copy(fnloBlockB* other);
    bool IsCompatible(fnloBlockB* other);
+   int GetIRef(){return IRef;}
    int GetIDataFlag(){return IDataFlag;}
    int GetIAddMultFlag(){return IAddMultFlag;}
    int GetIContrFlag1(){return IContrFlag1;}
@@ -26,10 +31,12 @@ class fnloBlockB {
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
    void Add(fnloBlockB* other);
-
+  
  private:
    void StripWhitespace(string &str);
- protected:
+ public:
+   static const int DividebyNevt = 1;
+
    fnloBlockA1 *BlockA1;
    fnloBlockA2 *BlockA2;
    int IXsectUnits;
@@ -70,11 +77,14 @@ class fnloBlockB {
    int IPDFdef2;
    int IPDFdef3;
    // Missing: linear PDF combinations for IPDFdef1=0
-   vector < int > Nxtot;
+   vector < int > Nxtot1;
+   vector < double > Hxlim1;
    vector < vector < double > > XNode1;
    vector < int >  Nxtot2;
+   vector < double > Hxlim2;
    vector < vector < double > > XNode2;
    vector < int > Nztot;
+   vector < double > Hzlim;
    vector < vector < double > > ZNode;
    int NScales;
    int NScaleDim;
@@ -85,7 +95,7 @@ class fnloBlockB {
    vector < int > Nscalenode;
    vector < vector < double > > ScaleFac;
    vector < vector < vector < vector < double > > > > ScaleNode;
-   vector < vector < vector < vector < vector < vector < double > > > > > > SigmaTilde;
+   vector < vector < vector < vector < vector < double > > > > > SigmaTilde; // valid only for one scale dimension
 
 };
 #endif

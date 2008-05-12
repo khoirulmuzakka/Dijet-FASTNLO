@@ -14,6 +14,7 @@ class fnloTable{
    void RewindRead();
    void SkipBlockA1A2();
    ofstream *OpenFileWrite();
+   ofstream *OpenFileRewrite();
    void CloseFileWrite();
    int ReadBlockA1(){return BlockA1.Read(ifilestream);}
    int WriteBlockA1(){return BlockA1.Write(ofilestream);}
@@ -22,9 +23,11 @@ class fnloTable{
    int WriteBlockA2(){return BlockA2.Write(ofilestream);}
    fnloBlockA2* GetBlockA2(){return &BlockA2;}
    int CreateBlockB(int no);
+   int CreateBlockB(int no,fnloBlockB *newblock);
    int ReadBlockB(int no);
    int WriteBlockB(int no);
    int WriteBlockB(int no,ofstream* outstream );
+   int WriteBlockBDividebyN(int no);   
    fnloBlockB* GetBlockB(int no){return BlockB[no];}
    string GetFilename(){return filename;}
    void SetFilename(string name){filename=name;}

@@ -1,7 +1,11 @@
 #include "fnloTable.h"
 
+#ifdef __CINT__
+   ClassImp(fnloTable)
+#endif
+
 int fnloTable::OpenFileRead(){
-   if (ifilestream) delete ifilestream;
+      //   if (ifilestream) delete ifilestream;
    ifilestream = new ifstream(filename.c_str(),ios::in);
 }
 
@@ -43,6 +47,16 @@ ofstream *fnloTable::OpenFileWrite(){
    return ofilestream;
 }
 
+ofstream *fnloTable::OpenFileRewrite(){
+   ofilestream = new ofstream(filename.c_str(),ios::out);
+   if(!ofilestream->good()){
+       printf("fnloTable::OpenFileWrite: Cannot open %s for writing. Stopping.\n",filename.c_str());
+       exit(2);
+    }
+   ofilestream->precision(8);
+   return ofilestream;
+}
+
 void fnloTable::CloseFileWrite(){
    *ofilestream << tablemagicno << endl;
    *ofilestream << tablemagicno << endl;
@@ -65,6 +79,14 @@ int fnloTable::CreateBlockB(int no){
    return 0;
 }
 
+int fnloTable::CreateBlockB(int no,fnloBlockB *newblockb){
+   if((no+1)>BlockB.size()){
+      BlockB.resize(no+1);
+   }
+   BlockB[no] = newblockb;
+   return 0;
+}
+
 int fnloTable::WriteBlockB(int no){
    fnloBlockB* blockb;
    if((no)<BlockB.size()){
@@ -76,6 +98,19 @@ int fnloTable::WriteBlockB(int no){
    }
    return blockb->Write(ofilestream);
 }
+
+int fnloTable::WriteBlockBDividebyN(int no){
+   fnloBlockB* blockb;
+   if((no)<BlockB.size()){
+      blockb = BlockB[no];
+   }else{
+      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %d. Stopping.\n",no,BlockB.size());
+      exit(2);
+      
+   }
+   return blockb->Write(ofilestream,fnloBlockB::DividebyNevt);
+}
+
 
 int fnloTable::WriteBlockB(int no,ofstream* outstream ){
    fnloBlockB* blockb;

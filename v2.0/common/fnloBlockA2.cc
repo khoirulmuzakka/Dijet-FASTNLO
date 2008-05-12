@@ -23,8 +23,9 @@ int fnloBlockA2::Read(istream *table){
    for(int i=0;i<NScDescript;i++){
       table->getline(buffer,256);
       ScDescript[i] = buffer;
-      StripWhitespace(ScDescript[i]);
+      //      StripWhitespace(ScDescript[i]);
    }
+
    *table >> Ecms;
    *table >> ILOord;
    *table >> NObsBin;
@@ -34,8 +35,9 @@ int fnloBlockA2::Read(istream *table){
    for(int i=0;i<NDim;i++){
       table->getline(buffer,256);
       DimLabel[i] = buffer;
-      StripWhitespace(DimLabel[i]);
+      //      StripWhitespace(DimLabel[i]);
    }
+
    IDiffBin.resize(NDim);
    for(int i=0;i<NDim;i++){
       *table >>  IDiffBin[i];
@@ -50,6 +52,7 @@ int fnloBlockA2::Read(istream *table){
          if(IDiffBin[j]==2) *table >>  UpBin[i][j];
       }
    }
+
    *table >> INormFlag;
    if(INormFlag>1){
       *table >> DenomTable;

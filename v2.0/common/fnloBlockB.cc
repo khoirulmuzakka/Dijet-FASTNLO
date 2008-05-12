@@ -1,6 +1,5 @@
 #include "fnloBlockB.h"
 
-
 int fnloBlockB::Read(istream *table){
    table->peek();
    if (table->eof()){
@@ -28,7 +27,7 @@ int fnloBlockB::Read(istream *table){
    for(int i=0;i<NContrDescr;i++){
       table->getline(buffer,256);
       CtrbDescript[i] = buffer;
-      StripWhitespace(CtrbDescript[i]);
+      //      StripWhitespace(CtrbDescript[i]);
    }
    *table >> NCodeDescr;   
    CodeDescript.resize(NCodeDescr);
@@ -36,7 +35,7 @@ int fnloBlockB::Read(istream *table){
    for(int i=0;i<NCodeDescr;i++){
       table->getline(buffer,256);
       CodeDescript[i] = buffer;
-      StripWhitespace(CodeDescript[i]);
+      //      StripWhitespace(CodeDescript[i]);
    }
    if(IDataFlag==1){
       *table >> Nuncorrel;
@@ -45,7 +44,7 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<Nuncorrel;i++){
          table->getline(buffer,256);
          UncDescr[i] = buffer;
-         StripWhitespace(UncDescr[i]);
+         //         StripWhitespace(UncDescr[i]);
       }
       *table >> Ncorrel;
       CorDescr.resize(Ncorrel);
@@ -53,7 +52,7 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<Ncorrel;i++){
          table->getline(buffer,256);
          CorDescr[i] = buffer;
-         StripWhitespace(CorDescr[i]);
+         //         StripWhitespace(CorDescr[i]);
       }
       Xcenter.resize(BlockA2->GetNObsBin());
       Value.resize(BlockA2->GetNObsBin());
@@ -93,7 +92,7 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<Nuncorrel;i++){
          table->getline(buffer,256);
          UncDescr[i] = buffer;
-         StripWhitespace(UncDescr[i]);
+         //         StripWhitespace(UncDescr[i]);
       }
       *table >> Ncorrel;
       CorDescr.resize(Ncorrel);
@@ -101,7 +100,7 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<Ncorrel;i++){
          table->getline(buffer,256);
          CorDescr[i] = buffer;
-         StripWhitespace(CorDescr[i]);
+         //         StripWhitespace(CorDescr[i]);
       }
       fact.resize(BlockA2->GetNObsBin());
       UncorLo.resize(BlockA2->GetNObsBin());
@@ -159,12 +158,12 @@ int fnloBlockB::Read(istream *table){
             }
          }
       }
-      Nxtot.resize(BlockA2->GetNObsBin());
+      Nxtot1.resize(BlockA2->GetNObsBin());
       XNode1.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         *table >> Nxtot[i];
-         XNode1[i].resize(Nxtot[i]);
-         for(int j=0;j<Nxtot[i];j++){
+         *table >> Nxtot1[i];
+         XNode1[i].resize(Nxtot1[i]);
+         for(int j=0;j<Nxtot1[i];j++){
             *table >> XNode1[i][j];
          }         
       }      
@@ -193,6 +192,10 @@ int fnloBlockB::Read(istream *table){
 
       *table >> NScales;
       *table >> NScaleDim;
+      if(NScaleDim > 1){
+         printf("fnloBlockB::Read: Sorry, NScaledim>1 not yet supported by this program. (NScaledim=%d).\n",NScaleDim);
+         return 1;
+      }
       Iscale.resize(NScales);
       for(int i=0;i<NScales;i++){
          *table >> Iscale[i];
@@ -206,7 +209,7 @@ int fnloBlockB::Read(istream *table){
          for(int j=0;j<NscaleDescript[i];j++){
             table->getline(buffer,256);
             ScaleDescript[i][j] = buffer;
-            StripWhitespace(ScaleDescript[i][j]);
+            //            StripWhitespace(ScaleDescript[i][j]);
          }
       }
       Nscalevar.resize(NScaleDim);
@@ -240,26 +243,23 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          int nxmax =0;
          switch (NPDFDim) {
-         case 0: nxmax = Nxtot[i];
+         case 0: nxmax = Nxtot1[i];
             break;
-         case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+         case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
             break;
-         case 2: nxmax = Nxtot[i]*Nxtot2[i];
+         case 2: nxmax = Nxtot1[i]*Nxtot2[i];
             break;
          default: ;
          }
-         SigmaTilde[i].resize(NScaleDim);
-         for(int j=0;j<NScaleDim;j++){
-            SigmaTilde[i][j].resize(Nscalevar[j]);
-            for(int k=0;k<Nscalevar[j];k++){
-               SigmaTilde[i][j][k].resize(Nscalenode[j]);
-               for(int l=0;l<Nscalenode[j];l++){
-                  SigmaTilde[i][j][k][l].resize(nxmax);
-                  for(int m=0;m<nxmax;m++){
-                     SigmaTilde[i][j][k][l][m].resize(NSubproc);
-                     for(int n=0;n<NSubproc;n++){
-                        *table >> SigmaTilde[i][j][k][l][m][n];
-                     }
+         SigmaTilde[i].resize(Nscalevar[0]);
+         for(int k=0;k<Nscalevar[0];k++){
+            SigmaTilde[i][k].resize(Nscalenode[0]);
+            for(int l=0;l<Nscalenode[0];l++){
+               SigmaTilde[i][k][l].resize(nxmax);
+               for(int m=0;m<nxmax;m++){
+                  SigmaTilde[i][k][l][m].resize(NSubproc);
+                  for(int n=0;n<NSubproc;n++){
+                     *table >> SigmaTilde[i][k][l][m][n];
                   }
                }
             }
@@ -279,7 +279,7 @@ int fnloBlockB::Read(istream *table){
    return 0;
 }
 
-int fnloBlockB::Write(ostream *table){
+int fnloBlockB::Write(ostream *table, int option){
 
    *table << tablemagicno << endl;
    *table << IXsectUnits << endl;
@@ -379,8 +379,8 @@ int fnloBlockB::Write(ostream *table){
          }
       }
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         *table << Nxtot[i] << endl;
-         for(int j=0;j<Nxtot[i];j++){
+         *table << Nxtot1[i] << endl;
+         for(int j=0;j<Nxtot1[i];j++){
             *table << XNode1[i][j] << endl;
          }         
       }      
@@ -434,20 +434,22 @@ int fnloBlockB::Write(ostream *table){
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          int nxmax =0;
          switch (NPDFDim) {
-         case 0: nxmax = Nxtot[i];
+         case 0: nxmax = Nxtot1[i];
             break;
-         case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+         case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
             break;
-         case 2: nxmax = Nxtot[i]*Nxtot2[i];
+         case 2: nxmax = Nxtot1[i]*Nxtot2[i];
             break;
          default: ;
          }
-         for(int j=0;j<NScaleDim;j++){
-            for(int k=0;k<Nscalevar[j];k++){
-               for(int l=0;l<Nscalenode[j];l++){
-                  for(int m=0;m<nxmax;m++){
-                     for(int n=0;n<NSubproc;n++){
-                        *table << SigmaTilde[i][j][k][l][m][n] << endl;
+         for(int k=0;k<Nscalevar[0];k++){
+            for(int l=0;l<Nscalenode[0];l++){
+               for(int m=0;m<nxmax;m++){
+                  for(int n=0;n<NSubproc;n++){
+                     if( (option & DividebyNevt) && Nevt>0){
+                        *table << SigmaTilde[i][k][l][m][n] / Nevt << endl;
+                     }else{
+                        *table << SigmaTilde[i][k][l][m][n] << endl;
                      }
                   }
                }
@@ -459,28 +461,39 @@ int fnloBlockB::Write(ostream *table){
    return 0;
 }
 
+int fnloBlockB::Copy(fnloBlockB* other){
+
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   iostream* buffer = new iostream(streambuf);
+   other->Write(buffer);
+   *buffer << tablemagicno << endl;
+   this->Read(buffer);
+   delete buffer;
+   delete streambuf;
+
+   return(0);
+}
+
 void fnloBlockB::Add(fnloBlockB* other){
    double w1 = (double)Nevt / (Nevt+other->Nevt);
    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
    for(int i=0;i<BlockA2->GetNObsBin();i++){
       int nxmax =0;
       switch (NPDFDim) {
-      case 0: nxmax = Nxtot[i];
+      case 0: nxmax = Nxtot1[i];
          break;
-      case 1: nxmax = ((int)pow((double)Nxtot[i],2)+Nxtot[i])/2;
+      case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
          break;
-      case 2: nxmax = Nxtot[i]*Nxtot2[i];
+      case 2: nxmax = Nxtot1[i]*Nxtot2[i];
          break;
       default: ;
       }
-      for(int j=0;j<NScaleDim;j++){
-         for(int k=0;k<Nscalevar[j];k++){
-            for(int l=0;l<Nscalenode[j];l++){
-               for(int m=0;m<nxmax;m++){
-                  for(int n=0;n<NSubproc;n++){
-                     SigmaTilde[i][j][k][l][m][n] = 
-                        w1*SigmaTilde[i][j][k][l][m][n] + w2*other->SigmaTilde[i][j][k][l][m][n];
-                  }
+      for(int k=0;k<Nscalevar[0];k++){
+         for(int l=0;l<Nscalenode[0];l++){
+            for(int m=0;m<nxmax;m++){
+               for(int n=0;n<NSubproc;n++){
+                  SigmaTilde[i][k][l][m][n] = 
+                     w1*SigmaTilde[i][k][l][m][n] + w2*other->SigmaTilde[i][k][l][m][n];
                }
             }
          }
@@ -489,8 +502,6 @@ void fnloBlockB::Add(fnloBlockB* other){
    Nevt += other->Nevt;
 ;
 }
-
-
 
 bool fnloBlockB::IsCompatible(fnloBlockB* other){
    return true;
@@ -505,3 +516,5 @@ void fnloBlockB::StripWhitespace(string &str){
       }
    }
 }
+
+

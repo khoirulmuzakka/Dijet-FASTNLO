@@ -24,7 +24,7 @@ class fnloBlockA2 {
    bool cmp(const vector < double > x1, const vector < double > x2) const;
    bool cmp(const vector < vector < double > > x1,const vector < vector < double > > x2) const;
    
- protected:
+ public:
    int Ipublunits;
    int NScDescript;
    vector <string> ScDescript;
