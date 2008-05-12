@@ -36,85 +36,85 @@ int main(int argc,void** argv)
            delete thistable;
            break;
         }
-        
         if(thistable->ReadBlockA2() != 0){
            printf("Invalid format in %s, skipping.\n",path);      
            table_list.pop_back();
            delete thistable;
            break;
         }
+        
+
      }else{
         printf("Cannot access %s, skipping.\n",path);      
      }
   }
   
   int ntables = table_list.size();
-  printf("Found %d table(s).\n",ntables);
+  printf("Found %d table file(s).\n",ntables);
   if(ntables<1) exit(1);
 
   Entry *oneentry;
   vector <Entry*> entries;
-  TContrib contribution;
+  Contrib contribution;
   tableptr tablepointer;
 
-  if(ntables>0){
-     // check for compatibility by looking at block A1 and A2
-     vector <fnloTable*>::iterator table;
+  // check for compatibility by looking at block A1 and A2
+  vector <fnloTable*>::iterator table;
 
-     fnloBlockA1 *blocka1 = table_list[0]->GetBlockA1();
-     fnloBlockA2 *blocka2 = table_list[0]->GetBlockA2();
-     for( table=table_list.begin()+1; table!=table_list.end();  table++){
-        if(! blocka1->IsCompatible((*table)->GetBlockA1())){
-           printf("main.cc: Non compatible A1 blocks found. Files: %s and %s. Stopping.\n",
-                  table_list[0]->GetFilename().c_str(),(*table)->GetFilename().c_str());
-           exit(1);
-        }
-        if(! blocka2->IsCompatible((*table)->GetBlockA2())){
-           printf("main.cc: Non compatible A2 blocks found. Files: %s and %s. Stopping.\n",
-                  table_list[0]->GetFilename().c_str(),(*table)->GetFilename().c_str());
-           exit(1);
-        }
+  fnloBlockA1 *blocka1 = table_list[0]->GetBlockA1();
+  fnloBlockA2 *blocka2 = table_list[0]->GetBlockA2();
+  for( table=table_list.begin()+1; table!=table_list.end();  table++){
+     if(! blocka1->IsCompatible((*table)->GetBlockA1())){
+        printf("main.cc: Non compatible A1 blocks found. Files: %s and %s. Stopping.\n",
+               table_list[0]->GetFilename().c_str(),(*table)->GetFilename().c_str());
+        exit(1);
      }
+     if(! blocka2->IsCompatible((*table)->GetBlockA2())){
+        printf("main.cc: Non compatible A2 blocks found. Files: %s and %s. Stopping.\n",
+               table_list[0]->GetFilename().c_str(),(*table)->GetFilename().c_str());
+        exit(1);
+     }
+  }
 
-     // extract the contribution types from all the block Bs of the tablefiles
-     for( table=table_list.begin(); table!=table_list.end();  table++){
-        fnloBlockA1 *blocka1 = (*table)->GetBlockA1();  
-        int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
-        (*table)->RewindRead();
-        (*table)->SkipBlockA1A2();
-        for(int i=0;i<nblocks;i++){
-           if((*table)->ReadBlockB(i)>0){
-              printf("main.cc: Bad format in a B block found, file %s. Stopping.\n",(*table)->GetFilename().c_str());
-              exit(1);
+  // extract the contribution types from all the block Bs of the tablefiles
+  for( table=table_list.begin(); table!=table_list.end();  table++){
+     fnloBlockA1 *blocka1 = (*table)->GetBlockA1();  
+     int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
+     (*table)->RewindRead();
+     (*table)->SkipBlockA1A2();
+     for(int i=0;i<nblocks;i++){
+        if((*table)->ReadBlockB(i)>0){
+           printf("main.cc: Bad format in a B block found, file %s. Stopping.\n",(*table)->GetFilename().c_str());
+           exit(1);
+        }
+        tablepointer.table = table;
+        tablepointer.blockbno = i;
+        fnloBlockB *blockb = (*table)->GetBlockB(i);
+        contribution.IRef = blockb->GetIRef();
+        contribution.IDataFlag = blockb->GetIDataFlag();
+        contribution.IAddMultFlag = blockb->GetIAddMultFlag();
+        contribution.IContrFlag1 = blockb->GetIContrFlag1();
+        contribution.IContrFlag2 = blockb->GetIContrFlag2();
+        contribution.IContrFlag3 = blockb->GetIContrFlag3();
+        contribution.Npow = blockb->GetNpow();
+        bool newentry = true;
+        for(int j=0;j<entries.size();j++){
+           if(entries[j]->contribution==contribution){
+              entries[j]->tables.push_back(tablepointer);
+              newentry = false;
+              break;
            }
-           fnloBlockB *blockb = (*table)->GetBlockB(i);
-           // Do something here.....
-           tablepointer.table = table;
-           tablepointer.blockbno = i;
-           contribution.IDataFlag = blockb->GetIDataFlag();
-           contribution.IAddMultFlag = blockb->GetIAddMultFlag();
-           contribution.IContrFlag1 = blockb->GetIContrFlag1();
-           contribution.IContrFlag2 = blockb->GetIContrFlag2();
-           contribution.IContrFlag3 = blockb->GetIContrFlag3();
-           contribution.Npow = blockb->GetNpow();
-           bool newentry = true;
-           for(int j=0;j<entries.size();j++){
-              if(entries[j]->contribution==contribution){
-                 entries[j]->tables.push_back(tablepointer);
-                 newentry = false;
-                 break;
-              }
-           }
-           if(newentry){
-              oneentry = new Entry();
-              oneentry->contribution = contribution;
-              oneentry->tables.clear();
-              oneentry->tables.push_back(tablepointer);
-              entries.push_back(oneentry);
-           }
+        }
+        if(newentry){
+           oneentry = new Entry();
+           oneentry->contribution = contribution;
+           oneentry->tables.clear();
+           oneentry->tables.push_back(tablepointer);
+           entries.push_back(oneentry);
         }
      }
   }
+
   printf("No of types of contributions: %d\n",entries.size());
   int Ncontrib = 0;
   int Nmult = 0;
@@ -138,9 +138,9 @@ int main(int argc,void** argv)
   result->WriteBlockA2();
   int nblocks = entries.size();
   for(int i=0;i<nblocks;i++){
-     vector <fnloTable*>::iterator table = entries[i]->tables[0].table;
      printf(" %d file(s) containing",entries[i]->tables.size());
-     printf(" %s %s ",entries[i]->contribution.GetName1().c_str(),entries[i]->contribution.GetName2(table_list[0]->GetBlockA2()->GetILOord()).c_str());
+     printf(" %s %s",entries[i]->contribution.GetName1().c_str(),entries[i]->contribution.GetName2(table_list[0]->GetBlockA2()->GetILOord()).c_str());
+     vector <fnloTable*>::iterator table = entries[i]->tables[0].table;
      // Addition 
      for(int j=1;j<entries[i]->tables.size();j++){
         fnloBlockB *otherblock = (*(entries[i]->tables[j].table))->GetBlockB(entries[i]->tables[j].blockbno);

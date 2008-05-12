@@ -13,7 +13,7 @@ LDADD = ../common/libfastnloAuthor.a
 AM_CXXFLAGS = 
 
 # Preprocessor flags
-AM_CPPFLAGS = -I$(srcdir)/../common
+AM_CPPFLAGS = -I$(srcdir)/../common -I${HOME}/include/nlo++
 
 
 # Files that are required to build the project but that can be

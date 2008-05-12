@@ -4,12 +4,14 @@
 #include <vector>
 #include "fnloTable.h"
 
-class TContrib;
+class Contrib;
 
-class TContrib{
+class Contrib{
  public:
-   bool operator==(TContrib val) const{
-      return(IDataFlag==val.IDataFlag && 
+   bool operator==(Contrib val) const{
+      return(
+           IRef==val.IRef &&
+           IDataFlag==val.IDataFlag && 
            IAddMultFlag==val.IAddMultFlag &&
            IContrFlag1==val.IContrFlag1 &&
            IContrFlag2==val.IContrFlag2 &&
@@ -32,6 +34,10 @@ class TContrib{
 
   }
   string GetName2(int ILOord){
+     string Refstring = "";
+     if(IRef>0){
+        Refstring = " (reference)";
+     }
      if(IDataFlag>0){
         return "";
      }
@@ -42,10 +48,10 @@ class TContrib{
      case 0: return "unknown"; break;
      case 1:
         switch(Npow-ILOord){
-        case 0: return "LO"; break;
-        case 1: return "NLO"; break;
-        case 2: return "NNLO"; break;
-        case 3: return "NNLO"; break;
+        case 0: return "LO"+Refstring; break;
+        case 1: return "NLO"+Refstring; break;
+        case 2: return "NNLO"+Refstring; break;
+        case 3: return "NNLO"+Refstring; break;
         default:;
         }
      default:;
@@ -53,6 +59,7 @@ class TContrib{
 
    }
  public:
+   int IRef;
    int IDataFlag;
    int IAddMultFlag;
    int IContrFlag1;
@@ -69,7 +76,7 @@ class tableptr{
 
 class Entry{
  public:
-   TContrib contribution;
+   Contrib contribution;
    vector <tableptr> tables;
 };
 
