@@ -22,17 +22,17 @@ public:
   
   //   strong coupling
   double alpha_qcd(unsigned int nf, double mr2) {
-    return _M_pdf(std::sqrt(mr2))/6.28318530717958647692;
+     return _M_pdf(std::sqrt(mr2))/6.28318530717958647692;
   }
   
   //  photon in electron (Williams-Weicheker function)
   double photon(double x) 
   {
     const double Me2 = 0.00000026112004954086;  //  GeV^2
-    double Q2max = 4.0, Q2min = Me2*x*x/(1-x);
+    double Q2max = 1.0, Q2min = Me2*x*x/(1-x);
 
     return 1.0/137.0*((1+(1-x)*(1-x))/x*log(Q2max/Q2min) 
-	   + 2.0*Me2*x*(1.0/Q2max-1.0/Q2min))/6.28318530717958647692; 
+          + 2.0*Me2*x*(1.0/Q2max-1.0/Q2min))/6.28318530717958647692; 
   }
     
 
