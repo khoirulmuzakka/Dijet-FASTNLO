@@ -1,8 +1,8 @@
 //
-// fastNLO author code for fnt2003
+// fastNLO author code for fnt2006
 //
-//    Run II CDF publication of the incl jet x-set w/ kT D=0.7
-//                hep-ex/0512062
+//    Run II CDF publication of the incl jet x-set w/ kT D=1.0
+//                hep-ex/0701051
 // 
 // last modification
 // 2005/12/07 MW - new xlimit calculation (y-integration)
@@ -52,7 +52,7 @@ struct {
 //------ USER DEFINED PART STARTS HERE ------
 //#include "kt2jet-e-07.h"
 //#include "kt2jet-e-07.h"
-#include "kt-e-07.h"
+#include "kt-e-10.h"
 //#include "cone-et-07.h"
 //#include "rsep-et-07.h"
 #include "cteq6.h"
@@ -108,7 +108,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_07 jetclus;   // jet algorithm
+   kt_e_10 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -323,7 +323,7 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"         *** scenario fnt2003 ***"<<endl;
+   cout<<"         *** scenario fnt2006 ***"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;
    cout<<"        store table after "<<nwrite<<" events"<<endl;
@@ -683,7 +683,7 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_dy_(nb_GeV)" << endl;
-   table << "hep-ex-0512062" << endl;
+   table << "hep-ex-0701051" << endl;
    table << "CDF_Collaboration" << endl;
    table << "-" << endl;
    table << "-" << endl;
@@ -697,7 +697,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.7;  // kT distance D
+   double JetResol1 = 1.0;  // kT distance D
    WRITE(JetResol1);
 
    //JetResol2
