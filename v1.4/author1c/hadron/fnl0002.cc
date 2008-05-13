@@ -173,12 +173,12 @@ void UserHHC::initfunc(unsigned int)
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 137 bins
+   //Define binning in pt: 132 bins
    npt[0]=34;
    npt[1]=34;
-   npt[2]=31;
-   npt[3]=23;
-   npt[4]=15;
+   npt[2]=30;
+   npt[3]=21;
+   npt[4]=13;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -232,7 +232,7 @@ void UserHHC::initfunc(unsigned int)
      pthigh[j][33] = 3750.0;
      pthigh[j][34] = 4000.0;
    }
-   //----- rap bin 3, # = 31
+   //----- rap bin 3, # = 30
    pthigh[2][0]  =   50.0;
    pthigh[2][1]  =   60.0;
    pthigh[2][2]  =   80.0;
@@ -264,8 +264,7 @@ void UserHHC::initfunc(unsigned int)
    pthigh[2][28] = 2600.0;
    pthigh[2][29] = 2800.0;
    pthigh[2][30] = 3000.0;
-   pthigh[2][31] = 3250.0;
-   //----- rap bin 4, # = 23
+   //----- rap bin 4, # = 21
    pthigh[3][0]  =   50.0;
    pthigh[3][1]  =   60.0;
    pthigh[3][2]  =   80.0;
@@ -288,9 +287,7 @@ void UserHHC::initfunc(unsigned int)
    pthigh[3][19] =  900.0;
    pthigh[3][20] = 1000.0;
    pthigh[3][21] = 1200.0;
-   pthigh[3][22] = 1400.0;
-   pthigh[3][23] = 1600.0;
-   //----- rap bin 5, # = 15
+   //----- rap bin 5, # = 13
    pthigh[4][0]  =   50.0;
    pthigh[4][1]  =   60.0;
    pthigh[4][2]  =   80.0;
@@ -305,8 +302,6 @@ void UserHHC::initfunc(unsigned int)
    pthigh[4][11] =  335.0;
    pthigh[4][12] =  380.0;
    pthigh[4][13] =  425.0;
-   pthigh[4][14] =  470.0;
-   pthigh[4][15] =  520.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
    for(int i=0;i<nrap/2;i++){
