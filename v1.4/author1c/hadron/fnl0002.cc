@@ -1,8 +1,10 @@
 //
-// fastNLO author code for fnl0002kt10 - CMS LHC test scenario
-//         for kT algo with D=1.0 in E-scheme
+// fastNLO author code for fnl0002:
+//     CMS LHC test scenario, E_cms = 14 TeV
+//     for kT algo with D=1.0 in E-scheme
 // 
 // last modification
+// 2008/05/13 KR - Fixed kt bug
 // 2006/03/16 KR - Change pb to fb units
 // 2006/03/16 KR - Adapt binning at low p_T to CMS trigger thresholds
 // 2006/03/13 KR - Copy from fnl0001 adapted to CMS scenario
@@ -355,6 +357,18 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
 	 double ymin = raphigh[(j)];
+	 if (ymin > ymax ) {
+	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
+	     " and rapidity bin " << j << endl;
+	   cout << "The pt bin runs from " << pthigh[j][k] <<
+	     " to " << pthigh[j][k+1] << endl;
+	   cout << "The rapidity bin runs from " << raphigh[j] <<
+	     " to " << raphigh[j+1] << endl;
+	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
+	     ", " << ymin << ", " << ymax << endl;
+	   cout << "Remove empty bin!" << endl;
+	   exit(2);
+	 }
 
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
@@ -415,17 +429,20 @@ void UserHHC::initfunc(unsigned int)
    if (tablefilename=="") tablefilename = "fastnlotable.raw";
 
    // Say Hello
-   cout<<"  "<<endl;
-   cout<<"   *******************************************"<<endl;
-   cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"         *** scenario fnl0002kt10 ***"<<endl;
-   cout<<" "<<endl;
-   cout<<"        table file "<<tablefilename<<endl;
-   cout<<"        store table after "<<nwrite<<" events"<<endl;
-   cout<<"        sqrt(s)= "<<sqrt(s)<<endl;
-   cout<<"        No. x-bins: "<<nxtot<<endl;
-   cout<<"        No. rapidity regions: "<<nrap<<endl;
-   cout<<"        No. of pT bins in each rapidity region:"<<endl;
+   cout << " " << endl;
+   cout << "   *******************************************" << endl;
+   cout << "    fastNLO - initialization" << endl;
+   cout << "    Scenario fnl0002:" << endl;
+   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
+   cout << "      for kT algo with D=1.0 in E-scheme" << endl; 
+   cout << " " << endl;
+   cout << "        table file " << tablefilename << endl;
+   cout << "        store table after " << nwrite << " events" << endl;
+   cout << "        sqrt(s)= " << sqrt(s) << endl;
+   cout << "        No. x-bins: " << nxtot << endl;
+   cout << "        No. rapidity regions: " << nrap << endl;
+   cout << "        No. of pT bins in each rapidity region:" << endl;
+
    for( int j = 0; j < nrap; j++) {
       cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
@@ -781,10 +798,10 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "to be published" << endl;
+   table << "published in" << endl;
    table << "CMS Physics Technical Design Report" << endl;
-   table << "-" << endl;
-   table << "-" << endl;
+   table << "Vol. II" << endl;
+   table << "LHCC-2006-021" << endl;
 
   //iproc
    int iproc = 1; // incl. jets
