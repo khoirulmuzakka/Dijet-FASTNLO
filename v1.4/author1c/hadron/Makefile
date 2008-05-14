@@ -462,6 +462,19 @@ fnl1007: links fnl1007.cc $(CommonPath)/kt-e-06.cc \
 	-o fnl1007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
+# =====   FNL1008: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
+# ======================================================================
+# LHC scenario for CMS like 0008 @ 10 TeV
+#
+fnl1008: links fnl1008.cc $(CommonPath)/fj-sc-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1008.cc \
+	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
+	-o fnl1008 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
 # =====   FNL1010: LHC CMS incl. jets with fastjet kT D=0.6 ============
 # ======================================================================
 # LHC scenario for CMS like 0010 @ 10 TeV
@@ -473,6 +486,19 @@ fnl1010: links fnl1010.cc $(CommonPath)/fj-kt-06.cc \
 	-o fnl1010 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
+# =====   FNL1018: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
+# ======================================================================
+# LHC scenario for CMS like 0018 @ 14 TeV
+#
+fnl1018: links fnl1018.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1018.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1018 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
