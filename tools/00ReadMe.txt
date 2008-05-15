@@ -76,7 +76,6 @@ staterr.f
 
 
 
-
 ######################################
 # fastrun.pl: Starting run of fastNLO: FASTRUN0_15052008_223606
 ######################################
@@ -110,6 +109,7 @@ Examples:
    ./fastrun.pl [-b LOCAL|GRID|batch] [-d .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname
 
 
+
 #####################################################
 # fastprep.pl: Starting archive creation for fastNLO: FASTPREP_15052008_223611
 #####################################################
@@ -121,6 +121,7 @@ Usage: fastprep.pl [switches/options]
   -p pdf          Add CTEQ parton densities or LHAPDF
 
 
+
 ######################################################
 # fastidcheck.pl: Starting table id check for fastNLO: FASTIDCHECK_15052008_223624
 ######################################################
@@ -129,6 +130,7 @@ Usage: fastprep.pl [switches/options]
 fastidcheck.pl
 Usage: fastidcheck.pl glob (selects all files matching glob)
   -h              Print this text
+
 
 
 ##################################################
@@ -145,4 +147,3 @@ Usage: fastadd.pl [switches/options] scenario
                   i.e. combinations of each LO with 1 NLO table and
                   all LO with each NLO table
   -v              Verbose output
-
