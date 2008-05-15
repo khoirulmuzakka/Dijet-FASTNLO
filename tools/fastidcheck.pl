@@ -17,6 +17,12 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+my $date = `date +%d%m%Y_%H%M%S`;
+chomp $date;
+print "\n######################################################\n";
+print "# fastidcheck.pl: Starting table id check for fastNLO: FASTIDCHECK_$date\n";
+print "######################################################\n\n";
+
 #
 # Parse options
 #

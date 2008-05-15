@@ -4,6 +4,7 @@
  ************************************************************
 
 
+
 add.sh
   MW 2005-12-27
    - flexible shell script to add raw tables into sum-table
@@ -45,48 +46,6 @@ addstaterr.sh
 
 
 
-gridrun.pl
-  KR 2006-02-02
-################################################
-# gridrun.pl: Starting grid run of fastNLO: 02022006_1918
-################################################
-
-
-gridrun.pl
-Usage: gridrun.pl [switches/options] scenario
-  -h              Print this text
-  -o order        LO (def.) or NLO calculation
-  -p pdf          CTEQ parton densities (def.) or LHAPDF
-  -r              Reference calculation incl. pdf access
-
-    gridrun.pl is a perl program to install and run in one go all
-    necessary ingredients of cernlib, lhapdf, nlojet and fastNLO
-    as suitable for running on the grid.
-    It expects to find in the directory where it is called from
-    either the archives cernlib-2003.tar.gz, lhapdf-4.2.tar.gz,
-    nlojet++-2.0.1.tar.gz, nlojet++-2.0.1-fix.tar.gz and 
-    fastNLO-rev125.tar.gz or the corresponding subdirectories
-    cernlib-1003, lhapdf-4.2, nlojet++-2.0.1 and fastNLO-rev125,
-    assuming that the archives have already been installed there.
-
-    The scenario to calculate is given as argument, e.g. fnt1003rsep.
-    The default order for option -o is LO for leading order.
-    By default, option -p is set to CTEQ so that LHAPDF use and
-    installation is skipped.
-    Option -r can be set to run the reference computations. According
-    to this setting the files scenario.cc and Makefile are automatically
-    adapted to use iref = 0/1 resp. -o scenario/scenarioref as name.
-
-    For the moment, this has been set up for author1c scenarios only.
-    
-    If this is used as executable on the grid, it has to be accompanied
-    by a jdl (job description language) file, specifying the files to
-    transfer with the input sandbox, the program to run with which arguments,
-    where to write STDOUT, STDERR and what files to return to the submitter
-    with the output sandbox. An example is given as gridrun.jdl
-
-
-
 staterr.f       
   MW 2005-12-27
     - This is a Fortran routine that can be copied into the user-directory.
@@ -114,4 +73,76 @@ staterr.f
     >>>> the logic should be checked again (It seems that the errors
          are quite small - on the other hand I used high statistics! 
          MW-051227)
+
+
+
+
+######################################
+# fastrun.pl: Starting run of fastNLO: FASTRUN0_15052008_223606
+######################################
+
+
+fastrun.pl
+Usage: fastrun.pl [switches/options] ([scenario])
+  -b batch        Batch system used: LOCAL (def.), GRID or PBS
+  -d dir          Installation directory (def.=.)
+  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)
+  -f rev          fastNLO revision to use (def.=187)
+  -h              Print this text
+  -j jobnr        Job number to attach (def.=0001)
+  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only
+  -o order        LO (def.) or NLO calculation
+  -p pdf          CTEQ parton densities (def.) or LHAPDF
+  -r              Reference calculation incl. pdf access
+  -s dir          Archive source directory (def.=.)
+  -t dir          Output target directory: (def.= {scen}{ref}_{jobnr} with
+                  ref. to working directory in fastNLO installation)
+  -v              Switch verbose mode on
+
+Examples:
+1) Install only (to install with LHAPDF use option -p):
+   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir]
+
+2) Make only scenario (to make scenario for reference mode use option -r):
+   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname
+
+3) Run only (to run scenario in reference mode use option -r):
+   ./fastrun.pl [-b LOCAL|GRID|batch] [-d .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname
+
+
+#####################################################
+# fastprep.pl: Starting archive creation for fastNLO: FASTPREP_15052008_223611
+#####################################################
+
+
+fastprep.pl
+Usage: fastprep.pl [switches/options]
+  -h              Print this text
+  -p pdf          Add CTEQ parton densities or LHAPDF
+
+
+######################################################
+# fastidcheck.pl: Starting table id check for fastNLO: FASTIDCHECK_15052008_223624
+######################################################
+
+
+fastidcheck.pl
+Usage: fastidcheck.pl glob (selects all files matching glob)
+  -h              Print this text
+
+
+##################################################
+# fastadd.pl: Starting table addition for fastNLO: FASTADD_15052008_223633
+##################################################
+
+
+fastadd.pl
+Usage: fastadd.pl [switches/options] scenario
+  -h              Print this text
+  -l dir          Directory for LO tables, (def.=scenario)
+  -n dir          Directory for NLO tables, (def.=scenario)
+  -s              Produce tables for statistical evaluation,
+                  i.e. combinations of each LO with 1 NLO table and
+                  all LO with each NLO table
+  -v              Verbose output
 

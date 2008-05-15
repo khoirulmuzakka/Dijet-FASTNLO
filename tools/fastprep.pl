@@ -23,7 +23,7 @@ use warnings;
 my $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\n#####################################################\n";
-print "# fastprep.pl: Starting archive creation for fastNLO: $date\n";
+print "# fastprep.pl: Starting archive creation for fastNLO: FASTPREP_$date\n";
 print "#####################################################\n\n";
 
 #
