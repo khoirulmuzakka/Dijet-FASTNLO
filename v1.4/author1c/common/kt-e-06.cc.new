@@ -18,9 +18,9 @@ kt_e_06::operator()(const event_hhc& ev, double r0)
     const double pz = ev[ip].Z();
     const double E  = ev[ip].T();
     cout << "**************************\n";
-    cout << "Input objects:\n";
+    cout << "Input objects: ip, px, py, pz, E, np\n";
     printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-	   ip, px, py, pz, E, nt);
+  	   ip, px, py, pz, E, nt);
     cout << "**************************\n";
   }
 
@@ -91,7 +91,7 @@ kt_e_06::operator()(const event_hhc& ev, double r0)
       if ( pt >= 1. ) {
 	jp++;
 	cout << "**************************\n";
-	cout << "Output jets pt >= 1.0:\n";
+	cout << "Output jets pt >= 1.0: ijet, px, py, pz, E, pt\n";
 	printf("%5u %15.8f %15.8f %15.8f %15.8f %15.8f\n",
 	       jp, px, py, pz, E, pt);
 	cout << "**************************\n";
