@@ -227,11 +227,11 @@ fnt200a: links fnt200a.cc $(CommonPath)/cone-e-07.cc \
 # ======================================================================
 # hep-ex/0512062
 #
-fnt2003: links fnt2003.cc $(CommonPath)/kt-e-07.cc \
-	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnt2003.cc \
-	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
-	-o fnt2003 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+#fnt2003: links fnt2003.cc $(CommonPath)/kt-e-07.cc \
+#	$(cteq6pdf)
+#	$(NLOJET)/bin/create-nlojet-user fnt2003.cc \
+#	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
+#	-o fnt2003 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNT2005: Tevatron Run II CDF incl. jets with kT D=0.5   ======
