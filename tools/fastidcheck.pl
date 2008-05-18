@@ -7,7 +7,7 @@
 # last modified:
 #
 #-----------------------------------------------------------------------
-# Todo:
+# Todo: Move double tables automatically out of the way!
 #
 use Cwd;
 use English;

@@ -146,7 +146,7 @@ if ( $opt_s ) {
 	$scmd1 =~ s/\.raw$/\.stc/;
 	print "fastrun.pl: Creating sum table for $lotab ...\n";
 	if ( $opt_v ) {print "fastrun.pl: Running command $scmd1\n";}
-	system("$scmd1 >> ${scen}stadd.log");
+	system("$scmd1 >> ${scen}_addst.log");
     }
     foreach my $nlotab ( @nlotabs ) {
 	my $scmd1 = $scmd2;
@@ -155,7 +155,7 @@ if ( $opt_s ) {
 	$scmd1 =~ s/\.raw$/\.stc/;
 	print "fastrun.pl: Creating sum table for $nlotab ...\n";
 	if ( $opt_v ) {print "fastrun.pl: Running command $scmd1\n";}
-	system("$scmd1 >> ${scen}stadd.log");
+	system("$scmd1 >> ${scen}_addst.log");
     }
 # Normal mode: All LO with all NLO tables
 } else {
@@ -169,7 +169,7 @@ if ( $opt_s ) {
     $scmd1 .= " $scen.tab";
     print "fastrun.pl: Creating total sum table for $scen ...\n";
     if ( $opt_v ) {print "fastrun.pl: Running command $scmd1\n";}
-    system("$scmd1 > ${scen}add.log");
+    system("$scmd1 > ${scen}_add.log");
 }
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
