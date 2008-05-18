@@ -13,11 +13,12 @@ NAME=example-v14a
 #
 
 FFILES= example.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f
-FFILESD= exampled01.f fastnlod00.f fn-pdf.f fn-alphas-demo.f  fn-interface.f
+FFILESD= exampled01.f fastnlod00.f fn-pdf.f fn-alphas-demo.f fn-interface.f
 FFILES2= gz.F 
 CFILES= ftn_gzio.c
 
 FFILESERR= staterr.f fnx9999.f fn-hbook.f fn-alphas-demo.f  fn-interface.f
+FFILESERRKR= staterr_kr.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f
 
 # --- executable at CEDAR web page - so far w/o LHAPDF and w/o alphas choice
 FFILESCEDAR=example-cedar.f fnx9999.f fn-alphas-demo.f fn-interface-cedar.f
@@ -37,6 +38,7 @@ SRCFILES = $(FFILES) $(FFILES2) $(CFILES)
 OBJFILES = $(FFILES:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
 OBJFILESD = $(FFILESD:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
 OBJFILESERR = $(FFILESERR:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
+OBJFILESERRKR = $(FFILESERRKR:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
 OBJFILESREF = $(REFFILES:.f=.o) $(FFILES2:.F=.o) $(CFILES:.c=.o)
 OBJFILESPDF = $(PDFFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESCEDAR = $(FFILESCEDAR:.f=.o) 
@@ -48,10 +50,15 @@ $(NAME): $(OBJFILES)
 	-L $(LHAPDF) -lLHAPDF \
 	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
 
-
 # --- for statistical error analysis
 staterr-v14a: $(OBJFILESERR)
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESERR) \
+	-L $(LHAPDF) -lLHAPDF \
+	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
+
+# --- my statistical error analysis (kr)
+staterr: $(OBJFILESERRKR)
+	 $(FC) -o $@ $(FFLAGS) $(OBJFILESERRKR) \
 	-L $(LHAPDF) -lLHAPDF \
 	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
 
