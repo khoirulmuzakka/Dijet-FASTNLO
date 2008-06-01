@@ -1,106 +1,136 @@
       PROGRAM PDFUNC
-* -------------------------------------------------------------------
-* M. Wobisch 02/09/2006
+* ---------------------------------------------------------------------
+* M. Wobisch  02/09/2006
+* K. Rabbertz 01/06/2008 Restructured and cleaned up version
 *
-* fastNLO - example program to compute PDF uncertainties
-*           using PDFs from LHAPDF
+* PDFUNC - example program to compute PDF uncertainties
+*          using a fastNLO table and PDFs from LHAPDF
 *
-* -------------------------------------------------------------------
-      implicit none
-      CHARACTER*255 FILENAME,HISTOFILE,PDFSET,LHAPDF
-      integer i,j,k,l1,l2,l3,l4,npdf,iopdf,ioas
+* ---------------------------------------------------------------------
+      IMPLICIT NONE
+      INCLUDE "fnx9999.inc"
+      CHARACTER*255 FILENAME,HISTOFILE,PDFSET,PDFPATH,LHAPDF,ASMODE
+      INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER LENOCC
-      INCLUDE 'fnx9999.inc'
-      double precision mur,muf,diff,qlam4,qlam5,
-     +     res0(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     res1hi(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     res1lo(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     reslo,reshi
-      
-c - Attention!!! - this mus be declared consistent with the
-c                  definition in the commonblock!!!!!
-      double precision xsect1(900,3),xsect0(900,3)
+      DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5,
+     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
+     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,3),
+     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,3),
+     >     RESLO,RESHI
+c - Attention!!! This mus be declared consistent with the
+c                definition in the commonblock!!!!!
+      DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
+      COMMON/STEER/ASMODE
 
-
-c --- parse command line
+c --- Parse command line
 ckr 30.01.2008: Some more checks on input arguments
+      WRITE(*,*)"\n ##############################################"
+      WRITE(*,*)"# PDFUNC"
+      WRITE(*,*)"##############################################"
+      WRITE(*,*)"# Example program to compute PDF uncertainties"
+      WRITE(*,*)"# using a fastNLO table and PDFs from LHAPDF"
+      WRITE(*,*)"##############################################"
+      WRITE(*,*)"#"
       IF (IARGC().LT.1) THEN
-         FILENAME = 'table.txt'
+         FILENAME = "table.txt"
          WRITE(*,*)
-     &        "\npdfunc: WARNING! No input table given, "//
-     &        "taking table.txt instead!"
+     >        "PDFUNC: WARNING! No input table given, "//
+     >        "taking table.txt instead!"
+         WRITE(*,*)"      For an explanation of command line "//
+     >        "arguments type:"
+         WRITE(*,*)"      ./pdfunc -h"
       ELSE
          CALL GETARG(1,FILENAME)
-         WRITE(*,*)"\npdfunc: Using input table: ",
-     &        FILENAME(1:LENOCC(FILENAME))
+         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+            WRITE(*,*)" "
+            WRITE(*,*)"Usage: ./pdfunc [arguments]"
+            WRITE(*,*)"  NLO input table, def. = table.txt"
+            WRITE(*,*)"  HBOOK output file, def. = fastnlo.hbk"
+            WRITE(*,*)"  PDF set, def. = cteq65.LHgrid"
+            WRITE(*,*)"  PDF path, def. = $(LHAPDF)/"//
+     >           "../share/lhapdf/PDFsets"
+            WRITE(*,*)"  alpha_s calc., def. from PDF set"
+            WRITE(*,*)" "
+            STOP
+         ENDIF
+         WRITE(*,*)"PDFUNC: Using input table: ",
+     >        FILENAME(1:LENOCC(FILENAME))
       ENDIF
       IF (IARGC().LT.2) THEN
-         HISTOFILE = 'fastnlo.hbk'
+         HISTOFILE = "fastnlo.hbk"
          WRITE(*,*)
-     &        "\npdfunc: WARNING! No output filename given, "//
-     &        "taking fastnlo.hbk instead!"
+     >        "PDFUNC: WARNING! No output filename given, "//
+     >        "taking fastnlo.hbk instead!"
       ELSE
          CALL GETARG(2,HISTOFILE)
-         WRITE(*,*)"\npdfunc: Creating output file: ",
-     &        HISTOFILE(1:LENOCC(HISTOFILE))
+         WRITE(*,*)"PDFUNC: Creating output file: ",
+     >        HISTOFILE(1:LENOCC(HISTOFILE))
       ENDIF
       IF (IARGC().LT.3) THEN
-         PDFSET = 'cteq65.LHgrid'
+         PDFSET = "cteq65.LHgrid"
          WRITE(*,*)
-     &        "\npdfunc: WARNING! No PDF set given, "//
-     &        "taking cteq65.LHgrid instead!"
+     >        "PDFUNC: WARNING! No PDF set given, "//
+     >        "taking cteq65.LHgrid instead!"
       ELSE
          CALL GETARG(3,PDFSET)
-         WRITE(*,*)"\npdfunc: Using PDF set: ",
-     &        PDFSET(1:LENOCC(PDFSET))
+         WRITE(*,*)"PDFUNC: Using PDF set: ",
+     >        PDFSET(1:LENOCC(PDFSET))
       ENDIF
-      IF (IARGC().GT.3) THEN
-         WRITE(*,*)"\npdfunc: ERROR! Too many arguments, aborting!"
-         RETURN
-      ENDIF
-
+      IF (IARGC().LT.4) THEN
+         PDFPATH = "/../share/lhapdf/PDFsets"
+         WRITE(*,*)
+     >        "PDFUNC: No PDF path given, "//
+     >        "assuming: $(LHAPDF)"//PDFPATH
 c - Initialize path to LHAPDF libs
-      CALL GETENV('LHAPDF',LHAPDF)
-      IF (LENOCC(LHAPDF).EQ.0) THEN
-ckr         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
-         LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/lib'
+         CALL GETENV("LHAPDF",LHAPDF)
+         IF (LENOCC(LHAPDF).EQ.0) THEN
+            WRITE(*,*)"\nPDFUNC: ERROR! $LHAPDF not set, aborting!"
+            STOP
+         ENDIF
+         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
+     >        PDFPATH(1:LENOCC(PDFPATH))
+      ELSE
+         CALL GETARG(4,PDFPATH)
       ENDIF
-      WRITE(*,*)"\n Looking for LHAPDF sets in directory "
-     &     //LHAPDF(1:LENOCC(LHAPDF))
-      PDFSET = LHAPDF(1:LENOCC(LHAPDF))//"/../PDFsets/"//PDFSET
-      WRITE(*,*)"Taking PDF set "
-     &     //PDFSET(1:LENOCC(PDFSET))
-      
-      CALL InitPDFset(PDFSET(1:LENOCC(PDFSET)))
+      WRITE(*,*)"PDFUNC: Looking for LHAPDF PDF sets in path: ",
+     >     PDFPATH(1:LENOCC(PDFPATH))
+      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
+      WRITE(*,*)"PDFUNC: Taking PDF set "
+     >     //PDFSET(1:LENOCC(PDFSET))
+      IF (IARGC().LT.5) THEN
+         ASMODE = "PDF"
+         WRITE(*,*)
+     >        "PDFUNC: No alpha_s mode given, "//
+     >        "using alpha_s according to PDF set"
+      ELSE
+         CALL GETARG(5,ASMODE)
+         WRITE(*,*)"PDFUNC: Using alpha_s mode:",ASMODE
+      ENDIF
+      IF (IARGC().GT.5) THEN
+         WRITE(*,*)"\nPDFUNC: ERROR! Too many arguments, aborting!"
+         STOP
+      ENDIF
 
-ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq65.LHgrid')
-ckr      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/../PDFsets/cteq61.LHgrid')
-
-c      call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
-c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/cteq61.LHgrid')
-c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2001E.LHgrid')
-c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/MRST2004nnlo.LHgrid')
-c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.2/PDFsets/a02m_nlo.LHgrid')
-c      call InitPDFset('/h1/h1gen/lhapdf/LHAPDFv4/PDFsets/cteq61.LHgrid')
-
-      call numberPDF(NPDF)
-      call GetOrderPDF(IOPDF)
-      call GetOrderAs(IOAS)
-      call GetLam4(0,QLAM4)
-      call GetLam5(0,QLAM5)
-      WRITE(*,*) "fastNLO: The PDF set has",NPDF+1," members"
-      WRITE(*,*) "fastNLO: The PDF is of order",IOPDF+1
-      WRITE(*,*) "fastNLO: alpha_s was used in",IOAS+1,
+c - Initialization      
+      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL NUMBERPDF(NPDF)
+      CALL GETORDERPDF(IOPDF)
+      CALL GETORDERAS(IOAS)
+      CALL GETLAM4(0,QLAM4)
+      CALL GETLAM5(0,QLAM5)
+      WRITE(*,*) "PDFUNC: The PDF set has",NPDF+1," members"
+      WRITE(*,*) "PDFUNC: The PDF is of order",IOPDF+1
+      WRITE(*,*) "PDFUNC: alpha_s was used in",IOAS+1,
      >     "-loop order in the PDF"
-      WRITE(*,*) "fastNLO: The lamba_4 value for member 0 is",QLAM4
-      WRITE(*,*) "fastNLO: The lamba_5 value for member 0 is",QLAM5
+      WRITE(*,*) "PDFUNC: The lamba_4 value for member 0 is",QLAM4
+      WRITE(*,*) "PDFUNC: The lamba_5 value for member 0 is",QLAM5
 
-c - one initial call - to fill commonblock -> for histo-booking
-      call InitPDF(0)
-      call FX9999CC(FILENAME, 1d0 , 1d0 , 0 , XSECT1)
-      call PDFHIST(1,histofile)
+c - One initial call - to fill commonblock -> for histo-booking
+      CALL INITPDF(0)
+      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
+      CALL PDFHIST(1,HISTOFILE)
 
-c- new call: a single call for each scale
+c - New call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
 c                              any choice is possible, but please note 
@@ -111,195 +141,209 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-c -> compute PDF uncertainties for all available scales
-      do i=1,Nscalevar
-         call InitPDF(0)
-         mur = murscale(i)
-         muf = mufscale(i)
-         write(*,*) "Now scale no.",i,"; mur, muf = ",mur,muf
-         call FX9999CC(FILENAME, mur , muf, 0 , XSECT1)
+c - Compute PDF uncertainties for all available scales
+      DO I=1,NSCALEVAR
+         CALL INITPDF(0)
+         MUR = MURSCALE(I)
+         MUF = MUFSCALE(I)
+         WRITE(*,*)"PDFUNC: Now scale no.",i,"; mur, muf = ",mur,muf
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
 
-c -    save the result array from the first call (= central result)
-c      and reset result arrays   
-         write(*,*) "the observable has",NBINTOT," bins -",NSUBPROC
-     >        ," subprocesses"
-         do l1=1,NBINTOT
-            do l2=1,(NSUBPROC+1)
-               do l3=1,NORD
-                  res0(l1,l2,l3) = 0d0 
-                  do l4=1,l3
-                     res0(l1,l2,l3) = res0(l1,l2,l3)+result(l1,l2,l4)
-                  enddo
-                  res1lo(l1,l2,l3) = 0d0
-                  res1hi(l1,l2,l3) = 0d0
-               enddo
-            enddo
-         enddo
+c - Save the result array from the first call (= central result)
+c   and reset result arrays   
+         WRITE(*,*)"PDFUNC: The observable has",NBINTOT," bins -",
+     >        NSUBPROC," subprocesses"
+         DO L1=1,NBINTOT
+            DO L2=1,(NSUBPROC+1)
+               DO L3=1,NORD
+                  RES0(L1,L2,L3) = 0D0 
+                  DO L4=1,L3
+                     RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
+                  ENDDO
+                  RES1LO(L1,L2,L3) = 0D0
+                  RES1HI(L1,L2,L3) = 0D0
+               ENDDO
+            ENDDO
+         ENDDO
 
-ckr Do loop runs once even if NPDF=0! => Avoid with IF statement         
-         if (npdf.gt.1) then
-            do j=1,NPDF
-               call InitPDF(j)
-               call FX9999CC(FILENAME,mur,muf,0,XSECT0)
-               
-c - for all bins/subproc/orders: add negative/positive variations
-               do l1=1,NBINTOT
-                  do l2=1,(NSUBPROC+1)
-                     do l3=1,NORD
-                        diff = - res0(l1,l2,l3)
-                        do l4=1,l3
-                           diff = diff + result(l1,l2,l4) 
-                        enddo
-                        if (diff .gt. 0d0) then
-                           res1hi(l1,l2,l3) = res1hi(l1,l2,l3)+diff*diff
-                        else
-                           res1lo(l1,l2,l3) = res1lo(l1,l2,l3)+diff*diff
-                        endif
-                     enddo
-                  enddo
-               enddo
-            enddo               ! loop over bins
-         endif                  ! not done for npdf <= 1
+ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
+         IF (NPDF.GT.1) THEN
+            DO J=1,NPDF
+               CALL INITPDF(J)
+               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+c - For all bins/subproc/orders: Add negative/positive variations
+               DO L1=1,NBINTOT
+                  DO L2=1,(NSUBPROC+1)
+                     DO L3=1,NORD
+                        DIFF = - RES0(L1,L2,L3)
+                        DO L4=1,L3
+                           DIFF = DIFF + RESULT(L1,L2,L4) 
+                        ENDDO
+                        IF (DIFF.GT.0D0) THEN
+                           RES1HI(L1,L2,L3) =
+     >                          RES1HI(L1,L2,L3)+DIFF*DIFF
+                        ELSE
+                           RES1LO(L1,L2,L3) =
+     >                          RES1LO(L1,L2,L3)+DIFF*DIFF
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO               ! Loop over bins
+         ENDIF                  ! Not done for npdf <= 1
 
-c - take square-root of sum of squares
-         do l1=1,NBINTOT
-            if (npdf.gt.1) then
-               do l2=1,(NSUBPROC+1)
-                  do l3=1,NORD
-                     res1hi(l1,l2,l3) = sqrt(res1hi(l1,l2,l3))
-                     res1lo(l1,l2,l3) = -sqrt(res1lo(l1,l2,l3))
-                  enddo
-               enddo
-               reslo = res1lo(l1,NSUBPROC+1,NORD)/
-     >              res0(l1,NSUBPROC+1,NORD)
-               reshi = res1hi(l1,NSUBPROC+1,NORD)/
-     >              res0(l1,NSUBPROC+1,NORD)
-ckr 30.01.2008: Change output format for better comparison with C++ version
-            else
-               reslo = 0d0
-               reshi = 0d0
-            endif
-            WRITE(*,900) l1,res0(l1,NSUBPROC+1,NORD),reslo,reshi
-         enddo
-
+c - Take square-root of sum of squares
+         DO L1=1,NBINTOT
+            IF (NPDF.GT.1) THEN
+               DO L2=1,(NSUBPROC+1)
+                  DO L3=1,NORD
+                     RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
+                     RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
+                  ENDDO
+               ENDDO
+               RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
+     >              RES0(L1,NSUBPROC+1,NORD)
+               RESHI = RES1HI(L1,NSUBPROC+1,NORD)/
+     >              RES0(L1,NSUBPROC+1,NORD)
+ckr 30.01.2008: Change output format for better comp. with C++ version
+            ELSE
+               RESLO = 0D0
+               RESHI = 0D0
+            ENDIF
+            WRITE(*,900) L1,RES0(L1,NSUBPROC+1,NORD),RESLO,RESHI
+         ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
 
-c - fill histograms
-         call PDFFILL(i,res0,res1hi,res1lo)
+c - Fill histograms
+         CALL PDFFILL(I,RES0,RES1HI,RES1LO)
+         
+      ENDDO                     ! Loop over scales
 
-      enddo                     ! loop over scales
-      write(*,*) 'Bin    x-sect       lower PDF    upper PDF unc.'
-      write(*,*) '(the printed uncertainties are for the highest order)'
-      write(*,*) '(histograms contain results for all orders and subprocesses)'
+      WRITE(*,*)"Bin    x-sect       lower PDF    upper PDF unc."
+      WRITE(*,*)"(the printed uncertainties are for "//
+     >     "the highest order)"
+      WRITE(*,*)"(histograms contain results for all orders and "//
+     >     "subprocesses)"
 
-c - close hbook file
-      call PDFHIST(2,histofile)
-      RETURN
+c - Close hbook file
+      CALL PDFHIST(2,HISTOFILE)
       END
 
 c
+c ======================= Book the histograms ========================
 c
-c ======================= do the histogramming =========================
-      SUBROUTINE PDFHIST(n,histofile)
-      implicit none
-      Character*(*) histofile
-      INTEGER IFIRST, IFILE, J,N,istat2,icycle
-      Integer ix,iord,isub, iscale, irap, ihist, nhist
-      INCLUDE 'fnx9999.inc'
-      real pt(nptmax)
+      SUBROUTINE PDFHIST(N,HISTOFILE)
+      IMPLICIT NONE
+      CHARACTER*(*) HISTOFILE
+      INTEGER N
 
+      INTEGER J,ISTAT2,ICYCLE
+      INTEGER IORD,ISUB,ISCALE,IRAP,IHIST,NHIST
+      INCLUDE "fnx9999.inc"
+      REAL PT(NPTMAX)
+      
 c - HBOOK common 
       INTEGER NWPAWC
       PARAMETER (NWPAWC=2500000)
       REAL HMEMOR(NWPAWC)
       COMMON /PAWC/ HMEMOR
 
-
-c - open & book
-      if (n.eq.1) then
-         write(*,*)'----------- book histograms -------'
+c - Open & book
+      IF (N.EQ.1) THEN
+         WRITE(*,*)"----------- Book histograms -------"
          CALL HLIMIT(NWPAWC)
-         CALL HROPEN(11,'fastNLO',histofile,'N',1024,ISTAT2)
-         if (ISTAT2.NE.0) then
-            WRITE(*,*) ' FNHBOOK: could not open histofile ',istat2
-         endif
+         CALL HROPEN(11,"fastNLO",HISTOFILE,"N",1024,ISTAT2)
+         IF (ISTAT2.NE.0) THEN
+            WRITE(*,*)"\nPDFHIST: ERROR! Could not open histofile: ",
+     >           ISTAT2," Aborted!"
+            STOP
+         ENDIF
          
-         nhist = 0
-         do iord=0,Nord         ! order: tot, LO, NLO-corr, NNLO-corr -> Nord
-            do iscale=1,NSCALEVAR ! scale variations
-               do isub=0,Nsubproc      ! subprocess: 0 tot + 7 subproc
-               
-                  do irap=1, nrapidity
-                     ihist = iord*1000000+iscale*100000+isub*10000+irap*100
-                     do j=1,(npt(irap)+1)
-                        pt(j) = real(PTBIN(irap,j))
-                     enddo
-                     call hbookb(ihist,'p?T! (GeV)' , NPT(irap) ,PT ,0)
-                     call hbookb(ihist+1,'p?T! (GeV)' , NPT(irap) ,PT ,0)
-                     call hbookb(ihist+2,'p?T! (GeV)' , NPT(irap) ,PT ,0)
-                     nhist = nhist+3
-                  enddo
-               enddo
-            enddo
-         enddo        
-         write(*,*)"Number of histograms booked:",nhist
+         NHIST = 0
+         DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
+            DO ISCALE=1,NSCALEVAR ! Scale variations
+               DO ISUB=0,NSUBPROC ! Subprocesses: 0 tot + 7 subproc
+                  DO IRAP=1, NRAPIDITY
+                     IHIST = IORD*1000000 + ISCALE*100000 +
+     >                    ISUB*10000 + IRAP*100
+                     DO J=1,(NPT(IRAP)+1)
+                        PT(J) = REAL(PTBIN(IRAP,J))
+                     ENDDO
+                     CALL HBOOKB(IHIST,
+     >                    "P?T! (GEV)",
+     >                    NPT(IRAP),PT,0)
+                     CALL HBOOKB(IHIST+1,
+     >                    "P?T! (GEV)",
+     >                    NPT(IRAP),PT,0)
+                     CALL HBOOKB(IHIST+2,
+     >                    "P?T! (GEV)",
+     >                    NPT(IRAP),PT,0)
+                     NHIST = NHIST+3
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO        
+         WRITE(*,*)"Number of histograms booked:",NHIST
 
-c - close HBOOK file
-      elseif (n.eq.2) then
-         CALL HROUT (0,ICYCLE,' ')
-         CALL HREND ('fastNLO')
-      endif
+c - Close HBOOK file
+      ELSEIF (N.EQ.2) THEN
+         CALL HROUT(0,ICYCLE," ")
+         CALL HREND("fastNLO")
+      ENDIF
 
       RETURN
       END
-c ======================= do the histogramming =========================
-      SUBROUTINE PDFFILL(nscale,res0,res1hi,res1lo)
+
+c
+c ======================= Fill the histograms =========================
+c
+      SUBROUTINE PDFFILL(NSCALE,RES0,RES1HI,RES1LO)
       IMPLICIT NONE
-      INTEGER nscale,   I,J,K,L, nbin,nx
-      Integer iord,isub,isub2, iscale,ihist
-      INCLUDE 'fnx9999.inc'
-      double precision 
-     +     res0(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     res1hi(NBINTOTMAX,NMAXSUBPROC+1,3),
-     +     res1lo(NBINTOTMAX,NMAXSUBPROC+1,3)
-      real val0,vallo,valhi,v
+      INCLUDE "fnx9999.inc"
+      INTEGER NSCALE
+      DOUBLE PRECISION 
+     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
+     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,3),
+     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,3)
+      INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
+      REAL VAL0,VALLO,VALHI
+      
+      IF (NSCALE.LT.1 .OR. NSCALE.GT.NSCALEVAR) THEN
+         WRITE(*,*) "\nPDFFILL: ERROR! NSCALE ",NSCALE,
+     >        " is out of range, aborted!"
+         WRITE(*,*) "PDFFILL: Max. NSCALE: ",NSCALEVAR
+         STOP
+      ENDIF
+      ISCALE = NSCALE
 
-      if (nscale.lt.1 .or. nscale.gt.Nscalevar) then
-         write(*,*) " FNHFILL:   nscale=",nscale," is out of range"
-         write(*,*) "            max: ",nscalevar
-         stop
-      endif
-      iscale = nscale
-
-c - fill all histograms for the given scale
-      do iord=0,Nord            ! order: tot, LO, NLO-corr, 3 NNLOcorr
-         do isub2=1,(Nsubproc+1) ! subprocess: Nsubproc + 1 tot
-            isub=isub2
-            if (isub.eq.8) isub=0
-            nbin=0
-            do i=1,nrapidity                   
-               do j=1,npt(i)
-                  nbin = nbin + 1
-
-                  if (iord.gt.0) then
-                     val0  = real(res0(nbin,isub2,iord))
-                     vallo = real(res1lo(nbin,isub2,iord))
-                     valhi = real(res1hi(nbin,isub2,iord))
-                  else
-                     val0  = real(res0(nbin,isub2,Nord))
-                     vallo = real(res1lo(nbin,isub2,Nord))
-                     valhi = real(res1hi(nbin,isub2,Nord))
-                  endif
-
-                  ihist = iord*1000000+iscale*100000+isub*10000+i*100
-                  call hfill(ihist, real(PTBIN(i,j)+0.01) ,0.0, val0)
-                  call hfill(ihist+1, real(PTBIN(i,j)+0.01) ,0.0, vallo)
-                  call hfill(ihist+2, real(PTBIN(i,j)+0.01) ,0.0, valhi)
-               enddo            ! pT-loop
-            enddo               ! rap-loop
-         enddo                  ! isub loop
-      enddo                     ! iord-loop
-
+c - Fill all histograms for the given scale
+      DO IORD=0,NORD            ! Order: tot, LO, NLO-corr, NNLO-corr
+         DO ISUB2=1,(NSUBPROC+1) ! Subprocesses: 0 tot + 7 subproc
+            ISUB=ISUB2
+            IF (ISUB.EQ.8) ISUB=0
+            NBIN=0
+            DO I=1,NRAPIDITY                   
+               DO J=1,NPT(I)
+                  NBIN = NBIN + 1
+                  IF (IORD.GT.0) THEN
+                     VAL0  = REAL(RES0(NBIN,ISUB2,IORD))
+                     VALLO = REAL(RES1LO(NBIN,ISUB2,IORD))
+                     VALHI = REAL(RES1HI(NBIN,ISUB2,IORD))
+                  ELSE
+                     VAL0  = REAL(RES0(NBIN,ISUB2,NORD))
+                     VALLO = REAL(RES1LO(NBIN,ISUB2,NORD))
+                     VALHI = REAL(RES1HI(NBIN,ISUB2,NORD))
+                  ENDIF
+ckr Recall: HBOOK understands only single precision
+                  IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
+                  CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
+                  CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
+                  CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+               ENDDO            ! pT-loop
+            ENDDO               ! rap-loop
+         ENDDO                  ! isub-loop
+      ENDDO                     ! iord-loop
+      
       RETURN
       END

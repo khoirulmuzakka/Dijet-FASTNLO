@@ -31,8 +31,8 @@
       DOUBLE PRECISION BPI(0:2),LFAC,LSCALE,PI
       
       LOGICAL FIRST
-      DATA FIRST/.TRUE./
       SAVE FIRST
+      DATA FIRST/.TRUE./
 
 *---Initialization
       IF (FIRST) THEN
@@ -116,8 +116,8 @@
       DOUBLE PRECISION LSCALE2,PI
       
       LOGICAL FIRST
-      DATA FIRST/.TRUE./
       SAVE FIRST
+      DATA FIRST/.TRUE./
       
 *---Initialization
       IF (FIRST) THEN
@@ -190,8 +190,8 @@
       DOUBLE PRECISION BFAC,BPRIM,EXPON,LFAC,PI
       
       LOGICAL FIRST
-      DATA FIRST/.TRUE./
       SAVE FIRST
+      DATA FIRST/.TRUE./
       
 *---Initialization
       IF (FIRST) THEN

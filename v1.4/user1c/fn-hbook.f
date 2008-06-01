@@ -35,7 +35,8 @@
       double precision mur,muf
       INCLUDE 'fnx9999.inc'
 
-      write(*,*) '   #     store HBOOK histograms in file >>',histofile,'<<'
+      write(*,*) '   #     store HBOOK histograms in file >>',
+     >     histofile,'<<'
  
 c - reset result arrays
       nbin = 0                  ! continuos numbering for the final array
@@ -60,7 +61,8 @@ c - loop over all scale variations
          muf = mufscale(i)
          call FX9999CC(TABLEFILE, mur, muf, 0, XSECT)
 c --- fill histograms
-         write(*,*)'FNHIST: filling histograms for scale No. ',i,' mur/muf=',mur,muf
+         write(*,*)'FNHIST: filling histograms for scale No. ',i,
+     >        ' mur/muf=',mur,muf
          call FNHFILL(i)
       enddo
 
@@ -86,10 +88,10 @@ C -------------------------------------------------------------
 * fill HBOOK histograms
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER nscale,   I,J,K,L, nbin,nx
+      INTEGER nscale,   I,J,K, nbin
       Integer iord,isub,isub2, iscale,ihist
       INCLUDE 'fnx9999.inc'
-      real value,v
+      real value
 
 c - identify the scale bin
       if (nscale.lt.1 .or. nscale.gt.Nscalevar) then
@@ -152,7 +154,8 @@ C -------------------------------------------------------------
       INTEGER I,J,K,L,P,iord,isub, iscale,  nx2limit    
       Integer  nbin,nx , index ,ihist,ihi2,ihi3,ihi4
       INCLUDE 'fnx9999.inc'
-      double precision FNALPHAS, as(nscalebinmax), mur, contr, sum, hxlimit,hx1,hx2
+      double precision FNALPHAS,as(nscalebinmax),mur,contr,sum
+      double precision hxlimit,hx1,hx2
       DOUBLE PRECISION mu0scale,llptlo,llpthi,t1,t2,bweight
       real v
       PARAMETER (mu0scale=0.25)
@@ -168,8 +171,10 @@ c - first get PDFs at right scale
          do i=1,nrapidity       ! (Pseudo-)Rapidity Bins
             do j=1,NPT(i)       ! ET/pT Bins
                nbin=nbin+1                           
-               llptlo = log(log(murscale(iscale) * murval(i,j,1)/mu0scale))
-               llpthi = log(log(murscale(iscale) * murval(i,j,NSCALEBIN)/mu0scale))
+               llptlo = log(log(murscale(iscale) *
+     >              murval(i,j,1)/mu0scale))
+               llpthi = log(log(murscale(iscale) *
+     >              murval(i,j,NSCALEBIN)/mu0scale))
             
                sum = 0d0
                
@@ -182,10 +187,13 @@ c - first get PDFs at right scale
                      do isub=1,Nsubproc ! Subprocess
 
                         if(NSCALEBIN.eq.1) then
-                           as(1) =  FNALPHAS(murval(i,j,1) * murscale(iscale))
+                           as(1) = FNALPHAS(murval(i,j,1) *
+     >                          murscale(iscale))
                         else
                            do p=1,NSCALEBIN ! loop over all scale bins, calc alphas
-                              mur = mu0scale * exp(exp((llptlo + (dble(l)-1.)/(NSCALEBIN-1)*(llpthi-llptlo) )))
+                              mur = mu0scale * exp(exp((llptlo +
+     >                             (dble(l)-1.)/(NSCALEBIN-1)*(llpthi
+     >                             -llptlo) )))
                               as(p) = FNALPHAS(mur) !    ... and get alpha_s
                            enddo
                         endif
@@ -199,52 +207,72 @@ c - first get PDFs at right scale
                               t1 = 1./2.
                               if(p.eq.1) bweight =  as(1)
                               if(p.eq.2) bweight = 1./(2.*(1.-t1)*t1)*
-     &                             (as(2)-as(1)*(1.-t1)**2-as(3)*(t1)**2)
+     >                             (as(2)-as(1)*(1.-t1)**2-
+     >                             as(3)*(t1)**2)
                               if(p.eq.3) bweight = as(3)
                            elseif(nscalebin.eq.4) then 
                               t1 = 1./3.
                               t2 = 2./3.
-                              if(p.eq.1) bweight =  as(1)
-                              if(p.eq.2) bweight = 1./(3.*(1.-t1)**2*t1*3.*(1.-t2)*(t2)**2 - 3.*(1.-t2)**2*t2 * 3.*(1.-t1)*(t1)**2)
-     &                             *(3.*(1.-t2)*(t2)**2*(as(2)-as(1)*(1.-t1)**3-as(4)*(t1)**3) 
-     &                             - 3.*(1.-t1)*(t1)**2*(as(3)-as(1)*(1.-t2)**3-as(4)*(t2)**3  ) )
-                              if(p.eq.3) bweight =1./(3.*(1.-t1)**2*t1*3.*(1.-t2)*(t2)**2  - 3.*(1.-t2)**2*t2 * 3.*(1.-t1)*(t1)**2)
-     &                             *(3.*(1.-t1)**2*(t1)*(as(3)-as(1)*(1.-t2)**3-as(4)*(t2)**3) 
-     &                             - 3.*(1.-t2)**2*(t2)*(as(2)-as(1)*(1.-t1)**3-as(4)*(t1)**3  ) )
-                              if(p.eq.4) bweight = as(4)
+                              if (p.eq.1) bweight = as(1)
+                              if (p.eq.2) bweight = 1./(3.*(1.-t1)**2*
+     >                             t1*3.*(1.-t2)*(t2)**2 -3.*(1.-t2)**2
+     >                             *t2 *3.*(1.-t1)*(t1)**2)*(3.*(1.-t2)
+     >                             *(t2)**2*(as(2)-as(1)*(1.-t1)**3-
+     >                             as(4)*(t1)**3) -
+     >                             3.*(1.-t1)*(t1)**2*(as(3)
+     >                             -as(1)*(1.-t2)**3-as(4)*(t2)**3))
+                              if (p.eq.3) bweight = 1./(3.*(1.-t1)**2*
+     >                             t1*3.*(1.-t2)*(t2)**2  -
+     >                             3.*(1.-t2)**2*t2 * 3.*(1.-t1)*
+     >                             (t1)**2)
+     >                             *(3.*(1.-t1)**2*(t1)*(as(3)-as(1)*
+     >                             (1.-t2)**3-as(4)*(t2)**3) 
+     >                             - 3.*(1.-t2)**2*(t2)*(as(2)-as(1)*
+     >                             (1.-t1)**3-as(4)*(t1)**3))
+                              if (p.eq.4) bweight = as(4)
                            else
-                              write(*,*)'NSCALEBIN = ',nscalebin,' not yet supported.'
+                              write(*,*)'NSCALEBIN = ',nscalebin,
+     >                             ' not yet supported.'
                               stop
                            endif
 
                            do iord=1,Nord ! order: 1 LO  2 NLO 3 NNLO
-                              ihist= iord*1000000+iscale*100000+isub*10000+i*100+j
-                              ihi2 = iord*1000000+iscale*100000 +i*100+j ! sum subproc
-                              ihi3 = iscale*100000+isub*10000+i*100+j ! sum orders
-                              ihi4 = iscale*100000+i*100+j ! sum orders and subpr.
+                              ihist = iord*1000000+iscale*100000+
+     >                             isub*10000+i*100+j
+                              ihi2 = iord*1000000+iscale*100000+
+     >                             i*100+j ! sum subproc
+                              ihi3 = iscale*100000+isub*10000+
+     >                             i*100+j ! sum orders
+                              ihi4 = iscale*100000+
+     >                             i*100+j ! sum orders and subpr.
 
                               if (iord.eq.1) index=1
                               if (iord.eq.2) index=iscale+1
                               if (iord.eq.3) index=Nscalevar+iscale+1
 
                               contr = array(nbin,nx,isub,index,p)
-     +                             * bweight**(iord+1) ! multiply alpha-s
-     +                             * pdf(nbin,nx,isub,p) ! multiply PDFs
+     +                             * bweight**(iord+1) ! mult. alpha-s
+     +                             * pdf(nbin,nx,isub,p) ! mult. PDFs
                               sum=sum+contr
 c     - - - - - - - - - - see below for test-output for: sum
 
                               v = real(contr)
                               if (ixscheme.eq.2) then ! default
-                                 hxlimit = - sqrt(log10(1D0/xlimit(i,j)))
+                                 hxlimit = - sqrt(log10(1D0/
+     >                                xlimit(i,j)))
                               elseif (ixscheme.eq.1) then ! simple log
                                  hxlimit = log10(xlimit(i,j))
-                              elseif (ixscheme.eq.3) then ! proposed log(x) + x -1
-                                 hxlimit = log10(xlimit(i,j))+xlimit(i,j)-1d0
+                              elseif (ixscheme.eq.3) then ! prop.log(x)+x-1
+                                 hxlimit = log10(xlimit(i,j))+
+     >                                xlimit(i,j)-1d0
                               else
-                                 write(*,*) 'FNHBOOK: ixscheme not implemented: ',ixscheme
+                                 write(*,*) 'FNHBOOK: ixscheme not "//
+     >                                "implemented: ',ixscheme
                               endif
-                              hx1 = hxlimit*(1d0 - dble(k-0.5d0)/dble(nxtot))
-                              hx2 = hxlimit*(1d0 - dble(l-0.5d0)/dble(nxtot))
+                              hx1 = hxlimit*(1d0 - dble(k-0.5d0)/
+     >                             dble(nxtot))
+                              hx2 = hxlimit*(1d0 - dble(l-0.5d0)/
+     >                             dble(nxtot))
                               call hfill( ihist, real(hx1) ,0.0, v)
                               call hfill(-ihist, real(hx2) ,0.0, v)
                               call hfill( ihi2 , real(hx1) ,0.0, v)
@@ -285,7 +313,7 @@ c               if (iscale.eq.3) write(*,*) " rapbin ",i,"  ptbin ",j," -> ",sum
 *-----------------------------------------------------------------
       IMPLICIT NONE
       Character*(*) filename
-      INTEGER IFIRST, IFILE, J,N,istat2,icycle
+      INTEGER J,N,istat2,icycle
       Integer ix,iord,isub, iscale, irap, ihist
       Double Precision hxlimit
       INCLUDE 'fnx9999.inc'
@@ -317,22 +345,28 @@ c - open & book
 
                         pt(j) = real(PTBIN(irap,j))
 c                        write(*,*) "  irap,j=",irap,j,"  pt=",pt(j)
-                        ihist = iord*1000000+iscale*100000+isub*10000+irap*100
+                        ihist = iord*1000000+iscale*100000+isub*10000+
+     >                       irap*100
 
 c --------------------- x-distributions in pT-bins 
                         if (ix.eq.2 .and.j.ne.(npt(irap)+1)) then
                            if (ixscheme.eq.2) then    ! default
-                              hxlimit = - sqrt(log10(1D0/xlimit(irap,j)))
+                              hxlimit = - sqrt(log10(1D0/
+     >                             xlimit(irap,j)))
                            elseif (ixscheme.eq.1) then   ! simple log
                               hxlimit = log10(xlimit(irap,j))
                            elseif (ixscheme.eq.3) then   ! proposed log(x) + x -1
-                              hxlimit = log10(xlimit(irap,j))+xlimit(irap,j)-1d0
+                              hxlimit = log10(xlimit(irap,j))+
+     >                             xlimit(irap,j)-1d0
                            else
-                              write(*,*) 'FNHBOOK: ixscheme not implemented: ',ixscheme
+                              write(*,*) 'FNHBOOK: ixscheme not "//
+     >                             "implemented: ',ixscheme
                            endif
 c                           write(*,*) "xlim ",irap,j,xlimit(irap,j),hxlimit
-                           call hbook1(ihist+j,'x-Bin',nxtot,real(hxlimit),0.0,0)
-                           call hbook1(-(ihist+j),'x-Bin',nxtot,real(hxlimit),0.0,0)
+                           call hbook1(ihist+j,'x-Bin',nxtot,
+     >                          real(hxlimit),0.0,0)
+                           call hbook1(-(ihist+j),'x-Bin',nxtot,
+     >                          real(hxlimit),0.0,0)
                         endif
 
                      enddo
@@ -350,5 +384,3 @@ c - close
 
       RETURN
       END
-
-

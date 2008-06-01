@@ -28,10 +28,14 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       DOUBLE PRECISION MUR
-      DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSL,RALPSM
-      DOUBLE PRECISION ASMZ,ASMZPDF,A2PI1,A2PI2
+      CHARACTER*255 ASMODE
+      COMMON/STEER/ASMODE
+      
+      DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSM
+      DOUBLE PRECISION AS,ASMZ,ASMZPDF
       INTEGER IOAS,NLOOP
 
+ckr Set default values
       DOUBLE PRECISION ZMASS
 ckr Old Z mass
 ckr      PARAMETER (ZMASS = 91.187D0)
@@ -42,18 +46,20 @@ ckr PDG 2006
       DOUBLE PRECISION ASMZPDG
       PARAMETER (ASMZPDG = 0.1176D0)
 
-ckr For LHC energies assume always 5 flavours
+ckr For LHC energies assume 5 flavours
       INTEGER NF
       PARAMETER (NF = 5)
 
-ckr 30.01.2008: Initialize pi in double precision at first call like elsewhere
+ckr 30.01.2008: Initialize pi in double precision at first call
 ckr      PARAMETER (PI=3.1415927D0)
       INTEGER IFIRST
       DOUBLE PRECISION PI
-      DATA IFIRST,PI/0,0.D0/
       SAVE IFIRST,PI
-      
-      call GetOrderAs(IOAS)
+      DATA IFIRST,PI/0,0.D0/
+
+c - Get info from PDF set      
+      CALL GETORDERAS(IOAS)
+      NLOOP = IOAS+1
       ASMZPDF = ALPHASPDF(ZMASS)
 ckr Round value to 6 digits only
       ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
@@ -61,35 +67,41 @@ ckr Round value to 6 digits only
          IFIRST = 1
          PI = 4D0 * ATAN(1D0)
          WRITE(*,*)"FNALPHAS: PI =",PI 
-         WRITE(*,*)"FNALPHAS: M_Z/GeV =",ZMASS 
+         WRITE(*,*)"FNALPHAS: M_Z_PDG/GeV =",ZMASS 
          WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDG (parameter) =",ASMZPDG 
          WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDF (1st call)  =",ASMZPDF 
-         WRITE(*,*)"FNALPHAS: a_s was used in",IOAS+1,
+         WRITE(*,*)"FNALPHAS: a_s was used in",NLOOP,
      >        "-loop order in PDF"
       ENDIF
 
-c === example: exact, iterative solution of the 2-loop RGE 
-c      nloop=2
-c      ASMZ=0.118              ! set here the value of alpha_s(Mz)
-c      ASMZ=0.1185             ! for H1-2000 MSbar
-c      ASMZ=0.1205             ! for MRST2004
-ckr 30.01.2008: Initialize alphas(M_Z) in double precision!
-ckr      ASMZ=0.118D0              ! set here the value of alpha_s(Mz)
-ckr      FNALPHAS = ALPS_IT(MUR,ASMZ,NLOOP)/2d0/PI
-ckr      A2PI1 = ALPS_IT(MUR,ASMZ,NLOOP)/2d0/PI
-
-c === here you can call your own alpha_s code
-c           -> remember to divide by 2Pi
-
-      NLOOP = IOAS+1
-      ASMZ = ASMZPDF
-ckr      ASMZ = ASMZPDG
-      FNALPHAS = ALPHASPDF(MUR)/2D0/PI
-ckr      FNALPHAS = RALPSL(MUR,ZMASS,ASMZ,NF,NLOOP)/2D0/PI
-ckr      FNALPHAS = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)/2D0/PI
-ckr      A2PI2 = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)/2D0/PI
-ckr      write(*,*)"d(A2PI) =",abs(a2pi2-a2pi1)/a2pi1
-ckr      FNALPHAS = A2PI2
+c - ASMODE "PDF": Take alpha_s etc. from PDF set
+      IF (ASMODE.EQ."PDF") THEN 
+         AS = ALPHASPDF(MUR)
+c - ASMODE "MW": Use Markus original example code
+c -              Exact, iterative solution of the 2-loop RGE 
+      ELSEIF (ASMODE.EQ."MW") THEN
+c   ASMZ = 0.1185             ! for H1-2000 MSbar
+c   ASMZ = 0.1205             ! for MRST2004
+         ASMZ = ASMZPDG
+c - Only NLOOP=2 or 4 allowed
+         NLOOP = 2
+         AS = ALPS_IT(MUR,ASMZ,NLOOP)
+c - ASMODE "KR":
+c Calculation of the running strong coupling up to 3-loop order
+c in the MSbar scheme for given alpha_s(M_Z) according to Giele,
+c Glover, Yu: hep-ph/9506442.
+      ELSEIF (ASMODE.EQ."KR") THEN
+         ASMZ = ASMZPDG
+c - Only NLOOP=1,2,3 allowed
+c         NLOOP = 2
+         AS = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)
+      ELSE
+c - Call your own alpha_s code
+         WRITE(*,*)"fastNLO: ERROR! Own alpha_s code called, "//
+     >        "but not implemented! ASMODE =", ASMODE
+         STOP
+      ENDIF
+      FNALPHAS = AS/2D0/PI
 
       RETURN
       END

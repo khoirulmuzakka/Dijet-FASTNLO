@@ -1,7 +1,7 @@
-*******************************************************************
-*******************************************************************
-* fastNLO user code                 T. Kluge, M. Wobisch 02/01/2006      
-* Some output modification:         K. Rabbertz          30/01/2008
+***********************************************************************
+***********************************************************************
+* fastNLO user code                 T. Kluge, M. Wobisch 02/01/2006
+* Cleaned up and improved version   K. Rabbertz          01/06/2008
 *                            
 *   >> this code should not be edited
 *   >> if you have questions, please contact 
@@ -30,14 +30,14 @@
 *     FNALPHAS        alpha_s interface (double precision function)
 *     FNPDF           PDF interface
 *
-*******************************************************************
-*******************************************************************
+***********************************************************************
+***********************************************************************
 
 
 
-*******************************************************************
+***********************************************************************
       SUBROUTINE FX9999CC(FILENAME, XMUR, XMUF, IPRINTFLAG, XSECT)
-*-----------------------------------------------------------------
+*----------------------------------------------------------------------
 * fastNLO user code - main routine 
 *
 * input:
@@ -55,11 +55,11 @@
 *   XSECT(nbin,3)    array of cross sections 
 *                      first dimension: Bin number
 *                      second dimension: 1 LO   2 NLO   
-*                                3 NNLO / or other correction (if available)
+*                        3 NNLO / or other correction (if available)
 *
 * MW 04/15/2005 initial version
 * MW 09/02/2005 implement flexible scale variations
-* TK 12/07/2005 table format contains now LO + NLO with 5 scale variations
+* TK 12/07/2005 table format now LO + NLO with 5 scale variations
 * MW 2006/01/17 implement tableformat version 1c
 * MW 2006/02/01 implement tableformat version 1.4 
 * TK 2006/08/06 implement scalebins for N>2
@@ -68,258 +68,267 @@
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
 ckr 30.01.2008: Use LENOCC string length function 
-      INTEGER IFIRST, IFILE, iord, isub, lenocc, I,J,K,L,M, 
-     +     IPRINTFLAG, INORMFLAG, 
-     +     maxscale, nbin,nx, ixmur,ixmuf
+      INTEGER IFIRST,IORD,ISUB,LENOCC,I,J,K,L,M, 
+     >     IPRINTFLAG,INORMFLAG, 
+     >     NBIN,IXMUR,IXMUF
       CHARACTER*(*) FILENAME
-      CHARACTER*50 OLDFILENAME
+ckr 01.06.2008 Allow longer paths/filenames
+      CHARACTER*255 OLDFILENAME
 ckr 30.01.2008: Define temp. CSTRNG for output
       CHARACTER*255 CSTRNG
-      DOUBLE PRECISION xmur, xmuf, sum(3)
-      DATA IFIRST/0/, OLDFILENAME/'xxxx'/
+      DOUBLE PRECISION XMUR,XMUF,SUM(3)
       SAVE IFIRST, OLDFILENAME
+      INCLUDE 'strings.inc'
+      DATA IFIRST/0/, OLDFILENAME/'xxxx'/
 
-c - output in first call
-      if (IFIRST.EQ.0) then
-         Do i=1,12
-ckr 30.01.2008: Print strings only until end, not complete CHARACTER dimension
+c - Output in first call
+      IF (IFIRST.EQ.0) THEN
+         DO I=1,12
+ckr 30.01.2008: Print strings only until end, not complete
+ckr             CHARACTER dimension
 ckr             Similar usage below with CSTRNG at many places
             CSTRNG = CHEADER(I)
-            write(*,5000) " #",CSTRNG(1:LENOCC(CSTRNG))
-         enddo
-      endif
+            WRITE(*,5000) " #",CSTRNG(1:LENOCC(CSTRNG))
+         ENDDO
+      ENDIF
 
-c --- read the fastNLO coefficient table
-      IF (FILENAME.ne.OLDFILENAME) THEN
-         call FX9999RD(FILENAME)
-         OLDFILENAME=FILENAME
+c - Read the fastNLO coefficient table
+      IF (FILENAME.NE.OLDFILENAME) THEN
+         CALL FX9999RD(FILENAME)
+         OLDFILENAME = FILENAME
          
-c - check consistency of array dimensions / commonblock parameters
-         if (NXSUM.gt.NXMAX) then
-            write(*,*)'fastNLO: fatal error, nxsum=',nxsum,' > nxmax=',nxmax
-            stop
-         endif
-         if (NSCALEVAR.gt.NSCALEMAX) then
-            write(*,*)'fastNLO: fatal error, nscalevar=',nscalevar,') > nscalemax=',nscalemax
-            stop
-         endif
+c - Check consistency of array dimensions / commonblock parameters
+         IF (NXSUM.GT.NXMAX) THEN
+            WRITE(*,*)"fastNLO: ERROR! Inconsistent x binning,"//
+     >           " NXSUM =",NXSUM," > NXMAX =",NXMAX
+            STOP
+         ENDIF
+         IF (NSCALEVAR.GT.NSCALEMAX) THEN
+            WRITE(*,*)"fastNLO: ERROR! Inconsistent scale variations,"
+     >           //", NSCALEVAR =",NSCALEVAR," > NSCALEMAX =",NSCALEMAX
+            STOP
+         ENDIF
+         IF (NRAPIDITY.GT.NRAPMAX) THEN
+            WRITE(*,*)"fastNLO: ERROR! Inconsistent rap. binning,"//
+     >           " NRAPIDITY =",NRAPIDITY," > NRAPMAX =",NRAPMAX
+            STOP
+         ENDIF
+         DO I=1,NRAPIDITY
+            IF (NPT(I).GT.NPTMAX) THEN 
+               WRITE(*,*)"fastNLO: ERROR! Inconsistent pt binning,"//
+     >              " NPT(",I,") =",NPT(I)," > NPTMAX =",NPTMAX
+               STOP
+            ENDIF
+         ENDDO
+         K = 0
+         DO I=1,NRAPIDITY
+            DO J=1,NPT(I)
+               K=K+1
+            ENDDO
+         ENDDO
+         IF (K.GT.NBINTOTMAX) THEN
+            WRITE(*,*)"fastNLO: ERROR! Too many bins =",K,
+     >           " > NBINTOTMAX=",NBINTOTMAX
+            STOP
+         ENDIF
+         IF (NBINTOT.GT.NBINTOTMAX) THEN
+            WRITE(*,*)"fastNLO: ERROR! NBINTOT =",NBINTOT,
+     >           " > NBINTOTMAX =",NBINTOTMAX
+            STOP
+         ENDIF
 
-         if (NRAPIDITY.gt.NRAPMAX) then
-           write(*,*)'fastNLO: fatal error, nrapidity=',nrapidity,' > nrapmax=',nrapmax
-            stop
-            
-         endif
-         do i=1,nrapidity
-            if (npt(i).gt.NPTMAX) then 
-               write(*,*)'fastNLO: fatal error, npt(',i,')=',npt(i),' > nptmax=',nptmax
-               stop
-            endif
-         enddo
-         k = 0
-         do i=1,nrapidity
-            do j=1,npt(i)
-               k=k+1
-            enddo
-         enddo
-         if (k.gt.NBINTOTMAX) then
-            write(*,*)'fastNLO: # of bins=',k,' > nbintotmax=',nbintotmax
-            stop
-         endif
-         if (NBINTOT.gt.NBINTOTMAX) then
-            write(*,*)'fastNLO: nbintot=',nbintot,' > nbintotmax=',nbintotmax
-            stop
-         endif
-
-
-c - print further info
-         write(*,*) "#      "
+c - Print further info
+         WRITE(*,*)"#      "
          CSTRNG = NAMELABEL(1)
-         write(*,5000) " #      this table contains: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,5000)" #      this table contains: ",
+     >        CSTRNG(1:LENOCC(CSTRNG))
          CSTRNG = NAMELABEL(2)
-         write(*,5000) " #      as published in:     ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,5000)" #      as published in:     ",
+     >        CSTRNG(1:LENOCC(CSTRNG))
          CSTRNG = NAMELABEL(3)
-         write(*,5000) " #      by:                  ",CSTRNG(1:LENOCC(CSTRNG))
-         write(*,*) "#      "
+         WRITE(*,5000)" #      by:                  ",
+     >        CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      "
          CSTRNG = CIREACTION(IREACTION)
-         write(*,*) "#      reaction: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      reaction: ",CSTRNG(1:LENOCC(CSTRNG))
          CSTRNG = CIPROC(IPROC)
-         write(*,*) "#      process: ",CSTRNG(1:LENOCC(CSTRNG))
-         write(*,*) "#      total No. of observable bins:",Nbintot        
+         WRITE(*,*)"#      process: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      total No. of observable bins:",Nbintot
          CSTRNG = CIALGO(IALGO)
-         write(*,*) "#      jet algo: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      jet algo: ",CSTRNG(1:LENOCC(CSTRNG))
          CSTRNG = CJETRES1(IALGO)
 ckr 30.01.2008: Use explicit format for comparisons
-         write(*,FMT='(A,A,A,F6.4)')
-     &        " #         parameter 1: ",CSTRNG(1:LENOCC(CSTRNG)),' = ',jetres1
+         WRITE(*,FMT='(A,A,A,F6.4)')
+     >        " #         parameter 1: ",CSTRNG(1:LENOCC(CSTRNG)),
+     >        " = ",JETRES1
          CSTRNG = CJETRES2(IALGO)
-         write(*,FMT='(A,A,A,F6.4)')
-     &        " #         parameter 2: ",CSTRNG(1:LENOCC(CSTRNG)),' = ',jetres2
-         write(*,*) "#"
-         write(*,*) "#"
-         write(*,*) "#      the single contributions have been computed"
-         write(*,*) "#      using the following codes:"
-         do i=1,nord
+         WRITE(*,FMT='(A,A,A,F6.4)')
+     >        " #         parameter 2: ",CSTRNG(1:LENOCC(CSTRNG)),
+     >        " = ",JETRES2
+         WRITE(*,*)"#"
+         WRITE(*,*)"#"
+         WRITE(*,*)"#      the single contributions have been computed"
+         WRITE(*,*)"#      using the following codes:"
+         DO I=1,NORD
             CSTRNG = POWLABEL(I)
-            write(*,5000) " #      ",CSTRNG(1:LENOCC(CSTRNG))
+            WRITE(*,5000)" #      ",CSTRNG(1:LENOCC(CSTRNG))
             CSTRNG = CODELABEL(I)
-            write(*,5000) " #      by: ",CSTRNG(1:LENOCC(CSTRNG))
-         enddo
-         write(*,*)"#"
-         IF (nord.gt.0) then
-            do i=1,4
+            WRITE(*,5000)" #      by: ",CSTRNG(1:LENOCC(CSTRNG))
+         ENDDO
+         WRITE(*,*)"#"
+         IF (NORD.GT.0) THEN
+            DO I=1,4
                CSTRNG = CNLOJET(I)
-               write(*,5000) " # ",CSTRNG(1:LENOCC(CSTRNG))
-            enddo
-         endif 
-         IF (nord.eq.3) then
-            do i=1,5
+               WRITE(*,5000)" # ",CSTRNG(1:LENOCC(CSTRNG))
+            ENDDO
+         ENDIF 
+         IF (NORD.EQ.3) THEN
+            DO I=1,5
                CSTRNG = CTHRCOR(I)
-               write(*,5000) " # ",CSTRNG(1:LENOCC(CSTRNG))
-            enddo
-         endif 
+               WRITE(*,5000)" # ",CSTRNG(1:LENOCC(CSTRNG))
+            ENDDO
+         ENDIF 
 
-c - print scale-variations available in the table
-         write(*,*) "#"
-         write (*,*)
-     +        "#   --- the renormalization and factorization scales mur, muf"
-         write (*,*) "#       are proportional to"
+c - Print scale-variations available in the table
+         WRITE(*,*)"#"
+         WRITE(*,*)"#   --- the renormalization and factorization "//
+     >        "scales mur, muf"
+         WRITE (*,*)"#       are proportional to"
          CSTRNG = SCALELABEL
-         write (*,5000) " #           mu0 = ",CSTRNG(1:LENOCC(CSTRNG))
-         write (*,*) "#"
+         WRITE (*,5000)" #           mu0 = ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE (*,*)"#"
+         WRITE (*,*)"#   --- available No. of scale",
+     >        " variations:",NSCALEVAR
+         WRITE (*,*)"#         available factorization scale settings:"
+         DO I=1,NSCALEVAR
+            WRITE (*,FMT='(A,I1,A,F6.4)')
+     >           " #           ",I,"  (muf/mu0) = ",MUFSCALE(I)
+         ENDDO
+         WRITE (*,*)"#"
+         WRITE (*,*)"#         available renormalization scale "//
+     >        "settings:"
+         DO I=1,NSCALEVAR
+            WRITE (*,FMT='(A,I1,A,F6.4)')
+     >           " #           ",I,"  (mur/mu0) = ",MURSCALE(I)
+         ENDDO
+         WRITE (*,*)"#   (In LO and NLO, the renormalization scale"
+         WRITE (*,*)"#    can be varied arbitrarily afterwards."
+         WRITE (*,*)"#    This is, however, not possible for the"
+         WRITE (*,*)"#    2-loop threshold corrections.)"
+         WRITE (*,*)"# "
+      ENDIF
 
-         write (*,*) "#   --- available No. of scale",
-     +        " variations:",nscalevar
-         write (*,*) "#         available factorization scale settings:"
-         do i=1,nscalevar
-            write (*,FMT='(A,I1,A,F6.4)')
-     &           " #           ",i,"  (muf/mu0) = ",mufscale(i)
-         enddo
-         write (*,*) "#"
-         write (*,*) "#         available renormalization scale settings:"
-         do i=1,nscalevar
-            write (*,FMT='(A,I1,A,F6.4)')
-     &           " #           ",i,"  (mur/mu0) = ",murscale(i)
-         enddo
-         write (*,*) "#         (in LO and NLO, the renormalization scale"
-         write (*,*) "#          can be varied arbitrarily afterwards."
-         write (*,*) "#          This is, however, not possible for the"
-         write (*,*) "#          2-loop threshold corrections.)"
-         write (*,*) "# "
+c - Identify the scales chosen in this call
+      IXMUR = 0
+      IXMUF = 0
+      DO I=1,NSCALEVAR
+         IF (ABS(XMUR/MURSCALE(I)-1D0).LT.0.000001) IXMUR=I
+         IF (ABS(XMUF/MUFSCALE(I)-1D0).LT.0.000001) IXMUF=I
+      ENDDO
+
+      IF (IFIRST.EQ.0) THEN
+         WRITE (*,*)"#    --> in the first call the scales are "//
+     >        "chosen to be:"
+         WRITE (*,5002)" #     (mur/mu0) =",XMUR,
+     >        "(muf/mu0) =",MUFSCALE(IXMUF)
+      ENDIF
+      IF (IXMUF.EQ.0) THEN
+         WRITE(*,*)"# factorization scale ",XMUF,
+     >        " not available in table"
+         GOTO 998
+      ENDIF
+      IF (NORD.EQ.3 .AND. IXMUR.NE.IXMUF) THEN
+         WRITE(*,*)"# renormalization scale  mur<>muf  not available ",
+     >        "for threshold corrections"
+         WRITE(*,*)"#                (only mur=muf)"
+      ENDIF
+
+      IF (IFIRST.EQ.0) THEN
+         IFIRST = 1
+         WRITE(*,*)"#"
+         WRITE(*,*)"#################################################",
+     >        "################"
+         WRITE(*,*)"#"
       ENDIF
 
 
-c - identify the scales chosen in this call
-      ixmur = 0
-      ixmuf = 0
-      do i=1,nscalevar
-         if ( abs(xmur/murscale(i)-1d0).lt.0.000001 ) ixmur=i
-         if ( abs(xmuf/mufscale(i)-1d0).lt.0.000001 ) ixmuf=i
-      enddo
+c - Reset result arrays
+      DO NBIN=1,NBINTOT         ! Cont. numbering of the final array
+         DO L=1,NORD            ! All orders LO, NLO, NNLO, ...
+            DO M=1,(NSUBPROC+1) ! No. of Subproc + 1 for total sum
+               RESULT(NBIN,M,L) = 0D0 ! Reset 
+            ENDDO
+            XSECT(NBIN,L) = 0D0 ! Reset 
+         ENDDO
+      ENDDO
 
-      if (IFIRST.EQ.0) then
-         write (*,*) "#    --> in the first call the scales are chosen to be:"
-         write (*,5002) " #     (mur/mu0) =",xmur,"(muf/mu0) =",mufscale(ixmuf)
-      endif
-      if (ixmuf.eq.0) then
-         write(*,*) "# factorization scale ",xmuf," not available in table"
-         goto 998
-      endif
-      if (nord.eq.3 .and. ixmur.ne.ixmuf) then
-         write(*,*) "# renormalization scale  mur<>muf  not available ",
-     +        "for threshold corrections"
-         write(*,*) "#                (only mur=muf)"
-      endif
-
-      if (IFIRST.EQ.0) then
-         IFIRST = 1
-         write(*,*) "#"
-         write(*,*) "#################################################",
-     +        "################"
-         write(*,*) "#"
-      endif
-
-
-c - reset result arrays
-      do nbin=1,nbintot         ! continuous numbering of the final array
-         do l=1,Nord            ! all orders LO, NLO, NNLO, ...
-            do m=1,(Nsubproc+1) ! No.of Subproc + 1 for total sum
-               result(nbin,m,l) = 0d0 ! reset 
-            enddo
-            xsect(nbin,l) = 0d0   ! reset 
-         enddo
-      enddo
-
-
-c - now get the PDFs ...
-      call FX9999GP(mufscale(ixmuf))
+c - Now get the PDFs ...
+      CALL FX9999GP(MUFSCALE(IXMUF))
 c - ... and multiply with perturbative coefficients 
-      call FX9999MT(xmur,ixmuf)
-
+      CALL FX9999MT(XMUR,IXMUF)
 
 c ----------------- final touches ------------------------------------
-c - sum subprocesses / fill result array / fill 'XSECT' array
-      do nbin=1,nbintot         ! continuos numbering of the final array
-         do iord=1,Nord         ! loop over all orders
-            result(nbin,(Nsubproc+1),iord) = 0d0
-            xsect(nbin,iord) = 0d0
-            do m=1,Nsubproc     ! No. of Subprocesses
-               result(nbin,(Nsubproc+1),iord)=
-     +              result(nbin,(Nsubproc+1),iord) + result(nbin,m,iord)
-            enddo
-            xsect(nbin,iord) = result(nbin,(Nsubproc+1),iord)
-         enddo
-      enddo
-
+c - Sum subprocesses / fill result array / fill 'XSECT' array
+      DO NBIN=1,NBINTOT         ! Cont. numbering of the final array
+         DO IORD=1,NORD         ! Loop over all orders
+            RESULT(NBIN,(NSUBPROC+1),IORD) = 0D0
+            XSECT(NBIN,IORD) = 0D0
+            DO M=1,NSUBPROC     ! No. of Subprocesses
+               RESULT(NBIN,(NSUBPROC+1),IORD) =
+     >              RESULT(NBIN,(NSUBPROC+1),IORD)+RESULT(NBIN,M,IORD)
+            ENDDO
+            XSECT(NBIN,IORD) = RESULT(NBIN,(NSUBPROC+1),IORD)
+         ENDDO
+      ENDDO
 
 c -----------------------------------------------------------------
-c --- special feature:    compute   1/sigma * dsigma/d[whatever]
+c --- Special feature:    compute   1/sigma * dsigma/d[whatever]
 c --------- normalization - if required for observable ------------
 c
-      INORMFLAG = 0             ! switch normnalization Off(=0) / On(=1)
+      INORMFLAG = 0             ! switch normnalization Off(=0)/On(=1)
 c
-      IF (INORMFLAG .eq. 1) then
-c --- assume: observable has been divided by binwidth in 2nd dimension
+      IF (INORMFLAG.EQ.1) THEN
+c --- Assume: observable has been divided by binwidth in 2nd dimension
 c     here: normalize LO & NLO results (the NLO numbers are normalized
 c                    such that the sum (LO+NLO) is properly normalized)
 c   
-         do isub=1,(Nsubproc+1) ! subprocess: Nsubproc + 1 tot
-            nbin=0
-            do i=1,nrapidity                   
-               do iord=1,Nord
-                  sum(iord) = 0d0
-               enddo
-               do j=1,npt(i)    ! *** step 1: compute normalization factor
-                  nbin = nbin + 1
-                  do iord=1,Nord ! order: tot, LO, NLO-corr, 3 NNLOcorr
-                     do k=1,iord ! sum over all lower orders
-                        sum(iord) = sum(iord) +  
-     +                       result(nbin,isub,k)*(ptbin(i,j+1)-ptbin(i,j))
-                     enddo
-                  enddo
-               enddo
-               nbin = nbin - npt(i)
-               do j=1,npt(i)    ! *** step 2: apply normalization factor
-                  nbin = nbin + 1
-                  if (Nord.ge.1) result(nbin,isub,1) =
-     +                 result(nbin,isub,1) / sum(1)
-                  if (Nord.ge.2) result(nbin,isub,2) =
-     +                 (result(nbin,isub,1)*(sum(1)-sum(2))
-     +                 + result(nbin,isub,2))  / sum(2)
-               enddo 
-            enddo               ! Rapidity-Loop (or: 1st Dimension)
-         enddo                  ! Subprocess-Loop
-c -  fill "xsect" array
-         do nbin=1,nbintot      ! continuos numbering of the final array
-            do iord=1,Nord      ! loop over all orders
-               xsect(nbin,iord) = result(nbin,(Nsubproc+1),iord)
-            enddo
-         enddo
-      endif                     ! end: normalization 1/sigma dsigma/d[s.th.]
+         DO ISUB=1,(NSUBPROC+1) ! subprocess: Nsubproc + 1 tot
+            NBIN=0
+            DO I=1,NRAPIDITY                   
+               DO IORD=1,NORD
+                  SUM(IORD) = 0D0
+               ENDDO
+               DO J=1,NPT(I)    ! *** step 1: compute norm. factor
+                  NBIN = NBIN + 1
+                  DO IORD=1,NORD ! Order: tot, LO, NLO-corr, 3 NNLOcorr
+                     DO K=1,IORD ! Sum over all lower orders
+                        SUM(IORD) = SUM(IORD) +  
+     >                       RESULT(NBIN,ISUB,K)*(PTBIN(I,J+1) -
+     >                       PTBIN(I,J))
+                     ENDDO
+                  ENDDO
+               ENDDO
+               NBIN = NBIN - NPT(I)
+               DO J=1,NPT(I)    ! *** step 2: Apply norm. factor
+                  NBIN = NBIN + 1
+                  IF (NORD.GE.1) RESULT(NBIN,ISUB,1) =
+     >                 RESULT(NBIN,ISUB,1) / SUM(1)
+                  IF (NORD.GE.2) RESULT(NBIN,ISUB,2) =
+     >                 (RESULT(NBIN,ISUB,1)*(SUM(1)-SUM(2))
+     >                 + RESULT(NBIN,ISUB,2))  / SUM(2)
+               ENDDO 
+            ENDDO               ! Rapidity-Loop (or: 1st Dimension)
+         ENDDO                  ! Subprocess-Loop
+c - Fill "xsect" array
+         DO NBIN=1,NBINTOT      ! Cont. numbering of the final array
+            DO IORD=1,NORD      ! Loop over all orders
+               XSECT(NBIN,IORD) = RESULT(NBIN,(NSUBPROC+1),IORD)
+            ENDDO
+         ENDDO
+      ENDIF                     ! End: norm. 1/sigma dsigma/d[s.th.]
 
-
-
-c - print results - if requested
-      if (IPRINTFLAG.eq.1) call FX9999PR(xmur,IXMUF)
+c - Print results - if requested
+      IF (IPRINTFLAG.EQ.1) CALL FX9999PR(XMUR,IXMUF)
 
       RETURN
 
@@ -327,151 +336,165 @@ ckr 30.01.2008: Use simple A format, string length via LENOCC
  5000 FORMAT (A,A)
  5001 FORMAT (A,A,A)
  5002 FORMAT (A,F8.4,4X,A,F8.4)
- 998  continue
+ 998  CONTINUE
       END
 
+
+
 *******************************************************************
-      SUBROUTINE FX9999MT(xmur,ixmuf)
+      SUBROUTINE FX9999MT(XMUR,IXMUF)
 *-----------------------------------------------------------------
 * MW 08/26/2005
 *
 * multiply the PDFs and the coefficients for a single scale setting
 * 
-* input:    XMUR  prefactor for nominal renormalization scale
-*           IXMUF No.of factorization scale setting (as stored in table) 
+* input:   XMUR  prefactor for nominal renormalization scale
+*          IXMUF No.of factorization scale setting (as stored in table)
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER IXMUF, i,j,k,l,m,iord, jord,    nbin,nx
-      INTEGER iposition(5)
-      DOUBLE PRECISION  mur, as(nscalebinmax), aspow(5), FNALPHAS, coeff 
-      DOUBLE PRECISION beta0,beta1,PI,xmur, logmu, scfac,
-     +     scfac2a,scfac2b      ! for ren-scale variation
-      DOUBLE PRECISION mu0scale,llptlo,llpthi,t1,t2,bweight
-      INTEGER NF, CA
+      INTEGER IXMUF,I,J,K,L,M,IORD,JORD,NBIN
+      INTEGER IPOSITION(5)
+      DOUBLE PRECISION  MUR,AS(NSCALEBINMAX),ASPOW(5),FNALPHAS,COEFF 
+      DOUBLE PRECISION BETA0,BETA1,PI,XMUR,LOGMU,SCFAC
+ckr      DOUBLE PRECISION SCFAC2A,SCFAC2B ! For ren-scale variation
+      DOUBLE PRECISION MU0SCALE,LLPTLO,LLPTHI,T1,T2,BWEIGHT
+      INTEGER NF,CA
       DOUBLE PRECISION CF
-      PARAMETER (PI=3.14159265358979323846, NF=5, CA=3, CF=4d0/3d0)
-      PARAMETER (beta0=(11d0*CA-2d0*NF)/3d0) 
-      PARAMETER (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
-      PARAMETER (mu0scale=0.25)
+      PARAMETER (PI=3.14159265358979323846, NF=5, CA=3, CF=4D0/3D0)
+      PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0) 
+      PARAMETER (BETA1=34*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
+      PARAMETER (MU0SCALE=0.25)
 
-c - get the absolute order in alpha_s of the LO contribution
-      jord = NPOW(1)
+c - Get the absolute order in alpha_s of the LO contribution
+      JORD = NPOW(1)
 
-c - vary renormalization scale around the value used in orig. calculation
-      logmu = log(xmur/murscale(ixmuf)) ! change w.r.t. orig. calculation
-      scfac  = dble(jord)  *beta0 *logmu          ! NLO contrib.
+c - Vary renormalization scale around the value used in orig. calc.
+      LOGMU = LOG(XMUR/MURSCALE(IXMUF)) ! change w.r.t. orig. calc.
+      SCFAC = DBLE(JORD)*BETA0*LOGMU ! NLO contrib.
 ckr 30.01.2008: Comment unused defs
 c      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
 c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
-c     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib. continued
-
+c     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib.cont.
 
 c - MW:  we may save time if we make the mur-variation later
 c        for the whole contribution - instead of doing it for
 c        each array element.
 
-c - position of scale/order in array
-      iposition(1) = 1
-      iposition(2) = 1+ixmuf+(2-2)*nscalevar
-      iposition(3) = 1+ixmuf+(3-2)*nscalevar
+c - Position of scale/order in array
+      IPOSITION(1) = 1
+      IPOSITION(2) = 1+IXMUF+(2-2)*NSCALEVAR
+      IPOSITION(3) = 1+IXMUF+(3-2)*NSCALEVAR
 
-c - loop over coefficient array
-      nbin = 0                  ! continuos numbering for the final array
-      do i=1,nrapidity          ! (Pseudo-)Rapidity Bins
-         do j=1,NPT(i)          ! ET/pT Bins
-            nbin=nbin+1         ! continuous bin No.
-            llptlo = log(log(xmur * murval(i,j,1)/mu0scale))
-            llpthi = log(log(xmur * murval(i,j,NSCALEBIN)/mu0scale))
-            if(NSCALEBIN.eq.1) then
-               as(1) =  FNALPHAS(xmur * murval(i,j,1))
-            else
-               do l=1,NSCALEBIN ! loop over all scale bins, calc alphas
-                  mur = mu0scale * exp(exp((llptlo + (dble(l)-1.)/(NSCALEBIN-1)*(llpthi-llptlo) )))
-                  as(l) = FNALPHAS(mur) !    ... and get alpha_s
-               enddo
-            endif
-            do l=1,NSCALEBIN
-               if(nscalebin.eq.1) then
-                  bweight =  as(1)
-               elseif(nscalebin.eq.2) then
-                  if(l.eq.1) bweight =  as(1)
-                  if(l.eq.2) bweight =  as(2)
-               elseif(nscalebin.eq.3) then 
-                  t1 = 1./2.
-                  if(l.eq.1) bweight =  as(1)
-                  if(l.eq.2) bweight = 1./(2.*(1.-t1)*t1)*
-     &                 (as(2)-as(1)*(1.-t1)**2-as(3)*(t1)**2)
-                  if(l.eq.3) bweight = as(3)
-               elseif(nscalebin.eq.4) then 
-                  t1 = 1./3.
-                  t2 = 2./3.
-                  if(l.eq.1) bweight =  as(1)
-                  if(l.eq.2) bweight = 1./(3.*(1.-t1)**2*t1 * 3.*(1.-t2)*(t2)**2 - 3.*(1.-t2)**2*t2 * 3.*(1.-t1)*(t1)**2)
-     &             *(3.*(1.-t2)*(t2)**2*(as(2)-as(1)*(1.-t1)**3-as(4)*(t1)**3) 
-     &             - 3.*(1.-t1)*(t1)**2*(as(3)-as(1)*(1.-t2)**3-as(4)*(t2)**3  ) )
-                  if(l.eq.3) bweight = 1./(3.*(1.-t1)**2*t1 * 3.*(1.-t2)*(t2)**2  - 3.*(1.-t2)**2*t2 * 3.*(1.-t1)*(t1)**2)
-     &             *(3.*(1.-t1)**2*(t1)*(as(3)-as(1)*(1.-t2)**3-as(4)*(t2)**3) 
-     &             - 3.*(1.-t2)**2*(t2)*(as(2)-as(1)*(1.-t1)**3-as(4)*(t1)**3  ) )
-                  if(l.eq.4) bweight = as(4)
-               else
-                  write(*,*)'NSCALEBIN = ',nscalebin,' not yet supported.'
-                  stop
-               endif
-               do iord=1,Nord
-                  aspow(iord) = bweight **npow(iord)
-               enddo
-               do k=1,NXSUM     ! loop over all x bins
-                  do m=1,Nsubproc ! loop over subprocesses
-                     do iord=1,Nord ! relative order: 1 LO  2 NLO  3 NNLO ...
-                        if (iord.eq.1) then ! LO contribution
-                           coeff = array(nbin,k,m,iposition(1),l)
-                        elseif (iord.eq.2) then ! NLO contributions
-                           coeff = 
-     +                          array(nbin,k,m,iposition(2),l)
-     +                          + scfac*array(nbin,k,m,1,l) 
-                        elseif (iord.eq.3) then !2-loop threshold corr.
+c - Loop over coefficient array
+      NBIN = 0                  ! Cont. numbering for the final array
+      DO I=1,NRAPIDITY          ! (Pseudo-)Rapidity Bins
+         DO J=1,NPT(I)          ! ET/pT Bins
+            NBIN=NBIN+1         ! Continuous bin No.
+            LLPTLO = LOG(LOG(XMUR * MURVAL(I,J,1)/MU0SCALE))
+            LLPTHI = LOG(LOG(XMUR * MURVAL(I,J,NSCALEBIN)/MU0SCALE))
+            IF (NSCALEBIN.EQ.1) THEN
+               AS(1) = FNALPHAS(XMUR * MURVAL(I,J,1))
+            ELSE
+               DO L=1,NSCALEBIN ! Loop over all scale bins, calc alphas
+                  MUR = MU0SCALE * EXP(EXP((LLPTLO + (DBLE(L)-1.)
+     >                 /(NSCALEBIN-1)*(LLPTHI-LLPTLO) )))
+                  AS(L) = FNALPHAS(MUR) !    ... and get alpha_s
+               ENDDO
+            ENDIF
+            DO L=1,NSCALEBIN
+               IF (NSCALEBIN.EQ.1) THEN
+                  BWEIGHT = AS(1)
+               ELSEIF (NSCALEBIN.EQ.2) THEN
+                  IF (L.EQ.1) BWEIGHT = AS(1)
+                  IF (L.EQ.2) BWEIGHT = AS(2)
+               ELSEIF (NSCALEBIN.EQ.3) THEN 
+                  T1 = 1./2.
+                  IF (L.EQ.1) BWEIGHT = AS(1)
+                  IF (L.EQ.2) BWEIGHT = 1./(2.*(1.-T1)*T1)*
+     >                 (AS(2)-AS(1)*(1.-T1)**2-AS(3)*(T1)**2)
+                  IF (L.EQ.3) BWEIGHT = AS(3)
+               ELSEIF (NSCALEBIN.EQ.4) THEN 
+                  T1 = 1./3.
+                  T2 = 2./3.
+                  IF (L.EQ.1) BWEIGHT = AS(1)
+                  IF (L.EQ.2) BWEIGHT = 1./(3.*(1.-T1)**2*T1 * 
+     >                 3.*(1.-T2)*(T2)**2 - 3.*(1.-T2)**2*T2 * 
+     >                 3.*(1.-T1)*(T1)**2)
+     >                 *(3.*(1.-T2)*(T2)**2*(AS(2)-AS(1)*(1.-T1)**3
+     >                 -AS(4)*(T1)**3) 
+     >                 - 3.*(1.-T1)*(T1)**2*(AS(3)-AS(1)*(1.-T2)**3
+     >                 -AS(4)*(T2)**3))
+                  IF (L.EQ.3) BWEIGHT = 1./(3.*(1.-T1)**2*T1 *
+     >                 3.*(1.-T2)*(T2)**2
+     >                 - 3.*(1.-T2)**2*T2 * 3.*(1.-T1)*(T1)**2)
+     >                 *(3.*(1.-T1)**2*(T1)*(AS(3)-AS(1)*(1.-T2)**3
+     >                 -AS(4)*(T2)**3) 
+     >                 - 3.*(1.-T2)**2*(T2)*(AS(2)-AS(1)*(1.-T1)**3
+     >                 -AS(4)*(T1)**3))
+                  IF (L.EQ.4) BWEIGHT = AS(4)
+               ELSE
+                  WRITE(*,*)"fastNLO: ERROR! NSCALEBIN = ",NSCALEBIN,
+     >                 " not yet supported."
+                  STOP
+               ENDIF
+               DO IORD=1,NORD
+                  ASPOW(IORD) = BWEIGHT**NPOW(IORD)
+               ENDDO
+               DO K=1,NXSUM     ! Loop over all x bins
+                  DO M=1,NSUBPROC ! Loop over subprocesses
+                     DO IORD=1,NORD ! Rel. order: 1 LO 2 NLO 3 NNLO ...
+                        IF (IORD.EQ.1) THEN ! LO contribution
+                           COEFF = ARRAY(NBIN,K,M,IPOSITION(1),L)
+                        ELSEIF (IORD.EQ.2) THEN ! NLO CONTRIBUTIONS
+                           COEFF = 
+     >                          ARRAY(NBIN,K,M,IPOSITION(2),L)
+     >                          + SCFAC*ARRAY(NBIN,K,M,1,L) 
+                        ELSEIF (IORD.EQ.3) THEN !2-LOOP THRESHOLD CORR.
 c
 c     - the following works only for "true" higher orders (NNLO)
-c     -> not for 2-loop threshold corrections (N. Kidonakis, Jan 10, 2006)
+c     -> not for 2-loop threshold corrections (N. Kidonakis,10.01.2006)
 c     coeff = 
-cc     +                       array(nbin,k,m,(1+ixmuf+(iord-2)*nscalevar),l)
+c     +                       array(nbin,k,m,(1+ixmuf+(iord-2)*nscalevar),l)
 c     +                       array(nbin,k,m,iposition(3),l)
 c     +                       + scfac2a*array(nbin,k,m,(1+ixmuf))
 c     +                       + scfac2b*array(nbin,k,m,1) 
 c     
 c     ... therefore the NLLO-NLL contributions are only available for mu_r=mu_f
 c     -           in other words: for  log(mur/muf)=0
-                           if (logmu.eq.0d0) then
-                              coeff = array(nbin,k,m,iposition(3),l)
-                           else
-                              coeff = 0d0
-                           endif
-                        endif
+                           IF (LOGMU.EQ.0D0) THEN
+                              COEFF = ARRAY(NBIN,K,M,IPOSITION(3),L)
+                           ELSE
+                              COEFF = 0D0
+                           ENDIF
+                        ENDIF
 
-c - for 'standard' fastNLO tables 
-                        if (iref.eq.0 .or. i.le.(nrapidity/2)) then 
-                           result(nbin,m,iord) = result(nbin,m,iord)
-     +                          + coeff 
-     +                          * aspow(iord) ! multiply w/ (alpha-s/2pi)**n
-     +                          * pdf(nbin,k,m,l) ! multiply with PDFs
-c - for 'reference' fastNLO tables including PDF/alphas
-c - only relevant for fastNLO authors -> for precision studies
-                        else
-                           if(l.eq.1) then ! reference is stored in scale bin#1
-                              result(nbin,m,iord) = result(nbin,m,iord) + coeff
-                           endif
-                        endif
-                     enddo      ! iord perturbative order
-                  enddo         ! l scale-bins
-               enddo            ! m subprocess
-            enddo               ! k x-bin
-         enddo                  ! j pt
-      enddo                     ! i rapidity
-
+c - For 'standard' fastNLO tables 
+                        IF (IREF.EQ.0 .OR. I.LE.(NRAPIDITY/2)) THEN 
+                           RESULT(NBIN,M,IORD) = RESULT(NBIN,M,IORD)
+     >                          + COEFF 
+     >                          * ASPOW(IORD) ! Mult.w.(alpha_s/2Pi)**N
+     >                          * PDF(NBIN,K,M,L) ! Mult.with PDFs
+c - For 'reference' fastNLO tables including PDF/alphas
+c - Only relevant for fastNLO authors -> for precision studies
+                        ELSE
+                           IF (L.EQ.1) THEN !Ref.is stored in sc. bin 1
+                              RESULT(NBIN,M,IORD) =
+     >                             RESULT(NBIN,M,IORD) + COEFF
+                           ENDIF
+                        ENDIF
+                     ENDDO      ! iord perturbative order
+                  ENDDO         ! l scale-bins
+               ENDDO            ! m subprocess
+            ENDDO               ! k x-bin
+         ENDDO                  ! j pt
+      ENDDO                     ! i rapidity
+      
       RETURN
       END
+
+
 
 *******************************************************************
       SUBROUTINE FX9999GP(muffactor)
@@ -487,8 +510,8 @@ c - only relevant for fastNLO authors -> for precision studies
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
       DOUBLE PRECISION MUFFACTOR
-      INTEGER NBIN,NX, i,j,k,l,m,n,p,nx2limit
-      DOUBLE PRECISION x1, x2, xlim, hx, hxlim, muf, H(7), D(3), sum,
+      INTEGER NBIN,NX, i,j,k,l,m,p,nx2limit
+      DOUBLE PRECISION x1, xlim, hx, hxlim, muf, H(7),
      +   reweight, NEWPDF(-6:6), XPDF(nxmax,-6:6)
 c      DOUBLE PRECISION hxinv3   ! invert h(x) for ixscheme=3: log(1/x)+x-1
       DOUBLE PRECISION mu0scale,llptlo,llpthi
@@ -506,30 +529,33 @@ c      DOUBLE PRECISION hxinv3   ! invert h(x) for ixscheme=3: log(1/x)+x-1
             elseif (ixscheme.eq.3) then
                hxlim = log10(xlim)+xlim-1d0
             else
-               write(*,*) ' fastNLO - IXSCHEME ',ixscheme,' not available'
+               WRITE(*,*)" fastNLO - IXSCHEME ",ixscheme
+     >              ," not available"
                Stop
             endif
 
             llptlo = log(log( muffactor * mufval(i,j,1)/mu0scale))
-            llpthi = log(log( muffactor * mufval(i,j,NSCALEBIN)/mu0scale))
+            llpthi = log(log( muffactor * mufval(i,j,NSCALEBIN)/
+     >           mu0scale))
             do p=1,NSCALEBIN
                if(NSCALEBIN.eq.1) then
                   muf =  muffactor * mufval(i,j,1)
                else
-                  muf = mu0scale * exp(exp((llptlo + (dble(p)-1.)/(NSCALEBIN-1)*(llpthi-llptlo) )))
+                  muf = mu0scale * exp(exp((llptlo + (dble(p)-1.)
+     >                 /(NSCALEBIN-1)*(llpthi-llptlo) )))
                endif
 c - get PDFs(-6:6) directly from interface, reweight, copy into linear array
                do k=1,NXTOT     ! loop over all x-values
                   hx = hxlim *(1d0 - dble(k-1)/dble(nxtot)) ! compute x1-value
                   if (ixscheme.eq.2) then
-                     x1 = 10**-(hx*hx)  ! best scheme: sqrt(log10(1/x)
+                     x1 = 10**(-(hx*hx))  !best scheme: sqrt(log10(1/x)
                   elseif (ixscheme.eq.1) then
                      x1 = 10**(hx)      ! simple log10(1/x)
 c                  elseif (ixscheme.eq.3) then
 c                     x1 = hxinv3(hx)    ! inefficient: log10(1/x)+x-1
                   else
-                     write(*,*) ' fastNLO - IXSCHEME ',ixscheme,
-     +                    ' not available'
+                     WRITE(*,*)" fastNLO - IXSCHEME ",ixscheme,
+     +                    " not available"
                      Stop
                   endif
 
@@ -540,8 +566,8 @@ c                     x1 = hxinv3(hx)    ! inefficient: log10(1/x)+x-1
                   elseif (IPDFWGT.eq.0) then ! no reweighting
                      reweight = 1d0
                   else
-                     write(*,*) ' fastNLO - reweighting scheme not available: '
-     +                    ,IPDFWGT
+                     WRITE(*,*)" fastNLO - reweighting scheme not "//
+     >                    "available: ",IPDFWGT
                   ENDIF
                   do l=-6,6
                      XPDF(k,l) = newpdf(l) * reweight
@@ -654,8 +680,8 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
             H(4) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
          endif
       else
-         write(*,*) '    ireaction =',ireact
-         write(*,*) ' this reaction is not yet defined'
+         WRITE(*,*)"    ireaction =",ireact
+         WRITE(*,*)" this reaction is not yet defined"
          stop
       endif
 
@@ -674,36 +700,36 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
 * MW 04/18/2005
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER IMUFFLAG, nbin, i,j, maxscale, nproc
+      INTEGER IMUFFLAG, nbin, i,j, nproc
       DOUBLE PRECISION XMUR
       INCLUDE 'fnx9999.inc'
 
-      write(*,5000) " --  fastNLO - results for  ",NAMELABEL(1)
+      WRITE(*,5000)" --  fastNLO - results for  ",NAMELABEL(1)
 
       nproc = Nsubproc+1        ! print sum of all subprocesses
 c      nproc = 1                 ! print only gg->jets subprocess
 
       if (nord.le.2) then ! - LO and NLO output only
-         write(*,*) "--    cross sections:              ",
+         WRITE(*,*)"--    cross sections:              ",
      +        "LO          NLOcorr      total"
       elseif (nord.eq.3) then   ! incl 2-loop threshold correction term
-         write(*,*) "--    cross sections:              ",
+         WRITE(*,*)"--    cross sections:              ",
      +        "LO         NLOcorr      2-loop       total"
       else
-         write(*,*) " fastNLO error: Nord=",nord," is not possible"
+         WRITE(*,*)" fastNLO error: Nord=",nord," is not possible"
          stop
       endif
 
-      write(*,*) '--------  muf/mu0=',mufscale(imufflag),
-     +     '     mur/mu0=',xmur
+      WRITE(*,*)"--------  muf/mu0=",mufscale(imufflag),
+     +     "     mur/mu0=",xmur
    
       nbin = 0                  ! linear bin for the final observable
       do i=1,nrapidity          ! Rapidity Bins
          if (RAPBIN(i).lt.RAPBIN(i+1)) then
-            WRITE(*,*) "       from ",RAPBIN(i)," - ",RAPBIN(i+1),
+            WRITE(*,*)"       from ",RAPBIN(i)," - ",RAPBIN(i+1),
      +           "  in:  ",dimlabel(1)
          else                   !  happens only for reference tables
-            WRITE(*,*) "       from ",RAPBIN(1)," - ",RAPBIN(i+1),
+            WRITE(*,*)"       from ",RAPBIN(1)," - ",RAPBIN(i+1),
      +           "  in:  ",dimlabel(1)
          endif
          do j=1,NPT(i)          ! pT Bins
@@ -725,7 +751,7 @@ c      nproc = 1                 ! print only gg->jets subprocess
             endif
          enddo
       enddo
-      write(*,*) " "
+      WRITE(*,*)" "
 
       RETURN
 ckr 30.01.2008: Change format for better comparison
@@ -748,28 +774,26 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
 *-----------------------------------------------------------------
       IMPLICIT NONE
       CHARACTER*(*) FILENAME
-      CHARACTER*255 BUFFER,CSTRNG
-      INTEGER IFIRST, IFILE, LENOCC, I,J,K,L,M,N,   NBIN,NX
+      CHARACTER*255 CSTRNG
+      INTEGER IFILE, LENOCC, I,J,K,L,M,N,   NBIN
       INCLUDE 'fnx9999.inc'
-
-      DATA IFIRST/0/
-      SAVE IFIRST
 
       OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
       IF (IFILE .ne. 0) THEN
-         WRITE(*,*) '          fastNLO:  table file not found ',
-     +        '  -  IOSTAT = ',IFILE
+         WRITE(*,*)"          fastNLO:  table file not found ",
+     +        "  -  IOSTAT = ",IFILE
          STOP
       ENDIF
 
       READ(2,*) i
       if (i.ne.iseparator) goto 999
       READ(2,*) ITABVERSION
-      WRITE(*,*) "#       tableformat is version",real(itabversion)/10000d0
+      WRITE(*,*)"#       tableformat is version",
+     >     real(itabversion)/10000d0
       if (ITABVERSION.ne.14000) then
-         write(*,*)"#     ==> this usercode works only for version 1.4"
-         write(*,*)"#     ==> please get updated usercode from"
-         write(*,*)"#         http://hepforge.cedar.ac.uk/fastnlo "
+         WRITE(*,*)"#     ==> this usercode works only for version 1.4"
+         WRITE(*,*)"#     ==> please get updated usercode from"
+         WRITE(*,*)"#         http://hepforge.cedar.ac.uk/fastnlo "
          stop
       endif
       READ(2,*) i
@@ -801,11 +825,11 @@ c   -----------------------------------
       enddo
       do i=1,nord
          CSTRNG = POWLABEL(I)
-         write(*,5000)
-     &        ' #      ',NEVT(i),' events in ',CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,5000)
+     &        " #      ",NEVT(i)," events in ",CSTRNG(1:LENOCC(CSTRNG))
       enddo
       READ(2,*) NXTOT
-      WRITE(*,*) "#           No. of x bins:",NXTOT
+      WRITE(*,*)"#           No. of x bins:",NXTOT
       READ(2,*) IXSCHEME
       READ(2,*) IPDFWGT
       READ(2,*) IREF
@@ -905,9 +929,9 @@ c   -----------------------------------
  999  continue
 
       close (2) 
-      write(*,*) " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      write(*,*) " >>>>>   fastNLO error in table format "
-      write(*,*) " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+      WRITE(*,*)" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+      WRITE(*,*)" >>>>>   fastNLO error in table format "
+      WRITE(*,*)" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
       stop
       RETURN
 

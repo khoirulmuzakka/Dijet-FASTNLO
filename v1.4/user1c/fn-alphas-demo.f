@@ -16,13 +16,13 @@
       IMPLICIT NONE
       DOUBLE PRECISION MU, ALPSMZ, ALPS4_IT
       DOUBLE PRECISION B0, B1, B10 , PI4, F, FP,FM,
-     +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
+     +     ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
       INTEGER  NLOOP, NF, IFIRST, I
 ckr 30.01.2008: Initialize Z mass in double precision 
 ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
       PARAMETER (ZMASS = 91.187D0)
-      DATA IFIRST/0/, ONED/1.D0/, TWOD/2.D0/
-      SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2
+      SAVE IFIRST, NF, PI4, B0, B1, B10, ZMASS2
+      DATA IFIRST/0/
 
 c - other routine for 4-loop
       IF (NLOOP .eq. 4) THEN
@@ -81,15 +81,15 @@ C --------------------------------------------------------------------
 *
       IMPLICIT NONE
       DOUBLE PRECISION MU, ALPSMZ,  FBETA
-      DOUBLE PRECISION B0, B1, B2,B3, B10 , ZETA3,
+      DOUBLE PRECISION B0, B1, B10,
      +     PI4, F, FP,FM, LL2,
-     +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
+     +     ONED, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
      +     MUCACHE,ASCACHE,ASMZCACHE
       INTEGER  NLOOP, NF, IFIRST, I
       PARAMETER (ZMASS = 91.187)        ! PDG data book '98
-      DATA IFIRST/0/, ONED/1.D0/, TWOD/2.D0/
-      SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2, ASCACHE,
+      SAVE IFIRST, NF, ONED, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
+      DATA IFIRST/0/, ONED/1.D0/
 
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
@@ -151,8 +151,8 @@ C ------------------------------------------------------------------
       DOUBLE PRECISION ALPHAS, ALPI, B0, B1, B2,B3, B10,B20,B30,C,
      +     ZETA3, PI, ONED, TWOD
       INTEGER  IFIRST, NF
-      DATA IFIRST/0/
       SAVE IFIRST, NF, PI, ONED, TWOD, ZETA3,B0,B1,B2,B3,B10,B20,B30,C
+      DATA IFIRST/0/
 
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
