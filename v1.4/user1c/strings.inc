@@ -21,8 +21,7 @@ C
       DATA CJETRES2/"n/a","f_overlap","Rsep","R_searchcone"/
       
       DATA CHEADER/
-     >     "####################################"//
-     >     "####################################",
+     >     "##########################################################",
      >     " ",
      >     "  fastNLO - version 1.4         Jan. 31, 2006",
      >     " ",
@@ -34,19 +33,17 @@ C
      >     " ",
      >     "      ... now reading the coefficient table:",
      >     " ",
-     >     "####################################"//
-     >     "####################################"/
+     >     "##########################################################"/
 
       DATA CNLOJET/
-     >     "  for NLOJET++ please cite:",
-     >     "     Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),",
-     >     "     Z. Nagy, Phys. Rev. D68, 094002 (2003).",
+     >     "For NLOJET++ please cite:",
+     >     "  Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),",
+     >     "  Z. Nagy, Phys. Rev. D68, 094002 (2003).",
      >     " "/
 
       DATA CTHRCOR/
-     >     "  the 2-loop threshold corrections for the inclusive jet",
-     >     "  cross section in pp and ppbar have been computed by:",
+     >     "The 2-loop threshold corrections for the inclusive jet",
+     >     "cross section in pp and ppbar have been computed by:",
      >     "  N. Kidonakis and J.F. Owens - please cite",
-     >     "     N. Kidonakis, J.F. Owens, Phys. Rev. D63,"//
-     >     " 054019 (2001).",
+     >     "  N. Kidonakis, J.F. Owens, Phys. Rev. D63, 054019 (2001).",
      >     " "/
