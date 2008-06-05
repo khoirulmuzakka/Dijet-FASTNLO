@@ -3,7 +3,7 @@
 * K. Rabbertz 16.05.2008 Largely reworked version
 * M. Wobisch  12/27/2005 
 * 
-* fastNLO - program to compute statistical errors from a large set
+* STATERR - program to compute statistical errors from a large set
 *           of LO/NLO tables
 *
 * Please specify:
@@ -25,20 +25,46 @@
       INTEGER BORNN,NLON,LENOCC
 
 c --- Parse command line
+ckr 30.01.2008: Some more checks on input arguments
+      WRITE(*,*)"\n ##############################################"
+      WRITE(*,*)"# STATERR"
+      WRITE(*,*)"##############################################"
+      WRITE(*,*)"# Program to compute statistical uncertainties"
+      WRITE(*,*)"# from a large number of raw fastNLO tables"
+      WRITE(*,*)"##############################################"
+      WRITE(*,*)"#"
       IF (IARGC().LT.1) THEN
          WRITE(*,*)
-     &        "STATERR: ERROR! No scenario name given, "//
-     &        "aborting!"
+     >        "STATERR: ERROR! No scenario name given, "//
+     >        "aborting!"
+         WRITE(*,*)"      For an explanation of command line "//
+     >        "arguments type:"
+         WRITE(*,*)"      ./staterr -h"
          STOP
       ELSE
          CALL GETARG(1,SCENARIO)
+         IF (SCENARIO(1:LENOCC(SCENARIO)).EQ."-h") THEN
+            WRITE(*,*)" "
+            WRITE(*,*)"Usage: ./staterr (arguments)"
+            WRITE(*,*)"  scenario name"
+            WRITE(*,*)"  last LO table number to use"
+            WRITE(*,*)"  last NLO table number to use"
+            WRITE(*,*)"  HBOOK output file, def. = (scenario)_stat.hbk"
+
+            WRITE(*,*)"  PDF set, def. = cteq65.LHgrid"
+            WRITE(*,*)"  PDF path, def. = $(LHAPDF)/"//
+     >           "../share/lhapdf/PDFsets"
+            WRITE(*,*)"  alpha_s calc., def. from PDF set"
+            WRITE(*,*)" "
+            STOP
+         ENDIF
          WRITE(*,*)"STATERR: Evaluating scenario: ",
-     &        SCENARIO(1:LENOCC(SCENARIO))
+     >        SCENARIO(1:LENOCC(SCENARIO))
       ENDIF
       IF (IARGC().LT.2) THEN
          WRITE(*,*)
-     &        "STATERR: ERROR! Last number of LO tables not given, "//
-     &        "aborting!"
+     >        "STATERR: ERROR! Last number of LO tables not given, "//
+     >        "aborting!"
          STOP
       ELSE
          CALL GETARG(2,CHBORN)
@@ -47,8 +73,8 @@ c --- Parse command line
       ENDIF
       IF (IARGC().LT.3) THEN
          WRITE(*,*)
-     &        "STATERR: ERROR! Last number of NLO tables not given, "/
-     &        /"aborting!"
+     >        "STATERR: ERROR! Last number of NLO tables not given, "/
+     >        /"aborting!"
          STOP
       ELSE
          CALL GETARG(3,CHNLO)
@@ -56,26 +82,47 @@ c --- Parse command line
          WRITE(*,*)"STATERR: Last NLO table number: ",NLON
       ENDIF
       IF (IARGC().LT.4) THEN
-         PDFSET = "cteq65.LHgrid"
-         WRITE(*,*)
-     &        "STATERR: No PDF set given, "//
-     &        "taking "//PDFSET(1:LENOCC(PDFSET))//"!"
-      ELSE
-         CALL GETARG(4,PDFSET)
-         WRITE(*,*)"STATERR: Using PDF set: ",
-     &        PDFSET(1:LENOCC(PDFSET))
-      ENDIF
-      IF (IARGC().LT.5) THEN
          HISTFILE = SCENARIO(1:LENOCC(SCENARIO))//"_stat.hbk"
          WRITE(*,*)
-     &        "STATERR: No histo filename given, "//
-     &        "using "//HISTFILE(1:LENOCC(HISTFILE))//"!"
+     >        "STATERR: No histo filename given, "//
+     >        "using "//HISTFILE(1:LENOCC(HISTFILE))//"!"
       ELSE
-         CALL GETARG(5,HISTFILE)
+         CALL GETARG(4,HISTFILE)
          WRITE(*,*)"STATERR: Using histo filename: ",
-     &        HISTFILE(1:LENOCC(HISTFILE))
+     >        HISTFILE(1:LENOCC(HISTFILE))
       ENDIF
-      IF (IARGC().GT.5) THEN
+      IF (IARGC().LT.5) THEN
+         PDFSET = "cteq65.LHgrid"
+         WRITE(*,*)
+     >        "STATERR: WARNING! No PDF set given, "//
+     >        "taking "//PDFSET(1:LENOCC(PDFSET))//" instead!"
+      ELSE
+         CALL GETARG(5,PDFSET)
+         WRITE(*,*)"STATERR: Using PDF set: ",
+     >        PDFSET(1:LENOCC(PDFSET))
+      ENDIF
+      IF (IARGC().LT.6) THEN
+         PDFPATH = "/../share/lhapdf/PDFsets"
+         WRITE(*,*)
+     >        "STATERR: No PDF path given, "//
+     >        "assuming: $(LHAPDF)"//PDFPATH
+c - Initialize path to LHAPDF libs
+         CALL GETENV("LHAPDF",LHAPDF)
+         IF (LENOCC(LHAPDF).EQ.0) THEN
+            WRITE(*,*)"\nSTATERR: ERROR! $LHAPDF not set, aborting!"
+            STOP
+         ENDIF
+         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
+     >        PDFPATH(1:LENOCC(PDFPATH))
+      ELSE
+         CALL GETARG(6,PDFPATH)
+      ENDIF
+      WRITE(*,*)"STATERR: Looking for LHAPDF PDF sets in path: ",
+     >     PDFPATH(1:LENOCC(PDFPATH))
+      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
+      WRITE(*,*)"STATERR: Taking PDF set "
+     >     //PDFSET(1:LENOCC(PDFSET))
+      IF (IARGC().GT.6) THEN
          WRITE(*,*)"STATERR: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
@@ -102,7 +149,6 @@ c - Call statistical error-code for scenario
       NLONAME  = SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
       CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME,HISTFILE)
 
-      RETURN
       END
 
 C -----------------------------------------------------------------

@@ -70,7 +70,7 @@ ckr 30.01.2008: Some more checks on input arguments
          PDFSET = "cteq65.LHgrid"
          WRITE(*,*)
      >        "PDFUNC: WARNING! No PDF set given, "//
-     >        "taking cteq65.LHgrid instead!"
+     >        "taking "//PDFSET(1:LENOCC(PDFSET))//" instead!"
       ELSE
          CALL GETARG(3,PDFSET)
          WRITE(*,*)"PDFUNC: Using PDF set: ",
@@ -112,6 +112,7 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 c - Initialization      
+      write(*,*)"DEBUG: Init PDF"
       CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
