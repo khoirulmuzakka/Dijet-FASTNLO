@@ -43,7 +43,7 @@ if ( $opt_h ) {
     print "Usage: fastadd.pl [switches/options] scenario\n";
     print "  -h              Print this text\n";
     print "  -l dir          Directory for LO tables, (def.=scenario)\n";
-    print "  -n dir          Directory for NLO tables, (def.=scenario)\n";
+    print "  -n dir          Directory for NLO/NNLO tables, (def.=scenario)\n";
     print "  -s              Produce tables for statistical evaluation,\n".
 	"                  i.e. combinations of each LO with 1 NLO table and\n".
 	"                  all LO with each NLO table\n";
@@ -62,12 +62,14 @@ my $scen   = shift;
 #
 # Initialization
 #
-my $lodir   = "${scen}"; 
+my $lodir    = "${scen}"; 
 if ( $opt_l ) {$lodir = $opt_l;}
-my $nlodir  = "${scen}"; 
+my $nlodir   = "${scen}"; 
 if ( $opt_n ) {$nlodir = $opt_n;}
-my $loglob  = "${scen}*born*.raw*";
-my $nloglob = "${scen}*nlo*.raw*";
+my $nnlodir  = $nlodir; 
+my $loglob   = "${scen}*born*.raw*";
+my $nloglob  = "${scen}*nlo*.raw*";
+my $nnloglob = "${scen}*thrcor*.raw*";
 # Directory
 my $sdir = getcwd();
 
@@ -129,6 +131,25 @@ unless ( @nlotabs ) {
 if ( $opt_v ) {print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";}
 
 #
+# Find NNLO tables
+#
+my @nnlotabs;
+if ( -d "$nnlodir" ) {
+    chdir $nnlodir;
+    @nnlotabs = glob $nnloglob;
+    chdir $sdir;
+}
+unless ( @nnlotabs ) {
+    print "fastadd.pl: No NNLO table found in $nnlodir, now looking in $sdir ...\n";
+    $nnlodir  = ".";
+    @nnlotabs = glob $nnloglob;
+} 
+unless ( @nnlotabs ) {
+    print "fastadd.pl: WARNING! No NNLO table found!\n";
+}
+if ( $opt_v ) {print "fastadd.pl: DEBUG! nnlotabs @nnlotabs\n";}
+
+#
 # nlofast-add
 #
 $date = `date +%d%m%Y_%H%M%S`;
@@ -157,7 +178,7 @@ if ( $opt_s ) {
 	if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
 	system("$scmd1 >> ${scen}_addst.log");
     }
-# Normal mode: All LO with all NLO tables
+# Normal mode: All LO with all NLO/NNLO tables
 } else {
     my $scmd1 = $cmd;
     foreach my $lotab ( @lotabs ) {
@@ -165,6 +186,9 @@ if ( $opt_s ) {
     }
     foreach my $nlotab ( @nlotabs ) {
 	$scmd1 .= " $nlodir/$nlotab";
+    }
+    foreach my $nnlotab ( @nnlotabs ) {
+	$scmd1 .= " $nnlodir/$nnlotab";
     }
     $scmd1 .= " $scen.tab";
     print "fastadd.pl: Creating total sum table for $scen ...\n";
