@@ -10,7 +10,7 @@ example_SOURCES = example.f fnx9999.f fnx9999.inc fx9999rw.f fnio.f fnset.f fn-a
 AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132
 
 # libraries to be linked to the main target
-LDADD = -L $(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
 
 # path to LHAPDF pdfsets
 %.f: %.F

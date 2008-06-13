@@ -2,7 +2,6 @@
 #include <bits/photo-phasespace.h>
 #include <bits/photo-process.h>
 #include <bits/photo-jetfunc.h>
-#include <nlo++-module_add.h>
 
 //----- used namespaces -----
 using namespace nlo;
@@ -13,10 +12,6 @@ using namespace std;
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
 void psinput(phasespace_photo *, double&, double&);
 user_base_photo * userfunc();
-
-typedef unsigned long int (*module_add_type)(bool, const list<basic_string<char> >&, const basic_string<char>&);
-extern  module_add_type module_add;
-
 
 //----- array of the symbols symbols -----
 extern "C"{
@@ -38,9 +33,6 @@ extern "C"{
 	//   user defined functions
 	{"userfunc",  (void *) userfunc},
   
-	//   module to generate the readable result
-	{"main_module_add", (void *) module_add},
-  
 	//  end of the list
 	{0, 0}
   };
@@ -48,12 +40,11 @@ extern "C"{
 //------ END OF THE DO-NOT-TOUCH-PART ------
 
 
-
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 #include <kT_clus.h>
 #include "pdf-cteq6.h"
-#include "pdf-dummy.h"
+#include "pdf-photo-dummy.h"
 #include "fnloTable.h"
 #include "fnloBlockBNlojet.h"
 
@@ -62,32 +53,12 @@ extern "C"{
 const char *mySample_label[4] = {"g", "u", "d", "total"};
 typedef weight<4U, mySample_label> mySample;
 
-namespace nlo {
-  template<>
-  struct weight_conversion<weight_photo, mySample>
-    : public std::unary_function<weight_photo, mySample>
-  {
-    mySample operator()(const weight_photo& x)
-    {
-      mySample res;
-      
-      for(unsigned int i = 0; i < 3; i++)
-		res[3] += (res[i] = x[i]);
-
-      return res;
-    }
-  };
-}
 
 //   Here we specify some base user objects with the new sample type
 //     (see photo-jetfunc.h and included header files therein) 
-typedef basic_user<jetfunc_photo, void,        mySample, weight_conversion> myUser0d;
-typedef basic_user<jetfunc_photo, double,      mySample, weight_conversion> myUser1d;
-typedef basic_user<jetfunc_photo, histpoint1d, mySample, weight_conversion> myUser1h;
-typedef basic_user<jetfunc_photo, histpoint2d, mySample, weight_conversion> myUser2h;
+typedef basic_user<jetfunc_photo, void, mySample, weight_conversion> myUser0d;
 
-
-class UserPhoto : public basic_user_set<myUser0d, myUser1h, myUser2h> 
+class UserPhoto : public basic_user_set<myUser0d> 
 {
 public:
   //   init and user function
@@ -98,48 +69,28 @@ public:
    virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
   
 private:
-  //   pdf
-  pdf_cteq6 pdf;
-  pdf_dummy dummypdf;
+   //   pdf
+   pdf_cteq6 pdf;
+   pdf_photo_dummy dummypdf;
 
-  // algorithms
-  kT_clus_long jetclus;
+   // algorithms
+   kT_clus_long jetclus;
    
-  //  private types
-  typedef lorentzvector<double> _Lv;
+   //  private types
+   typedef lorentzvector<double> _Lv;
 
-  // the jet structore
-  bounded_vector<_Lv> cj, pj_lab; 
-  bounded_vector<unsigned int> jet;
+   // the jet structore
+   bounded_vector<_Lv> pj_lab; 
+   bounded_vector<unsigned int> jet;
   
-   struct pT_sort {
-      bool operator()(const _Lv& p1, const _Lv& p2) const {
-         return p1.perp2() > p2.perp2();
-      }
-   };
-   
-   struct E_sort {
-      bool operator()(const _Lv& p1, const _Lv& p2) const {
-         return p1.T() > p2.T();
-      }
-   };
-
    //fastNLO starts here
 
    fnloTable *table;
    
-   // ===== variables for the b-cubic interpolation =====
-   // - the relative distances to the four nearest bins
-   vector<double> cm ; 
-   // - the weights for the cubic eigenfunctions (1-dim)
-   vector<double> cefm; 
-
    double nevents;        // No of events calculated so far
    unsigned long nwrite;  // No of events after to write out the table
 
    string tablefilename; // The table file to write to
-   bool textoutput; // If true, the table is written in plain ASCII instead of BASE64 encoded doubles (later for XML)
-   amplitude_photo::integral_type itype; // Born, NLO etc.  
    time_t start_time;
    
    bool nlo;
@@ -148,10 +99,6 @@ private:
   
 };
   
-
-//----- defines the module to sum up the results of the different runs -----
-module_add_type module_add = 
-main_module_add<basic_user_result<myUser0d::distbook_type, myUser1h::distbook_type, myUser2h::distbook_type> >; 
 
 user_base_photo * userfunc() {
   return new UserPhoto;
@@ -198,10 +145,11 @@ void UserPhoto::userfunc(const event_photo& p, const amplitude_photo& amp)
    //----- H1 cuts -----
    double pt = 0.0;
    double pTmin = 21.0, etamin = -1.0, etamax = 2.5;
+   double ymin = 0.3; double ymax = 0.65;
 
    //----- photon momentum fraction -----
    double y = (p[-1]*p[hadron(0)])/(p[hadron(-1)]*p[hadron(0)]);
-   if(y < 0.3 || y > 0.65) return; 
+   if(y < ymin || y > ymax) return; 
 
    //----- Bjorken x -----
    double x = (p[-1]*p[0])/(p[-1]*p[hadron(0)]);
@@ -226,7 +174,6 @@ void UserPhoto::userfunc(const event_photo& p, const amplitude_photo& amp)
          //---------- fill fastNLO arrays
          if ( ptbin>=0 ) {
             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-               //               double thisscale = (A2->UpBin[ptbin][0] + A2->LoBin[ptbin][0])/2.;
                if(table->GetBlockB(k)->GetIRef()>0){
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventPhoto(ptbin,x,pt,amp,pdf);
                }else{
@@ -240,9 +187,6 @@ void UserPhoto::userfunc(const event_photo& p, const amplitude_photo& amp)
 }
 
 void UserPhoto::end_of_event(){
-   // let NLOJET++ store its results
-   basic_user_set<myUser0d, myUser1h, myUser2h>::end_of_event();
-   
    nevents += 1;
    //-------- store table
    if (( (unsigned long)nevents % nwrite)==0){
@@ -270,9 +214,6 @@ void UserPhoto::end_of_event(){
 void UserPhoto::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
-//    // Suppress output of NLOJET++ files
-   basic_user_set<myUser0d, myUser1h, myUser2h>::phys_output("",2000000000,false);
-
    tablefilename.assign(__file_name.c_str());
    tablefilename += ".tab";
    
@@ -288,7 +229,6 @@ void UserPhoto::phys_output(const std::basic_string<char>& __file_name,
          exit(1);
       }
    }
-   textoutput = __txt;
    nwrite = __save;
    inittable();
 
@@ -340,40 +280,39 @@ void UserPhoto::inittable(){
    B->IDataFlag = 0;
    B->IAddMultFlag = 0;
    B->IContrFlag1 = 1;
-   B->IContrFlag2 = 1;
    B->IContrFlag3 = 0;
-   if(nlo){
-      B->CtrbDescript.push_back("NLO");
-   }else{
-      B->CtrbDescript.push_back("LO");      
-   }
-   B->CtrbDescript.push_back("direct");
-   B->NContrDescr = B->CtrbDescript.size();
    B->CodeDescript.push_back("NLOJET++ 4.0.1");
    B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
+   B->NSubproc = 3;
    if(nlo){
+      B->CtrbDescript.push_back("NLO");
+      B->IContrFlag2 = 2;
       B->IScaleDep = 1;
-      B->Npow = 2;
+      B->Npow = A2->ILOord+1;
    }else{
+      B->CtrbDescript.push_back("LO");      
+      B->IContrFlag2 = 1;
       B->IScaleDep = 0;
-      B->Npow = 1;
+      B->Npow = A2->ILOord;
    }
+   B->CtrbDescript.push_back("direct");
+   B->NContrDescr = B->CtrbDescript.size();
 
    B->NPDF = 1;
    B->NPDFPDG.push_back(2212);
    B->NPDFDim = 0;
    B->NFragFunc = 0;
-   B->NSubproc = 3;
    B->IPDFdef1 = 2;
    B->IPDFdef2 = 1;
    B->IPDFdef3 = 1;
 
-   const int nxtot = 40;
-   const double xlim = 5e-4;
    B->XNode1.resize(A2->NObsBin);
    for(int i=0;i<A2->NObsBin;i++){
+      int nxtot = 20;
       B->Nxtot1.push_back(nxtot);
+      double s = pow(A2->Ecms,2);
+      double xlim = (1./s/0.9+pow(A2->LoBin[i][0],2)/s)*(2.+i/3.); 
       double hxlim = log10(xlim);
       B->Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
@@ -387,9 +326,9 @@ void UserPhoto::inittable(){
    B->Iscale.push_back(0);  // mur=mur(ET), ET = index 0 
    B->Iscale.push_back(0);  // muf=muf(ET), ET = index 0 
    B->ScaleDescript.resize(B->NScaleDim);
-   B->ScaleDescript[0].push_back("center of E_T  bin");
+   B->ScaleDescript[0].push_back(" E_T of jet");
    B->NscaleDescript.push_back(B->ScaleDescript[0].size());
-   B->Nscalenode.push_back(5); // number of scale nodes
+   B->Nscalenode.push_back(4); // number of scale nodes
 
    B->ScaleFac.resize(B->NScaleDim);
    for(int i=0;i<B->NScaleDim;i++){
@@ -407,12 +346,14 @@ void UserPhoto::inittable(){
          for(int k=0;k<B->Nscalevar[j];k++){
             B->ScaleNode[i][j][k].resize(B->Nscalenode[j]);
             if(B->Nscalenode[j]==1){
-               B->ScaleNode[i][j][k][0] = (A2->UpBin[i][B->Iscale[j]] + A2->LoBin[i][B->Iscale[j]])/2.;
+               B->ScaleNode[i][j][k][0] = B->ScaleFac[0][k]*(A2->UpBin[i][B->Iscale[j]] + A2->LoBin[i][B->Iscale[j]])/2.;
             }else{
+               const double mu0scale = .25; // In GeV
+               double llscalelo = log(log((B->ScaleFac[0][k]*A2->LoBin[i][B->Iscale[j]])/mu0scale));
+               double llscalehi = log(log((B->ScaleFac[0][k]*A2->UpBin[i][B->Iscale[j]])/mu0scale));
                for(int l=0;l<B->Nscalenode[j];l++){
-                  B->ScaleNode[i][j][k][l] = A2->LoBin[i][B->Iscale[j]] +
-                     ((double)l/(double)(B->Nscalenode[j]-1)) *
-                     ( A2->UpBin[i][B->Iscale[j]] - A2->LoBin[i][B->Iscale[j]] );
+                   B->ScaleNode[i][j][k][l] = mu0scale * exp(exp( llscalelo +
+                                                                  double(l)/double(B->Nscalenode[j]-1)*(llscalehi-llscalelo) ));
                }
             }
          }            
@@ -425,8 +366,9 @@ void UserPhoto::inittable(){
       for(int k=0;k<B->Nscalevar[0];k++){
          B->SigmaTilde[i][k].resize(B->Nscalenode[0]);
          for(int l=0;l<B->Nscalenode[0];l++){
-            B->SigmaTilde[i][k][l].resize(B->Nxtot1[i]);
-            for(int m=0;m<B->Nxtot1[i];m++){
+            int nxmax = B->GetNxmax(i);
+            B->SigmaTilde[i][k][l].resize(nxmax);
+            for(int m=0;m<nxmax;m++){
                B->SigmaTilde[i][k][l][m].resize(B->NSubproc);
                for(int n=0;n<B->NSubproc;n++){
                   B->SigmaTilde[i][k][l][m][n] = 0.;
@@ -440,6 +382,7 @@ void UserPhoto::inittable(){
    // reference table
    if(doReference){
       fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+      refB->NSubproc = 3;
       table->CreateBlockB(1,refB);
       refB->Copy(table->GetBlockB(0));
       refB->IRef = 1;
@@ -454,6 +397,14 @@ void UserPhoto::inittable(){
       }
       table->GetBlockA1()->SetNcontrib(2);
    }
+
+   if(nlo){
+      B->NSubproc = 3;
+   }else{
+      B->NSubproc = 2;
+   }
+
+
 
 }
 

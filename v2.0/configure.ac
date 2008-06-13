@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([fastnlo], [1.0], [wobisch@fnal.gov])
+AC_INIT([fastnlo], [2.0], [thomas.kluge@cern.ch])
 AM_INIT_AUTOMAKE
 AC_PREFIX_DEFAULT(${HOME})
 
@@ -7,7 +7,7 @@ AC_PREFIX_DEFAULT(${HOME})
 AC_PROG_CXX
 AC_PROG_F77
 AC_PROG_CPP
-AC_PROG_RANLIB
+AM_PROG_LIBTOOL
 
 # Checks for sources.
 AC_CONFIG_SRCDIR([common/fnloconstants.h])
@@ -34,9 +34,28 @@ AC_MSG_CHECKING([for LHAPDF installation])
 AC_SUBST([LHAPDFPREFIX], [`lhapdf-config --prefix`])
 AC_SUBST([LHAPDFLIBPATH],$LHAPDFPREFIX/lib)
 AC_SUBST([LHAPDFSETPATH], [`lhapdf-config --pdfsets-path`])
+AC_SUBST([LHAPDFINCLUDEPATH],"$LHAPDFPREFIX/include/lhapdf")
 AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
+AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
 AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
 
+#ROOT
+AC_MSG_CHECKING([for ROOT installation])
+if test "x$ROOTSYS" = "x"; then
+  AC_MSG_WARN([ROOTSYS environment variable is not set.
+  Not a big problem, but library will be build without ROOT dictionary.])
+else
+  AC_SUBST([ROOTSYS], ["$ROOTSYS"])	
+  AC_CHECK_PROGS([have_rootcint],[rootcint],[:],["$ROOTSYS/bin/"])
+  if test "$have_rootcint" = ":"; then
+    AC_MSG_WARN([ROOTSYS environment variable set, but no rootcint found.
+    Not a big problem, but library will be build without ROOT dictionary.])
+  else
+    AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
+    AC_MSG_RESULT([Using $ROOTCINTPATH])
+  fi
+fi
+AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 
 # Output
 AC_CONFIG_FILES([Makefile

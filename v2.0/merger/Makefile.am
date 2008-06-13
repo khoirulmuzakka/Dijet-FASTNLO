@@ -7,7 +7,7 @@ bin_PROGRAMS = fnlo-merge
 fnlo_merge_SOURCES = main.cc entry.h
 
 # libraries to be linked to the main target
-LDADD = ../common/libfastnloAuthor.a
+LDADD = ../common/.libs/libfastnlo.a
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 

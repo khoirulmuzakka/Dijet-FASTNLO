@@ -1,17 +1,33 @@
 AUTOMAKE_OPTIONS = foreign
 
 # the main library with the fastNLO classes inside
-pkglib_LTLIBRARIES = libfastnloAuthor.la
+pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la
 
-# all source files which go into the main target
-libfastnloAuthor_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc fnloBlockBNlojet.cc \
-  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloBlockBNlojet.h fnloTableDict.cc
+libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  \
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
+
+libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  fnloTableUser.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloTableUser.h LHAPDF.h
+
+libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc fnloBlockBNlojet.cc  \
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloBlockBNlojet.h
+
+# if ROOT is installed, add a dictionary to the library
+if HAVEROOT
+  libfastnlo_la_SOURCES += fnloTableDict.cc
+  libfastnloUser_la_SOURCES += fnloTableDict.cc
+  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+	-${ROOTCINTPATH} -f fnloTableDict.cc -c -I${LHAPDFINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
+endif
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 
 
 # Preprocessor flags
-AM_CPPFLAGS = -I${HOME}/include/nlo++ -I${ROOTSYS}/include
+AM_CPPFLAGS = -I${HOME}/include/nlo++ -I${LHAPDFINCLUDEPATH}
+if HAVEROOT
+  AM_CPPFLAGS += -I${ROOTSYS}/include
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

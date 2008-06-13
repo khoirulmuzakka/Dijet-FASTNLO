@@ -8,8 +8,10 @@
 #include "fnloBlockB.h"
 
 class fnloTable{
- public:
-   fnloTable(string name){filename = name;}
+public:
+   fnloTable(){filename = "";BlockIndexLO=BlockIndexNLO=BlockIndexLORef=BlockIndexNLORef=-1;}
+   fnloTable(string name){filename = name;BlockIndexLO=BlockIndexNLO=BlockIndexLORef=BlockIndexNLORef=-1;}
+   int ReadTable();
    int OpenFileRead();
    void RewindRead();
    void SkipBlockA1A2();
@@ -31,14 +33,27 @@ class fnloTable{
    fnloBlockB* GetBlockB(int no){return BlockB[no];}
    string GetFilename(){return filename;}
    void SetFilename(string name){filename=name;}
-   
+
+   int GetNObsBin(){return BlockA2.GetNObsBin();}
+   int GetNScaleVar(int dimension){return BlockB[0]->Nscalevar[dimension];}
+   double GetScaleFac(int dimension,int scalevar){return BlockB[0]->ScaleFac[dimension][scalevar];}
+   string GetScaleDescript(int dimension,int line){return BlockB[0]->ScaleDescript[dimension][line];}
+   double GetLoBin(int bin, int dimension){return BlockA2.LoBin[bin][dimension];}
+   double GetUpBin(int bin, int dimension){return BlockA2.UpBin[bin][dimension];}
+
    ~fnloTable();
- private:
+private:
    string filename;
    ifstream *ifilestream;
    ofstream *ofilestream;
    fnloBlockA1 BlockA1;
    fnloBlockA2 BlockA2;
    vector < fnloBlockB* > BlockB;
+protected:
+   int BlockIndexLO;
+   int BlockIndexNLO;
+   int BlockIndexLORef;
+   int BlockIndexNLORef;
+
 };
 #endif

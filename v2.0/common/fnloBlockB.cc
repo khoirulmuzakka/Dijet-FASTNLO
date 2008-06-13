@@ -240,26 +240,22 @@ int fnloBlockB::Read(istream *table){
       }
       
       SigmaTilde.resize(BlockA2->GetNObsBin());
+      PdfLc.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         int nxmax =0;
-         switch (NPDFDim) {
-         case 0: nxmax = Nxtot1[i];
-            break;
-         case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
-            break;
-         case 2: nxmax = Nxtot1[i]*Nxtot2[i];
-            break;
-         default: ;
-         }
+         int nxmax = GetNxmax(i);
          SigmaTilde[i].resize(Nscalevar[0]);
          for(int k=0;k<Nscalevar[0];k++){
             SigmaTilde[i][k].resize(Nscalenode[0]);
+            PdfLc[i].resize(Nscalenode[0]);
             for(int l=0;l<Nscalenode[0];l++){
                SigmaTilde[i][k][l].resize(nxmax);
+               PdfLc[i][l].resize(nxmax);
                for(int m=0;m<nxmax;m++){
                   SigmaTilde[i][k][l][m].resize(NSubproc);
+                  PdfLc[i][l][m].resize(NSubproc);
                   for(int n=0;n<NSubproc;n++){
                      *table >> SigmaTilde[i][k][l][m][n];
+                     PdfLc[i][l][m][n] = 0.;
                   }
                }
             }
@@ -432,16 +428,7 @@ int fnloBlockB::Write(ostream *table, int option){
       }
       
       for(int i=0;i<BlockA2->GetNObsBin();i++){
-         int nxmax =0;
-         switch (NPDFDim) {
-         case 0: nxmax = Nxtot1[i];
-            break;
-         case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
-            break;
-         case 2: nxmax = Nxtot1[i]*Nxtot2[i];
-            break;
-         default: ;
-         }
+         int nxmax = GetNxmax(i);
          for(int k=0;k<Nscalevar[0];k++){
             for(int l=0;l<Nscalenode[0];l++){
                for(int m=0;m<nxmax;m++){
@@ -478,16 +465,7 @@ void fnloBlockB::Add(fnloBlockB* other){
    double w1 = (double)Nevt / (Nevt+other->Nevt);
    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
    for(int i=0;i<BlockA2->GetNObsBin();i++){
-      int nxmax =0;
-      switch (NPDFDim) {
-      case 0: nxmax = Nxtot1[i];
-         break;
-      case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
-         break;
-      case 2: nxmax = Nxtot1[i]*Nxtot2[i];
-         break;
-      default: ;
-      }
+      int nxmax = GetNxmax(i);
       for(int k=0;k<Nscalevar[0];k++){
          for(int l=0;l<Nscalenode[0];l++){
             for(int m=0;m<nxmax;m++){
@@ -517,4 +495,289 @@ void fnloBlockB::StripWhitespace(string &str){
    }
 }
 
+int fnloBlockB::GetNxmax(int i){
+   int nxmax = 0;
+   switch (NPDFDim) {
+   case 0: nxmax = Nxtot1[i];
+      break;
+   case 1: nxmax = ((int)pow((double)Nxtot1[i],2)+Nxtot1[i])/2;
+      break;
+   case 2: nxmax = Nxtot1[i]*Nxtot2[i];
+      break;
+   default: ;
+   }
+   return nxmax;
+};
 
+void fnloBlockB::ResetXsection(){
+   Xsection.resize(BlockA2->GetNObsBin());
+   for(int i=0;i<BlockA2->GetNObsBin();i++){
+      Xsection[i] = 0.0; 
+   }
+}
+
+void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, vector<double> *result){
+
+   // indices for pdfx1 and pdfx2:
+   // 0..5 = tbar, ..., ubar, dbar;
+   // 6 = g;
+   // 7..12 = d, u, ..., t
+   
+   vector<double> &pdflc = *result; // to make acces via "[]" more easy
+   
+   switch(IPDFdef1){
+   case 2: // ep , DIS and gP
+      switch(IPDFdef2){
+      case 1: // DIS: determine gluon,sigma,delta,
+      case 2: // direct gammaP: gluon,sigma,delta
+         pdflc[0] = pdfx1[6]; //gluon
+
+         pdflc[1] = 0.;
+         for(int l=0;l<13;l++){
+            double temp = (l==6 ? 0.0 : pdfx1[l]);
+            if (!(l&1)) temp *= 4.;
+            pdflc[1] += temp; // delta
+         }
+         pdflc[1] /= 9.;
+         if(NSubproc>2){ // only from NLO
+            pdflc[2] = 0.;
+            for(int l=0;l<6;l++){
+               pdflc[2] += pdfx1[5-l] + pdfx1[l+7]; // sigma
+            }
+         }
+         break;
+      default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
+      }
+      break;
+   case 4:
+      switch(IPDFdef2){
+      case 1: // resolved gammaP: gg   qg   gq   qr   qq   qqb   qrb 
+         double B0,B,Bb;
+         double A0,A,Ab;
+         double D,Db;
+
+         A0 = pdfx2[6];
+         B0 = pdfx1[6];
+         
+         A = Ab = 0.;
+         B = Bb = 0.;
+         D = Db = 0.;
+          for(int l=0;l<6;l++){
+             A  += pdfx2[l+7];
+             Ab += pdfx2[5-l];
+             B  += pdfx1[l+7];
+             Bb += pdfx1[5-l];
+             D  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
+             Db += pdfx1[l+7] * pdfx2[5-l]   + pdfx1[5-l] * pdfx2[l+7];
+          }         
+
+
+         pdflc[0] = A0*B0; // gluon gluon
+         pdflc[1] = (A + Ab)*B0; // quark gluon
+         pdflc[2] = A0*(B + Bb);
+         pdflc[3] = A*B + Ab*Bb - D;
+         pdflc[4] = D;
+         pdflc[5] = Db;
+         pdflc[6] = A*Bb +Ab*B - Db;
+ 
+         break;
+      default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
+      }
+      break;
+   default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef1= %d not supported. Exit.\n",IPDFdef1); exit(1);
+   }
+}
+
+void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf,vector<double> &xfx),fnloTableUser *tableptr){
+   vector<double> xfx; // PDFs of all partons
+   xfx.resize(13);
+
+   vector <double> buffer; // for resorting a pdf array
+   buffer.resize(NSubproc);
+
+   for(int i=0;i<BlockA2->GetNObsBin();i++){
+      int nxmax = GetNxmax(i);
+      for(int j=0;j<Nscalenode[0];j++){
+         for(int k=0;k<nxmax;k++){ 
+            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][0][scalevar][j],xfx);
+            CalcPDFLinearComb(xfx,xfx,&buffer); //calculate linear combinations
+            for(int l=0;l<NSubproc;l++){ 
+               PdfLc[i][j][k][l] = buffer[l];
+            }
+         }
+      }
+   }
+}
+
+void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf,vector<double> &xfx),
+                              void (fnloTableUser::*GetPdfs2)(double x, double muf,vector<double> &xfx), fnloTableUser *tableptr){
+   vector < vector<double> > xfx; // PDFs of all partons
+   vector < vector<double> > xfx2;
+
+   vector <double> buffer; // for resorting a pdf array
+   buffer.resize(NSubproc);
+
+   for(int i=0;i<BlockA2->GetNObsBin();i++){
+      int nxmax = GetNxmax(i);
+      for(int j=0;j<Nscalenode[0];j++){
+
+         // determine all pdfs of hadron1
+         int nxbins1 = nxmax / Nxtot2[i];
+         xfx.resize(nxbins1);
+         for(int k=0;k<nxbins1;k++){ 
+            xfx[k].resize(13);
+            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][0][scalevar][j],xfx[k]);
+         }
+
+         // determine all pdfs of hadron2
+         int nxbins2 = nxmax / Nxtot1[i];
+         xfx2.resize(nxbins2);
+         for(int k=0;k<nxbins2;k++){ 
+            xfx2[k].resize(13);
+               (tableptr->*GetPdfs2)(XNode2[i][k],ScaleNode[i][0][scalevar][j],xfx2[k]);
+         }         
+
+         for(int k=0;k<nxmax;k++){ 
+            int x1bin = k % Nxtot1[i];
+            int x2bin = k / Nxtot1[i];
+            //            printf("i=%d scalevar=%d j=%d scale=%f\n ",i,scalevar,j,ScaleNode[i][0][scalevar][j]);
+            //            printf("x1=%f x2=%f gluonP=%f gluonG=%f \n",XNode1[i][x1bin],XNode2[i][x2bin],xfx[x1bin][6],xfx2[x2bin][6]);
+            CalcPDFLinearComb(xfx[x1bin],xfx2[x2bin],&buffer); //calculate linear combinations
+            for(int l=0;l<NSubproc;l++){ 
+               PdfLc[i][j][k][l] = buffer[l];
+            }
+         }
+      }
+   }
+}
+
+void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
+   
+   ResetXsection();
+   
+   if(IsReference()){
+      for(int i=0;i<BlockA2->GetNObsBin();i++){
+         for(int l=0;l<NSubproc;l++){ 
+            Xsection[i] +=  SigmaTilde[i][scalevar][0][0][l];
+         }
+      }
+      return;
+   }
+
+   if(IsLO()){
+       for(int i=0;i<BlockA2->GetNObsBin();i++){
+          int nxmax = GetNxmax(i);
+          for(int j=0;j<Nscalenode[0];j++){
+             double alphastwopi = pow(GetAlphas(ScaleNode[i][0][scalevar][j],asmz)/TWOPI, Npow);
+             for(int k=0;k<nxmax;k++){ 
+                for(int l=0;l<NSubproc;l++){ 
+                   int x1bin = k % Nxtot1[i];
+                   int x2bin = k / Nxtot1[i];
+                   //                   printf("%d %d %d : %f\n",x1bin,x2bin,k,SigmaTilde[i][scalevar][j][k][l]);
+                   //                   printf(">> %d %d %d %d %g %g %g\n",i,j,k,l,SigmaTilde[i][scalevar][j][k][l],alphastwopi,PdfLc[i][j][k][l]);
+                   Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][j][k][l];
+                   //                   if(SigmaTilde[i][scalevar][j][k][l]>0) printf("im=%d x2bin=%d x1bin=%d : x2=%g sigma=%g\n",k,x2bin,x1bin,XNode2[i][x2bin],SigmaTilde[i][scalevar][j][k][l]);
+                }
+             }
+          }
+       }
+       return;
+   }
+
+   if(IsNLO()){
+      if(fabs(1.-rescale)>1e-5){
+         printf("fnloBlockB::CalcXsection: A posteriori change of scale not yet supported in usercode.\n");
+         return;
+      }
+      double beta0=(11.*3.-2.*double(5))/3.; // = (11*CA-2*NF)/3  for NF = 5
+      double mu0scale = 0.25;
+//       for(int p=0;p<nscalebin;p++){ // scalebins         
+//          double bweight =0.;
+//          double t1 = 0.;
+//          double t2 = 0.;
+//          double aspow[nordmax];
+//          for(int k=0;k<nxsum;k++){ // all x bins
+//             for(int l=0;l<nsubproc;l++){ // subprocesses
+//                double coeff = 0.;
+//                switch(m){ //order in pert. series
+//                case 1:
+//                   coeff = weights[nbin][k][0][l][p]; // LO
+//                   break;
+//                case 2: 
+//                   coeff = weights[nbin][k][1+fscale][l][p] + scfac*weights[nbin][k][0][l][p]  ; // NLO
+//                   break;
+//                default: printf("nord= %d not supported. Exit.\n",m); exit(1);
+//                }
+//                xsection[i][j][m-1] += coeff *  aspow[m-1]  *  pdflc[nbin][k][l][p];
+      for(int i=0;i<BlockA2->GetNObsBin();i++){
+         int nxmax = GetNxmax(i);
+         for(int j=0;j<Nscalenode[0];j++){
+            double alphastwopi = pow(GetAlphas(ScaleNode[i][0][scalevar][j],asmz)/TWOPI, Npow);
+            for(int k=0;k<nxmax;k++){ 
+               for(int l=0;l<NSubproc;l++){                  
+                  Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][j][k][l];
+               }
+            }
+         }
+      }
+      return;
+   }
+}
+
+double fnloBlockB::GetSmallestX(int ObsBin){
+   double smallestx = 1.0;
+
+   int nxmax = GetNxmax(ObsBin);
+   for(int scalevar=0;scalevar<Nscalevar[0];scalevar++ ){
+      for(int j=0;j<Nscalenode[0];j++){
+         for(int k=0;k<nxmax;k++){ 
+            for(int l=0;l<NSubproc;l++){ 
+               int x1bin = k % Nxtot1[ObsBin];
+               int x2bin = k / Nxtot1[ObsBin];
+               if((SigmaTilde[ObsBin][scalevar][j][k][l]!=0.)&&(XNode1[ObsBin][x1bin]<smallestx)){
+                  smallestx = XNode1[ObsBin][x1bin];
+               }
+            }
+         }
+      }
+   }
+   return smallestx;
+}
+
+double fnloBlockB::GetSmallestX2(int ObsBin){
+   double smallestx = 1.0;
+
+   int nxmax = GetNxmax(ObsBin);
+   for(int scalevar=0;scalevar<Nscalevar[0];scalevar++ ){
+      for(int j=0;j<Nscalenode[0];j++){
+         for(int k=0;k<nxmax;k++){ 
+            for(int l=0;l<NSubproc;l++){ 
+               int x1bin = k % Nxtot1[ObsBin];
+               int x2bin = k / Nxtot1[ObsBin];
+               if((SigmaTilde[ObsBin][scalevar][j][k][l]!=0.)&&(XNode2[ObsBin][x2bin]<smallestx)){
+                  smallestx = XNode2[ObsBin][x2bin];
+               }
+            }
+         }
+      }
+   }
+   return smallestx;
+}
+
+
+
+double fnloBlockB::GetAlphas(double Q, double alphasMZ){
+
+   double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
+   double BETA1 =  (51. - 19./3.*NF);
+
+   // This is from NLOJET++, alpha.cc
+   double res = alphasMZ;
+   double b0 = BETA0/TWOPI;
+   double w = 1.0 + b0*alphasMZ*log(Q/MZ);
+   res /= w;
+   double b1 = BETA1/TWOPISQR;
+   res *= 1.0 - alphasMZ*b1/b0*log(w)/w;
+   return res;
+   
+}

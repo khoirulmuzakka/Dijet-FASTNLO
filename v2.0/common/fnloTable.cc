@@ -1,12 +1,25 @@
 #include "fnloTable.h"
 
-#ifdef __CINT__
-   ClassImp(fnloTable)
-#endif
+int fnloTable::ReadTable(){
+   OpenFileRead();
+   ReadBlockA1();
+   ReadBlockA2();
+   fnloBlockA1 *blocka1 = GetBlockA1();  
+   int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
+   for(int i=0;i<nblocks;i++){
+      ReadBlockB(i);
+      fnloBlockB *B = GetBlockB(i);
+      if(B->IContrFlag1==1 && B->IContrFlag2==1 && B->IRef==0) BlockIndexLO=i;
+      if(B->IContrFlag1==1 && B->IContrFlag2==2 && B->IRef==0) BlockIndexNLO=i;
+      if(B->IContrFlag1==1 && B->IContrFlag2==1 && B->IRef==1) BlockIndexLORef=i;
+      if(B->IContrFlag1==1 && B->IContrFlag2==2 && B->IRef==1) BlockIndexNLORef=i;
+   }
+   return 0;
+}
 
 int fnloTable::OpenFileRead(){
-      //   if (ifilestream) delete ifilestream;
    ifilestream = new ifstream(filename.c_str(),ios::in);
+   return 0;
 }
 
 void fnloTable::RewindRead(){

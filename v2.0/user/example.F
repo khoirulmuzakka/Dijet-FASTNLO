@@ -33,7 +33,7 @@ c --- parse command line
       ENDIF
 c - Initialize LHAPDF    - for CTEQ6.1M      MRST2004NLO:0.1205
       call InitPDFset(str(LHAPDF_PATH)// 
-     &     "/cteq61.LHgrid")
+     &     "/cteq6.LHpdf")
 c - initialize one member, 0=best fit member
       call InitPDF(0)
 
@@ -52,9 +52,10 @@ c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
       call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+c      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
 c      call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
       call FX9999CC(FILENAME, 1.0d0 , 1.0d0, 1 , XST1001)
+      call FX9999CC(FILENAME, 2.0d0 , 1.0d0, 1 , XST1001)
 c      call FX9999NF             ! print scenario info
 
 c - the results of the last call can be accessed in the array:  xst1001(n,iord)

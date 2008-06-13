@@ -14,6 +14,8 @@
 
 using namespace std;
 
+class fnloTableUser;
+
 class fnloBlockB {
  public:
    fnloBlockB(){;}
@@ -30,10 +32,27 @@ class fnloBlockB {
    int GetIContrFlag3(){return IContrFlag3;}
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
+   int GetNxmax(int Obsbin);
    void Add(fnloBlockB* other);
-  
+   bool IsLO(){return IContrFlag1==1 && IContrFlag2==1;}
+   bool IsNLO(){return IContrFlag1==1 && IContrFlag2==2;}
+   bool IsReference(){return IRef>0;};
+   double GetAlphas(double mur, double asmz);
+
+   // from here on "user" code
+   void ResetXsection();
+   void FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf ,vector<double> &xfx),fnloTableUser *tableptr);
+   void FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf,vector<double> &xfx),
+                     void (fnloTableUser::*GetPdfs2)(double x, double muf,vector<double> &xfx), fnloTableUser *tableptr);
+   void CalcXsection(double asmz,  int scalevar = 0, double rescale=1.);
+   double GetXsection(int bin){return Xsection[bin];}
+   double GetSmallestX(int ObsBin);
+   double GetSmallestX2(int ObsBin);
+
  private:
    void StripWhitespace(string &str);
+   void CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, vector<double> *result);
+
  public:
    static const int DividebyNevt = 1;
 
@@ -95,7 +114,16 @@ class fnloBlockB {
    vector < int > Nscalenode;
    vector < vector < double > > ScaleFac;
    vector < vector < vector < vector < double > > > > ScaleNode;
-   vector < vector < vector < vector < vector < double > > > > > SigmaTilde; // valid only for one scale dimension
+
+   // the follwoing is valid only for one scale dimension
+   vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
+   vector < vector < vector < vector < double > > > > PdfLc; 
+   vector < double > Xsection; 
+
+   static const double TWOPI = 6.28318530717958647692528;
+   static const double TWOPISQR = 39.47841760435743447533796;
+   static const int NF = 5;
+   static const double MZ = 91.1882;
 
 };
 #endif

@@ -531,21 +531,21 @@ c            write(*,*) 'muf ',muf
      +     Q1(6),Q2(6), QB1(6),QB2(6), ! arrays of 6 (anti-)quark densities
      +     S,A                  ! products S,A
 
-c --- DIS: inclusive and jets
-      if (icf1.eq.1 .and. icf2.eq.1 .and.(icf3.ge.1.and.icf3.le.3)) then 
-         H(1) = 0d0             ! Delta  at O(as^0)
+c --- DIS: inclusive and jets, gammaP direct
+      if (icf1.eq.2 .and. (icf2.eq.0 .or. icf2.eq.1)) then 
+         H(3) = 0d0             ! Delta  at O(as^0)
          do k=1,5,2
-            H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
+            H(3) = H(3) + (XPDF1(i,k)+XPDF1(i,-k)+
      +           4d0*(XPDF1(i,k+1)+XPDF1(i,-k-1)))/9d0
          enddo
-         H(2) = XPDF1(i,0)      ! Gluon  at O(as^1)
-         H(3) = 0d0             ! Sigma  at O(as^2)
+         H(1) = XPDF1(i,0)      ! Gluon  at O(as^1)
+         H(2) = 0d0             ! Sigma  at O(as^2)
          do k=1,6
-            H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
+            H(2) = H(2)+XPDF1(i,k)+XPDF1(i,-k)
          enddo
 
 c --- hadron-hadron: jets
-      elseif (icf1.eq.2.and.icf2.eq.1.and.(icf3.ge.1.and.icf3.le.2))then 
+      elseif (icf1.eq.3.and.icf2.eq.1.and.(icf3.ge.1.and.icf3.le.2))then 
          SumQ1  = 0d0
          SumQB1 = 0d0
          SumQ2  = 0d0
@@ -578,6 +578,11 @@ c   - compute seven combinations
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
          if (icf3.eq.1) H(6) = H(6)+H(7) ! case: 6 subproc
+c --- gammaP: direct, jets
+      elseif (icf1.eq.2 .and. icf2.eq.2) then 
+         write(*,*) '    gammaP to be implemented'
+         stop
+
       else
          write(*,*) '    icf1,2,3 =',icf1,icf2,icf3
          write(*,*) '    this combination is not yet defined'

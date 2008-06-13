@@ -120,7 +120,7 @@ void psinput(phasespace_photo *ps, double& el, double& eh)
 {
   //  energy of incomings
   el = 27.5;
-  eh = 820.0;
+  eh = 920.0;
   
   //   You can use your own phase generator. 
   //   Here we use the default.
@@ -144,10 +144,10 @@ void UserPhoto::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
    fnloBlockA2 *A2 =  table->GetBlockA2();
 
-   //----- H1 cuts -----
+   //----- ZEUS cuts -----
    double pt = 0.0;
-   double pTmin = 21.0, etamin = -1.0, etamax = 2.5;
-   double ymin = 0.3; double ymax = 0.65;
+   double pTmin = 17.0, etamin = -1.0, etamax = 2.5;
+   double ymin = 0.2; double ymax = 0.85;
    double Q2max = 1.0;
 
    //----- photon momentum fraction -----
@@ -245,7 +245,7 @@ void UserPhoto::inittable(){
    //Set up fastNLO
    table = new fnloTable(tablefilename);
 
-   table->GetBlockA1()->SetScenName("fnh2101r");
+   table->GetBlockA1()->SetScenName("fnh2102r");
    table->GetBlockA1()->SetNcontrib(1);
    table->GetBlockA1()->SetNmult(0);
    table->GetBlockA1()->SetNdata(0);
@@ -253,11 +253,11 @@ void UserPhoto::inittable(){
 
    fnloBlockA2 *A2 =  table->GetBlockA2();
    A2->ScDescript.push_back("Inclusive jet cross sections in photoproduction");
-   A2->ScDescript.push_back("H1 Collaboration");
-   A2->ScDescript.push_back("DESY 02-225");
-   A2->ScDescript.push_back("EPJC ?");
+   A2->ScDescript.push_back("ZEUS Collaboration");
+   A2->ScDescript.push_back("DESY 02-228");
+   A2->ScDescript.push_back("?");
    A2->NScDescript = A2->ScDescript.size();
-   A2->Ecms = sqrt(4.*820.*27.5);
+   A2->Ecms = sqrt(4.*920.*27.5);
    A2->ILOord = 2;
    A2->NDim = 1;
    A2->DimLabel.push_back("E_T");
@@ -266,14 +266,17 @@ void UserPhoto::inittable(){
    vector <double> bound;
    bound.resize(1);
   
-   bound[0] = 21.; A2->LoBin.push_back(bound);
-   bound[0] = 28.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 17.; A2->LoBin.push_back(bound);
+   bound[0] = 21.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 25.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 29.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
    bound[0] = 35.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 42.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 52.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 62.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 75.; A2->UpBin.push_back(bound);
-   A2->NObsBin = 6;
+   bound[0] = 41.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 47.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 55.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 71.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
+   bound[0] = 95.; A2->UpBin.push_back(bound);
+   A2->NObsBin = 9;
 
    A2->INormFlag = 0;
 
@@ -312,7 +315,7 @@ void UserPhoto::inittable(){
    B->IPDFdef2 = 1;
    B->IPDFdef3 = 1;
 
-   double xlimits[6] = {0.015,0.03,0.05,0.06,0.1,0.15};
+   double xlimits[9] = {0.01,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08};
    B->XNode1.resize(A2->NObsBin);
    for(int i=0;i<A2->NObsBin;i++){
       int nxtot = 14+i;
@@ -326,10 +329,10 @@ void UserPhoto::inittable(){
       }
    }
    
-   double xlimits2[6] = {0.02,0.02,0.03,0.04,0.05,0.07};
+   double xlimits2[9] = {0.02,0.02,0.03,0.04,0.05,0.07,0.10,0.15,0.15};
    B->XNode2.resize(A2->NObsBin);
    for(int i=0;i<A2->NObsBin;i++){
-      int nxlow = 20;
+      int nxlow = 15;
       int nxhigh = 20;
       int nxtot = nxlow + nxhigh;
       B->Nxtot2.push_back(nxtot);

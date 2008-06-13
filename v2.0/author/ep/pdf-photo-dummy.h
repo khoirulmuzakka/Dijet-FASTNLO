@@ -1,5 +1,5 @@
-#ifndef __pdf_dummy_h__
-#define __pdf_dummy_h__ 1
+#ifndef __pdf_photo_dummy_h__
+#define __pdf_photo_dummy_h__ 1
 
 
 #include <bits/photo-process.h>
@@ -11,12 +11,12 @@ using namespace std;
 using namespace lhpdf;
 
 
-class pdf_dummy
+class pdf_photo_dummy
   : public pdf_and_coupling_photo
 {
 public:
   //   constructor
-   explicit pdf_dummy(unsigned int mem = 0){;}
+   explicit pdf_photo_dummy(unsigned int mem = 0){;}
   
   //   strong coupling
   double alpha_qcd(unsigned int nf, double mr2) {
@@ -35,11 +35,23 @@ public:
     
   //   the parton distribution function
    void hadron(double x, double Q2, unsigned int, unsigned int, double *f) {
-       for(int i=-6; i <= 6; i++) f[i] = 0.;
-       f[0] = 1./x;
-       f[1] = 1./x;
-       f[2] = 1./x;
-  }
+      printf("pdf_photon_dummy::hadron : PDF in dummy should never be called.\n");
+      exit(1);
+   }
+
+  weight_photo pdf(double x1, double x2, double mf2, unsigned int nu, unsigned int nd) {
+     weight_photo retval;
+     //----- gluon pdfs -----
+     retval[0] = 1./x2;
+     //---- up type quarks -----
+     retval[1] = 1./x2;
+     //---- down type quarks -----
+     retval[2] = 1./x2;
+     return retval*(this -> photon(x1));
+    
+  }  
+
+   
   
 };
 
