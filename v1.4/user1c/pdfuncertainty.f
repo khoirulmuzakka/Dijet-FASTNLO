@@ -70,7 +70,7 @@ ckr 30.01.2008: Some more checks on input arguments
          PDFSET = "cteq65.LHgrid"
          WRITE(*,*)
      >        "PDFUNC: WARNING! No PDF set given, "//
-     >        "taking "//PDFSET(1:LENOCC(PDFSET))//" instead!"
+     >        "taking cteq65.LHgrid instead!"
       ELSE
          CALL GETARG(3,PDFSET)
          WRITE(*,*)"PDFUNC: Using PDF set: ",
@@ -112,7 +112,6 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 c - Initialization      
-      write(*,*)"DEBUG: Init PDF"
       CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
@@ -123,8 +122,8 @@ c - Initialization
       WRITE(*,*) "PDFUNC: The PDF is of order",IOPDF+1
       WRITE(*,*) "PDFUNC: alpha_s was used in",IOAS+1,
      >     "-loop order in the PDF"
-      WRITE(*,*) "PDFUNC: The lamba_4 value for member 0 is",QLAM4
-      WRITE(*,*) "PDFUNC: The lamba_5 value for member 0 is",QLAM5
+      WRITE(*,*) "PDFUNC: The lambda_4 value for member 0 is",QLAM4
+      WRITE(*,*) "PDFUNC: The lambda_5 value for member 0 is",QLAM5
 
 c - One initial call - to fill commonblock -> for histo-booking
       CALL INITPDF(0)
