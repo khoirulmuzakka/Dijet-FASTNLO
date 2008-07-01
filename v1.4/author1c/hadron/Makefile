@@ -490,13 +490,39 @@ fnl1010: links fnl1010.cc $(CommonPath)/fj-kt-06.cc \
 # ======================================================================
 # =====   FNL1018: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
 # ======================================================================
-# LHC scenario for CMS like 0018 @ 14 TeV
+# LHC scenario for CMS like 0018 @ 10 TeV
 #
 fnl1018: links fnl1018.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1018.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
 	-o fnl1018 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
+# =====   FNL1118: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
+# ======================================================================
+# LHC scenario for CMS like 1018 but for forward jets |y| = 3 - 5
+#
+fnl1118: links fnl1118.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1118.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1118 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
+# =====   FNL1218: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
+# ======================================================================
+# LHC scenario for CMS like 1118 but using pseudo-rapidity
+#
+fnl1218: links fnl1218.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1218.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1218 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
