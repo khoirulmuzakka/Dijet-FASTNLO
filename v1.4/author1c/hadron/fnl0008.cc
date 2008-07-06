@@ -120,11 +120,12 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy square
-   //s = 40000;       // RHIC           200GeV   
-   //s = 3240000;     // TeV Run I     1800GeV
-   //s = 3841600;       // TeV Run II    1960GeV
-   s = 196000000;   // LHC          14000GeV
+   //  total c.m. energy squared
+   //s = 40000.;     // RHIC               200 GeV   
+   //s = 3240000.;   // TeV Run I         1800 GeV
+   //s = 3841600.;   // TeV Run II        1960 GeV
+   //s = 100000000.; // LHC Start-up Run 10000 GeV
+   s = 196000000.; // LHC              14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
