@@ -123,8 +123,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s = 40000.;     // RHIC               200 GeV   
    //s = 3240000.;   // TeV Run I         1800 GeV
    //s = 3841600.;   // TeV Run II        1960 GeV
+   s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC              14000 GeV
-   s = 100000000.; // LHC Start-up Run   10000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
