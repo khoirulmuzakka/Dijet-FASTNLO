@@ -1,8 +1,8 @@
 //
-// fastNLO author code for fnl0117:
+// fastNLO author code for fnl0217:
 //     CMS LHC test scenario, E_cms = 14 TeV
 //     for kT algo with D=0.4 in E-scheme
-//     (phase space adapted to forward jet analysis)
+//     (phase space adapted to forward jet analysis, using pseudo-rapidity)
 // 
 // last modification
 //
@@ -325,10 +325,10 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0117:" << endl;
+   cout << "    Scenario fnl0217:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
    cout << "      for kT algo with D=0.4 in E-scheme" << endl; 
-   cout << "      (phase space adapted to forward jet analysis)" << endl;
+   cout << "      (phase space adapted to forward jet analysis, using pseudo-rapidity)" << endl;
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -410,7 +410,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       //------- get jet properties
       double pt = pj[i].perp(); 
       if (pt>ptlow){ // check for low pt first, will fail most of the time
-         double rap = abs(pj[i].rapidity());
+	//         double rap = abs(pj[i].rapidity());
+         double rap = abs(pj[i].prapidity());
         
          // --- determine y and pt bin --- for D0 w/ 5 pseudo-rapidity regions
 	 double binwidth = 1.0;
@@ -691,7 +692,7 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
+   table << "d2sigma-jet_dpT_deta_(pb_GeV)" << endl;
    table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
    table << "Forward jets" << endl;
    table << "kT with D=0.4, E scheme" << endl;

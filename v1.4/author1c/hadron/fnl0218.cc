@@ -696,7 +696,7 @@ void UserHHC::writetable(){
    table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
    table << "Forward jets" << endl;
    table << "SISCone with R=0.5, E scheme" << endl;
-   table << "" << endl;
+   table << "-" << endl;
 
   //iproc
    int iproc = 1; // incl. jets
