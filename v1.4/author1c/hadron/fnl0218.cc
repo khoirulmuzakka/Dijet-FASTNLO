@@ -693,10 +693,10 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_deta_(pb_GeV)" << endl;
-   table << "CMS LHC Test Scenario" << endl;
-   table << "-" << endl;
-   table << "-" << endl;
-   table << "-" << endl;
+   table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
+   table << "Forward jets" << endl;
+   table << "SISCone with R=0.5, E scheme" << endl;
+   table << "" << endl;
 
   //iproc
    int iproc = 1; // incl. jets
