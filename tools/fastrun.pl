@@ -205,9 +205,9 @@ chdir $pwdir;
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
-# Version 5.4.0 doesn't work with gcc 3.3.6 so far ...
-#$install{lhapdf}[0]     = "lhapdf-5.4.0";
-$install{lhapdf}[0]     = "lhapdf-5.3.1";
+# Version 5.4.0 doesn't work with gcc 3.3.6 so far, test version 5.5.0
+$install{lhapdf}[0]     = "lhapdf-5.5.0";
+#$install{lhapdf}[0]     = "lhapdf-5.3.1";
 $install{fastjet}[0]    = "fastjet-2.3.2";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
@@ -369,14 +369,15 @@ if ( $mode == 0 || $mode == 1) {
 	chdir "$idir/$install{lhapdf}[0]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-# Avoid Python Murks in LHAPDF 5.4.0
-#	$ret = system("./configure --prefix=`pwd` --disable-pyext");
-	$ret = system("./configure --prefix=`pwd`");
+# Avoid Python Murks in LHAPDF >= 5.4.0
+	$ret = system("./configure --prefix=`pwd` --disable-pyext");
+#	$ret = system("./configure --prefix=`pwd`");
 	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
 	print "\nfastrun.pl: Making lhapdf ...\n";
 # At least until LHAPDF 5.3.1 a race condition spoils multithreaded make!
-#	$ret = system("make -j2");
-	$ret = system("make");
+#	$ret = system("make");
+# Works now
+	$ret = system("make -j2");
 	if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for lhapdf ...\n";
 	$ret = system("make install");
