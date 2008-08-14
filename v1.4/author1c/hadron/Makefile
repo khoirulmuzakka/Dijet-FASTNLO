@@ -337,7 +337,7 @@ fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0007.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
-	-o fnl0007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0007ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0008: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
@@ -348,7 +348,7 @@ fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0008.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl0008 -Wno-deprecated -Wf,-O3 \
+	-o fnl0008ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 

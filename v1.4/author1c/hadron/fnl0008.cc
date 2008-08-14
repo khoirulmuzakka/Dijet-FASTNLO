@@ -348,7 +348,7 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
 	 double ymin = raphigh[(j)];
-	 if (ymin > ymax ) {
+	 if ( (ymin > ymax) && (iref == 0 || (iref == 1 && j < nrap/2 ) ) ) {
 	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
 	     " and rapidity bin " << j << endl;
 	   cout << "The pt bin runs from " << pthigh[j][k] <<
