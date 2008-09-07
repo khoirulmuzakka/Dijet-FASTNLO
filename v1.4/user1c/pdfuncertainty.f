@@ -9,7 +9,7 @@
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      CHARACTER*255 FILENAME,HISTOFILE,PDFSET,PDFPATH,LHAPDF,ASMODE
+      CHARACTER*255 FILENAME,HISTFILE,PDFSET,PDFPATH,LHAPDF,ASMODE
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER LENOCC
       DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5,
@@ -57,14 +57,14 @@ ckr 30.01.2008: Some more checks on input arguments
      >        FILENAME(1:LENOCC(FILENAME))
       ENDIF
       IF (IARGC().LT.2) THEN
-         HISTOFILE = "fastnlo.hbk"
+         HISTFILE = "fastnlo.hbk"
          WRITE(*,*)
      >        "PDFUNC: WARNING! No output filename given, "//
      >        "taking fastnlo.hbk instead!"
       ELSE
-         CALL GETARG(2,HISTOFILE)
+         CALL GETARG(2,HISTFILE)
          WRITE(*,*)"PDFUNC: Creating output file: ",
-     >        HISTOFILE(1:LENOCC(HISTOFILE))
+     >        HISTFILE(1:LENOCC(HISTFILE))
       ENDIF
       IF (IARGC().LT.3) THEN
          PDFSET = "cteq65.LHgrid"
@@ -128,7 +128,7 @@ c - Initialization
 c - One initial call - to fill commonblock -> for histo-booking
       CALL INITPDF(0)
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTOFILE)
+      CALL PDFHIST(1,HISTFILE)
 
 c - New call: a single call for each scale
 c         1st argument:  name of table
@@ -227,15 +227,15 @@ c - Fill histograms
      >     "subprocesses)"
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTOFILE)
+      CALL PDFHIST(2,HISTFILE)
       END
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTOFILE)
+      SUBROUTINE PDFHIST(N,HISTFILE)
       IMPLICIT NONE
-      CHARACTER*(*) HISTOFILE
+      CHARACTER*(*) HISTFILE
       INTEGER N
 
       INTEGER J,ISTAT2,ICYCLE
@@ -253,7 +253,7 @@ c - Open & book
       IF (N.EQ.1) THEN
          WRITE(*,*)"----------- Book histograms -------"
          CALL HLIMIT(NWPAWC)
-         CALL HROPEN(11,"fastNLO",HISTOFILE,"N",1024,ISTAT2)
+         CALL HROPEN(11,"fastNLO",HISTFILE,"N",1024,ISTAT2)
          IF (ISTAT2.NE.0) THEN
             WRITE(*,*)"\nPDFHIST: ERROR! Could not open histofile: ",
      >           ISTAT2," Aborted!"
