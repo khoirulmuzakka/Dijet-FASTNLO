@@ -3,11 +3,12 @@
 #
 NAME=pdfunc
 
-PDFFILES= pdfuncertainty.f fnx9999.f fn-hbook.f fn-interface.f \
-	fn-alphas-demo.f alphst.f gz.F
 CFILES= ftn_gzio.c
-STATFILES= staterr_kr.f fnx9999.f fn-hbook.f fn-interface.f \
-	fn-alphas-demo.f alphst.f gz.F
+PDFFILES= pdfuncertainty.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
+#REFFILES= refapprox.f fnx9999.f fn-hbook.f fn-interface-cteq6.f Cteq61Pdf.f
+REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
+	fn-interface-cteq6.f Cteq61Pdf.f
+STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
@@ -19,6 +20,7 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-72
 FC=gfortran
 
 OBJFILESPDF  = $(PDFFILES:.f=.o) $(CFILES:.c=.o)
+OBJFILESREF  = $(REFFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESSTAT = $(STATFILES:.f=.o) $(CFILES:.c=.o)
 
 # Compute PDF uncertainties
@@ -31,6 +33,12 @@ pdfunc: $(OBJFILESPDF) fnx9999.inc strings.inc
 staterr: $(OBJFILESSTAT)
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESSTAT) \
 	-L $(LHAPDF) -lLHAPDF \
+	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
+
+# Analyze algorithmic uncertainty from reference jobs with
+# original CTEQ PDF code
+example-ref: $(OBJFILESREF) fnx9999.inc
+	 $(FC) -o $@ $(FFLAGS) $(OBJFILESREF) \
 	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
 
 clean:
