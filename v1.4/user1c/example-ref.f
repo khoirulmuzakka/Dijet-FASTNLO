@@ -18,7 +18,7 @@ c                  definition in the commonblock!!!!!
 
 
 c --- parse command line
-      IF ( IARGC().LT.1)  FILENAME = 'table.txt.gz'
+      IF ( IARGC().LT.1)  FILENAME = 'table.txt'
       IF ( IARGC().LT.2)  HISTOFILE= 'fastnlo.hbk'
       IF ( IARGC().GT.0)  CALL GETARG(1,FILENAME)
       IF ( IARGC().GT.1)  CALL GETARG(2,HISTOFILE)
