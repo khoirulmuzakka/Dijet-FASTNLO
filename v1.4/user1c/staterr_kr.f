@@ -20,7 +20,8 @@
 *
 * -------------------------------------------------------------------
       IMPLICIT NONE
-      CHARACTER*255 SCENARIO,BORNNAME,NLONAME,HISTFILE,PDFSET,LHAPDF
+      CHARACTER*255 SCENARIO,BORNNAME,NLONAME,HISTFILE
+      CHARACTER*255 PDFSET,PDFPATH,LHAPDF,ASMODE
       CHARACTER*4 CHBORN,CHNLO
       INTEGER BORNN,NLON,LENOCC
 
@@ -112,13 +113,12 @@ c - Initialize path to LHAPDF libs
             WRITE(*,*)"\nSTATERR: ERROR! $LHAPDF not set, aborting!"
             STOP
          ENDIF
-         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
-     >        PDFPATH(1:LENOCC(PDFPATH))
+         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//PDFPATH(1:LENOCC(PDFPATH))
       ELSE
          CALL GETARG(6,PDFPATH)
       ENDIF
-      WRITE(*,*)"STATERR: Looking for LHAPDF PDF sets in path: ",
-     >     PDFPATH(1:LENOCC(PDFPATH))
+      WRITE(*,*)"STATERR: Looking for LHAPDF PDF sets in path: "
+     >     //PDFPATH(1:LENOCC(PDFPATH))
       PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
       WRITE(*,*)"STATERR: Taking PDF set "
      >     //PDFSET(1:LENOCC(PDFSET))
@@ -239,7 +239,9 @@ c - Loop over files
          IF (ISTAT.NE.0) THEN
             WRITE(*,*)"STATERR: WARNING! Table file not found, "//
      >           "skipped! IOSTAT = ",ISTAT
-            GOTO 10
+ckr While using f90 DO-ENDDO ... use also the EXIT statement instead of GOTO
+ckr            GOTO 10
+            EXIT
          ENDIF
          NBORN = NBORN + 1
 
@@ -287,7 +289,8 @@ c - LO only at single scale
             ENDDO
          ENDDO
          WRITE(*,*)"STATERR: Total weight:",WTAB(NBORN)
- 10   ENDDO
+ckr 10   ENDDO
+      ENDDO
 
 c - Extract mean values and standard deviations
       WRITE(*,*)"\n *************************************************"
@@ -375,7 +378,9 @@ c - Loop over files
          IF (ISTAT.NE.0) THEN
             WRITE(*,*)"STATERR: WARNING! Table file not found, "//
      >           "skipped! IOSTAT = ",ISTAT
-            GOTO 20
+ckr While using f90 DO-ENDDO ... use also the EXIT statement instead of GOTO
+ckr            GOTO 20
+            EXIT
          ENDIF
          NNLO = NNLO + 1
 
@@ -431,7 +436,8 @@ c     >              J,K,NNLO,VAL
             ENDDO
          ENDDO
          WRITE(*,*)"STATERR: Total weight:",WTAB(NNLO)
- 20   ENDDO
+ckr 20   ENDDO
+      ENDDO
 
 c - Extract mean values and standard deviations
       WRITE(*,*)"\n *************************************************"
