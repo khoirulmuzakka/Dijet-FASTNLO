@@ -1,51 +1,63 @@
-      PROGRAM PDFUNC
+      PROGRAM ALLUNC
 * ---------------------------------------------------------------------
-* M. Wobisch  02/09/2006
-* K. Rabbertz 01/06/2008 Restructured and cleaned up version
+* K. Rabbertz 07.09.2008 First try to integrate all uncertainties
+*                        into one job
 *
-* PDFUNC - example program to compute PDF uncertainties
-*          using a fastNLO table and PDFs from LHAPDF
+* ALLUNC - Program to derive the algorithmic, statistical and PDF
+*          uncertainties using fastNLO tables
 *
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      CHARACTER*255 FILENAME,HISTFILE,PDFSET,PDFPATH,LHAPDF,ASMODE
+      CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
+      CHARACTER*255 BORNNAME,NLONAME,HISTFILE
+      CHARACTER*255 PDFSET,PDFPATH,LHAPDF,ASMODE
+      CHARACTER*4 CHBORN,CHNLO
+      INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
-      INTEGER LENOCC
+      INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
+      LOGICAL LALG,LSTAT,LPDF
       DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5,
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,3),
-     >     RESLO,RESHI
-c - Attention!!! This mus be declared consistent with the
+     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RESLO,RESHI,DREF
+c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
+      REAL PT(NPTMAX)
       COMMON/STEER/ASMODE
 
 c --- Parse command line
-ckr 30.01.2008: Some more checks on input arguments
-      WRITE(*,*)"\n ##############################################"
-      WRITE(*,*)"# PDFUNC"
-      WRITE(*,*)"##############################################"
-      WRITE(*,*)"# Example program to compute PDF uncertainties"
-      WRITE(*,*)"# using a fastNLO table and PDFs from LHAPDF"
-      WRITE(*,*)"##############################################"
+      WRITE(*,*)"\n #################################################"
+      WRITE(*,*)"# ALLUNC"
+      WRITE(*,*)"#################################################"
+      WRITE(*,*)"# Program to derive the algorithmic, statistical, "
+      WRITE(*,*)"# and PDF uncertainties using fastNLO tables"
+      WRITE(*,*)"#################################################"
       WRITE(*,*)"#"
       IF (IARGC().LT.1) THEN
-         FILENAME = "table.txt"
+         SCENARIO = "fnt2003"
          WRITE(*,*)
-     >        "PDFUNC: WARNING! No input table given, "//
-     >        "taking table.txt instead!"
+     >        "ALLUNC: WARNING! No scenario name given, "//
+     >        "taking the default fnt2003 instead!"
          WRITE(*,*)"      For an explanation of command line "//
      >        "arguments type:"
-         WRITE(*,*)"      ./pdfunc -h"
+         WRITE(*,*)"      ./allunc -h"
       ELSE
-         CALL GETARG(1,FILENAME)
-         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+         CALL GETARG(1,SCENARIO)
+         IF (SCENARIO(1:LENOCC(SCENARIO)).EQ."-h") THEN
             WRITE(*,*)" "
-            WRITE(*,*)"Usage: ./pdfunc [arguments]"
-            WRITE(*,*)"  NLO input table, def. = table.txt"
-            WRITE(*,*)"  HBOOK output file, def. = fastnlo.hbk"
+            WRITE(*,*)"Usage: ./allunc [arguments]"
+            WRITE(*,*)"  Scenario name, def. = fnt2003"
+            WRITE(*,*)"  Table path, def. = ."
+            WRITE(*,*)"     Table names have to be of style:"
+            WRITE(*,*)"     \"scenario\".tab"
+            WRITE(*,*)"     \"scenario\"ref.tab"
+            WRITE(*,*)"     \"scenario\"-hhc-nlo-2jet_nnnn.tab"
+            WRITE(*,*)"  Last LO stat. table number, def. = -999"
+            WRITE(*,*)"  Last NLO stat. table number, def. = -999"
+            WRITE(*,*)"  HBOOK output file, def. = scenario.hbk"
             WRITE(*,*)"  PDF set, def. = cteq65.LHgrid"
             WRITE(*,*)"  PDF path, def. = $(LHAPDF)/"//
      >           "../share/lhapdf/PDFsets"
@@ -53,83 +65,163 @@ ckr 30.01.2008: Some more checks on input arguments
             WRITE(*,*)" "
             STOP
          ENDIF
-         WRITE(*,*)"PDFUNC: Using input table: ",
-     >        FILENAME(1:LENOCC(FILENAME))
+         WRITE(*,*)"ALLUNC: Evaluating scenario: ",
+     >        SCENARIO(1:LENOCC(SCENARIO))
       ENDIF
+      TABNAME = SCENARIO(1:LENOCC(SCENARIO))//".tab"
+      REFNAME = SCENARIO(1:LENOCC(SCENARIO))//"ref.tab"
       IF (IARGC().LT.2) THEN
-         HISTFILE = "fastnlo.hbk"
+         TABPATH = "."
          WRITE(*,*)
-     >        "PDFUNC: WARNING! No output filename given, "//
-     >        "taking fastnlo.hbk instead!"
+     >        "ALLUNC: WARNING! No table path given, "//
+     >        "taking . instead!"
       ELSE
-         CALL GETARG(2,HISTFILE)
-         WRITE(*,*)"PDFUNC: Creating output file: ",
-     >        HISTFILE(1:LENOCC(HISTFILE))
+         CALL GETARG(2,TABPATH)
       ENDIF
+      WRITE(*,*)"ALLUNC: Using table path: ",
+     >     TABPATH(1:LENOCC(TABPATH))
+      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+      WRITE(*,*)"ALLUNC: Taking primary table ",
+     >     FILENAME(1:LENOCC(FILENAME))
       IF (IARGC().LT.3) THEN
-         PDFSET = "cteq65.LHgrid"
+         CHBORN = "-999"
+         BORNN  =  -999
          WRITE(*,*)
-     >        "PDFUNC: WARNING! No PDF set given, "//
-     >        "taking cteq65.LHgrid instead!"
+     >        "ALLUNC: WARNING! Last number of LO tables not given, "//
+     >        "using -999 instead ==> no stat. uncertainty!"
       ELSE
-         CALL GETARG(3,PDFSET)
-         WRITE(*,*)"PDFUNC: Using PDF set: ",
-     >        PDFSET(1:LENOCC(PDFSET))
+         CALL GETARG(3,CHBORN)
+         READ(CHBORN,'(I4)'),BORNN
+         WRITE(*,*)"ALLUNC: Last LO table number: ",BORNN
       ENDIF
       IF (IARGC().LT.4) THEN
+         CHNLO = "-999"
+         NLON  =  -999
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! Last number of NLO tables not given, "//
+     >        "using -999 instead ==> no stat. uncertainty!"
+      ELSE
+         CALL GETARG(4,CHNLO)
+         READ(CHNLO,'(I4)'),NLON
+         WRITE(*,*)"ALLUNC: Last NLO table number: ",NLON
+      ENDIF
+
+      IF (IARGC().LT.5) THEN
+         HISTFILE = SCENARIO(1:LENOCC(SCENARIO))//".hbk"
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! No output filename given, "//
+     >        "taking scenario.hbk instead!"
+      ELSE
+         CALL GETARG(5,HISTFILE)
+         WRITE(*,*)"ALLUNC: Creating output file: ",
+     >        HISTFILE(1:LENOCC(HISTFILE))
+      ENDIF
+
+      IF (IARGC().LT.6) THEN
+         PDFSET = "cteq65.LHgrid"
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! No PDF set given, "//
+     >        "taking cteq65.LHgrid instead!"
+      ELSE
+         CALL GETARG(6,PDFSET)
+         WRITE(*,*)"ALLUNC: Using PDF set: ",
+     >        PDFSET(1:LENOCC(PDFSET))
+      ENDIF
+      IF (IARGC().LT.7) THEN
          PDFPATH = "/../share/lhapdf/PDFsets"
          WRITE(*,*)
-     >        "PDFUNC: No PDF path given, "//
-     >        "assuming: $(LHAPDF)"//PDFPATH
+     >        "ALLUNC: No PDF path given, "//
+     >        "assuming: $(LHAPDF)"//PDFPATH(1:LENOCC(PDFPATH))
 c - Initialize path to LHAPDF libs
          CALL GETENV("LHAPDF",LHAPDF)
          IF (LENOCC(LHAPDF).EQ.0) THEN
-            WRITE(*,*)"\nPDFUNC: ERROR! $LHAPDF not set, aborting!"
+            WRITE(*,*)"\nALLUNC: ERROR! $LHAPDF not set, aborting!"
             STOP
          ENDIF
          PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
      >        PDFPATH(1:LENOCC(PDFPATH))
       ELSE
-         CALL GETARG(4,PDFPATH)
+         CALL GETARG(7,PDFPATH)
       ENDIF
-      WRITE(*,*)"PDFUNC: Looking for LHAPDF PDF sets in path: ",
+      WRITE(*,*)"ALLUNC: Looking for LHAPDF PDF sets in path: "//
      >     PDFPATH(1:LENOCC(PDFPATH))
       PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
-      WRITE(*,*)"PDFUNC: Taking PDF set "
+      WRITE(*,*)"ALLUNC: Taking PDF set "
      >     //PDFSET(1:LENOCC(PDFSET))
-      IF (IARGC().LT.5) THEN
+      IF (IARGC().LT.8) THEN
          ASMODE = "PDF"
          WRITE(*,*)
-     >        "PDFUNC: No alpha_s mode given, "//
+     >        "ALLUNC: No alpha_s mode given, "//
      >        "using alpha_s according to PDF set"
       ELSE
-         CALL GETARG(5,ASMODE)
-         WRITE(*,*)"PDFUNC: Using alpha_s mode:",ASMODE
+         CALL GETARG(8,ASMODE)
+         WRITE(*,*)"ALLUNC: Using alpha_s mode:",ASMODE
       ENDIF
-      IF (IARGC().GT.5) THEN
-         WRITE(*,*)"\nPDFUNC: ERROR! Too many arguments, aborting!"
+      IF (IARGC().GT.8) THEN
+         WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
+      WRITE(*,*)" "
 
-c - Initialization      
+
+
+c - Initialize LHAPDF
       CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+
+c - Initialize one member, 0=best fit member
+      CALL INITPDF(0)
+
+c - Write out some info on best fit member      
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
       CALL GETORDERAS(IOAS)
       CALL GETLAM4(0,QLAM4)
       CALL GETLAM5(0,QLAM5)
-      WRITE(*,*) "PDFUNC: The PDF set has",NPDF+1," members"
-      WRITE(*,*) "PDFUNC: The PDF is of order",IOPDF+1
-      WRITE(*,*) "PDFUNC: alpha_s was used in",IOAS+1,
+      WRITE(*,*) "ALLUNC: The PDF set has",NPDF+1," members"
+      WRITE(*,*) "ALLUNC: The PDF is of order",IOPDF+1
+      WRITE(*,*) "ALLUNC: alpha_s was used in",IOAS+1,
      >     "-loop order in the PDF"
-      WRITE(*,*) "PDFUNC: The lambda_4 value for member 0 is",QLAM4
-      WRITE(*,*) "PDFUNC: The lambda_5 value for member 0 is",QLAM5
+      WRITE(*,*) "ALLUNC: The lambda_4 value for member 0 is",QLAM4
+      WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
+      
+c - Include histograms on statistical uncertainty?
+ckr      LPDF  = NPDF.GT.1
+      LPDF  = .TRUE.
+      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+      WRITE(*,*)"ALLUNC: Checking primary table: "//
+     >     FILENAME(1:LENOCC(FILENAME))
+      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
+      IF (ISTAT.NE.0) THEN
+         WRITE(*,*)"ALLUNC: ERROR! Primary table not found, "//
+     >        "aborting! IOSTAT = ",ISTAT
+         STOP
+      ELSE
+         CLOSE(2)
+      ENDIF
+      LSTAT = BORNN.GE.2.OR.NLON.GE.2
+      LALG  = .TRUE.
+      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+      WRITE(*,*)"ALLUNC: Checking reference table: "//
+     >     FILENAME(1:LENOCC(FILENAME))
+      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
+      IF (ISTAT.NE.0) THEN
+         WRITE(*,*)"ALLUNC: WARNING! Reference table not found, "//
+     >        "skipped! IOSTAT = ",ISTAT
+         LALG = .FALSE.
+      ELSE
+         CLOSE(2)
+      ENDIF
+      WRITE(*,*)" "
 
+
+      
 c - One initial call - to fill commonblock -> for histo-booking
-      CALL INITPDF(0)
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTFILE)
+      CALL PDFHIST(1,HISTFILE,LPDF,LSTAT,LALG)
 
+
+
+c - PDF part
 c - New call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
@@ -146,12 +238,12 @@ c - Compute PDF uncertainties for all available scales
          CALL INITPDF(0)
          MUR = MURSCALE(I)
          MUF = MUFSCALE(I)
-         WRITE(*,*)"PDFUNC: Now scale no.",i,"; mur, muf = ",mur,muf
+         WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
 
 c - Save the result array from the first call (= central result)
 c   and reset result arrays   
-         WRITE(*,*)"PDFUNC: The observable has",NBINTOT," bins -",
+         WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >        NSUBPROC," subprocesses"
          DO L1=1,NBINTOT
             DO L2=1,(NSUBPROC+1)
@@ -226,21 +318,109 @@ c - Fill histograms
       WRITE(*,*)"(histograms contain results for all orders and "//
      >     "subprocesses)"
 
+
+
+c - Statistics part
+c - Call statistical error-code for scenario
+      IF (LSTAT) THEN
+         WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties"
+         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/"//
+     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-2jet_"
+         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/"//
+     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
+ckr         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME,HISTFILE)
+         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME,"stat.hbk")
+      ENDIF
+
+
+
+c - Algorithmic part
+      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+      WRITE(*,*)"ALLUNC: Taking reference table: "//
+     >     FILENAME(1:LENOCC(FILENAME))
+c - Initialize CTEQ61 reference PDFs
+      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/cteq61.LHgrid"
+      WRITE(*,*)"ALLUNC: Taking reference PDF: "//
+     >     PDFSET(1:LENOCC(PDFSET))
+      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL INITPDF(0)
+
+c - Default scale (C++ 2, Fortran 3) ==> normal result
+      ISCALE = 3
+      MUR = MURSCALE(ISCALE)
+      MUF = MUFSCALE(ISCALE)
+      CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+c - Get the normal result, scale 3, from first half of doubled rap bins
+      IBIN = 0
+      DO IRAP=1,INT(NRAPIDITY/2)
+         DO IPT=1,NPT(IRAP)
+            IBIN = IBIN+1
+            RES0(IBIN,NSUBPROC+1,0) = 0.D0
+            DO IORD=1,NORD
+               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
+               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
+     >              RES0(IBIN,NSUBPROC+1,IORD)
+            ENDDO
+         ENDDO
+      ENDDO
+      NBIN = IBIN
+
+c - Reference scale no. always 1
+      ISCALE = 1
+      MUR = MURSCALE(ISCALE)
+      MUF = MUFSCALE(ISCALE)
+      CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+c - Get the reference result, scale 1, nrap/2 ++ bins
+      DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
+         DO IPT=1,NPT(IRAP)
+            IBIN = IBIN+1
+            RES0(IBIN,NSUBPROC+1,0) = 0.D0
+            DO IORD=1,NORD
+               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
+               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
+     >              RES0(IBIN,NSUBPROC+1,IORD)
+            ENDDO
+         ENDDO
+      ENDDO
+
+c - Compare results and fill histos
+      ISCALE = 3
+      ISUB   = 0
+      IBIN   = 0
+      DO IRAP=1,INT(NRAPIDITY/2)
+         DO IPT=1,NPT(IRAP)
+            IBIN = IBIN+1
+            PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+            DO IORD=0,NORD
+               DREF = RES0(IBIN,NSUBPROC+1,IORD)/
+     >              RES0(IBIN+NBIN,NSUBPROC+1,IORD) - 1.D0
+               IHIST = IORD*1000000 + ISCALE*100000 +
+     >              ISUB*10000 + IRAP*100
+               CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
+            ENDDO
+         ENDDO
+      ENDDO
+
+
+
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE)
+      CALL PDFHIST(2,HISTFILE,LPDF,LSTAT,LALG)
       END
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTFILE)
+      SUBROUTINE PDFHIST(N,HISTFILE,LPDF,LSTAT,LALG)
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
-      INTEGER N
+      CHARACTER*255 CSTRNG,CBASE,CTMP
+      INTEGER N,LENOCC
+      LOGICAL LPDF,LSTAT,LALG
 
       INTEGER J,ISTAT2,ICYCLE
       INTEGER IORD,ISUB,ISCALE,IRAP,IHIST,NHIST
       INCLUDE "fnx9999.inc"
+      INCLUDE "strings.inc"
       REAL PT(NPTMAX)
       
 c - HBOOK common 
@@ -270,21 +450,76 @@ c - Open & book
                      DO J=1,(NPT(IRAP)+1)
                         PT(J) = REAL(PTBIN(IRAP,J))
                      ENDDO
+                     CSTRNG = CIPROC(IPROC)
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_"
+     >                    //NAMELABEL(1)
+                     CBASE  = CSTRNG
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_"
+     >                    //CIALGO(IALGO)
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_"
+     >                    //CJETRES1(IALGO)
+                     WRITE(CTMP,'(F3.1)'),JETRES1
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"="
+     >                    //CTMP
+                     WRITE(CTMP,'(I1)'),IORD
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
+     >                    //CTMP
+                     WRITE(CTMP,'(I1)'),ISCALE
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_imu="
+     >                    //CTMP
+                     WRITE(CTMP,'(I1)'),IRAP
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iy="
+     >                    //CTMP
                      CALL HBOOKB(IHIST,
-     >                    "P?T! (GEV)",
+     >                    CSTRNG(1:LENOCC(CSTRNG)),
      >                    NPT(IRAP),PT,0)
+ckr                     CALL HBARX(IHIST)
+                     CSTRNG = CBASE
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                    "_dPDF_low"
                      CALL HBOOKB(IHIST+1,
-     >                    "P?T! (GEV)",
+     >                    CSTRNG(1:LENOCC(CSTRNG)),
      >                    NPT(IRAP),PT,0)
+                     CSTRNG = CBASE
+                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                    "_dPDF_up"
                      CALL HBOOKB(IHIST+2,
-     >                    "P?T! (GEV)",
+     >                    CSTRNG(1:LENOCC(CSTRNG)),
      >                    NPT(IRAP),PT,0)
                      NHIST = NHIST+3
+                     IF (LSTAT.AND.IORD.LT.2.AND.
+     >                    ISCALE.EQ.3.AND.ISUB.EQ.0) THEN
+                        CSTRNG = CBASE
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dstat/xsect_%"
+                        CALL HBOOKB(IHIST+3,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        CSTRNG = CBASE
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dmax/2/xsect_%"
+                        CALL HBOOKB(IHIST+4,
+     >                    CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+2
+                     ENDIF
+                     IF (LALG.AND.IORD.LE.2.AND.
+     >                    ISCALE.EQ.3) THEN
+                        CSTRNG = CBASE
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dref/xsect_%"
+                        CALL HBOOKB(IHIST+5,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+1
+                     ENDIF
                   ENDDO
                ENDDO
             ENDDO
          ENDDO        
          WRITE(*,*)"Number of histograms booked:",NHIST
+
+
 
 c - Close HBOOK file
       ELSEIF (N.EQ.2) THEN
