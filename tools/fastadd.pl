@@ -5,7 +5,6 @@
 #    sum tables for statistical uncertainty evaluation: 
 #    - For each single LO table with *one* 'dummy' NLO table
 #    - For each single NLO table with *all* LO tables
-#    The latter sum tables will have the ending ".stc"
 #
 # Version:
 # 
@@ -167,7 +166,7 @@ if ( $opt_s ) {
 	$scmd1 .= " $lodir/$lotab $nlodir/$nlotabs[0]";
 	$scmd2 .= " $lodir/$lotab";
 	$scmd1 .= " $lotab";
-	$scmd1 =~ s/\.raw$/\.stc/;
+	$scmd1 =~ s/\.raw$/\.tab/;
 	print "fastadd.pl: Creating sum table for $lotab ...\n";
 	if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
 	system("$scmd1 >> ${scen}_addst.log");
@@ -176,7 +175,7 @@ if ( $opt_s ) {
 	my $scmd1 = $scmd2;
 	$scmd1 .= " $nlodir/$nlotab";
 	$scmd1 .= " $nlotab";
-	$scmd1 =~ s/\.raw$/\.stc/;
+	$scmd1 =~ s/\.raw$/\.tab/;
 	print "fastadd.pl: Creating sum table for $nlotab ...\n";
 	if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
 	system("$scmd1 >> ${scen}_addst.log");
