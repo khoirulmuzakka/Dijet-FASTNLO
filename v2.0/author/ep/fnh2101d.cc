@@ -49,7 +49,7 @@ extern "C"{
 #include "fnloBlockBNlojet.h"
 
 
-//    Defines new sample type to do felavor decomposation in the initial state
+//    Defines new sample type to do flavor decomposation in the initial state
 const char *mySample_label[4] = {"g", "u", "d", "total"};
 typedef weight<4U, mySample_label> mySample;
 
@@ -70,7 +70,7 @@ public:
   
 private:
    //   pdf
-   pdf_cteq6 pdf;
+   pdf_cteq6photo pdf;
    pdf_photo_dummy dummypdf;
 
    // algorithms

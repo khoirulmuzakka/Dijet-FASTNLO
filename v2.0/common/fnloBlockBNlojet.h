@@ -3,6 +3,7 @@
 
 
 #include "fnloBlockB.h"
+#include <bits/dis-process.h>
 #include <bits/photo-process.h>
 #include <bits/hhc-process.h>
 
@@ -10,8 +11,9 @@
 class fnloBlockBNlojet : public fnloBlockB {
  public:
    fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);}
-   void FillEventPhoto(int ObsBin,double x, double scale1, const nlo::amplitude_photo& amp, nlo::pdf_and_coupling_photo& pdf);
-   void FillEventResolved(int ObsBin,double x1, double x2,double scale1, double ymin, double ymax,  double Q2max,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf);
+   void FillEventDIS(int ObsBin,double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor=1.0);
+   void FillEventPhoto(int ObsBin,double x, double scale1, const nlo::amplitude_photo& amp, nlo::pdf_and_coupling_photo& pdf, double prefactor=1.0);
+   void FillEventResolved(int ObsBin,double x1, double x2,double scale1, double ymin, double ymax,  double Q2max,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
 
 private:
    //    gauss-legendre base point and weights

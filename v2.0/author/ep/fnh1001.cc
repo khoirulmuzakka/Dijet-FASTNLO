@@ -1,8 +1,7 @@
 //------ DON'T TOUCH THIS PART! ------
-#include <bits/hhc-phasespace.h>
-#include <bits/photo-phasespace.h>
-#include <bits/hhc-process.h>
-#include <bits/hhc-jetfunc.h>
+#include <bits/dis-phasespace.h>
+#include <bits/dis-process.h>
+#include <bits/dis-jetfunc.h>
 
 //----- used namespaces -----
 using namespace nlo;
@@ -11,8 +10,8 @@ using namespace std;
 
 //----- declaration of the user defined functons -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
-void psinput(phasespace_photo *, double&, double&);
-user_base_hhc * userfunc();
+void psinput(phasespace_dis *, double&, double&, double&, double&, double&, double&, double&, double&);
+user_base_dis * userfunc();
 
 //----- array of the symbols symbols -----
 extern "C"{
@@ -22,8 +21,8 @@ extern "C"{
 	void *address;
   } user_defined_functions[] = 
   {
-	//   process index: hhc for gamma + p --> jets (photoproduction resolved photon)
-	{"procindex", (void *) "photores"},
+	//   process index: hhc for e + p --> jets (DIS)
+	{"procindex", (void *) "dis"},
   
 	//   input function 
 	{"inputfunc", (void *) inputfunc},
@@ -41,48 +40,42 @@ extern "C"{
 //------ END OF THE DO-NOT-TOUCH-PART ------
 
 
-
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 #include <kT_clus.h>
-#include "pdf-grv-cteq6.h"
-#include "pdf-hhc-dummy.h"
+#include "pdf-cteq6.h"
+#include "pdf-dis-dummy.h"
 #include "fnloTable.h"
 #include "fnloBlockBNlojet.h"
 
 
-//    Defines new sample type to do felavor decomposation in the initial state
-const char *mySample_label[8] = {"gg", "qg", "gq", "qr", "qq", "qqb", "qrb","total"};
-typedef weight<8U, mySample_label> mySample;
-
-//   Here we specify some base user objects with the new sample type
-//     (see photo-jetfunc.h and included header files therein) 
-typedef basic_user<jetfunc_hhc, void,        mySample, weight_conversion> myUser0d;
-
-class UserPhoto : public basic_user_set<myUser0d> 
+class UserDIS : public basic_user_set<user1d_dis, user1h_dis> 
 {
 public:
   //   init and user function
-  void initfunc(unsigned int);
-  void userfunc(const event_hhc&, const amplitude_hhc&);
+   void initfunc(unsigned int);
+   void userfunc(const event_dis&, const amplitude_dis&);
 
    virtual void end_of_event();  
    virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
   
 private:
    //   pdf
-   pdf_grv_cteq6 pdf;
-   pdf_hhc_dummy dummypdf;
+   pdf_cteq6dis pdf;
+   pdf_dis_dummy dummypdf;
 
    // algorithms
    kT_clus_long jetclus;
    
-   //  private types
-   typedef lorentzvector<double> _Lv;
-
-   // the jet structore
-   bounded_vector<_Lv> pj_lab; 
+   // the jet structore in breit & lab. frame
+   bounded_vector<lorentzvector<double> > pjb, pjl; 
    bounded_vector<unsigned int> jet;
+   
+   //  event in breit frame
+   event_dis pbreit;
+  
+  // boost the jet momenta back to the laboratory frame
+  void boost_back_to_lab(const event_dis&);
   
    //fastNLO starts here
 
@@ -95,15 +88,14 @@ private:
    time_t start_time;
    
    bool nlo;
-
    void inittable();
    void writetable();
-
   
 };
   
-user_base_hhc * userfunc() {
-  return new UserPhoto;
+
+user_base_dis * userfunc() {
+  return new UserDIS;
 }
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
@@ -116,19 +108,33 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
   nd = 3U;
 } 
 
-void psinput(phasespace_photo *ps, double& el, double& eh)
+void psinput(phasespace_dis *ps, double& el, double& eh, double& q2min, double& q2max, 
+			 double& xmin, double& xmax, double& ymin, double& ymax)
 {
-  //  energy of incomings
-  el = 27.5;
-  eh = 820.0;
+  // energy of the incomong lepton and 
+  // hadron in the laboratory frame
+  el = 27.5;    // GeV
+  eh = 820.0;     // GeV
   
+  //  Q^2 cuts
+  q2min = 150.0;    // GeV^2
+  q2max = 5000.0;  // GeV^2 
+
+  //   xB cuts
+  xmin = 0.0;
+  xmax = 1.0;
+  
+  //   y cuts
+  ymin = 0.2;
+  ymax = 0.6;
+
   //   You can use your own phase generator. 
   //   Here we use the default.
   ps = 0;
 } 
 
 
-void UserPhoto::initfunc(unsigned int)
+void UserDIS::initfunc(unsigned int)
 {
    // ---- Initialize event counters
    nevents = 0;
@@ -136,64 +142,73 @@ void UserPhoto::initfunc(unsigned int)
    if (nwrite==0) nwrite = 5000000;
     
    start_time = std::time(0);
-  
+   
+}
+
+extern"C" double xalfaem_(double *);
+
+double xalpha_em(double mq2) {
+  return xalfaem_(&mq2);
 }
 
 
-void UserPhoto::userfunc(const event_hhc& p, const amplitude_hhc& amp)
+
+void UserDIS::userfunc(const event_dis& p, const amplitude_dis& amp)
 {
    fnloBlockA2 *A2 =  table->GetBlockA2();
 
    //----- H1 cuts -----
    double pt = 0.0;
-   double pTmin = 21.0, etamin = -1.0, etamax = 2.5;
-   double ymin = 0.3; double ymax = 0.65;
-   double Q2max = 1.0;
+   double pTmin = 7.0, etamin = -1.0, etamax = 2.5;
 
-   //----- photon momentum fraction -----
-   pdf.photon_momentum_fraction(ymin, ymax);
+   double alem = 0; // for running alpha EM
 
    //----- Bjorken x -----
-   //   double x = (p[-1]*p[0])/(p[-1]*p[hadron(0)]);
-   double s = 2.0*(p[hadron(-1)]*p[hadron(0)]);
-   double x = 2.0*(p[0]*p[hadron(-1)])/s;
-   double x2 = 2.0*(p[-1]*p[hadron(0)])/s;
+   double x = (p[-1]*p[0])/(p[-1]*p[hadron(0)]);
+   double Q2 = -((p[-1] - p[-2]).mag2());
+   alem = xalpha_em(Q2);
+
+   //----- copy the momenta and boost to the breit frame ----
+   pbreit = p; lab_to_breit(pbreit);
 
    //----- do the cluster analysis-----
    jetclus.set_up(1,false,2);
-   jetclus(p); jetclus.incl(pj_lab, jet);
-   unsigned int nj = pj_lab.upper();
+   jetclus(pbreit); jetclus.incl(pjb, jet);
+   unsigned int nj = pjb.upper(); 
+   
+   //----- jet structure in laboratory frame -----
+   pjl = pjb; boost_back_to_lab(p);
 
    // loop over all jets
    for(unsigned int i = 1; i <= nj; i++){
-      printf("i=%d nj=%d\n",i,nj);
-      printf("nobs=%d\n",A2->GetNObsBin());
-
       // jet valid?
-      if((pt = pj_lab[i].perp()) > pTmin && -pj_lab[i].prapidity() < etamax && -pj_lab[i].prapidity() > etamin) { // pz in wrong direction 
-         // find corresponding bin number (E_T)
-         int ptbin = -1;
+      if((pt = pjb[i].perp()) > pTmin && pjl[i].prapidity() < etamax && pjl[i].prapidity() > etamin) { 
+         // find corresponding bin number (E_T and Q^2)
+         int bin = -1;
          for(int j = 0; j < A2->GetNObsBin(); j++) {
-            if (pt >= A2->LoBin[j][0]  && pt <  A2->UpBin[j][0]) {
-               ptbin=j;
+            if (pt >= A2->LoBin[j][0]  && pt <  A2->UpBin[j][0] &&
+                Q2 >= A2->LoBin[j][1]  && Q2 <  A2->UpBin[j][1]) {
+               bin=j;
                break;
             }
          }
+
          //---------- fill fastNLO arrays
-//          if ( ptbin>=0 ) {
-//             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-//                if(table->GetBlockB(k)->GetIRef()>0){
-//                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,pdf);
-//                }else{
-//                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,dummypdf);
-//                }
-//             }
-//          }        
+         if ( bin>=0 ) {
+            for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+               if(table->GetBlockB(k)->GetIRef()>0){
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventDIS(bin,x,pt,amp,pdf,alem * alem);
+               }else{
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventDIS(bin,x,pt,amp,dummypdf,alem * alem);
+               }
+            }
+         }        
       }
    }
+
 }
 
-void UserPhoto::end_of_event(){
+void UserDIS::end_of_event(){
    nevents += 1;
    //-------- store table
    if (( (unsigned long)nevents % nwrite)==0){
@@ -218,7 +233,7 @@ void UserPhoto::end_of_event(){
    }
 }
 
-void UserPhoto::phys_output(const std::basic_string<char>& __file_name, 
+void UserDIS::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
    tablefilename.assign(__file_name.c_str());
@@ -241,42 +256,52 @@ void UserPhoto::phys_output(const std::basic_string<char>& __file_name,
 
 }
 
-void UserPhoto::inittable(){
+void UserDIS::inittable(){
 
-   const bool doReference = false;
+   const bool doReference = true;
 
    //Set up fastNLO
    table = new fnloTable(tablefilename);
 
-   table->GetBlockA1()->SetScenName("fnh2101r");
+   table->GetBlockA1()->SetScenName("fnh1001");
    table->GetBlockA1()->SetNcontrib(1);
    table->GetBlockA1()->SetNmult(0);
    table->GetBlockA1()->SetNdata(0);
    table->GetBlockA2()->SetIpublunits(12);
 
    fnloBlockA2 *A2 =  table->GetBlockA2();
-   A2->ScDescript.push_back("Inclusive jet cross sections in photoproduction");
+   A2->ScDescript.push_back("Inclusive jet cross sections in DIS");
    A2->ScDescript.push_back("H1 Collaboration");
-   A2->ScDescript.push_back("DESY 02-225");
-   A2->ScDescript.push_back("EPJC ?");
+   A2->ScDescript.push_back("hep-ex/0010054");
+   A2->ScDescript.push_back("Eur.Phys.J. C19 (2001) 289-311");
    A2->NScDescript = A2->ScDescript.size();
    A2->Ecms = sqrt(4.*820.*27.5);
-   A2->ILOord = 2;
-   A2->NDim = 1;
+   A2->ILOord = 1;
+   A2->NDim = 2;
    A2->DimLabel.push_back("E_T");
+   A2->IDiffBin.push_back(2);
+   A2->DimLabel.push_back("Q^2");
    A2->IDiffBin.push_back(2);
 
    vector <double> bound;
-   bound.resize(1);
-  
-   bound[0] = 21.; A2->LoBin.push_back(bound);
-   bound[0] = 28.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 35.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 42.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 52.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 62.; A2->LoBin.push_back(bound);  A2->UpBin.push_back(bound);
-   bound[0] = 75.; A2->UpBin.push_back(bound);
-   A2->NObsBin = 6;
+   bound.resize(2);
+
+   const int netbins = 4;
+   const int nq2bins = 4;
+   double etbins[netbins+1] = {7.,11.,18.,30.,50.};
+   double q2bins[nq2bins+1] = {150.,200.,300.,600.,5000.};
+
+   for(int i=0;i<nq2bins;i++){
+      for(int j=0;j<netbins;j++){
+         bound[0] = etbins[j];
+         bound[1] = q2bins[i];
+         A2->LoBin.push_back(bound);
+         bound[0] = etbins[j+1];
+         bound[1] = q2bins[i+1];
+         A2->UpBin.push_back(bound);
+      }
+   }
+   A2->NObsBin = netbins*nq2bins;
 
    A2->INormFlag = 0;
 
@@ -291,7 +316,7 @@ void UserPhoto::inittable(){
    B->CodeDescript.push_back("NLOJET++ 4.0.1");
    B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
-   B->NSubproc = 7;
+   B->NSubproc = 3;
    if(nlo){
       B->CtrbDescript.push_back("NLO");
       B->IContrFlag2 = 2;
@@ -303,24 +328,23 @@ void UserPhoto::inittable(){
       B->IScaleDep = 0;
       B->Npow = A2->ILOord;
    }
-   B->CtrbDescript.push_back("resolved");
    B->NContrDescr = B->CtrbDescript.size();
 
-   B->NPDF = 2;
+   B->NPDF = 1;
    B->NPDFPDG.push_back(2212);
-   B->NPDFPDG.push_back(20);
-   B->NPDFDim = 2;
+   B->NPDFDim = 0;
    B->NFragFunc = 0;
-   B->IPDFdef1 = 4;
+   B->IPDFdef1 = 2;
    B->IPDFdef2 = 1;
    B->IPDFdef3 = 1;
 
-   double xlimits[6] = {0.015,0.03,0.05,0.06,0.1,0.15};
    B->XNode1.resize(A2->NObsBin);
    for(int i=0;i<A2->NObsBin;i++){
-      int nxtot = 14+i;
+      int nxtot = 20;
       B->Nxtot1.push_back(nxtot);
-      double xlim = xlimits[i];
+      double s = pow(A2->Ecms,2);
+      double xlim = 0.8*(A2->LoBin[i][1]/s/0.6+pow(A2->LoBin[i][0] ,2)/s);
+      //      printf("bin#=%d Q2=%f et=%f s=%f xlim=%f\n",i,A2->LoBin[i][1],A2->LoBin[i][0],s,xlim);
       double hxlim = log10(xlim);
       B->Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
@@ -328,28 +352,6 @@ void UserPhoto::inittable(){
          B->XNode1[i].push_back(pow(10,hx)); 
       }
    }
-   
-   double xlimits2[6] = {0.02,0.02,0.03,0.04,0.05,0.07};
-   B->XNode2.resize(A2->NObsBin);
-   for(int i=0;i<A2->NObsBin;i++){
-      int nxlow = 20;
-      int nxhigh = 20;
-      int nxtot = nxlow + nxhigh;
-      B->Nxtot2.push_back(nxtot);
-      double xlim = xlimits2[i]; 
-      double hxlim = log10(xlim);
-      double xmax = 0.9;
-      double hxmax = log10(xmax);
-      B->Hxlim2.push_back(hxlim);
-      for(int j=0;j<nxlow;j++){
-         double hx = hxlim +  ((double)j)/((double)(nxlow)) * (hxmax-hxlim);
-         B->XNode2[i].push_back(pow(10,hx)); 
-      }
-      for(int j=0;j<nxhigh;j++){
-         B->XNode2[i].push_back(xmax +  ((double)j)/((double)(nxhigh))*(1.0-xmax)); 
-      }
-   }
-   
 
    B->NScales = 2;  // two scales: mur and muf
    B->NScaleDim = 1; // only one variable used in scales: ET
@@ -412,31 +414,33 @@ void UserPhoto::inittable(){
    // reference table
    if(doReference){
       fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
-      refB->NSubproc = 7;
+      refB->NSubproc = 3;
       table->CreateBlockB(1,refB);
       refB->Copy(table->GetBlockB(0));
       refB->IRef = 1;
       refB->Nscalenode[0] = 1;
       refB->Nxtot1.clear();
       refB->Hxlim1.clear();
-      refB->Nxtot2.clear();
-      refB->Hxlim2.clear();
       for(int i=0;i<A2->NObsBin;i++){
          refB->Nxtot1.push_back(1);
          refB->Hxlim1.push_back(0.);
          refB->XNode1[i].clear(); 
          refB->XNode1[i].push_back(0.); 
-         refB->Nxtot2.push_back(1);
-         refB->Hxlim2.push_back(0.);
-         refB->XNode2[i].clear(); 
-         refB->XNode2[i].push_back(0.); 
       }
       table->GetBlockA1()->SetNcontrib(2);
    }
 
+   if(nlo){
+      B->NSubproc = 3;
+   }else{
+      B->NSubproc = 2;
+   }
+
+
+
 }
- 
-void UserPhoto::writetable(){
+
+void UserDIS::writetable(){
    table->OpenFileRewrite();
    table->WriteBlockA1();
    table->WriteBlockA2();
@@ -447,5 +451,21 @@ void UserPhoto::writetable(){
 }
 
 
-
-
+void UserDIS::boost_back_to_lab(const event_dis& p)
+{ 
+  double x = p[-1].T()/p[hadron(0)].T();
+  double bz = (1.0 - x)/(1.0 + x);
+  threevector<double> bVec = -((pbreit[-1] + pbreit[hadron(0)]).boostVector());
+  lorentzvector<double> p0(pbreit[hadron(0)]);
+  
+  p0.boost(bVec);
+  double phi = p0.phi(), theta = p0.theta();
+  unsigned int njet = pjl.upper();
+  
+  for(unsigned int i = 1; i <= njet; i++) {
+    pjl[i].boost(bVec);
+    pjl[i].rotateZ(-phi);
+    pjl[i].rotateY(-theta); 
+    pjl[i].boost(0.0, 0.0, bz);
+  }
+}

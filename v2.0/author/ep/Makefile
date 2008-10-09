@@ -1,4 +1,9 @@
 
+# H1 HERA I inclusive jets, DIS
+
+fnh1001.la: pdf-cteq6.h fnh1001.cc 
+	create-nlojet-user fnh1001.cc alew.f -o fnh1001 -Wx,-O0,-Wall,-I${HOME}/include/lhpdf,-I../../common -Wl,-L${HOME}/lib/fastnlo,-llhpdf_cteq6,-lfastnloNlojet
+
 # H1 DESY 02-225
 
 fnh2101d.la: pdf-cteq6.h pdf-photo-dummy.h fnh2101d.cc 
