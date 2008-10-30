@@ -12,7 +12,7 @@ NAME= allunc
 
 CFILES= ftn_gzio.c
 REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
-	fn-interface-cteq6.f
+	fn-interface-cteq6.f Cteq61Pdf.f
 STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 PDFFILES= pdfuncertainty.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
