@@ -205,9 +205,9 @@ chdir $pwdir;
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
 $install{cernlib}[0]    = "cernlib-2003";
-# Version 5.4.0 doesn't work with gcc 3.3.6 so far, test version 5.5.0
-$install{lhapdf}[0]     = "lhapdf-5.5.0";
-#$install{lhapdf}[0]     = "lhapdf-5.3.1";
+# Versions >= 5.4.0 don't work with gcc 3.3.6
+$install{lhapdf}[0]     = "lhapdf-5.3.1";
+#$install{lhapdf}[0]     = "lhapdf-5.6.0";
 $install{fastjet}[0]    = "fastjet-2.3.2";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
