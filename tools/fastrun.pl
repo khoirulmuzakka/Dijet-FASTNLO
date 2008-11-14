@@ -23,8 +23,8 @@ use warnings;
 #
 # Tee STDOUT and STDERR into file
 my $gjobnr = "";
-if ( defined $ENV{MY_JOB} ) {
-    $gjobnr = $ENV{MY_JOB};
+if ( defined $ENV{MY_JOBID} ) {
+    $gjobnr = $ENV{MY_JOBID};
 #    $gjobnr++;
     $gjobnr = substr("0000$gjobnr",-4);	    
     open STDOUT, "| tee fastrun_${gjobnr}.log" or die
@@ -874,8 +874,8 @@ sub grid_storage {
     $target =~ s/\/\.\//\//g;
     
     my $gjobnr = "";
-    if ( defined $ENV{MY_JOB} ) {
-	$gjobnr = $ENV{MY_JOB};
+    if ( defined $ENV{MY_JOBID} ) {
+	$gjobnr = $ENV{MY_JOBID};
 #        $gjobnr++;
 	$gjobnr = substr("0000$gjobnr",-4);	    
     }
