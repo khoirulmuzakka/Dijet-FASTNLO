@@ -1,10 +1,12 @@
 //
-// fastNLO author code for fnl0117:
-//     CMS LHC test scenario, E_cms = 14 TeV
-//     for kT algo with D=0.4 in E-scheme
-//     (phase space adapted to forward jet analysis)
+// fastNLO author code for fnl1007:
+//     CMS LHC test scenario, E_cms = 10 TeV
+//     for kT algo with D=0.6 in E-scheme
 // 
 // last modification
+// 2008/10/30 KR - Make some copies for algorithmic precision study
+// 2008/04/24 KR - Add protection against empty phase space bins in xlimit
+// 2008/04/14 KR - Copy from fnl0007, change to new LHC start energy
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -42,7 +44,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "kt-e-04.h"
+#include "kt-e-06.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,7 +98,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_04 jetclus;   // jet algorithm
+   kt_e_06 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -123,8 +125,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s = 40000.;     // RHIC               200 GeV   
    //s = 3240000.;   // TeV Run I         1800 GeV
    //s = 3841600.;   // TeV Run II        1960 GeV
-   //s = 100000000.; // LHC Start-up Run 10000 GeV
-   s = 196000000.; // LHC              14000 GeV
+   s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 196000000.; // LHC              14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -159,16 +161,16 @@ void UserHHC::initfunc(unsigned int)
    npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
 
    // flexible rap binning
-   raphigh[0]=3.00;
-   raphigh[1]=5.00;
+   raphigh[0]=0.00;
+   raphigh[1]=0.55;
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 14 bins
-   npt[0]=14;
+   //Define binning in pt: 152 bins
+   npt[0]=34;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -176,7 +178,7 @@ void UserHHC::initfunc(unsigned int)
    }
    
    // lowest pT value in sample
-   ptlow = 20.;          //  start low for LHC
+   ptlow = 50.;          //  start low for LHC
    
    pthigh.resize(nrap);
    //----- array for pt boundaries
@@ -184,22 +186,44 @@ void UserHHC::initfunc(unsigned int)
      pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   //----- rap bins 1, # = 14
-   pthigh[0][0]  =   20.0;
-   pthigh[0][1]  =   30.0;
-   pthigh[0][2]  =   40.0;
-   pthigh[0][3]  =   50.0;
-   pthigh[0][4]  =   60.0;
-   pthigh[0][5]  =   80.0;
-   pthigh[0][6]  =   95.0;
-   pthigh[0][7]  =  120.0;
-   pthigh[0][8]  =  145.0;
-   pthigh[0][9]  =  170.0;
-   pthigh[0][10] =  195.0;
-   pthigh[0][11] =  230.0;
-   pthigh[0][12] =  250.0;
-   pthigh[0][13] =  300.0;
-   pthigh[0][14] =  335.0;
+   //----- rap bin 1, # = 34
+   for (int j=0; j<1; j++){
+     pthigh[j][0]  =   50.0;
+     pthigh[j][1]  =   60.0;
+     pthigh[j][2]  =   80.0;
+     pthigh[j][3]  =   95.0;
+     pthigh[j][4]  =  120.0;
+     pthigh[j][5]  =  145.0;
+     pthigh[j][6]  =  170.0;
+     pthigh[j][7]  =  195.0;
+     pthigh[j][8]  =  230.0;
+     pthigh[j][9]  =  250.0;
+     pthigh[j][10] =  300.0;
+     pthigh[j][11] =  335.0;
+     pthigh[j][12] =  380.0;
+     pthigh[j][13] =  425.0;
+     pthigh[j][14] =  470.0;
+     pthigh[j][15] =  520.0;
+     pthigh[j][16] =  600.0;
+     pthigh[j][17] =  700.0;
+     pthigh[j][18] =  800.0;
+     pthigh[j][19] =  900.0;
+     pthigh[j][20] = 1000.0;
+     pthigh[j][21] = 1200.0;
+     pthigh[j][22] = 1400.0;
+     pthigh[j][23] = 1600.0;
+     pthigh[j][24] = 1800.0;
+     pthigh[j][25] = 2000.0;
+     pthigh[j][26] = 2200.0;
+     pthigh[j][27] = 2400.0;
+     pthigh[j][28] = 2600.0;
+     pthigh[j][29] = 2800.0;
+     pthigh[j][30] = 3000.0;
+     pthigh[j][31] = 3250.0;
+     pthigh[j][32] = 3500.0;
+     pthigh[j][33] = 3750.0;
+     pthigh[j][34] = 4000.0;
+   }
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
    for(int i=0;i<nrap/2;i++){
@@ -264,7 +288,6 @@ void UserHHC::initfunc(unsigned int)
 	   cout << "Remove empty bin!" << endl;
 	   exit(2);
 	 }
-
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
 	 for (int nr = 0; nr <= 400; nr++) {
@@ -327,10 +350,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0117:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.4 in E-scheme" << endl; 
-   cout << "      (phase space adapted to forward jet analysis)" << endl;
+   cout << "    Scenario fnl1007:" << endl;
+   cout << "      CMS LHC test scenario, E_cms = 10 TeV," << endl;
+   cout << "      for kT algo with D=0.6 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -694,9 +716,9 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
-   table << "Forward jets" << endl;
-   table << "kT with D=0.4, E scheme" << endl;
+   table << "CMS LHC Test Scenario, E_cms = 10 TeV" << endl;
+   table << "Inclusive jets" << endl;
+   table << "kT with D=0.6, E scheme" << endl;
    table << "-" << endl;
 
   //iproc
@@ -708,7 +730,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.4;  // kT distance D
+   double JetResol1 = 0.6;  // kT distance D
    WRITE(JetResol1);
 
    //JetResol2

@@ -142,7 +142,7 @@ void UserHHC::initfunc(unsigned int)
 
    // ********************************************************
    // ********** switch for reference mode on/off ************
-   iref = 0;       //  switch for reference mode
+   iref = 1;       //  switch for reference mode
    //iref = 1;       //  switch for reference mode
                   //   0: standard fastNLO table only
                  //    1: include 2nd "reference table" (a_s/PDFs)

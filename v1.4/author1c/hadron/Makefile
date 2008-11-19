@@ -187,7 +187,7 @@ fnt2003: links fnt2003.cc $(CommonPath)/kt-e-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnt2003.cc \
 	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
-	-o fnt2003 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnt2003ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 #
 # ===  --> extended version - using multiple y ranges 
 fnt2003plus: links fnt2003plus.cc $(CommonPath)/kt-e-07.cc \
@@ -210,6 +210,29 @@ fnt2003plusD10: links fnt2003plusD10.cc $(CommonPath)/kt-e-10.cc \
 	$(CommonPath)/kt-e-10.cc $(cteq6pdf) \
 	-o fnt2003plusD10 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
+# --- ... as original version with 12 x bins, but different x binning
+fnt2003.x_06_2: links fnt2003.x_06_2.cc $(CommonPath)/kt-e-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnt2003.x_06_2.cc \
+	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
+	-o fnt2003.x_06_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+fnt2003.x_24_2: links fnt2003.x_24_2.cc $(CommonPath)/kt-e-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnt2003.x_24_2.cc \
+	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
+	-o fnt2003.x_24_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+fnt2003.x_48_2: links fnt2003.x_48_2.cc $(CommonPath)/kt-e-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnt2003.x_48_2.cc \
+	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
+	-o fnt2003.x_48_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+fnt2003.x_12_1: links fnt2003.x_12_1.cc $(CommonPath)/kt-e-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnt2003.x_12_1.cc \
+	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
+	-o fnt2003.x_12_1ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+
 
 #
 # ======================================================================
@@ -231,7 +254,7 @@ fnt200a: links fnt200a.cc $(CommonPath)/cone-e-07.cc \
 #	$(cteq6pdf)
 #	$(NLOJET)/bin/create-nlojet-user fnt2003.cc \
 #	$(CommonPath)/kt-e-07.cc $(cteq6pdf) \
-#	-o fnt2003 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+#	-o fnt2003ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNT2005: Tevatron Run II CDF incl. jets with kT D=0.5   ======
@@ -242,7 +265,7 @@ fnt2005: links fnt2005.cc $(CommonPath)/kt-e-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnt2005.cc \
 	$(CommonPath)/kt-e-05.cc $(cteq6pdf) \
-	-o fnt2005 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnt2005ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNT2006: Tevatron Run II CDF incl. jets with kT D=1.0   ======
@@ -253,7 +276,7 @@ fnt2006: links fnt2006.cc $(CommonPath)/kt-e-10.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnt2006.cc \
 	$(CommonPath)/kt-e-10.cc $(cteq6pdf) \
-	-o fnt2006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnt2006ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -337,7 +360,7 @@ fnl0007: links fnl0007.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0007.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
-	-o fnl0007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0007ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0008: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
@@ -348,7 +371,7 @@ fnl0008: links fnl0008.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0008.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl0008 -Wno-deprecated -Wf,-O3 \
+	-o fnl0008ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -361,7 +384,7 @@ fnl0009: links fnl0009.cc $(CommonPath)/cone-e-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0009.cc \
 	$(CommonPath)/cone-e-07.cc $(cteq6pdf) \
-	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0009ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0010: LHC CMS incl. jets with fastjet kT D=0.6 ============
@@ -372,7 +395,7 @@ fnl0010: links fnl0010.cc $(CommonPath)/fj-kt-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0010.cc \
 	$(CommonPath)/fj-kt-06.cc $(cteq6pdf) \
-	-o fnl0010 -Wno-deprecated -Wf,-O3 \
+	-o fnl0010ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
@@ -385,7 +408,7 @@ fnl0011: links fnl0011.cc $(CommonPath)/fj-mc-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0011.cc \
 	$(CommonPath)/fj-mc-07.cc $(cteq6pdf) \
-	-o fnl0011 -Wno-deprecated -Wf,-O3 \
+	-o fnl0011ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/CDFCones \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/CDFCones,-lCDFConesPlugin,-L$(FASTJET)/plugins/CDFCones/CDFcode,-lCDFcode
 
@@ -398,7 +421,7 @@ fnl0017: links fnl0017.cc $(CommonPath)/kt-e-04.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0017.cc \
 	$(CommonPath)/kt-e-04.cc $(cteq6pdf) \
-	-o fnl0017 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0017ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0018: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
@@ -409,7 +432,7 @@ fnl0018: links fnl0018.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0018.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl0018 -Wno-deprecated -Wf,-O3 \
+	-o fnl0018ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -422,7 +445,7 @@ fnl0019: links fnl0019.cc $(CommonPath)/cone-e-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0019.cc \
 	$(CommonPath)/cone-e-05.cc $(cteq6pdf) \
-	-o fnl0019 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0019ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0020: LHC CMS incl. jets with fastjet kT D=0.4 ============
@@ -433,7 +456,7 @@ fnl0020: links fnl0020.cc $(CommonPath)/fj-kt-04.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0020.cc \
 	$(CommonPath)/fj-kt-04.cc $(cteq6pdf) \
-	-o fnl0020 -Wno-deprecated -Wf,-O3 \
+	-o fnl0020ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
@@ -446,7 +469,7 @@ fnl0021: links fnl0021.cc $(CommonPath)/fj-mc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0021.cc \
 	$(CommonPath)/fj-mc-05.cc $(cteq6pdf) \
-	-o fnl0021 -Wno-deprecated -Wf,-O3 \
+	-o fnl0021ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/CDFCones \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/CDFCones,-lCDFConesPlugin,-L$(FASTJET)/plugins/CDFCones/CDFcode,-lCDFcode
 
@@ -459,7 +482,7 @@ fnl0117: links fnl0117.cc $(CommonPath)/kt-e-04.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0117.cc \
 	$(CommonPath)/kt-e-04.cc $(cteq6pdf) \
-	-o fnl0117 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0117ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0118: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
@@ -470,7 +493,39 @@ fnl0118: links fnl0118.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0118.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl0118 -Wno-deprecated -Wf,-O3 \
+	-o fnl0118ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl0118.x_06_2: links fnl0118.x_06_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0118.x_06_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl0118.x_06_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl0118.x_24_2: links fnl0118.x_24_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0118.x_24_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl0118.x_24_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl0118.x_48_2: links fnl0118.x_48_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0118.x_48_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl0118.x_48_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl0118.x_12_1: links fnl0118.x_12_1.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0118.x_12_1.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl0118.x_12_1ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -483,7 +538,7 @@ fnl0217: links fnl0217.cc $(CommonPath)/kt-e-04.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0217.cc \
 	$(CommonPath)/kt-e-04.cc $(cteq6pdf) \
-	-o fnl0217 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl0217ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL0218: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
@@ -494,7 +549,7 @@ fnl0218: links fnl0218.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl0218.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl0218 -Wno-deprecated -Wf,-O3 \
+	-o fnl0218ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -507,7 +562,19 @@ fnl1007: links fnl1007.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1007.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
-	-o fnl1007 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+	-o fnl1007ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+fnl1007.y_1_x_12_2: links fnl1007.y_1_x_12_2.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_12_2.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl1007.y_1_x_12_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+fnl1007.y_1_x_12_1: links fnl1007.y_1_x_12_1.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_12_1.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl1007.y_1_x_12_1ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
 # =====   FNL1008: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
@@ -518,7 +585,7 @@ fnl1008: links fnl1008.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1008.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl1008 -Wno-deprecated -Wf,-O3 \
+	-o fnl1008ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -531,7 +598,7 @@ fnl1010: links fnl1010.cc $(CommonPath)/fj-kt-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1010.cc \
 	$(CommonPath)/fj-kt-06.cc $(cteq6pdf) \
-	-o fnl1010 -Wno-deprecated -Wf,-O3 \
+	-o fnl1010ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
@@ -544,7 +611,7 @@ fnl1018: links fnl1018.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1018.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl1018 -Wno-deprecated -Wf,-O3 \
+	-o fnl1018ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -557,7 +624,39 @@ fnl1118: links fnl1118.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1118.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl1118 -Wno-deprecated -Wf,-O3 \
+	-o fnl1118ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl1118.x_06_2: links fnl1118.x_06_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1118.x_06_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1118.x_06_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl1118.x_24_2: links fnl1118.x_24_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1118.x_24_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1118.x_24_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl1118.x_48_2: links fnl1118.x_48_2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1118.x_48_2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1118.x_48_2ref -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl1118.x_12_1: links fnl1118.x_12_1.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1118.x_12_1.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1118.x_12_1ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
@@ -570,7 +669,7 @@ fnl1218: links fnl1218.cc $(CommonPath)/fj-sc-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1218.cc \
 	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
-	-o fnl1218 -Wno-deprecated -Wf,-O3 \
+	-o fnl1218ref -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 

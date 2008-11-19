@@ -1,7 +1,7 @@
 //
-// fastNLO author code for fnl0117:
-//     CMS LHC test scenario, E_cms = 14 TeV
-//     for kT algo with D=0.4 in E-scheme
+// fastNLO author code for fnl1118:
+//     CMS LHC test scenario, E_cms = 10 TeV
+//     for fastjet SISCone algo with R=0.5 in E-scheme
 //     (phase space adapted to forward jet analysis)
 // 
 // last modification
@@ -42,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "kt-e-04.h"
+#include "fj-sc-05.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_04 jetclus;   // jet algorithm
+   fj_sc_05 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -123,8 +123,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s = 40000.;     // RHIC               200 GeV   
    //s = 3240000.;   // TeV Run I         1800 GeV
    //s = 3841600.;   // TeV Run II        1960 GeV
-   //s = 100000000.; // LHC Start-up Run 10000 GeV
-   s = 196000000.; // LHC              14000 GeV
+   s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 196000000.; // LHC              14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -208,7 +208,7 @@ void UserHHC::initfunc(unsigned int)
       }
    }
    
-   nxtot = 12;
+   nxtot = 48;
 
    // NLO scale variations - for scales in GeV
    nscalevar = 4;
@@ -327,9 +327,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0117:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.4 in E-scheme" << endl; 
+   cout << "    Scenario fnl1118:" << endl;
+   cout << "      CMS LHC test scenario, E_cms = 10 TeV," << endl;
+   cout << "      for fastjet SISCone algo with R=0.5 in E-scheme" << endl; 
    cout << "      (phase space adapted to forward jet analysis)" << endl;
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
@@ -694,9 +694,9 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
+   table << "CMS LHC test scenario, E_cms = 10 TeV" << endl;
    table << "Forward jets" << endl;
-   table << "kT with D=0.4, E scheme" << endl;
+   table << "SISCone with R=0.5, E scheme" << endl;
    table << "-" << endl;
 
   //iproc
@@ -704,15 +704,15 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 1; // kT algo
+   int ialgo = 4; // SISCone
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.4;  // kT distance D
+   double JetResol1 = 0.5;  // Cone size R
    WRITE(JetResol1);
 
    //JetResol2
-   double JetResol2 = 0.0; // kT - no further parameter
+   double JetResol2 = 0.75; // Overlap threshold
    WRITE(JetResol2);
 
    // relative order

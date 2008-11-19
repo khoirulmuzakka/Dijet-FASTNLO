@@ -1,10 +1,19 @@
 //
-// fastNLO author code for fnl0117:
-//     CMS LHC test scenario, E_cms = 14 TeV
-//     for kT algo with D=0.4 in E-scheme
-//     (phase space adapted to forward jet analysis)
+// fastNLO author code for fnt2003
+//
+//    Run II CDF publication of the incl jet x-set w/ kT D=0.7
+//                hep-ex/0512062
 // 
 // last modification
+// 2005/12/07 MW - new xlimit calculation (y-integration)
+// 2005/12/.. TK - add "reference" setting
+// 2006/01/13 MW - make "reference" option switchable "iref=0/1"
+//                 scale variations are now ordered ; and mur=muf
+//                 implement bicubic eigenfunctions
+// 2006/01/17 MW - divide by binwidth 
+//                 store in fb (as in publication) -> variable "unitfactor"
+//                 extend tableformat to version 1c
+//             --> used for production
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -37,12 +46,15 @@ struct {
     
       //   user defined functions
       {"userfunc",  (void *) userfunc},
-    
-      //  end of the list
+          //  end of the list
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "kt-e-04.h"
+//#include "kt2jet-e-07.h"
+//#include "kt2jet-e-07.h"
+#include "kt-e-07.h"
+//#include "cone-et-07.h"
+//#include "rsep-et-07.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,14 +108,11 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   kt_e_04 jetclus;   // jet algorithm
+   kt_e_07 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
-   bool textoutput; // If true, the table is written in plain ASCII instead of BASE64 encoded doubles (later for XML)
    amplitude_hhc::integral_type itype; // Born, NLO etc.
-
-   time_t start_time;
 
    void writetable();
 };
@@ -119,12 +128,11 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy squared
-   //s = 40000.;     // RHIC               200 GeV   
-   //s = 3240000.;   // TeV Run I         1800 GeV
-   //s = 3841600.;   // TeV Run II        1960 GeV
-   //s = 100000000.; // LHC Start-up Run 10000 GeV
-   s = 196000000.; // LHC              14000 GeV
+   //  total c.m. energy square
+   //s = 40000;       // RHIC           200GeV   
+   //s = 3240000;     // TeV Run I     1800GeV
+   s = 3841600;       // TeV Run II    1960GeV
+   //s = 196000000;   // LHC          14000GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -147,59 +155,61 @@ void UserHHC::initfunc(unsigned int)
                  //    1: include 2nd "reference table" (a_s/PDFs)
    refscale = 2;   // which of the scalevariations is used in ref-table?
 
-   unitfactor = 1000000.0;  // for fb
-   //unitfactor = 1000.0;  // for pb   << used for LHC
-   //unitfactor = 1.0;  // for nb     
+   //unitfactor = 1000000.0;  // for fb
+   //unitfactor = 1000.0;  // for pb
+   unitfactor = 1.0;  // for nb      << used in CDF publication
 
    //Set up binning  
-   nrap   = 1;                 // No. of bins in rapidity
+   nrap   = 1;                 // No. of bins in rapidity (5 for Olga) 
    if (iref==1) nrap=nrap*2;  // -> in reference mode: double No. rap bins
 
    raphigh = new double[nrap+1];  //----- array for rapidity boundaries
    npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
 
    // flexible rap binning
-   raphigh[0]=3.00;
-   raphigh[1]=5.00;
+   raphigh[0]=0.1;        // 
+   raphigh[1]=0.7;        // 
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 14 bins
-   npt[0]=14;
+   //Define binning in pt - 76 bins
+   npt[0]=17;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
      for(int i=0;i<nrap/2;i++){
-       npt[i+nrap/2] = npt[i];
+      npt[i+nrap/2] = npt[i];
    }
-   
+
    // lowest pT value in sample
-   ptlow = 20.;          //  start low for LHC
-   
+   ptlow = 54.;          // 54 for CDF Run II kT
+
    pthigh.resize(nrap);
    //----- array for pt boundaries
    for(int i=0;i<nrap;i++){
-     pthigh[i].resize(npt[i]+1);
+      pthigh[i].resize(npt[i]+1);
    }
-   //----- array for pt boundaries
-   //----- rap bins 1, # = 14
-   pthigh[0][0]  =   20.0;
-   pthigh[0][1]  =   30.0;
-   pthigh[0][2]  =   40.0;
-   pthigh[0][3]  =   50.0;
-   pthigh[0][4]  =   60.0;
-   pthigh[0][5]  =   80.0;
-   pthigh[0][6]  =   95.0;
-   pthigh[0][7]  =  120.0;
-   pthigh[0][8]  =  145.0;
-   pthigh[0][9]  =  170.0;
-   pthigh[0][10] =  195.0;
-   pthigh[0][11] =  230.0;
-   pthigh[0][12] =  250.0;
-   pthigh[0][13] =  300.0;
-   pthigh[0][14] =  335.0;
+   //----- array for pt boundaries - include one more bin in add. to analysis
+   pthigh[0][0] = 54;  //  0.1<|Y|<0.7
+   pthigh[0][1] = 62 ;
+   pthigh[0][2] = 72 ;
+   pthigh[0][3] = 83 ;
+   pthigh[0][4] = 96;
+   pthigh[0][5] = 110;
+   pthigh[0][6] = 127;
+   pthigh[0][7] = 146;
+   pthigh[0][8] = 169;
+   pthigh[0][9] = 195;
+   pthigh[0][10] = 224;
+   pthigh[0][11] = 259;
+   pthigh[0][12] = 298;
+   pthigh[0][13] = 344;
+   pthigh[0][14] = 396;
+   pthigh[0][15] = 457;
+   pthigh[0][16] = 527;
+   pthigh[0][17] = 700;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
    for(int i=0;i<nrap/2;i++){
@@ -250,20 +260,6 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
 	 double ymin = raphigh[(j)];
-	 // - Check limit only for first loop over rap. bins when arrays
-         //   are doubled for reference calculation
-	 if ( (ymin > ymax) && (iref == 0 || (iref == 1 && j < nrap/2 ) ) ) {
-	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
-	     " and rapidity bin " << j << endl;
-	   cout << "The pt bin runs from " << pthigh[j][k] <<
-	     " to " << pthigh[j][k+1] << endl;
-	   cout << "The rapidity bin runs from " << raphigh[j] <<
-	     " to " << raphigh[j+1] << endl;
-	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
-	     ", " << ymin << ", " << ymax << endl;
-	   cout << "Remove empty bin!" << endl;
-	   exit(2);
-	 }
 
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
@@ -324,21 +320,17 @@ void UserHHC::initfunc(unsigned int)
    if (tablefilename=="") tablefilename = "fastnlotable.raw";
 
    // Say Hello
-   cout << " " << endl;
-   cout << "   *******************************************" << endl;
-   cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl0117:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
-   cout << "      for kT algo with D=0.4 in E-scheme" << endl; 
-   cout << "      (phase space adapted to forward jet analysis)" << endl;
-   cout << " " << endl;
-   cout << "        table file " << tablefilename << endl;
-   cout << "        store table after " << nwrite << " events" << endl;
-   cout << "        sqrt(s)= " << sqrt(s) << endl;
-   cout << "        No. x-bins: " << nxtot << endl;
-   cout << "        No. rapidity regions: " << nrap << endl;
-   cout << "        No. of pT bins in each rapidity region:" << endl;
-
+   cout<<"  "<<endl;
+   cout<<"   *******************************************"<<endl;
+   cout<<"    fastNLO    - initialization"<<endl;
+   cout<<"         *** scenario fnt2003 ***"<<endl;
+   cout<<" "<<endl;
+   cout<<"        table file "<<tablefilename<<endl;
+   cout<<"        store table after "<<nwrite<<" events"<<endl;
+   cout<<"        sqrt(s)= "<<sqrt(s)<<endl;
+   cout<<"        No. x-bins: "<<nxtot<<endl;
+   cout<<"        No. rapidity regions: "<<nrap<<endl;
+   cout<<"        No. of pT bins in each rapidity region:"<<endl;
    for( int j = 0; j < nrap; j++) {
       cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
@@ -368,7 +360,6 @@ void UserHHC::initfunc(unsigned int)
      pdf.mode(pdf_cteq6::nlo); pdf.loop(2);
    }
 
-   start_time = ::time(0);
 }
 
 
@@ -424,7 +415,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
             if (rap >= raphigh[j] && rap < raphigh[(j+1)]) {
 	      rapbin=j;
 	      binwidth = 2.0*(raphigh[(j+1)] - raphigh[j]);
-	      break;
 	    }
          }
          if (rapbin >=0 ) {              
@@ -433,7 +423,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	      if (pt >= pthigh[rapbin][j] && pt < pthigh[rapbin][(j+1)]) {
 		ptbin=j;
 		binwidth=binwidth*(pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
-		break;
 	      }
             }
 
@@ -679,7 +668,7 @@ void UserHHC::writetable(){
    fstream table(tablefilename.c_str() ,ios::out|ios::binary); // open file
  
    // ireaction
-   int ireaction = 2;
+   int ireaction = 3;
    WRITE(ireaction);
 
    unsigned int nj;
@@ -693,10 +682,10 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
-   table << "Forward jets" << endl;
-   table << "kT with D=0.4, E scheme" << endl;
+   table << "d2sigma-jet_dpT_dy_(nb_GeV)" << endl;
+   table << "hep-ex-0512062" << endl;
+   table << "CDF_Collaboration" << endl;
+   table << "-" << endl;
    table << "-" << endl;
 
   //iproc
@@ -708,7 +697,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.4;  // kT distance D
+   double JetResol1 = 0.7;  // kT distance D
    WRITE(JetResol1);
 
    //JetResol2
@@ -742,7 +731,7 @@ void UserHHC::writetable(){
    WRITE(nxtot);    // No of x-bins in table
 
    //ixscheme
-   int ixscheme = 2;  //   1 log(x)   2 sqrt(log(1/x)
+   int ixscheme = 1;  //   1 log(1/x)   2 sqrt(log(1/x)
    WRITE(ixscheme);
 
    //ipdfwgt
@@ -848,42 +837,17 @@ void UserHHC::end_of_event(){
    nevents += 1;
    //-------- store table
    if (( (unsigned long)nevents % nwrite)==0){
-      time_t hour, min, time = ::time(0) - start_time;
-      
-      hour = time/3600L;
-      time -= hour*3600L;
-      min  = time/60L;
-      time -= min*60L;
-      
-      std::cout<<"--->     "
-	  <<(hour < 10 ? "0" : "")<<hour
-	  <<(min < 10 ? ":0" : ":")<<min
-	  <<(time < 10 ? ":0" : ":")<<time<<std::endl;
-      printf ("No. events: %.2G writing table....",nevents);
-      cout.flush();
+      printf ("No. events: %.0f writing table\n",nevents);
       writetable();
-      printf("done.\n");
    }
 }
 
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
-   // Suppress output of NLOJET++ files
-   user_hhc::phys_output("",2000000000,false);
+   // First let NLOJET do the work
+   user_hhc::phys_output(__file_name,__save,__txt);
    tablefilename = __file_name +".raw";
-   //Determine whether we are running LO or NLO
-   const char* const file = __file_name.c_str(); 
-   if(strstr(file,"born")!=NULL){
-      nlo = false;
-   }else{
-      if(strstr(file,"nlo")!=NULL){
-         nlo = true;
-      }else{
-         printf("This module can only be run at Born level or at NLO.\n");
-         exit(1);
-      }
-   }
-   textoutput = __txt;
    nwrite = __save;
 }
+
