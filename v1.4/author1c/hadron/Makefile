@@ -564,11 +564,29 @@ fnl1007: links fnl1007.cc $(CommonPath)/kt-e-06.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
 	-o fnl1007ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
+fnl1007.y_1_x_06_2: links fnl1007.y_1_x_06_2.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_06_2.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl1007.y_1_x_06_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
 fnl1007.y_1_x_12_2: links fnl1007.y_1_x_12_2.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_12_2.cc \
 	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
 	-o fnl1007.y_1_x_12_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+fnl1007.y_1_x_24_2: links fnl1007.y_1_x_24_2.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_24_2.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl1007.y_1_x_24_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
+
+fnl1007.y_1_x_48_2: links fnl1007.y_1_x_48_2.cc $(CommonPath)/kt-e-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1007.y_1_x_48_2.cc \
+	$(CommonPath)/kt-e-06.cc $(cteq6pdf) \
+	-o fnl1007.y_1_x_48_2ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 fnl1007.y_1_x_12_1: links fnl1007.y_1_x_12_1.cc $(CommonPath)/kt-e-06.cc \
 	$(cteq6pdf)
