@@ -38,6 +38,8 @@ class fnloBlockB {
    bool IsNLO(){return IContrFlag1==1 && IContrFlag2==2;}
    bool IsReference(){return IRef>0;};
    double GetAlphas(double mur, double asmz);
+   int GetTotalScalevars();
+   int GetTotalScalenodes();
 
    // from here on "user" code
    void ResetXsection();
@@ -52,6 +54,7 @@ class fnloBlockB {
  private:
    void StripWhitespace(string &str);
    void CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, vector<double> *result);
+   int GetScaledimfromvar(int scalevar);
 
  public:
    static const int DividebyNevt = 1;
@@ -115,7 +118,6 @@ class fnloBlockB {
    vector < vector < double > > ScaleFac;
    vector < vector < vector < vector < double > > > > ScaleNode;
 
-   // the follwoing is valid only for one scale dimension
    vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
    vector < vector < vector < vector < double > > > > PdfLc; 
    vector < double > Xsection; 

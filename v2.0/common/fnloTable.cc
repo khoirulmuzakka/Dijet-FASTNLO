@@ -143,3 +143,32 @@ fnloTable::~fnloTable(){
    if(ifilestream) delete ifilestream;
    if(ofilestream) delete ofilestream;
 }
+
+
+int fnloTable::GetScale1index(int scalevar){
+   fnloBlockB* blockb;
+   blockb = BlockB[0];
+   int scalei1 = scalevar;
+   if(blockb->NScaleDim==2){
+      scalei1 = scalevar / blockb->Nscalevar[1];
+   }
+   if(blockb->NScaleDim>2){
+      printf("fnloTable::GetScale1index: more than two scale dimensions not yet implemented. Stopping.\n");
+      exit(2);
+   }
+   return scalei1;
+}
+
+int fnloTable::GetScale2index(int scalevar){
+   fnloBlockB* blockb;
+   blockb = BlockB[0];
+   int scalei2 = scalevar;
+   if(blockb->NScaleDim==2){
+      scalei2 = scalevar % blockb->Nscalevar[1];
+   }
+   if(blockb->NScaleDim>2){
+      printf("fnloTable::GetScale1index: more than two scale dimensions not yet implemented. Stopping.\n");
+      exit(2);
+   }
+   return scalei2;
+}

@@ -36,6 +36,10 @@ public:
 
    int GetNObsBin(){return BlockA2.GetNObsBin();}
    int GetNScaleVar(int dimension){return BlockB[0]->Nscalevar[dimension];}
+   int GetNScaleVar(){return BlockB[0]->GetTotalScalevars();}
+   int GetScale1index(int scalevar);
+   int GetScale2index(int scalevar);
+   int GetIscale(int scale){return BlockB[0]->Iscale[scale];}
    double GetScaleFac(int dimension,int scalevar){return BlockB[0]->ScaleFac[dimension][scalevar];}
    string GetScaleDescript(int dimension,int line){return BlockB[0]->ScaleDescript[dimension][line];}
    double GetLoBin(int bin, int dimension){return BlockA2.LoBin[bin][dimension];}

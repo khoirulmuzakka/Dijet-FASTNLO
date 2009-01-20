@@ -192,10 +192,6 @@ int fnloBlockB::Read(istream *table){
 
       *table >> NScales;
       *table >> NScaleDim;
-      if(NScaleDim > 1){
-         printf("fnloBlockB::Read: Sorry, NScaledim>1 not yet supported by this program. (NScaledim=%d).\n",NScaleDim);
-         return 1;
-      }
       Iscale.resize(NScales);
       for(int i=0;i<NScales;i++){
          *table >> Iscale[i];
@@ -212,12 +208,15 @@ int fnloBlockB::Read(istream *table){
             //            StripWhitespace(ScaleDescript[i][j]);
          }
       }
+
+
       Nscalevar.resize(NScaleDim);
       Nscalenode.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
          *table >> Nscalevar[i];
          *table >> Nscalenode[i];
       }
+
       ScaleFac.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
          ScaleFac[i].resize(Nscalevar[i]);
@@ -225,6 +224,7 @@ int fnloBlockB::Read(istream *table){
             *table >> ScaleFac[i][j];
          }
       }
+
       ScaleNode.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          ScaleNode[i].resize(NScaleDim);
@@ -238,16 +238,18 @@ int fnloBlockB::Read(istream *table){
             }
          }
       }
-      
+
       SigmaTilde.resize(BlockA2->GetNObsBin());
       PdfLc.resize(BlockA2->GetNObsBin());
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          int nxmax = GetNxmax(i);
-         SigmaTilde[i].resize(Nscalevar[0]);
-         for(int k=0;k<Nscalevar[0];k++){
-            SigmaTilde[i][k].resize(Nscalenode[0]);
-            PdfLc[i].resize(Nscalenode[0]);
-            for(int l=0;l<Nscalenode[0];l++){
+         int totalscalevars = GetTotalScalevars();
+         SigmaTilde[i].resize(totalscalevars);
+         for(int k=0;k<totalscalevars;k++){
+            int totalscalenodes =  GetTotalScalenodes();
+            SigmaTilde[i][k].resize(totalscalenodes);
+            PdfLc[i].resize(totalscalenodes);
+            for(int l=0;l<totalscalenodes;l++){
                SigmaTilde[i][k][l].resize(nxmax);
                PdfLc[i][l].resize(nxmax);
                for(int m=0;m<nxmax;m++){
@@ -261,7 +263,9 @@ int fnloBlockB::Read(istream *table){
             }
          }
       }
+
    }// end of not data and not corrections
+
    key = 0;
    *table >> key;
    if(key != tablemagicno){
@@ -417,6 +421,7 @@ int fnloBlockB::Write(ostream *table, int option){
             *table << ScaleFac[i][j] << endl;
          }
       }
+
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          for(int j=0;j<NScaleDim;j++){
             for(int k=0;k<Nscalevar[j];k++){
@@ -429,8 +434,10 @@ int fnloBlockB::Write(ostream *table, int option){
       
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          int nxmax = GetNxmax(i);
-         for(int k=0;k<Nscalevar[0];k++){
-            for(int l=0;l<Nscalenode[0];l++){
+         int totalscalevars = GetTotalScalevars();
+         for(int k=0;k<totalscalevars;k++){
+            int totalscalenodes = GetTotalScalenodes();
+            for(int l=0;l<totalscalenodes;l++){
                for(int m=0;m<nxmax;m++){
                   for(int n=0;n<NSubproc;n++){
                      if( (option & DividebyNevt) && Nevt>0){
@@ -443,6 +450,7 @@ int fnloBlockB::Write(ostream *table, int option){
             }
          }
       }
+
    }// end of not data and not corrections
 
    return 0;
@@ -466,8 +474,10 @@ void fnloBlockB::Add(fnloBlockB* other){
    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
    for(int i=0;i<BlockA2->GetNObsBin();i++){
       int nxmax = GetNxmax(i);
-      for(int k=0;k<Nscalevar[0];k++){
-         for(int l=0;l<Nscalenode[0];l++){
+      int totalscalevars = GetTotalScalevars();
+      for(int k=0;k<totalscalevars;k++){
+         int totalscalenodes = GetTotalScalenodes();
+         for(int l=0;l<totalscalenodes;l++){
             for(int m=0;m<nxmax;m++){
                for(int n=0;n<NSubproc;n++){
                   SigmaTilde[i][k][l][m][n] = 
@@ -509,6 +519,24 @@ int fnloBlockB::GetNxmax(int i){
    return nxmax;
 };
 
+
+int fnloBlockB::GetTotalScalevars(){
+   int totalscalevars=1;
+   for(int scaledim=0;scaledim<NScaleDim;scaledim++){
+      totalscalevars *= Nscalevar[scaledim];
+   }
+   return totalscalevars;
+}
+
+int fnloBlockB::GetTotalScalenodes(){
+   int totalscalenodes=1;
+   for(int scaledim=0;scaledim<NScaleDim;scaledim++){
+      totalscalenodes *= Nscalenode[scaledim];
+   }
+   return totalscalenodes;
+}
+
+
 void fnloBlockB::ResetXsection(){
    Xsection.resize(BlockA2->GetNObsBin());
    for(int i=0;i<BlockA2->GetNObsBin();i++){
@@ -546,9 +574,42 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
             }
          }
          break;
-      default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
+      default: printf("fnloBlockB::CalcPDFLinearComb : Ipdfdef1=2, Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
       }
       break;
+   case 3:
+      switch(IPDFdef2){
+      case 1: // ppbar: gg   qg   gq   qr   qq   qqb   qrb 
+         double B0,B,Bb;
+         double A0,A,Ab;
+         double D,Db;
+
+         A0 = pdfx2[6];
+         B0 = pdfx1[6];
+         
+         A = Ab = 0.;
+         B = Bb = 0.;
+         D = Db = 0.;
+          for(int l=0;l<6;l++){
+             A  += pdfx2[l+7];
+             Ab += pdfx2[5-l];
+             B  += pdfx1[l+7];
+             Bb += pdfx1[5-l];
+             D  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
+             Db += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
+          }         
+
+
+         pdflc[0] = A0*B0; // gluon gluon
+         pdflc[1] = (A + Ab)*B0; // quark gluon
+         pdflc[2] = A0*(B + Bb);
+         pdflc[3] = A*B + Ab*Bb - D;
+         pdflc[4] = D;
+         pdflc[5] = Db;
+         pdflc[6] = A*Bb +Ab*B - Db;        
+         break;
+      default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef1=3, Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
+      }
    case 4:
       switch(IPDFdef2){
       case 1: // resolved gammaP: gg   qg   gq   qr   qq   qqb   qrb 
@@ -568,7 +629,7 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
              B  += pdfx1[l+7];
              Bb += pdfx1[5-l];
              D  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
-             Db += pdfx1[l+7] * pdfx2[5-l]   + pdfx1[5-l] * pdfx2[l+7];
+             Db += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
           }         
 
 
@@ -581,7 +642,7 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
          pdflc[6] = A*Bb +Ab*B - Db;
  
          break;
-      default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
+      default: printf("fnloBlockB::CalcPDFLinearComb ::Ipdfdef1=4, Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
       }
       break;
    default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef1= %d not supported. Exit.\n",IPDFdef1); exit(1);
@@ -595,11 +656,19 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
    vector <double> buffer; // for resorting a pdf array
    buffer.resize(NSubproc);
 
+   int scaleindex2 = 0;
+   int scalevar2 = scalevar;
+
+   if (NScaleDim>1){
+      scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
+      scalevar2 = scalevar % Nscalevar[1]; 
+   }
+
    for(int i=0;i<BlockA2->GetNObsBin();i++){
       int nxmax = GetNxmax(i);
-      for(int j=0;j<Nscalenode[0];j++){
+      for(int j=0;j<Nscalenode[scaleindex2];j++){
          for(int k=0;k<nxmax;k++){ 
-            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][0][scalevar][j],xfx);
+            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx);
             CalcPDFLinearComb(xfx,xfx,&buffer); //calculate linear combinations
             for(int l=0;l<NSubproc;l++){ 
                PdfLc[i][j][k][l] = buffer[l];
@@ -617,16 +686,24 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
    vector <double> buffer; // for resorting a pdf array
    buffer.resize(NSubproc);
 
+   int scaleindex2 = 0;
+   int scalevar2 = scalevar;
+
+   if (NScaleDim>1){
+      scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
+      scalevar2 = scalevar % Nscalevar[1]; 
+   }
+
    for(int i=0;i<BlockA2->GetNObsBin();i++){
       int nxmax = GetNxmax(i);
-      for(int j=0;j<Nscalenode[0];j++){
+      for(int j=0;j<Nscalenode[scaleindex2];j++){
 
          // determine all pdfs of hadron1
          int nxbins1 = nxmax / Nxtot2[i];
          xfx.resize(nxbins1);
          for(int k=0;k<nxbins1;k++){ 
             xfx[k].resize(13);
-            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][0][scalevar][j],xfx[k]);
+            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx[k]);
          }
 
          // determine all pdfs of hadron2
@@ -634,7 +711,7 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
          xfx2.resize(nxbins2);
          for(int k=0;k<nxbins2;k++){ 
             xfx2[k].resize(13);
-               (tableptr->*GetPdfs2)(XNode2[i][k],ScaleNode[i][0][scalevar][j],xfx2[k]);
+               (tableptr->*GetPdfs2)(XNode2[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx2[k]);
          }         
 
          for(int k=0;k<nxmax;k++){ 
@@ -652,9 +729,9 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
 }
 
 void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
-   
+
    ResetXsection();
-   
+
    if(IsReference()){
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          for(int l=0;l<NSubproc;l++){ 
@@ -667,16 +744,26 @@ void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
    if(IsLO()){
        for(int i=0;i<BlockA2->GetNObsBin();i++){
           int nxmax = GetNxmax(i);
-          for(int j=0;j<Nscalenode[0];j++){
-             double alphastwopi = pow(GetAlphas(ScaleNode[i][0][scalevar][j],asmz)/TWOPI, Npow);
+          int scaleindex1 = 0; // Even if we use multiple scales, mu_r is by convention the first scale -> index=0
+          int scalevar1 = scalevar;
+          if (NScaleDim>1){          
+             scalevar1 = scalevar / Nscalevar[1];
+          }
+          for(int j=0;j<GetTotalScalenodes();j++){
+             int scalenode1 = j;
+             int scalenode2 = j;
+             if (NScaleDim>1){          
+                scalenode1 = j / Nscalenode[1];
+                scalenode2 = j % Nscalenode[1];
+             }
+             double alphastwopi = pow(GetAlphas(ScaleNode[i][scaleindex1][scalevar1][scalenode1],asmz)/TWOPI, Npow);
              for(int k=0;k<nxmax;k++){ 
                 for(int l=0;l<NSubproc;l++){ 
                    int x1bin = k % Nxtot1[i];
                    int x2bin = k / Nxtot1[i];
                    //                   printf("%d %d %d : %f\n",x1bin,x2bin,k,SigmaTilde[i][scalevar][j][k][l]);
                    //                   printf(">> %d %d %d %d %g %g %g\n",i,j,k,l,SigmaTilde[i][scalevar][j][k][l],alphastwopi,PdfLc[i][j][k][l]);
-                   Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][j][k][l];
-                   //                   if(SigmaTilde[i][scalevar][j][k][l]>0) printf("im=%d x2bin=%d x1bin=%d : x2=%g sigma=%g\n",k,x2bin,x1bin,XNode2[i][x2bin],SigmaTilde[i][scalevar][j][k][l]);
+                   Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][scalenode2][k][l];
                 }
              }
           }
@@ -711,11 +798,22 @@ void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
 //                xsection[i][j][m-1] += coeff *  aspow[m-1]  *  pdflc[nbin][k][l][p];
       for(int i=0;i<BlockA2->GetNObsBin();i++){
          int nxmax = GetNxmax(i);
-         for(int j=0;j<Nscalenode[0];j++){
-            double alphastwopi = pow(GetAlphas(ScaleNode[i][0][scalevar][j],asmz)/TWOPI, Npow);
+         int scaleindex1 = 0; // Even if we use multiple scales, mu_r is by convention the first scale -> index=0
+         int scalevar1 = scalevar;
+          if (NScaleDim>1){          
+             scalevar1 = scalevar / Nscalevar[1];
+          }
+         for(int j=0;j<GetTotalScalenodes();j++){
+             int scalenode1 = j;
+             int scalenode2 = j;
+             if (NScaleDim>1){          
+                scalenode1 = j / Nscalenode[1];
+                scalenode2 = j % Nscalenode[1];
+             }
+            double alphastwopi = pow(GetAlphas(ScaleNode[i][scaleindex1][scalevar1][scalenode1],asmz)/TWOPI, Npow);
             for(int k=0;k<nxmax;k++){ 
                for(int l=0;l<NSubproc;l++){                  
-                  Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][j][k][l];
+                  Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][scalenode2][k][l];
                }
             }
          }

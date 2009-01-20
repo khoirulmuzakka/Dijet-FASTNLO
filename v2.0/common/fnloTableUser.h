@@ -14,7 +14,9 @@ public:
    void SetPDFSet2(int set);
    void SetAlphasMZ(double asmz){alphasmz=asmz;}
    void SetRescale(double xmur){rescale=xmur;}
-   void SetScale(int scale){scalevar=scale;}
+   void SetScalevar(int scale){scalevar = scale;}
+   void SetMurScale(int scale);
+   void SetMufScale(int scale);
    void FillPDFCache();
    void CalcXsection();
    double GetXsection(int bin1, int order);
@@ -37,7 +39,10 @@ private:
    int pdfset2;  
 
    double alphasmz;
-   int scalevar;
+   int scalevar1; // used for mur, and for muf if only one scale
+   int scalevar2; // used for muf
+   int scalevar;  // computed from the scalevar1 and scalevar2
+
    double rescale;
 
 

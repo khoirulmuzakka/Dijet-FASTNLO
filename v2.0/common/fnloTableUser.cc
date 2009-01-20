@@ -70,7 +70,6 @@ void fnloTableUser::FillPDFCache(){
 }
 
 void fnloTableUser::CalcXsection(){
-   //   printf("Contributions: %d %d %d %d\n",BlockIndexLO,BlockIndexNLO,BlockIndexLORef,BlockIndexNLORef);
    if(BlockIndexLO>=0) GetBlockB(BlockIndexLO)->CalcXsection(alphasmz,scalevar,rescale);
    if(BlockIndexNLO>=0) GetBlockB(BlockIndexNLO)->CalcXsection(alphasmz,scalevar,rescale);
    if(BlockIndexLORef>=0) GetBlockB(BlockIndexLORef)->CalcXsection(alphasmz,scalevar,rescale);
@@ -101,5 +100,10 @@ double fnloTableUser::GetXsectionRef(int bin1, int order){
    return xsection;
 }
 
+void fnloTableUser::SetMurScale(int scale){
+   scalevar1 = scale;
+}
 
-
+void fnloTableUser::SetMufScale(int scale){
+   scalevar2 = scale;
+}

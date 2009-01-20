@@ -166,8 +166,8 @@ void UserPhoto::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // loop over all jets
    for(unsigned int i = 1; i <= nj; i++){
-      printf("i=%d nj=%d\n",i,nj);
-      printf("nobs=%d\n",A2->GetNObsBin());
+      //      printf("i=%d nj=%d\n",i,nj);
+      //      printf("nobs=%d\n",A2->GetNObsBin());
 
       // jet valid?
       if((pt = pj_lab[i].perp()) > pTmin && -pj_lab[i].prapidity() < etamax && -pj_lab[i].prapidity() > etamin) { // pz in wrong direction 
@@ -180,15 +180,15 @@ void UserPhoto::userfunc(const event_hhc& p, const amplitude_hhc& amp)
             }
          }
          //---------- fill fastNLO arrays
-//          if ( ptbin>=0 ) {
-//             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-//                if(table->GetBlockB(k)->GetIRef()>0){
-//                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,pdf);
-//                }else{
-//                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,dummypdf);
-//                }
-//             }
-//          }        
+         if ( ptbin>=0 ) {
+            for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+               if(table->GetBlockB(k)->GetIRef()>0){
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,pdf);
+               }else{
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventResolved(ptbin,x,x2,pt,ymin,ymax,Q2max,amp,dummypdf);
+               }
+            }
+         }        
       }
    }
 }
