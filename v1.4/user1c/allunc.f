@@ -17,7 +17,8 @@
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
       LOGICAL LALG,LSTAT,LPDF
-      DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5,
+      DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5
+      DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
@@ -362,14 +363,14 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
       DO IRAP=1,INT(NRAPIDITY/2)
          DO IPT=1,NPT(IRAP)
             IBIN = IBIN+1
-            do isub=0,nsubproc
-               RES0(IBIN,isub+1,0) = 0.D0
+            DO ISUB=0,NSUBPROC
+               RES0(IBIN,ISUB+1,0) = 0.D0
                DO IORD=1,NORD
-                  RES0(IBIN,isub+1,IORD) = XSECT(IBIN,IORD)
-                  RES0(IBIN,isub+1,0) = RES0(IBIN,isub+1,0) +
-     >                 RES0(IBIN,isub+1,IORD)
+                  RES0(IBIN,ISUB+1,IORD) = XSECT(IBIN,IORD)
+                  RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
+     >                 RES0(IBIN,ISUB+1,IORD)
                ENDDO
-            enddo
+            ENDDO
 c            RES0(IBIN,NSUBPROC+1,0) = 0.D0
 c            DO IORD=1,NORD
 c               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
@@ -519,7 +520,7 @@ ckr                     CALL HBARX(IHIST)
      >                    CSTRNG(1:LENOCC(CSTRNG)),
      >                    NPT(IRAP),PT,0)
                      NHIST = NHIST+3
-                     IF (LSTAT.AND.IORD.LT.2.AND.
+                     IF (LSTAT.AND.IORD.LE.2.AND.
      >                    ISCALE.EQ.3.AND.ISUB.EQ.0) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
@@ -622,9 +623,9 @@ c
       INCLUDE "fnx9999.inc"
       INTEGER NSCALE
       DOUBLE PRECISION 
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,3)
+     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
       INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
       REAL VAL0,VALLO,VALHI
       
@@ -656,6 +657,10 @@ c - Fill all histograms for the given scale
                   ENDIF
 ckr Recall: HBOOK understands only single precision
                   IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
+ckr                  write(*,*)"iord,iscale,isub/2,i",iord,iscale,
+ckr     >                 isub,isub2,i
+ckr                  write(*,*)"ihist,val0,vallo,valhi",
+ckr     >                 ihist,val0,vallo,valhi
                   CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
                   CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
                   CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)

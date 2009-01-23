@@ -12,7 +12,7 @@ c      DOUBLE PRECISION XSECT(900,3)
       
 ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
       INTEGER BORNN,NLON,NTAB,NCOUNT
-      INTEGER I,J,K,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
+      INTEGER I,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST
       INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR)
       INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR)
@@ -55,8 +55,8 @@ c - Initialization
 c ==================================================================
 c === Loop over all orders up to NLO ===============================
 c ==================================================================
-ckr      DO IORD=0,MIN(2,NORD)
-      DO IORD=1,MIN(2,NORD)
+      DO IORD=0,MIN(2,NORD)
+ckr      DO IORD=1,MIN(2,NORD)
 
 c - Loop initialization
          DO ISCL=1,NSCALEVAR
@@ -149,10 +149,17 @@ c - Take LO file with 1D9 events as weight 1
             DO IRAP=1,NRAPIDITY
                DO IPT=1,NPT(IRAP)
                   J = J+1
-                  IF (IORD.EQ.1) THEN
-                     VAL = XSECT(J,1)
-                  ELSE
+                  IF (IORD.EQ.0) THEN
                      VAL = XSECT(J,1)+XSECT(J,2)
+                  ELSEIF (IORD.EQ.1) THEN
+                     VAL = XSECT(J,1)
+                  ELSEIF (IORD.EQ.2) THEN
+                     VAL = XSECT(J,2)
+                  ELSE
+                     WRITE(*,*)
+     >                    "STATERR: ERROR! Order too large:",
+     >                    IORD
+                     STOP
                   ENDIF
                   CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) = VAL
                   WGT(IPT,IRAP,ISCL,IORD) =
@@ -232,7 +239,7 @@ ckr     >              MEAN(IPT,IRAP,ISCL,IORD)
       ENDDO 
       
 c - Fill histos
-c - Only all subprocesses
+c - Only for sum of subprocesses
       ISUB = 0
       DO ISCL=1,NSCALEVAR
          DO IRAP=1,NRAPIDITY
@@ -243,40 +250,51 @@ c - Only all subprocesses
 ckr If histogram with central result (IHIST+0) filled, derive stat. unc.
 ckr rel. to MEAN and then use central result. If not, just use SIGMA. 
                IF (HI(IHIST,IPT).GT.0.) THEN
-                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,K,IORD) /
-     >                 MEAN(IPT,IRAP,K,IORD))*HI(IHIST,IPT)
+                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,ISCL,IORD) /
+     >                 MEAN(IPT,IRAP,ISCL,IORD))*HI(IHIST,IPT)
                ELSE
-                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,K,IORD))
+                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,ISCL,IORD))
                ENDIF
+Comment:                write(*,*)"ihist+3,pt,input",
+Comment:      >              IHIST+3,PT(IPT,IRAP),
+Comment:      >              MAX(0.,REAL(100D0*SIGMA(IPT,IRAP,ISCL,IORD) / 
+Comment:      >              MEAN(IPT,IRAP,ISCL,IORD)))
+Comment:                write(*,*)"ipt,irap,iscl,iord,mean,sigma",
+Comment:      >              ipt,irap,iscl,iord,
+Comment:      >              MEAN(IPT,IRAP,ISCL,IORD),
+Comment:      >              SIGMA(IPT,IRAP,ISCL,IORD)
                CALL HFILL(IHIST+3,PT(IPT,IRAP),0.,
-     >              MAX(0.,REAL(100D0*SIGMA(IPT,IRAP,K,IORD) / 
-     >              MEAN(IPT,IRAP,K,IORD))))
+     >              MAX(0.,REAL(100D0*SIGMA(IPT,IRAP,ISCL,IORD) / 
+     >              MEAN(IPT,IRAP,ISCL,IORD))))
                CALL HFILL(IHIST+4,PT(IPT,IRAP),0.,
-     >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,K,IORD) - 
-     >              MINE(IPT,IRAP,K,IORD))/MEAN(IPT,IRAP,K,IORD))))
+     >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,ISCL,IORD) - 
+     >              MINE(IPT,IRAP,ISCL,IORD)) / 
+     >              MEAN(IPT,IRAP,ISCL,IORD))))
                DO I=1,NCOUNT
-CKR            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
+ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
                   IHIST = IORD*1000000 + ISCL*100000 +
      >                 ISUB*10000 + IRAP*100
                   CALL HFILL(IHIST + 10,
-     >                 REAL( (CBIN(IPT,IRAP,K,IORD,NCOUNT) -
-     >                 MEAN(IPT,IRAP,K,IORD)) / 
-     >                 SIGMA(IPT,IRAP,K,IORD)),
+     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
+     >                 SIGMA(IPT,IRAP,ISCL,IORD)),
      >                 0.,REAL(WTAB(I)))
                   CALL HFILL(IHIST + 2*IPT + 10,
-     >                 REAL( (CBIN(IPT,IRAP,K,IORD,NCOUNT) -
-     >                 MEAN(IPT,IRAP,K,IORD)) / 
-     >                 SIGMA(IPT,IRAP,K,IORD)),
+     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
+     >                 SIGMA(IPT,IRAP,ISCL,IORD)),
      >                 0.,REAL(WTAB(I)))
                   CALL HFILL(IHIST + 11,
-     >                 REAL(2D0*(CBIN(IPT,IRAP,K,IORD,NCOUNT) -
-     >                 MEAN(IPT,IRAP,K,IORD)) /
-     >                 (MAXE(IPT,IRAP,K,IORD) - MINE(IPT,IRAP,K,IORD))),
+     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) /
+     >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
+     >                 MINE(IPT,IRAP,ISCL,IORD))),
      >                 0.,REAL(WTAB(I)))
                   CALL HFILL(IHIST + 2*IPT + 11,
-     >                 REAL(2D0*(CBIN(IPT,IRAP,K,IORD,NCOUNT) -
-     >                 MEAN(IPT,IRAP,K,IORD)) /
-     >                 (MAXE(IPT,IRAP,K,IORD) - MINE(IPT,IRAP,K,IORD))),
+     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) /
+     >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
+     >                 MINE(IPT,IRAP,ISCL,IORD))),
      >                 0.,REAL(WTAB(I)))
                ENDDO
             ENDDO
@@ -285,163 +303,9 @@ CKR            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
       ENDDO
 
       ENDDO
-ckr      GOTO 999
 
-c ==================================================================
-c === for NLO ======================================================
-c ==================================================================
-Comment:       WRITE(*,*)"\n **************************************************"
-Comment:       WRITE(*,*)"STATERR: Compute statistical errors for NLO tables"
-Comment:       WRITE(*,*)"**************************************************"
-Comment: 
-Comment:       DO J=1,3*NBINTOTMAX
-Comment:          DO K=1,4
-Comment:             WGT(J,K)   = 0D0
-Comment:             WGT2(J,K)  = 0D0
-Comment:             WGTX(J,K)  = 0D0
-Comment:             WGTX2(J,K) = 0D0
-Comment:          ENDDO
-Comment:       ENDDO
-Comment: 
-Comment: c - Loop over files
-Comment:       NNLO = 0
-Comment:       DO I=0,NLON
-Comment:          WRITE(*,*) " ###############################################"
-Comment:          WRITE(*,*) " ############  NEXT NLO TABLE  #################"
-Comment:          WRITE(*,*) " ###############################################"
-Comment:          WRITE(NO,'(I4.4)'),I
-Comment:          FILENAME = NLONAME(1:LENOCC(NLONAME))//NO//".tab"
-Comment:          WRITE(*,*)"NLO filename:",FILENAME
-Comment:          OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
-Comment:          IF (ISTAT.NE.0) THEN
-Comment:             WRITE(*,*)"STATERR: WARNING! Table file not found, "//
-Comment:      >           "skipped! IOSTAT = ",ISTAT
-Comment: ckr While using f90 DO-ENDDO ... use also the EXIT statement instead of GOTO
-Comment: ckr            GOTO 20
-Comment:             EXIT
-Comment:          ENDIF
-Comment:          NNLO = NNLO + 1
-Comment: 
-Comment: c - Loop over scales
-Comment:          DO K=1,4
-Comment:             CALL FX9999CC(FILENAME,MU(K),MU(K),0,XSECT)
-Comment: c - Take NLO file with 1D8 events as weight 1 
-Comment:             IF (K.EQ.1) WTAB(NNLO) = NEVTS(2)/1D8
-Comment: ckr Histo booking, for first NLO table and first scale only
-Comment:             IF (I.EQ.0 .AND. K.EQ.1) THEN 
-Comment:                NBINS = NMAX(1)
-Comment:                WRITE(*,*)"STATERR: This file has ",NBINS," bins"
-Comment:                IF (NBINS.GT.NBINTOTMAX) THEN
-Comment:                   WRITE(*,*)"STATERR: ERROR! NBINTOTMAX too small:",
-Comment:      >                 NBINTOTMAX
-Comment:                   STOP
-Comment:                ENDIF
-Comment: c - NLO for now only at single scale
-Comment: Comment:                CALL HBOOK1(2000001,"NLO sigma/mu in % vs. bin number",
-Comment: Comment:      >              NBINS,0.5,REAL(NBINS+0.5),0)
-Comment: Comment:                CALL HBOOK1(2000002,"NLO dmax/2/mu in % vs. bin number",
-Comment: Comment:      >              NBINS,0.5,REAL(NBINS+0.5),0)
-Comment: Comment:                DO IBIN=0,NBINS
-Comment: Comment:                   WRITE(NO,'(I4)'),IBIN
-Comment: Comment:                   CALL HBOOK1(2001000+IBIN,
-Comment: Comment:      >                 "Distr. of NLO x sections norm. to "//
-Comment: Comment:      >                 "mu,sigma for bin no. "//NO,
-Comment: Comment:      >                 21,-5.5,5.5,0)
-Comment: Comment:                   CALL HBOOK1(2002000+IBIN,
-Comment: Comment:      >                 "Distr. of NLO x sections norm. to "//
-Comment: Comment:      >                 "mu,dmax half for bin no. "//NO,
-Comment: Comment:      >                 31,-1.5,1.5,0)
-Comment: Comment:                ENDDO
-Comment:             ENDIF
-Comment: 
-Comment:             DO J=1,NBINS
-Comment:                VAL = XSECT(J,1)+XSECT(J,2)
-Comment:                CBIN(NNLO,J,K) = VAL
-Comment: c               IF (VAL.LT.0D0) WRITE(*,*)"J,K,NNLO,VAL",
-Comment: c     >              J,K,NNLO,VAL
-Comment:                WGT(J,K)   = WGT(J,K)  + WTAB(NNLO)
-Comment:                WGT2(J,K)  = WGT2(J,K) + WTAB(NNLO)*WTAB(NNLO)
-Comment:                WGTX(J,K)  = WGTX(J,K) + VAL * WTAB(NNLO)
-Comment:                WGTX2(J,K) = WGTX2(J,K)+ VAL*VAL * WTAB(NNLO)
-Comment:                IF (VAL.LT.MINN(J,K)) THEN
-Comment:                   MINN(J,K) = VAL
-Comment:                   NJMIN(J)  = I
-Comment:                ENDIF
-Comment:                IF (VAL.GT.MAXN(J,K)) THEN
-Comment:                   MAXN(J,K) = VAL
-Comment:                   NJMAX(J)  = I
-Comment:                ENDIF
-Comment:             ENDDO
-Comment:          ENDDO
-Comment:          WRITE(*,*)"STATERR: Total weight:",WTAB(NNLO)
-Comment: ckr 20   ENDDO
-Comment:       ENDDO
-Comment: 
-Comment: c - Extract mean values and standard deviations
-Comment:       WRITE(*,*)"\n *************************************************"
-Comment:       WRITE(*,*)"STATERR: Looping over scales, NLO ..."
-Comment:       WRITE(*,*)"*************************************************"
-Comment:       DO K=1,4
-Comment:          WRITE(*,*)"STATERR: Next scale: ",K," ; weight: ",WTAB(NNLO)
-Comment:          DO J=1,NBINS
-Comment:             MEANN(J,K)  = WGTX(J,K) / WGT(J,K)
-Comment:             SIGMAN(J,K) = (WGTX2(J,K)/WGT(J,K)-MEANN(J,K)*MEANN(J,K)) /
-Comment:      >           (1D0 - WGT2(J,K)/WGT(J,K)/WGT(J,K))
-Comment:             SIGMAN(J,K) = SQRT(SIGMAN(J,K)/NNLO)
-Comment:             WRITE(*,901) J,MEANN(J,K),
-Comment:      >           100D0*SIGMAN(J,K)/MEANN(J,K),
-Comment:      >           100D0*(MINN(J,K)-MEANN(J,K))/MEANN(J,K),
-Comment:      >           100D0*(MAXN(J,K)-MEANN(J,K))/MEANN(J,K),
-Comment:      >           NJMIN(J),NJMAX(J)
-Comment:          ENDDO
-Comment:       ENDDO
-Comment:       
-c 900  FORMAT (3I4,E16.5,"  in %:",3F10.3)
  900  FORMAT (I4,E16.5,"  in %:",3F10.3)
  901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2I5)
-Comment: 
-Comment: c Fill histos for scale KHIST, normally no. 3, mu = 1.0      
-Comment:       IORD = 0
-Comment:       K = KHIST
-Comment:       ISUB = 0
-Comment: 
-Comment: ckr      DO J=1,NBINS
-Comment:       J = 0
-Comment:       DO IRAP=1,NRAPIDITY         ! RAPIDITY BINS
-Comment:          IHIST = IORD*1000000 + K*100000 + ISUB*10000 + IRAP*100
-Comment:          DO IPT=1,NPT(IRAP)        ! PT BINS
-Comment:             J = J + 1
-Comment:             PT(J) = REAL(PTBIN(IRAP,IPT))
-Comment: ckr If histogram with central result (IHIST+0) filled, derive stat. unc.
-Comment: ckr rel. to MEAN and then use central result. If not, just use SIGMA. 
-Comment:             IF (HI(IHIST,IPT).GT.0.) THEN
-Comment:                SERR(IPT,IRAP) = REAL(SIGMAN(J,K)/MEANN(J,K))*HI(IHIST,IPT)
-Comment:             ELSE
-Comment:                SERR(IPT,IRAP) = REAL(SIGMAN(J,K))
-Comment:             ENDIF
-Comment:             CALL HFILL(IHIST+3,PT(J),0.,
-Comment:      >           MAX(0.,REAL(100D0*SIGMAN(J,K)/MEANN(J,K))))
-Comment:             CALL HFILL(IHIST+4,PT(J),0.,
-Comment:      >           MAX(0.,REAL(50D0*(MAXN(J,K)-MINN(J,K))/MEANN(J,K))))
-Comment: Comment:          DO I=1,NNLO
-Comment: Comment:             CALL HFILL(2001000,
-Comment: Comment:      >           REAL((CBIN(I,J,K)-MEANN(J,K))/SIGMAN(J,K)),
-Comment: Comment:      >           0.,REAL(WTAB(I)))
-Comment: Comment:             CALL HFILL(2001000+J,
-Comment: Comment:      >           REAL((CBIN(I,J,K)-MEANN(J,K))/SIGMAN(J,K)),
-Comment: Comment:      >           0.,REAL(WTAB(I)))
-Comment: Comment:             CALL HFILL(2002000,
-Comment: Comment:      >           REAL(2D0*(CBIN(I,J,K)-MEANN(J,K))/(MAXN(J,K)-MINN(J,K))
-Comment: Comment:      >           ),0.,REAL(WTAB(I)))
-Comment: Comment:             CALL HFILL(2002000+J,
-Comment: Comment:      >           REAL(2D0*(CBIN(I,J,K)-MEANN(J,K))/(MAXN(J,K)-MINN(J,K))
-Comment: Comment:      >           ),0.,REAL(WTAB(I)))
-Comment: Comment:         ENDDO
-Comment:          ENDDO
-Comment:          CALL HPAKE(IHIST,SERR(1,IRAP))
-Comment:       ENDDO
-      
- 999  CONTINUE
       
       WRITE(*,*)"\n **********************************************"
       WRITE(*,*)"STATERR: Job finished, storing histos in file: ",
