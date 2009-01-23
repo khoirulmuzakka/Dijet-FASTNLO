@@ -713,6 +713,19 @@ fnl1218: links fnl1218.cc $(CommonPath)/fj-sc-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
+# ======================================================================
+# =====   FNL1310: LHC CMS incl. jets with fastjet kT D=0.6 ============
+# ======================================================================
+# LHC scenario for CMS, pt binning acc. to expected resolution
+#
+fnl1310: links fnl1310.cc $(CommonPath)/fj-kt-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1310.cc \
+	$(CommonPath)/fj-kt-06.cc $(cteq6pdf) \
+	-o fnl1310 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
