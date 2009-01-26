@@ -211,6 +211,7 @@ $install{lhapdf}[0]     = "lhapdf-5.3.1";
 $install{fastjet}[0]    = "fastjet-2.3.2";
 $install{nlojet}[0]     = "nlojet++-2.0.1";
 $install{nlojetfix}[0]  = "nlojet++-2.0.1";
+$install{nlojet4}[0]    = "nlojet++-4.0.1";
 $install{mcfm}[0]       = "mcfm-5.1";
 $install{mcfmfix}[0]    = "mcfm-5.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
@@ -419,6 +420,7 @@ if ( $mode == 0 || $mode == 1) {
 #
 # 4) Install Nlojet++
 #
+# NLOJet++ Version 2
     unless ( -e "$idir/$install{nlojet}[0]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
@@ -444,6 +446,30 @@ if ( $mode == 0 || $mode == 1) {
 	print "\nfastrun.pl: Make install for Nlojet++ ...\n";
 	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
+	chdir "$pwdir";
+    }
+# NLOJet++ Version 4
+    unless ( -e "$idir/$install{nlojet4}[0]" ) {
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Installing Nlojet++ version 4 from $install{nlojet4}[1]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{nlojet4}[1] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet4}[1]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet4}[1] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	if ( -l "$idir/nlojet4" ) {system("rm -f $idir/nlojet4");}
+	system("ln -s  $install{nlojet4}[0] $idir/nlojet4");
+	chdir "$idir/$install{nlojet4}[0]";
+	print "\nfastrun.pl: Configuring Nlojet++ version 4 ...\n";
+#	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+	$ret = system("./configure --prefix=`pwd`");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 configure step, aborted!\n";}
+	print "\nfastrun.pl: Making Nlojet++ version 4 ...\n";
+	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make step, aborted!\n";}
+	print "\nfastrun.pl: Make install for Nlojet++ version 4 ...\n";
+	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make install step, aborted!\n";}
 	chdir "$pwdir";
     }
 
@@ -513,40 +539,47 @@ print FILE "setenv FASTJET $cwdir/fastjet\n";
 print FILE "setenv FASTNLO $cwdir/fastNLO\n";
 print FILE "setenv LHAPDF  $cwdir/lhapdf/lib\n";
 print FILE "setenv NLOJET  $cwdir/nlojet\n";
+print FILE "setenv NLOJET4 $cwdir/nlojet4\n";
 $ENV{CERNLIB}  = "$cwdir/cernlib"; 
 $ENV{FASTJET}  = "$cwdir/fastjet";
 $ENV{FASTNLO}  = "$cwdir/fastNLO";
 $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
 $ENV{NLOJET}   = "$cwdir/nlojet";
+$ENV{NLOJET4}  = "$cwdir/nlojet4";
 print FILE "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
+    "$ENV{NLOJET4}/bin:\${PATH}".
     "$ENV{NLOJET}/bin:\${PATH}\n";
 if ( $ENV{LD_LIBRARY_PATH} ) {
     print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
 	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+	"$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+	"$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
     $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
 	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	"$ENV{NLOJET}/lib:$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
+	"$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+	"$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
 } else {
     print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
 	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	"$ENV{NLOJET}/lib:$ENV{LHAPDF}\n";
+	"$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+	"$ENV{LHAPDF}\n";
     $ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
 	"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	"$ENV{NLOJET}/lib:$ENV{LHAPDF}";
+	"$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+	"$ENV{LHAPDF}";
 }
 print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
 print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
 $ENV{PATH}            = "$cwdir/bin:$ENV{FASTJET}:".
-    "$ENV{NLOJET}/bin:$ENV{PATH}";
+    "$ENV{NLOJET4}/bin:$ENV{NLOJET}/bin:$ENV{PATH}";
 $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
 $ENV{CXXFLAGS} = "-O3 -I .";
 close (FILE);
