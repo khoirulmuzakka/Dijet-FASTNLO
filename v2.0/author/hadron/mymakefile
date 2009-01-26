@@ -1,0 +1,55 @@
+CommonPath        = ../common
+
+cteq5pdf = $(CommonPath)/Ctq5Par.f \
+	   $(CommonPath)/cteq5m.cc
+
+cteq6pdf = $(CommonPath)/Cteq61Pdf.f \
+	   $(CommonPath)/cteq6.cc
+
+search_07 = $(CommonPath)/search-e-07.cc \
+	    $(CommonPath)/search-int.f \
+	    $(CommonPath)/pxcone_mod_new.f
+
+searchcone = $(CommonPath)/MidPointAlgorithm.cc \
+	$(CommonPath)/PhysicsTower.cc \
+	$(CommonPath)/LorentzVector.cc \
+	$(CommonPath)/ClusterComparisons.cc\
+	$(CommonPath)/Cluster.cc
+
+midpt_e_05 = $(CommonPath)/midpt-e-05.cc \
+             $(CommonPath)/px_interface.f \
+             $(CommonPath)/pxcone_mod_new.f
+
+midpt_e_07 = $(CommonPath)/midpt-e-07.cc \
+             $(CommonPath)/px_interface.f \
+             $(CommonPath)/pxcone_mod_new.f
+
+export CPATH = $(CommonPath)
+
+#links: ./common ctq61.00.tbl 
+
+#./common:
+#	ln -s $(CommonPath) ./common
+
+#ctq61.00.tbl:
+#	ln -s $(CommonPath)/ctq61.00.tbl ctq61.00.tbl
+
+#
+# ======================================================================
+# =====         FNT1001  v29      CDF incl jets @ 1800GeV     ==========
+# ======================================================================
+# 
+#fnt1001midp: fnt1001midp.cc cone-et-07.cc
+#	create-nlojet-user fnt1001midp.cc cone-et-07.cc  -o fnt1001midp -Wx,-O0,-Wall,-I${HOME}/include/lhpdf,-I../../common -Wl,-L${HOME}/lib/fastnlo,-llhpdf_cteq6,-lfastnloNlojet
+
+fnt1001midp: fnt1001midp.cc cone-et-07.cc \
+	$(NLOJET4)/bin/create-nlojet-user fnt1001midp.cc \
+	cone-et-07.cc \
+	-o fnt1001midp -Wno-deprecated \
+	-Wx,-O0,-Wall,-I${LHAPDF}/../include/lhapdf,-I../../common -Wf,-O3 \
+	-Wl,-L${FASTNLO}/lib/fastnlo,-llhpdf_cteq6,-lfastnloNlojet
+
+
+
+clean:
+	rm -rf .libs .obj *~ *.la *.lo *.o $(CommonPath)/*.o $(CommonPath)/*.lo ctq61.00.tbl ./common
