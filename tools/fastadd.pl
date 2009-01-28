@@ -108,7 +108,8 @@ unless ( @lotabs ) {
 unless ( @lotabs ) {
     die "fastadd.pl: ERROR! No LO table found, aborted!\n";
 }
-print "fastadd.pl: $#lotabs LO tables found.\n";
+my $ntab = scalar @lotabs;
+print "fastadd.pl: $ntab LO tables found.\n";
 if ( $opt_v ) {print "fastadd.pl: DEBUG! lotabs @lotabs\n";}
 
 #
@@ -128,7 +129,8 @@ unless ( @nlotabs ) {
 unless ( @nlotabs ) {
     die "fastadd.pl: ERROR! No NLO table found, aborted!\n";
 }
-print "fastadd.pl: $#nlotabs NLO tables found.\n";
+$ntab = scalar @nlotabs;
+print "fastadd.pl: $ntab NLO tables found.\n";
 if ( $opt_v ) {print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";}
 
 #
@@ -148,7 +150,8 @@ unless ( @nnlotabs ) {
 unless ( @nnlotabs ) {
     print "fastadd.pl: WARNING! No NNLO table found!\n";
 }
-print "fastadd.pl: $#nnlotabs NNLO tables found.\n";
+$ntab = scalar @nnlotabs;
+print "fastadd.pl: $ntab NNLO tables found.\n";
 if ( $opt_v ) {print "fastadd.pl: DEBUG! nnlotabs @nnlotabs\n";}
 
 #
