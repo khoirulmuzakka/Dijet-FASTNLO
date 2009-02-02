@@ -44,19 +44,20 @@ print "######################################\n\n";
 #
 # Parse options
 #
-our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_j,
+our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LOCAL", ".", "0", "187", "", "0001",
-      "0", "LO", "CTEQ", "", ".", "", "" );
-getopts('b:d:e:f:hj:m:o:p:rs:t:v') or die "fastrun.pl: Malformed option syntax!\n";
+    ( "LOCAL", "", "0", "187", "", ".", "0001",
+      "0", "LO", "CTEQ", "", ".", "", "1" );
+getopts('b:de:f:hi:j:m:o:p:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
     print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
-    print "  -d dir          Installation directory (def.=.)\n";
+    print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -f rev          fastNLO revision to use (def.=187)\n";
     print "  -h              Print this text\n";
+    print "  -i dir          Installation directory (def.=.)\n";
     print "  -j jobnr        Job number to attach (def.=0001)\n";
     print "  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only\n";
     print "  -o order        LO (def.) or NLO calculation\n";
@@ -66,29 +67,29 @@ if ( $opt_h ) {
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v              Switch verbose mode on\n";
+    print "  -v #            Choose between fastNLO version 1 and 2 (def.=1)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
-    print "   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir]\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 187|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1|2]\n\n";
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
-    print "   ./fastrun.pl [-d .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-d .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
     exit;
 }
 
 unless ( $opt_b eq "LOCAL" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fastrun.pl: Error! Illegal batch system: $opt_b, aborted.\n";
 }
-unless ( -d $opt_d ) {
-    die "fastrun.pl: Error! No such directory: $opt_d, aborted.\n";
-}
 unless ( $opt_e =~ m/\d+/ && $opt_e !~ m/\D+/ ) {
     die "fastrun.pl: Error! Illegal maximal event number: $opt_e, aborted.\n";
 }
 unless ( $opt_f =~ m/\d+/ && $opt_f !~ m/\D+/ ) {
     die "fastrun.pl: Error! Illegal fastNLO revision number: $opt_f, aborted.\n";
+}
+unless ( -d $opt_i ) {
+    die "fastrun.pl: Error! No such directory: $opt_i, aborted.\n";
 }
 unless ( $opt_j =~ m/\d{4}/ && $opt_j !~ m/\D+/ ) {
     die "fastrun.pl: Error! Illegal job number (nnnn): $opt_j, aborted.\n";
@@ -105,9 +106,12 @@ unless ( $opt_p eq "CTEQ" || $opt_p eq "LHAPDF" ) {
 unless ( -d $opt_s || -l $opt_s ) {
     die "fastrun.pl: Error! Archive source directory $opt_s does not exist, aborted.\n";
 }
+unless ( $opt_v == 1 || $opt_v == 2) {
+    die "fastrun.pl: Error! fastNLO version $opt_v does not exist, aborted.\n";
+}
 
 my $batch = $opt_b;
-my $idir  = $opt_d;
+my $idir  = $opt_i;
 my $nmax  = $opt_e;
 my $frev  = $opt_f;
 my $jobnr = $opt_j;
@@ -118,6 +122,7 @@ my $ref   = "";
 if ( $opt_r ) { $ref = "ref";}
 my $sdir  = $opt_s;
 my $verb  = "";
+my $vers  = $opt_v;
 print "fastrun.pl: Directory for/of installation is $idir\n";
 print "fastrun.pl: Using fastNLO revision $frev\n";
 print "fastrun.pl: Job mode is $mode\n";
@@ -136,9 +141,9 @@ if ( $mode != 1 && $ref ) {
 if ( $mode == 0 || $mode ==1 ) {
     print "fastrun.pl: Looking for sources in $sdir\n";
 }
-if ( $opt_v ) {
+if ( $opt_d ) {
     $verb = 1;
-    print "fastrun.pl: Verbose mode is active.\n";
+    print "fastrun.pl: Debug/verbose mode is active.\n";
 }
 
 #
@@ -204,20 +209,31 @@ chdir $pwdir;
 # Define install hash
 my %install;
 # First entry (index 0!): Subdirecory name into which the archive is unpacked!
-$install{cernlib}[0]    = "cernlib-2003";
-# Versions >= 5.4.0 don't work with gcc 3.3.6
-$install{lhapdf}[0]     = "lhapdf-5.3.1";
-#$install{lhapdf}[0]     = "lhapdf-5.6.0";
+my $gccvers = "gcc-3.3.6";
+if ( $vers == 2 ) {
+    $gccvers = `gcc -dumpversion`;
+    chomp $gccvers;
+}
+print "fastrun.pl: Using gcc compiler version $gccvers\n\n"; 
 $install{fastjet}[0]    = "fastjet-2.3.2";
-$install{nlojet}[0]     = "nlojet++-2.0.1";
-$install{nlojetfix}[0]  = "nlojet++-2.0.1";
-$install{nlojet4}[0]    = "nlojet++-4.0.1";
 $install{mcfm}[0]       = "mcfm-5.1";
 $install{mcfmfix}[0]    = "mcfm-5.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
-$install{gcccore}[0]    = "gcc-3.3.6";
-$install{gccgpp}[0]     = "gcc-3.3.6";
-$install{gccg77}[0]     = "gcc-3.3.6";
+if ( $vers == 1 ) { 
+    $install{cernlib}[0]    = "cernlib-2003";
+# Versions >= 5.4.0 don't work with gcc 3.3.6
+    $install{lhapdf}[0]     = "lhapdf-5.3.1";
+    $install{nlojet}[0]     = "nlojet++-2.0.1";
+    $install{nlojetfix}[0]  = "nlojet++-2.0.1";
+    $install{gcccore}[0]    = "gcc-core-$gccvers";
+    $install{gccgpp}[0]     = "gcc-g++-$gccvers";
+    $install{gccg77}[0]     = "gcc-g77-$gccvers";
+} else {
+    $install{root}[0]       = "root-5.22";
+    $install{lhapdf}[0]     = "lhapdf-5.6.0";
+    $install{nlojet}[0]     = "nlojet++-4.0.1";
+}
+
 # Second: Archive filenames 
 foreach my $comp ( keys %install ) {
     my $tmp = $install{$comp}[0].".tar.gz";
@@ -225,12 +241,6 @@ foreach my $comp ( keys %install ) {
 	$install{$comp}[1] = "nlojet++-2.0.1-fix.tar.gz";
     } elsif ( $comp eq "mcfmfix" ) {
 	$install{$comp}[1] = "mcfm-5.1-fix.tar.gz";
-    } elsif ( $comp eq "gcccore" ) {
-	$install{$comp}[1] = "gcc-core-3.3.6.tar.gz";
-    } elsif ( $comp eq "gccgpp" ) {
-	$install{$comp}[1] = "gcc-g\+\+-3.3.6.tar.gz";
-    } elsif ( $comp eq "gccg77" ) {
-	$install{$comp}[1] = "gcc-g77-3.3.6.tar.gz";
     } else {
 	$install{$comp}[1] = $tmp;
     }
@@ -274,34 +284,64 @@ if ( $verb ) {
 #
 # 0) Install gcc
 #
-if ( $mode == 0 || $mode == 1) {
+if ( $mode == 0 || $mode == 1 ) {
+    if ( $vers == 1 ) {
 # Standard environment to use system compiler still
-    unless ( -e "$idir/$install{gcccore}[0]" ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[1]: $date\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	if ( -l "$idir/gcc" ) {system("rm -f $idir/gcc");}
-	system("ln -s $install{gcccore}[0] $idir/gcc");
-	chdir "$idir/gcc";
-	my $cmd = "./configure ".
-	    "--prefix=$aidir/gcc ".
-	    "--bindir=$aidir/bin ".
-	    "--libdir=$aidir/lib ".
-	    "--with-gxx-include-dir=$aidir/include";
-	print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
+	unless ( -e "$idir/$install{gcccore}[0]" ) {
+	    $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[1]: $date\n";
+	    my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[1] ".
+			     "in $idir failed: $ret, aborted!\n";}
+	    if ( -l "$idir/gcc" ) {system("rm -f $idir/gcc");}
+	    system("ln -s $install{gcccore}[0] $idir/gcc");
+	    chdir "$idir/gcc";
+	    my $cmd = "./configure ".
+		"--prefix=$aidir/gcc ".
+		"--bindir=$aidir/bin ".
+		"--libdir=$aidir/lib ".
+		"--with-gxx-include-dir=$aidir/include";
+	    print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
 # Bugfix gcc	
-	$ENV{SHELL} = "/bin/sh";
-	$ret = system("$cmd");
-	if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
-	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
-	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
+	    $ENV{SHELL} = "/bin/sh";
+	    $ret = system("$cmd");
+	    if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
+	    $ret = system("make -j2");
+	    if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
+	    $ret = system("make install");
+	    if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
 #	my @acmd = split(" ",$cmd);
 #	system(@acmd);
+	    $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+	    if ( $ENV{LD_LIBRARY_PATH} ) {
+		$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+		    "$ENV{LD_LIBRARY_PATH}";
+	    } else {
+		$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+	    }
+	    $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
+	    chdir "..";
+	    print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
+	    $ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[1] ".
+			     "in $idir failed: $ret, aborted!\n";}
+	    $ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[1] ".
+			     "in $idir failed: $ret, aborted!\n";}
+	    chdir "$idir/gcc";
+	    system("make clean");
+	    print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
+	    $ret = system("$cmd");
+	    if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
+	    $ret = system("make -j2");
+	    if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
+	    $ret = system("make install");
+	    if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
+	    chdir "$aidir";
+	}
+# Switch to proper gcc-3.3.6 compiler if not already done
+	$ENV{SHELL} = "/bin/sh";
 	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
 	if ( $ENV{LD_LIBRARY_PATH} ) {
 	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
@@ -310,49 +350,54 @@ if ( $mode == 0 || $mode == 1) {
 	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
 	}
 	$ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
-	chdir "..";
-	print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
-	$ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	$ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	chdir "$idir/gcc";
-	system("make clean");
-	print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
-	$ret = system("$cmd");
-	if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
-	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
-	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
-	chdir "$aidir";
-    }
-# Switch to proper gcc-3.3.6 compiler if not already done
-    $ENV{SHELL} = "/bin/sh";
-    $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-    if ( $ENV{LD_LIBRARY_PATH} ) {
-	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
-	    "$ENV{LD_LIBRARY_PATH}";
+    }	
+
+#
+# 1) Install CERN libraries (V1 only) resp. ROOT (V2)
+#
+    if ( $vers == 1 ) {
+	unless ( -e "$idir/$install{cernlib}[0]" ) {
+	    $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
+	    my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[1] ".
+			     "in $idir failed: $ret, aborted!\n";}
+	    if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
+	    system("ln -s $install{cernlib}[0] $idir/cernlib");
+	}
     } else {
-	$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+	unless ( -e "$idir/$install{root}[0]" ) {
+	    $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "\nfastrun.pl: Installing ROOT from $install{root}[1]: $date\n";
+	    print "\nfastrun.pl: Unpacking $install{root}[1] ...\n";
+	    my $ret = system("tar xz -C $idir -f $sdir/$install{root}[1]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
+			     "$sdir/$install{root}[1] ".
+			     "in $idir failed: $ret, aborted!\n";}
+# ROOT unpacks in subdirectory root ...
+	    $ret = system("mv root $idir/$install{root}[0]");
+	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir root ".
+			     "to $idir/$install{root}[0]: $ret, aborted!\n";}
+	    if ( -l "$idir/root" ) {system("rm -f $idir/root");}
+	    system("ln -s $install{root}[0] $idir/root");
+	    chdir "$idir/$install{root}[0]";
+	    print "\nfastrun.pl: Configuring ROOT ...\n";
+	    my $cmd = "./configure --enable-roofit --prefix=`pwd` --etcdir=`pwd`/etc --with-cxx=\"gcc -Wall\"\n";
+	    if ( $verb ) {print "$cmd"};
+	    $ret = system("./configure --enable-roofit --prefix=`pwd` --etcdir=`pwd`/etc --with-cxx=\"gcc -Wall\"");
+	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT configure step, aborted!\n";}
+	    print "\nfastrun.pl: Making ROOT ...\n";
+	    $ret = system("make -j2");
+	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make step, aborted!\n";}
+	    print "\nfastrun.pl: Make install for ROOT ...\n";
+	    $ret = system("make install");
+	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make install step, aborted!\n";}
+	    chdir "$pwdir";
+	}
     }
-    $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
-    
-#
-# 1) Unpack CERN libraries
-#
-    unless ( -e "$idir/$install{cernlib}[0]" ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
-	system("ln -s $install{cernlib}[0] $idir/cernlib");
-    }
+    return 0;
 
 #
 # 2) Install lhapdf
