@@ -1,0 +1,10 @@
+To install
+
+autoreconf --install
+./configure
+make install
+
+Required 
+LHAPDF
+ROOT
+

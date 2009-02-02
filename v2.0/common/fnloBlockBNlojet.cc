@@ -772,14 +772,14 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       }
    }else{
 
-      if (x<XNode1[ObsBin][0]){
-         printf("fnloBlockB::FillEventHHC: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
-                x,XNode1[ObsBin][0],ObsBin);
+      if (x1<XNode1[ObsBin][0]){
+         printf("fnloBlockB::FillEventHHC: Error: x1 (%f) smaller than lowest point (%f) at bin #%d .\n",
+                x1,XNode1[ObsBin][0],ObsBin);
          exit(1);
       }
       //--- determine fractional contribution x1
       double hxlimit = Hxlim1[ObsBin];
-      double hx = log10(x);
+      double hx = log10(x1);
       double hxone = 0.0;
 
       // define the x-bin number in the range  [0:ntot[
@@ -823,19 +823,18 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          // define the x-bin number in the range  [0:ntot[
          int nx2;
          //-- relative distances in h(x): deltam
-         double deltam;
 
          //--- determine fractional contribution x2
-         double hxlimit = Hxlim2[ObsBin];
-         double hx = log10(x2);
-         double hxone = 0.0;
+         hxlimit = Hxlim2[ObsBin];
+         hx = log10(x2);
+         hxone = 0.0;
 
          // define the x-bin number in the range  [0:ntot[
          nx2 = int(Nxtot2[ObsBin] *(hx-hxlimit)/(hxone-hxlimit));
 
          //-- relative distances in h(x): deltam
-         double delta  = (hxone-hxlimit)/ Nxtot2[ObsBin];
-         double hxi = hxlimit+double(nx2)/double(Nxtot2[ObsBin])*(hxone-hxlimit);
+         delta  = (hxone-hxlimit)/ Nxtot2[ObsBin];
+         hxi = hxlimit+double(nx2)/double(Nxtot2[ObsBin])*(hxone-hxlimit);
          deltam = (hx-hxi)/delta;
 
          //         printf("x2= %g nx2=%d deltam=%g\n",x2,nx2,deltam);
@@ -934,7 +933,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                      //                        if(i3==0) printf("fastNLO: filled at index %d in x2bin #%d x1bin #%d at x=%f\n",im,(nx2 +i2-1),(nx +i1 -1), XNode2[ObsBin][nx2+i2-1]);
                      for(int proc=0;proc<NSubproc;proc++){
                         //                           printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,cefscale[i3],photoweight);
-                        SigmaTilde[ObsBin][scalevar][is][im][proc] +=  cefm[i1]  * cefm2[i2] * photoweight * cefscale[i3] * wt[proc];
+                        SigmaTilde[ObsBin][scalevar][is][im][proc] +=  cefm[i1]  * cefm2[i2] * cefscale[i3] * wt[proc];
                      }
                   }
                }
