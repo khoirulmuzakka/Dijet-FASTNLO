@@ -208,56 +208,55 @@ chdir $pwdir;
 
 # Define install hash
 my %install;
-# First entry (index 0!): Subdirecory basename into which the archive is unpacked!
-# Store used gcc version to add this later
+# 0: Archive names
+# 1: Unpacking directory of the archives
+# 2: Final directories
+# 3: Link shortcut
+#
+# Store used gcc version to add this to final directories
 my $gccvers = "3.3.6";
 if ( $vers == 2 ) {
     $gccvers = `gcc -dumpversion`;
     chomp $gccvers;
 }
 print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
+
 $install{fastjet}[0]    = "fastjet-2.3.4";
-$install{fastjet}[2]    = "fastjet-2.3.4";
-$install{mcfm}[0]       = "mcfm-5.1";
-$install{mcfmfix}[0]    = "mcfm-5.1";
+$install{fastjet}[1]    = "fastjet-2.3.4";
+$install{mcfm}[0]       = "mcfm-5.3";
+$install{mcfm}[1]       = "MCFM-5.3";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
+$install{fastNLO}[1]    = "fastNLO-rev${frev}";
 if ( $vers == 1 ) { 
-    $install{gcccore}[0]    = "gcc";
-    $install{gccgpp}[0]     = "gcc";
-    $install{gccg77}[0]     = "gcc";
+    $install{gcccore}[0]    = "gcc-core-$gccvers";
+    $install{gcccore}[1]    = "gcc-$gccvers";
+    $install{gccgpp}[0]     = "gcc-g\+\+-$gccvers";
+    $install{gccgpp}[1]     = "gcc-$gccvers";
+    $install{gccg77}[0]     = "gcc-g77-$gccvers";
+    $install{gccg77}[1]     = "gcc-$gccvers";
     $install{cernlib}[0]    = "cernlib-2003";
+    $install{cernlib}[1]    = "cernlib-2003";
 # Versions >= 5.4.0 don't work with gcc 3.3.6
     $install{lhapdf}[0]     = "lhapdf-5.3.1";
-    $install{lhapdf}[2]     = "lhapdf-5.3.1";
+    $install{lhapdf}[1]     = "lhapdf-5.3.1";
     $install{nlojet}[0]     = "nlojet++-2.0.1";
-    $install{nlojet}[2]     = "nlojet++-2.0.1";
-    $install{nlojetfix}[0]  = "nlojet++-2.0.1";
+    $install{nlojet}[1]     = "nlojet++-2.0.1";
+    $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
+    $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
     $install{root}[0]       = "root-5.22";
-    $install{root}[2]       = "root";
+    $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.6.0";
-    $install{lhapdf}[2]     = "lhapdf-5.6.0";
+    $install{lhapdf}[1]     = "lhapdf-5.6.0";
     $install{nlojet}[0]     = "nlojet++-4.0.1";
-    $install{nlojet}[2]     = "nlojet++-4.0.1";
+    $install{nlojet}[1]     = "nlojet++-4.0.1";
 }
 
-# Second: Finalize subdir and archive filenames 
 foreach my $comp ( keys %install ) {
-    my $tmp0 = $install{$comp}[0];
-    if ( $comp !~ m/gcc/ ) {$tmp0 .= "-gcc";}
-    $tmp0 .= "-$gccvers";
-    my $tmp1 = $install{$comp}[0];
-    if ( $comp =~ m/fix/ ) {$tmp1 .= "-fix";}
-    if ( $comp eq "gcccore" ) {
-	$tmp1 = "gcc-core-3.3.6";
-    } elsif ( $comp eq "gccgpp" ) {
-	$tmp1 = "gcc-g\+\+-3.3.6";
-    } elsif ( $comp eq "gccg77" ) {
-	$tmp1 = "gcc-g77-3.3.6";
-    }
-    $tmp1 .= ".tar.gz";
-    $install{$comp}[0] = $tmp0;
-    $install{$comp}[1] = $tmp1;
+    $install{$comp}[0] .=".tar.gz";
+    $install{$comp}[2] = $install{$comp}[1]."-$gccvers";
+    $install{$comp}[3] = $install{$comp}[1];"
+
     unless ( $mode == 2 || $mode == 3 ||
 	     -d "$idir/$install{$comp}[0]" ||
 	     -f "$sdir/$install{$comp}[1]" ||
@@ -266,6 +265,7 @@ foreach my $comp ( keys %install ) {
 	    "aborted!\n";
     }
 }
+exit 0;
 
 #
 # Print system info
