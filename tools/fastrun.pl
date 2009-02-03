@@ -208,42 +208,54 @@ chdir $pwdir;
 
 # Define install hash
 my %install;
-# First entry (index 0!): Subdirecory name into which the archive is unpacked!
-my $gccvers = "gcc-3.3.6";
+# First entry (index 0!): Subdirecory basename into which the archive is unpacked!
+# Store used gcc version to add this later
+my $gccvers = "3.3.6";
 if ( $vers == 2 ) {
     $gccvers = `gcc -dumpversion`;
     chomp $gccvers;
 }
-print "fastrun.pl: Using gcc compiler version $gccvers\n\n"; 
-$install{fastjet}[0]    = "fastjet-2.3.2";
+print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
+$install{fastjet}[0]    = "fastjet-2.3.4";
+$install{fastjet}[2]    = "fastjet-2.3.4";
 $install{mcfm}[0]       = "mcfm-5.1";
 $install{mcfmfix}[0]    = "mcfm-5.1";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
 if ( $vers == 1 ) { 
+    $install{gcccore}[0]    = "gcc";
+    $install{gccgpp}[0]     = "gcc";
+    $install{gccg77}[0]     = "gcc";
     $install{cernlib}[0]    = "cernlib-2003";
 # Versions >= 5.4.0 don't work with gcc 3.3.6
     $install{lhapdf}[0]     = "lhapdf-5.3.1";
+    $install{lhapdf}[2]     = "lhapdf-5.3.1";
     $install{nlojet}[0]     = "nlojet++-2.0.1";
     $install{nlojetfix}[0]  = "nlojet++-2.0.1";
-    $install{gcccore}[0]    = "gcc-core-$gccvers";
-    $install{gccgpp}[0]     = "gcc-g++-$gccvers";
-    $install{gccg77}[0]     = "gcc-g77-$gccvers";
 } else {
     $install{root}[0]       = "root-5.22";
+    $install{root}[2]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.6.0";
+    $install{lhapdf}[2]     = "lhapdf-5.6.0";
     $install{nlojet}[0]     = "nlojet++-4.0.1";
 }
 
-# Second: Archive filenames 
+# Second: Finalize subdir and archive filenames 
 foreach my $comp ( keys %install ) {
-    my $tmp = $install{$comp}[0].".tar.gz";
-    if ( $comp eq "nlojetfix" ) {
-	$install{$comp}[1] = "nlojet++-2.0.1-fix.tar.gz";
-    } elsif ( $comp eq "mcfmfix" ) {
-	$install{$comp}[1] = "mcfm-5.1-fix.tar.gz";
-    } else {
-	$install{$comp}[1] = $tmp;
+    my $tmp0 = $install{$comp}[0];
+    if ( $comp !~ m/gcc/ ) {$tmp0 .= "-gcc";}
+    $tmp0 .= "-$gccvers";
+    my $tmp1 = $install{$comp}[0];
+    if ( $comp =~ m/fix/ ) {$tmp1 .= "-fix";}
+    if ( $comp eq "gcccore" ) {
+	$tmp1 = "gcc-core-3.3.6";
+    } elsif ( $comp eq "gccgpp" ) {
+	$tmp1 = "gcc-g\+\+-3.3.6";
+    } elsif ( $comp eq "gccg77" ) {
+	$tmp1 = "gcc-g77-3.3.6";
     }
+    $tmp1 .= ".tar.gz";
+    $install{$comp}[0] = $tmp0;
+    $install{$comp}[1] = $tmp1;
     unless ( $mode == 2 || $mode == 3 ||
 	     -d "$idir/$install{$comp}[0]" ||
 	     -f "$sdir/$install{$comp}[1]" ||
@@ -376,10 +388,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
 			     "$sdir/$install{root}[1] ".
 			     "in $idir failed: $ret, aborted!\n";}
-# ROOT unpacks in subdirectory root ...
-	    $ret = system("mv root $idir/$install{root}[0]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir root ".
-			     "to $idir/$install{root}[0]: $ret, aborted!\n";}
+	    $ret = system("mv $install{root}[2] $idir/$install{root}[0]");
+	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			     "$install{root}[2] to ".
+			     "$idir/$install{root}[0]: $ret, aborted!\n";}
 	    if ( -l "$idir/root" ) {system("rm -f $idir/root");}
 	    system("ln -s $install{root}[0] $idir/root");
 	    chdir "$idir/$install{root}[0]";
@@ -389,7 +401,9 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --enable-roofit --prefix=`pwd` --etcdir=`pwd`/etc --with-cxx=\"gcc -Wall\"");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making ROOT ...\n";
-	    $ret = system("make -j2");
+# No multithreaded make for ROOT :-( 
+#	    $ret = system("make -j2");
+	    $ret = system("make");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for ROOT ...\n";
 	    $ret = system("make install");
@@ -397,7 +411,6 @@ if ( $mode == 0 || $mode == 1 ) {
 	    chdir "$pwdir";
 	}
     }
-    return 0;
 
 #
 # 2) Install lhapdf
@@ -410,6 +423,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
 	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[1] ".
 			 "in $idir failed: $ret, aborted!\n";}
+	$ret = system("mv $install{lhapdf}[2] $idir/$install{lhapdf}[0]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{lhapdf}[2] to ".
+			 "$idir/$install{root}[0]: $ret, aborted!\n";}
 	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
 	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
 	chdir "$idir/$install{lhapdf}[0]";
@@ -444,6 +461,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[1]");
 	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[1] ".
 			 "in $idir failed: $ret, aborted!\n";}
+	$ret = system("mv $install{fastjet}[2] $idir/$install{fastjet}[0]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{fastjet}[2] to ".
+			 "$idir/$install{fastjet}[0]: $ret, aborted!\n";}
 	if ( -l "$idir/fastjet" ) {system("rm -f $idir/fastjet");}
 	system("ln -s $install{fastjet}[0] $idir/fastjet");
 	chdir "$idir/$install{fastjet}[0]";
@@ -461,6 +482,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
 	chdir "$pwdir";
     }
+    exit 0;
 
 #
 # 4) Install Nlojet++
@@ -494,29 +516,29 @@ if ( $mode == 0 || $mode == 1 ) {
 	chdir "$pwdir";
     }
 # NLOJet++ Version 4
-    unless ( -e "$idir/$install{nlojet4}[0]" ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing Nlojet++ version 4 from $install{nlojet4}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{nlojet4}[1] ...\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet4}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet4}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	if ( -l "$idir/nlojet4" ) {system("rm -f $idir/nlojet4");}
-	system("ln -s  $install{nlojet4}[0] $idir/nlojet4");
-	chdir "$idir/$install{nlojet4}[0]";
-	print "\nfastrun.pl: Configuring Nlojet++ version 4 ...\n";
-#	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	$ret = system("./configure --prefix=`pwd`");
-	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 configure step, aborted!\n";}
-	print "\nfastrun.pl: Making Nlojet++ version 4 ...\n";
-	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make step, aborted!\n";}
-	print "\nfastrun.pl: Make install for Nlojet++ version 4 ...\n";
-	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make install step, aborted!\n";}
-	chdir "$pwdir";
-    }
+#    unless ( -e "$idir/$install{nlojet4}[0]" ) {
+#	$date = `date +%d%m%Y_%H%M%S`;
+#	chomp $date;
+#	print "\nfastrun.pl: Installing Nlojet++ version 4 from $install{nlojet4}[1]: $date\n";
+#	print "\nfastrun.pl: Unpacking $install{nlojet4}[1] ...\n";
+#	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet4}[1]");
+#	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet4}[1] ".
+#			 "in $idir failed: $ret, aborted!\n";}
+#	if ( -l "$idir/nlojet4" ) {system("rm -f $idir/nlojet4");}
+#	system("ln -s  $install{nlojet4}[0] $idir/nlojet4");
+#	chdir "$idir/$install{nlojet4}[0]";
+#	print "\nfastrun.pl: Configuring Nlojet++ version 4 ...\n";
+##	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+#	$ret = system("./configure --prefix=`pwd`");
+#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 configure step, aborted!\n";}
+#	print "\nfastrun.pl: Making Nlojet++ version 4 ...\n";
+#	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make step, aborted!\n";}
+#	print "\nfastrun.pl: Make install for Nlojet++ version 4 ...\n";
+#	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make install step, aborted!\n";}
+#	chdir "$pwdir";
+#    }
 
 #
 # 5) Install mcfm
