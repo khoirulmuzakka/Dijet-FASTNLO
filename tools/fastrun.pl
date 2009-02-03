@@ -230,6 +230,7 @@ if ( $vers == 1 ) {
     $install{lhapdf}[0]     = "lhapdf-5.3.1";
     $install{lhapdf}[2]     = "lhapdf-5.3.1";
     $install{nlojet}[0]     = "nlojet++-2.0.1";
+    $install{nlojet}[2]     = "nlojet++-2.0.1";
     $install{nlojetfix}[0]  = "nlojet++-2.0.1";
 } else {
     $install{root}[0]       = "root-5.22";
@@ -237,6 +238,7 @@ if ( $vers == 1 ) {
     $install{lhapdf}[0]     = "lhapdf-5.6.0";
     $install{lhapdf}[2]     = "lhapdf-5.6.0";
     $install{nlojet}[0]     = "nlojet++-4.0.1";
+    $install{nlojet}[2]     = "nlojet++-4.0.1";
 }
 
 # Second: Finalize subdir and archive filenames 
@@ -482,7 +484,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
 	chdir "$pwdir";
     }
-    exit 0;
+
 
 #
 # 4) Install Nlojet++
@@ -502,7 +504,10 @@ if ( $mode == 0 || $mode == 1 ) {
 			 "in $idir failed: $ret, aborted!\n";}
 	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
 	system("ln -s  $install{nlojet}[0] $idir/nlojet");
-	chdir "$idir/$install{nlojet}[0]";
+	print "0: $install{nlojet}[0]\n";
+	print "1: $install{nlojet}[1]\n";
+	print "2: $install{nlojet}[2]\n";
+	chdir "$idir/$install{nlojet}[2]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 	$ret = system("./configure --prefix=`pwd`");
@@ -570,6 +575,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
         chdir "..";
     }
+    exit 0;
 
 #
 # 6) Install fastNLO
