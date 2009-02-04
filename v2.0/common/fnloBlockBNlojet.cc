@@ -26,7 +26,7 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    }else{
 
       if (x<XNode1[ObsBin][0]){
-         printf("fnloBlockB::FillEventDIS: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventDIS: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
                 x,XNode1[ObsBin][0],ObsBin);
          exit(1);
       }
@@ -378,7 +378,7 @@ void fnloBlockBNlojet::FillEventPhoto(int ObsBin, double x, double scale1, const
    }else{
 
       if (x<XNode1[ObsBin][0]){
-         printf("fnloBlockB::FillEventPhoto: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventPhoto: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
                 x,XNode1[ObsBin][0],ObsBin);
          exit(1);
       }
@@ -527,7 +527,7 @@ void fnloBlockBNlojet::FillEventResolved(int ObsBin, double x, double x2, double
    }else{
 
       if (x<XNode1[ObsBin][0]){
-         printf("fnloBlockB::FillEventResolved: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventResolved: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
                 x,XNode1[ObsBin][0],ObsBin);
          exit(1);
       }
@@ -582,7 +582,7 @@ void fnloBlockBNlojet::FillEventResolved(int ObsBin, double x, double x2, double
                                     + 2.0*Me2*y*(1.0/Q2max-1.0/Q2min))/6.28318530717958647692; 
 
          if (x2prime<XNode2[ObsBin][0]){
-            printf("fnloBlockB::FillEventResolved: Error: x2 (%f) smaller than lowest point (%f) at bin #%d .\n",
+            printf("fnloBlockBNlojet::FillEventResolved: Error: x2 (%f) smaller than lowest point (%f) at bin #%d .\n",
                    x2prime,XNode2[ObsBin][0],ObsBin);
             exit(1);
          }
@@ -771,172 +771,196 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          }
       }
    }else{
-
-      if (x1<XNode1[ObsBin][0]){
-         printf("fnloBlockB::FillEventHHC: Error: x1 (%f) smaller than lowest point (%f) at bin #%d .\n",
-                x1,XNode1[ObsBin][0],ObsBin);
+      if(this->NPDFDim != 1){
+         printf("fnloBlockBNlojet::FillEventHHC: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
          exit(1);
       }
-      //--- determine fractional contribution x1
+
+      // Half matrix x variables
+      double xmin=0.0, xmax=0.0;
+      if (x1 > x2) {
+         xmax = x1;
+         xmin = x2; }
+      else {
+         xmax = x2;
+         xmin = x1;
+      }
+      if (xmin<XNode1[ObsBin][0]){
+         printf("fnloBlockBNlojet::FillEventHHC: Error: xmin (%f) smaller than lowest point (%f) at bin #%d .\n",
+                xmin,XNode1[ObsBin][0],ObsBin);
+         exit(1);
+      }
+
+      double hxmin  = log10(xmin);
+      double hxmax  = log10(xmax);
+      double hxone   = 0.0;
+
+      // define the x-bin numbers in the range  [0:nxtot[
       double hxlimit = Hxlim1[ObsBin];
-      double hx = log10(x1);
-      double hxone = 0.0;
-
-      // define the x-bin number in the range  [0:ntot[
-      int nx = int(Nxtot1[ObsBin] *(hx-hxlimit)/(hxone-hxlimit));
-
-      //-- relative distances in h(x): deltam
+      int nxmin = int(Nxtot1[ObsBin] *(hxmin-hxlimit)/(hxone-hxlimit));
+      int nxmax = int(Nxtot1[ObsBin] *(hxmax-hxlimit)/(hxone-hxlimit));
+ 
+      //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
       double delta  = (hxone-hxlimit)/Nxtot1[ObsBin];
-      double hxi = hxlimit+double(nx)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
-      double deltam = (hx-hxi)/delta;
+      double hxi =hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
+      double hxj =hxlimit+double(nxmin)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
+      double deltamax = (hxmax-hxi)/delta;
+      double deltamin = (hxmin-hxj)/delta;
+      if(deltamax>1.0 || deltamin>1.0 || deltamax<0.0 || deltamin<0.0){
+         cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
+      }                             
 
       // ===== variables for the bi-cubic interpolation =====
       // === the relative distances to the four nearest bins
-      vector<double> cm(4) ; 
-      cm[0] = deltam+1.0;
-      cm[1] = deltam;
-      cm[2] = 1.0-deltam;
-      cm[3] = 2.0-deltam;
+      vector<double> cmax(4); 
+      vector<double> cmin(4); 
+      cmax[0] = deltamax+1.0;
+      cmax[1] = deltamax;
+      cmax[2] = 1.0-deltamax;
+      cmax[3] = 2.0-deltamax;
+      cmin[0] = deltamin+1.0;
+      cmin[1] = deltamin;
+      cmin[2] = 1.0-deltamin;
+      cmin[3] = 2.0-deltamin;
 
-      vector<double> cefm(4) ; 
-      if (nx==0 || nx>=(Nxtot1[ObsBin]-3)) { //linear in 1st and last bin
-         cefm[0] = 0.0;
-         cefm[1] = 1.0-cm[1];
-         cefm[2] = 1.0-cm[2];
-         cefm[3] = 0.0; }
+      vector<double> cefmax(4) ; 
+      vector<double> cefmin(4) ; 
+      if (nxmax==0 || nxmax>=(Nxtot1[ObsBin]-3)) { //linear in 1st and last bin
+         cefmax[0] = 0.0;
+         cefmax[1] = 1.0-cmax[1];
+         cefmax[2] = 1.0-cmax[2];
+         cefmax[3] = 0.0; }
       else {                              // cubic in the middle
-         cefm[1]=1.0-2.5*cm[1]*cm[1]+1.5*cm[1]*cm[1]*cm[1];
-         cefm[2]=1.0-2.5*cm[2]*cm[2]+1.5*cm[2]*cm[2]*cm[2];
-         cefm[0]=2.0 - 4.0*cm[0] + 2.5*cm[0]*cm[0]
-            - 0.5*cm[0]*cm[0]*cm[0];
-         cefm[3]=2.0 - 4.0*cm[3] + 2.5*cm[3]*cm[3]
-            - 0.5*cm[3]*cm[3]*cm[3];
+         cefmax[1]=1.0-2.5*cmax[1]*cmax[1]+1.5*cmax[1]*cmax[1]*cmax[1];
+         cefmax[2]=1.0-2.5*cmax[2]*cmax[2]+1.5*cmax[2]*cmax[2]*cmax[2];
+         cefmax[0]=2.0 - 4.0*cmax[0] + 2.5*cmax[0]*cmax[0]
+            - 0.5*cmax[0]*cmax[0]*cmax[0];
+         cefmax[3]=2.0 - 4.0*cmax[3] + 2.5*cmax[3]*cmax[3]
+            - 0.5*cmax[3]*cmax[3]*cmax[3];
+      }
+      if (nxmin==0 || nxmin>=(Nxtot1[ObsBin]-3)) { //linear in 1st and last bin
+         cefmin[0] = 0.0;
+         cefmin[1] = 1.0-cmin[1];
+         cefmin[2] = 1.0-cmin[2];
+         cefmin[3] = 0.0; }
+      else {                              // cubic in the middle
+         cefmin[1]=1.0-2.5*cmin[1]*cmin[1]+1.5*cmin[1]*cmin[1]*cmin[1];
+         cefmin[2]=1.0-2.5*cmin[2]*cmin[2]+1.5*cmin[2]*cmin[2]*cmin[2];
+         cefmin[0]=2.0 - 4.0*cmin[0] + 2.5*cmin[0]*cmin[0]
+            - 0.5*cmin[0]*cmin[0]*cmin[0];
+         cefmin[3]=2.0 - 4.0*cmin[3] + 2.5*cmin[3]*cmin[3]
+            - 0.5*cmin[3]*cmin[3]*cmin[3];
       }
 
-
-         if (x2<XNode2[ObsBin][0]){
-            printf("fnloBlockB::FillEventHHC: Error: x2 (%f) smaller than lowest point (%f) at bin #%d .\n",
-                   x2,XNode2[ObsBin][0],ObsBin);
-            exit(1);
-         }
-
-         // define the x-bin number in the range  [0:ntot[
-         int nx2;
-         //-- relative distances in h(x): deltam
-
-         //--- determine fractional contribution x2
-         hxlimit = Hxlim2[ObsBin];
-         hx = log10(x2);
-         hxone = 0.0;
-
-         // define the x-bin number in the range  [0:ntot[
-         nx2 = int(Nxtot2[ObsBin] *(hx-hxlimit)/(hxone-hxlimit));
-
-         //-- relative distances in h(x): deltam
-         delta  = (hxone-hxlimit)/ Nxtot2[ObsBin];
-         hxi = hxlimit+double(nx2)/double(Nxtot2[ObsBin])*(hxone-hxlimit);
-         deltam = (hx-hxi)/delta;
-
-         //         printf("x2= %g nx2=%d deltam=%g\n",x2,nx2,deltam);
-         // ===== variables for the bi-cubic interpolation =====
-         // === the relative distances to the four nearest bins
-         vector<double> cm2(4) ; 
-         cm2[0] = deltam+1.0;
-         cm2[1] = deltam;
-         cm2[2] = 1.0-deltam;
-         cm2[3] = 2.0-deltam;
-
-         vector<double> cefm2(4) ; 
-         if (nx2==0 || nx2>=(Nxtot2[ObsBin]-3)) { //linear in 1st and last bin
-            cefm2[0] = 0.0;
-            cefm2[1] = 1.0-cm2[1];
-            cefm2[2] = 1.0-cm2[2];
-            cefm2[3] = 0.0; }
-         else {                              // cubic in the middle
-            cefm2[1]=1.0-2.5*cm2[1]*cm2[1]+1.5*cm2[1]*cm2[1]*cm2[1];
-            cefm2[2]=1.0-2.5*cm2[2]*cm2[2]+1.5*cm2[2]*cm2[2]*cm2[2];
-            cefm2[0]=2.0 - 4.0*cm2[0] + 2.5*cm2[0]*cm2[0]
-               - 0.5*cm2[0]*cm2[0]*cm2[0];
-            cefm2[3]=2.0 - 4.0*cm2[3] + 2.5*cm2[3]*cm2[3]
-               - 0.5*cm2[3]*cm2[3]*cm2[3];
-         }
-
-         amp.pdf_and_qcd_coupling(pdf, prefactor);
+      // === the weights for the bi-cubic eigenfunctions (2-dim)
+      double bicef[4][4];
       
-         for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
+      for( int i1 = 0; i1 < 4; i1++) {
+         for( int i2 = 0; i2 < 4; i2++) {
+            bicef[i1][i2] = cefmax[i1] * cefmin[i2];
+         }
+      }
 
-            double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-            nlo::weight_hhc wt = amp(mu2,mu2);
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+      
+      for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
-            double binsize = 1.0;
-            for(int dim=0; dim<A2->NDim; dim++){
-               binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
+         double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
+         nlo::weight_hhc wt = amp(mu2,mu2);
+
+         double binsize = 1.0;
+         for(int dim=0; dim<A2->NDim; dim++){
+            binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
+         }
+
+         wt *= 389385730./binsize;
+         if(IXsectUnits!=12){
+            wt *= pow(10.,(IXsectUnits-12)) ;
+         }
+
+         // deal with subprocesses 2 and 3
+         //    - if x1>x2 -> o.k.
+         //    - if x2>x1 -> swap weights for subprocesses 2,3
+         if(x2>x1){
+            double buffer;
+            buffer = wt[1];
+            wt[1] = wt[2];
+            wt[2] = buffer;
+         }
+
+         // define the scale-bin number in the range  [0:nscalebin[
+         int scalenode = 0;
+         double cefscale[4] = {0.0,0.5,0.5,0.0};
+         if(Nscalenode[0]>1){
+            for(int i=1;i<Nscalenode[0];i++){
+               if (ScaleFac[0][scalevar]*scale1<ScaleNode[ObsBin][0][scalevar][i]){
+                  scalenode=i;
+                  break;
+               }
+            }
+            double deltascale = (ScaleFac[0][scalevar]*scale1 - ScaleNode[ObsBin][0][scalevar][scalenode-1])/
+               (ScaleNode[ObsBin][0][scalevar][scalenode]-ScaleNode[ObsBin][0][scalevar][scalenode-1]);
+            vector<double> cscale(4) ; 
+            cscale[0] = deltascale+1.0;
+            cscale[1] = deltascale;
+            cscale[2] = 1.0-deltascale;
+            cscale[3] = 2.0-deltascale;
+
+            if(scalenode<2 || scalenode>ScaleNode[ObsBin][0][scalevar][scalenode-1]-3){
+               cefscale[0] = 0.0;
+               cefscale[1] = 1.0-cscale[1];
+               cefscale[2] = 1.0-cscale[2];
+               cefscale[3] = 0.0;
+            }else{
+               cefscale[1]=1.0-2.5*cscale[1]*cscale[1]+1.5*cscale[1]*cscale[1]*cscale[1];
+               cefscale[2]=1.0-2.5*cscale[2]*cscale[2]+1.5*cscale[2]*cscale[2]*cscale[2];
+               cefscale[0]=2.0 - 4.0*cscale[0] + 2.5*cscale[0]*cscale[0]
+                  - 0.5*cscale[0]*cscale[0]*cscale[0];
+               cefscale[3]=2.0 - 4.0*cscale[3] + 2.5*cscale[3]*cscale[3]
+                  - 0.5*cscale[3]*cscale[3]*cscale[3];
+            }
+         }
+
+         // ** loop over all 4 scale nodes that receive contributions
+         for(int i3 = 0; i3 < 4; i3++){
+            int is = scalenode +i3 -2;  // the target scale index
+            if(is<0){
+               is = 0;
+            }
+            if (is> Nscalenode[0]-1){
+               is = Nscalenode[0]-1;
             }
 
-            wt *= 389385730./binsize;
-            if(IXsectUnits!=12){
-               wt *= pow(10.,(IXsectUnits-12)) ;
-            }
 
-            // define the scale-bin number in the range  [0:nscalebin[
-            int scalenode = 0;
-            double cefscale[4] = {0.0,0.5,0.5,0.0};
-            if(Nscalenode[0]>1){
-               for(int i=1;i<Nscalenode[0];i++){
-                  if (ScaleFac[0][scalevar]*scale1<ScaleNode[ObsBin][0][scalevar][i]){
-                     scalenode=i;
-                     break;
+
+            // ** loop over all 4 x1 points that receive contributions
+            for( int i1 = 0; i1 < 4; i1++) {           
+               for (int i2 = 0; i2 < 4; i2++){
+                  int xmaxbin = (nxmax +i1 -1);
+                  int xminbin = (nxmin +i2 -1);
+                  nlo::weight_hhc wtmp = wt;  // a working copy of the weights
+                  // - check if above diagonal? project back and swap!
+                  if (xminbin>xmaxbin) { 
+                     int di = xminbin - xmaxbin;
+                     xmaxbin = xmaxbin + di;   // modify indicees
+                     xminbin = xminbin - di;		
+                     double buffer  = wtmp[1]; // swap subprocesses 2,3
+                     wtmp[1] = wtmp[2];
+                     wtmp[2] = buffer;
+                  } 
+
+                  if(xmaxbin<0) xmaxbin = 0;
+                  if(xmaxbin>Nxtot1[ObsBin]-1) xmaxbin =Nxtot1[ObsBin]-1;
+                  if(xminbin<0) xminbin = 0;
+                  if(xminbin>Nxtot2[ObsBin]-1) xminbin =Nxtot1[ObsBin]-1;
+                  int im = xmaxbin + xminbin * Nxtot1[ObsBin];   // the target x index
+                  //                        if(i3==0) printf("fastNLO: filled at index %d in xminbin #%d xmaxbin #%d at x=%f\n",im,(nx2 +i2-1),(nx +i1 -1), XNode2[ObsBin][nx2+i2-1]);
+                  for(int proc=0;proc<NSubproc;proc++){
+                     //                           printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,cefscale[i3]);
+                     SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
                   }
                }
-               double deltascale = (ScaleFac[0][scalevar]*scale1 - ScaleNode[ObsBin][0][scalevar][scalenode-1])/
-                  (ScaleNode[ObsBin][0][scalevar][scalenode]-ScaleNode[ObsBin][0][scalevar][scalenode-1]);
-               vector<double> cscale(4) ; 
-               cscale[0] = deltascale+1.0;
-               cscale[1] = deltascale;
-               cscale[2] = 1.0-deltascale;
-               cscale[3] = 2.0-deltascale;
-
-               if(scalenode<2 || scalenode>ScaleNode[ObsBin][0][scalevar][scalenode-1]-3){
-                  cefscale[0] = 0.0;
-                  cefscale[1] = 1.0-cscale[1];
-                  cefscale[2] = 1.0-cscale[2];
-                  cefscale[3] = 0.0;
-               }else{
-                  cefscale[1]=1.0-2.5*cscale[1]*cscale[1]+1.5*cscale[1]*cscale[1]*cscale[1];
-                  cefscale[2]=1.0-2.5*cscale[2]*cscale[2]+1.5*cscale[2]*cscale[2]*cscale[2];
-                  cefscale[0]=2.0 - 4.0*cscale[0] + 2.5*cscale[0]*cscale[0]
-                     - 0.5*cscale[0]*cscale[0]*cscale[0];
-                  cefscale[3]=2.0 - 4.0*cscale[3] + 2.5*cscale[3]*cscale[3]
-                     - 0.5*cscale[3]*cscale[3]*cscale[3];
-               }
             }
-
-            // ** loop over all 4 scale nodes that receive contributions
-            for(int i3 = 0; i3 < 4; i3++){
-               int is = scalenode +i3 -2;  // the target scale index
-               if(is<0){
-                  is = 0;
-               }
-               if (is> Nscalenode[0]-1){
-                  is = Nscalenode[0]-1;
-               }
-               // ** loop over all 4 x1 points that receive contributions
-               for( int i1 = 0; i1 < 4; i1++) {           
-                  for (int i2 = 0; i2 < 4; i2++){
-                     int x1bin = (nx +i1 -1);
-                     if(x1bin<0) x1bin = 0;
-                     if(x1bin>Nxtot1[ObsBin]-1) x1bin =Nxtot1[ObsBin]-1;
-                     int x2bin = (nx2 +i2 -1);
-                     if(x2bin<0) x2bin = 0;
-                     if(x2bin>Nxtot2[ObsBin]-1) x2bin =Nxtot2[ObsBin]-1;
-                     int im = x1bin + x2bin * Nxtot1[ObsBin];   // the target x index
-                     //                        if(i3==0) printf("fastNLO: filled at index %d in x2bin #%d x1bin #%d at x=%f\n",im,(nx2 +i2-1),(nx +i1 -1), XNode2[ObsBin][nx2+i2-1]);
-                     for(int proc=0;proc<NSubproc;proc++){
-                        //                           printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,cefscale[i3],photoweight);
-                        SigmaTilde[ObsBin][scalevar][is][im][proc] +=  cefm[i1]  * cefm2[i2] * cefscale[i3] * wt[proc];
-                     }
-                  }
-               }
          }
       }
    }

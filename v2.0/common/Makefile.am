@@ -26,7 +26,7 @@ AM_CXXFLAGS =
 # Preprocessor flags
 AM_CPPFLAGS = -I${HOME}/include/nlo++ -I${LHAPDFINCLUDEPATH}
 if HAVEROOT
-  AM_CPPFLAGS += -I${ROOTSYS}/include
+  AM_CPPFLAGS += -I${ROOTINCLUDEPATH}
 endif
 
 # Files that are required to build the project but that can be
