@@ -54,6 +54,14 @@ else
     AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
     AC_MSG_RESULT([Using $ROOTCINTPATH])
   fi
+  AC_CHECK_PROGS([have_root_config],[root-config],[:])
+  if test "$have_root_config" = :; then
+    AC_MSG_WARN([root-config is not in path! ROOT include directory might be wrongly identified.])
+  else
+    AC_MSG_CHECKING([for ROOT installation])
+    AC_SUBST([ROOTINCLUDEPATH], [`root-config --incdir`])
+    AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+  fi
 fi
 AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 
