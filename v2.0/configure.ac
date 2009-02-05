@@ -15,53 +15,92 @@ AC_CONFIG_SRCDIR([common/fnloconstants.h])
 # Checks for libraries.
 AC_F77_LIBRARY_LDFLAGS
 
+# Announce checks particluar for fastNLO
+AC_MSG_NOTICE([Starting checks particular for fastNLO ...])
+
 #CERNLIB
-AC_MSG_CHECKING([for CERN libraries])
+AC_MSG_NOTICE([Looking for CERN libraries ...])
 if test "x$CERN_ROOT" = "x"; then
-  AC_MSG_WARN([CERN_ROOT environment variable is not set!
+  AC_MSG_ERROR([CERN_ROOT environment variable is not set!
   CERN_ROOT/lib must be the path to -lkernlib, -lmathlib, -lpacklib])
 else
+  AC_MSG_RESULT([Using environment variable CERN_ROOT=$CERN_ROOT to locate CERNlib installation])
+  AC_SUBST([CERNLIBPATH], ["$CERN_ROOT/lib"])
   AC_SUBST([CERNLIBS], ["-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"])
-  AC_MSG_RESULT([Using -L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib ])
+  AC_MSG_RESULT([Using $CERN_ROOT for CERNlib installation path])
+  AC_MSG_RESULT([Using $CERNLIBPATH for the libraries])
+  AC_MSG_RESULT([Using -L$CERNLIBPATH -lmathlib -lkernlib -lpacklib for the linker flag])
 fi
+
+#NLOJET++
+AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
+if test "x$NLOJET" = "x"; then
+  AC_MSG_WARN([NLOJET environment variable is not set, trying to find create-nlojet-user in PATH ...])
+  AC_PATH_PROG([NLOJETBINPATH],[create-nlojet-user],[:])
+  if test "$NLOJETBINPATH" = :; then
+    AC_MSG_ERROR([No path to NLOJET++ binaries found, configuration aborted!])
+  else
+    AC_SUBST([NLOJETPREFIX], "$NLOJETBINPATH/..")
+    AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
+  fi
+else
+  AC_MSG_RESULT([Using environment variable NLOJET=$NLOJET to locate NLOJET++ installation])
+  AC_SUBST([NLOJETPREFIX], "$NLOJET")
+  AC_SUBST([NLOJETBINPATH], "$NLOJET/bin")
+  AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
+fi
+AC_MSG_RESULT([Using $NLOJETPREFIX for the NLOJET++ installation path])
+AC_MSG_RESULT([Using $NLOJETBINPATH for the binaries])
+AC_MSG_RESULT([Using $NLOJETINCLUDEPATH for the includes])
 
 #LHAPDF
-AC_CHECK_PROGS([have_lhapdf_config],[lhapdf-config],[:])
-if test "$have_lhapdf_config" = :; then
-   AC_MSG_WARN([lhapdf-config is not in path! This means LHAPDF is not properly installed.])
+AC_MSG_NOTICE([Looking for LHAPDF installation ...])
+if test "x$LHAPDF" = "x"; then
+  AC_MSG_WARN([LHAPDF environment variable is not set, trying to find lhapdf-config in PATH ...])
+  AC_PATH_PROG([LHAPDFBINPATH],[lhapdf-config],[:])
+  if test "$LHAPDFBINPATH" = :; then
+    AC_MSG_ERROR([No path to LHAPDF binaries found, configuration aborted!])
+  else
+    AC_SUBST([LHAPDFPREFIX], [`lhapdf-config --prefix`])
+    AC_SUBST([LHAPDFSETPATH], [`lhapdf-config --pdfsets-path`])
+  fi
+else
+  AC_MSG_RESULT([Using environment variable LHAPDF=$LHAPDF to locate LHAPDF installation])
+  AC_SUBST([LHAPDFPREFIX], ["$LHAPDF"])
+  AC_SUBST([LHAPDFSETPATH], [`$LHAPDF/bin/lhapdf-config --pdfsets-path`])
 fi
-AC_MSG_CHECKING([for LHAPDF installation])
-AC_SUBST([LHAPDFPREFIX], [`lhapdf-config --prefix`])
-AC_SUBST([LHAPDFLIBPATH],$LHAPDFPREFIX/lib)
-AC_SUBST([LHAPDFSETPATH], [`lhapdf-config --pdfsets-path`])
-AC_SUBST([LHAPDFINCLUDEPATH],"$LHAPDFPREFIX/include/LHAPDF")
+AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
+AC_SUBST([LHAPDFLIBPATH], ["$LHAPDFPREFIX/lib"])
+AC_SUBST([LHAPDFINCLUDEPATH],["$LHAPDFPREFIX/include/LHAPDF"])
+AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
+AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
+AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
 AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
 AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
-AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
 
 #ROOT
-AC_MSG_CHECKING([for ROOT installation])
+AC_MSG_NOTICE([Looking for ROOT installation ...])
 if test "x$ROOTSYS" = "x"; then
-  AC_MSG_WARN([ROOTSYS environment variable is not set.
-  Not a big problem, but library will be build without ROOT dictionary.])
+  AC_MSG_WARN([ROOTSYS environment variable is not set, trying to find root-config in PATH ...])
+  AC_PATH_PROG([ROOTBINPATH],[root-config],[:])
+  if test "$ROOTBINPATH" = :; then
+    AC_MSG_ERROR([No path to ROOT binaries found, configuration aborted!])
+  else
+    AC_SUBST([ROOTSYS], ["$ROOTBINPATH/.."])
+    AC_SUBST([ROOTINCLUDEPATH], [`root-config --incdir`])
+  fi
 else
   AC_SUBST([ROOTSYS], ["$ROOTSYS"])	
-  AC_CHECK_PROGS([have_rootcint],[rootcint],[:],["$ROOTSYS/bin/"])
-  if test "$have_rootcint" = ":"; then
-    AC_MSG_WARN([ROOTSYS environment variable set, but no rootcint found.
-    Not a big problem, but library will be build without ROOT dictionary.])
-  else
-    AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
-    AC_MSG_RESULT([Using $ROOTCINTPATH])
-  fi
-  AC_CHECK_PROGS([have_root_config],[root-config],[:])
-  if test "$have_root_config" = :; then
-    AC_MSG_WARN([root-config is not in path! ROOT include directory might be wrongly identified.])
-  else
-    AC_MSG_CHECKING([for ROOT installation])
-    AC_SUBST([ROOTINCLUDEPATH], [`root-config --incdir`])
-    AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
-  fi
+  AC_SUBST([ROOTINCLUDEPATH], [`$ROOTSYS/bin/root-config --incdir`])
+fi
+AC_MSG_RESULT([Using $ROOTSYS for the ROOT installation path])
+AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+AC_CHECK_PROGS([have_rootcint],[rootcint],[:],["$ROOTSYS/bin/"])
+if test "$have_rootcint" = ":"; then
+  AC_MSG_WARN([ROOTSYS environment variable set and/or root-config found, but no rootcint. Not a big problem, but library will be build without ROOT dictionary.])
+else
+  AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
+  AC_MSG_RESULT([Using $ROOTCINTPATH])
 fi
 AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 

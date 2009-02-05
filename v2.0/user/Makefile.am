@@ -21,4 +21,5 @@ LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure missing install-sh
+MAINTAINERCLEANFILES = example.f \
+	Makefile.in aclocal.m4 configure missing install-sh

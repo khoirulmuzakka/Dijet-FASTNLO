@@ -24,7 +24,7 @@ endif
 AM_CXXFLAGS = 
 
 # Preprocessor flags
-AM_CPPFLAGS = -I${HOME}/include/nlo++ -I${LHAPDFINCLUDEPATH}
+AM_CPPFLAGS = -I${NLOJETINCLUDEPATH} -I${LHAPDFINCLUDEPATH}
 if HAVEROOT
   AM_CPPFLAGS += -I${ROOTINCLUDEPATH}
 endif
@@ -34,7 +34,5 @@ endif
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure depcomp missing install-sh
-
-
-
+MAINTAINERCLEANFILES = fnloTableDict.h fnloTableDict.cc \
+	configure Makefile.in aclocal.m4 depcomp missing install-sh
