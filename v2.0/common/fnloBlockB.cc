@@ -519,6 +519,21 @@ int fnloBlockB::GetNxmax(int i){
    return nxmax;
 };
 
+int fnloBlockB::GetXIndex(int Obsbin,int x1bin,int x2bin){
+   int xbin = 0;
+   switch (NPDFDim) {
+   case 0: xbin = x1bin; // linear
+      break;
+   case 1: xbin = x1bin + (x2bin*(x2bin+1)/2);    // half matrix
+      break;
+   case 2: xbin = x1bin + x2bin * Nxtot1[Obsbin]; // full matrix
+      break;
+   default: ;
+   }
+   return xbin;
+};
+
+
 
 int fnloBlockB::GetTotalScalevars(){
    int totalscalevars=1;
@@ -593,12 +608,17 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
           for(int l=0;l<6;l++){
              A  += pdfx2[l+7];
              Ab += pdfx2[5-l];
-             B  += pdfx1[l+7];
-             Bb += pdfx1[5-l];
-             D  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
-             Db += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
+// pp
+//              B  += pdfx1[l+7];
+//              Bb += pdfx1[5-l];
+//              D  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
+//              Db += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
+// ppbar
+             Bb  += pdfx1[l+7];
+             B += pdfx1[5-l];
+             Db  += pdfx1[l+7] * pdfx2[l+7] + pdfx1[5-l] * pdfx2[5-l];
+             D += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
           }         
-
 
          pdflc[0] = A0*B0; // gluon gluon
          pdflc[1] = (A + Ab)*B0; // quark gluon
@@ -610,6 +630,7 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
          break;
       default: printf("fnloBlockB::CalcPDFLinearComb :Ipdfdef1=3, Ipdfdef2= %d not supported. Exit.\n",IPDFdef2); exit(1);
       }
+      break;
    case 4:
       switch(IPDFdef2){
       case 1: // resolved gammaP: gg   qg   gq   qr   qq   qqb   qrb 
@@ -632,7 +653,6 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
              Db += pdfx1[l+7] * pdfx2[5-l] + pdfx1[5-l] * pdfx2[l+7];
           }         
 
-
          pdflc[0] = A0*B0; // gluon gluon
          pdflc[1] = (A + Ab)*B0; // quark gluon
          pdflc[2] = A0*(B + Bb);
@@ -650,12 +670,6 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
 }
 
 void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf,vector<double> &xfx),fnloTableUser *tableptr){
-   vector<double> xfx; // PDFs of all partons
-   xfx.resize(13);
-
-   vector <double> buffer; // for resorting a pdf array
-   buffer.resize(NSubproc);
-
    int scaleindex2 = 0;
    int scalevar2 = scalevar;
 
@@ -664,18 +678,61 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
       scalevar2 = scalevar % Nscalevar[1]; 
    }
 
-   for(int i=0;i<BlockA2->GetNObsBin();i++){
-      int nxmax = GetNxmax(i);
-      for(int j=0;j<Nscalenode[scaleindex2];j++){
-         for(int k=0;k<nxmax;k++){ 
-            (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx);
-            CalcPDFLinearComb(xfx,xfx,&buffer); //calculate linear combinations
-            for(int l=0;l<NSubproc;l++){ 
-               PdfLc[i][j][k][l] = buffer[l];
+   // linear
+   if(NPDFDim == 0){
+      vector<double> xfx; // PDFs of all partons
+      xfx.resize(13);
+       vector <double> buffer; // for resorting a pdf array
+      buffer.resize(NSubproc);
+     
+      for(int i=0;i<BlockA2->GetNObsBin();i++){
+         int nxmax = GetNxmax(i);
+         for(int j=0;j<Nscalenode[scaleindex2];j++){
+            for(int k=0;k<nxmax;k++){ 
+               (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx);
+               CalcPDFLinearComb(xfx,xfx,&buffer); //calculate linear combinations
+               for(int l=0;l<NSubproc;l++){ 
+                  PdfLc[i][j][k][l] = buffer[l];
+               }
             }
          }
       }
    }
+
+   // half matrix
+   if(NPDFDim == 1){
+      vector < vector<double> > xfx; // PDFs of all partons
+      vector <double> buffer; // for resorting a pdf array
+      buffer.resize(NSubproc);
+      for(int i=0;i<BlockA2->GetNObsBin();i++){
+         int nxmax = GetNxmax(i);  // total entries in half matrix
+         int nxbins1 = Nxtot1[i]; // number of columns in half matrix
+         xfx.resize(nxbins1);
+         for(int j=0;j<Nscalenode[scaleindex2];j++){
+            // determine all pdfs of hadron1
+            for(int k=0;k<nxbins1;k++){ 
+               xfx[k].resize(13);
+               (tableptr->*GetPdfs)(XNode1[i][k],ScaleNode[i][scaleindex2][scalevar2][j],xfx[k]);
+            }
+            int x1bin = 0;
+            int x2bin = 0;
+            for(int k=0;k<nxmax;k++){ 
+               CalcPDFLinearComb(xfx[x1bin],xfx[x2bin],&buffer); //calculate linear combinations
+               for(int l=0;l<NSubproc;l++){ 
+                  PdfLc[i][j][k][l] = buffer[l];
+               }
+               x1bin++;
+               if(x1bin>x2bin){
+                  x1bin = 0;
+                  x2bin++;
+               }
+            }
+         }
+      }
+   }
+   
+
+
 }
 
 void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(double x, double muf,vector<double> &xfx),
@@ -759,8 +816,8 @@ void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
              double alphastwopi = pow(GetAlphas(ScaleNode[i][scaleindex1][scalevar1][scalenode1],asmz)/TWOPI, Npow);
              for(int k=0;k<nxmax;k++){ 
                 for(int l=0;l<NSubproc;l++){ 
-                   int x1bin = k % Nxtot1[i];
-                   int x2bin = k / Nxtot1[i];
+                   //                   int x1bin = k % Nxtot1[i];
+                   //                   int x2bin = k / Nxtot1[i];
                    //                   printf("%d %d %d : %f\n",x1bin,x2bin,k,SigmaTilde[i][scalevar][j][k][l]);
                    //                   printf(">> %d %d %d %d %g %g %g\n",i,j,k,l,SigmaTilde[i][scalevar][j][k][l],alphastwopi,PdfLc[i][j][k][l]);
                    Xsection[i] +=  SigmaTilde[i][scalevar][j][k][l] *  alphastwopi  *  PdfLc[i][scalenode2][k][l];

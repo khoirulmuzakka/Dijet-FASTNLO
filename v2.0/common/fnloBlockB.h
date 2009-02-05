@@ -33,6 +33,7 @@ class fnloBlockB {
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
    int GetNxmax(int Obsbin);
+   int GetXIndex(int Obsbin,int x1bin,int x2bin =0);
    void Add(fnloBlockB* other);
    bool IsLO(){return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO(){return IContrFlag1==1 && IContrFlag2==2;}

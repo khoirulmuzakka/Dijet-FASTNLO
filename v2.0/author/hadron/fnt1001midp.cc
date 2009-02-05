@@ -267,7 +267,7 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("");
    A2->NScDescript = A2->ScDescript.size();
    A2->Ecms = sqrt(s);
-   A2->ILOord = 1;
+   A2->ILOord = 2;
    A2->NDim = 2;
    A2->DimLabel.push_back("E_T");
    A2->IDiffBin.push_back(2);
@@ -278,8 +278,8 @@ void UserHHC::inittable(){
    bound.resize(2);
 
    const int nptbins = 33;
-   const int nrapbins = 1;
    double ptbins[nptbins+1] = {40.5,46.5,52.44,58.26,64.01,69.63,75.19,80.82,86.37,91.8,97.37,102.78,108.38,113.55,119.2,124.31,130.03,135.07,140.86,150.96,162.35,172.42,183.84,193.9,205.54,215.14,237.13,258.36,280.59,301.56,323.9,344.32,383.76,452.71};
+   const int nrapbins = 1;
    double rapbins[nrapbins+1] = {0.1,0.7};
 
    for(int i=0;i<nrapbins;i++){
@@ -354,7 +354,7 @@ void UserHHC::inittable(){
       B->Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
          double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
-         B->XNode1[i].push_back(-pow(-pow(10,hx),2)); 
+         B->XNode1[i].push_back(pow(10,-pow(hx,2))); 
       }
    }
 
@@ -371,8 +371,8 @@ void UserHHC::inittable(){
    B->ScaleFac.resize(B->NScaleDim);
 
    B->ScaleFac[0].push_back(1.0);
-   B->ScaleFac[0].push_back(0.5);
-   B->ScaleFac[0].push_back(2.0);
+   //   B->ScaleFac[0].push_back(0.5);
+   //   B->ScaleFac[0].push_back(2.0);
    B->Nscalevar.push_back(B->ScaleFac[0].size());
 
    B->ScaleNode.resize(A2->NObsBin);

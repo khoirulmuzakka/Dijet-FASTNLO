@@ -702,7 +702,7 @@ void fnloBlockBNlojet::FillEventResolved(int ObsBin, double x, double x2, double
                      int x2bin = (nx2 +i2 -1);
                      if(x2bin<0) x2bin = 0;
                      if(x2bin>Nxtot2[ObsBin]-1) x2bin =Nxtot2[ObsBin]-1;
-                     int im = x1bin + x2bin * Nxtot1[ObsBin];   // the target x index
+                     int im = GetXIndex(ObsBin,x1bin,x2bin);
                      //                        if(i3==0) printf("fastNLO: filled at index %d in x2bin #%d x1bin #%d at x=%f\n",im,(nx2 +i2-1),(nx +i1 -1), XNode2[ObsBin][nx2+i2-1]);
                      for(int proc=0;proc<NSubproc;proc++){
                         //                           printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,cefscale[i3],photoweight);
@@ -790,9 +790,8 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                 xmin,XNode1[ObsBin][0],ObsBin);
          exit(1);
       }
-
-      double hxmin  = log10(xmin);
-      double hxmax  = log10(xmax);
+      double hxmin  = -sqrt(-log10(xmin));
+      double hxmax  = -sqrt(-log10(xmax));
       double hxone   = 0.0;
 
       // define the x-bin numbers in the range  [0:nxtot[
@@ -802,8 +801,8 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
  
       //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
       double delta  = (hxone-hxlimit)/Nxtot1[ObsBin];
-      double hxi =hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
-      double hxj =hxlimit+double(nxmin)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
+      double hxi = hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
+      double hxj = hxlimit+double(nxmin)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
       double deltamax = (hxmax-hxi)/delta;
       double deltamin = (hxmin-hxj)/delta;
       if(deltamax>1.0 || deltamin>1.0 || deltamax<0.0 || deltamin<0.0){
@@ -862,7 +861,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       }
 
       amp.pdf_and_qcd_coupling(pdf, prefactor);
-      
+
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
@@ -932,8 +931,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
             }
 
 
-
-            // ** loop over all 4 x1 points that receive contributions
+            // ** loop over all 16 xmin,xmax points that receive contributions
             for( int i1 = 0; i1 < 4; i1++) {           
                for (int i2 = 0; i2 < 4; i2++){
                   int xmaxbin = (nxmax +i1 -1);
@@ -952,11 +950,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                   if(xmaxbin<0) xmaxbin = 0;
                   if(xmaxbin>Nxtot1[ObsBin]-1) xmaxbin =Nxtot1[ObsBin]-1;
                   if(xminbin<0) xminbin = 0;
-                  if(xminbin>Nxtot2[ObsBin]-1) xminbin =Nxtot1[ObsBin]-1;
-                  int im = xmaxbin + xminbin * Nxtot1[ObsBin];   // the target x index
-                  //                        if(i3==0) printf("fastNLO: filled at index %d in xminbin #%d xmaxbin #%d at x=%f\n",im,(nx2 +i2-1),(nx +i1 -1), XNode2[ObsBin][nx2+i2-1]);
+                  if(xminbin>Nxtot1[ObsBin]-1) xminbin =Nxtot1[ObsBin]-1;
+                  int im = GetXIndex(ObsBin,xminbin,xmaxbin);
+                  //                  printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
                   for(int proc=0;proc<NSubproc;proc++){
-                     //                           printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,cefscale[i3]);
+                     //                     printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,bicef[i1][i2],cefscale[i3]);
                      SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
                   }
                }
