@@ -18,5 +18,5 @@ libfnt1001midp_la_LDFLAGS = -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -ll
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = .deps .obj .libs \
+MAINTAINERCLEANFILES = .deps .obj .libs *.la \
 	Makefile.in Makefile.gen Makefile
