@@ -16,21 +16,9 @@ AC_CONFIG_SRCDIR([common/fnloconstants.h])
 AC_F77_LIBRARY_LDFLAGS
 
 # Announce checks particluar for fastNLO
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Starting checks particular for fastNLO ...])
-
-#CERNLIB
-AC_MSG_NOTICE([Looking for CERN libraries ...])
-if test "x$CERN_ROOT" = "x"; then
-  AC_MSG_ERROR([CERN_ROOT environment variable is not set!
-  CERN_ROOT/lib must be the path to -lkernlib, -lmathlib, -lpacklib])
-else
-  AC_MSG_RESULT([Using environment variable CERN_ROOT=$CERN_ROOT to locate CERNlib installation])
-  AC_SUBST([CERNLIBPATH], ["$CERN_ROOT/lib"])
-  AC_SUBST([CERNLIBS], ["-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"])
-  AC_MSG_RESULT([Using $CERN_ROOT for CERNlib installation path])
-  AC_MSG_RESULT([Using $CERNLIBPATH for the libraries])
-  AC_MSG_RESULT([Using -L$CERNLIBPATH -lmathlib -lkernlib -lpacklib for the linker flag])
-fi
+AC_MSG_NOTICE([******************************************])
 
 #NLOJET++
 AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
@@ -52,6 +40,21 @@ fi
 AC_MSG_RESULT([Using $NLOJETPREFIX for the NLOJET++ installation path])
 AC_MSG_RESULT([Using $NLOJETBINPATH for the binaries])
 AC_MSG_RESULT([Using $NLOJETINCLUDEPATH for the includes])
+
+#LHPDF (Attention! This is the version coming with NLOJET++ version 4!) 
+AC_MSG_NOTICE([Looking for LHPDF installation ...])
+AC_MSG_NOTICE([Attention! These are the pdf's coming with NLOJET++ version 4!])
+AC_MSG_NOTICE([Do not confuse with LHAPDF which will also be required by fastNLO!])
+if test "x$LHPDF" = "x"; then
+  AC_MSG_ERROR([LHPDF environment variable is not set, configuration aborted!])
+else
+  AC_MSG_RESULT([Using environment variable LHPDF=$LHPDF to locate LHPDF installation])
+  AC_SUBST([LHPDFPREFIX], "$LHPDF")
+  AC_SUBST([LHPDFLIBPATH], "$LHPDF/lib")
+  AC_SUBST([LHPDFINCLUDEPATH], "$LHPDFPREFIX/include/lhpdf") fi
+AC_MSG_RESULT([Using $LHPDFPREFIX for the LHPDF installation path])
+AC_MSG_RESULT([Using $LHPDFLIBPATH for the libraries])
+AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
 
 #LHAPDF
 AC_MSG_NOTICE([Looking for LHAPDF installation ...])
@@ -77,6 +80,20 @@ AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
 AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
 AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
 AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+
+#CERNLIB
+AC_MSG_NOTICE([Looking for CERN libraries ...])
+if test "x$CERN_ROOT" = "x"; then
+  AC_MSG_ERROR([CERN_ROOT environment variable is not set!
+  CERN_ROOT/lib must be the path to -lkernlib, -lmathlib, -lpacklib])
+else
+  AC_MSG_RESULT([Using environment variable CERN_ROOT=$CERN_ROOT to locate CERNlib installation])
+  AC_SUBST([CERNLIBPATH], ["$CERN_ROOT/lib"])
+  AC_SUBST([CERNLIBS], ["-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"])
+  AC_MSG_RESULT([Using $CERN_ROOT for CERNlib installation path])
+  AC_MSG_RESULT([Using $CERNLIBPATH for the libraries])
+  AC_MSG_RESULT([Using -L$CERNLIBPATH -lmathlib -lkernlib -lpacklib for the linker flag])
+fi
 
 #ROOT
 AC_MSG_NOTICE([Looking for ROOT installation ...])
@@ -106,6 +123,7 @@ AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 
 # Output
 AC_CONFIG_FILES([Makefile
+                 author/hadron/Makefile
                  common/Makefile
                  merger/Makefile
                  user/Makefile
