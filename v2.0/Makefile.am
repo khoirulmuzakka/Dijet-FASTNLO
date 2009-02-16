@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = author/hadron common merger user tableconvert
+SUBDIRS = common merger user tableconvert author/hadron
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

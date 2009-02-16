@@ -22,36 +22,81 @@ AC_MSG_NOTICE([******************************************])
 
 #NLOJET++
 AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
-if test "x$NLOJET" = "x"; then
-  AC_MSG_WARN([NLOJET environment variable is not set, trying to find create-nlojet-user in PATH ...])
-  AC_PATH_PROG([NLOJETBINPATH],[create-nlojet-user],[:])
-  if test "$NLOJETBINPATH" = :; then
-    AC_MSG_ERROR([No path to NLOJET++ binaries found, configuration aborted!])
+AC_MSG_NOTICE([First try to find NLOJET++ via create-nlojet-user executable in system PATH ...])
+AC_PATH_PROG([NLOJETBINPATH],[create-nlojet-user],[no])
+if test "x$NLOJETBINPATH" = "xno"; then
+  AC_MSG_WARN([No path to NLOJET++ binaries found, try to use NLOJET environment variable ...])
+  if test "x$NLOJET" = "x"; then
+    AC_MSG_ERROR([NLOJET environment variable is not set, please install NLOJET++. Configuration aborted!])
   else
-    AC_SUBST([NLOJETPREFIX], "$NLOJETBINPATH/..")
-    AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
+    AC_MSG_RESULT([Using environment variable NLOJET=$NLOJET to locate NLOJET++ installation ...])
+    AC_PATH_PROG([NLOJETBINPATH],[create-nlojet-user],[no],[path=$NLOJET/bin])
+    if test "x$NLOJETBINPATH" = "xno"; then
+      AC_MSG_ERROR([NLOJET binaries not found in $NLOJET/bin, please install NLOJET++ correctly. Configuration aborted!])
+    fi
   fi
-else
-  AC_MSG_RESULT([Using environment variable NLOJET=$NLOJET to locate NLOJET++ installation])
-  AC_SUBST([NLOJETPREFIX], "$NLOJET")
-  AC_SUBST([NLOJETBINPATH], "$NLOJET/bin")
-  AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
 fi
+AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBINPATH`])
+AC_SUBST([NLOJETPREFIX], [`dirname $NLOJETBINPATH`])
+AC_SUBST([NLOJETLIBPATH], "$NLOJETPREFIX/lib")
+AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
 AC_MSG_RESULT([Using $NLOJETPREFIX for the NLOJET++ installation path])
 AC_MSG_RESULT([Using $NLOJETBINPATH for the binaries])
+AC_MSG_RESULT([Using $NLOJETLIBPATH for the libraries])
 AC_MSG_RESULT([Using $NLOJETINCLUDEPATH for the includes])
 
 #LHPDF (Attention! This is the version coming with NLOJET++ version 4!) 
 AC_MSG_NOTICE([Looking for LHPDF installation ...])
 AC_MSG_NOTICE([Attention! These are the pdf's coming with NLOJET++ version 4!])
 AC_MSG_NOTICE([Do not confuse with LHAPDF which will also be required by fastNLO!])
-if test "x$LHPDF" = "x"; then
-  AC_MSG_ERROR([LHPDF environment variable is not set, configuration aborted!])
+# Does not work yet
+AC_MSG_NOTICE([First try to find lhpdf in system libs or LD_LIBRARY_PATH ...])
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+found=no
+for i in "yes" $(echo "$LD_LIBRARY_PATH" | tr : ' '); do
+  if test "x$i" = "xyes"; then
+    LIBS="$saved_LIBS"
+    LDFLAGS="$saved_LDFLAGS"
+  else
+    LIBS="$saved_LIBS -l$i"
+    LDFLAGS="$saved_LDFLAGS -L$i"
+  fi
+#  echo "LIBS $LIBS"
+#  echo "LDFLAGS $LDFLAGS"
+  AC_CHECK_LIB([lhpdf], [lhpdf_pdf_evolveas], [found="$i"; break])
+done
+
+AC_SUBST([LHPDFPREFIX], "")
+if test "x$found" = "xyes"; then
+  AC_MSG_RESULT([Found lhpdf lib amongst system libs, assuming /usr as system install path])
+  AC_SUBST([LHPDFPREFIX], "/usr")
 else
-  AC_MSG_RESULT([Using environment variable LHPDF=$LHPDF to locate LHPDF installation])
-  AC_SUBST([LHPDFPREFIX], "$LHPDF")
-  AC_SUBST([LHPDFLIBPATH], "$LHPDF/lib")
-  AC_SUBST([LHPDFINCLUDEPATH], "$LHPDFPREFIX/include/lhpdf") fi
+  if test "x$found" = "xno"; then
+    AC_MSG_WARN([lhpdf lib not found, try to use LHPDF environment variable ...])
+    if test "x$LHPDF" = "x"; then
+      AC_MSG_ERROR([LHPDF environment variable is not set, please install LHPDF. Configuration aborted!])
+    else
+      AC_MSG_RESULT([Using environment variable LHPDF=$LHPDF to locate LHPDF installation ...])
+#      LIBS="$saved_LIBS -L$LHPDF/lib"
+#      LDFLAGS="$saved_LDFLAGS -L$LHPDF/lib"
+#      AC_CHECK_LIB([lhpdf], [lhpdf_pdf_evolveas], [found="$LHPDF/lib"])
+      found=$LHPDF/lib
+      if test "x$found" = "xno"; then
+        AC_MSG_ERROR([lhpdf lib not found in $LHPDF/lib, configuration aborted])
+      else
+        AC_SUBST([LHPDFPREFIX], "$LHPDF")
+      fi
+    fi
+  else
+    AC_MSG_RESULT([Found lhpdf lib in $found from LD_LIBRARY_PATH])
+    AC_SUBST([LHPDFPREFIX], `dirname $found`)
+  fi
+fi
+LIBS="$saved_LIBS"
+LDFLAGS="$saved_LDFLAGS"
+AC_SUBST([LHPDFLIBPATH], "$LHPDFPREFIX/lib")
+AC_SUBST([LHPDFINCLUDEPATH], "$LHPDFPREFIX/include/lhpdf")
 AC_MSG_RESULT([Using $LHPDFPREFIX for the LHPDF installation path])
 AC_MSG_RESULT([Using $LHPDFLIBPATH for the libraries])
 AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
@@ -103,15 +148,21 @@ if test "x$ROOTSYS" = "x"; then
   if test "$ROOTBINPATH" = :; then
     AC_MSG_ERROR([No path to ROOT binaries found, configuration aborted!])
   else
-    AC_SUBST([ROOTSYS], ["$ROOTBINPATH/.."])
+    AC_SUBST([ROOTBINPATH], [`dirname $ROOTBINPATH`])
+    AC_SUBST([ROOTSYS], [`dirname $ROOTBINPATH`])
+    AC_SUBST([ROOTLIBPATH], [`root-config --libdir`])
     AC_SUBST([ROOTINCLUDEPATH], [`root-config --incdir`])
   fi
 else
   AC_SUBST([ROOTSYS], ["$ROOTSYS"])	
+  AC_SUBST([ROOTBINPATH], [`$ROOTSYS/bin/root-config --bindir`])
+  AC_SUBST([ROOTLIBPATH], [`$ROOTSYS/bin/root-config --libdir`])
   AC_SUBST([ROOTINCLUDEPATH], [`$ROOTSYS/bin/root-config --incdir`])
 fi
 AC_MSG_RESULT([Using $ROOTSYS for the ROOT installation path])
+AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
 AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
 AC_CHECK_PROGS([have_rootcint],[rootcint],[:],["$ROOTSYS/bin/"])
 if test "$have_rootcint" = ":"; then
   AC_MSG_WARN([ROOTSYS environment variable set and/or root-config found, but no rootcint. Not a big problem, but library will be build without ROOT dictionary.])

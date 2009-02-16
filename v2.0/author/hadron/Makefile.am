@@ -10,8 +10,9 @@ libfnt1001midp_la_SOURCES = fnt1001midp.cc cone-et-07.cc
 libfnt1001midp_la_CXXFLAGS = -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
 
 # Linker flags to be used for the main target
-#libfnt1001midp_la_LDFLAGS = -L${HOME}/local/lib/fastnlo -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnt1001midp_la_LDFLAGS = -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+# libfastnloNlojet in pkglibdir only after make install ...
+#libfnt1001midp_la_LDFLAGS = -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+libfnt1001midp_la_LDFLAGS = ../../common/libfastnloNlojet.la -L${LHPDFLIBPATH} -llhpdf_cteq6
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
