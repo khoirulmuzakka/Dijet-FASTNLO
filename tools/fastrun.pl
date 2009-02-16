@@ -46,7 +46,7 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LOCAL", "", "0", "187", "", ".", "0001",
+    ( "LOCAL", "", "0", "433", "", ".", "0001",
       "0", "LO", "CTEQ", "", ".", "", "1" );
 getopts('b:de:f:hi:j:m:o:p:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
@@ -55,7 +55,7 @@ if ( $opt_h ) {
     print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
-    print "  -f rev          fastNLO revision to use (def.=187)\n";
+    print "  -f rev          fastNLO revision to use (def.=433)\n";
     print "  -h              Print this text\n";
     print "  -i dir          Installation directory (def.=.)\n";
     print "  -j jobnr        Job number to attach (def.=0001)\n";
@@ -71,11 +71,11 @@ if ( $opt_h ) {
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 187|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1|2]\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 433|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1|2]\n\n";
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 187|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 433|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 187|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 433|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
     exit;
 }
 
@@ -219,12 +219,16 @@ if ( $vers == 2 ) {
     $gccvers = `gcc -dumpversion`;
     chomp $gccvers;
 }
+my $gccapp = "gcc$gccvers";
+$gccapp =~ s/\.//g;
 print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
 
 $install{fastjet}[0]    = "fastjet-2.3.4";
 $install{fastjet}[1]    = "fastjet-2.3.4";
 $install{mcfm}[0]       = "mcfm-5.3";
 $install{mcfm}[1]       = "MCFM-5.3";
+$install{mcfmfix}[0]    = "mcfm-5.3-fix";
+$install{mcfmfix}[1]    = "MCFM-5.3";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
 $install{fastNLO}[1]    = "fastNLO-rev${frev}";
 if ( $vers == 1 ) { 
@@ -244,7 +248,9 @@ if ( $vers == 1 ) {
     $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
     $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
-    $install{root}[0]       = "root-5.22";
+    $install{cernlib}[0]    = "cernlib-2006_slc4_ia32_gcc4";
+    $install{cernlib}[1]    = "2006";
+    $install{root}[0]       = "root-5.18";
     $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.6.0";
     $install{lhapdf}[1]     = "lhapdf-5.6.0";
@@ -253,19 +259,39 @@ if ( $vers == 1 ) {
 }
 
 foreach my $comp ( keys %install ) {
+    if ( $comp =~ m/gcc/ ) {
+	$install{$comp}[2] = $install{$comp}[1];
+	$install{$comp}[3] = "gcc";
+    } elsif ( $comp =~ m/cern/ ) {
+	$install{$comp}[2] = "cernlib-2006_slc4_ia32_gcc4";
+	$install{$comp}[3] = "cernlib-2006_slc4_ia32_gcc4-v2";
+    } elsif ( $comp =~ m/fix/ ) {
+	$install{$comp}[2] = "";
+	$install{$comp}[3] = "";
+    } else {
+	$install{$comp}[2] = $install{$comp}[0]."-$gccapp";
+	if ( $vers == 1 ) {
+	    $install{$comp}[3] = $install{$comp}[0]."-v1";
+	} else {
+	    $install{$comp}[3] = $install{$comp}[0]."-v2";
+	}
+    }
     $install{$comp}[0] .=".tar.gz";
-    $install{$comp}[2] = $install{$comp}[1]."-$gccvers";
-    $install{$comp}[3] = $install{$comp}[1];"
+    if ( $verb ) {
+	print "fastrun.pl: Archive name: $install{$comp}[0]\n";
+	print "fastrun.pl: Unpack dir  : $install{$comp}[1]\n";
+	print "fastrun.pl: Install dir : $install{$comp}[2]\n";
+	print "fastrun.pl: Final link  : $install{$comp}[3]\n";
 
+    }
     unless ( $mode == 2 || $mode == 3 ||
-	     -d "$idir/$install{$comp}[0]" ||
-	     -f "$sdir/$install{$comp}[1]" ||
+	     -d "$idir/$install{$comp}[2]" ||
+	     -f "$sdir/$install{$comp}[0]" ||
 	     ( $comp eq "lhapdf" && $pdf eq "CTEQ" ) ) {
-	die "fastrun.pl: Archive $install{$comp}[1] does not exist, ".
+	die "fastrun.pl: Archive $install{$comp}[0] does not exist, ".
 	    "aborted!\n";
     }
 }
-exit 0;
 
 #
 # Print system info
@@ -301,16 +327,16 @@ if ( $verb ) {
 if ( $mode == 0 || $mode == 1 ) {
     if ( $vers == 1 ) {
 # Standard environment to use system compiler still
-	unless ( -e "$idir/$install{gcccore}[0]" ) {
+	unless ( -e "$idir/$install{gcccore}[2]" ) {
 	    $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
-	    print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[1]: $date\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[1]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[1] ".
+	    print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[0]: $date\n";
+	    my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[0] ".
 			     "in $idir failed: $ret, aborted!\n";}
-	    if ( -l "$idir/gcc" ) {system("rm -f $idir/gcc");}
-	    system("ln -s $install{gcccore}[0] $idir/gcc");
-	    chdir "$idir/gcc";
+	    if ( -l "$idir/$install{gcccore}[3]" ) {system("rm -f $idir/$install{gcccore}[3]");}
+	    system("ln -s $install{gcccore}[2] $idir/$install{gcccore}[3]");
+	    chdir "$idir/$install{gcccore}[3]";
 	    my $cmd = "./configure ".
 		"--prefix=$aidir/gcc ".
 		"--bindir=$aidir/bin ".
@@ -367,36 +393,39 @@ if ( $mode == 0 || $mode == 1 ) {
     }	
 
 #
-# 1) Install CERN libraries (V1 only) resp. ROOT (V2)
+# 1) Install CERN libraries and ROOT (V2 only)
 #
-    if ( $vers == 1 ) {
-	unless ( -e "$idir/$install{cernlib}[0]" ) {
+    unless ( -e "$idir/$install{cernlib}[2]" ) {
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
+	my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[0] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	$ret = system("mv $install{cernlib}[1] $idir/$install{cernlib}[2]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{cernlib}[1] to ".
+			 "$idir/$install{cernlib}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{cernlib}[3]" ) {system("rm -f $idir/$install{cernlib}[3]");}
+	system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
+    }
+    if ( $vers == 2 ) {
+	unless ( -e "$idir/$install{root}[2]" ) {
 	    $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
-	    print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	    my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[1]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[1] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    if ( -l "$idir/cernlib" ) {system("rm -f $idir/cernlib");}
-	    system("ln -s $install{cernlib}[0] $idir/cernlib");
-	}
-    } else {
-	unless ( -e "$idir/$install{root}[0]" ) {
-	    $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    print "\nfastrun.pl: Installing ROOT from $install{root}[1]: $date\n";
-	    print "\nfastrun.pl: Unpacking $install{root}[1] ...\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{root}[1]");
+	    print "\nfastrun.pl: Installing ROOT from $install{root}[0]: $date\n";
+	    print "\nfastrun.pl: Unpacking $install{root}[0] ...\n";
+	    my $ret = system("tar xz -C $idir -f $sdir/$install{root}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
-			     "$sdir/$install{root}[1] ".
+			     "$sdir/$install{root}[0] ".
 			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{root}[2] $idir/$install{root}[0]");
+	    $ret = system("mv $install{root}[1] $idir/$install{root}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{root}[2] to ".
-			     "$idir/$install{root}[0]: $ret, aborted!\n";}
-	    if ( -l "$idir/root" ) {system("rm -f $idir/root");}
-	    system("ln -s $install{root}[0] $idir/root");
-	    chdir "$idir/$install{root}[0]";
+			     "$install{root}[1] to ".
+			     "$idir/$install{root}[2]: $ret, aborted!\n";}
+	    if ( -l "$idir/$install{root}[3]" ) {system("rm -f $idir/$install{root}[3]");}
+	    system("ln -s $install{root}[2] $idir/$install{cernlib}[3]");
+	    chdir "$idir/$install{root}[2]";
 	    print "\nfastrun.pl: Configuring ROOT ...\n";
 	    my $cmd = "./configure --enable-roofit --prefix=`pwd` --etcdir=`pwd`/etc --with-cxx=\"gcc -Wall\"\n";
 	    if ( $verb ) {print "$cmd"};
@@ -417,21 +446,22 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 2) Install lhapdf
 #
-    unless ( -e "$idir/$install{lhapdf}[0]" || $pdf eq "CTEQ" ) {
+    unless ( -e "$idir/$install{lhapdf}[2]" ||
+	     ( $vers == 1 && $pdf eq "CTEQ") ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{lhapdf}[1] ...\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[1] ".
+	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[0]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[0] ".
 			 "in $idir failed: $ret, aborted!\n";}
-	$ret = system("mv $install{lhapdf}[2] $idir/$install{lhapdf}[0]");
+	$ret = system("mv $install{lhapdf}[1] $idir/$install{lhapdf}[2]");
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{lhapdf}[2] to ".
-			 "$idir/$install{root}[0]: $ret, aborted!\n";}
-	if ( -l "$idir/lhapdf" ) {system("rm -f $idir/lhapdf");}
-	system("ln -s $install{lhapdf}[0] $idir/lhapdf");
-	chdir "$idir/$install{lhapdf}[0]";
+			 "$install{lhapdf}[1] to ".
+			 "$idir/$install{lhapdf}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{lhapdf}[3]" ) {system("rm -f $idir/$install{lhapdf}[3]");}
+	system("ln -s $install{lhapdf}[2] $idir/$install{lhapdf}[3]");
+	chdir "$idir/$install{lhapdf}[2]";
 	print "\nfastrun.pl: Configuring lhapdf ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 # Avoid Python Murks in LHAPDF >= 5.4.0
@@ -455,21 +485,21 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 3) Install fastjet
 #
-    unless ( -e "$idir/$install{fastjet}[0]" ) {
+    unless ( -e "$idir/$install{fastjet}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing fastjet from $install{fastjet}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{fastjet}[1] ...\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[1] ".
+	print "\nfastrun.pl: Installing fastjet from $install{fastjet}[0]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
 			 "in $idir failed: $ret, aborted!\n";}
-	$ret = system("mv $install{fastjet}[2] $idir/$install{fastjet}[0]");
+	$ret = system("mv $install{fastjet}[1] $idir/$install{fastjet}[2]");
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{fastjet}[2] to ".
-			 "$idir/$install{fastjet}[0]: $ret, aborted!\n";}
-	if ( -l "$idir/fastjet" ) {system("rm -f $idir/fastjet");}
-	system("ln -s $install{fastjet}[0] $idir/fastjet");
-	chdir "$idir/$install{fastjet}[0]";
+			 "$install{fastjet}[1] to ".
+			 "$idir/$install{fastjet}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{fastjet}[3]" ) {system("rm -f $idir/$install{fastjet}[3]");}
+	system("ln -s $install{fastjet}[2] $idir/$install{fastjet}[3]");
+	chdir "$idir/$install{fastjet}[2]";
 	print "\nfastrun.pl: Configuring fastjet ...\n";
 	$ret = system("./configure --enable-shared --prefix=`pwd` --bindir=$aidir/bin");
 	if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
@@ -485,28 +515,34 @@ if ( $mode == 0 || $mode == 1 ) {
 	chdir "$pwdir";
     }
 
-
 #
 # 4) Install Nlojet++
 #
-# NLOJet++ Version 2
-    unless ( -e "$idir/$install{nlojet}[0]" ) {
+    unless ( -e "$idir/$install{nlojet}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{nlojet}[1] ...\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[1] ".
+	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[0]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
 			 "in $idir failed: $ret, aborted!\n";}
-	print "\nfastrun.pl: Unpacking fix for $install{nlojet}[1] ...\n";
-	$ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[1] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	if ( -l "$idir/nlojet" ) {system("rm -f $idir/nlojet");}
-	system("ln -s  $install{nlojet}[0] $idir/nlojet");
+	if ( $vers == 1) {
+	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+	    $ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
+			     "in $idir failed: $ret, aborted!\n";}
+	}
+	$ret = system("mv $install{nlojet}[1] $idir/$install{nlojet}[2]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{nlojet}[1] to ".
+			 "$idir/$install{nlojet}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{nlojet}[3]" ) {system("rm -f $idir/$install{nlojet}[3]");}
+	system("ln -s $install{nlojet}[2] $idir/$install{nlojet}[3]");
+
 	print "0: $install{nlojet}[0]\n";
 	print "1: $install{nlojet}[1]\n";
 	print "2: $install{nlojet}[2]\n";
+
 	chdir "$idir/$install{nlojet}[2]";
 	print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
@@ -520,54 +556,41 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
 	chdir "$pwdir";
     }
-# NLOJet++ Version 4
-#    unless ( -e "$idir/$install{nlojet4}[0]" ) {
-#	$date = `date +%d%m%Y_%H%M%S`;
-#	chomp $date;
-#	print "\nfastrun.pl: Installing Nlojet++ version 4 from $install{nlojet4}[1]: $date\n";
-#	print "\nfastrun.pl: Unpacking $install{nlojet4}[1] ...\n";
-#	my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet4}[1]");
-#	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet4}[1] ".
-#			 "in $idir failed: $ret, aborted!\n";}
-#	if ( -l "$idir/nlojet4" ) {system("rm -f $idir/nlojet4");}
-#	system("ln -s  $install{nlojet4}[0] $idir/nlojet4");
-#	chdir "$idir/$install{nlojet4}[0]";
-#	print "\nfastrun.pl: Configuring Nlojet++ version 4 ...\n";
-##	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-#	$ret = system("./configure --prefix=`pwd`");
-#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 configure step, aborted!\n";}
-#	print "\nfastrun.pl: Making Nlojet++ version 4 ...\n";
-#	$ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make step, aborted!\n";}
-#	print "\nfastrun.pl: Make install for Nlojet++ version 4 ...\n";
-#	$ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-#	if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ version 4 make install step, aborted!\n";}
-#	chdir "$pwdir";
-#    }
 
 #
 # 5) Install mcfm
 #
 # CERNLIB var already needed for mcfm    
-    print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm:\n";
+    print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm to:\n";
     my $cwdir = getcwd();
-    $ENV{CERNLIB}  = "$cwdir/cernlib"; 
-    unless ( -e "$idir/$install{mcfm}[0]" ) {
+    if ( $vers == 1 ) {
+	$ENV{CERNLIB} = "$cwdir/$install{cernlib}[2]"; 
+    } else {
+	$ENV{CERNLIB} = "$cwdir/$install{cernlib}[2]/slc4_ia32_gcc4/lib"; 
+    }
+    print "\nfastrun.pl: $ENV{CERNLIB}\n";
+    unless ( -e "$idir/$install{mcfm}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing mcfm from $install{mcfm}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{mcfm}[1] ...\n";
-	system ("mkdir $idir/$install{mcfm}[0]");
-	my $ret = system("tar xz -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfm}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfm}[1] ".
-			 "in $idir/$install{mcfm}[0] failed: $ret, aborted!\n";}
-	print "\nfastrun.pl: Unpacking fix for $install{mcfm}[1] ...\n";
-	$ret = system("tar xzv -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfmfix}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfmfix}[1] ".
-			 "in $idir/$install{mcfm}[0] failed: $ret, aborted!\n";}
-	if ( -l "$idir/mcfm" ) {system("rm -f $idir/mcfm");}
-	system("ln -s  $install{mcfm}[0] $idir/mcfm");
-	chdir "$idir/$install{mcfm}[0]";
+	print "\nfastrun.pl: Installing mcfm from $install{mcfm}[0]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{mcfm}[0] ...\n";
+# Old mcfm version 5
+#	system ("mkdir $idir/$install{mcfm}[0]");
+#	my $ret = system("tar xz -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfm}[1]");
+	my $ret = system("tar xz -C $idir -f $sdir/$install{mcfm}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfm}[0] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	print "\nfastrun.pl: Unpacking fix for $install{mcfm}[0] ...\n";
+	$ret = system("tar xzv -C $idir -f $sdir/$install{mcfmfix}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfmfix}[0] ".
+			 "in $idir failed: $ret, aborted!\n";}
+	$ret = system("mv $install{mcfm}[1] $idir/$install{mcfm}[2]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{mcfm}[1] to ".
+			 "$idir/$install{mcfm}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{mcfm}[3]" ) {system("rm -f $idir/$install{mcfm}[3]");}
+	system("ln -s $install{mcfm}[2] $idir/$install{mcfm}[3]");
+	chdir "$idir/$install{mcfm}[2]";
 	print "\nfastrun.pl: Configuring mcfm ...\n";
 	$ret = system("./Install");
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
@@ -575,23 +598,40 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
         chdir "..";
     }
-    exit 0;
 
 #
 # 6) Install fastNLO
 #
-    unless ( -e "$idir/$install{fastNLO}[0]" ) {
+    unless ( -e "$idir/$install{fastNLO}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[1]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{fastNLO}[1] ...\n";
-	my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[1]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[1] ".
+	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[0]: $date\n";
+	print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
+	my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
 			 "in $idir failed: $ret, aborted!\n";}
-	if ( -l "$idir/fastNLO" ) {system("rm -f $idir/fastNLO");}
-	system("ln -s $install{fastNLO}[0] $idir/fastNLO");
+	$ret = system("mv $install{fastNLO}[1] $idir/$install{fastNLO}[2]");
+	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+			 "$install{fastNLO}[1] to ".
+			 "$idir/$install{fastNLO}[2]: $ret, aborted!\n";}
+	if ( -l "$idir/$install{fastNLO}[3]" ) {system("rm -f $idir/$install{fastNLO}[3]");}
+	system("ln -s $install{fastNLO}[2] $idir/$install{fastNLO}[3]");
+	if ( $vers == 2 ) {
+	    chdir "$idir/$install{fastNLO}[2]/trunk/v2.0";
+	    my $ret = system("autoreconf --install");
+	    if ( $ret ) {die "fastrun.pl: autoreconf of fastNLO V2 failed: ".
+			     "$ret, aborted!\n";}
+	    $ret = system("./configure");
+	    if ( $ret ) {die "fastrun.pl: configure of fastNLO V2 failed: ".
+			     "$ret, aborted!\n";}
+	    $ret = system("make install");
+	    if ( $ret ) {die "fastrun.pl: make install of fastNLO V2 failed: ".
+			     "$ret, aborted!\n";}
+	}
     }
 }
+exit 0;
+
 
 #
 # Set environment that is expected to have been set up and
