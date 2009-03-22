@@ -252,8 +252,8 @@ if ( $vers == 1 ) {
     $install{cernlib}[1]    = "2006";
     $install{root}[0]       = "root-5.18";
     $install{root}[1]       = "root";
-    $install{lhapdf}[0]     = "lhapdf-5.6.0";
-    $install{lhapdf}[1]     = "lhapdf-5.6.0";
+    $install{lhapdf}[0]     = "lhapdf-5.7.0";
+    $install{lhapdf}[1]     = "lhapdf-5.7.0";
     $install{nlojet}[0]     = "nlojet++-4.0.1";
     $install{nlojet}[1]     = "nlojet++-4.0.1";
 }
