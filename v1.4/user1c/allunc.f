@@ -53,9 +53,10 @@ c --- Parse command line
             WRITE(*,*)"  Scenario name, def. = fnt2003"
             WRITE(*,*)"  Table path, def. = ."
             WRITE(*,*)"     Table names have to be of style:"
-            WRITE(*,*)"     \"scenario\".tab"
-            WRITE(*,*)"     \"scenario\"ref.tab"
-            WRITE(*,*)"     \"scenario\"-hhc-nlo-2jet_nnnn.tab"
+C --- Use '...' with \", otherwise gfortran complains 
+            WRITE(*,*)'     \"scenario\".tab'
+            WRITE(*,*)'     \"scenario\"ref.tab'
+            WRITE(*,*)'     \"scenario\"-hhc-nlo-2jet_nnnn.tab'
             WRITE(*,*)"  Last LO stat. table number, def. = -999"
             WRITE(*,*)"  Last NLO stat. table number, def. = -999"
             WRITE(*,*)"  HBOOK output file, def. = scenario.hbk"
