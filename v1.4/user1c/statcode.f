@@ -11,7 +11,7 @@ c      DOUBLE PRECISION XSECT(900,3)
       CHARACTER*4 NO
       
 ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
-      INTEGER BORNN,NLON,NTAB,NCOUNT
+      INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
       INTEGER I,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST
       INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR)
@@ -275,27 +275,27 @@ ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
                   IHIST = IORD*1000000 + ISCL*100000 +
      >                 ISUB*10000 + IRAP*100
                   CALL HFILL(IHIST + 10,
-     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
      >                 SIGMA(IPT,IRAP,ISCL,IORD)),
      >                 0.,REAL(WTAB(I)))
                   write(*,*)"ipt,irap,iscl,iord",
      >                 ipt,irap,iscl,iord
-                  write(*,*)"ncount,cbin",
-     >                 ncount,CBIN(IPT,IRAP,ISCL,IORD,NCOUNT)
+                  write(*,*)"icount,cbin",
+     >                 icount,CBIN(IPT,IRAP,ISCL,IORD,ICOUNT)
                   CALL HFILL(IHIST + 2*IPT + 10,
-     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
      >                 SIGMA(IPT,IRAP,ISCL,IORD)),
      >                 0.,REAL(WTAB(I)))
                   CALL HFILL(IHIST + 11,
-     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) /
      >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
      >                 MINE(IPT,IRAP,ISCL,IORD))),
      >                 0.,REAL(WTAB(I)))
                   CALL HFILL(IHIST + 2*IPT + 11,
-     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
+     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) /
      >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
      >                 MINE(IPT,IRAP,ISCL,IORD))),
