@@ -1,4 +1,4 @@
-      SUBROUTINE STATCODE(BORNN,BORNNAME,NLON,NLONAME,HISTFILE)
+      SUBROUTINE STATCODE(BORNN,BORNNAME,NLON,NLONAME)
       
       IMPLICIT NONE
 c - Attention!!! - this must be declared consistent with its 
@@ -6,7 +6,7 @@ c                  definition in the commonblock!!!!!
 c      DOUBLE PRECISION XSECT(900,3) 
       INCLUDE 'fnx9999.inc'
       
-      CHARACTER*(*) BORNNAME,NLONAME,HISTFILE
+      CHARACTER*(*) BORNNAME,NLONAME
       CHARACTER*255 FILEBASE,FILENAME,LOFILE,NLOFILE
       CHARACTER*4 NO
       
@@ -185,7 +185,7 @@ c - Take LO file with 1D9 events as weight 1
                ENDDO
             ENDDO
          ENDDO
-         WRITE(*,*)"STATERR: Total weight:",WTAB(NCOUNT)
+         WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
  10   ENDDO
 ckr      ENDDO
 
@@ -270,7 +270,7 @@ Comment:      >              SIGMA(IPT,IRAP,ISCL,IORD)
      >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,ISCL,IORD) - 
      >              MINE(IPT,IRAP,ISCL,IORD)) / 
      >              MEAN(IPT,IRAP,ISCL,IORD))))
-               DO I=1,NCOUNT
+               DO ICOUNT=1,NCOUNT
 ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
                   IHIST = IORD*1000000 + ISCL*100000 +
      >                 ISUB*10000 + IRAP*100
@@ -279,6 +279,10 @@ ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
      >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
      >                 SIGMA(IPT,IRAP,ISCL,IORD)),
      >                 0.,REAL(WTAB(I)))
+                  write(*,*)"ipt,irap,iscl,iord",
+     >                 ipt,irap,iscl,iord
+                  write(*,*)"ncount,cbin",
+     >                 ncount,CBIN(IPT,IRAP,ISCL,IORD,NCOUNT)
                   CALL HFILL(IHIST + 2*IPT + 10,
      >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
@@ -298,19 +302,18 @@ ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
      >                 0.,REAL(WTAB(I)))
                ENDDO
             ENDDO
+            CALL HPAKE(IHIST,SERR(1,IRAP))
          ENDDO
-         CALL HPAKE(IHIST,SERR(1,IRAP))
       ENDDO
-
+      
       ENDDO
 
  900  FORMAT (I4,E16.5,"  in %:",3F10.3)
  901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2I5)
       
       WRITE(*,*)"\n **********************************************"
-      WRITE(*,*)"STATERR: Job finished, storing histos in file: ",
-     >     HISTFILE(1:LENOCC(HISTFILE))
-      WRITE(*,*)"STATERR: All scales used for histo filling."
+      WRITE(*,*)"STATERR: Job finished, "//
+     >     "all scales used for histo filling!"
       WRITE(*,*)"**********************************************"
       
       END

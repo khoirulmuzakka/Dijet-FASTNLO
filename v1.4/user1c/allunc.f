@@ -48,23 +48,25 @@ c --- Parse command line
       ELSE
          CALL GETARG(1,SCENARIO)
          IF (SCENARIO(1:LENOCC(SCENARIO)).EQ."-h") THEN
-            WRITE(*,*)" "
-            WRITE(*,*)"Usage: ./allunc [arguments]"
-            WRITE(*,*)"  Scenario name, def. = fnt2003"
-            WRITE(*,*)"  Table path, def. = ."
-            WRITE(*,*)"     Table names have to be of style:"
+            WRITE(*,*)' '
+            WRITE(*,*)'Usage: ./allunc [arguments]'
+            WRITE(*,*)'  Scenario name, def. = fnt2003'
+            WRITE(*,*)'  Table path, def. = .'
+            WRITE(*,*)'     Table names have to be of style:'
 C --- Use '...' with \", otherwise gfortran complains 
             WRITE(*,*)'     \"scenario\".tab'
             WRITE(*,*)'     \"scenario\"ref.tab'
+            WRITE(*,*)'     The statistics tables named e.g.:'
             WRITE(*,*)'     \"scenario\"-hhc-nlo-2jet_nnnn.tab'
-            WRITE(*,*)"  Last LO stat. table number, def. = -999"
-            WRITE(*,*)"  Last NLO stat. table number, def. = -999"
-            WRITE(*,*)"  HBOOK output file, def. = scenario.hbk"
-            WRITE(*,*)"  PDF set, def. = cteq65.LHgrid"
-            WRITE(*,*)"  PDF path, def. = $(LHAPDF)/"//
-     >           "../share/lhapdf/PDFsets"
-            WRITE(*,*)"  alpha_s calc., def. from PDF set"
-            WRITE(*,*)" "
+            WRITE(*,*)'     have to be in the subdir. \"stat\".'
+            WRITE(*,*)'  Last LO stat. table number, def. = -999'
+            WRITE(*,*)'  Last NLO stat. table number, def. = -999'
+            WRITE(*,*)'  HBOOK output file, def. = scenario.hbk'
+            WRITE(*,*)'  PDF set, def. = cteq65.LHgrid'
+            WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
+     >           '../share/lhapdf/PDFsets'
+            WRITE(*,*)'  alpha_s calc., def. from PDF set'
+            WRITE(*,*)' '
             STOP
          ENDIF
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
@@ -186,9 +188,7 @@ c - Write out some info on best fit member
       WRITE(*,*) "ALLUNC: The lambda_4 value for member 0 is",QLAM4
       WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
       
-c - Check table existence
-ckr      LPDF  = NPDF.GT.1
-      LPDF  = .TRUE.
+c - Check primary table existence
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
       WRITE(*,*)"ALLUNC: Checking primary table: "//
      >     FILENAME(1:LENOCC(FILENAME))
@@ -200,6 +200,10 @@ ckr      LPDF  = NPDF.GT.1
       ELSE
          CLOSE(2)
       ENDIF
+
+c - Check uncertainties to derive 
+ckr      LPDF  = .TRUE.
+      LPDF  = NPDF.GT.4
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       LALG  = .TRUE.
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
@@ -265,7 +269,8 @@ c   and reset result arrays
          ENDDO
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
-         IF (NPDF.GT.1) THEN
+ckr         IF (NPDF.GT.1) THEN
+         IF (LPDF) THEN
             DO J=1,NPDF
                CALL INITPDF(J)
                CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
@@ -292,7 +297,8 @@ c - For all bins/subproc/orders: Add negative/positive variations
 
 c - Take square-root of sum of squares
          DO L1=1,NBINTOT
-            IF (NPDF.GT.1) THEN
+ckr            IF (NPDF.GT.1) THEN
+            IF (LPDF) THEN
                DO L2=1,(NSUBPROC+1)
                   DO L3=1,NORD
                      RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
@@ -331,12 +337,15 @@ c - Use statistics tables
 c - Call statistical error-code for scenario
       IF (LSTAT) THEN
          WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties"
-         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/"//
+ckr         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/"//
+ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-2jet_"
+ckr         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/"//
+ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
+         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-2jet_"
-         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/"//
+         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
-ckr         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME,HISTFILE)
-         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME,"stat.hbk")
+         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME)
       ENDIF
 
 
@@ -491,6 +500,8 @@ c - Open & book
                   DO IRAP=1, NRAPIDITY
                      IHIST = IORD*1000000 + ISCALE*100000 +
      >                    ISUB*10000 + IRAP*100
+ckr                     write(*,*)"ALL: iord,isc,isub,irap,ihist",
+ckr     >                    iord,iscale,isub,irap,ihist
                      DO J=1,(NPT(IRAP)+1)
                         PT(J) = REAL(PTBIN(IRAP,J))
                      ENDDO
@@ -508,19 +519,24 @@ c - Open & book
      >                    CSTRNG(1:LENOCC(CSTRNG)),
      >                    NPT(IRAP),PT,0)
 ckr                     CALL HBARX(IHIST)
-                     CSTRNG = CBASE1
-                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                    "_dPDF_low"
-                     CALL HBOOKB(IHIST+1,
-     >                    CSTRNG(1:LENOCC(CSTRNG)),
-     >                    NPT(IRAP),PT,0)
-                     CSTRNG = CBASE1
-                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                    "_dPDF_up"
-                     CALL HBOOKB(IHIST+2,
-     >                    CSTRNG(1:LENOCC(CSTRNG)),
-     >                    NPT(IRAP),PT,0)
-                     NHIST = NHIST+3
+                     NHIST = NHIST+1
+ckr                     write(*,*)"1. Booked histo #",nhist
+                     IF (LPDF) THEN
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dPDF_low"
+                        CALL HBOOKB(IHIST+1,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dPDF_up"
+                        CALL HBOOKB(IHIST+2,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+2
+ckr                        write(*,*)"2. Booked histo #",nhist
+                     ENDIF
                      IF (LSTAT.AND.IORD.LE.2.AND.
      >                    ISCALE.EQ.3.AND.ISUB.EQ.0) THEN
                         CSTRNG = CBASE1
@@ -536,6 +552,7 @@ ckr                     CALL HBARX(IHIST)
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
+ckr                        write(*,*)"3. Booked histo #",nhist
                      ENDIF
                      IF (LALG.AND.IORD.LE.2.AND.
      >                    ISCALE.EQ.3) THEN
@@ -546,6 +563,7 @@ ckr                     CALL HBARX(IHIST)
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
+ckr                        write(*,*)"4. Booked histo #",nhist
                      ENDIF
                      IF (LSTAT.AND.ISUB.EQ.0) THEN
                         IHIST = IORD*1000000 + ISCALE*100000 +
@@ -570,6 +588,8 @@ ckr                     CALL HBARX(IHIST)
                         CALL HBOOK1(IHIST + 11,
      >                       CTMP(1:LENOCC(CTMP)),
      >                       31,-1.5,1.5,0)
+                        NHIST = NHIST+2
+ckr                        write(*,*)"5. Booked histo #",nhist
                         DO IPT=1,NPT(IRAP)
                            CSTRNG = CBASE1(1:LENOCC(CBASE1))
                            WRITE(CTMP,'(I1)'),IORD
@@ -594,10 +614,9 @@ ckr                     CALL HBARX(IHIST)
                            CALL HBOOK1(IHIST + 2*IPT + 11,
      >                          CTMP(1:LENOCC(CTMP)),
      >                          31,-1.5,1.5,0)
-ckr                     write(*,*)"i,j,k,ihist",iord,irap,ipt,ihist
                            NHIST = NHIST+2
+ckr                           write(*,*)"6. Booked histo #",nhist
                         ENDDO
-                        NHIST = NHIST+2
                      ENDIF
                   ENDDO
                ENDDO
