@@ -12,7 +12,7 @@ c      DOUBLE PRECISION XSECT(900,3)
       
 ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
       INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
-      INTEGER I,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
+      INTEGER ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST
       INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR)
       INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR)
@@ -30,6 +30,8 @@ ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
       DOUBLE PRECISION MAXE(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       DOUBLE PRECISION MEAN(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       DOUBLE PRECISION SIGMA(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
+      DOUBLE PRECISION NEFF(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
+      DOUBLE PRECISION MEANE(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
 
       DOUBLE PRECISION MUR(NSCALEVAR),MUF(NSCALEVAR)
       DOUBLE PRECISION BWGT,NEVTS,VAL
@@ -72,6 +74,8 @@ c - Loop initialization
                   MAXE(IPT,IRAP,ISCL,IORD)  = -1D99
                   MEAN(IPT,IRAP,ISCL,IORD)  =  0D0
                   SIGMA(IPT,IRAP,ISCL,IORD) =  0D0
+                  NEFF(IPT,IRAP,ISCL,IORD)  =  0D0
+                  MEANE(IPT,IRAP,ISCL,IORD) =  0D0
                ENDDO
             ENDDO
          ENDDO
@@ -103,7 +107,7 @@ c - NLO
       ENDIF
       NCOUNT = 0
 
-      DO I=0,NTAB
+      DO ITAB=0,NTAB
          WRITE(*,*) " ###############################################"
          IF (IORD.EQ.1) THEN
             WRITE(*,*)
@@ -113,7 +117,7 @@ c - NLO
      >           " ############  NEXT NLO TABLE ##################"
          ENDIF
          WRITE(*,*) " ###############################################"
-         WRITE(NO,'(I4.4)'),I
+         WRITE(NO,'(I4.4)'),ITAB
          FILENAME = FILEBASE(1:LENOCC(FILEBASE))//NO//".tab"
          WRITE(*,*)"Filename for order",IORD,":",FILENAME
          OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
@@ -133,9 +137,9 @@ ckr            CYCLE
 c - Loop over scales
          DO ISCL=1,NSCALEVAR
             CALL FX9999CC(FILENAME,MUR(ISCL),MUF(ISCL),0,XSECT)
-c - Take LO file with 1D9 events as weight 1 
+c - Take LO/NLO file with 1D9/1D8 events as weight 1 
             WTAB(NCOUNT) = NEVTS(IORD)*BWGT
-            IF (I.EQ.0 .AND. ISCL.EQ.1) THEN 
+            IF (ITAB.EQ.0 .AND. ISCL.EQ.1) THEN 
                NBINS = NMAX(1)
                WRITE(*,*)"STATERR: This file has ",NBINS," bins"
                IF (NBINS.GT.NBINTOTMAX) THEN
@@ -161,6 +165,10 @@ c - Take LO file with 1D9 events as weight 1
      >                    IORD
                      STOP
                   ENDIF
+                  write(*,*)"FIRST: iord,iscl,irap,ipt"
+     >                 ,iord,iscl,irap,ipt
+                  write(*,*)"FIRST: ncount,cbin,mean,sigma",ncount,
+     >                 val
                   CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) = VAL
                   WGT(IPT,IRAP,ISCL,IORD) =
      >                 WGT(IPT,IRAP,ISCL,IORD) +
@@ -176,17 +184,17 @@ c - Take LO file with 1D9 events as weight 1
      >                 VAL*VAL * WTAB(NCOUNT)
                   IF (VAL.LT.MINE(IPT,IRAP,ISCL,IORD)) THEN
                      MINE(IPT,IRAP,ISCL,IORD) = VAL
-                     NJMIN(IPT,IRAP,ISCL) = I
+                     NJMIN(IPT,IRAP,ISCL) = ITAB
                   ENDIF
                   IF (VAL.GT.MAXE(IPT,IRAP,ISCL,IORD)) THEN
                      MAXE(IPT,IRAP,ISCL,IORD) = VAL
-                     NJMAX(IPT,IRAP,ISCL) = I
+                     NJMAX(IPT,IRAP,ISCL) = ITAB
                   ENDIF
                ENDDO
             ENDDO
          ENDDO
-         WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
- 10   ENDDO
+ 10      WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
+      ENDDO
 ckr      ENDDO
 
 c - Extract mean values and standard deviations
@@ -211,10 +219,6 @@ ckr               write(*,*)"ipt,irap,iscl,iord",ipt,irap,iscl,iord
                MEAN(IPT,IRAP,ISCL,IORD) =
      >              WGTX(IPT,IRAP,ISCL,IORD) /
      >              WGT(IPT,IRAP,ISCL,IORD)
-ckr               write(*,*)"wgtx,wgt,mean",
-ckr     >              WGTX(IPT,IRAP,ISCL,IORD),
-ckr     >              WGT(IPT,IRAP,ISCL,IORD),
-ckr     >              MEAN(IPT,IRAP,ISCL,IORD)
                SIGMA(IPT,IRAP,ISCL,IORD) =
      >              (WGTX2(IPT,IRAP,ISCL,IORD) / 
      >              WGT(IPT,IRAP,ISCL,IORD) -
@@ -222,10 +226,16 @@ ckr     >              MEAN(IPT,IRAP,ISCL,IORD)
      >              MEAN(IPT,IRAP,ISCL,IORD)) /
      >              (1D0 - WGT2(IPT,IRAP,ISCL,IORD) /
      >              WGT(IPT,IRAP,ISCL,IORD)/WGT(IPT,IRAP,ISCL,IORD))
+               NEFF(IPT,IRAP,ISCL,IORD) =
+     >              WGT(IPT,IRAP,ISCL,IORD)*WGT(IPT,IRAP,ISCL,IORD) /
+     >              WGT2(IPT,IRAP,ISCL,IORD)
                SIGMA(IPT,IRAP,ISCL,IORD) =
-     >              SQRT(SIGMA(IPT,IRAP,ISCL,IORD)/NCOUNT)
+     >              SQRT(SIGMA(IPT,IRAP,ISCL,IORD))
+               MEANE(IPT,IRAP,ISCL,IORD) =
+     >              SIGMA(IPT,IRAP,ISCL,IORD)/
+     >              SQRT(NEFF(IPT,IRAP,ISCL,IORD))
                WRITE(*,901) J,MEAN(IPT,IRAP,ISCL,IORD),
-     >              100D0*SIGMA(IPT,IRAP,ISCL,IORD) /
+     >              100D0*MEANE(IPT,IRAP,ISCL,IORD) /
      >              MEAN(IPT,IRAP,ISCL,IORD),
      >              100D0*(MINE(IPT,IRAP,ISCL,IORD) -
      >              MEAN(IPT,IRAP,ISCL,IORD)) /
@@ -250,56 +260,51 @@ c - Only for sum of subprocesses
 ckr If histogram with central result (IHIST+0) filled, derive stat. unc.
 ckr rel. to MEAN and then use central result. If not, just use SIGMA. 
                IF (HI(IHIST,IPT).GT.0.) THEN
-                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,ISCL,IORD) /
+                  SERR(IPT,IRAP) = REAL(MEANE(IPT,IRAP,ISCL,IORD) /
      >                 MEAN(IPT,IRAP,ISCL,IORD))*HI(IHIST,IPT)
                ELSE
-                  SERR(IPT,IRAP) = REAL(SIGMA(IPT,IRAP,ISCL,IORD))
+                  SERR(IPT,IRAP) = REAL(MEANE(IPT,IRAP,ISCL,IORD))
                ENDIF
-Comment:                write(*,*)"ihist+3,pt,input",
-Comment:      >              IHIST+3,PT(IPT,IRAP),
-Comment:      >              MAX(0.,REAL(100D0*SIGMA(IPT,IRAP,ISCL,IORD) / 
-Comment:      >              MEAN(IPT,IRAP,ISCL,IORD)))
-Comment:                write(*,*)"ipt,irap,iscl,iord,mean,sigma",
-Comment:      >              ipt,irap,iscl,iord,
-Comment:      >              MEAN(IPT,IRAP,ISCL,IORD),
-Comment:      >              SIGMA(IPT,IRAP,ISCL,IORD)
                CALL HFILL(IHIST+3,PT(IPT,IRAP),0.,
-     >              MAX(0.,REAL(100D0*SIGMA(IPT,IRAP,ISCL,IORD) / 
+     >              MAX(0.,REAL(100D0*MEANE(IPT,IRAP,ISCL,IORD) / 
      >              MEAN(IPT,IRAP,ISCL,IORD))))
                CALL HFILL(IHIST+4,PT(IPT,IRAP),0.,
      >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,ISCL,IORD) - 
      >              MINE(IPT,IRAP,ISCL,IORD)) / 
      >              MEAN(IPT,IRAP,ISCL,IORD))))
+               write(*,*)"SECOND: iord,iscl,irap,ipt"
+     >              ,iord,iscl,irap,ipt
                DO ICOUNT=1,NCOUNT
-ckr            CALL HFILL(1000000+J,REAL(CBIN(I,J,K)),0.,REAL(WTAB(I))
                   IHIST = IORD*1000000 + ISCL*100000 +
      >                 ISUB*10000 + IRAP*100
+                  write(*,*)"SECOND: icount,cbin,mean,sigma",icount,
+     >                 CBIN(IPT,IRAP,ISCL,IORD,ICOUNT),
+     >                 MEAN(IPT,IRAP,ISCL,IORD),
+     >                 SIGMA(IPT,IRAP,ISCL,IORD)
                   CALL HFILL(IHIST + 10,
-     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
-     >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
-     >                 SIGMA(IPT,IRAP,ISCL,IORD)),
-     >                 0.,REAL(WTAB(I)))
-                  write(*,*)"ipt,irap,iscl,iord",
-     >                 ipt,irap,iscl,iord
-                  write(*,*)"icount,cbin",
-     >                 icount,CBIN(IPT,IRAP,ISCL,IORD,ICOUNT)
+     >                 REAL(
+     >                 ( CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD) ) / 
+     >                 SIGMA(IPT,IRAP,ISCL,IORD))
+     >                 ,0.,REAL(WTAB(ICOUNT)))
                   CALL HFILL(IHIST + 2*IPT + 10,
-     >                 REAL( (CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
-     >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
-     >                 SIGMA(IPT,IRAP,ISCL,IORD)),
-     >                 0.,REAL(WTAB(I)))
+     >                 REAL(
+     >                 ( CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD) ) / 
+     >                 SIGMA(IPT,IRAP,ISCL,IORD))
+     >                 ,0.,REAL(WTAB(ICOUNT)))
                   CALL HFILL(IHIST + 11,
      >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) /
      >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
      >                 MINE(IPT,IRAP,ISCL,IORD))),
-     >                 0.,REAL(WTAB(I)))
+     >                 0.,REAL(WTAB(ICOUNT)))
                   CALL HFILL(IHIST + 2*IPT + 11,
      >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) /
      >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
      >                 MINE(IPT,IRAP,ISCL,IORD))),
-     >                 0.,REAL(WTAB(I)))
+     >                 0.,REAL(WTAB(ICOUNT)))
                ENDDO
             ENDDO
             CALL HPAKE(IHIST,SERR(1,IRAP))

@@ -582,12 +582,14 @@ ckr                        write(*,*)"4. Booked histo #",nhist
      >                       "_norm_mu_sig_all_pt"
                         CALL HBOOK1(IHIST + 10,
      >                       CTMP(1:LENOCC(CTMP)),
-     >                       21,-5.5,5.5,0)
+     >                       31,-7.5,7.5,0)
+                        CALL HIDOPT(IHIST + 10,'STAT')
                         CTMP = CSTRNG(1:LENOCC(CSTRNG))//
      >                       "_norm_mu_dmax_all_pt"
                         CALL HBOOK1(IHIST + 11,
      >                       CTMP(1:LENOCC(CTMP)),
      >                       31,-1.5,1.5,0)
+                        CALL HIDOPT(IHIST + 11,'STAT')
                         NHIST = NHIST+2
 ckr                        write(*,*)"5. Booked histo #",nhist
                         DO IPT=1,NPT(IRAP)
@@ -608,12 +610,14 @@ ckr                        write(*,*)"5. Booked histo #",nhist
      >                          "_norm_mu_sig"
                            CALL HBOOK1(IHIST + 2*IPT + 10,
      >                          CTMP(1:LENOCC(CTMP)),
-     >                          21,-5.5,5.5,0)
+     >                          31,-7.5,7.5,0)
+                           CALL HIDOPT(IHIST + 2*IPT + 10,'STAT')
                            CTMP = CSTRNG(1:LENOCC(CSTRNG))//
      >                          "_norm_mu_dmax"
                            CALL HBOOK1(IHIST + 2*IPT + 11,
      >                          CTMP(1:LENOCC(CTMP)),
      >                          31,-1.5,1.5,0)
+                           CALL HIDOPT(IHIST + 2*IPT + 11,'STAT')
                            NHIST = NHIST+2
 ckr                           write(*,*)"6. Booked histo #",nhist
                         ENDDO
