@@ -4,13 +4,12 @@
 c - Attention!!! - this must be declared consistent with its 
 c                  definition in the commonblock!!!!!
 c      DOUBLE PRECISION XSECT(900,3) 
-      INCLUDE 'fnx9999.inc'
+      INCLUDE "fnx9999.inc"
       
       CHARACTER*(*) BORNNAME,NLONAME
       CHARACTER*255 FILEBASE,FILENAME,LOFILE,NLOFILE
       CHARACTER*4 NO
       
-ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
       INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
       INTEGER ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST
@@ -32,6 +31,8 @@ ckr      INTEGER BORNN,NLON,NBORN,NNLO,NTAB,NCOUNT
       DOUBLE PRECISION SIGMA(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       DOUBLE PRECISION NEFF(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       DOUBLE PRECISION MEANE(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
+ckr
+ckr      DOUBLE PRECISION SIGMMW(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
 
       DOUBLE PRECISION MUR(NSCALEVAR),MUF(NSCALEVAR)
       DOUBLE PRECISION BWGT,NEVTS,VAL
@@ -58,7 +59,6 @@ c ==================================================================
 c === Loop over all orders up to NLO ===============================
 c ==================================================================
       DO IORD=0,MIN(2,NORD)
-ckr      DO IORD=1,MIN(2,NORD)
 
 c - Loop initialization
          DO ISCL=1,NSCALEVAR
@@ -76,6 +76,7 @@ c - Loop initialization
                   SIGMA(IPT,IRAP,ISCL,IORD) =  0D0
                   NEFF(IPT,IRAP,ISCL,IORD)  =  0D0
                   MEANE(IPT,IRAP,ISCL,IORD) =  0D0
+ckr                  SIGMMW(IPT,IRAP,ISCL,IORD)=  0D0
                ENDDO
             ENDDO
          ENDDO
@@ -165,10 +166,10 @@ c - Take LO/NLO file with 1D9/1D8 events as weight 1
      >                    IORD
                      STOP
                   ENDIF
-                  write(*,*)"FIRST: iord,iscl,irap,ipt"
-     >                 ,iord,iscl,irap,ipt
-                  write(*,*)"FIRST: ncount,cbin,mean,sigma",ncount,
-     >                 val
+ckr                  write(*,*)"FIRST: iord,iscl,irap,ipt"
+ckr     >                 ,iord,iscl,irap,ipt
+ckr                  write(*,*)"FIRST: ncount,cbin",ncount,
+ckr     >                 val
                   CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) = VAL
                   WGT(IPT,IRAP,ISCL,IORD) =
      >                 WGT(IPT,IRAP,ISCL,IORD) +
@@ -208,32 +209,44 @@ c - Extract mean values and standard deviations
          DO IRAP=1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
                J = J+1
-ckr Markus: Entspricht sigma mit 1/sqrt(n) fuer ungewichtete Daten
-c            MEANL(J,K)  = WGTX(J,K) / WGT(J,K)
-c            SIGMAL(J,K) = (WGTX2(J,K)-(WGTX(J,K)*WGTX(J,K)/WGT(J,K)))
-c     >           /WGT(J,K)
-c            SIGMAL(J,K) = SQRT(SIGMAL(J,K)/NCOUNT)
-ckr Klaus: Entspricht sigma mit 1/sqrt(n-1) fuer ungew. Daten
-ckr        Ein Freiheitsgrad fuer Mittelwertsberechnung!
-ckr               write(*,*)"ipt,irap,iscl,iord",ipt,irap,iscl,iord
+ckr Markus: Entspricht mittl. Fehler des Mittelwerts sigma/sqrt(n)
+ckr         fuer ungewichtete Daten
+ckr            MEANL(J,K)  = WGTX(J,K) / WGT(J,K)
+ckr            SIGMAL(J,K) = (WGTX2(J,K)-(WGTX(J,K)*WGTX(J,K)/WGT(J,K)))
+ckr     >           /WGT(J,K)
+ckr            SIGMAL(J,K) = SQRT(SIGMAL(J,K)/NCOUNT)
+ckr Klaus: Entspricht mittl. Fehler des Mittelwerts sigma/sqrt(n-1)
+ckr        auch fuer gew. Daten
+ckr        Ein Freiheitsgrad weniger fuer Mittelwertsberechnung!
+ckr               WRITE(*,*)"STATERR: DEBUG: IPT,IRAP,ISCL,IORD",IPT,IRAP,ISCL,IORD
+ckr Sample average
                MEAN(IPT,IRAP,ISCL,IORD) =
      >              WGTX(IPT,IRAP,ISCL,IORD) /
      >              WGT(IPT,IRAP,ISCL,IORD)
+ckr Effective number of events
+               NEFF(IPT,IRAP,ISCL,IORD) =
+     >              WGT(IPT,IRAP,ISCL,IORD)*WGT(IPT,IRAP,ISCL,IORD) /
+     >              WGT2(IPT,IRAP,ISCL,IORD)
+ckr The right formula for the spread of x section values of single jobs
                SIGMA(IPT,IRAP,ISCL,IORD) =
      >              (WGTX2(IPT,IRAP,ISCL,IORD) / 
      >              WGT(IPT,IRAP,ISCL,IORD) -
      >              MEAN(IPT,IRAP,ISCL,IORD) *
-     >              MEAN(IPT,IRAP,ISCL,IORD)) /
-     >              (1D0 - WGT2(IPT,IRAP,ISCL,IORD) /
-     >              WGT(IPT,IRAP,ISCL,IORD)/WGT(IPT,IRAP,ISCL,IORD))
-               NEFF(IPT,IRAP,ISCL,IORD) =
-     >              WGT(IPT,IRAP,ISCL,IORD)*WGT(IPT,IRAP,ISCL,IORD) /
-     >              WGT2(IPT,IRAP,ISCL,IORD)
+     >              MEAN(IPT,IRAP,ISCL,IORD))
                SIGMA(IPT,IRAP,ISCL,IORD) =
      >              SQRT(SIGMA(IPT,IRAP,ISCL,IORD))
+ckr Markus formula: Mittl. Fehler des Mittelwerts
+ckr               SIGMMW(IPT,IRAP,ISCL,IORD) =
+ckr     >              (WGTX2(IPT,IRAP,ISCL,IORD) - 
+ckr     >              (WGTX(IPT,IRAP,ISCL,IORD)*WGTX(IPT,IRAP,ISCL,IORD) /
+ckr     >              WGT(IPT,IRAP,ISCL,IORD))) / WGT(IPT,IRAP,ISCL,IORD)
+ckr               SIGMMW(IPT,IRAP,ISCL,IORD) =
+ckr     >              SQRT(SIGMMW(IPT,IRAP,ISCL,IORD) /
+ckr     >              WGT(IPT,IRAP,ISCL,IORD)) 
+ckr My formula:
                MEANE(IPT,IRAP,ISCL,IORD) =
      >              SIGMA(IPT,IRAP,ISCL,IORD)/
-     >              SQRT(NEFF(IPT,IRAP,ISCL,IORD))
+     >              SQRT(NEFF(IPT,IRAP,ISCL,IORD)-1D0)
                WRITE(*,901) J,MEAN(IPT,IRAP,ISCL,IORD),
      >              100D0*MEANE(IPT,IRAP,ISCL,IORD) /
      >              MEAN(IPT,IRAP,ISCL,IORD),
@@ -258,7 +271,7 @@ c - Only for sum of subprocesses
      >              ISUB*10000 + IRAP*100
                PT(IPT,IRAP) = REAL(PTBIN(IRAP,IPT))
 ckr If histogram with central result (IHIST+0) filled, derive stat. unc.
-ckr rel. to MEAN and then use central result. If not, just use SIGMA. 
+ckr rel. to MEAN and then use central result. If not, just use MEANE.
                IF (HI(IHIST,IPT).GT.0.) THEN
                   SERR(IPT,IRAP) = REAL(MEANE(IPT,IRAP,ISCL,IORD) /
      >                 MEAN(IPT,IRAP,ISCL,IORD))*HI(IHIST,IPT)
@@ -272,15 +285,15 @@ ckr rel. to MEAN and then use central result. If not, just use SIGMA.
      >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,ISCL,IORD) - 
      >              MINE(IPT,IRAP,ISCL,IORD)) / 
      >              MEAN(IPT,IRAP,ISCL,IORD))))
-               write(*,*)"SECOND: iord,iscl,irap,ipt"
-     >              ,iord,iscl,irap,ipt
+ckr               write(*,*)"SECOND: iord,iscl,irap,ipt"
+ckr     >              ,iord,iscl,irap,ipt
                DO ICOUNT=1,NCOUNT
                   IHIST = IORD*1000000 + ISCL*100000 +
      >                 ISUB*10000 + IRAP*100
-                  write(*,*)"SECOND: icount,cbin,mean,sigma",icount,
-     >                 CBIN(IPT,IRAP,ISCL,IORD,ICOUNT),
-     >                 MEAN(IPT,IRAP,ISCL,IORD),
-     >                 SIGMA(IPT,IRAP,ISCL,IORD)
+ckr                  write(*,*)"SECOND: icount,cbin,mean,sigma",icount,
+ckr     >                 CBIN(IPT,IRAP,ISCL,IORD,ICOUNT),
+ckr     >                 MEAN(IPT,IRAP,ISCL,IORD),
+ckr     >                 SIGMA(IPT,IRAP,ISCL,IORD)
                   CALL HFILL(IHIST + 10,
      >                 REAL(
      >                 ( CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
