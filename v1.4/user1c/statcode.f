@@ -249,13 +249,13 @@ ckr My formula:
      >              SQRT(NEFF(IPT,IRAP,ISCL,IORD)-1D0)
                WRITE(*,901) J,MEAN(IPT,IRAP,ISCL,IORD),
      >              100D0*MEANE(IPT,IRAP,ISCL,IORD) /
-     >              MEAN(IPT,IRAP,ISCL,IORD),
-     >              100D0*(MINE(IPT,IRAP,ISCL,IORD) -
-     >              MEAN(IPT,IRAP,ISCL,IORD)) /
-     >              MEAN(IPT,IRAP,ISCL,IORD),
+     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
+     >              -100D0*(MEAN(IPT,IRAP,ISCL,IORD) -
+     >              MINE(IPT,IRAP,ISCL,IORD)) /
+     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
      >              100D0*(MAXE(IPT,IRAP,ISCL,IORD) -
      >              MEAN(IPT,IRAP,ISCL,IORD)) / 
-     >              MEAN(IPT,IRAP,ISCL,IORD),
+     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
      >              NJMIN(IPT,IRAP,ISCL),NJMAX(IPT,IRAP,ISCL)
             ENDDO
          ENDDO
