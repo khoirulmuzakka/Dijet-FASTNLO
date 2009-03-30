@@ -31,7 +31,8 @@ FC=g77
 OBJFILESREF  = $(REFFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESSTAT = $(STATFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESPDF  = $(PDFFILES:.f=.o) $(CFILES:.c=.o)
-OBJFILESALL  = $(ALLFILES:.f=.o) $(CFILES:.c=.o)
+#OBJFILESALL  = $(ALLFILES:.f=.o) $(CFILES:.c=.o)
+OBJFILESALL  = $(ALLFILES:.f=.o)
 
 # Derive all uncertainties in one go
 allunc:	$(OBJFILESALL) fnx9999.inc strings.inc
