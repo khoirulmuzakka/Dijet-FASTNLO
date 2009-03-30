@@ -9,8 +9,9 @@
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
+      CHARACTER*255 BORNNAME,NLONAME
+      CHARACTER*255 HISTFILE
       CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
-      CHARACTER*255 BORNNAME,NLONAME,HISTFILE
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,ASMODE
       CHARACTER*4 CHBORN,CHNLO
       INTEGER BORNN,NLON,LENOCC
@@ -352,88 +353,89 @@ ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
 
 c - Algorithmic part
 c - Use reference table
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
-      WRITE(*,*)"ALLUNC: Taking reference table: "//
-     >     FILENAME(1:LENOCC(FILENAME))
+      IF (LALG) THEN
+         FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+         WRITE(*,*)"ALLUNC: Taking reference table: "//
+     >        FILENAME(1:LENOCC(FILENAME))
 c - Initialize CTEQ61 reference PDFs
-      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/cteq61.LHgrid"
-      WRITE(*,*)"ALLUNC: Taking reference PDF: "//
-     >     PDFSET(1:LENOCC(PDFSET))
-      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
-      CALL INITPDF(0)
+         PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/cteq61.LHgrid"
+         WRITE(*,*)"ALLUNC: Taking reference PDF: "//
+     >        PDFSET(1:LENOCC(PDFSET))
+         CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+         CALL INITPDF(0)
 
 c - Default scale (C++ 2, Fortran 3) ==> normal result
-      ISCALE = 3
-      MUR = MURSCALE(ISCALE)
-      MUF = MUFSCALE(ISCALE)
-      CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         ISCALE = 3
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
 c - Attention: From now on ref. table loaded ==> rap. bins doubled
 c - Get the normal result, scale 3, from first half of doubled rap bins
-      IBIN = 0
-      DO IRAP=1,INT(NRAPIDITY/2)
-         DO IPT=1,NPT(IRAP)
-            IBIN = IBIN+1
-            DO ISUB=0,NSUBPROC
-               RES0(IBIN,ISUB+1,0) = 0.D0
-               DO IORD=1,NORD
-                  RES0(IBIN,ISUB+1,IORD) = XSECT(IBIN,IORD)
-                  RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
-     >                 RES0(IBIN,ISUB+1,IORD)
+         IBIN = 0
+         DO IRAP=1,INT(NRAPIDITY/2)
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               DO ISUB=0,NSUBPROC
+                  RES0(IBIN,ISUB+1,0) = 0.D0
+                  DO IORD=1,NORD
+                     RES0(IBIN,ISUB+1,IORD) = XSECT(IBIN,IORD)
+                     RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
+     >                    RES0(IBIN,ISUB+1,IORD)
+                  ENDDO
                ENDDO
-            ENDDO
 c            RES0(IBIN,NSUBPROC+1,0) = 0.D0
 c            DO IORD=1,NORD
 c               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
 c               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
 c     >              RES0(IBIN,NSUBPROC+1,IORD)
 c            ENDDO
+            ENDDO
          ENDDO
-      ENDDO
-      NBIN = IBIN
+         NBIN = IBIN
 
 c - Reference scale no. always 1
-      ISCALE = 1
-      MUR = MURSCALE(ISCALE)
-      MUF = MUFSCALE(ISCALE)
-      CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         ISCALE = 1
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
 c - Get the reference result, scale 1, nrap/2 ++ bins
-      DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
-         DO IPT=1,NPT(IRAP)
-            IBIN = IBIN+1
-            do isub=0,nsubproc
-               RES0(IBIN,isub+1,0) = 0.D0
-               DO IORD=1,NORD
-                  RES0(IBIN,isub+1,IORD) = XSECT(IBIN,IORD)
-                  RES0(IBIN,isub+1,0) = RES0(IBIN,isub+1,0) +
-     >                 RES0(IBIN,isub+1,IORD)
+         DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               DO ISUB=0,NSUBPROC
+                  RES0(IBIN,isub+1,0) = 0.D0
+                  DO IORD=1,NORD
+                     RES0(IBIN,isub+1,IORD) = XSECT(IBIN,IORD)
+                     RES0(IBIN,isub+1,0) = RES0(IBIN,isub+1,0) +
+     >                    RES0(IBIN,isub+1,IORD)
+                  ENDDO
                ENDDO
-            enddo
 c            RES0(IBIN,NSUBPROC+1,0) = 0.D0
 c            DO IORD=1,NORD
 c               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
 c               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
 c     >              RES0(IBIN,NSUBPROC+1,IORD)
 c            ENDDO
+            ENDDO
          ENDDO
-      ENDDO
 
 c - Compare results and fill histos
-      ISCALE = 3
-      ISUB   = 0
-      IBIN   = 0
-      DO IRAP=1,INT(NRAPIDITY/2)
-         DO IPT=1,NPT(IRAP)
-            IBIN = IBIN+1
-            PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-            do isub=0,nsubproc
-               DO IORD=0,NORD
-                  DREF = RES0(IBIN,isub+1,IORD)/
-     >                 RES0(IBIN+NBIN,isub+1,IORD) - 1.D0
-                  IHIST = IORD*1000000 + ISCALE*100000 +
-     >                 ISUB*10000 + IRAP*100
-                  CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
+         ISCALE = 3
+         ISUB   = 0
+         IBIN   = 0
+         DO IRAP=1,INT(NRAPIDITY/2)
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+               DO ISUB=0,NSUBPROC
+                  DO IORD=0,NORD
+                     DREF = RES0(IBIN,isub+1,IORD)/
+     >                    RES0(IBIN+NBIN,isub+1,IORD) - 1.D0
+                     IHIST = IORD*1000000 + ISCALE*100000 +
+     >                    ISUB*10000 + IRAP*100
+                     CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
+                  ENDDO
                ENDDO
-            enddo
 c            DO IORD=0,NORD
 c               DREF = RES0(IBIN,NSUBPROC+1,IORD)/
 c     >              RES0(IBIN+NBIN,NSUBPROC+1,IORD) - 1.D0
@@ -441,8 +443,9 @@ c               IHIST = IORD*1000000 + ISCALE*100000 +
 c     >              ISUB*10000 + IRAP*100
 c               CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
 c            ENDDO
+            ENDDO
          ENDDO
-      ENDDO
+      ENDIF
 
 
 
@@ -582,13 +585,13 @@ ckr                        write(*,*)"4. Booked histo #",nhist
      >                       "_norm_mu_sig_all_pt"
                         CALL HBOOK1(IHIST + 10,
      >                       CTMP(1:LENOCC(CTMP)),
-     >                       31,-7.5,7.5,0)
+     >                       63,-10.5,10.5,0)
                         CALL HIDOPT(IHIST + 10,'STAT')
                         CTMP = CSTRNG(1:LENOCC(CSTRNG))//
      >                       "_norm_mu_dmax_all_pt"
                         CALL HBOOK1(IHIST + 11,
      >                       CTMP(1:LENOCC(CTMP)),
-     >                       31,-1.5,1.5,0)
+     >                       30,-1.5,1.5,0)
                         CALL HIDOPT(IHIST + 11,'STAT')
                         NHIST = NHIST+2
 ckr                        write(*,*)"5. Booked histo #",nhist
@@ -610,13 +613,13 @@ ckr                        write(*,*)"5. Booked histo #",nhist
      >                          "_norm_mu_sig"
                            CALL HBOOK1(IHIST + 2*IPT + 10,
      >                          CTMP(1:LENOCC(CTMP)),
-     >                          31,-7.5,7.5,0)
+     >                          63,-10.5,10.5,0)
                            CALL HIDOPT(IHIST + 2*IPT + 10,'STAT')
                            CTMP = CSTRNG(1:LENOCC(CSTRNG))//
      >                          "_norm_mu_dmax"
                            CALL HBOOK1(IHIST + 2*IPT + 11,
      >                          CTMP(1:LENOCC(CTMP)),
-     >                          31,-1.5,1.5,0)
+     >                          30,-1.5,1.5,0)
                            CALL HIDOPT(IHIST + 2*IPT + 11,'STAT')
                            NHIST = NHIST+2
 ckr                           write(*,*)"6. Booked histo #",nhist
