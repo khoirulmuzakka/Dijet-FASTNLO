@@ -14,7 +14,7 @@
       CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
       CHARACTER*8 CH8TMP
-      CHARACTER*4 CHBORN,CHNLO,CH4TMP
+      CHARACTER*4 CH4TMP
       INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
@@ -43,6 +43,8 @@ c --- Parse command line
       WRITE(*,*)"# and PDF uncertainties using fastNLO tables"
       WRITE(*,*)"#################################################"
       WRITE(*,*)"#"
+
+*---Scenario
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
          WRITE(*,*)
@@ -65,9 +67,10 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     The statistics tables named e.g.:'
             WRITE(*,*)'     \"scenario\"-hhc-nlo-2jet_nnnn.tab'
             WRITE(*,*)'     have to be in the subdir. \"stat\".'
-            WRITE(*,*)'  Last LO stat. table number, def. = -999'
-            WRITE(*,*)'  Last NLO stat. table number, def. = -999'
             WRITE(*,*)'  HBOOK output file, def. = scenario.hbk'
+            WRITE(*,*)'  Derive algorithmic uncertainty, def. = no'
+            WRITE(*,*)'  Last LO stat. table number, def. = -1'
+            WRITE(*,*)'  Last NLO stat. table number, def. = -1'
             WRITE(*,*)'  PDF set, def. = cteq65.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
      >           '../share/lhapdf/PDFsets'
@@ -82,68 +85,113 @@ C --- Use '...' with \", otherwise gfortran complains
       ENDIF
       TABNAME = SCENARIO(1:LENOCC(SCENARIO))//".tab"
       REFNAME = SCENARIO(1:LENOCC(SCENARIO))//"ref.tab"
-      IF (IARGC().LT.2) THEN
+
+*---Path to tables
+      TABPATH = "X"
+      IF (IARGC().GE.2) THEN
+         CALL GETARG(2,TABPATH)
+      ENDIF
+      IF (IARGC().LT.2.OR.TABPATH(1:1).EQ."_") THEN
          TABPATH = "."
          WRITE(*,*)
      >        "ALLUNC: WARNING! No table path given, "//
      >        "taking . instead!"
-      ELSE
-         CALL GETARG(2,TABPATH)
       ENDIF
       WRITE(*,*)"ALLUNC: Using table path: ",
      >     TABPATH(1:LENOCC(TABPATH))
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
       WRITE(*,*)"ALLUNC: Taking primary table ",
      >     FILENAME(1:LENOCC(FILENAME))
-      IF (IARGC().LT.3) THEN
-         CHBORN = "-999"
-         BORNN  =  -999
-         WRITE(*,*)
-     >        "ALLUNC: WARNING! Last number of LO tables not given, "//
-     >        "using -999 instead ==> no stat. uncertainty!"
-      ELSE
-         CALL GETARG(3,CHBORN)
-         READ(CHBORN,'(I4)'),BORNN
-         WRITE(*,*)"ALLUNC: Last LO table number: ",BORNN
-      ENDIF
-      IF (IARGC().LT.4) THEN
-         CHNLO = "-999"
-         NLON  =  -999
-         WRITE(*,*)
-     >        "ALLUNC: WARNING! Last number of NLO tables not given, "//
-     >        "using -999 instead ==> no stat. uncertainty!"
-      ELSE
-         CALL GETARG(4,CHNLO)
-         READ(CHNLO,'(I4)'),NLON
-         WRITE(*,*)"ALLUNC: Last NLO table number: ",NLON
-      ENDIF
 
-      IF (IARGC().LT.5) THEN
+*---HBOOK filename
+      HISTFILE = "X"
+      IF (IARGC().GE.3) THEN
+         CALL GETARG(3,HISTFILE)
+      ENDIF
+      IF (IARGC().LT.3.OR.HISTFILE(1:1).EQ."_") THEN
          HISTFILE = SCENARIO(1:LENOCC(SCENARIO))//".hbk"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No output filename given, "//
      >        "taking scenario.hbk instead!"
       ELSE
-         CALL GETARG(5,HISTFILE)
          WRITE(*,*)"ALLUNC: Creating output file: ",
      >        HISTFILE(1:LENOCC(HISTFILE))
       ENDIF
 
-      IF (IARGC().LT.6) THEN
+*---Derive algorithmic uncertainty?
+      CH4TMP = "X"
+      IF (IARGC().GE.4) THEN
+         CALL GETARG(4,CH4TMP)
+      ENDIF
+      IF (IARGC().LT.4.OR.CH4TMP(1:1).EQ."_".OR.
+     >     CH4TMP(1:2).EQ."no") THEN
+         LALG   =  .FALSE.
+         WRITE(*,*)
+     >        "ALLUNC: Do NOT derive algorithmic uncertainty!"
+      ELSE
+         IF (CH4TMP(1:3).EQ."yes") THEN
+            LALG = .TRUE.
+            WRITE(*,*)"ALLUNC: Derive algorithmic uncertainty."
+         ELSE
+            LALG = .FALSE.
+            WRITE(*,*)
+     >         "ALLUNC: WARNING! Do NOT derive algorithmic uncertainty!"
+         ENDIF
+      ENDIF
+
+*---Last LO table to use 
+      CH4TMP = "X"
+      IF (IARGC().GE.5) THEN
+         CALL GETARG(5,CH4TMP)
+      ENDIF
+      IF (IARGC().LT.5.OR.CH4TMP(1:1).EQ."_") THEN
+         CH4TMP = "-1"
+         BORNN  =  -1
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! Last number of LO tables not given, "//
+     >        "using -1 instead ==> no stat. uncertainty!"
+      ELSE
+         READ(CH4TMP,'(I4)'),BORNN
+         WRITE(*,*)"ALLUNC: Last LO table number: ",BORNN
+      ENDIF
+
+*---Last NLO table to use 
+      CH4TMP = "X"
+      IF (IARGC().GE.6) THEN
+         CALL GETARG(6,CH4TMP)
+      ENDIF
+      IF (IARGC().LT.6.OR.CH4TMP(1:1).EQ."_") THEN
+         CH4TMP = "-1"
+         NLON   =  -1
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! Last number of NLO tables not given, "//
+     >        "using -1 instead ==> no stat. uncertainty!"
+      ELSE
+         READ(CH4TMP,'(I4)'),NLON
+         WRITE(*,*)"ALLUNC: Last NLO table number: ",NLON
+      ENDIF
+
+*---PDF set
+      PDFSET = "X"
+      IF (IARGC().GE.7) THEN
+         CALL GETARG(7,PDFSET)
+      ENDIF
+      IF (IARGC().LT.7.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq65.LHgrid"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No PDF set given, "//
      >        "taking cteq65.LHgrid instead!"
       ELSE
-         CALL GETARG(6,PDFSET)
          WRITE(*,*)"ALLUNC: Using PDF set: ",
      >        PDFSET(1:LENOCC(PDFSET))
       ENDIF
-c - Not very elegant ...
-      IF (IARGC().GE.7) THEN
-         CALL GETARG(7,CHTMP)
+
+*---Path to PDF sets
+      CHTMP = "X"
+      IF (IARGC().GE.8) THEN
+         CALL GETARG(8,CHTMP)
       ENDIF
-      IF (IARGC().LT.7.OR.CHTMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.8.OR.CHTMP(1:1).EQ."_") THEN
          PDFPATH = "/../share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
@@ -164,21 +212,29 @@ c - Initialize path to LHAPDF libs
       PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
       WRITE(*,*)"ALLUNC: Taking PDF set "
      >     //PDFSET(1:LENOCC(PDFSET))
-      IF (IARGC().LT.8) THEN
+
+*---alpha_s mode
+      CHTMP = "X"
+      IF (IARGC().GE.9) THEN
+         CALL GETARG(9,CHTMP)
+      ENDIF
+      IF (IARGC().LT.9.OR.CHTMP(1:1).EQ."_") THEN
          ASMODE = "PDF"
          WRITE(*,*)
      >        "ALLUNC: No alpha_s mode given, "//
      >        "using alpha_s according to PDF set"
       ELSE
-         CALL GETARG(8,CHTMP)
          ASMODE = CHTMP(1:LENOCC(CHTMP))
          WRITE(*,*)"ALLUNC: Using alpha_s mode: ",
      >        ASMODE(1:LENOCC(ASMODE))
       ENDIF
-      IF (IARGC().GE.9) THEN
-         CALL GETARG(9,CH8TMP)
+
+*---alpha_s(M_Z)
+      CH8TMP = "X"
+      IF (IARGC().GE.10) THEN
+         CALL GETARG(10,CH8TMP)
       ENDIF
-      IF (IARGC().LT.9.OR.CH8TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.10.OR.CH8TMP(1:1).EQ."_") THEN
          ASMZVAL = -1D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) value given, "//
@@ -189,17 +245,24 @@ c - Initialize path to LHAPDF libs
          READ(CH8TMP,'(F9.6)'),ASMZVAL
          WRITE(*,*)"ALLUNC: Using alpha_s(M_Z):",ASMZVAL
       ENDIF
-      IF (IARGC().LT.10) THEN
+
+*---alpha_s loop order in evolution
+      CH4TMP = "X"
+      IF (IARGC().GE.11) THEN
+         CALL GETARG(11,CH4TMP)
+      ENDIF
+      IF (IARGC().LT.11.OR.CH4TMP(1:1).EQ."_") THEN
          IASLOOP = -1
          WRITE(*,*)
      >        "ALLUNC: No alpha_s loop order given, "//
      >        "using alpha_s loop order according to PDF set"
       ELSE
-         CALL GETARG(10,CH4TMP)
          READ(CH4TMP,'(I4)'),IASLOOP
          WRITE(*,*)"ALLUNC: Using alpha_s loop order:",IASLOOP
       ENDIF
-      IF (IARGC().GT.10) THEN
+
+*---Too many arguments
+      IF (IARGC().GT.11) THEN
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
@@ -241,17 +304,19 @@ c - Check primary table existence
 
 c - Check uncertainties to derive 
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
-      LALG  = .TRUE.
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
-      WRITE(*,*)"ALLUNC: Checking reference table: "//
-     >     FILENAME(1:LENOCC(FILENAME))
-      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
-      IF (ISTAT.NE.0) THEN
-         WRITE(*,*)"ALLUNC: WARNING! Reference table not found, "//
-     >        "skipped! IOSTAT = ",ISTAT
-         LALG = .FALSE.
-      ELSE
-         CLOSE(2)
+ckr      LALG  = .TRUE.
+      IF (LALG) THEN
+         FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+         WRITE(*,*)"ALLUNC: Checking reference table: "//
+     >        FILENAME(1:LENOCC(FILENAME))
+         OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
+         IF (ISTAT.NE.0) THEN
+            WRITE(*,*)"ALLUNC: WARNING! Reference table not found, "//
+     >           "skipped! IOSTAT = ",ISTAT
+            LALG = .FALSE.
+         ELSE
+            CLOSE(2)
+         ENDIF
       ENDIF
       LSER  = NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LSER
