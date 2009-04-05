@@ -12,12 +12,13 @@
       CHARACTER*255 BORNNAME,NLONAME
       CHARACTER*255 HISTFILE
       CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
-      CHARACTER*255 PDFSET,PDFPATH,LHAPDF,ASMODE
-      CHARACTER*4 CHBORN,CHNLO
+      CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
+      CHARACTER*8 CH8TMP
+      CHARACTER*4 CHBORN,CHNLO,CH4TMP
       INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
-      LOGICAL LALG,LSTAT,LPDF
+      LOGICAL LALG,LSTAT,LPDF,LSER
       DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
@@ -28,7 +29,11 @@ c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
       REAL PT(NPTMAX)
-      COMMON/STEER/ASMODE
+
+      CHARACTER*255 ASMODE
+      DOUBLE PRECISION ASMZVAL
+      INTEGER IASLOOP
+      COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Parse command line
       WRITE(*,*)"\n #################################################"
@@ -67,6 +72,8 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
      >           '../share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. from PDF set'
+            WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
+            WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
             STOP
          ENDIF
@@ -132,7 +139,11 @@ C --- Use '...' with \", otherwise gfortran complains
          WRITE(*,*)"ALLUNC: Using PDF set: ",
      >        PDFSET(1:LENOCC(PDFSET))
       ENDIF
-      IF (IARGC().LT.7) THEN
+c - Not very elegant ...
+      IF (IARGC().GE.7) THEN
+         CALL GETARG(7,CHTMP)
+      ENDIF
+      IF (IARGC().LT.7.OR.CHTMP(1:1).EQ."_") THEN
          PDFPATH = "/../share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
@@ -146,7 +157,7 @@ c - Initialize path to LHAPDF libs
          PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
      >        PDFPATH(1:LENOCC(PDFPATH))
       ELSE
-         CALL GETARG(7,PDFPATH)
+         PDFPATH = CHTMP(1:LENOCC(CHTMP)) 
       ENDIF
       WRITE(*,*)"ALLUNC: Looking for LHAPDF PDF sets in path: "//
      >     PDFPATH(1:LENOCC(PDFPATH))
@@ -159,10 +170,36 @@ c - Initialize path to LHAPDF libs
      >        "ALLUNC: No alpha_s mode given, "//
      >        "using alpha_s according to PDF set"
       ELSE
-         CALL GETARG(8,ASMODE)
-         WRITE(*,*)"ALLUNC: Using alpha_s mode:",ASMODE
+         CALL GETARG(8,CHTMP)
+         ASMODE = CHTMP(1:LENOCC(CHTMP))
+         WRITE(*,*)"ALLUNC: Using alpha_s mode: ",
+     >        ASMODE(1:LENOCC(ASMODE))
       ENDIF
-      IF (IARGC().GT.8) THEN
+      IF (IARGC().GE.9) THEN
+         CALL GETARG(9,CH8TMP)
+      ENDIF
+      IF (IARGC().LT.9.OR.CH8TMP(1:1).EQ."_") THEN
+         ASMZVAL = -1D0
+         WRITE(*,*)
+     >        "ALLUNC: No alpha_s(M_Z) value given, "//
+     >        "using alpha_s according to PDF set (mode PDF) or"
+         WRITE(*,*)
+     >        "        PDG book (mode MW and KR)"
+      ELSE
+         READ(CH8TMP,'(F9.6)'),ASMZVAL
+         WRITE(*,*)"ALLUNC: Using alpha_s(M_Z):",ASMZVAL
+      ENDIF
+      IF (IARGC().LT.10) THEN
+         IASLOOP = -1
+         WRITE(*,*)
+     >        "ALLUNC: No alpha_s loop order given, "//
+     >        "using alpha_s loop order according to PDF set"
+      ELSE
+         CALL GETARG(10,CH4TMP)
+         READ(CH4TMP,'(I4)'),IASLOOP
+         WRITE(*,*)"ALLUNC: Using alpha_s loop order:",IASLOOP
+      ENDIF
+      IF (IARGC().GT.10) THEN
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
@@ -203,8 +240,6 @@ c - Check primary table existence
       ENDIF
 
 c - Check uncertainties to derive 
-ckr      LPDF  = .TRUE.
-      LPDF  = NPDF.GT.4
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       LALG  = .TRUE.
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
@@ -218,6 +253,20 @@ ckr      LPDF  = .TRUE.
       ELSE
          CLOSE(2)
       ENDIF
+      LSER  = NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
+      LPDF  = .NOT.LSER
+      IF (LALG) THEN
+         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties."
+      ENDIF
+      IF (LSTAT) THEN
+         WRITE(*,*)"ALLUNC: Deriving statistical uncertainties."
+      ENDIF
+      IF (LPDF) THEN
+         WRITE(*,*)"ALLUNC: Deriving PDF uncertainties."
+      ENDIF
+      IF (LSER) THEN
+         WRITE(*,*)"ALLUNC: Deriving cross sections of series variation"
+      ENDIF
       WRITE(*,*)" "
 
 
@@ -226,7 +275,7 @@ c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTFILE,LPDF,LSTAT,LALG)
+      CALL PDFHIST(1,HISTFILE,LPDF,LSTAT,LALG,LSER,NPDF)
 
 
 
@@ -245,6 +294,7 @@ c         5th argument:  array to return results
 
 c - Compute PDF uncertainties for all available scales
 c - Check that FILENAME is still the primary table here ...!!!
+      IF (.NOT.LSER) THEN
       DO I=1,NSCALEVAR
          CALL INITPDF(0)
          MUR = MURSCALE(I)
@@ -330,6 +380,7 @@ c - Fill histograms
      >     "the highest order)"
       WRITE(*,*)"(histograms contain results for all orders and "//
      >     "subprocesses)"
+      ENDIF
 
 
 
@@ -347,6 +398,47 @@ ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
          NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
          CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME)
+      ENDIF
+      
+      
+      
+c - PDF series of variations (e.g. alpha_s(M_Z))
+c - Use primary table
+c - Check that FILENAME is still the primary table here ...!!!
+c - Fill only central scale
+      IF (LSER) THEN
+         ISCALE = 3
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",ISCALE,
+     >        "; mur, muf = ",mur,muf
+         DO J=0,NPDF
+            CALL INITPDF(J)
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            IBIN = 0
+            DO IRAP=1,NRAPIDITY
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+                  DO ISUB=0,NSUBPROC
+                     RES0(IBIN,ISUB+1,0) = 0.D0
+                     DO IORD=1,NORD
+                        RES0(IBIN,ISUB+1,IORD) = XSECT0(IBIN,IORD)
+                        RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
+     >                       RES0(IBIN,ISUB+1,IORD)
+                     ENDDO
+c - Fill histograms
+                     DO IORD=0,NORD
+                        IHIST = IORD*1000000 + ISCALE*100000 +
+     >                       ISUB*10000 + IRAP*100
+                        CALL HFILL(IHIST+J,PT(IBIN),0.,
+     >                       REAL(RES0(IBIN,ISUB+1,IORD)))
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            NBIN = IBIN
+         ENDDO
       ENDIF
 
 
@@ -383,12 +475,6 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
      >                    RES0(IBIN,ISUB+1,IORD)
                   ENDDO
                ENDDO
-c            RES0(IBIN,NSUBPROC+1,0) = 0.D0
-c            DO IORD=1,NORD
-c               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
-c               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
-c     >              RES0(IBIN,NSUBPROC+1,IORD)
-c            ENDDO
             ENDDO
          ENDDO
          NBIN = IBIN
@@ -410,12 +496,6 @@ c - Get the reference result, scale 1, nrap/2 ++ bins
      >                    RES0(IBIN,isub+1,IORD)
                   ENDDO
                ENDDO
-c            RES0(IBIN,NSUBPROC+1,0) = 0.D0
-c            DO IORD=1,NORD
-c               RES0(IBIN,NSUBPROC+1,IORD) = XSECT(IBIN,IORD)
-c               RES0(IBIN,NSUBPROC+1,0) = RES0(IBIN,NSUBPROC+1,0) +
-c     >              RES0(IBIN,NSUBPROC+1,IORD)
-c            ENDDO
             ENDDO
          ENDDO
 
@@ -436,13 +516,6 @@ c - Compare results and fill histos
                      CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
                   ENDDO
                ENDDO
-c            DO IORD=0,NORD
-c               DREF = RES0(IBIN,NSUBPROC+1,IORD)/
-c     >              RES0(IBIN+NBIN,NSUBPROC+1,IORD) - 1.D0
-c               IHIST = IORD*1000000 + ISCALE*100000 +
-c     >              ISUB*10000 + IRAP*100
-c               CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
-c            ENDDO
             ENDDO
          ENDDO
       ENDIF
@@ -450,18 +523,18 @@ c            ENDDO
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LPDF,LSTAT,LALG)
+      CALL PDFHIST(2,HISTFILE,LPDF,LSTAT,LALG,LSER,NPDF)
       END
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTFILE,LPDF,LSTAT,LALG)
+      SUBROUTINE PDFHIST(N,HISTFILE,LPDF,LSTAT,LALG,LSER,NPDF)
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
-      INTEGER N,LENOCC
-      LOGICAL LPDF,LSTAT,LALG
+      INTEGER N,LENOCC,IPDF,NPDF
+      LOGICAL LPDF,LSTAT,LALG,LSER
 
       INTEGER J,ISTAT2,ICYCLE
       INTEGER IORD,ISUB,ISCALE,IRAP,IPT,IHIST,NHIST
@@ -524,6 +597,14 @@ ckr     >                    iord,iscale,isub,irap,ihist
 ckr                     CALL HBARX(IHIST)
                      NHIST = NHIST+1
 ckr                     write(*,*)"1. Booked histo #",nhist
+                     IF (LSER) THEN
+                        DO IPDF=1,NPDF
+                           CALL HBOOKB(IHIST+IPDF,
+     >                          CSTRNG(1:LENOCC(CSTRNG)),
+     >                          NPT(IRAP),PT,0)
+                           NHIST = NHIST+1
+                        ENDDO
+                     ENDIF
                      IF (LPDF) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//

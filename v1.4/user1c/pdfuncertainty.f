@@ -9,7 +9,7 @@
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      CHARACTER*255 FILENAME,HISTFILE,PDFSET,PDFPATH,LHAPDF,ASMODE
+      CHARACTER*255 FILENAME,HISTFILE,PDFSET,PDFPATH,LHAPDF
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER LENOCC
       DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5
@@ -21,7 +21,11 @@
 c - Attention!!! This mus be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
-      COMMON/STEER/ASMODE
+
+      CHARACTER*255 ASMODE
+      DOUBLE PRECISION ASMZVAL
+      INTEGER IASLOOP
+      COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Parse command line
 ckr 30.01.2008: Some more checks on input arguments
