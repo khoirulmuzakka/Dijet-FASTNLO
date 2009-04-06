@@ -18,13 +18,20 @@
       INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
-      LOGICAL LALG,LSTAT,LPDF,LSER
-      DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5
+      LOGICAL LALG,LSTAT,LPDF,LSER,LTOY
+      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RESLO,RESHI,DREF
+c - NNPDF method
+      DOUBLE PRECISION WGT(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGT2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGTX(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGTX2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+c - To unify quoted uncertainties (CL68,CL90,special)
+      DOUBLE PRECISION CL90,CLGJR
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
@@ -261,8 +268,30 @@ c - Initialize path to LHAPDF libs
          WRITE(*,*)"ALLUNC: Using alpha_s loop order:",IASLOOP
       ENDIF
 
+*---Use eigen vector (CTEQ/MSTW) or toy MC (NNPDF) method for
+*---PDF uncertainties
+      CH4TMP = "X"
+      IF (IARGC().GE.12) THEN
+         CALL GETARG(12,CH4TMP)
+      ENDIF
+      IF (IARGC().LT.12.OR.CH4TMP(1:1).EQ."_".OR.
+     >     CH4TMP(1:2).EQ."no") THEN
+         LTOY   =  .FALSE.
+         WRITE(*,*)
+     >        "ALLUNC: Use eigen vector (CTEQ/MSTW) method."
+      ELSE
+         IF (CH4TMP(1:3).EQ."yes") THEN
+            LTOY = .TRUE.
+            WRITE(*,*)"ALLUNC: Use toy MC (NNPDF) method."
+         ELSE
+            LTOY = .FALSE.
+            WRITE(*,*)
+     >         "ALLUNC: WARNING! Use eigen vector (CTEQ/MSTW) method!"
+         ENDIF
+      ENDIF
+
 *---Too many arguments
-      IF (IARGC().GT.11) THEN
+      IF (IARGC().GT.12) THEN
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
@@ -380,6 +409,10 @@ c   and reset result arrays
                   ENDDO
                   RES1LO(L1,L2,L3) = 0D0
                   RES1HI(L1,L2,L3) = 0D0
+                  WGT(L1,L2,L3)    = 0D0
+                  WGT2(L1,L2,L3)   = 0D0
+                  WGTX(L1,L2,L3)   = 0D0
+                  WGTX2(L1,L2,L3)  = 0D0
                ENDDO
             ENDDO
          ENDDO
@@ -387,6 +420,10 @@ c   and reset result arrays
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
 ckr         IF (NPDF.GT.1) THEN
          IF (LPDF) THEN
+*---Convert from CL68 to CL90 values
+            CL90  = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
+*---Convert from GJR to CTEQ (CL90) values
+            CLGJR = 1.D0/0.47D0
             DO J=1,NPDF
                CALL INITPDF(J)
                CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
@@ -394,10 +431,16 @@ c - For all bins/subproc/orders: Add negative/positive variations
                DO L1=1,NBINTOT
                   DO L2=1,(NSUBPROC+1)
                      DO L3=1,NORD
+                        SUMM = 0.D0
                         DIFF = - RES0(L1,L2,L3)
                         DO L4=1,L3
+                           SUMM = SUMM + RESULT(L1,L2,L4)
                            DIFF = DIFF + RESULT(L1,L2,L4) 
                         ENDDO
+                        WGT(L1,L2,L3)   = WGT(L1,L2,L3)   + 1.D0 
+                        WGT2(L1,L2,L3)  = WGT2(L1,L2,L3)  + 1.D0 
+                        WGTX(L1,L2,L3)  = WGTX(L1,L2,L3)  + SUMM 
+                        WGTX2(L1,L2,L3) = WGTX2(L1,L2,L3) + SUMM*SUMM 
                         IF (DIFF.GT.0D0) THEN
                            RES1HI(L1,L2,L3) =
      >                          RES1HI(L1,L2,L3)+DIFF*DIFF
@@ -412,13 +455,27 @@ c - For all bins/subproc/orders: Add negative/positive variations
          ENDIF                  ! Not done for npdf <= 1
 
 c - Take square-root of sum of squares
+c - or apply Toy MC method for NNPDF
          DO L1=1,NBINTOT
-ckr            IF (NPDF.GT.1) THEN
             IF (LPDF) THEN
                DO L2=1,(NSUBPROC+1)
                   DO L3=1,NORD
-                     RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
-                     RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
+                     IF (.NOT.LTOY) THEN
+ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
+ckr                        RES1LO(L1,L2,L3) = -CL90*SQRT(RES1LO(L1,L2,L3))
+ckr                        RES1HI(L1,L2,L3) = CLGJR*SQRT(RES1HI(L1,L2,L3))
+ckr                        RES1LO(L1,L2,L3) = -CLGJR*SQRT(RES1LO(L1,L2,L3))
+                        RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
+                        RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
+                     ELSE
+                        RES0(L1,L2,L3) = WGTX(L1,L2,L3)/WGT(L1,L2,L3)
+                        RES1HI(L1,L2,L3) = 
+     >                       (WGTX2(L1,L2,L3)/WGT(L1,L2,L3) -
+     >                       RES0(L1,L2,L3)*RES0(L1,L2,L3))
+ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
+                        RES1HI(L1,L2,L3) = SQRT(RES1HI(L1,L2,L3))
+                        RES1LO(L1,L2,L3) = -RES1HI(L1,L2,L3)
+                     ENDIF
                   ENDDO
                ENDDO
                RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
