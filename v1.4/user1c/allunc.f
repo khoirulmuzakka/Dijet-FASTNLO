@@ -89,6 +89,7 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'    alt. = MW: 2- and 4-loop '//
      >           '(from hep-ph/9806404)'
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
+            WRITE(*,*)'     (in mode PY this has to be Lambda_5!)'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
             STOP
@@ -252,9 +253,6 @@ c - Initialize path to LHAPDF libs
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) value given, "//
      >        "using alpha_s according to PDF set"
-ckr     >        "using alpha_s according to PDF set (mode PDF) or"
-ckr         WRITE(*,*)
-ckr     >        "        PDG book (mode MW and KR)"
       ELSE
          READ(CH8TMP,'(F9.6)'),ASMZVAL
          WRITE(*,*)"ALLUNC: Using alpha_s(M_Z):",ASMZVAL

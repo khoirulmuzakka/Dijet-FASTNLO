@@ -35,7 +35,7 @@
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
       
       DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSM,PYALPS
-      DOUBLE PRECISION AS,ASMZ,ASMZPDF,QLAM5
+      DOUBLE PRECISION AS,ASMZ,ASMZPDF,QLAM4,QLAM5
       INTEGER IOAS,NLOOP
 
 ckr Set default values
@@ -62,11 +62,12 @@ ckr      PARAMETER (PI=3.1415927D0)
 
 c - Get info from PDF set      
       CALL GETORDERAS(IOAS)
+      CALL GETLAM4(0,QLAM4)
       CALL GETLAM5(0,QLAM5)
       NLOOP = IOAS+1
       ASMZPDF = ALPHASPDF(ZMASS)
-ckr Round value to 6 digits only
-      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
+ckr Round value to 6 digits only for comparisons
+ckr      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
 
 c - Print info
       IF (IFIRST.EQ.0) THEN
@@ -76,8 +77,14 @@ c - Print info
          WRITE(*,*)"FNALPHAS: M_Z_PDG/GeV =",ZMASS 
          WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDG (parameter) =",ASMZPDG 
          WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDF (1st call)  =",ASMZPDF 
+         WRITE(*,*)"FNALPHAS: Lambda_4_PDF (1st call)  =",QLAM4 
+         WRITE(*,*)"FNALPHAS: Lambda_5_PDF (1st call)  =",QLAM5 
          IF (ASMZVAL.GT.0.D0) THEN
-            WRITE(*,*)"FNALPHAS: a_s(M_Z) requested       =",ASMZVAL 
+            IF (ASMODE.EQ."PY") THEN
+               WRITE(*,*)"FNALPHAS: Lambda requested       =",ASMZVAL 
+            ELSE
+               WRITE(*,*)"FNALPHAS: a_s(M_Z) requested       =",ASMZVAL 
+            ENDIF
          ENDIF
          WRITE(*,*)"FNALPHAS: a_s was used in",NLOOP,
      >        "-loop order in PDF"
@@ -100,6 +107,7 @@ c - ASMODE "PY":
 c Calculation of the running strong coupling up to 2-loop order
 c as in PYTHIA 6.4 using Lambda ...
       ELSEIF (ASMODE.EQ."PY") THEN
+ckr         ASMZ = QLAM4
          ASMZ = QLAM5
          IF (ASMZVAL.GT.0.D0) THEN
             ASMZ = ASMZVAL
@@ -113,6 +121,7 @@ ckr         NLOOP = 2
      >           "only loop orders 1 and 2 are possible!"
             STOP
          ENDIF
+ckr         AS = PYALPS(MUR,ZMASS,ASMZ,4,NLOOP)
          AS = PYALPS(MUR,ZMASS,ASMZ,NF,NLOOP)
 
 c - ASMODE "KR":
@@ -120,13 +129,11 @@ c Calculation of the running strong coupling up to 3-loop order
 c in the MSbar scheme for given alpha_s(M_Z) according to Giele,
 c Glover, Yu: hep-ph/9506442.
       ELSEIF (ASMODE.EQ."KR") THEN
-ckr         ASMZ = ASMZPDG
          ASMZ = ASMZPDF
          IF (ASMZVAL.GT.0.D0) THEN
             ASMZ = ASMZVAL
          ENDIF
 c - Only NLOOP=1,2,3 allowed
-ckr         NLOOP = 2
          IF (IASLOOP.EQ.1.OR.IASLOOP.EQ.2.OR.IASLOOP.EQ.3) THEN
             NLOOP = IASLOOP
          ELSEIF (IASLOOP.GT.0) THEN
@@ -141,7 +148,6 @@ c -              Exact, iterative solution of the 2-loop RGE
       ELSEIF (ASMODE.EQ."MW") THEN
 c   ASMZ = 0.1185             ! for H1-2000 MSbar
 c   ASMZ = 0.1205             ! for MRST2004
-ckr         ASMZ = ASMZPDG
          ASMZ = ASMZPDF
          IF (ASMZVAL.GT.0.D0) THEN
             ASMZ = ASMZVAL
