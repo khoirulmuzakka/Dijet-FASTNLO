@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl1518d (differential in dPhi)
+// fastNLO author code for fnl1518 (differential in dPhi)
 //
 //    LHC @ 10 TeV test scenario
 //    a la Run II first D0 QCD jet publication - Dijet Delta Phi:
@@ -494,7 +494,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      double rap = max( abs(pj[ij1].rapidity()),abs(pj[ij2].rapidity()));
  
      // -------- define central jets and dijet variables
-     if (pt2>20. && pt1>90. && rap<1.1) {
+     if (pt2>50. && pt1>90. && rap<1.1) {
        double pt = pt1;
        double delph = abs(pj[ij1].phi() - pj[ij2].phi());
        if(delph > pi) delph = twopi - delph;

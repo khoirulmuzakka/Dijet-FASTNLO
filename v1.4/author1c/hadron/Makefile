@@ -744,19 +744,19 @@ fnl1310: links fnl1310.cc $(CommonPath)/fj-kt-06.cc \
 # ======================================================================
 # LHC scenario for CMS
 #
-fnl1518d: links fnl1518d.cc $(CommonPath)/fj-sc-07.cc \
+fnl1518diff: links fnl1518diff.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnl1518d.cc \
+	$(NLOJET)/bin/create-nlojet-user fnl1518diff.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl1518d -Wno-deprecated -Wf,-O3 \
+	-o fnl1518diff -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
-fnl1518n: links fnl1518n.cc $(CommonPath)/fj-sc-07.cc \
+fnl1518norm: links fnl1518norm.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnl1518n.cc \
+	$(NLOJET)/bin/create-nlojet-user fnl1518norm.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl1518n -Wno-deprecated -Wf,-O3 \
+	-o fnl1518norm -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
