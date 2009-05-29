@@ -740,15 +740,23 @@ fnl1310: links fnl1310.cc $(CommonPath)/fj-kt-06.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
-# =====   FNL1408: LHC CMS azim. decorrelation with fastjet SISCone R=0.7 
+# =====   FNL1518: LHC CMS azim. decorrelation with fastjet SISCone R=0.5 
 # ======================================================================
 # LHC scenario for CMS
 #
-fnl1508: links fnl1508.cc $(CommonPath)/fj-sc-07.cc \
+fnl1518d: links fnl1508d.cc $(CommonPath)/fj-sc-07.cc \
 	$(cteq6pdf)
-	$(NLOJET)/bin/create-nlojet-user fnl1508.cc \
+	$(NLOJET)/bin/create-nlojet-user fnl1508d.cc \
 	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
-	-o fnl1508 -Wno-deprecated -Wf,-O3 \
+	-o fnl1508d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl1518n: links fnl1508n.cc $(CommonPath)/fj-sc-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1508n.cc \
+	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
+	-o fnl1508n -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 

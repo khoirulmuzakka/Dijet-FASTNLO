@@ -2,7 +2,7 @@
 // fastNLO author code for fnl1518d (differential in dPhi)
 //
 //    LHC @ 10 TeV test scenario
-//    a la Run II first D0 QCD jet publication - Dijet Delta Phi
+//    a la Run II first D0 QCD jet publication - Dijet Delta Phi:
 //         hep-ex0409040
 // 
 // last modification
@@ -280,8 +280,20 @@ void UserHHC::initfunc(unsigned int)
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
          if (ymax>1.1) ymax=1.1;
 	 double ymin = 0.0;
-
-	 //  ----> could be improved for dijets
+	 // - Check limit only for first loop over rap. bins when arrays
+         //   are doubled for reference calculation
+	 if ( (ymin > ymax) && (iref == 0 || (iref == 1 && j < nrap/2 ) ) ) {
+	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
+	     " and rapidity bin " << j << endl;
+	   cout << "The pt bin runs from " << pthigh[j][k] <<
+	     " to " << pthigh[j][k+1] << endl;
+	   cout << "The rapidity bin runs from " << raphigh[j] <<
+	     " to " << raphigh[j+1] << endl;
+	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
+	     ", " << ymin << ", " << ymax << endl;
+	   cout << "Remove empty bin!" << endl;
+	   exit(2);
+	 }
 
 	 //   find smallest x by integrating over accessible y-range
 	 double xmin = 1.0; 
@@ -302,8 +314,8 @@ void UserHHC::initfunc(unsigned int)
          mufval[j][k][0] = murval[j][k][0];
          murval[j][k][1] = raphigh[j+1] * 0.90;
          mufval[j][k][1] =  murval[j][k][1];
-	 if (j==3) {    // special value for bin 180-980
-	   murval[j][k][1] = 260.0 ;
+	 if (j==3) {    // special value for bin 800-5000
+	   murval[j][k][1] = 1220.0 ;
 	   mufval[j][k][1] =  murval[j][k][1];
 	 }
          for( int l = 0; l < nscalevar; l++) {
@@ -362,7 +374,7 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"         *** scenario fnl1518d ***"<<endl;
+   cout<<"         *** scenario fnl1518 ***"<<endl;
    cout<<"              (differential)"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;

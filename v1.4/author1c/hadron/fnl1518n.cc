@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl1508n (normalized)
+// fastNLO author code for fnl1518 (normalization)
 //
 //    LHC @ 10 TeV test scenario
 //    a la Run II first D0 QCD jet publication - Dijet Delta Phi:
@@ -43,7 +43,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fj-sc-07.h"
+#include "fj-sc-05.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -100,7 +100,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fj_sc_07 jetclus;   // jet algorithm
+   fj_sc_05 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -179,7 +179,7 @@ void UserHHC::initfunc(unsigned int)
      }
 
    // lowest pT value in sample
-   ptlow = 90.;          // 75 - for DeltaPhi
+   ptlow = 90.;          // 90. - for DeltaPhi
 
    pthigh.resize(nrap);
    //----- array for pt boundaries
@@ -301,10 +301,10 @@ void UserHHC::initfunc(unsigned int)
          mufval[j][k][0] = murval[j][k][0];
          murval[j][k][1] = pthigh[j][k+1] * 0.90;
          mufval[j][k][1] =  murval[j][k][1];
-// 	 if (k==3) {    // special value for bin 180-980
-// 	   murval[j][k][1] = 260.0 ;
-// 	   mufval[j][k][1] =  murval[j][k][1];
-// 	 }
+ 	 if (k==3) {    // special value for bin 800-5000
+ 	   murval[j][k][1] = 1220.0 ;
+ 	   mufval[j][k][1] =  murval[j][k][1];
+ 	 }
          for( int l = 0; l < nscalevar; l++) {
 	   murvaltrans[j][k][l][0]=log(log(murscale[l]*murval[j][k][0]/mu0scale)); 
 	   murvaltrans[j][k][l][1]=log(log(murscale[l]*murval[j][k][1]/mu0scale));
@@ -361,7 +361,7 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"         *** scenario fnl1508 ***"<<endl;
+   cout<<"         *** scenario fnl1518 ***"<<endl;
    cout<<"              (normalization)"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;
@@ -479,7 +479,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      double rap = max( abs(pj[ij1].rapidity()),abs(pj[ij2].rapidity()));
  
      // -------- define central jets and dijet variables
-     if (pt2>40 && pt1>75 && rap<0.5) {
+     if (pt2>20. && pt1>90. && rap<1.1) {
        double pt = pt1;
        int rapbin = 0;
        int ptbin  = -1;
@@ -757,9 +757,9 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "azim. decorrelation" << endl;
-   table << "test" << endl;
-   table << "CMS" << endl;
+   table << "dsigma-dijet_dDeltaPhi_(nb)" << endl;
+   table << "CMS-PAS-QCD-09-003" << endl;
+   table << "CMS_Collaboration" << endl;
    table << "normalization" << endl;
    table << "-" << endl;
 
@@ -772,12 +772,11 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.7;  // Cone size R
+   double JetResol1 = 0.5;  // Cone size R
    WRITE(JetResol1);
 
    //JetResol2
    double JetResol2 = 0.75; // Overlap threshold
-
    WRITE(JetResol2);
 
    // relative order
@@ -929,4 +928,3 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
    tablefilename = __file_name +".raw";
    nwrite = __save;
 }
-
