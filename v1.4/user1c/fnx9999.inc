@@ -21,7 +21,10 @@ C - Needed for bin boundaries, xlimit, scales
      >     NMAXSUBPROC,NSCALEBINMAX
 C - Scenario-dependent limits
       PARAMETER(ISEPARATOR=1234567890)
-      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=400,NXMAX=200)
+ckr Normal version
+ckr      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=400,NXMAX=200)
+ckr Avoid segfault problem on my notebook
+      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=170,NXMAX=200)
 ckr For precision tests with scenario fnl1007
 c      PARAMETER(NRAPMAX=2,NPTMAX=35,NBINTOTMAX=70,NXMAX=5050) 
 ckr These limits don't work anymore on my test system

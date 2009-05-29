@@ -16,7 +16,7 @@ REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
 STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 PDFFILES= pdfuncertainty.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
-	fn-hbook.f statcode.f
+	pyalps.f fn-hbook.f statcode.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic

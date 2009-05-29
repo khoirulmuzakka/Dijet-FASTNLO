@@ -34,8 +34,8 @@
       INTEGER IASLOOP
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
       
-      DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSM
-      DOUBLE PRECISION AS,ASMZ,ASMZPDF
+      DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSM,PYALPS
+      DOUBLE PRECISION AS,ASMZ,ASMZPDF,QLAM5
       INTEGER IOAS,NLOOP
 
 ckr Set default values
@@ -62,6 +62,7 @@ ckr      PARAMETER (PI=3.1415927D0)
 
 c - Get info from PDF set      
       CALL GETORDERAS(IOAS)
+      CALL GETLAM5(0,QLAM5)
       NLOOP = IOAS+1
       ASMZPDF = ALPHASPDF(ZMASS)
 ckr Round value to 6 digits only
@@ -95,17 +96,58 @@ c - ASMODE "PDF": Take alpha_s etc. from PDF set
          ENDIF
          AS = ALPHASPDF(MUR)
 
+c - ASMODE "PY":
+c Calculation of the running strong coupling up to 2-loop order
+c as in PYTHIA 6.4 using Lambda ...
+      ELSEIF (ASMODE.EQ."PY") THEN
+         ASMZ = QLAM5
+         IF (ASMZVAL.GT.0.D0) THEN
+            ASMZ = ASMZVAL
+         ENDIF
+c - Only NLOOP=0,1,2 allowed (0 = fixed value)
+ckr         NLOOP = 2
+         IF (IASLOOP.EQ.0.OR.IASLOOP.EQ.1.OR.IASLOOP.EQ.2) THEN
+            NLOOP = IASLOOP
+         ELSEIF (IASLOOP.GT.0) THEN
+            WRITE(*,*)"fastNLO: ERROR! In a_s mode PY "//
+     >           "only loop orders 1 and 2 are possible!"
+            STOP
+         ENDIF
+         AS = PYALPS(MUR,ZMASS,ASMZ,NF,NLOOP)
+
+c - ASMODE "KR":
+c Calculation of the running strong coupling up to 3-loop order
+c in the MSbar scheme for given alpha_s(M_Z) according to Giele,
+c Glover, Yu: hep-ph/9506442.
+      ELSEIF (ASMODE.EQ."KR") THEN
+ckr         ASMZ = ASMZPDG
+         ASMZ = ASMZPDF
+         IF (ASMZVAL.GT.0.D0) THEN
+            ASMZ = ASMZVAL
+         ENDIF
+c - Only NLOOP=1,2,3 allowed
+ckr         NLOOP = 2
+         IF (IASLOOP.EQ.1.OR.IASLOOP.EQ.2.OR.IASLOOP.EQ.3) THEN
+            NLOOP = IASLOOP
+         ELSEIF (IASLOOP.GT.0) THEN
+            WRITE(*,*)"fastNLO: ERROR! In a_s mode KR "//
+     >           "only loop orders 1,2 and 3 are possible!"
+            STOP
+         ENDIF
+         AS = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)
+
 c - ASMODE "MW": Use Markus original example code
 c -              Exact, iterative solution of the 2-loop RGE 
       ELSEIF (ASMODE.EQ."MW") THEN
 c   ASMZ = 0.1185             ! for H1-2000 MSbar
 c   ASMZ = 0.1205             ! for MRST2004
-         ASMZ = ASMZPDG
+ckr         ASMZ = ASMZPDG
+         ASMZ = ASMZPDF
          IF (ASMZVAL.GT.0.D0) THEN
             ASMZ = ASMZVAL
          ENDIF
 c - Only NLOOP=2 or 4 allowed
-         NLOOP = 2
+ckr         NLOOP = 2
          IF (IASLOOP.EQ.2.OR.IASLOOP.EQ.4) THEN
             NLOOP = IASLOOP
          ELSEIF (IASLOOP.GT.0) THEN
@@ -115,25 +157,6 @@ c - Only NLOOP=2 or 4 allowed
          ENDIF
          AS = ALPS_IT(MUR,ASMZ,NLOOP)
 
-c - ASMODE "KR":
-c Calculation of the running strong coupling up to 3-loop order
-c in the MSbar scheme for given alpha_s(M_Z) according to Giele,
-c Glover, Yu: hep-ph/9506442.
-      ELSEIF (ASMODE.EQ."KR") THEN
-         ASMZ = ASMZPDG
-         IF (ASMZVAL.GT.0.D0) THEN
-            ASMZ = ASMZVAL
-         ENDIF
-c - Only NLOOP=1,2,3 allowed
-         NLOOP = 2
-         IF (IASLOOP.EQ.1.OR.IASLOOP.EQ.2.OR.IASLOOP.EQ.3) THEN
-            NLOOP = IASLOOP
-         ELSEIF (IASLOOP.GT.0) THEN
-            WRITE(*,*)"fastNLO: ERROR! In a_s mode KR "//
-     >           "only loop orders 1,2 and 3 are possible!"
-            STOP
-         ENDIF
-         AS = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)
       ELSE
 c - Call your own alpha_s code
          WRITE(*,*)"fastNLO: ERROR! Own alpha_s code called, "//
@@ -141,6 +164,7 @@ c - Call your own alpha_s code
          STOP
       ENDIF
       FNALPHAS = AS/2D0/PI
+ckr      write(*,*)"mur,as2pi",MUR,FNALPHAS
 
       RETURN
       END

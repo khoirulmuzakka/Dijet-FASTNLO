@@ -81,7 +81,13 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  PDF set, def. = cteq65.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
      >           '../share/lhapdf/PDFsets'
-            WRITE(*,*)'  alpha_s calc., def. from PDF set'
+            WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
+            WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
+     >           '(from Pythia 6.4 using Lambda_5 from PDF)'
+            WRITE(*,*)'    alt. = KR: 1-, 2- and 3-loop '//
+     >           '(from hep-ph/9506442)'
+            WRITE(*,*)'    alt. = MW: 2- and 4-loop '//
+     >           '(from hep-ph/9806404)'
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
@@ -245,9 +251,10 @@ c - Initialize path to LHAPDF libs
          ASMZVAL = -1D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) value given, "//
-     >        "using alpha_s according to PDF set (mode PDF) or"
-         WRITE(*,*)
-     >        "        PDG book (mode MW and KR)"
+     >        "using alpha_s according to PDF set"
+ckr     >        "using alpha_s according to PDF set (mode PDF) or"
+ckr         WRITE(*,*)
+ckr     >        "        PDG book (mode MW and KR)"
       ELSE
          READ(CH8TMP,'(F9.6)'),ASMZVAL
          WRITE(*,*)"ALLUNC: Using alpha_s(M_Z):",ASMZVAL
