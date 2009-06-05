@@ -198,7 +198,13 @@ void UserHHC::initfunc(unsigned int)
       pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   for (int i=0; i<nrap/2; i++) {
+   int nrp = 0;
+   if (iref==0) {
+     nrp = nrap;
+   } else {
+     nrp = nrap/2;
+   }
+   for (int i=0; i<nrp; i++) {
      for (int j=0; j<npt[i]+1; j++) {
        pthigh[i][j] = 90. + j*2.;
      }
@@ -214,6 +220,7 @@ void UserHHC::initfunc(unsigned int)
    for(int i=0;i<nrap;i++){
      for(int j=0;j<npt[i]+1;j++){
        pthigh[i][j] = pthigh[i][j] * pi/180.0;
+       //       cout << "rapbin i" << i << ",   ptbin j" << j << ",   pthigh" << pthigh[i][j] << endl;
      }
    }
 

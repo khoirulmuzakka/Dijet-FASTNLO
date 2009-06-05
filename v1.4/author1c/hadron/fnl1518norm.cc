@@ -757,7 +757,7 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "dsigma-dijet_dDeltaPhi_(nb)" << endl;
+   table << "sigma-dijet_(nb)" << endl;
    table << "CMS-PAS-QCD-09-003" << endl;
    table << "CMS_Collaboration" << endl;
    table << "normalization" << endl;
