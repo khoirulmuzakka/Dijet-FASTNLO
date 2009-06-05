@@ -44,9 +44,9 @@ print "######################################\n\n";
 #
 # Parse options
 #
-our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_h, $opt_i, $opt_j,
+our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LOCAL", "", "0", "433", "", ".", "0001",
+    ( "LOCAL", "", "0", "433", "guc", "", ".", "0001",
       "0", "LO", "CTEQ", "", ".", "", "1" );
 getopts('b:de:f:hi:j:m:o:p:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
@@ -56,6 +56,7 @@ if ( $opt_h ) {
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -f rev          fastNLO revision to use (def.=433)\n";
+    print "  -g prot         Grid storage protocol to use (def.=guc)\n";
     print "  -h              Print this text\n";
     print "  -i dir          Installation directory (def.=.)\n";
     print "  -j jobnr        Job number to attach (def.=0001)\n";
@@ -88,6 +89,9 @@ unless ( $opt_e =~ m/\d+/ && $opt_e !~ m/\D+/ ) {
 unless ( $opt_f =~ m/\d+/ && $opt_f !~ m/\D+/ ) {
     die "fastrun.pl: Error! Illegal fastNLO revision number: $opt_f, aborted.\n";
 }
+unless ( $opt_g eq "guc" || $opt_g eq "srm" ) {
+    die "fastrun.pl: Error! No such grid storage protocol: $opt_g, aborted.\n";
+}
 unless ( -d $opt_i ) {
     die "fastrun.pl: Error! No such directory: $opt_i, aborted.\n";
 }
@@ -114,6 +118,7 @@ my $batch = $opt_b;
 my $idir  = $opt_i;
 my $nmax  = $opt_e;
 my $frev  = $opt_f;
+my $prot  = $opt_g;
 my $jobnr = $opt_j;
 my $mode  = $opt_m;
 my $order = $opt_o;
@@ -128,6 +133,7 @@ print "fastrun.pl: Using fastNLO revision $frev\n";
 print "fastrun.pl: Job mode is $mode\n";
 unless ( $mode == 1 || $mode == 2 ) {
     print "fastrun.pl: Running on batch system $batch\n";
+    print "fastrun.pl: Using grid storage protocol $prot\n";
     print "fastrun.pl: Maximal event number: $nmax\n";
     print "fastrun.pl: Attaching job number $jobnr\n";
     print "fastrun.pl: Running in order $order\n";
@@ -838,7 +844,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	}
 	$file .= ".tgz";
 	if ( ! -f $file ) {
-	    grid_storage("FETCH","fastNLO_archives",$file,".",$file,"srm");
+	    grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
 	}
 	if ( -f $file ) {
 	    system ("tar xfz $file");
@@ -896,7 +902,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	    my $tfile  = $sfile;
 	    $tfile =~ s/_0001//;
 	    $tfile =~ s/\.raw/_${gjobnr}\.raw/;
-	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile","srm");
+	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Table stored: TABSAV1_$date\n";
@@ -917,8 +923,8 @@ if ( $mode == 0 || $mode == 3 ) {
 		$tpath = "";
 	    }
 	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err","srm");
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log","srm");
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
