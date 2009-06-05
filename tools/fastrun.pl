@@ -138,7 +138,7 @@ unless ( $mode == 1 || $mode == 2 ) {
 if ( $mode != 1 && $ref ) {
     print "fastrun.pl: Making/running in reference mode\n";
 }
-if ( $mode == 0 || $mode ==1 ) {
+if ( $mode == 0 || $mode == 1 ) {
     print "fastrun.pl: Looking for sources in $sdir\n";
 }
 if ( $opt_d ) {
@@ -198,7 +198,12 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
 }
 
 # NLOJET++ table name
-my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-2jet.raw";
+my $njet = "2jet";
+# Dirty hack for 3jet calcs ...
+if ($scen =~ m/diff/) {
+    $njet = "3jet";
+}
+my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.raw";
 
 # Directories
 my $pwdir = getcwd();
@@ -630,7 +635,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	}
     }
 }
-exit 0;
+#exit 0;
 
 
 #
@@ -833,7 +838,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	}
 	$file .= ".tgz";
 	if ( ! -f $file ) {
-	    grid_storage("FETCH","fastNLO_archives",$file,".",$file);
+	    grid_storage("FETCH","fastNLO_archives",$file,".",$file,"srm");
 	}
 	if ( -f $file ) {
 	    system ("tar xfz $file");
@@ -891,7 +896,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	    my $tfile  = $sfile;
 	    $tfile =~ s/_0001//;
 	    $tfile =~ s/\.raw/_${gjobnr}\.raw/;
-	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile");
+	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile","srm");
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Table stored: TABSAV1_$date\n";
@@ -911,9 +916,9 @@ if ( $mode == 0 || $mode == 3 ) {
 	    } else {
 		$tpath = "";
 	    }
-	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-2jet_${gjobnr}";
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err");
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log");
+	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err","srm");
+	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log","srm");
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
@@ -993,31 +998,81 @@ exit 0;
 # Grid table naming example:     fnl0002kt10-hhc-born-2jet_0000.raw
 #
 sub grid_storage {
-    my $signam = shift;
-    my $spath  = shift;
-    my $sfile  = shift;
-    my $tpath  = shift;
-    my $tfile  = shift;
+    my $signam   = shift;
+    my $spath    = shift;
+    my $sfile    = shift;
+    my $tpath    = shift;
+    my $tfile    = shift;
+    my $protocol = shift;
     print "fastrun.pl: spath $spath\n";
     print "fastrun.pl: sfile $sfile\n";
     print "fastrun.pl: tpath $tpath\n";
     print "fastrun.pl: tfile $tfile\n";
+    print "fastrun.pl: protocol $protocol\n";
 
 #    my $sename = "ekp-lcg-se.physik.uni-karlsruhe.de";
 #    my $sename = "dcache-se-cms.desy.de";
 #    my $sename = "dcache-door-cms02.desy.de";
 #    my $sepath = "/pnfs/desy.de/cms/analysis/qcd/rabbertz/";
-    my $sename = "ic-kit-lcgse.rz.uni-karlsruhe.de";
-    my $sepath = "/wlcg/data/users/cms/rabbertz/";
+
+# KITEKP via globus-url-copy
+    my $gucname = "ic-kit-lcgse.rz.uni-karlsruhe.de";
+    my $gucpath = "/wlcg/data/users/cms/rabbertz/";
+    
+# DESY T2 via srm
+#    my $srmname = "dcache-se-cms.desy.de:8443/srm/managerv2?SFN=";
+    my $srmname = "dcache-se-cms.desy.de:8443";
+    my $srmpath = "/pnfs/desy.de/cms/tier2/store/user/krabbert/";
+    
+    my $gucopt = "-cd";
+    if ($protocol eq "guc") {
+# Check globus-url-copy version
+	my $gcmd = "globus-url-copy -version 2>&1";
+	my $ret = `$gcmd`;
+	chomp $ret;
+	my @tmp = split(" ",$ret); 
+	my $guccmd = $tmp[0];
+	my $gucver = $tmp[1];
+	unless ( $gucver =~ m/\d*\.\d*/ ) {
+	    print "fastrun.pl: ERROR! ".
+		"globus-url-copy not found: $ret!\n";}
+	print "fastrun.pl: Found command $guccmd version $gucver\n";
+	$gucopt = "-cd";
+	if ( $gucver <= 2.9 ) {
+	    print "fastrun.pl: WARNING! Version of globus-url-copy ".
+		"too old: $gucver. Cannot create directories on the fly!\n";
+	    $gucopt = "";
+	}
+    } else {
+# Check srmcp version
+	my $gcmd = "srmcp -version 2>&1 | grep -i version";
+	my $ret = `$gcmd`;
+	chomp $ret;
+	my @tmp = split(" ",$ret); 
+	my $srmver = $tmp[$#tmp];
+	chomp $srmver;
+	print "fastrun.pl: Found srmcp command version $srmver\n";
+    }
+
+    my $sename = $gucname;
+    my $sepath = $gucpath;
+    if ($protocol eq "srm" ) {
+	$sename = $srmname;
+	$sepath = $srmpath;
+    }
     
     my $source = "${spath}/${sfile}";
     my $target = "${sepath}${tpath}/${tfile}";
+
     if ( $signam eq "FETCH" ) {
 	$source = "${sepath}${spath}/${sfile}";
 	$target = "${tpath}/${tfile}";
     }
     $source =~ s/\/\.\//\//g;
     $target =~ s/\/\.\//\//g;
+
+    print "fastrun.pl: Source: $source\n";
+    print "fastrun.pl: Target: $target\n";
     
     my $gjobnr = "";
     if ( defined $ENV{MY_JOBID} ) {
@@ -1040,23 +1095,6 @@ sub grid_storage {
 	unless ( -f "$source" ) {
 	    die "fastrun.pl: ERROR! Could not find source $source\n";
 	}		
-# Check globus-url-copy version
-	my $gcmd = "globus-url-copy -version 2>&1";
-	my $ret = `$gcmd`;
-	chomp $ret;
-	my @tmp = split(" ",$ret); 
-	my $guccmd = $tmp[0];
-	my $gucver = $tmp[1];
-	unless ( $gucver =~ m/\d*\.\d*/ ) {
-	    print "fastrun.pl: ERROR! ".
-		"globus-url-copy not found: $ret!\n";}
-	print "fastrun.pl: Found command $guccmd version $gucver\n";
-	my $gucopt = "-cd";
-	if ( $gucver <= 2.9 ) {
-	    print "fastrun.pl: WARNING! Version of globus-url-copy ".
-		"too old: $gucver. Cannot create directories on the fly!\n";
-	    $gucopt = "";
-	}
 # Create target directory if necessary
 # Deprecated due to grid chaos! What does work? srm? edg/glite-gridftp-mkdir?
 #		my $gcmd = "edg-gridftp-mkdir ".
@@ -1066,13 +1104,24 @@ sub grid_storage {
 #		my $ret = system("$gcmd");
 #		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
 # Create target directory directly with globus-url-copy if possible
-	$gcmd = "globus-url-copy $gucopt ".
-	    "file://${source} ".
-	    "gsiftp://${sename}/${target}";
-	print "Command $gcmd\n";
-	$ret = system("$gcmd");
-	if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
-			 "source $source to target $target failed: $ret!\n";}
+	if ($protocol eq "guc") {
+	    my $gcmd = "globus-url-copy $gucopt ".
+		"file://${source} ".
+		"gsiftp://${sename}/${target}";
+	    print "Command $gcmd\n";
+	    my $ret = system("$gcmd");
+	    if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+			     "source $source to target $target failed: $ret!\n";}
+	} else {
+	    $ENV{SRM_PATH} = "";
+	    my $gcmd = "srmcp ".
+		"file:////${source} ".
+		"srm://${sename}/${target}";
+	    print "Command $gcmd\n";
+	    my $ret = system("$gcmd");
+	    if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+			     "source $source to target $target failed: $ret!\n";}
+	}
     } elsif ( $signam eq "FETCH" ) {
 	print "fastrun.pl: Fetching binary fastNLO archive $sfile from\n";
 	print "fastrun.pl: SE $sename in path $sepath\n";
@@ -1081,6 +1130,12 @@ sub grid_storage {
 	my $gcmd = "globus-url-copy ".
 	    "gsiftp://${sename}/${source} ". 
 	    "file://`pwd`/${target}";
+	if ($protocol eq "srm") {
+	    $ENV{SRM_PATH} = "";
+	    $gcmd = "srmcp -streams_num=1 ".
+		"srm://${sename}/${source} ". 
+		"file:///`pwd`/${target}";
+	}
 	print "Command $gcmd\n";
 	system("$gcmd");
 	system("pwd");
