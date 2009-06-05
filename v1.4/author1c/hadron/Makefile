@@ -278,6 +278,20 @@ fnt2006: links fnt2006.cc $(CommonPath)/kt-e-10.cc \
 	$(CommonPath)/kt-e-10.cc $(cteq6pdf) \
 	-o fnt2006ref -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
+# ======================================================================
+# =====   FNT2310: CMS incl. jets with fastjet kT D=0.6 ============
+# ======================================================================
+# LHC scenario for CMS, pt binning acc. to expected resolution
+# For comparison done at Tevatron Run II energies in p\bar{p} collisions
+#
+fnt2310: links fnt2310.cc $(CommonPath)/fj-kt-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnt2310.cc \
+	$(CommonPath)/fj-kt-06.cc $(cteq6pdf) \
+	-o fnt2310 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
