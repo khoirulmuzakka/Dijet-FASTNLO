@@ -83,6 +83,7 @@ class UserHHC : public user_hhc
 
    int nxtot;      // no of xbins 
    vector< vector<double> >xlimit; // array for lower x limits
+   vector< vector<double> >cxlimit; // array for lower x limit corrections
    vector< vector<double> >hxlim; // array for function h at xlimit
    vector< vector<double> >xsmallest; // array for smallest actual x values
    //    array for the weights MAIN ARRAY
@@ -240,6 +241,7 @@ void UserHHC::initfunc(unsigned int)
    murscale[3] = 2.0;  mufscale[3] = 2.0;
 
    xlimit.resize (nrap);
+   cxlimit.resize (nrap);
    hxlim.resize (nrap);
    xsmallest.resize (nrap);     // test: find smallest x values
    murval.resize (nrap);
@@ -250,6 +252,7 @@ void UserHHC::initfunc(unsigned int)
    weights.resize (nrap);
    for( int j = 0; j < nrap; j++) {
       xlimit[j].resize(npt[j]);
+      cxlimit[j].resize(npt[j]);
       hxlim[j].resize(npt[j]);
       xsmallest[j].resize(npt[j]);
       murval[j].resize (npt[j]);
@@ -310,8 +313,12 @@ void UserHHC::initfunc(unsigned int)
 	   if (xtest<xmin) xmin = xtest;
 	 }
 	 xlimit[j][k] = xmin;
-         // ---- safety factors for E-scheme: only small safety factor
-	 xlimit[j][k] = xlimit[j][k]*1.55 * pi/(pthigh[j][k+1]+1.0);
+         // ---- Apply safety factors cxlimit
+	 // Original value from Markus Tevatron scenario: 1.55
+	 //	 cxlimit[j][k] = 1.55 * pi/(pthigh[j][k+1] + 1.0);
+	 // For LHC decrease to at most 95% => 1.4725
+	 cxlimit[j][k] = 1.45 * pi/(pthigh[j][k+1] + 1.0);
+	 xlimit[j][k] = xlimit[j][k] * cxlimit[j][k];
        
          hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
          xsmallest[j][k]=0.999;
@@ -350,15 +357,16 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // print x-limit values at the begin of the job
-   printf ("(rapidity, pt) array for this job:\n");
-   printf ("#rap #pt xlimit pt_high rap_high \n");
+   printf ("\n2-dim. array of observables (usually rapidity and pt) for this job:\n");
+   printf ("#rap #pt    xlimit    cxlimit   pt_high  rap_high\n");
+   printf ("-------------------------------------------------\n");
    for( int j = 0; j < nrap; j++) {
-      for( int k = 0; k < npt[j]; k++) {
-         printf("%3d %3d   %8.6f %8.3f %8.1f \n",j,k,
-		xlimit[j][k],pthigh[j][k],raphigh[(j+1)]);
-      }
+     for( int k = 0; k < npt[j]; k++) {
+       printf("%3d %3d    %8.6f  %8.6f %8.3f %8.1f\n",j,k,
+	      xlimit[j][k],cxlimit[j][k],pthigh[j][k],raphigh[(j+1)]);
+     }
    }
-
+   
    // ===== variables for the bi-cubic interpolation =====
    // - the relative distances to the four nearest bins
    cmax.resize (4); cmin.resize (4);
@@ -534,14 +542,20 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   //      if yes -> make big warning!!! 
 	   //      -> need to change x_limit values
 	   if (xmin<xlimit[rapbin][ptbin]){
-	     printf("Warning: xmin (%f) < xlimit (%f) at pt=%f GeV y=%f \n ",
+	     printf("fastNLO: Error! xmin = %f < xlimit = %f at p_T = %f GeV and y = %f\n",
 		    xmin,xlimit[rapbin][ptbin],pt,rap);
+	     printf("         for bin no. %i of first observable (normally rapidity y): [%f, %f]\n",
+		    rapbin,raphigh[rapbin],raphigh[rapbin+1]);
+	     printf("         and bin no. %i of second observable (normally p_T): [%f, %f]\n",
+		    ptbin,pthigh[rapbin][ptbin],pthigh[rapbin][ptbin+1]);
+	     printf("         Please correct determination of lower x limits in this scenario!\n");
 	     exit(1);
 	   }
 	 
 	   // *******  identify smallest x value in each pT/y bin  *******
 	   //               -> to optimize the x-limit values
-	   if (xmin<xsmallest[rapbin][ptbin]*0.98){  // 0.98 reduces output
+	   //	   if (xmin<xsmallest[rapbin][ptbin]*0.98){//0.98 reduces output
+	   if (xmin<xsmallest[rapbin][ptbin]*0.95){// Reduce even further
 	     xsmallest[rapbin][ptbin] = xmin;
 	     //if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 7h 
 	     //(itype==amplitude_hhc::nlo && nevents> 120000000)){  // 10h
