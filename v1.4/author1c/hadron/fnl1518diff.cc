@@ -151,7 +151,7 @@ void UserHHC::initfunc(unsigned int)
    //iref = 1;       //  switch for reference mode
                   //   0: standard fastNLO table only
                  //    1: include 2nd "reference table" (a_s/PDFs)
-   refscale = 1;   // which of the scalevariations is used in ref-table?
+   refscale = 2;   // which of the scalevariations is used in ref-table?
 
    //unitfactor = 1000000.0;  // for fb
    //unitfactor = 1000.0;  // for pb
