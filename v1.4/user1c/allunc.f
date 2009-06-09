@@ -537,6 +537,7 @@ c - PDF series of variations (e.g. alpha_s(M_Z))
 c - Use primary table
 c - Check that FILENAME is still the primary table here ...!!!
 c - Fill only central scale
+c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSER) THEN
          ISCALE = 3
          MUR = MURSCALE(ISCALE)
@@ -589,6 +590,8 @@ c - Initialize CTEQ61 reference PDFs
 
 c - Default scale (C++ 2, Fortran 3) ==> normal result
          ISCALE = 3
+c - (Use other ISCALE in FORTRAN ONLY if refscale <> 2 in author code)
+c         ISCALE = 2
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
