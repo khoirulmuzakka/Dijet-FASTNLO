@@ -9,7 +9,6 @@
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      CHARACTER*255 BORNNAME,NLONAME
       CHARACTER*255 HISTFILE
       CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
@@ -520,15 +519,7 @@ c - Use statistics tables
 c - Call statistical error-code for scenario
       IF (LSTAT) THEN
          WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties"
-ckr         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/"//
-ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-2jet_"
-ckr         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/"//
-ckr     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
-         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
-     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-2jet_"
-         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
-     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-2jet_"
-         CALL STATCODE(BORNN,BORNNAME,NLON,NLONAME)
+         CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
       ENDIF
       
       
@@ -667,7 +658,7 @@ c
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
-      INTEGER N,LENOCC,IPDF,NPDF
+      INTEGER N,LENOCC,IPDF,NPDF,IPTMAX
       LOGICAL LONE,LPDF,LSTAT,LALG,LSER
 
       INTEGER J,ISTAT2,ICYCLE
@@ -676,6 +667,7 @@ c
       INCLUDE "strings.inc"
       REAL PT(NPTMAX)
       
+
 c - HBOOK common 
       INTEGER NWPAWC
       PARAMETER (NWPAWC=2500000)
@@ -809,8 +801,12 @@ ckr                        write(*,*)"4. Booked histo #",nhist
      >                       30,-1.5,1.5,0)
                         CALL HIDOPT(IHIST + 11,'STAT')
                         NHIST = NHIST+2
-ckr                        write(*,*)"5. Booked histo #",nhist
-                        DO IPT=1,NPT(IRAP)
+ckr                        write(*,*)"5. Booked histo #, IHIST",nhist,
+ckr     >                       IHIST + 11
+ckr IHIST limit before next rapidity bin: IHIST+2*IPT+11 < IHIST+100
+ckr => Maximal IPT = IPTMAX < 45
+                        IPTMAX = 44
+                        DO IPT=1,MIN(NPT(IRAP),IPTMAX)
                            CSTRNG = CBASE1(1:LENOCC(CBASE1))
                            WRITE(CTMP,'(I1)'),IORD
                            CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
@@ -837,7 +833,8 @@ ckr                        write(*,*)"5. Booked histo #",nhist
      >                          30,-1.5,1.5,0)
                            CALL HIDOPT(IHIST + 2*IPT + 11,'STAT')
                            NHIST = NHIST+2
-ckr                           write(*,*)"6. Booked histo #",nhist
+ckr                           write(*,*)"6. Booked histo #, IHIST",nhist,
+ckr     >                          IHIST + 2*IPT + 11
                         ENDDO
                      ENDIF
                   ENDDO

@@ -107,8 +107,8 @@ c - ASMODE "PY":
 c Calculation of the running strong coupling up to 2-loop order
 c as in PYTHIA 6.4 using Lambda ...
       ELSEIF (ASMODE.EQ."PY") THEN
-ckr         ASMZ = QLAM4
-         ASMZ = QLAM5
+         ASMZ = QLAM4
+ckr         ASMZ = QLAM5
          IF (ASMZVAL.GT.0.D0) THEN
             ASMZ = ASMZVAL
          ENDIF
@@ -121,8 +121,8 @@ ckr         NLOOP = 2
      >           "only loop orders 1 and 2 are possible!"
             STOP
          ENDIF
-ckr         AS = PYALPS(MUR,ZMASS,ASMZ,4,NLOOP)
-         AS = PYALPS(MUR,ZMASS,ASMZ,NF,NLOOP)
+         AS = PYALPS(MUR,ZMASS,ASMZ,4,NLOOP)
+ckr         AS = PYALPS(MUR,ZMASS,ASMZ,NF,NLOOP)
 
 c - ASMODE "KR":
 c Calculation of the running strong coupling up to 3-loop order

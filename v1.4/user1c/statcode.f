@@ -1,4 +1,4 @@
-      SUBROUTINE STATCODE(BORNN,BORNNAME,NLON,NLONAME)
+      SUBROUTINE STATCODE(TABPATH,SCENARIO,BORNN,NLON)
       
       IMPLICIT NONE
 c - Attention!!! - this must be declared consistent with its 
@@ -6,16 +6,17 @@ c                  definition in the commonblock!!!!!
 c      DOUBLE PRECISION XSECT(900,3) 
       INCLUDE "fnx9999.inc"
       
-      CHARACTER*(*) BORNNAME,NLONAME
+      CHARACTER*(*) TABPATH,SCENARIO
+      CHARACTER*255 BORNNAME,NLONAME
       CHARACTER*255 FILEBASE,FILENAME,LOFILE,NLOFILE
       CHARACTER*4 NO
       
       INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
       INTEGER ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
-      INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST
+      INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST,IPTMAX
       INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR)
       INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR)
-
+      
       REAL PT(NPTMAX,NRAPIDITY),SERR(NPTMAX,NRAPIDITY),HI
       
       DOUBLE PRECISION WGT(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
@@ -48,6 +49,11 @@ c - HBOOK common
 
 
 c - Initialization
+      BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
+     >     SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-"
+      NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
+     >     SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-"
+      IPTMAX = 44
       DO ISCL = 1,NSCALEVAR
          MUR(ISCL) = MURSCALE(ISCL)
          MUF(ISCL) = MUFSCALE(ISCL)
@@ -119,20 +125,23 @@ c - NLO
          ENDIF
          WRITE(*,*) " ###############################################"
          WRITE(NO,'(I4.4)'),ITAB
-         FILENAME = FILEBASE(1:LENOCC(FILEBASE))//NO//".tab"
-         WRITE(*,*)"Filename for order",IORD,":",FILENAME
+         FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO//".tab"
          OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
          IF (ISTAT.NE.0) THEN
-            WRITE(*,*)"STATERR: WARNING! Table file not found, "//
-     >           "skipped! IOSTAT = ",ISTAT
+            FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"3jet_"//NO//".tab"
+            OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
+            IF (ISTAT.NE.0) THEN
+               WRITE(*,*)"STATERR: WARNING! Table file not found, "//
+     >              "skipped! IOSTAT = ",ISTAT
 ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
 ckr instead of GOTO. However, EXIT leaves the loop!
 ckr To continue the loop use CYCLE instead! 
-            GOTO 10
+               GOTO 10
 ckr            CYCLE
-         ELSE
-            CLOSE(2)
+            ENDIF
          ENDIF
+         CLOSE(2)
+         WRITE(*,*)"Filename for order",IORD,":",FILENAME
          NCOUNT = NCOUNT + 1
          
 c - Loop over scales
@@ -300,24 +309,28 @@ ckr     >                 SIGMA(IPT,IRAP,ISCL,IORD)
      >                 MEAN(IPT,IRAP,ISCL,IORD) ) / 
      >                 SIGMA(IPT,IRAP,ISCL,IORD))
      >                 ,0.,REAL(WTAB(ICOUNT)))
-                  CALL HFILL(IHIST + 2*IPT + 10,
-     >                 REAL(
-     >                 ( CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
-     >                 MEAN(IPT,IRAP,ISCL,IORD) ) / 
-     >                 SIGMA(IPT,IRAP,ISCL,IORD))
-     >                 ,0.,REAL(WTAB(ICOUNT)))
                   CALL HFILL(IHIST + 11,
      >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
      >                 MEAN(IPT,IRAP,ISCL,IORD)) /
      >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
      >                 MINE(IPT,IRAP,ISCL,IORD))),
      >                 0.,REAL(WTAB(ICOUNT)))
-                  CALL HFILL(IHIST + 2*IPT + 11,
-     >                 REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
-     >                 MEAN(IPT,IRAP,ISCL,IORD)) /
-     >                 (MAXE(IPT,IRAP,ISCL,IORD) - 
-     >                 MINE(IPT,IRAP,ISCL,IORD))),
-     >                 0.,REAL(WTAB(ICOUNT)))
+ckr IHIST limit before next rapidity bin: IHIST+2*IPT+11 < IHIST+100
+ckr => Maximal IPT = IPTMAX < 45
+                  IF (IPT.LE.IPTMAX) THEN
+                     CALL HFILL(IHIST + 2*IPT + 10,
+     >                    REAL(
+     >                    ( CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
+     >                    MEAN(IPT,IRAP,ISCL,IORD) ) / 
+     >                    SIGMA(IPT,IRAP,ISCL,IORD))
+     >                    ,0.,REAL(WTAB(ICOUNT)))
+                     CALL HFILL(IHIST + 2*IPT + 11,
+     >                    REAL(2D0*(CBIN(IPT,IRAP,ISCL,IORD,ICOUNT) -
+     >                    MEAN(IPT,IRAP,ISCL,IORD)) /
+     >                    (MAXE(IPT,IRAP,ISCL,IORD) - 
+     >                    MINE(IPT,IRAP,ISCL,IORD))),
+     >                    0.,REAL(WTAB(ICOUNT)))
+                  ENDIF
                ENDDO
             ENDDO
             CALL HPAKE(IHIST,SERR(1,IRAP))
