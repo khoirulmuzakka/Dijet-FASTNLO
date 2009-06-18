@@ -774,6 +774,14 @@ fnl1518diff: links fnl1518diff.cc $(CommonPath)/fj-sc-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
+fnl1518diffpt4: links fnl1518diffpt4.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1518diffpt4.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl1518diffpt4 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
