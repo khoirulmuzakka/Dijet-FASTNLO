@@ -1,18 +1,12 @@
 //
-// fastNLO author code for fnt2008
-//         Run II  CDF dijet mass  (prel.)
-//             midpoint version
+// fastNLO author code for fnl1418:
+//     CMS LHC dijet mass test scenario, E_cms = 10 TeV
+//     for fastjet SISCone algo with R=0.7 in E-scheme
 // 
+// copied from: Run I  D0 dijet mass  hep-ex/0012046
+//              midpoint version (fnt1008)
 // last modification
-// 2005/12/07 MW - new xlimit calculation (y-integration)
-// 2005/12/.. TK - add "reference" setting
-// 2006/01/13 MW - make "reference" option switchable "iref=0/1"
-//                 scale variations are now ordered ; and mur=muf
-//                 implement bicubic eigenfunctions
-// 2006/01/17 MW - divide by binwidth 
-//                 store in fb (as in publication) -> variable "unitfactor"
-//                 extend tableformat to version 1c
-//             --> used for production
+// 19.06.2009 KR - Try for LHC
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>

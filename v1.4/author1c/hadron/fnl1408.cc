@@ -7,7 +7,7 @@
 //              midpoint version (fnt1008)
 // 
 // last modification
-// 12.02.2009 KR - Try for LHC
+// 19.06.2009 KR - Try for LHC
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
