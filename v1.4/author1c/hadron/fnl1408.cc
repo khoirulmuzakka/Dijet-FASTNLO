@@ -3,11 +3,11 @@
 //     CMS LHC dijet mass test scenario, E_cms = 10 TeV
 //     for fastjet SISCone algo with R=0.7 in E-scheme
 //
-// copied from: Run I  D0 dijet mass  hep-ex/0012046
-//              midpoint version (fnt1008)
+// copied from: Run II  CDF dijet mass  (prel.)
+//              midpoint version (fnt2008)
 // 
 // last modification
-// 19.06.2009 KR - Try for LHC
+// 22.06.2009 KR - Try for LHC
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
@@ -45,12 +45,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-//#include "kt2jet-e-07.h"
-//#include "kt2jet-e-07.h"
-//#include "kt-e-07.h"
-#include "cone-et-07.h"
-//#include "midpt-e-07.h"
-//#include "rsep-et-07.h"
+#include "fj-sc-07.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -111,11 +106,14 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   cone_et_07 jetclus;   // jet algorithm
+   fj_sc_07 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
+   bool textoutput; // If true, the table is written in plain ASCII instead of BASE64 encoded doubles (later for XML)
    amplitude_hhc::integral_type itype; // Born, NLO etc.
+
+   time_t start_time;
 
    void writetable();
 };
@@ -131,11 +129,12 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy square
-   //s = 40000;       // RHIC           200GeV   
-   s = 3240000;     // TeV Run I     1800GeV
-   //s = 3841600;       // TeV Run II    1960GeV
-   //s = 196000000;   // LHC          14000GeV
+   //  total c.m. energy squared
+   //s = 40000.;     // RHIC               200 GeV   
+   //s = 3240000.;   // TeV Run I         1800 GeV
+   //s = 3841600.;   // TeV Run II        1960 GeV
+   s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 196000000.; // LHC              14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -156,24 +155,23 @@ void UserHHC::initfunc(unsigned int)
    //iref = 1;       //  switch for reference mode
                   //   0: standard fastNLO table only
                  //    1: include 2nd "reference table" (a_s/PDFs)
-   refscale = 1;   // which of the scalevariations is used in ref-table?
+   refscale = 2;   // which of the scalevariations is used in ref-table?
 
-   //unitfactor = 1000000.0;  // for fb
-   //unitfactor = 1000.0;  // for pb 
-   unitfactor = 1.0;  // for nb    <<< use for D0 dijet mass
+   unitfactor = 1000000.0;  // for fb
+   //unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
+   //unitfactor = 1.0;  // for nb    
 
    //Set up binning  
    nrap   = 1;  //            // No. of bins in rapidity -> here: one
    if (iref==1) nrap=nrap*2;  // -> in reference mode: double No. rap bins
-
+   
    raphigh = new double[nrap+1];  //----- array for rapidity boundaries
    npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
 
    // flexible rap binning
-   raphigh[0]=0;
-   for(int i=0;i<nrap;i++){
-     raphigh[i+1]=raphigh[i]+2.0;    // these are dijet mass bins
-   }
+   // these are dijet rapidity bins
+   raphigh[0]=0.0;
+   raphigh[1]=1.0;
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
@@ -182,7 +180,7 @@ void UserHHC::initfunc(unsigned int)
 
    //Define binning in pt -> here:  DijetMass
    for(int i=0;i<nrap;i++){
-     npt[i]=15;
+     npt[i]=14;
    }
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
@@ -191,30 +189,29 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // lowest pT value in sample   -> here: mass
-   ptlow = 200.;          // 
+   ptlow = 419.;          // 
 
    pthigh.resize(nrap);
    //----- array for pt boundaries
    for(int i=0;i<nrap;i++){
       pthigh[i].resize(npt[i]+1);
    }
-   //----- array for pt boundaries
-   pthigh[0][0]=200.0;
-   pthigh[0][1]=220.0;
-   pthigh[0][2]=240.0;
-   pthigh[0][3]=270.0;
-   pthigh[0][4]=300.0;
-   pthigh[0][5]=320.0;
-   pthigh[0][6]=350.0;
-   pthigh[0][7]=390.0;
-   pthigh[0][8]=430.0;
-   pthigh[0][9]=470.0;
-   pthigh[0][10]=510.0;
-   pthigh[0][11]=550.0;
-   pthigh[0][12]=600.0;
-   pthigh[0][13]=700.0;
-   pthigh[0][14]=800.0;
-   pthigh[0][15]=1400.0;
+   //----- array for pt boundaries (=mass boundaries)
+   pthigh[0][0]=419.0;
+   pthigh[0][1]=526.0;
+   pthigh[0][2]=649.0;
+   pthigh[0][3]=788.0;
+   pthigh[0][4]=944.0;
+   pthigh[0][5]=1118.0;
+   pthigh[0][6]=1313.0;
+   pthigh[0][7]=1530.0;
+   pthigh[0][8]=1770.0;
+   pthigh[0][9]=2037.0;
+   pthigh[0][10]=2332.0;
+   pthigh[0][11]=2659.0;
+   pthigh[0][12]=3019.0;
+   pthigh[0][13]=3416.0;
+   pthigh[0][14]=10000.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -223,7 +220,7 @@ void UserHHC::initfunc(unsigned int)
        }
      }
 
-   nxtot = 10;  // 
+   nxtot = 20;  // Start high with 20
 
    // no of scalebins, linear interpolation in between for now
    nscalebin = 2;
@@ -290,15 +287,20 @@ void UserHHC::initfunc(unsigned int)
 	 
          // - Setup the xlimit array - computed from kinematic constraints
 	 //  ----> need good formula for dijets
-	 double xmin = 0.031+(pthigh[j][k]+120.0)*(pthigh[j][k]+120.0) / s; 
-	 xlimit[j][k] = xmin * 0.63;   // exact limit value!!!
+         double xmin = 1.0;
+	 double xminmax = pthigh[j][k]*pthigh[j][k] / s;
+         double xmin2 = 1.0/2.71828 *pthigh[j][k] / sqrt(s); // for y<1
+	 if (xminmax > xmin2) {
+	   xmin = xminmax; }
+	 else {
+	   xmin = xmin2; }
+	 xlimit[j][k] = xmin * 1.0;   // exact limit value!!!
 	 // define reasonable upper and lower pT boundaries for each bin
-         pthi[j][k]  = 0.52*pthigh[j][k+1];
-         ptlo[j][k]  = 0.35*pthigh[j][k];
+         pthi[j][k]  = 0.502*pthigh[j][k+1];
+         ptlo[j][k]  = 0.325*pthigh[j][k];
 
          // ---- safety factors for E-scheme: only small safety factor
-	 xlimit[j][k] = xlimit[j][k]*0.98;
-	 if (k==0) xlimit[j][k] = xlimit[j][k]*1.00;
+	 xlimit[j][k] = xlimit[j][k]*1.0;
          hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
          xsmallest[j][k]=0.999;
          ptsmallest[j][k]=999.9;
@@ -306,10 +308,10 @@ void UserHHC::initfunc(unsigned int)
 
          // - Setup the murval and mufval arrays
 	 double dpt = (pthi[j][k]-ptlo[j][k]);
-         murval[j][k][0] = ptlo[j][k] +dpt*0.18;    // for CDF: dpt*0.18;0.4
+         murval[j][k][0] = ptlo[j][k] +dpt*0.12;
          murval[j][k][1] = pthi[j][k] -dpt*0.4;
 	 mufval[j][k][0] = murval[j][k][0];
-         mufval[j][k][1] = murval[j][k][1];
+         mufval[j][k][1] =  murval[j][k][1];
 
          for( int l = 0; l < nscalevar; l++) {
 	   murvaltrans[j][k][l][0]=log(log(murscale[l]*murval[j][k][0]/mu0scale)); 
@@ -367,9 +369,8 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"         *** scenario fnt1008 ***"<<endl;
-   cout<<"        (D0 Run I dijets - w/ midpoint)"<<endl;
-   cout<<"            (hep-ex/0012046)"<<endl;
+   cout<<"         *** scenario fnl1408 ***"<<endl;
+   cout<<"             (CMS di-jet mass)"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;
    cout<<"        store table after "<<nwrite<<" events"<<endl;
@@ -414,8 +415,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //  typedef lorentzvector<double> _Lv;
    //-------- general stuff
    //  double s = 2.0*(p[hadron(0)]*p[hadron(-1)]);
-   static const double twopi = 6.28318530717958647692;
-   static const double pi = 3.14159265358979323846;
+
    //---------------------------------------------------
    //--------- start event processing ------------------
    //---------------------------------------------------
@@ -484,19 +484,23 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        ij2 = tempij;
      }
      // define dijet variables
-     double dijceta = cosh( abs(pj[ij1].prapidity()-pj[ij2].prapidity() ));
-     double dijphi = abs(pj[ij1].phi() - pj[ij2].phi()) ;
-     if (dijphi> pi) dijphi = twopi - dijphi;
-     double dijmass = sqrt(2.0*pt1*pt2* (dijceta-cos(dijphi))); 
-
+     double dijmass = sqrt((pj[ij1].T()+pj[ij2].T())*(pj[ij1].T()+pj[ij2].T())
+                           -(pj[ij1].X()+pj[ij2].X())*(pj[ij1].X()+pj[ij2].X())
+                           -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
+                           -(pj[ij1].Z()+pj[ij2].Z())*(pj[ij1].Z()+pj[ij2].Z()));
+     // Make it pseudo-rapidity for CMS
      double dijeta = max(abs(pj[ij1].prapidity()),abs(pj[ij2].prapidity()));
+     //double dijeta = max(abs(pj[ij1].rapidity()),abs(pj[ij2].rapidity()));
+     //double costhstar = abs( tanh((pj[ij1].rapidity()-
+     //			   pj[ij2].rapidity())/2.0));
 
-     if (dijeta<1.0 && dijmass > ptlow ) {
+     if (dijeta<raphigh[1] && dijmass > ptlow) {
        // --- later this variable will be the ren/fact. scale
        //     double ptmax = pt1;    // either pTmax
        double ptmax = (pt1+pt2)/2.0; // or the average dijet pT
 
        // --- determine eta and pt(=Mass) bin 
+       // Not normalized to binwidth in eta ...!
        double binwidth = 1.0;    // 
        int rapbin = 0;
        if (rapbin >=0 ) {              
@@ -504,10 +508,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	 for( int j = 0; j < npt[rapbin]; j++) {
 	   if (dijmass>=pthigh[rapbin][j] && dijmass<pthigh[rapbin][(j+1)]) {
 	     ptbin=j;
-	     binwidth = (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]) *4.0;
+	     binwidth = pthigh[rapbin][(j+1)]-pthigh[rapbin][j];
 	     break;
 	   }
 	 }
+	 
 	 
 	 //---------- compute weight, fill fastNLO array
 	 if ( ptbin>=0 ) {
@@ -516,7 +521,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   //      -> need to change x_limit values
 	   if (xmin<xlimit[rapbin][ptbin]){
 	     printf("Warning: xmin (%f) < xlimit (%f) at pt=%f GeV y=%f \n ",
-		    xmin,xlimit[rapbin][ptbin],dijmass,0.0);
+		    xmin,xlimit[rapbin][ptbin],dijmass,dijeta);
+             printf("         in ptbin: %i  rapbin %i \n ", ptbin,rapbin);
 	     exit(1);
 	   }
 
@@ -529,10 +535,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   //               -> to optimize the x-limit values
 	   if (xmin<xsmallest[rapbin][ptbin]*0.98){  // 0.98 reduces output
 	     xsmallest[rapbin][ptbin] = xmin;
-	     //if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 7h 
-	     //(itype==amplitude_hhc::nlo && nevents> 120000000)){  // 10h
-	     if((itype==amplitude_hhc::lo && nevents> 10000000)|| // 2.5h 
-		(itype==amplitude_hhc::nlo && nevents> 50000)){  // 5hh
+	     if((itype==amplitude_hhc::lo && nevents> 20000000)|| // 2.5h
+	      (itype==amplitude_hhc::nlo && nevents> 15000000)){  // 5hh
+	       //if((itype==amplitude_hhc::lo && nevents> 3000000)|| // 2.5h 
+	       //(itype==amplitude_hhc::nlo && nevents> 150000)){  // 5hh
 	       cout<<" "<<endl;
 	       cout<<">>>>>> smaller x found in bin  "<<rapbin<<"  "<<ptbin
 		   <<"   -  "<<xmin<<"  "<<xlimit[rapbin][ptbin]<<"  :  "<<
@@ -670,6 +676,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 		 ;
 	       }
 
+	       /*
+	       cout<<scalebin<<"   dsc "<<deltascale<<" "<<hmu<<" "<<
+		 murvaltrans[rapbin][ptbin][scalevar][0]<<
+		 murvaltrans[rapbin][ptbin][scalevar][1]<<endl;
+	       */
+
 	       // ** ----------------------------------------------------
 	       // ** now fill half-table
 	       // ** loop over all 16 points that receive contributions
@@ -773,7 +785,7 @@ void UserHHC::writetable(){
    fstream table(tablefilename.c_str() ,ios::out|ios::binary); // open file
  
    // ireaction
-   int ireaction = 3;
+   int ireaction = 2;
    WRITE(ireaction);
 
    unsigned int nj;
@@ -787,9 +799,9 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d3sigma_dMass_deta1_deta2_(nb_GeV)" << endl;
-   table << "hep-ex-0012046" << endl;
-   table << "D0_Collaboration" << endl;
+   table << "dsigma-dijet_dMass_(fb_GeV)" << endl;
+   table << "a la CMS-PAS-SBM-007-01" << endl;
+   table << "CMS_Collaboration" << endl;
    table << "-" << endl;
    table << "-" << endl;
 
@@ -798,16 +810,15 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 2; // midpoint cone algo
+   int ialgo = 4; // midpoint cone algo
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.7;  // midpoint cone: R_cone
+   double JetResol1 = 0.7;  // Jet size R
    WRITE(JetResol1);
 
    //JetResol2
-   double JetResol2 = 0.5; //midpoint cone: f_overlap (not effective up to NLO)
-
+   double JetResol2 = 0.75; // Overlap threshold
    WRITE(JetResol2);
 
    // relative order
@@ -876,7 +887,7 @@ void UserHHC::writetable(){
    WRITE(marker);// ------------------END of block
 
    // a brief description how the scale is defined
-   table << "average_ET_of_dijets" << endl;
+   table << "average_pT_of_dijets" << endl;
 
    WRITE(nscalebin); // No. of Bins in mur,muf
 
@@ -959,4 +970,3 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
    tablefilename = __file_name +".raw";
    nwrite = __save;
 }
-

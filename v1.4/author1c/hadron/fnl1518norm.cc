@@ -205,7 +205,8 @@ void UserHHC::initfunc(unsigned int)
       }
    }
    
-   nxtot = 12;
+   //   nxtot = 12;
+   nxtot = 20;
 
    // no of scalebins, linear interpolation in between for now
    nscalebin = 2;

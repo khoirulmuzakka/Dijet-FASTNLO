@@ -165,8 +165,8 @@ void UserHHC::initfunc(unsigned int)
    npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
 
    // flexible rap binning
-   raphigh[0]=300.0;        // here: these are pT bins!!!
-   raphigh[1]=500.0;        // 
+   raphigh[0]=500.0;        // here: these are pT bins!!!
+   raphigh[1]=800.0;        // 
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
@@ -181,7 +181,7 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // lowest pT value in sample   -> here: smallest DeltaPhi value
-   ptlow = 300.;          // corresponds to pi/2
+   ptlow = 500.;          // corresponds to pi/2
 
    pthigh.resize(nrap);
    //----- array for pt boundaries
@@ -816,7 +816,7 @@ void UserHHC::writetable(){
    table << "CMS-PAS-QCD-09-003" << endl;
    table << "CMS_Collaboration" << endl;
    table << "differential" << endl;
-   table << "fourth pT bin" << endl;
+   table << "fifth pT bin" << endl;
 
   //iproc
    int iproc = 2; // dijets
