@@ -234,8 +234,8 @@ my $gccapp = "gcc$gccvers";
 $gccapp =~ s/\.//g;
 print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
 
-$install{fastjet}[0]    = "fastjet-2.3.4";
-$install{fastjet}[1]    = "fastjet-2.3.4";
+$install{fastjet}[0]    = "fastjet-2.4.1";
+$install{fastjet}[1]    = "fastjet-2.4.1";
 $install{mcfm}[0]       = "mcfm-5.3";
 $install{mcfm}[1]       = "MCFM-5.3";
 $install{mcfmfix}[0]    = "mcfm-5.3-fix";
@@ -261,7 +261,8 @@ if ( $vers == 1 ) {
 } else {
     $install{cernlib}[0]    = "cernlib-2006_slc4_ia32_gcc4";
     $install{cernlib}[1]    = "2006";
-    $install{root}[0]       = "root-5.18";
+#    $install{root}[0]       = "root-5.18";
+    $install{root}[0]       = "root-5.22";
     $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.7.0";
     $install{lhapdf}[1]     = "lhapdf-5.7.0";
