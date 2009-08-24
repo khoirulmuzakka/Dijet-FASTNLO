@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([fastnlo], [2.0], [thomas.kluge@cern.ch])
+AC_INIT([fastnlo], [2.0], [thomas.kluge@cern.ch,klaus.rabbertz@cern.ch])
 AM_INIT_AUTOMAKE
 AC_PREFIX_DEFAULT(${HOME})
 
@@ -15,7 +15,7 @@ AC_CONFIG_SRCDIR([common/fnloconstants.h])
 # Checks for libraries.
 AC_F77_LIBRARY_LDFLAGS
 
-# Announce checks particluar for fastNLO
+# Announce checks particular for fastNLO
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Starting checks particular for fastNLO ...])
 AC_MSG_NOTICE([******************************************])
@@ -62,9 +62,10 @@ for i in "yes" $(echo "$LD_LIBRARY_PATH" | tr : ' '); do
     LIBS="$saved_LIBS -l$i"
     LDFLAGS="$saved_LDFLAGS -L$i"
   fi
-#  echo "LIBS $LIBS"
-#  echo "LDFLAGS $LDFLAGS"
-  AC_CHECK_LIB([lhpdf], [lhpdf_pdf_evolveas], [found="$i"; break])
+  echo "LIBS $LIBS"
+  echo "LDFLAGS $LDFLAGS"
+#  AC_CHECK_LIB([lhpdf], [lhpdf], [found="$i"; break])
+  AC_SEARCH_LIBS([lhpdf],[lhpdf])
 done
 
 AC_SUBST([LHPDFPREFIX], "")
@@ -125,6 +126,28 @@ AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
 AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
 AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
 AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+
+#FASTJET
+AC_MSG_NOTICE([Looking for fastjet installation ...])
+if test "x$FASTJET" = "x"; then
+  AC_MSG_WARN([FASTJET environment variable is not set, trying to find fastjet-config in PATH ...])
+  AC_PATH_PROG([FASTJETBINPATH],[fastjet-config],[:])
+  if test "$FASTJETBINPATH" = :; then
+    AC_MSG_ERROR([No path to FASTJET binaries found, configuration aborted!])
+  else
+    AC_SUBST([FASTJETPREFIX], [`fastjet-config --prefix`])
+  fi
+else
+  AC_MSG_RESULT([Using environment variable FASTJET=$FASTJET to locate FASTJET installation])
+  AC_SUBST([FASTJETPREFIX], ["$FASTJET"])
+fi
+AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
+AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
+AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
+AC_MSG_RESULT([Using $FASTJETPREFIX for the FASTJET installation path])
+AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
+AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
+AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
 
 #CERNLIB
 AC_MSG_NOTICE([Looking for CERN libraries ...])
