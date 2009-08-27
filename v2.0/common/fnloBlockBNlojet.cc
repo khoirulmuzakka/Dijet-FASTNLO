@@ -1,3 +1,6 @@
+// KR: Add include because of header clean-up in gcc-4.3
+#include <cstdlib>
+
 #include "fnloBlockBNlojet.h"
 
 void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor){

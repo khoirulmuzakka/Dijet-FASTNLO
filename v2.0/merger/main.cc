@@ -1,3 +1,6 @@
+// KR: Add include because of header clean-up in gcc-4.3
+#include <cstdlib>
+
 #include "stdio.h"
 #include <vector>
 
@@ -7,7 +10,9 @@
 
 using namespace std;
 
-int main(int argc,void** argv)
+// KR: Change void** to char** for gcc-4.3
+// int main(int argc,void** argv)
+int main(int argc, char** argv)
 {
   // check parameters
   if(argc<3){

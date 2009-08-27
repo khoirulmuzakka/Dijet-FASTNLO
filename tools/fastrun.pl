@@ -263,8 +263,8 @@ if ( $vers == 1 ) {
     $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
     $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
-    $install{cernlib}[0]    = "cernlib-2006_slc4_ia32_gcc4";
-    $install{cernlib}[1]    = "2006";
+    $install{cernlib}[0]    = "cernlib-2006";
+    $install{cernlib}[1]    = "cernlib-2006";
 #    $install{root}[0]       = "root-5.18";
     $install{root}[0]       = "root-5.22";
     $install{root}[1]       = "root";
@@ -286,9 +286,9 @@ foreach my $comp ( keys %install ) {
     if ( $comp =~ m/gcc/ ) {
 	$install{$comp}[2] = $install{$comp}[1];
 	$install{$comp}[3] = "gcc";
-    } elsif ( $comp =~ m/cern/ ) {
-	$install{$comp}[2] = "cernlib-2006_slc4_ia32_gcc4";
-	$install{$comp}[3] = "cernlib-2006_slc4_ia32_gcc4-v2";
+#    } elsif ( $comp =~ m/cern/ ) {
+#	$install{$comp}[2] = "cernlib-2006_slc4_ia32_gcc4";
+#	$install{$comp}[3] = "cernlib-2006_slc4_ia32_gcc4-v2";
     } elsif ( $comp =~ m/fix/ ) {
 	$install{$comp}[2] = "";
 	$install{$comp}[3] = "";
@@ -422,16 +422,32 @@ if ( $mode == 0 || $mode == 1 ) {
     unless ( -e "$idir/$install{cernlib}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
+
+	unless ( -d "$idir/src" ) {
+	    my $ret = system ("mkdir -p $idir/src");
+	    if ( $ret ) {die "fastrun.pl: Couldn't create unpacking ".
+			     "directory $idir/src: $ret, aborted!\n";}
+	}
+	chdir "$idir/src";
+
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	my $ret =system("tar xz -C $idir -f $sdir/$install{cernlib}[0]");
+	my $ret =system("tar xz -f $sdir/$install{cernlib}[0]");
 	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[0] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	$ret = system("mv $install{cernlib}[1] $idir/$install{cernlib}[2]");
+			 "in $idir/src failed: $ret, aborted!\n";}
+	$ret = system("mv $install{cernlib}[1] $install{cernlib}[2]");
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			 "$install{cernlib}[1] to ".
-			 "$idir/$install{cernlib}[2]: $ret, aborted!\n";}
-	if ( -l "$idir/$install{cernlib}[3]" ) {system("rm -f $idir/$install{cernlib}[3]");}
-	system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
+			 "$install{cernlib}[2]: $ret, aborted!\n";}
+#	if ( -l "$idir/$install{cernlib}[3]" ) {system("rm -f $idir/$install{cernlib}[3]");}
+#	system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
+	unless ( -d "$idir/lib" ) {
+	    my $ret = system ("mkdir -p $idir/lib");
+	    if ( $ret ) {die "fastrun.pl: Couldn't create lib ".
+			     "directory $idir/lib: $ret, aborted!\n";}
+	}
+	$ret = system("cp -p $install{cernlib}[2]/\* $idir/lib");
+	if ( $ret ) {die "fastrun.pl: Couldn't copy CERNlibs into ".
+			 "directory $idir/lib: $ret, aborted!\n";}
     }
     if ( $vers == 2 ) {
 	unless ( -e "$idir/src/$install{root}[2]" ) {

@@ -1,3 +1,6 @@
+// KR: Add include because of header clean-up in gcc-4.3
+#include <cstdlib>
+
 #include "fnloTable.h"
 
 int fnloTable::ReadTable(){

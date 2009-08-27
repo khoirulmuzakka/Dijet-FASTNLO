@@ -1,3 +1,6 @@
+// KR: Add include because of header clean-up in gcc-4.3
+#include <cstdlib>
+
 #include "fnloBlockB.h"
 
 int fnloBlockB::Read(istream *table){
