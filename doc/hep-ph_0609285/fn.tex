@@ -1,0 +1,76 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{amssymb}   % for math
+\usepackage{psfig}   % for math
+
+%\usepackage[light,none,bottom]{draftcopy}
+
+
+%\renewcommand{\rmdefault}{bch}
+%\renewcommand{\sfdefault}{phv}
+
+\newcommand{\bvt}{\begin{verbatim}}
+\newcommand{\evt}{\end{verbatim}}
+
+\topmargin=-1.5cm
+\textwidth15.3cm
+\textheight23cm
+\evensidemargin13mm
+\oddsidemargin5mm
+\unitlength1cm
+\sloppy
+
+\begin{document}
+
+
+
+\title{\bf fastNLO: Fast pQCD Calculations \\ for PDF Fits}
+\author{T. Kluge$^1$, K. Rabbertz$^2$, M. Wobisch$^3$\\ \, \\
+\em     $^1$ DESY, Hamburg, Germany
+  \\\em$^2$ University of Karlsruhe, Karlsruhe, Germany
+  \\\em$^3$ Fermi National Accelerator Laboratory, Batavia, IL, USA}
+
+\maketitle
+
+\begin{abstract}
+We present a method for very fast repeated computations of higher-order
+cross sections in hadron-induced processes
+for arbitrary parton density functions.
+A full implementation of the method
+for computations of jet cross sections
+in Deep-Inelastic Scattering and in Hadron-Hadron Collisions
+is offered by the ``fastNLO'' project.  
+A web-interface for online calculations and user code
+can be found at
+{\tt http://hepforge.cedar.ac.uk/fastnlo/}.
+\end{abstract}
+
+\vskip-13.8cm
+\hfill {hep-ph/0609285} \\
+\phantom{a} \hfill{DESY 06-186}  \\
+\phantom{a} \hfill{FERMILAB-CONF-06-352-E} \\
+
+
+\vskip18cm
+
+\noindent
+To appear in the
+{\sl Final Report of the QCD working group of the Tevatron-for-LHC Workshop}, 
+eds. M. Carena and S. Mrenna (2006)
+\vskip2mm
+\noindent
+A slightly shorter version will appear in
+{\sl Proceedings of the XIV Workshop on Deep Inelastic Scattering, 
+April 20-24, 2006 in Tsukuba, Japan}.
+
+
+
+
+\newpage
+\input{fastnlo.tex}
+\input{references.tex}
+
+
+\end{document}

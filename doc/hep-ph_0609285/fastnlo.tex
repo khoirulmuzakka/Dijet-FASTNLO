@@ -1,0 +1,529 @@
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\section{Introduction}
+
+
+
+The aim of the "fastNLO" project is to make the inclusion of jet data
+into global fits of parton density functions (PDFs) feasible. 
+Due to the prohibitive computing time required for the jet cross sections 
+using standard calculation techniques,
+jet data have either been omitted in these fits completely 
+or they were included using a simple approximation.
+%
+The fastNLO project implements a method that offers exact and 
+very fast pQCD calculations
+for a large number of jet data sets 
+allowing to take full advantage of their direct sensitivity 
+to the gluon density in the proton in future PDF fits.
+%
+This includes Tevatron jet data beyond
+the inclusive jet cross section and also
+HERA jet data which have %successfully  
+been used to determine the proton's gluon
+density~\cite{Adloff:2000tq,Chekanov:2001bw,Chekanov:2002be,Chekanov:2005nn},
+but which are ignored in current 
+PDF fits~\cite{Alekhin:2005gq,Martin:2004ir,Pumplin:2002vw}.
+
+
+
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\section{Concept}
+
+\subsection{Cross Sections in Perturbative QCD}
+
+Perturbative QCD predictions for observables in 
+hadron-induced processes depend on the strong coupling 
+constant $\alpha_s$ and on the PDFs of the hadron(s).
+Any cross section in hadron-hadron collisions 
+can be written as the convolution of 
+the strong coupling constant  $\alpha_s$ in order $n$,
+the perturbative coefficient $c_{n,i}$ for the partonic
+subprocess $i$,
+and the corresponding linear combination of PDFs 
+from the two hadrons $F_i$
+which is a function of the  fractional hadron momenta
+$x_{a,b}$ carried by the partons
+%
+\begin{equation}
+\sigma(\mu_r,\mu_f) = \sum_{n,i}  \, c_{n,i}(x_a, x_b, \mu_r,\mu_f) 
+\otimes 
+\left[ \alpha_s^n(\mu_r) \cdot F_i(x_a,x_b,\mu_f) \right] \,.
+\label{eq:fnmain}
+\end{equation}
+%
+The PDFs and $\alpha_s$ also depend on the factorization and the 
+renormalization scales $\mu_{f,r}$, respectively,
+as does the perturbative prediction for the cross section
+in finite order $n$.
+%
+An iterative PDF fitting procedure
+using exact NLO calculations for jet data, 
+based on Monte-Carlo integrations of~(\ref{eq:fnmain}), 
+is too time-consuming.
+Only an approximation of~(\ref{eq:fnmain}) is, therefore,
+currently being used in global PDF fits.
+
+
+
+
+
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\subsection{A Simple Approach}
+
+
+\begin{figure}[t]
+\centerline{
+%   \psfig{figure=qcd/fastNLO/plots/kfactorapprox1.eps,height=4.9cm}
+   \psfig{figure=kfactorapprox1.eps,height=4.9cm}
+}
+   \caption{The $k$-factor for the inclusive $p\bar{p}$ jet cross section 
+   at $\sqrt{s}=1.96$\,TeV as a function of $p_T$ at different rapidities $y$
+   for the total cross section (solid line) and for different 
+   partonic subprocesses:
+   gluon-gluon (dashed), gluon-quark (dotted) and the sum of all
+   quark and/or anti-quark induced subprocesses (dashed-dotted).
+\label{fig:kfactor}}
+\end{figure}
+
+
+
+The ``$k$-factor approximation''
+as used in~\cite{Martin:2004ir,Pumplin:2002vw}
+parameterizes higher-order corrections
+for each bin of the observable by a factor
+$\displaystyle k = \frac{\sigma_{\rm NLO}}{\sigma_{\rm LO}}
+= \frac{\sigma_{(2)}+\sigma_{(3)}}{\sigma_{(2)}}$
+computed from the contributions 
+with $n=2$ ($\sigma_{(2)}$) and $n=3$ ($\sigma_{(3)}$)
+for a fixed PDF, averaged over all subprocesses~$i$.
+In the iterative fitting procedure
+only the LO cross section is computed
+and multiplied with $k$ to obtain an estimate of 
+the NLO cross section.
+This procedure does not take into account that 
+different partonic subprocesses can have largely 
+different higher-order corrections.
+Fig.~\ref{fig:kfactor} shows that the $k$-factors
+for quark-only and gluon-only induced subprocesses
+can differ by more than $\pm20\%$ from the average.
+%
+The $\chi^2$ is therefore minimized under an incorrect assumption
+of the true PDF dependence of the cross section.
+%
+Further limitations of this approach are:
+\begin{itemize}
+\item 
+   Even the LO Monte-Carlo integration of~(\ref{eq:fnmain})
+   is a trade-off between speed  
+   and precision. With finite statistical errors,
+   however, theory predictions are not ideally smooth 
+   functions of the fit parameters.
+   This contributes to numerical noise in the $\chi^2$
+   calculations~\cite{Pumplin:2000vx}
+   distorting the  $\chi^2$ contour during the  
+   PDF error analysis, especially for fit parameters 
+   with small errors.
+
+\item
+   The procedure can only be used for observables for 
+   which LO calculations  are fast. 
+   Currently, this prevents the global PDF analyses from  
+   using Tevatron dijet data and DIS jet data. 
+\end{itemize}
+%
+In a time when phenomenology is aiming towards 
+NNLO precision~\cite{Alekhin:2005gq,Martin:2004ir},
+the $k$-factor approximation is clearly not satisfying concerning both
+its limitation  in precision and its restrictions concerning data sets.
+
+
+
+
+
+
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\subsection{The fastNLO Solution}
+
+
+
+\begin{figure}[t]
+\centerline{
+%   \psfig{figure=qcd/fastNLO/plots/subprocfrac-pp.eps,width=15cm}
+   \psfig{figure=subprocfrac-pp-2.eps,width=15cm}
+}
+  \caption{Contributions of different partonic subprocesses to 
+   the inclusive jet cross section at 
+   RHIC (left), the Tevatron (middle) and the LHC (right)
+   as a function of $p_T$ and $x_T = 2 p_T/\sqrt{s}$.
+   The subprocess $gq \rightarrow {\rm jets}$ has been
+   separated into the contributions (2) and (3) where either the 
+   quark- or the gluon momentum fraction is larger.
+  \label{fig:fnsubprocpp}}
+\end{figure}
+
+
+
+\begin{figure}[t]
+\centerline{
+%   \psfig{figure=qcd/fastNLO/plots/pdfunc-pp.eps,width=15cm}
+   \psfig{figure=pdfunc-pp.eps,width=15cm}
+}
+  \caption{Comparison of PDF uncertainties for 
+   the inclusive jet cross section at 
+   RHIC (left), the Tevatron (middle) and the LHC (right).
+   The uncertainty band is obtained for the CTEQ6.1M 
+   parton density functions and the results are shown
+   as a function of $p_T$ and $x_T = 2 p_T/\sqrt{s}$.
+  \label{fig:fnpdfuncpp}}
+\end{figure}
+
+
+A better solution is implemented in the fastNLO project.
+The basic idea is to transform the convolution 
+in~(\ref{eq:fnmain}) into the factorized expression~(\ref{eq:fnfinal}).
+Many proposals for this have been made in the past, originally
+related to solving the DGLAP parton evolution equations~\cite{Pascaud:1994vx}
+and later to computing of jet cross 
+sections~\cite{Lobo:1996,Graudenz:1995sk,Kosower:1997vj,Wobisch:2000dk,Carli:2005ji}.
+The fastNLO method is an extension of the 
+concepts developed for DIS jet production~\cite{Lobo:1996,Wobisch:2000dk}
+which have been applied at HERA
+to determine the gluon density in the proton from DIS jet data~\cite{Adloff:2000tq}.
+%
+Starting from~(\ref{eq:fnmain}) for  the following discussion the 
+renormalization scale is set equal to the factorization scale 
+($\mu_{r,f}=\mu$).
+The extension to $\mu_r \ne \mu_f$ is, however, trivial.
+The $x$ dependence of the PDFs and the 
+scale dependence of $\alpha_s^n$ and the PDFs can be approximated 
+using an interpolation between sets of fixed values $x^{(k)}$ 
+and $\mu^{(m)}$ 
+($k=1, \cdots, k_{\rm max}\,;\,  m =1, \cdots, m_{\rm max}$)
+%
+\begin{eqnarray}
+  &  \alpha^n_s(\mu)&  \cdot \; F_i(x_a,x_b,\mu) \; \simeq 
+      \hskip28mm 
+{[{\scriptstyle \mbox{``='' is true for 
+$k_{\rm max}, l_{\rm max}, m_{\rm max}\rightarrow \infty $} }]}
+\nonumber \\
+& & 
+\sum_{k,l,m}  \alpha^n_s(\mu^{(m)}) \cdot F_i(x_a^{(k)}, x_b^{(l)}, \mu^{(m)}) 
+\, \cdot \,  e^{(k)}(x_a) \cdot  e^{(l)}(x_b) \cdot b^{(m)}(\mu)   
+\end{eqnarray}
+%
+where $e^{(k,l)}(x)$ and $b^{(m)}(\mu)$ are interpolation functions
+for the $x$ and the $\mu$ dependence, respectively.
+All information of the perturbatively calculable piece
+(including phase space restrictions, jet definition, etc.\
+but excluding $\alpha_s$ and the PDFs)
+is fully contained in the quantity
+%
+\begin{equation}
+\tilde{\sigma}_{n,i,k,l,m}(\mu) = 
+ c_{n,i}(x_a, x_b, \mu) \otimes 
+\left[ e^{(k)}(x_a) \cdot e^{(l)}(x_b)  \cdot b^{(m)}(\mu) \right] \, .
+\label{eq:sigmatilde}
+\end{equation}
+%
+In the final prediction for the cross section
+the convolution in~(\ref{eq:fnmain}) is then reduced
+to a simple product
+\begin{equation}
+\sigma(\mu) \, \simeq \sum_{n,i,k,l,m} 
+\tilde{\sigma}_{n,i,k,l,m}(\mu)  \, \cdot \,
+ \alpha^n_s(\mu^{(m)}) \cdot
+ F_i(x_a^{(k)}, x_b^{(l)}, \mu^{(m)}) \, .
+\label{eq:fnfinal}
+\end{equation}
+%
+The time-consuming step involving the calculation of the universal
+(PDF and $\alpha_s$ independent) $\tilde\sigma$
+is therefore factorized and needs to be done only once.
+Any further calculation of the pQCD prediction
+for arbitrary PDFs and $\alpha_s$ values can later
+be done very fast by computing the simple sum of products
+in~(\ref{eq:fnfinal}).
+%
+While the extension of the method from one 
+initial-state hadron~\cite{Wobisch:2000dk}
+to two hadrons was conceptually trivial, the case of two hadrons
+requires additional efforts to improve the efficiency
+and precision of the interpolation.
+Both, the efficiency and the precision, are directly related to the 
+choices of the points 
+$x^{(k,l)}$, $\mu^{(m)}$ and the 
+interpolation functions $e(x)$, $b(\mu)$.
+The implementation in 
+fastNLO achieves a precision of better than $0.1\%$ 
+for $k_{\rm max},l_{\rm max} =10$ and $m_{\rm max}\le 4$.
+%
+Computation times for cross sections in fastNLO are roughly 
+40-200\,$\mu$s per order $\alpha_s$ (depending on 
+$m_{\rm max}$).
+Further details are given in Ref~\cite{fastnlo}.
+
+
+The $\tilde{\sigma}$ in~(\ref{eq:sigmatilde}) are computed using 
+{\tt NLOJET++}~\cite{Nagy:2003tz,Nagy:2001fj}.
+A unique feature in fastNLO is the inclusion of the $O(\alpha_s^4)$
+threshold correction terms to the 
+inclusive jet cross section~\cite{Kidonakis:2000gi},
+a first step towards a full NNLO calculation.
+
+
+
+
+
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\section{Results}
+
+\begin{figure}[!h]
+\centerline{
+%   \includegraphics[width=\textwidth]{qcd/fastNLO/plots/alljets.eps}
+   \psfig{figure=alljets.eps,width=14.3cm}
+}
+  \caption{An overview of data over theory ratios for 
+  inclusive jet cross sections, measured 
+  in different processes at different center-of-mass energies.
+  The data are compared to calculations obtained by fastNLO
+  in NLO precision (for DIS data) and including 
+  ${\cal O}(\alpha_s^4)$ threshold  corrections (for $p\bar{p}$ data).
+  The inner error bars represent the statistical errors and the
+  outer error bars correspond to the quadratic sum of all 
+  experimental uncertainties.
+  In all cases the perturbative predictions have been 
+  corrected for non-perturbative effects.
+  \label{fig:fnresults}}
+\end{figure}
+
+\begin{figure}[!h]
+\centerline{
+%   \includegraphics[width=\textwidth]{qcd/fastNLO/plots/ps-incl.eps}
+%   \includegraphics[width=\textwidth]{ps-incl.eps}
+   \psfig{figure=ps-incl.eps,width=11cm}
+}
+  \caption{The phase space in $x$ and $p_T$
+      covered by the data sets shown in the previous figure.
+  \label{fig:fnresults2}}
+\end{figure}
+
+Calculations by fastNLO
+are available at {\tt http://hepforge.cedar.ac.uk/fastnlo}
+for a large set of (published, ongoing, or planned) 
+jet cross section measurements at 
+HERA, RHIC, the Tevatron, and the LHC
+(either online or as computer code for inclusion in PDF fits).
+%
+Some fastNLO results for the inclusive jet cross section 
+in different reactions are shown in this section.
+%
+The contributions from different partonic subprocesses
+to the central inclusive jet cross section
+are compared in Fig.~\ref{fig:fnsubprocpp} for different
+colliders: 
+For $pp$ collisions at RHIC and the LHC, 
+and for $p\bar{p}$ scattering at Tevatron Run II energies.
+It is seen that the quark-induced subprocesses are dominated
+by the valence quarks:
+In proton-proton collisions (RHIC, LHC)
+the quark-quark subprocesses (4,5) give much larger 
+contributions than the quark-antiquark subprocesses (6,7)
+while exactly the opposite is true for proton-antiproton collisions
+at the Tevatron.
+%
+The contribution from gluon-induced subprocesses is 
+significant at all colliders over the whole $p_T$ ranges.
+It is interesting to note that at fixed $x_T = 2 p_T/\sqrt{s}$
+the gluon contributions are largest at RHIC.
+Here, the jet cross section at 
+$x_T = 0.5$ still receives $55\%$
+contributions from gluon-induced subprocesses,
+as compared to only $35\%$ at the Tevatron or $38\%$ at the LHC.
+%
+As shown in Fig.~\ref{fig:fnpdfuncpp}, this results in much larger
+PDF uncertainties for the high $x_T$ inclusive jet cross section 
+at RHIC, as compared to the Tevatron and the LHC for which
+PDF uncertainties are roughly 
+of the same size (at the same $x_T$).
+This indicates that the PDF sensitivity at the same $x_T$
+is about the same at the Tevatron and at the LHC, 
+while it is much higher at RHIC.
+
+
+An overview over published measurements of the inclusive
+jet cross section in different reactions and at different
+center-of-mass energies is given in Fig.~\ref{fig:fnresults}.
+The results are shown as ratios of data over theory.
+The theory calculations include the best available 
+perturbative predictions (NLO for DIS data and NLO + 
+${\cal O}(\alpha_s^4)$ threshold corrections for $p\bar{p}$ data)
+which have been corrected for non-perturbative effects.
+Over the whole phase space of $8 < p_T < 700$\,GeV
+jet data in DIS and $p\bar{p}$ collisions are well-described
+by the theory predictions using 
+CTEQ6.1M PDFs~\cite{Pumplin:2002vw}.
+%
+The phase space in $x$ and $p_T$ covered 
+by these measurements is shown in Fig.~\ref{fig:fnresults2},
+demonstrating what can be gained by using fastNLO 
+to include these data sets in future PDF fits.
+A first study using fastNLO on the future potential
+of LHC jet data has been published in Ref.~\cite{cmsptdrv2}.
+
+
+
+%\begin{thebibliography}{19}
+
+%%\cite{Adloff:2000tq}
+%\bibitem{Adloff:2000tq}
+%  C.~Adloff {\it et al.} [H1 Collaboration],
+%  %``Measurement and QCD analysis of jet cross sections in deep-inelastic
+%  %positron proton collisions at s**(1/2) of 300-GeV,''
+%  Eur.\ Phys.\ J.\ C {\bf 19}, 289 (2001)
+%  [arXiv:hep-ex/0010054].
+%  %%CITATION = HEP-EX 0010054;%%
+
+%%\cite{Alekhin:2005gq}
+%\bibitem{Alekhin:2005gq}
+%  S.~Alekhin,
+%  %``Parton distribution functions from the precise NNLO QCD fit,''
+%  JETP Lett.\  {\bf 82}, 628 (2005)
+% % [Pisma Zh.\ Eksp.\ Teor.\ Fiz.\  {\bf 82}, 710 (2005)]
+%  [arXiv:hep-ph/0508248].
+%  %%CITATION = HEP-PH 0508248;%%
+
+%%\cite{Martin:2004ir}
+%\bibitem{Martin:2004ir}
+%  A.~D.~Martin, R.~G.~Roberts, W.~J.~Stirling and R.~S.~Thorne,
+%  %``Physical gluons and high-E(T) jets,''
+%  Phys.\ Lett.\ B {\bf 604}, 61 (2004)
+%  [arXiv:hep-ph/0410230].
+%  %%CITATION = HEP-PH 0410230;%%
+
+%%\cite{Pumplin:2002vw}
+%\bibitem{Pumplin:2002vw}
+%  J.~Pumplin {\it et al.},
+%%      D.~R.~Stump, J.~Huston, H.~L.~Lai, P.~Nadolsky and W.~K.~Tung,
+%%   ``New generation of parton distributions with uncertainties from global  QCD analysis,''
+%  JHEP {\bf 0207}, 012 (2002)
+%  [arXiv:hep-ph/0201195].
+%  %%CITATION = HEP-PH 0201195;%%
+
+
+
+%%\cite{Pascaud:1994vx}
+%\bibitem{Pascaud:1994vx}
+%  C.~Pascaud, F.~Zomer,
+%  %``Fast method to integrate linear integrodifferential equations,''
+%   LAL-94-42 (1994);
+%%\href{http://www.slac.stanford.edu/spires/find/hep/www?r=lal-94-42}{SPIRES entry}
+%%http://ccdb4fs.kek.jp/cgi-bin/img/allpdf?199409041
+%   and
+%          [arXiv:hep-ph/0104013].
+
+
+%\bibitem{Lobo:1996}
+%  G.~Lobo,
+%  %``Extraction of the Gluon Density from F2 and Jet Rates,''
+%   in Proceedings of the Workshop ``Future Physics at HERA'', 
+%   Hamburg, Germany, 25-26 Sep 1995,
+%   Ed. G. Ingelman, A. De Roeck, R. Klanner.
+
+%%\cite{Graudenz:1995sk}
+%\bibitem{Graudenz:1995sk}
+%  D.~Graudenz, M.~Hampel, A.~Vogt and C.~Berger,
+%  %``The Mellin transform technique for the extraction of the gluon density,''
+%  Z.\ Phys.\ C {\bf 70}, 77 (1996)
+%  [arXiv:hep-ph/9506333].
+%  %%CITATION = HEP-PH 9506333;%%
+
+
+
+%%\cite{Kosower:1997vj}
+%\bibitem{Kosower:1997vj}
+%  D.~A.~Kosower,
+%  %``Extracting parton densities from collider data,''
+%  Nucl.\ Phys.\ B {\bf 520}, 263 (1998)
+%  [arXiv:hep-ph/9708392].
+%  %%CITATION = HEP-PH 9708392;%%
+
+%%\cite{Wobisch:2000dk}
+%\bibitem{Wobisch:2000dk}
+%  M.~Wobisch,
+%  %``Measurement and QCD analysis of jet cross sections in deep-inelastic
+%  %positron proton collisions at s**(1/2) = 300-GeV,''
+%  % PhD thesis RWTH Aachen,
+%   PITHA 00/12 and
+%  DESY-THESIS-2000-049 (2000).
+%%\href{http://www.slac.stanford.edu/spires/find/hep/www?r=desy-thesis-2000-049}{SPIRES entry}
+
+
+%%\cite{Carli:2005ji}
+%\bibitem{Carli:2005ji}
+%  T.~Carli, G.~P.~Salam, F.~Siegert,
+%  %``A posteriori inclusion of PDFs in NLO QCD final-state calculations,''
+%  [arXiv:hep-ph/0510324].
+%  %%CITATION = HEP-PH 0510324;%%
+
+%\bibitem{fastnlo}
+%T. Kluge, K. Rabbertz, M. Wobisch, in preparation.
+%%   and {\tt http://hepforge.cedar.ac.uk/fastnlo/}
+
+
+%%\cite{Nagy:2003tz}
+%\bibitem{Nagy:2003tz}
+%  Z.~Nagy,
+%%   ``Next-to-leading order calculation of three-jet observables in hadron
+%  %hadron collision,''
+%  Phys.\ Rev.\ D {\bf 68}, 094002 (2003)
+%  [arXiv:hep-ph/0307268].
+%  %%CITATION = HEP-PH 0307268;%%
+
+%%\cite{Nagy:2001fj}
+%\bibitem{Nagy:2001fj}
+%  Z.~Nagy,
+% %  ``Three-jet cross sections in hadron hadron collisions at next-to-leading
+%  %order,''
+%  Phys.\ Rev.\ Lett.\  {\bf 88}, 122003 (2002)
+%  [arXiv:hep-ph/0110315].
+%  %%CITATION = HEP-PH 0110315;%%
+
+
+
+%%\cite{Kidonakis:2000gi}
+%\bibitem{Kidonakis:2000gi}
+%  N.~Kidonakis, J.~F.~Owens,
+%  % ``Effects of higher-order threshold corrections in high-E(T) jet
+%  %production,''
+%  Phys.\ Rev.\ D {\bf 63}, 054019 (2001).
+%%  [arXiv:hep-ph/0007268].
+%  %%CITATION = HEP-PH 0007268;%%
+
+
+%\bibitem{cmsptdrv2}
+%  CMS Collaboration, 
+%  "The CMS Physics Technical Design Report, Volume 2,"
+%  CERN/LHCC 2006/021, CMS TDR 8.2, 26. Juni 2006.
+
+
+ 
+%\end{thebibliography}
+
+
+% LocalWords:  Rabbertz Wobisch DESY Karlsruhe parton fastNLO PDFs pQCD PDF QCD
+% LocalWords:  Tevatron Perturbative perturbative partonic partons NLO TeV NNLO
+% LocalWords:  rapidities analyses dijet RHIC LHC gq CTEQ DGLAP perturbatively
+% LocalWords:  NLOJET online colliders antiquark antiproton Adloff al GeV JETP
+% LocalWords:  Alekhin Lett Pumplin JHEP Pascaud Zomer LAL lal Lobo Sep Roeck
+% LocalWords:  Ingelman Klanner Graudenz Nucl PITHA desy Carli Siegert
+% LocalWords:  Kidonakis
