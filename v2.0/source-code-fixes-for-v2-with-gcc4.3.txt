@@ -1,0 +1,54 @@
+LHAPDF-5.7.0:
+-------------
+
+Correct wrong include statement
+#include "LHAPDF/LHAPDFConfig.h"
+in lhapdf-5.7.0/include/LHAPDF/LHAPDF.h to
+#include "LHAPDFConfig.h"
+
+The fix has been put into the archive
+lhapdf-5.7.0-fix.tar.gz
+
+
+
+NLOJet++-4.0.1:
+---------------
+
+Add includes missing due to header dependency cleanup in
+C++ with gcc-4.3, see
+http://gcc.gnu.org/gcc-4.3/porting_to.html 
+
+Includes of <cstdlib>, <cstring> and <typeinfo> were
+added to the following files:
+
+nlojet++-4.0.1/nlo-core/bits/mkbuset.cc
+nlojet++-4.0.1/nlo-core/bits/mkburesult.cc
+nlojet++-4.0.1/src/main_calc.cc
+nlojet++-4.0.1/src/main_add.cc
+
+The fixes have been collected into the archive
+nlojet++-4.0.1-fix.tar.gz
+
+
+
+LHPDF-1.0.0:
+------------
+
+Some f77 "WRITE" statements with just "I" as format specifier
+had to replaced with "I10" to give an explicit length.
+In addition, one expression with
+      some calc +
+      -2.* ....
+has been corrected to
+      some calc +
+      (-2.)* ....
+to make the compiler happy.
+
+The concerned file is
+lhpdf-1.0.0/lhpdf/f77-qcdnum.f
+
+and has been put into the archive
+lhpdf-1.0.0-fix.tar.gz
+
+
+

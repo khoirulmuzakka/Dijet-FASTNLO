@@ -55,7 +55,7 @@ if ( $opt_h ) {
     print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
-    print "  -f rev          fastNLO revision to use (def.=433)\n";
+    print "  -f rev          fastNLO revision to use (def.=486)\n";
     print "  -g prot         Grid storage protocol to use (def.=guc)\n";
     print "  -h              Print this text\n";
     print "  -i dir          Installation directory (def.=.)\n";
@@ -270,10 +270,16 @@ if ( $vers == 1 ) {
     $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.7.0";
     $install{lhapdf}[1]     = "lhapdf-5.7.0";
+    $install{lhapdffix}[0]  = "lhapdf-5.7.0-fix";
+    $install{lhapdffix}[1]  = "lhapdf-5.7.0";
     $install{nlojet}[0]     = "nlojet++-4.0.1";
     $install{nlojet}[1]     = "nlojet++-4.0.1";
+    $install{nlojetfix}[0]  = "nlojet++-4.0.1-fix";
+    $install{nlojetfix}[1]  = "nlojet++-4.0.1";
     $install{lhpdf}[0]      = "lhpdf-1.0.0";
     $install{lhpdf}[1]      = "lhpdf-1.0.0";
+    $install{lhpdffix}[0]      = "lhpdf-1.0.0-fix";
+    $install{lhpdffix}[1]      = "lhpdf-1.0.0";
 }
 
 foreach my $comp ( keys %install ) {
@@ -520,6 +526,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
 			     "$sdir/$install{lhapdf}[0] ".
 			     "in $idir/src failed: $ret, aborted!\n";}
+	    print "\nfastrun.pl: Unpacking fix for $install{lhapdf}[0] ...\n";
+	    $ret = system("tar xz -f $sdir/$install{lhapdffix}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdffix}[0] ".
+			     "in $idir/src failed: $ret, aborted!\n";}
 	    $ret = system("mv $install{lhapdf}[1] $install{lhapdf}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			     "$install{lhapdf}[1] to ".
@@ -631,12 +641,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
 			     "in $idir failed: $ret, aborted!\n";}
-	    if ( $vers == 1) {
-		print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
-		$ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[0]");
-		if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
-				 "in $idir failed: $ret, aborted!\n";}
-	    }
+	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+	    $ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
+			     "in $idir failed: $ret, aborted!\n";}
 	    $ret = system("mv $install{nlojet}[1] $idir/$install{nlojet}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			     "$install{nlojet}[1] to ".
@@ -670,6 +678,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	    print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
 	    my $ret = system("tar xz -f $sdir/$install{nlojet}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
+			     "in $idir/src failed: $ret, aborted!\n";}
+	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+	    $ret = system("tar xz -f $sdir/$install{nlojetfix}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
 			     "in $idir/src failed: $ret, aborted!\n";}
 	    $ret = system("mv $install{nlojet}[1] $install{nlojet}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
@@ -714,6 +726,11 @@ if ( $mode == 0 || $mode == 1 ) {
 	print "\nfastrun.pl: Unpacking $install{lhpdf}[0] ...\n";
 	my $ret = system("tar xz -f $sdir/$install{lhpdf}[0]");
 	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdf}[0] ".
+			 "in $idir/src failed: $ret, aborted!\n";}
+
+	print "\nfastrun.pl: Unpacking fix for $install{lhpdf}[0] ...\n";
+	$ret = system("tar xz -f $sdir/$install{lhpdffix}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdffix}[0] ".
 			 "in $idir/src failed: $ret, aborted!\n";}
 	$ret = system("mv $install{lhpdf}[1] $install{lhpdf}[2]");
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
