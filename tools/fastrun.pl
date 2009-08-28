@@ -419,7 +419,7 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 1) Install CERN libraries and ROOT (V2 only)
 #
-    unless ( -e "$idir/$install{cernlib}[2]" ) {
+    unless ( -e "$idir/src/$install{cernlib}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 
