@@ -226,6 +226,9 @@ unless ( -d "$idir/src" ) {
 }
 chdir "$idir";
 my $aidir = getcwd();
+print "aidir 1 ${aidir}blafasel\n";
+chomp $aidir;
+print "aidir 2 ${aidir}blafasel\n";
 chdir "$pwdir";
 
 
@@ -601,10 +604,10 @@ if ( $mode == 0 || $mode == 1 ) {
 	    print FILE "setenv LHAPDFBINPATH $aidir/bin\n";
 	    print FILE "setenv LHAPDFLIBPATH $aidir/lib\n";
 	    print FILE "setenv LHAPDFINCLUDEPATH $aidir/include/LHAPDF\n";
-	    $ENV{LHAPDF}            = "$aidir\n";
-	    $ENV{LHAPDFBINPATH}     = "$aidir/bin\n";
-	    $ENV{LHAPDFLIBPATH}     = "$aidir/lib\n";
-	    $ENV{LHAPDFINCLUDEPATH} = "$aidir/include/LHAPDF\n";
+	    $ENV{LHAPDF}            = "$aidir";
+	    $ENV{LHAPDFBINPATH}     = "$aidir/bin";
+	    $ENV{LHAPDFLIBPATH}     = "$aidir/lib";
+	    $ENV{LHAPDFINCLUDEPATH} = "$aidir/include/LHAPDF";
 	    $ret = `$aidir/bin/lhapdf-config --pdfsets-path`;
 	    chomp $ret;
 	    print FILE "setenv LHAPDFSETPATH $ret\n";

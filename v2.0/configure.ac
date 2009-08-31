@@ -21,7 +21,9 @@ AC_MSG_NOTICE([Starting checks particular for fastNLO ...])
 AC_MSG_NOTICE([******************************************])
 
 #NLOJET++
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([First try to find NLOJET++ via create-nlojet-user executable in system PATH ...])
 AC_PATH_PROG([NLOJETBINPATH],[create-nlojet-user],[no])
 if test "x$NLOJETBINPATH" = "xno"; then
@@ -36,7 +38,7 @@ if test "x$NLOJETBINPATH" = "xno"; then
     fi
   fi
 fi
-AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBINPATH`])
+AC_SUBST([NLOJETBINPATH], [$NLOJETBINPATH])
 AC_SUBST([NLOJETPREFIX], [`dirname $NLOJETBINPATH`])
 AC_SUBST([NLOJETLIBPATH], "$NLOJETPREFIX/lib")
 AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
@@ -46,7 +48,9 @@ AC_MSG_RESULT([Using $NLOJETLIBPATH for the libraries])
 AC_MSG_RESULT([Using $NLOJETINCLUDEPATH for the includes])
 
 #LHPDF (Attention! This is the version coming with NLOJET++ version 4!) 
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for LHPDF installation ...])
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Attention! These are the pdf's coming with NLOJET++ version 4!])
 AC_MSG_NOTICE([Do not confuse with LHAPDF which will also be required by fastNLO!])
 # Does not work yet
@@ -102,7 +106,9 @@ AC_MSG_RESULT([Using $LHPDFLIBPATH for the libraries])
 AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
 
 #LHAPDF
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for LHAPDF installation ...])
+AC_MSG_NOTICE([******************************************])
 if test "x$LHAPDF" = "x"; then
   AC_MSG_WARN([LHAPDF environment variable is not set, trying to find lhapdf-config in PATH ...])
   AC_PATH_PROG([LHAPDFBINPATH],[lhapdf-config],[:])
@@ -127,7 +133,9 @@ AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
 AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
 
 #FASTJET
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for fastjet installation ...])
+AC_MSG_NOTICE([******************************************])
 if test "x$FASTJET" = "x"; then
   AC_MSG_WARN([FASTJET environment variable is not set, trying to find fastjet-config in PATH ...])
   AC_PATH_PROG([FASTJETBINPATH],[fastjet-config],[:])
@@ -149,7 +157,9 @@ AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
 AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
 
 #CERNLIB
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for CERN libraries ...])
+AC_MSG_NOTICE([******************************************])
 if test "x$CERN_ROOT" = "x"; then
   AC_MSG_ERROR([CERN_ROOT environment variable is not set!
   CERN_ROOT/lib must be the path to -lkernlib, -lmathlib, -lpacklib])
@@ -163,7 +173,9 @@ else
 fi
 
 #ROOT
+AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for ROOT installation ...])
+AC_MSG_NOTICE([******************************************])
 if test "x$ROOTSYS" = "x"; then
   AC_MSG_WARN([ROOTSYS environment variable is not set, trying to find root-config in PATH ...])
   AC_PATH_PROG([ROOTBINPATH],[root-config],[:])
