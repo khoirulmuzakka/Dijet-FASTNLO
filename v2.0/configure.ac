@@ -168,7 +168,7 @@ if test "x$ROOTSYS" = "x"; then
   AC_MSG_WARN([ROOTSYS environment variable is not set, trying to find root-config in PATH ...])
   AC_PATH_PROG([ROOTBINPATH],[root-config],[:])
   if test "$ROOTBINPATH" = :; then
-    AC_MSG_ERROR([No path to ROOT binaries found, configuration aborted!])
+    AC_MSG_WARN([No path to ROOT binaries found, will work without ROOT dictionaries!])
   else
     AC_SUBST([ROOTBINPATH], [`dirname $ROOTBINPATH`])
     AC_SUBST([ROOTSYS], [`dirname $ROOTBINPATH`])
@@ -180,21 +180,22 @@ else
   AC_SUBST([ROOTSYS], ["$ROOTSYS"])	
   AC_PATH_PROG([ROOTBINPATH],[root-config],[:],[$ROOTSYS/bin])
   if test "$ROOTBINPATH" = :; then
-    AC_MSG_ERROR([ROOT binaries not found in $ROOTSYS/bin, configuration aborted!])
+    AC_MSG_WARN([ROOT binaries not found in $ROOTSYS/bin, will work without ROOT dictionaries!])
+  else
+    AC_SUBST([ROOTBINPATH], [`$ROOTSYS/bin/root-config --bindir`])
+    AC_SUBST([ROOTLIBPATH], [`$ROOTSYS/bin/root-config --libdir`])
+    AC_SUBST([ROOTINCLUDEPATH], [`$ROOTSYS/bin/root-config --incdir`])
   fi
-  AC_SUBST([ROOTBINPATH], [`$ROOTSYS/bin/root-config --bindir`])
-  AC_SUBST([ROOTLIBPATH], [`$ROOTSYS/bin/root-config --libdir`])
-  AC_SUBST([ROOTINCLUDEPATH], [`$ROOTSYS/bin/root-config --incdir`])
 fi
-AC_MSG_RESULT([Using $ROOTSYS for the ROOT installation path])
-AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
-AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
-AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
 AC_CHECK_PROGS([have_rootcint],[rootcint],[:],["$ROOTSYS/bin/"])
 if test "$have_rootcint" = ":"; then
   AC_MSG_WARN([ROOTSYS environment variable set and/or root-config found, but no rootcint. Not a big problem, but library will be build without ROOT dictionary.])
 else
   AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
+  AC_MSG_RESULT([Using $ROOTSYS for the ROOT installation path])
+  AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
+  AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+  AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
   AC_MSG_RESULT([Using $ROOTCINTPATH])
 fi
 AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")

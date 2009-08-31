@@ -45,10 +45,10 @@ print "######################################\n\n";
 # Parse options
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
-      $opt_m, $opt_o, $opt_p, $opt_r, $opt_s, $opt_t, $opt_v ) =
+      $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
     ( "LOCAL", "", "0", "486", "guc", "", ".", "0001",
-      "0", "LO", "CTEQ", "", ".", "", "1" );
-getopts('b:de:f:hi:j:m:o:p:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
+      "0", "LO", "CTEQ", "none", "", ".", "", "1" );
+getopts('b:de:f:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
@@ -63,6 +63,7 @@ if ( $opt_h ) {
     print "  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only\n";
     print "  -o order        LO (def.) or NLO calculation\n";
     print "  -p pdf          CTEQ parton densities (def.) or LHAPDF\n";
+    print "  -q rootversion  ROOT version to install (def.=none)\n";
     print "  -r              Reference calculation incl. pdf access\n";
     print "  -s dir          Archive source directory (def.=.)\n";
     print "  -t dir          Output target directory: ".
@@ -127,6 +128,7 @@ my $jobnr = $opt_j;
 my $mode  = $opt_m;
 my $order = $opt_o;
 my $pdf   = $opt_p;
+my $rv    = $opt_q;
 my $ref   = "";
 if ( $opt_r ) { $ref = "ref";}
 my $sdir  = $opt_s;
@@ -272,8 +274,7 @@ if ( $vers == 1 ) {
 } else {
     $install{cernlib}[0]    = "cernlib-2006";
     $install{cernlib}[1]    = "cernlib-2006";
-#    $install{root}[0]       = "root-5.18";
-    $install{root}[0]       = "root-5.22";
+    $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.7.0";
     $install{lhapdf}[1]     = "lhapdf-5.7.0";
@@ -318,7 +319,8 @@ foreach my $comp ( keys %install ) {
     unless ( $mode == 2 || $mode == 3 ||
 	     -d "$idir/$install{$comp}[2]" ||
 	     -f "$sdir/$install{$comp}[0]" ||
-	     ( $comp eq "lhapdf" && $pdf eq "CTEQ" ) ) {
+	     ( $comp eq "lhapdf" && $pdf eq "CTEQ" ) ||
+	     ( $comp eq "root" && $rv eq "none" ) ) {
 	die "fastrun.pl: Archive $install{$comp}[0] does not exist, ".
 	    "aborted!\n";
     }
@@ -471,17 +473,17 @@ if ( $mode == 0 || $mode == 1 ) {
 	print FILE "# Add CERNLIB environment\n";
 	print FILE "setenv CERN_ROOT $aidir\n";
 	print FILE "setenv CERNLIBPATH $aidir/lib\n";
-	print FILE 'setenv CERNLIBS "-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"';
+	print FILE "setenv CERNLIBS \"-L\$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib\"";
 	print FILE "\n";
 	$ENV{CERN_ROOT}   = "$aidir";
 	$ENV{CERNLIBPATH} = "$aidir/lib";
-	$ENV{CERNLIBS}    = '-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib';
+	$ENV{CERNLIBS}    = "-L$ENV{CERN_ROOT}/lib -lmathlib -lkernlib -lpacklib";
     }
     chdir "$pwdir";
 # ROOT
     if ( $vers == 2 ) {
 #	unless ( -e "$aidir/src/$install{root}[2]" ) {
-	unless ( $ENV{ROOTSYS} ) {
+	unless ( $ENV{ROOTSYS} || $rv eq "none") {
 	    $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    chdir "$aidir/src";
@@ -681,7 +683,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ENV{FASTJETINCLUDEPATH} = "$aidir/include/fastjet";
 	    $ret = `$aidir/bin/fastjet-config --libs`;
 	    chomp $ret;
-	    print FILE 'setenv FASTJETLIBS "$ret"';
+	    print FILE "setenv FASTJETLIBS \"$ret\"";
 	    print FILE "\n";
 	    $ENV{FASTJETLIBS} = "$ret";
 	}
