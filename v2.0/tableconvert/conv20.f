@@ -47,7 +47,7 @@ c --- parse command line
       WRITE(*,*) ' '
       WRITE(*,*) ' '
       WRITE(*,*) ' **************************************************'
-      WRITE(*,*) ' ******* fastNLO: convert from v1.4 to v1.5 *******'
+      WRITE(*,*) ' ******* fastNLO: convert from v1.4 to v2.0 *******'
       WRITE(*,*) ' **************************************************'
       WRITE(*,*) ' *  ==> scenario name has to be edited by hand'
       WRITE(*,*) ' *'

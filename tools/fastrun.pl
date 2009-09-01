@@ -226,9 +226,7 @@ unless ( -d "$idir/src" ) {
 }
 chdir "$idir";
 my $aidir = getcwd();
-print "aidir 1 ${aidir}blafasel\n";
 chomp $aidir;
-print "aidir 2 ${aidir}blafasel\n";
 chdir "$pwdir";
 
 
@@ -416,11 +414,11 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
 	    chdir "..";
 	    print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
-	    $ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[1]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[1] ".
+	    $ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[0] ".
 			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[1]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[1] ".
+	    $ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[0] ".
 			     "in $idir failed: $ret, aborted!\n";}
 	    chdir "$idir/gcc";
 	    system("make clean");
@@ -463,8 +461,6 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			 "$install{cernlib}[1] to ".
 			 "$install{cernlib}[2]: $ret, aborted!\n";}
-#	if ( -l "$idir/$install{cernlib}[3]" ) {system("rm -f $idir/$install{cernlib}[3]");}
-#	system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
 	unless ( -d "$aidir/lib" ) {
 	    my $ret = system ("mkdir -p $aidir/lib");
 	    if ( $ret ) {die "fastrun.pl: Couldn't create lib ".
@@ -825,11 +821,7 @@ if ( $mode == 0 || $mode == 1 ) {
     if ( $vers == 1 ) {
     print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm to:\n";
     my $cwdir = getcwd();
-    if ( $vers == 1 ) {
-	$ENV{CERNLIB} = "$cwdir/$install{cernlib}[2]"; 
-    } else {
-	$ENV{CERNLIB} = "$cwdir/$install{cernlib}[2]/slc4_ia32_gcc4/lib"; 
-    }
+    $ENV{CERNLIB} = "$ENV{CERN_ROOT}/lib"; 
     print "\nfastrun.pl: $ENV{CERNLIB}\n";
     unless ( -e "$idir/$install{mcfm}[2]" ) {
 	$date = `date +%d%m%Y_%H%M%S`;
