@@ -73,11 +73,11 @@ if ( $opt_h ) {
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 433|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1|2]\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1|2]\n\n";
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 433|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 2 [-p CTEQ|LHAPDF] [-r] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 433|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 500|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] scenarioname\n\n";
     exit;
 }
 
