@@ -22,6 +22,9 @@
 *   - set codes for PDF Linear combinations correctly
 *   - reorder pp subprocesses (move 2,3 to end)
 *
+* KR 09/05/2009 Fixed IPDFdef1 to be 2 resp. 3 for DIS resp. pp/ppbar 
+*               instead of 1,2! According to v2.0 table format 1 is
+*               reserved for e+e-.
 * MW 06/03/2007 first version with correct format (missing reweighting)
 * MW 11/22/2006 remove bug in pointer to scale variations
 * MW 11/20/2006 first version
@@ -279,7 +282,7 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
             Elseif (n.eq.2) Then
                WRITE(2,4999) 3
             Endif
-         ElseIf(NPDFDIm.eq.1) then ! --------- pp
+         ElseIf(NPDFDim.eq.1) then ! --------- pp
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
                WRITE(2,4999) 6
             Elseif (n.eq.2) then ! ---- NLO
@@ -287,8 +290,10 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
             Endif
          Endif
 
+ckr Fixed IPDFdef1 to be 2 resp. 3 for DIS resp. pp/ppbar instead of 1,2!
+ckr According to v2.0 table format 1 is reserved for e+e-.
          If (ireaction.eq.1) then
-            IPDFdef1 = 1
+            IPDFdef1 = 2
             IPDFdef2 = 1
             If (n.eq.1) then
                IPDFdef3 = 2     ! --- only Delta, G
@@ -300,12 +305,12 @@ c         WRITE(2,*) NSubpr      ! Nsubproc   <<< modify for DIS & pp
             Endif
          elseif (ireaction.ge.2) then
             If (n.eq.1 .or. n.eq.3) then    ! ------ LO or threshcor
-               IPDFdef1 = 2
+               IPDFdef1 = 3
                IPDFdef2 = 1
                IPDFdef3 = 1
                IPDFCoeff = 2000101
             Elseif (n.eq.2) then ! ---- NLO
-               IPDFdef1 = 2
+               IPDFdef1 = 3
                IPDFdef2 = 1
                IPDFdef3 = 2
             Else
