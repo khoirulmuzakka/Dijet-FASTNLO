@@ -892,6 +892,9 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --prefix=$aidir");
 	    if ( $ret ) {die "fastrun.pl: configure of fastNLO V2 failed: ".
 			     "$ret, aborted!\n";}
+	    $ret = system("make -j2");
+	    if ( $ret ) {die "fastrun.pl: make -j2 of fastNLO V2 failed: ".
+			     "$ret, aborted!\n";}
 	    $ret = system("make install");
 	    if ( $ret ) {die "fastrun.pl: make install of fastNLO V2 failed: ".
 			     "$ret, aborted!\n";}
