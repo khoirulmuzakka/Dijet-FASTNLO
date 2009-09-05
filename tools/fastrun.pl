@@ -46,7 +46,7 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
-    ( "LOCAL", "", "0", "486", "guc", "", ".", "0001",
+    ( "LOCAL", "", "0", "500", "guc", "", ".", "0001",
       "0", "LO", "CTEQ", "none", "", ".", "", "1" );
 getopts('b:de:f:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
@@ -55,7 +55,7 @@ if ( $opt_h ) {
     print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
-    print "  -f rev          fastNLO revision to use (def.=486)\n";
+    print "  -f rev          fastNLO revision to use (def.=500)\n";
     print "  -g prot         Grid storage protocol to use (def.=guc)\n";
     print "  -h              Print this text\n";
     print "  -i dir          Installation directory (def.=.)\n";
