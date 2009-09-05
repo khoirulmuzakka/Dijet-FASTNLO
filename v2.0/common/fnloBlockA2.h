@@ -32,6 +32,8 @@ class fnloBlockA2 {
    int ILOord;
    int NObsBin;
    int NDim;
+   //KR: Added possibility to store and read start of new rapidity bin in nobs
+   vector <int> RapIndex;
    vector <string> DimLabel;
    vector <int> IDiffBin;
    vector < vector <double> > LoBin;

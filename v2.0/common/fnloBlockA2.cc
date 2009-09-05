@@ -44,9 +44,14 @@ int fnloBlockA2::Read(istream *table){
    }
    LoBin.resize(NObsBin);
    UpBin.resize(NObsBin);
+   //KR: Set rapidity index also when reading a table, not tested yet
+   RapIndex.push_back(0);
    for(int i=0;i<NObsBin;i++){
       LoBin[i].resize(NDim);
       UpBin[i].resize(NDim);
+      if (LoBin[i+1][1] && LoBin[i][1] != LoBin[i+1][1]) {
+	 RapIndex.push_back(i+1);
+      } 
       for(int j=0;j<NDim;j++){
          *table >>  LoBin[i][j];
          if(IDiffBin[j]==2) *table >>  UpBin[i][j];
