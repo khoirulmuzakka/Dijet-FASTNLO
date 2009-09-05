@@ -9,9 +9,9 @@ libfnl1310_la_SOURCES = fnl1310.cc fj-kt-06.cc
 libfnl1308_la_SOURCES = fnl1308.cc fj-sc-07.cc
 
 # C++ compiler flags to be used for the main target
-libfnt1001midp_la_CXXFLAGS = -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnl1310_la_CXXFLAGS = -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
-libfnl1308_la_CXXFLAGS = -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
+libfnt1001midp_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+libfnl1310_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
+libfnl1308_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 
 # Linker flags to be used for the main target
 # libfastnloNlojet in pkglibdir only after make install ...
