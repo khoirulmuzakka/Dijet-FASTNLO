@@ -4,6 +4,7 @@
 //     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
+// 2009/09/05 KR   First V2.0 Version with multiple bins in pT and rap, table header ok
 // 2009/09/01 KR   V2.0 Version
 //
 //------ DON'T TOUCH THIS PART! ------
