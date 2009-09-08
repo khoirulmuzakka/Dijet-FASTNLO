@@ -1,5 +1,5 @@
 #include "fnloBlockA2.h"
-
+//#include <iostream>
 
 int fnloBlockA2::Read(istream *table){
    table->peek();
@@ -44,17 +44,24 @@ int fnloBlockA2::Read(istream *table){
    }
    LoBin.resize(NObsBin);
    UpBin.resize(NObsBin);
-   //KR: Set rapidity index also when reading a table, not tested yet
+   //KR: Set rapidity index also when reading a table
    RapIndex.push_back(0);
+   //   int irap = 0;
    for(int i=0;i<NObsBin;i++){
       LoBin[i].resize(NDim);
       UpBin[i].resize(NDim);
-      if (LoBin[i+1][1] && LoBin[i][1] != LoBin[i+1][1]) {
-	 RapIndex.push_back(i+1);
-      } 
       for(int j=0;j<NDim;j++){
          *table >>  LoBin[i][j];
          if(IDiffBin[j]==2) *table >>  UpBin[i][j];
+      }
+      //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
+      if ( i > 0 ) {
+	if ( LoBin[i][1] != LoBin[i-1][1] ) {
+	  //	  cout << "iobs2: " << i << ", LoBin i-1: " << LoBin[i-1][1] << ", LoBin i: " << LoBin[i][1] << endl;
+	  RapIndex.push_back(i);
+	  //	  irap++;
+	  //	  cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
+	} 
       }
    }
 
