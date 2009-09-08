@@ -238,9 +238,22 @@ c ------------------------------------------------------------------
          WRITE(2,4999) IXSECTUNITS      ! Ixsectunits (for each block)
          WRITE(2,4999) IDataFlag     ! IDataFlag
          WRITE(2,4999) IAddMultFlag  ! IAddMultFlag
-         If (n.le.2) then
+ckr Correct n <= 2 => (1,0,0) and n=3 (Thresh.) => (2,1,0) to
+ckr         n = 1  (LO) => (1,1,0)
+ckr         n = 2 (NLO) => (1,2,0)
+ckr         n = 3 (Thr) => (2,1,0)
+ckr as defined in v2.0
+ckr         If (n.le.2) then
+ckr            IContrFlag1 = 1
+ckr            IContrFlag2 = 0
+ckr            IContrFlag3 = 0
+         If (n.le.1) then
             IContrFlag1 = 1
-            IContrFlag2 = 0
+            IContrFlag2 = 1
+            IContrFlag3 = 0
+         elseif (n.eq.2) then
+            IContrFlag1 = 1
+            IContrFlag2 = 2
             IContrFlag3 = 0
          elseif (n.eq.3) then
             IContrFlag1 = 2
