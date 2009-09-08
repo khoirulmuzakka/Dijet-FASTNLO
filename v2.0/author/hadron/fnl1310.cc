@@ -7,6 +7,8 @@
 // 2009/09/05 KR   First V2.0 Version with multiple bins in pT and rap, table header ok
 // 2009/09/01 KR   V2.0 Version
 //
+//# define DEBUG
+//
 //------ DON'T TOUCH THIS PART! ------
 #include <bits/hhc-phasespace.h>
 #include <bits/hhc-process.h>
@@ -85,6 +87,7 @@ private:
   time_t start_time;
    
   bool nlo;
+  bool ref;
   void inittable();
   void writetable();
 };
@@ -99,6 +102,9 @@ user_base_hhc * userfunc() {
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
+#ifdef DEBUG
+  cout << "Start fastNLO inputfunc ..." << endl; 
+#endif /* DEBUG */
   //  number of jets 
   //nj = 1U;
   nj = 2U;
@@ -113,6 +119,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 
 void psinput(phasespace_hhc *ps, double& s)
 {
+#ifdef DEBUG
+  cout << "Start fastNLO psinput ..." << endl; 
+#endif /* DEBUG */
   //  total c.m. energy squared
   //s =     40000.; // RHIC               200 GeV   
   //s =   3240000.; // TeV Run I         1800 GeV
@@ -131,18 +140,20 @@ void psinput(phasespace_hhc *ps, double& s)
 
 void UserHHC::initfunc(unsigned int)
 {
+#ifdef DEBUG
+  cout << "Start fastNLO initfunc ..." << endl; 
+#endif /* DEBUG */
   // ---- Initialize event counters
   nevents = 0;
   // Set some defaults
   // KR: Change for testing
-  //   if (nwrite==0) nwrite = 5000000;
-  if (nwrite==0) nwrite = 5000;
+  if (nwrite==0) nwrite = 1000000;
+  //  if (nwrite==0) nwrite = 10000;
     
   // KR: Avoid seg faults, initialize table here and not only in
-  //     UserDIS::phys_output where it seems to be too late ?
-  std::cout << "   before inittable   " << endl;
-  inittable();
-  std::cout << "   after inittable   " << endl;
+  //     UserHHC::phys_output where it seems to be too late ?
+  // Not required any more if phys_output declared virtual in NLOJet++ 
+  //  inittable();
 
   start_time = std::time(0);
 }
@@ -151,8 +162,11 @@ void UserHHC::initfunc(unsigned int)
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
+#ifdef DEBUG
+  cout << "Start fastNLO userfunc ..." << endl; 
+#endif /* DEBUG */
   fnloBlockA2 *A2 =  table->GetBlockA2();
-
+  
   double x1 = p[-1].Z()/p[hadron(-1)].Z();
   double x2 = p[0].Z()/p[hadron(0)].Z();
 
@@ -171,13 +185,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
     //----- first cut on lowest pt and on y
     int nobs = A2->GetNObsBin();
-//     cout << "pt: " << pt << ", rap: " << rap << endl;
-//     cout << "ptmin old: " << pTmin << ", ptmin new:" << A2->LoBin[0][0] << endl;  
-//     cout << "ymin old: " << ymin << ", ymin new:" << A2->LoBin[0][1] << endl;  
-//     cout << "ymax old: " << ymax << ", ymax new:" << A2->UpBin[nobs-1][1] << endl;  
+#ifdef DEBUG
+    int iobs = A2->RapIndex[1];
+    cout << "iobs = " << iobs << endl;
+    cout << "ptmin =  " << A2->LoBin[0][0] << ", pt = " << pt <<
+      ", ptmax = " << A2->UpBin[iobs-1][0] << endl;
+    cout << "ymin =  " << A2->LoBin[0][1] << ", rap = " << rap <<
+      ", rapmax = " << A2->UpBin[nobs-1][1] << endl;
+#endif /* DEBUG */
     if ( pt >= A2->LoBin[0][0] &&
 	 A2->LoBin[0][1] <= rap && rap < A2->UpBin[nobs-1][1] ) {
-
+      
       //----- determine y and pt bin -----
       int nrap = A2->RapIndex.size();
       for ( int i = 0; i < nrap; i++) {        
@@ -185,38 +203,38 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	if ( A2->LoBin[iobs][1] <= rap && rap < A2->UpBin[iobs][1] ) {
 	  irap = i;
 	  drap = 2.0* (A2->UpBin[iobs][1] - A2->LoBin[iobs][1]);
-// 	  cout << "Rap bin: i = " << i <<
-// 	    " , LoBin i,1 = " << A2->LoBin[iobs][1] <<
-// 	    " , rap = " << rap <<
-// 	    " , UpBin i,1 = " << A2->UpBin[iobs][1] << endl;
+#ifdef DEBUG
+ 	  cout << "Rap bin: i = " << i <<
+ 	    " , LoBin i,1 = " << A2->LoBin[iobs][1] <<
+ 	    " , rap = " << rap <<
+ 	    " , UpBin i,1 = " << A2->UpBin[iobs][1] << endl;
+#endif /* DEBUG */
 	  break;
 	}
       }
-
+      
       if (irap >= 0) { 
 	// find corresponding pt bin number
 	int npt = nobs;
 	int rapindex = A2->RapIndex.size();
 	if (irap+1 < rapindex ) {
 	  npt = A2->RapIndex[irap+1]; 
-// 	  cout << "RapIndexSize: " << A2->RapIndex.size() << endl;
-// 	  cout << "RapIndex: " << A2->RapIndex[irap] << endl;
-// 	  cout << "RapIndex+1: " << A2->RapIndex[irap+1] << endl;
 	}
 	for (int i = A2->RapIndex[irap]; i < npt; i++) {
 	  if (A2->LoBin[i][0] <= pt && pt < A2->UpBin[i][0]) {
 	    ipt = i;
-// 	    cout << "pt bin: i = " << i <<
-// 	      " , LoBin i,0 = " << A2->LoBin[i][0] <<
-// 	      " , pt = " << pt <<
-// 	      " , UpBin i,0 = " << A2->UpBin[i][0] << endl;
+#ifdef DEBUG
+ 	    cout << "pt bin: i = " << i <<
+ 	      " , LoBin i,0 = " << A2->LoBin[i][0] <<
+ 	      " , pt = " << pt <<
+	      " , UpBin i,0 = " << A2->UpBin[i][0] << endl;
+#endif /* DEBUG */
 	    break;
 	  }
 	}
       }
     
       //----- fill fastNLO arrays -----
-      //      cout << "irap: " << irap << ", ipt: " << ipt << ", ptbin: " << ptbin << endl; 
       if ( ipt>=0 ) {
 	for (int k=0; k<table->GetBlockA1()->GetNcontrib(); k++){
 	  if (table->GetBlockB(k)->GetIRef()>0) {
@@ -233,6 +251,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
 
 void UserHHC::writetable(){
+#ifdef DEBUG
+  cout << "Start fastNLO writetable ..." << endl; 
+#endif /* DEBUG */
   table->OpenFileRewrite();
   table->WriteBlockA1();
   table->WriteBlockA2();
@@ -245,6 +266,9 @@ void UserHHC::writetable(){
 
 
 void UserHHC::end_of_event(){
+#ifdef DEBUG
+  cout << "Start fastNLO end_of_event ..." << endl; 
+#endif /* DEBUG */
   nevents += 1;
   //-------- store table
   if (( (unsigned long)nevents % nwrite)==0){
@@ -255,7 +279,7 @@ void UserHHC::end_of_event(){
     min  = time/60L;
     time -= min*60L;
       
-    std::cout<<"--->     "
+    cout     <<"--->     "
 	     <<(hour < 10 ? "0" : "")<<hour
 	     <<(min < 10 ? ":0" : ":")<<min
 	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
@@ -274,21 +298,37 @@ void UserHHC::end_of_event(){
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
+#ifdef DEBUG
+  cout << "Start fastNLO phys_output ..." << endl; 
+#endif /* DEBUG */
   tablefilename.assign(__file_name.c_str());
   tablefilename += ".tab";
    
   //Determine whether we are running LO or NLO
   const char* const file = __file_name.c_str(); 
-  if(strstr(file,"born")!=NULL){
+  if (strstr(file,"born") != NULL) {
     nlo = false;
-  }else{
-    if(strstr(file,"nlo")!=NULL){
+    cout << "fastNLO: Running at Born level ..." << endl;
+  } else {
+    if (strstr(file,"nlo") != NULL) {
       nlo = true;
-    }else{
-      printf("This module can only be run at Born level or at NLO.\n");
+      cout << "fastNLO: Running at NLO level ..." << endl;
+    } else {
+      //      printf("This module can only be run at Born level or at NLO.\n");
+      cout <<
+	"fastNLO: This module can only run at Born or NLO level, aborted!"
+	   << endl;
       exit(1);
     }
   }
+
+  //Determine whether we are running in reference mode or not
+  ref = false;
+  if (strstr(file,"ref") != NULL) {
+    ref = true;
+    cout << "fastNLO: Running in reference mode ..." << endl; 
+  }
+  
   nwrite = __save;
   inittable();
 }
@@ -296,11 +336,14 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
 
 
 void UserHHC::inittable(){
-   
-  const bool doReference = false;
+#ifdef DEBUG
+  cout << "Start fastNLO inittable ..." << endl; 
+#endif /* DEBUG */
+  // Replaced by bool ref set in phys_output via filename string match
+  //  const bool doReference = false;
   // KR: Workaround since I couldn't figure out how the filename setting
   //     could work with inittable() in initfunc
-  string tablefilename = "fastNLO.tab";
+  //  string tablefilename = "fastNLO.tab";
 
   //  total c.m. energy squared
   //double s =     40000.; // RHIC               200 GeV   
@@ -380,7 +423,8 @@ void UserHHC::inittable(){
   B->CodeDescript.push_back("NLOJet++_4.0.1");
   B->NCodeDescr = B->CodeDescript.size();
   B->IRef = 0;
-  if (doReference) {B->IRef = 1;}
+  //  if (doReference) {B->IRef = 1;}
+  if (ref) {B->IRef = 1;}
   if (nlo) {
     B->CtrbDescript.push_back("NLO");
     B->IContrFlag2 = 2;
@@ -493,7 +537,8 @@ void UserHHC::inittable(){
    
    
   // reference table
-  if(doReference){
+  //  if(doReference){
+  if(ref){
     fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
     refB->NSubproc = 7;
     table->CreateBlockB(1,refB);
