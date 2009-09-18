@@ -15,11 +15,15 @@ LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
 # path to LHAPDF pdfsets
 %.f: %.F
 	cpp -ansi -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
+# Trial to use in fx9999rw.F 
+#	cpp -ansi -traditional-ccp -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
+
+# Clean files that are automatically produced by the preprocessor cpp
+CLEANFILES = example.f fnio.f
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = example.f \
-	Makefile.in aclocal.m4 configure missing install-sh
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure missing install-sh
