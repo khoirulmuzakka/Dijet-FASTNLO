@@ -15,12 +15,21 @@
 #endif
 
       Implicit None
+      INCLUDE "fnx9999.inc"
       CHARACTER*255 FILENAME, HISTOFILE
-      Integer i
+      Integer i, LENOCC
 
 c - Attention!!! - this mus be declared consistent with its 
 c                  definition in the commonblock!!!!!
-      double precision xst1001(200) 
+      double precision xst1001(200,mxctrb) 
+
+ckr Add steering block for more flexible alpha_s calculation
+ckr Set parameters so as to get results of original example
+      CHARACTER*255 ASMODE
+      DOUBLE PRECISION ASMZVAL
+      INTEGER IASLOOP
+      COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
+      DATA ASMZVAL,IASLOOP,ASMODE/0.118D0,2,"MW"/
 
 c --- parse command line
       IF ( IARGC().LT.1)  FILENAME = 'table.tab'
@@ -54,8 +63,10 @@ c         5th argument:  array to return results
       call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
 c      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
 c      call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
-      call FX9999CC(FILENAME, 1.0d0 , 1.0d0, 1 , XST1001)
-      call FX9999CC(FILENAME, 2.0d0 , 1.0d0, 1 , XST1001)
+      call FX9999CC(FILENAME(1:LENOCC(FILENAME)),
+     >     1.0d0 , 1.0d0, 1 , XST1001)
+      call FX9999CC(FILENAME(1:LENOCC(FILENAME)),
+     >     2.0d0 , 1.0d0, 1 , XST1001)
 c      call FX9999NF             ! print scenario info
 
 c - the results of the last call can be accessed in the array:  xst1001(n,iord)
@@ -63,6 +74,5 @@ c      n: continuous bin number for all D0/CDF bins (see documentation)
 c   iord: order  1 LO, 
 c                2 NLO correction (add 1,2 to get the NLO x-section)
 c                3 NNLO-NLL correction (add 1,2,3 to get full prediction)
-
 
       END

@@ -15,31 +15,43 @@
       CHARACTER*8 CH8TMP
       CHARACTER*4 CH4TMP
       INTEGER BORNN,NLON,LENOCC
-      INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
-      INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
+      INTEGER I,J,L1,L2,L3,L4,MYNPDF,IOPDF,IOAS
+      INTEGER ISTAT,MYISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
       LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY
       DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
+     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
+     >     RES1LO(MXOBSBIN,MXSUBPROC+1,0:3),
      >     RESLO,RESHI,DREF
 c - NNPDF method
-      DOUBLE PRECISION WGT(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGT2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGT(MXOBSBIN,MXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGT2(MXOBSBIN,MXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGTX(MXOBSBIN,MXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGTX2(MXOBSBIN,MXSUBPROC+1,0:3)
 c - To unify quoted uncertainties (CL68,CL90,special)
       DOUBLE PRECISION CL90,CLGJR
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
-      DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
-      REAL PT(NPTMAX)
+      DOUBLE PRECISION XS0(MXOBSBIN,3),XS1(MXOBSBIN,3)
+      DOUBLE PRECISION XS2(MXOBSBIN,3)
+      REAL PT(MXOBSBIN)
 
       CHARACTER*255 ASMODE
       DOUBLE PRECISION ASMZVAL
       INTEGER IASLOOP
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
+
+c --- Mods for v2.0
+      INTEGER ICONTR,NORD,nargs,IArgC
+c      external iargc
+
+      ICONTR = 2
+      NORD   = NPOW(ICONTR) - ILOORD +1
+
+c      nargs = command_argument_count()
+      nargs = IArgC()
+      write(*,*)"nargs, iargc",nargs,iargc()
 
 c --- Parse command line
       WRITE(*,*)"\n #################################################"
@@ -50,6 +62,8 @@ c --- Parse command line
       WRITE(*,*)"#################################################"
       WRITE(*,*)"#"
 
+      CALL GETARG(1,SCENARIO)
+      write(*,*)"scen",scenario
 *---Scenario
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
@@ -310,12 +324,12 @@ c - Initialize one member, 0=best fit member
       CALL INITPDF(0)
 
 c - Write out some info on best fit member      
-      CALL NUMBERPDF(NPDF)
+      CALL NUMBERPDF(MYNPDF)
       CALL GETORDERPDF(IOPDF)
       CALL GETORDERAS(IOAS)
       CALL GETLAM4(0,QLAM4)
       CALL GETLAM5(0,QLAM5)
-      WRITE(*,*) "ALLUNC: The PDF set has",NPDF+1," members"
+      WRITE(*,*) "ALLUNC: The PDF set has",MYNPDF+1," members"
       WRITE(*,*) "ALLUNC: The PDF is of order",IOPDF+1
       WRITE(*,*) "ALLUNC: alpha_s was used in",IOAS+1,
      >     "-loop order in the PDF"
@@ -351,8 +365,8 @@ ckr      LALG  = .TRUE.
             CLOSE(2)
          ENDIF
       ENDIF
-      LONE  = NPDF.LE.1
-      LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
+      LONE  = MYNPDF.LE.1
+      LSER  = .NOT.LONE.AND.MYNPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LONE.AND..NOT.LSER
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
@@ -376,8 +390,8 @@ ckr      LALG  = .TRUE.
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
-      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      CALL FX9999CC(FILENAME,1D0,1D0,0,XS1)
+      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYNPDF)
 
 
 
@@ -397,19 +411,19 @@ c         5th argument:  array to return results
 c - Compute PDF uncertainties for all available scales
 c - Check that FILENAME is still the primary table here ...!!!
       IF (.NOT.LSER) THEN
-      DO I=1,NSCALEVAR
+      DO I=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
          CALL INITPDF(0)
-         MUR = MURSCALE(I)
-         MUF = MUFSCALE(I)
+         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),I)
+         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),I)
          WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
-         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XS1)
 
 c - Save the result array from the first call (= central result)
 c   and reset result arrays   
-         WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
-     >        NSUBPROC," subprocesses"
-         DO L1=1,NBINTOT
-            DO L2=1,(NSUBPROC+1)
+         WRITE(*,*)"ALLUNC: The observable has",NOBSBIN," bins -",
+     >        NSUBPROC(ICONTR)," subprocesses"
+         DO L1=1,NOBSBIN
+            DO L2=1,(NSUBPROC(ICONTR)+1)
                DO L3=1,NORD
                   RES0(L1,L2,L3) = 0D0 
                   DO L4=1,L3
@@ -425,19 +439,19 @@ c   and reset result arrays
             ENDDO
          ENDDO
 
-ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
-ckr         IF (NPDF.GT.1) THEN
+ckr Do loop runs once even if MYNPDF=0! => Avoid with IF statement
+ckr         IF (MYNPDF.GT.1) THEN
          IF (LPDF) THEN
 *---Convert from CL68 to CL90 values
             CL90  = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
 *---Convert from GJR to CTEQ (CL90) values
             CLGJR = 1.D0/0.47D0
-            DO J=1,NPDF
+            DO J=1,MYNPDF
                CALL INITPDF(J)
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+               CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
 c - For all bins/subproc/orders: Add negative/positive variations
-               DO L1=1,NBINTOT
-                  DO L2=1,(NSUBPROC+1)
+               DO L1=1,NOBSBIN
+                  DO L2=1,(NSUBPROC(ICONTR)+1)
                      DO L3=1,NORD
                         SUMM = 0.D0
                         DIFF = - RES0(L1,L2,L3)
@@ -464,9 +478,9 @@ c - For all bins/subproc/orders: Add negative/positive variations
 
 c - Take square-root of sum of squares
 c - or apply Toy MC method for NNPDF
-         DO L1=1,NBINTOT
+         DO L1=1,NOBSBIN
             IF (LPDF) THEN
-               DO L2=1,(NSUBPROC+1)
+               DO L2=1,(NSUBPROC(ICONTR)+1)
                   DO L3=1,NORD
                      IF (.NOT.LTOY) THEN
 ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
@@ -486,16 +500,16 @@ ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
                      ENDIF
                   ENDDO
                ENDDO
-               RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
-     >              RES0(L1,NSUBPROC+1,NORD)
-               RESHI = RES1HI(L1,NSUBPROC+1,NORD)/
-     >              RES0(L1,NSUBPROC+1,NORD)
+               RESLO = RES1LO(L1,NSUBPROC(ICONTR)+1,NORD)/
+     >              RES0(L1,NSUBPROC(ICONTR)+1,NORD)
+               RESHI = RES1HI(L1,NSUBPROC(ICONTR)+1,NORD)/
+     >              RES0(L1,NSUBPROC(ICONTR)+1,NORD)
 ckr 30.01.2008: Change output format for better comp. with C++ version
             ELSE
                RESLO = 0D0
                RESHI = 0D0
             ENDIF
-            WRITE(*,900) L1,RES0(L1,NSUBPROC+1,NORD),RESLO,RESHI
+            WRITE(*,900) L1,RES0(L1,NSUBPROC(ICONTR)+1,NORD),RESLO,RESHI
          ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
@@ -528,31 +542,32 @@ c - PDF series of variations (e.g. alpha_s(M_Z))
 c - Use primary table
 c - Check that FILENAME is still the primary table here ...!!!
 c - Fill only central scale
-c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
+c - (MYISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSER) THEN
-         ISCALE = 3
-         MUR = MURSCALE(ISCALE)
-         MUF = MUFSCALE(ISCALE)
-         WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",ISCALE,
+         MYISCALE = 3
+         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",MYISCALE,
      >        "; mur, muf = ",mur,muf
-         DO J=0,NPDF
+         DO J=0,MYNPDF
             CALL INITPDF(J)
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
             IBIN = 0
             DO IRAP=1,NRAPIDITY
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-                  DO ISUB=0,NSUBPROC
+ckr                  PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+                  PT(IBIN) = REAL(LOBIN(IBIN,1))
+                  DO ISUB=0,NSUBPROC(ICONTR)
                      RES0(IBIN,ISUB+1,0) = 0.D0
                      DO IORD=1,NORD
-                        RES0(IBIN,ISUB+1,IORD) = XSECT0(IBIN,IORD)
+                        RES0(IBIN,ISUB+1,IORD) = XS0(IBIN,IORD)
                         RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
      >                       RES0(IBIN,ISUB+1,IORD)
                      ENDDO
 c - Fill histograms
                      DO IORD=0,NORD
-                        IHIST = IORD*1000000 + ISCALE*100000 +
+                        IHIST = IORD*1000000 + MYISCALE*100000 +
      >                       ISUB*10000 + IRAP*100
                         CALL HFILL(IHIST+J,PT(IBIN),0.,
      >                       REAL(RES0(IBIN,ISUB+1,IORD)))
@@ -580,22 +595,22 @@ c - Initialize CTEQ61 reference PDFs
          CALL INITPDF(0)
 
 c - Default scale (C++ 2, Fortran 3) ==> normal result
-         ISCALE = 3
-c - (Use other ISCALE in FORTRAN ONLY if refscale <> 2 in author code)
-c         ISCALE = 2
-         MUR = MURSCALE(ISCALE)
-         MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         MYISCALE = 3
+c - (Use other MYISCALE in FORTRAN ONLY if refscale <> 2 in author code)
+c         MYISCALE = 2
+         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
 c - Attention: From now on ref. table loaded ==> rap. bins doubled
 c - Get the normal result, scale 3, from first half of doubled rap bins
          IBIN = 0
          DO IRAP=1,INT(NRAPIDITY/2)
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC
+               DO ISUB=0,NSUBPROC(ICONTR)
                   RES0(IBIN,ISUB+1,0) = 0.D0
                   DO IORD=1,NORD
-                     RES0(IBIN,ISUB+1,IORD) = XSECT(IBIN,IORD)
+                     RES0(IBIN,ISUB+1,IORD) = XS2(IBIN,IORD)
                      RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
      >                    RES0(IBIN,ISUB+1,IORD)
                   ENDDO
@@ -605,18 +620,18 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
          NBIN = IBIN
 
 c - Reference scale no. always 1
-         ISCALE = 1
-         MUR = MURSCALE(ISCALE)
-         MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         MYISCALE = 1
+         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
 c - Get the reference result, scale 1, nrap/2 ++ bins
          DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC
+               DO ISUB=0,NSUBPROC(ICONTR)
                   RES0(IBIN,isub+1,0) = 0.D0
                   DO IORD=1,NORD
-                     RES0(IBIN,isub+1,IORD) = XSECT(IBIN,IORD)
+                     RES0(IBIN,isub+1,IORD) = XS2(IBIN,IORD)
                      RES0(IBIN,isub+1,0) = RES0(IBIN,isub+1,0) +
      >                    RES0(IBIN,isub+1,IORD)
                   ENDDO
@@ -625,18 +640,19 @@ c - Get the reference result, scale 1, nrap/2 ++ bins
          ENDDO
 
 c - Compare results and fill histos
-         ISCALE = 3
+         MYISCALE = 3
          ISUB   = 0
          IBIN   = 0
          DO IRAP=1,INT(NRAPIDITY/2)
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-               DO ISUB=0,NSUBPROC
+ckr               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+               PT(IBIN) = REAL(LOBIN(IBIN,1))
+               DO ISUB=0,NSUBPROC(ICONTR)
                   DO IORD=0,NORD
                      DREF = RES0(IBIN,isub+1,IORD)/
      >                    RES0(IBIN+NBIN,isub+1,IORD) - 1.D0
-                     IHIST = IORD*1000000 + ISCALE*100000 +
+                     IHIST = IORD*1000000 + MYISCALE*100000 +
      >                    ISUB*10000 + IRAP*100
                      CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
                   ENDDO
@@ -648,24 +664,24 @@ c - Compare results and fill histos
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYNPDF)
       END
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      SUBROUTINE PDFHIST(N,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYNPDF)
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
-      INTEGER N,LENOCC,IPDF,NPDF,IPTMAX
+      INTEGER N,LENOCC,IPDF,MYNPDF,IPTMAX
       LOGICAL LONE,LPDF,LSTAT,LALG,LSER
 
       INTEGER J,ISTAT2,ICYCLE
-      INTEGER IORD,ISUB,ISCALE,IRAP,IPT,IHIST,NHIST
+      INTEGER IORD,ISUB,MYISCALE,IRAP,IPT,IHIST,NHIST
       INCLUDE "fnx9999.inc"
       INCLUDE "strings.inc"
-      REAL PT(NPTMAX)
+      REAL PT(MXOBSBIN)
       
 
 c - HBOOK common 
@@ -673,6 +689,12 @@ c - HBOOK common
       PARAMETER (NWPAWC=2500000)
       REAL HMEMOR(NWPAWC)
       COMMON /PAWC/ HMEMOR
+
+c --- Mods for v2.0
+      INTEGER ICONTR,NORD
+
+      ICONTR = 2
+      NORD   = NPOW(ICONTR) - ILOORD + 1
 
 c - Open & book
       IF (N.EQ.1) THEN
@@ -686,32 +708,58 @@ c - Open & book
          ENDIF
          
          NHIST = 0
-         CBASE1 = CIPROC(IPROC)
+         IF (NSCDESCRIPT.LT.3) THEN
+            WRITE(*,*)"\nPDFHIST: ERROR! Insufficient number of "//
+     >           "table descriptors for histogram booking: ",
+     >           NSCDESCRIPT
+            WRITE(*,*)"         Please add descriptive lines, stopped."
+            STOP
+         ENDIF
+         
+*--- Process name
+ckr         CBASE1 = CIPROC(IPROC)
+         IF (NSCDESCRIPT.GT.3) THEN
+            CBASE1 = SCDESCRIPT(4)
+         ELSEIF (NSCDESCRIPT.GT.2) THEN
+            CBASE1 = SCDESCRIPT(3)
+         ELSE
+            CBASE1 = "Undefined_Process"
+         ENDIF
+*--- Differential formula
+ckr         CBASE1 = CBASE1(1:LENOCC(CBASE1))//"_"
+ckr     >        //NAMELABEL(1)
          CBASE1 = CBASE1(1:LENOCC(CBASE1))//"_"
-     >        //NAMELABEL(1)
-         CBASE2 = CBASE1(1:LENOCC(CBASE1))//"_"
-     >        //CIALGO(IALGO)
-         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"_"
-     >        //CJETRES1(IALGO)
-         WRITE(CTMP,'(F3.1)'),JETRES1
-         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"="
-     >        //CTMP
+     >        //SCDESCRIPT(1)
+*--- Jet algorithm & parameters
+ckr         CBASE2 = CBASE1(1:LENOCC(CBASE1))//"_"
+ckr     >        //CIALGO(IALGO)
+         IF (NSCDESCRIPT.GT.4) THEN
+            CBASE2 = CBASE1(1:LENOCC(CBASE1))//"_"//SCDESCRIPT(5)
+         ELSE
+            CBASE2 = CBASE1(1:LENOCC(CBASE1))//"_Undefined_JetAlgo"
+         ENDIF
+ckr         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"_"
+ckr     >        //CJETRES1(IALGO)
+ckr         WRITE(CTMP,'(F3.1)'),JETRES1
+ckr         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"="
+ckr     >        //CTMP
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
-            DO ISCALE=1,NSCALEVAR ! Scale variations
-               DO ISUB=0,NSUBPROC ! Subprocesses: 0 tot + 7 subproc
+            DO MYISCALE=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))! Scale variations
+               DO ISUB=0,NSUBPROC(ICONTR) ! Subprocesses: 0 tot + 7 subproc
                   DO IRAP=1, NRAPIDITY
-                     IHIST = IORD*1000000 + ISCALE*100000 +
+                     IHIST = IORD*1000000 + MYISCALE*100000 +
      >                    ISUB*10000 + IRAP*100
 ckr                     write(*,*)"ALL: iord,isc,isub,irap,ihist",
 ckr     >                    iord,iscale,isub,irap,ihist
                      DO J=1,(NPT(IRAP)+1)
-                        PT(J) = REAL(PTBIN(IRAP,J))
+ckr                        PT(J) = REAL(PTBIN(IRAP,J))
+                        PT(J) = REAL(LOBIN(RAPINDEX(IRAP)+J-1,1))
                      ENDDO
                      CSTRNG = CBASE2
                      WRITE(CTMP,'(I1)'),IORD
                      CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
      >                    //CTMP
-                     WRITE(CTMP,'(I1)'),ISCALE
+                     WRITE(CTMP,'(I1)'),MYISCALE
                      CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_imu="
      >                    //CTMP
                      WRITE(CTMP,'(I1)'),IRAP
@@ -724,7 +772,7 @@ ckr                     CALL HBARX(IHIST)
                      NHIST = NHIST+1
 ckr                     write(*,*)"1. Booked histo #",nhist
                      IF (LSER) THEN
-                        DO IPDF=1,NPDF
+                        DO IPDF=1,MYNPDF
                            CALL HBOOKB(IHIST+IPDF,
      >                          CSTRNG(1:LENOCC(CSTRNG)),
      >                          NPT(IRAP),PT,0)
@@ -748,7 +796,7 @@ ckr                     write(*,*)"1. Booked histo #",nhist
 ckr                        write(*,*)"2. Booked histo #",nhist
                      ENDIF
                      IF (LSTAT.AND.IORD.LE.2.AND.
-     >                    ISCALE.EQ.3.AND.ISUB.EQ.0) THEN
+     >                    MYISCALE.EQ.3.AND.ISUB.EQ.0) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
      >                       "_dstat/xsect_%"
@@ -765,7 +813,7 @@ ckr                        write(*,*)"2. Booked histo #",nhist
 ckr                        write(*,*)"3. Booked histo #",nhist
                      ENDIF
                      IF (LALG.AND.IORD.LE.2.AND.
-     >                    ISCALE.EQ.3) THEN
+     >                    MYISCALE.EQ.3) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
      >                       "_dref/xsect_%"
@@ -776,13 +824,13 @@ ckr                        write(*,*)"3. Booked histo #",nhist
 ckr                        write(*,*)"4. Booked histo #",nhist
                      ENDIF
                      IF (LSTAT.AND.ISUB.EQ.0) THEN
-                        IHIST = IORD*1000000 + ISCALE*100000 +
+                        IHIST = IORD*1000000 + MYISCALE*100000 +
      >                       ISUB*10000 + IRAP*100
                         CSTRNG = CBASE1(1:LENOCC(CBASE1))
                         WRITE(CTMP,'(I1)'),IORD
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
      >                       //CTMP
-                        WRITE(CTMP,'(I1)'),ISCALE
+                        WRITE(CTMP,'(I1)'),MYISCALE
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_imu="
      >                       //CTMP
                         WRITE(CTMP,'(I1)'),IRAP
@@ -811,7 +859,7 @@ ckr => Maximal IPT = IPTMAX < 45
                            WRITE(CTMP,'(I1)'),IORD
                            CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
      >                          //CTMP
-                           WRITE(CTMP,'(I1)'),ISCALE
+                           WRITE(CTMP,'(I1)'),MYISCALE
                            CSTRNG = CSTRNG(1:LENOCC(CSTRNG))/
      >                          /"_imu="//CTMP
                            WRITE(CTMP,'(I1)'),IRAP
@@ -839,7 +887,7 @@ ckr     >                          IHIST + 2*IPT + 11
                      ENDIF
                   ENDDO
                ENDDO
-            ENDDO               ! End od ISCALE loop, IORD still on
+            ENDDO               ! End od MYISCALE loop, IORD still on
          ENDDO
          WRITE(*,*)"Number of histograms booked:",NHIST
 
@@ -862,23 +910,32 @@ c
       INCLUDE "fnx9999.inc"
       INTEGER NSCALE
       DOUBLE PRECISION 
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
+     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
+     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
+     >     RES1LO(MXOBSBIN,MXSUBPROC+1,0:3)
+      INTEGER I,J,NBIN,IORD,ISUB,ISUB2,MYISCALE,IHIST
       REAL VAL0,VALLO,VALHI
-      
-      IF (NSCALE.LT.1 .OR. NSCALE.GT.NSCALEVAR) THEN
+
+c --- Mods for v2.0
+      REAL PT(MXOBSBIN)
+      INTEGER ICONTR,NORD
+
+      ICONTR = 2
+      NORD   = NPOW(ICONTR) - ILOORD + 1
+
+      IF (NSCALE.LT.1 .OR.
+     >     NSCALE.GT.NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))) THEN
          WRITE(*,*) "\nPDFFILL: ERROR! NSCALE ",NSCALE,
      >        " is out of range, aborted!"
-         WRITE(*,*) "PDFFILL: Max. NSCALE: ",NSCALEVAR
+         WRITE(*,*) "PDFFILL: Max. NSCALE: ",
+     >        NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
          STOP
       ENDIF
-      ISCALE = NSCALE
+      MYISCALE = NSCALE
 
 c - Fill all histograms for the given scale
       DO IORD=0,NORD            ! Order: tot, LO, NLO-corr, NNLO-corr
-         DO ISUB2=1,(NSUBPROC+1) ! Subprocesses: 0 tot + 7 subproc
+         DO ISUB2=1,(NSUBPROC(ICONTR)+1) ! Subprocesses: 0 tot + 7 subproc
             ISUB=ISUB2
             IF (ISUB.EQ.8) ISUB=0
             NBIN=0
@@ -895,14 +952,21 @@ c - Fill all histograms for the given scale
                      VALHI = REAL(RES1HI(NBIN,ISUB2,NORD))
                   ENDIF
 ckr Recall: HBOOK understands only single precision
-                  IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
+                  IHIST = IORD*1000000+MYISCALE*100000+ISUB*10000+I*100
 ckr                  write(*,*)"iord,iscale,isub/2,i",iord,iscale,
 ckr     >                 isub,isub2,i
 ckr                  write(*,*)"ihist,val0,vallo,valhi",
 ckr     >                 ihist,val0,vallo,valhi
-                  CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
-                  CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
-                  CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+                  CALL HFILL(IHIST,
+     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VAL0)
+ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VAL0)
+                  CALL HFILL(IHIST+1,
+     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALLO)
+ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VALLO)
+                  CALL HFILL(IHIST+2,
+     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALHI)
+ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+                        PT(J) = REAL(LOBIN(RAPINDEX(I)+J-1,1))
                ENDDO            ! pT-loop
             ENDDO               ! rap-loop
          ENDDO                  ! isub-loop

@@ -91,19 +91,19 @@
       Include 'fnx9999.inc'
       Integer IFILE, ipoint, I,J,K,L,M, 
      +     IPrintFlag,
-     +     maxscale, nbin,nx
+     +     maxscale, nbin,nx,
+     +     lenocc
       Character*(*) FILENAME
-      Character*50 OLDFILENAME
       Double Precision Xmur, Xmuf
-      Data OLDFILENAME/'xxxx'/
-      Save OLDFILENAME
-
 
 c === initialization: read table, set pointers to contributions
       call FX9999IN(Filename)
 c === reset output array
-      Do j=1,NObsBin
-         xsect(j) = 0d0
+ckr Add back Ctrb loop for xsect as in description
+      Do i=0,NContrib
+         Do j=1,NObsBin
+            xsect(j,i) = 0d0
+         Enddo
       Enddo
 c === determine pointers to contributions/scales
       Call FX9999PT(xmur,xmuf)
@@ -120,7 +120,8 @@ c - multiply with perturbative coefficients and alphas
 c - add up in small array
          Do j=1,NObsBin
             Do k=1,NSubProc(Ipoint)
-               xsect(j) = xsect(j)+result(j,k,Ipoint)
+               xsect(j,0) = xsect(j,0)+result(j,k,Ipoint)
+               xsect(j,i) = xsect(j,i)+result(j,k,Ipoint)
 c               write(*,*) 'result ',j,k,result(j,k,Ipoint)
             Enddo
          Enddo
@@ -167,18 +168,23 @@ c 5000 Format (A,A64)
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer i,j,k
+      Include 'strings.inc'
+      Integer i,j,k,
+     +     lenocc
       Character*(*) FILENAME
-      Character*50 OLDFILENAME
+      Character*255 OLDFILENAME
       Data OLDFILENAME/'xxxx'/
       Save OLDFILENAME
 
 c === reset result arrays
+ckr Add back Ctrb loop for xsect as in description
       Do i=1,MxObsBin
-         Xsect(i) = 0d0
-         Xsect2(i)= 0d0
-         Do j=1,MxSubproc
-            Do k=1,MxCtrb
+         Xsect(i,0) = 0d0
+         Xsect2(i,0)= 0d0
+         Do k=1,MxCtrb
+            Xsect(i,k) = 0d0
+            Xsect2(i,k)= 0d0
+            Do j=1,MxSubproc
                result(i,j,k) = 0d0
             Enddo
          Enddo
@@ -193,10 +199,12 @@ c === output in first fastNLO call
       Endif
 
 c === in 1st scenario call: read fastNLO coefficient table
-      If (FILENAME.ne.OLDFILENAME) Then
+      If (FILENAME(1:LENOCC(FILENAME)).ne.
+     >     OLDFILENAME(1:LENOCC(OLDFILENAME))) Then
 c         Call FX9999RD(FILENAME)
-         Call FX9999RW('read',FILENAME) ! new flexible version
-         OLDFILENAME=FILENAME
+         Call FX9999RW('read',FILENAME(1:LENOCC(FILENAME)))
+                                ! new flexible version
+         OLDFILENAME = FILENAME
 
 c   - check consistency of array dimensions / commonblock parameters
 c ----------> to be done
@@ -611,8 +619,11 @@ c --- gammaP: direct, jets
 
       write(*,*) "fastNLO results:"
 
-      Do i=1,NObsBin
-         write(*,*) 'bin No/result ',i,'  ',xsect(i)
+ckr Add back Ctrb loop for xsect as in description
+      Do j=0,NContrib
+         Do i=1,NObsBin
+            write(*,*) 'icontr, bin No, result ',j,i,'  ',xsect(i,j)
+         Enddo
       Enddo
 
       Return

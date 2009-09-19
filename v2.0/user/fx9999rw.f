@@ -9,7 +9,7 @@
 * ------------------------------------------------------------
       Implicit None
       Character*(*) crw,filename
-      Integer Nunit, Ifile,ic,i,j,k,l,n,m, nxmax
+      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax
       Include 'fnx9999.inc'
 
       Nunit=2
@@ -19,8 +19,8 @@
       Else
          OPEN(Nunit,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
          IF (Ifile .ne. 0) THEN
-            WRITE(*,*) '          fastNLO:  table file not found ',
-     +           '  -  IOSTAT = ',Ifile
+            WRITE(*,*)"FX9999RW: ERROR! Table file not found, "//
+     >           "stopped! IOSTAT = ",Ifile
             STOP
          Endif
       Endif
