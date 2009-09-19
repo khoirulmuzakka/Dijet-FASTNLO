@@ -86,7 +86,9 @@ C --------------------------------------------------------------------
      +     ONED, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
      +     MUCACHE,ASCACHE,ASMZCACHE
       INTEGER  NLOOP, NF, IFIRST, I
-      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
+ckr 30.01.2008: Initialize Z mass in double precision 
+ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
+      PARAMETER (ZMASS = 91.187D0)
       SAVE IFIRST, NF, ONED, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
       DATA IFIRST/0/, ONED/1.D0/
