@@ -67,7 +67,7 @@ c - Get info from PDF set
       NLOOP = IOAS+1
       ASMZPDF = ALPHASPDF(ZMASS)
 ckr Round value to 6 digits only for comparisons
-ckr      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
+      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
 
 c - Print info
       IF (IFIRST.EQ.0) THEN

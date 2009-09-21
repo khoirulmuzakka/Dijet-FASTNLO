@@ -60,13 +60,14 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-      call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-c      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-c      call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
+c      call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+      call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+      call FNSET("P_THRESHCOR",0) ! select No. loops in threshold corrections
+ckr      write(*,*)"EX: Filename: ",FILENAME(1:LENOCC(FILENAME))
       call FX9999CC(FILENAME(1:LENOCC(FILENAME)),
      >     1.0d0 , 1.0d0, 1 , XST1001)
-      call FX9999CC(FILENAME(1:LENOCC(FILENAME)),
-     >     2.0d0 , 1.0d0, 1 , XST1001)
+c      call FX9999CC(FILENAME(1:LENOCC(FILENAME)),
+c     >     2.0d0 , 2.0d0, 1 , XST1001)
 c      call FX9999NF             ! print scenario info
 
 c - the results of the last call can be accessed in the array:  xst1001(n,iord)

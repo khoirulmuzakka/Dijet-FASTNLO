@@ -11,14 +11,14 @@ allunc_SOURCES = allunc.f statcode.f fnx9999.f fx9999rw.f fnio.f fnset.f \
 	fnx9999.inc strings.inc
 
 # FORTRAN compiler flags to be used for the main target
-AM_FFLAGS = -O -g -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -O -g -ff2c -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
 # libraries to be linked to the main target
-example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
-allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
+allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
 allunc_LDFLAGS = -lg2c
 
 # path to LHAPDF pdfsets

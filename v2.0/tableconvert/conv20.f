@@ -494,7 +494,9 @@ c                        do l=1,NscaleBin !           scalebin
      & 1d0 *Bnst(4)
  
                               Else
-                                 Write(*,*) 'not implemented: NScaleBin=',NScaleBin
+                                 Write(*,*)
+     >                                'not implemented: NScaleBin='
+     >                                ,NScaleBin
                                  Stop
                               Endif
                            enddo

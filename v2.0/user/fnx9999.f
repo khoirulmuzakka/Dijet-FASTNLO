@@ -109,10 +109,10 @@ c === determine pointers to contributions/scales
       Call FX9999PT(xmur,xmuf)
 
 c === loop over pointers to contributions
-      Do i=1,IContrib
-         Ipoint = IContrPoint(i)
-         write(*,*) "Ctrb",i,IContrPoint(i),IScalePoint(i),
-     +        NSubproc(IContrPoint(i))
+      Do i=1,IContr
+         Ipoint = IContrPointer(i)
+ckr         write(*,*) "Ctrb",i,IContrPointer(i),IScalePointer(i),
+ckr     +        NSubproc(IContrPointer(i))
 c - get PDFs
          call FX9999GP(i)
 c - multiply with perturbative coefficients and alphas
@@ -122,7 +122,8 @@ c - add up in small array
             Do k=1,NSubProc(Ipoint)
                xsect(j,0) = xsect(j,0)+result(j,k,Ipoint)
                xsect(j,i) = xsect(j,i)+result(j,k,Ipoint)
-c               write(*,*) 'result ',j,k,result(j,k,Ipoint)
+ckr               write(*,*) 'result ',j,k,result(j,k,Ipoint)
+ckr               write(*,*) "xsect0,i",xsect(j,0),xsect(j,i)
             Enddo
          Enddo
       Enddo
@@ -228,113 +229,207 @@ c ----------> to be done
 *           Xmuf        factorization scale factor
 *
 * 06/11/2007 MW
+* 19.09.2009 KR Improve contribution determination
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
       Integer i,j,k, i1
       Double Precision Xmur, Xmuf, XmurOld, XmufOld
       Data XMurOld/0d0/,XmufOld/0d0/
+      
+c --- Find particular contributions
+      IContr = 0
+ckr      IContrPointer(IContr) = 0
 
-c === preliminary: assume fixed table structure: LO, NLO, threshcor
-c   -->  still need to implement test if and where available
-      IContrib = 0
-      If (PORDPTHY.ge.1) then   ! LO contribution selected
-         IContrib = IContrib+1
-c         IContrib = 2           ! test: run NLO correction only
-c            IContrPoint(IContrib) = function(IContrFlags: 1, 1, 0) <<<<<
-         IContrPoint(IContrib) = 1 ! <<< assumes that LO comes first
+c --- Find LO contribution
+      If (PORDPTHY.ge.1) then
+         j = IContr + 1
+         IContrPointer(j) = -1
+         Do i=1,NContrib
+            If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1) Then
+               IContr = IContr+1
+               IContrPointer(IContr) = i
+            Endif
+         Enddo
+         If (IContrPointer(j).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY
+            Stop
+         Elseif (j.ne.IContr) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY
+            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Stop
+         Endif
       Endif
-      If (PORDPTHY.ge.2) then   ! NLO contribution selected
-         IContrib = IContrib+1
-         IContrPoint(IContrib) = 2 ! <<< assumes that NLO comes second
+      
+c --- Find NLO contribution
+      If (PORDPTHY.ge.2) then
+         j = IContr + 1
+         IContrPointer(j) = -1
+         Do i=1,NContrib
+            If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.2) Then
+               IContr = IContr+1
+               IContrPointer(IContr) = i
+            Endif
+         Enddo
+         If (IContrPointer(j).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY
+            Stop
+         Elseif (j.ne.IContr) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY
+            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Stop
+         Endif
       Endif
-      If (PTHRESHCOR.eq.1) then ! 1-loop threshold corrections selected
+      
+c --- Find 1-loop TC
+      If (PTHRESHCOR.eq.1) then
          If (PORDPTHY.lt.1) then
-            write(*,*)' inconsistent choice: 1-loop threshold corrections'
-            write(*,*)'                      need to be matched to LO'
+            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
+     >           "1-loop TC without LO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
             Stop
          Endif
          If (PORDPTHY.ge.2) then
-            write(*,*)' inconsistent choice: NLO and 1-loop threshold'
-            write(*,*)'                     corrections are redundant'
+            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
+     >           "1-loop TC with NLO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
             Stop
          Endif
-         IContrib = IContrib+1
-         IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
+         j = IContr + 1
+         IContrPointer(j) = -1
+         Do i=1,NContrib
+            If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
+     >           IContrFlag3(i).eq.1) Then
+               IContr = IContr+1
+               IContrPointer(IContr) = i
+            Endif
+         Enddo
+         If (IContrPointer(j).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
+            Stop
+         Elseif (j.ne.IContr) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
+            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Stop
+         Endif
       Endif
-      If (PTHRESHCOR.eq.2) then ! 2-loop threshold corrections selected
+
+c --- Find 2-loop TC
+      If (PTHRESHCOR.eq.2) then
          If (PORDPTHY.lt.2) then
-            write(*,*)' inconsistent choice: 2-loop threshold corrections'
-            write(*,*)'                      need to be matched to NLO'
+            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
+     >           "2-loop TC without NLO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
             Stop
          Endif
          If (PORDPTHY.ge.3) then
-            write(*,*)' inconsistent choice: NNLO and 2-loop threshold'
-            write(*,*)'                     corrections are redundant'
+            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
+     >           "2-loop TC with NNLO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
             Stop
          Endif
-         IContrib = IContrib+1
-         IContrPoint(IContrib) = IContrib ! assume threshcor come after FO
+         j = IContr + 1
+         IContrPointer(j) = -1
+         Do i=1,NContrib
+            If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
+     >           IContrFlag3(i).eq.2) Then
+               IContr = IContr+1
+               IContrPointer(IContr) = i
+            Endif
+         Enddo
+         If (IContrPointer(j).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
+            Stop
+         Elseif (j.ne.IContr) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
+     >           ,PTHRESHCOR
+            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Stop
+         Endif
       Endif
 
-c ----- reorder, so that identical subprocesses are calculated in a row!!
-c      Do i=1,Icontrib
-c         write(*,*) 'Pointer:',IcontrPoint(i)
-c      Enddo
-
-
-c - check availability of fact scale choice and assign pointer
-c    (based on fact scale since renorm scale is flexible
-c         --- ecxept for threshold corrections ---
-      Do i=1,Icontrib
-         i1 = IContrPoint(i)
-         IScalePoint(i) = 0
+c --- Check availability of fact scale choice and assign pointer
+c     (based on fact scale since renorm scale is flexible)
+c           --- except for threshold corrections ---
+      Do i=1,IContr
+         i1 = IContrPointer(i)
+         IScalePointer(i) = 0
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
-               IScalePoint(i) = 1
+               IScalePointer(i) = 1
             Else
-               Write(*,*) ' not a single scale variation in contrib.',i1
+               Write(*,*)"FX9999PT: ERROR! Not a single scale "//
+     >              "available in contribution, stopped!"
+               Write(*,*)"          IContr = ",IContr,
+     >              ", NScaleVar(.,1) = ",NScaleVar(i1,1) 
                Stop
             Endif
-            If (NScaleVar(i1,1).gt.1) write(*,*) " why more than one",
-     +           ' scale variation for Born-type contrib.',i1,'?'
+            If (NScaleVar(i1,1).gt.1) Then
+               Write(*,*)"FX9999PT: WARNING! Why more than one "//
+     >              " scale variation for Born-type contribution?"
+            Endif
          Else                   ! no Born type contribution
             Do j=1,NScaleVar(i1,1)
-               If (xmuf.eq.scalefac(i1,1,j)) IScalePoint(i)=j
+               If (xmuf.eq.scalefac(i1,1,j)) IScalePointer(i)=j
             Enddo
          Endif
-         If (IScalePoint(i).eq.0) Then
-            Write(*,*)' In fastNLO scenario ',ScenName
-            Write(*,*)' the requested factorization scale xmuf of ',xmuf
-            Write(*,*)' is not available for the contribution:'
+         If (IScalePointer(i).eq.0) Then
+            Write(*,*)"FX9999PT: ERROR! The requested "//
+     >           " factorization scale xmuf = ",xmuf
+            Write(*,*)"          is not available, stopped!"
             Do j=1,NContrDescr(i1)
-               Write(*,*) ' ',CtrbDescript(i1,j)
+               Write(*,*) "         Descriptions: ",CtrbDescript(i1,j)
             Enddo
             Stop
          Endif 
       Enddo
 
-c - check if renormalization scale can be provided aposteriori if needed
+c --- Check if renormalization scale can be provided a posteriori if needed
       If (xmur .ne. xmuf) Then
-         Do i=1,Icontrib
-            i1 = IContrPoint(i)
+         Do i=1,IContr
+            i1 = IContrPointer(i)
             IF (IScaleDep(i1).eq.2) Then
-               Write(*,*)' In fastNLO scenario ',ScenName
-               Write(*,*)' the requested renormalization scale xmur of ',xmur
-               Write(*,*)' is not available for the contribution:'
+               Write(*,*)"FX9999PT: ERROR! The requested "//
+     >              " renormalization scale xmur = ",xmur
+               Write(*,*)"          is not available, stopped!"
+               Write(*,*)"          Only xmur=xmuf is possible."
                Do j=1,NContrDescr(i1)
                   Write(*,*) ' ',CtrbDescript(i1,j)
                Enddo
-               Write(*,*) '      (only xmur=xmuf is possible)'
                Stop
             Endif
          Enddo
       Endif
 
-c ----- test output
-      Do i=1,Icontrib
-         write(*,*) 'Pointer:',i,IcontrPoint(i),IScalePoint(i)
-      Enddo
+c --- Debug print-out
+c      Do i=1,IContr
+c         Write(*,*) "FX9999PT: Pointer number ",i," to "//
+c     >        "IContr, IScale:",IcontrPoint(i),IScalePointer(i)
+c      Enddo
+
 
       Return
       End
@@ -348,7 +443,7 @@ c ----- test output
 * multiply the PDFs and the perturbative coefficients 
 *
 *  question: give 'relative' contribution
-*            IScalePoint only available for relative contrib.
+*            IScalePointer only available for relative contrib.
 * 
 * input:    IN    No. of contribution in present calculation
 *           XMUR  prefactor for nominal renormalization scale
@@ -366,8 +461,8 @@ c ----- test output
       Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
 
 c - set pointers to contribution in table and to scale variation
-      ic = IContrPoint(in)
-      is = IScalePoint(in)
+      ic = IContrPointer(in)
+      is = IScalePointer(in)
 
 c - the absolute order in alpha_s of the LO contribution is in ILOord
 c - vary renormalization scale around the value used in orig. calculation
@@ -416,11 +511,17 @@ c            write(*,*) 'xmur ',xmur,mu
             aspow(1) = as(1)**Npow(ic)
             Do l=1,nxmax
                Do m=1,NSubProc(ic)
-c               Do m=1,1 ! gg only
                   result(j,m,ic) = result(j,m,ic) + 
      +                 SigmaTilde(ic,j,1,is,k,l,m)
      +                 * aspow(1)
      +                 * pdf(j,k,l,m)
+Comment:                   if (ic.eq.1.and.j.eq.1) then
+Comment:                      write(*,*)"imu,ix",k,l
+Comment:                      write(*,*)"ibin,isub,iord,result",j,m,ic,result(j,m
+Comment:      >                    ,ic)
+Comment:                      write(*,*)"me,as,pdf",SigmaTilde(ic,j,1,is,k,l,m),
+Comment:      >                    aspow(1),pdf(j,k,l,m)
+Comment:                   endif
                Enddo
             Enddo
          Enddo
@@ -448,8 +549,8 @@ c               Do m=1,1 ! gg only
       Integer in,ic,is, i,j,k,l,m, nx, nx2limit
 
 c - set pointers to contribution in table and to scale variation
-      ic = IContrPoint(in)
-      is = IScalePoint(in)
+      ic = IContrPointer(in)
+      is = IScalePointer(in)
 
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
@@ -466,6 +567,7 @@ c            write(*,*) 'muf ',muf
                   Elseif (NPDF(ic).eq.2) Then ! two hadrons
                      If (NPDFPDG(ic,1).eq.NPDFPDG(ic,2)) Then ! identical
                         xpdf2(k,m) = tmppdf(m)
+ckr                        write(*,*)"k,m,xpdf2",k,m,tmppdf(m)
                      Elseif (NPDFPDG(ic,1).eq.-NPDFPDG(ic,2)) Then ! h anti-h
                         xpdf2(k,-m) = tmppdf(m)
                      Else
@@ -499,6 +601,7 @@ c            write(*,*) 'muf ',muf
      +                 IPDFdef(ic,3),k,l,xpdf1,xpdf2,H)
                   Do m=1,NSubproc(ic)
                      pdf(i,j,nx,m) = H(m)
+ckr                     write(*,*)"i,j,nx,m,pdf",i,j,nx,m,pdf(i,j,nx,m)
                   Enddo         ! m subproc
                Enddo            ! x2-loop
             Enddo               ! x1-loop

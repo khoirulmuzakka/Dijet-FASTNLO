@@ -12,6 +12,8 @@
       Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax
       Include 'fnx9999.inc'
 
+ckr      write(*,*)"RW: Filename: ",FILENAME
+
       Nunit=2
 
       If (crw.eq.'write') Then
@@ -53,12 +55,49 @@ c - block A2
       Do i=1,NDim
          Call fnioint(crw,nunit, IDiffBin(i))
       Enddo
+ckr Define counters and pointers to changes of borders in i'th dimension
+ckr (RapIndex, NRapidity, NPt).
+ckr Useful in case of npt pt bins in nrap rapidity bins etc.
+ckr With LoBin(i,j) works only in two dimensions! 
+      Do i=1,NDim
+         IDimPointer(1,i) = 1
+         NDimCounter(i)   = 1
+      Enddo
+ckr
       Do i=1,NObsBin
          Do j=1,NDim
             Call fniodbl(crw,nunit, LoBin(i,j))
             If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
          Enddo
+ckr
+         If (i.gt.1) Then
+            If (LoBin(i-1,1).ne.LoBin(i,1)) Then
+               NDimCounter(1) = NDimCounter(1) + 1  
+               IDimPointer(NDimCounter(1),1) = i
+            Endif
+            If (LoBin(i-1,2).ne.LoBin(i,2)) Then
+               NDimCounter(2) = NDimCounter(2) + 1  
+               IDimPointer(NDimCounter(2),2) = i
+            Endif
+         Endif
+Comment:          write(*,*)"iobs, ndimcounter1, ndimcounter2",
+Comment:      >        i,NDimCounter(1),NDimCounter(2)
+Comment:          write(*,*)"iobs, idimpointer1, idimpointer2",i,
+Comment:      >        IDimPointer(NDimCounter(1),1),
+Comment:      >        IDimPointer(NDimCounter(2),2)
+ckr
       Enddo
+ckr DEBUG
+      Do i=1,NDim
+         Write(*,*)"FX9999RW: INFO: Counted ",NDimCounter(i),
+     >        " border changes in dimension ",i
+         Write(*,*)"          The associated pointers are: "
+         Do j=1,NDimCounter(i)
+            Write(*,*)"          counter = ",j,
+     >           ", pointer = ",IDimPointer(j,i)
+         Enddo
+      Enddo
+ckr End DEBUG
       Call fnioint(crw,nunit, INormFlag)
       If (INormFlag.gt.1) Call fniochar(crw,nunit, DenomTable)
       If (INormFlag.gt.0) Then
@@ -199,13 +238,17 @@ c --- here we assume NFragFunc=0
                   Endif
                   Do m=1,nxmax
                      Do n=1,NSubProc(ic)
-                        Call fniodbl(crw,nunit, SigmaTilde(ic,i,1,k,l,m,n))
+                        Call fniodbl(crw,nunit,
+     >                       SigmaTilde(ic,i,1,k,l,m,n))
+Comment:                         write(*,*)"ic,iobs,iscv,iscn,ix,isub,st",
+Comment:      >                       ic,i,k,l,m,n,
+Comment:      >                       SigmaTilde(ic,i,1,k,l,m,n)
                      Enddo
                   Enddo
                Enddo
             Enddo
          Enddo
-
+         
 
 
  100     Continue

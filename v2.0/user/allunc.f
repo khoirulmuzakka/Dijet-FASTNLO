@@ -33,8 +33,8 @@ c - To unify quoted uncertainties (CL68,CL90,special)
       DOUBLE PRECISION CL90,CLGJR
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
-      DOUBLE PRECISION XS0(MXOBSBIN,3),XS1(MXOBSBIN,3)
-      DOUBLE PRECISION XS2(MXOBSBIN,3)
+      DOUBLE PRECISION XS0(MXOBSBIN,0:MxCtrb),XS1(MXOBSBIN,0:MxCtrb)
+      DOUBLE PRECISION XS2(MXOBSBIN,0:MxCtrb)
       REAL PT(MXOBSBIN)
 
       CHARACTER*255 ASMODE
@@ -43,15 +43,9 @@ c                definition in the commonblock!!!!!
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Mods for v2.0
-      INTEGER ICONTR,NORD,nargs,IArgC
-c      external iargc
+      INTEGER IC,MYICONTR,NORD
 
-      ICONTR = 2
-      NORD   = NPOW(ICONTR) - ILOORD +1
-
-c      nargs = command_argument_count()
-      nargs = IArgC()
-      write(*,*)"nargs, iargc",nargs,iargc()
+      MYICONTR = 2
 
 c --- Parse command line
       WRITE(*,*)"\n #################################################"
@@ -62,8 +56,6 @@ c --- Parse command line
       WRITE(*,*)"#################################################"
       WRITE(*,*)"#"
 
-      CALL GETARG(1,SCENARIO)
-      write(*,*)"scen",scenario
 *---Scenario
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
@@ -93,7 +85,7 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  Last NLO stat. table number, def. = -1'
             WRITE(*,*)'  PDF set, def. = cteq65.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
-     >           '../share/lhapdf/PDFsets'
+     >           'share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
             WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
      >           '(from Pythia 6.4 using Lambda_5 from PDF)'
@@ -219,7 +211,7 @@ C --- Use '...' with \", otherwise gfortran complains
          CALL GETARG(8,CHTMP)
       ENDIF
       IF (IARGC().LT.8.OR.CHTMP(1:1).EQ."_") THEN
-         PDFPATH = "/../share/lhapdf/PDFsets"
+         PDFPATH = "/share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
      >        "assuming: $(LHAPDF)"//PDFPATH(1:LENOCC(PDFPATH))
@@ -368,6 +360,12 @@ ckr      LALG  = .TRUE.
       LONE  = MYNPDF.LE.1
       LSER  = .NOT.LONE.AND.MYNPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LONE.AND..NOT.LSER
+ctmp
+      lalg  = .false.
+      lpdf  = .false.
+      lser  = .false.
+      lstat = .false.
+ctmp
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
       ENDIF
@@ -390,7 +388,36 @@ ckr      LALG  = .TRUE.
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+ckr Markus selection scheme
+ckr      call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+ckr Select order pert. theory: 1=LO, 2=NLO
+      CALL FNSET("P_ORDPTHY",2)
+ckr Select no. of loops in threshold corrections
+      CALL FNSET("P_THRESHCOR",0)
       CALL FX9999CC(FILENAME,1D0,1D0,0,XS1)
+
+ckr Add some initializations after first table read
+      NORD   = NPOW(MYICONTR) - ILOORD +1
+      write(*,*)"icontr,npow,iloord,nord",icontr,npow(icontr),iloord
+     >     ,nord
+ckr Determine npt,nrap,rapindex; attention, simple workaround,
+ckr works only for two-dim. pt,y or y,pt binning!
+      IF (NDimCounter(1).EQ.NObsBin) Then ! 1st dim.: pT, 2nd: rap
+         IPTDIM  = 1
+         IRAPDIM = 2
+      ELSEIF (NDimCounter(2).EQ.NObsBin) Then ! 1st dim.: rap, 2nd: pT
+         IPTDIM  = 2
+         IRAPDIM = 1
+      ELSE
+         WRITE(*,*)"ALLUNC: Cannot decrypt pt, rap binning, stopped!"
+         STOP
+      ENDIF
+      NRAPIDITY = NDimCounter(IRAPDIM)
+      DO I=1,NRAPIDITY-1
+         NPT(I) = IDimPointer(I+1,IRAPDIM) - IDimPointer(I,IRAPDIM)
+      ENDDO
+      NPT(NRAPIDITY) = NDimCounter(IPTDIM) -
+     >     IDimPointer(NRAPIDITY,IRAPDIM) + 1
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYNPDF)
 
 
@@ -411,23 +438,30 @@ c         5th argument:  array to return results
 c - Compute PDF uncertainties for all available scales
 c - Check that FILENAME is still the primary table here ...!!!
       IF (.NOT.LSER) THEN
-      DO I=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+ckr      DO I=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
+      DO I=3,3
          CALL INITPDF(0)
-         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),I)
-         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),I)
+         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
+         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
          WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
          CALL FX9999CC(FILENAME,MUR,MUF,0,XS1)
 
 c - Save the result array from the first call (= central result)
 c   and reset result arrays   
          WRITE(*,*)"ALLUNC: The observable has",NOBSBIN," bins -",
-     >        NSUBPROC(ICONTR)," subprocesses"
+     >        NSUBPROC(MYICONTR)," subprocesses"
          DO L1=1,NOBSBIN
-            DO L2=1,(NSUBPROC(ICONTR)+1)
+ckr            write(*,*)"iobs, xs :",l1,xs1(l1,0),xs1(l1,1),
+ckr     >           xs1(l1,2),xs1(l1,3)
+            DO L2=1,(NSUBPROC(MYICONTR)+1)
                DO L3=1,NORD
+ckr               DO IC=1,NContrib
+ckr                  L3 = IContrPointer(IC)
                   RES0(L1,L2,L3) = 0D0 
                   DO L4=1,L3
                      RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
+ckr                     write(*,*)"l1,l2,l3,l4,res0,result",
+ckr     >                    l1,l2,l3,l4,res0(l1,l2,l3),result(l1,l2,l4)
                   ENDDO
                   RES1LO(L1,L2,L3) = 0D0
                   RES1HI(L1,L2,L3) = 0D0
@@ -451,7 +485,7 @@ ckr         IF (MYNPDF.GT.1) THEN
                CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
 c - For all bins/subproc/orders: Add negative/positive variations
                DO L1=1,NOBSBIN
-                  DO L2=1,(NSUBPROC(ICONTR)+1)
+                  DO L2=1,(NSUBPROC(MYICONTR)+1)
                      DO L3=1,NORD
                         SUMM = 0.D0
                         DIFF = - RES0(L1,L2,L3)
@@ -479,9 +513,13 @@ c - For all bins/subproc/orders: Add negative/positive variations
 c - Take square-root of sum of squares
 c - or apply Toy MC method for NNPDF
          DO L1=1,NOBSBIN
+ckr            write(*,*)"AAA iobsbin,nobsbin",l1,nobsbin
             IF (LPDF) THEN
-               DO L2=1,(NSUBPROC(ICONTR)+1)
+               DO L2=1,(NSUBPROC(MYICONTR)+1)
+ckr                  write(*,*)"AAA isproc,icontr,nsub",l2,icontr
+ckr     >                 ,NSUBPROC(MYICONTR)
                   DO L3=1,NORD
+ckr                     write(*,*)"AAA iord,nord",l3,nord
                      IF (.NOT.LTOY) THEN
 ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
 ckr                        RES1LO(L1,L2,L3) = -CL90*SQRT(RES1LO(L1,L2,L3))
@@ -500,16 +538,16 @@ ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
                      ENDIF
                   ENDDO
                ENDDO
-               RESLO = RES1LO(L1,NSUBPROC(ICONTR)+1,NORD)/
-     >              RES0(L1,NSUBPROC(ICONTR)+1,NORD)
-               RESHI = RES1HI(L1,NSUBPROC(ICONTR)+1,NORD)/
-     >              RES0(L1,NSUBPROC(ICONTR)+1,NORD)
+               RESLO = RES1LO(L1,NSUBPROC(MYICONTR)+1,NORD)/
+     >              RES0(L1,NSUBPROC(MYICONTR)+1,NORD)
+               RESHI = RES1HI(L1,NSUBPROC(MYICONTR)+1,NORD)/
+     >              RES0(L1,NSUBPROC(MYICONTR)+1,NORD)
 ckr 30.01.2008: Change output format for better comp. with C++ version
             ELSE
                RESLO = 0D0
                RESHI = 0D0
             ENDIF
-            WRITE(*,900) L1,RES0(L1,NSUBPROC(ICONTR)+1,NORD),RESLO,RESHI
+            WRITE(*,900) L1,RES0(L1,NSUBPROC(MYICONTR)+1,NORD),RESLO,RESHI
          ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
@@ -545,8 +583,8 @@ c - Fill only central scale
 c - (MYISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSER) THEN
          MYISCALE = 3
-         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
-         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
          WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",MYISCALE,
      >        "; mur, muf = ",mur,muf
          DO J=0,MYNPDF
@@ -557,8 +595,8 @@ c - (MYISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
 ckr                  PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-                  PT(IBIN) = REAL(LOBIN(IBIN,1))
-                  DO ISUB=0,NSUBPROC(ICONTR)
+                  PT(IBIN) = REAL(LOBIN(IBIN,IPTDIM))
+                  DO ISUB=0,NSUBPROC(MYICONTR)
                      RES0(IBIN,ISUB+1,0) = 0.D0
                      DO IORD=1,NORD
                         RES0(IBIN,ISUB+1,IORD) = XS0(IBIN,IORD)
@@ -598,8 +636,8 @@ c - Default scale (C++ 2, Fortran 3) ==> normal result
          MYISCALE = 3
 c - (Use other MYISCALE in FORTRAN ONLY if refscale <> 2 in author code)
 c         MYISCALE = 2
-         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
-         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
 c - Attention: From now on ref. table loaded ==> rap. bins doubled
 c - Get the normal result, scale 3, from first half of doubled rap bins
@@ -607,7 +645,7 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
          DO IRAP=1,INT(NRAPIDITY/2)
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC(ICONTR)
+               DO ISUB=0,NSUBPROC(MYICONTR)
                   RES0(IBIN,ISUB+1,0) = 0.D0
                   DO IORD=1,NORD
                      RES0(IBIN,ISUB+1,IORD) = XS2(IBIN,IORD)
@@ -621,14 +659,14 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
 
 c - Reference scale no. always 1
          MYISCALE = 1
-         MUR = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
-         MUF = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),MYISCALE)
+         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
 c - Get the reference result, scale 1, nrap/2 ++ bins
          DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC(ICONTR)
+               DO ISUB=0,NSUBPROC(MYICONTR)
                   RES0(IBIN,isub+1,0) = 0.D0
                   DO IORD=1,NORD
                      RES0(IBIN,isub+1,IORD) = XS2(IBIN,IORD)
@@ -647,8 +685,8 @@ c - Compare results and fill histos
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
 ckr               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-               PT(IBIN) = REAL(LOBIN(IBIN,1))
-               DO ISUB=0,NSUBPROC(ICONTR)
+               PT(IBIN) = REAL(LOBIN(IBIN,IPTDIM))
+               DO ISUB=0,NSUBPROC(MYICONTR)
                   DO IORD=0,NORD
                      DREF = RES0(IBIN,isub+1,IORD)/
      >                    RES0(IBIN+NBIN,isub+1,IORD) - 1.D0
@@ -691,10 +729,12 @@ c - HBOOK common
       COMMON /PAWC/ HMEMOR
 
 c --- Mods for v2.0
-      INTEGER ICONTR,NORD
+      INTEGER MYICONTR,NORD
 
-      ICONTR = 2
-      NORD   = NPOW(ICONTR) - ILOORD + 1
+      MYICONTR = 2
+      NORD   = NPOW(MYICONTR) - ILOORD + 1
+ckr      write(*,*)"PDFHIST: icontr,npow,iloord,nord",icontr,npow(icontr)
+ckr     >     ,iloord,nord
 
 c - Open & book
       IF (N.EQ.1) THEN
@@ -743,18 +783,34 @@ ckr     >        //CJETRES1(IALGO)
 ckr         WRITE(CTMP,'(F3.1)'),JETRES1
 ckr         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"="
 ckr     >        //CTMP
+ckr         write(*,*)"BBB nord",nord
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
-            DO MYISCALE=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))! Scale variations
-               DO ISUB=0,NSUBPROC(ICONTR) ! Subprocesses: 0 tot + 7 subproc
-                  DO IRAP=1, NRAPIDITY
+ckr            write(*,*)"BBB scales",NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
+            DO MYISCALE=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR)) ! Scale variations
+ckr               write(*,*)"BBB nsubp",NSUBPROC(MYICONTR)
+               DO ISUB=0,NSUBPROC(MYICONTR) ! Subprocesses: 0 tot + 7 subproc
+ckr                  write(*,*)"BBB nrap",nrapidity
+                  DO IRAP=1,NRAPIDITY
                      IHIST = IORD*1000000 + MYISCALE*100000 +
      >                    ISUB*10000 + IRAP*100
 ckr                     write(*,*)"ALL: iord,isc,isub,irap,ihist",
 ckr     >                    iord,iscale,isub,irap,ihist
-                     DO J=1,(NPT(IRAP)+1)
+                     DO J=1,NPT(IRAP)
 ckr                        PT(J) = REAL(PTBIN(IRAP,J))
-                        PT(J) = REAL(LOBIN(RAPINDEX(IRAP)+J-1,1))
+ckr                        PT(J) = REAL(LOBIN(RAPINDEX(IRAP)+J-1,1))
+                        PT(J) = REAL(LOBIN(
+     >                       IDimPointer(IRAP,IRAPDIM)+J-1,IPTDIM
+     >                       ))
+ckr                        write(*,*)"irapdim,iptdim,idimpointer",
+ckr     >                       irapdim,iptdim,IDimPointer(IRAP,IRAPDIM)
+ckr                        write(*,*)"j,irap,npt(irap),pt",
+ckr     >                       j,irap,npt(irap),pt(j)
                      ENDDO
+                     PT(NPT(IRAP)+1) = REAL(UPBIN(
+     >                    IDimPointer(IRAP,IRAPDIM)+NPT(IRAP)-1,IPTDIM
+     >                    ))
+ckr                     write(*,*)"irap,npt(irap),pt",
+ckr     >                    irap,npt(irap),pt(npt(irap)+1)
                      CSTRNG = CBASE2
                      WRITE(CTMP,'(I1)'),IORD
                      CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
@@ -910,46 +966,50 @@ c
       INCLUDE "fnx9999.inc"
       INTEGER NSCALE
       DOUBLE PRECISION 
-     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
-     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
-     >     RES1LO(MXOBSBIN,MXSUBPROC+1,0:3)
-      INTEGER I,J,NBIN,IORD,ISUB,ISUB2,MYISCALE,IHIST
+     >     RES0  (MXOBSBIN,0:MXSUBPROC,0:MXCTRB),
+     >     RES1HI(MXOBSBIN,0:MXSUBPROC,0:MXCTRB),
+     >     RES1LO(MXOBSBIN,0:MXSUBPROC,0:MXCTRB)
+      INTEGER I,J,NBIN,IORD,ISUB,MYISCALE,IHIST
       REAL VAL0,VALLO,VALHI
-
+      
 c --- Mods for v2.0
       REAL PT(MXOBSBIN)
-      INTEGER ICONTR,NORD
+      INTEGER MYICONTR,NORD
+      
+      MYICONTR = 2
+      NORD   = NPOW(MYICONTR) - ILOORD + 1
+ckr      write(*,*)"PDFFILL: icontr,npow,iloord,nord",icontr,npow(icontr)
+ckr     >     ,iloord,nord
 
-      ICONTR = 2
-      NORD   = NPOW(ICONTR) - ILOORD + 1
 
       IF (NSCALE.LT.1 .OR.
-     >     NSCALE.GT.NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))) THEN
+     >     NSCALE.GT.NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))) THEN
          WRITE(*,*) "\nPDFFILL: ERROR! NSCALE ",NSCALE,
      >        " is out of range, aborted!"
          WRITE(*,*) "PDFFILL: Max. NSCALE: ",
-     >        NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+     >        NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
          STOP
       ENDIF
       MYISCALE = NSCALE
 
 c - Fill all histograms for the given scale
       DO IORD=0,NORD            ! Order: tot, LO, NLO-corr, NNLO-corr
-         DO ISUB2=1,(NSUBPROC(ICONTR)+1) ! Subprocesses: 0 tot + 7 subproc
-            ISUB=ISUB2
-            IF (ISUB.EQ.8) ISUB=0
+         DO ISUB=0,NSUBPROC(MYICONTR) ! Subprocesses: 0 tot + 7 subproc
             NBIN=0
             DO I=1,NRAPIDITY                   
                DO J=1,NPT(I)
                   NBIN = NBIN + 1
                   IF (IORD.GT.0) THEN
-                     VAL0  = REAL(RES0(NBIN,ISUB2,IORD))
-                     VALLO = REAL(RES1LO(NBIN,ISUB2,IORD))
-                     VALHI = REAL(RES1HI(NBIN,ISUB2,IORD))
+                     VAL0  = REAL(RES0(NBIN,ISUB,IORD))
+                     VALLO = REAL(RES1LO(NBIN,ISUB,IORD))
+                     VALHI = REAL(RES1HI(NBIN,ISUB,IORD))
                   ELSE
-                     VAL0  = REAL(RES0(NBIN,ISUB2,NORD))
-                     VALLO = REAL(RES1LO(NBIN,ISUB2,NORD))
-                     VALHI = REAL(RES1HI(NBIN,ISUB2,NORD))
+ckr                     VAL0  = REAL(RES0(NBIN,ISUB,NORD))
+ckr                     VALLO = REAL(RES1LO(NBIN,ISUB,NORD))
+ckr                     VALHI = REAL(RES1HI(NBIN,ISUB,NORD))
+                     VAL0  = REAL(RES0(NBIN,ISUB,0))
+                     VALLO = REAL(RES1LO(NBIN,ISUB,0))
+                     VALHI = REAL(RES1HI(NBIN,ISUB,0))
                   ENDIF
 ckr Recall: HBOOK understands only single precision
                   IHIST = IORD*1000000+MYISCALE*100000+ISUB*10000+I*100
@@ -957,16 +1017,31 @@ ckr                  write(*,*)"iord,iscale,isub/2,i",iord,iscale,
 ckr     >                 isub,isub2,i
 ckr                  write(*,*)"ihist,val0,vallo,valhi",
 ckr     >                 ihist,val0,vallo,valhi
+ckr                  write(*,*)"pt",REAL(LOBIN(
+ckr     >                 IDimPointer(I,IRAPDIM)+J-1,IPTDIM
+ckr     >                 )+0.01)
                   CALL HFILL(IHIST,
-     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VAL0)
+     >                 REAL(LOBIN(
+     >                 IDimPointer(I,IRAPDIM)+J-1,IPTDIM
+     >                 )+0.01),0.0,VAL0)
+ckr     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VAL0)
 ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VAL0)
                   CALL HFILL(IHIST+1,
-     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALLO)
+     >                 REAL(LOBIN(
+     >                 IDimPointer(I,IRAPDIM)+J-1,IPTDIM
+     >                 )+0.01),0.0,VALLO)
+ckr     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALLO)
 ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VALLO)
                   CALL HFILL(IHIST+2,
-     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALHI)
+     >                 REAL(LOBIN(
+     >                 IDimPointer(I,IRAPDIM)+J-1,IPTDIM
+     >                 )+0.01),0.0,VALHI)
+ckr     >                 REAL(LOBIN(RAPINDEX(I)+J-1,1)+0.01),0.0,VALHI)
 ckr     >                 REAL(PTBIN(I,J)+0.01),0.0,VALHI)
-                        PT(J) = REAL(LOBIN(RAPINDEX(I)+J-1,1))
+                  PT(J) = REAL(LOBIN(
+     >                 IDimPointer(I,IRAPDIM)+J-1,IPTDIM
+     >                 ))
+ckr                        PT(J) = REAL(LOBIN(RAPINDEX(I)+J-1,1))
                ENDDO            ! pT-loop
             ENDDO               ! rap-loop
          ENDDO                  ! isub-loop

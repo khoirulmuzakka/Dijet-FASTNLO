@@ -273,6 +273,10 @@ if ( $vers == 1 ) {
     $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
     $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
+# 2003 seems to work on SuSE 11.0
+#    $install{cernlib}[0]    = "cernlib-2003";
+#    $install{cernlib}[1]    = "cernlib-2003";
+# 2006 seems to work on slc4
     $install{cernlib}[0]    = "cernlib-2006";
     $install{cernlib}[1]    = "cernlib-2006";
     $install{root}[0]       = "root-$rv";

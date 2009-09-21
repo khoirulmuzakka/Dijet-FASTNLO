@@ -45,10 +45,10 @@ c - HBOOK common
       COMMON /PAWC/ HMEMOR
 
 c --- Mods for v2.0
-      INTEGER ICONTR,NORD
+      INTEGER MYICONTR,NORD
 
-      ICONTR = 2
-      NORD   = NPOW(ICONTR) - ILOORD +1
+      MYICONTR = 2
+      NORD   = NPOW(MYICONTR) - ILOORD +1
 
 c - Initialization
       BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
@@ -56,11 +56,11 @@ c - Initialization
       NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >     SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-"
       IPTMAX = 44
-      DO ISCL = 1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+      DO ISCL = 1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
 ckr         MUR(ISCL) = MURSCALE(ISCL)
 ckr         MUF(ISCL) = MUFSCALE(ISCL)
-         MUR(ISCL) = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),ISCL)
-         MUF(ISCL) = SCALEFAC(ICONTR,NSCALEDIM(ICONTR),ISCL)
+         MUR(ISCL) = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),ISCL)
+         MUF(ISCL) = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),ISCL)
       ENDDO
       
 
@@ -71,7 +71,7 @@ c ==================================================================
       DO IORD=0,MIN(2,NORD)
 
 c - Loop initialization
-         DO ISCL=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+         DO ISCL=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
             DO IRAP=1,NRAPIDITY
                DO IPT=1,NPT(IRAP)
                   NJMIN(IPT,IRAP,ISCL)      = -1
@@ -149,7 +149,7 @@ ckr            CYCLE
          NCOUNT = NCOUNT + 1
          
 c - Loop over scales
-         DO ISCL=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+         DO ISCL=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
             CALL FX9999CC(FILENAME,MUR(ISCL),MUF(ISCL),0,XSECT)
 c - Take LO/NLO file with 1D9/1D8 events as weight 1 
             WTAB(NCOUNT) = NEVTS(IORD)*BWGT
@@ -215,7 +215,7 @@ c - Extract mean values and standard deviations
       WRITE(*,*)"\n *************************************************"
       WRITE(*,*)"STATERR: Looping over scales for order:",IORD
       WRITE(*,*)"*************************************************"
-      DO ISCL=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+      DO ISCL=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
          WRITE(*,*)"STATERR: Next scale: ",ISCL,
      >        " ; weight: ",WTAB(NCOUNT)
          J = 0
@@ -277,13 +277,16 @@ ckr My formula:
 c - Fill histos
 c - Only for sum of subprocesses
       ISUB = 0
-      DO ISCL=1,NSCALEVAR(ICONTR,NSCALEDIM(ICONTR))
+      DO ISCL=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
          DO IRAP=1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
                IHIST = IORD*1000000 + ISCL*100000 +
      >              ISUB*10000 + IRAP*100
 ckr               PT(IPT,IRAP) = REAL(PTBIN(IRAP,IPT))
-               PT(IPT,IRAP) = REAL(LOBIN(RAPINDEX(IRAP)+IPT-1,1))
+ckr               PT(IPT,IRAP) = REAL(LOBIN(RAPINDEX(IRAP)+IPT-1,1))
+               PT(IPT,IRAP) = REAL(LOBIN(
+     >              IDimPointer(IRAP,IRAPDIM)+IPT-1,IPTDIM
+     >              ))
 ckr If histogram with central result (IHIST+0) filled, derive stat. unc.
 ckr rel. to MEAN and then use central result. If not, just use MEANE.
                IF (HI(IHIST,IPT).GT.0.) THEN

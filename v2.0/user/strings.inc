@@ -2,28 +2,13 @@
 C
 C ----- define character strings
 C
-      CHARACTER*17 CIREACTION(4)
-      CHARACTER*17 CIPROC(4)
-      CHARACTER*28 CIALGO(4)
-ckr      CHARACTER*5  CJETRES1(4)
-ckr      CHARACTER*12 CJETRES2(4)
       CHARACTER*72 CHEADER(13)
       CHARACTER*72 CNLOJET(4)
       CHARACTER*72 CTHRCOR(5)
-
-      DATA CIREACTION/"electron-proton  ","proton-proton    ",
-     >     "proton-antiproton","photon-proton"/
-      DATA CIPROC/"inclusive jets   ","dijets","three-jets",
-     >     "four-jets"/
-      DATA CIALGO/"kT algorithm","midpoint cone algorithm",
-     >     "rsep cone algorithm","searchcone algorithm"/
-ckr      DATA CJETRES1/"D","Rcone","Rcone","Rcone"/
-ckr      DATA CJETRES2/"n/a","f_overlap","Rsep","R_searchcone"/
-      
       DATA CHEADER/
      >     "##########################################################",
      >     " ",
-     >     "  fastNLO - version 1.4         Jan. 31, 2006",
+     >     "  fastNLO - version 2.0",
      >     " ",
      >     "  Thomas Kluge, Klaus Rabbertz, Markus Wobisch",
      >     " ",
