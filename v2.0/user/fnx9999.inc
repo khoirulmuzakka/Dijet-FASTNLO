@@ -77,9 +77,10 @@ c - output array
 c - internal variables
 ckr Add DimPointers/Counters
       Integer NDimCounter(MxDim),IDimPointer(MxObsBin,MxDim)
-ckr      Integer IContr,IContrPointer(0:MxCtrb),IScalePointer(MxCtrb)
-      Integer IContr,IContrPointer(MxCtrb),IScalePointer(MxCtrb)
-      Double Precision Result(MxObsBin,MxSubproc,MxCtrb),
+ckr      Integer IContr,IContrPointer(MxCtrb),IScalePointer(MxCtrb)
+      Integer IContr,IContrPointer(0:MxCtrb),IScalePointer(MxCtrb)
+ckr      Double Precision Result(MxObsBin,MxSubproc,MxCtrb),
+      Double Precision Result(MxObsBin,0:MxSubproc,0:MxCtrb),
      +     pdf(MxObsBin,MxScaleNode,MxNxMax,MxSubproc)
       
 

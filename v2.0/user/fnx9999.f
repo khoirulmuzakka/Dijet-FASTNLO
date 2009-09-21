@@ -86,49 +86,80 @@
 * TK 2006/08/06 implement scalebins for N>2
 * MW 2006/08/09 add normalization feature: 1/sigma dsigma/d[s.th.] 
 * MW 2007/06/11 (@London Gatwick) implement v2.0
+* KR 2009/09/22 Add filling sum of subprocesses (into 0 bin), sum of all
+*               orders for isub=0 (into 0 bin) and adding up contributions
+*               successively from lower to higher order according to pointers.
+*               ===> result(MxObsBin,0:MxSubproc,0:MxCtrb)
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer IFILE, ipoint, I,J,K,L,M, 
+      Integer IFILE, IPoint, IScPoint, I,J,K,L,M, 
      +     IPrintFlag,
      +     maxscale, nbin,nx,
      +     lenocc
       Character*(*) FILENAME
       Double Precision Xmur, Xmuf
 
-c === initialization: read table, set pointers to contributions
-      call FX9999IN(Filename)
-c === reset output array
-ckr Add back Ctrb loop for xsect as in description
+c === Initialization: Read table
+      Call FX9999IN(Filename)
+
+c === Reset output array
       Do i=0,NContrib
          Do j=1,NObsBin
-            xsect(j,i) = 0d0
+            xsect(j,i) = 0.d0
          Enddo
       Enddo
-c === determine pointers to contributions/scales
+
+c === Determine access order to contributions and set pointers to 
+c === contributions/scales
       Call FX9999PT(xmur,xmuf)
 
-c === loop over pointers to contributions
-      Do i=1,IContr
-         Ipoint = IContrPointer(i)
-ckr         write(*,*) "Ctrb",i,IContrPointer(i),IScalePointer(i),
-ckr     +        NSubproc(IContrPointer(i))
-c - get PDFs
-         call FX9999GP(i)
-c - multiply with perturbative coefficients and alphas
-         call FX9999MT(i,xmur,xmuf) ! <<< need to think about argument
-c - add up in small array
+c === Loop over contributions, use pointers ordered according to FX9999PT
+      Do i=1,NContrib
+         IPoint   = IContrPointer(i)
+         IScPoint = IScalePointer(i)
+cdebug
+cdebug         Write(*,*)"FX9999CC: IContr, IContrPointer, "//
+cdebug     +        " IScalePointer, NSubproc(IContrPointer): ",
+cdebug     +        i, IPoint, IScPoint, NSubProc(IPoint)
+cdebug
+
+c === Get PDFs
+         Call FX9999GP(i)       ! Use i, pointers are derived inside. Change?
+         
+c === Multiply with perturbative coefficients and alphas
+         Call FX9999MT(i,xmur,xmuf) ! Use i, pointers are derived inside. ?
+
+
+c === Add up in result array
          Do j=1,NObsBin
-            Do k=1,NSubProc(Ipoint)
-               xsect(j,0) = xsect(j,0)+result(j,k,Ipoint)
-               xsect(j,i) = xsect(j,i)+result(j,k,Ipoint)
-ckr               write(*,*) 'result ',j,k,result(j,k,Ipoint)
-ckr               write(*,*) "xsect0,i",xsect(j,0),xsect(j,i)
+            result(j,0,IPoint) = 0.D0
+            Do k=1,NSubProc(IPoint)
+               result(j,0,IPoint) = result(j,0,IPoint) +
+     >              result(j,k,IPoint)
             Enddo
          Enddo
       Enddo
 
-c === normalization
+c === Fill sum of subprocesses, --> result(j,0,i), and 
+c === sum of sums, --> result(j,0,0)      
+      Do j=1,NObsBin
+         If (NContrib.gt.1) Then
+            Do i=2,NContrib
+               result(j,0,IContrPointer(i)) =
+     >              result(j,0,IContrPointer(i)) +
+     >              result(j,0,IContrPointer(i-1))
+            Enddo
+         Endif
+         result(j,0,0) = result(j,0,NContrib)
+         Do i=0,NContrib
+            xsect(j,i) = result(j,0,i)
+cdebug            WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
+cdebug     >           j,i,xsect(j,i)
+         Enddo
+      Enddo
+
+c === Normalization: Todo
       If (INormFlag.eq.0) Then
          Continue               ! no normalization - nothing to do
       ElseIf (INormFlag.eq.1) Then
@@ -145,8 +176,8 @@ c         Xsect(i) = Xsect(i)/Sum
 c         EndDo
       EndIf
 
-c === print results - if requested
-      If (IPrintFlag.eq.1) call FX9999PR(xsect)
+c === Print results - if requested
+      If (IPrintFlag.eq.1) Call FX9999PR(xsect)
       Return
 
 c 5000 Format (A,A64)
@@ -185,7 +216,9 @@ ckr Add back Ctrb loop for xsect as in description
          Do k=1,MxCtrb
             Xsect(i,k) = 0d0
             Xsect2(i,k)= 0d0
-            Do j=1,MxSubproc
+         Enddo
+         Do k=0,MxCtrb
+            Do j=0,MxSubproc
                result(i,j,k) = 0d0
             Enddo
          Enddo
@@ -239,7 +272,7 @@ c ----------> to be done
       
 c --- Find particular contributions
       IContr = 0
-ckr      IContrPointer(IContr) = 0
+      IContrPointer(IContr) = 0
 
 c --- Find LO contribution
       If (PORDPTHY.ge.1) then
@@ -515,23 +548,9 @@ c            write(*,*) 'xmur ',xmur,mu
      +                 SigmaTilde(ic,j,1,is,k,l,m)
      +                 * aspow(1)
      +                 * pdf(j,k,l,m)
-Comment:                   if (ic.eq.1.and.j.eq.1) then
-Comment:                      write(*,*)"imu,ix",k,l
-Comment:                      write(*,*)"ibin,isub,iord,result",j,m,ic,result(j,m
-Comment:      >                    ,ic)
-Comment:                      write(*,*)"me,as,pdf",SigmaTilde(ic,j,1,is,k,l,m),
-Comment:      >                    aspow(1),pdf(j,k,l,m)
-Comment:                   endif
                Enddo
             Enddo
          Enddo
-cdebug
-         result(j,nsubproc(ic)+1,ic) = 0.d0
-         do m=1,nsubproc(ic)
-            result(j,nsubproc(ic)+1,ic) = result(j,nsubproc(ic)+1,ic) + 
-     +           result(j,m,ic)
-         enddo
-cdebug
       Enddo
 
       Return 

@@ -20,15 +20,23 @@
       LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY
       DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
-     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
-     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
-     >     RES1LO(MXOBSBIN,MXSUBPROC+1,0:3),
+cnew5     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
+cnew5     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
+cnew5     >     RES1LO(MXOBSBIN,MXSUBPROC+1,0:3),
+cnew5     >     RESLO,RESHI,DREF
+     >     RES0  (MXOBSBIN,0:MXSUBPROC,0:MXCTRB),
+     >     RES1HI(MXOBSBIN,0:MXSUBPROC,0:MXCTRB),
+     >     RES1LO(MXOBSBIN,0:MXSUBPROC,0:MXCTRB),
      >     RESLO,RESHI,DREF
 c - NNPDF method
-      DOUBLE PRECISION WGT(MXOBSBIN,MXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGT2(MXOBSBIN,MXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX(MXOBSBIN,MXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX2(MXOBSBIN,MXSUBPROC+1,0:3)
+Comment:       DOUBLE PRECISION WGT(MXOBSBIN,MXSUBPROC+1,0:3)
+Comment:       DOUBLE PRECISION WGT2(MXOBSBIN,MXSUBPROC+1,0:3)
+Comment:       DOUBLE PRECISION WGTX(MXOBSBIN,MXSUBPROC+1,0:3)
+Comment:       DOUBLE PRECISION WGTX2(MXOBSBIN,MXSUBPROC+1,0:3)
+      DOUBLE PRECISION WGT(MXOBSBIN,0:MXSUBPROC,0:MXCTRB)
+      DOUBLE PRECISION WGT2(MXOBSBIN,0:MXSUBPROC,0:MXCTRB)
+      DOUBLE PRECISION WGTX(MXOBSBIN,0:MXSUBPROC,0:MXCTRB)
+      DOUBLE PRECISION WGTX2(MXOBSBIN,0:MXSUBPROC,0:MXCTRB)
 c - To unify quoted uncertainties (CL68,CL90,special)
       DOUBLE PRECISION CL90,CLGJR
 c - Attention!!! This must be declared consistent with the
@@ -43,6 +51,7 @@ c                definition in the commonblock!!!!!
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Mods for v2.0
+      INTEGER IOBS,IPROC,ICP
       INTEGER IC,MYICONTR,NORD
 
       MYICONTR = 2
@@ -362,7 +371,7 @@ ckr      LALG  = .TRUE.
       LPDF  = .NOT.LONE.AND..NOT.LSER
 ctmp
       lalg  = .false.
-      lpdf  = .false.
+ctmp      lpdf  = .false.
       lser  = .false.
       lstat = .false.
 ctmp
@@ -451,105 +460,131 @@ c   and reset result arrays
          myicontr = 1 
          WRITE(*,*)"ALLUNC: The observable has",NOBSBIN," bins -",
      >        NSUBPROC(MYICONTR)," subprocesses"
-         DO L1=1,NOBSBIN
-            DO L2=1,(NSUBPROC(MYICONTR)+1)
-cdebug               DO L3=1,NORD
-               DO L3=1,2
-ckr               DO IC=1,NContrib
-ckr                  L3 = IContrPointer(IC)
-                  RES0(L1,L2,L3) = 0D0 
-                  DO L4=1,L3
-                     RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
-cdebug
-                     write(*,*)"iobs,isub,iord,iord2,res0,result",
-     >                    l1,l2,l3,l4,res0(l1,l2,l3),result(l1,l2,l4)
-cdebug
-                  ENDDO
-                  RES1LO(L1,L2,L3) = 0D0
-                  RES1HI(L1,L2,L3) = 0D0
-                  WGT(L1,L2,L3)    = 0D0
-                  WGT2(L1,L2,L3)   = 0D0
-                  WGTX(L1,L2,L3)   = 0D0
-                  WGTX2(L1,L2,L3)  = 0D0
+         
+         DO IOBS=1,NOBSBIN
+            DO ICONTR=0,NContrib
+               ICP = IContrPointer(ICONTR)
+               DO IPROC = 0,NSUBPROC(ICP)
+                  RES0(IOBS,IPROC,ICONTR)   = RESULT(IOBS,IPROC,ICP)
+                  RES1LO(IOBS,IPROC,ICONTR) = 0D0
+                  RES1HI(IOBS,IPROC,ICONTR) = 0D0
+                  WGT(IOBS,IPROC,ICONTR)    = 0D0
+                  WGT2(IOBS,IPROC,ICONTR)   = 0D0
+                  WGTX(IOBS,IPROC,ICONTR)   = 0D0
+                  WGTX2(IOBS,IPROC,ICONTR)  = 0D0
                ENDDO
+cdebug               WRITE(*,*)"ALLUNC: IOBS,ICONTR,XS: ",
+cdebug     >              IOBS,ICONTR,RES0(IOBS,0,ICONTR)
             ENDDO
          ENDDO
-
+         
+         
 ckr Do loop runs once even if MYNPDF=0! => Avoid with IF statement
 ckr         IF (MYNPDF.GT.1) THEN
          IF (LPDF) THEN
 *---Convert from CL68 to CL90 values
-            CL90  = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
+            CL90  = 1.64485D0   ! SQRT(2.D0)/InvERF(0.9D0)
 *---Convert from GJR to CTEQ (CL90) values
             CLGJR = 1.D0/0.47D0
             DO J=1,MYNPDF
                CALL INITPDF(J)
                CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
 c - For all bins/subproc/orders: Add negative/positive variations
-               DO L1=1,NOBSBIN
-                  DO L2=1,(NSUBPROC(MYICONTR)+1)
-                     DO L3=1,NORD
-                        SUMM = 0.D0
-                        DIFF = - RES0(L1,L2,L3)
-                        DO L4=1,L3
-                           SUMM = SUMM + RESULT(L1,L2,L4)
-                           DIFF = DIFF + RESULT(L1,L2,L4) 
-                        ENDDO
-                        WGT(L1,L2,L3)   = WGT(L1,L2,L3)   + 1.D0 
-                        WGT2(L1,L2,L3)  = WGT2(L1,L2,L3)  + 1.D0 
-                        WGTX(L1,L2,L3)  = WGTX(L1,L2,L3)  + SUMM 
-                        WGTX2(L1,L2,L3) = WGTX2(L1,L2,L3) + SUMM*SUMM 
+               DO IOBS=1,NOBSBIN
+                  DO ICONTR=0,NContrib
+                     ICP = IContrPointer(ICONTR)
+                     DO IPROC = 0,NSUBPROC(ICP)
+                        DIFF = RESULT(IOBS,IPROC,ICP) -
+     >                       RES0(IOBS,IPROC,ICONTR)
                         IF (DIFF.GT.0D0) THEN
-                           RES1HI(L1,L2,L3) =
-     >                          RES1HI(L1,L2,L3)+DIFF*DIFF
+                           RES1HI(IOBS,IPROC,ICONTR) =
+     >                          RES1HI(IOBS,IPROC,ICONTR)+DIFF*DIFF
                         ELSE
-                           RES1LO(L1,L2,L3) =
-     >                          RES1LO(L1,L2,L3)+DIFF*DIFF
+                           RES1LO(IOBS,IPROC,ICONTR) =
+     >                          RES1LO(IOBS,IPROC,ICONTR)+DIFF*DIFF
                         ENDIF
+                        SUMM = RESULT(IOBS,IPROC,ICP)
+                        WGT(IOBS,IPROC,ICONTR)   =
+     >                       WGT(IOBS,IPROC,ICONTR)   + 1.D0 
+                        WGT2(IOBS,IPROC,ICONTR)  =
+     >                       WGT2(IOBS,IPROC,ICONTR)  + 1.D0 
+                        WGTX(IOBS,IPROC,ICONTR)  =
+     >                       WGTX(IOBS,IPROC,ICONTR)  + SUMM 
+                        WGTX2(IOBS,IPROC,ICONTR) =
+     >                       WGTX2(IOBS,IPROC,ICONTR) + SUMM*SUMM 
                      ENDDO
                   ENDDO
                ENDDO
+Comment:                DO L1=1,NOBSBIN
+Comment:                   DO L2=1,(NSUBPROC(MYICONTR)+1)
+Comment:                      DO L3=1,NORD
+Comment:                         SUMM = 0.D0
+Comment:                         DIFF = - RES0(L1,L2,L3)
+Comment:                         DO L4=1,L3
+Comment:                            SUMM = SUMM + RESULT(L1,L2,L4)
+Comment:                            DIFF = DIFF + RESULT(L1,L2,L4) 
+Comment:                         ENDDO
+Comment:                         WGT(L1,L2,L3)   = WGT(L1,L2,L3)   + 1.D0 
+Comment:                         WGT2(L1,L2,L3)  = WGT2(L1,L2,L3)  + 1.D0 
+Comment:                         WGTX(L1,L2,L3)  = WGTX(L1,L2,L3)  + SUMM 
+Comment:                         WGTX2(L1,L2,L3) = WGTX2(L1,L2,L3) + SUMM*SUMM 
+Comment:                         IF (DIFF.GT.0D0) THEN
+Comment:                            RES1HI(L1,L2,L3) =
+Comment:      >                          RES1HI(L1,L2,L3)+DIFF*DIFF
+Comment:                         ELSE
+Comment:                            RES1LO(L1,L2,L3) =
+Comment:      >                          RES1LO(L1,L2,L3)+DIFF*DIFF
+Comment:                         ENDIF
+Comment:                      ENDDO
+Comment:                   ENDDO
+Comment:                ENDDO
             ENDDO               ! Loop over bins
          ENDIF                  ! Not done for npdf <= 1
 
 c - Take square-root of sum of squares
 c - or apply Toy MC method for NNPDF
-         DO L1=1,NOBSBIN
-ckr            write(*,*)"AAA iobsbin,nobsbin",l1,nobsbin
+         DO IOBS=1,NOBSBIN
             IF (LPDF) THEN
-               DO L2=1,(NSUBPROC(MYICONTR)+1)
-ckr                  write(*,*)"AAA isproc,icontr,nsub",l2,icontr
-ckr     >                 ,NSUBPROC(MYICONTR)
-                  DO L3=1,NORD
-ckr                     write(*,*)"AAA iord,nord",l3,nord
+               DO ICONTR=0,NContrib
+                  ICP = IContrPointer(ICONTR)
+                  DO IPROC = 0,NSUBPROC(ICP)
                      IF (.NOT.LTOY) THEN
-ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
-ckr                        RES1LO(L1,L2,L3) = -CL90*SQRT(RES1LO(L1,L2,L3))
-ckr                        RES1HI(L1,L2,L3) = CLGJR*SQRT(RES1HI(L1,L2,L3))
-ckr                        RES1LO(L1,L2,L3) = -CLGJR*SQRT(RES1LO(L1,L2,L3))
-                        RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
-                        RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
+c     kr                        RES1HI(IOBS,IPROC,ICONTR) = CL90
+c     *SQRT(RES1HI(IOBS,IPROC,ICONTR))
+c     kr                        RES1LO(IOBS,IPROC,ICONTR) = -CL90
+c     *SQRT(RES1LO(IOBS,IPROC,ICONTR))
+c     kr                        RES1HI(IOBS,IPROC,ICONTR) = CLGJR
+c     *SQRT(RES1HI(IOBS,IPROC,ICONTR))
+c     kr                        RES1LO(IOBS,IPROC,ICONTR) = -CLGJR
+c     *SQRT(RES1LO(IOBS,IPROC,ICONTR))
+                        RES1HI(IOBS,IPROC,ICONTR) =  SQRT(RES1HI(IOBS
+     >                       ,IPROC,ICONTR))
+                        RES1LO(IOBS,IPROC,ICONTR) = -SQRT(RES1LO(IOBS
+     >                       ,IPROC,ICONTR))
                      ELSE
-                        RES0(L1,L2,L3) = WGTX(L1,L2,L3)/WGT(L1,L2,L3)
-                        RES1HI(L1,L2,L3) = 
-     >                       (WGTX2(L1,L2,L3)/WGT(L1,L2,L3) -
-     >                       RES0(L1,L2,L3)*RES0(L1,L2,L3))
-ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
-                        RES1HI(L1,L2,L3) = SQRT(RES1HI(L1,L2,L3))
-                        RES1LO(L1,L2,L3) = -RES1HI(L1,L2,L3)
+                        RES0(IOBS,IPROC,ICONTR) = WGTX(IOBS,IPROC
+     >                       ,ICONTR)/WGT(IOBS,IPROC,ICONTR)
+                        RES1HI(IOBS,IPROC,ICONTR) = 
+     >                       (WGTX2(IOBS,IPROC,ICONTR)/WGT(IOBS,IPROC
+     >                       ,ICONTR) -RES0(IOBS,IPROC,ICONTR)*RES0(IOBS
+     >                       ,IPROC,ICONTR))
+c     kr                        RES1HI(IOBS,IPROC,ICONTR) = CL90
+c     *SQRT(RES1HI(IOBS,IPROC,ICONTR))
+                        RES1HI(IOBS,IPROC,ICONTR) = SQRT(RES1HI(IOBS
+     >                       ,IPROC,ICONTR))
+                        RES1LO(IOBS,IPROC,ICONTR) = -RES1HI(IOBS,IPROC
+     >                       ,ICONTR)
                      ENDIF
                   ENDDO
                ENDDO
-               RESLO = RES1LO(L1,NSUBPROC(MYICONTR)+1,NORD)/
-     >              RES0(L1,NSUBPROC(MYICONTR)+1,NORD)
-               RESHI = RES1HI(L1,NSUBPROC(MYICONTR)+1,NORD)/
-     >              RES0(L1,NSUBPROC(MYICONTR)+1,NORD)
+               RESLO = RES1LO(IOBS,0,0)/RES0(IOBS,0,0)
+               RESHI = RES1HI(IOBS,0,0)/RES0(IOBS,0,0)
 ckr 30.01.2008: Change output format for better comp. with C++ version
             ELSE
                RESLO = 0D0
                RESHI = 0D0
             ENDIF
-            WRITE(*,900) L1,RES0(L1,NSUBPROC(MYICONTR)+1,NORD),RESLO,RESHI
+            WRITE(*,900) IOBS,RES0(IOBS,0,0),RESLO,RESHI
          ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
