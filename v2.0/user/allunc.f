@@ -448,20 +448,22 @@ ckr      DO I=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
 
 c - Save the result array from the first call (= central result)
 c   and reset result arrays   
+         myicontr = 1 
          WRITE(*,*)"ALLUNC: The observable has",NOBSBIN," bins -",
      >        NSUBPROC(MYICONTR)," subprocesses"
          DO L1=1,NOBSBIN
-ckr            write(*,*)"iobs, xs :",l1,xs1(l1,0),xs1(l1,1),
-ckr     >           xs1(l1,2),xs1(l1,3)
             DO L2=1,(NSUBPROC(MYICONTR)+1)
-               DO L3=1,NORD
+cdebug               DO L3=1,NORD
+               DO L3=1,2
 ckr               DO IC=1,NContrib
 ckr                  L3 = IContrPointer(IC)
                   RES0(L1,L2,L3) = 0D0 
                   DO L4=1,L3
                      RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
-ckr                     write(*,*)"l1,l2,l3,l4,res0,result",
-ckr     >                    l1,l2,l3,l4,res0(l1,l2,l3),result(l1,l2,l4)
+cdebug
+                     write(*,*)"iobs,isub,iord,iord2,res0,result",
+     >                    l1,l2,l3,l4,res0(l1,l2,l3),result(l1,l2,l4)
+cdebug
                   ENDDO
                   RES1LO(L1,L2,L3) = 0D0
                   RES1HI(L1,L2,L3) = 0D0

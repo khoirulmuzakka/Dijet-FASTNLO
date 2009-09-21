@@ -525,6 +525,13 @@ Comment:                   endif
                Enddo
             Enddo
          Enddo
+cdebug
+         result(j,nsubproc(ic)+1,ic) = 0.d0
+         do m=1,nsubproc(ic)
+            result(j,nsubproc(ic)+1,ic) = result(j,nsubproc(ic)+1,ic) + 
+     +           result(j,m,ic)
+         enddo
+cdebug
       Enddo
 
       Return 
