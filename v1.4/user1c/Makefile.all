@@ -3,7 +3,8 @@
 #
 NAME=example-v14a
 
-FFILES= example.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f
+FFILES= example.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f \
+	alphst.f pyalps.f
 FFILESD= exampled01.f fastnlod00.f fn-pdf.f fn-alphas-demo.f fn-interface.f
 FFILES2= gz.F 
 CFILES= ftn_gzio.c

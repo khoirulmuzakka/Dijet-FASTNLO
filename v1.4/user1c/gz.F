@@ -36,7 +36,7 @@
 *
       INTEGER       NLUNS
       DATA          NLUNS / 0/
-      SAVE          NLUNS
+ckr      SAVE          NLUNS
 *
       ISTAT = 0
       ILUN = GZFINDL (LUN)

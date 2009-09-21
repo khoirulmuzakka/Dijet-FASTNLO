@@ -25,7 +25,7 @@ c --- parse command line
       IF ( IARGC().GT.1)  CALL GETARG(2,HISTOFILE)
       IF ( IARGC().GT.2)  THEN
          write(*,*) 'fastNLO: too many arguments given. Stopping'
-         RETURN
+         STOP
       ENDIF
 
 c - Initialize LHAPDF    - for CTEQ6.1M   
@@ -35,7 +35,8 @@ c - Initialize LHAPDF    - for CTEQ6.1M
       ENDIF
       write(*,*)"Looking for LHAPDF in directory "//
      &     LHAPDF(1:LENOCC(LHAPDF))//"!"
-      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))//'/PDFsets/cteq61.LHgrid')
+      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))/
+     >     /'/../share/PDFsets/cteq61.LHgrid')
 
 c - initialize one member, 0=best fit member
       call InitPDF(0)
