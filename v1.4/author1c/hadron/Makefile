@@ -836,6 +836,19 @@ fnl1518diffpt6: links fnl1518diffpt6.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
+# =====   FNL2308: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
+# ======================================================================
+# LHC scenario for CMS,  pt binning acc. to expected resolution, @ 7 TeV
+#
+fnl2308: links fnl2308.cc $(CommonPath)/fj-sc-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2308.cc \
+	$(CommonPath)/fj-sc-07.cc $(cteq6pdf) \
+	-o fnl2308 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
 # =====   FNL2310: LHC CMS incl. jets with fastjet kT D=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution, @ 7 TeV 
