@@ -911,6 +911,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ENV{FASTNLOLIBPATH}     = "$aidir/lib/fastnlo";
 	}
     }
+    close (FILE);
 }
 #exit 6;
 
@@ -923,28 +924,28 @@ if ( $mode == 0 || $mode == 1 ) {
 my $cwdir = getcwd();
 if ( $vers == 1 ) {
 #open (FILE,"> fastNLO.csh");
-    print FILE "setenv CERNLIB $cwdir/cernlib\n";
-    print FILE "setenv FASTJET $cwdir/fastjet\n";
-    print FILE "setenv FASTNLO $cwdir/fastNLO\n";
-    print FILE "setenv LHAPDF  $cwdir/lhapdf/lib\n";
-    print FILE "setenv NLOJET  $cwdir/nlojet\n";
-    print FILE "setenv NLOJET4 $cwdir/nlojet4\n";
+#    print FILE "setenv CERNLIB $cwdir/cernlib\n";
+#    print FILE "setenv FASTJET $cwdir/fastjet\n";
+#    print FILE "setenv FASTNLO $cwdir/fastNLO\n";
+#    print FILE "setenv LHAPDF  $cwdir/lhapdf/lib\n";
+#    print FILE "setenv NLOJET  $cwdir/nlojet\n";
+#    print FILE "setenv NLOJET4 $cwdir/nlojet4\n";
     $ENV{CERNLIB}  = "$cwdir/cernlib"; 
     $ENV{FASTJET}  = "$cwdir/fastjet";
     $ENV{FASTNLO}  = "$cwdir/fastNLO";
     $ENV{LHAPDF}   = "$cwdir/lhapdf/lib";
     $ENV{NLOJET}   = "$cwdir/nlojet";
     $ENV{NLOJET4}  = "$cwdir/nlojet4";
-    print FILE "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
-	"$ENV{NLOJET4}/bin:\${PATH}".
-	"$ENV{NLOJET}/bin:\${PATH}\n";
+#    print FILE "setenv PATH $cwdir/bin:$ENV{FASTJET}:".
+#	"$ENV{NLOJET4}/bin:\${PATH}".
+#	"$ENV{NLOJET}/bin:\${PATH}\n";
     if ( $ENV{LD_LIBRARY_PATH} ) {
-	print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
-	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
-	    "$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
+#	print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+#	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+#	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+#	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+#	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+#	    "$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
 	$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
@@ -952,12 +953,12 @@ if ( $vers == 1 ) {
 	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
 	    "$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
     } else {
-	print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
-	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
-	    "$ENV{LHAPDF}\n";
+#	print FILE "setenv LD_LIBRARY_PATH $cwdir/lib:$cwdir/lib64:".
+#	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+#	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+#	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+#	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
+#	    "$ENV{LHAPDF}\n";
 	$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64:".
 	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
 	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
@@ -965,37 +966,37 @@ if ( $vers == 1 ) {
 	    "$ENV{NLOJET}/lib:$ENV{NLOJET4}/lib:".
 	    "$ENV{LHAPDF}";
     }
-    print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
-    print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
+#    print FILE "setenv GCC_EXEC_PREFIX $cwdir/lib/gcc-lib/\n";
+#    print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
     $ENV{PATH}            = "$cwdir/bin:$ENV{FASTJET}:".
 	"$ENV{NLOJET4}/bin:$ENV{NLOJET}/bin:$ENV{PATH}";
     $ENV{GCC_EXEC_PREFIX} ="$cwdir/lib/gcc-lib/";
     $ENV{CXXFLAGS} = "-O3 -I .";
 } else {
-    print FILE "# Add to system path environment\n";
+#    print FILE "# Add to system path environment\n";
     if ( $ENV{LD_LIBRARY_PATH} ) {
-	print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-	    "\${LD_LIBRARY_PATH}\n";
+#	print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
+#	    "\${LD_LIBRARY_PATH}\n";
 	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
 	    "$ENV{LD_LIBRARY_PATH}";
     } else {
 	print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64\n";
-	$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64";
+#	$ENV{LD_LIBRARY_PATH} ="$cwdir/lib:$cwdir/lib64";
     }
     if ( $ENV{PATH} ) {
-	print FILE "setenv PATH $aidir/bin:\${PATH}\n";
+#	print FILE "setenv PATH $aidir/bin:\${PATH}\n";
 	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
     } else {
-	print FILE "setenv PATH $aidir/bin\n";
+#	print FILE "setenv PATH $aidir/bin\n";
 	$ENV{PATH} = "$aidir/bin";
     }
 }
-close (FILE);
+#close (FILE);
 if ( $verb ) {
     my $tmp = `which gcc`;
     print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
 }
-exit 7;
+#exit 7;
 
 
     
@@ -1179,7 +1180,9 @@ if ( $mode == 0 || $mode == 3 ) {
 	if ( $batch eq "GRID" ) {
 	    my $spath = "${scendir}/${tdir}";
 	    my $sfile = "${tabnam}";
-	    my $tpath = "fastNLO_tables/${scen}${ref}";
+# Remove ref from table path
+#	    my $tpath = "fastNLO_tables/${scen}${ref}";
+	    my $tpath = "fastNLO_tables/${scen}";
 	    if ( $tpath ) {
 		$tpath =~ s/\/\.\//\//g;
 	    } else {
@@ -1203,7 +1206,8 @@ if ( $mode == 0 || $mode == 3 ) {
 #	close STDOUT;
 # Copy log files to grid storage
 	if ( $batch eq "GRID" ) {
-	    my $tpath = "fastNLO_tables/${scen}${ref}";
+#	    my $tpath = "fastNLO_tables/${scen}${ref}";
+	    my $tpath = "fastNLO_tables/${scen}";
 	    if ( $tpath ) {
 		$tpath =~ s/\/\.\//\//g;
 	    } else {
