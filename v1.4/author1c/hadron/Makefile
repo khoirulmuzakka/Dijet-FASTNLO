@@ -874,6 +874,75 @@ fnl2310: links fnl2310.cc $(CommonPath)/fj-kt-06.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+# ======================================================================
+# =====   FNL2518: LHC CMS Az. decorrelation with fastjet SISCone R=0.5 
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2518norm: links fnl2518norm.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518norm.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518norm -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diff: links fnl2518diff.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diff.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diff -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt1: links fnl2518diffpt1.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt1.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt1 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt2: links fnl2518diffpt2.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt2.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt2 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt3: links fnl2518diffpt3.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt3.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt3 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt4: links fnl2518diffpt4.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt4.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt4 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt5: links fnl2518diffpt5.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt5.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt5 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+fnl2518diffpt6: links fnl2518diffpt6.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2518diffpt6.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2518diffpt6 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
