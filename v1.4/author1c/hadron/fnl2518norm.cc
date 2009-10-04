@@ -299,8 +299,9 @@ void UserHHC::initfunc(unsigned int)
          // ---- Apply safety factors cxlimit
 	 // Original value from Markus Tevatron scenario: 1.20
 	 //	 xlimit[j][k] = xlimit[j][k]*1.2; // small safety factor -> E-scheme
-	 // Stick with this factor, did not seem to give problems
-	 cxlimit[j][k] = 1.20;
+	 // For LHC at 7 TeV this gives problems! Inclusive jets have C = 0.95.
+	 // Change from 1.20 to 1.00!
+	 cxlimit[j][k] = 1.00;
 	 xlimit[j][k] = xlimit[j][k] * cxlimit[j][k];
          
          hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
