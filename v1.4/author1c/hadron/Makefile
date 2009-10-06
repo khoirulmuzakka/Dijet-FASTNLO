@@ -875,6 +875,32 @@ fnl2310: links fnl2310.cc $(CommonPath)/fj-kt-06.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
+# =====   FNL2322: LHC CMS incl. jets with fastjet anti-kT R=0.5 =======
+# ======================================================================
+# LHC scenario for CMS, pt binning acc. to expected resolution, @ 7 TeV 
+#
+fnl2322: links fnl2322.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2322.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2322 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
+# =====   FNL2323: LHC CMS incl. jets with fastjet CA R=0.5 ============
+# ======================================================================
+# LHC scenario for CMS, pt binning acc. to expected resolution, @ 7 TeV 
+#
+fnl2323: links fnl2323.cc $(CommonPath)/fj-ca-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2323.cc \
+	$(CommonPath)/fj-ca-05.cc $(cteq6pdf) \
+	-o fnl2323 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
 # =====   FNL2408: LHC CMS dijet mass with fastjet SISCone R=0.7 =======
 # ======================================================================
 # LHC scenario for CMS, @ 7 TeV
