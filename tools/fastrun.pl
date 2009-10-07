@@ -354,9 +354,13 @@ if ( $verb ) {
     print "fastrun.pl: The available disk space is:\n$freedisk\n";
     my $freenode = `df -hi`;
     print "fastrun.pl: The available inode space is:\n$freenode\n";
+    my $cwd = getcwd();
+    print "fastrun.pl: The current working directory is:\n$cwd\n\n";
+    print "fastrun.pl: The current working directorys content is:\n";
+    system("ls -la");
 #print "fastrun.pl: Installation environment:\n";
 #system("printenv");
-    print "######################################################\n";
+    print "######################################################\n\n";
 }
 
 
@@ -818,6 +822,8 @@ if ( $mode == 0 || $mode == 1 ) {
     chdir "$pwdir";
 #exit 4;
 
+
+
 #
 # 5) Install mcfm
 #
@@ -858,6 +864,8 @@ if ( $mode == 0 || $mode == 1 ) {
     }
     }
 #exit 5;
+
+
 
 #
 # 6) Install fastNLO
@@ -994,6 +1002,7 @@ if ( $vers == 1 ) {
 #close (FILE);
 if ( $verb ) {
     my $tmp = `which gcc`;
+    chomp $tmp;
     print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
 }
 #exit 7;
@@ -1123,16 +1132,21 @@ if ( $mode == 0 || $mode == 3 ) {
     chomp $date;
     print "\nfastrun.pl: Running fastNLO scenario on batch system $batch: $date\n";
     
-# a) Run on grid without complete installation by source
-    if ( $batch eq "GRID" && $mode == 3 ) {
-# Fetching and unpacking of fastNLO binary archive
+# Run without complete installation by source
+    if ( $mode == 3 ) {
+# Fetching and unpacking of fastNLO binary archive, use version incl. CTEQ PDFs for reference
 	my $file = "fastNLO-bin";
-	if ( $ref ) {
+#	if ( $ref ) {
 	    $file .= "-${pdf}";
-	}
+#	}
 	$file .= ".tgz";
+	
 	if ( ! -f $file ) {
-	    grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
+	    if ( $batch eq "GRID" ) {
+		grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
+	    } elsif ( $batch eq "PBS" ) {
+		die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file in PBS working dir, aborted!\n";
+	    }
 	}
 	if ( -f $file ) {
 	    system ("tar xfz $file");
@@ -1140,7 +1154,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	    die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file, aborted!\n";
 	}
     }
-    
+
 # Structure change in fastNLO following change in revision 212!
     if ( $frev < 212 ) { 
 	$scendir = "$ENV{FASTNLO}/author1c/hadron";
@@ -1177,7 +1191,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	chomp $date;
 	print "\nfastrun.pl: Calculation finished: FASTCAL1_$date\n";
 # Copy table to grid storage
-	if ( $batch eq "GRID" ) {
+	if ( $batch ne "LOCAL" ) {
 	    my $spath = "${scendir}/${tdir}";
 	    my $sfile = "${tabnam}";
 # Remove ref from table path
@@ -1192,7 +1206,13 @@ if ( $mode == 0 || $mode == 3 ) {
 	    my $tfile  = $sfile;
 	    $tfile =~ s/_0001//;
 	    $tfile =~ s/\.raw/_${gjobnr}\.raw/;
-	    grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
+	    if ( $batch eq "GRID" ) {
+		grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
+	    } else {
+		my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
+		if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
+				 "current directory $cwdir: $ret, aborted!\n";}
+	    }
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Table stored: TABSAV1_$date\n";
@@ -1205,7 +1225,7 @@ if ( $mode == 0 || $mode == 3 ) {
 #	close STDERR;
 #	close STDOUT;
 # Copy log files to grid storage
-	if ( $batch eq "GRID" ) {
+	if ( $batch ne "LOCAL" ) {
 #	    my $tpath = "fastNLO_tables/${scen}${ref}";
 	    my $tpath = "fastNLO_tables/${scen}";
 	    if ( $tpath ) {
@@ -1214,8 +1234,20 @@ if ( $mode == 0 || $mode == 3 ) {
 		$tpath = "";
 	    }
 	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
-	    grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
+	    if ( $batch eq "GRID" ) {
+		grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
+		grid_storage("LOGSAV","$cwdir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
+	    } else {
+# For PBS with grid-control log files are in $pwdir as job.stdout and .stderr
+# ... only copy
+		chdir $pwdir;
+		my $ret = system("cp -p job.stderr ${tfile}.err");
+		if ( $ret ) {die "fastrun.pl: Couldn't copy job.stderr ".
+				 "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+		$ret = system("cp -p job.stdout ${tfile}.log");
+		if ( $ret ) {die "fastrun.pl: Couldn't copy job.stdout ".
+				 "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+	    }
 	    my $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
