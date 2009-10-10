@@ -366,7 +366,7 @@ fnl0006: links fnl0006.cc $(CommonPath)/kt2jet-e-07.cc \
 	-o fnl0006 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====   FNL0007: LHC CMS incl. jets with kT D=0.6 ====================
+# =====   FNL0007: LHC CMS incl. jets with kT R=0.6 ====================
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
@@ -401,7 +401,7 @@ fnl0009: links fnl0009.cc $(CommonPath)/cone-e-07.cc \
 	-o fnl0009 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====   FNL0010: LHC CMS incl. jets with fastjet kT D=0.6 ============
+# =====   FNL0010: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
@@ -427,7 +427,7 @@ fnl0011: links fnl0011.cc $(CommonPath)/fj-mc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/CDFCones,-lCDFConesPlugin,-L$(FASTJET)/plugins/CDFCones/CDFcode,-lCDFcode
 
 # ======================================================================
-# =====   FNL0017: LHC CMS incl. jets with kT D=0.4 ====================
+# =====   FNL0017: LHC CMS incl. jets with kT R=0.4 ====================
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
@@ -462,7 +462,7 @@ fnl0019: links fnl0019.cc $(CommonPath)/cone-e-05.cc \
 	-o fnl0019 -Wno-deprecated -Wx,-O3,-Wall -Wf,-O3
 
 # ======================================================================
-# =====   FNL0020: LHC CMS incl. jets with fastjet kT D=0.4 ============
+# =====   FNL0020: LHC CMS incl. jets with fastjet kT R=0.4 ============
 # ======================================================================
 # LHC scenario for CMS @ 14 TeV
 #
@@ -488,7 +488,7 @@ fnl0021: links fnl0021.cc $(CommonPath)/fj-mc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/CDFCones,-lCDFConesPlugin,-L$(FASTJET)/plugins/CDFCones/CDFcode,-lCDFcode
 
 # ======================================================================
-# =====   FNL0117: LHC CMS incl. jets with kT D=0.4 ====================
+# =====   FNL0117: LHC CMS incl. jets with kT R=0.4 ====================
 # ======================================================================
 # LHC scenario for CMS like 0017 but for forward jets
 #
@@ -544,7 +544,7 @@ fnl0118.x_12_1: links fnl0118.x_12_1.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL0217: LHC CMS incl. jets with kT D=0.4 ====================
+# =====   FNL0217: LHC CMS incl. jets with kT R=0.4 ====================
 # ======================================================================
 # LHC scenario for CMS like 0117 but for forward jets with pseudo-rapidity
 #
@@ -568,7 +568,7 @@ fnl0218: links fnl0218.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL1007: LHC CMS incl. jets with kT D=0.6 ====================
+# =====   FNL1007: LHC CMS incl. jets with kT R=0.6 ====================
 # ======================================================================
 # LHC scenario for CMS like 0007 @ 10 TeV
 #
@@ -628,7 +628,7 @@ fnl1008: links fnl1008.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL1010: LHC CMS incl. jets with fastjet kT D=0.6 ============
+# =====   FNL1010: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS like 0010 @ 10 TeV
 #
@@ -741,7 +741,7 @@ fnl1308: links fnl1308.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL1310: LHC CMS incl. jets with fastjet kT D=0.6 ============
+# =====   FNL1310: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution
 #
@@ -862,7 +862,7 @@ fnl2308: links fnl2308.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
-# =====   FNL2310: LHC CMS incl. jets with fastjet kT D=0.6 ============
+# =====   FNL2310: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution, @ 7 TeV 
 #
@@ -871,6 +871,32 @@ fnl2310: links fnl2310.cc $(CommonPath)/fj-kt-06.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl2310.cc \
 	$(CommonPath)/fj-kt-06.cc $(cteq6pdf) \
 	-o fnl2310 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
+# =====   FNL2318: LHC CMS incl. jets with fastjet SISCone R=0.5 =======
+# ======================================================================
+# LHC scenario for CMS,  pt binning acc. to expected resolution, @ 7 TeV
+#
+fnl2318: links fnl2318.cc $(CommonPath)/fj-sc-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2318.cc \
+	$(CommonPath)/fj-sc-05.cc $(cteq6pdf) \
+	-o fnl2318 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
+	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
+# =====   FNL2320: LHC CMS incl. jets with fastjet kT R=0.5 ============
+# ======================================================================
+# LHC scenario for CMS, pt binning acc. to expected resolution, @ 7 TeV 
+#
+fnl2320: links fnl2320.cc $(CommonPath)/fj-kt-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2320.cc \
+	$(CommonPath)/fj-kt-05.cc $(cteq6pdf) \
+	-o fnl2320 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
