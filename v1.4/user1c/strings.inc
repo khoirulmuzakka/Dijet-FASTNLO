@@ -4,21 +4,20 @@ C ----- define character strings
 C
       CHARACTER*17 CIREACTION(4)
       CHARACTER*17 CIPROC(4)
-      CHARACTER*28 CIALGO(4)
-      CHARACTER*5  CJETRES1(4)
-      CHARACTER*12 CJETRES2(4)
+      CHARACTER*28 CIALGO(6)
+      CHARACTER*5  CJETRES1(6)
+      CHARACTER*12 CJETRES2(6)
       CHARACTER*72 CHEADER(13)
       CHARACTER*72 CNLOJET(4)
       CHARACTER*72 CTHRCOR(5)
 
-      DATA CIREACTION/"electron-proton  ","proton-proton    ",
+      DATA CIREACTION/"electron-proton","proton-proton",
      >     "proton-antiproton","photon-proton"/
-      DATA CIPROC/"inclusive jets   ","dijets","three-jets",
+      DATA CIPROC/"inclusive jets","dijets","three-jets",
      >     "four-jets"/
-      DATA CIALGO/"kT algorithm","midpoint cone algorithm",
-     >     "rsep cone algorithm","searchcone algorithm"/
-      DATA CJETRES1/"D","Rcone","Rcone","Rcone"/
-      DATA CJETRES2/"n/a","f_overlap","Rsep","R_searchcone"/
+      DATA CIALGO/"kT","MP","MP_RSEP","SISCone","anti-kT","C/A"/
+      DATA CJETRES1/"R","R","R","R","R","R"/
+      DATA CJETRES2/"n/a","f_overlap","Rsep","f_overlap","n/a","n/a"/
       
       DATA CHEADER/
      >     "##########################################################",
