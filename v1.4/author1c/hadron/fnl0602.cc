@@ -490,6 +490,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      }
 
      // Derive dijet variables
+     double ymax = 4.0;
      double mjj = sqrt((pj[ij1].T()+pj[ij2].T())*(pj[ij1].T()+pj[ij2].T())
 		       -(pj[ij1].X()+pj[ij2].X())*(pj[ij1].X()+pj[ij2].X())
 		       -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
