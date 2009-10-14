@@ -20,7 +20,7 @@
 using namespace nlo;
 using namespace std;
 
-
+5~
 //----- declaration of the user defined functons -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&, double&);
 user_hhc * userfunc();
@@ -93,13 +93,13 @@ class UserHHC : public user_hhc
    //    array for the weights MAIN ARRAY
    vector <vector <vector< vector < vector < vector <weight_hhc> > > > > >weights; 
    
-  // ===== variables for the bi-cubic x-interpolation =====
-  // - the relative distances to the four nearest bins
-  vector<double> cmax ;   vector<double> cmin ; 
-  // - the weights for the cubic eigenfunctions (1-dim)
-  vector<double> cefmin ; vector<double> cefmax ; 
-  // - the weights for the bi-cubic eigenfunctions (2-dim)
-  vector< vector<double> > bicef;
+   // ===== variables for the bi-cubic x-interpolation =====
+   // - the relative distances to the four nearest bins
+   vector<double> cmax ;   vector<double> cmin ; 
+   // - the weights for the cubic eigenfunctions (1-dim)
+   vector<double> cefmin ; vector<double> cefmax ; 
+   // - the weights for the bi-cubic eigenfunctions (2-dim)
+   vector< vector<double> > bicef;
 
    double nevents;        // No of events calculated so far
    unsigned long nwrite;  // No of events after to write out the table
@@ -256,7 +256,7 @@ void UserHHC::initfunc(unsigned int)
          pthigh[i+nrap/2][j] = pthigh[i][j];
        }
      }
-   
+
    nxtot = 20;
 
    // no of scalebins, linear interpolation in between for now
@@ -267,7 +267,7 @@ void UserHHC::initfunc(unsigned int)
    nscalevar = 4;
    murscale.resize(nscalevar);
    mufscale.resize(nscalevar);
-   murscale[0] = 0.25; mufscale[0] = 0.25;   // all scales in pT (GeV)  
+   murscale[0] = 0.25; mufscale[0] = 0.25;
    murscale[1] = 0.5;  mufscale[1] = 0.5;
    murscale[2] = 1.0;  mufscale[2] = 1.0;
    murscale[3] = 2.0;  mufscale[3] = 2.0;

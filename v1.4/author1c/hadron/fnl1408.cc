@@ -7,14 +7,13 @@
 //              midpoint version (fnt2008)
 // 
 // last modification
-// 22.06.2009 KR - Try for LHC
 //
 //------ DON'T TOUCH THIS PART! ------
 #include <phasespace.h>
 #include <process.h>
 #include <jetfunc.h>
 #include <qcdlib.h>
- 
+
 #include <iomanip>              // for ASCII output for table
 
 //----- used namespaces -----
@@ -129,12 +128,14 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy squared
-   //s = 40000.;     // RHIC               200 GeV   
-   //s = 3240000.;   // TeV Run I         1800 GeV
-   //s = 3841600.;   // TeV Run II        1960 GeV
+  //  total c.m. energy squared
+  //s =     40000.; // RHIC               200 GeV
+  //s =   3240000.; // TeV Run I         1800 GeV
+  //s =   3841600.; // TeV Run II        1960 GeV
+  //s =    810000.; // LHC Injection Run  900 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
    s = 100000000.; // LHC Start-up Run 10000 GeV
-   //s = 196000000.; // LHC              14000 GeV
+  //s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -157,8 +158,8 @@ void UserHHC::initfunc(unsigned int)
                  //    1: include 2nd "reference table" (a_s/PDFs)
    refscale = 2;   // which of the scalevariations is used in ref-table?
 
-   unitfactor = 1000000.0;  // for fb
-   //unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
+   //unitfactor = 1000000.0;  // for fb
+   unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
    //unitfactor = 1.0;  // for nb    
 
    //Set up binning  
@@ -171,7 +172,7 @@ void UserHHC::initfunc(unsigned int)
    // flexible rap binning
    // these are dijet rapidity bins
    raphigh[0]=0.0;
-   raphigh[1]=1.0;
+   raphigh[1]=1.3;
 
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
@@ -180,7 +181,7 @@ void UserHHC::initfunc(unsigned int)
 
    //Define binning in pt -> here:  DijetMass
    for(int i=0;i<nrap;i++){
-     npt[i]=14;
+     npt[i]=50;
    }
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
@@ -189,7 +190,7 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // lowest pT value in sample   -> here: mass
-   ptlow = 419.;          // 
+   ptlow = 156.;          // 
 
    pthigh.resize(nrap);
    //----- array for pt boundaries
@@ -197,21 +198,57 @@ void UserHHC::initfunc(unsigned int)
       pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries (=mass boundaries)
-   pthigh[0][0]=419.0;
-   pthigh[0][1]=526.0;
-   pthigh[0][2]=649.0;
-   pthigh[0][3]=788.0;
-   pthigh[0][4]=944.0;
-   pthigh[0][5]=1118.0;
-   pthigh[0][6]=1313.0;
-   pthigh[0][7]=1530.0;
-   pthigh[0][8]=1770.0;
-   pthigh[0][9]=2037.0;
-   pthigh[0][10]=2332.0;
-   pthigh[0][11]=2659.0;
-   pthigh[0][12]=3019.0;
-   pthigh[0][13]=3416.0;
-   pthigh[0][14]=10000.0;
+   pthigh[0][0]=156.0;
+   pthigh[0][1]=176.0;
+   pthigh[0][2]=197.0;
+   pthigh[0][3]=220.0;
+   pthigh[0][4]=244.0;
+   pthigh[0][5]=270.0;
+   pthigh[0][6]=296.0;
+   pthigh[0][7]=325.0;
+   pthigh[0][8]=354.0;
+   pthigh[0][9]=386.0;
+   pthigh[0][10]=419.0;
+   pthigh[0][11]=453.0;
+   pthigh[0][12]=489.0;
+   pthigh[0][13]=526.0;
+   pthigh[0][14]=565.0;
+   pthigh[0][15]=606.0;
+   pthigh[0][16]=649.0;
+   pthigh[0][17]=693.0;
+   pthigh[0][18]=740.0;
+   pthigh[0][19]=788.0;
+   pthigh[0][20]=838.0;
+   pthigh[0][21]=890.0;
+   pthigh[0][22]=944.0;
+   pthigh[0][23]=1000.0;
+   pthigh[0][24]=1058.0;
+   pthigh[0][25]=1118.0;
+   pthigh[0][26]=1181.0;
+   pthigh[0][27]=1246.0;
+   pthigh[0][28]=1313.0;
+   pthigh[0][29]=1383.0;
+   pthigh[0][30]=1455.0;
+   pthigh[0][31]=1530.0;
+   pthigh[0][32]=1607.0;
+   pthigh[0][33]=1687.0;
+   pthigh[0][34]=1770.0;
+   pthigh[0][35]=1856.0;
+   pthigh[0][36]=1945.0;
+   pthigh[0][37]=2037.0;
+   pthigh[0][38]=2132.0;
+   pthigh[0][39]=2231.0;
+   pthigh[0][40]=2332.0;
+   pthigh[0][41]=2438.0;
+   pthigh[0][42]=2546.0;
+   pthigh[0][43]=2659.0;
+   pthigh[0][44]=2775.0;
+   pthigh[0][45]=2895.0;
+   pthigh[0][46]=3019.0;
+   pthigh[0][47]=3147.0;
+   pthigh[0][48]=3279.0;
+   pthigh[0][49]=3416.0;
+   pthigh[0][50]=3558.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -220,7 +257,7 @@ void UserHHC::initfunc(unsigned int)
        }
      }
 
-   nxtot = 20;  // Start high with 20
+   nxtot = 20;
 
    // no of scalebins, linear interpolation in between for now
    nscalebin = 2;
@@ -230,7 +267,7 @@ void UserHHC::initfunc(unsigned int)
    nscalevar = 4;
    murscale.resize(nscalevar);
    mufscale.resize(nscalevar);
-   murscale[0] = 0.25; mufscale[0] = 0.25;   
+   murscale[0] = 0.25; mufscale[0] = 0.25;
    murscale[1] = 0.5;  mufscale[1] = 0.5;
    murscale[2] = 1.0;  mufscale[2] = 1.0;
    murscale[3] = 2.0;  mufscale[3] = 2.0;
@@ -275,7 +312,7 @@ void UserHHC::initfunc(unsigned int)
          // Setup the weights array
          weights[j][k].resize(nxtot);
          for( int l = 0; l < nxtot; l++) {
-            weights[j][k][l].resize(l+1); // half matrix xmin,xax: (n^2+n)/2
+            weights[j][k][l].resize(l+1); // half matrix xmin,xmax: (n^2+n)/2
             // scale variation
             for(int i = 0; i < l+1; i++){
                weights[j][k][l][i].resize(nscalevar);
