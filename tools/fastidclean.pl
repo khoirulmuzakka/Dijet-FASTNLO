@@ -39,7 +39,11 @@ if ( $opt_h ) {
 # Initialization
 #
 my $scenario = shift;
+if ( ! $scenario ) {
+    die "fastidclean.pl: ERROR! No scenario specified\n";
+}
 chomp $scenario;
+
 my @subdirs = ($scenario, $scenario."ref");
 my @globs = ("\\\*born\\\*.raw", "\\\*nlo\\\*.raw");
 
