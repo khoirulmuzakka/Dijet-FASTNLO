@@ -398,6 +398,7 @@ c - Compute PDF uncertainties for all available scales
 c - Check that FILENAME is still the primary table here ...!!!
       IF (.NOT.LSER) THEN
       DO I=1,NSCALEVAR
+ckr      DO I=1,1
          CALL INITPDF(0)
          MUR = MURSCALE(I)
          MUF = MUFSCALE(I)

@@ -30,7 +30,7 @@ ckr      PARAMETER(NRAPMAX=2,NPTMAX=50,NBINTOTMAX=400,NXMAX=250)
 ckr Forward jets
 ckr      PARAMETER(NRAPMAX=2,NPTMAX=30,NBINTOTMAX=500,NXMAX=300)
 ckr Avoid segfault problem on my notebook
-ckr      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=170,NXMAX=200)
+      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=170,NXMAX=200)
 ckr For precision tests with scenario fnl1007
 c      PARAMETER(NRAPMAX=2,NPTMAX=35,NBINTOTMAX=70,NXMAX=5050) 
 ckr These limits don't work anymore on my test system
