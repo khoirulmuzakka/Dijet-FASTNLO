@@ -1,6 +1,6 @@
 //
 // fastNLO author code for fnl0602:
-//     ATLAS LHC dijet Chi test scenario, E_cms = 14 TeV
+//     ATLAS LHC Dijet chi test scenario, E_cms = 14 TeV
 //     for fastjet kT algo with R=1.0 in E-scheme
 //
 //
@@ -11,7 +11,7 @@
 #include <process.h>
 #include <jetfunc.h>
 #include <qcdlib.h>
-
+ 
 #include <iomanip>              // for ASCII output for table
 
 //----- used namespaces -----
@@ -91,13 +91,13 @@ class UserHHC : public user_hhc
    //    array for the weights MAIN ARRAY
    vector <vector <vector< vector < vector < vector <weight_hhc> > > > > >weights; 
    
-  // ===== variables for the bi-cubic x-interpolation =====
-  // - the relative distances to the four nearest bins
-  vector<double> cmax ;   vector<double> cmin ; 
-  // - the weights for the cubic eigenfunctions (1-dim)
-  vector<double> cefmin ; vector<double> cefmax ; 
-  // - the weights for the bi-cubic eigenfunctions (2-dim)
-  vector< vector<double> > bicef;
+   // ===== variables for the bi-cubic x-interpolation =====
+   // - the relative distances to the four nearest bins
+   vector<double> cmax ;   vector<double> cmin ; 
+   // - the weights for the cubic eigenfunctions (1-dim)
+   vector<double> cefmin ; vector<double> cefmax ; 
+   // - the weights for the bi-cubic eigenfunctions (2-dim)
+   vector< vector<double> > bicef;
 
    double nevents;        // No of events calculated so far
    unsigned long nwrite;  // No of events after to write out the table
@@ -131,9 +131,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
   //s =   3240000.; // TeV Run I         1800 GeV
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
-  //s = 196000000.; // LHC Design Run   14000 GeV
+   s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -157,30 +157,38 @@ void UserHHC::initfunc(unsigned int)
    refscale = 2;   // which of the scalevariations is used in ref-table?
 
    //unitfactor = 1000000.0;  // for fb
-   unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
+   unitfactor = 1000.0;  // for pb
    //unitfactor = 1.0;  // for nb    
 
    //Set up binning  
-   nrap   = 40;  //            // No. of bins in rapidity -> here: Chi!
-   if (iref==1) nrap=nrap*2;  // -> in reference mode: double No. rap bins
+   nrap = 4;                 // No. of bins in rapidity --> here: dijet mass!
+   if (iref==1) nrap=nrap*2; // --> In reference mode: double no. of rap bins
    
-   raphigh = new double[nrap+1];  //----- array for rapidity boundaries
-   npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
+   raphigh = new double[nrap+1]; // Array for rapidity boundaries
+   npt     = new int[nrap];      // nrap bins in rapidity, each npt[irap] pT bins
 
    // flexible rap binning
-   // these are dijet Chi bins
-   for (int i=0; i<nrap+1; i++) {
-     raphigh[i] = double(i) * 15.;
-   }
-   
+   // these are dijet mass bins
+   raphigh[0] =   500.0;
+   raphigh[1] =  1000.0;
+   raphigh[2] =  2000.0;
+   raphigh[3] =  3000.0;
+   raphigh[4] = 14000.0;
+
    if (iref==1)      // -> in reference mode: copy rapidity definitions
      for(int i=0;i<nrap/2;i++){
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
    
-   //Define binning in pt -> here:  DijetMass
-   for(int i=0;i<nrap;i++){
-     npt[i]=4;
+   //DEBUG
+   //   for (int i=0; i<nrap+1; i++) {
+   //     cout << "i, raphigh: " << i << ", " << raphigh[i] << endl;
+   //   }
+   //DEBUGEND
+
+   // Define binning in pT --> here: dijet chi!
+   for (int i=0; i<nrap; i++) {
+     npt[i] = 40; 
    }
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
@@ -188,20 +196,31 @@ void UserHHC::initfunc(unsigned int)
       npt[i+nrap/2] = npt[i];
    }
 
-   // lowest pT value in sample   -> here: mass
-   ptlow = 500.;          // 
+   // lowest pT value in sample --> here: dijet mass
+   ptlow = 500.;
 
    pthigh.resize(nrap);
-   //----- array for pt boundaries
-   for(int i=0;i<nrap;i++){
-      pthigh[i].resize(npt[i]+1);
+   for (int i=0; i<nrap; i++) {
+     pthigh[i].resize(npt[i]+1);
    }
-   //----- array for pt boundaries (=mass boundaries)
-   pthigh[0][0]=500.0;
-   pthigh[0][1]=1000.0;
-   pthigh[0][2]=2000.0;
-   pthigh[0][3]=3000.0;
-   pthigh[0][4]=14000.0;
+
+   //----- array for pT boundaries (= chi boundaries)
+   int nrp = 0;
+   if (iref==0) {
+     nrp = nrap;
+   } else {
+     nrp = nrap/2;
+   }
+   for (int i=0; i<nrp; i++) {
+     // Minimal chi value is 1.! Make first bin smaller by 1.
+     pthigh[i][0] = 1.0;
+     for (int j=1; j<npt[i]+1; j++) {
+       pthigh[i][j] = double(j) * 15.;
+       //DEBUG
+       //       cout << "i, j, pthigh: " << i << ", " << j << ", " << pthigh[i][j] << endl;
+       //DEBUGEND
+     }
+   }
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -214,7 +233,7 @@ void UserHHC::initfunc(unsigned int)
 
    // no of scalebins, linear interpolation in between for now
    nscalebin = 2;
-   mu0scale = 0.25; // 0.25 Gev as reference scale (HERA!)
+   mu0scale = 0.25; // 0.25 GeV as reference scale (HERA!)
 
    // NLO scale variations - for scales in GeV
    nscalevar = 4;
@@ -278,22 +297,22 @@ void UserHHC::initfunc(unsigned int)
          // - Setup the xlimit array - computed from kinematic constraints
 	 //  ----> need good formula for dijets
 	 // KR: My x limits
+	 double s = 196000000.; // LHC Design Run   14000 GeV
 	 double ymax  = 4.0;
 	 // double dymax = 2.0*ymax;
 	 // double ptred = 1./sqrt(2.)/(sqrt(exp(dymax)) + sqrt(exp(-dymax)))
 	 double ptred = 0.0939753;
 	 
 	 // define reasonable upper and lower pT boundaries for each bin
-	 // KR: This is for |y| <= 1.0 @ LO
-	 //         ptlo[j][k]  = 0.325*pthigh[j][k];
-	 //         pthi[j][k]  = 0.502*pthigh[j][k+1];
 	 // KR: For |y| <= 1.3 @ NLO (= LO / sqrt(2))
-         ptlo[j][k]  = ptred*pthigh[j][k];
-         pthi[j][k]  = 0.502*pthigh[j][k+1];
+	 //         ptlo[j][k]  = ptred*pthigh[j][k];
+	 //         pthi[j][k]  = 0.502*pthigh[j][k+1];
+         ptlo[j][k]  = ptred*raphigh[j];
+	 //         pthi[j][k]  = 0.502*raphigh[j+1];
 
 	 double xtmin = 2.0 * ptlo[j][k] / sqrt(s);
 	 double xmin  = exp(-ymax) * xtmin;
-	 // MW:
+	 // MW I:
 	 //       double xmin = 1.0;
 	 // 	 double xminmax = pthigh[j][k]*pthigh[j][k] / s;
 	 //          double xmin2 = 1.0/2.71828 *pthigh[j][k] / sqrt(s); // for y<1
@@ -301,9 +320,21 @@ void UserHHC::initfunc(unsigned int)
 	 // 	   xmin = xminmax; }
 	 // 	 else {
 	 // 	   xmin = xmin2; }
-	 xlimit[j][k] = xmin * 1.0;
+	 // MW II: fnt1009
+	 double xminmw = raphigh[j]*raphigh[j] / s; 
+	 // define reasonable upper and lower pT boundaries for each bin
+	 double xlo = 1.0/sqrt(2.0*(cosh(log(pthigh[j][k+1]))+1.0));
+	 double xhi = 1.0/sqrt(2.0*(cosh(log(pthigh[j][k]))+1.0));
+	 ptlo[j][k]  = xlo * raphigh[j];
+	 //	 cout << "j, xhi, raphigh " << j << " " << xhi << " " << raphigh[j+1] << endl;
+	 pthi[j][k]  = xhi * raphigh[j+1];
+	 cout << "xmins: KR, MW " << xmin << ", " << xminmw << endl;
+	 //	 cout << "ptlow: KR, MW " << ptlo[j][k] << ", " << xlo*raphigh[j] << endl;
+	 //	 cout << "pthig: KR, MW " << pthi[j][k] << ", " << xhi*raphigh[j+1] << endl;
 
          // ---- safety factors for E-scheme: None
+	 //	 xlimit[j][k] = xmin * 1.0;
+	 xlimit[j][k] = xminmw * 1.0;
 	 xlimit[j][k] = xlimit[j][k]*1.0;
          hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
          xsmallest[j][k]=0.999;
@@ -312,10 +343,16 @@ void UserHHC::initfunc(unsigned int)
 
          // - Setup the murval and mufval arrays
 	 double dpt = (pthi[j][k]-ptlo[j][k]);
-         murval[j][k][0] = ptlo[j][k] +dpt*0.12;
-         murval[j][k][1] = pthi[j][k] -dpt*0.4;
+	 //	 cout << "pT lo,hi,dpt: " << ptlo[j][k] << ", " << pthi[j][k] << ", " << dpt <<
+	 //	   ", " << (ptlo[j][k] + dpt * 0.18) << ", " << (pthi[j][k] - dpt * 0.40) << endl;
+         murval[j][k][0] = ptlo[j][k] + dpt * 0.18;
+         murval[j][k][1] = pthi[j][k] - dpt * 0.40;
+         if (j==3) { // special definition in last - large - mass bin
+	   murval[j][k][0] = ptlo[j][k] + dpt * 0.08; //??? was .14  .48
+	   murval[j][k][1] = pthi[j][k] - dpt * 0.65; //??? <<- 0.5 was checked!!
+	 }
 	 mufval[j][k][0] = murval[j][k][0];
-         mufval[j][k][1] =  murval[j][k][1];
+         mufval[j][k][1] = murval[j][k][1];
 
          for( int l = 0; l < nscalevar; l++) {
 	   murvaltrans[j][k][l][0]=log(log(murscale[l]*murval[j][k][0]/mu0scale)); 
@@ -374,7 +411,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
    cout << "    Scenario fnl0602:" << endl;
-   cout  <<  "      ATLAS LHC test scenario, E_cms = 14 TeV,"  <<  endl;
+   cout  <<  "      ATLAS LHC Dijet chi test scenario, E_cms = 14 TeV,"  <<  endl;
    cout  <<  "      for fastjet kT algo with R=1.0 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
@@ -489,22 +526,25 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        ij2 = ijtmp;
      }
 
-     // Derive dijet variables
-     double ymax = 4.0;
+     // Derive dijet variables (using pseudorapidity) 
      double mjj = sqrt((pj[ij1].T()+pj[ij2].T())*(pj[ij1].T()+pj[ij2].T())
 		       -(pj[ij1].X()+pj[ij2].X())*(pj[ij1].X()+pj[ij2].X())
 		       -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
 		       -(pj[ij1].Z()+pj[ij2].Z())*(pj[ij1].Z()+pj[ij2].Z()));
-
+     double ymax = 4.0;
+     double y1   = pj[ij1].prapidity();
+     double y2   = pj[ij2].prapidity();
      // Sum and diffs in pseudo-rapidity
-     double dyjj  = abs(pj[ij1].prapidity()-pj[ij2].prapidity());
-     double syjj  = abs(pj[ij1].prapidity()+pj[ij2].prapidity());
+     double dyjj  = abs(y1-y2);
+     double syjj  = abs(y1+y2);
      double chijj = exp(dyjj);
 
-     if (mjj > ptlow && dyjj < 2.*ymax - 1.5 && syjj < 1.5) {
+     if (dyjj < 2.*ymax - 1.5 && syjj < 1.5 &&
+	 abs(y1) < ymax && abs(y2) < ymax &&  
+	 mjj > ptlow ) {
        // --- Later this variable will be the ren./fact. scale
-       //     double ptmax = pt1;    // either pTmax
-       double ptmax = (pt1+pt2)/2.0; // or the average dijet pT
+       double ptmax = pt1;    // either pTmax
+       //double ptmax = (pt1+pt2)/2.0; // or the average dijet pT
 
        // --- Determine eta (= chi) and pt (= dijet mass) bin 
        // KR: Note, for more than one rap bin BOTH leadings jets are
@@ -515,16 +555,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        int nloop = nrap;   // - important for iref==1: different No loops
        if (iref == 1) nloop = nrap/2; // -> in reference mode
        for (int j = 0; j < nloop; j++) {        
-	 if (raphigh[j] <= chijj && chijj < raphigh[j+1]) {
+	 if (raphigh[j] <= mjj && mjj < raphigh[j+1]) {
 	   rapbin=j;
-	   binwidth = binwidth * 2.0*(raphigh[(j+1)] - raphigh[j]);
+	   binwidth = binwidth * (raphigh[(j+1)] - raphigh[j]);
 	   break;
 	 }
        }
        if (rapbin >=0) {              
 	 int ptbin  = -1;
 	 for (int j = 0; j < npt[rapbin]; j++) {
-	   if (pthigh[rapbin][j] <= mjj && mjj < pthigh[rapbin][j+1]) {
+	   if (pthigh[rapbin][j] <= chijj && chijj < pthigh[rapbin][j+1]) {
 	     ptbin=j;
 	     binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
 	     break;
@@ -904,7 +944,7 @@ void UserHHC::writetable(){
    WRITE(marker);// ------------------END of block
 
    // a brief description how the scale is defined
-   table << "pT_dijet_average_(GeV)" << endl;
+   table << "pT_of_leading_jet_(GeV)" << endl;
 
    WRITE(nscalebin); // No. of Bins in mur,muf
 
