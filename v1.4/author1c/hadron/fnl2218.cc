@@ -699,7 +699,7 @@ void UserHHC::writetable(){
    table << "d2sigma-jet_dpT_deta_(fb_GeV)" << endl;
    table << "CMS-LHC-Test-Scenario" << endl;
    table << "Forward_Jets" << endl;
-   table << "SISCone_R=0.5" << endl;
+   table << "SISCone_R=0.5_E-Scheme" << endl;
    table << "-" << endl;
 
   //iproc

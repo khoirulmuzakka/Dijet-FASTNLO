@@ -119,12 +119,14 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-   //  total c.m. energy squared
-   //s = 40000.;     // RHIC               200 GeV   
-   //s = 3240000.;   // TeV Run I         1800 GeV
-   //s = 3841600.;   // TeV Run II        1960 GeV
-   //s = 100000000.; // LHC Start-up Run 10000 GeV
-   s = 196000000.; // LHC              14000 GeV
+  //  total c.m. energy squared
+  //s =     40000.; // RHIC               200 GeV
+  //s =   3240000.; // TeV Run I         1800 GeV
+  //s =   3841600.; // TeV Run II        1960 GeV
+  //s =    810000.; // LHC Injection Run  900 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
+  //s = 100000000.; // LHC Start-up Run 10000 GeV
+   s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -141,7 +143,7 @@ void UserHHC::initfunc(unsigned int)
 
    // ********************************************************
    // ********** switch for reference mode on/off ************
-   iref = 1;       //  switch for reference mode
+   iref = 0;       //  switch for reference mode
    //iref = 1;       //  switch for reference mode
                   //   0: standard fastNLO table only
                  //    1: include 2nd "reference table" (a_s/PDFs)
@@ -694,10 +696,10 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d2sigma-jet_dpT_deta_(pb_GeV)" << endl;
-   table << "CMS LHC test scenario, E_cms = 14 TeV" << endl;
-   table << "Forward jets" << endl;
-   table << "SISCone with R=0.5, E scheme" << endl;
+   table << "d2sigma-jet_dpT_deta_(fb_GeV)" << endl;
+   table << "CMS-LHC-Test-Scenario" << endl;
+   table << "Forward_Jets" << endl;
+   table << "SISCone_R=0.5_E-Scheme" << endl;
    table << "-" << endl;
 
   //iproc
