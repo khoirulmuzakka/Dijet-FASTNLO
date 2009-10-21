@@ -139,16 +139,8 @@ void UserHHC::initfunc(unsigned int)
    // ---- Initialize event counters
    nevents = 0;
    // Set some defaults
-   // KR: Change for testing
-   //   if (nwrite==0) nwrite = 5000000;
-   if (nwrite==0) nwrite = 5000;
+   if (nwrite==0) nwrite = 5000000;
     
-   // KR: Avoid seg faults, initialize table here and not only in
-   //     UserDIS::phys_output where it seems to be too late ?
-   std::cout << "   before inittable   " << endl;
-   inittable();
-   std::cout << "   after inittable   " << endl;
-
    start_time = std::time(0);
 
 }
@@ -258,9 +250,6 @@ void UserHHC::inittable(){
    double s = 3240000; 
    
    const bool doReference = true;
-   // KR: Workaround since I couldn't figure out how the filename setting
-   //     could work with inittable() in initfunc
-   string tablefilename = "fastNLO.tab";
 
    //Set up fastNLO
    table = new fnloTable(tablefilename);
