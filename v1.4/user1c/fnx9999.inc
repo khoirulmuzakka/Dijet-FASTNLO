@@ -19,10 +19,11 @@ C ---------------------------------------------------------------------
 C - Needed for bin boundaries, xlimit, scales
       INTEGER ISEPARATOR, NRAPMAX,NPTMAX,NBINTOTMAX,NXMAX,NSCALEMAX,
      >     NMAXSUBPROC,NSCALEBINMAX
-C - Scenario-dependent limits
       PARAMETER(ISEPARATOR=1234567890)
-ckr Normal version
+C - Scenario dependend limits!
+ckr Normal version (Incl. jets, d2s/dchidmjj)
       PARAMETER(NRAPMAX=12,NPTMAX=50,NBINTOTMAX=400,NXMAX=250)
+ckr
 ckr      PARAMETER(NRAPMAX=50,NPTMAX=50,NBINTOTMAX=400,NXMAX=200)
 ckr      PARAMETER(NRAPMAX=12,NPTMAX=45,NBINTOTMAX=550,NXMAX=200)
 ckr      PARAMETER(NRAPMAX=12,NPTMAX=45,NBINTOTMAX=400,NXMAX=250)
