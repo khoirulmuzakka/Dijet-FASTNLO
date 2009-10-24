@@ -280,15 +280,16 @@ c - Sum subprocesses / fill result array / fill 'XSECT' array
             XSECT(NBIN,IORD) = RESULT(NBIN,(NSUBPROC+1),IORD)
          ENDDO
       ENDDO
-      DO NBIN=1,NBINTOT
-         WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
-     >        nbin,0,xsect(nbin,1)+xsect(nbin,2)
-         DO IORD=1,NORD
-            WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
-     >           nbin,iord,xsect(nbin,iord)
-         ENDDO
-      ENDDO
-
+ckr DEBUG
+Comment:       DO NBIN=1,NBINTOT
+Comment:          WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
+Comment:      >        nbin,0,xsect(nbin,1)+xsect(nbin,2)
+Comment:          DO IORD=1,NORD
+Comment:             WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
+Comment:      >           nbin,iord,xsect(nbin,iord)
+Comment:          ENDDO
+Comment:       ENDDO
+ckr DEBUG
 
 c -----------------------------------------------------------------
 c --- Special feature:    compute   1/sigma * dsigma/d[whatever]
@@ -376,7 +377,9 @@ ckr      DOUBLE PRECISION SCFAC2A,SCFAC2B ! For ren-scale variation
       PARAMETER (BETA1=34*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
       PARAMETER (MU0SCALE=0.25)
 
-      WRITE(*,*)"CCC: XMUR,XMUF",XMUR,IXMUF
+ckr DEBUG
+Comment:       WRITE(*,*)"CCC: XMUR,XMUF",XMUR,IXMUF
+ckr DEBUG
 
 c - Get the absolute order in alpha_s of the LO contribution
       JORD = NPOW(1)
@@ -384,8 +387,10 @@ c - Get the absolute order in alpha_s of the LO contribution
 c - Vary renormalization scale around the value used in orig. calc.
       LOGMU = LOG(XMUR/MURSCALE(IXMUF)) ! change w.r.t. orig. calc.
       SCFAC = DBLE(JORD)*BETA0*LOGMU ! NLO contrib.
-      WRITE(*,*)"CCCC: SCALEFAC,LOGMU: ",
-     >     SCFAC,LOGMU
+ckr DEBUG
+Comment:       WRITE(*,*)"CCCC: SCALEFAC,LOGMU: ",
+Comment:      >     SCFAC,LOGMU
+ckr DEBUG
 ckr 30.01.2008: Comment unused defs
 c      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
 c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
@@ -455,10 +460,10 @@ c - Loop over coefficient array
                DO IORD=1,NORD
                   ASPOW(IORD) = BWEIGHT**NPOW(IORD)
                ENDDO
-cdebug
-               WRITE(*,*)"FX9999MT: ScaleDep, xmu, mu, as1, asp = ",
-     >              -1,xmur,XMUR * MURVAL(I,J,1),bweight,aspow(1)
-cdebug
+ckr DEBUG
+Comment:                WRITE(*,*)"FX9999MT: ScaleDep, xmu, mu, as1, asp = ",
+Comment:      >              -1,xmur,XMUR * MURVAL(I,J,1),bweight,aspow(1)
+ckr DEBUG
                DO K=1,NXSUM     ! Loop over all x bins
                   DO M=1,NSUBPROC ! Loop over subprocesses
                      DO IORD=1,NORD ! Rel. order: 1 LO 2 NLO 3 NNLO ...
@@ -508,21 +513,21 @@ c - Only relevant for fastNLO authors -> for precision studies
          ENDDO                  ! j pt
       ENDDO                     ! i rapidity
       
-cdebug
-      DO IORD=1,NORD
-         NBIN = 0
-         DO I=1,NRAPIDITY
-            DO J=1,NPT(I)
-               NBIN=NBIN+1
-               DO M=1,NSUBPROC
-                  WRITE(*,*)"FX9999MT: IOBS,IPROC,IORD,"//
-     >                 "RESULT: ",
-     >                 NBIN,M,IORD,RESULT(NBIN,M,IORD)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-cdebug
+ckr DEBUG
+Comment:       DO IORD=1,NORD
+Comment:          NBIN = 0
+Comment:          DO I=1,NRAPIDITY
+Comment:             DO J=1,NPT(I)
+Comment:                NBIN=NBIN+1
+Comment:                DO M=1,NSUBPROC
+Comment:                   WRITE(*,*)"FX9999MT: IOBS,IPROC,IORD,"//
+Comment:      >                 "RESULT: ",
+Comment:      >                 NBIN,M,IORD,RESULT(NBIN,M,IORD)
+Comment:                ENDDO
+Comment:             ENDDO
+Comment:          ENDDO
+Comment:       ENDDO
+ckr DEBUG
 
       RETURN
       END
@@ -577,7 +582,9 @@ c      DOUBLE PRECISION hxinv3   ! invert h(x) for ixscheme=3: log(1/x)+x-1
                   muf = mu0scale * exp(exp((llptlo + (dble(p)-1.)
      >                 /(NSCALEBIN-1)*(llpthi-llptlo) )))
                endif
-               write(*,*)"FX9999GP: muffactor, muf: ",muffactor,muf
+ckr DEBUG
+Comment:                write(*,*)"FX9999GP: muffactor, muf: ",muffactor,muf
+ckr DEBUG
 c - get PDFs(-6:6) directly from interface, reweight, copy into linear array
                do k=1,NXTOT     ! loop over all x-values
                   hx = hxlim *(1d0 - dble(k-1)/dble(nxtot)) ! compute x1-value
