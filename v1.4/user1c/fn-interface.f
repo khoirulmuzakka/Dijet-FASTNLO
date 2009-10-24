@@ -81,7 +81,7 @@ c - Print info
          WRITE(*,*)"FNALPHAS: Lambda_5_PDF (1st call)  =",QLAM5 
          IF (ASMZVAL.GT.0.D0) THEN
             IF (ASMODE.EQ."PY") THEN
-               WRITE(*,*)"FNALPHAS: Lambda requested       =",ASMZVAL 
+               WRITE(*,*)"FNALPHAS: Lambda_4 requested       =",ASMZVAL 
             ELSE
                WRITE(*,*)"FNALPHAS: a_s(M_Z) requested       =",ASMZVAL 
             ENDIF

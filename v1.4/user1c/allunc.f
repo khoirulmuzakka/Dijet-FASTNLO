@@ -82,13 +82,13 @@ C --- Use '...' with \", otherwise gfortran complains
      >           '../share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
             WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
-     >           '(from Pythia 6.4 using Lambda_5 from PDF)'
+     >           '(from Pythia 6.4 using Lambda_4 from PDF)'
             WRITE(*,*)'    alt. = KR: 1-, 2- and 3-loop '//
      >           '(from hep-ph/9506442)'
             WRITE(*,*)'    alt. = MW: 2- and 4-loop '//
      >           '(from hep-ph/9806404)'
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
-            WRITE(*,*)'     (in mode PY this has to be Lambda_5!)'
+            WRITE(*,*)'     (in mode PY this has to be Lambda_4!)'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
             STOP
