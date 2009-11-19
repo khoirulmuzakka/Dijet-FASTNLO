@@ -949,12 +949,19 @@ if ( $mode == 0 || $mode == 1 ) {
 	    print FILE "setenv FASTNLO $aidir\n";
 	    print FILE "setenv FASTNLOBINPATH $aidir/bin\n";
 	    print FILE "setenv FASTNLOLIBPATH $aidir/lib/fastnlo\n";
+	    print FILE "setenv FASTNLOSRCPATH $aidir/src/$install{fastNLO}[2]\n";
 	    $ENV{FASTNLO}            = "$aidir";
 	    $ENV{FASTNLOBINPATH}     = "$aidir/bin";
 	    $ENV{FASTNLOLIBPATH}     = "$aidir/lib/fastnlo";
+	    $ENV{FASTNLOSRCPATH}     = "$aidir/src/$install{fastNLO}[2]";
 	}
 	print FILE "#\n";
+	$date = `date +%d%m%Y_%H%M%S`;
+	chomp $date;
+	print "\nfastrun.pl: Installation of fastNLO and all required ".
+	    "components finished: $date\n";
     }
+}
 #exit 6;
 
 
@@ -963,70 +970,89 @@ if ( $mode == 0 || $mode == 1 ) {
 # Set PATH environment
 #
 #    my $cwdir = getcwd();
-    print FILE "# Add to system paths PATH and LD_LIBRARY_PATH\n";
-    if ( $vers == 1 ) {
-	if ( $ENV{PATH} ) {
+if ( $mode == 0 || $mode == 1 ) {
+    print FILE "# Add to system paths PATH and LD_LIBRARY_PATH\n";}
+if ( $vers == 1 ) {
+    if ( $mode == 2 || $mode == 3 ) {
+	$ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
+	$ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
+	$ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+    }
+    if ( $ENV{PATH} ) {
+	if ( $mode == 0 || $mode == 1 ) {
 	    print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin:\${PATH}\n";
-	    $ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin:$ENV{PATH}";
-	} else {
-	    print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin\n";
-	    $ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin";
-	}
-	if ( $ENV{LD_LIBRARY_PATH} ) {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";
-	    $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
-	} else {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}\n";
-	    $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}";
-	}
+		"$ENV{NLOJET}/bin:\${PATH}\n";}
+	$ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
+	    "$ENV{NLOJET}/bin:$ENV{PATH}";
     } else {
-	if ( $ENV{PATH} ) {
-	    print FILE "setenv PATH $aidir/bin:\${PATH}\n";
-	    $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-	} else {
-	    print FILE "setenv PATH $aidir/bin\n";
-	    $ENV{PATH} = "$aidir/bin";
-	}
-	if ( $ENV{LD_LIBRARY_PATH} ) {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
+		"$ENV{NLOJET}/bin\n";}
+	$ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
+	    "$ENV{NLOJET}/bin";
+    }
+    if ( $ENV{LD_LIBRARY_PATH} ) {
+	if ( $mode == 0 || $mode == 1 ) {
 	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-		"\${LD_LIBRARY_PATH}\n";
-	    $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
-		"$ENV{LD_LIBRARY_PATH}";
-	} else {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64\n";
-	    $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64";
-	}
+		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
+		"$ENV{NLOJET}/lib:".
+		"$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";}
+	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
+	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+	    "$ENV{NLOJET}/lib:".
+	    "$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
+    } else {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
+		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
+		"$ENV{NLOJET}/lib:".
+		"$ENV{LHAPDF}\n";}
+	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
+	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+	    "$ENV{NLOJET}/lib:".
+	    "$ENV{LHAPDF}";
+    }
+} else {
+    if ( $mode == 2 || $mode == 3 ) {
+	$ENV{FASTJET} = "$aidir";
+	$ENV{NLOJET}  = "$aidir";
+	$ENV{LHAPDF}  = "$aidir";
+    }
+    if ( $ENV{PATH} ) {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv PATH $aidir/bin:\${PATH}\n";}
+	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+    } else {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv PATH $aidir/bin\n";}
+	$ENV{PATH} = "$aidir/bin";
+    }
+    if ( $ENV{LD_LIBRARY_PATH} ) {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
+		"$aidir/lib64:\${LD_LIBRARY_PATH}\n";}
+	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64:".
+	    "$ENV{LD_LIBRARY_PATH}";
+    } else {
+	if ( $mode == 0 || $mode == 1 ) {
+	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
+		"$aidir/lib64\n";}
+	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64";
+    }
 }
-close (FILE);
+if ( $mode == 0 || $mode == 1 ) {close (FILE);}
 if ( $verb ) {
     my $tmp = `which gcc`;
     chomp $tmp;
     print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
-}
 }
 #exit 7;
 
@@ -1039,113 +1065,132 @@ my $scendir;
 if ( $mode == 0 || $mode == 2 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
-    print "\nfastrun.pl: Making fastNLO scenario: $date\n";
-    chdir $idir;
-# Structure change in fastNLO following change in revision 212!
-    if ( $frev < 212 ) { 
-	$scendir = "$ENV{FASTNLO}/author1c/hadron";
-    } else {
-	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
-    }
-    chdir "$scendir" or die
-	"fastrun.pl: Could not cd to dir $scendir!\n";
-    
-# Adapting scenario cc file for ref or noref calculation
-    my $scenfil = "${scen}.cc";
-    my $scenlib = "${scen}${ref}.la";
-    my $deb = `pwd`;
-    chomp $deb;
-    if ( $verb ) {
-	print "fastrun.pl: DEBUG! Current directory to run NLOJET++: $deb\n";
-	print "fastrun.pl: DEBUG! ls -la:\n\n";
-	system("ls -la");
-	print "\nfastrun.pl: DEBUG! Check on scenario library: $scenlib\n";
-    }
-    if ( -f $scenlib ) {
-	print "\nfastrun.pl: Scenario already compiled, make step skipped!\n";
-    } else {
-	print "\nfastrun.pl: Checking scenario file $scenfil in $scendir for ".
-	    "reference setting: $ref ...\n";
-	my $oldfil = "$scendir/$scenfil";
-	my $test = "";
-	if ( $ref ) {
-	    my $cmd = "grep \"$refsw1\" $oldfil";
-	    if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-	    $test = `$cmd`; 
-	} else {
-	    my $cmd = "grep \"$refsw0\" $oldfil";
-	    if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-	    $test = `$cmd`; 
-	}
-	if ( $test ) {
-	    print "\nfastrun.pl: Scenario file $scenfil already adapted, skipped!\n";
-	} else {
-	    print "\nfastrun.pl: Adapting scenario file $scenfil in $scendir for ".
-		"reference setting: $ref ...\n";
-	    open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
-	    my $newfil = $oldfil.".new";
-	    open(NEWFILE,">$newfil");
-	    while ( my $in = <OLDFILE> ) {	
-		my $out = $in;
-		if ( $ref ) {
-		    $out =~ s/$refsw0/$refsw1/;
-		} else {
-		    $out =~ s/$refsw1/$refsw0/;
-		}
-		print NEWFILE $out; 
-	    }
-	    close(OLDFILE);
-	    close(NEWFILE);
-	    system("mv -f $oldfil ${oldfil}.old");
-	    system("mv -f $newfil $oldfil");
-	}
+    print "\nfastrun.pl: Making fastNLO scenario for version $vers: $date\n";
 
-# Adapting scenario Makefile for ref or noref calculation
-	$scenfil = "Makefile";
-	$oldfil  = "$scendir/$scenfil";
-	$test = "";
-	if ( $ref ) {
-	    my $cmd = "grep \"\\$maksw1\" $oldfil";
-	    if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-	    $test = `$cmd`; 
+    if ( $vers == 1 ) {
+	chdir $idir;
+# Structure change in fastNLO following change in revision 212!
+	if ( $frev < 212 ) { 
+	    $scendir = "$ENV{FASTNLO}/author1c/hadron";
 	} else {
-	    my $cmd = "grep \"\\$maksw0\" $oldfil";
-	    if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-	    $test = `$cmd`; 
+	    $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
 	}
-	if ( $test ) {
-	    print "\nfastrun.pl: $scenfil already adapted, skipped!\n";
+	chdir "$scendir" or die
+	    "fastrun.pl: Could not cd to dir $scendir!\n";
+	
+# Adapting scenario cc file for ref or noref calculation
+	my $scenfil = "${scen}.cc";
+	my $scenlib = "${scen}${ref}.la";
+	my $deb = `pwd`;
+	chomp $deb;
+	if ( $verb ) {
+	    print "fastrun.pl: DEBUG! Current directory to run NLOJET++: $deb\n";
+	    print "fastrun.pl: DEBUG! ls -la:\n\n";
+	    system("ls -la");
+	    print "\nfastrun.pl: DEBUG! Check on scenario library: $scenlib\n";
+	}
+	if ( -f $scenlib ) {
+	    print "\nfastrun.pl: Scenario already compiled, make step skipped!\n";
 	} else {
-	    print "\nfastrun.pl: Adapting Makefile in $scendir for ".
+	    print "\nfastrun.pl: Checking scenario file $scenfil in $scendir for ".
 		"reference setting: $ref ...\n";
-	    open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
-	    my $newfil = $oldfil.".new";
-	    open(NEWFILE,">$newfil");
-	    while ( my $in = <OLDFILE> ) {	
-		my $out = $in;
-		if ( $ref ) {
-		    $out =~ s/$maksw0/$maksw1/;
-		} else {
-		    $out =~ s/$maksw1/$maksw0/;
-		}
-		print NEWFILE $out; 
+	    my $oldfil = "$scendir/$scenfil";
+	    my $test = "";
+	    if ( $ref ) {
+		my $cmd = "grep \"$refsw1\" $oldfil";
+		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+		$test = `$cmd`; 
+	    } else {
+		my $cmd = "grep \"$refsw0\" $oldfil";
+		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+		$test = `$cmd`; 
 	    }
-	    close(OLDFILE);
-	    close(NEWFILE);
-	    system("mv -f $oldfil ${oldfil}.old");
-	    system("mv -f $newfil $oldfil");
+	    if ( $test ) {
+		print "\nfastrun.pl: Scenario file $scenfil already adapted, skipped!\n";
+	    } else {
+		print "\nfastrun.pl: Adapting scenario file $scenfil in $scendir for ".
+		    "reference setting: $ref ...\n";
+		open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
+		my $newfil = $oldfil.".new";
+		open(NEWFILE,">$newfil");
+		while ( my $in = <OLDFILE> ) {	
+		    my $out = $in;
+		    if ( $ref ) {
+			$out =~ s/$refsw0/$refsw1/;
+		    } else {
+			$out =~ s/$refsw1/$refsw0/;
+		    }
+		    print NEWFILE $out; 
+		}
+		close(OLDFILE);
+		close(NEWFILE);
+		system("mv -f $oldfil ${oldfil}.old");
+		system("mv -f $newfil $oldfil");
+	    }
+	    
+# Adapting scenario Makefile for ref or noref calculation
+	    $scenfil = "Makefile";
+	    $oldfil  = "$scendir/$scenfil";
+	    $test = "";
+	    if ( $ref ) {
+		my $cmd = "grep \"\\$maksw1\" $oldfil";
+		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+		$test = `$cmd`; 
+	    } else {
+		my $cmd = "grep \"\\$maksw0\" $oldfil";
+		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+		$test = `$cmd`; 
+	    }
+	    if ( $test ) {
+		print "\nfastrun.pl: $scenfil already adapted, skipped!\n";
+	    } else {
+		print "\nfastrun.pl: Adapting Makefile in $scendir for ".
+		    "reference setting: $ref ...\n";
+		open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
+		my $newfil = $oldfil.".new";
+		open(NEWFILE,">$newfil");
+		while ( my $in = <OLDFILE> ) {	
+		    my $out = $in;
+		    if ( $ref ) {
+			$out =~ s/$maksw0/$maksw1/;
+		    } else {
+			$out =~ s/$maksw1/$maksw0/;
+		    }
+		    print NEWFILE $out; 
+		}
+		close(OLDFILE);
+		close(NEWFILE);
+		system("mv -f $oldfil ${oldfil}.old");
+		system("mv -f $newfil $oldfil");
+	    }
+	    $date = `date +%d%m%Y_%H%M%S`;
+	    chomp $date;
+	    print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
+	    my $ret = system("make -j2 nlofast-add");
+	    if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
+	    print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
+	    chdir $scendir;
+	    $ret = system("make -j2 $scen");
+	    if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
 	}
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
-	my $ret = system("make -j2 nlofast-add");
-	if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
-	print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
-	chdir $scendir;
-	$ret = system("make -j2 $scen");
-	if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
+    } else {
+#	print "\nfastrun.pl: (Re-)making scenario $scen of fastNLO: $date\n";
+	print "\nfastrun.pl: (Re-)making scenarios of fastNLO: $date\n";
+	chdir "$ENV{FASTNLOSRCPATH}/trunk/v2.0";
+#	my $ret = system("make -j2 lib${scen}.la");
+	my $ret = system("make -j2");
+#	if ( $ret ) {die "fastrun.pl: (re-)make -j2 lib${scen}.la ".
+	if ( $ret ) {die "fastrun.pl: (re-)make -j2 ".
+			 "of fastNLO V2 failed: $ret, aborted!\n";}
+#	$ret = system("make install lib${scen}.la");
+	$ret = system("make install");
+#	if ( $ret ) {die "fastrun.pl: (re-)make install lib${scen}.la ".
+	if ( $ret ) {die "fastrun.pl: (re-)make install ".
+			 "of fastNLO V2 failed: $ret, aborted!\n";}
     }
 }
+
+
     
 #
 # 8) Run fastNLO
@@ -1153,15 +1198,34 @@ if ( $mode == 0 || $mode == 2 ) {
 if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
-    print "\nfastrun.pl: Running fastNLO scenario on batch system $batch: $date\n";
+    print "\nfastrun.pl: Running fastNLO version $vers scenario on batch system $batch: $date\n";
     
 # Run without complete installation by source
-    if ( $mode == 3 ) {
+# In case of non-local running need to unpack binary fastNLO distribution
+    if ( $mode == 3 && $batch ne "LOCAL" ) {
+# Set minimal environment with respect to current working directory
+#	my $cwd = `pwd`;
+#	chomp $cwd;
+#	if ( $vers == 1 ) {
+#	    $ENV{NLOJET} = "$cwd/nlojet";
+#	    $ENV{FASTNLO} = "$cwd/fastNLO";
+#	} else {
+#	    $ENV{NLOJET}  = $cwd;
+#	    $ENV{FASTNLO} = $cwd;
+#	    if ( 
+#	    $ENV{LD_LIBRARY_PATH} = 
+#	}
+
 # Fetching and unpacking of fastNLO binary archive, use version incl. CTEQ PDFs for reference
 	my $file = "fastNLO-bin";
 #	if ( $ref ) {
+	if ( $vers == 1 ) {
 	    $file .= "-${pdf}";
 #	}
+	} else {
+	    $file .= "-v${vers}";
+	}
+
 	$file .= ".tgz";
 	
 	if ( ! -f $file ) {
@@ -1179,24 +1243,39 @@ if ( $mode == 0 || $mode == 3 ) {
     }
 
 # Structure change in fastNLO following change in revision 212!
-    if ( $frev < 212 ) { 
+    if ( $vers == 1 && $frev < 212 ) { 
 	$scendir = "$ENV{FASTNLO}/author1c/hadron";
-    } else {
+    } elsif ( $vers == 1 ) {
 	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+    } else {
+#	$scendir = "$ENV{FASTNLOSRCPATH}/trunk/v2.0/author/hadron";
+	$scendir = ".";
     }
+
     chdir "$scendir" or die
 	"fastrun.pl: ERROR! Could not cd to dir $scendir!\n";
     
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Running fastNLO: $date\n";
-    my $cmd = "$ENV{NLOJET}/bin/nlojet++ -P dipole ".
-	"--save-after $runmode{$order}[1] ".
-	"-c$runmode{$order}[0] ".
-	"-d $tdir ".
-	"-n ${scen}${ref}_${jobnr} ".
-	"-u ${scen}${ref}.la ";
-    if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+    my $cmd;
+    if ( $vers==1 ) {
+	$cmd = "$ENV{NLOJET}/bin/nlojet++ -P dipole ".
+	    "--save-after $runmode{$order}[1] ".
+	    "-c$runmode{$order}[0] ".
+	    "-d $tdir ".
+	    "-n ${scen}${ref}_${jobnr} ".
+	    "-u ${scen}${ref}.la ";
+	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+    } else {
+	$cmd = "$ENV{NLOJET}/bin/nlojet++ --calculate ".
+	    "--save-after $runmode{$order}[1] ".
+	    "-c$runmode{$order}[0] ".
+	    "-d $tdir ".
+	    "-n ${scen}${ref}_${jobnr} ".
+	    "-u lib/lib${scen}.la ";
+	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+    }
 # Do not try to maximize CPU time yet, too unstable
     if ( $batch eq "MAX" ) {
 # Fork NLO calculation
