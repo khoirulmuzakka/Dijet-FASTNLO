@@ -215,7 +215,13 @@ my $njet = "2jet";
 if ($scen =~ m/diff/) {
     $njet = "3jet";
 }
-my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.raw";
+my $tabext;
+if ( $vers == 1 ) {
+    $tabext = "raw";
+} else {
+    $tabext = "tab";
+}
+my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${tabext}";
 
 # Directories
 my $pwdir = getcwd();
@@ -273,12 +279,15 @@ if ( $vers == 1 ) {
     $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
     $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
-# 2003 seems to work on SuSE 11.0
-#    $install{cernlib}[0]    = "cernlib-2003";
-#    $install{cernlib}[1]    = "cernlib-2003";
+    if ( $gccvers lt "4.0.0" ) { 
 # 2006 seems to work on slc4
-    $install{cernlib}[0]    = "cernlib-2006";
-    $install{cernlib}[1]    = "cernlib-2006";
+	$install{cernlib}[0]    = "cernlib-2006";
+	$install{cernlib}[1]    = "cernlib-2006";
+    } else {
+# 2003 seems to work on SuSE 11.0 & Mandriva 10
+	$install{cernlib}[0]    = "cernlib-2003";
+	$install{cernlib}[1]    = "cernlib-2003";
+    }
     $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
     $install{lhapdf}[0]     = "lhapdf-5.7.0";
@@ -1307,7 +1316,7 @@ if ( $mode == 0 || $mode == 3 ) {
 # Change job numbering according to grid-control
 	    my $tfile  = $sfile;
 	    $tfile =~ s/_0001//;
-	    $tfile =~ s/\.raw/_${gjobnr}\.raw/;
+	    $tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
 	    if ( $batch eq "GRID" ) {
 		grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
 	    } else {
@@ -1425,8 +1434,8 @@ exit 0;
 #
 # Signal handling and grid storage: Save table and logs on grid storage
 #
-# Original table naming example: fnl0002kt10_0001-hhc-born-2jet.raw
-# Grid table naming example:     fnl0002kt10-hhc-born-2jet_0000.raw
+# Original table naming example: fnl0002kt10_0001-hhc-born-2jet.raw/tab
+# Grid table naming example:     fnl0002kt10-hhc-born-2jet_0000.raw/tab
 #
 sub grid_storage {
     my $signam   = shift;
