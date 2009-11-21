@@ -94,7 +94,33 @@ if ( $vers == 1 ) {
     if ( $ret ) {die "fastprep.pl: ERROR! Could not create archive $arcname: $ret\n";}
 } else {
     chdir "$ENV{FASTNLO}" or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}!\n";
+# For version 2:
+# Copy system libg2c to lib dir in case it's missing on the target system
+    my @libg2c = `ldconfig -p | grep libg2c | cut -d" " -f4`;
+    chomp @libg2c;
+#    print "libg2c @libg2c\n";
+    foreach my $tmp ( @libg2c ) {
+	my $dir = `dirname $tmp`;
+	chomp $dir;
+#	print "dir $dir\n";
+	my $lib = `basename $tmp`;
+	chomp $lib;
+#	print "lib $lib\n";
+	my @parts = split(/\./,$lib);
+#	print "parts @parts\n";
+	my @addlibs = `find $dir -name $parts[0]\*.so\*`;
+#	print "addlibs @addlibs\n";
+	chomp @addlibs;
+#	push @gcclibs, @addlibs;
+	foreach my $copy ( @addlibs ) {
+	    my $cmd = "cp -p $copy lib";
+	    my $ret = system("$cmd");
+	    if ( $ret ) {print "fastprep.pl: Warning! ".
+			     "Copying system libg2c $tmp failed.\n"}
+	}
+    }
 
+# Only used in version 1
 #    my @gcclibs = `find lib -follow -name \*.so\*`;
 #    chomp @gcclibs;
     my @solibs  = `find lib -follow -name \*.so\*`;
@@ -104,8 +130,8 @@ if ( $vers == 1 ) {
 
     my $cmd = "tar cfz $arcname ".
 	"@solibs @lalibs bin/nlojet++";
-
     my $ret = system("$cmd");
     if ( $ret ) {die "fastprep.pl: ERROR! Could not create archive $arcname: $ret\n";}
 }
+
 exit 0;

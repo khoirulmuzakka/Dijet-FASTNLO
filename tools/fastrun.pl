@@ -36,6 +36,8 @@ if ( defined $ENV{MY_JOBID} ) {
 }
 
 my $date = `date +%d%m%Y_%H%M%S`;
+if ( $? ) {die "fastrun.pl: Error! date command failed, timing not possible,".
+	       " aborted.\n";}
 chomp $date;
 print "\n######################################\n";
 print "# fastrun.pl: Starting run of fastNLO: FASTRUN0_$date\n";
@@ -245,9 +247,25 @@ my %install;
 # 3: Link shortcut
 #
 # Store used gcc version to add this to final directories
-my $gccvers = "3.3.6";
-if ( $vers == 2 ) {
-    $gccvers = `gcc -dumpversion`;
+my $gccv1 = "3.3.6";
+my $gccvers = `gcc -dumpversion`;
+if ( $? ) {
+    if ( $vers == 1 ) {
+	print "fastrun.pl: Warning! System gcc command failed. ".
+	    " Will use version $gccv1 anyway.\n";
+    } else {
+	if ( $mode == 0 || $mode == 1 || $mode == 2 ) {
+	    die "fastrun.pl: Error! System gcc command failed, ".
+		" aborted.\n";
+	} else {
+	    print "fastrun.pl: Warning! System gcc command failed. ".
+		" Will try to run anyway.\n";
+	}
+    }
+}
+if ( $vers == 1 ) {
+    $gccvers = $gccv1;
+} else {
     chomp $gccvers;
 }
 my $gccapp = "gcc$gccvers";
@@ -348,25 +366,57 @@ if ( $verb ) {
     print "fastrun.pl: System information for debugging purposes:\n";
     print "######################################################\n";
     my $host = `hostname`;
-    chomp $host;
-    print "fastrun.pl: The system's hostname is (hostname):\n$host\n\n"; 
+    if ( $? ) {
+	print "fastrun.pl: Info: \"hostname\" command failed.\n\n";
+    } else {
+	chomp $host;
+	print "fastrun.pl: The system's hostname is (hostname):\n$host\n\n"; 
+    }
     my $osvers = `uname -a`;
-    print "fastrun.pl: Your operating system is (uname -a):\n$osvers\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"uname -a\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: Your operating system is (uname -a):\n$osvers\n";
+    }
     my $procvers = `cat /proc/version`;
-    print "fastrun.pl: Your linux version is (/proc/version):\n$procvers\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"cat /proc/version\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: Your linux version is (/proc/version):\n$procvers\n";
+    }
     my $freemem = `free`;
-    print "fastrun.pl: The available memory is:\n$freemem\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"free\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: The available memory is:\n$freemem\n";
+    }
     my $cpumod = `cat /proc/cpuinfo | grep \"model name\"`;
-    my $cpufrq = `cat /proc/cpuinfo | grep \"cpu MHz\"`;
-    print "fastrun.pl: The processor type is:\n${cpumod}at\n${cpufrq}\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"cat /proc/cpuinfo\" command failed.\n\n";
+    } else {
+	my $cpufrq = `cat /proc/cpuinfo | grep \"cpu MHz\"`;
+	print "fastrun.pl: The processor type is:\n${cpumod}at\n${cpufrq}\n";
+    }
     my $freedisk = `df -h`;
-    print "fastrun.pl: The available disk space is:\n$freedisk\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"df -h\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: The available disk space is:\n$freedisk\n";
+    }
     my $freenode = `df -hi`;
-    print "fastrun.pl: The available inode space is:\n$freenode\n";
+    if ( $? ) {
+	print "fastrun.pl: Info: \"df -hi\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: The available inode space is:\n$freenode\n";
+    }
     my $cwd = getcwd();
-    print "fastrun.pl: The current working directory is:\n$cwd\n\n";
-    print "fastrun.pl: The current working directorys content is:\n";
-    system("ls -la");
+    if ( $? ) {
+	print "fastrun.pl: Info: \"getcwd()\" command failed.\n\n";
+    } else {
+	print "fastrun.pl: The current working directory is:\n$cwd\n\n";
+	print "fastrun.pl: The current working directorys content is:\n";
+	system("ls -la");
+    }
 #print "fastrun.pl: Installation environment:\n";
 #system("printenv");
     print "######################################################\n\n";
@@ -1058,11 +1108,6 @@ if ( $vers == 1 ) {
     }
 }
 if ( $mode == 0 || $mode == 1 ) {close (FILE);}
-if ( $verb ) {
-    my $tmp = `which gcc`;
-    chomp $tmp;
-    print "fastrun.pl: DEBUG! gcc executable used: $tmp\n";
-}
 #exit 7;
 
 
@@ -1257,8 +1302,7 @@ if ( $mode == 0 || $mode == 3 ) {
     } elsif ( $vers == 1 ) {
 	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
     } else {
-#	$scendir = "$ENV{FASTNLOSRCPATH}/trunk/v2.0/author/hadron";
-	$scendir = ".";
+	$scendir = "$aidir";
     }
 
     chdir "$scendir" or die
