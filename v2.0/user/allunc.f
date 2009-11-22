@@ -18,7 +18,7 @@
       INTEGER I,J,L1,L2,L3,L4,MYNPDF,IOPDF,IOAS
       INTEGER ISTAT,MYISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
       LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY
-      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
+      DOUBLE PRECISION XMUR,XMUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
 cnew5     >     RES0(MXOBSBIN,MXSUBPROC+1,0:3),
 cnew5     >     RES1HI(MXOBSBIN,MXSUBPROC+1,0:3),
@@ -67,7 +67,9 @@ c --- Parse command line
 
 *---Scenario
       IF (IARGC().LT.1) THEN
-         SCENARIO = "fnt2003"
+ckr Change because of lack of iargc functionality
+ckr         SCENARIO = "fnt2003"
+         SCENARIO = "test"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No scenario name given, "//
      >        "taking the default fnt2003 instead!"
@@ -444,16 +446,20 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-c - Compute PDF uncertainties for all available scales
+c - Compute PDF uncertainties for all available scales in NLO!
 c - Check that FILENAME is still the primary table here ...!!!
       IF (.NOT.LSER) THEN
-ckr      DO I=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
-      DO I=3,3
+      MYICONTR = IContrPointer(2)   
+      WRITE(*,*)"ALLUNC: Deriving PDF uncertainties at NLO, "//
+     >     "IContr, NScaleVar, NScaleDim = ",MYICONTR,
+     >     NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR)),NSCALEDIM(MYICONTR)
+      DO I=1,NSCALEVAR(MYICONTR,NSCALEDIM(MYICONTR))
+ckr      DO I=1,1
          CALL INITPDF(0)
-         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
-         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
-         WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
-         CALL FX9999CC(FILENAME,MUR,MUF,0,XS1)
+         XMUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
+         XMUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),I)
+         WRITE(*,*)"ALLUNC: Now scale no.",i,"; xmur, xmuf = ",xmur,xmuf
+         CALL FX9999CC(FILENAME,XMUR,XMUF,0,XS1)
 
 c - Save the result array from the first call (= central result)
 c   and reset result arrays   
@@ -488,7 +494,7 @@ ckr         IF (MYNPDF.GT.1) THEN
             CLGJR = 1.D0/0.47D0
             DO J=1,MYNPDF
                CALL INITPDF(J)
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
+               CALL FX9999CC(FILENAME,XMUR,XMUF,0,XS0)
 c - For all bins/subproc/orders: Add negative/positive variations
                DO IOBS=1,NOBSBIN
                   DO ICONTR=0,NContrib
@@ -620,13 +626,13 @@ c - Fill only central scale
 c - (MYISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSER) THEN
          MYISCALE = 3
-         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
-         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         XMUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         XMUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
          WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",MYISCALE,
-     >        "; mur, muf = ",mur,muf
+     >        "; xmur, xmuf = ",xmur,xmuf
          DO J=0,MYNPDF
             CALL INITPDF(J)
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XS0)
+            CALL FX9999CC(FILENAME,XMUR,XMUF,0,XS0)
             IBIN = 0
             DO IRAP=1,NRAPIDITY
                DO IPT=1,NPT(IRAP)
@@ -673,9 +679,9 @@ c - Default scale (C++ 2, Fortran 3) ==> normal result
          MYISCALE = 3
 c - (Use other MYISCALE in FORTRAN ONLY if refscale <> 2 in author code)
 c         MYISCALE = 2
-         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
-         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
+         XMUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         XMUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         CALL FX9999CC(FILENAME,XMUR,XMUF,1,XS2)
 c - Attention: From now on ref. table loaded ==> rap. bins doubled
 c - Get the normal result, scale 3, from first half of doubled rap bins
          IBIN = 0
@@ -696,9 +702,9 @@ c - Get the normal result, scale 3, from first half of doubled rap bins
 
 c - Reference scale no. always 1
          MYISCALE = 1
-         MUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
-         MUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XS2)
+         XMUR = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         XMUF = SCALEFAC(MYICONTR,NSCALEDIM(MYICONTR),MYISCALE)
+         CALL FX9999CC(FILENAME,XMUR,XMUF,1,XS2)
 c - Get the reference result, scale 1, nrap/2 ++ bins
          DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
             DO IPT=1,NPT(IRAP)

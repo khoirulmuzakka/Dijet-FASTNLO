@@ -100,6 +100,9 @@
       Character*(*) FILENAME
       Double Precision Xmur, Xmuf
 
+
+ckr      write(*,*)"BBB: xmur,xmuf",xmur,xmuf
+
 c === Initialization: Read table
       Call FX9999IN(Filename)
 
@@ -125,11 +128,10 @@ cdebug     +        i, IPoint, IScPoint, NSubProc(IPoint)
 cdebug
 
 c === Get PDFs
-         Call FX9999GP(i)       ! Use i, pointers are derived inside. Change?
+         Call FX9999GP(i,xmuf)       ! Use i, pointers are derived inside. Change?
          
 c === Multiply with perturbative coefficients and alphas
          Call FX9999MT(i,xmur,xmuf) ! Use i, pointers are derived inside. ?
-
 
 c === Add up in result array
          Do j=1,NObsBin
@@ -154,8 +156,13 @@ c === sum of sums, --> result(j,0,0)
          result(j,0,0) = result(j,0,NContrib)
          Do i=0,NContrib
             xsect(j,i) = result(j,0,i)
-cdebug            WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
-cdebug     >           j,i,xsect(j,i)
+            if (i.eq.NContrib) then
+               WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
+     >              j,i,xsect(j,i)-xsect(j,i-1)
+            else
+               WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
+     >              j,i,xsect(j,i)
+            Endif
          Enddo
       Enddo
 
@@ -262,13 +269,23 @@ c ----------> to be done
 *           Xmuf        factorization scale factor
 *
 * 06/11/2007 MW
-* 19.09.2009 KR Improve contribution determination
+* 19.09.2009 KR Improve contribution determination, fix double comparison
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
       Integer i,j,k, i1
-      Double Precision Xmur, Xmuf, XmurOld, XmufOld
-      Data XMurOld/0d0/,XmufOld/0d0/
+      Double Precision Xmur, Xmuf
+      
+c --- Find particular contributions
+      IContr = 0
+      IContrPointer(IContr) = 0
+
+c --- Check input
+      If (xmur.lt.1.d-3.or.xmuf.lt.1.d-3) Then
+         WRITE(*,*)"FX9999PT: ERROR! Scale factors smaller than "//
+     >        "0.001 are not allowed, stopped! xmur, xmuf = ",xmur,xmuf
+         STOP
+      Endif
       
 c --- Find particular contributions
       IContr = 0
@@ -410,6 +427,7 @@ c           --- except for threshold corrections ---
       Do i=1,IContr
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
+ckr         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
                IScalePointer(i) = 1
@@ -426,7 +444,14 @@ c           --- except for threshold corrections ---
             Endif
          Else                   ! no Born type contribution
             Do j=1,NScaleVar(i1,1)
-               If (xmuf.eq.scalefac(i1,1,j)) IScalePointer(i)=j
+ckr This was dangerous ...
+ckr               If (xmuf.eq.scalefac(i1,1,j)) IScalePointer(i)=j
+               If (dabs(scalefac(i1,1,j)/xmuf-1.d0).lt.1d-3) Then
+                  IScalePointer(i)=j
+                  write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
+     >                 scalefac(i1,1,j),IScalePointer(i)
+                  Exit
+               Endif
             Enddo
          Endif
          If (IScalePointer(i).eq.0) Then
@@ -441,7 +466,9 @@ c           --- except for threshold corrections ---
       Enddo
 
 c --- Check if renormalization scale can be provided a posteriori if needed
-      If (xmur .ne. xmuf) Then
+ckr This was dangerous ...
+ckr      If (xmur .ne. xmuf) Then
+      If (dabs(xmur/xmuf-1.d0).lt.1d-3) Then
          Do i=1,IContr
             i1 = IContrPointer(i)
             IF (IScaleDep(i1).eq.2) Then
@@ -458,10 +485,10 @@ c --- Check if renormalization scale can be provided a posteriori if needed
       Endif
 
 c --- Debug print-out
-c      Do i=1,IContr
-c         Write(*,*) "FX9999PT: Pointer number ",i," to "//
-c     >        "IContr, IScale:",IcontrPoint(i),IScalePointer(i)
-c      Enddo
+      Do i=1,IContr
+         Write(*,*) "FX9999PT: Pointer number ",i," to "//
+     >        "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
+      Enddo
 
 
       Return
@@ -488,10 +515,12 @@ c      Enddo
       Integer Ixmur,Ixmuf, in,ic,is, i,j,k,l,m,n, nxmax
       Double Precision xmur,xmuf,mu, FNALPHAS, scf
       Double Precision logmu, scfac,scfac2a, scfac2b, as(8),aspow(8)
-      Double Precision pi, beta0, beta1, NF,CA,CF
+      Double Precision pi, beta0, beta1, NF,CA,CF,coeff
       Parameter (PI=3.14159265358979323846, NF=5d0, CA=3d0, CF=4d0/3d0)
       Parameter (beta0=(11d0*CA-2d0*NF)/3d0) 
       Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
+
+      WRITE(*,*)"CCC: XMUR,XMUF",XMUR,XMUF
 
 c - set pointers to contribution in table and to scale variation
       ic = IContrPointer(in)
@@ -499,12 +528,15 @@ c - set pointers to contribution in table and to scale variation
 
 c - the absolute order in alpha_s of the LO contribution is in ILOord
 c - vary renormalization scale around the value used in orig. calculation
-c      logmu = log(xmur/xmuf)    ! aposteriori change w.r.t. orig. calculation
-      logmu = log(xmur/ScaleFac(ic,1,is)) ! aposteriori change wrt. orig. calc.
+      logmu = log(xmur/xmuf)    ! aposteriori change w.r.t. orig. calculation
+c      logmu = log(xmur/ScaleFac(ic,1,is)) ! aposteriori change wrt. orig. calc.
       scfac  = dble(ILOord)  *beta0 *logmu          ! NLO contrib.
       scfac2a= dble(ILOord+1)*beta0 *logmu          ! NNLO contrib.
       scfac2b= dble(ILOord*(ILOord+1))/2d0*beta0*beta0*logmu*logmu  
      +     + dble(ILOord)*beta1/2d0*logmu           ! NNLO contrib. continued
+
+      WRITE(*,*)"CCCC: IC,IS,SCALEFAC,LOGMU: ",IC,IS,
+     >     SCFAC,LOGMU
 
 c - MW:  maybe simpler if we make the mur-variation later
 c        for the whole contribution - instead of doing it for
@@ -539,13 +571,22 @@ c loop: observable, scalebins,(get alphas), xbins,subproc
                mu = ScaleNode(ic,j,1,is,k) ! ???????
             Endif
 c     - get alphas
-c            write(*,*) 'xmur ',xmur,mu
             as(1) =  FNALPHAS(xmur * mu) ! ??????????????
             aspow(1) = as(1)**Npow(ic)
+cdebug
+            WRITE(*,*)"FX9999MT: ScaleDep, xmu, mu, as1, asp = ",
+     >           IScaleDep(ic),xmur,mu,as(1),aspow(1)
+cdebug
             Do l=1,nxmax
                Do m=1,NSubProc(ic)
+                  coeff = SigmaTilde(ic,j,1,is,k,l,m)
+ckr Is ic the counter of contributions or the pointer?
+                  if (ic.eq.2) then
+                     coeff = coeff + scfac *
+     >                    SigmaTilde(ic-1,j,1,is,k,l,m)
+                  endif
                   result(j,m,ic) = result(j,m,ic) + 
-     +                 SigmaTilde(ic,j,1,is,k,l,m)
+     +                 coeff
      +                 * aspow(1)
      +                 * pdf(j,k,l,m)
                Enddo
@@ -553,12 +594,22 @@ c            write(*,*) 'xmur ',xmur,mu
          Enddo
       Enddo
 
+cdebug
+      Do j=1,NObsBin
+         Do m=1,NSubProc(ic)
+            WRITE(*,*)"FX9999MT: IOBS,IPROC,IORD,"//
+     >           "RESULT: ",
+     >           J,M,IC,RESULT(J,M,IC)
+         Enddo
+      Enddo
+cdebug
+
       Return 
       End
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999GP(in)
+      SUBROUTINE FX9999GP(in,xmuf)
 *-----------------------------------------------------------------
 * MW 08/26/2005
 *
@@ -577,11 +628,18 @@ c            write(*,*) 'xmur ',xmur,mu
 c - set pointers to contribution in table and to scale variation
       ic = IContrPointer(in)
       is = IScalePointer(in)
+      WRITE(*,*)"FX9999GP: in,ic,is: ",in,ic,is
 
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
-            muf = ScaleNode(ic,i,1,is,j)
-c            write(*,*) 'muf ',muf
+ckr MW version            muf = ScaleNode(ic,i,1,is,j)
+c            if (ic.eq.1) then
+               muf = xmuf*ScaleNode(ic,i,1,is,j)
+c            else
+c               muf = ScaleNode(ic,i,1,is,j)
+c            endif
+            write(*,*)"FX9999GP: xmuf, scalenode, muf: ",
+     >           xmuf,ScaleNode(ic,i,1,is,j),muf
             nx =0
             Do k=1,NxTot(ic,1,i)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
@@ -597,13 +655,16 @@ ckr                        write(*,*)"k,m,xpdf2",k,m,tmppdf(m)
                      Elseif (NPDFPDG(ic,1).eq.-NPDFPDG(ic,2)) Then ! h anti-h
                         xpdf2(k,-m) = tmppdf(m)
                      Else
-                        Write(*,*) ' So far only the scattering of identical'
+                        Write(*,*)
+     >                       ' So far only the scattering of identical'
                         Write(*,*) ' hadrons or hadron&anti-hadron is'
-                        Write(*,*) ' implemented -> gamma-p to be done...'
+                        Write(*,*)
+     >                       ' implemented -> gamma-p to be done...'
                         Stop
                      Endif
                   Else
-                     write(*,*) ' neither one nor two hadrons...?',NPDF(ic)
+                     write(*,*) ' neither one nor two hadrons...?'
+     >                    ,NPDF(ic)
                      Stop
                   Endif
                Enddo            ! m
