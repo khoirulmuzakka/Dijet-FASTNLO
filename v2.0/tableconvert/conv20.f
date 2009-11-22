@@ -104,7 +104,7 @@ c      call CV20WRT('contrib3.txt',3) ! thresh-cor only
       integer Iflg
       CHARACTER*(*) filename
       CHARACTER*(33) label(0:2)
-      integer i,j,k,l,m,n,n1,n2,o,p, nbin, i1,i2
+      integer i,j,k,l,m,n,n1,n2,o,p, nbin, i1,i2, iscdef
       INCLUDE 'conv20.inc'
 
       Integer nctrmin,nctrmax, mmax
@@ -366,21 +366,34 @@ c         WRITE(2,5000) Nxtot       ! Nxtot(1) - obsolete see below
             WRITE(2,*) 1        ! NScaleDescript(i) <- one descriptive string
             WRITE(2,5009) SCALELABEL           
          enddo
-
+         
          If (IScaleDep.eq.0) then
             nscvar = 1
+            iscdef = 3          ! in v1.4 tables default scale usually no. 3 
          else
             nscvar = NscaleVar
          endif
-
+         
          do i=1,NscaleDim
-            WRITE(2,*) nscvar ! NscaleVar
+            WRITE(2,*) nscvar   ! NscaleVar
             WRITE(2,*) NscaleBin ! NscaleBin
          enddo
          do i=1,Nscaledim
-            do j=1,nscvar
-               WRITE(2,*) MURSCALE(j) ! Scalefac(i)(j)               
-            enddo
+            if (nscvar.eq.1) then
+               WRITE(2,*) MURSCALE(iscdef) ! Scalefac(i)(j)               
+cdebug
+cdebug               WRITE(*,*)"CONV20: IScaleDim,IScaleVar,ScaleFac: ",
+cdebug     >              i,iscdef,MURSCALE(iscdef)
+cdebug
+            else
+               do j=1,nscvar
+                  WRITE(2,*) MURSCALE(j) ! Scalefac(i)(j)               
+cdebug
+cdebug                  WRITE(*,*)"CONV20: IScaleDim,IScaleVar,ScaleFac: ",
+cdebug     >                 i,j,MURSCALE(j)
+cdebug
+               enddo
+            endif
          enddo
 
          i = 0
