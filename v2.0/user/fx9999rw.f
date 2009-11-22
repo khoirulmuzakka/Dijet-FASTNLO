@@ -202,6 +202,10 @@ c --- coefficient block
          Do i=1,NScaleDim(ic)
             Do j=1,NScaleVar(ic,i)
                Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
+cdebug
+               Write(*,*)"FX9999RW: IC,IScaleDim,IScaleVar,ScaleFac",
+     >              ic,i,j,ScaleFac(ic,i,j)
+cdebug
             Enddo
          Enddo
 
