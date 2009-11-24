@@ -1038,6 +1038,7 @@ if ( $vers == 1 ) {
 	$ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
 	$ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
 	$ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+	$ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
     }
     if ( $ENV{PATH} ) {
 	if ( $mode == 0 || $mode == 1 ) {
