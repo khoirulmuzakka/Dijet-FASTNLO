@@ -784,7 +784,7 @@ void UserHHC::writetable(){
    WRITE(marker);// ------------------END of block
 
    // a brief description how the scale is defined
-   table << "pT_of_individual_jet" << endl;
+   table << "pT_jet_(GeV)" << endl;
 
    int nscalebin = 1;
    WRITE(nscalebin); // No. of Bins in mur,muf - new in v1c
