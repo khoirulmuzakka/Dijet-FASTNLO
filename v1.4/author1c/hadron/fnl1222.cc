@@ -1,7 +1,7 @@
 //
-// fastNLO author code for fnl1218:
+// fastNLO author code for fnl1222:
 //     CMS LHC test scenario, E_cms = 10 TeV
-//     for fastjet SISCone algo with R=0.5 in E-scheme
+//     for fastjet anti-kT algo with R=0.5 in E-scheme
 //     (phase space adapted to forward jet analysis, using pseudo-rapidity)
 // 
 // last modification
@@ -42,7 +42,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fj-sc-05.h"
+#include "fj-ak-05.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -96,7 +96,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fj_sc_05 jetclus;   // jet algorithm
+   fj_ak_05 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -329,9 +329,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl1218:" << endl;
+   cout << "    Scenario fnl1222:" << endl;
    cout << "      CMS LHC test scenario, E_cms = 10 TeV," << endl;
-   cout << "      for fastjet SISCone algo with R=0.5 in E-scheme" << endl; 
+   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
    cout << "      (phase space adapted to forward jet analysis, using pseudo-rapidity)" << endl;
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
@@ -699,7 +699,7 @@ void UserHHC::writetable(){
    table << "d2sigma-jet_dpT_deta_(fb_GeV)" << endl;
    table << "CMS-LHC-Test-Scenario" << endl;
    table << "Forward_Jets" << endl;
-   table << "SISCone_R=0.5_E-Scheme" << endl;
+   table << "anti-kT_R=0.5_E-Scheme" << endl;
    table << "-" << endl;
 
   //iproc
@@ -707,15 +707,15 @@ void UserHHC::writetable(){
    WRITE(iproc);
 
    //ialgo
-   int ialgo = 4; // SISCone
+   int ialgo = 5; // anti-kT
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.5;  // Cone size R
+   double JetResol1 = 0.5; // distance parameter R
    WRITE(JetResol1);
 
    //JetResol2
-   double JetResol2 = 0.75; // Overlap threshold
+   double JetResol2 = 0.0; // no further parameter
    WRITE(JetResol2);
 
    // relative order

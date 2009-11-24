@@ -568,6 +568,19 @@ fnl0218: links fnl0218.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
+# =====   FNL0222: LHC CMS forward jets with fastjet anti-kT R=0.5 =====
+# ======================================================================
+# LHC scenario for CMS at 14 TeV
+#
+fnl0222: links fnl0222.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl0222.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl0222 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
 # =====   FNL0602: LHC ATLAS dchi dijets with fastjet kT R=1.0 ============
 # ======================================================================
 # LHC scenario for ATLAS, @ 14 TeV 
@@ -739,6 +752,19 @@ fnl1218: links fnl1218.cc $(CommonPath)/fj-sc-05.cc \
 	-o fnl1218 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include,-I,$(FASTJET)/plugins/SISCone \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
+
+# ======================================================================
+# =====   FNL1222: LHC CMS forward jets with fastjet anti-kT R=0.5 =====
+# ======================================================================
+# LHC scenario for CMS at 10 TeV
+#
+fnl1222: links fnl1222.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl1222.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl1222 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
 # =====   FNL1308: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
