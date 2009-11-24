@@ -272,8 +272,6 @@ my $gccapp = "gcc$gccvers";
 $gccapp =~ s/\.//g;
 print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
 
-$install{fastjet}[0]    = "fastjet-2.4.1";
-$install{fastjet}[1]    = "fastjet-2.4.1";
 $install{mcfm}[0]       = "mcfm-5.3";
 $install{mcfm}[1]       = "MCFM-5.3";
 $install{mcfmfix}[0]    = "mcfm-5.3-fix";
@@ -289,6 +287,8 @@ if ( $vers == 1 ) {
     $install{gccg77}[1]     = "gcc-$gccvers";
     $install{cernlib}[0]    = "cernlib-2003";
     $install{cernlib}[1]    = "cernlib-2003";
+    $install{fastjet}[0]    = "fastjet-2.3.2";
+    $install{fastjet}[1]    = "fastjet-2.3.2";
 # Versions >= 5.4.0 don't work with gcc 3.3.6
     $install{lhapdf}[0]     = "lhapdf-5.3.1";
     $install{lhapdf}[1]     = "lhapdf-5.3.1";
@@ -308,6 +308,8 @@ if ( $vers == 1 ) {
     }
     $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
+    $install{fastjet}[0]    = "fastjet-2.4.1";
+    $install{fastjet}[1]    = "fastjet-2.4.1";
     $install{lhapdf}[0]     = "lhapdf-5.7.0";
     $install{lhapdf}[1]     = "lhapdf-5.7.0";
     $install{lhapdffix}[0]  = "lhapdf-5.7.0-fix";
