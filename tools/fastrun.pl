@@ -1035,10 +1035,16 @@ if ( $mode == 0 || $mode == 1 ) {
     print FILE "# Add to system paths PATH and LD_LIBRARY_PATH\n";}
 if ( $vers == 1 ) {
     if ( $mode == 2 || $mode == 3 ) {
-	$ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
-	$ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
-	$ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
-	$ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
+# For old v1 installation
+	$ENV{FASTJET}  = "$aidir/fastjet";
+	$ENV{NLOJET}   = "$aidir/nlojet";
+	$ENV{LHAPDF}   = "$aidir/lhapdf/lib";
+	$ENV{FASTNLO}  = "$aidir/fastNLO";
+# For new v1 installation
+#	$ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
+#	$ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
+#	$ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+#	$ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
     }
     if ( $ENV{PATH} ) {
 	if ( $mode == 0 || $mode == 1 ) {
@@ -1307,6 +1313,9 @@ if ( $mode == 0 || $mode == 3 ) {
     } else {
 	$scendir = "$aidir";
     }
+
+    system("pwd");
+    system("ls -la");
 
     chdir "$scendir" or die
 	"fastrun.pl: ERROR! Could not cd to dir $scendir!\n";
