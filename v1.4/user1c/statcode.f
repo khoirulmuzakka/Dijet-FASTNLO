@@ -14,8 +14,8 @@ c      DOUBLE PRECISION XSECT(900,3)
       INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
       INTEGER ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST,IPTMAX
-      INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR)
-      INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR)
+      INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
+      INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       
       REAL PT(NPTMAX,NRAPIDITY),SERR(NPTMAX,NRAPIDITY),HI
       
@@ -70,8 +70,8 @@ c - Loop initialization
          DO ISCL=1,NSCALEVAR
             DO IRAP=1,NRAPIDITY
                DO IPT=1,NPT(IRAP)
-                  NJMIN(IPT,IRAP,ISCL)      = -1
-                  NJMAX(IPT,IRAP,ISCL)      = -1
+                  NJMIN(IPT,IRAP,ISCL,IORD) = -1
+                  NJMAX(IPT,IRAP,ISCL,IORD) = -1
                   WGT(IPT,IRAP,ISCL,IORD)   = 0D0
                   WGT2(IPT,IRAP,ISCL,IORD)  = 0D0
                   WGTX(IPT,IRAP,ISCL,IORD)  = 0D0
@@ -193,12 +193,20 @@ ckr     >                 val
      >                 WGTX2(IPT,IRAP,ISCL,IORD) +
      >                 VAL*VAL * WTAB(NCOUNT)
                   IF (VAL.LT.MINE(IPT,IRAP,ISCL,IORD)) THEN
+                     if (iscl.eq.3) then
+                        write(*,*)"MINIMUM: ipt,itab,mine,val",ipt,itab,
+     >                       MINE(IPT,IRAP,ISCL,IORD),val
+                     endif
                      MINE(IPT,IRAP,ISCL,IORD) = VAL
-                     NJMIN(IPT,IRAP,ISCL) = ITAB
+                     NJMIN(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                   IF (VAL.GT.MAXE(IPT,IRAP,ISCL,IORD)) THEN
+                     if (iscl.eq.3) then
+                        write(*,*)"MAXIMUM: ipt,itab,maxe,val",ipt,itab,
+     >                       MAXE(IPT,IRAP,ISCL,IORD),val
+                     endif
                      MAXE(IPT,IRAP,ISCL,IORD) = VAL
-                     NJMAX(IPT,IRAP,ISCL) = ITAB
+                     NJMAX(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                ENDDO
             ENDDO
@@ -214,6 +222,9 @@ c - Extract mean values and standard deviations
       DO ISCL=1,NSCALEVAR
          WRITE(*,*)"STATERR: Next scale: ",ISCL,
      >        " ; weight: ",WTAB(NCOUNT)
+         WRITE(*,*)"#IBIN      <xs>               ds/<s>"//
+     >        " min(s)/<s>max(s)/<s>"//
+     >        " i_min     #delta(s)   i_max     #delta(s)"
          J = 0
          DO IRAP=1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
@@ -265,7 +276,14 @@ ckr My formula:
      >              100D0*(MAXE(IPT,IRAP,ISCL,IORD) -
      >              MEAN(IPT,IRAP,ISCL,IORD)) / 
      >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              NJMIN(IPT,IRAP,ISCL),NJMAX(IPT,IRAP,ISCL)
+     >              NJMIN(IPT,IRAP,ISCL,IORD),
+     >              MINE(IPT,IRAP,ISCL,IORD),
+     >              CBIN(IPT,IRAP,ISCL,IORD,NJMIN(IPT,IRAP,ISCL,IORD)),
+c     >              MEAN(IPT,IRAP,ISCL,IORD))/MEANE(IPT,IRAP,ISCL,IORD),
+     >              NJMAX(IPT,IRAP,ISCL,IORD),
+     >              MAXE(IPT,IRAP,ISCL,IORD),
+     >              CBIN(IPT,IRAP,ISCL,IORD,NJMAX(IPT,IRAP,ISCL,IORD))
+c     >              MEAN(IPT,IRAP,ISCL,IORD))/MEANE(IPT,IRAP,ISCL,IORD)
             ENDDO
          ENDDO
       ENDDO 
@@ -340,7 +358,8 @@ ckr => Maximal IPT = IPTMAX < 45
       ENDDO
 
  900  FORMAT (I4,E16.5,"  in %:",3F10.3)
- 901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2I5)
+c 901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2(I5,F10.3))
+ 901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2(I5,E16.5,E16.5))
       
       WRITE(*,*)"\n **********************************************"
       WRITE(*,*)"STATERR: Job finished, "//
