@@ -119,11 +119,14 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //nj = 3U;
 
    //  total c.m. energy squared
-   //s = 40000.;     // RHIC               200 GeV   
-   //s = 3240000.;   // TeV Run I         1800 GeV
-   //s = 3841600.;   // TeV Run II        1960 GeV
-   s = 100000000.; // LHC Start-up Run   10000 GeV
-   //s = 196000000.; // LHC              14000 GeV
+   //s =     40000.; // RHIC               200 GeV
+   //s =   3240000.; // TeV Run I         1800 GeV
+   //s =   3841600.; // TeV Run II        1960 GeV
+   //s =    810000.; // LHC Injection Run  900 GeV
+   //s =   5569600.; // LHC Initial Run   2360 GeV
+   //s =  49000000.; // LHC First Run     7000 GeV
+   s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -193,10 +196,6 @@ void UserHHC::initfunc(unsigned int)
      pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   //	{  53.,   67.,   81.,   97.,  114.,  133.,  153.,  174.,  196.,
-   //	  220.,  245.,  272.,  300.,  330.,  362.,  395.,  430.,  468.,  507.,
-   //	  548.,  592.,  638.,  686.,  737.,  790.,  846.,  905.,  967., 1032.,
-   //    1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.},
    //----- rap bin 1, # = 37
    pthigh[0][0]  =   53.0;
    pthigh[0][1]  =   67.0;
@@ -506,7 +505,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
    cout << "    Scenario fnl1310:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
+   cout << "      CMS LHC test scenario, E_cms = 10 TeV," << endl;
    cout << "      for fastjet kT algo with D=0.6 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
@@ -870,10 +869,10 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d2sigma-jet_dpT_dy_(pb_GeV)" << endl;
-   table << "CMS LHC Test Scenario, E_cms = 10 TeV" << endl;
-   table << "Inclusive jets" << endl;
-   table << "kT with D=0.6, E scheme" << endl;
+   table << "d2sigma-jet_dpT_dy_(fb_GeV)" << endl;
+   table << "CMS-LHC-Test-Scenario" << endl;
+   table << "Inclusive_Jets" << endl;
+   table << "fast-kT_R=0.6" << endl;
    table << "pT binning according to resolution expected by CMS " << endl;
 
   //iproc
@@ -958,7 +957,7 @@ void UserHHC::writetable(){
    WRITE(marker);// ------------------END of block
 
    // a brief description how the scale is defined
-   table << "pT_of_individual_jet" << endl;
+   table << "pT_jet_(GeV)" << endl;
 
    int nscalebin = 1;
    WRITE(nscalebin); // No. of Bins in mur,muf - new in v1c

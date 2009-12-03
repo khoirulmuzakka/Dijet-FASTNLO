@@ -1,6 +1,6 @@
 //
-// fastNLO author code for fnl1408:
-//     CMS LHC dijet mass test scenario, E_cms = 10 TeV
+// fastNLO author code for fnl3408:
+//     CMS LHC dijet mass test scenario, E_cms = 2.36 TeV
 //     for fastjet SISCone algo with R=0.7 in E-scheme
 //
 // copied from: Run II  CDF dijet mass  (prel.)
@@ -133,9 +133,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s =   3240000.; // TeV Run I         1800 GeV
    //s =   3841600.; // TeV Run II        1960 GeV
    //s =    810000.; // LHC Injection Run  900 GeV
-   //s =   5569600.; // LHC Initial Run   2360 GeV
+   s =   5569600.; // LHC Initial Run   2360 GeV
    //s =  49000000.; // LHC First Run     7000 GeV
-   s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
@@ -421,8 +421,8 @@ void UserHHC::initfunc(unsigned int)
    cout << "  " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
-   cout << "    Scenario fnl1408:" << endl;
-   cout  <<  "      CMS LHC test scenario, E_cms = 10 TeV,"  <<  endl;
+   cout << "    Scenario fnl3408:" << endl;
+   cout  <<  "      CMS LHC test scenario, E_cms = 2.36 TeV,"  <<  endl;
    cout  <<  "      for fastjet SISCone algo with R=0.7 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;

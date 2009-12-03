@@ -1,6 +1,6 @@
 //
-// fastNLO author code for fnl2310:
-//     CMS LHC test scenario, E_cms = 7 TeV
+// fastNLO author code for fnl0310:
+//     CMS LHC test scenario, E_cms = 14 TeV
 //     for fastjet kT algo with D=0.6 in E-scheme
 // 
 // last modification
@@ -124,9 +124,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s =   3841600.; // TeV Run II        1960 GeV
    //s =    810000.; // LHC Injection Run  900 GeV
    //s =   5569600.; // LHC Initial Run   2360 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
+   //s =  49000000.; // LHC First Run     7000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
-   //s = 196000000.; // LHC Design Run   14000 GeV
+   s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -174,13 +174,13 @@ void UserHHC::initfunc(unsigned int)
       raphigh[i+nrap/2+1] = raphigh[i+1];
    }
 
-   //Define binning in pt: 164 bins
-   npt[0]=37;
-   npt[1]=36;
-   npt[2]=33;
-   npt[3]=27;
-   npt[4]=19;
-   npt[5]=12;
+   //Define binning in pt: 232 bins
+   npt[0]=52;
+   npt[1]=51;
+   npt[2]=47;
+   npt[3]=38;
+   npt[4]=27;
+   npt[5]=17;
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -196,7 +196,7 @@ void UserHHC::initfunc(unsigned int)
      pthigh[i].resize(npt[i]+1);
    }
    //----- array for pt boundaries
-   //----- rap bin 1, # = 37
+   //----- rap bin 1, # = 52
    pthigh[0][0]  =   53.0;
    pthigh[0][1]  =   67.0;
    pthigh[0][2]  =   81.0;
@@ -235,8 +235,23 @@ void UserHHC::initfunc(unsigned int)
    pthigh[0][35] = 1588.0;
    pthigh[0][36] = 1684.0;
    pthigh[0][37] = 1784.0;
+   pthigh[0][38] = 1890.0; 
+   pthigh[0][39] = 2000.0;
+   pthigh[0][40] = 2116.0;
+   pthigh[0][41] = 2238.0;
+   pthigh[0][42] = 2366.0;
+   pthigh[0][43] = 2500.0;
+   pthigh[0][44] = 2640.0;
+   pthigh[0][45] = 2787.0;
+   pthigh[0][46] = 2941.0;
+   pthigh[0][47] = 3103.0;
+   pthigh[0][48] = 3273.0;
+   pthigh[0][49] = 3450.0;
+   pthigh[0][50] = 3637.0;
+   pthigh[0][51] = 3832.0;
+   pthigh[0][52] = 4037.0;
 
-   //----- rap bin 2, # = 36
+   //----- rap bin 2, # = 51
    pthigh[1][0]  =   53.0;
    pthigh[1][1]  =   67.0;
    pthigh[1][2]  =   81.0;
@@ -274,8 +289,23 @@ void UserHHC::initfunc(unsigned int)
    pthigh[1][34] = 1497.0;
    pthigh[1][35] = 1588.0;
    pthigh[1][36] = 1684.0;
+   pthigh[1][37] = 1784.0;
+   pthigh[1][38] = 1890.0; 
+   pthigh[1][39] = 2000.0;
+   pthigh[1][40] = 2116.0;
+   pthigh[1][41] = 2238.0;
+   pthigh[1][42] = 2366.0;
+   pthigh[1][43] = 2500.0;
+   pthigh[1][44] = 2640.0;
+   pthigh[1][45] = 2787.0;
+   pthigh[1][46] = 2941.0;
+   pthigh[1][47] = 3103.0;
+   pthigh[1][48] = 3273.0;
+   pthigh[1][49] = 3450.0;
+   pthigh[1][50] = 3637.0;
+   pthigh[1][51] = 3832.0;
 
-   //----- rap bin 3, # = 33
+   //----- rap bin 3, # = 47
    pthigh[2][0]  =   53.0;
    pthigh[2][1]  =   67.0;
    pthigh[2][2]  =   81.0;
@@ -310,8 +340,22 @@ void UserHHC::initfunc(unsigned int)
    pthigh[2][31] = 1248.0;
    pthigh[2][32] = 1327.0;
    pthigh[2][33] = 1410.0;
+   pthigh[2][34] = 1497.0;
+   pthigh[2][35] = 1588.0;
+   pthigh[2][36] = 1684.0;
+   pthigh[2][37] = 1784.0;
+   pthigh[2][38] = 1890.0; 
+   pthigh[2][39] = 2000.0;
+   pthigh[2][40] = 2116.0;
+   pthigh[2][41] = 2238.0;
+   pthigh[2][42] = 2366.0;
+   pthigh[2][43] = 2500.0;
+   pthigh[2][44] = 2640.0;
+   pthigh[2][45] = 2787.0;
+   pthigh[2][46] = 2941.0;
+   pthigh[2][47] = 3103.0;
 
-   //----- rap bin 4, # = 27
+   //----- rap bin 4, # = 38
    pthigh[3][0]  =   53.0;
    pthigh[3][1]  =   67.0;
    pthigh[3][2]  =   81.0;
@@ -340,8 +384,19 @@ void UserHHC::initfunc(unsigned int)
    pthigh[3][25] =  846.0;
    pthigh[3][26] =  905.0;
    pthigh[3][27] =  967.0;
+   pthigh[3][28] = 1032.0;
+   pthigh[3][29] = 1101.0;
+   pthigh[3][30] = 1172.0;
+   pthigh[3][31] = 1248.0;
+   pthigh[3][32] = 1327.0;
+   pthigh[3][33] = 1410.0;
+   pthigh[3][34] = 1497.0;
+   pthigh[3][35] = 1588.0;
+   pthigh[3][36] = 1684.0;
+   pthigh[3][37] = 1784.0;
+   pthigh[3][38] = 1890.0; 
 
-   //----- rap bin 5, # = 19
+   //----- rap bin 5, # = 27
    pthigh[4][0]  =   53.0;
    pthigh[4][1]  =   67.0;
    pthigh[4][2]  =   81.0;
@@ -362,8 +417,16 @@ void UserHHC::initfunc(unsigned int)
    pthigh[4][17] =  468.0;
    pthigh[4][18] =  507.0;
    pthigh[4][19] =  548.0;
+   pthigh[4][20] =  592.0;
+   pthigh[4][21] =  638.0;
+   pthigh[4][22] =  686.0;
+   pthigh[4][23] =  737.0;
+   pthigh[4][24] =  790.0;
+   pthigh[4][25] =  846.0;
+   pthigh[4][26] =  905.0;
+   pthigh[4][27] =  967.0;
 
-   //----- rap bin 6, # = 12
+   //----- rap bin 6, # = 17
    pthigh[5][0]  =   53.0;
    pthigh[5][1]  =   67.0;
    pthigh[5][2]  =   81.0;
@@ -377,6 +440,11 @@ void UserHHC::initfunc(unsigned int)
    pthigh[5][10] =  245.0;
    pthigh[5][11] =  272.0;
    pthigh[5][12] =  300.0;
+   pthigh[5][13] =  330.0;
+   pthigh[5][14] =  362.0;
+   pthigh[5][15] =  395.0;
+   pthigh[5][16] =  430.0;
+   pthigh[5][17] =  468.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
    for(int i=0;i<nrap/2;i++){
@@ -504,8 +572,8 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl2310:" << endl;
-   cout << "      CMS LHC test scenario, E_cms = 7 TeV," << endl;
+   cout << "    Scenario fnl0310:" << endl;
+   cout << "      CMS LHC test scenario, E_cms = 14 TeV," << endl;
    cout << "      for fastjet kT algo with D=0.6 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;

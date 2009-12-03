@@ -1,6 +1,6 @@
 //
-// fastNLO author code for fnl1408:
-//     CMS LHC dijet mass test scenario, E_cms = 10 TeV
+// fastNLO author code for fnl0408:
+//     CMS LHC dijet mass test scenario, E_cms = 14 TeV
 //     for fastjet SISCone algo with R=0.7 in E-scheme
 //
 // copied from: Run II  CDF dijet mass  (prel.)
@@ -135,8 +135,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    //s =    810000.; // LHC Injection Run  900 GeV
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =  49000000.; // LHC First Run     7000 GeV
-   s = 100000000.; // LHC Start-up Run 10000 GeV
-   //s = 196000000.; // LHC Design Run   14000 GeV
+   //s = 100000000.; // LHC Start-up Run 10000 GeV
+   s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
@@ -182,7 +182,7 @@ void UserHHC::initfunc(unsigned int)
 
    //Define binning in pt -> here:  DijetMass
    for(int i=0;i<nrap;i++){
-     npt[i]=50;
+     npt[i]=68;
    }
 
    if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
@@ -250,6 +250,24 @@ void UserHHC::initfunc(unsigned int)
    pthigh[0][48]=3279.0;
    pthigh[0][49]=3416.0;
    pthigh[0][50]=3558.0;
+   pthigh[0][51]=3704.0;
+   pthigh[0][52]=3854.0;
+   pthigh[0][53]=4010.0;
+   pthigh[0][54]=4171.0;
+   pthigh[0][55]=4337.0;
+   pthigh[0][56]=4509.0;
+   pthigh[0][57]=4686.0;
+   pthigh[0][58]=4869.0;
+   pthigh[0][59]=5058.0;
+   pthigh[0][60]=5253.0;
+   pthigh[0][61]=5455.0;
+   pthigh[0][62]=5663.0;
+   pthigh[0][63]=5877.0;
+   pthigh[0][64]=6099.0;
+   pthigh[0][65]=6328.0;
+   pthigh[0][66]=6564.0;
+   pthigh[0][67]=6808.0;
+   pthigh[0][68]=7060.0;
 
    if (iref==1)      // -> in reference mode: copy pT-bin definitions
      for(int i=0;i<nrap/2;i++){
@@ -421,8 +439,8 @@ void UserHHC::initfunc(unsigned int)
    cout << "  " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
-   cout << "    Scenario fnl1408:" << endl;
-   cout  <<  "      CMS LHC test scenario, E_cms = 10 TeV,"  <<  endl;
+   cout << "    Scenario fnl0408:" << endl;
+   cout  <<  "      CMS LHC test scenario, E_cms = 14 TeV,"  <<  endl;
    cout  <<  "      for fastjet SISCone algo with R=0.7 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;

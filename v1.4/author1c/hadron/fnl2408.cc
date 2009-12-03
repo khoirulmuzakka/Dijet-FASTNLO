@@ -20,7 +20,7 @@
 using namespace nlo;
 using namespace std;
 
-5~
+
 //----- declaration of the user defined functons -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&, double&);
 user_hhc * userfunc();
@@ -128,14 +128,15 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
    nj = 2U;
    //nj = 3U;
 
-  //  total c.m. energy squared
-  //s =     40000.; // RHIC               200 GeV
-  //s =   3240000.; // TeV Run I         1800 GeV
-  //s =   3841600.; // TeV Run II        1960 GeV
-  //s =    810000.; // LHC Injection Run  900 GeV
+   //  total c.m. energy squared
+   //s =     40000.; // RHIC               200 GeV
+   //s =   3240000.; // TeV Run I         1800 GeV
+   //s =   3841600.; // TeV Run II        1960 GeV
+   //s =    810000.; // LHC Injection Run  900 GeV
+   //s =   5569600.; // LHC Initial Run   2360 GeV
    s =  49000000.; // LHC First Run     7000 GeV
-  //s = 100000000.; // LHC Start-up Run 10000 GeV
-  //s = 196000000.; // LHC Design Run   14000 GeV
+   //s = 100000000.; // LHC Start-up Run 10000 GeV
+   //s = 196000000.; // LHC Design Run   14000 GeV
 
    //  number of the up and down type flavours
    nu = 2U;
