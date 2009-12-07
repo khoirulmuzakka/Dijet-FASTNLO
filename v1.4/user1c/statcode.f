@@ -1,9 +1,6 @@
       SUBROUTINE STATCODE(TABPATH,SCENARIO,BORNN,NLON)
       
       IMPLICIT NONE
-c - Attention!!! - this must be declared consistent with its 
-c                  definition in the commonblock!!!!!
-c      DOUBLE PRECISION XSECT(900,3) 
       INCLUDE "fnx9999.inc"
       
       CHARACTER*(*) TABPATH,SCENARIO
@@ -165,8 +162,29 @@ c - Take LO/NLO file with 1D9/1D8 events as weight 1
                   J = J+1
                   IF (IORD.EQ.0) THEN
                      VAL = XSECT(J,1)+XSECT(J,2)
+c - Write out error when the total cross section is negative for
+c - the primary scale (taken to be 3 here)!
+                     IF (VAL.LT.0.D0.AND.ISCL.EQ.3) THEN
+                        WRITE(*,*)"STATERR: ERROR! "//
+     >                       "Total cross section negative for file:",
+     >                       NCOUNT,FILENAME
+                        WRITE(*,*)"STATERR: IORD, ISCL, IRAP, IPT, VAL",
+     >                       IORD,ISCL,IRAP,IPT,VAL
+                        WRITE(*,*)"It is strongly suggested to "//
+     >                       "exclude this file from the evaluation!"
+                     ENDIF
                   ELSEIF (IORD.EQ.1) THEN
                      VAL = XSECT(J,1)
+c - Write warning when the LO cross section is negative!
+                     IF (VAL.LT.0.D0.AND.ISCL.EQ.3) THEN
+                        WRITE(*,*)"STATERR: ERROR! "//
+     >                       "LO cross section negative for file:",
+     >                       NCOUNT,FILENAME
+                        WRITE(*,*)"STATERR: IORD, ISCL, IRAP, IPT, VAL",
+     >                       IORD,ISCL,IRAP,IPT,VAL
+                        WRITE(*,*)"It is strongly suggested to "//
+     >                       "exclude this file from the evaluation!"
+                     ENDIF
                   ELSEIF (IORD.EQ.2) THEN
                      VAL = XSECT(J,2)
                   ELSE
@@ -175,10 +193,6 @@ c - Take LO/NLO file with 1D9/1D8 events as weight 1
      >                    IORD
                      STOP
                   ENDIF
-ckr                  write(*,*)"FIRST: iord,iscl,irap,ipt"
-ckr     >                 ,iord,iscl,irap,ipt
-ckr                  write(*,*)"FIRST: ncount,cbin",ncount,
-ckr     >                 val
                   CBIN(IPT,IRAP,ISCL,IORD,NCOUNT) = VAL
                   WGT(IPT,IRAP,ISCL,IORD) =
      >                 WGT(IPT,IRAP,ISCL,IORD) +
@@ -193,6 +207,7 @@ ckr     >                 val
      >                 WGTX2(IPT,IRAP,ISCL,IORD) +
      >                 VAL*VAL * WTAB(NCOUNT)
                   IF (VAL.LT.MINE(IPT,IRAP,ISCL,IORD)) THEN
+ckr debug
                      if (iscl.eq.3) then
                         write(*,*)"MINIMUM: ipt,itab,mine,val",ipt,itab,
      >                       MINE(IPT,IRAP,ISCL,IORD),val
@@ -201,6 +216,7 @@ ckr     >                 val
                      NJMIN(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                   IF (VAL.GT.MAXE(IPT,IRAP,ISCL,IORD)) THEN
+ckr debug
                      if (iscl.eq.3) then
                         write(*,*)"MAXIMUM: ipt,itab,maxe,val",ipt,itab,
      >                       MAXE(IPT,IRAP,ISCL,IORD),val
@@ -222,9 +238,18 @@ c - Extract mean values and standard deviations
       DO ISCL=1,NSCALEVAR
          WRITE(*,*)"STATERR: Next scale: ",ISCL,
      >        " ; weight: ",WTAB(NCOUNT)
-         WRITE(*,*)"#IBIN      <xs>               ds/<s>"//
-     >        " min(s)/<s>max(s)/<s>"//
-     >        " i_min     #delta(s)   i_max     #delta(s)"
+         WRITE(*,*)"========================================"//
+     >        "===================================="//
+     >        "=========================="//
+     >        "==========================="
+         WRITE(*,*)"#IBIN #IMIN #IMAX         <s>           "//
+     >        "s_min           s_max       ds/<s>/%"//
+     >        " ds_min/<s>/% ds_max/<s>/%"//
+     >        "     ds_min/ds    ds_max/ds"
+         WRITE(*,*)"----------------------------------------"//
+     >        "------------------------------------"//
+     >        "--------------------------"//
+     >        "---------------------------"
          J = 0
          DO IRAP=1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
@@ -267,23 +292,44 @@ ckr My formula:
                MEANE(IPT,IRAP,ISCL,IORD) =
      >              SIGMA(IPT,IRAP,ISCL,IORD)/
      >              SQRT(NEFF(IPT,IRAP,ISCL,IORD)-1D0)
-               WRITE(*,901) J,MEAN(IPT,IRAP,ISCL,IORD),
+c - Write warning when the minimal or maximal cross sections have not
+c - the same sign as the average!
+Comment:                IF (MINE(IPT,IRAP,ISCL,IORD) *
+Comment:      >              MEAN(IPT,IRAP,ISCL,IORD).LT.0D0) THEN
+Comment:                   WRITE(*,*)"STATERR: WARNING! "//
+Comment:      >                 "Minimal cross section has sign different from"//
+Comment:      >                 " average:",
+Comment:      >                 MINE(IPT,IRAP,ISCL,IORD),MEAN(IPT,IRAP,ISCL,IORD)
+Comment:                   WRITE(*,*)"STATERR: IORD, ISCL, IRAP, IPT",
+Comment:      >                 IORD,ISCL,IRAP,IPT
+Comment:                ENDIF
+Comment:                IF (MAXE(IPT,IRAP,ISCL,IORD) *
+Comment:      >              MEAN(IPT,IRAP,ISCL,IORD).LT.0D0) THEN
+Comment:                   WRITE(*,*)"STATERR: WARNING! "//
+Comment:      >                 "Maximal cross section has sign different from"//
+Comment:      >                 " average:",
+Comment:      >                 MAXE(IPT,IRAP,ISCL,IORD),MEAN(IPT,IRAP,ISCL,IORD)
+Comment:                   WRITE(*,*)"STATERR: IORD, ISCL, IRAP, IPT",
+Comment:      >                 IORD,ISCL,IRAP,IPT
+Comment:                ENDIF
+               WRITE(*,900) J,
+     >              NJMIN(IPT,IRAP,ISCL,IORD),
+     >              NJMAX(IPT,IRAP,ISCL,IORD),
+     >              MEAN(IPT,IRAP,ISCL,IORD),
+     >              MINE(IPT,IRAP,ISCL,IORD),
+     >              MAXE(IPT,IRAP,ISCL,IORD),
      >              100D0*MEANE(IPT,IRAP,ISCL,IORD) /
      >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              -100D0*(MEAN(IPT,IRAP,ISCL,IORD) -
-     >              MINE(IPT,IRAP,ISCL,IORD)) /
+     >              100D0*(MINE(IPT,IRAP,ISCL,IORD) -
+     >              MEAN(IPT,IRAP,ISCL,IORD)) /
      >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
      >              100D0*(MAXE(IPT,IRAP,ISCL,IORD) -
      >              MEAN(IPT,IRAP,ISCL,IORD)) / 
      >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              NJMIN(IPT,IRAP,ISCL,IORD),
-     >              MINE(IPT,IRAP,ISCL,IORD),
-     >              CBIN(IPT,IRAP,ISCL,IORD,NJMIN(IPT,IRAP,ISCL,IORD)),
-c     >              MEAN(IPT,IRAP,ISCL,IORD))/MEANE(IPT,IRAP,ISCL,IORD),
-     >              NJMAX(IPT,IRAP,ISCL,IORD),
-     >              MAXE(IPT,IRAP,ISCL,IORD),
-     >              CBIN(IPT,IRAP,ISCL,IORD,NJMAX(IPT,IRAP,ISCL,IORD))
-c     >              MEAN(IPT,IRAP,ISCL,IORD))/MEANE(IPT,IRAP,ISCL,IORD)
+     >              (MINE(IPT,IRAP,ISCL,IORD)-
+     >              MEAN(IPT,IRAP,ISCL,IORD))/SIGMA(IPT,IRAP,ISCL,IORD),
+     >              (MAXE(IPT,IRAP,ISCL,IORD)-
+     >              MEAN(IPT,IRAP,ISCL,IORD))/SIGMA(IPT,IRAP,ISCL,IORD)
             ENDDO
          ENDDO
       ENDDO 
@@ -357,9 +403,7 @@ ckr => Maximal IPT = IPTMAX < 45
       
       ENDDO
 
- 900  FORMAT (I4,E16.5,"  in %:",3F10.3)
-c 901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2(I5,F10.3))
- 901  FORMAT (I4,E16.5,"  in %:",3F10.3,2X,2(I5,E16.5,E16.5))
+ 900  FORMAT (3I6,3E16.5,5(F10.3,3X))
       
       WRITE(*,*)"\n **********************************************"
       WRITE(*,*)"STATERR: Job finished, "//
