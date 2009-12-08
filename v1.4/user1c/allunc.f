@@ -487,10 +487,15 @@ ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
                      ENDIF
                   ENDDO
                ENDDO
-               RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
-     >              RES0(L1,NSUBPROC+1,NORD)
-               RESHI = RES1HI(L1,NSUBPROC+1,NORD)/
-     >              RES0(L1,NSUBPROC+1,NORD)
+               IF (DABS(RES0(L1,NSUBPROC+1,NORD)).GT.1D-99) THEN
+                  RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
+     >                 RES0(L1,NSUBPROC+1,NORD)
+                  RESHI = RES1HI(L1,NSUBPROC+1,NORD)/
+     >                 RES0(L1,NSUBPROC+1,NORD)
+               ELSE
+                  RESLO = -1.D0
+                  RESHI = -1.D0
+               ENDIF
 ckr 30.01.2008: Change output format for better comp. with C++ version
             ELSE
                RESLO = 0D0

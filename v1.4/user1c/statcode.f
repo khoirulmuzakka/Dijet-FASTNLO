@@ -9,7 +9,7 @@
       CHARACTER*4 NO
       
       INTEGER BORNN,NLON,NTAB,ICOUNT,NCOUNT
-      INTEGER ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
+      INTEGER I,ITAB,J,IBIN,NBINS,NMAX,ICYCLE,ISTAT,LENOCC
       INTEGER IORD,ISCL,ISUB,IRAP,IPT,IHIST,IPTMAX
       INTEGER NJMIN(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
       INTEGER NJMAX(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
@@ -33,7 +33,7 @@ ckr
 ckr      DOUBLE PRECISION SIGMMW(NPTMAX,NRAPIDITY,NSCALEVAR,0:NORD)
 
       DOUBLE PRECISION MUR(NSCALEVAR),MUF(NSCALEVAR)
-      DOUBLE PRECISION BWGT,NEVTS,VAL
+      DOUBLE PRECISION BWGT,NEVTS,VAL,DSTMP(5)
 
 
  
@@ -312,24 +312,35 @@ Comment:      >                 MAXE(IPT,IRAP,ISCL,IORD),MEAN(IPT,IRAP,ISCL,IORD
 Comment:                   WRITE(*,*)"STATERR: IORD, ISCL, IRAP, IPT",
 Comment:      >                 IORD,ISCL,IRAP,IPT
 Comment:                ENDIF
+               DO I=1,5
+                  DSTMP(I) = 0D0
+               ENDDO
+               IF (DABS(MEAN(IPT,IRAP,ISCL,IORD)).GT.1D-99) THEN
+                  DSTMP(1) = 100D0*MEANE(IPT,IRAP,ISCL,IORD) /
+     >                 DABS(MEAN(IPT,IRAP,ISCL,IORD))
+                  DSTMP(2) = 100D0*(MINE(IPT,IRAP,ISCL,IORD) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) /
+     >                 DABS(MEAN(IPT,IRAP,ISCL,IORD))
+                  DSTMP(3) = 100D0*(MAXE(IPT,IRAP,ISCL,IORD) -
+     >                 MEAN(IPT,IRAP,ISCL,IORD)) / 
+     >                 DABS(MEAN(IPT,IRAP,ISCL,IORD))
+               ENDIF
+               IF (DABS(SIGMA(IPT,IRAP,ISCL,IORD)).GT.1D-99) THEN
+                  DSTMP(4) = (MINE(IPT,IRAP,ISCL,IORD)-
+     >                 MEAN(IPT,IRAP,ISCL,IORD))/
+     >                 SIGMA(IPT,IRAP,ISCL,IORD)
+                  DSTMP(5) = (MAXE(IPT,IRAP,ISCL,IORD)-
+     >                 MEAN(IPT,IRAP,ISCL,IORD))/
+     >                 SIGMA(IPT,IRAP,ISCL,IORD)
+               ENDIF
                WRITE(*,900) J,
      >              NJMIN(IPT,IRAP,ISCL,IORD),
      >              NJMAX(IPT,IRAP,ISCL,IORD),
      >              MEAN(IPT,IRAP,ISCL,IORD),
      >              MINE(IPT,IRAP,ISCL,IORD),
      >              MAXE(IPT,IRAP,ISCL,IORD),
-     >              100D0*MEANE(IPT,IRAP,ISCL,IORD) /
-     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              100D0*(MINE(IPT,IRAP,ISCL,IORD) -
-     >              MEAN(IPT,IRAP,ISCL,IORD)) /
-     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              100D0*(MAXE(IPT,IRAP,ISCL,IORD) -
-     >              MEAN(IPT,IRAP,ISCL,IORD)) / 
-     >              DABS(MEAN(IPT,IRAP,ISCL,IORD)),
-     >              (MINE(IPT,IRAP,ISCL,IORD)-
-     >              MEAN(IPT,IRAP,ISCL,IORD))/SIGMA(IPT,IRAP,ISCL,IORD),
-     >              (MAXE(IPT,IRAP,ISCL,IORD)-
-     >              MEAN(IPT,IRAP,ISCL,IORD))/SIGMA(IPT,IRAP,ISCL,IORD)
+     >              DSTMP(1),DSTMP(2),DSTMP(3),
+     >              DSTMP(4),DSTMP(5)
             ENDDO
          ENDDO
       ENDDO 
