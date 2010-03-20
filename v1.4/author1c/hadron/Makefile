@@ -1018,6 +1018,32 @@ fnl2408: links fnl2408.cc $(CommonPath)/fj-sc-07.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
+# =====   FNL2412: LHC CMS dijet mass with fastjet anti-kT R=0.7 =======
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2412: links fnl2412.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2412.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2412 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+# ======================================================================
+# =====   FNL2442: LHC CMS dijet mass ratio with fastjet anti-kT R=0.7 =
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2442: links fnl2442.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2442.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2442 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+# ======================================================================
 # =====   FNL2518: LHC CMS Az. decorrelation with fastjet SISCone R=0.5 
 # ======================================================================
 # LHC scenario for CMS, @ 7 TeV
