@@ -17,7 +17,7 @@
       INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
-      LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY
+      LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY,LRAT
       DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
@@ -31,6 +31,11 @@ c - NNPDF method
       DOUBLE PRECISION WGTX2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
 c - To unify quoted uncertainties (CL68,CL90,special)
       DOUBLE PRECISION CL90,CLGJR
+c - To derive x section ratios
+      DOUBLE PRECISION RAT(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION RATHI(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION RATLO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      DOUBLE PRECISION RATDIF(NBINTOTMAX,NMAXSUBPROC+1,0:3)
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
@@ -51,6 +56,7 @@ c --- Parse command line
       WRITE(*,*)"#"
 
 *---Scenario
+      LRAT = .FALSE.
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
          WRITE(*,*)
@@ -92,6 +98,10 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
             STOP
+         ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442") THEN
+            LRAT = .TRUE.
+            WRITE(*,*)
+     >           "ALLUNC: Deriving x section ratios"
          ENDIF
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
      >        SCENARIO(1:LENOCC(SCENARIO))
@@ -377,7 +387,7 @@ c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
 
 
 
@@ -409,7 +419,12 @@ c - Save the result array from the first call (= central result)
 c   and reset result arrays   
          WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >        NSUBPROC," subprocesses"
-         DO L1=1,NBINTOT
+ckrbin         DO L1=1,NBINTOT
+         L1 = 0
+         DO IRAP=1,NRAPIDITY
+         DO IPT=1,NPT(IRAP)
+            L1 = L1+1
+ckrbin
             DO L2=1,(NSUBPROC+1)
                DO L3=1,NORD
                   RES0(L1,L2,L3) = 0D0 
@@ -422,8 +437,26 @@ c   and reset result arrays
                   WGT2(L1,L2,L3)   = 0D0
                   WGTX(L1,L2,L3)   = 0D0
                   WGTX2(L1,L2,L3)  = 0D0
+ckrrat Assume two rap bins with equal # of pt bins
+                  IF (IRAP.EQ.1) THEN
+                     RAT(L1,L2,L3) = RES0(L1,L2,L3)
+                  ELSEIF (IRAP.EQ.2) THEN
+                     IF (RES0(L1,L2,L3).GT.0.D0) THEN
+                        RAT(L1,L2,L3) =
+     >                       RAT(L1-NPT(IRAP-1),L2,L3)/RES0(L1,L2,L3)
+                        write(*,*
+     >                       )"Test ratio: irap, ipt, l1, l2, l3, rat"
+                        write(*,*)irap,ipt,l1,l2,l3,rat(l1,l2,l3)
+                     ELSE
+                        RAT(L1,L2,L3) = 0.D0
+                     ENDIF
+                  ENDIF
+                  RATLO(L1,L2,L3)  = 0D0
+                  RATHI(L1,L2,L3)  = 0D0
+ckrrat
                ENDDO
             ENDDO
+         ENDDO
          ENDDO
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
@@ -437,7 +470,12 @@ ckr         IF (NPDF.GT.1) THEN
                CALL INITPDF(J)
                CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
 c - For all bins/subproc/orders: Add negative/positive variations
-               DO L1=1,NBINTOT
+ckrbin               DO L1=1,NBINTOT
+               L1 = 0
+               DO IRAP=1,NRAPIDITY
+               DO IPT=1,NPT(IRAP)
+                  L1 = L1+1
+ckrbin
                   DO L2=1,(NSUBPROC+1)
                      DO L3=1,NORD
                         SUMM = 0.D0
@@ -457,15 +495,47 @@ c - For all bins/subproc/orders: Add negative/positive variations
                            RES1LO(L1,L2,L3) =
      >                          RES1LO(L1,L2,L3)+DIFF*DIFF
                         ENDIF
+ckrrat Assume two rap bins with equal # of pt bins
+                        IF (IRAP.EQ.1) THEN
+                           RATDIF(L1,L2,L3) = SUMM
+                        ELSEIF (IRAP.EQ.2) THEN
+                           IF (SUMM.GT.0.D0) THEN
+                              RATDIF(L1,L2,L3) =
+     >                             (RATDIF(L1-NPT(IRAP-1),L2,L3)/
+     >                             SUMM)
+                              write(*,*)"l1,l2,l3,r,rdif1",l1,l2,l3
+     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
+                              RATDIF(L1,L2,L3) = RATDIF(L1,L2,L3) -
+     >                             RAT(L1,L2,L3)
+                              write(*,*)"l1,l2,l3,r,rdif2",l1,l2,l3
+     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
+                           ELSE
+                              RATDIF(L1,L2,L3) = 0.D0
+                           ENDIF
+                           IF (RATDIF(L1,L2,L3).GT.0.D0) THEN
+                              RATHI(L1,L2,L3) = RATHI(L1,L2,L3) +
+     >                             RATDIF(L1,L2,L3)*RATDIF(L1,L2,L3)
+                           ELSE
+                              RATLO(L1,L2,L3) = RATLO(L1,L2,L3) +
+     >                             RATDIF(L1,L2,L3)*RATDIF(L1,L2,L3)
+                           ENDIF
+                        ENDIF
+ckrrat
                      ENDDO
                   ENDDO
+               ENDDO
                ENDDO
             ENDDO               ! Loop over bins
          ENDIF                  ! Not done for npdf <= 1
 
 c - Take square-root of sum of squares
 c - or apply Toy MC method for NNPDF
-         DO L1=1,NBINTOT
+ckrbin         DO L1=1,NBINTOT
+         L1 = 0
+         DO IRAP=1,NRAPIDITY
+         DO IPT=1,NPT(IRAP)
+            L1 = L1+1
+ckrbin
             IF (LPDF) THEN
                DO L2=1,(NSUBPROC+1)
                   DO L3=1,NORD
@@ -476,6 +546,10 @@ ckr                        RES1HI(L1,L2,L3) = CLGJR*SQRT(RES1HI(L1,L2,L3))
 ckr                        RES1LO(L1,L2,L3) = -CLGJR*SQRT(RES1LO(L1,L2,L3))
                         RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
                         RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
+                        IF (LRAT.AND.IRAP.EQ.2) THEN
+                           RATHI(L1,L2,L3) =  SQRT(RATHI(L1,L2,L3))
+                           RATLO(L1,L2,L3) = -SQRT(RATLO(L1,L2,L3))
+                        ENDIF
                      ELSE
                         RES0(L1,L2,L3) = WGTX(L1,L2,L3)/WGT(L1,L2,L3)
                         RES1HI(L1,L2,L3) = 
@@ -484,6 +558,10 @@ ckr                        RES1LO(L1,L2,L3) = -CLGJR*SQRT(RES1LO(L1,L2,L3))
 ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
                         RES1HI(L1,L2,L3) = SQRT(RES1HI(L1,L2,L3))
                         RES1LO(L1,L2,L3) = -RES1HI(L1,L2,L3)
+                        IF (LRAT.AND.IRAP.EQ.2) THEN
+                           RATHI(L1,L2,L3) = -1D0
+                           RATLO(L1,L2,L3) =  1D0
+                        ENDIF
                      ENDIF
                   ENDDO
                ENDDO
@@ -502,12 +580,25 @@ ckr 30.01.2008: Change output format for better comp. with C++ version
                RESHI = 0D0
             ENDIF
             WRITE(*,900) L1,RES0(L1,NSUBPROC+1,NORD),RESLO,RESHI
+            IF (LRAT.AND.IRAP.EQ.2) THEN
+               IF (DABS(RAT(L1,NSUBPROC+1,NORD)).GT.1D-99) THEN
+                  RESLO = RATLO(L1,NSUBPROC+1,NORD)/
+     >                 RAT(L1,NSUBPROC+1,NORD)
+                  RESHI = RATHI(L1,NSUBPROC+1,NORD)/
+     >                 RAT(L1,NSUBPROC+1,NORD)
+               ELSE
+                  RESLO = -1.D0
+                  RESHI = -1.D0
+               ENDIF
+               WRITE(*,900) L1,RAT(L1,NSUBPROC+1,NORD),RESLO,RESHI
+            ENDIF
+         ENDDO
          ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900     FORMAT(1P,I5,3(6X,E18.11))
 
 c - Fill histograms
-         CALL PDFFILL(I,RES0,RES1HI,RES1LO)
+         CALL PDFFILL(I,RES0,RES1HI,RES1LO,LRAT,RAT,RATHI,RATLO)
          
       ENDDO                     ! Loop over scales
 
@@ -654,18 +745,18 @@ c - Compare results and fill histos
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
       END
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF)
+      SUBROUTINE PDFHIST(N,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
-      INTEGER N,LENOCC,IPDF,NPDF,IPTMAX
-      LOGICAL LONE,LPDF,LSTAT,LALG,LSER
+      INTEGER N,LENOCC,IPDF,NPDF,IPTMAX,NRAP
+      LOGICAL LONE,LPDF,LSTAT,LALG,LSER,LRAT
 
       INTEGER J,ISTAT2,ICYCLE
       INTEGER IORD,ISUB,ISCALE,IRAP,IPT,IHIST,NHIST
@@ -691,6 +782,14 @@ c - Open & book
             STOP
          ENDIF
          
+         NRAP = NRAPIDITY
+         IF (LRAT) THEN
+            NRAP = NRAPIDITY+1
+            NPT(NRAP) = NPT(NRAPIDITY)
+            DO J=1,(NPT(NRAP)+1)
+               PTBIN(NRAP,J) = PTBIN(NRAPIDITY,J)
+            ENDDO
+         ENDIF
          NHIST = 0
          CBASE1 = CIPROC(IPROC)
          CBASE1 = CBASE1(1:LENOCC(CBASE1))//"_"
@@ -705,7 +804,7 @@ c - Open & book
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
             DO ISCALE=1,NSCALEVAR ! Scale variations
                DO ISUB=0,NSUBPROC ! Subprocesses: 0 tot + 7 subproc
-                  DO IRAP=1, NRAPIDITY
+                  DO IRAP=1, NRAP
                      IHIST = IORD*1000000 + ISCALE*100000 +
      >                    ISUB*10000 + IRAP*100
 ckr                     write(*,*)"ALL: iord,isc,isub,irap,ihist",
@@ -863,14 +962,18 @@ c - Close HBOOK file
 c
 c ======================= Fill the histograms =========================
 c
-      SUBROUTINE PDFFILL(NSCALE,RES0,RES1HI,RES1LO)
+      SUBROUTINE PDFFILL(NSCALE,RES0,RES1HI,RES1LO,LRAT,RAT,RATHI,RATLO)
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       INTEGER NSCALE
       DOUBLE PRECISION 
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RAT(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RATHI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
+     >     RATLO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+      LOGICAL LRAT
       INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
       REAL VAL0,VALLO,VALHI
       
@@ -909,6 +1012,24 @@ ckr     >                 ihist,val0,vallo,valhi
                   CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
                   CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
                   CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+                  IF (LRAT.AND.I.EQ.2) THEN
+                     IF (IORD.GT.0) THEN 
+                        VAL0  = REAL(RAT(NBIN,ISUB2,IORD))
+                        VALLO = REAL(RATLO(NBIN,ISUB2,IORD))
+                        VALHI = REAL(RATHI(NBIN,ISUB2,IORD))
+                     ELSE
+                        VAL0  = REAL(RAT(NBIN,ISUB2,NORD))
+                        VALLO = REAL(RATLO(NBIN,ISUB2,NORD))
+                        VALHI = REAL(RATHI(NBIN,ISUB2,NORD))
+                     ENDIF
+                     IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+(I+1)
+     >                    *100
+                     write(*,*)"FUCK: ihist,pt,val,lo,hi",ihist,ptbin(i
+     >                    ,j),val0,vallo,valhi
+                     CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
+                     CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
+                     CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+                  ENDIF
                ENDDO            ! pT-loop
             ENDDO               ! rap-loop
          ENDDO                  ! isub-loop

@@ -38,7 +38,8 @@ OBJFILESALL  = $(ALLFILES:.f=.o)
 allunc:	$(OBJFILESALL) fnx9999.inc strings.inc
 	$(FC) -o $@ $(FFLAGS) $(OBJFILESALL) \
 	-L $(LHAPDF) -lLHAPDF \
-	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
+	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib
+#	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
 
 # Analyze algorithmic uncertainty from reference jobs with
 # original CTEQ PDF code
