@@ -49,7 +49,7 @@ print "######################################\n\n";
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
     ( "LOCAL", "", "0", "542", "guc", "", ".", "0001",
-      "0", "LO", "CTEQ", "none", "", ".", "", "1" );
+      "0", "LO", "CTEQ", "none", "", ".", "", "1a" );
 getopts('b:de:f:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
@@ -71,7 +71,7 @@ if ( $opt_h ) {
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v #            Choose between fastNLO version 1 and 2 (def.=1)\n";
+    print "  -v #            Choose between fastNLO version 1a, 1b and 2 (def.=1a)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
@@ -113,7 +113,7 @@ unless ( $opt_p eq "CTEQ" || $opt_p eq "LHAPDF" ) {
 unless ( -d $opt_s || -l $opt_s ) {
     die "fastrun.pl: Error! Archive source directory $opt_s does not exist, aborted.\n";
 }
-unless ( $opt_v == 1 || $opt_v == 2) {
+unless ( $opt_v eq "1a" || $opt_v eq "1b" || $opt_v eq "2") {
     die "fastrun.pl: Error! fastNLO version $opt_v does not exist, aborted.\n";
 }
 
@@ -218,7 +218,7 @@ if ($scen =~ m/diff/) {
     $njet = "3jet";
 }
 my $tabext;
-if ( $vers == 1 ) {
+if ( $vers eq "1a" || $vers eq "1b" ) {
     $tabext = "raw";
 } else {
     $tabext = "tab";
@@ -250,7 +250,7 @@ my %install;
 my $gccv1 = "3.3.6";
 my $gccvers = `gcc -dumpversion`;
 if ( $? ) {
-    if ( $vers == 1 ) {
+    if ( $vers eq "1a" || $vers eq "1b" ) {
 	print "fastrun.pl: Warning! System gcc command failed. ".
 	    " Will use version $gccv1 anyway.\n";
     } else {
@@ -263,7 +263,7 @@ if ( $? ) {
 	}
     }
 }
-if ( $vers == 1 ) {
+if ( $vers eq "1a" || $vers eq "1b" ) {
     $gccvers = $gccv1;
 } else {
     chomp $gccvers;
@@ -278,7 +278,7 @@ $install{mcfmfix}[0]    = "mcfm-5.3-fix";
 $install{mcfmfix}[1]    = "MCFM-5.3";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
 $install{fastNLO}[1]    = "fastNLO-rev${frev}";
-if ( $vers == 1 ) { 
+if ( $vers eq "1a" || $vers eq "1b" ) { 
     $install{gcccore}[0]    = "gcc-core-$gccvers";
     $install{gcccore}[1]    = "gcc-$gccvers";
     $install{gccgpp}[0]     = "gcc-g\+\+-$gccvers";
@@ -336,7 +336,7 @@ foreach my $comp ( keys %install ) {
 	$install{$comp}[3] = "";
     } else {
 	$install{$comp}[2] = $install{$comp}[0]."-$gccapp";
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    $install{$comp}[3] = $install{$comp}[0]."-v1";
 	} else {
 	    $install{$comp}[3] = $install{$comp}[0]."-v2";
@@ -445,7 +445,7 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 0) Install gcc
 #
-    if ( $vers == 1 ) {
+    if ( $vers eq "1a" || $vers eq "1b" ) {
 # Standard environment to use system compiler still
 	print FILE "# Add GCC 3.6.6 environment\n";
 	unless ( -e "$idir/$install{gcccore}[2]" ) {
@@ -571,7 +571,7 @@ if ( $mode == 0 || $mode == 1 ) {
     }
     chdir "$pwdir";
 # ROOT
-    if ( $vers == 2 ) {
+    if ( $vers eq "2" ) {
 #	unless ( -e "$aidir/src/$install{root}[2]" ) {
 	unless ( $ENV{ROOTSYS} || $rv eq "none") {
 	    $date = `date +%d%m%Y_%H%M%S`;
@@ -625,14 +625,14 @@ if ( $mode == 0 || $mode == 1 ) {
 # 2) Install lhapdf
 #
 #    unless ( -e "$idir/$install{lhapdf}[2]" ||
-#	     ( $vers == 1 && $pdf eq "CTEQ") ||
-#	     ( $vers == 2 && -e "$idir/src/$install{lhapdf}[2]" ) ) {
+#	     ( ($vers eq "1a" || $vers eq "1b") && $pdf eq "CTEQ") ||
+#	     ( $vers eq "2" && -e "$idir/src/$install{lhapdf}[2]" ) ) {
     unless ( $ENV{LHAPDF} || $pdf eq "CTEQ") {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[0]: $date\n";
 	print FILE "# Add LHAPDF environment\n";
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[0] ".
@@ -714,13 +714,13 @@ if ( $mode == 0 || $mode == 1 ) {
 # 3) Install fastjet
 #
 #    unless ( -e "$idir/$install{fastjet}[2]" ||
-#	     ( $vers == 2 && -e "$idir/src/$install{fastjet}[2]" ) ) {
+#	     ( $vers eq "2" && -e "$idir/src/$install{fastjet}[2]" ) ) {
     unless ( $ENV{FASTJET} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing fastjet from $install{fastjet}[0]: $date\n";
 	print FILE "# Add FASTJET environment\n";
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
@@ -794,13 +794,13 @@ if ( $mode == 0 || $mode == 1 ) {
 # 4) Install Nlojet++
 #
 #    unless ( -e "$idir/$install{nlojet}[2]" ||
-#	     ( $vers == 2 && -e "$idir/src/$install{nlojet}[2]" ) ) {
+#	     ( $vers eq "2" && -e "$idir/src/$install{nlojet}[2]" ) ) {
     unless ( $ENV{NLOJET} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[0]: $date\n";
 	print FILE "# Add NLOJET environment\n";
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
@@ -876,7 +876,7 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 4b) Install lhpdf for Nlojet++, only for version 2
 #
-    if ( $vers == 2 && ! $ENV{LHPDF} ) {
+    if ( $vers eq "2" && ! $ENV{LHPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing lhpdf from $install{lhpdf}[0]: $date\n";
@@ -922,7 +922,7 @@ if ( $mode == 0 || $mode == 1 ) {
 # 5) Install mcfm
 #
 # CERNLIB var already needed for mcfm    
-    if ( $vers == 3 ) {
+    if ( $vers eq 3 ) {
     print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm to:\n";
     my $cwdir = getcwd();
     $ENV{CERNLIB} = "$ENV{CERN_ROOT}/lib"; 
@@ -965,13 +965,13 @@ if ( $mode == 0 || $mode == 1 ) {
 # 6) Install fastNLO
 #
 #    unless ( -e "$idir/$install{fastNLO}[2]" ||
-#	     ( $vers == 2 && -e "$idir/src/$install{fastNLO}[2]" ) ) {
+#	     ( $vers eq "2" && -e "$idir/src/$install{fastNLO}[2]" ) ) {
     unless ( $ENV{FASTNLO} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[0]: $date\n";
 	print FILE "# Add FASTNLO environment\n";
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
@@ -1033,18 +1033,21 @@ if ( $mode == 0 || $mode == 1 ) {
 #    my $cwdir = getcwd();
 if ( $mode == 0 || $mode == 1 ) {
     print FILE "# Add to system paths PATH and LD_LIBRARY_PATH\n";}
-if ( $vers == 1 ) {
+if ( $vers eq "1a" || $vers eq "1b" ) {
     if ( $mode == 2 || $mode == 3 ) {
-# For old v1 installation
-	$ENV{FASTJET}  = "$aidir/fastjet";
-	$ENV{NLOJET}   = "$aidir/nlojet";
-	$ENV{LHAPDF}   = "$aidir/lhapdf/lib";
-	$ENV{FASTNLO}  = "$aidir/fastNLO";
-# For new v1 installation
-#	$ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
-#	$ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
-#	$ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
-#	$ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
+# For old v1 installation (1a)
+	if ( $vers eq "1a" ) {
+	    $ENV{FASTJET}  = "$aidir/fastjet";
+	    $ENV{NLOJET}   = "$aidir/nlojet";
+	    $ENV{LHAPDF}   = "$aidir/lhapdf/lib";
+	    $ENV{FASTNLO}  = "$aidir/fastNLO";
+# For new v1 installation (1b)
+	} elsif ( $vers eq "1b" ) {
+	    $ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
+	    $ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
+	    $ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+	    $ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
+	}
     }
     if ( $ENV{PATH} ) {
 	if ( $mode == 0 || $mode == 1 ) {
@@ -1130,7 +1133,7 @@ if ( $mode == 0 || $mode == 2 ) {
     chomp $date;
     print "\nfastrun.pl: Making fastNLO scenario for version $vers: $date\n";
 
-    if ( $vers == 1 ) {
+    if ( $vers eq "1a" || $vers eq "1b" ) {
 	chdir $idir;
 # Structure change in fastNLO following change in revision 212!
 	if ( $frev < 212 ) { 
@@ -1269,7 +1272,7 @@ if ( $mode == 0 || $mode == 3 ) {
 # Set minimal environment with respect to current working directory
 #	my $cwd = `pwd`;
 #	chomp $cwd;
-#	if ( $vers == 1 ) {
+#	if ( $vers eq "1a" || $vers eq "1b" ) {
 #	    $ENV{NLOJET} = "$cwd/nlojet";
 #	    $ENV{FASTNLO} = "$cwd/fastNLO";
 #	} else {
@@ -1282,7 +1285,7 @@ if ( $mode == 0 || $mode == 3 ) {
 # Fetching and unpacking of fastNLO binary archive, use version incl. CTEQ PDFs for reference
 	my $file = "fastNLO-bin";
 #	if ( $ref ) {
-	if ( $vers == 1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    $file .= "-${pdf}";
 #	}
 	} else {
@@ -1306,9 +1309,9 @@ if ( $mode == 0 || $mode == 3 ) {
     }
 
 # Structure change in fastNLO following change in revision 212!
-    if ( $vers == 1 && $frev < 212 ) { 
+    if ( ($vers eq "1a" || $vers eq "1b") && $frev < 212 ) { 
 	$scendir = "$ENV{FASTNLO}/author1c/hadron";
-    } elsif ( $vers == 1 ) {
+    } elsif ( $vers eq "1a" || $vers eq "1b" ) {
 	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
     } else {
 	$scendir = "$aidir";
