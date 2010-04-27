@@ -493,6 +493,19 @@ if ( $mode == 0 || $mode == 1 ) {
 	    chdir "$idir/gcc";
 	    system("make clean");
 	    print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
+# In case a different "system's" compiler was chosen via CC, CXX and FC environment variables
+            if ( $ENV{CC} ) {
+		print "fastrun.pl: Changing system's CC compiler $ENV{CC} to $aidir/bin/gcc\n";
+	    }
+	    $ENV{CC}  = "$aidir/bin/gcc";
+            if ( $ENV{CXX} ) {
+		print "fastrun.pl: Changing system's CXX compiler $ENV{CXX} to $aidir/bin/g++\n";
+	    }
+	    $ENV{CXX}  = "$aidir/bin/g++";
+            if ( $ENV{FC} ) {
+		print "fastrun.pl: Changing system's FC compiler $ENV{FC} to $aidir/bin/g77\n";
+	    }
+	    $ENV{FC}  = "$aidir/bin/g77";
 	    $ret = system("$cmd");
 	    if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
 	    $ret = system("make -j2");
