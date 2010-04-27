@@ -49,7 +49,7 @@ print "######################################\n\n";
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
     ( "LOCAL", "", "0", "542", "guc", "", ".", "0001",
-      "0", "LO", "CTEQ", "none", "", ".", "", "1a" );
+      "0", "LO", "CTEQ", "none", "", ".", "", "1b" );
 getopts('b:de:f:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
@@ -71,7 +71,7 @@ if ( $opt_h ) {
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v #            Choose between fastNLO version 1a, 1b and 2 (def.=1a)\n";
+    print "  -v #            Choose between fastNLO version 1a, 1b and 2 (def.=1b)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
@@ -523,8 +523,8 @@ if ( $mode == 0 || $mode == 1 ) {
 # 1) Install CERN libraries and ROOT (V2 only)
 #
 #    unless ( -e "$idir/src/$install{cernlib}[2]" ) {
-    unless ( ($vers==1 && $ENV{CERNLIB}) ||
-	     ($vers==2 && $ENV{CERN_ROOT} ) ) {
+    unless ( (($vers eq "1a" || $vers eq "1b") && $ENV{CERNLIB}) ||
+	     ($vers eq "2" && $ENV{CERN_ROOT} ) ) {
         $date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	chdir "$aidir/src";
@@ -536,7 +536,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			 "$install{cernlib}[1] to ".
 			 "$install{cernlib}[2]: $ret, aborted!\n";}
-	if ( $vers==1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    unless ( -d "$aidir/$install{cernlib}[2]" ) {
 		my $ret = system("mv $install{cernlib}[2] $aidir");
 		if ( $ret ) {die "fastrun.pl: Couldn't move cernlib ".
@@ -556,7 +556,7 @@ if ( $mode == 0 || $mode == 1 ) {
 			     "directory $aidir/lib: $ret, aborted!\n";}
 	}
 	print FILE "# Add CERNLIB environment\n";
-	if ( $vers==1 ) {
+	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print FILE "setenv CERNLIB $aidir/$install{cernlib}[2]\n";
 	    $ENV{CERNLIB}  = "$aidir/$install{cernlib}[2]"; 
 	} else {
@@ -1327,7 +1327,7 @@ if ( $mode == 0 || $mode == 3 ) {
     chomp $date;
     print "\nfastrun.pl: Running fastNLO: $date\n";
     my $cmd;
-    if ( $vers==1 ) {
+    if ( $vers eq "1a" || $vers eq "1b" ) {
 	$cmd = "$ENV{NLOJET}/bin/nlojet++ -P dipole ".
 	    "--save-after $runmode{$order}[1] ".
 	    "-c$runmode{$order}[0] ".
