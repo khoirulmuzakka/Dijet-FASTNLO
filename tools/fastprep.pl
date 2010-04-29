@@ -65,28 +65,37 @@ if ( $vers == 1 ) {
 
     my @gcclibs = `find lib -follow -name \*.so\*`;
     chomp @gcclibs;
-    my @njlibs  = `find nlojet/lib -follow -name \*.so\*`;
+    my @njlibs  = `find nlojet*/lib -follow -name \*.so\*`;
     chomp @njlibs;
-    my @fjlibs  = `find fastjet/lib -follow -name \*.so\*`;
+    my @fjlibs  = `find fastjet*/lib -follow -name \*.so\*`;
     chomp @fjlibs;
-    my @fjplugs = `find fastjet/plugins -follow -name \*.so\*`;
+    my @fjplugs = `find fastjet*/plugins -follow -name \*.so\*`;
     chomp @fjplugs;
-    my @fnlibs1 = `find fastNLO/trunk -follow -name \*.so\*`;
+    my @fnlibs1 = `find fastNLO*/trunk -follow -name \*.so\*`;
     chomp @fnlibs1;
-    my @fnlibs2 = `find fastNLO/trunk -follow -name \*.la`;
+    my @fnlibs2 = `find fastNLO*/trunk -follow -name \*.la`;
     chomp @fnlibs2;
-    
-    my $cmd = "tar cfz $arcname ".
-	"@gcclibs @njlibs @fjlibs @fjplugs @fnlibs1 @fnlibs2 nlojet/bin/nlojet++";
+    my $nloexe  = `find nlojet*/bin -follow -name nlojet++`;
+    chomp $nloexe;
+
+    my $cmd = "tar cfz $arcname --exclude .svn ".
+	"@gcclibs @njlibs @fjlibs @fjplugs @fnlibs1 @fnlibs2 $nloexe";
     if ( -d "lib64" ) {
 	my @libs64 = `find lib64 -follow -name \*.so\*`;
 	chomp @libs64;
 	$cmd .= " @libs64";
     }
     if ( $pdf eq "CTEQ" ) {
-	$cmd .= " fastNLO/trunk/v1.4/author1c/common/ctq61.00.tbl".
-	    " fastNLO/trunk/v1.4/author1c/hadron/common".
-	    " fastNLO/trunk/v1.4/author1c/hadron/ctq61.00.tbl";
+	my @ctqlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name ctq61.00.tbl`;
+	chomp @ctqlnk;
+	my @ctqtbl = `find fastNLO*/trunk/v1.4/author1c/common -name ctq61.00.tbl`;
+	chomp @ctqtbl;
+	my @comlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name common`;
+	chomp @comlnk;
+	$cmd .= " @ctqlnk @ctqtbl @comlnk";
+#	$cmd .= " fastNLO/trunk/v1.4/author1c/common/".
+#	    " fastNLO/trunk/v1.4/author1c/hadron/common".
+#	    " fastNLO/trunk/v1.4/author1c/hadron/ctq61.00.tbl";
     } elsif ( $pdf eq "LHAPDF" ) {
 	$cmd .= " lhapdf/lib";
     }
