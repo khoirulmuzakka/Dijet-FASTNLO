@@ -1,8 +1,7 @@
 //
 // fastNLO author code for fnl2622:
-//     CMS LHC Dijet chi scenario, E_cms = 7 TeV
+//     CMS LHC Dijet Chi scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//
 //
 // last modification
 //
@@ -11,7 +10,6 @@
 #include <process.h>
 #include <jetfunc.h>
 #include <qcdlib.h>
- 
 #include <iomanip>              // for ASCII output for table
 
 //----- used namespaces -----
@@ -158,7 +156,7 @@ void UserHHC::initfunc(unsigned int)
 
    //unitfactor = 1000000.0;  // for fb
    unitfactor = 1000.0;  // for pb
-   //unitfactor = 1.0;  // for nb    
+   //unitfactor = 1.0;  // for nb
    
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
@@ -191,9 +189,10 @@ void UserHHC::initfunc(unsigned int)
    // Second dimension (histogram x axis), usually pT
    // Here, these are dijet chi bins
    // # of bins npt per irap bin of first dimension
+   int nptb[11] = {14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14};
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
-     npt[i] = 14; 
+     npt[i] = nptb[i]; 
    }
    // In reference mode: Copy # of bins definition
    if ( iref==1 ) {
@@ -208,11 +207,10 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // Array for bin boundaries
-   int nptb = 14;
    double ptb[15] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.,
 		      12., 14., 16., 18., 20.};
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
-     for (int j=0; j<nptb+1; j++) { 
+     for (int j=0; j<npt[i]+1; j++) { 
        pthigh[i][j] = ptb[j];
      }
    }
@@ -438,7 +436,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
    cout << "    Scenario fnl2622:" << endl;
-   cout  <<  "      CMS LHC Dijet chi scenario, E_cms = 7 TeV,"  <<  endl;
+   cout  <<  "      CMS LHC Dijet Chi scenario, E_cms = 7 TeV,"  <<  endl;
    cout  <<  "      for fastjet anti-kT algo with R=0.5 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;

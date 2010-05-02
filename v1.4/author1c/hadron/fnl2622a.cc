@@ -1,8 +1,7 @@
 //
 // fastNLO author code for fnl2622:
-//     CMS LHC Dijet chi scenario, E_cms = 7 TeV
+//     CMS LHC Dijet Chi scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//
 //
 // last modification
 //
@@ -11,7 +10,6 @@
 #include <process.h>
 #include <jetfunc.h>
 #include <qcdlib.h>
- 
 #include <iomanip>              // for ASCII output for table
 
 //----- used namespaces -----
@@ -158,7 +156,7 @@ void UserHHC::initfunc(unsigned int)
 
    //unitfactor = 1000000.0;  // for fb
    unitfactor = 1000.0;  // for pb
-   //unitfactor = 1.0;  // for nb    
+   //unitfactor = 1.0;  // for nb
    
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
@@ -434,7 +432,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
    cout << "    Scenario fnl2622:" << endl;
-   cout  <<  "      CMS LHC Dijet chi scenario, E_cms = 7 TeV,"  <<  endl;
+   cout  <<  "      CMS LHC Dijet Chi scenario, E_cms = 7 TeV,"  <<  endl;
    cout  <<  "      for fastjet anti-kT algo with R=0.5 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
