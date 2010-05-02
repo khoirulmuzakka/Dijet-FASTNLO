@@ -1113,6 +1113,27 @@ fnl2518diffpt6: links fnl2518diffpt6.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
+# =====   FNL2622: LHC CMS dchi dijets with fastjet ak R=0.5 ===========
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV 
+#
+fnl2622a: links fnl2622a.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2622a.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2622a -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+fnl2622b: links fnl2622b.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2622b.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2622b -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
 # =====   FNL3310: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution, @ 2.36 TeV 
