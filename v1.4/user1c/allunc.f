@@ -94,7 +94,7 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'    alt. = MW: 2- and 4-loop '//
      >           '(from hep-ph/9806404)'
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
-            WRITE(*,*)'     (in mode PY this has to be Lambda_4!)'
+            WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
             WRITE(*,*)' '
             STOP
@@ -444,9 +444,9 @@ ckrrat Assume two rap bins with equal # of pt bins
                      IF (RES0(L1,L2,L3).GT.0.D0) THEN
                         RAT(L1,L2,L3) =
      >                       RAT(L1-NPT(IRAP-1),L2,L3)/RES0(L1,L2,L3)
-                        write(*,*
-     >                       )"Test ratio: irap, ipt, l1, l2, l3, rat"
-                        write(*,*)irap,ipt,l1,l2,l3,rat(l1,l2,l3)
+ckrrat                        write(*,*
+ckrrat     >                       )"Test ratio: irap, ipt, l1, l2, l3, rat"
+ckrrat                        write(*,*)irap,ipt,l1,l2,l3,rat(l1,l2,l3)
                      ELSE
                         RAT(L1,L2,L3) = 0.D0
                      ENDIF
@@ -503,12 +503,12 @@ ckrrat Assume two rap bins with equal # of pt bins
                               RATDIF(L1,L2,L3) =
      >                             (RATDIF(L1-NPT(IRAP-1),L2,L3)/
      >                             SUMM)
-                              write(*,*)"l1,l2,l3,r,rdif1",l1,l2,l3
-     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
+ckrrat                              write(*,*)"l1,l2,l3,r,rdif1",l1,l2,l3
+ckrrat     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
                               RATDIF(L1,L2,L3) = RATDIF(L1,L2,L3) -
      >                             RAT(L1,L2,L3)
-                              write(*,*)"l1,l2,l3,r,rdif2",l1,l2,l3
-     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
+ckrrat                              write(*,*)"l1,l2,l3,r,rdif2",l1,l2,l3
+ckrrat     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
                            ELSE
                               RATDIF(L1,L2,L3) = 0.D0
                            ENDIF
@@ -1024,8 +1024,8 @@ ckr     >                 ihist,val0,vallo,valhi
                      ENDIF
                      IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+(I+1)
      >                    *100
-                     write(*,*)"FUCK: ihist,pt,val,lo,hi",ihist,ptbin(i
-     >                    ,j),val0,vallo,valhi
+ckrrat                     write(*,*)"FUCK: ihist,pt,val,lo,hi",ihist,ptbin(i
+ckrrat     >                    ,j),val0,vallo,valhi
                      CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
                      CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
                      CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
