@@ -3,7 +3,6 @@
 //     CMS LHC 3-jet ratio scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
-//
 // last modification
 //
 //------ DON'T TOUCH THIS PART! ------
@@ -162,102 +161,86 @@ void UserHHC::initfunc(unsigned int)
 
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
-   // Here: Jet multiplicity
+   // Here: Two pseudo-bins in rapidity of same size for normalization:
+   //       1) 3+ jets in |y| < 2.5
+   //       2) 2  jets in |y| < 2.5
    // # of bins
-   nrap   = 2;
-   if (iref==1) nrap=nrap*2;  // -> in reference mode: double No. rap bins
-   
-   raphigh = new double[nrap+1];  //----- array for rapidity boundaries
-   npt     = new  int[nrap];      // nrap bins in rapid.-each npt[irap] pT bins
+   nrap = 2;
+   double rapb[3] = { 0.0, 2.5, 5.0};
+   // In reference mode: Double no. of bins
+   nrap = nrap*(iref+1);
 
-   // flexible rap binning
-   // these are dijet rapidity bins
-   raphigh[0]=0.0;
-   raphigh[1]=0.7;
-   raphigh[2]=1.3;
-
-   if (iref==1)      // -> in reference mode: copy rapidity definitions
-     for(int i=0;i<nrap/2;i++){
-      raphigh[i+nrap/2+1] = raphigh[i+1];
+   // Array for bin boundaries
+   raphigh = new double[nrap+1];
+   for ( unsigned int i=0; i<nrap/(iref+1)+1; i++) {
+     raphigh[i] = rapb[i];
+   }
+   // In reference mode: Copy high end of bin boundaries
+   if ( iref==1 ) {
+     for (unsigned int i=0; i<nrap/(iref+1); i++) {
+       raphigh[i+nrap/2+1] = raphigh[i+1];
+     }
    }
 
-   //Define binning in pt -> here:  DijetMass
-   for(int i=0;i<nrap;i++){
-     npt[i]=50;
+   //DEBUG
+   for (int i=0; i<nrap+1; i++) {
+     cout << "i, raphigh: " << i << ", " << raphigh[i] << endl;
    }
+   //DEBUGEND
 
-   if (iref==1)      // -> in reference mode: copy No.pT-bin definitions
-     for(int i=0;i<nrap/2;i++){
-      npt[i+nrap/2] = npt[i];
+   // Second dimension (histogram x axis), usually pT
+   // Here, these are HT bins
+   // # of bins npt per irap bin of first dimension
+   int nptb[2] = {35, 35};
+   npt = new int[nrap];
+   for (unsigned int i=0; i<nrap/(iref+1); i++) {
+     npt[i] = nptb[i]; 
    }
-
-   // lowest pT value in sample   -> here: mass
-   ptlow = 156.;          // 
+   // In reference mode: Copy # of bins definition
+   if ( iref==1 ) {
+     for (unsigned int i=0; i<nrap/(iref+1); i++) {
+       npt[i+nrap/2] = npt[i];
+     }
+   }
 
    pthigh.resize(nrap);
-   //----- array for pt boundaries
-   for(int i=0;i<nrap;i++){
-      pthigh[i].resize(npt[i]+1);
-   //----- array for pt boundaries (=mass boundaries)
-      pthigh[i][0]=156.0;
-      pthigh[i][1]=176.0;
-      pthigh[i][2]=197.0;
-      pthigh[i][3]=220.0;
-      pthigh[i][4]=244.0;
-      pthigh[i][5]=270.0;
-      pthigh[i][6]=296.0;
-      pthigh[i][7]=325.0;
-      pthigh[i][8]=354.0;
-      pthigh[i][9]=386.0;
-      pthigh[i][10]=419.0;
-      pthigh[i][11]=453.0;
-      pthigh[i][12]=489.0;
-      pthigh[i][13]=526.0;
-      pthigh[i][14]=565.0;
-      pthigh[i][15]=606.0;
-      pthigh[i][16]=649.0;
-      pthigh[i][17]=693.0;
-      pthigh[i][18]=740.0;
-      pthigh[i][19]=788.0;
-      pthigh[i][20]=838.0;
-      pthigh[i][21]=890.0;
-      pthigh[i][22]=944.0;
-      pthigh[i][23]=1000.0;
-      pthigh[i][24]=1058.0;
-      pthigh[i][25]=1118.0;
-      pthigh[i][26]=1181.0;
-      pthigh[i][27]=1246.0;
-      pthigh[i][28]=1313.0;
-      pthigh[i][29]=1383.0;
-      pthigh[i][30]=1455.0;
-      pthigh[i][31]=1530.0;
-      pthigh[i][32]=1607.0;
-      pthigh[i][33]=1687.0;
-      pthigh[i][34]=1770.0;
-      pthigh[i][35]=1856.0;
-      pthigh[i][36]=1945.0;
-      pthigh[i][37]=2037.0;
-      pthigh[i][38]=2132.0;
-      pthigh[i][39]=2231.0;
-      pthigh[i][40]=2332.0;
-      pthigh[i][41]=2438.0;
-      pthigh[i][42]=2546.0;
-      pthigh[i][43]=2659.0;
-      pthigh[i][44]=2775.0;
-      pthigh[i][45]=2895.0;
-      pthigh[i][46]=3019.0;
-      pthigh[i][47]=3147.0;
-      pthigh[i][48]=3279.0;
-      pthigh[i][49]=3416.0;
-      pthigh[i][50]=3558.0;
+   for (int i=0; i<nrap; i++) {
+     pthigh[i].resize(npt[i]+1);
    }
-   
-   if (iref==1)      // -> in reference mode: copy pT-bin definitions
-     for(int i=0;i<nrap/2;i++){
-       for(int j=0;j<npt[i]+1;j++){
+
+   // Array for bin boundaries
+   double ptb[36] = { 100., 125., 150., 175., 200., 225., 250.,
+		      280., 310., 340., 370., 400.,
+		      440., 480., 520., 560., 600.,
+		      650., 700., 750., 800., 850., 900., 950., 1000.,
+		      1060., 1120., 1180.,
+		      1260., 1340., 1420., 1500.,
+		      1600., 1700.,
+		      1850., 2000.};
+   for (unsigned int i=0; i<nrap/(iref+1); i++) {
+     for (int j=0; j<npt[i]+1; j++) { 
+       pthigh[i][j] = ptb[j];
+     }
+   }
+   // In reference mode: Copy high end of bin boundaries
+   if ( iref==1 ) {
+     for ( unsigned int i=0; i<nrap/(iref+1); i++ ) {
+       for ( int j=0; j<npt[i]+1; j++) {
          pthigh[i+nrap/2][j] = pthigh[i][j];
        }
      }
+   }
+
+   //DEBUG
+   for (int i=0; i<nrap; i++) {
+     for (int j=0; j<npt[i]+1; j++) {
+       cout << "i, j, pthigh: " << i << ", " << j << ", " << pthigh[i][j] << endl;
+     }
+   }
+   //DEBUGEND
+
+   // lowest pT value in sample = min(HT)/2
+   ptlow = pthigh[0][0]/2.;
 
    nxtot = 20;
 
@@ -326,19 +309,22 @@ void UserHHC::initfunc(unsigned int)
 	 
          // - Setup the xlimit array - computed from kinematic constraints
 	 //  ----> need good formula for dijets
+         // Attention: Here this is HT in pthigh and only the first rapidity bin counts!!!
 	 // KR: My x limits
-	 double ymax  = 1.3;
+	 double ymax  = 2.5;
 	 // double dymax = 2.0*ymax;
 	 // double ptred = 1./sqrt(2.)/(sqrt(exp(dymax)) + sqrt(exp(-dymax)))
-	 double ptred = 0.179385;
+	 double ptred = 0.0576544;
 	 
 	 // define reasonable upper and lower pT boundaries for each bin
 	 // KR: This is for |y| <= 1.0 @ LO
 	 //         ptlo[j][k]  = 0.325*pthigh[j][k];
 	 //         pthi[j][k]  = 0.502*pthigh[j][k+1];
 	 // KR: For |y| <= 1.3 @ NLO (= LO / sqrt(2))
-         ptlo[j][k]  = ptred*pthigh[j][k];
-         pthi[j][k]  = 0.502*pthigh[j][k+1];
+         // ptlo[j][k]  = ptred*pthigh[j][k];
+         // pthi[j][k]  = 0.502*pthigh[j][k+1];
+         ptlo[j][k]  = ptred*pthigh[j][k]/2.;
+         pthi[j][k]  = 0.502*pthigh[j][k+1]/2.;
 
 	 double xtmin = 2.0 * ptlo[j][k] / sqrt(s);
 	 double xmin  = exp(-ymax) * xtmin;
@@ -422,16 +408,16 @@ void UserHHC::initfunc(unsigned int)
    cout << "  " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
-   cout << "    Scenario fnl2442:" << endl;
-   cout  <<  "      CMS LHC test scenario, E_cms = 7 TeV,"  <<  endl;
-   cout  <<  "      for fastjet anti-kT algo with R=0.7 in E-scheme"  <<  endl; 
+   cout << "    Scenario fnl2722:" << endl;
+   cout  <<  "      CMS LHC 3-jet ratio scenario, E_cms = 7 TeV,"  <<  endl;
+   cout  <<  "      for fastjet anti-kT algo with R=0.5 in E-scheme"  <<  endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
    cout << "        sqrt(s)= " << sqrt(s) << endl;
    cout << "        No. x-bins: " << nxtot << endl;
-   cout << "        No. rapidity regions: " << nrap << endl;
-   cout << "        No. of pT bins in each rapidity region:" << endl;
+   cout << "        No. rapidity*multiplicity regions: " << nrap << endl;
+   cout << "        No. of HT bins in each rapidity region:" << endl;
    for( int j = 0; j < nrap; j++) {
       cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
@@ -499,8 +485,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    pj = jetclus(p);
    int nj = pj.upper(); 
 
-   // --- logic to identify correct jets --- (from fnt1003)
-   // - find two highest pT jets
+   // --- logic to identify jets
+   // - order all jets in pT
    //   - 1. compare 1,2 - order
    //   - 2. compare 2 (lower than 1!) and 3 - order
    //   - 3. compare 1,2 order
@@ -511,74 +497,112 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    // if No.2 is central -> save rap. of No.1 with (2) -> swap (1,2)
    // -> swapping makes sure that (new, reordered) first jet is central
    
-   // Sort jets in pT
+   // Sort jet indices in descending jet pT (selection sort algorithm)
    if (nj >= 2) {
-     // Initialize pointers to the two leading jets in pT
-     int ij1 = 1;
-     int ij2 = 2;
-     double pt1 = pj[1].perp();
-     double pt2 = pj[2].perp();
-     if (pt2 > pt1) {
-       double pttmp = pt1;
-       pt1 = pt2;
-       pt2 = pttmp;
-       ij1 = 2;
-       ij2 = 1;
-     }
-     if (nj == 3 && pj[3].perp() > pt2) {
-       pt2 = pj[3].perp();
-       ij2 = 3;
-     }
-     if (pt2 > pt1) {
-       double pttmp = pt1;   
-       pt1 = pt2;
-       pt2 = pttmp;
-       int ijtmp = ij1;
-       ij1 = ij2;
-       ij2 = ijtmp;
-     }
-
-     // Derive dijet variables
-     double mjj = sqrt((pj[ij1].T()+pj[ij2].T())*(pj[ij1].T()+pj[ij2].T())
-		       -(pj[ij1].X()+pj[ij2].X())*(pj[ij1].X()+pj[ij2].X())
-		       -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
-		       -(pj[ij1].Z()+pj[ij2].Z())*(pj[ij1].Z()+pj[ij2].Z()));
-
-     // Make it pseudo-rapidity for CMS
-     double yjjmin = min(abs(pj[ij1].prapidity()),abs(pj[ij2].prapidity()));
-     double yjjmax = max(abs(pj[ij1].prapidity()),abs(pj[ij2].prapidity()));
-     //double yjjmax = max(abs(pj[ij1].rapidity()),abs(pj[ij2].rapidity()));
-     //double costhstar = abs( tanh((pj[ij1].rapidity()-
-     //			   pj[ij2].rapidity())/2.0));
-
-     if (mjj > ptlow) {
-       // --- Later this variable will be the ren./fact. scale
-       //     double ptmax = pt1;    // either pTmax
-       double ptmax = (pt1+pt2)/2.0; // or the average dijet pT
-
-       // --- Determine eta and pt (= dijet mass) bin 
-       // KR: Note, for more than one rap bin BOTH leading jets are
-       //     required to be inside the SAME |rapidity| interval
-       // KR: Do normalize to binwidth in eta ...!
-       double binwidth = 1.0;
-       int rapbin = -1;
-       int nloop = nrap;   // - important for iref==1: different No loops
-       if (iref == 1) nloop = nrap/2; // -> in reference mode
-       for (int j = 0; j < nloop; j++) {        
-	 if (raphigh[j] <= yjjmin && yjjmax < raphigh[j+1]) {
-	   rapbin=j;
-	   binwidth = binwidth * 2.0*(raphigh[(j+1)] - raphigh[j]);
-	   break;
+     int njin = 0;
+     //     int ijet[5] = {0,1,2,3,4};
+     double pttmp[5]  = {0., 0., 0., 0., 0.};
+     double raptmp[5] = {9., 9., 9., 9., 9.};
+     double ptjet[5]  = {0., 0., 0., 0., 0.};
+     double rapjet[5] = {9., 9., 9., 9., 9.};
+     // There are maximally four jets
+     int imax = 0;
+     double ptmax = ptlow;
+     for ( int j=1; j<=nj; j++ ) {
+       pttmp[j]  = pj[j].perp();
+       raptmp[j] = abs(pj[j].prapidity());
+       if ( pttmp[j] < ptlow || raptmp[j] > raphigh[1] ) {
+	 pttmp[j]  = 0.;
+	 raptmp[j] = 9.;
+       } else {
+	 njin = njin+1;
+	 if ( pttmp[j] >= ptmax ) {
+	   imax = j;
+	   ptmax = pttmp[j];
 	 }
        }
+     }
+     if ( imax>0 ) {
+       ptjet[1]  = pttmp[imax];
+       rapjet[1] = raptmp[imax];
+       pttmp[imax] = 0.;
+       raptmp[imax] = 9.;
+     }
+     if ( njin>1 ) {
+       for ( int j=2; j<=njin; j++ ) {
+	 int imax = 0;
+	 double ptmax = ptlow;
+	 for ( int i=1; i<=nj; i++ ) {
+	   if ( pttmp[i] > ptmax ) {
+	     imax = i;
+	     ptmax = pttmp[i];
+	   }
+	 }
+	 if ( imax>0 ) {
+	   ptjet[j]  = pttmp[imax];
+	   rapjet[j] = raptmp[imax];
+	   pttmp[imax] = 0.;
+	   raptmp[imax] = 9.;
+	 }
+       }
+     }
+
+     cout << endl << "jets = " << nj << ", jets in = " << njin << endl;
+     for ( int i=1; i<=njin; i++ ) {
+       cout << "jet no. = " << i << ", pt = " << ptjet[i] << ", rap = " << rapjet[i] << endl;
+     }
+     
+     // for ( int j=1; j<nj; j++ ) {
+     //   int i0 = j;
+     //   int imax = j;
+     //   double ptmax = 0.;
+     //   for ( int i=j; i<nj; i++ ) {
+     // 	 if ( pj[ijet[i]].perp()>ptmax ) {
+     // 	   i0 = i;
+     // 	   imax = ijet[i]; 
+     // 	   ptmax = pj[ijet[i]].perp();
+     // 	 }
+     //   }
+     //   ijet[0] = ijet[j];
+     //   ijet[j] = imax;
+     //   ijet[i0] = ijet[0];
+     // }
+     
+     // for ( int i=1; i<=nj; i++ ) {
+     //   ptjet[i]  = pj[ijet[i]].perp();
+     //   rapjet[i] = abs(pj[ijet[i]].prapidity());
+     // }
+
+     if (njin > 1) {
+       // --- Later this variable will be the ren./fact. scale
+       //     double ptmax = pt1;    // either pTmax
+       double ptmax = (ptjet[1]+ptjet[2])/2.0; // or the average leading dijet pT
+       double ht = 0.;
+       for ( int i=1; i<=njin; i++ ) {
+	 ht = ht + ptjet[i];
+       }
+
+       // --- Determine multiplicity and HT bin, 3+ in rapbin 0, 2 in rapbin 1 
+       // KR: Do normalize to binwidths ...
+       int rapbin = 0;
+       double binwidth = 2.0*(raphigh[1] - raphigh[0]);
+       if ( njin==2 ) {
+	 rapbin = 1;
+       }
+
        if (rapbin >=0) {              
 	 int ptbin  = -1;
 	 for (int j = 0; j < npt[rapbin]; j++) {
-	   if (pthigh[rapbin][j] <= mjj && mjj < pthigh[rapbin][j+1]) {
+	   if (pthigh[rapbin][j] <= ht && ht < pthigh[rapbin][j+1]) {
 	     ptbin=j;
 	     binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
 	     break;
 	   }
+	 }
+	 if ( ptbin>0 ) {
+	   cout << endl << "htlow = " << pthigh[rapbin][ptbin] << ", ht = " << ht << ", hthig = " << pthigh[rapbin][ptbin+1] << endl;
+	 } else {
+	   cout << endl << "ht = " << ht << endl;
 	 }
        
 	 //---------- compute weight, fill fastNLO array
@@ -587,8 +611,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   //      if yes -> make big warning!!! 
 	   //      -> need to change x_limit values
 	   if (xmin<xlimit[rapbin][ptbin]){
-	     printf("Warning: xmin (%f) < xlimit (%f) at pt=%f GeV y=%f \n ",
-		    xmin,xlimit[rapbin][ptbin],mjj,yjjmax);
+	     printf("Warning: xmin (%f) < xlimit (%f) at ht=%f GeV njin=%i \n ",
+		    xmin,xlimit[rapbin][ptbin],ht,njin);
              printf("         in ptbin: %i  rapbin %i \n ", ptbin,rapbin);
 	     exit(1);
 	   }
@@ -866,14 +890,14 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "d2sigma-dijet_dM_dy_(pb_GeV)" << endl;
-   table << "CMS-LHC-Test-Scenario" << endl;
-   table << "Dijet_Mass" << endl;
-   table << "anti-kT_R=0.7" << endl;
+   table << "d2sigma-d3jet_dHT_dy_(pb_GeV)" << endl;
+   table << "CMS-LHC-Scenario" << endl;
+   table << "3-jet_Ratio" << endl;
+   table << "anti-kT_R=0.5" << endl;
    table << "-" << endl;
 
   //iproc
-   int iproc = 2; // dijets
+   int iproc = 2; // 3-jet ratio
    WRITE(iproc);
 
    //ialgo
@@ -881,7 +905,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.7; // jet size R
+   double JetResol1 = 0.5; // jet size R
    WRITE(JetResol1);
 
    //JetResol2

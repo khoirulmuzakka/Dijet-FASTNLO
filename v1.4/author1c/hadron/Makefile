@@ -1147,6 +1147,19 @@ fnl2622b: links fnl2622b.cc $(CommonPath)/fj-ak-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
+# =====   FNL2722: LHC CMS 3-jet ratio with fastjet anti-kT R=0.5 =
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2722: links fnl2722.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+# ======================================================================
 # =====   FNL3310: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution, @ 2.36 TeV 
