@@ -1151,6 +1151,14 @@ fnl2622b: links fnl2622b.cc $(CommonPath)/fj-ak-05.cc \
 # ======================================================================
 # LHC scenario for CMS, @ 7 TeV
 #
+fnl2722norm: links fnl2722norm.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722norm.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722norm -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 fnl2722: links fnl2722.cc $(CommonPath)/fj-ak-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl2722.cc \

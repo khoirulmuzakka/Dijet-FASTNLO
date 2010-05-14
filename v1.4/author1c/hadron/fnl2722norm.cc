@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl2722:
+// fastNLO author code for fnl2722 (normalization):
 //     CMS LHC 3-jet ratio scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
@@ -121,8 +121,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
 {
    //  number of jets 
    //nj = 1U;
-   //nj = 2U;
-   nj = 3U;
+   nj = 2U;
+   //nj = 3U;
 
    //  total c.m. energy squared
    //s =     40000.; // RHIC               200 GeV
@@ -408,7 +408,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "  " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
-   cout << "    Scenario fnl2722:" << endl;
+   cout << "    Scenario fnl2722norm:" << endl;
    cout  <<  "      CMS LHC 3-jet ratio scenario, E_cms = 7 TeV,"  <<  endl;
    cout  <<  "      for fastjet anti-kT algo with R=0.5 in E-scheme"  <<  endl; 
    cout << " " << endl;
@@ -575,9 +575,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        // KR: Do normalize to binwidths ...
        int rapbin = 0;
        double binwidth = 2.0*(raphigh[1] - raphigh[0]);
-       if ( njin==2 ) {
-	 rapbin = 1;
-       }
+       // if ( njin==2 ) {
+       // 	 rapbin = 1;
+       // }
 
        if (rapbin >=0) {              
 	 int ptbin  = -1;
