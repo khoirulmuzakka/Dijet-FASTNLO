@@ -564,7 +564,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      double syjj  = abs(y1+y2);
      double chijj = exp(dyjj);
 
-     if (dyjj < 3.0 && syjj < 3.0 &&
+     if (dyjj < 3.0 && syjj < 2.22 &&
 	 abs(y1) < ymax && abs(y2) < ymax &&  
 	 mjj > ptlow ) {
        // --- Later this variable will be the ren./fact. scale
