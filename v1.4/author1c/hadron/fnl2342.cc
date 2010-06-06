@@ -155,8 +155,8 @@ void UserHHC::initfunc(unsigned int)
    // First dimension (histogram numbers xxxxRxx), usually rapidity
    // 
    // # of bins
-   nrap = 5;
-   double rapb[6] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5};
+   nrap = 6;
+   double rapb[7] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
    // In reference mode: Double no. of bins
    nrap = nrap*(iref+1);
    
@@ -181,7 +181,7 @@ void UserHHC::initfunc(unsigned int)
    // Second dimension (histogram x axis), usually pT
    // 
    // # of bins npt per irap bin of first dimension
-   int nptb[5] = {39, 39, 39, 39, 39};
+   int nptb[6] = {39, 39, 39, 39, 39, 32};
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      npt[i] = nptb[i]; 
