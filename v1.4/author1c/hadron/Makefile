@@ -1056,6 +1056,14 @@ fnl2442: links fnl2442.cc $(CommonPath)/fj-ak-07.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
+fnl2442x40: links fnl2442x40.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2442x40.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2442x40 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 # ======================================================================
 # =====   FNL2518: LHC CMS Az. decorrelation with fastjet SISCone R=0.5 
 # ======================================================================
