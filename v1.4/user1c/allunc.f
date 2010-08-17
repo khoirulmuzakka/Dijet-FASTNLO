@@ -1024,11 +1024,23 @@ ckr     >                 ihist,val0,vallo,valhi
                      ENDIF
                      IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+(I+1)
      >                    *100
-ckrrat                     write(*,*)"FUCK: ihist,pt,val,lo,hi",ihist,ptbin(i
+ckrrat                     write(*,*)"MURKS: ihist,pt,val,lo,hi",ihist,ptbin(i
 ckrrat     >                    ,j),val0,vallo,valhi
                      CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
                      CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
                      CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
+ckrrat Stat. uncertainty: Add rel. uncertainties of ratio
+                     IHIST = IORD*1000000+ISCALE*100000+ISUB*10000 + 3
+                     CALL HOPERA(IHIST+(I-1)*100,'+',IHIST+(I)*100,
+     >                    IHIST+(I+1)*100,1.,1.)
+ckrrat Scale uncertainty: Derive rel. uncertainties for ratio
+                     IHIST = IORD*1000000+ISUB*10000
+                     CALL HOPERA(IHIST+4*100000+(I-1)*100+0,'/',
+     >                    IHIST+4*100000+(I)*100+0,
+     >                    IHIST+4*100000+(I+1)*100+0,1.,1.)
+                     CALL HOPERA(IHIST+2*100000+(I-1)*100+0,'/',
+     >                    IHIST+2*100000+(I)*100+0,
+     >                    IHIST+2*100000+(I+1)*100+0,1.,1.)
                   ENDIF
                ENDDO            ! pT-loop
             ENDDO               ! rap-loop

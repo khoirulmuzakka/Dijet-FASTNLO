@@ -50,15 +50,16 @@ our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
       $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
     ( "LOCAL", "", "0", "542", "guc", "", ".", "0001",
       "0", "LO", "CTEQ", "none", "", ".", "", "1b" );
-getopts('b:de:f:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
+getopts('b:de:f:g:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
-    print "  -b batch        Batch system used: LOCAL (def.), GRID or PBS\n";
+    print "  -b batch        Batch system used: LOCAL (def.),\n";
+    print "                  GC (grid-control), GRID or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -f rev          fastNLO revision to use (def.=542)\n";
-    print "  -g prot         Grid storage protocol to use (def.=guc)\n";
+    print "  -g prot         Grid storage protocol to use: guc (def.), srm\n";
     print "  -h              Print this text\n";
     print "  -i dir          Installation directory (def.=.)\n";
     print "  -j jobnr        Job number to attach (def.=0001)\n";
@@ -83,7 +84,7 @@ if ( $opt_h ) {
     exit;
 }
 
-unless ( $opt_b eq "LOCAL" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
+unless ( $opt_b eq "LOCAL" || $opt_b eq "GC" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fastrun.pl: Error! Illegal batch system: $opt_b, aborted.\n";
 }
 unless ( $opt_e =~ m/\d+/ && $opt_e !~ m/\D+/ ) {
@@ -343,7 +344,7 @@ foreach my $comp ( keys %install ) {
 	}
     }
     $install{$comp}[0] .=".tar.gz";
-    if ( $verb ) {
+    if ( $verb & ($mode < 2) ) {
 	print "fastrun.pl: Archive name: $install{$comp}[0]\n";
 	print "fastrun.pl: Unpack dir  : $install{$comp}[1]\n";
 	print "fastrun.pl: Install dir : $install{$comp}[2]\n";
@@ -1308,7 +1309,9 @@ if ( $mode == 0 || $mode == 3 ) {
 	$file .= ".tgz";
 	
 	if ( ! -f $file ) {
-	    if ( $batch eq "GRID" ) {
+	    if ( $batch eq "GC" ) {
+		die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file working dir, aborted!\nCheck your grid storage options for grid-control!\n";
+	    } elsif ( $batch eq "GRID" ) {
 		grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
 	    } elsif ( $batch eq "PBS" ) {
 		die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file in PBS working dir, aborted!\n";
@@ -1388,17 +1391,30 @@ if ( $mode == 0 || $mode == 3 ) {
 # Change job numbering according to grid-control
 	    my $tfile  = $sfile;
 	    $tfile =~ s/_0001//;
-	    $tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
-	    if ( $batch eq "GRID" ) {
+	    if ( $batch eq "GC" ) {
+		$tfile =~ s/\.${tabext}/\.${tabext}/;
+	    } else {
+		$tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
+	    }
+# GC does not support my file rename scheme with leading zeros in job numbers
+	    if ( $batch eq "GC" ) {
+		print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
+		print "                  Copy table to current directory for storage.\n";
+		my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
+		if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
+				 "current directory $aidir: $ret, aborted!\n";}
+	    } elsif ( $batch eq "GRID" ) {
 		grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
 	    } else {
 		my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
 		if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
 				 "current directory $aidir: $ret, aborted!\n";}
 	    }
-	    my $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    print "fastrun.pl: Table stored: TABSAV1_$date\n";
+	    unless ( $batch eq "GC" ) {
+		my $date = `date +%d%m%Y_%H%M%S`;
+		chomp $date;
+		print "fastrun.pl: Table stored: TABSAV1_$date\n";
+	    }
 	}
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
@@ -1407,7 +1423,8 @@ if ( $mode == 0 || $mode == 3 ) {
 	print "###############################\n\n";
 #	close STDERR;
 #	close STDOUT;
-# Copy log files to grid storage
+# Copy log files to grid storage, but rename first to go with the job
+# If size = 0, as should be normal for job.stderr, do NOT rename => no grid storage.
 	if ( $batch ne "LOCAL" ) {
 #	    my $tpath = "fastNLO_tables/${scen}${ref}";
 	    my $tpath = "fastNLO_tables/${scen}";
@@ -1417,23 +1434,61 @@ if ( $mode == 0 || $mode == 3 ) {
 		$tpath = "";
 	    }
 	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
-	    if ( $batch eq "GRID" ) {
+	    if ( $batch eq "GC" ) {
+		$tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}";
+	    }
+	    chdir $pwdir or die "fastrun.pl: ERROR! Couldn't cd to $pwdir, aborted!\n";
+#	    if ( -z "job.stderr" ) {
+#		my $ret = system("rm -f job.stderr");
+#		if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stderr: ".
+#				 "$ret, aborted!\n";}
+#	    }
+#	    if ( -z "job.stdout" ) {
+#		my $ret = system("rm -f job.stdout");
+#		if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stdout: ".
+#				 "$ret, aborted!\n";}
+#	    }
+# GC does not support my file rename scheme with leading zeros in job numbers
+	    if ( $batch eq "GC" ) {
+# GC will copy renamed files to SE 
+		print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
+		print "                  Move log files to correct file names for storage.\n\n";
+		if ( -f "job.stderr" && ! -z "job.stderr" ) {
+		    my $ret = system("cp -p job.stderr ${tfile}.err");
+		    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stderr ".
+				     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+		}
+		if ( -f "job.stdout" && ! -z "job.stdout" ) {
+		    $ret = system("cp -p job.stdout ${tfile}.log");
+		    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stdout ".
+				     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+		}
+		$ret = system("pwd");
+		if ( $ret ) {print "fastrun.pl: WARNING! Couldn't print cwd!\n";}
+		$ret = system("ls -la");
+		if ( $ret ) {print "fastrun.pl: WARNING! Couldn't list cwd!\n";}
+	    } elsif ( $batch eq "GRID" ) {
 		grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
 		grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
 	    } else {
 # For PBS with grid-control log files are in $pwdir as job.stdout and .stderr
 # ... only copy
-		chdir $pwdir;
-		my $ret = system("cp -p job.stderr ${tfile}.err");
-		if ( $ret ) {die "fastrun.pl: Couldn't copy job.stderr ".
-				 "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-		$ret = system("cp -p job.stdout ${tfile}.log");
-		if ( $ret ) {die "fastrun.pl: Couldn't copy job.stdout ".
-				 "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+		if ( -f "job.stderr" ) {
+		    my $ret = system("cp -p job.stderr ${tfile}.err");
+		    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stderr ".
+				     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+		}
+		if ( -f "job.stdout" ) {
+		    $ret = system("cp -p job.stdout ${tfile}.log");
+		    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stdout ".
+				     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+		}
 	    }
-	    my $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
+	    unless ( $batch eq "GC" ) {
+		my $date = `date +%d%m%Y_%H%M%S`;
+		chomp $date;
+		print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
+	    }
 	}
 	exit 0;
     }
@@ -1531,10 +1586,15 @@ sub grid_storage {
     my $gucname = "ic-kit-lcgse.rz.uni-karlsruhe.de";
     my $gucpath = "/wlcg/data/users/cms/rabbertz/";
     
+# Aachen T2 via srm
+#    my $srmname = "dcache-se-cms.desy.de:8443/srm/managerv2?SFN=";
+    my $srmname = "grid-srm.physik.rwth-aachen.de:8443";
+    my $srmpath = "/pnfs/physik.rwth-aachen.de/cms/store/user/krabbert/";
+
 # DESY T2 via srm
 #    my $srmname = "dcache-se-cms.desy.de:8443/srm/managerv2?SFN=";
-    my $srmname = "dcache-se-cms.desy.de:8443";
-    my $srmpath = "/pnfs/desy.de/cms/tier2/store/user/krabbert/";
+#    my $srmname = "dcache-se-cms.desy.de:8443";
+#    my $srmpath = "/pnfs/desy.de/cms/tier2/store/user/krabbert/";
     
     my $gucopt = "-cd";
     if ($protocol eq "guc") {
@@ -1616,23 +1676,28 @@ sub grid_storage {
 #		my $ret = system("$gcmd");
 #		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
 # Create target directory directly with globus-url-copy if possible
-	if ($protocol eq "guc") {
-	    my $gcmd = "globus-url-copy $gucopt ".
-		"file://${source} ".
-		"gsiftp://${sename}/${target}";
-	    print "Command $gcmd\n";
-	    my $ret = system("$gcmd");
-	    if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
-			     "source $source to target $target failed: $ret!\n";}
+# Don't bother to copy empty error files ...
+	if ( -z "$source" ) {
+	    print "fastrun.pl: WARNING! Skipping storage of empty file $source\n";
 	} else {
-	    $ENV{SRM_PATH} = "";
-	    my $gcmd = "srmcp ".
-		"file:////${source} ".
-		"srm://${sename}/${target}";
-	    print "Command $gcmd\n";
-	    my $ret = system("$gcmd");
-	    if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
-			     "source $source to target $target failed: $ret!\n";}
+	    if ($protocol eq "guc") {
+		my $gcmd = "globus-url-copy $gucopt ".
+		    "file://${source} ".
+		    "gsiftp://${sename}/${target}";
+		print "Command $gcmd\n";
+		my $ret = system("$gcmd");
+		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+				 "source $source to target $target failed: $ret!\n";}
+	    } else {
+		$ENV{SRM_PATH} = "";
+		my $gcmd = "srmcp ".
+		    "file:////${source} ".
+		    "srm://${sename}/${target}";
+		print "Command $gcmd\n";
+		my $ret = system("$gcmd");
+		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+				 "source $source to target $target failed: $ret!\n";}
+	    }
 	}
     } elsif ( $signam eq "FETCH" ) {
 	print "fastrun.pl: Fetching binary fastNLO archive $sfile from\n";
