@@ -927,6 +927,19 @@ fnl2222: links fnl2222.cc $(CommonPath)/fj-ak-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
 # ======================================================================
+# =====   FNL2222a: LHC CMS forward jets with fastjet anti-kT R=0.5 ====
+# ======================================================================
+# LHC scenario for CMS at 7 TeV
+#
+fnl2222a: links fnl2222a.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2222a.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2222a -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
 # =====   FNL2308: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
 # ======================================================================
 # LHC scenario for CMS,  pt binning acc. to expected resolution, @ 7 TeV
@@ -1061,6 +1074,14 @@ fnl2442x40: links fnl2442x40.cc $(CommonPath)/fj-ak-07.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl2442x40.cc \
 	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
 	-o fnl2442x40 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2442a: links fnl2442a.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2442a.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2442a -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
