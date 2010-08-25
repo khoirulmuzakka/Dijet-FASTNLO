@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 # the main target, i.e. the executable to build
-bin_PROGRAMS = example allunc
+bin_PROGRAMS = example allunc testhhc
 # Add later: testhhc
 
 # all source files which go into the main target (and have to be distributed)
@@ -22,8 +22,10 @@ AM_FFLAGS = -O -g -ff2c -fno-automatic -ffixed-line-length-132
 testhhc_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 
 # libraries to be linked to the main target
-example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
-allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
+#example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
+#allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
+example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
 allunc_LDFLAGS = -lg2c
 
 # path to LHAPDF pdfsets
