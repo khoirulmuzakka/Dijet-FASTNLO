@@ -68,19 +68,19 @@ if ( $opt_h ) {
     print "  -p pdf          CTEQ parton densities (def.) or LHAPDF\n";
     print "  -q rootversion  ROOT version to install (def.=none)\n";
     print "  -r              Reference calculation incl. pdf access\n";
-    print "  -s dir          Archive source directory (def.=.)\n";
+    print "  -s dir          Archive source directory, abs. path (def.=`pwd`)\n";
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v #            Choose between fastNLO version 1a, 1b and 2 (def.=1b)\n";
+    print "  -v #            Choose between fastNLO version 1a, 1b, 2a and 2b (def.=1b)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1a|1b|2]\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1a|1b|2a|2b]\n\n";
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 2 [-p CTEQ|LHAPDF] [-r] [-v 1a|1b|2] scenarioname\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f 500|rev] -m 2 [-p CTEQ|LHAPDF] [-r] [-v 1a|1b|2a|2b] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 500|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 1a|1b|2] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f 500|rev] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 1a|1b|2a|2b] scenarioname\n\n";
     exit;
 }
 
@@ -114,7 +114,7 @@ unless ( $opt_p eq "CTEQ" || $opt_p eq "LHAPDF" ) {
 unless ( -d $opt_s || -l $opt_s ) {
     die "fastrun.pl: Error! Archive source directory $opt_s does not exist, aborted.\n";
 }
-unless ( $opt_v eq "1a" || $opt_v eq "1b" || $opt_v eq "2") {
+unless ( $opt_v eq "1a" || $opt_v eq "1b" || $opt_v eq "2a" || $opt_v eq "2b") {
     die "fastrun.pl: Error! fastNLO version $opt_v does not exist, aborted.\n";
 }
 
@@ -315,14 +315,29 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{lhapdf}[1]     = "lhapdf-5.7.0";
     $install{lhapdffix}[0]  = "lhapdf-5.7.0-fix";
     $install{lhapdffix}[1]  = "lhapdf-5.7.0";
-    $install{nlojet}[0]     = "nlojet++-4.0.1";
-    $install{nlojet}[1]     = "nlojet++-4.0.1";
-    $install{nlojetfix}[0]  = "nlojet++-4.0.1-fix";
-    $install{nlojetfix}[1]  = "nlojet++-4.0.1";
-    $install{lhpdf}[0]      = "lhpdf-1.0.0";
-    $install{lhpdf}[1]      = "lhpdf-1.0.0";
-    $install{lhpdffix}[0]      = "lhpdf-1.0.0-fix";
-    $install{lhpdffix}[1]      = "lhpdf-1.0.0";
+    if ( $vers eq "2a" ) {
+	$install{nlojet}[0]     = "nlojet++-4.0.1";
+	$install{nlojet}[1]     = "nlojet++-4.0.1";
+	$install{nlojetfix}[0]  = "nlojet++-4.0.1-fix";
+	$install{nlojetfix}[1]  = "nlojet++-4.0.1";
+	$install{znpdf}[0]      = "lhpdf-1.0.0";
+	$install{znpdf}[1]      = "lhpdf-1.0.0";
+	$install{znpdffix}[0]   = "lhpdf-1.0.0-fix";
+	$install{znpdffix}[1]   = "lhpdf-1.0.0";
+	$install{fastNLOfix}[0] = "fastNLO-rev${frev}-fix";
+	$install{fastNLOfix}[1] = "fastNLO-rev${frev}-fix";
+    } else {
+	$install{nlojet}[0]     = "nlojet++-4.1.3";
+	$install{nlojet}[1]     = "nlojet++-4.1.3";
+	$install{nlojetfix}[0]  = "";
+	$install{nlojetfix}[1]  = "";
+	$install{znpdf}[0]      = "cteq-pdf-1.0.4";
+	$install{znpdf}[1]      = "cteq-pdf-1.0.4";
+	$install{znpdffix}[0]   = "";
+	$install{znpdffix}[1]   = "";
+	$install{fastNLOfix}[0] = "";
+	$install{fastNLOfix}[1] = "";
+    }
 }
 
 foreach my $comp ( keys %install ) {
@@ -538,12 +553,12 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 #    unless ( -e "$idir/src/$install{cernlib}[2]" ) {
     unless ( (($vers eq "1a" || $vers eq "1b") && $ENV{CERNLIB}) ||
-	     ($vers eq "2" && $ENV{CERN_ROOT} ) ) {
+	     (($vers eq "2a" || $vers eq "2b") && $ENV{CERN_ROOT}) ) {
         $date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	chdir "$aidir/src";
 	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	my $ret =system("tar xz -f $sdir/$install{cernlib}[0]");
+	my $ret = system("tar xz -f $sdir/$install{cernlib}[0]");
 	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[0] ".
 			 "in $aidir/src failed: $ret, aborted!\n";}
 	$ret = system("mv $install{cernlib}[1] $install{cernlib}[2]");
@@ -585,7 +600,7 @@ if ( $mode == 0 || $mode == 1 ) {
     }
     chdir "$pwdir";
 # ROOT
-    if ( $vers eq "2" ) {
+    if ( ($vers eq "2a" || $vers eq "2b") ) {
 #	unless ( -e "$aidir/src/$install{root}[2]" ) {
 	unless ( $ENV{ROOTSYS} || $rv eq "none") {
 	    $date = `date +%d%m%Y_%H%M%S`;
@@ -814,6 +829,9 @@ if ( $mode == 0 || $mode == 1 ) {
 	chomp $date;
 	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[0]: $date\n";
 	print FILE "# Add NLOJET environment\n";
+	print "0: $install{nlojet}[0]\n";
+	print "1: $install{nlojet}[1]\n";
+	print "2: $install{nlojet}[2]\n";
 	if ( $vers eq "1a" || $vers eq "1b" ) {
 	    print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
 	    my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
@@ -829,11 +847,6 @@ if ( $mode == 0 || $mode == 1 ) {
 			     "$idir/$install{nlojet}[2]: $ret, aborted!\n";}
 #	    if ( -l "$idir/$install{nlojet}[3]" ) {system("rm -f $idir/$install{nlojet}[3]");}
 #	    system("ln -s $install{nlojet}[2] $idir/$install{nlojet}[3]");
-	    
-	    print "0: $install{nlojet}[0]\n";
-	    print "1: $install{nlojet}[1]\n";
-	    print "2: $install{nlojet}[2]\n";
-	    
 	    chdir "$idir/$install{nlojet}[2]";
 	    print "\nfastrun.pl: Configuring Nlojet++ ...\n";
 #	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
@@ -853,10 +866,15 @@ if ( $mode == 0 || $mode == 1 ) {
 	    my $ret = system("tar xz -f $sdir/$install{nlojet}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
 			     "in $aidir/src failed: $ret, aborted!\n";}
-	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
-	    $ret = system("tar xz -f $sdir/$install{nlojetfix}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
+	    print "$install{nlojetfix}[0]\n";
+	    my $tmp = ($install{nlojetfix}[0] ne "");
+	    print "tmp $tmp\n";
+	    unless ( $install{nlojetfix}[0] eq ".tar.gz" ) {
+		print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+		$ret = system("tar xz -f $sdir/$install{nlojetfix}[0]");
+		if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
+				 "in $aidir/src failed: $ret, aborted!\n";}
+	    }
 	    $ret = system("mv $install{nlojet}[1] $install{nlojet}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			     "$install{nlojet}[1] to ".
@@ -888,44 +906,53 @@ if ( $mode == 0 || $mode == 1 ) {
 
 
 #
-# 4b) Install lhpdf for Nlojet++, only for version 2
+# 4b) Install znpdf for Nlojet++, only for version 2a, 2b
 #
-    if ( $vers eq "2" && ! $ENV{LHPDF} ) {
+    if ( ($vers eq "2a" || $vers eq "2b") && ! $ENV{ZNPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
-	print "\nfastrun.pl: Installing lhpdf from $install{lhpdf}[0]: $date\n";
+	print "\nfastrun.pl: Installing znpdf from $install{znpdf}[0]: $date\n";
 	chdir "$aidir/src";
-	print "\nfastrun.pl: Unpacking $install{lhpdf}[0] ...\n";
-	my $ret = system("tar xz -f $sdir/$install{lhpdf}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdf}[0] ".
+	print "\nfastrun.pl: Unpacking $install{znpdf}[0] ...\n";
+	my $ret = system("tar xz -f $sdir/$install{znpdf}[0]");
+	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{znpdf}[0] ".
 			 "in $aidir/src failed: $ret, aborted!\n";}
-
-	print "\nfastrun.pl: Unpacking fix for $install{lhpdf}[0] ...\n";
-	$ret = system("tar xz -f $sdir/$install{lhpdffix}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdffix}[0] ".
-			 "in $aidir/src failed: $ret, aborted!\n";}
-	$ret = system("mv $install{lhpdf}[1] $install{lhpdf}[2]");
+	unless ( $install{znpdffix}[0] eq ".tar.gz" ) {
+	    print "\nfastrun.pl: Unpacking fix for $install{znpdf}[0] ...\n";
+	    $ret = system("tar xz -f $sdir/$install{znpdffix}[0]");
+	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{znpdffix}[0] ".
+			     "in $aidir/src failed: $ret, aborted!\n";}
+	}
+	$ret = system("mv $install{znpdf}[1] $install{znpdf}[2]");
 	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{lhpdf}[1] to ".
-			 "$install{lhpdf}[2]: $ret, aborted!\n";}
-	chdir "$install{lhpdf}[2]";
-	print "\nfastrun.pl: Configuring lhpdf ...\n";
+			 "$install{znpdf}[1] to ".
+			 "$install{znpdf}[2]: $ret, aborted!\n";}
+	chdir "$install{znpdf}[2]";
+	print "\nfastrun.pl: Configuring znpdf ...\n";
 	$ret = system("./configure --prefix=$aidir");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf configure step, aborted!\n";}
-	print "\nfastrun.pl: Making lhpdf ...\n";
+	if ( $ret ) {die "fastrun.pl: Error $ret in znpdf configure step, aborted!\n";}
+	print "\nfastrun.pl: Making znpdf ...\n";
 	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make step, aborted!\n";}
-	print "\nfastrun.pl: Make install for lhpdf ...\n";
+	if ( $ret ) {die "fastrun.pl: Error $ret in znpdf make step, aborted!\n";}
+	print "\nfastrun.pl: Make install for znpdf ...\n";
 	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make install step, aborted!\n";}
-	print FILE "# Add LHPDF environment\n";
-	print FILE "setenv LHPDF $aidir\n";
-	print FILE "setenv LHPDFLIBPATH $aidir/lib\n";
-	print FILE "setenv LHPDFINCLUDEPATH $aidir/include/lhpdf\n";
+	if ( $ret ) {die "fastrun.pl: Error $ret in znpdf make install step, aborted!\n";}
+	print FILE "# Add ZNPDF environment\n";
+	print FILE "setenv ZNPDF $aidir\n";
+	print FILE "setenv ZNPDFLIBPATH $aidir/lib\n";
+        if ( $vers eq "2a" ) {
+	    print FILE "setenv ZNPDFINCLUDEPATH $aidir/include/lhpdf\n";
+	} else {
+	    print FILE "setenv ZNPDFINCLUDEPATH $aidir/include/cteq\n";
+	}
 	print FILE "#\n";
-	$ENV{LHPDF}            = "$aidir";
-	$ENV{LHPDFLIBPATH}     = "$aidir/lib";
-	$ENV{LHPDFINCLUDEPATH} = "$aidir/include/lhpdf";
+	$ENV{ZNPDF}            = "$aidir";
+	$ENV{ZNPDFLIBPATH}     = "$aidir/lib";
+        if ( $vers eq "2a" ) {
+	    $ENV{ZNPDFINCLUDEPATH} = "$aidir/include/lhpdf";
+	} else {
+	    $ENV{ZNPDFINCLUDEPATH} = "$aidir/include/cteq";
+	}
     }
     chdir "$pwdir";
 #exit 4;
@@ -1004,6 +1031,12 @@ if ( $mode == 0 || $mode == 1 ) {
 	    my $ret = system("tar xz -f $sdir/$install{fastNLO}[0]");
 	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
 			     "in $aidir/src failed: $ret, aborted!\n";}
+	    unless ( $install{fastNLOfix}[0] eq ".tar.gz" ) {
+		print "\nfastrun.pl: Unpacking fix for $install{fastNLO}[0] ...\n";
+		$ret = system("tar xz -f $sdir/$install{fastNLOfix}[0]");
+		if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLOfix}[0] ".
+				 "in $aidir/src failed: $ret, aborted!\n";}
+	    }
 	    $ret = system("mv $install{fastNLO}[1] $install{fastNLO}[2]");
 	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
 			     "$install{fastNLO}[1] to ".
