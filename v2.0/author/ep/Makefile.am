@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libfnh1001.la
 
 # all source files which go into the main target (and have to be distributed)
-libfnh1001_la_SOURCES = fnh1001.cc alew.f
+libfnh1001_la_SOURCES = fnh1001.cc alew.f pdf-cteq6.h pdf-dis-dummy.h
 
 # C++ compiler flags to be used for the main target
 libfnh1001_la_CXXFLAGS = -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}

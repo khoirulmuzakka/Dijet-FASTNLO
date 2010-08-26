@@ -7,18 +7,20 @@ libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc
   fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
 
 libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  fnloTableUser.cc \
-  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloTableUser.h LHAPDF.h
+  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloTableUser.h \
+  LHAPDF.h LHAPDFConfig.h
+# Copied from LHAPDF 5.8.4. This is far from optimal ...
 
 libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc fnloBlockBNlojet.cc  \
   fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloBlockBNlojet.h
 
 # if ROOT is installed, add a dictionary to the library
-if HAVEROOT
-  libfastnlo_la_SOURCES += fnloTableDict.cc
-  libfastnloUser_la_SOURCES += fnloTableDict.cc
-  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
-	-${ROOTCINTPATH} -f fnloTableDict.cc -c -I${LHAPDFINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
-endif
+#if HAVEROOT
+#  libfastnlo_la_SOURCES += fnloTableDict.cc
+#  libfastnloUser_la_SOURCES += fnloTableDict.cc
+#  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+#	-${ROOTCINTPATH} -f fnloTableDict.cc -c -I${LHAPDFINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
+#endif
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 

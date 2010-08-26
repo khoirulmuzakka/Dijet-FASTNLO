@@ -7,9 +7,11 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    fnloBlockA2 *A2 =  BlockA2;
 
    if(this->IRef>0){
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_dis wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_dis wt = amp(mu2,mu2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -69,11 +71,13 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
             - 0.5*cm[3]*cm[3]*cm[3];
       }
 
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
          
-         nlo::weight_dis wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_dis wt = amp(mu2,mu2);
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
@@ -151,6 +155,7 @@ void fnloBlockBNlojet::FillEventDIS2Scale(int ObsBin, double x, double scale1, d
    fnloBlockA2 *A2 =  BlockA2;
 
    if(this->IRef>0){
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
 
       for(int scalevar=0; scalevar<GetTotalScalevars(); scalevar++){
          int scalei1 = scalevar / Nscalevar[1];
@@ -159,7 +164,7 @@ void fnloBlockBNlojet::FillEventDIS2Scale(int ObsBin, double x, double scale1, d
          double mur2 = ScaleFac[0][scalei1]*ScaleFac[0][scalei1]*scale1*scale1;
          double muf2 = ScaleFac[1][scalei2]*ScaleFac[1][scalei2]*scale2*scale2;
          //         printf("%d %d %d %f %f %f %f\n",scalevar,scalei1,scalei2,ScaleFac[0][scalei1],ScaleFac[1][scalei2],mur2,muf2);
-         nlo::weight_dis wt = amp(pdf,mur2,muf2,prefactor);
+         nlo::weight_dis wt = amp(mur2,muf2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -219,6 +224,8 @@ void fnloBlockBNlojet::FillEventDIS2Scale(int ObsBin, double x, double scale1, d
             - 0.5*cm[3]*cm[3]*cm[3];
       }
 
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+
       for(int scalevar=0; scalevar<GetTotalScalevars(); scalevar++){
 
          int scalei1 = scalevar / Nscalevar[1];
@@ -227,7 +234,7 @@ void fnloBlockBNlojet::FillEventDIS2Scale(int ObsBin, double x, double scale1, d
          double mur2 = ScaleFac[0][scalei1]*ScaleFac[0][scalei1]*scale1*scale1;
          double muf2 = ScaleFac[1][scalei2]*ScaleFac[1][scalei2]*scale2*scale2;
 
-         nlo::weight_dis wt = amp(pdf,mur2,muf2,prefactor);
+         nlo::weight_dis wt = amp(mur2,muf2);
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
@@ -351,10 +358,11 @@ void fnloBlockBNlojet::FillEventPhoto(int ObsBin, double x, double scale1, const
    fnloBlockA2 *A2 =  BlockA2;
    
    if(this->IRef>0){
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
 
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_photo wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_photo wt = amp(mu2,mu2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -415,10 +423,12 @@ void fnloBlockBNlojet::FillEventPhoto(int ObsBin, double x, double scale1, const
             - 0.5*cm[3]*cm[3]*cm[3];
       }
 
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+      
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_photo wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_photo wt = amp(mu2,mu2);
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
@@ -497,10 +507,11 @@ void fnloBlockBNlojet::FillEventResolved(int ObsBin, double x, double x2, double
    fnloBlockA2 *A2 =  BlockA2;
    
    if(this->IRef>0){
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
 
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_hhc wt = amp(mu2,mu2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -626,10 +637,12 @@ void fnloBlockBNlojet::FillEventResolved(int ObsBin, double x, double x2, double
                - 0.5*cm2[3]*cm2[3]*cm2[3];
          }
 
+         amp.pdf_and_qcd_coupling(pdf, prefactor);
+      
          for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
             double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-            nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+            nlo::weight_hhc wt = amp(mu2,mu2);
 
             double binsize = 1.0;
             for(int dim=0; dim<A2->NDim; dim++){
@@ -740,10 +753,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    fnloBlockA2 *A2 =  BlockA2;
    
    if(this->IRef>0){
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
 
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_hhc wt = amp(mu2,mu2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -849,10 +863,12 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          }
       }
 
+      amp.pdf_and_qcd_coupling(pdf, prefactor);
+
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_hhc wt = amp(mu2,mu2);
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){

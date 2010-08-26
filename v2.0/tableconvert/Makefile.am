@@ -18,3 +18,4 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure missing install-sh
 
 # Additional scripts
 bin_SCRIPTS = tablefix.pl
+EXTRA_DIST  = tablefix.pl

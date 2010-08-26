@@ -1,15 +1,15 @@
 AUTOMAKE_OPTIONS = foreign
 
 # the main target, i.e. the executable to build
-bin_PROGRAMS = example allunc testhhc
-# Add later: testhhc
+bin_PROGRAMS = testhhc
+# Add later: allunc example
 
 # all source files which go into the main target (and have to be distributed)
-example_SOURCES = example.f fnx9999.f fnx9999.inc fx9999rw.f fnio.f fnset.f fn-alphas-demo.f fn-interface.f alphst.f pyalps.f
-allunc_SOURCES = allunc.f statcode.f fnx9999.f fx9999rw.f fnio.f fnset.f \
-	fn-interface.f \
-	fn-alphas-demo.f alphst.f pyalps.f  \
-	fnx9999.inc strings.inc
+#example_SOURCES = example.f fnx9999.f fnx9999.inc fx9999rw.f fnio.f fnset.f fn-alphas-demo.f fn-interface.f alphst.f pyalps.f strings.inc
+#allunc_SOURCES = allunc.f statcode.f fnx9999.f fx9999rw.f fnio.f fnset.f \
+#	fn-interface.f \
+#	fn-alphas-demo.f alphst.f pyalps.f  \
+#	fnx9999.inc strings.inc
 testhhc_SOURCES = testhhc.cc
 
 # FORTRAN compiler flags to be used for the main target
@@ -24,9 +24,9 @@ testhhc_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFI
 # libraries to be linked to the main target
 #example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
 #allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
-example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
-allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
-allunc_LDFLAGS = -lg2c
+#example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+#allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+#allunc_LDFLAGS = -lg2c
 
 # path to LHAPDF pdfsets
 %.f: %.F
