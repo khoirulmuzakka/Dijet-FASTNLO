@@ -81,7 +81,7 @@ void fnloTable::CloseFileWrite(){
 
 int fnloTable::ReadBlockB(int no){
    if( CreateBlockB(no) ){
-      printf("fnloTable::ReadBlockB: Cannot create block B #%d. Already existing blocks: %d. Stopping.\n",no,BlockB.size());
+      printf("fnloTable::ReadBlockB: Cannot create block B #%d. Already existing blocks: %zu. Stopping.\n",no,BlockB.size());
    }
    return BlockB[no]->Read(ifilestream);
 }
@@ -108,7 +108,7 @@ int fnloTable::WriteBlockB(int no){
    if((no)<BlockB.size()){
       blockb = BlockB[no];
    }else{
-      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %d. Stopping.\n",no,BlockB.size());
+      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
       
    }
@@ -120,7 +120,7 @@ int fnloTable::WriteBlockBDividebyN(int no){
    if((no)<BlockB.size()){
       blockb = BlockB[no];
    }else{
-      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %d. Stopping.\n",no,BlockB.size());
+      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
       
    }
@@ -133,7 +133,7 @@ int fnloTable::WriteBlockB(int no,ofstream* outstream ){
    if((no)<BlockB.size()){
       blockb = BlockB[no];
    }else{
-      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %d. Stopping.\n",no,BlockB.size());
+      printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
       
    }

@@ -55,7 +55,7 @@ int main(int argc, char** argv)
   }
   
   int ntables = table_list.size();
-  printf("Found %d table file(s).\n",ntables);
+  printf("Found %zu table file(s).\n",ntables);
   if(ntables<1) exit(1);
 
   Entry *oneentry;
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
      }
   }
 
-  printf("No of types of contributions: %d\n",entries.size());
+  printf("No of types of contributions: %zu\n",entries.size());
   int Ncontrib = 0;
   int Nmult = 0;
   int Ndata = 0;

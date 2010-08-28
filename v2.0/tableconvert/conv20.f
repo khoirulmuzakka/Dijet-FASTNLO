@@ -345,7 +345,7 @@ c         WRITE(2,5000) Nxtot       ! Nxtot(1) - obsolete see below
                   if (ixscheme.eq.2) then
                      hxlim = - sqrt(-log10(xnode))
                      hx = hxlim *(1d0 - dble(j-1)/dble(Nxtot)) 
-                     XNode = 10**-(hx*hx)
+                     XNode = 10**(-(hx*hx))
                   elseif (ixscheme.eq.1) then
                      hxlim = log10(xnode)
                      hx = hxlim *(1d0 - dble(j-1)/dble(Nxtot))
