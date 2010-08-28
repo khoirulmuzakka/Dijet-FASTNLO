@@ -1,4 +1,10 @@
-AUTOMAKE_OPTIONS = foreign
+# Provide local m4 macros in dir m4, copy also system-wide macros
+#ACLOCAL_AMFLAGS = -I m4 --install
+# Provide local m4 macros in dir m4, don't copy system-wide macros
+ACLOCAL_AMFLAGS = -I m4
+#
+AUTOMAKE_OPTIONS = gnu
+#AUTOMAKE_OPTIONS = foreign
 SUBDIRS = common merger tableconvert author/ep
 # author/hadron user  
 
@@ -6,7 +12,7 @@ SUBDIRS = common merger tableconvert author/ep
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
-# but not for distribution 
-MAINTAINERCLEANFILES = config.guess config.status config.sub configure \
-	Makefile.in Makefile aclocal.m4 auto4mte.cache \
-	depcomp install-sh libtool ltmain.sh missing
+# but NOT before distribution with "make dist"! 
+MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
+	depcomp install-sh ltmain.sh missing \
+	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4

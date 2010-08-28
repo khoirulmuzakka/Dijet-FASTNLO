@@ -1,10 +1,82 @@
-To install
-
-autoreconf --install
-./configure
+Installation of distribution package:
+=====================================
+./configure --prefix=/your/install/directory
+make
 make install
+TODO: make check
 
-Required 
-LHAPDF
-ROOT
+Required external packages:
+---------------------------
+   Mandatory:
+              nlojet++-4.1.3.tar.gz
+              cteq-pdf-1.0.4.tar.gz
+              lhpdf-1.0.0.tar.gz
+              lhpdf-1.0.0-fix.tar.gz
 
+   Optional:
+              lhapdf-5.8.4.tar.gz
+              lhapdf-5.8.4-fix.tar.gz
+              fastjet-2.4.2.tar.gz
+              ROOT
+              CERNLIB
+
+Example for used environment variables:
+---------------------------------------
+#                                              
+# fastrun.pl: Setting fastNLO and gcc environment as required by this installation of fastNLO version 2b!
+#                                                                                                        
+# Add CERNLIB environment                                                                                
+setenv CERN_ROOT /home/rabbertz/local                                                             
+setenv CERNLIBPATH /home/rabbertz/local/lib                                                       
+setenv CERNLIBS "-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"                                         
+#                                                                                                        
+# Add LHAPDF environment                                                                                 
+setenv LHAPDF /home/rabbertz/local                                                                
+setenv LHAPDFBINPATH /home/rabbertz/local/bin                                                     
+setenv LHAPDFLIBPATH /home/rabbertz/local/lib                                                     
+setenv LHAPDFINCLUDEPATH /home/rabbertz/local/include/LHAPDF                                      
+setenv LHAPDFSETPATH /home/rabbertz/local/share/lhapdf/PDFsets                                    
+#                                                                                                        
+# Add FASTJET environment                                                                                
+setenv FASTJET /home/rabbertz/local                                                               
+setenv FASTJETBINPATH /home/rabbertz/local/bin                                                    
+setenv FASTJETLIBPATH /home/rabbertz/local/lib
+setenv FASTJETINCLUDEPATH /home/rabbertz/local/include/fastjet
+setenv FASTJETLIBS "-Wl,-rpath,/home/rabbertz/local/lib -lm -L/home/rabbertz/local/lib -lfastjet"
+#
+# Add NLOJET environment
+setenv NLOJET /home/rabbertz/local
+setenv NLOJETBINPATH /home/rabbertz/local/bin
+setenv NLOJETLIBPATH /home/rabbertz/local/lib
+setenv NLOJETINCLUDEPATH /home/rabbertz/local/include/nlo++
+#
+# Add LHPDF environment
+setenv LHPDF /home/rabbertz/local
+setenv LHPDFLIBPATH /home/rabbertz/local/lib
+setenv LHPDFINCLUDEPATH /home/rabbertz/local/include/lhpdf
+#
+# Add ZNPDF environment
+setenv ZNPDF /home/rabbertz/local
+setenv ZNPDFLIBPATH /home/rabbertz/local/lib
+setenv ZNPDFINCLUDEPATH /home/rabbertz/local/include/cteq
+#
+# Add FASTNLO environment
+setenv FASTNLO /home/rabbertz/local
+setenv FASTNLOBINPATH /home/rabbertz/local/bin
+setenv FASTNLOLIBPATH /home/rabbertz/local/lib/fastnlo
+setenv FASTNLOSRCPATH /home/rabbertz/local/src/fastnlo-2.0.0-gcc412
+#
+# Add to system paths PATH and LD_LIBRARY_PATH
+setenv PATH /home/rabbertz/local/bin:${PATH}
+setenv LD_LIBRARY_PATH /home/rabbertz/local/lib:/home/rabbertz/local/lib/fastnlo:/home/rabbertz/local/lib64:${LD_LIBRARY_PATH}
+
+
+
+Preparation of distribution package:
+====================================
+autoreconf --install
+./configure --prefix=/your/install/directory
+make dist
+
+Note: configure only terminates properly if mandatory requirements
+are fulfilled even if this configuration is not foreseen to be installed!
