@@ -222,9 +222,23 @@ c - Identify the scales chosen in this call
       IXMUR = 0
       IXMUF = 0
       DO I=1,NSCALEVAR
-         IF (ABS(XMUR/MURSCALE(I)-1D0).LT.0.000001) IXMUR=I
-         IF (ABS(XMUF/MUFSCALE(I)-1D0).LT.0.000001) IXMUF=I
+ckr Give priority to precalculated table for a particular xmur, xmuf combination 
+         IF (ABS(XMUR/MURSCALE(I)-1D0).LT.1.D-6 .AND.
+     >        ABS(XMUF/MUFSCALE(I)-1D0).LT.1.D-6) THEN
+            IXMUR=I
+            IXMUF=I
+         ENDIF
       ENDDO
+ckr If no precalculated table, take whatever is available for xmur, xmuf
+ckr This selects the first match in contrast to previous version
+      IF (IXMUR*IXMUF.EQ.0) THEN
+         DO I=1,NSCALEVAR
+            IF (IXMUR.EQ.0.AND.
+     >           ABS(XMUR/MURSCALE(I)-1D0).LT.1.D-6) IXMUR=I
+            IF (IXMUF.EQ.0.AND.
+     >           ABS(XMUF/MUFSCALE(I)-1D0).LT.1.D-6) IXMUF=I
+         ENDDO
+      ENDIF
 
       IF (IFIRST.EQ.0) THEN
          WRITE (*,*)"#    --> in the first call the scales are "//

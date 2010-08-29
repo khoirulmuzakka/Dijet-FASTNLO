@@ -16,7 +16,7 @@ REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
 STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 PDFFILES= pdfuncertainty.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
-	pyalps.f fn-hbook.f statcode.f
+	pyalps.f fn-hbook.f statcode.f uncert.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
@@ -35,7 +35,7 @@ OBJFILESPDF  = $(PDFFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESALL  = $(ALLFILES:.f=.o)
 
 # Derive all uncertainties in one go
-allunc:	$(OBJFILESALL) fnx9999.inc strings.inc
+allunc:	$(OBJFILESALL) fnx9999.inc strings.inc uncert.inc
 	$(FC) -o $@ $(FFLAGS) $(OBJFILESALL) \
 	-L $(LHAPDF) -lLHAPDF \
 	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib

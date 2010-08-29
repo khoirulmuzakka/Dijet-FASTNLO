@@ -9,37 +9,36 @@
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
+      INCLUDE "uncert.inc"
       CHARACTER*255 HISTFILE
       CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
       CHARACTER*8 CH8TMP
       CHARACTER*4 CH4TMP
       INTEGER BORNN,NLON,LENOCC
-      INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
+      INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS,NSCALES
       INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
-      LOGICAL LONE,LALG,LSTAT,LPDF,LSER,LTOY,LRAT
+      LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG
+      LOGICAL LTOY
       DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RESLO,RESHI,DREF
-c - NNPDF method
-      DOUBLE PRECISION WGT(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGT2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION WGTX2(NBINTOTMAX,NMAXSUBPROC+1,0:3)
 c - To unify quoted uncertainties (CL68,CL90,special)
-      DOUBLE PRECISION CL90,CLGJR
-c - To derive x section ratios
-      DOUBLE PRECISION RAT(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION RATHI(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION RATLO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      DOUBLE PRECISION RATDIF(NBINTOTMAX,NMAXSUBPROC+1,0:3)
+c - Convert from CL68 to CL90 values
+c - TOCL90 = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
+c - Convert from GJR to CTEQ (CL90) values ?
+c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
+      DOUBLE PRECISION TOCL90,TOCL90GJR
+      PARAMETER (TOCL90 = 1.64485D0, TOCL90GJR = 2.12766D0)
+      
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
       REAL PT(NPTMAX)
+      INTEGER IMODE,NRAP
 
       CHARACTER*255 ASMODE
       DOUBLE PRECISION ASMZVAL
@@ -57,6 +56,7 @@ c --- Parse command line
 
 *---Scenario
       LRAT = .FALSE.
+      LSCL = .TRUE.
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
          WRITE(*,*)
@@ -96,9 +96,12 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
             WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
+            WRITE(*,*)'  Use MC sampling method for PDF uncertainty,'//
+     >           ' def. = no'
             WRITE(*,*)' '
             STOP
-         ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442") THEN
+         ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442".OR.
+     >           SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442a") THEN
             LRAT = .TRUE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
@@ -347,7 +350,6 @@ c - Check primary table existence
 
 c - Check uncertainties to derive 
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
-ckr      LALG  = .TRUE.
       IF (LALG) THEN
          FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
          WRITE(*,*)"ALLUNC: Checking reference table: "//
@@ -367,17 +369,23 @@ ckr      LALG  = .TRUE.
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
       ENDIF
-      IF (LALG) THEN
-         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties."
+      IF (LPDF) THEN
+         WRITE(*,*)"ALLUNC: Deriving PDF uncertainties."
       ENDIF
       IF (LSTAT) THEN
          WRITE(*,*)"ALLUNC: Deriving statistical uncertainties."
       ENDIF
-      IF (LPDF) THEN
-         WRITE(*,*)"ALLUNC: Deriving PDF uncertainties."
-      ENDIF
       IF (LSER) THEN
          WRITE(*,*)"ALLUNC: Deriving cross sections of series variation"
+      ENDIF
+      IF (LSCL) THEN
+         WRITE(*,*)"ALLUNC: Deriving scale uncertainties"
+      ENDIF
+      IF (LRAT) THEN
+         WRITE(*,*)"ALLUNC: Deriving uncertainties for ratios"
+      ENDIF
+      IF (LALG) THEN
+         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties."
       ENDIF
       WRITE(*,*)" "
 
@@ -387,10 +395,12 @@ c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
-      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
-
-
-
+      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
+      WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
+     >     NSUBPROC," subprocesses"
+      
+      
+      
 c - PDF part
 c - Use primary table
 c - New call: a single call for each scale
@@ -406,207 +416,76 @@ c         5th argument:  array to return results
 
 c - Compute PDF uncertainties for all available scales
 c - Check that FILENAME is still the primary table here ...!!!
-      IF (.NOT.LSER) THEN
-      DO I=1,NSCALEVAR
-ckr      DO I=1,1
-         CALL INITPDF(0)
-         MUR = MURSCALE(I)
-         MUF = MUFSCALE(I)
-         WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
-         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
-
-c - Save the result array from the first call (= central result)
-c   and reset result arrays   
-         WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
-     >        NSUBPROC," subprocesses"
-ckrbin         DO L1=1,NBINTOT
-         L1 = 0
-         DO IRAP=1,NRAPIDITY
-         DO IPT=1,NPT(IRAP)
-            L1 = L1+1
-ckrbin
-            DO L2=1,(NSUBPROC+1)
-               DO L3=1,NORD
-                  RES0(L1,L2,L3) = 0D0 
-                  DO L4=1,L3
-                     RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
-                  ENDDO
-                  RES1LO(L1,L2,L3) = 0D0
-                  RES1HI(L1,L2,L3) = 0D0
-                  WGT(L1,L2,L3)    = 0D0
-                  WGT2(L1,L2,L3)   = 0D0
-                  WGTX(L1,L2,L3)   = 0D0
-                  WGTX2(L1,L2,L3)  = 0D0
-ckrrat Assume two rap bins with equal # of pt bins
-                  IF (IRAP.EQ.1) THEN
-                     RAT(L1,L2,L3) = RES0(L1,L2,L3)
-                  ELSEIF (IRAP.EQ.2) THEN
-                     IF (RES0(L1,L2,L3).GT.0.D0) THEN
-                        RAT(L1,L2,L3) =
-     >                       RAT(L1-NPT(IRAP-1),L2,L3)/RES0(L1,L2,L3)
-ckrrat                        write(*,*
-ckrrat     >                       )"Test ratio: irap, ipt, l1, l2, l3, rat"
-ckrrat                        write(*,*)irap,ipt,l1,l2,l3,rat(l1,l2,l3)
-                     ELSE
-                        RAT(L1,L2,L3) = 0.D0
-                     ENDIF
-                  ENDIF
-                  RATLO(L1,L2,L3)  = 0D0
-                  RATHI(L1,L2,L3)  = 0D0
-ckrrat
-               ENDDO
-            ENDDO
-         ENDDO
-         ENDDO
+      IF (LPDF.AND..NOT.LSER) THEN
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)"Relative PDF Uncertainties"
+         WRITE(*,*)"(the printed values are for the total)"
+         WRITE(*,*)"(histograms contain results for all orders and "//
+     >        "subprocesses)"
+         WRITE(*,*)" bin       cross section           "//
+     >        "lower PDF uncertainty   upper PDF uncertainty"
+         DO I=1,NSCALEVAR
+            CALL INITPDF(0)
+            MUR = MURSCALE(I)
+            MUF = MUFSCALE(I)
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
+            
+            ISTAT = 1
+            IMODE = 1
+            NRAP  = NRAPIDITY
+            IF (LTOY) THEN
+               IMODE = 2
+            ENDIF
+            IF (LRAT) THEN
+               IMODE = 5
+               NRAP = 2*NRAPIDITY
+               write(*,*)"nrapidity,nrap",nrapidity,nrap
+            ENDIF
+            CALL CENRES(IMODE)
+            CALL UNCERT(ISTAT,IMODE)
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
-ckr         IF (NPDF.GT.1) THEN
-         IF (LPDF) THEN
-*---Convert from CL68 to CL90 values
-            CL90  = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
-*---Convert from GJR to CTEQ (CL90) values
-            CLGJR = 1.D0/0.47D0
-            DO J=1,NPDF
-               CALL INITPDF(J)
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-c - For all bins/subproc/orders: Add negative/positive variations
-ckrbin               DO L1=1,NBINTOT
-               L1 = 0
-               DO IRAP=1,NRAPIDITY
-               DO IPT=1,NPT(IRAP)
-                  L1 = L1+1
-ckrbin
-                  DO L2=1,(NSUBPROC+1)
-                     DO L3=1,NORD
-                        SUMM = 0.D0
-                        DIFF = - RES0(L1,L2,L3)
-                        DO L4=1,L3
-                           SUMM = SUMM + RESULT(L1,L2,L4)
-                           DIFF = DIFF + RESULT(L1,L2,L4) 
-                        ENDDO
-                        WGT(L1,L2,L3)   = WGT(L1,L2,L3)   + 1.D0 
-                        WGT2(L1,L2,L3)  = WGT2(L1,L2,L3)  + 1.D0 
-                        WGTX(L1,L2,L3)  = WGTX(L1,L2,L3)  + SUMM 
-                        WGTX2(L1,L2,L3) = WGTX2(L1,L2,L3) + SUMM*SUMM 
-                        IF (DIFF.GT.0D0) THEN
-                           RES1HI(L1,L2,L3) =
-     >                          RES1HI(L1,L2,L3)+DIFF*DIFF
-                        ELSE
-                           RES1LO(L1,L2,L3) =
-     >                          RES1LO(L1,L2,L3)+DIFF*DIFF
-                        ENDIF
-ckrrat Assume two rap bins with equal # of pt bins
-                        IF (IRAP.EQ.1) THEN
-                           RATDIF(L1,L2,L3) = SUMM
-                        ELSEIF (IRAP.EQ.2) THEN
-                           IF (SUMM.GT.0.D0) THEN
-                              RATDIF(L1,L2,L3) =
-     >                             (RATDIF(L1-NPT(IRAP-1),L2,L3)/
-     >                             SUMM)
-ckrrat                              write(*,*)"l1,l2,l3,r,rdif1",l1,l2,l3
-ckrrat     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
-                              RATDIF(L1,L2,L3) = RATDIF(L1,L2,L3) -
-     >                             RAT(L1,L2,L3)
-ckrrat                              write(*,*)"l1,l2,l3,r,rdif2",l1,l2,l3
-ckrrat     >                             ,rat(l1,l2,l3),ratdif(l1,l2,l3)
-                           ELSE
-                              RATDIF(L1,L2,L3) = 0.D0
-                           ENDIF
-                           IF (RATDIF(L1,L2,L3).GT.0.D0) THEN
-                              RATHI(L1,L2,L3) = RATHI(L1,L2,L3) +
-     >                             RATDIF(L1,L2,L3)*RATDIF(L1,L2,L3)
-                           ELSE
-                              RATLO(L1,L2,L3) = RATLO(L1,L2,L3) +
-     >                             RATDIF(L1,L2,L3)*RATDIF(L1,L2,L3)
-                           ENDIF
-                        ENDIF
-ckrrat
-                     ENDDO
-                  ENDDO
-               ENDDO
-               ENDDO
-            ENDDO               ! Loop over bins
-         ENDIF                  ! Not done for npdf <= 1
-
-c - Take square-root of sum of squares
-c - or apply Toy MC method for NNPDF
-ckrbin         DO L1=1,NBINTOT
-         L1 = 0
-         DO IRAP=1,NRAPIDITY
-         DO IPT=1,NPT(IRAP)
-            L1 = L1+1
-ckrbin
             IF (LPDF) THEN
-               DO L2=1,(NSUBPROC+1)
-                  DO L3=1,NORD
-                     IF (.NOT.LTOY) THEN
-ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
-ckr                        RES1LO(L1,L2,L3) = -CL90*SQRT(RES1LO(L1,L2,L3))
-ckr                        RES1HI(L1,L2,L3) = CLGJR*SQRT(RES1HI(L1,L2,L3))
-ckr                        RES1LO(L1,L2,L3) = -CLGJR*SQRT(RES1LO(L1,L2,L3))
-                        RES1HI(L1,L2,L3) =  SQRT(RES1HI(L1,L2,L3))
-                        RES1LO(L1,L2,L3) = -SQRT(RES1LO(L1,L2,L3))
-                        IF (LRAT.AND.IRAP.EQ.2) THEN
-                           RATHI(L1,L2,L3) =  SQRT(RATHI(L1,L2,L3))
-                           RATLO(L1,L2,L3) = -SQRT(RATLO(L1,L2,L3))
-                        ENDIF
-                     ELSE
-                        RES0(L1,L2,L3) = WGTX(L1,L2,L3)/WGT(L1,L2,L3)
-                        RES1HI(L1,L2,L3) = 
-     >                       (WGTX2(L1,L2,L3)/WGT(L1,L2,L3) -
-     >                       RES0(L1,L2,L3)*RES0(L1,L2,L3))
-ckr                        RES1HI(L1,L2,L3) = CL90*SQRT(RES1HI(L1,L2,L3))
-                        RES1HI(L1,L2,L3) = SQRT(RES1HI(L1,L2,L3))
-                        RES1LO(L1,L2,L3) = -RES1HI(L1,L2,L3)
-                        IF (LRAT.AND.IRAP.EQ.2) THEN
-                           RATHI(L1,L2,L3) = -1D0
-                           RATLO(L1,L2,L3) =  1D0
-                        ENDIF
-                     ENDIF
-                  ENDDO
+               DO J=1,NPDF
+                  CALL INITPDF(J)
+                  CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+                  ISTAT = 2
+                  CALL UNCERT(ISTAT,IMODE)
                ENDDO
-               IF (DABS(RES0(L1,NSUBPROC+1,NORD)).GT.1D-99) THEN
-                  RESLO = RES1LO(L1,NSUBPROC+1,NORD)/
-     >                 RES0(L1,NSUBPROC+1,NORD)
-                  RESHI = RES1HI(L1,NSUBPROC+1,NORD)/
-     >                 RES0(L1,NSUBPROC+1,NORD)
-               ELSE
-                  RESLO = -1.D0
-                  RESHI = -1.D0
-               ENDIF
-ckr 30.01.2008: Change output format for better comp. with C++ version
-            ELSE
-               RESLO = 0D0
-               RESHI = 0D0
             ENDIF
-            WRITE(*,900) L1,RES0(L1,NSUBPROC+1,NORD),RESLO,RESHI
-            IF (LRAT.AND.IRAP.EQ.2) THEN
-               IF (DABS(RAT(L1,NSUBPROC+1,NORD)).GT.1D-99) THEN
-                  RESLO = RATLO(L1,NSUBPROC+1,NORD)/
-     >                 RAT(L1,NSUBPROC+1,NORD)
-                  RESHI = RATHI(L1,NSUBPROC+1,NORD)/
-     >                 RAT(L1,NSUBPROC+1,NORD)
-               ELSE
-                  RESLO = -1.D0
-                  RESHI = -1.D0
-               ENDIF
-               WRITE(*,900) L1,RAT(L1,NSUBPROC+1,NORD),RESLO,RESHI
-            ENDIF
-         ENDDO
-         ENDDO
+            
+            ISTAT = 3
+            CALL UNCERT(ISTAT,IMODE)
+
+c - Give some standard output, fill histograms
+            IBIN = 0
+            write(*,*)"nrapidity,nrap",nrapidity,nrap
+            DO IRAP=1,NRAP
+               write(*,*)"irap,npt",irap,npt(irap)
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
+     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
+                  WRITE(*,900) IBIN,WTX(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
+     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
+               ENDDO
+            ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
- 900     FORMAT(1P,I5,3(6X,E18.11))
+ 900        FORMAT(1P,I5,3(6X,E18.11))
 
 c - Fill histograms
-         CALL PDFFILL(I,RES0,RES1HI,RES1LO,LRAT,RAT,RATHI,RATLO)
-         
-      ENDDO                     ! Loop over scales
-
-      WRITE(*,*)"Bin    x-sect       lower PDF    upper PDF unc."
-      WRITE(*,*)"(the printed uncertainties are for "//
-     >     "the highest order)"
-      WRITE(*,*)"(histograms contain results for all orders and "//
-     >     "subprocesses)"
+            CALL PDFFILL(NRAP,0,I,MYRES)
+            CALL PDFFILL(NRAP,1,I,WTDXL2)
+            CALL PDFFILL(NRAP,2,I,WTDXU2)
+         ENDDO                  ! Loop over scales
       ENDIF
 
 
@@ -632,133 +511,227 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          MUF = MUFSCALE(ISCALE)
          WRITE(*,*)"ALLUNC: For PDF series fill only scale no.",ISCALE,
      >        "; mur, muf = ",mur,muf
-         DO J=0,NPDF
+
+         CALL INITPDF(0)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+         ISTAT = 1
+         IMODE = 3
+         CALL CENRES(IMODE)
+         CALL UNCERT(ISTAT,IMODE)
+         ISTAT = 2
+         DO J=1,NPDF
             CALL INITPDF(J)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            IBIN = 0
-            DO IRAP=1,NRAPIDITY
-               DO IPT=1,NPT(IRAP)
-                  IBIN = IBIN+1
-                  PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-                  DO ISUB=0,NSUBPROC
-                     RES0(IBIN,ISUB+1,0) = 0.D0
-                     DO IORD=1,NORD
-                        RES0(IBIN,ISUB+1,IORD) = XSECT0(IBIN,IORD)
-                        RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
-     >                       RES0(IBIN,ISUB+1,IORD)
-                     ENDDO
-c - Fill histograms
-                     DO IORD=0,NORD
-                        IHIST = IORD*1000000 + ISCALE*100000 +
-     >                       ISUB*10000 + IRAP*100
-                        CALL HFILL(IHIST+J,PT(IBIN),0.,
-     >                       REAL(RES0(IBIN,ISUB+1,IORD)))
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ENDDO
-            NBIN = IBIN
+            CALL UNCERT(ISTAT,IMODE)
          ENDDO
+         ISTAT = 3
+         CALL UNCERT(ISTAT,IMODE)
+
+c - Give some standard output, fill histograms
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)"Relative Series Uncertainties"
+         WRITE(*,*)"(the printed values are for the total)"
+         WRITE(*,*)"(histograms contain results for all orders and "//
+     >        "subprocesses)"
+         WRITE(*,*)" bin       cross section           "//
+     >        "lower ser. uncertainty  upper ser. uncertainty"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         WRITE(*,*)"ALLUNC: Uncertainties from"//
+     >        " series variations"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         ISCALE = 3
+         IBIN   = 0
+         DO IRAP=1,NRAPIDITY
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
+     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1)-1D0,
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+            ENDDO
+         ENDDO
+         CALL PDFFILL(NRAPIDITY,1,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAPIDITY,2,ISCALE,WTDXUM)
+      ENDIF
+
+
+
+c - Scale uncertainty part
+c - Use primary table
+c - Check that FILENAME is still the primary table here ...!!!
+c - Two schemes are implemented for hadron-hadron:
+c - 1. NSCALEVAR = 4 with standard mur, muf factors of
+c      (1/4,1/4), (1/2,1/2), (  1,  1), (  2,  2)
+c - 2. NSCALEVAR = 8 with additional mur, muf combinations
+c      (1/4,1/4), (1/2,1/2), (  1,  1), (  2,  2) as before plus
+c      (  1,1/2), (  1,  2), (1/2,  1), (  2,  1)
+c - Uncertainty filled at central scale no. 3
+c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
+      IF (LSCL) THEN
+         NSCALES = NSCALEVAR
+         IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
+            NSCALES = 8
+            MURSCALE(5) = 1.0D0
+            MUFSCALE(5) = 0.5D0
+            MURSCALE(6) = 1.0D0
+            MUFSCALE(6) = 2.0D0
+            MURSCALE(7) = 0.5D0
+            MUFSCALE(7) = 1.0D0
+            MURSCALE(8) = 2.0D0
+            MUFSCALE(8) = 1.0D0
+         ENDIF
+         CALL INITPDF(0)
+         ISCALE = 3
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+         ISTAT = 1
+         IMODE = 3
+         CALL CENRES(IMODE)
+         CALL UNCERT(ISTAT,IMODE)
+         ISTAT = 2
+         DO ISCALE=1,NSCALES
+ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
+ckr Ugly goto construction avoidable with f90 CYCLE command
+            IF (ISCALE.EQ.1.OR.ISCALE.EQ.3) GOTO 10
+            MUR = MURSCALE(ISCALE)
+            MUF = MUFSCALE(ISCALE)
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            CALL UNCERT(ISTAT,IMODE)
+ 10         CONTINUE
+         ENDDO
+         ISTAT = 3
+         CALL UNCERT(ISTAT,IMODE)
+
+c - Give some standard output, fill histograms
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)"Relative Scale Uncertainties"
+         WRITE(*,*)"(the printed values are for the total)"
+         WRITE(*,*)"(histograms contain results for all orders and "//
+     >        "subprocesses)"
+         WRITE(*,*)" bin       cross section           "//
+     >        "lower scale uncertainty upper scale uncertainty"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         WRITE(*,*)"ALLUNC: Uncertainties from",NSCALES,
+     >        " scale variations"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         IORD   = 0
+         ISCALE = 3
+         ISUB   = 0
+         IBIN   = 0
+         DO IRAP=1,NRAPIDITY
+            IHIST = IORD*1000000 + ISCALE*100000 +
+     >           ISUB*10000 + IRAP*100
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
+               WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
+     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1)-1D0,
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+            ENDDO
+         ENDDO
+         CALL PDFFILL(NRAPIDITY,6,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAPIDITY,7,ISCALE,WTDXUM)
       ENDIF
 
 
 
 c - Algorithmic part
 c - Use reference table
+c - Reference scale is always no. 1
+c - Reference result is in nrap/2 ++ bins
+c - Reference result is evaluated with CTEQ61 PDFs
+c - Default scale (C++ 2, Fortran 3) ==> normal result
+c - (Use other ISCALE in FORTRAN ONLY if refscale <> 2 in author code)
+c - Attention: From now on ref. table loaded ==> rap. bins doubled
       IF (LALG) THEN
          FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
          WRITE(*,*)"ALLUNC: Taking reference table: "//
      >        FILENAME(1:LENOCC(FILENAME))
 c - Initialize CTEQ61 reference PDFs
          PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/cteq61.LHgrid"
          WRITE(*,*)"ALLUNC: Taking reference PDF: "//
      >        PDFSET(1:LENOCC(PDFSET))
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
          CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
          CALL INITPDF(0)
 
-c - Default scale (C++ 2, Fortran 3) ==> normal result
-         ISCALE = 3
-c - (Use other ISCALE in FORTRAN ONLY if refscale <> 2 in author code)
-c         ISCALE = 2
-         MUR = MURSCALE(ISCALE)
-         MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
-c - Attention: From now on ref. table loaded ==> rap. bins doubled
-c - Get the normal result, scale 3, from first half of doubled rap bins
-         IBIN = 0
-         DO IRAP=1,INT(NRAPIDITY/2)
-            DO IPT=1,NPT(IRAP)
-               IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC
-                  RES0(IBIN,ISUB+1,0) = 0.D0
-                  DO IORD=1,NORD
-                     RES0(IBIN,ISUB+1,IORD) = XSECT(IBIN,IORD)
-                     RES0(IBIN,ISUB+1,0) = RES0(IBIN,ISUB+1,0) +
-     >                    RES0(IBIN,ISUB+1,IORD)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         NBIN = IBIN
-
-c - Reference scale no. always 1
+c - Reference result
          ISCALE = 1
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
-c - Get the reference result, scale 1, nrap/2 ++ bins
-         DO IRAP=INT(NRAPIDITY/2)+1,NRAPIDITY
-            DO IPT=1,NPT(IRAP)
-               IBIN = IBIN+1
-               DO ISUB=0,NSUBPROC
-                  RES0(IBIN,isub+1,0) = 0.D0
-                  DO IORD=1,NORD
-                     RES0(IBIN,isub+1,IORD) = XSECT(IBIN,IORD)
-                     RES0(IBIN,isub+1,0) = RES0(IBIN,isub+1,0) +
-     >                    RES0(IBIN,isub+1,IORD)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
+         ISTAT = 1
+         IMODE = 4
+         CALL CENRES(IMODE)
+         CALL UNCERT(ISTAT,IMODE)
 
-c - Compare results and fill histos
+c - Normal result
          ISCALE = 3
-         ISUB   = 0
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         ISTAT = 2
+         CALL UNCERT(ISTAT,IMODE)
+         ISTAT = 3
+         CALL UNCERT(ISTAT,IMODE)
+
+c - Give some standard output, fill histograms
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)"Relative Algorithmic Uncertainty"
+         WRITE(*,*)"(the printed values are for the total)"
+         WRITE(*,*)"(histograms contain results for all orders and "//
+     >        "subprocesses)"
+         WRITE(*,*)" bin       cross section           "//
+     >        "algorithmic uncertainty"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         WRITE(*,*)"ALLUNC: Algorithmic Uncertainty with "//
+     >        "reference to CTEQ61 PDF set"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         ISCALE = 3
          IBIN   = 0
          DO IRAP=1,INT(NRAPIDITY/2)
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-               DO ISUB=0,NSUBPROC
-                  DO IORD=0,NORD
-                     DREF = RES0(IBIN,isub+1,IORD)/
-     >                    RES0(IBIN+NBIN,isub+1,IORD) - 1.D0
-                     IHIST = IORD*1000000 + ISCALE*100000 +
-     >                    ISUB*10000 + IRAP*100
-                     CALL HFILL(IHIST+5,PT(IBIN),0.,REAL(100D0*DREF))
-                  ENDDO
-               ENDDO
+               WRITE(*,901) IBIN,WTX(IBIN,NSUBPROC+1,NORD+1),
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+ 901           FORMAT(1P,I5,2(6X,E18.11))
             ENDDO
          ENDDO
+         CALL PDFFILL(NRAPIDITY,5,ISCALE,WTDXUM)
       ENDIF
 
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
+      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
       END
+
+
 
 c
 c ======================= Book the histograms ========================
 c
-      SUBROUTINE PDFHIST(N,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT)
+      SUBROUTINE PDFHIST(N,HISTFILE,
+     &     LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
       INTEGER N,LENOCC,IPDF,NPDF,IPTMAX,NRAP
-      LOGICAL LONE,LPDF,LSTAT,LALG,LSER,LRAT
+      LOGICAL LONE,LPDF,LSTAT,LALG,LSER,LRAT,LSCL
 
-      INTEGER J,ISTAT2,ICYCLE
+      INTEGER I,J,ISTAT2,ICYCLE,NSCALES
       INTEGER IORD,ISUB,ISCALE,IRAP,IPT,IHIST,NHIST
       INCLUDE "fnx9999.inc"
       INCLUDE "strings.inc"
@@ -784,10 +757,12 @@ c - Open & book
          
          NRAP = NRAPIDITY
          IF (LRAT) THEN
-            NRAP = NRAPIDITY+1
-            NPT(NRAP) = NPT(NRAPIDITY)
-            DO J=1,(NPT(NRAP)+1)
-               PTBIN(NRAP,J) = PTBIN(NRAPIDITY,J)
+            NRAP = 2*NRAPIDITY
+            DO I=NRAPIDITY+1,NRAP
+               NPT(I) = NPT(I-NRAPIDITY)
+               DO J=1,(NPT(I)+1)
+                  PTBIN(I,J) = PTBIN(I-NRAPIDITY,J)
+               ENDDO
             ENDDO
          ENDIF
          NHIST = 0
@@ -802,7 +777,11 @@ c - Open & book
          CBASE2 = CBASE2(1:LENOCC(CBASE2))//"="
      >        //CTMP
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
-            DO ISCALE=1,NSCALEVAR ! Scale variations
+            NSCALES = NSCALEVAR
+            IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
+               NSCALES = 8
+            ENDIF
+            DO ISCALE=1,NSCALES ! Scale variations
                DO ISUB=0,NSUBPROC ! Subprocesses: 0 tot + 7 subproc
                   DO IRAP=1, NRAP
                      IHIST = IORD*1000000 + ISCALE*100000 +
@@ -880,6 +859,24 @@ ckr                        write(*,*)"3. Booked histo #",nhist
                         NHIST = NHIST+1
 ckr                        write(*,*)"4. Booked histo #",nhist
                      ENDIF
+                     IF (LSCL.AND.IORD.LE.2.AND.
+     >                    ISCALE.EQ.3) THEN
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dscl_low/xsect_%"
+                        CALL HBOOKB(IHIST+6,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+1
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dscl_up/xsect_%"
+                        CALL HBOOKB(IHIST+7,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+1
+ckr                        write(*,*)"4b. Booked histo #",nhist
+                     ENDIF
                      IF (LSTAT.AND.ISUB.EQ.0) THEN
                         IHIST = IORD*1000000 + ISCALE*100000 +
      >                       ISUB*10000 + IRAP*100
@@ -947,6 +944,7 @@ ckr     >                          IHIST + 2*IPT + 11
             ENDDO               ! End od ISCALE loop, IORD still on
          ENDDO
          WRITE(*,*)"Number of histograms booked:",NHIST
+         WRITE(*,*)"-----------------------------------"
 
 
 
@@ -962,86 +960,38 @@ c - Close HBOOK file
 c
 c ======================= Fill the histograms =========================
 c
-      SUBROUTINE PDFFILL(NSCALE,RES0,RES1HI,RES1LO,LRAT,RAT,RATHI,RATLO)
+      SUBROUTINE PDFFILL(NRAP,IOFF,ISCALE,DVAL)
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      INTEGER NSCALE
-      DOUBLE PRECISION 
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RAT(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RATHI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RATLO(NBINTOTMAX,NMAXSUBPROC+1,0:3)
-      LOGICAL LRAT
-      INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
-      REAL VAL0,VALLO,VALHI
+      INTEGER NRAP,IOFF,ISCALE
+      DOUBLE PRECISION DVAL(NBINTOTMAX,NMAXSUBPROC+1,4)
+      INTEGER I,J,IBIN,IORD,IORD2,ISUB,ISUB2,IHIST
+      REAL RVAL
       
-      IF (NSCALE.LT.1 .OR. NSCALE.GT.NSCALEVAR) THEN
-         WRITE(*,*) "\nPDFFILL: ERROR! NSCALE ",NSCALE,
+      IF (ISCALE.LT.1 .OR. ISCALE.GT.NSCALEVAR) THEN
+         WRITE(*,*) "\nPDFFILL: ERROR! ISCALE ",ISCALE,
      >        " is out of range, aborted!"
-         WRITE(*,*) "PDFFILL: Max. NSCALE: ",NSCALEVAR
+         WRITE(*,*) "PDFFILL: Max. ISCALE: ",NSCALEVAR
          STOP
       ENDIF
-      ISCALE = NSCALE
 
 c - Fill all histograms for the given scale
-      DO IORD=0,NORD            ! Order: tot, LO, NLO-corr, NNLO-corr
-         DO ISUB2=1,(NSUBPROC+1) ! Subprocesses: 0 tot + 7 subproc
-            ISUB=ISUB2
-            IF (ISUB.EQ.8) ISUB=0
-            NBIN=0
-            DO I=1,NRAPIDITY                   
+c - Fill sums over subprocesses and/or orders into zero factors for IHIST
+      DO IORD2=1,NORD+1         ! Order: LO, NLO-corr, NNLO-corr, ... , tot
+         IORD = IORD2
+         IF (IORD2.EQ.NORD+1) IORD = 0 
+         DO ISUB2=1,NSUBPROC+1  ! Subprocesses hh: 7 subprocesses + total
+            ISUB = ISUB2
+            IF (ISUB2.EQ.NSUBPROC+1) ISUB=0
+            IBIN=0
+            DO I=1,NRAP
                DO J=1,NPT(I)
-                  NBIN = NBIN + 1
-                  IF (IORD.GT.0) THEN
-                     VAL0  = REAL(RES0(NBIN,ISUB2,IORD))
-                     VALLO = REAL(RES1LO(NBIN,ISUB2,IORD))
-                     VALHI = REAL(RES1HI(NBIN,ISUB2,IORD))
-                  ELSE
-                     VAL0  = REAL(RES0(NBIN,ISUB2,NORD))
-                     VALLO = REAL(RES1LO(NBIN,ISUB2,NORD))
-                     VALHI = REAL(RES1HI(NBIN,ISUB2,NORD))
-                  ENDIF
+                  IBIN = IBIN + 1
 ckr Recall: HBOOK understands only single precision
+                  RVAL  = REAL(DVAL(IBIN,ISUB2,IORD2))
                   IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
-ckr                  write(*,*)"iord,iscale,isub/2,i",iord,iscale,
-ckr     >                 isub,isub2,i
-ckr                  write(*,*)"ihist,val0,vallo,valhi",
-ckr     >                 ihist,val0,vallo,valhi
-                  CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
-                  CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
-                  CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
-                  IF (LRAT.AND.I.EQ.2) THEN
-                     IF (IORD.GT.0) THEN 
-                        VAL0  = REAL(RAT(NBIN,ISUB2,IORD))
-                        VALLO = REAL(RATLO(NBIN,ISUB2,IORD))
-                        VALHI = REAL(RATHI(NBIN,ISUB2,IORD))
-                     ELSE
-                        VAL0  = REAL(RAT(NBIN,ISUB2,NORD))
-                        VALLO = REAL(RATLO(NBIN,ISUB2,NORD))
-                        VALHI = REAL(RATHI(NBIN,ISUB2,NORD))
-                     ENDIF
-                     IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+(I+1)
-     >                    *100
-ckrrat                     write(*,*)"MURKS: ihist,pt,val,lo,hi",ihist,ptbin(i
-ckrrat     >                    ,j),val0,vallo,valhi
-                     CALL HFILL(IHIST,  REAL(PTBIN(I,J)+0.01),0.0,VAL0)
-                     CALL HFILL(IHIST+1,REAL(PTBIN(I,J)+0.01),0.0,VALLO)
-                     CALL HFILL(IHIST+2,REAL(PTBIN(I,J)+0.01),0.0,VALHI)
-ckrrat Stat. uncertainty: Add rel. uncertainties of ratio
-                     IHIST = IORD*1000000+ISCALE*100000+ISUB*10000 + 3
-                     CALL HOPERA(IHIST+(I-1)*100,'+',IHIST+(I)*100,
-     >                    IHIST+(I+1)*100,1.,1.)
-ckrrat Scale uncertainty: Derive rel. uncertainties for ratio
-                     IHIST = IORD*1000000+ISUB*10000
-                     CALL HOPERA(IHIST+4*100000+(I-1)*100+0,'/',
-     >                    IHIST+4*100000+(I)*100+0,
-     >                    IHIST+4*100000+(I+1)*100+0,1.,1.)
-                     CALL HOPERA(IHIST+2*100000+(I-1)*100+0,'/',
-     >                    IHIST+2*100000+(I)*100+0,
-     >                    IHIST+2*100000+(I+1)*100+0,1.,1.)
-                  ENDIF
+                  IHIST = IHIST+IOFF
+                  CALL HFILL(IHIST,REAL(PTBIN(I,J)+0.01),0.0,RVAL)
                ENDDO            ! pT-loop
             ENDDO               ! rap-loop
          ENDDO                  ! isub-loop
