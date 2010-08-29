@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = gnu
 
 # the main target, i.e. the executable to build
 bin_PROGRAMS = testhhc

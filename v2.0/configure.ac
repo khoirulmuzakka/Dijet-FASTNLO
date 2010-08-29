@@ -5,7 +5,7 @@ AC_PREREQ([2.63])
 # Define project fastNLO
 AC_INIT([fastNLO], [2.0.0], [klaus.rabbertz@cern.ch,wobisch@fnal.gov])
 # Require minimal automake version of 1.11, switch on warnings
-AM_INIT_AUTOMAKE([1.11],[-Wall])
+AM_INIT_AUTOMAKE([1.11 -Wall])
 
 #
 AC_CONFIG_SRCDIR([common/fnloTable.h])
@@ -16,16 +16,42 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PREFIX_DEFAULT(${HOME})
 
 # Checks for programs.
+AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
-AC_PROG_CXX
 AC_PROG_F77
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
+AC_LIBTOOL_DLOPEN
+#AC_PROG_AWK
+#AC_PROG_INSTALL
+#AC_PROG_LN_S
+#AC_PROG_MAKE_SET
 
 # Checks for sources.
 
 # Checks for libraries.
 AC_F77_LIBRARY_LDFLAGS
+AC_CHECK_LIB([g2c], [getenv_])
+# FIXME: Replace `main' with a function in `-lLHAPDF' etc.
+#AC_CHECK_LIB([LHAPDF], [LHAPDF])
+#AC_CHECK_LIB([gfortranbegin], [fmain])
+#AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+
+# Checks for library functions.
+AC_CHECK_FUNCS([memset pow sqrt strstr])
+
+# Add subversion revision number, recipe from Autotools by J. Calcote 
+SVNREV=`svnversion $srcdir | sed 's/:.*//'`
+which svnversion > /dev/null; \
+if [ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]
+  then SVNREV=`cat $srcdir/SVNREV`
+  else echo -n $SVNREV>$srcdir/SVNREV
+fi
+AC_SUBST(SVNREV)
 
 # Announce checks particular for fastNLO
 AC_MSG_NOTICE([******************************************])
@@ -36,6 +62,13 @@ AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
 AC_MSG_NOTICE([******************************************])
+
+
+
+
+
+
+
 AC_MSG_NOTICE([First try to find NLOJET++ via nlojet++ executable in system PATH ...])
 AC_PATH_PROG([NLOJETBIN],[nlojet++])
 if test "x$NLOJETBIN" = "x"; then
@@ -246,10 +279,10 @@ AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 # Output
 #                 user/Makefile
 #                 author/hadron/Makefile
+#	         tableconvert/Makefile
 AC_CONFIG_FILES([Makefile
                  author/ep/Makefile
                  common/Makefile
                  merger/Makefile
-	         tableconvert/Makefile
 	        ])
 AC_OUTPUT

@@ -1,7 +1,9 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = gnu
 
 # the main library with the fastNLO classes inside
 pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la
+
+pkginclude_HEADERS = fnloTable.h fnloBlockBNlojet.h
 
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  \
   fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h

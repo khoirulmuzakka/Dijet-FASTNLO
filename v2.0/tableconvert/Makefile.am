@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = gnu
 
 # The main target, i.e. the executable to build
 bin_PROGRAMS = conv20
@@ -7,7 +7,7 @@ bin_PROGRAMS = conv20
 conv20_SOURCES = conv20.inc conv20.f
 
 # FORTRAN compiler flags to be used for the main target
-AM_FFLAGS =  -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -o conv20 -O -fno-automatic -ffixed-line-length-132
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = gnu
 
 # the main target, here the libtool plugin library to build
 #lib_LTLIBRARIES = libfnt1001midp.la libfnl1310.la libfnl1308.la

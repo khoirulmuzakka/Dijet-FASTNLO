@@ -76,6 +76,7 @@ Preparation of distribution package:
 ====================================
 autoreconf --install
 ./configure --prefix=/your/install/directory
+make distcheck
 make dist
 
 Note: configure only terminates properly if mandatory requirements

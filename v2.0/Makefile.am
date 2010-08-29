@@ -4,10 +4,15 @@
 ACLOCAL_AMFLAGS = -I m4
 #
 AUTOMAKE_OPTIONS = gnu
-#AUTOMAKE_OPTIONS = foreign
-SUBDIRS = common merger tableconvert author/ep
+#
+# Add subversion revision number, recipe from Autotools by J. Calcote 
+EXTRA_DIST = SVNREV
+#distdir = $(PACKAGE)-$(VERSION).$(SVNREV)
+#
+SUBDIRS = common merger author/ep
+# tableconvert
 # author/hadron user  
-
+#
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
@@ -15,4 +20,5 @@ SUBDIRS = common merger tableconvert author/ep
 # but NOT before distribution with "make dist"! 
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
 	depcomp install-sh ltmain.sh missing \
-	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
+	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
+	SVNREV
