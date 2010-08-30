@@ -6,7 +6,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = gnu
 #
 # Add subversion revision number, recipe from Autotools by J. Calcote 
-EXTRA_DIST = SVNREV
+EXTRA_DIST = m4 SVNREV
 #distdir = $(PACKAGE)-$(VERSION).$(SVNREV)
 #
 SUBDIRS = common merger author/ep

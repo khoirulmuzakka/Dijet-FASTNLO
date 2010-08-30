@@ -1,11 +1,11 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 # Require minimal autoconf version of 2.63
-AC_PREREQ([2.63])
+AC_PREREQ([2.59])
 # Define project fastNLO
 AC_INIT([fastNLO], [2.0.0], [klaus.rabbertz@cern.ch,wobisch@fnal.gov])
 # Require minimal automake version of 1.11, switch on warnings
-AM_INIT_AUTOMAKE([1.11 -Wall])
+AM_INIT_AUTOMAKE([1.9 -Wall])
 
 #
 AC_CONFIG_SRCDIR([common/fnloTable.h])
@@ -20,8 +20,8 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_F77
-AC_PROG_LIBTOOL
 AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
 #AC_PROG_AWK
 #AC_PROG_INSTALL
 #AC_PROG_LN_S

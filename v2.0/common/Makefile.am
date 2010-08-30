@@ -1,22 +1,26 @@
+# Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# the main library with the fastNLO classes inside
+# The main libraries with the fastNLO classes inside
 pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la
 
+# The associated header files
 pkginclude_HEADERS = fnloTable.h fnloBlockBNlojet.h
 
-libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  \
-  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h
+# Source files to be distributed for each library
+libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h
 
-libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc  fnloTableUser.cc \
-  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloTableUser.h \
+libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
+  fnloTableUser.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloTableUser.h \
   LHAPDF.h LHAPDFConfig.h
 # Copied from LHAPDF 5.8.4. This is far from optimal ...
 
-libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc fnloBlockBNlojet.cc  \
-  fnloconstants.h fnloTable.h fnloBlockA1.h  fnloBlockA2.h  fnloBlockB.h fnloBlockBNlojet.h
-
-# if ROOT is installed, add a dictionary to the library
+libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
+  fnloBlockBNlojet.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
+# If ROOT is installed, add a dictionary to the library
 #if HAVEROOT
 #  libfastnlo_la_SOURCES += fnloTableDict.cc
 #  libfastnloUser_la_SOURCES += fnloTableDict.cc
