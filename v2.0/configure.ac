@@ -83,6 +83,7 @@ if test "x$NLOJET" = "x"; then
 fi
 
 AC_SUBST([NLOJETPREFIX], "$NLOJET")
+AC_SUBST([NLOJETBINPATH], "$NLOJETPREFIX/bin")
 AC_SUBST([NLOJETLIBPATH], "$NLOJETPREFIX/lib")
 AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
 AC_MSG_NOTICE([******************************************])
@@ -115,35 +116,26 @@ AC_ARG_WITH([cteq-pdf],
 
 if test "x$ZNPDF" = "x"; then
    AC_MSG_NOTICE([No ZNPDF installation path set. Try to find CTEQ-PDF in prefix path ...])
-
-
-
-   AC_PATH_PROG([NLOJETBIN],[nlojet++],[],[$prefix/bin])
-   if test "x$NLOJETBIN" = "x"; then
-      AC_MSG_NOTICE([No NLOJet++ installation found in prefix path. Try to find NLOJet++ in system path ...])
-      AC_PATH_PROG([NLOJETBIN],[nlojet++])
-      if test "x$NLOJETBIN" = "x"; then
-         AC_MSG_ERROR([No NLOJet++ installation found. Please install NLOJet++ first. Configuration aborted!])
-      fi
+   AC_CHECK_FILE([$prefix/lib/libcteqpdf.la],
+   [precteqpdf="$ac_cv_file_$prefix/lib/libcteqpdf.la"],
+   [precteqpdf=""])
+   if test "x$precteqpdf" = "x"; then
+      AC_MSG_NOTICE([No CTEQ-PDF library found in prefix path. Try to link with system's CTEQ-PDF ...])
+      AC_CHECK_LIB([cteqpdf],[libcteqpdf_la-cteqpdf],
+      [syscteqpdf=$ac_cv_lib_libcteqpdf_la-cteqpdf],
+      [syscteqpdf=""])
+      if test "x$syscteqpdf" = "x"; then
+         AC_MSG_ERROR([No CTEQ-PDF library found. Please install CTEQ-PDF first. Configuration aborted!])
+      else
+         AC_SUBST([ZNPDFLIBPATH], [`dirname $syscteqpdf`])
+      fi 
+   else
+      AC_SUBST([ZNPDFLIBPATH], [`dirname $precteqpdf`])
    fi
-   AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBIN`])
-   AC_SUBST([NLOJET], [`dirname $NLOJETBINPATH`])
+   AC_SUBST([ZNPDF], [`dirname $ZNPDFLIBPATH`])
 fi
 
-
-
-
-
-
-
-
-AC_MSG_NOTICE([Assume location of preinstalled package to be given by environment variable ZNPDF ...])
-if test "x$ZNPDF" = "x"; then
-  AC_MSG_ERROR([ZNPDF environment variable is not set, please install CTEQ-PDF. Configuration aborted!])
-else
-  AC_MSG_RESULT([Using environment variable ZNPDF=$ZNPDF to locate CTEQ-PDF installation ...])
-  AC_SUBST([ZNPDFPREFIX], "$ZNPDF")
-fi
+AC_SUBST([ZNPDFPREFIX], "$ZNPDF")
 AC_SUBST([ZNPDFLIBPATH], "$ZNPDFPREFIX/lib")
 AC_SUBST([ZNPDFINCLUDEPATH], "$ZNPDFPREFIX/include/cteq")
 AC_MSG_NOTICE([******************************************])
@@ -153,61 +145,54 @@ AC_MSG_RESULT([Using $ZNPDFINCLUDEPATH for the includes])
 
 # LHPDF (comes with NLOJET++ 4.0.1)
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Looking for LHPDF (comes with NLOJET++ 4.0.1)])
+AC_MSG_NOTICE([Looking for LHPDF (comes with NLOJET++ 4.0.1) installation ...])
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Attention! These are the PDFs coming with NLOJET++ version 4.0.x!])
 AC_MSG_NOTICE([Do not confuse with LHAPDF!])
-AC_MSG_NOTICE([Assume location of preinstalled package to be given by environment variable LHPDF ...])
+
+AC_ARG_WITH([lhpdf],
+	[AS_HELP_STRING([--with-lhpdf],
+	[Specify location of LHPDF installation. This takes precedence over
+	an LHPDF environment variable, the prefix path or other methods.
+	Please note: fastNLO currently CANNOT be used without LHPDF
+    	which is required by NLOJet++!])],
+	[if test "x$withval" = "xno"; then
+	AC_MSG_ERROR([fastNLO CANNOT be used without LHPDF! Configuration aborted!])
+	fi
+	if test "x$withval" != "xyes"; then
+	AC_SUBST([LHPDF],[$withval])
+	AC_MSG_NOTICE([Using given path $LHPDF as location of LHPDF installation.])
+	fi],
+	[])
+
 if test "x$LHPDF" = "x"; then
-  AC_MSG_ERROR([LHPDF environment variable is not set, please install LHPDF. Configuration aborted!])
-else
-  AC_MSG_RESULT([Using environment variable LHPDF=$LHPDF to locate LHPDF installation ...])
-  AC_SUBST([LHPDFPREFIX], "$LHPDF")
+   AC_MSG_NOTICE([No LHPDF installation path set. Try to find LHPDF in prefix path ...])
+   AC_CHECK_FILE([$prefix/lib/liblhpdf.la],
+   [prelhpdf="$ac_cv_file_$prefix/lib/liblhpdf.la"],
+   [prelhpdf=""])
+   if test "x$prelhpdf" = "x"; then
+      AC_MSG_NOTICE([No LHPDF library found in prefix path. Try to link with system's LHPDF ...])
+      AC_CHECK_LIB([lhpdf],[lhpdfset],
+      [syslhpdf=$ac_cv_lib_lhpdfset],
+      [syslhpdf=""])
+      if test "x$syslhpdf" = "x"; then
+         AC_MSG_ERROR([No LHPDF library found. Please install LHPDF first. Configuration aborted!])
+      else
+         AC_SUBST([LHPDFLIBPATH], [`dirname $syslhpdf`])
+      fi 
+   else
+      AC_SUBST([LHPDFLIBPATH], [`dirname $prelhpdf`])
+   fi
+   AC_SUBST([LHPDF], [`dirname $LHPDFLIBPATH`])
 fi
+
+AC_SUBST([LHPDFPREFIX], "$LHPDF")
 AC_SUBST([LHPDFLIBPATH], "$LHPDFPREFIX/lib")
 AC_SUBST([LHPDFINCLUDEPATH], "$LHPDFPREFIX/include/lhpdf")
 AC_MSG_NOTICE([******************************************])
 AC_MSG_RESULT([Using $LHPDFPREFIX for the LHPDF installation path])
 AC_MSG_RESULT([Using $LHPDFLIBPATH for the libraries])
 AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
-
-# FASTJET
-AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Looking for fastjet installation ...])
-AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([First try to find fastjet via fastjet-config executable in system PATH ...])
-AC_PATH_PROG([FASTJETBIN],[fastjet-config])
-if test "x$FASTJETBIN" = "x"; then
-  AC_MSG_WARN([No path to fastjet binary found, try to use FASTJET environment variable ...])
-  if test "x$FASTJET" = "x"; then
-    AC_MSG_WARN([FASTJET environment variable is not set, please install fastjet. Parts of fastNLO may not work without!])
-  else
-    AC_MSG_RESULT([Using environment variable FASTJET=$FASTJET to locate FASTJET installation ...])
-    AC_MSG_RESULT([Searching for executable fastjet-config in $FASTJET/bin ...])
-    AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
-    if test "x$FASTJETBIN" = "x"; then
-      AC_MSG_WARN([FASTJET binaries not found in $FASTJET/bin, please install fastjet. Parts of fastNLO may not work without!])
-    else
-      AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
-    fi
-  fi
-else
-  AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
-fi
-AC_MSG_NOTICE([******************************************])
-if test "x$FASTJETPREFIX" = "x"; then
-  AC_MSG_WARN([No installation of fastjet found. Parts of fastNLO may not work!])
-else
-  AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
-  AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
-  AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
-  AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
-  AC_MSG_RESULT([Using $FASTJETPREFIX for the FASTJET installation path])
-  AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
-  AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
-  AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
-  AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
-fi
 
 # LHAPDF
 AC_MSG_NOTICE([******************************************])
@@ -245,6 +230,44 @@ else
   AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
   AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
   AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+fi
+
+# FASTJET
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Looking for fastjet installation ...])
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([First try to find fastjet via fastjet-config executable in system PATH ...])
+AC_PATH_PROG([FASTJETBIN],[fastjet-config])
+if test "x$FASTJETBIN" = "x"; then
+  AC_MSG_WARN([No path to fastjet binary found, try to use FASTJET environment variable ...])
+  if test "x$FASTJET" = "x"; then
+    AC_MSG_WARN([FASTJET environment variable is not set, please install fastjet. Parts of fastNLO may not work without!])
+  else
+    AC_MSG_RESULT([Using environment variable FASTJET=$FASTJET to locate FASTJET installation ...])
+    AC_MSG_RESULT([Searching for executable fastjet-config in $FASTJET/bin ...])
+    AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
+    if test "x$FASTJETBIN" = "x"; then
+      AC_MSG_WARN([FASTJET binaries not found in $FASTJET/bin, please install fastjet. Parts of fastNLO may not work without!])
+    else
+      AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
+    fi
+  fi
+else
+  AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
+fi
+AC_MSG_NOTICE([******************************************])
+if test "x$FASTJETPREFIX" = "x"; then
+  AC_MSG_WARN([No installation of fastjet found. Parts of fastNLO may not work!])
+else
+  AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
+  AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
+  AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
+  AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
+  AC_MSG_RESULT([Using $FASTJETPREFIX for the FASTJET installation path])
+  AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
+  AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
+  AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
+  AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
 fi
 
 # CERNLIB
