@@ -1,10 +1,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-# Require minimal autoconf version of 2.63
+# Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
 # Define project fastNLO
 AC_INIT([fastNLO], [2.0.0], [klaus.rabbertz@cern.ch,wobisch@fnal.gov])
-# Require minimal automake version of 1.11, switch on warnings
+# Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 
 #
@@ -13,7 +13,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Set default installation directory
-AC_PREFIX_DEFAULT(${HOME})
+AC_PREFIX_DEFAULT(${HOME}/local)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -198,77 +198,114 @@ AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for LHAPDF installation ...])
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([First try to find LHAPDF via lhapdf-config executable in system PATH ...])
-AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
-if test "x$LHAPDFBIN" = "x"; then
-  AC_MSG_WARN([No path to LHAPDF binaries found, try to use LHAPDF environment variable ...])
-  if test "x$LHAPDF" = "x"; then
-    AC_MSG_WARN([LHAPDF environment variable is not set, please install LHAPDF. fastNLO user code may not work without!])
-  else
-    AC_MSG_RESULT([Using environment variable LHAPDF=$LHAPDF to locate LHAPDF installation ...])
-    AC_MSG_RESULT([Searching for executable lhapdf-config in $LHAPDF/bin ...])
-    AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$LHAPDF/bin])
-    if test "x$LHAPDFBIN" = "x"; then
-      AC_MSG_WARN([LHAPDF binary not found in $LHAPDF/bin, please install LHAPDF. fastNLO user code may not work without!])
-    else
-      AC_SUBST([LHAPDFPREFIX], [`$LHAPDFBIN --prefix`])
-    fi
-  fi
+
+AC_ARG_WITH([lhapdf],
+	[AS_HELP_STRING([--with-lhapdf],
+	 [Specify location of LHAPDF installation. This takes precedence over
+	  an LHAPDF environment variable, the prefix path or other methods.])],
+	[if test "x$withval" = "xno"; then
+	    AC_MSG_NOTICE([Building fastNLO without LHAPDF!])
+	 else
+     	    if test "x$withval" != "xyes"; then
+	       AC_SUBST([LHAPDF],[$withval])
+	       AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
+	    fi
+	 fi],
+	[])
+
+if test "x$withval" != "xno"; then
+   if test "x$LHAPDF" = "x"; then
+      AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
+      AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
+      if test "x$LHAPDFBIN" = "x"; then
+         AC_MSG_NOTICE([No LHAPDF installation found in prefix path. Try to find LHAPDF in system path ...])
+         AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
+         if test "x$LHAPDFBIN" = "x"; then
+            AC_MSG_NOTICE([Building fastNLO without LHAPDF!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$LHAPDF/bin])
+      if test "x$LHAPDFBIN" = "x"; then
+         AC_MSG_ERROR([lhapdf-config not found in given path to LHAPDF! Configuration aborted!])
+      fi
+   fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$LHAPDFBIN" != "x"; then
+      AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
+      AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
+      AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
+      AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
+      AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
+      AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
+      AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
+      AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
+      AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
+      AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+   else
+      AC_MSG_NOTICE([No LHAPDF library found. Building fastNLO without LHAPDF!])
+   fi
 else
-  AC_SUBST([LHAPDFPREFIX], `$LHAPDFBIN --prefix`)
-fi
-AC_MSG_NOTICE([******************************************])
-if test "x$LHAPDFPREFIX" = "x"; then
-  AC_MSG_WARN([No installation of LHAPDF found. fastNLO user code may not work without!])
-else
-  AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
-  AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
-  AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
-  AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
-  AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
-  AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
-  AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
-  AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
-  AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([LHAPDF support switched off by user. Building fastNLO without LHAPDF!])
 fi
 
 # FASTJET
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for fastjet installation ...])
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([First try to find fastjet via fastjet-config executable in system PATH ...])
-AC_PATH_PROG([FASTJETBIN],[fastjet-config])
-if test "x$FASTJETBIN" = "x"; then
-  AC_MSG_WARN([No path to fastjet binary found, try to use FASTJET environment variable ...])
-  if test "x$FASTJET" = "x"; then
-    AC_MSG_WARN([FASTJET environment variable is not set, please install fastjet. Parts of fastNLO may not work without!])
-  else
-    AC_MSG_RESULT([Using environment variable FASTJET=$FASTJET to locate FASTJET installation ...])
-    AC_MSG_RESULT([Searching for executable fastjet-config in $FASTJET/bin ...])
-    AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
-    if test "x$FASTJETBIN" = "x"; then
-      AC_MSG_WARN([FASTJET binaries not found in $FASTJET/bin, please install fastjet. Parts of fastNLO may not work without!])
-    else
-      AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
-    fi
-  fi
+
+AC_ARG_WITH([fastjet],
+	[AS_HELP_STRING([--with-fastjet],
+	 [Specify location of FASTJET installation. This takes precedence over
+	  a FASTJET environment variable, the prefix path or other methods.])],
+	[if test "x$withval" = "xno"; then
+	    AC_MSG_NOTICE([Building fastNLO without FASTJET!])
+	 else
+     	    if test "x$withval" != "xyes"; then
+	       AC_SUBST([FASTJET],[$withval])
+	       AC_MSG_NOTICE([Using given path $FASTJET as location of FASTJET installation.])
+	    fi
+	 fi],
+	[])
+
+if test "x$withval" != "xno"; then
+   if test "x$FASTJET" = "x"; then
+      AC_MSG_NOTICE([No FASTJET installation path set. Try to find FASTJET in prefix path ...])
+      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$prefix/bin])
+      if test "x$FASTJETBIN" = "x"; then
+         AC_MSG_NOTICE([No FASTJET installation found in prefix path. Try to find FASTJET in system path ...])
+         AC_PATH_PROG([FASTJETBIN],[fastjet-config])
+         if test "x$FASTJETBIN" = "x"; then
+            AC_MSG_NOTICE([Building fastNLO without FASTJET!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
+      if test "x$FASTJETBIN" = "x"; then
+         AC_MSG_ERROR([fastjet-config not found in given path to FASTJET! Configuration aborted!])
+      fi
+   fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$FASTJETBIN" != "x"; then
+      AC_SUBST([FASTJETPREFIX],  [`$FASTJETBIN --prefix`])
+      AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
+      AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
+      AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
+      AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
+      AC_MSG_RESULT([Using $FASTJETPREFIX for the FASTJET installation path])
+      AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
+      AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
+      AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
+   else
+      AC_MSG_NOTICE([No FASTJET library found. Building fastNLO without FASTJET!])
+   fi
 else
-  AC_SUBST([FASTJETPREFIX], [`$FASTJETBIN --prefix`])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([FASTJET support switched off by user. Building fastNLO without FASTJET!])
 fi
-AC_MSG_NOTICE([******************************************])
-if test "x$FASTJETPREFIX" = "x"; then
-  AC_MSG_WARN([No installation of fastjet found. Parts of fastNLO may not work!])
-else
-  AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
-  AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
-  AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
-  AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
-  AC_MSG_RESULT([Using $FASTJETPREFIX for the FASTJET installation path])
-  AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
-  AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
-  AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
-  AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
-fi
+#AC_MSG_ERROR([STOPP])
 
 # CERNLIB
 AC_MSG_NOTICE([******************************************])
@@ -343,12 +380,12 @@ AC_SUBST(SVNREV)
 
 # Output
 #                 user/Makefile
-#                 author/hadron/Makefile
-#	         tableconvert/Makefile
 AC_CONFIG_FILES([Makefile
-                 author/ep/Makefile
                  common/Makefile
                  merger/Makefile
+	         tableconvert/Makefile
+                 author/ep/Makefile
+                 author/hadron/Makefile
 	        ])
 
 AC_OUTPUT

@@ -9,9 +9,8 @@ AUTOMAKE_OPTIONS = gnu
 EXTRA_DIST = m4 SVNREV
 #distdir = $(PACKAGE)-$(VERSION).$(SVNREV)
 #
-SUBDIRS = common merger author/ep
-# tableconvert
-# author/hadron user  
+SUBDIRS = common merger tableconvert author/ep author/hadron
+# user  
 #
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

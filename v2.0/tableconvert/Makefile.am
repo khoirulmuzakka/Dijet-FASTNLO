@@ -1,10 +1,11 @@
+# Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
 # The main target, i.e. the executable to build
 bin_PROGRAMS = conv20
 
 # All source files which go into the main target (and have to be distributed)
-conv20_SOURCES = conv20.inc conv20.f
+conv20_SOURCES = conv20.f conv20.inc
 
 # FORTRAN compiler flags to be used for the main target
 AM_FFLAGS = -o conv20 -O -fno-automatic -ffixed-line-length-132
