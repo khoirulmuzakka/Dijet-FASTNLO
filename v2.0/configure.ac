@@ -44,52 +44,45 @@ AC_C_INLINE
 # Checks for library functions.
 AC_CHECK_FUNCS([memset pow sqrt strstr])
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
-SVNREV=`svnversion $srcdir | sed 's/:.*//'`
-which svnversion > /dev/null; \
-if [ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]
-  then SVNREV=`cat $srcdir/SVNREV`
-  else echo -n $SVNREV>$srcdir/SVNREV
-fi
-AC_SUBST(SVNREV)
-
 # Announce checks particular for fastNLO
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Starting checks particular for fastNLO ...])
 AC_MSG_NOTICE([******************************************])
 
-# NLOJET++
+# NLOJet++
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Looking for NLOJET++ installation ...])
+AC_MSG_NOTICE([Looking for NLOJet++ installation ...])
 AC_MSG_NOTICE([******************************************])
 
+AC_ARG_WITH([nlojet],
+	[AS_HELP_STRING([--with-nlojet],
+	[Specify location of NLOJet++ installation. This takes precedence over
+	an NLOJET environment variable, the prefix path or other methods.
+	Please note: fastNLO CANNOT be used without NLOJet++!])],
+	[if test "x$withval" = "xno"; then
+	AC_MSG_ERROR([fastNLO CANNOT be used without NLOJet++! Configuration aborted!])
+	fi
+	if test "x$withval" != "xyes"; then
+	AC_SUBST([NLOJET],[$withval])
+	AC_MSG_NOTICE([Using given path $NLOJET as location of NLOJet++ installation.])
+	fi],
+	[])
 
-
-
-
-
-
-AC_MSG_NOTICE([First try to find NLOJET++ via nlojet++ executable in system PATH ...])
-AC_PATH_PROG([NLOJETBIN],[nlojet++])
-if test "x$NLOJETBIN" = "x"; then
-  AC_MSG_WARN([No path to NLOJET++ binaries found, try to use NLOJET environment variable ...])
-  if test "x$NLOJET" = "x"; then
-    AC_MSG_ERROR([NLOJET environment variable is not set, please install NLOJET++. Configuration aborted!])
-  else
-    AC_MSG_RESULT([Using environment variable NLOJET=$NLOJET to locate NLOJET++ installation ...])
-    AC_MSG_RESULT([Searching for executables nlojet++ and create-nlojet-user in $NLOJET/bin ...])
-    AC_PATH_PROG([NLOJETBIN],[nlojet++],[],[$NLOJET/bin])
-    AC_PATH_PROG([NLOJETTMP],[create-nlojet-user],[],[$NLOJET/bin])
-    if test "x$NLOJETBIN" = "x"; then
-      AC_MSG_ERROR([NLOJET binaries not found in $NLOJET/bin, please install NLOJET++ correctly. Configuration aborted!])
-    else
-      AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBIN`])
-    fi
-  fi
-else
-  AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBIN`])
+if test "x$NLOJET" = "x"; then
+   AC_MSG_NOTICE([No NLOJet++ installation path set. Try to find NLOJet++ in prefix path ...])
+   AC_PATH_PROG([NLOJETBIN],[nlojet++],[],[$prefix/bin])
+   if test "x$NLOJETBIN" = "x"; then
+      AC_MSG_NOTICE([No NLOJet++ installation found in prefix path. Try to find NLOJet++ in system path ...])
+      AC_PATH_PROG([NLOJETBIN],[nlojet++])
+      if test "x$NLOJETBIN" = "x"; then
+         AC_MSG_ERROR([No NLOJet++ installation found. Please install NLOJet++ first. Configuration aborted!])
+      fi
+   fi
+   AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBIN`])
+   AC_SUBST([NLOJET], [`dirname $NLOJETBINPATH`])
 fi
-AC_SUBST([NLOJETPREFIX], [`dirname $NLOJETBINPATH`])
+
+AC_SUBST([NLOJETPREFIX], "$NLOJET")
 AC_SUBST([NLOJETLIBPATH], "$NLOJETPREFIX/lib")
 AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
 AC_MSG_NOTICE([******************************************])
@@ -104,6 +97,46 @@ AC_MSG_NOTICE([Looking for CTEQ-PDF (comes with NLOJET++ 4.1.3) installation ...
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Attention! These are the PDFs coming with NLOJET++ version 4.1.x!])
 AC_MSG_NOTICE([Do not confuse with LHAPDF!])
+
+AC_ARG_WITH([cteq-pdf],
+	[AS_HELP_STRING([--with-cteq-pdf],
+	[Specify location of CTEQ-PDF installation. This takes precedence over
+	a ZNPDF environment variable, the prefix path or other methods.
+	Please note: fastNLO currently CANNOT be used without CTEQ-PDF
+    	which is required by NLOJet++!])],
+	[if test "x$withval" = "xno"; then
+	AC_MSG_ERROR([fastNLO CANNOT be used without CTEQ-PDF! Configuration aborted!])
+	fi
+	if test "x$withval" != "xyes"; then
+	AC_SUBST([ZNPDF],[$withval])
+	AC_MSG_NOTICE([Using given path $ZNPDF as location of CTEQ-PDF installation.])
+	fi],
+	[])
+
+if test "x$ZNPDF" = "x"; then
+   AC_MSG_NOTICE([No ZNPDF installation path set. Try to find CTEQ-PDF in prefix path ...])
+
+
+
+   AC_PATH_PROG([NLOJETBIN],[nlojet++],[],[$prefix/bin])
+   if test "x$NLOJETBIN" = "x"; then
+      AC_MSG_NOTICE([No NLOJet++ installation found in prefix path. Try to find NLOJet++ in system path ...])
+      AC_PATH_PROG([NLOJETBIN],[nlojet++])
+      if test "x$NLOJETBIN" = "x"; then
+         AC_MSG_ERROR([No NLOJet++ installation found. Please install NLOJet++ first. Configuration aborted!])
+      fi
+   fi
+   AC_SUBST([NLOJETBINPATH], [`dirname $NLOJETBIN`])
+   AC_SUBST([NLOJET], [`dirname $NLOJETBINPATH`])
+fi
+
+
+
+
+
+
+
+
 AC_MSG_NOTICE([Assume location of preinstalled package to be given by environment variable ZNPDF ...])
 if test "x$ZNPDF" = "x"; then
   AC_MSG_ERROR([ZNPDF environment variable is not set, please install CTEQ-PDF. Configuration aborted!])
@@ -276,6 +309,15 @@ AC_MSG_WARN([ROOT will be ignored for the moment!])
 #fi
 AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 
+# Add subversion revision number, recipe from Autotools by J. Calcote 
+SVNREV=`svnversion $srcdir | sed 's/:.*//'`
+which svnversion > /dev/null; \
+if [ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]
+  then SVNREV=`cat $srcdir/SVNREV`
+  else echo -n $SVNREV>$srcdir/SVNREV
+fi
+AC_SUBST(SVNREV)
+
 # Output
 #                 user/Makefile
 #                 author/hadron/Makefile
@@ -285,4 +327,5 @@ AC_CONFIG_FILES([Makefile
                  common/Makefile
                  merger/Makefile
 	        ])
+
 AC_OUTPUT
