@@ -11,6 +11,8 @@
 NAME= allunc
 
 CFILES= ftn_gzio.c
+EXAFILES= example.f fnx9999.f fn-hbook.f fn-alphas-demo.f fn-interface.f \
+	alphst.f pyalps.f
 REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
 	fn-interface-cteq6.f Cteq61Pdf.f
 STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
@@ -28,6 +30,7 @@ FC=g77
 #FC=gfortran
 
 #OBJFILESCOM  = $(COMFILES:.f=.o)
+OBJFILESEXA  = $(EXAFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESREF  = $(REFFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESSTAT = $(STATFILES:.f=.o) $(CFILES:.c=.o)
 OBJFILESPDF  = $(PDFFILES:.f=.o) $(CFILES:.c=.o)
@@ -45,6 +48,12 @@ allunc:	$(OBJFILESALL) fnx9999.inc strings.inc uncert.inc
 # original CTEQ PDF code
 example-ref: $(OBJFILESREF) fnx9999.inc
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESREF) \
+	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
+
+# Example job
+example: $(OBJFILESEXA) fnx9999.inc
+	 $(FC) -o $@ $(FFLAGS) $(OBJFILESEXA) \
+	-L $(LHAPDF) -lLHAPDF \
 	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
 
 # My statistical error analysis (kr)

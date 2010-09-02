@@ -36,7 +36,7 @@ c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
       
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
-      DOUBLE PRECISION XSECT0(NBINTOTMAX,3),XSECT1(NBINTOTMAX,3)
+      DOUBLE PRECISION XSECT0(NBINTOTMAX,3)
       REAL PT(NPTMAX)
       INTEGER IMODE,NRAP
 
@@ -395,7 +395,7 @@ c - Check uncertainties to derive
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
-      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT1)
+      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
@@ -415,7 +415,7 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-c - Compute PDF uncertainties for all available scales
+c - Compute PDF uncertainties for all precalculated scale variations
 c - Check that FILENAME is still the primary table here ...!!!
       IF (LPDF.AND..NOT.LSER) THEN
          WRITE(*,*)"========================================"//
@@ -435,7 +435,7 @@ c - Check that FILENAME is still the primary table here ...!!!
             WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
             ISTAT = 1
             IMODE = 1
             NRAP  = NRAPIDITY
@@ -581,8 +581,7 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ISTAT = 1
-ckr         IMODE = 3
-         IMODE = 1
+         IMODE = 3
          NRAP  = NRAPIDITY
          IF (LRAT) THEN
             NRAP = 2*NRAPIDITY
@@ -614,7 +613,7 @@ c - Give some standard output, fill histograms
      >        "lower scale uncertainty upper scale uncertainty"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         WRITE(*,*)"ALLUNC: Uncertainties from",NSCALES,
+         WRITE(*,*)"ALLUNC: Uncertainties from",NSCALES-2,
      >        " scale variations"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
@@ -633,21 +632,21 @@ c - Give some standard output, fill histograms
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
             ENDDO
          ENDDO
-c         CALL PDFFILL(NRAP,6,ISCALE,WTDXLM)
-c         CALL PDFFILL(NRAP,7,ISCALE,WTDXUM)
-         CALL PDFFILL(NRAP,6,ISCALE,WTDXL2)
-         CALL PDFFILL(NRAP,7,ISCALE,WTDXU2)
+         CALL PDFFILL(NRAP,6,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAP,7,ISCALE,WTDXUM)
       ENDIF
 
 
 
 c - Algorithmic part
 c - Use reference table
-c - Reference scale is always no. 1
-c - Reference result is in nrap/2 ++ bins
+c - Reference result is always stored in scale variation no. 1
+c - Reference table has doubled number of rapidity bins and
+c -   the reference result is stored in upper half of these bins
 c - Reference result is evaluated with CTEQ61 PDFs
-c - Default scale (C++ 2, Fortran 3) ==> normal result
-c - (Use other ISCALE in FORTRAN ONLY if refscale <> 2 in author code)
+c - Default scale in hadron-hadron usually is the third variation:
+c -   C++ no. 2 --> Fortran no. 3 ==> normal result (but compare to author code!)
+c - (Use other scale in FORTRAN ONLY if refscale <> 2 in author code)
 c - Attention: From now on ref. table loaded ==> rap. bins doubled
       IF (LALG) THEN
          FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
@@ -665,10 +664,20 @@ c - Initialize CTEQ61 reference PDFs
          CALL INITPDF(0)
 
 c - Reference result
+c - Need scale variation no. 1 for this, upper half of rap. bins
+c - NOTE1: The values of mur and muf are internally used to select the
+c          the corresponding table number, so they have to be set
+c          according to scale variation 1 although the factors are wrong
+c          for the comparison ==>
+c            compare to scale variation 3, lower half of rap. bins
+c - NOTE2: The reference result should not depend on the mur or muf values
+c          apart from the table choice, BUT if mur is not equal to muf
+c          additional factors are taken into account which must be
+c          avoided for the reference calculation!
          ISCALE = 1
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ISTAT = 1
          IMODE = 4
          CALL CENRES(LRAT)
@@ -678,7 +687,7 @@ c - Normal result
          ISCALE = 3
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ISTAT = 2
          CALL UNCERT(ISTAT,IMODE,LRAT)
          ISTAT = 3
@@ -818,13 +827,13 @@ ckr                     write(*,*)"1. Booked histo #",nhist
                      IF (LPDF) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dPDF_low"
+     >                       "_PDF_low/xsect"
                         CALL HBOOKB(IHIST+1,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dPDF_up"
+     >                       "_PDF_up/xsect"
                         CALL HBOOKB(IHIST+2,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
@@ -852,7 +861,7 @@ ckr                        write(*,*)"3. Booked histo #",nhist
      >                    ISCALE.EQ.3) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dref/xsect_%"
+     >                       "_xsect/xsect_ref"
                         CALL HBOOKB(IHIST+5,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
@@ -863,14 +872,14 @@ ckr                        write(*,*)"4. Booked histo #",nhist
      >                    ISCALE.EQ.3) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dscl_low/xsect_%"
+     >                       "_SCL_low/xsect"
                         CALL HBOOKB(IHIST+6,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dscl_up/xsect_%"
+     >                       "_SCL_up/xsect"
                         CALL HBOOKB(IHIST+7,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
