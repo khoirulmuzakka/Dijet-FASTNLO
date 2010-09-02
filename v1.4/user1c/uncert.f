@@ -1,7 +1,8 @@
-      SUBROUTINE UNCERT(ISTAT,IMODE)
+      SUBROUTINE UNCERT(ISTAT,IMODE,LRAT)
       
       IMPLICIT NONE
       INTEGER ISTAT,IMODE
+      LOGICAL LRAT
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       DOUBLE PRECISION DIFF,SUMM,DIFFPROC,SUMMPROC,DIFFORD,SUMMORD
@@ -13,7 +14,7 @@
       IF (ISTAT.EQ.1) THEN
          IBIN = 0
          NRAP = NRAPIDITY
-         IF (IMODE.EQ.5) NRAP=2*NRAPIDITY
+         IF (LRAT) NRAP=2*NRAPIDITY
          DO IRAP=1,NRAP
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
@@ -21,6 +22,7 @@
                   DO ISUB=1,NSUBPROC+1
                      WT(IBIN,ISUB,IORD)     = 0.D0
                      WT2(IBIN,ISUB,IORD)    = 0.D0
+                     WRES(IBIN,ISUB,IORD)   = 0.D0
                      WTX(IBIN,ISUB,IORD)    = 0.D0
                      WTX2(IBIN,ISUB,IORD)   = 0.D0
                      WTDXL2(IBIN,ISUB,IORD) = 0.D0
@@ -32,6 +34,7 @@
             ENDDO
          ENDDO
          NBIN = IBIN
+         IF (LRAT) NBIN = NBIN/2
          RETURN
       ENDIF
       
@@ -57,11 +60,11 @@
      >                    WT(IBIN,ISUB,IORD)   + 1.D0 
                      WT2(IBIN,ISUB,IORD)  =
      >                    WT2(IBIN,ISUB,IORD)  + 1.D0 
+                     WRES(IBIN,ISUB,IORD) = SUMM
                      WTX(IBIN,ISUB,IORD) =
-     >                    WTX(IBIN,ISUB,IORD)  + RESULT(IBIN,ISUB,IORD)
+     >                    WTX(IBIN,ISUB,IORD)  + SUMM
                      WTX2(IBIN,ISUB,IORD) =
-     >                    WTX2(IBIN,ISUB,IORD) +
-     >                    RESULT(IBIN,ISUB,IORD)*RESULT(IBIN,ISUB,IORD)
+     >                    WTX2(IBIN,ISUB,IORD) + SUMM*SUMM
                      IF (DIFF.GT.0D0) THEN
                         WTDXU2(IBIN,ISUB,IORD) =
      >                       WTDXU2(IBIN,ISUB,IORD) + DIFF*DIFF
@@ -75,10 +78,10 @@
                            WTDXLM(IBIN,ISUB,IORD) = DIFF
                         ENDIF
                      ENDIF
-                     IF (IMODE.EQ.5) THEN
+                     IF (LRAT) THEN
                         WTX(IBIN+NBIN,ISUB,IORD) = 
-     >                       WTX(IPT,ISUB,IORD) /
-     >                       RESULT(IBIN,ISUB,IORD)
+     >                       WRES(IPT,ISUB,IORD) /
+     >                       WRES(IBIN,ISUB,IORD)
                         DIFF = WTX(IBIN+NBIN,ISUB,IORD) -
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
                         IF (DIFF.GT.0D0) THEN
@@ -104,6 +107,7 @@
      >                 WT(IBIN,NSUBPROC+1,IORD)   + 1.D0 
                   WT2(IBIN,NSUBPROC+1,IORD)   =
      >                 WT2(IBIN,NSUBPROC+1,IORD)  + 1.D0 
+                  WRES(IBIN,NSUBPROC+1,IORD)  = SUMMPROC
                   WTX(IBIN,NSUBPROC+1,IORD)   =
      >                 WTX(IBIN,NSUBPROC+1,IORD)  + SUMMPROC
                   WTX2(IBIN,NSUBPROC+1,IORD)  =
@@ -123,10 +127,10 @@
                         WTDXLM(IBIN,NSUBPROC+1,IORD) = DIFFPROC
                      ENDIF
                   ENDIF
-                  IF (IMODE.EQ.5) THEN
+                  IF (LRAT) THEN
                      WTX(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                    WTX(IPT,NSUBPROC+1,IORD) / 
-     >                    WTX(IBIN,NSUBPROC+1,IORD)
+     >                    WRES(IPT,NSUBPROC+1,IORD) / 
+     >                    WRES(IBIN,NSUBPROC+1,IORD)
                      DIFF = WTX(IBIN+NBIN,NSUBPROC+1,IORD) -
      >                    MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
                      IF (DIFF.GT.0D0) THEN
@@ -152,6 +156,7 @@
      >              WT(IBIN,NSUBPROC+1,NORD+1)   + 1.D0 
                WT2(IBIN,NSUBPROC+1,NORD+1)  =
      >              WT2(IBIN,NSUBPROC+1,NORD+1)  + 1.D0 
+               WRES(IBIN,NSUBPROC+1,NORD+1) = SUMMORD
                WTX(IBIN,NSUBPROC+1,NORD+1)  = 
      >              WTX(IBIN,NSUBPROC+1,NORD+1)  + SUMMORD
                WTX2(IBIN,NSUBPROC+1,NORD+1) =
@@ -171,20 +176,20 @@
                      WTDXLM(IBIN,NSUBPROC+1,NORD+1) = DIFFORD
                   ENDIF
                ENDIF
-               IF (IMODE.EQ.5) THEN
+               IF (LRAT) THEN
                   WTX(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
-     >                 WTX(IPT,NSUBPROC+1,NORD+1) /
-     >                 WTX(IBIN,NSUBPROC+1,NORD+1)
+     >                 WRES(IPT,NSUBPROC+1,NORD+1) /
+     >                 WRES(IBIN,NSUBPROC+1,NORD+1)
                   DIFF = WTX(IBIN+NBIN,NSUBPROC+1,NORD+1) -
      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
-                  write(*,*)"irap,ipt,iord,isub,ibin",irap,ipt,iord,isub
-     >                 ,ibin
-                  write(*,*)"wtx1,2,2",WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
-     >                 WTX(IPT,NSUBPROC+1,NORD+1),
-     >                 WTX(IBIN,NSUBPROC+1,NORD+1)
-                  write(*,*)"wtx,myres,diff",
-     >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
-     >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),diff
+Comment:                   write(*,*)"COMP: ibin,irap,ipt,iord,isub,i+n",
+Comment:      >                 ibin,irap,ipt,iord,isub,ibin+nbin
+Comment:                   write(*,*)"COMP: num,den,wtx,myres,diff",
+Comment:      >                 WRES(IPT,NSUBPROC+1,NORD+1),
+Comment:      >                 WRES(IBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 diff
                   IF (DIFF.GT.0D0) THEN
                      WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
      >                    WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) +
@@ -216,6 +221,7 @@
      >                 WT(IBIN,ISUB,NORD+1)   + 1.D0 
                   WT2(IBIN,ISUB,NORD+1)  =
      >                 WT2(IBIN,ISUB,NORD+1)  + 1.D0 
+                  WRES(IBIN,ISUB,NORD+1) = SUMMORD
                   WTX(IBIN,ISUB,NORD+1)  = 
      >                 WTX(IBIN,ISUB,NORD+1)  + SUMMORD
                   WTX2(IBIN,ISUB,NORD+1) =
@@ -235,10 +241,10 @@
                         WTDXLM(IBIN,ISUB,NORD+1) = DIFFORD
                      ENDIF
                   ENDIF
-                  IF (IMODE.EQ.5) THEN
+                  IF (LRAT) THEN
                      WTX(IBIN+NBIN,ISUB,NORD+1) = 
-     >                    WTX(IPT,ISUB,NORD+1) /
-     >                    WTX(IBIN,ISUB,NORD+1)
+     >                    WRES(IPT,ISUB,NORD+1) /
+     >                    WRES(IBIN,ISUB,NORD+1)
                      DIFF = WTX(IBIN+NBIN,ISUB,NORD+1) -
      >                    MYRES(IBIN+NBIN,ISUB,NORD+1)
                      IF (DIFF.GT.0D0) THEN
@@ -276,7 +282,7 @@
                DO IORD=1,NORD+1
                   DO ISUB=1,NSUBPROC+1
 ckr Eigen vector method (as needed for CTEQ or MSTW PDF uncertainty)
-                     IF (IMODE.EQ.1.OR.IMODE.EQ.5) THEN
+                     IF (IMODE.EQ.1) THEN
                         WTDXU2(IBIN,ISUB,IORD) =  SQRT(WTDXU2(IBIN
      >                       ,ISUB,IORD))
                         WTDXL2(IBIN,ISUB,IORD) = -SQRT(WTDXL2(IBIN
@@ -320,12 +326,22 @@ ckr            central result according to NNPDF.
 ckr Minimax method (as needed for scale uncertainties) 
                      ELSEIF (IMODE.EQ.3) THEN
                         IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1.D-99) THEN
+Comment:                            write(*,*)"FINA: ibin,irap,ipt,iord,isub,i+n"
+Comment:      >                          ,ibin,irap,ipt,iord,isub,ibin+nbin
+Comment:                            write(*,*)"FINA: dxu, dxl, myres",
+Comment:      >                          WTDXUM(IBIN,ISUB,IORD),
+Comment:      >                          WTDXLM(IBIN,ISUB,IORD),
+Comment:      >                          MYRES(IBIN,ISUB,IORD) 
                            WTDXUM(IBIN,ISUB,IORD) = 1D0 +
      >                          WTDXUM(IBIN,ISUB,IORD) /
      >                          MYRES(IBIN,ISUB,IORD) 
                            WTDXLM(IBIN,ISUB,IORD) = 1D0 +
      >                          WTDXLM(IBIN,ISUB,IORD) /
      >                          MYRES(IBIN,ISUB,IORD) 
+Comment:                            write(*,*)"FINB: dxu, dxl, myres",
+Comment:      >                          WTDXUM(IBIN,ISUB,IORD),
+Comment:      >                          WTDXLM(IBIN,ISUB,IORD),
+Comment:      >                          MYRES(IBIN,ISUB,IORD) 
                         ELSE
                            WTDXUM(IBIN,ISUB,IORD) = -1D0
                            WTDXLM(IBIN,ISUB,IORD) = -1D0
@@ -348,19 +364,26 @@ ckr Deviation from reference (as needed for algorithmic uncertainties)
             ENDDO
          ENDDO
 cdebug
-         IBIN = 0
-         DO IRAP=1,2*NRAPIDITY
-            DO IPT=1,NPT(IRAP)
-               IBIN = IBIN+1
-               DO IORD=1,NORD+1
-                  DO ISUB=1,NSUBPROC+1
-                     write(*,*)"ibin,iord,isub,wtxxx",
-     >                    ibin,iord,isub,wtx(IBIN,ISUB,IORD)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         NBIN = IBIN
+Comment:          IBIN = 0
+Comment:          DO IRAP=1,NRAPIDITY
+Comment:             DO IPT=1,NPT(IRAP)
+Comment:                IBIN = IBIN+1
+Comment:                DO IORD=1,NORD+1
+Comment:                   DO ISUB=1,NSUBPROC+1
+Comment:                      write(*,*)"ENDW: ibin,irap,ipt,iord,isub,i+n",
+Comment:      >                    ibin,irap,ipt,iord,isub,ibin+nbin
+Comment:                      write(*,*)"ENDW: wres,wtx,myres",
+Comment:      >                    WRES(IBIN,ISUB,IORD),
+Comment:      >                    WTX(IBIN,ISUB,IORD),
+Comment:      >                    MYRES(IBIN,ISUB,IORD)
+Comment:                      write(*,*)"ENDW: wres,wtx,myresnbin",
+Comment:      >                    WRES(IBIN+NBIN,ISUB,IORD),
+Comment:      >                    WTX(IBIN+NBIN,ISUB,IORD),
+Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
+Comment:                   ENDDO
+Comment:                ENDDO
+Comment:             ENDDO
+Comment:          ENDDO
 cdebug
 
          RETURN
@@ -371,10 +394,10 @@ cdebug
 
 
 
-      SUBROUTINE CENRES(IMODE)
+      SUBROUTINE CENRES(LRAT)
       
       IMPLICIT NONE
-      INTEGER IMODE
+      LOGICAL LRAT
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN
@@ -407,44 +430,44 @@ cdebug
                   MYRES(IBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IBIN,NSUBPROC+1,IORD) + 
      >                 MYRES(IBIN,ISUB,IORD)
-ckr Centrality ratio: IMODE = 5
-                  IF (IMODE.EQ.5) THEN
+ckr Centrality ratio: LRAT
+                  IF (LRAT) THEN
                      MYRES(IBIN+NBIN,ISUB,IORD) = 
      >                    MYRES(IPT,ISUB,IORD) /
      >                    RESULT(IBIN,ISUB,IORD)
                   ENDIF
-                  write(*,*)"ibin,irap,ipt,iord,isub",
-     >                 ibin,irap,ipt,iord,isub
-                  write(*,*)"r,a,b",MYRES(IBIN+NBIN,ISUB,IORD),
-     >                 MYRES(IPT,ISUB,IORD),RESULT(IBIN,ISUB,IORD)
+c                  write(*,*)"ibin,irap,ipt,iord,isub",
+c     >                 ibin,irap,ipt,iord,isub
+c                  write(*,*)"r,a,b",MYRES(IBIN+NBIN,ISUB,IORD),
+c     >                 MYRES(IPT,ISUB,IORD),RESULT(IBIN,ISUB,IORD)
                ENDDO
-               IF (IMODE.EQ.5) THEN
+               IF (LRAT) THEN
                   MYRES(IBIN+NBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IPT,NSUBPROC+1,IORD) / 
      >                 MYRES(IBIN,NSUBPROC+1,IORD)
                ENDIF
-               write(*,*)"sub r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,IORD),
-     >              MYRES(IPT,NSUBPROC+1,IORD),MYRES(IBIN,NSUBPROC+1
-     >              ,IORD)
+c               write(*,*)"sub r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,IORD),
+c     >              MYRES(IPT,NSUBPROC+1,IORD),MYRES(IBIN,NSUBPROC+1
+c     >              ,IORD)
                MYRES(IBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IBIN,NSUBPROC+1,NORD+1) +
      >              MYRES(IBIN,NSUBPROC+1,IORD)
             ENDDO
-            IF (IMODE.EQ.5) THEN
+            IF (LRAT) THEN
                MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IPT,NSUBPROC+1,NORD+1) /
      >              MYRES(IBIN,NSUBPROC+1,NORD+1)
             ENDIF
-            write(*,*)"tot r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
-     >           MYRES(IPT,NSUBPROC+1,NORD+1),MYRES(IBIN,NSUBPROC+1
-     >           ,NORD+1)
+c            write(*,*)"tot r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
+c     >           MYRES(IPT,NSUBPROC+1,NORD+1),MYRES(IBIN,NSUBPROC+1
+c     >           ,NORD+1)
             DO ISUB=1,NSUBPROC
                DO IORD=1,NORD
                   MYRES(IBIN,ISUB,NORD+1) =
      >                 MYRES(IBIN,ISUB,NORD+1) + 
      >                 MYRES(IBIN,ISUB,IORD)
                ENDDO
-               IF (IMODE.EQ.5) THEN
+               IF (LRAT) THEN
                   MYRES(IBIN+NBIN,ISUB,NORD+1) = 
      >                 MYRES(IPT,ISUB,NORD+1) /
      >                 MYRES(IBIN,ISUB,NORD+1)
@@ -454,19 +477,20 @@ ckr Centrality ratio: IMODE = 5
       ENDDO
 
 cdebug
-      IBIN = 0
-      DO IRAP=1,2*NRAPIDITY
-         DO IPT=1,NPT(IRAP)
-            IBIN = IBIN+1
-            DO IORD=1,NORD+1
-               DO ISUB=1,NSUBPROC+1
-                  write(*,*)"ibin,iord,isub,myres",
-     >                 ibin,iord,isub,MYRES(IBIN,ISUB,IORD)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      NBIN = IBIN
+Comment:       IBIN = 0
+Comment:       DO IRAP=1,NRAPIDITY
+Comment:          DO IPT=1,NPT(IRAP)
+Comment:             IBIN = IBIN+1
+Comment:             DO IORD=1,NORD+1
+Comment:                DO ISUB=1,NSUBPROC+1
+Comment:                   write(*,*)"ENDM: ibin,irap,ipt,iord,isub,i+n",
+Comment:      >                 ibin,irap,ipt,iord,isub,ibin+nbin
+Comment:                   write(*,*)"ENDM: myres, myresnbin",
+Comment:      >                 MYRES(IBIN,ISUB,IORD),MYRES(IBIN+NBIN,ISUB,IORD)
+Comment:                ENDDO
+Comment:             ENDDO
+Comment:          ENDDO
+Comment:       ENDDO
 cdebug
 
 

@@ -96,8 +96,9 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
             WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
-            WRITE(*,*)'  Use MC sampling method for PDF uncertainty,'//
-     >           ' def. = no'
+            WRITE(*,*)'  PDF uncertainties in toy MC method, '//
+     >           'def. = no'
+            WRITE(*,*)'     (i.e. eigen vector method (CTEQ, MSTW))'
             WRITE(*,*)' '
             STOP
          ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442".OR.
@@ -370,10 +371,10 @@ c - Check uncertainties to derive
          WRITE(*,*)"ALLUNC: Only central PDF available."
       ENDIF
       IF (LPDF) THEN
-         WRITE(*,*)"ALLUNC: Deriving PDF uncertainties."
+         WRITE(*,*)"ALLUNC: Deriving PDF uncertainties"
       ENDIF
       IF (LSTAT) THEN
-         WRITE(*,*)"ALLUNC: Deriving statistical uncertainties."
+         WRITE(*,*)"ALLUNC: Deriving statistical uncertainties"
       ENDIF
       IF (LSER) THEN
          WRITE(*,*)"ALLUNC: Deriving cross sections of series variation"
@@ -385,7 +386,7 @@ c - Check uncertainties to derive
          WRITE(*,*)"ALLUNC: Deriving uncertainties for ratios"
       ENDIF
       IF (LALG) THEN
-         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties."
+         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties"
       ENDIF
       WRITE(*,*)" "
 
@@ -435,7 +436,6 @@ c - Check that FILENAME is still the primary table here ...!!!
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
-            
             ISTAT = 1
             IMODE = 1
             NRAP  = NRAPIDITY
@@ -443,37 +443,30 @@ c - Check that FILENAME is still the primary table here ...!!!
                IMODE = 2
             ENDIF
             IF (LRAT) THEN
-               IMODE = 5
                NRAP = 2*NRAPIDITY
-               write(*,*)"nrapidity,nrap",nrapidity,nrap
             ENDIF
-            CALL CENRES(IMODE)
-            CALL UNCERT(ISTAT,IMODE)
+            CALL CENRES(LRAT)
+            CALL UNCERT(ISTAT,IMODE,LRAT)
+            ISTAT = 2
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
             IF (LPDF) THEN
                DO J=1,NPDF
                   CALL INITPDF(J)
                   CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-                  ISTAT = 2
-                  CALL UNCERT(ISTAT,IMODE)
+                  CALL UNCERT(ISTAT,IMODE,LRAT)
                ENDDO
             ENDIF
             
             ISTAT = 3
-            CALL UNCERT(ISTAT,IMODE)
+            CALL UNCERT(ISTAT,IMODE,LRAT)
 
 c - Give some standard output, fill histograms
             IBIN = 0
-            write(*,*)"nrapidity,nrap",nrapidity,nrap
             DO IRAP=1,NRAP
-               write(*,*)"irap,npt",irap,npt(irap)
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
                   WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
-     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
-                  WRITE(*,900) IBIN,WTX(IBIN,NSUBPROC+1,NORD+1),
      >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
      >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
                ENDDO
@@ -516,16 +509,16 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ISTAT = 1
          IMODE = 3
-         CALL CENRES(IMODE)
-         CALL UNCERT(ISTAT,IMODE)
+         CALL CENRES(LRAT)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
          ISTAT = 2
          DO J=1,NPDF
             CALL INITPDF(J)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(ISTAT,IMODE)
+            CALL UNCERT(ISTAT,IMODE,LRAT)
          ENDDO
          ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -588,9 +581,14 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ISTAT = 1
-         IMODE = 3
-         CALL CENRES(IMODE)
-         CALL UNCERT(ISTAT,IMODE)
+ckr         IMODE = 3
+         IMODE = 1
+         NRAP  = NRAPIDITY
+         IF (LRAT) THEN
+            NRAP = 2*NRAPIDITY
+         ENDIF
+         CALL CENRES(LRAT)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
          ISTAT = 2
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
@@ -599,11 +597,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(ISTAT,IMODE)
+            CALL UNCERT(ISTAT,IMODE,LRAT)
  10         CONTINUE
          ENDDO
          ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -624,7 +622,7 @@ c - Give some standard output, fill histograms
          ISCALE = 3
          ISUB   = 0
          IBIN   = 0
-         DO IRAP=1,NRAPIDITY
+         DO IRAP=1,NRAP
             IHIST = IORD*1000000 + ISCALE*100000 +
      >           ISUB*10000 + IRAP*100
             DO IPT=1,NPT(IRAP)
@@ -635,8 +633,10 @@ c - Give some standard output, fill histograms
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAPIDITY,6,ISCALE,WTDXLM)
-         CALL PDFFILL(NRAPIDITY,7,ISCALE,WTDXUM)
+c         CALL PDFFILL(NRAP,6,ISCALE,WTDXLM)
+c         CALL PDFFILL(NRAP,7,ISCALE,WTDXUM)
+         CALL PDFFILL(NRAP,6,ISCALE,WTDXL2)
+         CALL PDFFILL(NRAP,7,ISCALE,WTDXU2)
       ENDIF
 
 
@@ -671,8 +671,8 @@ c - Reference result
          CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
          ISTAT = 1
          IMODE = 4
-         CALL CENRES(IMODE)
-         CALL UNCERT(ISTAT,IMODE)
+         CALL CENRES(LRAT)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
 
 c - Normal result
          ISCALE = 3
@@ -680,9 +680,9 @@ c - Normal result
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT)
          ISTAT = 2
-         CALL UNCERT(ISTAT,IMODE)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
          ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE)
+         CALL UNCERT(ISTAT,IMODE,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
