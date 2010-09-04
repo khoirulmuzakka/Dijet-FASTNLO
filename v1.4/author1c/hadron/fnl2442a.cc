@@ -68,7 +68,6 @@ class UserHHC : public user_hhc
    double *raphigh;  // array for rapidity boundaries
    int *npt;       // No of pT bins in each y range
    vector< vector<double> >pthigh;   // array for pT boundaries
-   double ptlow;    // lowest pt considered 
    
    int nscalevar;             // number of scale variations (mu_r,mu_f) in NLO
    vector <double> murscale;  // overall scale factor for renormalization scale
@@ -161,7 +160,7 @@ void UserHHC::initfunc(unsigned int)
    unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
    //unitfactor = 1.0;  // for nb    
 
-   //Set up binning  
+   // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
    // 
    // # of bins
@@ -237,9 +236,6 @@ void UserHHC::initfunc(unsigned int)
    //      }
    //    }
    //DEBUGEND
-
-   // lowest pT value for jets to be considered
-   ptlow = 30.;
 
    // Binning in x
    nxtot = 20;
@@ -488,23 +484,25 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      exit(1);
    }
 
+   // lowest pT for jets to be considered
+   double ptlow = 0.;
+   // highest (pseudo-)rapidity for jets to be considered
+   double yjmax = 5.0;
+
    int njet = 0;
    int ijet[4]     = {0, 0, 0, 0};
    double ptjet[4] = {0.,0.,0.,0.};
    double yjet[4]  = {10.,10.,10.,10.};
-   int nrmax = nrap/(iref+1); // - important for iref==1: different No loops
    if (nj > 0) {
-// Initialize pointers to the jets, check min pT and max |eta|
+// Initialize pointers to the jets, check minimal jet pT and maximal |y,eta|
      for (int i=1; i<=nj; i++) {
        double pti = pj[i].perp();
        double yi  = abs(pj[i].prapidity());
        //DEBUG
        //       cout << "ijet, pti, yi: " << i << ", " << pti << ", " << yi << endl;
-       //       cout << "ptlow = " << ptlow << ", raphigh = " << raphigh[nrmax] << endl;
+       //       cout << "ptlow = " << ptlow << ", raphigh = " << yjmax << endl;
        //DEBUGEND
-       // QUESTION 1: Do we look for the two leading jets in |eta|<2.5 or |eta|<??? 
-       // QUESTION 2: Do we have an explicit minimal pT requirement? 
-       if (pti > ptlow && yi < raphigh[nrmax]) {
+       if (pti > ptlow && yi < yjmax) {
 	 ijet[i]  = 1;
 	 ptjet[i] = pti; 
 	 yjet[i]  = yi;
@@ -566,8 +564,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 		       -(pj[ij1].X()+pj[ij2].X())*(pj[ij1].X()+pj[ij2].X())
 		       -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
 		       -(pj[ij1].Z()+pj[ij2].Z())*(pj[ij1].Z()+pj[ij2].Z()));
-     
-     // Determine minimal and maximal pseudorapdity
+
+     // Determine minimal and maximal (pseudo-)rapidity
      double yjjmin = min(y1,y2);
      double yjjmax = max(y1,y2);
 
@@ -576,10 +574,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        //     double ptmax = pt1;    // either pTmax
        double ptmax = (pt1+pt2)/2.0; // or the average dijet pT
 
-       // --- Determine eta and pt (= dijet mass) bin 
+       // --- Determine (pseudo-)rapidity and pT (= dijet mass) bin 
        // KR: Note, BOTH leading jets are required to be inside
-       //     the SAME |rapidity| interval in this analysis!
-       // KR: Do normalize to binwidth in eta ...!
+       //     the SAME |(pseudo-)rapidity| interval in this analysis!
+       // KR: Do normalize to binwidths!
        double binwidth = 1.0;
        int rapbin = -1;
        int nloop = nrap;   // - important for iref==1: different No loops
