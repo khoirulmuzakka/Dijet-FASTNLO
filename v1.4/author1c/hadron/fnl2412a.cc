@@ -479,8 +479,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    //----- do the jet analysis -----
    pj = jetclus(p);
-   int nj = pj.upper(); 
-   
+   int nj = pj.upper();
+
    // Check on maximal no. of jets: 3
    if (nj > 3) {
      cout << "ERROR: This scenario is not suited for " << nj <<
