@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl2442a:
+// fastNLO author code for fnl2442:
 //     CMS LHC dijet mass ratio scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
@@ -165,7 +165,7 @@ void UserHHC::initfunc(unsigned int)
    // 
    // # of bins
    nrap = 2;
-   double rapb[3] = { 0.0, 1.1, 2.5};
+   double rapb[3] = { 0.0, 0.7, 1.3};
    // In reference mode: Double no. of bins
    nrap = nrap*(iref+1);
    
@@ -400,7 +400,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "  " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO    - initialization" << endl;
-   cout << "    Scenario fnl2442a:" << endl;
+   cout << "    Scenario fnl2442:" << endl;
    cout  <<  "      CMS LHC test scenario, E_cms = 7 TeV,"  <<  endl;
    cout  <<  "      for fastjet anti-kT algo with R=0.7 in E-scheme"  <<  endl; 
    cout << " " << endl;
