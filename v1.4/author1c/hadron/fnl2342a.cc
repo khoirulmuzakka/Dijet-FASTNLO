@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl2342:
+// fastNLO author code for fnl2342a:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
@@ -182,7 +182,7 @@ void UserHHC::initfunc(unsigned int)
    // Here:  Jet pT
    // 
    // # of bins npt per irap bin of first dimension
-   int nptb[6] = {39, 39, 39, 39, 39, 32};
+   int nptb[6] = {49, 49, 49, 46, 39, 32};
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      npt[i] = nptb[i]; 
@@ -200,10 +200,10 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // Array for bin boundaries
-   double ptb[40] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
+   double ptb[50] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
 		      114., 133., 153., 174., 196., 220., 245., 272., 300., 330., 362., 395., 430., 468.,
-		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.};
-   //		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
+		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.,
+		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      for (int j=0; j<npt[i]+1; j++) { 
        pthigh[i][j] = ptb[j];
@@ -346,7 +346,7 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl2342:" << endl;
+   cout << "    Scenario fnl2342a:" << endl;
    cout << "      CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV," << endl;
    cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
    cout << " " << endl;

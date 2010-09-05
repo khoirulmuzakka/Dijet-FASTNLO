@@ -1,7 +1,7 @@
 //
-// fastNLO author code for fnl2342:
+// fastNLO author code for fnl2332a:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.5 in E-scheme
+//     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 // last modification
 //
@@ -40,7 +40,7 @@ struct {
       {0, 0}
    };
 //------ USER DEFINED PART STARTS HERE ------
-#include "fj-ak-05.h"
+#include "fj-ak-07.h"
 #include "cteq6.h"
 
 class UserHHC : public user_hhc
@@ -93,7 +93,7 @@ class UserHHC : public user_hhc
    unsigned long nwrite;  // No of events after to write out the table
 
    pdf_cteq6 pdf;  //   pdf
-   fj_ak_05 jetclus;   // jet algorithm
+   fj_ak_07 jetclus;   // jet algorithm
  
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    basic_string<char> tablefilename; // The table file to write to
@@ -182,7 +182,7 @@ void UserHHC::initfunc(unsigned int)
    // Here:  Jet pT
    // 
    // # of bins npt per irap bin of first dimension
-   int nptb[6] = {39, 39, 39, 39, 39, 32};
+   int nptb[6] = {49, 49, 49, 46, 39, 32};
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      npt[i] = nptb[i]; 
@@ -200,10 +200,10 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // Array for bin boundaries
-   double ptb[40] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
+   double ptb[50] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
 		      114., 133., 153., 174., 196., 220., 245., 272., 300., 330., 362., 395., 430., 468.,
-		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.};
-   //		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
+		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.,
+		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      for (int j=0; j<npt[i]+1; j++) { 
        pthigh[i][j] = ptb[j];
@@ -346,9 +346,9 @@ void UserHHC::initfunc(unsigned int)
    cout << " " << endl;
    cout << "   *******************************************" << endl;
    cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl2342:" << endl;
+   cout << "    Scenario fnl2332a:" << endl;
    cout << "      CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV," << endl;
-   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
+   cout << "      for fastjet anti-kT algo with R=0.7 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -721,7 +721,7 @@ void UserHHC::writetable(){
    table << "d2sigma-jet_dpT_dy_(fb_GeV)" << endl;
    table << "CMS-LHC-Scenario" << endl;
    table << "Inclusive_Jets" << endl;
-   table << "anti-kT_R=0.5" << endl;
+   table << "anti-kT_R=0.7" << endl;
    table << "pT binning according to resolution expected by CMS" << endl;
 
   //iproc
@@ -733,7 +733,7 @@ void UserHHC::writetable(){
    WRITE(ialgo);
 
    //JetResol1
-   double JetResol1 = 0.5; // jet size R
+   double JetResol1 = 0.7; // jet size R
    WRITE(JetResol1);
 
    //JetResol2

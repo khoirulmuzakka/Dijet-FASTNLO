@@ -1,6 +1,6 @@
 //
 // fastNLO author code for fnl2442a:
-//     CMS LHC dijet mass ratio scenario, E_cms = 7 TeV
+//     CMS LHC Dijet Mass Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 //
@@ -157,8 +157,8 @@ void UserHHC::initfunc(unsigned int)
    refscale = 2;   // which of the scalevariations is used in ref-table?
 
    //unitfactor = 1000000.0;  // for fb
-   unitfactor = 1000.0;  // for pb   <<< use for CDF dijet mass
-   //unitfactor = 1.0;  // for nb    
+   unitfactor = 1000.0;  // for pb
+   //unitfactor = 1.0;  // for nb
 
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
@@ -266,7 +266,7 @@ void UserHHC::initfunc(unsigned int)
    mufvaltrans.resize (nrap);
  
    weights.resize (nrap);
-   for( int j = 0; j < nrap; j++) { 
+   for( int j = 0; j < nrap; j++) {
       xlimit[j].resize(npt[j]);
       hxlim[j].resize(npt[j]);
       xsmallest[j].resize(npt[j]);
@@ -397,12 +397,12 @@ void UserHHC::initfunc(unsigned int)
    if (tablefilename=="") tablefilename = "fastnlotable.raw";
 
    // Say Hello
-   cout << "  " << endl;
+   cout << " " << endl;
    cout << "   *******************************************" << endl;
-   cout << "    fastNLO    - initialization" << endl;
+   cout << "    fastNLO - initialization" << endl;
    cout << "    Scenario fnl2442a:" << endl;
-   cout  <<  "      CMS LHC test scenario, E_cms = 7 TeV,"  <<  endl;
-   cout  <<  "      for fastjet anti-kT algo with R=0.7 in E-scheme"  <<  endl; 
+   cout << "      CMS LHC Dijet Mass Ratio Scenario, E_cms = 7 TeV," << endl;
+   cout << "      for fastjet anti-kT algo with R=0.7 in E-scheme" << endl; 
    cout << " " << endl;
    cout << "        table file " << tablefilename << endl;
    cout << "        store table after " << nwrite << " events" << endl;
@@ -410,6 +410,7 @@ void UserHHC::initfunc(unsigned int)
    cout << "        No. x-bins: " << nxtot << endl;
    cout << "        No. rapidity regions: " << nrap << endl;
    cout << "        No. of pT bins in each rapidity region:" << endl;
+
    for( int j = 0; j < nrap; j++) {
       cout<<"          rap "<<j<<": "<<npt[j]<<endl;
    }
@@ -885,10 +886,10 @@ void UserHHC::writetable(){
 
    // five strings with table content
    table << "d2sigma-dijet_dM_dy_(pb_GeV)" << endl;
-   table << "CMS-LHC-Test-Scenario" << endl;
+   table << "CMS-LHC-Scenario" << endl;
    table << "Dijet_Mass" << endl;
    table << "anti-kT_R=0.7" << endl;
-   table << "-" << endl;
+   table << "M_jj binning according to resolution expected by CMS" << endl;
 
   //iproc
    int iproc = 2; // dijets
