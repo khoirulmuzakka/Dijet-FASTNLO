@@ -184,19 +184,27 @@
      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
 Comment:                   write(*,*)"COMP: ibin,irap,ipt,iord,isub,i+n",
 Comment:      >                 ibin,irap,ipt,iord,isub,ibin+nbin
-Comment:                   write(*,*)"COMP: num,den,wtx,myres,diff",
+Comment:                   write(*,*)"COMPA: num,den,wtx,myres,"//
+Comment:      >                 "diff,sum^2ul,maxul",
 Comment:      >                 WRES(IPT,NSUBPROC+1,NORD+1),
 Comment:      >                 WRES(IBIN,NSUBPROC+1,NORD+1),
 Comment:      >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
 Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 diff
+Comment:      >                 diff,wtdxu2(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxl2(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxum(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxlm(ibin+nbin,nsubproc+1,nord+1)
                   IF (DIFF.GT.0D0) THEN
                      WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
      >                    WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) +
      >                    DIFF*DIFF
+Comment:                      write(*,*)"DIFFA diff, wtdxum old",diff, 
+Comment:      >                    WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1)
                      IF (DIFF.GT.WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1))
      >                    THEN
                         WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1) = DIFF
+Comment:                         write(*,*)"DIFFB diff, wtdxum old",diff, 
+Comment:      >                       WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1)
                      ENDIF
                   ELSE
                      WTDXL2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
@@ -207,6 +215,16 @@ Comment:      >                 diff
                         WTDXLM(IBIN+NBIN,NSUBPROC+1,NORD+1) = DIFF
                      ENDIF
                   ENDIF
+Comment:                   write(*,*)"COMPB: num,den,wtx,myres,"//
+Comment:      >                 "diff,sum^2ul,maxul",
+Comment:      >                 WRES(IPT,NSUBPROC+1,NORD+1),
+Comment:      >                 WRES(IBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 diff,wtdxu2(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxl2(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxum(ibin+nbin,nsubproc+1,nord+1),
+Comment:      >                 wtdxlm(ibin+nbin,nsubproc+1,nord+1)
                ENDIF
                DO ISUB=1,NSUBPROC
                   SUMMORD = 0.D0
