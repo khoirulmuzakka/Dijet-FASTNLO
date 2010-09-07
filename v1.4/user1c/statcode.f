@@ -112,15 +112,15 @@ c - NLO
       NCOUNT = 0
 
       DO ITAB=0,NTAB
-         WRITE(*,*) " ###############################################"
-         IF (IORD.EQ.1) THEN
-            WRITE(*,*)
-     >           " ############  NEXT LO TABLE  ##################"
-         ELSE
-            WRITE(*,*)
-     >           " ############  NEXT NLO TABLE ##################"
-         ENDIF
-         WRITE(*,*) " ###############################################"
+Comment:          WRITE(*,*) " ###############################################"
+Comment:          IF (IORD.EQ.1) THEN
+Comment:             WRITE(*,*)
+Comment:      >           " ############  NEXT LO TABLE  ##################"
+Comment:          ELSE
+Comment:             WRITE(*,*)
+Comment:      >           " ############  NEXT NLO TABLE ##################"
+Comment:          ENDIF
+Comment:          WRITE(*,*) " ###############################################"
          WRITE(NO,'(I4.4)'),ITAB
          FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO//".tab"
          OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
@@ -128,8 +128,8 @@ c - NLO
             FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"3jet_"//NO//".tab"
             OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
             IF (ISTAT.NE.0) THEN
-               WRITE(*,*)"STATERR: WARNING! Table file not found, "//
-     >              "skipped! IOSTAT = ",ISTAT
+Comment:                WRITE(*,*)"STATERR: WARNING! Table file not found, "//
+Comment:      >              "skipped! IOSTAT = ",ISTAT
 ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
 ckr instead of GOTO. However, EXIT leaves the loop!
 ckr To continue the loop use CYCLE instead! 
@@ -138,7 +138,7 @@ ckr            CYCLE
             ENDIF
          ENDIF
          CLOSE(2)
-         WRITE(*,*)"Filename for order",IORD,":",FILENAME
+Comment:          WRITE(*,*)"Filename for order",IORD,":",FILENAME
          NCOUNT = NCOUNT + 1
          
 c - Loop over scales
@@ -208,26 +208,27 @@ c - Write warning when the LO cross section is negative!
      >                 VAL*VAL * WTAB(NCOUNT)
                   IF (VAL.LT.MINE(IPT,IRAP,ISCL,IORD)) THEN
 ckr debug
-                     if (iscl.eq.3) then
-                        write(*,*)"MINIMUM: ipt,itab,mine,val",ipt,itab,
-     >                       MINE(IPT,IRAP,ISCL,IORD),val
-                     endif
+Comment:                      if (iscl.eq.3) then
+Comment:                         write(*,*)"MINIMUM: ipt,itab,mine,val",ipt,itab,
+Comment:      >                       MINE(IPT,IRAP,ISCL,IORD),val
+Comment:                      endif
                      MINE(IPT,IRAP,ISCL,IORD) = VAL
                      NJMIN(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                   IF (VAL.GT.MAXE(IPT,IRAP,ISCL,IORD)) THEN
 ckr debug
-                     if (iscl.eq.3) then
-                        write(*,*)"MAXIMUM: ipt,itab,maxe,val",ipt,itab,
-     >                       MAXE(IPT,IRAP,ISCL,IORD),val
-                     endif
+Comment:                      if (iscl.eq.3) then
+Comment:                         write(*,*)"MAXIMUM: ipt,itab,maxe,val",ipt,itab,
+Comment:      >                       MAXE(IPT,IRAP,ISCL,IORD),val
+Comment:                      endif
                      MAXE(IPT,IRAP,ISCL,IORD) = VAL
                      NJMAX(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                ENDDO
             ENDDO
          ENDDO
- 10      WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
+Comment:  10      WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
+ 10      CONTINUE
       ENDDO
 ckr      ENDDO
 

@@ -11,16 +11,20 @@
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       CHARACTER*255 HISTFILE
-      CHARACTER*255 SCENARIO,FILENAME,TABPATH,TABNAME,REFNAME
+      CHARACTER*255 SCENARIO,FILENAME,FILENAMES,TABPATH,TABNAME,REFNAME
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
+      CHARACTER*255 FILEBASE,LOFILE,NLOFILE
+      CHARACTER*255 BORNNAME,NLONAME
       CHARACTER*8 CH8TMP
       CHARACTER*4 CH4TMP
+      CHARACTER*4 NO
       INTEGER BORNN,NLON,LENOCC
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS,NSCALES
-      INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST
+      INTEGER ITAB,NTAB,NFOUND,NFAIL
+      INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST,IPHASE
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG
       LOGICAL LTOY
-      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5
+      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5,BWGT
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
@@ -38,7 +42,7 @@ c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3)
       REAL PT(NPTMAX)
-      INTEGER IMODE,NRAP
+      INTEGER IMODE,IWEIGHT,NRAP
 
       CHARACTER*255 ASMODE
       DOUBLE PRECISION ASMZVAL
@@ -367,6 +371,7 @@ c - Check uncertainties to derive
       LONE  = NPDF.LE.1
       LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LONE.AND..NOT.LSER
+
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
       ENDIF
@@ -395,7 +400,7 @@ c - Check uncertainties to derive
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
-      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
+      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
@@ -427,7 +432,6 @@ c - Check that FILENAME is still the primary table here ...!!!
          WRITE(*,*)" bin       cross section           "//
      >        "lower PDF uncertainty   upper PDF uncertainty"
          DO I=1,NSCALEVAR
-            CALL INITPDF(0)
             MUR = MURSCALE(I)
             MUF = MUFSCALE(I)
             WRITE(*,*)"----------------------------------------"//
@@ -435,9 +439,11 @@ c - Check that FILENAME is still the primary table here ...!!!
             WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
+            CALL INITPDF(0)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            ISTAT = 1
-            IMODE = 1
+            IPHASE  = 1
+            IMODE   = 1
+            IWEIGHT = 0
             NRAP  = NRAPIDITY
             IF (LTOY) THEN
                IMODE = 2
@@ -446,20 +452,20 @@ c - Check that FILENAME is still the primary table here ...!!!
                NRAP = 2*NRAPIDITY
             ENDIF
             CALL CENRES(LRAT)
-            CALL UNCERT(ISTAT,IMODE,LRAT)
-            ISTAT = 2
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            IPHASE = 2
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
             IF (LPDF) THEN
                DO J=1,NPDF
                   CALL INITPDF(J)
                   CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-                  CALL UNCERT(ISTAT,IMODE,LRAT)
+                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
                ENDDO
             ENDIF
             
-            ISTAT = 3
-            CALL UNCERT(ISTAT,IMODE,LRAT)
+            IPHASE = 3
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
 
 c - Give some standard output, fill histograms
             IBIN = 0
@@ -467,18 +473,18 @@ c - Give some standard output, fill histograms
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
                   WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
-     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
+     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
                ENDDO
             ENDDO
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900        FORMAT(1P,I5,3(6X,E18.11))
 
 c - Fill histograms
-            CALL PDFFILL(NRAP,0,I,MYRES)
-            CALL PDFFILL(NRAP,1,I,WTDXL2)
-            CALL PDFFILL(NRAP,2,I,WTDXU2)
-         ENDDO                  ! Loop over scales
+            CALL PDFFILL(NRAP,0,-1,I,MYRES)
+            CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
+            CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
+         ENDDO                     ! Loop over scales
       ENDIF
 
 
@@ -491,152 +497,146 @@ c - Call statistical error-code for scenario
          CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
       ENDIF
 
-Comment: c - Test stat. calc analogous to other uncertainties
-Comment:       IF (LSTAT) THEN
-Comment:          WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties V2"
-Comment: c ==================================================================
-Comment: c === Loop over all orders up to NLO ===============================
-Comment: c ==================================================================
-Comment:          DO IORD=0,MIN(2,NORD)
-Comment:             DO I=1,NSCALEVAR
-Comment: 
-Comment: c - Loop over files
-Comment:                IF (IORD.EQ.0) THEN
-Comment: c - Total x section
-Comment:                   NTAB = NLON 
-Comment:                   BWGT = 1D0/1D8
-Comment:                   FILEBASE = NLONAME(1:LENOCC(NLONAME))
-Comment:                ELSEIF (IORD.EQ.1) THEN
-Comment: c - LO
-Comment:                   NTAB = BORNN
-Comment:                   BWGT = 1D0/1D9
-Comment:                   FILEBASE = BORNNAME(1:LENOCC(BORNNAME))
-Comment:                ELSEIF (IORD.EQ.2) THEN
-Comment: c - NLO
-Comment:                   NTAB = NLON
-Comment:                   BWGT = 1D0/1D8
-Comment:                   FILEBASE = NLONAME(1:LENOCC(NLONAME))
+c - TEST TEST TEST
+c - Compute statistical uncertainties for primary scale no. 3
+      IF (LSTAT) THEN
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)"Statistical Uncertainties"
+         WRITE(*,*)"(the printed values are for the subprocess total of"
+     >        //" scale no. 3)"
+         WRITE(*,*)"(histograms contain results for all orders and "//
+     >        "subprocesses)"
+         WRITE(*,*)" bin       cross section           "//
+     >        "1-sigma stat. uncertainty"
+         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
+     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-"
+         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
+     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-"
+         ISCALE = 3
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL INITPDF(0)
+         DO IORD=0,MIN(2,NORD)
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)"ALLUNC: Now order no.",iord
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+
+            NFOUND = 0
+            NFAIL  = 0
+            IPHASE  = 1
+            IMODE   = 1
+ckr            IWEIGHT = 1
+            IWEIGHT = 0
+c - This is the normal table to fill the default values
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            CALL CENRES(LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            IPHASE = 2
+
+c - Loop over files
+            IF (IORD.EQ.0) THEN
+c - Total x section
+               NTAB = NLON 
+               BWGT = 1D0/1D8
+               FILEBASE = NLONAME(1:LENOCC(NLONAME))
+            ELSEIF (IORD.EQ.1) THEN
+c - LO
+               NTAB = BORNN
+               BWGT = 1D0/1D9
+               FILEBASE = BORNNAME(1:LENOCC(BORNNAME))
+            ELSEIF (IORD.EQ.2) THEN
+c - NLO
+               NTAB = NLON
+               BWGT = 1D0/1D8
+               FILEBASE = NLONAME(1:LENOCC(NLONAME))
+            ELSE
+               WRITE(*,*
+     >              )"STATERR: ERROR! Illegal order for stat. calc:"
+     >              ,IORD
+               STOP
+            ENDIF
+            DO ITAB=0,NTAB
+Comment:                WRITE(*,*)" ##########"//
+Comment:      >              "#####################################"
+Comment:                IF (IORD.EQ.1) THEN
+Comment:                   WRITE(*,*)" ############"//
+Comment:      >                 "  NEXT LO TABLE  ##################"
 Comment:                ELSE
-Comment:                   WRITE(*,*
-Comment:      >                 )"STATERR: ERROR! Illegal order for stat. calc:"
-Comment:      >                 ,IORD
-Comment:                   STOP
+Comment:                   WRITE(*,*)" ############"//
+Comment:      >                 "  NEXT NLO TABLE  #################"
 Comment:                ENDIF
-Comment:                NCOUNT = 0
-Comment: 
-Comment:                DO ITAB=0,NTAB
-Comment:                   WRITE(*,*)" ##########"//
-Comment:      >                 "#####################################"
-Comment:                   IF (IORD.EQ.1) THEN
-Comment:                      WRITE(*,*)" ############"//
-Comment:      >                    "  NEXT LO TABLE  ##################"
-Comment:                   ELSE
-Comment:                      WRITE(*,*)" ############"//
-Comment:      >                    "  NEXT NLO TABLE  #################"
-Comment:                   ENDIF
-Comment:                   WRITE(*,*)" ##########"//
-Comment:      >                 "#####################################"
-Comment:                   WRITE(NO,'(I4.4)'),ITAB
-Comment:                   FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO
-Comment:      >                 //".tab"
-Comment:                   OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
-Comment:                   IF (ISTAT.NE.0) THEN
-Comment:                      FILENAME = FILEBASE(1:LENOCC(FILEBASE))//"3jet_"
-Comment:      >                    //NO//".tab"
-Comment:                      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
-Comment:                      IF (ISTAT.NE.0) THEN
-Comment:                         WRITE(*,*
-Comment:      >                       )"STATERR: WARNING! Table file not found, "
-Comment:      >                       //"skipped! IOSTAT = ",ISTAT
-Comment: ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
-Comment: ckr instead of GOTO. However, EXIT leaves the loop!
-Comment: ckr To continue the loop use CYCLE instead! 
-Comment:                         GOTO 10
-Comment: ckr            CYCLE
-Comment:                      ENDIF
-Comment:                   ENDIF
-Comment:                   CLOSE(2)
-Comment:                   WRITE(*,*)"Filename for order",IORD,":",FILENAME
-Comment:                   NCOUNT = NCOUNT + 1
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment:             CALL INITPDF(0)
-Comment:             MUR = MURSCALE(I)
-Comment:             MUF = MUFSCALE(I)
-Comment:             WRITE(*,*)"----------------------------------------"//
-Comment:      >           "--------------------------------"
-Comment:             WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",mur,muf
-Comment:             WRITE(*,*)"----------------------------------------"//
-Comment:      >           "--------------------------------"
-Comment:             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-Comment:             ISTAT = 1
-Comment:             IMODE = 1
-Comment:             NRAP  = NRAPIDITY
-Comment:             IF (LTOY) THEN
-Comment:                IMODE = 2
-Comment:             ENDIF
-Comment:             IF (LRAT) THEN
-Comment:                NRAP = 2*NRAPIDITY
-Comment:             ENDIF
-Comment:             CALL CENRES(LRAT)
-Comment:             CALL UNCERT(ISTAT,IMODE,LRAT)
-Comment:             ISTAT = 2
-Comment: 
-Comment: ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
-Comment:             IF (LPDF) THEN
-Comment:                DO J=1,NPDF
-Comment:                   CALL INITPDF(J)
-Comment:                   CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-Comment:                   CALL UNCERT(ISTAT,IMODE,LRAT)
-Comment:                ENDDO
-Comment:             ENDIF
-Comment:             
-Comment:             ISTAT = 3
-Comment:             CALL UNCERT(ISTAT,IMODE,LRAT)
-Comment: 
-Comment: c - Give some standard output, fill histograms
-Comment:             IBIN = 0
-Comment:             DO IRAP=1,NRAP
-Comment:                DO IPT=1,NPT(IRAP)
-Comment:                   IBIN = IBIN+1
-Comment:                   WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1)-1D0,
-Comment:      >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)-1D0
-Comment:                ENDDO
-Comment:             ENDDO
-Comment: ckr 900     FORMAT(1P,I5,3(3X,E21.14))
-Comment:  900        FORMAT(1P,I5,3(6X,E18.11))
-Comment: 
-Comment: c - Fill histograms
-Comment:             CALL PDFFILL(NRAP,0,I,MYRES)
-Comment:             CALL PDFFILL(NRAP,1,I,WTDXL2)
-Comment:             CALL PDFFILL(NRAP,2,I,WTDXU2)
-Comment:          ENDDO                  ! Loop over scales
-Comment:       ENDIF
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment: 
-Comment:       
-Comment:       
+Comment:                WRITE(*,*)" ##########"//
+Comment:      >              "#####################################"
+               WRITE(NO,'(I4.4)'),ITAB
+               FILENAMES = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO
+     >              //".tab"
+               OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
+               IF (ISTAT.NE.0) THEN
+                  FILENAMES = FILEBASE(1:LENOCC(FILEBASE))//"3jet_"
+     >                 //NO//".tab"
+                  OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
+                  IF (ISTAT.NE.0) THEN
+ckr                     WRITE(*,*)"Filename for order",IORD,":",FILENAMES
+                     NFAIL = NFAIL + 1
+                     IF (NFAIL.LT.10) THEN
+                        WRITE(*,*)"STATERR: WARNING! Table file "//
+     >                       "not found, skipped ! IOSTAT = ",ISTAT
+                     ENDIF
+ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
+ckr instead of GOTO. However, EXIT leaves the loop!
+ckr To continue the loop use CYCLE instead! 
+                     GOTO 20
+ckr            CYCLE
+                  ENDIF
+               ENDIF
+               CLOSE(2)
+               NFOUND = NFOUND + 1
+               IF (NFOUND.LT.10) THEN
+                  WRITE(*,*)"Filename for order",IORD,":",FILENAMES
+               ENDIF
+               
+               NRAP  = NRAPIDITY
+               IMODE = 2
+               IF (LRAT) THEN
+                  NRAP = 2*NRAPIDITY
+               ENDIF
+c - These are the stat. tables to get the deviations
+               CALL FX9999CC(FILENAMES,MUR,MUF,0,XSECT0)
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+ 20            CONTINUE
+            ENDDO
+            
+            WRITE(*,*)" ##########"//
+     >           "#####################################"
+            WRITE(*,*)"No. of filenames skipped:",NFAIL
+            WRITE(*,*)"No. of filenames analyzed:",NFOUND
+            WRITE(*,*)" ##########"//
+     >           "#####################################"
+
+            IPHASE = 3
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+
+c - Give some standard output, fill histograms
+            IBIN = 0
+            DO IRAP=1,NRAP
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXMN(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXMN(IBIN,NSUBPROC+1,NORD+1)
+               ENDDO
+            ENDDO
+c - Fill histograms
+            CALL PDFFILL(NRAP,8,IORD,ISCALE,MYRES)
+            CALL PDFFILL(NRAP,9,IORD,ISCALE,WTDXMN)
+            
+         ENDDO
+      ENDIF
+      
+      
       
 c - PDF series of variations (e.g. alpha_s(M_Z))
 c - Use primary table
@@ -652,18 +652,19 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
 
          CALL INITPDF(0)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-         ISTAT = 1
-         IMODE = 3
+         IPHASE  = 1
+         IMODE   = 3
+         IWEIGHT = 0
          CALL CENRES(LRAT)
-         CALL UNCERT(ISTAT,IMODE,LRAT)
-         ISTAT = 2
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         IPHASE = 2
          DO J=1,NPDF
             CALL INITPDF(J)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(ISTAT,IMODE,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
          ENDDO
-         ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE,LRAT)
+         IPHASE = 3
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -686,12 +687,12 @@ c - Give some standard output, fill histograms
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
                WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1)-1D0,
-     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1),
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAPIDITY,1,ISCALE,WTDXLM)
-         CALL PDFFILL(NRAPIDITY,2,ISCALE,WTDXUM)
+         CALL PDFFILL(NRAPIDITY,1,-1,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAPIDITY,2,-1,ISCALE,WTDXUM)
       ENDIF
 
 
@@ -725,15 +726,16 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-         ISTAT = 1
-         IMODE = 3
+         IPHASE  = 1
+         IMODE   = 3
+         IWEIGHT = 0
          NRAP  = NRAPIDITY
          IF (LRAT) THEN
             NRAP = 2*NRAPIDITY
          ENDIF
          CALL CENRES(LRAT)
-         CALL UNCERT(ISTAT,IMODE,LRAT)
-         ISTAT = 2
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         IPHASE = 2
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
 ckr Ugly goto construction avoidable with f90 CYCLE command
@@ -741,11 +743,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(ISTAT,IMODE,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
  10         CONTINUE
          ENDDO
-         ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE,LRAT)
+         IPHASE = 3
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -773,12 +775,12 @@ c - Give some standard output, fill histograms
                IBIN = IBIN+1
                PT(IBIN) = REAL(PTBIN(IRAP,IPT))
                WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1)-1D0,
-     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1),
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAP,6,ISCALE,WTDXLM)
-         CALL PDFFILL(NRAP,7,ISCALE,WTDXUM)
+         CALL PDFFILL(NRAP,6,-1,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAP,7,-1,ISCALE,WTDXUM)
       ENDIF
 
 
@@ -824,21 +826,22 @@ c          avoided for the reference calculation!
          ISCALE = 1
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-         ISTAT = 1
-         IMODE = 4
+         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT0)
+         IPHASE  = 1
+         IMODE   = 4
+         IWEIGHT = 0
          CALL CENRES(LRAT)
-         CALL UNCERT(ISTAT,IMODE,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
 
 c - Normal result
          ISCALE = 3
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-         ISTAT = 2
-         CALL UNCERT(ISTAT,IMODE,LRAT)
-         ISTAT = 3
-         CALL UNCERT(ISTAT,IMODE,LRAT)
+         IPHASE = 2
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         IPHASE = 3
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -861,11 +864,11 @@ c - Give some standard output, fill histograms
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
                WRITE(*,901) IBIN,WTX(IBIN,NSUBPROC+1,NORD+1),
-     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)-1D0
+     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
  901           FORMAT(1P,I5,2(6X,E18.11))
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAPIDITY,5,ISCALE,WTDXUM)
+         CALL PDFFILL(NRAPIDITY,5,-1,ISCALE,WTDXUM)
       ENDIF
 
 
@@ -1002,6 +1005,20 @@ ckr                        write(*,*)"2. Booked histo #",nhist
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
+ckr TEST TEST TEST
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dstat/xsect_new"
+                        CALL HBOOKB(IHIST+8,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_dmax/2/xsect_new"
+                        CALL HBOOKB(IHIST+9,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+2
 ckr                        write(*,*)"3. Booked histo #",nhist
                      ENDIF
                      IF (LALG.AND.IORD.LE.2.AND.
@@ -1116,10 +1133,10 @@ c - Close HBOOK file
 c
 c ======================= Fill the histograms =========================
 c
-      SUBROUTINE PDFFILL(NRAP,IOFF,ISCALE,DVAL)
+      SUBROUTINE PDFFILL(NRAP,IOFF,IORDFIL,ISCALE,DVAL)
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
-      INTEGER NRAP,IOFF,ISCALE
+      INTEGER NRAP,IOFF,IORDFIL,ISCALE
       DOUBLE PRECISION DVAL(NBINTOTMAX,NMAXSUBPROC+1,4)
       INTEGER I,J,IBIN,IORD,IORD2,ISUB,ISUB2,IHIST
       REAL RVAL
@@ -1130,27 +1147,29 @@ c
          WRITE(*,*) "PDFFILL: Max. ISCALE: ",NSCALEVAR
          STOP
       ENDIF
-
+      
 c - Fill all histograms for the given scale
 c - Fill sums over subprocesses and/or orders into zero factors for IHIST
       DO IORD2=1,NORD+1         ! Order: LO, NLO-corr, NNLO-corr, ... , tot
          IORD = IORD2
          IF (IORD2.EQ.NORD+1) IORD = 0 
-         DO ISUB2=1,NSUBPROC+1  ! Subprocesses hh: 7 subprocesses + total
-            ISUB = ISUB2
-            IF (ISUB2.EQ.NSUBPROC+1) ISUB=0
-            IBIN=0
-            DO I=1,NRAP
-               DO J=1,NPT(I)
-                  IBIN = IBIN + 1
+         IF (IORDFIL.EQ.-1.OR.IORDFIL.EQ.IORD) THEN
+            DO ISUB2=1,NSUBPROC+1 ! Subprocesses hh: 7 subprocesses + total
+               ISUB = ISUB2
+               IF (ISUB2.EQ.NSUBPROC+1) ISUB=0
+               IBIN=0
+               DO I=1,NRAP
+                  DO J=1,NPT(I)
+                     IBIN = IBIN + 1
 ckr Recall: HBOOK understands only single precision
-                  RVAL  = REAL(DVAL(IBIN,ISUB2,IORD2))
-                  IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
-                  IHIST = IHIST+IOFF
-                  CALL HFILL(IHIST,REAL(PTBIN(I,J)+0.01),0.0,RVAL)
-               ENDDO            ! pT-loop
-            ENDDO               ! rap-loop
-         ENDDO                  ! isub-loop
+                     RVAL  = REAL(DVAL(IBIN,ISUB2,IORD2))
+                     IHIST = IORD*1000000+ISCALE*100000+ISUB*10000+I*100
+                     IHIST = IHIST+IOFF
+                     CALL HFILL(IHIST,REAL(PTBIN(I,J)+0.01),0.0,RVAL)
+                  ENDDO         ! pT-loop
+               ENDDO            ! rap-loop
+            ENDDO               ! isub-loop
+         ENDIF
       ENDDO                     ! iord-loop
       
       RETURN

@@ -49,7 +49,7 @@
 *   XMUF        prefactor for nominal fact-scale
 *                     only a few choices are possible
 *                     (see output or table documentation)
-*   IPRINTFALG  =1 print results / =0 don't print
+*   IPRINTFLAG  =1 print results / =0 don't print
 *
 * output:
 *   XSECT(nbin,3)    array of cross sections 
@@ -64,6 +64,7 @@
 * MW 2006/02/01 implement tableformat version 1.4 
 * TK 2006/08/06 implement scalebins for N>2
 * MW 2006/08/09 add normalization feature: 1/sigma dsigma/d[s.th.] 
+* KR 2010/09/06 use iprintflag also to suppress output in FX9999RD
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -94,7 +95,7 @@ ckr             Similar usage below with CSTRNG at many places
 
 c - Read the fastNLO coefficient table
       IF (FILENAME.NE.OLDFILENAME) THEN
-         CALL FX9999RD(FILENAME)
+         CALL FX9999RD(FILENAME,IPRINTFLAG)
          OLDFILENAME = FILENAME
          
 c - Check consistency of array dimensions / commonblock parameters
@@ -138,6 +139,7 @@ c - Check consistency of array dimensions / commonblock parameters
          ENDIF
 
 c - Print further info
+         IF (IPRINTFLAG.EQ.1) THEN
          WRITE(*,*)"#      "
          CSTRNG = NAMELABEL(1)
          WRITE(*,5000)" #      this table contains: ",
@@ -217,6 +219,7 @@ c - Print scale-variations available in the table
          WRITE (*,*)"#    2-loop threshold corrections.)"
          WRITE (*,*)"# "
       ENDIF
+      ENDIF ! End of IF (IPRINTFLAG.EQ.1)
 
 c - Identify the scales chosen in this call
       IXMUR = 0
@@ -817,7 +820,7 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
       END
 
 *******************************************************************
-      SUBROUTINE FX9999RD(FILENAME)
+      SUBROUTINE FX9999RD(FILENAME,IPRINTFLAG)
 *-----------------------------------------------------------------
 * M. Wobisch   read ASCII table of perturbative coefficients
 *
@@ -826,11 +829,13 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
 * MW 04/15/2005
 * MW 01/30/2006 -> now reading tableformat v1.4
 * MW 06/02/2006 -> check table format
+* KR 2010/09/06 use iprintflag also to suppress output in FX9999RD
 *-----------------------------------------------------------------
       IMPLICIT NONE
       CHARACTER*(*) FILENAME
       CHARACTER*255 CSTRNG
       INTEGER IFILE, LENOCC, I,J,K,L,M,N,   NBIN
+      INTEGER IPRINTFLAG
       INCLUDE 'fnx9999.inc'
 
       OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
@@ -843,8 +848,10 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
       READ(2,*) i
       if (i.ne.iseparator) goto 999
       READ(2,*) ITABVERSION
-      WRITE(*,*)"#       tableformat is version",
-     >     real(itabversion)/10000d0
+      IF (IPRINTFLAG.EQ.1) THEN
+         WRITE(*,*)"#       tableformat is version",
+     >        real(itabversion)/10000d0
+      ENDIF
       if (ITABVERSION.ne.14000) then
          WRITE(*,*)"#     ==> this usercode works only for version 1.4"
          WRITE(*,*)"#     ==> please get updated usercode from"
@@ -880,11 +887,15 @@ c   -----------------------------------
       enddo
       do i=1,nord
          CSTRNG = POWLABEL(I)
-         WRITE(*,5000)
-     &        " #      ",NEVT(i)," events in ",CSTRNG(1:LENOCC(CSTRNG))
+         IF (IPRINTFLAG.EQ.1) THEN
+            WRITE(*,5000)" #      ",NEVT(i),
+     &           " events in ",CSTRNG(1:LENOCC(CSTRNG))
+         ENDIF
       enddo
       READ(2,*) NXTOT
-      WRITE(*,*)"#           No. of x bins:",NXTOT
+      IF (IPRINTFLAG.EQ.1) THEN
+         WRITE(*,*)"#           No. of x bins:",NXTOT
+      ENDIF
       READ(2,*) IXSCHEME
       READ(2,*) IPDFWGT
       READ(2,*) IREF
