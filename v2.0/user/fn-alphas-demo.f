@@ -19,11 +19,9 @@
       IMPLICIT NONE
       DOUBLE PRECISION MU, ALPSMZ, ALPS4_IT
       DOUBLE PRECISION B0, B1, B10 , PI4, F, FP,FM,
-     +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,W,PI2
+     +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
       INTEGER  NLOOP, NF, IFIRST, I
-ckr 30.01.2008: Initialize Z mass in double precision 
-ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
-      PARAMETER (ZMASS = 91.187D0)
+      PARAMETER (ZMASS = 91.187d0) ! PDG data book '98
       DATA IFIRST/0/, ONED/1.D0/, TWOD/2.D0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2
 
@@ -35,56 +33,40 @@ c - other routine for 4-loop
          WRITE(*,*) ' 3-loop alpha_s not available !!!  '
          STOP
       ENDIF
+
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
          IFIRST = 1
 c         WRITE(*,*) '  *   ALPS_IT:  exact 2-loop result for alpha_s'
          NF = 5
-         PI2 = 2D0 * 4D0 * ATAN(1D0)
-         B0  = (11D0 - 2D0/3D0 * DBLE(NF)) / PI2
-         B1  = (51D0 - 19D0 / 3D0 * DBLE(NF)) / (PI2*PI2)
+         PI4 = 4D0 * 4D0 * ATAN(1D0)
+         B0  = 11D0 - 2D0/3D0 * DBLE(NF)
+         B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
+         B10 = B1 / B0 / B0
+         ZMASS2 = ZMASS**2
          IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT:  only for 2-loop!!'
       ENDIF
 
-      ALPHAS = ALPSMZ
-      W = 1.d0 + B0*ALPSMZ*DLOG(MU/ZMASS)
-      ALPHAS = ALPHAS / W
-      ALPHAS = ALPHAS * (1.d0 - ALPSMZ*B1/B0*DLOG(W)/W)
+c - exact formula to extract Lambda from alpha_s(Mz)
+      Q2 = MU**2
+      LAM2 = ZMASS2 * EXP( -PI4/B0/ALPSMZ + 
+     +     B10 * DLOG( PI4/B0/ALPSMZ + B10) )
 
+c - extract approx. alpha_s(mu) value 
+      LQ2 = DLOG( Q2 / LAM2 ) 
+      ASAPPROX = PI4/B0/LQ2 * (1D0 - B10*DLOG(LQ2)/LQ2)
+      ALPHAS = ASAPPROX
 
-c$$$c - initialize pi and beta functions
-c$$$      IF (IFIRST.eq.0) THEN
-c$$$         IFIRST = 1
-c$$$c         WRITE(*,*) '  *   ALPS_IT:  exact 2-loop result for alpha_s'
-c$$$         NF = 5
-c$$$         PI4 = 4D0 * 4D0 * ATAN(1D0)
-c$$$         B0  = 11D0 - 2D0/3D0 * DBLE(NF)
-c$$$         B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
-c$$$         B10 = B1 / B0 / B0
-c$$$         ZMASS2 = ZMASS**2
-c$$$         IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT:  only for 2-loop!!'
-c$$$      ENDIF
-c$$$
-c$$$c - exact formula to extract Lambda from alpha_s(Mz)
-c$$$      Q2 = MU**2
-c$$$      LAM2 = ZMASS2 * EXP( -PI4/B0/ALPSMZ + 
-c$$$     +     B10 * DLOG( PI4/B0/ALPSMZ + B10) )
-c$$$
-c$$$c - extract approx. alpha_s(mu) value 
-c$$$      LQ2 = DLOG( Q2 / LAM2 ) 
-c$$$      ASAPPROX = PI4/B0/LQ2 * (1D0 - B10*DLOG(LQ2)/LQ2)
-c$$$      ALPHAS = ASAPPROX
-c$$$
-c$$$c - exact 2loop value by Newton procedure
-c$$$      DO I=1,6
-c$$$         F  = LQ2 - PI4/B0/ALPHAS + B10*DLOG(PI4/B0/ALPHAS + B10)
-c$$$         FP = - PI4/B0/(ALPHAS*1.01D0) + 
-c$$$     +        B10 * DLOG(PI4/B0/(ALPHAS*1.01D0) + B10)
-c$$$         FM = - PI4/B0/(ALPHAS*0.99D0) + 
-c$$$     +        B10 * DLOG(PI4/B0/(ALPHAS*0.99D0) + B10)
-c$$$         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
-c$$$c      WRITE(*,*) ' LAMDA/a_s_approx/a_s = ',sqrt(lam2),ASAPPROX,ALPHAS
-c$$$      ENDDO
+c - exact 2loop value by Newton procedure
+      DO I=1,6
+         F  = LQ2 - PI4/B0/ALPHAS + B10*DLOG(PI4/B0/ALPHAS + B10)
+         FP = - PI4/B0/(ALPHAS*1.01D0) + 
+     +        B10 * DLOG(PI4/B0/(ALPHAS*1.01D0) + B10)
+         FM = - PI4/B0/(ALPHAS*0.99D0) + 
+     +        B10 * DLOG(PI4/B0/(ALPHAS*0.99D0) + B10)
+         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
+c      WRITE(*,*) ' LAMDA/a_s_approx/a_s = ',sqrt(lam2),ASAPPROX,ALPHAS
+      ENDDO
 
 c - that's it!
       ALPS_IT = ALPHAS
@@ -99,15 +81,13 @@ C --------------------------------------------------------------------
 *  2nd version - for 4-loop RGE
 *
       IMPLICIT NONE
-      DOUBLE PRECISION MU, ALPSMZ,  FBETA
+      DOUBLE PRECISION MU, ALPSMZ,  FBETA4
       DOUBLE PRECISION B0, B1, B2,B3, B10 , ZETA3,
      +     PI4, F, FP,FM, LL2,
      +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
      +     MUCACHE,ASCACHE,ASMZCACHE
       INTEGER  NLOOP, NF, IFIRST, I
-ckr 30.01.2008: Initialize Z mass in double precision 
-ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
-      PARAMETER (ZMASS = 91.187D0)
+      PARAMETER (ZMASS = 91.187d0) ! PDG data book '98
       DATA IFIRST/0/, ONED/1.D0/, TWOD/2.D0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
@@ -138,7 +118,7 @@ c - initialize pi and beta functions
       Q2 = MU**2
 
 c - exact formula -> extract Lambda from alpha_s(Mz)
-      LAM2 = ZMASS2 / DEXP(FBETA(ALPSMZ))
+      LAM2 = ZMASS2 / DEXP(FBETA4(ALPSMZ))
 
 c - extract approx alpha_s(mu) value - 2 loop approx is fine
       LL2 = ZMASS2 * DEXP( -PI4/B0/ALPSMZ + 
@@ -149,9 +129,9 @@ c - extract approx alpha_s(mu) value - 2 loop approx is fine
 
 c - exact 4-loop value by Newton procedure
       DO I=1,3
-         F  = DLOG(Q2/LAM2) - FBETA(ALPHAS)
-         FP = - FBETA(ALPHAS*1.01D0)
-         FM = - FBETA(ALPHAS*0.99D0)
+         F  = DLOG(Q2/LAM2) - FBETA4(ALPHAS)
+         FP = - FBETA4(ALPHAS*1.01D0)
+         FM = - FBETA4(ALPHAS*0.99D0)
          ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
 c         WRITE(*,*) ' i,alphas,q2 = ',i,alphas,real(q2)
       ENDDO
@@ -167,7 +147,7 @@ c - that's it - modify cache - set function - return
 
 C ------------------------------------------------------------------
 
-      DOUBLE PRECISION FUNCTION FBETA(ALPHAS)
+      DOUBLE PRECISION FUNCTION FBETA4(ALPHAS)
       IMPLICIT NONE
       DOUBLE PRECISION ALPHAS, ALPI, B0, B1, B2,B3, B10,B20,B30,C,
      +     ZETA3, PI, ONED, TWOD
@@ -200,7 +180,7 @@ c - initialize pi and beta functions
       ENDIF
 
       ALPI = ALPHAS / PI
-      FBETA = C + ONED/B0 * ( 
+      FBETA4 = C + ONED/B0 * ( 
      +     ONED/ALPI + B10 * DLOG(ALPI) + (B20-B10**2) * ALPI 
      +     + (B30/TWOD - B10*B20 + B10**3/TWOD)*ALPI**2 )
 

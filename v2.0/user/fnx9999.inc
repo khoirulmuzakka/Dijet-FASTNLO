@@ -9,34 +9,38 @@ c      the authors at:  fastnlo@cedar.ac.uk
 c 
 c MW 06/01/07 new design for v2.0
 c KR 19.09.09 add second dimension of xsect(,MxCtrb) as before
+c                 MW -> remove this 2nd dimension again
 c KR 19.09.09 add dimension counters and pointers
 c             (can serve as NRapidity, RapIndex, NPt ...)
 c ------------------------------------------------------------
 
 c - global fastNLO commonblock
-      Integer IFNfirst,
+      Integer IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
-      Common /cfastnlo/ IFNfirst,
+      Common /cfastnlo/ IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
 
 c - fundamental parameters - scenario dependent
       Integer MxObsBin, MxCtrb, MxNxtot, MxScales, MxScaleNode, 
      +     MxSubProc, MxNxMax
-      Parameter (MxObsBin=200, MxCtrb=3, MxNxtot=20, MxScales=2, 
+      Parameter (MxObsBin=200, MxCtrb=4, MxNxtot=20, MxScales=2, 
      +     MxScaleNode=5, MxSubProc=7, MxNxMax=210)
 c - technical parameters
-      Integer MxScDescript, MxDim, MxContrDescr,
+      Integer MxUser, MxScDescript, MxDim, MxContrDescr,
      +     MxCodeDescr, MxPDF, MxFF, MxScaleDim, MxScaleDescript,
      +     MxScaleVar
-      Parameter (MxScDescript=5,MxDim=3,MxContrDescr=10,
+      Parameter (MxUser=10,MxScDescript=5,MxDim=3,MxContrDescr=10,
      +     MxCodeDescr=10,MxPDF=2,MxFF=1,MxScaleDim=1,MxScaleDescript=5,
      +     MxScaleVar=4)
 
 c --- Block A1 (header part 1)
-      Integer Iseparator, Itabversion, Ncontrib,Nmult,Ndata
+      Integer Iseparator, Itabversion, Ncontrib,Nmult,Ndata,
+     +     NuserString,NuserInt,NuserFloat, UserInt(MxUser)
       Character*24 ScenName
+      Character*64 UserString(MxUser)
+      Double Precision UserFloat(MxUser)
       Parameter (Iseparator=1234567890)
 
 c --- Block A2 (header part 2)
@@ -71,14 +75,14 @@ c --- Block B
      +     MxNxMax,MxSubProc)
 
 c - output array
-      Double Precision xsect(MxObsBin,0:MxCtrb),
-     +     xsect2(MxObsBin,0:MxCtrb)
+      Double Precision xsect(MxObsBin),
+     +     xsect2(MxObsBin)
 
 c - internal variables
 ckr Add DimPointers/Counters
       Integer NDimCounter(MxDim),IDimPointer(MxObsBin,MxDim)
-ckr      Integer IContr,IContrPointer(MxCtrb),IScalePointer(MxCtrb)
-      Integer IContr,IContrPointer(0:MxCtrb),IScalePointer(MxCtrb)
+      Integer IContr,IContrPointer(MxCtrb),IScalePointer(MxCtrb)
+cMW      Integer IContr,IContrPointer(0:MxCtrb),IScalePointer(MxCtrb)
 ckr      Double Precision Result(MxObsBin,MxSubproc,MxCtrb),
       Double Precision Result(MxObsBin,0:MxSubproc,0:MxCtrb),
      +     pdf(MxObsBin,MxScaleNode,MxNxMax,MxSubproc)
@@ -87,6 +91,7 @@ ckr      Double Precision Result(MxObsBin,MxSubproc,MxCtrb),
 c - put everything into common block
       Common /CFN9999/
 c - dbl 
+     +     UserFloat,
      +     Ecms,LoBin,UpBin, XNode1, XNode2,
      +     ScaleFac, ScaleNode, SigmaTilde,
      +     result,pdf,
@@ -94,6 +99,7 @@ c - int*8
      +     Nevt,
 c - int
      +     Itabversion, Ncontrib,Nmult,Ndata,
+     +     NuserString,NuserInt,NuserFloat,UserInt,
      +     Ipublunits, NscDescript, ILOord, Nobsbin, NDim,
      +     IDiffBin, INormFlag, IDivLoPointer, IDivUpPointer,
      +     IXsectUnits, IDataFlag, IAddMultFlag, 
@@ -107,7 +113,7 @@ ckr
      +     NDimCounter,IDimPointer,
      +     IContr,IContrPointer,IScalePointer,
 c - char
-     +     ScenName, ScDescript, DimLabel, DenomTable,
+     +     ScenName,UserString,ScDescript, DimLabel, DenomTable,
      +     CtrbDescript, CodeDescript, ScaleDescript
 
 ckr Add temporarily ?

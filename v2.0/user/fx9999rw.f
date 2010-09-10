@@ -1,18 +1,19 @@
       Subroutine fx9999rw(crw,filename)
 * ------------------------------------------------------------
-*  fastNLO usercode v2.0 reads or writes a v2 table
-*
-*  MW 07/23/2007
-*
-*  character   crw:        'read' or 'write'
-*  character   filename:    name of table
+*  fastNLO usercode v2.0                       MW 07/23/2007
+* 
+*  fx9999rw reads or writes fastNLO v2 tables
+*  input:
+*     character   crw:        'read' or 'write'
+*     character   filename:    name of table
+C
+C        1         2         3         4         5         6         7 
+C 3456789012345678901234567890123456789012345678901234567890123456789012
 * ------------------------------------------------------------
       Implicit None
       Character*(*) crw,filename
       Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax
       Include 'fnx9999.inc'
-
-ckr      write(*,*)"RW: Filename: ",FILENAME
 
       Nunit=2
 
@@ -22,7 +23,7 @@ ckr      write(*,*)"RW: Filename: ",FILENAME
          OPEN(Nunit,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
          IF (Ifile .ne. 0) THEN
             WRITE(*,*)"FX9999RW: ERROR! Table file not found, "//
-     >           "stopped! IOSTAT = ",Ifile
+     +           "stopped! IOSTAT = ",Ifile
             STOP
          Endif
       Endif
@@ -35,7 +36,33 @@ c - block A1
       Call fnioint(crw,nunit, Ncontrib)
       Call fnioint(crw,nunit, Nmult)
       Call fnioint(crw,nunit, Ndata)
+c  NuserString,NuserInt,NuserFloat
+c  UserString(MXuser),UserInt(MXuser),UserFloat(MXuser)
+      Call fnioint(crw,nunit, NuserString)
+      If (NuserString .gt. MxUser) Then
+         Write(*,*) ' NuserString too large ',NuserString,'<=',MxUser
+      Endif
+      Do i=1,NuserString
+        Call fniochar(crw,nunit, UserString(i))
+      Enddo
+      Call fnioint(crw,nunit, NuserInt)
+      If (NuserInt .gt. MxUser) Then
+         Write(*,*) ' NuserInt too large ',NuserInt,'<=',MxUser
+      Endif
+      Do i=1,NuserInt
+        Call fnioint(crw,nunit, UserInt(i))
+      Enddo
+      Call fnioint(crw,nunit, NuserFloat)
+      If (NuserFloat .gt. MxUser) Then
+         Write(*,*) ' NuserFloat too large ',NuserFloat,'<=',MxUser
+      Endif
+      Do i=1,NuserFloat
+        Call fniodbl(crw,nunit, UserFloat(i))
+      Enddo
 c - block A2
+c      Call fnioisep(crw,nunit)
+c      Call fnioint(crw,nunit, I[code]) 
+c - block A3
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, IpublUnits) 
       Call fnioint(crw,nunit, NscDescript)
@@ -55,49 +82,12 @@ c - block A2
       Do i=1,NDim
          Call fnioint(crw,nunit, IDiffBin(i))
       Enddo
-ckr Define counters and pointers to changes of borders in i'th dimension
-ckr (RapIndex, NRapidity, NPt).
-ckr Useful in case of npt pt bins in nrap rapidity bins etc.
-ckr With LoBin(i,j) works only in two dimensions! 
-      Do i=1,NDim
-         IDimPointer(1,i) = 1
-         NDimCounter(i)   = 1
-      Enddo
-ckr
       Do i=1,NObsBin
          Do j=1,NDim
             Call fniodbl(crw,nunit, LoBin(i,j))
             If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
          Enddo
-ckr
-         If (i.gt.1) Then
-            If (LoBin(i-1,1).ne.LoBin(i,1)) Then
-               NDimCounter(1) = NDimCounter(1) + 1  
-               IDimPointer(NDimCounter(1),1) = i
-            Endif
-            If (LoBin(i-1,2).ne.LoBin(i,2)) Then
-               NDimCounter(2) = NDimCounter(2) + 1  
-               IDimPointer(NDimCounter(2),2) = i
-            Endif
-         Endif
-Comment:          write(*,*)"iobs, ndimcounter1, ndimcounter2",
-Comment:      >        i,NDimCounter(1),NDimCounter(2)
-Comment:          write(*,*)"iobs, idimpointer1, idimpointer2",i,
-Comment:      >        IDimPointer(NDimCounter(1),1),
-Comment:      >        IDimPointer(NDimCounter(2),2)
-ckr
       Enddo
-ckr DEBUG
-      Do i=1,NDim
-         Write(*,*)"FX9999RW: INFO: Counted ",NDimCounter(i),
-     >        " border changes in dimension ",i
-         Write(*,*)"          The associated pointers are: "
-         Do j=1,NDimCounter(i)
-            Write(*,*)"          counter = ",j,
-     >           ", pointer = ",IDimPointer(j,i)
-         Enddo
-      Enddo
-ckr End DEBUG
       Call fnioint(crw,nunit, INormFlag)
       If (INormFlag.gt.1) Call fniochar(crw,nunit, DenomTable)
       If (INormFlag.gt.0) Then
@@ -140,11 +130,11 @@ c --------------------------- IAddMult ?????
          Endif
 
 c --- coefficient block
-      Call fnioint(crw,nunit, IRef(ic))
-      Call fnioint(crw,nunit, IScaleDep(ic))
-      Call fniolint(crw,nunit, Nevt(ic))
-      Call fnioint(crw,nunit, Npow(ic))
-      Call fnioint(crw,nunit, NPDF(ic))
+         Call fnioint(crw,nunit, IRef(ic))
+         Call fnioint(crw,nunit, IScaleDep(ic))
+         Call fniolint(crw,nunit, Nevt(ic))
+         Call fnioint(crw,nunit, Npow(ic))
+         Call fnioint(crw,nunit, NPDF(ic))
          Do i=1,NPDF(ic)
             Call fnioint(crw,nunit, NPDFPDG(ic,i))
          Enddo
@@ -199,13 +189,11 @@ c --- coefficient block
             Call fnioint(crw,nunit, NScaleVar(ic,i))
             Call fnioint(crw,nunit, NScaleNode(ic,i))
          Enddo
+         Write(*,*) ic,Nscales(ic),Nscaledim(ic)
+         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
          Do i=1,NScaleDim(ic)
             Do j=1,NScaleVar(ic,i)
                Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
-cdebug
-               Write(*,*)"FX9999RW: IC,IScaleDim,IScaleVar,ScaleFac",
-     >              ic,i,j,ScaleFac(ic,i,j)
-cdebug
             Enddo
          Enddo
 
@@ -243,26 +231,15 @@ c --- here we assume NFragFunc=0
                   Do m=1,nxmax
                      Do n=1,NSubProc(ic)
                         Call fniodbl(crw,nunit,
-     >                       SigmaTilde(ic,i,1,k,l,m,n))
-Comment:                         write(*,*)"ic,iobs,iscv,iscn,ix,isub,st",
-Comment:      >                       ic,i,k,l,m,n,
-Comment:      >                       SigmaTilde(ic,i,1,k,l,m,n)
+     +                       SigmaTilde(ic,i,1,k,l,m,n))
                      Enddo
                   Enddo
                Enddo
             Enddo
          Enddo
          
-
-
  100     Continue
       Enddo
-
-c      Call fnioint(crw,nunit, )
-c      Call fniodbl(crw,nunit, )
-c      Call fniochar(crw,nunit, )
-
-
 
 c - end of table
       Call fnioisep(crw,nunit)
@@ -271,3 +248,4 @@ c - end of table
 
       Return
       End
+C -------------------------------------------------------------

@@ -19,16 +19,20 @@
       Implicit None
       Character*(*) var
       Integer ival
-      Integer IFNfirst,
+      Integer IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
-      Common /cfastnlo/ IFNfirst,
+      Common /cfastnlo/ IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
       Data IFNfirst/0/,
+     +     Preftab/0/,
      +     PORDPTHY/0/, PTHRESHCOR/0/, 
      +     PQUARKCOMPOSITENESS/0/, PADDLED/0/, PTEVED/0/
       
+c --- evaluate 'standard' tables or reference tables
+      If (var.eq."P_REFTAB") PREFTAB = ival
+
 c --- Perturbative Contributions - Fixed Orders
       If (var.eq."P_ORDPTHY") PORDPTHY = ival
 
