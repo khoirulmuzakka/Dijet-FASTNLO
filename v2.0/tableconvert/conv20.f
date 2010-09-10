@@ -22,6 +22,7 @@
 *   - set codes for PDF Linear combinations correctly
 *   - reorder pp subprocesses (move 2,3 to end)
 *
+* MW 09/10/2010 Add new "machine readable" block A2 (old block A2->A3)
 * MW 08/17/2010 Add user variables in block A1
 * KR 09/05/2009 Fixed IPDFdef1 to be 2 resp. 3 for DIS resp. pp/ppbar 
 *               instead of 1,2! According to v2.0 table format 1 is
@@ -190,6 +191,9 @@ c ------------------------------------------------------------------
 
 c ------------------------------------------------------------------
       Write(2,5001) Iseparator  ! ------------------- block A2 ------
+      Write(2,4999) 0           ! Imachine
+c ------------------------------------------------------------------
+      Write(2,5001) Iseparator  ! ------------------- block A3 ------
       Write(2,4999) IXSECTUNITS    ! -> Ipublunits
       Write(2,4999) 3           ! NScDescript 
       Do i=1,3
