@@ -36,8 +36,6 @@ c - block A1
       Call fnioint(crw,nunit, Ncontrib)
       Call fnioint(crw,nunit, Nmult)
       Call fnioint(crw,nunit, Ndata)
-c  NuserString,NuserInt,NuserFloat
-c  UserString(MXuser),UserInt(MXuser),UserFloat(MXuser)
       Call fnioint(crw,nunit, NuserString)
       If (NuserString .gt. MxUser) Then
          Write(*,*) ' NuserString too large ',NuserString,'<=',MxUser
@@ -60,8 +58,13 @@ c  UserString(MXuser),UserInt(MXuser),UserFloat(MXuser)
         Call fniodbl(crw,nunit, UserFloat(i))
       Enddo
 c - block A2
-c      Call fnioisep(crw,nunit)
-c      Call fnioint(crw,nunit, I[code]) 
+      Call fnioisep(crw,nunit)
+      Call fnioint(crw,nunit, Imachine) 
+      If (Imachine.ne.0) Then
+         Write(*,*) ' Imachine different from zero - ',
+     +        'not yet implemented: ',Imachine
+         Stop
+      Endif
 c - block A3
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, IpublUnits) 

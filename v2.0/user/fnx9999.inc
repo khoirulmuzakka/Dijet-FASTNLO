@@ -37,7 +37,7 @@ c - technical parameters
 
 c --- Block A1 (header part 1)
       Integer Iseparator, Itabversion, Ncontrib,Nmult,Ndata,
-     +     NuserString,NuserInt,NuserFloat, UserInt(MxUser)
+     +     NuserString,NuserInt,NuserFloat, UserInt(MxUser), Imachine
       Character*24 ScenName
       Character*64 UserString(MxUser)
       Double Precision UserFloat(MxUser)
@@ -99,7 +99,7 @@ c - int*8
      +     Nevt,
 c - int
      +     Itabversion, Ncontrib,Nmult,Ndata,
-     +     NuserString,NuserInt,NuserFloat,UserInt,
+     +     NuserString,NuserInt,NuserFloat,UserInt,Imachine,
      +     Ipublunits, NscDescript, ILOord, Nobsbin, NDim,
      +     IDiffBin, INormFlag, IDivLoPointer, IDivUpPointer,
      +     IXsectUnits, IDataFlag, IAddMultFlag, 
