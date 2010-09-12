@@ -1,7 +1,7 @@
-      SUBROUTINE UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+      SUBROUTINE UNCERT(IPHASE,IMODE,IWEIGHT,IVAR,LRAT)
       
       IMPLICIT NONE
-      INTEGER IPHASE,IMODE,IWEIGHT
+      INTEGER IPHASE,IMODE,IWEIGHT,IVAR
       LOGICAL LRAT
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
@@ -15,6 +15,7 @@
 
 *---First run
 c - Implement sample averages with different weights
+c - Not active/well tested yet
 c - Required in case of e.g. tables with changing nos. of events
 c - Define weights to be one for 1D9 events for LO and 1D8 for NLO/total 
 c - If all weights are identical this has to cancel out completely
@@ -49,19 +50,23 @@ c - This is the order counting in fnx9999 common ...
          DO IRAP=1,NRAP
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
+               IJMIN(IBIN) = -1
+               IJMAX(IBIN) = -1
                DO IORD=1,NORD+1
                   DO ISUB=1,NSUBPROC+1
-                     WRES(IBIN,ISUB,IORD)   = 0.D0
-                     WT(IBIN,ISUB,IORD)     = 0.D0
-                     WT2(IBIN,ISUB,IORD)    = 0.D0
-                     WTN(IBIN,ISUB,IORD)    = 0.D0
-                     WTX(IBIN,ISUB,IORD)    = 0.D0
- 1                   WTX2(IBIN,ISUB,IORD)   = 0.D0
-                     WTDXL2(IBIN,ISUB,IORD) = 0.D0
-                     WTDXU2(IBIN,ISUB,IORD) = 0.D0
-                     WTDXLM(IBIN,ISUB,IORD) = 0.D0
-                     WTDXUM(IBIN,ISUB,IORD) = 0.D0
-                     WTDXMN(IBIN,ISUB,IORD) = 0.D0
+                     WRES(IBIN,ISUB,IORD)   = 0D0
+                     NTN(IBIN,ISUB,IORD)    = 0
+                     WT(IBIN,ISUB,IORD)     = 0D0
+                     WT2(IBIN,ISUB,IORD)    = 0D0
+                     WTX(IBIN,ISUB,IORD)    = 0D0
+                     WTX2(IBIN,ISUB,IORD)   = 0D0
+                     WTXMIN(IBIN,ISUB,IORD) = 1D99
+                     WTXMAX(IBIN,ISUB,IORD) = 1D-99
+                     WTDXL2(IBIN,ISUB,IORD) = 0D0
+                     WTDXU2(IBIN,ISUB,IORD) = 0D0
+                     WTDXLM(IBIN,ISUB,IORD) = 0D0
+                     WTDXUM(IBIN,ISUB,IORD) = 0D0
+                     WTDXMN(IBIN,ISUB,IORD) = 0D0
                   ENDDO
                ENDDO
             ENDDO
@@ -79,8 +84,11 @@ c - This is the order counting in fnx9999 common ...
          DO IRAP=1,NRAPIDITY
             DO IPT=1,NPT(IRAP)
                IBIN = IBIN+1
-               SUMMORD = 0.D0
-               DIFFORD = 0.D0
+               SUMMORD = 0D0
+               DIFFORD = 0D0
+Comment:                write(*,*)"AAA: wtdxum(1,8,3),so,do,sp,dp,s,d",
+Comment:      >              wtdxum(1,8,3),summord,difford,
+Comment:      >              summproc,diffproc,summ,diff
                DO IORD=1,NORD
                   IF (IORD.LT.NORD) THEN
                      TEVTS = DBLE(NEVT(IORD))
@@ -89,321 +97,71 @@ c - This is the order counting in fnx9999 common ...
                   ENDIF
                   WEIGHT = 1D0
                   IF (IWEIGHT.EQ.1) WEIGHT = TWGT(IORD)*TEVTS
-Comment:                   write(*,*)"iord,tevts,twgt,weight",
-Comment:      >                 iord,tevts,twgt(iord),weight
-                  SUMMPROC = 0.D0
-                  DIFFPROC = 0.D0
+                  SUMMPROC = 0D0
+                  DIFFPROC = 0D0
+Comment:                   write(*,*)"BBB: wtdxum(1,8,3),so,do,sp,dp,s,d",
+Comment:      >                 wtdxum(1,8,3),summord,difford,
+Comment:      >                 summproc,diffproc,summ,diff
                   DO ISUB=1,NSUBPROC
                      SUMM = RESULT(IBIN,ISUB,IORD)
                      SUMMPROC = SUMMPROC + SUMM
                      DIFF = SUMM - MYRES(IBIN,ISUB,IORD)
                      DIFFPROC = DIFFPROC + DIFF
-                     WT(IBIN,ISUB,IORD)   =
-     >                    WT(IBIN,ISUB,IORD)  +
-     >                    WEIGHT
-                     WT2(IBIN,ISUB,IORD)  =
-     >                    WT2(IBIN,ISUB,IORD) +
-     >                    WEIGHT*WEIGHT 
-                     WTN(IBIN,ISUB,IORD)  =
-     >                    WTN(IBIN,ISUB,IORD) +
-     >                    1.D0 
-                     WRES(IBIN,ISUB,IORD) = SUMM
-                     WTX(IBIN,ISUB,IORD) =
-     >                    WTX(IBIN,ISUB,IORD)  +
-     >                    SUMM*WEIGHT
-                     WTX2(IBIN,ISUB,IORD) =
-     >                    WTX2(IBIN,ISUB,IORD) +
-     >                    SUMM*WEIGHT*SUMM*WEIGHT
-                     IF (DIFF.GT.0D0) THEN
-                        WTDXU2(IBIN,ISUB,IORD) =
-     >                       WTDXU2(IBIN,ISUB,IORD) + DIFF*DIFF
-                        IF (DIFF.GT.WTDXUM(IBIN,ISUB,IORD)) THEN
-                           WTDXUM(IBIN,ISUB,IORD) = DIFF
-                        ENDIF
-                     ELSE
-                        WTDXL2(IBIN,ISUB,IORD) =
-     >                       WTDXL2(IBIN,ISUB,IORD) + DIFF*DIFF
-                        IF (DIFF.LT.WTDXLM(IBIN,ISUB,IORD)) THEN
-                           WTDXLM(IBIN,ISUB,IORD) = DIFF
-                        ENDIF
-                     ENDIF
-                     IF (LRAT) THEN
-                        RATIO =
-     >                       WRES(IPT,ISUB,IORD) /
-     >                       WRES(IBIN,ISUB,IORD)
-                        WRES(IBIN+NBIN,ISUB,IORD) = RATIO
-                        WT(IBIN+NBIN,ISUB,IORD) =
-     >                       WT(IBIN+NBIN,ISUB,IORD) + WEIGHT 
-                        WT2(IBIN+NBIN,ISUB,IORD) =
-     >                       WT2(IBIN+NBIN,ISUB,IORD) + WEIGHT*WEIGHT 
-                        WTX(IBIN+NBIN,ISUB,IORD) = 
-     >                       WTX(IBIN+NBIN,ISUB,IORD) +
-     >                       RATIO*WEIGHT
-                        WTX2(IBIN+NBIN,ISUB,IORD) = 
-     >                       WTX2(IBIN+NBIN,ISUB,IORD) +
-     >                       RATIO*WEIGHT*RATIO*WEIGHT
-                        DIFF = RATIO -
-     >                       MYRES(IBIN+NBIN,ISUB,IORD)
-                        IF (DIFF.GT.0D0) THEN
-                           WTDXU2(IBIN+NBIN,ISUB,IORD) =
-     >                          WTDXU2(IBIN+NBIN,ISUB,IORD) + DIFF*DIFF
-                           IF (DIFF.GT.WTDXUM(IBIN+NBIN,ISUB,IORD)) THEN
-                              WTDXUM(IBIN+NBIN,ISUB,IORD) = DIFF
-                           ENDIF
-                        ELSE
-                           WTDXL2(IBIN+NBIN,ISUB,IORD) =
-     >                          WTDXL2(IBIN+NBIN,ISUB,IORD) + DIFF*DIFF
-                           IF (DIFF.LT.WTDXLM(IBIN+NBIN,ISUB,IORD)) THEN
-                              WTDXLM(IBIN+NBIN,ISUB,IORD) = DIFF
-                           ENDIF
-                        ENDIF
-                     ENDIF
+                     CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                    SUMM,DIFF,WEIGHT,
+     >                    LRAT,IPT,NBIN)
                   ENDDO
+Comment:                   write(*,*)"CCC: wtdxum(1,8,3),so,do,sp,dp,s,d",
+Comment:      >                 wtdxum(1,8,3),summord,difford,
+Comment:      >                 summproc,diffproc,summ,diff
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
                   DIFF = SUMM - MYRES(IBIN,NSUBPROC+1,IORD)
                   DIFFORD = DIFFORD + DIFF
-                  WT(IBIN,NSUBPROC+1,IORD)    =
-     >                 WT(IBIN,NSUBPROC+1,IORD)  +
-     >                 WEIGHT
-                  WT2(IBIN,NSUBPROC+1,IORD)   =
-     >                 WT2(IBIN,NSUBPROC+1,IORD) +
-     >                 WEIGHT*WEIGHT 
-                  WTN(IBIN,NSUBPROC+1,IORD)   =
-     >                 WTN(IBIN,NSUBPROC+1,IORD) +
-     >                 1D0
-                  WRES(IBIN,NSUBPROC+1,IORD)  = SUMMPROC
-                  WTX(IBIN,NSUBPROC+1,IORD)   =
-     >                 WTX(IBIN,NSUBPROC+1,IORD)  +
-     >                 SUMMPROC*WEIGHT
-                  WTX2(IBIN,NSUBPROC+1,IORD)  =
-     >                 WTX2(IBIN,NSUBPROC+1,IORD) +
-     >                 SUMMPROC*WEIGHT*SUMMPROC*WEIGHT
-                  IF (DIFFPROC.GT.0D0) THEN
-                     WTDXU2(IBIN,NSUBPROC+1,IORD) =
-     >                    WTDXU2(IBIN,NSUBPROC+1,IORD) +
-     >                    DIFFPROC*DIFFPROC
-                     IF (DIFFPROC.GT.WTDXUM(IBIN,NSUBPROC+1,IORD)) THEN
-                        WTDXUM(IBIN,NSUBPROC+1,IORD) = DIFFPROC
-                     ENDIF
-                  ELSE
-                     WTDXL2(IBIN,NSUBPROC+1,IORD) =
-     >                    WTDXL2(IBIN,NSUBPROC+1,IORD) +
-     >                    DIFFPROC*DIFFPROC
-                     IF (DIFFPROC.LT.WTDXLM(IBIN,NSUBPROC+1,IORD)) THEN
-                        WTDXLM(IBIN,NSUBPROC+1,IORD) = DIFFPROC
-                     ENDIF
-                  ENDIF
-                  IF (LRAT) THEN
-                     RATIO =
-     >                    WRES(IPT,NSUBPROC+1,IORD) / 
-     >                    WRES(IBIN,NSUBPROC+1,IORD)
-                     WRES(IBIN+NBIN,NSUBPROC+1,IORD) = RATIO
-                     WT(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                    WT(IBIN+NBIN,NSUBPROC+1,IORD) + WEIGHT 
-                     WT2(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                    WT2(IBIN+NBIN,NSUBPROC+1,IORD) + WEIGHT*WEIGHT
-                     WTX(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                    WTX(IBIN+NBIN,NSUBPROC+1,IORD) +
-     >                    RATIO*WEIGHT
-                     WTX2(IBIN+NBIN,NSUBPROC+1,IORD) = 
-     >                    WTX2(IBIN+NBIN,NSUBPROC+1,IORD) +
-     >                    RATIO*WEIGHT*RATIO*WEIGHT
-                     DIFF = RATIO -
-     >                    MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
-                     IF (DIFF.GT.0D0) THEN
-                        WTDXU2(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                       WTDXU2(IBIN+NBIN,NSUBPROC+1,IORD) +
-     >                       DIFF*DIFF
-                        IF (DIFF.GT.WTDXUM(IBIN+NBIN,NSUBPROC+1,IORD))
-     >                       THEN
-                           WTDXUM(IBIN+NBIN,NSUBPROC+1,IORD) = DIFF
-                        ENDIF
-                     ELSE
-                        WTDXL2(IBIN+NBIN,NSUBPROC+1,IORD) =
-     >                       WTDXL2(IBIN+NBIN,NSUBPROC+1,IORD) +
-     >                       DIFF*DIFF
-                        IF (DIFF.LT.WTDXLM(IBIN+NBIN,NSUBPROC+1,IORD))
-     >                       THEN
-                           WTDXLM(IBIN+NBIN,NSUBPROC+1,IORD) = DIFF
-                        ENDIF
-                     ENDIF
-                  ENDIF
+c                  write(*,*)"XXX: DIFFPROC1,2",DIFFPROC,
+c     >                 SUMM-myres(ibin,nsubproc+1,iord)
+                  CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,IORD,
+     >                 SUMMPROC,DIFFPROC,WEIGHT,
+     >                 LRAT,IPT,NBIN)
                ENDDO
-               WT(IBIN,NSUBPROC+1,NORD+1)   =
-     >              WT(IBIN,NSUBPROC+1,NORD+1)  +
-     >              WEIGHT
-               WT2(IBIN,NSUBPROC+1,NORD+1)  =
-     >              WT2(IBIN,NSUBPROC+1,NORD+1) +
-     >              WEIGHT*WEIGHT 
-               WTN(IBIN,NSUBPROC+1,NORD+1)  =
-     >              WTN(IBIN,NSUBPROC+1,NORD+1) +
-     >              1D0
-               WRES(IBIN,NSUBPROC+1,NORD+1) = SUMMORD
-               WTX(IBIN,NSUBPROC+1,NORD+1)  = 
-     >              WTX(IBIN,NSUBPROC+1,NORD+1)  +
-     >              SUMMORD*WEIGHT
-               WTX2(IBIN,NSUBPROC+1,NORD+1) =
-     >              WTX2(IBIN,NSUBPROC+1,NORD+1) +
-     >              SUMMORD*WEIGHT*SUMMORD*WEIGHT
-Comment:                write(*,*)"MOD1: ibin,irap,ipt,iord,isub,i+n"
-Comment:      >              ,ibin,irap,ipt,iord,isub,ibin+nbin
-Comment:                write(*,*)"wt,summord,wtx,wtx2",
-Comment:      >              WT(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >              summord,
-Comment:      >              WTX(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >              WTX2(IBIN,NSUBPROC+1,NORD+1)
-               IF (DIFFORD.GT.0D0) THEN
-                  WTDXU2(IBIN,NSUBPROC+1,NORD+1) =
-     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1) +
-     >                 DIFFORD*DIFFORD
-                  IF (DIFFORD.GT.WTDXUM(IBIN,NSUBPROC+1,NORD+1)) THEN
-                     WTDXUM(IBIN,NSUBPROC+1,NORD+1) = DIFFORD
-                  ENDIF
-               ELSE
-                  WTDXL2(IBIN,NSUBPROC+1,NORD+1) =
-     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1) +
-     >                 DIFFORD*DIFFORD
-                  IF (DIFFORD.LT.WTDXLM(IBIN,NSUBPROC+1,NORD+1)) THEN
-                     WTDXLM(IBIN,NSUBPROC+1,NORD+1) = DIFFORD
-                  ENDIF
-               ENDIF
-               IF (LRAT) THEN
-                  RATIO =
-     >                 WRES(IPT,NSUBPROC+1,NORD+1) / 
-     >                 WRES(IBIN,NSUBPROC+1,NORD+1)
-                  WRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = RATIO
-                  WT(IBIN+NBIN,NSUBPROC+1,NORD+1) =
-     >                 WT(IBIN+NBIN,NSUBPROC+1,NORD+1) + WEIGHT 
-                  WT2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
-     >                 WT2(IBIN+NBIN,NSUBPROC+1,NORD+1) + WEIGHT*WEIGHT 
-                  WTX(IBIN+NBIN,NSUBPROC+1,NORD+1) =
-     >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1) +
-     >                 RATIO*WEIGHT
-                  WTX2(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
-     >                 WTX2(IBIN+NBIN,NSUBPROC+1,NORD+1) +
-     >                 RATIO*WEIGHT*RATIO*WEIGHT
-                  DIFF = RATIO -
-     >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
-Comment:                   write(*,*)"COMP: ibin,irap,ipt,iord,isub,i+n",
-Comment:      >                 ibin,irap,ipt,iord,isub,ibin+nbin
-Comment:                   write(*,*)"COMPA: num,den,wtx,myres,"//
-Comment:      >                 "diff,sum^2ul,maxul",
-Comment:      >                 WRES(IPT,NSUBPROC+1,NORD+1),
-Comment:      >                 WRES(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 diff,wtdxu2(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxl2(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxum(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxlm(ibin+nbin,nsubproc+1,nord+1)
-                  IF (DIFF.GT.0D0) THEN
-                     WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
-     >                    WTDXU2(IBIN+NBIN,NSUBPROC+1,NORD+1) +
-     >                    DIFF*DIFF
-Comment:                      write(*,*)"DIFFA diff, wtdxum old",diff, 
-Comment:      >                    WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1)
-                     IF (DIFF.GT.WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1))
-     >                    THEN
-                        WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1) = DIFF
-Comment:                         write(*,*)"DIFFB diff, wtdxum old",diff, 
-Comment:      >                       WTDXUM(IBIN+NBIN,NSUBPROC+1,NORD+1)
-                     ENDIF
-                  ELSE
-                     WTDXL2(IBIN+NBIN,NSUBPROC+1,NORD+1) =
-     >                    WTDXL2(IBIN+NBIN,NSUBPROC+1,NORD+1) +
-     >                    DIFF*DIFF
-                     IF (DIFF.LT.WTDXLM(IBIN+NBIN,NSUBPROC+1,NORD+1))
-     >                    THEN
-                        WTDXLM(IBIN+NBIN,NSUBPROC+1,NORD+1) = DIFF
-                     ENDIF
-                  ENDIF
-Comment:                   write(*,*)"COMPB: num,den,wtx,myres,"//
-Comment:      >                 "diff,sum^2ul,maxul",
-Comment:      >                 WRES(IPT,NSUBPROC+1,NORD+1),
-Comment:      >                 WRES(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 WTX(IBIN+NBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 diff,wtdxu2(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxl2(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxum(ibin+nbin,nsubproc+1,nord+1),
-Comment:      >                 wtdxlm(ibin+nbin,nsubproc+1,nord+1)
-               ENDIF
+Comment:                write(*,*)"DDD: wtdxum(1,8,3),so,do,sp,dp,s,d",
+Comment:      >              wtdxum(1,8,3),summord,difford,
+Comment:      >              summproc,diffproc,summ,diff
+c               write(*,*)"YYY: DIFFORD1,2",DIFFORD,
+c     >              SUMMORD-myres(ibin,nsubproc+1,nord+1)
+               CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,NORD+1,
+     >              SUMMORD,DIFFORD,WEIGHT,
+     >              LRAT,IPT,NBIN)
+Comment:                if (ibin.eq.1) then
+Comment:                   write(*,*)"UNCERT: ibin,itab,difford",
+Comment:      >                 ibin,ivar,difford
+Comment:                   write(*,*)"UNCERT:wt,wt2,wtx,wtx2,s+wtdxlm,s+wtdxum"//
+Comment:      >                 "wtxmin,wtxmax",
+Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 Wt2(IBIN,NSUBPROC+1,NORD+1),
+Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1),
+Comment:      >                 WTx2(IBIN,NSUBPROC+1,nORD+1),
+Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1) /
+Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1) +
+Comment:      >                 WTdxlm(IBIN,NSUBPROC+1,nORD+1),
+Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1) /
+Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1) +
+Comment:      >                 WTdxum(IBIN,NSUBPROC+1,nORD+1),
+Comment:      >                 WTxmin(IBIN,NSUBPROC+1,nORD+1),
+Comment:      >                 WTxmax(IBIN,NSUBPROC+1,nORD+1)
+Comment:                endif
                DO ISUB=1,NSUBPROC
-                  SUMMORD = 0.D0
-                  DIFFORD = 0.D0
+                  SUMMORD = 0D0
+                  DIFFORD = 0D0
                   DO IORD=1,NORD
                      SUMM = RESULT(IBIN,ISUB,IORD)
                      SUMMORD = SUMMORD + SUMM
                      DIFF = SUMM - MYRES(IBIN,ISUB,IORD)
                      DIFFORD = DIFFORD + DIFF
                   ENDDO
-                  WT(IBIN,ISUB,NORD+1)   =
-     >                 WT(IBIN,ISUB,NORD+1)  +
-     >                 WEIGHT
-                  WT2(IBIN,ISUB,NORD+1)  =
-     >                 WT2(IBIN,ISUB,NORD+1) +
-     >                 WEIGHT*WEIGHT 
-                  WTN(IBIN,ISUB,NORD+1)  =
-     >                 WTN(IBIN,ISUB,NORD+1) +
-     >                 1D0
-                  WRES(IBIN,ISUB,NORD+1) = SUMMORD
-                  WTX(IBIN,ISUB,NORD+1)  = 
-     >                 WTX(IBIN,ISUB,NORD+1)  +
-     >                 SUMMORD*WEIGHT
-                  WTX2(IBIN,ISUB,NORD+1) =
-     >                 WTX2(IBIN,ISUB,NORD+1) +
-     >                 SUMMORD*WEIGHT*SUMMORD*WEIGHT
-                  IF (DIFFORD.GT.0D0) THEN
-                     WTDXU2(IBIN,ISUB,NORD+1) =
-     >                    WTDXU2(IBIN,ISUB,NORD+1) +
-     >                    DIFFORD*DIFFORD
-                     IF (DIFFORD.GT.WTDXUM(IBIN,ISUB,NORD+1)) THEN
-                        WTDXUM(IBIN,ISUB,NORD+1) = DIFFORD
-                     ENDIF
-                  ELSE
-                     WTDXL2(IBIN,ISUB,NORD+1) =
-     >                    WTDXL2(IBIN,ISUB,NORD+1) +
-     >                    DIFFORD*DIFFORD
-                     IF (DIFFORD.LT.WTDXLM(IBIN,ISUB,NORD+1)) THEN
-                        WTDXLM(IBIN,ISUB,NORD+1) = DIFFORD
-                     ENDIF
-                  ENDIF
-                  IF (LRAT) THEN
-                     RATIO =
-     >                    WRES(IPT,ISUB,NORD+1) / 
-     >                    WRES(IBIN,ISUB,NORD+1)
-                     WRES(IBIN+NBIN,ISUB,NORD+1) = RATIO
-                     WT(IBIN+NBIN,ISUB,NORD+1) =
-     >                    WT(IBIN+NBIN,ISUB,NORD+1) + WEIGHT 
-                     WT2(IBIN+NBIN,ISUB,NORD+1) =
-     >                    WT2(IBIN+NBIN,ISUB,NORD+1) + WEIGHT*WEIGHT 
-                     WTX(IBIN+NBIN,ISUB,NORD+1) =
-     >                    WTX(IBIN+NBIN,ISUB,NORD+1) +
-     >                    RATIO*WEIGHT
-                     WTX2(IBIN+NBIN,ISUB,NORD+1) = 
-     >                    WTX2(IBIN+NBIN,ISUB,NORD+1) +
-     >                    RATIO*WEIGHT*RATIO*WEIGHT
-                     DIFF = RATIO -
-     >                    MYRES(IBIN+NBIN,ISUB,NORD+1)
-                     IF (DIFF.GT.0D0) THEN
-                        WTDXU2(IBIN+NBIN,ISUB,NORD+1) =
-     >                       WTDXU2(IBIN+NBIN,ISUB,NORD+1) +
-     >                       DIFF*DIFF
-                        IF (DIFF.GT.WTDXUM(IBIN+NBIN,ISUB,NORD+1))
-     >                       THEN
-                           WTDXUM(IBIN+NBIN,ISUB,NORD+1) = DIFF
-                        ENDIF
-                     ELSE
-                        WTDXL2(IBIN+NBIN,ISUB,NORD+1) =
-     >                       WTDXL2(IBIN+NBIN,ISUB,NORD+1) +
-     >                       DIFF*DIFF
-                        IF (DIFF.LT.WTDXLM(IBIN+NBIN,ISUB,NORD+1))
-     >                       THEN
-                           WTDXLM(IBIN+NBIN,ISUB,NORD+1) = DIFF
-                        ENDIF
-                     ENDIF
-                  ENDIF
+                  CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                 SUMMORD,DIFFORD,WEIGHT,
+     >                 LRAT,IPT,NBIN)
                ENDDO
             ENDDO
          ENDDO
@@ -426,110 +184,93 @@ ckr Eigen vector method (as needed for CTEQ or MSTW PDF uncertainty)
      >                       ,ISUB,IORD))
                         WTDXL2(IBIN,ISUB,IORD) = -SQRT(WTDXL2(IBIN
      >                       ,ISUB,IORD))
-                        IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1.D-99) THEN
+                        IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99) THEN
                            WTDXU2(IBIN,ISUB,IORD) =
      >                          WTDXU2(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
+     >                          DABS(MYRES(IBIN,ISUB,IORD))
                            WTDXL2(IBIN,ISUB,IORD) =
      >                          WTDXL2(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
+     >                          DABS(MYRES(IBIN,ISUB,IORD))
                         ELSE
                            WTDXU2(IBIN,ISUB,IORD) = -1D0
                            WTDXL2(IBIN,ISUB,IORD) = -1D0
                         ENDIF
-ckr Sampling method (as needed for NNPDF PDF or stat. uncertainty) 
+ckr Sampling method (as needed for statistical uncertainties or NNPDF) 
                      ELSEIF (IMODE.EQ.2) THEN
+                        WTDXU2(IBIN,ISUB,IORD) = -1D0
+                        WTDXL2(IBIN,ISUB,IORD) = -1D0
+                        WTDXMN(IBIN,ISUB,IORD) = -1D0
+                        IF (DABS(WT(IBIN,ISUB,IORD)).GT.1D-99) THEN
+                           IF (IWEIGHT.EQ.0) THEN
+                              NEFF = WT(IBIN,ISUB,IORD)
+                           ELSE
+                              NEFF = WT(IBIN,ISUB,IORD)*WT(IBIN,ISUB
+     >                             ,IORD)/WT2(IBIN,ISUB,IORD)
+                           ENDIF
 ckr Attention: This overwrites the precalculated result by averages
 ckr            from the sampling method as this should be considered the
 ckr            central result according to NNPDF.
-Comment:                         write(*,*)"MOD2: ibin,irap,ipt,iord,isub,i+n"
-Comment:      >                       ,ibin,irap,ipt,iord,isub,ibin+nbin
-                        IF (WT(IBIN,ISUB,IORD).GT.1D-99) THEN
                            MYRES(IBIN,ISUB,IORD) = 
      >                          WTX(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
                            WTDXU2(IBIN,ISUB,IORD) = 
      >                          (WTX2(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
      >                          -MYRES(IBIN,ISUB,IORD)
      >                          *MYRES(IBIN,ISUB,IORD))
-                        ELSE
-                           WTDXU2(IBIN,ISUB,IORD) = -1D0 
-                        ENDIF
-Comment:                         if (iord.eq.3.and.isub.eq.8.and.ibin.eq.151)then
-Comment:                            write(*,*)"MMMM: wt, wtx, wtx2, wtxu2 A",
-Comment:      >                          WT(IBIN,ISUB,IORD), WTX(IBIN,ISUB,IORD),
-Comment:      >                          WTX2(IBIN,ISUB,IORD),WTDXU2(IBIN,ISUB
-Comment:      >                          ,IORD)
-Comment:                            write(*,*)"MMMM: wtx2/wt",
-Comment:      >                          WTX2(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
-Comment:                            write(*,*)"MMMM: myres^2",
-Comment:      >                          MYRES(IBIN,ISUB,IORD)*MYRES(IBIN,ISUB
-Comment:      >                          ,IORD)
-Comment:                         endif
-                        IF (WTDXU2(IBIN,ISUB,IORD).GE.0D0) THEN
-                           WTDXU2(IBIN,ISUB,IORD) =
-     >                          SQRT(WTDXU2(IBIN,ISUB,IORD))
-                           WTDXL2(IBIN,ISUB,IORD) =
-     >                          -WTDXU2(IBIN,ISUB,IORD)
-                           NEFF = WT(IBIN,ISUB,IORD)*WT(IBIN,ISUB
-     >                          ,IORD)/WT2(IBIN,ISUB,IORD)
-Comment:                         if (iord.eq.3.and.isub.eq.8.and.ibin.eq.151)then
-Comment:                            write(*,*)"NNNN: wt, wt2, neff",
-Comment:      >                          WT(IBIN,ISUB,IORD),
-Comment:      >                          WT2(IBIN,ISUB,IORD),neff
-Comment:                         endif
                            IF (NEFF.GE.2D0) THEN
                               WTDXMN(IBIN,ISUB,IORD) =
      >                             WTDXU2(IBIN,ISUB,IORD) /
-     >                             SQRT(NEFF-1.D0)
+     >                             (NEFF-1D0)
                            ELSE
                               WTDXMN(IBIN,ISUB,IORD) = -1D0
                            ENDIF
-                        ELSE
-                           WTDXU2(IBIN,ISUB,IORD) = -1D0
-                           WTDXL2(IBIN,ISUB,IORD) = -1D0
-                           WTDXMN(IBIN,ISUB,IORD) = -1D0
-                        ENDIF
-Comment:                         if (iord.eq.3.and.isub.eq.8.and.ibin.eq.151)then
-Comment:                            write(*,*)"TTTT: myres, wres, wtdxmn",
-Comment:      >                          myres(ibin,isub,iord),
-Comment:      >                          wres(ibin,isub,iord),
-Comment:      >                          wtdxmn(ibin,isub,iord)
-Comment:                         endif
-                        IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1.D-99)
-     >                       THEN
-                           WTDXU2(IBIN,ISUB,IORD) =
-     >                          WTDXU2(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
-                           WTDXL2(IBIN,ISUB,IORD) =
-     >                          WTDXL2(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
-                           WTDXMN(IBIN,ISUB,IORD) =
-     >                          WTDXMN(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
-                        ELSE
-                           WTDXU2(IBIN,ISUB,IORD) = -1D0
-                           WTDXL2(IBIN,ISUB,IORD) = -1D0
-                           WTDXMN(IBIN,ISUB,IORD) = -1D0
+                           IF (WTDXU2(IBIN,ISUB,IORD).GE.0D0) THEN
+                              WTDXU2(IBIN,ISUB,IORD) =
+     >                             SQRT(WTDXU2(IBIN,ISUB,IORD))
+                              WTDXL2(IBIN,ISUB,IORD) =
+     >                             -WTDXU2(IBIN,ISUB,IORD)
+                              IF (WTDXMN(IBIN,ISUB,IORD).GE.0D0) THEN
+                                 WTDXMN(IBIN,ISUB,IORD) =
+     >                                SQRT(WTDXMN(IBIN,ISUB,IORD))
+                              ENDIF
+                              IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99)
+     >                             THEN
+                                 WTXMIN(IBIN,ISUB,IORD) =
+     >                                WTXMIN(IBIN,ISUB,IORD) /
+     >                                DABS(MYRES(IBIN,ISUB,IORD))
+                                 WTXMAX(IBIN,ISUB,IORD) =
+     >                                WTXMAX(IBIN,ISUB,IORD) /
+     >                                DABS(MYRES(IBIN,ISUB,IORD))
+                                 WTDXU2(IBIN,ISUB,IORD) =
+     >                                WTDXU2(IBIN,ISUB,IORD) /
+     >                                DABS(MYRES(IBIN,ISUB,IORD))
+                                 WTDXL2(IBIN,ISUB,IORD) =
+     >                                WTDXL2(IBIN,ISUB,IORD) /
+     >                                DABS(MYRES(IBIN,ISUB,IORD))
+                                 WTDXMN(IBIN,ISUB,IORD) =
+     >                                WTDXMN(IBIN,ISUB,IORD) /
+     >                                DABS(MYRES(IBIN,ISUB,IORD)) 
+                              ELSE
+                                 WTXMIN(IBIN,ISUB,IORD) = -1D0
+                                 WTXMAX(IBIN,ISUB,IORD) = -1D0
+                                 WTDXU2(IBIN,ISUB,IORD) = -1D0
+                                 WTDXL2(IBIN,ISUB,IORD) = -1D0
+                                 WTDXMN(IBIN,ISUB,IORD) = -1D0
+                              ENDIF
+                           ELSE
+                              WTDXU2(IBIN,ISUB,IORD) = -1D0
+                              WTDXL2(IBIN,ISUB,IORD) = -1D0
+                              WTDXMN(IBIN,ISUB,IORD) = -1D0
+                           ENDIF
                         ENDIF
 ckr Minimax method (as needed for scale uncertainties) 
                      ELSEIF (IMODE.EQ.3) THEN
-                        IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1.D-99) THEN
-Comment:                            write(*,*)"FINA: ibin,irap,ipt,iord,isub,i+n"
-Comment:      >                          ,ibin,irap,ipt,iord,isub,ibin+nbin
-Comment:                            write(*,*)"FINA: dxu, dxl, myres",
-Comment:      >                          WTDXUM(IBIN,ISUB,IORD),
-Comment:      >                          WTDXLM(IBIN,ISUB,IORD),
-Comment:      >                          MYRES(IBIN,ISUB,IORD) 
+                        IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99) THEN
                            WTDXUM(IBIN,ISUB,IORD) =
      >                          WTDXUM(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
+     >                          DABS(MYRES(IBIN,ISUB,IORD))
                            WTDXLM(IBIN,ISUB,IORD) =
      >                          WTDXLM(IBIN,ISUB,IORD) /
-     >                          MYRES(IBIN,ISUB,IORD) 
-Comment:                            write(*,*)"FINB: dxu, dxl, myres",
-Comment:      >                          WTDXUM(IBIN,ISUB,IORD),
-Comment:      >                          WTDXLM(IBIN,ISUB,IORD),
-Comment:      >                          MYRES(IBIN,ISUB,IORD) 
+     >                          DABS(MYRES(IBIN,ISUB,IORD))
                         ELSE
                            WTDXUM(IBIN,ISUB,IORD) = -1D0
                            WTDXLM(IBIN,ISUB,IORD) = -1D0
@@ -541,7 +282,8 @@ ckr Deviation from reference (as needed for algorithmic uncertainties)
      >                          1D-99) THEN
                               WTDXUM(IBIN,ISUB,IORD) =
      >                             (WTX(IBIN,ISUB,IORD) /
-     >                             MYRES(IBIN+NBIN/2,ISUB,IORD)) - 1D0
+     >                             DABS(MYRES(IBIN+NBIN/2,ISUB,IORD))) -
+     >                             1D0
                            ELSE
                               WTDXUM(IBIN,ISUB,IORD) = -1D0
                            ENDIF
@@ -552,12 +294,12 @@ ckr Deviation from reference (as needed for algorithmic uncertainties)
             ENDDO
          ENDDO
 cdebug
-         IBIN = 0
-         DO IRAP=1,NRAPIDITY
-            DO IPT=1,NPT(IRAP)
-               IBIN = IBIN+1
-               DO IORD=1,NORD+1
-                  DO ISUB=1,NSUBPROC+1
+Comment:          IBIN = 0
+Comment:          DO IRAP=1,NRAPIDITY
+Comment:             DO IPT=1,NPT(IRAP)
+Comment:                IBIN = IBIN+1
+Comment:                DO IORD=1,NORD+1
+Comment:                   DO ISUB=1,NSUBPROC+1
 Comment:                      if (iord.eq.3.and.isub.eq.8.and.ibin.eq.151)then
 Comment:                      write(*,*)"ZZZZ: ibin,irap,ipt,iord,isub,i+n",
 Comment:      >                    ibin,irap,ipt,iord,isub,ibin+nbin
@@ -574,10 +316,10 @@ Comment:      >                    myres(ibin,isub,iord),
 Comment:      >                    wres(ibin,isub,iord),
 Comment:      >                    wtdxmn(ibin,isub,iord)
 Comment:                   endif
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
+Comment:                   ENDDO
+Comment:                ENDDO
+Comment:             ENDDO
+Comment:          ENDDO
 cdebug
 
          RETURN
@@ -605,7 +347,7 @@ cdebug
             IBIN = IBIN+1
             DO IORD=1,NORD+1
                DO ISUB=1,NSUBPROC+1
-                  MYRES(IBIN,ISUB,IORD) = 0.D0
+                  MYRES(IBIN,ISUB,IORD) = 0D0
                ENDDO
             ENDDO
          ENDDO
@@ -630,19 +372,12 @@ ckr Centrality ratio: LRAT
      >                    MYRES(IPT,ISUB,IORD) /
      >                    RESULT(IBIN,ISUB,IORD)
                   ENDIF
-c                  write(*,*)"ibin,irap,ipt,iord,isub",
-c     >                 ibin,irap,ipt,iord,isub
-c                  write(*,*)"r,a,b",MYRES(IBIN+NBIN,ISUB,IORD),
-c     >                 MYRES(IPT,ISUB,IORD),RESULT(IBIN,ISUB,IORD)
                ENDDO
                IF (LRAT) THEN
                   MYRES(IBIN+NBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IPT,NSUBPROC+1,IORD) / 
      >                 MYRES(IBIN,NSUBPROC+1,IORD)
                ENDIF
-c               write(*,*)"sub r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,IORD),
-c     >              MYRES(IPT,NSUBPROC+1,IORD),MYRES(IBIN,NSUBPROC+1
-c     >              ,IORD)
                MYRES(IBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IBIN,NSUBPROC+1,NORD+1) +
      >              MYRES(IBIN,NSUBPROC+1,IORD)
@@ -652,9 +387,6 @@ c     >              ,IORD)
      >              MYRES(IPT,NSUBPROC+1,NORD+1) /
      >              MYRES(IBIN,NSUBPROC+1,NORD+1)
             ENDIF
-c            write(*,*)"tot r,a,b",MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1),
-c     >           MYRES(IPT,NSUBPROC+1,NORD+1),MYRES(IBIN,NSUBPROC+1
-c     >           ,NORD+1)
             DO ISUB=1,NSUBPROC
                DO IORD=1,NORD
                   MYRES(IBIN,ISUB,NORD+1) =
@@ -687,5 +419,111 @@ Comment:          ENDDO
 Comment:       ENDDO
 cdebug
 
+      RETURN
+      END
+      
+      
+      
+      SUBROUTINE SUMMUP(IVAR,IBIN,ISUB,IORD,SUMM,DIFF,WEIGHT,
+     >     LRAT,IBREF,NBIN)
+      
+      IMPLICIT NONE
+      INTEGER IVAR,IBIN,IORD,ISUB,IBREF,NBIN
+      DOUBLE PRECISION SUMM,DIFF,WEIGHT
+      LOGICAL LRAT
+      INCLUDE "fnx9999.inc"
+      INCLUDE "uncert.inc"
+      DOUBLE PRECISION RATIO,RDIFF
+
+      WRES(IBIN,ISUB,IORD) = SUMM
+      NTN(IBIN,ISUB,IORD)  =
+     >     NTN(IBIN,ISUB,IORD)  +
+     >     1 
+      WT(IBIN,ISUB,IORD)   =
+     >     WT(IBIN,ISUB,IORD)   +
+     >     WEIGHT
+      WT2(IBIN,ISUB,IORD)  =
+     >     WT2(IBIN,ISUB,IORD)  +
+     >     WEIGHT*WEIGHT 
+      WTX(IBIN,ISUB,IORD) =
+     >     WTX(IBIN,ISUB,IORD)  +
+     >     SUMM*WEIGHT
+      WTX2(IBIN,ISUB,IORD) =
+     >     WTX2(IBIN,ISUB,IORD) +
+     >     SUMM*SUMM*WEIGHT
+      IF (SUMM.LT.WTXMIN(IBIN,ISUB,IORD)) THEN
+         WTXMIN(IBIN,ISUB,IORD) = SUMM
+         IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+            IJMIN(IBIN) = IVAR
+         ENDIF
+      ENDIF
+      IF (SUMM.GT.WTXMAX(IBIN,ISUB,IORD)) THEN
+         WTXMAX(IBIN,ISUB,IORD) = SUMM
+         IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+            IJMAX(IBIN) = IVAR
+         ENDIF
+      ENDIF
+      IF (DIFF.GT.0D0) THEN
+         WTDXU2(IBIN,ISUB,IORD) =
+     >        WTDXU2(IBIN,ISUB,IORD) + DIFF*DIFF
+         IF (DIFF.GT.WTDXUM(IBIN,ISUB,IORD)) THEN
+            WTDXUM(IBIN,ISUB,IORD) = DIFF
+         ENDIF
+      ELSE
+         WTDXL2(IBIN,ISUB,IORD) =
+     >        WTDXL2(IBIN,ISUB,IORD) + DIFF*DIFF
+         IF (DIFF.LT.WTDXLM(IBIN,ISUB,IORD)) THEN
+            WTDXLM(IBIN,ISUB,IORD) = DIFF
+         ENDIF
+      ENDIF
+      IF (LRAT) THEN
+         RATIO =
+     >        WRES(IBREF,ISUB,IORD) /
+     >        WRES(IBIN,ISUB,IORD)
+         WRES(IBIN+NBIN,ISUB,IORD) = RATIO
+         NTN(IBIN+NBIN,ISUB,IORD) =
+     >        NTN(IBIN+NBIN,ISUB,IORD)  +
+     >        1 
+         WT(IBIN+NBIN,ISUB,IORD) =
+     >        WT(IBIN+NBIN,ISUB,IORD)   +
+     >        WEIGHT 
+         WT2(IBIN+NBIN,ISUB,IORD) =
+     >        WT2(IBIN+NBIN,ISUB,IORD)  +
+     >        WEIGHT*WEIGHT 
+         WTX(IBIN+NBIN,ISUB,IORD) = 
+     >        WTX(IBIN+NBIN,ISUB,IORD)  +
+     >        RATIO*WEIGHT
+         WTX2(IBIN+NBIN,ISUB,IORD) = 
+     >        WTX2(IBIN+NBIN,ISUB,IORD) +
+     >        RATIO*RATIO*WEIGHT
+         IF (RATIO.LT.WTXMIN(IBIN+NBIN,ISUB,IORD)) THEN
+            WTXMIN(IBIN+NBIN,ISUB,IORD) = RATIO
+            IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+               IJMIN(IBIN+NBIN) = IVAR
+            ENDIF
+         ENDIF
+         IF (RATIO.GT.WTXMAX(IBIN+NBIN,ISUB,IORD)) THEN
+            WTXMAX(IBIN+NBIN,ISUB,IORD) = RATIO
+            IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+               IJMAX(IBIN+NBIN) = IVAR
+            ENDIF
+         ENDIF
+         RDIFF = RATIO -
+     >        MYRES(IBIN+NBIN,ISUB,IORD)
+         IF (RDIFF.GT.0D0) THEN
+            WTDXU2(IBIN+NBIN,ISUB,IORD) =
+     >           WTDXU2(IBIN+NBIN,ISUB,IORD) + RDIFF*RDIFF
+            IF (RDIFF.GT.WTDXUM(IBIN+NBIN,ISUB,IORD)) THEN
+               WTDXUM(IBIN+NBIN,ISUB,IORD) = RDIFF
+            ENDIF
+         ELSE
+            WTDXL2(IBIN+NBIN,ISUB,IORD) =
+     >           WTDXL2(IBIN+NBIN,ISUB,IORD) + RDIFF*RDIFF
+            IF (RDIFF.LT.WTDXLM(IBIN+NBIN,ISUB,IORD)) THEN
+               WTDXLM(IBIN+NBIN,ISUB,IORD) = RDIFF
+            ENDIF
+         ENDIF
+      ENDIF
+      
       RETURN
       END

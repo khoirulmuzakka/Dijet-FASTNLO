@@ -3,8 +3,8 @@
 * K. Rabbertz 07.09.2008 First try to integrate all uncertainties
 *                        into one job
 *
-* ALLUNC - Program to derive the algorithmic, statistical and PDF
-*          uncertainties using fastNLO tables
+* ALLUNC - Program to derive all (PDF, statistical, algorithmic,
+*          scale ...) uncertainties using fastNLO tables
 *
 * ---------------------------------------------------------------------
       IMPLICIT NONE
@@ -19,12 +19,13 @@
       CHARACTER*4 CH4TMP
       CHARACTER*4 NO
       INTEGER BORNN,NLON,LENOCC
-      INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS,NSCALES
+      INTEGER I,J,NPDF,IOPDF,IOAS,NSCALES
       INTEGER ITAB,NTAB,NFOUND,NFAIL
-      INTEGER ISTAT,ISCALE,IORD,IBIN,NBIN,ISUB,IRAP,IPT,IHIST,IPHASE
+      INTEGER ISTAT,ISCALE,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
+      INTEGER IHIST,IPHASE
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG
       LOGICAL LTOY
-      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5,BWGT
+      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5,BWGT,DSTMP1,DSTMP2
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
@@ -53,8 +54,9 @@ c --- Parse command line
       WRITE(*,*)"\n #################################################"
       WRITE(*,*)"# ALLUNC"
       WRITE(*,*)"#################################################"
-      WRITE(*,*)"# Program to derive the algorithmic, statistical, "
-      WRITE(*,*)"# and PDF uncertainties using fastNLO tables"
+      WRITE(*,*)"# Program to derive all (PDF, statistical, "//
+     >     "algorithmic,"
+      WRITE(*,*)"# scale ...) uncertainties using fastNLO tables"
       WRITE(*,*)"#################################################"
       WRITE(*,*)"#"
 
@@ -371,6 +373,7 @@ c - Check uncertainties to derive
       LONE  = NPDF.LE.1
       LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LONE.AND..NOT.LSER
+      lpdf = .false.
 
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
@@ -405,6 +408,13 @@ c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
       
+
+
+c - Define output formats
+ckr 900     FORMAT(1P,I5,3(3X,E21.14))
+ 900        FORMAT(1P,I5,3(6X,E18.11))
+ 901        FORMAT(1P,I5,2(6X,E18.11))
+ 902        FORMAT(3I6,3E16.5,5(F10.3,3X))
       
       
 c - PDF part
@@ -423,12 +433,19 @@ c         5th argument:  array to return results
 c - Compute PDF uncertainties for all precalculated scale variations
 c - Check that FILENAME is still the primary table here ...!!!
       IF (LPDF.AND..NOT.LSER) THEN
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
+         WRITE(*,*)"ALLUNC: Evaluating PDF uncertainties"
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          WRITE(*,*)"========================================"//
      >        "================================"
          WRITE(*,*)"Relative PDF Uncertainties"
-         WRITE(*,*)"(the printed values are for the total)"
-         WRITE(*,*)"(histograms contain results for all orders and "//
-     >        "subprocesses)"
+         WRITE(*,*)"- the printed values are for the total "//
+     >        "cross section summed over all subprocesses"
+         WRITE(*,*)"- histograms contain more detailed results"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
      >        "lower PDF uncertainty   upper PDF uncertainty"
          DO I=1,NSCALEVAR
@@ -452,7 +469,7 @@ c - Check that FILENAME is still the primary table here ...!!!
                NRAP = 2*NRAPIDITY
             ENDIF
             CALL CENRES(LRAT)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
             IPHASE = 2
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
@@ -460,12 +477,12 @@ ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
                DO J=1,NPDF
                   CALL INITPDF(J)
                   CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT)
                ENDDO
             ENDIF
             
             IPHASE = 3
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
 c - Give some standard output, fill histograms
             IBIN = 0
@@ -477,8 +494,6 @@ c - Give some standard output, fill histograms
      >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
                ENDDO
             ENDDO
-ckr 900     FORMAT(1P,I5,3(3X,E21.14))
- 900        FORMAT(1P,I5,3(6X,E18.11))
 
 c - Fill histograms
             CALL PDFFILL(NRAP,0,-1,I,MYRES)
@@ -493,22 +508,17 @@ c - Statistics part
 c - Use statistics tables
 c - Call statistical error-code for scenario
       IF (LSTAT) THEN
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties"
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
       ENDIF
 
 c - TEST TEST TEST
 c - Compute statistical uncertainties for primary scale no. 3
       IF (LSTAT) THEN
-         WRITE(*,*)"========================================"//
-     >        "================================"
-         WRITE(*,*)"Statistical Uncertainties"
-         WRITE(*,*)"(the printed values are for the subprocess total of"
-     >        //" scale no. 3)"
-         WRITE(*,*)"(histograms contain results for all orders and "//
-     >        "subprocesses)"
-         WRITE(*,*)" bin       cross section           "//
-     >        "1-sigma stat. uncertainty"
          BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-"
          NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
@@ -518,12 +528,10 @@ c - Compute statistical uncertainties for primary scale no. 3
          MUF = MUFSCALE(ISCALE)
          CALL INITPDF(0)
          DO IORD=0,MIN(2,NORD)
-            WRITE(*,*)"----------------------------------------"//
-     >           "--------------------------------"
-            WRITE(*,*)"ALLUNC: Now order no.",iord
-            WRITE(*,*)"----------------------------------------"//
-     >           "--------------------------------"
-
+            IORD2 = IORD
+            IF (IORD.EQ.0) THEN
+               IORD2 = NORD+1
+            ENDIF
             NFOUND = 0
             NFAIL  = 0
             IPHASE  = 1
@@ -533,7 +541,7 @@ ckr            IWEIGHT = 1
 c - This is the normal table to fill the default values
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
             CALL CENRES(LRAT)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
             IPHASE = 2
 
 c - Loop over files
@@ -553,23 +561,11 @@ c - NLO
                BWGT = 1D0/1D8
                FILEBASE = NLONAME(1:LENOCC(NLONAME))
             ELSE
-               WRITE(*,*
-     >              )"STATERR: ERROR! Illegal order for stat. calc:"
-     >              ,IORD
+               WRITE(*,*)"ALLUNC: ERROR! "//
+     >              "Illegal order for stat. calc:",IORD
                STOP
             ENDIF
             DO ITAB=0,NTAB
-Comment:                WRITE(*,*)" ##########"//
-Comment:      >              "#####################################"
-Comment:                IF (IORD.EQ.1) THEN
-Comment:                   WRITE(*,*)" ############"//
-Comment:      >                 "  NEXT LO TABLE  ##################"
-Comment:                ELSE
-Comment:                   WRITE(*,*)" ############"//
-Comment:      >                 "  NEXT NLO TABLE  #################"
-Comment:                ENDIF
-Comment:                WRITE(*,*)" ##########"//
-Comment:      >              "#####################################"
                WRITE(NO,'(I4.4)'),ITAB
                FILENAMES = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO
      >              //".tab"
@@ -581,8 +577,8 @@ Comment:      >              "#####################################"
                   IF (ISTAT.NE.0) THEN
 ckr                     WRITE(*,*)"Filename for order",IORD,":",FILENAMES
                      NFAIL = NFAIL + 1
-                     IF (NFAIL.LT.10) THEN
-                        WRITE(*,*)"STATERR: WARNING! Table file "//
+                     IF (NFAIL.LT.2) THEN
+                        WRITE(*,*)"ALLUNC: WARNING! Table file "//
      >                       "not found, skipped ! IOSTAT = ",ISTAT
                      ENDIF
 ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
@@ -594,7 +590,7 @@ ckr            CYCLE
                ENDIF
                CLOSE(2)
                NFOUND = NFOUND + 1
-               IF (NFOUND.LT.10) THEN
+               IF (NFOUND.LT.2) THEN
                   WRITE(*,*)"Filename for order",IORD,":",FILENAMES
                ENDIF
                
@@ -605,28 +601,97 @@ ckr            CYCLE
                ENDIF
 c - These are the stat. tables to get the deviations
                CALL FX9999CC(FILENAMES,MUR,MUF,0,XSECT0)
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ITAB,LRAT)
  20            CONTINUE
             ENDDO
             
-            WRITE(*,*)" ##########"//
-     >           "#####################################"
+            WRITE(*,*)"########################################"//
+     >           "################################"
             WRITE(*,*)"No. of filenames skipped:",NFAIL
             WRITE(*,*)"No. of filenames analyzed:",NFOUND
-            WRITE(*,*)" ##########"//
-     >           "#####################################"
-
+            WRITE(*,*)"########################################"//
+     >           "################################"
+            
             IPHASE = 3
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
-c - Give some standard output, fill histograms
+c - Special statistics output
+
+ckr            WRITE(*,*
+ckr     >           )"\n *************************************************"
+ckr            WRITE(*,*)"ALLUNC: No looping over scales for order:",IORD
+ckr            WRITE(*,*
+ckr     >           )"*************************************************"
+
+            WRITE(*,*)"========================================"//
+     >           "===================================="//
+     >           "=========================="//
+     >           "==========================="
+            WRITE(*,*)"#IBIN #IMIN #IMAX         <s>           "//
+     >           "s_min           s_max       ds/<s>/%"//
+     >           " ds_min/<s>/% ds_max/<s>/%"//
+     >           "     ds_min/ds    ds_max/ds"
+            WRITE(*,*)"----------------------------------------"//
+     >           "------------------------------------"//
+     >           "--------------------------"//
+     >           "---------------------------"
+
             IBIN = 0
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  WRITE(*,900) IBIN,MYRES(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXMN(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXMN(IBIN,NSUBPROC+1,NORD+1)
+                  DSTMP1 = -1D0
+                  DSTMP2 = -1D0
+                  IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
+                     DSTMP1 = 
+     >                    (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0) /
+     >                    WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                     DSTMP2 = 
+     >                    (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0) /
+     >                    WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                  ENDIF
+                  WRITE(*,902) IBIN,
+     >                 IJMIN(IBIN),
+     >                 IJMAX(IBIN),
+     >                 MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 WTXMIN(IBIN,NSUBPROC+1,IORD2) *
+     >                 MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 WTXMAX(IBIN,NSUBPROC+1,IORD2) *
+     >                 MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 WTDXMN(IBIN,NSUBPROC+1,IORD2)*100D0,
+     >                 (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0)*100D0,
+     >                 (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0)*100D0,
+     >                 DSTMP1,DSTMP2
+               ENDDO
+            ENDDO
+
+c - End special statistics output
+
+
+
+c - Give some standard output, fill histograms
+            WRITE(*,*)"========================================"//
+     >           "================================"
+            WRITE(*,*)"Statistical Uncertainties"
+            WRITE(*,*)"- the printed values are for the total "//
+     >           "cross section, scale no. 3, "//
+     >           "summed over all subprocesses"
+            WRITE(*,*)"- histograms contain more detailed results"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)" bin       cross section           "//
+     >           "average error of the mean"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)"ALLUNC: Now order no.",iord
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            IBIN = 0
+            DO IRAP=1,NRAP
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  WRITE(*,901) IBIN,MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 WTDXMN(IBIN,NSUBPROC+1,IORD2)
                ENDDO
             ENDDO
 c - Fill histograms
@@ -644,6 +709,11 @@ c - Check that FILENAME is still the primary table here ...!!!
 c - Fill only central scale
 c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSER) THEN
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
+         WRITE(*,*)"ALLUNC: Evaluating alpha_s series uncertainties"
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          ISCALE = 3
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
@@ -656,15 +726,15 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          IMODE   = 3
          IWEIGHT = 0
          CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
          IPHASE = 2
          DO J=1,NPDF
             CALL INITPDF(J)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT)
          ENDDO
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -709,6 +779,11 @@ c      (  1,1/2), (  1,  2), (1/2,  1), (  2,  1)
 c - Uncertainty filled at central scale no. 3
 c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
       IF (LSCL) THEN
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
+         WRITE(*,*)"ALLUNC: Evaluating scale uncertainties"
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          NSCALES = NSCALEVAR
          IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
             NSCALES = 8
@@ -734,7 +809,7 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
             NRAP = 2*NRAPIDITY
          ENDIF
          CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
          IPHASE = 2
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
@@ -743,19 +818,22 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT)
  10         CONTINUE
          ENDDO
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
      >        "================================"
          WRITE(*,*)"Relative Scale Uncertainties"
-         WRITE(*,*)"(the printed values are for the total)"
-         WRITE(*,*)"(histograms contain results for all orders and "//
-     >        "subprocesses)"
+            WRITE(*,*)"- the printed values are for the total "//
+     >           "cross section, scale no. 3, "//
+     >           "summed over all subprocesses"
+         WRITE(*,*)"- histograms contain more detailed results"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
      >        "lower scale uncertainty upper scale uncertainty"
          WRITE(*,*)"----------------------------------------"//
@@ -798,6 +876,11 @@ c     - Attention: From now on ref. table loaded ==> rap. bins doubled,
 c                  no ratio calcs below ...
       LRAT = .FALSE.
       IF (LALG) THEN
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
+         WRITE(*,*)"ALLUNC: Evaluating algorithmic uncertainties"
+         WRITE(*,*)"****************************************"//
+     >        "********************************"
          FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
@@ -831,7 +914,7 @@ c          avoided for the reference calculation!
          IMODE   = 4
          IWEIGHT = 0
          CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
 c - Normal result
          ISCALE = 3
@@ -839,23 +922,21 @@ c - Normal result
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          IPHASE = 2
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
      >        "================================"
-         WRITE(*,*)"Relative Algorithmic Uncertainty"
-         WRITE(*,*)"(the printed values are for the total)"
-         WRITE(*,*)"(histograms contain results for all orders and "//
-     >        "subprocesses)"
-         WRITE(*,*)" bin       cross section           "//
-     >        "algorithmic uncertainty"
+         WRITE(*,*)"Relative Algorithmic Error"
+         WRITE(*,*)"- the printed values are for the total "//
+     >        "cross section summed over all subprocesses"
+         WRITE(*,*)"- histograms contain more detailed results"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         WRITE(*,*)"ALLUNC: Algorithmic Uncertainty with "//
-     >        "reference to CTEQ61 PDF set"
+         WRITE(*,*)" bin       ref. cross section      "//
+     >        "algorithmic deviation"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          ISCALE = 3
@@ -865,7 +946,6 @@ c - Give some standard output, fill histograms
                IBIN = IBIN+1
                WRITE(*,901) IBIN,WTX(IBIN,NSUBPROC+1,NORD+1),
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
- 901           FORMAT(1P,I5,2(6X,E18.11))
             ENDDO
          ENDDO
          CALL PDFFILL(NRAPIDITY,5,-1,ISCALE,WTDXUM)

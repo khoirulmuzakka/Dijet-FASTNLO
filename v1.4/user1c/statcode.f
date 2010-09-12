@@ -142,7 +142,9 @@ Comment:          WRITE(*,*)"Filename for order",IORD,":",FILENAME
          NCOUNT = NCOUNT + 1
          
 c - Loop over scales
-         DO ISCL=1,NSCALEVAR
+ckr 12092010: Only for central scale no. 3
+ckr         DO ISCL=1,NSCALEVAR
+         DO ISCL=3,3
             CALL FX9999CC(FILENAME,MUR(ISCL),MUF(ISCL),0,XSECT)
 c - Take LO/NLO file with 1D9/1D8 events as weight 1 
             WTAB(NCOUNT) = NEVTS(IORD)*BWGT
@@ -207,20 +209,10 @@ c - Write warning when the LO cross section is negative!
      >                 WGTX2(IPT,IRAP,ISCL,IORD) +
      >                 VAL*VAL * WTAB(NCOUNT)
                   IF (VAL.LT.MINE(IPT,IRAP,ISCL,IORD)) THEN
-ckr debug
-Comment:                      if (iscl.eq.3) then
-Comment:                         write(*,*)"MINIMUM: ipt,itab,mine,val",ipt,itab,
-Comment:      >                       MINE(IPT,IRAP,ISCL,IORD),val
-Comment:                      endif
                      MINE(IPT,IRAP,ISCL,IORD) = VAL
                      NJMIN(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
                   IF (VAL.GT.MAXE(IPT,IRAP,ISCL,IORD)) THEN
-ckr debug
-Comment:                      if (iscl.eq.3) then
-Comment:                         write(*,*)"MAXIMUM: ipt,itab,maxe,val",ipt,itab,
-Comment:      >                       MAXE(IPT,IRAP,ISCL,IORD),val
-Comment:                      endif
                      MAXE(IPT,IRAP,ISCL,IORD) = VAL
                      NJMAX(IPT,IRAP,ISCL,IORD) = ITAB
                   ENDIF
@@ -230,15 +222,16 @@ Comment:                      endif
 Comment:  10      WRITE(*,*)"STATERR: NCOUNT, total weight:",NCOUNT,WTAB(NCOUNT)
  10      CONTINUE
       ENDDO
-ckr      ENDDO
 
 c - Extract mean values and standard deviations
-      WRITE(*,*)"\n *************************************************"
-      WRITE(*,*)"STATERR: Looping over scales for order:",IORD
-      WRITE(*,*)"*************************************************"
-      DO ISCL=1,NSCALEVAR
-         WRITE(*,*)"STATERR: Next scale: ",ISCL,
-     >        " ; weight: ",WTAB(NCOUNT)
+ckr      WRITE(*,*)"\n *************************************************"
+ckr      WRITE(*,*)"STATERR: Looping over scales for order:",IORD
+ckr      WRITE(*,*)"*************************************************"
+ckr 12092010: Only for central scale no. 3
+ckr      DO ISCL=1,NSCALEVAR
+      DO ISCL=3,3
+ckr         WRITE(*,*)"STATERR: Next scale: ",ISCL,
+ckr     >        " ; weight: ",WTAB(NCOUNT)
          WRITE(*,*)"========================================"//
      >        "===================================="//
      >        "=========================="//
