@@ -357,7 +357,8 @@ ckr rel. to MEAN and then use central result. If not, just use MEANE.
                   SERR(IPT,IRAP) = REAL(MEANE(IPT,IRAP,ISCL,IORD))
                ENDIF
                CALL HFILL(IHIST+3,PT(IPT,IRAP),0.,
-     >              MAX(0.,REAL(100D0*MEANE(IPT,IRAP,ISCL,IORD) / 
+cstat Originally     >              MAX(0.,REAL(100D0*MEANE(IPT,IRAP,ISCL,IORD) / 
+     >              MAX(0.,REAL(MEANE(IPT,IRAP,ISCL,IORD) / 
      >              MEAN(IPT,IRAP,ISCL,IORD))))
                CALL HFILL(IHIST+4,PT(IPT,IRAP),0.,
      >              MAX(0.,REAL(50D0*(MAXE(IPT,IRAP,ISCL,IORD) - 

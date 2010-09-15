@@ -60,13 +60,14 @@ c - This is the order counting in fnx9999 common ...
                      WT2(IBIN,ISUB,IORD)    = 0D0
                      WTX(IBIN,ISUB,IORD)    = 0D0
                      WTX2(IBIN,ISUB,IORD)   = 0D0
-                     WTXMIN(IBIN,ISUB,IORD) = 1D99
-                     WTXMAX(IBIN,ISUB,IORD) = 1D-99
+                     WTXMIN(IBIN,ISUB,IORD) = +1D99
+                     WTXMAX(IBIN,ISUB,IORD) = -1D99
                      WTDXL2(IBIN,ISUB,IORD) = 0D0
                      WTDXU2(IBIN,ISUB,IORD) = 0D0
                      WTDXLM(IBIN,ISUB,IORD) = 0D0
                      WTDXUM(IBIN,ISUB,IORD) = 0D0
                      WTDXMN(IBIN,ISUB,IORD) = 0D0
+                     WTDXUL(IBIN,ISUB,IORD) = 0D0
                   ENDDO
                ENDDO
             ENDDO
@@ -86,9 +87,6 @@ c - This is the order counting in fnx9999 common ...
                IBIN = IBIN+1
                SUMMORD = 0D0
                DIFFORD = 0D0
-Comment:                write(*,*)"AAA: wtdxum(1,8,3),so,do,sp,dp,s,d",
-Comment:      >              wtdxum(1,8,3),summord,difford,
-Comment:      >              summproc,diffproc,summ,diff
                DO IORD=1,NORD
                   IF (IORD.LT.NORD) THEN
                      TEVTS = DBLE(NEVT(IORD))
@@ -99,9 +97,6 @@ Comment:      >              summproc,diffproc,summ,diff
                   IF (IWEIGHT.EQ.1) WEIGHT = TWGT(IORD)*TEVTS
                   SUMMPROC = 0D0
                   DIFFPROC = 0D0
-Comment:                   write(*,*)"BBB: wtdxum(1,8,3),so,do,sp,dp,s,d",
-Comment:      >                 wtdxum(1,8,3),summord,difford,
-Comment:      >                 summproc,diffproc,summ,diff
                   DO ISUB=1,NSUBPROC
                      SUMM = RESULT(IBIN,ISUB,IORD)
                      SUMMPROC = SUMMPROC + SUMM
@@ -111,45 +106,17 @@ Comment:      >                 summproc,diffproc,summ,diff
      >                    SUMM,DIFF,WEIGHT,
      >                    LRAT,IPT,NBIN)
                   ENDDO
-Comment:                   write(*,*)"CCC: wtdxum(1,8,3),so,do,sp,dp,s,d",
-Comment:      >                 wtdxum(1,8,3),summord,difford,
-Comment:      >                 summproc,diffproc,summ,diff
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
                   DIFF = SUMM - MYRES(IBIN,NSUBPROC+1,IORD)
                   DIFFORD = DIFFORD + DIFF
-c                  write(*,*)"XXX: DIFFPROC1,2",DIFFPROC,
-c     >                 SUMM-myres(ibin,nsubproc+1,iord)
                   CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,IORD,
      >                 SUMMPROC,DIFFPROC,WEIGHT,
      >                 LRAT,IPT,NBIN)
                ENDDO
-Comment:                write(*,*)"DDD: wtdxum(1,8,3),so,do,sp,dp,s,d",
-Comment:      >              wtdxum(1,8,3),summord,difford,
-Comment:      >              summproc,diffproc,summ,diff
-c               write(*,*)"YYY: DIFFORD1,2",DIFFORD,
-c     >              SUMMORD-myres(ibin,nsubproc+1,nord+1)
                CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,NORD+1,
      >              SUMMORD,DIFFORD,WEIGHT,
      >              LRAT,IPT,NBIN)
-Comment:                if (ibin.eq.1) then
-Comment:                   write(*,*)"UNCERT: ibin,itab,difford",
-Comment:      >                 ibin,ivar,difford
-Comment:                   write(*,*)"UNCERT:wt,wt2,wtx,wtx2,s+wtdxlm,s+wtdxum"//
-Comment:      >                 "wtxmin,wtxmax",
-Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 Wt2(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1),
-Comment:      >                 WTx2(IBIN,NSUBPROC+1,nORD+1),
-Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1) /
-Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1) +
-Comment:      >                 WTdxlm(IBIN,NSUBPROC+1,nORD+1),
-Comment:      >                 Wtx(IBIN,NSUBPROC+1,nORD+1) /
-Comment:      >                 WT(IBIN,NSUBPROC+1,NORD+1) +
-Comment:      >                 WTdxum(IBIN,NSUBPROC+1,nORD+1),
-Comment:      >                 WTxmin(IBIN,NSUBPROC+1,nORD+1),
-Comment:      >                 WTxmax(IBIN,NSUBPROC+1,nORD+1)
-Comment:                endif
                DO ISUB=1,NSUBPROC
                   SUMMORD = 0D0
                   DIFFORD = 0D0
@@ -200,6 +167,7 @@ ckr Sampling method (as needed for statistical uncertainties or NNPDF)
                         WTDXU2(IBIN,ISUB,IORD) = -1D0
                         WTDXL2(IBIN,ISUB,IORD) = -1D0
                         WTDXMN(IBIN,ISUB,IORD) = -1D0
+                        WTDXUL(IBIN,ISUB,IORD) = -1D0
                         IF (DABS(WT(IBIN,ISUB,IORD)).GT.1D-99) THEN
                            IF (IWEIGHT.EQ.0) THEN
                               NEFF = WT(IBIN,ISUB,IORD)
@@ -249,17 +217,24 @@ ckr            central result according to NNPDF.
                                  WTDXMN(IBIN,ISUB,IORD) =
      >                                WTDXMN(IBIN,ISUB,IORD) /
      >                                DABS(MYRES(IBIN,ISUB,IORD)) 
+                                 WTDXUL(IBIN,ISUB,IORD) =
+     >                                (WTXMAX(IBIN,ISUB,IORD) -
+     >                                WTXMIN(IBIN,ISUB,IORD)) / 2D0
                               ELSE
-                                 WTXMIN(IBIN,ISUB,IORD) = -1D0
-                                 WTXMAX(IBIN,ISUB,IORD) = -1D0
+                                 WTXMIN(IBIN,ISUB,IORD) = +1D99
+                                 WTXMAX(IBIN,ISUB,IORD) = -1D99
                                  WTDXU2(IBIN,ISUB,IORD) = -1D0
                                  WTDXL2(IBIN,ISUB,IORD) = -1D0
                                  WTDXMN(IBIN,ISUB,IORD) = -1D0
+                                 WTDXUL(IBIN,ISUB,IORD) = -1D0
                               ENDIF
                            ELSE
+                              WTXMIN(IBIN,ISUB,IORD) = +1D99
+                              WTXMAX(IBIN,ISUB,IORD) = -1D99
                               WTDXU2(IBIN,ISUB,IORD) = -1D0
                               WTDXL2(IBIN,ISUB,IORD) = -1D0
                               WTDXMN(IBIN,ISUB,IORD) = -1D0
+                              WTDXUL(IBIN,ISUB,IORD) = -1D0
                            ENDIF
                         ENDIF
 ckr Minimax method (as needed for scale uncertainties) 
@@ -278,11 +253,17 @@ ckr Minimax method (as needed for scale uncertainties)
 ckr Deviation from reference (as needed for algorithmic uncertainties) 
                      ELSEIF (IMODE.EQ.4) THEN
                         IF (IRAP.LE.INT(NRAPIDITY/2)) THEN
-                           IF (DABS(MYRES(IBIN+NBIN/2,ISUB,IORD)).GT.
+                           IF (MYRES(IBIN+NBIN/2,ISUB,IORD).GT.
      >                          1D-99) THEN
                               WTDXUM(IBIN,ISUB,IORD) =
      >                             (WTX(IBIN,ISUB,IORD) /
      >                             DABS(MYRES(IBIN+NBIN/2,ISUB,IORD))) -
+     >                             1D0
+                           ELSEIF (MYRES(IBIN+NBIN/2,ISUB,IORD).LT.
+     >                             -1D-99) THEN
+                              WTDXUM(IBIN,ISUB,IORD) =
+     >                             (WTX(IBIN,ISUB,IORD) /
+     >                             DABS(MYRES(IBIN+NBIN/2,ISUB,IORD))) +
      >                             1D0
                            ELSE
                               WTDXUM(IBIN,ISUB,IORD) = -1D0

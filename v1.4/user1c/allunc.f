@@ -10,8 +10,8 @@
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
-      CHARACTER*255 HISTFILE
-      CHARACTER*255 SCENARIO,FILENAME,FILENAMES,TABPATH,TABNAME,REFNAME
+      CHARACTER*255 SCENARIO,TABPATH,TABNAME,REFNAME
+      CHARACTER*255 FILENAME,FILENAMES,HISTFILE
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
       CHARACTER*255 FILEBASE,LOFILE,NLOFILE
       CHARACTER*255 BORNNAME,NLONAME
@@ -23,14 +23,9 @@
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCALE,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
       INTEGER IHIST,IPHASE
-      LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG
-      LOGICAL LTOY
-      DOUBLE PRECISION MUR,MUF,DIFF,SUMM,QLAM4,QLAM5,BWGT,DSTMP1,DSTMP2
-      DOUBLE PRECISION
-     >     RES0(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,0:3),
-     >     RESLO,RESHI,DREF
+      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG
+      DOUBLE PRECISION MUR,MUF,QLAM4,QLAM5,BWGT
+      DOUBLE PRECISION DSTMP(4)
 c - To unify quoted uncertainties (CL68,CL90,special)
 c - Convert from CL68 to CL90 values
 c - TOCL90 = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
@@ -51,14 +46,21 @@ c                definition in the commonblock!!!!!
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Parse command line
-      WRITE(*,*)"\n #################################################"
+      WRITE(*,*)"\n ########################################"//
+     >     "################################"
       WRITE(*,*)"# ALLUNC"
-      WRITE(*,*)"#################################################"
+      WRITE(*,*)"########################################"//
+     >     "################################"
       WRITE(*,*)"# Program to derive all (PDF, statistical, "//
-     >     "algorithmic,"
-      WRITE(*,*)"# scale ...) uncertainties using fastNLO tables"
-      WRITE(*,*)"#################################################"
-      WRITE(*,*)"#"
+     >     "algorithmic, scale ...)"
+      WRITE(*,*)"# uncertainties using fastNLO tables"
+      WRITE(*,*)"########################################"//
+     >     "################################"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"ALLUNC: Program Steering"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
 
 *---Scenario
       LRAT = .FALSE.
@@ -89,7 +91,7 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  Derive algorithmic uncertainty, def. = no'
             WRITE(*,*)'  Last LO stat. table number, def. = -1'
             WRITE(*,*)'  Last NLO stat. table number, def. = -1'
-            WRITE(*,*)'  PDF set, def. = cteq65.LHgrid'
+            WRITE(*,*)'  PDF set, def. = cteq66.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
      >           '../share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
@@ -109,6 +111,7 @@ C --- Use '...' with \", otherwise gfortran complains
             STOP
          ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442".OR.
      >           SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442a") THEN
+ckr Might be useful more generally, but only checked for these scenarios
             LRAT = .TRUE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
@@ -132,7 +135,8 @@ C --- Use '...' with \", otherwise gfortran complains
       ENDIF
       WRITE(*,*)"ALLUNC: Using table path: ",
      >     TABPATH(1:LENOCC(TABPATH))
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//
+     >     TABNAME(1:LENOCC(TABNAME))
       WRITE(*,*)"ALLUNC: Taking primary table ",
      >     FILENAME(1:LENOCC(FILENAME))
 
@@ -210,10 +214,10 @@ C --- Use '...' with \", otherwise gfortran complains
          CALL GETARG(7,PDFSET)
       ENDIF
       IF (IARGC().LT.7.OR.PDFSET(1:1).EQ."_") THEN
-         PDFSET = "cteq65.LHgrid"
+         PDFSET = "cteq66.LHgrid"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No PDF set given, "//
-     >        "taking cteq65.LHgrid instead!"
+     >        "taking cteq66.LHgrid instead!"
       ELSE
          WRITE(*,*)"ALLUNC: Using PDF set: ",
      >        PDFSET(1:LENOCC(PDFSET))
@@ -319,7 +323,6 @@ c - Initialize path to LHAPDF libs
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
-      WRITE(*,*)" "
 
 
 
@@ -330,6 +333,11 @@ c - Initialize one member, 0=best fit member
       CALL INITPDF(0)
 
 c - Write out some info on best fit member      
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"ALLUNC: PDF Set Info"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
       CALL GETORDERAS(IOAS)
@@ -356,6 +364,7 @@ c - Check primary table existence
       ENDIF
 
 c - Check uncertainties to derive 
+      LONE  = NPDF.LE.1
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       IF (LALG) THEN
          FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
@@ -370,11 +379,14 @@ c - Check uncertainties to derive
             CLOSE(2)
          ENDIF
       ENDIF
-      LONE  = NPDF.LE.1
       LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       LPDF  = .NOT.LONE.AND..NOT.LSER
-      lpdf = .false.
 
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"ALLUNC: Uncertainties"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
       IF (LONE) THEN
          WRITE(*,*)"ALLUNC: Only central PDF available."
       ENDIF
@@ -386,6 +398,7 @@ c - Check uncertainties to derive
       ENDIF
       IF (LSER) THEN
          WRITE(*,*)"ALLUNC: Deriving cross sections of series variation"
+         WRITE(*,*)"ALLUNC: WARNING! Too be implemented/checked!"
       ENDIF
       IF (LSCL) THEN
          WRITE(*,*)"ALLUNC: Deriving scale uncertainties"
@@ -396,17 +409,24 @@ c - Check uncertainties to derive
       IF (LALG) THEN
          WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties"
       ENDIF
-      WRITE(*,*)" "
 
 
       
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"ALLUNC: Initialize Table, Book Histograms"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
       FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
-      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
+ckr      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
+      CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,NPDF,LRAT,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
       
 
 
@@ -501,6 +521,12 @@ c - Fill histograms
             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales
       ENDIF
+c - Make sure to use again the central PDF!
+      ISCALE = 3
+      MUR = MURSCALE(ISCALE)
+      MUF = MUFSCALE(ISCALE)
+      CALL INITPDF(0)
+      CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
 
 
 
@@ -513,12 +539,8 @@ c - Call statistical error-code for scenario
          WRITE(*,*)"ALLUNC: Evaluating statistical uncertainties"
          WRITE(*,*)"****************************************"//
      >        "********************************"
-         CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
-      ENDIF
-
-c - TEST TEST TEST
-c - Compute statistical uncertainties for primary scale no. 3
-      IF (LSTAT) THEN
+ckr Replace old and crosschecked code
+ckr         CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
          BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
      >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-"
          NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
@@ -640,28 +662,46 @@ ckr     >           )"*************************************************"
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  DSTMP1 = -1D0
-                  DSTMP2 = -1D0
-                  IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
-                     DSTMP1 = 
-     >                    (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0) /
-     >                    WTDXU2(IBIN,NSUBPROC+1,IORD2)
-                     DSTMP2 = 
-     >                    (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0) /
-     >                    WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                  DSTMP(3) = -1D0
+                  DSTMP(4) = -1D0
+                  IF (MYRES(IBIN,NSUBPROC+1,IORD2).GE.0.D0) THEN
+                     DSTMP(1) = (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0)
+     >                    *100D0
+                     DSTMP(2) = (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0)
+     >                    *100D0
+                     IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
+                        DSTMP(3) = 
+     >                       (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0) /
+     >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                        DSTMP(4) = 
+     >                       (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0) /
+     >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                     ENDIF
+                  ELSE
+                     DSTMP(1) = (WTXMIN(IBIN,NSUBPROC+1,IORD2)+1D0)
+     >                    *100D0
+                     DSTMP(2) = (WTXMAX(IBIN,NSUBPROC+1,IORD2)+1D0)
+     >                    *100D0
+                     IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
+                        DSTMP(3) = 
+     >                       (WTXMIN(IBIN,NSUBPROC+1,IORD2)+1D0) /
+     >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                        DSTMP(4) = 
+     >                       (WTXMAX(IBIN,NSUBPROC+1,IORD2)+1D0) /
+     >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
+                     ENDIF
                   ENDIF
                   WRITE(*,902) IBIN,
      >                 IJMIN(IBIN),
      >                 IJMAX(IBIN),
      >                 MYRES(IBIN,NSUBPROC+1,IORD2),
      >                 WTXMIN(IBIN,NSUBPROC+1,IORD2) *
-     >                 MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 DABS(MYRES(IBIN,NSUBPROC+1,IORD2)),
      >                 WTXMAX(IBIN,NSUBPROC+1,IORD2) *
-     >                 MYRES(IBIN,NSUBPROC+1,IORD2),
+     >                 DABS(MYRES(IBIN,NSUBPROC+1,IORD2)),
      >                 WTDXMN(IBIN,NSUBPROC+1,IORD2)*100D0,
-     >                 (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0)*100D0,
-     >                 (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0)*100D0,
-     >                 DSTMP1,DSTMP2
+     >                 DSTMP(1),DSTMP(2),
+     >                 DSTMP(3),DSTMP(4)
                ENDDO
             ENDDO
 
@@ -695,8 +735,10 @@ c - Give some standard output, fill histograms
                ENDDO
             ENDDO
 c - Fill histograms
-            CALL PDFFILL(NRAP,8,IORD,ISCALE,MYRES)
-            CALL PDFFILL(NRAP,9,IORD,ISCALE,WTDXMN)
+ckr Replaces STATCODE
+            CALL PDFFILL(NRAP,3,IORD,ISCALE,WTDXMN)
+ckr Put replacement for STATCODE here
+            CALL PDFFILL(NRAP,4,IORD,ISCALE,WTDXUL)
             
          ENDDO
       ENDIF
@@ -784,6 +826,44 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          WRITE(*,*)"ALLUNC: Evaluating scale uncertainties"
          WRITE(*,*)"****************************************"//
      >        "********************************"
+c - 2-point scheme
+         NSCALES = NSCALEVAR
+         IF (NSCALEVAR.GT.4) THEN
+            NSCALES = 4
+         ENDIF
+         CALL INITPDF(0)
+         ISCALE = 3
+         MUR = MURSCALE(ISCALE)
+         MUF = MUFSCALE(ISCALE)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+         IPHASE  = 1
+         IMODE   = 3
+         IWEIGHT = 0
+         NRAP  = NRAPIDITY
+         IF (LRAT) THEN
+            NRAP = 2*NRAPIDITY
+         ENDIF
+         CALL CENRES(LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         IPHASE = 2
+         DO ISCALE=1,NSCALES
+ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
+ckr Ugly goto construction avoidable with f90 CYCLE command
+            IF (ISCALE.EQ.1.OR.ISCALE.EQ.3) GOTO 10
+            MUR = MURSCALE(ISCALE)
+            MUF = MUFSCALE(ISCALE)
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT)
+ 10         CONTINUE
+         ENDDO
+         IPHASE = 3
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+ckr No log file output, but store in histograms
+         ISCALE = 3
+         CALL PDFFILL(NRAP,6,-1,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAP,7,-1,ISCALE,WTDXUM)
+
+c - 6-point scheme
          NSCALES = NSCALEVAR
          IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
             NSCALES = 8
@@ -814,12 +894,12 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
 ckr Ugly goto construction avoidable with f90 CYCLE command
-            IF (ISCALE.EQ.1.OR.ISCALE.EQ.3) GOTO 10
+            IF (ISCALE.EQ.1.OR.ISCALE.EQ.3) GOTO 11
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT)
- 10         CONTINUE
+ 11         CONTINUE
          ENDDO
          IPHASE = 3
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
@@ -857,8 +937,8 @@ c - Give some standard output, fill histograms
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAP,6,-1,ISCALE,WTDXLM)
-         CALL PDFFILL(NRAP,7,-1,ISCALE,WTDXUM)
+         CALL PDFFILL(NRAP,8,-1,ISCALE,WTDXLM)
+         CALL PDFFILL(NRAP,9,-1,ISCALE,WTDXUM)
       ENDIF
 
 
@@ -909,7 +989,8 @@ c          avoided for the reference calculation!
          ISCALE = 1
          MUR = MURSCALE(ISCALE)
          MUF = MUFSCALE(ISCALE)
-         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT0)
+ckr         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT0)
+         CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          IPHASE  = 1
          IMODE   = 4
          IWEIGHT = 0
@@ -985,7 +1066,11 @@ c - HBOOK common
 
 c - Open & book
       IF (N.EQ.1) THEN
-         WRITE(*,*)"----------- Book histograms -------"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         WRITE(*,*)"PDFHIST: Book Histograms"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
          CALL HLIMIT(NWPAWC)
          CALL HROPEN(11,"fastNLO",HISTFILE,"N",1024,ISTAT2)
          IF (ISTAT2.NE.0) THEN
@@ -1196,8 +1281,9 @@ ckr     >                          IHIST + 2*IPT + 11
                ENDDO
             ENDDO               ! End od ISCALE loop, IORD still on
          ENDDO
-         WRITE(*,*)"Number of histograms booked:",NHIST
-         WRITE(*,*)"-----------------------------------"
+         WRITE(*,*)"PDFHIST: Number of histograms booked:",NHIST
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
 
 
 
