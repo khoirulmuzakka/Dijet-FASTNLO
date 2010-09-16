@@ -1159,28 +1159,14 @@ ckr                        write(*,*)"2. Booked histo #",nhist
      >                    ISCALE.EQ.3.AND.ISUB.EQ.0) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dstat/xsect_%"
+     >                       "_dstat/xsect"
                         CALL HBOOKB(IHIST+3,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dmax/2/xsect_%"
+     >                       "_dmax/2/xsect"
                         CALL HBOOKB(IHIST+4,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
-     >                       NPT(IRAP),PT,0)
-                        NHIST = NHIST+2
-ckr TEST TEST TEST
-                        CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dstat/xsect_new"
-                        CALL HBOOKB(IHIST+8,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
-     >                       NPT(IRAP),PT,0)
-                        CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_dmax/2/xsect_new"
-                        CALL HBOOKB(IHIST+9,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
@@ -1201,15 +1187,29 @@ ckr                        write(*,*)"4. Booked histo #",nhist
      >                    ISCALE.EQ.3) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_SCL_low/xsect"
+     >                       "_SCL2_low/xsect"
                         CALL HBOOKB(IHIST+6,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
-     >                       "_SCL_up/xsect"
+     >                       "_SCL2_up/xsect"
                         CALL HBOOKB(IHIST+7,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+1
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_SCL6_low/xsect"
+                        CALL HBOOKB(IHIST+8,
+     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       NPT(IRAP),PT,0)
+                        NHIST = NHIST+1
+                        CSTRNG = CBASE1
+                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+     >                       "_SCL6_up/xsect"
+                        CALL HBOOKB(IHIST+9,
      >                       CSTRNG(1:LENOCC(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
