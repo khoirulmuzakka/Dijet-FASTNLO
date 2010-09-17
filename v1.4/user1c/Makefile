@@ -1,12 +1,14 @@
 #
-# My (KR) Makefile for algorithmic, statistical and PDF uncertainties
+# My (KR) Makefile for all uncertainties with allunc
 # Requirements:
+#   - Normal sum table, e.g. fnl????.tab, of all LO, NLO, ... jobs and
+#     PDF with uncertainty sets from LHAPDF
+#     ==> cross sections, PDF uncertainty, scale uncertainties
+# Extra:
 #   - Sum table of scenario from reference calculations, e.g. fnl1007ref.tab,
-#     ==> algorithmic uncertainty in histo nnnnnn4
+#     ==> algorithmic uncertainty
 #   - Collection of sum tables for each NLO job combined with all LO jobs  
-#     ==> statistical uncertainty of NLO calculation in histo nnnnnn3
-#   - Normal sum table of all LO, NLO, ... jobs and PDF with unc. sets
-#     ==> PDF uncertainty, summed up upper, lower in histos nnnnnn1, nnnnnn2
+#     ==> statistical uncertainty of NLO calculation
 #
 NAME= allunc
 
@@ -18,7 +20,8 @@ REFFILES= example-ref.f fnx9999.f fn-hbook.f fn-alphas-demo.f \
 STATFILES= staterr_kr.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 PDFFILES= pdfuncertainty.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
-	pyalps.f fn-hbook.f statcode.f uncert.f
+	pyalps.f fn-hbook.f uncert.f
+#	pyalps.f fn-hbook.f statcode.f uncert.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
