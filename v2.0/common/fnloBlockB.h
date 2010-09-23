@@ -60,6 +60,14 @@ class fnloBlockB {
  public:
    static const int DividebyNevt = 1;
 
+   // MW: variables for warm-up run
+   int IWarmUp;
+   unsigned long IWarmUpCounter;
+   unsigned long IWarmUpPrint;
+   vector < double > xlo;
+   vector < double > scalelo;
+   vector < double > scalehi;
+
    fnloBlockA1 *BlockA1;
    fnloBlockA2 *BlockA2;
    int IXsectUnits;

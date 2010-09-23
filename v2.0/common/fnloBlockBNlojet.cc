@@ -77,8 +77,12 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
-         wt[1] = pdfdelta;
-         wt[2] = pdfsigma;
+         //wt[1] = pdfdelta;
+         //wt[2] = pdfsigma;
+	 // MW: order should be 0:Delta, 1:Gluon, 2:Sigma
+	 wt[1] = wt[0];
+	 wt[0] = pdfdelta;
+	 wt[2] = pdfsigma;
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -231,8 +235,12 @@ void fnloBlockBNlojet::FillEventDIS2Scale(int ObsBin, double x, double scale1, d
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
-         wt[1] = pdfdelta;
-         wt[2] = pdfsigma;
+         //wt[1] = pdfdelta;
+         //wt[2] = pdfsigma;
+	 // MW: order should be 0:Delta, 1:Gluon, 2:Sigma
+	 wt[1] = wt[0];
+	 wt[0] = pdfdelta;
+	 wt[2] = pdfsigma;
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -422,8 +430,12 @@ void fnloBlockBNlojet::FillEventPhoto(int ObsBin, double x, double scale1, const
 
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
          double pdfdelta = 3.*(wt[1]-wt[2]);
-         wt[1] = pdfdelta;
-         wt[2] = pdfsigma;
+         //wt[1] = pdfdelta;
+         //wt[2] = pdfsigma;
+	 // MW: order should be 0:Delta, 1:Gluon, 2:Sigma
+	 wt[1] = wt[0];
+	 wt[0] = pdfdelta;
+	 wt[2] = pdfsigma;
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -738,12 +750,51 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
-   
+
+   // declare here variables for extreme values of
+   // (xmin)*nbin, (mumax, mumin)*nbin*ndim*variations
+   // variations not really necessary - these are trivial
+   // ------------- or use gobal variables?? - could be printed to file in other routine 
+   // MW: see how SigmaTilde is resized to get multiple dimensions
+   //   double xlo,scalelo,scalehi[nobsbin]
+   //   printf(" obsbin %d  xmin = %f \n",ObsBin,xlo[ObsBin]);
+   //printf(" obsbin %d  %d \n",ObsBin,IWarmUp);
+
+   // --- Warm-Up Run to identify the extreme x,mu values
+   if (IWarmUp == 1) {
+     if (xlo[ObsBin] == 0.) xlo[ObsBin] = min(x1,x2);
+     if (scalelo[ObsBin] == 0.) scalelo[ObsBin] = scale1;
+     if (xlo[ObsBin] > min(x1,x2)) xlo[ObsBin] = min(x1,x2);
+     if (scalelo[ObsBin] > scale1) scalelo[ObsBin] = scale1;
+     if (scalehi[ObsBin] < scale1) scalehi[ObsBin] = scale1;
+     IWarmUpCounter++;
+     if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
+       printf(" // %d contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       for (int i=0;i<BlockA2->GetNObsBin();i++){
+	 printf(" xlim[%d]=%f, mulo[%d]=%f, muup[%d]=%f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
+       }
+     }
+     return;
+   }
+
    if(this->IRef>0){
 
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
+         nlo::weight_hhc wt;
+	 wt[0] = wtorg[0];
+	 wt[1] = wtorg[3];
+	 wt[2] = wtorg[4];
+	 wt[3] = wtorg[5];
+	 wt[4] = wtorg[6];
+	 wt[5] = wtorg[1];
+	 wt[6] = wtorg[2];
+
+	 if (NSubproc == 6) {
+	   wt[5] += wt[6];    // -- sum is correct in ref-mode
+	 }
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -777,17 +828,19 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       if (xmin<XNode1[ObsBin][0]){
          printf("fnloBlockBNlojet::FillEventHHC: Error: xmin (%f) smaller than lowest point (%f) at bin #%d .\n",
                 xmin,XNode1[ObsBin][0],ObsBin);
-         exit(1);
+	 //         exit(1);
       }
       double hxmin  = -sqrt(-log10(xmin));
       double hxmax  = -sqrt(-log10(xmax));
       double hxone   = 0.0;
 
-      // define the x-bin numbers in the range  [0:nxtot[
+      // define the x-bin numbers in the range  [0:Nxtot1[
       double hxlimit = Hxlim1[ObsBin];
       int nxmin = int(Nxtot1[ObsBin] *(hxmin-hxlimit)/(hxone-hxlimit));
       int nxmax = int(Nxtot1[ObsBin] *(hxmax-hxlimit)/(hxone-hxlimit));
- 
+      if (nxmin < 0) nxmin = 0;  // allow to extrapolate for x<xlimit
+      if (nxmax < 0) nxmax = 0;
+
       //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
       double delta  = (hxone-hxlimit)/Nxtot1[ObsBin];
       double hxi = hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
@@ -840,9 +893,26 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
             - 0.5*cmin[3]*cmin[3]*cmin[3];
       }
 
+      // --- PDF reweighting - compute weights, modify cefmax, cefmin 
+      //      weight = 1./sqrt(x1)/sqrt(x2)*(1.-0.99*x1)*(1.-0.99*x2);  
+      double pdfwgt;
+      double pdfwgtmax = 1./sqrt(xmax)*(1.-0.99*xmax);
+      for( int i1 = 0; i1 < 4; i1++) {
+	if ((nxmax-1+i1) >= 0 && (nxmax-1+i1) < Nxtot1[ObsBin] ) {
+	  pdfwgt = pdfwgtmax*sqrt(XNode1[ObsBin][nxmax-1+i1])/(1.-0.99*XNode1[ObsBin][nxmax-1+i1]);
+	  cefmax[i1] *= pdfwgt*pdfwgt*pdfwgt;
+	}
+      }
+      double pdfwgtmin = 1./sqrt(xmin)*(1.-0.99*xmin);
+      for( int i2 = 0; i2 < 4; i2++) {
+	if ((nxmin-1+i2) >= 0 && (nxmin-1+i2) < Nxtot1[ObsBin] ) {
+	  pdfwgt = pdfwgtmin*sqrt(XNode1[ObsBin][nxmin-1+i2])/(1.-0.99*XNode1[ObsBin][nxmin-1+i2]);
+	  cefmin[i2] *= pdfwgt*pdfwgt*pdfwgt;
+	} 
+      }
+
       // === the weights for the bi-cubic eigenfunctions (2-dim)
-      double bicef[4][4];
-      
+      double bicef[4][4];      
       for( int i1 = 0; i1 < 4; i1++) {
          for( int i2 = 0; i2 < 4; i2++) {
             bicef[i1][i2] = cefmax[i1] * cefmin[i2];
@@ -852,7 +922,18 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+         //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
+	 nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
+	 // - rearrange subprocesses
+	 nlo::weight_hhc wt;
+	 wt[0] = wtorg[0];
+	 wt[1] = wtorg[3];
+	 wt[2] = wtorg[4];
+	 wt[3] = wtorg[5];
+	 wt[4] = wtorg[6];
+	 wt[5] = wtorg[1];
+	 wt[6] = wtorg[2];
+	 // -- case NSubproc=6: see below
 
          double binsize = 1.0;
          for(int dim=0; dim<A2->NDim; dim++){
@@ -864,16 +945,27 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
 
-         // deal with subprocesses 2 and 3
+         // deal with subprocesses 2 and 3 -> moved to 6 and 7
          //    - if x1>x2 -> o.k.
-         //    - if x2>x1 -> swap weights for subprocesses 2,3
+         //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
          if(x2>x1){
             double buffer;
-            buffer = wt[1];
-            wt[1] = wt[2];
-            wt[2] = buffer;
+            //buffer = wt[1];
+            //wt[1] = wt[2];
+            //wt[2] = buffer;
+            buffer = wt[5];
+            wt[5] = wt[6];
+            wt[6] = buffer;
          }
+	 // --- combine subprocesses 5,6 here after possible swapping
+	 if (NSubproc == 6) {   
+	   wt[5] = (wt[5]+wt[6])/2.;
+	   wt[6] = wt[5];    // set equal in case of swapping below diagonal (at bottom) 
+	 }
 
+	 // xxxxxxxx  MW: the following will be modified completely when 
+	 //               Lagrangian interpolation will be implemented
+	 //
          // define the scale-bin number in the range  [0:nscalebin[
          int scalenode = 0;
          double cefscale[4] = {0.0,0.5,0.5,0.0};
@@ -906,6 +998,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                   - 0.5*cscale[3]*cscale[3]*cscale[3];
             }
          }
+	 // xxxxxxxxxxxxxxxx End of part to be modified for Lagrange Interpolation
 
          // ** loop over all 4 scale nodes that receive contributions
          for(int i3 = 0; i3 < 4; i3++){
@@ -929,19 +1022,24 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                      int di = xminbin - xmaxbin;
                      xmaxbin = xmaxbin + di;   // modify indicees
                      xminbin = xminbin - di;		
-                     double buffer  = wtmp[1]; // swap subprocesses 2,3
-                     wtmp[1] = wtmp[2];
-                     wtmp[2] = buffer;
-                  } 
+                     double buffer;
+		     //buffer = wtmp[1]; // swap subprocesses 2,3
+                     //wtmp[1] = wtmp[2];
+                     //wtmp[2] = buffer;
+		     // new ordering (1,2)->(5,6)	 
+		     buffer  = wtmp[5]; // swap subprocesses 6,7
+		     wtmp[5] = wtmp[6];
+		     wtmp[6] = buffer;
+		  }
 
                   if(xmaxbin<0) xmaxbin = 0;
                   if(xmaxbin>Nxtot1[ObsBin]-1) xmaxbin =Nxtot1[ObsBin]-1;
                   if(xminbin<0) xminbin = 0;
                   if(xminbin>Nxtot1[ObsBin]-1) xminbin =Nxtot1[ObsBin]-1;
                   int im = GetXIndex(ObsBin,xminbin,xmaxbin);
-                  //                  printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
+                  // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
                   for(int proc=0;proc<NSubproc;proc++){
-                     //                     printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,bicef[i1][i2],cefscale[i3]);
+                     // printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,bicef[i1][i2],cefscale[i3]);
                      SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
                   }
                }

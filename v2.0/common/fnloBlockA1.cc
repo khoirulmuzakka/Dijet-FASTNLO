@@ -19,6 +19,10 @@ int fnloBlockA1::Read(istream *table){
    *table >> Ncontrib;
    *table >> Nmult;
    *table >> Ndata;
+   *table >> NuserString;
+   *table >> NuserInt;
+   *table >> NuserFloat;
+   *table >> Imachine;
    key=0;
    *table >> key;
    if(key != tablemagicno){
@@ -39,6 +43,10 @@ int fnloBlockA1::Write(ostream *table){
    *table << Ncontrib << endl;
    *table << Nmult << endl;
    *table << Ndata << endl;
+   *table << NuserString << endl;
+   *table << NuserInt << endl;
+   *table << NuserFloat << endl;
+   *table << Imachine << endl;
    return 0;
 }
 

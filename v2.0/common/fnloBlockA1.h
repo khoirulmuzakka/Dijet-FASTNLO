@@ -20,15 +20,27 @@ class fnloBlockA1 {
    int GetNcontrib(){return Ncontrib;}
    int GetNmult(){return Nmult;}
    int GetNdata(){return Ndata;}
+   int GetNuserString(){return NuserString;}
+   int GetNuserInt(){return NuserInt;}
+   int GetNuserFloat(){return NuserFloat;}
+   int GetImachine(){return Imachine;}
    void SetScenName(string name){ScenName = name;}
    void SetNcontrib(int n){Ncontrib = n;}
    void SetNmult(int n){Nmult = n;}
    void SetNdata(int n){Ndata = n;}
+   void SetNuserString(int n){NuserString = n;}
+   void SetNuserInt(int n){NuserInt = n;}
+   void SetNuserFloat(int n){NuserFloat = n;}
+   void SetImachine(int n){Imachine = n;}
  protected:
    int Itabversion;
    string ScenName;
    int Ncontrib;
    int Nmult;
    int Ndata;
+   int NuserString;
+   int NuserInt;
+   int NuserFloat;
+   int Imachine;
 };
 #endif
