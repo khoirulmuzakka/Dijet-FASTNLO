@@ -150,14 +150,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
    fnloBlockA2 *A2 =  table->GetBlockA2();
 
-   double pTmin = 40.5, etamin = 0.1, etamax = 0.7;
-
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
-   //----- do the jet analysis -----
+   //----- run the jet algorithm
    pj = jetclus(p);
    unsigned int nj = pj.upper(); 
+
+   // ===== start of the fastNLO user part
+   // =====
+   double pTmin = 40.5, etamin = 0.1, etamax = 0.7;
 
    // loop over all jets
    for(unsigned int i = 1; i <= nj; i++){
@@ -280,7 +282,11 @@ void UserHHC::inittable(){
    bound.resize(2);
 
    const int nptbins = 33;
-   double ptbins[nptbins+1] = {40.5,46.5,52.44,58.26,64.01,69.63,75.19,80.82,86.37,91.8,97.37,102.78,108.38,113.55,119.2,124.31,130.03,135.07,140.86,150.96,162.35,172.42,183.84,193.9,205.54,215.14,237.13,258.36,280.59,301.56,323.9,344.32,383.76,452.71};
+   double ptbins[nptbins+1] = {
+     40.5, 46.5, 52.44, 58.26, 64.01, 69.63, 75.19, 80.82, 86.37, 91.8,
+     97.37, 102.78, 108.38, 113.55, 119.2, 124.31, 130.03, 135.07, 140.86, 150.96,
+     162.35, 172.42, 183.84, 193.9, 205.54, 215.14, 237.13, 258.36, 280.59, 301.56,
+     323.9, 344.32, 383.76, 452.71};
    const int nrapbins = 1;
    double rapbins[nrapbins+1] = {0.1,0.7};
 
@@ -362,15 +368,15 @@ void UserHHC::inittable(){
    
    // --------- start: insert here (copy&paste) results from warm-up run
    // 307000000 contributions (!= events) in warm-up run 
-   xlim[0]=0.011749, mulo[0]=40.500001, muup[0]=46.500000;
+   xlim[0]=0.011738, mulo[0]=40.500001, muup[0]=46.500000;
    xlim[1]=0.013584, mulo[1]=46.500001, muup[1]=52.439998;
    xlim[2]=0.015400, mulo[2]=52.440002, muup[2]=58.260000;
    xlim[3]=0.017213, mulo[3]=58.260004, muup[3]=64.009999;
    xlim[4]=0.019006, mulo[4]=64.010001, muup[4]=69.630000;
-   xlim[5]=0.020857, mulo[5]=69.630000, muup[5]=75.189999;
+   xlim[5]=0.020769, mulo[5]=69.630000, muup[5]=75.189999;
    xlim[6]=0.022643, mulo[6]=75.190002, muup[6]=80.819998;
    xlim[7]=0.024124, mulo[7]=80.820000, muup[7]=86.369999;
-   xlim[8]=0.026284, mulo[8]=86.370002, muup[8]=91.799999;
+   xlim[8]=0.026265, mulo[8]=86.370002, muup[8]=91.799999;
    xlim[9]=0.027668, mulo[9]=91.800001, muup[9]=97.369998;
    xlim[10]=0.030170, mulo[10]=97.370006, muup[10]=102.779999;
    xlim[11]=0.032094, mulo[11]=102.780001, muup[11]=108.379998;
@@ -381,20 +387,20 @@ void UserHHC::inittable(){
    xlim[16]=0.041257, mulo[16]=130.030000, muup[16]=135.069999;
    xlim[17]=0.043825, mulo[17]=135.070007, muup[17]=140.859998;
    xlim[18]=0.045953, mulo[18]=140.860003, muup[18]=150.959998;
-   xlim[19]=0.049170, mulo[19]=150.960002, muup[19]=162.349999;
-   xlim[20]=0.053795, mulo[20]=162.350002, muup[20]=172.419995;
+   xlim[19]=0.048473, mulo[19]=150.960002, muup[19]=162.349999;
+   xlim[20]=0.053317, mulo[20]=162.350002, muup[20]=172.419995;
    xlim[21]=0.057052, mulo[21]=172.420003, muup[21]=183.839999;
    xlim[22]=0.061254, mulo[22]=183.840003, muup[22]=193.899998;
-   xlim[23]=0.066363, mulo[23]=193.900003, muup[23]=205.539999;
+   xlim[23]=0.065609, mulo[23]=193.900003, muup[23]=205.539999;
    xlim[24]=0.069768, mulo[24]=205.540007, muup[24]=215.139997;
-   xlim[25]=0.075718, mulo[25]=215.140010, muup[25]=237.129994;
-   xlim[26]=0.085945, mulo[26]=237.130001, muup[26]=258.359997;
-   xlim[27]=0.096052, mulo[27]=258.360003, muup[27]=280.589991;
+   xlim[25]=0.074718, mulo[25]=215.140010, muup[25]=237.129994;
+   xlim[26]=0.083468, mulo[26]=237.130001, muup[26]=258.359997;
+   xlim[27]=0.093144, mulo[27]=258.360003, muup[27]=280.589991;
    xlim[28]=0.104822, mulo[28]=280.590007, muup[28]=301.559996;
    xlim[29]=0.114991, mulo[29]=301.560003, muup[29]=323.899986;
-   xlim[30]=0.129255, mulo[30]=323.900038, muup[30]=344.319995;
-   xlim[31]=0.143071, mulo[31]=344.320013, muup[31]=383.760000;
-   xlim[32]=0.167698, mulo[32]=383.760009, muup[32]=452.709998;
+   xlim[30]=0.129211, mulo[30]=323.900038, muup[30]=344.319995;
+   xlim[31]=0.141246, mulo[31]=344.320013, muup[31]=383.760000;
+   xlim[32]=0.161341, mulo[32]=383.760009, muup[32]=452.709998;
    // --------- end: insert here (copy&paste) results from warm-up run
 
    //printf("* --- xlimits \n");
@@ -402,30 +408,7 @@ void UserHHC::inittable(){
       int nxtot = 12;
       if (i == ((A2->NObsBin)-1)) nxtot = 13; // Darf's etwas mehr sein?
       B->Nxtot1.push_back(nxtot);
- 
-      /*   ------------ old code before implementation of Warm-Up Run
-      // - Setup the xlimit array - computed from kinematic constraints
-      double pt = A2->LoBin[i][0];
-      double raphigh = A2->UpBin[i][1];
-      double xt = 2*pt/sqrt(s);
-      double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
-      if (ymax>raphigh) ymax=raphigh;
-      double ymin = A2->LoBin[i][1];
-      //   find smallest x by integrating over accessible y-range
-      double xmin = 1.0; 
-      for (int nr = 0; nr <= 400; nr++) {
-	double ytest = ymin + double(nr)*(ymax-ymin)/400.0;
-	double xtest = pt*exp(-ytest)/(sqrt(s)-pt*exp(ytest));
-	if (xtest<xmin) xmin = xtest;
-      }  
-      */
-
-      // ---- safety factors for ET-scheme / optimized by eta range
-      //double hxlim = -sqrt(-log10(xmin*0.81));   // pre Warm-Up
-      //double hxlim = -sqrt(-log10(xlim[i]*0.93));   // later: remove 0.93 factor when interpolation is improved
-      double hxlim = -sqrt(-log10(xlim[i]));   //  use exact xlim - allow interpolation to handle x<xlim
-      //double hxlim = -sqrt(-log10(xlim[i]*1.02));   //  test!!!!
-      //printf("%d %g %g \n",i,pow(10,-pow(hxlim,2)),xlim[i]);
+      double hxlim = -sqrt(-log10(xlim[i]));
       B->Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
          double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
@@ -503,7 +486,13 @@ void UserHHC::inittable(){
    // reference table
    if(doReference){
       fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
-      refB->NSubproc = 7;
+      //  refB->NSubproc = 7;
+      if (nlo || A2->ILOord > 2) {
+	refB->NSubproc = 7;
+      } else {
+	refB->NSubproc = 6;
+	printf("  this reference job uses 6 subprocesses \n");
+      }
       table->CreateBlockB(1,refB);
       refB->Copy(table->GetBlockB(0));
       refB->IRef = 1;

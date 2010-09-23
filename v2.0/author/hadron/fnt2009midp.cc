@@ -240,8 +240,8 @@ void UserHHC::inittable(){
    //double s = 3240000; // Tevatron RunI
    double s = 3841600; // Tevatron RunII
    
-   const bool doReference = true;
-   //const bool doReference = false;
+   //const bool doReference = true;
+   const bool doReference = false;
 
    //Set up fastNLO
    table = new fnloTable(tablefilename);
@@ -338,9 +338,9 @@ void UserHHC::inittable(){
 
    // ===== MW: dirty solution for WarmUp run (but it works)
    // --- initialize variables for WarmUp run
-   //B->IWarmUp = 1;   // do the Warm-Up run (initialize x,mu limits) 
-   B->IWarmUp = 0;   // production
-   B->IWarmUpPrint = 5000000;
+   B->IWarmUp = 1;   // do the Warm-Up run (initialize x,mu limits) 
+   //B->IWarmUp = 0;   // production
+   B->IWarmUpPrint = 50000000;
    B->xlo.resize(A2->NObsBin);
    B->scalelo.resize(A2->NObsBin);
    B->scalehi.resize(A2->NObsBin);
@@ -461,7 +461,13 @@ void UserHHC::inittable(){
    // reference table
    if(doReference){
       fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
-      refB->NSubproc = 7;
+      //refB->NSubproc = 7;
+      if (nlo || A2->ILOord > 2) {
+        refB->NSubproc = 7;
+      } else {
+        refB->NSubproc = 6;
+        printf("  this reference job uses 6 subprocesses \n");
+      }
       table->CreateBlockB(1,refB);
       refB->Copy(table->GetBlockB(0));
       refB->IRef = 1;
