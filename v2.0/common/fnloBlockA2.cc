@@ -65,6 +65,11 @@ int fnloBlockA2::Read(istream *table){
       }
    }
 
+   BinSize.resize(NObsBin);
+   for(int i=0;i<NObsBin;i++){
+     *table >> BinSize[i];
+   }
+
    *table >> INormFlag;
    if(INormFlag>1){
       *table >> DenomTable;
@@ -114,6 +119,10 @@ int fnloBlockA2::Write(ostream *table){
          if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
       }
    }
+   for(int i=0;i<NObsBin;i++){
+     *table << BinSize[i]  << endl;
+   }
+
    *table << INormFlag << endl;
    if(INormFlag>1){
       *table << DenomTable << endl;
@@ -171,6 +180,10 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
    }
    if(!cmp(UpBin,other->UpBin)){
       printf("fnloBlockA2::IsCompatible: Differing UpBin found.\n");
+      return false;
+   }
+   if(!cmp(BinSize,other->BinSize)){
+      printf("fnloBlockA2::IsCompatible: Differing BinSize found.\n");
       return false;
    }
    if(INormFlag != other->INormFlag){

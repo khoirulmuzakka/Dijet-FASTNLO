@@ -751,15 +751,6 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
-   // declare here variables for extreme values of
-   // (xmin)*nbin, (mumax, mumin)*nbin*ndim*variations
-   // variations not really necessary - these are trivial
-   // ------------- or use gobal variables?? - could be printed to file in other routine 
-   // MW: see how SigmaTilde is resized to get multiple dimensions
-   //   double xlo,scalelo,scalehi[nobsbin]
-   //   printf(" obsbin %d  xmin = %f \n",ObsBin,xlo[ObsBin]);
-   //printf(" obsbin %d  %d \n",ObsBin,IWarmUp);
-
    // --- Warm-Up Run to identify the extreme x,mu values
    if (IWarmUp == 1) {
      if (xlo[ObsBin] == 0.) xlo[ObsBin] = min(x1,x2);
@@ -796,12 +787,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	   wt[5] += wt[6];    // -- sum is correct in ref-mode
 	 }
 
-         double binsize = 1.0;
-         for(int dim=0; dim<A2->NDim; dim++){
-            binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
-         }
-         
-         wt *= 389385730./binsize;
+         wt *= 389385730.;
          if(IXsectUnits!=12){
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
@@ -826,7 +812,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          xmin = x1;
       }
       if (xmin<XNode1[ObsBin][0]){
-         printf("fnloBlockBNlojet::FillEventHHC: Error: xmin (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventHHC: Warning, xmin (%f) smaller than lowest point (%f) at bin #%d .\n",
                 xmin,XNode1[ObsBin][0],ObsBin);
 	 //         exit(1);
       }
@@ -935,12 +921,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	 wt[6] = wtorg[2];
 	 // -- case NSubproc=6: see below
 
-         double binsize = 1.0;
-         for(int dim=0; dim<A2->NDim; dim++){
-            binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
-         }
-
-         wt *= 389385730./binsize;
+         wt *= 389385730.;
          if(IXsectUnits!=12){
             wt *= pow(10.,(IXsectUnits-12)) ;
          }

@@ -38,6 +38,7 @@ class fnloBlockA2 {
    vector <int> IDiffBin;
    vector < vector <double> > LoBin;
    vector < vector <double> > UpBin;
+   vector <double> BinSize;
    int INormFlag;
    string DenomTable;
    vector <int> IDivLoPointer;
