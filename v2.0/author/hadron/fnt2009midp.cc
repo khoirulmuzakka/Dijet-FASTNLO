@@ -211,7 +211,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	 	  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,pt,amp,dummypdf,prefactor);
 	       }
 	    }
-	 } - end: fill fastNLO array
+	 } // - end: fill fastNLO array
       }
    }
    // --- end: fastNLO user playground
