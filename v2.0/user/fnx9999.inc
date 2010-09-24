@@ -49,7 +49,8 @@ c --- Block A2 (header part 2)
      +     IDivLoPointer(MxObsBin), IDivUpPointer(MxObsBin)
       Character*64 ScDescript(MxScDescript), DimLabel(MxDim),
      +     DenomTable
-      Double Precision Ecms,LoBin(MxObsBin,MxDim),UpBin(MxObsBin,MxDim)
+      Double Precision Ecms,LoBin(MxObsBin,MxDim),UpBin(MxObsBin,MxDim),
+     +     BinSize(MxObsBin)
 
 c --- Block B
       Integer IXsectUnits(MxCtrb), IDataFlag(MxCtrb), 
@@ -92,7 +93,7 @@ c - put everything into common block
       Common /CFN9999/
 c - dbl 
      +     UserFloat,
-     +     Ecms,LoBin,UpBin, XNode1, XNode2,
+     +     Ecms,LoBin,UpBin,BinSize, XNode1, XNode2,
      +     ScaleFac, ScaleNode, SigmaTilde,
      +     result,pdf,
 c - int*8

@@ -57,15 +57,13 @@ c - block A1
       Do i=1,NuserFloat
         Call fniodbl(crw,nunit, UserFloat(i))
       Enddo
-c - block A2
-      Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, Imachine) 
       If (Imachine.ne.0) Then
          Write(*,*) ' Imachine different from zero - ',
      +        'not yet implemented: ',Imachine
          Stop
       Endif
-c - block A3
+c - block A2
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, IpublUnits) 
       Call fnioint(crw,nunit, NscDescript)
@@ -90,6 +88,9 @@ c - block A3
             Call fniodbl(crw,nunit, LoBin(i,j))
             If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
          Enddo
+      Enddo
+      Do i=1,NObsBin
+         Call fniodbl(crw,nunit, BinSize(i))
       Enddo
       Call fnioint(crw,nunit, INormFlag)
       If (INormFlag.gt.1) Call fniochar(crw,nunit, DenomTable)
@@ -152,8 +153,37 @@ c --- coefficient block
          Call fnioint(crw,nunit, IPDFdef(ic,2))  
          Call fnioint(crw,nunit, IPDFdef(ic,3))  
 
-         IF (IPDFdef(ic,1).eq.0) then ! - no predefined set of PDF coefficients
-            write(*,*) " case IPDFdef(1)=0 not yet implemented"
+c --- check consistency between Nsubproc and IPDFdef1,2,
+         If (IPDFdef(ic,1).eq.0) Then ! - no predefined set of PDF coefficients
+            Continue
+         Elseif (IPDFdef(ic,1).eq.1) Then ! --- e+e-
+            Continue
+         Elseif (IPDFdef(ic,1).eq.2) Then ! --- DIS
+            Continue
+         Elseif (IPDFdef(ic,1).eq.3) Then ! --- hh/hhbar
+            If (IPDFdef(ic,2).eq.1) Then 
+               If (IPDFdef(ic,3).eq.1) Then
+                  If (Nsubproc(ic).ne.6) Then
+                     Write(*,*) " IPDFdef(3)=1 requires ",
+     +                    "6 subprocesses for hh"
+                     STOP
+                  Endif
+               Elseif (IPDFdef(ic,3).eq.2) Then 
+                  If (Nsubproc(ic).ne.7) Then
+                     Write(*,*) " IPDFdef(3)=2 requires ",
+     +                    "7 subprocesses for hh"
+                     STOP
+                  Endif
+               Endif
+            Else
+               Write(*,*) " case IPDFdef(2)<>1 n/a for hh/hhbar"
+               STOP
+            Endif
+
+         Endif
+
+         If (IPDFdef(ic,1).eq.0) Then ! - no predefined set of PDF coefficients
+            Write(*,*) " case IPDFdef(1)=0 not yet implemented"
             STOP
          Endif
          If (NPDF(ic).gt.0) Then

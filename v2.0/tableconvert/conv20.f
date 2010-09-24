@@ -20,8 +20,9 @@
 * to do:
 *   - remove DIS subprocesses which are empty
 *   - set codes for PDF Linear combinations correctly
-*   - reorder pp subprocesses (move 2,3 to end)
 *
+* MW 09/23/2010 add BinWidth array to block A2
+* MW 09/17/2010 remove new block A2 and put Imachine at end of block A1
 * MW 09/10/2010 Add new "machine readable" block A2 (old block A2->A3)
 * MW 08/17/2010 Add user variables in block A1
 * KR 09/05/2009 Fixed IPDFdef1 to be 2 resp. 3 for DIS resp. pp/ppbar 
@@ -119,7 +120,7 @@ c - new variables that did not exist in v14
      +     IScaleDep, NPDF, NPDFPDG(2), NPDFDim, NFragFunc, NSubpr,
      +     IPDFCoeff, IPDFdef1, IPDFdef2, IPDFdef3,
      +     NScales, NScaleDim, nxall , nscaddr, nscvar
-      Double Precision XNode, hxlim,hx,a
+      Double Precision binsize,XNode, hxlim,hx,a
 c - variables for diagonalization of Bernstein Scale Interpolation
       Double Precision Bnst(4)
       Double Precision t1,t2
@@ -182,18 +183,16 @@ c ------------------------------------------------------------------
       Write(2,5000) 20000       ! Itabversion
       Write(2,5009) 'FNX9999'   ! ScenName
       Write(2,4999) Ncontrib        ! Ncontrib
-      Write(2,4999) 0        ! NMult
-      Write(2,4999) 0        ! NData
-      Write(2,4999) 1        ! Nuserstrings
-      Write(2,5009) 'converted_from_fastNLO_v14_table'   ! info      
-      Write(2,4999) 0        ! Nuserint
-      Write(2,4999) 0        ! Nuserfloat
-
-c ------------------------------------------------------------------
-      Write(2,5001) Iseparator  ! ------------------- block A2 ------
+      Write(2,4999) 0           ! NMult
+      Write(2,4999) 0           ! NData
+      Write(2,4999) 0           ! Nuserstrings
+c      Write(2,4999) 1           ! Nuserstrings
+c      Write(2,5009) 'converted_from_fastNLO_v14_table'   ! info      
+      Write(2,4999) 0           ! Nuserint
+      Write(2,4999) 0           ! Nuserfloat
       Write(2,4999) 0           ! Imachine
 c ------------------------------------------------------------------
-      Write(2,5001) Iseparator  ! ------------------- block A3 ------
+      Write(2,5001) Iseparator  ! ------------------- block A2 ------
       Write(2,4999) IXSECTUNITS    ! -> Ipublunits
       Write(2,4999) 3           ! NScDescript 
       Do i=1,3
@@ -203,10 +202,12 @@ c ------------------------------------------------------------------
       Write(2,4999) NPOW(1)     ! ILOord
       Write(2,5000) NBINTOT     ! NObsBin
       Write(2,4999) Ndim        ! NDim    (so far =2 - change where needed)
-      Do i=1,Ndim
+      Do i=Ndim,1,-1
+c      Do i=1,Ndim
          Write(2,5009) DIMLABEL(i)
       Enddo
-      Do i=1,Ndim
+      Do i=Ndim,1,-1
+c      Do i=1,Ndim
          Write(2,4999) IDiffBin(i) ! IDiffBin
       Enddo
 
@@ -214,7 +215,8 @@ c ------------------------------------------------------------------
       Do i1=1,Nrapidity
          Do i2=1,NPT(i1)
             i = i+1             ! --- bin counter - linear loop over all bins
-            Do j=1,Ndim
+            Do j=Ndim,1,-1
+c            Do j=1,Ndim
                If (j.eq.1) then
                   Write(2,*) RAPBIN(i1)
                   Write(2,*) RAPBIN(i1+1)
@@ -223,6 +225,17 @@ c ------------------------------------------------------------------
                   Write(2,*) PTBIN(i1,i2+1)
                endif
             Enddo
+         Enddo
+      Enddo
+
+      Write(*,*) ' Warning: bin width is computed, assuming incl. jet'
+      Write(*,*) '          double differential cross section, including'
+      Write(*,*) '          a factor of two (|y| -> y)'
+      Do i1=1,Nrapidity
+         Do i2=1,NPT(i1)
+            binsize = (PTBIN(i1,i2+1)-PTBIN(i1,i2))
+     +           * 2d0*(RAPBIN(i1+1)-RAPBIN(i1))
+            Write(2,*) binsize
          Enddo
       Enddo
       Write(2,4999) INormFlag   ! INormFlag
@@ -361,7 +374,8 @@ c               IPDFCoeff = 2000101
          Write(2,*) NScales     ! NScales
          Write(2,*) NScaleDim   ! NScaleDim
          Do i=1,Nscales
-            Write(2,*) 1        ! Iscale(i) <- all scales = 1st Dimension
+c            Write(2,*) 1        ! Iscale(i) <- all scales = 1st Dimension
+            Write(2,*) 0        ! Iscale(i) <- all scales = 1st Dimension
          Enddo
          Do i=1,Nscaledim
             Write(2,*) 1        ! NScaleDescript(i) <- one descriptive string
