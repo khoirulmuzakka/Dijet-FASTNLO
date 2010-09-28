@@ -638,9 +638,9 @@ c            factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
       Double Precision pi
       Parameter (PI=3.14159265358979323846)
 
-      Write(*,*)
-      Write(*,*)"FX9999MT: in,xmur,xmuf,Iaddpow,factor",in,real(xmur),
-     +     real(xmuf),Iaddpow,real(factor)
+c      Write(*,*)
+c      Write(*,*)"FX9999MT: in,xmur,xmuf,Iaddpow,factor",in,real(xmur),
+c     +     real(xmuf),Iaddpow,real(factor)
 
 c - set pointers to contribution in table and to scale variation
       ic = IContrPointer(in)
@@ -672,9 +672,9 @@ c --- get alphas
             aspow = as**(Npow(ic)+IAddPow)
 cdebug
 c            Write(*,*)'FX9999MT: ScaleNode',real(ScaleNode(ic,j,1,is,k))
-            Write(*,*)"FX9999MT: ScaleDep, xmur, mur, as, asp=",
-     >           IScaleDep(ic),real(xmur),real(mur),
-     >           real(as),real(aspow)
+c            Write(*,*)"FX9999MT: ScaleDep, xmur, mur, as, asp=",
+c     >           IScaleDep(ic),real(xmur),real(mur),
+c     >           real(as),real(aspow)
 cdebug
             Do l=1,nxmax
                Do m=1,NSubProc(ic)
@@ -736,7 +736,7 @@ cdebug
 c - set pointers to contribution in table and to scale variation
       ic = IContrPointer(ictrb)
       is = IScalePointer(ictrb)
-      Write(*,*)'FX9999GP: ictrb,ic,is: ',ictrb,ic,is
+c      Write(*,*)'FX9999GP: ictrb,ic,is: ',ictrb,ic,is
 
       Do i=1,NObsBin
          Do j=1,NScaleNode(ic,1)
@@ -749,8 +749,8 @@ c            Write(*,*) '    ic,IScaleDep(ic) ',ic,IScaleDep(ic)
                muf = ScaleNode(ic,i,1,is,j)
             Endif
 
-            Write(*,*)"FX9999GP: xmuf, scalenode, muf: ",
-     >           real(xmuf),real(ScaleNode(ic,i,1,is,j)),real(muf)
+c            Write(*,*)"FX9999GP: xmuf, scalenode, muf: ",
+c     >           real(xmuf),real(ScaleNode(ic,i,1,is,j)),real(muf)
             nx =0
             Do k=1,NxTot(ic,1,i)  ! --- fill first PDF
                x = Xnode1(ic,i,k) 
