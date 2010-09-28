@@ -905,6 +905,7 @@ c   - compute seven combinations
          H(6) = (SumQ1+SumQB1)*G2
          H(7) = G1*(SumQ2+SumQB2)
          If (icf3.eq.1) H(6) = H(6)+H(7) ! case: 6 subproc
+
 c --- gammaP: direct, jets
       Elseif (icf1.eq.2 .and. icf2.eq.2) Then 
          Write(*,*) '    gammaP to be implemented'
@@ -953,19 +954,26 @@ c --- gammaP: direct, jets
 
       Do i=1,NObsBin
          If (Ndim.gt.1) Then
-            If ((min2old.ne.lobin(i,Ndim-1)).and.
-     +           (max2old.ne.upbin(i,Ndim-1))) Then
-               min2old = lobin(i,Ndim-1)
-               max2old = upbin(i,Ndim-1)
+c            If ((min2old.ne.lobin(i,Ndim-1)).and.
+c     +           (max2old.ne.upbin(i,Ndim-1))) Then
+c               min2old = lobin(i,Ndim-1)
+c               max2old = upbin(i,Ndim-1)
+            If ((min2old.ne.lobin(i,2)).and.
+     +           (max2old.ne.upbin(i,2))) Then
+               min2old = lobin(i,2)
+               max2old = upbin(i,2)
                Write(*,*) '------------------------------------'
-               Write(*,9005) min2old,max2old,dimlabel(Ndim-1)
-               Write(*,*) ' bins in ',dimlabel(Ndim)
+c               Write(*,9005) min2old,max2old,dimlabel(Ndim-1)
+               Write(*,9005) min2old,max2old,dimlabel(Ndim)
+c               Write(*,*) ' bins in ',dimlabel(Ndim)
+               Write(*,*) ' bins in ',dimlabel(1)
             Endif
          Endif
-         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
+c         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
+         Write(*,9010) i,lobin(i,1),upbin(i,1),xsect(i)
       Enddo
  9003 Format (' results in units of 10^-',I2,' barn (',A2,')')
- 9005 Format ('  range 'F10.3,' -',F10.3,' in ',A64)
+ 9005 Format ('  range ',F10.3,' -',F10.3,' in ',A64)
  9010 Format (I4,F9.3,' -',F9.3,' :',E12.4)
 
       Return
