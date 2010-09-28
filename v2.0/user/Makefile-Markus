@@ -10,11 +10,11 @@ CERNLIB=/usr/lib/cernlib/2005/lib
 LHAPDF=/usr/local/lib
 
 
-NAME=example
 
+MAINEX=example.f
+MAINREF=example-ref.f
 
-
-FFILES= example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f
+FFILES= fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f
 
 
 
@@ -27,11 +27,18 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-132
 # FC=gfortran
 FC=f95 
 
-SRCFILES = $(FFILES) 
-OBJFILES = $(FFILES:.f=.o)
+SRCFILES = $(MAINEX) $(FFILES) 
+OBJFILES = $(MAINEX:.f=.o) $(FFILES:.f=.o)
 
-$(NAME): $(OBJFILES)
+SRCFILESREF = $(MAINREF) $(FFILES) 
+OBJFILESREF = $(MAINREF:.f=.o) $(FFILES:.f=.o)
+
+example: $(OBJFILES)
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILES) \
+	-L $(LHAPDF) -lLHAPDF 
+
+example-ref: $(OBJFILESREF)
+	 $(FC) -o $@ $(FFLAGS) $(OBJFILESREF) \
 	-L $(LHAPDF) -lLHAPDF 
 
 #	-l/usr/local/lib/libLHAPDF.a

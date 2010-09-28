@@ -1,16 +1,17 @@
-      PROGRAM EXAMPLE
+      PROGRAM EXAMPLEREF
 * -------------------------------------------------------------------
 * M. Wobisch                                08/10/2010
 *
-* fastNLO - example program to compute Run I cross section
-*           using PDFs from LHAPDF
+* fastNLO - example program to compare fastNLO v2 results with
+*           the results stored in the fastNLO reference table
 *
 * -------------------------------------------------------------------
       Implicit None
       Character*255 FILENAME
       Character*255 HISTOFILE
-      Integer i          !, LENNOC
-
+      Integer i,j          !, LENNOC
+      Double Precision scale(4)
+      
 c - Attention - this is the most likely source of errors in fastNLO!!!
 c        For each scenario, the result array must be declared 
 c        consistent with its definition in the commonblock of 
@@ -18,7 +19,12 @@ c        the corresponding scenario.
 c           -> See the value of the parameter MxObsBin
 c                           in the file [scenario].inc
 c        We recommend to name the array according to the scenario
-      Double Precision xst1001(200) 
+      Double Precision xs(200),ref(200),xsnlo(200),refnlo(200)
+
+      Scale(1) = 1d0
+      Scale(2) = 2d0
+      Scale(3) = 0.5d0
+      Scale(4) = 0.25d0
 
 c --- parse command line
       If ( IARGC().lt.1)  FILENAME = 'table.tab'
@@ -31,10 +37,8 @@ c --- parse command line
       Endif
 
 c - Initialize LHAPDF  
-c      call InitPDFset('/usr/local/share/lhapdf/PDFsets/cteq66.LHgrid')
-c - for Reference tables
+c - for Reference tables - use CTEQ6M
       call InitPDFset('/usr/local/share/lhapdf/PDFsets/cteq6mE.LHgrid')
-
 c - initialize one member, 0=best fit member
       call InitPDF(0)
 
@@ -53,31 +57,29 @@ c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
 
-c      Call FNSET("P_REFTAB",1) ! evaluate standard table:0 or reference:1
-      Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
 
-      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-c      Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
+      Write(*,*) ' evaluate relative differences to reference results ',
+     +     'for table ',FILENAME
 
+      Do i=1,4                  ! scale
+         Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+         Call FNSET("P_REFTAB",1) ! evaluate standard table:0 or reference:1
+         Call FX9999CC(FILENAME, scale(i), scale(i), 1, ref)
+         Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
+         Call FX9999CC(FILENAME, scale(i), scale(i), 1, xs)
 
-      Call FX9999CC(FILENAME, 1.0d0, 1.0d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 2.0d0, 2.0d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 0.5d0, 0.5d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 0.25d0, 0.25d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 1.0d0, 0.5d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 0.5d0, 1.0d0, 1, XST1001)
+         Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+         Call FNSET("P_REFTAB",1) ! evaluate standard table:0 or reference:1
+         Call FX9999CC(FILENAME, scale(i), scale(i), 1, refnlo)
+         Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
+         Call FX9999CC(FILENAME, scale(i), scale(i), 1, xsnlo)
 
-c - test aposteriori mur variation
-c      Call FX9999CC(FILENAME, 1d0, 0.25d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 2d0, 0.25d0, 1, XST1001)
-c      Call FX9999CC(FILENAME, 1d0, 0.5d0, 1, XST1001)
-
-c - the results of the last call can be accessed in the array:  xst1001(n)
-c      n: continuous bin number for all observable bins
-
-
-c      Call FX9999NF ! print scenario info
-
+         Write(*,*)
+         Write(*,*) '    now for scale factor ',i,' =',scale(i)
+         Do j=1,110
+            Write(*,*) j, 100d0*(xs(j)-ref(j))/ref(j), 
+     +           100d0*(xsnlo(j)-refnlo(j))/refnlo(j)
+         Enddo
+      Enddo
 
       End
