@@ -17,6 +17,11 @@ class fnloBlockBNlojet : public fnloBlockB {
    void FillEventResolved(int ObsBin,double x1, double x2,double scale1, double ymin, double ymax,  double Q2max,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
    void FillEventHHC(int ObsBin,double x1, double x2,double scale1,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
 
+   //double TransformHx1(double x){return log10(x);}
+   //double TransformHx2(double x){return -sqrt(log10(1.0/x));}
+   //double TransformHmu(double mu){return log(log(mu/0.25));}
+   double PDFwgt(double x){double w=(1.-0.99*x)/sqrt(x); w = w*w*w; return w;}
+
 private:
    // This is for gammaP in ep, for NLOJET++ integration
    //
@@ -26,6 +31,8 @@ private:
    double _M_xb[20], _M_wb[20];
    void _S_gauleg(unsigned int n, double *x, double *w);
 
+   // interpolation kernel
+   void Interpol(int nnode, int nmax, double delta, int ikern, int &nmod, vector <double> *kernel);
 
 };
 

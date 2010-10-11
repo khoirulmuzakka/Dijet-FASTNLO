@@ -1,21 +1,57 @@
-// KR: Add include because of header clean-up in gcc-4.3
 #include <cstdlib>
 
 #include "fnloBlockBNlojet.h"
 
+//
+// note (Oct 8, 2010) - MW:
+// the two routines FillEventDIS, and FillEventHHC are running
+// the other routines (DIS2scale and photoproduction) still need some work
+//
+
+
 void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
+
+   // ---
+   // --- Warm-Up Run to identify extreme x,mu values
+   // ---
+   if (IWarmUp == 1) {
+     if (xlo[ObsBin] == 0.) xlo[ObsBin] = x;
+     if (scalelo[ObsBin] == 0.) scalelo[ObsBin] = scale1;
+     if (xlo[ObsBin] > x) xlo[ObsBin] = x;
+     if (scalelo[ObsBin] > scale1) scalelo[ObsBin] = scale1;
+     if (scalehi[ObsBin] < scale1) scalehi[ObsBin] = scale1;
+     IWarmUpCounter++;
+     if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
+       printf(" // %d contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       for (int i=0;i<BlockA2->GetNObsBin();i++){
+         printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
+       }
+     }
+     return;
+   }
+
+   // --- select interpolation kernel for x and for mu 
+   //             1:CatmulRom   2:Lagrangian
+   const int ikernx = 1;     
+   const int ikernmu = 1;    
 
    if(this->IRef>0){
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
          nlo::weight_dis wt = amp(pdf,mu2,mu2,prefactor);
 
-         double binsize = 1.0;
-         for(int dim=0; dim<A2->NDim; dim++){
-            binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
-         }
-         wt *= 389385730./binsize;
+	 // --- rearrange elements of wt for reference table
+         //     store gluon in [1] - add quark contributions in [0]
+	 //     this is _not_ consistent with final format, but the best solution
+         //     at least the gluon (wt[1]) is at the same position
+         //     and at order(alphas) also wt[0] has the same content
+	 double tmp = wt[1]+wt[2];
+	 wt[1] = wt[0];
+	 wt[0] = tmp;
+	 wt[2] = 0;
+
+         wt *= 389385730.;
          if(IXsectUnits!=12){
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
@@ -27,124 +63,108 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    }else{
 
       if (x<XNode1[ObsBin][0]){
-         printf("fnloBlockBNlojet::FillEventDIS: Error: x (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventDIS: find: x (%f) smaller than lowest x-node (%f) for bin #%d .\n",
                 x,XNode1[ObsBin][0],ObsBin);
-         exit(1);
       }
 
       // **********  determine x_ij position in grid  ************
-      //--- determine fractional contributions
-      double hxlimit = Hxlim1[ObsBin];
+      // --- determine fractional contributions
       double hx = log10(x);
       double hxone = 0.0;
 
-      // define the x-bin number in the range  [0:ntot[
-      int nx = int(Nxtot1[ObsBin] *(hx-hxlimit)/(hxone-hxlimit));
+      // --- define the x-node number in the range: 0 <= nxnode < ntot
+      double hxlimit = Hxlim1[ObsBin];
+      int nxnode = int(Nxtot1[ObsBin] *(hx-hxlimit)/(hxone-hxlimit));
+      if (nxnode < 0) nxnode = 0;  // move into available range (allow to extrapolate for x<xlimit)
+      int nx = 0;   // - variable for final node (after modification in kernel)
 
-      //-- relative distances in h(x): deltam
+      // --- relative distance in h(x): deltam
       double delta  = (hxone-hxlimit)/Nxtot1[ObsBin];
-      double hxi = hxlimit+double(nx)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
+      double hxi = hxlimit+double(nxnode)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
       double deltam = (hx-hxi)/delta;
 
-      // ===== variables for the bi-cubic interpolation =====
-      // === the relative distances to the four nearest bins
-      vector<double> cm(4) ; 
-      cm[0] = deltam+1.0;
-      cm[1] = deltam;
-      cm[2] = 1.0-deltam;
-      cm[3] = 2.0-deltam;
-
+      // --- get x-interpolation kernel and updated x-node position: 1 <= nx < ntot-1
       vector<double> cefm(4) ; 
-      if (nx==0 || nx==(Nxtot1[ObsBin]-1)) { //linear in 1st and last bin
-         cefm[0] = 0.0;
-         cefm[1] = 1.0-cm[1];
-         cefm[2] = 1.0-cm[2];
-         cefm[3] = 0.0; }
-      else {                              // cubic in the middle
-         cefm[1]=1.0-2.5*cm[1]*cm[1]+1.5*cm[1]*cm[1]*cm[1];
-         cefm[2]=1.0-2.5*cm[2]*cm[2]+1.5*cm[2]*cm[2]*cm[2];
-         cefm[0]=2.0 - 4.0*cm[0] + 2.5*cm[0]*cm[0]
-            - 0.5*cm[0]*cm[0]*cm[0];
-         cefm[3]=2.0 - 4.0*cm[3] + 2.5*cm[3]*cm[3]
-            - 0.5*cm[3]*cm[3]*cm[3];
+      Interpol(nxnode, (Nxtot1[ObsBin]-1), deltam, ikernx, nx, &cefm);
+
+      // --- PDF reweighting - compute weights, modify cefm[.] 
+      //     but only those within grid, there are no nodes at x=1
+      double pdfwgtm = PDFwgt(x);
+      for( int i1 = 0; i1 < 4; i1++) {
+        if ((nx-1+i1) >= 0 && (nx-1+i1) < Nxtot1[ObsBin] ) {
+          cefm[i1] *= pdfwgtm/PDFwgt(XNode1[ObsBin][nx-1+i1]);
+	}
       }
 
+      // --- loop over all scale variations
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
+	 // --- compute renormalization=factorization scale squared 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         
-         nlo::weight_dis wt = amp(pdf,mu2,mu2,prefactor);
 
+	 // --- get coefficients - convert to our 3 subprocesses         
+         nlo::weight_dis wt = amp(pdf,mu2,mu2,prefactor);
          double pdfsigma = 1.0/3.0*(-wt[1] + 4.*wt[2]);
-         double pdfdelta = 3.*(wt[1]-wt[2]);
-         //wt[1] = pdfdelta;
-         //wt[2] = pdfsigma;
-	 // MW: order should be 0:Delta, 1:Gluon, 2:Sigma
+         double pdfdelta = 3.0*(wt[1]-wt[2]);
+	 // - order is 0:Delta, 1:Gluon, 2:Sigma
 	 wt[1] = wt[0];
 	 wt[0] = pdfdelta;
 	 wt[2] = pdfsigma;
 
-         double binsize = 1.0;
-         for(int dim=0; dim<A2->NDim; dim++){
-            binsize *= (A2->UpBin[ObsBin][dim] - A2->LoBin[ObsBin][dim]);
-         }
-
-         wt *= 389385730./binsize;
+         wt *= 389385730.;
          if(IXsectUnits!=12){
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
 
-         // define the scale-bin number in the range  [0:nscalebin[
-         int scalenode = 0;
-         double cefscale[4] = {0.0,0.5,0.5,0.0};
+         // --- define the scale-bin number in the range:  0 <= scalenode < nscalebin-2
+         int scalenode = Nscalenode[0]-2;  // --- initialize with largest possible value
+	 int nscale = 0;                   // --- variable for final scale node
+	 double mu0scale = 0.25;           // --- parameter in transformation function H(mu)
+         vector<double> cefscale(4);
+	 cefscale[0] = 0.0;
+	 cefscale[1] = 0.5;
+	 cefscale[2] = 0.5;
+	 cefscale[3] = 0.0;
+
          if(Nscalenode[0]>1){
+	    // --- find scale position in range:  0 <= scalenode < nscalenode-1
             for(int i=1;i<Nscalenode[0];i++){
+	      //printf("test node %d %d %f %f \n",ObsBin,i,scale1,ScaleNode[ObsBin][0][scalevar][i]);
                if (ScaleFac[0][scalevar]*scale1<ScaleNode[ObsBin][0][scalevar][i]){
-                  scalenode=i;
+                  scalenode=i-1;
                   break;
                }
             }
-            double deltascale = (ScaleFac[0][scalevar]*scale1 - ScaleNode[ObsBin][0][scalevar][scalenode-1])/
-               (ScaleNode[ObsBin][0][scalevar][scalenode]-ScaleNode[ObsBin][0][scalevar][scalenode-1]);
-            vector<double> cscale(4) ; 
-            cscale[0] = deltascale+1.0;
-            cscale[1] = deltascale;
-            cscale[2] = 1.0-deltascale;
-            cscale[3] = 2.0-deltascale;
 
-            if(scalenode<2 || scalenode>Nscalenode[0]-3){
-               cefscale[0] = 0.0;
-               cefscale[1] = 1.0-cscale[1];
-               cefscale[2] = 1.0-cscale[2];
-               cefscale[3] = 0.0;
-            }else{
-               cefscale[1]=1.0-2.5*cscale[1]*cscale[1]+1.5*cscale[1]*cscale[1]*cscale[1];
-               cefscale[2]=1.0-2.5*cscale[2]*cscale[2]+1.5*cscale[2]*cscale[2]*cscale[2];
-               cefscale[0]=2.0 - 4.0*cscale[0] + 2.5*cscale[0]*cscale[0]
-                  - 0.5*cscale[0]*cscale[0]*cscale[0];
-               cefscale[3]=2.0 - 4.0*cscale[3] + 2.5*cscale[3]*cscale[3]
-                  - 0.5*cscale[3]*cscale[3]*cscale[3];
-            }
+	    // --- relative distance delta - in function H(mu)
+	    double deltascale = (log(log(ScaleFac[0][scalevar]*scale1/mu0scale)) - HScaleNode[ObsBin][0][scalevar][scalenode])/
+               (HScaleNode[ObsBin][0][scalevar][scalenode+1]-HScaleNode[ObsBin][0][scalevar][scalenode]);
+
+	    // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
+	    Interpol(scalenode, (Nscalenode[0]-2), deltascale, ikernmu, nscale, &cefscale);
          }
 
-         // ** loop over all 4 scale nodes that receive contributions
+
+         // --- loop over all 4 scale nodes that receive contributions
          for(int i3 = 0; i3 < 4; i3++){
-            int is = scalenode +i3 -2;  // the target scale index
-            if(is<0){
-               is = 0;
+            int is = nscale + (i3-1);     // --- the target scale index
+
+	    // --- check: all elements should end up within grid
+            if (is < 0){
+	       printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+	       exit(1);
+            } else if (is > Nscalenode[0]-1){
+	       printf(" is>max   %d %d %f %f\n",nscale,i3,cefscale[i3]);
+	       exit(1);
             }
-            if (is> Nscalenode[0]-1){
-               is = Nscalenode[0]-1;
-            }
-            // ** loop over all 4 x points that receive contributions
+            // --- loop over all 4 x-nodes that receive contributions
             for( int i1 = 0; i1 < 4; i1++) {           
-               int x1bin = (nx +i1 -1);
-               if(x1bin<0) x1bin = 0;
-               if(x1bin>Nxtot1[ObsBin]-1) x1bin =Nxtot1[ObsBin]-1;
-               int im = x1bin;   // the target x index
-               for(int proc=0;proc<NSubproc;proc++){
+               int im = nx + (i1-1);     // --- the target x index
+	       if (im < Nxtot1[ObsBin]) {
+		  for(int proc=0;proc<NSubproc;proc++){
                   //                  printf("%d %d %d %d %d %f\n",ObsBin,scalevar,is,im,proc,cefscale[i3]);
-                  SigmaTilde[ObsBin][scalevar][is][im][proc] +=  cefm[i1]  * cefscale[i3] * wt[proc];
+		    SigmaTilde[ObsBin][scalevar][is][im][proc] += cefm[i1] * cefscale[i3] * wt[proc];
+		  }
                }
             }
          }
@@ -762,11 +782,16 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
      if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
        printf(" // %d contributions (!= events) in warm-up run \n",IWarmUpCounter);
        for (int i=0;i<BlockA2->GetNObsBin();i++){
-	 printf(" xlim[%d]=%f, mulo[%d]=%f, muup[%d]=%f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
+         printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
        }
      }
      return;
    }
+
+   // --- select interpolation kernel for x and for mu 
+   //             1:CatmulRom   2:Lagrangian
+   const int ikernx = 2;     
+   const int ikernmu = 2;    
 
    if(this->IRef>0){
 
@@ -812,88 +837,50 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          xmin = x1;
       }
       if (xmin<XNode1[ObsBin][0]){
-         printf("fnloBlockBNlojet::FillEventHHC: Warning, xmin (%f) smaller than lowest point (%f) at bin #%d .\n",
+         printf("fnloBlockBNlojet::FillEventHHC: find: xmin (%f) smaller than lowest x-node (%f) for bin #%d .\n",
                 xmin,XNode1[ObsBin][0],ObsBin);
-	 //         exit(1);
       }
+
+      // **********  determine x_ij position in grid  ************
+      // --- determine fractional contributions
       double hxmin  = -sqrt(-log10(xmin));
       double hxmax  = -sqrt(-log10(xmax));
       double hxone   = 0.0;
 
-      // define the x-bin numbers in the range  [0:Nxtot1[
+      // --- define the x-node numbers in the range: 0 <= nxnode < Nxtot1
       double hxlimit = Hxlim1[ObsBin];
       int nxmin = int(Nxtot1[ObsBin] *(hxmin-hxlimit)/(hxone-hxlimit));
       int nxmax = int(Nxtot1[ObsBin] *(hxmax-hxlimit)/(hxone-hxlimit));
-      if (nxmin < 0) nxmin = 0;  // allow to extrapolate for x<xlimit
+      if (nxmin < 0) nxmin = 0;  // move into available range
       if (nxmax < 0) nxmax = 0;
+      int nxminf = 0;  // - variables for final nodes (after modification in kernel)
+      int nxmaxf = 0;
 
-      //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
+      // --- relative distances in h(xmin), h(xmax): deltamin,deltamax 
       double delta  = (hxone-hxlimit)/Nxtot1[ObsBin];
-      double hxi = hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
       double hxj = hxlimit+double(nxmin)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
-      double deltamax = (hxmax-hxi)/delta;
+      double hxi = hxlimit+double(nxmax)/double(Nxtot1[ObsBin])*(hxone-hxlimit);
       double deltamin = (hxmin-hxj)/delta;
-      if(deltamax>1.0 || deltamin>1.0 || deltamax<0.0 || deltamin<0.0){
-         cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
-      }                             
+      double deltamax = (hxmax-hxi)/delta;
 
-      // ===== variables for the bi-cubic interpolation =====
-      // === the relative distances to the four nearest bins
-      vector<double> cmax(4); 
-      vector<double> cmin(4); 
-      cmax[0] = deltamax+1.0;
-      cmax[1] = deltamax;
-      cmax[2] = 1.0-deltamax;
-      cmax[3] = 2.0-deltamax;
-      cmin[0] = deltamin+1.0;
-      cmin[1] = deltamin;
-      cmin[2] = 1.0-deltamin;
-      cmin[3] = 2.0-deltamin;
+      // --- x-interpolation kernels and updated x-node positions: 1 <= nx < ntot-1
+      vector<double> cefmin(4) ;
+      vector<double> cefmax(4) ;
+      Interpol(nxmin, (Nxtot1[ObsBin]-1), deltamin, ikernx, nxminf, &cefmin);
+      Interpol(nxmax, (Nxtot1[ObsBin]-1), deltamax, ikernx, nxmaxf, &cefmax);
 
-      vector<double> cefmax(4) ; 
-      vector<double> cefmin(4) ; 
-      if (nxmax==0 || nxmax>=(Nxtot1[ObsBin]-3)) { //linear in 1st and last bin
-         cefmax[0] = 0.0;
-         cefmax[1] = 1.0-cmax[1];
-         cefmax[2] = 1.0-cmax[2];
-         cefmax[3] = 0.0; }
-      else {                              // cubic in the middle
-         cefmax[1]=1.0-2.5*cmax[1]*cmax[1]+1.5*cmax[1]*cmax[1]*cmax[1];
-         cefmax[2]=1.0-2.5*cmax[2]*cmax[2]+1.5*cmax[2]*cmax[2]*cmax[2];
-         cefmax[0]=2.0 - 4.0*cmax[0] + 2.5*cmax[0]*cmax[0]
-            - 0.5*cmax[0]*cmax[0]*cmax[0];
-         cefmax[3]=2.0 - 4.0*cmax[3] + 2.5*cmax[3]*cmax[3]
-            - 0.5*cmax[3]*cmax[3]*cmax[3];
-      }
-      if (nxmin==0 || nxmin>=(Nxtot1[ObsBin]-3)) { //linear in 1st and last bin
-         cefmin[0] = 0.0;
-         cefmin[1] = 1.0-cmin[1];
-         cefmin[2] = 1.0-cmin[2];
-         cefmin[3] = 0.0; }
-      else {                              // cubic in the middle
-         cefmin[1]=1.0-2.5*cmin[1]*cmin[1]+1.5*cmin[1]*cmin[1]*cmin[1];
-         cefmin[2]=1.0-2.5*cmin[2]*cmin[2]+1.5*cmin[2]*cmin[2]*cmin[2];
-         cefmin[0]=2.0 - 4.0*cmin[0] + 2.5*cmin[0]*cmin[0]
-            - 0.5*cmin[0]*cmin[0]*cmin[0];
-         cefmin[3]=2.0 - 4.0*cmin[3] + 2.5*cmin[3]*cmin[3]
-            - 0.5*cmin[3]*cmin[3]*cmin[3];
-      }
-
-      // --- PDF reweighting - compute weights, modify cefmax, cefmin 
-      //      weight = 1./sqrt(x1)/sqrt(x2)*(1.-0.99*x1)*(1.-0.99*x2);  
-      double pdfwgt;
-      double pdfwgtmax = 1./sqrt(xmax)*(1.-0.99*xmax);
+      // --- PDF reweighting - compute weights, modify cefmax[.], cefmin[.] 
+      //     but only those within grid, there are no nodes at x=1
+      double pdfwgtmax = PDFwgt(xmax);
       for( int i1 = 0; i1 < 4; i1++) {
-	if ((nxmax-1+i1) >= 0 && (nxmax-1+i1) < Nxtot1[ObsBin] ) {
-	  pdfwgt = pdfwgtmax*sqrt(XNode1[ObsBin][nxmax-1+i1])/(1.-0.99*XNode1[ObsBin][nxmax-1+i1]);
-	  cefmax[i1] *= pdfwgt*pdfwgt*pdfwgt;
+	if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
+	  cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
 	}
       }
-      double pdfwgtmin = 1./sqrt(xmin)*(1.-0.99*xmin);
+      double pdfwgtmin = PDFwgt(xmin);
       for( int i2 = 0; i2 < 4; i2++) {
-	if ((nxmin-1+i2) >= 0 && (nxmin-1+i2) < Nxtot1[ObsBin] ) {
-	  pdfwgt = pdfwgtmin*sqrt(XNode1[ObsBin][nxmin-1+i2])/(1.-0.99*XNode1[ObsBin][nxmin-1+i2]);
-	  cefmin[i2] *= pdfwgt*pdfwgt*pdfwgt;
+	if ((nxminf-1+i2) >= 0 && (nxminf-1+i2) < Nxtot1[ObsBin] ) {
+	  cefmin[i2] *= pdfwgtmin/PDFwgt(XNode1[ObsBin][nxminf-1+i2]);
 	} 
       }
 
@@ -905,8 +892,10 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          }
       }
 
+      // --- loop over all scale variations
       for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
 
+	 // --- compute renormalization=factorization scale squared 
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
          //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
 	 nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
@@ -944,88 +933,142 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	   wt[6] = wt[5];    // set equal in case of swapping below diagonal (at bottom) 
 	 }
 
-	 // xxxxxxxx  MW: the following will be modified completely when 
-	 //               Lagrangian interpolation will be implemented
-	 //
-         // define the scale-bin number in the range  [0:nscalebin[
-         int scalenode = 0;
-         double cefscale[4] = {0.0,0.5,0.5,0.0};
+         // --- define the scale-bin number in the range:  0 <= scalenode < nscalebin-2
+         int scalenode = Nscalenode[0]-2;  // --- initialize with largest possible value
+         int nscale = 0;                   // --- variable for final scale node
+         double mu0scale = 0.25;           // --- parameter in transformation function H(mu)
+         vector<double> cefscale(4);
+         cefscale[0] = 0.0;
+         cefscale[1] = 0.5;
+         cefscale[2] = 0.5;
+         cefscale[3] = 0.0;
+
          if(Nscalenode[0]>1){
+            // --- find scale position in range:  0 <= scalenode < nscalenode-1
             for(int i=1;i<Nscalenode[0];i++){
                if (ScaleFac[0][scalevar]*scale1<ScaleNode[ObsBin][0][scalevar][i]){
-                  scalenode=i;
+                  scalenode=i-1;
                   break;
                }
             }
-            double deltascale = (ScaleFac[0][scalevar]*scale1 - ScaleNode[ObsBin][0][scalevar][scalenode-1])/
-               (ScaleNode[ObsBin][0][scalevar][scalenode]-ScaleNode[ObsBin][0][scalevar][scalenode-1]);
-            vector<double> cscale(4) ; 
-            cscale[0] = deltascale+1.0;
-            cscale[1] = deltascale;
-            cscale[2] = 1.0-deltascale;
-            cscale[3] = 2.0-deltascale;
 
-            if(scalenode<2 || scalenode>ScaleNode[ObsBin][0][scalevar][scalenode-1]-3){
-               cefscale[0] = 0.0;
-               cefscale[1] = 1.0-cscale[1];
-               cefscale[2] = 1.0-cscale[2];
-               cefscale[3] = 0.0;
-            }else{
-               cefscale[1]=1.0-2.5*cscale[1]*cscale[1]+1.5*cscale[1]*cscale[1]*cscale[1];
-               cefscale[2]=1.0-2.5*cscale[2]*cscale[2]+1.5*cscale[2]*cscale[2]*cscale[2];
-               cefscale[0]=2.0 - 4.0*cscale[0] + 2.5*cscale[0]*cscale[0]
-                  - 0.5*cscale[0]*cscale[0]*cscale[0];
-               cefscale[3]=2.0 - 4.0*cscale[3] + 2.5*cscale[3]*cscale[3]
-                  - 0.5*cscale[3]*cscale[3]*cscale[3];
-            }
+	    // --- relative distance delta - in function H(mu)
+            double deltascale = (log(log(ScaleFac[0][scalevar]*scale1/mu0scale)) 
+				 - HScaleNode[ObsBin][0][scalevar][scalenode])/
+	      (HScaleNode[ObsBin][0][scalevar][scalenode+1]-HScaleNode[ObsBin][0][scalevar][scalenode]);
+
+            // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
+            Interpol(scalenode, (Nscalenode[0]-2), deltascale, ikernmu, nscale, &cefscale);
          }
-	 // xxxxxxxxxxxxxxxx End of part to be modified for Lagrange Interpolation
 
-         // ** loop over all 4 scale nodes that receive contributions
+         // --- loop over all 4 scale nodes that receive contributions
          for(int i3 = 0; i3 < 4; i3++){
-            int is = scalenode +i3 -2;  // the target scale index
-            if(is<0){
-               is = 0;
-            }
-            if (is> Nscalenode[0]-1){
-               is = Nscalenode[0]-1;
-            }
+            int is = nscale + (i3-1);  // --- the target scale index
 
-
-            // ** loop over all 16 xmin,xmax points that receive contributions
+            // --- check: all elements should end up within grid
+            if (is < 0){
+	      printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+	      exit(1);
+            } else if (is > Nscalenode[0]-1){
+	      printf(" is>max   %d %d %f %f\n",nscale,i3,cefscale[i3]);
+	      exit(1);
+            }
+            // --- loop over all 16 xmin,xmax points that receive contributions
             for( int i1 = 0; i1 < 4; i1++) {           
                for (int i2 = 0; i2 < 4; i2++){
-                  int xmaxbin = (nxmax +i1 -1);
-                  int xminbin = (nxmin +i2 -1);
-                  nlo::weight_hhc wtmp = wt;  // a working copy of the weights
-                  // - check if above diagonal? project back and swap!
-                  if (xminbin>xmaxbin) { 
-                     int di = xminbin - xmaxbin;
-                     xmaxbin = xmaxbin + di;   // modify indicees
-                     xminbin = xminbin - di;		
-                     double buffer;
-		     //buffer = wtmp[1]; // swap subprocesses 2,3
-                     //wtmp[1] = wtmp[2];
-                     //wtmp[2] = buffer;
-		     // new ordering (1,2)->(5,6)	 
-		     buffer  = wtmp[5]; // swap subprocesses 6,7
-		     wtmp[5] = wtmp[6];
-		     wtmp[6] = buffer;
+		  int xmaxbin = nxmaxf + (i1 -1);   // - the target x-max index
+                  int xminbin = nxminf + (i2 -1);   // - the target x-min index
+		  if (xmaxbin < Nxtot1[ObsBin] && xminbin < Nxtot1[ObsBin]) {
+		    nlo::weight_hhc wtmp = wt;  // - a working copy of the weights
+		    // --- check if above diagonal? project back and swap qg<->gq
+		    if (xminbin>xmaxbin) { 
+		      int di = xminbin - xmaxbin;
+		      xmaxbin = xmaxbin + di;   // modify indicees
+		      xminbin = xminbin - di;		
+		      double buffer;
+		      //buffer = wtmp[1]; // swap subprocesses 2,3
+		      //wtmp[1] = wtmp[2];
+		      //wtmp[2] = buffer;
+		      // new ordering (1,2)->(5,6)	 
+		      buffer  = wtmp[5]; // swap subprocesses 6,7
+		      wtmp[5] = wtmp[6];
+		      wtmp[6] = buffer;
+		    }
+		    int im = GetXIndex(ObsBin,xminbin,xmaxbin);
+		    // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
+		    for(int proc=0;proc<NSubproc;proc++){
+		      // printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,bicef[i1][i2],cefscale[i3]);
+		      SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
+		    }
 		  }
-
-                  if(xmaxbin<0) xmaxbin = 0;
-                  if(xmaxbin>Nxtot1[ObsBin]-1) xmaxbin =Nxtot1[ObsBin]-1;
-                  if(xminbin<0) xminbin = 0;
-                  if(xminbin>Nxtot1[ObsBin]-1) xminbin =Nxtot1[ObsBin]-1;
-                  int im = GetXIndex(ObsBin,xminbin,xmaxbin);
-                  // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
-                  for(int proc=0;proc<NSubproc;proc++){
-                     // printf("%d %d %d %d %d %g %g\n",ObsBin,scalevar,is,im,proc,bicef[i1][i2],cefscale[i3]);
-                     SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
-                  }
                }
             }
          }
       }
    }
+}
+
+void fnloBlockBNlojet::Interpol(int nnode, int nmax, double delta, int ikern, int &nmod, vector < double > *kernel){
+  // nnode: number of the next node to the left of the current value
+  // nmax:  number of the last node which could lie to the left of a potential value
+  // delta: relative distance of value to node 'nnode'
+  // ikern: select interpolation kernel   1:Catmul Rom  2: Lagrange
+  // nmod:  modified number of next node to the left (to be used for storage - relevant only at boundaries)
+  // kernel: array(4) containing the interpolation kernel
+
+  // --- distances to all nodes
+  vector <double> dist(4);
+  dist[0] = 1. + delta;
+  dist[1] = 0. + delta;
+  dist[2] = 1. - delta;
+  dist[3] = 2. - delta;
+
+  vector<double> &kern = *kernel;   // --- to make acces via "[]" more easy
+
+  if (ikern == 1) {         // --- Catmul Rom interpolation kernel
+    if (nnode == 0 ) { // --- left boundary
+      kern[0] = 1.0 - 7.0/6.0*delta - 1.0/6.0*delta*delta + 1.0/3.0*delta*delta*delta;
+      kern[1] = 4.0/3.0*delta + 1.0/3.0*delta*delta - 2.0/3.0*delta*delta*delta;
+      kern[2] = -1.0/6.0*delta - 1.0/6.0*delta*delta + 1.0/3.0*delta*delta*delta;
+      kern[3] = 0.0;
+      nmod = nnode + 1;
+    } else if (nnode == nmax) { // --- right boundary
+      kern[0] = 0.0;
+      kern[1] = -1.0/6.0*dist[2] - 1.0/6.0*dist[2]*dist[2] + 1.0/3.0*dist[2]*dist[2]*dist[2];
+      kern[2] = 4.0/3.0*dist[2] + 1.0/3.0*dist[2]*dist[2] - 2.0/3.0*dist[2]*dist[2]*dist[2];
+      kern[3] = 1.0 -7.0/6.0*dist[2] -1.0/6.0*dist[2]*dist[2] +1.0/3.0*dist[2]*dist[2]*dist[2];
+      nmod = nnode - 1;
+    } else { // --- central region
+      kern[0] = 2.0 - 4.0*dist[0] + 2.5*dist[0]*dist[0] - 0.5*dist[0]*dist[0]*dist[0];
+      kern[1] = 1.0 - 2.5*dist[1]*dist[1] + 1.5*dist[1]*dist[1]*dist[1];
+      kern[2] = 1.0 - 2.5*dist[2]*dist[2] + 1.5*dist[2]*dist[2]*dist[2];
+      kern[3] = 2.0 - 4.0*dist[3] + 2.5*dist[3]*dist[3] - 0.5*dist[3]*dist[3]*dist[3];
+      nmod = nnode;
+    }
+
+  } else if (ikern == 2) {  // --- Lagrange interpolation kernel
+    if (nnode == 0 ) { // --- left boundary
+      kern[0] = 1.0 - 11./6.*delta + delta*delta - 1./6.*delta*delta*delta;
+      kern[1] = 3.0*delta - 2.5*delta*delta + 0.5*delta*delta*delta;
+      kern[2] = -1.5*delta + 2.0*delta*delta - 0.5*delta*delta*delta;
+      kern[3] = 1./3.*delta - 0.5*delta*delta + 1./6.*delta*delta*delta;
+      nmod = nnode + 1;
+    } else if (nnode == nmax) { // --- right boundary
+      kern[0] = 1./3.*dist[2] - 0.5*dist[2]*dist[2] + 1./6.*dist[2]*dist[2]*dist[2];
+      kern[1] = -1.5*dist[2] + 2.0*dist[2]*dist[2] - 0.5*dist[2]*dist[2]*dist[2];
+      kern[2] = 3.0*dist[2] - 2.5*dist[2]*dist[2] + 0.5*dist[2]*dist[2]*dist[2];
+      kern[3] = 1.0 - 11./6.*dist[2] + dist[2]*dist[2] - 1./6.*dist[2]*dist[2]*dist[2];
+      nmod = nnode - 1;
+    } else { // --- central region - 
+      kern[0] = 1.0 - 11./6.*dist[0] + 1.*dist[0]*dist[0] - 1./6.*dist[0]*dist[0]*dist[0];
+      kern[1] = 1.0 - 0.5*dist[1] - 1.0*dist[1]*dist[1] + 0.5*dist[1]*dist[1]*dist[1];
+      kern[2] = 1.0 - 0.5*dist[2] - 1.0*dist[2]*dist[2] + 0.5*dist[2]*dist[2]*dist[2];
+      kern[3] = 1.0 - 11./6.*dist[3] + 1.*dist[3]*dist[3] - 1./6.*dist[3]*dist[3]*dist[3];
+      nmod = nnode;
+    }
+
+  } else {               // --- unknown interpolation kernel
+    printf("fnloBlockBNlojet::Interpol: Error  interpolation kernel (%d) is not defined.\n",ikern);
+    exit(1);
+  }
 }

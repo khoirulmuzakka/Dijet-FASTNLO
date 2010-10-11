@@ -126,6 +126,7 @@ class fnloBlockB {
    vector < int > Nscalenode;
    vector < vector < double > > ScaleFac;
    vector < vector < vector < vector < double > > > > ScaleNode;
+   vector < vector < vector < vector < double > > > > HScaleNode;
 
    vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
    vector < vector < vector < vector < double > > > > PdfLc; 
