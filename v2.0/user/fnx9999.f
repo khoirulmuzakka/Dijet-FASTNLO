@@ -958,7 +958,7 @@ c            If ((min2old.ne.lobin(i,Ndim-1)).and.
 c     +           (max2old.ne.upbin(i,Ndim-1))) Then
 c               min2old = lobin(i,Ndim-1)
 c               max2old = upbin(i,Ndim-1)
-            If ((min2old.ne.lobin(i,2)).and.
+            If ((min2old.ne.lobin(i,2)).or.
      +           (max2old.ne.upbin(i,2))) Then
                min2old = lobin(i,2)
                max2old = upbin(i,2)
