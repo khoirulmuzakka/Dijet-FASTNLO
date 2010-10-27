@@ -43,6 +43,8 @@
 *  fx9999nf     print scenario information (physics & technical)        (works)
 *  fx9999nm     normalize distribution by its own integral              (to do)
 *
+*  fx9999tb     returns information on variables from the table       (at work)
+*
 * external:
 *  fx9999rw     read (or write) table -> external                    (complete)
 *               -> need to include table consistency checks (<max?)
@@ -155,6 +157,7 @@ c      Do i=3,3   ! test - only single contribution  threshcor
          Do j=1,NObsBin
             Do k=1,NSubProc(Ipoint)
 c            Do k=1,1 ! test - only gg 
+c            Do k=2,2 ! test - only g (DIS)
 c            Do k=2,5 ! test - only qq
                xsect(j) = xsect(j)+result(j,k,i)
             Enddo
@@ -292,6 +295,7 @@ c --- Find LO contribution
          j = IContr + 1
          IContrPointer(j) = -1
          Do i=1,NContrib
+            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1
      +           .and. Iref(i).eq.Preftab) Then 
                IContr = IContr+1
@@ -859,17 +863,29 @@ c            H(2) = H(2)+XPDF1(i,k)+XPDF1(i,-k)
 c         Enddo
 
 c --- this is not final - just for an early DIS table
-c         final: 1Delta   2Gluon  3Sigma.
-         H(2) = 0d0             ! Delta  at O(as^0)
+c         H(2) = 0d0             ! Delta  at O(as^0)
+c         Do k=1,5,2
+c            H(2) = H(2) + (XPDF1(i,k)+XPDF1(i,-k)+
+c     +           4d0*(XPDF1(i,k+1)+XPDF1(i,-k-1)))/9d0
+c         Enddo
+c         H(1) = XPDF1(i,0)      ! Gluon  at O(as^1)
+c         H(3) = 0d0             ! Sigma  at O(as^2)
+c         Do k=1,6
+c            H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
+c         Enddo
+
+c --- final: 1Delta   2Gluon  3Sigma.
+         H(1) = 0d0             ! Delta  at O(as^0)
          Do k=1,5,2
-            H(2) = H(2) + (XPDF1(i,k)+XPDF1(i,-k)+
+            H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
      +           4d0*(XPDF1(i,k+1)+XPDF1(i,-k-1)))/9d0
          Enddo
-         H(1) = XPDF1(i,0)      ! Gluon  at O(as^1)
+         H(2) = XPDF1(i,0)      ! Gluon  at O(as^1)
          H(3) = 0d0             ! Sigma  at O(as^2)
          Do k=1,6
             H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
          Enddo
+
 
 c --- hadron-hadron: jets
       Elseif (icf1.eq.3.and.icf2.eq.1.and.(icf3.ge.1.and.icf3.le.2))Then 
@@ -1024,6 +1040,36 @@ c         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
       Enddo
       Write(*,*)' #'
       Write(*,*)' ######################################################'
+
+      Return
+      End
+
+*******************************************************************
+*******************************************************************
+      Subroutine FX9999TB(fnstring,ivar,dvar)
+*-----------------------------------------------------------------
+* fastNLO user code v2.0 - returns infortmation from table variables
+*-----------------------------------------------------------------
+      Implicit None
+      Include 'fnx9999.inc'
+      Character*(*) fnstring
+      Integer ivar
+      Double Precision dvar
+
+      ivar = 0
+      dvar = 0d0
+      If (fnstring .eq. 'NContrib') Then
+         ivar = NContrib
+      Elseif (fnstring .eq. 'NObsBin') Then
+         ivar = NObsBin
+      Elseif (fnstring .eq. 'Nevt1') Then
+         ivar = Nevt(1)
+      Elseif (fnstring .eq. 'Nevt2') Then
+         ivar = Nevt(2)
+      Else
+         Write(*,*) 'FX9999TB   unknown input - variable:',fnstring
+         Stop
+      Endif
 
       Return
       End
