@@ -1,4 +1,4 @@
-      Subroutine fx9999rw(crw,filename)
+      Subroutine fx9999rw(crw,filename,ictrb)
 * ------------------------------------------------------------
 *  fastNLO usercode v2.0                       MW 07/23/2007
 * 
@@ -6,13 +6,17 @@
 *  input:
 *     character   crw:        'read' or 'write'
 *     character   filename:    name of table
+*     integer     ictrb(30):   pointers for writing selected contributions
+*                              only contributions n with ictrb(n)<>0 are 
+*                              written - reading is not affected
 C
 C        1         2         3         4         5         6         7 
 C 3456789012345678901234567890123456789012345678901234567890123456789012
 * ------------------------------------------------------------
       Implicit None
       Character*(*) crw,filename
-      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax
+      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax, nselctrb
+      Integer ictrb(30)
       Include 'fnx9999.inc'
 
       Nunit=2
@@ -28,12 +32,31 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
          Endif
       Endif
 
+c --- when writing: count No. of selected contributions to be written
+c                   (those with ictrb(ic)=1)
+      nselctrb = 0
+      If (crw .eq. 'write') Then         
+         Do ic=1,NContrib
+            If (ictrb(ic).ne.0) Then
+               nselctrb = nselctrb + 1
+               Write(*,*) '         ... writing contribution ',ic
+            Endif
+         Enddo
+         Write(*,*) ' writing a total of ',nselctrb,' contributions',
+     +        ' into: ',filename
+      Endif
+
+
 c --- fastNLO table
 c - block A1
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, Itabversion)
       Call fniochar(crw,nunit, ScenName)
-      Call fnioint(crw,nunit, Ncontrib)
+      If (crw .eq. 'write') Then
+         Call fnioint(crw,nunit, nselctrb)
+      Else
+         Call fnioint(crw,nunit, Ncontrib)
+      Endif
       Call fnioint(crw,nunit, Nmult)
       Call fnioint(crw,nunit, Ndata)
       Call fnioint(crw,nunit, NuserString)
@@ -103,6 +126,9 @@ c - block A2
 
 c - block B
       Do ic=1,NContrib
+c -      write only selected contributions - those with ictrb(ic)=1         
+         If (crw .eq. 'write' .and. ictrb(ic).eq.0) Goto 100
+
          Call fnioisep(crw,nunit)
          Call fnioint(crw,nunit, IXsectUnits(ic))
          Call fnioint(crw,nunit, IDataFlag(ic))
@@ -192,6 +218,10 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
                Do j=1,Nxtot(ic,1,i)
                   Call fniodbl(crw,nunit, XNode1(ic,i,j))
                Enddo
+               If (crw.eq.'read') Then
+                  Hxlim1(ic,i) = -sqrt(-log10(XNode1(ic,i,1))) ! for HH
+               Endif
+
             Enddo 
             If (NPDFDim(ic).eq.2) Then
                Do i=1,NObsBin
@@ -222,8 +252,8 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
             Call fnioint(crw,nunit, NScaleVar(ic,i))
             Call fnioint(crw,nunit, NScaleNode(ic,i))
          Enddo
-         Write(*,*) ic,Nscales(ic),Nscaledim(ic)
-         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
+c         Write(*,*) ic,Nscales(ic),Nscaledim(ic)
+c         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
          Do i=1,NScaleDim(ic)
             Do j=1,NScaleVar(ic,i)
                Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
@@ -235,11 +265,15 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
                Do k=1,NScaleVar(ic,j)
                   Do l=1,NScaleNode(ic,j)
                      Call fniodbl(crw,nunit, ScaleNode(ic,i,j,k,l))
+                     If (crw.eq.'read') Then
+                        HScaleNode(ic,i,j,k,l) = 
+     +                       log(log(ScaleNode(ic,i,j,k,l)/0.25d0))
+                     Endif
                   Enddo
                Enddo
             Enddo
          Enddo
-
+         
          Do i=1,NObsBin
             Do k=1,NScaleVar(ic,1)
                Do l=1,NScaleNode(ic,1)
@@ -271,7 +305,7 @@ c --- here we assume NFragFunc=0
             Enddo
          Enddo
          
- 100     Continue
+ 100     Continue               ! - end of block
       Enddo
 
 c - end of table

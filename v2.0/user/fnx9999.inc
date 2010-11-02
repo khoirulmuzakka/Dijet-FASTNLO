@@ -26,7 +26,7 @@ c - fundamental parameters - scenario dependent
       Integer MxObsBin, MxCtrb, MxNxtot, MxScales, MxScaleNode, 
      +     MxSubProc, MxNxMax
       Parameter (MxObsBin=200, MxCtrb=4, MxNxtot=20, MxScales=2, 
-     +     MxScaleNode=5, MxSubProc=7, MxNxMax=210)
+     +     MxScaleNode=15, MxSubProc=7, MxNxMax=210)
 c - technical parameters
       Integer MxUser, MxScDescript, MxDim, MxContrDescr,
      +     MxCodeDescr, MxPDF, MxFF, MxScaleDim, MxScaleDescript,
@@ -65,13 +65,15 @@ c --- Block B
      +     NFragFunc(MxCtrb), NFFPDG(MxCtrb,MxFF), NFFDim(MxCtrb),
      +     NSubproc(MxCtrb), IPDFdef(MxCtrb,3), Nxtot(MxCtrb,2,MxObsBin)
       Double Precision XNode1(MxCtrb,MxObsBin,MxNxtot),
-     +     XNode2(MxCtrb,MxObsBin,MxNxtot)
+     +     XNode2(MxCtrb,MxObsBin,MxNxtot),
+     +     Hxlim1(MxCtrb,MxObsBin)
       Integer NScales(MxCtrb),NScaleDim(MxCtrb), IScale(MxCtrb,MxScales), 
      +     NScaleDescript(MxCtrb,MxScaleDim)
       Character*64 ScaleDescript(MxCtrb,MxScaleDim,MxScaleDescript)
       Integer NScaleVar(MxCtrb,MxScaleDim),NScaleNode(MxCtrb,MxScaleDim)
       Double Precision ScaleFac(MxCtrb,MxScaleDim,MxScaleVar),
      +     ScaleNode(MxCtrb,MxObsBin,MxScaleDim,MxScaleVar,MxScaleNode),
+     +     HScaleNode(MxCtrb,MxObsBin,MxScaleDim,MxScaleVar,MxScaleNode),
      +     SigmaTilde(MxCtrb,MxObsBin,1,MxScaleVar,MxScaleNode,
      +     MxNxMax,MxSubProc)
 
@@ -93,8 +95,8 @@ c - put everything into common block
       Common /CFN9999/
 c - dbl 
      +     UserFloat,
-     +     Ecms,LoBin,UpBin,BinSize, XNode1, XNode2,
-     +     ScaleFac, ScaleNode, SigmaTilde,
+     +     Ecms,LoBin,UpBin,BinSize, XNode1, XNode2,Hxlim1,
+     +     ScaleFac, ScaleNode, HScaleNode, SigmaTilde,
      +     result,pdf,
 c - int*8
      +     Nevt,

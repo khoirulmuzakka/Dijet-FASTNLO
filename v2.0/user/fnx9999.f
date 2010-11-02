@@ -211,7 +211,7 @@ c 5000 Format (A,A64)
       Implicit None
       Include 'fnx9999.inc'
       Include 'strings.inc'
-      Integer i,j,k
+      Integer i,j,k, ictrb(30)
       Character*(*) FILENAME
       Character*255 OLDFILENAME
       Data OLDFILENAME/'xxxx'/
@@ -238,7 +238,7 @@ c === output in first fastNLO call
 
 c === in 1st scenario call: read fastNLO coefficient table
       If (FILENAME.ne.OLDFILENAME) Then
-         Call FX9999RW('read',FILENAME)
+         Call FX9999RW('read',FILENAME,ictrb)
          OLDFILENAME = FILENAME
 
 c   - check consistency of array dimensions / commonblock parameters
@@ -361,6 +361,8 @@ c --- Find 1-loop TC
          j = IContr + 1
          IContrPointer(j) = -1
          Do i=1,NContrib
+            Write(*,*) IContrFlag1(i),IContrFlag2(i),
+     +           IContrFlag3(i),Iref(i),Preftab
             If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
      >           IContrFlag3(i).eq.1
      +           .and. Iref(i).eq.Preftab) Then
