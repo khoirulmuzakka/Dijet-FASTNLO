@@ -101,7 +101,8 @@ C -------------------------------------------------------------
       If (crw.eq.'read') Then
          Read(nunit,*) cvar
       Else 
-         Write(nunit,1000) cvar
+c         Write(nunit,1000) cvar
+         Write(nunit,1000) cvar(1:len_trim(cvar))
       Endif
 
  1000 Format (A) 
