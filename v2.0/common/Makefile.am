@@ -5,7 +5,8 @@ AUTOMAKE_OPTIONS = gnu
 pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la
 
 # The associated header files
-pkginclude_HEADERS = fnloTable.h fnloBlockBNlojet.h
+# Add header files for jet algos ?
+pkginclude_HEADERS = fnloTable.h fnloBlockBNlojet.h cone-e-07.h
 
 # Source files to be distributed for each library
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \

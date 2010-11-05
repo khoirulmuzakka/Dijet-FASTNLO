@@ -372,7 +372,7 @@ AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
-if [ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]
+if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];
   then SVNREV=`cat $srcdir/SVNREV`
   else echo -n $SVNREV>$srcdir/SVNREV
 fi
@@ -386,6 +386,7 @@ AC_CONFIG_FILES([Makefile
 	         tableconvert/Makefile
                  author/ep/Makefile
                  author/hadron/Makefile
+                 user/Makefile
 	        ])
 
 AC_OUTPUT

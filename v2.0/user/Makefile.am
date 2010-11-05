@@ -1,41 +1,37 @@
+# Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# the main target, i.e. the executable to build
-bin_PROGRAMS = testhhc
-# Add later: allunc example
+# The main target: Markus' default user code
+bin_PROGRAMS = example example-ref
 
-# all source files which go into the main target (and have to be distributed)
-#example_SOURCES = example.f fnx9999.f fnx9999.inc fx9999rw.f fnio.f fnset.f fn-alphas-demo.f fn-interface.f alphst.f pyalps.f strings.inc
-#allunc_SOURCES = allunc.f statcode.f fnx9999.f fx9999rw.f fnio.f fnset.f \
-#	fn-interface.f \
-#	fn-alphas-demo.f alphst.f pyalps.f  \
-#	fnx9999.inc strings.inc
-testhhc_SOURCES = testhhc.cc
+# All source files which go into the main target (and have to be distributed)
+example_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
+	fnx9999.inc strings.inc
+example_ref_SOURCES = example-ref.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
+	fnx9999.inc strings.inc
 
 # FORTRAN compiler flags to be used for the main target
-AM_FFLAGS = -O -g -ff2c -fno-automatic -ffixed-line-length-132
+# top_srcdir for direct compilation before install; pkgincludedir for after install
+AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
 # C++ compiler flags to be used for the main target
-testhhc_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 
-# libraries to be linked to the main target
-#example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
-#allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS) -L/usr/lib/gcc/i586-suse-linux/4.3 -lgfortranbegin
-#example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
-#allunc_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+# Libraries to be linked to the main target
+example_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
+example_ref_LDADD = -L$(LHAPDFLIBPATH) -lLHAPDF $(CERNLIBS)
 #allunc_LDFLAGS = -lg2c
 
 # path to LHAPDF pdfsets
-%.f: %.F
-	cpp -ansi -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
+#%.f: %.F
+#	cpp -ansi -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
 # Trial to use in fx9999rw.F 
 #	cpp -ansi -traditional-ccp -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
 
 # Clean files that are automatically produced by the preprocessor cpp
-CLEANFILES = example.f fnio.f
+#CLEANFILES = example.f fnio.f
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
