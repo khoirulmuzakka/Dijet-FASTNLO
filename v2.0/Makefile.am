@@ -7,7 +7,11 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 EXTRA_DIST = m4 SVNREV
-#distdir = $(PACKAGE)-$(VERSION).$(SVNREV)
+# This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
+distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
+# Don't put .svn subdirs into distribution package
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 #
 SUBDIRS = common merger tableconvert author/ep author/hadron user
 #
