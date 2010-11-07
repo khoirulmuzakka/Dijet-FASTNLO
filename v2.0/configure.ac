@@ -6,7 +6,9 @@ AC_PREREQ([2.59])
 AC_INIT([fastNLO], [2.0.0], [klaus.rabbertz@cern.ch,wobisch@fnal.gov])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
-
+# Require minimal libtool version of 1.5
+#LT_PREREQ([1.5])
+#LT_INIT([dlopen])
 #
 AC_CONFIG_SRCDIR([common/fnloTable.h])
 AC_CONFIG_HEADERS([config.h])
@@ -19,7 +21,12 @@ AC_PREFIX_DEFAULT(${HOME}/local)
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
-AC_PROG_F77
+AC_PROG_F77([gfortran g77])
+AC_PROG_FC([gfortran g77])
+#case $FC in
+#  gfortran) AC_SUBST([HAVE_GFORTRAN], [yes])
+#  g77) AC_SUBST([HAVE_G77], [yes])
+#esac
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 #AC_PROG_AWK
@@ -249,6 +256,8 @@ else
    AC_MSG_NOTICE([******************************************])
    AC_MSG_NOTICE([LHAPDF support switched off by user. Building fastNLO without LHAPDF!])
 fi
+AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
+AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
 # FASTJET
 AC_MSG_NOTICE([******************************************])
@@ -305,6 +314,8 @@ else
    AC_MSG_NOTICE([******************************************])
    AC_MSG_NOTICE([FASTJET support switched off by user. Building fastNLO without FASTJET!])
 fi
+AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
+AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
 #AC_MSG_ERROR([STOPP])
 
 # CERNLIB
@@ -321,6 +332,7 @@ else
   AC_MSG_RESULT([Using $CERNLIBPATH for the libraries])
   AC_MSG_RESULT([Using -L$CERNLIBPATH -lmathlib -lkernlib -lpacklib for the linker flag])
 fi
+AM_CONDITIONAL(HAVE_CERNLIB, test "x$CERNLIBPATH" != "x")
 
 # ROOT
 AC_MSG_NOTICE([******************************************])

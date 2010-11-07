@@ -6,7 +6,8 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = gnu
 #
 # Add subversion revision number, recipe from Autotools by J. Calcote 
-EXTRA_DIST = m4 SVNREV
+# Add source code of NLOJet++ 4.1.3 to be changed for use with fastNLO
+EXTRA_DIST = m4 SVNREV nlojet++-4.1.3
 # This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
 distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 # Don't put .svn subdirs into distribution package

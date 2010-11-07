@@ -1,25 +1,45 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# The main target, here the libtool plugin library to build
+# The main targets, here the libtool plugin libraries to build
 lib_LTLIBRARIES = libfnh1001.la
 # libfnh2101d.la
 
-# All source files which go into the main target (and have to be distributed)
-libfnh1001_la_SOURCES = fnh1001.cc alew.f pdf-cteq6.h pdf-dis-dummy.h
-#libfnh2101d_la_SOURCES = fnh2101d.cc alew.f pdf-cteq6.h pdf-photo-dummy.h
+#
+# All source files which go into the main targets (and have to be distributed)
+#
+# All targets
+AM_SOURCES = pdf-cteq6.h pdf-dis-dummy.h
+# Individual sources
+libfnh1001_la_SOURCES = fnh1001.cc alew.f $(AM_SOURCES)
+#libfnh2101d_la_SOURCES = fnh2101d.cc alew.f $(AM_SOURCES)
 
+#
 # C++ compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
-libfnh1001_la_CXXFLAGS = -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+#
+# All targets
+AM_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+# Example of individual specification of CXXFLAGS
+#libfnh1001_la_CXXFLAGS = -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
 #libfnh2101d_la_CXXFLAGS = -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
 
+#
 # Fortran compiler flags to be used for the main target
-libfnh1001_la_FFLAGS = -O0 -Wall
+#
+# All targets
+AM_FFLAGS = -O0 -Wall
+# Example of individual specification of FFLAGS
+#libfnh1001_la_FFLAGS = -O0 -Wall
 #libfnh2101d_la_FFLAGS = -O0 -Wall
 
+#
 # Linker flags to be used for the main target
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
+#
+# All targets
+AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+# Example of individual specification of LDFLAGS
 libfnh1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 #libfnh2101d_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 

@@ -1,57 +1,87 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# The main target, here the libtool plugin library to build
-lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2012.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la
+# The main targets, here the libtool plugin libraries to build
+lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
+#
+# Require fastjet
+#
+if HAVE_FASTJET
+   lib_LTLIBRARIES += libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+endif
+#
 # libfnl1310.la libfnl1308.la libfnt2015norm.la
+#
 
-# All source files which go into the main target (and have to be distributed)
-libfnt1001midp_la_SOURCES = fnt1001midp.cc cone-et-07.h cone-et-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnt2009midp_la_SOURCES = fnt2009midp.cc cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnt2012test_la_SOURCES = fnt2012test.cc cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-#libfnt2012_la_SOURCES = fnt2012.cc fj-sc-07.h fj-sc-07.cc pdf-cteq6.h pdf-hhc-dummy.h cteq6.h
-libfnt2012_la_SOURCES = fnt2012.cc fj-sc-07.h fj-sc-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnt2013norm_la_SOURCES = fnt2013norm.cc cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnt2014norm_la_SOURCES = fnt2014norm.cc cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-#libfnt2015norm_la_SOURCES = fnt2015norm.cc cone-e-07.h cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnl1001_la_SOURCES = fnl1001.cc cone-e-07.h cone-e-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnl1001ak07_la_SOURCES = fnl1001ak07.cc fj-ak-07.h fj-ak-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnl1001sc07_la_SOURCES = fnl1001sc07.cc fj-sc-07.h fj-sc-07.cc pdf-cteq6.h pdf-hhc-dummy.h
-libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2-07.h fj-d0r2-07.cc pdf-cteq6.h pdf-hhc-dummy.h
+#
+# All source files which go into the main targets (and have to be distributed)
+#
+# All targets
+AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
+# Individual sources
+libfnt1001midp_la_SOURCES = fnt1001midp.cc cone-et-07.h cone-et-07.cc $(AM_SOURCES)
+libfnt2009midp_la_SOURCES = fnt2009midp.cc cone-e-07.cc $(AM_SOURCES)
+libfnt2012test_la_SOURCES = fnt2012test.cc cone-e-07.cc $(AM_SOURCES)
+libfnt2013norm_la_SOURCES = fnt2013norm.cc cone-e-07.cc $(AM_SOURCES)
+libfnt2014norm_la_SOURCES = fnt2014norm.cc cone-e-07.cc $(AM_SOURCES)
+#libfnt2015norm_la_SOURCES = fnt2015norm.cc cone-e-07.h cone-e-07.cc $(AM_SOURCES)
+libfnl1001_la_SOURCES = fnl1001.cc cone-e-07.h cone-e-07.cc $(AM_SOURCES)
+# Require fastjet
+libfnl1001ak07_la_SOURCES = fnl1001ak07.cc fj-ak-07.h fj-ak-07.cc $(AM_SOURCES)
+libfnl1001sc07_la_SOURCES = fnl1001sc07.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
+libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2-07.h fj-d0r2-07.cc $(AM_SOURCES)
+libfnt2012_la_SOURCES = fnt2012.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
 
-#libfnl1310_la_SOURCES = fnl1310.cc fj-kt-06.h fj-kt-06.cc pdf-cteq6.h pdf-hhc-dummy.h cteq6.h
-#libfnl1308_la_SOURCES = fnl1308.cc fj-sc-07.h fj-sc-07.cc pdf-cteq6.h pdf-hhc-dummy.h cteq6.h
+#libfnl1310_la_SOURCES = fnl1310.cc fj-kt-06.h fj-kt-06.cc $(AM_SOURCES)
+#libfnl1308_la_SOURCES = fnl1308.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
 
+#
 # C++ compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
-libfnt1001midp_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnt2009midp_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnt2012test_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnt2012_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
-libfnt2013norm_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnt2014norm_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-# libfnt2015norm_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnl1001_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-libfnl1001ak07_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
-libfnl1001sc07_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH} 
-libfnl1001d0r207_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH} 
+#
+# All targets
+AM_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+if HAVE_FASTJETCONFIG 
+   AM_CXXFLAGS += `fastjet-config --plugins --cxxflags`
+else
+   if HAVE_FASTJET
+      AM_CXXFLAGS += -I${FASTJETINCLUDEPATH}
+   endif
+endif
+# Example of individual specification of CXXFLAGS
+#libfnl1001_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+# Require fastjet, use fastjet-config if possible
+#if HAVE_FASTJETCONFIG 
+#   libfnl1001sc07_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} `fastjet-config --plugins --cxxflags`
+#else
+#   libfnl1001sc07_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH} 
+#endif
 
 #libfnl1310_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 #libfnl1308_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 
+#
 # Linker flags to be used for the main target
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
-libfnt1001midp_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnt2009midp_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnt2012test_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnt2012_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone
-libfnt2013norm_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnt2014norm_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-# libfnt2015norm_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
-libfnl1001ak07_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet
-libfnl1001sc07_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone
-libfnl1001d0r207_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lD0RunIIConePlugin
+#
+# All targets
+AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+if HAVE_FASTJETCONFIG 
+   AM_LDFLAGS += `fastjet-config --libs --plugins`
+else
+   if HAVE_FASTJET
+      AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lD0RunIIConePlugin -lSISConePlugin -lsiscone
+   endif
+endif
+# Example of individual specification of LDFLAGS
+#libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+# Require fastjet, use fastjet-config if possible
+#if HAVE_FASTJETCONFIG 
+#   libfnl1001sc07_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 `fastjet-config --libs --plugins`
+#else
+#   libfnl1001sc07_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone
+#endif
+
 #libfnl1310_la_LDFLAGS = ../../common/libfastnloNlojet.la -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet
 #libfnl1308_la_LDFLAGS = ../../common/libfastnloNlojet.la -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone
 

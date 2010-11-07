@@ -5,11 +5,11 @@
 * fastNLO - example program to compare fastNLO v2 results with
 *           the results stored in the fastNLO reference table
 *
+* KR 07112010: Improved commandline steering
 * -------------------------------------------------------------------
       Implicit None
-      Character*255 FILENAME
-      Character*255 HISTOFILE
-      Integer i,j          !, LENNOC
+      Character*255 FILENAME,HISTOFILE,PDFSET
+      Integer i,j, LENOCC
       Double Precision scale(4)
       
 c - Attention - this is the most likely source of errors in fastNLO!!!
@@ -27,18 +27,90 @@ c        We recommend to name the array according to the scenario
       Scale(4) = 0.25d0
 
 c --- parse command line
-      If ( IARGC().lt.1)  FILENAME = 'table.tab'
-      If ( IARGC().lt.2)  HISTOFILE= 'fastnlo.hbk'
-      If ( IARGC().gt.0)  Call GETARG(1,FILENAME)
-      If ( IARGC().gt.1)  Call GETARG(2,HISTOFILE)
-      If ( IARGC().gt.2)  Then
-         Write(*,*) 'fastNLO: too many arguments given. Stopping'
-         Return
-      Endif
+      IF (IARGC().LT.1) THEN
+         FILENAME = "table.tab"
+         WRITE(*,*)
+     >        "EXAMPLE: WARNING! No table name given, "//
+     >        "taking the default table.tab instead!"
+         WRITE(*,*)"      For an explanation of command line "//
+     >        "arguments type:"
+         WRITE(*,*)"      ./example -h"
+      ELSE
+         CALL GETARG(1,FILENAME)
+         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+            WRITE(*,*)' '
+            WRITE(*,*)'Usage: ./example [arguments]'
+            WRITE(*,*)'  Table input file, def. = table.tab'
+            WRITE(*,*)'  HBOOK output file, def. = fastnlo.hbk'
+            WRITE(*,*)'  PDF set, def. = cteq6mE.LHgrid'
+            WRITE(*,*)'  Warning! The ref. PDF should not be changed!'
+            WRITE(*,*)' '
+            WRITE(*,*)'  Give full path(s) if these are not in the cwd.'
+            WRITE(*,*)'  Use \"_\" to skip changing a default argument.'
+            WRITE(*,*)' '
+            STOP
+         ELSEIF (FILENAME(1:1).EQ."_") THEN
+            FILENAME = "table.tab"
+            WRITE(*,*)
+     >           "EXAMPLE: WARNING! No table name given, "//
+     >           "taking the default table.tab instead!"
+            WRITE(*,*)"      For an explanation of command line "//
+     >           "arguments type:"
+            WRITE(*,*)"      ./example -h"
+         ELSE
+            WRITE(*,*)"ALLUNC: Evaluating table: ",
+     >           FILENAME(1:LENOCC(FILENAME))
+         ENDIF
+      ENDIF
+
+*---HBOOK filename
+      HISTOFILE = "X"
+      IF (IARGC().GE.2) THEN
+         CALL GETARG(2,HISTOFILE)
+      ENDIF
+      IF (IARGC().LT.2.OR.HISTOFILE(1:1).EQ."_") THEN
+         HISTOFILE = "fastnlo.hbk"
+         WRITE(*,*)
+     >        "EXAMPLE: WARNING! No output filename given, "//
+     >        "taking fastnlo.hbk instead!"
+      ELSE
+         WRITE(*,*)"EXAMPLE: Creating output file: ",
+     >        HISTOFILE(1:LENOCC(HISTOFILE))
+      ENDIF
+      
+*---PDF set
+      PDFSET = "X"
+      IF (IARGC().GE.3) THEN
+         CALL GETARG(3,PDFSET)
+      ENDIF
+      IF (IARGC().LT.3.OR.PDFSET(1:1).EQ."_") THEN
+         PDFSET = "cteq6mE.LHgrid"
+         WRITE(*,*)
+     >        "EXAMPLE: WARNING! No PDF set given, "//
+     >        "taking cteq66.LHgrid instead!"
+      ELSE
+         WRITE(*,*)"EXAMPLE: Using PDF set: ",
+     >        PDFSET(1:LENOCC(PDFSET))
+      ENDIF
+
+*---Too many arguments
+      IF (IARGC().GT.3) THEN
+         WRITE(*,*)"\nEXAMPLE: ERROR! Too many arguments, aborting!"
+         STOP
+      ENDIF
+
+ckr      If ( IARGC().lt.1)  FILENAME = 'table.tab'
+ckr      If ( IARGC().lt.2)  HISTOFILE= 'fastnlo.hbk'
+ckr      If ( IARGC().gt.0)  Call GETARG(1,FILENAME)
+ckr      If ( IARGC().gt.1)  Call GETARG(2,HISTOFILE)
+ckr      If ( IARGC().gt.2)  Then
+ckr         Write(*,*) 'fastNLO: too many arguments given. Stopping'
+ckr         Return
+ckr      Endif
 
 c - Initialize LHAPDF  
 c - for Reference tables - use CTEQ6M
-      call InitPDFset('/usr/local/share/lhapdf/PDFsets/cteq6mE.LHgrid')
+      call InitPDFset(PDFSET(1:LENOCC(PDFSET)))
 c - initialize one member, 0=best fit member
       call InitPDF(0)
 
