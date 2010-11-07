@@ -300,6 +300,12 @@ void UserHHC::inittable(){
    table->GetBlockA1()->SetNcontrib(1);
    table->GetBlockA1()->SetNmult(0);
    table->GetBlockA1()->SetNdata(0);
+   // KR Add vars for Markus updated header
+   table->GetBlockA1()->SetNuserString(0);
+   table->GetBlockA1()->SetNuserInt(0);
+   table->GetBlockA1()->SetNuserFloat(0);
+   table->GetBlockA1()->SetImachine(0);
+   // KR Ende
    table->GetBlockA2()->SetIpublunits(12);  // - fastNLO user: set cross section units
                                             //                 (negative power of ten)
 
