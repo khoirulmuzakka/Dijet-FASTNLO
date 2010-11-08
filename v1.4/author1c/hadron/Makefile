@@ -1200,6 +1200,19 @@ fnl2518diffpt6: links fnl2518diffpt6.cc $(CommonPath)/fj-sc-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet,-L$(FASTJET)/plugins/SISCone,-lSISConePlugin,-L$(FASTJET)/plugins/SISCone/siscone/siscone,-lsiscone
 
 # ======================================================================
+# =====   FNL2522: LHC CMS Az. decorrelation with fastjet anti-kT R=0.5 
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2522norm: links fnl2522norm.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2522norm.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2522norm -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+# ======================================================================
 # =====   FNL2622: LHC CMS dchi dijets with fastjet ak R=0.5 ===========
 # ======================================================================
 # LHC scenario for CMS, @ 7 TeV 
