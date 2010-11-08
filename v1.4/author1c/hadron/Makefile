@@ -1212,6 +1212,14 @@ fnl2522norm: links fnl2522norm.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
+fnl2522diffpt1: links fnl2522diffpt1.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2522diffpt1.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2522diffpt1 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 # ======================================================================
 # =====   FNL2622: LHC CMS dchi dijets with fastjet ak R=0.5 ===========
 # ======================================================================
