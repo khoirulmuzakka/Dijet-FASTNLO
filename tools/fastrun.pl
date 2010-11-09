@@ -765,7 +765,7 @@ if ( $mode == 0 || $mode == 1 ) {
 #	    system("ln -s $install{fastjet}[2] $idir/$install{fastjet}[3]");
 	    chdir "$idir/$install{fastjet}[2]";
 	    print "\nfastrun.pl: Configuring fastjet ...\n";
-	    $ret = system("./configure --enable-shared --prefix=`pwd` --bindir=$aidir/bin");
+	    $ret = system("./configure --enable-shared --enable-allplugins --prefix=`pwd` --bindir=$aidir/bin");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making fastjet ...\n";
 	    $ret = system("make -j2");
