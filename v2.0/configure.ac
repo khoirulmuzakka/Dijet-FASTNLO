@@ -391,7 +391,6 @@ fi
 AC_SUBST(SVNREV)
 
 # Output
-#                 user/Makefile
 AC_CONFIG_FILES([Makefile
                  common/Makefile
                  merger/Makefile
@@ -399,7 +398,7 @@ AC_CONFIG_FILES([Makefile
                  author/ep/Makefile
                  author/hadron/Makefile
                  user/Makefile
-                 userkr/Makefile
 	        ])
+#                 userkr/Makefile
 
 AC_OUTPUT

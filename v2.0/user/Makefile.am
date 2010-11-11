@@ -27,8 +27,8 @@ AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   example_LDFLAGS = `lhapdf-config --ldflags`
-   example_ref_LDFLAGS = `lhapdf-config --ldflags`
+   example_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   example_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
    example_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
    example_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
