@@ -12,6 +12,7 @@
       INCLUDE "uncert.inc"
       CHARACTER*255 SCENARIO,TABPATH,TABNAME,REFNAME
       CHARACTER*255 FILENAME,FILENAMES,HISTFILE
+      CHARACTER*255 TABNAMN,FILENAMN
       CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
       CHARACTER*255 FILEBASE,LOFILE,NLOFILE
       CHARACTER*255 BORNNAME,NLONAME
@@ -22,8 +23,8 @@
       INTEGER I,J,NPDF,IOPDF,IOAS,NSCALES
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCALE,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
-      INTEGER IHIST,IPHASE
-      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG
+      INTEGER IHIST,IPHASE,ISTEP
+      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG,LNRM
       DOUBLE PRECISION MUR,MUF,QLAM4,QLAM5,BWGT
       DOUBLE PRECISION DSTMP(4)
 c - To unify quoted uncertainties (CL68,CL90,special)
@@ -64,6 +65,7 @@ c --- Parse command line
 
 *---Scenario
       LRAT = .FALSE.
+      LNRM = .FALSE.
       LSCL = .TRUE.
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
@@ -115,11 +117,19 @@ ckr Might be useful more generally, but only checked for these scenarios
             LRAT = .TRUE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
+         ELSEIF (SCENARIO(1:7).EQ."fnl2522") THEN
+ckr Normalized x sections
+            LNRM = .TRUE.
+            WRITE(*,*)
+     >           "ALLUNC: Deriving normalized x sections"
          ENDIF
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
      >        SCENARIO(1:LENOCC(SCENARIO))
       ENDIF
       TABNAME = SCENARIO(1:LENOCC(SCENARIO))//".tab"
+      IF (LNRM) THEN
+         TABNAMN = SCENARIO(1:7)//"norm"//".tab"
+      ENDIF
       REFNAME = SCENARIO(1:LENOCC(SCENARIO))//"ref.tab"
 
 *---Path to tables
@@ -139,6 +149,12 @@ ckr Might be useful more generally, but only checked for these scenarios
      >     TABNAME(1:LENOCC(TABNAME))
       WRITE(*,*)"ALLUNC: Taking primary table ",
      >     FILENAME(1:LENOCC(FILENAME))
+      IF (LNRM) THEN
+         FILENAMN = TABPATH(1:LENOCC(TABPATH))//"/"//
+     >        TABNAMN(1:LENOCC(TABNAMN))
+         WRITE(*,*)"ALLUNC: Taking normalization table ",
+     >        FILENAMN(1:LENOCC(FILENAMN))
+      ENDIF
 
 *---HBOOK filename
       HISTFILE = "X"
@@ -406,6 +422,10 @@ c - Check uncertainties to derive
       IF (LRAT) THEN
          WRITE(*,*)"ALLUNC: Deriving uncertainties for ratios"
       ENDIF
+      IF (LNRM) THEN
+         WRITE(*,*)"ALLUNC: Deriving uncertainties for normalized "//
+     >        "x sections"
+      ENDIF
       IF (LALG) THEN
          WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties"
       ENDIF
@@ -477,7 +497,6 @@ c - Check that FILENAME is still the primary table here ...!!!
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
             CALL INITPDF(0)
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
             IPHASE  = 1
             IMODE   = 1
             IWEIGHT = 0
@@ -485,24 +504,41 @@ c - Check that FILENAME is still the primary table here ...!!!
             IF (LTOY) THEN
                IMODE = 2
             ENDIF
-            IF (LRAT) THEN
+            IF (LRAT.OR.LNRM) THEN
                NRAP = 2*NRAPIDITY
             ENDIF
-            CALL CENRES(LRAT)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+ckr Load normalization table
+            IF (LNRM) THEN
+               CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+               ISTEP = 0
+               CALL CENRES(ISTEP,LRAT,LNRM)
+            ENDIF
+            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            ISTEP = 1
+            CALL CENRES(ISTEP,LRAT,LNRM)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
 ckr Do loop runs once even if NPDF=0! => Avoid with IF statement
             IF (LPDF) THEN
                DO J=1,NPDF
                   CALL INITPDF(J)
+                  IF (LNRM) THEN
+                     CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+                     ISTEP = 0
+                     CALL CENRES(ISTEP,LRAT,LNRM)
+                  ENDIF
                   CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT)
+                  IF (LNRM) THEN
+                     ISTEP = 1
+                     CALL CENRES(ISTEP,LRAT,LNRM)
+                  ENDIF
+                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
             ENDIF
             
             IPHASE = 3
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
             IBIN = 0
@@ -562,8 +598,8 @@ ckr            IWEIGHT = 1
             IWEIGHT = 0
 c - This is the normal table to fill the default values
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL CENRES(LRAT)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+            CALL CENRES(ISTEP,LRAT,LNRM)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
 c - Loop over files
@@ -623,7 +659,7 @@ ckr            CYCLE
                ENDIF
 c - These are the stat. tables to get the deviations
                CALL FX9999CC(FILENAMES,MUR,MUF,0,XSECT0)
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ITAB,LRAT)
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ITAB,LRAT,LNRM)
  20            CONTINUE
             ENDDO
             
@@ -635,7 +671,7 @@ c - These are the stat. tables to get the deviations
      >           "################################"
             
             IPHASE = 3
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Special statistics output
 
@@ -767,16 +803,16 @@ c - (ISCALE=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          IPHASE  = 1
          IMODE   = 3
          IWEIGHT = 0
-         CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL CENRES(ISTEP,LRAT,LNRM)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
          DO J=1,NPDF
             CALL INITPDF(J)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
          ENDDO
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -843,8 +879,8 @@ c - 2-point scheme
          IF (LRAT) THEN
             NRAP = 2*NRAPIDITY
          ENDIF
-         CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL CENRES(ISTEP,LRAT,LNRM)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
@@ -853,11 +889,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT,LNRM)
  10         CONTINUE
          ENDDO
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 ckr No log file output, but store in histograms
          ISCALE = 3
          CALL PDFFILL(NRAP,6,-1,ISCALE,WTDXLM)
@@ -888,8 +924,8 @@ c - 6-point scheme
          IF (LRAT) THEN
             NRAP = 2*NRAPIDITY
          ENDIF
-         CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL CENRES(ISTEP,LRAT,LNRM)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
          DO ISCALE=1,NSCALES
 ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
@@ -898,11 +934,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             MUR = MURSCALE(ISCALE)
             MUF = MUFSCALE(ISCALE)
             CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT)
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCALE,LRAT,LNRM)
  11         CONTINUE
          ENDDO
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -994,8 +1030,8 @@ ckr         CALL FX9999CC(FILENAME,MUR,MUF,1,XSECT0)
          IPHASE  = 1
          IMODE   = 4
          IWEIGHT = 0
-         CALL CENRES(LRAT)
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL CENRES(ISTEP,LRAT,LNRM)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Normal result
          ISCALE = 3
@@ -1003,9 +1039,9 @@ c - Normal result
          MUF = MUFSCALE(ISCALE)
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          IPHASE = 2
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT)
+         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//

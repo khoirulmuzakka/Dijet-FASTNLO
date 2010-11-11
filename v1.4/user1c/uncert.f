@@ -1,8 +1,8 @@
-      SUBROUTINE UNCERT(IPHASE,IMODE,IWEIGHT,IVAR,LRAT)
+      SUBROUTINE UNCERT(IPHASE,IMODE,IWEIGHT,IVAR,LRAT,LNRM)
       
       IMPLICIT NONE
       INTEGER IPHASE,IMODE,IWEIGHT,IVAR
-      LOGICAL LRAT
+      LOGICAL LRAT,LNRM
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       DOUBLE PRECISION DIFF,SUMM,RATIO
@@ -104,7 +104,7 @@ c - This is the order counting in fnx9999 common ...
                      DIFFPROC = DIFFPROC + DIFF
                      CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
      >                    SUMM,DIFF,WEIGHT,
-     >                    LRAT,IPT,NBIN)
+     >                    LRAT,IPT,NBIN,LNRM)
                   ENDDO
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
@@ -112,11 +112,11 @@ c - This is the order counting in fnx9999 common ...
                   DIFFORD = DIFFORD + DIFF
                   CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,IORD,
      >                 SUMMPROC,DIFFPROC,WEIGHT,
-     >                 LRAT,IPT,NBIN)
+     >                 LRAT,IPT,NBIN,LNRM)
                ENDDO
                CALL SUMMUP(IVAR,IBIN,NSUBPROC+1,NORD+1,
      >              SUMMORD,DIFFORD,WEIGHT,
-     >              LRAT,IPT,NBIN)
+     >              LRAT,IPT,NBIN,LNRM)
                DO ISUB=1,NSUBPROC
                   SUMMORD = 0D0
                   DIFFORD = 0D0
@@ -128,7 +128,7 @@ c - This is the order counting in fnx9999 common ...
                   ENDDO
                   CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
      >                 SUMMORD,DIFFORD,WEIGHT,
-     >                 LRAT,IPT,NBIN)
+     >                 LRAT,IPT,NBIN,LNRM)
                ENDDO
             ENDDO
          ENDDO
@@ -311,10 +311,11 @@ cdebug
 
 
 
-      SUBROUTINE CENRES(LRAT)
+      SUBROUTINE CENRES(ISTEP,LRAT,LNRM)
       
       IMPLICIT NONE
-      LOGICAL LRAT
+      INTEGER ISTEP
+      LOGICAL LRAT,LNRM
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN
@@ -322,18 +323,21 @@ cdebug
       
 
 *---Initialization	
-      IBIN = 0
-      DO IRAP=1,NRAPIDITY
-         DO IPT=1,NPT(IRAP)
-            IBIN = IBIN+1
-            DO IORD=1,NORD+1
-               DO ISUB=1,NSUBPROC+1
-                  MYRES(IBIN,ISUB,IORD) = 0D0
+      IF (ISTEP.EQ.0) THEN
+         IBIN = 0
+         DO IRAP=1,NRAPIDITY
+            DO IPT=1,NPT(IRAP)
+               IBIN = IBIN+1
+               DO IORD=1,NORD+1
+                  DO ISUB=1,NSUBPROC+1
+                     MYRES(IBIN,ISUB,IORD) = 0D0
+                  ENDDO
                ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      NBIN = IBIN
+         NBIN = IBIN
+      ENDIF
+
 
 
 *---Fill array
@@ -348,16 +352,35 @@ cdebug
      >                 MYRES(IBIN,NSUBPROC+1,IORD) + 
      >                 MYRES(IBIN,ISUB,IORD)
 ckr Centrality ratio: LRAT
+ckr Normalization: LNRM
                   IF (LRAT) THEN
                      MYRES(IBIN+NBIN,ISUB,IORD) = 
      >                    MYRES(IPT,ISUB,IORD) /
      >                    RESULT(IBIN,ISUB,IORD)
+                  ELSEIF (LNRM) THEN
+                     IF (ISTEP.EQ.0) THEN
+                        MYRES(IBIN+NBIN,ISUB,IORD) = 
+     >                       1D0 / RESULT(IBIN,ISUB,IORD)
+                     ELSE
+                        MYRES(IBIN+NBIN,ISUB,IORD) = 
+     >                       MYRES(IBIN,ISUB,IORD) /
+     >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                     ENDIF
                   ENDIF
                ENDDO
                IF (LRAT) THEN
                   MYRES(IBIN+NBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IPT,NSUBPROC+1,IORD) / 
      >                 MYRES(IBIN,NSUBPROC+1,IORD)
+               ELSEIF (LNRM) THEN
+                  IF (ISTEP.EQ.0) THEN
+                     MYRES(IBIN+NBIN,NSUBPROC+1,IORD) = 
+     >                    1D0 / RESULT(IBIN,NSUBPROC+1,IORD)
+                  ELSE
+                     MYRES(IBIN+NBIN,NSUBPROC+1,IORD) = 
+     >                    MYRES(IBIN,NSUBPROC+1,IORD) /
+     >                    MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
+                  ENDIF
                ENDIF
                MYRES(IBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IBIN,NSUBPROC+1,NORD+1) +
@@ -367,6 +390,15 @@ ckr Centrality ratio: LRAT
                MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IPT,NSUBPROC+1,NORD+1) /
      >              MYRES(IBIN,NSUBPROC+1,NORD+1)
+            ELSEIF (LNRM) THEN
+               IF (ISTEP.EQ.0) THEN
+                  MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
+     >                 1D0 / RESULT(IBIN,NSUBPROC+1,NORD+1)
+               ELSE
+                  MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
+     >                 MYRES(IBIN,NSUBPROC+1,NORD+1) /
+     >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
+               ENDIF
             ENDIF
             DO ISUB=1,NSUBPROC
                DO IORD=1,NORD
@@ -378,6 +410,15 @@ ckr Centrality ratio: LRAT
                   MYRES(IBIN+NBIN,ISUB,NORD+1) = 
      >                 MYRES(IPT,ISUB,NORD+1) /
      >                 MYRES(IBIN,ISUB,NORD+1)
+               ELSEIF (LNRM) THEN
+                  IF (ISTEP.EQ.0) THEN
+                     MYRES(IBIN+NBIN,ISUB,NORD+1) = 
+     >                    1D0 / RESULT(IBIN,ISUB,NORD+1)
+                  ELSE
+                     MYRES(IBIN+NBIN,ISUB,NORD+1) = 
+     >                    MYRES(IBIN,ISUB,NORD+1) /
+     >                    MYRES(IBIN+NBIN,ISUB,NORD+1)
+                  ENDIF
                ENDIF
             ENDDO
          ENDDO
@@ -406,12 +447,12 @@ cdebug
       
       
       SUBROUTINE SUMMUP(IVAR,IBIN,ISUB,IORD,SUMM,DIFF,WEIGHT,
-     >     LRAT,IBREF,NBIN)
+     >     LRAT,IBREF,NBIN,LNRM)
       
       IMPLICIT NONE
       INTEGER IVAR,IBIN,IORD,ISUB,IBREF,NBIN
       DOUBLE PRECISION SUMM,DIFF,WEIGHT
-      LOGICAL LRAT
+      LOGICAL LRAT,LNRM
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
       DOUBLE PRECISION RATIO,RDIFF
@@ -461,6 +502,53 @@ cdebug
          RATIO =
      >        WRES(IBREF,ISUB,IORD) /
      >        WRES(IBIN,ISUB,IORD)
+         WRES(IBIN+NBIN,ISUB,IORD) = RATIO
+         NTN(IBIN+NBIN,ISUB,IORD) =
+     >        NTN(IBIN+NBIN,ISUB,IORD)  +
+     >        1 
+         WT(IBIN+NBIN,ISUB,IORD) =
+     >        WT(IBIN+NBIN,ISUB,IORD)   +
+     >        WEIGHT 
+         WT2(IBIN+NBIN,ISUB,IORD) =
+     >        WT2(IBIN+NBIN,ISUB,IORD)  +
+     >        WEIGHT*WEIGHT 
+         WTX(IBIN+NBIN,ISUB,IORD) = 
+     >        WTX(IBIN+NBIN,ISUB,IORD)  +
+     >        RATIO*WEIGHT
+         WTX2(IBIN+NBIN,ISUB,IORD) = 
+     >        WTX2(IBIN+NBIN,ISUB,IORD) +
+     >        RATIO*RATIO*WEIGHT
+         IF (RATIO.LT.WTXMIN(IBIN+NBIN,ISUB,IORD)) THEN
+            WTXMIN(IBIN+NBIN,ISUB,IORD) = RATIO
+            IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+               IJMIN(IBIN+NBIN) = IVAR
+            ENDIF
+         ENDIF
+         IF (RATIO.GT.WTXMAX(IBIN+NBIN,ISUB,IORD)) THEN
+            WTXMAX(IBIN+NBIN,ISUB,IORD) = RATIO
+            IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+               IJMAX(IBIN+NBIN) = IVAR
+            ENDIF
+         ENDIF
+         RDIFF = RATIO -
+     >        MYRES(IBIN+NBIN,ISUB,IORD)
+         IF (RDIFF.GT.0D0) THEN
+            WTDXU2(IBIN+NBIN,ISUB,IORD) =
+     >           WTDXU2(IBIN+NBIN,ISUB,IORD) + RDIFF*RDIFF
+            IF (RDIFF.GT.WTDXUM(IBIN+NBIN,ISUB,IORD)) THEN
+               WTDXUM(IBIN+NBIN,ISUB,IORD) = RDIFF
+            ENDIF
+         ELSE
+            WTDXL2(IBIN+NBIN,ISUB,IORD) =
+     >           WTDXL2(IBIN+NBIN,ISUB,IORD) + RDIFF*RDIFF
+            IF (RDIFF.LT.WTDXLM(IBIN+NBIN,ISUB,IORD)) THEN
+               WTDXLM(IBIN+NBIN,ISUB,IORD) = RDIFF
+            ENDIF
+         ENDIF
+      ELSEIF (LNRM) THEN
+         RATIO =
+     >        WRES(IBIN,ISUB,IORD) /
+     >        WRES(IBIN+NBIN,ISUB,IORD)
          WRES(IBIN+NBIN,ISUB,IORD) = RATIO
          NTN(IBIN+NBIN,ISUB,IORD) =
      >        NTN(IBIN+NBIN,ISUB,IORD)  +
