@@ -790,7 +790,7 @@ if ( $mode == 0 || $mode == 1 ) {
 			     "$install{fastjet}[2]: $ret, aborted!\n";}
 	    chdir "$install{fastjet}[2]";
 	    print "\nfastrun.pl: Configuring fastjet ...\n";
-	    $ret = system("./configure --enable-shared --prefix=$aidir --bindir=$aidir/bin");
+	    $ret = system("./configure --enable-shared --enable-allplugins --prefix=$aidir --bindir=$aidir/bin");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making fastjet ...\n";
 	    $ret = system("make -j2");
