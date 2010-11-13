@@ -21,20 +21,25 @@ libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlock
 libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
   fnloBlockBNlojet.cc \
   fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
+
 # If ROOT is installed, add a dictionary to the library
-#if HAVEROOT
-#  libfastnlo_la_SOURCES += fnloTableDict.cc
-#  libfastnloUser_la_SOURCES += fnloTableDict.cc
+if HAVE_ROOT
+  libfastnlo_la_SOURCES += fnloTableDict.cc
+  libfastnloUser_la_SOURCES += fnloTableDict.cc
+  fnloTableDict.cc: fnloTable.h fnloTableUser.h
+	${ROOTCINT} -f fnloTableDict.cc -c -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h -I${ROOTINCLUDEPATH} LinkDef.h
+else
+  fnloTableDict.cc: fnloTable.h fnloTableUser.h
+	echo "ROOT support needs to be enabled at configuration time! Creating empty file fnloTableDict.cc ..."; touch fnloTableDict.cc
+endif
 #  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
-#	-${ROOTCINTPATH} -f fnloTableDict.cc -c -I${LHAPDFINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
-#endif
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 
 
 # Preprocessor flags
 AM_CPPFLAGS = -I${NLOJETINCLUDEPATH} -I${LHAPDFINCLUDEPATH}
-if HAVEROOT
+if HAVE_ROOT
   AM_CPPFLAGS += -I${ROOTINCLUDEPATH}
 endif
 

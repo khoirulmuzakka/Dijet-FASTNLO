@@ -336,50 +336,47 @@ AM_CONDITIONAL(HAVE_CERNLIB, test "x$CERNLIBPATH" != "x")
 
 # ROOT
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Looking for ROOT installation ...])
+AC_MSG_NOTICE([Checking whether ROOT support is requested ...])
 AC_MSG_NOTICE([******************************************])
-#AC_PATH_PROG([ROOTBIN],[root-config])
-#if test "x$ROOTBIN" = "x"; then
-#  AC_MSG_WARN([No path to ROOT binaries found, try to use ROOTSYS environment variable ...])
-#  if test "x$ROOTSYS" = "x"; then
-#    AC_MSG_WARN([ROOTSYS environment variable is not set. Continue without ROOT.])
-#  else
-#    AC_MSG_RESULT([Using environment variable ROOTSYS=$ROOTSYS to locate ROOT installation ...])
-#    AC_MSG_RESULT([Searching for executable root-config in $ROOTSYS/bin ...])
-#    AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
-#    if test "x$ROOTBIN" = "x"; then
-#      AC_MSG_WARN([ROOT binaries not found in $ROOTSYS/bin. Continue without ROOT.])
-#    else
-#      AC_SUBST([ROOTPREFIX], [`$ROOTBIN --prefix`])
-#    fi
-#  fi
-#else
-#  AC_SUBST([ROOTPREFIX], [`$ROOTBIN --prefix`])
-#fi
-#AC_MSG_NOTICE([******************************************])
-#if test "x$ROOTPREFIX" = "x"; then
-#  AC_MSG_WARN([No installation of ROOT found, will work without ROOT dictionaries.])
-#else
-#  AC_SUBST([ROOTSYS], [$ROOTPREFIX])
-#  AC_SUBST([ROOTBINPATH], [`$ROOTBIN --bindir`])
-#  AC_SUBST([ROOTLIBPATH], [`$ROOTBIN --libdir`])
-#  AC_SUBST([ROOTINCLUDEPATH], [`$ROOTBIN --incdir`])
-#fi
-AC_MSG_WARN([ROOT will be ignored for the moment!])
-#AC_CHECK_PROGS([have_rootcint],[rootcint],[],["$ROOTSYS/bin"])
-#if test "x$have_rootcint" = "x"; then
-#  AC_MSG_WARN([ROOTSYS environment variable set and/or root-config found, but no rootcint. Not a big problem, but library will be build without ROOT dictionary.])
-#else
-# No use of ROOT for the moment
-#  AC_SUBST([ROOTCINTPATH], ["$ROOTSYS/bin/rootcint"])  
-  AC_SUBST([ROOTCINTPATH], [""])  
-#  AC_MSG_RESULT([Using $ROOTSYS for the ROOT installation path])
-#  AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
-#  AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
-#  AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
-#  AC_MSG_RESULT([Using $ROOTCINTPATH for rootcint path])
-#fi
-AM_CONDITIONAL(HAVEROOT, test "x$ROOTCINTPATH" != "x")
+
+AC_ARG_WITH([root],
+	[AS_HELP_STRING([--with-root],
+	 [Specify location of ROOT installation. By default fastNLO is built
+	  without ROOT support.])],
+	[if test "x$withval" = "xno"; then
+	    AC_MSG_NOTICE([Building fastNLO without ROOT support!])
+	 else
+     	    if test "x$withval" != "xyes"; then
+	       AC_SUBST([ROOTSYS],[$withval])
+	       AC_MSG_NOTICE([Using given path $ROOTSYS as location of ROOT installation.])
+	       AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
+               if test "x$ROOTBIN" = "x"; then
+                  AC_MSG_ERROR([ROOT binaries not found in $ROOTSYS/bin! Configuration aborted!])
+               fi
+               AC_PATH_PROG([ROOTCINT],[rootcint],[],["$ROOTSYS/bin"])
+               if test "x$ROOTCINT" = "x"; then
+                  AC_MSG_ERROR([ROOTSYS variable set and/or root-config found, but no rootcint!
+                                ROOT support not possible, configuration aborted!])
+               fi
+	    else
+               AC_MSG_ERROR(["yes" is not a valid ROOTSYS path! Configuration aborted!])
+	    fi
+	 fi],
+	[])
+
+if test "x$ROOTBIN" != "x"; then
+   AC_SUBST([ROOTPREFIX],  [`$ROOTBIN --prefix`])
+   AC_SUBST([ROOTBINPATH], [`$ROOTBIN --bindir`])
+   AC_SUBST([ROOTLIBPATH], [`$ROOTBIN --libdir`])
+   AC_SUBST([ROOTINCLUDEPATH],[`$ROOTBIN --incdir`])
+   AC_SUBST([ROOTLIBS],[`$ROOTBIN --libs`])
+   AC_MSG_RESULT([Using $ROOTPREFIX for the ROOT installation path])
+   AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
+   AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
+   AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+   AC_MSG_RESULT([Using $ROOTLIBS for the linker flags])
+fi
+AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTCINT" != "x")
 
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
