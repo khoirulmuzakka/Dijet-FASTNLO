@@ -334,10 +334,14 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
 	$install{fastNLOfix}[0] = "fastNLO-rev${frev}-fix";
 	$install{fastNLOfix}[1] = "fastNLO-rev${frev}-fix";
     } else {
+#	$install{nlojet}[0]     = "nlojet++-4.1.2";
+#	$install{nlojet}[1]     = "nlojet++-4.1.2";
+#	$install{nlojetfix}[0]  = "nlojet++-4.1.2-fix";
+#	$install{nlojetfix}[1]  = "nlojet++-4.1.2";
 	$install{nlojet}[0]     = "nlojet++-4.1.3";
 	$install{nlojet}[1]     = "nlojet++-4.1.3";
-	$install{nlojetfix}[0]  = "";
-	$install{nlojetfix}[1]  = "";
+	$install{nlojetfix}[0]  = "nlojet++-4.1.3-fix";
+	$install{nlojetfix}[1]  = "nlojet++-4.1.3";
 	$install{znpdf}[0]      = "cteq-pdf-1.0.4";
 	$install{znpdf}[1]      = "cteq-pdf-1.0.4";
 	$install{znpdffix}[0]   = "";
