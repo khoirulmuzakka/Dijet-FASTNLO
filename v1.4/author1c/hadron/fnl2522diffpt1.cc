@@ -692,10 +692,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   if (delph >= pthigh[rapbin][j] && delph < pthigh[rapbin][(j+1)]) {
 	     ptbin=j;
 	     binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
-	     //DEBUG
-	     cout << "-------------------- Next event --------------------" << endl; 
-	     cout << "binwidth = " << binwidth << ", pi/40 = " << pi/40. << endl;
-	     //DEBUGEND
 	     break;
 	   }
 	 }
