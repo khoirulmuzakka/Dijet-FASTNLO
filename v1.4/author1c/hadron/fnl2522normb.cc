@@ -1,8 +1,8 @@
 //
-// fastNLO author code for fnl2522 (differential in dPhi):
+// fastNLO author code for fnl2522 (normalization):
 //     CMS Dijet Azimuthal Decorrelation, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//
+//    
 // 
 // last modification
 //
@@ -82,7 +82,7 @@ class UserHHC : public user_hhc
 
    int nxtot;      // no of xbins 
    vector< vector<double> >xlimit; // array for lower x limits
-   vector< vector<double> >cxlimit; // array for lower x limit corrections
+   vector< vector<double> >cxlimit; // array for lower x limits
    vector< vector<double> >hxlim; // array for function h at xlimit
    vector< vector<double> >xsmallest; // array for smallest actual x values
    //    array for the weights MAIN ARRAY
@@ -120,8 +120,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
 {
    //  number of jets 
    //nj = 1U;
-   //nj = 2U;
-   nj = 3U;
+   nj = 2U;
+   //nj = 3U;
 
   //  total c.m. energy squared
   //s =     40000.; // RHIC               200 GeV
@@ -144,7 +144,6 @@ void UserHHC::initfunc(unsigned int)
    unsigned int nd;
    double      s;
    inputfunc(nj,nu,nd,s);
-   static const double pi = 3.14159265358979323846;
 
    // ********************************************************
    // ********** switch for reference mode on/off ************
@@ -160,10 +159,10 @@ void UserHHC::initfunc(unsigned int)
 
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
-   // Here: pT
+   // 
    // # of bins
    nrap = 1;
-   double rapb[2] = { 80., 110. };
+   double rapb[2] = { 0.0, 1.1 };
    // In reference mode: Double no. of bins
    nrap = nrap*(iref+1);
    
@@ -186,12 +185,12 @@ void UserHHC::initfunc(unsigned int)
      cout << "i, raphigh: " << i << ", " << raphigh[i] << endl;
    }
    //DEBUGEND
-
+   
    // Second dimension (histogram x axis), usually pT
-   // Here:  Delta Phi between leading two jets
+   // Here:  Leading jet pT
    // 
    // # of bins npt per irap bin of first dimension
-   int nptb[1] = { 20 };
+   int nptb[1] = { 5 };
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      npt[i] = nptb[i]; 
@@ -209,9 +208,10 @@ void UserHHC::initfunc(unsigned int)
    }
 
    // Array for bin boundaries
+   double ptb[6] = { 80.0, 110.0, 140.0, 200.0, 300.0, 1000. };
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      for (int j=0; j<npt[i]+1; j++) { 
-       pthigh[i][j] = pi/2. + double(j) * pi/40.;
+       pthigh[i][j] = ptb[j];
      }
    }
    // In reference mode: Copy high end of bin boundaries
@@ -295,11 +295,11 @@ void UserHHC::initfunc(unsigned int)
          }
 
          // - Setup the xlimit array - computed from kinematic constraints
-         double pt = raphigh[j];
+         double pt = pthigh[j][k];
          double xt = 2*pt/sqrt(s);
          double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
-         if (ymax>1.1) ymax=1.1;
-	 double ymin = 0.0;
+         if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
+	 double ymin = raphigh[(j)];
 	 // - Check limit only for first loop over rap. bins when arrays
          //   are doubled for reference calculation
 	 if ( (ymin > ymax) && (iref == 0 || (iref == 1 && j < nrap/2 ) ) ) {
@@ -324,24 +324,25 @@ void UserHHC::initfunc(unsigned int)
 	 }
 	 xlimit[j][k] = xmin;
          // ---- Apply safety factors cxlimit
-	 // Original value from Markus Tevatron scenario: 1.55
-	 //	 cxlimit[j][k] = 1.55 * pi/(pthigh[j][k+1] + 1.0);
-	 // For LHC decrease to at most 95% => 1.4725
-	 cxlimit[j][k] = 1.45 * pi/(pthigh[j][k+1] + 1.0);
+	 // Original value from Markus Tevatron scenario: 1.20
+	 //	 xlimit[j][k] = xlimit[j][k]*1.2; // small safety factor -> E-scheme
+	 // For LHC at 7 TeV this gives problems! Inclusive jets have C = 0.95.
+	 // Change from 1.20 to 1.00!
+	 cxlimit[j][k] = 1.00;
 	 xlimit[j][k] = xlimit[j][k] * cxlimit[j][k];
-       
+         
          hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
          xsmallest[j][k]=0.999;
 
          // - Setup the murval and mufval arrays
          murval[j][k][0] = pt * 1.03;
          mufval[j][k][0] = murval[j][k][0];
-         murval[j][k][1] = raphigh[j+1] * 0.90;
+         murval[j][k][1] = pthigh[j][k+1] * 0.90;
          mufval[j][k][1] =  murval[j][k][1];
-	 if (j==3) {    // special value for bin 800-5000
-	   murval[j][k][1] = 1220.0 ;
-	   mufval[j][k][1] =  murval[j][k][1];
-	 }
+ 	 if (k==3) {    // special value for bin 800-5000
+ 	   murval[j][k][1] = 1220.0 ;
+ 	   mufval[j][k][1] =  murval[j][k][1];
+ 	 }
          for( int l = 0; l < nscalevar; l++) {
 	   murvaltrans[j][k][l][0]=log(log(murscale[l]*murval[j][k][0]/mu0scale)); 
 	   murvaltrans[j][k][l][1]=log(log(murscale[l]*murval[j][k][1]/mu0scale));
@@ -376,7 +377,7 @@ void UserHHC::initfunc(unsigned int)
 	      xlimit[j][k],cxlimit[j][k],pthigh[j][k],raphigh[(j+1)]);
      }
    }
-   
+
    // ===== variables for the bi-cubic interpolation =====
    // - the relative distances to the four nearest bins
    cmax.resize (4); cmin.resize (4);
@@ -399,10 +400,10 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"    Scenario fnl2522diffpt1:"<<endl;
-   cout<<"      CMS Dijet Azimuthal Decorrelation, E_cms = 7 TeV"<<endl;
-   cout<<"      for fastjet anti-kT algo with R=0.5 in E-scheme"<<endl;
-   cout<<"      (differential)"<<endl;
+   cout<<"    Scenario fnl2522normb:"<<endl;
+   cout<<"      CMS Dijet Azimuthal Decorrelation, E_cms = 7 TeV" << endl;
+   cout<<"      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl;
+   cout<<"      (normalization)"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;
    cout<<"        store table after "<<nwrite<<" events"<<endl;
@@ -440,6 +441,7 @@ void UserHHC::initfunc(unsigned int)
      pdf.mode(pdf_cteq6::nlo); pdf.loop(2);
    }
 
+   start_time = ::time(0);
 }
 
 
@@ -452,9 +454,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //---------------------------------------------------
    //--------- start event processing ------------------
    //---------------------------------------------------
-
-   static const double pi = 3.14159265358979323846;
-   static const double twopi = 6.28318530717958647692;
 
    //----- variables: CM energy and x-values -----------
    double xmin=0.0, xmax=0.0;
@@ -480,8 +479,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    pj = jetclus(p);
    int nj = pj.upper(); 
 
-   // Check on maximal no. of jets: 4
-   if (nj > 4) {
+   // Check on maximal no. of jets: 3
+   if (nj > 3) {
      cout << "ERROR: This scenario is not suited for " << nj <<
        " jets. Aborted!" << endl;
      exit(1);
@@ -491,8 +490,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double ptlow = 30.;
    // highest (pseudo-)rapidity for jets to be considered
    double yjmax = 5.0;
-   // highest (pseudo-)rapidity for central dijets to be considered
-   double yjcmax = 1.1;
 
    //DEBUG
    //   cout << "-------------------- Next event --------------------" << endl; 
@@ -656,265 +653,188 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      // Determine maximal pT and (pseudo-)rapidity of two leading jets
      //     double ptmax = max(pt1,pt2); // Has to be equal to pt1 ...!
      double yjjmax  = max(y1,y2);
-     double ph1 = pj[ij1].phi();
-     double ph2 = pj[ij2].phi();
-     double delph   = abs(ph1 - ph2);
-     if (delph > pi) delph = twopi - delph;
-     
+
      //DEBUG
      //     cout << "njet, pt1, pt2, yjjmax: " << njet << ", " << pt1 << ", " << pt2 << ", " << yjjmax << endl;
-     //     cout << "njet, ph1, ph2, dphi: " << njet << ", " << ph1 << ", " << ph2 << ", " << delph << endl;
      //DEBUGEND
-     
-     if (delph > pthigh[0][0] && raphigh[0] <= pt1 && pt1 < raphigh[1] && yjjmax < yjcmax) {
+
+     if (pt1 > pthigh[0][0] && yjjmax < raphigh[1]) {
        //DEBUG
        //       cout << "Event accepted: " << endl;
-       //       cout << "njet, pt1, pt2, yjjmax, dphi: " << njet << ", " << pt1 << ", " << pt2 << ", " << yjjmax << ", " << delph << endl;
+       //       cout << "njet, pt1, pt2, yjjmax: " << njet << ", " << pt1 << ", " << pt2 << ", " << yjjmax << endl;
        //       cout << "==================== End of event ====================" << endl; 
        //DEBUGEND
        // --- Later this variable will be the ren./fact. scale
-       double pt = pt1;
-       
-       // --- determine y(=pT) and pt(=DPhi) bin 
-       double binwidth = 1.0;    //only DeltaPhi binwidth!
-       int rapbin = -1;
-       int nloop = nrap;   // - important for iref==1: different No loops
-       if (iref==1) nloop = nrap/2; // -> in reference mode
-       for( int j = 0; j < nloop; j++) {        
-	 if (pt >= raphigh[j] && pt < raphigh[(j+1)]) {
-	   rapbin=j;
+       double pt  = pt1;
+       int rapbin = 0;
+       int ptbin  = -1;
+       for ( int j = 0; j < npt[rapbin]; j++) {
+	 if (pt >= pthigh[rapbin][j] && pt < pthigh[rapbin][(j+1)]) {
+	   ptbin=j;
 	   break;
 	 }
        }
-       if (rapbin >=0 ) {              
-	 int ptbin  = -1;
-	 for( int j = 0; j < npt[rapbin]; j++) {
-	   if (delph >= pthigh[rapbin][j] && delph < pthigh[rapbin][(j+1)]) {
-	     ptbin=j;
-	     binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
-	     //DEBUG
-	     cout << "-------------------- Next event --------------------" << endl; 
-	     cout << "binwidth = " << binwidth << ", pi/40 = " << pi/40. << endl;
-	     //DEBUGEND
-	     break;
+
+       //---------- compute weight, fill fastNLO array
+       if ( ptbin>=0 ) {
+	 // test if x_min in event is lower than x_limit
+	 //      if yes -> make big warning!!! 
+	 //      -> need to change x_limit values
+	 if (xmin<xlimit[rapbin][ptbin]){
+	   printf("fastNLO: Error! xmin = %f < xlimit = %f at p_T = %f GeV and y = %f\n",
+		  xmin,xlimit[rapbin][ptbin],pt,yjjmax);
+	   printf("         for bin no. %i of first observable (normally rapidity y): [%f, %f]\n",
+		  rapbin,raphigh[rapbin],raphigh[rapbin+1]);
+	   printf("         and bin no. %i of second observable (normally p_T): [%f, %f]\n",
+		  ptbin,pthigh[rapbin][ptbin],pthigh[rapbin][ptbin+1]);
+	   printf("         Please correct determination of lower x limits in this scenario!\n");
+	   exit(1);
+	 }
+	 
+	 // *******  identify smallest x value in each pT/y bin  *******
+	 //               -> to optimize the x-limit values
+	 //	 if (xmin<xsmallest[rapbin][ptbin]*0.98){// 0.98 reduces output
+	 if (xmin<xsmallest[rapbin][ptbin]*0.95){// Reduce even further
+	   xsmallest[rapbin][ptbin] = xmin;
+	   if((itype==amplitude_hhc::lo && nevents> 300000000)|| // 7h 
+	      (itype==amplitude_hhc::nlo && nevents> 120000000)){  // 10h
+	     //if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 
+	     //(itype==amplitude_hhc::nlo && nevents> 60000000)){  // 3h
+	     cout<<" "<<endl;
+	     cout<<">>>>>> smaller x found in bin  "<<rapbin<<"  "<<ptbin
+		 <<"   -  "<<xmin<<"  "<<xlimit[rapbin][ptbin]<<"  :  "<<
+	       (xmin/xlimit[rapbin][ptbin])<<"  >> "<<nevents<<endl;
+	     for( int j = 0; j < nrap; j++) {
+	       for( int k = 0; k < npt[j]; k++) {
+		 cout<<"    bin "<<j<<"  "<<k<<"  "<<xsmallest[j][k]
+		     <<"  "<<xlimit[j][k]
+		     <<"   "<<pthigh[j][k]<<"  "<<raphigh[(j+1)]<<"  :  "
+			   <<(xsmallest[j][k]/xlimit[j][k])<<endl;
+	       }
+	     }
+	   }
+	 }
+	 // ------------  end: identify smallest x  -------------
+
+
+	 // **********  determine x_ij position in grid  ************
+	 //--- determine fractional contributions for all four x-bins
+	 // define the x-bin numbers in the range  [0:nxtot[
+	 double hxlimit = hxlim[rapbin][ptbin];
+	 int nxmin = int(nxtot *(hxmin-hxlimit)/(hxone-hxlimit));
+	 int nxmax = int(nxtot *(hxmax-hxlimit)/(hxone-hxlimit));
+	 
+	 //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
+	 double delta  = (hxone-hxlimit)/nxtot;
+	 double hxi =hxlimit+double(nxmax)/double(nxtot)*(hxone-hxlimit);
+	 double hxj =hxlimit+double(nxmin)/double(nxtot)*(hxone-hxlimit);
+	 double deltamax = (hxmax-hxi)/delta;
+	 double deltamin = (hxmin-hxj)/delta;
+	 if(deltamax>1.0 || deltamin>1.0 || deltamax<0.0 || deltamin<0.0){
+	   cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
+	 }                             
+	 	 
+	 // ===== variables for the bi-cubic interpolation =====
+	 // === the relative distances to the four nearest bins
+	 cmax[0] = deltamax+1.0;
+	 cmax[1] = deltamax;
+	 cmax[2] = 1.0-deltamax;
+	 cmax[3] = 2.0-deltamax;
+	 cmin[0] = deltamin+1.0;
+	 cmin[1] = deltamin;
+	 cmin[2] = 1.0-deltamin;
+	 cmin[3] = 2.0-deltamin;
+	 
+	 // === the weights for the cubic eigenfunctions (1-dim)
+	 //   - linear interpolation in 1st and last =(nxtot-1) bins
+	 //   - cubic approximation in the middle 
+	 
+	 if (nxmax==0 || nxmax==(nxtot-1)) { //linear in 1st and last bin
+	   cefmax[0] = 0.0;
+	   cefmax[1] = 1.0-cmax[1];
+	   cefmax[2] = 1.0-cmax[2];
+	   cefmax[3] = 0.0; }
+	 else {                              // cubic in the middle
+	   cefmax[1]=1.0-2.5*cmax[1]*cmax[1]+1.5*cmax[1]*cmax[1]*cmax[1];
+	   cefmax[2]=1.0-2.5*cmax[2]*cmax[2]+1.5*cmax[2]*cmax[2]*cmax[2];
+	   cefmax[0]=2.0 - 4.0*cmax[0] + 2.5*cmax[0]*cmax[0]
+	     - 0.5*cmax[0]*cmax[0]*cmax[0];
+	   cefmax[3]=2.0 - 4.0*cmax[3] + 2.5*cmax[3]*cmax[3]
+	     - 0.5*cmax[3]*cmax[3]*cmax[3];
+	 }
+	 
+	 if (nxmin==0 || nxmin==(nxtot-1)) { //linear in 1st and last bin
+	   cefmin[0] = 0.0;
+	   cefmin[1] = 1.0-cmin[1];
+	   cefmin[2] = 1.0-cmin[2];
+	   cefmin[3] = 0.0; }
+	 else {                              //  cubic in the middle 
+	   cefmin[1]=1.0-2.5*cmin[1]*cmin[1]+1.5*cmin[1]*cmin[1]*cmin[1];
+	   cefmin[2]=1.0-2.5*cmin[2]*cmin[2]+1.5*cmin[2]*cmin[2]*cmin[2];
+	   cefmin[0]=2.0 - 4.0*cmin[0] + 2.5*cmin[0]*cmin[0]
+	     - 0.5*cmin[0]*cmin[0]*cmin[0];
+	   cefmin[3]= 2.0 - 4.0*cmin[3] + 2.5*cmin[3]*cmin[3]
+	     - 0.5*cmin[3]*cmin[3]*cmin[3];
+	 }
+	 
+	 // === the weights for the bi-cubic eigenfunctions (2-dim)
+	 for( int i1 = 0; i1 < 4; i1++) {
+	   for( int i2 = 0; i2 < 4; i2++) {
+	     bicef[i1][i2] = cefmax[i1] * cefmin[i2];
 	   }
 	 }
 	 
-	 
-	 //---------- compute weight, fill fastNLO array
-	 if ( ptbin>=0 ) {
-	   // test if x_min in event is lower than x_limit
-	   //      if yes -> make big warning!!! 
-	   //      -> need to change x_limit values
-	   if (xmin<xlimit[rapbin][ptbin]){
-	     printf("fastNLO: Error! xmin = %f < xlimit = %f at p_T = %f GeV and y = %f\n",
-		    xmin,xlimit[rapbin][ptbin],pt,yjjmax);
-	     printf("         for bin no. %i of first observable (normally rapidity y): [%f, %f]\n",
-		    rapbin,raphigh[rapbin],raphigh[rapbin+1]);
-	     printf("         and bin no. %i of second observable (normally p_T): [%f, %f]\n",
-		    ptbin,pthigh[rapbin][ptbin],pthigh[rapbin][ptbin+1]);
-	     printf("         Please correct determination of lower x limits in this scenario!\n");
-	     exit(1);
-	   }
-	 
-	   // *******  identify smallest x value in each pT/y bin  *******
-	   //               -> to optimize the x-limit values
-	   //	   if (xmin<xsmallest[rapbin][ptbin]*0.98){//0.98 reduces output
-	   if (xmin<xsmallest[rapbin][ptbin]*0.95){// Reduce even further
-	     xsmallest[rapbin][ptbin] = xmin;
-	     //if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 7h 
-	     //(itype==amplitude_hhc::nlo && nevents> 120000000)){  // 10h
-	     if((itype==amplitude_hhc::lo && nevents> 100000000)|| // 2.5h 
-		(itype==amplitude_hhc::nlo && nevents> 10000000)){  // 5hh
-	       cout<<" "<<endl;
-	       cout<<">>>>>> smaller x found in bin  "<<rapbin<<"  "<<ptbin
-		   <<"   -  "<<xmin<<"  "<<xlimit[rapbin][ptbin]<<"  :  "<<
-		 (xmin/xlimit[rapbin][ptbin])<<"  >> "<<nevents<<endl;
-	       for( int j = 0; j < nrap; j++) {
-		 for( int k = 0; k < npt[j]; k++) {
-		   cout<<"    bin "<<j<<"  "<<k<<"  "<<xsmallest[j][k]
-		       <<"  "<<xlimit[j][k]
-		       <<"   "<<pthigh[j][k]<<"  "<<raphigh[(j+1)]<<"  :  "
-		       <<(xsmallest[j][k]/xlimit[j][k])<<endl;
-		 }
-	       }
-	     }
-	   }
-	   // ------------  end: identify smallest x  -------------
+	 // loop over scale variations for NLO
+	 int scalevarmax;
+	 if(itype==amplitude_hhc::lo){
+	   scalevarmax=1;
+	 }else{
+	   scalevarmax=nscalevar;
+	 }
+	 amp.pdf_and_qcd_coupling(0,1.0);
+	 for(int scalevar=0; scalevar<scalevarmax;scalevar++){
+	   double mur2 = murscale[scalevar]*murscale[scalevar] *pt*pt;
+	   double muf2 = mufscale[scalevar]*mufscale[scalevar] *pt*pt;
+	   weight_hhc wt = amp(mur2,muf2);
+	   wt = wt* reweight*reweight*reweight *389385.730;
+	   wt = wt* unitfactor;
 
+	   // deal with subprocesses 2 and 3
+	   //    - if x1>x2 -> o.k.
+	   //    - if x2>x1 -> swap weights for subprocesses 2,3
+	   if(x2>x1){
+	     double buffer;
+	     buffer = wt[1];
+	     wt[1] = wt[2];
+	     wt[2] = buffer;
+	   }
 
-	   // **********  determine x_ij position in grid  ************
-	   //--- determine fractional contributions for all four x-bins
-	   // define the x-bin numbers in the range  [0:nxtot[
-	   double hxlimit = hxlim[rapbin][ptbin];
-	   int nxmin = int(nxtot *(hxmin-hxlimit)/(hxone-hxlimit));
-	   int nxmax = int(nxtot *(hxmax-hxlimit)/(hxone-hxlimit));
-	   
-	   //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
-	   double delta  = (hxone-hxlimit)/nxtot;
-	   double hxi =hxlimit+double(nxmax)/double(nxtot)*(hxone-hxlimit);
-	   double hxj =hxlimit+double(nxmin)/double(nxtot)*(hxone-hxlimit);
-	   double deltamax = (hxmax-hxi)/delta;
-	   double deltamin = (hxmin-hxj)/delta;
-	   if(deltamax>1.0 || deltamin>1.0 || deltamax<0.0 || deltamin<0.0){
-	     cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
-	   }                             
-	   
-	   // ===== variables for the bi-cubic interpolation =====
-	   // === the relative distances to the four nearest bins
-	   cmax[0] = deltamax+1.0;
-	   cmax[1] = deltamax;
-	   cmax[2] = 1.0-deltamax;
-	   cmax[3] = 2.0-deltamax;
-	   cmin[0] = deltamin+1.0;
-	   cmin[1] = deltamin;
-	   cmin[2] = 1.0-deltamin;
-	   cmin[3] = 2.0-deltamin;
-	   
-	   // === the weights for the cubic eigenfunctions (1-dim)
-	   //   - linear interpolation in 1st and last =(nxtot-1) bins
-	   //   - cubic approximation in the middle 
-	   
-	   if (nxmax==0 || nxmax==(nxtot-1)) { //linear in 1st and last bin
-	     cefmax[0] = 0.0;
-	     cefmax[1] = 1.0-cmax[1];
-	     cefmax[2] = 1.0-cmax[2];
-	     cefmax[3] = 0.0; }
-	   else {                              // cubic in the middle
-	     cefmax[1]=1.0-2.5*cmax[1]*cmax[1]+1.5*cmax[1]*cmax[1]*cmax[1];
-	     cefmax[2]=1.0-2.5*cmax[2]*cmax[2]+1.5*cmax[2]*cmax[2]*cmax[2];
-	     cefmax[0]=2.0 - 4.0*cmax[0] + 2.5*cmax[0]*cmax[0]
-	       - 0.5*cmax[0]*cmax[0]*cmax[0];
-	     cefmax[3]=2.0 - 4.0*cmax[3] + 2.5*cmax[3]*cmax[3]
-	       - 0.5*cmax[3]*cmax[3]*cmax[3];
-	   }
-	   
-	   if (nxmin==0 || nxmin==(nxtot-1)) { //linear in 1st and last bin
-	     cefmin[0] = 0.0;
-	     cefmin[1] = 1.0-cmin[1];
-	     cefmin[2] = 1.0-cmin[2];
-	     cefmin[3] = 0.0; }
-	   else {                              //  cubic in the middle 
-	     cefmin[1]=1.0-2.5*cmin[1]*cmin[1]+1.5*cmin[1]*cmin[1]*cmin[1];
-	     cefmin[2]=1.0-2.5*cmin[2]*cmin[2]+1.5*cmin[2]*cmin[2]*cmin[2];
-	     cefmin[0]=2.0 - 4.0*cmin[0] + 2.5*cmin[0]*cmin[0]
-	       - 0.5*cmin[0]*cmin[0]*cmin[0];
-	     cefmin[3]= 2.0 - 4.0*cmin[3] + 2.5*cmin[3]*cmin[3]
-	       - 0.5*cmin[3]*cmin[3]*cmin[3];
-	   }
-	   
-	   // === the weights for the bi-cubic eigenfunctions (2-dim)
-	   for( int i1 = 0; i1 < 4; i1++) {
-	     for( int i2 = 0; i2 < 4; i2++) {
-	       bicef[i1][i2] = cefmax[i1] * cefmin[i2];
-	     }
-	   }
-	   
-	   // loop over scale variations for NLO
-	   int scalevarmax;
-	   if(itype==amplitude_hhc::lo){
-	     scalevarmax=1;
-	   }else{
-	     scalevarmax=nscalevar;
-	   }
-	   amp.pdf_and_qcd_coupling(0,1.0);
-	   for(int scalevar=0; scalevar<scalevarmax;scalevar++){
-	     double mur2 = murscale[scalevar]*murscale[scalevar] *pt*pt;
-	     double muf2 = mufscale[scalevar]*mufscale[scalevar] *pt*pt;
-	     weight_hhc wt = amp(mur2,muf2);
-	     wt = wt* reweight*reweight*reweight *389385.730;
-	     wt = wt* unitfactor/binwidth;
-	     
-	     // deal with subprocesses 2 and 3
-	     //    - if x1>x2 -> o.k.
-	     //    - if x2>x1 -> swap weights for subprocesses 2,3
-	     if(x2>x1){
-	       double buffer;
-	       buffer = wt[1];
-	       wt[1] = wt[2];
-	       wt[2] = buffer;
+	   //make linear interpolation for scalebins
+	   double hmu = log(log(murscale[scalevar]*pt/mu0scale));
+
+	   for(int scalebin=0; scalebin<nscalebin;scalebin++){
+	     double deltascale;
+	     switch(scalebin){
+	     case 0:
+	       deltascale = 1.0-(hmu-murvaltrans[rapbin][ptbin][scalevar][0])/
+		 (murvaltrans[rapbin][ptbin][scalevar][1]-
+		  murvaltrans[rapbin][ptbin][scalevar][0]);
+	       break;
+	     case 1:
+	       deltascale = 1.0-(murvaltrans[rapbin][ptbin][scalevar][1]-hmu)/
+		 (murvaltrans[rapbin][ptbin][scalevar][1]-
+		  murvaltrans[rapbin][ptbin][scalevar][0]);
+	       break;
+	     default:
+	       deltascale = 0.0;
+	       printf("Error: not defined scalebin accessed.\n");
+	       exit(1);
+	       ;
 	     }
 
-	     //make linear interpolation for scalebins
-	     double hmu = log(log(murscale[scalevar]*pt/mu0scale));
-	     
-	     for(int scalebin=0; scalebin<nscalebin;scalebin++){
-	       double deltascale;
-	       switch(scalebin){
-	       case 0:
-		 deltascale = 1.0-(hmu-murvaltrans[rapbin][ptbin][scalevar][0])/
-		   (murvaltrans[rapbin][ptbin][scalevar][1]-
-		    murvaltrans[rapbin][ptbin][scalevar][0]);
-		 break;
-	       case 1:
-		 deltascale = 1.0-(murvaltrans[rapbin][ptbin][scalevar][1]-hmu)/
-		   (murvaltrans[rapbin][ptbin][scalevar][1]-
-		    murvaltrans[rapbin][ptbin][scalevar][0]);
-		 break;
-	       default:
-		 deltascale = 0.0;
-		 printf("Error: not defined scalebin accessed.\n");
-		 exit(1);
-		 ;
-	       }
-
-	       // ** ----------------------------------------------------
-	       // ** now fill half-table
-	       // ** loop over all 16 points that receive contributions
-	       for( int i1 = 0; i1 < 4; i1++) {
-		 for( int i2 = 0; i2 < 4; i2++) {
-		   int imax = nxmax +i1 -1;   // the target index (xmax)
-		   int imin = nxmin +i2 -1;  // the target index (xmin)
-		   weight_hhc wtmp = wt;  // a working copy of the weights
-		   
-		   // - check if above diagonal? project back and swap!
-		   if (imin>imax) { 
-		     int di = imin - imax;
-		     imax = imax + di;   // modify indicees
-		     imin = imin - di;		
-		     double buffer  = wtmp[1]; // swap subprocesses 2,3
-		     wtmp[1] = wtmp[2];
-		     wtmp[2] = buffer;
-		   } 
-		   // - ignore if xmin coordinate is < 0 (contrib is zero!)
-		   // - ignore if xmax coordinate is >= nxtot
-		   //     (contrib. > nxtot are zero / =nxtot PDF is zero)
-		   if (imax<nxtot && imin>=0) {
-		     weights[rapbin][ptbin][imax][imin][scalevar][scalebin] += 
-		       bicef[i1][i2] * deltascale * wtmp;
-		   }
-		 }
-	       }
-	     }//-end loop scalebin
-	   }//-end loop scalevar
-	 
-	   // ** ------------------------------------------------------
-	   // **   only in "reference mode":
-	   // **         -> fill half-table with pdfs and alphas
-	   // **         -> only for a single scale (index=refscale)
-	   // **         -> don't throw away contributions at x=1
-	   // **            but store in last existing bin No. =(nxtot-1)
-	   // **                (needed for reference)
-	   // **
-	   if (iref==1) {  // -> in reference mode
-	     
-	     double mur2 = murscale[refscale]*murscale[refscale] *pt*pt;
-	     double muf2 = mufscale[refscale]*mufscale[refscale] *pt*pt;
-	     
-	     amp.pdf_and_qcd_coupling(pdf, 389385.730);
-	     weight_hhc wt = amp(mur2,muf2);
-	     wt = wt * unitfactor/binwidth;
-	     
-	     // deal with subprocesses 2 and 3
-	     //    - if x1>x2 -> o.k.
-	     //    - if x2>x1 -> swap weights for subprocesses 2,3
-	     if(x2>x1){
-	       double buffer;
-	       buffer = wt[1];
-	       wt[1] = wt[2];
-	       wt[2] = buffer;
-	     }
-	     
+	     // ** ----------------------------------------------------
+	     // ** now fill half-table
+	     // ** loop over all 16 points that receive contributions
 	     for( int i1 = 0; i1 < 4; i1++) {
 	       for( int i2 = 0; i2 < 4; i2++) {
 		 int imax = nxmax +i1 -1;   // the target index (xmax)
@@ -929,25 +849,78 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 		   double buffer  = wtmp[1]; // swap subprocesses 2,3
 		   wtmp[1] = wtmp[2];
 		   wtmp[2] = buffer;
-		 }
-		 
+		 } 
 		 // - ignore if xmin coordinate is < 0 (contrib is zero!)
-		 // - for reference: rescue contrib. if coord. is >=nxtot
-		 if (imin>=0) {
-		   if (imax>=nxtot) imax = nxtot - 1;
-		   if (imin>=nxtot) imin = nxtot - 1;
-		   weights[rapbin+nrap/2][ptbin][imax][imin][0][0]+=
-		     bicef[i1][i2] * wtmp;
+		 // - ignore if xmax coordinate is >= nxtot
+		 //     (contrib. > nxtot are zero / =nxtot PDF is zero)
+		 if (imax<nxtot && imin>=0) {
+		     weights[rapbin][ptbin][imax][imin][scalevar][scalebin] += 
+		       bicef[i1][i2] * deltascale * wtmp;
 		 }
 	       }
 	     }
-	   
-	   } //-end reference mode: a_s/PDF table filling 
+	   }//-end loop scalebin
+	 }//-end loop scalevar
 	 
-	 } //-end: IF in pT bins
-       }  // - end: IF in rapidity bins
-     }   // - ckeck pT range and rapidity range
-   }    // - end: nj>=2
+	 // ** ------------------------------------------------------
+	 // **   only in "reference mode":
+	 // **         -> fill half-table with pdfs and alphas
+	 // **         -> only for a single scale (index=refscale)
+	 // **         -> don't throw away contributions at x=1
+	 // **            but store in last existing bin No. =(nxtot-1)
+	 // **                (needed for reference)
+	 // **
+	 if (iref==1) {  // -> in reference mode
+
+	   double mur2 = murscale[refscale]*murscale[refscale] *pt*pt;
+	   double muf2 = mufscale[refscale]*mufscale[refscale] *pt*pt;
+	   
+	   amp.pdf_and_qcd_coupling(pdf, 389385.730);
+	   weight_hhc wt = amp(mur2,muf2);
+	   wt = wt * unitfactor;
+
+	   // deal with subprocesses 2 and 3
+	   //    - if x1>x2 -> o.k.
+	   //    - if x2>x1 -> swap weights for subprocesses 2,3
+	   if(x2>x1){
+	     double buffer;
+	     buffer = wt[1];
+	     wt[1] = wt[2];
+	     wt[2] = buffer;
+	   }
+	   
+	   for( int i1 = 0; i1 < 4; i1++) {
+	     for( int i2 = 0; i2 < 4; i2++) {
+	       int imax = nxmax +i1 -1;   // the target index (xmax)
+	       int imin = nxmin +i2 -1;  // the target index (xmin)
+	       weight_hhc wtmp = wt;  // a working copy of the weights
+	       
+	       // - check if above diagonal? project back and swap!
+	       if (imin>imax) { 
+		 int di = imin - imax;
+		 imax = imax + di;   // modify indicees
+		 imin = imin - di;		
+		 double buffer  = wtmp[1]; // swap subprocesses 2,3
+		 wtmp[1] = wtmp[2];
+		 wtmp[2] = buffer;
+	       }
+	       
+	       // - ignore if xmin coordinate is < 0 (contrib is zero!)
+	       // - for reference: rescue contrib. if coord. is >=nxtot
+	       if (imin>=0) {
+		 if (imax>=nxtot) imax = nxtot - 1;
+		 if (imin>=nxtot) imin = nxtot - 1;
+		 weights[rapbin+nrap/2][ptbin][imax][imin][0][0]+=
+		   bicef[i1][i2] * wtmp;
+	       }
+	     }
+	   }
+	   
+	 } //-end reference mode: a_s/PDF table filling 
+	 
+       } //-end: IF in pT range
+     }  // - end: IF in rapidity range
+   }     // - end: nj>=2
 }
 
 void UserHHC::writetable(){
@@ -975,11 +948,11 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "dsigma-dijet_dDeltaPhi_(nb)" << endl;
+   table << "sigma-dijet_(nb)" << endl;
    table << "CMS-LHC-Scenario" << endl;
    table << "Azimuthal_Decorrelation" << endl;
    table << "anti-kT_R=0.5" << endl;
-   table << "Differential, first pT bin" << endl;
+   table << "Normalization" << endl;
 
   //iproc
    int iproc = 2; // dijets
@@ -1002,7 +975,7 @@ void UserHHC::writetable(){
    WRITE(nord);
 
    // absolute order
-   int npow = nord+2; // -> here "+2" for three-jet xsect (DeltaPhi)
+   int npow = nord+1; // -> only valid for incl and dijet x-sect
    WRITE(npow);
 
    switch(nord){

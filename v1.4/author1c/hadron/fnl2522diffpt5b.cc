@@ -163,7 +163,7 @@ void UserHHC::initfunc(unsigned int)
    // Here: pT
    // # of bins
    nrap = 1;
-   double rapb[2] = { 80., 110. };
+   double rapb[2] = { 300., 1000. };
    // In reference mode: Double no. of bins
    nrap = nrap*(iref+1);
    
@@ -399,7 +399,7 @@ void UserHHC::initfunc(unsigned int)
    cout<<"  "<<endl;
    cout<<"   *******************************************"<<endl;
    cout<<"    fastNLO    - initialization"<<endl;
-   cout<<"    Scenario fnl2522diffpt1:"<<endl;
+   cout<<"    Scenario fnl2522diffpt5b:"<<endl;
    cout<<"      CMS Dijet Azimuthal Decorrelation, E_cms = 7 TeV"<<endl;
    cout<<"      for fastjet anti-kT algo with R=0.5 in E-scheme"<<endl;
    cout<<"      (differential)"<<endl;
@@ -692,10 +692,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	   if (delph >= pthigh[rapbin][j] && delph < pthigh[rapbin][(j+1)]) {
 	     ptbin=j;
 	     binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
-	     //DEBUG
-	     cout << "-------------------- Next event --------------------" << endl; 
-	     cout << "binwidth = " << binwidth << ", pi/40 = " << pi/40. << endl;
-	     //DEBUGEND
 	     break;
 	   }
 	 }
@@ -979,7 +975,7 @@ void UserHHC::writetable(){
    table << "CMS-LHC-Scenario" << endl;
    table << "Azimuthal_Decorrelation" << endl;
    table << "anti-kT_R=0.5" << endl;
-   table << "Differential, first pT bin" << endl;
+   table << "Differential, fifth pT bin" << endl;
 
   //iproc
    int iproc = 2; // dijets

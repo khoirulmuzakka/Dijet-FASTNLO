@@ -1220,6 +1220,14 @@ fnl2522norma: links fnl2522norma.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
+fnl2522normb: links fnl2522normb.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2522normb.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2522normb -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 fnl2522diffpt1: links fnl2522diffpt1.cc $(CommonPath)/fj-ak-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl2522diffpt1.cc \
@@ -1257,6 +1265,14 @@ fnl2522diffpt5: links fnl2522diffpt5.cc $(CommonPath)/fj-ak-05.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl2522diffpt5.cc \
 	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
 	-o fnl2522diffpt5 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2522diffpt5b: links fnl2522diffpt5b.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2522diffpt5b.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2522diffpt5b -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
