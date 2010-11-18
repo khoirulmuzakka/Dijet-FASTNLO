@@ -6,7 +6,7 @@ pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la
 
 # The associated header files
 # Add header files for jet algos ?
-pkginclude_HEADERS = fnloTable.h fnloBlockBNlojet.h cone-e-07.h
+pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h cone-e-07.h
 
 # Source files to be distributed for each library
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
@@ -24,12 +24,12 @@ libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlo
 
 # If ROOT is installed, add a dictionary to the library
 if HAVE_ROOT
-  libfastnlo_la_SOURCES += fnloTableDict.cc
-  libfastnloUser_la_SOURCES += fnloTableDict.cc
-  fnloTableDict.cc: fnloTable.h fnloTableUser.h
-	${ROOTCINT} -f fnloTableDict.cc -c -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h -I${ROOTINCLUDEPATH} LinkDef.h
+  libfastnlo_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
+  libfastnloUser_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
+  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+	${ROOTCINT} -f fnloTableDict.cc -c -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
 else
-  fnloTableDict.cc: fnloTable.h fnloTableUser.h
+  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
 	echo "ROOT support needs to be enabled at configuration time! Creating empty file fnloTableDict.cc ..."; touch fnloTableDict.cc
 endif
 #  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
