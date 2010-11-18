@@ -464,9 +464,55 @@ ckr Normalization table loaded
                   ENDDO
                ENDDO
             ENDDO
+         ELSEIF (SCENARIO(1:7).EQ."fnl2622") THEN
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+                        IF (IPT.EQ.1) THEN
+                           MYTMP(IRAP,ISUB,IORD) = 0.D0
+Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,mytmp",
+Comment:      >                          ibin,iord,isub,irap,ipt,
+Comment:      >                          mytmp(irap,isub,iord)
+                        ENDIF
+                        IF (IORD.LE.NORDN) THEN
+                           MYTMP(IRAP,ISUB,IORD) =
+     >                          MYTMP(IRAP,ISUB,IORD) +
+     >                          RESULT(IBIN,ISUB,IORD)
+                        ELSE
+                           MYTMP(IRAP,ISUB,IORD) =
+     >                          MYTMP(IRAP,ISUB,IORD) +
+     >                          RESULT(IBIN,ISUB,1) +
+     >                          RESULT(IBIN,ISUB,2)
+                        ENDIF
+Comment:                         write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
+Comment:      >                       ibin,iord,isub,irap,ipt,
+Comment:      >                       mytmp(irap,isub,iord)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+                        MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                       1D0/MYTMP(IRAP,ISUB,IORD)
+                        IF (ISTEP.EQ.1) THEN
+                           MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
          ENDIF
       ENDIF
-
+      
 
 
 ckr Reload table to normalize

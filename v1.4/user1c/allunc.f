@@ -24,7 +24,7 @@
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCALE,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
       INTEGER IHIST,IPHASE,ISTEP
-      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG,LNRM
+      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
       DOUBLE PRECISION MUR,MUF,QLAM4,QLAM5,BWGT
       DOUBLE PRECISION DSTMP(4)
 c - To unify quoted uncertainties (CL68,CL90,special)
@@ -66,6 +66,7 @@ c --- Parse command line
 *---Scenario
       LRAT = .FALSE.
       LNRM = .FALSE.
+      LTAB = .FALSE.
       LSCL = .TRUE.
       IF (IARGC().LT.1) THEN
          SCENARIO = "fnt2003"
@@ -115,20 +116,28 @@ C --- Use '...' with \", otherwise gfortran complains
      >           SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442a") THEN
 ckr Might be useful more generally, but only checked for these scenarios
             LRAT = .TRUE.
+            LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
          ELSEIF (SCENARIO(1:11).EQ."fnl2522diff") THEN
 ckr Normalized x sections
             LNRM = .TRUE.
+            LTAB = .TRUE.
+            WRITE(*,*)
+     >           "ALLUNC: Deriving normalized distributions"
+         ELSEIF (SCENARIO(1:7).EQ."fnl2622") THEN
+ckr Normalized x sections
+            LNRM = .TRUE.
+            LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving normalized distributions"
          ENDIF
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
      >        SCENARIO(1:LENOCC(SCENARIO))
       ENDIF
-      lnrm = .false.
+ckr      lnrm = .false.
       TABNAME = SCENARIO(1:LENOCC(SCENARIO))//".tab"
-      IF (LNRM) THEN
+      IF (LNRM.AND.LTAB) THEN
          TABNAMN = SCENARIO(1:7)//"norm"//".tab"
       ENDIF
       REFNAME = SCENARIO(1:LENOCC(SCENARIO))//"ref.tab"
@@ -150,7 +159,7 @@ ckr Normalized x sections
      >     TABNAME(1:LENOCC(TABNAME))
       WRITE(*,*)"ALLUNC: Taking primary table ",
      >     FILENAME(1:LENOCC(FILENAME))
-      IF (LNRM) THEN
+      IF (LNRM.AND.LTAB) THEN
          FILENAMN = TABPATH(1:LENOCC(TABPATH))//"/"//
      >        TABNAMN(1:LENOCC(TABNAMN))
          WRITE(*,*)"ALLUNC: Taking normalization table ",
@@ -530,16 +539,16 @@ ckr            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
             IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
-               CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
                ISTEP = 1
 ckr               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
                CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
             ENDIF
             ISTEP = 2
 ckr            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
-
+            
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
@@ -555,12 +564,12 @@ ckr                     WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LENOCC(SCENARIO)))
 ckr Load normalization table with potentially different binning!
-                     CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+                     IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
                      ISTEP = 4
 ckr                     WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LENOCC(SCENARIO)))
-                     CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+                     IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
                      ISTEP = 5
 ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
@@ -578,24 +587,14 @@ c - Give some standard output, fill histograms
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  IF (.NOT.LNRM) THEN
-                     WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
-     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
-     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1)
-                  ELSE
-                     WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
-     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
-     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1)
-                  ENDIF
+                  WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
                ENDDO
             ENDDO
-
+            
 c - Fill histograms
-            IF (.NOT.LNRM) THEN
-               CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            ELSE
-               CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            ENDIF
+            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
             CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales
@@ -926,10 +925,10 @@ c - 2-point scheme
          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
          IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
-            CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+            IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
             ISTEP = 1
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ENDIF
          ISTEP = 2
          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
@@ -949,11 +948,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
 ckr Load normalization table with potentially different binning!
-               CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
@@ -997,10 +996,10 @@ c - 6-point scheme
          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
          IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
-            CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+            IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
             ISTEP = 1
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
-            CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+            IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
          ENDIF
          ISTEP = 2
          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
@@ -1020,11 +1019,11 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
 ckr Load normalization table with potentially different binning!
-               CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAMN,MUR,MUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
-               CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
+               IF (LTAB) CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LENOCC(SCENARIO)))
