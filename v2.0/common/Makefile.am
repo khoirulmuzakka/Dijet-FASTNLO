@@ -26,12 +26,12 @@ libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlo
 if HAVE_ROOT
   libfastnlo_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
   libfastnloUser_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
-  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
-	${ROOTCINT} -f fnloTableDict.cc -c -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
-else
-  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
-	echo "ROOT support needs to be enabled at configuration time! Creating empty file fnloTableDict.cc ..."; touch fnloTableDict.cc
+fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+	${ROOTCINT} -f fnloTableDict.cc -c -I${ROOTINCLUDEPATH} -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
 endif
+#else
+#  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+#	echo "ROOT support needs to be enabled at configuration time! Creating empty file fnloTableDict.cc ..."; touch fnloTableDict.cc
 #  fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
 
 # C++ compiler flags to be used for the main target
