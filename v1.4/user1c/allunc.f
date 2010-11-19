@@ -429,29 +429,29 @@ c - Check uncertainties to derive
       IF (LSCL) THEN
          WRITE(*,*)"ALLUNC: Deriving scale uncertainties"
       ENDIF
+      IF (LALG) THEN
+         WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties"
+         IF (LRAT.OR.LNRM) THEN
+            WRITE(*,*)"ALLUNC: WARNING! Uncertainties for ratios or"//
+     >           " normalized distributions cannot be done at the"//
+     >           " same time as algorithmic ones, switched off"//
+     >           " both!"
+            LRAT = .FALSE.
+            LNRM = .FALSE.
+         ENDIF
+      ENDIF
       IF (LRAT) THEN
          WRITE(*,*)"ALLUNC: Deriving uncertainties for ratios"
+         IF (LNRM) THEN
+            WRITE(*,*)"ALLUNC: WARNING! Uncertainties for ratios and"
+     >           //" normalized distributions cannot be done at the "
+     >           //"same time, switched off normalization!"
+            LNRM = .FALSE.
+         ENDIF
       ENDIF
       IF (LNRM) THEN
-         IF (LRAT) THEN
-            WRITE(*,*)"\nALLUNC: ERROR! Uncertainties for ratios and "//
-     >           "normalized distributions cannot be done at the same "/
-     >           /"time, aborting!"
-            STOP
-         ELSE
-            WRITE(*,*)"ALLUNC: Deriving uncertainties for normalized "//
-     >           "distributions"
-         ENDIF
-      ENDIF
-      IF (LALG) THEN
-         IF (LRAT.OR.LNRM) THEN
-            WRITE(*,*)"\nALLUNC: ERROR! Uncertainties for ratios or "//
-     >           "normalized distributions cannot be done at the same "/
-     >           /"time as algorithmic ones, aborting!"
-            STOP
-         ELSE
-            WRITE(*,*)"ALLUNC: Deriving algorithmic uncertainties"
-         ENDIF
+         WRITE(*,*)"ALLUNC: Deriving uncertainties for normalized "//
+     >        "distributions"
       ENDIF
       
 
