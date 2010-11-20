@@ -102,7 +102,6 @@ c - This is the order counting in fnx9999 common ...
                   DO ISUB=1,NSUBPROC
                      SUMM = RESULT(IBIN,ISUB,IORD)
                      SUMMPROC = SUMMPROC + SUMM
-ckr                     DIFF = SUMM - MYRES(IBIN,ISUB,IORD)
                      DIFF = SUMM - MYRESN(IBIN,ISUB,IORD)
                      DIFFPROC = DIFFPROC + DIFF
 cdebug
@@ -112,7 +111,6 @@ Comment:      >                    result(ibin,isub,iord),
 Comment:      >                    myresn(ibin,isub,iord)
 Comment:                      WRITE(*,*)"DEF : summ,diff",SUMM,DIFF
 cdebug
-ckr                     IF (LNRM.AND.IBIN.GT.NBIN) THEN
                      IF (LNRM) THEN
                         SUMM = MYRES(IBIN,ISUB,IORD)
                         DIFF = MYRES(IBIN,ISUB,IORD) -
@@ -131,7 +129,6 @@ cdebug
                   ENDDO
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
-ckr                  DIFF = SUMM - MYRES(IBIN,NSUBPROC+1,IORD)
                   DIFF = SUMM - MYRESN(IBIN,NSUBPROC+1,IORD)
                   DIFFORD = DIFFORD + DIFF
                   IF (LNRM) THEN
@@ -157,7 +154,6 @@ ckr                  DIFF = SUMM - MYRES(IBIN,NSUBPROC+1,IORD)
                   DO IORD=1,NORD
                      SUMM = RESULT(IBIN,ISUB,IORD)
                      SUMMORD = SUMMORD + SUMM
-ckr                     DIFF = SUMM - MYRES(IBIN,ISUB,IORD)
                      DIFF = SUMM - MYRESN(IBIN,ISUB,IORD)
                      DIFFORD = DIFFORD + DIFF
                   ENDDO
@@ -191,6 +187,7 @@ ckr Eigen vector method (as needed for CTEQ or MSTW PDF uncertainty)
      >                       ,ISUB,IORD))
                         WTDXL2(IBIN,ISUB,IORD) = -SQRT(WTDXL2(IBIN
      >                       ,ISUB,IORD))
+cdebug
 Comment:                         IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99) THEN
 Comment:                            WTDXU2(IBIN,ISUB,IORD) =
 Comment:      >                          WTDXU2(IBIN,ISUB,IORD) /
@@ -198,6 +195,7 @@ Comment:      >                          DABS(MYRES(IBIN,ISUB,IORD))
 Comment:                            WTDXL2(IBIN,ISUB,IORD) =
 Comment:      >                          WTDXL2(IBIN,ISUB,IORD) /
 Comment:      >                          DABS(MYRES(IBIN,ISUB,IORD))
+cdebug
                         IF (DABS(MYRESN(IBIN,ISUB,IORD)).GT.1D-99) THEN
                            WTDXU2(IBIN,ISUB,IORD) =
      >                          WTDXU2(IBIN,ISUB,IORD) /
@@ -286,6 +284,7 @@ ckr            central result according to NNPDF.
                         ENDIF
 ckr Minimax method (as needed for scale uncertainties) 
                      ELSEIF (IMODE.EQ.3) THEN
+cdebug
 Comment:                         IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99) THEN
 Comment:                            WTDXUM(IBIN,ISUB,IORD) =
 Comment:      >                          WTDXUM(IBIN,ISUB,IORD) /
@@ -293,6 +292,7 @@ Comment:      >                          DABS(MYRES(IBIN,ISUB,IORD))
 Comment:                            WTDXLM(IBIN,ISUB,IORD) =
 Comment:      >                          WTDXLM(IBIN,ISUB,IORD) /
 Comment:      >                          DABS(MYRES(IBIN,ISUB,IORD))
+cdebug
                         IF (DABS(MYRESN(IBIN,ISUB,IORD)).GT.1D-99) THEN
                            WTDXUM(IBIN,ISUB,IORD) =
      >                          WTDXUM(IBIN,ISUB,IORD) /
@@ -411,7 +411,7 @@ ckr      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
                   ENDDO
                ENDDO
             ENDDO
-ckr Save structure of table to normalize
+ckr Save basic structure of table to normalize
             IF (ISTEP.EQ.0) THEN
                NRAPIDITYN = NRAPIDITY
                DO IRAP=1,NRAPIDITY
@@ -423,9 +423,26 @@ ckr Save structure of table to normalize
          ENDIF
       ENDIF
 
-ckr Normalization table loaded
+ckr Normalization table loaded, if necessary
       IF ((ISTEP.EQ.1.OR.ISTEP.EQ.4).AND.LNRM) THEN
-         IF (SCENARIO(1:7).EQ."fnl2522") THEN
+         IF (SCENARIO(1:7).EQ."fnl2442") THEN
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+                        MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                       1D0/RESULT(IPT,ISUB,IORD)
+                        IF (ISTEP.EQ.1) THEN
+                           MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ELSEIF (SCENARIO(1:7).EQ."fnl2522") THEN
             IBINN = 1
             IF (SCENARIO(8:14).EQ."diffpt1") THEN
                IBINN = 1
@@ -438,26 +455,26 @@ ckr Normalization table loaded
             ELSEIF (SCENARIO(8:14).EQ."diffpt5") THEN
                IBINN = 5
             ENDIF
-            IBIN = NBIN
-            DO IRAP=NRAPIDITYN/2,NRAPIDITYN
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSUBPROCN+1
                         IF (IORD.LE.NORDN) THEN
-                           MYRES(IBIN,ISUB,IORD) =
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
      >                          1D0/RESULT(IBINN,ISUB,IORD)
                            IF (ISTEP.EQ.1) THEN
-                              MYRESN(IBIN,ISUB,IORD) =
-     >                             MYRES(IBIN,ISUB,IORD)
+                              MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                             MYRES(IBIN+NBIN,ISUB,IORD)
                            ENDIF
                         ELSE
-                           MYRES(IBIN,ISUB,IORD) =
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
      >                          1D0/(RESULT(IBINN,ISUB,1) +
      >                          RESULT(IBINN,ISUB,2))
                            IF (ISTEP.EQ.1) THEN
-                              MYRESN(IBIN,ISUB,IORD) =
-     >                             MYRES(IBIN,ISUB,IORD)
+                              MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                             MYRES(IBIN+NBIN,ISUB,IORD)
                            ENDIF
                         ENDIF
                      ENDDO
