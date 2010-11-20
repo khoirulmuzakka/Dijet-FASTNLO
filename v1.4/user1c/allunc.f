@@ -112,10 +112,10 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     (i.e. eigen vector method (CTEQ, MSTW))'
             WRITE(*,*)' '
             STOP
-         ELSEIF (SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442".OR.
-     >           SCENARIO(1:LENOCC(SCENARIO)).EQ."fnl2442a") THEN
+         ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
 ckr Might be useful more generally, but only checked for these scenarios
-            LRAT = .TRUE.
+            LRAT = .false.
+            LNRM = .TRUE.
             LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
