@@ -1306,6 +1306,15 @@ fnl2622c: links fnl2622c.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+# Like fnl2622b, again dijet mass bins changed 
+fnl2622d: links fnl2622d.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2622d.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2622d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # ======================================================================
 # =====   FNL2722: LHC CMS 3-jet ratio with fastjet anti-kT R=0.5 =
 # ======================================================================
