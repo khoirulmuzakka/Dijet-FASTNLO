@@ -1277,6 +1277,20 @@ fnl2522diffpt5b: links fnl2522diffpt5b.cc $(CommonPath)/fj-ak-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
 # ======================================================================
+# =====   FNL2612: LHC CMS dchi dijets with fastjet ak R=0.7 ===========
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV 
+#
+# Like fnl2622d with ak07
+fnl2612d: links fnl2612d.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2612d.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2612d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
 # =====   FNL2622: LHC CMS dchi dijets with fastjet ak R=0.5 ===========
 # ======================================================================
 # LHC scenario for CMS, @ 7 TeV 
