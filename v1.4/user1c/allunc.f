@@ -114,8 +114,8 @@ C --- Use '...' with \", otherwise gfortran complains
             STOP
          ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
 ckr Might be useful more generally, but only checked for these scenarios
-            LRAT = .false.
-            LNRM = .TRUE.
+            LRAT = .true.
+            LNRM = .false.
             LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
