@@ -2,7 +2,7 @@
 // fastNLO author code for fnl2722 (differential in HT):
 //     CMS 3-Jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//     (numerator)
+//     (denominator)
 //
 // last modification
 //
@@ -123,8 +123,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
 {
    //  number of jets 
    //nj = 1U;
-   //nj = 2U;
-   nj = 3U;
+  nj = 2U;
+   //nj = 3U;
 
   //  total c.m. energy squared
   //s =     40000.; // RHIC               200 GeV
@@ -163,7 +163,7 @@ void UserHHC::initfunc(unsigned int)
    // Set up binning!
    // First dimension (histogram numbers xxxxRxx), usually rapidity
    // Here: One bin in rapidity (no normalization to bin width!):
-   //       1) Only 3+ jets in |y| < 2.5
+   //       1) Only 2+ jets in |y| < 2.5
    // # of bins
    nrap = 1;
    double rapb[2] = { 0.0, 2.5 };
@@ -414,7 +414,7 @@ void UserHHC::initfunc(unsigned int)
    cout<<"    Scenario fnl2722:"<<endl;
    cout<<"      CMS 3-jet ratio scenario, E_cms = 7 TeV,"<<endl;
    cout<<"      for fastjet anti-kT algo with R=0.5 in E-scheme"<<endl; 
-   cout<<"      (numerator)"<<endl;
+   cout<<"      (denominator)"<<endl;
    cout<<" "<<endl;
    cout<<"        table file "<<tablefilename<<endl;
    cout<<"        store table after "<<nwrite<<" events"<<endl;
@@ -691,11 +691,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
        // --- Later this variable will be the ren./fact. scale
        double ptmax = (pt1 + pt2)/2.0;
 
-       // --- determine y(=rap) and pT(=HT) bin (njc = 3+) 
+       // --- determine y(=rap) and pT(=HT) bin (njc = 2+) 
        // KR: Normalize to bin width in HT, but not |y|
        int rapbin = -1;
        double binwidth = 1.0;
-       if ( njc > 2 ) {
+       if ( njc > 1 ) {
 	 rapbin = 0;
        }
 
@@ -1005,11 +1005,11 @@ void UserHHC::writetable(){
    WRITE(s);
 
    // five strings with table content
-   table << "dsigma_nj3+_dHT_(pb_GeV)" << endl;
+   table << "dsigma_nj2+_dHT_(pb_GeV)" << endl;
    table << "CMS-LHC-Scenario" << endl;
    table << "3-jet_Ratio" << endl;
    table << "anti-kT_R=0.5" << endl;
-   table << "Numerator" << endl;
+   table << "Denominator" << endl;
 
   //iproc
    int iproc = 2; // 3-jet ratio
@@ -1032,7 +1032,7 @@ void UserHHC::writetable(){
    WRITE(nord);
 
    // absolute order
-   int npow = nord+2; // -> here "+2" for three-jet xsect (HT)
+   int npow = nord+1; // -> here "+1" for two-jet xsect (HT)
    WRITE(npow);
 
    switch(nord){
