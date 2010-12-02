@@ -664,10 +664,22 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      //DEBUGEND
 
      // Derive leading dijet and 3-jet quantities
-     double yjjmax = max(y1,y2);
-     double ht     = pt1 + pt2;
+     //     double yjjmax = max(y1,y2);
+     //     double ht     = pt1 + pt2;
      // Later check that yjjmax < yjcmax so njc = 2 is fine ...
-     int njc = 2;
+     //     int njc = 2;
+     //
+     // Requirements according to Panos & Costas
+     int njc = 0;
+     double ht = 0.;
+     if ( njet > 0 && y1 < yjcmax ) {
+       njc++;
+       ht = ht + pt1;
+     }
+     if ( njet > 1 && y2 < yjcmax ) {
+       njc++;
+       ht = ht + pt2;
+     }
      if ( njet > 2 && y3 < yjcmax ) {
        njc++;
        ht = ht + pt3;
@@ -682,14 +694,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
      //     cout << "njc, ht: " << njc << ", " << ht << endl;
      //DEBUGEND
 
-     if (yjjmax < yjcmax && ht > htmin ) {
+     //     if (yjjmax < yjcmax && ht > htmin ) {
+     if ( njc > 1 && ht > htmin ) {
        //DEBUG
        //       cout << "Event accepted: " << endl;
        //       cout << "njet, njc, pt1, pt2, yjjmax, ht: " << njet << ", " << njc << ", " << pt1 << ", " << pt2 << ", " << yjjmax << ", " << ht << endl;
        //       cout << "==================== End of event ====================" << endl; 
        //DEBUGEND
        // --- Later this variable will be the ren./fact. scale
-       double ptmax = (pt1 + pt2)/2.0;
+       //       double ptmax = (pt1 + pt2)/2.0;
+       double ptmax = ht / 2.0;
 
        // --- determine y(=rap) and pT(=HT) bin (njc = 2+) 
        // KR: Normalize to bin width in HT, but not |y|
