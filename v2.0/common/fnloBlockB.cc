@@ -574,21 +574,21 @@ void fnloBlockB::CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, v
    switch(IPDFdef1){
    case 2: // ep , DIS and gP
       switch(IPDFdef2){
-      case 1: // DIS: determine gluon,sigma,delta,
-      case 2: // direct gammaP: gluon,sigma,delta
-         pdflc[0] = pdfx1[6]; //gluon
+      case 1: // DIS: determine delta,gluon,sigma
+      case 2: // direct gammaP: delta,gluon,sigma
 
-         pdflc[1] = 0.;
+         pdflc[0] = 0.;
          for(int l=0;l<13;l++){
             double temp = (l==6 ? 0.0 : pdfx1[l]);
             if (!(l&1)) temp *= 4.;
-            pdflc[1] += temp; // delta
+            pdflc[0] += temp; // --- delta
          }
-         pdflc[1] /= 9.;
+         pdflc[0] /= 9.;
+         pdflc[1] = pdfx1[6]; // --- gluon
          if(NSubproc>2){ // only from NLO
             pdflc[2] = 0.;
             for(int l=0;l<6;l++){
-               pdflc[2] += pdfx1[5-l] + pdfx1[l+7]; // sigma
+               pdflc[2] += pdfx1[5-l] + pdfx1[l+7]; // --- sigma
             }
          }
          break;
