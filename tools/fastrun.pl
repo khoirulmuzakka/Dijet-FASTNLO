@@ -216,7 +216,7 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
 # NLOJET++ table name
 my $njet = "2jet";
 # Dirty hack for 3jet calcs ...
-if ($scen =~ m/diff/) {
+if ($scen =~ m/diff/ || $scen =~ m/num/) {
     $njet = "3jet";
 }
 my $tabext;
