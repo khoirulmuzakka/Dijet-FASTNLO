@@ -120,15 +120,18 @@ ckr Might be useful more generally, but only checked for these scenarios
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"
          ELSEIF (SCENARIO(1:11).EQ."fnl2522diff") THEN
-ckr Normalized x sections
             LNRM = .TRUE.
             LTAB = .TRUE.
             WRITE(*,*)
      >           "ALLUNC: Deriving normalized distributions"
          ELSEIF (SCENARIO(1:7).EQ."fnl2622") THEN
-ckr Normalized x sections
             LNRM = .TRUE.
             LTAB = .FALSE.
+            WRITE(*,*)
+     >           "ALLUNC: Deriving normalized distributions"
+         ELSEIF (SCENARIO(1:7).EQ."fnl2722num") THEN
+            LNRM = .TRUE.
+            LTAB = .TRUE.
             WRITE(*,*)
      >           "ALLUNC: Deriving normalized distributions"
          ENDIF

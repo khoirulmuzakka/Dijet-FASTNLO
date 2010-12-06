@@ -527,6 +527,33 @@ Comment:      >                       mytmp(irap,isub,iord)
                   ENDDO
                ENDDO
             ENDDO
+         ELSEIF (SCENARIO(1:7).EQ."fnl2722") THEN
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+                        IF (IORD.LE.NORDN) THEN
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                          1D0/RESULT(IBIN,ISUB,IORD)
+                           IF (ISTEP.EQ.1) THEN
+                              MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                             MYRES(IBIN+NBIN,ISUB,IORD)
+                           ENDIF
+                        ELSE
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                          1D0/(RESULT(IBIN,ISUB,1) +
+     >                          RESULT(IBIN,ISUB,2))
+                           IF (ISTEP.EQ.1) THEN
+                              MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                             MYRES(IBIN+NBIN,ISUB,IORD)
+                           ENDIF
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
          ENDIF
       ENDIF
       
