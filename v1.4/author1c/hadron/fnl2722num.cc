@@ -1107,7 +1107,7 @@ void UserHHC::writetable(){
    WRITE(marker);// ------------------END of block
 
    // a brief description how the scale is defined
-   table << "pT_dijet_average_(GeV)" << endl;
+   table << "HT_half_(GeV)" << endl;
 
    WRITE(nscalebin); // No. of Bins in mur,muf
 
