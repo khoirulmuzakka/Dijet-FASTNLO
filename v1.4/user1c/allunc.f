@@ -129,7 +129,7 @@ ckr Might be useful more generally, but only checked for these scenarios
             LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving normalized distributions"
-         ELSEIF (SCENARIO(1:7).EQ."fnl2722num") THEN
+         ELSEIF (SCENARIO(1:10).EQ."fnl2722num") THEN
             LNRM = .TRUE.
             LTAB = .TRUE.
             WRITE(*,*)
