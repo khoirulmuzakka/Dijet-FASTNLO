@@ -408,7 +408,9 @@ c - Check uncertainties to derive
             CLOSE(2)
          ENDIF
       ENDIF
-      LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
+ckr To be implemented
+ckr      LSER  = .NOT.LONE.AND.NPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
+      LSER  = .FALSE.
       LPDF  = .NOT.LONE.AND..NOT.LSER
 
       WRITE(*,*)"----------------------------------------"//
@@ -484,6 +486,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  901        FORMAT(1P,I5,2(6X,E18.11))
  902        FORMAT(3I6,3E16.5,5(F10.3,3X))
       
+
       
 c - PDF part
 c - Use primary table
@@ -498,20 +501,25 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-c - Compute PDF uncertainties for all precalculated scale variations
-c - Check that FILENAME is still the primary table here ...!!!
-      IF (LPDF.AND..NOT.LSER) THEN
+c - Compute central result and, if posible, PDF uncertainties for
+c - all precalculated scale variations
+      IF (LONE.OR.LPDF) THEN
          WRITE(*,*)"****************************************"//
      >        "********************************"
-         WRITE(*,*)"ALLUNC: Evaluating PDF uncertainties"
+         WRITE(*,*)"ALLUNC: Evaluating central result"
+         IF (LPDF) WRITE(*,*)"ALLUNC: Evaluating PDF uncertainties"
          WRITE(*,*)"****************************************"//
      >        "********************************"
          WRITE(*,*)"========================================"//
      >        "================================"
-         WRITE(*,*)"Relative PDF Uncertainties"
-         WRITE(*,*)"- the printed values are for the total "//
-     >        "cross section summed over all subprocesses"
-         WRITE(*,*)"- histograms contain more detailed results"
+         IF (LONE) THEN
+            WRITE(*,*)"No PDF Uncertainties possible"
+         ELSEIF (LPDF) THEN
+            WRITE(*,*)"Relative PDF Uncertainties"
+            WRITE(*,*)"- the printed values are for the total "//
+     >           "cross section summed over all subprocesses"
+            WRITE(*,*)"- histograms contain more detailed results"
+         ENDIF
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
