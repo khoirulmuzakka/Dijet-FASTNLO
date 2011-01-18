@@ -481,7 +481,8 @@ ckr Normalization table loaded, if necessary
                   ENDDO
                ENDDO
             ENDDO
-         ELSEIF (SCENARIO(1:7).EQ."fnl2622") THEN
+         ELSEIF (SCENARIO(1:7).EQ."fnl2622".OR.
+     >           SCENARIO(1:7).EQ."fnl2652") THEN
             IBIN = 0
             DO IRAP=1,NRAPIDITYN
                DO IPT=1,NPTN(IRAP)
@@ -490,19 +491,24 @@ ckr Normalization table loaded, if necessary
                      DO ISUB=1,NSUBPROCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,mytmp",
+Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,"//
+Comment:      >                          "mytmp,drap,dpt",
 Comment:      >                          ibin,iord,isub,irap,ipt,
-Comment:      >                          mytmp(irap,isub,iord)
+Comment:      >                          mytmp(irap,isub,iord),
+Comment:      >                          rapbin(irap+1)-rapbin(irap),
+Comment:      >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
                         ENDIF
                         IF (IORD.LE.NORDN) THEN
                            MYTMP(IRAP,ISUB,IORD) =
      >                          MYTMP(IRAP,ISUB,IORD) +
-     >                          RESULT(IBIN,ISUB,IORD)
+     >                          RESULT(IBIN,ISUB,IORD) *
+     >                          (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                         ELSE
                            MYTMP(IRAP,ISUB,IORD) =
      >                          MYTMP(IRAP,ISUB,IORD) +
-     >                          RESULT(IBIN,ISUB,1) +
-     >                          RESULT(IBIN,ISUB,2)
+     >                          (RESULT(IBIN,ISUB,1) +
+     >                          RESULT(IBIN,ISUB,2)) *
+     >                          (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                         ENDIF
 Comment:                         write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
 Comment:      >                       ibin,iord,isub,irap,ipt,
