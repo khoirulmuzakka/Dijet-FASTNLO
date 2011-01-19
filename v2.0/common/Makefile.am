@@ -24,8 +24,11 @@ libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlo
 
 # If ROOT is installed, add a dictionary to the library
 if HAVE_ROOT
-  libfastnlo_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
-  libfastnloUser_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
+# Not right: fnloTableDict.cc is NOT a source !
+#  libfastnlo_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
+  libfastnlo_la_SOURCES += fnloTable.h fnloTableUser.h LinkDef.h
+#  libfastnloUser_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
+  libfastnloUser_la_SOURCES += fnloTable.h fnloTableUser.h LinkDef.h
 fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
 	${ROOTCINT} -f fnloTableDict.cc -c -I${ROOTINCLUDEPATH} -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
 endif

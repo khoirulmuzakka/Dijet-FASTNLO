@@ -94,6 +94,7 @@ AC_SUBST([NLOJETBINPATH], "$NLOJETPREFIX/bin")
 AC_SUBST([NLOJETLIBPATH], "$NLOJETPREFIX/lib")
 AC_SUBST([NLOJETINCLUDEPATH], "$NLOJETPREFIX/include/nlo++")
 AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([NLOJet++ settings:])
 AC_MSG_RESULT([Using $NLOJETPREFIX for the NLOJET++ installation path])
 AC_MSG_RESULT([Using $NLOJETBINPATH for the binaries])
 AC_MSG_RESULT([Using $NLOJETLIBPATH for the libraries])
@@ -146,6 +147,7 @@ AC_SUBST([ZNPDFPREFIX], "$ZNPDF")
 AC_SUBST([ZNPDFLIBPATH], "$ZNPDFPREFIX/lib")
 AC_SUBST([ZNPDFINCLUDEPATH], "$ZNPDFPREFIX/include/cteq")
 AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([CTEQ-PDF settings:])
 AC_MSG_RESULT([Using $ZNPDFPREFIX for the CTEQ-PDF installation path])
 AC_MSG_RESULT([Using $ZNPDFLIBPATH for the libraries])
 AC_MSG_RESULT([Using $ZNPDFINCLUDEPATH for the includes])
@@ -197,6 +199,7 @@ AC_SUBST([LHPDFPREFIX], "$LHPDF")
 AC_SUBST([LHPDFLIBPATH], "$LHPDFPREFIX/lib")
 AC_SUBST([LHPDFINCLUDEPATH], "$LHPDFPREFIX/include/lhpdf")
 AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([LHPDF settings:])
 AC_MSG_RESULT([Using $LHPDFPREFIX for the LHPDF installation path])
 AC_MSG_RESULT([Using $LHPDFLIBPATH for the libraries])
 AC_MSG_RESULT([Using $LHPDFINCLUDEPATH for the includes])
@@ -239,6 +242,7 @@ if test "x$withval" != "xno"; then
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$LHAPDFBIN" != "x"; then
+      AC_MSG_NOTICE([LHAPDF settings:])
       AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
       AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
       AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
@@ -297,6 +301,7 @@ if test "x$withval" != "xno"; then
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$FASTJETBIN" != "x"; then
+      AC_MSG_NOTICE([FASTJET settings:])
       AC_SUBST([FASTJETPREFIX],  [`$FASTJETBIN --prefix`])
       AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
       AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
@@ -323,11 +328,13 @@ AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for CERN libraries ...])
 AC_MSG_NOTICE([******************************************])
 if test "x$CERN_ROOT" = "x"; then
-  AC_MSG_WARN([CERN_ROOT environment variable is not set. Continue without CERNlib.])
+  AC_MSG_NOTICE([CERN_ROOT environment variable is not set. Continue without CERNlib.])
 else
   AC_MSG_RESULT([Using environment variable CERN_ROOT=$CERN_ROOT to locate CERNlib installation])
   AC_SUBST([CERNLIBPATH], ["$CERN_ROOT/lib"])
   AC_SUBST([CERNLIBS], ["-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"])
+  AC_MSG_NOTICE([******************************************])
+  AC_MSG_NOTICE([CERNlib settings:])
   AC_MSG_RESULT([Using $CERN_ROOT for CERNlib installation path])
   AC_MSG_RESULT([Using $CERNLIBPATH for the libraries])
   AC_MSG_RESULT([Using -L$CERNLIBPATH -lmathlib -lkernlib -lpacklib for the linker flag])
@@ -370,13 +377,18 @@ if test "x$ROOTBIN" != "x"; then
    AC_SUBST([ROOTLIBPATH], [`$ROOTBIN --libdir`])
    AC_SUBST([ROOTINCLUDEPATH],[`$ROOTBIN --incdir`])
    AC_SUBST([ROOTLIBS],[`$ROOTBIN --libs`])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([ROOT settings:])
    AC_MSG_RESULT([Using $ROOTPREFIX for the ROOT installation path])
    AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
    AC_MSG_RESULT([Using $ROOTLIBPATH for the libraries])
    AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
    AC_MSG_RESULT([Using $ROOTLIBS for the linker flags])
+else
+   AC_MSG_NOTICE([No ROOT support requested. Continue without ROOT.])
 fi
 AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTCINT" != "x")
+AC_MSG_NOTICE([******************************************])
 
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
