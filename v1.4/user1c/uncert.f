@@ -432,8 +432,28 @@ ckr Normalization table loaded, if necessary
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSUBPROCN+1
+                        IF (IRAP.EQ.2) THEN
+                           IF (IORD.LE.NORDN) THEN
+                              MYTMP(IBIN,ISUB,IORD) =
+     >                             RESULT(IBIN,ISUB,IORD)
+                           ELSE
+                              MYTMP(IBIN,ISUB,IORD) =
+     >                             (RESULT(IBIN,ISUB,1) +
+     >                             RESULT(IBIN,ISUB,2))
+                           ENDIF
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
                         MYRES(IBIN+NBIN,ISUB,IORD) =
-     >                       1D0/RESULT(IPT,ISUB,IORD)
+     >                       1D0/MYTMP(NPTN(1)+IPT,ISUB,IORD)
                         IF (ISTEP.EQ.1) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
@@ -590,9 +610,17 @@ ckr Normalization: LNRM
      >                    RESULT(IBIN,ISUB,IORD)
                   ELSEIF (LNRM) THEN
                      IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
+Comment:                         write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
+Comment:      >                       ibin,iord,isub,irap,ipt,
+Comment:      >                       MYRES(IBIN,ISUB,IORD),
+Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
                         MYRES(IBIN+NBIN,ISUB,IORD) = 
      >                       MYRES(IBIN,ISUB,IORD) *
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
+Comment:                         write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
+Comment:      >                       ibin,iord,isub,irap,ipt,
+Comment:      >                       MYRES(IBIN,ISUB,IORD),
+Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
                         IF (ISTEP.EQ.2) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) = 
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
