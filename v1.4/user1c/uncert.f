@@ -511,13 +511,15 @@ ckr Normalization table loaded, if necessary
                      DO ISUB=1,NSUBPROCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,"//
-Comment:      >                          "mytmp,drap,dpt",
-Comment:      >                          ibin,iord,isub,irap,ipt,
-Comment:      >                          mytmp(irap,isub,iord),
-Comment:      >                          rapbin(irap+1)-rapbin(irap),
-Comment:      >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
+                           write(*,*)"AA ibin,iord,isub,irap,ipt,"//
+     >                          "mytmp,drap,dpt",
+     >                          ibin,iord,isub,irap,ipt,
+     >                          mytmp(irap,isub,iord),
+     >                          rapbin(irap+1)-rapbin(irap),
+     >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
                         ENDIF
+ckr Attention: Test normalizing only up to 16 in Chi like in exp. analysis
+                        if (ipt.lt.13) then
                         IF (IORD.LE.NORDN) THEN
                            MYTMP(IRAP,ISUB,IORD) =
      >                          MYTMP(IRAP,ISUB,IORD) +
@@ -530,9 +532,10 @@ Comment:      >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
      >                          RESULT(IBIN,ISUB,2)) *
      >                          (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                         ENDIF
-Comment:                         write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       mytmp(irap,isub,iord)
+                        endif
+                        write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
+     >                       ibin,iord,isub,irap,ipt,
+     >                       mytmp(irap,isub,iord)
                      ENDDO
                   ENDDO
                ENDDO
