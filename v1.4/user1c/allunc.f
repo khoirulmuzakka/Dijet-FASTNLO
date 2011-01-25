@@ -112,12 +112,12 @@ C --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     (i.e. eigen vector method (CTEQ, MSTW))'
             WRITE(*,*)' '
             STOP
+ckr To be cross-checked for each new scenario
          ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
-ckr Might be useful more generally, but only checked for these scenarios
-ckr Broken for fnl2442
-            LRAT = .false.
-ckr Seems to work fine now for fnl2442
-            LNRM = .true.
+ckr Original version for fnl2442: Works fine, trivial division in rap 3
+            LRAT = .FALSE.
+ckr New norm. version for fnl2442: Works fine, trivial division in rap 4
+            LNRM = .TRUE.
             LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving x section ratios"

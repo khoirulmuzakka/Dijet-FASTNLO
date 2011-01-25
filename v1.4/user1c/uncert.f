@@ -511,31 +511,32 @@ ckr Normalization table loaded, if necessary
                      DO ISUB=1,NSUBPROCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-                           write(*,*)"AA ibin,iord,isub,irap,ipt,"//
-     >                          "mytmp,drap,dpt",
-     >                          ibin,iord,isub,irap,ipt,
-     >                          mytmp(irap,isub,iord),
-     >                          rapbin(irap+1)-rapbin(irap),
-     >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
+Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,"//
+Comment:      >                          "mytmp,drap,dpt",
+Comment:      >                          ibin,iord,isub,irap,ipt,
+Comment:      >                          mytmp(irap,isub,iord),
+Comment:      >                          rapbin(irap+1)-rapbin(irap),
+Comment:      >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
                         ENDIF
-ckr Attention: Test normalizing only up to 16 in Chi like in exp. analysis
-                        if (ipt.lt.13) then
-                        IF (IORD.LE.NORDN) THEN
-                           MYTMP(IRAP,ISUB,IORD) =
-     >                          MYTMP(IRAP,ISUB,IORD) +
-     >                          RESULT(IBIN,ISUB,IORD) *
-     >                          (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
-                        ELSE
-                           MYTMP(IRAP,ISUB,IORD) =
-     >                          MYTMP(IRAP,ISUB,IORD) +
-     >                          (RESULT(IBIN,ISUB,1) +
-     >                          RESULT(IBIN,ISUB,2)) *
-     >                          (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
+ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
+                        IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
+     >                       .OR.(SCENARIO(1:7).EQ."fnl2652"))THEN
+                           IF (IORD.LE.NORDN) THEN
+                              MYTMP(IRAP,ISUB,IORD) =
+     >                             MYTMP(IRAP,ISUB,IORD) +
+     >                             RESULT(IBIN,ISUB,IORD) *
+     >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
+                           ELSE
+                              MYTMP(IRAP,ISUB,IORD) =
+     >                             MYTMP(IRAP,ISUB,IORD) +
+     >                             (RESULT(IBIN,ISUB,1) +
+     >                             RESULT(IBIN,ISUB,2)) *
+     >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
+                           ENDIF
                         ENDIF
-                        endif
-                        write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
-     >                       ibin,iord,isub,irap,ipt,
-     >                       mytmp(irap,isub,iord)
+Comment:                         write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
+Comment:      >                       ibin,iord,isub,irap,ipt,
+Comment:      >                       mytmp(irap,isub,iord)
                      ENDDO
                   ENDDO
                ENDDO
@@ -601,16 +602,17 @@ ckr Reload table to normalize
                   MYRES(IBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IBIN,NSUBPROC+1,IORD) + 
      >                 MYRES(IBIN,ISUB,IORD)
-                  IF (ISTEP.EQ.2) THEN
-                     MYRESN(IBIN,ISUB,IORD) = 
-     >                    MYRES(IBIN,ISUB,IORD)
-                  ENDIF
 ckr Centrality ratio: LRAT
 ckr Normalization: LNRM
                   IF (LRAT) THEN
                      MYRES(IBIN+NBIN,ISUB,IORD) = 
      >                    MYRES(IPT,ISUB,IORD) /
      >                    RESULT(IBIN,ISUB,IORD)
+Comment:                      write(*,*)"LRATA: ibin,iord,isub,irap,ipt,a,b,a/b",
+Comment:      >                    ibin,iord,isub,irap,ipt,
+Comment:      >                    MYRES(IPT,ISUB,IORD),
+Comment:      >                    RESULT(IBIN,ISUB,IORD),
+Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
                   ELSEIF (LNRM) THEN
                      IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
 Comment:                         write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
@@ -624,54 +626,62 @@ Comment:                         write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n"
 Comment:      >                       ibin,iord,isub,irap,ipt,
 Comment:      >                       MYRES(IBIN,ISUB,IORD),
 Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
-                        IF (ISTEP.EQ.2) THEN
-                           MYRESN(IBIN+NBIN,ISUB,IORD) = 
-     >                          MYRES(IBIN+NBIN,ISUB,IORD)
-                        ENDIF
                      ENDIF
                   ENDIF
+                  IF (ISTEP.EQ.2) THEN
+                     MYRESN(IBIN,ISUB,IORD) = 
+     >                    MYRES(IBIN,ISUB,IORD)
+                     MYRESN(IBIN+NBIN,ISUB,IORD) = 
+     >                    MYRES(IBIN+NBIN,ISUB,IORD)
+                  ENDIF
                ENDDO
-               IF (ISTEP.EQ.2) THEN
-                  MYRESN(IBIN,NSUBPROC+1,IORD) = 
-     >                 MYRES(IBIN,NSUBPROC+1,IORD)
-               ENDIF
+               MYRES(IBIN,NSUBPROC+1,NORD+1) = 
+     >              MYRES(IBIN,NSUBPROC+1,NORD+1) +
+     >              MYRES(IBIN,NSUBPROC+1,IORD)
                IF (LRAT) THEN
                   MYRES(IBIN+NBIN,NSUBPROC+1,IORD) =
      >                 MYRES(IPT,NSUBPROC+1,IORD) / 
      >                 MYRES(IBIN,NSUBPROC+1,IORD)
+Comment:                   write(*,*)"LRATB: ibin,iord,isub,irap,ipt,a,b,a/b",
+Comment:      >                 ibin,iord,isub,irap,ipt,
+Comment:      >                 MYRES(IPT,NSUBPROC+1,IORD),
+Comment:      >                 MYRES(IBIN,NSUBPROC+1,IORD),
+Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
                ELSEIF (LNRM) THEN
                   IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
                      MYRES(IBIN+NBIN,NSUBPROC+1,IORD) = 
      >                    MYRES(IBIN,NSUBPROC+1,IORD) *
      >                    MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
-                     IF (ISTEP.EQ.2) THEN
-                        MYRESN(IBIN+NBIN,NSUBPROC+1,IORD) = 
-     >                       MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
-                     ENDIF
                   ENDIF
                ENDIF
-               MYRES(IBIN,NSUBPROC+1,NORD+1) = 
-     >              MYRES(IBIN,NSUBPROC+1,NORD+1) +
-     >              MYRES(IBIN,NSUBPROC+1,IORD)
+               IF (ISTEP.EQ.2) THEN
+                  MYRESN(IBIN,NSUBPROC+1,IORD) = 
+     >                 MYRES(IBIN,NSUBPROC+1,IORD)
+                  MYRESN(IBIN+NBIN,NSUBPROC+1,IORD) = 
+     >                 MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
+               ENDIF
             ENDDO
-            IF (ISTEP.EQ.2) THEN
-               MYRESN(IBIN,NSUBPROC+1,NORD+1) = 
-     >              MYRES(IBIN,NSUBPROC+1,NORD+1)
-            ENDIF
             IF (LRAT) THEN
                MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
      >              MYRES(IPT,NSUBPROC+1,NORD+1) /
      >              MYRES(IBIN,NSUBPROC+1,NORD+1)
+Comment:                write(*,*)"LRATC: ibin,iord,isub,irap,ipt,a,b,a/b",
+Comment:      >              ibin,iord,isub,irap,ipt,
+Comment:      >              MYRES(IPT,NSUBPROC+1,NORD+1),
+Comment:      >              MYRES(IBIN,NSUBPROC+1,NORD+1),
+Comment:      >              MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
             ELSEIF (LNRM) THEN
                IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
                   MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
      >                 MYRES(IBIN,NSUBPROC+1,NORD+1) *
      >                 MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
-                  IF (ISTEP.EQ.2) THEN
-                     MYRESN(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
-     >                    MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
-                  ENDIF
                ENDIF
+            ENDIF
+            IF (ISTEP.EQ.2) THEN
+               MYRESN(IBIN,NSUBPROC+1,NORD+1) = 
+     >              MYRES(IBIN,NSUBPROC+1,NORD+1)
+               MYRESN(IBIN+NBIN,NSUBPROC+1,NORD+1) = 
+     >              MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
             ENDIF
             DO ISUB=1,NSUBPROC
                DO IORD=1,NORD
@@ -679,24 +689,27 @@ Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
      >                 MYRES(IBIN,ISUB,NORD+1) + 
      >                 MYRES(IBIN,ISUB,IORD)
                ENDDO
-               IF (ISTEP.EQ.2) THEN
-                  MYRESN(IBIN,ISUB,NORD+1) = 
-     >                 MYRES(IBIN,ISUB,NORD+1)
-               ENDIF
                IF (LRAT) THEN
                   MYRES(IBIN+NBIN,ISUB,NORD+1) = 
      >                 MYRES(IPT,ISUB,NORD+1) /
      >                 MYRES(IBIN,ISUB,NORD+1)
+Comment:                   write(*,*)"LRATD: ibin,iord,isub,irap,ipt,a,b,a/b",
+Comment:      >                 ibin,iord,isub,irap,ipt,
+Comment:      >                 MYRES(IPT,ISUB,NORD+1),
+Comment:      >                 MYRES(IBIN,ISUB,NORD+1),
+Comment:      >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
                ELSEIF (LNRM) THEN
                   IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
                      MYRES(IBIN+NBIN,ISUB,NORD+1) = 
      >                    MYRES(IBIN,ISUB,NORD+1) *
      >                    MYRES(IBIN+NBIN,ISUB,NORD+1)
-                     IF (ISTEP.EQ.2) THEN
-                        MYRESN(IBIN+NBIN,ISUB,NORD+1) = 
-     >                       MYRES(IBIN+NBIN,ISUB,NORD+1)
-                     ENDIF
                   ENDIF
+               ENDIF
+               IF (ISTEP.EQ.2) THEN
+                  MYRESN(IBIN,ISUB,NORD+1) = 
+     >                 MYRES(IBIN,ISUB,NORD+1)
+                  MYRESN(IBIN+NBIN,ISUB,NORD+1) = 
+     >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
                ENDIF
             ENDDO
          ENDDO
