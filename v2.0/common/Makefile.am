@@ -23,9 +23,9 @@ libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlo
   fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
 
 # If ROOT is installed, add a dictionary to the library
-# Note: fnloTableDict.cc has to be pre-created and therefore is a BUILT_SOURCE !
-BUILT_SOURCES = fnloTableDict.cc
 if HAVE_ROOT
+# Note: fnloTableDict.cc has to be pre-created and therefore is a BUILT_SOURCE !
+  BUILT_SOURCES = fnloTableDict.cc
 # But don't distribute it ...
   nodist_libfastnlo_la_SOURCES = fnloTableDict.cc
   nodist_libfastnloUser_la_SOURCES = fnloTableDict.cc
