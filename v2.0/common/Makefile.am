@@ -23,17 +23,24 @@ libfastnloNlojet_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlo
   fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
 
 # If ROOT is installed, add a dictionary to the library
+# Note: fnloTableDict.cc has to be pre-created and therefore is a BUILT_SOURCE !
 BUILT_SOURCES = fnloTableDict.cc
+if HAVE_ROOT
+# But don't distribute it ...
+  nodist_libfastnlo_la_SOURCES = fnloTableDict.cc
+  nodist_libfastnloUser_la_SOURCES = fnloTableDict.cc
+# Only these go to the distribution ...
+  libfastnlo_la_SOURCES += fnloTable.h fnloTableUser.h LinkDef.h
+  libfastnloUser_la_SOURCES += fnloTable.h fnloTableUser.h LinkDef.h
 # With my ROOT installation the "pre-compile" command with ROOTCINT fails
 # with seg fault :-(
 # Needs to be checked/fixed
 fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
 	${ROOTCINT} -f fnloTableDict.cc -c -I${ROOTINCLUDEPATH} -I${FASTNLOINCLUDEPATH} fnloTable.h fnloTableUser.h LinkDef.h
-if HAVE_ROOT
-# Note: fnloTableDict.cc has to be pre-created and therefore is a BUILT_SOURCE !
-  libfastnlo_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
-  libfastnloUser_la_SOURCES += fnloTableDict.cc fnloTable.h fnloTableUser.h LinkDef.h
 endif
+# Fake creation to make "make dist" happy
+#fnloTableDict.cc: fnloTable.h fnloTableUser.h LinkDef.h
+#	touch fnloTableDict.cc
 
 # C++ compiler flags to be used for the main target
 AM_CXXFLAGS = 
