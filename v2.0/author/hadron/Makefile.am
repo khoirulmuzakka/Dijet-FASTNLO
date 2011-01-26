@@ -7,11 +7,8 @@ lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt20
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+   lib_LTLIBRARIES += libfnl2342a.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 endif
-#
-# libfnl1310.la libfnl1308.la libfnt2015norm.la
-#
 
 #
 # All source files which go into the main targets (and have to be distributed)
@@ -19,21 +16,20 @@ endif
 # All targets
 AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
 # Individual sources
-libfnt1001midp_la_SOURCES = fnt1001midp.cc cone-et-07.h cone-et-07.cc $(AM_SOURCES)
-libfnt2009midp_la_SOURCES = fnt2009midp.cc cone-e-07.cc $(AM_SOURCES)
-libfnt2012test_la_SOURCES = fnt2012test.cc cone-e-07.cc $(AM_SOURCES)
-libfnt2013norm_la_SOURCES = fnt2013norm.cc cone-e-07.cc $(AM_SOURCES)
-libfnt2014norm_la_SOURCES = fnt2014norm.cc cone-e-07.cc $(AM_SOURCES)
-#libfnt2015norm_la_SOURCES = fnt2015norm.cc cone-e-07.h cone-e-07.cc $(AM_SOURCES)
-libfnl1001_la_SOURCES = fnl1001.cc cone-e-07.h cone-e-07.cc $(AM_SOURCES)
+libfnt1001midp_la_SOURCES   = fnt1001midp.cc   cone-et-07.h cone-et-07.cc $(AM_SOURCES)
+libfnt2009midp_la_SOURCES   = fnt2009midp.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+libfnt2012test_la_SOURCES   = fnt2012test.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+libfnt2013norm_la_SOURCES   = fnt2013norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+libfnt2014norm_la_SOURCES   = fnt2014norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnt2015norm_la_SOURCES   = fnt2015norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+libfnl1001_la_SOURCES       = fnl1001.cc       cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
 # Require fastjet
-libfnl1001ak07_la_SOURCES = fnl1001ak07.cc fj-ak-07.h fj-ak-07.cc $(AM_SOURCES)
-libfnl1001sc07_la_SOURCES = fnl1001sc07.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
+libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak-07.h   fj-ak-07.cc   $(AM_SOURCES)
+libfnl1001sc07_la_SOURCES   = fnl1001sc07.cc   fj-sc-07.h   fj-sc-07.cc   $(AM_SOURCES)
 libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2-07.h fj-d0r2-07.cc $(AM_SOURCES)
-libfnt2012_la_SOURCES = fnt2012.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
-
-#libfnl1310_la_SOURCES = fnl1310.cc fj-kt-06.h fj-kt-06.cc $(AM_SOURCES)
-#libfnl1308_la_SOURCES = fnl1308.cc fj-sc-07.h fj-sc-07.cc $(AM_SOURCES)
+libfnt2012_la_SOURCES       = fnt2012.cc       fj-sc-07.h   fj-sc-07.cc   $(AM_SOURCES)
+libfnl1001ak07n_la_SOURCES  = fnl1001ak07n.cc  fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl2342a_la_SOURCES      = fnl2342a.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 
 #
 # C++ compiler flags to be used for the main target
@@ -48,6 +44,7 @@ else
       AM_CXXFLAGS += -I${FASTJETINCLUDEPATH}
    endif
 endif
+
 # Example of individual specification of CXXFLAGS
 #libfnl1001_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
 # Require fastjet, use fastjet-config if possible
@@ -56,9 +53,6 @@ endif
 #else
 #   libfnl1001sc07_la_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH} 
 #endif
-
-#libfnl1310_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
-#libfnl1308_la_CXXFLAGS = -g -O0 -Wall -I../../common -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FASTJETINCLUDEPATH}
 
 #
 # Linker flags to be used for the main target
@@ -73,6 +67,7 @@ else
       AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
    endif
 endif
+
 # Example of individual specification of LDFLAGS
 #libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 # Require fastjet, use fastjet-config if possible
