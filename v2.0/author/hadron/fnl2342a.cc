@@ -1,879 +1,247 @@
 //
-// fastNLO author code for fnl2342a:
+// fastNLO v2 author code for fnl2342a:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
-// last modification
+// 
+// ============== fastNLO user: ===================================
+// To create your own scenario, it is recommended to take 
+// this code, make a copy and edit the relevant changes.
+// Important:
+// Edit only those lines which are labeled as "fastNLO user"
+// and refer to the documentation ("fastNLO authorcode in 
+// NLOJET++") for a detailed explanation of the parameters 
+// and variables.
+// If a code fragment is not explicitely labeled as "fastNLO user",
+// it is likely that a modification will interfere with
+// the fastNLO routines.
 //
+// This file contains the following routines:
+//   inputfunc   (-> user edits)
+//   psinput     (-> user edits)
+//   initfunc    (don't touch)
+//   userfunc    (-> user edits)
+//   writetable  (don't touch)
+//   end_of_even (don't touch)
+//   phys_output (don't touch)
+//   inittable   (-> user edits)
+//
+// Implementing a new scenario requires to edit:
+//  - the jet algorithm ("#include" statement and assignement of "jetclus")
+//  - number of jets (inputfunc)
+//  - center-of-mass energy (psinput)
+//  - compute observable, determine bin No. (userfunc)
+//  - declare all variables for table, define bin boundaries (inittable)
+//  
+// ================================================================
+// 
+// last modifications
+// 2011/01/26 KR Add CMS Inclusive Jets Scenario
+// 2011/01/13 KR unify jet sizes into one .cc and .h file
+// 2010/09/24 MW make user-friendly
+// 2010/09/22 MW implement D0 phase space
+// 2009/01/15 TK make code V2.0 compatible
+//
+
+
 //------ DON'T TOUCH THIS PART! ------
-#include <phasespace.h>
-#include <process.h>
-#include <jetfunc.h>
-#include <qcdlib.h>
-#include <iomanip>              // for ASCII output for table
+#include <bits/hhc-phasespace.h>
+#include <bits/hhc-process.h>
+#include <bits/hhc-jetfunc.h>
 
 //----- used namespaces -----
 using namespace nlo;
 using namespace std;
 
-
 //----- declaration of the user defined functons -----
-void inputfunc(unsigned int&, unsigned int&, unsigned int&, double&);
-user_hhc * userfunc();
+void inputfunc(unsigned int&, unsigned int&, unsigned int&);
+void psinput(phasespace_hhc *, double&);
+user_base_hhc * userfunc();
 
 //----- array of the symbols symbols -----
-struct { 
-   const char *name;
-   void *address;
-} user_defined_functions[] = 
-   {
-      //   process index: 3 --> hadron-hadron --> jets
-      {"procindex", (void *) "3"},
-    
-      //   input function 
-      {"inputfunc", (void *) inputfunc},
-    
-      //   user defined functions
-      {"userfunc",  (void *) userfunc},
-    
-      //  end of the list
-      {0, 0}
-   };
-//------ USER DEFINED PART STARTS HERE ------
-#include "fj-ak-05.h"
-#include "cteq6.h"
+extern "C"{
+  struct { 
+	const char *name;
+	void *address;
+  } user_defined_functions[] = 
+  {
+	//   process index: hhc for hadron-hadron --> jets
+	{"procindex", (void *) "hhc"},
+	//   input function 
+	{"inputfunc", (void *) inputfunc},
+	//   phase space input function 
+	{"psinput", (void *) psinput},
+	//   user defined functions
+	{"userfunc",  (void *) userfunc},
+	//  end of the list
+	{0, 0}
+  };
+}
+//------ END OF THE DO-NOT-TOUCH-PART ------
 
-class UserHHC : public user_hhc
+//------ USER DEFINED PART STARTS HERE ------
+#include <algorithm>
+
+#include "fj-ak.h"
+
+#include "pdf-cteq6.h"
+#include "pdf-hhc-dummy.h"
+#include "fnloTable.h"
+#include "fnloBlockBNlojet.h"
+
+class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
 {
  public:
    //   init and user function
    void initfunc(unsigned int);
    void userfunc(const event_hhc&, const amplitude_hhc&);
-   virtual void phys_output(const std::basic_string<char>& __file_name, 
-			   unsigned long __save = 10000UL, bool __txt = false);
-   void end_of_event();  
+   virtual void end_of_event();  
+   virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
 
  private:
+   // --- pdf
+   pdf_cteq6 pdf;
+   pdf_hhc_dummy dummypdf;
 
-   bool nlo;       // Is the job running at LO or NLO?
-   // binning
+   // --- jet algorithm
+   fj_ak jetclus;
    
-   unsigned int iref;     //  switch for reference mode
-   unsigned int refscale; //  select which scale variaton is used in ref-table
-
-   double unitfactor;   // factor to convert from nb to units in publication
-   int nrap;       // No of rapidity bins 
-   double *raphigh;  // array for rapidity boundaries
-   int *npt;       // No of pT bins in each y range
-   vector< vector<double> >pthigh;   // array for pT boundaries
+   bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    
-   int nscalevar;             // number of scale variations (mu_r,mu_f) in NLO
-   vector <double> murscale;  // overall scale factor for renormalization scale
-   vector< vector<double> >murval; // array for renormalization scale values
-   vector <double> mufscale;       // overall scale factor for fact. scale
-   vector< vector<double> >mufval; // array for factorization scale values
-
-   int nxtot;      // no of xbins 
-   vector< vector<double> >xlimit; // array for lower x limits
-   vector< vector<double> >hxlim; // array for function h at xlimit
-   vector< vector<double> >xsmallest; // array for smallest actual x values
-   //    array for the weights MAIN ARRAY
-   vector <vector< vector < vector < vector <weight_hhc> > > > >weights; 
-   
-  // ===== variables for the b-cubic interpolation =====
-  // - the relative distances to the four nearest bins
-  vector<double> cmax ;   vector<double> cmin ; 
-  // - the weights for the cubic eigenfunctions (1-dim)
-  vector<double> cefmin ; vector<double> cefmax ; 
-  // - the weights for the bi-cubic eigenfunctions (2-dim)
-  vector< vector<double> > bicef;
-
-
+   // --- fastNLO definitions (not for user)
+   fnloTable *table;
    double nevents;        // No of events calculated so far
    unsigned long nwrite;  // No of events after to write out the table
-
-   pdf_cteq6 pdf;  //   pdf
-   fj_ak_05 jetclus;   // jet algorithm
- 
-   bounded_vector<lorentzvector<double> > pj;    // the jet structure 
-   basic_string<char> tablefilename; // The table file to write to
-   bool textoutput; // If true, the table is written in plain ASCII instead of BASE64 encoded doubles (later for XML)
-   amplitude_hhc::integral_type itype; // Born, NLO etc.
-
+   string tablefilename;  // The table file to write to
    time_t start_time;
-
+   
+   bool nlo;
+   void inittable();
    void writetable();
 };
 
-user_hhc * userfunc() {
-   return new UserHHC;
+user_base_hhc * userfunc() {
+  return new UserHHC;
 }
 
-void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
+void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
-   //  number of jets 
-   //nj = 1U;
-   nj = 2U;
-   //nj = 3U;
+  // --- fastNLO user: select the number of jets for your observable
+  //nj = 1U;
+  nj = 2U;    
+  //nj = 3U;
 
-   //  total c.m. energy squared
-   //s =     40000.; // RHIC               200 GeV
-   //s =   3240000.; // TeV Run I         1800 GeV
-   //s =   3841600.; // TeV Run II        1960 GeV
-   //s =    810000.; // LHC Injection Run  900 GeV
-   //s =   5569600.; // LHC Initial Run   2360 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
-   //s = 100000000.; // LHC Start-up Run 10000 GeV
-   //s = 196000000.; // LHC Design Run   14000 GeV
-
-   //  number of the up and down type flavours
+   // --- number of the up and down type flavours (don't touch)
    nu = 2U;
    nd = 3U;
 } 
 
+
+void psinput(phasespace_hhc *ps, double& s)
+{
+   // --- fastNLO user: set the total c.m. energy squared in GeV^2
+   //double s =     40000.; // RHIC               200 GeV
+   //double s =   3240000.; // TeV Run I         1800 GeV
+   //double s =   3841600.; // TeV Run II        1960 GeV
+   //double s =    810000.; // LHC Injection Run  900 GeV
+   //double s =   5569600.; // LHC Initial Run   2360 GeV
+   double s =  49000000.; // LHC First Run     7000 GeV
+   //double s = 100000000.; // LHC Start-up Run 10000 GeV
+   //double s = 196000000.; // LHC Design Run   14000 GeV
+
+   //   You can use your own phase generator. 
+   //   Here we use the default.
+   ps = 0;
+} 
+
+
 void UserHHC::initfunc(unsigned int)
 {
-   unsigned int nj;
-   unsigned int nu;
-   unsigned int nd;
-   double      s;
-   inputfunc(nj,nu,nd,s);
-
-   // ********************************************************
-   // ********** switch for reference mode on/off ************
-   iref = 0;       //  switch for reference mode
-   //iref = 1;       //  switch for reference mode
-                  //   0: standard fastNLO table only
-                 //    1: include 2nd "reference table" (a_s/PDFs)
-   refscale = 2;   // which of the scalevariations is used in ref-table?
-
-   unitfactor = 1000000.0;  // for fb
-   //unitfactor = 1000.0;  // for pb
-   //unitfactor = 1.0;  // for nb
-
-   // Set up binning!
-   // First dimension (histogram numbers xxxxRxx), usually rapidity
-   // 
-   // # of bins
-   nrap = 6;
-   double rapb[7] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
-   // In reference mode: Double no. of bins
-   nrap = nrap*(iref+1);
-   
-   // Array for bin boundaries
-   raphigh = new double[nrap+1];
-   for ( unsigned int i=0; i<nrap/(iref+1)+1; i++) {
-     raphigh[i] = rapb[i];
-   }
-   // In reference mode: Copy high end of bin boundaries
-   if ( iref==1 ) {
-     for (unsigned int i=0; i<nrap/(iref+1); i++) {
-       raphigh[i+nrap/2+1] = raphigh[i+1];
-     }
-   }
-
-   //DEBUG
-   //    for (int i=0; i<nrap+1; i++) {
-   //      cout << "i, rapb, raphigh: " << i << ", " << rapb[i] << ", " << raphigh[i] << endl;
-   //    }
-   //DEBUGEND
-
-   // Second dimension (histogram x axis), usually pT
-   // Here:  Jet pT
-   // 
-   // # of bins npt per irap bin of first dimension
-   int nptb[6] = {49, 49, 49, 46, 39, 32};
-   npt = new int[nrap];
-   for (unsigned int i=0; i<nrap/(iref+1); i++) {
-     npt[i] = nptb[i]; 
-   }
-   // In reference mode: Copy # of bins definition
-   if ( iref==1 ) {
-     for (unsigned int i=0; i<nrap/(iref+1); i++) {
-       npt[i+nrap/2] = npt[i];
-     }
-   }
-
-   pthigh.resize(nrap);
-   for (int i=0; i<nrap; i++) {
-     pthigh[i].resize(npt[i]+1);
-   }
-
-   // Array for bin boundaries
-   double ptb[50] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
-		      114., 133., 153., 174., 196., 220., 245., 272., 300., 330., 362., 395., 430., 468.,
-		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.,
-		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
-   for (unsigned int i=0; i<nrap/(iref+1); i++) {
-     for (int j=0; j<npt[i]+1; j++) { 
-       pthigh[i][j] = ptb[j];
-     }
-   }
-   // In reference mode: Copy high end of bin boundaries
-   if ( iref==1 ) {
-     for ( unsigned int i=0; i<nrap/(iref+1); i++ ) {
-       for ( int j=0; j<npt[i]+1; j++) {
-         pthigh[i+nrap/2][j] = pthigh[i][j];
-       }
-     }
-   }
-
-   //DEBUG
-   //    for (int i=0; i<nrap; i++) {
-   //      for (int j=0; j<npt[i]+1; j++) {
-   //        cout << "i, j, ptb, pthigh: " << i << ", " << j << ", " << ptb[j] << ", " << pthigh[i][j] << endl;
-   //      }
-   //    }
-   //DEBUGEND
-
-   // Binning in x
-   nxtot = 12;
-
-   // NLO scale variations - for scales in GeV
-   nscalevar = 4;
-   murscale.resize(nscalevar);
-   mufscale.resize(nscalevar);
-   murscale[0] = 0.25; mufscale[0] = 0.25;
-   murscale[1] = 0.5;  mufscale[1] = 0.5;
-   murscale[2] = 1.0;  mufscale[2] = 1.0;
-   murscale[3] = 2.0;  mufscale[3] = 2.0;
-
-   xlimit.resize (nrap);
-   hxlim.resize (nrap);
-   xsmallest.resize (nrap);     // test: find smallest x values
-   murval.resize (nrap);
-   mufval.resize (nrap);
- 
-   weights.resize (nrap);
-   for( int j = 0; j < nrap; j++) {
-      xlimit[j].resize(npt[j]);
-      hxlim[j].resize(npt[j]);
-      xsmallest[j].resize(npt[j]);
-      murval[j].resize (npt[j]);
-      mufval[j].resize (npt[j]);
-      weights[j].resize(npt[j]);
-      for( int k = 0; k < npt[j]; k++) {
-         // Setup the weights array
-         weights[j][k].resize(nxtot);
-         for( int l = 0; l < nxtot; l++) {
-            weights[j][k][l].resize(l+1); // half matrix xmin,xmax: (n^2+n)/2
-            // scale variation
-            for(int i = 0; i < l+1; i++){
-               weights[j][k][l][i].resize(nscalevar);
-            }
-         }
-
-         // - Setup the xlimit array - computed from kinematic constraints
-         double pt = pthigh[j][k];
-         double xt = 2*pt/sqrt(s);
-         double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
-         if (ymax>raphigh[(j+1)]) ymax=raphigh[(j+1)];
-	 double ymin = raphigh[(j)];
-	 // - Check limit only for first loop over rap. bins when arrays
-         //   are doubled for reference calculation
-	 if ( (ymin > ymax) && (iref == 0 || (iref == 1 && j < nrap/2 ) ) ) {
-	   cout << "fastNLO: ERROR! No phase space left in pt bin " << k <<
-	     " and rapidity bin " << j << endl;
-	   cout << "The pt bin runs from " << pthigh[j][k] <<
-	     " to " << pthigh[j][k+1] << endl;
-	   cout << "The rapidity bin runs from " << raphigh[j] <<
-	     " to " << raphigh[j+1] << endl;
-	   cout << "pt,xt,ymin,ymax " << pt << ", " << xt <<
-	     ", " << ymin << ", " << ymax << endl;
-	   cout << "Remove empty bin!" << endl;
-	   exit(2);
-	 }
-
-	 //   find smallest x by integrating over accessible y-range
-	 double xmin = 1.0; 
-	 for (int nr = 0; nr <= 400; nr++) {
-	   double ytest = ymin + double(nr)*(ymax-ymin)/400.0;
-	   double xtest = pt*exp(-ytest)/(sqrt(s)-pt*exp(ytest));
-	   if (xtest<xmin) xmin = xtest;
-	 }
-	 xlimit[j][k] = xmin;
-         // ---- safety factors for ET-scheme / optimized by eta range
-	 xlimit[j][k] = xlimit[j][k]*0.95; // small safety factor -> E-scheme
-         
-         hxlim[j][k]= -sqrt(-log10(xlimit[j][k]));
-         xsmallest[j][k]=0.999;
-
-         // - Setup the murval and mufval arrays - take value at 45% of bin
-         murval[j][k]= (0.55*pt + 0.45*pthigh[j][k+1]); 
-         mufval[j][k]= (0.55*pt + 0.45*pthigh[j][k+1]); 
-      }
-   }
-
-   if (iref==1)      // -> in reference mode: copy all definitions
-     for(int j=0;j<nrap/2;j++){
-      for( int k = 0; k < npt[j]; k++) {
-	 xlimit[j+nrap/2][k] = xlimit[j][k];
-         hxlim[j+nrap/2][k]=  hxlim[j][k];
-         murval[j+nrap/2][k]= murval[j][k]; 
-         mufval[j+nrap/2][k]= mufval[j][k]; 
-      }
-   }
-
-   // print x-limit values at the begin of the job
-   printf ("(rapidity, pt) array for this job:\n");
-   printf ("#rap #pt xlimit pt_high rap_high \n");
-   for( int j = 0; j < nrap; j++) {
-      for( int k = 0; k < npt[j]; k++) {
-         printf("%3d %3d   %8.6f %8.1f %8.1f \n",j,k,
-		xlimit[j][k],pthigh[j][k],raphigh[(j+1)]);
-      }
-   }
-
-   // ===== variables for the bi-cubic interpolation =====
-   // - the relative distances to the four nearest bins
-   cmax.resize (4); cmin.resize (4);
-   // - the weights for the cubic eigenfunctions (1-dim)
-   cefmin.resize (4); cefmax.resize (4);
-   // - the weights for the bi-cubic eigenfunctions (2-dim)
-   bicef.resize (4);
-   for( int i = 0; i < 4; i++) {
-     bicef[i].resize (4);
-   }
-
-   // ---------------------------------------------------------------
-   // ---- Initialize event counters
+   // --- Initialize event counters
    nevents = 0;
    // Set some defaults
    if (nwrite==0) nwrite = 5000000;
-   if (tablefilename=="") tablefilename = "fastnlotable.raw";
-
-   // Say Hello
-   cout << " " << endl;
-   cout << "   *******************************************" << endl;
-   cout << "    fastNLO - initialization" << endl;
-   cout << "    Scenario fnl2342a:" << endl;
-   cout << "      CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV," << endl;
-   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
-   cout << " " << endl;
-   cout << "        table file " << tablefilename << endl;
-   cout << "        store table after " << nwrite << " events" << endl;
-   cout << "        sqrt(s)= " << sqrt(s) << endl;
-   cout << "        No. x-bins: " << nxtot << endl;
-   cout << "        No. rapidity regions: " << nrap << endl;
-   cout << "        No. of pT bins in each rapidity region:" << endl;
-
-   for( int j = 0; j < nrap; j++) {
-      cout<<"          rap "<<j<<": "<<npt[j]<<endl;
-   }
-   cout<<"        No. of scale variations in NLO: "<<nscalevar<<endl;
-   for( int j = 0; j < nscalevar; j++) {
-     cout<<"          "<<j<<":   (mur/pT) "<<murscale[j]<<
-	"      (muf/pT) "<<mufscale[j]<<endl;
-   }
-   cout<<"  "<<endl;
-
-   if (iref==1) {     // -> in reference mode: make output
-     cout<<"  "<<endl;
-     cout<<"      *****************************************"<<endl;
-     cout<<"      running in  >> reference mode << (iref=1)"<<endl;
-     cout<<"      -> filling second table including"<<endl;
-     cout<<"         alphas and PDFs in coefficients"<<endl;
-     cout<<"         for reference-table use scale No. "<<refscale<<endl;
-     cout<<"          -- for precision studies --"<<endl; }
-   else {
-     cout<<"          -- reference mode disabled --"<<endl;
-   }
-   cout<<"  "<<endl;
-   cout<<"   *******************************************"<<endl;
-   cout<<"        "<<endl;
-
-   if (iref==1) {      // -> in reference mode: define PDFs/alphas
-     pdf.mode(pdf_cteq6::nlo); pdf.loop(2);
-   }
-
-   start_time = ::time(0);
+   start_time = std::time(0);
 }
 
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
-   //  typedef lorentzvector<double> _Lv;
-   //-------- general stuff
-   //  double s = 2.0*(p[hadron(0)]*p[hadron(-1)]);
-
-   //---------------------------------------------------
-   //--------- start event processing ------------------
-   //---------------------------------------------------
-
-   //----- variables: CM energy and x-values -----------
-   double xmin=0.0, xmax=0.0;
+   fnloBlockA2 *A2 =  table->GetBlockA2();
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
    double x2 = p[0].Z()/p[hadron(0)].Z();
-   if (x1 > x2) {
-      xmax = x1;
-      xmin = x2; }
-   else {
-      xmax = x2;
-      xmin = x1;
-   }
-   // - to reweight the Eigenfunctions (universal PDF)
-   double reweight = 1/sqrt(xmin)/sqrt(xmax)*(1-0.99*xmin) * (1-0.99*xmax);  
-   double hxmin  = -sqrt(-log10(xmin));
-   double hxmax  = -sqrt(-log10(xmax));
-   double hxone   = 0.0;
 
-   // LO or NLO?
-   itype = amp.integral();
+   // --- run the jet algorithm
+   double jetsize = 0.5;
+   pj = jetclus(p,jetsize);
+   unsigned int nj = pj.upper(); 
 
-   //----- do the jet analysis -----
-   pj = jetclus(p);
-   int nj = pj.upper();
 
-   // highest bin in first dimension
-   int nloop = nrap/(iref+1); // Important: For iref==1 doubled no. of bins
+   // --- fastNLO user:
+   //     Here is your playground where you compute your observable 
+   //     and the bin number ("obsbin") which gets passed to
+   //     fastNLO's table filling code.
+   //     (all pT and E are in GeV)
 
+   // --- declare and initialize phase space cut variables
    // lowest pT for jets to be considered
-   double ptlow = pthigh[0][0];
+   double ptmin = 10.;
    // highest (pseudo-)rapidity for jets to be considered
-   double yjmax = raphigh[nrap];
-   
+   double ymax  = 3.;
+
    // Analyze inclusive jets in jet loop
-   for (int i = 1; i <= nj; i++) {
-     
-     // Get jet properties
+   for (unsigned int i = 1; i <= nj; i++) {
      double pt  = pj[i].perp(); 
      double rap = abs(pj[i].rapidity());
-     if (pt > ptlow && rap < yjmax) {
-       
-       // Determine y and pt bin
-       // Do normalize to binwidths!
-       double binwidth = 1.0;
-       int rapbin = -1;
-       
-       for (int j = 0; j < nloop; j++) {        
-	 if (rap >= raphigh[j] && rap < raphigh[(j+1)]) {
-	   rapbin=j;
-	   binwidth = 2.0*(raphigh[(j+1)] - raphigh[j]);
+     
+     // --- jet in phase space?
+     if (ptmin < pt && rap < ymax) {
+
+       // - set the renormalization and factorization scale to jet pT
+       double mu = pt;
+
+       // --- identify bin number (y,pT)
+       int obsbin = -1;
+       for (int j = 0; j < A2->GetNObsBin(); j++) {
+	 if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0] && 
+	     A2->LoBin[j][1] <= rap && rap < A2->UpBin[j][1]) {
+	   obsbin = j;
 	   break;
 	 }
        }
-       if (rapbin >= 0 ) {              
-	 int ptbin  = -1;
-	 for (int j = 0; j < npt[rapbin]; j++) {
-	   if (pt >= pthigh[rapbin][j] && pt < pthigh[rapbin][(j+1)]) {
-	     ptbin=j;
-	     binwidth=binwidth*(pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
-	     break;
-	   }
-	 }
-
-            //---------- compute weight, fill fastNLO array
-            if ( ptbin>=0 ) {
-               // test if x_min in event is lower than x_limit
-               //      if yes -> make big warning!!! 
-               //      -> need to change x_limit values
-               if (xmin<xlimit[rapbin][ptbin]){
-                  printf("Warning: xmin (%f) < xlimit (%f) at pt=%f GeV y=%f \n ",
-                         xmin,xlimit[rapbin][ptbin],pt,rap);
-                  exit(1);
-               }
-
-               // *******  identify smallest x value in each pT/y bin  *******
-               //               -> to optimize the x-limit values
-               if (xmin<xsmallest[rapbin][ptbin]*0.98){  // 0.98 reduces output
-                 xsmallest[rapbin][ptbin] = xmin;
-                 if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 7h 
-                  (itype==amplitude_hhc::nlo && nevents> 120000000)){  // 10h
-		   //if((itype==amplitude_hhc::lo && nevents> 600000000)|| // 
-		   //(itype==amplitude_hhc::nlo && nevents> 60000000)){  // 3h
-                   cout<<" "<<endl;
-                   cout<<">>>>>> smaller x found in bin  "<<rapbin<<"  "<<ptbin
-                       <<"   -  "<<xmin<<"  "<<xlimit[rapbin][ptbin]<<"  :  "<<
-                     (xmin/xlimit[rapbin][ptbin])<<"  >> "<<nevents<<endl;
-                   for( int j = 0; j < nrap; j++) {
-                     for( int k = 0; k < npt[j]; k++) {
-                       cout<<"    bin "<<j<<"  "<<k<<"  "<<xsmallest[j][k]
-                           <<"  "<<xlimit[j][k]
-                           <<"   "<<pthigh[j][k]<<"  "<<raphigh[(j+1)]<<"  :  "
-			   <<(xsmallest[j][k]/xlimit[j][k])<<endl;
-                     }
-                   }
-                 }
-               }
-               // ------------  end: identify smallest x  -------------
-
-
-	       // **********  determine x_ij position in grid  ************
-               //--- determine fractional contributions for all four x-bins
-               // define the x-bin numbers in the range  [0:nxtot[
-               double hxlimit = hxlim[rapbin][ptbin];
-               int nxmin = int(nxtot *(hxmin-hxlimit)/(hxone-hxlimit));
-               int nxmax = int(nxtot *(hxmax-hxlimit)/(hxone-hxlimit));
-
-               //-- relative distances in h(xmin), h(xmax): deltamin,deltamax 
-               double delta  = (hxone-hxlimit)/nxtot;
-               double hxi =hxlimit+double(nxmax)/double(nxtot)*(hxone-hxlimit);
-               double hxj =hxlimit+double(nxmin)/double(nxtot)*(hxone-hxlimit);
-               double deltamax = (hxmax-hxi)/delta;
-               double deltamin = (hxmin-hxj)/delta;
-               if(deltamax>1.0 || deltamin>1 || deltamax<0.0 || deltamin<0.0){
-                  cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
-               }                             
-
-
-	       // ===== variables for the bi-cubic interpolation =====
-	       // === the relative distances to the four nearest bins
-	       cmax[0] = deltamax+1.0;
-	       cmax[1] = deltamax;
-	       cmax[2] = 1.0-deltamax;
-	       cmax[3] = 2.0-deltamax;
-	       cmin[0] = deltamin+1.0;
-	       cmin[1] = deltamin;
-	       cmin[2] = 1.0-deltamin;
-	       cmin[3] = 2.0-deltamin;
-
-	       // === the weights for the cubic eigenfunctions (1-dim)
-	       //   - linear interpolation in 1st and last =(nxtot-1) bins
-	       //   - cubic approximation in the middle 
-
-	       if (nxmax==0 || nxmax==(nxtot-1)) { //linear in 1st and last bin
-		 cefmax[0] = 0.0;
-		 cefmax[1] = 1.0-cmax[1];
-		 cefmax[2] = 1.0-cmax[2];
-		 cefmax[3] = 0.0; }
-	       else {                              // cubic in the middle
-		 cefmax[1]=1.0-2.5*cmax[1]*cmax[1]+1.5*cmax[1]*cmax[1]*cmax[1];
-		 cefmax[2]=1.0-2.5*cmax[2]*cmax[2]+1.5*cmax[2]*cmax[2]*cmax[2];
-		 cefmax[0]=2.0 - 4.0*cmax[0] + 2.5*cmax[0]*cmax[0]
-		   - 0.5*cmax[0]*cmax[0]*cmax[0];
-		 cefmax[3]=2.0 - 4.0*cmax[3] + 2.5*cmax[3]*cmax[3]
-		   - 0.5*cmax[3]*cmax[3]*cmax[3];
+	 
+	 // --- fill fastNLO arrays - don't touch this piece of code!
+	 if (obsbin >= 0) {
+ 	    double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
+	    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+   	       if(table->GetBlockB(k)->GetIRef()>0){
+	          ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
+	       }else{
+	 	  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
 	       }
-
-	       if (nxmin==0 || nxmin==(nxtot-1)) { //linear in 1st and last bin
-		 cefmin[0] = 0.0;
-		 cefmin[1] = 1.0-cmin[1];
-		 cefmin[2] = 1.0-cmin[2];
-		 cefmin[3] = 0.0; }
-	       else {                              //  cubic in the middle 
-		 cefmin[1]=1.0-2.5*cmin[1]*cmin[1]+1.5*cmin[1]*cmin[1]*cmin[1];
-		 cefmin[2]=1.0-2.5*cmin[2]*cmin[2]+1.5*cmin[2]*cmin[2]*cmin[2];
-		 cefmin[0]=2.0 - 4.0*cmin[0] + 2.5*cmin[0]*cmin[0]
-		   - 0.5*cmin[0]*cmin[0]*cmin[0];
-		 cefmin[3]= 2.0 - 4.0*cmin[3] + 2.5*cmin[3]*cmin[3]
-		   - 0.5*cmin[3]*cmin[3]*cmin[3];
-	       }
-
-	       // === the weights for the bi-cubic eigenfunctions (2-dim)
-	       for( int i1 = 0; i1 < 4; i1++) {
-		 for( int i2 = 0; i2 < 4; i2++) {
-		   bicef[i1][i2] = cefmax[i1] * cefmin[i2];
-		 }
-	       }
-	       
-              // loop over scale variations for NLO
-               int scalevarmax;
-               if(itype==amplitude_hhc::lo){
-                  scalevarmax=1;
-               }else{
-                  scalevarmax=nscalevar;
-               }
-               for(int scalevar=0; scalevar<scalevarmax;scalevar++){
-
-  		  double mur2 = murscale[scalevar]*murscale[scalevar]
-		    * murval[rapbin][ptbin]*murval[rapbin][ptbin];
-		  double muf2 = mufscale[scalevar]*mufscale[scalevar]
-		    * mufval[rapbin][ptbin]*mufval[rapbin][ptbin];
-
-                  amp.pdf_and_qcd_coupling(0,1.0);
-		  weight_hhc wt = amp(mur2,muf2);
-
-		  //  in reference jobs:  comment the following line
-                  //   --> not here, since this part is w/o a_s/PDF
-                  wt = wt* reweight*reweight*reweight *389385.730;
-		  wt = wt* (unitfactor/binwidth);
-
-                  // deal with subprocesses 2 and 3
-                  //    - if x1>x2 -> o.k.
-                  //    - if x2>x1 -> swap weights for subprocesses 2,3
-                  if(x2>x1){
-                     double buffer;
-                     buffer = wt[1];
-                     wt[1] = wt[2];
-                     wt[2] = buffer;
-                  }
-
-
-                  // ** ----------------------------------------------------
-                  // ** now fill half-table
-		  // ** loop over all 16 points that receive contributions
-		  for( int i1 = 0; i1 < 4; i1++) {
-		    for( int i2 = 0; i2 < 4; i2++) {
-		      int imax = nxmax +i1 -1;   // the target index (xmax)
-		      int imin = nxmin +i2 -1;  // the target index (xmin)
-		      weight_hhc wtmp = wt;  // a working copy of the weights
-
-		      // - check if above diagonal? project back and swap!
-		      if (imin>imax) { 
-			int di = imin - imax;
-			imax = imax + di;   // modify indicees
-			imin = imin - di;		
-			double buffer  = wtmp[1]; // swap subprocesses 2,3
-			wtmp[1] = wtmp[2];
-			wtmp[2] = buffer;
-		      } 
-		      // - ignore if xmin coordinate is < 0 (contrib is zero!)
-		      // - ignore if xmax coordinate is >= nxtot
-		      //     (contrib. > nxtot are zero / =nxtot PDF is zero)
-		      if (imax<nxtot && imin>=0) {
-			weights[rapbin][ptbin][imax][imin][scalevar] += 
-			  bicef[i1][i2] * wtmp;
-		      }
-		    }
-		  }
-
-               }//-end loop scalevar
-
-	       // ** ------------------------------------------------------
-	       // **   only in "reference mode":
-	       // **         -> fill half-table with pdfs and alphas
-	       // **         -> only for a single scale (index=refscale)
-	       // **         -> don't throw away contributions at x=1
-	       // **            but store in last existing bin No. =(nxtot-1)
-	       // **                (needed for reference)
-	       // **
-	       if (iref==1) {  // -> in reference mode
-
-		 double mur2 = murscale[refscale]*murscale[refscale]
-		   * murval[rapbin][ptbin]*murval[rapbin][ptbin];
-		 double muf2 = mufscale[refscale]*mufscale[refscale]
-		   * mufval[rapbin][ptbin]*mufval[rapbin][ptbin];
-
-		 amp.pdf_and_qcd_coupling(pdf, 389385.730);
-		 weight_hhc wt = amp(mur2,muf2);
-		 wt = wt * (unitfactor/binwidth);
-		 // deal with subprocesses 2 and 3
-		 //    - if x1>x2 -> o.k.
-		 //    - if x2>x1 -> swap weights for subprocesses 2,3
-		 if(x2>x1){
-		   double buffer;
-		   buffer = wt[1];
-		   wt[1] = wt[2];
-		   wt[2] = buffer;
-		 }
-		 
-		 for( int i1 = 0; i1 < 4; i1++) {
-		   for( int i2 = 0; i2 < 4; i2++) {
-		     int imax = nxmax +i1 -1;   // the target index (xmax)
-		     int imin = nxmin +i2 -1;  // the target index (xmin)
-		     weight_hhc wtmp = wt;  // a working copy of the weights
-		     
-		     // - check if above diagonal? project back and swap!
-		     if (imin>imax) { 
-		       int di = imin - imax;
-		       imax = imax + di;   // modify indicees
-		       imin = imin - di;		
-		       double buffer  = wtmp[1]; // swap subprocesses 2,3
-		       wtmp[1] = wtmp[2];
-		       wtmp[2] = buffer;
-		     }
-
-		     // - ignore if xmin coordinate is < 0 (contrib is zero!)
-		     // - for reference: rescue contrib. if coord. is >=nxtot
-		     if (imin>=0) {
-		       if (imax>=nxtot) imax = nxtot - 1;
-		       if (imin>=nxtot) imin = nxtot - 1;
-		       weights[rapbin+nrap/2][ptbin][imax][imin][0]+=
-			 bicef[i1][i2] * wtmp;
-		     }
-		   }
-		 }
-
-	       } //-end reference mode: a_s/PDF table filling 
-	       
-            } //-end: IF in pT range
-         }  // - end: IF in rapidity range
-      }     // - end: IF ptlow-cut
-   }        // - end jet loop
-
+	    }
+	 } // - end: fill fastNLO array
+      }
+   }
+   // --- end: fastNLO user playground
 }
 
 void UserHHC::writetable(){
-#define WRITE(n) table.write(reinterpret_cast<char *>(&n),sizeof(n))
-   //#define WRITE(n) table << setprecision(40) << n << endl
-
-   int marker = 1234567890; //used to separate section in the table
-   
-   //fstream table("table05.raw",ios::out|ios::binary); // open file
-   //fstream table("/work/joker-clued0/wobisch/fastNLO/table/run1/run1t99n04.raw",ios::out|ios::binary); // open file
-   fstream table(tablefilename.c_str() ,ios::out|ios::binary); // open file
- 
-   // ireaction
-   int ireaction = 2;
-   WRITE(ireaction);
-
-   unsigned int nj;
-   unsigned int nu;
-   unsigned int nd;
-   double      s;
-   inputfunc(nj,nu,nd,s);
-
-   // Ecms
-   s= sqrt(s);
-   WRITE(s);
-
-   // five strings with table content
-   table << "d2sigma-jet_dpT_dy_(fb_GeV)" << endl;
-   table << "CMS-LHC-Scenario" << endl;
-   table << "Inclusive_Jets" << endl;
-   table << "anti-kT_R=0.5" << endl;
-   table << "pT binning according to resolution expected by CMS" << endl;
-
-  //iproc
-   int iproc = 1; // incl. jets
-   WRITE(iproc);
-
-   //ialgo
-   int ialgo = 5; // anti-kT
-   WRITE(ialgo);
-
-   //JetResol1
-   double JetResol1 = 0.5; // jet size R
-   WRITE(JetResol1);
-
-   //JetResol2
-   double JetResol2 = 0.0; // no further parameter
-   WRITE(JetResol2);
-
-   // relative order
-   int nord = itype+1; // LO: itype=0,  NLO: itype=1
-   WRITE(nord);
-
-   // absolute order
-   int npow = nord+1; // -> only valid for incl and dijet x-sect
-   WRITE(npow);
-
-   switch(nord){
-   case 1: 
-      table << "LO" << endl;
-      break;
-   case 2: 
-      table << "NLO"  << endl;
-      break;
-   default:
-      table << "not known"  << endl;
-   }   
-   WRITE(marker);// ------------------END of block
-
-   //nevt
-   WRITE(nevents);  // No.of events in table
-
-   //nxtot
-   WRITE(nxtot);    // No of x-bins in table
-
-   //ixscheme
-   int ixscheme = 2;  //   1 log(x)   2 sqrt(log(1/x)
-   WRITE(ixscheme);
-
-   //ipdfwgt
-   int ipdfwgt = 1;  //   0 no PDF weighting   1 'standard' weighting
-   WRITE(ipdfwgt);
-
-   //iref
-   WRITE(iref);     // reference table included?
-
-   WRITE(marker);// ------------------END of block
-
-   //Nrapidity
-   WRITE(nrap);
-   for(int i=0;i<nrap+1;i++){
-      WRITE(raphigh[i]); //Rap[0] ... Rap[Nrapidity]
+   table->OpenFileRewrite();
+   table->WriteBlockA1();
+   table->WriteBlockA2();
+   for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
+      table->WriteBlockBDividebyN(i);
    }
+   table->CloseFileWrite();
 
-   for(int i=0;i<nrap;i++){
-      WRITE(npt[i]); //Npt[0] ... Npt[Nrapidity-1] 
-   }
-
-   for(int i=0;i<nrap;i++){
-      for(int j=0;j<npt[i]+1;j++){
-         WRITE(pthigh[i][j]); // all pt bins 
-      }
-   }
-    
-   WRITE(marker);// ------------------END of block
-   
-   for(int i=0;i<nrap;i++){
-      for(int j=0;j<npt[i];j++){
-         WRITE(xlimit[i][j]); // all x limits 
-      }
-   }
-
-   WRITE(marker);// ------------------END of block
-
-   // a brief description how the scale is defined
-   table << "pT_jet_(GeV)" << endl;
-
-   int nscalebin = 1;
-   WRITE(nscalebin); // No. of Bins in mur,muf - new in v1c
-
-   for(int i=0;i<nrap;i++){
-      for(int j=0;j<npt[i];j++){
-         WRITE(murval[i][j]); // all murval 
-      }
-   }
-   
-   WRITE(marker);// ------------------END of block
-
-   
-   for(int i=0;i<nrap;i++){
-      for(int j=0;j<npt[i];j++){
-         WRITE(mufval[i][j]); // all mufval 
-      }
-   }
-
-   WRITE(marker);// ------------------END of block
-
-
-   int scalevarmax;
-   if(itype==amplitude_hhc::nlo){  // scale variations are only filled above LO
-      scalevarmax=nscalevar;
-      WRITE(nscalevar);
-      for(int i=0;i<nscalevar;i++){
-         WRITE(murscale[i]); // all murscale 
-      }
-      for(int i=0;i<nscalevar;i++){
-         WRITE(mufscale[i]); // all mufscale 
-      }
-      
-      WRITE(marker);// ------------------END of block
-   }else{
-      scalevarmax=1;
-   }
-
-   for(int i=0;i<nrap;i++){ // rapidity
-      for(int j=0;j<npt[i];j++){ // pt
-         for(int k=0;k<nxtot;k++){ // xmax
-            for(int l=0;l<k+1;l++){ // xmin
-	      // - new order in tableformat version 1c
-	      for(int m=0;m<7;m++){     //subprocesses
-		// loop over scale variations for NLO
-		for(int scalevar=0; scalevar<scalevarmax;scalevar++){
-                     WRITE(weights[i][j][k][l][scalevar][m]);
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   WRITE(marker);// ------------------END of table
-
-   table.close();
 }
 
 void UserHHC::end_of_event(){
-   // let NLOJET++ store its results
-   user_hhc::end_of_event();
-   
    nevents += 1;
-   //-------- store table
+   // --- store table
    if (( (unsigned long)nevents % nwrite)==0){
-      time_t hour, min, time = ::time(0) - start_time;
+      time_t hour, min, time = std::time(0) - start_time;
       
       hour = time/3600L;
       time -= hour*3600L;
@@ -886,6 +254,9 @@ void UserHHC::end_of_event(){
 	  <<(time < 10 ? ":0" : ":")<<time<<std::endl;
       printf ("No. events: %.2G writing table....",nevents);
       cout.flush();
+      for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+         table->GetBlockB(k)->Nevt = (long long int)nevents;
+      }
       writetable();
       printf("done.\n");
    }
@@ -894,10 +265,10 @@ void UserHHC::end_of_event(){
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
-   // Suppress output of NLOJET++ files
-   user_hhc::phys_output("",2000000000,false);
-   tablefilename = __file_name +".raw";
-   //Determine whether we are running LO or NLO
+   tablefilename.assign(__file_name.c_str());
+   tablefilename += ".tab";
+   
+   // --- determine whether we are running LO or NLO
    const char* const file = __file_name.c_str(); 
    if(strstr(file,"born")!=NULL){
       nlo = false;
@@ -909,6 +280,287 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
          exit(1);
       }
    }
-   textoutput = __txt;
    nwrite = __save;
+   inittable();
+}
+
+void UserHHC::inittable(){
+
+   // --- fastNLO user: set the total c.m. energy squared in GeV^2
+   //double s =     40000.; // RHIC               200 GeV
+   //double s =   3240000.; // TeV Run I         1800 GeV
+   //double s =   3841600.; // TeV Run II        1960 GeV
+   //double s =    810000.; // LHC Injection Run  900 GeV
+   //double s =   5569600.; // LHC Initial Run   2360 GeV
+   double s =  49000000.; // LHC First Run     7000 GeV
+   //double s = 100000000.; // LHC Start-up Run 10000 GeV
+   //double s = 196000000.; // LHC Design Run   14000 GeV
+
+   // --- fastNLO user: decide whether to include a reference table (for 
+   //                   precision studies, not for production jobs)
+   //const bool doReference = true;
+   const bool doReference = false;
+
+   // --- set up fastNLO
+   table = new fnloTable(tablefilename);
+
+   // --- fastNLO: fill variable for table header block A1
+   table->GetBlockA1()->SetScenName("fnl2342a");  // - fastNLO user: set scenario name
+   table->GetBlockA1()->SetNcontrib(1);
+   table->GetBlockA1()->SetNmult(0);
+   table->GetBlockA1()->SetNdata(0);
+   table->GetBlockA2()->SetIpublunits(15);  // - fastNLO user: set cross section units
+                                            //                 (negative power of ten)
+
+   // --- fastNLO: fill variables for table header block A2
+   fnloBlockA2 *A2 =  table->GetBlockA2();
+
+   // --- fastNLO user: up to 20 strings to describe the scenario
+   A2->ScDescript.push_back("d2sigma-jet_dpT_d|y|_(fb_GeV)");
+   A2->ScDescript.push_back("CMS_Collaboration");
+   A2->ScDescript.push_back("CMS-PAP-QCD-10-011");
+   //A2->ScDescript.push_back("");
+
+   A2->NScDescript = A2->ScDescript.size();
+   A2->Ecms = sqrt(s);
+   A2->ILOord = 2;   // --- fastNLO user: power of LO contribution for process
+   A2->NDim = 2;     // --- fastNLO user: No of dimensions in which observable is binned
+   A2->DimLabel.push_back("pT");  // --- fastNLO user: label of 1st dimension
+   A2->IDiffBin.push_back(2);
+   A2->DimLabel.push_back("|y|");   // --- fastNLO user: label of 2nd dimension
+   A2->IDiffBin.push_back(2);
+
+   vector <double> bound;
+   bound.resize(2);
+
+   // --- fastNLO user: bin definitions - here in |y| and pT
+   const int nrapbins = 6;
+   double rapbins[nrapbins+1] = {0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0};
+
+   const int nptbins[nrapbins] = {49, 49, 49, 46, 39, 32};
+   double ptb[50] = { 10., 12., 15., 18., 21., 24., 28., 32., 37., 43., 49., 56., 64., 74., 84., 97.,
+		      114., 133., 153., 174., 196., 220., 245., 272., 300., 330., 362., 395., 430., 468.,
+		      507., 548., 592., 638., 686., 737., 790., 846., 905., 967.,
+		      1032., 1101., 1172., 1248., 1327., 1410., 1497., 1588., 1684., 1784.};
+   for (unsigned int i=0; i<nrapbins; i++) {
+     for (unsigned int j=0; j<nptbins[i]+1; j++) { 
+       pthigh[i][j] = ptb[j];
+     }
+   }
+
+   // --- fastNLO user:
+   //     define below the bin width ("binsize") by which
+   //     the cross section is divided to obtain the 
+   //     (multi-) differential result.
+   double binsize = 0.;
+
+   int nbins = 0;   // --- count total No. bins
+   for (int i=0;i<nrapbins;i++){
+     for (int j=0;j<nptbins[i];j++){
+         nbins += 1;
+         bound[0] = ptbins[i][j];
+         bound[1] = rapbins[i];
+         A2->LoBin.push_back(bound);
+         bound[0] = ptbins[i][j+1];
+         bound[1] = rapbins[i+1];
+         A2->UpBin.push_back(bound);
+	 //printf(" %d %d  |  %f %f\n",i,j,bound[0],bound[1]);
+
+	 binsize = (ptbins[i][j+1]-ptbins[i][j]) *
+	   2.*(rapbins[i+1]-rapbins[i]);  // "*2." to account for |y| vs. y
+	 A2->BinSize.push_back(binsize);
+      }
+   }
+   printf(" tot. No. observable bins = %d\n",nbins);
+
+   A2->NObsBin = nbins;
+   A2->INormFlag = 0;   // --- fastNLO user: default=0 - set =1 if observable is 
+                        //     to be normalized by own integral (in 1st dimension)
+                        //     see documentation for details and for other options
+
+   // --- fastNLO table block B
+   fnloBlockB *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+   table->CreateBlockB(0,B);
+   B->IXsectUnits = 15;    // --- fastNLO user: set to same value as "SetIpublunits"
+   B->IDataFlag = 0;
+   B->IAddMultFlag = 0;
+   B->IContrFlag1 = 1;
+   B->IContrFlag3 = 0;
+   B->CodeDescript.push_back("NLOJet++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+   B->NCodeDescr = B->CodeDescript.size();
+   B->IRef = 0;
+   if (nlo || A2->ILOord > 2) {
+     B->NSubproc = 7;
+   } else {
+     B->NSubproc = 6;
+     printf("  this job uses 6 subprocesses \n");
+   }
+   if(nlo){
+      B->CtrbDescript.push_back("NLO");
+      B->IContrFlag2 = 2;
+      B->IScaleDep = 1;
+      B->Npow = A2->ILOord+1;
+   }else{
+      B->CtrbDescript.push_back("LO");      
+      B->IContrFlag2 = 1;
+      B->IScaleDep = 0;
+      B->Npow = A2->ILOord;
+   }
+   B->NContrDescr = B->CtrbDescript.size();
+
+   B->NPDF = 2;
+   B->NPDFPDG.push_back(2212);   // --- fastNLO user: PDG code for 1st hadron
+   B->NPDFPDG.push_back(2212);  // --- fastNLO user: PDG code for 2nd hadron
+   B->NPDFDim = 1;
+   B->NFragFunc = 0;
+   B->IPDFdef1 = 3;
+   B->IPDFdef2 = 1;
+   if(B->NSubproc == 7) {
+     B->IPDFdef3 = 2;
+   } else {
+     B->IPDFdef3 = 1;
+     printf("  set IPDFdef3=1 consistent with 6 subprocesses \n");
+   }
+   B->XNode1.resize(A2->NObsBin);
+
+   // --- initialize variables for WarmUp run
+   B->IWarmUp = 1;       // --- fastNLO user: do the Warm-Up run
+   //B->IWarmUp = 0;     //                   or do production run(s)
+   // - fastNLO user: remember to disable reference-mode in
+   //                 Warm-Up run: "doReference = false" (above)
+   B->IWarmUpPrint = 50000000;
+   B->xlo.resize(A2->NObsBin);
+   B->scalelo.resize(A2->NObsBin);
+   B->scalehi.resize(A2->NObsBin);
+
+   // --- arrays for extreme x and (default) scale values (computed in Warm-Up run)
+   double xlim[A2->NObsBin];
+   double mulo[A2->NObsBin];
+   double muup[A2->NObsBin];
+   for(int i=0;i<A2->NObsBin;i++){
+     xlim[i] = 1.1e-07, mulo[i] = 3.0, muup[i]=9.9e10; // - safe initializations
+   }
+   
+
+   // --- fastNLO user: before running a new scenario for the first time,
+   //     the following block (between "start" and "end") should be 
+   //     completely removed. The first run must be a "Warm-Up Run" (IWarmUp=1)
+   //     which produces an initialization block as output. This should be copied
+   //     and pasted below. These initialization values must be used for all
+   //     production jobs (IWarmUp=0) for a given scenario (otherwise the result 
+   //     tables can not be merged). 
+   //
+   // --------- fastNLO: Warm-Up run results (start)
+   // 500000000 contributions (!= events) in warm-up run 
+   // --------- fastNLO: Warm-Up run results (end)
+
+
+   //printf("* --- xlimits \n");
+   for(int i=0;i<A2->NObsBin;i++){
+      int nxtot = 15;
+      if (i == ((A2->NObsBin)-1)) nxtot += 1; // Darf's etwas mehr sein?
+      B->Nxtot1.push_back(nxtot);
+      double hxlim = -sqrt(-log10(xlim[i]));   // use value from Warm-Up run
+      //printf("%d %g %g \n",i,pow(10,-pow(hxlim,2)),xlim[i]);
+      B->Hxlim1.push_back(hxlim);
+      for(int j=0;j<nxtot;j++){
+         double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
+         B->XNode1[i].push_back(pow(10,-pow(hx,2))); 
+      }
+   }
+
+   B->NScales = 2;  // two scales: mur and muf
+   B->NScaleDim = 1; // one variable used in scales: pT
+   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0 
+   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0 
+   B->ScaleDescript.resize(B->NScaleDim);
+
+   B->ScaleDescript[0].push_back("pT");
+   B->NscaleDescript.push_back(B->ScaleDescript[0].size());
+   //B->Nscalenode.push_back(4); // number of scale nodes for pT
+   B->Nscalenode.push_back(6); // number of scale nodes for pT
+
+   B->ScaleFac.resize(B->NScaleDim);
+
+   B->ScaleFac[0].push_back(1.0);    // --- fastNLO: central scale (don't change)
+   if(nlo){
+     B->ScaleFac[0].push_back(0.5);  // --- fastNLO user: add any number of
+     B->ScaleFac[0].push_back(2.0);  //             additional scale variations
+     //B->ScaleFac[0].push_back(0.25); //             as desired.
+     //B->ScaleFac[0].push_back(4.0);
+     //B->ScaleFac[0].push_back(8.0);
+   }
+   B->Nscalevar.push_back(B->ScaleFac[0].size());
+
+   const double mu0scale = .25; // In GeV
+   B->ScaleNode.resize(A2->NObsBin);
+   B->HScaleNode.resize(A2->NObsBin);
+   for(int i=0;i<A2->NObsBin;i++){
+     B->ScaleNode[i].resize(B->NScaleDim);
+     B->HScaleNode[i].resize(B->NScaleDim);
+     for(int j=0;j<B->NScaleDim;j++){
+       B->ScaleNode[i][j].resize(B->Nscalevar[j]);
+       B->HScaleNode[i][j].resize(B->Nscalevar[j]);
+       for(int k=0;k<B->Nscalevar[j];k++){
+	 B->ScaleNode[i][j][k].resize(B->Nscalenode[j]);
+	 B->HScaleNode[i][j][k].resize(B->Nscalenode[j]);
+	 if(B->Nscalenode[j]==1){
+	   B->ScaleNode[i][j][k][0] = B->ScaleFac[0][k] * (muup[i]+mulo[i])/2.; // assume only one scale dimension
+	   B->HScaleNode[i][j][k][0] = log(log((B->ScaleFac[0][k]*(muup[i]+mulo[i])/2.)/mu0scale));
+	 }else{
+	   double llscalelo = log(log((B->ScaleFac[0][k]*mulo[i])/mu0scale));  
+	   double llscalehi = log(log((B->ScaleFac[0][k]*muup[i])/mu0scale));  
+	   for(int l=0;l<B->Nscalenode[j];l++){
+                 B->HScaleNode[i][j][k][l] = llscalelo +
+                   double(l)/double(B->Nscalenode[j]-1)*(llscalehi-llscalelo);
+                 B->ScaleNode[i][j][k][l] = mu0scale * exp(exp(B->HScaleNode[i][j][k][l]));
+	   }
+	 }
+       }            
+     }
+   }
+
+   B->SigmaTilde.resize(A2->NObsBin);
+   for(int i=0;i<A2->NObsBin;i++){
+      B->SigmaTilde[i].resize(B->Nscalevar[0]);
+      for(int k=0;k<B->Nscalevar[0];k++){
+         B->SigmaTilde[i][k].resize(B->Nscalenode[0]);
+         for(int l=0;l<B->Nscalenode[0];l++){
+            int nxmax = B->GetNxmax(i);
+            B->SigmaTilde[i][k][l].resize(nxmax);
+            for(int m=0;m<nxmax;m++){
+               B->SigmaTilde[i][k][l][m].resize(B->NSubproc);
+               for(int n=0;n<B->NSubproc;n++){
+                  B->SigmaTilde[i][k][l][m][n] = 0.;
+               }
+            }
+         }            
+      }
+   }   
+   
+   // --- reference table
+   if(doReference){
+      fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+      //refB->NSubproc = 7;
+      if (nlo || A2->ILOord > 2) {
+        refB->NSubproc = 7;
+      } else {
+        refB->NSubproc = 6;
+        printf("  this reference job uses 6 subprocesses \n");
+      }
+      table->CreateBlockB(1,refB);
+      refB->Copy(table->GetBlockB(0));
+      refB->IRef = 1;
+      refB->Nscalenode[0] = 1;
+      refB->Nxtot1.clear();
+      refB->Hxlim1.clear();
+      for(int i=0;i<A2->NObsBin;i++){
+         refB->Nxtot1.push_back(1);
+         refB->Hxlim1.push_back(0.);
+         refB->XNode1[i].clear(); 
+         refB->XNode1[i].push_back(0.); 
+      }
+      table->GetBlockA1()->SetNcontrib(2);
+   }
+
 }
