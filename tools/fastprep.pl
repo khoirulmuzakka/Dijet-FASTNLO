@@ -35,9 +35,12 @@ if ( $opt_h ) {
     print "\nfastprep.pl\n";
 #    print "Usage: fastprep.pl [switches/options] scenario\n";
     print "Usage: fastprep.pl [switches/options]\n";
+    print "       WARNING! fastprep.pl works only if all required software is installed \n";
+    print "       under a common prefix path given either via \$FASTNLO or the current \n";
+    print "       working directory!\n\n";
     print "  -h              Print this text\n";
     print "  -p pdf          Add CTEQ parton densities or LHAPDF\n";
-    print "  -v #            Choose between fastNLO version 1 and 2 (def.=1)\n\n";
+    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n\n";
     exit;
 }
 unless ( $opt_p eq "" || $opt_p eq "CTEQ" || $opt_p eq "LHAPDF" ) {
@@ -55,10 +58,14 @@ if ( $vers == 1 && $pdf ) {
 #
 # Starting archive creation
 #
-if ( ! $ENV{FASTNLO} ) {die "fastprep.pl: ERROR! Environment variable ".
-			    "FASTNLO not set, aborted!\n";}
+if ( ! $ENV{FASTNLO} ) {
+    print "fastprep.pl: WARNING! Environment variable FASTNLO not set!\n";
+    print "             Assume current directory to contain installation!\n";
+    $ENV{FASTNLO} = getcwd();
+}
+
 print "fastprep.pl: Preparing fastNLO archive for submission in directory $ENV{FASTNLO}/..\n";
-print "fastprep.pl: Only hh collisions, no LHAPDF for now!\n";
+print "fastprep.pl: Only tested for hh collisions so far ...\n";
 
 if ( $vers == 1 ) {
     chdir "$ENV{FASTNLO}/.." or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}/..!\n";
@@ -105,6 +112,8 @@ if ( $vers == 1 ) {
     chdir "$ENV{FASTNLO}" or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}!\n";
 # For version 2:
 # Copy system libg2c to lib dir in case it's missing on the target system
+    print "fastprep.pl: Copying systems g2c libs into directory $ENV{FASTNLO}/lib ...\n";
+    print "             This avoids crashes on poor target systems without these.\n";
     my @libg2c = `ldconfig -p | grep libg2c | cut -d" " -f4`;
     chomp @libg2c;
 #    print "libg2c @libg2c\n";
@@ -129,9 +138,6 @@ if ( $vers == 1 ) {
 	}
     }
 
-# Only used in version 1
-#    my @gcclibs = `find lib -follow -name \*.so\*`;
-#    chomp @gcclibs;
     my @solibs  = `find lib -follow -name \*.so\*`;
     chomp @solibs;
     my @lalibs  = `find lib -follow -name \*.la\*`;
