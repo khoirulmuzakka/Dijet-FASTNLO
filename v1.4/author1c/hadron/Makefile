@@ -1067,6 +1067,14 @@ fnl2342arap1: links fnl2342arap1.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+fnl2342arap6: links fnl2342arap6.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2342arap6.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2342arap6 -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # ======================================================================
 # =====   FNL2408: LHC CMS dijet mass with fastjet SISCone R=0.7 =======
 # ======================================================================
@@ -1326,6 +1334,20 @@ fnl2622d: links fnl2622d.cc $(CommonPath)/fj-ak-05.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl2622d.cc \
 	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
 	-o fnl2622d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# ======================================================================
+# =====   FNL2652: LHC ATLAS dchi dijets with fastjet ak R=0.6 =========
+# ======================================================================
+# LHC scenario for ATLAS @ 7 TeV 
+# PLB 694 (2011)
+#
+fnl2652: links fnl2652.cc $(CommonPath)/fj-ak-06.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2652.cc \
+	$(CommonPath)/fj-ak-06.cc $(cteq6pdf) \
+	-o fnl2652 -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
