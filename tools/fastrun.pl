@@ -234,7 +234,7 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
 } else {
     $tabext = "tab";
 }
-my $tabnam = "${scen}${ref}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${tabext}";
+my $tabnam = "${scen}${ref}${wrm}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${tabext}";
 
 # Directories
 my $pwdir = getcwd();
