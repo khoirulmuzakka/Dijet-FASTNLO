@@ -111,30 +111,48 @@ if ( $vers == 1 ) {
 } else {
     chdir "$ENV{FASTNLO}" or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}!\n";
 # For version 2:
-# Copy system libg2c to lib dir in case it's missing on the target system
-    print "fastprep.pl: Copying systems g2c libs into directory $ENV{FASTNLO}/lib ...\n";
+# Unfortunately need to copy some system libs in case of insufficiently equipped target systems
+    print "fastprep.pl: Copying some systems lib(s) into directory $ENV{FASTNLO}/lib ...\n";
     print "             This avoids crashes on poor target systems without these.\n";
-    my @libg2c = `ldconfig -p | grep libg2c | cut -d" " -f4`;
+    my @libc = `ldd bin/nlojet++ | grep libc | cut -d " " -f3`;
+    chomp @libc;
+    my @libm = `ldd bin/nlojet++ | grep libm | cut -d " " -f3`;
+    chomp @libm;
+    my @libstdc = `ldd bin/nlojet++ | grep libstdc | cut -d " " -f3`;
+    chomp @libstdc;
+    my @libg2c = `ldd bin/nlojet++ | grep libg2c | cut -d" " -f3`;
     chomp @libg2c;
-#    print "libg2c @libg2c\n";
-    foreach my $tmp ( @libg2c ) {
-	my $dir = `dirname $tmp`;
+    my @libgcc = `ldd bin/nlojet++ | grep libgcc | cut -d " " -f3`;
+    chomp @libgcc;
+    my @libdl = `ldd bin/nlojet++ | grep libdl | cut -d " " -f3`;
+    chomp @libdl;
+    my @libltdl = `ldd bin/nlojet++ | grep libltdl | cut -d " " -f3`;
+    chomp @libltdl;
+    my @sodeps = (@libc,@libm,@libstdc,@libg2c,@libgcc,@libltdl,@libdl);
+
+    print "fastprep.pl: Adding system lib(s) @sodeps if not yet done.\n";
+# Find all libs and links corresponding to the detected sodeps ...
+    foreach my $sodep ( @sodeps ) {
+	my $dir = `dirname $sodep`;
 	chomp $dir;
 #	print "dir $dir\n";
-	my $lib = `basename $tmp`;
+	my $lib = `basename $sodep`;
 	chomp $lib;
 #	print "lib $lib\n";
 	my @parts = split(/\./,$lib);
-#	print "parts @parts\n";
-	my @addlibs = `find $dir -name $parts[0]\*.so\*`;
-#	print "addlibs @addlibs\n";
+	print "parts @parts\n";
+	my @addlibs = `find $dir -name $parts[0].so\*`;
+	print "addlibs @addlibs\n";
 	chomp @addlibs;
-#	push @gcclibs, @addlibs;
 	foreach my $copy ( @addlibs ) {
-	    my $cmd = "cp -p $copy lib";
-	    my $ret = system("$cmd");
-	    if ( $ret ) {print "fastprep.pl: Warning! ".
-			     "Copying system libg2c $tmp failed.\n"}
+	    my $lib = `basename $copy`;
+	    chomp $lib;
+	    if (! -e "lib/$lib" ) {
+		my $cmd = "cp -P $copy lib";
+		my $ret = system("$cmd");
+		if ( $ret ) {print "fastprep.pl: Warning! ".
+				 "Copying system lib $copy failed.\n"}
+	    }
 	}
     }
 

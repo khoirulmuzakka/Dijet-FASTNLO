@@ -47,10 +47,10 @@ print "######################################\n\n";
 # Parse options
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
-      $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v ) =
+      $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w ) =
     ( "LOCAL", "", "0", "2.0.0", "guc", "", ".", "0001",
-      "0", "LO", "CTEQ", "none", "", ".", "", "1b" );
-getopts('b:de:f:g:hi:j:m:o:p:q:rs:t:v:') or die "fastrun.pl: Malformed option syntax!\n";
+      "0", "LO", "CTEQ", "none", "", ".", "", "1b", "" );
+getopts('b:de:f:g:hi:j:m:o:p:q:rs:t:v:w') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
@@ -74,6 +74,7 @@ if ( $opt_h ) {
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
     print "  -v #            Choose between fastNLO version 1a, 1b, and 2 (def.=1b)\n";
+    print "  -w              Warm-up run to determine x limits (version 2 only)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
@@ -138,6 +139,11 @@ if ( $opt_r ) { $ref = "ref";}
 my $sdir  = $opt_s;
 my $verb  = "";
 my $vers  = $opt_v;
+my $wrm   = "";
+if ( $opt_w ) { $wrm = "wrm";}
+if ( $opt_r && $opt_w ) {
+    die "fastrun.pl: Error! Reference and warm-up mode are mutually exclusive!\n";
+}
 print "fastrun.pl: Directory for/of installation is $idir\n";
 print "fastrun.pl: Using fastNLO revision $frev\n";
 print "fastrun.pl: Job mode is $mode\n";
@@ -149,6 +155,9 @@ unless ( $mode == 1 || $mode == 2 ) {
     print "fastrun.pl: Running in order $order\n";
     if ( $ref eq "ref" ) {
 	print "fastrun.pl: Running with pdf $pdf\n";
+    }
+    if ( $wrm eq "wrm" ) {
+	print "fastrun.pl: Running in warm-up mode\n";
     }
 }
 if ( $mode != 1 && $ref ) {
@@ -1429,7 +1438,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	    "--save-after $runmode{$order}[1] ".
 	    "-c$runmode{$order}[0] ".
 	    "-d $tdir ".
-	    "-n ${scen}${ref}_${jobnr} ".
+	    "-n ${scen}${ref}${wrm}_${jobnr} ".
 	    "-u lib/lib${scen}.la ";
 	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
     }
