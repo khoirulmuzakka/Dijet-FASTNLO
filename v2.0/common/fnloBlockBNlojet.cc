@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <iostream>
 
 #include "fnloBlockBNlojet.h"
 
@@ -15,6 +16,7 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    // ---
    // --- Warm-Up Run to identify extreme x,mu values
    // ---
+   // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
      if (xlo[ObsBin] == 0.) xlo[ObsBin] = x;
      if (scalelo[ObsBin] == 0.) scalelo[ObsBin] = scale1;
@@ -22,11 +24,24 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
      if (scalelo[ObsBin] > scale1) scalelo[ObsBin] = scale1;
      if (scalehi[ObsBin] < scale1) scalehi[ObsBin] = scale1;
      IWarmUpCounter++;
+     // KR: Create file already at start time, avoids problems when testing grid functionality  
+     if ( IWarmUpCounter == 1 ) {
+       FILE * ofile;
+       ofile = fopen("fastNLO-warmup.dat","w");
+       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fclose(ofile);
+     }
      if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
-       printf(" // %d contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       FILE * ofile;
+       ofile = fopen("fastNLO-warmup.dat","w");
+       printf(" // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
        for (int i=0;i<BlockA2->GetNObsBin();i++){
          printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
+	 //	 fprintf(ofile,"%7.5f, %8.3f, %8.3f;\n",xlo[i],scalelo[i],scalehi[i]);
+	 fprintf(ofile,"%e, %e, %e;\n",xlo[i],scalelo[i],scalehi[i]);
        }
+       fclose(ofile);
      }
      return;
    }
@@ -154,7 +169,7 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
 	       printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
 	       exit(1);
             } else if (is > Nscalenode[0]-1){
-	       printf(" is>max   %d %d %f %f\n",nscale,i3,cefscale[i3]);
+	       printf(" is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
 	       exit(1);
             }
             // --- loop over all 4 x-nodes that receive contributions
@@ -772,6 +787,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    fnloBlockA2 *A2 =  BlockA2;
 
    // --- Warm-Up Run to identify the extreme x,mu values
+   // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
      if (xlo[ObsBin] == 0.) xlo[ObsBin] = min(x1,x2);
      if (scalelo[ObsBin] == 0.) scalelo[ObsBin] = scale1;
@@ -779,11 +795,24 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
      if (scalelo[ObsBin] > scale1) scalelo[ObsBin] = scale1;
      if (scalehi[ObsBin] < scale1) scalehi[ObsBin] = scale1;
      IWarmUpCounter++;
+     // KR: Create file already at start time, avoids problems when testing grid functionality  
+     if ( IWarmUpCounter == 1 ) {
+       FILE * ofile;
+       ofile = fopen("fastNLO-warmup.dat","w");
+       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fclose(ofile);
+     }
      if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
-       printf(" // %d contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       FILE * ofile;
+       ofile = fopen("fastNLO-warmup.dat","w");
+       printf(" // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
        for (int i=0;i<BlockA2->GetNObsBin();i++){
          printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
+	 //	 fprintf(ofile,"%7.5f, %8.3f, %8.3f;\n",xlo[i],scalelo[i],scalehi[i]);
+	 fprintf(ofile,"%e, %e, %e;\n",xlo[i],scalelo[i],scalehi[i]);
        }
+       fclose(ofile);
      }
      return;
    }
@@ -970,7 +999,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	      printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
 	      exit(1);
             } else if (is > Nscalenode[0]-1){
-	      printf(" is>max   %d %d %f %f\n",nscale,i3,cefscale[i3]);
+	      printf(" is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
 	      exit(1);
             }
             // --- loop over all 16 xmin,xmax points that receive contributions
