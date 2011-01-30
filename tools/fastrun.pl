@@ -73,15 +73,15 @@ if ( $opt_h ) {
     print "  -t dir          Output target directory: ".
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
-    print "  -v #            Choose between fastNLO version 1a, 1b, 2a and 2b (def.=1b)\n";
+    print "  -v #            Choose between fastNLO version 1a, 1b, and 2 (def.=1b)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f rev|vers] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1a|1b|2a|2b]\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f rev|vers] -m 1 [-p CTEQ|LHAPDF] [-s .|sdir] [-v 1a|1b|2]\n\n";
     print "2) Make only scenario (to make scenario for reference mode use option -r):\n";
-    print "   ./fastrun.pl [-i .|installdir] [-f rev|vers] -m 2 [-p CTEQ|LHAPDF] [-r] [-v 1a|1b|2a|2b] scenarioname\n\n";
+    print "   ./fastrun.pl [-i .|installdir] [-f rev|vers] -m 2 [-p CTEQ|LHAPDF] [-r] [-v 1a|1b|2] scenarioname\n\n";
     print "3) Run only (to run scenario in reference mode use option -r):\n";
-    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f rev|vers] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 1a|1b|2a|2b] scenarioname\n\n";
+    print "   ./fastrun.pl [-b LOCAL|GRID|batch] [-i .|installdir] [-e max-events] [-f rev|vers] -m 3 [-p CTEQ|LHAPDF] [-r] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 1a|1b|2] scenarioname\n\n";
     exit;
 }
 
@@ -115,7 +115,7 @@ unless ( $opt_p eq "CTEQ" || $opt_p eq "LHAPDF" ) {
 unless ( -d $opt_s || -l $opt_s ) {
     die "fastrun.pl: Error! Archive source directory $opt_s does not exist, aborted.\n";
 }
-unless ( $opt_v eq "1a" || $opt_v eq "1b" || $opt_v eq "2a" || $opt_v eq "2b") {
+unless ( $opt_v eq "1a" || $opt_v eq "1b" || $opt_v eq "2") {
     die "fastrun.pl: Error! fastNLO version $opt_v does not exist, aborted.\n";
 }
 
@@ -495,7 +495,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ENV{SHELL} = "/bin/sh";
 	    $ret = system("$cmd");
 	    if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
-	    $ret = system("make -j2");
+	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
 	    $ret = system("make install");
 	    if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
@@ -535,7 +535,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ENV{FC}  = "$aidir/bin/g77";
 	    $ret = system("$cmd");
 	    if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
-	    $ret = system("make -j2");
+	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
 	    $ret = system("make install");
 	    if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
@@ -563,7 +563,7 @@ if ( $mode == 0 || $mode == 1 ) {
 # 1) Install CERN libraries and ROOT (V2 only)
 #
     unless ( (($vers eq "1a" || $vers eq "1b") && $ENV{CERNLIB}) ||
-	     (($vers eq "2a" || $vers eq "2b") && $ENV{CERN_ROOT}) ) {
+	     (($vers eq "2") && $ENV{CERN_ROOT}) ) {
         $date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	chdir "$aidir/src";
@@ -610,7 +610,7 @@ if ( $mode == 0 || $mode == 1 ) {
     }
     chdir "$pwdir";
 # ROOT
-    if ( ($vers eq "2a" || $vers eq "2b") ) {
+    if ( ($vers eq "2") ) {
 #	unless ( -e "$aidir/src/$install{root}[2]" ) {
 	unless ( $ENV{ROOTSYS} || $rv eq "none") {
 	    $date = `date +%d%m%Y_%H%M%S`;
@@ -637,7 +637,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making ROOT ...\n";
 # No multithreaded make for ROOT :-( 
-#	    $ret = system("make -j2");
+#	    $ret = system("make -j4");
 	    $ret = system("make");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for ROOT ...\n";
@@ -690,7 +690,7 @@ if ( $mode == 0 || $mode == 1 ) {
 # At least until LHAPDF 5.3.1 a race condition spoils multithreaded make!
 	    $ret = system("make");
 # Works now, maybe not
-#	    $ret = system("make -j2");
+#	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for lhapdf ...\n";
 	    $ret = system("make install");
@@ -723,7 +723,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --prefix=$aidir --disable-pyext");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making lhapdf ...\n";
-	    $ret = system("make -j2");
+	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for lhapdf ...\n";
 	    $ret = system("make install");
@@ -772,7 +772,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --enable-shared --enable-allplugins --prefix=`pwd` --bindir=$aidir/bin");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making fastjet ...\n";
-	    $ret = system("make -j2");
+	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for fastjet ...\n";
 	    $ret = system("make install");
@@ -797,7 +797,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --enable-shared --enable-allplugins --prefix=$aidir --bindir=$aidir/bin");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making fastjet ...\n";
-	    $ret = system("make -j2");
+	    $ret = system("make -j4");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for fastjet ...\n";
 	    $ret = system("make install");
@@ -857,7 +857,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --prefix=`pwd`");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making Nlojet++ ...\n";
-	    $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	    $ret = system("make -j4 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for Nlojet++ ...\n";
 	    $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
@@ -885,7 +885,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --prefix=$aidir");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
 	    print "\nfastrun.pl: Making Nlojet++ ...\n";
-	    $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+	    $ret = system("make -j4 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
 	    print "\nfastrun.pl: Make install for Nlojet++ ...\n";
 	    $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
@@ -907,9 +907,9 @@ if ( $mode == 0 || $mode == 1 ) {
 
 
 #
-# 4a) Install lhpdf for Nlojet++, both versions 2a, 2b
+# 4a) Install lhpdf for Nlojet++, only for fastNLO version 2
 #
-    if ( ($vers eq "2a" || $vers eq "2b") && ! $ENV{LHPDF} ) {
+    if ( ($vers eq "2") && ! $ENV{LHPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing lhpdf from $install{lhpdf}[0]: $date\n";
@@ -933,7 +933,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	$ret = system("./configure --prefix=$aidir");
 	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf configure step, aborted!\n";}
 	print "\nfastrun.pl: Making lhpdf ...\n";
-	$ret = system("make -j2");
+	$ret = system("make -j4");
 	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for lhpdf ...\n";
 	$ret = system("make install");
@@ -953,9 +953,9 @@ if ( $mode == 0 || $mode == 1 ) {
 
 
 #
-# 4b) Install znpdf for Nlojet++, only for version 2b
+# 4b) Install znpdf for Nlojet++, only for fastNLO version 2
 #
-    if ( ($vers eq "2b") && ! $ENV{ZNPDF} ) {
+    if ( ($vers eq "2") && ! $ENV{ZNPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
 	chomp $date;
 	print "\nfastrun.pl: Installing znpdf from $install{znpdf}[0]: $date\n";
@@ -979,7 +979,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	$ret = system("./configure --prefix=$aidir");
 	if ( $ret ) {die "fastrun.pl: Error $ret in znpdf configure step, aborted!\n";}
 	print "\nfastrun.pl: Making znpdf ...\n";
-	$ret = system("make -j2");
+	$ret = system("make -j4");
 	if ( $ret ) {die "fastrun.pl: Error $ret in znpdf make step, aborted!\n";}
 	print "\nfastrun.pl: Make install for znpdf ...\n";
 	$ret = system("make install");
@@ -1034,7 +1034,7 @@ if ( $mode == 0 || $mode == 1 ) {
 	print "\nfastrun.pl: Configuring mcfm ...\n";
 	$ret = system("./Install");
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
-	$ret = system("make -j2");
+	$ret = system("make -j4");
 	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
         chdir "..";
     }
@@ -1088,8 +1088,8 @@ if ( $mode == 0 || $mode == 1 ) {
 	    $ret = system("./configure --prefix=$aidir");
 	    if ( $ret ) {die "fastrun.pl: configure of fastNLO V2 failed: ".
 			     "$ret, aborted!\n";}
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: make -j2 of fastNLO V2 failed: ".
+	    $ret = system("make -j4");
+	    if ( $ret ) {die "fastrun.pl: make -j4 of fastNLO V2 failed: ".
 			     "$ret, aborted!\n";}
 	    $ret = system("make install");
 	    if ( $ret ) {die "fastrun.pl: make install of fastNLO V2 failed: ".
@@ -1319,21 +1319,21 @@ if ( $mode == 0 || $mode == 2 ) {
 	    $date = `date +%d%m%Y_%H%M%S`;
 	    chomp $date;
 	    print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
-	    my $ret = system("make -j2 nlofast-add");
+	    my $ret = system("make -j4 nlofast-add");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
 	    print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
 	    chdir $scendir;
-	    $ret = system("make -j2 $scen");
+	    $ret = system("make -j4 $scen");
 	    if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
 	}
     } else {
 #	print "\nfastrun.pl: (Re-)making scenario $scen of fastNLO: $date\n";
 	print "\nfastrun.pl: (Re-)making scenarios of fastNLO: $date\n";
 	chdir "$ENV{FASTNLOSRCPATH}/trunk/v2.0";
-#	my $ret = system("make -j2 lib${scen}.la");
-	my $ret = system("make -j2");
-#	if ( $ret ) {die "fastrun.pl: (re-)make -j2 lib${scen}.la ".
-	if ( $ret ) {die "fastrun.pl: (re-)make -j2 ".
+#	my $ret = system("make -j4 lib${scen}.la");
+	my $ret = system("make -j4");
+#	if ( $ret ) {die "fastrun.pl: (re-)make -j4 lib${scen}.la ".
+	if ( $ret ) {die "fastrun.pl: (re-)make -j4 ".
 			 "of fastNLO V2 failed: $ret, aborted!\n";}
 #	$ret = system("make install lib${scen}.la");
 	$ret = system("make install");
