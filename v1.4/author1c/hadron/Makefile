@@ -1421,6 +1421,27 @@ fnl2722dena: links fnl2722dena.cc $(CommonPath)/fj-ak-05.cc \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
 # ======================================================================
+# =====   FNL2822: LHC Leading jets with fastjet anti-kT R=0.5   =======
+# ======================================================================
+# LHC scenario for CMS, @ 7 TeV
+#
+fnl2822num: links fnl2822num.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2822num.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2822num -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2822den: links fnl2822den.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2822den.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2822den -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+# ======================================================================
 # =====   FNL3310: LHC CMS incl. jets with fastjet kT R=0.6 ============
 # ======================================================================
 # LHC scenario for CMS, pt binning acc. to expected resolution, @ 2.36 TeV 
