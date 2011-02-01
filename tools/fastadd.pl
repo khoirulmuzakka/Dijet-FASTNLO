@@ -35,18 +35,19 @@ print "##################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_h, $opt_l, $opt_n, $opt_s, $opt_v ) = ( "", "", "", "", "" );
-getopts('hl:n:sv') or die "fastadd.pl: Malformed option syntax!\n";
+our ( $opt_d, $opt_h, $opt_l, $opt_n, $opt_s, $opt_v ) = ( "", "", "", "", "", "1" );
+getopts('dhl:n:sv:') or die "fastadd.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastadd.pl\n";
     print "Usage: fastadd.pl [switches/options] scenario\n";
+    print "  -d              Verbose output\n\n";
     print "  -h              Print this text\n";
     print "  -l dir          Directory for LO tables, (def.=scenario)\n";
     print "  -n dir          Directory for NLO/NNLO tables, (def.=scenario)\n";
     print "  -s              Produce tables for statistical evaluation,\n".
 	"                  i.e. combinations of each LO with 1 NLO table and\n".
 	"                  all LO with each NLO table\n";
-    print "  -v              Verbose output\n\n";
+    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n\n";
     exit;
 }
 
@@ -57,6 +58,8 @@ unless ( @ARGV == 1 ) {
     die "fastadd.pl: Error! Need one scenario name!\n";
 }
 my $scen   = shift;
+my $debug  = $opt_d;
+my $vers   = $opt_v;
 
 #
 # Initialization
@@ -66,27 +69,34 @@ if ( $opt_l ) {$lodir = $opt_l;}
 my $nlodir   = "${scen}"; 
 if ( $opt_n ) {$nlodir = $opt_n;}
 my $nnlodir  = $nlodir; 
-my $loglob   = "${scen}*born*.raw*";
-my $nloglob  = "${scen}*nlo*.raw*";
-my $nnloglob = "${scen}*thrcor*.raw*";
+my $tabext = "raw";
+if ($vers == 2) {$tabext = "tab";} 
+my $loglob   = "${scen}*born*.${tabext}*";
+my $nloglob  = "${scen}*nlo*.${tabext}*";
+my $nnloglob = "${scen}*thrcor*.${tabext}*";
+
 # Directory
 my $sdir = getcwd();
 
 #
-# Check on nlofast-add
+# Check on nlofast-add resp. fnlo-merge
 #
-my $cmd = `which nlofast-add`;
+my $merger = "nlofast-add";
+if ( $vers == 2 ) {
+    $merger = "fnlo-merge";
+}
+my $cmd = `which ${merger}`;
 chomp $cmd;
 unless ( $cmd ) {
     if ( $ENV{NLOJET} ) {
-	if ( -f "$ENV{NLOJET}/bin/nlofast-add" ) {
-	    $cmd = "$ENV{NLOJET}/bin/nlofast-add";
+	if ( -f "$ENV{NLOJET}/bin/${merger}" ) {
+	    $cmd = "$ENV{NLOJET}/bin/${merger}";
 	} else {
-	    die "fastadd.pl: ERROR! nlofast-add command not found, ".
+	    die "fastadd.pl: ERROR! ${merger} command not found, ".
 		"neither via \`which\` nor in $ENV{NLOJET}/bin, aborted!\n";
 	}
     } else {
-	die "fastadd.pl: ERROR! nlofast-add command not found ".
+	die "fastadd.pl: ERROR! ${merger} command not found ".
 	    "via \`which\` and \$NLOJET is not set, aborted!\n";
     }
 }	
@@ -110,7 +120,7 @@ unless ( @lotabs ) {
 }
 my $ntab = scalar @lotabs;
 print "fastadd.pl: $ntab LO tables found.\n";
-if ( $opt_v ) {print "fastadd.pl: DEBUG! lotabs @lotabs\n";}
+if ( $debug ) {print "fastadd.pl: DEBUG! lotabs @lotabs\n";}
 
 #
 # Find NLO tables
@@ -131,7 +141,7 @@ unless ( @nlotabs ) {
 }
 $ntab = scalar @nlotabs;
 print "fastadd.pl: $ntab NLO tables found.\n";
-if ( $opt_v ) {print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";}
+if ( $debug ) {print "fastadd.pl: DEBUG! nlotabs @nlotabs\n";}
 
 #
 # Find NNLO tables
@@ -152,14 +162,14 @@ unless ( @nnlotabs ) {
 }
 $ntab = scalar @nnlotabs;
 print "fastadd.pl: $ntab NNLO tables found.\n";
-if ( $opt_v ) {print "fastadd.pl: DEBUG! nnlotabs @nnlotabs\n";}
+if ( $debug ) {print "fastadd.pl: DEBUG! nnlotabs @nnlotabs\n";}
 
 #
-# nlofast-add
+# nlofast-add resp. fnlo-merge
 #
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
-print "\nfastadd.pl: nlofast-add: $date\n";
+print "\nfastadd.pl: ${merger}: $date\n";
 # Statistics mode: Each LO with first NLO table & all LO with each NLO table
 if ( $opt_s ) {
     print "\nfastadd.pl: Statistics mode\n";
@@ -169,18 +179,18 @@ if ( $opt_s ) {
 	$scmd1 .= " $lodir/$lotab $nlodir/$nlotabs[0]";
 	$scmd2 .= " $lodir/$lotab";
 	$scmd1 .= " $lotab";
-	$scmd1 =~ s/\.raw$/\.tab/;
+	$scmd1 =~ s/\.${tabext}$/\.tab/;
 	print "fastadd.pl: Creating sum table for $lotab ...\n";
-	if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
+	if ( $debug ) {print "fastadd.pl: Running command $scmd1\n";}
 	system("$scmd1 >> ${scen}_addst.log");
     }
     foreach my $nlotab ( @nlotabs ) {
 	my $scmd1 = $scmd2;
 	$scmd1 .= " $nlodir/$nlotab";
 	$scmd1 .= " $nlotab";
-	$scmd1 =~ s/\.raw$/\.tab/;
+	$scmd1 =~ s/\.${tabext}$/\.tab/;
 	print "fastadd.pl: Creating sum table for $nlotab ...\n";
-	if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
+	if ( $debug ) {print "fastadd.pl: Running command $scmd1\n";}
 	system("$scmd1 >> ${scen}_addst.log");
     }
 # Normal mode: All LO with all NLO/NNLO tables
@@ -197,7 +207,7 @@ if ( $opt_s ) {
     }
     $scmd1 .= " $scen.tab";
     print "fastadd.pl: Creating total sum table for $scen ...\n";
-    if ( $opt_v ) {print "fastadd.pl: Running command $scmd1\n";}
+    if ( $debug ) {print "fastadd.pl: Running command $scmd1\n";}
     system("$scmd1 > ${scen}_add.log");
 }
 $date = `date +%d%m%Y_%H%M%S`;

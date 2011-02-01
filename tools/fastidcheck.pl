@@ -25,12 +25,13 @@ print "######################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_h ) = ( "" );
-getopts('h') or die "fastidcheck.pl: Malformed option syntax!\n";
+our ( $opt_h, $opt_v ) = ( "", "1" );
+getopts('hv:') or die "fastidcheck.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastidcheck.pl\n";
     print "Usage: fastidcheck.pl glob (selects all files matching glob)\n";
-    print "  -h              Print this text\n\n";
+    print "  -h              Print this text\n";
+    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n\n";
     exit;
 }
 
@@ -45,8 +46,9 @@ if ( ! -d "Dubletten" ) {
     print "fastidcheck.pl: Creating subdirectory Dubletten ...\n";
     system("mkdir Dubletten");
 }
-
-
+my $vers  = $opt_v;
+my $tabext = "raw";
+if ($vers == 2) {$tabext = "tab";} 
 
 #
 # Diff
@@ -62,12 +64,12 @@ for ( my $i=0; $i < @files; $i++) {
 		    print "fastidcheck.pl: Identical: $files[$i] and $files[$j]\n";
 		    print "fastidcheck.pl: Moving $files[$j] into Dubletten\n";
 		    my $logfil = $files[$j];
-		    $logfil =~ s/raw/log/;
-		    my $errfil = $files[$j];
-		    $errfil =~ s/raw/err/;
+		    $logfil =~ s/${tabext}/log/;
+#		    my $errfil = $files[$j];
+#		    $errfil =~ s/${tabext}/err/;
 		    system("mv $files[$j] Dubletten");
 		    system("mv $logfil Dubletten");
-		    system("mv $errfil Dubletten");
+#		    system("mv $errfil Dubletten");
 		}
 	    }
 	}

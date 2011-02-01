@@ -135,23 +135,23 @@ if ( $vers == 1 ) {
     foreach my $sodep ( @sodeps ) {
 	my $dir = `dirname $sodep`;
 	chomp $dir;
-#	print "dir $dir\n";
+	print "dir $dir\n";
 	my $lib = `basename $sodep`;
 	chomp $lib;
-#	print "lib $lib\n";
+	print "lib $lib\n";
 	my @parts = split(/\./,$lib);
 	print "parts @parts\n";
-	my @addlibs = `find $dir -name $parts[0].so\*`;
+	my @addlibs = `find $dir -maxdepth 1 -name $parts[0].so\*`;
 	print "addlibs @addlibs\n";
 	chomp @addlibs;
 	foreach my $copy ( @addlibs ) {
 	    my $lib = `basename $copy`;
 	    chomp $lib;
 	    if (! -e "lib/$lib" ) {
-		my $cmd = "cp -P $copy lib";
-		my $ret = system("$cmd");
-		if ( $ret ) {print "fastprep.pl: Warning! ".
-				 "Copying system lib $copy failed.\n"}
+#		my $cmd = "cp $copy lib";
+#		my $ret = system("$cmd");
+#		if ( $ret ) {print "fastprep.pl: Warning! ".
+#				 "Copying system lib $copy failed.\n"}
 	    }
 	}
     }
