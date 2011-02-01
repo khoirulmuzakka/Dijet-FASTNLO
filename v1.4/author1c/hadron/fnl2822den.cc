@@ -1,5 +1,5 @@
 //
-// fastNLO author code for fnl2822 (differential in pT):
+// fastNLO author code for fnl2822:
 //     Leading Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
@@ -851,7 +851,7 @@ void UserHHC::writetable(){
   table << "LHC-Scenario" << endl;
   table << "Leading_Jet_pTs" << endl;
   table << "anti-kT_R=0.5" << endl;
-  table << "2-to-3-Partons" << endl;
+  table << "2->2_&_2->3_Processes" << endl;
 
   //iproc
   int iproc = 1; // Leading Jets, 2-to-3
