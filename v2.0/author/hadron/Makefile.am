@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt20
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl2342a.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+   lib_LTLIBRARIES += libfnl2822num.la libfnl2822den.la libfnl2342a.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 endif
 
 #
@@ -30,6 +30,8 @@ libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2-07.h fj-d0r2-07.cc $(AM_S
 libfnt2012_la_SOURCES       = fnt2012.cc       fj-sc-07.h   fj-sc-07.cc   $(AM_SOURCES)
 libfnl1001ak07n_la_SOURCES  = fnl1001ak07n.cc  fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2342a_la_SOURCES      = fnl2342a.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl2822den_la_SOURCES    = fnl2822den.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl2822num_la_SOURCES    = fnl2822num.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 
 #
 # C++ compiler flags to be used for the main target

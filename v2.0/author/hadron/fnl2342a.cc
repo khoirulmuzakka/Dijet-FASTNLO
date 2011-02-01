@@ -54,7 +54,7 @@
 using namespace nlo;
 using namespace std;
 
-//----- declaration of the user defined functons -----
+//----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
 void psinput(phasespace_hhc *, double&);
 user_base_hhc * userfunc();
@@ -180,6 +180,13 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
 
+  // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
+  if (nj > 4) {
+    cout << "fastNLO: ERROR! This scenario is not suited for " << nj <<
+      " jets. Aborted!" << endl;
+    exit(1);
+  }
+
 
   // --- fastNLO user:
   //     Here is your playground where you compute your observable 
@@ -189,22 +196,22 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
   // --- declare and initialize phase space cut variables
   // lowest pT for jets to be considered
-  double ptmin = 10.;
+  double ptjmin = 10.;
   // highest (pseudo-)rapidity for jets to be considered
-  double ymax  = 3.;
+  double yjmax  = 3.0;
 
   // Analyze inclusive jets in jet loop
   for (unsigned int i = 1; i <= nj; i++) {
     double pt  = pj[i].perp(); 
     double rap = abs(pj[i].rapidity());
-     
+    
     // --- jet in phase space?
-    if (ptmin < pt && rap < ymax) {
+    if (ptjmin < pt && rap < yjmax) {
 
       // - set the renormalization and factorization scale to jet pT
       double mu = pt;
 
-      // --- identify bin number (y,pT)
+      // --- identify bin number (dim1,dim2) e.g. (pT,y)
       int obsbin = -1;
       for (int j = 0; j < A2->GetNObsBin(); j++) {
 	if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0] && 
@@ -224,11 +231,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	    ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
 	  }
 	}
-      } // - end: fill fastNLO array
-    }
-  }
-  // --- end: fastNLO user playground
-}
+      } // --- end: fill fastNLO array
+    } // --- end: phase space selection
+  } // --- end: jet loop
+} // --- end: fastNLO user playground
 
 void UserHHC::writetable(){
   table->OpenFileRewrite();
@@ -351,10 +357,11 @@ void UserHHC::inittable(){
   fnloBlockA2 *A2 =  table->GetBlockA2();
 
   // --- fastNLO user: up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("d2sigma-jet_dpT_d|y|_(fb_GeV)");
+  A2->ScDescript.push_back("d2sigma-jet_dpTd|y|_(fb_GeV)");
   A2->ScDescript.push_back("CMS_Collaboration");
+  A2->ScDescript.push_back("Inclusive_Jet_pT");
+  A2->ScDescript.push_back("anti-kT_R=0.5");
   A2->ScDescript.push_back("CMS-PAP-QCD-10-011");
-  //A2->ScDescript.push_back("");
 
   A2->NScDescript = A2->ScDescript.size();
   A2->Ecms = sqrt(s);
@@ -406,7 +413,8 @@ void UserHHC::inittable(){
   //     define below the bin width ("binsize") by which
   //     the cross section is divided to obtain the 
   //     (multi-) differential result.
-  double binsize = 0.;
+  // fnl2342a: divide by bin width in pT and |y|
+  double binsize = 1.;
 
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<nrapbins;i++){
@@ -419,9 +427,9 @@ void UserHHC::inittable(){
       bound[1] = rapbins[i+1];
       A2->UpBin.push_back(bound);
       //printf(" %d %d  |  %f %f\n",i,j,bound[0],bound[1]);
-
-      binsize = (ptbins[i][j+1]-ptbins[i][j]) *
-	2.*(rapbins[i+1]-rapbins[i]);  // "*2." to account for |y| vs. y
+      binsize = binsize // fnl2342a: Start with preset value = 1 
+	* (ptbins[i][j+1]-ptbins[i][j]) // ... times dpT
+	* 2. * (rapbins[i+1]-rapbins[i]); // ... times d|y|
       A2->BinSize.push_back(binsize);
     }
   }
@@ -440,7 +448,7 @@ void UserHHC::inittable(){
   B->IAddMultFlag = 0;
   B->IContrFlag1 = 1;
   B->IContrFlag3 = 0;
-  B->CodeDescript.push_back("NLOJet++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+  B->CodeDescript.push_back("NLOJet++_4.1.3");  // --- fastNLO user: enter NLOJET++ version
   B->NCodeDescr = B->CodeDescript.size();
   B->IRef = 0;
   if (nlo || A2->ILOord > 2) {
@@ -807,8 +815,6 @@ void UserHHC::inittable(){
   // }
   // --------- fastNLO: Warm-Up run results (end)
 
-
-  //printf("* --- xlimits \n");
   for(int i=0;i<A2->NObsBin;i++){
     int nxtot = 15;
     if (i == ((A2->NObsBin)-1)) nxtot += 1; // Darf's etwas mehr sein?
@@ -894,13 +900,12 @@ void UserHHC::inittable(){
   // --- reference table
   if(doReference){
     fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
-    //refB->NSubproc = 7;
     if (nlo || A2->ILOord > 2) {
       refB->NSubproc = 7;
     } else {
       refB->NSubproc = 6;
-      printf("  this reference job uses 6 subprocesses \n");
     }
+    printf("         This reference job uses %d subprocesses!\n",B->NSubproc);
     table->CreateBlockB(1,refB);
     refB->Copy(table->GetBlockB(0));
     refB->IRef = 1;
