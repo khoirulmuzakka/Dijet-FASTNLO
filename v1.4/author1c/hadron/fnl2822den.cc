@@ -231,7 +231,7 @@ void UserHHC::initfunc(unsigned int)
   //DEBUGEND
 
   // Binning in x
-  nxtot = 20;
+  nxtot = 15;
 
   // NLO scale variations - for scales in GeV
   nscalevar = 4;
@@ -352,9 +352,10 @@ void UserHHC::initfunc(unsigned int)
   cout << " " << endl;
   cout << "   *******************************************" << endl;
   cout << "    fastNLO - initialization" << endl;
-  cout << "    Scenario fnl2822:" << endl;
+  cout << "    Scenario fnl2822den:" << endl;
   cout << "      Leading Jets Scenario, E_cms = 7 TeV," << endl;
   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
+  cout << "      2->2_&_2->3_Processes" << endl; 
   cout << " " << endl;
   cout << "        table file " << tablefilename << endl;
   cout << "        store table after " << nwrite << " events" << endl;
@@ -936,7 +937,7 @@ void UserHHC::writetable(){
   WRITE(marker);// ------------------END of block
 
   // a brief description how the scale is defined
-  table << "pT_max_(GeV)" << endl;
+  table << "<pT_jet>_(GeV)" << endl;
 
   int nscalebin = 1;
   WRITE(nscalebin); // No. of Bins in mur,muf - new in v1c
