@@ -571,7 +571,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     //DEBUGEND
 
     // --- Later this variable will be the ren./fact. scale
-    double ptmax = pt1;
+    // Not possible without extra scale bins as in this scenario
+    //    double ptmax = pt1;
     double ptjet[4] = {pt1,pt2,pt3,pt4};
     
     // Loop over surviving jets, max. three
@@ -847,8 +848,8 @@ void UserHHC::writetable(){
   WRITE(s);
 
   // five strings with table content
-  table << "d2sigma_dpTd|y|_jetn_(fb_GeV)" << endl;
-  table << "LHC-Scenario" << endl;
+  table << "d2sigma-jetn_dpTd|y|_jetn_(fb_GeV)" << endl;
+  table << "LHC_Scenario" << endl;
   table << "Leading_Jet_pTs" << endl;
   table << "anti-kT_R=0.5" << endl;
   table << "2->2_&_2->3_Processes" << endl;
