@@ -595,11 +595,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       double yjet[4]  = {abs(pj[ij1].rapidity()),
 			 abs(pj[ij2].rapidity()),
 			 abs(pj[ij3].rapidity()),
-			 abs(pj[ij4].rapidity());}
+			 abs(pj[ij4].rapidity())};
       for (int i=1; i<=njet; i++) {
 	if ( yjet[i-1] < yjcmax ) {
 	  njc++;
-	  ht = ht + ptjet[i-1].perp();
+	  ht = ht + ptjet[i-1];
 	}
       }
       // --- Later this variable will be the ren./fact. scale
