@@ -1420,6 +1420,14 @@ fnl2722dena: links fnl2722dena.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
+fnl2722denb: links fnl2722denb.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722denb.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722denb -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 # ======================================================================
 # =====   FNL2822: LHC Leading jets with fastjet anti-kT R=0.5   =======
 # ======================================================================
