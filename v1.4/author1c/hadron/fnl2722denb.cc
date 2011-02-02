@@ -703,7 +703,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	      cout<<" -> deltas are off: "<<deltamax<<"  "<<deltamin<<endl;
 	    }                             
 
-
 	    // ===== variables for the bi-cubic interpolation =====
 	    // === the relative distances to the four nearest bins
 	    cmax[0] = deltamax+1.0;
@@ -814,7 +813,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 		  }
 		}
 	      }
-
 	    }//-end loop scalevar
 
 	    // ** ------------------------------------------------------
@@ -835,6 +833,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	      amp.pdf_and_qcd_coupling(pdf, 389385.730);
 	      weight_hhc wt = amp(mur2,muf2);
 	      wt = wt * (unitfactor/binwidth);
+
 	      // deal with subprocesses 2 and 3
 	      //    - if x1>x2 -> o.k.
 	      //    - if x2>x1 -> swap weights for subprocesses 2,3
@@ -1006,7 +1005,6 @@ void UserHHC::writetable(){
    
   WRITE(marker);// ------------------END of block
 
-   
   for(int i=0;i<nrap;i++){
     for(int j=0;j<npt[i];j++){
       WRITE(mufval[i][j]); // all mufval 
@@ -1014,7 +1012,6 @@ void UserHHC::writetable(){
   }
 
   WRITE(marker);// ------------------END of block
-
 
   int scalevarmax;
   if(itype==amplitude_hhc::nlo){  // scale variations are only filled above LO
