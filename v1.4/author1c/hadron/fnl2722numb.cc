@@ -2,7 +2,7 @@
 // fastNLO author code for fnl2722:
 //     CMS 3-Jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//     (denominator)
+//     (numerator)
 //
 // last modification
 //
@@ -113,8 +113,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
 {
   //  number of jets 
   //nj = 1U;
-  nj = 2U;
-  //nj = 3U;
+  //nj = 2U;
+  nj = 3U;
 
   //  total c.m. energy squared
   //s =     40000.; // RHIC               200 GeV
@@ -153,12 +153,12 @@ void UserHHC::initfunc(unsigned int)
 
   // Set up binning!
   // First dimension (histogram numbers xxxxRxx), usually rapidity
-  // Here: Jet multiplicity binning 2+; only jets in |y| < 2.5
+  // Here: Jet multiplicity binning 3+; only jets in |y| < 2.5
   // (Note: 2+ and 3+ at the same time not possible since
   //  event needs to be assigned uniquely to ONE observable bin)
   // # of bins
   nrap = 1;
-  double rapb[2] = { 1.5, 2.5 };
+  double rapb[2] = { 2.5, 3.5 };
   // In reference mode: Double no. of bins
   nrap = nrap*(iref+1);
    
@@ -364,7 +364,7 @@ void UserHHC::initfunc(unsigned int)
   cout << "    Scenario fnl2722:" << endl;
   cout << "      CMS 3-jet ratio scenario, E_cms = 7 TeV," << endl;
   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
-  cout << "      (denominator: 2->2_&_2->3_Processes)" << endl;
+  cout << "      (numerator: 2->3_&_2->4_Processes)" << endl;
   cout << " " << endl;
   cout << "        table file " << tablefilename << endl;
   cout << "        store table after " << nwrite << " events" << endl;
@@ -614,7 +614,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       //     cout << "njc, ht: " << njc << ", " << ht << endl;
       //DEBUGEND
 
-      if ( njc > 1 && ht > htmin ) {
+      if ( njc > 2 && ht > htmin ) {
 	//DEBUG
 	//       cout << "Event accepted: " << endl;
 	//       cout << "njet, njc, pt1, pt2, yjjmax, ht: " << njet << ", " << njc << ", " << pt1 << ", " << pt2 << ", " << yjjmax << ", " << ht << endl;
@@ -899,14 +899,14 @@ void UserHHC::writetable(){
   WRITE(s);
 
   // five strings with table content
-  table << "dsigma-jet2+_dHT_(fb_GeV)" << endl;
+  table << "dsigma-jet3+_dHT_(fb_GeV)" << endl;
   table << "CMS-LHC-Scenario" << endl;
   table << "3-Jet_Ratio" << endl;
   table << "anti-kT_R=0.5" << endl;
-  table << "2->2_&_2->3_Processes" << endl;
+  table << "2->3_&_2->4_Processes" << endl;
 
   //iproc
-  int iproc = 2; // dijets
+  int iproc = 3; // three-jets
   WRITE(iproc);
 
   //ialgo
@@ -926,7 +926,7 @@ void UserHHC::writetable(){
   WRITE(nord);
 
   // absolute order
-  int npow = nord+1; // -> here "+1" for two-jet xsect (HT)
+  int npow = nord+2; // -> here "+2" for three-jet xsect (HT)
   WRITE(npow);
 
   switch(nord){

@@ -2,7 +2,7 @@
 // fastNLO author code for fnl2722:
 //     CMS 3-Jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
-//     (denominator)
+//     (numerator)
 //
 // last modification
 //
@@ -113,8 +113,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd, double& s)
 {
   //  number of jets 
   //nj = 1U;
-  nj = 2U;
-  //nj = 3U;
+  //nj = 2U;
+  nj = 3U;
 
   //  total c.m. energy squared
   //s =     40000.; // RHIC               200 GeV
@@ -153,12 +153,12 @@ void UserHHC::initfunc(unsigned int)
 
   // Set up binning!
   // First dimension (histogram numbers xxxxRxx), usually rapidity
-  // Here: Jet multiplicity binning 2+; only jets in |y| < 2.5
+  // Here: Jet multiplicity binning 3+; only jets in |y| < 2.5
   // (Note: 2+ and 3+ at the same time not possible since
   //  event needs to be assigned uniquely to ONE observable bin)
   // # of bins
   nrap = 1;
-  double rapb[2] = { 1.5, 2.5 };
+  double rapb[2] = { 2.5, 3.5 };
   // In reference mode: Double no. of bins
   nrap = nrap*(iref+1);
    
@@ -183,7 +183,7 @@ void UserHHC::initfunc(unsigned int)
   //DEBUGEND
 
   // Second dimension (histogram x axis), usually pT
-  // Here:  These are HT bins
+  // Here:  These are pTmax bins
   //
   // # of bins npt per irap bin of first dimension
   int nptb[1] = { 35 };
@@ -213,7 +213,8 @@ void UserHHC::initfunc(unsigned int)
 		     1700., 1850., 2000., 2150., 2300., 2450., 2600., 2750., 2900.};
   for (unsigned int i=0; i<nrap/(iref+1); i++) {
     for (int j=0; j<npt[i]+1; j++) { 
-      pthigh[i][j] = ptb[j];
+      // Take one half of original HT bins
+      pthigh[i][j] = ptb[j]/2.;
     }
   }
   // In reference mode: Copy high end of bin boundaries
@@ -276,9 +277,9 @@ void UserHHC::initfunc(unsigned int)
       // - Setup the xlimit array - computed from kinematic constraints
       double ylmin = 0.0; // Attention! Scenario definition!
       double ylmax = 2.5;
-      // pthigh contains HT ..., use ptl for phase space limit
+      // pthigh contains pTmax ..., use ptl = pt for phase space limit
       double pt = pthigh[j][k];
-      double ptl = pthigh[j][k]/2.;
+      double ptl = pthigh[j][k];
       double xt = 2*ptl/sqrt(s);
       double ymin = ylmin;
       double ymax = log((1.+sqrt(1.-xt*xt))/xt);  // upper kin. y-limit
@@ -313,7 +314,7 @@ void UserHHC::initfunc(unsigned int)
       xsmallest[j][k]=0.999;
 
       // - Setup the murval and mufval arrays - take value at 45% of bin
-      // HT bins for the scale!
+      // pTmax bins for the scale!
       murval[j][k]= (0.55*pt + 0.45*pthigh[j][k+1]); 
       mufval[j][k]= (0.55*pt + 0.45*pthigh[j][k+1]); 
     }
@@ -364,7 +365,7 @@ void UserHHC::initfunc(unsigned int)
   cout << "    Scenario fnl2722:" << endl;
   cout << "      CMS 3-jet ratio scenario, E_cms = 7 TeV," << endl;
   cout << "      for fastjet anti-kT algo with R=0.5 in E-scheme" << endl; 
-  cout << "      (denominator: 2->2_&_2->3_Processes)" << endl;
+  cout << "      (numerator: 2->3_&_2->4_Processes)" << endl;
   cout << " " << endl;
   cout << "        table file " << tablefilename << endl;
   cout << "        store table after " << nwrite << " events" << endl;
@@ -453,8 +454,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double yjmax = 5.0;
   // highest (pseudo-)rapidity for central jets to be considered
   double yjcmax = 2.5;
-  // minimal ht of all central jets to be considered
-  double htmin = 250.;
+  // minimal pTmax of all central jets to be considered
+  double ptxmin = 125.;
 
   //DEBUG
   //   cout << "-------------------- Next event --------------------" << endl; 
@@ -590,9 +591,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // Later check that yjjmax < yjcmax so njc = 2 is fine ...
       //     int njc = 2;
       //
-      // Requirements according to Panos & Costas
+      // Translation of requirements according to Panos & Costas into pTmax
+      // Still there is no event rejection if the leading jets are non-central
       int njc = 0;
-      double ht = 0.;
+      int nlj = 0;
+      double pTmax = 0.;
       double ptjet[4] = {pt1,pt2,pt3,pt4};
       double yjet[4]  = {abs(pj[ij1].rapidity()),
 			 abs(pj[ij2].rapidity()),
@@ -601,33 +604,34 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       for (int i=1; i<=njet; i++) {
 	if ( yjet[i-1] < yjcmax ) {
 	  njc++;
-	  ht = ht + ptjet[i-1];
+	  pTmax = max(pTmax,ptjet[i-1]);
+	  if ( i < 3 ) {nlj++;}
 	}
       }
       // --- Later this variable will be the ren./fact. scale
       // Not possible without extra scale bins as in this scenario
-      //       double ptmax = (pt1 + pt2)/2.0;
+      //       double pTmax = (pt1 + pt2)/2.0;
       //       double pt = ht / 2.0;
 
       //DEBUG
       //     cout << "njet, pt1, pt2, yjjmax: " << njet << ", " << pt1 << ", " << pt2 << ", " << yjjmax << endl;
-      //     cout << "njc, ht: " << njc << ", " << ht << endl;
+      //     cout << "njc, pTmax: " << njc << ", " << pTmax << endl;
       //DEBUGEND
 
-      if ( njc > 1 && ht > htmin ) {
+      if ( nlj == 2 && njc > 2 && pTmax > ptxmin ) {
 	//DEBUG
 	//       cout << "Event accepted: " << endl;
-	//       cout << "njet, njc, pt1, pt2, yjjmax, ht: " << njet << ", " << njc << ", " << pt1 << ", " << pt2 << ", " << yjjmax << ", " << ht << endl;
+	//       cout << "njet, njc, pt1, pt2, yjjmax, pTmax: " << njet << ", " << njc << ", " << pt1 << ", " << pt2 << ", " << yjjmax << ", " << pTmax << endl;
 	//       cout << "==================== End of event ====================" << endl; 
 	//DEBUGEND
 	
-	// --- determine y(=mult) and pT(=HT) bin (njc = 2+) 
-	// KR: Normalize to bin width in HT, but not |y| or multiplicity
+	// --- determine y(=mult) and pT(=pTmax) bin (njc = 2+) 
+	// KR: Normalize to bin width in pT, but not |y| or multiplicity
 	double binwidth = 1.0;
 	int rapbin = 0;
 	int ptbin  = -1;
 	for (int j = 0; j < npt[rapbin]; j++) {
-	  if (pthigh[rapbin][j] <= ht && ht < pthigh[rapbin][j+1]) {
+	  if (pthigh[rapbin][j] <= pTmax && pTmax < pthigh[rapbin][j+1]) {
 	    ptbin=j;
 	    binwidth = binwidth * (pthigh[rapbin][(j+1)]-pthigh[rapbin][j]);
 	    break;
@@ -635,9 +639,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	}
 	//DEBUG
 	//	 if ( ptbin>0 ) {
-	//	   cout << endl << "htlow = " << pthigh[rapbin][ptbin] << ", ht = " << ht << ", hthig = " << pthigh[rapbin][ptbin+1] << endl;
+	//	   cout << endl << "pTmaxlow = " << pthigh[rapbin][ptbin] << ", pTmax = " << pTmax << ", pTmaxhig = " << pthigh[rapbin][ptbin+1] << endl;
 	//	 } else {
-	//	   cout << endl << "ht = " << ht << endl;
+	//	   cout << endl << "pTmax = " << pTmax << endl;
 	//	 }
 	//DEBUGEND
        
@@ -869,7 +873,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
 	  } //-end reference mode: a_s/PDF table filling 
 	} // - end: IF in pT range
-      } // - end: njc > 1 && ht > htmin
+      } // - end: njc > 1 && pTmax > ptxmin
     } // - end: nj >= 2
   } // - end: nj > 0
 } // - end: 
@@ -899,14 +903,14 @@ void UserHHC::writetable(){
   WRITE(s);
 
   // five strings with table content
-  table << "dsigma-jet2+_dHT_(fb_GeV)" << endl;
+  table << "dsigma-jet3+_dpTmax_(fb_GeV)" << endl;
   table << "CMS-LHC-Scenario" << endl;
   table << "3-Jet_Ratio" << endl;
   table << "anti-kT_R=0.5" << endl;
-  table << "2->2_&_2->3_Processes" << endl;
+  table << "2->3_&_2->4_Processes" << endl;
 
   //iproc
-  int iproc = 2; // dijets
+  int iproc = 3; // three-jets
   WRITE(iproc);
 
   //ialgo
@@ -926,7 +930,7 @@ void UserHHC::writetable(){
   WRITE(nord);
 
   // absolute order
-  int npow = nord+1; // -> here "+1" for two-jet xsect (HT)
+  int npow = nord+2; // -> here "+2" for three-jet xsect (pTmax)
   WRITE(npow);
 
   switch(nord){
@@ -987,7 +991,7 @@ void UserHHC::writetable(){
   WRITE(marker);// ------------------END of block
 
   // a brief description how the scale is defined
-  table << "<HT>_(GeV)" << endl;
+  table << "<pT_max>_(GeV)" << endl;
 
   int nscalebin = 1;
   WRITE(nscalebin); // No. of Bins in mur,muf - new in v1c

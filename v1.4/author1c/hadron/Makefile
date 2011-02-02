@@ -1420,11 +1420,51 @@ fnl2722dena: links fnl2722dena.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
+fnl2722numb: links fnl2722numb.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722numb.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722numb -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
 fnl2722denb: links fnl2722denb.cc $(CommonPath)/fj-ak-05.cc \
 	$(cteq6pdf)
 	$(NLOJET)/bin/create-nlojet-user fnl2722denb.cc \
 	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
 	-o fnl2722denb -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2722numc: links fnl2722numc.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722numc.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722numc -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2722denc: links fnl2722denc.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722denc.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722denc -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2722numd: links fnl2722numd.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722numd.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722numd -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet
+
+fnl2722dend: links fnl2722dend.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2722dend.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2722dend -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet
 
