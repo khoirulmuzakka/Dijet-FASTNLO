@@ -20,8 +20,10 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 #FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
+# Scientific Linux 4/5
 FC=g77
 #FC=f77
+# Ubuntu 10.04
 #FC=gfortran
 
 OBJFILESALL  = $(ALLFILES:.f=.o)
