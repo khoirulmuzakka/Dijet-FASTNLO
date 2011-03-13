@@ -46,10 +46,10 @@ print "######################################\n\n";
 #
 # Parse options
 #
-our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j,
-      $opt_m, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w ) =
-    ( "LOCAL", "", "0", "2.0.0", "guc", "", ".", "0001",
-      "0", "LO", "CTEQ", "none", "", ".", "", "1b", "" );
+our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j, $opt_m,
+      $opt_n, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w ) =
+    ( "LOCAL", "", "0", "2.0.0", "guc", "", ".", "0001", "0",
+      "2jet", "LO", "CTEQ", "none", "", ".", "", "1b", "" );
 getopts('b:de:f:g:hi:j:m:o:p:q:rs:t:v:w') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
@@ -65,6 +65,7 @@ if ( $opt_h ) {
     print "  -i dir          Installation directory (def.=.)\n";
     print "  -j jobnr        Job number to attach (def.=0001)\n";
     print "  -m mode         Job mode: 0 do all (def.), 1 install only, 2 make only, 3 run only\n";
+    print "  -n njet         NLOJet++ jet mode: 2jet (def.) for 2+, 3jet for 3+ final states\n";
     print "  -o order        LO (def.) or NLO calculation\n";
     print "  -p pdf          CTEQ parton densities (def.) or LHAPDF\n";
     print "  -q rootversion  ROOT version to install (def.=none)\n";
@@ -107,6 +108,9 @@ unless ( $opt_j =~ m/\d{4}/ && $opt_j !~ m/\D+/ ) {
 unless ( $opt_m == 0 || $opt_m == 1 || $opt_m == 2 || $opt_m == 3 ) {
     die "fastrun.pl: Error! Illegal job mode: $opt_m, aborted.\n";
 }
+unless ( $opt_n eq "2jet" || $opt_n eq "3jet" ) {
+    die "fastrun.pl: Error! Illegal njet mode: $opt_n, aborted.\n";
+}
 unless ( $opt_o eq "LO" || $opt_o eq "NLO" ) {
     die "fastrun.pl: Error! Illegal option -o $opt_o, aborted.\n";
 }
@@ -131,6 +135,7 @@ my $frev  = $opt_f;
 my $prot  = $opt_g;
 my $jobnr = $opt_j;
 my $mode  = $opt_m;
+my $njet  = $opt_n;
 my $order = $opt_o;
 my $pdf   = $opt_p;
 my $rv    = $opt_q;
@@ -223,11 +228,6 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
 }
 
 # NLOJET++ table name
-my $njet = "2jet";
-# Dirty hack for 3jet calcs ...
-if ($scen =~ m/diff/ || $scen =~ m/num/) {
-    $njet = "3jet";
-}
 my $tabext;
 if ( $vers eq "1a" || $vers eq "1b" ) {
     $tabext = "raw";
