@@ -50,7 +50,7 @@ our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j, $opt_m,
       $opt_n, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w ) =
     ( "LOCAL", "", "0", "2.0.0", "guc", "", ".", "0001", "0",
       "2jet", "LO", "CTEQ", "none", "", ".", "", "1b", "" );
-getopts('b:de:f:g:hi:j:m:o:p:q:rs:t:v:w') or die "fastrun.pl: Malformed option syntax!\n";
+getopts('b:de:f:g:hi:j:m:n:o:p:q:rs:t:v:w') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
