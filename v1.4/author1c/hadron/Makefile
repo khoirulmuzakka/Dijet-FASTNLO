@@ -976,6 +976,22 @@ fnl2272c: links fnl2272c.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+fnl2272d: links fnl2272d.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2272d.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2272d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+fnl2272e: links fnl2272e.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2272e.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2272e -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # ======================================================================
 # =====   FNL2308: LHC CMS incl. jets with fastjet SISCone R=0.7 =======
 # ======================================================================
