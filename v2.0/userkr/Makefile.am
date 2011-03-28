@@ -1,15 +1,13 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# The main target: Markus' default user code
+# The main target: My allunc code
 if HAVE_LHAPDFCONFIG
-   bin_PROGRAMS = example example-ref
+   bin_PROGRAMS = allunc
 endif
 
 # All source files which go into the main target (and have to be distributed)
-example_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc lenocc.f
-example_ref_SOURCES = example-ref.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
+allunc_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
 	fnx9999.inc strings.inc lenocc.f
 
 #
