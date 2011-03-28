@@ -47,10 +47,10 @@ print "######################################\n\n";
 # Parse options
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_f, $opt_g, $opt_h, $opt_i, $opt_j, $opt_m,
-      $opt_n, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w ) =
+      $opt_n, $opt_o, $opt_p, $opt_q, $opt_r, $opt_s, $opt_t, $opt_v, $opt_w, $opt_x ) =
     ( "LOCAL", "", "0", "2.0.0", "guc", "", ".", "0001", "0",
-      "2jet", "LO", "CTEQ", "none", "", ".", "", "1b", "" );
-getopts('b:de:f:g:hi:j:m:n:o:p:q:rs:t:v:w') or die "fastrun.pl: Malformed option syntax!\n";
+      "2jet", "LO", "CTEQ", "none", "", ".", "", "1b", "", "" );
+getopts('b:de:f:g:hi:j:m:n:o:p:q:rs:t:v:wx:') or die "fastrun.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastrun.pl\n";
     print "Usage: fastrun.pl [switches/options] ([scenario])\n";
@@ -75,7 +75,8 @@ if ( $opt_h ) {
 	"(def.= {scen}{ref}_{jobnr} with\n                  ".
 	"ref. to working directory in fastNLO installation)\n";
     print "  -v #            Choose between fastNLO version 1a, 1b, and 2 (def.=1b)\n";
-    print "  -w              Warm-up run to determine x limits (version 2 only)\n";
+    print "  -w              Warm-up run to determine x limits (def.=F; version 2 only)\n";
+    print "  -x seed         Seed for random number generator (def.=F; version 2 only)\n";
     print "\n";
     print "Examples:\n";
     print "1) Install only (to install with LHAPDF use option -p):\n";
@@ -149,6 +150,8 @@ if ( $opt_w ) { $wrm = "wrm";}
 if ( $opt_r && $opt_w ) {
     die "fastrun.pl: Error! Reference and warm-up mode are mutually exclusive!\n";
 }
+my $seed  = "";
+if ( $opt_x ) { $seed = $opt_x ;}
 print "fastrun.pl: Directory for/of installation is $idir\n";
 print "fastrun.pl: Using fastNLO revision $frev\n";
 print "fastrun.pl: Job mode is $mode\n";
@@ -1441,6 +1444,7 @@ if ( $mode == 0 || $mode == 3 ) {
 	    "-n ${scen}${ref}${wrm}_${jobnr} ".
 	    "-u lib/lib${scen}.la ";
 	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+	if ( $seed ) { $cmd .= "-s $seed"; }
     }
 # Do not try to maximize CPU time yet, too unstable
     if ( $batch eq "MAX" ) {
