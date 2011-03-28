@@ -5,6 +5,8 @@ C
       CHARACTER*72 CHEADER(13)
       CHARACTER*72 CNLOJET(4)
       CHARACTER*72 CTHRCOR(5)
+      CHARACTER*2 Cunits(0:15)
+
       DATA CHEADER/
      >     "##########################################################",
      >     " ",
@@ -32,3 +34,6 @@ C
      >     "  N. Kidonakis and J.F. Owens - please cite",
      >     "  N. Kidonakis, J.F. Owens, Phys. Rev. D63, 054019 (2001).",
      >     " "/
+
+      Data Cunits/' b','--','--','mb','--','--','ub','--','--','nb',
+     +     '--','--','pb','--','--','fb'/
