@@ -1,18 +1,23 @@
-      Subroutine fx9999rw(crw,filename)
+      Subroutine fx9999rw(crw,filename,ictrb)
 * ------------------------------------------------------------
-*  fastNLO usercode v2.0 reads or writes a v2 table
-*
-*  MW 07/23/2007
-*
-*  character   crw:        'read' or 'write'
-*  character   filename:    name of table
+*  fastNLO usercode v2.0                       MW 07/23/2007
+* 
+*  fx9999rw reads or writes fastNLO v2 tables
+*  input:
+*     character   crw:        'read' or 'write'
+*     character   filename:    name of table
+*     integer     ictrb(30):   pointers for writing selected contributions
+*                              only contributions n with ictrb(n)<>0 are 
+*                              written - reading is not affected
+C
+C        1         2         3         4         5         6         7 
+C 3456789012345678901234567890123456789012345678901234567890123456789012
 * ------------------------------------------------------------
       Implicit None
       Character*(*) crw,filename
-      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax
+      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax, nselctrb
+      Integer ictrb(30)
       Include 'fnx9999.inc'
-
-ckr      write(*,*)"RW: Filename: ",FILENAME
 
       Nunit=2
 
@@ -22,19 +27,65 @@ ckr      write(*,*)"RW: Filename: ",FILENAME
          OPEN(Nunit,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
          IF (Ifile .ne. 0) THEN
             WRITE(*,*)"FX9999RW: ERROR! Table file not found, "//
-     >           "stopped! IOSTAT = ",Ifile
+     +           "stopped! IOSTAT = ",Ifile
             STOP
          Endif
       Endif
+
+c --- when writing: count No. of selected contributions to be written
+c                   (those with ictrb(ic)=1)
+      nselctrb = 0
+      If (crw .eq. 'write') Then         
+         Do ic=1,NContrib
+            If (ictrb(ic).ne.0) Then
+               nselctrb = nselctrb + 1
+               Write(*,*) '         ... writing contribution ',ic
+            Endif
+         Enddo
+         Write(*,*) ' writing a total of ',nselctrb,' contributions',
+     +        ' into: ',filename
+      Endif
+
 
 c --- fastNLO table
 c - block A1
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, Itabversion)
       Call fniochar(crw,nunit, ScenName)
-      Call fnioint(crw,nunit, Ncontrib)
+      If (crw .eq. 'write') Then
+         Call fnioint(crw,nunit, nselctrb)
+      Else
+         Call fnioint(crw,nunit, Ncontrib)
+      Endif
       Call fnioint(crw,nunit, Nmult)
       Call fnioint(crw,nunit, Ndata)
+      Call fnioint(crw,nunit, NuserString)
+      If (NuserString .gt. MxUser) Then
+         Write(*,*) ' NuserString too large ',NuserString,'<=',MxUser
+      Endif
+      Do i=1,NuserString
+        Call fniochar(crw,nunit, UserString(i))
+      Enddo
+      Call fnioint(crw,nunit, NuserInt)
+      If (NuserInt .gt. MxUser) Then
+         Write(*,*) ' NuserInt too large ',NuserInt,'<=',MxUser
+      Endif
+      Do i=1,NuserInt
+        Call fnioint(crw,nunit, UserInt(i))
+      Enddo
+      Call fnioint(crw,nunit, NuserFloat)
+      If (NuserFloat .gt. MxUser) Then
+         Write(*,*) ' NuserFloat too large ',NuserFloat,'<=',MxUser
+      Endif
+      Do i=1,NuserFloat
+        Call fniodbl(crw,nunit, UserFloat(i))
+      Enddo
+      Call fnioint(crw,nunit, Imachine) 
+      If (Imachine.ne.0) Then
+         Write(*,*) ' Imachine different from zero - ',
+     +        'not yet implemented: ',Imachine
+         Stop
+      Endif
 c - block A2
       Call fnioisep(crw,nunit)
       Call fnioint(crw,nunit, IpublUnits) 
@@ -55,49 +106,47 @@ c - block A2
       Do i=1,NDim
          Call fnioint(crw,nunit, IDiffBin(i))
       Enddo
-ckr Define counters and pointers to changes of borders in i'th dimension
-ckr (RapIndex, NRapidity, NPt).
-ckr Useful in case of npt pt bins in nrap rapidity bins etc.
-ckr With LoBin(i,j) works only in two dimensions! 
-      Do i=1,NDim
-         IDimPointer(1,i) = 1
-         NDimCounter(i)   = 1
-      Enddo
-ckr
       Do i=1,NObsBin
          Do j=1,NDim
             Call fniodbl(crw,nunit, LoBin(i,j))
             If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
          Enddo
+      Enddo
+ckr Define counters and pointers to changes of borders in i'th dimension
+ckr (RapIndex, NRapidity, NPt).
+ckr Useful in case of npt pt bins in nrap rapidity bins etc.
+ckr With LoBin(i,j) works only in two dimensions! 
+ckr      Do i=1,NDim
+ckr         IDimPointer(1,i) = 1
+ckr         NDimCounter(i)   = 1
+ckr      Enddo
 ckr
-         If (i.gt.1) Then
-            If (LoBin(i-1,1).ne.LoBin(i,1)) Then
-               NDimCounter(1) = NDimCounter(1) + 1  
-               IDimPointer(NDimCounter(1),1) = i
-            Endif
-            If (LoBin(i-1,2).ne.LoBin(i,2)) Then
-               NDimCounter(2) = NDimCounter(2) + 1  
-               IDimPointer(NDimCounter(2),2) = i
-            Endif
-         Endif
+ckr      Do i=1,NObsBin
+ckr         Do j=1,NDim
+ckr            Call fniodbl(crw,nunit, LoBin(i,j))
+ckr            If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
+ckr         Enddo
+ckr
+ckr         If (i.gt.1) Then
+ckr            If (LoBin(i-1,1).ne.LoBin(i,1)) Then
+ckr               NDimCounter(1) = NDimCounter(1) + 1  
+ckr               IDimPointer(NDimCounter(1),1) = i
+ckr            Endif
+ckr            If (LoBin(i-1,2).ne.LoBin(i,2)) Then
+ckr               NDimCounter(2) = NDimCounter(2) + 1  
+ckr               IDimPointer(NDimCounter(2),2) = i
+ckr            Endif
+ckr         Endif
 Comment:          write(*,*)"iobs, ndimcounter1, ndimcounter2",
 Comment:      >        i,NDimCounter(1),NDimCounter(2)
 Comment:          write(*,*)"iobs, idimpointer1, idimpointer2",i,
 Comment:      >        IDimPointer(NDimCounter(1),1),
 Comment:      >        IDimPointer(NDimCounter(2),2)
 ckr
+ckr      Enddo
+      Do i=1,NObsBin
+         Call fniodbl(crw,nunit, BinSize(i))
       Enddo
-ckr DEBUG
-      Do i=1,NDim
-         Write(*,*)"FX9999RW: INFO: Counted ",NDimCounter(i),
-     >        " border changes in dimension ",i
-         Write(*,*)"          The associated pointers are: "
-         Do j=1,NDimCounter(i)
-            Write(*,*)"          counter = ",j,
-     >           ", pointer = ",IDimPointer(j,i)
-         Enddo
-      Enddo
-ckr End DEBUG
       Call fnioint(crw,nunit, INormFlag)
       If (INormFlag.gt.1) Call fniochar(crw,nunit, DenomTable)
       If (INormFlag.gt.0) Then
@@ -109,6 +158,9 @@ ckr End DEBUG
 
 c - block B
       Do ic=1,NContrib
+c -      write only selected contributions - those with ictrb(ic)=1         
+         If (crw .eq. 'write' .and. ictrb(ic).eq.0) Goto 100
+
          Call fnioisep(crw,nunit)
          Call fnioint(crw,nunit, IXsectUnits(ic))
          Call fnioint(crw,nunit, IDataFlag(ic))
@@ -140,11 +192,11 @@ c --------------------------- IAddMult ?????
          Endif
 
 c --- coefficient block
-      Call fnioint(crw,nunit, IRef(ic))
-      Call fnioint(crw,nunit, IScaleDep(ic))
-      Call fniolint(crw,nunit, Nevt(ic))
-      Call fnioint(crw,nunit, Npow(ic))
-      Call fnioint(crw,nunit, NPDF(ic))
+         Call fnioint(crw,nunit, IRef(ic))
+         Call fnioint(crw,nunit, IScaleDep(ic))
+         Call fniolint(crw,nunit, Nevt(ic))
+         Call fnioint(crw,nunit, Npow(ic))
+         Call fnioint(crw,nunit, NPDF(ic))
          Do i=1,NPDF(ic)
             Call fnioint(crw,nunit, NPDFPDG(ic,i))
          Enddo
@@ -159,8 +211,37 @@ c --- coefficient block
          Call fnioint(crw,nunit, IPDFdef(ic,2))  
          Call fnioint(crw,nunit, IPDFdef(ic,3))  
 
-         IF (IPDFdef(ic,1).eq.0) then ! - no predefined set of PDF coefficients
-            write(*,*) " case IPDFdef(1)=0 not yet implemented"
+c --- check consistency between Nsubproc and IPDFdef1,2,
+         If (IPDFdef(ic,1).eq.0) Then ! - no predefined set of PDF coefficients
+            Continue
+         Elseif (IPDFdef(ic,1).eq.1) Then ! --- e+e-
+            Continue
+         Elseif (IPDFdef(ic,1).eq.2) Then ! --- DIS
+            Continue
+         Elseif (IPDFdef(ic,1).eq.3) Then ! --- hh/hhbar
+            If (IPDFdef(ic,2).eq.1) Then 
+               If (IPDFdef(ic,3).eq.1) Then
+                  If (Nsubproc(ic).ne.6) Then
+                     Write(*,*) " IPDFdef(3)=1 requires ",
+     +                    "6 subprocesses for hh"
+                     STOP
+                  Endif
+               Elseif (IPDFdef(ic,3).eq.2) Then 
+                  If (Nsubproc(ic).ne.7) Then
+                     Write(*,*) " IPDFdef(3)=2 requires ",
+     +                    "7 subprocesses for hh"
+                     STOP
+                  Endif
+               Endif
+            Else
+               Write(*,*) " case IPDFdef(2)<>1 n/a for hh/hhbar"
+               STOP
+            Endif
+
+         Endif
+
+         If (IPDFdef(ic,1).eq.0) Then ! - no predefined set of PDF coefficients
+            Write(*,*) " case IPDFdef(1)=0 not yet implemented"
             STOP
          Endif
          If (NPDF(ic).gt.0) Then
@@ -169,6 +250,10 @@ c --- coefficient block
                Do j=1,Nxtot(ic,1,i)
                   Call fniodbl(crw,nunit, XNode1(ic,i,j))
                Enddo
+               If (crw.eq.'read') Then
+                  Hxlim1(ic,i) = -sqrt(-log10(XNode1(ic,i,1))) ! for HH
+               Endif
+
             Enddo 
             If (NPDFDim(ic).eq.2) Then
                Do i=1,NObsBin
@@ -199,12 +284,14 @@ c --- coefficient block
             Call fnioint(crw,nunit, NScaleVar(ic,i))
             Call fnioint(crw,nunit, NScaleNode(ic,i))
          Enddo
+c         Write(*,*) ic,Nscales(ic),Nscaledim(ic)
+c         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
          Do i=1,NScaleDim(ic)
             Do j=1,NScaleVar(ic,i)
                Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
 cdebug
-               Write(*,*)"FX9999RW: IC,IScaleDim,IScaleVar,ScaleFac",
-     >              ic,i,j,ScaleFac(ic,i,j)
+Comment:                Write(*,*)"FX9999RW: IC,IScaleDim,IScaleVar,ScaleFac",
+Comment:      >              ic,i,j,ScaleFac(ic,i,j)
 cdebug
             Enddo
          Enddo
@@ -214,11 +301,15 @@ cdebug
                Do k=1,NScaleVar(ic,j)
                   Do l=1,NScaleNode(ic,j)
                      Call fniodbl(crw,nunit, ScaleNode(ic,i,j,k,l))
+                     If (crw.eq.'read') Then
+                        HScaleNode(ic,i,j,k,l) = 
+     +                       log(log(ScaleNode(ic,i,j,k,l)/0.25d0))
+                     Endif
                   Enddo
                Enddo
             Enddo
          Enddo
-
+         
          Do i=1,NObsBin
             Do k=1,NScaleVar(ic,1)
                Do l=1,NScaleNode(ic,1)
@@ -243,7 +334,7 @@ c --- here we assume NFragFunc=0
                   Do m=1,nxmax
                      Do n=1,NSubProc(ic)
                         Call fniodbl(crw,nunit,
-     >                       SigmaTilde(ic,i,1,k,l,m,n))
+     +                       SigmaTilde(ic,i,1,k,l,m,n))
 Comment:                         write(*,*)"ic,iobs,iscv,iscn,ix,isub,st",
 Comment:      >                       ic,i,k,l,m,n,
 Comment:      >                       SigmaTilde(ic,i,1,k,l,m,n)
@@ -253,16 +344,8 @@ Comment:      >                       SigmaTilde(ic,i,1,k,l,m,n)
             Enddo
          Enddo
          
-
-
- 100     Continue
+ 100     Continue               ! - end of block
       Enddo
-
-c      Call fnioint(crw,nunit, )
-c      Call fniodbl(crw,nunit, )
-c      Call fniochar(crw,nunit, )
-
-
 
 c - end of table
       Call fnioisep(crw,nunit)
@@ -271,3 +354,4 @@ c - end of table
 
       Return
       End
+C -------------------------------------------------------------
