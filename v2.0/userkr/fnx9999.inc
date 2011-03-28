@@ -36,7 +36,7 @@ c - technical parameters
      +     MxScaleVar=4)
 
 c --- Block A1 (header part 1)
-      Integer Iseparator, Itabversion, Ncontrib,Nmult,Ndata
+      Integer Iseparator, Itabversion, Ncontrib,Nmult,Ndata,
      +     NuserString,NuserInt,NuserFloat, UserInt(MxUser), Imachine
       Character*24 ScenName
       Character*64 UserString(MxUser)
