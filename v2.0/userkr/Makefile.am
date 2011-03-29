@@ -7,8 +7,8 @@ if HAVE_LHAPDFCONFIG
 endif
 
 # All source files which go into the main target (and have to be distributed)
-allunc_SOURCES = fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc lenocc.f pyalps.f alphst.f allunc.f
+allunc_SOURCES = allunc.f fn-alphas-demo.f fn-interface.f fnio.f fnset.f fnx9999.f fx9999rw.f lenocc.f \
+	fnx9999.inc strings.inc alphst.f pyalps.f uncert.f uncert.inc
 
 #
 # FORTRAN compiler flags to be used for the main target
