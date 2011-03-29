@@ -49,11 +49,6 @@ c         WRITE(*,*) '  *   ALPS_IT:  exact 2-loop result for alpha_s'
          IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT:  only for 2-loop!!'
       ENDIF
 
-      ALPHAS = ALPSMZ
-      W = 1.d0 + B0*ALPSMZ*DLOG(MU/ZMASS)
-      ALPHAS = ALPHAS / W
-      ALPHAS = ALPHAS * (1.d0 - ALPSMZ*B1/B0*DLOG(W)/W)
-
 c - exact formula to extract Lambda from alpha_s(Mz)
       Q2 = MU**2
       LAM2 = ZMASS2 * EXP( -PI4/B0/ALPSMZ + 

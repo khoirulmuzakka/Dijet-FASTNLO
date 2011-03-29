@@ -7,15 +7,15 @@ if HAVE_LHAPDFCONFIG
 endif
 
 # All source files which go into the main target (and have to be distributed)
-allunc_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc lenocc.f
+allunc_SOURCES = fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
+	fnx9999.inc strings.inc lenocc.f pyalps.f alphst.f allunc.f
 
 #
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 #F77 = gfortran
-AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
@@ -25,11 +25,9 @@ AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   example_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-   example_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   example_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-   example_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+   allunc_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
 
 # cpp trick for path to LHAPDF pdfsets

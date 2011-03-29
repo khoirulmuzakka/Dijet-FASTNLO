@@ -15,10 +15,10 @@ c             (can serve as NRapidity, RapIndex, NPt ...)
 c ------------------------------------------------------------
 
 c - global fastNLO commonblock
-      Integer IFNfirst,
+      Integer IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
-      Common /cfastnlo/ IFNfirst,
+      Common /cfastnlo/ IFNfirst, Preftab,
      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      +     PHADRCOR, PUEVENT
 
