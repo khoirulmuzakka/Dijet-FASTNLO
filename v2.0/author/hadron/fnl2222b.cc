@@ -372,7 +372,7 @@ void UserHHC::inittable(){
   A2->NDim = 2;     // --- fastNLO user: No of dimensions in which observable is binned
   A2->DimLabel.push_back("pT");  // --- fastNLO user: label of 1st dimension
   A2->IDiffBin.push_back(2);
-  A2->DimLabel.push_back("|y|");   // --- fastNLO user: label of 2nd dimension
+  A2->DimLabel.push_back("|eta|");   // --- fastNLO user: label of 2nd dimension
   A2->IDiffBin.push_back(2);
 
   vector <double> bound;
@@ -407,7 +407,7 @@ void UserHHC::inittable(){
       //printf(" %d %d  |  %f %f\n",i,j,bound[0],bound[1]);
       binsize = binsize // fnl2222b: Start with preset value = 1 
 	* (ptbins[i][j+1]-ptbins[i][j]) // ... times dpT
-	* 2. * (rapbins[i+1]-rapbins[i]); // ... times d|y|
+	* 2. * (rapbins[i+1]-rapbins[i]); // ... times d|eta|
       A2->BinSize.push_back(binsize);
     }
   }
@@ -525,6 +525,13 @@ void UserHHC::inittable(){
 
   // --------- fastNLO: Warm-Up run results (start)
   // if ( ! doWarmUp ) {
+  //  // 3600000000 contributions (!= events) in warm-up run
+  // 1.003305e-04, 3.500000e+01, 4.500000e+01;
+  // 1.655632e-04, 4.500000e+01, 5.700000e+01;
+  // 2.655425e-04, 5.700000e+01, 7.200000e+01;
+  // 4.243137e-04, 7.200000e+01, 9.000000e+01;
+  // 6.621349e-04, 9.000000e+01, 1.200000e+02;
+  // 1.177732e-03, 1.200000e+02, 1.500000e+02;
   // }
   // --------- fastNLO: Warm-Up run results (end)
 
