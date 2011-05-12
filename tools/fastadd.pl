@@ -4,12 +4,14 @@
 #    This perl script creates either a total sum table (scen.tab) or
 #    sum tables for statistical uncertainty evaluation: 
 #    - For each single LO table with *one* 'dummy' NLO table
-#    - For each single NLO table with *all* LO tables
+#    - For each single NLO table with *all* LO tables or
+#    a summary warmup table from multiple warmup runs
 #
 # Version:
 # 
 # created by K. Rabbertz: 05.03.2006
 # last modified:
+# 02.05.2011 KR: Added warmup table part
 #
 #-----------------------------------------------------------------------
 # Todo:
@@ -35,19 +37,20 @@ print "##################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_d, $opt_h, $opt_l, $opt_n, $opt_s, $opt_v ) = ( "", "", "", "", "", "1" );
-getopts('dhl:n:sv:') or die "fastadd.pl: Malformed option syntax!\n";
+our ( $opt_d, $opt_h, $opt_l, $opt_n, $opt_s, $opt_v, $opt_w ) = ( "", "", "", "", "", "1", "" );
+getopts('dhl:n:sv:w') or die "fastadd.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
-    print "\nfastadd.pl\n";
+    print "fastadd.pl\n";
     print "Usage: fastadd.pl [switches/options] scenario\n";
-    print "  -d              Verbose output\n\n";
+    print "  -d              Verbose output\n";
     print "  -h              Print this text\n";
     print "  -l dir          Directory for LO tables, (def.=scenario)\n";
     print "  -n dir          Directory for NLO/NNLO tables, (def.=scenario)\n";
     print "  -s              Produce tables for statistical evaluation,\n".
 	"                  i.e. combinations of each LO with 1 NLO table and\n".
 	"                  all LO with each NLO table\n";
-    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n\n";
+    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n";
+    print "  -w              Write summary table from multiple warmup runs (def.=no)\n\n";
     exit;
 }
 
@@ -69,11 +72,14 @@ if ( $opt_l ) {$lodir = $opt_l;}
 my $nlodir   = "${scen}"; 
 if ( $opt_n ) {$nlodir = $opt_n;}
 my $nnlodir  = $nlodir; 
+my $wrmdir   = $nlodir;
 my $tabext = "raw";
 if ($vers == 2) {$tabext = "tab";} 
 my $loglob   = "${scen}*born*.${tabext}*";
 my $nloglob  = "${scen}*nlo*.${tabext}*";
 my $nnloglob = "${scen}*thrcor*.${tabext}*";
+my $wrmglob = "${scen}*wrm*.dat";
+my $wrmglobdef = "fastNLO-warmup*.dat";
 
 # Directory
 my $sdir = getcwd();
@@ -82,24 +88,95 @@ my $sdir = getcwd();
 # Check on nlofast-add resp. fnlo-merge
 #
 my $merger = "nlofast-add";
-if ( $vers == 2 ) {
-    $merger = "fnlo-merge";
-}
-my $cmd = `which ${merger}`;
-chomp $cmd;
-unless ( $cmd ) {
-    if ( $ENV{NLOJET} ) {
-	if ( -f "$ENV{NLOJET}/bin/${merger}" ) {
-	    $cmd = "$ENV{NLOJET}/bin/${merger}";
-	} else {
-	    die "fastadd.pl: ERROR! ${merger} command not found, ".
-		"neither via \`which\` nor in $ENV{NLOJET}/bin, aborted!\n";
-	}
-    } else {
-	die "fastadd.pl: ERROR! ${merger} command not found ".
-	    "via \`which\` and \$NLOJET is not set, aborted!\n";
+my $cmd;
+unless ( $opt_w ) {
+    if ( $vers == 2 ) {
+	$merger = "fnlo-merge";
     }
-}	
+    $cmd = `which ${merger}`;
+    chomp $cmd;
+    unless ( $cmd ) {
+	if ( $ENV{NLOJET} ) {
+	    if ( -f "$ENV{NLOJET}/bin/${merger}" ) {
+		$cmd = "$ENV{NLOJET}/bin/${merger}";
+	    } else {
+		die "fastadd.pl: ERROR! ${merger} command not found, ".
+		    "neither via \`which\` nor in $ENV{NLOJET}/bin, aborted!\n";
+	    }
+	} else {
+	    die "fastadd.pl: ERROR! ${merger} command not found ".
+		"via \`which\` and \$NLOJET is not set, aborted!\n";
+	}
+    }	
+}
+
+#
+# Analyze warmup tables
+#
+if ( $opt_w ) {
+    print "\nfastadd.pl: Warmup mode\n";
+    my @files = glob $wrmglob;  
+    chomp @files;
+    unless ( @files ) {
+	print "fastadd.pl: Warning! No warm-up files found for scenario $scen,\n";
+	print "            looking for generic filename fastNLO-warmup\* instead.\n";
+	@files = glob "fastNLO-warmup*";  
+	chomp @files;
+	unless ( @files ) {
+	    die "fastadd.pl: Warning! No warm-up files found, stopped\n";
+	} 
+    } 
+    my $ifil = 0;
+    my $nent = 0;
+    my $stat = 0;
+    my @xmin;
+    my @blow;
+    my @bhig;
+    foreach my $file ( @files ) {
+	open(INFILE,"< $file") or die "fastadd.pl: Error! Could not open $file!\n";
+	my $ient = 0; 
+	if ( $debug ) {print "fastadd.pl: Analyzing file no.: $ifil\n";}
+	while ( my $in = <INFILE> ) {	
+	    if ( $in =~ "//" ) {
+		my $tmp = $in;
+		chomp $tmp;
+		my @tmps = split(" ",$tmp);
+		$stat = $stat + $tmps[1];
+		if ( $debug ) {print "fastadd.pl: Accumulated statistics: $stat\n";}
+	    } else {
+		my $tmp = $in;
+		chomp $tmp;
+		$tmp =~ s/;//;
+		my @tmps = split(", ",$tmp);
+		if ( !$ifil || $tmps[0] < $xmin[$ient] ) {$xmin[$ient] = $tmps[0];} 
+		if ( !$ifil || $tmps[1] < $blow[$ient] ) {$blow[$ient] = $tmps[1];} 
+		if ( !$ifil || $tmps[2] > $bhig[$ient] ) {$bhig[$ient] = $tmps[2];} 
+		$ient++;
+	    }
+	}
+	if ( !$ifil ) {$nent = $ient};
+	if ( $debug ) {print "fastadd.pl: Number of entries: $nent\n";}
+	if ( $ifil && $ient != $nent ) {
+	    print "fastadd.pl: Error! Inconsistent line numbers in warm-up files found \n";
+	    die "            (ient = $ient, nent = $nent), stopped\n";
+	}
+	close INFILE;
+	$ifil++;
+    }
+    my $outfile = "${scen}wrm.dat";
+    open(OUTFILE,"> $outfile") or die "fastadd.pl: Error! Could not open $outfile!\n";
+    my $line = " // $stat contributions (!= events) in warm-up run\n";
+    print OUTFILE $line;
+    for (my $ient = 0; $ient < $nent; $ient++) {
+	my $line = "$xmin[$ient], $blow[$ient], $bhig[$ient];\n";
+	print OUTFILE $line;
+    }
+    close OUTFILE;
+    print "fastadd.pl: Finished table addition, result file is: $outfile\n";
+    exit(0);
+}
+
+print "Hallo\n";
 
 #
 # Find LO tables

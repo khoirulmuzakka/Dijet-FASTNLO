@@ -48,7 +48,10 @@ chomp $scenario;
 my @subdirs = ($scenario, $scenario."ref");
 my @globs = ("\\\*born\\\*.raw", "\\\*nlo\\\*.raw");
 my $vers  = $opt_v;
-if ($vers == 2) {@globs = ("\\\*born\\\*.tab", "\\\*nlo\\\*.tab");} 
+if ($vers == 2) {
+    push(@subdirs,$scenario."wrm");
+    @globs = ("\\\*born\\\*.tab", "\\\*nlo\\\*.tab", "\\\*warmup\\\*.dat");
+}
 
 #
 # Clean
