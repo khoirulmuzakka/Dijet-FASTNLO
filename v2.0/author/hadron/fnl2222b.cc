@@ -392,11 +392,10 @@ void UserHHC::inittable(){
   //     the cross section is divided to obtain the 
   //     (multi-) differential result.
   // fnl2222b: divide by bin width in pT and |eta|
-  double binsize = 1.;
-
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<nrapbins;i++){
     for (int j=0;j<nptbins[i];j++){
+      double binsize = 1.;
       nbins += 1;
       bound[0] = ptbins[i][j];
       bound[1] = rapbins[i];
@@ -536,7 +535,7 @@ void UserHHC::inittable(){
   // --------- fastNLO: Warm-Up run results (end)
 
   for(int i=0;i<A2->NObsBin;i++){
-    int nxtot = 15;
+    int nxtot = 12;
     if (i == ((A2->NObsBin)-1)) nxtot += 1; // Darf's etwas mehr sein?
     B->Nxtot1.push_back(nxtot);
     double hxlim = -sqrt(-log10(xlim[i]));   // use value from Warm-Up run
