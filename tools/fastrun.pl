@@ -1443,8 +1443,8 @@ if ( $mode == 0 || $mode == 3 ) {
 	    "-d $tdir ".
 	    "-n ${scen}${ref}${wrm}_${jobnr} ".
 	    "-u lib/lib${scen}.la ";
-	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
-	if ( $seed ) { $cmd .= "-s $seed"; }
+	if ( $nmax ) { $cmd .= "--max-event $nmax "; }
+	if ( $seed ) { $cmd .= "-s $seed "; }
     }
 # Do not try to maximize CPU time yet, too unstable
     if ( $batch eq "MAX" ) {
