@@ -1,7 +1,7 @@
 * --- force emacs to fortran mode -*-fortran-*-
 C ---------------------------------------------------------------------
 C
-C  Commonblock definition for fastNLO
+C  Commonblock definition for fastNLO v1.4
 C
 C   >> this code should not be edited
 C   >> if you have questions, please contact 
