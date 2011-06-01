@@ -1,6 +1,6 @@
 //
 // fastNLO v2 author code for fnl2222b:
-//     CMS LHC Forward Jets Scenario, E_cms = 7 TeV
+//     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
 // 
@@ -36,6 +36,7 @@
 // ================================================================
 // 
 // last modifications
+// 2011/05/18 KR Fixed bin widths, adapted text descriptions and units
 // 2011/03/27 KR Add CMS Forward Jets Scenario
 // 2011/01/26 KR Add CMS Inclusive Jets Scenario
 // 2011/01/13 KR unify jet sizes into one .cc and .h file
@@ -360,9 +361,9 @@ void UserHHC::inittable(){
   fnloBlockA2 *A2 =  table->GetBlockA2();
 
   // --- fastNLO user: up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("d2sigma-jet_dpTd|eta|_(fb_GeV)");
+  A2->ScDescript.push_back("d2sigma-jet_dpT_d|eta|_[fb/GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("Inclusive_Jet_pT");
+  A2->ScDescript.push_back("Inclusive_Jets");
   A2->ScDescript.push_back("anti-kT_R=0.5");
   A2->ScDescript.push_back("CMS-PAP-FWD-10-003");
 
@@ -370,7 +371,7 @@ void UserHHC::inittable(){
   A2->Ecms = sqrt(s);
   A2->ILOord = 2;   // --- fastNLO user: power of LO contribution for process
   A2->NDim = 2;     // --- fastNLO user: No of dimensions in which observable is binned
-  A2->DimLabel.push_back("pT");  // --- fastNLO user: label of 1st dimension
+  A2->DimLabel.push_back("pT_[GeV]");  // --- fastNLO user: label of 1st dimension
   A2->IDiffBin.push_back(2);
   A2->DimLabel.push_back("|eta|");   // --- fastNLO user: label of 2nd dimension
   A2->IDiffBin.push_back(2);
