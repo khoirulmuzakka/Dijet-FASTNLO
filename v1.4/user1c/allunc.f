@@ -14,7 +14,7 @@
       CHARACTER*255 SCENARIO,TABPATH,TABNAME,REFNAME
       CHARACTER*255 FILENAME,FILENAMES,HISTFILE
       CHARACTER*255 TABNAMN,FILENAMN
-      CHARACTER*255 PDFSET,PDFPATH,LHAPDF,CHTMP
+      CHARACTER*255 PDFNAM,PDFSET,PDFSET2,PDFPATH,LHAPDF,CHTMP
       CHARACTER*255 FILEBASE,LOFILE,NLOFILE
       CHARACTER*255 BORNNAME,NLONAME
       CHARACTER*8 CH8TMP
@@ -24,11 +24,15 @@
       INTEGER I,J,MYPDF,IPDF,IPDFUD,MYPDFAS,IOPDF,IOAS,NSCLS
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCL,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
-      INTEGER IHIST,IPHASE,ISTEP
-      LOGICAL LONE,LPDF,LTOY,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
-      DOUBLE PRECISION ALPHASPDF
+      INTEGER IHIST,IPHASE,ISTEP,IETYPE
+      LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
+cnew
+      DOUBLE PRECISION ALPHASPDF,ASMZPDF,ASUP,ASDN
       DOUBLE PRECISION XMUR,XMUF,QLAM4,QLAM5,BWGT
       DOUBLE PRECISION DSTMP(4)
+      DOUBLE PRECISION WTXTMP(NBINTOTMAX,NMAXSUBPROC+1,NMAXORD+1)
+      DOUBLE PRECISION WTXLTMP(NBINTOTMAX,NMAXSUBPROC+1,NMAXORD+1)
+      DOUBLE PRECISION WTXUTMP(NBINTOTMAX,NMAXSUBPROC+1,NMAXORD+1)
 c - To unify quoted uncertainties (CL68,CL90,special)
 c - Convert from CL68 to CL90 values
 c - TOCL90 = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
@@ -116,9 +120,10 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
             WRITE(*,*)'  alpha_s(M_Z) variation, def. = 0.D0, i.e. none'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
-            WRITE(*,*)'  PDF uncertainties in toy MC method, '//
-     >           'def. = no'
-            WRITE(*,*)'     (i.e. eigen vector method (CTEQ, MSTW))'
+            WRITE(*,*)'  PDF uncertainties in '//
+     >           'eigen vector (1; CTEQ,MSTW,ABKM), '//
+     >           'toy MC (2; NNPDF) or mixed method (3; HERAPDF), '//
+     >           'def. = 1'
             WRITE(*,*)' '
             STOP
 ckr To be cross-checked for each new scenario
@@ -264,6 +269,7 @@ ckr      lnrm = .false.
          WRITE(*,*)"ALLUNC: Using PDF set: ",
      >        PDFSET(1:LENOCC(PDFSET))
       ENDIF
+      PDFNAM = PDFSET(1:LENOCC(PDFSET))
 
 *---Path to PDF sets
       CHTMP = "X"
@@ -361,18 +367,23 @@ c - Initialize path to LHAPDF libs
          CALL GETARG(13,CH4TMP)
       ENDIF
       IF (IARGC().LT.13.OR.CH4TMP(1:1).EQ."_".OR.
-     >     CH4TMP(1:2).EQ."no") THEN
-         LTOY   =  .FALSE.
+     >     CH4TMP(1:1).EQ."1") THEN
+         IETYPE = 1
          WRITE(*,*)
-     >        "ALLUNC: Use eigen vector (CTEQ/MSTW) method."
+     >        "ALLUNC: Use eigen vector (CTEQ/MSTW/ABKM) method."
       ELSE
-         IF (CH4TMP(1:3).EQ."yes") THEN
-            LTOY = .TRUE.
-            WRITE(*,*)"ALLUNC: Use toy MC (NNPDF) method."
-         ELSE
-            LTOY = .FALSE.
+         READ(CH4TMP,'(I4)'),IETYPE
+         IF (IETYPE.EQ.1) THEN
             WRITE(*,*)
-     >         "ALLUNC: WARNING! Use eigen vector (CTEQ/MSTW) method!"
+     >           "ALLUNC: Use eigen vector (CTEQ/MSTW/ABKM) method."
+         ELSEIF (IETYPE.EQ.2) THEN
+            WRITE(*,*)"ALLUNC: Use toy MC (NNPDF) method."
+         ELSEIF (IETYPE.EQ.3) THEN
+            WRITE(*,*)"ALLUNC: Use mixed (HERAPDF) method."
+         ELSE
+            WRITE(*,*)
+     >           "ALLUNC: ERROR! Undefined PDF error method, aborted!"//
+     >           " IETYPE = ",IETYPE
          ENDIF
       ENDIF
 
@@ -384,8 +395,9 @@ c - Initialize path to LHAPDF libs
 
 
 
-c - Initialize LHAPDF
+c - Initialize LHAPDF, no PDF set printout after first call
       CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL SETLHAPARM('SILENT')
 
 c - Initialize one member, 0=best fit member
       CALL INITPDF(0)
@@ -538,7 +550,7 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-c - Compute central result and, if posible, PDF uncertainties for
+c - Compute central result and, if possible, PDF uncertainties for
 c - all precalculated scale variations
       IF (LONE.OR.LPDF) THEN
          WRITE(*,*)"****************************************"//
@@ -563,6 +575,13 @@ c - all precalculated scale variations
      >        "lower PDF uncertainty   upper PDF uncertainty"
          DO I=1,NSCALEVAR
 ckr         DO I=1,1
+ckr Part 1: Basic PDF uncertainty using a single PDF set (and only one
+ckr         initialization call!). For PDF uncertainty calculation from
+ckr         multiple PDF sets like full HERAPDF make sure to switch back
+ckr         to original one here
+            IF (IETYPE.EQ.3) THEN
+               CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+            ENDIF
             XMUR = MURSCALE(I)
             XMUF = MUFSCALE(I)
             WRITE(*,*)"----------------------------------------"//
@@ -576,7 +595,7 @@ ckr         DO I=1,1
             IMODE   = 1
             IWEIGHT = 0
             NRAP  = NRAPIDITY
-            IF (LTOY) THEN
+            IF (IETYPE.EQ.2) THEN
                IMODE = 2
             ENDIF
             IF (LRAT.OR.LNRM) THEN
@@ -633,6 +652,221 @@ ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
             IPHASE = 3
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
+ckr Part 2: Additional PDF uncertainty parts using a separate PDF set
+            IF (IETYPE.EQ.3) THEN
+               IF (PDFNAM(1:LENOCC(PDFNAM)).EQ.
+     >              "HERAPDF10_EIG.LHgrid") THEN
+                  PDFSET2 = PDFPATH(1:LENOCC(PDFPATH))//
+     >                 "/HERAPDF10_VAR.LHgrid"
+ckr                  WRITE(*,*)"ALLUNC: Taking second HERAPDF set: "//
+ckr     >                 PDFSET2(1:LENOCC(PDFSET2))
+               ELSE
+                  WRITE(*,*)"ALLUNC: Illegal HERAPDF set, aborted! "//
+     >                 "PDFNAM: ",PDFNAM(1:LENOCC(PDFNAM))
+                  STOP
+               ENDIF
+ckr Back up central result and relevant uncertainty
+               IBIN = 0
+               DO IRAP=1,NRAP
+                  DO IPT=1,NPT(IRAP)
+                     IBIN = IBIN+1
+                     DO IORD=1,NORD+1
+                        DO ISUB=1,NSUBPROC+1
+ckr Central result
+                           WTXTMP(IBIN,ISUB,IORD) =
+     >                          MYRESN(IBIN,ISUB,IORD)
+ckr Rel. lower uncertainty
+                           WTXLTMP(IBIN,ISUB,IORD) =
+     >                          WTDXL2(IBIN,ISUB,IORD)
+ckr Rel. upper uncertainty
+                           WTXUTMP(IBIN,ISUB,IORD) =
+     >                          WTDXU2(IBIN,ISUB,IORD)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
+ckr             with quadratic addition of
+ckr             all lower/upper deviations 
+               CALL INITPDFSET(PDFSET2(1:LENOCC(PDFSET2)))
+               CALL INITPDF(0)
+               IPHASE  = 1
+               IMODE   = 1
+               IWEIGHT = 0
+               NRAP  = NRAPIDITY
+               IF (LRAT.OR.LNRM) THEN
+                  NRAP = 2*NRAPIDITY
+               ENDIF
+               CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               ISTEP = 0
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LENOCC(SCENARIO)))
+               IF (LNRM) THEN
+ckr Load normalization table with potentially different binning!
+                  IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
+     >                 XSECT0)
+                  ISTEP = 1
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LENOCC(SCENARIO)))
+                  IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,
+     >                 XSECT0)
+               ENDIF
+               ISTEP = 2
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LENOCC(SCENARIO)))
+               
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               IPHASE = 2
+               
+ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
+               DO J=1,8
+                  CALL INITPDF(J)
+                  CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                  IF (LNRM) THEN
+                     ISTEP = 3
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                     IF (LTAB)
+     >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+                     ISTEP = 4
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                     IF (LTAB)
+     >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                     ISTEP = 5
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                  ENDIF
+                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+               ENDDO
+               
+               IPHASE = 3
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+
+ckr Add quadratically to previously backed-up result
+               IBIN = 0
+               DO IRAP=1,NRAP
+                  DO IPT=1,NPT(IRAP)
+                     IBIN = IBIN+1
+                     DO IORD=1,NORD+1
+                        DO ISUB=1,NSUBPROC+1
+ckr Central result
+ckr Rel. lower uncertainty
+                           WTXLTMP(IBIN,ISUB,IORD) =
+     >                          -SQRT(WTXLTMP(IBIN,ISUB,IORD)**2.+
+     >                          WTDXL2(IBIN,ISUB,IORD)**2.)
+ckr Rel. upper uncertainty
+                           WTXUTMP(IBIN,ISUB,IORD) =
+     >                          +SQRT(WTXUTMP(IBIN,ISUB,IORD)**2.+
+     >                          WTDXU2(IBIN,ISUB,IORD)**2.)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
+ckr             with quadratic addition of
+ckr             minimal/maximal lower/upper deviations 
+               CALL INITPDF(0)
+               IPHASE  = 1
+               IMODE   = 3
+               IWEIGHT = 0
+               NRAP  = NRAPIDITY
+               IF (LRAT.OR.LNRM) THEN
+                  NRAP = 2*NRAPIDITY
+               ENDIF
+               CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               ISTEP = 0
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LENOCC(SCENARIO)))
+               IF (LNRM) THEN
+ckr Load normalization table with potentially different binning!
+                  IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
+     >                 XSECT0)
+                  ISTEP = 1
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LENOCC(SCENARIO)))
+                  IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,
+     >                 XSECT0)
+               ENDIF
+               ISTEP = 2
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LENOCC(SCENARIO)))
+               
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               IPHASE = 2
+
+ckr HERAPDF1.0: Do loop runs from 9 - 13 for this part
+               DO J=9,13
+                  CALL INITPDF(J)
+                  CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                  IF (LNRM) THEN
+                     ISTEP = 3
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                     IF (LTAB)
+     >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+                     ISTEP = 4
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                     IF (LTAB)
+     >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                     ISTEP = 5
+                     CALL CENRES(ISTEP,LRAT,LNRM,
+     >                    SCENARIO(1:LENOCC(SCENARIO)))
+                  ENDIF
+                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+               ENDDO
+               
+               IPHASE = 3
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               
+ckr Add quadratically to previously backed-up result
+               IBIN = 0
+               DO IRAP=1,NRAP
+                  DO IPT=1,NPT(IRAP)
+                     IBIN = IBIN+1
+                     DO IORD=1,NORD+1
+                        DO ISUB=1,NSUBPROC+1
+ckr Central result
+ckr Rel. lower uncertainty
+                           WTXLTMP(IBIN,ISUB,IORD) =
+     >                          -SQRT(WTXLTMP(IBIN,ISUB,IORD)**2.+
+     >                          WTDXLM(IBIN,ISUB,IORD)**2.)
+ckr Rel. upper uncertainty
+                           WTXUTMP(IBIN,ISUB,IORD) =
+     >                          +SQRT(WTXUTMP(IBIN,ISUB,IORD)**2.+
+     >                          WTDXUM(IBIN,ISUB,IORD)**2.)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+ckr Copy back to original arrays as for single PDF set use
+               IBIN = 0
+               DO IRAP=1,NRAP
+                  DO IPT=1,NPT(IRAP)
+                     IBIN = IBIN+1
+                     DO IORD=1,NORD+1
+                        DO ISUB=1,NSUBPROC+1
+ckr Central result
+                           MYRESN(IBIN,ISUB,IORD) =
+     >                          WTXTMP(IBIN,ISUB,IORD)
+ckr Rel. lower uncertainty
+                           WTDXL2(IBIN,ISUB,IORD) =
+     >                          WTXLTMP(IBIN,ISUB,IORD)
+ckr Rel. upper uncertainty
+                           WTDXU2(IBIN,ISUB,IORD) =
+     >                          WTXUTMP(IBIN,ISUB,IORD)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF
+
+
+
 c - Give some standard output, fill histograms
             IBIN = 0
             DO IRAP=1,NRAP
@@ -651,6 +885,7 @@ c - Fill histograms
          ENDDO                     ! Loop over scales
       ENDIF
 c - Make sure to use again the central PDF!
+      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
       ISCL = 3
       XMUR = MURSCALE(ISCL)
       XMUF = MUFSCALE(ISCL)
@@ -946,6 +1181,9 @@ ckr alpha_s variations in PDF set
                NRAP = 2*NRAPIDITY
             ENDIF
             CALL INITPDF(IPDF)
+cnew
+            ASMZPDF = ALPHASPDF(ZMASS)
+cnew
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
@@ -963,6 +1201,10 @@ ckr Load normalization table with potentially different binning!
             IPHASE = 2
             
             CALL INITPDF(IPDF-IPDFUD)
+cnew
+            ASMZTMP = ALPHASPDF(ZMASS)
+            ASDN = ASMZTMP - ASMZPDF
+cnew
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             IF (LNRM) THEN
                ISTEP = 3
@@ -980,6 +1222,10 @@ ckr Load normalization table with potentially different binning!
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
             
             CALL INITPDF(IPDF+IPDFUD)
+cnew
+            ASMZTMP = ALPHASPDF(ZMASS)
+            ASUP = ASMZTMP - ASMZPDF
+cnew
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             IF (LNRM) THEN
                ISTEP = 3
@@ -1049,7 +1295,8 @@ ckr Load normalization table with potentially different binning!
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
          
-         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
+cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
+         ASMZVAL = ASMZVAL + ASDN
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          IF (LNRM) THEN
             ISTEP = 3
@@ -1067,7 +1314,8 @@ ckr Load normalization table with potentially different binning!
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
          
 ckr Add twice to correct previous subtraction!
-         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
+cnew         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
+         ASMZVAL = ASMZVAL - ASDN + ASUP
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          IF (LNRM) THEN
             ISTEP = 3
