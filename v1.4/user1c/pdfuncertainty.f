@@ -6,12 +6,12 @@
 * PDFUNC - example program to compute PDF uncertainties
 *          using a fastNLO table and PDFs from LHAPDF
 *
+* 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 * ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       CHARACTER*255 FILENAME,HISTFILE,PDFSET,PDFPATH,LHAPDF
       INTEGER I,J,L1,L2,L3,L4,NPDF,IOPDF,IOAS
-      INTEGER LENOCC
       DOUBLE PRECISION MUR,MUF,DIFF,QLAM4,QLAM5
       DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
@@ -46,7 +46,7 @@ ckr 30.01.2008: Some more checks on input arguments
          WRITE(*,*)"      ./pdfunc -h"
       ELSE
          CALL GETARG(1,FILENAME)
-         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+         IF (FILENAME(1:LEN_TRIM(FILENAME)).EQ."-h") THEN
             WRITE(*,*)" "
             WRITE(*,*)"Usage: ./pdfunc [arguments]"
             WRITE(*,*)"  NLO input table, def. = table.txt"
@@ -59,7 +59,7 @@ ckr 30.01.2008: Some more checks on input arguments
             STOP
          ENDIF
          WRITE(*,*)"PDFUNC: Using input table: ",
-     >        FILENAME(1:LENOCC(FILENAME))
+     >        FILENAME(1:LEN_TRIM(FILENAME))
       ENDIF
       IF (IARGC().LT.2) THEN
          HISTFILE = "fastnlo.hbk"
@@ -69,7 +69,7 @@ ckr 30.01.2008: Some more checks on input arguments
       ELSE
          CALL GETARG(2,HISTFILE)
          WRITE(*,*)"PDFUNC: Creating output file: ",
-     >        HISTFILE(1:LENOCC(HISTFILE))
+     >        HISTFILE(1:LEN_TRIM(HISTFILE))
       ENDIF
       IF (IARGC().LT.3) THEN
          PDFSET = "cteq65.LHgrid"
@@ -79,7 +79,7 @@ ckr 30.01.2008: Some more checks on input arguments
       ELSE
          CALL GETARG(3,PDFSET)
          WRITE(*,*)"PDFUNC: Using PDF set: ",
-     >        PDFSET(1:LENOCC(PDFSET))
+     >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
       IF (IARGC().LT.4) THEN
          PDFPATH = "/../share/lhapdf/PDFsets"
@@ -88,20 +88,20 @@ ckr 30.01.2008: Some more checks on input arguments
      >        "assuming: $(LHAPDF)"//PDFPATH
 c - Initialize path to LHAPDF libs
          CALL GETENV("LHAPDF",LHAPDF)
-         IF (LENOCC(LHAPDF).EQ.0) THEN
+         IF (LEN_TRIM(LHAPDF).EQ.0) THEN
             WRITE(*,*)"\nPDFUNC: ERROR! $LHAPDF not set, aborting!"
             STOP
          ENDIF
-         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
-     >        PDFPATH(1:LENOCC(PDFPATH))
+         PDFPATH = LHAPDF(1:LEN_TRIM(LHAPDF))//
+     >        PDFPATH(1:LEN_TRIM(PDFPATH))
       ELSE
          CALL GETARG(4,PDFPATH)
       ENDIF
       WRITE(*,*)"PDFUNC: Looking for LHAPDF PDF sets in path: ",
-     >     PDFPATH(1:LENOCC(PDFPATH))
-      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
+     >     PDFPATH(1:LEN_TRIM(PDFPATH))
+      PDFSET = PDFPATH(1:LEN_TRIM(PDFPATH))//"/"//PDFSET
       WRITE(*,*)"PDFUNC: Taking PDF set "
-     >     //PDFSET(1:LENOCC(PDFSET))
+     >     //PDFSET(1:LEN_TRIM(PDFSET))
       IF (IARGC().LT.5) THEN
          ASMODE = "PDF"
          WRITE(*,*)
@@ -117,7 +117,7 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 c - Initialization      
-      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
       CALL GETORDERAS(IOAS)

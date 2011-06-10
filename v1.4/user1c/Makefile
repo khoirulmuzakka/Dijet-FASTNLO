@@ -10,17 +10,22 @@
 #   - Collection of sum tables for each NLO job combined with all LO jobs  
 #     ==> statistical uncertainty of NLO calculation
 #
+# 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
+#                CERNLIB only needed for HBOOK histograms
+#
 NAME= allunc
 
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
 	pyalps.f fn-hbook.f uncert.f
 
+#FFLAGS= -O -fno-automatic
 FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 #FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 # Scientific Linux 4/5
+#FC=f95
 FC=g77
 #FC=f77
 # Ubuntu 10.04

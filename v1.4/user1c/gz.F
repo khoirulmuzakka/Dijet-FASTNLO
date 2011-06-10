@@ -24,6 +24,7 @@
 *  Input  file: Extension '.gz' is checked
 *  Output file: Extension '.gz' is checked
 *
+* 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 ************************************************************************
 *
       IMPLICIT NONE
@@ -32,7 +33,7 @@
       CHARACTER*1   MODE, MYMODE
       CHARACTER*(*) FILNAM
       CHARACTER*256 MYFNAM
-      INTEGER       LUN, ILUN, GZFINDL, FLNLEN, ISTAT, LENOCC
+      INTEGER       LUN, ILUN, GZFINDL, FLNLEN, ISTAT
 *
       INTEGER       NLUNS
       DATA          NLUNS / 0/
@@ -54,7 +55,7 @@ ckr      SAVE          NLUNS
         GO  TO  90
       END IF
 *
-      FLNLEN = LENOCC (FILNAM)
+      FLNLEN = LEN_TRIM(FILNAM)
       IF (MODE .EQ. 'r' .OR. MODE .EQ. 'R')  THEN
         MYMODE='r'
       ELSE IF (MODE .EQ. 'w' .OR. MODE .EQ. 'W')  THEN

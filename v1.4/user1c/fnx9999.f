@@ -30,6 +30,7 @@
 *     FNALPHAS        alpha_s interface (double precision function)
 *     FNPDF           PDF interface
 *
+* 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 ***********************************************************************
 ***********************************************************************
 
@@ -68,8 +69,7 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-ckr 30.01.2008: Use LENOCC string length function 
-      INTEGER IFIRST,IORD,ISUB,LENOCC,I,J,K,L,M, 
+      INTEGER IFIRST,IORD,ISUB,I,J,K,L,M, 
      >     IPRINTFLAG,INORMFLAG, 
      >     NBIN,IXMUR,IXMUF
       CHARACTER*(*) FILENAME
@@ -89,7 +89,7 @@ ckr 30.01.2008: Print strings only until end, not complete
 ckr             CHARACTER dimension
 ckr             Similar usage below with CSTRNG at many places
             CSTRNG = CHEADER(I)
-            WRITE(*,5000) " #",CSTRNG(1:LENOCC(CSTRNG))
+            WRITE(*,5000) " #",CSTRNG(1:LEN_TRIM(CSTRNG))
          ENDDO
       ENDIF
 
@@ -143,29 +143,29 @@ c - Print further info
          WRITE(*,*)"#      "
          CSTRNG = NAMELABEL(1)
          WRITE(*,5000)" #      this table contains: ",
-     >        CSTRNG(1:LENOCC(CSTRNG))
+     >        CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = NAMELABEL(2)
          WRITE(*,5000)" #      as published in:     ",
-     >        CSTRNG(1:LENOCC(CSTRNG))
+     >        CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = NAMELABEL(3)
          WRITE(*,5000)" #      by:                  ",
-     >        CSTRNG(1:LENOCC(CSTRNG))
+     >        CSTRNG(1:LEN_TRIM(CSTRNG))
          WRITE(*,*)"#      "
          CSTRNG = CIREACTION(IREACTION)
-         WRITE(*,*)"#      reaction: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      reaction: ",CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = CIPROC(IPROC)
-         WRITE(*,*)"#      process: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      process: ",CSTRNG(1:LEN_TRIM(CSTRNG))
          WRITE(*,*)"#      total No. of observable bins:",Nbintot
          CSTRNG = CIALGO(IALGO)
-         WRITE(*,*)"#      jet algo: ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE(*,*)"#      jet algo: ",CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = CJETRES1(IALGO)
 ckr 30.01.2008: Use explicit format for comparisons
          WRITE(*,FMT='(A,A,A,F6.4)')
-     >        " #         parameter 1: ",CSTRNG(1:LENOCC(CSTRNG)),
+     >        " #         parameter 1: ",CSTRNG(1:LEN_TRIM(CSTRNG)),
      >        " = ",JETRES1
          CSTRNG = CJETRES2(IALGO)
          WRITE(*,FMT='(A,A,A,F6.4)')
-     >        " #         parameter 2: ",CSTRNG(1:LENOCC(CSTRNG)),
+     >        " #         parameter 2: ",CSTRNG(1:LEN_TRIM(CSTRNG)),
      >        " = ",JETRES2
          WRITE(*,*)"#"
          WRITE(*,*)"#"
@@ -173,21 +173,21 @@ ckr 30.01.2008: Use explicit format for comparisons
          WRITE(*,*)"#      using the following codes:"
          DO I=1,NORD
             CSTRNG = POWLABEL(I)
-            WRITE(*,5000)" #      ",CSTRNG(1:LENOCC(CSTRNG))
+            WRITE(*,5000)" #      ",CSTRNG(1:LEN_TRIM(CSTRNG))
             CSTRNG = CODELABEL(I)
-            WRITE(*,5000)" #      by: ",CSTRNG(1:LENOCC(CSTRNG))
+            WRITE(*,5000)" #      by: ",CSTRNG(1:LEN_TRIM(CSTRNG))
          ENDDO
          WRITE(*,*)"#"
          IF (NORD.GT.0) THEN
             DO I=1,4
                CSTRNG = CNLOJET(I)
-               WRITE(*,5000)" # ",CSTRNG(1:LENOCC(CSTRNG))
+               WRITE(*,5000)" # ",CSTRNG(1:LEN_TRIM(CSTRNG))
             ENDDO
          ENDIF 
          IF (NORD.EQ.3) THEN
             DO I=1,5
                CSTRNG = CTHRCOR(I)
-               WRITE(*,5000)" # ",CSTRNG(1:LENOCC(CSTRNG))
+               WRITE(*,5000)" # ",CSTRNG(1:LEN_TRIM(CSTRNG))
             ENDDO
          ENDIF 
 
@@ -197,7 +197,7 @@ c - Print scale-variations available in the table
      >        "scales mur, muf"
          WRITE (*,*)"#       are proportional to"
          CSTRNG = SCALELABEL
-         WRITE (*,5000)" #           mu0 = ",CSTRNG(1:LENOCC(CSTRNG))
+         WRITE (*,5000)" #           mu0 = ",CSTRNG(1:LEN_TRIM(CSTRNG))
          WRITE (*,*)"#"
          WRITE (*,*)"#   --- available No. of scale",
      >        " variations:",NSCALEVAR
@@ -359,7 +359,7 @@ c - Print results - if requested
 
       RETURN
 
-ckr 30.01.2008: Use simple A format, string length via LENOCC
+ckr 30.01.2008: Use simple A format, string length via LEN_TRIM
  5000 FORMAT (A,A)
  5001 FORMAT (A,A,A)
  5002 FORMAT (A,F8.4,4X,A,F8.4)
@@ -834,7 +834,7 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
       IMPLICIT NONE
       CHARACTER*(*) FILENAME
       CHARACTER*255 CSTRNG
-      INTEGER IFILE, LENOCC, I,J,K,L,M,N,   NBIN
+      INTEGER IFILE, I,J,K,L,M,N,   NBIN
       INTEGER IPRINTFLAG
       INCLUDE 'fnx9999.inc'
 
@@ -889,7 +889,7 @@ c   -----------------------------------
          CSTRNG = POWLABEL(I)
          IF (IPRINTFLAG.EQ.1) THEN
             WRITE(*,5000)" #      ",NEVT(i),
-     &           " events in ",CSTRNG(1:LENOCC(CSTRNG))
+     &           " events in ",CSTRNG(1:LEN_TRIM(CSTRNG))
          ENDIF
       enddo
       READ(2,*) NXTOT
@@ -1001,7 +1001,7 @@ c   -----------------------------------
       stop
       RETURN
 
-ckr 30.01.2008: Use free format A, string length det. by LENOCC
+ckr 30.01.2008: Use free format A, string length det. by LEN_TRIM
  5000 FORMAT (A,I12,A,A) 
       END
 

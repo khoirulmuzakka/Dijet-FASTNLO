@@ -6,6 +6,7 @@
 * ALLUNC - Program to derive all (PDF, statistical, algorithmic,
 *          scale ...) uncertainties using fastNLO tables
 *
+* 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 * 31.03.2011 kr: Some modifications to improve v2 compatibility
 * ---------------------------------------------------------------------
       IMPLICIT NONE
@@ -20,7 +21,7 @@
       CHARACTER*8 CH8TMP
       CHARACTER*4 CH4TMP
       CHARACTER*4 NO
-      INTEGER BORNN,NLON,LENOCC
+      INTEGER BORNN,NLON
       INTEGER I,J,MYPDF,IPDF,IPDFUD,MYPDFAS,IOPDF,IOAS,NSCLS
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCL,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT
@@ -90,7 +91,7 @@ c --- Parse command line
          WRITE(*,*)"      ./allunc -h"
       ELSE
          CALL GETARG(1,SCENARIO)
-         IF (SCENARIO(1:LENOCC(SCENARIO)).EQ."-h") THEN
+         IF (SCENARIO(1:LEN_TRIM(SCENARIO)).EQ."-h") THEN
             WRITE(*,*)' '
             WRITE(*,*)'Usage: ./allunc [arguments]'
             WRITE(*,*)'  Scenario name, def. = fnt2003'
@@ -153,14 +154,14 @@ ckr New norm. version for fnl2442: Works fine, trivial division in rap 4
      >           "ALLUNC: Deriving normalized distributions"
          ENDIF
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
-     >        SCENARIO(1:LENOCC(SCENARIO))
+     >        SCENARIO(1:LEN_TRIM(SCENARIO))
       ENDIF
 ckr      lnrm = .false.
-      TABNAME = SCENARIO(1:LENOCC(SCENARIO))//".tab"
+      TABNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//".tab"
       IF (LNRM.AND.LTAB) THEN
          TABNAMN = SCENARIO(1:7)//"norm"//".tab"
       ENDIF
-      REFNAME = SCENARIO(1:LENOCC(SCENARIO))//"ref.tab"
+      REFNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//"ref.tab"
 
 *---Path to tables
       TABPATH = "X"
@@ -174,16 +175,16 @@ ckr      lnrm = .false.
      >        "taking . instead!"
       ENDIF
       WRITE(*,*)"ALLUNC: Using table path: ",
-     >     TABPATH(1:LENOCC(TABPATH))
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//
-     >     TABNAME(1:LENOCC(TABNAME))
+     >     TABPATH(1:LEN_TRIM(TABPATH))
+      FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//
+     >     TABNAME(1:LEN_TRIM(TABNAME))
       WRITE(*,*)"ALLUNC: Taking primary table ",
-     >     FILENAME(1:LENOCC(FILENAME))
+     >     FILENAME(1:LEN_TRIM(FILENAME))
       IF (LNRM.AND.LTAB) THEN
-         FILENAMN = TABPATH(1:LENOCC(TABPATH))//"/"//
-     >        TABNAMN(1:LENOCC(TABNAMN))
+         FILENAMN = TABPATH(1:LEN_TRIM(TABPATH))//"/"//
+     >        TABNAMN(1:LEN_TRIM(TABNAMN))
          WRITE(*,*)"ALLUNC: Taking normalization table ",
-     >        FILENAMN(1:LENOCC(FILENAMN))
+     >        FILENAMN(1:LEN_TRIM(FILENAMN))
       ENDIF
 
 *---HBOOK filename
@@ -192,13 +193,13 @@ ckr      lnrm = .false.
          CALL GETARG(3,HISTFILE)
       ENDIF
       IF (IARGC().LT.3.OR.HISTFILE(1:1).EQ."_") THEN
-         HISTFILE = SCENARIO(1:LENOCC(SCENARIO))//".hbk"
+         HISTFILE = SCENARIO(1:LEN_TRIM(SCENARIO))//".hbk"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No output filename given, "//
      >        "taking scenario.hbk instead!"
       ELSE
          WRITE(*,*)"ALLUNC: Creating output file: ",
-     >        HISTFILE(1:LENOCC(HISTFILE))
+     >        HISTFILE(1:LEN_TRIM(HISTFILE))
       ENDIF
 
 *---Derive algorithmic uncertainty?
@@ -267,9 +268,9 @@ ckr      lnrm = .false.
      >        "taking cteq66.LHgrid instead!"
       ELSE
          WRITE(*,*)"ALLUNC: Using PDF set: ",
-     >        PDFSET(1:LENOCC(PDFSET))
+     >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
-      PDFNAM = PDFSET(1:LENOCC(PDFSET))
+      PDFNAM = PDFSET(1:LEN_TRIM(PDFSET))
 
 *---Path to PDF sets
       CHTMP = "X"
@@ -280,23 +281,23 @@ ckr      lnrm = .false.
          PDFPATH = "/../share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
-     >        "assuming: $(LHAPDF)"//PDFPATH(1:LENOCC(PDFPATH))
+     >        "assuming: $(LHAPDF)"//PDFPATH(1:LEN_TRIM(PDFPATH))
 c - Initialize path to LHAPDF libs
          CALL GETENV("LHAPDF",LHAPDF)
-         IF (LENOCC(LHAPDF).EQ.0) THEN
+         IF (LEN_TRIM(LHAPDF).EQ.0) THEN
             WRITE(*,*)"\nALLUNC: ERROR! $LHAPDF not set, aborting!"
             STOP
          ENDIF
-         PDFPATH = LHAPDF(1:LENOCC(LHAPDF))//
-     >        PDFPATH(1:LENOCC(PDFPATH))
+         PDFPATH = LHAPDF(1:LEN_TRIM(LHAPDF))//
+     >        PDFPATH(1:LEN_TRIM(PDFPATH))
       ELSE
-         PDFPATH = CHTMP(1:LENOCC(CHTMP)) 
+         PDFPATH = CHTMP(1:LEN_TRIM(CHTMP)) 
       ENDIF
       WRITE(*,*)"ALLUNC: Looking for LHAPDF PDF sets in path: "//
-     >     PDFPATH(1:LENOCC(PDFPATH))
-      PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/"//PDFSET
+     >     PDFPATH(1:LEN_TRIM(PDFPATH))
+      PDFSET = PDFPATH(1:LEN_TRIM(PDFPATH))//"/"//PDFSET
       WRITE(*,*)"ALLUNC: Taking PDF set "
-     >     //PDFSET(1:LENOCC(PDFSET))
+     >     //PDFSET(1:LEN_TRIM(PDFSET))
 
 *---alpha_s mode
       CHTMP = "X"
@@ -309,9 +310,9 @@ c - Initialize path to LHAPDF libs
      >        "ALLUNC: No alpha_s mode given, "//
      >        "using alpha_s according to PDF set"
       ELSE
-         ASMODE = CHTMP(1:LENOCC(CHTMP))
+         ASMODE = CHTMP(1:LEN_TRIM(CHTMP))
          WRITE(*,*)"ALLUNC: Using alpha_s mode: ",
-     >        ASMODE(1:LENOCC(ASMODE))
+     >        ASMODE(1:LEN_TRIM(ASMODE))
       ENDIF
 
 *---alpha_s(M_Z)
@@ -396,7 +397,7 @@ c - Initialize path to LHAPDF libs
 
 
 c - Initialize LHAPDF, no PDF set printout after first call
-      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL SETLHAPARM('SILENT')
 
 c - Initialize one member, 0=best fit member
@@ -421,9 +422,9 @@ c - Write out some info on best fit member
       WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
       
 c - Check primary table existence
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+      FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
       WRITE(*,*)"ALLUNC: Checking primary table: "//
-     >     FILENAME(1:LENOCC(FILENAME))
+     >     FILENAME(1:LEN_TRIM(FILENAME))
       OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
       IF (ISTAT.NE.0) THEN
          WRITE(*,*)"ALLUNC: ERROR! Primary table not found, "//
@@ -437,9 +438,9 @@ c - Check uncertainties to derive
       LONE  = MYPDF.LE.1
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       IF (LALG) THEN
-         FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+         FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//REFNAME
          WRITE(*,*)"ALLUNC: Checking reference table: "//
-     >        FILENAME(1:LENOCC(FILENAME))
+     >        FILENAME(1:LEN_TRIM(FILENAME))
          OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
          IF (ISTAT.NE.0) THEN
             WRITE(*,*)"ALLUNC: WARNING! Reference table not found, "//
@@ -517,7 +518,7 @@ c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       WRITE(*,*)"ALLUNC: Initialize Table, Book Histograms"
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
-      FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//TABNAME
+      FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
 ckr      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
@@ -580,7 +581,7 @@ ckr         initialization call!). For PDF uncertainty calculation from
 ckr         multiple PDF sets like full HERAPDF make sure to switch back
 ckr         to original one here
             IF (IETYPE.EQ.3) THEN
-               CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+               CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
             ENDIF
             XMUR = MURSCALE(I)
             XMUF = MUFSCALE(I)
@@ -604,18 +605,19 @@ ckr         to original one here
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
 ckr            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 1
 ckr               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
-               CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ENDIF
             ISTEP = 2
 ckr            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
@@ -630,20 +632,20 @@ ckr               DO J=1,3
                      ISTEP = 3
 ckr                     WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                      ISTEP = 4
 ckr                     WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                      ISTEP = 5
 ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
@@ -654,15 +656,15 @@ ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
 
 ckr Part 2: Additional PDF uncertainty parts using a separate PDF set
             IF (IETYPE.EQ.3) THEN
-               IF (PDFNAM(1:LENOCC(PDFNAM)).EQ.
+               IF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
      >              "HERAPDF10_EIG.LHgrid") THEN
-                  PDFSET2 = PDFPATH(1:LENOCC(PDFPATH))//
+                  PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF10_VAR.LHgrid"
 ckr                  WRITE(*,*)"ALLUNC: Taking second HERAPDF set: "//
-ckr     >                 PDFSET2(1:LENOCC(PDFSET2))
+ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                ELSE
                   WRITE(*,*)"ALLUNC: Illegal HERAPDF set, aborted! "//
-     >                 "PDFNAM: ",PDFNAM(1:LENOCC(PDFNAM))
+     >                 "PDFNAM: ",PDFNAM(1:LEN_TRIM(PDFNAM))
                   STOP
                ENDIF
 ckr Back up central result and relevant uncertainty
@@ -689,7 +691,7 @@ ckr Rel. upper uncertainty
 ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
 ckr             with quadratic addition of
 ckr             all lower/upper deviations 
-               CALL INITPDFSET(PDFSET2(1:LENOCC(PDFSET2)))
+               CALL INITPDFSET(PDFSET2(1:LEN_TRIM(PDFSET2)))
                CALL INITPDF(0)
                IPHASE  = 1
                IMODE   = 1
@@ -701,20 +703,20 @@ ckr             all lower/upper deviations
                CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 0
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                   IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
      >                 XSECT0)
                   ISTEP = 1
                   CALL CENRES(ISTEP,LRAT,LNRM,
-     >                 SCENARIO(1:LENOCC(SCENARIO)))
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,
      >                 XSECT0)
                ENDIF
                ISTEP = 2
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
@@ -726,17 +728,17 @@ ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
                   IF (LNRM) THEN
                      ISTEP = 3
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                      ISTEP = 4
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                      ISTEP = 5
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
@@ -779,20 +781,20 @@ ckr             minimal/maximal lower/upper deviations
                CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 0
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                   IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
      >                 XSECT0)
                   ISTEP = 1
                   CALL CENRES(ISTEP,LRAT,LNRM,
-     >                 SCENARIO(1:LENOCC(SCENARIO)))
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,
      >                 XSECT0)
                ENDIF
                ISTEP = 2
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
@@ -804,17 +806,17 @@ ckr HERAPDF1.0: Do loop runs from 9 - 13 for this part
                   IF (LNRM) THEN
                      ISTEP = 3
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                      ISTEP = 4
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                      ISTEP = 5
                      CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LENOCC(SCENARIO)))
+     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
@@ -885,7 +887,7 @@ c - Fill histograms
          ENDDO                     ! Loop over scales
       ENDIF
 c - Make sure to use again the central PDF!
-      CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+      CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       ISCL = 3
       XMUR = MURSCALE(ISCL)
       XMUF = MUFSCALE(ISCL)
@@ -905,10 +907,10 @@ c - Call statistical error-code for scenario
      >        "********************************"
 ckr Replace old and crosschecked code
 ckr         CALL STATCODE(TABPATH,SCENARIO,BORNN,NLON)
-         BORNNAME = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
-     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-born-"
-         NLONAME  = TABPATH(1:LENOCC(TABPATH))//"/stat/"//
-     >        SCENARIO(1:LENOCC(SCENARIO))//"-hhc-nlo-"
+         BORNNAME = TABPATH(1:LEN_TRIM(TABPATH))//"/stat/"//
+     >        SCENARIO(1:LEN_TRIM(SCENARIO))//"-hhc-born-"
+         NLONAME  = TABPATH(1:LEN_TRIM(TABPATH))//"/stat/"//
+     >        SCENARIO(1:LEN_TRIM(SCENARIO))//"-hhc-nlo-"
          ISCL = 3
          XMUR = MURSCALE(ISCL)
          XMUF = MUFSCALE(ISCL)
@@ -926,7 +928,7 @@ ckr            IWEIGHT = 1
             IWEIGHT = 0
 c - This is the normal table to fill the default values
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
@@ -935,17 +937,17 @@ c - Loop over files
 c - Total x section
                NTAB = NLON 
                BWGT = 1D0/1D8
-               FILEBASE = NLONAME(1:LENOCC(NLONAME))
+               FILEBASE = NLONAME(1:LEN_TRIM(NLONAME))
             ELSEIF (IORD.EQ.1) THEN
 c - LO
                NTAB = BORNN
                BWGT = 1D0/1D9
-               FILEBASE = BORNNAME(1:LENOCC(BORNNAME))
+               FILEBASE = BORNNAME(1:LEN_TRIM(BORNNAME))
             ELSEIF (IORD.EQ.2) THEN
 c - NLO
                NTAB = NLON
                BWGT = 1D0/1D8
-               FILEBASE = NLONAME(1:LENOCC(NLONAME))
+               FILEBASE = NLONAME(1:LEN_TRIM(NLONAME))
             ELSE
                WRITE(*,*)"ALLUNC: ERROR! "//
      >              "Illegal order for stat. calc:",IORD
@@ -953,11 +955,11 @@ c - NLO
             ENDIF
             DO ITAB=0,NTAB
                WRITE(NO,'(I4.4)'),ITAB
-               FILENAMES = FILEBASE(1:LENOCC(FILEBASE))//"2jet_"//NO
+               FILENAMES = FILEBASE(1:LEN_TRIM(FILEBASE))//"2jet_"//NO
      >              //".tab"
                OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
                IF (ISTAT.NE.0) THEN
-                  FILENAMES = FILEBASE(1:LENOCC(FILEBASE))//"3jet_"
+                  FILENAMES = FILEBASE(1:LEN_TRIM(FILEBASE))//"3jet_"
      >                 //NO//".tab"
                   OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
                   IF (ISTAT.NE.0) THEN
@@ -1186,16 +1188,17 @@ cnew
 cnew
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 1
-               CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ENDIF
             ISTEP = 2
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
@@ -1209,15 +1212,15 @@ cnew
             IF (LNRM) THEN
                ISTEP = 3
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
             
@@ -1230,15 +1233,15 @@ cnew
             IF (LNRM) THEN
                ISTEP = 3
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
             
@@ -1281,16 +1284,16 @@ ckr Standalone alpha_s variations
 
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ISTEP = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
          IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
             ISTEP = 1
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ENDIF
          ISTEP = 2
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
          
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
@@ -1301,15 +1304,15 @@ cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
          IF (LNRM) THEN
             ISTEP = 3
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
             ISTEP = 4
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 5
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
          ENDIF
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
          
@@ -1320,15 +1323,15 @@ cnew         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
          IF (LNRM) THEN
             ISTEP = 3
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
             ISTEP = 4
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 5
             CALL CENRES(ISTEP,LRAT,LNRM,
-     >           SCENARIO(1:LENOCC(SCENARIO)))
+     >           SCENARIO(1:LEN_TRIM(SCENARIO)))
          ENDIF
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
          
@@ -1397,16 +1400,16 @@ c - 2-point scheme
          ENDIF
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ISTEP = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
          IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
             ISTEP = 1
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ENDIF
          ISTEP = 2
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
@@ -1421,16 +1424,16 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             IF (LNRM) THEN
                ISTEP = 3
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
  10         CONTINUE
@@ -1468,16 +1471,16 @@ c - 6-point scheme
          ENDIF
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ISTEP = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
          IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
             ISTEP = 1
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
          ENDIF
          ISTEP = 2
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
@@ -1492,16 +1495,16 @@ ckr Ugly goto construction avoidable with f90 CYCLE command
             IF (LNRM) THEN
                ISTEP = 3
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 4
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                ISTEP = 5
                CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LENOCC(SCENARIO)))
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
  11         CONTINUE
@@ -1566,18 +1569,18 @@ c                  no ratio calcs below ...
          WRITE(*,*)"ALLUNC: Evaluating algorithmic uncertainties"
          WRITE(*,*)"****************************************"//
      >        "********************************"
-         FILENAME = TABPATH(1:LENOCC(TABPATH))//"/"//REFNAME
+         FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//REFNAME
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          WRITE(*,*)"ALLUNC: Taking reference table: "//
-     >        FILENAME(1:LENOCC(FILENAME))
+     >        FILENAME(1:LEN_TRIM(FILENAME))
 c - Initialize CTEQ61 reference PDFs
-         PDFSET = PDFPATH(1:LENOCC(PDFPATH))//"/cteq61.LHgrid"
+         PDFSET = PDFPATH(1:LEN_TRIM(PDFPATH))//"/cteq61.LHgrid"
          WRITE(*,*)"ALLUNC: Taking reference PDF: "//
-     >        PDFSET(1:LENOCC(PDFSET))
+     >        PDFSET(1:LEN_TRIM(PDFSET))
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         CALL INITPDFSET(PDFSET(1:LENOCC(PDFSET)))
+         CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
          CALL INITPDF(0)
 
 c - Reference result
@@ -1599,7 +1602,7 @@ ckr         CALL FX9999CC(FILENAME,XMUR,XMUF,1,XSECT0)
          IPHASE  = 1
          IMODE   = 4
          IWEIGHT = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LENOCC(SCENARIO)))
+         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Normal result
@@ -1654,7 +1657,7 @@ c
       IMPLICIT NONE
       CHARACTER*(*) HISTFILE
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
-      INTEGER N,LENOCC,IPDF,MYPDF,IPTMAX,NRAP
+      INTEGER N,IPDF,MYPDF,IPTMAX,NRAP
       LOGICAL LONE,LPDF,LSTAT,LALG,LSER,LRAT,LSCL
 
       INTEGER I,J,ISTAT2,ICYCLE,NSCLS
@@ -1697,14 +1700,14 @@ c - Open & book
          ENDIF
          NHIST = 0
          CBASE1 = CIPROC(IPROC)
-         CBASE1 = CBASE1(1:LENOCC(CBASE1))//"_"
+         CBASE1 = CBASE1(1:LEN_TRIM(CBASE1))//"_"
      >        //NAMELABEL(1)
-         CBASE2 = CBASE1(1:LENOCC(CBASE1))//"_"
+         CBASE2 = CBASE1(1:LEN_TRIM(CBASE1))//"_"
      >        //CIALGO(IALGO)
-         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"_"
+         CBASE2 = CBASE2(1:LEN_TRIM(CBASE2))//"_"
      >        //CJETRES1(IALGO)
          WRITE(CTMP,'(F3.1)'),JETRES1
-         CBASE2 = CBASE2(1:LENOCC(CBASE2))//"="
+         CBASE2 = CBASE2(1:LEN_TRIM(CBASE2))//"="
      >        //CTMP
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
             NSCLS = NSCALEVAR
@@ -1723,16 +1726,16 @@ ckr     >                    iord,iscale,isub,irap,ihist
                      ENDDO
                      CSTRNG = CBASE2
                      WRITE(CTMP,'(I1)'),IORD
-                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
+                     CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iord="
      >                    //CTMP
                      WRITE(CTMP,'(I1)'),ISCL
-                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_imu="
+                     CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_imu="
      >                    //CTMP
                      WRITE(CTMP,'(I1)'),IRAP
-                     CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iy="
+                     CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iy="
      >                    //CTMP
                      CALL HBOOKB(IHIST,
-     >                    CSTRNG(1:LENOCC(CSTRNG)),
+     >                    CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                    NPT(IRAP),PT,0)
 ckr                     CALL HBARX(IHIST)
                      NHIST = NHIST+1
@@ -1740,38 +1743,38 @@ ckr                     write(*,*)"1. Booked histo #",nhist
 Comment:                      IF (LSER) THEN
 Comment:                         DO IPDF=1,MYPDF
 Comment:                            CALL HBOOKB(IHIST+IPDF,
-Comment:      >                          CSTRNG(1:LENOCC(CSTRNG)),
+Comment:      >                          CSTRNG(1:LEN_TRIM(CSTRNG)),
 Comment:      >                          NPT(IRAP),PT,0)
 Comment:                            NHIST = NHIST+1
 Comment:                         ENDDO
 Comment:                      ENDIF
                      IF (LPDF) THEN
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_PDF_low/xsect"
                         CALL HBOOKB(IHIST+1,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_PDF_up/xsect"
                         CALL HBOOKB(IHIST+2,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
 ckr                        write(*,*)"2. Booked histo #",nhist
                      ELSEIF (LSER.AND.ISCL.EQ.3) THEN
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_asPDF_low/xsect"
                         CALL HBOOKB(IHIST+1,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_asPDF_up/xsect"
                         CALL HBOOKB(IHIST+2,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
 ckr                        write(*,*)"2. Booked histo #",nhist
@@ -1780,32 +1783,32 @@ ckr                        write(*,*)"2. Booked histo #",nhist
                         IF (IORD.LE.2.AND.
      >                       ISCL.EQ.3.AND.ISUB.EQ.0) THEN
                            CSTRNG = CBASE1
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                          "_dstat/xsect"
                            CALL HBOOKB(IHIST+3,
-     >                          CSTRNG(1:LENOCC(CSTRNG)),
+     >                          CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                          NPT(IRAP),PT,0)
                            CSTRNG = CBASE1
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                          "_dmax/2/xsect"
                            CALL HBOOKB(IHIST+4,
-     >                          CSTRNG(1:LENOCC(CSTRNG)),
+     >                          CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                          NPT(IRAP),PT,0)
                            NHIST = NHIST+2
 ckr                        write(*,*)"3. Booked histo #",nhist
                         ENDIF
                      ELSEIF (LSER.AND.ISCL.EQ.3) THEN
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_as_low/xsect"
                         CALL HBOOKB(IHIST+3,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_as_up/xsect"
                         CALL HBOOKB(IHIST+4,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
 ckr                        write(*,*)"3. Booked histo #",nhist
@@ -1813,10 +1816,10 @@ ckr                        write(*,*)"3. Booked histo #",nhist
                      IF (LALG.AND.IORD.LE.2.AND.
      >                    ISCL.EQ.3) THEN
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_xsect/xsect_ref"
                         CALL HBOOKB(IHIST+5,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
 ckr                        write(*,*)"4. Booked histo #",nhist
@@ -1824,31 +1827,31 @@ ckr                        write(*,*)"4. Booked histo #",nhist
                      IF (LSCL.AND.IORD.LE.2.AND.
      >                    ISCL.EQ.3) THEN
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_SCL2_low/xsect"
                         CALL HBOOKB(IHIST+6,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_SCL2_up/xsect"
                         CALL HBOOKB(IHIST+7,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_SCL6_low/xsect"
                         CALL HBOOKB(IHIST+8,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
                         CSTRNG = CBASE1
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_SCL6_up/xsect"
                         CALL HBOOKB(IHIST+9,
-     >                       CSTRNG(1:LENOCC(CSTRNG)),
+     >                       CSTRNG(1:LEN_TRIM(CSTRNG)),
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+1
 ckr                        write(*,*)"4b. Booked histo #",nhist
@@ -1856,26 +1859,26 @@ ckr                        write(*,*)"4b. Booked histo #",nhist
                      IF (LSTAT.AND.ISUB.EQ.0) THEN
                         IHIST = IORD*1000000 + ISCL*100000 +
      >                       ISUB*10000 + IRAP*100
-                        CSTRNG = CBASE1(1:LENOCC(CBASE1))
+                        CSTRNG = CBASE1(1:LEN_TRIM(CBASE1))
                         WRITE(CTMP,'(I1)'),IORD
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iord="
      >                       //CTMP
                         WRITE(CTMP,'(I1)'),ISCL
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_imu="
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_imu="
      >                       //CTMP
                         WRITE(CTMP,'(I1)'),IRAP
-                        CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iy="
+                        CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iy="
      >                       //CTMP
-                        CTMP = CSTRNG(1:LENOCC(CSTRNG))//
+                        CTMP = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_norm_mu_sig_all_pt"
                         CALL HBOOK1(IHIST + 10,
-     >                       CTMP(1:LENOCC(CTMP)),
+     >                       CTMP(1:LEN_TRIM(CTMP)),
      >                       63,-10.5,10.5,0)
                         CALL HIDOPT(IHIST + 10,'STAT')
-                        CTMP = CSTRNG(1:LENOCC(CSTRNG))//
+                        CTMP = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_norm_mu_dmax_all_pt"
                         CALL HBOOK1(IHIST + 11,
-     >                       CTMP(1:LENOCC(CTMP)),
+     >                       CTMP(1:LEN_TRIM(CTMP)),
      >                       30,-1.5,1.5,0)
                         CALL HIDOPT(IHIST + 11,'STAT')
                         NHIST = NHIST+2
@@ -1885,29 +1888,29 @@ ckr IHIST limit before next rapidity bin: IHIST+2*IPT+11 < IHIST+100
 ckr => Maximal IPT = IPTMAX < 45
                         IPTMAX = 44
                         DO IPT=1,MIN(NPT(IRAP),IPTMAX)
-                           CSTRNG = CBASE1(1:LENOCC(CBASE1))
+                           CSTRNG = CBASE1(1:LEN_TRIM(CBASE1))
                            WRITE(CTMP,'(I1)'),IORD
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iord="
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iord="
      >                          //CTMP
                            WRITE(CTMP,'(I1)'),ISCL
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))/
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))/
      >                          /"_imu="//CTMP
                            WRITE(CTMP,'(I1)'),IRAP
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_iy="
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_iy="
      >                          //CTMP
                            WRITE(CTMP,'(I2)'),IPT
-                           CSTRNG = CSTRNG(1:LENOCC(CSTRNG))//"_ipt="
+                           CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//"_ipt="
      >                          //CTMP
-                           CTMP = CSTRNG(1:LENOCC(CSTRNG))//
+                           CTMP = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                          "_norm_mu_sig"
                            CALL HBOOK1(IHIST + 2*IPT + 10,
-     >                          CTMP(1:LENOCC(CTMP)),
+     >                          CTMP(1:LEN_TRIM(CTMP)),
      >                          63,-10.5,10.5,0)
                            CALL HIDOPT(IHIST + 2*IPT + 10,'STAT')
-                           CTMP = CSTRNG(1:LENOCC(CSTRNG))//
+                           CTMP = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                          "_norm_mu_dmax"
                            CALL HBOOK1(IHIST + 2*IPT + 11,
-     >                          CTMP(1:LENOCC(CTMP)),
+     >                          CTMP(1:LEN_TRIM(CTMP)),
      >                          30,-1.5,1.5,0)
                            CALL HIDOPT(IHIST + 2*IPT + 11,'STAT')
                            NHIST = NHIST+2

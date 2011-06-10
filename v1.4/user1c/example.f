@@ -5,13 +5,14 @@
 * fastNLO - example program to compute Run I cross section
 *           using PDFs from LHAPDF
 *
+* 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
+* 04.03.2006 kr: Get LHAPDF path from environment variable
 * -------------------------------------------------------------------
-* kr, 04.03.2006: Get LHAPDF path from environment variable
       implicit none
       CHARACTER*255 FILENAME
       CHARACTER*255 HISTOFILE
       CHARACTER*255 LHAPDF
-      integer i, lenocc
+      integer i
 
 c - Attention!!! - this mus be declared consistent with its 
 c                  definition in the commonblock!!!!!
@@ -30,12 +31,12 @@ c --- parse command line
 
 c - Initialize LHAPDF    - for CTEQ6.1M   
       CALL GETENV('LHAPDF',LHAPDF)
-      IF (LENOCC(LHAPDF).EQ.0) THEN
+      IF (LEN_TRIM(LHAPDF).EQ.0) THEN
          LHAPDF = '/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid'
       ENDIF
       write(*,*)"Looking for LHAPDF in directory "//
-     &     LHAPDF(1:LENOCC(LHAPDF))//"!"
-      call InitPDFset(LHAPDF(1:LENOCC(LHAPDF))/
+     &     LHAPDF(1:LEN_TRIM(LHAPDF))//"!"
+      call InitPDFset(LHAPDF(1:LEN_TRIM(LHAPDF))/
      >     /'/../share/PDFsets/cteq61.LHgrid')
 
 c - initialize one member, 0=best fit member
