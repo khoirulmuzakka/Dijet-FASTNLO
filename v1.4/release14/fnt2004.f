@@ -64,6 +64,7 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnt2004.inc'
+      INCLUDE 'strings.inc'
       INTEGER IFIRST, IFILE, iord, I,J,K,L,M, IPRINTFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME

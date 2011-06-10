@@ -22,8 +22,8 @@ c - needed for bin boundaries, xlimit, scales
 c
 c - scenario-dependent limits
       PARAMETER (ISEPARATOR=1234567890)
-      PARAMETER (NRAPMAX=4,NPTMAX=27,NBINTOTMAX=94,NXMAX=78)
-      PARAMETER (NMAXSUBPROC=7,NSCALEBINMAX=2,NSCALEMAX=4)
+      PARAMETER (NRAPMAX=6,NPTMAX=17,NBINTOTMAX=71,NXMAX=66) ! 11xBins
+      PARAMETER (NMAXSUBPROC=7,NSCALEBINMAX=2,NSCALEMAX=6)
 
       INTEGER*8 NEVT(6)  
       INTEGER ITABVERSION, IREACTION, IXSECTUNITS, IPROC, IALGO, NORD, 
@@ -45,7 +45,7 @@ c - scenario-dependent limits
      +        result(NBINTOTMAX,NMAXSUBPROC+1,3),
      +        xsect(NBINTOTMAX,3)    ! array returned as argument
 
-      COMMON /CFNT2001a/ ECMS, JETRES1, JETRES2, 
+      COMMON /CFNT2011/ ECMS, JETRES1, JETRES2, 
      +        RAPBIN, PTBIN,  XLIMIT,
      +        MURSCALE, MURVAL, MUFSCALE, MUFVAL,
      +        array, pdf, result,

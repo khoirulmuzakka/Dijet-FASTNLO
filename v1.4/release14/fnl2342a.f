@@ -35,7 +35,7 @@
 
 
 *******************************************************************
-      SUBROUTINE FH1003CC(FILENAME, XMUR, XMUF, IPRINTFLAG, XSECT)
+      SUBROUTINE FL2342ACC(FILENAME, XMUR, XMUF, IPRINTFLAG, XSECT)
 *-----------------------------------------------------------------
 * fastNLO user code - main routine 
 *
@@ -63,7 +63,7 @@
 * MW 2006/02/01 implement tableformat version 1.4 
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
       INCLUDE 'strings.inc'
       INTEGER IFIRST, IFILE, iord, I,J,K,L,M, IPRINTFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
@@ -82,7 +82,7 @@ c - output in first call
 
 c --- read the fastNLO coefficient table
       IF (FILENAME.ne.OLDFILENAME) THEN
-         call FH1003RD(FILENAME)
+         call FL2342ARD(FILENAME)
          OLDFILENAME=FILENAME
 
 c - check consistency of array dimensions / commonblock parameters
@@ -203,9 +203,9 @@ c - reset result arrays
 
 
 c - now get the PDFs ...
-      call FH1003GP(mufscale(ixmuf))
+      call FL2342AGP(mufscale(ixmuf))
 c - ... and multiply with perturbative coefficients 
-      call FH1003MT(xmur,ixmuf)
+      call FL2342AMT(xmur,ixmuf)
 
 
 c ----------------- final touches ------------------------------------
@@ -224,7 +224,7 @@ c - sum subprocesses / fill result array / fill 'XSECT' array
       enddo
 
 c - print results - if requested
-      if (IPRINTFLAG.eq.1) call FH1003PR(xmur,IXMUF)
+      if (IPRINTFLAG.eq.1) call FL2342APR(xmur,IXMUF)
 
       RETURN
 
@@ -239,7 +239,7 @@ c - print results - if requested
       END
 
 *******************************************************************
-      SUBROUTINE FH1003MT(xmur,ixmuf)
+      SUBROUTINE FL2342AMT(xmur,ixmuf)
 *-----------------------------------------------------------------
 * MW 08/26/2005
 *
@@ -250,7 +250,7 @@ c - print results - if requested
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
       INTEGER IXMUF, i,j,k,l,m,iord, jord,    nbin,nx
       INTEGER iposition(5)
       DOUBLE PRECISION  mur, as, aspow(5), FNALPHAS, coeff 
@@ -345,7 +345,7 @@ c - only relevant for fastNLO authors -> for precision studies
       END
 
 *******************************************************************
-      SUBROUTINE FH1003GP(muffactor)
+      SUBROUTINE FL2342AGP(muffactor)
 *-----------------------------------------------------------------
 * MW 08/26/2005
 *
@@ -356,7 +356,7 @@ c - only relevant for fastNLO authors -> for precision studies
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
       DOUBLE PRECISION MUFFACTOR
       INTEGER NBIN,NX, i,j,k,l,m,n,p,nx2limit
       DOUBLE PRECISION x1, x2, xlim, hx, hxlim, muf, H(7), D(3), sum,
@@ -419,7 +419,7 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
                   if (ireaction.eq.1) nx2limit=1
                   do l=1,nx2limit
                      nx=nx+1
-                     call fh1003pl(ireaction,k,l,XPDF,H)
+                     call FL2342APL(ireaction,k,l,XPDF,H)
                      do m=1,Nsubproc
                         pdf(nbin,nx,m,p) = H(m)
                      enddo
@@ -434,7 +434,7 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
       END
 
 *******************************************************************
-      SUBROUTINE FH1003PL(ireact,i,j,XPDF,H)
+      SUBROUTINE FL2342APL(ireact,i,j,XPDF,H)
 * ---------------------------------------------------------------
 * MW 03/27/06
 * compute PDF linear combinations - for different reactions
@@ -453,7 +453,7 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
 *    H(10)              PDF linear combinations
 * ---------------------------------------------------------------
       Implicit None
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
       Integer ireact, i,j,k
       Double Precision XPDF(nxmax,-6:6), H(10),
      +     G1, G2,              ! gluon densities from both hadrons
@@ -527,7 +527,7 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
       END
 *******************************************************************
 
-      SUBROUTINE FH1003PR(XMUR,IMUFFLAG)
+      SUBROUTINE FL2342APR(XMUR,IMUFFLAG)
 *-----------------------------------------------------------------
 * m. Wobisch  - print fastNLO cross section results
 *
@@ -540,7 +540,7 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
       IMPLICIT NONE
       INTEGER IMUFFLAG, nbin, i,j, maxscale
       DOUBLE PRECISION XMUR
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
 
       write(*,5000) " --  fastNLO - results for  ",NAMELABEL(1)
 
@@ -595,7 +595,7 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
       END
 
 *******************************************************************
-      SUBROUTINE FH1003RD(FILENAME)
+      SUBROUTINE FL2342ARD(FILENAME)
 *-----------------------------------------------------------------
 * M. Wobisch   read ASCII table of perturbative coefficients
 *
@@ -609,7 +609,7 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
       CHARACTER*(*) FILENAME
       CHARACTER*255 BUFFER
       INTEGER IFIRST, IFILE, I,J,K,L,M,N,   NBIN,NX
-      INCLUDE 'fnh1003.inc'
+      INCLUDE 'fnl2342a.inc'
 
       DATA IFIRST/0/
       SAVE IFIRST

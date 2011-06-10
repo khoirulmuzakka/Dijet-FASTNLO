@@ -1,44 +1,56 @@
 #
-# Makefile for fastNLO example program
+# Makefile for fastNLO example program running at the HepForge web interface
 # 
-# The environment variables CERNLIB and LHAPDF have to be set correctly by user
+# The environment variable LHAPDF has to be set correctly by the user
 #
+# 10.06.2011 kr: Add strings.inc from user1c and adapt ALL inclusions
+# 10.06.2011 kr: Remove CERNLIB which actually was never needed here
+# 
 
 # Check required environment variables and set defaults:
-# Old settings from Markus 
-ifndef CERNLIB
-CERNLIB=/D0/ups/cern/Linux-2-4/2002/lib
-endif
+# Old settings from Markus
+# TODO: Replace by HepForge default
 ifndef LHAPDF
 LHAPDF=/work/shootingstar-clued0/wobisch/lhapdf500/lib
 endif
 
 NAME=fastnlo
 
+# 10.06.2011 kr: 
+#
+# Remove two incomplete scenarios for now:
+#     - Table for fnt1006 missing at HepForge
+#     - There should be two tables for fnt2001, but there is only one!
+#     Start adding LHC scenarios 
+#
+# Tev2: Add fnt2007 - fnt2011 scenarios available at HepForge, but fnt2007 buggy?
+# HERA: Add fnh2001 and fnh2003 scenarios available at HepForge
+# RHIC: Consistent with web files
+# LHC: Add temporarily CMS incl jets fnl2342a
+#
 FF0= fn-example.f fn-alphas-demo.f fn-interface.f
-FF1= fnt1001.f fnt1002.f fnt1003.f fnt1004.f fnt1005.f fnt1006.f fnt1007.f fnt1008.f
-FF2= fnt2001.f fnt2002.f fnt2003.f fnt2004.f fnr0001.f fnl0004.f 
-FF3= fnh1001.f fnh1002.f fnh1003.f fnh1004.f
+# FFT1= fnt1006.f
+FFT1= fnt1001.f fnt1002.f fnt1003.f fnt1004.f fnt1005.f fnt1007.f fnt1008.f
+# FFT2= fnt2001.f fnt2007.f
+FFT2= fnt2002.f fnt2003.f fnt2004.f fnt2007.f fnt2008.f fnt2009.f fnt2010.f fnt2011.f
+FFH1= fnh1001.f fnh1002.f fnh1003.f fnh1004.f
+FFH2= fnh2001.f fnh2003.f
+FFR1= fnr0001.f
+FFL1= fnl0004.f fnl2342a.f
 
 FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 FC=f77
 
-OBJFILES = $(FF0:.f=.o) $(FF1:.F=.o) $(FF2:.F=.o) $(FF3:.F=.o)
+OBJFILES = $(FF0:.f=.o) $(FFT1:.f=.o) $(FFT2:.f=.o) $(FFH1:.f=.o) $(FFH2:.f=.o) $(FFR1:.f=.o) $(FFL1:.f=.o)
 
 $(NAME): $(OBJFILES)
-	@echo "Looking for CERN libs in"
-	@echo "$(CERNLIB)"
-	@echo "and for LHAPDF in"
+	@echo "Looking for LHAPDF in"
 	@echo "$(LHAPDF)"
-	@echo "Did you source fastNLO.(c)sh?"
-	 $(FC) -o $@ $(FFLAGS) $(OBJFILES) \
-	-L $(LHAPDF) -lLHAPDF \
-	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib -lz
+	$(FC) -o $@ $(FFLAGS) $(OBJFILES) \
+	-L $(LHAPDF) -lLHAPDF
 
-cln:
-	'rm' -f *.o
-	'rm' -f *.so
+
 
 clean:
 	'rm' -f *.o

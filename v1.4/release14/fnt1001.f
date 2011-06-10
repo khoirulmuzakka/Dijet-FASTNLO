@@ -63,6 +63,7 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnt1001.inc'
+      INCLUDE 'strings.inc'
       INTEGER IFIRST, IFILE, iord, I,J,K,L,M, IPRINTFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME

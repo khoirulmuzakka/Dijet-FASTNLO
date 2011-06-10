@@ -140,6 +140,7 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnt1005a.inc'
+      INCLUDE 'strings.inc'
       INTEGER IFIRST, IFILE, iord, I,J,K,L,M, IPRINTFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME
@@ -941,6 +942,7 @@ c      End
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnt1005b.inc'
+      INCLUDE 'strings.inc'
       INTEGER IFIRST, IFILE, iord, I,J,K,L,M, IPRINTFLAG, 
      +     maxscale, nbin,nx, ixmur,ixmuf
       CHARACTER*(*) FILENAME
