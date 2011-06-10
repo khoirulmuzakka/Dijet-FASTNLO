@@ -14,10 +14,18 @@
       CHARACTER*255 LHAPDF
       integer i
 
+ckr Added to make compatible with modified fn-interface.f
+      CHARACTER*255 ASMODE
+      DOUBLE PRECISION ASMZVAL
+      INTEGER IASLOOP
+      COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
+
 c - Attention!!! - this mus be declared consistent with its 
 c                  definition in the commonblock!!!!!
       double precision xst1001(700,3) 
 
+ckr Default: alpha_s from PDF
+      ASMODE = "PDF"
 
 c --- parse command line
       IF ( IARGC().LT.1)  FILENAME = 'table.txt.gz'
@@ -37,7 +45,7 @@ c - Initialize LHAPDF    - for CTEQ6.1M
       write(*,*)"Looking for LHAPDF in directory "//
      &     LHAPDF(1:LEN_TRIM(LHAPDF))//"!"
       call InitPDFset(LHAPDF(1:LEN_TRIM(LHAPDF))/
-     >     /'/../share/PDFsets/cteq61.LHgrid')
+     >     /'/../share/lhapdf/PDFsets/cteq61.LHgrid')
 
 c - initialize one member, 0=best fit member
       call InitPDF(0)
