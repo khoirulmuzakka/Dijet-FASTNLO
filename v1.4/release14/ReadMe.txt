@@ -86,18 +86,34 @@ files "fnt1001.f" and "fnt1001.inc"
 
 *** installation
   - create a new directory (e.g.: "fastnlo") and copy
-    your fastNLO code into this directory
-
+    your fastNLO code into this directory, e.g. :
+    mkdir $HOME/fastnlo
+    cp fn-common.tar.gz fnt2003-code.tar.gz $HOME/fastnlo
+    cd $HOME/fastnlo
+    tar -xzf fn-common.tar.gz
+    tar -xzf fnt2003-code.tar.gz
   - inside the directory "fastnlo" create two links:
     - one link "tablepath" pointing to a directory where
-      you store the (large!) coefficient tables
+      you store the (large!) coefficient tables, e.g. :
+      mkdir /largedisk/fastnlotables
+      cp fnt2003.tab.gz /largedisk/fastnlotables
+      gunzip /largedisk/fastnlotables/fnt2003.tab.gz
+      cd $HOME/fastnlo
+      ln -s /largedisk/fastnlotables tablepath
+       
     - one link "pdfpath" pointing to the LHAPDF directory
       where the .grid and .pdf files from LHAPDF are stored
-      (/share/lhapdf/PDFsets/ -> inside your LHAPDF directory) 
-
+      (e.g. /share/lhapdf/PDFsets/ -> inside your LHAPDF directory):
+      cd $HOME/fastnlo
+      ln -s /share/lhapdf/PDFsets/ pdfpath
+ 
   - edit the "Makefile" to set the two paths to LHAPDF and CERNLIB
-    (and delete the filenames for the scenarios for which you have 
-    not downloaded the code)
+    e.g.
+    LHAPDF=/usr/local/lib
+    CERNLIB=/cern/pro/lib
+
+    and delete the filenames for the scenarios for which you have 
+    not downloaded the code
 
   - unless you downloaded all usercode and tables from the webpage:
     uncomment in "fn-example.f" the scenarios that you don't want.
