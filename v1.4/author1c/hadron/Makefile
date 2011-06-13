@@ -1136,6 +1136,14 @@ fnl2342ar1m34: links fnl2342ar1m34.cc $(CommonPath)/fj-ak-05.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+fnl2342b: links fnl2342b.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2342b.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2342b -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # ======================================================================
 # =====   FNL2408: LHC CMS dijet mass with fastjet SISCone R=0.7 =======
 # ======================================================================
