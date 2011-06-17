@@ -201,6 +201,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double ptj1min = 60.;
   // highest (pseudo-)rapidity for jets to be considered
   double yjmax  = 3.0;
+  // minimal dijet mass for events to be considered
+  double mjjmin = 156.0;
 
 
 
@@ -282,13 +284,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 		      -(pj[ij1].Y()+pj[ij2].Y())*(pj[ij1].Y()+pj[ij2].Y())
 		      -(pj[ij1].Z()+pj[ij2].Z())*(pj[ij1].Z()+pj[ij2].Z()));
     
-    // Determine minimal and maximal (pseudo-)rapidity and maximal pT
-    double yjjmin = min(y1,y2);
+    // Determine maximal (pseudo-)rapidity and maximal pT
     double yjjmax = max(y1,y2);
     double ptmax  = max(pt1,pt2);
 
     // --- Further dijets phase space cuts?
-    if ( ptj1min < ptmax && mjjbin[0][0] < mjj ) {
+    if ( ptj1min < ptmax && mjjmin < mjj ) {
       
       // - set the renormalization and factorization scale to average dijet pT
       double mu = (pt1+pt2)/2.0;
