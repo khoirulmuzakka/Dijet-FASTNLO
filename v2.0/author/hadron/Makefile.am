@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt20
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2822num.la libfnl2822den.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2412c.la libfnl2822num.la libfnl2822den.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 endif
 
 #
@@ -31,6 +31,7 @@ libfnt2012_la_SOURCES       = fnt2012.cc       fj-sc-07.h   fj-sc-07.cc   $(AM_S
 libfnl1001ak07n_la_SOURCES  = fnl1001ak07n.cc  fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2222b_la_SOURCES      = fnl2222b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2342b_la_SOURCES      = fnl2342b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl2412c_la_SOURCES      = fnl2412c.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2822den_la_SOURCES    = fnl2822den.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2822num_la_SOURCES    = fnl2822num.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 
