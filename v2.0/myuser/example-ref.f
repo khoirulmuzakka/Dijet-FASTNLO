@@ -6,42 +6,67 @@
 *           the results stored in the fastNLO reference table
 *
 * KR 07112010: Improved commandline steering
+* KR 16052011: Simplify and improve pure text output
 * -------------------------------------------------------------------
       Implicit None
-      Character*255 FILENAME,HISTOFILE,PDFSET
-      Integer i,j, LENOCC
-      Double Precision scale(4)
+      Character*255 FILENAME,PDFSET
+      Integer i, j, IPRINT
+      Double Precision DREF
+      Data IPRINT/0/
       
-c - Attention - this is the most likely source of errors in fastNLO!!!
-c        For each scenario, the result array must be declared 
-c        consistent with its definition in the commonblock of 
-c        the corresponding scenario. 
+c - Attention - this is the most likely source of Fortran errors in fastNLO!!!
+c        For each scenario, the result array must be declared at least  
+c        as large as in the definition in the common block of the
+c        corresponding scenario. 
 c           -> See the value of the parameter MxObsBin
 c                           in the file [scenario].inc
 c        We recommend to name the array according to the scenario
-      Double Precision xs(200),ref(200),xsnlo(200),refnlo(200)
+c        Adapt the following to your scenario!
+      Integer MxObsBin
+      Parameter (MxObsBin = 200)
+      Double Precision xslo(MxObsBin),reflo(MxObsBin)
+      Double Precision xsnlo(MxObsBin),refnlo(MxObsBin)
 
-      Scale(1) = 1d0
-      Scale(2) = 2d0
-      Scale(3) = 0.5d0
-      Scale(4) = 0.25d0
+*---Initialization
+      DO I=1,MxObsBin
+         xslo(I)   = -1.d0
+         xsnlo(I)  = -1.d0
+         reflo(I)  = -1.d0
+         refnlo(I) = -1.d0
+      ENDDO
 
-c --- parse command line
+
+
+*---Parse command line
+      WRITE(*,*)" "
+      WRITE(*,*)"########################################"//
+     >     "################################"
+      WRITE(*,*)"# EXAMPLE-REF"
+      WRITE(*,*)"########################################"//
+     >     "################################"
+      WRITE(*,*)"# Example program to estimate the accuracy"
+      WRITE(*,*)"# of the fastNLO v2 approximation table"
+      WRITE(*,*)"########################################"//
+     >     "################################"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"EXAMPLE-REF: Program Steering"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
       IF (IARGC().LT.1) THEN
          FILENAME = "table.tab"
          WRITE(*,*)
-     >        "EXAMPLE: WARNING! No table name given, "//
+     >        "EXAMPLE-REF: WARNING! No table name given, "//
      >        "taking the default table.tab instead!"
          WRITE(*,*)"      For an explanation of command line "//
      >        "arguments type:"
-         WRITE(*,*)"      ./example -h"
+         WRITE(*,*)"      ./example-ref -h"
       ELSE
          CALL GETARG(1,FILENAME)
-         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+         IF (FILENAME(1:LEN_TRIM(FILENAME)).EQ."-h") THEN
             WRITE(*,*)' '
-            WRITE(*,*)'Usage: ./example [arguments]'
+            WRITE(*,*)'Usage: ./example-ref [arguments]'
             WRITE(*,*)'  Table input file, def. = table.tab'
-            WRITE(*,*)'  HBOOK output file, def. = fastnlo.hbk'
             WRITE(*,*)'  PDF set, def. = cteq6mE.LHgrid'
             WRITE(*,*)'  Warning! The ref. PDF should not be changed!'
             WRITE(*,*)' '
@@ -52,70 +77,54 @@ c --- parse command line
          ELSEIF (FILENAME(1:1).EQ."_") THEN
             FILENAME = "table.tab"
             WRITE(*,*)
-     >           "EXAMPLE: WARNING! No table name given, "//
+     >           "EXAMPLE-REF: WARNING! No table name given, "//
      >           "taking the default table.tab instead!"
-            WRITE(*,*)"      For an explanation of command line "//
-     >           "arguments type:"
-            WRITE(*,*)"      ./example -h"
          ELSE
-            WRITE(*,*)"ALLUNC: Evaluating table: ",
-     >           FILENAME(1:LENOCC(FILENAME))
+            WRITE(*,*)"EXAMPLE-REF: Evaluating reference table: ",
+     >           FILENAME(1:LEN_TRIM(FILENAME))
          ENDIF
       ENDIF
 
-*---HBOOK filename
-      HISTOFILE = "X"
-      IF (IARGC().GE.2) THEN
-         CALL GETARG(2,HISTOFILE)
-      ENDIF
-      IF (IARGC().LT.2.OR.HISTOFILE(1:1).EQ."_") THEN
-         HISTOFILE = "fastnlo.hbk"
-         WRITE(*,*)
-     >        "EXAMPLE: WARNING! No output filename given, "//
-     >        "taking fastnlo.hbk instead!"
-      ELSE
-         WRITE(*,*)"EXAMPLE: Creating output file: ",
-     >        HISTOFILE(1:LENOCC(HISTOFILE))
-      ENDIF
-      
 *---PDF set
       PDFSET = "X"
-      IF (IARGC().GE.3) THEN
-         CALL GETARG(3,PDFSET)
+      IF (IARGC().GE.2) THEN
+         CALL GETARG(2,PDFSET)
       ENDIF
-      IF (IARGC().LT.3.OR.PDFSET(1:1).EQ."_") THEN
+      IF (IARGC().LT.2.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq6mE.LHgrid"
          WRITE(*,*)
-     >        "EXAMPLE: WARNING! No PDF set given, "//
-     >        "taking cteq66.LHgrid instead!"
+     >        "EXAMPLE-REF: No PDF set given, "//
+     >        "taking the default of cteq6mE.LHgrid!"
       ELSE
-         WRITE(*,*)"EXAMPLE: Using PDF set: ",
-     >        PDFSET(1:LENOCC(PDFSET))
+         WRITE(*,*)"EXAMPLE-REF: Using PDF set: ",
+     >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
 
 *---Too many arguments
-      IF (IARGC().GT.3) THEN
-         WRITE(*,*)"\nEXAMPLE: ERROR! Too many arguments, aborting!"
+      IF (IARGC().GT.2) THEN
+         WRITE(*,*)"EXAMPLE-REF: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
 
-ckr      If ( IARGC().lt.1)  FILENAME = 'table.tab'
-ckr      If ( IARGC().lt.2)  HISTOFILE= 'fastnlo.hbk'
-ckr      If ( IARGC().gt.0)  Call GETARG(1,FILENAME)
-ckr      If ( IARGC().gt.1)  Call GETARG(2,HISTOFILE)
-ckr      If ( IARGC().gt.2)  Then
-ckr         Write(*,*) 'fastNLO: too many arguments given. Stopping'
-ckr         Return
-ckr      Endif
+*---Read table once to get scenario information
+      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
+      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+      Call FX9999CC(FILENAME, 1.D0, 1.D0, IPRINT, XSLO)
+*---Print out scenario information
+      Call FX9999NF
 
-c - Initialize LHAPDF  
-c - for Reference tables - use CTEQ6M
-      call InitPDFset(PDFSET(1:LENOCC(PDFSET)))
-c - initialize one member, 0=best fit member
+*---Initialize LHAPDF  
+      call InitPDFset(PDFSET(1:LEN_TRIM(PDFSET)))
+
+*---Initialize one member, 0=best fit member
       call InitPDF(0)
 
-c - compute the cross sections
-      Write(*,*) '     fastNLO: call user code'
+*---Compute the cross sections
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)"EXAMPLE-REF: Calculate cross sections"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
 
 c- new call: a single call for each scale
 c         1st argument:  name of table
@@ -128,30 +137,61 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
+*---Evaluate reference table
+      Call FNSET("P_REFTAB",1)  ! evaluate standard table:0 or reference:1
 
+*---Calculate reference LO cross sections (set IPRINT to 1 for more verbose output) 
+      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, reflo)
 
-      Write(*,*) ' evaluate relative differences to reference results ',
-     +     'for table ',FILENAME
+*---Evaluate normal table, calculate approximated LO cross sections
+      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
+      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, xslo)
 
-      Do i=1,4                  ! scale
-         Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-         Call FNSET("P_REFTAB",1) ! evaluate standard table:0 or reference:1
-         Call FX9999CC(FILENAME, scale(i), scale(i), 1, ref)
-         Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
-         Call FX9999CC(FILENAME, scale(i), scale(i), 1, xs)
+*---Evaluate reference table
+      Call FNSET("P_REFTAB",1)  ! evaluate standard table:0 or reference:1
 
-         Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-         Call FNSET("P_REFTAB",1) ! evaluate standard table:0 or reference:1
-         Call FX9999CC(FILENAME, scale(i), scale(i), 1, refnlo)
-         Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
-         Call FX9999CC(FILENAME, scale(i), scale(i), 1, xsnlo)
+*---Calculate reference NLO cross sections (set IPRINT to 1 for more verbose output) 
+      Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, refnlo)
 
-         Write(*,*)
-         Write(*,*) '    now for scale factor ',i,' =',scale(i)
-         Do j=1,110
-            Write(*,*) j, 100d0*(xs(j)-ref(j))/ref(j), 
-     +           100d0*(xsnlo(j)-refnlo(j))/refnlo(j)
-         Enddo
+*---Evaluate normal table, calculate approximated NLO cross sections
+      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
+      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, xsnlo)
+
+*---Cross section printout
+      WRITE(*,*)"========================================"//
+     >     "================================"
+      WRITE(*,*)" Relative Algorithmic Errors"
+      WRITE(*,*)" The scale factor is ",1.d0
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)" bin     LO cross section      "//
+     >     "LO reference          algorithmic deviation"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+ 900  FORMAT(1P,I5,3(4X,E18.11))
+      Do I=1,MxObsBin
+         IF (ABS(REFLO(I)).GT.1.D-99) THEN
+            DREF = (XSLO(I)-REFLO(I)) / REFLO(I)
+            IF ((ABS(1.D0 + xslo(I)).GT.1.D-99)) THEN
+               WRITE(*,900)I,XSLO(I),REFLO(I),DREF
+            ENDIF
+         ENDIF
       Enddo
-
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      WRITE(*,*)" bin     NLO cross section     "//
+     >     "NLO reference         algorithmic deviation"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
+      Do i=1,MxObsBin
+         IF (ABS(REFNLO(I)).GT.1.D-99) THEN
+            DREF = (XSNLO(I)-REFNLO(I)) / REFNLO(I)
+            IF ((ABS(1.D0 + xsNlo(I)).GT.1.D-99)) THEN
+               WRITE(*,900)I,XSNLO(I),REFNLO(I),DREF
+            ENDIF
+         ENDIF
+      Enddo
+      
       End

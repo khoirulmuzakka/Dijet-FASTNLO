@@ -138,9 +138,9 @@ c     -> sometimes the sequence may be called twice
 c === Loop over contributions, use pointers ordered according to FX9999PT
       Do i=1,Icontr
          IPoint   = IContrPointer(i)
-         Write(*,*)"FX9999CC: IContr, IContrPointer, "//
-     +        " IScalePointer, NSubproc(IContrPointer): "
-         Write(*,*)'   ',i, IPoint, IScalePointer(i), NSubProc(IPoint)
+ckr         Write(*,*)"FX9999CC: IContr, IContrPointer, "//
+ckr     +        " IScalePointer, NSubproc(IContrPointer): "
+ckr         Write(*,*)'   ',i, IPoint, IScalePointer(i), NSubProc(IPoint)
 
 c - Get PDFs - Multiply with perturbative coefficients and alphas 
          Call FX9999PM(i,xmur,xmuf)
@@ -230,8 +230,8 @@ c === reset result arrays
 
 c === output in first fastNLO call
       If (IFNfirst.eq.0) Then
-         Do i=1,12
-            Write(*,5000) " # ",CHEADER(i)
+         Do i=1,13
+            Write(*,5000)" #"//CHEADER(i)
          Enddo
          IFNfirst = 1
       Endif
@@ -295,7 +295,7 @@ c --- Find LO contribution
          j = IContr + 1
          IContrPointer(j) = -1
          Do i=1,NContrib
-            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
+ckr            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1
      +           .and. Iref(i).eq.Preftab) Then 
                IContr = IContr+1
@@ -435,7 +435,7 @@ c      except for threshold corrections)
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
 ckr
-         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
+ckr         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
                IScalePointer(i) = 1 ! use 1st scale variation
@@ -505,10 +505,10 @@ c
       Endif
 
 c --- Debug print-out
-      Write(*,*) "FX9999PT: No. contributions selected ",Icontr
+ckr      Write(*,*) "FX9999PT: No. contributions selected ",Icontr
       Do i=1,IContr
-         Write(*,*) "FX9999PT: Pointer number ",i," to "//
-     >        "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
+ckr         Write(*,*) "FX9999PT: Pointer number ",i," to "//
+ckr     >        "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
       Enddo
 
 
@@ -547,8 +547,8 @@ c --- Debug print-out
       Parameter (beta0=(11d0*CA-2d0*NF)/3d0) 
       Parameter (beta1=34*CA*CA/3d0-2d0*NF*(CF+5d0*CA/3d0))
 
-      Write(*,*) 
-      Write(*,*) 'FX9999PM at work ',ictrb,xmur,xmuf
+ckr      Write(*,*) 
+ckr      Write(*,*) 'FX9999PM at work ',ictrb,xmur,xmuf
 
 c - how to identify that a posteriori mur variation is required
 c - if: only one scale dim and same mur,muf scale factors used in table
@@ -566,7 +566,7 @@ c - first: compute 'standard' contribution at chosen scale
 c - aposteriori mur variation
       ic = IContrPointer(Ictrb)
       is = IScalePointer(Ictrb)
-      Write(*,*) 'FX9999PM: ic,is: ',ic,is,xmur,ScaleFac(ic,1,is)
+ckr      Write(*,*) 'FX9999PM: ic,is: ',ic,is,xmur,ScaleFac(ic,1,is)
 
       If (IScaleDep(ic).ne.0 .and. dabs(xmur/xmuf-1d0).gt.1d-4) Then
          Write(*,*) 'FX9999PM: trying aposteriori mur contribution'
@@ -1001,47 +1001,60 @@ c         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
 *******************************************************************
       Subroutine FX9999NF
 *-----------------------------------------------------------------
-* fastNLO user code v2.0 - print scenario iNFormation
+* fastNLO user code v2.0 - print scenario information
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
       Integer i,j
 
       Write(*,*)
-      Write(*,*)' ######################################################'
-      Write(*,*)' #    information on fastNLO scenario: ',ScenName
-      Write(*,*)' #   ------------------------------------------'
-      Write(*,*)' # description:'
+      WRITE(*,*)"########################################"//
+     >     "################################"
+      Write(*,*)"# Information on fastNLO scenario: ",ScenName
+      WRITE(*,*)"# --------------------------------------"//
+     >     "--------------------------------"
+      Write(*,*)"# Description:"
       Do i=1,NScDescript
-         Write(*,*)' #   ',SCDescript(i)  
+         Write(*,*)"#   ",SCDescript(i)  
       Enddo
-      Write(*,*)' # measured at at Ecms =',Ecms,' GeV'
-      Write(*,*)' #'
-      Write(*,*)' # tot. No. of Observable bins: ',NObsBin,' in ',Ndim,' dimensions'
-      Do i=1,NDim
-         Write(*,*)' # dimension ',i,':'
-         Write(*,*)' #        ',DimLabel(i)
+      Write(*,*)"#"
+      Write(*,*)"# Centre-of-mass energy Ecms: ",Ecms," GeV"
+      Write(*,*)"#"
+      Write(*,*)"# Tot. no. of observable bins: ",NObsBin," in ",Ndim,
+     >     " dimensions:"
+      Do j=1,NDim
+         Write(*,*)"# Binning in dimension ",j,":",DimLabel(j)
+         Do i=1,NObsBin
+            If (IDiffBin(j).EQ.1) Then
+               Write(*,*)"#   the bin center ",i," is at ",
+     >              LoBin(i,j)
+            Else
+               Write(*,*)"#   the bin no. ",i," goes from ",
+     >              LoBin(i,j),"up to ",UpBin(i,j)
+            Endif
+         Enddo
       Enddo
-      Write(*,*)' #'
-      Write(*,*)' # No. of contributions: ',Ncontrib
+      Write(*,*)"#"
+      Write(*,*)"# No. of contributions: ",Ncontrib
       Do i=1,Ncontrib         
-         Write(*,*)' # - contribution',i,':'
+         Write(*,*)"# Contribution",i,":"
          Do j=1,NcontrDescr(i)
-            Write(*,*)' #     ',CtrbDescript(i,j)
+            Write(*,*)"#   ",CtrbDescript(i,j)
          Enddo
-         Write(*,*)' #     computed by:'
+         Write(*,*)"#   computed by:"
          Do j=1,NcodeDescr(i)
-            Write(*,*)' #     ',CodeDescript(i,j)
+            Write(*,*)"#     ",CodeDescript(i,j)
          Enddo
-         
       Enddo
-      Write(*,*)' # No. of x bins in 1st contrib.:',Nxtot(1,1,1)
-      Write(*,*)' # No. of available scale variations/scale nodes:'
+      Write(*,*)"# No. of x bins in 1st contrib.:",Nxtot(1,1,1)
+      Write(*,*)"# No. of available scale variations/scale nodes:"
       Do i=1,Ncontrib         
-         Write(*,*)' #   NscaleVar,NScaleNode:',NscaleVar(i,1),NScaleNode(i,1)
+         Write(*,*)"#   NscaleVar,NScaleNode:",
+     >        NscaleVar(i,1),NScaleNode(i,1)
       Enddo
-      Write(*,*)' #'
-      Write(*,*)' ######################################################'
+      Write(*,*)"#"
+      WRITE(*,*)"########################################"//
+     >     "################################"
 
       Return
       End
