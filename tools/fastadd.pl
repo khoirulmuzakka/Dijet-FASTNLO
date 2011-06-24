@@ -176,8 +176,6 @@ if ( $opt_w ) {
     exit(0);
 }
 
-print "Hallo\n";
-
 #
 # Find LO tables
 #
