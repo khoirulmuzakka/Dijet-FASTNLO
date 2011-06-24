@@ -14,15 +14,15 @@ cone_e_07::operator()(const event_hhc& ev, double rcone)
 
   for(int ip = 1; ip <= nt; ip++) {
     if (ev[ip].perp2() > 1.0e-12) _M_p[++np] = ev[ip];
-    const double px = ev[ip].X();
-    const double py = ev[ip].Y();
-    const double pz = ev[ip].Z();
-    const double E  = ev[ip].T();
-    //     cout << "**************************\n";
-    //     cout << "Input objects: ip, px, py, pz, E, np\n";
-    //     printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-    //         ip, px, py, pz, E, nt);
-    //     cout << "**************************\n";
+    // const double px = ev[ip].X();
+    // const double py = ev[ip].Y();
+    // const double pz = ev[ip].Z();
+    // const double E  = ev[ip].T();
+    // cout << "**************************\n";
+    // cout << "Input objects: ip, px, py, pz, E, np\n";
+    // printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
+    // 	   ip, px, py, pz, E, nt);
+    // cout << "**************************\n";
   }
 
   nj = np;
@@ -108,9 +108,6 @@ double cone_e_07::_M_pair(int i, int j)
       distx = sqrt(dyx*dyx+dphix*dphix);
     }
   }
-  // test 
-  // if (rx>r) cout<<" MW:xxxxxxxxxxxxxx r "<<r<<"  "<<rx<<endl;
-  // if (rx/r < 0.5)    cout<<" MW: r/rx "<<r<<"  "<<rx<<"  "<<pti/ptj<<endl;
   
   return (distx/rcone);
 }

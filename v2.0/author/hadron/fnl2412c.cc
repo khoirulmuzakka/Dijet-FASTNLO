@@ -214,7 +214,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double yjet[4]  = {10.,10.,10.,10.};
   if (nj > 0) {
     // Initialize pointers to the jets, check minimal jet pT and maximal |y,eta|
-    for (int i=1; i<=nj; i++) {
+    for (unsigned int i=1; i<=nj; i++) {
       double pti = pj[i].perp();
       double yi  = abs(pj[i].rapidity());
       //DEBUG
@@ -237,7 +237,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     // Get first two jets 
     int ij1 = 0;
     int ij2 = 0;
-    for (int i=1; i<=nj; i++) {
+    for (unsigned int i=1; i<=nj; i++) {
       if (ijet[i] == 1) {
 	if (ij1 == 0) {
 	  ij1 = i;

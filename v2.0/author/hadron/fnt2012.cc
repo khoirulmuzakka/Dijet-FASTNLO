@@ -187,7 +187,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //     (all pT and E are in GeV)
 
    // --- declare and initialize phase space cut variables
-   double pTcut = 150., ymin = 0., ymax = 2.4;
+   double pTcut = 150., ymax = 2.4;
 
    // - require >=3 jets for trijet cross section
    if (nj >= 3) {   

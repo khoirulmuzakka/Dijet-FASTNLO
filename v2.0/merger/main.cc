@@ -55,7 +55,7 @@ int main(int argc, char** argv)
   }
   
   int ntables = table_list.size();
-  printf("Found %zu table file(s).\n",ntables);
+  printf("Found %d table file(s).\n",ntables);
   if(ntables<1) exit(1);
 
   Entry *oneentry;
@@ -143,7 +143,7 @@ int main(int argc, char** argv)
   result->WriteBlockA2();
   int nblocks = entries.size();
   for(int i=0;i<nblocks;i++){
-     printf(" %d file(s) containing",entries[i]->tables.size());
+     printf(" %zu file(s) containing",entries[i]->tables.size());
      printf(" %s %s",entries[i]->contribution.GetName1().c_str(),entries[i]->contribution.GetName2(table_list[0]->GetBlockA2()->GetILOord()).c_str());
      vector <fnloTable*>::iterator table = entries[i]->tables[0].table;
      // Addition 
