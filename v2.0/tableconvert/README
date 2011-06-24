@@ -1,0 +1,23 @@
+Issues with tables converted from v1.4 to v2.0
+----------------------------------------------
+
+1. The conversion has to be done using
+   conv20 intable.tab scenname.tab
+   to have scenname written as scenario name into the convrted table.
+
+2. Treat the table once with tablefix.pl to trim leading and trailing
+   space.
+
+3. Standard nlofast-add'er by default always writes:
+   ixsectunits = 9 which is nanobarns, check with scenario code
+   NLOJET++ without version number (should be 2.0.1)
+   1st dimension as "pT_in_GeV"
+   2nd dimension as "y", could also be "|y|" or eta or something else 
+   setprecision is 40! way too high, 17 would be sufficient
+   writes leading/trailing blanks and zeros
+
+4. Conversion doesn't work for reference tables
+
+5. Check title strings 
+
+6. Bug in conversion of dijet mass tables, check!!!
