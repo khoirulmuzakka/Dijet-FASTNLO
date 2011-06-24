@@ -1,23 +1,23 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# The main target: Markus' default user code
+# The main target: My default user code
 if HAVE_LHAPDFCONFIG
-   bin_PROGRAMS = example example-ref
+   bin_PROGRAMS = myexample myexample-ref
 endif
 
 # All source files which go into the main target (and have to be distributed)
-example_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc
-example_ref_SOURCES = example-ref.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc
+myexample_SOURCES = myexample.f fnx9999.f fnx9999.inc strings.inc \
+	fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f
+myexample_ref_SOURCES = myexample-ref.f fnx9999.f fnx9999.inc strings.inc \
+	fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f
 
 #
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 #F77 = gfortran
-AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -o myexample -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
@@ -27,11 +27,11 @@ AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   example_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-   example_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   myexample_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   myexample_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   example_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-   example_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+   myexample_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+   myexample_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
 
 # cpp trick for path to LHAPDF pdfsets
