@@ -103,8 +103,7 @@ class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
    pdf_hhc_dummy dummypdf;
 
    // --- jet algorithm
-   //cone_e_07 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
-   fj_sc jetclus;
+   fj_sc jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
 
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    

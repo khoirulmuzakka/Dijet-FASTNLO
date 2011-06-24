@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt20
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2412c.la libfnl2822num.la libfnl2822den.la libfnl1001ak07n.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2412c.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 endif
 
 #

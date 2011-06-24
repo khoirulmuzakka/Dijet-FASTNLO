@@ -105,7 +105,7 @@ private:
   pdf_hhc_dummy dummypdf;
 
   // --- jet algorithm
-  fj_ak jetclus;
+  fj_ak jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
    
   bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    
