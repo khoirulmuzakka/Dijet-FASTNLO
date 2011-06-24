@@ -1,4 +1,4 @@
-#include "fj-d0r2-07.h"
+#include "fj-d0r2.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/D0RunIIConePlugin.hh"
@@ -6,7 +6,7 @@
 using namespace std;
 
 const bounded_vector<lorentzvector<double> >&
-fj_d0r2_07::operator()(const event_hhc& ev, double rwhatfor)
+fj_d0r2::operator()(const event_hhc& ev, double jetsize)
 {
   int nt = ev.upper();
 
@@ -32,10 +32,9 @@ fj_d0r2_07::operator()(const event_hhc& ev, double rwhatfor)
   fastjet::JetDefinition::Plugin * plugin = 0;
   
   // allocate a new plugin for D0RunIICone
-  double Rcone = 0.7;
   double min_jet_Et = 6.0;
   double split_ratio = 0.5;
-  plugin = new fastjet::D0RunIIConePlugin(Rcone,
+  plugin = new fastjet::D0RunIIConePlugin(jetsize,
 					  min_jet_Et,
 					  split_ratio);
   

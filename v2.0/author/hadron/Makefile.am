@@ -24,11 +24,10 @@ libfnt2014norm_la_SOURCES   = fnt2014norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_S
 #libfnt2015norm_la_SOURCES   = fnt2015norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
 libfnl1001_la_SOURCES       = fnl1001.cc       cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
 # Require fastjet
-libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak-07.h   fj-ak-07.cc   $(AM_SOURCES)
-libfnl1001sc07_la_SOURCES   = fnl1001sc07.cc   fj-sc-07.h   fj-sc-07.cc   $(AM_SOURCES)
+libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl1001sc07_la_SOURCES   = fnl1001sc07.cc   fj-sc.h      fj-sc.cc      $(AM_SOURCES)
 libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2-07.h fj-d0r2-07.cc $(AM_SOURCES)
 libfnt2012_la_SOURCES       = fnt2012.cc       fj-sc-07.h   fj-sc-07.cc   $(AM_SOURCES)
-libfnl1001ak07n_la_SOURCES  = fnl1001ak07n.cc  fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2222b_la_SOURCES      = fnl2222b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2342b_la_SOURCES      = fnl2342b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 libfnl2412c_la_SOURCES      = fnl2412c.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)

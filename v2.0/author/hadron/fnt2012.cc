@@ -81,9 +81,7 @@ extern "C"{
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 
-//#include "cone-et-07.h"     // fastNLO user: .h file for jet algorithm
-//#include "cone-e-07.h"      // fastNLO user: .h file for jet algorithm
-#include "fj-sc-07.h"        // fastNLO user: .h file for jet algorithm
+#include "fj-sc.h"   // fastNLO user: .h file for jet algorithm
 
 #include "pdf-cteq6.h"
 #include "pdf-hhc-dummy.h"
@@ -105,9 +103,8 @@ class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
    pdf_hhc_dummy dummypdf;
 
    // --- jet algorithm
-   // cone_et_07 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
    //cone_e_07 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
-   fj_sc_07 jetclus;
+   fj_sc jetclus;
 
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 
    
@@ -176,7 +173,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    static const double pi = 3.14159265358979323846;
 
    // --- run the jet algorithm
-   pj = jetclus(p);
+   double jetsize = 0.7;
+   pj = jetclus(p,jetsize);
    unsigned int nj = pj.upper(); 
 
 

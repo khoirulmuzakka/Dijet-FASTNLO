@@ -1,5 +1,5 @@
-#ifndef __fj_kt_06_h__
-#define __fj_kt_06_h__ 1
+#ifndef __fj_sc_h__
+#define __fj_sc_h__ 1
 
 
 #include <bits/hhc-event.h>
@@ -8,7 +8,7 @@
 using namespace std;
 using namespace nlo;
 
-class fj_kt_06
+class fj_sc
 {
   
   //   private types
@@ -16,7 +16,7 @@ class fj_kt_06
   
 public:
   //   do the clustering and return with the momenta of the jets
-  const bounded_vector<_Lv>& operator()(const event_hhc&, double = 0.6);
+  const bounded_vector<_Lv>& operator()(const event_hhc&, double);
   
 private:
   //   private data members

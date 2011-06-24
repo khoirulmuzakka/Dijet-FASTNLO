@@ -1,11 +1,10 @@
-#include "fj-kt-06.h"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/ClusterSequence.hh"
+#include "fj-sc.h"
+#include "fastjet/SISConePlugin.hh"
 #include <cmath>
 using namespace std;
 
 const bounded_vector<lorentzvector<double> >&
-fj_kt_06::operator()(const event_hhc& ev, double rcone)
+fj_sc::operator()(const event_hhc& ev, double jetsize)
 {
   int nt = ev.upper();
 
@@ -27,9 +26,24 @@ fj_kt_06::operator()(const event_hhc& ev, double rcone)
     input_objects.push_back(fastjet::PseudoJet(px,py,pz,E));
   }
 
-  fastjet::Strategy strategy = fastjet::Best;
-  double r2 = 0.6;
-  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, r2, strategy);
+  // define a generic plugin pointer
+  fastjet::JetDefinition::Plugin * plugin = 0;
+  
+  // allocate a new plugin for SISCone
+  double ovthr = 0.75;
+  //   int n_pass_max = 0;
+  //   double protojet_ptmin = 0.0;
+  //   bool caching = false;
+  //   fastjet::SISConePlugin::SplitMergeScale split_merge_scale = fastjet::SISConePlugin::SM_pttilde;
+  plugin = new fastjet::SISConePlugin(jetsize,
+				      ovthr);
+  //   				      n_pass_max,
+  // 				      protojet_ptmin,
+  // 				      caching,
+  // 				      split_merge_scale);
+
+  // create a jet-definition based on the plugin
+  fastjet::JetDefinition jet_def(plugin);
   fastjet::ClusterSequence clust_seq(input_objects, jet_def);
   
   double ptmin = 1.0;
@@ -81,5 +95,6 @@ fj_kt_06::operator()(const event_hhc& ev, double rcone)
 //     }
 //   }
 
+  delete plugin;
   return _M_pj;
 }

@@ -81,10 +81,6 @@ extern "C"{
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 
-//#include "cone-et-07.h"     // fastNLO user: .h file for jet algorithm
-//#include "cone-e-07.h"     // fastNLO user: .h file for jet algorithm
-//#include "kt-e-06.h"     // fastNLO user: .h file for jet algorithm
-//#include "fj-ak-07.h"
 #include "fj-ak.h"
 
 #include "pdf-cteq6.h"
@@ -107,9 +103,6 @@ class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
    pdf_hhc_dummy dummypdf;
 
    // --- jet algorithm
-   // cone_et_07 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
-   // cone_e_07 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
-   // kt_e_06 jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
    fj_ak jetclus;
    
    bounded_vector<lorentzvector<double> > pj;    // the jet structure 

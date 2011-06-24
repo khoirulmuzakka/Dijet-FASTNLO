@@ -83,7 +83,7 @@ extern "C"{
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 
-#include "fj-ak.h"
+#include "fj-ak.h"   // fastNLO user: .h file for jet algorithm
 
 #include "pdf-cteq6.h"
 #include "pdf-hhc-dummy.h"
