@@ -1,9 +1,9 @@
-      PROGRAM EXAMPLEREF
+      PROGRAM MYEXAMPLE
 * -------------------------------------------------------------------
 * M. Wobisch                                08/10/2010
 *
-* fastNLO - example program to compare fastNLO v2 results with
-*           the results stored in the fastNLO reference table
+* fastNLO - example program to derive QCD cross sections
+*           from fastNLO v2 tables using PDFs from LHAPDF
 *
 * KR 07112010: Improved commandline steering
 * KR 16052011: Simplify and improve pure text output
@@ -11,9 +11,10 @@
       Implicit None
       Character*255 FILENAME,PDFSET
       Integer i, j, IPRINT
-      Double Precision DREF
+      Double Precision SCALEF(4)
       Data IPRINT/0/
-      
+      Data SCALEF/0.25D0,0.5D0,1.0D0,2.0D0/
+
 c - Attention - this is the most likely source of Fortran errors in fastNLO!!!
 c        For each scenario, the result array must be declared at least  
 c        as large as in the definition in the common block of the
@@ -24,51 +25,49 @@ c        We recommend to name the array according to the scenario
 c        Adapt the following to your scenario!
       Integer MxObsBin
       Parameter (MxObsBin = 200)
-      Double Precision xslo(MxObsBin),reflo(MxObsBin)
-      Double Precision xsnlo(MxObsBin),refnlo(MxObsBin)
+      Double Precision xslo(MxObsBin) 
+      Double Precision xsnlo(MxObsBin) 
+      Double Precision kfac(MxObsBin) 
 
 *---Initialization
       DO I=1,MxObsBin
-         xslo(I)   = -1.d0
-         xsnlo(I)  = -1.d0
-         reflo(I)  = -1.d0
-         refnlo(I) = -1.d0
+         xslo(I)  = -1.d0
+         xsnlo(I) = -1.d0
+         kfac(I)  =  0.d0
       ENDDO
-
 
 
 *---Parse command line
       WRITE(*,*)" "
       WRITE(*,*)"########################################"//
      >     "################################"
-      WRITE(*,*)"# EXAMPLE-REF"
+      WRITE(*,*)"# EXAMPLE"
       WRITE(*,*)"########################################"//
      >     "################################"
-      WRITE(*,*)"# Example program to estimate the accuracy"
-      WRITE(*,*)"# of the fastNLO v2 approximation table"
+      WRITE(*,*)"# Example program to derive QCD cross sections"
+      WRITE(*,*)"# from fastNLO v2 tables using PDFs from LHAPDF"
       WRITE(*,*)"########################################"//
      >     "################################"
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
-      WRITE(*,*)"EXAMPLE-REF: Program Steering"
+      WRITE(*,*)"EXAMPLE: Program Steering"
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       IF (IARGC().LT.1) THEN
          FILENAME = "table.tab"
          WRITE(*,*)
-     >        "EXAMPLE-REF: WARNING! No table name given, "//
+     >        "EXAMPLE: WARNING! No table name given, "//
      >        "taking the default table.tab instead!"
          WRITE(*,*)"      For an explanation of command line "//
      >        "arguments type:"
-         WRITE(*,*)"      ./example-ref -h"
+         WRITE(*,*)"      ./example -h"
       ELSE
          CALL GETARG(1,FILENAME)
          IF (FILENAME(1:LEN_TRIM(FILENAME)).EQ."-h") THEN
             WRITE(*,*)' '
-            WRITE(*,*)'Usage: ./example-ref [arguments]'
+            WRITE(*,*)'Usage: ./example [arguments]'
             WRITE(*,*)'  Table input file, def. = table.tab'
             WRITE(*,*)'  PDF set, def. = cteq6mE.LHgrid'
-            WRITE(*,*)'  Warning! The ref. PDF should not be changed!'
             WRITE(*,*)' '
             WRITE(*,*)'  Give full path(s) if these are not in the cwd.'
             WRITE(*,*)'  Use \"_\" to skip changing a default argument.'
@@ -77,10 +76,10 @@ c        Adapt the following to your scenario!
          ELSEIF (FILENAME(1:1).EQ."_") THEN
             FILENAME = "table.tab"
             WRITE(*,*)
-     >           "EXAMPLE-REF: WARNING! No table name given, "//
+     >           "EXAMPLE: WARNING! No table name given, "//
      >           "taking the default table.tab instead!"
          ELSE
-            WRITE(*,*)"EXAMPLE-REF: Evaluating reference table: ",
+            WRITE(*,*)"EXAMPLE: Evaluating table: ",
      >           FILENAME(1:LEN_TRIM(FILENAME))
          ENDIF
       ENDIF
@@ -93,16 +92,16 @@ c        Adapt the following to your scenario!
       IF (IARGC().LT.2.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq6mE.LHgrid"
          WRITE(*,*)
-     >        "EXAMPLE-REF: No PDF set given, "//
-     >        "taking the default of cteq6mE.LHgrid!"
+     >        "EXAMPLE: WARNING! No PDF set given, "//
+     >        "taking cteq6mE.LHgrid instead!"
       ELSE
-         WRITE(*,*)"EXAMPLE-REF: Using PDF set: ",
+         WRITE(*,*)"EXAMPLE: Using PDF set: ",
      >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
 
 *---Too many arguments
       IF (IARGC().GT.2) THEN
-         WRITE(*,*)"EXAMPLE-REF: ERROR! Too many arguments, aborting!"
+         WRITE(*,*)"EXAMPLE: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
 
@@ -122,7 +121,7 @@ c        Adapt the following to your scenario!
 *---Compute the cross sections
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
-      WRITE(*,*)"EXAMPLE-REF: Calculate cross sections"
+      WRITE(*,*)"EXAMPLE: Calculate cross sections"
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
 
@@ -137,61 +136,50 @@ c                              (see output or table documentation)
 c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
-*---Evaluate reference table
-      Call FNSET("P_REFTAB",1)  ! evaluate standard table:0 or reference:1
+*---Loop over scale settings
+      DO J=1,4
 
-*---Calculate reference LO cross sections (set IPRINT to 1 for more verbose output) 
-      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, reflo)
+*---Evaluate table
+         Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
+         
+*---Calculate LO cross sections (set IPRINT to 1 for more verbose output) 
+         Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+         Call FX9999CC(FILENAME, SCALEF(J), SCALEF(J), IPRINT, XSLO)
+      
+*---Calculate NLO cross sections (set IPRINT to 1 for more verbose output) 
+         Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+         Call FX9999CC(FILENAME, SCALEF(J), SCALEF(J), IPRINT, XSNLO)
 
-*---Evaluate normal table, calculate approximated LO cross sections
-      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
-      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, xslo)
-
-*---Evaluate reference table
-      Call FNSET("P_REFTAB",1)  ! evaluate standard table:0 or reference:1
-
-*---Calculate reference NLO cross sections (set IPRINT to 1 for more verbose output) 
-      Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, refnlo)
-
-*---Evaluate normal table, calculate approximated NLO cross sections
-      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
-      Call FX9999CC(FILENAME, 1.d0, 1.d0, IPRINT, xsnlo)
+*---Calculate and print threshold corrections
+c      Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
 
 *---Cross section printout
-      WRITE(*,*)"========================================"//
-     >     "================================"
-      WRITE(*,*)" Relative Algorithmic Errors"
-      WRITE(*,*)" The scale factor is ",1.d0
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
-      WRITE(*,*)" bin     LO cross section      "//
-     >     "LO reference          algorithmic deviation"
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
- 900  FORMAT(1P,I5,3(4X,E18.11))
-      Do I=1,MxObsBin
-         IF (ABS(REFLO(I)).GT.1.D-99) THEN
-            DREF = (XSLO(I)-REFLO(I)) / REFLO(I)
-            IF ((ABS(1.D0 + xslo(I)).GT.1.D-99)) THEN
-               WRITE(*,900)I,XSLO(I),REFLO(I),DREF
+         DO I=1,MxObsBin
+            IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
+     >           (ABS(1.D0 + xsnlo(I)).GT.1.D-99)) THEN
             ENDIF
-         ENDIF
-      Enddo
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
-      WRITE(*,*)" bin     NLO cross section     "//
-     >     "NLO reference         algorithmic deviation"
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
-      Do i=1,MxObsBin
-         IF (ABS(REFNLO(I)).GT.1.D-99) THEN
-            DREF = (XSNLO(I)-REFNLO(I)) / REFNLO(I)
-            IF ((ABS(1.D0 + xsNlo(I)).GT.1.D-99)) THEN
-               WRITE(*,900)I,XSNLO(I),REFNLO(I),DREF
+            IF ((ABS(xslo(I)).GT.1.D-99)) THEN
+               kfac(I) = xsnlo(I) / xslo(I)
             ENDIF
-         ENDIF
-      Enddo
-      
+         ENDDO
+         WRITE(*,*)"========================================"//
+     >        "================================"
+         WRITE(*,*)" Cross Sections"
+         WRITE(*,*)" The scale factor no. ",J," is: ",SCALEF(J)
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+         WRITE(*,*)" bin     LO cross section      "//
+     >        "NLO cross section     K factor"
+         WRITE(*,*)"----------------------------------------"//
+     >        "--------------------------------"
+ 900     FORMAT(1P,I5,3(4X,E18.11))
+         DO I=1,MxObsBin
+            IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
+     >           (ABS(1.D0 + xsNlo(I)).GT.1.D-99)) THEN
+               WRITE(*,900)I,XSLO(I),XSNLO(I),KFAC(I)
+            ENDIF
+         ENDDO
+      ENDDO
+
       End
