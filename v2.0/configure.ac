@@ -407,6 +407,7 @@ AC_CONFIG_FILES([Makefile
                  author/ep/Makefile
                  author/hadron/Makefile
                  user/Makefile
+                 myuser/Makefile
 	        ])
 #                 userkr/Makefile
 

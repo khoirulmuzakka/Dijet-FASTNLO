@@ -14,7 +14,7 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 #
-SUBDIRS = common merger tableconvert author/ep author/hadron user
+SUBDIRS = common merger tableconvert author/ep author/hadron user myuser
 #userkr
 #
 # Files that are required to build the project but that can be
