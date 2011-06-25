@@ -9,7 +9,9 @@ pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la libfast
 pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h cone-e-07.h
 
 # Source files to be distributed for each library
-libfastnloJetAlgos_la_SOURCES = fj-ak.h fj-ak.cc
+libfastnloJetAlgos_la_SOURCES = cone-e.cc cone-e.h cone-et.cc cone-et.h \
+  fj-ak.cc fj-ak.h fj-d0r2.cc fj-d0r2.h fj-kt.cc fj-kt.h fj-sc.cc fj-sc.h \
+  kt-e.cc kt-e.h
 
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
   fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h

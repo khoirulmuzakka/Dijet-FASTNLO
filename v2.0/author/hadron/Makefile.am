@@ -19,13 +19,6 @@ endif
 # All targets
 AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
 # Individual sources
-#libfnt1001midp_la_SOURCES   = fnt1001midp.cc   cone-et-07.h cone-et-07.cc $(AM_SOURCES)
-#libfnt2009midp_la_SOURCES   = fnt2009midp.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-#libfnt2012test_la_SOURCES   = fnt2012test.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-#libfnt2013norm_la_SOURCES   = fnt2013norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-#libfnt2014norm_la_SOURCES   = fnt2014norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-#libfnt2015norm_la_SOURCES   = fnt2015norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-#libfnl1001_la_SOURCES       = fnl1001.cc       cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
 libfnt1001midp_la_SOURCES   = fnt1001midp.cc   $(AM_SOURCES)
 libfnt2009midp_la_SOURCES   = fnt2009midp.cc   $(AM_SOURCES)
 libfnt2012test_la_SOURCES   = fnt2012test.cc   $(AM_SOURCES)
