@@ -1,6 +1,6 @@
 #include "kt-e.h"
 #include <cmath>
-
+using namespace std;
 
 const bounded_vector<lorentzvector<double> >&
 kt_e::operator()(const event_hhc& ev, double jetsize)

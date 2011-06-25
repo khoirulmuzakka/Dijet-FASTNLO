@@ -25,7 +25,7 @@ class cone_e
   bounded_vector<_Lv> _M_ax;
   
   //   private members
-  double _M_pair(int, int);
+  double _M_pair(int, int, double);
   void _M_merge(int i, int j) { _M_p[i] += _M_p[j];}
 };
 

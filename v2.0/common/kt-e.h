@@ -2,11 +2,11 @@
 #define __kt_e_h__ 1
 
 
-#include <event.h>
+#include <bits/hhc-event.h>
+#include <bits/hep-bounded_vector.h>
 
 using namespace std;
 using namespace nlo;
-
 
 class kt_e
 {

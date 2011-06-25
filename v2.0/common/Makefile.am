@@ -6,7 +6,7 @@ pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la libfast
 
 # The associated header files
 # Add header files for jet algos ?
-pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h cone-e-07.h
+pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h
 
 # Source files to be distributed for each library
 libfastnloJetAlgos_la_SOURCES = cone-e.cc cone-e.h cone-et.cc cone-et.h \
