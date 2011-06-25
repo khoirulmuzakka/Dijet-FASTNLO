@@ -18,6 +18,7 @@ endif
 #
 # All targets
 AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
+# cteq6.h is included from lhpdf installation which is different from original
 # Individual sources
 libfnt1001midp_la_SOURCES   = fnt1001midp.cc   $(AM_SOURCES)
 libfnt2009midp_la_SOURCES   = fnt2009midp.cc   $(AM_SOURCES)
@@ -85,9 +86,6 @@ endif
 #else
 #   libfnl1001sc07_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
 #endif
-
-#libfnl1310_la_LDFLAGS = ../../common/libfastnloNlojet.la -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet
-#libfnl1308_la_LDFLAGS = ../../common/libfastnloNlojet.la -L${LHPDFLIBPATH} -llhpdf_cteq6 -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
