@@ -1,9 +1,9 @@
-#include "cone-e-07.h"
+#include "cone-e.h"
 #include <cmath>
 
 
 const bounded_vector<lorentzvector<double> >&
-cone_e_07::operator()(const event_hhc& ev, double rcone)
+cone_e::operator()(const event_hhc& ev, double jetsize)
 {
   int merge = 0, nj = 0, np = 0, nt = ev.upper();
   double dist;
@@ -28,7 +28,7 @@ cone_e_07::operator()(const event_hhc& ev, double rcone)
   nj = np;
   for ( int i = 1; i <= np; i++ ) {
     for ( int j = i + 1; j <= np; j++ ) {     
-      if ( merge == 0 && (dist = _M_pair(i,j) ) < 1.0 ) {
+      if ( merge == 0 && (dist = _M_pair(i,j,jetsize) ) < 1.0 ) {
         _M_merge(i, j);               //   i<j      Run II E-scheme 
         merge = 1;
         nj--;
@@ -45,11 +45,11 @@ cone_e_07::operator()(const event_hhc& ev, double rcone)
   return _M_pj;
 }
 
-double cone_e_07::_M_pair(int i, int j)
+double cone_e::_M_pair(int i, int j, double rcone)
 {
   static const double pi = 3.14159265358979323846;
   static const double twopi = 6.28318530717958647692;
-  static const double rcone = 0.7;
+  //  static const double rcone = 0.7;
   static const double rsep = 2.0;
   
   //   - check if distance between both particles is < R_sep*R_cone)

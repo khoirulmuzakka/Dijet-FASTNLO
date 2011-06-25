@@ -1,12 +1,12 @@
-#include "kt-e-06.h"
+#include "kt-e.h"
 #include <cmath>
 
 
 const bounded_vector<lorentzvector<double> >&
-kt_e_06::operator()(const event_hhc& ev, double r0)
+kt_e::operator()(const event_hhc& ev, double jetsize)
 {
   int imin, jmin, kmin, nt = ev.upper();
-  double tmp, pmin, smin, r2 = r0*r0;
+  double tmp, pmin, smin, r2 = jetsize*jetsize;
   
   //----- initialize the arrays -----
   _M_pj.resize(1,0); _M_p.resize(1, nt);
@@ -102,7 +102,7 @@ kt_e_06::operator()(const event_hhc& ev, double r0)
   return _M_pj;
 }
 
-double kt_e_06::_M_pair(int i, int j)
+double kt_e::_M_pair(int i, int j)
 {
   static const double pi = 3.14159265358979323846;
   static const double twopi = 6.28318530717958647692;
@@ -139,7 +139,7 @@ double kt_e_06::_M_pair(int i, int j)
   return dist;
 }
 
-void kt_e_06::_M_merge(int i, int j)
+void kt_e::_M_merge(int i, int j)
 {
    _M_p[i] += _M_p[j];
 }

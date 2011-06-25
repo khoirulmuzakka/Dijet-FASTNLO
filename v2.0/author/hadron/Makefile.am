@@ -12,27 +12,40 @@ endif
 
 #
 # All source files which go into the main targets (and have to be distributed)
+# Note: All standard jet algo interfaces like fj-ak.cc and fj-ak.h reside in the
+#       "common" directory and are collected into the common library libfastnloJetAlgos.
+#       An example how to add one locally here can be found below. 
 #
 # All targets
 AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
 # Individual sources
-libfnt1001midp_la_SOURCES   = fnt1001midp.cc   cone-et-07.h cone-et-07.cc $(AM_SOURCES)
-libfnt2009midp_la_SOURCES   = fnt2009midp.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-libfnt2012test_la_SOURCES   = fnt2012test.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-libfnt2013norm_la_SOURCES   = fnt2013norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-libfnt2014norm_la_SOURCES   = fnt2014norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnt1001midp_la_SOURCES   = fnt1001midp.cc   cone-et-07.h cone-et-07.cc $(AM_SOURCES)
+#libfnt2009midp_la_SOURCES   = fnt2009midp.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnt2012test_la_SOURCES   = fnt2012test.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnt2013norm_la_SOURCES   = fnt2013norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnt2014norm_la_SOURCES   = fnt2014norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
 #libfnt2015norm_la_SOURCES   = fnt2015norm.cc   cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
-libfnl1001_la_SOURCES       = fnl1001.cc       cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+#libfnl1001_la_SOURCES       = fnl1001.cc       cone-e-07.h  cone-e-07.cc  $(AM_SOURCES)
+libfnt1001midp_la_SOURCES   = fnt1001midp.cc   $(AM_SOURCES)
+libfnt2009midp_la_SOURCES   = fnt2009midp.cc   $(AM_SOURCES)
+libfnt2012test_la_SOURCES   = fnt2012test.cc   $(AM_SOURCES)
+libfnt2013norm_la_SOURCES   = fnt2013norm.cc   $(AM_SOURCES)
+libfnt2014norm_la_SOURCES   = fnt2014norm.cc   $(AM_SOURCES)
+#libfnt2015norm_la_SOURCES   = fnt2015norm.cc   $(AM_SOURCES)
+libfnl1001_la_SOURCES       = fnl1001.cc       $(AM_SOURCES)
 # Require fastjet
-libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak.h      fj-ak.cc      $(AM_SOURCES)
-libfnl1001sc07_la_SOURCES   = fnl1001sc07.cc   fj-sc.h      fj-sc.cc      $(AM_SOURCES)
-libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc fj-d0r2.h    fj-d0r2.cc    $(AM_SOURCES)
-libfnt2012_la_SOURCES       = fnt2012.cc       fj-sc.h      fj-sc.cc      $(AM_SOURCES)
-libfnl2222b_la_SOURCES      = fnl2222b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
-libfnl2342b_la_SOURCES      = fnl2342b.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
-libfnl2412c_la_SOURCES      = fnl2412c.cc      fj-ak.h      fj-ak.cc      $(AM_SOURCES)
-libfnl2822den_la_SOURCES    = fnl2822den.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
-libfnl2822num_la_SOURCES    = fnl2822num.cc    fj-ak.h      fj-ak.cc      $(AM_SOURCES)
+libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   $(AM_SOURCES)
+libfnl1001sc07_la_SOURCES   = fnl1001sc07.cc   $(AM_SOURCES)
+libfnl1001d0r207_la_SOURCES = fnl1001d0r207.cc $(AM_SOURCES)
+libfnt2012_la_SOURCES       = fnt2012.cc       $(AM_SOURCES)
+libfnl2222b_la_SOURCES      = fnl2222b.cc      $(AM_SOURCES)
+libfnl2342b_la_SOURCES      = fnl2342b.cc      $(AM_SOURCES)
+libfnl2412c_la_SOURCES      = fnl2412c.cc      $(AM_SOURCES)
+libfnl2822den_la_SOURCES    = fnl2822den.cc    $(AM_SOURCES)
+libfnl2822num_la_SOURCES    = fnl2822num.cc    $(AM_SOURCES)
+# Example how to add a jet algo interface locally in this directory
+# Should only be done temporarily
+#libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak.h      fj-ak.cc      $(AM_SOURCES)
 
 #
 # C++ compiler flags to be used for the main target
@@ -62,7 +75,7 @@ endif
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
 #
 # All targets
-AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -lfastnloJets -L${LHPDFLIBPATH} -llhpdf_cteq6
 if HAVE_FASTJETCONFIG 
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else

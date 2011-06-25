@@ -1,5 +1,5 @@
-#ifndef __cone_et_07_h__
-#define __cone_et_07_h__ 1
+#ifndef __cone_et_h__
+#define __cone_et_h__ 1
 
 
 #include <bits/hhc-event.h>
@@ -9,14 +9,14 @@ using namespace std;
 using namespace nlo;
 
 
-class cone_et_07
+class cone_et
 {
   //   private types
   typedef lorentzvector<double> _Lv;
   
 public:
   //   do the clustering and return with the momenta of the jets
-  const bounded_vector<_Lv>& operator()(const event_hhc&, double = 0.7);
+  const bounded_vector<_Lv>& operator()(const event_hhc&, double);
   
 private:
   //   private data members

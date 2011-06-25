@@ -1,5 +1,5 @@
-#ifndef __kt_e_06_h__
-#define __kt_e_06_h__ 1
+#ifndef __kt_e_h__
+#define __kt_e_h__ 1
 
 
 #include <event.h>
@@ -8,13 +8,13 @@ using namespace std;
 using namespace nlo;
 
 
-class kt_e_06
+class kt_e
 {
   typedef lorentzvector<double> _Lv;
    
 public:
   //   do the clustering and return with the momenta of the jets
-   const bounded_vector<_Lv>& operator()(const event_hhc&, double = 0.6);
+   const bounded_vector<_Lv>& operator()(const event_hhc&, double);
   
 private:
   //   private data members
