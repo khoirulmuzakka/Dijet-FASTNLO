@@ -660,6 +660,10 @@ ckr Part 2: Additional PDF uncertainty parts using a separate PDF set
      >              "HERAPDF10_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF10_VAR.LHgrid"
+               ELSEIF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
+     >                 "HERAPDF15_EIG.LHgrid") THEN
+                  PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
+     >                 "/HERAPDF15_VAR.LHgrid"
 ckr                  WRITE(*,*)"ALLUNC: Taking second HERAPDF set: "//
 ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                ELSE
