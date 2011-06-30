@@ -1,1 +1,1 @@
-../author1c/common/Cteq61Pdf.f
+../author/common/Cteq61Pdf.f
