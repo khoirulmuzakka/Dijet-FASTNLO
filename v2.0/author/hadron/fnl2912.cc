@@ -193,6 +193,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double jetsize = 0.5;
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
+
+  // --- give some debug output after selection and sorting
   if ( doDebug ) {
     for (unsigned int i=1; i<=nj; i++) {
       double pti = pj[i].perp();
@@ -221,17 +223,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double yjmax  = 1.0;
   // lowest pT for jets to be considered
   double ptjmin = 40.;
-
-  // --- select jets in y and ptjmin (failing jets are removed from the jet array pj!)
+  
+  // --- select jets in y and ptjmin (failing jets are moved to the end of the jet array pj!)
   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
-  std::remove_if(pj.begin(), pj.end(), SelJets);
-
-  // --- sort jets, by default decreasing in pt
+  // --- count number of selected jets left at this stage
+  size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
+  
+  // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
   static fNLOSorter SortJets;
-  std::sort(pj.begin(), pj.end(), SortJets);
+  std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
-  // --- count number of jets left at this stage
-  unsigned int njet = pj.upper(); 
+  // --- give some debug output after selection and sorting
   if ( doDebug ) {
     cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
     cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
