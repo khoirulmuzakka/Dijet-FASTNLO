@@ -813,9 +813,9 @@ c      nproc = 1                 ! print only gg->jets subprocess
       WRITE(*,*)" "
 
       RETURN
+ 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
 ckr 30.01.2008: Change format for better comparison
-c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
- 900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
+c 900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
  901  Format (A12,F8.2,"-",F8.2,":",4E13.4)
  5000 FORMAT (A,A64)
       END
