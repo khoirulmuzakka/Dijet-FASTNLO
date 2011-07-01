@@ -1,4 +1,4 @@
-      PROGRAM WEBAPPLICATION
+      PROGRAM FASTNLOWEB
 * -------------------------------------------------------------------
 * M. Wobisch 06/29/2005
 *
