@@ -8,7 +8,7 @@ FFILES= main-cedar.f fnx9999.f fn-pdf.f fn-alphas-demo.f fn-interface-cedar.f
 FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 # At HepForge
-#LHAPDF=/hepforge/home/fastnlo/local/lib/libLHAPDF.la
+#LHAPDF=$(HOME)/fastnlo/local/lib/libLHAPDF.la
 # Local test
 LHAPDF=$(HOME)/local/lhapdf-5.8.4/lib/libLHAPDF.la
 

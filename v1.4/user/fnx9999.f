@@ -98,7 +98,8 @@ c - Read the fastNLO coefficient table
          CALL FX9999RD(FILENAME,IPRINTFLAG)
          OLDFILENAME = FILENAME
          
-c - Check consistency of array dimensions / commonblock parameters
+c - Check again consistency of array dimensions / commonblock parameters
+c - Partially done already while reading in FX9999RD 
          IF (NXSUM.GT.NXMAX) THEN
             WRITE(*,*)"fastNLO: ERROR! Inconsistent x binning,"//
      >           " NXSUM =",NXSUM," > NXMAX =",NXMAX
@@ -855,7 +856,7 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E13.4)
       if (ITABVERSION.ne.14000) then
          WRITE(*,*)"#     ==> this usercode works only for version 1.4"
          WRITE(*,*)"#     ==> please get updated usercode from"
-         WRITE(*,*)"#         http://hepforge.cedar.ac.uk/fastnlo "
+         WRITE(*,*)"#         http://projects.hepforge.org/fastnlo "
          stop
       endif
       READ(2,*) i
@@ -903,17 +904,50 @@ c   -----------------------------------
       if (i.ne.iseparator) goto 999
 c   -----------------------------------
       READ(2,*) NBINTOT
+      IF (NBINTOT.GT.NBINTOTMAX) THEN
+         WRITE(*,*)"fastNLO: ERROR! Too many obs. bins in this table!"
+         WRITE(*,*)"         Max. currently set to NBINTOTMAX = ",
+     >        NBINTOTMAX
+         WRITE(*,*)"         while table requires NBINTOT = ",
+     >        NBINTOT
+         WRITE(*,*)"         Please make clean and recompile"//
+     >        " with adequate dimensioning in fnx9999.inc"
+         STOP
+      ENDIF
+
       READ(2,*) NDIMENSION
       do i=1,ndimension
          READ(2,*) DIMLABEL(i)
       enddo
       
       READ(2,*) NRAPIDITY
+      IF (NRAPIDITY.GT.NRAPMAX) THEN
+         WRITE(*,*)"fastNLO: ERROR! Too many rap. bins in this table!"
+         WRITE(*,*)"         Max. currently set to NRAPMAX = ",
+     >        NRAPMAX
+         WRITE(*,*)"         while table requires NRAPIDITY = ",
+     >        NRAPIDITY
+         WRITE(*,*)"         Please make clean and recompile"//
+     >        " with adequate dimensioning in fnx9999.inc"
+         STOP
+      ENDIF
+
       do i=1,nrapidity+1
          READ(2,*) RAPBIN(i)
       enddo
       do i=1,nrapidity
          READ(2,*) NPT(i)
+         IF (NPT(I).GT.NPTMAX) THEN
+            WRITE(*,*)
+     >           "fastNLO: ERROR! Too many pt bins in this table!"
+            WRITE(*,*)"         Max. currently set to NPTMAX = ",
+     >           NPTMAX
+            WRITE(*,*)"         while table requires I, NPT(I) = ",
+     >           I,NPT(I)
+            WRITE(*,*)"         Please make clean and recompile"//
+     >           " with adequate dimensioning in fnx9999.inc"
+            STOP
+         ENDIF
       enddo
       do i=1,nrapidity
          do j=1,NPT(i)+1
@@ -971,6 +1005,16 @@ c   -----------------------------------
          NXSUM = NXTOT
          Nsubproc = 3
       endif
+      IF (NXSUM.GT.NXMAX) THEN
+         WRITE(*,*)"fastNLO: ERROR! Too many x bins in this table!"
+         WRITE(*,*)"         Max. currently set to NXMAX = ",
+     >        NXMAX
+         WRITE(*,*)"         while table requires NXSUM = ",
+     >        NXSUM
+         WRITE(*,*)"         Please make clean and recompile"//
+     >        " with adequate dimensioning in fnx9999.inc"
+         STOP
+      ENDIF
 
       nbin=0
       do i=1,nrapidity
