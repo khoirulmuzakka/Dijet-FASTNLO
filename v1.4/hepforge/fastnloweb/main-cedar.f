@@ -58,7 +58,8 @@ c --- parse command line
       ASMZ = alphas
 
       write(*,*) "  "
-      write(*,*) " in the matrixelements you use  alpha_s(Mz)=",alphas
+      write(*,FMT='(A,F8.5)')
+     >     " in the matrixelements you use  alpha_s(Mz)=",alphas
       write(*,*) "  "
 
 c      write(*,*) 'fastNLO input parameters',filename,pdfset,pdfmember,alphas,muf,mur
@@ -71,7 +72,7 @@ c - initialize one member, 0=best fit member
 
 
       aspdf = alphasPDF(91.1876d0)
-      write(*,*) " in the pdf was used: alpha_s(Mz)=",aspdf
+      write(*,FMT='(A,F8.5)') " in the pdf was used: alpha_s(Mz)=",aspdf
 
 c - compute the cross sections
       write(*,*) '     fastNLO: compute the cross section'
@@ -99,8 +100,9 @@ c                3 NNLO-NLL correction (add 1,2,3 to get full prediction)
 
 
       write(*,*) "  "
-      write(*,*) " in the matrixelements you use  alpha_s(Mz)=",alphas
+      write(*,FMT='(A,F8.5)')
+     >     " in the matrixelements you use  alpha_s(Mz)=",alphas
       write(*,*) "  "
-
-
+      
+      
       END

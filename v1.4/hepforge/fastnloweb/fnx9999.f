@@ -146,10 +146,16 @@ c - Print further info
          WRITE(*,5000)" #      this table contains: ",
      >        CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = NAMELABEL(2)
-         WRITE(*,5000)" #      as published in:     ",
+         WRITE(*,5000)" #                           ",
      >        CSTRNG(1:LEN_TRIM(CSTRNG))
          CSTRNG = NAMELABEL(3)
-         WRITE(*,5000)" #      by:                  ",
+         WRITE(*,5000)" #                           ",
+     >        CSTRNG(1:LEN_TRIM(CSTRNG))
+         CSTRNG = NAMELABEL(4)
+         WRITE(*,5000)" #                           ",
+     >        CSTRNG(1:LEN_TRIM(CSTRNG))
+         CSTRNG = NAMELABEL(5)
+         WRITE(*,5000)" #                           ",
      >        CSTRNG(1:LEN_TRIM(CSTRNG))
          WRITE(*,*)"#      "
          CSTRNG = CIREACTION(IREACTION)
@@ -204,14 +210,14 @@ c - Print scale-variations available in the table
      >        " variations:",NSCALEVAR
          WRITE (*,*)"#         available factorization scale settings:"
          DO I=1,NSCALEVAR
-            WRITE (*,FMT='(A,I1,A,F6.4)')
+            WRITE (*,FMT='(A,I1,A,F6.2)')
      >           " #           ",I,"  (muf/mu0) = ",MUFSCALE(I)
          ENDDO
          WRITE (*,*)"#"
          WRITE (*,*)"#         available renormalization scale "//
      >        "settings:"
          DO I=1,NSCALEVAR
-            WRITE (*,FMT='(A,I1,A,F6.4)')
+            WRITE (*,FMT='(A,I1,A,F6.2)')
      >           " #           ",I,"  (mur/mu0) = ",MURSCALE(I)
          ENDDO
          WRITE (*,*)"#   (In LO and NLO, the renormalization scale"
@@ -247,7 +253,7 @@ ckr This selects the first match in contrast to previous version
       IF (IFIRST.EQ.0) THEN
          WRITE (*,*)"#    --> in the first call the scales are "//
      >        "chosen to be:"
-         WRITE (*,5002)" #     (mur/mu0) =",XMUR,
+         WRITE (*,FMT='(A,F6.2,4X,A,F6.2)')" #     (mur/mu0) =",XMUR,
      >        "(muf/mu0) =",MUFSCALE(IXMUF)
       ENDIF
       IF (IXMUF.EQ.0) THEN
@@ -362,8 +368,6 @@ c - Print results - if requested
 
 ckr 30.01.2008: Use simple A format, string length via LEN_TRIM
  5000 FORMAT (A,A)
- 5001 FORMAT (A,A,A)
- 5002 FORMAT (A,F8.4,4X,A,F8.4)
  998  CONTINUE
       END
 
@@ -779,16 +783,16 @@ c      nproc = 1                 ! print only gg->jets subprocess
          stop
       endif
 
-      WRITE(*,*)"--------  muf/mu0=",mufscale(imufflag),
-     +     "     mur/mu0=",xmur
+      WRITE(*,FMT='(A,F6.2,A,F6.2)')"--------  muf/mu0=",
+     >     mufscale(imufflag),"     mur/mu0=",xmur
    
       nbin = 0                  ! linear bin for the final observable
       do i=1,nrapidity          ! Rapidity Bins
          if (RAPBIN(i).lt.RAPBIN(i+1)) then
-            WRITE(*,*)"       from ",RAPBIN(i)," - ",RAPBIN(i+1),
+            WRITE(*,902)"       from ",RAPBIN(i)," - ",RAPBIN(i+1),
      +           "  in:  ",dimlabel(1)
          else                   !  happens only for reference tables
-            WRITE(*,*)"       from ",RAPBIN(1)," - ",RAPBIN(i+1),
+            WRITE(*,902)"       from ",RAPBIN(1)," - ",RAPBIN(i+1),
      +           "  in:  ",dimlabel(1)
          endif
          do j=1,NPT(i)          ! pT Bins
@@ -817,6 +821,7 @@ c      nproc = 1                 ! print only gg->jets subprocess
 ckr 30.01.2008: Change format for better comparison
 c 900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
  901  Format (A12,F8.2,"-",F8.2,":",4E13.4)
+ 902  Format (A12,F8.2,A4,F8.2,A7,A12)
  5000 FORMAT (A,A64)
       END
 
