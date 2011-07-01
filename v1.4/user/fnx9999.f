@@ -855,7 +855,7 @@ c 900  Format (A12,F8.2,"-",F8.2,":",3E17.8)
       if (i.ne.iseparator) goto 999
       READ(2,*) ITABVERSION
       IF (IPRINTFLAG.EQ.1) THEN
-         WRITE(*,FMT='(A,F4.1)')"#       tableformat is version",
+         WRITE(*,FMT='(A,F4.1)')" #       tableformat is version",
      >        real(itabversion)/10000d0
       ENDIF
       if (ITABVERSION.ne.14000) then
