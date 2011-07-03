@@ -1,6 +1,6 @@
 //
-// fastNLO v2 author code for fnl2912:
-//     CMS LHC 3-jet Mass Scenario, E_cms = 7 TeV
+// fastNLO v2 author code for fnl2622e:
+//     CMS LHC Dijet Chi Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
 // 
@@ -124,8 +124,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
   // --- fastNLO user: select the number of jets for your observable
   //nj = 1U;
-  //nj = 2U;    
-  nj = 3U;
+  nj = 2U;    
+  //nj = 3U;
 
   // --- number of the up and down type flavours (don't touch)
   nu = 2U;
@@ -211,9 +211,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   // smallest |rapidity| for jets to be considered
   const double yjmin  = 0.0;
   // largest |rapidity| for jets to be considered
-  const double yjmax  = 1.0;
+  const double yjmax  = 5.0;
   // lowest pT for jets to be considered
-  const double ptjmin = 40.;
+  const double ptjmin = 0.;
   
   // --- select jets in y and ptjmin (failing jets are moved to the end of the jet array pj!)
   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -235,39 +235,47 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     }
   }
 
-  // 3-jet mass requires at least 3 jets
-  if (njet > 2) {
-    
-    // --- declare and initialize additional cut variables
-    // minimal 3-jet mass for events to be considered
-    const double m3jmin = 200.;
-    // minimum pT fraction of leading jet required for 3rd jet
-    const double ptrelmin = 0.2;
-    
-    // Derive 3-jet variables
-    // 3-jet mass
-    lorentzvector<double> pj123 = pj[1] + pj[2] + pj[3]; 
-    double m3j = pj123.mag();
-    if (m3j < 0.) {cout << "Warning!: Negative Mass" << m3j << endl;}
-    
-    // Maximal (pseudo-)rapidity
-    double y3jmax = max(abs(pj[1].rapidity()),abs(pj[2].rapidity()));
-    y3jmax = max(y3jmax,abs(pj[3].rapidity()));
+  // Dijet chi requires at least 2 jets
+  if (njet > 1) {
 
-    // Ratio of pt3 to pt1 (ptrel)
-    double ptrel = pj[3].perp()/pj[1].perp();
+    // --- declare and initialize additional cut variables
+    // minimal dijet mass for events to be considered
+    const double mjjmin = 400.;
+    // maximal rapidity of the two leading jets
+    const double yjjmax = 2.5;
+    // maximal allowed y_boost = 0.5 * |y1 + y2|
+    const double yboostmax = 1.11;
+    // maximal allowed y_star = 0.5 * |y1 - y2|
+    const double ystarmax  = 1.5;
     
-    // --- Further 3-jet phase space cuts?
-    if ( m3jmin <= m3j && y3jmax < yjmax && ptrelmin <= ptrel ) {
+    // Derive dijet variables
+    // Dijet mass
+    lorentzvector<double> pj12 = pj[1] + pj[2]; 
+    double mjj = pj12.mag();
+    if (mjj < 0.) {cout << "Warning!: Negative Mass" << mjj << endl;}
+
+    // Rapidities of two leading jets
+    double y1 = pj[1].rapidity();
+    double y2 = pj[2].rapidity();
+
+    // Sum, diff and chi for these rapidities
+    double syjj  = abs(y1+y2);
+    double dyjj  = abs(y1-y2);
+    double chijj = exp(dyjj);
+
+    // --- Further dijet phase space cuts?
+    if (syjj < 2.*yboostmax && dyjj < 2.*ystarmax &&
+	abs(y1) < yjjmax && abs(y2) < yjjmax &&  
+	mjj >= mjjmin ) {
       
-      // --- set the renormalization and factorization scale to average 3-jet pT
-      double mu = (pj[1].perp() + pj[2].perp() + pj[3].perp()) / 3.0;
+      // --- set the renormalization and factorization scale to average dijet pT
+      double mu = (pj[1].perp() + pj[2].perp()) / 2.0;
       
-      // --- identify bin number (dim1,dim2) here (m3j,y3jmax)
+      // --- identify bin number (dim1,dim2) here (chijj,mjj)
       int obsbin = -1;
       for (int j = 0; j < A2->GetNObsBin(); j++) {
-	if (A2->LoBin[j][0] <= m3j    && m3j    < A2->UpBin[j][0] && 
-	    A2->LoBin[j][1] <= y3jmax && y3jmax < A2->UpBin[j][1]) {
+	if (A2->LoBin[j][0] <= chijj && chijj < A2->UpBin[j][0] && 
+	    A2->LoBin[j][1] <= mjj   && mjj   < A2->UpBin[j][1]) {
 	  obsbin = j;
 	  break;
 	}
@@ -285,7 +293,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	}
       } // --- end: fill fastNLO array
     } // --- end: final selection
-  } // --- end: 3-jet+ events only
+  } // --- end: dijet+ events only
 } // --- end: fastNLO user playground
 
 void UserHHC::writetable(){
@@ -397,7 +405,7 @@ void UserHHC::inittable(){
   table = new fnloTable(tablefilename);
 
   // --- fastNLO: fill variable for table header block A1
-  table->GetBlockA1()->SetScenName("fnl2912");  // - fastNLO user: set scenario name
+  table->GetBlockA1()->SetScenName("fnl2622e");  // - fastNLO user: set scenario name
   table->GetBlockA1()->SetNcontrib(1);
   table->GetBlockA1()->SetNmult(0);
   table->GetBlockA1()->SetNdata(0);
@@ -407,36 +415,38 @@ void UserHHC::inittable(){
   table->GetBlockA1()->SetNuserFloat(0);
   table->GetBlockA1()->SetImachine(0);
   // KR Ende
-  table->GetBlockA2()->SetIpublunits(12);  // - fastNLO user: set cross section units
+  table->GetBlockA2()->SetIpublunits(9);  // - fastNLO user: set cross section units
   //                 (negative power of ten)
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 =  table->GetBlockA2();
 
   // --- fastNLO user: up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("d2sigma-3-jet_dM3Jd|y_max|_(pb_GeV)");
+  A2->ScDescript.push_back("d2sigma-dijet_dChidMJJ_(pb_GeV)");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("3-jet_Mass");
+  A2->ScDescript.push_back("Dijet_Chi");
   A2->ScDescript.push_back("anti-kT_R=0.5");
   A2->ScDescript.push_back("Test");
   
   A2->NScDescript = A2->ScDescript.size();
   A2->Ecms = sqrt(s);
-  A2->ILOord = 3;   // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
+  A2->ILOord = 2;   // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
   A2->NDim = 2;     // --- fastNLO user: no. of dimensions in which observable is binned
-  A2->DimLabel.push_back("M3J_[GeV]");  // --- fastNLO user: label of 1st dimension
+  A2->DimLabel.push_back("Chi");  // --- fastNLO user: label of 1st dimension
   A2->IDiffBin.push_back(2);
-  A2->DimLabel.push_back("|y_max|");   // --- fastNLO user: label of 2nd dimension
+  A2->DimLabel.push_back("MJJ_[GeV]");   // --- fastNLO user: label of 2nd dimension
   A2->IDiffBin.push_back(2);
 
   vector <double> bound;
   bound.resize(2);
 
-  // --- fastNLO user: bin definitions - here in m3j and y3jmax
-  const int ndim2bins = 1;
-  const double dim2bins[ndim2bins+1] = {0.0, 1.0};
+  // --- fastNLO user: bin definitions - here in chijj and mjj
+  const int ndim2bins = 13;
+  const double dim2bins[ndim2bins+1] = {400., 600., 900., 1200., 1500.,
+					1900., 2300., 2400., 2800., 3000.,
+					3200., 4000., 5000., 7000.};
   
-  const int ndim1bins[ndim2bins] = {10};
+  const int ndim1bins[ndim2bins] = {12,12,12,12,12,12,12,12,12,12,12,12,12};
   
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -450,13 +460,14 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim1[11] = { 200., 295., 348., 404., 529., 598., 751., 926., 1126., 1356., 1483. };
+  const double dim1[13] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.,
+			    12., 14., 16. };
   for (int i=0; i<ndim2bins; i++) {
     for (int j=0; j<ndim1bins[i]+1; j++) { 
       dim1bins[i][j] = dim1[j];
     }
   }
-
+  
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 1: " << A2->DimLabel[0] << endl;
   cout << "------------------------" << endl;
@@ -466,7 +477,7 @@ void UserHHC::inittable(){
     }
   }
   cout << "========================" << endl;
-
+  
   // --- fastNLO user:
   //     define below the bin width ("binsize") by which
   //     the cross section is divided to obtain the 
@@ -487,7 +498,7 @@ void UserHHC::inittable(){
       A2->UpBin.push_back(bound);
       binsize = binsize 
 	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... e.g. times dpT
-	* 2. * (dim2bins[i+1]-dim2bins[i]); // ... e.g. times d|y|
+	* (dim2bins[i+1]-dim2bins[i]); // ... e.g. times d|y|
       A2->BinSize.push_back(binsize);
     }
   }
@@ -501,7 +512,7 @@ void UserHHC::inittable(){
   // --- fastNLO table block B
   fnloBlockB *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
   table->CreateBlockB(0,B);
-  B->IXsectUnits = 12;    // --- fastNLO user: set to same value as "SetIpublunits"
+  B->IXsectUnits = 9;    // --- fastNLO user: set to same value as "SetIpublunits"
   B->IDataFlag = 0;
   B->IAddMultFlag = 0;
   B->IContrFlag1 = 1;
@@ -584,17 +595,6 @@ void UserHHC::inittable(){
       cout << "         Trying to find and use x limits included in scenario author code ..." << endl;
       // --------- fastNLO: Warm-Up run results (start)
       // fastNLO user: paste warm-up run results here ...
-      // 883400000 contributions (!= events) in warm-up run
-      xlim[ 0 ] = 1.063511e-02 , mulo[ 0 ] = 4.472458e+01 , muup[ 0 ] = 3.534750e+02 ;
-      xlim[ 1 ] = 1.567526e-02 , mulo[ 1 ] = 6.518156e+01 , muup[ 1 ] = 4.399650e+02 ;
-      xlim[ 2 ] = 1.849052e-02 , mulo[ 2 ] = 7.608355e+01 , muup[ 2 ] = 4.996462e+02 ;
-      xlim[ 3 ] = 2.150961e-02 , mulo[ 3 ] = 8.834811e+01 , muup[ 3 ] = 6.086999e+02 ;
-      xlim[ 4 ] = 2.814612e-02 , mulo[ 4 ] = 1.160387e+02 , muup[ 4 ] = 6.392365e+02 ;
-      xlim[ 5 ] = 3.178483e-02 , mulo[ 5 ] = 1.312755e+02 , muup[ 5 ] = 7.066228e+02 ;
-      xlim[ 6 ] = 3.993076e-02 , mulo[ 6 ] = 1.642966e+02 , muup[ 6 ] = 7.494784e+02 ;
-      xlim[ 7 ] = 4.917051e-02 , mulo[ 7 ] = 2.024171e+02 , muup[ 7 ] = 7.763640e+02 ;
-      xlim[ 8 ] = 5.949442e-02 , mulo[ 8 ] = 2.459496e+02 , muup[ 8 ] = 8.187805e+02 ;
-      xlim[ 9 ] = 7.195217e-02 , mulo[ 9 ] = 2.964002e+02 , muup[ 9 ] = 8.354523e+02 ;
       // --------- fastNLO: Warm-Up run results (end)
       // Safety check:
       // Count no. of xlim values > 0 (should be equal to NObsBin!)   
@@ -656,12 +656,12 @@ void UserHHC::inittable(){
   }
 
   B->NScales = 2;  // two scales: mur and muf
-  B->NScaleDim = 1; // one variable used in scales: 3-jet pT average
+  B->NScaleDim = 1; // one variable used in scales: dijet pT average
   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0 
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0 
   B->ScaleDescript.resize(B->NScaleDim);
 
-  B->ScaleDescript[0].push_back("<pT_1,2,3>"); // --- fastNLO user: give name for selected scale
+  B->ScaleDescript[0].push_back("<pT_1,2>"); // --- fastNLO user: give name for selected scale
   B->NscaleDescript.push_back(B->ScaleDescript[0].size());
   //B->Nscalenode.push_back(4); // number of scale nodes for pT
   B->Nscalenode.push_back(6); // number of scale nodes for pT

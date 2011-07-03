@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt20
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2412c.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la libfnl2912.la
+   lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2412c.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la libfnl2912.la libfnl2622e.la
 endif
 
 #
@@ -37,7 +37,8 @@ libfnl2342b_la_SOURCES      = fnl2342b.cc      $(AM_SOURCES)
 libfnl2412c_la_SOURCES      = fnl2412c.cc      $(AM_SOURCES)
 libfnl2822den_la_SOURCES    = fnl2822den.cc    $(AM_SOURCES)
 libfnl2822num_la_SOURCES    = fnl2822num.cc    $(AM_SOURCES)
-libfnl2912_la_SOURCES       = fnl2912.cc    $(AM_SOURCES)
+libfnl2912_la_SOURCES       = fnl2912.cc       $(AM_SOURCES)
+libfnl2622e_la_SOURCES      = fnl2622e.cc      $(AM_SOURCES)
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
 #libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak.h      fj-ak.cc      $(AM_SOURCES)
