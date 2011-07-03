@@ -146,11 +146,10 @@ if ( $opt_w ) {
 	    } else {
 		my $tmp = $in;
 		chomp $tmp;
-		$tmp =~ s/;//;
-		my @tmps = split(", ",$tmp);
-		if ( !$ifil || $tmps[0] < $xmin[$ient] ) {$xmin[$ient] = $tmps[0];} 
-		if ( !$ifil || $tmps[1] < $blow[$ient] ) {$blow[$ient] = $tmps[1];} 
-		if ( !$ifil || $tmps[2] > $bhig[$ient] ) {$bhig[$ient] = $tmps[2];} 
+		my @tmps = split(" ",$tmp);
+		if ( !$ifil || $tmps[4] < $xmin[$ient] ) {$xmin[$ient] = $tmps[4];} 
+		if ( !$ifil || $tmps[10] < $blow[$ient] ) {$blow[$ient] = $tmps[10];} 
+		if ( !$ifil || $tmps[16] > $bhig[$ient] ) {$bhig[$ient] = $tmps[16];} 
 		$ient++;
 	    }
 	}
@@ -165,10 +164,10 @@ if ( $opt_w ) {
     }
     my $outfile = "${scen}wrm.dat";
     open(OUTFILE,"> $outfile") or die "fastadd.pl: Error! Could not open $outfile!\n";
-    my $line = " // $stat contributions (!= events) in warm-up run\n";
+    my $line = "      // $stat contributions (!= events) in warm-up run\n";
     print OUTFILE $line;
     for (my $ient = 0; $ient < $nent; $ient++) {
-	my $line = "$xmin[$ient], $blow[$ient], $bhig[$ient];\n";
+	my $line = "      xlim[ $ient ] = $xmin[$ient] , mulo[ $ient ] = $blow[$ient] , muup[ $ient ] = $bhig[$ient] ;\n";
 	print OUTFILE $line;
     }
     close OUTFILE;

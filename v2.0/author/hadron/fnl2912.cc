@@ -44,7 +44,6 @@
 // 2009/01/15 TK make code V2.0 compatible
 //
 
-
 //------ DON'T TOUCH THIS PART! ------
 #include <iostream>
 #include <bits/hhc-phasespace.h>
@@ -169,11 +168,12 @@ void UserHHC::initfunc(unsigned int)
 }
 
 // --- fastNLO user: modify jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
+//     (return value must be true for jets to be UNselected)
 struct fNLOSelector {
   fNLOSelector(double ymin, double ymax, double ptmin):
     _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
   double _ymin, _ymax, _ptmin;
-  bool operator() (const lorentzvector<double> &a) {return (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
+  bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
 // --- fastNLO user: modify jet sorting in userfunc (default = descending in jet pt)
@@ -194,7 +194,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
 
-  // --- give some debug output after selection and sorting
+  // --- give some debug output before selection and sorting
   if ( doDebug ) {
     for (unsigned int i=1; i<=nj; i++) {
       double pti = pj[i].perp();
@@ -235,8 +235,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
   // --- give some debug output after selection and sorting
   if ( doDebug ) {
-    cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
     cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+    cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
     for (unsigned int i=1; i<=njet; i++) {
       double pti = pj[i].perp();
       double yi  = abs(pj[i].rapidity());
@@ -557,8 +557,7 @@ void UserHHC::inittable(){
   // KR: This is caught in an error condition now 
   // - fastNLO user: remember to disable reference-mode in
   //                 Warm-Up run: "doReference = false" (above)
-  B->IWarmUpPrint = 10000000;
-  //B->IWarmUpPrint = 10000;
+  B->IWarmUpPrint = 100000;
   B->xlo.resize(A2->NObsBin);
   B->scalelo.resize(A2->NObsBin);
   B->scalehi.resize(A2->NObsBin);
@@ -577,18 +576,30 @@ void UserHHC::inittable(){
   //     tables can not be merged). 
   //
   if ( doWarmUp ) {
+    cout << endl << "fastNLO: Initializing x limits for warm-up run ..." << endl;
     for(int i=0;i<A2->NObsBin;i++){
       xlim[i] = 1.1e-07, mulo[i] = 3.0, muup[i]=9.9e10; // - safe initializations
     }
   } else {
+    cout << endl << "fastNLO: Initializing x limits ..." << endl;
     FILE * infile;
     infile = fopen("fastNLO-warmup.dat","r");
     if ( ! infile ) {
       cout << "fastNLO: WARNING! Could not read x limits from file: fastNLO-warmup.dat" << endl;
       cout << "         Trying to find and use x limits included in scenario author code ..." << endl;
       // --------- fastNLO: Warm-Up run results (start)
-      // 4300000000 contributions (!= events) in warm-up run
       // fastNLO user: paste warm-up run results here ...
+      // 883400000 contributions (!= events) in warm-up run
+      xlim[ 0 ] = 1.063511e-02 , mulo[ 0 ] = 4.472458e+01 , muup[ 0 ] = 3.534750e+02 ;
+      xlim[ 1 ] = 1.567526e-02 , mulo[ 1 ] = 6.518156e+01 , muup[ 1 ] = 4.399650e+02 ;
+      xlim[ 2 ] = 1.849052e-02 , mulo[ 2 ] = 7.608355e+01 , muup[ 2 ] = 4.996462e+02 ;
+      xlim[ 3 ] = 2.150961e-02 , mulo[ 3 ] = 8.834811e+01 , muup[ 3 ] = 6.086999e+02 ;
+      xlim[ 4 ] = 2.814612e-02 , mulo[ 4 ] = 1.160387e+02 , muup[ 4 ] = 6.392365e+02 ;
+      xlim[ 5 ] = 3.178483e-02 , mulo[ 5 ] = 1.312755e+02 , muup[ 5 ] = 7.066228e+02 ;
+      xlim[ 6 ] = 3.993076e-02 , mulo[ 6 ] = 1.642966e+02 , muup[ 6 ] = 7.494784e+02 ;
+      xlim[ 7 ] = 4.917051e-02 , mulo[ 7 ] = 2.024171e+02 , muup[ 7 ] = 7.763640e+02 ;
+      xlim[ 8 ] = 5.949442e-02 , mulo[ 8 ] = 2.459496e+02 , muup[ 8 ] = 8.187805e+02 ;
+      xlim[ 9 ] = 7.195217e-02 , mulo[ 9 ] = 2.964002e+02 , muup[ 9 ] = 8.354523e+02 ;
       // --------- fastNLO: Warm-Up run results (end)
       // Safety check:
       // Count no. of xlim values > 0 (should be equal to NObsBin!)   
@@ -602,18 +613,25 @@ void UserHHC::inittable(){
 	exit(1);
       }
     } else {
+      cout << "fastNLO: Reading x limits from file fastNLO-warmup.dat ..." << endl;
       char line[256];
       // Ignore first documentation line
       if ( ! fgets(line,sizeof(line),infile) ) {
 	cerr << "fastNLO: ERROR! Reading empty file: fastNLO-warmup.dat" << endl;
 	exit(1);
       }
-      printf("fastNLO: Reading x limits from file: fastNLO-warmup.dat\n");
+      printf("fastNLO: Read first, documentation line from file: fastNLO-warmup.dat\n");
       printf("%s",line);
-      // Now read and print out all limits
+      // Now read all limits
       int i = 0;
       while ( fgets(line,sizeof(line),infile) ) {
-	sscanf(line,"%lf, %lf, %lf;",&xlim[i],&mulo[i],&muup[i]);
+	int nvar = sscanf(line,"      xlim[ %*u ] = %le , mulo[ %*u ] = %le , muup[ %*u ] = %le ;",
+			  &xlim[i],&mulo[i],&muup[i]);
+	if (nvar != 3) {
+	  cerr << "fastNLO: ERROR! x limits line did not match expected format:" << endl;
+	  printf("%s",line);
+	  exit(1);
+	}
 	i++;
       }
       if (i != A2->NObsBin ) {
@@ -625,7 +643,8 @@ void UserHHC::inittable(){
   // --- print initialized values 
   cout << endl << "fastNLO: Print initialized x and mu limits:" << endl;
   for (int i=0; i<A2->NObsBin; i++) {
-    printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlim[i],i,mulo[i],i,muup[i]);
+    printf("      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
+	   i,xlim[i],i,mulo[i],i,muup[i]);
   }
   
   for(int i=0;i<A2->NObsBin;i++){

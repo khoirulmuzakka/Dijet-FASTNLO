@@ -28,18 +28,19 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
      if ( IWarmUpCounter == 1 ) {
        FILE * ofile;
        ofile = fopen("fastNLO-warmup.dat","w");
-       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
        fclose(ofile);
      }
      if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
        FILE * ofile;
        ofile = fopen("fastNLO-warmup.dat","w");
-       printf(" // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       for (int i=0;i<BlockA2->GetNObsBin();i++){
-         printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
-	 //	 fprintf(ofile,"%7.5f, %8.3f, %8.3f;\n",xlo[i],scalelo[i],scalehi[i]);
-	 fprintf(ofile,"%e, %e, %e;\n",xlo[i],scalelo[i],scalehi[i]);
+       printf("      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
+         printf("      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
+		i,xlo[i],i,scalelo[i],i,scalehi[i]);
+	 fprintf(ofile,"      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
+		 i,xlo[i],i,scalelo[i],i,scalehi[i]);
        }
        fclose(ofile);
      }
@@ -786,7 +787,9 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
+   // ---
    // --- Warm-Up Run to identify the extreme x,mu values
+   // ---
    // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
      if (xlo[ObsBin] == 0.) xlo[ObsBin] = min(x1,x2);
@@ -799,18 +802,19 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
      if ( IWarmUpCounter == 1 ) {
        FILE * ofile;
        ofile = fopen("fastNLO-warmup.dat","w");
-       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
        fclose(ofile);
      }
      if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
        FILE * ofile;
        ofile = fopen("fastNLO-warmup.dat","w");
-       printf(" // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       fprintf(ofile," // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       for (int i=0;i<BlockA2->GetNObsBin();i++){
-         printf(" xlim[%d]=%7.5f, mulo[%d]=%8.3f, muup[%d]=%8.3f;\n",i,xlo[i],i,scalelo[i],i,scalehi[i]);
-	 //	 fprintf(ofile,"%7.5f, %8.3f, %8.3f;\n",xlo[i],scalelo[i],scalehi[i]);
-	 fprintf(ofile,"%e, %e, %e;\n",xlo[i],scalelo[i],scalehi[i]);
+       printf("      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
+       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
+         printf("      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
+		i,xlo[i],i,scalelo[i],i,scalehi[i]);
+	 fprintf(ofile,"      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
+		 i,xlo[i],i,scalelo[i],i,scalehi[i]);
        }
        fclose(ofile);
      }
