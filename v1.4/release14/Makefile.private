@@ -15,10 +15,21 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-132
 #setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${LHAPDF}
 #
 # At HepForge
-#LHAPDF=$(HOME)/fastnlo/local/lib
+LHAPDF=$(HOME)/fastnlo/local/lib
+# Local test
+#LHAPDF=$(LH)/local/lhapdf-5.8.4/lib
 
+# 10.06.2011 kr: 
 #
-# Remove non-LHC scenarios for now, their code needs some twiggling
+# Remove two incomplete scenarios for now:
+#     - Table for fnt1006 missing at HepForge
+#     - There should be two tables for fnt2001, but there is only one!
+#     Start adding LHC scenarios 
+#
+# Tev2: Add fnt2007 - fnt2011 scenarios available at HepForge, but fnt2007 buggy?
+# HERA: Add fnh2001 and fnh2003 scenarios available at HepForge
+# RHIC: Consistent with web files
+# LHC: Add temporarily CMS incl jets fnl2342a
 #
 FF0= fn-example.f fn-alphas-demo.f fn-interface.f
 # FFT1= fnt1006.f

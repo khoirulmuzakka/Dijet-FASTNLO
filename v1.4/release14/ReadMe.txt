@@ -1,4 +1,5 @@
 ***********************************************************************
+* Updated by K. Rabbertz, July 4th, 2011 
 ***********************************************************************
 *
 *                                         M. Wobisch - June 05, 2006
@@ -13,7 +14,7 @@
 * the parton distributions.
 *
 * All code can be obtained from the webpage
-*             http://hepforge.cedar.ac.uk/fastnlo
+*             http://projects.hepforge.org/fastnlo
 *
 *
 ***********************************************************************
@@ -33,13 +34,17 @@ corresponding to the results of one publication.
 *** There is general code - needed for all scenarios:
 This are the interfaces to the PDFs and to alphas - contained
 in the file "fn-interface.f".
+For all LHC scenarios please use the newer version of the common code
+which can be found under: fn-common-lhc.tar.gz
+The other scenarios will eventually be updated as well.
+
  - If you want to use your own PDF/alphas code, you need 
    to edit "fn-interface.f". (the subroutines and the interface
    are well-desribed)
  - If you want to compute cross sections, based on existing PDFs
    you can use the existing code, but you have to install
    LHAPDF. This is very easy - instructions can be found at
-   http://hepforge.cedar.ac.uk/lhapdf/
+   http://projects.hepforge.org/lhapdf
 
 
 *** There is scenario-specific code
@@ -50,6 +55,13 @@ Example:
 The usercode for scenario "fnt1001" is contained in the 
 files "fnt1001.f" and "fnt1001.inc"
 
+This code is provided in order to be able to load multiple tables
+in memory at the same time which can be important for running
+fits to many data sets. It is also possible to read all tables
+with one and the same code if the array dimensions are chosen sufficiently
+large, but then one table actually in memory is replaced by the newly read
+one. We can provide such a version as well.
+
 
 
 ***********************************************************************
@@ -59,11 +71,19 @@ files "fnt1001.f" and "fnt1001.inc"
 *** install LHAPDF
   The fastNLO example requires LHAPDF to be installed. 
   If this is not yet installed on your system, simply
-  follow the instructions at http://hepforge.cedar.ac.uk/lhapdf/
+  follow the instructions at http://projects.hepforge.org/lhapdf
+
+  In any case please check where LHAPDF is installed and
+  set the corresponding environment variables, e.g.
+
+  setenv LHAPDF $HOME/fastnlo/local/lib
+  setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${LHAPDF}
 
 
-*** get the fastNLO code from: http://hepforge.cedar.ac.uk/fastnlo
-  Make sure you get the common routines in "fn-common.tar.gz".
+
+*** get the fastNLO code from: http://projects.hepforge.org/fastnlo
+  Make sure you get the common routines in "fn-common.tar.gz" resp.
+  "fn-common-lhc.tar.gz":
   This file contains:
      ReadMe.txt         (this file)
      fn-alphas-demo.f   (a simple alphas routine which works only
@@ -73,6 +93,7 @@ files "fnt1001.f" and "fnt1001.inc"
      Makefile
      fn-example.f       (an example routine which demonstrates how to
                         call the usercode)
+     strings.inc        (a common include file used in the LHC scenarios)
 
   In addition, you need the code for at least one scenario
   "ft[xnnnn]-code.tar.gz" where [xnnnn] is scenario-specific, as
@@ -107,10 +128,7 @@ files "fnt1001.f" and "fnt1001.inc"
       cd $HOME/fastnlo
       ln -s /share/lhapdf/PDFsets/ pdfpath
  
-  - edit the "Makefile" to set the two paths to LHAPDF and CERNLIB
-    e.g.
-    LHAPDF=/usr/local/lib
-    CERNLIB=/cern/pro/lib
+  - edit the "Makefile" such that it picks up LHAPDF
 
     and delete the filenames for the scenarios for which you have 
     not downloaded the code
@@ -123,7 +141,7 @@ files "fnt1001.f" and "fnt1001.inc"
   - run "./fastnlo"
     -> the numbers that you get should be identical to the numbers
        that you can compute online using the webinterface at
-       http://hepforge.cedar.ac.uk/fastnlo
+       http://projects.hepforge.org/fastnlo
 
 
 ***********************************************************************
@@ -143,9 +161,5 @@ files "fnt1001.f" and "fnt1001.inc"
 
 
 ***********************************************************************
-* questions? please contact the authors at:   fastnlo@cedar.ac.uk
+* questions? please contact the authors at:   fastnlo@projects.hepforge.org
 ***********************************************************************
-
-
-
-

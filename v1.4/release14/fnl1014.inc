@@ -7,8 +7,6 @@ c   >> this code should not be edited
 c   >> if you have questions, please contact 
 c      the authors at:  fastnlo@cedar.ac.uk
 c 
-* MW 02/01/06 implement tableformat version 1.4 
-c KR 04/09/07 user/web code for fnl0002, copied from fnl0004.inc 
 c ------------------------------------------------------------
 
       INTEGER ISEPARATOR, NRAPMAX,NPTMAX,NBINTOTMAX,NXMAX,NSCALEMAX,
@@ -17,7 +15,7 @@ c - needed for bin boundaries, xlimit, scales
 c
 c - scenario-dependent limits
       PARAMETER (ISEPARATOR=1234567890)
-      PARAMETER (NRAPMAX=5,NPTMAX=34,NBINTOTMAX=137,NXMAX=78)
+      PARAMETER (NRAPMAX=6,NPTMAX=34,NBINTOTMAX=176,NXMAX=78)
       PARAMETER (NMAXSUBPROC=7,NSCALEBINMAX=2,NSCALEMAX=4)
 
       INTEGER*8 NEVT(6)  
@@ -40,7 +38,7 @@ c - scenario-dependent limits
      +        result(NBINTOTMAX,NMAXSUBPROC+1,3),
      +        xsect(NBINTOTMAX,3)    ! array returned as argument
 
-      COMMON /CFNL0002/ ECMS, JETRES1, JETRES2, 
+      COMMON /CFNT1014/ ECMS, JETRES1, JETRES2, 
      +        RAPBIN, PTBIN,  XLIMIT,
      +        MURSCALE, MURVAL, MUFSCALE, MUFVAL,
      +        array, pdf, result,

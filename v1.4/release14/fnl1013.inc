@@ -7,13 +7,6 @@ c   >> this code should not be edited
 c   >> if you have questions, please contact 
 c      the authors at:  fastnlo@cedar.ac.uk
 c 
-c TK 11/11/05 Changed dimensions of nevt and npow to 6
-c kr 30/08/05 Added trivial comment to start emacs fortran mode 
-c MW 08/26/05 restructure "array" - remove two dimensions
-c TK 12/07/05 NPOW added
-c MW 04/15/05
-c MW 01/17/06 new variables for tableformat version 1c
-* MW 02/01/06 implement tableformat version 1.4 
 c ------------------------------------------------------------
 
       INTEGER ISEPARATOR, NRAPMAX,NPTMAX,NBINTOTMAX,NXMAX,NSCALEMAX,
@@ -22,7 +15,7 @@ c - needed for bin boundaries, xlimit, scales
 c
 c - scenario-dependent limits
       PARAMETER (ISEPARATOR=1234567890)
-      PARAMETER (NRAPMAX=12,NPTMAX=50,NBINTOTMAX=600,NXMAX=250)
+      PARAMETER (NRAPMAX=5,NPTMAX=32,NBINTOTMAX=125,NXMAX=210)
       PARAMETER (NMAXSUBPROC=7,NSCALEBINMAX=2,NSCALEMAX=4)
 
       INTEGER*8 NEVT(6)  
@@ -45,7 +38,7 @@ c - scenario-dependent limits
      +        result(NBINTOTMAX,NMAXSUBPROC+1,3),
      +        xsect(NBINTOTMAX,3)    ! array returned as argument
 
-      COMMON /CFNT2342A/ ECMS, JETRES1, JETRES2, 
+      COMMON /CFNT1013/ ECMS, JETRES1, JETRES2, 
      +        RAPBIN, PTBIN,  XLIMIT,
      +        MURSCALE, MURVAL, MUFSCALE, MUFVAL,
      +        array, pdf, result,
