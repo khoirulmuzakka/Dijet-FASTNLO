@@ -11,8 +11,12 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-132
 # Users: Please check where LHAPDF is installed and
 #        set the corresponding environment variables!
 #
+# csh
 #setenv LHAPDF $HOME/fastnlo/local/lib
 #setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${LHAPDF}
+# sh
+#export LHAPDF=$HOME/fastnlo/local/lib
+#export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LHAPDF}
 #
 # At HepForge
 #LHAPDF=$(HOME)/fastnlo/local/lib
