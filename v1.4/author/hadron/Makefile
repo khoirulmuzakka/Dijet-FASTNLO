@@ -1083,6 +1083,14 @@ fnl2332a: links fnl2332a.cc $(CommonPath)/fj-ak-07.cc \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
+fnl2332c: links fnl2332c.cc $(CommonPath)/fj-ak-07.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2332c.cc \
+	$(CommonPath)/fj-ak-07.cc $(cteq6pdf) \
+	-o fnl2332c -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
 # ======================================================================
 # =====   FNL2342: LHC CMS incl. jets with fastjet anti-kT R=0.5 =======
 # ======================================================================
@@ -1419,6 +1427,15 @@ fnl2622d: links fnl2622d.cc $(CommonPath)/fj-ak-05.cc \
 	$(NLOJET)/bin/create-nlojet-user fnl2622d.cc \
 	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
 	-o fnl2622d -Wno-deprecated -Wf,-O3 \
+	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
+	-Wl,-L$(FASTJET)/lib,-lfastjet 
+
+# Dijet mass bins for 2011 data 
+fnl2622e: links fnl2622e.cc $(CommonPath)/fj-ak-05.cc \
+	$(cteq6pdf)
+	$(NLOJET)/bin/create-nlojet-user fnl2622e.cc \
+	$(CommonPath)/fj-ak-05.cc $(cteq6pdf) \
+	-o fnl2622e -Wno-deprecated -Wf,-O3 \
 	-Wx,-O3,-Wall,-I,$(FASTJET)/include \
 	-Wl,-L$(FASTJET)/lib,-lfastjet 
 
