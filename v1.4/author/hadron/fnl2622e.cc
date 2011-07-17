@@ -162,8 +162,8 @@ void UserHHC::initfunc(unsigned int)
    // First dimension (histogram numbers xxxxRxx), usually rapidity
    // Here, these are dijet mass bins
    // # of bins
-   nrap = 13;
-   double rapb[14] = {400., 600., 900., 1200., 1500.,
+   nrap = 14;
+   double rapb[15] = {400., 600., 800., 1000., 1200., 1500.,
 		      1900., 2300., 2400., 2800., 3000.,
 		      3200., 4000., 5000., 7000.};
    // In reference mode: Double no. of bins
@@ -190,7 +190,7 @@ void UserHHC::initfunc(unsigned int)
    // Second dimension (histogram x axis), usually pT
    // Here, these are dijet chi bins
    // # of bins npt per irap bin of first dimension
-   int nptb[13] = {12,12,12,12,12,12,12,12,12,12,12,12,12};
+   int nptb[14] = {12,12,12,12,12,12,12,12,12,12,12,12,12,12};
    npt = new int[nrap];
    for (unsigned int i=0; i<nrap/(iref+1); i++) {
      npt[i] = nptb[i]; 
