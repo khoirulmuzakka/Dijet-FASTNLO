@@ -17,7 +17,42 @@ class Contrib{
            IContrFlag2==val.IContrFlag2 &&
            IContrFlag3==val.IContrFlag3  &&
              Npow==val.Npow);}
-  string GetName1(){
+
+	bool operator<(const Contrib &val) const
+	{
+		if (IRef == val.IRef)
+			if (IDataFlag == val.IDataFlag)
+				if (IAddMultFlag == val.IAddMultFlag)
+					if (IContrFlag1 == val.IContrFlag1)
+						if (IContrFlag2 == val.IContrFlag2)
+							if (IContrFlag3 == val.IContrFlag3)
+								return Npow < val.Npow;
+							else
+								return IContrFlag3 < val.IContrFlag3;
+						else
+							return IContrFlag2 < val.IContrFlag2;
+					else
+						return IContrFlag1 < val.IContrFlag1;
+				else
+					return IAddMultFlag < val.IAddMultFlag;
+			else
+				return IDataFlag < val.IDataFlag;
+		else
+			return IRef < val.IRef;
+	}
+
+	void FromBlock(fnloBlockB *block)
+	{
+		IRef = block->GetIRef();
+		IDataFlag = block->GetIDataFlag();
+		IAddMultFlag = block->GetIAddMultFlag();
+		IContrFlag1 = block->GetIContrFlag1();
+		IContrFlag2 = block->GetIContrFlag2();
+		IContrFlag3 = block->GetIContrFlag3();
+		Npow = block->GetNpow();
+	}
+
+  string GetName1() const {
      if(IDataFlag>0){
         return "data";
      }
@@ -33,7 +68,7 @@ class Contrib{
      }
 
   }
-  string GetName2(int ILOord){
+  string GetName2(int ILOord) const {
      string Refstring = "";
      if(IRef>0){
         Refstring = " (reference)";

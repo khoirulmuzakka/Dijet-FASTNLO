@@ -9,8 +9,8 @@
 
 class fnloTable{
 public:
-   fnloTable(){filename = "";BlockIndexLO=BlockIndexNLO=BlockIndexLORef=BlockIndexNLORef=-1;}
-   fnloTable(string name){filename = name;BlockIndexLO=BlockIndexNLO=BlockIndexLORef=BlockIndexNLORef=-1;}
+   fnloTable() : ifilestream(0), ofilestream(0), BlockIndexLO(-1), BlockIndexNLO(-1), BlockIndexLORef(-1), BlockIndexNLORef(-1) {}
+   fnloTable(string name) : filename(name), ifilestream(0), ofilestream(0), BlockIndexLO(-1), BlockIndexNLO(-1), BlockIndexLORef(-1), BlockIndexNLORef(-1) {}
    int ReadTable();
    int OpenFileRead();
    void RewindRead();
