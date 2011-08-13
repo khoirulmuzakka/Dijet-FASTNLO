@@ -2,10 +2,11 @@
 AUTOMAKE_OPTIONS = gnu
 
 # The main target, i.e. the executable to build
-bin_PROGRAMS = fnlo-merge
+bin_PROGRAMS = fnlo-merge fnlo-merge2
 
 # All source files which go into the main target
-fnlo_merge_SOURCES = main.cc entry.h
+fnlo_merge_SOURCES = fnlo-merge.cc entry.h
+fnlo_merge2_SOURCES = fnlo-merge2.cc entry.h
 
 # Libraries to be linked to the main target
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
