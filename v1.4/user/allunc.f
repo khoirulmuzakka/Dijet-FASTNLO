@@ -147,7 +147,8 @@ ckr New norm. version for fnl2442: Works fine, trivial division in rap 4
             LTAB = .FALSE.
             WRITE(*,*)
      >           "ALLUNC: Deriving normalized distributions"
-         ELSEIF (SCENARIO(1:10).EQ."fnl2722num") THEN
+         ELSEIF (SCENARIO(1:10).EQ."fnl2722num".OR.
+     >           SCENARIO(1:10).EQ."fnl2742num") THEN
             LNRM = .TRUE.
             LTAB = .TRUE.
             WRITE(*,*)
