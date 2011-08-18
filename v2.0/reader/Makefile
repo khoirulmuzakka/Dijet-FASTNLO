@@ -9,9 +9,14 @@ CC 	= gcc
 CFLAGS 	= -Wall -g
 LDFLAGS	= -lm -lpthread `gtk-config --cflags` `gtk-config --libs` -lgthread
 
+LHAPDFVERSION	= 5.8.5
+LHAPDFDIR	= /afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf
+LHAPDFLIBPATH	= $(LHAPDFDIR)/$(LHAPDFVERSION)/$(SYSNAME)/lib/
+LHAPDFLIB	= LHAPDF
+
 ReadFNLOTable: $(OBJS)	
 	$(CC) $(OBJS) \
-	-L/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/i586_rhel50/lib/ -lLHAPDF \
+	-L$(LHAPDFLIBPATH) -l$(LHAPDFLIB) \
 	-o ReadFNLOTable
 
 clean:
