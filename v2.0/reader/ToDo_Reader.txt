@@ -1,0 +1,43 @@
+
+  ToDo List for FastNLOReader
+-----------------------------
+
+- Implement some 'read fast' switch and 'readfast' PDFLC if
+MuF is calculated using only one scale lookup table
+
+
+- SetPhysUnits.
+Availability of changing units afterward in pb, fb, or anything else
++ switch to differential units and divide by the bin size 
+=> we would need the dimension of both variables, which define the bin grid
+(like GeV and GeV^2 and 1 (for y))
+-> just implement some more switch!
+
+
+
+- QCDNUM as-evolution
+implement the usage of the internal qcdnum as-evolution.
+
+
+- Printing
+Add additional printout for the cross sections, without showing the 
+reference cross section!
+The reference cross section is actually only valuable for the authors for 
+testing and validation of the routines.
+
+
+- maybe: improve the check if the table exists and 
+maybe improve the error handling.
+
+
+- new iostream -> do we need some 'delete iostream'??
+
+
+
+- LHAPDF name and set
+IMPORTANT!!! since LHAPDF is a singleton, you have to crosscheck if the
+pdf at accessing time (when you calc xfx) is still the same as when initalizing the
+fastNLO reader.
+This is always true for simpel usages. But if smb might want to compare different pdfs, there
+should be some cross check implemented, if you really use the correct LHAPDF.
+(safe pdf-name and set for cross checks when returning and recalculating cross sections!!!)
