@@ -18,6 +18,8 @@ class fnloBlockA2 {
    int GetNObsBin(){return NObsBin;}
    int GetILOord(){return ILOord;}
    void SetIpublunits(int unit){Ipublunits = unit;}
+   void Print();
+
  private:
    void StripWhitespace(string &str) const;
    bool cmp(const double x1, const double x2) const;

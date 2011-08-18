@@ -247,3 +247,46 @@ bool fnloBlockA2::cmp(vector < vector < double > > x1,  vector < vector < double
    }
    return result;
 }
+
+
+void fnloBlockA2::Print(){
+  printf("\n **************** FastNLO Table: BlockA1 ****************\n\n");
+  printf(" A2  Ipublunits                    %d\n",Ipublunits);
+  printf(" A2  NScDescript                   %d\n",NScDescript);
+  for(int i=0;i<NScDescript;i++){
+    printf(" A2  ScDescript[%d]                 %s\n",i,ScDescript[i].data());
+  }
+  printf(" A2  Ecms                          %7.4f\n",Ecms);
+  printf(" A2  ILOord                        %d\n",ILOord);
+  printf(" A2  NDim                          %d\n",NDim);
+  for(int i=0;i<NDim;i++){
+    printf(" A2   - DimLabel[%d]                %s\n",i,DimLabel[i].data());
+  }
+  for(int i=0;i<NDim;i++){
+    printf(" A2   - IDiffBin[%d]               %d\n",i,IDiffBin[i]);
+  }
+  printf(" A2  NObsBin                       %d\n",NObsBin);
+  for(int i=0;i<NObsBin;i++){
+    for(int j=0;j<NDim;j++){
+      printf(" A2   -  - LoBin[%d][%d]             %7.4f\n", i,j,LoBin[i][j]);
+      if(IDiffBin[j]==2) 
+	printf(" A2   -  - UpBin[%d][%d]             %7.4f\n", i,j,UpBin[i][j]);
+    }
+   }
+   for(int i=0;i<NObsBin;i++){
+     printf(" A2   - BinSize[%d]                %7.4f\n", i,BinSize[i]);
+   }
+   printf(" A2  INormFlag                     %d\n",INormFlag);
+   
+   if(INormFlag>1){
+     printf(" A2  DenomTable                    %s\n",DenomTable.data());
+   }
+   if(INormFlag>0){
+      for(int i=0;i<NObsBin;i++){
+        printf(" A2   - IDivLoPointer[%d]               %d\n",i,IDivLoPointer[i]);
+	printf(" A2   - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
+      }
+   }
+   printf("\n ********************************************************\n\n");
+  
+}

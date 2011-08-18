@@ -1,5 +1,5 @@
 #include "fnloBlockA1.h"
-
+#include <iostream>
 
 int fnloBlockA1::Read(istream *table){
    table->peek();
@@ -68,3 +68,19 @@ bool fnloBlockA1::IsCompatible(fnloBlockA1* other){
    
    return true;
 };
+
+
+void fnloBlockA1::Print(){
+  printf("\n **************** FastNLO Table: BlockA1 ****************\n\n");
+  printf(" A1  tablemagicno                  %d\n",tablemagicno);
+  printf(" A1  Itabversion                   %d\n",Itabversion);
+  printf(" A1  ScenName                       %s\n",ScenName.data());
+  printf(" A1  Ncontrib                      %d\n",Ncontrib);
+  printf(" A1  Nmult                         %d\n",Nmult);
+  printf(" A1  Ndata                         %d\n",Ndata);
+  printf(" A1  NuserString                   %d\n",NuserString);
+  printf(" A1  NuserInt                      %d\n",NuserInt);
+  printf(" A1  NuserFloat                    %d\n",NuserFloat);
+  printf(" A1  Imachine                      %d\n",Imachine);
+  printf("\n ********************************************************\n\n");
+}

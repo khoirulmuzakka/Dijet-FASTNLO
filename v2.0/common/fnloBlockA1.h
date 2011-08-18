@@ -32,6 +32,8 @@ class fnloBlockA1 {
    void SetNuserInt(int n){NuserInt = n;}
    void SetNuserFloat(int n){NuserFloat = n;}
    void SetImachine(int n){Imachine = n;}
+   void Print();
+
  protected:
    int Itabversion;
    string ScenName;
