@@ -2,6 +2,10 @@
   ToDo List for FastNLOReader
 -----------------------------
 
+- shall we use *.cc to have it consistent with
+the rest of FastNLO and nlojet++?
+
+
 - Implement some 'read fast' switch and 'readfast' PDFLC if
 MuF is calculated using only one scale lookup table
 
@@ -13,6 +17,13 @@ Availability of changing units afterward in pb, fb, or anything else
 (like GeV and GeV^2 and 1 (for y))
 -> just implement some more switch!
 
+
+- @MW, @KR
+Please validate the:
+  1) printout
+  2) references given when initalizing
+  3) Comments/documentation throughout the reader
+  4) Class description at the beginning *C *h files
 
 
 - QCDNUM as-evolution
