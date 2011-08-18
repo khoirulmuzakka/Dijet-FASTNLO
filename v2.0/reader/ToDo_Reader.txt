@@ -41,3 +41,9 @@ fastNLO reader.
 This is always true for simpel usages. But if smb might want to compare different pdfs, there
 should be some cross check implemented, if you really use the correct LHAPDF.
 (safe pdf-name and set for cross checks when returning and recalculating cross sections!!!)
+
+
+
+-- future work:
+restructure the code in such a way, that the SAME code/routines/classes/methods are used
+for the FastNLOReader, than within common/author/creator directory.
