@@ -923,6 +923,226 @@ double fnloBlockB::GetSmallestX2(int ObsBin){
 }
 
 
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 ){
+  if ( dim0 > 0 ){
+    if ( dim5GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, GetNxmax(i), dim6 );
+      }
+    }
+    else if ( dim5GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+    
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, dim5, dim6 );
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, dim5 );
+    }
+  } else {
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 ){
+  if ( dim0 > 0 ){
+    if ( dim3GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , dim1, dim2, GetNxmax(i), dim4 );
+      }
+    }
+    else if ( dim3GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 ){
+  if ( dim0 > 0 ){
+    if ( dim1GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , GetNxmax(i), dim2, dim3, dim4 );
+      }
+    }
+    else if ( dim1GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4 );
+    }
+  } else {
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 ){
+  if ( dim0 > 0 ){
+    if ( dim2GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , dim1, GetNxmax(i), dim3 );
+      }
+    }
+    else if ( dim2GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+  
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1, dim2, dim3 );
+    }
+  } else {
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 ){
+  if ( dim0 > 0 ){
+    if ( dim1GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , GetNxmax(i), dim2 );
+      }
+    }
+    else if ( dim1GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1, dim2 );
+    }
+  } else {
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI ){
+  if ( dim0 > 0 ){
+    if ( dim1GetNxmaxFromDimI[0] == 0 ) {
+      v->resize(dim0);
+      for ( int i= 0 ; i<dim0 ; i++){
+	ResizeTable( &(v->at(i)) , GetNxmax(i) );
+      }
+    }
+    else if ( dim1GetNxmaxFromDimI[0] != 0 ){
+      cout << "Error in Resize Table. This is not yet implemented" << endl;
+      exit(1);
+    }
+  } else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+    for ( int i= 0 ; i<dim0 ; i++){
+      ResizeTable( &(v->at(i)) , dim1 );
+    }
+  } else {
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::ResizeTable( vector<double >* v, int dim0 ){
+  if ( dim0 > 0 ){
+    v->resize(dim0);
+  }
+  else{
+    cout << "Error in Resize Table." << endl;
+    exit(1);
+  }
+}
+
+
 
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::ReadTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table ){
