@@ -1484,3 +1484,117 @@ double fnloBlockB::GetAlphas(double Q, double alphasMZ){
    return res;
    
 }
+
+
+//________________________________________________________________________________________________________________ //
+
+
+void fnloBlockB::Print(){
+  printf("\n **************** FastNLO Table: BlockB ****************\n\n");
+  printf(" B   BlockA2->GetNObsBin()         %d\n",BlockA2->GetNObsBin());
+  printf(" B   IXsectUnits                   %d\n",IXsectUnits);
+  printf(" B   IDataFlag                     %d\n",IDataFlag);
+  printf(" B   IAddMultFlag                  %d\n",IAddMultFlag);
+  printf(" B   IContrFlag1                   %d\n",IContrFlag1);
+  printf(" B   IContrFlag2                   %d\n",IContrFlag2);
+  printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
+  printf(" B   NScaleDep                     %d\n",NScaleDep);
+  printf(" B   NContrDescr                   %d\n",NContrDescr);
+  for(int i=0;i<NContrDescr;i++){
+    printf(" B   CtrbDescript[%d]               %s\n",i,CtrbDescript[i].data());
+  }
+  printf(" B   NCodeDescr                    %d\n",NCodeDescr);
+  for(int i=0;i<NCodeDescr;i++){
+    printf(" B   CodeDescript[%d]               %s\n",i,CodeDescript[i].data());
+  }
+
+  if(IDataFlag==1){
+    printf(" B   Nuncorrel                     %d\n",Nuncorrel);
+    printf(" B   Ncorrel                       %d\n",Ncorrel);
+    printf(" B   NErrMatrix                    %d\n",NErrMatrix);
+    printf(" B   some more output could be printed here (IDataFlag==1).\n");
+  }
+  if(IAddMultFlag==1){
+    printf(" B   some more output could be printed here (IAddMultFlag==1).\n");
+  }
+
+  if(!(IDataFlag==1) && !(IAddMultFlag==1)){ // that's the usual case
+    printf(" B   IRef                          %d\n",IRef);
+    printf(" B   IScaleDep                     %d\n",IScaleDep);
+    printf(" B   Nevt                          %u\n",Nevt);
+    printf(" B   Nevt                          %i\n",Nevt);
+    printf(" B   Nevt                          %d\n",Nevt);
+    printf(" B   Nevt                          %e\n",Nevt);
+    printf(" B   Nevt                          %e\n",Nevt*1.);
+    printf(" B   Nevt                          %.4e\n",Nevt);
+    printf(" B   Nevt                          %.e\n",Nevt*1.);
+    printf(" B   Npow                          %d\n",Npow);
+    printf(" B   NPDF                          %d\n",NPDF);
+    if(NPDF>0){
+      for(int i=0;i<NPDF;i++){
+	printf(" B    - NPDFPDG[%d]                 %d\n",i,NPDFPDG[i]);
+      }      
+    }
+    printf(" B   NPDFDim                       %d\n",NPDFDim);
+    printf(" B   NFragFunc                     %d\n",NFragFunc);
+    if(NFragFunc>0){
+      for(int i=0;i<NFragFunc;i++){
+	printf(" B    - NFFPDG[%d]               %d\n",i,NFFPDG[i]);
+      }      
+    } 
+    printf(" B   NFFDim                        %d\n",NFFDim);
+    printf(" B   NSubproc                      %d\n",NSubproc);
+    printf(" B   IPDFdef1                      %d\n",IPDFdef1);
+    printf(" B   IPDFdef2                      %d\n",IPDFdef2);
+    printf(" B   IPDFdef3                      %d\n",IPDFdef3);
+    printf(" B   Nxtot1[0-%d]             ",BlockA2->GetNObsBin());
+    for(int i=0;i<BlockA2->GetNObsBin();i++){
+      printf("%d ,",Nxtot1[i]);
+    } 
+    printf(" B   \n");
+
+//     for(int i=0;i<BlockA2->GetNObsBin();i++){
+//       printf(" B    XNode1[%d]             ",i);
+//       for(int j=0;j<Nxtot1[i];j++){
+// 	printf(" B   %8.4f ,",XNode1[i][j]);
+//       } 
+//       printf(" B   \n");
+//     }
+    printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
+    printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %d)\n",NFragFunc);
+    printf(" B   NScales                       %d\n",NScales);
+    for(int i=0;i<NScales;i++){
+      printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
+    }
+    printf(" B   NScaleDim                     %d\n",NScaleDim);
+    for(int i=0;i<NScaleDim;i++){
+      printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
+      for(int j=0;j<NscaleDescript[i];j++){
+	printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
+      }
+      printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
+      printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
+      for(int j=0;j<Nscalevar[i];j++){
+	printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
+      }
+    }
+    printf(" B   No printing of ScaleNode implemented yet.\n");
+    printf(" B   No printing of SigmaTilde implemented yet.\n");
+    if ( NScaleDep == 2 )  
+      printf(" B   NScaleDep == 2 :              yes.\n");
+    if ( NScaleDep == 2 ) {
+      printf(" B   No printing of SigmaTilde2Scales, and Scale2Nodes, etc... implemented yet.\n");
+    }
+    if ( NScaleDep == 3 ) {
+      printf(" B   NscalenodeScale1              %d\n",NscalenodeScale1);
+      printf(" B   NscalenodeScale2              %d\n",NscalenodeScale2);
+    }    
+
+  }
+  printf("\n *******************************************************\n\n");
+
+  
+}
+
+
+//________________________________________________________________________________________________________________ //

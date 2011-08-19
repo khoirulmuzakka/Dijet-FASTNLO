@@ -17,26 +17,26 @@ using namespace std;
 class fnloTableUser;
 
 class fnloBlockB {
- public:
+public:
    fnloBlockB(){;}
    fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) : BlockA1(blocka1) ,  BlockA2(blocka2)   {;}
    int Read(istream *table);
    int Write(ostream *table, int option = 0);
    int Copy(fnloBlockB* other);
 
-  void ResizeTable( vector<double >* v, int dim0 );
-  void ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 );
-  void ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI );
-  void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
-  void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 );
-  void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 );
-  void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
-  void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 );
-  void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
-  void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
-  void ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
-  void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
-  void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
+   void ResizeTable( vector<double >* v, int dim0 );
+   void ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 );
+   void ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI );
+   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
+   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 );
+   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 );
+   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
+   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 );
+   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
+   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
+   void ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
+   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
+   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
    int ReadTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
    int ReadTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
@@ -54,13 +54,15 @@ class fnloBlockB {
    int WriteTable( vector<vector<double > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<double >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
 
-  void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1 = 0, double w2 = 0 );
-  void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1 = 1, double w2 = 1 );
-  void AddTableToAnotherTable( vector<vector<vector<vector<vector<double > > > > >* vSum, vector<vector<vector<vector<vector<double > > > > >* vAdd, double w1 = 1, double w2 = 1 );
-  void AddTableToAnotherTable( vector<vector<vector<vector<double > > > >* vSum, vector<vector<vector<vector<double > > > >* vAdd, double w1 = 1, double w2 = 1 );
-  void AddTableToAnotherTable( vector<vector<vector<double > > >* vSum, vector<vector<vector<double > > >* vAdd, double w1 = 1, double w2 = 1 );
-  void AddTableToAnotherTable( vector<vector<double > >* vSum, vector<vector<double > >* vAdd, double w1 = 1, double w2 = 1 );
-  void AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1 = 0, double w2 = 0 );
+   void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<vector<vector<vector<vector<double > > > > >* vSum, vector<vector<vector<vector<vector<double > > > > >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<vector<vector<vector<double > > > >* vSum, vector<vector<vector<vector<double > > > >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<vector<vector<double > > >* vSum, vector<vector<vector<double > > >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<vector<double > >* vSum, vector<vector<double > >* vAdd, double w1 = 1, double w2 = 1 );
+   void AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1 = 1, double w2 = 1 );
+
+   void Print();
 
    bool IsCompatible(fnloBlockB* other);
    int GetIRef(){return IRef;}
@@ -114,7 +116,8 @@ class fnloBlockB {
    int IAddMultFlag;
    int IContrFlag1;
    int IContrFlag2;
-   int IContrFlag3;
+   int IContrFlag3;	// @MW, @KR: IContrFlag3 was replaced by NScaleDep by DB and is now without any usage
+   int NScaleDep;
    int NContrDescr;
    vector < string > CtrbDescript;
    int NCodeDescr;
@@ -171,6 +174,9 @@ class fnloBlockB {
    vector < vector < vector < vector < double > > > > PdfLc; 
    vector < double > Xsection; 
 
+   int NscalenodeScale1;
+   int NscalenodeScale2;
+  
    static const double TWOPI = 6.28318530717958647692528;
    static const double TWOPISQR = 39.47841760435743447533796;
    static const int NF = 5;
