@@ -9,8 +9,9 @@
 * KR 16052011: Simplify and improve pure text output
 * -------------------------------------------------------------------
       Implicit None
-      Character*255 FILENAME,PDFSET
-      Integer i, j, IPRINT, NDimBins(MxDim)
+      Include 'fnx9999.inc'
+      Character*255 FILENAME,PDFSET,CHTMP1,CHTMP2
+      Integer i, j, IS, IPRINT, NDimBins(MxDim)
       Double Precision SCALEF(4)
       Data IPRINT/0/
       Data SCALEF/0.25D0,0.5D0,1.0D0,2.0D0/
@@ -23,8 +24,8 @@ c           -> See the value of the parameter MxObsBin
 c                           in the file [scenario].inc
 c        We recommend to name the array according to the scenario
 c        Adapt the following to your scenario!
-      Integer MxObsBin
-      Parameter (MxObsBin = 200)
+c      Integer MxObsBin
+c      Parameter (MxObsBin = 200)
       Double Precision xslo(MxObsBin) 
       Double Precision xsnlo(MxObsBin) 
       Double Precision kfac(MxObsBin) 
@@ -137,18 +138,18 @@ c         4th argument:  0: no ascii output       1: print results
 c         5th argument:  array to return results
 
 *---Loop over scale settings
-      DO J=1,4
+      DO IS=1,4
 
 *---Evaluate table
          Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
          
 *---Calculate LO cross sections (set IPRINT to 1 for more verbose output) 
          Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-         Call FX9999CC(FILENAME, SCALEF(J), SCALEF(J), IPRINT, XSLO)
+         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
       
 *---Calculate NLO cross sections (set IPRINT to 1 for more verbose output) 
          Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-         Call FX9999CC(FILENAME, SCALEF(J), SCALEF(J), IPRINT, XSNLO)
+         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
 
 *---Calculate and print threshold corrections
 c      Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
@@ -167,32 +168,35 @@ c ???
          WRITE(*,*)"========================================"//
      >        "================================"
          WRITE(*,*)" Cross Sections"
-         WRITE(*,*)" The scale factor no. ",J," is: ",SCALEF(J)
+         WRITE(*,*)" The scale factor no. ",IS," is: ",SCALEF(IS)
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         WRITE(*,*)" bin     LO cross section      "//
+         CHTMP1 = DimLabel(1)
+         CHTMP2 = DimLabel(2)
+         WRITE(*,*)" Bin  Bin Size     "//
+     >        CHTMP1(1:LEN_TRIM(CHTMP1))//
+     >        DimLabel(2)//
+     >        "LO cross section      "//
      >        "NLO cross section     K factor"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
- 900     FORMAT(1P,I5,3(4X,E18.11))
-ckr Initialize dimension bin counters
-         DO J=1,NDim
-            NDimBins(J) = 0
-         ENDDO
+ 900     FORMAT(1P,I5,X,G10.4,X,2(I5,X,2G10.4),3(2X,E18.11))
          DO I=1,MxObsBin
             DO J=1,NDim
-               IF (LoBin(I,J).LT.UpBin(I,J)) THEN
+               IF (I.EQ.1) THEN
+                  NDimBins(J) = 1 
+               ELSEIF (LoBin(I-1,J).LT.LoBin(I,J)) THEN
                   NDimBins(J) = NDimBins(J) + 1 
-               ELSE
+               ELSEIF (LoBin(I,J).LT.LoBin(I-1,J)) THEN
                   NDimBins(J) = 1 
                ENDIF
             ENDDO
-
-            write(*,*)"i,ndbins1,ndbins2",i,ndimbins(1),ndimbins(2)
-
             IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
      >           (ABS(1.D0 + xsNlo(I)).GT.1.D-99)) THEN
-               WRITE(*,900)I,XSLO(I),XSNLO(I),KFAC(I)
+               WRITE(*,900)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I),XSNLO(I),KFAC(I)
             ENDIF
          ENDDO
       ENDDO
