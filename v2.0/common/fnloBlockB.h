@@ -174,8 +174,42 @@ public:
    vector < vector < vector < vector < double > > > > PdfLc; 
    vector < double > Xsection; 
 
+   // --------------------------- mu_f, mu_r variaton scheme --------------------------- //
+   vector < double > scale1hi;
+   vector < double > scale1lo;
+   vector < double > scale2hi;
+   vector < double > scale2lo;
+
+   // ---- members to write to disc ---- //
+   // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuIndep; 
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuFDep; 
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuRDep; 
+   // SigmaRef [NObsBins] [nsubproc]
+   vector < vector < double > > SigmaRefMixed; 
+   vector < vector < double > > SigmaRefMuf1_MuRMixed; 
+   vector < vector < double > > SigmaRef_s1; 
+   vector < vector < double > > SigmaRef_s2; 
+  
    int NscalenodeScale1;
    int NscalenodeScale2;
+   // ScaleNodeXY [ObsBin] [NscalenodeScaleX]  
+   vector < vector < double > > ScaleNode1;
+   vector < vector < double > > ScaleNode2;
+   vector < vector < double > > HScaleNode1;
+   vector < vector < double > > HScaleNode2;
+  
+   // ---- stuff for reading the table ---- //
+   // @MW, @KR: if we provide a separate reader: we don't need variables here for reading the table.
+   vector < double > XsectionRef_s1; 
+   vector < double > XsectionRef_s2; 
+   vector < double > XsectionRefMixed; 
+   vector < double > XsectionRefMuf1_MuRMixed; 
+   vector < double > XsectionMuVar; 
+   // PdfLcMuVar [ObsBins] [NxNodes] [NQNodes] [NPtNodes] [nsubproc]
+   vector < vector < vector < vector < vector <double > > > > > PdfLcMuVar; 
+   // AlphasTwoPi [ObsBins] [N s1-Nodes] [N s2-Nodes]
+   vector < vector < vector <double > > > AlphasTwoPi; 
   
    static const double TWOPI = 6.28318530717958647692528;
    static const double TWOPISQR = 39.47841760435743447533796;
