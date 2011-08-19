@@ -3,7 +3,7 @@
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
 # Define project fastNLO
-AC_INIT([fastNLO], [2.0.0], [klaus.rabbertz@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO], [2.0.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5

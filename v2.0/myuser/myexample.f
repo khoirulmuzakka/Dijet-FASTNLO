@@ -10,7 +10,7 @@
 * -------------------------------------------------------------------
       Implicit None
       Character*255 FILENAME,PDFSET
-      Integer i, j, IPRINT
+      Integer i, j, IPRINT, NDimBins(MxDim)
       Double Precision SCALEF(4)
       Data IPRINT/0/
       Data SCALEF/0.25D0,0.5D0,1.0D0,2.0D0/
@@ -158,6 +158,7 @@ c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
          DO I=1,MxObsBin
             IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
      >           (ABS(1.D0 + xsnlo(I)).GT.1.D-99)) THEN
+c ???
             ENDIF
             IF ((ABS(xslo(I)).GT.1.D-99)) THEN
                kfac(I) = xsnlo(I) / xslo(I)
@@ -174,7 +175,21 @@ c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
  900     FORMAT(1P,I5,3(4X,E18.11))
+ckr Initialize dimension bin counters
+         DO J=1,NDim
+            NDimBins(J) = 0
+         ENDDO
          DO I=1,MxObsBin
+            DO J=1,NDim
+               IF (LoBin(I,J).LT.UpBin(I,J)) THEN
+                  NDimBins(J) = NDimBins(J) + 1 
+               ELSE
+                  NDimBins(J) = 1 
+               ENDIF
+            ENDDO
+
+            write(*,*)"i,ndbins1,ndbins2",i,ndimbins(1),ndimbins(2)
+
             IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
      >           (ABS(1.D0 + xsNlo(I)).GT.1.D-99)) THEN
                WRITE(*,900)I,XSLO(I),XSNLO(I),KFAC(I)
