@@ -19,6 +19,11 @@ int main(int argc, char** argv)
 
 	// loop over arguments
 	int nFiles = argc - 1;
+	if (access(argv[nFiles], R_OK) == 0)
+	{
+		cerr << "Error: Output file " << argv[nFiles] << " already exists!" << endl;
+		return 1;
+	}
 	fnloTable resultTable(argv[nFiles]);
 	bool validBlockA1 = false, validBlockA2 = false;
 	map<Contrib, int> contribCounter;
@@ -103,6 +108,7 @@ int main(int argc, char** argv)
 					contribMap[contribution]->Add(blockB);
 				++contribCounter[contribution];
 			}
+			table.DeleteAllBlockB();
 			++nValidTables;
 		}
 		else
@@ -131,6 +137,7 @@ int main(int argc, char** argv)
 		resultTable.CreateBlockB(idx, it->second);
 		resultTable.WriteBlockB(idx);
 		printf("  (%#4.2g events).\n", (double)resultTable.GetBlockB(idx)->GetNevt());
+		delete it->second;
 	}
 	resultTable.CloseFileWrite();
 

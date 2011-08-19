@@ -141,6 +141,12 @@ int fnloTable::WriteBlockB(int no,ofstream* outstream ){
 }
 
 
+void fnloTable::DeleteAllBlockB()
+{
+	for (size_t i = 0; i < BlockB.size(); ++i)
+		delete BlockB[i];
+	BlockB.clear();
+}
 
 fnloTable::~fnloTable(){
    if(ifilestream) delete ifilestream;

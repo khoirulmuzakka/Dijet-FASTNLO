@@ -29,7 +29,8 @@ public:
    int ReadBlockB(int no);
    int WriteBlockB(int no);
    int WriteBlockB(int no,ofstream* outstream );
-   int WriteBlockBDividebyN(int no);   
+   int WriteBlockBDividebyN(int no);
+   void DeleteAllBlockB(); // FIX: Correct way would be to fix object ownership
    fnloBlockB* GetBlockB(int no){return BlockB[no];}
    string GetFilename(){return filename;}
    void SetFilename(string name){filename=name;}
