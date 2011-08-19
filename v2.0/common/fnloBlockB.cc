@@ -1037,8 +1037,150 @@ int fnloBlockB::ReadTable(vector<double >* v, istream *table ){
 }
 
 
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, ostream *table , bool DivByNevt , int Nevt  ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
+	      for(unsigned int i6=0;i6<v->at(i0)[i1][i2][i3][i4][i5].size();i6++){
+		if( DivByNevt && Nevt>0){
+ 		  *table << v->at(i0)[i1][i2][i3][i4][i5][i6] / Nevt << endl;
+ 		}else{
+ 		  *table << v->at(i0)[i1][i2][i3][i4][i5][i6] << endl;
+		}
+		nn++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
 
-//________________________________________________________________________________________________________________//
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
+	      if( DivByNevt && Nevt>0){
+ 		*table << v->at(i0)[i1][i2][i3][i4][i5] / Nevt << endl;
+	      }else{
+		*table << v->at(i0)[i1][i2][i3][i4][i5] << endl;
+	      }
+	      nn++;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<vector<vector<vector<double > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    if( DivByNevt && Nevt>0){
+ 	      *table << v->at(i0)[i1][i2][i3][i4] / Nevt << endl;
+		}else{
+	      *table << v->at(i0)[i1][i2][i3][i4] << endl;
+	    }
+	    nn++;
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<vector<vector<double > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  if( DivByNevt && Nevt>0){
+ 	    *table << v->at(i0)[i1][i2][i3] / Nevt << endl;
+	  }else{
+	    *table << v->at(i0)[i1][i2][i3] << endl;
+	  }
+	  nn++;
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+	if( DivByNevt && Nevt>0){
+	  *table << v->at(i0)[i1][i2] / Nevt << endl;
+	}else{
+	  *table << v->at(i0)[i1][i2] << endl;
+	}
+	nn++;
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<vector<double > >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      if( DivByNevt && Nevt>0){
+	*table << v->at(i0)[i1] / Nevt << endl;
+      }else{
+	*table << v->at(i0)[i1] << endl;
+      }
+      nn++;
+    }
+  }
+  return nn;
+}
+
+
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::WriteTable(vector<double >* v, ostream *table , bool DivByNevt , int Nevt ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    if( DivByNevt && Nevt>0){
+      *table << v->at(i0) / Nevt << endl;
+    }else{
+      *table << v->at(i0) << endl;
+    }
+    nn++;
+  }
+  return nn;
+}
+
+
+//________________________________________________________________________________________________________________ //
 
 
 double fnloBlockB::GetAlphas(double Q, double alphasMZ){
