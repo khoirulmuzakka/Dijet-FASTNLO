@@ -1401,6 +1401,72 @@ int fnloBlockB::WriteTable(vector<double >* v, ostream *table , bool DivByNevt ,
 
 
 //________________________________________________________________________________________________________________ //
+void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1, double w2){
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1, double w2){
+
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+//________________________________________________________________________________________________________________ //
+
+
+void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<double > > > > >* vSum, vector<vector<vector<vector<vector<double > > > > >* vAdd, double w1, double w2){
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<double > > > >* vSum, vector<vector<vector<vector<double > > > >* vAdd, double w1, double w2){
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+//________________________________________________________________________________________________________________ //
+
+void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<double > > >* vSum, vector<vector<vector<double > > >* vAdd, double w1, double w2){
+
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::AddTableToAnotherTable( vector<vector<double > >* vSum, vector<vector<double > >* vAdd, double w1, double w2){
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fnloBlockB::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  for ( int i = 0 ; i<vSum->size() ; i++ ){
+    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i]; 
+  }
+}
+
+
+//________________________________________________________________________________________________________________ //
 
 
 double fnloBlockB::GetAlphas(double Q, double alphasMZ){

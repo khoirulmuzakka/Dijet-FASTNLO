@@ -38,7 +38,6 @@ class fnloBlockB {
   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
-
    int ReadTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
    int ReadTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
    int ReadTable( vector<vector<vector<vector<vector<double > > > > >* v, istream *table );
@@ -54,6 +53,14 @@ class fnloBlockB {
    int WriteTable( vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<vector<double > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<double >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+
+  void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1 = 0, double w2 = 0 );
+  void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1 = 1, double w2 = 1 );
+  void AddTableToAnotherTable( vector<vector<vector<vector<vector<double > > > > >* vSum, vector<vector<vector<vector<vector<double > > > > >* vAdd, double w1 = 1, double w2 = 1 );
+  void AddTableToAnotherTable( vector<vector<vector<vector<double > > > >* vSum, vector<vector<vector<vector<double > > > >* vAdd, double w1 = 1, double w2 = 1 );
+  void AddTableToAnotherTable( vector<vector<vector<double > > >* vSum, vector<vector<vector<double > > >* vAdd, double w1 = 1, double w2 = 1 );
+  void AddTableToAnotherTable( vector<vector<double > >* vSum, vector<vector<double > >* vAdd, double w1 = 1, double w2 = 1 );
+  void AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1 = 1, double w2 = 1 );
 
    bool IsCompatible(fnloBlockB* other);
    int GetIRef(){return IRef;}
