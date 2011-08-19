@@ -924,6 +924,123 @@ double fnloBlockB::GetSmallestX2(int ObsBin){
 
 
 
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
+	      for(unsigned int i6=0;i6<v->at(i0)[i1][i2][i3][i4][i5].size();i6++){
+		*table >> v->at(i0)[i1][i2][i3][i4][i5][i6];
+		nn++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
+	      *table >> v->at(i0)[i1][i2][i3][i4][i5];
+	      nn++;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<vector<vector<vector<double > > > > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
+	    *table >> v->at(i0)[i1][i2][i3][i4];
+	    nn++;
+	  }
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<vector<vector<double > > > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+ 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
+	  *table >> v->at(i0)[i1][i2][i3];
+	  nn++;
+	}
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<vector<double > > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
+	*table >> v->at(i0)[i1][i2];
+	nn++;
+      }
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<vector<double > >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
+      *table >> v->at(i0)[i1];
+      nn++;
+    }
+  }
+  return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int fnloBlockB::ReadTable(vector<double >* v, istream *table ){
+  int nn = 0;
+  for(unsigned int i0=0;i0<v->size();i0++){
+    *table >> v->at(i0);
+    nn++;
+  }
+  return nn;
+}
+
+
+
+//________________________________________________________________________________________________________________//
+
+
 double fnloBlockB::GetAlphas(double Q, double alphasMZ){
 
    double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function

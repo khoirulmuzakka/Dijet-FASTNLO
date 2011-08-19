@@ -23,6 +23,17 @@ class fnloBlockB {
    int Read(istream *table);
    int Write(ostream *table, int option = 0);
    int Copy(fnloBlockB* other);
+
+
+  int ReadTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
+  int ReadTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
+  int ReadTable( vector<vector<vector<vector<vector<double > > > > >* v, istream *table );
+  int ReadTable( vector<vector<vector<vector<double > > > >* v, istream *table );
+  int ReadTable( vector<vector<vector<double > > >* v, istream *table );
+  int ReadTable( vector<vector<double > >* v, istream *table );
+  int ReadTable( vector<double >* v, istream *table );
+
+
    bool IsCompatible(fnloBlockB* other);
    int GetIRef(){return IRef;}
    int GetIDataFlag(){return IDataFlag;}
