@@ -1,5 +1,7 @@
 // KR: Add include because of header clean-up in gcc-4.3
 #include <cstdlib>
+#include <iostream>
+#include <cmath>
 
 #include "fnloBlockB.h"
 
@@ -22,8 +24,11 @@ int fnloBlockB::Read(istream *table){
    *table >> IAddMultFlag;
    *table >> IContrFlag1;
    *table >> IContrFlag2;
-   *table >> IContrFlag3;
+   //*table >> IContrFlag3;	// IContrFlag3 was replace by NScaleDep
+   IContrFlag3 = 0;
+   *table >> NScaleDep;
    *table >> NContrDescr;
+   //   printf("  *  infnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep );
    CtrbDescript.resize(NContrDescr);
    char buffer[257];
    table->getline(buffer,256);
@@ -151,6 +156,8 @@ int fnloBlockB::Read(istream *table){
       *table >> IPDFdef1;
       *table >> IPDFdef2;
       *table >> IPDFdef3;
+      //printf("  *  infnloBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
+
       if(IPDFdef1==0){
          for(int i=0;i<NSubproc;i++){
             // Missing: linear PDF combinations for IPDFdef1=0
@@ -212,13 +219,15 @@ int fnloBlockB::Read(istream *table){
          }
       }
 
-
       Nscalevar.resize(NScaleDim);
       Nscalenode.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
          *table >> Nscalevar[i];
          *table >> Nscalenode[i];
       }
+
+      //printf("  *  infnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",BlockA2->GetNObsBin(), Nscalevar[0] , Nscalenode[0] , NScaleDim );
+
 
       ScaleFac.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
@@ -228,44 +237,147 @@ int fnloBlockB::Read(istream *table){
          }
       }
 
-      ScaleNode.resize(BlockA2->GetNObsBin());
-      for(int i=0;i<BlockA2->GetNObsBin();i++){
-         ScaleNode[i].resize(NScaleDim);
-         for(int j=0;j<NScaleDim;j++){
-            ScaleNode[i][j].resize(Nscalevar[j]);
-            for(int k=0;k<Nscalevar[j];k++){
-               ScaleNode[i][j][k].resize(Nscalenode[j]);
-               for(int l=0;l<Nscalenode[j];l++){
-                  *table >> ScaleNode[i][j][k][l];
-               }
-            }
-         }
+      //printf("  *  infnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",BlockA2->GetNObsBin(), Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
+
+      //! DB: This for-loop-mess was replace by ResizeTable)( and ReadTable()      
+//       ScaleNode.resize(BlockA2->GetNObsBin());
+//       for(int i=0;i<BlockA2->GetNObsBin();i++){
+//          ScaleNode[i].resize(NScaleDim);
+//          for(int j=0;j<NScaleDim;j++){
+//             ScaleNode[i][j].resize(Nscalevar[j]);
+//             for(int k=0;k<Nscalevar[j];k++){
+//                ScaleNode[i][j][k].resize(Nscalenode[j]);
+//                for(int l=0;l<Nscalenode[j];l++){
+//                   *table >> ScaleNode[i][j][k][l];
+//                }
+//             }
+//          }
+//       }
+
+      // @MW, @KR: I use this shorthand notation for reading vectors. Will it work for you?
+      //    I only see problems, if you make use of NScaleDim>1
+      ResizeTable( &ScaleNode , BlockA2->GetNObsBin(), 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
+      int nsn = ReadTable  ( &ScaleNode , table );
+      //printf("  *  infnloBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
+      
+      int XmaxFromI[1] = {0};
+      //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n", BlockA2->GetNObsBin(), GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
+      ResizeTable( &SigmaTilde , BlockA2->GetNObsBin(), GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
+      int nst = ReadTable  ( &SigmaTilde , table );
+      //printf("  *  infnloBlockB::Read(). Read %d lines of SigmaTilde.\n",nst);
+      printf("  *  infnloBlockB::Read(). Read %d lines of FNLO v2.0 tables.\n",nst+nsn);
+      
+      //printf(" &PdfLc  %i  %i  #%i  %i\n", BlockA2->GetNObsBin(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
+      ResizeTable( &PdfLc , BlockA2->GetNObsBin(), GetTotalScalenodes(), XmaxFromI, NSubproc );
+
+      //! DB: redundant code: was replaced by ResizeTable() and ReadTable() methods.
+      //       SigmaTilde.resize(BlockA2->GetNObsBin());
+      //       PdfLc.resize(BlockA2->GetNObsBin());
+      //       for(int i=0;i<BlockA2->GetNObsBin();i++){
+      //          int nxmax = GetNxmax(i);
+      //          int totalscalevars = GetTotalScalevars();
+      //          SigmaTilde[i].resize(totalscalevars);
+      //          for(int k=0;k<totalscalevars;k++){
+      //             int totalscalenodes =  GetTotalScalenodes();
+      //             SigmaTilde[i][k].resize(totalscalenodes);
+      //             PdfLc[i].resize(totalscalenodes);
+      //             for(int l=0;l<totalscalenodes;l++){
+      //                SigmaTilde[i][k][l].resize(nxmax);
+      //                PdfLc[i][l].resize(nxmax);
+      //                for(int m=0;m<nxmax;m++){
+      //                   SigmaTilde[i][k][l][m].resize(NSubproc);
+      //                   PdfLc[i][l][m].resize(NSubproc);
+      //                   for(int n=0;n<NSubproc;n++){
+      //                      *table >> SigmaTilde[i][k][l][m][n];
+      //                      PdfLc[i][l][m][n] = 0.;
+      //                   }
+      //                }
+      //             }
+      //          }
+      //       }
+
+      /*
+      if ( NScaleDep == 2 ) {
+	 int nn2 = 0;
+	 int temp;
+
+	 *table >> temp ;
+	 ResizeTable( &ScaleFactorsScale1 , temp );
+	 nn2 += ReadTable  ( &ScaleFactorsScale1 , table );
+
+	 *table >> temp ;
+	 ResizeTable( &ScaleFactorsScale2 , temp );
+	 nn2 += ReadTable  ( &ScaleFactorsScale2 , table );
+
+	 *table >> NscalenodeScale1 ;
+	 ResizeTable( &Scale1Node , BlockA2->GetNObsBin() , ScaleFactorsScale1.size() , NscalenodeScale1 );
+	 nn2 += ReadTable  ( &Scale1Node , table );
+
+	 *table >> NscalenodeScale2 ;
+	 ResizeTable( &Scale2Node , BlockA2->GetNObsBin() , ScaleFactorsScale2.size() , NscalenodeScale2 );
+	 nn2 += ReadTable  ( &Scale2Node , table );
+
+	 int XMaxFromFromDim[1] = {0};
+	 ResizeTable( &SigmaTilde2Scales  , BlockA2->GetNObsBin() , ScaleFactorsScale1.size(), ScaleFactorsScale2.size(), NscalenodeScale1, NscalenodeScale2, XMaxFromFromDim, NSubproc );
+	 ResizeTable( &PdfLc2Scales	 , BlockA2->GetNObsBin() , NscalenodeScale2, XMaxFromFromDim, NSubproc );
+	 nn2 += ReadTable(&SigmaTilde2Scales , table );
+
+	 ResizeTable( &SigmaRef2Scales , BlockA2->GetNObsBin() , ScaleFactorsScale1.size(), ScaleFactorsScale2.size(), NSubproc );
+	 nn2 += ReadTable  ( &SigmaRef2Scales , table );
+	 printf("  *  infnloBlockB::Read(). Read %d lines of NScaleDep==2 Tables.\n",nn2);
+	
+      }
+      */
+
+      if ( NScaleDep == 3 ) {
+
+	 //  ---- order of reading... ---- //
+	 //    - nscalenode q2
+	 //    - scalenode Q
+	 //    - nscalenode pt
+	 //    - scalenode pt
+	 //    - simgatilde mu indep
+	 //    - simgatilde mu_f dep
+	 //    - simgatilde mu_r dep
+	 //    - sigmarefmixed
+	 //    - sigmaref scale 1
+	 //    - sigmaref scale 2
+	 // ------------------------------ //
+	 int nn3 = 0;
+	  
+	 *table >> NscalenodeScale1 ;
+	 ResizeTable( &ScaleNode1 , BlockA2->GetNObsBin() , NscalenodeScale1 );
+	 nn3 += ReadTable  ( &ScaleNode1 , table );
+
+	 *table >> NscalenodeScale2 ;
+	 ResizeTable( &ScaleNode2 , BlockA2->GetNObsBin() , NscalenodeScale2 );
+	 nn3 += ReadTable  ( &ScaleNode2 , table );
+
+	 int XMaxFromFromDim[1] = { 0 };
+	 ResizeTable( &PdfLcMuVar , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+	 ResizeTable( &AlphasTwoPi , BlockA2->GetNObsBin() , NscalenodeScale1 , NscalenodeScale2 );
+
+	 ResizeTable( &SigmaTildeMuIndep , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+	 nn3 += ReadTable  ( &SigmaTildeMuIndep , table );
+
+	 ResizeTable( &SigmaTildeMuFDep , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+	 nn3 += ReadTable  ( &SigmaTildeMuFDep , table );
+
+	 ResizeTable( &SigmaTildeMuRDep , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+	 nn3 += ReadTable  ( &SigmaTildeMuRDep , table );
+
+	 ResizeTable( &SigmaRefMixed , BlockA2->GetNObsBin() , NSubproc );
+	 nn3 += ReadTable  ( &SigmaRefMixed , table );
+
+	 ResizeTable( &SigmaRef_s1 , BlockA2->GetNObsBin() , NSubproc );
+	 nn3 += ReadTable  ( &SigmaRef_s1 , table );
+
+	 ResizeTable( &SigmaRef_s2 , BlockA2->GetNObsBin() , NSubproc );
+	 nn3 += ReadTable  ( &SigmaRef_s2 , table );
+	 printf("  *  infnloBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
+
       }
 
-      SigmaTilde.resize(BlockA2->GetNObsBin());
-      PdfLc.resize(BlockA2->GetNObsBin());
-      for(int i=0;i<BlockA2->GetNObsBin();i++){
-         int nxmax = GetNxmax(i);
-         int totalscalevars = GetTotalScalevars();
-         SigmaTilde[i].resize(totalscalevars);
-         for(int k=0;k<totalscalevars;k++){
-            int totalscalenodes =  GetTotalScalenodes();
-            SigmaTilde[i][k].resize(totalscalenodes);
-            PdfLc[i].resize(totalscalenodes);
-            for(int l=0;l<totalscalenodes;l++){
-               SigmaTilde[i][k][l].resize(nxmax);
-               PdfLc[i][l].resize(nxmax);
-               for(int m=0;m<nxmax;m++){
-                  SigmaTilde[i][k][l][m].resize(NSubproc);
-                  PdfLc[i][l][m].resize(NSubproc);
-                  for(int n=0;n<NSubproc;n++){
-                     *table >> SigmaTilde[i][k][l][m][n];
-                     PdfLc[i][l][m][n] = 0.;
-                  }
-               }
-            }
-         }
-      }
 
    }// end of not data and not corrections
 

@@ -187,7 +187,6 @@ public:
    vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuRDep; 
    // SigmaRef [NObsBins] [nsubproc]
    vector < vector < double > > SigmaRefMixed; 
-   vector < vector < double > > SigmaRefMuf1_MuRMixed; 
    vector < vector < double > > SigmaRef_s1; 
    vector < vector < double > > SigmaRef_s2; 
   
