@@ -1,6 +1,6 @@
 #include "fnloTableUser.h"
 
-#include "LHAPDF.h"
+#include "LHAPDF/LHAPDF.h"
 
 int fnloTableUser::ReadPDF(string filename){
    
