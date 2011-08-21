@@ -402,10 +402,14 @@ AC_SUBST(SVNREV)
 # Output
 AC_CONFIG_FILES([Makefile
                  common/Makefile
-                 merger/Makefile
-	         tableconvert/Makefile
-                 author/ep/Makefile
-                 author/hadron/Makefile
+                 creator/Makefile
+                 creator/ep/Makefile
+                 creator/hadron/Makefile
+	         processor/Makefile
+	         processor/converter/Makefile
+                 processor/merger/Makefile
+                 reader/Makefile
+                 reader/reader_cc/Makefile
                  user/Makefile
                  myuser/Makefile
 	        ])
