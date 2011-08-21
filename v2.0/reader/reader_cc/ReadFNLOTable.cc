@@ -62,7 +62,8 @@ int main(int argc, char** argv){
 
   // ---- 'Setting'/init pdf ---- //
   //   fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
-  fnloreader->SetLHAPDFpath("/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/share/PDFsets/");
+  //KR  fnloreader->SetLHAPDFpath("/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/share/PDFsets/");
+  fnloreader->SetLHAPDFpath("./");
   fnloreader->SetLHAPDFfilename(PDFFile);
   fnloreader->SetLHAPDFset(0);
   fnloreader->FillPDFCache();	// pdf is 'external'! you always have to call FillPDFCache();

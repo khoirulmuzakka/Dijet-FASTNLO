@@ -7,12 +7,11 @@ if HAVE_LHAPDFCONFIG
 endif
 
 # All source files which go into the main target (and have to be distributed)
-ReadFNLOTable_SOURCES = FastNLOReader.cc ReadFNLOTable.cc FastNLOBlockB.cc qcdnumdummy.f
+ReadFNLOTable_SOURCES = FastNLOReader.cc FastNLOReader.h ReadFNLOTable.cc \
+	FastNLOBlockB.cc FastNLOBlockB.h qcdnumdummy.f
 
-#
-# C++ compiler flags to be used for the main target
-# top_srcdir for direct compilation before install; pkgincludedir for after install
-AM_CCLAGS =
+# Preprocessor flags
+AM_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
 
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
