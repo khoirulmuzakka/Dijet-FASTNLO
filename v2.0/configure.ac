@@ -410,8 +410,7 @@ AC_CONFIG_FILES([Makefile
                  processor/merger/Makefile
                  reader/Makefile
                  reader/reader_cc/Makefile
-                 user/Makefile
-                 myuser/Makefile
+                 reader/reader_f/Makefile
 	        ])
 #                 userkr/Makefile
 
