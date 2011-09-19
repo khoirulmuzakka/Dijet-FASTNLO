@@ -12,10 +12,11 @@ class fnloBlockBNlojet : public fnloBlockB {
  public:
    fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);}
    void FillEventDIS(int ObsBin,double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor=1.0);
-   void FillEventDIS2Scale(int ObsBin,double x, double scale1, double scale2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor=1.0);
+   void FillEventDISMuVar(int ObsBin, double x, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double prefactor=1.0);
    void FillEventPhoto(int ObsBin,double x, double scale1, const nlo::amplitude_photo& amp, nlo::pdf_and_coupling_photo& pdf, double prefactor=1.0);
    void FillEventResolved(int ObsBin,double x1, double x2,double scale1, double ymin, double ymax,  double Q2max,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
    void FillEventHHC(int ObsBin,double x1, double x2,double scale1,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
+   void FillEventHHCMuVar(int ObsBin,double x1, double x2, double M1, double M2, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& dummypdf, nlo::pdf_and_coupling_hhc& realpdf, double prefactor=1.0);
 
    //double TransformHx1(double x){return log10(x);}
    //double TransformHx2(double x){return -sqrt(log10(1.0/x));}
@@ -32,7 +33,13 @@ private:
    void _S_gauleg(unsigned int n, double *x, double *w);
 
    // interpolation kernel
+   enum EInterpolKernel { kCatmulRom = 1 , kLagrangian = 2 };
    void Interpol(int nnode, int nmax, double delta, int ikern, int &nmod, vector <double> *kernel);
+   vector < double > Interpol(int nnode, int nmax, double delta, EInterpolKernel eIkern, int &nmod );
+
+   void WarmUp( int ObsBin, double x, double M1, double M2 = 0 , string sx = "xlim", string s1 ="mu", string s2 ="");
+   void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& realpdf, double prefactor);
+   void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& realpdf, double prefactor);
 
 };
 
