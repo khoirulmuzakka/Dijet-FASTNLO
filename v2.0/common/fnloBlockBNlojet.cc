@@ -903,7 +903,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       // ---- printout on screen ---- //
       printf(" // %d contributions (!= events) in warm-up run \n",counter);
       for (int i=0;i<BlockA2->GetNObsBin();i++){
-	 printf("	%s [%d] = %e", sx.data(), i, xlo[i] );
+	 printf("	%s [%d] = %e", sx.data(), i, axlo[i] );
 	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], i, a1up[i] );	 }
 	 if ( a2lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], i, a2up[i] );	 }
 	 printf(";\n");
@@ -914,7 +914,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       ofile = fopen("fastNLO-warmup.dat","w");
       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
-	 fprintf(ofile,"	%s [%d] = %e", sx.data(), i, xlo[i] );
+	 fprintf(ofile,"	%s [%d] = %e", sx.data(), i, axlo[i] );
 	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], i, a1up[i] );	 }
 	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], i, a2up[i] );	 }
 	 fprintf(ofile,";\n");
@@ -1799,4 +1799,77 @@ vector < double > fnloBlockBNlojet::Interpol(int nnode, int nmax, double delta, 
    }
    
    return kern;
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
+void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitDISConstants(). Method for initalizing all necessary fastNLO values
+   //  for a reasonable v2.1 table.
+   //
+   //  Fills:
+   //     - SigmaRefMixed
+   //     - SigmaRef_s1
+   //     - SigmaRef_s2
+   //
+   // -------------------------------------------------------------------------- //
+   
+   A2->INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
+			 //     to be normalized by own integral (in 1st dimension)
+			 //     see documentation for details and for other options
+
+   IXsectUnits	= A2->Ipublunits;
+   IDataFlag = 0;
+   IAddMultFlag = 0;
+   IContrFlag1 = 1;
+   IContrFlag3 = 0;
+   CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+   IRef = 0;
+   
+   if (nlo || A2->ILOord > 1) {
+      NSubproc = 3;
+      printf("  this job uses 3 subprocesses \n");
+   } else {
+      NSubproc = 2;
+      printf("  this job uses 2 subprocesses \n");
+   }
+   
+   if(nlo){
+      CtrbDescript.push_back("NLO");
+      IContrFlag2 = 2;
+      IScaleDep = 1;
+      Npow = A2->ILOord+1;
+   }else{
+      CtrbDescript.push_back("LO");      
+      IContrFlag2 = 1;
+      IScaleDep = 0;
+      Npow = A2->ILOord;
+   }
+  
+   NPDF = 1;
+   NPDFPDG.push_back(2212);	// --- fastNLO user: PDG code for hadron
+   NPDFDim = 0;			// DIS
+   NFragFunc = 0;
+   IPDFdef1 = 2;
+   IPDFdef2 = 1;
+
+   if(NSubproc == 3) {
+      IPDFdef3 = 3;
+   } else {
+      IPDFdef3 = 2;
+      printf("  set IPDFdef3=2 consistent with 2 subprocesses \n");
+   }
+
+   IWarmUp = 0;			// no warm-up run -> production run.
+   IWarmUpPrint = 10000000 ;
+
+   // resize the vectors...
+   XNode1.resize(A2->NObsBin);
+
+
 }
