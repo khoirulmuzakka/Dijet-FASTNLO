@@ -55,6 +55,14 @@ private:
 
 
 public:
+   // variables for warm-up run
+   int IWarmUp;
+   unsigned long IWarmUpCounter;
+   unsigned long IWarmUpPrint;
+   vector < double > xlo;
+   vector < double > scalelo;
+   vector < double > scalehi;
+
    vector < double > scale1hi;
    vector < double > scale1lo;
    vector < double > scale2hi;

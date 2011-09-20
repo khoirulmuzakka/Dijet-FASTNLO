@@ -101,15 +101,6 @@ public:
  public:
    static const int DividebyNevt = 1;
 
-   // MW: variables for warm-up run
-   // DB: could we please move those variable to fnloBlockBNlojet.h ??? 
-   int IWarmUp;
-   unsigned long IWarmUpCounter;
-   unsigned long IWarmUpPrint;
-   vector < double > xlo;
-   vector < double > scalelo;
-   vector < double > scalehi;
-
    fnloBlockA1 *BlockA1;
    fnloBlockA2 *BlockA2;
    int IXsectUnits;
