@@ -306,7 +306,7 @@ void UserHHC::inittable(){
    A2->INormFlag = 0;
 
    // main table
-   fnloBlockB *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+   fnloBlockBNlojet *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
    table->CreateBlockB(0,B);
    B->IXsectUnits = 9;
    B->IDataFlag = 0;
@@ -314,7 +314,6 @@ void UserHHC::inittable(){
    B->IContrFlag1 = 1;
    B->IContrFlag3 = 0;
    B->CodeDescript.push_back("NLOJET++ 4.0.1");
-   B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
    if (nlo || A2->ILOord > 2) {
      B->NSubproc = 7;
@@ -333,7 +332,6 @@ void UserHHC::inittable(){
       B->IScaleDep = 0;
       B->Npow = A2->ILOord;
    }
-   B->NContrDescr = B->CtrbDescript.size();
 
    B->NPDF = 2;
    B->NPDFPDG.push_back(2212);
@@ -424,7 +422,6 @@ void UserHHC::inittable(){
    B->ScaleDescript.resize(B->NScaleDim);
 
    B->ScaleDescript[0].push_back(" p_T of jet");
-   B->NscaleDescript.push_back(B->ScaleDescript[0].size());
    B->Nscalenode.push_back(4); // number of scale nodes for pT
 
    B->ScaleFac.resize(B->NScaleDim);
@@ -486,7 +483,7 @@ void UserHHC::inittable(){
    
    // reference table
    if(doReference){
-      fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+      fnloBlockBNlojet *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
       //  refB->NSubproc = 7;
       if (nlo || A2->ILOord > 2) {
 	refB->NSubproc = 7;
