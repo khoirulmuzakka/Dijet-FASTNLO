@@ -862,11 +862,11 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
 
    static unsigned long counter = 0;
 
-   double* axlo = NULL;
-   double* a1lo = NULL;
-   double* a1up = NULL;
-   double* a2lo = NULL;
-   double* a2up = NULL;
+   static double* axlo = NULL;
+   static double* a1lo = NULL;
+   static double* a1up = NULL;
+   static double* a2lo = NULL;
+   static double* a2up = NULL;
    // init arrays
    if ( counter == 0 ){
       axlo = new double[BlockA2->GetNObsBin()];
@@ -904,8 +904,8 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       printf(" // %d contributions (!= events) in warm-up run \n",counter);
       for (int i=0;i<BlockA2->GetNObsBin();i++){
 	 printf("	%s [%d] = %e", sx.data(), i, axlo[i] );
-	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], i, a1up[i] );	 }
-	 if ( a2lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], i, a2up[i] );	 }
+	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
+	 if ( a2lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
 	 printf(";\n");
       }
       
@@ -915,12 +915,13 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
 	 fprintf(ofile,"	%s [%d] = %e", sx.data(), i, axlo[i] );
-	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], i, a1up[i] );	 }
-	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], i, a2up[i] );	 }
+	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
+	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
 	 fprintf(ofile,";\n");
       }
       fclose(ofile);
    }
+
    return;
 
 }
@@ -1812,10 +1813,8 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    //  InitDISConstants(). Method for initalizing all necessary fastNLO values
    //  for a reasonable v2.1 table.
    //
-   //  Fills:
-   //     - SigmaRefMixed
-   //     - SigmaRef_s1
-   //     - SigmaRef_s2
+   //  This method is only for v2.1 tables
+   //  
    //
    // -------------------------------------------------------------------------- //
    
@@ -1868,8 +1867,224 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    IWarmUp = 0;			// no warm-up run -> production run.
    IWarmUpPrint = 10000000 ;
 
-   // resize the vectors...
+   NScaleDep = 3;
+   
+   // ---- resize the vectors ---- //
    XNode1.resize(A2->NObsBin);
+
+   scale1lo.resize(A2->NObsBin);
+   scale1hi.resize(A2->NObsBin);
+   scale2lo.resize(A2->NObsBin);
+   scale2hi.resize(A2->NObsBin);
+
+   // ---- those numbers are partly not perfectly defined ---- //
+   NScales = 1;		// 
+   Iscale.resize(1);
+   Iscale[0] = 0;		// mur=mur(ET), ET = index 0 
+
+   NScaleDim = 1;		// NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
+   ScaleDescript.resize(1);
+   ScaleDescript[0].resize(2);
+   ScaleDescript[0][0] = ("Q");
+   ScaleDescript[0][1] = ("pt");
+   
+   if ( NScaleDep != 3 ){
+      ScaleFac.resize(1);	// 1 = NScaleDim
+   }
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
+void fnloBlockBNlojet::InitFinalDISValues( fnloBlockA2* A2 , double* xlim , double* scale1lo , double* scale1hi , double* scale2lo , double* scale2hi ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitFinalDISValues(). Method for initalizing all necessary fastNLO values
+   //  for a reasonable v2.1 table.
+   //
+   //   this method could be used for v2.1 and for v2.0 tables
+   //   for v2.0 tables just pass scale1lo and scal1hi arrays
+   //  
+   //
+   // -------------------------------------------------------------------------- //
+   
+   // ---- some numbers ---- //
+   const double mu0scale = 0.25; // --- variable in H(mu) (in GeV)
+   if ( NScaleDim != 1 ) cout << "Error! NScaleDim is not supposed to be <= one." << endl;
+
+   
+   if ( NScaleDep != 3 ){
+      Nscalevar.push_back(ScaleFac[0].size());
+
+      ResizeTable( &ScaleNode  , A2->NObsBin , NScaleDim , Nscalevar[0] , Nscalenode[0] );
+      ResizeTable( &HScaleNode , A2->NObsBin , NScaleDim , Nscalevar[0] , Nscalenode[0] );
+     
+      // init ScaleNode and HScaleNode
+      for(int i=0;i<A2->NObsBin;i++){
+	 int j = 0; // this was once the NScaleDim loop...
+	 for(int k=0;k<Nscalevar[j];k++){ 
+	    if(Nscalenode[j]==1){
+	       ScaleNode  [i][j][k][0]  = ScaleFac[0][k]*(scale1hi[i]+scale1lo[i])/2.;
+	       HScaleNode [i][j][k][0] = log(log((ScaleFac[0][k]*(scale1hi[i]+scale1lo[i])/2.)/mu0scale));
+	    }else{
+	       double llscale1lo = log(log((ScaleFac[0][k]*scale1lo[i])/mu0scale));
+	       double llscale1hi = log(log((ScaleFac[0][k]*scale1hi[i])/mu0scale));
+	       for(int l=0;l<Nscalenode[j];l++){
+		  // 1) later this is the place where the Chebychev nodes will be implemented
+		  // 2) here also: llscale1lo is supposed to be scale 1
+		  // 3) ScaleNode'X' is for 2ScaleInterpolationTables (NScaleDep==2)
+		  // 4) The one without number is for crosschecks and that FNLO is still working (NScaleDep == 1)
+		  // 		HScaleNode [i][j][k][l] = llscalelo +  double(l)/double(Nscalenode[j]-1)*(llscalehi-llscalelo);
+		  // 		ScaleNode [i][j][k][l] = mu0scale * exp(exp(HScaleNode [i][j][k][l]));
+		  HScaleNode [i][j][k][l] = llscale1lo +  double(l)/double(Nscalenode[j]-1)*(llscale1hi-llscale1lo);
+		  ScaleNode [i][j][k][l] = mu0scale * exp(exp(HScaleNode [i][j][k][l]));
+	       }
+	    }
+	 }
+      }
+
+      // ---- init sigma tilde ---- //
+      int XmaxFromI[1] = {0};
+      ResizeTable( &SigmaTilde , A2->NObsBin , Nscalevar[0] , Nscalenode[0] , XmaxFromI , NSubproc );
+
+   } // NScaleDep != 3 (v2.0 tables)
+  
+
+   if ( NScaleDep == 3 ){
+      if ( scale2hi==NULL ) printf("Error.\n");
+
+      // ---- init scale nodes ---- //
+      ResizeTable( &ScaleNode1   , A2->NObsBin , NscalenodeScale1 );
+      ResizeTable( &ScaleNode2   , A2->NObsBin , NscalenodeScale2 );
+     
+      ResizeTable( &HScaleNode1  , A2->NObsBin , NscalenodeScale1 );
+      ResizeTable( &HScaleNode2  , A2->NObsBin , NscalenodeScale2 );
+
+      for(int i=0;i<A2->NObsBin;i++){
+	 double llscale1lo = log(log((scale1lo[i])/mu0scale));
+	 double llscale1hi = log(log((scale1hi[i])/mu0scale));
+	 for(int l=0;l<NscalenodeScale1;l++){ 
+	    HScaleNode1[i][l]   = llscale1lo +  double(l)/double(NscalenodeScale1-1)*(llscale1hi-llscale1lo);
+	    ScaleNode1 [i][l]   = mu0scale * exp(exp(HScaleNode1[i][l]));       
+	 }
+	 double llscale2lo = log(log((scale2lo[i])/mu0scale));
+	 double llscale2hi = log(log((scale2hi[i])/mu0scale));
+	 for(int l=0;l<NscalenodeScale2;l++){ 
+	    HScaleNode2[i][l]   = llscale2lo +  double(l)/double(NscalenodeScale2-1)*(llscale2hi-llscale2lo);
+	    ScaleNode2 [i][l]   = mu0scale * exp(exp(HScaleNode2[i][l]));       
+	 }
+      }
+
+      int XmaxFromI[1] = {0};
+      // ---- init sigma tilde for the subprocess dependent table  ---- //
+      ResizeTable( &SigmaTildeMuIndep , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+      ResizeTable( &SigmaTildeMuFDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+      ResizeTable( &SigmaTildeMuRDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+     
+      ResizeTable( &SigmaRefMixed     , A2->NObsBin , NSubproc );
+      ResizeTable( &SigmaRef_s1       , A2->NObsBin , NSubproc );
+      ResizeTable( &SigmaRef_s2       , A2->NObsBin , NSubproc );
+   }   
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
+void fnloBlockBNlojet::InitReferenceTable( fnloBlockA2* A2 ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitReferenceTable(). Method for initalizing all necessary fastNLO values
+   //  for a reasonable v2.0 and v2.1 reference table.
+   //
+   // -------------------------------------------------------------------------- //
+
+   // do I need sth. like this here?
+   //          // refB->NSubproc = 3;
+   //       if (nlo || A2->ILOord > 1) {
+   //         refB->NSubproc = 3;
+   //       } else {
+   //         refB->NSubproc = 2;
+   //         printf("  this reference job uses 2 subprocesses \n");
+   //       }
+
+   IRef = 1; // IS Reference
+   Nscalenode[0] = 1;
+   Nxtot1.clear();
+   Hxlim1.clear();
+   NScaleDep = 1; //! the 2-scale-interplation mode has automatic reference cross sections.
+   for(int i=0;i<A2->NObsBin;i++){
+      Nxtot1.push_back(1);
+      Hxlim1.push_back(0.);
+      XNode1[i].clear(); 
+      XNode1[i].push_back(0.); 
+   }
+   
+   int XmaxFromI[1] = {0};
+   ResizeTable( &ScaleNode  , A2->NObsBin , NScaleDim , Nscalevar[0] , Nscalenode[0] );
+   ResizeTable( &HScaleNode , A2->NObsBin , NScaleDim , Nscalevar[0] , Nscalenode[0] );
+   ResizeTable( &SigmaTilde , A2->NObsBin , Nscalevar[0] , Nscalenode[0] , XmaxFromI , NSubproc );
+      
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
+void fnloBlockBNlojet::SetScale1Name( string name ){
+   if ( ScaleDescript.empty() ) printf("fnloBlockBNlojet::SetScale1Name. Error.\n");
+   if ( ScaleDescript[0].empty() ) printf("fnloBlockBNlojet::SetScale1Name. Error.\n");
+   if ( ScaleDescript[0].size() != 2 ) printf("fnloBlockBNlojet::SetScale1Name. Error.\n");
+   ScaleDescript[0][0]	 = name;  
+}
+
+void fnloBlockBNlojet::SetScale2Name( string name ){
+   if ( ScaleDescript.empty() ) printf("fnloBlockBNlojet::SetScale2Name. Error.\n");
+   if ( ScaleDescript[0].empty() ) printf("fnloBlockBNlojet::SetScale2Name. Error.\n");
+   if ( ScaleDescript[0].size() != 2 ) printf("fnloBlockBNlojet::SetScale2Name. Error.\n");
+   ScaleDescript[0][1]	 = name;  
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
+void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , double* xlim ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  Set number of x-noder per order of magnitude in x.
+   //
+   //  This method is tested only for v2.1 tables
+   //  XNode1 must be 'resized' to the right number of ObsBins before usage.
+   //
+   //  Input
+   //     - nxPerMagnitude	number of x-nodes for each order
+   //	  - xlim	array (from warm-up run) holding lowest x-limit in each bin
+   //  
+   //
+   // -------------------------------------------------------------------------- //
+   printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude):\n  *  ",nxPerMagnitude);
+   for(int i=0;i<XNode1.size();i++){
+      if ( xlim[i] < 1.e-6 && IWarmUp == 0 ) printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude.\n");
+      int nxtot	= (int)(fabs(log10(xlim[i]))*nxPerMagnitude);
+      printf("%d: %d, ",i,nxtot);
+      if ( i==((XNode1.size())-1))printf("\n");
+      
+      Nxtot1.push_back(nxtot);
+      double hxlim = log10(xlim[i]);  // use exact value from Warm-Up run
+      Hxlim1.push_back(hxlim);
+      for(int j=0;j<nxtot;j++){
+         double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
+         XNode1[i].push_back(pow(10,hx)); 
+      }
+   }
 
 
 }
