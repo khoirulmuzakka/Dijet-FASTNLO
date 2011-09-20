@@ -6,7 +6,7 @@
 #include <bits/dis-process.h>
 #include <bits/photo-process.h>
 #include <bits/hhc-process.h>
-
+#include "fnloBlockA2.h"
 
 class fnloBlockBNlojet : public fnloBlockB {
  public:
@@ -17,6 +17,18 @@ class fnloBlockBNlojet : public fnloBlockB {
    void FillEventResolved(int ObsBin,double x1, double x2,double scale1, double ymin, double ymax,  double Q2max,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
    void FillEventHHC(int ObsBin,double x1, double x2,double scale1,const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor=1.0);
    void FillEventHHCMuVar(int ObsBin,double x1, double x2, double M1, double M2, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& dummypdf, nlo::pdf_and_coupling_hhc& realpdf, double prefactor=1.0);
+
+   void InitDISConstants( fnloBlockA2* A2 , bool nlo );
+   void InitFinalDISValues( fnloBlockA2* A2 , double* xlim , double* scale1lo , double* scale1hi , double* scale2lo = NULL , double* scale2hi = NULL );
+   void InitReferenceTable( fnloBlockA2* A2 );
+   void SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , double* xlim );
+
+   void SetScale1Name( string name );
+   void SetScale2Name( string name );
+
+   void SetNumberOfScaleNodesScale1( int nNodes ) { NscalenodeScale1 = nNodes;  };
+   void SetNumberOfScaleNodesScale2( int nNodes ) { NscalenodeScale2 = nNodes;  };
+   void SetNumberOfScaleNodes_v20( int nNodes ) { Nscalenode.resize(1); Nscalenode[0] = nNodes;  };
 
    //double TransformHx1(double x){return log10(x);}
    //double TransformHx2(double x){return -sqrt(log10(1.0/x));}
@@ -40,6 +52,13 @@ private:
    void WarmUp( int ObsBin, double x, double M1, double M2 = 0 , string sx = "xlim", string s1 ="mu", string s2 ="");
    void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& realpdf, double prefactor);
    void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& realpdf, double prefactor);
+
+
+public:
+   vector < double > scale1hi;
+   vector < double > scale1lo;
+   vector < double > scale2hi;
+   vector < double > scale2lo;
 
 };
 
