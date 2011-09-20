@@ -396,7 +396,7 @@ void UserDIS::inittable(){
 			 //     see documentation for details and for other options
 
    // --- fastNLO table block B
-   fnloBlockB *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+   fnloBlockBNlojet *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
    table->CreateBlockB(0,B);
    B->IXsectUnits = 12;   // --- fastNLO user: set to same value as "SetIpublunits"
    B->IDataFlag = 0;
@@ -404,7 +404,7 @@ void UserDIS::inittable(){
    B->IContrFlag1 = 1;
    B->IContrFlag3 = 0;
    B->CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
-   B->NCodeDescr = B->CodeDescript.size();
+   //B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
    if (nlo || A2->ILOord > 1) {
      B->NSubproc = 3;
@@ -423,7 +423,7 @@ void UserDIS::inittable(){
       B->IScaleDep = 0;
       B->Npow = A2->ILOord;
    }
-   B->NContrDescr = B->CtrbDescript.size();
+   //B->NContrDescr = B->CtrbDescript.size();
 
    B->NPDF = 1;
    B->NPDFPDG.push_back(2212);   // --- fastNLO user: PDG code for hadron
@@ -506,7 +506,7 @@ void UserDIS::inittable(){
    B->ScaleDescript.resize(B->NScaleDim);
 
    B->ScaleDescript[0].push_back(" E_T of jet");
-   B->NscaleDescript.push_back(B->ScaleDescript[0].size());
+   //B->NscaleDescript.push_back(B->ScaleDescript[0].size());
    B->Nscalenode.push_back(13); // number of scale nodes for mu
 
    B->ScaleFac.resize(B->NScaleDim);
@@ -572,7 +572,7 @@ void UserDIS::inittable(){
    
    // reference table
    if(doReference){
-      fnloBlockB *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
+      fnloBlockBNlojet *refB = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
       // refB->NSubproc = 3;
       if (nlo || A2->ILOord > 1) {
         refB->NSubproc = 3;
