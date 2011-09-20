@@ -28,6 +28,7 @@ int fnloBlockB::Read(istream *table){
    // in v2.1. IContrFlag3 will be reintroduces again, and NScaleDep will be stored later in the table
    IContrFlag3 = 0;
    *table >> NScaleDep;
+   int NContrDescr;
    *table >> NContrDescr;
    //   printf("  *  infnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep );
    CtrbDescript.resize(NContrDescr);
@@ -38,6 +39,7 @@ int fnloBlockB::Read(istream *table){
       CtrbDescript[i] = buffer;
       //      StripWhitespace(CtrbDescript[i]);
    }
+   int NCodeDescr;
    *table >> NCodeDescr;   
    CodeDescript.resize(NCodeDescr);
    table->getline(buffer,256);
@@ -207,13 +209,13 @@ int fnloBlockB::Read(istream *table){
       for(int i=0;i<NScales;i++){
          *table >> Iscale[i];
       }      
-      NscaleDescript.resize(NScaleDim);
+      int NscaleDescript;
       ScaleDescript.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
-         *table >> NscaleDescript[i];
-         ScaleDescript[i].resize(NscaleDescript[i]);
+         *table >> NscaleDescript;
+         ScaleDescript[i].resize(NscaleDescript);
          table->getline(buffer,256);
-         for(int j=0;j<NscaleDescript[i];j++){
+         for(int j=0;j<NscaleDescript;j++){
             table->getline(buffer,256);
             ScaleDescript[i][j] = buffer;
             //            StripWhitespace(ScaleDescript[i][j]);
@@ -332,8 +334,8 @@ int fnloBlockB::Read(istream *table){
 	 nn3 += ReadTable  ( &ScaleNode2 , table );
 
 	 int XMaxFromFromDim[1] = { 0 };
-	 ResizeTable( &PdfLcMuVar , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
-	 ResizeTable( &AlphasTwoPi , BlockA2->GetNObsBin() , NscalenodeScale1 , NscalenodeScale2 );
+	 //ResizeTable( &PdfLcMuVar , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+	 //ResizeTable( &AlphasTwoPi , BlockA2->GetNObsBin() , NscalenodeScale1 , NscalenodeScale2 );
 
 	 ResizeTable( &SigmaTildeMuIndep , BlockA2->GetNObsBin() , XMaxFromFromDim , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
 	 nn3 += ReadTable  ( &SigmaTildeMuIndep , table );
@@ -382,14 +384,14 @@ int fnloBlockB::Write(ostream *table, int option){
    *table << IContrFlag2 << endl;
    //*table << IContrFlag3 << endl;	// v2.0+. for v2.1 write IContrFlag3 here, but NScaleDep only later
    *table << NScaleDep << endl;
-   *table << NContrDescr << endl;
+   *table << CtrbDescript.size() << endl;
    //printf("  *  infnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep);
-   for(int i=0;i<NContrDescr;i++){
+   for(int i=0;i<CtrbDescript.size();i++){
       *table << CtrbDescript[i] << endl;
    }
-   *table << NCodeDescr << endl;   
-   for(int i=0;i<NCodeDescr;i++){
+   *table << CodeDescript.size() << endl;   
+   for(int i=0;i<CodeDescript.size();i++){
       *table << CodeDescript[i] << endl;
    }
 
@@ -505,8 +507,8 @@ int fnloBlockB::Write(ostream *table, int option){
          *table << Iscale[i] << endl;
       }      
       for(int i=0;i<NScaleDim;i++){
-         *table << NscaleDescript[i] << endl;
-         for(int j=0;j<NscaleDescript[i];j++){
+         *table << ScaleDescript[i].size() << endl;
+         for(int j=0;j<ScaleDescript[i].size();j++){
             *table << ScaleDescript[i][j] << endl;
          }
       }
@@ -1568,8 +1570,15 @@ void fnloBlockB::AddTableToAnotherTable( vector<double >* vSum, vector<double >*
 
 double fnloBlockB::GetAlphas(double Q, double alphasMZ){
 
+   static const double TWOPI = 6.28318530717958647692528;
+   static const double TWOPISQR = 39.47841760435743447533796;
+   static const int NF = 5;
+   // DB: Todo: Update this number!
+   static const double MZ = 91.1882;
+
    double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
    double BETA1 =  (51. - 19./3.*NF);
+ 
 
    // This is from NLOJET++, alpha.cc
    double res = alphasMZ;
@@ -1596,12 +1605,11 @@ void fnloBlockB::Print(){
   printf(" B   IContrFlag2                   %d\n",IContrFlag2);
   printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
   printf(" B   NScaleDep                     %d\n",NScaleDep);
-  printf(" B   NContrDescr                   %d\n",NContrDescr);
-  for(int i=0;i<NContrDescr;i++){
+  for(int i=0;i<CtrbDescript.size();i++){
     printf(" B   CtrbDescript[%d]               %s\n",i,CtrbDescript[i].data());
   }
-  printf(" B   NCodeDescr                    %d\n",NCodeDescr);
-  for(int i=0;i<NCodeDescr;i++){
+  //printf(" B   NCodeDescr                    %d\n",NCodeDescr);
+  for(int i=0;i<CodeDescript.size();i++){
     printf(" B   CodeDescript[%d]               %s\n",i,CodeDescript[i].data());
   }
 
@@ -1665,8 +1673,8 @@ void fnloBlockB::Print(){
     }
     printf(" B   NScaleDim                     %d\n",NScaleDim);
     for(int i=0;i<NScaleDim;i++){
-      printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
-      for(int j=0;j<NscaleDescript[i];j++){
+       //printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
+       for(int j=0;j<ScaleDescript[i].size();j++){
 	printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
       printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
