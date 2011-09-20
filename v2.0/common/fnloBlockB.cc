@@ -889,6 +889,8 @@ void fnloBlockB::FillPDFCache(int scalevar, void (fnloTableUser::*GetPdfs)(doubl
 
 void fnloBlockB::CalcXsection(double asmz, int scalevar, double rescale){
 
+   static const double TWOPI = 6.28318530717958647692528;
+
    ResetXsection();
 
    if(IsReference()){
