@@ -102,6 +102,7 @@ public:
    static const int DividebyNevt = 1;
 
    // MW: variables for warm-up run
+   // DB: could we please move those variable to fnloBlockBNlojet.h ??? 
    int IWarmUp;
    unsigned long IWarmUpCounter;
    unsigned long IWarmUpPrint;
@@ -118,9 +119,9 @@ public:
    int IContrFlag2;
    int IContrFlag3;	// @MW, @KR: IContrFlag3 was replaced by NScaleDep by DB and is now without any usage
    int NScaleDep;
-   int NContrDescr;
+   // obsolete int NContrDescr;
    vector < string > CtrbDescript;
-   int NCodeDescr;
+   // obsolete   int NCodeDescr;
    vector < string > CodeDescript;
    int Nuncorrel;
    vector < string > UncDescr;
@@ -162,7 +163,7 @@ public:
    int NScales;
    int NScaleDim;
    vector < int > Iscale;
-   vector < int > NscaleDescript;
+   // obsolete vector < int > NscaleDescript;
    vector < vector < string > > ScaleDescript;
    vector < int > Nscalevar;
    vector < int > Nscalenode;
@@ -170,16 +171,12 @@ public:
    vector < vector < vector < vector < double > > > > ScaleNode;
    vector < vector < vector < vector < double > > > > HScaleNode;
 
+   // DB: todo: those variables should end up in a new class fnloBlockBXS : public fnloBlockB
    vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
    vector < vector < vector < vector < double > > > > PdfLc; 
    vector < double > Xsection; 
 
    // --------------------------- mu_f, mu_r variaton scheme --------------------------- //
-   vector < double > scale1hi;
-   vector < double > scale1lo;
-   vector < double > scale2hi;
-   vector < double > scale2lo;
-
    // ---- members to write to disc ---- //
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
    vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuIndep; 
@@ -199,21 +196,16 @@ public:
    vector < vector < double > > HScaleNode2;
   
    // ---- stuff for reading the table ---- //
-   // @MW, @KR: if we provide a separate reader: we don't need variables here for reading the table.
-   vector < double > XsectionRef_s1; 
-   vector < double > XsectionRef_s2; 
-   vector < double > XsectionRefMixed; 
-   vector < double > XsectionRefMuf1_MuRMixed; 
-   vector < double > XsectionMuVar; 
-   // PdfLcMuVar [ObsBins] [NxNodes] [NQNodes] [NPtNodes] [nsubproc]
-   vector < vector < vector < vector < vector <double > > > > > PdfLcMuVar; 
-   // AlphasTwoPi [ObsBins] [N s1-Nodes] [N s2-Nodes]
-   vector < vector < vector <double > > > AlphasTwoPi; 
+   //    // @MW, @KR: if we provide a separate reader: we don't need variables here for reading the table.
+   //    vector < double > XsectionRef_s1; 
+   //    vector < double > XsectionRef_s2; 
+   //    vector < double > XsectionRefMixed; 
+   //    vector < double > XsectionRefMuf1_MuRMixed; 
+   //    vector < double > XsectionMuVar; 
+   //    // PdfLcMuVar [ObsBins] [NxNodes] [NQNodes] [NPtNodes] [nsubproc]
+   //    vector < vector < vector < vector < vector <double > > > > > PdfLcMuVar; 
+   //    // AlphasTwoPi [ObsBins] [N s1-Nodes] [N s2-Nodes]
+   //    vector < vector < vector <double > > > AlphasTwoPi; 
   
-   static const double TWOPI = 6.28318530717958647692528;
-   static const double TWOPISQR = 39.47841760435743447533796;
-   static const int NF = 5;
-   static const double MZ = 91.1882;
-
 };
 #endif
