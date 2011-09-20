@@ -188,7 +188,7 @@ void UserDIS::initfunc(unsigned int)
    // ---- Initialize event counters
    nevents = 0;
    // Set some defaults
-   if (nwrite==0) nwrite = 10000000; // 5000000
+   if (nwrite==0) nwrite = 100000; // 5000000
 
    start_time = std::time(0);
    
@@ -356,12 +356,10 @@ void UserDIS::inittable(){
    A2->ILOord = 1;			// --- fastNLO user: power of LO contribution for process
    A2->NDim = 2;			// --- fastNLO user: No of dimensions in which observable is binned
    A2->DimLabel.push_back("p_T");	// --- fastNLO user: label of 1st dimension
-   A2->IDiffBin.push_back(2);
+   A2->IDiffBin.push_back(2);		// --- fastNLO user: Is the cross section in the publication divided by this dimension (2: yes, 1:no)
    A2->DimLabel.push_back("Q^2");	// --- fastNLO user: label of 2nd dimension
    A2->IDiffBin.push_back(2);
 
-   vector <double> bound;
-   bound.resize(2);
 
 
    // --- fastNLO user: bin definitions - here in Q2 and ET
@@ -378,31 +376,11 @@ void UserDIS::inittable(){
      {7.,11.,18.,30.,50.}
    };
 
-   // --- fastNLO user:
-   //     define below the bin width ("binsize") by which
-   //     the cross section is divided to obtain the 
-   //     (multi-) differential result.
-   double binsize = 0.;
+   vector<double*> vetbins(nq2bins);
+   for (int i=0;i<vetbins.size();i++) vetbins[i]=etbins[i]; 
 
-   int nbins = 0;   // --- count total No. bins
-   for(int i=0;i<nq2bins;i++){
-      for(int j=0;j<netbins[i];j++){
- 	 nbins += 1;
-         bound[0] = etbins[i][j];
-         bound[1] = q2bins[i];
-         A2->LoBin.push_back(bound);
-         bound[0] = etbins[i][j+1];
-         bound[1] = q2bins[i+1];
-         A2->UpBin.push_back(bound);
-
-         binsize = (etbins[i][j+1]-etbins[i][j]) 
-           *(q2bins[i+1]-q2bins[i]);  // binsize in ET, Q2
-         A2->BinSize.push_back(binsize);
-      }
-   }
-   printf(" tot. No. observable bins = %d\n",nbins);
-
-   A2->NObsBin = nbins;
+   // ---- initalize the bingrids and the normalizations ---- //
+   A2->InitBinning( nq2bins , q2bins , netbins , vetbins );
 
 
    // --- fastNLO table block B
@@ -410,13 +388,11 @@ void UserDIS::inittable(){
    table->CreateBlockB(0,B);
 
 
+   // ---- initalize all constants to make fastNLO behave like for DIS scenario ---- //
    B->InitDISConstants(A2,nlo);
 
    // --- initialize variables for WarmUp run
    //B->IWarmUp = 1;     cout<<"\nThis is a warmup run.\n"<<endl;      // --- fastNLO user: do the Warm-Up run
-   
-   // - fastNLO user: remember to disable reference-mode in
-   //                 Warm-Up run: "doReference = false" (above)
    //B->IWarmUpPrint = 10000000 ; //1 000 0000 is standard
 
    // --- arrays for extreme x and (default) scale values (computed in Warm-Up run) ---- //
@@ -441,33 +417,31 @@ void UserDIS::inittable(){
    //     tables can not be merged). 
    //
    // --------- fastNLO: Warm-Up run results (start)
- // 2000000 contributions (!= events) in warm-up run
-        xlim [0] = 5.219888e-03 , scale1lo [0] =   12.2478 , scale1hi [0] =   14.1421 , scale2lo [0] =    7.0006 , scale2hi [0] =   11.0000;
-        xlim [1] = 9.519490e-03 , scale1lo [1] =   12.2478 , scale1hi [1] =   14.1421 , scale2lo [1] =   11.0001 , scale2hi [1] =   17.9994;
-        xlim [2] = 2.224471e-02 , scale1lo [2] =   12.2478 , scale1hi [2] =   14.1411 , scale2lo [2] =   18.0000 , scale2hi [2] =   30.0000;
-        xlim [3] = 5.767716e-02 , scale1lo [3] =   12.2478 , scale1hi [3] =   14.1420 , scale2lo [3] =   30.0004 , scale2hi [3] =   49.9997;
-        xlim [4] = 6.481471e-03 , scale1lo [4] =   14.1429 , scale1hi [4] =   16.4316 , scale2lo [4] =    7.0005 , scale2hi [4] =   10.9993;
-        xlim [5] = 1.104695e-02 , scale1lo [5] =   14.1422 , scale1hi [5] =   16.4316 , scale2lo [5] =   11.0005 , scale2hi [5] =   17.9999;
-        xlim [6] = 2.210961e-02 , scale1lo [6] =   14.1422 , scale1hi [6] =   16.4316 , scale2lo [6] =   18.0010 , scale2hi [6] =   29.9969;
-        xlim [7] = 5.632149e-02 , scale1lo [7] =   14.1422 , scale1hi [7] =   16.4316 , scale2lo [7] =   30.0011 , scale2hi [7] =   49.9990;
-        xlim [8] = 7.517600e-03 , scale1lo [8] =   16.4319 , scale1hi [8] =   19.9996 , scale2lo [8] =    7.0000 , scale2hi [8] =   10.9997;
-        xlim [9] = 1.201805e-02 , scale1lo [9] =   16.4319 , scale1hi [9] =   19.9996 , scale2lo [9] =   11.0001 , scale2hi [9] =   17.9997;
-        xlim [10] = 2.367240e-02 , scale1lo [10] =   16.4317 , scale1hi [10] =   19.9998 , scale2lo [10] =   18.0003 , scale2hi [10] =   29.9973;
-        xlim [11] = 5.753835e-02 , scale1lo [11] =   16.4320 , scale1hi [11] =   19.9998 , scale2lo [11] =   30.0000 , scale2hi [11] =   49.9994;
-        xlim [12] = 8.822111e-03 , scale1lo [12] =   20.0013 , scale1hi [12] =   26.4575 , scale2lo [12] =    7.0000 , scale2hi [12] =   10.9997;
-        xlim [13] = 1.315474e-02 , scale1lo [13] =   20.0015 , scale1hi [13] =   26.4575 , scale2lo [13] =   11.0006 , scale2hi [13] =   17.9969;
-        xlim [14] = 2.601057e-02 , scale1lo [14] =   20.0004 , scale1hi [14] =   26.4571 , scale2lo [14] =   18.0007 , scale2hi [14] =   29.9998;
-        xlim [15] = 5.827202e-02 , scale1lo [15] =   20.0004 , scale1hi [15] =   26.4554 , scale2lo [15] =   30.0001 , scale2hi [15] =   49.9995;
-        xlim [16] = 1.423747e-02 , scale1lo [16] =   26.4580 , scale1hi [16] =   70.7090 , scale2lo [16] =    7.0000 , scale2hi [16] =   10.9999;
-        xlim [17] = 1.697281e-02 , scale1lo [17] =   26.4576 , scale1hi [17] =   70.7092 , scale2lo [17] =   11.0000 , scale2hi [17] =   17.9998;
-        xlim [18] = 2.911221e-02 , scale1lo [18] =   26.4576 , scale1hi [18] =   70.7103 , scale2lo [18] =   18.0001 , scale2hi [18] =   29.9998;
-        xlim [19] = 6.425069e-02 , scale1lo [19] =   26.4579 , scale1hi [19] =   70.7092 , scale2lo [19] =   30.0003 , scale2hi [19] =   50.0000;
-        xlim [20] = 7.724134e-02 , scale1lo [20] =   70.7144 , scale1hi [20] =  122.4729 , scale2lo [20] =    7.0002 , scale2hi [20] =   11.0000;
-        xlim [21] = 8.415003e-02 , scale1lo [21] =   70.7144 , scale1hi [21] =  122.4729 , scale2lo [21] =   11.0000 , scale2hi [21] =   17.9997;
-        xlim [22] = 9.654291e-02 , scale1lo [22] =   70.7143 , scale1hi [22] =  122.4692 , scale2lo [22] =   18.0004 , scale2hi [22] =   30.0000;
-        xlim [23] = 1.330466e-01 , scale1lo [23] =   70.7132 , scale1hi [23] =  122.4714 , scale2lo [23] =   30.0000 , scale2hi [23] =   49.9996;
-
-   
+   // 0  contributions (!= events) in warm-up run. more than > 7.e8 events
+   xlim [0] = 4.830240e-03 , scale1lo [0] =   12.2474 , scale1hi [0] =   14.1421 , scale2lo [0] =    7.0000 , scale2hi [0] =   11.0000;
+   xlim [1] = 8.676984e-03 , scale1lo [1] =   12.2474 , scale1hi [1] =   14.1421 , scale2lo [1] =   11.0000 , scale2hi [1] =   18.0000;
+   xlim [2] = 1.925820e-02 , scale1lo [2] =   12.2474 , scale1hi [2] =   14.1421 , scale2lo [2] =   18.0000 , scale2hi [2] =   30.0000;
+   xlim [3] = 4.942135e-02 , scale1lo [3] =   12.2474 , scale1hi [3] =   14.1421 , scale2lo [3] =   30.0000 , scale2hi [3] =   50.0000;
+   xlim [4] = 5.561276e-03 , scale1lo [4] =   14.1421 , scale1hi [4] =   16.4317 , scale2lo [4] =    7.0000 , scale2hi [4] =   11.0000;
+   xlim [5] = 9.449024e-03 , scale1lo [5] =   14.1421 , scale1hi [5] =   16.4317 , scale2lo [5] =   11.0000 , scale2hi [5] =   18.0000;
+   xlim [6] = 1.999068e-02 , scale1lo [6] =   14.1421 , scale1hi [6] =   16.4317 , scale2lo [6] =   18.0000 , scale2hi [6] =   30.0000;
+   xlim [7] = 4.968160e-02 , scale1lo [7] =   14.1421 , scale1hi [7] =   16.4317 , scale2lo [7] =   30.0000 , scale2hi [7] =   50.0000;
+   xlim [8] = 6.639102e-03 , scale1lo [8] =   16.4317 , scale1hi [8] =   20.0000 , scale2lo [8] =    7.0000 , scale2hi [8] =   11.0000;
+   xlim [9] = 1.054655e-02 , scale1lo [9] =   16.4317 , scale1hi [9] =   20.0000 , scale2lo [9] =   11.0000 , scale2hi [9] =   18.0000;
+   xlim [10] = 2.086355e-02 , scale1lo [10] =   16.4317 , scale1hi [10] =   20.0000 , scale2lo [10] =   18.0000 , scale2hi [10] =   30.0000;
+   xlim [11] = 5.124632e-02 , scale1lo [11] =   16.4317 , scale1hi [11] =   20.0000 , scale2lo [11] =   30.0000 , scale2hi [11] =   50.0000;
+   xlim [12] = 8.420308e-03 , scale1lo [12] =   20.0000 , scale1hi [12] =   26.4575 , scale2lo [12] =    7.0000 , scale2hi [12] =   11.0000;
+   xlim [13] = 1.232356e-02 , scale1lo [13] =   20.0000 , scale1hi [13] =   26.4575 , scale2lo [13] =   11.0000 , scale2hi [13] =   18.0000;
+   xlim [14] = 2.348163e-02 , scale1lo [14] =   20.0000 , scale1hi [14] =   26.4575 , scale2lo [14] =   18.0000 , scale2hi [14] =   30.0000;
+   xlim [15] = 5.382620e-02 , scale1lo [15] =   20.0000 , scale1hi [15] =   26.4575 , scale2lo [15] =   30.0000 , scale2hi [15] =   50.0000;
+   xlim [16] = 1.267082e-02 , scale1lo [16] =   26.4575 , scale1hi [16] =   70.7107 , scale2lo [16] =    7.0000 , scale2hi [16] =   11.0000;
+   xlim [17] = 1.675993e-02 , scale1lo [17] =   26.4575 , scale1hi [17] =   70.7107 , scale2lo [17] =   11.0000 , scale2hi [17] =   18.0000;
+   xlim [18] = 2.758318e-02 , scale1lo [18] =   26.4575 , scale1hi [18] =   70.7107 , scale2lo [18] =   18.0000 , scale2hi [18] =   30.0000;
+   xlim [19] = 5.718899e-02 , scale1lo [19] =   26.4575 , scale1hi [19] =   70.7107 , scale2lo [19] =   30.0000 , scale2hi [19] =   50.0000;
+   xlim [20] = 7.356358e-02 , scale1lo [20] =   70.7107 , scale1hi [20] =  122.4745 , scale2lo [20] =    7.0000 , scale2hi [20] =   11.0000;
+   xlim [21] = 7.739715e-02 , scale1lo [21] =   70.7107 , scale1hi [21] =  122.4745 , scale2lo [21] =   11.0000 , scale2hi [21] =   18.0000;
+   xlim [22] = 8.902488e-02 , scale1lo [22] =   70.7107 , scale1hi [22] =  122.4745 , scale2lo [22] =   18.0000 , scale2hi [22] =   30.0000;
+   xlim [23] = 1.217601e-01 , scale1lo [23] =   70.7107 , scale1hi [23] =  122.4745 , scale2lo [23] =   30.0000 , scale2hi [23] =   50.0000;
    // --------- fastNLO: Warm-Up run results (end)
  
  
@@ -487,16 +461,14 @@ void UserDIS::inittable(){
 
    // ----- v2.0 tables ---- //
    if ( B->NScaleDep != 3 ){
-
       // ---- number of scale nodes ---- //
       B->SetNumberOfScaleNodes_v20(13); //! I used 20 previously 13// number of scale nodes for mu
-
       // ---- set scale variations  ---- //
       B->ScaleFac[0].push_back(1.0);
       // 	B->ScaleFac[0].push_back(0.5); // --- fastNLO user: add any number of
       // 	B->ScaleFac[0].push_back(2.0); // additional scale variations as desired
-      
    }   
+
 
 
    // ---- final initializations ---- //
