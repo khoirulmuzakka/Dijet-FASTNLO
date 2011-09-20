@@ -1818,9 +1818,6 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    //
    // -------------------------------------------------------------------------- //
    
-   A2->INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
-			 //     to be normalized by own integral (in 1st dimension)
-			 //     see documentation for details and for other options
 
    IXsectUnits	= A2->Ipublunits;
    IDataFlag = 0;
