@@ -19,6 +19,7 @@ class fnloBlockA2 {
    int GetILOord(){return ILOord;}
    void SetIpublunits(int unit){Ipublunits = unit;}
    void Print();
+   void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
 
  private:
    void StripWhitespace(string &str) const;
