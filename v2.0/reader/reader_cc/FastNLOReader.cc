@@ -789,7 +789,7 @@ void FastNLOReader::PrintCrossSections( ){
       printf("  %9.3f - %9.3f   %3.0f         %12.4f\n",LoBin[i][0],UpBin[i][0],i*1.,xs[i]);
     }
   }
-  printf(" *  -------------------------------------------------------------------\n");
+  printf(" *  ---------------------------------------------------------------------\n");
 }
 
 
@@ -1053,7 +1053,7 @@ void FastNLOReader::CalcCrossSectionDISv21(){
 	       if ( BlockB_LO->NPDFDim == 0 ) {
 		  // LO Block
 		  for(int n=0;n<BlockB_LO->NSubproc;n++){ 
-		     double as	= BlockB_LO->AlphasTwoPi[i][jQ][jPt];
+		     double as		= BlockB_LO->AlphasTwoPi[i][jQ][jPt];
 		     double pdflc	= BlockB_LO->PdfLcMuVar[i][x][jQ][jPt][n];
 		     XSection[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * unit;
 		     XSection[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * unit;
@@ -1065,7 +1065,7 @@ void FastNLOReader::CalcCrossSectionDISv21(){
 		  }
 		  // NLO Block
 		  for(int n=0;n<BlockB_NLO->NSubproc;n++){ 
-		     double as	= BlockB_NLO->AlphasTwoPi[i][jQ][jPt];
+		     double as		= BlockB_NLO->AlphasTwoPi[i][jQ][jPt];
 		     double pdflc	= BlockB_NLO->PdfLcMuVar[i][x][jQ][jPt][n];
 		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * unit;
 		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * unit;
@@ -1488,51 +1488,8 @@ void FastNLOReader::FillBlockBPDFLCs( FastNLOBlockB* B ){
 
    // linear: DIS-case
    if(B->NPDFDim == 0){
-      vector<double> xfx; // PDFs of all partons
-      xfx.resize(13);
-      
-      if ( B->NScaleDep != 3 ){
-	 for(int i=0;i<NObsBin;i++){
-	    int nxmax = B->GetNxmax(i);
-	    for(int j=0;j<B->Nscalenode[0];j++){
-	       for(int k=0;k<nxmax;k++){ 
-		  
-		  double xp	= B->XNode1[i][k];
-		  double muf	= B->ScaleNode[i][0][fScalevar][j];
-		  xfx = GetXFX(xp,muf);
-		  //xfx = LHAPDF::xfx(xp,muf); // LHAPDF::xfx_p_(x,muf,0,0)
-		  vector < double > buffer = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc ); //calculate linear combinations
-		  for(int l=0;l<B->NSubproc;l++){ 
-		     B->PdfLc[i][j][k][l] = buffer[l];
-		  }
-	       }
-	    }
-	 }
-      }
-		
-      if ( B->NScaleDep == 3 ){
-		xfx.clear();// do i need this?
-		xfx.resize(13);// do i need this?
-		for(int i=0;i<NObsBin;i++){
-		  int nxmax = B->GetNxmax(i);
-		  for(int jQ=0;jQ<B->NscalenodeScaleQ;jQ++){
-		    for(int jPt=0;jPt<B->NscalenodeScalePt;jPt++){
-		      double muf	= CalcMu( kMuF , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuF );
-		      
-		      for(int x=0;x<nxmax;x++){ 
-			double xp	= B->XNode1[i][x];
-			xfx = GetXFX(xp,muf);
-			//xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
-			vector < double > buffer  = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc );
-			for(int l=0;l<B->NSubproc;l++){ 
-			  B->PdfLcMuVar[i][x][jQ][jPt][l] = buffer[l];
-			}
-		      }
-		    }
-		  }
-		}
-		
-     }
+      if	( B->NScaleDep != 3 ) FillBlockBPDFLCsDISv20(B);
+      else if	( B->NScaleDep == 3 ) FillBlockBPDFLCsDISv21(B);
    }
 
    else {
@@ -1541,6 +1498,90 @@ void FastNLOReader::FillBlockBPDFLCs( FastNLOBlockB* B ){
    
 
 
+}
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
+   vector<double> xfx(13); // PDFs of all partons
+   if ( B->NScaleDep != 3 ){
+      for(int i=0;i<NObsBin;i++){
+	 int nxmax = B->GetNxmax(i);
+	 for(int j=0;j<B->Nscalenode[0];j++){
+	    for(int k=0;k<nxmax;k++){ 
+		  
+	       double xp	= B->XNode1[i][k];
+	       double muf	= B->ScaleNode[i][0][fScalevar][j];
+	       xfx = GetXFX(xp,muf);
+	       //xfx = LHAPDF::xfx(xp,muf); // LHAPDF::xfx_p_(x,muf,0,0)
+	       vector < double > buffer = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc ); //calculate linear combinations
+	       for(int l=0;l<B->NSubproc;l++){ 
+		  B->PdfLc[i][j][k][l] = buffer[l];
+	       }
+	    }
+	 }
+      }
+   }
+}
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
+   vector<double> xfx(13); // PDFs of all partons
+   for(int i=0;i<NObsBin;i++){
+      int nxmax = B->GetNxmax(i);
+      
+      // speed up! if mu_f is only dependent on one variable, we can safe the loop over the other one
+
+      for(int x=0;x<nxmax;x++){ 
+	 double xp	= B->XNode1[i][x];
+	
+	 if ( fMuFFunc != kScale1 &&  fMuFFunc != kScale2 ) { // that't the standard case!
+	    for(int jQ=0;jQ<B->NscalenodeScaleQ;jQ++){
+	       for(int jPt=0;jPt<B->NscalenodeScalePt;jPt++){
+		  double muf = CalcMu( kMuF , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuF );
+		  
+		  xfx = GetXFX(xp,muf);
+		  //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
+		  vector < double > buffer  = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc );
+		  for(int l=0;l<B->NSubproc;l++){ 
+		     B->PdfLcMuVar[i][x][jQ][jPt][l] = buffer[l];
+		  }
+	       }
+	    }
+	 }
+	 else if ( fMuFFunc == kScale2 ){	// speed up
+	    for(int jPt=0;jPt<B->NscalenodeScalePt;jPt++){
+	       double muf = CalcMu( kMuF , 0 ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuF );
+	       xfx = GetXFX(xp,muf);
+	       //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
+	       vector < double > buffer  = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc );
+	       for(int jQ=0;jQ<B->NscalenodeScaleQ;jQ++){
+		  for(int l=0;l<B->NSubproc;l++){ 
+		     B->PdfLcMuVar[i][x][jQ][jPt][l] = buffer[l];
+		  }
+	       }
+	    }
+	 }
+	 else if ( fMuFFunc == kScale1 ){	// speed up
+	    for(int jQ=0;jQ<B->NscalenodeScaleQ;jQ++){
+	       double muf = CalcMu( kMuF , BlockB_LO->ScaleNodeQ[i][jQ] , 0 , fScaleFacMuF );
+	       xfx = GetXFX(xp,muf);
+	       //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
+	       vector < double > buffer  = CalcPDFLinearComb(xfx,xfx,B->IPDFdef1, B->IPDFdef2, B->NSubproc );
+	       for(int jPt=0;jPt<B->NscalenodeScalePt;jPt++){
+		  for(int l=0;l<B->NSubproc;l++){ 
+		     B->PdfLcMuVar[i][x][jQ][jPt][l] = buffer[l];
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+		
 }
 
 

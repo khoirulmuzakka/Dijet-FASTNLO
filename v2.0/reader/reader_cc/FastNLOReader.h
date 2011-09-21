@@ -177,6 +177,8 @@ private:
 
    void InitLHAPDF();
    void FillBlockBPDFLCs( FastNLOBlockB* B );
+   void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
+   void FillBlockBPDFLCsDISv21( FastNLOBlockB* B );
    vector<double> GetXFX(double x, double muf);
    vector<double> CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, int IPDFdef1, int IPDFdef2, int NSubproc );
    vector<double> CalcPDFLinearCombDIS(vector<double> pdfx1, int NSubproc );
