@@ -78,6 +78,11 @@ public:
       kUpDownMax		= 3	// performa a scan for maximum up an down value between 0.5 < cR x cF < 2
    };
 
+   enum EUnits {
+      kAbsoluteUnits		= 0,	// calculate the cross section in barn for each publicated bin
+      kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
+   };
+
    static const double TWOPI = 6.28318530717958647692528;
    static const double TWOPISQR = 39.47841760435743447533796;
 
@@ -98,10 +103,11 @@ protected:
    int fiPDFSet;
 
    EPDFInterface	fPDFInterface;
-   EAlphasEvolution fAlphasEvolution;
+   EAlphasEvolution	fAlphasEvolution;
    EScaleVariationDefinition fScaleVariationDefinition;
    EScaleFunctionalForm fMuRFunc;
    EScaleFunctionalForm fMuFFunc;
+   EUnits		fUnits;
 
    // ---- alpha_s vars ---- //
    double fAlphasMz;
@@ -211,7 +217,8 @@ public:
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
    void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
    void SetAlphasEvolution( EAlphasEvolution AlphasEvolution ) { fAlphasEvolution = AlphasEvolution; if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; };
-   void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ;}; // no impact yet.
+   void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
+   void SetUnits( EUnits Unit );
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R

@@ -54,6 +54,7 @@ FastNLOReader::FastNLOReader(void)
    BlockB_NLO		= NULL;
    BlockB_LO_Ref	= NULL;
    BlockB_NLO_Ref	= NULL;
+   fUnits		= kPublicationUnits;
    cout << "FastNLOReader::FastNLOReader. Please set a filename using SetFilename(<name>)! "<<endl;
 }
 
@@ -64,6 +65,7 @@ FastNLOReader::FastNLOReader(string filename)
    BlockB_NLO		= NULL;
    BlockB_LO_Ref	= NULL;
    BlockB_NLO_Ref	= NULL;
+   fUnits		= kPublicationUnits;
    
    SetFilename(filename);
 }
@@ -762,11 +764,14 @@ void FastNLOReader::PrintCrossSections( ){
   printf(".\n");
   printf(" *\n");
 
-  string unit[16] = { "b","","","mb","","","mu b","","","nb","","","pb","","","fb"};
+  string Aunits[16] = { "[b]","","","[mb]","","","[mu b]","","","[nb]","","","[pb]","","","[fb]"};
+  string Nounits[16] = { "    ","","","    ","","","    ","","","    ","","","    ","","","    "};
+  string* unit = fUnits==kAbsoluteUnits ? Aunits : Nounits;
+  
 
   if ( NDim == 2 ){
     double lobindim2 = -321312;
-    printf(" *  - Bin - |   ---  %s  ---         -- XS-FNLO [%s] --  -- k-factor -- |\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
+    printf(" *  - Bin - |   ---  %s  ---         -- XS-FNLO %s --  -- k-factor -- |\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
     printf(" *  ---------------------------------------------------------------------\n");
     for ( unsigned int i=0;i<xs.size();i++){
       if ( LoBin[i][1] != lobindim2 ){
@@ -779,7 +784,7 @@ void FastNLOReader::PrintCrossSections( ){
 
   else {
     printf("FastNLOReader::PrintCrossSections( ). Info. Single differential printing of cross sections not yet nicely implemented.\n");
-    printf("   ---  %s  ---        - Bin -    -- XS-FNLO [pb] --  \n",DimLabel[0].c_str());
+    printf("   ---  %s  ---        - Bin -    -- XS-FNLO --  \n",DimLabel[0].c_str());
     for ( unsigned int i=0;i<xs.size();i++){
       printf("  %9.3f - %9.3f   %3.0f         %12.4f\n",LoBin[i][0],UpBin[i][0],i*1.,xs[i]);
     }
@@ -834,11 +839,13 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
   printf(".\n");
   printf(" *\n");
 
-  string unit[16] = { "b","","","mb","","","mu b","","","nb","","","pb","","","fb"};
+  string Aunits[16] = { "[b]","","","[mb]","","","[mu b]","","","[nb]","","","[pb]","","","[fb]"};
+  string Nounits[16] = { "    ","","","    ","","","    ","","","    ","","","    ","","","    "};
+  string* unit = fUnits==kAbsoluteUnits ? Aunits : Nounits;
 
   if ( NDim == 2 ){
     double lobindim2 = -321312;
-    printf(" *  - Bin - |   ---  %s  ---         -- XS-FNLO [%s] --  -- k-factor -- |  -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
+    printf(" *  - Bin - |   ---  %s  ---         -- XS-FNLO %s --  -- k-factor -- |  -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
     printf(" *  ------------------------------------------------------------------------------------------------------------\n");
     for ( unsigned int i=0;i<xs.size();i++){
       if ( LoBin[i][1] != lobindim2 ){
@@ -851,7 +858,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 
   else {
     printf("FastNLOReader::PrintCrossSections( ). Info. Single differential printing of cross sections not yet nicely implemented.\n");
-    printf("   ---  %s  ---        - Bin -    -- XS-FNLO [pb] --    -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str());
+    printf("   ---  %s  ---        - Bin -    -- XS-FNLO  --       -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str());
     for ( unsigned int i=0;i<xs.size();i++){
       printf("  %9.3f - %9.3f   %3.0f         %12.4f           %12.4f          %5.4f\n",LoBin[i][0],UpBin[i][0],i*1.,xs[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
     }
@@ -917,28 +924,30 @@ void FastNLOReader::CalcReferenceCrossSection( ){
   if ( BlockB_LO_Ref && BlockB_NLO_Ref ){
 
     for(int i=0;i<NObsBin;i++){
-      for(int l=0;l<BlockB_LO_Ref->NSubproc;l++){ 
-	XSectionRef[i] +=  BlockB_LO_Ref->SigmaTilde[i][fScalevar][0][0][l] * BinSize[i];
-      }
-      for(int l=0;l<BlockB_NLO_Ref->NSubproc;l++){ 
-	XSectionRef[i] +=  BlockB_NLO_Ref->SigmaTilde[i][fScalevar][0][0][l] * BinSize[i];
-      }
+       double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+       for(int l=0;l<BlockB_LO_Ref->NSubproc;l++){ 
+	  XSectionRef[i] +=  BlockB_LO_Ref->SigmaTilde[i][fScalevar][0][0][l] * unit;
+       }
+       for(int l=0;l<BlockB_NLO_Ref->NSubproc;l++){ 
+	  XSectionRef[i] +=  BlockB_NLO_Ref->SigmaTilde[i][fScalevar][0][0][l] * unit;
+       }
     }
     
   }
   
   if ( BlockB_LO->NScaleDep == 3 ){
     for(int i=0;i<NObsBin;i++){
-      for(int n=0;n<BlockB_NLO->NSubproc;n++) {
-	XSectionRefMixed[i]		+= BlockB_LO ->SigmaRefMixed[i][n] * BinSize[i];
-	XSectionRef_s1[i]		+= BlockB_LO ->SigmaRef_s1[i][n] * BinSize[i];
-	XSectionRef_s2[i]		+= BlockB_LO ->SigmaRef_s2[i][n] * BinSize[i];
-      }
-      for(int n=0;n<BlockB_NLO->NSubproc;n++) {
-	XSectionRefMixed[i]		+= BlockB_NLO->SigmaRefMixed[i][n] * BinSize[i];
-	XSectionRef_s1[i]		+= BlockB_NLO->SigmaRef_s1[i][n] * BinSize[i];
-	XSectionRef_s2[i]		+= BlockB_NLO->SigmaRef_s2[i][n] * BinSize[i];
-      }
+       double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+       for(int n=0;n<BlockB_NLO->NSubproc;n++) {
+	  XSectionRefMixed[i]		+= BlockB_LO ->SigmaRefMixed[i][n] * unit;
+	  XSectionRef_s1[i]		+= BlockB_LO ->SigmaRef_s1[i][n] * unit;
+	  XSectionRef_s2[i]		+= BlockB_LO ->SigmaRef_s2[i][n] * unit;
+       }
+       for(int n=0;n<BlockB_NLO->NSubproc;n++) {
+	  XSectionRefMixed[i]		+= BlockB_NLO->SigmaRefMixed[i][n] * unit;
+	  XSectionRef_s1[i]		+= BlockB_NLO->SigmaRef_s1[i][n] * unit;
+	  XSectionRef_s2[i]		+= BlockB_NLO->SigmaRef_s2[i][n] * unit;
+       }
     }
   }
   
@@ -989,7 +998,8 @@ void FastNLOReader::CalcCrossSectionDISv20(){
    
    for(int i=0;i<NObsBin;i++){
       int nxmax = BlockB_LO->GetNxmax(i);
-      
+      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+   
       for(int j=0;j<BlockB_LO->GetTotalScalenodes();j++){
 	 int scalenode1 = j;
 	 int scalenode2 = j;
@@ -1001,13 +1011,13 @@ void FastNLOReader::CalcCrossSectionDISv20(){
 	 for(int k=0;k<nxmax;k++){ 
 	    // LO Block
 	    for(int l=0;l<BlockB_LO->NSubproc;l++){ 
-	       XSection[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
-	       XSection_LO[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
+	       XSection[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * unit;
+	       XSection_LO[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * unit;
 	       //printf("%15.13f     %9.5f         %16.14f\n",BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] ,  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  ,  BlockB_LO->PdfLc[i][scalenode2][k][l]);
 	    }
 	    // NLO Block
 	    for(int l=0;l<BlockB_NLO->NSubproc;l++){ 
-	       XSection[i]		+=  BlockB_NLO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_NLO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_NLO->PdfLc[i][scalenode2][k][l] * BinSize[i];
+	       XSection[i]		+=  BlockB_NLO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_NLO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_NLO->PdfLc[i][scalenode2][k][l] * unit;
 	    }
 	 }
       }
@@ -1024,6 +1034,7 @@ void FastNLOReader::CalcCrossSectionDISv21(){
       
    for(int i=0;i<NObsBin;i++){
       int nxmax = BlockB_LO->GetNxmax(i);
+      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
       
       for(int jQ=0;jQ<BlockB_LO->NscalenodeScaleQ;jQ++){
 	 for(int jPt=0;jPt<BlockB_LO->NscalenodeScalePt;jPt++){
@@ -1044,21 +1055,21 @@ void FastNLOReader::CalcCrossSectionDISv21(){
 		  for(int n=0;n<BlockB_LO->NSubproc;n++){ 
 		     double as	= BlockB_LO->AlphasTwoPi[i][jQ][jPt];
 		     double pdflc	= BlockB_LO->PdfLcMuVar[i][x][jQ][jPt][n];
-		     XSection[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-		     XSection[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-		     XSection[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * unit;
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * unit;
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * unit;
 
-		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * unit;
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * unit;
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * unit;
 		  }
 		  // NLO Block
 		  for(int n=0;n<BlockB_NLO->NSubproc;n++){ 
 		     double as	= BlockB_NLO->AlphasTwoPi[i][jQ][jPt];
 		     double pdflc	= BlockB_NLO->PdfLcMuVar[i][x][jQ][jPt][n];
-		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * unit;
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * unit;
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * unit;
 			
 		  }
 	       }
@@ -1086,6 +1097,19 @@ void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
     // nothing to do!
   }
   
+}
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::SetUnits( EUnits Unit ){
+   if ( fUnits != Unit ){
+      fUnits  = Unit;
+      CalcCrossSection();
+   }
+   else {
+      fUnits  = Unit;
+   }
 }
 
 
