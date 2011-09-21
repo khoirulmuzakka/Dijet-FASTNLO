@@ -143,12 +143,8 @@ protected:
    FastNLOBlockB* BlockB_NLO_Ref;
 
    // ---- Cross sections ---- //
-   // v2.0
    vector < double > XSection_LO;
    vector < double > XSection;
-   // v2.0+ MuVar
-   vector < double > XSectionMuVar_LO;
-   vector < double > XSectionMuVar;
    // k-factor
    vector < double > kFactor;
 
@@ -158,8 +154,8 @@ protected:
    // v2.0+ MuVar
    //vector < double > XSectionMuVarRef;
    vector < double > XSectionRefMixed;
-   vector < double > XSectionRefQ2;
-   vector < double > XSectionRefMufQ2MuRMixed;
+   vector < double > XSectionRef_s1;
+   vector < double > XSectionRef_s2;
 
 private:
 
@@ -199,7 +195,9 @@ private:
    double FuncMax ( double scale1 , double scale2 ) ;
    double FuncMin ( double scale1 , double scale2 ) ;
 
-  
+    void CalcCrossSectionDISv20();
+    void CalcCrossSectionDISv21();
+ 
 public:
    FastNLOReader(void);
    FastNLOReader(string filename);

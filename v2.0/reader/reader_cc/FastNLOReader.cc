@@ -6,7 +6,7 @@
 //  FastNLOReader                                                       //
 //                                                                      //
 //  FastNLOReader is a standalone code for reading                      //
-//  FastNLO tables of version 2.0 for DIS processes                     //
+//  FastNLO tables of version 2.0 and v2.1 for DIS processes            //
 //  It is also optimized for an integration into                        //
 //  the H1Fitter project.                                               //
 //                                                                      //
@@ -195,32 +195,32 @@ void FastNLOReader::InitScalevariation(){
 
 
 double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double scale2, double scalefac ){
-  //
-  //  Calculate the scales with the defined function and the 
-  //  corresponding prefactor.
-  //
+   //
+   //  Calculate the scales with the defined function and the 
+   //  corresponding prefactor.
+   //
   
-  if ( kMuX == kMuR && fScaleFacMuR != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
-  if ( kMuX == kMuF && fScaleFacMuF != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
+   if ( kMuX == kMuR && fScaleFacMuR != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
+   if ( kMuX == kMuF && fScaleFacMuF != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
   
-  EScaleFunctionalForm Func;
-  if ( kMuX  == FastNLOReader::kMuR )		Func	= fMuRFunc;    // return renormalization scale
-  else						Func	= fMuFFunc;    // return factorization scale
-  //   else if ( kMuX  == FastNLOReader::kMuF )	Func	= fMuFFunc;    // return factorization scale
-  //   else printf( "I dont know what to do.\n");
+   EScaleFunctionalForm Func;
+   if ( kMuX  == FastNLOReader::kMuR )		Func	= fMuRFunc;    // return renormalization scale
+   else						Func	= fMuFFunc;    // return factorization scale
+   //   else if ( kMuX  == FastNLOReader::kMuF )	Func	= fMuFFunc;    // return factorization scale
+   //   else printf( "I dont know what to do.\n");
   
-  double mu = 0;
+   double mu = 0;
 
-  if		( Func == kScale1 )		mu	= scale1 ;
-  else if	( Func == kScale2 )		mu	= scale2 ;
-  else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2) ;
-  else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2) ;
-  else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2) ;
-  else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
-  else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
-  else printf( "Error. could not identify functional form for scales calculation.\n");
+   if		( Func == kScale1 )		mu	= scale1 ;
+   else if	( Func == kScale2 )		mu	= scale2 ;
+   else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2) ;
+   else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2) ;
+   else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2) ;
+   else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
+   else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
+   else printf( "Error. could not identify functional form for scales calculation.\n");
   
-  return scalefac * mu;
+   return scalefac * mu;
 
 }
 
@@ -731,22 +731,19 @@ void FastNLOReader::PrintCrossSections( ){
   // Print Cross sections in NLO, k-factors and Reference table cross sections
   //
   
-  if ( XSection.empty() && XSectionMuVar.empty() ){
+  if ( XSection.empty() ){
      CalcCrossSection();
   }
-  if ( XSectionRef.empty() && XSectionRefQ2.empty() ){
+  if ( XSectionRef.empty() && XSectionRef_s1.empty() ){
     CalcReferenceCrossSection();
   }
 
-  vector < double > xs;
+  vector < double > xs = XSection;
   vector < double > xsref;
-
-  if ( BlockB_NLO->NScaleDep == 3 ) xs = XSectionMuVar;
-  else xs = XSection;
   
   if ( BlockB_NLO->NScaleDep == 3 ){
-    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			xsref = XSectionRefQ2;
-    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	xsref = XSectionRefMufQ2MuRMixed;
+    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			xsref = XSectionRef_s1;
+    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	xsref = XSectionRef_s2;
     else if ( fMuFFunc == kQuadraticMean && fMuRFunc == kQuadraticMean )xsref = XSectionRefMixed;
     else xsref = XSectionRefMixed;
   }
@@ -804,22 +801,19 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
    //
 
   
-  if ( XSection.empty() && XSectionMuVar.empty() ){
+  if ( XSection.empty() ){
      CalcCrossSection();
   }
-  if ( XSectionRef.empty() && XSectionRefQ2.empty() ){
+  if ( XSectionRef.empty() && XSectionRef_s1.empty() ){
     CalcReferenceCrossSection();
   }
 
-  vector < double > xs;
+  vector < double > xs = XSection;
   vector < double > xsref;
-
-  if ( BlockB_NLO->NScaleDep == 3 ) xs = XSectionMuVar;
-  else xs = XSection;
   
   if ( BlockB_NLO->NScaleDep == 3 ){
-    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			xsref = XSectionRefQ2;
-    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	xsref = XSectionRefMufQ2MuRMixed;
+    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			xsref = XSectionRef_s1;
+    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	xsref = XSectionRef_s2;
     else if ( fMuFFunc == kQuadraticMean && fMuRFunc == kQuadraticMean )xsref = XSectionRefMixed;
     else xsref = XSectionRefMixed;
   }
@@ -872,13 +866,11 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 vector < double > FastNLOReader::GetXSection( ){
   // Get fast calculated NLO cross section
   
-  if ( XSection.empty() && XSectionMuVar.empty() ){
+  if ( XSection.empty() ){
     CalcCrossSection();
   }
   
-  if ( BlockB_NLO->NScaleDep == 3 )
-    return XSectionMuVar;
-  else return XSection;
+  return XSection;
 }
 
 
@@ -888,13 +880,13 @@ vector < double > FastNLOReader::GetXSection( ){
 vector < double > FastNLOReader::GetReferenceXSection( ){
   // Get reference cross section from direct nlojet++ calculation
   
-  if ( XSectionRef.empty() && XSectionRefQ2.empty() ){
+  if ( XSectionRef.empty() && XSectionRef_s1.empty() ){
     CalcReferenceCrossSection();
   }
   
   if ( BlockB_NLO->NScaleDep == 3 ){
-    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			return XSectionRefQ2;
-    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	return XSectionRefMufQ2MuRMixed;
+    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			return XSectionRef_s1;
+    else if ( fMuFFunc == kScale1 && fMuRFunc == kQuadraticMean )	return XSectionRef_s2;
     else if ( fMuFFunc == kQuadraticMean && fMuRFunc == kQuadraticMean )return XSectionRefMixed;
     else return XSectionRefMixed;
   }
@@ -914,15 +906,13 @@ void FastNLOReader::CalcReferenceCrossSection( ){
   
   XSectionRef.clear();
   XSectionRef.resize(NObsBin);
-  //XSectionMuVarRef.clear();
-  //XSectionMuVarRef.resize(NObsBin);
 
   XSectionRefMixed.clear();		  
-  XSectionRefQ2.clear();
-  XSectionRefMufQ2MuRMixed.clear();
+  XSectionRef_s1.clear();
+  XSectionRef_s2.clear();
   XSectionRefMixed.resize(NObsBin);		  
-  XSectionRefQ2.resize(NObsBin);
-  XSectionRefMufQ2MuRMixed.resize(NObsBin);
+  XSectionRef_s1.resize(NObsBin);
+  XSectionRef_s2.resize(NObsBin);
 
   if ( BlockB_LO_Ref && BlockB_NLO_Ref ){
 
@@ -941,13 +931,13 @@ void FastNLOReader::CalcReferenceCrossSection( ){
     for(int i=0;i<NObsBin;i++){
       for(int n=0;n<BlockB_NLO->NSubproc;n++) {
 	XSectionRefMixed[i]		+= BlockB_LO ->SigmaRefMixed[i][n] * BinSize[i];
-	XSectionRefQ2[i]		+= BlockB_LO ->SigmaRefQ2[i][n] * BinSize[i];
-	XSectionRefMufQ2MuRMixed[i]	+= BlockB_LO ->SigmaRefMufQ2MuRMixed[i][n] * BinSize[i];
+	XSectionRef_s1[i]		+= BlockB_LO ->SigmaRef_s1[i][n] * BinSize[i];
+	XSectionRef_s2[i]		+= BlockB_LO ->SigmaRef_s2[i][n] * BinSize[i];
       }
       for(int n=0;n<BlockB_NLO->NSubproc;n++) {
 	XSectionRefMixed[i]		+= BlockB_NLO->SigmaRefMixed[i][n] * BinSize[i];
-	XSectionRefQ2[i]		+= BlockB_NLO->SigmaRefQ2[i][n] * BinSize[i];
-	XSectionRefMufQ2MuRMixed[i]	+= BlockB_NLO->SigmaRefMufQ2MuRMixed[i][n] * BinSize[i];
+	XSectionRef_s1[i]		+= BlockB_NLO->SigmaRef_s1[i][n] * BinSize[i];
+	XSectionRef_s2[i]		+= BlockB_NLO->SigmaRef_s2[i][n] * BinSize[i];
       }
     }
   }
@@ -968,99 +958,113 @@ void FastNLOReader::CalcCrossSection( ){
    //  the defined alpha_s
    //
    
-   if ( BlockB_LO->NScaleDep != 3 ){
-      XSection_LO.clear();
-      XSection.clear();
-      XSection_LO.resize(NObsBin);
-      XSection.resize(NObsBin);
-   }
-   if ( BlockB_LO->NScaleDep == 3 ){
-      XSectionMuVar_LO.clear();
-      XSectionMuVar.clear();
-      XSectionMuVar_LO.resize(NObsBin);
-      XSectionMuVar.resize(NObsBin);
-   }
+   XSection_LO.clear();
+   XSection.clear();
+   XSection_LO.resize(NObsBin);
+   XSection.resize(NObsBin);
    kFactor.clear();
    kFactor.resize(NObsBin);
+   
+   if ( BlockB_LO->NScaleDep != 3 ){
+      CalcCrossSectionDISv20();
+   }
+   else if ( BlockB_LO->NScaleDep == 3 ){
+      CalcCrossSectionDISv21();
+   }
+  
+   // ---- k-factor calculation ---- //
+   for(int i=0;i<NObsBin;i++){
+      kFactor[i]	= XSection[i] / XSection_LO[i];
+   }
+
+}
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::CalcCrossSectionDISv20(){
+   //
+   //  Cross section calculation for DIS tables in v2.0 format
+   //
    
    for(int i=0;i<NObsBin;i++){
       int nxmax = BlockB_LO->GetNxmax(i);
       
-      if ( BlockB_LO->NScaleDep != 3 ){
-    
-	 for(int j=0;j<BlockB_LO->GetTotalScalenodes();j++){
-	    int scalenode1 = j;
-	    int scalenode2 = j;
-	    if (BlockB_LO->NScaleDim>1){          
-	       scalenode1 = j / BlockB_LO->Nscalenode[1];
-	       scalenode2 = j % BlockB_LO->Nscalenode[1];
-	    }
+      for(int j=0;j<BlockB_LO->GetTotalScalenodes();j++){
+	 int scalenode1 = j;
+	 int scalenode2 = j;
+	 if (BlockB_LO->NScaleDim>1){          
+	    scalenode1 = j / BlockB_LO->Nscalenode[1];
+	    scalenode2 = j % BlockB_LO->Nscalenode[1];
+	 }
       
-	    for(int k=0;k<nxmax;k++){ 
-	       // LO Block
-	       for(int l=0;l<BlockB_LO->NSubproc;l++){ 
-		  XSection[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
-		  XSection_LO[i]	+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
-		  //printf("%15.13f     %9.5f         %16.14f\n",BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] ,  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  ,  BlockB_LO->PdfLc[i][scalenode2][k][l]);
-	       }
-	       // NLO Block
-	       for(int l=0;l<BlockB_NLO->NSubproc;l++){ 
-		  XSection[i]		+=  BlockB_NLO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_NLO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_NLO->PdfLc[i][scalenode2][k][l] * BinSize[i];
-	       }
+	 for(int k=0;k<nxmax;k++){ 
+	    // LO Block
+	    for(int l=0;l<BlockB_LO->NSubproc;l++){ 
+	       XSection[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
+	       XSection_LO[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * BinSize[i];
+	       //printf("%15.13f     %9.5f         %16.14f\n",BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] ,  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  ,  BlockB_LO->PdfLc[i][scalenode2][k][l]);
+	    }
+	    // NLO Block
+	    for(int l=0;l<BlockB_NLO->NSubproc;l++){ 
+	       XSection[i]		+=  BlockB_NLO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_NLO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_NLO->PdfLc[i][scalenode2][k][l] * BinSize[i];
 	    }
 	 }
       }
+   }
+}
 
-      if ( BlockB_LO->NScaleDep == 3 ){
+//______________________________________________________________________________
+
+
+void FastNLOReader::CalcCrossSectionDISv21(){
+   //
+   //  Cross section calculation for DIS tables in v2.1 format
+   //
       
-	 for(int jQ=0;jQ<BlockB_LO->NscalenodeScaleQ;jQ++){
-	    for(int jPt=0;jPt<BlockB_LO->NscalenodeScalePt;jPt++){
+   for(int i=0;i<NObsBin;i++){
+      int nxmax = BlockB_LO->GetNxmax(i);
+      
+      for(int jQ=0;jQ<BlockB_LO->NscalenodeScaleQ;jQ++){
+	 for(int jPt=0;jPt<BlockB_LO->NscalenodeScalePt;jPt++){
 		    
-	       double Q2   = BlockB_LO->ScaleNodeQ[i][jQ]*BlockB_LO->ScaleNodeQ[i][jQ];
+	    double Q2   = BlockB_LO->ScaleNodeQ[i][jQ]*BlockB_LO->ScaleNodeQ[i][jQ];
 	  
-	       double mur	= CalcMu( kMuR , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuR );
-	       double muf	= CalcMu( kMuF , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuF );
+	    double mur	= CalcMu( kMuR , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuR );
+	    double muf	= CalcMu( kMuF , BlockB_LO->ScaleNodeQ[i][jQ] ,  BlockB_LO->ScaleNodePt[i][jPt] , fScaleFacMuF );
 
-	       double mur2 = mur*mur;
-	       double muf2 = muf*muf;
+	    double mur2 = mur*mur;
+	    double muf2 = muf*muf;
 
-	       for(int x=0;x<nxmax;x++){ 
+	    for(int x=0;x<nxmax;x++){ 
 		      
-		  //  -----  DIS ---- //
-		  if ( BlockB_LO->NPDFDim == 0 ) {
-		     // LO Block
-		     for(int n=0;n<BlockB_LO->NSubproc;n++){ 
-			double as	= BlockB_LO->AlphasTwoPi[i][jQ][jPt];
-			double pdflc	= BlockB_LO->PdfLcMuVar[i][x][jQ][jPt][n];
-			XSectionMuVar[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-			XSectionMuVar[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-			XSectionMuVar[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+	       //  -----  DIS ---- //
+	       if ( BlockB_LO->NPDFDim == 0 ) {
+		  // LO Block
+		  for(int n=0;n<BlockB_LO->NSubproc;n++){ 
+		     double as	= BlockB_LO->AlphasTwoPi[i][jQ][jPt];
+		     double pdflc	= BlockB_LO->PdfLcMuVar[i][x][jQ][jPt][n];
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
 
-			XSectionMuVar_LO[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-			XSectionMuVar_LO[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-			XSectionMuVar_LO[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
-		     }
-		     // NLO Block
-		     for(int n=0;n<BlockB_NLO->NSubproc;n++){ 
-			double as	= BlockB_NLO->AlphasTwoPi[i][jQ][jPt];
-			double pdflc	= BlockB_NLO->PdfLcMuVar[i][x][jQ][jPt][n];
-			XSectionMuVar[i]	+=  BlockB_NLO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
-			XSectionMuVar[i]	+=  BlockB_NLO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
-			XSectionMuVar[i]	+=  BlockB_NLO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
+		     XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
+		  }
+		  // NLO Block
+		  for(int n=0;n<BlockB_NLO->NSubproc;n++){ 
+		     double as	= BlockB_NLO->AlphasTwoPi[i][jQ][jPt];
+		     double pdflc	= BlockB_NLO->PdfLcMuVar[i][x][jQ][jPt][n];
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuIndep[i][x][jQ][jPt][n] *                     as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuFDep [i][x][jQ][jPt][n] * std::log(muf2/Q2) * as * pdflc * BinSize[i];
+		     XSection[i]	+=  BlockB_NLO->SigmaTildeMuRDep [i][x][jQ][jPt][n] * std::log(mur2/Q2) * as * pdflc * BinSize[i];
 			
-		     }
 		  }
 	       }
 	    }
 	 }
       }
-    
-   }
-  
-   // ---- k-factor calculation ---- //
-   for(int i=0;i<NObsBin;i++){
-      if ( BlockB_LO->NScaleDep == 3 )		kFactor[i]	= XSectionMuVar[i] / XSectionMuVar_LO[i];
-      else					kFactor[i]	= XSection[i] / XSection_LO[i];
    }
 
 }
