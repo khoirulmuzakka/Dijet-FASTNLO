@@ -61,8 +61,8 @@ int main(int argc, char** argv){
   
 
   // ---- 'Setting'/init pdf ---- //
-  //   fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
-  //KR  fnloreader->SetLHAPDFpath("/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/share/PDFsets/");
+  //  fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
+  //fnloreader->SetLHAPDFpath("/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/share/PDFsets/");
   fnloreader->SetLHAPDFpath("./");
   fnloreader->SetLHAPDFfilename(PDFFile);
   fnloreader->SetLHAPDFset(0);
@@ -73,6 +73,9 @@ int main(int argc, char** argv){
   fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
   fnloreader->SetAlphasMz(0.1179);
 
+
+  // ---- Set the units of your calculation ---- //
+  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);			// Set the unit of your calculation (kPublicationUnits or kAbsoluteUnits)
 
 
 
@@ -98,7 +101,6 @@ int main(int argc, char** argv){
   // ---- (Re-)calcualte cross sections ---- //
   fnloreader->CalcCrossSection();
   
-
 
   // ****************************************************
 
