@@ -1,7 +1,7 @@
 // Author: Daniel Britzger
 // DESY, 23/07/2011
 
-//  Version 0.4, 
+//  Version 0.5, 
 //
 //  History:
 //    Version 0, initial version
@@ -119,7 +119,6 @@ protected:
 
    // ---- Block A2 ---- //
    int Ipublunits;
-   int NScDescript;
    vector < int > bla;
    vector <string> ScDescript;
    double Ecms;
@@ -263,8 +262,9 @@ public:
   
 
    void CalcCrossSection();
-   void Print();
+   void PrintFastNLOTableConstants();
    void PrintCrossSections();
+   void PrintCrossSectionsWithReference();
 
 };
 
