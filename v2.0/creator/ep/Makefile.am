@@ -2,7 +2,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # The main targets, here the libtool plugin libraries to build
-lib_LTLIBRARIES = libfnh1001.la
+lib_LTLIBRARIES = libfnh1001.la libfnh5001.la libfnh5002.la
 # libfnh2101d.la
 
 #
@@ -12,6 +12,8 @@ lib_LTLIBRARIES = libfnh1001.la
 AM_SOURCES = pdf-cteq6.h pdf-dis-dummy.h
 # Individual sources
 libfnh1001_la_SOURCES = fnh1001.cc alew.f $(AM_SOURCES)
+libfnh5001_la_SOURCES = fnh5001.cc alew.f $(AM_SOURCES)
+libfnh5002_la_SOURCES = fnh5002.cc alew.f $(AM_SOURCES)
 #libfnh2101d_la_SOURCES = fnh2101d.cc alew.f $(AM_SOURCES)
 
 #
@@ -41,6 +43,8 @@ AM_FFLAGS = -O0 -Wall
 AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 # Example of individual specification of LDFLAGS
 libfnh1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+libfnh5001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
+libfnh5002_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 #libfnh2101d_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnloNlojet -L${LHPDFLIBPATH} -llhpdf_cteq6
 
 # Files that are required to build the project but that can be
