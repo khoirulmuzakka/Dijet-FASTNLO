@@ -15,6 +15,7 @@ public:
    int OpenFileRead();
    void RewindRead();
    void SkipBlockA1A2();
+   void WriteTable( long long int nevents );
    ofstream *OpenFileWrite();
    ofstream *OpenFileRewrite();
    void CloseFileWrite();

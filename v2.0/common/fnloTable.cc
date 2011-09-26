@@ -49,6 +49,19 @@ void fnloTable::SkipBlockA1A2(){
    }
 }
 
+void fnloTable::WriteTable ( long long int nevents ){
+   for (int k=0;k<this->GetBlockA1()->GetNcontrib();k++){
+      this->GetBlockB(k)->Nevt = (long long int)nevents;
+   }
+   this->OpenFileRewrite();
+   this->WriteBlockA1();
+   this->WriteBlockA2();
+   for(int i=0;i< this->GetBlockA1()->GetNcontrib();i++){
+      this->WriteBlockBDividebyN(i);
+   }
+   this->CloseFileWrite();
+}
+
 ofstream *fnloTable::OpenFileWrite(){
    if (access(filename.c_str(), F_OK) == 0){
       printf("fnloTable::OpenFileWrite: File for writing the table exists: %s.\nPlease remove it.\n",filename.c_str());
