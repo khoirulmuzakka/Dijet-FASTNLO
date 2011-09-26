@@ -16,6 +16,7 @@ public:
    void RewindRead();
    void SkipBlockA1A2();
    void WriteTable( long long int nevents );
+   int  GetBinNumber( double var1, double var2 = 0 );
    ofstream *OpenFileWrite();
    ofstream *OpenFileRewrite();
    void CloseFileWrite();

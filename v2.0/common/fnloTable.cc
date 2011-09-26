@@ -62,6 +62,48 @@ void fnloTable::WriteTable ( long long int nevents ){
    this->CloseFileWrite();
 }
 
+int fnloTable::GetBinNumber( double var1, double var2 ){
+   //
+   //  calculate the bin number as define in A2::LoBin and A2::UpBin
+   //  initialized by A2::InitBinning.
+   //
+   //  returns the bin number, that has to be passse to FillEvent()
+   //  return -1 if values are out of bin-ranges
+   // 
+
+   fnloBlockA2* A2 =  this->GetBlockA2();
+   if ( var2==0 && A2->NDim!=1){
+      printf("fnloTable::GetBinNumber(%6.3f,%6.3f). Error. A single differential table only has one variable.\n",var1,var2);exit(1);
+   }
+   if ( var2!=0 && A2->NDim!=2){
+      printf("fnloTable::GetBinNumber(%6.3f,%6.3f). Error. A double differential table only needs two variables.\n",var1,var2);exit(1);
+   }
+   
+   int bin = -1;
+   if ( A2->NDim == 2) {
+	for(int j = 0; j < A2->GetNObsBin(); j++) {
+	   if ( var1 >= A2->LoBin[j][0]  && var1 <  A2->UpBin[j][0] &&
+		var2 >= A2->LoBin[j][1]  && var2 <  A2->UpBin[j][1]) {
+	      bin=j;
+	      break;
+	   }
+	}
+   }
+   else if ( A2->NDim == 1) {
+      for(int j = 0; j < A2->GetNObsBin(); j++) {
+	 if ( var1 >= A2->LoBin[j][0]  && var1 <  A2->UpBin[j][0] ){
+	    bin=j;
+	    break;
+	 }
+      }
+   }
+   else {
+      printf("fnloTable::GetBinNumber(%6.3f,%6.3f). Error. Only single, or double differential tables are supported. A2::NDim = %d.\n",var1,var2,A2->NDim);exit(1);
+   }
+
+   return bin;
+}
+
 ofstream *fnloTable::OpenFileWrite(){
    if (access(filename.c_str(), F_OK) == 0){
       printf("fnloTable::OpenFileWrite: File for writing the table exists: %s.\nPlease remove it.\n",filename.c_str());
