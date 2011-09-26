@@ -50,6 +50,10 @@ void fnloTable::SkipBlockA1A2(){
 }
 
 void fnloTable::WriteTable ( long long int nevents ){
+   //
+   // WriteTable(). writes the full FastNLO table to
+   // the previously defined filename on disk.
+   //
    for (int k=0;k<this->GetBlockA1()->GetNcontrib();k++){
       this->GetBlockB(k)->Nevt = (long long int)nevents;
    }
@@ -103,6 +107,41 @@ int fnloTable::GetBinNumber( double var1, double var2 ){
 
    return bin;
 }
+
+
+int fnloTable::FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double fac ){
+   //
+   //  FillEvent(). Fills one event into the FastNLO table.
+   // 
+   //  input:
+   //     ObsBin	BinNumber (as calculated by GetBinNumber())
+   //     x		the x-bin
+   //     M1, M2	The two scale variables of this event, for v2.1
+   //     mu		the scale mu_r, mu_f, if you use v2.0
+   //     amp		DIS-nlojet-amplitude
+   //     pdfs...
+   //     fac		alpha(Q2)^2 (c*hbar is multiplied in the fillingroutine)
+   //
+
+   // --- prefactor: divide by binwidth - and multiply with alpha_elm^2
+   double factor = 1./this->GetBlockA2()->BinSize[ObsBin] * fac;
+   if ( ObsBin >= 0 ) {
+      for (int k=0;k<this->GetBlockA1()->GetNcontrib();k++){
+	 if ( this->GetBlockB(k)->NScaleDep == 0 ){
+	    if(this->GetBlockB(k)->GetIRef()>0){
+	       // --- fastNLO user: don't modify the following calls!
+	       ((fnloBlockBNlojet*)(this->GetBlockB(k)))->FillEventDIS(ObsBin,x,mu,amp,realpdf,factor);
+	    }else{
+	       ((fnloBlockBNlojet*)(this->GetBlockB(k)))->FillEventDIS(ObsBin,x,mu,amp,dummypdf,factor);
+	    }
+	 } else if ( this->GetBlockB(k)->NScaleDep == 3 ){
+	    ((fnloBlockBNlojet*)(this->GetBlockB(k)))->FillEventDISMuVar(ObsBin,x,M1,M2,amp,dummypdf,realpdf,factor);
+	 }
+      }
+   }
+   return 1;
+}
+
 
 ofstream *fnloTable::OpenFileWrite(){
    if (access(filename.c_str(), F_OK) == 0){
