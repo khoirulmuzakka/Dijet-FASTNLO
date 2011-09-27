@@ -760,7 +760,7 @@ void FastNLOReader::PrintCrossSections( ){
   printf(" *  at sqrt(s) = %8.2f GeV\n", Ecms);
   printf(" *  \n");
   printf(" *  This is a %s-differential table in %s", ( (NDim==1)?"single":"double"),DimLabel[0].c_str());
-  if ( NDim==2 ) printf(" and %s",DimLabel[1].c_str());
+  if ( NDim==2 ) printf(" and in %s",DimLabel[1].c_str());
   printf(".\n");
   printf(" *\n");
 
@@ -770,7 +770,7 @@ void FastNLOReader::PrintCrossSections( ){
   
 
   if ( NDim == 2 ){
-    double lobindim2 = -321312;
+    double lobindim2 = -42;
     printf(" *  - Bin - |   ---  %s  ---         -- XS-FNLO %s --  -- k-factor -- |\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
     printf(" *  ---------------------------------------------------------------------\n");
     for ( unsigned int i=0;i<xs.size();i++){
@@ -833,8 +833,15 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
   printf(" *  at sqrt(s) = %8.2f GeV\n", Ecms);
   printf(" *  \n");
   printf(" *  This is a %s-differential table in %s", ( (NDim==1)?"single":"double"),DimLabel[0].c_str());
+  if ( NDim == 2 ) printf(" and in DimLabel[1].c_str()");
+  printf(" *  \n");
   printf(" *  Please mention, that the reference cross section can easily deviating up to more\n *  than 20% due to different scale choices, alhpa_s value/evolution, PDFs, etc.");
-  printf(" *  This does not mean, that this FastNLO table is wrong!\n");
+  printf(" *  This does not mean, that this FastNLO table is wrong!\n\n");
+  printf(" *  There are three reference cross sections stored for different scale choices.\n");
+  printf(" *  If you have choosen mu_r=mu_f=%s, or mu_r=mu_f=%s or mu_r=mu_f=sqrt((%s^2+%s^2)/2), then you access automatically the corresponding reference cross section.\n",BlockB_NLO->ScaleDescript[0][0].c_str(),BlockB_NLO->ScaleDescript[0][1].c_str(),BlockB_NLO->ScaleDescript[0][0].c_str(),BlockB_NLO->ScaleDescript[0][1].c_str());
+  printf(" *  In any other case your reference cross section is calculated using mu_r=mu_f=sqrt((%s^2+%s^2)/2).\n",BlockB_NLO->ScaleDescript[0][0].c_str(),BlockB_NLO->ScaleDescript[0][1].c_str());
+  printf(" *  To be fully consistent with the nlojet++ reference cross section, you also have to adjust alpha_s and the alpha_s evolution accordingly.\n\n");
+
   if ( NDim==2 ) printf(" and %s",DimLabel[1].c_str());
   printf(".\n");
   printf(" *\n");
