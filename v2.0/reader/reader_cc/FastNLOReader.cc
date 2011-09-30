@@ -1450,9 +1450,9 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
      evolution_();
    }
    
-   FillBlockBPDFLCs(BlockB_LO);
-   FillBlockBPDFLCs(BlockB_NLO);
-   
+   for ( unsigned int i = 0 ; i<BBlocks.size() ; i++ ){
+      FillBlockBPDFLCs(BBlocks[i]);
+   }   
    if ( ReCalcCrossSection ) CalcCrossSection();
 
 }
