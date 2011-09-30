@@ -102,7 +102,7 @@ void FastNLOReader::SetFilename(string filename){
 void FastNLOReader::Init(){
   printf(" ***************************************************************** \n");
   printf(" *  \n");
-  printf(" *  FastNLO Reader - version 0.5\n");
+  printf(" *  FastNLO Reader - version 0.6\n");
   printf(" *  \n");
   printf(" *  This code is a reader for FastNLO tables, which were\n");
   printf(" *  calculated using nlojet++ v4.1.3 and FastNLO v2.0 (or higher).\n"); 
