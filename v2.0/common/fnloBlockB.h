@@ -46,6 +46,15 @@ public:
    int ReadTable( vector<vector<double > >* v, istream *table );
    int ReadTable( vector<double >* v, istream *table );
 
+   int ReadFlexibleTable ( void* v, istream *table );
+   int ReadFlexibleVector( vector<double >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<double > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim = 0 );
+
    int WriteTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, ostream *table , bool DivByNevt=false , int Nevt=1 );
    int WriteTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<vector<vector<vector<vector<double > > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
@@ -53,6 +62,14 @@ public:
    int WriteTable( vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<vector<double > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
    int WriteTable( vector<double >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+
+   int WriteFlexibleTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, ostream *table , bool DivByNevt=false , int Nevt=1 );
+   int WriteFlexibleTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+   int WriteFlexibleTable( vector<vector<vector<vector<vector<double > > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+   int WriteFlexibleTable( vector<vector<vector<vector<double > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+   int WriteFlexibleTable( vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+   int WriteFlexibleTable( vector<vector<double > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
+   int WriteFlexibleTable( vector<double >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
 
    void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1 = 0, double w2 = 0 );
    void AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1 = 1, double w2 = 1 );
