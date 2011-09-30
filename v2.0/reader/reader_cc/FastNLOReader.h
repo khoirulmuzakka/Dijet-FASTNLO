@@ -83,6 +83,16 @@ public:
       kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
    };
 
+   enum ECalculationOrder {
+      kAllAvailableOrders	= 0,	// calculate all available orders in this table
+      kLO			= 1,	// return only LO calculation
+      kFullNLO			= 2,	// calcualte full NLO cross sectoin
+      kNLOOnly			= 3,	// calcualte NLO correction
+      kApproxNNLO		= 4,	// calculate LO+NLO+NNLO(threshold)
+      kNNLOOnly			= 5,	// calculate only corrections to NLO
+      kHigherOrderCorr		= 6	// calculate higher order corrections to LO
+   };
+
    static const double TWOPI = 6.28318530717958647692528;
    static const double TWOPISQR = 39.47841760435743447533796;
 
@@ -108,7 +118,7 @@ protected:
    EScaleFunctionalForm fMuRFunc;
    EScaleFunctionalForm fMuFFunc;
    EUnits		fUnits;
-
+   ECalculationOrder	fOrder;
    // ---- alpha_s vars ---- //
    double fAlphasMz;
 
@@ -147,6 +157,7 @@ protected:
    FastNLOBlockB* BlockB_NLO;
    FastNLOBlockB* BlockB_LO_Ref;
    FastNLOBlockB* BlockB_NLO_Ref;
+   vector < FastNLOBlockB* > BBlocks;
 
    // ---- Cross sections ---- //
    vector < double > XSection_LO;
@@ -221,6 +232,7 @@ public:
    void SetAlphasEvolution( EAlphasEvolution AlphasEvolution ) { fAlphasEvolution = AlphasEvolution; if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; };
    void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
    void SetUnits( EUnits Unit );
+   void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
