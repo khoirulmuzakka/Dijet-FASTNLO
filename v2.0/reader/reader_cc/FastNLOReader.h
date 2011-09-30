@@ -239,8 +239,8 @@ public:
    void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
    // ---- Getters ---- //
-   vector < double > GetXSection();
-   vector < double > GetReferenceXSection();
+   vector < double > GetCrossSection();
+   vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
 
    int GetNcontrib() { return Ncontrib; };

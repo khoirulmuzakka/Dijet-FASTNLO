@@ -1,8 +1,6 @@
 // Author: Daniel Britzger
 // DESY, 23/07/2011
 
-//  Version 0.2, 
-
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //  Data storage class for 'BlockB'-variables                           //
@@ -66,6 +64,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
    *table >> IContrFlag2;
    IContrFlag3 = 0;
    *table >> NScaleDep;
+   int NContrDescr;
    *table >> NContrDescr;
    //   printf("  *  FastNLOBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep );
    CtrbDescript.resize(NContrDescr);
@@ -77,6 +76,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       //      StripWhitespace(CtrbDescript[i]);
    }
 
+   int NCodeDescr;
    *table >> NCodeDescr;
    CodeDescript.resize(NCodeDescr);
    table->getline(buffer,256);
@@ -249,80 +249,107 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       for(int i=0;i<NScales;i++){
          *table >> Iscale[i];
       }
-      NscaleDescript.resize(NScaleDim);
+
+      int NscaleDescript;
       ScaleDescript.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
-         *table >> NscaleDescript[i];
-         ScaleDescript[i].resize(NscaleDescript[i]);
+         *table >> NscaleDescript;
+         ScaleDescript[i].resize(NscaleDescript);
          table->getline(buffer,256);
-         for(int j=0;j<NscaleDescript[i];j++){
+         for(int j=0;j<NscaleDescript;j++){
             table->getline(buffer,256);
             ScaleDescript[i][j] = buffer;
             //            StripWhitespace(ScaleDescript[i][j]);
          }
       }
 
-      Nscalevar.resize(NScaleDim);
-      Nscalenode.resize(NScaleDim);
-      for(int i=0;i<NScaleDim;i++){
-         *table >> Nscalevar[i];
-         *table >> Nscalenode[i];
+      //! v2.1 store NScaleDep here.
+      //! v2.1 *table >> NScaleDep;
+      
+      if ( NScaleDep != 3 ) {
+	 Nscalevar.resize(NScaleDim);
+	 Nscalenode.resize(NScaleDim);
+	 for(int i=0;i<NScaleDim;i++){
+	    *table >> Nscalevar[i];
+	    *table >> Nscalenode[i];
+	 }
+	 //printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+
+	 ScaleFac.resize(NScaleDim);
+	 for(int i=0;i<NScaleDim;i++){
+	    ScaleFac[i].resize(Nscalevar[i]);
+	    for(int j=0;j<Nscalevar[i];j++){
+	       *table >> ScaleFac[i][j];
+	    }
+	 }
+
+	 ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1 
+	 ReadTable  ( &ScaleNode , table );
+	 //printf("  *  FastNLOBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
+
+	 int XmaxFromI[1] = {0};
+	 ResizeTable( &SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
+	 ReadTable  ( &SigmaTilde , table );
+	 //printf("  *  FastNLOBlockB::Read(). Read %d lines of SigmaTilde.\n",nst);
+
+	 ResizeTable( &PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc );
+	 ResizeTable( &AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes() );
+
       }
-      //printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
-
-      ScaleFac.resize(NScaleDim);
-      for(int i=0;i<NScaleDim;i++){
-         ScaleFac[i].resize(Nscalevar[i]);
-         for(int j=0;j<Nscalevar[i];j++){
-            *table >> ScaleFac[i][j];
-         }
-      }
-
-      ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1 
-      ReadTable  ( &ScaleNode , table );
-      //printf("  *  FastNLOBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
-
-      int XmaxFromI[1] = {0};
-      ResizeTable( &SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
-      ReadTable  ( &SigmaTilde , table );
-      //printf("  *  FastNLOBlockB::Read(). Read %d lines of SigmaTilde.\n",nst);
-
-      ResizeTable( &PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc );
-      ResizeTable( &AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes() );
-
+      
       if ( NScaleDep == 3 ) {
-        int nn3 = 0;
+	int nn3 = 0;
 
-        *table >> NscalenodeScaleQ ;
-        ResizeTable( &ScaleNodeQ , fNObsBins , NscalenodeScaleQ );
-        nn3 += ReadTable  ( &ScaleNodeQ , table );
+	nn3 += ReadFlexibleVector  ( &ScaleNodeScale1 , table );
+	nn3 += ReadFlexibleVector  ( &ScaleNodeScale2 , table );
 
-        *table >> NscalenodeScalePt ;
-        ResizeTable( &ScaleNodePt , fNObsBins , NscalenodeScalePt );
-        nn3 += ReadTable  ( &ScaleNodePt , table );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table );
 
-        int XMaxFromFromDim[1] = { 0 };
-        ResizeTable( &PdfLcMuVar , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-        ResizeTable( &AlphasTwoPi , fNObsBins , NscalenodeScaleQ , NscalenodeScalePt );
+	nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table );
+	nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table );
+	nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table );
+         
+	ResizeFlexibleVector( &PdfLcMuVar  , &SigmaTildeMuIndep );
+	AlphasTwoPi.resize(ScaleNodeScale1.size());
+	for ( unsigned int i=0; i<AlphasTwoPi.size() ; i++ ){
+	   AlphasTwoPi[i].resize(ScaleNodeScale1[i].size());
+ 	   for ( unsigned int j=0; j<AlphasTwoPi[i].size() ; j++ ){
+	      AlphasTwoPi[i][j].resize(ScaleNodeScale2[i].size());
+	   }
+	}
 
-        ResizeTable( &SigmaTildeMuIndep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-        nn3 += ReadTable  ( &SigmaTildeMuIndep , table );
+//         *table >> NscalenodeScaleQ ;
+//         ResizeTable( &ScaleNodeQ , fNObsBins , NscalenodeScaleQ );
+//         nn3 += ReadTable  ( &ScaleNodeQ , table );
 
-        ResizeTable( &SigmaTildeMuFDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-        nn3 += ReadTable  ( &SigmaTildeMuFDep , table );
+//         *table >> NscalenodeScalePt ;
+//         ResizeTable( &ScaleNodePt , fNObsBins , NscalenodeScalePt );
+//         nn3 += ReadTable  ( &ScaleNodePt , table );
 
-        ResizeTable( &SigmaTildeMuRDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-        nn3 += ReadTable  ( &SigmaTildeMuRDep , table );
+//         int XMaxFromFromDim[1] = { 0 };
+//         ResizeTable( &PdfLcMuVar , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
+//         ResizeTable( &AlphasTwoPi , fNObsBins , NscalenodeScaleQ , NscalenodeScalePt );
 
-        ResizeTable( &SigmaRefMixed , fNObsBins , NSubproc );
-        nn3 += ReadTable  ( &SigmaRefMixed , table );
+//         ResizeTable( &SigmaTildeMuIndep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
+//         nn3 += ReadTable  ( &SigmaTildeMuIndep , table );
 
-        ResizeTable( &SigmaRefQ2 , fNObsBins , NSubproc );
-        nn3 += ReadTable  ( &SigmaRefQ2 , table );
+//         ResizeTable( &SigmaTildeMuFDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
+//         nn3 += ReadTable  ( &SigmaTildeMuFDep , table );
 
-        ResizeTable( &SigmaRefMufQ2MuRMixed , fNObsBins , NSubproc );
-        nn3 += ReadTable  ( &SigmaRefMufQ2MuRMixed , table );
-        //printf(" *  FastNLOBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
+//         ResizeTable( &SigmaTildeMuRDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
+//         nn3 += ReadTable  ( &SigmaTildeMuRDep , table );
+
+//         ResizeTable( &SigmaRefMixed , fNObsBins , NSubproc );
+//         nn3 += ReadTable  ( &SigmaRefMixed , table );
+
+//         ResizeTable( &SigmaRef_s1 , fNObsBins , NSubproc );
+//         nn3 += ReadTable  ( &SigmaRef_s1 , table );
+
+//         ResizeTable( &SigmaRef_s2 , fNObsBins , NSubproc );
+//         nn3 += ReadTable  ( &SigmaRef_s2 , table );
+        printf(" *  FastNLOBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
 
       }
 
@@ -358,12 +385,10 @@ void FastNLOBlockB::Print(){
   printf(" B   IContrFlag2                   %d\n",IContrFlag2);
   printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
   printf(" B   NScaleDep                     %d\n",NScaleDep);
-  printf(" B   NContrDescr                   %d\n",NContrDescr);
-  for(int i=0;i<NContrDescr;i++){
+  for(int i=0;i<CtrbDescript.size();i++){
     printf(" B   CtrbDescript[%d]               %s\n",i,CtrbDescript[i].data());
   }
-  printf(" B   NCodeDescr                    %d\n",NCodeDescr);
-  for(int i=0;i<NCodeDescr;i++){
+  for(int i=0;i<CodeDescript.size();i++){
     printf(" B   CodeDescript[%d]               %s\n",i,CodeDescript[i].data());
   }
 
@@ -414,8 +439,7 @@ void FastNLOBlockB::Print(){
     }
     printf(" B   NScaleDim                     %d\n",NScaleDim);
     for(int i=0;i<NScaleDim;i++){
-      printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
-      for(int j=0;j<NscaleDescript[i];j++){
+       for(int j=0;j<ScaleDescript[i].size();j++){
         printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
       printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
@@ -427,8 +451,16 @@ void FastNLOBlockB::Print(){
     printf(" B   No printing of ScaleNode implemented yet.\n");
     printf(" B   No printing of SigmaTilde implemented yet.\n");
     if ( NScaleDep == 3 ) {
-      printf(" B   NscalenodeScaleQ              %d\n",NscalenodeScaleQ);
-      printf(" B   NscalenodeScalePt             %d\n",NscalenodeScalePt);
+       printf(" B   NScaleNodeScale1[0-%d]   ",fNObsBins);
+       for(int i=0;i<fNObsBins;i++){
+	  printf("%d ,",ScaleNodeScale1[i].size());
+       }
+       printf(" B   \n");
+       printf(" B   NScaleNodeScale2[0-%d]   ",fNObsBins);
+       for(int i=0;i<fNObsBins;i++){
+	  printf("%d ,",ScaleNodeScale2[i].size());
+       }
+       printf(" B   \n");
     }
 
   }
@@ -791,6 +823,169 @@ void FastNLOBlockB::ResizeTable( vector<double >* v, int dim0 ){
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
+}
+
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleTable(void* v, istream *table ){
+   int nn = 0;
+   int dim = 0;
+   *table >> dim; nn++;
+   printf("ReadFlexibleTable(). ndim = %d\n",dim);
+   if ( dim == 1 )      nn += ReadFlexibleVector( (vector<double>*)v , table , dim );
+   else if ( dim == 2 ) nn += ReadFlexibleVector( (vector<vector<double> > *)v , table , dim );
+   else if ( dim == 3 ) nn += ReadFlexibleVector( (vector<vector<vector<double> > >*)v , table , dim );
+   else if ( dim == 4 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<double> > > >*)v , table , dim );
+   else if ( dim == 5 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<double> > > > >*)v , table , dim );
+   else if ( dim == 6 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<double> > > > > >*)v , table , dim );
+   else if ( dim == 7 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<vector<double> > > > > > >*)v , table , dim );
+   return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 7 ) printf("ReadFlexibleVector(v<v<v<v<v<v<v<d>>>>>>>). ERROR. ndim must be 7.\n");
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 6 ) printf("ReadFlexibleVector(v<v<v<v<v<v<d>>>>>>). ERROR. ndim must be 6.\n");
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 5 ) printf("ReadFlexibleVector(v<v<v<v<v<d>>>>>). ERROR. ndim must be 5 but is %d.\n",ndim);
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 4 ) printf("ReadFlexibleVector(v<v<v<v<d>>>>). ERROR. ndim must be 4.\n");
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 3 ) printf("ReadFlexibleVector(v<v<v<d>>>). ERROR. ndim must be 3.\n");
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 2 ) printf("ReadFlexibleVector(v<v<d>>). ERROR. ndim must be 2 but is %d.\n",ndim);
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      nn += ReadFlexibleVector(&(v->at(i0)),table);
+   }
+   return nn;
+}
+//________________________________________________________________________________________________________________ //
+int FastNLOBlockB::ReadFlexibleVector(vector<double >* v, istream *table , int ndim ){
+   int nn = 0;
+   if ( ndim == 0 ) { *table >> ndim; nn++; }
+   if ( ndim != 1 ) printf("ReadFlexibleVector(v<d>). ERROR. ndim must be 1 but is %d.\n",ndim);
+   int size = 0;
+   *table >> size; nn++;
+   v->resize(size);
+   for(unsigned int i0=0;i0<v->size();i0++){
+      *table >> v->at(i0);
+      nn++;
+   }
+   return nn;
+}
+
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, vector<vector<vector<vector<vector<vector<double > > > > > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, vector<vector<vector<vector<vector<double > > > > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<vector<vector<double > > > >* v, vector<vector<vector<vector<double > > > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<vector<double > > >* v, vector<vector<vector<double > > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<vector<double > >* v, vector<vector<double > >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
+   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+      ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
+   }
+}
+//________________________________________________________________________________________________________________ //
+void FastNLOBlockB::ResizeFlexibleVector(vector<double >* v, vector<double >*nom ){
+   // resize vector v to size of vector nom
+   v->resize(nom->size());
 }
 
 
