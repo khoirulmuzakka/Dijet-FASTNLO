@@ -41,14 +41,13 @@ private:
    void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
    void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
-   int ReadFlexibleTable ( void* v, istream *table );
-   int ReadFlexibleVector( vector<double >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<double > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<double >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<double > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
 
 
    void ResizeFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >*nom );

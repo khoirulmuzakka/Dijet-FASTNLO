@@ -826,26 +826,8 @@ void FastNLOBlockB::ResizeTable( vector<double >* v, int dim0 ){
 }
 
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleTable(void* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table ){
    int nn = 0;
-   int dim = 0;
-   *table >> dim; nn++;
-   printf("ReadFlexibleTable(). ndim = %d\n",dim);
-   if ( dim == 1 )      nn += ReadFlexibleVector( (vector<double>*)v , table , dim );
-   else if ( dim == 2 ) nn += ReadFlexibleVector( (vector<vector<double> > *)v , table , dim );
-   else if ( dim == 3 ) nn += ReadFlexibleVector( (vector<vector<vector<double> > >*)v , table , dim );
-   else if ( dim == 4 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<double> > > >*)v , table , dim );
-   else if ( dim == 5 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<double> > > > >*)v , table , dim );
-   else if ( dim == 6 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<double> > > > > >*)v , table , dim );
-   else if ( dim == 7 ) nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<vector<double> > > > > > >*)v , table , dim );
-   return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim ){
-   int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 7 ) printf("ReadFlexibleVector(v<v<v<v<v<v<v<d>>>>>>>). ERROR. ndim must be 7.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -855,10 +837,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 6 ) printf("ReadFlexibleVector(v<v<v<v<v<v<d>>>>>>). ERROR. ndim must be 6.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -868,10 +848,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 5 ) printf("ReadFlexibleVector(v<v<v<v<v<d>>>>>). ERROR. ndim must be 5 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -881,10 +859,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double 
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 4 ) printf("ReadFlexibleVector(v<v<v<v<d>>>>). ERROR. ndim must be 4.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -894,10 +870,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 3 ) printf("ReadFlexibleVector(v<v<v<d>>>). ERROR. ndim must be 3.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -907,10 +881,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istr
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 2 ) printf("ReadFlexibleVector(v<v<d>>). ERROR. ndim must be 2 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -920,10 +892,8 @@ int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *tabl
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<double >* v, istream *table , int ndim ){
+int FastNLOBlockB::ReadFlexibleVector(vector<double >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 1 ) printf("ReadFlexibleVector(v<d>). ERROR. ndim must be 1 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
