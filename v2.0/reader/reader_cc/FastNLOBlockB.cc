@@ -303,13 +303,13 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 	nn3 += ReadFlexibleVector  ( &ScaleNodeScale1 , table );
 	nn3 += ReadFlexibleVector  ( &ScaleNodeScale2 , table );
 
-	nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table );
-	nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table );
-	nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
+	nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true );
 
-	nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table );
-	nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table );
-	nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table );
+	nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table , true );
+	nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table , true );
+	nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table , true );
          
 	ResizeFlexibleVector( &PdfLcMuVar  , &SigmaTildeMuIndep );
 	AlphasTwoPi.resize(ScaleNodeScale1.size());
@@ -826,77 +826,82 @@ void FastNLOBlockB::ResizeTable( vector<double >* v, int dim0 ){
 }
 
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table , bool nProcLast ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int FastNLOBlockB::ReadFlexibleVector(vector<double >* v, istream *table ){
+int FastNLOBlockB::ReadFlexibleVector(vector<double >* v, istream *table , bool nProcLast ){
    int nn = 0;
-   int size = 0;
-   *table >> size; nn++;
-   v->resize(size);
+   if ( !nProcLast ){
+      int size = 0;
+      *table >> size; nn++;
+      v->resize(size);
+   }
+   else {
+      v->resize(NSubproc);
+   }
    for(unsigned int i0=0;i0<v->size();i0++){
       *table >> v->at(i0);
       nn++;
