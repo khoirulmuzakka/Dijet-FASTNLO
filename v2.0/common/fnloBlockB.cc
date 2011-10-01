@@ -1528,8 +1528,7 @@ int fnloBlockB::WriteTable(vector<double >* v, ostream *table , bool DivByNevt ,
 
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<vector<vector< double > > > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 7 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1538,8 +1537,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<vector<vec
 }
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 6 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1548,8 +1546,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<vector<dou
 }
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<double > > > >  >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 5 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1558,8 +1555,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<vector<double > >
 }
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<double > >  > >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 4 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1568,8 +1564,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<vector<vector<double > >  > >* 
 }
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 3 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1578,8 +1573,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<vector<double > > >* v, ostream
 }
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<vector<double > >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 2 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       nn += WriteFlexibleTable( &(v->at(i0)) , table , DivByNevt, Nevt );
@@ -1589,8 +1583,7 @@ int fnloBlockB::WriteFlexibleTable(vector<vector<double > >* v, ostream *table ,
 
 //________________________________________________________________________________________________________________ //
 int fnloBlockB::WriteFlexibleTable(vector<double >* v, ostream *table , bool DivByNevt , int Nevt ){
-   int nn = 2;
-   *table << 1 << endl;
+   int nn = 1;
    *table << v->size() << endl;
    for(unsigned int i0=0;i0<v->size();i0++){
       if( DivByNevt && Nevt>0)	*table << v->at(i0) / Nevt << endl;
@@ -1601,26 +1594,8 @@ int fnloBlockB::WriteFlexibleTable(vector<double >* v, ostream *table , bool Div
 }
 
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleTable(void* v, istream *table ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table ){
    int nn = 0;
-   int dim = 0;
-   *table >> dim; nn++;
-   printf("ReadFlexibleTable(). ndim = %d\n",dim);
-   if ( dim == 1 )	nn += ReadFlexibleVector( (vector<double>*)v , table , dim );
-   else if ( dim == 2 )	nn += ReadFlexibleVector( (vector<vector<double> > *)v , table , dim );
-   else if ( dim == 3 )	nn += ReadFlexibleVector( (vector<vector<vector<double> > >*)v , table , dim );
-   else if ( dim == 4 )	nn += ReadFlexibleVector( (vector<vector<vector<vector<double> > > >*)v , table , dim );
-   else if ( dim == 5 )	nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<double> > > > >*)v , table , dim );
-   else if ( dim == 6 )	nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<double> > > > > >*)v , table , dim );
-   else if ( dim == 7 )	nn += ReadFlexibleVector( (vector<vector<vector<vector<vector<vector<vector<double> > > > > > >*)v , table , dim );
-   return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim ){
-   int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 7 ) printf("ReadFlexibleVector(v<v<v<v<v<v<v<d>>>>>>>). ERROR. ndim must be 7.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1630,10 +1605,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<vec
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 6 ) printf("ReadFlexibleVector(v<v<v<v<v<v<d>>>>>>). ERROR. ndim must be 6.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1643,10 +1616,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<vector<dou
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 5 ) printf("ReadFlexibleVector(v<v<v<v<v<d>>>>>). ERROR. ndim must be 5 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1656,10 +1627,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<vector<double > >
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 4 ) printf("ReadFlexibleVector(v<v<v<v<d>>>>). ERROR. ndim must be 4.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1669,10 +1638,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<vector<vector<double > > > >* v
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 3 ) printf("ReadFlexibleVector(v<v<v<d>>>). ERROR. ndim must be 3.\n");
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1682,10 +1649,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<vector<double > > >* v, istream
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 2 ) printf("ReadFlexibleVector(v<v<d>>). ERROR. ndim must be 2 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
@@ -1695,10 +1660,8 @@ int fnloBlockB::ReadFlexibleVector(vector<vector<double > >* v, istream *table ,
    return nn;
 }
 //________________________________________________________________________________________________________________ //
-int fnloBlockB::ReadFlexibleVector(vector<double >* v, istream *table , int ndim ){
+int fnloBlockB::ReadFlexibleVector(vector<double >* v, istream *table ){
    int nn = 0;
-   if ( ndim == 0 ) { *table >> ndim; nn++; }
-   if ( ndim != 1 ) printf("ReadFlexibleVector(v<d>). ERROR. ndim must be 1 but is %d.\n",ndim);
    int size = 0;
    *table >> size; nn++;
    v->resize(size);

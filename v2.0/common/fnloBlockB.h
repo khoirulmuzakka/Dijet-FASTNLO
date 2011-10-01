@@ -46,14 +46,13 @@ public:
    int ReadTable( vector<vector<double > >* v, istream *table );
    int ReadTable( vector<double >* v, istream *table );
 
-   int ReadFlexibleTable ( void* v, istream *table );
-   int ReadFlexibleVector( vector<double >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<double > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , int ndim = 0 );
-   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , int ndim = 0 );
+   int ReadFlexibleVector( vector<double >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<double > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
+   int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
 
    int WriteTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, ostream *table , bool DivByNevt=false , int Nevt=1 );
    int WriteTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt=false, int Nevt=1 );
