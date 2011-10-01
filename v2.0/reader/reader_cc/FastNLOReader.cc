@@ -988,13 +988,55 @@ void FastNLOReader::CalcCrossSection( ){
    kFactor.clear();
    kFactor.resize(NObsBin);
    
-   if ( BlockB_LO->NScaleDep != 3 ){
-      CalcCrossSectionDISv20();
+   int iLOBs = 0;
+   for ( unsigned int i = 0 ; i<BBlocks.size() ; i++ ){
+      int tableorder = BBlocks[i]->Npow - ILOord; // 0:LO, 1:NLO, 2:NNLO
+      // 			    kAllAvailableOrders       = 0,    // calculate all available orders in this table
+      // 			    kLO                       = 1,    // return only LO calculation
+      // 			    kFullNLO                  = 2,    // calcualte full NLO cross sectoin
+      // 			    kNLOOnly                  = 3,    // calcualte NLO correction
+      // 			    kApproxNNLO               = 4,    // calculate LO+NLO+NNLO(threshold)
+      // 			    kNNLOOnly                 = 5,    // calculate only corrections to NLO
+      // 			    kHigherOrderCorr          = 6     // calculate higher order corrections to LO
+      if ( ( tableorder == 0 && ( fOrder==kLO || fOrder==kFullNLO || fOrder==kApproxNNLO ) ) ||
+	   ( tableorder == 1 && ( fOrder==kFullNLO || fOrder==kNLOOnly || fOrder==kApproxNNLO || fOrder==kHigherOrderCorr ) ) || 
+	   ( tableorder == 2 && ( fOrder==kNNLOOnly || fOrder==kApproxNNLO ) )||
+	   fOrder==kAllAvailableOrders ) {
+
+		// ---- DIS ---- //
+		if ( BBlocks[i]->NPDFDim == 0 ) {
+		   if ( BlockB_LO->NScaleDep != 3 ){ // v2.0
+		      CalcCrossSectionDISv20(BBlocks[i]);
+		   }
+		   else if ( BlockB_LO->NScaleDep == 3 ){ // v2.1
+		      CalcCrossSectionDISv21(BBlocks[i]);
+		   }
+		}
+		// ---- pp ---- //
+		// if ...
+		else {
+		   printf("CalcCrossSection(). HHC tables not yet implemented.\n");
+		}
+      }
+      
+      // calculate LO cross sections
+      if ( tableorder == 0 ){
+	 // ---- DIS ---- //
+	 if ( BBlocks[i]->NPDFDim == 0 ) {
+	    iLOBs++;
+	    if ( BlockB_LO->NScaleDep != 3 ){
+	       CalcCrossSectionDISv20(BBlocks[i],true);
+	    }
+	    else if ( BlockB_LO->NScaleDep == 3 ){
+	       CalcCrossSectionDISv21(BBlocks[i],true);
+	    }
+	 }	 
+	 // ---- pp ---- //
+	 // if ...
+      }
    }
-   else if ( BlockB_LO->NScaleDep == 3 ){
-      CalcCrossSectionDISv21();
-   }
-  
+   if ( iLOBs != 1 ) printf("CalcCrossSectionDISv21(). Warning. There are %d LO-tables instead of only one.\n",iLOBs);
+   
    // ---- k-factor calculation ---- //
    for(int i=0;i<NObsBin;i++){
       kFactor[i]	= XSection[i] / XSection_LO[i];
@@ -1005,33 +1047,26 @@ void FastNLOReader::CalcCrossSection( ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::CalcCrossSectionDISv20(){
+void FastNLOReader::CalcCrossSectionDISv20( FastNLOBlockB* B , bool IsLO ){
    //
    //  Cross section calculation for DIS tables in v2.0 format
    //
    
+   vector<double>* XS = IsLO ? &XSection_LO : &XSection;
    for(int i=0;i<NObsBin;i++){
-      int nxmax = BlockB_LO->GetNxmax(i);
+      int nxmax = B->GetNxmax(i);
       double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-   
-      for(int j=0;j<BlockB_LO->GetTotalScalenodes();j++){
+      for(int j=0;j<B->GetTotalScalenodes();j++){
 	 int scalenode1 = j;
 	 int scalenode2 = j;
-	 if (BlockB_LO->NScaleDim>1){          
-	    scalenode1 = j / BlockB_LO->Nscalenode[1];
-	    scalenode2 = j % BlockB_LO->Nscalenode[1];
+	 if (B->NScaleDim>1){          
+	    scalenode1 = j / B->Nscalenode[1];
+	    scalenode2 = j % B->Nscalenode[1];
 	 }
-      
 	 for(int k=0;k<nxmax;k++){ 
 	    // LO Block
-	    for(int l=0;l<BlockB_LO->NSubproc;l++){ 
-	       XSection[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * unit;
-	       XSection_LO[i]		+=  BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_LO->PdfLc[i][scalenode2][k][l] * unit;
-	       //printf("%15.13f     %9.5f         %16.14f\n",BlockB_LO->SigmaTilde[i][fScalevar][j][k][l] ,  BlockB_LO->AlphasTwoPi_v20[i][scalenode2]  ,  BlockB_LO->PdfLc[i][scalenode2][k][l]);
-	    }
-	    // NLO Block
-	    for(int l=0;l<BlockB_NLO->NSubproc;l++){ 
-	       XSection[i]		+=  BlockB_NLO->SigmaTilde[i][fScalevar][j][k][l] *  BlockB_NLO->AlphasTwoPi_v20[i][scalenode2]  *  BlockB_NLO->PdfLc[i][scalenode2][k][l] * unit;
+	    for(int l=0;l<B->NSubproc;l++){ 
+	       XS->at(i)		+=  B->SigmaTilde[i][fScalevar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
 	    }
 	 }
       }
@@ -1041,69 +1076,52 @@ void FastNLOReader::CalcCrossSectionDISv20(){
 //______________________________________________________________________________
 
 
-void FastNLOReader::CalcCrossSectionDISv21(){
+void FastNLOReader::CalcCrossSectionDISv21( FastNLOBlockB* B , bool IsLO){
    //
    //  Cross section calculation for DIS tables in v2.1 format
    //
-      
-   int iLOBs = 0;
-   for ( unsigned int b = 0 ; b<BBlocks.size() ; b++ ){
-      FastNLOBlockB* B = BBlocks[b];
-      if ( B-> Npow == ILOord ) iLOBs++;
-      int tableorder = B->Npow - ILOord; // 0:LO, 1:NLO, 2:NNLO
-      for(int i=0;i<NObsBin;i++){
-	 int nxmax = B->GetNxmax(i);
-	 double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-	 
-	 for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-	    for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
-	       
-	       double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
-	       
-	       double mur	= CalcMu( kMuR , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
-	       double muf	= CalcMu( kMuF , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
 
-	       double mur2 = pow(mur,2);
-	       double muf2 = pow(muf,2);
-	       
-	       for(int x=0;x<nxmax;x++){ 
-		  
-		  //  -----  DIS ---- //
-		  if ( B->NPDFDim == 0 ) {
-		     for(int n=0;n<B->NSubproc;n++){ 
-			double as	= B->AlphasTwoPi[i][jS1][kS2];
-			double pdflc	= B->PdfLcMuVar[i][x][jS1][kS2][n];
-			
-			if (   ( tableorder == 0 && ( fOrder==kLO || fOrder==kFullNLO || fOrder==kApproxNNLO ) ) ||
-			       ( tableorder == 1 && ( fOrder==kFullNLO || fOrder==kNLOOnly || fOrder==kApproxNNLO || fOrder==kHigherOrderCorr ) ) || 
-			       ( tableorder == 2 && ( fOrder==kNNLOOnly || fOrder==kApproxNNLO ) )||
-			       fOrder==kAllAvailableOrders ) {
-			   // 			    kAllAvailableOrders       = 0,    // calculate all available orders in this table
-			   // 			    kLO                       = 1,    // return only LO calculation
-			   // 			    kFullNLO                  = 2,    // calcualte full NLO cross sectoin
-			   // 			    kNLOOnly                  = 3,    // calcualte NLO correction
-			   // 			    kApproxNNLO               = 4,    // calculate LO+NLO+NNLO(threshold)
-			   // 			    kNNLOOnly                 = 5,    // calculate only corrections to NLO
-			   // 			    kHigherOrderCorr          = 6     // calculate higher order corrections to LO
-			   XSection[i]	+=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                     as * pdflc * unit;
-			   XSection[i]	+=  B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2/Q2) * as * pdflc * unit;
-			   XSection[i]	+=  B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2/Q2) * as * pdflc * unit;
-			}
-			// LO only
-			if ( B-> Npow == ILOord ){
-			   XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                     as * pdflc * unit;
-			   XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2/Q2) * as * pdflc * unit;
-			   XSection_LO[i]	+=  BlockB_LO->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2/Q2) * as * pdflc * unit;
-			}
-		     }
-		  }
+   vector<double>* XS = IsLO ? &XSection_LO : &XSection;
+   for(int i=0;i<NObsBin;i++){
+      int nxmax = B->GetNxmax(i);
+      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+      for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	 for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	    double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
+	    
+	    double mur	= CalcMu( kMuR , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
+	    double muf	= CalcMu( kMuF , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
+	    double mur2 = pow(mur,2);
+	    double muf2 = pow(muf,2);
+	    
+	    for(int x=0;x<nxmax;x++){ 
+	       for(int n=0;n<B->NSubproc;n++){ 
+		  double as	= B->AlphasTwoPi[i][jS1][kS2];
+		  double pdflc	= B->PdfLcMuVar[i][x][jS1][kS2][n];
+		  XS->at(i)	+=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                     as * pdflc * unit;
+		  XS->at(i)	+=  B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2/Q2) * as * pdflc * unit;
+		  XS->at(i)	+=  B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2/Q2) * as * pdflc * unit;
 	       }
 	    }
 	 }
       }
    }
-   if ( iLOBs != 1 ) printf("CalcCrossSectionDISv21(). Warning. There are %d LO-tables instead of only one.\n",iLOBs);
 }
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::SetUnits( EUnits Unit ){
+   if ( fUnits != Unit ){
+      fUnits  = Unit;
+      CalcCrossSection();
+   }
+   else {
+      // nothing todo
+   }
+}
+
+
 
 //______________________________________________________________________________
 
@@ -1127,21 +1145,6 @@ void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetUnits( EUnits Unit ){
-   if ( fUnits != Unit ){
-      fUnits  = Unit;
-      CalcCrossSection();
-   }
-   else {
-      fUnits  = Unit;
-   }
-}
-
-
-
-//______________________________________________________________________________
-
-
 void FastNLOReader::FillAlphasCache(){
   //
   //  Fill the internal alpha_s cache.
@@ -1151,11 +1154,63 @@ void FastNLOReader::FillAlphasCache(){
   //
 
    for ( unsigned int i = 0 ; i<BBlocks.size() ; i++ ){
-      FillAlphasCacheInBlockB( BBlocks[i]  );
+      if ( BBlocks[i]->NScaleDep != 3 ){
+	 FillAlphasCacheInBlockBv20( BBlocks[i]  );
+      }
+      else if ( BBlocks[i]->NScaleDep == 3 ){
+	 FillAlphasCacheInBlockBv21( BBlocks[i]  );
+      }
    }
 
 }
 
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
+   // 
+   //  Internal method for filling alpha_s cache
+   //
+  
+   for(int i=0;i<NObsBin;i++){
+      for(int j=0;j<B->GetTotalScalenodes();j++){
+	 int scalenode1 = j;
+	 int scalenode2 = j;
+	 if (B->NScaleDim>1){          
+	    scalenode1 = j / B->Nscalenode[1];
+	    scalenode2 = j % B->Nscalenode[1];
+	 }
+	 double mur	= B->ScaleNode[i][0][fScalevar][scalenode1];
+	 double as		= GetAlphas(mur);
+	 double alphastwopi = pow( as/TWOPI , B->Npow );
+	 B->AlphasTwoPi_v20[i][j] = alphastwopi;
+      }
+   }
+}
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
+   // 
+   //  Internal method for filling alpha_s cache
+   //
+
+   for(int i=0;i<NObsBin;i++){
+      for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	 for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	    // 	    double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
+	    // 	    double Pt   = B->ScaleNodeScale2[i][kS2];
+	    double mur		= CalcMu( kMuR , BlockB_LO->ScaleNodeScale1[i][jS1] ,  BlockB_LO->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
+	    double as		= GetAlphas(mur);
+	    double alphastwopi	= pow( as/TWOPI, B->Npow );
+	    B->AlphasTwoPi[i][jS1][kS2] = alphastwopi;
+	 }
+      }
+   }
+}
 
 
 //______________________________________________________________________________
@@ -1176,49 +1231,6 @@ double FastNLOReader::GetAlphas( double Q ){
   else return 0;
 }
 
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::FillAlphasCacheInBlockB( FastNLOBlockB* B ){
-   // 
-   //  Internal method for filling alpha_s cache
-   //
-  
-
-   for(int i=0;i<NObsBin;i++){
-      if ( B->NScaleDep != 3 ){
-	 for(int j=0;j<B->GetTotalScalenodes();j++){
-	    int scalenode1 = j;
-	    int scalenode2 = j;
-	    if (B->NScaleDim>1){          
-	       scalenode1 = j / B->Nscalenode[1];
-	       scalenode2 = j % B->Nscalenode[1];
-	    }
-	   
-	    double mur	= B->ScaleNode[i][0][fScalevar][scalenode1];
-	    double as		= GetAlphas(mur);
-	   
-	    double alphastwopi = pow( as/TWOPI , B->Npow );
-	    B->AlphasTwoPi_v20[i][j] = alphastwopi;
-	 }
-      }
-  
-      else if ( B->NScaleDep == 3 ){
-	 for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-	    for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
-	       // 	    double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
-	       // 	    double Pt   = B->ScaleNodeScale2[i][kS2];
-	       double mur		= CalcMu( kMuR , BlockB_LO->ScaleNodeScale1[i][jS1] ,  BlockB_LO->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
-	       double as		= GetAlphas(mur);
-	       double alphastwopi	= pow( as/TWOPI, B->Npow );
-	       B->AlphasTwoPi[i][jS1][kS2] = alphastwopi;
-	    }
-	 }
-      }
-   }
-}
 
 
 //______________________________________________________________________________
@@ -1451,7 +1463,21 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    }
    
    for ( unsigned int i = 0 ; i<BBlocks.size() ; i++ ){
-      FillBlockBPDFLCs(BBlocks[i]);
+      if (BBlocks[i]->NScaleDim>1){
+	 printf("FastNLOReader::FillBlockBPDFLCsWithLHAPDF. WOW! NScaleDim>1! This is usually not the case!\n");
+	 //scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
+	 //fScalevar2 = fScalevar % NfScalevar[1]; 
+      }
+      
+      // linear: DIS-case
+      if(BBlocks[i]->NPDFDim == 0){
+	 if	 ( BBlocks[i]->NScaleDep != 3 )	FillBlockBPDFLCsDISv20(BBlocks[i]);
+	 else if ( BBlocks[i]->NScaleDep == 3 )	FillBlockBPDFLCsDISv21(BBlocks[i]);
+      }
+      else {
+	 printf("FastNLOReader::FillBlockBPDFLCs. Error. I don't know what to do.\n");
+      }
+
    }   
    if ( ReCalcCrossSection ) CalcCrossSection();
 
@@ -1491,38 +1517,6 @@ void FastNLOReader::InitLHAPDF(){
   }
 
   LHAPDF::initPDF(fiPDFSet);
-
-}
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::FillBlockBPDFLCs( FastNLOBlockB* B ){
-  
-   //
-   // this method fills the already 'resized'
-   // pdflc-vectors inside FastNLOBlockB class.
-   //
-   
-   if (B->NScaleDim>1){
-      printf("FastNLOReader::FillBlockBPDFLCsWithLHAPDF. WOW! NScaleDim>1! This is usually not the case!\n");
-      //scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
-      //fScalevar2 = fScalevar % NfScalevar[1]; 
-   }
-   
-
-   // linear: DIS-case
-   if(B->NPDFDim == 0){
-      if	( B->NScaleDep != 3 ) FillBlockBPDFLCsDISv20(B);
-      else if	( B->NScaleDep == 3 ) FillBlockBPDFLCsDISv21(B);
-   }
-
-   else {
-      printf("FastNLOReader::FillBlockBPDFLCs. Error. I don't know what to do.\n");
-   }
-   
-
 
 }
 
@@ -1703,7 +1697,6 @@ vector<double> FastNLOReader::CalcPDFLinearCombDIS( vector<double> pdfx1 , int N
    pdflc.resize(3);
 
    pdflc[1] = pdfx1[6]; //gluon
-
   
    for(int l=0;l<13;l++){
       double temp = (l==6 ? 0.0 : pdfx1[l]);
