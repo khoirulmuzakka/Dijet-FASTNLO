@@ -349,7 +349,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 
 //         ResizeTable( &SigmaRef_s2 , fNObsBins , NSubproc );
 //         nn3 += ReadTable  ( &SigmaRef_s2 , table );
-        printf(" *  FastNLOBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
+        //printf(" *  FastNLOBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
 
       }
 
