@@ -70,28 +70,35 @@ int main(int argc, char** argv){
 
 
   // ---- Setting Alpha_s value ---- //
-  fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
-  fnloreader->SetAlphasMz(0.1179);
+  //   fnloreader->SetAlphasMz(0.1179);
+  //   fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);			// set the precoded alpha_s evolution codes
 
-
+  
   // ---- Set the units of your calculation ---- //
   //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);			// Set the unit of your calculation (kPublicationUnits or kAbsoluteUnits)
+
+
+  // ---- Set the calculation order (if available)---- //
+  fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
 
 
 
   // ****************************************************
   // 
-  //   Several example options are shown now
+  //   Several example options are shown here
   // 
   // ****************************************************
 
   // ---- options ---- //
   //fnloreader->Print();		// print FastNLO internal variables
 
+
   // ---- options for v2.0 tables ---- //
   //fnloreader->SetScaleVariation(0);	// set scale variation table
-    
-  // ---- options for v2.0+ tables ---- //
+  
+
+  
+  // ---- options for v2.1 tables ---- //
   //   fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean);		// set function how to calculate mu_f from scale1 and scale2
   //   fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);		// set function how to calculate mu_f from scale1 and scale2
   //   fnloreader->SetScaleFactorMuR(1.5);					// set scale factor for mu_r
