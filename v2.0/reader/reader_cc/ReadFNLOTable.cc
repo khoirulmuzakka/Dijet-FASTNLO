@@ -59,24 +59,23 @@ int main(int argc, char** argv){
   // -------- initialize FastNLOReader --------- //
   FastNLOReader* fnloreader = new FastNLOReader( tablename );
   
-
   // ---- 'Setting'/init pdf ---- //
-  //  fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
-  //fnloreader->SetLHAPDFpath("/afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf/5.8.4/share/PDFsets/");
-  fnloreader->SetLHAPDFpath("./");
+  //  fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);			// Interfaces to different pdf routines
   fnloreader->SetLHAPDFfilename(PDFFile);
   fnloreader->SetLHAPDFset(0);
   fnloreader->FillPDFCache();	// pdf is 'external'! you always have to call FillPDFCache();
 
 
   // ---- Setting Alpha_s value ---- //
-  //   fnloreader->SetAlphasMz(0.1179);
   //   fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);			// set the precoded alpha_s evolution codes
+  fnloreader->SetAlphasMz(0.1179);						// you MUST specify some alpha_s value
 
   
   // ---- Set the units of your calculation ---- //
-  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);			// Set the unit of your calculation (kPublicationUnits or kAbsoluteUnits)
+  fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);				// Set the unit of your calculation (kPublicationUnits or kAbsoluteUnits)
 
+  // ---- Set the calculation order (if available)---- //
+  fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
 
   // ---- Set the calculation order (if available)---- //
   fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
@@ -104,16 +103,17 @@ int main(int argc, char** argv){
   //   fnloreader->SetScaleFactorMuR(1.5);					// set scale factor for mu_r
   //   fnloreader->SetScaleFactorMuF(0.66);					// set scale factor for mu_f
     
-  
+
   // ---- (Re-)calcualte cross sections ---- //
   fnloreader->CalcCrossSection();
   
 
   // ****************************************************
 
-
   // ---- do sth. useful ---- //
   fnloreader->PrintCrossSections();
+
+
 
 
   // ---- get cross sections ---- //
