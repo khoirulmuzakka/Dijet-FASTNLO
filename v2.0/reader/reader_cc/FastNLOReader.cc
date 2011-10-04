@@ -1456,9 +1456,7 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
       if ( fLHAPDFfilename == ""){
 	 printf("FastNLOReader::FillPDFCache(). ERROR. You must specify a LHAPDF filename first or you have to specify kH1FITTER..\n"); exit(1);
       }
-      cout << "init lhapdf"<<endl;
       InitLHAPDF();
-      cout << "lhapdf ok init."<<endl;
    }
    else if ( fPDFInterface == kH1FITTER ){
      evolution_();
@@ -1471,7 +1469,6 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
 	 //fScalevar2 = fScalevar % NfScalevar[1]; 
       }
       
-      cout << "fill pdf cache block " << i << endl;
       // linear: DIS-case
       if(BBlocks[i]->NPDFDim == 0){
 	 if	 ( BBlocks[i]->NScaleDep != 3 )	FillBlockBPDFLCsDISv20(BBlocks[i]);
@@ -1503,13 +1500,13 @@ void FastNLOReader::InitLHAPDF(){
   //string LHAPDFfile = fLHAPDFpath+"/"+fLHAPDFfilename;
 
   // ---- check if file exists ----- //
-  FILE* fp = fopen(LHAPDFfile.c_str(), "r");
-  if (fp) {
-    fclose(fp);
-  } else {
-    printf("Error. LHAPDF file does not exists. Was looking in/for: %s.\n Exiting.\n",LHAPDFfile.c_str());
-    exit(1);
-  } 
+  //   FILE* fp = fopen(LHAPDFfile.c_str(), "r");
+  //   if (fp) {
+  //     fclose(fp);
+  //   } else {
+  //     printf("Error. LHAPDF file does not exists. Was looking in/for: %s.\n Exiting.\n",LHAPDFfile.c_str());
+  //     exit(1);
+  //   } 
 
   LHAPDF::setVerbosity(LHAPDF::SILENT);
   //cout << " LHAPDF version: " << LHAPDF::getVersion() <<endl;
@@ -1554,8 +1551,6 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
 
 void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
    
-   cout << "hier FillBlockBPDFLCsDISv21 "<<endl;
-
    if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}// [i][x][jS1][kS2][l]
 
    vector<double> xfx(13); // PDFs of all partons
@@ -1610,9 +1605,6 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	 }
       }
    }
-   cout << "hier FillBlockBPDFLCsDISv21 ok "<<endl;
-
-		
 }
 
 
