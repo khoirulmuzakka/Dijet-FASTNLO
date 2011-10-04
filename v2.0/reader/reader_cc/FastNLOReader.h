@@ -108,7 +108,7 @@ protected:
 
    // ---- LHAPDF vars ---- //
    string fLHAPDFfilename;
-   string fLHAPDFpath;
+   //string fLHAPDFpath;
    int fnPDFs;
    int fiPDFSet;
 
@@ -225,7 +225,7 @@ public:
    void SetFilename(string filename) ;
    void InitScalevariation();
    void SetLHAPDFfilename( string filename ) { fLHAPDFfilename = filename; };
-   void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
+   //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
    void SetLHAPDFset( int set ) { fiPDFSet = set; };
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
    void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };

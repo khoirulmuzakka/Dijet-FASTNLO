@@ -1453,10 +1453,12 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    //
    
    if ( fPDFInterface == kLHAPDF ){
-      if ( fLHAPDFfilename == "" || fLHAPDFpath =="" ){
+      if ( fLHAPDFfilename == ""){
 	 printf("FastNLOReader::FillPDFCache(). ERROR. You must specify a LHAPDF filename first or you have to specify kH1FITTER..\n"); exit(1);
       }
+      cout << "init lhapdf"<<endl;
       InitLHAPDF();
+      cout << "lhapdf ok init."<<endl;
    }
    else if ( fPDFInterface == kH1FITTER ){
      evolution_();
@@ -1469,6 +1471,7 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
 	 //fScalevar2 = fScalevar % NfScalevar[1]; 
       }
       
+      cout << "fill pdf cache block " << i << endl;
       // linear: DIS-case
       if(BBlocks[i]->NPDFDim == 0){
 	 if	 ( BBlocks[i]->NScaleDep != 3 )	FillBlockBPDFLCsDISv20(BBlocks[i]);
@@ -1493,12 +1496,12 @@ void FastNLOReader::InitLHAPDF(){
   //  Initalize some necessary LHAPDF parameters
   //
     
-  if ( fLHAPDFfilename == "" || fLHAPDFpath ==""){
+  if ( fLHAPDFfilename == ""){
     printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
   }
 
-  string LHAPDFfile = fLHAPDFpath+"/"+fLHAPDFfilename;
-  
+  //string LHAPDFfile = fLHAPDFpath+"/"+fLHAPDFfilename;
+
   // ---- check if file exists ----- //
   FILE* fp = fopen(LHAPDFfile.c_str(), "r");
   if (fp) {
@@ -1509,8 +1512,8 @@ void FastNLOReader::InitLHAPDF(){
   } 
 
   LHAPDF::setVerbosity(LHAPDF::SILENT);
+  //cout << " LHAPDF version: " << LHAPDF::getVersion() <<endl;
   LHAPDF::initPDFSetByName(fLHAPDFfilename);
-  // lastusedpdf=1; // if you use multiple pdfs and want to switch between them...
   fnPDFs = LHAPDF::numberPDF();
   if ( fnPDFs < fiPDFSet ){
     cout << "Error. There are only " << fnPDFs << " pdf sets within this LHAPDF file. You were looking for set number " << fiPDFSet << endl;
@@ -1551,6 +1554,8 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
 
 void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
    
+   cout << "hier FillBlockBPDFLCsDISv21 "<<endl;
+
    if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}// [i][x][jS1][kS2][l]
 
    vector<double> xfx(13); // PDFs of all partons
@@ -1605,6 +1610,8 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	 }
       }
    }
+   cout << "hier FillBlockBPDFLCsDISv21 ok "<<endl;
+
 		
 }
 
