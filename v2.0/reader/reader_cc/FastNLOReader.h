@@ -187,13 +187,13 @@ private:
    void PrintBlockA2();
 
    void InitLHAPDF();
-   void FillBlockBPDFLCs( FastNLOBlockB* B );
    void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
    void FillBlockBPDFLCsDISv21( FastNLOBlockB* B );
    vector<double> GetXFX(double x, double muf);
    vector<double> CalcPDFLinearComb(vector<double> pdfx1, vector<double> pdfx2, int IPDFdef1, int IPDFdef2, int NSubproc );
    vector<double> CalcPDFLinearCombDIS(vector<double> pdfx1, int NSubproc );
-   void FillAlphasCacheInBlockB( FastNLOBlockB* B );
+   void FillAlphasCacheInBlockBv20( FastNLOBlockB* B );
+   void FillAlphasCacheInBlockBv21( FastNLOBlockB* B );
    double GetAlphas(double Q);
 
    void CalcReferenceCrossSection();
@@ -214,8 +214,8 @@ private:
    double FuncMax ( double scale1 , double scale2 ) ;
    double FuncMin ( double scale1 , double scale2 ) ;
 
-    void CalcCrossSectionDISv20();
-    void CalcCrossSectionDISv21();
+   void CalcCrossSectionDISv20(FastNLOBlockB* B , bool IsLO = false);
+   void CalcCrossSectionDISv21(FastNLOBlockB* B , bool IsLO = false );
  
 public:
    FastNLOReader(void);
