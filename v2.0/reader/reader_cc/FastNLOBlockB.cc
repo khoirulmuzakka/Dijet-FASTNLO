@@ -438,18 +438,20 @@ void FastNLOBlockB::Print(){
       printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
     }
     printf(" B   NScaleDim                     %d\n",NScaleDim);
-    for(int i=0;i<NScaleDim;i++){
-       for(int j=0;j<ScaleDescript[i].size();j++){
-        printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
-      }
-      printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
-      printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
-      for(int j=0;j<Nscalevar[i];j++){
-        printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
-      }
+    if ( NScaleDep != 3 ) {
+       for(int i=0;i<NScaleDim;i++){
+	  for(int j=0;j<ScaleDescript[i].size();j++){
+	     printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
+	  }
+	  printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
+	  printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
+	  for(int j=0;j<Nscalevar[i];j++){
+	     printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
+	  }
+       }
+       printf(" B   No printing of ScaleNode implemented yet.\n");
+       printf(" B   No printing of SigmaTilde implemented yet.\n");
     }
-    printf(" B   No printing of ScaleNode implemented yet.\n");
-    printf(" B   No printing of SigmaTilde implemented yet.\n");
     if ( NScaleDep == 3 ) {
        printf(" B   NScaleNodeScale1[0-%d]   ",fNObsBins);
        for(int i=0;i<fNObsBins;i++){
