@@ -4,7 +4,8 @@
 #
 ###########################################################################################
 
-OBJS 	= ReadFNLOTable.o FastNLOBlockB.o FastNLOReader.o qcdnumdummy.o
+#OBJS 	= ReadFNLOTable.o FastNLOBlockB.o FastNLOReader.o qcdnumdummy.o
+OBJS 	= ReadFNLOTable.o FastNLOBlockB.cc FastNLOReader.cc qcdnumdummy.f
 CC 	= gcc
 CFLAGS 	= -Wall -g
 LDFLAGS	= -lm -lpthread `gtk-config --cflags` `gtk-config --libs` -lgthread
@@ -13,9 +14,11 @@ LHAPDFVERSION	= 5.8.5
 LHAPDFDIR	= /afs/desy.de/group/alliance/mcg/public/MCGenerators/lhapdf
 LHAPDFLIBPATH	= $(LHAPDFDIR)/$(LHAPDFVERSION)/$(SYSNAME)/lib/
 LHAPDFLIB	= LHAPDF
+LHAPDFINCLUDEPATH	= $(LHAPDFDIR)/$(LHAPDFVERSION)/$(SYSNAME)/include
 
-ReadFNLOTable: $(OBJS)	
+ReadFNLOTable: $(OBJS)
 	$(CC) $(OBJS) \
+	-I$(LHAPDFINCLUDEPATH) \
 	-L$(LHAPDFLIBPATH) -l$(LHAPDFLIB) \
 	-o ReadFNLOTable
 
