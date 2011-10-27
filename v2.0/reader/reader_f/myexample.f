@@ -10,11 +10,18 @@
 * -------------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Character*255 FILENAME,PDFSET,CHTMP1,CHTMP2
+      Character*255 FILENAME,PDFSET
+      Character*15 CHTMP1,CHTMP2
+      Character*50 CSEP50,DSEP50,SSEP50
+      Character*150 CSEP,DSEP,SSEP
       Integer i, j, IS, IPRINT, NDimBins(MxDim)
       Double Precision SCALEF(4)
       Data IPRINT/0/
       Data SCALEF/0.25D0,0.5D0,1.0D0,2.0D0/
+      Data CSEP50,DSEP50,SSEP50/
+     >     '##################################################',
+     >     '==================================================',
+     >     "--------------------------------------------------"/
 
 c - Attention - this is the most likely source of Fortran errors in fastNLO!!!
 c        For each scenario, the result array must be declared at least  
@@ -31,6 +38,9 @@ c      Parameter (MxObsBin = 200)
       Double Precision kfac(MxObsBin) 
 
 *---Initialization
+      CSEP = CSEP50//CSEP50//CSEP50
+      DSEP = DSEP50//DSEP50//DSEP50
+      SSEP = SSEP50//SSEP50//SSEP50
       DO I=1,MxObsBin
          xslo(I)  = -1.d0
          xsnlo(I) = -1.d0
@@ -120,11 +130,9 @@ c      Parameter (MxObsBin = 200)
       call InitPDF(0)
 
 *---Compute the cross sections
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
+      WRITE(*,*)CSEP
       WRITE(*,*)"EXAMPLE: Calculate cross sections"
-      WRITE(*,*)"----------------------------------------"//
-     >     "--------------------------------"
+      WRITE(*,*)CSEP
 
 c- new call: a single call for each scale
 c         1st argument:  name of table
@@ -165,21 +173,23 @@ c ???
                kfac(I) = xsnlo(I) / xslo(I)
             ENDIF
          ENDDO
-         WRITE(*,*)"========================================"//
-     >        "================================"
+         WRITE(*,*)DSEP
          WRITE(*,*)" Cross Sections"
          WRITE(*,*)" The scale factor no. ",IS," is: ",SCALEF(IS)
-         WRITE(*,*)"----------------------------------------"//
-     >        "--------------------------------"
+         WRITE(*,*)SSEP
          CHTMP1 = DimLabel(1)
+         CHTMP1 = "[ "//CHTMP1(1:LEN_TRIM(CHTMP1))//" ]"
          CHTMP2 = DimLabel(2)
-         WRITE(*,*)" Bin  Bin Size     "//
-     >        CHTMP1(1:LEN_TRIM(CHTMP1))//
-     >        DimLabel(2)//
-     >        "LO cross section      "//
-     >        "NLO cross section     K factor"
-         WRITE(*,*)"----------------------------------------"//
-     >        "--------------------------------"
+         CHTMP2 = "[ "//CHTMP2(1:LEN_TRIM(CHTMP2))//" ]"
+         WRITE(*,*)"IObs  Bin Size "//
+     >        "IODim1  "//
+     >        CHTMP1//"   "//
+     >        "IODim2  "//
+     >        CHTMP2//"       "//
+     >        "LO cross section    "//
+     >        "NLO cross section   "//
+     >        "K factor"
+         WRITE(*,*)SSEP
  900     FORMAT(1P,I5,X,G10.4,X,2(I5,X,2G10.4),3(2X,E18.11))
          DO I=1,MxObsBin
             DO J=1,NDim

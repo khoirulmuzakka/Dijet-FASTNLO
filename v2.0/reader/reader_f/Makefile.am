@@ -8,9 +8,9 @@ endif
 
 # All source files which go into the main target (and have to be distributed)
 example_SOURCES = example.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc lenocc.f
+	fnx9999.inc strings.inc
 example_ref_SOURCES = example-ref.f fnx9999.f fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f \
-	fnx9999.inc strings.inc lenocc.f
+	fnx9999.inc strings.inc
 myexample_SOURCES = myexample.f myfnx9999.f fnx9999.inc strings.inc \
 	fnset.f fn-alphas-demo.f fn-interface.f fx9999rw.f fnio.f
 myexample_ref_SOURCES = myexample-ref.f myfnx9999.f fnx9999.inc strings.inc \

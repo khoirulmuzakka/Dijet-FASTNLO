@@ -9,7 +9,7 @@
 * -------------------------------------------------------------------
       Implicit None
       Character*255 FILENAME,HISTOFILE,PDFSET
-      Integer i,j, LENOCC
+      Integer i,j
       Double Precision scale(4)
       
 c - Attention - this is the most likely source of errors in fastNLO!!!
@@ -37,7 +37,7 @@ c --- parse command line
          WRITE(*,*)"      ./example -h"
       ELSE
          CALL GETARG(1,FILENAME)
-         IF (FILENAME(1:LENOCC(FILENAME)).EQ."-h") THEN
+         IF (FILENAME(1:LEN_TRIM(FILENAME)).EQ."-h") THEN
             WRITE(*,*)' '
             WRITE(*,*)'Usage: ./example [arguments]'
             WRITE(*,*)'  Table input file, def. = table.tab'
@@ -59,7 +59,7 @@ c --- parse command line
             WRITE(*,*)"      ./example -h"
          ELSE
             WRITE(*,*)"ALLUNC: Evaluating table: ",
-     >           FILENAME(1:LENOCC(FILENAME))
+     >           FILENAME(1:LEN_TRIM(FILENAME))
          ENDIF
       ENDIF
 
@@ -75,7 +75,7 @@ c --- parse command line
      >        "taking fastnlo.hbk instead!"
       ELSE
          WRITE(*,*)"EXAMPLE: Creating output file: ",
-     >        HISTOFILE(1:LENOCC(HISTOFILE))
+     >        HISTOFILE(1:LEN_TRIM(HISTOFILE))
       ENDIF
       
 *---PDF set
@@ -90,7 +90,7 @@ c --- parse command line
      >        "taking cteq66.LHgrid instead!"
       ELSE
          WRITE(*,*)"EXAMPLE: Using PDF set: ",
-     >        PDFSET(1:LENOCC(PDFSET))
+     >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
 
 *---Too many arguments
@@ -110,7 +110,7 @@ ckr      Endif
 
 c - Initialize LHAPDF  
 c - for Reference tables - use CTEQ6M
-      call InitPDFset(PDFSET(1:LENOCC(PDFSET)))
+      call InitPDFset(PDFSET(1:LEN_TRIM(PDFSET)))
 c - initialize one member, 0=best fit member
       call InitPDF(0)
 

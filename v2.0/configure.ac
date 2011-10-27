@@ -3,7 +3,7 @@
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
 # Define project fastNLO
-AC_INIT([fastNLO], [2.0.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
@@ -211,15 +211,15 @@ AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([lhapdf],
 	[AS_HELP_STRING([--with-lhapdf],
-	 [Specify location of LHAPDF installation. This takes precedence over
-	  an LHAPDF environment variable, the prefix path or other methods.])],
+	[Specify location of LHAPDF installation. This takes precedence over
+	an LHAPDF environment variable, the prefix path or other methods.
+	Please note: LHAPDF is mandatory in order to use fastNLO!])],
 	[if test "x$withval" = "xno"; then
-	    AC_MSG_NOTICE([Building fastNLO without LHAPDF!])
-	 else
-     	    if test "x$withval" != "xyes"; then
-	       AC_SUBST([LHAPDF],[$withval])
+	    AC_MSG_ERROR([fastNLO CANNOT be used without LHAPDF! Configuration aborted!])
+	 fi
+         if test "x$withval" != "xyes"; then
+               AC_SUBST([LHAPDF],[$withval])
 	       AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
-	    fi
 	 fi],
 	[])
 
@@ -407,11 +407,11 @@ AC_CONFIG_FILES([Makefile
                  creator/hadron/Makefile
 	         processor/Makefile
 	         processor/converter/Makefile
-                 processor/merger/Makefile
                  reader/Makefile
                  reader/reader_cc/Makefile
                  reader/reader_f/Makefile
 	        ])
+#                 processor/merger/Makefile
 #                 userkr/Makefile
 
 AC_OUTPUT
