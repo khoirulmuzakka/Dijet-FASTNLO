@@ -26,8 +26,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
-//#include "LHAPD/LHAPDF.h"
-#include "LHAPDF.h"
+#include "LHAPDF/LHAPDF.h"
+//#include "LHAPDF.h"
 
 using namespace std;
 
@@ -803,6 +803,60 @@ void FastNLOReader::PrintCrossSections( ){
 //______________________________________________________________________________
 
 
+void FastNLOReader::PrintCrossSectionsLikeFreader( ){
+  //
+  // Print observable binnning and cross sections at
+  // LO, NLO and k-factors like in Fortran Reader for comparison
+  //
+  
+  if ( XSection.empty() ){
+    CalcCrossSection();
+  }
+  
+  vector < double > xs = XSection;
+  
+  string CSEP50("##################################################");
+  string DSEP50("==================================================");
+  string SSEP50("--------------------------------------------------");
+  string CSEP = CSEP50 + CSEP50 + CSEP50;
+  string DSEP = DSEP50 + DSEP50 + DSEP50;
+  string SSEP = SSEP50 + SSEP50 + SSEP50;
+  
+  cout << DSEP << endl;
+  printf(" Cross Sections\n");
+  printf(" The scale factor is: \n");
+  cout << SSEP << endl;
+  
+  if ( NDim == 2 ){
+    string header[3] = { "  IObs  Bin Size IODim1 ", 
+			 "      IODim2",
+			 "              LO cross section    NLO cross section   K factor"};
+    string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
+    unsigned int NDimBins[NDim];
+    printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
+    cout << SSEP << endl;
+    for ( unsigned int i=0; i<xs.size(); i++ ){ 
+      for ( unsigned int j=0; j<NDim; j++ ){ 
+	if ( i==0 ){
+	  NDimBins[j] = 1;
+	} else if ( LoBin[i-1][j] < LoBin[i][j]){
+	  NDimBins[j]++;
+	} else if ( LoBin[i][j] < LoBin[i-1][j]){
+	  NDimBins[j] = 1;
+	}
+      }
+      printf(" %5.i  %-#10.4g%5.i  %-#10.4g %-#10.4g %5.i %-#10.4g %-#10.4g %-#18.11E %-#18.11E %-#18.11E\n",
+	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]/kFactor[i],xs[i],kFactor[i]);
+    }
+  } else {
+  }
+}
+
+
+//______________________________________________________________________________
+
+
 void FastNLOReader::PrintCrossSectionsWithReference( ){
    //
    //  Print Cross sections in NLO, k-factors and Reference table cross sections
@@ -992,8 +1046,8 @@ void FastNLOReader::CalcCrossSection( ){
       int tableorder = BBlocks[i]->Npow - ILOord; // 0:LO, 1:NLO, 2:NNLO
       // 			    kAllAvailableOrders       = 0,    // calculate all available orders in this table
       // 			    kLO                       = 1,    // return only LO calculation
-      // 			    kFullNLO                  = 2,    // calcualte full NLO cross sectoin
-      // 			    kNLOOnly                  = 3,    // calcualte NLO correction
+      // 			    kFullNLO                  = 2,    // calculate full NLO cross sectoin
+      // 			    kNLOOnly                  = 3,    // calculate NLO correction
       // 			    kApproxNNLO               = 4,    // calculate LO+NLO+NNLO(threshold)
       // 			    kNNLOOnly                 = 5,    // calculate only corrections to NLO
       // 			    kHigherOrderCorr          = 6     // calculate higher order corrections to LO
@@ -1131,7 +1185,7 @@ void FastNLOReader::CalcCrossSectionDISv21( FastNLOBlockB* B , bool IsLO){
 
 void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
    //
-   //  Cross section calculation for DIS tables in v2.0 format
+   //  Cross section calculation for HH tables in v2.0 format
    //
    
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;

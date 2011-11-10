@@ -11,7 +11,7 @@
       Implicit None
       Include 'fnx9999.inc'
       Character*255 FILENAME,PDFSET
-      Character*15 CHTMP1,CHTMP2
+      Character*16 CHTMP1,CHTMP2
       Character*50 CSEP50,DSEP50,SSEP50
       Character*150 CSEP,DSEP,SSEP
       Integer i, j, IS, IPRINT, NDimBins(MxDim)
@@ -167,30 +167,30 @@ c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
          DO I=1,MxObsBin
             IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
      >           (ABS(1.D0 + xsnlo(I)).GT.1.D-99)) THEN
-c ???
             ENDIF
             IF ((ABS(xslo(I)).GT.1.D-99)) THEN
                kfac(I) = xsnlo(I) / xslo(I)
             ENDIF
          ENDDO
-         WRITE(*,*)DSEP
-         WRITE(*,*)" Cross Sections"
-         WRITE(*,*)" The scale factor no. ",IS," is: ",SCALEF(IS)
-         WRITE(*,*)SSEP
+         WRITE(*,"(A)")DSEP
+         WRITE(*,"(A)")" Cross Sections"
+         WRITE(*,"(A,I1,A,G10.2)")" The scale factor no. ",IS,
+     >        " is: ",SCALEF(IS)
+         WRITE(*,"(A)")SSEP
          CHTMP1 = DimLabel(1)
-         CHTMP1 = "[ "//CHTMP1(1:LEN_TRIM(CHTMP1))//" ]"
+         CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
          CHTMP2 = DimLabel(2)
-         CHTMP2 = "[ "//CHTMP2(1:LEN_TRIM(CHTMP2))//" ]"
-         WRITE(*,*)"IObs  Bin Size "//
+         CHTMP2 = "[ "//CHTMP2(1:12)//" ]"
+         WRITE(*,"(A)")"  IObs  Bin Size "//
      >        "IODim1  "//
-     >        CHTMP1//"   "//
+     >        CHTMP1//"    "//
      >        "IODim2  "//
-     >        CHTMP2//"       "//
-     >        "LO cross section    "//
-     >        "NLO cross section   "//
+     >        CHTMP2//"      "//
+     >        "LO cross section   "//
+     >        "NLO cross section  "//
      >        "K factor"
-         WRITE(*,*)SSEP
- 900     FORMAT(1P,I5,X,G10.4,X,2(I5,X,2G10.4),3(2X,E18.11))
+         WRITE(*,"(A)")SSEP
+ 900     FORMAT(X,I5,X,G10.4,2(X,I5,2(X,G10.4)),3(X,E18.11))
          DO I=1,MxObsBin
             DO J=1,NDim
                IF (I.EQ.1) THEN
