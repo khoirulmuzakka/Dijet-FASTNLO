@@ -26,8 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
-#include "LHAPDF/LHAPDF.h"
-//#include "LHAPDF.h"
+#include <LHAPDF/LHAPDF.h>
 
 using namespace std;
 
@@ -296,9 +295,9 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   
 
   if (  scalevar >= BlockB_NLO->Nscalevar[0]  ){
-    printf("Warning in FastNLOReader::SetScaleVariation. This table has only %d scalevariations stored. You wanted to acces number %d. Using '0' instead.\n", BlockB_NLO->Nscalevar[0] ,scalevar );
-    fScalevar	= 0;
-    return BlockB_NLO->ScaleFac[0][0] ;
+     printf("Warning in FastNLOReader::SetScaleVariation. This table has only %d scalevariations stored. You wanted to acces number %d. Using '0' instead.\n", BlockB_NLO->Nscalevar[0] ,scalevar );
+     fScalevar	= 0;
+     return BlockB_NLO->ScaleFac[0][0] ;
   }
   
   fScalevar	= scalevar;
@@ -993,7 +992,7 @@ void FastNLOReader::CalcReferenceCrossSection( ){
     for(int i=0;i<NObsBin;i++){
        double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
        for(int l=0;l<BlockB_LO_Ref->NSubproc;l++){ 
-	  XSectionRef[i] +=  BlockB_LO_Ref->SigmaTilde[i][fScalevar][0][0][l] * unit;
+	  XSectionRef[i] +=  BlockB_LO_Ref->SigmaTilde[i][0][0][0][l] * unit; // no scalevariations in LO tables
        }
        for(int l=0;l<BlockB_NLO_Ref->NSubproc;l++){ 
 	  XSectionRef[i] +=  BlockB_NLO_Ref->SigmaTilde[i][fScalevar][0][0][l] * unit;
@@ -1188,6 +1187,8 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
    //  Cross section calculation for HH tables in v2.0 format
    //
    
+   int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+   
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;
    for(int i=0;i<NObsBin;i++){
       int nxmax = B->GetNxmax(i);
@@ -1201,7 +1202,11 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
 	 }
 	 for(int k=0;k<nxmax;k++){ 
 	    for(int l=0;l<B->NSubproc;l++){ 
-	       XS->at(i)		+=  B->SigmaTilde[i][fScalevar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+	       XS->at(i)		+=  B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+// 	       static int count = 0;
+// 	       count++;
+// 	       printf("%3d  %2d  %3d  %2d  %16.12e    %16.12e    %16.12e\n",i,j,k,l,B->SigmaTilde[i][fScalevar][j][k][l],B->AlphasTwoPi_v20[i][scalenode2],B->PdfLc[i][scalenode2][k][l]);
+// 	       if ( count >20 ) exit(1);
 	    }
 	 }
       }
@@ -1272,7 +1277,9 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
    // 
    //  Internal method for filling alpha_s cache
    //
-  
+   
+   int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+
    for(int i=0;i<NObsBin;i++){
       for(int j=0;j<B->GetTotalScalenodes();j++){
 	 int scalenode1 = j;
@@ -1281,7 +1288,7 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
 	    scalenode1 = j / B->Nscalenode[1];
 	    scalenode2 = j % B->Nscalenode[1];
 	 }
-	 double mur	= B->ScaleNode[i][0][fScalevar][scalenode1];
+	 double mur	= B->ScaleNode[i][0][scaleVar][scalenode1];
 	 double as		= GetAlphas(mur);
 	 double alphastwopi = pow( as/TWOPI , B->Npow );
 	 B->AlphasTwoPi_v20[i][j] = alphastwopi;
@@ -1637,6 +1644,7 @@ void FastNLOReader::InitLHAPDF(){
 
 
 void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
+   int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
    vector<double> xfx(13); // PDFs of all partons
    if ( B->NScaleDep != 3 ){
       for(int i=0;i<NObsBin;i++){
@@ -1645,7 +1653,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
 	    for(int k=0;k<nxmax;k++){ 
 	       
 	       double xp	= B->XNode1[i][k];
-	       double muf	= B->ScaleNode[i][0][fScalevar][j];
+	       double muf	= B->ScaleNode[i][0][scaleVar][j];
 	       xfx = GetXFX(xp,muf);
 	       //xfx = LHAPDF::xfx(xp,muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	       vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
@@ -1724,6 +1732,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 
 
 void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
+   int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
    vector < vector < double > > xfx; // PDFs of all partons
    if ( B->NScaleDep != 3 ){
       for(int i=0;i<NObsBin;i++){
@@ -1735,7 +1744,7 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
 	       // determine all pdfs of hadron1
 	       for(int k=0;k<nxbins1;k++){ 
 		  double xp	= B->XNode1[i][k];
-		  double muf	= B->ScaleNode[i][0][fScalevar][j];
+		  double muf	= B->ScaleNode[i][0][scaleVar][j];
 		  xfx[k]	= GetXFX(xp,muf);
 	       }
 	       int x1bin = 0;
