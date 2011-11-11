@@ -435,7 +435,7 @@ c      except for threshold corrections)
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
 ckr
-ckr         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
+         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
                IScalePointer(i) = 1 ! use 1st scale variation
@@ -456,8 +456,8 @@ ckr         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
                If (dabs(scalefac(i1,1,j)/xmuf-1d0).lt.1d-4) Then
 c - works only if IScaleDep=2 - for =3 need to find correct pair of (xmur,xmuf)
                   IScalePointer(i)=j
-ckr                  Write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
-ckr     >                 scalefac(i1,1,j),IScalePointer(i)
+                  Write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
+     >                 scalefac(i1,1,j),IScalePointer(i)
                   Exit          ! <<< what does "Exit" do?
                Endif
             Enddo

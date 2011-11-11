@@ -104,14 +104,25 @@ int main(int argc, char** argv){
   //   fnloreader->SetScaleFactorMuF(0.66);					// set scale factor for mu_f
     
 
-  // ---- (Re-)calcualte cross sections ---- //
-  fnloreader->CalcCrossSection();
+  // ---- (Re-)calculate cross sections ---- //
+  //  fnloreader->CalcCrossSection();
   
 
   // ****************************************************
 
   // ---- do sth. useful ---- //
-  fnloreader->PrintCrossSections();
+  // fnloreader->SetScaleVariation(0);
+  // fnloreader->CalcCrossSection();
+  // fnloreader->PrintCrossSectionsLikeFreader();
+  fnloreader->SetScaleVariation(1);
+  fnloreader->CalcCrossSection();
+  fnloreader->PrintCrossSectionsLikeFreader();
+  // fnloreader->SetScaleVariation(2);
+  // fnloreader->CalcCrossSection();
+  // fnloreader->PrintCrossSectionsLikeFreader();
+  // fnloreader->SetScaleVariation(3);
+  // fnloreader->CalcCrossSection();
+  // fnloreader->PrintCrossSectionsLikeFreader();
 
 
 
