@@ -93,7 +93,7 @@ int Alphas::CalcNf(double mu){
 
 //static double GetAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
-double Alphas::GetAlphasMu(double mu, int nLoop, double alphasMz, int nFlavors){
+double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    
    nLoop	= nLoop == 0 ? fnLoop : nLoop;
    double asmz	= alphasMz==0 ? fAlphasMz : alphasMz;

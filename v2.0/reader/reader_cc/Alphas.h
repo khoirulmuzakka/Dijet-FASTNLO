@@ -23,7 +23,7 @@ public:
    static void GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, double& th4, double& th5, double& th6);
 	
    // Getters for Alphas at scale mu
-   static double GetAlphasMu(double mu, int nLoop = 0, double alphasMz = 0, int nFlavors = 0);
+   static double GetAlphasMu(double mu, double alphasMz = 0, int nLoop = 0, int nFlavors = 0);
    static double GetAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 	
 private:
