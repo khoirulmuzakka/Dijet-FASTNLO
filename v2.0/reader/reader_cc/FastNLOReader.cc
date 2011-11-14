@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <LHAPDF/LHAPDF.h>
+#include "Alphas.h"
 
 using namespace std;
 
@@ -81,6 +82,26 @@ FastNLOReader::~FastNLOReader(void)
    if ( BlockB_NLO )		delete BlockB_NLO;
    if ( BlockB_LO_Ref )		delete BlockB_LO_Ref;
    if ( BlockB_NLO_Ref )	delete BlockB_NLO_Ref;
+}
+
+
+//______________________________________________________________________________
+
+
+
+void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
+   fAlphasEvolution = AlphasEvolution; 
+   if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) {
+      cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; 
+   }
+
+   if ( AlphasEvolution == kGRV ){
+      Alphas::SetMz(91.1876);
+      //Alphas::SetAlphasMz(ALPSMZ);
+      Alphas::SetNf(5);
+      Alphas::SetNLoop(2);
+      Alphas::SetFlavorMatchingOn(true);
+   }
 }
 
 
@@ -291,6 +312,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   if ( BlockB_NLO->NScaleDep == 3 ){
     printf("FastNLOReader::SetScaleVariation(). Info: This is a v2.1 table, therefore, you can choose all possible scale variations. Your Scalevar has to be '0'.\n");
     printf("    Please use SetScaleFacMuR(double) and SetScaleFacMuF(double).\n");
+    return 0;
   }
   
 
@@ -1414,59 +1436,8 @@ double FastNLOReader::GetAlphasNLOJET(double Q, double alphasMZ){
 
 
 double FastNLOReader::GetAlphasGRV(double MU, double ALPSMZ){
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r.
-  //
-  // *******************************************************************
-  //    the version from v1.4 as used in fnh2003-desy07073 HERA-I HighQ2 jets
-  //    from: fn-alphas-demo.f 
-  // *******************************************************************
-  // * M. Wobisch  25/05/99
-  // *
-  // * calculation of alpha_s in the MSbar scheme
-  // * for given alpha_s(Mz)
-  // *
-  // * using exact / iterative solution of 2-loop formula
-  // *
-  // * as GRV hep-ph/9806404
-  // *
-  // *******************************************************************
-  // * This c++ translation:
-  // * D. Britzger  03/03/11
-  // *
 
-  // c - initialize pi and beta functions
-  const int NF	= 5;
-  const double PI4= TWOPI*2;
-  const double B0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-  const double B1 =  (102. - 38./3.*NF);
-  const double B10 = B1 / B0 / B0;
-  const double ZMASS2 = pow ( 91.187 , 2 );
-
-  // c - exact formula to extract Lambda from alpha_s(Mz)
-  double Q2 = pow(MU,2);
-  double LAM2 = ZMASS2 * exp( -1.*PI4/B0/ALPSMZ +  B10 * log( PI4/B0/ALPSMZ + B10) );
-
-  // c - extract approx. alpha_s(mu) value 
-  double LQ2 = log( Q2 / LAM2 ) ;
-  double ASAPPROX = PI4/B0/LQ2 * (1. - B10*log(LQ2)/LQ2);
-  double ALPHAS = ASAPPROX;
-    
-  // c - exact 2loop value by Newton procedure
-  for ( int I = 1 ; I <=6 ; I++ ){
-    double  F  = LQ2 - PI4/B0/ALPHAS + B10*log(PI4/B0/ALPHAS + B10);
-    double FP = -1.*PI4/B0/(ALPHAS*1.01) + B10 * log(PI4/B0/(ALPHAS*1.01) + B10);
-    double FM = -1.*PI4/B0/(ALPHAS*0.99) + B10 * log(PI4/B0/(ALPHAS*0.99) + B10);
-    ALPHAS = ALPHAS - F/(FP-FM)*0.02*ALPHAS;
-    // c      WRITE(*,*) ' LAMDA/a_s_approx/a_s = ',sqrt(lam2),ASAPPROX,ALPHAS
-    // c        alpsmz = alpsmz + I*0.001
-    // c       WRITE(*,*) ' alpsmz =', real(alpsmz)
-  }
-  
-  //printf("FNLO v1.4 as.  Q=%7.4f  alphasMZ_0=%7.4f, alphas(Q)=%7.4f\n",Q,alphasMZ,ALPHAS);
-
-  // c - that's it!
-  return ALPHAS;
+   return Alphas::GetAlphasMu(MU,ALPSMZ);
 
 }
 

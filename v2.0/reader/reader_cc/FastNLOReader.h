@@ -86,8 +86,8 @@ public:
    enum ECalculationOrder {
       kAllAvailableOrders	= 0,	// calculate all available orders in this table
       kLO			= 1,	// return only LO calculation
-      kFullNLO			= 2,	// calcualte full NLO cross sectoin
-      kNLOOnly			= 3,	// calcualte NLO correction
+      kFullNLO			= 2,	// calculate full NLO cross sectoin
+      kNLOOnly			= 3,	// calculate NLO correction
       kApproxNNLO		= 4,	// calculate LO+NLO+NNLO(threshold)
       kNNLOOnly			= 5,	// calculate only corrections to NLO
       kHigherOrderCorr		= 6	// calculate higher order corrections to LO
@@ -203,6 +203,7 @@ private:
    double GetAlphasQCDNUM(double Q);
    double GetAlphasNLOJET(double Q, double alphasMz);
    double GetAlphasGRV(double Q, double alphasMz);
+   double GetAlphasNewGRV(double Q, double alphasMz);
    double GetAlphasCTEQpdf(double Q, double alphasMz);
    double GetAlphasFastNLO(double Q, double alphasMz);
   
@@ -231,7 +232,7 @@ public:
    void SetLHAPDFset( int set ) { fiPDFSet = set; };
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
    void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
-   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution ) { fAlphasEvolution = AlphasEvolution; if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; };
+   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
    void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
    void SetUnits( EUnits Unit );
    void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
