@@ -1,10 +1,12 @@
 C --------------------------------------------------------------
 C   M. Wobisch   07/22/2007
+C   K. Rabbertz  11/14/2011 v2 and print-out updates 
+C
 C   i/o routines to read or write variables from/to fastNLO tables 
 C
 C   the following are implemented
 C     fniodbl   double precision
-C     fnioiny   integer
+C     fnioint   integer
 C     fniolint  long integer
 C     fniochar  character variables (strings)
 C
@@ -12,23 +14,31 @@ C   in addition:
 C     fnioisep  reads or writes the "separator" (=1234567890)
 C
 C   all routines have the input arguments
-C     crw   (character)   can be 'read' or 'write'
-C     nuit  (integer)     Fortran unit to be used to read/write
+C     crw    (character)  can be 'read' or 'write'
+C     nuit   (integer)    Fortran unit to be used to read/write
 C     dvar,ivar,cvar      variable to be read or written, 
 C                         type depends on the routine
 C                         (not used in fniosep)
+C     lprint (logical)    print value read from table
+C     dscrptn (character) description of table value
 C
 C        1         2         3         4         5         6         7 
 C 3456789012345678901234567890123456789012345678901234567890123456789012
 C -------------------------------------------------------------
-      Subroutine fniodbl(crw,nunit,dvar)
+      Subroutine fniodbl(crw,nunit,dvar,lprint,dscrptn)
       Implicit None
-      Character*(*) crw
+      Character*(*) crw, dscrptn
+      Character*40 chtmp
       Integer nunit
       Double Precision dvar
+      Logical lprint
 
       If (crw.eq.'read') Then
          Read(nunit,*) dvar
+         If (lprint) then
+            Read(dscrptn,'(A)'),chtmp
+            Write(*,'(A,G10.4)'),chtmp,dvar
+         Endif
       Else 
          If (dvar.eq.0d0) Then
             Write(nunit,1100) '0'
@@ -44,62 +54,80 @@ c     1000 Format (D24.17)           ! for coefficients
       Return
       End
 C -------------------------------------------------------------
-      Subroutine fnioint(crw,nunit,ivar)
+      Subroutine fnioint(crw,nunit,ivar,lprint,dscrptn)
       Implicit None
-      Character*(*) crw
-      Integer nunit, ivar, l,n
+      Character*(*) crw, dscrptn
+      Character*40 chtmp
+      Integer nunit, ivar, l, n
+      Logical lprint
       Character*5 f(20)
       Data f/"(I1)","(I2)","(I3)","(I4)","(I5)","(I6)","(I7)","(I8)",
      +     "(I9)","(I10)","(I11)","(I12)","(I13)","(I14)","(I15)",
      +     "(I16)","(I17)","(I18)","(I19)","(I20)"/
-
-      If (crw.eq.'read') Then
-         Read(nunit,*) ivar
-      Else 
-         If (ivar.eq.0) Then
-            l = 1
-         Else
-            l = int(log10(dble(abs(ivar))))+1
-         Endif
-         If (ivar.lt.0) l=l+1
-         Write(nunit,f(l)) ivar
-      Endif
-
-      Return
-      End
-C -------------------------------------------------------------
-      Subroutine fniolint(crw,nunit,ivar)
-      Implicit None
-      Character*(*) crw
-      Integer nunit, l,n
-      Integer*8 ivar
-      Character*5 f(20)
-      Data f/"(I1)","(I2)","(I3)","(I4)","(I5)","(I6)","(I7)","(I8)",
-     +     "(I9)","(I10)","(I11)","(I12)","(I13)","(I14)","(I15)",
-     +     "(I16)","(I17)","(I18)","(I19)","(I20)"/
-
-      If (crw.eq.'read') Then
-         Read(nunit,*) ivar
-      Else 
-         If (ivar.eq.0) Then
-            l = 1
-         Else
-            l = int(log10(dble(abs(ivar))))+1
-         Endif
-         If (ivar.lt.0) l=l+1
-         Write(nunit,f(l)) ivar
-      Endif
-
-      Return
-      End
-C -------------------------------------------------------------
-      Subroutine fniochar(crw,nunit,cvar)
-      Implicit None
-      Character*(*) crw,cvar
-      Integer nunit
       
       If (crw.eq.'read') Then
-         Read(nunit,*) cvar
+         Read(nunit,*) ivar
+         If (lprint) then
+            Read(dscrptn,'(A)'),chtmp
+            Write(*,'(A,I10)'),chtmp,ivar
+         Endif
+      Else 
+         If (ivar.eq.0) Then
+            l = 1
+         Else
+            l = int(log10(dble(abs(ivar))))+1
+         Endif
+         If (ivar.lt.0) l=l+1
+         Write(nunit,f(l)) ivar
+      Endif
+
+      Return
+      End
+C -------------------------------------------------------------
+      Subroutine fniolint(crw,nunit,ivar,lprint,dscrptn)
+      Implicit None
+      Character*(*) crw, dscrptn
+      Character*40 chtmp
+      Integer nunit, l, n
+      Integer*8 ivar
+      Logical lprint
+      Character*5 f(20)
+      Data f/"(I1)","(I2)","(I3)","(I4)","(I5)","(I6)","(I7)","(I8)",
+     +     "(I9)","(I10)","(I11)","(I12)","(I13)","(I14)","(I15)",
+     +     "(I16)","(I17)","(I18)","(I19)","(I20)"/
+
+      If (crw.eq.'read') Then
+         Read(nunit,*) ivar
+         If (lprint) then
+            Read(dscrptn,'(A)'),chtmp
+            Write(*,'(A,I16)'),chtmp,ivar
+         Endif
+      Else 
+         If (ivar.eq.0) Then
+            l = 1
+         Else
+            l = int(log10(dble(abs(ivar))))+1
+         Endif
+         If (ivar.lt.0) l=l+1
+         Write(nunit,f(l)) ivar
+      Endif
+
+      Return
+      End
+C -------------------------------------------------------------
+      Subroutine fniochar(crw,nunit,cvar,lprint,dscrptn)
+      Implicit None
+      Character*(*) crw,cvar,dscrptn
+      Character*40 chtmp
+      Integer nunit
+      Logical lprint
+      
+      If (crw.eq.'read') Then
+         Read(nunit,'(A)') cvar
+         If (lprint) then
+            Read(dscrptn,'(A)'),chtmp
+            Write(*,'(A,A)'),chtmp,cvar(1:len_trim(cvar))
+         Endif
       Else 
 c         Write(nunit,1000) cvar
          Write(nunit,1000) cvar(1:len_trim(cvar))
@@ -109,14 +137,19 @@ c         Write(nunit,1000) cvar
       Return
       End
 C -------------------------------------------------------------
-      Subroutine fnioisep(crw,nunit)
+      Subroutine fnioisep(crw,nunit,lprint,dscrptn)
       Implicit None
-      Character*(*) crw
+      Character*(*) crw, dscrptn
+      Character*40 chtmp
       Integer nunit, isep
-      
+      Logical lprint
 
       If (crw.eq.'read') Then
          Read(nunit,*) isep
+         If (lprint) then
+            Read(dscrptn,'(A)'),chtmp
+            Write(*,'(A,I10)'),chtmp,isep
+         Endif
          If (isep.ne.1234567890) Then
             Write(*,*) 'fastNLO: ERROR! '//
      +           'Expected separator line 1234567890 in table and not',

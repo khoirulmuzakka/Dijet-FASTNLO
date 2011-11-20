@@ -284,9 +284,9 @@ public:
   
 
    void CalcCrossSection();
-   void PrintFastNLOTableConstants();
+   void PrintFastNLOTableConstants(const int iprint);
    void PrintCrossSections();
-   void PrintCrossSectionsLikeFreader();
+   void PrintCrossSectionsLikeFreader(int iscalevar);
    void PrintCrossSectionsWithReference();
 
 };

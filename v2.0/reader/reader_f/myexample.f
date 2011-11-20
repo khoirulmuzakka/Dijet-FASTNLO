@@ -12,16 +12,17 @@
       Include 'fnx9999.inc'
       Character*255 FILENAME,PDFSET
       Character*16 CHTMP1,CHTMP2
-      Character*50 CSEP50,DSEP50,SSEP50
-      Character*150 CSEP,DSEP,SSEP
+      Character*33 CSEP33,DSEP33,LSEP33,SSEP33
+      Character*132 CSEP,DSEP,LSEP
       Integer i, j, IS, IPRINT, NDimBins(MxDim)
       Double Precision SCALEF(4)
       Data IPRINT/0/
       Data SCALEF/0.25D0,0.5D0,1.0D0,2.0D0/
-      Data CSEP50,DSEP50,SSEP50/
-     >     '##################################################',
-     >     '==================================================',
-     >     "--------------------------------------------------"/
+      Data CSEP33,DSEP33,LSEP33,SSEP33/
+     >     '#################################',
+     >     '=================================',
+     >     "---------------------------------",
+     >     "*********************************"/
 
 c - Attention - this is the most likely source of Fortran errors in fastNLO!!!
 c        For each scenario, the result array must be declared at least  
@@ -38,9 +39,9 @@ c      Parameter (MxObsBin = 200)
       Double Precision kfac(MxObsBin) 
 
 *---Initialization
-      CSEP = CSEP50//CSEP50//CSEP50
-      DSEP = DSEP50//DSEP50//DSEP50
-      SSEP = SSEP50//SSEP50//SSEP50
+      CSEP = CSEP33//CSEP33//CSEP33//CSEP33
+      DSEP = DSEP33//DSEP33//DSEP33//DSEP33
+      LSEP = LSEP33//LSEP33//LSEP33//LSEP33
       DO I=1,MxObsBin
          xslo(I)  = -1.d0
          xsnlo(I) = -1.d0
@@ -176,7 +177,7 @@ c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
          WRITE(*,"(A)")" Cross Sections"
          WRITE(*,"(A,I1,A,G10.2)")" The scale factor no. ",IS,
      >        " is: ",SCALEF(IS)
-         WRITE(*,"(A)")SSEP
+         WRITE(*,"(A)")LSEP
          CHTMP1 = DimLabel(1)
          CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
          CHTMP2 = DimLabel(2)
@@ -189,7 +190,7 @@ c      Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold corrections
      >        "LO cross section   "//
      >        "NLO cross section  "//
      >        "K factor"
-         WRITE(*,"(A)")SSEP
+         WRITE(*,"(A)")LSEP
  900     FORMAT(X,I5,X,G10.4,2(X,I5,2(X,G10.4)),3(X,E18.11))
          DO I=1,MxObsBin
             DO J=1,NDim

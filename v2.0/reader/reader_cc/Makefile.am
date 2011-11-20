@@ -7,8 +7,8 @@ if HAVE_LHAPDFCONFIG
 endif
 
 # All source files which go into the main target (and have to be distributed)
-ReadFNLOTable_SOURCES = FastNLOReader.cc FastNLOReader.h ReadFNLOTable.cc \
-	FastNLOBlockB.cc FastNLOBlockB.h qcdnumdummy.f
+ReadFNLOTable_SOURCES = ReadFNLOTable.cc FastNLOReader.cc FastNLOReader.h \
+	FastNLOBlockB.cc FastNLOBlockB.h qcdnumdummy.f Alphas.cc Alphas.h
 
 # Preprocessor flags
 AM_CPPFLAGS = -I${LHAPDFINCLUDEPATH}

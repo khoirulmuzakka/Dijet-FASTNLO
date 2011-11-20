@@ -175,7 +175,7 @@ protected:
 public:
 
    void ReadBlockB(istream *table);
-   void Print();
+   void Print(const int ic, const int iprint);
    void SetName(const char* name) { fname = (char*) name;};
    void FillPDFCache();
   

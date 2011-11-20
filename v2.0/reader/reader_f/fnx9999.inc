@@ -124,3 +124,8 @@ ckr
       INTEGER IRAPDIM,NRAPIDITY,IPTDIM,NPT(MXOBSBIN)
       COMMON/TFN9999/IRAPDIM,NRAPIDITY,IPTDIM,NPT
 ckr
+ckr
+ckr Moved from strings.inc
+      CHARACTER*2 Cunits(0:15)
+      Data Cunits/' b','--','--','mb','--','--','ub','--','--','nb',
+     +     '--','--','pb','--','--','fb'/

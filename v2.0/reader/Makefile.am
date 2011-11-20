@@ -1,3 +1,11 @@
+#                                               -*- Automake -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 10.11.2011
+#
+# Create separate distribution and installation package for fastNLO_reader 
+#
+# -----------------------------------------------------------------------------
 # Provide local m4 macros in dir m4, copy also system-wide macros
 #ACLOCAL_AMFLAGS = -I m4 --install
 # Provide local m4 macros in dir m4, don't copy system-wide macros

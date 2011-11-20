@@ -107,7 +107,6 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    const double beta10	= beta1 / beta0 / beta0;
    const double MZ2 = pow(fMz,2);
    
-
    // do we want to use a cache?
    //    double ASMZCACHE = 0;
    //    double MUCACHE = 0;
@@ -119,6 +118,17 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    //       Return
    //       Endif
      
+   // - Print info
+   // printf("\n");
+   // printf("*********************************\n");
+   // printf("* alphas-grv: First call:\n");
+   // printf("*********************************\n");
+   // printf("ALPHAS-GRV: PI = % -#10.4g",twopi/2.); 
+   // printf("ALPHAS-GRV: M_Z/GeV = % -#10.4g",fMz); 
+   // printf("ALPHAS-GRV: a_s(M_Z) = % -#10.4g",alphasMz); 
+   // printf("APLHAS-GRV: a_s loop = %i1",nLoop);
+   // printf("APLHAS-GRV: scale = % -#10.4g",mu);
+   // printf("*********************************\n");
  
    // - exact formula -> extract Lambda from alpha_s(Mz)
    double LAM2 = MZ2 / exp( FBeta(asmz,nLoop,nf));

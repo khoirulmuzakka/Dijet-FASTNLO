@@ -2,38 +2,30 @@
 C
 C ----- define character strings
 C
-      CHARACTER*72 CHEADER(13)
-      CHARACTER*72 CNLOJET(4)
-      CHARACTER*72 CTHRCOR(5)
-      CHARACTER*2 Cunits(0:15)
+      INTEGER NHEADER
+      PARAMETER (NHEADER=7)
+      CHARACTER*72 CHEADER(NHEADER)
+ckr      CHARACTER*72 CNLOJET(4)
+ckr      CHARACTER*72 CTHRCOR(5)
 
       DATA CHEADER/
-     >     "#######################################################################",
-     >     " ",
-     >     "  fastNLO - version 2.0",
-     >     " ",
-     >     "  Thomas Kluge, Klaus Rabbertz, Markus Wobisch",
-     >     " ",
-     >     "  if you use this code, please cite as reference:",
-     >     "      T. Kluge, K. Rabbertz and M. Wobisch,",
-     >     "      hep-ph/0609285",
-     >     " ",
-     >     "      ... now reading the coefficient table:",
-     >     " ",
-     >     "#######################################################################"/
+     >     " fastNLO_reader_2.1.0",
+     >     "",
+     >     " D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch",
+     >     "",
+     >     " If you use this code, please cite:",
+     >     "   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285",
+     >     "   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, TBD"/
 
-      DATA CNLOJET/
-     >     "For NLOJET++ please cite:",
-     >     "  Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),",
-     >     "  Z. Nagy, Phys. Rev. D68, 094002 (2003).",
-     >     " "/
-
-      DATA CTHRCOR/
-     >     "The 2-loop threshold corrections for the inclusive jet",
-     >     "cross section in pp and ppbar have been computed by:",
-     >     "  N. Kidonakis and J.F. Owens - please cite",
-     >     "  N. Kidonakis, J.F. Owens, Phys. Rev. D63, 054019 (2001).",
-     >     " "/
-
-      Data Cunits/' b','--','--','mb','--','--','ub','--','--','nb',
-     +     '--','--','pb','--','--','fb'/
+Comment:       DATA CNLOJET/
+Comment:      >     "For NLOJET++ please cite:",
+Comment:      >     "  Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),",
+Comment:      >     "  Z. Nagy, Phys. Rev. D68, 094002 (2003).",
+Comment:      >     " "/
+Comment: 
+Comment:       DATA CTHRCOR/
+Comment:      >     "The 2-loop threshold corrections for the inclusive jet",
+Comment:      >     "cross section in pp and ppbar have been computed by:",
+Comment:      >     "  N. Kidonakis and J.F. Owens - please cite",
+Comment:      >     "  N. Kidonakis, J.F. Owens, Phys. Rev. D63, 054019 (2001).",
+Comment:      >     " "/

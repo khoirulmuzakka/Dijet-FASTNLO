@@ -15,10 +15,48 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
 * ------------------------------------------------------------
       Implicit None
       Character*(*) crw,filename
-      Integer Nunit, Ifile,ic,i,j,k,l,n,m,nxmax, nselctrb
       Integer ictrb(30)
+      Integer Nunit,Ifile,ic,i,j,k,l,n,m,nxmax,nselctrb
+      Character*1 CH1TMP,CH1TMP2,CH1TMP3,CH1TMP4
+      Character*2 CH2TMP
+      Character*3 CH3TMP
+      Character*4 CH4TMP
+      Character*40 CHTMP
+      Character*33  CSEP33,DSEP33,LSEP33,SSEP33
+      Character*66  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*132 CSEPL,DSEPL,LSEPL,SSEPL
+      Integer iprint
+      Logical lprint
       Include 'fnx9999.inc'
+      Data CSEP33,DSEP33,LSEP33,SSEP33/
+     >     '#################################',
+     >     '=================================',
+     >     "---------------------------------",
+     >     "*********************************"/
 
+*---  Initialization
+      CSEPS = CSEP33//CSEP33
+      DSEPS = DSEP33//DSEP33
+      LSEPS = LSEP33//LSEP33
+      SSEPS = SSEP33//SSEP33
+      CSEPL = CSEP33//CSEP33//CSEP33//CSEP33
+      DSEPL = DSEP33//DSEP33//DSEP33//DSEP33
+      LSEPL = LSEP33//LSEP33//LSEP33//LSEP33
+      SSEPL = SSEP33//SSEP33//SSEP33//SSEP33
+      DSEPS(1:2) = "# "
+      LSEPS(1:2) = "# "
+      SSEPS(1:2) = "# "
+      DSEPL(1:2) = "# "
+      LSEPL(1:2) = "# "
+      SSEPL(1:2) = "# "
+* iprint = 0: No additional printout
+*          1: Print Block A1 & A2 (A1, A2)
+*          2: Also print basic values of Block B (B0)
+*          3: Also print x nodes of Block B for each contribution (BX)
+*          4: Also print scale nodes of Block B for each contribution (BS)
+*          5: Also print sigma tilde of Block B (not implemented yet)
+      iprint = 2
+      lprint = .false.
       Nunit=2
 
       If (crw.eq.'write') Then
@@ -26,7 +64,9 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
       Else
          OPEN(Nunit,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
          IF (Ifile .ne. 0) THEN
-            WRITE(*,*)"FX9999RW: ERROR! Table file not found, "//
+            WRITE(*,*)"FX9999RW: ERROR! Table file "//
+     >           FILENAME(1:LEN_TRIM(FILENAME))
+            WRITE(*,*)"          not found, "//
      +           "stopped! IOSTAT = ",Ifile
             STOP
          Endif
@@ -47,102 +87,178 @@ c                   (those with ictrb(ic)=1)
       Endif
 
 
-c --- fastNLO table
-c - block A1
-      Call fnioisep(crw,nunit)
-      Call fnioint(crw,nunit, Itabversion)
-      Call fniochar(crw,nunit, ScenName)
-      If (crw .eq. 'write') Then
-         Call fnioint(crw,nunit, nselctrb)
-      Else
-         Call fnioint(crw,nunit, Ncontrib)
+c --- fastNLO Table
+c --- Block A1
+      If (iprint.gt.0) then
+         lprint = .true.
+         write(*,'(A)')""
+         write(*,*)SSEP33
+         write(*,*)"* fastNLO Table: Block A1"
+         write(*,*)SSEP33
       Endif
-      Call fnioint(crw,nunit, Nmult)
-      Call fnioint(crw,nunit, Ndata)
-      Call fnioint(crw,nunit, NuserString)
+      Call fnioisep(crw,nunit, lprint,"  A1  ISep")
+      Call fnioint(crw,nunit, Itabversion,lprint,"  A1  Itabversion")
+      Call fniochar(crw,nunit, ScenName,lprint,"  A1  ScenName")
+      If (crw .eq. 'write') Then
+         Call fnioint(crw,nunit, nselctrb,lprint,"  A1  nselctrb")
+      Else
+         Call fnioint(crw,nunit, Ncontrib,lprint,"  A1  Ncontrib")
+      Endif
+      Call fnioint(crw,nunit, Nmult,lprint,"  A1  Nmult")
+      Call fnioint(crw,nunit, Ndata,lprint,"  A1  Ndata")
+      Call fnioint(crw,nunit, NuserString,lprint,"  A1  NuserString")
       If (NuserString .gt. MxUser) Then
          Write(*,*) ' NuserString too large ',NuserString,'<=',MxUser
       Endif
       Do i=1,NuserString
-        Call fniochar(crw,nunit, UserString(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A1    UserString("//CH1TMP//")"
+         Call fniochar(crw,nunit, UserString(i),lprint,CHTMP)
       Enddo
-      Call fnioint(crw,nunit, NuserInt)
+      Call fnioint(crw,nunit, NuserInt,lprint,"  A1  NuserInt")
       If (NuserInt .gt. MxUser) Then
          Write(*,*) ' NuserInt too large ',NuserInt,'<=',MxUser
       Endif
       Do i=1,NuserInt
-        Call fnioint(crw,nunit, UserInt(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A1    UserInt("//CH1TMP//")"
+         Call fnioint(crw,nunit, UserInt(i),lprint,CHTMP)
       Enddo
-      Call fnioint(crw,nunit, NuserFloat)
+      Call fnioint(crw,nunit, NuserFloat,lprint,"  A1  NuserFloat")
       If (NuserFloat .gt. MxUser) Then
          Write(*,*) ' NuserFloat too large ',NuserFloat,'<=',MxUser
       Endif
       Do i=1,NuserFloat
-        Call fniodbl(crw,nunit, UserFloat(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A1    UserFloat("//CH1TMP//")"
+         Call fniodbl(crw,nunit, UserFloat(i),lprint,CHTMP)
       Enddo
-      Call fnioint(crw,nunit, Imachine) 
+      Call fnioint(crw,nunit, Imachine,lprint,"  A1  Imachine") 
       If (Imachine.ne.0) Then
          Write(*,*) ' Imachine different from zero - ',
      +        'not yet implemented: ',Imachine
          Stop
       Endif
-c - block A2
-      Call fnioisep(crw,nunit)
-      Call fnioint(crw,nunit, IpublUnits) 
-      Call fnioint(crw,nunit, NscDescript)
+      If (iprint.gt.0) then
+         write(*,*)CSEP33
+      Endif
+      lprint = .false.
+
+
+
+c --- Block A2
+      If (iprint.gt.0) then
+         lprint = .true.
+         write(*,'(A)')""
+         write(*,*)SSEP33
+         write(*,*)"* fastNLO Table: Block A2"
+         write(*,*)SSEP33
+      Endif
+      Call fnioisep(crw,nunit,lprint,"  A2  ISep")
+      Call fnioint(crw,nunit, IpublUnits,lprint,"  A2  IpublUnits") 
+      Call fnioint(crw,nunit, NscDescript,lprint,"  A2  NscDescript")
       If (NscDescript .gt. MxScDescript) then
          write(*,*) ' NscDescript too large ',NscDescript,'<=',MXScDescript
       Endif
       Do i=1,NscDescript
-        Call fniochar(crw,nunit, ScDescript(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A2    ScDescript("//CH1TMP//")"
+         Call fniochar(crw,nunit, ScDescript(i),lprint,CHTMP)
       Enddo
-      Call fniodbl(crw,nunit, Ecms)
-      Call fnioint(crw,nunit, ILOord)
-      Call fnioint(crw,nunit, NobsBin)
-      Call fnioint(crw,nunit, NDim)
+      Call fniodbl(crw,nunit, Ecms,lprint,"  A2  Ecms")
+      Call fnioint(crw,nunit, ILOord,lprint,"  A2  ILOord")
+      Call fnioint(crw,nunit, NobsBin,lprint,"  A2  NobsBin")
+      Call fnioint(crw,nunit, NDim,lprint,"  A2  NDim")
       Do i=1,NDim
-         Call fniochar(crw,nunit, DimLabel(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A2    DimLabel("//CH1TMP//")"
+         Call fniochar(crw,nunit, DimLabel(i),lprint,CHTMP)
       Enddo
       Do i=1,NDim
-         Call fnioint(crw,nunit, IDiffBin(i))
+         Write(CH1TMP,'(I1)'),i
+         CHTMP = "  A2    IDiffBin("//CH1TMP//")"
+         Call fnioint(crw,nunit, IDiffBin(i),lprint,CHTMP)
       Enddo
       Do i=1,NObsBin
          Do j=1,NDim
-            Call fniodbl(crw,nunit, LoBin(i,j))
-            If (IDiffBin(j).eq.2) Call fniodbl(crw,nunit, UpBin(i,j))
+            Write(CH3TMP,'(I3)'),i
+            Write(CH1TMP,'(I1)'),j
+            CHTMP = "  A2      LoBin("//
+     >           CH3TMP//","//CH1TMP//")"
+            Call fniodbl(crw,nunit, LoBin(i,j),lprint,CHTMP)
+            If (IDiffBin(j).eq.2) then
+               CHTMP = "  A2      UpBin("//
+     >              CH3TMP//","//CH1TMP//")"
+               Call fniodbl(crw,nunit, UpBin(i,j),lprint,CHTMP)
+            Endif
          Enddo
       Enddo
       Do i=1,NObsBin
-         Call fniodbl(crw,nunit, BinSize(i))
+         Write(CH3TMP,'(I3)'),i
+         CHTMP = "  A2    BinSize("//CH3TMP//")"
+         Call fniodbl(crw,nunit, BinSize(i),lprint,CHTMP)
       Enddo
-      Call fnioint(crw,nunit, INormFlag)
-      If (INormFlag.gt.1) Call fniochar(crw,nunit, DenomTable)
+      Call fnioint(crw,nunit, INormFlag,lprint,"  A2  INormFlag")
+      If (INormFlag.gt.1) then
+         Call fniochar(crw,nunit, DenomTable,lprint,"  A2  DenomTable")
+      Endif
       If (INormFlag.gt.0) Then
          Do i=1,NObsBin
-            Call fnioint(crw,nunit, IDivLoPointer(i))
-            Call fnioint(crw,nunit, IDivUpPointer(i))
+            Write(CH3TMP,'(I3)'),i 
+            CHTMP = "  A2    IDivLoPointer("//CH3TMP//")"
+            Call fnioint(crw,nunit, IDivLoPointer(i),lprint,CHTMP)
+            CHTMP = "  A2    IDivUpPointer("//CH3TMP//")"
+            Call fnioint(crw,nunit, IDivUpPointer(i),lprint,CHTMP)
          Enddo
       Endif
+      If (iprint.gt.0) then
+         write(*,*)CSEP33
+      Endif
+      lprint = .false.
 
-c - block B
+
+
+c --- Block B
+      If (iprint.gt.1) then
+         lprint = .true.
+         write(*,'(A)')""
+         write(*,*)SSEP33
+         write(*,*)"* fastNLO Table: Block B"
+         write(*,*)SSEP33
+      Endif
       Do ic=1,NContrib
 c -      write only selected contributions - those with ictrb(ic)=1         
          If (crw .eq. 'write' .and. ictrb(ic).eq.0) Goto 100
 
-         Call fnioisep(crw,nunit)
-         Call fnioint(crw,nunit, IXsectUnits(ic))
-         Call fnioint(crw,nunit, IDataFlag(ic))
-         Call fnioint(crw,nunit, IAddMultFlag(ic))
-         Call fnioint(crw,nunit, IContrFlag1(ic))
-         Call fnioint(crw,nunit, IContrFlag2(ic))
-         Call fnioint(crw,nunit, IContrFlag3(ic))
-         Call fnioint(crw,nunit, NContrDescr(ic))
+         Write(CH1TMP,'(I1)'),ic
+         Call fnioisep(crw,nunit,lprint,"  B0  ISep")
+         CHTMP = "  B0    IXsectUnits("//CH1TMP//")"
+         Call fnioint(crw,nunit, IXsectUnits(ic),lprint,CHTMP)
+         CHTMP = "  B0    IDataFlag("//CH1TMP//")"
+         Call fnioint(crw,nunit, IDataFlag(ic),lprint,CHTMP)
+         CHTMP = "  B0    IAddMultFlag("//CH1TMP//")"
+         Call fnioint(crw,nunit, IAddMultFlag(ic),lprint,CHTMP)
+         CHTMP = "  B0    IContrFlag1("//CH1TMP//")"
+         Call fnioint(crw,nunit, IContrFlag1(ic),lprint,CHTMP)
+         CHTMP = "  B0    IContrFlag2("//CH1TMP//")"
+         Call fnioint(crw,nunit, IContrFlag2(ic),lprint,CHTMP)
+         CHTMP = "  B0    IContrFlag3("//CH1TMP//")"
+         Call fnioint(crw,nunit, IContrFlag3(ic),lprint,CHTMP)
+         CHTMP = "  B0    NContrDescr("//CH1TMP//")"
+         Call fnioint(crw,nunit, NContrDescr(ic),lprint,CHTMP)
          Do i=1,NContrDescr(ic)
-            Call fniochar(crw,nunit, CtrbDescript(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      CtrbDescript("
+     >           //CH1TMP//","//CH1TMP2//")"
+            Call fniochar(crw,nunit, CtrbDescript(ic,i),lprint,CHTMP)
          Enddo
-         Call fnioint(crw,nunit, NCodeDescr(ic))
+         CHTMP = "  B0    NCodeDescr("//CH1TMP//")"
+         Call fnioint(crw,nunit, NCodeDescr(ic),lprint,CHTMP)
          Do i=1,NCodeDescr(ic)
-            Call fniochar(crw,nunit, CodeDescript(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      CodeDescript("
+     >           //CH1TMP//","//CH1TMP2//")"
+            Call fniochar(crw,nunit, CodeDescript(ic,i),lprint,CHTMP)
          Enddo
 
 c --------------------------- Idata ?????
@@ -160,24 +276,40 @@ c --------------------------- IAddMult ?????
          Endif
 
 c --- coefficient block
-         Call fnioint(crw,nunit, IRef(ic))
-         Call fnioint(crw,nunit, IScaleDep(ic))
-         Call fniolint(crw,nunit, Nevt(ic))
-         Call fnioint(crw,nunit, Npow(ic))
-         Call fnioint(crw,nunit, NPDF(ic))
+         CHTMP = "  B0    IRef("//CH1TMP//")"
+         Call fnioint(crw,nunit, IRef(ic),lprint,CHTMP)
+         CHTMP = "  B0    IScaleDep("//CH1TMP//")"
+         Call fnioint(crw,nunit, IScaleDep(ic),lprint,CHTMP)
+         CHTMP = "  B0    Nevt("//CH1TMP//")"
+         Call fniolint(crw,nunit, Nevt(ic),lprint,CHTMP)
+         CHTMP = "  B0    Npow("//CH1TMP//")"
+         Call fnioint(crw,nunit, Npow(ic),lprint,CHTMP)
+         CHTMP = "  B0    NPDF("//CH1TMP//")"
+         Call fnioint(crw,nunit, NPDF(ic),lprint,CHTMP)
          Do i=1,NPDF(ic)
-            Call fnioint(crw,nunit, NPDFPDG(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      NPDFPDG("//CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, NPDFPDG(ic,i),lprint,CHTMP)
          Enddo
-         Call fnioint(crw,nunit, NPDFDim(ic))
-         Call fnioint(crw,nunit, NFragFunc(ic))
+         CHTMP = "  B0    NPDFDim("//CH1TMP//")"
+         Call fnioint(crw,nunit, NPDFDim(ic),lprint,CHTMP)
+         CHTMP = "  B0    NFragFunc("//CH1TMP//")"
+         Call fnioint(crw,nunit, NFragFunc(ic),lprint,CHTMP)
          Do i=1,NFragFunc(ic)
-            Call fnioint(crw,nunit, NFFPDG(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0     NFFPDG("//CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, NFFPDG(ic,i),lprint,CHTMP)
          Enddo
-         Call fnioint(crw,nunit, NFFDim(ic))
-         Call fnioint(crw,nunit, NSubproc(ic))
-         Call fnioint(crw,nunit, IPDFdef(ic,1))   
-         Call fnioint(crw,nunit, IPDFdef(ic,2))  
-         Call fnioint(crw,nunit, IPDFdef(ic,3))  
+         CHTMP = "  B0    NFFDim("//CH1TMP//")"
+         Call fnioint(crw,nunit, NFFDim(ic),lprint,CHTMP)
+         CHTMP = "  B0    NSubproc("//CH1TMP//")"
+         Call fnioint(crw,nunit, NSubproc(ic),lprint,CHTMP)
+         CHTMP = "  B0    IPDFdef1("//CH1TMP//")"
+         Call fnioint(crw,nunit, IPDFdef(ic,1),lprint,CHTMP)
+         CHTMP = "  B0    IPDFdef2("//CH1TMP//")"
+         Call fnioint(crw,nunit, IPDFdef(ic,2),lprint,CHTMP)
+         CHTMP = "  B0    IPDFdef3("//CH1TMP//")"
+         Call fnioint(crw,nunit, IPDFdef(ic,3),lprint,CHTMP)
 
 c --- check consistency between Nsubproc and IPDFdef1,2,
          If (IPDFdef(ic,1).eq.0) Then ! - no predefined set of PDF coefficients
@@ -212,24 +344,51 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
             Write(*,*) " case IPDFdef(1)=0 not yet implemented"
             STOP
          Endif
+         
+         lprint = .false.
+         If (iprint.gt.2) then
+            lprint = .true.
+            write(*,'(A)')""
+            write(*,*)SSEP33
+            write(*,*)"* fastNLO Table: Block B ic = ",ic
+            write(*,*)"*    X Node Details"
+            write(*,*)SSEP33
+         Endif
+
          If (NPDF(ic).gt.0) Then
+            
             Do i=1,NObsBin
-               Call fnioint(crw,nunit, Nxtot(ic,1,i))
+               Write(CH3TMP,'(I3)'),i
+               CHTMP = "  BX        Nxtot1("//
+     >              CH1TMP//",1,"//CH3TMP//")"
+               Call fnioint(crw,nunit, Nxtot(ic,1,i),lprint,CHTMP)
                Do j=1,Nxtot(ic,1,i)
-                  Call fniodbl(crw,nunit, XNode1(ic,i,j))
+                  Write(CH2TMP,'(I2)'),j 
+                  CHTMP = "  BX        XNode1("//
+     >                 CH1TMP//","//CH3TMP//","//CH2TMP//")"
+                  Call fniodbl(crw,nunit, XNode1(ic,i,j),lprint,CHTMP)
                Enddo
                If (crw.eq.'read') Then
                   Hxlim1(ic,i) = -sqrt(-log10(XNode1(ic,i,1))) ! for HH
                Endif
-
+               
             Enddo 
             If (NPDFDim(ic).eq.2) Then
+               
                Do i=1,NObsBin
-                  Call fnioint(crw,nunit, Nxtot(ic,2,i))
+                  Write(CH3TMP,'(I3)'),i
+                  CHTMP = "  BX        Nxtot2("//
+     >                 CH1TMP//",2,"//CH3TMP//")"
+                  Call fnioint(crw,nunit, Nxtot(ic,2,i),lprint,CHTMP)
                   Do j=1,Nxtot(ic,2,i)
-                     Call fniodbl(crw,nunit, XNode2(ic,i,j))
+                     Write(CH2TMP,'(I2)'),j 
+                     CHTMP = "  BX        XNode2("//
+     >                    CH1TMP//","//CH3TMP//","//CH2TMP//")"
+                     Call fniodbl(crw,nunit, XNode2(ic,i,j),lprint
+     >                    ,CHTMP)
                   Enddo
                Enddo 
+
             Endif
          Endif
          IF (NFragFunc(ic).gt.0) then ! - no FFs so far
@@ -237,26 +396,64 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
             STOP
          Endif
 
-         Call fnioint(crw,nunit, NScales(ic))
-         Call fnioint(crw,nunit, NScaleDim(ic))
+         If (iprint.gt.2) then
+            write(*,*)CSEP33
+         Endif
+
+         lprint = .false.
+         if (iprint.gt.1) lprint=.true.
+
+         CHTMP = "  B0    NScales("//CH1TMP//")"
+         Call fnioint(crw,nunit, NScales(ic),lprint,CHTMP)
+         CHTMP = "  B0    NScaleDim("//CH1TMP//")"
+         Call fnioint(crw,nunit, NScaleDim(ic),lprint,CHTMP)
+
          Do i=1,NScales(ic)
-            Call fnioint(crw,nunit, IScale(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      NScales("//
+     >           CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, IScale(ic,i),lprint,CHTMP)
          Enddo
          Do i=1,NScaleDim(ic)
-            Call fnioint(crw,nunit, NScaleDescript(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      NScaleDescript("//
+     >           CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, NScaleDescript(ic,i),lprint,CHTMP)
             Do j=1,NScaleDescript(ic,i)
-               Call fniochar(crw,nunit, ScaleDescript(ic,i,j))
+               Write(CH1TMP3,'(I1)'),j
+               CHTMP = "  B0        ScaleDescript("//
+     >              CH1TMP//","//CH1TMP2//","//CH1TMP3//")"
+               Call fniochar(crw,nunit,
+     >              ScaleDescript(ic,i,j),lprint,CHTMP)
             Enddo
          Enddo
          Do i=1,NScaleDim(ic)
-            Call fnioint(crw,nunit, NScaleVar(ic,i))
-            Call fnioint(crw,nunit, NScaleNode(ic,i))
+            Write(CH1TMP2,'(I1)'),i
+            CHTMP = "  B0      NScaleVar("//
+     >           CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, NScaleVar(ic,i),lprint,CHTMP)
+            CHTMP = "  B0      NScaleNode("//
+     >           CH1TMP//","//CH1TMP2//")"
+            Call fnioint(crw,nunit, NScaleNode(ic,i),lprint,CHTMP)
          Enddo
-c         Write(*,*) ic,Nscales(ic),Nscaledim(ic)
-c         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
+
+         lprint = .false.
+         If (iprint.gt.3) then
+            lprint = .true.
+            write(*,'(A)')""
+            write(*,*)SSEP33
+            write(*,*)"* fastNLO Table: Block B ic = ",ic
+            write(*,*)"*    Scale Node Details"
+            write(*,*)SSEP33
+         Endif
+
          Do i=1,NScaleDim(ic)
             Do j=1,NScaleVar(ic,i)
-               Call fniodbl(crw,nunit, ScaleFac(ic,i,j))
+               Write(CH1TMP2,'(I1)'),i
+               Write(CH1TMP3,'(I1)'),j
+               CHTMP = "  BS        ScaleFac("//
+     >              CH1TMP//","//CH1TMP2//","//CH1TMP3//")"
+               Call fniodbl(crw,nunit, ScaleFac(ic,i,j),lprint,CHTMP)
             Enddo
          Enddo
 
@@ -264,7 +461,16 @@ c         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
             Do j=1,NScaleDim(ic)
                Do k=1,NScaleVar(ic,j)
                   Do l=1,NScaleNode(ic,j)
-                     Call fniodbl(crw,nunit, ScaleNode(ic,i,j,k,l))
+                     Write(CH3TMP,'(I3)'),i
+                     Write(CH1TMP2,'(I1)'),j
+                     Write(CH1TMP3,'(I1)'),k
+                     Write(CH1TMP4,'(I1)'),l
+                     CHTMP = "  BS          ScaleNode("//
+Comment:      >                    CH1TMP//","//
+     >                    CH3TMP//","//CH1TMP2//","//
+     >                    CH1TMP3//","//CH1TMP4//")"
+                     Call fniodbl(crw,nunit, ScaleNode(ic,i,j,k,l),
+     >                    lprint,CHTMP)
                      If (crw.eq.'read') Then
                         HScaleNode(ic,i,j,k,l) = 
      +                       log(log(ScaleNode(ic,i,j,k,l)/0.25d0))
@@ -274,6 +480,22 @@ c         Write(*,*) ' ',Nscalevar(ic,1),NScaleNode(ic,1)
             Enddo
          Enddo
          
+         If (iprint.gt.3) then
+            write(*,*)CSEP33
+         Endif
+
+         lprint = .false.
+         If (iprint.gt.4) then
+            lprint = .true.
+            write(*,'(A)')""
+            write(*,*)SSEP33
+            write(*,*)"* fastNLO Table: Block B ic = ",ic
+            write(*,*)"*    Sigma Tilde"
+            write(*,*)"* Not implemented yet!"
+            write(*,*)SSEP33
+            lprint = .false.
+         Endif
+
          Do i=1,NObsBin
             Do k=1,NScaleVar(ic,1)
                Do l=1,NScaleNode(ic,1)
@@ -298,19 +520,31 @@ c --- here we assume NFragFunc=0
                   Do m=1,nxmax
                      Do n=1,NSubProc(ic)
                         Call fniodbl(crw,nunit,
-     +                       SigmaTilde(ic,i,1,k,l,m,n))
+     +                       SigmaTilde(ic,i,1,k,l,m,n),lprint,CHTMP)
                      Enddo
                   Enddo
                Enddo
             Enddo
          Enddo
+
+         If (iprint.gt.4) then
+            write(*,*)CSEP33
+         Endif
+
+         lprint = .false.
+         if (iprint.gt.1) lprint=.true.
          
  100     Continue               ! - end of block
       Enddo
 
+      If (iprint.gt.1) then
+         write(*,*)CSEP33
+      Endif
+      lprint = .false.
+
 c - end of table
-      Call fnioisep(crw,nunit)
-      Call fnioisep(crw,nunit)
+      Call fnioisep(crw,nunit,lprint," T   ISep")
+      Call fnioisep(crw,nunit,lprint," F   ISep")
       Close(2)
 
       Return

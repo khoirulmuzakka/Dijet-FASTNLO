@@ -1,4 +1,11 @@
 #                                               -*- Autoconf -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 10.11.2011
+#
+# Create separate distribution and installation package for fastNLO_reader 
+#
+# -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])

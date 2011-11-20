@@ -211,11 +211,37 @@ c 5000 Format (A,A64)
       Implicit None
       Include 'fnx9999.inc'
       Include 'strings.inc'
-      Integer i,j,k, ictrb(30)
+      Integer i,j,k, ictrb(30), istat,nsep
       Character*(*) FILENAME
-      Character*255 OLDFILENAME
-      Data OLDFILENAME/'xxxx'/
-      Save OLDFILENAME
+      Character*255 OLDFILENAME,QUOTENAME
+      Character*72 CHEAD
+      Character*80 CHTMP
+      Character*33  CSEP33,DSEP33,LSEP33,SSEP33
+      Character*66  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*132 CSEPL,DSEPL,LSEPL,SSEPL
+      Data OLDFILENAME,QUOTENAME/'xxxx','QUOTE'/
+      Save OLDFILENAME,QUOTENAME
+      Data CSEP33,DSEP33,LSEP33,SSEP33/
+     >     '#################################',
+     >     '=================================',
+     >     "---------------------------------",
+     >     "*********************************"/
+
+*---  Initialization
+      CSEPS = CSEP33//CSEP33
+      DSEPS = DSEP33//DSEP33
+      LSEPS = LSEP33//LSEP33
+      SSEPS = SSEP33//SSEP33
+      CSEPL = CSEP33//CSEP33//CSEP33//CSEP33
+      DSEPL = DSEP33//DSEP33//DSEP33//DSEP33
+      LSEPL = LSEP33//LSEP33//LSEP33//LSEP33
+      SSEPL = SSEP33//SSEP33//SSEP33//SSEP33
+      DSEPS(1:2) = "# "
+      LSEPS(1:2) = "# "
+      SSEPS(1:2) = "# "
+      DSEPL(1:2) = "# "
+      LSEPL(1:2) = "# "
+      SSEPL(1:2) = "# "
 
 c === reset result arrays
       Do i=1,MxObsBin
@@ -230,10 +256,15 @@ c === reset result arrays
 
 c === output in first fastNLO call
       If (IFNfirst.eq.0) Then
-         Do i=1,13
-            Write(*,5000)" #"//CHEADER(i)
+         WRITE(*,*)CSEPS
+         WRITE(*,*)"#"
+         Do i=1,NHEADER
+            CHEAD = CHEADER(i)
+            Write(*,5000)" #"//CHEAD(1:LEN_TRIM(CHEAD))
          Enddo
          IFNfirst = 1
+         WRITE(*,*)"#"
+         WRITE(*,*)CSEPS
       Endif
 
 c === in 1st scenario call: read fastNLO coefficient table
@@ -434,8 +465,7 @@ c      except for threshold corrections)
       Do i=1,IContr
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
-ckr
-         write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
+Comment:          write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
                IScalePointer(i) = 1 ! use 1st scale variation
@@ -456,8 +486,8 @@ ckr
                If (dabs(scalefac(i1,1,j)/xmuf-1d0).lt.1d-4) Then
 c - works only if IScaleDep=2 - for =3 need to find correct pair of (xmur,xmuf)
                   IScalePointer(i)=j
-                  Write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
-     >                 scalefac(i1,1,j),IScalePointer(i)
+Comment:                   Write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
+Comment:      >                 scalefac(i1,1,j),IScalePointer(i)
                   Exit          ! <<< what does "Exit" do?
                Endif
             Enddo
@@ -1005,53 +1035,105 @@ c         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer i,j
+      Integer i,j,k
+      Character*64 CHTMP
+
+Comment:       OPEN(2,STATUS='OLD',FILE=QUOTENAME,IOSTAT=ISTAT)
+Comment:       IF (ISTAT.NE.0) THEN
+Comment:          WRITE(*,*)"FX9999in: ERROR! Input file "//
+Comment:      >        QUOTENAME(1:LEN_TRIM(QUOTENAME))//
+Comment:      >        " not found, stopped!"
+Comment:          STOP
+Comment:       ENDIF
+Comment:       NSEP = 0
+Comment:       DO I=1,10
+Comment:          READ(2,'(A)')CHTMP
+Comment:          IF (NSEP.EQ.0.AND.
+Comment:      >        CHTMP(1:LEN_TRIM(CHTMP)).NE."1234567890") THEN
+Comment:             WRITE(*,*)"FX9999in: ERROR! Wrong file format of "//
+Comment:      >           QUOTENAME(1:LEN_TRIM(QUOTENAME))//
+Comment:      >           ". First separator not found, stopped!"
+Comment:             STOP
+Comment:          ELSE
+Comment:             IF (CHTMP(1:LEN_TRIM(CHTMP)).EQ."1234567890")
+Comment:      >           NSEP = NSEP+1
+Comment:             IF (NSEP.EQ.1) THEN
+Comment:                WRITE(*,'(A)')CHTMP(1:LEN_TRIM(CHTMP))
+Comment:             ENDIF
+Comment:          ENDIF
+Comment:       ENDDO
 
       Write(*,*)
       WRITE(*,*)"########################################"//
      >     "################################"
-      Write(*,*)"# Information on fastNLO scenario: ",ScenName
+      Write(*,*)"# Information on fastNLO scenario: ",
+     >     ScenName(1:len_trim(ScenName))
       WRITE(*,*)"# --------------------------------------"//
      >     "--------------------------------"
       Write(*,*)"# Description:"
       Do i=1,NScDescript
-         Write(*,*)"#   ",SCDescript(i)  
+         CHTMP = SCDescript(i)
+         Write(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
       Enddo
       Write(*,*)"#"
-      Write(*,*)"# Centre-of-mass energy Ecms: ",Ecms," GeV"
+      Write(*,'(A,G10.4,A)')
+     >     " # Centre-of-mass energy Ecms: ",
+     >     Ecms," GeV"
       Write(*,*)"#"
-      Write(*,*)"# Tot. no. of observable bins: ",NObsBin," in ",Ndim,
+      Write(*,'(A,I3,A,I1,A)')
+     >     " # Tot. no. of observable bins: ",NObsBin," in ",Ndim,
      >     " dimensions:"
-      Do j=1,NDim
-         Write(*,*)"# Binning in dimension ",j,":",DimLabel(j)
-         Do i=1,NObsBin
-            If (IDiffBin(j).EQ.1) Then
-               Write(*,*)"#   the bin center ",i," is at ",
-     >              LoBin(i,j)
-            Else
-               Write(*,*)"#   the bin no. ",i," goes from ",
-     >              LoBin(i,j),"up to ",UpBin(i,j)
-            Endif
-         Enddo
-      Enddo
+Comment:       Do j=1,NDim
+Comment:          Write(*,*)"# Binning in dimension ",j,":",DimLabel(j)
+Comment:          Do i=1,NObsBin
+Comment:             If (IDiffBin(j).EQ.1) Then
+Comment:                Write(*,*)"#   the bin center ",i," is at ",
+Comment:      >              LoBin(i,j)
+Comment:             Else
+Comment:                Write(*,*)"#   the bin no. ",i," goes from ",
+Comment:      >              LoBin(i,j),"up to ",UpBin(i,j)
+Comment:             Endif
+Comment:          Enddo
+Comment:       Enddo
       Write(*,*)"#"
-      Write(*,*)"# No. of contributions: ",Ncontrib
+      Write(*,'(A,I1)')" # No. of contributions: ",Ncontrib
       Do i=1,Ncontrib         
-         Write(*,*)"# Contribution",i,":"
+         Write(*,'(A,I1,A)')" # Contribution ",i,":"
          Do j=1,NcontrDescr(i)
-            Write(*,*)"#   ",CtrbDescript(i,j)
+            CHTMP = CtrbDescript(i,j)
+            Write(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
          Enddo
          Write(*,*)"#   computed by:"
          Do j=1,NcodeDescr(i)
-            Write(*,*)"#     ",CodeDescript(i,j)
+            CHTMP = CodeDescript(i,j)
+            Write(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+         Enddo
+         Write(*,'(A,I1)')" #   Scale dimensions: ",
+     >        NScaleDim(i)
+         Do j=1,NScaleDim(i)
+            Do k=1,NScaleDescript(i,j)
+               CHTMP = ScaleDescript(i,j,k)
+               Write(*,'(A,I1,A,A)')
+     >              " #     Scale description for dimension ",
+     >              j,":          ",CHTMP(1:LEN_TRIM(CHTMP))  
+            Enddo
+            Write(*,'(A,I1,A,I1)')
+     >           " #     Number of scale variations for dimension ",
+     >           j,": ",NscaleVar(i,j)
+            Write(*,'(A,I1,A)')
+     >           " #     Available scale settings for dimension ",
+     >           j,":"
+            Do k=1,NscaleVar(i,j)
+               Write(*,'(A,I1,A,G10.4)')
+     >              " #       Scale factor number ",
+     >              k,":                   ",ScaleFac(i,j,k)
+            Enddo
+            Write(*,'(A,I1,A,I1)')
+     >           " #     Number of scale nodes for dimension ",
+     >           j,":      ",NScaleNode(i,j)
          Enddo
       Enddo
-      Write(*,*)"# No. of x bins in 1st contrib.:",Nxtot(1,1,1)
-      Write(*,*)"# No. of available scale variations/scale nodes:"
-      Do i=1,Ncontrib         
-         Write(*,*)"#   NscaleVar,NScaleNode:",
-     >        NscaleVar(i,1),NScaleNode(i,1)
-      Enddo
+ckr      Write(*,*)"# No. of x bins in 1st contrib.:",Nxtot(1,1,1)
       Write(*,*)"#"
       WRITE(*,*)"########################################"//
      >     "################################"
