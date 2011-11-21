@@ -95,13 +95,13 @@ void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
     cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; 
   }
 
-  if ( AlphasEvolution == kGRV ){
-    Alphas::SetMz(91.1876);
-    //Alphas::SetAlphasMz(ALPSMZ);
-    Alphas::SetNf(5);
-    Alphas::SetNLoop(2);
-    Alphas::SetFlavorMatchingOn(true);
-  }
+   if ( AlphasEvolution == kGRV ){
+      Alphas::SetMz(91.1876); // PDG 2011
+      //Alphas::SetAlphasMz(ALPSMZ);
+      Alphas::SetNf(5);
+      Alphas::SetNLoop(2);
+      Alphas::SetFlavorMatchingOn(true);
+   }
 }
 
 
@@ -320,7 +320,9 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   }
   
   fScalevar	= scalevar;
-  //  printf(" * FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen.\n",BlockB_NLO->ScaleFac[0][fScalevar]);
+  fScaleFacMuR	= BlockB_NLO->ScaleFac[0][fScalevar];
+  fScaleFacMuF	= BlockB_NLO->ScaleFac[0][fScalevar];
+  printf(" * FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BlockB_NLO->ScaleFac[0][fScalevar]);
 
   if ( ReFillCache ){
     FillAlphasCache();
@@ -881,7 +883,7 @@ void FastNLOReader::PrintCrossSections( ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintCrossSectionsLikeFreader(int iscalevar){
+void FastNLOReader::PrintCrossSectionsLikeFreader(){
   //
   // Print observable binnning and cross sections at
   // LO, NLO and k-factors like in Fortran Reader for comparison
@@ -902,7 +904,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(int iscalevar){
   
   cout << DSEP << endl;
   printf(" Cross Sections\n");
-  printf(" The scale factor chosen here is: % -#10.2g\n",BlockB_NLO->ScaleFac[0][iscalevar]);
+  printf(" The scale factor chosen here is: % -#10.2g\n",BlockB_NLO->ScaleFac[0][fScalevar]);
   cout << SSEP << endl;
   
   if ( NDim == 2 ){
@@ -1266,7 +1268,7 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
   //  Cross section calculation for HH tables in v2.0 format
   //
    
-  int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+  int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
    
   vector<double>* XS = IsLO ? &XSection_LO : &XSection;
   for(int i=0;i<NObsBin;i++){
@@ -1357,7 +1359,8 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
   //  Internal method for filling alpha_s cache
   //
    
-  int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+  int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
+  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
 
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<B->GetTotalScalenodes();j++){
@@ -1367,10 +1370,9 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
 	scalenode1 = j / B->Nscalenode[1];
 	scalenode2 = j % B->Nscalenode[1];
       }
-      double mur	= B->ScaleNode[i][0][scaleVar][scalenode1];
+      double mur	= scalefac * B->ScaleNode[i][0][scaleVar][scalenode1];
       double as		= GetAlphas(mur);
-      double alphastwopi = pow( as/TWOPI , B->Npow );
-      B->AlphasTwoPi_v20[i][j] = alphastwopi;
+      B->AlphasTwoPi_v20[i][j] = pow( as/TWOPI , B->Npow );
     }
   }
 }
@@ -1672,7 +1674,8 @@ void FastNLOReader::InitLHAPDF(){
 
 
 void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
-  int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+  int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
+  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
   vector<double> xfx(13); // PDFs of all partons
   if ( B->NScaleDep != 3 ){
     for(int i=0;i<NObsBin;i++){
@@ -1681,7 +1684,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
 	for(int k=0;k<nxmax;k++){ 
 	       
 	  double xp	= B->XNode1[i][k];
-	  double muf	= B->ScaleNode[i][0][scaleVar][j];
+	  double muf	= scalefac * B->ScaleNode[i][0][scaleVar][j];
 	  xfx = GetXFX(xp,muf);
 	  //xfx = LHAPDF::xfx(xp,muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
@@ -1760,7 +1763,8 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 
 
 void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
-  int scaleVar = B->Npow == ILOord ? 0 : fScalevar;
+  int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
+  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
   vector < vector < double > > xfx; // PDFs of all partons
   if ( B->NScaleDep != 3 ){
     for(int i=0;i<NObsBin;i++){
@@ -1772,7 +1776,7 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
 	// determine all pdfs of hadron1
 	for(int k=0;k<nxbins1;k++){ 
 	  double xp	= B->XNode1[i][k];
-	  double muf	= B->ScaleNode[i][0][scaleVar][j];
+	  double muf	= scalefac * B->ScaleNode[i][0][scaleVar][j];
 	  xfx[k]	= GetXFX(xp,muf);
 	}
 	int x1bin = 0;
