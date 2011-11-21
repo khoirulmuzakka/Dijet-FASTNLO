@@ -96,10 +96,12 @@ void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
   }
 
    if ( AlphasEvolution == kGRV ){
-      Alphas::SetMz(91.1876); // PDG 2011
+      //Alphas::SetMz(91.1876); // PDG 2011
+      Alphas::SetMz(91.1870); // PDG 2011
       //Alphas::SetAlphasMz(ALPSMZ);
       Alphas::SetNf(5);
       Alphas::SetNLoop(2);
+      //Alphas::SetFlavorMatchingOn(false);
       Alphas::SetFlavorMatchingOn(true);
    }
 }
@@ -1269,7 +1271,6 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
   //
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
-   
   vector<double>* XS = IsLO ? &XSection_LO : &XSection;
   for(int i=0;i<NObsBin;i++){
     int nxmax = B->GetNxmax(i);
@@ -1896,93 +1897,52 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
   //  according to the used subprocesses of your
   //  calculation/table.
   //
-  
 
-  vector < double > njpdflc;
-  njpdflc.resize(7);
-  
-  // ---------------------------------------------------
-  // remember from nlojet++ proc-hhc/weight.cc
-  //   const char *weight_label_hhc[7] = {"gg", "qg", "gq", "qr", "qq", "qqb", "qrb"};
-  // ---------------------------------------------------
-  // remember from nlojet++ proc-hhc/process.cc
-  //    njpdflc[0] = A0*B0;
-  //    njpdflc[1] = (A + Ab)*B0;
-  //    njpdflc[2] = A0*(B + Bb);
-  //    njpdflc[3] = A*B + Ab*Bb - D;
-  //    njpdflc[4] = D;
-  //    njpdflc[5] = Db;
-  //    njpdflc[6] = A*Bb +Ab*B - Db;
-  // ---------------------------------------------------
-  unsigned int nu	= 2;
-  unsigned int nd	= 3;
-   
-  int ia, iq;
-  //weight_hhc njpdflc;
-  //   static double __f1[13], __f2[13];
-  static const int iu[3] = {2,4,6}, id[3] = {1,3,5};
-   
-  //   //----- calculat the pdfs -----
-  //   double *f1 = __f1+6, *f2 = __f2+6;
-   
-  //   this -> hadronA(x1, mf2, nu, nd, f1);
-  //   this -> hadronB(x2, mf2, nu, nd, f2);
-   
-  //----- gluon pdfs -----
-  double A0 = pdfx1[0+6];
-  double B0 = pdfx2[0+6];
-   
-   
-  //---- up type quarks -----
-  double q1, q2, a1, a2;
-  double A = 0.0, B = 0.0, Ab = 0.0, Bb = 0.0, D = 0.0, Db = 0.0; 
-   
-  for(unsigned int u = 0; u < nu && u < 3; u++) {
-    ia = -(iq = iu[u]);
-    q1 = pdfx1[iq+6]; q2 = pdfx2[iq+6];
-    a1 = pdfx1[ia+6]; a2 = pdfx2[ia+6];
-      
-    A += q1; Ab += a1; B += q2; Bb += a2;
-    D += q1*q2 + a1*a2; Db += q1*a2 + a1*q2;
-  }
-    
-  //----- down type quarks -----
-  for(unsigned int d = 0; d < nd && d < 3; d++) {
-    ia = -(iq = id[d]);
-    //cout << "ia="<<ia<<"\tiq="<<iq<<"\td="<<d<< endl;
-    q1 = pdfx1[iq+6]; q2 = pdfx2[iq+6];
-    a1 = pdfx1[ia+6]; a2 = pdfx2[ia+6];
-      
-    A += q1; Ab += a1; B += q2; Bb += a2;
-    D += q1*q2 + a1*a2; Db += q1*a2 + a1*q2;
-  }
-    
-  njpdflc[0] = A0*B0;
-  njpdflc[1] = (A + Ab)*B0;
-  njpdflc[2] = A0*(B + Bb);
-  njpdflc[3] = A*B + Ab*Bb - D;
-  njpdflc[4] = D;
-  njpdflc[5] = Db;
-  njpdflc[6] = A*Bb +Ab*B - Db;
-   
-   
-  vector < double > retval(7);
-   
-  retval[0] = njpdflc[0];
-  retval[1] = njpdflc[3];
-  retval[2] = njpdflc[4];
-  retval[3] = njpdflc[5];
-  retval[4] = njpdflc[6];
-  retval[5] = njpdflc[1];
-  retval[6] = njpdflc[2];
-   
-  if (NSubproc == 6) {
-    retval[5] += retval[6];    // -- sum is correct in ref-mode
-    retval.resize(6);
-  }
+   double SumQ1  = 0;
+   double SumQB1 = 0;
+   double SumQ2  = 0;
+   double SumQB2 = 0;
+   vector <double> Q1(6);
+   vector <double> QB1(6);
+   vector <double> Q2(6);
+   vector <double> QB2(6);
+   for ( int k = 0 ; k<6 ; k++ ){
+      Q1[k]  = pdfx1[k+7];  //! read 1st PDF at x1
+      QB1[k] = pdfx1[5-k];
+      SumQ1  += Q1[k];
+      SumQB1 += QB1[k];
+      Q2[k]  = pdfx2[k+7];//  ! read 2nd PDF at x2
+      QB2[k] = pdfx2[5-k];
+      SumQ2  += Q2[k];
+      SumQB2 += QB2[k];
+   }
+   double G1     = pdfx1[6];
+   double G2     = pdfx2[6]; 
 
-  return retval;
-    
+   //   - compute S,A
+   double S = 0;
+   double A = 0;
+   for ( int k = 0 ; k<6 ; k++ ){
+      S += (Q1[k]*Q2[k]) + (QB1[k]*QB2[k]);
+      A += (Q1[k]*QB2[k]) + (QB1[k]*Q2[k]);
+   }
+   
+   //c   - compute seven combinations
+   vector <double> H(7);
+   H[0]	= G1*G2;
+   H[1] = SumQ1*SumQ2 + SumQB1*SumQB2 - S;
+   H[2] = S;
+   H[3] = A;
+   H[4] = SumQ1*SumQB2 + SumQB1*SumQ2 - A;
+   H[5] = (SumQ1+SumQB1)*G2;
+   H[6] = G1*(SumQ2+SumQB2);
+
+   if (NSubproc == 6) {
+      H[5] += H[6];
+      H.resize(6);
+   }
+   return H;   
+
 }
 
 
