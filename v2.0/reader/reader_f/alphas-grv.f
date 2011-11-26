@@ -23,7 +23,7 @@
      +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
      +     MUCACHE,ASCACHE,ASMZCACHE
       INTEGER  NLOOP, NF, IFIRST, I, NLOOPCACHE
-      PARAMETER (ZMASS = 91.187d0)        ! PDG data book '98
+      PARAMETER (ZMASS = 91.1876d0)        ! PDG 2011
       DATA IFIRST/0/, ONED/1d0/, TWOD/2d0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
@@ -38,7 +38,7 @@ c - initialize pi and beta functions
          B0  = 11D0 - 2D0/3D0 * DBLE(NF)
          B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
          B10 = B1 / B0 / B0
-         ZMASS2 = ZMASS**2
+         ZMASS2 = ZMASS*ZMASS
          ASMZCACHE = 0d0
          MUCACHE = 0d0
          NLOOPCACHE = 0
