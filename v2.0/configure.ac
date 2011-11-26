@@ -407,11 +407,11 @@ AC_CONFIG_FILES([Makefile
                  creator/hadron/Makefile
 	         processor/Makefile
 	         processor/converter/Makefile
+                 processor/merger/Makefile
                  reader/Makefile
                  reader/reader_cc/Makefile
                  reader/reader_f/Makefile
 	        ])
-#                 processor/merger/Makefile
 #                 userkr/Makefile
 
 AC_OUTPUT

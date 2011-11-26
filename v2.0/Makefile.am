@@ -3,6 +3,7 @@
 # Provide local m4 macros in dir m4, don't copy system-wide macros
 ACLOCAL_AMFLAGS = -I m4
 #
+# Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 #
 # Add subversion revision number, recipe from Autotools by J. Calcote 
