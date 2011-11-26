@@ -32,7 +32,7 @@
 *     MW 11/22/2006 remove bug in pointer to scale variations
 *     MW 11/20/2006 first version
 *********************************************************************
-      implicit none
+      IMPLICIT NONE
       CHARACTER*255 FILENAME, FILENAME2
       LOGICAL LHEADONLY
       CHARACTER*4 SHEAD/'head'/
@@ -638,7 +638,7 @@ c     --- to do: what is variable "n"? -> outermost loop: contributions
 c     if (a.eq.0d0) then  ! --- remove later
 c     Write(2,'(A)') '0'
 c     else
-c     Write(2,'(D24.17)') a
+c     Write(2,'(G24.17)') a
 c     endif
                                     continue
                                  else
@@ -677,7 +677,7 @@ c     ---------------------------------------------------------
 
 ckr
 ckr Replace with format strings directly where needed
-ckr Do not use D format, not understood by C++ Reader ???
+ckr Use G instead of D format, which is not understood by C++ Reader
 ckr
 ckr 4998 FORMAT (I14)              ! for integers like Nevt
 ckr 4999 FORMAT (I2)               ! for integers < 100
