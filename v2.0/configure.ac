@@ -1,4 +1,11 @@
 #                                               -*- Autoconf -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 06.02.2009
+#
+# Create distribution and installation package for fastNLO v2 
+#
+# -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])

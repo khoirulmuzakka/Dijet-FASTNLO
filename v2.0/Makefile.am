@@ -1,3 +1,11 @@
+#                                               -*- Automake -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 06.02.2009
+#
+# Create distribution and installation package for fastNLO v2 
+#
+# -----------------------------------------------------------------------------
 # Provide local m4 macros in dir m4, copy also system-wide macros
 #ACLOCAL_AMFLAGS = -I m4 --install
 # Provide local m4 macros in dir m4, don't copy system-wide macros
