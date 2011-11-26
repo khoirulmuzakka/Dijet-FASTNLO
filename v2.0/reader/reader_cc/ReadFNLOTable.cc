@@ -173,28 +173,24 @@ int main(int argc, char** argv){
   int iscalevar = 3;
   fnloreader->SetScaleVariation(iscalevar);
   fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader(iscalevar);
+  fnloreader->PrintCrossSectionsLikeFreader();
   iscalevar = 2;
   fnloreader->SetScaleVariation(iscalevar);
   fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader(iscalevar);
+  fnloreader->PrintCrossSectionsLikeFreader();
   iscalevar = 0;
   fnloreader->SetScaleVariation(iscalevar);
   fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader(iscalevar);
+  fnloreader->PrintCrossSectionsLikeFreader();
   iscalevar = 1;
   fnloreader->SetScaleVariation(iscalevar);
   fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader(iscalevar);
-
-
-
+  fnloreader->PrintCrossSectionsLikeFreader();
 
   // ---- get cross sections ---- //
   //   vector < double > xs = fnloreader->GetXSection();
   //   vector < double > xsref = fnloreader->GetReferenceXSection();
   //   vector < double > kFactors = fnloreader->GetKFactors();
-  
 
   return 0;
 
