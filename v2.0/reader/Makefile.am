@@ -7,9 +7,7 @@
 #
 # -----------------------------------------------------------------------------
 # Provide local m4 macros in dir m4, copy also system-wide macros
-#ACLOCAL_AMFLAGS = -I m4 --install
-# Provide local m4 macros in dir m4, don't copy system-wide macros
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 --install
 #
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu

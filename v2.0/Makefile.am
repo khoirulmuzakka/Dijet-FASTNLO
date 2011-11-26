@@ -7,9 +7,7 @@
 #
 # -----------------------------------------------------------------------------
 # Provide local m4 macros in dir m4, copy also system-wide macros
-#ACLOCAL_AMFLAGS = -I m4 --install
-# Provide local m4 macros in dir m4, don't copy system-wide macros
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 --install
 #
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
@@ -32,6 +30,6 @@ SUBDIRS = common creator processor reader
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but NOT before distribution with "make dist"! 
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
-	depcomp install-sh ltmain.sh missing \
-	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
-	SVNREV
+	depcomp install-sh ltmain.sh missing aclocal.m4 SVNREV \
+	m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
+	reader/config.status reader/stamp-h1 reader/config.h reader/libtool
