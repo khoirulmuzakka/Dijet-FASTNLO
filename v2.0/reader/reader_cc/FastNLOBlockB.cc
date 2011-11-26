@@ -415,11 +415,11 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
     printf("  B0    IContrFlag2(%1i)                  %10i\n",ic,IContrFlag2);
     printf("  B0    IContrFlag3(%1i)                  %10i\n",ic,IContrFlag3);
     //  printf("  B0    NScaleDep(%1i)                    %10i\n",ic,NScaleDep);
-    printf("  B0    NContrDescr(%1i)                  %10i\n",ic,CtrbDescript.size());
+    printf("  B0    NContrDescr(%1i)                  %10zi\n",ic,CtrbDescript.size());
     for(int i=0;i<CtrbDescript.size();i++){
       printf("  B0      CtrbDescript(%1i,%1i)             %s\n",ic,i+1,CtrbDescript[i].data());
     }
-    printf("  B0    NCodeDescr(%1i)                   %10i\n",ic,CodeDescript.size());
+    printf("  B0    NCodeDescr(%1i)                   %10zi\n",ic,CodeDescript.size());
     for(int i=0;i<CodeDescript.size();i++){
       printf("  B0      CodeDescript(%1i,%1i)             %s\n",ic,i+1,CodeDescript[i].data());
     }

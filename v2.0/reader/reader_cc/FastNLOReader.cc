@@ -369,7 +369,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
     }
     for(int i=0;i<NObsBin;i++){
       if ( BlockB_NLO->ScaleNodeScale2[i].size() < 6 ){
-	printf("FastNLOReader::SetFunctionalForm. Warning. Scale2 has only very little nodes (n=%d) in bin %d.\n",BlockB_LO->ScaleNodeScale2[i].size(),i);
+	printf("FastNLOReader::SetFunctionalForm. Warning. Scale2 has only very little nodes (n=%zd) in bin %d.\n",BlockB_LO->ScaleNodeScale2[i].size(),i);
       }
     }
   }
@@ -786,7 +786,7 @@ void FastNLOReader::PrintBlockA2(){
   printf(" *********************************\n");
   printf("  A2  ISep                              %10i\n",tablemagicno);
   printf("  A2  IpublUnits                        %10i\n",Ipublunits);
-  printf("  A2  NscDescript                       %10i\n",ScDescript.size());
+  printf("  A2  NscDescript                       %10zi\n",ScDescript.size());
   for(int i=0;i<ScDescript.size();i++){
     printf("  A2    ScDescript(%1i)                   %s\n",i+1,ScDescript[i].data());
   }
