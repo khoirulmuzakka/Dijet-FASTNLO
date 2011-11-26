@@ -27,25 +27,32 @@
 *
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER nloop
-      DOUBLE PRECISION MUR, ALPSMZ, PI
+      DOUBLE PRECISION MUR
+      
+      DOUBLE PRECISION ALPSMZ, PI4, PI
       DOUBLE PRECISION ALPS_IT 
-c      DOUBLE PRECISION MY_FAVOURITE-ALPHAS
-      PARAMETER (PI=3.1415927d0)
+      INTEGER IFIRST, NLOOP
 
-c === example: exact, iterative solution of the 2-loop RGE 
-      nloop=2
-      alpsmz=0.118              ! set here the value of alpha_s(Mz)
-c      alpsmz=0.1185              ! for H1-2000 MSbar
-c      alpsmz=0.1205             ! for MRST2004
-      FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
+      DATA IFIRST/0/      
 
+      IF (IFIRST.EQ.0) THEN
+         IFIRST = 1
+         PI4 = 4D0 * 4D0 * ATAN(1D0)
+         PI  = PI4/4D0
+      ENDIF
 
-c - here you can call your own alpha_s code
-c           -> remember to divide by 2Pi
-c
-c     FNALPHAS = MY_FAVOURITE-ALPHAS(MUR)
-c
+*     Example:
+*     Calculation of alpha_s in the MSbar scheme for given alpha_s(Mz)
+*     using exact, iterative solution of 2-/3-/4-loop formulas
+*     as used by GRV hep-ph/9806404
+      NLOOP  = 2
+      ALPSMZ = 0.1185           ! Bethke 2011 (Ref. ???)
+
+*     One can also call ones own alpha_s code here
+*     --> Only one has to remember to divide by 2Pi!
+      FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2D0/PI
+ckr Fix alpha_s for debugging
+ckr      FNALPHAS = ALPSMZ/2D0/PI
 
       RETURN
       END
