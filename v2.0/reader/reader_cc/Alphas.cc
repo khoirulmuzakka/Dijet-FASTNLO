@@ -24,12 +24,15 @@ using namespace std;
 //_____________________________________________________
 
 Alphas* Alphas::instance	= NULL;
-double Alphas::fMz		= 91.1876;		// mass of Z0. PDG value 2011
-double Alphas::fAlphasMz	= 0.1185;		// alpha_s at starting scale of Mz. (Bethke 2011)
-int Alphas::fNf			= 6;			// MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
-int Alphas::fnLoop		= 4;			// n-loop solution of the RGE
-bool Alphas::bFlavorMatching	= true;			// switch flaovr matching on or off
-double Alphas::fTh[6]		= {0.0024 , 0.0049, 0.100, 1.29, 4.19, 172.9};
+double Alphas::fMz		= 91.1876;   // PDG 2011
+double Alphas::fAlphasMz	= 0.1185;    // Bethke 2011 (Ref. ???)
+int Alphas::fNf			= 6;         // MAXIMUM number of active flavours,
+                                             // e.g. at low scales mu, number of flavors is
+                                             // calculated respecting flavor thresholds if
+                                             // FlavorMatching is ON.
+int Alphas::fnLoop		= 4;         // n-loop solution of the RGE
+bool Alphas::bFlavorMatching	= true;      // switch flavor matching on or off
+double Alphas::fTh[6]		= {0.0024, 0.0049, 0.100, 1.29, 4.19, 172.9}; // Quark mass thresholds
 
 
 Alphas::Alphas(){
@@ -154,6 +157,8 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    //       ALPS_IT = as
 
    return as;
+   //kr Fix alphas for debugging
+   //return asmz;
 
 }
 
