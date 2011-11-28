@@ -11,6 +11,7 @@
 AC_PREREQ([2.59])
 # Define subproject fastNLO reader
 AC_INIT([fastNLO_reader], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AM_CONDITIONAL([HAVE_SUBPROJECT], test "x" = "x" )
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5

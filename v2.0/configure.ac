@@ -11,6 +11,7 @@
 AC_PREREQ([2.59])
 # Define project fastNLO
 AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AM_CONDITIONAL([HAVE_SUBPROJECT], test "x" = "xno" )
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
@@ -397,6 +398,19 @@ fi
 AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTCINT" != "x")
 AC_MSG_NOTICE([******************************************])
 
+# PDFLATEX
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Check for presence of pdflatex ...])
+AC_MSG_NOTICE([******************************************])
+AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+if test "x$PDFLATEX" = "x"; then
+  AC_MSG_WARN([Unable to create PDF version of documentation, continue without.])
+else
+  AC_MSG_NOTICE([Creating PDF version of documentation using pdflatex.])
+fi
+AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" != "x")
+AC_MSG_NOTICE([******************************************])
+
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
@@ -418,6 +432,8 @@ AC_CONFIG_FILES([Makefile
                  reader/Makefile
                  reader/reader_cc/Makefile
                  reader/reader_f/Makefile
+		 doc/Makefile
+		 doc/arXiv_1109.1310/Makefile
 	        ])
 #                 userkr/Makefile
 

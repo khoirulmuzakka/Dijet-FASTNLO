@@ -1,0 +1,1169 @@
+\RequirePackage{lineno} 
+\documentclass[11pt]{article}
+\usepackage{graphicx}% Include figure files
+\usepackage{bm}% bold math
+\usepackage{amssymb}   % for math
+\usepackage{psfig}   % for math
+
+\graphicspath{{figs/},{eps/},{pdf/},{png/},{jpg/}} % Note, the additional {} are mandatory!
+
+%\usepackage[light,none,bottom]{draftcopy}
+%\renewcommand{\rmdefault}{bch}
+%\renewcommand{\sfdefault}{phv}
+
+\newcommand{\bvt}{\begin{verbatim}}
+\newcommand{\evt}{\end{verbatim}}
+
+\topmargin=-1.5cm
+\textwidth15.3cm
+\textheight23cm
+\evensidemargin13mm
+\oddsidemargin5mm
+\unitlength1cm
+\sloppy
+
+
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+\newcommand{\Dphi}{\Delta \phi\,{}_{\rm dijet}}
+\newcommand{\DR}{\Delta R}
+\newcommand{\DRmin}{\Delta R_{\rm min}}
+\newcommand{\DRmax}{\Delta R_{\rm max}}
+\newcommand{\ptprobe}{p_T^{\rm probe}}
+\newcommand{\ptmax}{p_T^{\rm max}}
+\newcommand{\ptmin}{p_T^{\rm min}}
+\newcommand{\Mjj}{M_{\rm jj}}
+\newcommand{\chijj}{\chi_{\rm dijet}}
+\newcommand{\ystar}{y^*}
+\newcommand{\yboost}{y_{\rm boost}}
+
+\newcommand{\as}{\alpha_s}
+\newcommand{\ass}{\alpha_s^2}
+\newcommand{\asss}{\alpha_s^3}
+\newcommand{\asmz}{\alpha_s(M_Z)}
+\newcommand{\aspT}{\alpha_s(p_T)}
+
+\newcommand{\pythia}{{\sc pythia}}
+\newcommand{\herwig}{{\sc herwig}}
+\newcommand{\djangoh}{{\sc djangoh}}
+\newcommand{\rapgap}{{\sc rapgap}}
+\newcommand{\ariadne}{{\sc ariadne}}
+\newcommand{\lepto}{{\sc lepto}}
+\newcommand{\nlojet}{{\sc nlojet++}}
+\newcommand{\Rcone}{R_{\rm cone}}
+\newcommand{\Rsep}{R_{\rm sep}}
+
+\newcommand{\ybias}{y_{\rm bias}}
+\newcommand{\etajet}{\eta_{\rm jet}}
+\newcommand{\etadet}{\eta_{\rm det}}
+\newcommand{\zvtx}{z_{\rm vtx}}
+
+\newcommand{\ord}{{\cal O}}
+\newcommand{\ppbar}{p{\bar{p}}}
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+
+\begin{document}
+%\setpagewiselinenumbers
+%\modulolinenumbers[5]
+%\linenumbers
+
+\date{September 6, 2011}
+
+\title{\boldmath \bf 
+Theory-Data Comparisons for Jet Measurements in Hadron-Induced Processes
+}
+\author{
+The fastNLO Collaboration \\ 
+\phantom{aaaaaaaaaa aaaaaaaaaaa aaaaaaaaa aaaaaaaaaaa}\\
+M. Wobisch \\Louisiana Tech University, Ruston, Louisiana, USA \\
+\and
+D. Britzger \\  
+\phantom{aaaaaaaaaa} DESY, Hamburg, Germany \phantom{aaaaaaaaaa} \\
+% Deutsches Elektronen Synchrotron, Notkestraße 85, 22607 Hamburg, Germany
+%
+\and
+T. Kluge \\   University of Liverpool, U.K. \\
+\and
+K. Rabbertz, F. Stober \\
+ \phantom{aaaaaaaaaa} KIT, Karlsruhe, Germany \phantom{aaaaaaaaaa} 
+}
+
+
+\maketitle
+
+\vskip-11cm
+\noindent
+\phantom{.}\hfill \mbox{DESY 11-150}\\
+\phantom{.}\hfill \mbox{FERMILAB-PUB-11-418-PPD}\\
+
+
+
+
+\vskip4mm
+\noindent
+
+
+\vskip10.1cm
+
+\begin{abstract} \noindent
+We present a comprehensive overview of theory-data comparisons
+for inclusive jet production.
+Theory predictions are derived for recent
+parton distribution functions and compared with 
+jet data from different hadron-induced processes at 
+various center-of-mass energies $\sqrt{s}$.
+The comparisons are presented as a function of jet transverse
+momentum $p_T$ or, alternatively, 
+of the scaling variable $x_T = 2p_T/\sqrt{s}$.
+\end{abstract}
+
+
+
+
+
+% ************************************************************************
+% ************************************************************************
+% ************************************************************************
+\section{Introduction}
+
+In this article we provide a comprehensive overview
+of theory-data comparisons for 
+inclusive jet cross section measurements made in hadron-induced processes
+between 1993 and today.
+The comparisons are made for the central region in (pseudo-) rapidity.
+Data sets include inclusive jet cross sections measured in
+hadron-hadron collisions at center-of-mass energies $\sqrt{s}$
+between $200\,$GeV and $7\,$TeV 
+and in deeply inelastic scattering (DIS)
+at $\sqrt{s} = 300\,$GeV and $318\,$GeV. 
+The theory calculations are computed consistently for all data sets
+using recent parton distribution functions (PDFs)
+and common choices for the strong coupling constant $\asmz$
+and the renormalization and factorization scales.
+Ratios of data and theory are presented as a function 
+of jet transverse momentum\footnote{Some of the measurements 
+discussed in this article have been made 
+as a function of jet transverse energy $E_T$.
+Throughout this article we use $p_T$ to refer 
+to both, either the jet transverse momentum 
+or the jet transverse energy, as appropriate.
+In hadron-hadron collisions, ``transverse'' refers to the momentum
+or energy component perpendicular to the hadron-hadron beam axis.
+In DIS, ``transverse'' refers to the momentum component
+perpendicular to the photon-proton axis 
+(which is the $z$-axis in the Breit frame).}
+$p_T$ or, alternatively, as a function of the
+scaling variable $x_T = 2p_T/\sqrt{s}$.
+
+This article is intended as a persistent repository for the
+newest theory-data comparisons possible in jet production in
+hadron-induced
+processes and will be updated whenever new relevant data
+and/or theory results are published.
+
+In section 2 we discuss how the theory results are obtained
+while details of the data sets are described in section 3.
+Comparisons of theory and data are presented in section 4.
+
+
+
+
+% ************************************************************************
+% ************************************************************************
+% ************************************************************************
+\section{\label{sec:theory}Theory Predictions}
+
+Conventionally, experimental measurements are corrected 
+for instrumental effects and the results are provided at the 
+``particle level''~\cite{Buttar:2008jx}.
+%
+Corresponding theory predictions for jet observables
+${O}_{\rm theory}$
+are therefore obtained as the product of 
+a perturbative QCD (pQCD) result, ${ O}_{\rm pQCD}$,
+multiplied by a correction factor for non-perturbative effects,
+$c_{\rm non-pert}$
+%
+\begin{equation}
+ { O}_{\rm theory} =  
+   { O}_{\rm pQCD}
+    \cdot  c_{{\rm non-pert}}       \, .
+\label{eq:allQCD}
+\end{equation}
+%
+For inclusive jet cross sections in hadron-hadron collision and in DIS, 
+the fixed-order perturbative expansion is known to next-to-leading order (NLO)
+in the strong coupling constant $\as$, which is of order $\ord(\as^2)$ for DIS
+and $\ord(\as^3)$ for hadron-hadron collisions.
+For inclusive jet cross sections in hadron-hadron collisions, additional
+$\ord(\as^4)$ corrections from threshold corrections have been 
+computed~\cite{Kidonakis:2000gi}.
+These results are used for the calculations in this article.
+%
+Renormalization and factorization scales, $\mu_r$ and $\mu_f$,
+are set to $\mu_r = \mu_f = p_T$, where $p_T$ is the
+transverse momentum (or, where appropriate, transverse energy)
+of the individual jet.
+%
+In all cases $\mu_r$ and $\mu_f$ are larger than the b-quark mass, 
+and thus all calculations are made for five active flavors ($n_f=5$). 
+%
+The proton PDFs are taken from the 
+PDF parametrizations MSTW2008~\cite{Martin:2009iq},
+CT10~\cite{Lai:2010vv}, 
+NNPDF2.1~\cite{Ball:2011mu},
+or HERAPDF1.5~\cite{herapdf15nlo, herapdf15nnlo}.
+All of these parametrizations
+are available in NLO and NNLO approximations 
+(except for CT10 which are only available in NLO)
+as well as for a series of $\asmz$ values.
+In each case, we use those PDF sets which were obtained
+for $\asmz = 0.118$ which is closest
+to the current world average value~\cite{Bethke:2009jm}.
+The same value of $\asmz$ is also employed in the matrix elements.
+%
+The NLO PDF parametrizations are used for
+the comparisons with DIS data, together with the NLO matrix elements.
+The NNLO versions (where available) are used for the comparisons with 
+data from hadron-hadron collisions, together with NLO matrix elements
+plus $\ord(\as^4)$ contributions from threshold corrections.
+%
+Correspondingly, in these comparisons $\as$ is evolved using 
+the numerical solutions of
+the 2-loop and 3-loop approximations of the renormalization group equation 
+for DIS and hadron-hadron collisions, respectively.
+%
+All pQCD contributions are computed within the framework of
+fastNLO~\cite{Kluge:2006xs}
+using NLOJET++\cite{Nagy:2003tz,Nagy:2001fj} for the LO and NLO contributions
+and code from the authors of Ref.~\cite{Kidonakis:2000gi}
+for the threshold corrections.
+The anti-$k_T$ jet algorithm is taken from the implementation in
+{\sc FastJet}~\cite{Cacciari:2005hq}.
+
+The factor $c_{\rm non-pert}$ includes non-perturbative corrections 
+due to hadronization and the underlying event.
+These corrections are usually obtained using Monte Carlo event generators
+and the values are published together with the measurement results.
+Whenever this was not the case,  we have computed the correction factors 
+ourselves using \pythia\ 6.4~\cite{pythia} with tune~A~\cite{tunea}.
+For DIS data at high $Q^2$, underlying event corrections are assumed
+to be negligible.
+In those cases, the pQCD results are only corrected for hadronization effects.
+
+
+\bigskip
+
+For some of the data sets, additional theoretical effects have already
+been folded into the published results.
+This is taken into account as follows:  
+
+\begin{itemize}
+
+\item
+For some $\ppbar$ data sets (as mentioned in section 3), 
+corrections for the underlying event have already been applied to the data.
+In the corresponding calculations, pQCD theory is only corrected for 
+hadronization effects.
+
+\item
+Observables in DIS are usually corrected for higher order QED effects
+which may either include corrections for the running of the QED coupling
+$\alpha$, or not.
+The former is the standard choice by the ZEUS Collaboration, 
+and therefore the corresponding pQCD calculations
+are made for a fixed value of $\alpha = 1/137$.
+Jet measurement results from the H1 Collaboration are not corrected
+for the running of $\alpha$, and therefore the corresponding
+pQCD calculations include a running value of $\alpha(Q)$.
+
+\end{itemize}
+
+% ************************************************************************
+% ************************************************************************
+\section{\label{sec:data}Data Sets}
+
+In this section, we give a brief overview on the data sets
+which are used in the theory-data comparisons.
+The phase space requirements are given as stated in the cited publications
+which include further details regarding the exact definition 
+of the variables.
+%
+The recombination schemes used in the jet algorithms are usually the
+ $E$-scheme~\cite{run2cone}, 
+or the $E_T$-scheme (frequently referred to 
+as ``Snowmass convention'')~\cite{Huth:1990mi}.
+In some cases other recombination schemes have been used.
+%
+The following measurements of the inclusive jet cross section
+as a function of $p_T$ are used in the comparisons. 
+All data are corrected to the particle level as defined 
+in Ref.~\cite{Buttar:2008jx}, except where mentioned otherwise.
+
+
+\begin{enumerate}
+
+% ********
+\item Proton-proton scattering at $\sqrt{s} = 7\,$TeV at the LHC
+\begin{enumerate}
+
+%   fnl1014
+\item CMS Collaboration (2011) 
+      ${\cal L_{\rm int}}=34\,$pb$^{-1}$~\cite{:2011me}  \\
+Measurement of
+$d^2\sigma/dp_T dy$ for $18<p_T<1100\,$GeV
+      in six rapidity regions $|y|<3.0$ 
+using the
+anti-$k_T$ jet algorithm with $R=0.5$ in the $E$-scheme. 
+In our comparisons we display the results for $|y|<0.5$.  
+Non-perturbative corrections are determined 
+as the average of \pythia\ 6.422 with tune D6T~\cite{Field:2008zz}
+and \herwig++ 2.4.2~\cite{Bahr:2008pv} with the default tune
+of \herwig++ 2.3
+(as detailed in Ref.~\cite{Rabbertz:2011}).
+
+
+
+%   fnl1001
+\item ATLAS Collaboration (2010) 
+      ${\cal L_{\rm int}}=17\,$nb$^{-1}$~\cite{:2010wv} \\
+Measurement of
+$d^2\sigma/dp_T dy$  for $60<p_T<500\,$GeV
+     in five rapidity regions $|y|<2.8$ 
+using the 
+anti-$k_T$ jet algorithm with $R=0.4$ in the $E$-scheme. 
+In our comparisons we display the results for $0<|y|<0.3$.   
+Non-perturbative corrections are determined 
+using \pythia\ 6 with tune MC09.
+
+
+
+%   fnl1002
+\item ATLAS Collaboration (2010) 
+      ${\cal L_{\rm int}}=17\,$nb$^{-1}$~\cite{:2010wv}  \\
+The same as in 1.~(b), but for $R=0.6$.
+
+
+\end{enumerate}
+
+
+% ********
+\item Proton-anti-proton scattering at $\sqrt{s} = 1.96\,$TeV at the Fermilab Tevatron collider
+\begin{enumerate}
+
+%   fnt2007
+\item CDF Collaboration (2008) 
+      ${\cal L_{\rm int}}=1.13\,$fb$^{-1}$~\cite{Aaltonen:2008eq} \\
+Measurement of
+$d^2\sigma/dp_T dy$  for $62<p_T<700\,$GeV
+     in five rapidity regions $|y|<2.1$ 
+using the
+Run II iterative midpoint cone jet algorithm (CDF version) with $R=0.7$ 
+in the $E$-scheme. 
+In our comparisons we display the results for $0.1<|y|<0.7$.  
+Non-perturbative corrections are determined 
+using \pythia\ with tune A.
+
+
+%   fnt2004
+\item CDF Collaboration (2007) 
+      ${\cal L_{\rm int}}=1.0\,$fb$^{-1}$~\cite{Abulencia:2007ez} \\
+Measurement of
+$d^2\sigma/dp_T dy$  for $52<p_T<700\,$GeV
+     in five rapidity regions $|y|<2.1$ 
+using the 
+inclusive $k_T$ jet algorithm  with $R=0.7$ in the $E$-scheme. 
+In our comparisons we display the results for $0.1<|y|<0.7$.
+Non-perturbative corrections are determined 
+using \pythia\ with tune A.
+
+
+%   fnl2009
+\item D\O\ Collaboration (2008) 
+      ${\cal L_{\rm int}}=0.7\,$fb$^{-1}$~\cite{:2008hua}   \\
+Measurement of
+$d^2\sigma/dp_T dy$  for $50<p_T<600\,$GeV
+     in six rapidity regions $|y|<2.4$
+using the 
+Run II iterative midpoint cone jet algorithm (D\O\ version) with $R=0.7$ 
+in the $E$-scheme. 
+In our comparisons we display the results for $|y|<0.4$.  
+Non-perturbative corrections are determined 
+using \pythia\ with tune QW~\cite{Group:2006rt}.
+
+
+\end{enumerate}
+
+
+
+% ********
+\item Proton-anti-proton scattering at $\sqrt{s} = 1.8\,$TeV at the Fermilab Tevatron collider
+\begin{enumerate}
+
+%   fnt1001
+\item CDF Collaboration (2001) 
+      ${\cal L_{\rm int}}=10\,$pb$^{-1}$~\cite{Affolder:2001fa} \\
+Measurement of
+$d^2\sigma/dE_T d\eta$  for $40<E_T<465\,$GeV
+     in the pseudorapidity range $0.1<|\eta|<0.7$ 
+using the
+JETCLU iterative cone jet algorithm with $R=0.7$  
+    in a special recombination scheme
+    described in equations (3-9) in~\cite{Affolder:2001fa}. 
+Corrections for the effects due to the underlying event 
+have been estimated using ambient energy measured in 
+minimum bias events and applied to the data. 
+Hadronization corrections have not been published.
+
+
+%  fnt1002
+\item D\O\ Collaboration (2001) 
+      ${\cal L_{\rm int}}=95\,$pb$^{-1}$~\cite{Abbott:2000ew}  \\
+Measurement of
+$d^2\sigma/dE_T d\eta$  for $60<E_T<500\,$GeV
+     in five pseudorapidity regions $|\eta|<3.0$ 
+using the 
+D\O\ Run I iterative cone jet algorithm with $R=0.7$ 
+  in a special recombination scheme, but with additional corrections 
+  of jet $\eta$ to account for the differences 
+  to the $E_T$-scheme~\cite{Babukhadia}.
+In our comparisons we display the results for $|\eta|<0.5$.
+Corrections for the effects due to the underlying event 
+have been estimated using low luminosity minimum bias
+data~\cite{Abbott:1998xw} and applied to the data.
+Hadronization corrections have not been published.
+
+\end{enumerate}
+
+
+
+% ********
+\item Proton-anti-proton scattering at $\sqrt{s} = 546$, $630\,$GeV at the Fermilab Tevatron collider
+\begin{enumerate}
+
+%   fnt1011
+\item CDF Collaboration (1993) 
+     at $\sqrt{s} = 546\,$GeV,
+      ${\cal L_{\rm int}}=8.58\,$nb$^{-1}$~\cite{Abe:1992bk} \\
+Measurement of
+$d^2\sigma/dE_T d\eta$  for $27.5<E_T<73\,$GeV
+     in the pseudorapidity range $0.1<|\eta|<0.7$ 
+using the
+JETCLU iterative cone jet algorithm with $R=0.7$  in a special recombination scheme,
+    described in equations (3-9) in~\cite{Affolder:2001fa}.
+Corrections for effects due to the underlying event 
+have been estimated using the observed calorimeter transverse energy 
+at $90^\circ$ to the jet axis in CDF dijet events
+and applied to the data. 
+Hadronization corrections have not been published.
+
+
+
+
+%   fnt1004
+\item D\O\ Collaboration (2001) 
+  $\sqrt{s} = 630\,$GeV,
+     at ${\cal L_{\rm int}}=538\,$nb$^{-1}$~\cite{Abbott:2000kp}   \\
+Measurement of
+$d^2\sigma/dE_T d\eta$  for $21<E_T<196\,$GeV
+     in the pseudorapidity region $|\eta|<0.5$ 
+using the
+D\O\ Run I iterative cone jet algorithm with $R=0.7$ 
+  in a special recombination scheme (see~\cite{Abbott:2000kp}).
+Corrections for the effects due to the underlying event 
+have been estimated using Monte Carlo simulations 
+of $\ppbar$ interactions and applied to the data. 
+Hadronization corrections have not been published.
+
+\end{enumerate}
+
+
+
+% ********
+\item Proton-proton scattering at $\sqrt{s} = 200\,$GeV at RHIC
+\begin{enumerate}
+
+%   fnr0001
+\item STAR Collaboration (2006) 
+      ${\cal L_{\rm int}}=0.30\,$pb$^{-1}$~\cite{Abelev:2006uq} \\
+Measurement of
+$d^2\sigma/dp_T d\eta$  for $5<p_T<49\,$GeV
+     in the pseudorapidity region $0.2<|\eta|<0.8$ 
+using the 
+Run II iterative midpoint cone jet algorithm 
+(implemented following~\cite{run2cone})
+           with $R=0.7$ in the $E$-scheme. 
+Non-perturbative corrections have not been published.
+Those were provided to us by one of the authors~\cite{miller2006}. \\
+
+
+\end{enumerate}
+
+
+
+% ********
+\item Deeply inelastic scattering at $\sqrt{s} = 318\,$GeV at HERA
+\begin{enumerate}
+
+%   fnh2003
+\item H1 Collaboration (2007) 
+      ${\cal L_{\rm int}}=65.4\,$pb$^{-1}$~\cite{:2007pb} \\
+Measurement of
+$d^2\sigma/dE_T dQ^2$  for $7<E_T<50\,$GeV
+    and $150<Q^2<15000\,$GeV$^2$
+     at an inelasticity $0.2<y< 0.7$ 
+     in the pseudorapidity region $-1<\eta_{\rm lab}<2.5$
+using the
+inclusive $k_T$ jet algorithm in the Breit frame with $R=1$ 
+       in the $E_T$-scheme.
+In these comparisons we are using the data 
+$150<Q^2<5000\,$GeV$^2$ for which contributions from $Z$ exchange
+are negligible. 
+The data have been corrected to the particle level 
+and for QED radiative corrections, 
+but not for the running of $\alpha$. 
+Hadronization corrections have been determined 
+as the average value using 
+\djangoh~\cite{Charchula:1994kf} and \rapgap~\cite{Jung:1993gf}.
+
+
+%   fnh2001
+\item ZEUS Collaboration (2007) 
+      ${\cal L_{\rm int}}=81.7\,$pb$^{-1}$~\cite{Chekanov:2006xr} \\
+Measurement of
+$d^2\sigma/dE_T dQ^2$  for $8<E_T<100\,$GeV
+    and $Q^2>125\,$GeV$^2$
+     with $|\cos \gamma_h| < 0.65$
+     in the pseudorapidity region $-2<\eta_{\rm Breit}<1.5$ 
+using the
+inclusive $k_T$ jet algorithm in the Breit frame with $R=1$ 
+       in the $E_T$-scheme.
+In these comparisons we are using the data 
+$125<Q^2<5000\,$GeV$^2$ for which contributions from $Z$ exchange
+are negligible. 
+The data have been corrected to particle level 
+and for QED radiative corrections, 
+including the running of $\alpha$. 
+Hadronization corrections have been determined 
+as the average value using 
+\ariadne~\cite{Lonnblad:1992tz,Lonnblad:1994wk}
+and \lepto~\cite{Ingelman:1996mq}.
+
+
+
+\end{enumerate}
+
+% ********
+\item Deeply inelastic scattering at $\sqrt{s} = 300\,$GeV at HERA
+\begin{enumerate}
+
+%   fnh1001
+\item H1 Collaboration (2001) 
+      ${\cal L_{\rm int}}=33\,$pb$^{-1}$~\cite{Adloff:2000tq} \\
+Measurement of
+$d^2\sigma/dE_T dQ^2$  for $7<E_T<50\,$GeV
+    and $150<Q^2<5000\,$GeV$^2$
+     at $0.2<y< 0.6$ 
+     in the pseudorapidity region $-1<\eta_{\rm lab}<2.5$ 
+using the
+inclusive $k_T$ jet algorithm in the Breit frame with $R=1$ 
+       in the $E_T$-scheme.
+The data have been corrected to particle level 
+and for QED radiative corrections, 
+but not for the running of $\alpha$. 
+Hadronization corrections have been determined 
+as the average value from \herwig~\cite{Marchesini:1991ch}, 
+\lepto, and \ariadne.
+
+
+
+
+%    fnh1002
+\item ZEUS Collaboration (2002) 
+      ${\cal L_{\rm int}}=10\,$pb$^{-1}$~\cite{Chekanov:2002be} \\
+Measurement of
+$d^2\sigma/dE_T dQ^2$  for $8<E_T<100\,$GeV
+    and $Q^2>125\,$GeV$^2$
+     with $-0.7 <\cos \gamma_h < 0.5$
+     in the pseudorapidity region $-2<\eta_{\rm Breit}<1.8$ 
+using the
+inclusive $k_T$ jet algorithm in the Breit frame with $R=1$ 
+       using the $E_T$-scheme.
+In these comparisons we are using the data 
+$125<Q^2<5000\,$GeV$^2$ for which contributions from $Z$ exchange
+are negligible. 
+The data have been corrected to particle level 
+and for QED radiative corrections, 
+including the running of $\alpha$. 
+Hadronization corrections have been determined 
+as the average value using \ariadne, \lepto, and \herwig.
+
+
+
+\end{enumerate}
+
+\end{enumerate}
+
+
+
+\newpage
+% -----------------------------------------------------
+% -----------------------------------------------------
+% -----------------------------------------------------
+\section{Results}
+
+The ratios of data and theory for all results
+obtained in hadron-hadron collisions 
+and in DIS at large four-momentum transfer squared $Q^2$,
+are shown in Fig.~\ref{fig:incljets} as a function
+of jet $p_T$.
+For DIS, the variable $p_T$ corresponds to the jet transverse 
+energy defined in the Breit frame of reference.
+%
+The uncertainty bars indicate the total experimental uncertainties,
+defined as the quadratic sum of statistical and systematic uncertainties.
+For purposes of visibility, the ratios for different 
+center-of-mass energies are multiplied by factors as given in the figures,
+and the results are sorted from top to bottom
+in the order of increasing center-of-mass energy.
+
+
+Figure~\ref{fig:ppjetsxt} shows the data points
+from hadron-hadron collisions, this time as a function 
+of $x_T = 2p_T/\sqrt{s}$.
+For central jet production in hadron-hadron collisions, 
+the variable $x_T$ is closely related to the hadron 
+momentum fractions $x_1$ and $x_2$, carried by the partons.
+In exclusive dijet production with
+rapidities $y_1=y_2=0$, the relation $x_T= x_1 = x_2$ holds.
+
+The comparison of inclusive jet cross section data at central 
+(pseudo-) rapidities as a function of $x_T$
+allows to infer the sensitivity of PDF determinations 
+to the measured data.
+
+In general, we observe good agreement between theory and data.
+The data from some measurements 
+(CDF at $\sqrt{s}=546\,$GeV~\cite{Abe:1992bk} and 
+ATLAS and CMS at $\sqrt{s}=7\,$TeV~\cite{:2010wv,:2011me})
+have a tendency of being systematically below 
+the theory predictions.
+However, the CDF and ATLAS data have relatively large uncertainties,
+and it was discussed in Refs.~\cite{:2011me,Rabbertz:2011} that
+within experimental and theoretical uncertainties, 
+the CMS data are in agreement with theory.
+Differences in the shapes between theory and data as a function
+of $p_T$ for the jet data at $\sqrt{s}=1.8$ and $1.96\,$TeV
+can be explained by correlated experimental uncertainties,
+as studied in recent global 
+PDF analyses~\cite{Martin:2009iq,Lai:2010vv,Ball:2011mu}.
+
+
+The theory-data comparisons which are presented 
+in Figs.~\ref{fig:incljets} and~\ref{fig:ppjetsxt}
+for MSTW2008 PDFs are also repeated 
+for the PDF parametrizations CT10, NNPDF2.1, and HERAPDF1.5.
+These results are displayed in
+Figs.~\ref{fig:incljets-ct10} -- \ref{fig:ppjetsxt-hera}.
+In most cases we observe a very similar agreement as for MSTW2008 PDFs.
+
+
+From Fig.~\ref{fig:incljets}
+it is visible that the new LHC jet data have started to go beyond 
+the $p_T$ reach of the Fermilab Tevatron experiments CDF and D\O.
+Fig.~\ref{fig:ppjetsxt} shows that the new CMS measurement
+provides the first jet results which probe the PDFs down 
+to $x = 5\cdot10^{-3}$.
+In this $x$-region, the PDFs are already constrained by
+data from inclusive DIS experiments.
+Therefore the comparison of LHC jet data with theory predictions in this
+overlap region will help to understand
+uncertainties not related to PDFs.
+It is also visible from Fig.~\ref{fig:ppjetsxt} that 
+currently the Tevatron jet data still have the highest reach in $x$.
+
+
+
+
+
+
+% *********************************************************
+% *********************************************************
+% *********************************************************
+\begin{thebibliography}{99}
+
+
+
+\bibitem{Buttar:2008jx}
+  C.~Buttar {\it et al.},
+  ``Accords related to the hadronic final state,''
+  in G.~Belanger {\it et al.} (Eds.),
+  {\sl Les Houches 2007, Physics at TeV colliders},
+  arXiv:0803.0678 [hep-ph],  section 9.
+  %%CITATION = ARXIV:0803.0678;%%
+
+
+%\cite{Kidonakis:2000gi}
+\bibitem{Kidonakis:2000gi}
+  N.~Kidonakis and J.~F.~Owens,
+  ``Effects of higher-order threshold corrections in high-E(T) jet
+  production,''
+  Phys.\ Rev.\  D {\bf 63}, 054019 (2001).
+  [arXiv:hep-ph/0007268].
+  %%CITATION = PHRVA,D63,054019;%%
+
+
+%\cite{Martin:2009iq}
+\bibitem{Martin:2009iq}           % --- MSTW2008
+  A.~D.~Martin, W.~J.~Stirling, R.~S.~Thorne and G.~Watt,
+  ``Parton distributions for the LHC,''
+  Eur.\ Phys.\ J.\  C {\bf 63}, 189 (2009).
+  [arXiv:0901.0002 [hep-ph]].
+  %%CITATION = EPHJA,C63,189;%%
+
+\bibitem{Lai:2010vv}
+  H.~L.~Lai {\it et al.},
+  ``New parton distributions for collider physics,''
+  Phys.\ Rev.\  D {\bf 82}, 074024 (2010),
+  [arXiv:1007.2241 [hep-ph]].
+  %%CITATION = PHRVA,D82,074024;%%
+
+%%\cite{Ball:2011mu}
+\bibitem{Ball:2011mu}
+  R.~D.~Ball {\it et al.},
+  ``Impact of Heavy Quark Masses on Parton Distributions and LHC
+  Phenomenology,''
+  Nucl.\ Phys.\  B {\bf 849}, 296 (2011),
+   [arXiv:1101.1300 [hep-ph]].
+  %%CITATION = NUPHA,B849,296;%%
+
+\bibitem{herapdf15nlo}
+  H1 and ZEUS Collaborations, 
+  ``PDF fits including HERA-II high $Q^2$ data (HERAPDF1.5),''  
+  H1prelim-10-142, ZEUS-prel-10-018 (2010).
+
+\bibitem{herapdf15nnlo}
+  H1 and ZEUS Collaborations, 
+  ``HERAPDF1.5NNLO'' (preliminary), 
+  H1prelim-11-042, ZEUS-prel-11-002 (2011).
+
+
+\bibitem{Bethke:2009jm}
+  S.~Bethke,
+  ``The 2009 World Average of $\alpha_s (M_Z)$,''
+  Eur.\ Phys.\ J.\  C {\bf 64}, 689 (2009).
+   [arXiv:0908.1135 [hep-ph]].
+  %%CITATION = EPHJA,C64,689;%%
+
+
+%\cite{Kluge:2006xs}
+\bibitem{Kluge:2006xs}
+  T.~Kluge, K.~Rabbertz and M.~Wobisch,
+  ``fastNLO: Fast pQCD calculations for PDF fits,''
+  DESY-06-186, FERMILAB-CONF-06-352-E,
+  arXiv:hep-ph/0609285.
+  %%CITATION = HEP-PH 0609285;%%
+
+
+%%\cite{Nagy:2003tz}
+\bibitem{Nagy:2003tz}
+  Z.~Nagy,
+   ``Next-to-leading order calculation of three-jet observables in hadron
+  hadron collision,''
+  Phys.\ Rev.\ D {\bf 68}, 094002 (2003).
+  [arXiv:hep-ph/0307268].
+  %%CITATION = HEP-PH 0307268;%%
+
+
+%\cite{Nagy:2001fj}
+\bibitem{Nagy:2001fj}
+  Z.~Nagy,
+   ``Three-jet cross sections in hadron hadron collisions at next-to-leading
+  order,''
+  Phys.\ Rev.\ Lett.\  {\bf 88}, 122003 (2002).
+  [arXiv:hep-ph/0110315].
+  %%CITATION = HEP-PH 0110315;%%
+
+
+%\cite{Cacciari:2005hq}
+\bibitem{Cacciari:2005hq}
+  M.~Cacciari and G.~P.~Salam,
+  ``Dispelling the $N^{3}$ myth for the $k_t$ jet-finder,''
+  Phys.\ Lett.\  B {\bf 641}, 57 (2006)
+  [arXiv:hep-ph/0512210].
+  %%CITATION = PHLTA,B641,57;%%
+
+
+%\cite{Sjostrand:2000wi}
+\bibitem{pythia} 
+%\bibitem{Sjostrand:2000wi}
+  T.~Sjostrand, P.~Eden, C.~Friberg, L.~Lonnblad, G.~Miu, 
+        S.~Mrenna, E.~Norrbin,
+  ``High-energy physics event generation with PYTHIA 6.1,''
+  Comput.\ Phys.\ Commun.\  {\bf 135}, 238-259 (2001).
+  [hep-ph/0010017].
+
+
+\bibitem{tunea}
+  R. Field, presented at Fermilab ME/MC Tuning Work-
+  shop, Fermilab, October 4, 2002. 
+  \pythia\ Tune A implies
+  that the following parameters are set in \pythia\ with
+  CTEQ5L PDFs: PARP(67)=4, MSTP(82)=4, PARP(82)=2,
+  PARP(84)=0.4,      PARP(85)=0.9,      PARP(86)=0.95,
+  PARP(89)=1800, PARP(90)=0.25.
+
+
+\bibitem{run2cone} G.~C.~Blazey {\it et al.}, in
+     {\sl Proceedings of the Workshop:
+     ``QCD and Weak Boson Physics in Run II''},
+     edited by U.~Baur, R.~K.~Ellis, and D.~Zeppenfeld, 
+     Batavia, Illinois  (2000).
+     See Section 3.5.
+
+%\cite{Huth:1990mi}
+\bibitem{Huth:1990mi}
+  J.~E.~Huth, N.~Wainer, K.~Meier, N.~Hadley, F.~Aversa, M.~Greco, P.~Chiappetta, J.~P.~Guillet {\it et al.},
+  ``Toward a standardization of jet definitions,''
+  in Proc. of Research Directions for the Decade, Snowmass 1990, ed.
+     E.~L.~Berger (World Scientific, Singapore, 1992).
+
+
+
+
+
+
+% -------- LHC 7 TeV
+
+%\cite{:2011me}        fnl1014
+\bibitem{:2011me}
+  S.~Chatrchyan {\it et al.} [ CMS Collaboration ],
+  ``Measurement of the Inclusive Jet Cross Section in pp Collisions at sqrt(s) = 7 TeV,'' accepted by Phys.~Rev.~Lett.,
+  [arXiv:1106.0208 [hep-ex]].
+
+
+\bibitem{Field:2008zz}
+ R.~Field, 
+ ``Physics at the Tevatron,''
+  Acta Phys.Polon. B39, 2611 (2008).
+
+%\cite{Bahr:2008pv}
+\bibitem{Bahr:2008pv}
+  M.~Bahr, S.~Gieseke, M.~A.~Gigg, D.~Grellscheid, K.~Hamilton, O.~Latunde-Dada, S.~Platzer, P.~Richardson {\it et al.},
+  ``Herwig++ Physics and Manual,''
+  Eur.\ Phys.\ J.\  {\bf C58}, 639-707 (2008).
+  [arXiv:0803.0883 [hep-ph]].
+
+
+\bibitem{Rabbertz:2011}
+K.~Rabbertz, [ CMS Collaboration ],
+ ``Comparison of Inclusive Jet and Dijet Mass Cross Sections at $\sqrt{s}
+    = 7\,$TeV with Predictions of perturbative QCD,''
+  CMS Note 2011-004 (2011).
+
+%\cite{:2010wv}     fnl1001
+\bibitem{:2010wv}
+  G.~Aad {\it et al.} [ Atlas Collaboration ],
+  ``Measurement of inclusive jet and dijet cross sections in proton-proton collisions at 7 TeV centre-of-mass energy with the ATLAS detector,''
+  Eur.\ Phys.\ J.\  {\bf C71}, 1512 (2011).
+  [arXiv:1009.5908 [hep-ex]].
+
+
+
+% ------------- Tevatron RunII
+
+%\cite{Aaltonen:2008eq}    fnt2007
+\bibitem{Aaltonen:2008eq}
+  T.~Aaltonen {\it et al.} [ CDF Collaboration ],
+  ``Measurement of the Inclusive Jet Cross Section at the Fermilab Tevatron p anti-p Collider Using a Cone-Based Jet Algorithm,''
+  Phys.\ Rev.\  {\bf D78}, 052006 (2008).
+  [arXiv:0807.2204 [hep-ex]].
+
+%\cite{Abulencia:2007ez}      fnt2004
+\bibitem{Abulencia:2007ez}
+  A.~Abulencia {\it et al.} [ CDF - Run II Collaboration ],
+  ``Measurement of the Inclusive Jet Cross Section using the {\boldmath $k_{\rm T}$} algorithm in{\boldmath $p\overline{p}$} Collisions at{\boldmath $\sqrt{s}$} = 1.96 TeV with the CDF II Detector,''
+  Phys.\ Rev.\  {\bf D75}, 092006 (2007).
+  [hep-ex/0701051].
+
+%\cite{:2008hua}       fnt2009
+\bibitem{:2008hua}
+  V.~M.~Abazov {\it et al.} [ D0 Collaboration ],
+  ``Measurement of the inclusive jet cross-section in $p \bar{p}$ collisions at $s^{91/2)}$ =1.96-TeV,''
+  Phys.\ Rev.\ Lett.\  {\bf 101}, 062001 (2008).
+  [arXiv:0802.2400 [hep-ex]].
+
+
+%   tune QW
+%\cite{Group:2006rt}
+\bibitem{Group:2006rt}
+  T.~Q.~W.~Group {\it et al.},
+  ``Tevatron-for-LHC report of the QCD working group,''
+  [hep-ph/0610012].
+  %%CITATION = HEP-PH 0610012;%%
+
+
+
+% ----------- Tevatron Run I 1800 GeV
+
+%\cite{Affolder:2001fa}   fnt1001
+\bibitem{Affolder:2001fa}
+  T.~Affolder {\it et al.} [ CDF Collaboration ],
+  ``Measurement of the inclusive jet cross section in $\bar{p}p$ collisions at $\sqrt{s} = 1.8$ TeV,''
+  Phys.\ Rev.\  {\bf D64}, 032001 (2001).
+  [hep-ph/0102074].
+
+%\cite{Abbott:2000ew}        fnt1002
+\bibitem{Abbott:2000ew}
+  B.~Abbott {\it et al.} [ D0 Collaboration ],
+  ``Inclusive jet production in $p\bar{p}$ collisions,''
+  Phys.\ Rev.\ Lett.\  {\bf 86}, 1707-1712 (2001).
+  [hep-ex/0011036].
+
+%\cite{Babukhadia}    D0 student describes recombination scheme
+\bibitem{Babukhadia}
+  L. Babukhadia, 
+  ``Rapidity dependence of the single inclusive jet cross section
+   in pp collisions at sqrt(s)=1.8 TeV with the D0 detector,''
+    Ph.D. Dissertation, University of Arizona, Tucson, Arizona, USA 1999
+   (unpublished).
+
+
+%\cite{Abbott:1998xw}     D0 min mias corrections
+\bibitem{Abbott:1998xw}
+  B.~Abbott {\it et al.}  [D0 Collaboration],
+  ``Determination of the absolute jet energy scale in the D0 calorimeters,''
+  Nucl.\ Instrum.\ Meth.\  A {\bf 424} (1999) 352
+  [arXiv:hep-ex/9805009].
+  %%CITATION = NUIMA,A424,352;%%
+
+
+
+% ----------- Tevatron Run I 546, 630 GeV
+
+%\cite{Abe:1992bk}        fnt1011
+\bibitem{Abe:1992bk}
+  F.~Abe {\it et al.} [ CDF Collaboration ],
+  ``Comparison of jet production in $\bar{p}p$ collisions at $\sqrt{s} = 546$ GeV and 1800 GeV,''
+  Phys.\ Rev.\ Lett.\  {\bf 70}, 1376-1380 (1993).
+
+%\cite{Abbott:2000kp}         fnt1004
+\bibitem{Abbott:2000kp}
+  B.~Abbott {\it et al.} [ D0 Collaboration ],
+  ``High-$p_T$ jets in $\bar{p}p$ collisions at $\sqrt{s} = 630$ GeV and 1800 GeV,''
+  Phys.\ Rev.\  {\bf D64}, 032003 (2001).
+  [hep-ex/0012046].
+
+% ---------------- RHIC  200GeV  
+
+%\cite{Abelev:2006uq}             fnr0001
+\bibitem{Abelev:2006uq}
+  B.~I.~Abelev {\it et al.} [ STAR Collaboration ],
+  ``Longitudinal double-spin asymmetry and cross section for inclusive jet production in polarized proton collisions at s**(1/2) = 200-GeV,''
+  Phys.\ Rev.\ Lett.\  {\bf 97}, 252001 (2006).
+  [hep-ex/0608030].
+
+
+\bibitem{miller2006}
+ Mike Miller, private communication (2006).  % Oct 2006
+
+% --------------- HERA 2
+
+%\cite{:2007pb}        fnh2003
+\bibitem{:2007pb}
+  A.~Aktas {\it et al.} [ H1 Collaboration ],
+  ``Measurement of inclusive jet production in deep-inelastic scattering at high Q**2 and determination of the strong coupling,''
+  Phys.\ Lett.\  {\bf B653}, 134-144 (2007).
+  [arXiv:0706.3722 [hep-ex]].
+
+
+%\cite{Charchula:1994kf}
+\bibitem{Charchula:1994kf}
+  K.~Charchula, G.~A.~Schuler, H.~Spiesberger,
+  ``Combined QED and QCD radiative effects in deep inelastic lepton - proton scattering: The Monte Carlo generator DJANGO6,''
+  Comput.\ Phys.\ Commun.\  {\bf 81}, 381-402 (1994).
+  
+%\cite{Jung:1993gf}
+\bibitem{Jung:1993gf}
+  H.~Jung,
+  ``Hard diffractive scattering in high-energy e p collisions and the Monte Carlo generator RAPGAP,''
+  Comput.\ Phys.\ Commun.\  {\bf 86}, 147-161 (1995).
+  
+
+
+
+
+%\cite{Chekanov:2006xr}      fnh2001
+\bibitem{Chekanov:2006xr}
+  S.~Chekanov {\it et al.} [ ZEUS Collaboration ],
+  ``Inclusive-jet and dijet cross-sections in deep inelastic scattering at HERA,''
+  Nucl.\ Phys.\  {\bf B765}, 1-30 (2007).
+  [hep-ex/0608048].
+
+
+
+
+%\cite{Lonnblad:1992tz}
+\bibitem{Lonnblad:1992tz}
+  L.~Lonnblad,
+  ``ARIADNE version 4: A Program for simulation of QCD cascades implementing the color dipole model,''
+  Comput.\ Phys.\ Commun.\  {\bf 71}, 15-31 (1992).
+  
+%\cite{Lonnblad:1994wk}
+\bibitem{Lonnblad:1994wk}
+  L.~Lonnblad,
+  ``Rapidity gaps and other final state properties in the color dipole model for deep inelastic scattering,''
+  Z.\ Phys.\  {\bf C65}, 285-292 (1995).
+  
+
+%\cite{Ingelman:1996mq}
+\bibitem{Ingelman:1996mq}
+  G.~Ingelman, A.~Edin, J.~Rathsman,
+  ``LEPTO 6.5: A Monte Carlo generator for deep inelastic lepton - nucleon scattering,''
+  Comput.\ Phys.\ Commun.\  {\bf 101}, 108-134 (1997).
+  [hep-ph/9605286].
+
+% -------------- HERA 1
+
+%\cite{Adloff:2000tq}     fnh1001
+\bibitem{Adloff:2000tq}
+  C.~Adloff {\it et al.} [ H1 Collaboration ],
+  ``Measurement and QCD analysis of jet cross-sections in deep inelastic positron - proton collisions at s**(1/2) of 300-GeV,''
+  Eur.\ Phys.\ J.\  {\bf C19}, 289-311 (2001).
+  [hep-ex/0010054].
+
+%\cite{Marchesini:1991ch}
+\bibitem{Marchesini:1991ch}
+  G.~Marchesini, B.~R.~Webber, G.~Abbiendi, I.~G.~Knowles, M.~H.~Seymour, L.~Stanco,
+  ``HERWIG: A Monte Carlo event generator for simulating hadron emission reactions with interfering gluons. Version 5.1 - April 1991,''
+  Comput.\ Phys.\ Commun.\  {\bf 67}, 465-508 (1992).
+  
+
+%\cite{Chekanov:2002be}      fnh1002
+\bibitem{Chekanov:2002be}
+  S.~Chekanov {\it et al.} [ ZEUS Collaboration ],
+  ``Inclusive jet cross-sections in the Breit frame in neutral current deep inelastic scattering at HERA and determination of alpha(s),''
+  Phys.\ Lett.\  {\bf B547}, 164-180 (2002).
+  [hep-ex/0208037].
+
+
+
+
+
+
+\end{thebibliography}
+
+
+% - - - - - - - - - - - - -
+
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig2}% 
+}
+\caption{\label{fig:incljets}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions and in deeply inelastic scattering
+at different center-of-mass energies.
+The ratios are shown as a function of jet transverse momentum $p_T$.
+The theory results are computed for MSTW2008 PDFs.
+}
+\end{figure}
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig3}% 
+}
+\caption{\label{fig:ppjetsxt}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions
+at different center-of-mass energies.
+The ratios are shown as a function of the scaling variable
+$x_T = 2p_T/\sqrt{s}$.
+The theory results are computed for MSTW2008 PDFs.
+}
+\end{figure}
+
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig2-ct10}% 
+}
+\caption{\label{fig:incljets-ct10}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions and in deeply inelastic scattering
+at different center-of-mass energies.
+The ratios are shown as a function of jet transverse momentum $p_T$.
+The theory results are computed for CT10 PDFs.}
+\end{figure}
+
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig3-ct10}% 
+}
+\caption{\label{fig:ppjetsxt-ct10}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions
+at different center-of-mass energies.
+The ratios are shown as a function of the scaling variable
+$x_T = 2p_T/\sqrt{s}$.
+The theory results are computed for CT10 PDFs.}
+\end{figure}
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig2-nnpdf21}% 
+}
+\caption{\label{fig:incljets-nnpdf}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions and in deeply inelastic scattering
+at different center-of-mass energies.
+The ratios are shown as a function of jet transverse momentum $p_T$.
+The theory results are computed for NNPDF2.1 PDFs.}
+\end{figure}
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig3-nnpdf21}% 
+}
+\caption{\label{fig:ppjetsxt-nnpdf}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions
+at different center-of-mass energies.
+The ratios are shown as a function of the scaling variable
+$x_T = 2p_T/\sqrt{s}$.
+The theory results are computed for NNPDF2.1 PDFs.}
+\end{figure}
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig2-hera15}% 
+}
+\caption{\label{fig:incljets-hera}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions and in deeply inelastic scattering
+at different center-of-mass energies.
+The ratios are shown as a function of jet transverse momentum $p_T$.
+The theory results are computed for HERAPDF1.5 PDFs.
+}
+\end{figure}
+
+\begin{figure}
+  \centerline{
+\includegraphics[scale=0.7]{fastnlo-fig3-hera15}% 
+}
+\caption{\label{fig:ppjetsxt-hera}
+Ratios of data and theory for inclusive jet cross sections
+measured in hadron-hadron collisions
+at different center-of-mass energies.
+The ratios are shown as a function of the scaling variable
+$x_T = 2p_T/\sqrt{s}$.
+The theory results are computed for HERAPDF1.5 PDFs.
+}
+\end{figure}
+
+
+\end{document}
+

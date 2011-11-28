@@ -1,0 +1,19 @@
+DOC=alljet
+
+%pdflatexopts = -file-line-error -halt-on-error
+
+ALL:	$(DOC).pdf
+#	make pdf
+
+$(DOC).pdf:	$(DOC).tex
+	latex $(DOC)
+	latex $(DOC)
+	latex $(DOC)
+	dvipdfm $(DOC)
+
+#	bibtex   $(DOC).aux
+#	pdflatex $(pdflatexopts) $(DOC).tex
+
+clean:
+	rm -f $(DOC).dvi $(DOC).ps $(DOC).pdf $(DOC).bbl $(DOC).blg \
+	$(DOC).log $(DOC).out *.toc *.aux
