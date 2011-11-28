@@ -398,18 +398,36 @@ fi
 AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTCINT" != "x")
 AC_MSG_NOTICE([******************************************])
 
-# PDFLATEX
+# Create PDF documentation?
+# First PDFLATEX ...
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Check for presence of pdflatex ...])
 AC_MSG_NOTICE([******************************************])
 AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
 if test "x$PDFLATEX" = "x"; then
-  AC_MSG_WARN([Unable to create PDF version of documentation, continue without.])
+  AC_MSG_WARN([Unable to create PDF documentation with pdflatex, check for latex & dvipdfm.])
+# Then LATEX & DVIPDFM
+  AC_MSG_NOTICE([******************************************])
+  AC_MSG_NOTICE([Check for presence of latex & dvipdfm ...])
+  AC_MSG_NOTICE([******************************************])
+  AC_CHECK_PROG(LATEX, latex, latex)
+  if test "x$LATEX" = "x"; then
+    AC_MSG_WARN([Unable to create PDF documentation with latex & dvipdfm, continue without.])
+  else
+    AC_CHECK_PROG(DVIPDFM, dvipdfm, dvipdfm)
+    if test "x$DVIPDFM" = "x"; then
+      AC_MSG_WARN([Unable to create PDF documentation with latex & dvipdfm, continue without.])
+    else
+      AC_MSG_NOTICE([Creating PDF documentation using latex & dvipdfm.])
+      AC_MSG_NOTICE([******************************************])
+    fi
+  fi
 else
-  AC_MSG_NOTICE([Creating PDF version of documentation using pdflatex.])
+  AC_MSG_NOTICE([Creating PDF documentation using pdflatex.])
+  AC_MSG_NOTICE([******************************************])
 fi
 AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" != "x")
-AC_MSG_NOTICE([******************************************])
+AM_CONDITIONAL(HAVE_LATEXDVIPDFM, test "x$LATEX" != "x" && test "x$DVIPDFM" != "x")
 
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
@@ -428,13 +446,13 @@ AC_CONFIG_FILES([Makefile
                  creator/hadron/Makefile
 	         processor/Makefile
 	         processor/converter/Makefile
-                 processor/merger/Makefile
                  reader/Makefile
                  reader/reader_cc/Makefile
                  reader/reader_f/Makefile
 		 doc/Makefile
 		 doc/arXiv_1109.1310/Makefile
 	        ])
+#                 processor/merger/Makefile
 #                 userkr/Makefile
 
 AC_OUTPUT

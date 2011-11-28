@@ -21,7 +21,7 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 #
-SUBDIRS = common creator processor reader doc
+SUBDIRS = common creator reader doc
 #userkr
 #
 # Files that are required to build the project but that can be
@@ -32,4 +32,6 @@ SUBDIRS = common creator processor reader doc
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
 	depcomp install-sh ltmain.sh missing aclocal.m4 SVNREV \
 	m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
-	reader/config.status reader/stamp-h1 reader/config.h reader/libtool
+	reader/config.status reader/stamp-h1 reader/config.h reader/libtool \
+	processor/converter/config.status processor/converter/stamp-h1 \
+	processor/converter/config.h processor/converter/libtool
