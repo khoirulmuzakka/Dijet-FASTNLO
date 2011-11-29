@@ -68,7 +68,8 @@ public:
       kCTEQpdf			= 2,      
       kFastNLO			= 3,
       kLHAPDFInternal		= 4,	// use: double 	LHAPDF::alphasPDF (double Q)
-      kQCDNUMInternal		= 5	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
+      kQCDNUMInternal		= 5,	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
+      kFixed                    = 6     // Always gives back alpha_s(Mz) for testing.
    };
 
    enum EScaleVariationDefinition {
@@ -206,6 +207,7 @@ private:
    double GetAlphasNewGRV(double Q, double alphasMz);
    double GetAlphasCTEQpdf(double Q, double alphasMz);
    double GetAlphasFastNLO(double Q, double alphasMz);
+   double GetAlphasFixed(double Q, double alphasMz);
   
    double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
    double FuncMixedOver1 ( double scale1 , double scale2 ) ;

@@ -130,13 +130,17 @@ Comment:       SSEPL(1:2) = "# "
          STOP
       ENDIF
 
-*---  Read table once to get scenario information
-      Call FNSET("P_REFTAB",0)  ! evaluate standard table:0 or reference:1
-      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-      Call FX9999CC(FILENAME, 1.D0, 1.D0, IPRINT, XSLO)
+*---  Initialize table
+      Call FX9999IN(FILENAME)
 
 *---  Print out scenario information
       Call FX9999NF
+
+*---  Read table once to get scenario information
+      Call FNSET("P_REFTAB",0)  ! evaluate standard table: 0, or reference: 1
+      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+      Call FX9999CC(FILENAME, 1.D0, 1.D0, IPRINT, XSLO)
+ckr      Call FX9999CC(1.D0, 1.D0, IPRINT, XSLO)
 
 *---  Initialize LHAPDF  
       call SetLHAPARM('SILENT')
@@ -165,17 +169,20 @@ c     5th argument:  array to return results
       DO IS=1,4
 
 *---  Evaluate table
+ckr         Call FX9999IN(FILENAME)
          Call FNSET("P_REFTAB",0) ! evaluate standard table:0 or reference:1
          
 *---  Calculate LO cross sections (set IPRINT to 1 for more verbose
 *---  output) 
          Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
          Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
+ckr         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
          
 *---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
 *---  output) 
          Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
          Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
+ckr         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
 
 *---  Calculate and print threshold corrections
 c     Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO

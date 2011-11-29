@@ -96,8 +96,8 @@ void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
   }
 
    if ( AlphasEvolution == kGRV ){
-      //Alphas::SetMz(91.1876); // PDG 2011
-      Alphas::SetMz(91.1870); // PDG 2011
+      Alphas::SetMz(91.1876); // PDG 2011
+      //Alphas::SetMz(91.1870); // PDG 2011
       //Alphas::SetAlphasMz(ALPSMZ);
       Alphas::SetNf(5);
       Alphas::SetNLoop(2);
@@ -1413,19 +1413,22 @@ void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
 
 double FastNLOReader::GetAlphas( double Q ){
   // 
-  //  Internal method for caluclating the alpha_s(mu)
+  //  Internal method for calculating the alpha_s(mu)
   //
   
-  //switch (AlphasEvolution )
+  //switch ( AlphasEvolution )
   if ( fAlphasEvolution == kGRV )			return GetAlphasGRV	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kNLOJET )		return GetAlphasNLOJET	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kCTEQpdf )		return GetAlphasCTEQpdf	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kFastNLO )		return GetAlphasFastNLO	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kLHAPDFInternal )	return GetAlphasLHAPDF	( Q );
   else if ( fAlphasEvolution == kQCDNUMInternal )	return GetAlphasQCDNUM	( Q );
-  else return 0;
+  else if ( fAlphasEvolution == kFixed )        	return GetAlphasFixed	( Q , fAlphasMz );
+  else {
+    cout << "\nFastNLOReader: ERROR! No alpha_s evolution selected, aborting!\n";
+    exit (1);
+  }
 }
-
 
 
 //______________________________________________________________________________
@@ -1502,9 +1505,9 @@ double FastNLOReader::GetAlphasNLOJET(double Q, double alphasMZ){
 
 
 double FastNLOReader::GetAlphasGRV(double MU, double ALPSMZ){
-
+  
   return Alphas::GetAlphasMu(MU,ALPSMZ);
-
+  
 }
 
 
@@ -1584,6 +1587,14 @@ double FastNLOReader::GetAlphasFastNLO(double Q, double alphasMZ){
 }
 
 
+//______________________________________________________________________________
+
+
+double FastNLOReader::GetAlphasFixed(double MU, double ALPSMZ){
+
+  return ALPSMZ;
+
+}
 
 
 //______________________________________________________________________________

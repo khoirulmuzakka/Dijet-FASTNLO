@@ -44,15 +44,15 @@ c - initialize pi and beta functions
          NLOOPCACHE = 0
 c - Print info
          WRITE(*,'(A)')""
-         WRITE(*,*)SSEP33
-         WRITE(*,*)"* alphas-grv: First call:"
-         WRITE(*,*)SSEP33
-         WRITE(*,*)"ALPHAS-GRV: PI =",PI4/4D0 
-         WRITE(*,*)"ALPHAS-GRV: M_Z/GeV =",ZMASS 
-         WRITE(*,*)"ALPHAS-GRV: a_s(M_Z) =",ALPSMZ 
-         WRITE(*,*)"APLHAS-GRV: a_s loop =",NLOOP
-         WRITE(*,*)"APLHAS-GRV: scale =",MU
-         WRITE(*,*)SSEP33
+         WRITE(*,'(A)')SSEP33
+         WRITE(*,'(A)')"* alphas-grv: First call:"
+         WRITE(*,'(A)')SSEP33
+         WRITE(*,'(A,G20.15)')"ALPHAS-GRV: PI = ",PI4/4D0 
+         WRITE(*,'(A,G12.6)')"ALPHAS-GRV: M_Z/GeV = ",ZMASS 
+         WRITE(*,'(A,G12.6)')"ALPHAS-GRV: a_s(M_Z) = ",ALPSMZ 
+         WRITE(*,'(A,I1)')"APLHAS-GRV: a_s loop = ",NLOOP
+         WRITE(*,'(A,G12.6)')"APLHAS-GRV: scale = ",MU
+         WRITE(*,'(A)')SSEP33
       ENDIF
 
       If (MU.eq.MUCACHE .and. ALPSMZ.eq.ASMZCACHE 

@@ -66,11 +66,12 @@
 
 *******************************************************************
       Subroutine FX9999CC(FILENAME,XMUR,XMUF,IPRINTFLAG,XSECT)
+ckr      Subroutine FX9999CC(XMUR,XMUF,IPRINTFLAG,XSECT)
 *-----------------------------------------------------------------
 * fastNLO user code v2.0 - main routine 
 *
 * input:
-*   FILENAME    name of input table
+ckr*   FILENAME    name of input table
 *   XMUR        prefactor for nominal renormalization scale     
 *                    any choice is possible, but please note 
 *                    that 2-loop threshold corrections work
@@ -106,6 +107,7 @@
 *               orders for isub=0 (into 0 bin) and adding up contributions
 *               successively from lower to higher order according to pointers.
 *               ===> result(MxObsBin,0:MxSubproc,0:MxCtrb)
+* KR 2011/11/29 Kick out table initialization, to be done in main program
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'

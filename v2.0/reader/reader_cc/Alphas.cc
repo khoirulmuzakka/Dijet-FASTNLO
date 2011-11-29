@@ -94,7 +94,8 @@ int Alphas::CalcNf(double mu){
 }
 
 
-//static double GetAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
+//static double GetAlphasMuFixedNf(double mu, int nf);
+// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
 double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    
@@ -103,8 +104,26 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    int nf	= nFlavors == 0 ? CalcNf(mu) : nFlavors;
    double Q2	= pow(mu,2);
 
-   // - initialize pi and beta functions
-   static const double twopi = 6.28318530717958647692528;
+   // - initialize pi and do some initial print out 
+   static bool first = true;
+   static const double twopi = 2. * 4. * atan(1.);
+   if ( first ) {
+     first = false;
+     // - Print info
+     printf("\n");
+     printf("*********************************\n");
+     printf("* alphas-grv: First call:\n");
+     printf("*********************************\n");
+     printf("ALPHAS-GRV: PI = %-#24.15g\n",twopi/2.); 
+     printf("ALPHAS-GRV: M_Z/GeV = %-#10.6g\n",fMz); 
+     printf("ALPHAS-GRV: a_s(M_Z) = %-#10.6g\n",alphasMz); 
+     printf("APLHAS-GRV: a_s loop = %1i\n",nLoop);
+     printf("APLHAS-GRV: scale = %-#10.6g\n",mu);
+     printf("*********************************\n");
+   }
+   
+   // - initialize beta functions
+   //   static const double twopi = 6.28318530717958647692528;
    const double beta0	= 11. - 2./3. * nf;
    const double beta1	= 102. - 38./3. * nf;
    const double beta10	= beta1 / beta0 / beta0;
@@ -121,18 +140,6 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    //       Return
    //       Endif
      
-   // - Print info
-   // printf("\n");
-   // printf("*********************************\n");
-   // printf("* alphas-grv: First call:\n");
-   // printf("*********************************\n");
-   // printf("ALPHAS-GRV: PI = % -#10.4g",twopi/2.); 
-   // printf("ALPHAS-GRV: M_Z/GeV = % -#10.4g",fMz); 
-   // printf("ALPHAS-GRV: a_s(M_Z) = % -#10.4g",alphasMz); 
-   // printf("APLHAS-GRV: a_s loop = %i1",nLoop);
-   // printf("APLHAS-GRV: scale = % -#10.4g",mu);
-   // printf("*********************************\n");
- 
    // - exact formula -> extract Lambda from alpha_s(Mz)
    double LAM2 = MZ2 / exp( FBeta(asmz,nLoop,nf));
 

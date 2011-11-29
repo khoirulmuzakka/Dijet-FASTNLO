@@ -122,8 +122,10 @@ int main(int argc, char** argv){
   fnloreader->FillPDFCache();	// pdf is 'external'! you always have to call FillPDFCache();
 
   // ---- Setting Alpha_s value ---- //
-  //   fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);			// set the precoded alpha_s evolution codes
-  fnloreader->SetAlphasMz(0.1179);						// you MUST specify some alpha_s value
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET); // set the precoded alpha_s evolution codes
+  //  fnloreader->SetAlphasEvolution(FastNLOReader::kFixed);
+  fnloreader->SetAlphasEvolution(FastNLOReader::kGRV);
+  fnloreader->SetAlphasMz(0.1185);						// you MUST specify some alpha_s value
   
   // ---- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ---- //
   //  fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
