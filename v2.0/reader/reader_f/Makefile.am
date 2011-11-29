@@ -11,59 +11,30 @@ AUTOMAKE_OPTIONS = gnu
 
 # The main target: The Fortran table reader
 if HAVE_LHAPDFCONFIG
-#   bin_PROGRAMS = example example-ref myexample myexample-ref
    bin_PROGRAMS = FReadFNLOTable
 endif
 
 # All source files which go into the main target (and have to be distributed)
-FReadFNLOTable_SOURCES = FReadFNLOTable.f myfnx9999.f fnx9999.inc strings.inc \
-	fnset.f alphas-grv.f fn-interface.f fx9999rw.f fnio.f
-#example_SOURCES = example.f fnx9999.f fnset.f alphas-grv.f fn-interface.f fx9999rw.f fnio.f \
-#	fnx9999.inc strings.inc
-#example_ref_SOURCES = example-ref.f fnx9999.f fnset.f alphas-grv.f fn-interface.f fx9999rw.f fnio.f \
-#	fnx9999.inc strings.inc
-#myexample_SOURCES = myexample.f myfnx9999.f fnx9999.inc strings.inc \
-#	fnset.f alphas-grv.f fn-interface.f fx9999rw.f fnio.f
-#myexample_ref_SOURCES = myexample-ref.f myfnx9999.f fnx9999.inc strings.inc \
-#	fnset.f alphas-grv.f fn-interface.f fx9999rw.f fnio.f
+FReadFNLOTable_SOURCES = FReadFNLOTable.f fnx9999.f fnx9999.inc strings.inc \
+	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
 
 #
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 #F77 = gfortran
-#AM_FFLAGS = -o example -O -fno-automatic -ffixed-line-length-132
 AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
-# C++ compiler flags to be used for the main target
-
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
    FReadFNLOTable_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-#   example_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-#   example_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-#   myexample_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-#   myexample_ref_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
    FReadFNLOTable_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-#   example_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-#   example_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-#   myexample_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-#   myexample_ref_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
-
-# cpp trick for path to LHAPDF pdfsets
-#%.f: %.F
-#	cpp -ansi -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
-# Trial to use in fx9999rw.F 
-#	cpp -ansi -traditional-ccp -DLHAPDF_PATH=$(LHAPDFSETPATH) $*.F -o $*.f
-
-# Clean files that are automatically produced by the preprocessor cpp
-#CLEANFILES = example.f fnio.f
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

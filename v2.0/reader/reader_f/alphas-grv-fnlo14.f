@@ -1,6 +1,3 @@
-
-
-
 *******************************************************************
 * M. Wobisch  25/05/99
 *
@@ -12,12 +9,12 @@
 * as GRV hep-ph/9806404
 *
 *******************************************************************
-      DOUBLE PRECISION FUNCTION ALPS_IT(MU,ALPSMZ,NLOOP)
+      DOUBLE PRECISION FUNCTION ALPS_IT_FNLO14(MU,ALPSMZ,NLOOP)
 *
 *  1st version - only for 2-loop - as GRV code
 *
       IMPLICIT NONE
-      DOUBLE PRECISION MU, ALPSMZ, ALPS4_IT
+      DOUBLE PRECISION MU, ALPSMZ, ALPS4_IT_FNLO14
       DOUBLE PRECISION B0, B1, B10 , PI4, F, FP,FM,
      +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
       INTEGER  NLOOP, NF, IFIRST, I
@@ -27,7 +24,7 @@
 
 c - other routine for 4-loop
       IF (NLOOP .eq. 4) THEN
-         ALPS_IT =  ALPS4_IT(MU,ALPSMZ,NLOOP)
+         ALPS_IT_FNLO14 =  ALPS4_IT_FNLO14(MU,ALPSMZ,NLOOP)
          RETURN
       ELSEIF (NLOOP .eq. 3) THEN
          WRITE(*,*) ' 3-loop alpha_s not available !!!  '
@@ -37,14 +34,14 @@ c - other routine for 4-loop
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
          IFIRST = 1
-c         WRITE(*,*) '  *   ALPS_IT:  exact 2-loop result for alpha_s'
+c         WRITE(*,*) '  *   ALPS_IT_FNLO14:  exact 2-loop result for alpha_s'
          NF = 5
          PI4 = 4D0 * 4D0 * ATAN(1D0)
          B0  = 11D0 - 2D0/3D0 * DBLE(NF)
          B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
          B10 = B1 / B0 / B0
          ZMASS2 = ZMASS**2
-         IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT:  only for 2-loop!!'
+         IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT_FNLO14:  only for 2-loop!!'
       ENDIF
 
 c - exact formula to extract Lambda from alpha_s(Mz)
@@ -69,19 +66,19 @@ c      WRITE(*,*) ' LAMDA/a_s_approx/a_s = ',sqrt(lam2),ASAPPROX,ALPHAS
       ENDDO
 
 c - that's it!
-      ALPS_IT = ALPHAS
+      ALPS_IT_FNLO14 = ALPHAS
 
       RETURN 
       END
 
 C --------------------------------------------------------------------
 
-      DOUBLE PRECISION FUNCTION ALPS4_IT(MU,ALPSMZ,NLOOP)
+      DOUBLE PRECISION FUNCTION ALPS4_IT_FNLO14(MU,ALPSMZ,NLOOP)
 *
 *  2nd version - for 4-loop RGE
 *
       IMPLICIT NONE
-      DOUBLE PRECISION MU, ALPSMZ,  FBETA4
+      DOUBLE PRECISION MU, ALPSMZ,  FBETA4_FNLO14
       DOUBLE PRECISION B0, B1, B2,B3, B10 , ZETA3,
      +     PI4, F, FP,FM, LL2,
      +     ONED, TWOD, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
@@ -95,7 +92,7 @@ C --------------------------------------------------------------------
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
          IFIRST = 1
-         WRITE(*,*) '  *   ALPS_IT:  exact 4-loop result for alpha_s'
+         WRITE(*,*) '  *   ALPS_IT_FNLO14:  exact 4-loop result for alpha_s'
          WRITE(*,*) '  *                              in 3 iterations'
          NF = 5
          PI4 = 4D0 * 4D0 * ATAN(1D0)
@@ -103,7 +100,7 @@ c - initialize pi and beta functions
          B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
          B10 = B1 / B0 / B0
          ZMASS2 = ZMASS**2
-         IF (NLOOP .ne. 4) WRITE(*,*) 'ALPS_IT:  only for 4-loop!!'
+         IF (NLOOP .ne. 4) WRITE(*,*) 'ALPS_IT_FNLO14:  only for 4-loop!!'
          WRITE(*,*) '  *             1st call   mu , alpha_s(Mz)'
          WRITE(*,*) '  *                   ',real(mu),real(alpsmz)
          ASMZCACHE = 0d0
@@ -111,14 +108,14 @@ c - initialize pi and beta functions
       ENDIF
 
       IF (MU .eq. MUCACHE  .and.  ALPSMZ .eq. ASMZCACHE ) THEN
-         ALPS4_IT = ASCACHE
+         ALPS4_IT_FNLO14 = ASCACHE
          RETURN
       ENDIF
 
       Q2 = MU**2
 
 c - exact formula -> extract Lambda from alpha_s(Mz)
-      LAM2 = ZMASS2 / DEXP(FBETA4(ALPSMZ))
+      LAM2 = ZMASS2 / DEXP(FBETA4_FNLO14(ALPSMZ))
 
 c - extract approx alpha_s(mu) value - 2 loop approx is fine
       LL2 = ZMASS2 * DEXP( -PI4/B0/ALPSMZ + 
@@ -129,9 +126,9 @@ c - extract approx alpha_s(mu) value - 2 loop approx is fine
 
 c - exact 4-loop value by Newton procedure
       DO I=1,3
-         F  = DLOG(Q2/LAM2) - FBETA4(ALPHAS)
-         FP = - FBETA4(ALPHAS*1.01D0)
-         FM = - FBETA4(ALPHAS*0.99D0)
+         F  = DLOG(Q2/LAM2) - FBETA4_FNLO14(ALPHAS)
+         FP = - FBETA4_FNLO14(ALPHAS*1.01D0)
+         FM = - FBETA4_FNLO14(ALPHAS*0.99D0)
          ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
 c         WRITE(*,*) ' i,alphas,q2 = ',i,alphas,real(q2)
       ENDDO
@@ -140,14 +137,14 @@ c - that's it - modify cache - set function - return
       MUCACHE = MU
       ASMZCACHE = ALPSMZ
       ASCACHE = ALPHAS
-      ALPS4_IT = ALPHAS
+      ALPS4_IT_FNLO14 = ALPHAS
 
       RETURN 
       END
 
 C ------------------------------------------------------------------
 
-      DOUBLE PRECISION FUNCTION FBETA4(ALPHAS)
+      DOUBLE PRECISION FUNCTION FBETA4_FNLO14(ALPHAS)
       IMPLICIT NONE
       DOUBLE PRECISION ALPHAS, ALPI, B0, B1, B2,B3, B10,B20,B30,C,
      +     ZETA3, PI, ONED, TWOD
@@ -180,7 +177,7 @@ c - initialize pi and beta functions
       ENDIF
 
       ALPI = ALPHAS / PI
-      FBETA4 = C + ONED/B0 * ( 
+      FBETA4_FNLO14 = C + ONED/B0 * ( 
      +     ONED/ALPI + B10 * DLOG(ALPI) + (B20-B10**2) * ALPI 
      +     + (B30/TWOD - B10*B20 + B10**3/TWOD)*ALPI**2 )
 

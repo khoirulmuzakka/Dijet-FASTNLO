@@ -30,7 +30,7 @@
       DOUBLE PRECISION MUR
       
       DOUBLE PRECISION ALPSMZ, PI4, PI
-      DOUBLE PRECISION ALPS_IT 
+      DOUBLE PRECISION ALPS_IT,ALPS_IT_FNLO14 
       INTEGER IFIRST, NLOOP
 
       DATA IFIRST/0/      
@@ -50,7 +50,10 @@
 
 *     One can also call ones own alpha_s code here
 *     --> Only one has to remember to divide by 2Pi!
+ckr New code FNLO v2
       FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2D0/PI
+ckr Old code FNLO v14
+ckr      FNALPHAS = ALPS_IT_FNLO14(MUR,ALPSMZ,NLOOP)/2D0/PI
 ckr Fix alpha_s for debugging
 ckr      FNALPHAS = ALPSMZ/2D0/PI
 

@@ -61,7 +61,7 @@ Comment:       CSEPL(1:2) = "# "
 Comment:       DSEPL(1:2) = "# "
 Comment:       LSEPL(1:2) = "# "
 Comment:       SSEPL(1:2) = "# "
-      DO I=1,MxObsBin
+      DO I=1,NObsBin
          xslo(I)  = -1.d0
          xsnlo(I) = -1.d0
          kfac(I)  =  0.d0
@@ -137,9 +137,9 @@ Comment:       SSEPL(1:2) = "# "
       Call FX9999NF
 
 *---  Read table once to get scenario information
-      Call FNSET("P_REFTAB",0)  ! evaluate standard table: 0, or reference: 1
-      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-      Call FX9999CC(FILENAME, 1.D0, 1.D0, IPRINT, XSLO)
+ckr      Call FNSET("P_REFTAB",0)  ! evaluate standard table: 0, or reference: 1
+ckr      Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+ckr      Call FX9999CC(FILENAME, 1.D0, 1.D0, IPRINT, XSLO)
 ckr      Call FX9999CC(1.D0, 1.D0, IPRINT, XSLO)
 
 *---  Initialize LHAPDF  
@@ -175,14 +175,14 @@ ckr         Call FX9999IN(FILENAME)
 *---  Calculate LO cross sections (set IPRINT to 1 for more verbose
 *---  output) 
          Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
-ckr         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
+ckr         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
+         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSLO)
          
 *---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
 *---  output) 
          Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
-ckr         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
+ckr         Call FX9999CC(FILENAME, SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
+         Call FX9999CC(SCALEF(IS), SCALEF(IS), IPRINT, XSNLO)
 
 *---  Calculate and print threshold corrections
 c     Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
@@ -190,7 +190,7 @@ c     Call FNSET("P_THRESHCOR",2) ! select No. loops in threshold
 c     corrections
 
 *---  Cross section printout
-         DO I=1,MxObsBin
+         DO I=1,NObsBin
             IF ((ABS(1.D0 + xslo(I)).GT.1.D-99) .OR.
      >           (ABS(1.D0 + xsnlo(I)).GT.1.D-99)) THEN
             ENDIF
@@ -218,7 +218,7 @@ c     corrections
          WRITE(*,'(A)')LSEPL
  900     FORMAT(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),
      >        (X,I5,2(2X,E7.1)),3(X,E18.11),X)
-         DO I=1,MxObsBin
+         DO I=1,NObsBin
             DO J=1,NDim
                IF (I.EQ.1) THEN
                   NDimBins(J) = 1 

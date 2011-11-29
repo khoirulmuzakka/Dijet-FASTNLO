@@ -65,8 +65,8 @@
 
 
 *******************************************************************
-      Subroutine FX9999CC(FILENAME,XMUR,XMUF,IPRINTFLAG,XSECT)
-ckr      Subroutine FX9999CC(XMUR,XMUF,IPRINTFLAG,XSECT)
+ckr      Subroutine FX9999CC(FILENAME,XMUR,XMUF,IPRINTFLAG,XSECT)
+      Subroutine FX9999CC(XMUR,XMUF,IPRINTFLAG,XSECT)
 *-----------------------------------------------------------------
 * fastNLO user code v2.0 - main routine 
 *
@@ -114,11 +114,22 @@ ckr*   FILENAME    name of input table
       Integer IFILE, IPoint, IScPoint, I,J,K,L,M, 
      +     IPrintFlag,
      +     maxscale, nbin,nx
-      Character*(*) FILENAME
+ckr      Character*(*) FILENAME
       Double Precision Xmur, Xmuf
 
 c === Initialization: Read table
-      Call FX9999IN(Filename)
+ckr      Call FX9999IN(Filename)
+ckr Moved here from FX9999IN
+c === reset result arrays
+      Do i=1,MxObsBin
+         Xsect(i) = 0d0
+         Xsect2(i)= 0d0
+         Do j=0,MxSubproc
+            Do k=0,MxCtrb
+               result(i,j,k) = 0d0
+            Enddo
+         Enddo
+      Enddo
 
 c === Reset output array
       Do i=1,NObsBin
@@ -245,16 +256,17 @@ c 5000 Format (A,A64)
       LSEPL(1:2) = "# "
       SSEPL(1:2) = "# "
 
-c === reset result arrays
-      Do i=1,MxObsBin
-         Xsect(i) = 0d0
-         Xsect2(i)= 0d0
-         Do j=0,MxSubproc
-            Do k=0,MxCtrb
-               result(i,j,k) = 0d0
-            Enddo
-         Enddo
-      Enddo
+ckr Move this to FX9999CC
+Comment: c === reset result arrays
+Comment:       Do i=1,MxObsBin
+Comment:          Xsect(i) = 0d0
+Comment:          Xsect2(i)= 0d0
+Comment:          Do j=0,MxSubproc
+Comment:             Do k=0,MxCtrb
+Comment:                result(i,j,k) = 0d0
+Comment:             Enddo
+Comment:          Enddo
+Comment:       Enddo
 
 c === output in first fastNLO call
       If (IFNfirst.eq.0) Then
