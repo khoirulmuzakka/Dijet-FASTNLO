@@ -1284,7 +1284,13 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
       }
       for(int k=0;k<nxmax;k++){ 
 	for(int l=0;l<B->NSubproc;l++){ 
-	  XS->at(i)		+=  B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+	   //hier
+	   XS->at(i)		+=  B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+// 	   if ( l==6 ){
+// 	      XS->at(i)		+=  B->PdfLc[i][scalenode2][k][l];
+// 	   }
+	      //	   XS->at(i)		+=  (float)B->PdfLc[i][scalenode2][k][l] ;
+	   //	   if ( abs((float)B->PdfLc[i][scalenode2][k][l] - B->PdfLc[i][scalenode2][k][l]) > 1e-04) printf("%18.8e    %18.14e\n",(float)B->PdfLc[i][scalenode2][k][l] - B->PdfLc[i][scalenode2][k][l],B->PdfLc[i][scalenode2][k][l]);
 	  // 	       static int count = 0;
 	  // 	       count++;
 	  // 	       printf("%3d  %2d  %3d  %2d  %16.12e    %16.12e    %16.12e\n",i,j,k,l,B->SigmaTilde[i][fScalevar][j][k][l],B->AlphasTwoPi_v20[i][scalenode2],B->PdfLc[i][scalenode2][k][l]);
@@ -1657,9 +1663,9 @@ void FastNLOReader::InitLHAPDF(){
   //     exit(1);
   //   } 
 
-  LHAPDF::setVerbosity(LHAPDF::SILENT);
-  //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-  //cout << " LHAPDF version: " << LHAPDF::getVersion() <<endl;
+  //LHAPDF::setVerbosity(LHAPDF::SILENT);
+  //  LHAPDF::setVerbosity(LHAPDF::LOWKEY);
+  //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
   LHAPDF::initPDFSetByName(fLHAPDFfilename);
   fnPDFs = LHAPDF::numberPDF();
   if ( fnPDFs < fiPDFSet ){
@@ -1789,15 +1795,15 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
 	  // 		  }
 	  // ----- if pp ---- //
 	  if ( B->NPDFPDG[0] == B->NPDFPDG[1] ){
-	    B->PdfLc[i][j][k] = CalcPDFLinearCombHHC( xfx[x1bin], xfx[x2bin], B->NSubproc ) ;//CalcPDFLinearComb(xfx[x1bin],xfx[x2bin],B->IPDFdef1, B->IPDFdef2, B->NSubproc); //calculate linear combinations
+	     B->PdfLc[i][j][k] = CalcPDFLinearCombHHC( xfx[x2bin], xfx[x1bin], B->NSubproc ) ;//CalcPDFLinearComb(xfx[x1bin],xfx[x2bin],B->IPDFdef1, B->IPDFdef2, B->NSubproc); //calculate linear combinations
 	  }
 	  // ----- if ppbar ---- //
 	  else if ( B->NPDFPDG[0] == -B->NPDFPDG[1] ){
 	    vector < double > xfxbar(13);
 	    for ( unsigned int p = 0 ; p<13 ; p++ ){
-	      xfxbar[p] = xfx[x2bin][12-p];
+	      xfxbar[p] = xfx[x1bin][12-p];
 	    }
-	    B->PdfLc[i][j][k] = CalcPDFLinearCombHHC( xfx[x1bin], xfxbar, B->NSubproc ) ;
+	    B->PdfLc[i][j][k] = CalcPDFLinearCombHHC( xfx[x2bin], xfxbar, B->NSubproc ) ;
 	  }
 	  else {
 	    printf("FastNLOReader::FillBlockBPDFLCsHHCv20(). This is not pp, nor ppbar, nor pbarpbar!\n"); exit(1);
@@ -1844,8 +1850,8 @@ vector<double> FastNLOReader::GetXFX(double xp, double muf){
     return a;
   }
   else {
-    vector < double > a;
-    return a;
+     vector < double > a(13);
+     return a;
   }
 }
 
