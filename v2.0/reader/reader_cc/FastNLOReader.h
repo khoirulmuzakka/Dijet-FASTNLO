@@ -84,14 +84,10 @@ public:
       kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
    };
 
-   enum ECalculationOrder {
-      kAllAvailableOrders	= 0,	// calculate all available orders in this table
-      kLO			= 1,	// return only LO calculation
-      kFullNLO			= 2,	// calculate full NLO cross sectoin
-      kNLOOnly			= 3,	// calculate NLO correction
-      kApproxNNLO		= 4,	// calculate LO+NLO+NNLO(threshold)
-      kNNLOOnly			= 5,	// calculate only corrections to NLO
-      kHigherOrderCorr		= 6	// calculate higher order corrections to LO
+   enum ESMCalculation {
+      kFixedOrder		= 0,	// Fixed Order Calculation
+      kThresholdCorrections	= 1,	// Threshold corrections
+      kElectroWeakCorrections	= 2	// Electro weak corrections
    };
 
    static const double TWOPI = 6.28318530717958647692528;
@@ -119,7 +115,7 @@ protected:
    EScaleFunctionalForm fMuRFunc;
    EScaleFunctionalForm fMuFFunc;
    EUnits		fUnits;
-   ECalculationOrder	fOrder;
+   //    ECalculationOrder	fOrder;
    // ---- alpha_s vars ---- //
    double fAlphasMz;
 
@@ -158,7 +154,13 @@ protected:
    FastNLOBlockB* BlockB_NLO;
    FastNLOBlockB* BlockB_LO_Ref;
    FastNLOBlockB* BlockB_NLO_Ref;
-   vector < FastNLOBlockB* > BBlocks;
+   vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections (IContrFlag1 = 2) [Model(i~ContrFlag2)][contribution]
+							//  e.g. model = th. corr LO and NLO, e/w LO and NLO and NNLO, 0->fixed order
+							//  what to do with each contribution is defined in IContrFlag3
+   vector < vector < FastNLOBlockB* > > BBlocksNewPhys;		// BlockB's for New physics corrections [model][contribution]
+
+   vector < vector < bool > > bUseSMCalc;		// switch calclations ON/OFF
+   vector < vector < bool > > bUseNewPhys;		// switch calclations ON/OFF
 
    // ---- Cross sections ---- //
    vector < double > XSection_LO;
@@ -237,7 +239,8 @@ public:
    void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
    void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
    void SetUnits( EUnits Unit );
-   void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
+   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
+   void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true );	// Set contribution On/Off. Look for Id of this contribution during initialization.
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
@@ -291,6 +294,10 @@ public:
    void PrintCrossSectionsLikeFreader();
    void PrintCrossSectionsWithReference();
 
+   static string fOrdName[4];
+   static string fCorrName[10];
+   static string fNPName[10];
+   static string fNSDep[4];
 };
 
 #endif
