@@ -73,7 +73,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
   for(int i=0;i<NContrDescr;i++){
     table->getline(buffer,256);
     CtrbDescript[i] = buffer;
-    //      StripWhitespace(CtrbDescript[i]);
+    StripWhitespace(&CtrbDescript[i]);
   }
 
   int NCodeDescr;
@@ -83,7 +83,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
   for(int i=0;i<NCodeDescr;i++){
     table->getline(buffer,256);
     CodeDescript[i] = buffer;
-    //      StripWhitespace(CodeDescript[i]);
+    StripWhitespace(&CodeDescript[i]);
   }
 
   if(IDataFlag==1){
@@ -93,7 +93,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
     for(int i=0;i<Nuncorrel;i++){
       table->getline(buffer,256);
       UncDescr[i] = buffer;
-      //         StripWhitespace(UncDescr[i]);
+      StripWhitespace(&UncDescr[i]);
     }
 
     *table >> Ncorrel;
@@ -102,7 +102,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
     for(int i=0;i<Ncorrel;i++){
       table->getline(buffer,256);
       CorDescr[i] = buffer;
-      //         StripWhitespace(CorDescr[i]);
+      StripWhitespace(&CorDescr[i]);
     }
     Xcenter.resize(fNObsBins);
     Value.resize(fNObsBins);
@@ -142,7 +142,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
     for(int i=0;i<Nuncorrel;i++){
       table->getline(buffer,256);
       UncDescr[i] = buffer;
-      //         StripWhitespace(UncDescr[i]);
+      StripWhitespace(&UncDescr[i]);
     }
     *table >> Ncorrel;
     CorDescr.resize(Ncorrel);
@@ -150,7 +150,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
     for(int i=0;i<Ncorrel;i++){
       table->getline(buffer,256);
       CorDescr[i] = buffer;
-      //         StripWhitespace(CorDescr[i]);
+      StripWhitespace(&CorDescr[i]);
     }
     fact.resize(fNObsBins);
     UncorLo.resize(fNObsBins);
@@ -265,7 +265,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 
     //! v2.1 store NScaleDep here.
     //! v2.1 *table >> NScaleDep;
-      
+
     if ( NScaleDep != 3 ) {
       Nscalevar.resize(NScaleDim);
       Nscalenode.resize(NScaleDim);
@@ -1045,5 +1045,13 @@ int FastNLOBlockB::GetTotalScalenodes(){
   return totalscalenodes;
 }
 
+void FastNLOBlockB::StripWhitespace(string* s){
+   string fastlast = &(*s)[s->size()-1];
+   while ( !fastlast.compare(" ")){
+      string::iterator it = s->end();
+      s->erase(it-1);
+      fastlast = &(*s)[s->size()-1];
+   }
+}
 
 //________________________________________________________________________________________________________________ //
