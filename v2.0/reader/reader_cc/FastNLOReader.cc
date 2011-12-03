@@ -602,11 +602,19 @@ void FastNLOReader::ReadTable(void)
 
 void FastNLOReader::PrintTableInfo(){
 
+  printf(" * This FastNLO table holds %d contributions:\n",Ncontrib + Ndata);
+  if ( BlockB_Data ) {
+     string CodeD = "";
+     for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) CodeD += BlockB_Data->CodeDescript[k];
+     printf(" * Data Table: %s\n",CodeD.c_str());
+  }
+
    for ( int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
       if ( !BBlocksSMCalc[j].empty() ){
 	 string CodeD = "";
 	 if ( !BBlocksSMCalc[j].empty() )
-	    for ( int k = 0 ; k<BBlocksSMCalc[j].size();k++ ) CodeD += BBlocksSMCalc[j][0]->CodeDescript[k];
+	    //for ( int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) CodeD += BBlocksSMCalc[j][0]->CodeDescript[k];
+	    CodeD = BBlocksSMCalc[j][0]->CodeDescript[0];
 	 cout << " * Table "<<fCorrName[j]<< " ("<<CodeD <<") with order:  ";
 	 for ( int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	    //cout << fOrdName[BBlocksSMCalc[j][i]->Npow - ILOord] <<" (Id="<<i<<")   ";
