@@ -1,3 +1,4 @@
+
 // Author: Daniel Britzger
 // DESY, 23/07/2011
 
@@ -150,6 +151,7 @@ protected:
    vector <int> IDivUpPointer;
 
    // ---- Block B ---- //
+   FastNLOBlockB* BlockB_Data;
    FastNLOBlockB* BlockB_LO;
    FastNLOBlockB* BlockB_NLO;
    FastNLOBlockB* BlockB_LO_Ref;
@@ -289,13 +291,14 @@ public:
   
 
    void CalcCrossSection();
+   void PrintTableInfo();
    void PrintFastNLOTableConstants(const int iprint);
    void PrintCrossSections();
    void PrintCrossSectionsLikeFreader();
    void PrintCrossSectionsWithReference();
 
    static string fOrdName[4];
-   static string fCorrName[10];
+   static string fCorrName[20];
    static string fNPName[10];
    static string fNSDep[4];
 };
