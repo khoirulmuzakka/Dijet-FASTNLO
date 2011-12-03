@@ -67,6 +67,7 @@ private:
    int ReadTable( vector<vector<double > >* v, istream *table );
    int ReadTable( vector<double >* v, istream *table );
 
+   void StripWhitespace(string* s);
   
 public:
    int GetNxmax(int i);
