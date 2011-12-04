@@ -46,11 +46,11 @@ extern "C"{
 
 
 // some names for nice output
-string FastNLOReader::fOrdName[4]	= {"LO","NLO","NNLO","NNNLO"};
-string FastNLOReader::fCorrName[20]	= {"Fixed order calculation","Threshold corrections","Electro weak corrections","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn",
-"non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction","non-perturbative correction"};
-string FastNLOReader::fNPName[10]	= {"unkn","Quark compositeness","ADD-LED","TeV 1-ED","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn"};
-string FastNLOReader::fNSDep[4]		= {"v2.0","v2.0","v2.0","v2.1"};
+const string FastNLOReader::fOrdName[4]	= {"LO","NLO","NNLO","NNNLO"};
+const string FastNLOReader::fCorrName[11]	= {"Fixed order calculation","Threshold corrections","Electro weak corrections","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn",
+"non-perturbative correction",};
+const string FastNLOReader::fNPName[10]	= {"unkn","Quark compositeness","ADD-LED","TeV 1-ED","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn"};
+const string FastNLOReader::fNSDep[4]		= {"v2.0","v2.0","v2.0","v2.1"};
 
 
 //______________________________________________________________________________
@@ -494,7 +494,7 @@ void FastNLOReader::ReadTable(void)
   ReadBlockA2(instream);
 
   // init lists for BlockB's
-  BBlocksSMCalc.resize(20);
+  BBlocksSMCalc.resize(11);
   BBlocksNewPhys.resize(10);
 
   bUseSMCalc.resize(BBlocksSMCalc.size());
@@ -561,9 +561,11 @@ void FastNLOReader::ReadTable(void)
      else if ( blockb->IRef == 0 && blockb->IAddMultFlag ) { // non-perturbative corrections
 	sprintf(nbuf,"BlockB. %s. %s. %s",fCorrName[blockb->IContrFlag2].c_str(),fOrdName[blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	blockb->SetName(nbuf);
-	if (blockb->IContrFlag2>9 ){ cout << " * Warning. Non-pert Corr. IContrFlag2 = " << blockb->IContrFlag2 << endl;}
-	BBlocksSMCalc[blockb->IContrFlag2+10].push_back(blockb);
-	bUseSMCalc[blockb->IContrFlag2].push_back(true);
+	//if (blockb->IContrFlag2>9 ){ cout << " * Warning. Non-pert Corr. IContrFlag2 = " << blockb->IContrFlag2 << endl;}
+	// 	BBlocksSMCalc[blockb->IContrFlag2+10].push_back(blockb);
+	// 	bUseSMCalc[blockb->IContrFlag2+10].push_back(true);
+	BBlocksSMCalc[10].push_back(blockb);
+	bUseSMCalc[10].push_back(true);
      }
      else {
 	printf("FastNLOReader::ReadTable(). Error in initializing the 'B'-Blocks. This block could not be classified. Your FastNLO Table file might be incompatible with this reader. Exiting.\n");
@@ -591,8 +593,7 @@ void FastNLOReader::ReadTable(void)
   }
 
   // some printout
-  PrintTableInfo();
-
+  PrintTableInfo(0);
   //NPDFDim	= BlockB_LO->NPDFDim;
 
 }
@@ -600,26 +601,31 @@ void FastNLOReader::ReadTable(void)
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintTableInfo(){
+void FastNLOReader::PrintTableInfo(const int iprint){
 
   printf(" * This FastNLO table holds %d contributions:\n",Ncontrib + Ndata);
+
   if ( BlockB_Data ) {
-     string CodeD = "";
-     for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) CodeD += BlockB_Data->CodeDescript[k];
-     printf(" * Data Table: %s\n",CodeD.c_str());
+     printf(" * Data Table: %s\n",BlockB_Data->CodeDescript[0].c_str());
+     if ( iprint > 0 ){
+	for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
+	   printf( " * \t\t%s\n",BlockB_Data->CodeDescript[k].c_str());
+	}
+     }
   }
 
    for ( int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
       if ( !BBlocksSMCalc[j].empty() ){
-	 string CodeD = "";
-	 if ( !BBlocksSMCalc[j].empty() )
-	    //for ( int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) CodeD += BBlocksSMCalc[j][0]->CodeDescript[k];
-	    CodeD = BBlocksSMCalc[j][0]->CodeDescript[0];
-	 cout << " * Table "<<fCorrName[j]<< " ("<<CodeD <<") with order:  ";
+	 cout << " * Table "<<fCorrName[j]<< " ("<<BBlocksSMCalc[j][0]->CodeDescript[0] <<") with order:  ";
 	 for ( int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
-	    //cout << fOrdName[BBlocksSMCalc[j][i]->Npow - ILOord] <<" (Id="<<i<<")   ";
 	    cout << BBlocksSMCalc[j][i]->CtrbDescript[0] <<" (Id="<<i<<")   ";
-	}cout << endl;
+	 }cout << endl;
+	 if ( iprint > 0 ){
+	    for ( int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) {
+	       printf( " * \t\t%s\n",BBlocksSMCalc[j][0]->CodeDescript[k].c_str());
+	    }
+	    //BBlocksSMCalc[j][0]->Print(0,0);
+	 }
       }
    }
    
@@ -1264,9 +1270,10 @@ void FastNLOReader::CalcCrossSection( ){
   kFactor.clear();
   kFactor.resize(NObsBin);
    
+  // perturbative (additive) contributions
   int iLOBs = 0;
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
-     if ( !BBlocksSMCalc.empty() ) {
+     if ( !BBlocksSMCalc[j].empty() ) {
 	for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	   if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag) {
 	      // ---- DIS ---- //
@@ -1298,14 +1305,16 @@ void FastNLOReader::CalcCrossSection( ){
      }
   }	   
 
-
-  // non-perturbative correctoins
+  
+  // non-perturbative corrections (multiplicative corrections)
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
-     if ( !BBlocksSMCalc.empty() ) {
+     if ( !BBlocksSMCalc[j].empty() ) {
 	for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	   if ( bUseSMCalc[j][i] && BBlocksSMCalc[j][i]->IAddMultFlag) {
-	      printf("CalcCrossSection(). The formula for non-perturbative corrections still has to be implemented.\n");
-	      printf("Please send an email to daniel.britzger@desy.de.\n");
+	      for(int iB=0;iB<NObsBin;iB++){
+		 XSection[iB]		*= BBlocksSMCalc[j][i]->fact[iB];
+		 XSection_LO[iB]	*= BBlocksSMCalc[j][i]->fact[iB];
+	      }
 	   }
 	}
      }

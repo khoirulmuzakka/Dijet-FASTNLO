@@ -87,8 +87,9 @@ public:
 
    enum ESMCalculation {
       kFixedOrder		= 0,	// Fixed Order Calculation
-      kThresholdCorrections	= 1,	// Threshold corrections
-      kElectroWeakCorrections	= 2	// Electro weak corrections
+      kThresholdCorrection	= 1,	// Threshold corrections
+      kElectroWeakCorrection	= 2,	// Electro weak corrections
+      kNonPertrubativeCorretion	= 10	// Hadronisation correction/non-perturbative correction
    };
 
    static const double TWOPI = 6.28318530717958647692528;
@@ -291,16 +292,16 @@ public:
   
 
    void CalcCrossSection();
-   void PrintTableInfo();
-   void PrintFastNLOTableConstants(const int iprint);
+   void PrintTableInfo(const int iprint = 0);
+   void PrintFastNLOTableConstants(const int iprint = 2);
    void PrintCrossSections();
    void PrintCrossSectionsLikeFreader();
    void PrintCrossSectionsWithReference();
 
-   static string fOrdName[4];
-   static string fCorrName[20];
-   static string fNPName[10];
-   static string fNSDep[4];
+   static const string fOrdName[4];
+   static const string fCorrName[11];
+   static const string fNPName[10];
+   static const string fNSDep[4];
 };
 
 #endif
