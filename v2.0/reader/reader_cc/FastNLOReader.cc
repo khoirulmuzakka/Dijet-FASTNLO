@@ -338,7 +338,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   fScalevar	= scalevar;
   fScaleFacMuR	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
   fScaleFacMuF	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
-  printf(" * FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
+  printf(" # FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
 
   if ( ReFillCache ){
     FillAlphasCache();
@@ -421,24 +421,36 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFil
 
 
 void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
-  // 
-  // Set scale factor for scale variations in MuVar tables
-  // You have to ReFill your cache!
-  // This is done automatically, but if you want to do it by yourself
-  // set ReFillCache=false
-  //
-
-  if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetScaleFactorMuR. Warning. This is not a MuVar table.\n");
-    printf("      SetScaleFactorMuR has no impact.\n");
-    printf("      Please use SetScaleVariation(int) instead.\n");
-  }
-  fScaleFacMuR = fac;
-
-  if ( ReFillCache ){
-    FillAlphasCache();
-    FillPDFCache();
-  }
+   // 
+   // Set scale factor for scale variations in MuVar and v2.0 tables
+   // You have to ReFill your cache!
+   // This is done automatically, but if you want to do it by yourself
+   // set ReFillCache=false
+   //
+   
+   if ( BBlocksSMCalc[0][1]->NScaleDep != 3 ) {
+      printf(" * Setting a-posteriori scale variation factor for renormalization scale to %4.2f (=%4.2f*%4.2f) of the nominal scale.\n",
+	     fac*BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar],fac,BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
+      fScaleFacMuR = BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] * fac;
+      if ( fac != 1. && !BBlocksSMCalc[kThresholdCorrection].empty() ){
+	 printf("FastNLOReader::SetScaleFactorMuR. Warning. Deactivating contribution from threshold corrections.\n");
+	 printf("  A-posteriori scale variations for renormalizations scale is only valid for fixed order calculations.\n");
+	 printf("  You can reactivate the threshold corrections again using FastNLOReader::SetContributionON(kTresholdCorrections,Id,true).\n");
+	 for ( int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++ ){
+	    //printf("   * Deactivating threshold corrections with Id = %d.\n",i);
+	    SetContributionON(kThresholdCorrection,i,false);
+	 }
+      }
+   }
+   else if ( BBlocksSMCalc[0][1]->NScaleDep == 3 ) {
+      printf("FastNLOReader::SetScaleFactorMuR. Setting multiplicative scale factor for renormalization scale to %4.2.\n",fac);
+      fScaleFacMuR = fac;
+   }
+   
+   if ( ReFillCache ){
+      FillAlphasCache();
+      FillPDFCache();
+   }
 }
 
 
@@ -502,7 +514,7 @@ void FastNLOReader::ReadTable(void)
 
   // initialize BlockB's
   int nblocks	= Ncontrib + Ndata;
-  printf(" * FastNLOReader::ReadTable(). Reading %d B-Blocks.\n",nblocks);
+  printf(" # FastNLOReader::ReadTable(). Reading %d B-Blocks.\n",nblocks);
   for(int i=0;i<nblocks;i++){
      // read block
      FastNLOBlockB* blockb	= new FastNLOBlockB( "ReadingBlockB", NObsBin , instream );
@@ -603,10 +615,10 @@ void FastNLOReader::ReadTable(void)
 
 void FastNLOReader::PrintTableInfo(const int iprint){
 
-  printf(" * This FastNLO table holds %d contributions:\n",Ncontrib + Ndata);
+  printf(" # This FastNLO table holds %d contributions:\n",Ncontrib + Ndata);
 
   if ( BlockB_Data ) {
-     printf(" * Data Table: %s\n",BlockB_Data->CodeDescript[0].c_str());
+     printf(" # Data Table: %s\n",BlockB_Data->CodeDescript[0].c_str());
      if ( iprint > 0 ){
 	for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
 	   printf( " * \t\t%s\n",BlockB_Data->CodeDescript[k].c_str());
@@ -616,13 +628,13 @@ void FastNLOReader::PrintTableInfo(const int iprint){
 
    for ( int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
       if ( !BBlocksSMCalc[j].empty() ){
-	 cout << " * Table "<<fCorrName[j]<< " ("<<BBlocksSMCalc[j][0]->CodeDescript[0] <<") with order:  ";
+	 cout << " # Table "<<fCorrName[j]<< " ("<<BBlocksSMCalc[j][0]->CodeDescript[0] <<") with order:  ";
 	 for ( int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	    cout << BBlocksSMCalc[j][i]->CtrbDescript[0] <<" (Id="<<i<<")   ";
 	 }cout << endl;
 	 if ( iprint > 0 ){
 	    for ( int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) {
-	       printf( " * \t\t%s\n",BBlocksSMCalc[j][0]->CodeDescript[k].c_str());
+	       printf( " # \t\t%s\n",BBlocksSMCalc[j][0]->CodeDescript[k].c_str());
 	    }
 	    //BBlocksSMCalc[j][0]->Print(0,0);
 	 }
@@ -631,11 +643,11 @@ void FastNLOReader::PrintTableInfo(const int iprint){
    
    for ( int j = 0 ; j<BBlocksNewPhys.size() ; j++ ){
       if ( !BBlocksNewPhys[j].empty() ){
-	 cout << " * Found new physics table with number "<<j<<" with order:  ";
+	 cout << " # Found new physics table with number "<<j<<" with order:  ";
 	 for ( int i = 0 ; i<BBlocksNewPhys[j].size() ; i++ ){
 	    cout << BBlocksNewPhys[j][i]->CtrbDescript[0] <<" (Id="<<i<<")   ";
 	 }cout << endl;
-	 printf(" *   -> SM extensions can not be evaluated by this reader! Just skipping those...\n");
+	 printf(" #   -> SM extensions can not be evaluated by this reader! Just skipping those...\n");
       }
    }
 }
@@ -654,7 +666,15 @@ void FastNLOReader::SetContributionON( ESMCalculation eCalc , unsigned int Id , 
       return;
    }
    
+   printf(" * %s contribution '%s' with Id = %d.\n",
+	  (SetOn?"Activating":"Deactivating"),fCorrName[eCalc].c_str(),Id);
+
    bUseSMCalc[eCalc][Id] = SetOn;   
+
+   if ( eCalc==kThresholdCorrection && SetOn && fScaleFacMuR!=BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]){
+      printf("FastNLOReader::SetContributionON. Info. Resetting a-posteriori scale variation factor, since threshold corrections can not be used with an a-posteriori scale variation..\n");
+      SetScaleFactorMuR(1.,true);
+   }
 
 }
 
@@ -1052,7 +1072,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 
   cout << DSEP << endl;
   printf(" Cross Sections\n");
-  printf(" The scale factor chosen here is: % -#10.2g\n",fScalevar+1);
+  printf(" The scale factor chosen here is: % -#10.2g\n",fScaleFacMuR);
   cout << SSEP << endl;
   
   if ( NDim == 2 ){
@@ -1168,11 +1188,9 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 
 vector < double > FastNLOReader::GetCrossSection( ){
   // Get fast calculated NLO cross section
-  
   if ( XSection.empty() ){
     CalcCrossSection();
   }
-  
   return XSection;
 }
 
@@ -1269,9 +1287,8 @@ void FastNLOReader::CalcCrossSection( ){
   XSection.resize(NObsBin);
   kFactor.clear();
   kFactor.resize(NObsBin);
-   
+
   // perturbative (additive) contributions
-  int iLOBs = 0;
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
      if ( !BBlocksSMCalc[j].empty() ) {
 	for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
@@ -1280,7 +1297,7 @@ void FastNLOReader::CalcCrossSection( ){
 	      if ( BBlocksSMCalc[j][i]->IPDFdef1 == 2 ){
 		 if ( BBlocksSMCalc[j][i]->NPDFDim == 0 ) {
 		    if ( BlockB_LO->NScaleDep != 3 ){ // v2.0
-		       CalcCrossSectionDISv20(BBlocksSMCalc[j][i]);
+		       CalcCrossSectionv20(BBlocksSMCalc[j][i]);
 		    }
 		    else if ( BlockB_LO->NScaleDep == 3 ){ // v2.1
 		       CalcCrossSectionDISv21(BBlocksSMCalc[j][i]);
@@ -1290,7 +1307,7 @@ void FastNLOReader::CalcCrossSection( ){
 	      // ---- pp ---- //
 	      else if (  BBlocksSMCalc[j][i]->IPDFdef1 == 3 ){
 		 if ( BBlocksSMCalc[j][i]->NPDFDim == 1 ) {
-		    CalcCrossSectionHHCv20(BBlocksSMCalc[j][i]);
+		    CalcCrossSectionv20(BBlocksSMCalc[j][i]);
 		 }
 		 else {
 		    printf("CalcCrossSection(). only half matrices for hh is implemented.\n"); exit(1);
@@ -1303,7 +1320,14 @@ void FastNLOReader::CalcCrossSection( ){
 	   }
 	}
      }
-  }	   
+  }
+
+  
+  // contributions from the a-posteriori scale variation
+  if ( fScaleFacMuR != BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] ){
+     CalcAposterioriScaleVariation();
+  }
+
 
   
   // non-perturbative corrections (multiplicative corrections)
@@ -1330,13 +1354,13 @@ void FastNLOReader::CalcCrossSection( ){
      // ---- DIS ---- //
      if ( BBlocksSMCalc[0][0]->IPDFdef1 == 2 ){
 	if ( BBlocksSMCalc[0][0]->NPDFDim == 0 ) {
-	   if ( BlockB_LO->NScaleDep != 3 )		CalcCrossSectionDISv20(BBlocksSMCalc[0][0],true);
+	   if ( BlockB_LO->NScaleDep != 3 )		CalcCrossSectionv20(BBlocksSMCalc[0][0],true);
 	   else if ( BlockB_LO->NScaleDep == 3 )	CalcCrossSectionDISv21(BBlocksSMCalc[0][0],true);
 	}
      }
      // ---- pp ---- //
      else if (  BBlocksSMCalc[0][0]->IPDFdef1 == 3 ){
-	if ( BBlocksSMCalc[0][0]->NPDFDim == 1 )	CalcCrossSectionHHCv20(BBlocksSMCalc[0][0],true);
+	if ( BBlocksSMCalc[0][0]->NPDFDim == 1 )	CalcCrossSectionv20(BBlocksSMCalc[0][0],true);
 	else {
 	   printf("CalcCrossSection(). only half matrices for hh is implemented.\n"); exit(1);
 	}
@@ -1353,30 +1377,31 @@ void FastNLOReader::CalcCrossSection( ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::CalcCrossSectionDISv20( FastNLOBlockB* B , bool IsLO ){
-  //
-  //  Cross section calculation for DIS tables in v2.0 format
-  //
-   
-  vector<double>* XS = IsLO ? &XSection_LO : &XSection;
-  for(int i=0;i<NObsBin;i++){
-    int nxmax = B->GetNxmax(i);
-    double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-    for(int j=0;j<B->GetTotalScalenodes();j++){
-      int scalenode1 = j;
-      int scalenode2 = j;
-      if (B->NScaleDim>1){          
-	scalenode1 = j / B->Nscalenode[1];
-	scalenode2 = j % B->Nscalenode[1];
+void FastNLOReader::CalcAposterioriScaleVariation( ){
+   int scaleVar		= BBlocksSMCalc[0][1]->Npow == ILOord ? 0 : fScalevar;
+   vector<double>* XS	= &XSection;
+   for(int i=0;i<NObsBin;i++){
+      int nxmax = BBlocksSMCalc[0][1]->GetNxmax(i);
+      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+      for(int j=0;j<BBlocksSMCalc[0][1]->GetTotalScalenodes();j++){
+	 int scalenode1 = j;
+	 int scalenode2 = j;
+	 if (BBlocksSMCalc[0][1]->NScaleDim>1){          
+	    scalenode1 = j / BBlocksSMCalc[0][0]->Nscalenode[1];
+	    scalenode2 = j % BBlocksSMCalc[0][0]->Nscalenode[1];
+	 }
+	 double asnp1 = BBlocksSMCalc[0][1]->AlphasTwoPi_v20[i][scalenode2];//as^n+1
+	 double n = BBlocksSMCalc[0][0]->Npow;
+	 double L = std::log(fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar]);
+	 double beta0 = (11.*3.-2.*Alphas::GetNf())/3.;
+	 for(int k=0;k<nxmax;k++){ 
+	    for(int l=0;l<BBlocksSMCalc[0][0]->NSubproc;l++){ 
+	       double clo = BBlocksSMCalc[0][0]->SigmaTilde[i][0][j][k][l] *  BBlocksSMCalc[0][0]->PdfLc[i][scalenode2][k][l] * unit;
+	       XS->at(i)	+=  asnp1 * clo * n * L * beta0;
+	    }
+	 }
       }
-      for(int k=0;k<nxmax;k++){ 
-	// LO Block
-	for(int l=0;l<B->NSubproc;l++){ 
-	  XS->at(i)		+=  B->SigmaTilde[i][fScalevar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
-	}
-      }
-    }
-  }
+   }
 }
 
 //______________________________________________________________________________
@@ -1417,13 +1442,13 @@ void FastNLOReader::CalcCrossSectionDISv21( FastNLOBlockB* B , bool IsLO){
 //______________________________________________________________________________
 
 
-void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
+void FastNLOReader::CalcCrossSectionv20( FastNLOBlockB* B , bool IsLO ){
   //
-  //  Cross section calculation for HH tables in v2.0 format
+  //  Cross section calculation in v2.0 format
   //
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
-  vector<double>* XS = IsLO ? &XSection_LO : &XSection;
+  vector<double>* XS	= IsLO ? &XSection_LO : &XSection;
   for(int i=0;i<NObsBin;i++){
     int nxmax = B->GetNxmax(i);
     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
@@ -1436,17 +1461,7 @@ void FastNLOReader::CalcCrossSectionHHCv20( FastNLOBlockB* B , bool IsLO ){
       }
       for(int k=0;k<nxmax;k++){ 
 	for(int l=0;l<B->NSubproc;l++){ 
-	   //hier
 	   XS->at(i)		+=  B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
-// 	   if ( l==6 ){
-// 	      XS->at(i)		+=  B->PdfLc[i][scalenode2][k][l];
-// 	   }
-	      //	   XS->at(i)		+=  (float)B->PdfLc[i][scalenode2][k][l] ;
-	   //	   if ( abs((float)B->PdfLc[i][scalenode2][k][l] - B->PdfLc[i][scalenode2][k][l]) > 1e-04) printf("%18.8e    %18.14e\n",(float)B->PdfLc[i][scalenode2][k][l] - B->PdfLc[i][scalenode2][k][l],B->PdfLc[i][scalenode2][k][l]);
-	  // 	       static int count = 0;
-	  // 	       count++;
-	  // 	       printf("%3d  %2d  %3d  %2d  %16.12e    %16.12e    %16.12e\n",i,j,k,l,B->SigmaTilde[i][fScalevar][j][k][l],B->AlphasTwoPi_v20[i][scalenode2],B->PdfLc[i][scalenode2][k][l]);
-	  // 	       if ( count >20 ) exit(1);
 	}
       }
     }
@@ -1524,7 +1539,10 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
   //
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
-  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
+  double scalefac	= fScaleFacMuR/B->ScaleFac[0][scaleVar];
+
+  //hier scalefac richtig machen!
+  cout<< "alkphas cache. scalefac = " << scalefac <<"\tnpow = "<<B->Npow<<endl;
 
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<B->GetTotalScalenodes();j++){
@@ -1853,7 +1871,7 @@ void FastNLOReader::InitLHAPDF(){
 
 void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
-  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
+  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuF ? 1. : fScaleFacMuF;
   vector<double> xfx(13); // PDFs of all partons
   if ( B->NScaleDep != 3 ){
     for(int i=0;i<NObsBin;i++){
@@ -1942,7 +1960,8 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 
 void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
-  double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuR ? 1. : fScaleFacMuR;
+  double scalefac	= fScaleFacMuF/B->ScaleFac[0][scaleVar];
+
   vector < vector < double > > xfx; // PDFs of all partons
   if ( B->NScaleDep != 3 ){
     for(int i=0;i<NObsBin;i++){

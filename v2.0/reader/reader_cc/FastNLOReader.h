@@ -196,6 +196,7 @@ private:
    void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
    void FillBlockBPDFLCsDISv21( FastNLOBlockB* B );
    void FillBlockBPDFLCsHHCv20( FastNLOBlockB* B );
+   void CalcAposterioriScaleVariation();
    vector<double> GetXFX(double x, double muf);
    vector<double> CalcPDFLinearCombDIS(vector<double> pdfx1, int NSubproc );
    vector<double> CalcPDFLinearCombHHC(vector<double> pdfx1, vector<double> pdfx2, int NSubproc );
@@ -223,9 +224,8 @@ private:
    double FuncMax ( double scale1 , double scale2 ) ;
    double FuncMin ( double scale1 , double scale2 ) ;
 
-   void CalcCrossSectionDISv20(FastNLOBlockB* B , bool IsLO = false);
    void CalcCrossSectionDISv21(FastNLOBlockB* B , bool IsLO = false );
-   void CalcCrossSectionHHCv20(FastNLOBlockB* B , bool IsLO = false);
+   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
  
 public:
    FastNLOReader(void);
