@@ -1159,15 +1159,15 @@ void FastNLOReader::PrintDataCrossSections(){
 	  NDimBins[j] = 1;
 	}
       }
-      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#12.5E ",
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E    %-#12.3E ",
  	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
  	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]);
       
       for ( int iUnco = 0 ; iUnco<BlockB_Data->Nuncorrel ; iUnco++ ){
-	 printf("      %+8.2E    %+8.2E     ",BlockB_Data->UncorLo[i][iUnco],BlockB_Data->UncorHi[i][iUnco]);
+	 printf("       %+8.2E   %+8.2E     ",BlockB_Data->UncorHi[i][iUnco],BlockB_Data->UncorLo[i][iUnco]);
       }
       for ( int iCorr = 0 ; iCorr<BlockB_Data->Ncorrel ; iCorr++ ){
-	 printf("      %+8.2E    %+8.2E     ",BlockB_Data->CorrLo[i][iCorr],BlockB_Data->CorrHi[i][iCorr]);
+	 printf("       %+8.2E   %+8.2E     ",BlockB_Data->CorrHi[i][iCorr],BlockB_Data->CorrLo[i][iCorr]);
       }
       cout << endl;
     }
