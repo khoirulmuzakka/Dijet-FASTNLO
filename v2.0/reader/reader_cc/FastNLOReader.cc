@@ -1079,9 +1079,11 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
     string header[3] = { "  IObs  Bin Size IODim1 ", 
 			 "   IODim2 ",
 			 " LO cross section   NLO cross section  K factor"};
-    string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
+    //string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
     unsigned int NDimBins[NDim];
-    printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
+    //printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
+    printf("%s [ %-12s ] %s [ %-12s ] %s\n",
+	   header[0].c_str(),DimLabel[0].c_str(),header[1].c_str(),DimLabel[1].c_str(),header[2].c_str());
     cout << SSEP << endl;
     for ( unsigned int i=0; i<xs.size(); i++ ){ 
       for ( unsigned int j=0; j<NDim; j++ ){ 
@@ -1396,12 +1398,12 @@ void FastNLOReader::CalcCrossSection( ){
      }
   }
 
-  
   // contributions from the a-posteriori scale variation
-  if ( fScaleFacMuR != BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] ){
-     CalcAposterioriScaleVariation();
+  if ( BBlocksSMCalc[0][0]->NScaleDep!=3 ){
+     if ( fScaleFacMuR != BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] ){
+	CalcAposterioriScaleVariation();
+     }
   }
-
 
   
   // non-perturbative corrections (multiplicative corrections)
@@ -1418,6 +1420,7 @@ void FastNLOReader::CalcCrossSection( ){
      }
   }
   
+
 
   // calculate LO cross sections
   if ( !BBlocksSMCalc[0][0] ) printf("CalcCrossSection(). Warning. There is no LO fixed order calculation.\n");
@@ -1441,6 +1444,7 @@ void FastNLOReader::CalcCrossSection( ){
      }
   }
   
+
   // ---- k-factor calculation ---- //
   for(int i=0;i<NObsBin;i++){
      kFactor[i]	= XSection[i] / XSection_LO[i];
