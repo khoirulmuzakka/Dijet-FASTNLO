@@ -757,7 +757,7 @@ void FastNLOReader::ReadBlockA2(istream *table){
   for(int i=0;i<NScDescript;i++){
     table->getline(buffer,256);
     ScDescript[i] = buffer;
-    //      StripWhitespace(ScDescript[i]);
+    StripWhitespace(&ScDescript[i]);
   }
 
   *table >> Ecms;
@@ -769,7 +769,7 @@ void FastNLOReader::ReadBlockA2(istream *table){
   for(int i=0;i<NDim;i++){
     table->getline(buffer,256);
     DimLabel[i] = buffer;
-    //      StripWhitespace(DimLabel[i]);
+    StripWhitespace(&DimLabel[i]);
   }
 
   IDiffBin.resize(NDim);
@@ -1072,7 +1072,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 
   cout << DSEP << endl;
   printf(" Cross Sections\n");
-  printf(" The scale factor chosen here is: % -#10.2g\n",fScaleFacMuR);
+  printf(" The scale factor chosen here is: % -#10.3g\n",fScaleFacMuR);
   cout << SSEP << endl;
   
   if ( NDim == 2 ){
@@ -1096,6 +1096,80 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
       printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#18.11E\n",
 	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]/kFactor[i],xs[i],kFactor[i]);
+    }
+  } else {
+  }
+}
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::PrintDataCrossSections(){
+  //
+  // Print data table if available
+  //
+
+  if ( !BlockB_Data ){
+     return;
+  }
+  
+  vector < double > xs = BlockB_Data->Value;;
+
+  string CSEP33("#################################");
+  string DSEP33("=================================");
+  string SSEP33("---------------------------------");
+  string CSEP = CSEP33 + CSEP33 + CSEP33 + CSEP33;
+  string DSEP = DSEP33 + DSEP33 + DSEP33 + DSEP33;
+  string SSEP = SSEP33 + SSEP33 + SSEP33 + SSEP33;
+  
+  cout << DSEP << endl;
+  printf(" Data Cross Sections\n");
+  for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
+     printf( "\t\t%s\n",BlockB_Data->CodeDescript[k].c_str());
+  }
+  cout << SSEP << endl;
+  
+  if ( NDim == 2 ){
+    string header[3] = { "  IObs  Bin Size IODim1 ", 
+			 "   IODim2 ",
+			 "cross section  "};
+
+
+    string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
+    unsigned int NDimBins[NDim];
+    printf("%s %s %s %s %s",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
+    for ( int iUnco = 0 ; iUnco<BlockB_Data->Nuncorrel ; iUnco++ ){
+       printf("%30s   ",BlockB_Data->UncDescr[iUnco].c_str());
+    }
+    for ( int iCorr = 0 ; iCorr<BlockB_Data->Ncorrel ; iCorr++ ){
+       printf("%30s   ",BlockB_Data->CorDescr[iCorr].c_str());
+    }
+    cout<<endl;
+    
+
+    cout << SSEP << endl;
+    for ( unsigned int i=0; i<xs.size(); i++ ){ 
+      for ( unsigned int j=0; j<NDim; j++ ){ 
+	if ( i==0 ){
+	  NDimBins[j] = 1;
+	} else if ( LoBin[i-1][j] < LoBin[i][j]){
+	  NDimBins[j]++;
+	} else if ( LoBin[i][j] < LoBin[i-1][j]){
+	  NDimBins[j] = 1;
+	}
+      }
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#12.5E ",
+ 	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+ 	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]);
+      
+      for ( int iUnco = 0 ; iUnco<BlockB_Data->Nuncorrel ; iUnco++ ){
+	 printf("      %+8.2E    %+8.2E     ",BlockB_Data->UncorLo[iUnco][i],BlockB_Data->UncorHi[iUnco][i]);
+      }
+      for ( int iCorr = 0 ; iCorr<BlockB_Data->Ncorrel ; iCorr++ ){
+	 printf("      %+8.2E    %+8.2E     ",BlockB_Data->CorrLo[iCorr][i],BlockB_Data->CorrHi[iCorr][i]);
+      }
+      cout << endl;
     }
   } else {
   }
@@ -1595,7 +1669,6 @@ double FastNLOReader::GetAlphas( double Q ){
   if ( fAlphasEvolution == kGRV )			return GetAlphasGRV	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kNLOJET )		return GetAlphasNLOJET	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kCTEQpdf )		return GetAlphasCTEQpdf	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kFastNLO )		return GetAlphasFastNLO	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kLHAPDFInternal )	return GetAlphasLHAPDF	( Q );
   else if ( fAlphasEvolution == kQCDNUMInternal )	return GetAlphasQCDNUM	( Q );
   else if ( fAlphasEvolution == kFixed )        	return GetAlphasFixed	( Q , fAlphasMz );
@@ -1738,37 +1811,8 @@ double FastNLOReader::GetAlphasCTEQpdf(double Q, double alphasMZ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasFastNLO(double Q, double alphasMZ){
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r.
-  //
-  // This is the 'original' FNLOv2.0 implementation.
-  //
-
-  const int NF	= 5;
-  double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-  double BETA1 =  (51. - 19./3.*NF);
-
-  //    // This is from NLOJET++, alpha.cc
-  double Mz	= 91.187;
-  double res	= alphasMZ;
-  double b0	= BETA0/TWOPI;
-  double w = 1.0 + b0*alphasMZ*log(Q/Mz);
-  res /= w;
-  double b1 = BETA1/TWOPISQR;
-  res *= 1.0 - alphasMZ*b1/b0*log(w)/w;
-  return res;
-
-}
-
-
-//______________________________________________________________________________
-
-
 double FastNLOReader::GetAlphasFixed(double MU, double ALPSMZ){
-
-  return ALPSMZ;
-
+   return ALPSMZ;
 }
 
 
@@ -2142,5 +2186,17 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 }
 
 
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::StripWhitespace(string* s){
+   string fastlast = &(*s)[s->size()-1];
+   while ( !fastlast.compare(" ")){
+      string::iterator it = s->end();
+      s->erase(it-1);
+      fastlast = &(*s)[s->size()-1];
+   }
+}
 
 //______________________________________________________________________________

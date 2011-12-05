@@ -67,7 +67,6 @@ public:
       kGRV			= 0,
       kNLOJET			= 1,      
       kCTEQpdf			= 2,      
-      kFastNLO			= 3,
       kLHAPDFInternal		= 4,	// use: double 	LHAPDF::alphasPDF (double Q)
       kQCDNUMInternal		= 5,	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
       kFixed                    = 6     // Always gives back alpha_s(Mz) for testing.
@@ -184,6 +183,7 @@ private:
 
    void Init() ;
    void ReadTable();
+   void StripWhitespace(string* s);
 
    void ReadBlockA1(istream *table);
    void ReadBlockA2(istream *table);
@@ -212,7 +212,6 @@ private:
    double GetAlphasGRV(double Q, double alphasMz);
    double GetAlphasNewGRV(double Q, double alphasMz);
    double GetAlphasCTEQpdf(double Q, double alphasMz);
-   double GetAlphasFastNLO(double Q, double alphasMz);
    double GetAlphasFixed(double Q, double alphasMz);
   
    double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
@@ -293,6 +292,7 @@ public:
 
    void CalcCrossSection();
    void PrintTableInfo(const int iprint = 0);
+   void PrintDataCrossSections();
    void PrintFastNLOTableConstants(const int iprint = 2);
    void PrintCrossSections();
    void PrintCrossSectionsLikeFreader();
