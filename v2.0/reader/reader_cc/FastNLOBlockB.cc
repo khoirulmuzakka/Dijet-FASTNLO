@@ -402,9 +402,9 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
     }
   } else {
     if (ic==1) {
-      printf("\n *********************************\n");
+      printf("\n *****************************************\n");
       printf(" * fastNLO Table: Block B\n");
-      printf(" *********************************\n");
+      printf(" *****************************************\n");
     }
     //  printf("  B0  fNNObsBins                        %10i\n",fNObsBins);
     printf("  B0  ISep                              %10i\n",tablemagicno);
@@ -506,7 +506,7 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
       //   printf(" B   \n");
       // }
       if (ic>1) {
-	printf(" #################################\n");
+	printf(" #########################################\n");
       }
     }
   }

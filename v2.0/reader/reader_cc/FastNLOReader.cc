@@ -136,7 +136,7 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-  string cseps = " ##################################################################\n";
+  string cseps = " ##################################################################################\n";
   cout << cseps;
   printf(" #\n");
   printf(" # fastNLO_reader_2.1.0\n");
@@ -145,7 +145,8 @@ void FastNLOReader::Init(){
   printf(" #\n"); 
   printf(" # If you use this code, please cite:\n"); 
   printf(" #   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285\n");
-  printf(" #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, TBD\n");
+  printf(" #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch,\n");
+  printf(" #      arXiv:nnnn.mmmm\n");
   printf(" #\n");
   cout << cseps;
 
@@ -443,7 +444,7 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
       }
    }
    else if ( BBlocksSMCalc[0][1]->NScaleDep == 3 ) {
-      printf("FastNLOReader::SetScaleFactorMuR. Setting multiplicative scale factor for renormalization scale to %4.2.\n",fac);
+      printf("FastNLOReader::SetScaleFactorMuR. Setting multiplicative scale factor for renormalization scale to %4.2f.\n",fac);
       fScaleFacMuR = fac;
    }
    
@@ -862,11 +863,11 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
      for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
 	if ( !BBlocksSMCalc.empty() ) {
 	   for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
-	      if ( BBlocksSMCalc[j][i] )  BBlocksSMCalc[j][i]	->Print(1,iprint);
+	      if ( BBlocksSMCalc[j][i] )  BBlocksSMCalc[j][i]->Print(1,iprint);
 	   }
 	}
      }
-     if ( BlockB_LO_Ref  ) BlockB_LO_Ref	->Print(11,iprint);
+     if ( BlockB_LO_Ref  ) BlockB_LO_Ref->Print(11,iprint);
      if ( BlockB_NLO_Ref ) BlockB_NLO_Ref->Print(12,iprint);
   }
   
@@ -923,9 +924,9 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
 
 
 void FastNLOReader::PrintBlockA1(){
-  printf("\n *********************************\n");
+  printf("\n *****************************************\n");
   printf(" * fastNLO Table: Block A1\n");
-  printf(" *********************************\n");
+  printf(" *****************************************\n");
   printf("  A1  ISep                              %10i\n",tablemagicno);
   printf("  A1  Itabversion                       %10i\n",Itabversion);
   printf("  A1  ScenName                          %s\n",ScenName.data());
@@ -936,7 +937,7 @@ void FastNLOReader::PrintBlockA1(){
   printf("  A1  NuserInt                          %10i\n",NuserInt);
   printf("  A1  NuserFloat                        %10i\n",NuserFloat);
   printf("  A1  Imachine                          %10i\n",Imachine);
-  printf(" #################################\n");
+  printf(" #########################################\n");
 }
 
 
@@ -946,9 +947,9 @@ void FastNLOReader::PrintBlockA1(){
 
 
 void FastNLOReader::PrintBlockA2(){
-  printf("\n *********************************\n");
+  printf("\n *****************************************\n");
   printf(" * fastNLO Table: Block A2\n");
-  printf(" *********************************\n");
+  printf(" *****************************************\n");
   printf("  A2  ISep                              %10i\n",tablemagicno);
   printf("  A2  IpublUnits                        %10i\n",Ipublunits);
   printf("  A2  NscDescript                       %10zi\n",ScDescript.size());
@@ -986,7 +987,7 @@ void FastNLOReader::PrintBlockA2(){
       printf("  A2    IDivUpPointer(%3i)              %10i\n",i+1,IDivUpPointer[i]);
     }
   }
-  printf(" #################################\n");
+  printf(" #########################################\n");
 }
 
 
@@ -1062,12 +1063,12 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
   
   vector < double > xs = XSection;
   
-  string CSEP33("#################################");
-  string DSEP33("=================================");
-  string SSEP33("---------------------------------");
-  string CSEP = CSEP33 + CSEP33 + CSEP33 + CSEP33;
-  string DSEP = DSEP33 + DSEP33 + DSEP33 + DSEP33;
-  string SSEP = SSEP33 + SSEP33 + SSEP33 + SSEP33;
+  string CSEP41("#########################################");
+  string DSEP41("=========================================");
+  string SSEP41("-----------------------------------------");
+  string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
+  string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
+  string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
   
 
   cout << DSEP << endl;
@@ -1118,12 +1119,12 @@ void FastNLOReader::PrintDataCrossSections(){
   
   vector < double > xs = BlockB_Data->Value;;
 
-  string CSEP33("#################################");
-  string DSEP33("=================================");
-  string SSEP33("---------------------------------");
-  string CSEP = CSEP33 + CSEP33 + CSEP33 + CSEP33;
-  string DSEP = DSEP33 + DSEP33 + DSEP33 + DSEP33;
-  string SSEP = SSEP33 + SSEP33 + SSEP33 + SSEP33;
+  string CSEP41("#########################################");
+  string DSEP41("=========================================");
+  string SSEP41("-----------------------------------------");
+  string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
+  string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
+  string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
   
   cout << DSEP << endl;
   printf(" Data Cross Sections\n");

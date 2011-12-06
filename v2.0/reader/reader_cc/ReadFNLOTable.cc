@@ -14,8 +14,8 @@ int main(int argc, char** argv){
   using namespace std;
 
   //---  Initialization
-  string cseps = " ##################################################################\n";
-  string lseps = " # ----------------------------------------------------------------\n";
+  string cseps = " ##################################################################################\n";
+  string lseps = " # --------------------------------------------------------------------------------\n";
   string csepl = "##################################################################";
   csepl = csepl + csepl + "\n";
 
@@ -71,7 +71,7 @@ int main(int argc, char** argv){
     printf(" # ReadFNLOTable: WARNING! No PDF set given,\n");
     printf(" # taking cteq6mE.LHgrid instead!\n");
   } else {
-    cout << " # ReadFNLOTable: Using PDF set: " << PDFFile << endl;
+    cout << " # ReadFNLOTable: Using PDF set   : " << PDFFile << endl;
   }
 
   //---  Too many arguments
@@ -133,10 +133,8 @@ int main(int argc, char** argv){
   fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
 
   // ---- Set the calculation order (if available)---- //
-  fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
-
-  // ---- Set the calculation order (if available)---- //
-  fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
+  //  fnloreader->SetContributionON( contrib, Id, on/off) 
+    //  fnloreader->SetCalculationOrder(FastNLOReader::kAllAvailableOrders);		// Set the order of your calculation (Mind: k-factor is always calculated as ratio to LO calcuation)
 
 
 
@@ -172,22 +170,13 @@ int main(int argc, char** argv){
   cout << csepl;
   printf("ReadFNLOTable: Calculate cross sections\n");
   cout << csepl;
-  int iscalevar = 3;
-  fnloreader->SetScaleVariation(iscalevar);
-  fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader();
-  iscalevar = 2;
-  fnloreader->SetScaleVariation(iscalevar);
-  fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader();
-  iscalevar = 0;
-  fnloreader->SetScaleVariation(iscalevar);
-  fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader();
-  iscalevar = 1;
-  fnloreader->SetScaleVariation(iscalevar);
-  fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsLikeFreader();
+  //  vector < int > Nscales;
+  int nscale = fnloreader->GetNScaleVariations();
+  for (int iscale = 0;iscale < nscale ;iscale++) {
+    fnloreader->SetScaleVariation(iscale);
+    fnloreader->CalcCrossSection();
+    fnloreader->PrintCrossSectionsLikeFreader();
+  }
 
   // ---- get cross sections ---- //
   //   vector < double > xs = fnloreader->GetXSection();
