@@ -4,8 +4,6 @@
 class Alphas{
 
 public:
-   static Alphas* Instance();
-   static void destroy();
    ~Alphas();
 
    // initializations
@@ -25,12 +23,13 @@ public:
    // Getters for Alphas at scale mu
    static double GetAlphasMu(double mu, double alphasMz = 0, int nLoop = 0, int nFlavors = 0);
    static double GetAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
+
+   static int CalcNf(double mu);
 	
 private:
    static Alphas* instance;
    Alphas();
 
-   static int CalcNf(double mu);
    static double FBeta(double alphasMz , int nLoop , int nf);
 
 public:

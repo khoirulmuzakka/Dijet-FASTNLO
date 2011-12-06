@@ -23,41 +23,23 @@ using namespace std;
 //
 //_____________________________________________________
 
-Alphas* Alphas::instance	= NULL;
-double Alphas::fMz		= 91.1876;   // PDG 2011
-double Alphas::fAlphasMz	= 0.1185;    // Bethke 2011 (Ref. ???)
-int Alphas::fNf			= 6;         // MAXIMUM number of active flavours,
-                                             // e.g. at low scales mu, number of flavors is
-                                             // calculated respecting flavor thresholds if
-                                             // FlavorMatching is ON.
-int Alphas::fnLoop		= 4;         // n-loop solution of the RGE
-bool Alphas::bFlavorMatching	= true;      // switch flavor matching on or off
-double Alphas::fTh[6]		= {0.0024, 0.0049, 0.100, 1.29, 4.19, 172.9}; // Quark mass thresholds
+double Alphas::fMz		= 91.1876;		// mass of Z0. PDG value 2011
+double Alphas::fAlphasMz	= 0.1185;		// alpha_s at starting scale of Mz. (Bethke 2011)
+int Alphas::fNf			= 6;			// MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
+int Alphas::fnLoop		= 4;			// n-loop solution of the RGE
+bool Alphas::bFlavorMatching	= true;			// switch flaovr matching on or off
+double Alphas::fTh[6]		= {0.0024 , 0.0049, 0.100, 1.29, 4.19, 172.9};	// PDG 2011
 
 
 Alphas::Alphas(){
-   //
    // private constructor since this is a Singleton class
-   //
 }
 
 Alphas::~Alphas(){
 }
 
-Alphas* Alphas::Instance(){
-   if ( !instance ) instance 	= new Alphas();
-   return instance;
-}
-
-void Alphas::destroy()
-{
-  if ( instance ) delete instance;
-  instance = 0;
-}
-
 void Alphas::SetFlavorMatchingThresholds(double th1, double th2, double th3, double th4, double th5, double th6){
    // in GeV
-   if ( !instance ) instance = new Alphas();
    fTh[0] = th1;
    fTh[1] = th2;
    fTh[2] = th3;
@@ -68,7 +50,6 @@ void Alphas::SetFlavorMatchingThresholds(double th1, double th2, double th3, dou
 
 
 void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, double& th4, double& th5, double& th6){
-   if ( !instance ) instance = new Alphas();
    th1 = fTh[0];
    th2 = fTh[1];
    th3 = fTh[2];
@@ -139,15 +120,22 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
    //       ALPS_IT = ASCACHE
    //       Return
    //       Endif
-     
+   
+   //    // plain alphas code that is used in nlojet++
+   //    double L = log(mu/fMz);
+   //    L = (beta0/twopi + alphasMz*beta1/twopi/twopi/2.)*L;
+   //    return alphasMz/(1. + alphasMz*L);
+   
+
    // - exact formula -> extract Lambda from alpha_s(Mz)
    double LAM2 = MZ2 / exp( FBeta(asmz,nLoop,nf));
+
 
    // - extract approx alpha_s(mu) value - 2 loop approx is fine
    double LL2 = MZ2 * exp( -2.*twopi/beta0/asmz + beta10 * log( 2*twopi/beta0/asmz + beta10) );
    double LQ2 = log( Q2 / LL2 );
    double as = 2*twopi/beta0/LQ2 * ( 1. - beta10*log(LQ2)/LQ2);
-      
+
    // - exact 4-loop value by Newton procedure
    for ( int i = 1 ; i <=3 ; i++ ){
       double F  = log(Q2/LAM2) - FBeta(as,nLoop,nf);
@@ -188,11 +176,11 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
 
    double aspi = alphasMz/Pi;
    double aspi2 = pow(aspi,2);
-
-   if ( nLoop == 1 ){ // 1-loop
-      return 1./( beta0 * aspi );
-   }
-   else if ( nLoop == 2 ){ // 2-loop RGE
+   
+   //    if ( nLoop == 2 ){ // 1-loop
+   //       return 1./( beta0 * aspi );
+   //    }
+   if ( nLoop == 2 ){ // 2-loop RGE
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (-beta102) * aspi + (beta103/2.)*aspi2 );
    }
    else if ( nLoop == 3 ){	// 3-loop RGE
@@ -207,7 +195,7 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi  + (beta30/2. - beta10*beta20 + beta103/2.)*aspi2 );
    }
    else {
-      printf("Alphas::FBeta(). Error. Only 1-, 2-, 3- or 4-loop solution implemented.\n");
+      printf("Alphas::FBeta(). Error. Only 2-, 3- or 4-loop solution implemented.\n");
       return 0;
    }
 
