@@ -285,9 +285,9 @@ public:
    //   vector <int> IDivUpPointer;
 
    // Getters about scale-interpolations
-   string GetScaleDescription() { return BlockB_NLO->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
-   int GetNScaleVariations() { return BlockB_NLO->Nscalevar[0]; };			// Get number of available scale variations
-   vector < double > GetScaleFactors() { return BlockB_NLO->ScaleFac[0]; };		// Get list of available scale factors
+   string GetScaleDescription() { return BBlocksSMCalc[0][1]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
+   int GetNScaleVariations() { return BBlocksSMCalc[0][1]->Nscalevar[0]; };			// Get number of available scale variations
+   vector < double > GetScaleFactors() { return BBlocksSMCalc[0][1]->ScaleFac[0]; };		// Get list of available scale factors
   
 
    void CalcCrossSection();
