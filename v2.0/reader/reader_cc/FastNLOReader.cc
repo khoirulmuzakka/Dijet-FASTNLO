@@ -1457,6 +1457,9 @@ void FastNLOReader::CalcCrossSection( ){
 
 void FastNLOReader::CalcAposterioriScaleVariation( ){
    int scaleVar		= BBlocksSMCalc[0][1]->Npow == ILOord ? 0 : fScalevar;
+   double scalefac	= fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar];
+
+
    vector<double>* XS	= &XSection;
    for(int i=0;i<NObsBin;i++){
       int nxmax = BBlocksSMCalc[0][1]->GetNxmax(i);
@@ -1471,7 +1474,8 @@ void FastNLOReader::CalcAposterioriScaleVariation( ){
 	 double asnp1 = BBlocksSMCalc[0][1]->AlphasTwoPi_v20[i][scalenode2];//as^n+1
 	 double n = BBlocksSMCalc[0][0]->Npow;
 	 double L = std::log(fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar]);
-	 double beta0 = (11.*3.-2.*Alphas::GetNf())/3.;
+	 double mur	= scalefac * BBlocksSMCalc[0][1]->ScaleNode[i][0][scaleVar][scalenode1];
+	 double beta0 = (11.*3.-2.*Alphas::CalcNf(mur))/3.;
 	 for(int k=0;k<nxmax;k++){ 
 	    for(int l=0;l<BBlocksSMCalc[0][0]->NSubproc;l++){ 
 	       double clo = BBlocksSMCalc[0][0]->SigmaTilde[i][0][j][k][l] *  BBlocksSMCalc[0][0]->PdfLc[i][scalenode2][k][l] * unit;
