@@ -17,6 +17,7 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
       Character*(*) crw,filename
       Integer ictrb(30)
       Integer Nunit,Ifile,ic,i,j,k,l,n,m,nxmax,nselctrb
+      Integer IMult
       Character*1 CH1TMP,CH1TMP2,CH1TMP3,CH1TMP4
       Character*2 CH2TMP
       Character*3 CH3TMP
@@ -226,6 +227,8 @@ c --- Block B
          write(*,*)"* fastNLO Table: Block B"
          write(*,*)SSEP33
       Endif
+c -   count number of multiplicative contributions
+      IMult = 0
       Do ic=1,NContrib
 c -      write only selected contributions - those with ictrb(ic)=1         
          If (crw .eq. 'write' .and. ictrb(ic).eq.0) Goto 100
@@ -261,17 +264,129 @@ c -      write only selected contributions - those with ictrb(ic)=1
             Call fniochar(crw,nunit, CodeDescript(ic,i),lprint,CHTMP)
          Enddo
 
-c --------------------------- Idata ?????
-         If (IDataFlag(ic).eq.1) Then
-            Write(*,*) "   Data Blocks can not yet be read"
-            STOP
+c --------------------------- IAddMult, done (KR)
+         If (IAddMultFlag(ic).eq.1) Then
+            IMult = IMult + 1
+            Write(CH1TMP2,'(I1)'),IMult
+            CHTMP = "  B0    NMUncorrel("//CH1TMP2//")"
+            Call fnioint(crw,nunit, NMUncorrel(IMult),lprint,CHTMP)
+            Do i=1,NMUncorrel(IMult)
+               Write(CH1TMP3,'(I1)'),i
+               CHTMP = "  B0      MUncDescript("
+     >              //CH1TMP2//","//CH1TMP3//")"
+               Call fniochar(crw,nunit,
+     >              MUncDescript(IMult,i),lprint,CHTMP)
+            Enddo
+            CHTMP = "  B0    NMCorrel("//CH1TMP2//")"
+            Call fnioint(crw,nunit, NMCorrel(IMult),lprint,CHTMP)
+            Do i=1,NMCorrel(IMult)
+               Write(CH1TMP3,'(I1)'),i
+               CHTMP = "  B0      MCorDescript("
+     >              //CH1TMP2//","//CH1TMP3//")"
+               Call fniochar(crw,nunit,
+     >              MCorDescript(IMult,i),lprint,CHTMP)
+            Enddo
+            Do i=1,NObsbin
+               Write(CH3TMP,'(I3)'),i
+               CHTMP = "  B0      MFact("
+     >              //CH1TMP2//","//CH3TMP//")"
+               Call fniodbl(crw,nunit,
+     >              MFact(IMult,i),lprint,CHTMP)
+               Do j=1,NMUncorrel(IMult)
+                  Write(CH1TMP4,'(I1)'),j
+                  CHTMP = "  B0        MUnCorLo("
+     >                 //CH1TMP2//","//CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 MUnCorLo(IMult,i,j),lprint,CHTMP)
+                  CHTMP = "  B0        MUnCorUp("
+     >                 //CH1TMP2//","//CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 MUnCorUp(IMult,i,j),lprint,CHTMP)
+               Enddo
+               Do j=1,NMCorrel(IMult)
+                  Write(CH1TMP4,'(I1)'),j
+                  CHTMP = "  B0        MCorLo("
+     >                 //CH1TMP2//","//CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 MCorLo(IMult,i,j),lprint,CHTMP)
+                  CHTMP = "  B0        MCorUp("
+     >                 //CH1TMP2//","//CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 MCorUp(IMult,i,j),lprint,CHTMP)
+               Enddo
+            Enddo
             Goto 100
          Endif
 
-c --------------------------- IAddMult ?????
-         If (IAddMultFlag(ic).eq.1) Then
-            Write(*,*) "   Multiplicative Blocks can not yet be read"
-            STOP
+c --------------------------- Idata, done (KR)
+         If (IDataFlag(ic).eq.1) Then
+            CHTMP = "  B0    NDUncorrel"
+            Call fnioint(crw,nunit, NDUncorrel,lprint,CHTMP)
+            Do i=1,NDUncorrel
+               Write(CH1TMP3,'(I1)'),i
+               CHTMP = "  B0      DUncDescript("
+     >              //CH1TMP3//")"
+               Call fniochar(crw,nunit,
+     >              DUncDescript(i),lprint,CHTMP)
+            Enddo
+            CHTMP = "  B0    NDCorrel"
+            Call fnioint(crw,nunit, NDCorrel,lprint,CHTMP)
+            Do i=1,NDCorrel
+               Write(CH1TMP3,'(I1)'),i
+               CHTMP = "  B0      DCorDescript("
+     >              //CH1TMP3//")"
+               Call fniochar(crw,nunit,
+     >              DCorDescript(i),lprint,CHTMP)
+            Enddo
+            Do i=1,NObsbin
+               Write(CH3TMP,'(I3)'),i
+               CHTMP = "  B0      DxVal("
+     >              //CH3TMP//")"
+               Call fniodbl(crw,nunit,
+     >              DxVal(i),lprint,CHTMP)
+               CHTMP = "  B0      DyVal("
+     >              //CH3TMP//")"
+               Call fniodbl(crw,nunit,
+     >              DyVal(i),lprint,CHTMP)
+ckr Use write out for changing order Up Lo to Lo Up and
+ckr rel. to abs. if required for table
+Comment:                write(*,'(A,G10.4)')"ABSX: ",DxVal(i)
+Comment:                write(*,'(A,G10.4)')"ABSY: ",DyVal(i)
+               Do j=1,NDUncorrel
+                  Write(CH1TMP4,'(I1)'),j
+                  CHTMP = "  B0        DUnCorLo("
+     >                 //CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 DUnCorLo(i,j),lprint,CHTMP)
+                  CHTMP = "  B0        DUnCorUp("
+     >                 //CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 DUnCorUp(i,j),lprint,CHTMP)
+Comment:                   write(*,'(A,G10.4)')"ABSUPU: ",DUnCorUp(i,j)*DyVal(i)/100.D0
+Comment:                   write(*,'(A,G10.4)')"ABSLOU: ",DUnCorLo(i,j)*DyVal(i)/100.D0
+               Enddo
+               Do j=1,NDCorrel
+                  Write(CH1TMP4,'(I1)'),j
+                  CHTMP = "  B0        DCorLo("
+     >                 //CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 DCorLo(i,j),lprint,CHTMP)
+                  CHTMP = "  B0        DCorUp("
+     >                 //CH3TMP//","//CH1TMP4//")"
+                  Call fniodbl(crw,nunit,
+     >                 DCorUp(i,j),lprint,CHTMP)
+Comment:                   write(*,'(A,G10.4)')"ABSUPC: ",DCorUp(i,j)*DyVal(i)/100.D0
+Comment:                   write(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
+               Enddo
+            Enddo
+            CHTMP = "  B0    NDErrMatrix"
+            Call fnioint(crw,nunit, NDErrMatrix,lprint,CHTMP)
+            If (NDErrMatrix.NE.0) Then
+               Write(*,*)"fx9999rw: Data with error matrix not"//
+     >              " yet implemented, aborted! NDErrMatrix =",
+     >              NDErrMatrix
+               Stop
+            Endif
             Goto 100
          Endif
 

@@ -65,13 +65,11 @@
 
 
 *******************************************************************
-ckr      Subroutine FX9999CC(FILENAME,XMUR,XMUF,IPRINTFLAG,XSECT)
-      Subroutine FX9999CC(XMUR,XMUF,IPRINTFLAG,XSECT)
+      Subroutine FX9999CC(XMUR,XMUF,XSECT,XSUNCOR,XSCOR)
 *-----------------------------------------------------------------
-* fastNLO user code v2.0 - main routine 
+* fastNLO user code v2 - main routine 
 *
 * input:
-ckr*   FILENAME    name of input table
 *   XMUR        prefactor for nominal renormalization scale     
 *                    any choice is possible, but please note 
 *                    that 2-loop threshold corrections work
@@ -79,11 +77,13 @@ ckr*   FILENAME    name of input table
 *   XMUF        prefactor for nominal fact-scale
 *                     only a few choices are possible
 *                     (see output or table documentation)
-*   IPRINTFALG  =1 print results / =0 don't print
 *
 * output:
-*   XSECT(nbin)    array of cross sections 
-*                      nbin (int): Bin number
+*   XSECT(nbin)        array of cross sections 
+*                         nbin (int): Bin number
+*   XSUNCOR(nbin,2)    total uncorr. uncertainty, lower (.,1), upper (.,2)
+*   XSCOR(nbin,2)      total corr. uncertainty, lower (.,1), upper (.,2)
+*
 *
 *
 * --- propose add flag: which order 1 LO, 2 NLO,
@@ -92,117 +92,157 @@ ckr*   FILENAME    name of input table
 *  - can deal with single scale dim only (no DIS with muf=Q, mur=pT
 *  - assumes xmur=xmuf for each contribution
 *  - assumes same cross section units (nb,pb,...) for all contributions
-*        -> maybe convert everything to"published units"?
+*        -> maybe convert everything to "published units"?
+*  - assumes that max. one contribution per allowed type is present
 *
-*
-* MW 04/15/2005 initial version
-* MW 09/02/2005 implement flexible scale variations
-* TK 12/07/2005 table format contains now LO + NLO with 5 scale variations
-* MW 2006/01/17 implement tableformat version 1c
-* MW 2006/02/01 implement tableformat version 1.4 
-* TK 2006/08/06 implement scalebins for N>2
-* MW 2006/08/09 add normalization feature: 1/sigma dsigma/d[s.th.] 
-* MW 2007/06/11 (@London Gatwick) implement v2.0
-* KR 2009/09/22 Add filling sum of subprocesses (into 0 bin), sum of all
-*               orders for isub=0 (into 0 bin) and adding up contributions
-*               successively from lower to higher order according to pointers.
-*               ===> result(MxObsBin,0:MxSubproc,0:MxCtrb)
-* KR 2011/11/29 Kick out table initialization, to be done in main program
 *-----------------------------------------------------------------
       Implicit None
-      Include 'fnx9999.inc'
-      Integer IFILE, IPoint, IScPoint, I,J,K,L,M, 
-     +     IPrintFlag,
-     +     maxscale, nbin,nx
-ckr      Character*(*) FILENAME
       Double Precision Xmur, Xmuf
+      Include 'fnx9999.inc'
+      Integer IPoint, I,J,K
 
-c === Initialization: Read table
-ckr      Call FX9999IN(Filename)
-ckr Moved here from FX9999IN
-c === reset result arrays
+c === Reset output arrays
       Do i=1,MxObsBin
-         Xsect(i) = 0d0
-         Xsect2(i)= 0d0
+         Xsect(i)      = 0d0
+         Xsnorm(i)     = 0d0
+         XsUnCor(i,1)  = 0d0
+         XsUnCor(i,2)  = 0d0
+         XsCor(i,1)    = 0d0
+         XsCor(i,2)    = 0d0
+c === Also reset result array
          Do j=0,MxSubproc
             Do k=0,MxCtrb
                result(i,j,k) = 0d0
             Enddo
          Enddo
       Enddo
-
-c === Reset output array
-      Do i=1,NObsBin
-         xsect(i) = 0d0
-      Enddo
-c === Determine pointers to acces order of contributions and to scales
-c       >>> this should also fill new pointers to LO and NLO, needed
-c       >>> for aposteriori scale variations    
+      
+c === Determine pointers to access contributions and scales
       Call FX9999PT(xmur,xmuf)
 
-c === check if aposteriori mur variation is required
-c     Imurapost = 1
-c     set Log term
-c     fill beta0, n
+c === Check if aposteriori mur variation is required
+c     Todo ?
 
-c === see below: should we combine calls to GP and MT in single subroutine?
-c     -> sometimes the sequence may be called twice
+c === Differentiate between output requiring scales and alpha_s or not
+c === Start with perturbative contributions
+      If (IContrSelector(ILO).EQ.1.OR.
+     >     IContrSelector(INLO).EQ.1.OR.
+     >     IContrSelector(ITHC1L).EQ.1.OR.
+     >     IContrSelector(ITHC2L).EQ.1) Then
 
 c === Loop over contributions, use pointers ordered according to FX9999PT
-      Do i=1,Icontr
-         IPoint   = IContrPointer(i)
-ckr         Write(*,*)"FX9999CC: IContr, IContrPointer, "//
-ckr     +        " IScalePointer, NSubproc(IContrPointer): "
-ckr         Write(*,*)'   ',i, IPoint, IScalePointer(i), NSubProc(IPoint)
+         Do I=ILO,ITHC2L
+            IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
+               IPoint = IContrPointer(i)
+Comment:                Write(*,*)"FX9999CC: IContr, IContrPointer, "//
+Comment:      >              " IScalePointer, NSubproc(IContrPointer): "
+Comment:                Write(*,*)'   ',i, IPoint, IScalePointer(i),
+Comment:      >              NSubProc(IPoint)
 
-c - Get PDFs - Multiply with perturbative coefficients and alphas 
-         Call FX9999PM(i,xmur,xmuf)
-
-      Enddo
-
-
-c - add results in output array - does not work for NP/npert cor
-      Do i=1,Icontr
-c      Do i=1,1   ! test - only single contribution  LO
-c      Do i=2,2   ! test - only single contribution  NLO
-c      Do i=3,3   ! test - only single contribution  threshcor
-         IPoint   = IContrPointer(i)
-         Do j=1,NObsBin
-            Do k=1,NSubProc(Ipoint)
-c            Do k=1,1 ! test - only gg 
-c            Do k=2,2 ! test - only g (DIS)
-c            Do k=2,5 ! test - only qq
-               xsect(j) = xsect(j)+result(j,k,i)
-            Enddo
+c === Get PDFs - Multiply with perturbative coefficients and alphas 
+               Call FX9999PM(i,xmur,xmuf)
+            Endif
          Enddo
-      Enddo
+
+c === Add results in output array
+         Do I=ILO,ITHC2L
+            IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
+               IPoint = IContrPointer(i)
+               Do j=1,NObsBin
+                  Do k=1,NSubProc(Ipoint)
+c     Do k=1,1 ! test - only gg 
+c     Do k=2,2 ! test - only g (DIS)
+c     Do k=2,5 ! test - only qq
+                     xsect(j) = xsect(j)+result(j,k,i)
+                  Enddo
+               Enddo
+            Endif
+         Enddo
+
+c === Fill multiplicative correction and uncertainties into output arrays
+c === (Only take first correction for now)
+      ElseIf (IContrSelector(IMult1).EQ.1.AND.
+     >        IContrPointer(IMult1).NE.-1) Then
+         Do j=1,NObsBin
+            xsect(j) = MFact(1,j)
+c === For now add sources quadratically
+            Do k=1,NMUncorrel(1)
+               XsUnCor(j,1) = XsUnCor(j,1) +
+     >              MUnCorLo(1,j,k)*MUnCorLo(1,j,k)
+               XsUnCor(j,2) = XsUnCor(j,2) +
+     >              MUnCorUp(1,j,k)*MUnCorUp(1,j,k)
+            Enddo
+            XsUnCor(j,1) = - sqrt(min(0d0,XsUnCor(j,1)))
+            XsUnCor(j,2) = + sqrt(min(0d0,XsUnCor(j,2)))
+            Do k=1,NMCorrel(1)
+               XsCor(j,1) = XsCor(j,1) +
+     >              MCorLo(1,j,k)*MCorLo(1,j,k)
+               XsCor(j,2) = XsCor(j,2) +
+     >              MCorUp(1,j,k)*MCorUp(1,j,k)
+            Enddo
+            XsCor(j,1) = - sqrt(min(0d0,XsCor(j,1)))
+            XsCor(j,2) = + sqrt(min(0d0,XsCor(j,2)))
+         Enddo
+
+c === Fill data points and uncertainties into output arrays
+      ElseIf (IContrSelector(IData).EQ.1.AND.
+     >        IContrPointer(IData).NE.-1) Then
+         Do j=1,NObsBin
+            xsect(j) = DyVal(j)
+c === For now add sources quadratically
+            Do k=1,NDUncorrel
+               XsUnCor(j,1) = XsUnCor(j,1) +
+     >              DUnCorLo(j,k)*DUnCorLo(j,k)
+               XsUnCor(j,2) = XsUnCor(j,2) +
+     >              DUnCorUp(j,k)*DUnCorUp(j,k)
+            Enddo
+            XsUnCor(j,1) = - sqrt(max(0d0,XsUnCor(j,1)))
+            XsUnCor(j,2) = + sqrt(max(0d0,XsUnCor(j,2)))
+            Do k=1,NDCorrel
+               XsCor(j,1) = XsCor(j,1) +
+     >              DCorLo(j,k)*DCorLo(j,k)
+               XsCor(j,2) = XsCor(j,2) +
+     >              DCorUp(j,k)*DCorUp(j,k)
+            Enddo
+            XsCor(j,1) = - sqrt(max(0d0,XsCor(j,1)))
+            XsCor(j,2) = + sqrt(max(0d0,XsCor(j,2)))
+         Enddo
+      Else
+         WRITE(*,*)"FX9999CC: ERROR! Contribution selected "//
+     >        "for output not defined, aborted."
+         Do I=ILO,IDATA
+            Write(*,*)"          IContr, NContr, Pointer, Selector",
+     >           I,NContrCounter(I),IContrPointer(I),IContrSelector(I)
+         Enddo
+         STOP
+      Endif
 
 c === Normalization: Todo
       If (INormFlag.eq.0) Then
          Continue               ! no normalization - nothing to do
       ElseIf (INormFlag.eq.1) Then
-c         Call FX9999NM          ! normalize by own integral
-         continue
-c      ElseIf (INormFlag.eq.2 .or INormFlag.eq.3) Then ! get denomin., divide
-c         Call DX9999CC(DenomTable,Xmur,Xmuf,0,Xsect2)
-c         Do i=1,NObsBin
-c            Xsect(i) = Xsect(i)/Xsect2(IDivPointer(i))
-cc            Sum = 0d0 
-cc            Do j=IDivLoPointer(i),IDivUpPointer
-cc              Sum=Sum+Xsect2(j)
-cc            Enddo
-cc         Xsect(i) = Xsect(i)/Sum
-c         EndDo
+Comment:          Call FX9999NM          ! normalize by own integral
+         WRITE(*,*)"FX9999CC: ERROR! Cross section normalization "//
+     >        "not implemented yet, aborted. INormFlag = ",INormFlag
+         STOP
+      ElseIf (INormFlag.eq.2 .OR. INormFlag.eq.3) Then ! get denomin., divide
+         WRITE(*,*)"FX9999CC: ERROR! Cross section normalization "//
+     >        "not implemented yet, aborted. INormFlag = ",INormFlag
+Comment:          Call DX9999CC(DenomTable,Xmur,Xmuf,0,Xsnorm)
+Comment:          Do i=1,NObsBin
+Comment:             Xsect(i) = Xsect(i)/Xsnorm(IDivPointer(i))
+Comment:             Sum = 0d0 
+Comment:             Do j=IDivLoPointer(i),IDivUpPointer
+Comment:               Sum=Sum+Xsnorm(j)
+Comment:             Enddo
+Comment:          Xsect(i) = Xsect(i)/Sum
+Comment:          EndDo
+      Else
+         WRITE(*,*)"FX9999CC: ERROR! Illegal normalization "//
+     >        "flag, aborted. INormFlag = ",INormFlag
       EndIf
 
-c === Print results - if requested
-      If (IPrintFlag.eq.1) Call FX9999PR(xsect)
       Return
-
-c 5000 Format (A,A64)
- 5001 Format (A,A,A)
- 5002 Format (A,F9.4,4X,A,F9.4)
- 998  Continue
       End
 
 *******************************************************************
@@ -229,26 +269,26 @@ c 5000 Format (A,A64)
       Character*255 OLDFILENAME,QUOTENAME
       Character*72 CHEAD
       Character*80 CHTMP
-      Character*33  CSEP33,DSEP33,LSEP33,SSEP33
-      Character*66  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*132 CSEPL,DSEPL,LSEPL,SSEPL
+      Character*37  CSEP37,DSEP37,LSEP37,SSEP37
+      Character*74  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*148 CSEPL,DSEPL,LSEPL,SSEPL
       Data OLDFILENAME,QUOTENAME/'xxxx','QUOTE'/
       Save OLDFILENAME,QUOTENAME
-      Data CSEP33,DSEP33,LSEP33,SSEP33/
-     >     '#################################',
-     >     '=================================',
-     >     "---------------------------------",
-     >     "*********************************"/
+      Data CSEP37,DSEP37,LSEP37,SSEP37/
+     >     '#####################################',
+     >     '=====================================',
+     >     "-------------------------------------",
+     >     "*************************************"/
 
 *---  Initialization
-      CSEPS = CSEP33//CSEP33
-      DSEPS = DSEP33//DSEP33
-      LSEPS = LSEP33//LSEP33
-      SSEPS = SSEP33//SSEP33
-      CSEPL = CSEP33//CSEP33//CSEP33//CSEP33
-      DSEPL = DSEP33//DSEP33//DSEP33//DSEP33
-      LSEPL = LSEP33//LSEP33//LSEP33//LSEP33
-      SSEPL = SSEP33//SSEP33//SSEP33//SSEP33
+      CSEPS = CSEP37//CSEP37
+      DSEPS = DSEP37//DSEP37
+      LSEPS = LSEP37//LSEP37
+      SSEPS = SSEP37//SSEP37
+      CSEPL = CSEP37//CSEP37//CSEP37//CSEP37
+      DSEPL = DSEP37//DSEP37//DSEP37//DSEP37
+      LSEPL = LSEP37//LSEP37//LSEP37//LSEP37
+      SSEPL = SSEP37//SSEP37//SSEP37//SSEP37
       DSEPS(1:2) = "# "
       LSEPS(1:2) = "# "
       SSEPS(1:2) = "# "
@@ -260,7 +300,7 @@ ckr Move this to FX9999CC
 Comment: c === reset result arrays
 Comment:       Do i=1,MxObsBin
 Comment:          Xsect(i) = 0d0
-Comment:          Xsect2(i)= 0d0
+Comment:          Xsnorm(i)= 0d0
 Comment:          Do j=0,MxSubproc
 Comment:             Do k=0,MxCtrb
 Comment:                result(i,j,k) = 0d0
@@ -324,7 +364,14 @@ c --> better in RW so it can be used in other codes / in read and write
       Include 'fnx9999.inc'
       Integer i,j,k, i1
       Double Precision Xmur, Xmuf
-      
+
+c --- Initialize counters and pointers for contribution types 
+      Do I=1,MxCtrb
+         NContrCounter(I)  =  0
+         IContrPointer(I)  = -1
+         IContrSelector(I) = -1
+      Enddo
+
 c --- Check input
       If (xmur.lt.1d-3.or.xmuf.lt.1d-3) Then
          WRITE(*,*)"FX9999PT: ERROR! Scale factors smaller than "//
@@ -332,58 +379,116 @@ c --- Check input
          STOP
       Endif
 
+c --- Loop once over all contributions and register types
+      DO I=1,NContrib
+         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.1.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(ILO) = NContrCounter(ILO) + 1
+            IContrPointer(ILO) = I
+         ENDIF
+         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.2.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(INLO) = NContrCounter(INLO) + 1
+            IContrPointer(INLO) = I
+         ENDIF
+         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
+     >        IContrFlag3(I).EQ.1.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(ITHC1L) = NContrCounter(ITHC1L) + 1
+            IContrPointer(ITHC1L) = I
+         ENDIF
+         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
+     >        IContrFlag3(I).EQ.2.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(ITHC2L) = NContrCounter(ITHC2L) + 1
+            IContrPointer(ITHC2L) = I
+         ENDIF
+         IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
+     >        IContrFlag3(I).EQ.0.AND.IAddMultFlag(I).EQ.1.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(IMULT1) = NContrCounter(IMULT1) + 1
+            IContrPointer(IMULT1) = I
+         ENDIF
+         IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
+     >        IContrFlag3(I).EQ.0.AND.IDataFlag(I).EQ.1.AND.
+     >        Iref(i).eq.Preftab) THEN
+            NContrCounter(IDATA) = NContrCounter(IDATA) + 1
+            IContrPointer(IDATA) = I
+         ENDIF
+      ENDDO
+Comment:       do i=1,ncontrib
+Comment:          write(*,*)"ic,ipoint,iselect,ncount",
+Comment:      >        i,icontrpointer(i),icontrselector(i),ncontrcounter(i)
+Comment:       enddo
+      
 c --- Find particular contributions
-      IContr = 0
+ckr      IContr = 0
 
 c --- Find LO contribution
       If (PORDPTHY.ge.1) then
-         j = IContr + 1
-         IContrPointer(j) = -1
-         Do i=1,NContrib
-ckr            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
-            If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1
-     +           .and. Iref(i).eq.Preftab) Then 
-               IContr = IContr+1
-               IContrPointer(IContr) = i
-            Endif
-         Enddo
-         If (IContrPointer(j).eq.-1) Then
+Comment:          j = IContr + 1
+Comment:          IContrPointer(j) = -1
+Comment:          Do i=1,NContrib
+Comment: ckr            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
+Comment:             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1
+Comment:      +           .and. Iref(i).eq.Preftab) Then 
+Comment:                IContr = IContr+1
+Comment:                IContrPointer(IContr) = i
+Comment:                IContrSelector(IContr) = 1
+Comment:             Endif
+Comment:          Enddo
+ckr         If (IContrPointer(j).eq.-1) Then
+         If (IContrPointer(ilo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY
             Stop
-         Elseif (j.ne.IContr) Then
+ckr         Elseif (j.ne.icontr) Then
+         Elseif (NContrCounter(ilo).ne.1) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
 c - would be strange, but why stop?
             Write(*,*)"          PORDPTHY = ",PORDPTHY
-            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Write(*,*)"          icontr = ",IContrPointer(ilo),
+     >           "NContrCounter = ",NContrCounter(ilo)
             Stop
+ckr
+         Else
+            IContrSelector(ILO) = 1
+ckr
          Endif
       Endif
       
 c --- Find NLO contribution
       If (PORDPTHY.ge.2) then
-         j = IContr + 1
-         IContrPointer(j) = -1
-         Do i=1,NContrib
-            If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.2
-     +           .and. Iref(i).eq.Preftab) Then
-               IContr = IContr+1
-               IContrPointer(IContr) = i
-            Endif
-         Enddo
-         If (IContrPointer(j).eq.-1) Then
+Comment:          j = IContr + 1
+Comment:          IContrPointer(j) = -1
+Comment:          Do i=1,NContrib
+Comment:             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.2
+Comment:      +           .and. Iref(i).eq.Preftab) Then
+Comment:                IContr = IContr+1
+Comment:                IContrPointer(IContr) = i
+Comment:                IContrSelector(IContr) = 1
+Comment:             Endif
+Comment:          Enddo
+ckr         If (IContrPointer(j).eq.-1) Then
+         If (IContrPointer(inlo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY
             Stop
-         Elseif (j.ne.IContr) Then
+ckr         Elseif (j.ne.icontr) Then
+         Elseif (NContrCounter(inlo).ne.1) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY
-            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Write(*,*)"          icontr = ",IContrPointer(inlo),
+     >           "NContrCounter = ",NContrCounter(inlo)
             Stop
+ckr
+         Else
+            IContrSelector(INLO) = 1
+ckr
          Endif
       Endif
       
@@ -403,31 +508,39 @@ c --- Find 1-loop TC
      >           ,PTHRESHCOR
             Stop
          Endif
-         j = IContr + 1
-         IContrPointer(j) = -1
-         Do i=1,NContrib
-            Write(*,*) IContrFlag1(i),IContrFlag2(i),
-     +           IContrFlag3(i),Iref(i),Preftab
-            If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
-     >           IContrFlag3(i).eq.1
-     +           .and. Iref(i).eq.Preftab) Then
-               IContr = IContr+1
-               IContrPointer(IContr) = i
-            Endif
-         Enddo
-         If (IContrPointer(j).eq.-1) Then
+Comment:          j = IContr + 1
+Comment:          IContrPointer(j) = -1
+Comment:          Do i=1,NContrib
+Comment:             Write(*,*) IContrFlag1(i),IContrFlag2(i),
+Comment:      +           IContrFlag3(i),Iref(i),Preftab
+Comment:             If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
+Comment:      >           IContrFlag3(i).eq.1
+Comment:      +           .and. Iref(i).eq.Preftab) Then
+Comment:                IContr = IContr+1
+Comment:                IContrPointer(IContr) = i
+Comment:                IContrSelector(IContr) = 1
+Comment:             Endif
+Comment:          Enddo
+ckr         If (IContrPointer(j).eq.-1) Then
+         If (IContrPointer(ithc1l).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
      >           ,PTHRESHCOR
             Stop
-         Elseif (j.ne.IContr) Then
+         Elseif (NContrCounter(ithc1l).ne.1) Then
+ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
      >           ,PTHRESHCOR
-            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Write(*,*)"          icontr = ",IContrPointer(ithc1l),
+     >           "NContrCounter = ",NContrCounter(ithc1l)
             Stop
+ckr
+         Else
+            IContrSelector(ITHC1L) = 1
+ckr
          Endif
       Endif
 
@@ -447,36 +560,98 @@ c --- Find 2-loop TC
      >           ,PTHRESHCOR
             Stop
          Endif
-         j = IContr + 1
-         IContrPointer(j) = -1
-         Do i=1,NContrib
-            If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
-     >           IContrFlag3(i).eq.2
-     +           .and. Iref(i).eq.Preftab) Then 
-               IContr = IContr+1
-               IContrPointer(IContr) = i
-            Endif
-         Enddo
-         If (IContrPointer(j).eq.-1) Then
+Comment:          j = IContr + 1
+Comment:          IContrPointer(j) = -1
+Comment:          Do i=1,NContrib
+Comment:             If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
+Comment:      >           IContrFlag3(i).eq.2
+Comment:      +           .and. Iref(i).eq.Preftab) Then 
+Comment:                IContr = IContr+1
+Comment:                IContrPointer(IContr) = i
+Comment:                IContrSelector(IContr) = 1
+Comment:             Endif
+Comment:          Enddo
+         If (IContrPointer(ithc2l).eq.-1) Then
+ckr         If (IContrPointer(j).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
      >           ,PTHRESHCOR
             Stop
-         Elseif (j.ne.IContr) Then
+         Elseif (NContrCounter(ithc2l).ne.1) Then
+ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
      >           ,PTHRESHCOR
-            Write(*,*)"          j = ",j,"IContr = ",IContr
+            Write(*,*)"          icontr = ",IContrPointer(ithc2l),
+     >           "NContrCounter = ",NContrCounter(ithc2l)
             Stop
+ckr
+         Else
+            IContrSelector(ITHC2L) = 1
+ckr
          Endif
       Endif
+
+c --- Find NP corrections
+      If (PNPCOR.eq.1) then
+         If (IContrPointer(imult1).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PNPCOR = ",PNPCOR
+            Stop
+         Elseif (NContrCounter(imult1).ne.1) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PNPCOR = ",PNPCOR
+            Write(*,*)"          icontr = ",IContrPointer(imult1),
+     >           "NContrCounter = ",NContrCounter(imult1)
+            Stop
+ckr
+         Else
+            IContrSelector(IMULT1) = 1
+ckr
+         Endif
+      Endif
+
+c --- Find Data
+      If (PDATA.eq.1) then
+         If (IContrPointer(idata).eq.-1) Then
+            Write(*,*)"FX9999PT: ERROR! Requested contribution "//
+     >           "not available, stopped!"
+            Write(*,*)"          PDATA = ",PDATA
+            Stop
+         Elseif (NContrCounter(idata).ne.1) Then
+            Write(*,*)"FX9999PT: ERROR! More than one contribution "//
+     >           "available, stopped!"
+            Write(*,*)"          PDATA = ",PDATA
+            Write(*,*)"          icontr = ",IContrPointer(idata),
+     >           "NContrCounter = ",NContrCounter(idata)
+            Stop
+ckr
+         Else
+            IContrSelector(IDATA) = 1
+ckr
+         Endif
+      Endif
+
+ckr
+Comment:       write(*,*)"AAA: icontr",icontr
+Comment:       icontr = 0
+Comment:       do i=1,mxctrb
+Comment:          IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1)
+Comment:      >        icontr=icontr+1
+Comment:       enddo
+Comment:       write(*,*)"BBB: icontr",icontr
+ckr
 
 c --- Check availability of factorization scale choice and assign pointer
 c     (based on factorization scale since renorm scale is flexible -
 c      except for threshold corrections)
-      Do i=1,IContr
+ckr      Do i=1,IContr
+      Do I=ILO,ITHC2L
+         IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
 Comment:          write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
@@ -486,7 +661,7 @@ Comment:          write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
             Else
                Write(*,*)"FX9999PT: ERROR! Not a single scale "//
      >              "available in contribution, stopped!"
-               Write(*,*)"          IContr = ",IContr,
+               Write(*,*)"          IContr = ",IContrPointer(I),
      >              ", NScaleVar(.,1) = ",NScaleVar(i1,1) 
                Stop
             Endif
@@ -515,6 +690,7 @@ Comment:      >                 scalefac(i1,1,j),IScalePointer(i)
             Enddo
             Stop
          Endif 
+         Endif
       Enddo
 
 c --- Check if renormalization scale is directly available or (if not)
@@ -533,7 +709,9 @@ c >>>>>>>
 c > should not be necessary if we distinguish between IScaleDep=2,3 in mur code
 c
       If (dabs(xmur/xmuf-1.d0).gt.1d-4) Then
-         Do i=1,IContr
+ckr         Do i=1,IContr
+         Do I=ILO,ITHC2L
+         IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
             i1 = IContrPointer(i)
             If (IScaleDep(i1).eq.2) Then
                Write(*,*)"FX9999PT: ERROR! The requested "//
@@ -545,15 +723,16 @@ c
                Enddo
                Stop
             Endif
+         Endif
          Enddo
       Endif
 
 c --- Debug print-out
 ckr      Write(*,*) "FX9999PT: No. contributions selected ",Icontr
-      Do i=1,IContr
+ckr      Do i=1,IContr
 ckr         Write(*,*) "FX9999PT: Pointer number ",i," to "//
 ckr     >        "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
-      Enddo
+ckr      Enddo
 
 
       Return
@@ -1117,7 +1296,7 @@ Comment:       Enddo
             CHTMP = CtrbDescript(i,j)
             Write(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
          Enddo
-         Write(*,*)"#   computed by:"
+         Write(*,*)"#   provided by:"
          Do j=1,NcodeDescr(i)
             CHTMP = CodeDescript(i,j)
             Write(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
