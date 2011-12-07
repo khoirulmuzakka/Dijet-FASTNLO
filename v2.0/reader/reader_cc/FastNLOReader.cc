@@ -1079,7 +1079,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
   if ( NDim == 2 ){
     string header[3] = { "  IObs  Bin Size IODim1 ", 
 			 "   IODim2 ",
-			 " LO cross section   NLO cross section  K factor"};
+			 " LO cross section   NLO cross section  k factor  k thr. corr."};
     //string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
     unsigned int NDimBins[NDim];
     //printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
@@ -1096,9 +1096,13 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 	  NDimBins[j] = 1;
 	}
       }
-      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#18.11E\n",
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E  % #6.3f",
 	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]/kFactor[i],xs[i],kFactor[i]);
+      if ( !BBlocksSMCalc[1].empty() ) { // th. corr
+	 printf(" % #11.2f", 0.);//BBlocksSMCalc[1][0]->fact[i]/
+      }
+      printf("\n");
     }
   } else {
   }
@@ -1483,8 +1487,6 @@ void FastNLOReader::CalcCrossSection( ){
 void FastNLOReader::CalcAposterioriScaleVariation( ){
    int scaleVar		= BBlocksSMCalc[0][1]->Npow == ILOord ? 0 : fScalevar;
    double scalefac	= fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar];
-
-
    vector<double>* XS	= &XSection;
    for(int i=0;i<NObsBin;i++){
       int nxmax = BBlocksSMCalc[0][1]->GetNxmax(i);
@@ -1511,6 +1513,7 @@ void FastNLOReader::CalcAposterioriScaleVariation( ){
    }
 }
 
+
 //______________________________________________________________________________
 
 
@@ -1520,29 +1523,31 @@ void FastNLOReader::CalcCrossSectionDISv21( FastNLOBlockB* B , bool IsLO){
   //
 
   vector<double>* XS = IsLO ? &XSection_LO : &XSection;
+  B->fact.resize(NObsBin);
   for(int i=0;i<NObsBin;i++){
-    int nxmax = B->GetNxmax(i);
-    double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-    for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-      for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
-	double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
-	    
-	double mur	= CalcMu( kMuR , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
-	double muf	= CalcMu( kMuF , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
-	double mur2 = pow(mur,2);
-	double muf2 = pow(muf,2);
-	    
-	for(int x=0;x<nxmax;x++){ 
-	  for(int n=0;n<B->NSubproc;n++){ 
-	    double as	= B->AlphasTwoPi[i][jS1][kS2];
-	    double pdflc	= B->PdfLcMuVar[i][x][jS1][kS2][n];
-	    XS->at(i)	+=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                     as * pdflc * unit;
-	    XS->at(i)	+=  B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2/Q2) * as * pdflc * unit;
-	    XS->at(i)	+=  B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2/Q2) * as * pdflc * unit;
-	  }
+     B->fact[i]=0;
+     int nxmax = B->GetNxmax(i);
+     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+     for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	   double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
+	   double mur	= CalcMu( kMuR , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
+	   double muf	= CalcMu( kMuF , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
+	   double mur2 = pow(mur,2);
+	   double muf2 = pow(muf,2);
+	   for(int x=0;x<nxmax;x++){ 
+	      for(int n=0;n<B->NSubproc;n++){ 
+		 double as	= B->AlphasTwoPi[i][jS1][kS2];
+		 double pdflc	= B->PdfLcMuVar[i][x][jS1][kS2][n];
+		 double xsci	=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                     as * pdflc * unit;
+		 xsci		+= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2/Q2) * as * pdflc * unit;
+		 xsci		+= B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2/Q2) * as * pdflc * unit;;
+		 XS->at(i)	+= xsci;
+		 B->fact[i]	+= xsci;
+	      }
+	   }
 	}
-      }
-    }
+     }
   }
 }
 
@@ -1556,22 +1561,26 @@ void FastNLOReader::CalcCrossSectionv20( FastNLOBlockB* B , bool IsLO ){
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
   vector<double>* XS	= IsLO ? &XSection_LO : &XSection;
+  B->fact.resize(NObsBin);
   for(int i=0;i<NObsBin;i++){
-    int nxmax = B->GetNxmax(i);
-    double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-    for(int j=0;j<B->GetTotalScalenodes();j++){
-      int scalenode1 = j;
-      int scalenode2 = j;
-      if (B->NScaleDim>1){          
-	scalenode1 = j / B->Nscalenode[1];
-	scalenode2 = j % B->Nscalenode[1];
-      }
-      for(int k=0;k<nxmax;k++){ 
-	for(int l=0;l<B->NSubproc;l++){ 
-	   XS->at(i)		+=  B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+     B->fact[i] = 0;
+     int nxmax = B->GetNxmax(i);
+     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+     for(int j=0;j<B->GetTotalScalenodes();j++){
+	int scalenode1 = j;
+	int scalenode2 = j;
+	if (B->NScaleDim>1){          
+	   scalenode1 = j / B->Nscalenode[1];
+	   scalenode2 = j % B->Nscalenode[1];
 	}
-      }
-    }
+	for(int k=0;k<nxmax;k++){ 
+	   for(int l=0;l<B->NSubproc;l++){ 
+	      double xsci	= B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+	      XS->at(i)		+=  xsci;
+	      B->fact[i]	+=  xsci;
+	   }
+	}
+     }
   }
 }
 
@@ -1647,9 +1656,6 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
   double scalefac	= fScaleFacMuR/B->ScaleFac[0][scaleVar];
-
-  //hier scalefac richtig machen!
-  cout<< "alkphas cache. scalefac = " << scalefac <<"\tnpow = "<<B->Npow<<endl;
 
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<B->GetTotalScalenodes();j++){
