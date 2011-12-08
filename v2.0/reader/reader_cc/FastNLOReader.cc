@@ -36,9 +36,10 @@ using namespace std;
 
 
 extern "C"{
-  void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
-  void evolution_();
-  //int getalf_( double* alfs, double* r2 );
+   void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
+   void evolution_();
+   double asfunc_( double* r2, int* nf  , int* ierr);
+
 }
 
 
@@ -106,7 +107,7 @@ FastNLOReader::~FastNLOReader(void)
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
   fAlphasEvolution = AlphasEvolution; 
   if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) {
-    cout << "Warning. You cannot change the Alpha_s(Mz) value."<<endl; 
+     cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, ...)."<<endl; 
   }
 
    if ( AlphasEvolution == kGRV ){
@@ -1740,9 +1741,18 @@ double FastNLOReader::GetAlphasLHAPDF(double Q){
 
 double FastNLOReader::GetAlphasQCDNUM(double Q){
   //
-  // Sorry! This function is still under developement.
-  printf("FastNLOReader::GetAlphasQCDNUM. ERROR. Not yet implemented.\n");
-  return 0.;
+  // alpha_s evolution as used in QCDNUM
+   
+  double mu2 = Q*Q;
+  int ierr = 9876;
+  int nf = 9;
+  double as = asfunc_( &mu2, &nf  , &ierr);
+
+  if ( ierr > 0 ){
+     printf("FastNLOReader::GetAlphasQCDNUM. Error. alphas evolution failed. ierr = %d, Q = %7.4f\n",ierr,Q);
+  }
+
+  return as;
 }
 
 
@@ -1792,9 +1802,7 @@ double FastNLOReader::GetAlphasNLOJET(double Q, double alphasMZ){
 
 
 double FastNLOReader::GetAlphasGRV(double MU, double ALPSMZ){
-  
-  return Alphas::GetAlphasMu(MU,ALPSMZ);
-  
+   return Alphas::GetAlphasMu(MU,ALPSMZ);
 }
 
 
@@ -1923,17 +1931,6 @@ void FastNLOReader::InitLHAPDF(){
   if ( fLHAPDFfilename == ""){
     printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
   }
-
-  //string LHAPDFfile = fLHAPDFpath+"/"+fLHAPDFfilename;
-
-  // ---- check if file exists ----- //
-  //   FILE* fp = fopen(LHAPDFfile.c_str(), "r");
-  //   if (fp) {
-  //     fclose(fp);
-  //   } else {
-  //     printf("Error. LHAPDF file does not exists. Was looking in/for: %s.\n Exiting.\n",LHAPDFfile.c_str());
-  //     exit(1);
-  //   } 
 
   //LHAPDF::setVerbosity(LHAPDF::SILENT);
   //  LHAPDF::setVerbosity(LHAPDF::LOWKEY);
