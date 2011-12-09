@@ -13,3 +13,7 @@ c     100    format('ii=',i2,' ff=',f6.3)
       subroutine evolution()
       return
       end
+
+      subroutine asfunc(r2,nf,ierr)
+      return
+      end
