@@ -172,7 +172,6 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
    const double beta103	= pow(beta10,3);
    const double beta20	= beta2 / beta0;
    const double C10	= beta10 / beta0 *log(beta0);
-   const double ZMass2	= pow(fMz,2);
 
    double aspi = alphasMz/Pi;
    double aspi2 = pow(aspi,2);

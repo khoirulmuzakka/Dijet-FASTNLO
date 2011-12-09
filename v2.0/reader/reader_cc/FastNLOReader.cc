@@ -89,9 +89,9 @@ FastNLOReader::FastNLOReader(string filename)
 
 FastNLOReader::~FastNLOReader(void)
 {
-   for ( int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
+   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
       if ( !BBlocksSMCalc[j].empty() ){
-	 for ( int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
+	 for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	    delete BBlocksSMCalc[j][i];
 	 }
 	 BBlocksSMCalc.clear();
@@ -438,7 +438,7 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
 	 printf("FastNLOReader::SetScaleFactorMuR. Warning. Deactivating contribution from threshold corrections.\n");
 	 printf("  A-posteriori scale variations for renormalizations scale is only valid for fixed order calculations.\n");
 	 printf("  You can reactivate the threshold corrections again using FastNLOReader::SetContributionON(kTresholdCorrections,Id,true).\n");
-	 for ( int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++ ){
+	 for ( unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++ ){
 	    //printf("   * Deactivating threshold corrections with Id = %d.\n",i);
 	    SetContributionON(kThresholdCorrection,i,false);
 	 }
@@ -622,20 +622,20 @@ void FastNLOReader::PrintTableInfo(const int iprint){
   if ( BlockB_Data ) {
      printf(" # Data Table: %s\n",BlockB_Data->CodeDescript[0].c_str());
      if ( iprint > 0 ){
-	for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
+	for ( unsigned int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
 	   printf( " * \t\t%s\n",BlockB_Data->CodeDescript[k].c_str());
 	}
      }
   }
 
-   for ( int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
+   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
       if ( !BBlocksSMCalc[j].empty() ){
 	 cout << " # Table "<<fCorrName[j]<< " ("<<BBlocksSMCalc[j][0]->CodeDescript[0] <<") with order:  ";
-	 for ( int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
+	 for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	    cout << BBlocksSMCalc[j][i]->CtrbDescript[0] <<" (Id="<<i<<")   ";
 	 }cout << endl;
 	 if ( iprint > 0 ){
-	    for ( int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) {
+	    for ( unsigned int k = 0 ; k<BBlocksSMCalc[j][0]->CodeDescript.size();k++ ) {
 	       printf( " # \t\t%s\n",BBlocksSMCalc[j][0]->CodeDescript[k].c_str());
 	    }
 	    //BBlocksSMCalc[j][0]->Print(0,0);
@@ -643,10 +643,10 @@ void FastNLOReader::PrintTableInfo(const int iprint){
       }
    }
    
-   for ( int j = 0 ; j<BBlocksNewPhys.size() ; j++ ){
+   for ( unsigned int j = 0 ; j<BBlocksNewPhys.size() ; j++ ){
       if ( !BBlocksNewPhys[j].empty() ){
 	 cout << " # Found new physics table with number "<<j<<" with order:  ";
-	 for ( int i = 0 ; i<BBlocksNewPhys[j].size() ; i++ ){
+	 for ( unsigned int i = 0 ; i<BBlocksNewPhys[j].size() ; i++ ){
 	    cout << BBlocksNewPhys[j][i]->CtrbDescript[0] <<" (Id="<<i<<")   ";
 	 }cout << endl;
 	 printf(" #   -> SM extensions can not be evaluated by this reader! Just skipping those...\n");
@@ -880,7 +880,7 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
   printf(" # Information on fastNLO scenario: %s\n",ScenName.data());
   printf(" # ----------------------------------------------------------------------\n");
   printf(" # Description:\n");
-  for(int i=0;i<ScDescript.size();i++){
+  for(unsigned int i=0;i<ScDescript.size();i++){
     printf(" #   %s\n",ScDescript[i].data());
   }
   printf(" #\n");
@@ -954,7 +954,7 @@ void FastNLOReader::PrintBlockA2(){
   printf("  A2  ISep                              %10i\n",tablemagicno);
   printf("  A2  IpublUnits                        %10i\n",Ipublunits);
   printf("  A2  NscDescript                       %10zi\n",ScDescript.size());
-  for(int i=0;i<ScDescript.size();i++){
+  for(unsigned int i=0;i<ScDescript.size();i++){
     printf("  A2    ScDescript(%1i)                   %s\n",i+1,ScDescript[i].data());
   }
   printf("  A2  Ecms                              % -#10.4g\n",Ecms);
@@ -1011,7 +1011,7 @@ void FastNLOReader::PrintCrossSections( ){
 
   printf(" *  \n");
   printf(" *  FastNLO Cross sections for\n");
-  for ( int i = 0 ; i < ScDescript.size() ; i++ ){
+  for ( unsigned int i = 0 ; i < ScDescript.size() ; i++ ){
     printf(" *     %s\n",ScDescript[i].c_str());
   }
   printf(" *  at sqrt(s) = %8.2f GeV\n", Ecms);
@@ -1088,7 +1088,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 	   header[0].c_str(),DimLabel[0].c_str(),header[1].c_str(),DimLabel[1].c_str(),header[2].c_str());
     cout << SSEP << endl;
     for ( unsigned int i=0; i<xs.size(); i++ ){ 
-      for ( unsigned int j=0; j<NDim; j++ ){ 
+      for ( int j=0; j<NDim; j++ ){ 
 	if ( i==0 ){
 	  NDimBins[j] = 1;
 	} else if ( LoBin[i-1][j] < LoBin[i][j]){
@@ -1133,7 +1133,7 @@ void FastNLOReader::PrintDataCrossSections(){
   
   cout << DSEP << endl;
   printf(" Data Cross Sections\n");
-  for ( int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
+  for ( unsigned int k = 0 ; k<BlockB_Data->CodeDescript.size();k++ ) {
      printf( "\t\t%s\n",BlockB_Data->CodeDescript[k].c_str());
   }
   cout << SSEP << endl;
@@ -1158,7 +1158,7 @@ void FastNLOReader::PrintDataCrossSections(){
 
     cout << SSEP << endl;
     for ( unsigned int i=0; i<xs.size(); i++ ){ 
-      for ( unsigned int j=0; j<NDim; j++ ){ 
+      for ( int j=0; j<NDim; j++ ){ 
 	if ( i==0 ){
 	  NDimBins[j] = 1;
 	} else if ( LoBin[i-1][j] < LoBin[i][j]){
@@ -1218,7 +1218,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 
   printf(" *  \n");
   printf(" *  FastNLO Cross sections for\n");
-  for ( int i = 0 ; i < ScDescript.size() ; i++ ){
+  for ( unsigned int i = 0 ; i < ScDescript.size() ; i++ ){
     printf(" *     %s\n",ScDescript[i].c_str());
   }
   printf(" *  at sqrt(s) = %8.2f GeV\n", Ecms);
@@ -1529,8 +1529,8 @@ void FastNLOReader::CalcCrossSectionDISv21( FastNLOBlockB* B , bool IsLO){
      B->fact[i]=0;
      int nxmax = B->GetNxmax(i);
      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-     for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-	for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+     for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	   double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
 	   double mur	= CalcMu( kMuR , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
 	   double muf	= CalcMu( kMuF , B->ScaleNodeScale1[i][jS1] ,  B->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
@@ -1683,8 +1683,8 @@ void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
   //
 
   for(int i=0;i<NObsBin;i++){
-    for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-      for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+    for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+      for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	// 	    double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
 	// 	    double Pt   = B->ScaleNodeScale2[i][kS2];
 	double mur		= CalcMu( kMuR , BlockB_LO->ScaleNodeScale1[i][jS1] ,  BlockB_LO->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
@@ -1991,8 +1991,8 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
       double xp	= B->XNode1[i][x];
 	
       if ( fMuFFunc != kScale1 &&  fMuFFunc != kScale2 ) { // that't the standard case!
-	for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-	  for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    double muf = CalcMu( kMuF , BlockB_LO->ScaleNodeScale1[i][jS1] ,  BlockB_LO->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
 		  
 	    xfx = GetXFX(xp,muf);
@@ -2005,12 +2005,12 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	}
       }
       else if ( fMuFFunc == kScale2 ){	// speed up
-	for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	  double muf = CalcMu( kMuF , 0 ,  BlockB_LO->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
 	  xfx = GetXFX(xp,muf);
 	  //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
-	  for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	  for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	    for(int l=0;l<B->NSubproc;l++){ 
 	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
 	    }
@@ -2018,12 +2018,12 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	}
       }
       else if ( fMuFFunc == kScale1 ){	// speed up
-	for(int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	  double muf = CalcMu( kMuF , BlockB_LO->ScaleNodeScale1[i][jS1] , 0 , fScaleFacMuF );
 	  xfx = GetXFX(xp,muf);
 	  //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
-	  for(int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    for(int l=0;l<B->NSubproc;l++){ 
 	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
 	    }

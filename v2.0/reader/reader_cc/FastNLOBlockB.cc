@@ -259,7 +259,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       for(int j=0;j<NscaleDescript;j++){
 	table->getline(buffer,256);
 	ScaleDescript[i][j] = buffer;
-	//            StripWhitespace(ScaleDescript[i][j]);
+	StripWhitespace(&ScaleDescript[i][j]);
       }
     }
 
@@ -379,17 +379,17 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 void FastNLOBlockB::Print(const int ic, const int iprint){
   if (iprint==0) {
     printf(" # Contribution %1i:\n",ic);
-    for(int i=0;i<CtrbDescript.size();i++){
+    for(unsigned int i=0;i<CtrbDescript.size();i++){
       printf(" #   %s\n",CtrbDescript[i].data());
     }
     printf(" #   computed by:\n");
-    for(int i=0;i<CodeDescript.size();i++){
+    for(unsigned int i=0;i<CodeDescript.size();i++){
       printf(" #   %s\n",CodeDescript[i].data());
     }
     if ( NScaleDep != 3 ) {
       for(int i=0;i<NScaleDim;i++){
 	printf(" #   Scale dimensions: %1i\n",NScaleDim);
-	for(int j=0;j<ScaleDescript[i].size();j++){
+	for(unsigned int j=0;j<ScaleDescript[i].size();j++){
 	  printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
 	}
 	printf(" #     Number of scale variations for dimension %1i: %1i\n",i+1,Nscalevar[i]);
@@ -416,11 +416,11 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
     printf("  B0    IContrFlag3(%1i)                  %10i\n",ic,IContrFlag3);
     //  printf("  B0    NScaleDep(%1i)                    %10i\n",ic,NScaleDep);
     printf("  B0    NContrDescr(%1i)                  %10zi\n",ic,CtrbDescript.size());
-    for(int i=0;i<CtrbDescript.size();i++){
+    for(unsigned int i=0;i<CtrbDescript.size();i++){
       printf("  B0      CtrbDescript(%1i,%1i)             %s\n",ic,i+1,CtrbDescript[i].data());
     }
     printf("  B0    NCodeDescr(%1i)                   %10zi\n",ic,CodeDescript.size());
-    for(int i=0;i<CodeDescript.size();i++){
+    for(unsigned int i=0;i<CodeDescript.size();i++){
       printf("  B0      CodeDescript(%1i,%1i)             %s\n",ic,i+1,CodeDescript[i].data());
     }
 
@@ -465,7 +465,7 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
       if ( NScaleDep != 3 ) {
 	for(int i=0;i<NScaleDim;i++){
 	  printf("  B0      NScaleDescript(%1i,%1i)           %10i\n",ic,i+1,NScaleDim);
-	  for(int j=0;j<ScaleDescript[i].size();j++){
+	  for(unsigned int j=0;j<ScaleDescript[i].size();j++){
 	    printf("  B0        ScaleDescript(%1i,%1i,%1i)        %s\n",ic,i+1,j+1,ScaleDescript[i][j].data());
 	  }
 	  printf("  B0      NScaleVar(%1i,%1i)                %10i\n",ic,i+1,Nscalevar[i]);
