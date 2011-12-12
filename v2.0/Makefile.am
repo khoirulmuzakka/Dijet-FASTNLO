@@ -21,7 +21,7 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 #
-SUBDIRS = common creator reader doc
+SUBDIRS = common creator reader processor doc
 #userkr
 #
 # Files that are required to build the project but that can be

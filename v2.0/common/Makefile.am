@@ -8,13 +8,9 @@ pkglib_LTLIBRARIES = libfastnlo.la libfastnloUser.la libfastnloNlojet.la libfast
 # Add header files for jet algos ?
 pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h
 
-# Source files to be distributed for each library
-libfastnloJetAlgos_la_SOURCES = cone-e.cc cone-e.h cone-et.cc cone-et.h \
-  fj-ak.cc fj-ak.h fj-d0r2.cc fj-d0r2.h fj-kt.cc fj-kt.h fj-sc.cc fj-sc.h \
-  kt-e.cc kt-e.h
-
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
-  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h
+  fnloBlockBNlojet.cc \
+  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
 
 libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
   fnloTableUser.cc \
@@ -51,6 +47,12 @@ AM_CXXFLAGS =
 AM_CPPFLAGS = -I${NLOJETINCLUDEPATH} -I${LHAPDFINCLUDEPATH}
 if HAVE_FASTJET
   AM_CPPFLAGS += -I${FASTJETINCLUDEPATH}
+
+  # Source files to be distributed for each library
+  libfastnloJetAlgos_la_SOURCES = cone-e.cc cone-e.h cone-et.cc cone-et.h \
+    fj-ak.cc fj-ak.h fj-d0r2.cc fj-d0r2.h fj-kt.cc fj-kt.h fj-sc.cc fj-sc.h \
+    kt-e.cc kt-e.h
+
 endif
 if HAVE_ROOT
   AM_CPPFLAGS += -I${ROOTINCLUDEPATH}

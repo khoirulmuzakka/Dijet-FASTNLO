@@ -49,12 +49,12 @@ libfnl2622e_la_SOURCES      = fnl2622e.cc      $(AM_SOURCES)
 #
 # All targets
 AM_CXXFLAGS = -g -O0 -Wall -I${top_srcdir}/common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-if HAVE_FASTJETCONFIG 
+if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`
 else
-   if HAVE_FASTJET
-      AM_CXXFLAGS += -I${FASTJETINCLUDEPATH}
-   endif
+if HAVE_FASTJET
+   AM_CXXFLAGS += -I${FASTJETINCLUDEPATH}
+endif
 endif
 
 # Example of individual specification of CXXFLAGS
@@ -75,9 +75,9 @@ AM_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir
 if HAVE_FASTJETCONFIG 
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else
-   if HAVE_FASTJET
-      AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
-   endif
+if HAVE_FASTJET
+   AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
+endif
 endif
 
 # Example of individual specification of LDFLAGS

@@ -24,13 +24,13 @@ $(DOCPDF): $(srcdir)/$(DOCSRC)
 	$(PDFLATEX) $<
 	$(PDFLATEX) $<
 else
-  if HAVE_LATEXDVIPDFM
+if HAVE_LATEXDVIPDFM
 $(DOCPDF): $(srcdir)/$(DOCSRC)
 	$(LATEX) $<
 	$(LATEX) $<
 	$(LATEX) $<
 	$(DVIPDFM) $<
-  endif
+endif
 endif
 
 dist_doc_DATA = $(docfiles)

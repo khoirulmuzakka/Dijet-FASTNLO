@@ -440,19 +440,19 @@ AC_SUBST(SVNREV)
 
 # Output
 AC_CONFIG_FILES([Makefile
-                 common/Makefile
-                 creator/Makefile
-                 creator/ep/Makefile
-                 creator/hadron/Makefile
-	         processor/Makefile
-	         processor/converter/Makefile
-                 reader/Makefile
-                 reader/reader_cc/Makefile
-                 reader/reader_f/Makefile
-		 doc/Makefile
-		 doc/arXiv_1109.1310/Makefile
-	        ])
-#                 processor/merger/Makefile
-#                 userkr/Makefile
+	common/Makefile
+	creator/ep/Makefile
+	creator/hadron/Makefile
+	creator/Makefile
+	doc/arXiv_1109.1310/Makefile
+	doc/Makefile
+	processor/converter/Makefile
+	processor/Makefile
+	processor/merger/Makefile
+	reader/Makefile
+	reader/reader_cc/Makefile
+	reader/reader_f/Makefile
+])
+#userkr/Makefile
 
 AC_OUTPUT
