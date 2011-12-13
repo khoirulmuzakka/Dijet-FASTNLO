@@ -607,7 +607,7 @@ void FastNLOReader::ReadTable(void)
   }
 
   // some printout
-  PrintTableInfo(0);
+  //  PrintTableInfo(0);
   //NPDFDim	= BlockB_LO->NPDFDim;
 
 }
@@ -914,8 +914,8 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
   // for(int i=0;i<Ncontrib;i++){
   //    printf("#   NscaleVar,NScaleNode: %i3, %i3\n",NscaleVar(i,1),NScaleNode(i,1));
   // }
-  printf(" #\n");
-  printf(" ########################################################################\n");
+  // printf(" #\n");
+  // printf(" ########################################################################\n");
 }
 
 

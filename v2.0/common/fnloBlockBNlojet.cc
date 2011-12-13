@@ -356,14 +356,14 @@ void fnloBlockBNlojet::FillEventDISMuVar(int ObsBin, double x, double M1, double
 	    printf(" idxQ<0     %d %d %f \n",nscale1,iNode1,cefscale1[iNode1]);
 	    exit(1);
 	 } else if (idxQ > NscalenodeScale1-1){
-	    printf(" idxQ>max   %d %d %f %f\n",nscale1,iNode1,cefscale1[iNode1]);
+	    printf(" idxQ>max   %d %d %f \n",nscale1,iNode1,cefscale1[iNode1]);
 	    exit(1);
 	 }
 	 if (idxPt < 0){
 	    printf(" idxPt<0     %d %d %f \n",nscale2,iNode2,cefscale2[iNode2]);
 	    exit(1);
 	 } else if (idxPt > NscalenodeScale2-1){
-	    printf(" idxPt>max   %d %d %f %f\n",nscale2,iNode2,cefscale2[iNode2]);
+	    printf(" idxPt>max   %d %d %f \n",nscale2,iNode2,cefscale2[iNode2]);
 	    exit(1);
 	 }
 	 // ---- check done ---- //
@@ -901,7 +901,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
    // ---- write out --- //
    if ( (counter % IWarmUpPrint) == 0) {
       // ---- printout on screen ---- //
-      printf(" // %d contributions (!= events) in warm-up run \n",counter);
+      printf(" // %16lu contributions (!= events) in warm-up run \n",counter);
       for (int i=0;i<BlockA2->GetNObsBin();i++){
 	 printf("	%s [%d] = %e", sx.data(), i, axlo[i] );
 	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }

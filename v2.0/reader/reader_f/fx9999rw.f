@@ -23,27 +23,27 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
       Character*3 CH3TMP
       Character*4 CH4TMP
       Character*40 CHTMP
-      Character*33  CSEP33,DSEP33,LSEP33,SSEP33
-      Character*66  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*132 CSEPL,DSEPL,LSEPL,SSEPL
+      Character*41  CSEP41,DSEP41,LSEP41,SSEP41
+      Character*82  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Integer iprint
       Logical lprint
       Include 'fnx9999.inc'
-      Data CSEP33,DSEP33,LSEP33,SSEP33/
-     >     '#################################',
-     >     '=================================',
-     >     "---------------------------------",
-     >     "*********************************"/
+      Data CSEP41,DSEP41,LSEP41,SSEP41/
+     >     '#########################################',
+     >     '=========================================',
+     >     "-----------------------------------------",
+     >     "*****************************************"/
 
 *---  Initialization
-      CSEPS = CSEP33//CSEP33
-      DSEPS = DSEP33//DSEP33
-      LSEPS = LSEP33//LSEP33
-      SSEPS = SSEP33//SSEP33
-      CSEPL = CSEP33//CSEP33//CSEP33//CSEP33
-      DSEPL = DSEP33//DSEP33//DSEP33//DSEP33
-      LSEPL = LSEP33//LSEP33//LSEP33//LSEP33
-      SSEPL = SSEP33//SSEP33//SSEP33//SSEP33
+      CSEPS = CSEP41//CSEP41
+      DSEPS = DSEP41//DSEP41
+      LSEPS = LSEP41//LSEP41
+      SSEPS = SSEP41//SSEP41
+      CSEPL = CSEP41//CSEP41//CSEP41//CSEP41
+      DSEPL = DSEP41//DSEP41//DSEP41//DSEP41
+      LSEPL = LSEP41//LSEP41//LSEP41//LSEP41
+      SSEPL = SSEP41//SSEP41//SSEP41//SSEP41
       DSEPS(1:2) = "# "
       LSEPS(1:2) = "# "
       SSEPS(1:2) = "# "
@@ -93,9 +93,9 @@ c --- Block A1
       If (iprint.gt.0) then
          lprint = .true.
          write(*,'(A)')""
-         write(*,*)SSEP33
+         write(*,*)SSEP41
          write(*,*)"* fastNLO Table: Block A1"
-         write(*,*)SSEP33
+         write(*,*)SSEP41
       Endif
       Call fnioisep(crw,nunit, lprint,"  A1  ISep")
       Call fnioint(crw,nunit, Itabversion,lprint,"  A1  Itabversion")
@@ -141,7 +141,7 @@ c --- Block A1
          Stop
       Endif
       If (iprint.gt.0) then
-         write(*,*)CSEP33
+         write(*,*)CSEP41
       Endif
       lprint = .false.
 
@@ -151,9 +151,9 @@ c --- Block A2
       If (iprint.gt.0) then
          lprint = .true.
          write(*,'(A)')""
-         write(*,*)SSEP33
+         write(*,*)SSEP41
          write(*,*)"* fastNLO Table: Block A2"
-         write(*,*)SSEP33
+         write(*,*)SSEP41
       Endif
       Call fnioisep(crw,nunit,lprint,"  A2  ISep")
       Call fnioint(crw,nunit, IpublUnits,lprint,"  A2  IpublUnits") 
@@ -213,7 +213,7 @@ c --- Block A2
          Enddo
       Endif
       If (iprint.gt.0) then
-         write(*,*)CSEP33
+         write(*,*)CSEP41
       Endif
       lprint = .false.
 
@@ -223,9 +223,9 @@ c --- Block B
       If (iprint.gt.1) then
          lprint = .true.
          write(*,'(A)')""
-         write(*,*)SSEP33
+         write(*,*)SSEP41
          write(*,*)"* fastNLO Table: Block B"
-         write(*,*)SSEP33
+         write(*,*)SSEP41
       Endif
 c -   count number of multiplicative contributions
       IMult = 0
@@ -464,10 +464,10 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
          If (iprint.gt.2) then
             lprint = .true.
             write(*,'(A)')""
-            write(*,*)SSEP33
+            write(*,*)SSEP41
             write(*,*)"* fastNLO Table: Block B ic = ",ic
             write(*,*)"*    X Node Details"
-            write(*,*)SSEP33
+            write(*,*)SSEP41
          Endif
 
          If (NPDF(ic).gt.0) Then
@@ -512,7 +512,7 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
          Endif
 
          If (iprint.gt.2) then
-            write(*,*)CSEP33
+            write(*,*)CSEP41
          Endif
 
          lprint = .false.
@@ -556,10 +556,10 @@ c --- check consistency between Nsubproc and IPDFdef1,2,
          If (iprint.gt.3) then
             lprint = .true.
             write(*,'(A)')""
-            write(*,*)SSEP33
+            write(*,*)SSEP41
             write(*,*)"* fastNLO Table: Block B ic = ",ic
             write(*,*)"*    Scale Node Details"
-            write(*,*)SSEP33
+            write(*,*)SSEP41
          Endif
 
          Do i=1,NScaleDim(ic)
@@ -596,18 +596,18 @@ Comment:      >                    CH1TMP//","//
          Enddo
          
          If (iprint.gt.3) then
-            write(*,*)CSEP33
+            write(*,*)CSEP41
          Endif
 
          lprint = .false.
          If (iprint.gt.4) then
             lprint = .true.
             write(*,'(A)')""
-            write(*,*)SSEP33
+            write(*,*)SSEP41
             write(*,*)"* fastNLO Table: Block B ic = ",ic
             write(*,*)"*    Sigma Tilde"
             write(*,*)"* Not implemented yet!"
-            write(*,*)SSEP33
+            write(*,*)SSEP41
             lprint = .false.
          Endif
 
@@ -643,7 +643,7 @@ c --- here we assume NFragFunc=0
          Enddo
 
          If (iprint.gt.4) then
-            write(*,*)CSEP33
+            write(*,*)CSEP41
          Endif
 
          lprint = .false.
@@ -653,7 +653,7 @@ c --- here we assume NFragFunc=0
       Enddo
 
       If (iprint.gt.1) then
-         write(*,*)CSEP33
+         write(*,*)CSEP41
       Endif
       lprint = .false.
 

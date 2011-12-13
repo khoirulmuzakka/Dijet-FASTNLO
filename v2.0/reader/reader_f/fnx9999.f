@@ -158,9 +158,16 @@ c     Do k=2,5 ! test - only qq
                Enddo
             Endif
          Enddo
-
-c === Fill multiplicative correction and uncertainties into output arrays
-c === (Only take first correction for now)
+c === Either multiply x section now by multiplicative correction or ... 
+         I = IMULT1
+         IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
+            IPoint = IContrPointer(i)
+            Do j=1,NObsBin
+               xsect(j) = xsect(j)*MFact(1,j)
+            Enddo
+         Endif
+c === ... fill multiplicative correction and uncertainties into output arrays
+c === (Only works with one correction of this type for now)
       ElseIf (IContrSelector(IMult1).EQ.1.AND.
      >        IContrPointer(IMult1).NE.-1) Then
          Do j=1,NObsBin
@@ -269,44 +276,32 @@ Comment:          EndDo
       Character*255 OLDFILENAME,QUOTENAME
       Character*72 CHEAD
       Character*80 CHTMP
-      Character*37  CSEP37,DSEP37,LSEP37,SSEP37
-      Character*74  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*148 CSEPL,DSEPL,LSEPL,SSEPL
+      Character*41  CSEP41,DSEP41,LSEP41,SSEP41
+      Character*82  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Data OLDFILENAME,QUOTENAME/'xxxx','QUOTE'/
       Save OLDFILENAME,QUOTENAME
-      Data CSEP37,DSEP37,LSEP37,SSEP37/
-     >     '#####################################',
-     >     '=====================================',
-     >     "-------------------------------------",
-     >     "*************************************"/
+      Data CSEP41,DSEP41,LSEP41,SSEP41/
+     >     '#########################################',
+     >     '=========================================',
+     >     "-----------------------------------------",
+     >     "*****************************************"/
 
 *---  Initialization
-      CSEPS = CSEP37//CSEP37
-      DSEPS = DSEP37//DSEP37
-      LSEPS = LSEP37//LSEP37
-      SSEPS = SSEP37//SSEP37
-      CSEPL = CSEP37//CSEP37//CSEP37//CSEP37
-      DSEPL = DSEP37//DSEP37//DSEP37//DSEP37
-      LSEPL = LSEP37//LSEP37//LSEP37//LSEP37
-      SSEPL = SSEP37//SSEP37//SSEP37//SSEP37
+      CSEPS = CSEP41//CSEP41
+      DSEPS = DSEP41//DSEP41
+      LSEPS = LSEP41//LSEP41
+      SSEPS = SSEP41//SSEP41
+      CSEPL = CSEP41//CSEP41//CSEP41//CSEP41
+      DSEPL = DSEP41//DSEP41//DSEP41//DSEP41
+      LSEPL = LSEP41//LSEP41//LSEP41//LSEP41
+      SSEPL = SSEP41//SSEP41//SSEP41//SSEP41
       DSEPS(1:2) = "# "
       LSEPS(1:2) = "# "
       SSEPS(1:2) = "# "
       DSEPL(1:2) = "# "
       LSEPL(1:2) = "# "
       SSEPL(1:2) = "# "
-
-ckr Move this to FX9999CC
-Comment: c === reset result arrays
-Comment:       Do i=1,MxObsBin
-Comment:          Xsect(i) = 0d0
-Comment:          Xsnorm(i)= 0d0
-Comment:          Do j=0,MxSubproc
-Comment:             Do k=0,MxCtrb
-Comment:                result(i,j,k) = 0d0
-Comment:             Enddo
-Comment:          Enddo
-Comment:       Enddo
 
 c === output in first fastNLO call
       If (IFNfirst.eq.0) Then
@@ -369,7 +364,7 @@ c --- Initialize counters and pointers for contribution types
       Do I=1,MxCtrb
          NContrCounter(I)  =  0
          IContrPointer(I)  = -1
-         IContrSelector(I) = -1
+         IContrSelector(I) =  0
       Enddo
 
 c --- Check input
@@ -422,62 +417,32 @@ Comment:      >        i,icontrpointer(i),icontrselector(i),ncontrcounter(i)
 Comment:       enddo
       
 c --- Find particular contributions
-ckr      IContr = 0
-
 c --- Find LO contribution
       If (PORDPTHY.ge.1) then
-Comment:          j = IContr + 1
-Comment:          IContrPointer(j) = -1
-Comment:          Do i=1,NContrib
-Comment: ckr            Write(*,*) 'FX9999PT Icintrflag1,2 ',IContrFlag1(i),IContrFlag2(i),Iref(i)
-Comment:             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.1
-Comment:      +           .and. Iref(i).eq.Preftab) Then 
-Comment:                IContr = IContr+1
-Comment:                IContrPointer(IContr) = i
-Comment:                IContrSelector(IContr) = 1
-Comment:             Endif
-Comment:          Enddo
-ckr         If (IContrPointer(j).eq.-1) Then
          If (IContrPointer(ilo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY
             Stop
-ckr         Elseif (j.ne.icontr) Then
          Elseif (NContrCounter(ilo).ne.1) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
-c - would be strange, but why stop?
             Write(*,*)"          PORDPTHY = ",PORDPTHY
             Write(*,*)"          icontr = ",IContrPointer(ilo),
      >           "NContrCounter = ",NContrCounter(ilo)
             Stop
-ckr
          Else
             IContrSelector(ILO) = 1
-ckr
          Endif
       Endif
       
 c --- Find NLO contribution
       If (PORDPTHY.ge.2) then
-Comment:          j = IContr + 1
-Comment:          IContrPointer(j) = -1
-Comment:          Do i=1,NContrib
-Comment:             If (IContrFlag1(i).eq.1.and.IContrFlag2(i).eq.2
-Comment:      +           .and. Iref(i).eq.Preftab) Then
-Comment:                IContr = IContr+1
-Comment:                IContrPointer(IContr) = i
-Comment:                IContrSelector(IContr) = 1
-Comment:             Endif
-Comment:          Enddo
-ckr         If (IContrPointer(j).eq.-1) Then
          If (IContrPointer(inlo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY
             Stop
-ckr         Elseif (j.ne.icontr) Then
          Elseif (NContrCounter(inlo).ne.1) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
@@ -485,101 +450,83 @@ ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"          icontr = ",IContrPointer(inlo),
      >           "NContrCounter = ",NContrCounter(inlo)
             Stop
-ckr
          Else
             IContrSelector(INLO) = 1
-ckr
          Endif
       Endif
       
 c --- Find 1-loop TC
-      If (PTHRESHCOR.eq.1) then
-         If (PORDPTHY.lt.1) then
-            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
-     >           "1-loop TC without LO, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
+      If (PTHRESHCOR.EQ.1) then
+         If (PORDPTHY.LT.0) then
+            Write(*,*)"FX9999PT: ERROR! Illegal choice of "//
+     >           "perturbative order, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
             Stop
-         Endif
-         If (PORDPTHY.ge.2) then
+         ElseIf (PORDPTHY.EQ.0) then
+            Write(*,*)"FX9999PT: Warning! 1-loop TC returned "//
+     >           "separately, but need to be added to LO!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
+         ElseIf (PORDPTHY.GE.2) then
             Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
      >           "1-loop TC with NLO, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
             Stop
          Endif
-Comment:          j = IContr + 1
-Comment:          IContrPointer(j) = -1
-Comment:          Do i=1,NContrib
-Comment:             Write(*,*) IContrFlag1(i),IContrFlag2(i),
-Comment:      +           IContrFlag3(i),Iref(i),Preftab
-Comment:             If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
-Comment:      >           IContrFlag3(i).eq.1
-Comment:      +           .and. Iref(i).eq.Preftab) Then
-Comment:                IContr = IContr+1
-Comment:                IContrPointer(IContr) = i
-Comment:                IContrSelector(IContr) = 1
-Comment:             Endif
-Comment:          Enddo
-ckr         If (IContrPointer(j).eq.-1) Then
          If (IContrPointer(ithc1l).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
             Stop
          Elseif (NContrCounter(ithc1l).ne.1) Then
-ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
             Write(*,*)"          icontr = ",IContrPointer(ithc1l),
      >           "NContrCounter = ",NContrCounter(ithc1l)
             Stop
-ckr
          Else
             IContrSelector(ITHC1L) = 1
-ckr
          Endif
       Endif
 
 c --- Find 2-loop TC
       If (PTHRESHCOR.eq.2) then
-         If (PORDPTHY.lt.2) then
+         If (PORDPTHY.LT.0) then
+            Write(*,*)"FX9999PT: ERROR! Illegal choice of "//
+     >           "perturbative order, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
+            Stop
+         ElseIf (PORDPTHY.EQ.0) then
+            Write(*,*)"FX9999PT: Warning! 2-loop TC returned "//
+     >           "separately, but need to be added to NLO!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
+         ElseIf (PORDPTHY.EQ.1) then
             Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
-     >           "2-loop TC without NLO, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
+     >           "2-loop TC with LO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
+            Stop
+         ElseIf (PORDPTHY.GE.3) then
+            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
+     >           "2-loop TC with N?LO, stopped!"
+            Write(*,*)"          PORDPTHY = ",PORDPTHY,
+     >           ", PTHRESHCOR = ",PTHRESHCOR
             Stop
          Endif
-         If (PORDPTHY.ge.3) then
-            Write(*,*)"FX9999PT: ERROR! Inconsistent choice of "//
-     >           "2-loop TC with NNLO, stopped!"
-            Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
-     >           ,PTHRESHCOR
-            Stop
-         Endif
-Comment:          j = IContr + 1
-Comment:          IContrPointer(j) = -1
-Comment:          Do i=1,NContrib
-Comment:             If (IContrFlag1(i).eq.2.and.IContrFlag2(i).eq.1.and.
-Comment:      >           IContrFlag3(i).eq.2
-Comment:      +           .and. Iref(i).eq.Preftab) Then 
-Comment:                IContr = IContr+1
-Comment:                IContrPointer(IContr) = i
-Comment:                IContrSelector(IContr) = 1
-Comment:             Endif
-Comment:          Enddo
          If (IContrPointer(ithc2l).eq.-1) Then
-ckr         If (IContrPointer(j).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
      >           ,PTHRESHCOR
             Stop
          Elseif (NContrCounter(ithc2l).ne.1) Then
-ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
             Write(*,*)"          PORDPTHY = ",PORDPTHY,", PTHRESHCOR = "
@@ -587,13 +534,11 @@ ckr         Elseif (j.ne.icontr) Then
             Write(*,*)"          icontr = ",IContrPointer(ithc2l),
      >           "NContrCounter = ",NContrCounter(ithc2l)
             Stop
-ckr
          Else
             IContrSelector(ITHC2L) = 1
-ckr
          Endif
       Endif
-
+      
 c --- Find NP corrections
       If (PNPCOR.eq.1) then
          If (IContrPointer(imult1).eq.-1) Then
@@ -608,10 +553,8 @@ c --- Find NP corrections
             Write(*,*)"          icontr = ",IContrPointer(imult1),
      >           "NContrCounter = ",NContrCounter(imult1)
             Stop
-ckr
          Else
             IContrSelector(IMULT1) = 1
-ckr
          Endif
       Endif
 
@@ -629,32 +572,18 @@ c --- Find Data
             Write(*,*)"          icontr = ",IContrPointer(idata),
      >           "NContrCounter = ",NContrCounter(idata)
             Stop
-ckr
          Else
             IContrSelector(IDATA) = 1
-ckr
          Endif
       Endif
-
-ckr
-Comment:       write(*,*)"AAA: icontr",icontr
-Comment:       icontr = 0
-Comment:       do i=1,mxctrb
-Comment:          IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1)
-Comment:      >        icontr=icontr+1
-Comment:       enddo
-Comment:       write(*,*)"BBB: icontr",icontr
-ckr
 
 c --- Check availability of factorization scale choice and assign pointer
 c     (based on factorization scale since renorm scale is flexible -
 c      except for threshold corrections)
-ckr      Do i=1,IContr
       Do I=ILO,ITHC2L
          IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
          i1 = IContrPointer(i)
          IScalePointer(i) = 0
-Comment:          write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
          If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
             If (NScaleVar(i1,1).ge.1) Then
                IScalePointer(i) = 1 ! use 1st scale variation
@@ -675,8 +604,6 @@ Comment:          write(*,*)"AAA: ic,icp,iscaledep",i,i1,iscaledep(i1)
                If (dabs(scalefac(i1,1,j)/xmuf-1d0).lt.1d-4) Then
 c - works only if IScaleDep=2 - for =3 need to find correct pair of (xmur,xmuf)
                   IScalePointer(i)=j
-Comment:                   Write(*,*)"iscvar,xmuf,scalfac,scalpt",j,xmuf,
-Comment:      >                 scalefac(i1,1,j),IScalePointer(i)
                   Exit          ! <<< what does "Exit" do?
                Endif
             Enddo

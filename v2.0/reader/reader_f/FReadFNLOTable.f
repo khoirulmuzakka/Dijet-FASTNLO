@@ -15,19 +15,20 @@
       Implicit None
       Include 'fnx9999.inc'
       Character*16 CHTMP1,CHTMP2
-      Character*37  CSEP37,DSEP37,LSEP37,SSEP37
-      Character*74  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*148 CSEPL,DSEPL,LSEPL,SSEPL
+      Character*41  CSEP41,DSEP41,LSEP41,SSEP41
+      Character*82  CSEPS,DSEPS,LSEPS,SSEPS
+      Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Character*255 FILENAME,PDFSET
       Integer i, j, IS, IPRINT, NDimBins(MxDim)
       Logical LLO,LNLO,LTHC1L,LTHC2L,LMULT,LDATA
+      Logical LTHCSEP,LNPCSEP
       Double Precision SCALEF
       Data IPRINT/0/
-      Data CSEP37,DSEP37,LSEP37,SSEP37/
-     >     '#####################################',
-     >     '=====================================',
-     >     "-------------------------------------",
-     >     "*************************************"/
+      Data CSEP41,DSEP41,LSEP41,SSEP41/
+     >     '#########################################',
+     >     '=========================================',
+     >     "-----------------------------------------",
+     >     "*****************************************"/
 
 c     - Attention - this is the most likely source of Fortran errors in !!!
 c     fastNLO
@@ -43,6 +44,7 @@ c     Parameter (MxObsBin = 200)
       Double Precision xslo(MxObsBin) 
       Double Precision xsnlo(MxObsBin) 
       Double Precision xsthc(MxObsBin) 
+      Double Precision dxsuctmp(MxObsBin,2),dxscortmp(MxObsBin,2) 
       Double Precision xsnpc(MxObsBin)
       Double Precision dxsucnpc(MxObsBin,2),dxscornpc(MxObsBin,2) 
       Double Precision xsdat(MxObsBin) 
@@ -50,14 +52,14 @@ c     Parameter (MxObsBin = 200)
       Double Precision kfac(MxObsBin),kthc(MxObsBin),knpc(MxObsBin) 
 
 *---  Initialization
-      CSEPL = CSEP37//CSEP37//CSEP37//CSEP37
-      DSEPL = DSEP37//DSEP37//DSEP37//DSEP37
-      LSEPL = LSEP37//LSEP37//LSEP37//LSEP37
-      SSEPL = SSEP37//SSEP37//SSEP37//SSEP37
-      CSEPS = CSEP37//CSEP37
-      DSEPS = DSEP37//DSEP37
-      LSEPS = LSEP37//LSEP37
-      SSEPS = SSEP37//SSEP37
+      CSEPL = CSEP41//CSEP41//CSEP41//CSEP41
+      DSEPL = DSEP41//DSEP41//DSEP41//DSEP41
+      LSEPL = LSEP41//LSEP41//LSEP41//LSEP41
+      SSEPL = SSEP41//SSEP41//SSEP41//SSEP41
+      CSEPS = CSEP41//CSEP41
+      DSEPS = DSEP41//DSEP41
+      LSEPS = LSEP41//LSEP41
+      SSEPS = SSEP41//SSEP41
 Comment:       CSEPS(1:2) = "# "
       DSEPS(1:2) = "# "
       LSEPS(1:2) = "# "
@@ -66,18 +68,23 @@ Comment:       CSEPL(1:2) = "# "
 Comment:       DSEPL(1:2) = "# "
 Comment:       LSEPL(1:2) = "# "
 Comment:       SSEPL(1:2) = "# "
-ckr CHeck Fortran 90 functions tiny(x),huge(x),precision(x) 
-      write(*,*)"tiny,huge,precision",tiny(1d0),huge(1d0),precision(1d0)
+Comment: *---  Fortran 90 functions for computing precision:
+Comment: *---  tiny(x), huge(x), precision(x)
+Comment:       Write(*,*)"FReadFNLOTable: F90 double tiny, huge, precision = ",
+Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       DO I=1,NObsBin
          xslo(I)  = -1.d0
          xsnlo(I) = -1.d0
          xsthc(I) = -1.d0
          kfac(I)  =  0.d0
          kthc(I)  =  0.d0
+         knpc(I)  =  0.d0
       ENDDO
+      LTHCSEP = .FALSE.
+      LNPCSEP = .FALSE.
 
 *---  Initial output
-      WRITE(*,*)""
+      WRITE(*,'(A)')""
       WRITE(*,*)CSEPS
       WRITE(*,*)"# ReadFNLOTable"
       WRITE(*,*)CSEPS
@@ -196,58 +203,75 @@ ckr CHeck Fortran 90 functions tiny(x),huge(x),precision(x)
 *---  output)
          IF (LLO) THEN
             Call FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-            Call FX9999CC(SCALEF, SCALEF, XSLO, DXSUCNPC, DXSCORNPC)
+            Call FX9999CC(SCALEF, SCALEF, XSLO, DXSUCTMP, DXSCORTMP)
          ENDIF
          
 *---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
 *---  output)
          IF (LLO.AND.LNLO) THEN
             Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-            Call FX9999CC(SCALEF, SCALEF, XSNLO, DXSUCNPC, DXSCORNPC)
+            Call FX9999CC(SCALEF, SCALEF, XSNLO, DXSUCTMP, DXSCORTMP)
          ENDIF
 
 *---  Calculate NLO cross section incl. 2-loop threshold corrections
 *---  (set IPRINT to 1 for more verbose output)
-Comment:          IF (LLO.AND.LNLO.AND.LTHC2L) THEN
-Comment:             Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-Comment:             Call FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
-Comment:             Call FX9999CC(SCALEF, SCALEF, XSTHC, DXSUCNPC, DXSCORNPC)
-Comment:          ENDIF
+         IF (LLO.AND.LNLO.AND.LTHC2L) THEN
+            Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+            Call FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
+            Call FX9999CC(SCALEF, SCALEF, XSTHC, DXSUCTMP, DXSCORTMP)
+         ENDIF
 
 *---  Print out 2-loop threshold corrections (set IPRINT to 1 for more
 *---  verbose output)
-         IF (LTHC2L) THEN
-            Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
-            Call FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
-            Call FX9999CC(SCALEF, SCALEF, XSTHC, DXSUCNPC, DXSCORNPC)
-         ENDIF
+Comment:          IF (LTHC2L) THEN
+Comment:             Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+Comment:             Call FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
+Comment:             Call FX9999CC(SCALEF, SCALEF, XSTHC, DXSUCTMP, DXSCORTMP)
+Comment:             LTHCSEP = .TRUE.
+Comment:          ENDIF
 
 *---  Apply non-perturbative corrections to NLO cross section (set
 *---  IPRINT to 1 for more verbose output)
-Comment:          IF (LLO.AND.LNLO.AND.LMULT) THEN
-Comment:             Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-Comment:             Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
-Comment:             Call FNSET("P_NPCOR",1) ! select non-perturbative corrections
-Comment:             Call FX9999CC(SCALEF, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
-Comment:          ENDIF
-
-*---  Print out non-perturbative corrections (set IPRINT to 1 for more
-*---  verbose output)
-         IF (LMULT) THEN
-            Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+         IF (LLO.AND.LNLO.AND.LMULT) THEN
+            Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
             Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
             Call FNSET("P_NPCOR",1) ! select non-perturbative corrections
             Call FX9999CC(SCALEF, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
          ENDIF
 
+*---  Print out non-perturbative corrections (set IPRINT to 1 for more
+*---  verbose output)
+Comment:          IF (LMULT) THEN
+Comment:             Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+Comment:             Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
+Comment:             Call FNSET("P_NPCOR",1) ! select non-perturbative corrections
+Comment:             Call FX9999CC(SCALEF, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
+Comment:             LNPCSEP = .TRUE.
+Comment:          ENDIF
+
+*---  Reset selection for within scale loop
+         Call FNSET("P_THRESHCOR",0) ! select no. loops in threshold
+         Call FNSET("P_NPCOR",0) ! deselect non-perturbative corrections
+
 *---  Cross section printout
          DO I=1,NObsBin
-            IF ((ABS(xslo(I)).GT.1.D-99)) THEN
+            IF ((ABS(xslo(I)).GT.Tiny(1D0))) THEN
                kfac(I) = xsnlo(I) / xslo(I)
             ENDIF
-            IF ((ABS(xsnlo(I)).GT.1.D-99)) THEN
-               kthc(I) = xsthc(I) / xsnlo(I)
-            ENDIF
+            If (LTHCSEP) Then
+               kthc(I) = xsthc(I)
+            Else
+               IF ((ABS(xsnlo(I)).GT.Tiny(1D0))) THEN
+                  kthc(I) = xsthc(I) / xsnlo(I)
+               ENDIF
+            Endif
+            If (LNPCSEP) Then
+               knpc(I) = xsnpc(I)
+            Else
+               IF ((ABS(xsnlo(I)).GT.Tiny(1D0))) THEN
+                  knpc(I) = xsnpc(I) / xsnlo(I)
+               ENDIF
+            Endif
          ENDDO
          WRITE(*,'(A)')DSEPL
          WRITE(*,'(A)')" Cross Sections"
@@ -266,7 +290,8 @@ Comment:          ENDIF
      >        "LO cross section   "//
      >        "NLO cross section  "//
      >        "K factor           "//
-     >        "K thr. corr."
+     >        "K thr. corr.       "//
+     >        "Non-pert. corr."
          WRITE(*,'(A)')LSEPL
          DO I=1,NObsBin
             DO J=1,NDim

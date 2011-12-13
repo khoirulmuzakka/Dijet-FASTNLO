@@ -80,38 +80,6 @@ int main(int argc, char** argv){
     return 1;
   }
 
-  // if ( argc >= 3 ){
-  //   string ThePDF = (const char*) argv[2];
-  //   if ( ThePDF == "ct10" || ThePDF == "CT10" ){
-  //     PDFFile	= "CT10.LHgrid";		
-  //   } else if ( ThePDF == "cteq66" || ThePDF=="CTEQ66" ){
-  //     PDFFile	= "cteq66.LHgrid";		
-  //   } else if ( ThePDF == "cteq6m" || ThePDF=="CTEQ6M" ){
-  //     cout << "ToDo: Cteq6m not yet proper implemented. (PDFEigenvektorer)"<<endl;
-  //     PDFFile	= "cteq6m.LHpdf";		
-  //   } else if ( ThePDF == "cteq65" || ThePDF=="CTEQ65" ){
-  //     PDFFile	= "cteq65.LHgrid";		
-  //   } else if ( ThePDF == "herapdf10" || ThePDF=="HERAPDF10" ){
-  //     PDFFile	= "HERAPDF10_EIG.LHgrid";	
-  //   } else if ( ThePDF == "MSTW2008as" || ThePDF == "MSTW2008AS" || ThePDF=="mstw2008as" ){
-  //     PDFFile	= "MSTW2008nlo90cl_asmz+90cl.LHgrid";	
-  //   } else if ( ThePDF == "MSTW2008" || ThePDF=="mstw2008" ){
-  //     PDFFile	= "MSTW2008nlo90cl.LHgrid";	
-  //   } else if ( ThePDF == "nnpdf20" || ThePDF=="NNPDF20" ){
-  //     PDFFile	= "NNPDF20_100.LHgrid";		
-  //   } else if ( ThePDF == "nnpdf21" || ThePDF=="NNPDF21" ){
-  //     PDFFile	= "NNPDF21_100.LHgrid";		
-  //   } else if ( ThePDF == "herapdf15" || ThePDF=="HERAPDF15" ){
-  //     PDFFile	= "HERAPDF1.5_EIG.LHgrid";	
-  //   } else{
-  //     PDFFile	= ThePDF;
-  //     printf("Warning. I try to set the pdf-file directly to %s.\n",PDFFile.c_str());
-  //   }
-  // }
-  // else {
-  //   printf("Using default pdf file %s.\n",PDFFile.c_str());
-  // }  
-
   // -------- initialize FastNLOReader --------- //
   FastNLOReader* fnloreader = new FastNLOReader( tablename );
   

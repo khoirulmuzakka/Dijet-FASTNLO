@@ -377,7 +377,7 @@ void UserDIS::inittable(){
    };
 
    vector<double*> vetbins(nq2bins);
-   for (int i=0;i<vetbins.size();i++) vetbins[i]=etbins[i]; 
+   for (unsigned int i=0;i<vetbins.size();i++) vetbins[i]=etbins[i]; 
 
    // ---- initalize the bingrids and the normalizations ---- //
    A2->InitBinning( nq2bins , q2bins , netbins , vetbins );
