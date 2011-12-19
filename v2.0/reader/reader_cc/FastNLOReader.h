@@ -47,15 +47,15 @@ public:
    };
   
    enum EScaleFunctionalForm {
-      kScale1			= 0,
-      kScale2			= 1,
-      kQuadraticSum		= 2,
-      kQuadraticMean		= 3,
-      kQuadraticSumOver4	= 4,
-      kLinearMean		= 5,
-      kLinearSum		= 6,
-      kScaleMax			= 7,
-      kScaleMin			= 8
+      kScale1			= 0,	// e.g. mu^2 = Q^2 
+      kScale2			= 1,	// e.g. mu^2 = pt^2 
+      kQuadraticSum		= 2,	// e.g. mu^2 = ( Q^2 + pt^2 )
+      kQuadraticMean		= 3,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 2 
+      kQuadraticSumOver4	= 4,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 4 
+      kLinearMean		= 5,	// e.g. mu^2 = (( Q + pt ) / 2 )^2
+      kLinearSum		= 6,	// e.g. mu^2 = (( Q + pt ))^2
+      kScaleMax			= 7,	// e.g. mu^2 = max( Q^2, pt^2)
+      kScaleMin			= 8	// e.g. mu^2 = min( Q^2, pt^2) 
    };
 
    enum EPDFInterface {
@@ -88,7 +88,7 @@ public:
       kFixedOrder		= 0,	// Fixed Order Calculation
       kThresholdCorrection	= 1,	// Threshold corrections
       kElectroWeakCorrection	= 2,	// Electro weak corrections
-      kNonPertrubativeCorretion	= 10	// Hadronisation correction/non-perturbative correction
+      kNonPerturbativeCorrection	= 10	// Hadronisation correction/non-perturbative correction
    };
 
    static const double TWOPI = 6.28318530717958647692528;
