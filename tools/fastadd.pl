@@ -91,7 +91,7 @@ my $merger = "nlofast-add";
 my $cmd;
 unless ( $opt_w ) {
     if ( $vers == 2 ) {
-	$merger = "fnlo-merge";
+	$merger = "fnlo-merge2";
     }
     $cmd = `which ${merger}`;
     chomp $cmd;
