@@ -152,8 +152,6 @@ protected:
 
    // ---- Block B ---- //
    FastNLOBlockB* BlockB_Data;
-   FastNLOBlockB* BlockB_LO;
-   FastNLOBlockB* BlockB_NLO;
    FastNLOBlockB* BlockB_LO_Ref;
    FastNLOBlockB* BlockB_NLO_Ref;
    vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections (IContrFlag1 = 2) [Model(i~ContrFlag2)][contribution]
