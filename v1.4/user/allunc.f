@@ -128,6 +128,11 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)' '
             STOP
 ckr To be cross-checked for each new scenario
+         ELSEIF (SCENARIO(1:8).EQ."fnl2332c") THEN
+            LNRM = .TRUE.
+            LTAB = .FALSE.
+            WRITE(*,*)
+     >           "ALLUNC: Deriving x section ratios"
          ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
 ckr Original version for fnl2442: Works fine, trivial division in rap 3
             LRAT = .FALSE.
@@ -157,7 +162,7 @@ ckr New norm. version for fnl2442: Works fine, trivial division in rap 4
          WRITE(*,*)"ALLUNC: Evaluating scenario: ",
      >        SCENARIO(1:LEN_TRIM(SCENARIO))
       ENDIF
-ckr      lnrm = .false.
+ckr      LNRM = .FALSE.
       TABNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//".tab"
       IF (LNRM.AND.LTAB) THEN
          TABNAMN = SCENARIO(1:7)//"norm"//".tab"

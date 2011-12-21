@@ -373,7 +373,7 @@ cdebug
       CHARACTER*255 SCENARIO
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
-      INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN
+      INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM
       INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSUBPROCN
 
       
@@ -425,7 +425,60 @@ ckr Save basic structure of table to normalize
 
 ckr Normalization table loaded, if necessary
       IF ((ISTEP.EQ.1.OR.ISTEP.EQ.4).AND.LNRM) THEN
-         IF (SCENARIO(1:7).EQ."fnl2442") THEN
+         IF (SCENARIO(1:8).EQ."fnl2332c") THEN
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  IF (IPT.EQ.1) IBNRM=IBIN
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+ckr Only first pT bin needed to normalize in each rapidity region
+ckr Might be required to sum up multiple bins in pT and y for CMS analysis 
+ckr                        IF (IPT.EQ.1) THEN
+                           IF (IORD.LE.NORDN) THEN
+                              MYTMP(IBIN,ISUB,IORD) =
+     >                             RESULT(IBIN,ISUB,IORD)
+                           ELSE
+                              MYTMP(IBIN,ISUB,IORD) =
+     >                             (RESULT(IBIN,ISUB,1) +
+     >                             RESULT(IBIN,ISUB,2))
+                           ENDIF
+ckr                        ENDIF
+                           IF (IPT.EQ.13) THEN
+ckr                           IF (IPT.EQ.1) THEN
+                              MYTMP(IBNRM,ISUB,IORD) =
+     >                             MYTMP(IBIN,ISUB,IORD)
+                           ENDIF
+                           IF (13.LT.IPT.AND.IPT.LE.15) THEN
+                              MYTMP(IBNRM,ISUB,IORD) =
+     >                             MYTMP(IBNRM,ISUB,IORD) +
+     >                             MYTMP(IBIN,ISUB,IORD)
+                           ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            IBIN = 0
+ckr Counter for bin containing normalization factor
+            IBNRM = 1
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSUBPROCN+1
+                        MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                       1D0/MYTMP(IBNRM,ISUB,IORD)
+                        IF (ISTEP.EQ.1) THEN
+                           MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+               IBNRM = IBNRM + NPTN(IRAP)
+            ENDDO
+         ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
             IBIN = 0
             DO IRAP=1,NRAPIDITYN
                DO IPT=1,NPTN(IRAP)
