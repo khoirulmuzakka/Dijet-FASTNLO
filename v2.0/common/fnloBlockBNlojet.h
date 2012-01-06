@@ -10,7 +10,7 @@
 
 class fnloBlockBNlojet : public fnloBlockB {
  public:
-   fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);}
+   fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);counter=0;}
    void FillEventDIS(int ObsBin,double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor=1.0);
    void FillEventDISMuVar(int ObsBin, double x, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double prefactor=1.0);
    void FillEventPhoto(int ObsBin,double x, double scale1, const nlo::amplitude_photo& amp, nlo::pdf_and_coupling_photo& pdf, double prefactor=1.0);
@@ -20,6 +20,10 @@ class fnloBlockBNlojet : public fnloBlockB {
 
    void InitDISConstants( fnloBlockA2* A2 , bool nlo );
    void InitFinalDISValues( fnloBlockA2* A2 , double* xlim , double* scale1lo , double* scale1hi , double* scale2lo = NULL , double* scale2hi = NULL );
+   void InitLogLogScaleNode( fnloBlockA2* A2 , double* slo , double* shi , int iScale );
+   void InitLinearScaleNode( fnloBlockA2* A2 , double* slo , double* shi , int iScale );
+   void ResizeSigmaTildeTables( fnloBlockA2* A2 );
+   void InitLHCConstants( fnloBlockA2* A2 , bool nlo );
    void InitReferenceTable( fnloBlockA2* A2 );
    void SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , double* xlim );
 
@@ -52,6 +56,22 @@ private:
    void WarmUp( int ObsBin, double x, double M1, double M2 = 0 , string sx = "xlim", string s1 ="mu", string s2 ="");
    void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& realpdf, double prefactor);
    void FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& realpdf, double prefactor);
+   unsigned long counter; // here, if you want to have multiple tables in a warm up run
+   double* axlo;
+   double* a1lo;
+   double* a1up;
+   double* a2lo;
+   double* a2up;
+   
+
+   void InitScaleNode( fnloBlockA2* A2, double* slo, double* shi, int iScale  );
+   double (fnloBlockBNlojet::*Fct_H_Scale[2])(double); // an array of pointers to member functions
+   double (fnloBlockBNlojet::*Fct_H_Scale_Inv[2])(double); // an array of pointers to member functions
+
+   double Function_loglog025( double mu );
+   double Function_loglog025_inv( double mu );
+   double Function_x( double mu );
+   double Function_x_inv( double mu );
 
 
 public:

@@ -272,7 +272,7 @@ void fnloBlockBNlojet::FillEventDISMuVar(int ObsBin, double x, double M1, double
    // --- relative distance delta - in function H(mu)
    // deltascale (Interpol(.,.,.delta,.): relative distance of value to node 'nnode'
    double deltascale1 = 
-      ( log(log(M1/mu0scale)) - HScaleNode1[ObsBin][scalenode1] ) /
+      ( (this->*Fct_H_Scale[0])(M1) - HScaleNode1[ObsBin][scalenode1] ) /
       (HScaleNode1[ObsBin][scalenode1+1] - HScaleNode1[ObsBin][scalenode1]);
       
    // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
@@ -295,7 +295,7 @@ void fnloBlockBNlojet::FillEventDISMuVar(int ObsBin, double x, double M1, double
    // --- relative distance delta - in function H(mu)
    // deltascale (Interpol(.,.,.delta,.): relative distance of value to node 'nnode'
    double deltascale2 = 
-      ( log(log(M2/mu0scale)) - HScaleNode2[ObsBin][scalenode2] ) /
+      ( (this->*Fct_H_Scale[1])(M2) - HScaleNode2[ObsBin][scalenode2] ) /
       (HScaleNode2[ObsBin][scalenode2+1] - HScaleNode2[ObsBin][scalenode2]);
       
    // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
@@ -695,7 +695,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 
 
    const double mu0scale = 0.25;           // --- parameter in transformation function H(mu)
-   if( NscalenodeScale1<=2 || NscalenodeScale2<=2){
+   if( NscalenodeScale1<=3 || NscalenodeScale2<=3){
       printf("fnloBlockBNlojet::FillEventHHCMuVar(). Error. Sorry, but you need some more scale nodes!\n");exit(1);
    }
 
@@ -714,7 +714,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // --- relative distance delta - in function H(mu)
    // deltascale (Interpol(.,.,.delta,.): relative distance of value to node 'nnode'
    double deltascale1 = 
-      ( log(log(M1/mu0scale)) - HScaleNode1[ObsBin][scalenode1] ) /
+      ( (this->*Fct_H_Scale[0])(M1) - HScaleNode1[ObsBin][scalenode1] ) /
       (HScaleNode1[ObsBin][scalenode1+1] - HScaleNode1[ObsBin][scalenode1]);
    
    // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
@@ -727,7 +727,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ---------------------------- calculate second scale  interpolation --------------------- //
    // ---------------------------------------------------------------------------------------- //
    int scalenode2 = NscalenodeScale2-2;  // --- initialize with largest possible value
-      
+
    // --- find scale position in range:  0 <= scalenode2 < nscalenode2-1
    for( int iNode=1 ; iNode<NscalenodeScale2 ; iNode++ ){
       //printf("test node %d %d %f %f \n",ObsBin,i,scale2,ScaleNode[ObsBin][i]);
@@ -739,7 +739,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // --- relative distance delta - in function H(mu)
    // deltascale (Interpol(.,.,.delta,.): relative distance of value to node 'nnode'
    double deltascale2 = 
-      ( log(log(M2/mu0scale)) - HScaleNode2[ObsBin][scalenode2] ) /
+      ( (this->*Fct_H_Scale[1])(M2) - HScaleNode2[ObsBin][scalenode2] ) /
       (HScaleNode2[ObsBin][scalenode2+1] - HScaleNode2[ObsBin][scalenode2]);
    
    // --- get scale interpolation kernel and updated scalenode position: 1 <= nmu < ntot-2
@@ -796,36 +796,41 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 		  int im = GetXIndex(ObsBin,xminbin,xmaxbin);
 		  // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
 
+		  double fac = bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2];
+		  double* st = &SigmaTildeMuIndep[ObsBin][im][idx1][idx2][0]; // improves speed slightly!
 		  if(itype == nlo::amplitude_hhc::fini) { 
 		     if (amp._M_fini.mode==0) { //finix1
 			for(int proc=0;proc<NSubproc;proc++){
-			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[0][proc];
-			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[3][proc];
-			   // 	       SigmaTilde[ObsBin][scalevar][is][im][proc] +=  bicef[i1][i2] * cefscale[i3] * wtmp[proc];
+			   st[proc] +=  fac * ( weights[0][proc] + weights[3][proc] );
+
+			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[0][proc] + weights[3][proc] );
+			   //SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[3][proc];
 			}
 		     }		
-	       
-		     if (amp._M_fini.mode==1) { //finix2
+		     else if (amp._M_fini.mode==1) { //finix2
 			for(int proc=0;proc<NSubproc;proc++){
-			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[1][proc];
-			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[4][proc];
+			   st[proc] +=  fac * ( weights[1][proc] + weights[4][proc] );
+			   
+			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[1][proc] + weights[4][proc] );
+			   //SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[4][proc];
 			}
 		     }		
-	       
-		     if(amp._M_fini.mode==2){ //fini1
+		     else if(amp._M_fini.mode==2){ //fini1
 			for(int proc=0;proc<NSubproc;proc++){
-			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[2][proc];
-			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[5][proc];
-			   SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * weights[6][proc];
+			   st[proc] +=  fac * ( weights[2][proc] + weights[5][proc] + weights[6][proc]);
+			   
+			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[2][proc] + weights[5][proc] + weights[6][proc]);
+			   // 			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[5][proc];
+			   // 			   SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[6][proc];
 			}
 		     }
 		  }
 		  else { // no fini contribution
 		     for(int proc=0;proc<NSubproc;proc++){
-			SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2] * wtmp[proc];
+			st[proc] +=  fac * wtmp[proc];
+			//SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * wtmp[proc];
 		     }
 		  }
-
 	       }
 	    }
 	 }
@@ -860,13 +865,13 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
    //
    // -------------------------------------------------------------------------- //
 
-   static unsigned long counter = 0;
+   //static unsigned long counter = 0;
+   //    static double* axlo = NULL;
+   //    static double* a1lo = NULL;
+   //    static double* a1up = NULL;
+   //    static double* a2lo = NULL;
+   //    static double* a2up = NULL;
 
-   static double* axlo = NULL;
-   static double* a1lo = NULL;
-   static double* a1up = NULL;
-   static double* a2lo = NULL;
-   static double* a2up = NULL;
    // init arrays
    if ( counter == 0 ){
       axlo = new double[BlockA2->GetNObsBin()];
@@ -946,6 +951,13 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    // ---- SigmaRefMixed ---- //
    double mur2 = (M1*M1 + M2*M2) / 2;
    double muf2 = mur2;
+
+   // if LHC -> mur=muf=scale1*exp(0.3*scale2)
+   if (  NPDF == 2 &&  NPDFPDG[1] == 2212 ){
+      mur2 = pow( M1*exp(0.3*M2)  ,2);
+      muf2 = mur2;
+   }
+
    nlo::weight_dis wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
    double tmp = wt[1]+wt[2];
    wt[1] = wt[0];
@@ -1896,6 +1908,83 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
 
 
 
+void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitDISConstants(). Method for initalizing all necessary fastNLO values
+   //  for a reasonable v2.1 table.
+   //
+   //  This method is only for v2.1 tables
+   //  
+   //
+   // -------------------------------------------------------------------------- //
+   
+   CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+
+   IXsectUnits	= A2->Ipublunits;
+   IDataFlag	= 0;
+   IAddMultFlag	= 0;
+   IContrFlag1	= 1;
+   IContrFlag3	= 0;
+   IRef		= 0;
+   // -> v2.0 
+   // NSubproc	= (nlo || A2->ILOord > 2) ? 7 : 6;
+   // printf("  this job uses %d subprocesses \n",NSubproc);
+   NSubproc	= 7;
+   printf("  this job uses ALWAYS (also for LO) %d subprocesses \n",NSubproc);
+   
+   if(nlo){
+      CtrbDescript.push_back("NLO");
+      IContrFlag2 = 2;
+      IScaleDep = 1;
+      Npow = A2->ILOord+1;
+   }else{
+      CtrbDescript.push_back("LO");      
+      IContrFlag2 = 1;
+      IScaleDep = 0;
+      Npow = A2->ILOord;
+   }
+  
+   NPDF		= 2;
+   NPDFPDG.push_back(2212);	// --- fastNLO user: PDG code for 1st hadron
+   NPDFPDG.push_back(2212);	// --- fastNLO user: PDG code for 2nd hadron
+   NPDFDim	= 1;			// pp
+   NFragFunc	= 0;
+   IPDFdef1	= 3;
+   IPDFdef2	= 1;
+   IPDFdef3	= NSubproc == 7 ? 2 : 1;
+   printf("         Set IPDFdef3 = %d, consistent with %d subprocesses.\n",IPDFdef3,NSubproc);
+   
+
+   IWarmUp	= 0;			// no warm-up run -> production run.
+   IWarmUpPrint	= 10000000 ;
+
+   NScaleDep	= 3;
+   
+   // ---- resize the vectors ---- //
+   XNode1.resize(A2->NObsBin);
+
+   scale1lo.resize(A2->NObsBin);
+   scale1hi.resize(A2->NObsBin);
+   scale2lo.resize(A2->NObsBin);
+   scale2hi.resize(A2->NObsBin);
+
+   // ---- those numbers are partly not ambigously defined in v2.1 ---- //
+   NScales = 1;		// 
+   Iscale.resize(1);
+   Iscale[0] = 0;		// mur=mur(ET), ET = index 0 
+
+   NScaleDim = 1;		// NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
+   ScaleDescript.resize(1);
+   ScaleDescript[0].resize(2);
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+
 void fnloBlockBNlojet::InitFinalDISValues( fnloBlockA2* A2 , double* xlim , double* scale1lo , double* scale1hi , double* scale2lo , double* scale2hi ){
    // -------------------------------------------------------------------------- //
    //  
@@ -1903,17 +1992,15 @@ void fnloBlockBNlojet::InitFinalDISValues( fnloBlockA2* A2 , double* xlim , doub
    //  for a reasonable v2.1 table.
    //
    //   this method could be used for v2.1 and for v2.0 tables
-   //   for v2.0 tables just pass scale1lo and scal1hi arrays
+   //   for v2.0 tables just pass scale1lo and scale1hi arrays
    //  
    //
    // -------------------------------------------------------------------------- //
    
-   // ---- some numbers ---- //
-   const double mu0scale = 0.25; // --- variable in H(mu) (in GeV)
    if ( NScaleDim != 1 ) cout << "Error! NScaleDim is not supposed to be <= one." << endl;
 
-   
    if ( NScaleDep != 3 ){
+      const double mu0scale = 0.25; // --- variable in H(mu) (in GeV)
       Nscalevar.push_back(ScaleFac[0].size());
 
       ResizeTable( &ScaleNode  , A2->NObsBin , NScaleDim , Nscalevar[0] , Nscalenode[0] );
@@ -1948,42 +2035,11 @@ void fnloBlockBNlojet::InitFinalDISValues( fnloBlockA2* A2 , double* xlim , doub
       ResizeTable( &SigmaTilde , A2->NObsBin , Nscalevar[0] , Nscalenode[0] , XmaxFromI , NSubproc );
 
    } // NScaleDep != 3 (v2.0 tables)
-  
-
-   if ( NScaleDep == 3 ){
+   else if ( NScaleDep == 3 ){
       if ( scale2hi==NULL ) printf("Error.\n");
-
-      // ---- init scale nodes ---- //
-      ResizeTable( &ScaleNode1   , A2->NObsBin , NscalenodeScale1 );
-      ResizeTable( &ScaleNode2   , A2->NObsBin , NscalenodeScale2 );
-     
-      ResizeTable( &HScaleNode1  , A2->NObsBin , NscalenodeScale1 );
-      ResizeTable( &HScaleNode2  , A2->NObsBin , NscalenodeScale2 );
-
-      for(int i=0;i<A2->NObsBin;i++){
-	 double llscale1lo = log(log((scale1lo[i])/mu0scale));
-	 double llscale1hi = log(log((scale1hi[i])/mu0scale));
-	 for(int l=0;l<NscalenodeScale1;l++){ 
-	    HScaleNode1[i][l]   = llscale1lo +  double(l)/double(NscalenodeScale1-1)*(llscale1hi-llscale1lo);
-	    ScaleNode1 [i][l]   = mu0scale * exp(exp(HScaleNode1[i][l]));       
-	 }
-	 double llscale2lo = log(log((scale2lo[i])/mu0scale));
-	 double llscale2hi = log(log((scale2hi[i])/mu0scale));
-	 for(int l=0;l<NscalenodeScale2;l++){ 
-	    HScaleNode2[i][l]   = llscale2lo +  double(l)/double(NscalenodeScale2-1)*(llscale2hi-llscale2lo);
-	    ScaleNode2 [i][l]   = mu0scale * exp(exp(HScaleNode2[i][l]));       
-	 }
-      }
-
-      int XmaxFromI[1] = {0};
-      // ---- init sigma tilde for the subprocess dependent table  ---- //
-      ResizeTable( &SigmaTildeMuIndep , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
-      ResizeTable( &SigmaTildeMuFDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
-      ResizeTable( &SigmaTildeMuRDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
-     
-      ResizeTable( &SigmaRefMixed     , A2->NObsBin , NSubproc );
-      ResizeTable( &SigmaRef_s1       , A2->NObsBin , NSubproc );
-      ResizeTable( &SigmaRef_s2       , A2->NObsBin , NSubproc );
+      InitLogLogScaleNode( A2 , scale1lo , scale1hi , 1 );
+      InitLogLogScaleNode( A2 , scale2lo , scale2hi , 2 );
+      ResizeSigmaTildeTables( A2 );
    }   
 
 }
@@ -1991,6 +2047,145 @@ void fnloBlockBNlojet::InitFinalDISValues( fnloBlockA2* A2 , double* xlim , doub
 
 //________________________________________________________________________________________________________________ //
 
+
+void fnloBlockBNlojet::InitScaleNode( fnloBlockA2* A2, double* slo , double* shi, int iScale  ){
+   //
+   // InitScaleNode
+   // call this function after initializing Fct_H_Scale[iScale-1]
+   // 
+   // This function initializes and resizes
+   //    HScaleNode
+   //    ScaleNode
+   //    
+
+   // ---- get 'universal' pointers ---- //
+   vector < vector < double > >* node	= (iScale == 1) ? &ScaleNode1 : &ScaleNode2;
+   vector < vector < double > >* Hnode	= (iScale == 1) ? &HScaleNode1 : &HScaleNode2;
+   int Nscalenodes			= (iScale == 1) ? NscalenodeScale1 : NscalenodeScale2 ;
+
+   // ---- init scale nodes ---- //
+   ResizeTable( node   , A2->NObsBin , Nscalenodes );
+   ResizeTable( Hnode  , A2->NObsBin , Nscalenodes );
+   
+   // ---- make binning ---- //
+   for(int i=0;i<A2->NObsBin;i++){
+      double llslo = (this->*Fct_H_Scale[iScale-1])(slo[i]);
+      double llshi = (this->*Fct_H_Scale[iScale-1])(shi[i]);
+      for(int l=0;l<Nscalenodes;l++){ 
+	 (*Hnode)[i][l]   = llslo +  double(l)/double(Nscalenodes-1)*(llshi-llslo);
+	 (*node) [i][l]   = (this->*Fct_H_Scale_Inv[iScale-1])((*Hnode)[i][l]);
+	 //printf("bin %3d: Hnode[%3d][%2d] = %7.4f, ScaleNode[%3d][%2d] = %7.4f\n",i,i,l,(*Hnode)[i][l],i,l,(*node) [i][l]);
+      }
+   }
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+void fnloBlockBNlojet::InitLogLogScaleNode( fnloBlockA2* A2 , double* slo , double* shi , int iScale ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitLogLogScaleNode(). Initialize scale nodes in a loglog distance 
+   //  
+   //  Input values:
+   //       slo, shi:	arrays from warm-up run (extreme values)
+   //       iScale:		Scale 1 or 2
+   //
+   // -------------------------------------------------------------------------- //
+
+   // ---- check validity of call ---- //
+   if ( iScale != 1 && iScale != 2 ){
+      printf("fnloBlockBNlojet::InitLogLogScaleNode. Error. iScale must be 1 or 2.\n");
+      exit(1);
+   }
+   if ( NScaleDim != 1 ) cout << "Error! NScaleDim is not supposed to be <= one." << endl;
+   if ( NScaleDep != 3 ){
+      printf("fnloBlockBNlojet::InitLogLogScaleNode. Error. This method works sofar only for v2.1 tables.\n");
+   } 
+
+   // ---- init pointers to correspoding functions ---- //
+   Fct_H_Scale[iScale-1]	= &fnloBlockBNlojet::Function_loglog025;
+   Fct_H_Scale_Inv[iScale-1]	= &fnloBlockBNlojet::Function_loglog025_inv;
+
+   // ---- init the scale nodes ---- //
+   InitScaleNode( A2, slo, shi,  iScale ) ;   
+
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+void fnloBlockBNlojet::InitLinearScaleNode( fnloBlockA2* A2 , double* slo , double* shi , int iScale ){
+   // -------------------------------------------------------------------------- //
+   //  
+   //  InitLogLogScaleNode(). Initialize scale nodes in a linear distance 
+   //  
+   //  Input values:
+   //       slo, shi:	arrays from warm-up run (extreme values)
+   //       iScale:		ScaleNode 1 or 2
+   //
+   // -------------------------------------------------------------------------- //
+
+   // ---- check validity of call ---- //
+   if ( iScale != 1 && iScale != 2 ){
+      printf("fnloBlockBNlojet::InitLogLogScaleNode. Error. iScale must be 1 or 2.\n");
+      exit(1);
+   }
+   if ( NScaleDim != 1 ) cout << "Error! NScaleDim is not supposed to be <= one." << endl;
+   if ( NScaleDep != 3 ){
+      printf("fnloBlockBNlojet::InitLogLogScaleNode. Error. This method works sofar only for v2.1 tables.\n");
+   } 
+
+   // ---- init pointers to correspoding vectors ---- //
+   Fct_H_Scale[iScale-1]	= &fnloBlockBNlojet::Function_x;
+   Fct_H_Scale_Inv[iScale-1]	= &fnloBlockBNlojet::Function_x_inv;
+
+   // ---- init the scale nodes ---- //
+   InitScaleNode( A2, slo, shi, iScale ) ;   
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+double fnloBlockBNlojet::Function_loglog025( double mu ){
+   // function H(mu) = log(log( mu / 0.25 ))
+   return log(log(mu/0.25));
+}
+double fnloBlockBNlojet::Function_loglog025_inv( double mu ){
+   // inverse of function H(mu) = log(log( mu / 0.25 ))
+   return 0.25*exp(exp(mu));
+}
+
+double fnloBlockBNlojet::Function_x( double mu ){
+   // function H(mu) = x
+   return mu;
+}
+double fnloBlockBNlojet::Function_x_inv( double mu ){
+   // inverse of function H(mu) = x;
+   return mu;
+}
+
+
+//________________________________________________________________________________________________________________ //
+
+
+void fnloBlockBNlojet::ResizeSigmaTildeTables( fnloBlockA2* A2 ){
+   int XmaxFromI[1] = {0};
+   // ---- init sigma tilde for the subprocess dependent table  ---- //
+   ResizeTable( &SigmaTildeMuIndep , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+   ResizeTable( &SigmaTildeMuFDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+   ResizeTable( &SigmaTildeMuRDep  , A2->NObsBin , XmaxFromI , NscalenodeScale1 , NscalenodeScale2 , NSubproc );
+   
+   ResizeTable( &SigmaRefMixed     , A2->NObsBin , NSubproc );
+   ResizeTable( &SigmaRef_s1       , A2->NObsBin , NSubproc );
+   ResizeTable( &SigmaRef_s2       , A2->NObsBin , NSubproc );
+}
+
+
+//________________________________________________________________________________________________________________ //
 
 
 void fnloBlockBNlojet::InitReferenceTable( fnloBlockA2* A2 ){
@@ -2069,7 +2264,9 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    // -------------------------------------------------------------------------- //
    printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude):\n  *  ",nxPerMagnitude);
    for(int i=0;i<XNode1.size();i++){
-      if ( xlim[i] < 1.e-6 && IWarmUp == 0 ) printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude.\n");
+      if ( (xlim[i] < 1.e-6 || xlim[i]>1) && IWarmUp == 0 ) {
+	 printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude. xlim[%d] = %8.3e\n",i,xlim[i]);
+      }
       int nxtot	= (int)(fabs(log10(xlim[i]))*nxPerMagnitude);
       printf("%d: %d, ",i,nxtot);
       if ( i==((XNode1.size())-1))printf("\n");
