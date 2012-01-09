@@ -23,7 +23,6 @@
 //   inittable		(-> user edits)
 //   GetWarmupValues	(-> user edits)
 //   DefineBinning	(-> user edits)
-//   GetDoubleDiffBinNumber	(don't touch usually)
 //   initfunc		(don't touch)
 //   writetable		(don't touch)
 //   end_of_event	(don't touch)
@@ -125,7 +124,6 @@ private:
   void writetable();
   void GetWarmupValues( fnloBlockBNlojet* B );
   void DefineBinning();
-  int GetDoubleDiffBinNumber( double val1 , double val2 );
   int FillEvent( double val1 , double val2 , double mu1, double mu2 , const event_hhc& p , const nlo::amplitude_hhc& amp );
   double GetEcms();
   unsigned int GetNj();
@@ -135,6 +133,7 @@ private:
 user_base_hhc * userfunc() {
   return new UserHHC;
 }
+
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
@@ -150,11 +149,6 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    nd = 3U;
 } 
 
-unsigned int UserHHC::GetNj(){
-   unsigned int nj = 0, nu = 0 ,nd = 0;
-   inputfunc(nj,nu,nd);
-   return nj;
-}
 
 void psinput(phasespace_hhc *ps, double& s)
 {
@@ -174,22 +168,6 @@ void psinput(phasespace_hhc *ps, double& s)
    //   Here we use the default.
    ps = 0;
 } 
-
-double UserHHC::GetEcms(){
-   double ecms = 0;
-   psinput(NULL,ecms);
-   return sqrt(ecms);
-}
-
-
-void UserHHC::initfunc(unsigned int)
-{
-  // --- Initialize event counters
-  nevents = 0;
-  // Set some defaults
-  if (nwrite==0) nwrite = 5000000;
-  start_time = std::time(0);
-}
 
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
@@ -263,29 +241,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 } // --- end userfunc
 
 
-
-int UserHHC::GetDoubleDiffBinNumber( double val1 , double val2 ){
-   // Get Bin number of this event 
-   // return -1 if no bin was found
-   int obsbin = -1;
-   fnloBlockA2* A2 = table->GetBlockA2();
-   for(int j = 0; j < A2->GetNObsBin(); j++) {
-      if ( val1 >= A2->LoBin[j][0]  && val1 <  A2->UpBin[j][0] &&
-	   val2 >= A2->LoBin[j][1]  && val2 <  A2->UpBin[j][1]) {
-	 obsbin=j;
-	 break;
-      }
-   }
-   return obsbin;
-}
-
-
-
 int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , const event_hhc& p, const nlo::amplitude_hhc& amp ){
-   // Fill FastNLO Array
+   // ---- Fill FastNLO Array ---- //
+   // --- fastNLO user: usually nothing to do
+
+   // ---- get x-values ---- //
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
-   double x2 = p[0].Z()/p[hadron(0)].Z();
-   int obsbin = GetDoubleDiffBinNumber( val1 , val2  );
+   double x2 = p[0].Z()/p[hadron(0)].Z();   
+
+   // --- fastNLO user: If this is not a single or double differential binning
+   //     user has to perform calculation of bin number 'obsbin' by himself.
+   int obsbin = table->GetBlockA2()->GetBinNumber( val1 , val2  );
    if (obsbin >= 0) {
       double prefactor = 1./table->GetBlockA2()->BinSize[obsbin]; 
       for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
@@ -295,79 +261,15 @@ int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , con
 }
 
 
-
-void UserHHC::writetable(){
-   table->OpenFileRewrite();
-   table->WriteBlockA1();
-   table->WriteBlockA2();
-   for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
-      table->WriteBlockBDividebyN(i);
-   }
-   table->CloseFileWrite();
-}
-
-
-
-void UserHHC::end_of_event(){
-  nevents += 1;
-  // --- store table and show calculation time
-  if (( (unsigned long)nevents % nwrite)==0){
-    time_t hour, min, time = std::time(0) - start_time;
-      
-    hour = time/3600L;
-    time -= hour*3600L;
-    min  = time/60L;
-    time -= min*60L;
-      
-    std::cout<<"--->     "
-	     <<(hour < 10 ? "0" : "")<<hour
-	     <<(min < 10 ? ":0" : ":")<<min
-	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
-    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
-    cout.flush();
-    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-      table->GetBlockB(k)->Nevt = (long long int)nevents;
-    }
-    writetable();
-    printf("fastNLO: Table written.\n");
-  }
-}
-
-
-
-void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
-                          unsigned long __save, bool __txt) 
-{
-  tablefilename.assign(__file_name.c_str());
-  tablefilename += ".tab";
-   
-  // --- determine whether we are running LO or NLO
-  const char* const file = __file_name.c_str(); 
-
-  if(strstr(file,"-born-")!=NULL){
-    nlo = false;
-    printf("fastNLO: This is a LO run!\n");
-  }else{
-    if(strstr(file,"-nlo-")!=NULL){
-      nlo = true;
-      printf("fastNLO: This is a NLO run!\n");
-    }else{
-      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
-      exit(1);
-    }
-  }
-
-  nwrite = __save;
-  inittable();
-}
-
-
-
-
 void UserHHC::inittable(){
+
+   // --- fastNLO user: This is the part, where the fastNLO table
+   //     and the main initializations are set up. Please refer to the
+   //     the documentation which parts have to be changed.
+   //
  
    // ---- set up fastNLO and fnloTable---- //
-   // ---- fastNLO user: nothing to do 
+   // --- fastNLO user: nothing to do 
    table		= new fnloTable(tablefilename);
    fnloBlockA1  *A1	= table->GetBlockA1();
    fnloBlockA2  *A2	= table->GetBlockA2();
@@ -378,10 +280,11 @@ void UserHHC::inittable(){
    A2->ILOord	= GetNj();
    
 
-   // --- fastNLO user: set scenario name
-   A1->SetScenName("fnl5002-ATLAS-Dijet-06");	// --- fastNLO user: set scenario name (no whitespaces)
+   // ---- set scenario name and description ---- //
+   // --- fastNLO user: set scenario name (no whitespaces!)
+   A1->SetScenName("fnl5002-ATLAS-Dijet-06");
 
-   // --- fastNLO user: up to 20 strings to describe the scenario
+   // --- fastNLO user: up to 20 strings and any number of lines to describe the scenario
    A2->ScDescript.push_back("d2sigma/dM12dy* (pb_TeV)");
    A2->ScDescript.push_back("ATLAS Collaboration");
    A2->ScDescript.push_back("Dijet invariant mass");
@@ -688,5 +591,99 @@ void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
 	 scale2lo[i] = 1.0, scale2hi[i]=9.9e10;
       }
    }
+}
+
+
+
+// --- fastNLO user: nothing further todo
+
+
+unsigned int UserHHC::GetNj(){
+   unsigned int nj = 0, nu = 0 ,nd = 0;
+   inputfunc(nj,nu,nd);
+   return nj;
+}
+
+
+double UserHHC::GetEcms(){
+   double ecms = 0;
+   psinput(NULL,ecms);
+   return sqrt(ecms);
+}
+
+
+
+void UserHHC::initfunc(unsigned int)
+{
+  // --- Initialize event counters 
+  nevents = 0;
+  if (nwrite==0) nwrite = 5000000;
+  start_time = std::time(0);
+}
+
+
+void UserHHC::writetable(){
+   table->OpenFileRewrite();
+   table->WriteBlockA1();
+   table->WriteBlockA2();
+   for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
+      table->WriteBlockBDividebyN(i);
+   }
+   table->CloseFileWrite();
+}
+
+
+
+void UserHHC::end_of_event(){
+  nevents += 1;
+  // --- store table and show calculation time
+  if (( (unsigned long)nevents % nwrite)==0){
+    time_t hour, min, time = std::time(0) - start_time;
+      
+    hour = time/3600L;
+    time -= hour*3600L;
+    min  = time/60L;
+    time -= min*60L;
+      
+    std::cout<<"--->     "
+	     <<(hour < 10 ? "0" : "")<<hour
+	     <<(min < 10 ? ":0" : ":")<<min
+	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
+    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
+    cout.flush();
+    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+      table->GetBlockB(k)->Nevt = (long long int)nevents;
+    }
+    writetable();
+    printf("fastNLO: Table written.\n");
+  }
+}
+
+
+
+void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
+                          unsigned long __save, bool __txt) 
+{
+  tablefilename.assign(__file_name.c_str());
+  tablefilename += ".tab";
+   
+  // --- determine whether we are running LO or NLO
+  const char* const file = __file_name.c_str(); 
+
+  if(strstr(file,"-born-")!=NULL){
+    nlo = false;
+    printf("fastNLO: This is a LO run!\n");
+  }else{
+    if(strstr(file,"-nlo-")!=NULL){
+      nlo = true;
+      printf("fastNLO: This is a NLO run!\n");
+    }else{
+      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
+      exit(1);
+    }
+  }
+
+  nwrite = __save;
+  inittable();
 }
 
