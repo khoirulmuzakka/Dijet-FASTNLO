@@ -275,6 +275,30 @@ bool fnloBlockA2::cmp(vector < vector < double > > x1,  vector < vector < double
 
 
 
+void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
+   // Set label for dimension
+
+   // check validity of call
+   if ( NDim < iDim ) {
+      printf("fnloBlockA2::SetDimLabel. Error. Sorry, you have only initialized %d dimensions, but you want to label a dimension with number %d.\n",NDim,iDim);
+      exit(1);
+   }
+   if ( iDim < 1) {
+      printf("fnloBlockA2::SetDimLabel. Error. Your dimension must be a natural number.\n",iDim);
+      exit(1);
+   }
+   
+   if ( DimLabel.size() != NDim ){
+      printf("fnloBlockA2::SetDimLabel. Error. You have to call SetNumDiffBin with a reasonable number before.\n");
+      exit(1);
+   }
+
+   DimLabel[iDim-1] = label;
+   IDiffBin[iDim-1] = IsDiff ? 2 : 0 ;
+}
+
+
+
 void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2  , vector<double*> bingrid2  , double binwidth3 ){
 
    // ------------------------------------------------------------------- //
