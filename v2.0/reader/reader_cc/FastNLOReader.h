@@ -202,7 +202,6 @@ private:
    vector<double> GetXFX(double x, double muf);
    vector<double> CalcPDFLinearCombDIS(vector<double> pdfx1, int NSubproc );
    vector<double> CalcPDFLinearCombHHC(vector<double> pdfx1, vector<double> pdfx2, int NSubproc );
-   vector<double> CalcPDFLinearCombHHCnlojetlike(vector<double> pdfx1, vector<double> pdfx2, int NSubproc );
    void FillAlphasCacheInBlockBv20( FastNLOBlockB* B );
    void FillAlphasCacheInBlockBv21( FastNLOBlockB* B );
    double GetAlphas(double Q);
