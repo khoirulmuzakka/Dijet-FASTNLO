@@ -230,30 +230,29 @@ void FastNLOReader::InitScalevariation(){
 
 
 double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double scale2, double scalefac ){
-  //
-  //  Calculate the scales with the defined function and the 
-  //  corresponding prefactor.
-  //
+   //
+   //  Calculate the scales with the defined function and the 
+   //  corresponding prefactor.
+   //
   
-  if ( kMuX == kMuR && fScaleFacMuR != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
-  if ( kMuX == kMuF && fScaleFacMuF != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
+   if ( kMuX == kMuR && fScaleFacMuR != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
+   if ( kMuX == kMuF && fScaleFacMuF != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
   
-  EScaleFunctionalForm Func;
-  if ( kMuX  == FastNLOReader::kMuR )		Func	= fMuRFunc;    // return renormalization scale
-  else						Func	= fMuFFunc;    // return factorization scale
+   EScaleFunctionalForm Func = (kMuX == FastNLOReader::kMuR) ? fMuRFunc : fMuFFunc;
   
-  double mu = 0;
+   double mu = 0;
 
-  if		( Func == kScale1 )		mu	= scale1 ;
-  else if	( Func == kScale2 )		mu	= scale2 ;
-  else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2) ;
-  else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2) ;
-  else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2) ;
-  else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
-  else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
-  else printf( "Error. could not identify functional form for scales calculation.\n");
+   if		( Func == kScale1 )		mu	= scale1 ;
+   else if	( Func == kScale2 )		mu	= scale2 ;
+   else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2) ;
+   else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2) ;
+   else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2) ;
+   else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
+   else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
+   else if	( Func == kExtern  )		mu	= (kMuX==FastNLOReader::kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
+   else printf( "Error. could not identify functional form for scales calculation.\n");
   
-  return scalefac * mu;
+   return scalefac * mu;
 
 }
 
@@ -377,7 +376,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
       else fMuFFunc = kScale1;
     }
     for(int i=0;i<NObsBin;i++){
-      if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 6 ){
+      if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 5 ){
 	printf("FastNLOReader::SetFunctionalForm. Warning. Scale2 has only very little nodes (n=%zd) in bin %d.\n",BBlocksSMCalc[0][0]->ScaleNodeScale2[i].size(),i);
       }
     }
@@ -1197,10 +1196,22 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
   vector < double > xsref;
   
   if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
-    if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )			xsref = XSectionRef_s1;
-    else if ( fMuFFunc == kScale2 && fMuRFunc == kScale2 )		xsref = XSectionRef_s2;
-    else if ( fMuFFunc == kQuadraticMean && fMuRFunc == kQuadraticMean )xsref = XSectionRefMixed;
-    else xsref = XSectionRefMixed;
+     if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )	{
+	printf(" *  FastNLOReader::PrintCrossSectionsWithReference. Info. Taking reference cross sections 's1'\n");
+	xsref = XSectionRef_s1;
+     }
+     else if ( fMuFFunc == kScale2 && fMuRFunc == kScale2 ){
+	printf(" *  FastNLOReader::PrintCrossSectionsWithReference. Info. Taking reference cross sections 's2'\n");
+	xsref = XSectionRef_s2;
+     }
+     else if ( fMuFFunc == kQuadraticMean && fMuRFunc == kQuadraticMean ) {
+	printf(" *  FastNLOReader::PrintCrossSectionsWithReference. Info. Taking reference cross sections 'mixed'\n");
+	xsref = XSectionRefMixed;
+     }
+     else {
+	xsref = XSectionRefMixed;
+	printf(" *  FastNLOReader::PrintCrossSectionsWithReference. Info. Taking reference cross sections 'mixed'\n");
+     }
   }
   else xsref = XSectionRef;
 
@@ -1653,7 +1664,7 @@ void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
       for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	double mur		= CalcMu( kMuR , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
 	double as		= GetAlphas(mur);
-	double alphastwopi	= pow( as/TWOPI, B->Npow );
+	double alphastwopi	= pow( as/TWOPI, B->Npow);
 	B->AlphasTwoPi[i][jS1][kS2] = alphastwopi;
       }
     }
@@ -2042,7 +2053,6 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
 
 
 void FastNLOReader::FillBlockBPDFLCsHHCv21( FastNLOBlockB* B ){
-   cout << "FillBlockBPDFLCsHHCv21"<<endl;
    if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}// [i][x][jS1][kS2][l]
    vector < vector < double > > xfx; // PDFs of all partons
    for(int i=0;i<NObsBin;i++){
@@ -2085,7 +2095,6 @@ void FastNLOReader::FillBlockBPDFLCsHHCv21( FastNLOBlockB* B ){
 	 }
       }
    }
-   cout << "FillBlockBPDFLCsHHCv21 ok"<<endl;
 }
 
 
@@ -2216,8 +2225,8 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 
 vector<double> FastNLOReader::CalcPDFLinearCombHHCnlojetlike( vector<double> pdfx1 , vector<double> pdfx2 , int NSubproc){
    // pieces of code are from nlojet++ (see reference above)
-  vector < double > retval;
-  retval.resize(7);
+   vector < double > retval;
+   retval.resize(7);
   
   // ---------------------------------------------------
   // remember from nlojet++ proc-hhc/weight.cc
@@ -2285,6 +2294,43 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHCnlojetlike( vector<double> pdf
 
   return retval;
 
+}
+
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool ReFillCache ){
+   fMuRFunc = kExtern;
+   Fct_MuR = Func;
+   printf(" *  FastNLOReader::SetExternalFuncForMuR(). Test.\n");
+   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuR)(1,1));
+   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuR)(91.1876,91.1876));
+   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuR)(1,91.1876));
+   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuR)(91.1876,1));
+   if ( ReFillCache ){
+      FillAlphasCache();
+      FillPDFCache();
+   }
+}
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache ){
+   fMuFFunc = kExtern;
+   Fct_MuF = Func;
+   printf(" *  FastNLOReader::SetExternalFuncForMuF(). Test.\n");
+   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuF)(1,1));
+   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuF)(91.1876,91.1876));
+   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuF)(1,91.1876));
+   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuF)(91.1876,1));
+   if ( ReFillCache ){
+      FillAlphasCache();
+      FillPDFCache();
+   }
 }
 
 

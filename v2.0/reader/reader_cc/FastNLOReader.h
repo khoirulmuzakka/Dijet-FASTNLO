@@ -55,7 +55,8 @@ public:
       kLinearMean		= 5,	// e.g. mu^2 = (( Q + pt ) / 2 )^2
       kLinearSum		= 6,	// e.g. mu^2 = (( Q + pt ))^2
       kScaleMax			= 7,	// e.g. mu^2 = max( Q^2, pt^2)
-      kScaleMin			= 8	// e.g. mu^2 = min( Q^2, pt^2) 
+      kScaleMin			= 8,	// e.g. mu^2 = min( Q^2, pt^2) 
+      kExtern			= 9	// define an external function for your scale
    };
 
    enum EPDFInterface {
@@ -116,6 +117,8 @@ protected:
    EScaleFunctionalForm fMuRFunc;
    EScaleFunctionalForm fMuFFunc;
    EUnits		fUnits;
+   double (*Fct_MuR)(double,double);			// Function, if you define your functional form for your scale external
+   double (*Fct_MuF)(double,double);			// Function, if you define your functional form for your scale external
    //    ECalculationOrder	fOrder;
    // ---- alpha_s vars ---- //
    double fAlphasMz;
@@ -249,8 +252,11 @@ public:
    void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_F
    void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX );	// Set functional form of MuX
    void SetScaleFactorMuR( double fac , bool ReFillCache = true );			// Set scale factor for MuR
-   void SetScaleFactorMuF( double fac , bool ReFillCache = true );			// Set scale facotr for MuF
-  
+   void SetScaleFactorMuF( double fac , bool ReFillCache = true );			// Set scale factor for MuF
+   void SetExternalFuncForMuR( double (*Func)(double,double) , bool ReFillCache = true );	// Set external function for scale calculation (optional)
+   void SetExternalFuncForMuF( double (*Func)(double,double) , bool ReFillCache = true );	// Set external function for scale calculation (optional)
+
+
    // ---- setters for scale variation in v2.0 tables  ---- //
    double SetScaleVariation(int scalevar , bool ReFillCache = true);			// choose the scale variation table
   
