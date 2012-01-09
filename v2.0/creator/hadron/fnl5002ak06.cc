@@ -174,9 +174,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
    // --- fastNLO user:
    //     Here is your playground where you compute your observable 
-   //     and the bin number ("obsbin") which gets passed to
-   //     fastNLO's table filling code.
-   //     (all pT and E are in GeV)
+   //     and define the two possible scale variables.
+   //     At least one scale variable must be in 'GeV'. All observables
+   //     must be in same dimension as your bingrid is defined.
 
    // --- run the jet algorithm
    double jetsize = 0.6;
@@ -186,10 +186,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    // --- declare and initialize phase space cut variables
    double pTmin = 20., ymin = 0., ymax = 4.4;
 
-   vector<lorentzvector<double> > pj_ps;
-   vector<lorentzvector<double> > pj_ps_sort;
 	
    // --- for inclusive jet cross section: loop over all jets
+   vector<lorentzvector<double> > pj_ps;
    for(unsigned int i = 1; i <= nj; i++){
       double pt = pj[i].perp(); 
       double rap = fabs(pj[i].rapidity());
@@ -200,6 +199,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    }
    
    // sort pj_ps array in pt
+   vector<lorentzvector<double> > pj_ps_sort;
    lorentzvector<double> temp;
    for(unsigned int i = 0; i < pj_ps.size(); i++) {
       for (unsigned int y=0; y < (pj_ps.size()-i-1); y++){
