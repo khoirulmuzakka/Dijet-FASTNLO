@@ -299,6 +299,39 @@ void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
 
 
 
+int fnloBlockA2::GetBinNumber( double val1 , double val2 ){
+   // Get Bin number of this event if you use a single or double differential binning
+   // return -1 if no bin was found
+   
+   if ( (val2 == -42 && NDim != 1 ) || ( val2 != -42 && NDim != 2 ) ) {
+      printf("fnloBlockA2::GetBinNumber. Error. This function can calculate the bin number only for single and double differential binnings (NDim = %d ).\n",NDim);
+      exit(1);
+   }
+   int obsbin = -1;
+
+   if ( NDim == 2 ) {
+      for(int j = 0; j < NObsBin; j++) {
+	 if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] &&
+	      val2 >= LoBin[j][1]  && val2 <  UpBin[j][1]) {
+	    obsbin=j;
+	    break;
+	 }
+      }
+   }
+   else if ( NDim == 1 ) {
+      for(int j = 0; j < NObsBin; j++) {
+	 if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] ){
+	    obsbin = j;
+	    break;
+	 }
+      }
+   }
+   return obsbin;
+
+}
+
+
+
 void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2  , vector<double*> bingrid2  , double binwidth3 ){
 
    // ------------------------------------------------------------------- //

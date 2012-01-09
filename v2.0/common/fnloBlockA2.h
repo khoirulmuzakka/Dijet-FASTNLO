@@ -22,6 +22,7 @@ class fnloBlockA2 {
    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
    void SetNumDiffBin(int iDiff ) { NDim = iDiff; DimLabel.resize(NDim) ; IDiffBin.resize(NDim) ;};
    void SetDimLabel( string label, int iDim , bool IsDiff = true );
+   int GetBinNumber(double val1 , double val2 = -42. );
 
  private:
    void StripWhitespace(string &str) const;
