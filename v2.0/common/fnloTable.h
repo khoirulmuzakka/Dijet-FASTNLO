@@ -19,7 +19,8 @@ public:
    void SkipBlockA1A2();
    void WriteTable( long long int nevents );
    int  GetBinNumber( double var1, double var2 = 0 );
-   int  FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double prefactor );
+   //int  FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double prefactor );
+   ////////   int  FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, void* amp, void* dummypdf, void* realpdf, double prefactor );
    ofstream *OpenFileWrite();
    ofstream *OpenFileRewrite();
    void CloseFileWrite();

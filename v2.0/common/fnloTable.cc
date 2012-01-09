@@ -108,7 +108,7 @@ int fnloTable::GetBinNumber( double var1, double var2 ){
    return bin;
 }
 
-
+/*
 int fnloTable::FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double fac ){
    //
    //  FillEvent(). Fills one event into the FastNLO table.
@@ -141,7 +141,7 @@ int fnloTable::FillEventDIS(int ObsBin, double x, double M1, double M2, double m
    }
    return 1;
 }
-
+*/
 
 ofstream *fnloTable::OpenFileWrite(){
    if (access(filename.c_str(), F_OK) == 0){

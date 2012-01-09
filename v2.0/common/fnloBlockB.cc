@@ -310,6 +310,7 @@ int fnloBlockB::Read(istream *table){
 
       }
 
+
       if ( NScaleDep == 3 ) {
 
 	 //  ---- order of reading... ---- //
@@ -328,6 +329,8 @@ int fnloBlockB::Read(istream *table){
 	  
 	 nn3 += ReadFlexibleVector  ( &ScaleNode1 , table );
 	 nn3 += ReadFlexibleVector  ( &ScaleNode2 , table );
+ 	 NscalenodeScale1 = ScaleNode1[0].size();
+ 	 NscalenodeScale2 = ScaleNode2[0].size();
 
 	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true );
 	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
@@ -377,6 +380,7 @@ int fnloBlockB::Read(istream *table){
    *table >> key;
    if(key != tablemagicno){
       printf("fnloBlockB::Read: At end of block found %d instead of %d.\n",key,tablemagicno);
+      printf("                  You might have 'nan' in your table.\n");
       return 1;
    };
    // Put magic number back
@@ -545,6 +549,7 @@ int fnloBlockB::Write(ostream *table, int option){
 	//printf("  *  infnloBlockB::Write(). Wrote %d lines of SigmaTilde.\n",nst);
 	printf("  *  infnloBlockB::Write(). Wrote %d lines of FNLO v2.0 tables.\n",nst+nsn);
 
+
       } // end if NScaleDep !=3.
       
       if ( NScaleDep == 3 ) {
@@ -552,12 +557,10 @@ int fnloBlockB::Write(ostream *table, int option){
        
 	 nn3 += WriteFlexibleTable( &ScaleNode1 , table );
 	 nn3 += WriteFlexibleTable( &ScaleNode2 , table );
- 	 NscalenodeScale1 = ScaleNode1[0].size();
- 	 NscalenodeScale2 = ScaleNode2[0].size();
  
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+ 	 nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
+ 	 nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+ 	 nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       
 	 nn3 += WriteFlexibleTable( &SigmaRefMixed	, table , (bool)(option & DividebyNevt) , Nevt , true );
 	 nn3 += WriteFlexibleTable( &SigmaRef_s1	, table , (bool)(option & DividebyNevt) , Nevt , true );
@@ -1857,11 +1860,13 @@ void fnloBlockB::Print(){
        for(int j=0;j<ScaleDescript[i].size();j++){
 	printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
-      printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
-      printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
-      for(int j=0;j<Nscalevar[i];j++){
-	printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
-      }
+       if ( NScaleDep != 3 ) {
+	  printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
+	  printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
+	  for(int j=0;j<Nscalevar[i];j++){
+	     printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
+	  }
+       }
     }
     printf(" B   No printing of ScaleNode implemented yet.\n");
     printf(" B   No printing of SigmaTilde implemented yet.\n");

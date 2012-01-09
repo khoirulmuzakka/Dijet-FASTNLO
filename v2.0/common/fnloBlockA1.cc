@@ -23,6 +23,7 @@ int fnloBlockA1::Read(istream *table){
    *table >> NuserInt;
    *table >> NuserFloat;
    *table >> Imachine;
+
    key=0;
    *table >> key;
    if(key != tablemagicno){
