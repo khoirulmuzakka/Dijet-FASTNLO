@@ -563,19 +563,18 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
      wt *= pow(10.,(IXsectUnits-12)) ;
    }
    
-   // the weigths are shuffled again when filling !!!
-   //    // deal with subprocesses 2 and 3 -> moved to 6 and 7
-   //    //    - if x1>x2 -> o.k.
-   //    //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
-   //    if(x2>x1){
-   //      double buffer;
-   //      //buffer = wt[1];
-   //      //wt[1] = wt[2];
-   //      //wt[2] = buffer;
-   //      buffer = wt[5];
-   //      wt[5] = wt[6];
-   //      wt[6] = buffer;
-   //    }
+   // deal with subprocesses 2 and 3 -> moved to 6 and 7
+   //    - if x1>x2 -> o.k.
+   //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
+   if(x2>x1){
+      double buffer;
+      buffer = wt[1];
+      wt[1] = wt[2];
+      wt[2] = buffer;
+      //       buffer = wt[5];
+      //       wt[5] = wt[6];
+      //       wt[6] = buffer;
+   }
    //    // --- combine subprocesses 5,6 here after possible swapping
    //    if (NSubproc == 6) {   
    //      wt[5] = (wt[5]+wt[6])/2.;
@@ -591,12 +590,12 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    nlo::amplitude_hhc::contrib_type itype = amp.contrib();
    double coef = 389385730.*prefactor;
    if(IXsectUnits!=12)  coef *= pow(10.,(IXsectUnits-12)) ;
-   nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,M1*M1,2,3);
+   nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,M1*M1,2,3); // 1/x1/x2
    
    
 
-   //double weights[7][7]; // weights[amp_i][proc]
-   nlo::weight_hhc weights[7];
+   double weights[7][7]; // weights[amp_i][proc]
+   //nlo::weight_hhc weights[7]; nicer, but I do net get the syntax correct
    if(itype == nlo::amplitude_hhc::fini) { 
      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
        //	no more shuffling...       
@@ -608,14 +607,13 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
        //        weights[kk][5] = amp._M_fini.amp[kk][1]*coef*cPDF[1];
        //        weights[kk][6] = amp._M_fini.amp[kk][2]*coef*cPDF[2];
        //        // todo: further shuffling... here
-       for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // contrib amp_i
+       for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // nsubproc
 	 weights[kk][nproc] = amp._M_fini.amp[kk][nproc]*coef*cPDF[nproc];//wtorg[0];
        }
      }     
    }
 
-
-/*
+   /*
    // ---------------------- cross check ------------------------ //
    //
    //    we calculate here some control cross section with a weired scale (2*pt)^2
@@ -627,29 +625,29 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ----------------------------------------------------------- //
 
    // ----- calculate weights for cross checks ---- //
-   mu2 = 2*ptmean*2*ptmean;
+   mu2 = 2*M1*2*M1;
    nlo::weight_hhc wtctrlorg = amp(dummypdf, mu2, mu2 ,prefactor); // mu is a 'dummy'-sca
 
-   // - rearrange subprocesses
-   nlo::weight_hhc wtctrl;
-   wtctrl[0] = wtctrlorg[0];
-   wtctrl[1] = wtctrlorg[3];
-   wtctrl[2] = wtctrlorg[4];
-   wtctrl[3] = wtctrlorg[5];
-   wtctrl[4] = wtctrlorg[6];
-   wtctrl[5] = wtctrlorg[1];
-   wtctrl[6] = wtctrlorg[2];
-   // no further shuffling...
+   //    // - rearrange subprocesses
+   nlo::weight_hhc wtctrl = wtctrlorg;
+   //    wtctrl[0] = wtctrlorg[0];
+   //    wtctrl[1] = wtctrlorg[3];
+   //    wtctrl[2] = wtctrlorg[4];
+   //    wtctrl[3] = wtctrlorg[5];
+   //    wtctrl[4] = wtctrlorg[6];
+   //    wtctrl[5] = wtctrlorg[1];
+   //    wtctrl[6] = wtctrlorg[2];
+   //    // no further shuffling...
 
    wtctrl *= 389385730.;
    if(IXsectUnits!=12)  wtctrl *= pow(10.,(IXsectUnits-12)) ;
 
-   amp(dummypdf, ptmean*ptmean, ptmean*ptmean ,prefactor); // call it with another scale for proper cross check!
+   amp(dummypdf, M1*M1, M1*M1 ,prefactor); // call it with another scale for proper cross check!
 
    // ----- calculate weights by myself for cross checks ---- //
    double wself[7] = {0};
  
-   if(itype == amplitude_hhc::fini) { 
+   if(itype == nlo::amplitude_hhc::fini) { 
 	
      if (amp._M_fini.mode==0) { //finix1
        for(int proc=0;proc<NSubproc;proc++){
@@ -692,9 +690,6 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ------------------------ cross check ende ----------------------------------- //
    */
 
-
-
-   const double mu0scale = 0.25;           // --- parameter in transformation function H(mu)
    if( NscalenodeScale1<=3 || NscalenodeScale2<=3){
       printf("fnloBlockBNlojet::FillEventHHCMuVar(). Error. Sorry, but you need some more scale nodes!\n");exit(1);
    }
@@ -772,11 +767,17 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 		     int di = xminbin - xmaxbin;
 		     xmaxbin = xmaxbin + di;   // modify indicees
 		     xminbin = xminbin - di;		
-		     // no more shuffling.
-		     // 	       double buffer;
-		     // 	       //buffer = wtmp[1]; // swap subprocesses 2,3
-		     // 	       //wtmp[1] = wtmp[2];
-		     // 	       //wtmp[2] = buffer;
+
+		     double buffer;
+		     buffer = wtmp[1]; // swap subprocesses 2,3 // if you use nlojet-type PDF-LCs
+		     wtmp[1] = wtmp[2];
+		     wtmp[2] = buffer;
+		     for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
+			double weightsbuffer; 
+			weightsbuffer	= weights[kk][1];
+			weights[kk][1]	= weights[kk][2];
+			weights[kk][2]	= weightsbuffer;
+		     }
 		     // 	       // new ordering (1,2)->(5,6)	 
 		     // 	       buffer  = wtmp[5]; // swap subprocesses 6,7
 		     // 	       wtmp[5] = wtmp[6];
@@ -797,38 +798,30 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 		  // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
 
 		  double fac = bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2];
-		  double* st = &SigmaTildeMuIndep[ObsBin][im][idx1][idx2][0]; // improves speed slightly!
 		  if(itype == nlo::amplitude_hhc::fini) { 
 		     if (amp._M_fini.mode==0) { //finix1
 			for(int proc=0;proc<NSubproc;proc++){
-			   st[proc] +=  fac * ( weights[0][proc] + weights[3][proc] );
-
-			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[0][proc] + weights[3][proc] );
-			   //SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[3][proc];
+			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[0][proc];
+			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[3][proc];
 			}
 		     }		
 		     else if (amp._M_fini.mode==1) { //finix2
 			for(int proc=0;proc<NSubproc;proc++){
-			   st[proc] +=  fac * ( weights[1][proc] + weights[4][proc] );
-			   
-			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[1][proc] + weights[4][proc] );
-			   //SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[4][proc];
+			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[1][proc];
+			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[4][proc];
 			}
 		     }		
 		     else if(amp._M_fini.mode==2){ //fini1
 			for(int proc=0;proc<NSubproc;proc++){
-			   st[proc] +=  fac * ( weights[2][proc] + weights[5][proc] + weights[6][proc]);
-			   
-			   //SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * ( weights[2][proc] + weights[5][proc] + weights[6][proc]);
-			   // 			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[5][proc];
-			   // 			   SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[6][proc];
+			   SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[2][proc];
+			   SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[5][proc];
+			   SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[6][proc];
 			}
 		     }
 		  }
 		  else { // no fini contribution
 		     for(int proc=0;proc<NSubproc;proc++){
-			st[proc] +=  fac * wtmp[proc];
-			//SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * wtmp[proc];
+			SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * wtmp[proc];
 		     }
 		  }
 	       }
@@ -948,30 +941,22 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    //
    // -------------------------------------------------------------------------- //
 
-   // ---- SigmaRefMixed ---- //
+   // ---- SigmaRefMixed for DIS calculations ---- //
    double mur2 = (M1*M1 + M2*M2) / 2;
    double muf2 = mur2;
-
-   // if LHC -> mur=muf=scale1*exp(0.3*scale2)
-   if (  NPDF == 2 &&  NPDFPDG[1] == 2212 ){
-      mur2 = pow( M1*exp(0.3*M2)  ,2);
-      muf2 = mur2;
-   }
 
    nlo::weight_dis wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
    double tmp = wt[1]+wt[2];
    wt[1] = wt[0];
    wt[0] = tmp;
    wt[2] = 0;
-     
    wt *= 389385730.;
    if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-     
    for(int proc=0;proc<NSubproc;proc++){
       SigmaRefMixed[ObsBin][proc] += wt[proc];
    }
 
-   // ---- SigmaRef_s1 ---- //
+   // ---- SigmaRef_s1 for DIS calculations ---- //
    mur2 = M1*M1;
    muf2 = mur2;
    wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
@@ -985,8 +970,7 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
       SigmaRef_s1[ObsBin][proc] += wt[proc];
    }
      
-
-   // ---- SigmaRef_s2 ---- //
+   // ---- SigmaRef_s2 for DIS calculations---- //
    mur2 = M2*M2;
    muf2 = mur2;
    wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
@@ -1019,9 +1003,16 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    //
    // -------------------------------------------------------------------------- //
 
+
    // ---- SigmaRefMixed ---- //
-   double mur2 = (M1*M1 + M2*M2) / 2;
+   double mur2 = pow( M1*exp(0.3*M2)  ,2);
+   //double mur2 = (M1*M1 + M2*M2 )/ 2.;
    double muf2 = mur2;
+   if ( mur2 < 1. ){
+      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",sqrt(mur2));
+      exit(1);
+   }
+
    nlo::weight_hhc wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
      
    wt *= 389385730.;
@@ -1034,6 +1025,10 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    // ---- SigmaRef_s1 ---- //
    mur2 = M1*M1;
    muf2 = mur2;
+   if ( M1 < 1. ){
+      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your scale #1 is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",M1);
+      exit(1);
+   }
    wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
    wt *= 389385730.;
    if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
@@ -1043,8 +1038,13 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
      
 
    // ---- SigmaRef_s2 ---- //
-   mur2 = M2*M2;
+   mur2 = pow( M1/(2*cosh(0.7*M2)) , 2);
+   //mur2 = M2*M2;
    muf2 = mur2;
+   if ( mur2 < 1. ){
+      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",sqrt(mur2));
+      exit(1);
+   }
    wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
    wt *= 389385730.;
    if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
@@ -1956,7 +1956,7 @@ void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
    printf("         Set IPDFdef3 = %d, consistent with %d subprocesses.\n",IPDFdef3,NSubproc);
    
 
-   IWarmUp	= 0;			// no warm-up run -> production run.
+   //IWarmUp	= 0;			// no warm-up run -> production run.
    IWarmUpPrint	= 10000000 ;
 
    NScaleDep	= 3;
@@ -2265,18 +2265,26 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude):\n  *  ",nxPerMagnitude);
    for(int i=0;i<XNode1.size();i++){
       if ( (xlim[i] < 1.e-6 || xlim[i]>1) && IWarmUp == 0 ) {
-	 printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude. xlim[%d] = %8.3e\n",i,xlim[i]);
+	 printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude. xlim[%d] = %8.3e, IWarmUp = %d.\n",i,xlim[i],IWarmUp);
       }
       int nxtot	= (int)(fabs(log10(xlim[i]))*nxPerMagnitude);
       printf("%d: %d, ",i,nxtot);
-      if ( i==((XNode1.size())-1))printf("\n");
+      if ( i==XNode1.size()-1 )printf("\n");
       
       Nxtot1.push_back(nxtot);
-      double hxlim = log10(xlim[i]);  // use exact value from Warm-Up run
+      double hxlim = 0;
+      if ( NPDF == 1) {
+	 hxlim = log10(xlim[i]);  // use exact value from Warm-Up run
+      }
+      else if ( NPDF == 2 ){
+	 hxlim = -sqrt(-log10(xlim[i]));
+      }
+
       Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
          double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
-         XNode1[i].push_back(pow(10,hx)); 
+         if ( NPDF == 1 )	XNode1[i].push_back(pow(10,hx)); 
+	 else if ( NPDF == 2 )	XNode1[i].push_back(pow(10,-pow(hx,2)));
       }
    }
 
