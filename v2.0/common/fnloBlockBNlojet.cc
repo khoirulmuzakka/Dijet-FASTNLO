@@ -423,9 +423,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //
    // ------------------------------------------------------------------------------------------------------- //
 
-   fnloBlockA2 *A2 =  BlockA2;
-
-    // --- select interpolation kernel for x and for mu 
+   // --- select interpolation kernel for x and for mu 
    //             1:CatmulRom   2:Lagrangian
    const EInterpolKernel eIkernx  = kCatmulRom;    // kLagrangian ?!?!
    const EInterpolKernel eIkernmu = kCatmulRom;    // kLagrangian ?!?!
@@ -449,14 +447,8 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ---------------------------------------------------------------------------------------- //
    FillMuVarReferenceTables( ObsBin, M1, M2, amp, realpdf, prefactor);
    
-
-   // ---------------------------------------------------------------------------------------- //
-   if(this->NPDFDim != 1){
-     printf("fnloBlockBNlojet::FillEventHHC: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
-     exit(1);
-   }
-
-   // Half matrix x variables
+   
+   // ---- Half matrix x variables ---- //
    double xmin=0.0, xmax=0.0;
    if (x1 > x2) {
      xmax = x1;
@@ -465,10 +457,19 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
      xmax = x2;
      xmin = x1;
    }
+
+   // ---------------------------- check validity of call ------------------------------------ //
+   if(this->NPDFDim != 1){
+     printf("fnloBlockBNlojet::FillEventHHC: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
+     exit(1);   }
    if (xmin<XNode1[ObsBin][0]){
      printf("fnloBlockBNlojet::FillEventHHC: find: xmin (%f) smaller than lowest x-node (%f) for bin #%d .\n",
-	    xmin,XNode1[ObsBin][0],ObsBin);
+	    xmin,XNode1[ObsBin][0],ObsBin);   }
+   if( NscalenodeScale1<=3 || NscalenodeScale2<=3){
+      printf("fnloBlockBNlojet::FillEventHHCMuVar(). Error. Sorry, but you need some more scale nodes!\n");exit(1);
    }
+   // ---------------------------------------------------------------------------------------- //
+
       
    // ---------------------------------------------------------------------------------------- //
    // **********  determine x_ij position in grid  ************
@@ -548,14 +549,13 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    nlo::weight_hhc wtorg = amp(dummypdf,mu2,mu2,prefactor);
    // - rearrange subprocesses
    nlo::weight_hhc wt = wtorg;
-   // no shuffling
-   //    wt[0] = wtorg[0];
-   //    wt[1] = wtorg[3];
-   //    wt[2] = wtorg[4];
-   //    wt[3] = wtorg[5];
-   //    wt[4] = wtorg[6];
-   //    wt[5] = wtorg[1];
-   //    wt[6] = wtorg[2];
+   wt[0] = wtorg[0];
+   wt[1] = wtorg[3];
+   wt[2] = wtorg[4];
+   wt[3] = wtorg[5];
+   wt[4] = wtorg[6];
+   wt[5] = wtorg[1];
+   wt[6] = wtorg[2];
    // -- case NSubproc=6: see below
    
    wt *= 389385730.;
@@ -568,12 +568,12 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
    if(x2>x1){
       double buffer;
-      buffer = wt[1];
-      wt[1] = wt[2];
-      wt[2] = buffer;
-      //       buffer = wt[5];
-      //       wt[5] = wt[6];
-      //       wt[6] = buffer;
+      //       buffer = wt[1];
+      //       wt[1] = wt[2];
+      //       wt[2] = buffer;
+      buffer  = wt[5]; // swap subprocesses 6,7
+      wt[5] = wt[6];
+      wt[6] = buffer;
    }
    //    // --- combine subprocesses 5,6 here after possible swapping
    //    if (NSubproc == 6) {   
@@ -581,9 +581,6 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //      wt[6] = wt[5];    // set equal in case of swapping below diagonal (at bottom) 
    //    }
    
-   //    buffer  = wt[5]; // swap subprocesses 6,7
-   //    wt[5] = wt[6];
-   //    wt[6] = buffer;
    
 
    // ---- calcualte weights for fini contributions ---- //
@@ -598,20 +595,29 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //nlo::weight_hhc weights[7]; nicer, but I do net get the syntax correct
    if(itype == nlo::amplitude_hhc::fini) { 
      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
-       //	no more shuffling...       
-       //        weights[kk][0] = amp._M_fini.amp[kk][0]*coef*cPDF[0];//wtorg[0];
-       //        weights[kk][1] = amp._M_fini.amp[kk][3]*coef*cPDF[3];
-       //        weights[kk][2] = amp._M_fini.amp[kk][4]*coef*cPDF[4];
-       //        weights[kk][3] = amp._M_fini.amp[kk][5]*coef*cPDF[5];
-       //        weights[kk][4] = amp._M_fini.amp[kk][6]*coef*cPDF[6];
-       //        weights[kk][5] = amp._M_fini.amp[kk][1]*coef*cPDF[1];
-       //        weights[kk][6] = amp._M_fini.amp[kk][2]*coef*cPDF[2];
-       //        // todo: further shuffling... here
-       for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // nsubproc
-	 weights[kk][nproc] = amp._M_fini.amp[kk][nproc]*coef*cPDF[nproc];//wtorg[0];
-       }
+	weights[kk][0] = amp._M_fini.amp[kk][0]*coef*cPDF[0];//wtorg[0];
+	weights[kk][1] = amp._M_fini.amp[kk][3]*coef*cPDF[3];
+	weights[kk][2] = amp._M_fini.amp[kk][4]*coef*cPDF[4];
+	weights[kk][3] = amp._M_fini.amp[kk][5]*coef*cPDF[5];
+	weights[kk][4] = amp._M_fini.amp[kk][6]*coef*cPDF[6];
+	weights[kk][5] = amp._M_fini.amp[kk][1]*coef*cPDF[1];
+	weights[kk][6] = amp._M_fini.amp[kk][2]*coef*cPDF[2];
+	//        for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // nsubproc
+	// 	 weights[kk][nproc] = amp._M_fini.amp[kk][nproc]*coef*cPDF[nproc];//wtorg[0];
+	//        }
      }     
    }
+
+   // neu
+   if(x2>x1){
+     for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
+	double buffer;
+	buffer = weights[kk][5];
+	weights[kk][5] = weights[kk][6];
+	weights[kk][6] = buffer;
+     }
+   }
+
 
    /*
    // ---------------------- cross check ------------------------ //
@@ -690,9 +696,6 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ------------------------ cross check ende ----------------------------------- //
    */
 
-   if( NscalenodeScale1<=3 || NscalenodeScale2<=3){
-      printf("fnloBlockBNlojet::FillEventHHCMuVar(). Error. Sorry, but you need some more scale nodes!\n");exit(1);
-   }
 
    // ---------------------------------------------------------------------------------------- //
    // ------------------------------ calculation of the scale nodes -------------------------- //
@@ -769,14 +772,20 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 		     xminbin = xminbin - di;		
 
 		     double buffer;
-		     buffer = wtmp[1]; // swap subprocesses 2,3 // if you use nlojet-type PDF-LCs
-		     wtmp[1] = wtmp[2];
-		     wtmp[2] = buffer;
+// 		     buffer = wtmp[1]; // swap subprocesses 2,3 // if you use nlojet-type PDF-LCs
+// 		     wtmp[1] = wtmp[2];
+// 		     wtmp[2] = buffer;
+		     buffer  = wtmp[5]; // swap subprocesses 6,7
+		     wtmp[5] = wtmp[6];
+		     wtmp[6] = buffer;
 		     for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
 			double weightsbuffer; 
-			weightsbuffer	= weights[kk][1];
-			weights[kk][1]	= weights[kk][2];
-			weights[kk][2]	= weightsbuffer;
+// 			weightsbuffer	= weights[kk][1];
+// 			weights[kk][1]	= weights[kk][2];
+// 			weights[kk][2]	= weightsbuffer;
+			weightsbuffer	= weights[kk][5];
+			weights[kk][5]	= weights[kk][6];
+			weights[kk][6]	= weightsbuffer;
 		     }
 		     // 	       // new ordering (1,2)->(5,6)	 
 		     // 	       buffer  = wtmp[5]; // swap subprocesses 6,7
@@ -790,7 +799,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 		     // 		 //weights[kk][2]	= weightsbuffer;
 		     // 		 weightsbuffer	= weights[kk][5];
 		     // 		 weights[kk][5]	= weights[kk][6];
-		     // 		 weights[kk][5]	= weightsbuffer;
+		     // 		 weights[kk][6]	= weightsbuffer;
 		     //              }
 		  }
 	     
