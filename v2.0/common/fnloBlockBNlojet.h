@@ -63,17 +63,21 @@ private:
    double* a2lo;
    double* a2up;
    
-
    void InitScaleNode( fnloBlockA2* A2, double* slo, double* shi, int iScale  );
-   double (fnloBlockBNlojet::*Fct_H_Scale[2])(double); // an array of pointers to member functions
-   double (fnloBlockBNlojet::*Fct_H_Scale_Inv[2])(double); // an array of pointers to member functions
+   double (fnloBlockBNlojet::*Fct_H_Scale[2])(double);		// functions (member-function pointers) for function in which the scales are binned
+   double (fnloBlockBNlojet::*Fct_H_Scale_Inv[2])(double);
+   double (fnloBlockBNlojet::*Fct_H_XNode)(double);		// functions (member-function pointers) for function in which the x-nodes are binned
+   double (fnloBlockBNlojet::*Fct_H_XNode_Inv)(double);
 
    double Function_loglog025( double mu );
    double Function_loglog025_inv( double mu );
    double Function_x( double mu );
    double Function_x_inv( double mu );
-
-
+   double Function_log10( double x );
+   double Function_log10_inv( double x );
+   double Function_sqrtlog10( double x );
+   double Function_sqrtlog10_inv( double x );
+   
 public:
    // variables for warm-up run
    int IWarmUp;
