@@ -1,10 +1,10 @@
 //
-// fastNLO v2 author code for fnl2342b:
+// fastNLO v2.1 author code for fnl5002ak06:
 //     ATLAS LHC Dijets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.6 in E-scheme
 //
 // 
-// ============== fastNLO user: ===================================
+// ===================== fastNLO user: ============================
 // To create your own scenario, it is recommended to take 
 // this code, make a copy and edit the relevant changes.
 // Important:
@@ -17,21 +17,27 @@
 // the fastNLO routines.
 //
 // This file contains the following routines:
-//   inputfunc    (-> user edits)
-//   psinput      (-> user edits)
-//   initfunc     (don't touch)
-//   userfunc     (-> user edits)
-//   writetable   (don't touch)
-//   end_of_event (don't touch)
-//   phys_output  (don't touch)
-//   inittable    (-> user edits)
+//   inputfunc		(-> user edits)
+//   psinput		(-> user edits)
+//   userfunc		(-> user edits)
+//   inittable		(-> user edits)
+//   GetWarmupValues	(-> user edits)
+//   DefineBinning	(-> user edits)
+//   GetDoubleDiffBinNumber	(don't touch usually)
+//   initfunc		(don't touch)
+//   writetable		(don't touch)
+//   end_of_event	(don't touch)
+//   phys_output	(don't touch)
+//   GetEcms		(don't touch)
+//   GetNj		(don't touch)
+//   FillEvent		(don't touch)	
 //
 // Implementing a new scenario requires to edit:
 //  - the jet algorithm ("#include" statement and assignment of "jetclus")
 //  - number of jets (inputfunc)
 //  - center-of-mass energy (psinput)
 //  - compute observable, determine bin No. (userfunc)
-//  - declare all variables for table, define bin boundaries (inittable)
+//  - declare all variables for table, define bin boundaries (inittable, etc...)
 //  
 // ================================================================
 // 
@@ -74,6 +80,7 @@ extern "C"{
 }
 //------ END OF THE DO-NOT-TOUCH-PART ------
 
+
 //------ USER DEFINED PART STARTS HERE ------
 #include <algorithm>
 
@@ -101,25 +108,27 @@ private:
   // --- jet algorithm
   fj_ak jetclus;   // fastNLO user: define jet algorithm (consistent with .h file above)
    
-  bounded_vector<lorentzvector<double> > pj;    // the jet structure 
-   
   // --- fastNLO definitions (not for user)
   fnloTable *table;
   double nevents;        // No of events calculated so far
   unsigned long nwrite;  // No of events after to write out the table
   string tablefilename;  // The table file to write to
   time_t start_time;
-   
   bool nlo;
-
+  double* xlim;
+  double* scale1lo;
+  double* scale1hi;
+  double* scale2lo;
+  double* scale2hi;
+   
   void inittable();
   void writetable();
-  void GetWarmupValues( double* xlim, double* scale1lo, double* scale1hi , double* scale2lo , double* scale2hi , fnloBlockBNlojet* B );
+  void GetWarmupValues( fnloBlockBNlojet* B );
   void DefineBinning();
-  double GetEcms();
-  unsigned int GetNj();
   int GetDoubleDiffBinNumber( double val1 , double val2 );
   int FillEvent( double val1 , double val2 , double mu1, double mu2 , const event_hhc& p , const nlo::amplitude_hhc& amp );
+  double GetEcms();
+  unsigned int GetNj();
 
 };
 
@@ -129,14 +138,16 @@ user_base_hhc * userfunc() {
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
-  // --- fastNLO user: select the number of jets for your observable
-  //nj = 1U;
-  nj = 2U;    
-  //nj = 3U;
+   // --- fastNLO user: select the number of jets for your observable
+   //     Possible choices
+   //       - nj = 1U
+   //       - nj = 2U
+   //       - nj = 3U
+   nj = 2U;    
 
-  // --- number of the up and down type flavours (don't touch)
-  nu = 2U;
-  nd = 3U;
+   // --- number of the up and down type flavours (don't touch)
+   nu = 2U;
+   nd = 3U;
 } 
 
 unsigned int UserHHC::GetNj(){
@@ -147,19 +158,21 @@ unsigned int UserHHC::GetNj(){
 
 void psinput(phasespace_hhc *ps, double& s)
 {
-  // --- fastNLO user: set the total c.m. energy squared in GeV^2
-  //s =     40000.; // RHIC               200 GeV
-  //s =   3240000.; // TeV Run I         1800 GeV
-  //s =   3841600.; // TeV Run II        1960 GeV
-  //s =    810000.; // LHC Injection Run  900 GeV
-  //s =   5569600.; // LHC Initial Run   2360 GeV
-  s =  49000000.; // LHC First Run     7000 GeV
-  //s = 100000000.; // LHC Start-up Run 10000 GeV
-  //s = 196000000.; // LHC Design Run   14000 GeV
+   // --- fastNLO user: set the total c.m. energy squared in GeV^2
+   //     Reasonable choices for existing accelerators
+   //		s =     40000.; // RHIC               200 GeV
+   //		s =   3240000.; // TeV Run I         1800 GeV
+   //		s =   3841600.; // TeV Run II        1960 GeV
+   //		s =    810000.; // LHC Injection Run  900 GeV
+   //		s =   5569600.; // LHC Initial Run   2360 GeV
+   //		s =  49000000.; // LHC First Run     7000 GeV
+   //		s = 100000000.; // LHC Start-up Run 10000 GeV
+   //		s = 196000000.; // LHC Design Run   14000 GeV
+   s =  49000000.;
 
-  //   You can use your own phase generator. 
-  //   Here we use the default.
-  ps = 0;
+   //   You can use your own phase generator. 
+   //   Here we use the default.
+   ps = 0;
 } 
 
 double UserHHC::GetEcms(){
@@ -189,7 +202,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // --- run the jet algorithm
    double jetsize = 0.6;
-   pj = jetclus(p,jetsize);
+   bounded_vector<lorentzvector<double> > pj = jetclus(p,jetsize);
    unsigned int nj = pj.upper(); 
 
    // --- declare and initialize phase space cut variables
@@ -250,6 +263,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 } // --- end userfunc
 
 
+
 int UserHHC::GetDoubleDiffBinNumber( double val1 , double val2 ){
    // Get Bin number of this event 
    // return -1 if no bin was found
@@ -266,6 +280,7 @@ int UserHHC::GetDoubleDiffBinNumber( double val1 , double val2 ){
 }
 
 
+
 int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , const event_hhc& p, const nlo::amplitude_hhc& amp ){
    // Fill FastNLO Array
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
@@ -280,6 +295,7 @@ int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , con
 }
 
 
+
 void UserHHC::writetable(){
    table->OpenFileRewrite();
    table->WriteBlockA1();
@@ -289,6 +305,8 @@ void UserHHC::writetable(){
    }
    table->CloseFileWrite();
 }
+
+
 
 void UserHHC::end_of_event(){
   nevents += 1;
@@ -314,6 +332,8 @@ void UserHHC::end_of_event(){
     printf("fastNLO: Table written.\n");
   }
 }
+
+
 
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
@@ -344,11 +364,10 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
 
 
 
-
 void UserHHC::inittable(){
  
    // ---- set up fastNLO and fnloTable---- //
-   // ---- nothing to do for fastNLO user
+   // ---- fastNLO user: nothing to do 
    table		= new fnloTable(tablefilename);
    fnloBlockA1  *A1	= table->GetBlockA1();
    fnloBlockA2  *A2	= table->GetBlockA2();
@@ -359,8 +378,8 @@ void UserHHC::inittable(){
    A2->ILOord	= GetNj();
    
 
-   // --- fastNLO: set scenario name
-   A1->SetScenName("fnl5002-ATLAS-Dijet-06");	// - fastNLO user: set scenario name
+   // --- fastNLO user: set scenario name
+   A1->SetScenName("fnl5002-ATLAS-Dijet-06");	// --- fastNLO user: set scenario name (no whitespaces)
 
    // --- fastNLO user: up to 20 strings to describe the scenario
    A2->ScDescript.push_back("d2sigma/dM12dy* (pb_TeV)");
@@ -369,42 +388,42 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("anti-kT_R=0.6");
    A2->ScDescript.push_back("arXiv:1112.6297");
 
-   A2->SetIpublunits(12);			// --- fastNLO user: set cross section units
-						//                   (negative power of ten), pb: 12
-   A2->NDim   = 2;				// --- fastNLO user: No of dimensions in which observable is binned
-   A2->DimLabel.push_back("m12_[TeV]");		// --- fastNLO user: label of 1st dimension
-   A2->IDiffBin.push_back(2);			// --- fastNLO user: Are publication units divided by this variable
-   A2->DimLabel.push_back("y*");		// --- fastNLO user: label of 2nd dimension
-   A2->IDiffBin.push_back(2);			// --- fastNLO user: Are publication units divided by this variable
+
+   // --- fastNLO user: Give information about your measurement
+   A2->SetIpublunits( 12 );			// --- fastNLO user: set cross section units (negative power of ten), e.g. 'pb' -> 12.
+   A2->SetNumDiffBin( 2 );			// --- fastNLO user: No of dimensions in which observable is binned
+   bool IsDiffBin = true;			// --- fastNLO user: Are publication units divided by this variable?
+   A2->SetDimLabel("m12_[TeV]", 1 , IsDiffBin );// --- fastNLO user: label of 1st dimension
+   A2->SetDimLabel("y*",        2 , IsDiffBin );// --- fastNLO user: label of 2nd dimension
 
 
    // ---- Define your bingrid in method DefineBinning() ---- //
+   // --- fastNLO user: Modifiy function DefineBinning() below according to your bin grid.
    DefineBinning();
 
 
-   // --- fastNLO user: before running a new scenario for the first time,
-   //     the first run must be a "Warm-Up Run" (B->IWarmUp=1), which produces
-   //     an initialization block as output. This should be copied and pasted
-   //     below into GetWarmupValues(). These initialization values must be used for all
-   //     production jobs (IWarmUp=0) for a given scenario.
-   // --- initialize variables for WarmUp run
-   //B->IWarmUpPrint = 50000000;	// default 10000000
-   //B->IWarmUp = 1;			// --- fastNLO user: do the Warm-Up run
-   B->IWarmUp = 0;			//  or do production run(s)
-   // --- arrays for extreme x and (default) scale values (computed in Warm-Up run)
-   double xlim[A2->NObsBin];
-   double scale1lo[A2->NObsBin], scale1hi[A2->NObsBin];
-   double scale2lo[A2->NObsBin], scale2hi[A2->NObsBin];
-   // ---- get warm up values or init array reasonably ---- //
-   GetWarmupValues( xlim, scale1lo, scale1hi , scale2lo , scale2hi, B );
+   // ---- initialize variables for WarmUp run ---- //
+   // --- fastNLO user: Start "Warm-Up" or "Production" run.
+   //     See documentation or GetWarmupValues() for more details.
+   //     choices for B->IWarmUp
+   //	    -  B->DoWarmUp(true)   ->  Do the Warm-Up run
+   //	    -  B->DoWarmUp(false)  ->  Do a production run
+   B->DoWarmUp(false);
+
+
+   // ---- get warm up values or init arrays reasonably ---- //
+   // --- fastNLO user: See documentation in GetWarmUpValues for details.
+   //     Do not modify this call.
+   GetWarmupValues( B );
 
 
    // ---- initalize BlockB ---- //
+   // --- fastNLO user: nothing to do.
    B->InitLHCConstants(A2,nlo);
 
 
    // ---- set number-of x-nodes ---- //
-   B->SetNumberOfXNodesPerMagnitude(9,xlim);
+   B->SetNumberOfXNodesPerMagnitude( 9 , xlim );
 
 
    // ---- number of scale nodes for mu ---- //
@@ -412,34 +431,50 @@ void UserHHC::inittable(){
    B->SetNumberOfScaleNodesScale2( 5 );
 
 
-   // ---- set names for the two possible scale variables (according to variables used in FillEventHHCMuVar()) ---- //
+   // ---- set names for the two possible scale variables (according to variables used in FillEvent()) ---- //
    B->SetScale1Name( "pt_max" );
    B->SetScale2Name( "y*" );
 
 
    // ---- Choose function for ScaleNode distances ---- //
+   // --- fastNLO user: possibility to choose function which
+   //     is used for binning of scale nodes
+   //     possible choices
+   //        - LogLog Binning ( H(mu) = log(log(mu/0.25)) )
+   //        - Linear         ( H(mu) = mu )
    B->InitLogLogScaleNode( A2 , scale1lo , scale1hi , 1 );	// choose function H for scale 1
    B->InitLinearScaleNode( A2 , scale2lo , scale2hi , 2 );	// choose function H for scale 2
 
 
    // ---- Initialzie the cross section tables ---- //
+   // --- fastNLO user: nothing to do.
    B->ResizeSigmaTildeTables( A2 );
- 
+
 }
+
 
 
 void UserHHC::DefineBinning(){
    // ---- define the binning ---- //
-   vector <double> bound;
-   bound.resize(2);
+   // --- fastNLO user: Define your binning here.
+   //     If you use a double differential binning
+   //     you should use the method fnloBlockA2::InitBinning().
+   //     Therefore you have to define following variables.
+   //     1) (int)		number of bins in your first dimension
+   //     2) (double*)		array of bin edges in 1st dimension
+   //     3) (int*)		array of number of bins for second dimension for each 1st dim bin
+   //     4) (vector<double*>)	vector of arrays for bin edges in 2nd dimension for each 1st dim bin
 
    // ---- initalize the bingrids ---- //
    // --- fastNLO user: bin definitions - here in y* and m12
+   // 1)
    const int nrapbins = 9;
+   // 2)
    double rapbins[nrapbins+1] = {0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0 , 3.5 , 4.0, 4.4 };
-  
+   // 3)
    const int nptbins[nrapbins] = {20,20,21,20,19,16,12,9,2};
-
+   
+   // prepare 4)
    double ptbins[nrapbins][22] = {
       { 0.07 , 0.11 , 0.16 , 0.21 , 0.26 , 0.31 , 0.37 , 0.44 , 0.51 , 0.59 , 
 	0.67 , 0.76 , 0.85 , 0.95 , 1.06 , 1.18 , 1.31 , 1.45 , 1.60 , 
@@ -464,6 +499,7 @@ void UserHHC::DefineBinning(){
       { 2.55 , 3.04, 4.27 }
    };
 
+   // 4)
    vector<double*> vptbins(nrapbins);
    for (unsigned int i=0;i<vptbins.size();i++) vptbins[i]=ptbins[i]; 
    
@@ -472,7 +508,29 @@ void UserHHC::DefineBinning(){
 }
 
 
-void UserHHC::GetWarmupValues( double* xlim, double* scale1lo, double* scale1hi , double* scale2lo , double* scale2hi, fnloBlockBNlojet* B ){
+
+void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
+   // --- fastNLO user: before running a new scenario for the first time,
+   //     the first run must be a "Warm-Up Run" (B->IWarmUp=1), which produces
+   //     an initialization block as output. This should be copied and pasted
+   //     below into GetWarmupValues(). These initialization values must be used for all
+   //     production jobs (IWarmUp=0) for a given scenario.
+   // --- fastNLO user: Copy the values from the Warm-Up run here
+   //     If this IS a Warm-Up run, we initialize the
+   //     arrays with reasonable numbers.
+   // --- Info: During a warm-up run, you might have to decrease
+   //     your number of x-nodes per magnitude, that you do not
+   //     run out of memory.
+
+   // ---- Allocate Warmup run arrays ---- //
+   const int NObsBin = table->GetBlockA2()->NObsBin;
+   xlim = new double[NObsBin];
+   scale1lo = new double[NObsBin];
+   scale1hi = new double[NObsBin];
+   scale2lo = new double[NObsBin];
+   scale2hi = new double[NObsBin];
+
+   // Get Warmup Values or initialize arrays with reasonable numbers
    if ( !B->IWarmUp ) {
       // ---- copy result from warmup run here ---- //
       // 2090000000 contributions (!= events) in warm-up run
@@ -619,8 +677,12 @@ void UserHHC::GetWarmupValues( double* xlim, double* scale1lo, double* scale1hi 
    }
    else {
       printf("fastNLO: This is a warm-up run!\n");
+      // --- fastNLO user: You can set the number of contributions
+      //     after which the WarmUp values are printed
+      B->IWarmUpPrint = 50000000;		// default 10000000
+
       // safe initialziations
-      for(int i=0;i<table->GetBlockA2()->NObsBin;i++){ 
+      for(int i=0;i<NObsBin;i++){ 
 	 xlim[i] = 1.1e-07;
 	 scale1lo[i] = 1.0, scale1hi[i]=9.9e10;
 	 scale2lo[i] = 1.0, scale2hi[i]=9.9e10;
