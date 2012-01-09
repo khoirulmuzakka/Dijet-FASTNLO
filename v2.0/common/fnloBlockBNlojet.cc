@@ -474,8 +474,8 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // **********  determine x_ij position in grid  ************
    // ---------------------------------------------------------------------------------------- //
    // --- determine fractional contributions
-   double hxmin  = -sqrt(-log10(xmin));
-   double hxmax  = -sqrt(-log10(xmax));
+   double hxmin  = (this->*Fct_H_XNode)(xmin);
+   double hxmax  = (this->*Fct_H_XNode)(xmax);
    double hxone   = 0.0;
 
    // --- define the x-node numbers in the range: 0 <= nxnode < Nxtot1
@@ -2152,21 +2152,27 @@ void fnloBlockBNlojet::InitLinearScaleNode( fnloBlockA2* A2 , double* slo , doub
 
 double fnloBlockBNlojet::Function_loglog025( double mu ){
    // function H(mu) = log(log( mu / 0.25 ))
-   return log(log(mu/0.25));
-}
+   return log(log(mu/0.25));}
 double fnloBlockBNlojet::Function_loglog025_inv( double mu ){
    // inverse of function H(mu) = log(log( mu / 0.25 ))
-   return 0.25*exp(exp(mu));
-}
+   return 0.25*exp(exp(mu));}
 
 double fnloBlockBNlojet::Function_x( double mu ){
    // function H(mu) = x
-   return mu;
-}
+   return mu;}
 double fnloBlockBNlojet::Function_x_inv( double mu ){
    // inverse of function H(mu) = x;
-   return mu;
-}
+   return mu;}
+
+double fnloBlockBNlojet::Function_log10( double x ){
+   return log10(x);}
+double fnloBlockBNlojet::Function_log10_inv( double x ){
+   return pow(10,x);}
+
+double fnloBlockBNlojet::Function_sqrtlog10( double x ){
+   return -sqrt(-log10(x));}
+double fnloBlockBNlojet::Function_sqrtlog10_inv( double x ){
+   return pow(10,-pow(x,2));}
 
 
 //________________________________________________________________________________________________________________ //
@@ -2255,6 +2261,8 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    //
    //  This method is tested only for v2.1 tables
    //  XNode1 must be 'resized' to the right number of ObsBins before usage.
+   //  This function makes use of Fct_H_XNode, which is implemented consistently 
+   //  only for v2.1 tables yet.
    //
    //  Input
    //     - nxPerMagnitude	number of x-nodes for each order
@@ -2263,6 +2271,17 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    //
    // -------------------------------------------------------------------------- //
    printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude):\n  *  ",nxPerMagnitude);
+
+   // set functions how the x-nodes are binned
+   if ( NPDF == 1) {
+      Fct_H_XNode		= &fnloBlockBNlojet::Function_log10;
+      Fct_H_XNode_Inv		= &fnloBlockBNlojet::Function_log10_inv;
+   }
+   else if ( NPDF == 2 ){
+      Fct_H_XNode		= &fnloBlockBNlojet::Function_sqrtlog10;
+      Fct_H_XNode_Inv		= &fnloBlockBNlojet::Function_sqrtlog10_inv;
+   }
+
    for(int i=0;i<XNode1.size();i++){
       if ( (xlim[i] < 1.e-6 || xlim[i]>1) && IWarmUp == 0 ) {
 	 printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude. xlim[%d] = %8.3e, IWarmUp = %d.\n",i,xlim[i],IWarmUp);
@@ -2272,21 +2291,11 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
       if ( i==XNode1.size()-1 )printf("\n");
       
       Nxtot1.push_back(nxtot);
-      double hxlim = 0;
-      if ( NPDF == 1) {
-	 hxlim = log10(xlim[i]);  // use exact value from Warm-Up run
-      }
-      else if ( NPDF == 2 ){
-	 hxlim = -sqrt(-log10(xlim[i]));
-      }
-
+      double hxlim = (this->*Fct_H_XNode)(xlim[i]);
       Hxlim1.push_back(hxlim);
       for(int j=0;j<nxtot;j++){
          double hx = hxlim*( 1.- ((double)j)/(double)nxtot);
-         if ( NPDF == 1 )	XNode1[i].push_back(pow(10,hx)); 
-	 else if ( NPDF == 2 )	XNode1[i].push_back(pow(10,-pow(hx,2)));
+	 XNode1[i].push_back((this->*Fct_H_XNode_Inv)(hx));
       }
    }
-
-
 }
