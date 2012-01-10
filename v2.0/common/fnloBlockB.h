@@ -18,8 +18,8 @@ class fnloTableUser;
 
 class fnloBlockB {
 public:
-   fnloBlockB(){;}
-   fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) : BlockA1(blocka1) ,  BlockA2(blocka2)   {;}
+   fnloBlockB();
+   fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2);
    int Read(istream *table);
    int Write(ostream *table, int option = 0);
    int Copy(fnloBlockB* other);

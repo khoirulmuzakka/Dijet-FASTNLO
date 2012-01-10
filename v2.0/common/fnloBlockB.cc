@@ -5,6 +5,15 @@
 
 #include "fnloBlockB.h"
 
+fnloBlockB::fnloBlockB(){
+   // standard constructor
+}
+
+fnloBlockB::fnloBlockB(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) : BlockA1(blocka1) ,  BlockA2(blocka2){
+   NScaleDep = 0;
+}
+
+
 int fnloBlockB::Read(istream *table){
    table->peek();
    if (table->eof()){
