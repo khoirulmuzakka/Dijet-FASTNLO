@@ -202,8 +202,10 @@ int main(int argc, char** argv){
   //       - kThresholdCorrection	-> Threshold corrections
   //       - kElectroWeakCorrection	-> Electro-weak corrections
   //     And you must know the 'Id' of this contribution, which is typically
-  //     printed when reading a table. Please use:
+  //     printed when reading a table. To switch contribution on/off please use:
   //            fnloreader->SetContributionON( contrib, Id, on/off) 
+  //     To show the Id's of each contribution please call:
+  //            fnloreader->PrintTableInfo();
   //
 
 
