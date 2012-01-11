@@ -320,13 +320,15 @@ int main(int argc, char** argv){
   //             fnloreader->PrintCrossSections();
   //     Or print it (almost exaclty) like the fortran reading code:
   //             fnloreader->PrintCrossSectionsLikeFreader();
+  //
+  fnloreader->PrintCrossSectionsLikeFreader();
 
 
 
   // ---- Information ---- //
   // --- fastNLO user: For a comprehensive insight into the FastNLO variables
   //     you can use:
-  //             fnloreader->Print();
+  //             fnloreader->PrintFastNLOTableConstants();
   //     
   //     For a comparision with a Reference cross section calculated with
   //     nlojet++ you might use:

@@ -142,7 +142,7 @@ void FastNLOReader::Init(){
 
   ReadTable();
   int iprint = 2;
-  PrintFastNLOTableConstants(iprint);
+  //PrintFastNLOTableConstants(iprint);
 
   SetPDFInterface(FastNLOReader::kLHAPDF);
   SetAlphasEvolution(FastNLOReader::kGRV);
@@ -596,7 +596,7 @@ void FastNLOReader::ReadTable(void)
   }
 
   // some printout
-  //  PrintTableInfo(0);
+  PrintTableInfo();
 
 }
 
