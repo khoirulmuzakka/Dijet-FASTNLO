@@ -10,7 +10,7 @@
 
 class fnloBlockBNlojet : public fnloBlockB {
  public:
-   fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);counter=0;}
+   fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2);// :fnloBlockB(blocka1,blocka2){_S_gauleg(20, _M_xb, _M_wb);counter=0;}
    void FillEventDIS(int ObsBin,double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor=1.0);
    void FillEventDISMuVar(int ObsBin, double x, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double prefactor=1.0);
    void FillEventPhoto(int ObsBin,double x, double scale1, const nlo::amplitude_photo& amp, nlo::pdf_and_coupling_photo& pdf, double prefactor=1.0);
@@ -33,11 +33,13 @@ class fnloBlockBNlojet : public fnloBlockB {
    void SetNumberOfScaleNodesScale1( int nNodes ) { NscalenodeScale1 = nNodes;  };
    void SetNumberOfScaleNodesScale2( int nNodes ) { NscalenodeScale2 = nNodes;  };
    void SetNumberOfScaleNodes_v20( int nNodes ) { Nscalenode.resize(1); Nscalenode[0] = nNodes;  };
+   void SetFuncMuForReference( double (*func_mur)(double,double) , double (*func_muf)(double,double) , int iRefTable );
 
    //double TransformHx1(double x){return log10(x);}
    //double TransformHx2(double x){return -sqrt(log10(1.0/x));}
    //double TransformHmu(double mu){return log(log(mu/0.25));}
    double PDFwgt(double x){double w=(1.-0.99*x)/sqrt(x); w = w*w*w; return w;}
+   void DoWarmUp(bool dowu ) { dowu ? IWarmUp = 1 : IWarmUp = 0; };
 
 private:
    // This is for gammaP in ep, for NLOJET++ integration
@@ -68,6 +70,8 @@ private:
    double (fnloBlockBNlojet::*Fct_H_Scale_Inv[2])(double);
    double (fnloBlockBNlojet::*Fct_H_XNode)(double);		// functions (member-function pointers) for function in which the x-nodes are binned
    double (fnloBlockBNlojet::*Fct_H_XNode_Inv)(double);
+   double (*Fct_MuR_Ref[3])(double,double);				// function for calculating the scales for the reference cross sections
+   double (*Fct_MuF_Ref[3])(double,double);
 
    double Function_loglog025( double mu );
    double Function_loglog025_inv( double mu );

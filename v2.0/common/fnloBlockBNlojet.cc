@@ -9,6 +9,13 @@
 // the other routines (DIS2scale and photoproduction) still need some work
 //
 
+fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2) {
+   _S_gauleg(20, _M_xb, _M_wb);
+   counter=0;
+   for ( int i = 0 ; i < 3 ; i++ ) Fct_MuR_Ref[i] = NULL;
+   for ( int i = 0 ; i < 3 ; i++ ) Fct_MuF_Ref[i] = NULL;
+}
+
 
 void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
@@ -1012,55 +1019,51 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    //
    // -------------------------------------------------------------------------- //
 
+   // simplify calls:
+   vector<vector<double> >* SigmaRef[3] = { &SigmaRefMixed, &SigmaRef_s1, &SigmaRef_s2 };
 
    // ---- SigmaRefMixed ---- //
-   double mur2 = pow( M1*exp(0.3*M2)  ,2);
-   //double mur2 = (M1*M1 + M2*M2 )/ 2.;
-   double muf2 = mur2;
-   if ( mur2 < 1. ){
-      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",sqrt(mur2));
+   for ( int iR = 0 ; iR < 3 ; iR++ ) {
+      if ( Fct_MuR_Ref[iR] && Fct_MuF_Ref[iR] ){
+	 double mur2 = pow((Fct_MuR_Ref[iR])(M1,M2),2);
+	 double muf2 = pow((Fct_MuF_Ref[iR])(M1,M2),2);
+	 if ( mur2 < 1. ){
+	    printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale for reference cross section %d is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",iR,sqrt(mur2));
+	    exit(1);
+	 }
+	 nlo::weight_hhc wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
+	 wt *= 389385730.;
+	 if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
+	 for(int proc=0;proc<NSubproc;proc++){
+	    (*SigmaRef[iR])[ObsBin][proc] += wt[proc];
+	 }
+      }      
+   }
+}
+
+
+// ___________________________________________________________________________________________________ //
+
+
+void fnloBlockBNlojet::SetFuncMuForReference( double (*func_mur)(double,double) , double (*func_muf)(double,double) , int iRefTable ){
+   printf(" *  fnloBlockBNlojet::SetFuncMuForReference(). Test call for renormalization scale.\n");
+   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*func_mur)(1,1));
+   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*func_mur)(91.1876,91.1876));
+   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*func_mur)(1,91.1876));
+   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*func_mur)(91.1876,1));
+   printf(" *  fnloBlockBNlojet::SetFuncMuForReference(). Test call for factorization scale.\n");
+   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*func_muf)(1,1));
+   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*func_muf)(91.1876,91.1876));
+   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*func_muf)(1,91.1876));
+   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*func_muf)(91.1876,1));
+   
+   if ( iRefTable >= 3 || iRefTable < 0 ){
+      printf(" *  fnloBlockBNlojet::SetFuncMuForReference(). Error. iRefTable must be 0, 1 or 2, but is %d.\n",iRefTable);
       exit(1);
    }
 
-   nlo::weight_hhc wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-     
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-     
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRefMixed[ObsBin][proc] += wt[proc];
-   }
-
-   // ---- SigmaRef_s1 ---- //
-   mur2 = M1*M1;
-   muf2 = mur2;
-   if ( M1 < 1. ){
-      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your scale #1 is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",M1);
-      exit(1);
-   }
-   wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRef_s1[ObsBin][proc] += wt[proc];
-   }
-     
-
-   // ---- SigmaRef_s2 ---- //
-   mur2 = pow( M1/(2*cosh(0.7*M2)) , 2);
-   //mur2 = M2*M2;
-   muf2 = mur2;
-   if ( mur2 < 1. ){
-      printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",sqrt(mur2));
-      exit(1);
-   }
-   wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRef_s2[ObsBin][proc] += wt[proc];
-   }
-     
+   Fct_MuR_Ref[iRefTable]	= func_mur;
+   Fct_MuF_Ref[iRefTable]	= func_muf;
 }
 
 
@@ -2279,7 +2282,7 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    //  
    //
    // -------------------------------------------------------------------------- //
-   printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude):\n  *  ",nxPerMagnitude);
+   printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude, or at least &d nodes ):\n  *  ",nxPerMagnitude,nxPerMagnitude);
 
    // set functions how the x-nodes are binned
    if ( NPDF == 1) {
@@ -2296,9 +2299,13 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
 	 printf("fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude. Warning. You might have not initialized your xlim-array properly. Please do this before calling SetNumberOfXNodesPerMagnitude. xlim[%d] = %8.3e, IWarmUp = %d.\n",i,xlim[i],IWarmUp);
       }
       int nxtot	= (int)(fabs(log10(xlim[i]))*nxPerMagnitude);
+      if ( nxtot < nxPerMagnitude ) nxtot = nxPerMagnitude; // at least nxPerMagnitude points
+
+      // printing...
       printf("%d: %d, ",i,nxtot);
       if ( i==XNode1.size()-1 )printf("\n");
       
+      // init x-nodes
       Nxtot1.push_back(nxtot);
       double hxlim = (this->*Fct_H_XNode)(xlim[i]);
       Hxlim1.push_back(hxlim);
