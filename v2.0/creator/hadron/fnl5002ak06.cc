@@ -261,6 +261,16 @@ int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , con
 }
 
 
+
+// ---- some function that can be used for reference calculations
+double Fct_x(double x, double y){ return x; }
+double Fct_y(double x, double y){ return y; }
+double Fct_xyov2(double x, double y){ return (x+y)/2.; }
+double Fct_x2y2ov2(double x, double y){ return sqrt((x*x+y*y)/2.); }
+double Fct_x_exp03y(double x, double y){ return x*exp(0.3*y); }
+
+
+
 void UserHHC::inittable(){
 
    // --- fastNLO user: This is the part, where the fastNLO table
@@ -326,7 +336,7 @@ void UserHHC::inittable(){
 
 
    // ---- set number-of x-nodes ---- //
-   B->SetNumberOfXNodesPerMagnitude( 9 , xlim );
+   B->SetNumberOfXNodesPerMagnitude( 8 , xlim );
 
 
    // ---- number of scale nodes for mu ---- //
@@ -352,6 +362,27 @@ void UserHHC::inittable(){
    // ---- Initialzie the cross section tables ---- //
    // --- fastNLO user: nothing to do.
    B->ResizeSigmaTildeTables( A2 );
+
+
+   // ---- Reference tables ---- //
+   // --- fastNLO user: You have the possibility to store
+   //     three reference calculations in your fastNLO table
+   //     which hold the plain nlojet++ results (cteq6m, as=0.1179, etc...).
+   //     You can use those three references e.g. for three different scale 
+   //     definitions.
+   //     Therefore you can specify the functions how to calculate the renormalization
+   //     and factorization scale using the scales mu1 and mu2 that you pass to 
+   //     FastNLO when calling FillEventHHCMuVar();
+   //     Usually you are folling this convention:
+   //      - 0		-> some 'mixed' or composed scale of scale values 1 and 2
+   //      - 1		-> just scale 1 (if this is reasoably defined)
+   //      - 2		-> just scale 2 (if this is reasoably defined)
+   //
+   //     INFO: Don't make any call, if your value does not make any sence (e.g. mu=|y|)
+   //
+   B->SetFuncMuForReference( Fct_x_exp03y , Fct_x_exp03y , 0 );
+   B->SetFuncMuForReference( Fct_x , Fct_x , 1 );
+   //B->SetFuncMuForReference( Fct_y , Fct_y , 2 );
 
 }
 
