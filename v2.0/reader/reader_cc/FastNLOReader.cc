@@ -2223,6 +2223,13 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 
 
 void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool ReFillCache ){
+  if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
+    printf("FastNLOReader::SetExternalFuncForMuR. Warning. This is not a MuVar table.\n");
+    printf("      SetFunctionalForm has no impact.\n");
+    printf("      Please use another table, if you want to change your scale-definition.\n");
+    return;
+  }
+
    fMuRFunc = kExtern;
    Fct_MuR = Func;
    printf(" *  FastNLOReader::SetExternalFuncForMuR(). Test.\n");
@@ -2241,6 +2248,12 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool
 
 
 void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache ){
+  if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
+    printf("FastNLOReader::SetExternalFuncForMuF. Warning. This is not a MuVar table.\n");
+    printf("      SetFunctionalForm has no impact.\n");
+    printf("      Please use another table, if you want to change your scale-definition.\n");
+    return;
+  }
    fMuFFunc = kExtern;
    Fct_MuF = Func;
    printf(" *  FastNLOReader::SetExternalFuncForMuF(). Test.\n");
