@@ -359,7 +359,7 @@ void UserHHC::inittable(){
    B->InitLinearScaleNode( A2 , scale2lo , scale2hi , 2 );	// choose function H for scale 2
 
 
-   // ---- Initialzie the cross section tables ---- //
+   // ---- Initialize the cross section tables ---- //
    // --- fastNLO user: nothing to do.
    B->ResizeSigmaTildeTables( A2 );
 
@@ -373,15 +373,18 @@ void UserHHC::inittable(){
    //     Therefore you can specify the functions how to calculate the renormalization
    //     and factorization scale using the scales mu1 and mu2 that you pass to 
    //     FastNLO when calling FillEventHHCMuVar();
-   //     Usually you are folling this convention:
+   //     Usually you are following this convention:
    //      - 0		-> some 'mixed' or composed scale of scale values 1 and 2
-   //      - 1		-> just scale 1 (if this is reasoably defined)
-   //      - 2		-> just scale 2 (if this is reasoably defined)
+   //      - 1		-> just scale 1 (if this is reasonably defined)
+   //      - 2		-> just scale 2 (if this is reasonably defined)
    //
-   //     INFO: Don't make any call, if your value does not make any sence (e.g. mu=|y|)
+   //     INFO: Don't make any call, if your value does not make any sense (e.g. mu=|y|)
+   //     INFO: The calculation of each reference table implies a recalculation of the matrix
+   //     elements and slows down your calculation. 
+   //     Each reference table needs around +25% computation time
    //
    B->SetFuncMuForReference( Fct_x_exp03y , Fct_x_exp03y , 0 );
-   B->SetFuncMuForReference( Fct_x , Fct_x , 1 );
+   //B->SetFuncMuForReference( Fct_x , Fct_x , 1 );
    //B->SetFuncMuForReference( Fct_y , Fct_y , 2 );
 
 }
