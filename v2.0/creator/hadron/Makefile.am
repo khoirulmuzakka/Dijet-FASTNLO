@@ -2,7 +2,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # The main targets, here the libtool plugin libraries to build
-lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la libfnl5002ak06.la
+lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #

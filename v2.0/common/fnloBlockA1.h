@@ -5,7 +5,7 @@
 #include <fstream>
 #include <math.h>
 
-#include "fnloconstants.h"
+#include "fnloConstants.h"
 
 using namespace std;
 

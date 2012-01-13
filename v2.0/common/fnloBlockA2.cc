@@ -1,5 +1,6 @@
 #include "fnloBlockA2.h"
 //#include <iostream>
+#include <cstdlib>
 
 int fnloBlockA2::Read(istream *table){
    table->peek();

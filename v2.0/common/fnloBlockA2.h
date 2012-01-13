@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vector>
 
-#include "fnloconstants.h"
+#include "fnloConstants.h"
 
 using namespace std;
 
