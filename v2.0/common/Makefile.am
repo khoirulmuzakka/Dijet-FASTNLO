@@ -18,7 +18,8 @@ pkglib_LTLIBRARIES = libfastnlo.la libfastnloJetAlgos.la
 pkginclude_HEADERS = fnloTable.h fnloTableUser.h LinkDef.h fnloBlockBNlojet.h
 
 libfastnlo_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc fnloBlockBNlojet.cc \
-  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h
+  fnloconstants.h fnloTable.h fnloBlockA1.h fnloBlockA2.h fnloBlockB.h fnloBlockBNlojet.h \
+  fnloCmdLine.h fnloCmdLine.cc fnloUtils.h fnloUtils.hxx fnloUtils.cc
 
 #libfastnloUser_la_SOURCES = fnloTable.cc fnloBlockA1.cc fnloBlockA2.cc fnloBlockB.cc \
 #  fnloTableUser.cc \
