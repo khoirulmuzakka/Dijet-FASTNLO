@@ -39,7 +39,7 @@ class fnloBlockBNlojet : public fnloBlockB {
    //double TransformHx2(double x){return -sqrt(log10(1.0/x));}
    //double TransformHmu(double mu){return log(log(mu/0.25));}
    double PDFwgt(double x){double w=(1.-0.99*x)/sqrt(x); w = w*w*w; return w;}
-   void DoWarmUp(bool dowu ) { dowu ? IWarmUp = 1 : IWarmUp = 0; };
+   void SetDoWarmUp(bool dowu ) { dowu ? IWarmUp = 1 : IWarmUp = 0; };
 
 private:
    // This is for gammaP in ep, for NLOJET++ integration

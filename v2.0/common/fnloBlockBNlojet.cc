@@ -233,7 +233,7 @@ void fnloBlockBNlojet::FillEventDISMuVar(int ObsBin, double x, double M1, double
    //  ------------------- determine x_ij position in grid ----------------------------------- //
    // ---------------------------------------------------------------------------------------- //
    // --- determine fractional contributions
-   double hx = log10(x);
+   double hx = (this->*Fct_H_XNode)(x);
    double hxone = 0.0;
    
    // --- define the x-node number in the range: 0 <= nxnode < ntot
@@ -947,9 +947,8 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
 void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& realpdf, double prefactor){
    // -------------------------------------------------------------------------- //
    //  
-   //  FillMuVarReferenceTables(). Method for filling the three
-   //  reference tables that come with the MuVar tables
-   //
+   //  FillMuVarReferenceTables(). Method for filling the three DIS
+   //  reference tables 
    //  Fills:
    //     - SigmaRefMixed
    //     - SigmaRef_s1
@@ -957,49 +956,30 @@ void fnloBlockBNlojet::FillMuVarReferenceTables(int ObsBin, double M1, double M2
    //
    // -------------------------------------------------------------------------- //
 
-   // ---- SigmaRefMixed for DIS calculations ---- //
-   double mur2 = (M1*M1 + M2*M2) / 2;
-   double muf2 = mur2;
+   // simplify calls:
+   vector<vector<double> >* SigmaRef[3] = { &SigmaRefMixed, &SigmaRef_s1, &SigmaRef_s2 };
 
-   nlo::weight_dis wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-   double tmp = wt[1]+wt[2];
-   wt[1] = wt[0];
-   wt[0] = tmp;
-   wt[2] = 0;
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRefMixed[ObsBin][proc] += wt[proc];
+   // ---- SigmaRefMixed ---- //
+   for ( int iR = 0 ; iR < 3 ; iR++ ) {
+      if ( Fct_MuR_Ref[iR] && Fct_MuF_Ref[iR] ){
+	 double mur2 = pow((Fct_MuR_Ref[iR])(M1,M2),2);
+	 double muf2 = pow((Fct_MuF_Ref[iR])(M1,M2),2);
+	 if ( mur2 < 1. ){
+	    printf("fnloBlockBNlojet::FillMuVarReferenceTables. Sorry, but your composite scale for reference cross section %d is only %7.4f GeV small. This seems to be unphysical and leads to 'nan'.\n",iR,sqrt(mur2));
+	    exit(1);
+	 }
+		nlo::weight_dis wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
+	   double tmp = wt[1]+wt[2];
+	   wt[1] = wt[0];
+	   wt[0] = tmp;
+	   wt[2] = 0;
+	   wt *= 389385730.;
+	   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
+	 for(int proc=0;proc<NSubproc;proc++){
+	    (*SigmaRef[iR])[ObsBin][proc] += wt[proc];
+	 }
+      }      
    }
-
-   // ---- SigmaRef_s1 for DIS calculations ---- //
-   mur2 = M1*M1;
-   muf2 = mur2;
-   wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-   tmp = wt[1]+wt[2];
-   wt[1] = wt[0];
-   wt[0] = tmp;
-   wt[2] = 0;
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRef_s1[ObsBin][proc] += wt[proc];
-   }
-     
-   // ---- SigmaRef_s2 for DIS calculations---- //
-   mur2 = M2*M2;
-   muf2 = mur2;
-   wt = amp(realpdf,mur2,muf2,prefactor); // the REAL pdf
-   tmp = wt[1]+wt[2];
-   wt[1] = wt[0];
-   wt[0] = tmp;
-   wt[2] = 0;
-   wt *= 389385730.;
-   if(IXsectUnits!=12)  wt *= pow(10.,(IXsectUnits-12)) ;
-   for(int proc=0;proc<NSubproc;proc++){
-      SigmaRef_s2[ObsBin][proc] += wt[proc];
-   }
-     
 }
 
 
