@@ -2262,7 +2262,7 @@ void fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude( int nxPerMagnitude , doubl
    //  
    //
    // -------------------------------------------------------------------------- //
-   printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude, or at least &d nodes ):\n  *  ",nxPerMagnitude,nxPerMagnitude);
+   printf("   fnloBlockBNlojet::SetNumberOfXNodesPerMagnitude(). Info. Number of x-nodes in each ObsBin (%d per order of magnitude, or at least %d nodes ):\n  *  ",nxPerMagnitude,nxPerMagnitude);
 
    // set functions how the x-nodes are binned
    if ( NPDF == 1) {
