@@ -12,9 +12,8 @@
 // and refer to the documentation ("fastNLO authorcode in 
 // NLOJET++") for a detailed explanation of the parameters 
 // and variables.
-// If a code fragment is not explicitely labeled as "fastNLO user",
-// it is likely that a modification will interfere with
-// the fastNLO routines.
+// Please keep the order of all statements in inittable
+// in order to guarantee a working code.
 //
 // This file contains the following routines:
 //   inputfunc		(-> user edits)
@@ -272,7 +271,6 @@ double Fct_x_exp03y(double x, double y){ return x*exp(0.3*y); }
 
 
 void UserHHC::inittable(){
-
    // --- fastNLO user: This is the part, where the fastNLO table
    //     and the main initializations are set up. Please refer to the
    //     the documentation which parts have to be changed.
@@ -318,10 +316,10 @@ void UserHHC::inittable(){
    // ---- initialize variables for WarmUp run ---- //
    // --- fastNLO user: Start "Warm-Up" or "Production" run.
    //     See documentation or GetWarmupValues() for more details.
-   //     choices for B->IWarmUp
-   //	    -  B->DoWarmUp(true)   ->  Do the Warm-Up run
-   //	    -  B->DoWarmUp(false)  ->  Do a production run
-   B->DoWarmUp(false);
+   //     choices for B->SetDoWarmUp((bool))
+   //	    -  B->SetDoWarmUp(true)   ->  Do the Warm-Up run
+   //	    -  B->SetDoWarmUp(false)  ->  Do a production run
+   B->SetDoWarmUp(false);
 
 
    // ---- get warm up values or init arrays reasonably ---- //
@@ -468,7 +466,7 @@ void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
    scale2hi = new double[NObsBin];
 
    // Get Warmup Values or initialize arrays with reasonable numbers
-   if ( !B->IWarmUp ) {
+   if ( !B->GetDoWarmUp() ) {
       // ---- copy result from warmup run here ---- //
       // 2090000000 contributions (!= events) in warm-up run
       xlim [0]  = 1.25e-04 , scale1lo [0] =   30.7000 , scale1hi [0] =  107.3000 , scale2lo [0] =    0.0000 , scale2hi [0] =    0.5000;
@@ -616,7 +614,7 @@ void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
       printf("fastNLO: This is a warm-up run!\n");
       // --- fastNLO user: You can set the number of contributions
       //     after which the WarmUp values are printed
-      B->IWarmUpPrint = 50000000;		// default 10000000
+      B->SetWarmUpPrint(50000000);		// default 10000000
 
       // safe initialziations
       for(int i=0;i<NObsBin;i++){ 
