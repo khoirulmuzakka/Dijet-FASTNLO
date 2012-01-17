@@ -556,8 +556,10 @@ void UserHHC::inittable(){
   B->IDataFlag = 0;
   B->IAddMultFlag = 0;
   B->IContrFlag1 = 1;
-  B->IContrFlag3 = 0;
+  B->NScaleDep = 0;
   B->CodeDescript.push_back("NLOJet++_4.1.3");  // --- fastNLO user: enter NLOJET++ version
+  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
+  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
   B->IRef = 0;
   if (nlo || A2->ILOord > 2) {
     B->NSubproc = 7;
@@ -654,7 +656,7 @@ void UserHHC::inittable(){
 
   // --------- fastNLO: Warm-Up run results (start)
   // if ( ! doWarmUp ) {
- // 4300000000 contributions (!= events) in warm-up run
+  // 4300000000 contributions (!= events) in warm-up run
   // 1.355504e-02, 6.832594e+01, 1.839275e+02;
   // 1.527259e-02, 7.656396e+01, 1.929201e+02;
   // 1.711369e-02, 8.604910e+01, 1.949562e+02;

@@ -425,8 +425,10 @@ void UserHHC::inittable(){
   B->IDataFlag = 0;
   B->IAddMultFlag = 0;
   B->IContrFlag1 = 1;
-  B->IContrFlag3 = 0;
+  B->NScaleDep = 0;
   B->CodeDescript.push_back("NLOJet++_4.1.3");  // --- fastNLO user: enter NLOJET++ version
+  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
+  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
   B->IRef = 0;
   if (nlo || A2->ILOord > 2) {
     B->NSubproc = 7;
