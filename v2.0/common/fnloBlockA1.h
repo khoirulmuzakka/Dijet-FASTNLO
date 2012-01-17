@@ -33,6 +33,7 @@ class fnloBlockA1 {
    void SetNuserFloat(int n){NuserFloat = n;}
    void SetImachine(int n){Imachine = n;}
    void Print();
+   void SetContributionHeader();
 
  protected:
    int Itabversion;
