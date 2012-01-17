@@ -86,7 +86,7 @@ public:
    int GetIAddMultFlag(){return IAddMultFlag;}
    int GetIContrFlag1(){return IContrFlag1;}
    int GetIContrFlag2(){return IContrFlag2;}
-   int GetIContrFlag3(){return IContrFlag3;}
+   //   int GetIContrFlag3(){return IContrFlag3;}
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
    int GetNxmax(int Obsbin);
@@ -124,7 +124,7 @@ public:
    int IAddMultFlag;
    int IContrFlag1;
    int IContrFlag2;
-   int IContrFlag3;	// @MW, @KR: IContrFlag3 was replaced by NScaleDep by DB and is now without any usage
+   //   int IContrFlag3;	// @MW, @KR: IContrFlag3 was replaced by NScaleDep by DB and is now without any usage
    int NScaleDep;
    // obsolete int NContrDescr;
    vector < string > CtrbDescript;

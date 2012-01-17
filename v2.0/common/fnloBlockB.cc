@@ -33,13 +33,15 @@ int fnloBlockB::Read(istream *table){
    *table >> IAddMultFlag;
    *table >> IContrFlag1;
    *table >> IContrFlag2;
+   // KR: Let's simply drop IContrFlag3, which in pp scenarios was always 0 anyway and
+   // KR: reuse this table line for NScaleDep!
    // *table >> IContrFlag3;	// IContrFlag3 is written here in v2.0 and v2.1 but  not in v2.0+
    // in v2.1. IContrFlag3 will be reintroduces again, and NScaleDep will be stored later in the table
-   IContrFlag3 = 0;
+   //   IContrFlag3 = 0;
    *table >> NScaleDep;
    int NContrDescr;
    *table >> NContrDescr;
-   //   printf("  *  infnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep );
+   //   printf("  *  infnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
    CtrbDescript.resize(NContrDescr);
    char buffer[257];
    table->getline(buffer,256);
@@ -407,11 +409,12 @@ int fnloBlockB::Write(ostream *table, int option){
    *table << IAddMultFlag << endl;
    *table << IContrFlag1 << endl;
    *table << IContrFlag2 << endl;
+   //KR: IContrFlag3 replaced by NScaleDep
    //*table << IContrFlag3 << endl;	// v2.0+. for v2.1 write IContrFlag3 here, but NScaleDep only later
    *table << NScaleDep << endl;
    *table << CtrbDescript.size() << endl;
-   //printf("  *  infnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",
-   //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep);
+   //printf("  *  infnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
+   //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
    for(int i=0;i<CtrbDescript.size();i++){
       *table << CtrbDescript[i] << endl;
    }
@@ -1795,7 +1798,7 @@ void fnloBlockB::Print(){
   printf(" B   IAddMultFlag                  %d\n",IAddMultFlag);
   printf(" B   IContrFlag1                   %d\n",IContrFlag1);
   printf(" B   IContrFlag2                   %d\n",IContrFlag2);
-  printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
+  //  printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
   printf(" B   NScaleDep                     %d\n",NScaleDep);
   for(int i=0;i<CtrbDescript.size();i++){
     printf(" B   CtrbDescript[%d]               %s\n",i,CtrbDescript[i].data());
@@ -1818,13 +1821,7 @@ void fnloBlockB::Print(){
   if(!(IDataFlag==1) && !(IAddMultFlag==1)){ // that's the usual case
     printf(" B   IRef                          %d\n",IRef);
     printf(" B   IScaleDep                     %d\n",IScaleDep);
-    printf(" B   Nevt                          %u\n",Nevt);
-    printf(" B   Nevt                          %i\n",Nevt);
-    printf(" B   Nevt                          %d\n",Nevt);
-    printf(" B   Nevt                          %e\n",Nevt);
-    printf(" B   Nevt                          %e\n",Nevt*1.);
-    printf(" B   Nevt                          %.4e\n",Nevt);
-    printf(" B   Nevt                          %.e\n",Nevt*1.);
+    printf(" B   Nevt                          %llu\n",Nevt);
     printf(" B   Npow                          %d\n",Npow);
     printf(" B   NPDF                          %d\n",NPDF);
     if(NPDF>0){

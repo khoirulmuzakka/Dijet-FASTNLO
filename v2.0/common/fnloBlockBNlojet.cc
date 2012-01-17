@@ -1827,7 +1827,7 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    IDataFlag = 0;
    IAddMultFlag = 0;
    IContrFlag1 = 1;
-   IContrFlag3 = 0;
+   //   IContrFlag3 = 0;
    CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
    IRef = 0;
    
