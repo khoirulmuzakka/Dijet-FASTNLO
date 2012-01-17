@@ -1917,7 +1917,7 @@ void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
    IDataFlag	= 0;
    IAddMultFlag	= 0;
    IContrFlag1	= 1;
-   IContrFlag3	= 0;
+   //   IContrFlag3	= 0;
    IRef		= 0;
    // -> v2.0 
    // NSubproc	= (nlo || A2->ILOord > 2) ? 7 : 6;

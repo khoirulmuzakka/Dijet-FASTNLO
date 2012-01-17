@@ -402,7 +402,8 @@ void UserDIS::inittable(){
    B->IDataFlag = 0;
    B->IAddMultFlag = 0;
    B->IContrFlag1 = 1;
-   B->IContrFlag3 = 0;
+   //   B->IContrFlag3 = 0;
+   B->NScaleDep = 0;
    B->CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
    //B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
