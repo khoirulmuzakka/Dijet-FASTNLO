@@ -283,7 +283,7 @@ void UserPhoto::inittable(){
    B->IDataFlag = 0;
    B->IAddMultFlag = 0;
    B->IContrFlag1 = 1;
-   B->IContrFlag3 = 0;
+   B->NScaleDep = 0;
    B->CodeDescript.push_back("NLOJET++ 4.0.1");
    B->NCodeDescr = B->CodeDescript.size();
    B->IRef = 0;
