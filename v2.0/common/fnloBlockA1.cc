@@ -71,6 +71,17 @@ bool fnloBlockA1::IsCompatible(fnloBlockA1* other){
 };
 
 
+void fnloBlockA1::SetContributionHeader(){
+   SetNcontrib(1);
+   SetNmult(0);
+   SetNdata(0);
+   SetNuserString(0);
+   SetNuserInt(0);
+   SetNuserFloat(0);
+   SetImachine(0);
+};
+
+
 void fnloBlockA1::Print(){
   printf("\n **************** FastNLO Table: BlockA1 ****************\n\n");
   printf(" A1  tablemagicno                  %d\n",tablemagicno);
