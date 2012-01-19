@@ -12,6 +12,7 @@
 fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2) {
    _S_gauleg(20, _M_xb, _M_wb);
    counter=0;
+   IWarmUp=0;
    for ( int i = 0 ; i < 3 ; i++ ) Fct_MuR_Ref[i] = NULL;
    for ( int i = 0 ; i < 3 ; i++ ) Fct_MuF_Ref[i] = NULL;
 }
@@ -1865,7 +1866,7 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
       printf("  set IPDFdef3=2 consistent with 2 subprocesses \n");
    }
 
-   IWarmUp = 0;			// no warm-up run -> production run.
+   //IWarmUp = 0;			// no warm-up run -> production run.
    IWarmUpPrint = 10000000 ;
 
    NScaleDep = 3;
