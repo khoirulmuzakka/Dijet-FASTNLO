@@ -100,7 +100,7 @@ int main(int argc, char** argv)
         contribution.IAddMultFlag = blockb->GetIAddMultFlag();
         contribution.IContrFlag1 = blockb->GetIContrFlag1();
         contribution.IContrFlag2 = blockb->GetIContrFlag2();
-        contribution.IContrFlag3 = blockb->GetIContrFlag3();
+        contribution.NScaleDep = blockb->GetNScaleDep();
         contribution.Npow = blockb->GetNpow();
         bool newentry = true;
         for(int j=0;j<entries.size();j++){

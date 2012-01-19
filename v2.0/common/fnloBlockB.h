@@ -87,6 +87,7 @@ public:
    int GetIContrFlag1(){return IContrFlag1;}
    int GetIContrFlag2(){return IContrFlag2;}
    //   int GetIContrFlag3(){return IContrFlag3;}
+   int GetNScaleDep(){return NScaleDep;}
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
    int GetNxmax(int Obsbin);

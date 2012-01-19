@@ -15,7 +15,7 @@ class Contrib{
            IAddMultFlag==val.IAddMultFlag &&
            IContrFlag1==val.IContrFlag1 &&
            IContrFlag2==val.IContrFlag2 &&
-           IContrFlag3==val.IContrFlag3  &&
+           NScaleDep==val.NScaleDep  &&
              Npow==val.Npow);}
 
 	bool operator<(const Contrib &val) const
@@ -25,10 +25,10 @@ class Contrib{
 				if (IAddMultFlag == val.IAddMultFlag)
 					if (IContrFlag1 == val.IContrFlag1)
 						if (IContrFlag2 == val.IContrFlag2)
-							if (IContrFlag3 == val.IContrFlag3)
+							if (NScaleDep == val.NScaleDep)
 								return Npow < val.Npow;
 							else
-								return IContrFlag3 < val.IContrFlag3;
+								return NScaleDep < val.NScaleDep;
 						else
 							return IContrFlag2 < val.IContrFlag2;
 					else
@@ -48,7 +48,7 @@ class Contrib{
 		IAddMultFlag = block->GetIAddMultFlag();
 		IContrFlag1 = block->GetIContrFlag1();
 		IContrFlag2 = block->GetIContrFlag2();
-		IContrFlag3 = block->GetIContrFlag3();
+		NScaleDep = block->GetNScaleDep();
 		Npow = block->GetNpow();
 	}
 
@@ -99,7 +99,7 @@ class Contrib{
    int IAddMultFlag;
    int IContrFlag1;
    int IContrFlag2;
-   int IContrFlag3;
+   int NScaleDep;
    int Npow;
 };
 
