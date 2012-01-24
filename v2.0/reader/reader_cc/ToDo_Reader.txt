@@ -1,3 +1,13 @@
+LHAPDF:
+- InitPDFSetByName needs LHAPDF properly installed with PDF sets
+  expected where put at install time
+  ---> fails for improper installation
+  ---> fails on the grid where simple the PDF file should be necessary
+
+- InitPDFSet needs local filename to be give with at least rel
+  path, e.g. ./cteq66.LHgrid
+
+
   Done List for FastNLOReader
 -----------------------------
 - KR: Doesn't have an extra Makefile anymore. Included now in usual

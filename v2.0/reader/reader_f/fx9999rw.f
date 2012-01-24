@@ -56,7 +56,7 @@ C 3456789012345678901234567890123456789012345678901234567890123456789012
 *          3: Also print x nodes of Block B for each contribution (BX)
 *          4: Also print scale nodes of Block B for each contribution (BS)
 *          5: Also print sigma tilde of Block B (not implemented yet)
-      iprint = 2
+      iprint = 0
       lprint = .false.
       Nunit=2
 

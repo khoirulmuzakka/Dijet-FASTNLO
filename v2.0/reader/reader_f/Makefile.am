@@ -11,17 +11,15 @@ AUTOMAKE_OPTIONS = gnu
 
 # The main target: The Fortran table reader
 if HAVE_LHAPDFCONFIG
-   bin_PROGRAMS = FReadFNLOTable
+   bin_PROGRAMS = fnlo-fread
 endif
 
 # All source files which go into the main target (and have to be distributed)
-FReadFNLOTable_SOURCES = FReadFNLOTable.f fnx9999.f fnx9999.inc strings.inc \
+fnlo_fread_SOURCES = FReadFNLOTable.f fnx9999.f fnx9999.inc strings.inc \
 	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
 
-#
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
-#
 #F77 = gfortran
 AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
@@ -31,9 +29,9 @@ AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   FReadFNLOTable_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   fnlo_fread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   FReadFNLOTable_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+   fnlo_fread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
 
 # Files that are required to build the project but that can be
@@ -41,4 +39,4 @@ endif
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure missing install-sh
+MAINTAINERCLEANFILES = Makefile.in

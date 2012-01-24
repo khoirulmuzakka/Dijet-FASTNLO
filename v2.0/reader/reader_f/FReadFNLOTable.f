@@ -1,4 +1,4 @@
-      PROGRAM FReadFNLOTable
+      PROGRAM FNLOFREAD
 *     ------------------------------------------------------------------
 *     
 *     M. Wobisch                                08/10/2010
@@ -70,7 +70,7 @@ Comment:       LSEPL(1:2) = "# "
 Comment:       SSEPL(1:2) = "# "
 Comment: *---  Fortran 90 functions for computing precision:
 Comment: *---  tiny(x), huge(x), precision(x)
-Comment:       Write(*,*)"FReadFNLOTable: F90 double tiny, huge, precision = ",
+Comment:       Write(*,*)"fnlo-fread: F90 double tiny, huge, precision = ",
 Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       DO I=1,NObsBin
          xslo(I)  = -1.d0
@@ -86,27 +86,27 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
 *---  Initial output
       WRITE(*,'(A)')""
       WRITE(*,*)CSEPS
-      WRITE(*,*)"# ReadFNLOTable"
+      WRITE(*,*)"# fnlo-fread"
       WRITE(*,*)CSEPS
-      WRITE(*,*)"# Program to read fastNLO v2 tables and derive"
+      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and derive"
       WRITE(*,*)"# QCD cross sections using PDFs from LHAPDF"
       WRITE(*,*)CSEPS
 
 *---  Parse command line
-      WRITE(*,*)"# ReadFNLOTable: Program Steering"
+      WRITE(*,*)"# fnlo-read: Program Steering"
       WRITE(*,*)LSEPS
       IF (IARGC().LT.1) THEN
          FILENAME = "table.tab"
-         WRITE(*,*)"# ReadFNLOTable: WARNING! No table name given,"
+         WRITE(*,*)"# fnlo-read: WARNING! No table name given,"
          WRITE(*,*)"# taking the default table.tab instead!"
          WRITE(*,*)"#   For an explanation of command line "//
      >        "arguments type:"
-         WRITE(*,*)"#   ./FReadFNLOTable -h"
+         WRITE(*,*)"#   ./fnlo-fread -h"
       ELSE
          CALL GETARG(1,FILENAME)
          IF (FILENAME(1:LEN_TRIM(FILENAME)).EQ."-h") THEN
             WRITE(*,*)'#'
-            WRITE(*,*)'# Usage: ./FReadFNLOTable [arguments]'
+            WRITE(*,*)'# Usage: ./fnlo-fread [arguments]'
             WRITE(*,*)'# Table input file, def. = table.tab'
             WRITE(*,*)'# PDF set, def. = cteq6mE.LHgrid'
             WRITE(*,*)'#'
@@ -117,10 +117,10 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
          ELSEIF (FILENAME(1:1).EQ."_") THEN
             FILENAME = "table.tab"
             WRITE(*,*)
-            WRITE(*,*)"# ReadFNLOTable: WARNING! No table name given,"
+            WRITE(*,*)"# fnlo-read: WARNING! No table name given,"
             WRITE(*,*)"# taking the default table.tab instead!"
          ELSE
-            WRITE(*,*)"# ReadFNLOTable: Evaluating table: ",
+            WRITE(*,*)"# fnlo-read: Evaluating table: ",
      >           FILENAME(1:LEN_TRIM(FILENAME))
          ENDIF
       ENDIF
@@ -132,17 +132,17 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       ENDIF
       IF (IARGC().LT.2.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq6mE.LHgrid"
-         WRITE(*,*)"# ReadFNLOTable: WARNING! No PDF set given,"
+         WRITE(*,*)"# fnlo-read: WARNING! No PDF set given,"
          WRITE(*,*)"# taking cteq6mE.LHgrid instead!"
       ELSE
-         WRITE(*,*)"# ReadFNLOTable: Using PDF set   : ",
+         WRITE(*,*)"# fnlo-read: Using PDF set   : ",
      >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
 
 *---  Too many arguments
       IF (IARGC().GT.2) THEN
          WRITE(*,*)
-     >        "ReadFNLOTable: ERROR! Too many arguments, aborting!"
+     >        "fnlo-read: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
 
@@ -184,7 +184,7 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
 *---  Compute the cross sections
       WRITE(*,*)""
       WRITE(*,'(A)')CSEPL
-      WRITE(*,'(A)')"ReadFNLOTable: Calculate cross sections"
+      WRITE(*,'(A)')"fnlo-read: Calculate cross sections"
       WRITE(*,'(A)')CSEPL
 
 *---  Initial settings
@@ -275,7 +275,7 @@ Comment:          ENDIF
          ENDDO
          WRITE(*,'(A)')DSEPL
          WRITE(*,'(A)')" Cross Sections"
-         WRITE(*,"(A,G10.2)")" The scale factor chosen here is: ",
+         WRITE(*,"(A,G10.3)")" The scale factor chosen here is: ",
      >        SCALEF
          WRITE(*,'(A)')LSEPL
          CHTMP1 = DimLabel(1)

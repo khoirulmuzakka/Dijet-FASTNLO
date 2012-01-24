@@ -20,17 +20,18 @@ int main(int argc, char** argv){
   //---  Initialization for nice printing
   string cseps = " ##################################################################################\n";
   string lseps = " # --------------------------------------------------------------------------------\n";
-  string csepl = "##################################################################";
+  string csepl = "#########################################";
+  csepl = csepl + csepl + csepl + csepl + "\n";
 
   //---  Display welcome message
   PrintWelcomeMessage();
   
   // ---------------------------- parse commmand line ---------------------------- //
-  printf(" # ReadFNLOTable: Program Steering\n");
+  printf(" # fnlo-read: Program Steering\n");
   cout << lseps;
   string tablename = "table.tab";
   if ( argc <= 1 ){
-    printf(" # ReadFNLOTable: WARNING! No table name given,\n");
+    printf(" # fnlo-read: WARNING! No table name given,\n");
     printf(" # taking the default table.tab instead!\n");
     printf(" #   For an explanation of command line arguments type:\n");
     printf(" #   ./ReadFNLOTable -h\n");
@@ -51,10 +52,10 @@ int main(int argc, char** argv){
       return 0;
     } else if (tablename == "_") {
       tablename = "table.tab";
-      printf("\n # ReadFNLOTable: WARNING! No table name given,\n");
+      printf("\n # fnlo-read: WARNING! No table name given,\n");
       printf(" # taking the default table.tab instead!\n");
     } else {
-      cout << " # ReadFNLOTable: Evaluating table: " << tablename << endl;
+      cout << " # fnlo-read: Evaluating table: " << tablename << endl;
     }
   }
 
@@ -65,15 +66,15 @@ int main(int argc, char** argv){
   }
   if ( argc <= 2 || PDFFile == "_"){
     PDFFile = "cteq6m.LHpdf";
-    printf(" # ReadFNLOTable: WARNING! No PDF set given,\n");
+    printf(" # fnlo-read: WARNING! No PDF set given,\n");
     printf(" # taking cteq6mE.LHgrid instead!\n");
   } else {
-    cout << " # ReadFNLOTable: Using PDF set   : " << PDFFile << endl;
+    cout << " # fnlo-read: Using PDF set   : " << PDFFile << endl;
   }
 
   //---  Too many arguments
   if ( argc > 3 ){
-    printf("ReadFNLOTable: ERROR! Too many arguments, aborting!\n");
+    printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
     return 1;
   }
 
@@ -282,8 +283,8 @@ int main(int argc, char** argv){
   //    fnloreader->SetExternalFuncForMuR( &Function_Mu );			// set external function to calculate mu_r from scale1 and scale2
   //    fnloreader->SetScaleFactorMuR(1.5);					// set scale factor for mu_r
   //    fnloreader->SetScaleFactorMuF(0.66);					// set scale factor for mu_f
-  fnloreader->SetExternalFuncForMuR( &Function_Mu );
-  fnloreader->SetExternalFuncForMuF( &Function_Mu );
+  //  fnloreader->SetExternalFuncForMuR( &Function_Mu );
+  //  fnloreader->SetExternalFuncForMuF( &Function_Mu );
     
 
 
@@ -321,14 +322,14 @@ int main(int argc, char** argv){
   //     Or print it (almost exaclty) like the fortran reading code:
   //             fnloreader->PrintCrossSectionsLikeFreader();
   //
-  fnloreader->PrintCrossSectionsLikeFreader();
+  //  fnloreader->PrintCrossSectionsLikeFreader();
 
 
 
   // ---- Information ---- //
   // --- fastNLO user: For a comprehensive insight into the FastNLO variables
   //     you can use:
-  //             fnloreader->PrintFastNLOTableConstants();
+  fnloreader->PrintFastNLOTableConstants(0);
   //     
   //     For a comparision with a Reference cross section calculated with
   //     nlojet++ you might use:
@@ -349,7 +350,7 @@ int main(int argc, char** argv){
 
   // ---- do sth. useful ---- //
   cout << csepl;
-  printf("ReadFNLOTable: Calculate cross sections\n");
+  printf("fnlo-read: Calculate cross sections\n");
   cout << csepl;
   int nscale = fnloreader->GetNScaleVariations();
   for (int iscale = 0;iscale < nscale ;iscale++) {
@@ -384,13 +385,13 @@ void PrintWelcomeMessage( ){
    // Say hello to the FastNLO user.
    string cseps = " ##################################################################################\n";
    string lseps = " # --------------------------------------------------------------------------------\n";
-   string csepl = "##################################################################";
-   csepl = csepl + csepl + "\n";
+   string csepl = "#########################################";
+   csepl = csepl + csepl + csepl + csepl + "\n";
    printf("\n");
    cout << cseps;
-   printf(" # ReadFNLOTable\n");
+   printf(" # fnlo-cppread\n");
    cout << cseps;
-   printf(" # Program to read fastNLO v2 tables and derive\n");
+   printf(" # C++ program to read fastNLO v2 tables and derive\n");
    printf(" # QCD cross sections using PDFs from LHAPDF\n");
    cout << cseps;
 }

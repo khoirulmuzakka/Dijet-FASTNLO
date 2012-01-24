@@ -332,7 +332,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   fScalevar	= scalevar;
   fScaleFacMuR	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
   fScaleFacMuF	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
-  printf(" # FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
+  //  printf(" # FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
 
   if ( ReFillCache ){
     FillAlphasCache();
@@ -505,7 +505,7 @@ void FastNLOReader::ReadTable(void)
   FastNLOBlockB* BlockB_NLO  = NULL;
   FastNLOBlockB* BlockB_LO  = NULL;
   int nblocks	= Ncontrib + Ndata;
-  printf(" # FastNLOReader::ReadTable(). Reading %d B-Blocks.\n",nblocks);
+  //  printf(" # FastNLOReader::ReadTable(). Reading %d B-Blocks.\n",nblocks);
   for(int i=0;i<nblocks;i++){
      // read block
      FastNLOBlockB* blockb	= new FastNLOBlockB( "ReadingBlockB", NObsBin , instream );
@@ -596,7 +596,7 @@ void FastNLOReader::ReadTable(void)
   }
 
   // some printout
-  PrintTableInfo();
+  //  PrintTableInfo();
 
 }
 
@@ -1068,7 +1068,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
   if ( NDim == 2 ){
     string header[3] = { "  IObs  Bin Size IODim1 ", 
 			 "   IODim2 ",
-			 " LO cross section   NLO cross section  k factor  k thr. corr."};
+			 " LO cross section   NLO cross section  K factor             K thr. corr.        Non-pert. corr."};
     //string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
     unsigned int NDimBins[NDim];
     //printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
@@ -1085,7 +1085,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 	  NDimBins[j] = 1;
 	}
       }
-      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E  % #6.3f",
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#18.11E",
 	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]/kFactor[i],xs[i],kFactor[i]);
       if ( !BBlocksSMCalc[1].empty() ) { // th. corr
@@ -1897,10 +1897,13 @@ void FastNLOReader::InitLHAPDF(){
     printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
   }
 
-  //LHAPDF::setVerbosity(LHAPDF::SILENT);
+  LHAPDF::setVerbosity(LHAPDF::SILENT);
   //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
   //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
-  LHAPDF::initPDFSetByName(fLHAPDFfilename);
+  // KR: Do not use the ByName feature, destroys ease of use on the grid without LHAPDF 
+  //LHAPDF::initPDFSetByName(fLHAPDFfilename);
+  //  cout << "PDF set name " << fLHAPDFfilename << endl;
+  LHAPDF::initPDFSet(fLHAPDFfilename);
   fnPDFs = LHAPDF::numberPDF();
   if ( fnPDFs < fiPDFSet ){
     cout << "Error. There are only " << fnPDFs << " pdf sets within this LHAPDF file. You were looking for set number " << fiPDFSet << endl;
