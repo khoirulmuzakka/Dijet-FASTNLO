@@ -500,8 +500,8 @@ void UserHHC::inittable(){
       bound[1] = dim2bins[i+1];
       A2->UpBin.push_back(bound);
       binsize = binsize 
-	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... e.g. times dpT
-	* (dim2bins[i+1]-dim2bins[i]); // ... e.g. times d|y|
+	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dChi
+	* (dim2bins[i+1]-dim2bins[i]); // ... times dMjj
       A2->BinSize.push_back(binsize);
     }
   }
@@ -665,7 +665,7 @@ void UserHHC::inittable(){
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0 
   B->ScaleDescript.resize(B->NScaleDim);
 
-  B->ScaleDescript[0].push_back("<pT_1,2>"); // --- fastNLO user: give name for selected scale
+  B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]"); // --- fastNLO user: give name for selected scale
   //B->Nscalenode.push_back(4); // number of scale nodes for pT
   B->Nscalenode.push_back(6); // number of scale nodes for pT
 
