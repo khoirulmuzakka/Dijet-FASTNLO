@@ -28,10 +28,10 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 #FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
-# Scientific Linux 4/5
-#FC=f95
+# Scientific Linux 4
 FC=g77
-#FC=f77
+# Scientific Linux 5
+#FC=???
 # Ubuntu 10.04
 #FC=gfortran
 

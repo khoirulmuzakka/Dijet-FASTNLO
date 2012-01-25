@@ -611,6 +611,7 @@ Comment:      >                       mytmp(irap,isub,iord)
                ENDDO
             ENDDO
          ELSEIF (SCENARIO(1:7).EQ."fnl2722".OR.
+     >           SCENARIO(1:7).EQ."fnl2732".OR.
      >           SCENARIO(1:7).EQ."fnl2742") THEN
             IBIN = 0
             DO IRAP=1,NRAPIDITYN
