@@ -51,7 +51,7 @@ const string FastNLOReader::fCorrName[11]	= {"Fixed order calculation","Threshol
 "non-perturbative correction",};
 const string FastNLOReader::fNPName[10]	= {"unkwn","Quark compositeness","ADD-LED","TeV 1-ED","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn"};
 const string FastNLOReader::fNSDep[4]		= {"v2.0","v2.0","v2.0","v2.1"};
-int WelcomeOnce = 0;
+int FastNLOReader::WelcomeOnce = 0;
 
 //______________________________________________________________________________
 
@@ -126,7 +126,7 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-   if ( WelcomeOnce++ == 1 ){
+   if ( WelcomeOnce++ == 0 ){
       string cseps = " ##################################################################################\n";
       cout << cseps;
       printf(" #\n");
@@ -404,7 +404,7 @@ void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFil
 void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache  ){
   SetFunctionalForm(func,kMuF);
   if ( ReFillCache ){
-    FillPDFCache();
+     FillPDFCache();
   }
 }
 
@@ -2064,37 +2064,112 @@ void FastNLOReader::FillBlockBPDFLCsHHCv21( FastNLOBlockB* B ){
       int nxmax = B->GetNxmax(i);
       int nxbins1 = B->Nxtot1[i]; // number of columns in half matrix
       xfx.resize(nxbins1);
-      for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+
+      if ( fMuFFunc != kScale1 &&  fMuFFunc != kScale2 )  { // that't the standard case!
+	 for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	    for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	       // determine all pdfs of hadron1
+	       for(int k=0;k<nxbins1;k++){ 
+		  double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
+		  double xp	= B->XNode1[i][k];
+		  xfx[k] = GetXFX(xp,muf);
+	       }
+	       int x1bin = 0;
+	       int x2bin = 0;
+	   
+	       for(int x=0;x<nxmax;x++){ 
+		  // ----- if pp ---- //
+		  if ( B->NPDFPDG[0] == B->NPDFPDG[1] ){
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfx[x1bin], B->NSubproc ) ;
+		  }
+		  // ----- if ppbar ---- //
+		  else if ( B->NPDFPDG[0] == -B->NPDFPDG[1] ){
+		     vector < double > xfxbar(13);
+		     for ( unsigned int p = 0 ; p<13 ; p++ ){
+			xfxbar[p] = xfx[x1bin][12-p];
+		     }
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfxbar, B->NSubproc ) ;
+		  }
+		  else {
+		     printf("FastNLOReader::FillBlockBPDFLCsHHCv21(). This is not pp, nor ppbar, nor pbarpbar!\n"); exit(1);
+		  }
+		  x1bin++;
+		  if(x1bin>x2bin){
+		     x1bin = 0;
+		     x2bin++;
+		  }
+	       }
+	    }
+	 }
+      }
+      else if ( fMuFFunc == kScale2 ){	// speed up
 	 for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    // determine all pdfs of hadron1
 	    for(int k=0;k<nxbins1;k++){ 
-	       double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
+	       double muf = CalcMu( kMuF , 0 ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
 	       double xp	= B->XNode1[i][k];
 	       xfx[k] = GetXFX(xp,muf);
 	    }
-	    int x1bin = 0;
-	    int x2bin = 0;
-	   
-	    for(int x=0;x<nxmax;x++){ 
-	       // ----- if pp ---- //
-	       if ( B->NPDFPDG[0] == B->NPDFPDG[1] ){
-		  B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfx[x1bin], B->NSubproc ) ;
-	       }
-	       // ----- if ppbar ---- //
-	       else if ( B->NPDFPDG[0] == -B->NPDFPDG[1] ){
-		  vector < double > xfxbar(13);
-		  for ( unsigned int p = 0 ; p<13 ; p++ ){
-		     xfxbar[p] = xfx[x1bin][12-p];
+	    for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	       int x1bin = 0;
+	       int x2bin = 0;
+	       for(int x=0;x<nxmax;x++){ 
+		  // ----- if pp ---- //
+		  if ( B->NPDFPDG[0] == B->NPDFPDG[1] ){
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfx[x1bin], B->NSubproc ) ;
 		  }
-		  B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfxbar, B->NSubproc ) ;
+		  // ----- if ppbar ---- //
+		  else if ( B->NPDFPDG[0] == -B->NPDFPDG[1] ){
+		     vector < double > xfxbar(13);
+		     for ( unsigned int p = 0 ; p<13 ; p++ ){
+			xfxbar[p] = xfx[x1bin][12-p];
+		     }
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfxbar, B->NSubproc ) ;
+		  }
+		  else {
+		     printf("FastNLOReader::FillBlockBPDFLCsHHCv21(). This is not pp, nor ppbar, nor pbarpbar!\n"); exit(1);
+		  }
+		  x1bin++;
+		  if(x1bin>x2bin){
+		     x1bin = 0;
+		     x2bin++;
+		  }
 	       }
-	       else {
-		  printf("FastNLOReader::FillBlockBPDFLCsHHCv21(). This is not pp, nor ppbar, nor pbarpbar!\n"); exit(1);
-	       }
-	       x1bin++;
-	       if(x1bin>x2bin){
-		  x1bin = 0;
-		  x2bin++;
+	    }
+	 }
+      }
+      else if ( fMuFFunc == kScale1 ){	// speed up
+	 for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
+	    // determine all pdfs of hadron1
+	    for(int k=0;k<nxbins1;k++){ 
+	       double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] , 0 , fScaleFacMuF );
+	       double xp	= B->XNode1[i][k];
+	       xfx[k] = GetXFX(xp,muf);
+	    }
+	    for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
+	       int x1bin = 0;
+	       int x2bin = 0;
+	       for(int x=0;x<nxmax;x++){ 
+		  // ----- if pp ---- //
+		  if ( B->NPDFPDG[0] == B->NPDFPDG[1] ){
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfx[x1bin], B->NSubproc ) ;
+		  }
+		  // ----- if ppbar ---- //
+		  else if ( B->NPDFPDG[0] == -B->NPDFPDG[1] ){
+		     vector < double > xfxbar(13);
+		     for ( unsigned int p = 0 ; p<13 ; p++ ){
+			xfxbar[p] = xfx[x1bin][12-p];
+		     }
+		     B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombHHC( xfx[x2bin], xfxbar, B->NSubproc ) ;
+		  }
+		  else {
+		     printf("FastNLOReader::FillBlockBPDFLCsHHCv21(). This is not pp, nor ppbar, nor pbarpbar!\n"); exit(1);
+		  }
+		  x1bin++;
+		  if(x1bin>x2bin){
+		     x1bin = 0;
+		     x2bin++;
+		  }
 	       }
 	    }
 	 }
