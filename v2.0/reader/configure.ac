@@ -73,41 +73,53 @@ AC_ARG_WITH([lhapdf],
 	[AS_HELP_STRING([--with-lhapdf],
 	[Specify location of LHAPDF installation. This takes precedence over
 	an LHAPDF environment variable, the prefix path or other methods.
-	Please note: fastNLO_reader CANNOT be used without LHAPDF!])],
+	Please note: LHAPDF is mandatory in order to use fastNLO_reader!])],
 	[if test "x$withval" = "xno"; then
-	AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
-        fi
- 	if test "x$withval" != "xyes"; then
-	AC_SUBST([LHAPDF],[$withval])
-	AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
-	fi],
+	    AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
+	 fi
+         if test "x$withval" != "xyes"; then
+               AC_SUBST([LHAPDF],[$withval])
+	       AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
+	 fi],
 	[])
 
-if test "x$LHAPDF" = "x"; then
-   AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
-   AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
-   if test "x$LHAPDFBIN" = "x"; then
-      AC_MSG_NOTICE([No LHAPDF installation found in prefix path. Try to find LHAPDF in system path ...])
-      AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
+if test "x$withval" != "xno"; then
+   if test "x$LHAPDF" = "x"; then
+      AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
+      AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
       if test "x$LHAPDFBIN" = "x"; then
-         AC_MSG_ERROR([No LHAPDF installation found. Please install LHAPDF first. Configuration aborted!])
+         AC_MSG_NOTICE([No LHAPDF installation found in prefix path. Try to find LHAPDF in system path ...])
+         AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
+         if test "x$LHAPDFBIN" = "x"; then
+            AC_MSG_ERROR([No LHAPDF library found. Configuration aborted!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$LHAPDF/bin])
+      if test "x$LHAPDFBIN" = "x"; then
+         AC_MSG_ERROR([lhapdf-config not found in given path to LHAPDF! Configuration aborted!])
       fi
    fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$LHAPDFBIN" != "x"; then
+      AC_MSG_NOTICE([LHAPDF settings:])
+      AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
+      AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
+      AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
+      AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
+      AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
+      AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
+      AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
+      AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
+      AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
+      AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+   else
+      AC_MSG_ERROR([No LHAPDF library found. Configuration aborted!])
+   fi
+else
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
 fi
-
-AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
-AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
-AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
-AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
-AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
-AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([LHAPDF settings:])
-AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
-AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
-AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
-AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
-AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
-
 AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
 AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
