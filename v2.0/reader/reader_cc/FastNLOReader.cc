@@ -51,7 +51,7 @@ const string FastNLOReader::fCorrName[11]	= {"Fixed order calculation","Threshol
 "non-perturbative correction",};
 const string FastNLOReader::fNPName[10]	= {"unkwn","Quark compositeness","ADD-LED","TeV 1-ED","unkwn","unkwn","unkwn","unkwn","unkwn","unkwn"};
 const string FastNLOReader::fNSDep[4]		= {"v2.0","v2.0","v2.0","v2.1"};
-
+int WelcomeOnce = 0;
 
 //______________________________________________________________________________
 
@@ -126,28 +126,30 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-  string cseps = " ##################################################################################\n";
-  cout << cseps;
-  printf(" #\n");
-  printf(" # fastNLO_reader_2.1.0\n");
-  printf(" #\n");
-  printf(" # D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch\n");
-  printf(" #\n"); 
-  printf(" # If you use this code, please cite:\n"); 
-  printf(" #   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285\n");
-  printf(" #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch,\n");
-  printf(" #      arXiv:nnnn.mmmm\n");
-  printf(" #\n");
-  cout << cseps;
+   if ( WelcomeOnce++ == 1 ){
+      string cseps = " ##################################################################################\n";
+      cout << cseps;
+      printf(" #\n");
+      printf(" # fastNLO_reader_2.1.0\n");
+      printf(" #\n");
+      printf(" # D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch\n");
+      printf(" #\n"); 
+      printf(" # If you use this code, please cite:\n"); 
+      printf(" #   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285\n");
+      printf(" #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch,\n");
+      printf(" #      arXiv:nnnn.mmmm\n");
+      printf(" #\n");
+      cout << cseps;
+   }
 
-  ReadTable();
-  int iprint = 2;
-  //PrintFastNLOTableConstants(iprint);
-
-  SetPDFInterface(FastNLOReader::kLHAPDF);
-  SetAlphasEvolution(FastNLOReader::kGRV);
-  
-  InitScalevariation();
+   ReadTable();
+   //int iprint = 2;
+   //PrintFastNLOTableConstants(iprint);
+   
+   SetPDFInterface(FastNLOReader::kLHAPDF);
+   SetAlphasEvolution(FastNLOReader::kGRV);
+   
+   InitScalevariation();
 
 }
 
