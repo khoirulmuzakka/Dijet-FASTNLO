@@ -85,11 +85,30 @@ setenv LD_LIBRARY_PATH /home/rabbertz/local/lib:/home/rabbertz/local/lib/fastnlo
 
 
 
-Preparation of distribution package:
-====================================
+Preparation of distribution package for fastNLO v2:
+===================================================
+In directory v2.0 (containing the configure.ac file) type:
+----------------------------------------------------------
 autoreconf --install
-./configure --prefix=/your/install/directory
-make distcheck
+./configure --prefix=/your/install/directory --with-... further options
+#make distcheck
+make dist
+
+Note: configure only terminates properly if mandatory requirements
+are fulfilled even if this configuration is not foreseen to be installed!
+
+Preparation of distribution package for fastNLO v2 subproject:
+==============================================================
+Make sure that the main project has been cleaned up using
+   make maintainer-clean
+in v2.0 directory! Otherwise files added automatically by autotools might
+be left out.
+
+In subproject directory of v2.0 containing the configure.ac file type:
+----------------------------------------------------------------------
+autoreconf --install
+./configure --prefix=/your/install/directory --with-... further options
+#make distcheck
 make dist
 
 Note: configure only terminates properly if mandatory requirements

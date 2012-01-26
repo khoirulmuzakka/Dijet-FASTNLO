@@ -6,6 +6,11 @@
 # Include documentation into distribution tarball
 #
 # -----------------------------------------------------------------------------
+# Use GNU standards
+AUTOMAKE_OPTIONS = gnu
+#
+EXTRA_DIST =
+#
 docfiles = alljet.pdf
 
 DOCNAM = alljet
@@ -13,6 +18,7 @@ DOCSRC = $(DOCNAM).tex
 DOCAUX = $(DOCNAM).aux
 DOCPDF = $(DOCNAM).pdf
 
+EXTRA_DIST += $(DOCSRC) psfig.sty figs 1109.1310v1.pdf
 CLEANFILES = $(DOCAUX) $(DOCPDF) $(DOCNAM).log
 
 #
