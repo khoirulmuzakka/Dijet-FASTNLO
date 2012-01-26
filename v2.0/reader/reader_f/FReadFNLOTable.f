@@ -18,8 +18,8 @@
       Character*41  CSEP41,DSEP41,LSEP41,SSEP41
       Character*82  CSEPS,DSEPS,LSEPS,SSEPS
       Character*164 CSEPL,DSEPL,LSEPL,SSEPL
-      Character*255 FILENAME,PDFSET
-      Integer i, j, IS, IPRINT, NDimBins(MxDim)
+      Character*255 FILENAME,PDFSET,CHRES,CHFRM
+      Integer i, j, IS, IPRINT, NDimBins(MxDim), NSCLS
       Logical LLO,LNLO,LTHC1L,LTHC2L,LMULT,LDATA
       Logical LTHCSEP,LNPCSEP
       Double Precision SCALEF
@@ -195,8 +195,11 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       Call FNSET("P_DATA",0)    ! deselect data
          
 *---  Loop over scale settings in order of appearance in the table
-*---  Assume for now that NLO = ctrb. 2 and scale dimension = 1
-      DO IS=1,NScaleVar(2,1)
+*---  Assume for now that NLO = ctrb. 2, THC = ctrb. 3 and scale dimension = 1
+      NSCLS = 1
+      IF (LNLO)   NSCLS = NScaleVar(2,1)
+      IF (LTHC2L) NSCLS = MIN(NSCLS,NScaleVar(3,1))
+      DO IS=1,NSCLS
          SCALEF = ScaleFac(2,1,IS)
          
 *---  Calculate LO cross sections (set IPRINT to 1 for more verbose
@@ -282,17 +285,37 @@ Comment:          ENDIF
          CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
          CHTMP2 = DimLabel(2)
          CHTMP2 = "[ "//CHTMP2(1:12)//" ]"
+         CHRES  = ""
+         CHFRM  = "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E7.1))"
+         IF (LLO) THEN
+            CHRES = CHRES(1:LEN_TRIM(CHRES))//"LO cross section"
+            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
+            IF (LNLO) THEN
+               CHRES = CHRES(1:LEN_TRIM(CHRES))//"   NLO cross section"
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
+               CHRES = CHRES(1:LEN_TRIM(CHRES))//"  K NLO"
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+               IF (LTHC2L) THEN
+                  CHRES =
+     >                 CHRES(1:LEN_TRIM(CHRES))//"       K THC"
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+               ENDIF
+               IF (LMULT) THEN
+                  CHRES =
+     >                 CHRES(1:LEN_TRIM(CHRES))//"       K NPC"
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+               ENDIF
+            ENDIF
+         ENDIF
+         CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",X)"
+
          WRITE(*,'(A)')"  IObs  Bin Size "//
      >        "IODim1  "//
      >        CHTMP1//"    "//
      >        "IODim2  "//
-     >        CHTMP2//"  "//
-     >        "LO cross section   "//
-     >        "NLO cross section  "//
-     >        "K factor           "//
-     >        "K thr. corr.       "//
-     >        "Non-pert. corr."
+     >        CHTMP2//"  "//CHRES(1:LEN_TRIM(CHRES))
          WRITE(*,'(A)')LSEPL
+
          DO I=1,NObsBin
             DO J=1,NDim
                IF (I.EQ.1) THEN
@@ -303,10 +326,37 @@ Comment:          ENDIF
                   NDimBins(J) = 1 
                ENDIF
             ENDDO
-            WRITE(*,999)I,BinSize(I),
-     >           NDimBins(1),LoBin(I,1),UpBin(I,1),
-     >           NDimBins(2),LoBin(I,2),UpBin(I,2),
-     >           XSLO(I),XSNLO(I),KFAC(I),KTHC(I),KNPC(I)
+
+            IF (LLO.AND.LNLO.AND.LTHC2L.AND.LMULT) THEN
+               WRITE(*,CHFRM)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I),XSNLO(I),KFAC(I),KTHC(I),KNPC(I)
+            ELSEIF (LLO.AND.LNLO.AND.LTHC2L) THEN
+               WRITE(*,CHFRM)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I),XSNLO(I),KFAC(I),KTHC(I)
+            ELSEIF (LLO.AND.LNLO.AND.LMULT) THEN
+               WRITE(*,CHFRM)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I),XSNLO(I),KFAC(I),KNPC(I)
+            ELSEIF (LLO.AND.LNLO) THEN
+               WRITE(*,CHFRM)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I),XSNLO(I),KFAC(I)
+            ELSEIF (LLO) THEN
+               WRITE(*,CHFRM)I,BinSize(I),
+     >              NDimBins(1),LoBin(I,1),UpBin(I,1),
+     >              NDimBins(2),LoBin(I,2),UpBin(I,2),
+     >              XSLO(I)
+            ELSE
+               WRITE(*,*)
+     >              "fnlo-read: Nothing to report!"
+            ENDIF
+            
          ENDDO
       ENDDO
 
