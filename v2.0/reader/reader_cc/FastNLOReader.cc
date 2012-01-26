@@ -1273,7 +1273,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 int FastNLOReader::GetNScaleVariations(){
    if ( BBlocksSMCalc[0][1]->NScaleDep ==3 ){
       printf("FastNLOReader::GetNScaleVariations(). This is a 'flexible scale table', therefore you can choose all desired scale variations.\n");
-      return 0;
+      return 1;
    }
    return BBlocksSMCalc[0][1]->Nscalevar[0];
 }
