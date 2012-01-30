@@ -1887,6 +1887,52 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    }
 }     
 
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::SetLHAPDFfilename( string filename ) { 
+   fLHAPDFfilename = filename; 
+   // reset pdfset
+   fiPDFSet = 0;
+   InitLHAPDF();
+}
+
+
+void FastNLOReader::SetLHAPDFset( int set ) { 
+   //if ( set != fiPDFSet ) {
+   fiPDFSet = set; 
+   InitLHAPDF();
+   //}
+}
+
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::PrintCurrentLHAPDFInformation(){
+   //
+   // print out the information about the currently used LHAPDF file.
+   // unfortunately there is no getter for lhapdf-filename or
+   // used pdf-member-id available.
+   // One must take care, that one is always using the desired pdf.
+   // 
+   // e.g. If one has two FastNLOReader instances and one initalizes the
+   // second instance with another pdf. Then also the first one is using this
+   // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
+   //
+   printf(" ##################################################################################\n");
+   printf(" #  FastNLOReader::PrintCurrentLHAPDFInformation.\n");
+   printf(" #      Your currently initalized pdf is called:\n");
+   LHAPDF::getDescription();
+   printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
+   printf(" #      Please use FastNLOReader::SetLHAPDFset(int) to choose a pdf-set.\n");
+   printf(" ##################################################################################\n");
+}
+
+
+
 //______________________________________________________________________________
 
 

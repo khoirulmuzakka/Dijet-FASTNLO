@@ -235,9 +235,10 @@ public:
 
    void SetFilename(string filename) ;
    void InitScalevariation();
-   void SetLHAPDFfilename( string filename ) { fLHAPDFfilename = filename; };
+   void SetLHAPDFfilename( string filename );
    //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
-   void SetLHAPDFset( int set ) { fiPDFSet = set; };
+   void SetLHAPDFset( int set );
+   void PrintCurrentLHAPDFInformation();
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
    void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
    void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
