@@ -60,9 +60,9 @@ AC_C_INLINE
 AC_CHECK_FUNCS([memset pow sqrt strstr])
 
 # Announce checks particular for fastNLO_reader
-AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([*************************************************])
 AC_MSG_NOTICE([Starting checks particular for fastNLO_reader ...])
-AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([*************************************************])
 
 # LHAPDF
 AC_MSG_NOTICE([******************************************])

@@ -1,6 +1,10 @@
+fastNLO_reader version 2.1.0:
+=============================
+
 Installation of distribution package:
-=====================================
+-------------------------------------
 Via autotools setup, in unpacking directory of *.tar.gz file:
+
 ./configure --prefix=your_local_directory
 (should contain LHAPDF installation, otherwise specify
  separate path via --with-lhapdf=path_to_lhapdf;
@@ -8,20 +12,69 @@ Via autotools setup, in unpacking directory of *.tar.gz file:
 make
 make install
 
+
 Requirements:
 -------------
-  - For installation of reader package: LHAPDF
-  - For running executable: fastNLO table, PDF set from LHAPDF
+For installation of reader package: LHAPDF
+For running executable: fastNLO table, PDF set from LHAPDF
 
 
+Content:
+--------
+Generic Fortran and C++ code to read and evaluate fastNLO v2 tables
+(ATTENTION: Due to limitations in memory management with Fortran, the
+            array sizes of the generic code need to be adapted to
+            the investigated scenarios!
+            Code dedicated to read particular scenarios (tables) can
+            be made available.)
 
-Example settings for work with environment variables for LHAPDF,
-usually only LHAPDF needs to be set.
-#                                                                                                        
-# Add LHAPDF environment                                                                                 
+
+Features:
+---------
+Observable definition:
+- Arbitrary number of dimensions for binning of observable,
+  stored and printed out as one large linear array
+
+Scale treatment:
+Two ways of storing scale dependence:
+- Scale interpolation much improved compared to v1.4 or
+- Scale factors and functional form freely choosable a posteriori
+ 
+Possible table content:
+fastNLO v2 Tables can contain additional contributions like
+- non-perturbative correction factors with uncertainties
+  (simple print-out of stored info, available)
+- data points with uncertainties
+  (simple print-out of stored info, available)
+- threshold corrections
+  (dependence on coupling constants to be evaluated,
+   available for inclusive jets)
+- electroweak corrections
+  (dependence on coupling constants to be evaluated)
+- new physics contributions
+  (dependence on coupling constants to be evaluated)
+- normalization options
+  (not used yet)
+
+
+Example settings for work with environment variables for LHAPDF:
+----------------------------------------------------------------
+(Usually only LHAPDF needs to be set.)
+#
+# Add LHAPDF environment
 #
 setenv LHAPDF /home/rabbertz/local                                                                
 setenv LHAPDFBINPATH /home/rabbertz/local/bin                                                     
 setenv LHAPDFLIBPATH /home/rabbertz/local/lib                                                     
 setenv LHAPDFINCLUDEPATH /home/rabbertz/local/include/LHAPDF                                      
 setenv LHAPDFSETPATH /home/rabbertz/local/share/lhapdf/PDFsets                                    
+
+
+For maintainers only: Preparation of distribution package:
+----------------------------------------------------------
+autoreconf --install
+./configure --prefix=your_install_directory
+make dist
+
+Note: configure only terminates properly if mandatory requirements
+are fulfilled even if this configuration is not foreseen to be installed!

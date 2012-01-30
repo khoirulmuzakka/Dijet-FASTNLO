@@ -1,17 +1,15 @@
       PROGRAM FNLOFREAD
-*     ------------------------------------------------------------------
-*     
-*     M. Wobisch                                08/10/2010
+*********************************************************************
 *     
 *     fastNLO_reader:
 *     Program to read fastNLO v2 tables and derive
 *     QCD cross sections using PDFs from LHAPDF
 *     
-*     K. Rabbertz                               16.11.2011
-*     
-*     First version common with C++ reader
-*     
-*     ------------------------------------------------------------------
+*     M. Wobisch, K. Rabbertz
+*
+*     Contains:
+*
+*********************************************************************
       Implicit None
       Include 'fnx9999.inc'
       Character*16 CHTMP1,CHTMP2
@@ -60,14 +58,9 @@ c     Parameter (MxObsBin = 200)
       DSEPS = DSEP41//DSEP41
       LSEPS = LSEP41//LSEP41
       SSEPS = SSEP41//SSEP41
-Comment:       CSEPS(1:2) = "# "
       DSEPS(1:2) = "# "
       LSEPS(1:2) = "# "
       SSEPS(1:2) = "# "
-Comment:       CSEPL(1:2) = "# "
-Comment:       DSEPL(1:2) = "# "
-Comment:       LSEPL(1:2) = "# "
-Comment:       SSEPL(1:2) = "# "
 Comment: *---  Fortran 90 functions for computing precision:
 Comment: *---  tiny(x), huge(x), precision(x)
 Comment:       Write(*,*)"fnlo-fread: F90 double tiny, huge, precision = ",
@@ -88,8 +81,8 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       WRITE(*,*)CSEPS
       WRITE(*,*)"# fnlo-fread"
       WRITE(*,*)CSEPS
-      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and derive"
-      WRITE(*,*)"# QCD cross sections using PDFs from LHAPDF"
+      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and"
+      WRITE(*,*)"# derive QCD cross sections using PDFs from LHAPDF"
       WRITE(*,*)CSEPS
 
 *---  Parse command line
