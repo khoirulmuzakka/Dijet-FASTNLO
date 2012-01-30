@@ -224,6 +224,8 @@ int resetbuffer(string filename){
    
    READ(s);
 
+   // KR: ATTENTION! This was never done!
+   //     v1.4 code is NOT writing nb mod unitfactor into the tables
    // units of cross section not yet read in v1.3 -> assigned for v1.4
    // --> assigned below in write-table code
 
@@ -854,11 +856,15 @@ int writetable(string filename){
    // Ecms
    WRITE(s);
 
+   // KR: This is really BAD!
+   //     Write out BIG warning for user to check.
    // units of cross section 
    ixsectunits=9;                                // --- usually nb
-   if (nrap==5 && npt[0]==24) ixsectunits=15;    // fnt1002
-   if (nrap==6 && npt[0]==115) ixsectunits=12;   // fnl000a
+   //   if (nrap==5 && npt[0]==24) ixsectunits=15;    // fnt1002
+   //   if (nrap==6 && npt[0]==115) ixsectunits=12;   // fnl000a
 
+   cout << "NLOFAST-ADD: WARNING! Cross section unitfactor not stored in tables!" << endl;
+   cout << "             Writing only default value of 9 ( = nb)!" << endl;
    WRITE(ixsectunits);
 
    // 5 strings for description
