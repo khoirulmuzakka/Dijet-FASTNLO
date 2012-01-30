@@ -122,7 +122,22 @@ int main(int argc, char** argv){
   //           fnloreader->SetLHAPDFfilename(PDFFile);
   //           fnloreader->SetLHAPDFset( int PDFSet );
   //     Or you directly talk to LHAPDF using LHAPDF::LHAPDF().
+  //
+  //     >>>>   WARNING  <<<< 
+  //     FastNLO communictes to LHAPDF using the LHAPDFwrap class.
+  //     This class is a global singleton class, which means, that if
+  //     it is e.g. changed to another PDF-name (e.g. by a second
+  //     instance of FastNLOReader), then all FastNLOReader 
+  //     instances access this 'new' LHAPDF-file or member-set (of course
+  //     only after calling FillPDFCache() and CalcCrossSection()).
+  //     
+  //     You can print some information about the currently initialized
+  //     LHAPDF using
+  //		fnloreader->PrintCurrentLHAPDFInformation().
   //	
+  //	 If you are not really sure, which pdf set is currently used, then
+  //     please reset the LHAPDF filename and memberset id.
+  //
   fnloreader->SetLHAPDFfilename(PDFFile);
   fnloreader->SetLHAPDFset( 0 );
 
@@ -283,9 +298,7 @@ int main(int argc, char** argv){
   //    fnloreader->SetExternalFuncForMuR( &Function_Mu );			// set external function to calculate mu_r from scale1 and scale2
   //    fnloreader->SetScaleFactorMuR(1.5);					// set scale factor for mu_r
   //    fnloreader->SetScaleFactorMuF(0.66);					// set scale factor for mu_f
-  //  fnloreader->SetExternalFuncForMuR( &Function_Mu );
-  //  fnloreader->SetExternalFuncForMuF( &Function_Mu );
-    
+
 
 
   // ---- (Re-)calculate cross sections ---- //
@@ -299,7 +312,6 @@ int main(int argc, char** argv){
   fnloreader->CalcCrossSection();
 
 
-  
   // ---- Get cross sections ---- //
   // --- fastNLO user: To access the cross section from FastNLO
   //     you should use:
@@ -329,7 +341,7 @@ int main(int argc, char** argv){
   // ---- Information ---- //
   // --- fastNLO user: For a comprehensive insight into the FastNLO variables
   //     you can use:
-  fnloreader->PrintFastNLOTableConstants(0);
+  //		fnloreader->PrintFastNLOTableConstants(0);
   //     
   //     For a comparision with a Reference cross section calculated with
   //     nlojet++ you might use:
@@ -343,6 +355,7 @@ int main(int argc, char** argv){
   //     INFO: NLOJET++ typically uses the nlojet-like alpha_s evolution with a value of 0.1179
   //     and a PDF similar to the cteq6m.LHgrid pdf-file.
   //
+  fnloreader->PrintFastNLOTableConstants(0);
 
 
   // ************************************************************************************************
