@@ -1,124 +1,67 @@
-Issues with tables converted from v1.4 to v2.0
-----------------------------------------------
-
-1. The conversion has to be done using
-   conv20 intable.tab scenname.tab
-   to have scenname written as scenario name into the convrted table.
-
-2. Treat the table once with tablefix.pl to trim leading and trailing
-   space.
-
-3. Standard nlofast-add'er by default always writes:
-   ixsectunits = 9 which is nanobarns, check with scenario code
-   NLOJET++ without version number (should be 2.0.1)
-   1st dimension as "pT_in_GeV"
-   2nd dimension as "y", could also be "|y|" or eta or something else 
-   setprecision is 40! way too high, 17 would be sufficient
-   writes leading/trailing blanks and zeros
-
-4. Conversion doesn't work for reference tables
-
-5. Check title strings 
-
-6. Bug in conversion of dijet mass tables, check!!!
-
-
-To be adapted to converter only use!
-
-
+fastNLO_converter version 2.1.0:
+================================
 
 Installation of distribution package:
-=====================================
-./configure --prefix=/your/install/directory
+-------------------------------------
+Via autotools setup, in unpacking directory of *.tar.gz file:
+
+./configure --prefix=your_local_directory
 make
 make install
-TODO: make check
-
-Required external packages:
----------------------------
-   Mandatory:
-              nlojet++-4.1.3.tar.gz
-              nlojet++-4.1.3-fix.tar.gz
-              cteq-pdf-1.0.4.tar.gz
-              lhpdf-1.0.0.tar.gz
-              lhpdf-1.0.0-fix.tar.gz
-
-   Note: One file (nlo-core/bits/nlo-basic_user.h) of the original
-         NLOJet++ 4.1.3 distribution needs to be replaced, either
-         via the nlojet++-4.1.3-fix.tar.gz package or using the file
-         shipping with the fastnlo tarball. NLOJet++ has to be 
-         reinstalled from scratch with this change before installing
-         fastnlo. Otherwise nlojet++ in combination with a fastnlo module
-         will always terminate with a segmentation fault! 
-
-   Optional:
-              lhapdf-5.8.4.tar.gz
-              lhapdf-5.8.4-fix.tar.gz
-              fastjet-2.4.2.tar.gz
-              ROOT
-              CERNLIB
-
-   Note: In order to use certain plugin jet algorithms from the fastjet
-         package they need to be configured to be produced. We recommend
-         to enable all using the fastjet configure option --enable-allplugins.
-
-Example for used environment variables:
----------------------------------------
-#                                              
-# fastrun.pl: Setting fastNLO and gcc environment as required by this installation of fastNLO version 2b!
-#                                                                                                        
-# Add CERNLIB environment                                                                                
-setenv CERN_ROOT /home/rabbertz/local                                                             
-setenv CERNLIBPATH /home/rabbertz/local/lib                                                       
-setenv CERNLIBS "-L$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib"                                         
-#                                                                                                        
-# Add LHAPDF environment                                                                                 
-setenv LHAPDF /home/rabbertz/local                                                                
-setenv LHAPDFBINPATH /home/rabbertz/local/bin                                                     
-setenv LHAPDFLIBPATH /home/rabbertz/local/lib                                                     
-setenv LHAPDFINCLUDEPATH /home/rabbertz/local/include/LHAPDF                                      
-setenv LHAPDFSETPATH /home/rabbertz/local/share/lhapdf/PDFsets                                    
-#                                                                                                        
-# Add FASTJET environment                                                                                
-setenv FASTJET /home/rabbertz/local                                                               
-setenv FASTJETBINPATH /home/rabbertz/local/bin                                                    
-setenv FASTJETLIBPATH /home/rabbertz/local/lib
-setenv FASTJETINCLUDEPATH /home/rabbertz/local/include/fastjet
-setenv FASTJETLIBS "-Wl,-rpath,/home/rabbertz/local/lib -lm -L/home/rabbertz/local/lib -lfastjet"
-#
-# Add NLOJET environment
-setenv NLOJET /home/rabbertz/local
-setenv NLOJETBINPATH /home/rabbertz/local/bin
-setenv NLOJETLIBPATH /home/rabbertz/local/lib
-setenv NLOJETINCLUDEPATH /home/rabbertz/local/include/nlo++
-#
-# Add LHPDF environment
-setenv LHPDF /home/rabbertz/local
-setenv LHPDFLIBPATH /home/rabbertz/local/lib
-setenv LHPDFINCLUDEPATH /home/rabbertz/local/include/lhpdf
-#
-# Add ZNPDF environment
-setenv ZNPDF /home/rabbertz/local
-setenv ZNPDFLIBPATH /home/rabbertz/local/lib
-setenv ZNPDFINCLUDEPATH /home/rabbertz/local/include/cteq
-#
-# Add FASTNLO environment
-setenv FASTNLO /home/rabbertz/local
-setenv FASTNLOBINPATH /home/rabbertz/local/bin
-setenv FASTNLOLIBPATH /home/rabbertz/local/lib/fastnlo
-setenv FASTNLOSRCPATH /home/rabbertz/local/src/fastnlo-2.0.0-gcc412
-#
-# Add to system paths PATH and LD_LIBRARY_PATH
-setenv PATH /home/rabbertz/local/bin:${PATH}
-setenv LD_LIBRARY_PATH /home/rabbertz/local/lib:/home/rabbertz/local/lib/fastnlo:/home/rabbertz/local/lib64:${LD_LIBRARY_PATH}
 
 
+Requirements:
+-------------
+None.
 
-Preparation of distribution package:
-====================================
+
+Content:
+--------
+Fortran code to read fastNLO v1.4 tables and convert them to fastNLO v2.0
+
+
+Features:
+---------
+Readable table content:
+fastNLO v1.4 Tables may contain the following contributions
+- LO QCD
+- NLO QCD
+- threshold corrections
+  (only for inclusive jets)
+
+Usage: ./fnlo-convert [arguments]
+Table input file, def. = intable.tab
+Table output file, def. = outtable.tab
+Scenarioname, def. = fnx9999
+Table part to write, def. = 9 (all)
+   0: Table header only
+   1: LO contribution only
+   2: NLO contribution only
+   3: THC contribution only
+   9: Complete table
+Bin width factor, def. = 1
+      Set to 2 for |eta| or |y| bins
+Cross section units, def. = read from table
+
+Use "_" to skip changing a default argument.
+
+Some issues with tables converted from v1.4 to v2.0:
+
+1. Conversion does not work for reference tables
+2. Standard nlofast-add'er by default ALWAYS writes:
+   - IXSECTUNITS = 9 which is 10^-9 barns = nanobarns.
+     Check the scenario code for correctness and eventually
+     replace the value using the command line argument!
+   - Writes leading/trailing blanks and zeros
+3. Potentially treat the table once with tablefix.pl to
+   trim leading and trailing space.
+4. Bug in conversion of dijet mass tables? Check!!!
+
+
+For maintainers only: Preparation of distribution package:
+----------------------------------------------------------
 autoreconf --install
-./configure --prefix=/your/install/directory
-make distcheck
+./configure --prefix=your_install_directory
 make dist
 
 Note: configure only terminates properly if mandatory requirements

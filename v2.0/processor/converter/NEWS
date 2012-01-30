@@ -1,6 +1,9 @@
-Release Notes for fastNLO_processor:
-------------------------------------
+Release Notes for fastNLO_converter version 2.1.0:
+==================================================
 
-===========================================================
-To be written ...
-===========================================================
+Revision nnnn
+
+- First internal release of the fastNLO_converter package
+
+- Content:
+  Fortran code to read fastNLO v1.4 tables and convert them to fastNLO v2.0

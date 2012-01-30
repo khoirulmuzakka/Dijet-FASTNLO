@@ -3,11 +3,12 @@
 #
 # K. Rabbertz, 26.11.2011
 #
-# Create separate distribution and installation package for fastNLO_processor 
+# Create separate distribution and installation package for fastNLO_converter
 #
 # -----------------------------------------------------------------------------
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
+#
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 #
@@ -23,14 +24,14 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 endif
 #
-# The main target, i.e. the executable to build
-bin_PROGRAMS = conv20
+# The main target: The Fortran table converter
+bin_PROGRAMS = fnlo-convert
 
 # All source files which go into the main target (and have to be distributed)
-conv20_SOURCES = conv20.f conv20.inc
+fnlo_convert_SOURCES = fnlo-convert.f fnlo-convert.inc strings.inc
 
 # FORTRAN compiler flags to be used for the main target
-AM_FFLAGS = -o conv20 -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
