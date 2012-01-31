@@ -904,8 +904,8 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
   // for(int i=0;i<Ncontrib;i++){
   //    printf("#   NscaleVar,NScaleNode: %i3, %i3\n",NscaleVar(i,1),NScaleNode(i,1));
   // }
-  // printf(" #\n");
-  // printf(" ########################################################################\n");
+  printf(" #\n");
+  printf(" ########################################################################\n\n");
 }
 
 
@@ -1070,7 +1070,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
   if ( NDim == 2 ){
     string header[3] = { "  IObs  Bin Size IODim1 ", 
 			 "   IODim2 ",
-			 " LO cross section   NLO cross section  K factor             K thr. corr.        Non-pert. corr."};
+			 " LO cross section   NLO cross section  K NLO       K THC       K NPC"};
     //string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
     unsigned int NDimBins[NDim];
     //printf("%s %s %s %s %s\n",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
@@ -1087,7 +1087,7 @@ void FastNLOReader::PrintCrossSectionsLikeFreader(){
 	  NDimBins[j] = 1;
 	}
       }
-      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#18.11E",
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#11.5G",
 	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]/kFactor[i],xs[i],kFactor[i]);
       if ( !BBlocksSMCalc[1].empty() ) { // th. corr
