@@ -1,7 +1,7 @@
       PROGRAM FNLOFREAD
 *********************************************************************
 *     
-*     fastNLO_reader:
+*     fastNLO_reader: FNLOFREAD
 *     Program to read fastNLO v2 tables and derive
 *     QCD cross sections using PDFs from LHAPDF
 *     
