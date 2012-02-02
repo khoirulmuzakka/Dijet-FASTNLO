@@ -679,25 +679,25 @@ void FastNLOReader::PrintTableInfo(const int iprint){
 
 
 void FastNLOReader::SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn ){
-  if ( bUseSMCalc[eCalc].empty() || BBlocksSMCalc.empty() ){
-    printf("FastNLOReader::SetContributionON. Error. This contribution (%s) does not exist in this table. Cannot switch it On/Off. Ignoring call.\n",fContrName[eCalc].c_str());
-    return;
-  }
+   if ( bUseSMCalc[eCalc].empty() || BBlocksSMCalc.empty() ){
+      printf("FastNLOReader::SetContributionON. Warning. This contribution (%s) does not exist in this table. Cannot switch it On/Off. Ignoring call.\n",fCorrName[eCalc].c_str());
+      return;
+   }
    
-  if ( bUseSMCalc[eCalc].size() < Id || BBlocksSMCalc[eCalc].size() < Id || !BBlocksSMCalc[eCalc][Id] ){
-    printf("FastNLOReader::SetContributionON. Error. This Id = %d does not exist for this contribtion. Cannot switch it On/Off. Ignoring call.\n",Id);
-    return;
-  }
+   if ( bUseSMCalc[eCalc].size() < Id || BBlocksSMCalc[eCalc].size() < Id || !BBlocksSMCalc[eCalc][Id] ){
+      printf("FastNLOReader::SetContributionON. Warning. This Id = %d does not exist for this contribtion. Cannot switch it On/Off. Ignoring call.\n",Id);
+      return;
+   }
    
-  printf(" * %s contribution '%s' with Id = %d.\n",
-	 (SetOn?"Activating":"Deactivating"),fContrName[eCalc].c_str(),Id);
+   printf(" * %s contribution '%s' with Id = %d.\n",
+	  (SetOn?"Activating":"Deactivating"),fContrName[eCalc].c_str(),Id);
 
-  bUseSMCalc[eCalc][Id] = SetOn;   
+   bUseSMCalc[eCalc][Id] = SetOn;   
 
-  if ( eCalc==kThresholdCorrection && SetOn && fScaleFacMuR!=BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]){
-    printf("FastNLOReader::SetContributionON. Info. Resetting a-posteriori scale variation factor, since threshold corrections can not be used with an a-posteriori scale variation..\n");
-    SetScaleFactorMuR(1.,true);
-  }
+   if ( eCalc==kThresholdCorrection && SetOn && fScaleFacMuR!=BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]){
+      printf("FastNLOReader::SetContributionON. Info. Resetting a-posteriori scale variation factor, since threshold corrections can not be used with an a-posteriori scale variation..\n");
+      SetScaleFactorMuR(1.,true);
+   }
 
 }
 
