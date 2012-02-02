@@ -680,7 +680,7 @@ void FastNLOReader::PrintTableInfo(const int iprint){
 
 void FastNLOReader::SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn ){
    if ( bUseSMCalc[eCalc].empty() || BBlocksSMCalc.empty() ){
-      printf("FastNLOReader::SetContributionON. Warning. This contribution (%s) does not exist in this table. Cannot switch it On/Off. Ignoring call.\n",fCorrName[eCalc].c_str());
+      printf("FastNLOReader::SetContributionON. Warning. This contribution (%s) does not exist in this table. Cannot switch it On/Off. Ignoring call.\n",fContrName[eCalc].c_str());
       return;
    }
    
