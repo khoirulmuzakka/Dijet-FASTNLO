@@ -186,36 +186,20 @@ void FastNLOReader::InitScalevariation(){
     
     if ( BBlocksSMCalc[0][0]->ScaleDescript[0].size() <0 ) {
       printf("Error. No scaledescription available.\n"); // the code will crash soon.
-      fMuFFunc	= kScale1;
-      fMuRFunc	= kScale1;
+      SetFunctionalForm( kScale1 , kMuR );
+      SetFunctionalForm( kScale1 , kMuF );
       return;
     }
 
     // ---- DIS ---- //
     if ( BBlocksSMCalc[0][0]->NPDFDim == 0 ) {
-      fMuRFunc	= kQuadraticMean;
-      fMuFFunc	= kScale1;
-      printf (" *    Setting factorization scale to mu_f^2 = %s^2 .\n", BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str() );
-      if ( BBlocksSMCalc[0][0]->ScaleDescript[0].size() == 2 ){
-	printf (" *    Setting renormalization scale to mu_r^2 = (%s^2 + %s^2)/2 .\n", BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str() , BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str() );
-      }
-      else if ( BBlocksSMCalc[0][0]->ScaleDescript[0].size() == 1 &&  BBlocksSMCalc[0][0]->ScaleNodeScale2[0].size() > 3 ){
-	printf("FastNLOReader::InitScalevariation. Warning. Could not find description for scale variables.\n");
-	printf (" *    Setting renormalization scale to mu_r^2 = (scale1^2 + scale2^2)/2 .\n" );
-      }
-      else if ( BBlocksSMCalc[0][0]->ScaleDescript[0].size() == 1 &&  BBlocksSMCalc[0][0]->ScaleNodeScale2[0].size() <= 3  ){
-	printf("FastNLOReader::InitScalevariation. Warning. This table has only one scale variable %s stored.\n", BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str() );
-	printf (" *    Setting renormalization scale to mu_r^2 = %s^2 .\n", BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str() );
-	fMuRFunc	= kScale1;
-      }
-      else {
-	printf("Error. I don't know what to do.\n");
-      }
+      SetFunctionalForm( kQuadraticMean , kMuR );
+      SetFunctionalForm( kScale1 , kMuF );
     }
     // ---- HHC --- //
     else if (  BBlocksSMCalc[0][0]->NPDFDim == 1 ) {
-      fMuFFunc	= kScale1;
-      fMuRFunc	= kScale1;
+      SetFunctionalForm( kScale1 , kMuR );
+      SetFunctionalForm( kScale1 , kMuF );
     }
     else {
       printf("Error. Unknown process.\n");
@@ -253,6 +237,8 @@ double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double s
   else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2);
   else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2);
   else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2);
+  else if	( Func == kLinearMean )		mu	= FuncLinearMean(scale1,scale2);
+  else if	( Func == kLinearSum )		mu	= FuncLinearSum(scale1,scale2);
   else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
   else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
   else if	( Func == kExtern  )		mu	= (kMuX==FastNLOReader::kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
@@ -367,19 +353,57 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
     printf("FastNLOReader::SetFunctionalForm. Warning. This is not a MuVar table.\n");
     printf("      SetFunctionalForm has no impact.\n");
-    printf("      Please use another file, if you want to change your scale-definition.\n");
+    printf("      Please use another FastNLO table in 'flexible scale version', if you want to change your scale-definition.\n");
     return;
   }
 
+
+  // ---- prepare printout ---- //
+  const string sname[2] = {"renormalization","factorization"};
+  const string smu[2] = {"mu_r","mu_f"};
+  const int isc = kMuX==kMuR ? 0 : 1;
+  char fname[100];
+
+  switch (func){
+  case kScale1: sprintf(fname,"%s^2",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str());
+     break;
+  case kScale2: sprintf(fname,"%s^2",BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kQuadraticSum: sprintf(fname,"%s^2 + %s^2",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kQuadraticMean: sprintf(fname,"(%s^2 + %s^2)/2",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kQuadraticSumOver4: sprintf(fname,"(%s^2 + %s^2)/4",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kLinearMean: sprintf(fname,"((%s+%s)/2)^2",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kLinearSum: sprintf(fname,"(%s+%s)^2",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kScaleMax: sprintf(fname,"max(%s^2,%s^2)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+      break;
+  case kScaleMin: sprintf(fname,"min(%s^2,%s^2)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kExtern: sprintf(fname,"f_ext(%s,%s)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  default: printf("unknown scale choice.\n");
+  }
+  
+   
+  // ---- setting scale ---- //
+  printf (" *    Setting %s scale to %s^2 = %1.2f^2 * %s.\n",
+	  sname[isc].c_str(),smu[isc].c_str(), 
+	  (kMuX==kMuR?fScaleFacMuR:fScaleFacMuF), fname);
   if ( kMuX == kMuR ) fMuRFunc = func;
   else fMuFFunc = func;
 
-  if	( func == kScale2 || func == kQuadraticSum||  func == kQuadraticMean ||  func == kQuadraticSumOver4 ||  func == kScaleMax|| func == kScaleMin ) {
+
+  // ---- cross check ---- //
+  if	( func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 
+	  || func == kLinearMean || func == kLinearSum  ||  func == kScaleMax|| func == kScaleMin ) {
     if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[0].size() <= 3){
       printf("FastNLOReader::SetFunctionalForm. Error. There is no second scale variable available in this table.\n");
-      printf("      Please use FastNLOReader::kScale1 only.\n");
-      if ( kMuX == kMuR ) fMuRFunc = kScale1;
-      else fMuFFunc = kScale1;
+      printf("      Using FastNLOReader::kScale1 only.\n");
+      SetFunctionalForm(kScale1,kMuX);
     }
     for(int i=0;i<NObsBin;i++){
       if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 5 ){
@@ -438,8 +462,9 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
     }
   }
   else if ( BBlocksSMCalc[0][1]->NScaleDep == 3 ) {
-    printf("FastNLOReader::SetScaleFactorMuR. Setting multiplicative scale factor for renormalization scale to %4.2f.\n",fac);
+    printf(" *  Setting multiplicative scale factor for renormalization scale to %1.2f.\n",fac);
     fScaleFacMuR = fac;
+    SetFunctionalForm( fMuRFunc , kMuR ); // just for printout
   }
    
   if ( ReFillCache ){
@@ -465,10 +490,13 @@ void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache ){
     printf("      SetScaleFactorMuF has no impact.\n");
     printf("      Please use SetScaleVariation(int) instead.\n");
   }
-  fScaleFacMuF = fac;
-
-  if ( ReFillCache ){
-    FillPDFCache();
+  else {
+     printf(" *  Setting multiplicative scale factor for factorization scale to %1.2f.\n",fac);
+     fScaleFacMuF = fac;
+     SetFunctionalForm( fMuFFunc , kMuF ); // just for printout
+     if ( ReFillCache ){
+	FillPDFCache();
+     }
   }
 }
 
@@ -508,7 +536,6 @@ void FastNLOReader::ReadTable(void)
   bUseNewPhys.resize(BBlocksNewPhys.size());
 
   // Initialize BlockB's
-  FastNLOBlockB* BlockB_DATA = NULL;
   FastNLOBlockB* BlockB_LO   = NULL;
   FastNLOBlockB* BlockB_NLO  = NULL;
   FastNLOBlockB* BlockB_THC1 = NULL;
@@ -598,11 +625,6 @@ void FastNLOReader::ReadTable(void)
     }
   }
   
-  if ( BlockB_LO == NULL ){
-    printf("FastNLOReader::ReadTable(): ERROR! Could not find any LO Calculation, stopped!\n");
-    exit(1);
-  }
-  
   // Assign NPC, switch off by default
   if ( BlockB_NPC1 ) {
     BBlocksSMCalc[BlockB_NPC1->IContrFlag1-1].push_back(BlockB_NPC1);
@@ -623,6 +645,9 @@ void FastNLOReader::ReadTable(void)
   if ( BlockB_LO )  {
     BBlocksSMCalc[0].push_back(BlockB_LO);
     bUseSMCalc[0].push_back(true);
+  } else {
+    printf("FastNLOReader::ReadTable(): ERROR! Could not find any LO Calculation, stopped!\n");
+    exit(1);
   }
   if ( BlockB_NLO ) {
     BBlocksSMCalc[0].push_back(BlockB_NLO);
@@ -1126,7 +1151,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
     vector < double > xsnlo = GetCrossSection();
     vector < double > kfac  = GetKFactors();
     vector < double > xslo  = xsnlo;
-    for (int i=0;i<xslo.size();i++){
+    for (unsigned int i=0;i<xslo.size();i++){
       if ( abs(kfac[i]) > DBL_MIN ){
 	xslo[i] = xslo[i]/kfac[i];
       } else {
@@ -1143,7 +1168,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
       xsthc2 = GetCrossSection();
       kthc   = GetKFactors();
       // Threshold K factor is NLO including 2-loop vs. NLO
-      for (int i=0;i<kthc.size();i++){
+      for (unsigned int i=0;i<kthc.size();i++){
 	if ( abs(kfac[i]) > DBL_MIN ){
 	  kthc[i] = kthc[i]/kfac[i];
 	} else {
@@ -1163,7 +1188,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
       xsnpc  = GetCrossSection();
       knpc   = GetKFactors();
       // Non-pert. K factor is NLO including NP vs. NLO
-      for (int i=0;i<knpc.size();i++){
+      for (unsigned int i=0;i<knpc.size();i++){
 	if ( abs(kfac[i]) > DBL_MIN ){
 	  knpc[i] = knpc[i]/kfac[i];
 	} else {
@@ -2509,8 +2534,8 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool
     return;
   }
 
-  fMuRFunc = kExtern;
   Fct_MuR = Func;
+  SetFunctionalForm( kExtern , kMuR );
   printf(" *  FastNLOReader::SetExternalFuncForMuR(). Test.\n");
   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuR)(1,1));
   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuR)(91.1876,91.1876));
@@ -2533,8 +2558,9 @@ void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool
     printf("      Please use another table, if you want to change your scale-definition.\n");
     return;
   }
-  fMuFFunc = kExtern;
+
   Fct_MuF = Func;
+  SetFunctionalForm( kExtern , kMuF );
   printf(" *  FastNLOReader::SetExternalFuncForMuF(). Test.\n");
   printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuF)(1,1));
   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuF)(91.1876,91.1876));
