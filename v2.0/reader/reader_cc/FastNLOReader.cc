@@ -2600,7 +2600,7 @@ int FastNLOReader::ContrId( ESMCalculation eCalc, ESMOrder eOrder ){
   // Requested order
   string requested = fOrdName[eCalc][eOrder];
   // Loop over all available orders of contribution type eCalc 
-  for(int i=0; i<BBlocksSMCalc[eCalc].size(); i++){
+  for(unsigned int i=0; i<BBlocksSMCalc[eCalc].size(); i++){
     // Found order
     string available = fOrdName[BBlocksSMCalc[eCalc][i]->IContrFlag1-1][BBlocksSMCalc[eCalc][i]->IContrFlag2-1];
     if ( available == requested ) {Id = i;} 
