@@ -1799,7 +1799,7 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
 	scalenode2 = j % B->Nscalenode[1];
       }
       double mur	= scalefac * B->ScaleNode[i][0][scaleVar][scalenode1];
-      double as		= GetAlphas(mur);
+      double as		= CalcAlphas(mur);
       B->AlphasTwoPi_v20[i][j] = pow( as/TWOPI , B->Npow );
     }
   }
@@ -1818,7 +1818,7 @@ void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
     for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
       for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	double mur		= CalcMu( kMuR , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuR );
-	double as		= GetAlphas(mur);
+	double as		= CalcAlphas(mur);
 	double alphastwopi	= pow( as/TWOPI, B->Npow);
 	B->AlphasTwoPi[i][jS1][kS2] = alphastwopi;
       }
@@ -1830,18 +1830,18 @@ void FastNLOReader::FillAlphasCacheInBlockBv21( FastNLOBlockB* B ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphas( double Q ){
+double FastNLOReader::CalcAlphas( double Q ){
   // 
   //  Internal method for calculating the alpha_s(mu)
   //
   
   //switch ( AlphasEvolution )
-  if ( fAlphasEvolution == kGRV )			return GetAlphasGRV	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kNLOJET )		return GetAlphasNLOJET	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kCTEQpdf )		return GetAlphasCTEQpdf	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kLHAPDFInternal )	return GetAlphasLHAPDF	( Q );
-  else if ( fAlphasEvolution == kQCDNUMInternal )	return GetAlphasQCDNUM	( Q );
-  else if ( fAlphasEvolution == kFixed )        	return GetAlphasFixed	( Q , fAlphasMz );
+  if ( fAlphasEvolution == kGRV )			return CalcAlphasGRV	( Q , fAlphasMz );
+  else if ( fAlphasEvolution == kNLOJET )		return CalcAlphasNLOJET	( Q , fAlphasMz );
+  else if ( fAlphasEvolution == kCTEQpdf )		return CalcAlphasCTEQpdf	( Q , fAlphasMz );
+  else if ( fAlphasEvolution == kLHAPDFInternal )	return CalcAlphasLHAPDF	( Q );
+  else if ( fAlphasEvolution == kQCDNUMInternal )	return CalcAlphasQCDNUM	( Q );
+  else if ( fAlphasEvolution == kFixed )        	return CalcAlphasFixed	( Q , fAlphasMz );
   else {
     cout << "\nFastNLOReader: ERROR! No alpha_s evolution selected, aborting!\n";
     exit (1);
@@ -1852,7 +1852,7 @@ double FastNLOReader::GetAlphas( double Q ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasLHAPDF(double Q){
+double FastNLOReader::CalcAlphasLHAPDF(double Q){
   //
   // Implementation of Alpha_s evolution as function of Mu_r only.
   //
@@ -1869,7 +1869,7 @@ double FastNLOReader::GetAlphasLHAPDF(double Q){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasQCDNUM(double Q){
+double FastNLOReader::CalcAlphasQCDNUM(double Q){
   //
   // alpha_s evolution as used in QCDNUM
    
@@ -1879,7 +1879,7 @@ double FastNLOReader::GetAlphasQCDNUM(double Q){
   double as = asfunc_( &mu2, &nf  , &ierr);
 
   if ( ierr > 0 ){
-    printf("FastNLOReader::GetAlphasQCDNUM. Error. alphas evolution failed. ierr = %d, Q = %7.4f\n",ierr,Q);
+    printf("FastNLOReader::CalcAlphasQCDNUM. Error. alphas evolution failed. ierr = %d, Q = %7.4f\n",ierr,Q);
   }
 
   return as;
@@ -1889,7 +1889,7 @@ double FastNLOReader::GetAlphasQCDNUM(double Q){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasNLOJET(double Q, double alphasMZ){
+double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
   //
   // Implementation of Alpha_s evolution as function of Mu_r.
   //
@@ -1931,15 +1931,15 @@ double FastNLOReader::GetAlphasNLOJET(double Q, double alphasMZ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasGRV(double MU, double ALPSMZ){
-  return Alphas::GetAlphasMu(MU,ALPSMZ);
+double FastNLOReader::CalcAlphasGRV(double MU, double ALPSMZ){
+  return Alphas::CalcAlphasMu(MU,ALPSMZ);
 }
 
 
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasCTEQpdf(double Q, double alphasMZ){
+double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
   //
   // Implementation of Alpha_s evolution as function of Mu_r.
   //
@@ -1977,7 +1977,7 @@ double FastNLOReader::GetAlphasCTEQpdf(double Q, double alphasMZ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::GetAlphasFixed(double MU, double ALPSMZ){
+double FastNLOReader::CalcAlphasFixed(double MU, double ALPSMZ){
   return ALPSMZ;
 }
 
