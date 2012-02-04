@@ -118,7 +118,7 @@ c === Also reset result array
       Enddo
       
 c === Determine pointers to access contributions and scales
-      Call FX9999PT(xmur,xmuf)
+      Call FX9999PT(xmur,xmuf,1)
 
 c === Check if aposteriori mur variation is required
 c     Todo ?
@@ -159,7 +159,7 @@ c     Do k=2,5 ! test - only qq
             Endif
          Enddo
 c === Either multiply x section now by multiplicative correction or ... 
-         I = IMULT1
+         I = INPC1
          IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
             IPoint = IContrPointer(i)
             Do j=1,NObsBin
@@ -168,8 +168,8 @@ c === Either multiply x section now by multiplicative correction or ...
          Endif
 c === ... fill multiplicative correction and uncertainties into output arrays
 c === (Only works with one correction of this type for now)
-      ElseIf (IContrSelector(IMult1).EQ.1.AND.
-     >        IContrPointer(IMult1).NE.-1) Then
+      ElseIf (IContrSelector(INPC1).EQ.1.AND.
+     >        IContrPointer(INPC1).NE.-1) Then
          Do j=1,NObsBin
             xsect(j) = MFact(1,j)
 c === For now add sources quadratically
@@ -333,89 +333,94 @@ c --> better in RW so it can be used in other codes / in read and write
 
 *******************************************************************
 *******************************************************************
-      SUBROUTINE FX9999PT(xmur,xmuf)
+      SUBROUTINE FX9999PT(xmur,xmuf,iprint)
 *-----------------------------------------------------------------
-* MW 06/14/2007
-*
-* determine pointer to contributions and to scales
-* 
-* input:    
-*           Xmur        renormalization scale factor        
-*           Xmuf        factorization scale factor
-*
-* 06/11/2007 MW
-* 19.09.2009 KR Improve contribution determination, fix double comparison
-*
-* current restrictions:
-* - muf and mur recognition:
-*   So far it is assumed that all scales are stored in first dimension
-*   multiple scale dimensions are not yet implemented here
-* - mur recognition
-*   So far it is assumed that (in one dimension) the scale factors
-*   for mur and muf are the same (i.e. can not have fixed mur, but different
-*   muf values (which, in principle would work with aposteriori variations)
+*     
+*     Determine pointers to contributions and scales
+*     
+*     input:    
+*     Xmur        renormalization scale factor        
+*     Xmuf        factorization scale factor
+*     iprint      verbosity
+*     
+*     current restrictions:
+*     - muf and mur recognition:
+*     So far it is assumed that all scales are stored in first dimension
+*     multiple scale dimensions are not yet implemented here
+*     - mur recognition
+*     So far it is assumed that (in one dimension) the scale factors
+*     for mur and muf are the same (i.e. can not have fixed mur, but
+*     different
+*     muf values (which, in principle would work with aposteriori
+*     variations)
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
-      Integer i,j,k, i1
-      Double Precision Xmur, Xmuf
+      Integer iprint,i,j,k,i1
+      Double Precision Xmur,Xmuf
 
-c --- Initialize counters and pointers for contribution types 
+*---  Initialize counters and pointers for contribution types 
       Do I=1,MxCtrb
          NContrCounter(I)  =  0
          IContrPointer(I)  = -1
          IContrSelector(I) =  0
+         IScalePointer(I)  = -1
       Enddo
 
-c --- Check input
-      If (xmur.lt.1d-3.or.xmuf.lt.1d-3) Then
+*---  Check input
+      IF (XMUR.LT.1D-3.OR.XMUF.LT.1D-3) THEN
          WRITE(*,*)"FX9999PT: ERROR! Scale factors smaller than "//
      >        "0.001 are not allowed, stopped! xmur, xmuf = ",xmur,xmuf
          STOP
-      Endif
+      ELSEIF (XMUR.GT.1D3.OR.XMUF.GT.1D3) THEN
+         WRITE(*,*)"FX9999PT: ERROR! Scale factors largeer than "//
+     >        "1000. are not allowed, stopped! xmur, xmuf = ",xmur,xmuf
+         STOP
+      ENDIF
 
-c --- Loop once over all contributions and register types
+*---  Loop once over all contributions and register types
       DO I=1,NContrib
          IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.1.AND.
      >        Iref(i).eq.Preftab) THEN
             NContrCounter(ILO) = NContrCounter(ILO) + 1
             IContrPointer(ILO) = I
-         ENDIF
-         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.2.AND.
-     >        Iref(i).eq.Preftab) THEN
+         ELSEIF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.2.AND.
+     >           Iref(i).eq.Preftab) THEN
             NContrCounter(INLO) = NContrCounter(INLO) + 1
             IContrPointer(INLO) = I
-         ENDIF
-         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
-     >        Iref(i).eq.Preftab) THEN
+         ELSEIF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
+     >           Iref(i).eq.Preftab) THEN
             NContrCounter(ITHC1L) = NContrCounter(ITHC1L) + 1
             IContrPointer(ITHC1L) = I
-         ENDIF
-         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.2.AND.
-     >        Iref(i).eq.Preftab) THEN
+         ELSEIF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.2.AND.
+     >           Iref(i).eq.Preftab) THEN
             NContrCounter(ITHC2L) = NContrCounter(ITHC2L) + 1
             IContrPointer(ITHC2L) = I
-         ENDIF
-         IF (IContrFlag1(I).EQ.4.AND.IContrFlag2(I).EQ.1.AND.
-     >        IAddMultFlag(I).EQ.1.AND.
-     >        Iref(i).eq.Preftab) THEN
-            NContrCounter(IMULT1) = NContrCounter(IMULT1) + 1
-            IContrPointer(IMULT1) = I
-         ENDIF
-         IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
-     >        IDataFlag(I).EQ.1.AND.
-     >        Iref(i).eq.Preftab) THEN
+         ELSEIF (IContrFlag1(I).EQ.4.AND.IContrFlag2(I).EQ.1.AND.
+     >           IAddMultFlag(I).EQ.1.AND.
+     >           Iref(i).eq.Preftab) THEN
+            NContrCounter(INPC1) = NContrCounter(INPC1) + 1
+            IContrPointer(INPC1) = I
+         ELSEIF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
+     >           IDataFlag(I).EQ.1.AND.
+     >           Iref(i).eq.Preftab) THEN
             NContrCounter(IDATA) = NContrCounter(IDATA) + 1
             IContrPointer(IDATA) = I
+         ELSE
+            WRITE(*,*)"FX9999PT: ERROR! Unknown contribution type "//
+     >           "encountered, stopped!"
+            WRITE(*,*)"          IContrFlag1, IContrFlag2 = ",
+     >           IContrFlag1(I),IContrFlag2(I)
+            WRITE(*,*)"          IAddMultFlag,IDataFlag = ",
+     >           IAddMultFlag(I),IDataFlag(I)
+            WRITE(*,*)"          Iref = ",
+     >           Iref(I)
+            STOP
          ENDIF
       ENDDO
-Comment:       do i=1,ncontrib
-Comment:          write(*,*)"ic,ipoint,iselect,ncount",
-Comment:      >        i,icontrpointer(i),icontrselector(i),ncontrcounter(i)
-Comment:       enddo
       
-c --- Find particular contributions
-c --- Find LO contribution
+*---  Find particular contributions
+*---  Find LO contribution
       If (PORDPTHY.ge.1) then
          If (IContrPointer(ilo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
@@ -434,7 +439,7 @@ c --- Find LO contribution
          Endif
       Endif
       
-c --- Find NLO contribution
+*---  Find NLO contribution
       If (PORDPTHY.ge.2) then
          If (IContrPointer(inlo).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
@@ -453,7 +458,7 @@ c --- Find NLO contribution
          Endif
       Endif
       
-c --- Find 1-loop TC
+*---  Find 1-loop TC
       If (PTHRESHCOR.EQ.1) then
          If (PORDPTHY.LT.0) then
             Write(*,*)"FX9999PT: ERROR! Illegal choice of "//
@@ -492,7 +497,7 @@ c --- Find 1-loop TC
          Endif
       Endif
 
-c --- Find 2-loop TC
+*---  Find 2-loop TC
       If (PTHRESHCOR.eq.2) then
          If (PORDPTHY.LT.0) then
             Write(*,*)"FX9999PT: ERROR! Illegal choice of "//
@@ -537,26 +542,26 @@ c --- Find 2-loop TC
          Endif
       Endif
       
-c --- Find NP corrections
+*---  Find NP corrections
       If (PNPCOR.eq.1) then
-         If (IContrPointer(imult1).eq.-1) Then
+         If (IContrPointer(INPC1).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
      >           "not available, stopped!"
             Write(*,*)"          PNPCOR = ",PNPCOR
             Stop
-         Elseif (NContrCounter(imult1).ne.1) Then
+         Elseif (NContrCounter(INPC1).ne.1) Then
             Write(*,*)"FX9999PT: ERROR! More than one contribution "//
      >           "available, stopped!"
             Write(*,*)"          PNPCOR = ",PNPCOR
-            Write(*,*)"          icontr = ",IContrPointer(imult1),
-     >           "NContrCounter = ",NContrCounter(imult1)
+            Write(*,*)"          icontr = ",IContrPointer(INPC1),
+     >           "NContrCounter = ",NContrCounter(INPC1)
             Stop
          Else
-            IContrSelector(IMULT1) = 1
+            IContrSelector(INPC1) = 1
          Endif
       Endif
 
-c --- Find Data
+*---  Find Data
       If (PDATA.eq.1) then
          If (IContrPointer(idata).eq.-1) Then
             Write(*,*)"FX9999PT: ERROR! Requested contribution "//
@@ -575,91 +580,84 @@ c --- Find Data
          Endif
       Endif
 
-c --- Check availability of factorization scale choice and assign pointer
-c     (based on factorization scale since renorm scale is flexible -
-c      except for threshold corrections)
+*---  Check availability of scale choices and assign pointers
+*---  The current treatment works only for a single scale dimension!
+*---  For 2nd scale dimension need 2nd scale pointer!
+*     (Selection is based on factorization scale since renormalization
+*     scale is
+*     flexible - except for threshold corrections with IScaleDep = 2)
       Do I=ILO,ITHC2L
          IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
-         i1 = IContrPointer(i)
-         IScalePointer(i) = 0
-         If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
-            If (NScaleVar(i1,1).ge.1) Then
-               IScalePointer(i) = 1 ! use 1st scale variation
-            Else
-               Write(*,*)"FX9999PT: ERROR! Not a single scale "//
-     >              "available in contribution, stopped!"
-               Write(*,*)"          IContr = ",IContrPointer(I),
-     >              ", NScaleVar(.,1) = ",NScaleVar(i1,1) 
-               Stop
-            Endif
-            If (NScaleVar(i1,1).gt.1) Then
-               Write(*,*)"FX9999PT: WARNING! Why more than one "//
-     >              " scale variation for contribution"
-               Write(*,*) "        with scale-independent coefficients?"
-            Endif
-         Else                   ! >>> to do: distinguish between IScaleDep=2,3
-            Do j=1,NScaleVar(i1,1)
-               If (dabs(scalefac(i1,1,j)/xmuf-1d0).lt.1d-4) Then
-c - works only if IScaleDep=2 - for =3 need to find correct pair of (xmur,xmuf)
-                  IScalePointer(i)=j
-                  Exit          ! <<< what does "Exit" do?
+            i1 = IContrPointer(i)
+            IScalePointer(i) = 0
+            If (IScaleDep(i1).eq.0) Then ! Born-type w/o scale dep - use any scale
+               If (NScaleVar(i1,1).ge.1) Then
+                  IScalePointer(i) = 1 ! Use 1st scale variation
+               Else
+                  Write(*,*)"FX9999PT: ERROR! Not a single scale "//
+     >                 "available in contribution, stopped!"
+                  Write(*,*)"          IContr = ",IContrPointer(I),
+     >                 ", NScaleVar(.,1) = ",NScaleVar(i1,1) 
+                  Stop
                Endif
-            Enddo
-         Endif
-         If (IScalePointer(i).eq.0) Then
-            Write(*,*)"FX9999PT: ERROR! The requested "//
-     >           " factorization scale xmuf = ",xmuf
-            Write(*,*)"          is not available, stopped!"
-            Do j=1,NContrDescr(i1)
-               Write(*,*) "         Descriptions: ",CtrbDescript(i1,j)
-            Enddo
-            Stop
-         Endif 
+               If (NScaleVar(i1,1).gt.1) Then
+                  Write(*,*)"FX9999PT: WARNING! Why more than one "//
+     >                 " scale variation for contribution"
+                  Write(*,*)
+     >                 "        with scale-independent coefficients?"
+               Endif
+*---  Check for presence of more restrictive factorization scale
+            Else
+               Do j=1,NScaleVar(i1,1)
+                  IF (DABS(SCALEFAC(I1,1,J)/XMUF-1D0).LT.1D-4) THEN
+                     IScalePointer(i)=j
+                     Exit       ! Quit DO loop at first match
+                  Endif
+               Enddo
+            Endif
+            If (IScalePointer(i).eq.0) Then
+               If (iprint.gt.0) Then
+                  Write(*,*)"FX9999PT: WARNING! The requested "//
+     >                 " factorization scale xmuf = ",xmuf
+                  Write(*,*)"          is not available!"
+                  Do j=1,NContrDescr(i1)
+                     Write(*,*) '  ',CtrbDescript(i1,j)
+                  Enddo
+                  Stop
+               Endif
+            Endif 
          Endif
       Enddo
-
-c --- Check if renormalization scale is directly available or (if not)
-c     can be provided a posteriori
-c
-c - the current treatment works only for a single scale dimension
-c   in two scale dimensions one needs to check
-c    - if the chosen xmur corresponds to the ... variable for the chosen muf
-c          -> can be computed 
-c    - if the chosen xmur corresponds to one of the ... variables
-c      for the chosen muf -> can be computed only if aposteriori is possible
-c
-c - for 2 scale dim: need 2nd scale pointer I2ScalePointer
-c
-c >>>>>>>
-c > should not be necessary if we distinguish between IScaleDep=2,3 in mur code
-c
-      If (dabs(xmur/xmuf-1.d0).gt.1d-4) Then
-ckr         Do i=1,IContr
+      
+*---  For IScaleDep = 2 check if renormalization scale is directly
+*---  available,
+*---  i.e. identical to factorization scale
+*---  Can be provided a posteriori otherwise
+      IF (DABS(XMUR/XMUF-1.D0).GT.1D-4) THEN
          Do I=ILO,ITHC2L
-         IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
-            i1 = IContrPointer(i)
-            If (IScaleDep(i1).eq.2) Then
-               Write(*,*)"FX9999PT: ERROR! The requested "//
-     >              " renormalization scale xmur = ",xmur
-               Write(*,*)"          is not available, stopped!"
-               Write(*,*)"          Only xmur=xmuf is possible."
-               Do j=1,NContrDescr(i1)
-                  Write(*,*) '  ',CtrbDescript(i1,j)
-               Enddo
-               Stop
+            IF (IContrSelector(I).EQ.1.AND.IContrPointer(I).NE.-1) THEN
+               i1 = IContrPointer(i)
+               If (IScaleDep(i1).eq.2) Then
+                  IScalePointer(i) = -1
+                  If (iprint.gt.0) Then
+                     Write(*,*)"FX9999PT: WARNING! The requested "//
+     >                    " renormalization scale xmur = ",xmur
+                     Write(*,*)"          is not available, stopped!"
+                     Write(*,*)"          Only xmur=xmuf is possible."
+                     Do j=1,NContrDescr(i1)
+                        Write(*,*) '  ',CtrbDescript(i1,j)
+                     Enddo
+                     Stop
+                  Endif
+               Endif
             Endif
-         Endif
+            If (iprint.gt.1) Then
+               Write(*,*) "FX9999PT: Pointer number ",i," to "//
+     >              "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
+            Endif
          Enddo
       Endif
-
-c --- Debug print-out
-ckr      Write(*,*) "FX9999PT: No. contributions selected ",Icontr
-ckr      Do i=1,IContr
-ckr         Write(*,*) "FX9999PT: Pointer number ",i," to "//
-ckr     >        "IContr, IScale:",IcontrPointer(i),IScalePointer(i)
-ckr      Enddo
-
-
+      
       Return
       End
 
@@ -728,7 +726,7 @@ c        - abs. order in alphas:     "Npow(ic)"
 c        - abs order of LO contrib:  "ILOord"
 c NLO if (Npow-ILOord)=1      NNLO if (Npow(ic)-ILOord)=2
 
-c --- if NLO 
+*--- if NLO 
          If ( (Npow(ic)-ILOord).eq.1) Then
             logmur = log(xmur/ScaleFac(ic,1,is))
             factor = dble(ILOord)*beta0*logmur ! n beta0 logmu
@@ -736,7 +734,7 @@ c --- if NLO
             Write(*,*) 'factor ',factor,ILOOrd,real(beta0),real(logmur)
             Call FX9999GP(Ictrb-1,Xmuf)
             Call FX9999MT(Ictrb-1,Xmur,Xmuf,1,factor) ! 1:mod NLO
-c --- if NNLO
+*--- if NNLO
          Elseif ( (Npow(ic)-ILOord).eq.2) Then
             logmur = log(xmur/ScaleFac(ic,1,is))
 
@@ -821,7 +819,7 @@ c loop: observable, scalebins,(get alphas), xbins,subproc
          Do k=1,NScaleNode(ic,1)
             mur = xmur / ScaleFac(ic,1,is) * ScaleNode(ic,j,1,is,k) 
 
-c --- get alphas
+*--- get alphas
             as =  FNALPHAS(mur)
             aspow = as**(Npow(ic)+IAddPow)
 cdebug
@@ -999,7 +997,7 @@ ckr                     write(*,*)"i,j,nx,m,pdf",i,j,nx,m,pdf(i,j,nx,m)
      +     Q1(6),Q2(6), QB1(6),QB2(6), ! arrays of 6 (anti-)quark densities
      +     S,A                  ! products S,A
 
-c --- DIS: inclusive and jets, gammaP direct
+*--- DIS: inclusive and jets, gammaP direct
       If (icf1.eq.2 .and. (icf2.eq.0 .or. icf2.eq.1)) Then 
 c         H(3) = 0d0             ! Delta  at O(as^0)
 c         Do k=1,5,2
@@ -1012,7 +1010,7 @@ c         Do k=1,6
 c            H(2) = H(2)+XPDF1(i,k)+XPDF1(i,-k)
 c         Enddo
 
-c --- this is not final - just for an early DIS table
+*--- this is not final - just for an early DIS table
 c         H(2) = 0d0             ! Delta  at O(as^0)
 c         Do k=1,5,2
 c            H(2) = H(2) + (XPDF1(i,k)+XPDF1(i,-k)+
@@ -1024,7 +1022,7 @@ c         Do k=1,6
 c            H(3) = H(3)+XPDF1(i,k)+XPDF1(i,-k)
 c         Enddo
 
-c --- final: 1Delta   2Gluon  3Sigma.
+*--- final: 1Delta   2Gluon  3Sigma.
          H(1) = 0d0             ! Delta  at O(as^0)
          Do k=1,5,2
             H(1) = H(1) + (XPDF1(i,k)+XPDF1(i,-k)+
@@ -1037,7 +1035,7 @@ c --- final: 1Delta   2Gluon  3Sigma.
          Enddo
 
 
-c --- hadron-hadron: jets
+*--- hadron-hadron: jets
       Elseif (icf1.eq.3.and.icf2.eq.1.and.(icf3.ge.1.and.icf3.le.2))Then 
          SumQ1  = 0d0
          SumQB1 = 0d0
@@ -1072,7 +1070,7 @@ c   - compute seven combinations
          H(7) = G1*(SumQ2+SumQB2)
          If (icf3.eq.1) H(6) = H(6)+H(7) ! case: 6 subproc
 
-c --- gammaP: direct, jets
+*--- gammaP: direct, jets
       Elseif (icf1.eq.2 .and. icf2.eq.2) Then 
          Write(*,*) '    gammaP to be implemented'
          Stop

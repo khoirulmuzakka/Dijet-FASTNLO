@@ -18,25 +18,31 @@
       Implicit None
       Character*(*) var
       Integer ival
-Comment:       Integer IFNfirst, Preftab,
-Comment:      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
-Comment:      +     PNPCOR, PUEVENT, PDATA
-Comment:       Common /cfastnlo/ IFNfirst, Preftab,
-Comment:      +     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
-Comment:      +     PNPCOR, PUEVENT, PDATA
       Include "fnx9999.inc"
       Data IFNfirst/0/,
-     +     Preftab/0/,
-     +     PORDPTHY/0/, PTHRESHCOR/0/, 
-     +     PQUARKCOMPOSITENESS/0/, PADDLED/0/, PTEVED/0/
-     +     PNPCOR/0/, PUEVENT/0/, PDATA/0/
+     >     Preftab/0/,
+     >     PORDPTHY/0/, PTHRESHCOR/0/, 
+     >     PQUARKCOMPOSITENESS/0/, PADDLED/0/, PTEVED/0/
+     >     PNPCOR/0/, PUEVENT/0/, PDATA/0/
       
-c --- evaluate 'standard' tables or reference tables
+c --- Reset
+      If (var.eq."P_RESET") Then
+         PREFTAB             = 0
+         PORDPTHY            = 0
+         PTHRESHCOR          = 0
+         PNPCOR              = 0
+         PQUARKCOMPOSITENESS = 0
+         PADDLED             = 0
+         PTEVED              = 0
+         PDATA               = 0
+      Endif
+
+c --- Evaluate standard tables or reference tables
       If (var.eq."P_REFTAB") PREFTAB = ival
 
 c --- Perturbative Contributions - Fixed Orders
       If (var.eq."P_ORDPTHY") PORDPTHY = ival
-
+      
 c --- Perturbative Contributions - Corrections
       If (var.eq."P_THRESHCOR") PTHRESHCOR = ival
 
@@ -53,4 +59,3 @@ c --- Data
 
       Return
       End
-**********************************************************************

@@ -18,8 +18,8 @@ c - global fastNLO commonblock
      +     PNPCOR, PUEVENT, PDATA
 
 c - define numbering scheme of contribution types
-      Integer ILO, INLO, ITHC1L, ITHC2L, IMULT1, IDATA 
-      Parameter(ILO=1,INLO=2,ITHC1L=3,ITHC2L=4,IMULT1=5,IDATA=6)
+      Integer ILO, INLO, ITHC1L, ITHC2L, INPC1, IDATA 
+      Parameter(ILO=1,INLO=2,ITHC1L=3,ITHC2L=4,INPC1=5,IDATA=6)
       
 c - fundamental parameters - scenario dependent
       Integer MxObsBin, MxCtrb, MxNxtot, MxScales, MxScaleNode, 

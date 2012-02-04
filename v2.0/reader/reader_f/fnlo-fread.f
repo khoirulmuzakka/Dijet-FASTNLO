@@ -6,21 +6,24 @@
 *     QCD cross sections using PDFs from LHAPDF
 *     
 *     M. Wobisch, K. Rabbertz
-*
-*     Contains:
-*
+*     
 *********************************************************************
       Implicit None
       Include 'fnx9999.inc'
+      Integer NXMU
+      Parameter(NXMU = 4)
       Character*16 CHTMP1,CHTMP2
       Character*41  CSEP41,DSEP41,LSEP41,SSEP41
       Character*82  CSEPS,DSEPS,LSEPS,SSEPS
       Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Character*255 FILENAME,PDFSET,CHRES,CHFRM
-      Integer i, j, IS, IPRINT, NDimBins(MxDim), NSCLS
+      Integer i, j, IS, IPRINT, NDimBins(MxDim)
+      Integer NSCDM, NSCLS, ISCLPNT(NXMU)
       Logical LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
       Logical LTHCSEP,LNPCSEP
-      Double Precision ALPS,FNALPHAS,SCALEF
+      Double Precision ALPS,FNALPHAS,SCALEF,XMU(NXMU)
+      Data ISCLPNT/0,0,0,0/
+      Data XMU/1D0,2D0,0.5D0,0.25D0/
       Data IPRINT/0/
       Data CSEP41,DSEP41,LSEP41,SSEP41/
      >     '#########################################',
@@ -28,17 +31,16 @@
      >     "-----------------------------------------",
      >     "*****************************************"/
 
-c     - Attention - this is the most likely source of Fortran errors in !!!
-c     fastNLO
-c     For each scenario, the result array must be declared at least  
-c     as large as in the definition in the common block of the
-c     corresponding scenario. 
-c     -> See the value of the parameter MxObsBin
-c     in the file [scenario].inc
-c     We recommend to name the array according to the scenario
-c     Adapt the following to your scenario!
-c     Integer MxObsBin
-c     Parameter (MxObsBin = 200)
+*---  Attention - this is the most likely source of Fortran errors!
+*---  For each scenario, the result array must be declared at least  
+*---  as large as in the definition in the common block of the
+*---  corresponding scenario. 
+*---  --> See the value of the parameter MxObsBin
+*---  in the file [scenario].inc or fnx9999.inc
+*---  We recommend to name the array according to the scenario
+*---  Adapt the following to your scenario!
+*---  Integer MxObsBin
+*---  Parameter (MxObsBin = 200)
       Double Precision xslo(MxObsBin) 
       Double Precision xsnlo(MxObsBin) 
       Double Precision xsthc(MxObsBin) 
@@ -182,20 +184,22 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       WRITE(*,'(A)')CSEPL
 
 *---  Initial settings
-      Call FNSET("P_REFTAB",0)  ! evaluate standard table: 0, or reference: 1
-      Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
-      Call FNSET("P_THRESHCOR",0) ! select no. loops in threshold
-      Call FNSET("P_NPCOR",0)   ! deselect non-perturbative corrections
-      Call FNSET("P_DATA",0)    ! deselect data
-         
-*---  Loop over scale settings in order of appearance in the table
-*---  Assume for now that NLO = ctrb. 2, THC = ctrb. 3 and scale dimension = 1
-      NSCLS = 1
-      IF (LNLO)   NSCLS = NScaleVar(2,1)
-      IF (LTHC2L) NSCLS = MIN(NSCLS,NScaleVar(3,1))
-      DO IS=1,NSCLS
-         SCALEF = ScaleFac(2,1,IS)
-         
+      Call FNSET("P_RESET",0)   ! Reset all selections to zero
+      
+*---  Loop over allowed scale settings for values required in XMU
+*---  For now assume only one scale dimension, since (MxScaleDim=1)!
+      DO IS=1,NXMU
+
+*---  Check on pointers to access contributions and scales for NLO and
+*---  2-loop --> otherwise skip this scale setting 
+         If (LNLO) Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+         If (LTHC2L) Call FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
+         Call FX9999PT(XMU(IS),XMU(IS),0)
+         IF (LNLO.AND..NOT.IScalePointer(INLO).GT.0) CYCLE
+         If (LTHC2L.AND..NOT.IScalePointer(ITHC2L).GT.0) CYCLE
+         SCALEF = XMU(IS)
+         Call FNSET("P_RESET",0) ! Reset all selections to zero
+
 *---  Calculate LO cross sections (set IPRINT to 1 for more verbose
 *---  output)
          IF (LLO) THEN
@@ -247,8 +251,7 @@ Comment:             LNPCSEP = .TRUE.
 Comment:          ENDIF
 
 *---  Reset selection for within scale loop
-         Call FNSET("P_THRESHCOR",0) ! select no. loops in threshold
-         Call FNSET("P_NPCOR",0) ! deselect non-perturbative corrections
+         Call FNSET("P_RESET",0) ! Reset all selections to zero
 
 *---  Cross section printout
          DO I=1,NObsBin
@@ -280,12 +283,14 @@ Comment:          ENDIF
          CHTMP2 = DimLabel(2)
          CHTMP2 = "[ "//CHTMP2(1:12)//" ]"
          CHRES  = ""
-         CHFRM  = "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E7.1))"
+         CHFRM  =
+     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E7.1))"
          IF (LLO) THEN
             CHRES = CHRES(1:LEN_TRIM(CHRES))//"LO cross section"
             CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
             IF (LNLO) THEN
-               CHRES = CHRES(1:LEN_TRIM(CHRES))//"   NLO cross section"
+               CHRES = CHRES(1:LEN_TRIM(CHRES))/
+     >              /"   NLO cross section"
                CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
                CHRES = CHRES(1:LEN_TRIM(CHRES))//"   K NLO"
                CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",0P,(X,F9.5)"
@@ -356,10 +361,8 @@ Comment:          ENDIF
 
 *---  Print out data (set IPRINT to 1 for more verbose output)
       IF (LDATA) THEN
-         Call FNSET("P_ORDPTHY",0) ! deselect pert. theory
-         Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
-         Call FNSET("P_NPCOR",0) ! deselect non-perturbative corrections
-         Call FNSET("P_DATA",1) ! select data
+         Call FNSET("P_RESET",0) ! Reset all selections to zero
+         Call FNSET("P_DATA",1) ! Select data
          Call FX9999CC(SCALEF, SCALEF, XSDAT, DXSUCDATA, DXSCORDATA)
 
 *---  Data section printout
