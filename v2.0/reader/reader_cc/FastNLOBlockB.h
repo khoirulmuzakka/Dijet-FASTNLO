@@ -78,6 +78,7 @@ public:
 
    char* fname;
    int   fNObsBins;
+   int   fIcontr;
   
    // ---- Block B ---- //
    static const int DividebyNevt = 1;
@@ -176,8 +177,10 @@ protected:
 public:
 
    void ReadBlockB(istream *table);
-   void Print(const int ic = 0, const int iprint = 0);
+   void Print(const int i, const int iprint = 0);
    void SetName(const char* name) { fname = (char*) name;};
+   void SetIc(const int i) { fIcontr = i; };
+   int GetIc() { return fIcontr; };
    void FillPDFCache();
   
 public:

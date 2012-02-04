@@ -84,13 +84,15 @@ class FastNLOReader {
     kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
   };
 
+  // Corresponds to IContrFlag1 in v2 table definition
   enum ESMCalculation {
     kFixedOrder		        = 0,	// Fixed order calculation (pQCD)
     kThresholdCorrection	= 1,	// Threshold corrections
     kElectroWeakCorrection	= 2,	// Electroweak corrections
     kNonPerturbativeCorrection	= 3	// Non-perturbative corrections|Hadronisation corrections
   };
-
+  
+  // Corresponds to IContrFlag2 in v2 table definition
   enum ESMOrder {
     kLeading		        = 0,	// LO,   1-loop, LO MC
     kNextToLeading        	= 1,	// NLO,  2-loop, NLO MC
@@ -162,13 +164,11 @@ class FastNLOReader {
   FastNLOBlockB* BlockB_Data;
   FastNLOBlockB* BlockB_LO_Ref;
   FastNLOBlockB* BlockB_NLO_Ref;
-  vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections (IContrFlag1 = 2) [Model(i~ContrFlag2)][contribution]
-							//  e.g. model = th. corr LO and NLO, e/w LO and NLO and NNLO, 0->fixed order
-							//  what to do with each contribution is defined in IContrFlag3
-  vector < vector < FastNLOBlockB* > > BBlocksNewPhys;		// BlockB's for New physics corrections [model][contribution]
+  vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections
+  vector < vector < FastNLOBlockB* > > BBlocksNewPhys;	// BlockB's for New physics corrections
 
-  vector < vector < bool > > bUseSMCalc;		// switch calclations ON/OFF
-  vector < vector < bool > > bUseNewPhys;		// switch calclations ON/OFF
+  vector < vector < bool > > bUseSMCalc;		// switch calculations ON/OFF
+  vector < vector < bool > > bUseNewPhys;		// switch calculations ON/OFF
 
   // ---- Cross sections ---- //
   vector < double > XSection_LO;
@@ -250,7 +250,7 @@ class FastNLOReader {
   void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
   void SetUnits( EUnits Unit );
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
-  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true );	// Set contribution On/Off. Look for Id of this contribution during initialization.
+  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
   int ContrId( ESMCalculation eCalc, ESMOrder eOrder );
 
   // ---- setters for scales of MuVar tables ---- //
@@ -304,11 +304,11 @@ class FastNLOReader {
 
   void CalcCrossSection();
   void PrintTableInfo(const int iprint = 0);
-  void PrintDataCrossSections();
   void PrintFastNLOTableConstants(const int iprint = 2);
   void PrintCrossSections();
   void PrintCrossSectionsDefault();
   void PrintCrossSectionsWithReference();
+  void PrintCrossSectionsData();
 
   static const string fContrName[20];
   static const string fOrdName[4][4];

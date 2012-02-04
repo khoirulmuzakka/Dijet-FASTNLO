@@ -219,13 +219,13 @@ int main(int argc, char** argv){
   // --- fastNLO user: Each fastNLO table comes typically with
   //     various contributions.
   //     Currently, five different types of contributions have been tested.
-  //     Three can be combined to give a scale and alpha_s dependent
+  //     Three can be combined to give a scale, PDF and alpha_s dependent
   //     cross-section, one is a fixed multiplicative correction and, at last,
   //     also data points with uncertainties might be included.
-  //     For calculating a cross-section, by default all contributions
-  //     are used (apart from data points). However, each contribution can be
-  //     swiched on or off separately. Please make sure to avoid combinations
-  //     that do not make sense, e.g. 2-loop threshold corrections with LO pQCD.
+  //     For calculating a cross-section, by default only the LO & NLO contributions
+  //     are used. However, each contribution can be swiched on or off separately.
+  //     Please make sure to avoid combinations that do not make sense,
+  //     e.g. 2-loop threshold corrections with LO pQCD.
   //     
   //     For switching a contribution on/off, its type must be known:
   //       - kFixedOrder		-> Fixed order calculation (in alpha_s)
@@ -395,6 +395,9 @@ int main(int argc, char** argv){
   // Example code to access cross sections and K factors is given below
   // The presented example is done automatically for print out here  
   fnloreader->PrintCrossSectionsDefault();
+
+  // Example code to print out data points (if available)
+  fnloreader->PrintCrossSectionsData();
 
   // // Check on existence of LO and NLO (Id = -1 if not existing)
   // int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 

@@ -55,7 +55,7 @@ c --- Block A2 (header part 2)
 c --- Block B
       Integer IXsectUnits(MxCtrb), IDataFlag(MxCtrb), 
      +     IAddMultFlag(MxCtrb), IContrFlag1(MxCtrb),
-     +     IContrFlag2(MxCtrb), IContrFlag3(MxCtrb), 
+     +     IContrFlag2(MxCtrb), NScaleDep(MxCtrb), 
      +     NContrDescr(MxCtrb), NCodeDescr(MxCtrb)
       Character*64 CtrbDescript(MxCtrb,MxContrDescr), 
      +     CodeDescript(MxCtrb,MxCodeDescr)
@@ -127,7 +127,7 @@ c - int
      +     Ipublunits, NscDescript, ILOord, Nobsbin, NDim,
      +     IDiffBin, INormFlag, IDivLoPointer, IDivUpPointer,
      +     IXsectUnits, IDataFlag, IAddMultFlag, 
-     +     IContrFlag1, IContrFlag2, IContrFlag3, 
+     +     IContrFlag1, IContrFlag2, NScaleDep, 
      +     NContrDescr, NCodeDescr, IRef, IScaleDep, Npow, 
      +     NPDF, NPDFPDG, NPDFDim,
      +     NFragFunc, NFFPDG, NFFDim, NSubproc, IPDFdef, Nxtot,

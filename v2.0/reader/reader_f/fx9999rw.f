@@ -100,6 +100,8 @@ c --- Block A1
       Call fnioisep(crw,nunit, lprint,"  A1  ISep")
       Call fnioint(crw,nunit, Itabversion,lprint,"  A1  Itabversion")
       Call fniochar(crw,nunit, ScenName,lprint,"  A1  ScenName")
+c --- Ncontrib: All contributions including additive, multiplicative or data
+c ---           (Then: Nadd = Ncontrib - Nmult - Ndata)
       If (crw .eq. 'write') Then
          Call fnioint(crw,nunit, nselctrb,lprint,"  A1  nselctrb")
       Else
@@ -245,8 +247,8 @@ c -      write only selected contributions - those with ictrb(ic)=1
          Call fnioint(crw,nunit, IContrFlag1(ic),lprint,CHTMP)
          CHTMP = "  B0    IContrFlag2("//CH1TMP//")"
          Call fnioint(crw,nunit, IContrFlag2(ic),lprint,CHTMP)
-         CHTMP = "  B0    IContrFlag3("//CH1TMP//")"
-         Call fnioint(crw,nunit, IContrFlag3(ic),lprint,CHTMP)
+         CHTMP = "  B0    NScaleDep("//CH1TMP//")"
+         Call fnioint(crw,nunit, NScaleDep(ic),lprint,CHTMP)
          CHTMP = "  B0    NContrDescr("//CH1TMP//")"
          Call fnioint(crw,nunit, NContrDescr(ic),lprint,CHTMP)
          Do i=1,NContrDescr(ic)

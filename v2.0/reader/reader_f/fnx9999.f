@@ -387,25 +387,23 @@ c --- Loop once over all contributions and register types
             IContrPointer(INLO) = I
          ENDIF
          IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
-     >        IContrFlag3(I).EQ.1.AND.
      >        Iref(i).eq.Preftab) THEN
             NContrCounter(ITHC1L) = NContrCounter(ITHC1L) + 1
             IContrPointer(ITHC1L) = I
          ENDIF
-         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
-     >        IContrFlag3(I).EQ.2.AND.
+         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.2.AND.
      >        Iref(i).eq.Preftab) THEN
             NContrCounter(ITHC2L) = NContrCounter(ITHC2L) + 1
             IContrPointer(ITHC2L) = I
          ENDIF
-         IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
-     >        IContrFlag3(I).EQ.0.AND.IAddMultFlag(I).EQ.1.AND.
+         IF (IContrFlag1(I).EQ.4.AND.IContrFlag2(I).EQ.1.AND.
+     >        IAddMultFlag(I).EQ.1.AND.
      >        Iref(i).eq.Preftab) THEN
             NContrCounter(IMULT1) = NContrCounter(IMULT1) + 1
             IContrPointer(IMULT1) = I
          ENDIF
          IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
-     >        IContrFlag3(I).EQ.0.AND.IDataFlag(I).EQ.1.AND.
+     >        IDataFlag(I).EQ.1.AND.
      >        Iref(i).eq.Preftab) THEN
             NContrCounter(IDATA) = NContrCounter(IDATA) + 1
             IContrPointer(IDATA) = I

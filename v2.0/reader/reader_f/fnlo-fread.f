@@ -18,9 +18,9 @@
       Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Character*255 FILENAME,PDFSET,CHRES,CHFRM
       Integer i, j, IS, IPRINT, NDimBins(MxDim), NSCLS
-      Logical LLO,LNLO,LTHC1L,LTHC2L,LMULT,LDATA
+      Logical LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
       Logical LTHCSEP,LNPCSEP
-      Double Precision SCALEF
+      Double Precision ALPS,FNALPHAS,SCALEF
       Data IPRINT/0/
       Data CSEP41,DSEP41,LSEP41,SSEP41/
      >     '#########################################',
@@ -142,6 +142,9 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
 *---  Initialize table
       Call FX9999IN(FILENAME)
 
+*---  Initial call to alpha_s interface
+      ALPS = FNALPHAS(91.1876D0)
+
 *---  Print out scenario information
       Call FX9999NF
 
@@ -150,20 +153,18 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       LNLO   = .FALSE.
       LTHC1L = .FALSE.
       LTHC2L = .FALSE.
-      LMULT  = .FALSE.
+      LNPC1  = .FALSE.
       LDATA  = .FALSE.
       DO I=1,NContrib
-         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.1) LLO  = .TRUE.
-         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.2) LNLO = .TRUE.
-         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
-     >        IContrFlag3(I).EQ.1) LTHC1L = .TRUE.
-         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1.AND.
-     >        IContrFlag3(I).EQ.2) LTHC2L = .TRUE.
+         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.1)LLO    = .TRUE.
+         IF (IContrFlag1(I).EQ.1.AND.IContrFlag2(I).EQ.2)LNLO   = .TRUE.
+         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.1)LTHC1L = .TRUE.
+         IF (IContrFlag1(I).EQ.2.AND.IContrFlag2(I).EQ.2)LTHC2L = .TRUE.
+         IF (IContrFlag1(I).EQ.4.AND.IContrFlag2(I).EQ.1.AND.
+     >        IAddMultFlag(I).EQ.1)
+     >        LNPC1 = .TRUE.
          IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
-     >        IContrFlag3(I).EQ.0.AND.IAddMultFlag(I).EQ.1)
-     >        LMULT = .TRUE.
-         IF (IContrFlag1(I).EQ.0.AND.IContrFlag2(I).EQ.0.AND.
-     >        IContrFlag3(I).EQ.0.AND.IDataFlag(I).EQ.1)
+     >        IDataFlag(I).EQ.1)
      >        LDATA = .TRUE.
       ENDDO
 
@@ -175,7 +176,7 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       call InitPDF(0)
 
 *---  Compute the cross sections
-      WRITE(*,*)""
+      WRITE(*,'(A)')""
       WRITE(*,'(A)')CSEPL
       WRITE(*,'(A)')"fnlo-read: Calculate cross sections"
       WRITE(*,'(A)')CSEPL
@@ -228,7 +229,7 @@ Comment:          ENDIF
 
 *---  Apply non-perturbative corrections to NLO cross section (set
 *---  IPRINT to 1 for more verbose output)
-         IF (LLO.AND.LNLO.AND.LMULT) THEN
+         IF (LLO.AND.LNLO.AND.LNPC1) THEN
             Call FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
             Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
             Call FNSET("P_NPCOR",1) ! select non-perturbative corrections
@@ -237,7 +238,7 @@ Comment:          ENDIF
 
 *---  Print out non-perturbative corrections (set IPRINT to 1 for more
 *---  verbose output)
-Comment:          IF (LMULT) THEN
+Comment:          IF (LNPC1) THEN
 Comment:             Call FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
 Comment:             Call FNSET("P_THRESHCOR",0) ! deselect threshold corrections
 Comment:             Call FNSET("P_NPCOR",1) ! select non-perturbative corrections
@@ -293,7 +294,7 @@ Comment:          ENDIF
      >                 CHRES(1:LEN_TRIM(CHRES))//"       K THC"
                   CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
                ENDIF
-               IF (LMULT) THEN
+               IF (LNPC1) THEN
                   CHRES =
      >                 CHRES(1:LEN_TRIM(CHRES))//"       K NPC"
                   CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
@@ -320,7 +321,7 @@ Comment:          ENDIF
                ENDIF
             ENDDO
 
-            IF (LLO.AND.LNLO.AND.LTHC2L.AND.LMULT) THEN
+            IF (LLO.AND.LNLO.AND.LTHC2L.AND.LNPC1) THEN
                WRITE(*,CHFRM)I,BinSize(I),
      >              NDimBins(1),LoBin(I,1),UpBin(I,1),
      >              NDimBins(2),LoBin(I,2),UpBin(I,2),
@@ -330,7 +331,7 @@ Comment:          ENDIF
      >              NDimBins(1),LoBin(I,1),UpBin(I,1),
      >              NDimBins(2),LoBin(I,2),UpBin(I,2),
      >              XSLO(I),XSNLO(I),KFAC(I),KTHC(I)
-            ELSEIF (LLO.AND.LNLO.AND.LMULT) THEN
+            ELSEIF (LLO.AND.LNLO.AND.LNPC1) THEN
                WRITE(*,CHFRM)I,BinSize(I),
      >              NDimBins(1),LoBin(I,1),UpBin(I,1),
      >              NDimBins(2),LoBin(I,2),UpBin(I,2),
@@ -373,12 +374,12 @@ Comment:          ENDIF
      >        "IODim1  "//
      >        CHTMP1//"    "//
      >        "IODim2  "//
-     >        CHTMP2//"  "//
-     >        "X Section          "//
-     >        "Lower unc. uncert. "//
-     >        "Upper unc. uncert. "//
-     >        "Lower corr. uncert."//
-     >        "Upper corr. uncert."
+     >        CHTMP2//"    "//
+     >        "X Section "//
+     >        "QSumUnc.+ "//
+     >        "QSumUnc.- "//
+     >        "QSumCor.+ "//
+     >        "QSumCor.-"
          WRITE(*,'(A)')LSEPL
          DO I=1,NObsBin
             DO J=1,NDim
@@ -394,12 +395,12 @@ Comment:          ENDIF
      >           NDimBins(1),LoBin(I,1),UpBin(I,1),
      >           NDimBins(2),LoBin(I,2),UpBin(I,2),
      >           XSDAT(I),
-     >           DXSUCDATA(I,1),DXSUCDATA(I,2),
-     >           DXSCORDATA(I,1),DXSCORDATA(I,2)
+     >           DXSUCDATA(I,2),DXSUCDATA(I,1),
+     >           DXSCORDATA(I,2),DXSCORDATA(I,1)
          ENDDO
       Endif
       
  999  FORMAT(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),
-     >     (X,I5,2(2X,E7.1)),5(X,E18.11),X)
+     >     (X,I5,2(2X,E7.1)),(3X,E10.3),4(X,SP,E9.2),X)
       
       End

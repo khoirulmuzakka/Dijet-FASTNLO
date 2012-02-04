@@ -1,4 +1,4 @@
-Revision nnnn:
+Revision $(SVNREV):
 Candidate for public release
 
 10.11.2011:

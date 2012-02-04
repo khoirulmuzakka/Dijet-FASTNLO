@@ -62,11 +62,11 @@ void FastNLOBlockB::ReadBlockB(istream *table){
   *table >> IAddMultFlag;
   *table >> IContrFlag1;
   *table >> IContrFlag2;
-  IContrFlag3 = 0;
   *table >> NScaleDep;
   int NContrDescr;
   *table >> NContrDescr;
-  //   printf("  *  FastNLOBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, IContrFlag3: %d, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,IContrFlag3,NScaleDep );
+  // printf("# FastNLOBlockB::Read(): IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
+  // 	 IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
   CtrbDescript.resize(NContrDescr);
   char buffer[257];
   table->getline(buffer,256);
@@ -387,16 +387,16 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
       printf(" #   %s\n",CodeDescript[i].data());
     }
     if ( NScaleDep != 3 ) {
+      printf(" #   Scale dimensions: %1i\n",NScaleDim);
       for(int i=0;i<NScaleDim;i++){
-	printf(" #   Scale dimensions: %1i\n",NScaleDim);
 	for(unsigned int j=0;j<ScaleDescript[i].size();j++){
 	  printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
 	}
 	printf(" #     Number of scale variations for dimension %1i: %1i\n",i+1,Nscalevar[i]);
 	printf(" #     Available scale settings for dimension %1i:\n",i+1);
 	for(int k=0;k<Nscalevar[i];k++){
-	    printf(" #       Scale factor number %1i:                   % -#10.4g\n",k+1,ScaleFac[i][k]);
-	  }
+	  printf(" #       Scale factor number %1i:                   % -#10.4g\n",k+1,ScaleFac[i][k]);
+	}
 	printf(" #     Number of scale nodes for dimension %1i:      %1i\n",i+1,Nscalenode[i]);
       }
     }
@@ -413,8 +413,7 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
     printf("  B0    IAddMultFlag(%1i)                 %10i\n",ic,IAddMultFlag);
     printf("  B0    IContrFlag1(%1i)                  %10i\n",ic,IContrFlag1);
     printf("  B0    IContrFlag2(%1i)                  %10i\n",ic,IContrFlag2);
-    printf("  B0    IContrFlag3(%1i)                  %10i\n",ic,IContrFlag3);
-    //  printf("  B0    NScaleDep(%1i)                    %10i\n",ic,NScaleDep);
+    printf("  B0    NScaleDep(%1i)                    %10i\n",ic,NScaleDep);
     printf("  B0    NContrDescr(%1i)                  %10zi\n",ic,CtrbDescript.size());
     for(unsigned int i=0;i<CtrbDescript.size();i++){
       printf("  B0      CtrbDescript(%1i,%1i)             %s\n",ic,i+1,CtrbDescript[i].data());
@@ -1046,12 +1045,12 @@ int FastNLOBlockB::GetTotalScalenodes(){
 }
 
 void FastNLOBlockB::StripWhitespace(string* s){
-   string fastlast = &(*s)[s->size()-1];
-   while ( !fastlast.compare(" ")){
-      string::iterator it = s->end();
-      s->erase(it-1);
-      fastlast = &(*s)[s->size()-1];
-   }
+  string fastlast = &(*s)[s->size()-1];
+  while ( !fastlast.compare(" ")){
+    string::iterator it = s->end();
+    s->erase(it-1);
+    fastlast = &(*s)[s->size()-1];
+  }
 }
 
 //________________________________________________________________________________________________________________ //

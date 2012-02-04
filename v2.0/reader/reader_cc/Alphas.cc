@@ -92,15 +92,15 @@ double Alphas::GetAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
      first = false;
      // - Print info
      printf("\n");
-     printf("*********************************\n");
-     printf("* alphas-grv: First call:\n");
-     printf("*********************************\n");
-     printf("ALPHAS-GRV: PI = %-#24.15g\n",twopi/2.); 
-     printf("ALPHAS-GRV: M_Z/GeV = %-#10.6g\n",fMz); 
-     printf("ALPHAS-GRV: a_s(M_Z) = %-#10.6g\n",alphasMz); 
-     printf("APLHAS-GRV: a_s loop = %1i\n",nLoop);
-     printf("APLHAS-GRV: scale = %-#10.6g\n",mu);
-     printf("*********************************\n");
+     printf(" #################################\n");
+     printf(" # alphas-grv: First call:\n");
+     printf(" #################################\n");
+     printf(" # ALPHAS-GRV: PI = %-#20.15g\n",twopi/2.); 
+     printf(" # ALPHAS-GRV: M_Z/GeV = %-#12.6g\n",fMz); 
+     printf(" # ALPHAS-GRV: a_s(M_Z) = %-#12.6g\n",alphasMz); 
+     printf(" # APLHAS-GRV: a_s loop = %1i\n",nLoop);
+     //     printf(" # APLHAS-GRV: scale = %-#10.6g\n",mu);
+     printf(" #################################\n");
    }
    
    // - initialize beta functions

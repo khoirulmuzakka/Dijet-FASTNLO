@@ -27,8 +27,8 @@
       DATA IFIRST/0/, ONED/1d0/, TWOD/2d0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
-      Character*33  SSEP33
-      Data SSEP33/"*********************************"/
+      Character*33  CSEP33
+      Data CSEP33/"#################################"/
 
 c - initialize pi and beta functions
       If (IFIRST.eq.0) Then
@@ -44,15 +44,15 @@ c - initialize pi and beta functions
          NLOOPCACHE = 0
 c - Print info
          WRITE(*,'(A)')""
-         WRITE(*,'(A)')SSEP33
-         WRITE(*,'(A)')"* alphas-grv: First call:"
-         WRITE(*,'(A)')SSEP33
-         WRITE(*,'(A,G20.15)')"ALPHAS-GRV: PI = ",PI4/4D0 
-         WRITE(*,'(A,G12.6)')"ALPHAS-GRV: M_Z/GeV = ",ZMASS 
-         WRITE(*,'(A,G12.6)')"ALPHAS-GRV: a_s(M_Z) = ",ALPSMZ 
-         WRITE(*,'(A,I1)')"APLHAS-GRV: a_s loop = ",NLOOP
-         WRITE(*,'(A,G12.6)')"APLHAS-GRV: scale = ",MU
-         WRITE(*,'(A)')SSEP33
+         WRITE(*,'(X,A)')CSEP33
+         WRITE(*,'(X,A)')"# alphas-grv: First call:"
+         WRITE(*,'(X,A)')CSEP33
+         WRITE(*,'(X,A,G20.15)')"# ALPHAS-GRV: PI = ",PI4/4D0 
+         WRITE(*,'(X,A,G12.6)')"# ALPHAS-GRV: M_Z/GeV = ",ZMASS 
+         WRITE(*,'(X,A,G12.6)')"# ALPHAS-GRV: a_s(M_Z) = ",ALPSMZ 
+         WRITE(*,'(X,A,I1)')"# APLHAS-GRV: a_s loop = ",NLOOP
+ckr         WRITE(*,'(X,A,G12.6)')"# APLHAS-GRV: scale = ",MU
+         WRITE(*,'(X,A)')CSEP33
       ENDIF
 
       If (MU.eq.MUCACHE .and. ALPSMZ.eq.ASMZCACHE 
