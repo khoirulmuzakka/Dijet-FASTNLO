@@ -1175,18 +1175,18 @@ void FastNLOReader::PrintCrossSectionsDefault(){
     
     cout << DSEP << endl;
     printf(" Cross Sections\n");
-    printf(" The scale factor chosen here is: % -#10.3g\n",fScaleFacMuR);
+    printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuR);
     cout << SSEP << endl;
     
     if ( NDim == 2 ){
       string header0 = "  IObs  Bin Size IODim1 "; 
       string header1 = "   IODim2 ";
-      string header2 = " LO cross section   NLO cross section  K NLO";
+      string header2 = " LO cross section   NLO cross section   K NLO";
       if ( ithc2>-1 ){
-	header2 += "       K THC";
+	header2 += "     K THC";
       }
       if ( inpc1>-1 ){
-	header2 += "       K NPC";
+	header2 += "     K NPC";
       }
       unsigned int NDimBins[NDim];
       printf("%s [ %-12s ] %s [ %-12s ] %s\n",
@@ -1203,19 +1203,19 @@ void FastNLOReader::PrintCrossSectionsDefault(){
 	  }
 	}
 	if ( ithc2<0 && inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#11.5G",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
 	} else if ( inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#11.5G %-#11.5G",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
 	} else if ( ithc2<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#11.5G %-#11.5G",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
 	} else {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E  %-#18.11E %-#18.11E %-#11.5G %-#11.5G %-#11.5G",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
 	}

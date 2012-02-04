@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Alphas.h"
 #include <math.h>
 #include <cstdio>
@@ -86,21 +87,22 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    double Q2	= pow(mu,2);
 
    // - initialize pi and do some initial print out 
+   const string csep41("#########################################");
+   const string cseps = csep41 + csep41;
    static bool first = true;
    static const double twopi = 2. * 4. * atan(1.);
    if ( first ) {
      first = false;
      // - Print info
      printf("\n");
-     printf(" #################################\n");
+     cout << " " << cseps << endl;
      printf(" # alphas-grv: First call:\n");
-     printf(" #################################\n");
-     printf(" # ALPHAS-GRV: PI = %-#20.15g\n",twopi/2.); 
-     printf(" # ALPHAS-GRV: M_Z/GeV = %-#12.6g\n",fMz); 
-     printf(" # ALPHAS-GRV: a_s(M_Z) = %-#12.6g\n",alphasMz); 
-     printf(" # APLHAS-GRV: a_s loop = %1i\n",nLoop);
-     //     printf(" # APLHAS-GRV: scale = %-#10.6g\n",mu);
-     printf(" #################################\n");
+     cout << " " << cseps << endl;
+     printf(" # ALPHAS-GRV: PI       = %#18.15f\n",twopi/2.); 
+     printf(" # ALPHAS-GRV: M_Z/GeV  = %#9.6f\n",fMz); 
+     printf(" # ALPHAS-GRV: a_s(M_Z) = %#9.6f\n",alphasMz); 
+     printf(" # APLHAS-GRV: a_s loop = %2i\n",nLoop);
+     cout << " " << cseps << endl;
    }
    
    // - initialize beta functions

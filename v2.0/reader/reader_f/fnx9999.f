@@ -1242,7 +1242,7 @@ Comment:       Enddo
      >           " #     Available scale settings for dimension ",
      >           j,":"
             Do k=1,NscaleVar(i,j)
-               Write(*,'(A,I1,A,G10.4)')
+               Write(*,'(A,I1,A,F10.4)')
      >              " #       Scale factor number ",
      >              k,":                   ",ScaleFac(i,j,k)
             Enddo

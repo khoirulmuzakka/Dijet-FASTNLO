@@ -272,7 +272,7 @@ Comment:          ENDIF
          ENDDO
          WRITE(*,'(A)')DSEPL
          WRITE(*,'(A)')" Cross Sections"
-         WRITE(*,"(A,G10.3)")" The scale factor chosen here is: ",
+         WRITE(*,"(A,F10.3)")" The scale factor chosen here is: ",
      >        SCALEF
          WRITE(*,'(A)')LSEPL
          CHTMP1 = DimLabel(1)
@@ -287,17 +287,17 @@ Comment:          ENDIF
             IF (LNLO) THEN
                CHRES = CHRES(1:LEN_TRIM(CHRES))//"   NLO cross section"
                CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
-               CHRES = CHRES(1:LEN_TRIM(CHRES))//"  K NLO"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+               CHRES = CHRES(1:LEN_TRIM(CHRES))//"   K NLO"
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",0P,(X,F9.5)"
                IF (LTHC2L) THEN
                   CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//"       K THC"
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+     >                 CHRES(1:LEN_TRIM(CHRES))//"     K THC"
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,F9.5)"
                ENDIF
                IF (LNPC1) THEN
                   CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//"       K NPC"
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,G11.5)"
+     >                 CHRES(1:LEN_TRIM(CHRES))//"     K NPC"
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,F9.5)"
                ENDIF
             ENDIF
          ENDIF
@@ -401,6 +401,6 @@ Comment:          ENDIF
       Endif
       
  999  FORMAT(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),
-     >     (X,I5,2(2X,E7.1)),(3X,E10.3),4(X,SP,E9.2),X)
+     >     (X,I5,2(2X,E7.1)),(3X,E10.3),SP,4(X,E9.2),X)
       
       End

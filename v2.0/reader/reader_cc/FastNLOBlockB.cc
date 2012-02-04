@@ -395,7 +395,7 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
 	printf(" #     Number of scale variations for dimension %1i: %1i\n",i+1,Nscalevar[i]);
 	printf(" #     Available scale settings for dimension %1i:\n",i+1);
 	for(int k=0;k<Nscalevar[i];k++){
-	  printf(" #       Scale factor number %1i:                   % -#10.4g\n",k+1,ScaleFac[i][k]);
+	  printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,ScaleFac[i][k]);
 	}
 	printf(" #     Number of scale nodes for dimension %1i:      %1i\n",i+1,Nscalenode[i]);
       }
