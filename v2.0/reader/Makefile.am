@@ -15,7 +15,7 @@ AUTOMAKE_OPTIONS = gnu
 EXTRA_DIST =
 if HAVE_SUBPROJECT
 # Add subversion revision number, recipe from Autotools by J. Calcote 
-   EXTRA_DIST += m4 SVNREV QUOTE
+   EXTRA_DIST += m4 SVNREV
 # This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
    distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 # Don't put .svn subdirs into distribution package
