@@ -1,0 +1,40 @@
+/* --- force emacs to C++ mode -*-C++-*-*/
+#include <cstdio>
+#include <string>
+
+//---  Declare function for real work
+extern int fnlocppread(int argc, char** argv);
+
+int main(int argc, char** argv){
+
+  using namespace std;
+
+  //---  Initialization for nice printing
+  string CSEPS = "##################################################################################\n";
+  string LSEPS = "#---------------------------------------------------------------------------------\n";
+
+  //---  Display welcome message
+  printf("\n");
+  printf(" %s",CSEPS.c_str());
+  printf(" # @PACKAGE_NAME@_@PACKAGE_VERSION@_@SVNREV@ \n");
+  printf(" # @AUTHORSv2@ \n");
+  printf(" %s",CSEPS.c_str());
+  printf(" #\n");
+  printf(" # C++ program to read fastNLO v2 tables and\n");
+  printf(" # derive QCD cross sections using PDFs from LHAPDF\n");
+  printf(" #\n");
+  printf(" %s",LSEPS.c_str());
+  printf(" #\n");
+  printf(" # The projects web page can be found at:\n");
+  printf(" #   @WEBPAGE@\n");
+  printf(" #\n");
+  printf(" # If you use this code, please cite:\n");
+  printf(" #   @AUTHORSv14@, @QUOTEv14@\n");
+  printf(" #   @AUTHORSv2@, @QUOTEv2@\n");
+  printf(" #\n");
+  printf(" %s",CSEPS.c_str());
+
+  int iret = fnlocppread(argc, argv);
+
+  return iret;
+}

@@ -128,23 +128,6 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-  if ( WelcomeOnce++ == 0 ){
-    string cseps = " ##################################################################################\n";
-    cout << cseps;
-    printf(" #\n");
-    printf(" # fastNLO_reader_2.1.0\n");
-    printf(" # D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch\n");
-    printf(" #\n");
-    printf(" # The projects web page can be found at:\n");
-    printf(" #   http://projects.hepforge.org/fastnlo\n");
-    printf(" #\n"); 
-    printf(" # If you use this code, please cite:\n"); 
-    printf(" #   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285\n");
-    printf(" #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch,\n");
-    printf(" #      arXiv:1109.1310\n");
-    printf(" #\n");
-    cout << cseps;
-  }
 
   ReadTable();
   //int iprint = 2;
@@ -903,13 +886,17 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
   //          4: Also print scale nodes of Block B for each contribution (BS)
   //          5: Also print sigma tilde of Block B (not implemented yet)
   
+  //---  Initialization for nice printing
+  string CSEPS = "##################################################################################\n";
+  string LSEPS = "#---------------------------------------------------------------------------------\n";
+  
   //
   // Print basic scenario information (always)
   //
   printf("\n");
-  printf(" ########################################################################\n");
+  printf(" %s",CSEPS.c_str());
   printf(" # Information on fastNLO scenario: %s\n",ScenName.data());
-  printf(" # ----------------------------------------------------------------------\n");
+  printf(" %s",LSEPS.c_str());
   printf(" # Description:\n");
   for( unsigned int i=0; i<ScDescript.size(); i++ ){
     printf(" #   %s\n",ScDescript[i].data());
@@ -964,7 +951,7 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
   }
   
   printf(" #\n");
-  printf(" ########################################################################\n\n");
+  printf(" %s",CSEPS.c_str());
 }
 
 

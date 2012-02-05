@@ -15,7 +15,7 @@ if HAVE_LHAPDFCONFIG
 endif
 
 # All source files which go into the main target (and have to be distributed)
-fnlo_fread_SOURCES = fnlo-fread.f fnx9999.f fnx9999.inc strings.inc \
+fnlo_fread_SOURCES = main.f fnlo-fread.f fnx9999.f fnx9999.inc strings.inc \
 	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
 
 # FORTRAN compiler flags to be used for the main target

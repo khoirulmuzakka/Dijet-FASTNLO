@@ -1,4 +1,4 @@
-      PROGRAM FNLOFREAD
+      SUBROUTINE FNLOFREAD
 *********************************************************************
 *     
 *     fastNLO_reader: FNLOFREAD
@@ -10,12 +10,10 @@
 *********************************************************************
       Implicit None
       Include 'fnx9999.inc'
+      Include 'strings.inc'
       Integer NXMU
       Parameter(NXMU = 4)
       Character*16 CHTMP1,CHTMP2
-      Character*41  CSEP41,DSEP41,LSEP41,SSEP41
-      Character*82  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Character*255 FILENAME,PDFSET,CHRES,CHFRM
       Integer i, j, IS, IPRINT, NDimBins(MxDim)
       Integer NSCDM, NSCLS, ISCLPNT(NXMU)
@@ -25,11 +23,6 @@
       Data ISCLPNT/0,0,0,0/
       Data XMU/1D0,2D0,0.5D0,0.25D0/
       Data IPRINT/0/
-      Data CSEP41,DSEP41,LSEP41,SSEP41/
-     >     '#########################################',
-     >     '=========================================',
-     >     "-----------------------------------------",
-     >     "*****************************************"/
 
 *---  Attention - this is the most likely source of Fortran errors!
 *---  For each scenario, the result array must be declared at least  
@@ -52,17 +45,6 @@
       Double Precision kfac(MxObsBin),kthc(MxObsBin),knpc(MxObsBin) 
 
 *---  Initialization
-      CSEPL = CSEP41//CSEP41//CSEP41//CSEP41
-      DSEPL = DSEP41//DSEP41//DSEP41//DSEP41
-      LSEPL = LSEP41//LSEP41//LSEP41//LSEP41
-      SSEPL = SSEP41//SSEP41//SSEP41//SSEP41
-      CSEPS = CSEP41//CSEP41
-      DSEPS = DSEP41//DSEP41
-      LSEPS = LSEP41//LSEP41
-      SSEPS = SSEP41//SSEP41
-      DSEPS(1:2) = "# "
-      LSEPS(1:2) = "# "
-      SSEPS(1:2) = "# "
 Comment: *---  Fortran 90 functions for computing precision:
 Comment: *---  tiny(x), huge(x), precision(x)
 Comment:       Write(*,*)"fnlo-fread: F90 double tiny, huge, precision = ",
@@ -78,16 +60,9 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
       LTHCSEP = .FALSE.
       LNPCSEP = .FALSE.
 
-*---  Initial output
-      WRITE(*,'(A)')""
-      WRITE(*,*)CSEPS
-      WRITE(*,*)"# fnlo-fread"
-      WRITE(*,*)CSEPS
-      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and"
-      WRITE(*,*)"# derive QCD cross sections using PDFs from LHAPDF"
-      WRITE(*,*)CSEPS
-
 *---  Parse command line
+      WRITE(*,'(A)')
+      WRITE(*,*)CSEPS
       WRITE(*,*)"# fnlo-read: Program Steering"
       WRITE(*,*)LSEPS
       IF (IARGC().LT.1) THEN
@@ -140,6 +115,7 @@ Comment:      >     tiny(1d0),huge(1d0),precision(1d0)
      >        "fnlo-read: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
+      WRITE(*,*)CSEPS
 
 *---  Initialize table
       Call FX9999IN(FILENAME)
@@ -406,4 +382,5 @@ Comment:          ENDIF
  999  FORMAT(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),
      >     (X,I5,2(2X,E7.1)),(3X,E10.3),SP,4(X,E9.2),X)
       
+      Return
       End

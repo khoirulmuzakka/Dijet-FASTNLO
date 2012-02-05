@@ -17,29 +17,25 @@
 #include "FastNLOReader.h"
 #include "Alphas.h"
 
-// Function prototype for welcome message 
-void PrintWelcomeMessage( );
 // Function prototype for flexible-scale function 
 double Function_Mu(double s1, double s2 );
 
 //__________________________________________________________________________________________________________________________________
 
-int main(int argc, char** argv){
+int fnlocppread(int argc, char** argv){
 
   using namespace std;
 
   //---  Initialization for nice printing
-  string cseps = " ##################################################################################\n";
-  string lseps = " # --------------------------------------------------------------------------------\n";
-  string csepl = "#########################################";
-  csepl = csepl + csepl + csepl + csepl + "\n";
+  string CSEPS = "##################################################################################\n";
+  string LSEPS = "#---------------------------------------------------------------------------------\n";
+  string CSEPL = "####################################################################################################################################################################\n";
 
-  //---  Display welcome message
-  PrintWelcomeMessage();
-  
   //---  Parse commmand line
+  printf("\n");
+  printf(" %s",CSEPS.c_str());
   printf(" # fnlo-read: Program Steering\n");
-  cout << lseps;
+  printf(" %s",LSEPS.c_str());
   string tablename = "table.tab";
   if ( argc <= 1 ){
     printf(" # fnlo-read: WARNING! No table name given,\n");
@@ -85,7 +81,7 @@ int main(int argc, char** argv){
     printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
     return 1;
   }
-
+  printf(" %s",CSEPS.c_str());
   //---  End of parsing arguments
 
 
@@ -385,9 +381,10 @@ int main(int argc, char** argv){
 
 
   // ---- do sth. useful ---- //
-  cout << csepl;
+  printf("\n");
+  printf("%s",CSEPL.c_str());
   printf("fnlo-read: Calculate cross sections\n");
-  cout << csepl;
+  printf("%s",CSEPL.c_str());
   
   // Give some info on contribution Ids
   // fnloreader->PrintTableInfo();
@@ -468,21 +465,6 @@ int main(int argc, char** argv){
 
 //__________________________________________________________________________________________________________________________________
 
-void PrintWelcomeMessage( ){
-  string cseps = " ##################################################################################\n";
-  string lseps = " # --------------------------------------------------------------------------------\n";
-  string csepl = "#########################################";
-  csepl = csepl + csepl + csepl + csepl + "\n";
-  printf("\n");
-  cout << cseps;
-  printf(" # fnlo-cppread\n");
-  cout << cseps;
-  printf(" # C++ program to read fastNLO v2 tables and\n");
-  printf(" # derive QCD cross sections using PDFs from LHAPDF\n");
-  cout << cseps;
-}
-
-//__________________________________________________________________________________________________________________________________
 
 double Function_Mu(double s1, double s2 ){
   // --- fastNLO user: This is an example function

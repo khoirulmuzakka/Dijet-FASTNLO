@@ -27,14 +27,11 @@
       DATA IFIRST/0/, ONED/1d0/, TWOD/2d0/
       SAVE IFIRST, NF, ONED, TWOD, PI4, B0, B1, B10, ZMASS2, ASCACHE,
      +     MUCACHE
-      Character*41  CSEP41
-      Character*82  CSEPS
-      Data CSEP41/"#########################################"/
+      Include 'strings.inc'
 
 c - initialize pi and beta functions
       If (IFIRST.eq.0) Then
          IFIRST = 1
-         CSEPS = CSEP41//CSEP41
          NF = 5
          PI4 = 4D0 * 4D0 * ATAN(1D0)
          B0  = 11D0 - 2D0/3D0 * DBLE(NF)

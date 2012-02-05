@@ -1,8 +1,6 @@
 Release Notes for fastNLO_reader version 2.1.0:
 ===============================================
 
-Revision $(SVNREV)
-
 - First public release of the fastNLO_reader package
 
 - Content:

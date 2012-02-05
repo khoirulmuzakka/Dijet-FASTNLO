@@ -276,45 +276,10 @@ Comment:          EndDo
       Character*255 OLDFILENAME,QUOTENAME
       Character*72 CHEAD
       Character*80 CHTMP
-      Character*41  CSEP41,DSEP41,LSEP41,SSEP41
-      Character*82  CSEPS,DSEPS,LSEPS,SSEPS
-      Character*164 CSEPL,DSEPL,LSEPL,SSEPL
       Data OLDFILENAME,QUOTENAME/'xxxx','QUOTE'/
       Save OLDFILENAME,QUOTENAME
-      Data CSEP41,DSEP41,LSEP41,SSEP41/
-     >     '#########################################',
-     >     '=========================================',
-     >     "-----------------------------------------",
-     >     "*****************************************"/
 
 *---  Initialization
-      CSEPS = CSEP41//CSEP41
-      DSEPS = DSEP41//DSEP41
-      LSEPS = LSEP41//LSEP41
-      SSEPS = SSEP41//SSEP41
-      CSEPL = CSEP41//CSEP41//CSEP41//CSEP41
-      DSEPL = DSEP41//DSEP41//DSEP41//DSEP41
-      LSEPL = LSEP41//LSEP41//LSEP41//LSEP41
-      SSEPL = SSEP41//SSEP41//SSEP41//SSEP41
-      DSEPS(1:2) = "# "
-      LSEPS(1:2) = "# "
-      SSEPS(1:2) = "# "
-      DSEPL(1:2) = "# "
-      LSEPL(1:2) = "# "
-      SSEPL(1:2) = "# "
-
-c === output in first fastNLO call
-      If (IFNfirst.eq.0) Then
-         WRITE(*,*)CSEPS
-         WRITE(*,*)"#"
-         Do i=1,NHEADER
-            CHEAD = CHEADER(i)
-            Write(*,5000)" #"//CHEAD(1:LEN_TRIM(CHEAD))
-         Enddo
-         IFNfirst = 1
-         WRITE(*,*)"#"
-         WRITE(*,*)CSEPS
-      Endif
 
 c === in 1st scenario call: read fastNLO coefficient table
       If (FILENAME.ne.OLDFILENAME) Then
@@ -1151,41 +1116,15 @@ c         Write(*,9010) i,lobin(i,Ndim),upbin(i,Ndim),xsect(i)
 *-----------------------------------------------------------------
       Implicit None
       Include 'fnx9999.inc'
+      Include 'strings.inc'
       Integer i,j,k
       Character*64 CHTMP
 
-Comment:       OPEN(2,STATUS='OLD',FILE=QUOTENAME,IOSTAT=ISTAT)
-Comment:       IF (ISTAT.NE.0) THEN
-Comment:          WRITE(*,*)"FX9999in: ERROR! Input file "//
-Comment:      >        QUOTENAME(1:LEN_TRIM(QUOTENAME))//
-Comment:      >        " not found, stopped!"
-Comment:          STOP
-Comment:       ENDIF
-Comment:       NSEP = 0
-Comment:       DO I=1,10
-Comment:          READ(2,'(A)')CHTMP
-Comment:          IF (NSEP.EQ.0.AND.
-Comment:      >        CHTMP(1:LEN_TRIM(CHTMP)).NE."1234567890") THEN
-Comment:             WRITE(*,*)"FX9999in: ERROR! Wrong file format of "//
-Comment:      >           QUOTENAME(1:LEN_TRIM(QUOTENAME))//
-Comment:      >           ". First separator not found, stopped!"
-Comment:             STOP
-Comment:          ELSE
-Comment:             IF (CHTMP(1:LEN_TRIM(CHTMP)).EQ."1234567890")
-Comment:      >           NSEP = NSEP+1
-Comment:             IF (NSEP.EQ.1) THEN
-Comment:                WRITE(*,'(A)')CHTMP(1:LEN_TRIM(CHTMP))
-Comment:             ENDIF
-Comment:          ENDIF
-Comment:       ENDDO
-
-      Write(*,*)
-      WRITE(*,*)"########################################"//
-     >     "################################"
+      Write(*,'(A)')
+      WRITE(*,*)CSEPS
       Write(*,*)"# Information on fastNLO scenario: ",
      >     ScenName(1:len_trim(ScenName))
-      WRITE(*,*)"# --------------------------------------"//
-     >     "--------------------------------"
+      WRITE(*,*)LSEPS
       Write(*,*)"# Description:"
       Do i=1,NScDescript
          CHTMP = SCDescript(i)
@@ -1199,18 +1138,6 @@ Comment:       ENDDO
       Write(*,'(A,I3,A,I1,A)')
      >     " # Tot. no. of observable bins: ",NObsBin," in ",Ndim,
      >     " dimensions:"
-Comment:       Do j=1,NDim
-Comment:          Write(*,*)"# Binning in dimension ",j,":",DimLabel(j)
-Comment:          Do i=1,NObsBin
-Comment:             If (IDiffBin(j).EQ.1) Then
-Comment:                Write(*,*)"#   the bin center ",i," is at ",
-Comment:      >              LoBin(i,j)
-Comment:             Else
-Comment:                Write(*,*)"#   the bin no. ",i," goes from ",
-Comment:      >              LoBin(i,j),"up to ",UpBin(i,j)
-Comment:             Endif
-Comment:          Enddo
-Comment:       Enddo
       Write(*,*)"#"
       Write(*,'(A,I1)')" # No. of contributions: ",Ncontrib
       Do i=1,Ncontrib         
@@ -1249,10 +1176,8 @@ Comment:       Enddo
      >           j,":      ",NScaleNode(i,j)
          Enddo
       Enddo
-ckr      Write(*,*)"# No. of x bins in 1st contrib.:",Nxtot(1,1,1)
       Write(*,*)"#"
-      WRITE(*,*)"########################################"//
-     >     "################################"
+      WRITE(*,*)CSEPS
 
       Return
       End

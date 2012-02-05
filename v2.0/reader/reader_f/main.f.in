@@ -1,0 +1,30 @@
+* --- force emacs to fortran mode -*-fortran-*-
+      PROGRAM MAIN
+
+      Implicit None
+      Include 'strings.inc'
+
+*---  Initial output
+      WRITE(*,'(A)')""
+      WRITE(*,*)CSEPS
+      WRITE(*,*)"# @PACKAGE_NAME@_@PACKAGE_VERSION@_@SVNREV@ "
+      WRITE(*,*)"# @AUTHORSv2@ "
+      WRITE(*,*)CSEPS
+      WRITE(*,*)"#"
+      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and"
+      WRITE(*,*)"# derive QCD cross sections using PDFs from LHAPDF"
+      WRITE(*,*)"#"
+      WRITE(*,*)LSEPS
+      WRITE(*,*)"#"
+      WRITE(*,*)"# The projects web page can be found at:"
+      WRITE(*,*)"#   @WEBPAGE@"
+      WRITE(*,*)"#"
+      WRITE(*,*)"# If you use this code, please cite:"
+      WRITE(*,*)"#   @AUTHORSv14@, @QUOTEv14@"
+      WRITE(*,*)"#   @AUTHORSv2@, @QUOTEv2@"
+      WRITE(*,*)"#"
+      WRITE(*,*)CSEPS
+
+      CALL FNLOFREAD
+      
+      END
