@@ -27,6 +27,7 @@
 *---  Initialization
       CSEPS = CSEP41//CSEP41
       LSEPS = LSEP41//LSEP41
+      LSEPS(1:2) = "# " 
 
 *---  Initial output
       WRITE(*,'(A)')""
@@ -483,7 +484,7 @@
       Write(2,'(A)') CHTMP(1:LEN_TRIM(CHTMP)) ! ScDescript(3)
 *---  Jet algo: Compose another additional line from jet algo definition
       CHTMP = CIALGO(IALGO)
-      CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//","//CJETRES1(IALGO)
+      CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//"_"//CJETRES1(IALGO)
       CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//"="
       Write(CH4TMP,'(F4.2)')JETRES1
       CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//CH4TMP(1:LEN_TRIM(CH4TMP))
