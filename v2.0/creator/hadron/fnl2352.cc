@@ -15,23 +15,25 @@
 // If a code fragment is not explicitely labeled as "fastNLO user",
 // it is likely that a modification will interfere with
 // the fastNLO routines.
+// Please keep the order of all statements in inittable
+// in order to guarantee a working code.
 //
 // This file contains the following routines:
 //   inputfunc    (-> user edits)
 //   psinput      (-> user edits)
-//   initfunc     (don't touch)
 //   userfunc     (-> user edits)
+//   inittable    (-> user edits)
+//   initfunc     (don't touch)
 //   writetable   (don't touch)
 //   end_of_event (don't touch)
 //   phys_output  (don't touch)
-//   inittable    (-> user edits)
 //
 // Implementing a new scenario requires to edit:
 //  - the jet algorithm ("#include" statement and assignment of "jetclus")
 //  - number of jets (inputfunc)
 //  - center-of-mass energy (psinput)
-//  - compute observable, determine bin No. (userfunc)
-//  - declare all variables for table, define bin boundaries (inittable)
+//  - compute observable, determine bin no. (userfunc)
+//  - declare all variables for table, define bin boundaries (inittable, etc.)
 //  
 // ================================================================
 
@@ -149,15 +151,6 @@ void psinput(phasespace_hhc *ps, double& s)
   ps = 0;
 } 
 
-void UserHHC::initfunc(unsigned int)
-{
-  // --- Initialize event counters
-  nevents = 0;
-  // Set some defaults
-  if (nwrite==0) nwrite = 5000000;
-  start_time = std::time(0);
-}
-
 // --- fastNLO user: modify jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //     (return value must be true for jets to be UNselected)
 // fnl2352: use rapidity!
@@ -175,7 +168,6 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
-  
   // --- fastNLO: Don't touch this piece of code!
   fnloBlockA2 *A2 =  table->GetBlockA2();
   double x1 = p[-1].Z()/p[hadron(-1)].Z();
@@ -207,7 +199,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   //     Here is your playground where you compute your observable 
   //     and the bin number ("obsbin") which gets passed to
   //     fastNLO's table filling code.
-  //     (all pT and E are in GeV)
+  //     Usually, pT and E are in GeV, but this may be changed.
+  //     ATTENTION: Scales must always be in GeV!
   
   // --- declare and initialize phase space cut variables
   // smallest |(pseudo-)rapidity| for jets to be considered
@@ -223,9 +216,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
   
   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
+  // fnl2352: Not required for inclusive jets
   //  static fNLOSorter SortJets;
   //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
-
+  
   // --- give some debug output after selection
   if ( doDebug ) {
     cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
@@ -272,95 +266,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   } // --- end: jet loop
 } // --- end: fastNLO user playground
 
-void UserHHC::writetable(){
-  table->OpenFileRewrite();
-  table->WriteBlockA1();
-  table->WriteBlockA2();
-  for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
-    table->WriteBlockBDividebyN(i);
-  }
-  table->CloseFileWrite();
-
-}
-
-void UserHHC::end_of_event(){
-  nevents += 1;
-  // --- store table
-  if (( (unsigned long)nevents % nwrite)==0){
-    time_t hour, min, time = std::time(0) - start_time;
-      
-    hour = time/3600L;
-    time -= hour*3600L;
-    min  = time/60L;
-    time -= min*60L;
-      
-    std::cout<<"--->     "
-	     <<(hour < 10 ? "0" : "")<<hour
-	     <<(min < 10 ? ":0" : ":")<<min
-	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
-    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
-    cout.flush();
-    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-      table->GetBlockB(k)->Nevt = (long long int)nevents;
-    }
-    writetable();
-    printf("fastNLO: Table written.\n");
-  }
-}
-
-void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
-                          unsigned long __save, bool __txt) 
-{
-  tablefilename.assign(__file_name.c_str());
-  tablefilename += ".tab";
-   
-  // --- determine whether we are running LO or NLO
-  const char* const file = __file_name.c_str(); 
-
-  if(strstr(file,"born")!=NULL){
-    nlo = false;
-    printf("fastNLO: This is a LO run!\n");
-  }else{
-    if(strstr(file,"nlo")!=NULL){
-      nlo = true;
-      printf("fastNLO: This is a NLO run!\n");
-    }else{
-      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
-      exit(1);
-    }
-  }
-
-  // --- determine whether this is a debug, reference, or warm-up run
-  doDebug = false;
-  if (strstr(file,"deb")!=NULL) {
-    doDebug = true;
-    printf("fastNLO: This is a debug run. Attention, huge output!\n");
-  }
-  doReference = false;
-  if (strstr(file,"ref")!=NULL) {
-    doReference = true;
-    printf("fastNLO: This is a reference run!\n");
-  }
-  doWarmUp = false;
-  if (strstr(file,"wrm")!=NULL) {
-    doWarmUp = true;
-    printf("fastNLO: This is a warm-up run!\n");
-    if ( ! nlo ) {
-      printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
-    }
-  }
-  if ( doWarmUp && doReference ) {
-    printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
-    printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
-    exit(2);
-  }
-
-  nwrite = __save;
-  inittable();
-}
-
 void UserHHC::inittable(){
-
   // --- fastNLO user: set the total c.m. energy squared in GeV^2
   //double s =     40000.; // RHIC               200 GeV
   //double s =   3240000.; // TeV Run I         1800 GeV
@@ -379,24 +285,17 @@ void UserHHC::inittable(){
 
   // --- set up fastNLO
   table = new fnloTable(tablefilename);
-
-  // --- fastNLO: fill variable for table header block A1
-  table->GetBlockA1()->SetScenName("fnl2352");  // - fastNLO user: set scenario name
-  table->GetBlockA1()->SetNcontrib(1);
-  table->GetBlockA1()->SetNmult(0);
-  table->GetBlockA1()->SetNdata(0);
-  // KR Add vars for Markus updated header
-  table->GetBlockA1()->SetNuserString(0);
-  table->GetBlockA1()->SetNuserInt(0);
-  table->GetBlockA1()->SetNuserFloat(0);
-  table->GetBlockA1()->SetImachine(0);
-  // KR Ende
-  table->GetBlockA2()->SetIpublunits(12);  // - fastNLO user: set cross section units
-  //                 (negative power of ten)
+  
+  // --- fastNLO: fill variables for table header block A1
+  fnloBlockA1 *A1 = table->GetBlockA1();
+  A1->SetHeaderDefaults();
+  // --- fastNLO user: set scenario name (no white space)
+  A1->SetScenName("fnl2352");
 
   // --- fastNLO: fill variables for table header block A2
-  fnloBlockA2 *A2 =  table->GetBlockA2();
-
+  fnloBlockA2 *A2 = table->GetBlockA2();
+  // --- fastNLO user: set cross section units (negative power of ten)
+  A2->SetIpublunits(12);
   // --- fastNLO user: up to 20 strings to describe the scenario
   A2->ScDescript.push_back("d2sigma-jet_dpTd|y|_[pb_GeV]");
   A2->ScDescript.push_back("ATLAS_Collaboration");
@@ -458,6 +357,7 @@ void UserHHC::inittable(){
   //     (multi-) differential result.
   //     default: divide by bin width in dim 1 and dim 2
   //              ATTENTION: Don't forget to include a factor of 2 for abs. rapidity |y| !
+  // fnl2352: divide by bin width in pT and |y|
   
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<ndim2bins;i++){
@@ -486,14 +386,10 @@ void UserHHC::inittable(){
   // --- fastNLO table block B
   fnloBlockBNlojet *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
   table->CreateBlockB(0,B);
+  B->SetNlojetDefaults();
+
   B->IXsectUnits = 12;    // --- fastNLO user: set to same value as "SetIpublunits"
-  B->IDataFlag = 0;
-  B->IAddMultFlag = 0;
-  B->IContrFlag1 = 1;
   B->NScaleDep = 0;
-  B->CodeDescript.push_back("NLOJet++_4.1.3");  // --- fastNLO user: enter NLOJET++ version
-  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
-  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
 
   B->IRef = 0;
   if (nlo || A2->ILOord > 2) {
@@ -538,8 +434,8 @@ void UserHHC::inittable(){
   // KR: This is caught in an error condition now 
   // - fastNLO user: remember to disable reference-mode in
   //                 Warm-Up run: "doReference = false" (above)
-  //B->IWarmUpPrint = 10000000;
-  B->IWarmUpPrint = 10000;
+  B->IWarmUpPrint = 1000000;
+  //B->IWarmUpPrint = 10000;
   B->xlo.resize(A2->NObsBin);
   B->scalelo.resize(A2->NObsBin);
   B->scalehi.resize(A2->NObsBin);
@@ -722,4 +618,101 @@ void UserHHC::inittable(){
     table->GetBlockA1()->SetNcontrib(2);
   }
 
+}
+//------ END OF USER DEFINED PARTS, NO USER EDITS BELOW ------
+
+//------ DON'T TOUCH THIS PART! ------
+void UserHHC::initfunc(unsigned int)
+{
+  // --- Initialize event counters
+  nevents = 0;
+  // Set some defaults
+  if (nwrite==0) nwrite = 5000000;
+  start_time = std::time(0);
+}
+
+void UserHHC::writetable(){
+  table->OpenFileRewrite();
+  table->WriteBlockA1();
+  table->WriteBlockA2();
+  for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
+    table->WriteBlockBDividebyN(i);
+  }
+  table->CloseFileWrite();
+}
+
+void UserHHC::end_of_event(){
+  nevents += 1;
+  // --- store table
+  if (( (unsigned long)nevents % nwrite)==0){
+    time_t hour, min, time = std::time(0) - start_time;
+      
+    hour = time/3600L;
+    time -= hour*3600L;
+    min  = time/60L;
+    time -= min*60L;
+      
+    std::cout<<"--->     "
+	     <<(hour < 10 ? "0" : "")<<hour
+	     <<(min < 10 ? ":0" : ":")<<min
+	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
+    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
+    cout.flush();
+    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+      table->GetBlockB(k)->Nevt = (long long int)nevents;
+    }
+    writetable();
+    printf("fastNLO: Table written.\n");
+  }
+}
+
+void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
+                          unsigned long __save, bool __txt) 
+{
+  tablefilename.assign(__file_name.c_str());
+  tablefilename += ".tab";
+   
+  // --- determine whether we are running LO or NLO
+  const char* const file = __file_name.c_str(); 
+
+  if(strstr(file,"born")!=NULL){
+    nlo = false;
+    printf("fastNLO: This is a LO run!\n");
+  }else{
+    if(strstr(file,"nlo")!=NULL){
+      nlo = true;
+      printf("fastNLO: This is a NLO run!\n");
+    }else{
+      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
+      exit(1);
+    }
+  }
+
+  // --- determine whether this is a debug, reference, or warm-up run
+  doDebug = false;
+  if (strstr(file,"deb")!=NULL) {
+    doDebug = true;
+    printf("fastNLO: This is a debug run. Attention, huge output!\n");
+  }
+  doReference = false;
+  if (strstr(file,"ref")!=NULL) {
+    doReference = true;
+    printf("fastNLO: This is a reference run!\n");
+  }
+  doWarmUp = false;
+  if (strstr(file,"wrm")!=NULL) {
+    doWarmUp = true;
+    printf("fastNLO: This is a warm-up run!\n");
+    if ( ! nlo ) {
+      printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
+    }
+  }
+  if ( doWarmUp && doReference ) {
+    printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
+    printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
+    exit(2);
+  }
+
+  nwrite = __save;
+  inittable();
 }

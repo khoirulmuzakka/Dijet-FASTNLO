@@ -447,7 +447,7 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 
 
 void fnloBlockA2::Print(){
-  printf("\n **************** FastNLO Table: BlockA1 ****************\n\n");
+  printf("\n **************** FastNLO Table: BlockA2 ****************\n\n");
   printf(" A2  Ipublunits                    %d\n",Ipublunits);
   //   NScDescript = NScDescript.size();
   //   printf(" A2  NScDescript                   %d\n",NScDescript);

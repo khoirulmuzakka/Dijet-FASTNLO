@@ -71,6 +71,20 @@ bool fnloBlockA1::IsCompatible(fnloBlockA1* other){
 };
 
 
+// KR: Could replace SetContributionHeader 
+void fnloBlockA1::SetHeaderDefaults(){
+// TableMagicNo and ITabVersion are defined as constant in fnloConstants.h
+  SetScenName("fnx9999");
+  SetNcontrib(1);
+  SetNmult(0);
+  SetNdata(0);
+  SetNuserString(0);
+  SetNuserInt(0);
+  SetNuserFloat(0);
+  SetImachine(0);
+};
+
+
 void fnloBlockA1::SetContributionHeader(){
    SetNcontrib(1);
    SetNmult(0);

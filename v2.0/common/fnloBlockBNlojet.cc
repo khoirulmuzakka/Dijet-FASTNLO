@@ -1828,8 +1828,8 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    IDataFlag = 0;
    IAddMultFlag = 0;
    IContrFlag1 = 1;
-   //   IContrFlag3 = 0;
-   CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+   // CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+   SetNlojetDescr();
    IRef = 0;
    
    if (nlo || A2->ILOord > 1) {
@@ -1904,7 +1904,7 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
 void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
    // -------------------------------------------------------------------------- //
    //  
-   //  InitDISConstants(). Method for initalizing all necessary fastNLO values
+   //  InitLHCConstants(). Method for initalizing all necessary fastNLO values
    //  for a reasonable v2.1 table.
    //
    //  This method is only for v2.1 tables
@@ -1912,13 +1912,13 @@ void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
    //
    // -------------------------------------------------------------------------- //
    
-   CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+  // CodeDescript.push_back("NLOJET++ 4.1.3");  // --- fastNLO user: enter NLOJET++ version
+   SetNlojetDescr();
 
    IXsectUnits	= A2->Ipublunits;
    IDataFlag	= 0;
    IAddMultFlag	= 0;
    IContrFlag1	= 1;
-   //   IContrFlag3	= 0;
    IRef		= 0;
    // -> v2.0 
    // NSubproc	= (nlo || A2->ILOord > 2) ? 7 : 6;

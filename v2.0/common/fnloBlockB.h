@@ -86,12 +86,22 @@ public:
    int GetIAddMultFlag(){return IAddMultFlag;}
    int GetIContrFlag1(){return IContrFlag1;}
    int GetIContrFlag2(){return IContrFlag2;}
-   //   int GetIContrFlag3(){return IContrFlag3;}
    int GetNScaleDep(){return NScaleDep;}
    int GetNpow(){return Npow;}
    long long int GetNevt(){return Nevt;}
    int GetNxmax(int Obsbin);
    int GetXIndex(int Obsbin,int x1bin,int x2bin =0);
+
+   void SetNlojetDefaults();
+   void SetIXsectUnits(int n){IXsectUnits = n;}
+   void SetIDataFlag(int n){IDataFlag = n;}
+   void SetIAddMultFlag(int n){IAddMultFlag = n;}
+   void SetIContrFlag1(int n){IContrFlag1 = n;}
+   void SetNScaleDep(int n){NScaleDep = n;}
+   void SetNlojetDescr(){CodeDescript.push_back("NLOJet++_4.1.3");
+     CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
+     CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");}
+   
    void Add(fnloBlockB* other);
    bool IsLO(){return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO(){return IContrFlag1==1 && IContrFlag2==2;}
@@ -125,7 +135,6 @@ public:
    int IAddMultFlag;
    int IContrFlag1;
    int IContrFlag2;
-   //   int IContrFlag3;	// @MW, @KR: IContrFlag3 was replaced by NScaleDep by DB and is now without any usage
    int NScaleDep;
    // obsolete int NContrDescr;
    vector < string > CtrbDescript;

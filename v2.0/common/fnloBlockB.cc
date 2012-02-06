@@ -1790,6 +1790,15 @@ double fnloBlockB::GetAlphas(double Q, double alphasMZ){
 //________________________________________________________________________________________________________________ //
 
 
+void fnloBlockB::SetNlojetDefaults(){
+  SetIDataFlag(0);
+  SetIAddMultFlag(0);
+  SetIContrFlag1(1);
+  SetNScaleDep(0);
+  SetNlojetDescr();
+};
+
+
 void fnloBlockB::Print(){
   printf("\n **************** FastNLO Table: BlockB ****************\n\n");
   printf(" B   BlockA2->GetNObsBin()         %d\n",BlockA2->GetNObsBin());
