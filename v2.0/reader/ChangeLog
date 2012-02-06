@@ -1,4 +1,7 @@
 Candidate for public release
 
+06.02.2012:
+Rearrange code to have autocompleted main program printing out version info etc.
+
 10.11.2011:
 First test version of fastNLO_reader version 2.1.0

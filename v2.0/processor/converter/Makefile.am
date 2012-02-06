@@ -28,7 +28,7 @@ endif
 bin_PROGRAMS = fnlo-convert
 
 # All source files which go into the main target (and have to be distributed)
-fnlo_convert_SOURCES = fnlo-convert.f fnlo-convert.inc strings.inc
+fnlo_convert_SOURCES = main.f fnlo-convert.f fnlo-convert.inc strings.inc
 
 # FORTRAN compiler flags to be used for the main target
 AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132

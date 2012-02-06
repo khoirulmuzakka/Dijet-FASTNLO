@@ -1,7 +1,7 @@
 * --- force emacs to fortran mode -*-fortran-*-
-C
-C ----- define character strings
-C
+*     
+*---  Define character strings for print out
+*     
       Character*41  CSEP0,DSEP0,LSEP0,SSEP0
       Parameter(CSEP0='#########################################')
       Parameter(DSEP0='#========================================')

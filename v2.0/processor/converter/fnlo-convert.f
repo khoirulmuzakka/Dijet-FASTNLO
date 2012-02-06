@@ -1,4 +1,4 @@
-      PROGRAM FNLOCONVERT
+      SUBROUTINE FNLOCONVERT
 ************************************************************************
 *     
 *     fastNLO_converter:
@@ -12,33 +12,17 @@
 *     
 ************************************************************************
       Implicit None
+      Include 'strings.inc'
       Character*1 CH1TMP
       Character*2 CH2TMP
       Character*8 CH8TMP
-      Character*41  CSEP41,LSEP41
-      Character*82  CSEPS,LSEPS
       Character*255 INFILE,OUTFILE,SCENNAME
       Double Precision DBWID
       Integer ICONT, ISECT
-      Data CSEP41,LSEP41/
-     >     '#########################################',
-     >     "-----------------------------------------"/
-
-*---  Initialization
-      CSEPS = CSEP41//CSEP41
-      LSEPS = LSEP41//LSEP41
-      LSEPS(1:2) = "# " 
-
-*---  Initial output
-      WRITE(*,'(A)')""
-      WRITE(*,*)CSEPS
-      WRITE(*,*)"# fnlo-convert"
-      WRITE(*,*)CSEPS
-      WRITE(*,*)"# Fortran program to read fastNLO v1.4 tables and"
-      WRITE(*,*)"# convert them into fastNLO v2.0 format"
-      WRITE(*,*)CSEPS
 
 *---  Parse command line
+      WRITE(*,'(A)')
+      WRITE(*,*)CSEPS
       WRITE(*,*)"# fnlo-convert: Program Steering"
       WRITE(*,*)LSEPS
 *---  Input table name
@@ -155,6 +139,7 @@
      >        "fnlo-convert: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
+      WRITE(*,*)CSEPS
 
 *---  Read the fastNLO v1.4 coefficient table
       WRITE(*,'(A)')""
@@ -162,6 +147,7 @@
       WRITE(*,*)"# fnlo-convert: Read v1.4 table"
       WRITE(*,*)CSEPS
       Call CV14RD(INFILE)
+      WRITE(*,*)CSEPS
 
 *---  Write the selected fastNLO v2.0 parts
       WRITE(*,'(A)')""
@@ -169,6 +155,7 @@
       WRITE(*,*)"# fnlo-convert: Write selected v2.0 parts"
       WRITE(*,*)CSEPS
       Call CV20WRT(OUTFILE,SCENNAME,ICONT,DBWID,ISECT)
+      WRITE(*,*)CSEPS
 
 *--- Finished
       WRITE(*,'(A)')""

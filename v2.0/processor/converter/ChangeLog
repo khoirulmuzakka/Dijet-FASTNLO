@@ -1,5 +1,7 @@
-Revision nnnn:
 Candidate for internal release
+
+06.02.2012:
+Rearrange code to have autocompleted main program printing out version info etc.
 
 26.11.2011:
 First test version of fastNLO_converter version 2.1.0

@@ -454,6 +454,7 @@ AC_CONFIG_FILES([Makefile
 	doc/arXiv_1109.1310/Makefile
 	doc/Makefile
 	processor/converter/Makefile
+	processor/converter/main.f
 	processor/Makefile
 	processor/merger/Makefile
 	reader/Makefile
