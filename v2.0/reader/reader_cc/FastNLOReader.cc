@@ -1203,7 +1203,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
 	header2 += "     K NPC";
       }
       unsigned int NDimBins[NDim];
-      printf("%s [ %-12s ] %s [ %-12s ] %s\n",
+      printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
 	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
       cout << SSEP << endl;
       for ( unsigned int i=0; i<xslo.size(); i++ ){ 
@@ -1217,19 +1217,19 @@ void FastNLOReader::PrintCrossSectionsDefault(){
 	  }
 	}
 	if ( ithc2<0 && inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
 	} else if ( inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
 	} else if ( ithc2<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
 	} else {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
 	}
@@ -1275,7 +1275,7 @@ void FastNLOReader::PrintCrossSectionsData(){
     string header[3] = { "  IObs  Bin Size IODim1 ", 
 			 "   IODim2 ",
 			 "   X Section QSumUnc.+ QSumUnc.- QSumCor.+ QSumCor.-\n"};
-    string label[2] = { "[ " + DimLabel[0] + "     ]", "[ " + DimLabel[1] + "          ]"};
+    string label[2] = { "[ " + DimLabel[0] + "     ]", "[  " + DimLabel[1] + "           ]"};
     unsigned int NDimBins[NDim];
     printf("%s %s %s %s %s",header[0].c_str(),label[0].c_str(),header[1].c_str(),label[1].c_str(),header[2].c_str());
     //--- Additionally print out descriptions on all uncertainties
@@ -1298,7 +1298,7 @@ void FastNLOReader::PrintCrossSectionsData(){
 	  NDimBins[j] = 1;
 	}
       }
-      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#7.1E  %-#7.1E   % -#10.3E",
+      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E   % -#10.3E",
  	     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
  	     NDimBins[1],LoBin[i][1],UpBin[i][1],xs[i]);
       

@@ -14,7 +14,8 @@
       INCLUDE 'strings.inc'
       INTEGER NXMU
       PARAMETER(NXMU = 4)
-      CHARACTER*16 CHTMP1,CHTMP2
+      CHARACTER*16 CHTMP1
+      CHARACTER*18 CHTMP2
       CHARACTER*255 FILENAME,PDFSET,CHRES,CHFRM
       INTEGER I, J, IS, IPRINT, NDIMBINS(MXDIM)
       INTEGER NSCDM, NSCLS, ISCLPNT(NXMU)
@@ -260,10 +261,10 @@ C---  ENDIF
          CHTMP1 = DIMLABEL(1)
          CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
          CHTMP2 = DIMLABEL(2)
-         CHTMP2 = "[ "//CHTMP2(1:12)//" ]"
+         CHTMP2 = "[  "//CHTMP2(1:12)//"  ]"
          CHRES  = ""
          CHFRM  =
-     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E7.1))"
+     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E8.2))"
          IF (LLO) THEN
             CHRES = CHRES(1:LEN_TRIM(CHRES))//"LO cross section"
             CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
@@ -344,13 +345,16 @@ C---  ENDIF
          CALL FX9999CC(SCALEF, SCALEF, XSDAT, DXSUCDATA, DXSCORDATA)
 
 *---  Data section printout
+         CHFRM  =
+     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),"//
+     >        "(X,I5,2(2X,E8.2)),(3X,E10.3),SP,4(X,E9.2),X)"
          WRITE(*,'(A)')DSEPL
          WRITE(*,'(A)')" Measurement"
          WRITE(*,'(A)')LSEPL
          CHTMP1 = DIMLABEL(1)
          CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
          CHTMP2 = DIMLABEL(2)
-         CHTMP2 = "[ "//CHTMP2(1:12)//" ]"
+         CHTMP2 = "[  "//CHTMP2(1:12)//"  ]"
          WRITE(*,'(A)')"  IObs  Bin Size "//
      >        "IODim1  "//
      >        CHTMP1//"    "//
@@ -372,7 +376,7 @@ C---  ENDIF
                   NDIMBINS(J) = 1 
                ENDIF
             ENDDO
-            WRITE(*,999)I,BINSIZE(I),
+            WRITE(*,CHFRM)I,BINSIZE(I),
      >           NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >           NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
      >           XSDAT(I),
@@ -380,9 +384,6 @@ C---  ENDIF
      >           DXSCORDATA(I,2),DXSCORDATA(I,1)
          ENDDO
       ENDIF
-      
- 999  FORMAT(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),
-     >     (X,I5,2(2X,E7.1)),(3X,E10.3),SP,4(X,E9.2),X)
       
       RETURN
       END

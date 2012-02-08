@@ -1024,6 +1024,7 @@ C---  ENDDO
             CHTMP = CTRBDESCRIPT(I,J)
             WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
          ENDDO
+         WRITE(*,'(A,I16)')" #   No. of events: ",NEVT(I)
          WRITE(*,*)"#   provided by:"
          DO J=1,NCODEDESCR(I)
             CHTMP = CODEDESCRIPT(I,J)

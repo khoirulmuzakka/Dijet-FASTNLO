@@ -382,6 +382,7 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
     for(unsigned int i=0;i<CtrbDescript.size();i++){
       printf(" #   %s\n",CtrbDescript[i].data());
     }
+    printf(" #   No. of events: %16llu\n",Nevt);
     printf(" #   provided by:\n");
     for(unsigned int i=0;i<CodeDescript.size();i++){
       printf(" #   %s\n",CodeDescript[i].data());
