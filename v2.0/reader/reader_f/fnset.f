@@ -1,32 +1,27 @@
-**********************************************************************
-* fastNLO routines to select the contributions to be computed
-* in subsequent calls
-*
-* notice: any changes in the commonblock need to be copied into
-*         the include file fnx9999.inc 
-*
-*
-* question: how can we later determine if the usercode was called 
-*           earlier with exactly the same settings?
-* possible solution: increment a variable with each call (up to 37k)
-*                    if identical in a subsequent call, one can assume 
-*                    that FNSET was not called in between
-*                                  ? ? ? 
-* MW 06/11/2007
-**********************************************************************
-      Subroutine fnset(var,ival)
-      Implicit None
-      Character*(*) var
-      Integer ival
-      Include "fnx9999.inc"
-      Data IFNfirst/0/,
-     >     Preftab/0/,
+      SUBROUTINE FNSET(VAR,IVAL)
+***********************************************************************
+*     
+*     fastNLO routines to select the contributions to be computed
+*     in subsequent calls
+*     
+*     Input:
+*     ------
+*     VAR   Contribution name --> translated into integer of sim. name
+*     IVAL  Selection flag (0: not selected, 1 selected)
+*     
+***********************************************************************
+      IMPLICIT NONE
+      CHARACTER*(*) VAR
+      INTEGER IVAL
+      INCLUDE "fnx9999.inc"
+      DATA IFNFIRST/0/,
+     >     PREFTAB/0/,
      >     PORDPTHY/0/, PTHRESHCOR/0/, 
      >     PQUARKCOMPOSITENESS/0/, PADDLED/0/, PTEVED/0/
      >     PNPCOR/0/, PUEVENT/0/, PDATA/0/
       
-c --- Reset
-      If (var.eq."P_RESET") Then
+*---  Reset
+      IF (VAR.EQ."P_RESET") THEN
          PREFTAB             = 0
          PORDPTHY            = 0
          PTHRESHCOR          = 0
@@ -35,27 +30,27 @@ c --- Reset
          PADDLED             = 0
          PTEVED              = 0
          PDATA               = 0
-      Endif
+      ENDIF
 
-c --- Evaluate standard tables or reference tables
-      If (var.eq."P_REFTAB") PREFTAB = ival
+*---  Evaluate standard tables or reference tables
+      IF (VAR.EQ."P_REFTAB") PREFTAB = IVAL
 
-c --- Perturbative Contributions - Fixed Orders
-      If (var.eq."P_ORDPTHY") PORDPTHY = ival
+*---  Perturbative Contributions - Fixed Orders
+      IF (VAR.EQ."P_ORDPTHY") PORDPTHY = IVAL
       
-c --- Perturbative Contributions - Corrections
-      If (var.eq."P_THRESHCOR") PTHRESHCOR = ival
+*---  Perturbative Contributions - Corrections
+      IF (VAR.EQ."P_THRESHCOR") PTHRESHCOR = IVAL
 
-c --- Multiplicative Corrections
-      If (var.eq."P_NPCOR") PNPCOR = ival
+*---  Multiplicative Corrections
+      IF (VAR.EQ."P_NPCOR") PNPCOR = IVAL
 
-c --- New Physics Contributions
-      If (var.eq."P_QUARKCOMPOSITENESS") PQUARKCOMPOSITENESS = ival
-      If (var.eq."P_ADDLED") PADDLED = ival
-      If (var.eq."P_TEVED") PTEVED = ival
+*---  New Physics Contributions
+      IF (VAR.EQ."P_QUARKCOMPOSITENESS") PQUARKCOMPOSITENESS = IVAL
+      IF (VAR.EQ."P_ADDLED") PADDLED = IVAL
+      IF (VAR.EQ."P_TEVED") PTEVED = IVAL
 
-c --- Data
-      If (var.eq."P_DATA") PDATA = ival
+*---  Data
+      IF (VAR.EQ."P_DATA") PDATA = IVAL
 
-      Return
-      End
+      RETURN
+      END

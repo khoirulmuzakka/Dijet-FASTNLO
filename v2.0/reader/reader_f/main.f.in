@@ -1,8 +1,8 @@
-* --- force emacs to fortran mode -*-fortran-*-
+*     --- force emacs to fortran mode -*-fortran-*-
       PROGRAM MAIN
 
-      Implicit None
-      Include 'strings.inc'
+      IMPLICIT NONE
+      INCLUDE 'strings.inc'
 
 *---  Initial output
       WRITE(*,'(A)')""
