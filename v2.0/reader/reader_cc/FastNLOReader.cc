@@ -64,6 +64,7 @@ FastNLOReader::FastNLOReader(void)
   BlockB_LO_Ref		= NULL;
   BlockB_NLO_Ref	= NULL;
   fUnits		= kPublicationUnits;
+  fAlphasMz		= 0.118500001;
   printf("FastNLOReader::FastNLOReader. Please set a filename using SetFilename(<name>)!\n");
 }
 
@@ -74,6 +75,7 @@ FastNLOReader::FastNLOReader(string filename)
   BlockB_LO_Ref		= NULL;
   BlockB_NLO_Ref	= NULL;
   fUnits		= kPublicationUnits;
+  fAlphasMz		= 0.118500001;
   SetFilename(filename);
 }
 
