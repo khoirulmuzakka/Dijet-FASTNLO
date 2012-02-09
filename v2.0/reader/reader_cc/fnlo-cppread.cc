@@ -389,74 +389,18 @@ int fnlocppread(int argc, char** argv){
   // Give some info on contribution Ids
   // fnloreader->PrintTableInfo();
   
-  // Example code to access cross sections and K factors is given below
+  // Example code to access cross sections and K factors:
+  //   See the code in FastNLOReader.cc for the following print out methods!
+  //   Note that when using the example code like 
+  //     int ilo   = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
+  //   in THIS routine, the methods have to be called like the follwoing:
+  //     int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
+
   // The presented example is done automatically for print out here  
   fnloreader->PrintCrossSectionsDefault();
 
   // Example code to print out data points (if available)
   fnloreader->PrintCrossSectionsData();
-
-  // // Check on existence of LO and NLO (Id = -1 if not existing)
-  // int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
-  // int inlo  = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);
-  // if ( ilo < 0 || inlo < 0 ){
-  //   printf("fnlo-read: ERROR! LO and/or NLO not found, nothing to be done!\n");
-  //   exit(1);
-  // }
-  // // Check on existence of 2-loop threshold corrections
-  // int ithc2 = fnloreader->ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
-  // // If yes, switch off. Also, don't do scale variations. Not available for the moment.
-  // int nscale = fnloreader->GetNScaleVariations();
-  // if ( ithc2 > -1 ) {
-  //   fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false ) ;
-  //   nscale = 1;
-  // }
-  // // Check on existence of non-perturbative corrections from LO MC
-  // int inpc1 = fnloreader->ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
-  // // If yes, switch off.
-  // if ( inpc1 > -1 ) {
-  //   fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false ) ;
-  // }
-
-  // // First result is with NLO, LO result via division by K factor
-  // int iscale = 0;
-  // fnloreader->SetScaleVariation(iscale);
-  // fnloreader->CalcCrossSection();
-  
-  // vector < double > xsnlo = fnloreader->GetCrossSection();
-  // vector < double > kfac  = fnloreader->GetKFactors();
-  // vector < double > xslo  = xsnlo;
-  // Check for division by zero ....!!!!
-  // for (int i=0;i<xslo.size();i++){
-  //   xslo[i] = xslo[i]/kfac[i];
-  // }
-
-  // // Second result: Include threshold corrections for NLO if available
-  // if ( ithc2 > -1 ) {
-  //   fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, true ) ;
-  // }
-  // fnloreader->CalcCrossSection();
-  
-  // vector < double > xsthc2 = fnloreader->GetCrossSection();
-  // vector < double > kthc   = fnloreader->GetKFactors();
-  // // Threshold K factor is NLO including 2-loop vs. NLO
-  // for (int i=0;i<kthc.size();i++){
-  //   kthc[i] = kthc[i]/kfac[i];
-  // }
-
-  // // Second result: Include non-pert. corrections for NLO if available
-  // if ( inpc1 > -1 ) {
-  //   fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false ) ;
-  //   fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, true ) ;
-  // }
-  // fnloreader->CalcCrossSection();
-  
-  // vector < double > xsnpc  = fnloreader->GetCrossSection();
-  // vector < double > knpc   = fnloreader->GetKFactors();
-  // // Non-pert. K factor is NLO including it vs. NLO
-  // for (int i=0;i<knpc.size();i++){
-  //   knpc[i] = knpc[i]/kfac[i];
-  // }
 
   return 0;
 }
