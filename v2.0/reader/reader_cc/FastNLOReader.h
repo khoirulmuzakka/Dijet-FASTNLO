@@ -200,6 +200,7 @@ public:
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
   void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
   int ContrId( ESMCalculation eCalc, ESMOrder eOrder );
+  void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
   void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
@@ -332,8 +333,6 @@ private:
 
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
-
-  void SetGRVtoPDG2011_2loop(bool print);
 
 private:
   static int WelcomeOnce;

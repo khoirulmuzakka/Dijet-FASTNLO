@@ -105,8 +105,7 @@ void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
     cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, ...)."<<endl; 
   }
 
-  bool Print = true;
-  if ( AlphasEvolution == kGRV ) SetGRVtoPDG2011_2loop(Print);
+  //if ( AlphasEvolution == kGRV ) SetGRVtoPDG2011_2loop(true);
   fAlphasEvolution = AlphasEvolution; 
   FillAlphasCache();
 }
@@ -122,13 +121,7 @@ void FastNLOReader::SetGRVtoPDG2011_2loop(bool Print){
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
    Alphas::SetFlavorMatchingOn(true);
-   if ( Print ) {
-      Alphas::PrintInfo();
-//       printf("   Mz               %7.4f\n",Alphas::GetMz());
-//       printf("   Nf               %7d\n",Alphas::GetNf());
-//       printf("   NLoop            %7d\n",Alphas::GetNLoop());
-//       printf("   FlavorMatching     %s\n", (Alphas::GetFlavorMatchingOn()?" true":"false"));
-   }
+   if ( Print )  Alphas::PrintInfo();
 }
 
 
