@@ -1111,18 +1111,14 @@ void FastNLOReader::PrintCrossSectionsDefault(){
     printf("FastNLOReader: ERROR! LO and/or NLO not found, nothing to be done!\n");
     exit(1);
   }
-
-  // Get number of available scale variations (set back to 1 in case of threshold corrections)
-  int nscls = GetNScaleVariations();
-
+  
   // Check on existence of 2-loop threshold corrections
   int ithc2 = ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
   // Switched off by default. Don't do scale variations. Not available for the moment.
-  if ( ithc2 > -1 ) {
-    //    SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
-    nscls = 1;
-  }
-
+  //  if ( ithc2 > -1 ) {
+  //    SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
+  //  }
+  
   // Check on existence of non-perturbative corrections from LO MC
   int inpc1 = ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
   // Switched off by default.
@@ -1130,113 +1126,136 @@ void FastNLOReader::PrintCrossSectionsDefault(){
   //   SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );
   // }
   
-  // Loop over scales
+  // Pre-define desired order of scale variations
+  const int nxmu = 4;
+  double xmu[nxmu] = {1.0, 0.25, 0.5, 2.0};
+  int   ixmu[nxmu] = { -1,   -1,  -1,  -1};
+  // Get number of available scale variations and check on available scale factors,
+  // in particular for MuF; set pointers
+  int nscls = GetNScaleVariations();
+  // With threshold corrections, allow only default scale (0)
+  if ( ithc2 > -1 ) {
+    nscls = 1;
+  }
   for (int iscls=0; iscls<nscls; iscls++){
-    // First result is with NLO, LO result via division by K factor
     SetScaleVariation(iscls);
-    FillPDFCache();
-    CalcCrossSection();
-    
-    vector < double > xsnlo = GetCrossSection();
-    vector < double > kfac  = GetKFactors();
-    vector < double > xslo  = xsnlo;
-    for (unsigned int i=0;i<xslo.size();i++){
-      if ( abs(kfac[i]) > DBL_MIN ){
-	xslo[i] = xslo[i]/kfac[i];
-      } else {
-	xslo[i] = -1.;
+    double fxmu = fScaleFacMuF;
+    for (int i=0; i<nxmu; i++){
+      if (abs(xmu[i]-fxmu) < 0.000001){
+	ixmu[i] = iscls;
       }
     }
-    
-    // Second result: Include threshold corrections for NLO if available
-    vector < double > xsthc2;
-    vector < double > kthc;
-    if ( ithc2 > -1 ) {
-      SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, true, false );
+  }
+  
+  // Loop over scales
+  for (int iscls=0; iscls<nxmu; iscls++){
+    // First result is with NLO, LO result via division by K factor
+    if (ixmu[iscls] > -1){
+      SetScaleVariation(ixmu[iscls]);
+      FillPDFCache();
       CalcCrossSection();
-      xsthc2 = GetCrossSection();
-      kthc   = GetKFactors();
-      // Threshold K factor is NLO including 2-loop vs. NLO
-      for (unsigned int i=0;i<kthc.size();i++){
+      
+      vector < double > xsnlo = GetCrossSection();
+      vector < double > kfac  = GetKFactors();
+      vector < double > xslo  = xsnlo;
+      for (unsigned int i=0;i<xslo.size();i++){
 	if ( abs(kfac[i]) > DBL_MIN ){
-	  kthc[i] = kthc[i]/kfac[i];
+	  xslo[i] = xslo[i]/kfac[i];
 	} else {
-	  kthc[i] = -1.;
+	  xslo[i] = -1.;
 	}
       }
-      SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
-    }
     
-    // Third result: Include non-pert. corrections for NLO if available
-    vector < double > xsnpc;
-    vector < double > knpc;
-    if ( inpc1 > -1 ) {
-      if ( ithc2 > -1 ) {SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );}
-      SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, true, false );
-      CalcCrossSection();
-      xsnpc  = GetCrossSection();
-      knpc   = GetKFactors();
-      // Non-pert. K factor is NLO including NP vs. NLO
-      for (unsigned int i=0;i<knpc.size();i++){
-	if ( abs(kfac[i]) > DBL_MIN ){
-	  knpc[i] = knpc[i]/kfac[i];
-	} else {
-	  knpc[i] = -1.;
-	}
-      }
-      SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );
-    }
-    
-    cout << DSEP << endl;
-    printf(" Cross Sections\n");
-    printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuR);
-    cout << SSEP << endl;
-    
-    if ( NDim == 2 ){
-      string header0 = "  IObs  Bin Size IODim1 "; 
-      string header1 = "   IODim2 ";
-      string header2 = " LO cross section   NLO cross section   K NLO";
-      if ( ithc2>-1 ){
-	header2 += "     K THC";
-      }
-      if ( inpc1>-1 ){
-	header2 += "     K NPC";
-      }
-      unsigned int NDimBins[NDim];
-      printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
-	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
-      cout << SSEP << endl;
-      for ( unsigned int i=0; i<xslo.size(); i++ ){ 
-	for ( int j=0; j<NDim; j++ ){ 
-	  if ( i==0 ){
-	    NDimBins[j] = 1;
-	  } else if ( LoBin[i-1][j] < LoBin[i][j]){
-	    NDimBins[j]++;
-	  } else if ( LoBin[i][j] < LoBin[i-1][j]){
-	    NDimBins[j] = 1;
+      // Second result: Include threshold corrections for NLO if available
+      vector < double > xsthc2;
+      vector < double > kthc;
+      if ( ithc2 > -1 ) {
+	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, true, false );
+	CalcCrossSection();
+	xsthc2 = GetCrossSection();
+	kthc   = GetKFactors();
+	// Threshold K factor is NLO including 2-loop vs. NLO
+	for (unsigned int i=0;i<kthc.size();i++){
+	  if ( abs(kfac[i]) > DBL_MIN ){
+	    kthc[i] = kthc[i]/kfac[i];
+	  } else {
+	    kthc[i] = -1.;
 	  }
 	}
-	if ( ithc2<0 && inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
-	} else if ( inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
-	} else if ( ithc2<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
-	} else {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
-	}
-	printf("\n");
+	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
       }
-    } else {
-      printf("FastNLOReader: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+    
+      // Third result: Include non-pert. corrections for NLO if available
+      vector < double > xsnpc;
+      vector < double > knpc;
+      if ( inpc1 > -1 ) {
+	if ( ithc2 > -1 ) {SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );}
+	SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, true, false );
+	CalcCrossSection();
+	xsnpc  = GetCrossSection();
+	knpc   = GetKFactors();
+	// Non-pert. K factor is NLO including NP vs. NLO
+	for (unsigned int i=0;i<knpc.size();i++){
+	  if ( abs(kfac[i]) > DBL_MIN ){
+	    knpc[i] = knpc[i]/kfac[i];
+	  } else {
+	    knpc[i] = -1.;
+	  }
+	}
+	SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );
+      }
+    
+      cout << DSEP << endl;
+      printf(" Cross Sections\n");
+      printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuF);
+      cout << SSEP << endl;
+    
+      if ( NDim == 2 ){
+	string header0 = "  IObs  Bin Size IODim1 "; 
+	string header1 = "   IODim2 ";
+	string header2 = " LO cross section   NLO cross section   K NLO";
+	if ( ithc2>-1 ){
+	  header2 += "     K THC";
+	}
+	if ( inpc1>-1 ){
+	  header2 += "     K NPC";
+	}
+	unsigned int NDimBins[NDim];
+	printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
+	       header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+	cout << SSEP << endl;
+	for ( unsigned int i=0; i<xslo.size(); i++ ){ 
+	  for ( int j=0; j<NDim; j++ ){ 
+	    if ( i==0 ){
+	      NDimBins[j] = 1;
+	    } else if ( LoBin[i-1][j] < LoBin[i][j]){
+	      NDimBins[j]++;
+	    } else if ( LoBin[i][j] < LoBin[i-1][j]){
+	      NDimBins[j] = 1;
+	    }
+	  }
+	  if ( ithc2<0 && inpc1<0 ) {
+	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
+		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
+	  } else if ( inpc1<0 ) {
+	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
+	  } else if ( ithc2<0 ) {
+	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+	  } else {
+	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
+	  }
+	  printf("\n");
+	}
+      } else {
+	printf("FastNLOReader: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+      }
     }
   }
 }
