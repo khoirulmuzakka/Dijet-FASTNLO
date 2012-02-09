@@ -11,7 +11,9 @@
 AC_PREREQ([2.59])
 # Define project fastNLO
 AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
-AM_CONDITIONAL([HAVE_SUBPROJECT], test "x" = "xno" )
+# Properly include subprojects
+AC_CONFIG_AUX_DIR([.])
+AC_CONFIG_SUBDIRS([reader processor/converter])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
@@ -445,7 +447,7 @@ AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 
-# Output
+# Output (not listed as subproject in AC_CONFIG_SUBDIRS above)
 AC_CONFIG_FILES([Makefile
 	common/Makefile
 	creator/ep/Makefile
@@ -453,16 +455,8 @@ AC_CONFIG_FILES([Makefile
 	creator/Makefile
 	doc/arXiv_1109.1310/Makefile
 	doc/Makefile
-	processor/converter/Makefile
-	processor/converter/main.f
 	processor/Makefile
 	processor/merger/Makefile
-	reader/Makefile
-	reader/reader_cc/Makefile
-        reader/reader_cc/main.cc
-	reader/reader_f/Makefile
-        reader/reader_f/main.f
 ])
-#userkr/Makefile
 
 AC_OUTPUT
