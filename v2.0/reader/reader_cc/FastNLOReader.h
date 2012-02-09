@@ -179,7 +179,113 @@ protected:
   vector < double > XSectionRef_s1;
   vector < double > XSectionRef_s2;
 
- private:
+ 
+public:
+
+  FastNLOReader(void);
+  FastNLOReader(string filename);
+  ~FastNLOReader(void);
+
+  void SetFilename(string filename) ;
+  void InitScalevariation();
+  void SetLHAPDFfilename( string filename );
+  //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
+  void SetLHAPDFset( int set );
+  void PrintCurrentLHAPDFInformation();
+  void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
+  void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
+  void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
+  void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
+  void SetUnits( EUnits Unit );
+  //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
+  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
+  int ContrId( ESMCalculation eCalc, ESMOrder eOrder );
+
+  // ---- setters for scales of MuVar tables ---- //
+  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
+  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_F
+  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX );	// Set functional form of MuX
+  void SetScaleFactorMuR( double fac , bool ReFillCache = true );			// Set scale factor for MuR
+  void SetScaleFactorMuF( double fac , bool ReFillCache = true );			// Set scale factor for MuF
+  void SetExternalFuncForMuR( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
+
+
+  // ---- setters for scale variation in v2.0 tables  ---- //
+  double SetScaleVariation(int scalevar , bool ReFillCache = true);			// choose the scale variation table
+  
+
+  // ---- Pdf interface ---- //
+  void FillPDFCache( bool ReCalcCrossSection = false );					// Prepare for recalculation of cross section with 'new'/updated pdf.
+
+
+  // ---- alphas cache ---- //
+  void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
+
+
+  // ---- Do the cross section calculation ---- //
+  void CalcCrossSection();
+
+
+  // ---- Getters for results---- //
+  vector < double > GetCrossSection();
+  vector < double > GetReferenceCrossSection();
+  vector < double > GetKFactors();
+
+
+  // ---- Getters for FastNLOReader member variables ---- //
+  EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
+  EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
+  EPDFInterface GetPDFInterface() const  { return fPDFInterface; };
+  EAlphasEvolution GetAlphasEvolution() const { return fAlphasEvolution; };
+  EScaleVariationDefinition GetScaleVariationDefinition() const { return fScaleVariationDefinition; };
+  EUnits GetUnits() const{ return fUnits; };
+  mu_func GetExternalFuncForMuR(){ return Fct_MuR; };
+  mu_func GetExternalFuncForMuF(){ return Fct_MuF; };
+  double GetAlphasMz() const { return fAlphasMz; };
+  double GetScaleFactorMuR() const { return fScaleFacMuR;};
+  double GetScaleFactorMuF() const { return fScaleFacMuF;};
+  int GetScaleVariation() const { return fScalevar; };
+  int GetIPdfSet() const {return fiPDFSet;};
+
+
+  // ---- Getters for FastNLO table constants ---- //
+  int GetNcontrib() const { return Ncontrib; };
+  int GetIExpUnit() const { return Ipublunits; };			// exponent of xs units (like -12 for pb)
+  string GetScenarioName() const { return ScenName; };			// Get Scenario/Table name
+  vector < string > GetScenarioDescription() const { return ScDescript; };	// Get Description of scenario
+  double GetCMSEnergy() const { return Ecms; };				// Get center of mass energy
+  int GetILOord() const { return ILOord; };				// Get number of alpha_s in leading order (1 or 2 usually)
+  int GetNObsBins() const { return NObsBin; };				// Get number of measured bins
+  int GetNDiffBin() const { return NDim; };				// Get number of differential measurement. 1: single differential; 2: double differential
+  vector < int > GetRapidityIndex() const { return RapIndex;};		// Get rapidity indices
+  vector < string > GetDimensionLabel() const { return DimLabel;};	// Get label for measured dimensions
+  vector < int > GetIDiffBin() const { return IDiffBin;};		// Get number of differential bins
+  vector < vector < double > > GetLowBinEdge() const { return LoBin; };	// Get Lower Bin edge [ObsBin][DiffBin]
+  vector < vector < double > > GetUpBinEdge() const { return UpBin; };	// Get Upper Bin edge [ObsBin][DiffBin]
+  vector < double > GetBinSize() const { return BinSize; };		// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+  int IsNormalized() const { return INormFlag; };			// Normalized Cross sections?
+  string GetScaleDescription() const { return BBlocksSMCalc[0][1]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
+  int GetNScaleVariations() const;					// Get number of available scale variations
+  vector < double > GetScaleFactors() const;				// Get list of available scale factors
+  
+
+  // ---- Print outs ---- //
+  void PrintTableInfo(const int iprint = 0);
+  void PrintFastNLOTableConstants(const int iprint = 2);
+  void PrintCrossSections();
+  void PrintCrossSectionsDefault();
+  void PrintCrossSectionsWithReference();
+  void PrintCrossSectionsData();
+
+
+  // ---- human readable strings ---- //
+  static const string fContrName[20];
+  static const string fOrdName[4][4];
+  static const string fNSDep[4];
+
+
+private:
 
   void Init() ;
   void ReadTable();
@@ -226,109 +332,8 @@ protected:
 
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
- 
-public:
-  FastNLOReader(void);
-  FastNLOReader(string filename);
-  ~FastNLOReader(void);
 
-  void SetFilename(string filename) ;
-  void InitScalevariation();
-  void SetLHAPDFfilename( string filename );
-  //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
-  void SetLHAPDFset( int set );
-  void PrintCurrentLHAPDFInformation();
-  void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
-  void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
-  void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
-  void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
-  void SetUnits( EUnits Unit );
-  //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
-  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
-  int ContrId( ESMCalculation eCalc, ESMOrder eOrder );
-
-  // ---- setters for scales of MuVar tables ---- //
-  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
-  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_F
-  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX );	// Set functional form of MuX
-  void SetScaleFactorMuR( double fac , bool ReFillCache = true );			// Set scale factor for MuR
-  void SetScaleFactorMuF( double fac , bool ReFillCache = true );			// Set scale factor for MuF
-  void SetExternalFuncForMuR( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
-
-
-  // ---- setters for scale variation in v2.0 tables  ---- //
-  double SetScaleVariation(int scalevar , bool ReFillCache = true);			// choose the scale variation table
-  
-
-  // ---- Pdf interface ---- //
-  void FillPDFCache( bool ReCalcCrossSection = false );				// Prepare for recalculation of cross section with 'new'/updated pdf.
-
-
-  // ---- alphas cache ---- //
-  void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
-
-
-  // ---- Do the cross section calculation ---- //
-  void CalcCrossSection();
-
-
-  // ---- Getters for results---- //
-  vector < double > GetCrossSection();
-  vector < double > GetReferenceCrossSection();
-  vector < double > GetKFactors();
-
-
-  // ---- Getters for FastNLOReader member variables ---- //
-  EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
-  EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
-  EPDFInterface GetPDFInterface() const  { return fPDFInterface; };
-  EAlphasEvolution GetAlphasEvolution() const { return fAlphasEvolution; };
-  EScaleVariationDefinition GetScaleVariationDefinition() const { return fScaleVariationDefinition; };
-  EUnits GetUnits() const{ return fUnits; };
-  mu_func GetExternalFuncForMuR(){ return Fct_MuR; };
-  mu_func GetExternalFuncForMuF(){ return Fct_MuF; };
-  double GetAlphasMz() const { return fAlphasMz; };
-  double GetScaleFactorMuR() const { return fScaleFacMuR;};
-  double GetScaleFactorMuF() const { return fScaleFacMuF;};
-  int GetScaleVariation() const { return fScalevar; };
-  int GetIPdfSet() const {return fiPDFSet;};
-
-
-  // ---- Getters for FastNLO table constants ---- //
-  int GetNcontrib() { return Ncontrib; };
-  int GetIExpUnit() { return Ipublunits; };				// exponent of xs units (like -12 for pb)
-  string GetScenarioName() { return ScenName; };			// Get Scenario/Table name
-  vector < string > GetScenarioDescription() { return ScDescript; };	// Get Description of scenario
-  double GetCMSEnergy() { return Ecms; };				// Get center of mass energy
-  int GetILOord() { return ILOord; };					// Get number of alpha_s in leading order (1 or 2 usually)
-  int GetNObsBins() { return NObsBin; };				// Get number of measured bins
-  int GetNDiffBin() { return NDim; };					// Get number of differential measurement. 1: single differential; 2: double differential
-  vector < int > GetRapidityIndex() { return RapIndex;};		// Get rapidity indices
-  vector < string > GetDimensionLabel() { return DimLabel;};		// Get label for measured dimensions
-  vector < int > GetIDiffBin() { return IDiffBin;};			// Get number of differential bins
-  vector < vector < double > > GetLowBinEdge() const { return LoBin; };	// Get Lower Bin edge [ObsBin][DiffBin]
-  vector < vector < double > > GetUpBinEdge() const { return UpBin; };	// Get Upper Bin edge [ObsBin][DiffBin]
-  vector < double > GetBinSize() const { return BinSize; };		// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
-  int IsNormalized() const { return INormFlag; };			// Normalized Cross sections?
-  string GetScaleDescription() const { return BBlocksSMCalc[0][1]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
-  int GetNScaleVariations();									// Get number of available scale variations
-  vector < double > GetScaleFactors();								// Get list of available scale factors
-  
-
-  // ---- Print outs ---- //
-  void PrintTableInfo(const int iprint = 0);
-  void PrintFastNLOTableConstants(const int iprint = 2);
-  void PrintCrossSections();
-  void PrintCrossSectionsDefault();
-  void PrintCrossSectionsWithReference();
-  void PrintCrossSectionsData();
-
-
-  // ---- human readable strings ---- //
-  static const string fContrName[20];
-  static const string fOrdName[4][4];
-  static const string fNSDep[4];
+  void SetGRVtoPDG2011_2loop(bool print);
 
 private:
   static int WelcomeOnce;

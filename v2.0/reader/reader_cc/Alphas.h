@@ -25,6 +25,7 @@ public:
    static double CalcAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
    static int CalcNf(double mu);
+   static void PrintInfo();
 	
 private:
    static Alphas* instance;

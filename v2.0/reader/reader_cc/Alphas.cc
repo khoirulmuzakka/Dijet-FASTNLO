@@ -93,16 +93,9 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    static const double twopi = 2. * 4. * atan(1.);
    if ( first ) {
      first = false;
-     // - Print info
-     printf("\n");
      cout << " " << cseps << endl;
      printf(" # alphas-grv: First call:\n");
-     cout << " " << cseps << endl;
-     printf(" # ALPHAS-GRV: PI       = %#18.15f\n",twopi/2.); 
-     printf(" # ALPHAS-GRV: M_Z/GeV  = %#9.6f\n",fMz); 
-     printf(" # ALPHAS-GRV: a_s(M_Z) = %#9.6f\n",alphasMz); 
-     printf(" # APLHAS-GRV: a_s loop = %2i\n",nLoop);
-     cout << " " << cseps << endl;
+     PrintInfo();
    }
    
    // - initialize beta functions
@@ -111,23 +104,6 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    const double beta1	= 102. - 38./3. * nf;
    const double beta10	= beta1 / beta0 / beta0;
    const double MZ2 = pow(fMz,2);
-   
-   // do we want to use a cache?
-   //    double ASMZCACHE = 0;
-   //    double MUCACHE = 0;
-   //    double NLOOPCACHE = 0;
-   //    double asca
-   //    If (MU.eq.MUCACHE .and. ALPSMZ.eq.ASMZCACHE 
-   //        +     .and. NLOOP.eq.NLOOPCACHE) Then
-   //       ALPS_IT = ASCACHE
-   //       Return
-   //       Endif
-   
-   //    // plain alphas code that is used in nlojet++
-   //    double L = log(mu/fMz);
-   //    L = (beta0/twopi + alphasMz*beta1/twopi/twopi/2.)*L;
-   //    return alphasMz/(1. + alphasMz*L);
-   
 
    // - exact formula -> extract Lambda from alpha_s(Mz)
    double LAM2 = MZ2 / exp( FBeta(asmz,nLoop,nf));
@@ -147,16 +123,24 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
       //printf(" i = %d , alphas = %8.6f , mu = %7.4f\n",i,as,mu);
    }
    
-   //- that's it - modify cache - set function - return
-   //    MUCACHE = MU
-   //       ASMZCACHE = asmz
-   //       ASCACHE = as
-   //       ALPS_IT = as
-
    return as;
-   //kr Fix alphas for debugging
-   //return asmz;
+}
 
+
+void Alphas::PrintInfo(){
+    // - Print info
+   const string csep41("#########################################");
+   const string cseps = csep41 + csep41;
+   static bool first = true;
+   static const double twopi = 2. * 4. * atan(1.);
+   cout << " " << cseps << endl;
+   printf(" # ALPHAS-GRV: PI              = %#18.15f\n",twopi/2.); 
+   printf(" # ALPHAS-GRV: M_Z/GeV         = %#9.6f\n",fMz); 
+   printf(" # ALPHAS-GRV: a_s(M_Z)        = %#9.6f\n",fAlphasMz); 
+   printf(" # APLHAS-GRV: a_s loop        = %2i\n",fnLoop);
+   printf(" # APLHAS-GRV: flavor-matching = %s\n",(bFlavorMatching?"true":"false"));
+   printf(" # APLHAS-GRV: nf (M_Z)        = %2d\n",CalcNf(fMz));
+   cout << " " << cseps << endl;
 }
 
 

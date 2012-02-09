@@ -101,17 +101,34 @@ FastNLOReader::~FastNLOReader(void)
 
 
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
-  fAlphasEvolution = AlphasEvolution; 
   if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) {
     cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, ...)."<<endl; 
   }
 
-  if ( AlphasEvolution == kGRV ){
-    Alphas::SetMz(91.1876); // PDG 2011
-    Alphas::SetNf(5);
-    Alphas::SetNLoop(2);
-    Alphas::SetFlavorMatchingOn(true);
-  }
+  bool Print = true;
+  if ( AlphasEvolution == kGRV ) SetGRVtoPDG2011_2loop(Print);
+  fAlphasEvolution = AlphasEvolution; 
+  FillAlphasCache();
+}
+
+
+//______________________________________________________________________________
+
+
+
+void FastNLOReader::SetGRVtoPDG2011_2loop(bool Print){
+   printf("FastNLOReader::SetAlphasEvolution. Info. Resetting GRV Alphas::Alphas evolution.\n");
+   Alphas::SetMz(91.1876); // PDG 2011
+   Alphas::SetNf(5);
+   Alphas::SetNLoop(2);
+   Alphas::SetFlavorMatchingOn(true);
+   if ( Print ) {
+      Alphas::PrintInfo();
+//       printf("   Mz               %7.4f\n",Alphas::GetMz());
+//       printf("   Nf               %7d\n",Alphas::GetNf());
+//       printf("   NLoop            %7d\n",Alphas::GetNLoop());
+//       printf("   FlavorMatching     %s\n", (Alphas::GetFlavorMatchingOn()?" true":"false"));
+   }
 }
 
 
@@ -1445,7 +1462,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 //______________________________________________________________________________
 
 
-int FastNLOReader::GetNScaleVariations(){
+int FastNLOReader::GetNScaleVariations() const {
   if ( BBlocksSMCalc[0][1]->NScaleDep ==3 ){
     printf("FastNLOReader::GetNScaleVariations(). This is a 'flexible scale table', therefore you can choose all desired scale variations.\n");
     return 1;
@@ -1457,7 +1474,7 @@ int FastNLOReader::GetNScaleVariations(){
 //______________________________________________________________________________
 
 
-vector < double > FastNLOReader::GetScaleFactors(){
+vector < double > FastNLOReader::GetScaleFactors() const {
   if ( BBlocksSMCalc[0][1]->NScaleDep ==3 ){
     printf("FastNLOReader::GetScaleFactors(). This is a 'flexible scale table', therefore you can choose all desired scale variations.\n");
     return vector<double>();
@@ -1925,7 +1942,6 @@ double FastNLOReader::CalcAlphasQCDNUM(double Q){
 double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
   //
   // Implementation of Alpha_s evolution as function of Mu_r.
-  //
   // this is the evolution, which is used by nlojet++ and cteq6m.
   // Be aware of the Mz-value from 2001 of 91.70.
   //
@@ -1936,20 +1952,17 @@ double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
   //   double Mz  = 91.70
   //
   // as evolution by lhpdf.c 
+  // please cite the nlojet++ references.
   //
-
   // the original parameters from the cteq6 pdf
   //   // Alpha QCD //
   //   1, 1, 0, -1, 0.1179, 91.70, 1.3, 4.5, 180.0,
-
-  // #define b0 1.2202
-  // #define b1 0.4897
-  // #define b2 0.1913
   //   double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
   //   double BETA1 =  (51. - 19./3.*NF);
 
   double b0  = 1.2202;
   double b1  = 0.4897;
+  // double b2 = 0.1913;
 
   //double Mz	= 91.187;
   double Mz	= 91.70;
@@ -2178,7 +2191,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
 
 void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
    
-  if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}// [i][x][jS1][kS2][l]
+  if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}
 
   vector<double> xfx(13); // PDFs of all partons
 
@@ -2186,17 +2199,13 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
     int nxmax = B->GetNxmax(i);
       
     // speed up! if mu_f is only dependent on one variable, we can safe the loop over the other one
-
     for(int x=0;x<nxmax;x++){ 
       double xp	= B->XNode1[i][x];
-	
       if ( fMuFFunc != kScale1 &&  fMuFFunc != kScale2 ) { // that't the standard case!
 	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
-		  
 	    xfx = GetXFX(xp,muf);
-	    //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	    vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
 	    for(int l=0;l<B->NSubproc;l++){ 
 	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
@@ -2208,7 +2217,6 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	  double muf = CalcMu( kMuF , 0 ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
 	  xfx = GetXFX(xp,muf);
-	  //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
 	  for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	    for(int l=0;l<B->NSubproc;l++){ 
@@ -2221,7 +2229,6 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
 	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	  double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] , 0 , fScaleFacMuF );
 	  xfx = GetXFX(xp,muf);
-	  //xfx = LHAPDF::xfx(xp, muf); // LHAPDF::xfx_p_(x,muf,0,0)
 	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
 	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    for(int l=0;l<B->NSubproc;l++){ 
@@ -2290,7 +2297,7 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
 
 
 void FastNLOReader::FillBlockBPDFLCsHHCv21( FastNLOBlockB* B ){
-  if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}// [i][x][jS1][kS2][l]
+  if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}
   vector < vector < double > > xfx; // PDFs of all partons
   for(int i=0;i<NObsBin;i++){
     int nxmax = B->GetNxmax(i);

@@ -263,8 +263,6 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       }
     }
 
-    //! v2.1 store NScaleDep here.
-    //! v2.1 *table >> NScaleDep;
 
     if ( NScaleDep != 3 ) {
       Nscalevar.resize(NScaleDim);
@@ -319,37 +317,6 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 	  AlphasTwoPi[i][j].resize(ScaleNodeScale2[i].size());
 	}
       }
-
-      //         *table >> NscalenodeScaleQ ;
-      //         ResizeTable( &ScaleNodeQ , fNObsBins , NscalenodeScaleQ );
-      //         nn3 += ReadTable  ( &ScaleNodeQ , table );
-
-      //         *table >> NscalenodeScalePt ;
-      //         ResizeTable( &ScaleNodePt , fNObsBins , NscalenodeScalePt );
-      //         nn3 += ReadTable  ( &ScaleNodePt , table );
-
-      //         int XMaxFromFromDim[1] = { 0 };
-      //         ResizeTable( &PdfLcMuVar , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-      //         ResizeTable( &AlphasTwoPi , fNObsBins , NscalenodeScaleQ , NscalenodeScalePt );
-
-      //         ResizeTable( &SigmaTildeMuIndep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaTildeMuIndep , table );
-
-      //         ResizeTable( &SigmaTildeMuFDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaTildeMuFDep , table );
-
-      //         ResizeTable( &SigmaTildeMuRDep , fNObsBins , XMaxFromFromDim , NscalenodeScaleQ , NscalenodeScalePt , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaTildeMuRDep , table );
-
-      //         ResizeTable( &SigmaRefMixed , fNObsBins , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaRefMixed , table );
-
-      //         ResizeTable( &SigmaRef_s1 , fNObsBins , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaRef_s1 , table );
-
-      //         ResizeTable( &SigmaRef_s2 , fNObsBins , NSubproc );
-      //         nn3 += ReadTable  ( &SigmaRef_s2 , table );
-      //printf(" *  FastNLOBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
 
     }
 
@@ -472,39 +439,6 @@ void FastNLOBlockB::Print(const int ic, const int iprint){
 	  printf("  B0      NScaleNode(%1i,%1i)               %10i\n",ic,i+1,Nscalenode[i]);
 	}
       }
-      // printf("  B0  Nxtot1[0-%d]             ",fNObsBins);
-      // for(int i=0;i<fNObsBins;i++){
-      //   printf("%d ,",Nxtot1[i]);
-      // }
-      // printf("  B0   \n");
-      // printf("  B0   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
-      // printf("  B0   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %d)\n",NFragFunc);
-      // if ( NScaleDep != 3 ) {
-      //   for(int i=0;i<NScaleDim;i++){
-      // 	for(int j=0;j<ScaleDescript[i].size();j++){
-      // 	  printf("  B0    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
-      // 	}
-      // 	printf("  B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
-      // 	printf("  B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
-      // 	for(int j=0;j<Nscalevar[i];j++){
-      // 	  printf("  B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
-      // 	}
-      //   }
-      //   printf("  B   No printing of ScaleNode implemented yet.\n");
-      //   printf("  B   No printing of SigmaTilde implemented yet.\n");
-      // }
-      // if ( NScaleDep == 3 ) {
-      //   printf(" B   NScaleNodeScale1[0-%d]   ",fNObsBins);
-      //   for(int i=0;i<fNObsBins;i++){
-      // 	printf("%d ,",ScaleNodeScale1[i].size());
-      //   }
-      //   printf(" B   \n");
-      //   printf(" B   NScaleNodeScale2[0-%d]   ",fNObsBins);
-      //   for(int i=0;i<fNObsBins;i++){
-      // 	printf("%d ,",ScaleNodeScale2[i].size());
-      //   }
-      //   printf(" B   \n");
-      // }
       if (ic>1) {
 	printf(" #########################################\n");
       }
