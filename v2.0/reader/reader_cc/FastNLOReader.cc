@@ -1978,6 +1978,7 @@ double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
 
 
 double FastNLOReader::CalcAlphasGRV(double MU, double ALPSMZ){
+  Alphas::SetAlphasMz(fAlphasMz);
   return Alphas::CalcAlphasMu(MU,ALPSMZ);
 }
 
