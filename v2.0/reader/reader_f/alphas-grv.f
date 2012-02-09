@@ -46,10 +46,13 @@
          WRITE(*,'(X,A)')CSEPS
          WRITE(*,'(X,A)')"# alphas-grv: First call:"
          WRITE(*,'(X,A)')CSEPS
-         WRITE(*,'(X,A,F18.15)')"# ALPHAS-GRV: PI       = ",PI4/4D0 
-         WRITE(*,'(X,A,F9.6)')"# ALPHAS-GRV: M_Z/GeV  = ",ZMASS 
-         WRITE(*,'(X,A,F9.6)')"# ALPHAS-GRV: a_s(M_Z) = ",ALPSMZ 
-         WRITE(*,'(X,A,I2)')"# APLHAS-GRV: a_s loop = ",NLOOP
+         WRITE(*,'(X,A,F18.15)')"# ALPHAS-GRV: PI              = ",
+     >        PI4/4D0 
+         WRITE(*,'(X,A,F9.6)')"# ALPHAS-GRV: M_Z/GeV         = ",ZMASS 
+         WRITE(*,'(X,A,F9.6)')"# ALPHAS-GRV: a_s(M_Z)        = ",ALPSMZ 
+         WRITE(*,'(X,A,I2)')"# APLHAS-GRV: a_s loop        = ",NLOOP
+         WRITE(*,'(X,A,L4)')"# APLHAS-GRV: flavor-matching = ",.FALSE.
+         WRITE(*,'(X,A,I2)')"# APLHAS-GRV: nf (M_Z)        = ",NF
          WRITE(*,'(X,A)')CSEPS
       ENDIF
 

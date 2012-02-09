@@ -236,6 +236,7 @@ double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double s
   else if	( Func == kLinearSum )		mu	= FuncLinearSum(scale1,scale2);
   else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
   else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
+  else if	( Func == kExpProd2 )		mu	= FuncExpProd2(scale1,scale2);
   else if	( Func == kExtern  )		mu	= (kMuX==FastNLOReader::kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
   else printf( "Error. could not identify functional form for scales calculation.\n");
   
@@ -279,6 +280,11 @@ double FastNLOReader::FuncMax(double scale1 , double scale2 ){
 double FastNLOReader::FuncMin(double scale1 , double scale2 ){
   if ( scale1 < scale2 ) return scale1;
   else return scale2;
+}
+
+//______________________________________________________________________________
+double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
+  return ( scale1 * exp(0.3*scale2) );
 }
 
 
@@ -377,6 +383,8 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   case kScaleMax: sprintf(fname,"max(%s^2,%s^2)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
       break;
   case kScaleMin: sprintf(fname,"min(%s^2,%s^2)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
+     break;
+  case kExpProd2: sprintf(fname,"(%s*exp(0.3*%s)^2)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
      break;
   case kExtern: sprintf(fname,"f_ext(%s,%s)",BBlocksSMCalc[0][0]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][0]->ScaleDescript[0][1].c_str());
      break;
@@ -1114,6 +1122,14 @@ void FastNLOReader::PrintCrossSectionsDefault(){
   string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
   string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
   
+  // If flexible-scale table, set MuR and MuF functional forms
+  if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
+    SetMuRFunctionalForm(FastNLOReader::kScale1);
+    SetMuRFunctionalForm(FastNLOReader::kScale1);
+    //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
+    //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
+  }
+
   // Check on existence of LO and NLO (Id = -1 if not existing)
   int ilo   = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
   int inlo  = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);

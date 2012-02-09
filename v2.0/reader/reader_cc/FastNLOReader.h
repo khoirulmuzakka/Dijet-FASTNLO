@@ -49,7 +49,8 @@ public:
     kLinearSum			= 6,	// e.g. mu^2 = (( Q + pt ))^2
     kScaleMax			= 7,	// e.g. mu^2 = max( Q^2, pt^2)
     kScaleMin			= 8,	// e.g. mu^2 = min( Q^2, pt^2) 
-    kExtern			= 9	// define an external function for your scale
+    kExpProd2                   = 9,    // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
+    kExtern			= 10	// define an external function for your scale
   };
 
   enum EPDFInterface {
@@ -330,6 +331,7 @@ private:
   double FuncLinearSum ( double scale1 , double scale2 ) ;
   double FuncMax ( double scale1 , double scale2 ) ;
   double FuncMin ( double scale1 , double scale2 ) ;
+  double FuncExpProd2 ( double scale1 , double scale2 ) ;
 
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);

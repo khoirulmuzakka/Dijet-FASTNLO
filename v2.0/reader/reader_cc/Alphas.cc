@@ -93,7 +93,7 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    static const double twopi = 2. * 4. * atan(1.);
    if ( first ) {
      first = false;
-     cout << " " << cseps << endl;
+     cout << endl << " " << cseps << endl;
      printf(" # alphas-grv: First call:\n");
      PrintInfo();
    }
