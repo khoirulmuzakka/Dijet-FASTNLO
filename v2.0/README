@@ -1,3 +1,7 @@
+**************
+* For users: *
+**************
+
 Installation of distribution package:
 =====================================
 ./configure --prefix=/your/install/directory
@@ -82,6 +86,42 @@ setenv FASTNLOSRCPATH /home/rabbertz/local/src/fastnlo-2.0.0-gcc412
 # Add to system paths PATH and LD_LIBRARY_PATH
 setenv PATH /home/rabbertz/local/bin:${PATH}
 setenv LD_LIBRARY_PATH /home/rabbertz/local/lib:/home/rabbertz/local/lib/fastnlo:/home/rabbertz/local/lib64:${LD_LIBRARY_PATH}
+
+
+
+*******************
+* For developers: *
+*******************
+
+Using checked out subversion working area for fastNLOv2 development:
+(NOT required for normal users installing distribution tarballs ...!)
+====================================================================
+With recent versions of autoconf/automake, e.g. versions 2.65/1.11.1:
+
+In directory v2.0 (containing the configure.ac file) type:
+----------------------------------------------------------
+autoreconf --install
+./configure --prefix=/your/install/directory --with-... further options
+make -j #_of_cores
+make install
+
+With old versions of autoconf/automake as in SLC5, e.g. versions 2.59/1.9.6:
+In directory v2.0 (containing the configure.ac file) type:
+----------------------------------------------------------
+# Provide initial versions of required auto-files (usually done via --install)
+tar -C . xvfz m4/autoinstallfiles_ac-2.65_am-1.11.1.tar.gz
+# Reinitialize for present autoconf/automake versions
+aclocal --force && autoconf && autoheader && automake && libtoolize --force -c
+# Do the same in the two subprojects
+cd processor/converter
+aclocal --force && autoconf && autoheader && automake && libtoolize --force -c
+cd ../../reader
+aclocal --force && autoconf && autoheader && automake && libtoolize --force -c
+cd ..
+# Then continue as usual
+./configure --prefix=/your/install/directory --with-... further options
+make -j #_of_cores
+make install
 
 
 
