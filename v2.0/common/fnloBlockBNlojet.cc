@@ -13,6 +13,7 @@ fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :
    _S_gauleg(20, _M_xb, _M_wb);
    counter=0;
    IWarmUp=0;
+   IWarmUpPrint = 10000000 ;
    for ( int i = 0 ; i < 3 ; i++ ) Fct_MuR_Ref[i] = NULL;
    for ( int i = 0 ; i < 3 ; i++ ) Fct_MuF_Ref[i] = NULL;
 }
@@ -445,11 +446,14 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ------------------------ Warm-Up Run to identify extreme x,mu values ------------------- //
    // ---------------------------------------------------------------------------------------- //
 
+
    if (IWarmUp == 1) {
       WarmUp( ObsBin , min(x1,x2) , M1 , M2 , "xlim" , "scale1" , "scale2");
       return;
    }
 
+
+   
    // ---------------------------------------------------------------------------------------- //
    // --------------------------------- reference tables ------------------------------------- //
    // ---------------------------------------------------------------------------------------- //
@@ -912,7 +916,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       
    // ---- count ---- //
    counter++;
-      
+
    // ---- write out --- //
    if ( (counter % IWarmUpPrint) == 0) {
       // ---- printout on screen ---- //
@@ -926,7 +930,9 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       
       // ---- write out to file ---- //
       FILE * ofile;
-      ofile = fopen("fastNLO-warmup.dat","w");
+      char filename [500];
+      sprintf(filename,"fastNLO-warmup.%s.dat",BlockA1->GetScenName().data() );
+      ofile = fopen(filename,"w");
       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
 	 fprintf(ofile,"	%s [%d] = %8.2e", sx.data(), i, axlo[i] );
@@ -1867,7 +1873,7 @@ void fnloBlockBNlojet::InitDISConstants( fnloBlockA2* A2 , bool nlo ){
    }
 
    //IWarmUp = 0;			// no warm-up run -> production run.
-   IWarmUpPrint = 10000000 ;
+   //IWarmUpPrint = 10000000 ;
 
    NScaleDep = 3;
    
@@ -1950,7 +1956,7 @@ void fnloBlockBNlojet::InitLHCConstants( fnloBlockA2* A2 , bool nlo ){
    
 
    //IWarmUp	= 0;			// no warm-up run -> production run.
-   IWarmUpPrint	= 10000000 ;
+   //IWarmUpPrint	= 10000000 ;
 
    NScaleDep	= 3;
    
