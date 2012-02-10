@@ -2,12 +2,13 @@
 AUTOMAKE_OPTIONS = gnu
 
 # The main targets, here the libtool plugin libraries to build
-lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la libfnl5002ak06.la
+lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #
 if HAVE_FASTJET
    lib_LTLIBRARIES += libfnl2222b.la libfnl2342b.la libfnl2352.la libfnl2412c.la libfnl2412d.la libfnl2422.la libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la libfnl2912.la libfnl2622f.la
+   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
 endif
 
 #
@@ -43,7 +44,8 @@ libfnl2822den_la_SOURCES    = fnl2822den.cc    $(AM_SOURCES)
 libfnl2822num_la_SOURCES    = fnl2822num.cc    $(AM_SOURCES)
 libfnl2912_la_SOURCES       = fnl2912.cc       $(AM_SOURCES)
 libfnl2622f_la_SOURCES      = fnl2622f.cc      $(AM_SOURCES)
-libfnl5002ak06_la_SOURCES   = fnl5002ak06.cc       $(AM_SOURCES)
+libfnl5002ptavystar_la_SOURCES   = fnl5002ptavystar.cc       $(AM_SOURCES)
+libfnl5002pt12_la_SOURCES   = fnl5002pt12.cc   $(AM_SOURCES)
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
 #libfnl1001ak07_la_SOURCES   = fnl1001ak07.cc   fj-ak.h      fj-ak.cc      $(AM_SOURCES)
