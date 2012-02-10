@@ -11,6 +11,9 @@ AUTOMAKE_OPTIONS = gnu
 #
 EXTRA_DIST =
 #
+# Normally, it's not necessary to define docdir! Accommodate feature
+# lacking in autoconf-2.59, automake-1.9.6
+docdir = ${datadir}/doc/${PACKAGE}
 docfiles = alljet.pdf
 
 DOCNAM = alljet
