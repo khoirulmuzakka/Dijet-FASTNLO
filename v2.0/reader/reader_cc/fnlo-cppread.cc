@@ -27,9 +27,9 @@ int fnlocppread(int argc, char** argv){
   using namespace std;
 
   //---  Initialization for nice printing
-  string CSEPS = "##################################################################################\n";
-  string LSEPS = "#---------------------------------------------------------------------------------\n";
-  string CSEPL = "####################################################################################################################################################################\n";
+  const string CSEPS = "##################################################################################\n";
+  const string LSEPS = "#---------------------------------------------------------------------------------\n";
+  const string CSEPL = "####################################################################################################################################################################\n";
 
   //---  Parse commmand line
   printf("\n");
@@ -92,21 +92,23 @@ int fnlocppread(int argc, char** argv){
   //     If you use fastNLO for the first time, please read through the
   //     documentation and comments carefully in order to calculate
   //     a reasonable cross section.
+  //     All comments that start with '--- fastNLO user:' are intended as a
+  //     short documentation for various options, that can be changed by you.
   //
   //     In fastNLO version 2, there are two different types of tables.
-  //     Although internally they are implemented differently, both are called
+  //     Although internally they are implemented slightly differently, both are called
   //     v2 for their larger flexiblity compared to version 1.4.
   //     The simpler ones, v2.0, are extended versions of this previous format
   //     v1.4 from which a conversion into v2.0 is possible, but without profiting
   //     of the improvements, of course.
-  //     The second type of tables, v2.1, are called 'flexible-scale'-tables which
+  //     The second type of tables, v2.1, are called 'flexible-scale'-tables
   //     which have encoded an advanced storage of matrix elements and scale variables. 
   //     These tables give you the possibility to change the renormalization and
-  //     the factorization scales independently and also to define a posteriori 
-  //     how to exactly calculate the scale variables.
+  //     the factorization scales independently and also have the possiblity to
+  //     change the calculation of the scale.
   //
-  //     Please check, which type of table you want to use and then
-  //     refer only to the comments and functions that are suitable for your
+  //     Please check, which type of table you are using and then
+  //     refer only to the comments and functions that are suitable for this
   //     fastNLO table.
   
 
@@ -217,22 +219,22 @@ int fnlocppread(int argc, char** argv){
   //     Currently, five different types of contributions have been tested.
   //     Three can be combined to give a scale, PDF and alpha_s dependent
   //     cross-section, one is a fixed multiplicative correction and, at last,
-  //     also data points with uncertainties might be included.
+  //     also data points with uncertainties might be included in a table.
   //     For calculating a cross-section, by default only the LO & NLO contributions
   //     are used. However, each contribution can be swiched on or off separately.
   //     Please make sure to avoid combinations that do not make sense,
   //     e.g. 2-loop threshold corrections with LO pQCD.
   //     
   //     For switching a contribution on/off, its type must be known:
-  //       - kFixedOrder		-> Fixed order calculation (in alpha_s)
-  //       - kThresholdCorrection	-> Threshold corrections
-  //       - kElectroWeakCorrection	-> Electroweak corrections (not derived yet)
-  //     @DB And the non-perturbative corrections?
+  //       - kFixedOrder		  -> Fixed order calculation (in alpha_s)
+  //       - kThresholdCorrection	  -> Threshold corrections
+  //       - kElectroWeakCorrection	  -> Electroweak corrections (not derived yet)
+  //       - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
   //     plus one must know the 'Id' of this contribution, which is typically
   //     printed when reading a table. To switch contribution on/off please use:
   //            fnloreader->SetContributionON( contrib, Id, on/off ) 
   //     To show the Id's of each contribution please call:
-  //     fnloreader->PrintTableInfo();
+  //		fnloreader->PrintTableInfo();
 
 
 
@@ -256,11 +258,10 @@ int fnlocppread(int argc, char** argv){
   //            fnloreader->SetScaleVariation(0);
   //
   //     Furthermore you have the possiblity to vary the renormalization scale by any
-  //     factor. Please use e.g.:
+  //     factor. For a scale variation factor of 0.5, please use e.g.:
   //            fnloreader->SetScaleFactorMuR(0.5);
   //     WARNING: This option is inconsistent with threshold corrections. These require
   //     in the present implementation to always have mu_r = mu_f.
-  //     @DB What is "automatically switched OFF to preserve consistency." ???
   
 
   
@@ -271,7 +272,7 @@ int fnlocppread(int argc, char** argv){
   //     for calculating the scales. They are called scale1 and scale2 and
   //     at least one needs to have a dimension in "GeV".
   //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
-  //     HHC tables might have for example scale1 = pt and scale2 = y.
+  //     hadron-hadron tables might have for example scale1 = pt and scale2 = y.
   //     Other settings are imaginable. Please check, which obervables exactly
   //     are stored as scale variables!
   //
@@ -288,9 +289,9 @@ int fnlocppread(int argc, char** argv){
   //    
   //     Further you can define a scale factor (one for the renormalization
   //     and one for the factorization scale) which is multiplied to the scale
-  //     independently from the predefined function, like e.g. for mu_r
+  //     independently from the predefined function, like e.g. for mu_r:
   //         mu_r = scalefac * f(scale1,scale2)
-  //     Please use e.g. for mu_r:
+  //     Please use e.g. a factor of 1.5 for mu_r:
   //             fnloreader->SetScaleFactorMuR(1.5);
   //
   //     For changing the factorization scale, replace all 'MuR' by 'MuF' in the function calls.
@@ -308,7 +309,7 @@ int fnlocppread(int argc, char** argv){
   //       - mu_r:  kScale1		-> mu_r = scale1
   //       - mu_f:  kScale1		-> mu_f = scale1
   //
-  //  Possible calls are e.g.:
+  //  Valid calls are e.g.:
   //    fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
   //    fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
   //    fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
@@ -321,11 +322,11 @@ int fnlocppread(int argc, char** argv){
   // --- fastNLO user: Before you can access the fastNLO computed
   //     cross sections, you always have to call CalcCrossSection()!
   //     If you are not sure, whether you have recalculated the internal
-  //     alphas-cache and PDF-cache with your current scale choice,
-  //     you further can call FillAlphasCache() and FillPDFCache() before.
-  //     @DB: FillAlphasCache comes a bit as a surprise here. Was not mentioned before!?
-  //     So please call:
+  //     PDF-cache with your current scale choice you further can call 
+  //     FillPDFCache() before calling CalcCrossSection().
+  //     So, before accessing the cross sections, please call:
   //             fnloreader->CalcCrossSection();
+  fnloreader->CalcCrossSection();
 
 
   
@@ -334,7 +335,8 @@ int fnlocppread(int argc, char** argv){
   //     you should use:
   //           vector < double > xs = fnloreader->GetCrossSection();
   //     If you want to have a pointer to an array of numbers you might use
-  //           double* cs = &fnloreader->GetCrossSection()[0];
+  //           vector < double > xs = fnloreader->GetCrossSection();
+  //           double* cs = &xs[0];
   //     
   //     Further you can access the "k-factor", which is calculated with all
   //     'contributions' that are switched on (e.g. non-perturbative corrections)
