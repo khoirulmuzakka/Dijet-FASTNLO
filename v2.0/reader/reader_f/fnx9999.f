@@ -996,7 +996,7 @@ C---  ENDDO
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
       INTEGER I,J,K
-      CHARACTER*64 CHTMP
+      CHARACTER*80 CHTMP
 
       WRITE(*,'(A)')
       WRITE(*,*)CSEPS
@@ -1065,7 +1065,7 @@ C---  ENDDO
       SUBROUTINE FX9999TB(FNSTRING,IVAR,DVAR)
 ***********************************************************************
 *
-*     fastNLO user code v2.0 - returns infortmation from table variables
+*     fastNLO user code v2.0 - returns information from table variables
 *
 ***********************************************************************
       IMPLICIT NONE
