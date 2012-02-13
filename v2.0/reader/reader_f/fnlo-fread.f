@@ -151,7 +151,8 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
       ENDDO
 
 *---  Initialize LHAPDF  
-      CALL SETLHAPARM('SILENT')
+C---  CALL SETLHAPARM('SILENT')
+      CALL SETLHAPARM('LOWKEY')
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
 
 *---  Initialize one member, 0=best fit member

@@ -833,7 +833,7 @@ void FastNLOReader::ReadBlockA2(istream *table){
   }
   LoBin.resize(NObsBin);
   UpBin.resize(NObsBin);
-  //KR: Set rapidity index also when reading a table
+  // Set rapidity index also when reading a table
   RapIndex.push_back(0);
   //   int irap = 0;
   for(int i=0;i<NObsBin;i++){
@@ -2153,12 +2153,12 @@ void FastNLOReader::InitLHAPDF(){
     printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
   }
 
-  LHAPDF::setVerbosity(LHAPDF::SILENT);
-  //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
+  //LHAPDF::setVerbosity(LHAPDF::SILENT);
+  LHAPDF::setVerbosity(LHAPDF::LOWKEY);
   //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
-  // KR: Do not use the ByName feature, destroys ease of use on the grid without LHAPDF 
+  // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF 
   //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-  //  cout << "PDF set name " << fLHAPDFfilename << endl;
+  //cout << "PDF set name " << fLHAPDFfilename << endl;
   LHAPDF::initPDFSet(fLHAPDFfilename);
   fnPDFs = LHAPDF::numberPDF();
   if ( fnPDFs < fiPDFSet ){
