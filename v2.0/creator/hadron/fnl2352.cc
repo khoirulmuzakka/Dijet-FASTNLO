@@ -178,7 +178,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
 
-  // --- give some debug output before selection
+  // --- give some debug output before selection and sorting
   if ( doDebug ) {
     for (unsigned int i=1; i<=nj; i++) {
       double pti  = pj[i].perp();

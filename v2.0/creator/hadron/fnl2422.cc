@@ -178,7 +178,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
 
-  // --- give some debug output before selection
+  // --- give some debug output before selection and sorting
   if ( doDebug ) {
     for (unsigned int i=1; i<=nj; i++) {
       double pti  = pj[i].perp();
@@ -219,7 +219,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   static fNLOSorter SortJets;
   std::sort(pj.begin(), pj.begin() + njet, SortJets);
   
-  // --- give some debug output after selection
+  // --- give some debug output after selection and sorting
   if ( doDebug ) {
     cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
     cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
