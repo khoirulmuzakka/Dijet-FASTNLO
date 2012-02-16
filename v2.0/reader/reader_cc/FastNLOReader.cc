@@ -1125,7 +1125,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
   // If flexible-scale table, set MuR and MuF functional forms
   if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
     SetMuRFunctionalForm(FastNLOReader::kScale1);
-    SetMuRFunctionalForm(FastNLOReader::kScale1);
+    SetMuFFunctionalForm(FastNLOReader::kScale1);
     //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
     //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
   }
