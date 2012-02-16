@@ -50,7 +50,7 @@
       ELSE
          OPEN(NUNIT,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
          IF (IFILE .NE. 0) THEN
-            WRITE(*,*)"FX9999RW: ERROR! Table file "//
+            WRITE(*,*)"FX9999RW: ERROR! Table file ",
      >           FILENAME(1:LEN_TRIM(FILENAME))
             WRITE(*,*)"          not found, "//
      >           "stopped! IOSTAT = ",Ifile
