@@ -584,24 +584,24 @@ void FastNLOReader::ReadTable(void)
     else if ( blockb->IRef == 0 && !blockb->IAddMultFlag ) { // Additive corrections
       if ( blockb->IContrFlag1==1 ) { // Fixed order
 	if ( blockb->IContrFlag2==1 ){ // LO
-	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	  blockb->SetName(nbuf);
 	  BlockB_LO  = blockb;
 	}
 	else if ( blockb->IContrFlag2==2 ){ //NLO
-	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	  blockb->SetName(nbuf);
 	  BlockB_NLO = blockb;
 	}
       }
       else if ( blockb->IContrFlag1==2 ){ // Threshold corrections
 	if ( blockb->IContrFlag2==1 ){ // 1-loop
-	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	  blockb->SetName(nbuf);
 	  BlockB_THC1 = blockb;
 	}
 	else if ( blockb->IContrFlag2==2 ){ // 2-loop
-	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+	  sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	  blockb->SetName(nbuf);
 	  BlockB_THC2 = blockb;
 	}
@@ -623,7 +623,7 @@ void FastNLOReader::ReadTable(void)
     }
     else if ( blockb->IRef == 0 && blockb->IAddMultFlag ) { // Multiplicative corrections
       if ( blockb->IContrFlag1==4 ) { // Non-perturbative corrections
-	sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1][blockb->IContrFlag2].c_str(),fNSDep[blockb->NScaleDep].c_str());
+	sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->IContrFlag2-1].c_str(),fNSDep[blockb->NScaleDep].c_str());
 	blockb->SetName(nbuf);
 	BlockB_NPC1 = blockb;
       }
@@ -2160,8 +2160,8 @@ void FastNLOReader::InitLHAPDF(){
     printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
   }
 
-  //LHAPDF::setVerbosity(LHAPDF::SILENT);
-  LHAPDF::setVerbosity(LHAPDF::LOWKEY);
+  LHAPDF::setVerbosity(LHAPDF::SILENT);
+  //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
   //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
   // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF 
   //LHAPDF::initPDFSetByName(fLHAPDFfilename);
