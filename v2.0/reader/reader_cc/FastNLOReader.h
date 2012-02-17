@@ -249,6 +249,7 @@ public:
   double GetScaleFactorMuF() const { return fScaleFacMuF;};
   int GetScaleVariation() const { return fScalevar; };
   int GetIPdfSet() const {return fiPDFSet;};
+  int GetNPdfSet() const {return fnPDFs;};
 
 
   // ---- Getters for FastNLO table constants ---- //
@@ -291,6 +292,7 @@ private:
 
   void Init() ;
   void ReadTable();
+  void InitMembers();
   void StripWhitespace(string* s);
 
   void ReadBlockA1(istream *table);

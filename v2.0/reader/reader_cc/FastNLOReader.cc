@@ -60,22 +60,14 @@ int FastNLOReader::WelcomeOnce = 0;
 
 FastNLOReader::FastNLOReader(void)
 {
-  BlockB_Data		= NULL;
-  BlockB_LO_Ref		= NULL;
-  BlockB_NLO_Ref	= NULL;
-  fUnits		= kPublicationUnits;
-  fAlphasMz		= 0.118500001;
+  InitMembers();
   printf("FastNLOReader::FastNLOReader. Please set a filename using SetFilename(<name>)!\n");
 }
 
 
 FastNLOReader::FastNLOReader(string filename)
 {
-  BlockB_Data		= NULL;
-  BlockB_LO_Ref		= NULL;
-  BlockB_NLO_Ref	= NULL;
-  fUnits		= kPublicationUnits;
-  fAlphasMz		= 0.118500001;
+  InitMembers();
   SetFilename(filename);
 }
 
@@ -93,6 +85,21 @@ FastNLOReader::~FastNLOReader(void)
       BBlocksSMCalc.clear();
     }
   }
+}
+
+
+//______________________________________________________________________________
+
+
+
+void FastNLOReader::InitMembers(){
+  BlockB_Data		= NULL;
+  BlockB_LO_Ref		= NULL;
+  BlockB_NLO_Ref	= NULL;
+  fUnits		= kPublicationUnits;
+  fAlphasMz		= 0.118500001;
+  fMuRFunc		= FastNLOReader::kScale1;
+  fMuFFunc		= FastNLOReader::kScale1;
 }
 
 
