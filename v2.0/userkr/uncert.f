@@ -259,7 +259,8 @@ ckr            central result according to NNPDF.
                                  WTDXL2(IBIN,ISUB,IORD) =
      >                                WTDXL2(IBIN,ISUB,IORD) /
      >                                DABS(MYRES(IBIN,ISUB,IORD))
-                                 WTDXMN(IBIN,ISUB,IORD) =
+                                 IF (WTDXMN(IBIN,ISUB,IORD).GT.0.D0)
+     >                                WTDXMN(IBIN,ISUB,IORD) =
      >                                WTDXMN(IBIN,ISUB,IORD) /
      >                                DABS(MYRES(IBIN,ISUB,IORD)) 
                                  WTDXUL(IBIN,ISUB,IORD) =
