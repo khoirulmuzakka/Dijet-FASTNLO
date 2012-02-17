@@ -248,8 +248,8 @@ public:
   double GetScaleFactorMuR() const { return fScaleFacMuR;};
   double GetScaleFactorMuF() const { return fScaleFacMuF;};
   int GetScaleVariation() const { return fScalevar; };
-  int GetIPdfSet() const {return fiPDFSet;};
-  int GetNPdfSet() const {return fnPDFs;};
+  int GetIPDFSet() const {return fiPDFSet;};
+  int GetNPDFSet() const {return fnPDFs;};
 
 
   // ---- Getters for FastNLO table constants ---- //
