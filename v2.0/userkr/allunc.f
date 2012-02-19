@@ -1761,14 +1761,16 @@ c
       CHARACTER*255 CSTRNG,CBASE1,CBASE2,CTMP
       INTEGER N,IPDF,MYPDF,IPTMAX,NRAP,MYNSCLS
       LOGICAL LONE,LPDF,LSTAT,LALG,LSER,LRAT,LSCL
-
+      
       INTEGER I,J,ISTAT2,ICYCLE
       INTEGER IORD,ISUB,ISCL,IRAP,IPT,IHIST,NHIST
       INCLUDE "fnx9999.inc"
       INCLUDE "strings.inc"
       INCLUDE "uncert.inc"
       REAL PT(NPTMAX)
-      
+*---  Primary scale, i.e. xmur=xmuf=1., in v14 was 3, in v2 it is 1
+      INTEGER ISCLPR
+      PARAMETER(ISCLPR=1)
 
 c - HBOOK common 
       INTEGER NWPAWC
@@ -1874,7 +1876,7 @@ Comment:                      ENDIF
      >                       NPT(IRAP),PT,0)
                         NHIST = NHIST+2
 ckr                        write(*,*)"2. Booked histo #",nhist
-                     ELSEIF (LSER.AND.ISCL.EQ.3) THEN
+                     ELSEIF (LSER.AND.ISCL.EQ.ISCLPR) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_asPDF_low/xsect"
@@ -1892,7 +1894,7 @@ ckr                        write(*,*)"2. Booked histo #",nhist
                      ENDIF
                      IF (LSTAT) THEN
                         IF (IORD.LE.2.AND.
-     >                       ISCL.EQ.3.AND.ISUB.EQ.0) THEN
+     >                       ISCL.EQ.ISCLPR.AND.ISUB.EQ.0) THEN
                            CSTRNG = CBASE1
                            CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                          "_dstat/xsect"
@@ -1908,7 +1910,7 @@ ckr                        write(*,*)"2. Booked histo #",nhist
                            NHIST = NHIST+2
 ckr                        write(*,*)"3. Booked histo #",nhist
                         ENDIF
-                     ELSEIF (LSER.AND.ISCL.EQ.3) THEN
+                     ELSEIF (LSER.AND.ISCL.EQ.ISCLPR) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_as_low/xsect"
@@ -1925,7 +1927,7 @@ ckr                        write(*,*)"3. Booked histo #",nhist
 ckr                        write(*,*)"3. Booked histo #",nhist
                      ENDIF
                      IF (LALG.AND.IORD.LE.2.AND.
-     >                    ISCL.EQ.3) THEN
+     >                    ISCL.EQ.ISCLPR) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_xsect/xsect_ref"
@@ -1936,7 +1938,7 @@ ckr                        write(*,*)"3. Booked histo #",nhist
 ckr                        write(*,*)"4. Booked histo #",nhist
                      ENDIF
                      IF (LSCL.AND.IORD.LE.2.AND.
-     >                    ISCL.EQ.3) THEN
+     >                    ISCL.EQ.ISCLPR) THEN
                         CSTRNG = CBASE1
                         CSTRNG = CSTRNG(1:LEN_TRIM(CSTRNG))//
      >                       "_SCL2_low/xsect"
@@ -2073,7 +2075,7 @@ c - Fill sums over subprocesses and/or orders into zero factors for IHIST
          IORD = IORD2
          IF (IORD2.EQ.NORD+1) IORD = 0 
          IF (IORDFIL.EQ.-1.OR.IORDFIL.EQ.IORD) THEN
-            DO ISUB2=1,NSBPRC+1 ! Subprocesses hh: 7 subprocesses + total
+            DO ISUB2=1,NSBPRC+1 ! Subprocesses hh: 6/7 subprocesses + total
                ISUB = ISUB2
                IF (ISUB2.EQ.NSBPRC+1) ISUB=0
                IBIN=0
