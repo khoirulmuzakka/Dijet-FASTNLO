@@ -147,16 +147,12 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-
   ReadTable();
   //int iprint = 2;
   //PrintFastNLOTableConstants(iprint);
-   
+  InitScalevariation();
   SetPDFInterface(FastNLOReader::kLHAPDF);
   SetAlphasEvolution(FastNLOReader::kGRV);
-   
-  InitScalevariation();
-
 }
 
 
