@@ -324,10 +324,10 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{root}[1]       = "root";
     $install{fastjet}[0]    = "fastjet-2.4.4";
     $install{fastjet}[1]    = "fastjet-2.4.4";
-    $install{lhapdf}[0]     = "lhapdf-5.8.4";
-    $install{lhapdf}[1]     = "lhapdf-5.8.4";
-    $install{lhapdffix}[0]  = "lhapdf-5.8.4-fix";
-    $install{lhapdffix}[1]  = "lhapdf-5.8.4-fix";
+    $install{lhapdf}[0]     = "lhapdf-5.8.7";
+    $install{lhapdf}[1]     = "lhapdf-5.8.7";
+    $install{lhapdffix}[0]  = "";
+    $install{lhapdffix}[1]  = "";
     $install{lhpdf}[0]      = "lhpdf-1.0.0";
     $install{lhpdf}[1]      = "lhpdf-1.0.0";
     $install{lhpdffix}[0]   = "lhpdf-1.0.0-fix";

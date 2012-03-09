@@ -49,7 +49,7 @@ if ( $opt_h ) {
     print "  -s              Produce tables for statistical evaluation,\n".
 	"                  i.e. combinations of each LO with 1 NLO table and\n".
 	"                  all LO with each NLO table\n";
-    print "  -v #            Choose between fastNLO version 1 or 2 (def.=1)\n";
+    print "  -v #            Choose between fastNLO version 1, 2 or 2.1 (def.=1)\n";
     print "  -w              Write summary table from multiple warmup runs (def.=no)\n\n";
     exit;
 }
@@ -72,7 +72,8 @@ if ( $opt_l ) {$lodir = $opt_l;}
 my $nlodir   = "${scen}"; 
 if ( $opt_n ) {$nlodir = $opt_n;}
 my $nnlodir  = $nlodir; 
-my $wrmdir   = $nlodir;
+my $wrmdir   = "${scen}wrm"; 
+if ( $opt_n ) {$wrmdir = $opt_n;}
 my $tabext = "raw";
 if ($vers == 2) {$tabext = "tab";} 
 my $loglob   = "${scen}*born*.${tabext}*";
@@ -91,6 +92,7 @@ my $merger = "nlofast-add";
 my $cmd;
 unless ( $opt_w ) {
     if ( $vers == 2 ) {
+#	$merger = "fnlo-merge";
 	$merger = "fnlo-merge2";
     }
     $cmd = `which ${merger}`;
@@ -115,64 +117,88 @@ unless ( $opt_w ) {
 #
 if ( $opt_w ) {
     print "\nfastadd.pl: Warmup mode\n";
-    my @files = glob $wrmglob;  
-    chomp @files;
-    unless ( @files ) {
-	print "fastadd.pl: Warning! No warm-up files found for scenario $scen,\n";
-	print "            looking for generic filename fastNLO-warmup\* instead.\n";
-	@files = glob "fastNLO-warmup*";  
+    if ( -d "$wrmdir" ) {
+	chdir $wrmdir;
+	my @files = glob $wrmglob;  
 	chomp @files;
 	unless ( @files ) {
-	    die "fastadd.pl: Warning! No warm-up files found, stopped\n";
+	    print "fastadd.pl: Warning! No warm-up files found for scenario $scen,\n";
+	    print "            looking for generic filename fastNLO-warmup\* instead.\n";
+	    @files = glob "fastNLO-warmup*";  
+	    chomp @files;
+	    unless ( @files ) {
+		die "fastadd.pl: Warning! No warm-up files found, stopped\n";
+	    } 
 	} 
-    } 
-    my $ifil = 0;
-    my $nent = 0;
-    my $stat = 0;
-    my @xmin;
-    my @blow;
-    my @bhig;
-    foreach my $file ( @files ) {
-	open(INFILE,"< $file") or die "fastadd.pl: Error! Could not open $file!\n";
-	my $ient = 0; 
-	if ( $debug ) {print "fastadd.pl: Analyzing file no.: $ifil\n";}
-	while ( my $in = <INFILE> ) {	
-	    if ( $in =~ "//" ) {
-		my $tmp = $in;
-		chomp $tmp;
-		my @tmps = split(" ",$tmp);
-		$stat = $stat + $tmps[1];
-		if ( $debug ) {print "fastadd.pl: Accumulated statistics: $stat\n";}
-	    } else {
-		my $tmp = $in;
-		chomp $tmp;
-		my @tmps = split(" ",$tmp);
-		if ( !$ifil || $tmps[4] < $xmin[$ient] ) {$xmin[$ient] = $tmps[4];} 
-		if ( !$ifil || $tmps[10] < $blow[$ient] ) {$blow[$ient] = $tmps[10];} 
-		if ( !$ifil || $tmps[16] > $bhig[$ient] ) {$bhig[$ient] = $tmps[16];} 
-		$ient++;
+	my $ifil = 0;
+	my $nent = 0;
+	my $stat = 0;
+	my @xmin;
+	my @blow;
+	my @bhig;
+	my @clow;
+	my @chig;
+	foreach my $file ( @files ) {
+	    open(INFILE,"< $file") or die "fastadd.pl: Error! Could not open $file!\n";
+	    my $ient = 0; 
+	    if ( $debug ) {print "fastadd.pl: Analyzing file no.: $ifil\n";}
+	    while ( my $in = <INFILE> ) {	
+		if ( $in =~ "//" ) {
+		    my $tmp = $in;
+		    chomp $tmp;
+		    my @tmps = split(" ",$tmp);
+		    $stat = $stat + $tmps[1];
+		    if ( $debug ) {print "fastadd.pl: Accumulated statistics: $stat\n";}
+		} else {
+		    if ( $vers == 2 ) {
+			my $tmp = $in;
+			chomp $tmp;
+			my @tmps = split(" ",$tmp);
+			if ( !$ifil || $tmps[4] < $xmin[$ient] ) {$xmin[$ient] = $tmps[4];} 
+			if ( !$ifil || $tmps[10] < $blow[$ient] ) {$blow[$ient] = $tmps[10];} 
+			if ( !$ifil || $tmps[16] > $bhig[$ient] ) {$bhig[$ient] = $tmps[16];} 
+			$ient++;
+		    } else {
+			my $tmp = $in;
+			chomp $tmp;
+			chop $tmp;
+			my @tmps = split(" ",$tmp);
+			if ( !$ifil || $tmps[3] < $xmin[$ient] ) {$xmin[$ient] = $tmps[3];} 
+			if ( !$ifil || $tmps[8] < $blow[$ient] ) {$blow[$ient] = $tmps[8];} 
+			if ( !$ifil || $tmps[13] > $bhig[$ient] ) {$bhig[$ient] = $tmps[13];} 
+			if ( !$ifil || $tmps[18] < $clow[$ient] ) {$clow[$ient] = $tmps[18];} 
+			if ( !$ifil || $tmps[23] > $chig[$ient] ) {$chig[$ient] = $tmps[23];} 
+			$ient++;
+		    }
+		}
 	    }
+	    if ( !$ifil ) {$nent = $ient};
+	    if ( $debug ) {print "fastadd.pl: Number of entries: $nent\n";}
+	    if ( $ifil && $ient != $nent ) {
+		print "fastadd.pl: Error! Inconsistent line numbers in warm-up files found \n";
+		die "            (ient = $ient, nent = $nent), stopped\n";
+	    }
+	    close INFILE;
+	    $ifil++;
 	}
-	if ( !$ifil ) {$nent = $ient};
-	if ( $debug ) {print "fastadd.pl: Number of entries: $nent\n";}
-	if ( $ifil && $ient != $nent ) {
-	    print "fastadd.pl: Error! Inconsistent line numbers in warm-up files found \n";
-	    die "            (ient = $ient, nent = $nent), stopped\n";
-	}
-	close INFILE;
-	$ifil++;
-    }
-    my $outfile = "${scen}wrm.dat";
-    open(OUTFILE,"> $outfile") or die "fastadd.pl: Error! Could not open $outfile!\n";
-    my $line = "      // $stat contributions (!= events) in warm-up run\n";
-    print OUTFILE $line;
-    for (my $ient = 0; $ient < $nent; $ient++) {
-	my $line = "      xlim[ $ient ] = $xmin[$ient] , mulo[ $ient ] = $blow[$ient] , muup[ $ient ] = $bhig[$ient] ;\n";
+	my $outfile = "${scen}wrm.dat";
+	open(OUTFILE,"> $outfile") or die "fastadd.pl: Error! Could not open $outfile!\n";
+	my $line = "      // $stat contributions (!= events) in warm-up run\n";
 	print OUTFILE $line;
+	for (my $ient = 0; $ient < $nent; $ient++) {
+	    my $line;
+	    if ( $vers == 2 ) {
+		$line = "      xlim[ $ient ] = $xmin[$ient] , mulo[ $ient ] = $blow[$ient] , muup[ $ient ] = $bhig[$ient] ;\n";
+	    } else {
+		$line = "      xlim[ $ient ] = $xmin[$ient] , scale1lo[ $ient ] = $blow[$ient] , scale1hi[ $ient ] = $bhig[$ient] , scale2lo[ $ient ] = $clow[$ient] , scale2hi[ $ient ] = $chig[$ient];\n";
+	    }
+	    print OUTFILE $line;
+	}
+	close OUTFILE;
+	print "fastadd.pl: Finished table addition, result file is: $outfile\n";
+	chdir $sdir;
+	exit(0);
     }
-    close OUTFILE;
-    print "fastadd.pl: Finished table addition, result file is: $outfile\n";
-    exit(0);
 }
 
 #
