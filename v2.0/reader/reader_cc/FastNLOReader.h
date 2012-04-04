@@ -55,16 +55,19 @@ public:
 
   enum EPDFInterface {
     kLHAPDF			= 0,	// use LHAPDF
-    kH1FITTER			= 1	// use H1Fitter for determining the pdflc
+    kQCDNUM			= 1,	// use QCDNUM for the pdf grid
+    kH1Fitter			= 2,	// use H1Fitter/HeraFitter for the pdf grid
+    kDiffPDF			= 3	// use DiffPDF
   };
 
   enum EAlphasEvolution {
     kGRV			= 0,
     kNLOJET			= 1,      
     kCTEQpdf			= 2,      
-    kLHAPDFInternal		= 4,	// use: double 	LHAPDF::alphasPDF (double Q)
-    kQCDNUMInternal		= 5,	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
-    kFixed			= 6     // Always gives back alpha_s(Mz) for testing.
+    kLHAPDFAs			= 4,	// use: double 	LHAPDF::alphasPDF (double Q)
+    kQCDNUMAs			= 5,	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
+    kH1FitterAs			= 6,	// Alpha_s routine from H1Fitter
+    kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
   };
 
   enum EScaleVariationDefinition {
@@ -114,6 +117,11 @@ protected:
   //string fLHAPDFpath;
   int fnPDFs;
   int fiPDFSet;
+
+   // ---- vars for diffractive tables ---- //
+   double fxpom;
+   double fzmin;
+   double fzmax;
 
   EPDFInterface	fPDFInterface;
   EAlphasEvolution	fAlphasEvolution;
@@ -192,7 +200,7 @@ public:
   void SetLHAPDFfilename( string filename );
   //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
   void SetLHAPDFset( int set );
-  void PrintCurrentLHAPDFInformation();
+  void PrintCurrentLHAPDFInformation() const;
   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
   void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
@@ -200,7 +208,7 @@ public:
   void SetUnits( EUnits Unit );
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
   void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
-  int ContrId( ESMCalculation eCalc, ESMOrder eOrder );
+  int ContrId( const ESMCalculation eCalc, const ESMOrder eOrder ) const;
   void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
@@ -274,12 +282,13 @@ public:
   
 
   // ---- Print outs ---- //
-  void PrintTableInfo(const int iprint = 0);
-  void PrintFastNLOTableConstants(const int iprint = 2);
-  void PrintCrossSections();
-  void PrintCrossSectionsDefault();
+  void PrintTableInfo(const int iprint = 0) const;
+  void PrintFastNLOTableConstants(const int iprint = 2) const;
+  void PrintCrossSections() const ;
+  void PrintCrossSectionsDefault(vector<double> kthc = vector<double>() ) const ;
   void PrintCrossSectionsWithReference();
-  void PrintCrossSectionsData();
+  void PrintCrossSectionsData() const;
+  void PrintFastNLODemo();
 
 
   // ---- human readable strings ---- //
@@ -288,7 +297,7 @@ public:
   static const string fNSDep[4];
 
 
-private:
+protected:
 
   void Init() ;
   void ReadTable();
@@ -299,8 +308,8 @@ private:
   void ReadBlockA2(istream *table);
   void ReadBlockB(istream *table);
 
-  void PrintBlockA1();
-  void PrintBlockA2();
+  void PrintBlockA1() const;
+  void PrintBlockA2() const;
 
   void InitLHAPDF();
   void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
@@ -338,7 +347,7 @@ private:
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
 
-private:
+protected:
   static int WelcomeOnce;
 
 };

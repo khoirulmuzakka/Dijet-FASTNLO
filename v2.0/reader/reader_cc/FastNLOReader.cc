@@ -38,6 +38,7 @@ extern "C"{
   void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
   void evolution_();
   double asfunc_( double* r2, int* nf  , int* ierr);
+  void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
 }
 
 
@@ -108,8 +109,8 @@ void FastNLOReader::InitMembers(){
 
 
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
-  if (AlphasEvolution==kLHAPDFInternal || AlphasEvolution==kQCDNUMInternal ) {
-    cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, ...)."<<endl; 
+  if (AlphasEvolution==kLHAPDFAs || AlphasEvolution==kQCDNUMAs ||AlphasEvolution==kH1FitterAs  ) {
+    cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, H1Fitter, ...)."<<endl; 
   }
 
   //if ( AlphasEvolution == kGRV ) SetGRVtoPDG2011_2loop(true);
@@ -669,7 +670,7 @@ void FastNLOReader::ReadTable(void)
 
 
 
-void FastNLOReader::PrintTableInfo(const int iprint){
+void FastNLOReader::PrintTableInfo(const int iprint) const {
 
   printf(" # This FastNLO table holds %d contributions:\n",Ncontrib);
   
@@ -893,7 +894,7 @@ void FastNLOReader::ReadBlockA2(istream *table){
 
 
 
-void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
+void FastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
 
   //
   // Define different levels of detail for printing out table content
@@ -983,7 +984,7 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint){
 
 
 
-void FastNLOReader::PrintBlockA1(){
+void FastNLOReader::PrintBlockA1() const{
   printf("\n *****************************************\n");
   printf(" * fastNLO Table: Block A1\n");
   printf(" *****************************************\n");
@@ -1006,7 +1007,7 @@ void FastNLOReader::PrintBlockA1(){
 
 
 
-void FastNLOReader::PrintBlockA2(){
+void FastNLOReader::PrintBlockA2() const {
   printf("\n *****************************************\n");
   printf(" * fastNLO Table: Block A2\n");
   printf(" *****************************************\n");
@@ -1054,17 +1055,13 @@ void FastNLOReader::PrintBlockA2(){
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintCrossSections( ){
+void FastNLOReader::PrintCrossSections( ) const {
   //
   // Print Cross sections in NLO, k-factors and Reference table cross sections
   //
   
-  if ( XSection.empty() ){
-    CalcCrossSection();
-  }
-  if ( XSectionRef.empty() && XSectionRef_s1.empty() ){
-    CalcReferenceCrossSection();
-  }
+   //   if ( XSection.empty() )    CalcCrossSection();
+   //   if ( XSectionRef.empty() && XSectionRef_s1.empty() )    CalcReferenceCrossSection();}
 
   vector < double > xs = XSection;
 
@@ -1111,20 +1108,13 @@ void FastNLOReader::PrintCrossSections( ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintCrossSectionsDefault(){
-  //
-  // Print observable binnning and cross sections at
-  // LO, NLO and K factors like in Fortran Reader for comparison
-  //
-  
-  // Some initialization
-  string CSEP41("#########################################");
-  string DSEP41("=========================================");
-  string SSEP41("-----------------------------------------");
-  string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
-  string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
-  string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
-  
+void FastNLOReader::PrintFastNLODemo(){
+   //
+   // This method prints out cross sections for different scale
+   // variation tables. Though it also changes the currently stored
+   // settings of this instance!
+   //
+
   // If flexible-scale table, set MuR and MuF functional forms
   if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
     SetMuRFunctionalForm(FastNLOReader::kScale1);
@@ -1137,10 +1127,9 @@ void FastNLOReader::PrintCrossSectionsDefault(){
   int ilo   = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
   int inlo  = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);
   if ( ilo < 0 || inlo < 0 ){
-    printf("FastNLOReader: ERROR! LO and/or NLO not found, nothing to be done!\n");
-    exit(1);
+     printf("FastNLOReader: ERROR! LO and/or NLO not found, nothing to be done!\n");
+     exit(1);
   }
-  
   // Check on existence of 2-loop threshold corrections
   int ithc2 = ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
   // Switched off by default. Don't do scale variations. Not available for the moment.
@@ -1175,7 +1164,7 @@ void FastNLOReader::PrintCrossSectionsDefault(){
       }
     }
   }
-  
+
   // Loop over scales
   for (int iscls=0; iscls<nxmu; iscls++){
     // First result is with NLO, LO result via division by K factor
@@ -1183,108 +1172,26 @@ void FastNLOReader::PrintCrossSectionsDefault(){
       SetScaleVariation(ixmu[iscls]);
       FillPDFCache();
       CalcCrossSection();
-      
-      vector < double > xsnlo = GetCrossSection();
-      vector < double > kfac  = GetKFactors();
-      vector < double > xslo  = xsnlo;
-      for (unsigned int i=0;i<xslo.size();i++){
-	if ( abs(kfac[i]) > DBL_MIN ){
-	  xslo[i] = xslo[i]/kfac[i];
-	} else {
-	  xslo[i] = -1.;
-	}
-      }
-    
+
       // Second result: Include threshold corrections for NLO if available
-      vector < double > xsthc2;
       vector < double > kthc;
       if ( ithc2 > -1 ) {
+	vector < double > stdk = kFactor;
 	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, true, false );
 	CalcCrossSection();
-	xsthc2 = GetCrossSection();
-	kthc   = GetKFactors();
+	kthc = kFactor;
 	// Threshold K factor is NLO including 2-loop vs. NLO
 	for (unsigned int i=0;i<kthc.size();i++){
-	  if ( abs(kfac[i]) > DBL_MIN ){
-	    kthc[i] = kthc[i]/kfac[i];
+	   if ( abs(kFactor[i]) > DBL_MIN ){
+	     kthc[i] = kFactor[i]/stdk[i];
 	  } else {
 	    kthc[i] = -1.;
 	  }
 	}
 	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
       }
-    
-      // Third result: Include non-pert. corrections for NLO if available
-      vector < double > xsnpc;
-      vector < double > knpc;
-      if ( inpc1 > -1 ) {
-	if ( ithc2 > -1 ) {SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );}
-	SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, true, false );
-	CalcCrossSection();
-	xsnpc  = GetCrossSection();
-	knpc   = GetKFactors();
-	// Non-pert. K factor is NLO including NP vs. NLO
-	for (unsigned int i=0;i<knpc.size();i++){
-	  if ( abs(kfac[i]) > DBL_MIN ){
-	    knpc[i] = knpc[i]/kfac[i];
-	  } else {
-	    knpc[i] = -1.;
-	  }
-	}
-	SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );
-      }
-    
-      cout << DSEP << endl;
-      printf(" Cross Sections\n");
-      printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuF);
-      cout << SSEP << endl;
-    
-      if ( NDim == 2 ){
-	string header0 = "  IObs  Bin Size IODim1 "; 
-	string header1 = "   IODim2 ";
-	string header2 = " LO cross section   NLO cross section   K NLO";
-	if ( ithc2>-1 ){
-	  header2 += "     K THC";
-	}
-	if ( inpc1>-1 ){
-	  header2 += "     K NPC";
-	}
-	unsigned int NDimBins[NDim];
-	printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
-	       header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
-	cout << SSEP << endl;
-	for ( unsigned int i=0; i<xslo.size(); i++ ){ 
-	  for ( int j=0; j<NDim; j++ ){ 
-	    if ( i==0 ){
-	      NDimBins[j] = 1;
-	    } else if ( LoBin[i-1][j] < LoBin[i][j]){
-	      NDimBins[j]++;
-	    } else if ( LoBin[i][j] < LoBin[i-1][j]){
-	      NDimBins[j] = 1;
-	    }
-	  }
-	  if ( ithc2<0 && inpc1<0 ) {
-	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
-		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
-	  } else if ( inpc1<0 ) {
-	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
-	  } else if ( ithc2<0 ) {
-	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
-	  } else {
-	    printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-		   i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		   NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
-	  }
-	  printf("\n");
-	}
-      } else {
-	printf("FastNLOReader: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
-      }
+      
+      PrintCrossSectionsDefault( kthc );
     }
   }
 }
@@ -1293,7 +1200,85 @@ void FastNLOReader::PrintCrossSectionsDefault(){
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintCrossSectionsData(){
+void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) const {
+  //
+  // Print observable binnning and cross sections at
+  // LO, NLO and K factors like in Fortran Reader for comparison
+  //
+
+  // Some initialization
+  const string CSEP41("#########################################");
+  const string DSEP41("=========================================");
+  const string SSEP41("-----------------------------------------");
+  const string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
+  const string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
+  const string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
+  
+
+  // Check on existence of 2-loop threshold corrections
+  //const int ithc2 = kthc.empty() ? -1 : ContrId( FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
+  const int ithc2 = kthc.empty() ? -1 : ContrId( kThresholdCorrection,kNextToLeading);
+  // Check on existence of non-perturbative corrections from LO MC
+  const int inpc1 = ContrId(kNonPerturbativeCorrection,kLeading);
+
+
+  cout << DSEP << endl;
+  printf(" Cross Sections\n");
+  printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuF);
+  cout << SSEP << endl;
+    
+  if ( NDim == 2 ){
+
+     // non-perturbative corrections (just first np correction)
+     const int inpc1 = ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
+     const vector < double > knpc = inpc1>-1 ? BBlocksSMCalc[3][0]->fact : vector<double>(NObsBin);
+     
+
+     string header0 = "  IObs  Bin Size IODim1 "; 
+     string header1 = "   IODim2 ";
+     string header2 = " LO cross section   NLO cross section   K NLO";
+     if ( ithc2>-1 )header2 += "     K THC";
+     if ( inpc1>-1 )header2 += "     K NPC";
+     unsigned int NDimBins[NDim];
+     printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
+	    header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+     cout << SSEP << endl;
+     for ( int i=0; i<NObsBin; i++ ){ 
+	for ( int j=0; j<NDim; j++ ){ 
+	   if ( i==0 )					NDimBins[j] = 1;
+	   else if ( LoBin[i-1][j] < LoBin[i][j])	NDimBins[j]++;
+	   else if ( LoBin[i][j] < LoBin[i-1][j])	NDimBins[j] = 1;
+	}
+	if ( ithc2<0 && inpc1<0 ) {
+	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
+		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i]);
+	} else if ( inpc1<0 ) {
+	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
+	} else if ( ithc2<0 ) {
+	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
+	} else {
+	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
+	}
+	printf("\n");
+     }
+  } else {
+     printf("FastNLOReader: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+  }
+
+}
+
+
+//______________________________________________________________________________
+
+
+void FastNLOReader::PrintCrossSectionsData() const{
   //
   // Print summary information on data table if available
   //
@@ -1440,7 +1425,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
   printf(" *  In any other case your reference cross section is calculated using mu_r=mu_f=sqrt((%s^2+%s^2)/2).\n",BBlocksSMCalc[0][1]->ScaleDescript[0][0].c_str(),BBlocksSMCalc[0][1]->ScaleDescript[0][1].c_str());
   printf(" *  To be fully consistent with the nlojet++ reference cross section, you also have to adjust alpha_s and the alpha_s evolution accordingly.\n\n");
 
-  printf(".\n");
+  printf("\n");
   printf(" *\n");
 
   string Aunits[16]  = { "[b] --   ","","","[mb] --  ","","","[mu b] --","","","[nb] --  ","","","[pb] --  ","","","[fb] --  "};
@@ -1628,11 +1613,12 @@ void FastNLOReader::CalcCrossSection( ){
     }
   }
 
+
   // contributions from the a-posteriori scale variation
   if ( BBlocksSMCalc[0][0]->NScaleDep!=3 ){
-    if ( fScaleFacMuR != BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] ){
-      CalcAposterioriScaleVariation();
-    }
+     if ( fScaleFacMuR != BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] ){
+	CalcAposterioriScaleVariation();
+     }
   }
 
   // calculate LO cross sections
@@ -1901,9 +1887,13 @@ double FastNLOReader::CalcAlphas( double Q ){
   if ( fAlphasEvolution == kGRV )			return CalcAlphasGRV	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kNLOJET )		return CalcAlphasNLOJET	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kCTEQpdf )		return CalcAlphasCTEQpdf	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kLHAPDFInternal )	return CalcAlphasLHAPDF	( Q );
-  else if ( fAlphasEvolution == kQCDNUMInternal )	return CalcAlphasQCDNUM	( Q );
+  else if ( fAlphasEvolution == kLHAPDFAs )		return CalcAlphasLHAPDF	( Q );
+  else if ( fAlphasEvolution == kQCDNUMAs )		return CalcAlphasQCDNUM	( Q );
   else if ( fAlphasEvolution == kFixed )        	return CalcAlphasFixed	( Q , fAlphasMz );
+  else if ( fAlphasEvolution == kH1FitterAs ){
+     double mu2 = Q*Q;
+     return 0;//HF_GET_ALPHAS_WRAP( &mu2 );
+  }
   else {
     cout << "\nFastNLOReader: ERROR! No alpha_s evolution selected, aborting!\n";
     exit (1);
@@ -1923,8 +1913,7 @@ double FastNLOReader::CalcAlphasLHAPDF(double Q){
   // WARNING: You cannot change alpha_s(Mz), but is is
   // defined with the pdf.
   //
-  
-  return LHAPDF::alphasPDF(Q); 
+   return LHAPDF::alphasPDF(Q); 
 }
 
 
@@ -1998,6 +1987,26 @@ double FastNLOReader::CalcAlphasGRV(double MU, double ALPSMZ){
 
 
 double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
+
+      //
+      //  the original FNLOv2.0 implementation
+      //
+      //   cout << "using old alphas evolution." << endl;
+      const int NF  = 5;
+      double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
+      double BETA1 =  (51. - 19./3.*NF);
+
+      //    // This is from NLOJET++, alpha.cc
+      double Mz     = 91.187;
+      double res    = alphasMZ;
+      double b0     = BETA0/TWOPI;
+      double w = 1.0 + b0*alphasMZ*log(Q/Mz);
+      res /= w;
+      double b1 = BETA1/TWOPISQR;
+      res *= 1.0 - alphasMZ*b1/b0*log(w)/w;
+      return res;
+      /*
+
   //
   // Implementation of Alpha_s evolution as function of Mu_r.
   //
@@ -2028,6 +2037,7 @@ double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
   double asMz = 1.0/(b0*t);
 
   return asMz*(1.0-b1/b0*asMz*log(2.0*t)) *TWOPI;
+      */
 }
 
 
@@ -2052,13 +2062,23 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    
   if ( fPDFInterface == kLHAPDF ){
     if ( fLHAPDFfilename == ""){
-      printf("FastNLOReader::FillPDFCache(). ERROR. You must specify a LHAPDF filename first or you have to specify kH1FITTER..\n"); exit(1);
+      printf("FastNLOReader::FillPDFCache(). ERROR. You must specify a LHAPDF filename first or you have to specify kQCDNUM..\n"); exit(1);
     }
     InitLHAPDF();
   }
-  else if ( fPDFInterface == kH1FITTER ){
+  else if ( fPDFInterface == kQCDNUM ){
     evolution_();
   }
+  else if ( fPDFInterface == kH1Fitter ){
+     // nothing todo
+  }
+  else if ( fPDFInterface == kDiffPDF ){
+     // 
+     //      cout << "do DiffPDF initialization or evolution here!"<<endl;
+     //      cout << "SET fxpom inf FastNLODiffReader!  Access FastNLOReader::xpom there!!!"<<endl;
+     //      cout << "e.g. implement InitDiffPDF"<<endl;
+  }
+
    
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if (  !BBlocksSMCalc.empty() ){
@@ -2122,7 +2142,7 @@ void FastNLOReader::SetLHAPDFset( int set ) {
 //______________________________________________________________________________
 
 
-void FastNLOReader::PrintCurrentLHAPDFInformation(){
+void FastNLOReader::PrintCurrentLHAPDFInformation() const{
   //
   // print out the information about the currently used LHAPDF file.
   // unfortunately there is no getter for lhapdf-filename or
@@ -2443,14 +2463,30 @@ vector<double> FastNLOReader::GetXFX(double xp, double muf){
   if ( fPDFInterface == kLHAPDF ){
     return LHAPDF::xfx(xp,muf);
   }
-  else if ( fPDFInterface == kH1FITTER ){
+  else if ( fPDFInterface == kQCDNUM ){
     int iqnset = 1;
     int iqnchk = 0;
     double muf2	= muf*muf;
-    vector < double > a;
-    a.resize(13);
+    vector < double > a(13);
     fpdfxq_(&iqnset, &xp, &muf2, &a[0], &iqnchk); 
     return a;
+  }
+  else if ( fPDFInterface == kH1Fitter ){
+     //! return  pdf grid 'xfx'
+    double muf2	= muf*muf;
+    vector < double > a(13);
+    //HF_GET_PDFS_WRAP(&xp, &muf2, &a[0]);
+    a.resize(13);
+  }
+  else if ( fPDFInterface == kDiffPDF ){
+     vector < double > a(13);
+     a.resize(13);
+     double zpom = xp/fxpom;
+     if ( zpom > fzmin && zpom < fzmax ) {
+	diffpdf_(&fxpom,&zpom,&muf,&a[0]);
+	//for ( int k = 0 ; k<a.size() ; k++ ){cout << "k = " << k << "\tpdf = " << a[k] << endl;}
+     }
+     return a;
   }
   else {
     vector < double > a(13);
@@ -2616,7 +2652,7 @@ void FastNLOReader::StripWhitespace(string* s){
 //______________________________________________________________________________
 
 
-int FastNLOReader::ContrId( ESMCalculation eCalc, ESMOrder eOrder ){
+int FastNLOReader::ContrId( const ESMCalculation eCalc, const ESMOrder eOrder ) const {
   
   int Id = -1;
   
@@ -2637,3 +2673,4 @@ int FastNLOReader::ContrId( ESMCalculation eCalc, ESMOrder eOrder ){
 }
 
 //______________________________________________________________________________
+
