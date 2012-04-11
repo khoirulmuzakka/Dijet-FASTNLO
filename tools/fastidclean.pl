@@ -61,6 +61,37 @@ my $cwd = `pwd`;
 chomp $cwd;
 foreach my $subdir (@subdirs) {
     chdir $subdir or die "fastidclean.pl: ERROR! Could not cd to subdirectory $subdir, aborted.\n";;
+    if ($vers == 2) {
+# Clean "nan" and "inf"
+	if ( ! -d "Problems" ) {
+	    print "fastidchlean.pl: Creating subdirectory Problems ...\n";
+	    system("mkdir Problems");
+	}
+	my $glob = ".tab"; 
+	my @files = glob "*${glob}";
+	chomp @files;
+	foreach my $file (@files) {
+	    print "fastidchlean.pl: Checking file $file\n";
+	    my $cmd = "grep -i -l \"nan\" $file";
+	    system($cmd);
+	    my $ret = $? >> 8;
+	    if ( ! $ret ) {
+		print "fastidchlean.pl: WARNING! Found nan in file $file\n";
+		$file =~ s/\.tab//;
+		system("mv $file\* Problems");
+	    } else {
+		my $cmd = "grep -i -l \"inf\" $file";
+		system($cmd);
+		my $ret = $? >> 8;
+		if ( ! $ret ) {
+		    print "fastidchlean.pl: WARNING! Found inf in file $file\n";
+		    $file =~ s/\.tab//;
+		    system("mv $file\* Problems");
+		}
+	    }
+	}
+    }
+# Clean duplicates
     foreach my $glob (@globs) {
 	print "\nfastidclean.pl: Calling fastidcheck.pl for filename glob $glob in directory $subdir ...\n";
 	system("fastidcheck.pl -v $vers $glob");
