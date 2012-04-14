@@ -237,9 +237,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     
     // --- declare and initialize additional cut variables
     // minimum pT required for 3rd jet
-    const double pt3min = 100.;
+    const double pT3min = 100.;
     // minimal 3-jet mass for events to be considered
-    const double m3jmin = 150.;
+    double m3jmin = A2->LoBin[0][0];
     // maximal |y| of three leading jets
     const double y3jmax = 3.0;
     
@@ -262,7 +262,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     double pT3 = pj[3].perp();
     
     // --- Further 3-jet phase space cuts?
-    if ( m3jmin <= m3j && y3j < y3jmax && pt3min <= pT3 ) {
+    if ( m3jmin <= m3j && y3j < y3jmax && pT3min <= pT3 ) {
       
       // --- set the renormalization and factorization scale to average 3-jet pT
       double mu = pT123;
@@ -349,7 +349,7 @@ void UserHHC::inittable(){
   const int ndim2bins = 3;
   const double dim2bins[ndim2bins+1] = {0.0, 1.0, 2.0, 3.0};
   
-  const int ndim1bins[ndim2bins] = { 42, 42, 42 };
+  const int ndim1bins[ndim2bins] = { 37, 37, 37 };
   
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -363,12 +363,11 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim0[43] = {
-    150.,   177.,  207.,  240.,  275.,  313.,  354.,  398.,  445.,  495.,
-    548.,   604.,  664.,  727.,  794.,  864.,  938., 1016., 1098., 1184.,
-    1274., 1369., 1469., 1573., 1682., 1796., 1916., 2041., 2172., 2309.,
-    2452., 2602., 2758., 2921., 3092., 3270., 3456., 3650., 3852., 4063.,
-    4283., 4513., 4753. };
+  const double dim0[38] = {
+    313.,   354.,  398.,  445.,  495.,  548.,  604.,  664.,  727.,  794.,
+    864.,   938., 1016., 1098., 1184., 1274., 1369., 1469., 1573., 1682.,
+    1796., 1916., 2041., 2172., 2309., 2452., 2602., 2758., 2921., 3092.,
+    3270., 3456., 3650., 3852., 4063., 4283., 4513., 4753. };
   for (int i=0; i<ndim2bins; i++) {
     for (int j=0; j<ndim1bins[i]+1; j++) { 
       dim1bins[i][j] = dim0[j];
