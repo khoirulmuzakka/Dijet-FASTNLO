@@ -446,6 +446,111 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 }
 
 
+void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const int* nBins2, vector< vector<double> > bingrid2, const double bwfactor ){
+  
+  // ------------------------------------------------------------------- //
+  //
+  //  InitBinning. This method initalizes and (partly) checks the binning
+  //  that is used in the scenario.
+  //
+  //   We must know NDim before calling InitBinning.
+  //	NDim tells us, in how many dimensions/variables the measurement was performed
+  //   this method only supports two dimensional measurements and a third dimension for 
+  //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
+  //   Still, fastNLO could support higher dimensional binnings.
+  // 
+  //  input.
+  //     nBins1	number of bins in 1st dimension
+  //     bingrid1	binning in 1st dimension
+  //     nBins2	number of bins of second dimension for each 1st-dimension variable
+  //     bingrid	binning in 2nd dimension for each 1st dimension bin
+  //     bwfactor	additional factor to take into account e.g. factors of 2 for binning in abs. rapidity
+  //
+  //  output.
+  //     no output
+  //
+  //  initalized values
+  //     LoBin, UpBin, BinSize, NObsBin
+  //
+  //
+  //  logic for binwidth
+  //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
+  //     if IDiffBin==2, then you divide the 'final' fnlo-cross section by this number too -> we multiply the binwidth by this 
+  //        dimensional width.
+  //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
+  //        the bingrid since the 'ObsBin' is binned in this binning.
+  //        MENTION: the UpBin is the NOT stored in the table! (DB. maybe this could be changed.)
+  //
+  // ------------------------------------------------------------------- //
+
+
+  if ( NDim == 2 && ( nBins2==NULL || bingrid2.empty()) ) printf("fnloBlockA2::InitBinning. Error. NDim=2, but you have defined only one dimensional bin grid\n");
+  if ( NDim != 1 && NDim != 2 )  printf("fnloBlockA2::InitBinning. Error. NDim must be 1 or 2. three is not yet fully implemented.\n");
+
+  vector <double> bound(NDim);
+  double binsize = 0.;
+  int nbins = 0;   // --- count total No. bins
+
+  if ( DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
+  if ( IDiffBin.size() != NDim ) printf("Error. you do not have the same number of IDiffBin than NDim.\n");
+ 
+  if ( NDim == 1 ){
+    for(int i=0;i<nBins1;i++){
+      nbins++;
+      bound[0] = bingrid1[i];
+      LoBin.push_back(bound);
+      bound[0] = bingrid1[i+1];
+      UpBin.push_back(bound);
+
+      if ( bwfactor > 0. ) {
+	binsize = bwfactor;
+      } else {
+	binsize = 1;
+      }
+      if ( IDiffBin[0] == 2 ) binsize *=  ((UpBin.back())[0] - (LoBin.back())[0]);
+      BinSize.push_back(binsize);
+    }
+  } else if ( NDim == 2 ){
+    for(int i=0;i<nBins1;i++){
+      for(int j=0;j<nBins2[i];j++){
+	nbins ++;
+	// warning: the variables are exchanged here!
+	// what is bound[0] corresponds to bingrid2[nBins][nBins2]
+	// what is bound[1] corresponds to bingrid1[nBins]
+	bound[0] = bingrid2[i][j];
+	bound[1] = bingrid1[i];
+	LoBin.push_back(bound);
+	bound[0] = bingrid2[i][j+1];
+	bound[1] = bingrid1[i+1];
+	UpBin.push_back(bound);
+	    
+	if ( bwfactor > 0. ) {
+	  binsize = bwfactor;
+	} else {
+	  binsize = 1;
+	}
+	// warning: the variables are exchanged here!
+	// what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
+	// what is DimLabel[1] corresponds to bingrid1[nBins]
+	if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
+	if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
+	BinSize.push_back(binsize);
+      }
+    }
+  }
+  else printf("fnloBlockA2::InitBinning. Error. unknown NDim.\n");
+  
+  printf(" tot. No. observable bins = %d\n",nbins);
+
+  NObsBin = nbins;
+ 
+  INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
+  //     to be normalized by own integral (in 1st dimension)
+  //     see documentation for details and for other options
+   
+}
+
+
 void fnloBlockA2::Print(){
   printf("\n **************** FastNLO Table: BlockA2 ****************\n\n");
   printf(" A2  Ipublunits                    %d\n",Ipublunits);
