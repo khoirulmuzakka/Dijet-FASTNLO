@@ -41,7 +41,7 @@ int fnloBlockB::Read(istream *table){
    *table >> NScaleDep;
    int NContrDescr;
    *table >> NContrDescr;
-   //   printf("  *  infnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
+   //   printf("  *  fnloBlockB::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
    CtrbDescript.resize(NContrDescr);
    char buffer[257];
    table->getline(buffer,256);
@@ -171,7 +171,7 @@ int fnloBlockB::Read(istream *table){
       *table >> IPDFdef1;
       *table >> IPDFdef2;
       *table >> IPDFdef3;
-      //printf("  *  infnloBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
+      //printf("  *  fnloBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
       if(IPDFdef1==0){
          for(int i=0;i<NSubproc;i++){
@@ -246,7 +246,7 @@ int fnloBlockB::Read(istream *table){
 	    *table >> Nscalenode[i];
 	 }
 	 
-	 // 	 printf("  *  infnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
+	 // 	 printf("  *  fnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
 	 // 	 BlockA2->GetNObsBin(), Nscalevar[0] , Nscalenode[0] , NScaleDim );
 
 	 
@@ -258,7 +258,7 @@ int fnloBlockB::Read(istream *table){
 	    }
 	 }
 	 
-	 //printf("  *  infnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
+	 //printf("  *  fnloBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
 	 //BlockA2->GetNObsBin(), Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
 
 	 //! DB: This for-loop-mess was replace by ResizeTable)( and ReadTable()      
@@ -280,15 +280,15 @@ int fnloBlockB::Read(istream *table){
 	 //    I only see problems, if you make use of NScaleDim>1
 	 ResizeTable( &ScaleNode , BlockA2->GetNObsBin(), 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
 	 int nsn = ReadTable  ( &ScaleNode , table );
-	 //printf("  *  infnloBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
+	 //printf("  *  fnloBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
 	 
 	 int XmaxFromI[1] = {0};
 	 //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n", 
 	 //BlockA2->GetNObsBin(), GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
 	 ResizeTable( &SigmaTilde , BlockA2->GetNObsBin(), GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
 	 int nst = ReadTable  ( &SigmaTilde , table );
-	 //printf("  *  infnloBlockB::Read(). Read %d lines of SigmaTilde.\n",nst);
-	 printf("  *  infnloBlockB::Read(). Read %d lines of FNLO v2.0 tables.\n",nst+nsn);
+	 //printf("  *  fnloBlockB::Read(). Read %d lines of SigmaTilde.\n",nst);
+	 printf("  *  fnloBlockB::Read(). Read %d lines of FNLO v2.0 tables.\n",nst+nsn);
 	 
 	 //printf(" &PdfLc  %i  %i  #%i  %i\n", BlockA2->GetNObsBin(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
 	 ResizeTable( &PdfLc , BlockA2->GetNObsBin(), GetTotalScalenodes(), XmaxFromI, NSubproc );
@@ -380,7 +380,7 @@ int fnloBlockB::Read(istream *table){
 
 // 	 ResizeTable( &SigmaRef_s2 , BlockA2->GetNObsBin() , NSubproc );
 // 	 nn3 += ReadTable  ( &SigmaRef_s2 , table );
-	 printf("  *  infnloBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
+	 printf("  *  fnloBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
 
       }
 
@@ -413,7 +413,7 @@ int fnloBlockB::Write(ostream *table, int option){
    //*table << IContrFlag3 << endl;	// v2.0+. for v2.1 write IContrFlag3 here, but NScaleDep only later
    *table << NScaleDep << endl;
    *table << CtrbDescript.size() << endl;
-   //printf("  *  infnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
+   //printf("  *  fnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
    for(int i=0;i<CtrbDescript.size();i++){
       *table << CtrbDescript[i] << endl;
@@ -556,10 +556,10 @@ int fnloBlockB::Write(ostream *table, int option){
 	 }
 	 
 	int nsn = WriteTable( &ScaleNode  , table );
-	//printf("  *  infnloBlockB::Write(). Wrote %d lines of ScaleNode.\n",nsn);
+	//printf("  *  fnloBlockB::Write(). Wrote %d lines of ScaleNode.\n",nsn);
 	int nst = WriteTable( &SigmaTilde , table , (bool)(option & DividebyNevt) , Nevt );
-	//printf("  *  infnloBlockB::Write(). Wrote %d lines of SigmaTilde.\n",nst);
-	printf("  *  infnloBlockB::Write(). Wrote %d lines of FNLO v2.0 tables.\n",nst+nsn);
+	//printf("  *  fnloBlockB::Write(). Wrote %d lines of SigmaTilde.\n",nst);
+	printf("  *  fnloBlockB::Write(). Wrote %d lines of FNLO v2.0 tables.\n",nst+nsn);
 
 
       } // end if NScaleDep !=3.
@@ -592,7 +592,7 @@ int fnloBlockB::Write(ostream *table, int option){
 // 	 nn3 += WriteTable( &SigmaRef_s1	, table , (bool)(option & DividebyNevt) , Nevt );
 // 	 nn3 += WriteTable( &SigmaRef_s2	, table , (bool)(option & DividebyNevt) , Nevt );
 
-	 printf("  *  infnloBlockB::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
+	 printf("  *  fnloBlockB::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
 	  
       } // if(NScaleDep==3)
    }// end of not data and not corrections
@@ -1696,7 +1696,7 @@ int fnloBlockB::ReadFlexibleVector(vector<double >* v, istream *table , bool nPr
 
 //________________________________________________________________________________________________________________ //
 void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vSum, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* vAdd, double w1, double w2){
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v7] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1706,7 +1706,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vect
 //________________________________________________________________________________________________________________ //
 void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vector<double > > > > > >* vSum, vector<vector<vector<vector<vector<vector<double > > > > > >* vAdd, double w1, double w2){
 
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v6] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1716,7 +1716,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<vect
 
 
 void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<double > > > > >* vSum, vector<vector<vector<vector<vector<double > > > > >* vAdd, double w1, double w2){
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v5] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1725,7 +1725,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<vector<doub
 
 //________________________________________________________________________________________________________________ //
 void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<double > > > >* vSum, vector<vector<vector<vector<double > > > >* vAdd, double w1, double w2){
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v4] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1735,7 +1735,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<vector<double > > 
 
 void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<double > > >* vSum, vector<vector<vector<double > > >* vAdd, double w1, double w2){
 
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v3] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1744,7 +1744,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<vector<double > > >* vSum
 
 //________________________________________________________________________________________________________________ //
 void fnloBlockB::AddTableToAnotherTable( vector<vector<double > >* vSum, vector<vector<double > >* vAdd, double w1, double w2){
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v2] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     AddTableToAnotherTable( &(vSum->at(i)), &(vAdd->at(i)), w1 , w2  );
   }
@@ -1753,7 +1753,7 @@ void fnloBlockB::AddTableToAnotherTable( vector<vector<double > >* vSum, vector<
 
 //________________________________________________________________________________________________________________ //
 void fnloBlockB::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
-  if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size."<<endl; return;}
+   if ( vSum->size() != vAdd->size() ) {cout<<"Error in fnloBlockB::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( int i = 0 ; i<vSum->size() ; i++ ){
     (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i]; 
   }
