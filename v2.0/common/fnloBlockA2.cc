@@ -279,6 +279,17 @@ bool fnloBlockA2::cmp(vector < vector < double > > x1,  vector < vector < double
 
 void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
    // Set label for dimension
+   // 
+   // In this method, we also set IDiffBin.
+   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder 
+   // binned distribution (=2).
+   // Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
+   // use binned distributions, we use IDiffBin to identify, if the publication
+   // was divided by this bin(-width) (=2) or not.
+   // At the end of ::InitBinning() we have to set IDiffBin then always to 2
+   // to identify this dimension to be a 'binned' dimension.
+   //
+
 
    // check validity of call
    if ( NDim < iDim ) {
@@ -354,7 +365,7 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
    //     bingrid	binning in 2nd dimension for each 1st dimension bin
    //     binwidth3	binwidth for a 3rd dimension. If the publ. cross sections are e.g. divided by the eta-range.
    //			   if this is dependent on 1st or 2nd dimension binning, this method has to be updated.
-   //                   or you can use binwidth3 if your binning is e.g. in TeV, but you want to have pb/GeV
+   //                   or you can use binwidth3 as a scalling factor if your binning is e.g. in TeV, but you want to have pb/GeV
    //
    //  output.
    //     no output
@@ -396,6 +407,12 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 	 binsize = 1;
 	 if ( IDiffBin[0] == 2 ) binsize *=  ((UpBin.back())[0] - (LoBin.back())[0]);
          BinSize.push_back(binsize);
+
+	 // here we always assume, that all dimensions are
+	 // 'binned' dimensions (and not 'differential'). We were using IDiffBin
+	 // to tag, if the publication was divided by this binwidth or not, so we have 
+	 // to set NOW IDiffBin = 2
+	 IDiffBin[0] = 2 ;
       }
    }
    else if ( NDim == 2 || NDim == 3 ){
@@ -407,12 +424,14 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 	    // what is bound[1] corresponds to bingrid1[nBins]
 	    bound[0] = bingrid2[i][j];
 	    bound[1] = bingrid1[i];
-	    if ( NDim == 3 ) bound[2] = 0;
+	    //if ( NDim == 3 ) bound[2] = 0;
+	    if ( NDim == 3 ) bound[2] = binwidth3;
 	    LoBin.push_back(bound);
 	    bound[0] = bingrid2[i][j+1];
 	    bound[1] = bingrid1[i+1];
 	    UpBin.push_back(bound);
-	    if ( NDim == 3 ) bound[2] = binwidth3;
+	    //if ( NDim == 3 ) bound[2] = binwidth3;
+	    if ( NDim == 3 ) bound[2] = 0;
 	    //if ( binwidth3 != 0 ) bound[2] = binwidth3;
 	    
 	    binsize = 1;
@@ -422,13 +441,24 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 	    if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
 	    if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
 	    if ( NDim==3 ) { 
-	       if (IDiffBin[2] == 2 ) binsize *= binwidth3;
+	       //if (IDiffBin[2] == 2 ) 
+		  binsize *= binwidth3;
 	    }
-	    else if ( binwidth3 != 0 && NDim != 3 ) { // go from e.g. from GeV to TeV
-	       binsize *= 1000;
+	    else if ( binwidth3 != 0 && NDim != 3 ) {
+	       binsize *= binwidth3;
 	    }
 
 	    BinSize.push_back(binsize);
+	    
+	    // here we always assume, that all dimensions are
+	    // 'binned' dimensions (and not 'differential'). We were using IDiffBin
+	    // to tag, if the publication was divided by this binwidth or not, so we have 
+	    // to set NOW IDiffBin = 2
+	    // The 'third' dimension in this method however, is NOT a binned distribution
+	    IDiffBin[0] = 2 ;
+	    IDiffBin[1] = 2 ;
+	    if ( NDim==3 )
+	       IDiffBin[2] = 1 ;
 	 }
       }
    }
