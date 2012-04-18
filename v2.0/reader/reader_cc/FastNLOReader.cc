@@ -331,8 +331,8 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   fScaleFacMuF	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
   //  printf(" # FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
 
+  FillAlphasCache();
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 
@@ -426,8 +426,8 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
 
 void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache  ){
   SetFunctionalForm(func,kMuR);
+  FillAlphasCache();
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 }
@@ -474,8 +474,8 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
     SetFunctionalForm( fMuRFunc , kMuR ); // just for printout
   }
    
+  FillAlphasCache();
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 }
@@ -1787,16 +1787,9 @@ void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
   //
   //  Set the alpha_s value at M_Z
   //
-  
-  if ( AlphasMz != fAlphasMz ){
-    fAlphasMz	= AlphasMz;		// new alpha_s value
-    FillAlphasCache();
-    if ( ReCalcCrossSection ) CalcCrossSection(); 
-  }
-  else {
-    // nothing to do!
-  }
-  
+   fAlphasMz	= AlphasMz;		// new alpha_s value
+   FillAlphasCache();
+   if ( ReCalcCrossSection ) CalcCrossSection(); 
 }
 
 //______________________________________________________________________________
@@ -2482,10 +2475,15 @@ vector<double> FastNLOReader::GetXFX(double xp, double muf){
      vector < double > a(13);
      a.resize(13);
      double zpom = xp/fxpom;
+     //double zpom = xp;
      if ( zpom > fzmin && zpom < fzmax ) {
 	diffpdf_(&fxpom,&zpom,&muf,&a[0]);
 	//for ( int k = 0 ; k<a.size() ; k++ ){cout << "k = " << k << "\tpdf = " << a[k] << endl;}
      }
+     //      for ( int i = 0 ; i<13 ; i++ ){
+     // 	a[i] *= xp/zpom/fxpom;// xp/zom/fxpom = 1
+     //      }
+     
      return a;
   }
   else {
@@ -2604,8 +2602,8 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool
   printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuR)(91.1876,91.1876));
   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuR)(1,91.1876));
   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuR)(91.1876,1));
+  FillAlphasCache();
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 }
@@ -2630,7 +2628,6 @@ void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool
   printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuF)(1,91.1876));
   printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuF)(91.1876,1));
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 }
