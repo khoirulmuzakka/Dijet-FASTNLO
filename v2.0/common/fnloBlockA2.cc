@@ -380,7 +380,7 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
    //        dimensional width.
    //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
    //        the bingrid since the 'ObsBin' is binned in this binning.
-   //        MENTION: the UpBin is the NOT stored in the table! (DB. maybe this could be changed.)
+   //        MENTION: the UpBin is the NOT stored in the table!
    //
    // ------------------------------------------------------------------- //
 
@@ -390,7 +390,6 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
    //if ( NDim != 1 && NDim != 2 )  printf("fnloBlockA2::InitBinning. Error. NDim must be 1 or 2. three is not yet fully implemented.\n");
 
    vector <double> bound(NDim);
-   double binsize = 0.;
    int nbins = 0;   // --- count total No. bins
 
    if ( DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
@@ -404,16 +403,14 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
          bound[0] = bingrid1[i+1];
          UpBin.push_back(bound);
 
-	 binsize = 1;
-	 if ( IDiffBin[0] == 2 ) binsize *=  ((UpBin.back())[0] - (LoBin.back())[0]);
+	 double binsize = IDiffBin[0] == 2 ? (UpBin.back())[0] - (LoBin.back())[0] : 1;
          BinSize.push_back(binsize);
-
-	 // here we always assume, that all dimensions are
-	 // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-	 // to tag, if the publication was divided by this binwidth or not, so we have 
-	 // to set NOW IDiffBin = 2
-	 IDiffBin[0] = 2 ;
       }
+      // here we always assume, that all dimensions are
+      // 'binned' dimensions (and not 'differential'). We were using IDiffBin
+      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to set NOW IDiffBin = 2
+      IDiffBin[0] = 2 ;
    }
    else if ( NDim == 2 || NDim == 3 ){
       for(int i=0;i<nBins1;i++){
@@ -434,7 +431,8 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 	    if ( NDim == 3 ) bound[2] = 0;
 	    //if ( binwidth3 != 0 ) bound[2] = binwidth3;
 	    
-	    binsize = 1;
+	    double binsize = 1;
+	
 	    // warning: the variables are exchanged here!
 	    // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
 	    // what is DimLabel[1] corresponds to bingrid1[nBins]
@@ -447,20 +445,19 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 	    else if ( binwidth3 != 0 && NDim != 3 ) {
 	       binsize *= binwidth3;
 	    }
-
 	    BinSize.push_back(binsize);
 	    
-	    // here we always assume, that all dimensions are
-	    // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-	    // to tag, if the publication was divided by this binwidth or not, so we have 
-	    // to set NOW IDiffBin = 2
-	    // The 'third' dimension in this method however, is NOT a binned distribution
-	    IDiffBin[0] = 2 ;
-	    IDiffBin[1] = 2 ;
-	    if ( NDim==3 )
-	       IDiffBin[2] = 1 ;
 	 }
       }
+      // here we always assume, that all dimensions are
+      // 'binned' dimensions (and not 'differential'). We were using IDiffBin
+      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to set NOW IDiffBin = 2
+      // The 'third' dimension in this method however, is NOT a binned distribution
+      IDiffBin[0] = 2 ;
+      IDiffBin[1] = 2 ;
+      if ( NDim==3 )
+	 IDiffBin[2] = 1 ;
    }
    else printf("fnloBlockA2::InitBinning. Error. unknown NDim.\n");
 
@@ -468,7 +465,6 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 
    NObsBin = nbins;
  
-
    INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
 			 //     to be normalized by own integral (in 1st dimension)
 			 //     see documentation for details and for other options
