@@ -1714,6 +1714,7 @@ void FastNLOReader::CalcCrossSectionv21( FastNLOBlockB* B , bool IsLO){
 	  for(int n=0;n<B->NSubproc;n++){ 
 	    double as	= B->AlphasTwoPi[i][jS1][kS2];
 	    double pdflc	= B->PdfLcMuVar[i][x][jS1][kS2][n];
+	    if ( pdflc == 0. ) continue;
 	    double fac	= as * pdflc * unit;
 	    double xsci	=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                  fac;
 	    xsci		+= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2) * fac;
@@ -1980,57 +1981,37 @@ double FastNLOReader::CalcAlphasGRV(double MU, double ALPSMZ){
 
 
 double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
+   //
+   // Implementation of Alpha_s evolution as function of Mu_r.
+   //
+   // alpha_s evolution as it is within by cteq-pdf-1.0.4 and used in nlojet 4.1.3
+   // please notice the nlojet++ reference
 
-      //
-      //  the original FNLOv2.0 implementation
-      //
-      //   cout << "using old alphas evolution." << endl;
-      const int NF  = 5;
-      double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-      double BETA1 =  (51. - 19./3.*NF);
+   double as_twopi = alphasMZ/TWOPI;
+   double Mz	= 91.187;
+   //double Mz	= 91.70;
+   //int ord=2;
+   int nf=5;
 
-      //    // This is from NLOJET++, alpha.cc
-      double Mz     = 91.187;
-      double res    = alphasMZ;
-      double b0     = BETA0/TWOPI;
-      double w = 1.0 + b0*alphasMZ*log(Q/Mz);
-      res /= w;
-      double b1 = BETA1/TWOPISQR;
-      res *= 1.0 - alphasMZ*b1/b0*log(w)/w;
-      return res;
-      /*
+   const int NF	= 5;
+   double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
+   double b1 =  (51. - 19./3.*NF);
+   double t8 = 1.0/(b0*as_twopi);
+   double as0, as1, ot, lt, br = (51.0 - 19.0/3.0*nf)/(b0*b0);
+   do {
+      lt = log(2.0*t8)/t8;
+      ot = t8;
 
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r.
-  //
-  // alpha_s evolution as it is within by cteq-pdf-1.0.4 and used in nlojet 4.1.3
-  // please notice the nlojet++ reference
+      as0 = (1.0 - br*lt)/(b0*t8);
+      as1 = (-1.0 - br*(1.0/t8-2.0*lt))/(b0*t8*t8);
+      t8 += (as_twopi - as0)/as1;
+   } while(fabs(ot-t8)/ot > 1e-5);
+   double lmd = Mz*exp(-t8);
+   double t = log(Q/lmd);
+   double asMz = 1.0/(b0*t);
 
-  double as_twopi = alphasMZ/TWOPI;
-  double Mz	= 91.187;
-  //double Mz	= 91.70;
-  //int ord=2;
-  int nf=5;
+   return asMz*(1.0-b1/b0*asMz*log(2.0*t)) *TWOPI;
 
-  const int NF	= 5;
-  double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-  double b1 =  (51. - 19./3.*NF);
-  double t8 = 1.0/(b0*as_twopi);
-  double as0, as1, ot, lt, br = (51.0 - 19.0/3.0*nf)/(b0*b0);
-  do {
-    lt = log(2.0*t8)/t8;
-    ot = t8;
-
-    as0 = (1.0 - br*lt)/(b0*t8);
-    as1 = (-1.0 - br*(1.0/t8-2.0*lt))/(b0*t8*t8);
-    t8 += (as_twopi - as0)/as1;
-  } while(fabs(ot-t8)/ot > 1e-5);
-  double lmd = Mz*exp(-t8);
-  double t = log(Q/lmd);
-  double asMz = 1.0/(b0*t);
-
-  return asMz*(1.0-b1/b0*asMz*log(2.0*t)) *TWOPI;
-      */
 }
 
 
@@ -2218,47 +2199,33 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
    
   if ( B->PdfLcMuVar.empty() ) { cout<< "empty."<<endl; exit(1);}
 
-  vector<double> xfx(13); // PDFs of all partons
-
   for(int i=0;i<NObsBin;i++){
-    int nxmax = B->GetNxmax(i);
-      
     // speed up! if mu_f is only dependent on one variable, we can safe the loop over the other one
-    for(int x=0;x<nxmax;x++){ 
+    for(int x=0;x<B->GetNxmax(i);x++){ 
       double xp	= B->XNode1[i][x];
       if ( fMuFFunc != kScale1 &&  fMuFFunc != kScale2 ) { // that't the standard case!
 	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	    double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
-	    xfx = GetXFX(xp,muf);
-	    vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
-	    for(int l=0;l<B->NSubproc;l++){ 
-	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
-	    }
+	    B->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS( GetXFX(xp,muf) , B->NSubproc );
 	  }
 	}
       }
       else if ( fMuFFunc == kScale2 ){	// speed up
 	for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
 	  double muf = CalcMu( kMuF , 0 ,  BBlocksSMCalc[0][0]->ScaleNodeScale2[i][kS2] , fScaleFacMuF );
-	  xfx = GetXFX(xp,muf);
-	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
+	  vector < double > buffer = CalcPDFLinearCombDIS( GetXFX(xp,muf) , B->NSubproc );
 	  for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
-	    for(int l=0;l<B->NSubproc;l++){ 
-	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
-	    }
+	     B->PdfLcMuVar[i][x][jS1][kS2] = buffer;
 	  }
 	}
       }
       else if ( fMuFFunc == kScale1 ){	// speed up
 	for(unsigned int jS1=0;jS1<B->ScaleNodeScale1[i].size();jS1++){
 	  double muf = CalcMu( kMuF , BBlocksSMCalc[0][0]->ScaleNodeScale1[i][jS1] , 0 , fScaleFacMuF );
-	  xfx = GetXFX(xp,muf);
-	  vector < double > buffer = CalcPDFLinearCombDIS( xfx , B->NSubproc );
+	  vector < double > buffer = CalcPDFLinearCombDIS( GetXFX(xp,muf) , B->NSubproc );
 	  for(unsigned int kS2=0;kS2<B->ScaleNodeScale2[i].size();kS2++){
-	    for(int l=0;l<B->NSubproc;l++){ 
-	      B->PdfLcMuVar[i][x][jS1][kS2][l] = buffer[l];
-	    }
+	     B->PdfLcMuVar[i][x][jS1][kS2] = buffer;
 	  }
 	}
       }
@@ -2473,22 +2440,11 @@ vector<double> FastNLOReader::GetXFX(double xp, double muf){
   }
   else if ( fPDFInterface == kDiffPDF ){
      vector < double > a(13);
-     a.resize(13);
      double zpom = xp/fxpom;
-     //double zpom = xp;
      if ( zpom > fzmin && zpom < fzmax ) {
 	diffpdf_(&fxpom,&zpom,&muf,&a[0]);
-	//for ( int k = 0 ; k<a.size() ; k++ ){cout << "k = " << k << "\tpdf = " << a[k] << endl;}
      }
-     //      for ( int i = 0 ; i<13 ; i++ ){
-     // 	a[i] *= xp/zpom/fxpom;// xp/zom/fxpom = 1
-     //      }
-     
      return a;
-  }
-  else {
-    vector < double > a(13);
-    return a;
   }
 }
 
