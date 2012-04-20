@@ -131,7 +131,6 @@ void Alphas::PrintInfo(){
     // - Print info
    const string csep41("#########################################");
    const string cseps = csep41 + csep41;
-   static bool first = true;
    static const double twopi = 2. * 4. * atan(1.);
    cout << " " << cseps << endl;
    printf(" # ALPHAS-GRV: PI              = %#18.15f\n",twopi/2.); 
