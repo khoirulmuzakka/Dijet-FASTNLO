@@ -1137,13 +1137,6 @@ void FastNLOReader::PrintFastNLODemo(){
   //    SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
   //  }
   
-  // Check on existence of non-perturbative corrections from LO MC
-  int inpc1 = ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
-  // Switched off by default.
-  // if ( inpc1 > -1 ) {
-  //   SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );
-  // }
-  
   // Pre-define desired order of scale variations
   const int nxmu = 4;
   double xmu[nxmu] = {1.0, 0.25, 0.5, 2.0};
@@ -1218,8 +1211,6 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
   // Check on existence of 2-loop threshold corrections
   //const int ithc2 = kthc.empty() ? -1 : ContrId( FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
   const int ithc2 = kthc.empty() ? -1 : ContrId( kThresholdCorrection,kNextToLeading);
-  // Check on existence of non-perturbative corrections from LO MC
-  const int inpc1 = ContrId(kNonPerturbativeCorrection,kLeading);
 
 
   cout << DSEP << endl;
@@ -1885,7 +1876,7 @@ double FastNLOReader::CalcAlphas( double Q ){
   else if ( fAlphasEvolution == kQCDNUMAs )		return CalcAlphasQCDNUM	( Q );
   else if ( fAlphasEvolution == kFixed )        	return CalcAlphasFixed	( Q , fAlphasMz );
   else if ( fAlphasEvolution == kH1FitterAs ){
-     double mu2 = Q*Q;
+     //double mu2 = Q*Q;
      return 0;//HF_GET_ALPHAS_WRAP( &mu2 );
   }
   else {
@@ -2432,11 +2423,11 @@ vector<double> FastNLOReader::GetXFX(double xp, double muf){
     return a;
   }
   else if ( fPDFInterface == kH1Fitter ){
-     //! return  pdf grid 'xfx'
-    double muf2	= muf*muf;
+    //! return  pdf grid 'xfx'
     vector < double > a(13);
+    //double muf2	= muf*muf;
     //HF_GET_PDFS_WRAP(&xp, &muf2, &a[0]);
-    a.resize(13);
+    return a;
   }
   else if ( fPDFInterface == kDiffPDF ){
      vector < double > a(13);
