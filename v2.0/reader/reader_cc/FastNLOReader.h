@@ -62,7 +62,7 @@ public:
     kGRV			= 0,
     kNLOJET			= 1,      
     kCTEQpdf			= 2,      
-    kExternAs			= 4,	// use alhpas-evolution as define in FastNLOInterface.cc
+    kExternAs			= 4,	// use alphas-evolution as define in FastNLOInterface.cc
     kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
   };
 
