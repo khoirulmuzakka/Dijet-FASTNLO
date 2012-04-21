@@ -14,6 +14,7 @@
 #include <string>
 #include <cmath>
 #include <cstdlib>
+#include "FastNLOUser.h"
 #include "FastNLOReader.h"
 #include "Alphas.h"
 
@@ -113,10 +114,17 @@ int fnlocppread(int argc, char** argv){
   
 
 
+
   // -------- Initialize fastNLOReader --------- //
-  // --- fastNLO user: Make an instance of the fastNLO reader and
+  // --- fastNLO user: Make an instance of your class that derived 
+  //     from the FastNLOReader class and
   //     pass the name of the fastNLO table as an argument.
-  FastNLOReader* fnloreader = new FastNLOReader( tablename );
+  //
+  //        FastNLOUser* fnloreader = new FastNLOUser( tablename );
+  //
+  //     The example class for LHAPDF has overwriten the constructor
+  //     and thus takes also the PDF-filename (and PDFset).
+  FastNLOUser* fnloreader = new FastNLOUser( tablename , PDFFile , 0 );
   
 
 
@@ -147,8 +155,8 @@ int fnlocppread(int argc, char** argv){
   //     By default LHAPDF is used:
   //           fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
   //	
-  fnloreader->SetLHAPDFfilename( PDFFile );
-  fnloreader->SetLHAPDFset( 0 );
+  //   fnloreader->SetLHAPDFfilename( PDFFile );
+  //   fnloreader->SetLHAPDFset( 0 );
 
 
 
@@ -195,8 +203,14 @@ int fnlocppread(int argc, char** argv){
   //     NLOJet++ typically uses 5 massless flavors.
   //
   fnloreader->SetAlphasEvolution(FastNLOReader::kGRV);
-  fnloreader->SetAlphasMz(0.1185);
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET); 
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kLHAPDFInternal); 
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kCTEQpdf);
+  //fnloreader->SetAlphasMz(0.1168);
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
+  fnloreader->SetAlphasMz(0.1179);
 
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kLHAPDFInternal);
 
   
   // ---- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ---- //
@@ -210,6 +224,7 @@ int fnlocppread(int argc, char** argv){
   //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
   //            fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
   fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
+  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
 
 
 
@@ -234,8 +249,9 @@ int fnlocppread(int argc, char** argv){
   //     printed when reading a table. To switch contribution on/off please use:
   //            fnloreader->SetContributionON( contrib, Id, on/off ) 
   //     To show the Id's of each contribution please call:
-  //		fnloreader->PrintTableInfo();
+  fnloreader->PrintTableInfo();
 
+  fnloreader->PrintFastNLOTableConstants(0);
 
 
   //****************************************************
@@ -315,7 +331,6 @@ int fnlocppread(int argc, char** argv){
   //    fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
   //    fnloreader->SetScaleFactorMuR(1.5);				 // set scale factor for mu_r
   //    fnloreader->SetScaleFactorMuF(0.66);				 // set scale factor for mu_f
-    
 
 
   // ---- (Re-)calculate cross sections ---- //
@@ -326,10 +341,13 @@ int fnlocppread(int argc, char** argv){
   //     FillPDFCache() before calling CalcCrossSection().
   //     So, before accessing the cross sections, please call:
   //             fnloreader->CalcCrossSection();
-  fnloreader->CalcCrossSection();
-
-
   
+  fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+  fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+  //   fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+  //   fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+
+
   // ---- Get cross sections ---- //
   // --- fastNLO user: To access the cross section from fastNLO
   //     you should use:
@@ -392,12 +410,8 @@ int fnlocppread(int argc, char** argv){
   // fnloreader->PrintTableInfo();
   
   // Example code to access cross sections and K factors:
-  //   See the code in FastNLOReader.cc for the following print out methods!
-  //   Note that when using the example code like 
-  //     int ilo   = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
-  //   in THIS routine, the methods have to be called like the follwoing:
-  //     int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
-
+  fnloreader->PrintFastNLODemo();
+  
   // The presented example is done automatically for print out here  
   fnloreader->PrintCrossSectionsDefault();
 
