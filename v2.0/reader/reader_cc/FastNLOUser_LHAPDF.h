@@ -73,9 +73,9 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 
 
 FastNLOUser::FastNLOUser(string name, string LHAPDFfile, int PDFset) : FastNLOReader(name) {
-   SetAlphasEvolution(kExternAs);
    SetLHAPDFfilename(LHAPDFfile);
    SetLHAPDFset(PDFset);
+   SetAlphasEvolution(kExternAs);
 }
 
 
