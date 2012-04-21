@@ -31,9 +31,14 @@
 
 using namespace std;
 
+
+
 class FastNLOReader {
 
 public:
+
+  typedef double(*mu_func)(double,double);
+
   enum EMuX {
     kMuR			= 0,	// renormalization scale
     kMuF			= 1	// factorization scale
@@ -53,28 +58,12 @@ public:
     kExtern			= 10	// define an external function for your scale
   };
 
-  enum EPDFInterface {
-    kLHAPDF			= 0,	// use LHAPDF
-    kQCDNUM			= 1,	// use QCDNUM for the pdf grid
-    kH1Fitter			= 2,	// use H1Fitter/HeraFitter for the pdf grid
-    kDiffPDF			= 3	// use DiffPDF
-  };
-
   enum EAlphasEvolution {
     kGRV			= 0,
     kNLOJET			= 1,      
     kCTEQpdf			= 2,      
-    kLHAPDFAs			= 4,	// use: double 	LHAPDF::alphasPDF (double Q)
-    kQCDNUMAs			= 5,	// You cannot change alpha_s(Mz) here, but is done within QCDNUM
-    kH1FitterAs			= 6,	// Alpha_s routine from H1Fitter
+    kExternAs			= 4,	// use alhpas-evolution as define in FastNLOInterface.cc
     kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
-  };
-
-  enum EScaleVariationDefinition {
-    kMuRVar			= 0,	// vary only MuR var by a factor 2 up and down
-    kMuRMuFSimultaneously	= 1,	// vary MuR and MuF simulataneously up and down
-    kMuRTimesMuFVar		= 2,	// vary MuR x MuF up and down by a factor of 2
-    kUpDownMax			= 3	// perform a scan for maximum up an down value between 0.5 < cR x cF < 2
   };
 
   enum EUnits {
@@ -100,39 +89,24 @@ public:
   static const double TWOPI = 6.28318530717958647692528;
   static const double TWOPISQR = 39.47841760435743447533796;
 
-  typedef double(*mu_func)(double,double);
-
 protected:
 
   static const int tablemagicno	= 1234567890;
   string ffilename;
-
-  // ---- scale variations ---- //
   int fScalevar;
   double fScaleFacMuR;
   double fScaleFacMuF;
-
-  // ---- LHAPDF vars ---- //
-  string fLHAPDFfilename;
-  //string fLHAPDFpath;
-  int fnPDFs;
-  int fiPDFSet;
-
-   // ---- vars for diffractive tables ---- //
-   double fxpom;
-   double fzmin;
-   double fzmax;
-
-  EPDFInterface	fPDFInterface;
+  double fxpom;
+  double fzmin;
+  double fzmax;
   EAlphasEvolution	fAlphasEvolution;
-  EScaleVariationDefinition fScaleVariationDefinition;
   EScaleFunctionalForm fMuRFunc;
   EScaleFunctionalForm fMuFFunc;
   EUnits		fUnits;
   mu_func Fct_MuR;				// Function, if you define your functional form for your scale external
   mu_func Fct_MuF;				// Function, if you define your functional form for your scale external
-
-  //    ECalculationOrder	fOrder;
+  vector < vector < bool > > bUseSMCalc;		// switch calculations ON/OFF
+  vector < vector < bool > > bUseNewPhys;		// switch calculations ON/OFF
 
   // ---- alpha_s vars ---- //
   double fAlphasMz;
@@ -174,9 +148,6 @@ protected:
   vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections
   vector < vector < FastNLOBlockB* > > BBlocksNewPhys;	// BlockB's for New physics corrections
 
-  vector < vector < bool > > bUseSMCalc;		// switch calculations ON/OFF
-  vector < vector < bool > > bUseNewPhys;		// switch calculations ON/OFF
-
   // ---- Cross sections ---- //
   vector < double > XSection_LO;
   vector < double > XSection;
@@ -191,20 +162,13 @@ protected:
  
 public:
 
-  FastNLOReader(void);
   FastNLOReader(string filename);
   ~FastNLOReader(void);
 
   void SetFilename(string filename) ;
   void InitScalevariation();
-  void SetLHAPDFfilename( string filename );
-  //void SetLHAPDFpath( string path ) { fLHAPDFpath = path; };
-  void SetLHAPDFset( int set );
-  void PrintCurrentLHAPDFInformation() const;
   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
-  void SetPDFInterface( EPDFInterface PDFInterface)	{ fPDFInterface = PDFInterface; };
   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
-  void SetScaleVariationDefinition( EScaleVariationDefinition ScaleVariationDefinition ) { fScaleVariationDefinition = ScaleVariationDefinition ; cout << "not implemented yet."<<endl;}; // no impact yet.
   void SetUnits( EUnits Unit );
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
   void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
@@ -246,9 +210,7 @@ public:
   // ---- Getters for FastNLOReader member variables ---- //
   EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
   EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
-  EPDFInterface GetPDFInterface() const  { return fPDFInterface; };
   EAlphasEvolution GetAlphasEvolution() const { return fAlphasEvolution; };
-  EScaleVariationDefinition GetScaleVariationDefinition() const { return fScaleVariationDefinition; };
   EUnits GetUnits() const{ return fUnits; };
   mu_func GetExternalFuncForMuR(){ return Fct_MuR; };
   mu_func GetExternalFuncForMuF(){ return Fct_MuF; };
@@ -256,9 +218,6 @@ public:
   double GetScaleFactorMuR() const { return fScaleFacMuR;};
   double GetScaleFactorMuF() const { return fScaleFacMuF;};
   int GetScaleVariation() const { return fScalevar; };
-  int GetIPDFSet() const {return fiPDFSet;};
-  int GetNPDFSets() const {return fnPDFs;};
-
 
   // ---- Getters for FastNLO table constants ---- //
   int GetNcontrib() const { return Ncontrib; };
@@ -279,7 +238,8 @@ public:
   string GetScaleDescription() const { return BBlocksSMCalc[0][1]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
   int GetNScaleVariations() const;					// Get number of available scale variations
   vector < double > GetScaleFactors() const;				// Get list of available scale factors
-  
+   bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep == 3; } // Get, if this table is a 'flexible scale' table or not.
+
 
   // ---- Print outs ---- //
   void PrintTableInfo(const int iprint = 0) const;
@@ -296,7 +256,6 @@ public:
   static const string fOrdName[4][4];
   static const string fNSDep[4];
 
-
 protected:
 
   void Init() ;
@@ -311,13 +270,11 @@ protected:
   void PrintBlockA1() const;
   void PrintBlockA2() const;
 
-  void InitLHAPDF();
   void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
   void FillBlockBPDFLCsDISv21( FastNLOBlockB* B );
   void FillBlockBPDFLCsHHCv20( FastNLOBlockB* B );
   void FillBlockBPDFLCsHHCv21( FastNLOBlockB* B );
   void CalcAposterioriScaleVariation();
-  vector<double> GetXFX(double x, double muf);
   vector<double> CalcPDFLinearCombDIS(vector<double> pdfx1, int NSubproc );
   vector<double> CalcPDFLinearCombHHC(vector<double> pdfx1, vector<double> pdfx2, int NSubproc );
   void FillAlphasCacheInBlockBv20( FastNLOBlockB* B );
@@ -326,13 +283,8 @@ protected:
 
   void CalcReferenceCrossSection();
 
-  double CalcAlphasLHAPDF(double Q);
-  double CalcAlphasQCDNUM(double Q);
   double CalcAlphasNLOJET(double Q, double alphasMz);
-  double CalcAlphasGRV(double Q, double alphasMz);
-  double CalcAlphasNewGRV(double Q, double alphasMz);
   double CalcAlphasCTEQpdf(double Q, double alphasMz);
-  double CalcAlphasFixed(double Q, double alphasMz);
   
   double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
   double FuncMixedOver1 ( double scale1 , double scale2 ) ;
@@ -347,9 +299,17 @@ protected:
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
 
+   // virtual functions for the user interface
+   virtual void InitPDF() = 0;
+   virtual vector<double> GetXFX(double x, double muf) const = 0;
+   virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
+
+
+
 protected:
   static int WelcomeOnce;
-
+   
 };
+
 
 #endif

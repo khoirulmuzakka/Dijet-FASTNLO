@@ -25,21 +25,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <cfloat>
-#include <LHAPDF/LHAPDF.h>
 #include "Alphas.h"
 
 using namespace std;
-
-
-//______________________________________________________________________________
-
-
-extern "C"{
-  void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
-  void evolution_();
-  double asfunc_( double* r2, int* nf  , int* ierr);
-  void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
-}
 
 
 //______________________________________________________________________________
@@ -58,12 +46,6 @@ const string FastNLOReader::fNSDep[4] = {"v2.0","v2.0","v2.0","v2.1"};
 int FastNLOReader::WelcomeOnce = 0;
 
 //______________________________________________________________________________
-
-FastNLOReader::FastNLOReader(void)
-{
-  InitMembers();
-  printf("FastNLOReader::FastNLOReader. Please set a filename using SetFilename(<name>)!\n");
-}
 
 
 FastNLOReader::FastNLOReader(string filename)
@@ -109,11 +91,11 @@ void FastNLOReader::InitMembers(){
 
 
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
-  if (AlphasEvolution==kLHAPDFAs || AlphasEvolution==kQCDNUMAs ||AlphasEvolution==kH1FitterAs  ) {
-    cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from an external program (e.g. QCDNUM, LHAPDF, H1Fitter, ...)."<<endl; 
+  if (AlphasEvolution==kExternAs ) {
+    cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from some derive class."<<endl; 
+    cout << "    SetAlphasMz(double) and thus the internal Alphas(Mz) value might have no more influence."<<endl;
   }
 
-  //if ( AlphasEvolution == kGRV ) SetGRVtoPDG2011_2loop(true);
   fAlphasEvolution = AlphasEvolution; 
   FillAlphasCache();
 }
@@ -152,8 +134,7 @@ void FastNLOReader::Init(){
   //int iprint = 2;
   //PrintFastNLOTableConstants(iprint);
   InitScalevariation();
-  SetPDFInterface(FastNLOReader::kLHAPDF);
-  SetAlphasEvolution(FastNLOReader::kGRV);
+  //SetAlphasEvolution(FastNLOReader::kGRV);
 }
 
 
@@ -1868,57 +1849,18 @@ double FastNLOReader::CalcAlphas( double Q ){
   //  Internal method for calculating the alpha_s(mu)
   //
   
-  //switch ( AlphasEvolution )
-  if ( fAlphasEvolution == kGRV )			return CalcAlphasGRV	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kNLOJET )		return CalcAlphasNLOJET	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kCTEQpdf )		return CalcAlphasCTEQpdf	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kLHAPDFAs )		return CalcAlphasLHAPDF	( Q );
-  else if ( fAlphasEvolution == kQCDNUMAs )		return CalcAlphasQCDNUM	( Q );
-  else if ( fAlphasEvolution == kFixed )        	return CalcAlphasFixed	( Q , fAlphasMz );
-  else if ( fAlphasEvolution == kH1FitterAs ){
-     //double mu2 = Q*Q;
-     return 0;//HF_GET_ALPHAS_WRAP( &mu2 );
-  }
-  else {
-    cout << "\nFastNLOReader: ERROR! No alpha_s evolution selected, aborting!\n";
-    exit (1);
-  }
-}
-
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasLHAPDF(double Q){
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r only.
-  //
-  // the alpha_s evolution is done within LHAPDF.
-  // 
-  // WARNING: You cannot change alpha_s(Mz), but is is
-  // defined with the pdf.
-  //
-   return LHAPDF::alphasPDF(Q); 
-}
-
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasQCDNUM(double Q){
-  //
-  // alpha_s evolution as used in QCDNUM
-   
-  double mu2 = Q*Q;
-  int ierr = 9876;
-  int nf = 9;
-  double as = asfunc_( &mu2, &nf  , &ierr);
-
-  if ( ierr > 0 ){
-    printf("FastNLOReader::CalcAlphasQCDNUM. Error. alphas evolution failed. ierr = %d, Q = %7.4f\n",ierr,Q);
-  }
-
-  return as;
+   switch ( fAlphasEvolution ) {
+   case kGRV: return Alphas::CalcAlphasMu( Q , fAlphasMz );
+   case kNLOJET: return CalcAlphasNLOJET ( Q , fAlphasMz );
+   case kCTEQpdf: return CalcAlphasCTEQpdf        ( Q , fAlphasMz );
+   case kExternAs: return EvolveAlphas     ( Q , fAlphasMz );
+   case kFixed: return fAlphasMz;
+   default: {
+      cout << "\nFastNLOReader: ERROR! No alpha_s evolution selected, aborting!\n";
+      exit (1);
+ 
+   }
+   }
 }
 
 
@@ -1957,14 +1899,6 @@ double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
 
   return alphasMZ/(1.0 + alphasMZ*L);
 
-}
-
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasGRV(double MU, double ALPSMZ){
-  return Alphas::CalcAlphasMu(MU,ALPSMZ);
 }
 
 
@@ -2010,14 +1944,6 @@ double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
 //______________________________________________________________________________
 
 
-double FastNLOReader::CalcAlphasFixed(double MU, double ALPSMZ){
-  return ALPSMZ;
-}
-
-
-//______________________________________________________________________________
-
-
 void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
   //
   //  Fill the internal pdf cache.
@@ -2025,32 +1951,39 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
   //  pdf parameters and evolutions are calculated externally.
   //
    
-  if ( fPDFInterface == kLHAPDF ){
-    if ( fLHAPDFfilename == ""){
-      printf("FastNLOReader::FillPDFCache(). ERROR. You must specify a LHAPDF filename first or you have to specify kQCDNUM..\n"); exit(1);
-    }
-    InitLHAPDF();
+  InitPDF();
+
+  // check if the pdf is somehow reasonable
+  vector<double> pdftest = GetXFX(1.e-2,10);
+  if ( pdftest.size() != 13) {
+     printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
+     exit(1);
   }
-  else if ( fPDFInterface == kQCDNUM ){
-    evolution_();
+  else if ( pdftest[6] == 0. ) {
+     printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
   }
-  else if ( fPDFInterface == kH1Fitter ){
-     // nothing todo
-  }
-  else if ( fPDFInterface == kDiffPDF ){
-     // 
-     //      cout << "do DiffPDF initialization or evolution here!"<<endl;
-     //      cout << "SET fxpom inf FastNLODiffReader!  Access FastNLOReader::xpom there!!!"<<endl;
-     //      cout << "e.g. implement InitDiffPDF"<<endl;
+  
+  double sum = 0;
+  for ( int i = 0 ; i<13 ; i++ ) sum+=pdftest[i];
+  if ( sum== 0. ) {
+     printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
+     exit(1);
   }
 
-   
+
+  for ( int i = 0 ; i<13 ; i++ ){
+     if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
+	printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
+     }
+  }
+
+  
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if (  !BBlocksSMCalc.empty() ){
       for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
 	if ( !BBlocksSMCalc[j][i]->IAddMultFlag ){
 	  if (BBlocksSMCalc[j][i]->NScaleDim>1){
-	    printf("FastNLOReader::FillBlockBPDFLCsWithLHAPDF. WOW! NScaleDim>1! This is usually not the case!\n");
+	    printf("FastNLOReader::FillPDFCache. WOW! NScaleDim>1! This is usually not the case!\n");
 	    //scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
 	    //fScalevar2 = fScalevar % NfScalevar[1]; 
 	  }
@@ -2082,80 +2015,6 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
     }
   }
 }     
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::SetLHAPDFfilename( string filename ) { 
-  fLHAPDFfilename = filename; 
-  // reset pdfset
-  fiPDFSet = 0;
-  InitLHAPDF();
-}
-
-
-void FastNLOReader::SetLHAPDFset( int set ) { 
-  //if ( set != fiPDFSet ) {
-  fiPDFSet = set; 
-  InitLHAPDF();
-  //}
-}
-
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::PrintCurrentLHAPDFInformation() const{
-  //
-  // print out the information about the currently used LHAPDF file.
-  // unfortunately there is no getter for lhapdf-filename or
-  // used pdf-member-id available.
-  // One must take care, that one is always using the desired pdf.
-  // 
-  // e.g. If one has two FastNLOReader instances and one initalizes the
-  // second instance with another pdf. Then also the first one is using this
-  // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
-  //
-  printf(" ##################################################################################\n");
-  printf(" #  FastNLOReader::PrintCurrentLHAPDFInformation.\n");
-  printf(" #      Your currently initalized pdf is called:\n");
-  LHAPDF::getDescription();
-  printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
-  printf(" #      Please use FastNLOReader::SetLHAPDFset(int) to choose a pdf-set.\n");
-  printf(" ##################################################################################\n");
-}
-
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::InitLHAPDF(){
-  //
-  //  Initalize some necessary LHAPDF parameters
-  //
-    
-  if ( fLHAPDFfilename == ""){
-    printf("FastNLOReader::FillPDFCacheLHAPDF(). ERROR. You must specify a LHAPDF filename first.\n"); exit(1);
-  }
-
-  LHAPDF::setVerbosity(LHAPDF::SILENT);
-  //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-  //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
-  // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF 
-  //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-  //cout << "PDF set name " << fLHAPDFfilename << endl;
-  LHAPDF::initPDFSet(fLHAPDFfilename);
-  fnPDFs = LHAPDF::numberPDF();
-  if ( fnPDFs < fiPDFSet ){
-    cout << "Error. There are only " << fnPDFs << " pdf sets within this LHAPDF file. You were looking for set number " << fiPDFSet << endl;
-  }
-
-  LHAPDF::initPDF(fiPDFSet);
-
-}
 
 
 //______________________________________________________________________________
@@ -2396,46 +2255,6 @@ void FastNLOReader::FillBlockBPDFLCsHHCv21( FastNLOBlockB* B ){
 	}
       }
     }
-  }
-}
-
-
-//______________________________________________________________________________
-
-
-
-vector<double> FastNLOReader::GetXFX(double xp, double muf){
-  //
-  //  Internal method.
-  //  GetXFX is used to get the parton array from the
-  //  pre-defined pdf-interface.
-  // 
-  
-  if ( fPDFInterface == kLHAPDF ){
-    return LHAPDF::xfx(xp,muf);
-  }
-  else if ( fPDFInterface == kQCDNUM ){
-    int iqnset = 1;
-    int iqnchk = 0;
-    double muf2	= muf*muf;
-    vector < double > a(13);
-    fpdfxq_(&iqnset, &xp, &muf2, &a[0], &iqnchk); 
-    return a;
-  }
-  else if ( fPDFInterface == kH1Fitter ){
-    //! return  pdf grid 'xfx'
-    vector < double > a(13);
-    //double muf2	= muf*muf;
-    //HF_GET_PDFS_WRAP(&xp, &muf2, &a[0]);
-    return a;
-  }
-  else if ( fPDFInterface == kDiffPDF ){
-     vector < double > a(13);
-     double zpom = xp/fxpom;
-     if ( zpom > fzmin && zpom < fzmax ) {
-	diffpdf_(&fxpom,&zpom,&muf,&a[0]);
-     }
-     return a;
   }
 }
 
