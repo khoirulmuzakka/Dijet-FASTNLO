@@ -1776,6 +1776,13 @@ void FastNLOReader::FillAlphasCache(){
   //  to take care of this filling by yourself.
   //
    
+   // check if the alpha_s value is somehow reasonable
+   double asMz = CalcAlphas(91.18);
+   if ( fAlphasEvolution != kFixed && ( asMz > 0.5 || asMz < 0.01 ) ) {
+      printf("FastNLOReader. Warning. Your alphas value seems to be unreasonably small/large.\n");
+      printf("   Your evolution code calculated alphas(Mz=91.18GeV) = %9.7f.\n",asMz);
+   }
+
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if ( !BBlocksSMCalc.empty() ){
       for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
@@ -1964,7 +1971,7 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
   }
   
   double sum = 0;
-  for ( int i = 0 ; i<13 ; i++ ) sum+=pdftest[i];
+  for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
   if ( sum== 0. ) {
      printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
      exit(1);
