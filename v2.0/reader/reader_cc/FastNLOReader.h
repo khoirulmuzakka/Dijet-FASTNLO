@@ -96,9 +96,6 @@ protected:
   int fScalevar;
   double fScaleFacMuR;
   double fScaleFacMuF;
-  double fxpom;
-  double fzmin;
-  double fzmax;
   EAlphasEvolution	fAlphasEvolution;
   EScaleFunctionalForm fMuRFunc;
   EScaleFunctionalForm fMuFFunc;
@@ -301,7 +298,7 @@ protected:
 
    // virtual functions for the user interface
    virtual void InitPDF() = 0;
-   virtual vector<double> GetXFX(double x, double muf) const = 0;
+   virtual vector<double> GetXFX(double x, double muf ) const = 0;
    virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
 
 
