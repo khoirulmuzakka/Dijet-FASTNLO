@@ -160,7 +160,7 @@ protected:
 public:
 
   FastNLOReader(string filename);
-  ~FastNLOReader(void);
+  virtual ~FastNLOReader(void);
 
   void SetFilename(string filename) ;
   void InitScalevariation();
