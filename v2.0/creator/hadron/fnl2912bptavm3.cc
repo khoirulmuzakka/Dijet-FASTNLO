@@ -358,7 +358,7 @@ void UserHHC::inittable(){
   //	    -  B->SetDoWarmUp(true)   ->  Do the Warm-Up run
   //	    -  B->SetDoWarmUp(false)  ->  Do a production run
   B->SetDoWarmUp(doWarmUp);
-
+  
   // --- fastNLO user: You can set the number of contributions
   //     after which the WarmUp values are printed
   B->SetWarmUpPrint(1000000);		// default 10000000
