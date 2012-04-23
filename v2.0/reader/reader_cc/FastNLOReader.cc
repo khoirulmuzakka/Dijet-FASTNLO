@@ -1960,23 +1960,23 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    
   InitPDF();
 
+ 
   // check if the pdf is somehow reasonable
   vector<double> pdftest = GetXFX(1.e-2,10);
   if ( pdftest.size() != 13) {
      printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
      exit(1);
   }
-  else if ( pdftest[6] == 0. ) {
-     printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
-  }
   
-  double sum = 0;
-  for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
-  if ( sum== 0. ) {
-     printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
-     exit(1);
-  }
-
+  //   if ( pdftest[6] == 0. ) {
+  //      printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
+  //   }
+  //   double sum = 0;
+  //   for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
+  //   if ( sum== 0. ) {
+  //      printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
+  //      exit(1);
+  //   }
 
   for ( int i = 0 ; i<13 ; i++ ){
      if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
