@@ -44,7 +44,6 @@ protected:
 
 };
 
-#endif
 
 
 //______________________________________________________________________________
@@ -89,7 +88,7 @@ void FastNLODiffUser::InitPDF(){
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
-
+   
    // nothing todo!
 }
 
@@ -116,3 +115,6 @@ vector<double> FastNLODiffUser::GetXFX(double xp, double muf) const {
 
 
 //______________________________________________________________________________
+
+
+#endif

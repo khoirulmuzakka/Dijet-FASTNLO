@@ -54,8 +54,6 @@ protected:
 };
 
 
-#endif
-
 
 //______________________________________________________________________________
 
@@ -183,3 +181,4 @@ void FastNLOUser::PrintPDFInformation() const {
 
 
 
+#endif
