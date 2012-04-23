@@ -23,14 +23,14 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    fnloBlockA2 *A2 =  BlockA2;
 
    // ---
-   // --- Warm-Up Run to identify extreme x,mu values
+   // --- Warm-Up Run to identify extreme x, mu values
    // ---
    // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
-      WarmUp( ObsBin , x , scale1 , 0, "xlim" , "mu" );
-      return;
+     WarmUp( ObsBin , x , scale1 , 0 , "xlim" , "mu" );
+     return;
    }
-
+   
    // --- select interpolation kernel for x and for mu 
    //             1:CatmulRom   2:Lagrangian
    const int ikernx = 1;     
@@ -931,7 +931,9 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       // ---- write out to file ---- //
       FILE * ofile;
       char filename [500];
-      sprintf(filename,"fastNLO-warmup.%s.dat",BlockA1->GetScenName().data() );
+      //      sprintf(filename,"fastNLO-warmup.%s.dat",BlockA1->GetScenName().data() );
+      // KR: Set back to v2 value, otherwise grid jobs don't find output
+      sprintf(filename,"fastNLO-warmup.dat");
       ofile = fopen(filename,"w");
       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
@@ -1455,36 +1457,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    fnloBlockA2 *A2 =  BlockA2;
 
    // ---
-   // --- Warm-Up Run to identify the extreme x,mu values
+   // --- Warm-Up Run to identify extreme x, mu values
    // ---
    // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
-     if (xlo[ObsBin] == 0.) xlo[ObsBin] = min(x1,x2);
-     if (scalelo[ObsBin] == 0.) scalelo[ObsBin] = scale1;
-     if (xlo[ObsBin] > min(x1,x2)) xlo[ObsBin] = min(x1,x2);
-     if (scalelo[ObsBin] > scale1) scalelo[ObsBin] = scale1;
-     if (scalehi[ObsBin] < scale1) scalehi[ObsBin] = scale1;
-     IWarmUpCounter++;
-     // KR: Create file already at start time, avoids problems when testing grid functionality  
-     if ( IWarmUpCounter == 1 ) {
-       FILE * ofile;
-       ofile = fopen("fastNLO-warmup.dat","w");
-       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       fclose(ofile);
-     }
-     if ( (IWarmUpCounter % IWarmUpPrint) == 0) {
-       FILE * ofile;
-       ofile = fopen("fastNLO-warmup.dat","w");
-       printf("      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",IWarmUpCounter);
-       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
-         printf("      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
-		i,xlo[i],i,scalelo[i],i,scalehi[i]);
-	 fprintf(ofile,"      xlim[ %u ] = %e , mulo[ %u ] = %e , muup[ %u ] = %e ;\n",
-		 i,xlo[i],i,scalelo[i],i,scalehi[i]);
-       }
-       fclose(ofile);
-     }
+     WarmUp( ObsBin , min(x1,x2) , scale1 , 0 , "xlim" , "mu" );
      return;
    }
 
