@@ -33,7 +33,7 @@ class FastNLODiffReader : public FastNLOReader {
 public:
    
    FastNLODiffReader(string filename);
-   //~FastNLODiffReader(void);
+   virtual ~FastNLODiffReader(void){};
    
    void SetXPomSlicing(int nStep, double* xpom, double* dxpom);
    void SetXPomLogSlicing(int nStep, double xpommin, double xpommax );
