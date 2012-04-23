@@ -16,7 +16,9 @@ endif
 
 # All source files which go into the main target (and have to be distributed)
 fnlo_cppread_SOURCES = main.cc fnlo-cppread.cc FastNLOReader.cc FastNLOReader.h FastNLOUser.h \
-	FastNLOBlockB.cc FastNLOBlockB.h Alphas.cc Alphas.h 
+	FastNLOBlockB.cc FastNLOBlockB.h Alphas.cc Alphas.h \
+	FastNLODiffReader.h FastNLODiffReader.cc FastNLODiffUser.h
+#	diffpdf.f 
 #	i_2006_fitb.f i_2006_fita.f h12006flux.f qcd_2006.f pion_stand_alone.f 
 
 # Preprocessor flags
