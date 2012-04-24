@@ -394,7 +394,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
       SetFunctionalForm(kScale1,kMuX);
     }
     for(int i=0;i<NObsBin;i++){
-      if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 5 ){
+      if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 4 ){
 	printf("FastNLOReader::SetFunctionalForm. Warning. Scale2 has only very little nodes (n=%zd) in bin %d.\n",BBlocksSMCalc[0][0]->ScaleNodeScale2[i].size(),i);
       }
     }
