@@ -33,7 +33,7 @@ class FastNLODiffUser : public FastNLODiffReader {
 public:
    
    FastNLODiffUser(string filename);
-   ~FastNLODiffUser(void);
+   ~FastNLODiffUser(void){;};
   
 protected:
    

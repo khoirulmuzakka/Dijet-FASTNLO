@@ -33,7 +33,6 @@ using namespace std;
 
 FastNLODiffReader::FastNLODiffReader(string filename) : FastNLOReader(filename)
 {
-   cout << "yeah! it's diffraction!"<<endl;
    fzmin = 0; fzmax = 1.;
    fxpom = 0.01;
 }
@@ -183,7 +182,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
       printf(".");
       fflush(stdout);
       
-      for ( unsigned int i = 0 ; i<NObsBin ; i++ ){
+      for ( int i = 0 ; i<NObsBin ; i++ ){
 	 xs[i] += XSection[i] * slicesize ;
       }
    }
