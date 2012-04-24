@@ -25,8 +25,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <cfloat>
-#include <LHAPDF/LHAPDF.h>
-#include "Alphas.h"
 
 using namespace std;
 
