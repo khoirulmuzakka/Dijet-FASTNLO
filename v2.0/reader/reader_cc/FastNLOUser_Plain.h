@@ -87,7 +87,7 @@ vector<double> FastNLOUser::GetXFX(double xp, double muf) const {
    //  parton flavors from tbar to t at a certain
    //  x-proton and factorisation scale.
    //
-   vector <double >(13) a;
+   vector <double > a(13);
    return a;
 }
 
