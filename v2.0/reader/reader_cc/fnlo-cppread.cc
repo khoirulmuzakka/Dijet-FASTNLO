@@ -15,7 +15,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "FastNLOUser.h"
-#include "FastNLOReader.h"
+#include "FastNLODiffUser.h"
 #include "Alphas.h"
 
 // Function prototype for flexible-scale function 
@@ -262,90 +262,97 @@ int fnlocppread(int argc, char** argv){
 
 
 
-  // ---- options for scales in v2.0 tables ---- //
-  // --- fastNLO user: Here you can specify the options if you use a v2.0 fastNLO table
-  //     (normal case in pp/ppbar) but NOT a 'flexible-scale' table (v2.1):
-  //     A fastNLO table comes usually with various precalculated scale variations.
-  //     There, the renormalization and the factorization scale are varied simultaneously
-  //     by a series of predefined factors, usually 1, 2, 1/2, 1/4.
-  //     The welcome message should show you the information about the available
-  //     scale variations. For accessing a table with a certain factor you need to
-  //     know the scale Id (int) and then use:
-  //            fnloreader->SetScaleVariation(0);
-  //
-  //     Furthermore you have the possiblity to vary the renormalization scale by any
-  //     factor. For a scale variation factor of 0.5, please use e.g.:
-  //            fnloreader->SetScaleFactorMuR(0.5);
-  //     WARNING: This option is inconsistent with threshold corrections. These require
-  //     in the present implementation to always have mu_r = mu_f.
-  
+  if ( !fnloreader->IsFlexibleScale() ) {
+     // ---- options for scales in v2.0 tables ---- //
+     // --- fastNLO user: Here you can specify the options if you use a v2.0 fastNLO table
+     //     (normal case in pp/ppbar) but NOT a 'flexible-scale' table (v2.1):
+     //     A fastNLO table comes usually with various precalculated scale variations.
+     //     There, the renormalization and the factorization scale are varied simultaneously
+     //     by a series of predefined factors, usually 1, 2, 1/2, 1/4.
+     //     The welcome message should show you the information about the available
+     //     scale variations. For accessing a table with a certain factor you need to
+     //     know the scale Id (int) and then use:
+     //            fnloreader->SetScaleVariation(0);
+     //
+     //     Furthermore you have the possiblity to vary the renormalization scale by any
+     //     factor. For a scale variation factor of 0.5, please use e.g.:
+     //            fnloreader->SetScaleFactorMuR(0.5);
+     //     WARNING: This option is inconsistent with threshold corrections. These require
+     //     in the present implementation to always have mu_r = mu_f.
+  }  
 
   
-  // ---- options for scales in 'flexible-scale' tables (v2.1) ---- //
-  // --- fastNLO user: You can choose a function to define how
-  //     to compute the renormalization and factorization scale. 
-  //     Each 'flexible-scale' table comes with two variables that can be used 
-  //     for calculating the scales. They are called scale1 and scale2 and
-  //     at least one needs to have a dimension in "GeV".
-  //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
-  //     hadron-hadron tables might have for example scale1 = pt and scale2 = y.
-  //     Other settings are imaginable. Please check, which obervables exactly
-  //     are stored as scale variables!
-  //
-  //     There are two possibilities, how you can define your scale now:
-  //
-  //       - use predefined functions using e.g.
-  //            fnloreader->SetMuRFunctionalForm(FastNLOReader::EScaleFunctionalForm);
-  //         for changing the calculation of the renormalizatoin scale.
-  //         Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
-  //
-  //       - or you can pass a function pointer to FastNLOReader using
-  //            fnloreader->SetExternalFuncForMuR( double (*Func)(double,double) );
-  //         to pass any function using scale1 and scale2 to fastNLO.
-  //    
-  //     Further you can define a scale factor (one for the renormalization
-  //     and one for the factorization scale) which is multiplied to the scale
-  //     independently from the predefined function, like e.g. for mu_r:
-  //         mu_r = scalefac * f(scale1,scale2)
-  //     Please use e.g. a factor of 1.5 for mu_r:
-  //             fnloreader->SetScaleFactorMuR(1.5);
-  //
-  //     For changing the factorization scale, replace all 'MuR' by 'MuF' in the function calls.
-  //  
-  //     INFO: All above-mentioned functions automatically perform a refilling of the
-  //     fastNLO internal PDF-cache. To switch it off you can use a boolean, like:
-  //             fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1 , false );
-  //
-  //     WARNING: Some choice had to be made for the default settings. Please think
-  //     carefully about the choice of the scales ...
-  //     Default setting for DIS tables:
-  //       - mu_r:  kQuadraticMean	-> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
-  //       - mu_f:  kScale1		-> mu_f = Q
-  //     Default setting for pp and ppbar tables:
-  //       - mu_r:  kScale1		-> mu_r = scale1
-  //       - mu_f:  kScale1		-> mu_f = scale1
-  //
-  //  Valid calls are e.g.:
-  //    fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-  //    fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-  //    fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
+  if ( !fnloreader->IsFlexibleScale() ) {
+     // ---- options for scales in 'flexible-scale' tables (v2.1) ---- //
+     // --- fastNLO user: You can choose a function to define how
+     //     to compute the renormalization and factorization scale. 
+     //     Each 'flexible-scale' table comes with two variables that can be used 
+     //     for calculating the scales. They are called scale1 and scale2 and
+     //     at least one needs to have a dimension in "GeV".
+     //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
+     //     hadron-hadron tables might have for example scale1 = pt and scale2 = y.
+     //     Other settings are imaginable. Please check, which obervables exactly
+     //     are stored as scale variables!
+     //
+     //     There are two possibilities, how you can define your scale now:
+     //
+     //       - use predefined functions using e.g.
+     //            fnloreader->SetMuRFunctionalForm(FastNLOReader::EScaleFunctionalForm);
+     //         for changing the calculation of the renormalizatoin scale.
+     //         Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
+     //
+     //       - or you can pass a function pointer to FastNLOReader using
+     //            fnloreader->SetExternalFuncForMuR( double (*Func)(double,double) );
+     //         to pass any function using scale1 and scale2 to fastNLO.
+     //    
+     //     Further you can define a scale factor (one for the renormalization
+     //     and one for the factorization scale) which is multiplied to the scale
+     //     independently from the predefined function, like e.g. for mu_r:
+     //         mu_r = scalefac * f(scale1,scale2)
+     //     Please use e.g. a factor of 1.5 for mu_r:
+     //             fnloreader->SetScaleFactorMuR(1.5);
+     //
+     //     For changing the factorization scale, replace all 'MuR' by 'MuF' in the function calls.
+     //  
+     //     INFO: All above-mentioned functions automatically perform a refilling of the
+     //     fastNLO internal PDF-cache. To switch it off you can use a boolean, like:
+     //             fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1 , false );
+     //
+     //     WARNING: Some choice had to be made for the default settings. Please think
+     //     carefully about the choice of the scales ...
+     //     Default setting for DIS tables:
+     //       - mu_r:  kQuadraticMean	-> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
+     //       - mu_f:  kScale1		-> mu_f = Q
+     //     Default setting for pp and ppbar tables:
+     //       - mu_r:  kScale1		-> mu_r = scale1
+     //       - mu_f:  kScale1		-> mu_f = scale1
+     //
+     //  Valid calls are e.g.:
+     //    fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+     //    fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+     //    fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
+ 
+
+     // ---- (Re-)calculate cross sections ---- //
+     // --- fastNLO user: Before you can access the fastNLO computed
+     //     cross sections, you always have to call CalcCrossSection()!
+     //     If you are not sure, whether you have recalculated the internal
+     //     PDF-cache with your current scale choice you further can call 
+     //     FillPDFCache() before calling CalcCrossSection().
+     //     So, before accessing the cross sections, please call:
+     //             fnloreader->CalcCrossSection();
+  
+     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+     fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+     //   fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+     //   fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+  }
+
+
+  
+  // ---- fastNLO user: choice of scale factor
   //    fnloreader->SetScaleFactorMuR(1.5);				 // set scale factor for mu_r
   //    fnloreader->SetScaleFactorMuF(0.66);				 // set scale factor for mu_f
-
-
-  // ---- (Re-)calculate cross sections ---- //
-  // --- fastNLO user: Before you can access the fastNLO computed
-  //     cross sections, you always have to call CalcCrossSection()!
-  //     If you are not sure, whether you have recalculated the internal
-  //     PDF-cache with your current scale choice you further can call 
-  //     FillPDFCache() before calling CalcCrossSection().
-  //     So, before accessing the cross sections, please call:
-  //             fnloreader->CalcCrossSection();
-  
-  fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-  fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-  //   fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
-  //   fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
 
 
   // ---- Get cross sections ---- //
@@ -419,6 +426,7 @@ int fnlocppread(int argc, char** argv){
   fnloreader->PrintCrossSectionsData();
 
   return 0;
+
 }
 
 
