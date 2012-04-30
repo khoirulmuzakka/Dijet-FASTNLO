@@ -203,3 +203,71 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
 
 
 //______________________________________________________________________________
+
+vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
+   //
+   //  GetXFX is used to get the parton array from the
+   //  pdf-interface. It should return a vector of 13
+   //  parton flavors from tbar to t at a certain
+   //  x-proton and factorisation scale.
+   //
+
+   // get pdf
+   double zpom = xp/fxpom;
+   double xpo = fxpom;
+   vector < double > a(13);
+   if ( zpom > fzmin && zpom < fzmax ){
+
+      // find x-node index
+      int nx = -1;
+      int nb = -1;
+      for ( int ib = 0 ; nb == -1 && nb<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
+	 for ( int ix = 0 ; nx == -1 && nx<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+	    if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
+	       nx = ix;
+	       nb = ib;
+	    }
+	 }
+      }
+      if ( nx == -1 || nb == -1 ) {printf("error. Could not find x-node index.\n");exit(1);}
+
+      // check if this is the 'last' or 'first' xnode
+      bool IsLastX  = nx == (int)BBlocksSMCalc[0][0]->XNode1[nb].size()-1 ;
+      bool IsFirstX = nx == 0 ;
+
+      //    if ( zpom > fzmin && zpom < fzmax ) cout << "-";
+      //    else cout << "|";
+      //    fflush(stdout);
+
+      a = GetDiffXFX( fxpom, zpom, muf );
+      
+      // calc reweight at integration edges
+      if ( !IsLastX && !IsFirstX ){
+	 const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node 
+	 const double x1 = BBlocksSMCalc[0][0]->XNode1[nb][nx-1];// prev. node
+	 const double zpom2 = x2/fxpom; 
+	 const double zpom1 = x1/fxpom; 
+	 double xSpan = 1.;
+	 // wenn jetzt der naechste bin nicht mehr in fzmax ist, dann wird gewichtet
+	 if ( zpom2 > fzmax && zpom < fzmax ){
+	    double xmax = fzmax*fxpom;
+	    double ldelx = log10(xmax) - log10(xp);
+	    double ldelx0 = log10(x2) - log10(xp);
+	    xSpan *= ldelx/ldelx0 + 0.5 ;
+	 }
+	 if ( zpom1 < fzmin && zpom > fzmin ){
+	    double xmin = fzmin*fxpom;
+	    double ldelx = log10(xp) - log10(xmin);
+	    double ldelx0 = log10(xp) - log10(x1);
+	    xSpan *= ldelx/ldelx0 + 0.5 ;
+	 }
+	 if ( xSpan != 1. )
+	    for ( unsigned  int i = 0 ; i<a.size() ; i++ ) a[i]*=xSpan;
+      
+      }
+   }
+   return a;
+}
+
+
+//______________________________________________________________________________

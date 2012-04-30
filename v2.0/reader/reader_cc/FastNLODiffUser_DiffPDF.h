@@ -40,7 +40,7 @@ protected:
    // inherited functions
    double EvolveAlphas(double Q, double alphasMz ) const ;
    void InitPDF();
-   vector<double> GetXFX(double xp, double muf) const ;
+   vector<double> GetDiffXFX(double xpom, double zpom, double muf) const ;
 
 };
 
@@ -97,19 +97,15 @@ void FastNLODiffUser::InitPDF(){
 
 
 
-vector<double> FastNLODiffUser::GetXFX(double xp, double muf) const {
+vector<double> FastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf) const {
    //
-   //  GetXFX is used to get the parton array from the
+   //  GetDiffXFX is used to get the parton array from the
    //  pdf-interface. It should return a vector of 13
    //  parton flavors from tbar to t at a certain
-   //  x-proton and factorisation scale.
+   //  xpom, zpom and factorisation scale.
    //
    vector < double > a(13);
-   double zpom = xp/fxpom;
-   double xpo = fxpom;
-   if ( zpom > fzmin && zpom < fzmax ) {
-      diffpdf_(&xpo,&zpom,&muf,&a[0]);
-   }
+   diffpdf_(&xpom,&zpom,&muf,&a[0]);
    return a;
 }
 

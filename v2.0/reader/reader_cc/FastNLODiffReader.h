@@ -67,7 +67,8 @@ protected:
    // inherited functions
    virtual double EvolveAlphas(double Q, double alphasMz ) const = 0;
    virtual void InitPDF() = 0;
-   virtual vector<double> GetXFX(double xp, double muf) const = 0;
+   vector<double> GetXFX(double xp, double muf) const;
+   virtual vector<double> GetDiffXFX(double xpom, double zpom, double muf) const = 0;
 
 };
 
