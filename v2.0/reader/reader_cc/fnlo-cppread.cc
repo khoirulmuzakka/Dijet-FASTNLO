@@ -262,7 +262,7 @@ int fnlocppread(int argc, char** argv){
 
 
 
-  if ( !fnloreader->IsFlexibleScale() ) {
+  if ( !fnloreader->GetIsFlexibleScaleTable() ) {
      // ---- options for scales in v2.0 tables ---- //
      // --- fastNLO user: Here you can specify the options if you use a v2.0 fastNLO table
      //     (normal case in pp/ppbar) but NOT a 'flexible-scale' table (v2.1):
@@ -282,7 +282,7 @@ int fnlocppread(int argc, char** argv){
   }  
 
   
-  if ( !fnloreader->IsFlexibleScale() ) {
+  if ( !fnloreader->GetIsFlexibleScaleTable() ) {
      // ---- options for scales in 'flexible-scale' tables (v2.1) ---- //
      // --- fastNLO user: You can choose a function to define how
      //     to compute the renormalization and factorization scale. 
