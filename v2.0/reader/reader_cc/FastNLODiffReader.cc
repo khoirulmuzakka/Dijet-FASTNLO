@@ -221,8 +221,8 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
       // find x-node index
       int nx = -1;
       int nb = -1;
-      for ( int ib = 0 ; nb == -1 && nb<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
-	 for ( int ix = 0 ; nx == -1 && nx<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+      for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
+	 for ( int ix = 0 ; nx == -1 && ix<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
 	    if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
 	       nx = ix;
 	       nb = ib;
