@@ -218,6 +218,7 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
    vector < double > a(13);
    if ( zpom > fzmin && zpom < fzmax ){
 
+
       // find x-node index
       int nx = -1;
       int nb = -1;
@@ -229,18 +230,38 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 	    }
 	 }
       }
-      if ( nx == -1 || nb == -1 ) {printf("error. Could not find x-node index.\n");exit(1);}
 
       // check if this is the 'last' or 'first' xnode
       bool IsLastX  = nx == (int)BBlocksSMCalc[0][0]->XNode1[nb].size()-1 ;
       bool IsFirstX = nx == 0 ;
 
+
+      if ( nx == -1 || nb == -1 ) {
+	 //printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
+	 for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
+	    for ( int ix = 0 ; nx == -1 && ix<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+	       if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
+		  nx = ix;
+		  nb = ib;
+	       }
+	       if (  fabs ( 1. - xp / BBlocksSMCalc[0][0]->XNode1[ib][ix] ) < 1.e-6 ){
+		  printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
+		  printf("but a quite close one: xp = %14.10e , xnode = %14.10e\n",xp,BBlocksSMCalc[0][0]->XNode1[ib][ix]);
+	       }
+	    }
+	 }
+	 //exit(1);
+	 IsLastX = true;
+	 IsFirstX = true;
+      }
+
+
       //    if ( zpom > fzmin && zpom < fzmax ) cout << "-";
       //    else cout << "|";
       //    fflush(stdout);
 
-      a = GetDiffXFX( fxpom, zpom, muf );
-      
+      a = GetDiffXFX( fxpom, zpom, muf);
+
       // calc reweight at integration edges
       if ( !IsLastX && !IsFirstX ){
 	 const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node 
@@ -261,9 +282,9 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 	    double ldelx0 = log10(xp) - log10(x1);
 	    xSpan *= ldelx/ldelx0 + 0.5 ;
 	 }
-	 if ( xSpan != 1. )
+	 if ( xSpan != 1. ){
 	    for ( unsigned  int i = 0 ; i<a.size() ; i++ ) a[i]*=xSpan;
-      
+	 }
       }
    }
    return a;
