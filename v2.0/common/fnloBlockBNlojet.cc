@@ -920,11 +920,11 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
    // ---- write out --- //
    if ( (counter % IWarmUpPrint) == 0) {
       // ---- printout on screen ---- //
-      printf(" // %16lu contributions (!= events) in warm-up run \n",counter);
+      printf("      // %16lu contributions (!= events) in warm-up run \n",counter);
       for (int i=0;i<BlockA2->GetNObsBin();i++){
-	 printf("	%s [%d] = %8.2e", sx.data(), i, axlo[i] ); // xmin
-	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
-	 if ( a2lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
+	 printf("      %s[ %d ] = %8.2e", sx.data(), i, axlo[i] ); // xmin
+	 if ( a1lo[0] != 0 ) {	    printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
+	 if ( a2lo[0] != 0 ) {	    printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
 	 printf(" ;\n");
       }
       
@@ -935,11 +935,11 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       // KR: Set back to v2 value, otherwise grid jobs don't find output
       sprintf(filename,"fastNLO-warmup.dat");
       ofile = fopen(filename,"w");
-      fprintf(ofile,"      // %lu contributions (!= events) in warm-up run \n",counter);
+      fprintf(ofile,"      // %16lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
-	 fprintf(ofile,"	%s [%d] = %8.2e", sx.data(), i, axlo[i] );
-	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
-	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
+	 fprintf(ofile,"      %s[ %d ] = %8.2e", sx.data(), i, axlo[i] );
+	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
+	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
 	 fprintf(ofile," ;\n");
       }
       fclose(ofile);
