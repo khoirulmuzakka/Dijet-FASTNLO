@@ -925,7 +925,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
 	 printf("	%s [%d] = %8.2e", sx.data(), i, axlo[i] ); // xmin
 	 if ( a1lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
 	 if ( a2lo[0] != 0 ) {	    printf(" , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
-	 printf(";\n");
+	 printf(" ;\n");
       }
       
       // ---- write out to file ---- //
@@ -940,7 +940,7 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
 	 fprintf(ofile,"	%s [%d] = %8.2e", sx.data(), i, axlo[i] );
 	 if ( a1lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );	 }
 	 if ( a2lo[0] != 0 ) {	    fprintf(ofile," , %slo [%d] = %9.4f , %shi [%d] = %9.4f", 	   s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );	 }
-	 fprintf(ofile,";\n");
+	 fprintf(ofile," ;\n");
       }
       fclose(ofile);
    }
