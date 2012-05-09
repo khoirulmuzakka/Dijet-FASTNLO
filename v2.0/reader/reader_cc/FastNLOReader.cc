@@ -279,7 +279,7 @@ double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
 
 
 
-double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){ 
+double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool Verbose ){ 
   
   // ------------------------------------------------
   //   Set the scalevariation factor for detemining the
@@ -295,11 +295,11 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   // ------------------------------------------------
 
   if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
-    printf("FastNLOReader::SetScaleVariation(). Info: This is a v2.1 table, therefore, you can choose all possible scale variations. Your Scalevar has to be '0'.\n");
-    printf("    Please use SetScaleFacMuR(double) and SetScaleFacMuF(double).\n");
+    printf("FastNLOReader::SetScaleVariation(). Info: This is a flexible-scale table!\n");
+    printf("  You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n");
+    printf("  Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n");
     return 0;
   }
-  
 
   if (  scalevar >= BBlocksSMCalc[0][1]->Nscalevar[0]  ){
     printf("Warning in FastNLOReader::SetScaleVariation. This table has only %d scalevariations stored. You wanted to acces number %d. Using '0' instead.\n", BBlocksSMCalc[0][1]->Nscalevar[0] ,scalevar );
@@ -308,12 +308,11 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
   }
   
   fScalevar	= scalevar;
-  fScaleFacMuR	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
   fScaleFacMuF	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
-  //  printf(" # FastNLOReader::SetScaleVariation. Scalefactor of %4.2f for the nominal scale is chosen (resetting also the mu_r scale factor).\n",BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
-
-  FillAlphasCache();
+  if (Verbose) {printf("FastNLOReader: Selecting MuF table according to a multiplicative scale factor of the factorization scale of %4.2f times the nominal scale.\n",fScaleFacMuF);}
+  
   if ( ReFillCache ){
+    //    FillAlphasCache();
     FillPDFCache();
   }
 
@@ -328,7 +327,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache ){
 
 
 
-void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX  ){
+void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX , bool Verbose ){
   //
   //  For MuVar tables this method sets the functional form of
   //  the renormalization or the factorization scale.
@@ -337,9 +336,9 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   //
 
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetFunctionalForm. Warning. This is not a MuVar table.\n");
-    printf("      SetFunctionalForm has no impact.\n");
-    printf("      Please use another FastNLO table in 'flexible scale version', if you want to change your scale-definition.\n");
+    printf("FastNLOReader::SetFunctionalForm. WARNING! This is not a flexible-scale table.\n");
+    printf("  SetFunctionalForm has no impact.\n");
+    printf("  Please use a flexible-scale table, if you want to change your scale-definition.\n");
     return;
   }
 
@@ -378,9 +377,9 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   
    
   // ---- setting scale ---- //
-  printf (" *    Setting %s scale to %s^2 = %1.2f^2 * %s.\n",
-	  sname[isc].c_str(),smu[isc].c_str(), 
-	  (kMuX==kMuR?fScaleFacMuR:fScaleFacMuF), fname);
+  if ( Verbose ) {printf (" *    Setting %s scale to %s^2 = %1.2f^2 * %s.\n",
+			  sname[isc].c_str(),smu[isc].c_str(), 
+			  (kMuX==kMuR?fScaleFacMuR:fScaleFacMuF), fname);}
   if ( kMuX == kMuR ) fMuRFunc = func;
   else fMuFFunc = func;
 
@@ -389,13 +388,13 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   if	( func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 
 	  || func == kLinearMean || func == kLinearSum  ||  func == kScaleMax|| func == kScaleMin ) {
     if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[0].size() <= 3){
-      printf("FastNLOReader::SetFunctionalForm. Error. There is no second scale variable available in this table.\n");
+      printf("FastNLOReader::SetFunctionalForm. ERROR! There is no second scale variable available in this table.\n");
       printf("      Using FastNLOReader::kScale1 only.\n");
       SetFunctionalForm(kScale1,kMuX);
     }
     for(int i=0;i<NObsBin;i++){
       if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[i].size() < 4 ){
-	printf("FastNLOReader::SetFunctionalForm. Warning. Scale2 has only very little nodes (n=%zd) in bin %d.\n",BBlocksSMCalc[0][0]->ScaleNodeScale2[i].size(),i);
+	printf("FastNLOReader::SetFunctionalForm. WARNING! Scale2 has only very little nodes (n=%zd) in bin %d.\n",BBlocksSMCalc[0][0]->ScaleNodeScale2[i].size(),i);
       }
     }
   }
@@ -405,8 +404,8 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache  ){
-  SetFunctionalForm(func,kMuR);
+void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache , bool Verbose ){
+  SetFunctionalForm(func,kMuR,Verbose);
   FillAlphasCache();
   if ( ReFillCache ){
     FillPDFCache();
@@ -417,8 +416,8 @@ void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFil
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache  ){
-  SetFunctionalForm(func,kMuF);
+void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache , bool Verbose ){
+  SetFunctionalForm(func,kMuF,Verbose);
   if ( ReFillCache ){
     FillPDFCache();
   }
@@ -428,7 +427,7 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFil
 
 
 
-void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
+void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache , bool Verbose ){
   // 
   // Set scale factor for scale variations in MuVar and v2.0 tables
   // You have to ReFill your cache!
@@ -436,12 +435,11 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
   // set ReFillCache=false
   //
    
+  if (Verbose) {printf("FastNLOReader: Setting multiplicative scale factor for renormalization scale to %4.2f times the nominal scale.\n",fac);}
   if ( BBlocksSMCalc[0][1]->NScaleDep != 3 ) {
-    printf(" * Setting a-posteriori scale variation factor for renormalization scale to %4.2f (=%4.2f*%4.2f) of the nominal scale.\n",
-	   fac*BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar],fac,BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar]);
-    fScaleFacMuR = BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar] * fac;
+    fScaleFacMuR = fac;
     if ( fac != 1. && !BBlocksSMCalc[kThresholdCorrection].empty() ){
-      printf("FastNLOReader::SetScaleFactorMuR. Warning. Deactivating contribution from threshold corrections.\n");
+      printf("FastNLOReader::SetScaleFactorMuR. WARNING! Deactivating contribution from threshold corrections.\n");
       printf("  A-posteriori scale variations for renormalizations scale is only valid for fixed order calculations.\n");
       printf("  You can reactivate the threshold corrections again using FastNLOReader::SetContributionON(kTresholdCorrections,Id,true).\n");
       for ( unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++ ){
@@ -450,13 +448,12 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
     }
   }
   else if ( BBlocksSMCalc[0][1]->NScaleDep == 3 ) {
-    printf(" *  Setting multiplicative scale factor for renormalization scale to %1.2f.\n",fac);
     fScaleFacMuR = fac;
     SetFunctionalForm( fMuRFunc , kMuR ); // just for printout
   }
    
-  FillAlphasCache();
   if ( ReFillCache ){
+    FillAlphasCache();
     FillPDFCache();
   }
 }
@@ -465,7 +462,7 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache ){
+void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbose ){
   // 
   // Set scale factor for scale variations in MuVar tables
   // You have to ReFill your cache.
@@ -474,12 +471,12 @@ void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache ){
   //
   
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetScaleFactorMuF. Warning. This is not a MuVar table.\n");
+    printf("FastNLOReader::SetScaleFactorMuF. WARNING! This is not a MuVar table.\n");
     printf("      SetScaleFactorMuF has no impact.\n");
     printf("      Please use SetScaleVariation(int) instead.\n");
   }
   else {
-     printf(" *  Setting multiplicative scale factor for factorization scale to %1.2f.\n",fac);
+    if (Verbose) {printf("FastNLOReader: Setting multiplicative scale factor for factorization scale to %4.2f times the nominal scale.\n",fac);}
      fScaleFacMuF = fac;
      SetFunctionalForm( fMuFFunc , kMuF ); // just for printout
      if ( ReFillCache ){
@@ -2360,21 +2357,23 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool ReFillCache ){
+void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool ReFillCache , bool Verbose ){
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetExternalFuncForMuR. Warning. This is not a MuVar table.\n");
-    printf("      SetFunctionalForm has no impact.\n");
-    printf("      Please use another table, if you want to change your scale-definition.\n");
+    printf("FastNLOReader::SetExternalFuncForMuR. WARNING! This is not a flexible-scale table.\n");
+    printf("  SetFunctionalForm has no impact.\n");
+    printf("  Please use a flexible-scale table, if you want to change your scale definition.\n");
     return;
   }
 
   Fct_MuR = Func;
   SetFunctionalForm( kExtern , kMuR );
-  printf(" *  FastNLOReader::SetExternalFuncForMuR(). Test.\n");
-  printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuR)(1,1));
-  printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuR)(91.1876,91.1876));
-  printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuR)(1,91.1876));
-  printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuR)(91.1876,1));
+  if ( Verbose ) {
+    printf(" *  FastNLOReader::SetExternalFuncForMuR(). Test.\n");
+    printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuR)(1,1));
+    printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuR)(91.1876,91.1876));
+    printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuR)(1,91.1876));
+    printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuR)(91.1876,1));
+  }
   FillAlphasCache();
   if ( ReFillCache ){
     FillPDFCache();
@@ -2385,21 +2384,23 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache ){
+void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache , bool Verbose ){
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetExternalFuncForMuF. Warning. This is not a MuVar table.\n");
-    printf("      SetFunctionalForm has no impact.\n");
-    printf("      Please use another table, if you want to change your scale-definition.\n");
+    printf("FastNLOReader::SetExternalFuncForMuF. WARNING! This is not a flexible-scale table.\n");
+    printf("  SetFunctionalForm has no impact.\n");
+    printf("  Please use a flexible-scale table, if you want to change your scale definition.\n");
     return;
   }
 
   Fct_MuF = Func;
   SetFunctionalForm( kExtern , kMuF );
-  printf(" *  FastNLOReader::SetExternalFuncForMuF(). Test.\n");
-  printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuF)(1,1));
-  printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuF)(91.1876,91.1876));
-  printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuF)(1,91.1876));
-  printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuF)(91.1876,1));
+  if ( Verbose ) {
+    printf(" *  FastNLOReader::SetExternalFuncForMuF(). Test.\n");
+    printf(" *    Scale1 = 1 ,      Scale2 = 1        ->  mu = func(1,1)             = %9.4f\n",(*Fct_MuF)(1,1));
+    printf(" *    Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = %9.4f\n",(*Fct_MuF)(91.1876,91.1876));
+    printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuF)(1,91.1876));
+    printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuF)(91.1876,1));
+  }
   if ( ReFillCache ){
     FillPDFCache();
   }

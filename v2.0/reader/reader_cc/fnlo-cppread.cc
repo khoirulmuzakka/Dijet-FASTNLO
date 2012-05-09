@@ -14,6 +14,7 @@
 #include <string>
 #include <cmath>
 #include <cstdlib>
+#include <cfloat>
 #include "FastNLOUser.h"
 #include "FastNLODiffUser.h"
 #include "Alphas.h"
@@ -208,7 +209,9 @@ int fnlocppread(int argc, char** argv){
   //fnloreader->SetAlphasEvolution(FastNLOReader::kCTEQpdf);
   //fnloreader->SetAlphasMz(0.1168);
   //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
-  fnloreader->SetAlphasMz(0.1179);
+  //  fnloreader->SetAlphasMz(0.1179);
+  // KR number in released code for comparison
+  fnloreader->SetAlphasMz(0.1185);
 
   //fnloreader->SetAlphasEvolution(FastNLOReader::kLHAPDFInternal);
 
@@ -282,7 +285,7 @@ int fnlocppread(int argc, char** argv){
   }  
 
   
-  if ( !fnloreader->GetIsFlexibleScaleTable() ) {
+  if ( fnloreader->GetIsFlexibleScaleTable() ) {
      // ---- options for scales in 'flexible-scale' tables (v2.1) ---- //
      // --- fastNLO user: You can choose a function to define how
      //     to compute the renormalization and factorization scale. 
@@ -390,7 +393,7 @@ int fnlocppread(int argc, char** argv){
   // ---- Information ---- //
   // --- fastNLO user: For a comprehensive insight into the fastNLO variables
   //     you can use:
-  fnloreader->PrintFastNLOTableConstants(0);
+  //  fnloreader->PrintFastNLOTableConstants(0);
   //     
   //     For a comparision with a Reference cross section calculated with
   //     NLOJet++ you might use:
@@ -405,25 +408,174 @@ int fnlocppread(int argc, char** argv){
   //     and a PDF similar to the cteq6m.LHgrid pdf-file.
   // ************************************************************************************************
 
-
-
-  // ---- do sth. useful ---- //
-  printf("\n");
-  printf("%s",CSEPL.c_str());
-  printf("fnlo-read: Calculate cross sections\n");
-  printf("%s",CSEPL.c_str());
-  
   // Give some info on contribution Ids
   // fnloreader->PrintTableInfo();
   
   // Example code to access cross sections and K factors:
-  fnloreader->PrintFastNLODemo();
+  //  fnloreader->PrintFastNLODemo();
   
   // The presented example is done automatically for print out here  
-  fnloreader->PrintCrossSectionsDefault();
+  //  fnloreader->PrintCrossSectionsDefault();
 
   // Example code to print out data points (if available)
-  fnloreader->PrintCrossSectionsData();
+  //  fnloreader->PrintCrossSectionsData();
+
+
+
+  // ---- Example to do some cross section analysis ---- //
+  // Some initialization
+  string CSEP41("#########################################");
+  string DSEP41("=========================================");
+  string SSEP41("-----------------------------------------");
+  string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
+  string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
+  string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
+  printf("\n");
+  printf("%s",CSEPL.c_str());
+  printf("fnlo-read: Calculate my cross sections\n");
+  printf("%s",CSEPL.c_str());
+
+  // Check on existence of LO and NLO (Id = -1 if not existing)
+  int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
+  int inlo  = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);
+  if ( ilo < 0 || inlo < 0 ){
+    printf("fnlo-read: ERROR! LO and/or NLO not found, nothing to be done!\n");
+    exit(1);
+  } else {
+    printf("fnlo-read: LO and NLO contributions have Id's: %i and %i\n",ilo,inlo);
+  }
+  // Check on existence of 2-loop threshold corrections
+  int ithc2 = fnloreader->ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
+  if ( ithc2 < 0 ){
+    printf("fnlo-read: 2-loop threshold corrections not found!\n");
+  } else {
+    printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
+  }
+  // Check on existence of non-perturbative corrections from LO MC
+  int inpc1 = fnloreader->ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
+  if ( inpc1 < 0 ){
+    printf("fnlo-read: Non-perturbative corrections not found!\n");
+  } else {
+    printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
+  }
+
+  // Switch on LO & NLO, switch off anything else and be verbose about it (last "true" entry)
+  if (! ilo   < 0) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 0, true, true );} 
+  if (! inlo  < 0) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 1, true, true );}
+  if (! ithc2 < 0) {fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, 0, false, true );}
+  if (! inpc1 < 0) {fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, 0, false, true );}
+  // Also don't print this out even when existing
+  ithc2 = -1;
+  inpc1 = -1;
+  
+  // Get number of available scale variations and check on available scale factors,
+  // in particular for MuF
+  int nscls = fnloreader->GetNScaleVariations();
+  // With threshold corrections, allow only default scale (0) usable!
+  //  for (int iscls=0; iscls<nscls; iscls++){
+  //    fnloreader->SetScaleVariation(iscls);
+  //    double fxmu = fnloreader->GetScaleFactorMuF();
+  //    printf("fnlo-read: MuF scale factor for scale no. %i is: %7.4f\n",iscls,fxmu);
+  //  }
+
+  // Select MuF scale variation
+  //   Do not refill PDF cache (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
+  //  fnloreader->SetScaleVariation(0, false, true);
+  
+  // Set MuR scale factor
+  //   Do not refill PDF & alpha_s caches (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
+  double fxmur = 1.0; 
+  //  fnloreader->SetScaleFactorMuR(fxmur, false, true);
+  
+  // Set MuF scale factor, only usable with flexible-scale tables
+  //   Do not refill PDF cache (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
+  //  double fxmuf = 1.0; 
+  //  fnloreader->SetScaleFactorMuF(fxmuf, false, true);
+  
+  // If the MuR scale was changed the alpha_s cache MUST be refilled
+  fnloreader->FillAlphasCache();
+  // If the PDF or a scale was changed the PDF cache MUST be refilled
+  fnloreader->FillPDFCache();
+  
+  // Calculate cross section
+  fnloreader->CalcCrossSection();
+
+  // Get results
+  vector < double > xsnlo = fnloreader->GetCrossSection();
+  vector < double > kfac  = fnloreader->GetKFactors();
+  vector < double > xslo  = xsnlo;
+  for (unsigned int i=0;i<xslo.size();i++){
+    if ( abs(kfac[i]) > DBL_MIN ){
+      xslo[i] = xslo[i]/kfac[i];
+    } else {
+      xslo[i] = -1.;
+    }
+  }
+  vector < double > xsthc2;
+  vector < double > kthc;
+  vector < double > xsnpc;
+  vector < double > knpc;
+
+  // Start print out
+  cout << DSEP << endl;
+  printf(" My Cross Sections\n");
+  printf(" The scale factors chosen here are: % #10.3f, % #10.3f\n",fxmur,fnloreader->GetScaleFactorMuF());
+  cout << SSEP << endl;
+    
+  // Get table constants relevant for print out
+  int NDim = fnloreader->GetNDiffBin();
+  unsigned int NDimBins[NDim];
+  vector < string > DimLabel = fnloreader->GetDimensionLabel();
+  vector < vector < double > > LoBin = fnloreader->GetLowBinEdge();
+  vector < vector < double > > UpBin = fnloreader->GetUpBinEdge();
+  vector < double > BinSize = fnloreader->GetBinSize();
+  
+  // Print
+  if ( NDim == 2 ){
+    string header0 = "  IObs  Bin Size IODim1 "; 
+    string header1 = "   IODim2 ";
+    string header2 = " LO cross section   NLO cross section   K NLO";
+    if ( ithc2>-1 ){
+      header2 += "     K THC";
+    }
+    if ( inpc1>-1 ){
+      header2 += "     K NPC";
+    }
+    printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
+	   header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+    cout << SSEP << endl;
+    for ( unsigned int i=0; i<xslo.size(); i++ ){ 
+      for ( int j=0; j<NDim; j++ ){ 
+	if ( i==0 ){
+	  NDimBins[j] = 1;
+	} else if ( LoBin[i-1][j] < LoBin[i][j]){
+	  NDimBins[j]++;
+	} else if ( LoBin[i][j] < LoBin[i-1][j]){
+	  NDimBins[j] = 1;
+	}
+      }
+      if ( ithc2<0 && inpc1<0 ) {
+	printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
+	       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+	       NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
+      } else if ( inpc1<0 ) {
+	printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+	       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+	       NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
+      } else if ( ithc2<0 ) {
+	printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+	       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+	       NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+      } else {
+	printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+	       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+	       NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
+      }
+      printf("\n");
+    }
+  } else {
+    printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+  }
 
   return 0;
 

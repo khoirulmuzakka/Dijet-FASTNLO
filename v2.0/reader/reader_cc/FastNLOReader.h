@@ -173,17 +173,17 @@ public:
   void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
-  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_R
-  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true );	// Set the functional form of Mu_F
-  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX );	// Set functional form of MuX
-  void SetScaleFactorMuR( double fac , bool ReFillCache = true );			// Set scale factor for MuR
-  void SetScaleFactorMuF( double fac , bool ReFillCache = true );			// Set scale factor for MuF
-  void SetExternalFuncForMuR( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true );			// Set external function for scale calculation (optional)
+  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_R
+  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_F
+  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX , bool Verbose = false );// Set functional form of MuX
+  void SetScaleFactorMuR( double fac , bool ReFillCache = true , bool Verbose = false );// Set scale factor for MuR
+  void SetScaleFactorMuF( double fac , bool ReFillCache = true , bool Verbose = false );// Set scale factor for MuF
+  void SetExternalFuncForMuR( mu_func , bool ReFillCache = true , bool Verbose = false );// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true , bool Verbose = false );// Set external function for scale calculation (optional)
 
 
   // ---- setters for scale variation in v2.0 tables  ---- //
-  double SetScaleVariation(int scalevar , bool ReFillCache = true);			// choose the scale variation table
+  double SetScaleVariation( int scalevar , bool ReFillCache = true , bool Verbose = false );// Choose the MuF scale variation table
   
 
   // ---- Pdf interface ---- //
