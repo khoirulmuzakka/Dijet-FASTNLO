@@ -63,7 +63,6 @@
 *     Current restrictions:
 *     ---------------------
 *     - can deal with single scale dim. only (no DIS with muf=Q, mur=pT)
-*     - assumes xmur=xmuf for each contribution (CKR)
 *     - assumes same x section units (nb, pb, ...) for all contributions
 *     - assumes that max. one contribution per allowed type is present
 *     
@@ -99,11 +98,10 @@
      >     ICONTRSELECTOR(ITHC1L).EQ.1.OR.
      >     ICONTRSELECTOR(ITHC2L).EQ.1) THEN
 
-*---  Loop over contributions using the pointers
+*---  Loop over logical contributions
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
-               IPOINT = ICONTRPOINTER(I)
-
+               
 *---  Get PDFs - multiply with perturbative coefficients and alpha_s
                CALL FX9999PM(I,XMUR,XMUF)
             ENDIF
@@ -126,7 +124,6 @@ C---  DO K=2,5 ! Test - only qq
 *---  Either multiply x section by multiplicative correction or ...
          I = INPC1
          IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
-            IPOINT = ICONTRPOINTER(I)
             DO J=1,NOBSBIN
                XSECT(J) = XSECT(J) * MFACT(1,J)
             ENDDO
@@ -490,6 +487,19 @@ C---  DO K=2,5 ! Test - only qq
          ENDIF
       ENDIF
 
+*---  Print contribution summary (if requested)
+      IF (IPRINT.GT.1) THEN
+         WRITE(*,'(A)')
+     >        " FX9999PT: Contribution summary:"
+         WRITE(*,'(A)')
+     >        " FX9999PT: Name  ,  Enum, IPoint, NCount, ISelct"
+         DO I=ILO,IDATA
+            WRITE(*,'(A,I6,I8,I8,I8)')" FX9999PT: "//CNAME(I)//":",
+     >           I,ICONTRPOINTER(I),NCONTRCOUNTER(I),
+     >           ICONTRSELECTOR(I)
+         ENDDO
+      ENDIF
+
 *---  Check availability of scale choices and assign pointers
 *---  The current treatment works only for a single scale dimension!
 *---  For 2nd scale dimension need 2nd scale pointer!
@@ -517,9 +527,9 @@ C---  DO K=2,5 ! Test - only qq
      >                 "        with scale-independent coefficients?"
                ENDIF
 *---  Check for presence of more restrictive factorization scale
-             ELSE
+            ELSE
                DO J=1,NSCALEVAR(I1,1)
-                  IF (DABS(SCALEFAC(I1,1,J)/XMUF-1D0).LT.1D-4) THEN
+                  IF (ABS(SCALEFAC(I1,1,J)-XMUF).LT.TINY(1.D0)) THEN
                      ISCALEPOINTER(I)=J
                      EXIT       ! Quit DO loop at first match
                   ENDIF
@@ -542,7 +552,7 @@ C---  DO K=2,5 ! Test - only qq
 *---  For IScaleDep = 2 check if renormalization scale is directly
 *---  available, i.e. identical to factorization scale
 *---  Can be provided a posteriori otherwise
-      IF (DABS(XMUR/XMUF-1.D0).GT.1D-4) THEN
+      IF (ABS(XMUR-XMUF).GT.TINY(1D0)) THEN
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
                I1 = ICONTRPOINTER(I)
@@ -595,39 +605,48 @@ C---  DO K=2,5 ! Test - only qq
       DOUBLE PRECISION FACTOR, BETA0, BETA1, NF,CA,CF, LOGMUR
       PARAMETER (NF=5D0, CA=3D0, CF=4D0/3D0)
       PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0) 
-      PARAMETER (BETA1=34*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
+      PARAMETER (BETA1=34D0*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
 
-*---  Compute 'standard' contribution at chosen scale 
+*---  Compute 'standard' contribution at chosen scales
+      IADDPOW = 0
+      FACTOR  = 1D0
       CALL FX9999GP(ICTRB,XMUF)
-      CALL FX9999MT(ICTRB,XMUR,XMUF,0,1D0)
-
-*---  A posteriori mur variation
+      CALL FX9999MT(ICTRB,XMUR,XMUF,IADDPOW,FACTOR)
+      
+*---  A posteriori MuR variation for scale dependent parts
       IC = ICONTRPOINTER(ICTRB)
       IS = ISCALEPOINTER(ICTRB)
-      
-      IF (ISCALEDEP(IC).NE.0 .AND. DABS(XMUR/XMUF-1D0).GT.1D-4) THEN
-         WRITE(*,*)'FX9999PM: A posteriori mur variation needs '//
-     >        'final check! Stopped for now ...'
-         STOP
-         IF (ISCALEDEP(IC).NE.1) THEN
-            WRITE(*,*)'FX9999PM: ERROR! A posteriori scale variation'
-     >           //' for contribution',ic,' not possible! Stopped.'
+      IF (ISCALEDEP(IC).NE.0.AND.ABS(XMUR-XMUF).GT.TINY(1D0)) THEN
+         IF (ISCALEDEP(IC).GT.1) THEN
+            WRITE(*,*)'FX9999PM: ERROR! A posteriori variation '//
+     >           'of MuR for contribution type',ICTRB,
+     >           'with scale dependence',ISCALEDEP(IC),
+     >           'not implemented! Stopped.'
             STOP
          ENDIF
-         
-*---  Abs. order in alphas: NPOW(IC)
+   
 *---  Abs. order of LO:     ILOORD
+*---  Abs. order in alphas: NPOW(IC)
 *---  >  NLO if (NPOW-ILOORD) = 1, NNLO if (NPOW(IC)-ILOORD) = 2
-         
+
+*---  If LO
+         IF ( (NPOW(IC)-ILOORD).EQ.0 ) THEN
+*---  Nothing to do, direct MuR dependence via alpha_s already taken
+*---  into account by first call to FX9999MT. Also, MuRcache
+*---  was filled in FX9999MT for a posteriori use.
 *---  If NLO 
-         IF ( (NPOW(IC)-ILOORD).EQ.1) THEN
-            LOGMUR = LOG(XMUR/SCALEFAC(IC,1,IS))
-            FACTOR = DBLE(ILOORD)*BETA0*LOGMUR
-C---  WRITE(*,*)'factor ',factor,ILOOrd,real(beta0),real(logmur)
+         ELSEIF ( (NPOW(IC)-ILOORD).EQ.1 ) THEN
+            IADDPOW = 1
+            LOGMUR  = LOG(XMUR/SCALEFAC(IC,1,IS))
+            FACTOR  = DBLE(ILOORD)*BETA0*LOGMUR
             CALL FX9999GP(ICTRB-1,XMUF)
-            CALL FX9999MT(ICTRB-1,XMUR,XMUF,1,FACTOR) ! 1: mod NLO
+*---  For NLO, ICTRB-1 is LO as required to store c_1 dependent
+*---  NLO scale modification. However, this has to go one order higher,
+*---  that is IADDPOW = 1, and also use the cached MuR values of the NLO
+*---  scale nodes.
+            CALL FX9999MT(ICTRB-1,XMUR,XMUF,IADDPOW,FACTOR) ! 1: mod NLO
 *---  If NNLO
-         ELSEIF ( (NPOW(IC)-ILOORD).EQ.2) THEN
+         ELSEIF ( (NPOW(IC)-ILOORD).EQ.2 ) THEN
             LOGMUR = LOG(XMUR/SCALEFAC(IC,1,IS))
             WRITE(*,*)'FX9999PM: ERROR! A posteriori scale variation'
      >           //' beyond NLO not yet implemented! Stopped.'
@@ -635,7 +654,7 @@ C---  WRITE(*,*)'factor ',factor,ILOOrd,real(beta0),real(logmur)
 C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             CALL FX9999GP(ICTRB-2,XMUF)
             CALL FX9999MT(ICTRB-2,XMUR,XMUF,2,FACTOR) ! 2: mod LO
-
+            
 C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             CALL FX9999GP(ICTRB-1,XMUF)
             CALL FX9999MT(ICTRB-1,XMUR,XMUF,1,FACTOR) ! 1: mod NLO
@@ -650,14 +669,14 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
       END
 ***********************************************************************
 
-      SUBROUTINE FX9999MT(IN,XMUR,XMUF,IADDPOW,FACTOR)
+      SUBROUTINE FX9999MT(ICTRB,XMUR,XMUF,IADDPOW,FACTOR)
 ***********************************************************************
 *     
 *     Multiply the PDFs and the perturbative coefficients 
 *     
 *     Input:
 *     ------    
-*     IN    no. of contribution in present calculation
+*     ICTRB number of logical contribution 
 *     XMUR  pre-factor for nominal renormalization scale     
 *     >     any choice is possible, but please note 
 *     >     that 2-loop threshold corrections work
@@ -674,19 +693,20 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
       INTEGER IADDPOW
-      INTEGER IXMUR,IXMUF, IN,IC,IS, I,J,K,L,M,N, NXMAX,
+      INTEGER IXMUR,IXMUF, ICTRB,IC,IS, I,J,K,L,M,N, NXMAX,
      >     ISTORE
       DOUBLE PRECISION XMUR, XMUF, FACTOR, MUR, FNALPHAS, SCF
       DOUBLE PRECISION AS, ASPOW
+      DOUBLE PRECISION MURCACHE(MXOBSBIN,MXSCALENODE)
 
 *---  Set pointers to contribution in table and to scale variation
-      IC = ICONTRPOINTER(IN)
-      IS = ISCALEPOINTER(IN)
+      IC = ICONTRPOINTER(ICTRB)
+      IS = ISCALEPOINTER(ICTRB)
 
 *---  If regular contribution (i.e. no a posteriori scale variation)
 *---  then store in slot number of logical contribution,
 *---  otherwise increment by no. of add powers in alphas
-      ISTORE = IN + IADDPOW
+      ISTORE = ICTRB + IADDPOW
 
 *---  Loop over coefficient array - compare with order in table !
 *---  Storage loop: observable, scalebins, (get alphas), xbins, subproc
@@ -701,11 +721,18 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             STOP
          ENDIF
          DO K=1,NSCALENODE(IC,1)
-            MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
-
+*---  If regular contribution (i.e. no a posteriori scale variation)
+*---  then store MuR in cache for use with a posteriori scale variation
+            IF (IADDPOW.EQ.0) THEN
+               MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
+               MURCACHE(J,K) = MUR
+*---  Otherwise retrieve previously (Check! TBD) cached MuR values
+            ELSE
+               MUR = MURCACHE(J,K)
+            ENDIF
 *---  Get alpha_s
             AS =  FNALPHAS(MUR)
-            ASPOW = AS**(NPOW(IC)+IADDPOW)
+            ASPOW = AS**DBLE(NPOW(IC)+IADDPOW)
             DO L=1,NXMAX
                DO M=1,NSUBPROC(IC)
                   IF (PREFTAB.EQ.0) THEN
@@ -751,9 +778,20 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
 *---  Set pointers to contribution in table and to scale variation
       IC = ICONTRPOINTER(ICTRB)
       IS = ISCALEPOINTER(ICTRB)
-
+      
       DO I=1,NOBSBIN
          DO J=1,NSCALENODE(IC,1)
+*---  For MuF independent contributions (e.g. LO) the scale factor XMUF
+*---  has to be applied to the scale IS stored within the table
+*---  contribution IC.
+*---  For MuF dependent contributions the scale factor XMUF is
+*---  integrated already in the properly chosen scale IS stored within
+*---  the table contribution IC.
+*---  Note:
+*---  For threshold corrections MuR and MuF must be identical!
+*---  The LO jet cross sections DO change with MuF for identical
+*---  MuR because of the PDF's. Only the first perturbative coefficient
+*---  is independent of MuF.
             IF (ISCALEDEP(IC).EQ.0) THEN
                MUF = XMUF*SCALENODE(IC,I,1,IS,J) ! 1: ScaleDim  IS: ScaleVar
             ELSE
@@ -1091,3 +1129,35 @@ C---  ENDDO
 
       RETURN
       END
+***********************************************************************
+
+
+
+      SUBROUTINE FX9999CL
+***********************************************************************
+*
+*     fastNLO user code v2.0 - print contribution list
+*
+***********************************************************************
+      IMPLICIT NONE
+      INCLUDE 'fnx9999.inc'
+      INCLUDE 'strings.inc'
+      INTEGER I,J,K
+      CHARACTER*80 CHTMP
+
+      WRITE(*,'(A)')
+      WRITE(*,*)CSEPS
+      WRITE(*,*)"# Overview on contribution types and "//
+     >     "numbers contained in table:"
+      WRITE(*,*)LSEPS
+      WRITE(*,'(A,I2)')" # Number of contributions: ",Ncontrib
+      DO I=ILO,IDATA
+         WRITE(*,'(A,I2)')" #   No.: ",I
+ckr TBD     >        I,ICONTRPOINTER(I),NCONTRCOUNTER(I),
+ckr TBD     >        ICONTRSELECTOR(I)
+      ENDDO
+      WRITE(*,*)CSEPS
+
+      RETURN
+      END
+***********************************************************************

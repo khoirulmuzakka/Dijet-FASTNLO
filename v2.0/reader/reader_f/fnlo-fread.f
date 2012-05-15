@@ -12,21 +12,24 @@
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
-      INTEGER NXMU
-      PARAMETER(NXMU = 4)
+      CHARACTER*2  CH2TMP
       CHARACTER*16 CHTMP1
       CHARACTER*18 CHTMP2
       CHARACTER*255 FILENAME,PDFSET,CHRES,CHFRM
       INTEGER I, J, IS, IPRINT, NDIMBINS(MXDIM)
-      INTEGER NSCDM, NSCLS, ISCLPNT(NXMU)
+      INTEGER NSCDM, NSCLS
+      INTEGER MXSCALECOMB
+      PARAMETER (MXSCALECOMB=2*MXSCALEVAR)
       LOGICAL LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
       LOGICAL LTHCSEP,LNPCSEP
-      DOUBLE PRECISION ALPS,FNALPHAS,SCALEF,XMU(NXMU)
-      DATA ISCLPNT/0,0,0,0/
+      DOUBLE PRECISION ALPS,FNALPHAS,SCALER,SCALEF
+      DOUBLE PRECISION XMURS(MXSCALECOMB),XMUFS(MXSCALECOMB)
       DATA IPRINT/0/
-*---  Define series of scale factor settings to test
-      DATA XMU/1D0,0.25D0,0.5D0,2D0/
-
+*---  Define series of scale factor settings to test. Last and 8th entry
+*---  is (0,0) and is not to be used!
+      DATA XMURS/1.0D0,0.5D0,2.0D0,0.5D0,1.0D0,1.D0,2.D0,0.0D0/
+      DATA XMUFS/1.0D0,0.5D0,2.0D0,1.0D0,0.5D0,2.D0,1.D0,0.0D0/
+      
 *---  ATTENTION: This is the most likely source of Fortran problems!
 *---  For each scenario, the result array must be declared at least  
 *---  as large as in the definition in the common block of the
@@ -83,6 +86,8 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
             WRITE(*,*)'# Usage: ./fnlo-fread [arguments]'
             WRITE(*,*)'# Table input file, def. = table.tab'
             WRITE(*,*)'# PDF set, def. = cteq6mE.LHgrid'
+            WRITE(*,*)'# Number of mu_r, mu_f scale settings to '//
+     >           'investigate, if possible, def. = 1, max. = 7'
             WRITE(*,*)'#'
             WRITE(*,*)'# Give full path(s) if these are not in the cwd.'
             WRITE(*,*)'# Use "_" to skip changing a default argument.'
@@ -113,8 +118,41 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
      >        PDFSET(1:LEN_TRIM(PDFSET))
       ENDIF
 
+*---  Number of scale settings
+      CH2TMP = "X"
+      IF (IARGC().GE.3) THEN
+         CALL GETARG(3,CH2TMP)
+      ENDIF
+      IF (IARGC().LT.3.OR.CH2TMP(1:1).EQ."_") THEN
+         NSCLS = 1
+         WRITE(*,*)
+     >        "# fnlo-read: No request given for number of "//
+     >        "scale settings,"
+         WRITE(*,*)
+     >        "#            investigating primary scale only."
+      ELSE
+         READ(CH2TMP,'(I2)'),NSCLS
+         IF (NSCLS.LT.1) THEN
+            WRITE(*,*)
+     >           "# fnlo-read: ERROR! No scale setting "//
+     >           "or even less??? Aborting! NSCLS = ",
+     >           NSCLS
+            STOP
+         ELSEIF (NSCLS.GT.MXSCALECOMB-1) THEN
+            WRITE(*,*)
+     >           "# fnlo-read: ERROR! Too many scale settings "//
+     >           "requested, aborting! NSCLS = ",
+     >           NSCLS
+            STOP
+         ELSE
+            WRITE(*,'(A,I1,A)')
+     >           " # fnlo-read: If possible, will try to do ",
+     >           NSCLS, " scale setting(s)."
+         ENDIF
+      ENDIF
+
 *---  Too many arguments
-      IF (IARGC().GT.2) THEN
+      IF (IARGC().GT.3) THEN
          WRITE(*,*)
      >        "fnlo-read: ERROR! Too many arguments, aborting!"
          STOP
@@ -126,6 +164,9 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
 
 *---  Initial call to alpha_s interface
       ALPS = FNALPHAS(91.1876D0)
+
+*---  Print out contribution list
+      Call FX9999CL
 
 *---  Print out scenario information
       Call FX9999NF
@@ -149,6 +190,11 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
      >        IDATAFLAG(I).EQ.1)
      >        LDATA = .TRUE.
       ENDDO
+ckr TBD
+      lthc1l = .false.
+      lthc2l = .false.
+      lnpc1 = .false.
+      ldata = .false.
 
 *---  Initialize LHAPDF  
 C---  CALL SETLHAPARM('SILENT')
@@ -161,41 +207,43 @@ C---  CALL SETLHAPARM('SILENT')
 *---  Compute the cross sections
       WRITE(*,'(A)')""
       WRITE(*,'(A)')CSEPL
-      WRITE(*,'(A)')"fnlo-read: Calculate cross sections"
+      WRITE(*,'(A)')"fnlo-read: Calculate my cross sections"
       WRITE(*,'(A)')CSEPL
 
 *---  Initial settings
       Call FNSET("P_RESET",0)   ! Reset all selections to zero
       
-*---  Loop over allowed scale settings for values pre-set in XMU
+*---  Loop over predefined scale settings in XMURS(F)
 *---  For now assume only one scale dimension, since (MxScaleDim=1)!
-      DO IS=1,NXMU
+      DO IS=1,NSCLS
+         SCALER = XMURS(IS)
+         SCALEF = XMUFS(IS)
 
 *---  Check on pointers to access contributions and scales for NLO and
 *---  2-loop --> otherwise skip this scale setting 
          IF (LNLO) CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
          IF (LTHC2L) CALL FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
-         CALL FX9999PT(XMU(IS),XMU(IS),0)
+         CALL FX9999PT(SCALER,SCALEF,IPRINT)
          IF (LNLO.AND..NOT.ISCALEPOINTER(INLO).GT.0) CYCLE
          IF (LTHC2L.AND..NOT.ISCALEPOINTER(ITHC2L).GT.0) CYCLE
-         SCALEF = XMU(IS)
          CALL FNSET("P_RESET",0) ! Reset all selections to zero
 
 *---  Calculate LO cross sections (set IPRINT to 1 for more verbose
 *---  output)
          IF (LLO) THEN
             CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-            CALL FX9999CC(SCALEF, SCALEF, XSLO, DXSUCTMP, DXSCORTMP)
+            CALL FX9999CC(SCALER, SCALEF, XSLO, DXSUCTMP, DXSCORTMP)
          ENDIF
          
 *---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
 *---  output)
          IF (LLO.AND.LNLO) THEN
             CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-            CALL FX9999CC(SCALEF, SCALEF, XSNLO, DXSUCTMP, DXSCORTMP)
+            CALL FX9999CC(SCALER, SCALEF, XSNLO, DXSUCTMP, DXSCORTMP)
          ENDIF
 
 *---  Calculate NLO cross section incl. 2-loop threshold corrections
+*---  Only xmur = xmuf allowed here!
 *---  (set IPRINT to 1 for more verbose output)
          IF (LLO.AND.LNLO.AND.LTHC2L) THEN
             CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
@@ -218,7 +266,7 @@ C---  ENDIF
             CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
             CALL FNSET("P_THRESHCOR",0) ! deselect threshold corrections
             CALL FNSET("P_NPCOR",1) ! select non-perturbative corrections
-            CALL FX9999CC(SCALEF, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
+            CALL FX9999CC(SCALER, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
          ENDIF
 
 *---  Print out non-perturbative corrections (set IPRINT to 1 for more
@@ -227,7 +275,7 @@ C---  IF (LNPC1) THEN
 C---  CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
 C---  CALL FNSET("P_THRESHCOR",0) ! deselect threshold corrections
 C---  CALL FNSET("P_NPCOR",1) ! select non-perturbative corrections
-C---  CALL FX9999CC(SCALEF, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
+C---  CALL FX9999CC(SCALER, SCALEF, XSNPC, DXSUCNPC, DXSCORNPC)
 C---  LNPCSEP = .TRUE.
 C---  ENDIF
 
@@ -255,9 +303,9 @@ C---  ENDIF
             ENDIF
          ENDDO
          WRITE(*,'(A)')DSEPL
-         WRITE(*,'(A)')" Cross Sections"
-         WRITE(*,"(A,F10.3)")" The scale factor chosen here is: ",
-     >        SCALEF
+         WRITE(*,'(A)')" My Cross Sections"
+         WRITE(*,'(2(A,F10.3))')" The scale factors chosen here are: ",
+     >        SCALER,", ",SCALEF
          WRITE(*,'(A)')LSEPL
          CHTMP1 = DIMLABEL(1)
          CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
@@ -343,7 +391,7 @@ C---  ENDIF
       IF (LDATA) THEN
          CALL FNSET("P_RESET",0) ! Reset all selections to zero
          CALL FNSET("P_DATA",1) ! Select data
-         CALL FX9999CC(SCALEF, SCALEF, XSDAT, DXSUCDATA, DXSCORDATA)
+         CALL FX9999CC(SCALER, SCALEF, XSDAT, DXSUCDATA, DXSCORDATA)
 
 *---  Data section printout
          CHFRM  =

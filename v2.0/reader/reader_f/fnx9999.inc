@@ -14,9 +14,11 @@
      >     PORDPTHY, PTHRESHCOR, PQUARKCOMPOSITENESS, PADDLED, PTEVED,
      >     PNPCOR, PUEVENT, PDATA
       
-*---  Define numbering scheme of contribution types
+*---  Define numbering and naming scheme of contribution types
       INTEGER ILO, INLO, ITHC1L, ITHC2L, INPC1, IDATA 
       PARAMETER(ILO=1,INLO=2,ITHC1L=3,ITHC2L=4,INPC1=5,IDATA=6)
+      CHARACTER*6 CNAME(6)
+      DATA CNAME/"LO    ","NLO   ","THC1L ","THC2L ","NPC1  ","DATA  "/
       
 *---  Fundamental parameters - scenario dependent
       INTEGER MXOBSBIN, MXCTRB, MXNXTOT, MXSCALES, MXSCALENODE, 
