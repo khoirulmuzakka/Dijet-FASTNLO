@@ -171,7 +171,7 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
 *---  Print out scenario information
       Call FX9999NF
 
-*---  Check on existence of LO, NLO, and THC contributions
+*---  Check on existence of LO, NLO, THC, NPC and DATA contributions
       LLO    = .FALSE.
       LNLO   = .FALSE.
       LTHC1L = .FALSE.
@@ -213,7 +213,7 @@ C---  CALL SETLHAPARM('SILENT')
 *---  Initial settings
       Call FNSET("P_RESET",0)   ! Reset all selections to zero
       
-*---  Loop over predefined scale settings in XMURS(F)
+*---  Loop over pre-defined scale settings in XMURS(F)
 *---  For now assume only one scale dimension, since (MxScaleDim=1)!
       DO IS=1,NSCLS
          SCALER = XMURS(IS)
