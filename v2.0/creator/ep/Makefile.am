@@ -2,7 +2,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # The main targets, here the libtool plugin libraries to build
-lib_LTLIBRARIES = libfnh1001.la libfnh5001.la libfnh5002.la
+lib_LTLIBRARIES = libfnh1001.la libfnh5001.la libfnh5002.la libfnhd5102.la libfnhd0001.la
 # libfnh2101d.la
 
 #
@@ -14,6 +14,8 @@ AM_SOURCES = pdf-cteq6.h pdf-dis-dummy.h
 libfnh1001_la_SOURCES = fnh1001.cc alew.f $(AM_SOURCES)
 libfnh5001_la_SOURCES = fnh5001.cc alew.f $(AM_SOURCES)
 libfnh5002_la_SOURCES = fnh5002.cc alew.f $(AM_SOURCES)
+libfnhd5102_la_SOURCES = fnhd5102.cc alew.f $(AM_SOURCES)
+libfnhd0001_la_SOURCES = fnhd0001.cc alew.f $(AM_SOURCES)
 #libfnh2101d_la_SOURCES = fnh2101d.cc alew.f $(AM_SOURCES)
 
 #
