@@ -107,7 +107,6 @@ private:
    //   pdf
    pdf_cteq6dis pdf;
    pdf_dis_dummy dummypdf;
-   pdf_dis_flat_dummy flatpdf;
 
    // algorithms
    kT_clus_long jetclus;
