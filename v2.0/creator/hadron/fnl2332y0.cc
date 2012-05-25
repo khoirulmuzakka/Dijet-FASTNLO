@@ -153,7 +153,7 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //     (return value must be true for jets to be UNselected)
-// fnl2332y0: use rapidity!
+// fnl2332: use rapidity!
 struct fNLOSelector {
   fNLOSelector(double ymin, double ymax, double ptmin):
     _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
@@ -168,6 +168,7 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
+
   // --- fastNLO: Don't touch this piece of code!
   fnloBlockA2 *A2 =  table->GetBlockA2();
   double x1 = p[-1].Z()/p[hadron(-1)].Z();
@@ -216,7 +217,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
   
   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-  // fnl2332y0: Not required for inclusive jets
+  // fnl2332: Not required for inclusive jets
   //  static fNLOSorter SortJets;
   //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
   
@@ -302,6 +303,10 @@ void UserHHC::inittable(){
   A2->ScDescript.push_back("Inclusive_Jet_pT");
   A2->ScDescript.push_back("anti-kT_R=0.7");
   A2->ScDescript.push_back("CMS-PAS-QCD-11-004");
+  A2->ScDescript.push_back("provided by:");
+  A2->ScDescript.push_back("fastNLO_2.1.0");
+  A2->ScDescript.push_back("If you use this table, please cite:");
+  A2->ScDescript.push_back("  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310");
 
   A2->NScDescript = A2->ScDescript.size();
   A2->Ecms = sqrt(s);
@@ -317,7 +322,7 @@ void UserHHC::inittable(){
 
   // --- fastNLO user: bin definitions - here in pT and |y|
   const int ndim2bins = 1;
-  double dim2bins[ndim2bins+1] = { 0.0, 0.5 };
+  const double dim2bins[ndim2bins+1] = { 0.0, 0.5 };
   
   const int ndim1bins[ndim2bins] = { 48 };
 
@@ -333,11 +338,12 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  double dim0[49] = { 18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,
-		      74.  ,   84.,   97.,  114.,  133.,  153.,  174.,  196.,  220.,  245.,
-		      272. ,  300.,  330.,  362.,  395.,  430.,  468.,  507.,  548.,  592.,
-		      638. ,  686.,  737.,  790.,  846.,  905.,  967., 1032., 1101., 1172.,
-		      1248., 1327., 1410., 1497., 1588., 1784., 2116., 2500., 3000. };
+  const double dim0[49] = {
+    18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,
+    74.  ,   84.,   97.,  114.,  133.,  153.,  174.,  196.,  220.,  245.,
+    272. ,  300.,  330.,  362.,  395.,  430.,  468.,  507.,  548.,  592.,
+    638. ,  686.,  737.,  790.,  846.,  905.,  967., 1032., 1101., 1172.,
+    1248., 1327., 1410., 1497., 1588., 1784., 2116., 2500., 3000. };
   for (int j=0; j<ndim1bins[0]+1; j++) { 
     dim1bins[0][j] = dim0[j];
   }
@@ -358,7 +364,7 @@ void UserHHC::inittable(){
   //     (multi-) differential result.
   //     default: divide by bin width in dim 1 and dim 2
   //              ATTENTION: Don't forget to include a factor of 2 for abs. rapidity |y| !
-  // fnl2332y0: divide by bin width in pT and |y|
+  // fnl2332: divide by bin width in pT and |y|
 
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<ndim2bins;i++){
