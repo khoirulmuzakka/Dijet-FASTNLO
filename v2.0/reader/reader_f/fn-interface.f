@@ -39,7 +39,7 @@
       IMPLICIT NONE
       DOUBLE PRECISION MUR
       
-      DOUBLE PRECISION ALPSMZ, PI4, PI
+      DOUBLE PRECISION ALPSMZ, PI
       DOUBLE PRECISION ALPS_IT,ALPS_IT_FNLO14 
       INTEGER IFIRST, NLOOP
 
@@ -47,8 +47,7 @@
 
       IF (IFIRST.EQ.0) THEN
          IFIRST = 1
-         PI4 = 4D0 * 4D0 * ATAN(1D0)
-         PI  = PI4/4D0
+         PI = 4D0 * ATAN(1D0)
       ENDIF
 
 *---  Example:
@@ -97,6 +96,10 @@ C---  FNALPHAS = ALPSMZ/2D0/PI
 *     >  CALL INITPDFSET("cteq61.LHgrid")
 *     >  CALL INITPDF(0)
       CALL EVOLVEPDF(X,MUF,XPDF)
+ckr Temporary fix for lhapdf-5.8.7 bug with ABKM09 or ABM11
+      xpdf(-6) = 0d0
+      xpdf( 6) = 0d0
+ckr Temporary!
 
 *---  Here one can also call ones own PDF code
 *---  --> Only remember that these are MOMENTUM DENSITIES, i.e. x * PDF

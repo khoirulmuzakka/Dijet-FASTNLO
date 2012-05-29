@@ -41,7 +41,8 @@ c         WRITE(*,*) '  *   ALPS_IT_FNLO14:  exact 2-loop result for alpha_s'
          B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
          B10 = B1 / B0 / B0
          ZMASS2 = ZMASS**2
-         IF (NLOOP .ne. 2) WRITE(*,*) 'ALPS_IT_FNLO14:  only for 2-loop!!'
+         IF (NLOOP .ne. 2)
+     >        WRITE(*,*)'ALPS_IT_FNLO14:  only for 2-loop!!'
       ENDIF
 
 c - exact formula to extract Lambda from alpha_s(Mz)
@@ -92,7 +93,8 @@ C --------------------------------------------------------------------
 c - initialize pi and beta functions
       IF (IFIRST.eq.0) THEN
          IFIRST = 1
-         WRITE(*,*) '  *   ALPS_IT_FNLO14:  exact 4-loop result for alpha_s'
+         WRITE(*,*)
+     >        '  *   ALPS_IT_FNLO14:  exact 4-loop result for alpha_s'
          WRITE(*,*) '  *                              in 3 iterations'
          NF = 5
          PI4 = 4D0 * 4D0 * ATAN(1D0)
@@ -100,7 +102,8 @@ c - initialize pi and beta functions
          B1  = 102D0 - 38D0 / 3D0 * DBLE(NF)
          B10 = B1 / B0 / B0
          ZMASS2 = ZMASS**2
-         IF (NLOOP .ne. 4) WRITE(*,*) 'ALPS_IT_FNLO14:  only for 4-loop!!'
+         IF (NLOOP .ne. 4) 
+     >        WRITE(*,*) 'ALPS_IT_FNLO14:  only for 4-loop!!'
          WRITE(*,*) '  *             1st call   mu , alpha_s(Mz)'
          WRITE(*,*) '  *                   ',real(mu),real(alpsmz)
          ASMZCACHE = 0d0
