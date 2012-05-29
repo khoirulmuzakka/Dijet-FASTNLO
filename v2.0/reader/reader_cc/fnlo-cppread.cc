@@ -70,7 +70,7 @@ int fnlocppread(int argc, char** argv){
   //---  PDF set
   string PDFFile = "X";
   if ( argc > 2 ){
-    PDFFile = (char*) argv[2];
+    PDFFile = (const char*) argv[2];
   }
   if ( argc <= 2 || PDFFile == "_"){
     PDFFile = "cteq6m.LHpdf";
@@ -87,9 +87,9 @@ int fnlocppread(int argc, char** argv){
   const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 }; 
   string ch2tmp = "X";
   if ( argc > 3 ){
-    ch2tmp = (char*) argv[3];
+    ch2tmp = (const char*) argv[3];
   }
-  if ( argc <= 2 || ch2tmp == "_" ){
+  if ( argc <= 3 || ch2tmp == "_" ){
     printf(" # fnlo-read: No request given for number of scale settings,\n");
     printf(" #            investigating primary scale only.\n");
   } else {

@@ -2027,30 +2027,27 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
    
   InitPDF();
 
-  
   // check if the pdf is somehow reasonable
-  //   vector<double> pdftest = GetXFX(1.e-2,10);
-  //   if ( pdftest.size() != 13) {
-  //      printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
-  //      exit(1);
-  //   }
+  // vector<double> pdftest = GetXFX(1.e-2,10);
+  // if ( pdftest.size() != 13) {
+  //   printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
+  //   exit(1);
+  // }
   
-  //   if ( pdftest[6] == 0. ) {
-  //      printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
+  // if ( pdftest[6] == 0. ) {
+  //   printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
+  // }
+  // double sum = 0;
+  // for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
+  // if ( sum== 0. ) {
+  //   printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
+  //   exit(1);
+  // }
+  // for ( int i = 0 ; i<13 ; i++ ){
+  //   if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
+  //     printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
   //   }
-  //   double sum = 0;
-  //   for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
-  //   if ( sum== 0. ) {
-  //      printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
-  //      exit(1);
-  //   }
-
-  //   for ( int i = 0 ; i<13 ; i++ ){
-  //      if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
-  // 	printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
-  //      }
-  //   }
-
+  // }
   
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if (  !BBlocksSMCalc.empty() ){
