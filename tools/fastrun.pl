@@ -301,8 +301,10 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{gccg77}[1]     = "gcc-$gccvers";
     $install{cernlib}[0]    = "cernlib-2003";
     $install{cernlib}[1]    = "cernlib-2003";
-    $install{fastjet}[0]    = "fastjet-2.3.2";
-    $install{fastjet}[1]    = "fastjet-2.3.2";
+#    $install{fastjet}[0]    = "fastjet-2.3.2";
+#    $install{fastjet}[1]    = "fastjet-2.3.2";
+    $install{fastjet}[0]    = "fastjet-2.4.4";
+    $install{fastjet}[1]    = "fastjet-2.4.4";
 # Versions >= 5.4.0 don't work with gcc 3.3.6
     $install{lhapdf}[0]     = "lhapdf-5.3.1";
     $install{lhapdf}[1]     = "lhapdf-5.3.1";

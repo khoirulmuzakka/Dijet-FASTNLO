@@ -33,7 +33,6 @@ our ( $opt_h, $opt_p, $opt_v ) = ( "", "", "1" );
 getopts('hp:v:') or die "fastprep.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfastprep.pl\n";
-#    print "Usage: fastprep.pl [switches/options] scenario\n";
     print "Usage: fastprep.pl [switches/options]\n";
     print "       WARNING! fastprep.pl works only if all required software is installed \n";
     print "       under a common prefix path given either via \$FASTNLO or the current \n";
@@ -111,56 +110,58 @@ if ( $vers == 1 ) {
 } else {
     chdir "$ENV{FASTNLO}" or die "fastprep.pl: ERROR! Could not cd to $ENV{FASTNLO}!\n";
 # For version 2:
+# Since SLC5 distributed on the grid, prepare jobs on SLC5 as well ...
+# Then the following is not necessary!
 # Unfortunately need to copy some system libs in case of insufficiently equipped target systems
-    print "fastprep.pl: Copying some systems lib(s) into directory $ENV{FASTNLO}/lib ...\n";
-    print "             This avoids crashes on poor target systems without these.\n";
-    my @libc = `ldd bin/nlojet++ | grep libc | cut -d " " -f3`;
-    chomp @libc;
-    my @libm = `ldd bin/nlojet++ | grep libm | cut -d " " -f3`;
-    chomp @libm;
-    my @libstdc = `ldd bin/nlojet++ | grep libstdc | cut -d " " -f3`;
-    chomp @libstdc;
-    my @libg2c = `ldd bin/nlojet++ | grep libg2c | cut -d" " -f3`;
-    chomp @libg2c;
-    my @libgcc = `ldd bin/nlojet++ | grep libgcc | cut -d " " -f3`;
-    chomp @libgcc;
-    my @libdl = `ldd bin/nlojet++ | grep libdl | cut -d " " -f3`;
-    chomp @libdl;
-    my @libltdl = `ldd bin/nlojet++ | grep libltdl | cut -d " " -f3`;
-    chomp @libltdl;
-    my @sodeps = (@libc,@libm,@libstdc,@libg2c,@libgcc,@libltdl,@libdl);
+#    print "fastprep.pl: Copying some systems lib(s) into directory $ENV{FASTNLO}/lib ...\n";
+#    print "             This avoids crashes on poor target systems without these.\n";
+#    my @libc = `ldd bin/nlojet++ | grep libc | cut -d " " -f3`;
+#    chomp @libc;
+#    my @libm = `ldd bin/nlojet++ | grep libm | cut -d " " -f3`;
+#    chomp @libm;
+#    my @libstdc = `ldd bin/nlojet++ | grep libstdc | cut -d " " -f3`;
+#    chomp @libstdc;
+#    my @libg2c = `ldd bin/nlojet++ | grep libg2c | cut -d" " -f3`;
+#    chomp @libg2c;
+#    my @libgcc = `ldd bin/nlojet++ | grep libgcc | cut -d " " -f3`;
+#    chomp @libgcc;
+#    my @libdl = `ldd bin/nlojet++ | grep libdl | cut -d " " -f3`;
+#    chomp @libdl;
+#    my @libltdl = `ldd bin/nlojet++ | grep libltdl | cut -d " " -f3`;
+#    chomp @libltdl;
+#    my @sodeps = (@libc,@libm,@libstdc,@libg2c,@libgcc,@libltdl,@libdl);
 
-    print "fastprep.pl: Adding system lib(s) @sodeps if not yet done.\n";
+#    print "fastprep.pl: Adding system lib(s) @sodeps if not yet done.\n";
 # Find all libs and links corresponding to the detected sodeps ...
-    foreach my $sodep ( @sodeps ) {
-	my $dir = `dirname $sodep`;
-	chomp $dir;
-	print "dir $dir\n";
-	my $lib = `basename $sodep`;
-	chomp $lib;
-	print "lib $lib\n";
-	my @parts = split(/\./,$lib);
-	print "parts @parts\n";
-	my @addlibs = `find $dir -maxdepth 1 -name $parts[0].so\*`;
-	print "addlibs @addlibs\n";
-	chomp @addlibs;
-	foreach my $copy ( @addlibs ) {
-	    my $lib = `basename $copy`;
-	    chomp $lib;
-	    if (! -e "lib/$lib" ) {
+#    foreach my $sodep ( @sodeps ) {
+#	my $dir = `dirname $sodep`;
+#	chomp $dir;
+#	print "dir $dir\n";
+#	my $lib = `basename $sodep`;
+#	chomp $lib;
+#	print "lib $lib\n";
+#	my @parts = split(/\./,$lib);
+#	print "parts @parts\n";
+#	my @addlibs = `find $dir -maxdepth 1 -name $parts[0].so\*`;
+#	print "addlibs @addlibs\n";
+#	chomp @addlibs;
+#	foreach my $copy ( @addlibs ) {
+#	    my $lib = `basename $copy`;
+#	    chomp $lib;
+#	    if (! -e "lib/$lib" ) {
 #		my $cmd = "cp $copy lib";
 #		my $ret = system("$cmd");
 #		if ( $ret ) {print "fastprep.pl: Warning! ".
 #				 "Copying system lib $copy failed.\n"}
-	    }
-	}
-    }
+#	    }
+#	}
+#    }
 
     my @solibs  = `find lib -follow -name \*.so\*`;
     chomp @solibs;
     my @lalibs  = `find lib -follow -name \*.la\*`;
     chomp @lalibs;
-
+    
     my $cmd = "tar cfz $arcname ".
 	"@solibs @lalibs bin/nlojet++";
     my $ret = system("$cmd");
