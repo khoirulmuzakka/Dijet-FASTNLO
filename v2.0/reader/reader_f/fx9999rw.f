@@ -158,6 +158,15 @@
       CALL FNIODBL(CRW,NUNIT, ECMS,LPRINT,"  A2  Ecms")
       CALL FNIOINT(CRW,NUNIT, ILOORD,LPRINT,"  A2  ILOord")
       CALL FNIOINT(CRW,NUNIT, NOBSBIN,LPRINT,"  A2  NobsBin")
+      IF (NOBSBIN.GT.MXOBSBIN) THEN
+         WRITE(*,*)
+     >        'FX9999RW: ERROR! Max. # of observable bins, MXOBSBIN = ',
+     >        MXOBSBIN
+         WRITE(*,*)
+     >        '          too small for this table. NOBSBIN = ',
+     >        NOBSBIN
+         STOP
+      ENDIF
       CALL FNIOINT(CRW,NUNIT, NDIM,LPRINT,"  A2  NDim")
       DO I=1,NDIM
          WRITE(CH1TMP,'(I1)'),I
