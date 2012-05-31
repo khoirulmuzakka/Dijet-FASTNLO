@@ -212,7 +212,7 @@
       Read(2,*) ECMS
       Read(2,*) IXSECTUNITS
       Do i=1,5
-         Read(2,*) NAMELABEL(i)
+         Read(2,'(A)') NAMELABEL(i)
       Enddo
       Read(2,*) IPROC
       Read(2,*) IALGO
@@ -223,8 +223,8 @@
          Read(2,*) NPOW(i)
       Enddo
       Do i=1,nord
-         Read(2,*) POWLABEL(i)
-         Read(2,*) CODELABEL(i)
+         Read(2,'(A)') POWLABEL(i)
+         Read(2,'(A)') CODELABEL(i)
       Enddo
       Read(2,*) i
       if (i.ne.iseparator) goto 999
@@ -248,7 +248,7 @@
       Read(2,*) NBINTOT
       Read(2,*) NDIMENSION
       Do i=1,ndimension
-         Read(2,*) DIMLABEL(i)
+         Read(2,'(A)') DIMLABEL(i)
       Enddo
       Read(2,*) NRAPIDITY
       Do i=1,nrapidity+1
@@ -273,7 +273,7 @@
       Read(2,*) i
       if (i.ne.iseparator) goto 999
 *---------------------------------------
-      Read(2,*) SCALELABEL
+      Read(2,'(A)') SCALELABEL
       Read(2,*) NSCALEBIN
       Do i=1,nrapidity
          Do j=1,NPT(i)
