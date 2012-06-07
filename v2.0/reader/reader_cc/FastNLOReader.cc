@@ -146,20 +146,22 @@ void FastNLOReader::InitScalevariation(){
   
   fScaleFacMuR	= 1.;
   fScaleFacMuF	= 1.;
-  fScalevar	= 0;
+  fScalevar	= -1;
 
-  if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ){
-    // this is an 'original' v2.0 table
-    // printf (" *  This table has following %d scale variations for 'theory-error' determination.\n",BBlocksSMCalc[0][1]->Nscalevar[0]);
-    // printf (" *    scalevar #n -> scalefactor\n");
-    // for ( int i = 0 ; i<BBlocksSMCalc[0][1]->Nscalevar[0]; i++ ){
-    //   printf (" *         '%d'    ->    %4.2f .\n", i, BBlocksSMCalc[0][1]->ScaleFac[0][i]);
-    // }
-    // printf (" *    Setting scale factor to %4.2f and varying mu_f and mu_r simultaneously.\n",BBlocksSMCalc[0][1]->ScaleFac[0][0]);
-    fScalevar	= 0;
+  if ( !GetIsFlexibleScaleTable() ){
+     for (int iscls=0; iscls<GetNScaleVariations(); iscls++){
+	const double muFac = BBlocksSMCalc[0][1]->ScaleFac[0][iscls];
+ 	if (abs(muFac-1.0) < 1.e-7){
+	   SetScaleVariation(iscls,false);
+	   break;
+	}
+     }
+     if ( fScalevar == -1 ){
+	printf(" FastNLOReader::InitScalevariation(). Error. Could not found scale variation with scale factor 1.0. Exiting.\n");
+	exit(1);
+     }
   }
-
-  else if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
+  else {
     // this is a MuVar table. You can vary mu_f and mu_r independently by any factor
     // and you can choose the functional form of mu_f and mu_r as functions of
     // scale1 and scale1 (called partly scaleQ2 and scalePt).
@@ -185,10 +187,6 @@ void FastNLOReader::InitScalevariation(){
       printf("Error. Unknown process.\n");
       exit(1);
     }
-  }
-  
-  else {
-    printf("FastNLOReader::InitScalevariation(). ERROR. Could not identify table version.\n");
   }
   
   
@@ -1184,6 +1182,7 @@ void FastNLOReader::PrintFastNLODemo(){
     // First result is with NLO, LO result via division by K factor
     if (ixmu[iscls] > -1){
       SetScaleVariation(ixmu[iscls]);
+      FillAlphasCache();
       FillPDFCache();
       CalcCrossSection();
 
