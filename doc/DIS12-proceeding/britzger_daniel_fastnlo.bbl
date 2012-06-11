@@ -1,0 +1,90 @@
+\providecommand{\href}[2]{#2}\begingroup\raggedright\begin{thebibliography}{10}
+
+\bibitem{Alekhin:2011sk}
+S.~Alekhin, S.~Alioli, R.~D. Ball, V.~Bertone, J.~Blumlein, {\em et~al.}
+\newblock
+\href{http://arxiv.org/abs/1101.0536}{{\ttfamily arXiv:1101.0536 [hep-ph]}}.
+%%CITATION = ARXIV:1101.0536;%%.
+
+\bibitem{Martin:2009iq}
+A.~Martin, W.~Stirling, R.~Thorne, and G.~Watt.
+\newblock \href{http://dx.doi.org/10.1140/epjc/s10052-009-1072-5}{Eur.Phys.J.
+  {\bfseries C63} (2009) 189--285},
+\href{http://arxiv.org/abs/0901.0002}{{\ttfamily arXiv:0901.0002 [hep-ph]}}.
+%%CITATION = ARXIV:0901.0002;%%.
+
+\bibitem{Lai:2010vv}
+H.-L. Lai, M.~Guzzi, J.~Huston, Z.~Li, P.~M. Nadolsky, {\em et~al.}
+\newblock \href{http://dx.doi.org/10.1103/PhysRevD.82.074024}{Phys.Rev.
+  {\bfseries D82} (2010) 074024},
+\href{http://arxiv.org/abs/1007.2241}{{\ttfamily arXiv:1007.2241 [hep-ph]}}.
+%%CITATION = ARXIV:1007.2241;%%.
+
+\bibitem{Ball:2011mu}
+R.~D. Ball, V.~Bertone, F.~Cerutti, L.~Del~Debbio, S.~Forte, {\em et~al.}
+\newblock \href{http://dx.doi.org/10.1016/j.nuclphysb.2011.03.021}{Nucl.Phys.
+  {\bfseries B849} (2011) 296--363},
+\href{http://arxiv.org/abs/1101.1300}{{\ttfamily arXiv:1101.1300 [hep-ph]}}.
+%%CITATION = ARXIV:1101.1300;%%.
+
+\bibitem{Alekhin:2012ig}
+S.~Alekhin, J.~Blumlein, and S.~Moch.
+\newblock
+\href{http://arxiv.org/abs/1202.2281}{{\ttfamily arXiv:1202.2281 [hep-ph]}}.
+%%CITATION = ARXIV:1202.2281;%%.
+
+\bibitem{Nowak:12}
+{K. Nowak {\it et al.}}
+\newblock these proceedings (2012) .
+
+\bibitem{Nagy:99}
+Z.~Nagy and Z.~Trocsanyi.
+\newblock Phys. Rev. D {\bfseries 59} (1999) 14020.
+
+\bibitem{Nagy:01}
+Z.~Nagy and Z.~Trocsanyi.
+\newblock Phys. Rev. Lett. {\bfseries 87} (2001) 82001.
+
+\bibitem{Kluge:2006xs}
+T.~Kluge, K.~Rabbertz, and M.~Wobisch.
+\newblock
+\href{http://arxiv.org/abs/hep-ph/0609285}{{\ttfamily arXiv:hep-ph/0609285
+  [hep-ph]}}.
+%%CITATION = HEP-PH/0609285;%%.
+
+\bibitem{Pascaud:1994vx}
+C.~Pascaud and F.~Zomer.
+\newblock
+LAL-94-42 (1994) .
+%%CITATION = LAL-94-42 ETC.;%%.
+
+\bibitem{Wobisch:00}
+M.~Wobisch.
+\newblock Dissertation, RWTH Aachen, DESY-THESIS-2000-049, 2000.
+
+\bibitem{Kidonakis:2000gi}
+N.~Kidonakis and J.~Owens.
+\newblock \href{http://dx.doi.org/10.1103/PhysRevD.63.054019}{Phys.Rev.
+  {\bfseries D63} (2001) 054019},
+\href{http://arxiv.org/abs/hep-ph/0007268}{{\ttfamily arXiv:hep-ph/0007268
+  [hep-ph]}}.
+%%CITATION = HEP-PH/0007268;%%.
+
+\bibitem{Fnlo:2012:Online}
+{\bfseries fastNLO} Collaboration, ``Fastnlo homepage @ hepforge'', May, 2012.
+\newblock \url{http://fastnlo.hepforge.org/}.
+
+\bibitem{Whalley:2005nh}
+M.~Whalley, D.~Bourilkov, and R.~Group.
+\newblock
+\href{http://arxiv.org/abs/hep-ph/0508110}{{\ttfamily arXiv:hep-ph/0508110
+  [hep-ph]}}.
+%%CITATION = HEP-PH/0508110;%%.
+
+\bibitem{Wobisch:2011ij}
+M.~Wobisch, D.~Britzger, T.~Kluge, K.~Rabbertz, and F.~Stober.
+\newblock
+\href{http://arxiv.org/abs/1109.1310}{{\ttfamily arXiv:1109.1310 [hep-ph]}}.
+%%CITATION = ARXIV:1109.1310;%%.
+
+\end{thebibliography}\endgroup
