@@ -32,9 +32,9 @@
   arbitrary parton distribution functions, different scale choices, or
   $\alpha_s(M_Z)$.  Various tables with code for their evaluation are
   available for numerous jet measurements at the LHC, the TeVatron,
-  and HERA. FastNLO is used in publications of experimental
+  and HERA\@. FastNLO is used in publications of experimental
   results by the ATLAS, CMS, CDF, D0, and H1 collaborations, and in
-  all recent global PDF analyses by MSTW, CTEQ, and NNPDF. This
+  all recent global PDF analyses by MSTW, CTEQ, and NNPDF\@. This
   article focuses on developments implemented in the new version~2 of
   fastNLO, enhancing and broadening its functionality.
 \end{abstract}
@@ -65,7 +65,7 @@ the same observable are:
   % PDF4LHC recommendation \cite{Alekhin:2011sk}
 \item Fitting of PDFs where for each step in the iterative procedure
   the cross sections have to be recalculated for the corresponding
-  temporary PDF.  FastNLO is used by various global PDF fitting
+  temporary PDF\@.  FastNLO is used by various global PDF fitting
   groups, like MSTW~\cite{Martin:2009iq}, CTEQ~\cite{Lai:2010vv},
   NNPDF~\cite{Ball:2011mu}, ABM~\cite{Alekhin:2012ig}, or
   HERAPDF~\cite{Nowak:12}.
@@ -90,7 +90,7 @@ Some observables in next-to-leading order (NLO) or even higher-order
 calculations can be computed rather fast like e.g.\ DIS structure
 functions.  Other observables like Drell-Yan and jet cross sections,
 however, are very slow to compute. Especially the latter ones are the
-current focus of fastNLO. FastNLO provides computer code and
+current focus of fastNLO\@. FastNLO provides computer code and
 precalculated tables of perturbative coefficients for various
 observables in hadron-induced processes.
 % This allows the very fast computation of these observables for
@@ -133,7 +133,7 @@ the PDFs and the $\alpha_s$ factors from the perturbative coefficients
 $c_{i,n}$ and to convert this integration into a
 sum~\cite{Pascaud:1994vx,Wobisch:00}.  This discretization introduces
 a set of eigenfunctions $E_i(x)$ (with $\sum_i E_i(x) \equiv 1$) around
-a defined number of $x$-values.  The PDF in eq.\ \ref{eq:CrossSection}
+a defined number of $x$-values.  The PDF in eq.~\ref{eq:CrossSection}
 can then be replaced by $f_i \simeq \sum_i f_a(x_i) E_i(x)$ and is
 removed from the integral.  When calculating the perturbative
 coefficients the nodes receive fractional contributions of each event
@@ -221,8 +221,8 @@ perturbative coefficients $c_{i,n}$, like
 This way, only scale independent weights $c^0$, $c^r$, and $c^f$ are
 stored in three scale independent fastNLO tables.  The multiplication
 of the scale dependent $\log$ terms are performed only when evaluating
-the table.  Similarly to the $\alpha_s$ term in eq.\
-\ref{eq:CrossSection}, where $a_s(\mu_r)$ can be regarded as an
+the table.  Similarly to the $\alpha_s$ term in
+eq.~\ref{eq:CrossSection}, where $a_s(\mu_r)$ can be regarded as an
 arbitrary function of the scale $\mu_r$, also the scales $\mu_r$ and
 $\mu_f$ can be regarded as functions of any relevant $k$ observables
 $s_k$, like $\mu_{r/f} = \mu_{r/f}(s_1,s_2)$.
@@ -270,25 +270,25 @@ calculations like NNLO without any significant loss in speed.
 
 Numerous fastNLO tables are available on the fastNLO website
 \cite{Fnlo:2012:Online} for various measurements by ATLAS, CDF, CMS,
-D$\emptyset$, H1, STAR, and ZEUS.  All calculations were performed
+D$\emptyset$, H1, STAR, and ZEUS\@.  All calculations were performed
 using the \texttt{NLOJet++} program~\cite{Nagy:2001xb,Nagy:2001fj,Nagy:2003tz},
 for calculating the matrix elements.  A data/theory comparison of global
 inclusive jet data in hadron induced processes as a function of the
 transverse jet momentum for various center-of-mass energies is shown
 in fig.~\ref{Fig:Alljets} employing the MSTW2008 PDF
 sets. Hadron-hadron induced processes further include $2$-loop
-threshold corrections, which represent a part of NNLO. An
+threshold corrections, which represent a part of NNLO\@. An
 updated version of this plot is available through the arXiv
 article~\cite{Wobisch:2011ij}.
 
 \begin{figure}[htb]
   \centering
   \includegraphics[width=0.98\textwidth]{britzger_daniel_fastnlo_fig3}
-  \caption{ Ratios of data and theory for inclusive jet cross section
+  \caption{Ratios of data and theory for inclusive jet cross section
     measured in hadron-hadron collisions and in deeply inelastic
     scattering at different center-of-mass energies. The ratios are
     shown as a function of jet transverse momentum $p_\mathrm{T}$. The
-    theory results are computed for MSTW2008 PDFs.  }
+    theory results are computed for MSTW2008 PDFs.}
   \label{Fig:Alljets}
 \end{figure}
 
