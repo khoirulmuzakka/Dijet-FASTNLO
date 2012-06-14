@@ -33,11 +33,11 @@ AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 # Libraries to be linked to the main target
 # Require cernlib and lhapdf, use lhapdf-config if possible
-if HAVE_LHAPDFCONFIG 
-   allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-else
+#if HAVE_LHAPDFCONFIG 
+#   allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+#else
    allunc_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
-endif
+#endif
 allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lpacklib -lkernlib
 
 # Files that are required to build the project but that can be
