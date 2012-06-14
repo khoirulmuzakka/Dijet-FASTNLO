@@ -157,7 +157,9 @@ if test "x$withval" != "xno"; then
    else
       AC_PATH_PROG([CERNLIBBIN],[cernlib],[],[$CERNLIB/bin])
       if test "x$CERNLIBBIN" = "x"; then
-         AC_MSG_ERROR([cernlib command not found in given path to CERNLIB! Configuration aborted!])
+         AC_MSG_NOTICE([cernlib command not found in given path to CERNLIB, pretend to have found it anyway!])
+         AC_MSG_NOTICE([Keep your fingers crossed ...])
+         AC_SUBST([CERNLIBBIN], ["$CERNLIB/bin/cernlib"])
       fi
    fi
    AC_MSG_NOTICE([******************************************])
