@@ -45,7 +45,9 @@ endif
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution 
-MAINTAINERCLEANFILES = Makefile.in
+MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
+	depcomp install-sh ltmain.sh missing aclocal.m4 SVNREV \
+	m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
 
 # Add dependencies on include files by hand
 main.o:                   strings.inc
