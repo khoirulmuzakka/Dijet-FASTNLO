@@ -1,0 +1,1 @@
+./configure --with-cernlib=/usr/lib64/cernlib/2006 --prefix=$HOME/local
