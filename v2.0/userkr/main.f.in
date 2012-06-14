@@ -1,0 +1,56 @@
+*     --- force emacs to fortran mode -*-fortran-*-
+      PROGRAM MAIN
+
+      IMPLICIT NONE
+      INCLUDE 'strings.inc'
+
+*---  Initial output
+      WRITE(*,'(A)')""
+      WRITE(*,*)CSEPS
+      WRITE(*,*)"#"
+      WRITE(*,*)"# @PACKAGE_NAME@_@PACKAGE_VERSION@_@SVNREV@ "
+      WRITE(*,*)"#"
+      WRITE(*,*)"# Fortran program to read fastNLO v2 tables and"
+      WRITE(*,*)"# derive all kind of uncertainties to "
+      WRITE(*,*)"# QCD cross sections using PDFs from LHAPDF"
+      WRITE(*,*)"#"
+      WRITE(*,*)LSEPS
+      WRITE(*,*)"#"
+      WRITE(*,*)"# Copyright (C) 2011 fastNLO Collaboration"
+      WRITE(*,*)"# @AUTHORSv2@ "
+      WRITE(*,*)"#"
+      WRITE(*,*)"# This program is free software: "//
+     >     "you can redistribute it and/or modify"
+      WRITE(*,*)"# it under the terms of the "//
+     >     "GNU General Public License as published by"
+      WRITE(*,*)"# the Free Software Foundation, "//
+     >     "either version 3 of the License, or"
+      WRITE(*,*)"# (at your option) any later version."
+      WRITE(*,*)"#"
+      WRITE(*,*)"# This program is distributed in the hope "//
+     >     "that it will be useful,"
+      WRITE(*,*)"# but WITHOUT ANY WARRANTY; "//
+     >     "without even the implied warranty of"
+      WRITE(*,*)"# MERCHANTABILITY or FITNESS FOR "//
+     >     "A PARTICULAR PURPOSE. See the"
+      WRITE(*,*)"# GNU General Public License for more details."
+      WRITE(*,*)"#"
+      WRITE(*,*)"# You should have received a copy of the "//
+     >     "GNU General Public License"
+      WRITE(*,*)"# along with this program. "//
+     >     "If not, see <http://www.gnu.org/licenses/>."
+      WRITE(*,*)"#"
+      WRITE(*,*)LSEPS
+      WRITE(*,*)"#"
+      WRITE(*,*)"# The projects web page can be found at:"
+      WRITE(*,*)"#   @WEBPAGE@"
+      WRITE(*,*)"#"
+      WRITE(*,*)"# If you use this code, please cite:"
+      WRITE(*,*)"#   @AUTHORSv14@, @QUOTEv14@"
+      WRITE(*,*)"#   @AUTHORSv2@, @QUOTEv2@"
+      WRITE(*,*)"#"
+      WRITE(*,*)CSEPS
+
+      CALL ALLUNC
+      
+      END
