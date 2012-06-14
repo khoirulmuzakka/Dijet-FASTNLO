@@ -1,4 +1,4 @@
-      PROGRAM ALLUNC
+      SUBROUTINE ALLUNC
 * ---------------------------------------------------------------------
 * K. Rabbertz 07.09.2008 First try to integrate all uncertainties
 *                        into one job
@@ -1897,6 +1897,8 @@ Comment:       ENDIF
 c - Close hbook file
       CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
      >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
+
+      RETURN
       END
 
 

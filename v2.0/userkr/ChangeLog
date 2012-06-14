@@ -1,0 +1,5 @@
+First private version using autotools
+
+08.06.2012:
+Take over setup from fastNLO_reader and adapt to allunc and
+cernlib use with Ubuntu CERNLIBs
