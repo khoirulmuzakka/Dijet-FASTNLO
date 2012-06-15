@@ -1,6 +1,6 @@
 //
-// fastNLO v2 author code for fnl2332y5:
-//     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
+// fastNLO v2 author code for fnl4332y5:
+//     CMS LHC Inclusive Jets Scenario, E_cms = 2.76 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 // 
@@ -146,8 +146,8 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
-  //s =   7617600.; // LHC HIpp base Run 2760 GeV
-  s =  49000000.; // LHC First Run     7000 GeV
+  s =   7617600.; // LHC HIpp base Run 2760 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
   //s =  64000000.; // LHC Second Run     8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
   //s = 196000000.; // LHC Design Run   14000 GeV
@@ -159,7 +159,7 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //     (return value must be true for jets to be UNselected)
-// fnl2332: use rapidity!
+// fnl4332: use rapidity!
 struct fNLOSelector {
   fNLOSelector(double ymin, double ymax, double ptmin):
     _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
@@ -223,7 +223,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
   
   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-  // fnl2332: Not required for inclusive jets
+  // fnl4332: Not required for inclusive jets
   //  static fNLOSorter SortJets;
   //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
   
@@ -288,7 +288,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set scenario name (no white space)
-  A1->SetScenName("fnl2332y5");
+  A1->SetScenName("fnl4332y5");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
@@ -297,10 +297,10 @@ void UserHHC::inittable(){
   // --- fastNLO user: up to 20 strings to describe the scenario
   A2->ScDescript.push_back("d2sigma-jet_dpTd|y|_[pb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("E_cms=7_TeV");
+  A2->ScDescript.push_back("E_cms=2.76_TeV");
   A2->ScDescript.push_back("Inclusive_Jet_pT");
   A2->ScDescript.push_back("anti-kT_R=0.7");
-  A2->ScDescript.push_back("CMS-PAS-QCD-11-004");
+  A2->ScDescript.push_back("CMS-PAS-HIN");
   A2->ScDescript.push_back("provided by:");
   A2->ScDescript.push_back("fastNLO_2.1.0");
   A2->ScDescript.push_back("If you use this table, please cite:");
@@ -360,7 +360,7 @@ void UserHHC::inittable(){
   //     (multi-) differential result.
   //     default: divide by bin width in dim 1 and dim 2
   //              ATTENTION: Don't forget to include a factor of 2 for abs. rapidity |y| !
-  // fnl2332: divide by bin width in pT and |y|
+  // fnl4332: divide by bin width in pT and |y|
 
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<ndim2bins;i++){

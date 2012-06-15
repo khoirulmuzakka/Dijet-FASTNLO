@@ -146,6 +146,7 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
+  //s =   7617600.; // LHC HIpp base Run 2760 GeV
   //s =  49000000.; // LHC First Run     7000 GeV
   s =  64000000.; // LHC Second Run     8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV

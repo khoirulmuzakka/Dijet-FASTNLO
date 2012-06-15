@@ -27,6 +27,8 @@
 //   writetable   (don't touch)
 //   end_of_event (don't touch)
 //   phys_output  (don't touch)
+//   GetEcms      (don't touch)
+//   GetNj        (don't touch)
 //
 // Implementing a new scenario requires to edit:
 //  - the jet algorithm ("#include" statement and assignment of "jetclus")
@@ -116,6 +118,8 @@ private:
 
   void inittable();
   void writetable();
+  double GetEcms();
+  unsigned int GetNj();
 };
 
 user_base_hhc * userfunc() {
@@ -142,7 +146,9 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
+  //s =   7617600.; // LHC HIpp base Run 2760 GeV
   s =  49000000.; // LHC First Run     7000 GeV
+  //s =  64000000.; // LHC Second Run     8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
   //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -268,19 +274,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
-  // --- fastNLO user: set the total c.m. energy squared in GeV^2
-  //double s =     40000.; // RHIC               200 GeV
-  //double s =   3240000.; // TeV Run I         1800 GeV
-  //double s =   3841600.; // TeV Run II        1960 GeV
-  //double s =    810000.; // LHC Injection Run  900 GeV
-  //double s =   5569600.; // LHC Initial Run   2360 GeV
-  double s =  49000000.; // LHC First Run     7000 GeV
-  //double s = 100000000.; // LHC Start-up Run 10000 GeV
-  //double s = 196000000.; // LHC Design Run   14000 GeV
-
-  // --- fastNLO user: decide whether to include a reference table (for 
-  //                   precision studies, not for production jobs)
-  // KR: Now set via filename string match to "ref"
+  // Decide whether to include a reference table
+  // (for precision studies, not for production jobs)
+  // Set via filename string match to "ref", see also -n option of NLOJet++
+  // To set manually use these lines and disable string match
   //const bool doReference = true;
   //const bool doReference = false;
 
@@ -300,6 +297,7 @@ void UserHHC::inittable(){
   // --- fastNLO user: up to 20 strings to describe the scenario
   A2->ScDescript.push_back("d2sigma-jet_dpTd|y|_[pb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
+  A2->ScDescript.push_back("E_cms=7_TeV");
   A2->ScDescript.push_back("Inclusive_Jet_pT");
   A2->ScDescript.push_back("anti-kT_R=0.7");
   A2->ScDescript.push_back("CMS-PAS-QCD-11-004");
@@ -309,8 +307,8 @@ void UserHHC::inittable(){
   A2->ScDescript.push_back("  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310");
 
   A2->NScDescript = A2->ScDescript.size();
-  A2->Ecms = sqrt(s);
-  A2->ILOord = 2;   // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
+  A2->Ecms = GetEcms();
+  A2->ILOord = GetNj(); // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
   A2->NDim = 2;     // --- fastNLO user: no. of dimensions in which observable is binned
   A2->DimLabel.push_back("pT_[GeV]");  // --- fastNLO user: label of 1st dimension
   A2->IDiffBin.push_back(2);
@@ -723,4 +721,16 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
 
   nwrite = __save;
   inittable();
+}
+
+unsigned int UserHHC::GetNj(){
+  unsigned int nj = 0, nu = 0 ,nd = 0;
+  inputfunc(nj,nu,nd);
+  return nj;
+}
+
+double UserHHC::GetEcms(){
+  double ecms = 0;
+  psinput(NULL,ecms);
+  return sqrt(ecms);
 }

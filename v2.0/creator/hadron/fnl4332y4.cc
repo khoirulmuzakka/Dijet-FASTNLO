@@ -1,6 +1,6 @@
 //
-// fastNLO v2 author code for fnl2412d:
-//     CMS LHC Dijet Mass Scenario, E_cms = 7 TeV
+// fastNLO v2 author code for fnl4332y4:
+//     CMS LHC Inclusive Jets Scenario, E_cms = 2.76 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 // 
@@ -15,23 +15,27 @@
 // If a code fragment is not explicitely labeled as "fastNLO user",
 // it is likely that a modification will interfere with
 // the fastNLO routines.
+// Please keep the order of all statements in inittable
+// in order to guarantee a working code.
 //
 // This file contains the following routines:
 //   inputfunc    (-> user edits)
 //   psinput      (-> user edits)
-//   initfunc     (don't touch)
 //   userfunc     (-> user edits)
+//   inittable    (-> user edits)
+//   initfunc     (don't touch)
 //   writetable   (don't touch)
 //   end_of_event (don't touch)
 //   phys_output  (don't touch)
-//   inittable    (-> user edits)
+//   GetEcms      (don't touch)
+//   GetNj        (don't touch)
 //
 // Implementing a new scenario requires to edit:
 //  - the jet algorithm ("#include" statement and assignment of "jetclus")
 //  - number of jets (inputfunc)
 //  - center-of-mass energy (psinput)
-//  - compute observable, determine bin No. (userfunc)
-//  - declare all variables for table, define bin boundaries (inittable)
+//  - compute observable, determine bin no. (userfunc)
+//  - declare all variables for table, define bin boundaries (inittable, etc.)
 //  
 // ================================================================
 
@@ -114,6 +118,8 @@ private:
 
   void inittable();
   void writetable();
+  double GetEcms();
+  unsigned int GetNj();
 };
 
 user_base_hhc * userfunc() {
@@ -132,7 +138,6 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
   nd = 3U;
 } 
 
-
 void psinput(phasespace_hhc *ps, double& s)
 {
   // --- fastNLO user: set the total c.m. energy squared in GeV^2
@@ -141,7 +146,9 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
-  s =  49000000.; // LHC First Run     7000 GeV
+  s =   7617600.; // LHC HIpp base Run 2760 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
+  //s =  64000000.; // LHC Second Run     8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
   //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -150,19 +157,9 @@ void psinput(phasespace_hhc *ps, double& s)
   ps = 0;
 } 
 
-
-void UserHHC::initfunc(unsigned int)
-{
-  // --- Initialize event counters
-  nevents = 0;
-  // Set some defaults
-  if (nwrite==0) nwrite = 5000000;
-  start_time = std::time(0);
-}
-
 // --- fastNLO user: modify jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //     (return value must be true for jets to be UNselected)
-// fnl2412d: use rapidity!
+// fnl4332: use rapidity!
 struct fNLOSelector {
   fNLOSelector(double ymin, double ymax, double ptmin):
     _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
@@ -188,7 +185,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   pj = jetclus(p,jetsize);
   unsigned int nj = pj.upper(); 
 
-  // --- give some debug output before selection
+  // --- give some debug output before selection and sorting
   if ( doDebug ) {
     for (unsigned int i=1; i<=nj; i++) {
       double pti  = pj[i].perp();
@@ -209,15 +206,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   //     Here is your playground where you compute your observable 
   //     and the bin number ("obsbin") which gets passed to
   //     fastNLO's table filling code.
-  //     (all pT and E are in GeV)
+  //     Usually, pT and E are in GeV, but this may be changed.
+  //     ATTENTION: Scales must always be in GeV!
 
   // --- declare and initialize phase space cut variables
   // smallest |(pseudo-)rapidity| for jets to be considered
-  const double yjmin  = 0.0;
+  const double yjmin  = 2.0;
   // largest |(pseudo-)rapidity| for jets to be considered
-  const double yjmax  = 3.0;
+  const double yjmax  = 2.5;
   // lowest pT for jets to be considered
-  const double ptjmin = 30.;
+  const double ptjmin = 18.;
 
   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -225,9 +223,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
   
   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-  static fNLOSorter SortJets;
-  std::sort(pj.begin(), pj.begin() + njet, SortJets);
-
+  // fnl4332: Not required for inclusive jets
+  //  static fNLOSorter SortJets;
+  //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
+  
   // --- give some debug output after selection
   if ( doDebug ) {
     cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
@@ -240,210 +239,91 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     }
   }
 
-  // Dijets require at least 2 jets
-  if (njet > 1) {
+  // Analyze inclusive jets in jet loop
+  for (unsigned int i = 1; i <= njet; i++) {
 
-    // --- declare and initialize additional cut variables
-    // lowest pT of leading jet for event to be considered (trigger threshold)
-    const double ptj1min = 60.;
-    // minimal dijet mass for events to be considered
-    const double mjjmin = 197.0;
+    // Get jet quantities
+    double pt  = pj[i].perp(); 
+    double rap = abs(pj[i].rapidity());
     
-    // Derive dijet variables
-    // Dijet mass
-    lorentzvector<double> pj12 = pj[1] + pj[2]; 
-    double mjj = pj12.mag();
-    if (mjj < 0.) {cout << "Warning!: Negative Mass" << mjj << endl;}
+    // --- set the renormalization and factorization scale to jet pT
+    double mu = pt;
     
-    // Rapidities of two leading jets
-    double y1 = pj[1].rapidity();
-    double y2 = pj[2].rapidity();
-    
-    // Determine maximal (pseudo-)rapidity and maximal pT
-    double maxyjj  = max(abs(y1),abs(y2));
-    double ptmax   = pj[1].perp();
-
-    // --- Further dijet phase space cuts?
-    if ( ptj1min < ptmax && mjjmin < mjj ) {
-      
-      // --- set the renormalization and factorization scale to average dijet pT
-      double mu = (pj[1].perp() + pj[2].perp()) / 2.0;
-
-      // --- identify bin number (dim1,dim2) here (mjj,|ymax|)
-      int obsbin = -1;
-      for (int j = 0; j < A2->GetNObsBin(); j++) {
-	if (A2->LoBin[j][0] <= mjj    && mjj    < A2->UpBin[j][0] && 
-	    A2->LoBin[j][1] <= maxyjj && maxyjj < A2->UpBin[j][1]) {
-	  obsbin = j;
-	  break;
+    // --- identify bin number (dim1,dim2) here (pT,|y|)
+    int obsbin = -1;
+    for (int j = 0; j < A2->GetNObsBin(); j++) {
+      if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0] && 
+	  A2->LoBin[j][1] <= rap && rap < A2->UpBin[j][1]) {
+	obsbin = j;
+	break;
+      }
+    }
+	 
+    // --- fill fastNLO arrays - don't touch this piece of code!
+    if (obsbin >= 0) {
+      double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
+      for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+	if(table->GetBlockB(k)->GetIRef()>0){
+	  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
+	}else{
+	  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
 	}
       }
-	 
-      // --- fill fastNLO arrays - don't touch this piece of code!
-      if (obsbin >= 0) {
-	double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
-	for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-	  if(table->GetBlockB(k)->GetIRef()>0){
-	    ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
-	  }else{
-	    ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
-	  }
-	}
-      } // --- end: fill fastNLO array
-    } // --- end: final selection
-  } // --- end: dijet+ events only
+    } // --- end: fill fastNLO array
+  } // --- end: jet loop
 } // --- end: fastNLO user playground
 
-void UserHHC::writetable(){
-  table->OpenFileRewrite();
-  table->WriteBlockA1();
-  table->WriteBlockA2();
-  for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
-    table->WriteBlockBDividebyN(i);
-  }
-  table->CloseFileWrite();
-
-}
-
-void UserHHC::end_of_event(){
-  nevents += 1;
-  // --- store table
-  if (( (unsigned long)nevents % nwrite)==0){
-    time_t hour, min, time = std::time(0) - start_time;
-      
-    hour = time/3600L;
-    time -= hour*3600L;
-    min  = time/60L;
-    time -= min*60L;
-      
-    std::cout<<"--->     "
-	     <<(hour < 10 ? "0" : "")<<hour
-	     <<(min < 10 ? ":0" : ":")<<min
-	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
-    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
-    cout.flush();
-    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-      table->GetBlockB(k)->Nevt = (long long int)nevents;
-    }
-    writetable();
-    printf("fastNLO: Table written.\n");
-  }
-}
-
-void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
-                          unsigned long __save, bool __txt) 
-{
-  tablefilename.assign(__file_name.c_str());
-  tablefilename += ".tab";
-   
-  // --- determine whether we are running LO or NLO
-  const char* const file = __file_name.c_str(); 
-
-  if(strstr(file,"born")!=NULL){
-    nlo = false;
-    printf("fastNLO: This is a LO run!\n");
-  }else{
-    if(strstr(file,"nlo")!=NULL){
-      nlo = true;
-      printf("fastNLO: This is a NLO run!\n");
-    }else{
-      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
-      exit(1);
-    }
-  }
-
-  // --- determine whether this is a debug, reference, or warm-up run
-  doDebug = false;
-  if (strstr(file,"deb")!=NULL) {
-    doDebug = true;
-    printf("fastNLO: This is a debug run. Attention, huge output!\n");
-  }
-  doReference = false;
-  if (strstr(file,"ref")!=NULL) {
-    doReference = true;
-    printf("fastNLO: This is a reference run!\n");
-  }
-  doWarmUp = false;
-  if (strstr(file,"wrm")!=NULL) {
-    doWarmUp = true;
-    printf("fastNLO: This is a warm-up run!\n");
-    if ( ! nlo ) {
-      printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
-    }
-  }
-  if ( doWarmUp && doReference ) {
-    printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
-    printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
-    exit(2);
-  }
-
-  nwrite = __save;
-  inittable();
-}
-
 void UserHHC::inittable(){
-
-  // --- fastNLO user: set the total c.m. energy squared in GeV^2
-  //double s =     40000.; // RHIC               200 GeV
-  //double s =   3240000.; // TeV Run I         1800 GeV
-  //double s =   3841600.; // TeV Run II        1960 GeV
-  //double s =    810000.; // LHC Injection Run  900 GeV
-  //double s =   5569600.; // LHC Initial Run   2360 GeV
-  double s =  49000000.; // LHC First Run     7000 GeV
-  //double s = 100000000.; // LHC Start-up Run 10000 GeV
-  //double s = 196000000.; // LHC Design Run   14000 GeV
-
-  // --- fastNLO user: decide whether to include a reference table (for 
-  //                   precision studies, not for production jobs)
-  // KR: Now set via filename string match to "ref"
+  // Decide whether to include a reference table
+  // (for precision studies, not for production jobs)
+  // Set via filename string match to "ref", see also -n option of NLOJet++
+  // To set manually use these lines and disable string match
   //const bool doReference = true;
   //const bool doReference = false;
 
   // --- set up fastNLO
   table = new fnloTable(tablefilename);
 
-  // --- fastNLO: fill variable for table header block A1
-  table->GetBlockA1()->SetScenName("fnl2412d");  // - fastNLO user: set scenario name
-  table->GetBlockA1()->SetNcontrib(1);
-  table->GetBlockA1()->SetNmult(0);
-  table->GetBlockA1()->SetNdata(0);
-  // KR Add vars for Markus updated header
-  table->GetBlockA1()->SetNuserString(0);
-  table->GetBlockA1()->SetNuserInt(0);
-  table->GetBlockA1()->SetNuserFloat(0);
-  table->GetBlockA1()->SetImachine(0);
-  // KR Ende
-  table->GetBlockA2()->SetIpublunits(12);  // - fastNLO user: set cross section units
-  //                 (negative power of ten)
+  // --- fastNLO: fill variables for table header block A1
+  fnloBlockA1 *A1 = table->GetBlockA1();
+  A1->SetHeaderDefaults();
+  // --- fastNLO user: set scenario name (no white space)
+  A1->SetScenName("fnl4332y4");
 
   // --- fastNLO: fill variables for table header block A2
-  fnloBlockA2 *A2 =  table->GetBlockA2();
-
+  fnloBlockA2 *A2 = table->GetBlockA2();
+  // --- fastNLO user: set cross section units (negative power of ten)
+  A2->SetIpublunits(12);
   // --- fastNLO user: up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("d2sigma-dijet_dMjjd|y_max|_[pb_GeV]");
+  A2->ScDescript.push_back("d2sigma-jet_dpTd|y|_[pb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("Dijet_Mass");
+  A2->ScDescript.push_back("E_cms=2.76_TeV");
+  A2->ScDescript.push_back("Inclusive_Jet_pT");
   A2->ScDescript.push_back("anti-kT_R=0.7");
-  A2->ScDescript.push_back("CMS-PAS-QCD-11-004");
+  A2->ScDescript.push_back("CMS-PAS-HIN");
+  A2->ScDescript.push_back("provided by:");
+  A2->ScDescript.push_back("fastNLO_2.1.0");
+  A2->ScDescript.push_back("If you use this table, please cite:");
+  A2->ScDescript.push_back("  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310");
 
   A2->NScDescript = A2->ScDescript.size();
-  A2->Ecms = sqrt(s);
-  A2->ILOord = 2;   // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
+  A2->Ecms = GetEcms();
+  A2->ILOord = GetNj(); // --- fastNLO user: power of LO contr. for process (2 for incl. jets, 3 for 3-jet mass)
   A2->NDim = 2;     // --- fastNLO user: no. of dimensions in which observable is binned
-  A2->DimLabel.push_back("Mjj_[GeV]");  // --- fastNLO user: label of 1st dimension
+  A2->DimLabel.push_back("pT_[GeV]");  // --- fastNLO user: label of 1st dimension
   A2->IDiffBin.push_back(2);
-  A2->DimLabel.push_back("|y_max|");   // --- fastNLO user: label of 2nd dimension
+  A2->DimLabel.push_back("|y|");   // --- fastNLO user: label of 2nd dimension
   A2->IDiffBin.push_back(2);
 
   vector <double> bound;
   bound.resize(2);
 
-  // --- fastNLO user: bin definitions - here in mjj and |y_max|
-  const int ndim2bins = 5;
-  const double dim2bins[ndim2bins+1] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5 };
+  // --- fastNLO user: bin definitions - here in pT and |y|
+  const int ndim2bins = 1;
+  const double dim2bins[ndim2bins+1] = { 2.0, 2.5 };
   
-  const int ndim1bins[ndim2bins] = { 48, 45, 43, 42, 33 };
-  
+  const int ndim1bins[ndim2bins] = { 36 };
+
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
   cout << "------------------------" << endl;
@@ -456,57 +336,13 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim0[49] = {
-    197.0, 220.0, 244.0, 270.0, 296.0, 325.0, 354.0, 386.0, 419.0, 453.0,
-    489.0, 526.0, 565.0, 606.0, 649.0, 693.0, 740.0, 788.0, 838.0, 890.0,
-    944.0, 1000.0, 1058.0, 1118.0, 1181.0, 1246.0, 1313.0, 1383.0, 1455.0, 1530.0,
-    1607.0, 1687.0, 1770.0, 1856.0, 1945.0, 2037.0, 2132.0, 2231.0, 2332.0, 2438.0,
-    2546.0, 2659.0, 2775.0, 2895.0, 3019.0, 3147.0, 3279.0, 3416.0, 4010.0
-  };
-  const double dim1[46] = {
-    270.0, 296.0, 325.0, 354.0, 386.0, 419.0, 453.0,
-    489.0, 526.0, 565.0, 606.0, 649.0, 693.0, 740.0, 788.0, 838.0, 890.0,
-    944.0, 1000.0, 1058.0, 1118.0, 1181.0, 1246.0, 1313.0, 1383.0, 1455.0, 1530.0,
-    1607.0, 1687.0, 1770.0, 1856.0, 1945.0, 2037.0, 2132.0, 2231.0, 2332.0, 2438.0,
-    2546.0, 2659.0, 2775.0, 2895.0, 3019.0, 3147.0, 3279.0, 3416.0, 4010.0
-  };
-  const double dim2[44] = {
-    419.0, 453.0,
-    489.0, 526.0, 565.0, 606.0, 649.0, 693.0, 740.0, 788.0, 838.0, 890.0,
-    944.0, 1000.0, 1058.0, 1118.0, 1181.0, 1246.0, 1313.0, 1383.0, 1455.0, 1530.0,
-    1607.0, 1687.0, 1770.0, 1856.0, 1945.0, 2037.0, 2132.0, 2231.0, 2332.0, 2438.0,
-    2546.0, 2659.0, 2775.0, 2895.0, 3019.0, 3147.0, 3279.0, 3416.0, 3558.0, 3704.0,
-    3854.0, 4509.0,
-  };
-  const double dim3[43] = {
-    565.0, 606.0, 649.0, 693.0, 740.0, 788.0, 838.0, 890.0,
-    944.0, 1000.0, 1058.0, 1118.0, 1181.0, 1246.0, 1313.0, 1383.0, 1455.0, 1530.0,
-    1607.0, 1687.0, 1770.0, 1856.0, 1945.0, 2037.0, 2132.0, 2231.0, 2332.0, 2438.0,
-    2546.0, 2659.0, 2775.0, 2895.0, 3019.0, 3147.0, 3279.0, 3416.0, 3558.0, 3704.0,
-    3854.0, 4010.0,
-    4171.0, 4337.0, 5058.0
-  };
-  const double dim4[34] = {
-    1000.0, 1058.0, 1118.0, 1181.0, 1246.0, 1313.0, 1383.0, 1455.0, 1530.0,
-    1607.0, 1687.0, 1770.0, 1856.0, 1945.0, 2037.0, 2132.0, 2231.0, 2332.0, 2438.0,
-    2546.0, 2659.0, 2775.0, 2895.0, 3019.0, 3147.0, 3279.0, 3416.0, 3558.0, 3704.0,
-    3854.0, 4010.0,
-    4171.0, 4337.0, 5058.0
-  };
+  const double dim0[37] = {
+    18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,
+    74.  ,   84.,   97.,  114.,  133.,  153.,  174.,  196.,  220.,  245.,
+    272. ,  300.,  330.,  362.,  395.,  430.,  468.,  507.,  548.,  592.,
+    638. ,  686.,  737.,  790.,  846.,  905.,  967. };
   for (int j=0; j<ndim1bins[0]+1; j++) { 
     dim1bins[0][j] = dim0[j];
-  }
-  for (int j=0; j<ndim1bins[1]+1; j++) { 
-    dim1bins[1][j] = dim1[j];
-  }
-  for (int j=0; j<ndim1bins[2]+1; j++) { 
-    dim1bins[2][j] = dim2[j];
-  }
-  for (int j=0; j<ndim1bins[3]+1; j++) { 
-    dim1bins[3][j] = dim3[j];
-  }
-  for (int j=0; j<ndim1bins[4]+1; j++) { 
-    dim1bins[4][j] = dim4[j];
   }
 
   cout << endl << "------------------------" << endl;
@@ -525,7 +361,7 @@ void UserHHC::inittable(){
   //     (multi-) differential result.
   //     default: divide by bin width in dim 1 and dim 2
   //              ATTENTION: Don't forget to include a factor of 2 for abs. rapidity |y| !
-  // fnl2412d: divide by bin width in Mjj and |y_max|
+  // fnl4332: divide by bin width in pT and |y|
 
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<ndim2bins;i++){
@@ -539,8 +375,8 @@ void UserHHC::inittable(){
       bound[1] = dim2bins[i+1];
       A2->UpBin.push_back(bound);
       binsize = binsize
-	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dMjj
-	* 2. * (dim2bins[i+1]-dim2bins[i]); // ... times d|y_max|
+	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dpT
+	* 2. * (dim2bins[i+1]-dim2bins[i]); // ... times d|y|
       A2->BinSize.push_back(binsize);
     }
   }
@@ -554,14 +390,11 @@ void UserHHC::inittable(){
   // --- fastNLO table block B
   fnloBlockBNlojet *B = new fnloBlockBNlojet(table->GetBlockA1(),table->GetBlockA2());
   table->CreateBlockB(0,B);
+  B->SetNlojetDefaults();
+
   B->IXsectUnits = 12;    // --- fastNLO user: set to same value as "SetIpublunits"
-  B->IDataFlag = 0;
-  B->IAddMultFlag = 0;
-  B->IContrFlag1 = 1;
   B->NScaleDep = 0;
-  B->CodeDescript.push_back("NLOJet++_4.1.3");  // --- fastNLO user: enter NLOJET++ version
-  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
-  B->CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
+  
   B->IRef = 0;
   if (nlo || A2->ILOord > 2) {
     B->NSubproc = 7;
@@ -605,8 +438,8 @@ void UserHHC::inittable(){
   // KR: This is caught in an error condition now 
   // - fastNLO user: remember to disable reference-mode in
   //                 Warm-Up run: "doReference = false" (above)
-  //B->IWarmUpPrint = 10000000;
-  B->IWarmUpPrint = 10000;
+  B->IWarmUpPrint = 1000000;
+  //B->IWarmUpPrint = 10000;
   B->xlo.resize(A2->NObsBin);
   B->scalelo.resize(A2->NObsBin);
   B->scalehi.resize(A2->NObsBin);
@@ -698,12 +531,12 @@ void UserHHC::inittable(){
   }
 
   B->NScales = 2;  // two scales: mur and muf
-  B->NScaleDim = 1; // one variable used in scales: dijet pT average
+  B->NScaleDim = 1; // one variable used in scales: jet pT
   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0 
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0 
   B->ScaleDescript.resize(B->NScaleDim);
 
-  B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
+  B->ScaleDescript[0].push_back("pT_jet_[GeV]"); // --- fastNLO user: give name for selected scale
   //B->Nscalenode.push_back(4); // number of scale nodes for pT
   B->Nscalenode.push_back(6); // number of scale nodes for pT
 
@@ -789,4 +622,114 @@ void UserHHC::inittable(){
     table->GetBlockA1()->SetNcontrib(2);
   }
 
+}
+//------ END OF USER DEFINED PARTS, NO USER EDITS BELOW ------
+
+//------ DON'T TOUCH THIS PART! ------
+void UserHHC::initfunc(unsigned int)
+{
+  // --- Initialize event counters
+  nevents = 0;
+  // Set some defaults
+  if (nwrite==0) nwrite = 5000000;
+  start_time = std::time(0);
+}
+
+void UserHHC::writetable(){
+  table->OpenFileRewrite();
+  table->WriteBlockA1();
+  table->WriteBlockA2();
+  for(int i=0;i< table->GetBlockA1()->GetNcontrib();i++){
+    table->WriteBlockBDividebyN(i);
+  }
+  table->CloseFileWrite();
+
+}
+
+void UserHHC::end_of_event(){
+  nevents += 1;
+  // --- store table
+  if (( (unsigned long)nevents % nwrite)==0){
+    time_t hour, min, time = std::time(0) - start_time;
+      
+    hour = time/3600L;
+    time -= hour*3600L;
+    min  = time/60L;
+    time -= min*60L;
+      
+    std::cout<<"--->     "
+	     <<(hour < 10 ? "0" : "")<<hour
+	     <<(min < 10 ? ":0" : ":")<<min
+	     <<(time < 10 ? ":0" : ":")<<time<<std::endl;
+    printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
+    cout.flush();
+    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+      table->GetBlockB(k)->Nevt = (long long int)nevents;
+    }
+    writetable();
+    printf("fastNLO: Table written.\n");
+  }
+}
+
+void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
+                          unsigned long __save, bool __txt) 
+{
+  tablefilename.assign(__file_name.c_str());
+  tablefilename += ".tab";
+   
+  // --- determine whether we are running LO or NLO
+  const char* const file = __file_name.c_str(); 
+
+  if(strstr(file,"born")!=NULL){
+    nlo = false;
+    printf("fastNLO: This is a LO run!\n");
+  }else{
+    if(strstr(file,"nlo")!=NULL){
+      nlo = true;
+      printf("fastNLO: This is a NLO run!\n");
+    }else{
+      printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
+      exit(1);
+    }
+  }
+
+  // --- determine whether this is a debug, reference, or warm-up run
+  doDebug = false;
+  if (strstr(file,"deb")!=NULL) {
+    doDebug = true;
+    printf("fastNLO: This is a debug run. Attention, huge output!\n");
+  }
+  doReference = false;
+  if (strstr(file,"ref")!=NULL) {
+    doReference = true;
+    printf("fastNLO: This is a reference run!\n");
+  }
+  doWarmUp = false;
+  if (strstr(file,"wrm")!=NULL) {
+    doWarmUp = true;
+    printf("fastNLO: This is a warm-up run!\n");
+    if ( ! nlo ) {
+      printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
+    }
+  }
+  if ( doWarmUp && doReference ) {
+    printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
+    printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
+    exit(2);
+  }
+
+  nwrite = __save;
+  inittable();
+}
+
+unsigned int UserHHC::GetNj(){
+  unsigned int nj = 0, nu = 0 ,nd = 0;
+  inputfunc(nj,nu,nd);
+  return nj;
+}
+
+double UserHHC::GetEcms(){
+  double ecms = 0;
+  psinput(NULL,ecms);
+  return sqrt(ecms);
 }
