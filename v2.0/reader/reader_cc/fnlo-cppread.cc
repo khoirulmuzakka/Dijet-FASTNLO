@@ -507,10 +507,12 @@ int fnlocppread(int argc, char** argv){
   // Find scale variation for intended MuF scale factor value
   const int nsclsfmax = 10;
   double fxmuf[nsclsfmax];
+  // Get number of available scale variations for selected set of contributions and
+  // check on available scale factors, in particular for MuF
+  int nsclsf = nsclsfmax;
+  
   if ( !fnloreader->GetIsFlexibleScaleTable() ) {
-    // Get number of available scale variations for selected set of contributions and
-    // check on available scale factors, in particular for MuF
-    int nsclsf = fnloreader->GetNScaleVariations();
+    nsclsf = fnloreader->GetNScaleVariations();
     if ( nsclsf > nsclsfmax ) {
       printf("fnlo-read: WARNING! Found more scale variations than I can deal with: %i\n",nsclsf); 
       printf("           Using only the first 10 of them.\n");
@@ -522,9 +524,11 @@ int fnlocppread(int argc, char** argv){
       fxmuf[iscls] = fnloreader->GetScaleFactorMuF();
       //      printf("fnlo-read: MuF scale factor for scale variation no. %i is: %7.3f\n",iscls,fxmuf[iscls]);
     }
-    
-    // Run over all requested scale settings xmur, xmuf if possible
-    for (int iscls=0; iscls<nscls; iscls++){
+  }   
+  
+  // Run over all requested scale settings xmur, xmuf if possible
+  for (int iscls=0; iscls<nscls; iscls++){
+    if ( !fnloreader->GetIsFlexibleScaleTable() ) {
       int isclf = -1;
       for (int jscls=0; jscls<nsclsf; jscls++){
 	if ( abs(xmuf[iscls]-fxmuf[jscls]) < DBL_MIN ){
@@ -540,7 +544,8 @@ int fnlocppread(int argc, char** argv){
 	// Set MuR scale factor
 	//   Do not refill PDF & alpha_s caches (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
 	fnloreader->SetScaleFactorMuR(xmur[iscls], false, false);
-
+      }
+    } else {
 	// This refers to flex scales ...
 	// } else {
 	//   // Set MuF scale factor, only usable with flexible-scale tables
@@ -548,93 +553,98 @@ int fnlocppread(int argc, char** argv){
 	//   //  double fxmuf = 1.0; 
 	//   //  fnloreader->SetScaleFactorMuF(fxmuf, false, true);
 	// }
+      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);
+      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);
+	    //      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale2);
+	    //      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale2);
+      fnloreader->SetScaleFactorMuF(xmuf[iscls]);
+      fnloreader->SetScaleFactorMuR(xmur[iscls]);
+    }
 
-	// If the MuR scale was changed the alpha_s cache MUST be refilled
-	fnloreader->FillAlphasCache();
-	// If the PDF or a scale was changed the PDF cache MUST be refilled
-	fnloreader->FillPDFCache();
-  
-	// Calculate cross section
-	fnloreader->CalcCrossSection();
-
-	// Get results
-	vector < double > xsnlo = fnloreader->GetCrossSection();
-	vector < double > kfac  = fnloreader->GetKFactors();
-	vector < double > xslo  = xsnlo;
-	for (unsigned int i=0;i<xslo.size();i++){
-	  if ( abs(kfac[i]) > DBL_MIN ){
-	    xslo[i] = xslo[i]/kfac[i];
-	  } else {
-	    xslo[i] = -1.;
-	  }
-	}
-	vector < double > xsthc2;
-	vector < double > kthc;
-	vector < double > xsnpc;
-	vector < double > knpc;
-	
-	// Start print out
-	cout << DSEP << endl;
-	printf(" My Cross Sections\n");
-	printf(" The scale factors chosen here are: % #10.3f, % #10.3f\n",fnloreader->GetScaleFactorMuR(),fnloreader->GetScaleFactorMuF());
-	cout << SSEP << endl;
+    // If the MuR scale was changed the alpha_s cache MUST be refilled
+    fnloreader->FillAlphasCache();
+    // If the PDF or a scale was changed the PDF cache MUST be refilled
+    fnloreader->FillPDFCache();
     
-	// Get table constants relevant for print out
-	// TBD: This Getter should be renamed!!!
-	int NDim = fnloreader->GetNDiffBin();
-	unsigned int NDimBins[NDim];
-	vector < string > DimLabel = fnloreader->GetDimensionLabel();
-	vector < vector < double > > LoBin = fnloreader->GetLowBinEdge();
-	vector < vector < double > > UpBin = fnloreader->GetUpBinEdge();
-	vector < double > BinSize = fnloreader->GetBinSize();
-	
-	// Print
-	if ( NDim == 2 ){
-	  string header0 = "  IObs  Bin Size IODim1 "; 
-	  string header1 = "   IODim2 ";
-	  string header2 = " LO cross section   NLO cross section   K NLO";
-	  if ( ithc2>-1 ){
-	    header2 += "     K THC";
-	  }
-	  if ( inpc1>-1 ){
-	    header2 += "     K NPC";
-	  }
-	  printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
-		 header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
-	  cout << SSEP << endl;
-	  for ( unsigned int i=0; i<xslo.size(); i++ ){ 
-	    for ( int j=0; j<NDim; j++ ){ 
-	      if ( i==0 ){
-		NDimBins[j] = 1;
-	      } else if ( LoBin[i-1][j] < LoBin[i][j]){
-		NDimBins[j]++;
-	      } else if ( LoBin[i][j] < LoBin[i-1][j]){
-		NDimBins[j] = 1;
-	      }
-	    }
-	    if ( ithc2<0 && inpc1<0 ) {
-	      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
-		     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		     NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
-	    } else if ( inpc1<0 ) {
-	      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		     NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
-	    } else if ( ithc2<0 ) {
-	      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-		     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		     NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
-	    } else {
-	      printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-		     i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		     NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
-	    }
-	    printf("\n");
-	  }
-	} else {
-	  printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
-	}
+    // Calculate cross section
+    fnloreader->CalcCrossSection();
+
+    // Get results
+    vector < double > xsnlo = fnloreader->GetCrossSection();
+    vector < double > kfac  = fnloreader->GetKFactors();
+    vector < double > xslo  = xsnlo;
+    for (unsigned int i=0;i<xslo.size();i++){
+      if ( abs(kfac[i]) > DBL_MIN ){
+	xslo[i] = xslo[i]/kfac[i];
+      } else {
+	xslo[i] = -1.;
       }
+    }
+    vector < double > xsthc2;
+    vector < double > kthc;
+    vector < double > xsnpc;
+    vector < double > knpc;
+	
+    // Start print out
+    cout << DSEP << endl;
+    printf(" My Cross Sections\n");
+    printf(" The scale factors chosen here are: % #10.3f, % #10.3f\n",fnloreader->GetScaleFactorMuR(),fnloreader->GetScaleFactorMuF());
+    cout << SSEP << endl;
+    
+    // Get table constants relevant for print out
+    // TBD: This Getter should be renamed!!!
+    int NDim = fnloreader->GetNDiffBin();
+    unsigned int NDimBins[NDim];
+    vector < string > DimLabel = fnloreader->GetDimensionLabel();
+    vector < vector < double > > LoBin = fnloreader->GetLowBinEdge();
+    vector < vector < double > > UpBin = fnloreader->GetUpBinEdge();
+    vector < double > BinSize = fnloreader->GetBinSize();
+	
+    // Print
+    if ( NDim == 2 ){
+      string header0 = "  IObs  Bin Size IODim1 "; 
+      string header1 = "   IODim2 ";
+      string header2 = " LO cross section   NLO cross section   K NLO";
+      if ( ithc2>-1 ){
+	header2 += "     K THC";
+      }
+      if ( inpc1>-1 ){
+	header2 += "     K NPC";
+      }
+      printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
+	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+      cout << SSEP << endl;
+      for ( unsigned int i=0; i<xslo.size(); i++ ){ 
+	for ( int j=0; j<NDim; j++ ){ 
+	  if ( i==0 ){
+	    NDimBins[j] = 1;
+	  } else if ( LoBin[i-1][j] < LoBin[i][j]){
+	    NDimBins[j]++;
+	  } else if ( LoBin[i][j] < LoBin[i-1][j]){
+	    NDimBins[j] = 1;
+	  }
+	}
+	if ( ithc2<0 && inpc1<0 ) {
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
+		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
+	} else if ( inpc1<0 ) {
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
+	} else if ( ithc2<0 ) {
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+	} else {
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
+	}
+	printf("\n");
+      }
+    } else {
+      printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
     }
   }
   return 0;
