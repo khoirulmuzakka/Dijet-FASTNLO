@@ -20,7 +20,7 @@ endif
 endif
 
 # All source files which go into the main target (and have to be distributed)
-allunc_SOURCES = main.f allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
+allunc_v14_SOURCES = main.f allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
 	pyalps.f fn-hbook.f uncert.f fnx9999.inc strings.inc uncert.inc
 
 # FORTRAN compiler flags to be used for the main target
@@ -34,13 +34,13 @@ AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 # Libraries to be linked to the main target
 # Require lhapdf and cernlib, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   allunc_v14_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   allunc_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+   allunc_v14_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
 # To avoid 32-64-bit compatibility problems static CERN libs should be used if available
 # Use "--as-needed" option for this instead of "--static"
-allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,--as-needed -lmathlib -lpacklib -lkernlib
+allunc_v14_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,--as-needed -lmathlib -lpacklib -lkernlib
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
