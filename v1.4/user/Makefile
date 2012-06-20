@@ -29,11 +29,11 @@ FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #FFLAGS= -O -fno-automatic -ffixed-line-length-132
 
 # Scientific Linux 4
-FC=g77
+#FC=g77
 # Scientific Linux 5
 #FC=???
 # Ubuntu 10.04
-#FC=gfortran
+FC=gfortran
 
 OBJFILESALL  = $(ALLFILES:.f=.o)
 OBJFILESEXA  = $(EXAFILES:.f=.o)
