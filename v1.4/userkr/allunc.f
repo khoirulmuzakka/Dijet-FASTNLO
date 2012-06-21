@@ -42,6 +42,18 @@ c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
       DOUBLE PRECISION TOCL90,TOCL90GJR
       PARAMETER (TOCL90 = 1.64485D0, TOCL90GJR = 2.12766D0)
       
+*---  Define series of scale factor settings to test. Last and 8th entry
+*---  is (0,0) and is not to be used!
+      INTEGER MXSCALECOMB
+      PARAMETER (MXSCALECOMB=2*NSCALEMAX)
+      INTEGER ISCLPT(MXSCALECOMB)
+      DOUBLE PRECISION XMURS(MXSCALECOMB),XMUFS(MXSCALECOMB)
+      DATA XMURS/1.0D0,0.5D0,2.0D0,0.5D0,1.0D0,1.D0,2.D0,0.0D0/
+      DATA XMUFS/1.0D0,0.5D0,2.0D0,1.0D0,0.5D0,2.D0,1.D0,0.0D0/
+*---  Use argument counter to simplify logic
+      INTEGER NARG
+      DATA NARG/0/
+
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3)
@@ -60,7 +72,7 @@ ckr Z mass from PDG 2006
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
 c --- Parse command line
-      WRITE(*,*)"\n ########################################"//
+      WRITE(*,*)"########################################"//
      >     "################################"
       WRITE(*,*)"# ALLUNC"
       WRITE(*,*)"########################################"//
@@ -80,8 +92,9 @@ c --- Parse command line
       LRAT = .FALSE.
       LNRM = .FALSE.
       LTAB = .FALSE.
-      LSCL = .TRUE.
-      IF (IARGC().LT.1) THEN
+      LSCL = .FALSE.
+      NARG = NARG + 1
+      IF (IARGC().LT.NARG) THEN
          SCENARIO = "fnt2003"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No scenario name given, "//
@@ -90,7 +103,7 @@ c --- Parse command line
      >        "arguments type:"
          WRITE(*,*)"      ./allunc -h"
       ELSE
-         CALL GETARG(1,SCENARIO)
+         CALL GETARG(NARG,SCENARIO)
          IF (SCENARIO(1:LEN_TRIM(SCENARIO)).EQ."-h") THEN
             WRITE(*,*)' '
             WRITE(*,*)'Usage: ./allunc [arguments]'
@@ -107,6 +120,8 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  Derive algorithmic uncertainty, def. = no'
             WRITE(*,*)'  Last LO stat. table number, def. = -1'
             WRITE(*,*)'  Last NLO stat. table number, def. = -1'
+            WRITE(*,*)'  Number of pre-defined mu_r, mu_f scale '//
+     >           'settings to investigate, def. = 1'
             WRITE(*,*)'  PDF set, def. = cteq66.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
      >           '../share/lhapdf/PDFsets'
@@ -171,11 +186,12 @@ ckr      LNRM = .FALSE.
       REFNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//"ref.tab"
 
 *---Path to tables
+      NARG = NARG + 1
       TABPATH = "X"
-      IF (IARGC().GE.2) THEN
-         CALL GETARG(2,TABPATH)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,TABPATH)
       ENDIF
-      IF (IARGC().LT.2.OR.TABPATH(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.TABPATH(1:1).EQ."_") THEN
          TABPATH = "."
          WRITE(*,*)
      >        "ALLUNC: WARNING! No table path given, "//
@@ -195,11 +211,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---HBOOK filename
+      NARG = NARG + 1
       HISTFILE = "X"
-      IF (IARGC().GE.3) THEN
-         CALL GETARG(3,HISTFILE)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,HISTFILE)
       ENDIF
-      IF (IARGC().LT.3.OR.HISTFILE(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.HISTFILE(1:1).EQ."_") THEN
          HISTFILE = SCENARIO(1:LEN_TRIM(SCENARIO))//".hbk"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No output filename given, "//
@@ -210,11 +227,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Derive algorithmic uncertainty?
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.4) THEN
-         CALL GETARG(4,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.4.OR.CH4TMP(1:1).EQ."_".OR.
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_".OR.
      >     CH4TMP(1:2).EQ."no") THEN
          LALG   =  .FALSE.
          WRITE(*,*)
@@ -232,11 +250,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Last LO table to use 
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.5) THEN
-         CALL GETARG(5,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.5.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          CH4TMP = "-1"
          BORNN  =  -1
          WRITE(*,*)
@@ -248,11 +267,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Last NLO table to use 
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.6) THEN
-         CALL GETARG(6,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.6.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          CH4TMP = "-1"
          NLON   =  -1
          WRITE(*,*)
@@ -263,12 +283,45 @@ ckr      LNRM = .FALSE.
          WRITE(*,*)"ALLUNC: Last NLO table number: ",NLON
       ENDIF
 
-*---PDF set
-      PDFSET = "X"
-      IF (IARGC().GE.7) THEN
-         CALL GETARG(7,PDFSET)
+*---No. of pre-defined scale settings to investigate
+      NARG = NARG + 1
+      CH4TMP = "X"
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.7.OR.PDFSET(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
+         CH4TMP = "1"
+         NSCLS   = 1
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! No. of scale settings not given, "//
+     >        "using 1 instead ==> no scale uncertainties!"
+      ELSE
+         READ(CH4TMP,'(I1)'),NSCLS
+         IF (NSCLS.LT.1) THEN
+            WRITE(*,*)
+     >           "ALLUNC: ERROR! No scale setting "//
+     >           "or even less??? Aborting! NSCLS = ",
+     >           NSCLS
+            STOP
+         ELSEIF (NSCLS.GT.MXSCALECOMB-1) THEN
+            WRITE(*,*)
+     >           "ALLUNC: ERROR! Too many scale settings "//
+     >           "requested, aborting! NSCLS = ",
+     >           NSCLS
+            STOP
+         ELSE
+            IF (NSCLS.GE.3) LSCL = .TRUE.
+            WRITE(*,*)"ALLUNC: No. of scale settings: ",NSCLS
+         ENDIF
+      ENDIF
+      
+*---PDF set
+      NARG = NARG + 1
+      PDFSET = "X"
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,PDFSET)
+      ENDIF
+      IF (IARGC().LT.NARG.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq66.LHgrid"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No PDF set given, "//
@@ -280,16 +333,17 @@ ckr      LNRM = .FALSE.
       PDFNAM = PDFSET(1:LEN_TRIM(PDFSET))
 
 *---Path to PDF sets
+      NARG = NARG + 1
       CHTMP = "X"
-      IF (IARGC().GE.8) THEN
-         CALL GETARG(8,CHTMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CHTMP)
       ENDIF
-      IF (IARGC().LT.8.OR.CHTMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CHTMP(1:1).EQ."_") THEN
          PDFPATH = "/../share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
      >        "assuming: $(LHAPDF)"//PDFPATH(1:LEN_TRIM(PDFPATH))
-c - Initialize path to LHAPDF libs
+*---  Initialize path to LHAPDF libs
          CALL GETENV("LHAPDF",LHAPDF)
          IF (LEN_TRIM(LHAPDF).EQ.0) THEN
             WRITE(*,*)"\nALLUNC: ERROR! $LHAPDF not set, aborting!"
@@ -307,11 +361,12 @@ c - Initialize path to LHAPDF libs
      >     //PDFSET(1:LEN_TRIM(PDFSET))
 
 *---alpha_s mode
+      NARG = NARG + 1
       CHTMP = "X"
-      IF (IARGC().GE.9) THEN
-         CALL GETARG(9,CHTMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CHTMP)
       ENDIF
-      IF (IARGC().LT.9.OR.CHTMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CHTMP(1:1).EQ."_") THEN
          ASMODE = "PDF"
          WRITE(*,*)
      >        "ALLUNC: No alpha_s mode given, "//
@@ -323,11 +378,12 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 *---alpha_s(M_Z)
+      NARG = NARG + 1
       CH8TMP = "X"
-      IF (IARGC().GE.10) THEN
-         CALL GETARG(10,CH8TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH8TMP)
       ENDIF
-      IF (IARGC().LT.10.OR.CH8TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH8TMP(1:1).EQ."_") THEN
          ASMZVAL = -1D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) value given, "//
@@ -338,11 +394,12 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 *---alpha_s(M_Z) +- variation
+      NARG = NARG + 1
       CH8TMP = "X"
-      IF (IARGC().GE.11) THEN
-         CALL GETARG(11,CH8TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH8TMP)
       ENDIF
-      IF (IARGC().LT.11.OR.CH8TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH8TMP(1:1).EQ."_") THEN
          DASMZVAL = 0.D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) variation given, "//
@@ -354,11 +411,12 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 *---alpha_s loop order in evolution
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.12) THEN
-         CALL GETARG(12,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.12.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          IASLOOP = -1
          WRITE(*,*)
      >        "ALLUNC: No alpha_s loop order given, "//
@@ -370,11 +428,12 @@ c - Initialize path to LHAPDF libs
 
 *---Use eigen vector (CTEQ/MSTW) or toy MC (NNPDF) method for
 *---PDF uncertainties
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.13) THEN
-         CALL GETARG(13,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.13.OR.CH4TMP(1:1).EQ."_".OR.
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_".OR.
      >     CH4TMP(1:1).EQ."1") THEN
          IETYPE = 1
          WRITE(*,*)
@@ -396,21 +455,20 @@ c - Initialize path to LHAPDF libs
       ENDIF
 
 *---Too many arguments
-      IF (IARGC().GT.13) THEN
+      NARG = NARG + 1
+      IF (IARGC().GT.NARG) THEN
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
-
-
-
-c - Initialize LHAPDF, no PDF set printout after first call
+      
+*---  Initialize LHAPDF, no PDF set printout after first call
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL SETLHAPARM('SILENT')
-
-c - Initialize one member, 0=best fit member
+      
+*---  Initialize one member, 0=best fit member
       CALL INITPDF(0)
-
-c - Write out some info on best fit member      
+      
+*---  Write out some info on best fit member      
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       WRITE(*,*)"ALLUNC: PDF Set Info"
@@ -428,7 +486,7 @@ c - Write out some info on best fit member
       WRITE(*,*) "ALLUNC: The lambda_4 value for member 0 is",QLAM4
       WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
       
-c - Check primary table existence
+*---  Check primary table existence
       FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
       WRITE(*,*)"ALLUNC: Checking primary table: "//
      >     FILENAME(1:LEN_TRIM(FILENAME))
@@ -441,7 +499,7 @@ c - Check primary table existence
          CLOSE(2)
       ENDIF
 
-c - Check uncertainties to derive 
+*---  Check uncertainties to derive 
       LONE  = MYPDF.LE.1
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       IF (LALG) THEN
@@ -516,50 +574,61 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
      >        "distributions"
       ENDIF
       
-
-      
-c - One initial call - to fill commonblock -> for histo-booking
-c - Use primary table for this (recall: ref. table has 2 x rap. bins)
+*---  One initial call - to fill commonblock -> for histo-booking
+*---  Use primary table for this (recall: ref. table has 2 x rap. bins)
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       WRITE(*,*)"ALLUNC: Initialize Table, Book Histograms"
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
-ckr      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
+
+*---  Initialize table ... scenario information 
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
      >     LRAT.OR.LNRM,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
-         WRITE(*,*)"----------------------------------------"//
-     >        "--------------------------------"
+      WRITE(*,*)"----------------------------------------"//
+     >     "--------------------------------"
       
-
-
-c - Define output formats
+*---  Define output formats
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
- 900        FORMAT(1P,I5,3(6X,E18.11))
- 901        FORMAT(1P,I5,2(6X,E18.11))
- 902        FORMAT(3I6,3E16.5,5(F10.3,3X))
+ 900  FORMAT(1P,I5,3(6X,E18.11))
+ 901  FORMAT(1P,I5,2(6X,E18.11))
+ 902  FORMAT(3I6,3E16.5,5(F10.3,3X))
       
+*---  Look for pointers matching requested scale settings
+      DO ISCL=1,NSCLS
+         XMUR = XMURS(ISCL)
+         XMUF = XMUFS(ISCL)
+         DO J=1,NSCALEVAR
+            IF (ABS(MUFSCALE(J)-XMUF).LT.TINY(1.D0)) THEN
+               ISCLPT(ISCL) = J
+               EXIT
+            ENDIF
+         ENDDO
+         IF (ISCLPT(ISCL).LE.0) THEN
+            WRITE(*,*)"ALLUNC: ERROR! Required scale no. ",ISCL,
+     >           "not found, stopped."
+            STOP
+         ENDIF
+      ENDDO
 
-      
-c - PDF part
-c - Use primary table
-c - New call: a single call for each scale
-c         1st argument:  name of table
-c         2nd argument:  xmur  prefactor for nominal ren-scale
-c                              any choice is possible, but please note 
-c                              that NNLO-NLL works only for xmur=xmuf
-c         3rd argument:  xmuf  prefactor for nominal fact-scale
-c                              only a few choices are possible
-c                              (see output or table documentation)
-c         4th argument:  0: no ascii output       1: print results
-c         5th argument:  array to return results
+*---  PDF part
+*     Use primary table
+*     New call: a single call for each scale
+*     1st argument:  name of table
+*     2nd argument:  xmur  prefactor for nominal ren-scale
+*     -              any choice is possible, but please note 
+*     -              that NNLO-NLL works only for xmur=xmuf
+*     3rd argument:  xmuf  prefactor for nominal fact-scale
+*     -              only a few choices are possible
+*                    (see output or table documentation)
+*     4th argument:  0: no ascii output       1: print results
+*     5th argument:  array to return results
 
-c - Compute central result and, if possible, PDF uncertainties for
-c - all precalculated scale variations
+*---  Compute central result (LO+NLO) and PDF uncertainties
       IF (LONE.OR.LPDF) THEN
          WRITE(*,*)"****************************************"//
      >        "********************************"
@@ -581,17 +650,20 @@ c - all precalculated scale variations
      >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
      >        "lower PDF uncertainty   upper PDF uncertainty"
-         DO I=1,NSCALEVAR
-ckr         DO I=1,1
-ckr Part 1: Basic PDF uncertainty using a single PDF set (and only one
-ckr         initialization call!). For PDF uncertainty calculation from
-ckr         multiple PDF sets like full HERAPDF make sure to switch back
-ckr         to original one here
+
+*---  Only primary scale
+         DO I=1,1
+            ISCL = ISCLPT(I)
+            XMUR = XMURS(I)
+            XMUF = XMUFS(I)
+*---  Part 1: Basic PDF uncertainty using a single PDF set (and only one
+*---         initialization call!). For PDF uncertainty calculation from
+*---         multiple PDF sets like full HERAPDF make sure to switch back
+*---         to original one here
             IF (IETYPE.EQ.3) THEN
                CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
             ENDIF
-            XMUR = MURSCALE(I)
-            XMUF = MUFSCALE(I)
+*---  NLO contribution
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
             WRITE(*,*)"ALLUNC: Now scale no.",i,"; mur, muf = ",
@@ -611,25 +683,25 @@ ckr         to original one here
             ENDIF
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
-ckr            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
-ckr Load normalization table with potentially different binning!
+*--- Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 1
-ckr               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ENDIF
             ISTEP = 2
-ckr            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
-ckr Do loop runs once even if MYPDF=0! => Avoid with IF statement
+*--- Do loop runs once even if MYPDF=0! => Avoid with IF statement
             IF (LPDF) THEN
                DO J=1,MYPDF
 ckr               DO J=1,3
@@ -637,20 +709,20 @@ ckr               DO J=1,3
                   CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                   IF (LNRM) THEN
                      ISTEP = 3
-ckr                     WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
-ckr Load normalization table with potentially different binning!
+*--- Load normalization table with potentially different binning!
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                      ISTEP = 4
-ckr                     WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                      ISTEP = 5
-ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
@@ -661,7 +733,7 @@ ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
             IPHASE = 3
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
-ckr Part 2: Additional PDF uncertainty parts using a separate PDF set
+*--- Part 2: Additional PDF uncertainty parts using a separate PDF set
             IF (IETYPE.EQ.3) THEN
                IF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
      >              "HERAPDF10_EIG.LHgrid") THEN
@@ -678,20 +750,20 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
      >                 "PDFNAM: ",PDFNAM(1:LEN_TRIM(PDFNAM))
                   STOP
                ENDIF
-ckr Back up central result and relevant uncertainty
+*--- Back up central result and relevant uncertainty
                IBIN = 0
                DO IRAP=1,NRAP
                   DO IPT=1,NPT(IRAP)
                      IBIN = IBIN+1
                      DO IORD=1,NORD+1
                         DO ISUB=1,NSUBPROC+1
-ckr Central result
+*--- Central result
                            WTXTMP(IBIN,ISUB,IORD) =
      >                          MYRESN(IBIN,ISUB,IORD)
-ckr Rel. lower uncertainty
+*--- Rel. lower uncertainty
                            WTXLTMP(IBIN,ISUB,IORD) =
      >                          WTDXL2(IBIN,ISUB,IORD)
-ckr Rel. upper uncertainty
+*--- Rel. upper uncertainty
                            WTXUTMP(IBIN,ISUB,IORD) =
      >                          WTDXU2(IBIN,ISUB,IORD)
                         ENDDO
@@ -699,9 +771,9 @@ ckr Rel. upper uncertainty
                   ENDDO
                ENDDO
 
-ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
-ckr             with quadratic addition of
-ckr             all lower/upper deviations 
+*--- HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
+*---             with quadratic addition of
+*---             all lower/upper deviations 
                CALL INITPDFSET(PDFSET2(1:LEN_TRIM(PDFSET2)))
                CALL INITPDF(0)
                IPHASE  = 1
@@ -716,7 +788,7 @@ ckr             all lower/upper deviations
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
-ckr Load normalization table with potentially different binning!
+*--- Load normalization table with potentially different binning!
                   IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
      >                 XSECT0)
                   ISTEP = 1
@@ -732,7 +804,7 @@ ckr Load normalization table with potentially different binning!
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
                
-ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
+*--- HERAPDF1.0: Do loop runs from 1 - 8 for this part
                DO J=1,8
                   CALL INITPDF(J)
                   CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
@@ -757,19 +829,19 @@ ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
                IPHASE = 3
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
-ckr Add quadratically to previously backed-up result
+*--- Add quadratically to previously backed-up result
                IBIN = 0
                DO IRAP=1,NRAP
                   DO IPT=1,NPT(IRAP)
                      IBIN = IBIN+1
                      DO IORD=1,NORD+1
                         DO ISUB=1,NSUBPROC+1
-ckr Central result
-ckr Rel. lower uncertainty
+*--- Central result
+*--- Rel. lower uncertainty
                            WTXLTMP(IBIN,ISUB,IORD) =
      >                          -SQRT(WTXLTMP(IBIN,ISUB,IORD)**2.+
      >                          WTDXL2(IBIN,ISUB,IORD)**2.)
-ckr Rel. upper uncertainty
+*--- Rel. upper uncertainty
                            WTXUTMP(IBIN,ISUB,IORD) =
      >                          +SQRT(WTXUTMP(IBIN,ISUB,IORD)**2.+
      >                          WTDXU2(IBIN,ISUB,IORD)**2.)
@@ -778,9 +850,9 @@ ckr Rel. upper uncertainty
                   ENDDO
                ENDDO
 
-ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
-ckr             with quadratic addition of
-ckr             minimal/maximal lower/upper deviations 
+*--- HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
+*---             with quadratic addition of
+*---             minimal/maximal lower/upper deviations 
                CALL INITPDF(0)
                IPHASE  = 1
                IMODE   = 3
@@ -794,7 +866,7 @@ ckr             minimal/maximal lower/upper deviations
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
-ckr Load normalization table with potentially different binning!
+*--- Load normalization table with potentially different binning!
                   IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,
      >                 XSECT0)
                   ISTEP = 1
@@ -810,7 +882,7 @@ ckr Load normalization table with potentially different binning!
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
 
-ckr HERAPDF1.0: Do loop runs from 9 - 13 for this part
+*--- HERAPDF1.0: Do loop runs from 9 - 13 for this part
                DO J=9,13
                   CALL INITPDF(J)
                   CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
@@ -835,19 +907,19 @@ ckr HERAPDF1.0: Do loop runs from 9 - 13 for this part
                IPHASE = 3
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                
-ckr Add quadratically to previously backed-up result
+*--- Add quadratically to previously backed-up result
                IBIN = 0
                DO IRAP=1,NRAP
                   DO IPT=1,NPT(IRAP)
                      IBIN = IBIN+1
                      DO IORD=1,NORD+1
                         DO ISUB=1,NSUBPROC+1
-ckr Central result
-ckr Rel. lower uncertainty
+*--- Central result
+*--- Rel. lower uncertainty
                            WTXLTMP(IBIN,ISUB,IORD) =
      >                          -SQRT(WTXLTMP(IBIN,ISUB,IORD)**2.+
      >                          WTDXLM(IBIN,ISUB,IORD)**2.)
-ckr Rel. upper uncertainty
+*--- Rel. upper uncertainty
                            WTXUTMP(IBIN,ISUB,IORD) =
      >                          +SQRT(WTXUTMP(IBIN,ISUB,IORD)**2.+
      >                          WTDXUM(IBIN,ISUB,IORD)**2.)
@@ -856,20 +928,20 @@ ckr Rel. upper uncertainty
                   ENDDO
                ENDDO
 
-ckr Copy back to original arrays as for single PDF set use
+*--- Copy back to original arrays as for single PDF set use
                IBIN = 0
                DO IRAP=1,NRAP
                   DO IPT=1,NPT(IRAP)
                      IBIN = IBIN+1
                      DO IORD=1,NORD+1
                         DO ISUB=1,NSUBPROC+1
-ckr Central result
+*--- Central result
                            MYRESN(IBIN,ISUB,IORD) =
      >                          WTXTMP(IBIN,ISUB,IORD)
-ckr Rel. lower uncertainty
+*--- Rel. lower uncertainty
                            WTDXL2(IBIN,ISUB,IORD) =
      >                          WTXLTMP(IBIN,ISUB,IORD)
-ckr Rel. upper uncertainty
+*--- Rel. upper uncertainty
                            WTDXU2(IBIN,ISUB,IORD) =
      >                          WTXUTMP(IBIN,ISUB,IORD)
                         ENDDO
@@ -897,6 +969,8 @@ c - Fill histograms
             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales
       ENDIF
+*---  End of PDF uncertainties
+
 c - Make sure to use again the central PDF!
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       ISCL = 3
