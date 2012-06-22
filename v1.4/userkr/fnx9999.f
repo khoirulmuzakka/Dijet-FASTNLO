@@ -675,12 +675,12 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
 *    XPDF(nxmax,-6:6)   PDF array for all x-bins
 *
 * output:
-*    H(10)              PDF linear combinations
+*    H(7)              PDF linear combinations
 * ---------------------------------------------------------------
       Implicit None
       INCLUDE 'fnx9999.inc'
       Integer ireact, i,j,k
-      Double Precision XPDF(nxmax,-6:6), H(10),
+      Double Precision XPDF(nxmax,-6:6), H(7),
      +     G1, G2,              ! gluon densities from both hadrons
      +     SumQ1, SumQ2,        ! sum of quark densities
      +     SumQB1, SumQB2,      ! sum of anti-quark densities
