@@ -124,7 +124,7 @@ c --- Use '...' with \", otherwise gfortran complains
      >           'settings to investigate, def. = 1'
             WRITE(*,*)'  PDF set, def. = cteq66.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
-     >           '../share/lhapdf/PDFsets'
+     >           'share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
             WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
      >           '(from Pythia 6.4 using Lambda_4 from PDF)'
@@ -339,7 +339,7 @@ ckr      LNRM = .FALSE.
          CALL GETARG(NARG,CHTMP)
       ENDIF
       IF (IARGC().LT.NARG.OR.CHTMP(1:1).EQ."_") THEN
-         PDFPATH = "/../share/lhapdf/PDFsets"
+         PDFPATH = "/share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
      >        "assuming: $(LHAPDF)"//PDFPATH(1:LEN_TRIM(PDFPATH))
