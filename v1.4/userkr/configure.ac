@@ -13,8 +13,10 @@ AC_PREREQ([2.59])
 AC_INIT([fastNLO_allunc], [1.4.0], [klaus.rabbertz@cern.ch])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
-# Require minimal automake version of 1.9, switch on warnings, allow silent compilation/linking
-AM_INIT_AUTOMAKE([1.9 -Wall silent-rules])
+# Require minimal automake version of 1.9, switch on warnings
+# Don't allow silent compilation/linking for now, incompatible with SLC5
+#AM_INIT_AUTOMAKE([1.9 -Wall silent-rules])
+AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
 #LT_PREREQ([1.5])
 #LT_INIT([dlopen])
