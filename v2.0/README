@@ -109,7 +109,7 @@ With old versions of autoconf/automake as in SLC5, e.g. versions 2.59/1.9.6:
 In directory v2.0 (containing the configure.ac file) type:
 ----------------------------------------------------------
 # Provide initial versions of required auto-files (usually done via --install)
-tar -C . xvfz m4/autoinstallfiles_ac-2.65_am-1.11.1.tar.gz
+tar xvfz m4/autoinstallfiles_ac-2.65_am-1.11.1.tar.gz -C .
 # Reinitialize for present autoconf/automake versions
 aclocal --force && autoconf && autoheader && automake && libtoolize --force -c
 # Do the same in the two subprojects

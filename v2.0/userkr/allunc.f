@@ -52,6 +52,9 @@ c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
       DOUBLE PRECISION XMURS(MXSCALECOMB),XMUFS(MXSCALECOMB)
       DATA XMURS/1.0D0,0.5D0,2.0D0,0.5D0,1.0D0,1.D0,2.D0,0.0D0/
       DATA XMUFS/1.0D0,0.5D0,2.0D0,1.0D0,0.5D0,2.D0,1.D0,0.0D0/
+*---  Use argument counter to simplify logic
+      INTEGER NARG
+      DATA NARG/0/
 
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
@@ -92,7 +95,8 @@ c --- Parse command line
       LNRM = .FALSE.
       LTAB = .FALSE.
       LSCL = .FALSE.
-      IF (IARGC().LT.1) THEN
+      NARG = NARG + 1
+      IF (IARGC().LT.NARG) THEN
          SCENARIO = "fnt2003"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No scenario name given, "//
@@ -101,7 +105,7 @@ c --- Parse command line
      >        "arguments type:"
          WRITE(*,*)"      ./allunc -h"
       ELSE
-         CALL GETARG(1,SCENARIO)
+         CALL GETARG(NARG,SCENARIO)
          IF (SCENARIO(1:LEN_TRIM(SCENARIO)).EQ."-h") THEN
             WRITE(*,*)' '
             WRITE(*,*)'Usage: ./allunc [arguments]'
@@ -122,7 +126,7 @@ c --- Use '...' with \", otherwise gfortran complains
      >           'settings to investigate, def. = 1'
             WRITE(*,*)'  PDF set, def. = cteq66.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
-     >           '../share/lhapdf/PDFsets'
+     >           'share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
             WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
      >           '(from Pythia 6.4 using Lambda_4 from PDF)'
@@ -184,11 +188,12 @@ ckr      LNRM = .FALSE.
       REFNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//"ref.tab"
 
 *---Path to tables
+      NARG = NARG + 1
       TABPATH = "X"
-      IF (IARGC().GE.2) THEN
-         CALL GETARG(2,TABPATH)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,TABPATH)
       ENDIF
-      IF (IARGC().LT.2.OR.TABPATH(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.TABPATH(1:1).EQ."_") THEN
          TABPATH = "."
          WRITE(*,*)
      >        "ALLUNC: WARNING! No table path given, "//
@@ -208,11 +213,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---HBOOK filename
+      NARG = NARG + 1
       HISTFILE = "X"
-      IF (IARGC().GE.3) THEN
-         CALL GETARG(3,HISTFILE)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,HISTFILE)
       ENDIF
-      IF (IARGC().LT.3.OR.HISTFILE(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.HISTFILE(1:1).EQ."_") THEN
          HISTFILE = SCENARIO(1:LEN_TRIM(SCENARIO))//".hbk"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No output filename given, "//
@@ -223,11 +229,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Derive algorithmic uncertainty?
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.4) THEN
-         CALL GETARG(4,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.4.OR.CH4TMP(1:1).EQ."_".OR.
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_".OR.
      >     CH4TMP(1:2).EQ."no") THEN
          LALG   =  .FALSE.
          WRITE(*,*)
@@ -245,11 +252,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Last LO table to use 
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.5) THEN
-         CALL GETARG(5,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.5.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          CH4TMP = "-1"
          BORNN  =  -1
          WRITE(*,*)
@@ -261,11 +269,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Last NLO table to use 
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.6) THEN
-         CALL GETARG(6,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.6.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          CH4TMP = "-1"
          NLON   =  -1
          WRITE(*,*)
@@ -277,11 +286,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---No. of pre-defined scale settings to investigate
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.7) THEN
-         CALL GETARG(7,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.7.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          CH4TMP = "1"
          NSCLS   = 1
          WRITE(*,*)
@@ -308,11 +318,12 @@ ckr      LNRM = .FALSE.
       ENDIF
       
 *---PDF set
+      NARG = NARG + 1
       PDFSET = "X"
-      IF (IARGC().GE.8) THEN
-         CALL GETARG(8,PDFSET)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,PDFSET)
       ENDIF
-      IF (IARGC().LT.8.OR.PDFSET(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.PDFSET(1:1).EQ."_") THEN
          PDFSET = "cteq66.LHgrid"
          WRITE(*,*)
      >        "ALLUNC: WARNING! No PDF set given, "//
@@ -324,12 +335,13 @@ ckr      LNRM = .FALSE.
       PDFNAM = PDFSET(1:LEN_TRIM(PDFSET))
 
 *---Path to PDF sets
+      NARG = NARG + 1
       CHTMP = "X"
-      IF (IARGC().GE.9) THEN
-         CALL GETARG(9,CHTMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CHTMP)
       ENDIF
-      IF (IARGC().LT.9.OR.CHTMP(1:1).EQ."_") THEN
-         PDFPATH = "/../share/lhapdf/PDFsets"
+      IF (IARGC().LT.NARG.OR.CHTMP(1:1).EQ."_") THEN
+         PDFPATH = "/share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
      >        "assuming: $(LHAPDF)"//PDFPATH(1:LEN_TRIM(PDFPATH))
@@ -351,11 +363,12 @@ ckr      LNRM = .FALSE.
      >     //PDFSET(1:LEN_TRIM(PDFSET))
 
 *---alpha_s mode
+      NARG = NARG + 1
       CHTMP = "X"
-      IF (IARGC().GE.10) THEN
-         CALL GETARG(10,CHTMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CHTMP)
       ENDIF
-      IF (IARGC().LT.10.OR.CHTMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CHTMP(1:1).EQ."_") THEN
          ASMODE = "PDF"
          WRITE(*,*)
      >        "ALLUNC: No alpha_s mode given, "//
@@ -367,11 +380,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---alpha_s(M_Z)
+      NARG = NARG + 1
       CH8TMP = "X"
-      IF (IARGC().GE.11) THEN
-         CALL GETARG(11,CH8TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH8TMP)
       ENDIF
-      IF (IARGC().LT.11.OR.CH8TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH8TMP(1:1).EQ."_") THEN
          ASMZVAL = -1D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) value given, "//
@@ -382,11 +396,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---alpha_s(M_Z) +- variation
+      NARG = NARG + 1
       CH8TMP = "X"
-      IF (IARGC().GE.12) THEN
-         CALL GETARG(12,CH8TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH8TMP)
       ENDIF
-      IF (IARGC().LT.12.OR.CH8TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH8TMP(1:1).EQ."_") THEN
          DASMZVAL = 0.D0
          WRITE(*,*)
      >        "ALLUNC: No alpha_s(M_Z) variation given, "//
@@ -398,11 +413,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---alpha_s loop order in evolution
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.13) THEN
-         CALL GETARG(13,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.13.OR.CH4TMP(1:1).EQ."_") THEN
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_") THEN
          IASLOOP = -1
          WRITE(*,*)
      >        "ALLUNC: No alpha_s loop order given, "//
@@ -414,11 +430,12 @@ ckr      LNRM = .FALSE.
 
 *---Use eigen vector (CTEQ/MSTW) or toy MC (NNPDF) method for
 *---PDF uncertainties
+      NARG = NARG + 1
       CH4TMP = "X"
-      IF (IARGC().GE.14) THEN
-         CALL GETARG(14,CH4TMP)
+      IF (IARGC().GE.NARG) THEN
+         CALL GETARG(NARG,CH4TMP)
       ENDIF
-      IF (IARGC().LT.14.OR.CH4TMP(1:1).EQ."_".OR.
+      IF (IARGC().LT.NARG.OR.CH4TMP(1:1).EQ."_".OR.
      >     CH4TMP(1:1).EQ."1") THEN
          IETYPE = 1
          WRITE(*,*)
@@ -440,11 +457,12 @@ ckr      LNRM = .FALSE.
       ENDIF
 
 *---Too many arguments
-      IF (IARGC().GT.15) THEN
+      NARG = NARG + 1
+      IF (IARGC().GT.NARG) THEN
          WRITE(*,*)"\nALLUNC: ERROR! Too many arguments, aborting!"
          STOP
       ENDIF
-
+      
 *---  Initialize LHAPDF, no PDF set printout after first call
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL SETLHAPARM('SILENT')
@@ -806,7 +824,7 @@ C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
                         CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 4
-ckr                     WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB) THEN
@@ -814,7 +832,7 @@ ckr                     WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                         CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 5
-ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF

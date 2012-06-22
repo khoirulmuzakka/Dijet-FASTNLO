@@ -14,6 +14,8 @@ AC_INIT([fastNLO_allunc], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version of 1.9, switch on warnings
+# Don't allow silent compilation/linking for now, incompatible with SLC5
+#AM_INIT_AUTOMAKE([1.9 -Wall silent-rules])
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
 #LT_PREREQ([1.5])
@@ -25,6 +27,10 @@ AC_CONFIG_MACRO_DIR([m4])
 
 # Set default installation directory
 AC_PREFIX_DEFAULT(${HOME}/local)
+
+# Detect host system, required for conditional static CERNLIB linking
+AC_CANONICAL_HOST
+AM_CONDITIONAL(HAVE_64BIT, test "$host_cpu" = "x86_64")
 
 # Checks for programs.
 AC_PROG_CXX

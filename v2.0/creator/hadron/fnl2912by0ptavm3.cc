@@ -486,7 +486,7 @@ void UserHHC::DefineBinning(){
   //     (multi-) differential result.
   //     default: divide by bin width in dim 1 and dim 2
   //              ATTENTION: Don't forget to include a factor of 2 for abs. rapidity |y| !
-  // fnl2912b: divide by bin width in M3j and 2. * |y3j|_max
+  // fnl2912: divide by bin width in M3j and |y3j|_max
   // ---- pass arrays to FnloTable and init bingrid ---- //
   const double bwfactor = 2.;
   A2->InitBinningKR( ndim2bins , dim2bins , ndim1bins , dim1bins, bwfactor );

@@ -13,9 +13,9 @@ ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS = gnu
 
 # The main target: My Fortran table reader
-if HAVE_LHAPDFCONFIG
+if HAVE_LHAPDF
 if HAVE_CERNLIB
-   bin_PROGRAMS = allunc
+bin_PROGRAMS = allunc
 endif
 endif
 
@@ -32,15 +32,23 @@ AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
 # Libraries to be linked to the main target
-# Require lhapdf and cernlib, use lhapdf-config if possible
+# Require lhapdf and cernlib, use lhapdf-config and cernlib command if possible
 if HAVE_LHAPDFCONFIG 
-   allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+allunc_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   allunc_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
+allunc_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
-# To avoid 32-64-bit compatibility problems static CERN libs should be used if available
-# Use "--as-needed" option for this instead of "--static"
+# To avoid 32-64-bit compatibility problems 64-bit systems require static linking of at least kernlib
+# (Tried to use "--as-needed" option instead of "--static" but didn't work as intended.) 
+if HAVE_64BIT
+allunc_LDFLAGS += $(CERNLIBLIBPATH)/libmathlib.a $(CERNLIBLIBPATH)/libpacklib.a $(CERNLIBLIBPATH)/libkernlib.a
+else
+if HAVE_CERNLIBCONFIG 
+allunc_LDFLAGS += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} mathlib packlib kernlib`
+else
 allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,--as-needed -lmathlib -lpacklib -lkernlib
+endif
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
