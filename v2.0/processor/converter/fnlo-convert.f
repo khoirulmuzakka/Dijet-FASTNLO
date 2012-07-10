@@ -480,7 +480,7 @@
       CHTMP = NAMELABEL(2)
       Write(2,'(A)') CHTMP(1:LEN_TRIM(CHTMP)) ! ScDescript(5)
 *---
-      Write(2,*) ECMS           ! Ecms
+      Write(2,'(G24.17)') ECMS  ! Ecms
       Write(2,'(I2)') NPOW(1)   ! ILOord
       Write(2,'(I5)') NBINTOT   ! NObsBin
       Write(2,'(I2)') Ndim      ! NDim    (so far = 2 - change where needed)
@@ -498,11 +498,11 @@
             i = i+1             ! --- bin counter - linear loop over all bins
             Do j=Ndim,1,-1
                If (j.eq.1) then
-                  Write(2,*) RAPBIN(i1)
-                  Write(2,*) RAPBIN(i1+1)
+                  Write(2,'(G24.17)') RAPBIN(i1)
+                  Write(2,'(G24.17)') RAPBIN(i1+1)
                elseif (j.eq.2) then
-                  Write(2,*) PTBIN(i1,i2)
-                  Write(2,*) PTBIN(i1,i2+1)
+                  Write(2,'(G24.17)') PTBIN(i1,i2)
+                  Write(2,'(G24.17)') PTBIN(i1,i2+1)
                endif
             Enddo
          Enddo
@@ -514,7 +514,7 @@
          Do i2=1,NPT(i1)
             binsize = (PTBIN(i1,i2+1)-PTBIN(i1,i2)) *
      >           (RAPBIN(i1+1)-RAPBIN(i1)) * DBWID
-            Write(2,*)binsize
+            Write(2,'(G24.17)')binsize
          Enddo
       Enddo
       Write(2,'(I2)') INormFlag ! INormFlag
@@ -665,13 +665,13 @@
             Enddo
          Enddo
 
-         Write(2,*) NScales     ! NScales
-         Write(2,*) NScaleDim   ! NScaleDim
+         Write(2,'(I2)') NScales     ! NScales
+         Write(2,'(I2)') NScaleDim   ! NScaleDim
          Do i=1,Nscales
-            Write(2,*) 0        ! Iscale(i) <- all scales = 1st Dimension
+            Write(2,'(I2)') 0        ! Iscale(i) <- all scales = 1st Dimension
          Enddo
          Do i=1,Nscaledim
-            Write(2,*) 1        ! NScaleDescript(i) <- one descriptive string
+            Write(2,'(I2)') 1        ! NScaleDescript(i) <- one descriptive string
             Write(2,'(A)') SCALELABEL(1:LEN_TRIM(SCALELABEL))          
          Enddo
          
@@ -682,15 +682,15 @@
          endif
          
          Do i=1,NscaleDim
-            Write(2,*) nscvar   ! NscaleVar
-            Write(2,*) NscaleBin ! NscaleBin
+            Write(2,'(I2)') nscvar   ! NscaleVar
+            Write(2,'(I2)') NscaleBin ! NscaleBin
          Enddo
          Do i=1,Nscaledim
             if (nscvar.eq.1) then
-               Write(2,*) 1d0   ! Scalefac(i)(j)
+               Write(2,'(G24.17)') 1d0   ! Scalefac(i)(j)
             else
                Do j=1,nscvar
-                  Write(2,*) MURSCALE(j) ! Scalefac(i)(j)               
+                  Write(2,'(G24.17)') MURSCALE(j) ! Scalefac(i)(j)               
                Enddo
             endif
          Enddo
@@ -703,9 +703,9 @@
                   Do k=1,nscvar
                      Do l=1,NscaleBin
                         If (n.eq.1) Then
-                           Write(2,*)MURVAL(i1,i2,l) !ScaleNode(ijkl)
+                           Write(2,'(G24.17)')MURVAL(i1,i2,l) !ScaleNode(ijkl)
                         Else
-                           Write(2,*)MURVAL(i1,i2,l) !ScaleNode(ijkl)
+                           Write(2,'(G24.17)')MURVAL(i1,i2,l) !ScaleNode(ijkl)
      >                          *MURSCALE(k)
                         Endif
                      Enddo
@@ -750,7 +750,8 @@
 
 
 *---  Diagonalize Bernstein scale interpolation in v1.4
-         If (ITabversion.eq.14000 .and. NScaleBin.gt.2) Then
+*---  Also convert the simpler linear interpolation with 2 scale bins 
+         If (ITabversion.eq.14000 .and. NScaleBin.ge.2) Then
             i = 0
             Do i1=1,Nrapidity
                Do i2=1,NPT(i1)
@@ -767,7 +768,9 @@
                                  nscaddr = 1+k+(n-2)*nscalevar
                               Endif
                               
-                              If (NScaleBin.eq.3) Then ! 3 Bernstein Scalebins
+                              If (NScaleBin.eq.2) Then ! 2 Scalebins as in Dijet Mass
+ckr Something to do here? Converted dijet mass tables of this type exhibit discrepancies!!!
+                              ElseIf (NScaleBin.eq.3) Then ! 3 Bernstein Scalebins
                                  t1 = 1./2.
                                  Bnfactor =  1./(2.*(1.-t1)*t1)
                                  Bnst(1) = array(i,m,n1,nscaddr,1)
