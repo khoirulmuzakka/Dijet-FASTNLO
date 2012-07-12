@@ -1,5 +1,5 @@
 //
-// fastNLO v2 author code for fnl2332c:
+// fastNLO v2 author code for fnl2332d:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
@@ -290,7 +290,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set scenario name (no white space)
-  A1->SetScenName("fnl2332c");
+  A1->SetScenName("fnl2332d");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
