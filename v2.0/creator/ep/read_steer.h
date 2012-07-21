@@ -8,11 +8,22 @@
 //     read_steer.h
 //     Tiny reading tool to read steering values from one or more steering files.
 //
-//     This class reads in values, which are stored in a file. New varibles
-//     can be included without changes of the steering class.
+//     This class reads in values, which are stored in a file. New variables
+//     can be included without changes of the steering class. Following types
+//     are supported:
+//      - Single values
+//        bool, int, double, string (with empty spaces)
+//      - Arrays
+//        int, double, string (with empty spaces)
+//      - Tables/matrices
+//        int, double, string (no empty spaces)
 //
+//
+//     Initalize the steering
+//     ------------------------------
 //     Set the filename and initilize the read_steer class by using:
 //        read_steer::initsteering(string filename)
+//
 //
 //     Single values
 //     ------------------------------
