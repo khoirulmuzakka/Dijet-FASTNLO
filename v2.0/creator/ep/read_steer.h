@@ -32,11 +32,12 @@
 //     To speed up the code and to avoid repeated string comparisions, 
 //     use static variables, e.g if you want to access the value in 
 //     your steering file with the label 'pi' or 'name', use:
-//        static double pi = read_steer::getdouble("pi");
+//        static double pi   = read_steer::getdouble("pi");
 //     or 
 //        static string name = read_steer::getstring("name");
 //        static int    age  = read_steer::getint("age");
 //        static bool   sex  = read_steer::getbool("female");
+//
 //     Labels are case sensitive!
 //
 //
@@ -173,6 +174,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <map>
