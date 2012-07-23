@@ -326,8 +326,6 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     }
     $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
-#    $install{fastjet}[0]    = "fastjet-2.4.4";
-#    $install{fastjet}[1]    = "fastjet-2.4.4";
     $install{fastjet}[0]    = "fastjet-3.0.3";
     $install{fastjet}[1]    = "fastjet-3.0.3";
     $install{lhapdf}[0]     = "lhapdf-5.8.8";
