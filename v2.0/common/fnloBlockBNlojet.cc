@@ -607,6 +607,11 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //nlo::weight_hhc weights[7]; nicer, but I do net get the syntax correct
    if(itype == nlo::amplitude_hhc::fini) { 
      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
+       for ( int p = 0; p<7 ; p++ ){
+	 if (isnan(amp._M_fini.amp[kk][p])) {
+	   cout << "ATTENTION! isnan for p = " << p << " and kk = " << kk << " in mode " << amp._M_fini.mode << endl;
+	 }
+       }
 	weights[kk][0] = amp._M_fini.amp[kk][0]*coef*cPDF[0];//wtorg[0];
 	weights[kk][1] = amp._M_fini.amp[kk][3]*coef*cPDF[3];
 	weights[kk][2] = amp._M_fini.amp[kk][4]*coef*cPDF[4];
@@ -1586,6 +1591,13 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	 wt[5] = wtorg[1];
 	 wt[6] = wtorg[2];
 	 // -- case NSubproc=6: see below
+
+	 for ( int p = 0; p<7 ; p++ ){
+	   double w = wt[p];
+	   if (isnan(w)) {
+	     cout << "ATTENTION! isnan for p = " << p << " in mode " << amp._M_fini.mode << endl;
+	   }
+	 }
 
          wt *= 389385730.;
          if(IXsectUnits!=12){

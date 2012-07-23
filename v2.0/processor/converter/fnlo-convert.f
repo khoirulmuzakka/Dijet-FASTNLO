@@ -660,7 +660,7 @@
                      XNode = 10**(hx) 
                   endif
                   xarray(i,j) = XNode ! --- use later for PDF unweighting
-                  Write(2,'(F20.18)') XNode
+                  Write(2,'(G24.17)') XNode
                Enddo
             Enddo
          Enddo
