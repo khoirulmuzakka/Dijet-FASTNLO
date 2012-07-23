@@ -438,7 +438,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    const EInterpolKernel eIkernmu = kCatmulRom;    // kLagrangian ?!?!
    
    if(this->IRef>0){
-     printf("fnloBlockBNlojet::FillEventHHCMuVar should not be called for refernce tables (Ref>0)\n");
+     printf("fnloBlockBNlojet::FillEventHHCMuVar should not be called for reference tables (Ref>0)\n");
      return;
    }
 
@@ -607,24 +607,25 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    //nlo::weight_hhc weights[7]; nicer, but I do net get the syntax correct
    if(itype == nlo::amplitude_hhc::fini) { 
      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
-       for ( int p = 0; p<7 ; p++ ){
-	 if (isnan(amp._M_fini.amp[kk][p])) {
-	   cout << "ATTENTION! isnan for p = " << p << " and kk = " << kk << " in mode " << amp._M_fini.mode << endl;
+       for ( int iwgt = 0; iwgt<7 ; iwgt++ ){
+	 // Add check on NaN for weights and print warning
+	 if (isnan(amp._M_fini.amp[kk][iwgt])) {
+	   cout << "fastNLO: WARNING! NaN for weight iwgt no. " << iwgt << " in contribution kk no. " << kk << " in mode " << amp._M_fini.mode << endl;
 	 }
        }
-	weights[kk][0] = amp._M_fini.amp[kk][0]*coef*cPDF[0];//wtorg[0];
-	weights[kk][1] = amp._M_fini.amp[kk][3]*coef*cPDF[3];
-	weights[kk][2] = amp._M_fini.amp[kk][4]*coef*cPDF[4];
-	weights[kk][3] = amp._M_fini.amp[kk][5]*coef*cPDF[5];
-	weights[kk][4] = amp._M_fini.amp[kk][6]*coef*cPDF[6];
-	weights[kk][5] = amp._M_fini.amp[kk][1]*coef*cPDF[1];
-	weights[kk][6] = amp._M_fini.amp[kk][2]*coef*cPDF[2];
-	//        for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // nsubproc
-	// 	 weights[kk][nproc] = amp._M_fini.amp[kk][nproc]*coef*cPDF[nproc];//wtorg[0];
-	//        }
+       weights[kk][0] = amp._M_fini.amp[kk][0]*coef*cPDF[0];//wtorg[0];
+       weights[kk][1] = amp._M_fini.amp[kk][3]*coef*cPDF[3];
+       weights[kk][2] = amp._M_fini.amp[kk][4]*coef*cPDF[4];
+       weights[kk][3] = amp._M_fini.amp[kk][5]*coef*cPDF[5];
+       weights[kk][4] = amp._M_fini.amp[kk][6]*coef*cPDF[6];
+       weights[kk][5] = amp._M_fini.amp[kk][1]*coef*cPDF[1];
+       weights[kk][6] = amp._M_fini.amp[kk][2]*coef*cPDF[2];
+       //        for ( int nproc = 0 ; nproc<7 ; nproc ++ ){ // nsubproc
+       // 	 weights[kk][nproc] = amp._M_fini.amp[kk][nproc]*coef*cPDF[nproc];//wtorg[0];
+       //        }
      }     
    }
-
+   
    // neu
    if(x2>x1){
      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
@@ -1591,30 +1592,31 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 	 wt[5] = wtorg[1];
 	 wt[6] = wtorg[2];
 	 // -- case NSubproc=6: see below
-
-	 for ( int p = 0; p<7 ; p++ ){
-	   double w = wt[p];
-	   if (isnan(w)) {
-	     cout << "ATTENTION! isnan for p = " << p << " in mode " << amp._M_fini.mode << endl;
+	 
+	 for ( int iwgt = 0; iwgt<7 ; iwgt++ ){
+	   double wgt = wt[iwgt];
+	   // Add check on NaN for weights and print warning
+	   if (isnan(wgt)) {
+	     cout << "fastNLO: WARNING! NaN for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << endl;
 	   }
 	 }
-
+	 
          wt *= 389385730.;
          if(IXsectUnits!=12){
-            wt *= pow(10.,(IXsectUnits-12)) ;
+	   wt *= pow(10.,(IXsectUnits-12)) ;
          }
-
+	 
          // deal with subprocesses 2 and 3 -> moved to 6 and 7
          //    - if x1>x2 -> o.k.
          //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
          if(x2>x1){
-            double buffer;
-            //buffer = wt[1];
-            //wt[1] = wt[2];
-            //wt[2] = buffer;
-            buffer = wt[5];
-            wt[5] = wt[6];
-            wt[6] = buffer;
+	   double buffer;
+	   //buffer = wt[1];
+	   //wt[1] = wt[2];
+	   //wt[2] = buffer;
+	   buffer = wt[5];
+	   wt[5] = wt[6];
+	   wt[6] = buffer;
          }
 	 // --- combine subprocesses 5,6 here after possible swapping
 	 if (NSubproc == 6) {   
