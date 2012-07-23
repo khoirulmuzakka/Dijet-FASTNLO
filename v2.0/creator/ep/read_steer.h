@@ -52,9 +52,9 @@
 //     are recognized. Complete lines can beginn with '!' to mark comments.
 //     If string values should contain empty spaces, enclose them in double quotes
 //     like:
-//         Name		"Peter Higgs"
+//         Name			"Peter Higgs"
 //     Boolean values can be assigned by 0, 1, true or false, e.g.
-//         WithHiggs	true
+//         WithHiggs		true
 //
 //
 //     Arrays
@@ -136,8 +136,22 @@
 //     To access values, pass the fileID to the getter methods, e.g.:
 //          static double pi   = read_steer::getdouble("pi","constants");
 //          static string name = read_steer::getstring("name","file1");
-//	    static vector<vector<string> > confDISnames = read_steer::getstringcolumn("Participants","Surname","file1")
+//	    static vector<vector<string> > ConfIchepNames = read_steer::getstringcolumn("Participants","Surname","file1")
 //     You can access the values at any place within your code.
+//
+//
+//     Script-like Variables
+//     ------------------------------
+//     It is often neessary to read in identical substrings, e.g. if
+//     many different files are located in the same folder. To simplify the
+//     structure of the steering file, 'script-like' variables can be used.
+//
+//     It is possible to access previously defined variables foo by ${foo}.
+//     An example steering file can look like:
+//	     !Home directories of famous physicists
+//           HomeDir			/afs/cern.ch/user
+//           UserEinstein		${HomeDir}/e/einstein
+//           UserNewton			"${HomeDir}/i/isaac"
 //
 //
 //     Printing
@@ -261,8 +275,9 @@ public:
 private:
    int read_stdin(string filename);
    void ParseString(string value);
-   bool ParseFindString(const char* str, const string tag);
-   string ParseEnclosedString(const char* pch);
+   const bool ParseFindString(const char* str, const string tag);
+   const string ParseEnclosedString(const string);
+   const int ReplaceVariables(string& value);
    const bool CheckNumber(const char* str);
    const bool CheckInt(const char* str);
 
@@ -283,6 +298,8 @@ private:
    static const string str_arrend;
    static const string str_tabbeg;
    static const string str_tabend;
+
+   static const string oW, oI, oE;
 };
 
 
@@ -294,13 +311,16 @@ const string read_steer::str_arrbeg="{";
 const string read_steer::str_arrend="}";
 const string read_steer::str_tabbeg="{{";
 const string read_steer::str_tabend="}}";
+const string read_steer::oW=" # read_steer. Warning. ";
+const string read_steer::oI=" # read_steer. Info. ";
+const string read_steer::oE=" # read_steer. ERROR. ";
 
 read_steer* read_steer::Steering(string fileID)
 {
    // get singleton class
    if ( !instances[fileID] ){
       if ( fileID.compare(stdID) ) 
-	 cout << " # read_steer. Info. Creating new read_steer instance with fileID = '"<<fileID<<"'."<<endl;
+	 cout<<oI<<"Creating new read_steer instance with fileID = '"<<fileID<<"'."<<endl;
       instances[fileID] = new read_steer();
    }
    return instances[fileID];
@@ -309,9 +329,9 @@ read_steer* read_steer::Steering(string fileID)
 
 void read_steer::inits(string filename){
    if ( ffilename != "" )
-      cout << " # read_steer: WARNING. Filename already set (old="<<ffilename<<", new="<<filename<<"). Is the used fileID unique?"<<endl;
+      cout<<oW<<"Filename already set (old="<<ffilename<<", new="<<filename<<"). Is the used fileID unique?"<<endl;
    if ( filename == "" )
-      cout << " # read_steer: WARNING. No filename specified."<<endl;
+      cout<<oW<<"No filename specified."<<endl;
    ffilename = filename;
    read_stdin(ffilename);
 }
@@ -327,7 +347,7 @@ void read_steer::destroy()
 
 const void read_steer::printall()
 {
-   const string linesep = " +--------------------------------------------------------------------+\n";
+   const string linesep = " +----------------------------------------------------------------------------+\n";
    const string l = " | ";
    cout<<linesep;
    cout<<l<<"    read_steer. Printing all steering information.                 |"<<endl;
@@ -345,7 +365,7 @@ const void read_steer::printall()
 
 const void read_steer::print(string fileID)
 {
-   const string linesep = " +--------------------------------------------------------------------+\n";
+   const string linesep = " +----------------------------------------------------------------------------+\n";
    const string l = " | ";
    cout<<linesep;
    cout<<l<<"    read_steer. Printing steering information of fileID = '"<<fileID<<"'"<<endl;
@@ -358,21 +378,22 @@ const void read_steer::prt()
 {
    const string l = " | ";
    // filename
-   cout<<l<<"Filename\t\t"<<ffilename<<endl;
+   printf("%s%-30s\t%s\n",l.c_str(),"Filename",ffilename.c_str());
    cout<<l<<endl;;
    //single values
    cout<<l<<"Single values"<<endl;
    for( map<string,string>::iterator ii=fstrings.begin(); ii!=fstrings.end(); ++ii)
-      if ( (*ii).first!="") cout<<l<<"  "<<(*ii).first<<"\t\t"<<(*ii).second<<endl;
+      if ( (*ii).first!="") 
+	 printf("%s   %-27s\t%s\n",l.c_str(),(*ii).first.c_str(),(*ii).second.c_str());
    // arrays
    if ( !ffields.empty() ) {
       cout<<l<<endl;
       cout<<l<<"Arrays"<<endl;
       for( map<string,vector<string> >::iterator ii=ffields.begin(); ii!=ffields.end(); ++ii){
-	 cout<<l<<"  "<<(*ii).first<< " {"<<endl;
+	 cout<<l<<"   "<<(*ii).first<< " {"<<endl;
 	 for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ )
-	    cout <<l<<"    ["<<j<<"]\t"<<(*ii).second[j]<<endl;
-	 cout <<l<<"  }"<<endl;
+	    cout <<l<<"     ["<<j<<"]\t"<<(*ii).second[j]<<endl;
+	 cout <<l<<"   }"<<endl;
       }
    }
    // tables
@@ -380,19 +401,19 @@ const void read_steer::prt()
       cout<<l<<endl;
       cout<<l<<"Tables/Matrices"<<endl;
       for( map<string,vector<string> >::iterator ii=ftableheaders.begin(); ii!=ftableheaders.end(); ++ii){
-	 cout<<l<<"  "<<(*ii).first<< " {{"<<endl;
-	 cout<<l<<"  ";
+	 cout<<l<<"   "<<(*ii).first<< " {{"<<endl;
+	 cout<<l<<"     [H]\t";
 	 for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ )
-	    printf("%10s",(*ii).second[j].c_str());
+	    printf("%-10s",(*ii).second[j].c_str());
 	 cout<< endl;
 	 vector<vector<string> > tab = ftables[(*ii).first];
 	 for ( unsigned int ll = 0 ; ll<tab.size() ; ll++ ){
-	    cout<<l<<"  ";
+	    cout<<l<<"     ["<<ll<<"]\t";
 	    for ( unsigned int j = 0 ; j<tab[ll].size() ; j++ )
-	       printf("%10s",tab[ll][j].c_str());
+	       printf("%-10s",tab[ll][j].c_str());
 	    cout<<endl;
 	 }
-	 cout <<l<<"  }}"<<endl;
+	 cout <<l<<"   }}"<<endl;
       }
    }
 }
@@ -404,7 +425,7 @@ int read_steer::read_stdin(string filename)
    ifstream file;
    file.open(filename.c_str());
    if (!file){
-      cout << " # read_steer.h: Error in openening file ('"<<filename<<"')." << endl;
+      cerr<<oE<<" Could not open file ('"<<filename<<"')."<<endl;
       return EXIT_FAILURE;
    }
    string lineread;
@@ -427,7 +448,7 @@ const vector<int> read_steer::getif(string label){
       string val = sf[i];
       bool isnan = CheckInt(val.c_str());
       if ( !isnan ) 
-	 cout<<" # read_steer. Warning. Value number "<< i<<" of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
+	 cout<<oW<<"Value number "<< i<<" of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
       ret.push_back( atoi(val.c_str()));
    }
    return ret;
@@ -440,7 +461,7 @@ const vector<double> read_steer::getdf(string label){
       string val = sf[i];
       bool isnan = CheckNumber(val.c_str());
       if ( !isnan ) 
-	 cout<<" # read_steer. Warning. Value number "<< i<<" of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
+	 cout<<oW<<"Value number "<< i<<" of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
       ret.push_back( atof(val.c_str()));
    }
    return ret;
@@ -449,7 +470,7 @@ const vector<double> read_steer::getdf(string label){
 const vector<string> read_steer::getsf(string label){
    vector<string> ret = ffields[label];
    if (ret.empty())
-      cout << " # read_steer. Warning. Label '"<<  label <<"' was not found in list or has no values."<< endl;
+      cout << oW<<"Label '"<<  label <<"' was not found in list or has no values."<< endl;
    return ret;
 }
 
@@ -466,7 +487,7 @@ const vector<string> read_steer::getstcol(string label,string col){
 	 return ret;
       }
    }
-   cout << " # read_steer. Warning. Column '"<<col<<"' was not found in table '"<<label<<"'."<<endl;
+   cout << oW<<"Column '"<<col<<"' was not found in table '"<<label<<"'."<<endl;
    return ret;
 }
 
@@ -477,7 +498,7 @@ const vector<int> read_steer::getitcol(string label,string col){
    for(vector<string>::size_type i = 0; i != scol.size(); i++) {
       string val = scol[i];
       if ( !CheckInt(val.c_str()) ) 
-	 cout<<" # read_steer. Warning. Value number "<<i<<" of table='"<<label
+	 cout<<oW<<"Value number "<<i<<" of table='"<<label
 	     <<"' in column '"<<col<<"' does not seem to be an integer number. value="<<val<<endl;
       ret.push_back(atoi(val.c_str()));
    }
@@ -491,7 +512,7 @@ const vector<double> read_steer::getdtcol(string label,string col){
    for(vector<string>::size_type i = 0; i != scol.size(); i++) {
       string val = scol[i];
       if ( !CheckNumber(val.c_str()) ) 
-	 cout<<" # read_steer. Warning. Value number "<<i<<" of table='"<<label
+	 cout<<oW<<"Value number "<<i<<" of table='"<<label
 	     <<"' in column '"<<col<<"' does not seem to be a numeric number. value="<<val<<endl;
       ret.push_back(atof(val.c_str()));
    }
@@ -502,7 +523,7 @@ const vector<string> read_steer::getsthead(string label){
    // get table header
    vector<string> ret = ftableheaders[label];
    if (ret.empty())
-      cout << " # read_steer. Warning. Label '"<<  label <<"' was not found in list or has no values."<< endl;
+      cout << oW<<"Label '"<<  label <<"' was not found in list or has no values."<< endl;
    return ret;
 }
 
@@ -510,7 +531,7 @@ const vector<vector<string> > read_steer::getst(string label){
    // get table values as strings
    vector<vector<string> > ret = ftables[label];
    if (ret.empty())
-      cout << " # read_steer. Warning. Label '"<<  label <<"' was not found in list or has no values."<< endl;
+      cout << oW<<"Label '"<<  label <<"' was not found in list or has no values."<< endl;
    return ret;
 }
 
@@ -523,7 +544,7 @@ const vector<vector<double> > read_steer::getdt(string label){
       for ( unsigned int j = 0 ; j<sf[i].size() ; j++ ){
 	 string val = sf[i][j];
 	 if ( !CheckNumber(val.c_str()) ) 
-	    cout<<" # read_steer. Warning. Value number ("<<i<<","<<j<<") of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
+	    cout<<oW<<"Value number ("<<i<<","<<j<<") of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
 	 ret[i].push_back( atof(val.c_str()));
       }
    }
@@ -540,7 +561,7 @@ const vector<vector<int> > read_steer::getit(string label){
       for ( unsigned int j = 0 ; j<sf[i].size() ; j++ ){
 	 string val = sf[i][j];
 	 if ( !CheckInt(val.c_str()) )
-	    cout<<" # read_steer. Warning. Value number ("<<i<<","<<j<<") of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
+	    cout<<oW<<"Value number ("<<i<<","<<j<<") of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
 	 ret[i].push_back( atof(val.c_str()));
       }
    }
@@ -551,14 +572,14 @@ const vector<vector<int> > read_steer::getit(string label){
 const string read_steer::gets(string label){
    string ret = fstrings[label];
    if (ret=="")
-      cout << " # read_steer. Warning. Label '"<<  label <<"' was not found in list or has an empty value."<< endl;
+      cout << oW<<"Label '"<<  label <<"' was not found in list or has an empty value."<< endl;
    return ret;
 }
 
 const double read_steer::getd(string label){
    string val = gets(label);
    if ( !CheckNumber(val.c_str()) ) 
-      cout<<" # read_steer. Warning. Value of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
+      cout<<oW<<"Value of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
    return atof(val.c_str());
 }
 
@@ -566,7 +587,7 @@ const int read_steer::geti(string label){
    string val = gets(label);
    bool isnan = CheckInt(val.c_str());
    if ( !isnan )
-      cout<<" # read_steer. Warning. Value of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
+      cout<<oW<<"Value of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
    return atoi(val.c_str());
 }
 
@@ -574,7 +595,7 @@ const bool read_steer::getb(string label){
    string sval = gets(label);
    int val = atoi(sval.c_str());
    if ( sval!="0" && sval!="1" && sval!="true" && sval!="false")
-      cout<<" # read_steer. Warning. Expecting value '0','1','true' or 'false' for boolean values. label='"<<label<<"', value='"<<sval<<"'."<<endl;
+      cout<<oW<<"Expecting value '0','1','true' or 'false' for boolean values. label='"<<label<<"', value='"<<sval<<"'."<<endl;
    if ( sval=="true" ) return true;
    else if ( sval=="false") return false;
    else return val;
@@ -607,27 +628,26 @@ void read_steer::ParseString(string line)
    string value;
 
    // keep the string for error messages
-   char orgline[20000];
-   strcpy(orgline,line.c_str());
+   const string orgl=line;
 
    // parsing statements enclosed in '"' 
    value = ParseEnclosedString(line.c_str());
 
-   // count tags
+   // count
    int i=0;
 
    // parsing line
    char* str = (char*)line.c_str();
-   char* pch;
-   pch = strtok (str,str_sep.c_str());
-   while (pch != NULL)
+   for(char* pch=strtok (str,str_sep.c_str());
+       pch!=NULL;
+       pch=strtok(NULL,str_sep.c_str()),i++)
       {
 	 if ( fParseTableMode>0 ) {
 	    if ( ParseFindString(pch,str_tabend) ) { // store table
 	       fParseTableMode = 0;
 	       if ( !ftablevalues.empty() && !ffieldvalues.empty() && ffieldvalues.size() != ftablevalues[0].size() )
-		  cout << " # read_steer. Warning. Table ('"<<ffieldlabel<<"'): header has different number of columns (n="
-		       <<ffieldvalues.size()<<") than table (n="<<ftablevalues[0].size()<<")."<< endl;
+		  cout<< oW<<"Table ('"<<ffieldlabel<<"'): header has a different number of columns (n="
+		      <<ffieldvalues.size()<<") than table (n="<<ftablevalues[0].size()<<")."<<endl;
 	       ftableheaders[ffieldlabel] = ffieldvalues;
 	       ftables[ffieldlabel]	= ftablevalues;
 	       ffieldvalues.clear();
@@ -637,12 +657,18 @@ void read_steer::ParseString(string line)
 	    } else {
 	       if ( fParseTableMode==2 ){ // column names
 		  if ( ParseFindString(pch,str_cmt) ) break;
-		  ffieldvalues.push_back(pch);
+		  //ffieldvalues.push_back(pch);
+		  string val = pch;
+		  ReplaceVariables(val);
+		  ffieldvalues.push_back(val);
 	       }
 	       else { // table values
 		  if ( (int)ftablevalues.size() < fParseTableMode-2 )
 		     ftablevalues.push_back(vector<string>());
-		  ftablevalues[fParseTableMode-3].push_back(pch);
+		  //ftablevalues[fParseTableMode-3].push_back(pch);
+		  string val = pch;
+		  ReplaceVariables(val);
+		  ftablevalues[fParseTableMode-3].push_back(val);
 	       }
 	    }
 	 }
@@ -656,9 +682,15 @@ void read_steer::ParseString(string line)
 	    }
 	    if ( value=="" ){ // read single values
 	       if ( ParseFindString(pch,str_cmt) ) break;
-	       ffieldvalues.push_back(pch);
+	       //ffieldvalues.push_back(pch);
+	       string val = pch;
+	       ReplaceVariables(val);
+	       ffieldvalues.push_back(val);
 	    } else { // read enclosed value
-	       ffieldvalues.push_back(value);
+	       //ffieldvalues.push_back(value);
+	       string val = value;
+	       ReplaceVariables(val);
+	       ffieldvalues.push_back(val);
 	       break;
 	    }
 	 } 
@@ -667,7 +699,7 @@ void read_steer::ParseString(string line)
 	    if ( ParseFindString(pch,str_tabbeg) ){
 	       fParseTableMode = 1;
 	       if ( label=="" ) 
-		  cout << " # read_steer. Warning. Table found, starting with ' "<<str_tabbeg<<"' but no label was found."<< endl;
+		  cout << oW<<"Table found, starting with ' "<<str_tabbeg<<"' but no label was found."<< endl;
 	       ffieldlabel = label;
 	       break;
 	    }
@@ -675,13 +707,13 @@ void read_steer::ParseString(string line)
 	    if (ParseFindString(pch,str_arrbeg) ){
 	       fParseFieldMode = true;
 	       if ( label=="" ) 
-		  cout << " # read_steer. Warning. Array found, starting with ' "<<str_arrbeg<<"' but no label was found."<< endl;
+		  cout << oW<<"Array found, starting with ' "<<str_arrbeg<<"' but no label was found."<< endl;
 	       ffieldlabel = label;
 	       break;
 	    }
 	    // look for comments
 	    if ( ParseFindString(pch,str_cmt) ) {
-	       if ( i==1 ) { cout<< " # read_steer. Warning. Found comment after label ('"<<label<<"'), but before a value."<<endl;}
+	       if ( i==1 ) { cout<< oW<<"Found comment after label ('"<<label<<"'), but before a value."<<endl;}
 	       break;
 	    }
 
@@ -695,65 +727,72 @@ void read_steer::ParseString(string line)
 	    }
 	    else {
 	       cout << " # read_steer. Error parsing string: " << endl;
-	       cout << "'" << orgline << "'"<<endl;
+	       cout << "'" << orgl << "'"<<endl;
 	       cout << " #   Expect two values separated by 'empty spaces' or 'tabstop'."<< endl;
 	       cout << " #   Add comments starting with '!' character."<<endl;
 	    }
 	 }
-	 i++;
-	 pch = strtok (NULL,str_sep.c_str());
       }
 
    if ( fParseTableMode>2 ) { // check number of columns in table
       if ( ftablevalues.size() > 1 ) 
 	 if ( ftablevalues.back().size() != ftablevalues[0].size() )
-	    cout << " # read_steer. Warning. Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()+1
-		 <<" has different number of columns (n="<< ftablevalues.back().size()
+	    cout <<oW<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()+1
+		 <<" has a different number of columns (n="<< ftablevalues.back().size()
 		 <<") than first row (n="<<ftablevalues[0].size()<<")."<<endl;
    }
    if ( fParseTableMode>0 ) fParseTableMode++;
    if ( !fParseFieldMode && fParseTableMode==0) {
-      if ( fstrings[label] == "" )
+      if ( fstrings[label] == "" ) {
+	 ReplaceVariables(value);
 	 fstrings[label] = value;
-      else 
-	 cout << " # read_steer. Warning. Label '"<<  label <<"' already found. Ignoring value ('"<<value<<"'.)"<< endl;
+      }  else 
+	 cout << oW<<"Label '"<<  label <<"' already found. Ignoring value ('"<<value<<"'.)"<< endl;
    }
 }
 
-
-string read_steer::ParseEnclosedString(const char* str){
-   string value;
-   char strenc[20000];
-   strcpy(strenc,str);
-   char * pch;
-   //printf ("Looking for the \" character in '%s '...\n",strenc);
-   pch=strchr(strenc,'"');
-   vector < int > occ;
-   while (pch!=NULL)
-      {
-	 occ.push_back(pch-strenc+1);
-	 pch=strchr(pch+1,'"');
+const int read_steer::ReplaceVariables(string& str){
+   // replace all occurences of ${<sth>} by 
+   // the stringvalue of the label <sth> 
+   // return the number of replaced variables
+   int ret=0;
+   size_t found = str.find(string("${"));
+   while ( found!=string::npos ) {
+      size_t end = str.find(string("}"));
+      if ( end==string::npos ) {
+	 cout << oW<<"Start of a variable found with '${', but termination with '}' is missing."<<endl;
+	 break;
       }
-   if ( occ.size() == 2 ) {
-      const int nchar = occ[1]-occ[0];
-      char t[nchar];
-      strncpy(t,str+occ[0],nchar-1); // first character to t.
-      t[nchar-1]='\0';
-      value = t;
-   } else if (occ.empty() ){
-      // nothing todo
-   } else {
-      // warning
-      cout << " # read_steer. Warning. Only lines with exactly two \" symbols are allowed." << endl;
-      cout << "'" << str << "'"<<endl;
+      string var = string(str,found+2,end-found-2);
+      string val = fstrings[var];
+      if ( val=="" )
+	 cout<<oW<<"Value of variable ${"<<var<<"} is empty or was not defined."<<endl;
+      str.replace(found,end-found+1,val);
+      ret++;
+      found = str.find(string("${"));
    }
-   return value;
+   return ret;
 }
 
 
-bool read_steer::ParseFindString(const char* str, const string tag)
+const string read_steer::ParseEnclosedString(const string str){
+   vector<size_t> occ;
+   for ( char* pch=strchr(str.c_str(),'"');pch!=NULL;pch=strchr(pch+1,'"'))
+      occ.push_back(pch-str.c_str()+1);
+   if ( occ.size() == 2 )
+      return str.substr(occ[0],occ[1]-occ[0]-1);
+   else {
+      if ( !occ.empty() ) 
+	 cout<<oW<<"Only lines with exactly two \" symbols are allowed in substring '"<<str<<"'."<<endl;
+      return string();
+   }
+}
+
+
+const bool read_steer::ParseFindString(const char* str, const string tag)
 {
-   return strncmp(str,tag.c_str(),tag.size())==0;
+   //return strncmp(str,tag.c_str(),tag.size())==0;
+   return ( string(str).find(tag)==0 );
 }
 
 #endif
