@@ -263,6 +263,10 @@ my %install;
 # Store used gcc version to add this to final directories
 my $gccv1 = "3.3.6";
 my $gccvers = `gcc -dumpversion`;
+if ($ENV{CC}) {
+    $gccvers = `$ENV{CC} -dumpversion`;
+}
+    
 if ( $? ) {
     if ( $vers eq "1a" || $vers eq "1b" ) {
 	print "fastrun.pl: Warning! System gcc command failed. ".
@@ -301,8 +305,6 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{gccg77}[1]     = "gcc-$gccvers";
     $install{cernlib}[0]    = "cernlib-2003";
     $install{cernlib}[1]    = "cernlib-2003";
-#    $install{fastjet}[0]    = "fastjet-2.3.2";
-#    $install{fastjet}[1]    = "fastjet-2.3.2";
     $install{fastjet}[0]    = "fastjet-2.4.4";
     $install{fastjet}[1]    = "fastjet-2.4.4";
 # Versions >= 5.4.0 don't work with gcc 3.3.6
@@ -324,10 +326,12 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     }
     $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
-    $install{fastjet}[0]    = "fastjet-2.4.4";
-    $install{fastjet}[1]    = "fastjet-2.4.4";
-    $install{lhapdf}[0]     = "lhapdf-5.8.7";
-    $install{lhapdf}[1]     = "lhapdf-5.8.7";
+#    $install{fastjet}[0]    = "fastjet-2.4.4";
+#    $install{fastjet}[1]    = "fastjet-2.4.4";
+    $install{fastjet}[0]    = "fastjet-3.0.3";
+    $install{fastjet}[1]    = "fastjet-3.0.3";
+    $install{lhapdf}[0]     = "lhapdf-5.8.8";
+    $install{lhapdf}[1]     = "lhapdf-5.8.8";
     $install{lhapdffix}[0]  = "";
     $install{lhapdffix}[1]  = "";
     $install{lhpdf}[0]      = "lhpdf-1.0.0";

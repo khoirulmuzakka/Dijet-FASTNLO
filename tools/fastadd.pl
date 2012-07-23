@@ -161,13 +161,12 @@ if ( $opt_w ) {
 		    } else {
 			my $tmp = $in;
 			chomp $tmp;
-			chop $tmp;
 			my @tmps = split(" ",$tmp);
-			if ( !$ifil || $tmps[3] < $xmin[$ient] ) {$xmin[$ient] = $tmps[3];} 
-			if ( !$ifil || $tmps[8] < $blow[$ient] ) {$blow[$ient] = $tmps[8];} 
-			if ( !$ifil || $tmps[13] > $bhig[$ient] ) {$bhig[$ient] = $tmps[13];} 
-			if ( !$ifil || $tmps[18] < $clow[$ient] ) {$clow[$ient] = $tmps[18];} 
-			if ( !$ifil || $tmps[23] > $chig[$ient] ) {$chig[$ient] = $tmps[23];} 
+			if ( !$ifil || $tmps[4] < $xmin[$ient] ) {$xmin[$ient] = $tmps[4];} 
+			if ( !$ifil || $tmps[10] < $blow[$ient] ) {$blow[$ient] = $tmps[10];} 
+			if ( !$ifil || $tmps[16] > $bhig[$ient] ) {$bhig[$ient] = $tmps[16];} 
+			if ( !$ifil || $tmps[22] < $clow[$ient] ) {$clow[$ient] = $tmps[22];} 
+			if ( !$ifil || $tmps[28] > $chig[$ient] ) {$chig[$ient] = $tmps[28];} 
 			$ient++;
 		    }
 		}
