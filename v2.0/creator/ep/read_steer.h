@@ -365,34 +365,35 @@ const void read_steer::prt()
    for( map<string,string>::iterator ii=fstrings.begin(); ii!=fstrings.end(); ++ii)
       if ( (*ii).first!="") cout<<l<<"  "<<(*ii).first<<"\t\t"<<(*ii).second<<endl;
    // arrays
-   cout<<l<<endl;
-   cout<<l<<"Arrays"<<endl;
-   for( map<string,vector<string> >::iterator ii=ffields.begin(); ii!=ffields.end(); ++ii){
-      cout<<l<<"  "<<(*ii).first<< " {"<<endl;
-      for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ ){
-	 cout <<l<<"    ["<<j<<"]\t"<<(*ii).second[j]<<endl;
+   if ( !ffields.empty() ) {
+      cout<<l<<endl;
+      cout<<l<<"Arrays"<<endl;
+      for( map<string,vector<string> >::iterator ii=ffields.begin(); ii!=ffields.end(); ++ii){
+	 cout<<l<<"  "<<(*ii).first<< " {"<<endl;
+	 for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ )
+	    cout <<l<<"    ["<<j<<"]\t"<<(*ii).second[j]<<endl;
+	 cout <<l<<"  }"<<endl;
       }
-      cout <<l<<"  }"<<endl;
    }
    // tables
-   cout<<l<<endl;
-   cout<<l<<"Tables/Matrices"<<endl;
-   for( map<string,vector<string> >::iterator ii=ftableheaders.begin(); ii!=ftableheaders.end(); ++ii){
-      cout<<l<<"  "<<(*ii).first<< " {{"<<endl;
-      cout<<l<<"  ";
-      for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ )
-	 //	 cout <<(*ii).second[j]<<"\t";
-	 printf("%10s",(*ii).second[j].c_str());
-      cout<< endl;
-      vector<vector<string> > tab = ftables[(*ii).first];
-      for ( unsigned int ll = 0 ; ll<tab.size() ; ll++ ){
+   if ( !ftables.empty() ){
+      cout<<l<<endl;
+      cout<<l<<"Tables/Matrices"<<endl;
+      for( map<string,vector<string> >::iterator ii=ftableheaders.begin(); ii!=ftableheaders.end(); ++ii){
+	 cout<<l<<"  "<<(*ii).first<< " {{"<<endl;
 	 cout<<l<<"  ";
-	 for ( unsigned int j = 0 ; j<tab[ll].size() ; j++ )
-	    //cout <<tab[ll][j]<<"\t";
-	    printf("%10s",tab[ll][j].c_str());
-	 cout<<endl;
+	 for ( unsigned int j = 0 ; j<(*ii).second.size() ; j++ )
+	    printf("%10s",(*ii).second[j].c_str());
+	 cout<< endl;
+	 vector<vector<string> > tab = ftables[(*ii).first];
+	 for ( unsigned int ll = 0 ; ll<tab.size() ; ll++ ){
+	    cout<<l<<"  ";
+	    for ( unsigned int j = 0 ; j<tab[ll].size() ; j++ )
+	       printf("%10s",tab[ll][j].c_str());
+	    cout<<endl;
+	 }
+	 cout <<l<<"  }}"<<endl;
       }
-      cout <<l<<"  }}"<<endl;
    }
 }
 
@@ -403,7 +404,7 @@ int read_steer::read_stdin(string filename)
    ifstream file;
    file.open(filename.c_str());
    if (!file){
-      cout << " # read_steer.h: Error in openening file.";
+      cout << " # read_steer.h: Error in openening file ('"<<filename<<"')." << endl;
       return EXIT_FAILURE;
    }
    string lineread;
