@@ -3,26 +3,32 @@
 #ifndef __read_steer_h__
 #define __read_steer_h__ 1
 
-//********************************************************************
+//**********************************************************************************
 //
 //     read_steer.h
 //     Tiny reading tool to read steering values from one or more steering files.
 //
 //     This class reads in values, which are stored in a file. New variables
-//     can be included without changes of the steering class. Following types
-//     are supported:
-//      - Single values
-//        bool, int, double, string (with empty spaces)
-//      - Arrays
-//        int, double, string (with empty spaces)
-//      - Tables/matrices
-//        int, double, string (no empty spaces)
+//     can be included without changes of the steering class. 
+//
+//     Features
+//     ------------------------------
+//       o  Following types are supported:
+//            - Single values
+//              bool, int, double, string (with empty spaces)
+//            - Arrays
+//              int, double, string (with empty spaces)
+//            - Tables/matrices
+//              int, double, string (no empty spaces)
+//       o  Multiple files can be read in and handled individually or together. 
+//       o  Namespaces can be defined.
+//       o  Local variables within the steer-file can be defined.
 //
 //
 //     Initalize the steering
 //     ------------------------------
 //     Set the filename and initilize the read_steer class by using:
-//        read_steer::initsteering(string filename)
+//        read_steer::readfile(string filename)
 //
 //
 //     Single values
@@ -85,8 +91,8 @@
 //
 //     To access the arrays use e.g.:
 //         static vector<string> musicians = read_steer::getstringarray("FamousMusicians");
-//         static vector<double> floatings = read_steer::getdoublearray("Array1");
-//         static vector<int>    numbers   = read_steer::getintarray("Array1");
+//         static vector<double> nums      = read_steer::getdoublearray("Array1");
+//         static vector<int>    ints      = read_steer::getintarray("Array1");
 //
 //
 //     Tables and matrices
@@ -98,19 +104,19 @@
 //     keep the first line empty or add a comment there. The steering file should look like:
 //    
 //        Crossections {{
-//		Q2min	Q2max	cs[pb]	stat[%]		!header tags should not contain emtpy spaces
+//		Q2min	Q2max	cs[pb]	stat[%]			!header tags should not contain emtpy spaces
 //		100	200	22.12	1.2
 //		200	300	12.72	2.7
 //		300	500	23.22	5.3
 //	  }}
 //        Participants {{
-//		Name		Surname		Country
+//		Name		Surname		Country		! first line is always the header
 //		Obama		Barack		U.S.A.
 //		Merkel		Angela		Germany
 //		Benedikt	XVI		Vatican
 //	  }}
 //        Matrix {{
-//	        !the first line is ignored. Keep it empty
+//	        !the first line is ignored. Keep it empty.
 //		11 12
 //		21 22
 //	   }}
@@ -122,22 +128,68 @@
 //      To access the table header use:
 //         static vector<string>	   head = read_steer::gettableheader("Crossections);
 //	To access a single column of a table use:
-//	    static vector<double> xs   = read_steer::getdoublecolumn("Crossections","cs[pb]");
-//	    static vector<string> nick = read_steer::getstringcolumn("Participants","Surname");
+//	    static vector<double> xs		= read_steer::getdoublecolumn("Crossections","cs[pb]");
+//	    static vector<string> nick		= read_steer::getstringcolumn("Participants","Surname");
 //
 //
 //     Multiple steering files.
 //     ------------------------------
 //     In case multiple steering files are necessary, each steering file must
-//     be assigned a unique 'fileID'.
-//          read_steer::initsteering("file1.steer","file1")
-//          read_steer::initsteering("anotherfile.steer","constants")
+//     be assigned a unique 'steerID' if variable names (labels)  are identically.
+//          read_steer::readfile("file1.steer","file1")
+//          read_steer::readfile("anotherfile.steer","constants")
 //
-//     To access values, pass the fileID to the getter methods, e.g.:
+//     To access values, pass the steerID to the getter methods, e.g.:
 //          static double pi   = read_steer::getdouble("pi","constants");
 //          static string name = read_steer::getstring("name","file1");
 //	    static vector<vector<string> > ConfIchepNames = read_steer::getstringcolumn("Participants","Surname","file1")
 //     You can access the values at any place within your code.
+//
+//     If different labels should be read in from multiple files, just call
+//          read_steer::readfile("file1.steer");
+//          read_steer::readfile("file2.steer");
+//     and access the variables without the usage of the steerID.
+//
+//
+//     Namespaces
+//     ------------------------------
+//     Instead of using multiple files for reading identical labels for
+//     various occasions, one can use namespaces instead. Namespaces are
+//     handled identically to multiple files, but can be defined within
+//     one single steering file. Each namespace is assigned a steerID.
+//     Namespaces are defined by a label, which is used as the steerID 
+//     and start with the '{{{' tag and end with the '}}}' tag.
+//     A steerfile could look like:
+//	 HostInstitute		CERN		! standard variabel
+//       ATLAS {{{				! namespace ATLAS starts here
+//          length	45			! define variables as usual
+//	    height	22
+//          weight	7000
+//	    Crossection {{			! also tables are possible
+//	 	bin	cs[pb]	stat[%]
+//	 	1	32.2	1.2
+//		2	12.2	3.2
+//          }}
+//	 }}}					! namespace ATLAS ends here
+//       CMS {{{
+//          length	21
+//	    height	16
+//          weight	12500
+//	    Crossection {{
+//		bin	cs[pb]	stat[%]
+//		1	33.1	0.8
+//		2	13.6	3.4
+//          }}
+//	 }}}
+//
+//     To access the values, use the steerID which is the label of the namespace
+//          static double ATLASheight	  = read_steer::getdouble("height","ATLAS");
+//          static double CMSheight	  = read_steer::getdouble("height","CMS");
+//          static vector<double> CMSxs	  = read_steer::getdoublecolumn("Crossection","cs[pb]","CMS");
+//          static vector<double> ATLASxs = read_steer::getdoublecolumn("Crossection","cs[pb]","ATLAS");
+//
+//     Warning: Namespace steerID and file steerID might conflict if identically!
+//     It is NOT possible to read in multiple files, wherein identical namespaces are define!
 //
 //
 //     Script-like Variables
@@ -160,7 +212,7 @@
 //	    read_steer::print();
 //     If multiple files are used, print all information using:
 //          read_steer::printall();
-//     or just the information of one fileID:
+//     or just the information of one steerID:
 //          read_steer::print("constants");
 //
 //
@@ -172,18 +224,19 @@
 //     values to static variables.
 //
 //
-//     Not existing labels or fileID
+//     Not existing labels or steerID
 //     ------------------------------
 //     If you access an element which was not read in from the steering file,
 //     this label is automatically added to the list of elements with value zero.
-//     If a fileID is accesed, which is not identified, a new fileID is added
+//     If a steerID is accesed, which is not identified, a new steerID is added
 //     to the list without any values.
 //
 //
 //     D. Britzger
 //     daniel.britzger@desy.de
 //
-//********************************************************************
+//
+//**********************************************************************************
  
 #include <stdio.h>
 #include <stdlib.h>
@@ -204,49 +257,49 @@ private:
    read_steer(const read_steer& ) {;};
 public:
    ~read_steer() {;};
-   static read_steer* Steering(string fileID=stdID);			// get an object!
+   static read_steer* Steering(string steerID=stdID);			// get an object!
    static void destroy();						// destroy all instances
    
    // static member function
-   static void initsteering(string filename,string fileID=stdID) {	// set the steer-filename
-      read_steer::Steering(fileID)->inits(filename); }
+   static void readfile(string filename,string steerID=stdID) {	// set the steer-filename
+      read_steer::Steering(steerID)->inits(filename); }
    // getters
    // values
-   static bool getbool(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getb(label); }
-   static int getint(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->geti(label); }
-   static double getdouble(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getd(label); }
-   static string getstring(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->gets(label); }
+   static bool getbool(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getb(label); }
+   static int getint(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->geti(label); }
+   static double getdouble(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getd(label); }
+   static string getstring(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->gets(label); }
    // arrays
-   static vector<int> getintarray(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getif(label); }
-   static vector<double> getdoublearray(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getdf(label); }
-   static vector<string> getstringarray(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getsf(label); }
+   static vector<int> getintarray(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getif(label); }
+   static vector<double> getdoublearray(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getdf(label); }
+   static vector<string> getstringarray(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getsf(label); }
    // tables header
-   static vector<string> gettableheader(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getsthead(label); }
+   static vector<string> gettableheader(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getsthead(label); }
    // tables/matrices
-   static vector<vector<int> > getinttable(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getit(label); }
-   static vector<vector<double> > getdoubletable(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getdt(label); }
-   static vector<vector<string> > getstringtable(string label,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getst(label); }
+   static vector<vector<int> > getinttable(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getit(label); }
+   static vector<vector<double> > getdoubletable(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getdt(label); }
+   static vector<vector<string> > getstringtable(string label,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getst(label); }
    // table columns
-   static vector<int> getintcolumn(string label,string column ,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getitcol(label,column); }
-   static vector<double> getdoublecolumn(string label,string column ,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getdtcol(label,column); }
-   static vector<string> getstringcolumn(string label,string column ,string fileID=stdID) {
-      return read_steer::Steering(fileID)->getstcol(label,column); }
+   static vector<int> getintcolumn(string label,string column ,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getitcol(label,column); }
+   static vector<double> getdoublecolumn(string label,string column ,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getdtcol(label,column); }
+   static vector<string> getstringcolumn(string label,string column ,string steerID=stdID) {
+      return read_steer::Steering(steerID)->getstcol(label,column); }
    
    const static void printall();						// print values of all files
-   const static void print(string fileID=stdID);				// print values
+   const static void print(string steerID=stdID);				// print values
 
 public:
    // getters for single instance
@@ -270,16 +323,20 @@ public:
    
    // controls
    void inits(string filename);
+   int initnmspc(ifstream& strm, string filename);
    const void prt();
+   static void initnamespace(ifstream& strm,string filename, string steerID=stdID) {	// set the steer-filename
+      read_steer::Steering(steerID)->initnmspc(strm,filename); }
 
 private:
    int read_stdin(string filename);
-   void ParseString(string value);
-   const bool ParseFindString(const char* str, const string tag);
+   int readstrm(ifstream& strm);
+   bool ParseString(string value);
+   const bool ParseFindString(const string str, const string tag);
    const string ParseEnclosedString(const string);
    const int ReplaceVariables(string& value);
-   const bool CheckNumber(const char* str);
-   const bool CheckInt(const char* str);
+   const bool CheckNumber(const string str);
+   const bool CheckInt(const string str);
 
    map<string,string> fstrings;
    map<string,vector<string> > ffields;
@@ -291,6 +348,8 @@ private:
    vector<string> ffieldvalues;
    vector<vector<string> > ftablevalues;
    string ffilename;
+   string fcurrentfilename;
+   ifstream ffile;
 
    static const string str_cmt;
    static const string str_sep;
@@ -298,6 +357,8 @@ private:
    static const string str_arrend;
    static const string str_tabbeg;
    static const string str_tabend;
+   static const string str_nmspcbeg;
+   static const string str_nmspcend;
 
    static const string oW, oI, oE;
 };
@@ -311,29 +372,33 @@ const string read_steer::str_arrbeg="{";
 const string read_steer::str_arrend="}";
 const string read_steer::str_tabbeg="{{";
 const string read_steer::str_tabend="}}";
+const string read_steer::str_nmspcbeg="{{{";
+const string read_steer::str_nmspcend="}}}";
 const string read_steer::oW=" # read_steer. Warning. ";
 const string read_steer::oI=" # read_steer. Info. ";
 const string read_steer::oE=" # read_steer. ERROR. ";
 
-read_steer* read_steer::Steering(string fileID)
+read_steer* read_steer::Steering(string steerID)
 {
    // get singleton class
-   if ( !instances[fileID] ){
-      if ( fileID.compare(stdID) ) 
-	 cout<<oI<<"Creating new read_steer instance with fileID = '"<<fileID<<"'."<<endl;
-      instances[fileID] = new read_steer();
+   if ( !instances[steerID] ){
+      if ( steerID.compare(stdID)!=0 ) 
+	 cout<<oI<<"Initalizing new read_steer instance with steerID = '"<<steerID<<"'."<<endl;
+      instances[steerID] = new read_steer();
    }
-   return instances[fileID];
+   return instances[steerID];
 }
 
 
 void read_steer::inits(string filename){
-   if ( ffilename != "" )
-      cout<<oW<<"Filename already set (old="<<ffilename<<", new="<<filename<<"). Is the used fileID unique?"<<endl;
+   //    if ( ffilename != "" )
+   //       cout<<oW<<"Filename already set (old="<<ffilename<<", new="<<filename<<"). Is the used steerID unique?"<<endl;
    if ( filename == "" )
       cout<<oW<<"No filename specified."<<endl;
-   ffilename = filename;
-   read_stdin(ffilename);
+   if ( ffilename !="" ) ffilename+=", ";
+   ffilename += filename;
+   fcurrentfilename = filename;
+   read_stdin(fcurrentfilename);
 }
 
 
@@ -350,12 +415,12 @@ const void read_steer::printall()
    const string linesep = " +----------------------------------------------------------------------------+\n";
    const string l = " | ";
    cout<<linesep;
-   cout<<l<<"    read_steer. Printing all steering information.                 |"<<endl;
+   cout<<l<<"    read_steer. Printing all steering information.                         |"<<endl;
    cout<<linesep;
    for( map<string, read_steer*>::iterator ii=instances.begin(); ii!=instances.end(); ++ii)
       {
 	 cout<<l<<endl;
-	 cout<<l<<"fileID = '"<<(*ii).first<<"'"<<endl;
+	 cout<<l<<"steerID = '"<<(*ii).first<<"'"<<endl;
 	 cout<<linesep;
 	 (*ii).second->prt();
 	 cout<<linesep;
@@ -363,14 +428,14 @@ const void read_steer::printall()
 }
 
 
-const void read_steer::print(string fileID)
+const void read_steer::print(string steerID)
 {
    const string linesep = " +----------------------------------------------------------------------------+\n";
    const string l = " | ";
    cout<<linesep;
-   cout<<l<<"    read_steer. Printing steering information of fileID = '"<<fileID<<"'"<<endl;
+   cout<<l<<"    read_steer. Printing steering information of steerID = '"<<steerID<<"'"<<endl;
    cout<<linesep;
-   read_steer::Steering(fileID)->prt();
+   read_steer::Steering(steerID)->prt();
    cout<<linesep;
 }
 
@@ -378,7 +443,7 @@ const void read_steer::prt()
 {
    const string l = " | ";
    // filename
-   printf("%s%-30s\t%s\n",l.c_str(),"Filename",ffilename.c_str());
+   printf("%s%-30s\t%s\n",l.c_str(),"Filename(s)",ffilename.c_str());
    cout<<l<<endl;;
    //single values
    cout<<l<<"Single values"<<endl;
@@ -418,14 +483,16 @@ const void read_steer::prt()
    }
 }
 
+int read_steer::initnmspc(ifstream& strm, string filename){
+   if ( ffilename !="" ) ffilename+=", ";
+   ffilename += filename;
+   //ffilename = filename;
+   return readstrm(strm);
+}
 
-int read_steer::read_stdin(string filename)
-{
-   //If the steering has alread been read -> do nothing
-   ifstream file;
-   file.open(filename.c_str());
-   if (!file){
-      cerr<<oE<<" Could not open file ('"<<filename<<"')."<<endl;
+int read_steer::readstrm(ifstream& strm){
+   if (!strm){
+      cerr<<oE<<"This is not a valid stream."<<endl;
       return EXIT_FAILURE;
    }
    string lineread;
@@ -433,11 +500,25 @@ int read_steer::read_stdin(string filename)
    fParseFieldMode = false;
    fParseTableMode = 0;
    ffieldlabel = "";
-   while(std::getline(file, lineread)) {
-      ParseString(lineread);
+   while( std::getline(strm, lineread)) {
+      bool goon = ParseString(lineread);
       nlines++;
+      if ( !goon ) break;
    }
    return nlines; // return nlines including comments
+}
+
+int read_steer::read_stdin(string filename)
+{
+   //If the steering has alread been read -> do nothing
+   ffile.open(filename.c_str());
+   if (!ffile){
+      cerr<<oE<<" Could not open file ('"<<filename<<"')."<<endl;
+      return EXIT_FAILURE;
+   }
+   int n = readstrm(ffile); 
+   ffile.close();
+   return n;
 };
   
 
@@ -480,14 +561,14 @@ const vector<string> read_steer::getstcol(string label,string col){
    vector<string> head = getsthead(label);
    vector<vector<string> > tab = getst(label);
    for(vector<string>::size_type i = 0; i != head.size(); i++) {
-      if ( col.compare(head[i]) ){
+      if ( col.compare(head[i])==0 ){
 	 for(vector<string>::size_type j = 0; j != tab.size(); j++) {
 	    ret.push_back(tab[j][i]);
 	 }
 	 return ret;
       }
    }
-   cout << oW<<"Column '"<<col<<"' was not found in table '"<<label<<"'."<<endl;
+   cout<<oW<<"Column '"<<col<<"' was not found in table '"<<label<<"'."<<endl;
    return ret;
 }
 
@@ -602,26 +683,18 @@ const bool read_steer::getb(string label){
 }
 
 
-const bool read_steer::CheckNumber(const char* str){
-   const char keys[] = "-+1234567890";
-   int i = strcspn (str,keys);
-   if ( i!=0 ) return false;
-   else return true;
+const bool read_steer::CheckNumber(const string str){
+   return str.find_first_of("-+1234567890")==0;
 }
 
 
-const bool read_steer::CheckInt(const char* str){
-   const char keys[] = ".eE";
-   int i = strcspn (str,keys);
-   const char keye[] = "\0";
-   int ie = strcspn (str,keye);
-   if ( ie!=i || !CheckNumber(str) ) return false;
-   else return true;
+const bool read_steer::CheckInt(const string str){
+   return str.find_first_of(".eE")==string::npos && CheckNumber(str);
 }
 
 
 
-void read_steer::ParseString(string line)
+bool read_steer::ParseString(string line)
 {
    // target variables
    string label;
@@ -653,7 +726,7 @@ void read_steer::ParseString(string line)
 	       ffieldvalues.clear();
 	       ftablevalues.clear();
 	       ffieldlabel = "";
-	       return;
+	       return true;
 	    } else {
 	       if ( fParseTableMode==2 ){ // column names
 		  if ( ParseFindString(pch,str_cmt) ) break;
@@ -678,7 +751,7 @@ void read_steer::ParseString(string line)
 	       ffields[ffieldlabel] = ffieldvalues;
 	       ffieldvalues.clear();
 	       ffieldlabel="";
-	       return;
+	       return true;
 	    }
 	    if ( value=="" ){ // read single values
 	       if ( ParseFindString(pch,str_cmt) ) break;
@@ -695,6 +768,15 @@ void read_steer::ParseString(string line)
 	    }
 	 } 
 	 else {
+	    // look for a namespace
+	    if ( ParseFindString(pch,str_nmspcend) ){
+	       return false;
+	    }
+	    if ( ParseFindString(pch,str_nmspcbeg) ){
+	       read_steer::initnamespace(ffile,fcurrentfilename,label);
+	       label = "";
+	       continue;
+	    }
 	    // look for a table
 	    if ( ParseFindString(pch,str_tabbeg) ){
 	       fParseTableMode = 1;
@@ -749,6 +831,7 @@ void read_steer::ParseString(string line)
       }  else 
 	 cout << oW<<"Label '"<<  label <<"' already found. Ignoring value ('"<<value<<"'.)"<< endl;
    }
+   return true;
 }
 
 const int read_steer::ReplaceVariables(string& str){
@@ -789,10 +872,10 @@ const string read_steer::ParseEnclosedString(const string str){
 }
 
 
-const bool read_steer::ParseFindString(const char* str, const string tag)
+const bool read_steer::ParseFindString(const string str, const string tag)
 {
    //return strncmp(str,tag.c_str(),tag.size())==0;
-   return ( string(str).find(tag)==0 );
+   return ( str.find(tag)==0 );
 }
 
 #endif
