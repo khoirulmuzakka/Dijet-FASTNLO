@@ -188,8 +188,6 @@ void FastNLOReader::InitScalevariation(){
       exit(1);
     }
   }
-  
-  
 }
 
 
@@ -1692,26 +1690,26 @@ void FastNLOReader::CalcAposterioriScaleVariation( ){
   double scalefac	= fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar];
   vector<double>* XS	= &XSection;
   for(int i=0;i<NObsBin;i++){
-    int nxmax = BBlocksSMCalc[0][1]->GetNxmax(i);
+    int nxmax = BBlocksSMCalc[0][0]->GetNxmax(i);
     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-    for(int j=0;j<BBlocksSMCalc[0][1]->GetTotalScalenodes();j++){
-      int scalenode1 = j;
-      int scalenode2 = j;
-      if (BBlocksSMCalc[0][1]->NScaleDim>1){          
-	scalenode1 = j / BBlocksSMCalc[0][0]->Nscalenode[1];
-	scalenode2 = j % BBlocksSMCalc[0][0]->Nscalenode[1];
-      }
-      double asnp1 = BBlocksSMCalc[0][1]->AlphasTwoPi_v20[i][scalenode2];//as^n+1
-      double n = BBlocksSMCalc[0][0]->Npow;
-      double L = std::log(fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar]);
-      double mur	= scalefac * BBlocksSMCalc[0][1]->ScaleNode[i][0][scaleVar][scalenode1];
-      double beta0 = (11.*3.-2.*Alphas::CalcNf(mur))/3.;
-      for(int k=0;k<nxmax;k++){ 
-	for(int l=0;l<BBlocksSMCalc[0][0]->NSubproc;l++){ 
-	  double clo = BBlocksSMCalc[0][0]->SigmaTilde[i][0][j][k][l] *  BBlocksSMCalc[0][0]->PdfLc[i][scalenode2][k][l] * unit;
-	  XS->at(i)	+=  asnp1 * clo * n * L * beta0;
-	}
-      }
+    for(int j=0;j<BBlocksSMCalc[0][0]->GetTotalScalenodes();j++){
+       int scalenode1 = j;
+       int scalenode2 = j;
+       if (BBlocksSMCalc[0][1]->NScaleDim>1){
+	  scalenode1 = j / BBlocksSMCalc[0][0]->Nscalenode[1];
+	  scalenode2 = j % BBlocksSMCalc[0][0]->Nscalenode[1];
+       }
+       double asnp1 = BBlocksSMCalc[0][0]->AlphasTwoPi_v20[i][scalenode2];//as^n+1
+       double n = BBlocksSMCalc[0][0]->Npow;
+       double L = std::log(fScaleFacMuR/BBlocksSMCalc[0][0]->ScaleFac[0][0]);
+       double mur	= scalefac * BBlocksSMCalc[0][0]->ScaleNode[i][0][0][scalenode2];
+       double beta0 = (11.*3.-2.*Alphas::CalcNf(mur))/3.;
+       for(int k=0;k<nxmax;k++){ 
+	  for(int l=0;l<BBlocksSMCalc[0][0]->NSubproc;l++){ 
+	     double clo = BBlocksSMCalc[0][0]->SigmaTilde[i][0][scalenode2][k][l] *  BBlocksSMCalc[0][0]->PdfLc[i][scalenode2][k][l] * unit;
+	     XS->at(i)	+=  asnp1 * clo * n * L * beta0;
+	  }
+       }
     }
   }
 }
