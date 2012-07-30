@@ -633,8 +633,9 @@ C---  DO K=2,5 ! Test - only qq
 *---  If LO
          IF ( (NPOW(IC)-ILOORD).EQ.0 ) THEN
 *---  Nothing to do, direct MuR dependence via alpha_s already taken
-*---  into account by first call to FX9999MT. Also, MuRcache
-*---  was filled in FX9999MT for a posteriori use.
+*---  into account by first call to FX9999MT.
+*---  The MuRcache was filled in FX9999MT for tests,
+*---  BUT should NOT be used, since in general it would be wrong!
 *---  If NLO 
          ELSEIF ( (NPOW(IC)-ILOORD).EQ.1 ) THEN
             IADDPOW = 1
@@ -643,8 +644,8 @@ C---  DO K=2,5 ! Test - only qq
             CALL FX9999GP(ICTRB-1,XMUF)
 *---  For NLO, ICTRB-1 is LO as required to store c_1 dependent
 *---  NLO scale modification. However, this has to go one order higher,
-*---  that is IADDPOW = 1, and also use the cached MuR values of the NLO
-*---  scale nodes.
+*---  that is IADDPOW = 1.
+*---  Normally, DO NOT use the cached MuR values of the NLO scale nodes.
             CALL FX9999MT(ICTRB-1,XMUR,XMUF,IADDPOW,FACTOR) ! 1: mod NLO
 *---  If NNLO
          ELSEIF ( (NPOW(IC)-ILOORD).EQ.2 ) THEN
@@ -722,14 +723,14 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             STOP
          ENDIF
          DO K=1,NSCALENODE(IC,1)
+            MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
 *---  If regular contribution (i.e. no a posteriori scale variation)
-*---  then store MuR in cache for use with a posteriori scale variation
+*---  then also store MuR in cache for testing.
             IF (IADDPOW.EQ.0) THEN
-               MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
                MURCACHE(J,K) = MUR
-*---  Otherwise retrieve previously (Check! TBD) cached MuR values
-            ELSE
-               MUR = MURCACHE(J,K)
+*---  For testing retrieve previously (Check! TBD) cached MuR values
+ckr            ELSE
+ckr               MUR = MURCACHE(J,K)
             ENDIF
 *---  Get alpha_s
             AS =  FNALPHAS(MUR)
