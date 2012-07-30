@@ -290,12 +290,12 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
   //   the chosen 'scalevar'.
   // ------------------------------------------------
 
-  if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
-    printf("FastNLOReader::SetScaleVariation(). Info: This is a flexible-scale table!\n");
-    printf("  You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n");
-    printf("  Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n");
-    return 0;
-  }
+   if ( GetIsFlexibleScaleTable() ){
+      printf("FastNLOReader::SetScaleVariation(). Info: This is a flexible-scale table!\n");
+      printf("  You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n");
+      printf("  Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n");
+      return 0;
+   }
 
   // Check for maximal scale variation of all rel. and active SM calcs
   int scalevarmax = GetNScaleVariations(); 
@@ -304,11 +304,11 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
     printf("  for the currently active contributions. You wanted to access the non-existing number %d.\n",scalevar);
     printf("  Using '0' instead.\n");
     fScalevar = 0;
-    return BBlocksSMCalc[0][1]->ScaleFac[0][0];
+    return B_NLO()->ScaleFac[0][0];
   }
   
   fScalevar	= scalevar;
-  fScaleFacMuF	= BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
+  fScaleFacMuF	= B_NLO()->ScaleFac[0][fScalevar];
   if (Verbose) {printf("FastNLOReader: Selecting MuF table according to a multiplicative scale factor of the factorization scale of %4.2f times the nominal scale.\n",fScaleFacMuF);}
   
   if ( !BBlocksSMCalc[kThresholdCorrection].empty() ){
@@ -328,12 +328,12 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
     }
   }
 
+  FillAlphasCache();
   if ( ReFillCache ){
-    FillAlphasCache();
     FillPDFCache();
   }
 
-  return BBlocksSMCalc[0][1]->ScaleFac[0][fScalevar];
+  return B_NLO()->ScaleFac[0][fScalevar];
   
 }
 
@@ -420,12 +420,9 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache , bool Verbose ){
+void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func , bool Verbose ){
   SetFunctionalForm(func,kMuR,Verbose);
-  if ( ReFillCache ){
-    FillAlphasCache();
-    FillPDFCache();
-  }
+  FillAlphasCache();
 }
 
 
@@ -443,7 +440,7 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFil
 
 
 
-void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache , bool Verbose ){
+void FastNLOReader::SetScaleFactorMuR(double fac , bool Verbose ){
   // 
   // Set scale factor for scale variations in MuVar and v2.0 tables
   // You have to ReFill your cache!
@@ -470,14 +467,11 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool ReFillCache , bool Verbo
 	printf("  FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n");
       }
     }
-  } else if ( BBlocksSMCalc[0][1]->NScaleDep == 3 ) {
+  } else if ( GetIsFlexibleScaleTable() ) {
     SetFunctionalForm( fMuRFunc , kMuR ); // just for printout
   }
   
-  if ( ReFillCache ){
-    FillAlphasCache();
-    FillPDFCache();
-  }
+  FillAlphasCache();
 }
 
 
@@ -492,20 +486,32 @@ void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbo
   // set ReFillCache=false
   //
   
-  if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
-    printf("FastNLOReader::SetScaleFactorMuF. WARNING! This is not a flexible-scale table.\n");
-    printf("  SetScaleFactorMuF has no impact.\n");
-    printf("  Please use SetScaleVariation(int) instead.\n");
-  }
-  else {
-    if (Verbose) {printf("FastNLOReader: Setting multiplicative scale factor for factorization scale to %4.2f times the nominal scale.\n",fac);}
-    fScaleFacMuF = fac;
-    SetFunctionalForm( fMuFFunc , kMuF ); // just for printout
+   if ( !GetIsFlexibleScaleTable() ) {
+      const double muf0 = B_NLO()->ScaleFac[0][fScalevar];
+      const int ns = GetNScaleVariations();
+      cout << "nscalevarmax = "<<ns<<"\tvgl. B->ScaleFac[0].size()="<<B_NLO()->ScaleFac[0].size()<<endl;
+      int sf = -1;
+      for ( int is = 0 ; is<ns ; is++ ){
+	 if ( fabs(B_NLO()->ScaleFac[0][is]-fac)<1.e-6 ){
+	    sf=is;
+	    cout<<"Found scale! is="<<is<<"\tfac="<<fac<<"\tBlockfac="<<B_NLO()->ScaleFac[0][is]<<endl;
+	 }
+      }
+      if ( sf==-1 ) 
+	 printf("FastNLOReader::SetScaleFactorMuF. WARNING! Could not find table with given mu_f scale factor of %6.3f.\n",fac);
+      else 
+	 SetScaleVariation( sf ,  ReFillCache , Verbose );
+      // hier
+   }
+   else {
+      if (Verbose) {printf("FastNLOReader: Setting multiplicative scale factor for factorization scale to %4.2f times the nominal scale.\n",fac);}
+      fScaleFacMuF = fac;
+      SetFunctionalForm( fMuFFunc , kMuF ); // just for printout
     
-    if ( ReFillCache ){
-      FillPDFCache();
-    }
-  }
+      if ( ReFillCache ){
+	 FillPDFCache();
+      }
+   }
 }
 
 
@@ -1233,7 +1239,7 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
 
   cout << DSEP << endl;
   printf(" Cross Sections\n");
-  printf(" The scale factor chosen here is: % #10.3f\n",fScaleFacMuF);
+  printf(" The scale chosen here are: mu_f = % #6.3f * %s, and mu_r = % #6.3f * %s \n",fScaleFacMuF,GetScaleDescription().c_str(),fScaleFacMuR,GetScaleDescription().c_str());
   cout << SSEP << endl;
     
   if ( NDim == 2 ){
@@ -1469,10 +1475,10 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
 
 
 int FastNLOReader::GetNScaleVariations() const {
-  if ( BBlocksSMCalc[0][1]->NScaleDep ==3 ){
-    printf("FastNLOReader::GetNScaleVariations(). This is a 'flexible-scale' table, therefore you can choose all desired scale variations.\n");
-    return 0;
-  }
+   if ( GetIsFlexibleScaleTable() ){
+      printf("FastNLOReader::GetNScaleVariations(). This is a 'flexible-scale' table, therefore you can choose all desired scale variations.\n");
+      return 0;
+   }
   
   // Check for maximal scale variation of all rel. and active SM calcs
   // Assume a maximum of 10!
@@ -1686,31 +1692,29 @@ void FastNLOReader::CalcCrossSection( ){
 
 
 void FastNLOReader::CalcAposterioriScaleVariation( ){
-  int scaleVar		= BBlocksSMCalc[0][1]->Npow == ILOord ? 0 : fScalevar;
-  double scalefac	= fScaleFacMuR/BBlocksSMCalc[0][1]->ScaleFac[0][scaleVar];
+  double scalefac	= fScaleFacMuR/fScaleFacMuF;
   vector<double>* XS	= &XSection;
+  const double n     = B_LO()->Npow;
+  const double L     = std::log(scalefac); 
+  const double beta0 = (11.*3.-2.*5)/3.;
   for(int i=0;i<NObsBin;i++){
-    int nxmax = BBlocksSMCalc[0][0]->GetNxmax(i);
-    double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
-    for(int j=0;j<BBlocksSMCalc[0][0]->GetTotalScalenodes();j++){
-       int scalenode1 = j;
-       int scalenode2 = j;
-       if (BBlocksSMCalc[0][1]->NScaleDim>1){
-	  scalenode1 = j / BBlocksSMCalc[0][0]->Nscalenode[1];
-	  scalenode2 = j % BBlocksSMCalc[0][0]->Nscalenode[1];
-       }
-       double asnp1 = BBlocksSMCalc[0][0]->AlphasTwoPi_v20[i][scalenode2];//as^n+1
-       double n = BBlocksSMCalc[0][0]->Npow;
-       double L = std::log(fScaleFacMuR/BBlocksSMCalc[0][0]->ScaleFac[0][0]);
-       double mur	= scalefac * BBlocksSMCalc[0][0]->ScaleNode[i][0][0][scalenode2];
-       double beta0 = (11.*3.-2.*Alphas::CalcNf(mur))/3.;
-       for(int k=0;k<nxmax;k++){ 
-	  for(int l=0;l<BBlocksSMCalc[0][0]->NSubproc;l++){ 
-	     double clo = BBlocksSMCalc[0][0]->SigmaTilde[i][0][scalenode2][k][l] *  BBlocksSMCalc[0][0]->PdfLc[i][scalenode2][k][l] * unit;
-	     XS->at(i)	+=  asnp1 * clo * n * L * beta0;
-	  }
-       }
-    }
+     int nxmax = B_LO()->GetNxmax(i);
+     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+     for(int j=0;j<B_LO()->GetTotalScalenodes();j++){
+	int scalenode1 = j;
+	int scalenode2 = j;
+	if (BBlocksSMCalc[0][1]->NScaleDim>1){
+	   scalenode1 = j / B_LO()->Nscalenode[1];
+	   scalenode2 = j % B_LO()->Nscalenode[1];
+	}
+	double asnp1 = pow(B_LO()->AlphasTwoPi_v20[i][scalenode2],(n+1)/n);//as^n+1
+	for(int k=0;k<nxmax;k++){ 
+	   for(int l=0;l<B_LO()->NSubproc;l++){ 
+	      double clo = B_LO()->SigmaTilde[i][0][scalenode2][k][l] *  B_LO()->PdfLc[i][scalenode2][k][l] * unit;
+	      XS->at(i)	+=  asnp1 * clo * n * L * beta0;
+	   }
+	}
+     }
   }
 }
 
@@ -2423,7 +2427,7 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool ReFillCache , bool Verbose ){
+void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool Verbose ){
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
     printf("FastNLOReader::SetExternalFuncForMuR. WARNING! This is not a flexible-scale table.\n");
     printf("  SetFunctionalForm has no impact.\n");
@@ -2440,10 +2444,7 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)  , bool
     printf(" *    Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = %9.4f\n",(*Fct_MuR)(1,91.1876));
     printf(" *    Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = %9.4f\n",(*Fct_MuR)(91.1876,1));
   }
-  if ( ReFillCache ){
-    FillAlphasCache();
-    FillPDFCache();
-  }
+  FillAlphasCache();
 }
 
 

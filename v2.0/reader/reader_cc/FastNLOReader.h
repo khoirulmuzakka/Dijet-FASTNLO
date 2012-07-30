@@ -173,25 +173,17 @@ public:
   void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
-  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_R
+  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool Verbose = false );// Set the functional form of Mu_R
   void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_F
   void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX , bool Verbose = false );// Set functional form of MuX
-  void SetScaleFactorMuR( double fac , bool ReFillCache = true , bool Verbose = false );// Set scale factor for MuR
-  void SetScaleFactorMuF( double fac , bool ReFillCache = true , bool Verbose = false );// Set scale factor for MuF
-  void SetExternalFuncForMuR( mu_func , bool ReFillCache = true , bool Verbose = false );// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true , bool Verbose = false );// Set external function for scale calculation (optional)
+  void SetScaleFactorMuR( double fac , bool Verbose = false );						// Set scale factor for MuR
+  void SetScaleFactorMuF( double fac , bool ReFillCache = true , bool Verbose = false );		// Set scale factor for MuF
+  void SetExternalFuncForMuR( mu_func , bool Verbose = false );						// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true , bool Verbose = false );		// Set external function for scale calculation (optional)
 
-
-  // ---- setters for scale variation in v2.0 tables  ---- //
-  double SetScaleVariation( int scalevar , bool ReFillCache = true , bool Verbose = false );// Choose the MuF scale variation table
-  
 
   // ---- Pdf interface ---- //
   void FillPDFCache( bool ReCalcCrossSection = false );					// Prepare for recalculation of cross section with 'new'/updated pdf.
-
-
-  // ---- alphas cache ---- //
-  void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
 
   // ---- Do the cross section calculation ---- //
@@ -232,7 +224,7 @@ public:
   vector < vector < double > > GetUpBinEdge() const { return UpBin; };	// Get Upper Bin edge [ObsBin][DiffBin]
   vector < double > GetBinSize() const { return BinSize; };		// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
   int IsNormalized() const { return INormFlag; };			// Normalized Cross sections?
-  string GetScaleDescription() const { return BBlocksSMCalc[0][1]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
+  string GetScaleDescription() const { return BBlocksSMCalc[0][0]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
   int GetNScaleVariations() const;					// Get number of available scale variations
   vector < double > GetScaleFactors() const;				// Get list of available scale factors
    bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep == 3; } // Get, if this table is a 'flexible scale' table or not.
@@ -295,12 +287,19 @@ protected:
 
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
+   
+   FastNLOBlockB* B_NLO() { return BBlocksSMCalc[0][1]; };
+   FastNLOBlockB* B_LO() { return BBlocksSMCalc[0][0]; };
 
    // virtual functions for the user interface
    virtual void InitPDF() = 0;
    virtual vector<double> GetXFX(double x, double muf ) const = 0;
    virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
 
+   // ---- setters for scale variation in v2.0 tables  ---- //
+   double SetScaleVariation( int scalevar , bool ReFillCache = true , bool Verbose = false );// Choose the MuF scale variation table
+   // ---- alphas cache ---- //
+   void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
 
 protected:
