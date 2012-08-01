@@ -478,13 +478,16 @@ void FastNLOReader::SetScaleFactorMuR(double fac , bool Verbose ){
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbose ){
+double FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbose ){
   // 
   // Set scale factor for scale variations in MuVar tables
   // You have to ReFill your cache.
   // This is done automatically, but if you want to do it by yourself
   // set ReFillCache=false
   //
+   // Function returns new scalefactor for mu_f.
+   // If it is NOT a flexibleScaleTable and there is no
+   // corresponding scalevar-table, function returns 0.
   
    if ( !GetIsFlexibleScaleTable() ) {
       const double muf0 = B_NLO()->ScaleFac[0][fScalevar];
@@ -494,11 +497,13 @@ void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbo
       for ( int is = 0 ; is<ns ; is++ ){
 	 if ( fabs(B_NLO()->ScaleFac[0][is]-fac)<1.e-6 ){
 	    sf=is;
-	    cout<<"Found scale! is="<<is<<"\tfac="<<fac<<"\tBlockfac="<<B_NLO()->ScaleFac[0][is]<<endl;
+	    break;
 	 }
       }
-      if ( sf==-1 ) 
-	 printf("FastNLOReader::SetScaleFactorMuF. WARNING! Could not find table with given mu_f scale factor of %6.3f.\n",fac);
+      if ( sf==-1 ) {
+	 if (Verbose) printf("FastNLOReader::SetScaleFactorMuF. WARNING! Could not find table with given mu_f scale factor of %6.3f.\n",fac);
+	 return 0.;
+      }
       else 
 	 SetScaleVariation( sf ,  ReFillCache , Verbose );
       // hier
@@ -512,6 +517,7 @@ void FastNLOReader::SetScaleFactorMuF(double fac , bool ReFillCache , bool Verbo
 	 FillPDFCache();
       }
    }
+   return fScaleFacMuF;
 }
 
 
