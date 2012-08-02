@@ -304,7 +304,7 @@ C---  ENDIF
          ENDDO
          WRITE(*,'(A)')DSEPL
          WRITE(*,'(A)')" My Cross Sections"
-         WRITE(*,'(2(A,F10.3))')" The scale factors chosen here are: ",
+         WRITE(*,'(2(A,F10.3))')" The scale factors xmur, xmuf chosen here are: ",
      >        SCALER,", ",SCALEF
          WRITE(*,'(A)')LSEPL
          CHTMP1 = DIMLABEL(1)

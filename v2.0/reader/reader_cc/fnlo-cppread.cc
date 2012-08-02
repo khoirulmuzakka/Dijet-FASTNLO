@@ -504,71 +504,24 @@ int fnlocppread(int argc, char** argv){
   ithc2 = -1;
   inpc1 = -1;
 
-  // Find scale variation for intended MuF scale factor value
-  const int nsclsfmax = 10;
-  double fxmuf[nsclsfmax];
-  // Get number of available scale variations for selected set of contributions and
-  // check on available scale factors, in particular for MuF
-  int nsclsf = nsclsfmax;
-  
-  if ( !fnloreader->GetIsFlexibleScaleTable() ) {
-    nsclsf = fnloreader->GetNScaleVariations();
-    if ( nsclsf > nsclsfmax ) {
-      printf("fnlo-read: WARNING! Found more scale variations than I can deal with: %i\n",nsclsf); 
-      printf("           Using only the first 10 of them.\n");
-      nsclsf = nsclsfmax;
-    }
-    // With active threshold corrections, only default scale (0) usable for the moment!
-    for (int iscls=0; iscls<nsclsf; iscls++){
-      fnloreader->SetScaleVariation(iscls);
-      fxmuf[iscls] = fnloreader->GetScaleFactorMuF();
-      //      printf("fnlo-read: MuF scale factor for scale variation no. %i is: %7.3f\n",iscls,fxmuf[iscls]);
-    }
-  }   
-  
-  // Run over all requested scale settings xmur, xmuf if possible
+  // Run over all requested scale settings xmur, xmuf
   for (int iscls=0; iscls<nscls; iscls++){
-    if ( !fnloreader->GetIsFlexibleScaleTable() ) {
-      int isclf = -1;
-      for (int jscls=0; jscls<nsclsf; jscls++){
-	if ( abs(xmuf[iscls]-fxmuf[jscls]) < DBL_MIN ){
-	  isclf = jscls;
-	  break;
-	}
-      }
-      if ( isclf > -1 ) {
-	// Select MuF scale variation
-	//   Do not refill PDF cache (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
-	fnloreader->SetScaleVariation(isclf, false, false);
-	
-	// Set MuR scale factor
-	//   Do not refill PDF & alpha_s caches (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
-	fnloreader->SetScaleFactorMuR(xmur[iscls], false, false);
-      }
-    } else {
-	// This refers to flex scales ...
-	// } else {
-	//   // Set MuF scale factor, only usable with flexible-scale tables
-	//   //   Do not refill PDF cache (2nd arg. = false) --> will be done explicitly, be verbose (3rd arg. = true)
-	//   //  double fxmuf = 1.0; 
-	//   //  fnloreader->SetScaleFactorMuF(fxmuf, false, true);
-	// }
+    // Set MuR and MuF scale factors
+    bool lscvar = fnloreader->SetScaleFactors(xmur[iscls], xmuf[iscls], true, false);
+    if ( !lscvar ) {
+      printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n");
+      continue;
+    }
+    if ( fnloreader->GetIsFlexibleScaleTable() ) {
       fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);
       fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);
-	    //      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale2);
-	    //      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale2);
-      fnloreader->SetScaleFactorMuF(xmuf[iscls]);
-      fnloreader->SetScaleFactorMuR(xmur[iscls]);
+      //      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale2);
+      //      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale2);
     }
-
-    // If the MuR scale was changed the alpha_s cache MUST be refilled
-    fnloreader->FillAlphasCache();
-    // If the PDF or a scale was changed the PDF cache MUST be refilled
-    fnloreader->FillPDFCache();
     
     // Calculate cross section
     fnloreader->CalcCrossSection();
-
+    
     // Get results
     vector < double > xsnlo = fnloreader->GetCrossSection();
     vector < double > kfac  = fnloreader->GetKFactors();
@@ -588,7 +541,7 @@ int fnlocppread(int argc, char** argv){
     // Start print out
     cout << DSEP << endl;
     printf(" My Cross Sections\n");
-    printf(" The scale factors chosen here are: % #10.3f, % #10.3f\n",fnloreader->GetScaleFactorMuR(),fnloreader->GetScaleFactorMuF());
+    printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnloreader->GetScaleFactorMuR(),fnloreader->GetScaleFactorMuF());
     cout << SSEP << endl;
     
     // Get table constants relevant for print out

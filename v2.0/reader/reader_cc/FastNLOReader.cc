@@ -309,7 +309,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
   
   fScalevar	= scalevar;
   fScaleFacMuF	= B_NLO()->ScaleFac[0][fScalevar];
-  if (Verbose) {printf("FastNLOReader: Selecting MuF table according to a multiplicative scale factor of the factorization scale of %4.2f times the nominal scale.\n",fScaleFacMuF);}
+  if (Verbose) {printf("FastNLOReader::SetScaleVariation: Selecting MuF table according to a multiplicative scale factor of the factorization scale of %4.2f times the nominal scale.\n",fScaleFacMuF);}
   
   if ( !BBlocksSMCalc[kThresholdCorrection].empty() ){
     bool lkth = false;
@@ -435,6 +435,96 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFil
     FillPDFCache();
   }
 }
+
+
+
+//______________________________________________________________________________
+
+
+
+bool FastNLOReader::SetScaleFactors( double xmur, double xmuf, bool ReFillCache, bool Verbose ){
+  // 
+  // Set renormalization and factorization scale factors simultaneously for scale variations in all v2 tables.
+  // You have to ReFill your cache!
+  // This is done automatically, but if you want to do it by yourself set ReFillCache = false.
+  // 
+  // The function aborts the whole program if non-sensical scale factors < 1.E-6 are requested. 
+  // The function returns true if the requested scale factors can be used with the available table.
+  // If threshold corrections are selected, only xmur / xmuf = 1. is allowed.
+  //    If this is not the case, xmur and xmuf are unchanged,
+  //    a warning is printed and the function returns false!
+  // If it is NOT a flexibleScaleTable and there is no scalevar-table for xmuf,
+  //    xmur and xmuf are unchanged, a warning is printed and the function returns false!
+
+  // Check whether xmur and xmuf are positive and at least larger than 1.E-6
+  if ( xmur < 1.E-6 || xmuf < 1.E-6 ) {
+    printf("FastNLOReader::SetScaleFactors: ERROR! Selected scale factors too small ( < 1.E-6 )!\n");
+    printf("  Program aborted!\n");
+    exit(1);
+  }
+  
+  // Check whether threshold corrections exist and are activated
+  if ( !BBlocksSMCalc[kThresholdCorrection].empty() ){
+    bool lkth = false;
+    for ( unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++ ){
+      if ( bUseSMCalc[kThresholdCorrection][i] ) {
+	lkth = true;
+	break;
+      }
+    }
+    if ( lkth && abs(xmur-xmuf) > DBL_MIN ) {
+      printf("FastNLOReader::SetScaleFactors: WARNING! Threshold corrections do not allow\n");
+      printf("  different scale factors for MuR and MuF, nothing changed!\n");
+      printf("  Please do only symmetric scale variation, i.e. xmur = xmuf,\n");
+      printf("  or deactivate first all threshold corrections using\n");
+      printf("  FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n");
+      return false;
+    }
+  }
+
+  // Deal with factorization scale first
+  // Check whether corresponding xmuf variation exists in case of v2.0 table 
+  if ( !GetIsFlexibleScaleTable() ) {
+    const double xmuf0 = B_NLO()->ScaleFac[0][fScalevar];
+    const int ns = GetNScaleVariations();
+    if ( Verbose ) {
+      cout << "FastNLOReader::SetScaleFactors: NScaleVarMax = " << ns << ", B->ScaleFac[0].size() = " << B_NLO()->ScaleFac[0].size() << endl;
+    }
+    int sf = -1;
+    for ( int is = 0 ; is<ns ; is++ ) {
+      if ( abs(B_NLO()->ScaleFac[0][is]-xmuf) < DBL_MIN ){
+	sf = is;
+	break;
+      }
+    }
+    if ( sf == -1 ) {
+      printf("FastNLOReader::SetScaleFactors: WARNING! Could not find table with given mu_f scale factor of %6.3f.\n",xmuf);
+      printf("  Nothing changed!\n");
+      return false;
+    } else {
+      SetScaleVariation( sf , ReFillCache , Verbose );
+    }
+  } else {
+    fScaleFacMuF = xmuf;
+    if ( GetIsFlexibleScaleTable() && Verbose ) {SetFunctionalForm( fMuFFunc , kMuF );} // just for printout
+    if ( ReFillCache ){
+      FillPDFCache();
+    }
+  }
+  if ( Verbose ) {printf("FastNLOReader::SetScaleFactors: Setting multiplicative scale factor for factorization scale to %4.2f times the nominal scale.\n",xmuf);}
+  
+  // Now the renormalization scale
+  fScaleFacMuR = xmur;
+  if ( ReFillCache ){
+    FillAlphasCache();
+  }
+  if ( GetIsFlexibleScaleTable() && Verbose ) {SetFunctionalForm( fMuRFunc , kMuR );} // just for printout
+  if ( Verbose ) {printf("FastNLOReader::SetScaleFactors: Setting multiplicative scale factor for renormalization scale to %4.2f times the nominal scale.\n",xmur);}
+  
+  return true;
+}
+
+
 
 //______________________________________________________________________________
 
