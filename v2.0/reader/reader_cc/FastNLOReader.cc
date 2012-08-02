@@ -26,6 +26,7 @@
 #include <fstream>
 #include <cfloat>
 #include "Alphas.h"
+#include <sstream>
 
 using namespace std;
 
@@ -44,9 +45,15 @@ const string FastNLOReader::fOrdName[4][4] = { { "LO",     "NLO",    "NNLO"   , 
 					       { "LO MC" , "NLO MC", "NNLO MC", "N3LO MC" } };
 const string FastNLOReader::fNSDep[4] = {"v2.0","v2.0","v2.0","v2.1"};
 int FastNLOReader::WelcomeOnce = 0;
+speaker FastNLOReader::debug = speaker(" # fastNLO debug: ",true);
+speaker FastNLOReader::error = speaker(" # fastNLO. Error. ",false,true);
+speaker FastNLOReader::warn = speaker(" # fastNLO. Warning. ",false);
+speaker FastNLOReader::info = speaker(" # fastNLO. Info. ",false);
+speaker FastNLOReader::text = speaker(" #   ",true);
+// speaker FastNLOReader::fatsep = speaker("##################################################################################");
+// speaker FastNLOReader::thinsep = speaker(" #---------------------------------------------------------------------------------");
 
 //______________________________________________________________________________
-
 
 FastNLOReader::FastNLOReader(string filename)
 {
@@ -75,7 +82,63 @@ FastNLOReader::~FastNLOReader(void)
 
 
 
+void FastNLOReader::SetVerbosity(FastNLOReader::Verbosity verbosity){
+  switch (verbosity){
+  case Debug:
+     debug.DoSpeak(true);
+     text.DoSpeak(true);
+     info.DoSpeak(true);
+     warn.DoSpeak(true);
+     error.DoSpeak(true);
+     break;
+  case Text:
+     debug.DoSpeak(false);
+     text.DoSpeak(true);
+     info.DoSpeak(true);
+     warn.DoSpeak(true);
+     error.DoSpeak(true);
+     break;
+  case Info:
+     debug.DoSpeak(false);
+     text.DoSpeak(false);
+     info.DoSpeak(true);
+     warn.DoSpeak(true);
+     error.DoSpeak(true);
+     break;
+  case Warning:
+     debug.DoSpeak(false);
+     text.DoSpeak(false);
+     info.DoSpeak(false);
+     warn.DoSpeak(true);
+     error.DoSpeak(true);
+     break;
+  case Error:
+     debug.DoSpeak(false);
+     text.DoSpeak(false);
+     info.DoSpeak(false);
+     warn.DoSpeak(false);
+     error.DoSpeak(true);
+     break;
+  case Silent:
+     debug.DoSpeak(false);
+     error.DoSpeak(false);
+     warn.DoSpeak(false);
+     info.DoSpeak(false);
+     text.DoSpeak(false);
+     break;
+  default: 
+     error<<"Unknown verbosity level."<<endl;
+  }   
+  info<<"Verosity level set to "<<verbosity<<endl;
+}
+
+
+//______________________________________________________________________________
+
+
+
 void FastNLOReader::InitMembers(){
+   debug["InitMembers"]<<endl;
   BlockB_Data		= NULL;
   BlockB_LO_Ref		= NULL;
   BlockB_NLO_Ref	= NULL;
@@ -92,10 +155,9 @@ void FastNLOReader::InitMembers(){
 
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
   if (AlphasEvolution==kExternAs ) {
-    cout << "FastNLOReader::SetAlphasEvolution. Info. Alphas(Mz) is received from some derive class."<<endl; 
-    cout << "    SetAlphasMz(double) and thus the internal Alphas(Mz) value might have no more influence."<<endl;
+     info["SetAlphasEvolution"]<<"Alphas(Mz) is received from some derived class."<<endl; 
+     text<<"The SetAlphasMz(double) function and thus the internal Alphas(Mz) value might have no more influence."<<endl;
   }
-
   fAlphasEvolution = AlphasEvolution; 
   FillAlphasCache();
 }
@@ -106,7 +168,7 @@ void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
 
 
 void FastNLOReader::SetGRVtoPDG2011_2loop(bool Print){
-   printf("FastNLOReader::SetAlphasEvolution. Info. Resetting GRV Alphas::Alphas evolution.\n");
+   info["SetGrVtoPDF2011"]<<"Resetting GRV Alphas::Alphas evolution."<<endl;
    Alphas::SetMz(91.1876); // PDG 2011
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
@@ -120,8 +182,9 @@ void FastNLOReader::SetGRVtoPDG2011_2loop(bool Print){
 
 
 void FastNLOReader::SetFilename(string filename){
-  ffilename	= filename;
-  Init();
+   debug["SetFilename"]<<"New filename="<<filename<<endl;
+   ffilename	= filename;
+   Init();
 }
 
 
@@ -130,11 +193,12 @@ void FastNLOReader::SetFilename(string filename){
 
 
 void FastNLOReader::Init(){
-  ReadTable();
-  //int iprint = 2;
-  //PrintFastNLOTableConstants(iprint);
-  InitScalevariation();
-  //SetAlphasEvolution(FastNLOReader::kGRV);
+   debug["Init"]<<endl;
+   ReadTable();
+   //int iprint = 2;
+   //PrintFastNLOTableConstants(iprint);
+   InitScalevariation();
+   //SetAlphasEvolution(FastNLOReader::kGRV);
 }
 
 
@@ -143,7 +207,7 @@ void FastNLOReader::Init(){
 
 
 void FastNLOReader::InitScalevariation(){
-  
+   debug["InitScalevariation"]<<endl;
   fScaleFacMuR	= 1.;
   fScaleFacMuF	= 1.;
   fScalevar	= -1;
@@ -157,7 +221,7 @@ void FastNLOReader::InitScalevariation(){
 	}
      }
      if ( fScalevar == -1 ){
-	printf(" FastNLOReader::InitScalevariation(). Error. Could not found scale variation with scale factor 1.0. Exiting.\n");
+	error["InitScalevariation"]<<"Could not found scale variation with scale factor 1.0. Exiting.\n";
 	exit(1);
      }
   }
@@ -167,10 +231,10 @@ void FastNLOReader::InitScalevariation(){
     // scale1 and scale1 (called partly scaleQ2 and scalePt).
     
     if ( BBlocksSMCalc[0][0]->ScaleDescript[0].size() <0 ) {
-      printf("Error. No scaledescription available.\n"); // the code will crash soon.
-      SetFunctionalForm( kScale1 , kMuR );
-      SetFunctionalForm( kScale1 , kMuF );
-      return;
+       warn["InitScalevariation"]<<"No scaledescription available.\n";
+       SetFunctionalForm( kScale1 , kMuR );
+       SetFunctionalForm( kScale1 , kMuF );
+       return;
     }
 
     // ---- DIS ---- //
@@ -184,8 +248,8 @@ void FastNLOReader::InitScalevariation(){
       SetFunctionalForm( kScale1 , kMuF );
     }
     else {
-      printf("Error. Unknown process.\n");
-      exit(1);
+       error<<"Unknown process.\n";
+       exit(1);
     }
   }
 }
@@ -200,9 +264,9 @@ double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double s
   //  Calculate the scales with the defined function and the 
   //  corresponding prefactor.
   //
-  
-  if ( kMuX == kMuR && fScaleFacMuR != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
-  if ( kMuX == kMuF && fScaleFacMuF != scalefac ) printf("Error. Sth. went wrong with the scales.\n");
+   
+   if ( kMuX == kMuR && fScaleFacMuR != scalefac ) error<<"Sth. went wrong with the scales.\n";
+   if ( kMuX == kMuF && fScaleFacMuF != scalefac ) error<<"Sth. went wrong with the scales.\n";
   
   EScaleFunctionalForm Func = (kMuX == FastNLOReader::kMuR) ? fMuRFunc : fMuFFunc;
   
@@ -219,7 +283,7 @@ double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double s
   else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
   else if	( Func == kExpProd2 )		mu	= FuncExpProd2(scale1,scale2);
   else if	( Func == kExtern  )		mu	= (kMuX==FastNLOReader::kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
-  else printf( "Error. could not identify functional form for scales calculation.\n");
+  else error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
   
   return scalefac * mu;
 
@@ -291,25 +355,27 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
   // ------------------------------------------------
 
    if ( GetIsFlexibleScaleTable() ){
-      printf("FastNLOReader::SetScaleVariation(). Info: This is a flexible-scale table!\n");
-      printf("  You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n");
-      printf("  Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n");
+      info["SetScaleVariation"]<<"This is a flexible-scale table. No Scalevariation tables available!"<<endl;
+      text<<"You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n";
+      text<<"Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n";
       return 0;
    }
 
   // Check for maximal scale variation of all rel. and active SM calcs
   int scalevarmax = GetNScaleVariations(); 
   if ( scalevar >= scalevarmax ){
-    printf("FastNLOReader::SetScaleVariation. WARNING! This table has only %d scale variation(s) stored!\n",scalevarmax);
-    printf("  for the currently active contributions. You wanted to access the non-existing number %d.\n",scalevar);
-    printf("  Using '0' instead.\n");
-    fScalevar = 0;
-    return B_NLO()->ScaleFac[0][0];
+     warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
+     text<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
+     text<<"Using '0' instead."<<endl;;
+     fScalevar = 0;
+     return B_NLO()->ScaleFac[0][0];
   }
   
   fScalevar	= scalevar;
   fScaleFacMuF	= B_NLO()->ScaleFac[0][fScalevar];
-  if (Verbose) {printf("FastNLOReader::SetScaleVariation: Selecting MuF table according to a multiplicative scale factor of the factorization scale of %4.2f times the nominal scale.\n",fScaleFacMuF);}
+  info["SetScaleVariation"]
+     <<"Selecting MuF table according to a multiplicative scale factor of the factorization scale of "
+     <<fScaleFacMuF<<" times the nominal scale."<<endl;
   
   if ( !BBlocksSMCalc[kThresholdCorrection].empty() ){
     bool lkth = false;
@@ -317,20 +383,17 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache , bool V
       if ( bUseSMCalc[kThresholdCorrection][i] ) {lkth = true;}
     }
     if ( lkth && abs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN ) {
-      fScaleFacMuR = fScaleFacMuF;
-      printf("FastNLOReader::SetScaleVariation. WARNING! Threshold corrections do not allow\n");
-      printf("  a posteriori variations of the renormalization scale!\n");
-      printf("  The scale factor for MuR has been set equal to the one for MuF = %7.3f\n",fScaleFacMuF);
-      printf("  Either select a different simultaneous scale variation i, if possible, via\n");
-      printf("  FastNLOReader::SetScaleVariation(i);\n");
-      printf("  or deactivate first all threshold corrections using\n");
-      printf("  FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n");
+       fScaleFacMuR = fScaleFacMuF;
+       warn["SetScaleVariation."]<<"Threshold corrections do not allow variations of the renormalization scale!"<<endl;
+       text<<"The scale factor for MuR has been set equal to the one for MuF = "<<fScaleFacMuF<<endl;
+       text<<"Either select a different simultaneous scale variation i, if possible, via FastNLOReader::SetScaleVariation(i)"<<endl;
+       text<<"or deactivate first all threshold corrections using FastNLOReader::SetContributionON(kTresholdCorrections,Id,false)."<<endl;
     }
   }
 
   FillAlphasCache();
   if ( ReFillCache ){
-    FillPDFCache();
+     FillPDFCache();
   }
 
   return B_NLO()->ScaleFac[0][fScalevar];
@@ -350,6 +413,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
   //     func:  Choose a pre-defined function
   //     kMuX:  is it for mu_r or for mu_f ?
   //
+
 
   if ( BBlocksSMCalc[0][0]->NScaleDep != 3 ) {
     printf("FastNLOReader::SetFunctionalForm. WARNING! This is not a flexible-scale table.\n");
@@ -1826,6 +1890,7 @@ void FastNLOReader::SetUnits( EUnits Unit ){
 
 
 void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
+   debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
   //
   //  Set the alpha_s value at M_Z
   //
@@ -1838,13 +1903,14 @@ void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
 
 
 void FastNLOReader::FillAlphasCache(){
+   debug["FillAlphasCache"]<<endl;
   //
   //  Fill the internal alpha_s cache.
   //  This is usally called automatically. Only if you
   //  make use of ReFillCache==false options, you have
   //  to take care of this filling by yourself.
   //
-   
+      
   // check if the alpha_s value is somehow reasonable
   double asMz = CalcAlphas(91.18);
   if ( fAlphasEvolution != kFixed && ( asMz > 0.5 || asMz < 0.01 ) ) {

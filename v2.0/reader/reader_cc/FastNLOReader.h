@@ -26,11 +26,69 @@
 #include <string>
 #include <iostream>
 #include <cstdio>
+#include <fstream>
 #include <vector>
 #include "FastNLOBlockB.h"
 
 using namespace std;
 
+class speaker {
+public:
+   speaker(std::string prefix="",bool quiet=false,bool err=false) : 
+      weg(0) , quiet(quiet){
+      weg.clear(std::ios::badbit);
+      pref=prefix;
+      errs=cerr; };
+   speaker(const speaker& spk):weg(0){;}; 
+   std::ostream& operator() (std::string fct) {
+      if (quiet) return weg;
+      *this<<"In "<<fct<<". ";
+      if(errs) return std::cerr;
+      else return std::cout;
+   }
+   std::ostream& operator[] (std::string fct) {
+      if (quiet) return weg;
+      return *this<<"["<<fct<<"] ";
+      if(errs) return std::cerr;
+      else return std::cout;
+      //return *this;
+   }
+   speaker& operator+ (std::string fct){return this->prefix(fct);}
+   speaker& prefix(std::string fct) {
+      if (!quiet){
+	 if (errs) std::cerr<<fct;
+	 else std::cout<<fct;;
+      }
+      return *this;
+   }
+   template<typename T> std::ostream& operator<< (T arg) {
+      if (quiet) return weg;
+      else {	
+	 if (errs) return std::cerr<<pref<<arg;
+	 else std::cout<<pref<<arg;
+      }
+   };
+   template<typename T> std::ostream& operator<= (T arg) {
+      if (quiet) return weg;
+      else {	
+	 if (errs) return std::cerr<<arg;
+	 else  std::cout<<arg;
+      }
+   };
+   std::ostream& print(string mes) { 
+      if (!quiet)std::cout<<mes;
+      return std::cout;
+   }
+   void DoSpeak(bool loud){quiet=!loud;};
+   bool GetSpeak() const {return !quiet;};
+   void SetPrefix(std::string prefix){pref=prefix;};
+   std::string GetPrefix(std::string prefix) const {return pref;};
+private:
+   std::ostream weg;
+   bool quiet;
+   std::string pref;
+   bool errs;
+};
 
 
 class FastNLOReader {
@@ -70,6 +128,15 @@ public:
     kAbsoluteUnits		= 0,	// calculate the cross section in barn for each publicated bin
     kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
   };
+
+   enum Verbosity {
+      Debug			= -2,	// All output, inclusive debug informations
+      Text			= -1,	// All output, also text-output with explanations
+      Info			= 0,	// Info, Warning and error messages
+      Warning			= 1,	// Warning and error messages
+      Error			= 2,	// error messages
+      Silent			= 3	// No output (not recommended)
+   };
 
   // Corresponds to IContrFlag1 in v2 table definition
   enum ESMCalculation {
@@ -160,8 +227,10 @@ protected:
 public:
 
   FastNLOReader(string filename);
+  FastNLOReader(const FastNLOReader& fnlo);
   virtual ~FastNLOReader(void);
 
+   static void SetVerbosity(FastNLOReader::Verbosity verbosity);
   void SetFilename(string filename) ;
   void InitScalevariation();
   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
@@ -239,10 +308,12 @@ public:
   void PrintFastNLODemo();
 
 
-  // ---- human readable strings ---- //
-  static const string fContrName[20];
-  static const string fOrdName[4][4];
-  static const string fNSDep[4];
+   static speaker debug;
+   static speaker error;
+   static speaker warn;
+   static speaker info;
+   static speaker text;
+      
 
 protected:
 
@@ -300,6 +371,10 @@ protected:
    // ---- alphas cache ---- //
    void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
+  // ---- human readable strings ---- //
+  static const string fContrName[20];
+  static const string fOrdName[4][4];
+  static const string fNSDep[4];
 
 protected:
   static int WelcomeOnce;
