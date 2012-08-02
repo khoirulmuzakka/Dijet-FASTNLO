@@ -176,9 +176,7 @@ public:
   void SetMuRFunctionalForm( EScaleFunctionalForm func , bool Verbose = false );// Set the functional form of Mu_R
   void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_F
   void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX , bool Verbose = false );// Set functional form of MuX
-  bool SetScaleFactors( double xmur, double xmuf, bool ReFillCache = true, bool Verbose = false );	// Set scale factors for MuR and MuF
-  void SetScaleFactorMuR( double fac , bool Verbose = false );						// Set scale factor for MuR
-  double SetScaleFactorMuF( double fac , bool ReFillCache = true , bool Verbose = false );		// Set scale factor for MuF
+  bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true, bool Verbose = false );// Set scale factors for MuR and MuF
   void SetExternalFuncForMuR( mu_func , bool Verbose = false );						// Set external function for scale calculation (optional)
   void SetExternalFuncForMuF( mu_func , bool ReFillCache = true , bool Verbose = false );		// Set external function for scale calculation (optional)
 

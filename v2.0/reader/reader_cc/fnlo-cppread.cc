@@ -507,7 +507,7 @@ int fnlocppread(int argc, char** argv){
   // Run over all requested scale settings xmur, xmuf
   for (int iscls=0; iscls<nscls; iscls++){
     // Set MuR and MuF scale factors
-    bool lscvar = fnloreader->SetScaleFactors(xmur[iscls], xmuf[iscls], true, false);
+    bool lscvar = fnloreader->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true, false);
     if ( !lscvar ) {
       printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n");
       continue;
