@@ -870,6 +870,8 @@ void FastNLOReader::ReadBlockA1(istream *table){
   for(int i=0;i<(int)(log10((double)key)+1);i++){
      table->unget();
   }
+  if ( debug.GetSpeak() ) PrintBlockA1();
+
 }
 
 
@@ -974,6 +976,7 @@ void FastNLOReader::ReadBlockA2(istream *table){
   for(int i=0;i<(int)(log10((double)key)+1);i++){
     table->unget();
   }
+  if ( debug.GetSpeak() ) PrintBlockA2();
 }
 
 
