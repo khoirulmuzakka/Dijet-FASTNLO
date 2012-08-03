@@ -68,16 +68,15 @@ public:
 	 else std::cout<<pref<<arg;
       }
    };
-   template<typename T> std::ostream& operator<= (T arg) {
-      if (quiet) return weg;
-      else {	
-	 if (errs) return std::cerr<<arg;
-	 else  std::cout<<arg;
-      }
+   template<typename T> std::ostream& operator>> (T arg) {
+      return print(arg);
    };
    std::ostream& print(string mes) { 
-      if (!quiet)std::cout<<mes;
-      return std::cout;
+      if (quiet) return weg;
+      else {	
+	 if (errs) return std::cerr<<mes;
+	 else  return std::cout<<mes;
+      }
    }
    void DoSpeak(bool loud){quiet=!loud;};
    bool GetSpeak() const {return !quiet;};
@@ -130,8 +129,8 @@ public:
   };
 
    enum Verbosity {
-      Debug			= -2,	// All output, inclusive debug informations
-      Text			= -1,	// All output, also text-output with explanations
+      DevelopDebug		= -100,	// All output, inclusive debug informations
+      Debug			= -1,	// All output, also text-output with explanations
       Info			= 0,	// Info, Warning and error messages
       Warning			= 1,	// Warning and error messages
       Error			= 2,	// error messages
@@ -237,17 +236,17 @@ public:
   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
   void SetUnits( EUnits Unit );
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
-  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true, bool Verbose = false );	// Set contribution On/Off. Look for Id of this contribution during initialization.
+  void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true);	// Set contribution On/Off. Look for Id of this contribution during initialization.
   int ContrId( const ESMCalculation eCalc, const ESMOrder eOrder ) const;
   void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
-  void SetMuRFunctionalForm( EScaleFunctionalForm func , bool Verbose = false );// Set the functional form of Mu_R
-  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true , bool Verbose = false );// Set the functional form of Mu_F
-  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX , bool Verbose = false );// Set functional form of MuX
-  bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true, bool Verbose = false );// Set scale factors for MuR and MuF
-  void SetExternalFuncForMuR( mu_func , bool Verbose = false );						// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true , bool Verbose = false );		// Set external function for scale calculation (optional)
+  void SetMuRFunctionalForm( EScaleFunctionalForm func);// Set the functional form of Mu_R
+  void SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache = true);// Set the functional form of Mu_F
+  void SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader::EMuX kMuX);// Set functional form of MuX
+  bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true);// Set scale factors for MuR and MuF
+  void SetExternalFuncForMuR( mu_func);						// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true);		// Set external function for scale calculation (optional)
 
 
   // ---- Pdf interface ---- //
@@ -292,7 +291,7 @@ public:
   vector < vector < double > > GetUpBinEdge() const { return UpBin; };	// Get Upper Bin edge [ObsBin][DiffBin]
   vector < double > GetBinSize() const { return BinSize; };		// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
   int IsNormalized() const { return INormFlag; };			// Normalized Cross sections?
-  string GetScaleDescription() const { return BBlocksSMCalc[0][0]->ScaleDescript[0][0]; };		// Description of renormalization and facorization scale choice
+  string GetScaleDescription(int scalen=0) const { return BBlocksSMCalc[0][0]->ScaleDescript[0][scalen]; };		// Description of renormalization and facorization scale choice
   int GetNScaleVariations() const;					// Get number of available scale variations
   vector < double > GetScaleFactors() const;				// Get list of available scale factors
    bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep == 3; } // Get, if this table is a 'flexible scale' table or not.
@@ -329,6 +328,7 @@ protected:
   void PrintBlockA1() const;
   void PrintBlockA2() const;
 
+  void PrintScaleSettings(EMuX kMuX=kMuR);
   void FillBlockBPDFLCsDISv20( FastNLOBlockB* B );
   void FillBlockBPDFLCsDISv21( FastNLOBlockB* B );
   void FillBlockBPDFLCsHHCv20( FastNLOBlockB* B );
@@ -360,6 +360,9 @@ protected:
    
    FastNLOBlockB* B_NLO() { return BBlocksSMCalc[0][1]; };
    FastNLOBlockB* B_LO() { return BBlocksSMCalc[0][0]; };
+   FastNLOBlockB* B_ThC(int n=0) { 
+      if ( BBlocksSMCalc[kThresholdCorrection].empty() ) return NULL;
+      else return BBlocksSMCalc[kThresholdCorrection][n]; };
 
    // virtual functions for the user interface
    virtual void InitPDF() = 0;
@@ -367,7 +370,7 @@ protected:
    virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation( int scalevar , bool ReFillCache = true , bool Verbose = false );// Choose the MuF scale variation table
+   double SetScaleVariation( int scalevar , bool ReFillCache = true);// Choose the MuF scale variation table
    // ---- alphas cache ---- //
    void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 

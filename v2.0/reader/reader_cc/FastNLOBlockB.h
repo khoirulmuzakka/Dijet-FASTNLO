@@ -26,7 +26,7 @@ protected:
   
 public:
 
-   char* fname;
+   string fname;
    int   fNObsBins;
    int   fIcontr;
   
@@ -126,7 +126,7 @@ public:
    ~FastNLOBlockB();
    void ReadBlockB(istream *table);
    void Print(const int i, const int iprint = 0);
-   void SetName(const char* name) { fname = (char*) name;};
+   void SetName(const char* name) { fname = name;};
    void SetIc(const int i) { fIcontr = i; };
    int GetIc() { return fIcontr; };
    void FillPDFCache();

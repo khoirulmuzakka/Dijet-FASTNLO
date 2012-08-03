@@ -24,14 +24,14 @@ using namespace std;
 
 FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins )
 {
-  fname		= (char*)name;
+  fname		= name;
   fNObsBins	= NObsBins;
 }
 
 
 FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins , istream* table)
 {
-  fname		= (char*)name;
+  fname		= name;
   fNObsBins	= NObsBins;
   ReadBlockB(table);
 }
