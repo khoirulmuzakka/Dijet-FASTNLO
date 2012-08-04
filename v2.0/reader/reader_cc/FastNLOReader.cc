@@ -154,12 +154,13 @@ void FastNLOReader::InitMembers(){
 
 
 void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
-   debug["SetAlphasEvolution"]<<"Setting alphas evolution from "<<fAlphasEvolution<<" to "<<AlphasEvolution<<endl;
+  debug["SetAlphasEvolution"]<<"Setting alphas evolution from "<<fAlphasEvolution<<" to "<<AlphasEvolution<<endl;
   if (AlphasEvolution==kExternAs ) {
      info["SetAlphasEvolution"]<<"Alphas(Mz) is received from the derived user class."<<endl; 
      text<<"The SetAlphasMz(double) function (and thus the internal Alphas(Mz) value) might have no more influence."<<endl;
   }
   fAlphasEvolution = AlphasEvolution; 
+  debug["SetAlphasEvolution"]<<"Test call: Alpha_s(91.1876) = "<<CalcAlphas(91.1876)<<endl;
   FillAlphasCache();
 }
 
@@ -506,7 +507,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
   // Deal with factorization scale first
   // Check whether corresponding xmuf variation exists in case of v2.0 table 
   if ( !GetIsFlexibleScaleTable() ) {
-    const double xmuf0 = B_NLO()->ScaleFac[0][fScalevar];
+    //const double xmuf0 = B_NLO()->ScaleFac[0][fScalevar];
     const int ns = GetNScaleVariations();
     debug<<"NScaleVarMax="<<ns<<" must be >= than B->ScaleFac[0].size()="<<B_NLO()->ScaleFac[0].size()<<endl;
     int sf = -1;
@@ -1560,7 +1561,7 @@ int FastNLOReader::GetNScaleVariations() const {
 	// Do not check pQCD LO or mult. corrections
 	if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag &&
 	     !( j==kFixedOrder && i==kLeading) ){
-	  if ( BBlocksSMCalc[j][i]->Nscalevar[0] < scalevarmax ) {
+	   if ( BBlocksSMCalc[j][i]->Nscalevar[0] < (int)scalevarmax ) {
 	    scalevarmax = BBlocksSMCalc[j][i]->Nscalevar[0];
 	  }
 	}

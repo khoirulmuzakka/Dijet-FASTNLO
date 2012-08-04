@@ -38,7 +38,7 @@ public:
       weg(0) , quiet(quiet){
       weg.clear(std::ios::badbit);
       pref=prefix;
-      errs=cerr; };
+      errs=err; };
    speaker(const speaker& spk):weg(0){;}; 
    std::ostream& operator() (std::string fct) {
       if (quiet) return weg;
@@ -65,7 +65,7 @@ public:
       if (quiet) return weg;
       else {	
 	 if (errs) return std::cerr<<pref<<arg;
-	 else std::cout<<pref<<arg;
+	 else return std::cout<<pref<<arg;
       }
    };
    template<typename T> std::ostream& operator>> (T arg) {
