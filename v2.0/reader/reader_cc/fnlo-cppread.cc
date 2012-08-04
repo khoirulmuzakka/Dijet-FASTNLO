@@ -112,11 +112,10 @@ int fnlocppread(int argc, char** argv){
   }
   printf(" %s",CSEPS.c_str());
   //---  End of parsing arguments
-
+  
 
 
   // ************************** fastNLO and example documentation starts here ****************************
-
   // --- fastNLO user: Hello!
   //     If you use fastNLO for the first time, please read through the
   //     documentation and comments carefully in order to calculate
@@ -138,7 +137,7 @@ int fnlocppread(int argc, char** argv){
   //
   //     Please check, which type of table you are using and then refer to the comments and
   //     functions suitable for this fastNLO table.
-  
+
 
 
   // ------- Initialize fastNLOReader ------- //
@@ -148,13 +147,29 @@ int fnlocppread(int argc, char** argv){
   //
   //        FastNLOUser* fnloreader = new FastNLOUser( tablename );
   //
-  //     The example class for LHAPDF has overwriten the constructor
+  //     The example class for LHAPDF has overwritten the constructor
   //     and thus takes also the PDF filename (and PDF set).
   //     TBD: ??? C++ chinese ???
   FastNLOUser* fnloreader = new FastNLOUser( tablename , PDFFile , 0 );
   
+  fnloreader->SetVerbosity(FastNLOReader::Warning);
 
 
+
+  // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
+  // --- fastNLO user: You can choose the units in which you want
+  //     to access (or print) your cross-section results.
+  //     There are two possibilites:
+  //       - The default option is 'publication units', i.e. divided by 
+  //         bin widths if done so in the relevant publication
+  //            fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
+  //       - The other option is 'absolute' units in barn, but still in
+  //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
+  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
+  fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
+  
+  
+  
   // ------- Select a PDF set and member ------- //
   // --- fastNLO user: You can select the PDF here.
   //     With LHAPDF, you can set the PDF set and member using e.g.:
@@ -163,9 +178,9 @@ int fnlocppread(int argc, char** argv){
   //     Or you talk directly to LHAPDF using LHAPDF::LHAPDF().
   //
   //     >>>>   WARNING  <<<< 
-  //     fastNLO communictes to LHAPDF using the LHAPDFwrap class.
+  //     fastNLO communicates to LHAPDF using the LHAPDFwrap class.
   //     This class is a global singleton class, which means, that if
-  //     it is e.g. changed to another PDF-name (e.g. by a second
+  //     it is e.g. changed to another PDF name (e.g. by a second
   //     instance of FastNLOReader), then all FastNLOReader 
   //     instances access this 'new' LHAPDF file or member set (of course
   //     only after calling FillPDFCache() and CalcCrossSection()).
@@ -189,18 +204,9 @@ int fnlocppread(int argc, char** argv){
   //   fnloreader->SetLHAPDFset( 0 );
   //  TBD: The following doesn't work ...???
   //  fnloreader->PrintCurrentLHAPDFInformation();
-  
-  
-  
-  // --- fastNLO user: After defining the PDF or changing the factorization
-  //     scale you always have to refill the fastNLO internal PDF cache
-  //     calling:
-  //            fnloreader->FillPDFCache();
-  //
-  fnloreader->FillPDFCache();
 
 
-
+  
   // ------- Setting Alpha_s value ------- //
   // --- fastNLO user: With fastNLO, the user can choose the value of alpha_s(Mz).
   //     Furthermore, there are multiple options for the evolution
@@ -224,8 +230,11 @@ int fnlocppread(int argc, char** argv){
   //				some reasonable values and overwrite previous settings in this class!
   //      - kNLOJET		This is the alpha_s evolution, which is used by NLOJet++ as default
   //      - kCTEQpdf		This alpha_s evolution is used in the CTEQ6 PDFs. [Sure?]
+  //      - kCRunDec            alpha_s evolution from:
+  //                            RunDec: K. G. Chetyrkin, J. H. Kuhn and M. Steinhauser, arXiv:hep-ph/0004189
+  //                            CRunDec: B. Schmidt and M. Steinhauser, arXiv:1201.6149 [hep-ph]
   //      - kLHAPDFInternal	With this option, you access the alpha_s evolution, which is defined
-  //                            within the LHAPDF-file. You cannot change alphas(Mz) here!
+  //                            within the LHAPDF file. You cannot change alphas(Mz) here!
   //      - kQCDNUMInternal	Using kQCDNUM as PDF evolution code, you can make use of the
   //				QCDNUM alpha_s evolution. Please see the QCDNUM manual for options.
   //      - kFixed		Take always the fixed value of SetAlphasMz() without any evolution code.
@@ -238,28 +247,12 @@ int fnlocppread(int argc, char** argv){
   //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET); 
   //fnloreader->SetAlphasEvolution(FastNLOReader::kLHAPDFInternal); 
   //fnloreader->SetAlphasEvolution(FastNLOReader::kCTEQpdf);
-  //fnloreader->SetAlphasMz(0.1168);
+  //fnloreader->SetAlphasEvolution(FastNLOReader::kCRunDec);
   //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
-  //  fnloreader->SetAlphasMz(0.1179);
+  //fnloreader->SetAlphasMz(0.1168);
+  //fnloreader->SetAlphasMz(0.1179);
   // TBD: Use again value in released reader code for comparison
   fnloreader->SetAlphasMz(0.1185);
-  
-  // TBD: What about alpha_s cache? Fill here also?
-
-
-
-  // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
-  // --- fastNLO user: You can choose the units in which you want
-  //     to access (or print) your cross-section results.
-  //     There are two possibilites:
-  //       - The default option is 'publication units', i.e. divided by 
-  //         bin widths if done so in the relevant publication
-  //            fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
-  //       - The other option is 'absolute' units in barn, but still in
-  //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
-  //            fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
-  fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
-  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
 
 
 
@@ -291,102 +284,83 @@ int fnlocppread(int argc, char** argv){
   //     The total number of contributions then counts all contributions of all types.
   fnloreader->PrintTableInfo();
   
-
-
-  if ( !fnloreader->GetIsFlexibleScaleTable() ) {
-     // ---- options for scales in v2.0 tables ---- //
-     // --- fastNLO user: Here you can specify the options if you use a v2.0 fastNLO table
-     //     (normal case in pp/ppbar) but NOT a 'flexible-scale' table (v2.1):
-     //     A fastNLO table comes usually with various precalculated scale variations.
-     //     There, the renormalization and the factorization scale are varied simultaneously
-     //     by a series of predefined factors, usually 1, 2, 1/2, 1/4.
-     //     The welcome message should show you the information about the available
-     //     scale variations. For accessing a table with a certain factor you need to
-     //     know the scale Id (int) and then use:
-     //            fnloreader->SetScaleVariation(0);
-     //
-     //     Furthermore you have the possiblity to vary the renormalization scale by any
-     //     factor. For a scale variation factor of 0.5, please use e.g.:
-     //            fnloreader->SetScaleFactorMuR(0.5);
-     //     WARNING: This option is inconsistent with threshold corrections. These require
-     //     in the present implementation to always have mu_r = mu_f.
-  }  
-
   
+  
+  // ------- Selecting the scale treatment ------- //
+  // --- fastNLO user: The simplest way to modify the predefined renormalization and
+  //     factorization scales is to provide a scale factor by which the default scale
+  //     is multiplied. These factors must be positive and not too small (> 1.E-6).
+  //     Otherwise they can in principal (within reason) be set arbitrarily for
+  //     flexible-scale tables. For the normal v2 tables the choice of factors for the
+  //     factorization scale is limited to some fixed values, usually 0.5, 1.0, and 2.0
+  //     plus sometimes also 0.25, see the respective table information.
+  //     Note: If threshold corrections are available and switched on for evaluation,
+  //     the scale factors for the renormalization and factorization scale must be identical. 
+  //
+  //     The function call to set the scale factors is:
+  //         fnloreader->SetScaleFactorsMuRMuF(xmur, xmuf, ReFillCache);
+  //     where xmur, xmuf are the scale factors, and
+  //     ReFillCache, by default true, should not be changed.
+  //
+  //     The return value of this function call is boolean and returns false, if the
+  //     the requested scale factors can not be chosen. In this case, the last legal
+  //     values remain unchanged.
+  
+  // ----- Additional possibilities for scales in 'flexible-scale' tables (v2.1) ----- //
   if ( fnloreader->GetIsFlexibleScaleTable() ) {
-     // ---- options for scales in 'flexible-scale' tables (v2.1) ---- //
-     // --- fastNLO user: You can choose a function to define how
-     //     to compute the renormalization and factorization scale. 
-     //     Each 'flexible-scale' table comes with two variables that can be used 
-     //     for calculating the scales. They are called scale1 and scale2 and
-     //     at least one needs to have a dimension in "GeV".
-     //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
-     //     hadron-hadron tables might have for example scale1 = pt and scale2 = y.
-     //     Other settings are imaginable. Please check, which obervables exactly
-     //     are stored as scale variables!
-     //
-     //     There are two possibilities, how you can define your scale now:
-     //
-     //       - use predefined functions using e.g.
-     //            fnloreader->SetMuRFunctionalForm(FastNLOReader::EScaleFunctionalForm);
-     //         for changing the calculation of the renormalizatoin scale.
-     //         Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
-     //
-     //       - or you can pass a function pointer to FastNLOReader using
-     //            fnloreader->SetExternalFuncForMuR( double (*Func)(double,double) );
-     //         to pass any function using scale1 and scale2 to fastNLO.
-     //    
-     //     Further you can define a scale factor (one for the renormalization
-     //     and one for the factorization scale) which is multiplied to the scale
-     //     independently from the predefined function, like e.g. for mu_r:
-     //         mu_r = scalefac * f(scale1,scale2)
-     //     Please use e.g. a factor of 1.5 for mu_r:
-     //             fnloreader->SetScaleFactorMuR(1.5);
-     //
-     //     For changing the factorization scale, replace all 'MuR' by 'MuF' in the function calls.
-     //  
-     //     INFO: All above-mentioned functions automatically perform a refilling of the
-     //     fastNLO internal PDF-cache. To switch it off you can use a boolean, like:
-     //             fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1 , false );
-     //
-     //     WARNING: Some choice had to be made for the default settings. Please think
-     //     carefully about the choice of the scales ...
-     //     Default setting for DIS tables:
-     //       - mu_r:  kQuadraticMean	-> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
-     //       - mu_f:  kScale1		-> mu_f = Q
-     //     Default setting for pp and ppbar tables:
-     //       - mu_r:  kScale1		-> mu_r = scale1
-     //       - mu_f:  kScale1		-> mu_f = scale1
-     //
-     //  Valid calls are e.g.:
-     //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-     //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-     //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-     //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-     //     fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
-     //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
-     //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
-     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-     fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-
- 
-
-     // ---- (Re-)calculate cross sections ---- //
-     // --- fastNLO user: Before you can access the fastNLO computed
-     //     cross sections, you always have to call CalcCrossSection()!
-     //     If you are not sure, whether you have recalculated the internal
-     //     PDF cache with your current scale choice you further can call 
-     //     FillPDFCache() before calling CalcCrossSection().
-     //     So, before accessing the cross sections, please call:
-     //             fnloreader->CalcCrossSection();
-  
+    // --- fastNLO user: You can choose a function to define how
+    //     to compute the renormalization and factorization scale. 
+    //     Each 'flexible-scale' table comes with two variables that can be used 
+    //     for calculating the scales. They are called scale1 and scale2 and
+    //     at least one needs to have a dimension in "GeV".
+    //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
+    //     hadron-hadron tables might have for example scale1 = pt and scale2 = y.
+    //     Other settings are imaginable. Please check, which obervables exactly
+    //     are stored as scale variables!
+    //
+    //     There are two possibilities, how you can define your scale now:
+    //
+    //       - use predefined functions using e.g.
+    //            fnloreader->SetMuRFunctionalForm(FastNLOReader::EScaleFunctionalForm);
+    //         for changing the calculation of the renormalizatoin scale.
+    //         Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
+    //
+    //       - or you can pass a function pointer to FastNLOReader using
+    //            fnloreader->SetExternalFuncForMuR( double (*Func)(double,double) );
+    //         to pass any function using scale1 and scale2 to fastNLO.
+    //  
+    //     WARNING: Some choice had to be made for the default settings. Please think
+    //     carefully about the choice of the scales ...
+    //     Default setting for DIS tables:
+    //       - mu_r:  kQuadraticMean	-> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
+    //       - mu_f:  kScale1		-> mu_f = Q
+    //     Default setting for pp and ppbar tables:
+    //       - mu_r:  kScale1		-> mu_r = scale1
+    //       - mu_f:  kScale1		-> mu_f = scale1
+    //
+    //     Valid calls are e.g.:
+    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_r from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
+    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
   }
-
-
+  // INFO: All above-mentioned scale changing functions automatically perform a refilling of the
+  //       fastNLO internal PDF cache. To switch it off you can use a boolean, like:
+  //       fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1 , false );
   
-  // ---- fastNLO user: choice of scale factor
-  //    fnloreader->SetScaleFactorMuR(1.5);				 // set scale factor for mu_r
-  //    fnloreader->SetScaleFactorMuF(0.66);				 // set scale factor for mu_f
+  
+  
+  // ---- (Re-)calculate cross sections ---- //
+  // --- fastNLO user: Before you can access the fastNLO computed
+  //     cross sections, you always have to call CalcCrossSection()!
+  //     If you are not sure, whether you have recalculated the internal
+  //     PDF cache with your current scale choice you further can call 
+  //     FillPDFCache() before calling CalcCrossSection().
+  //     So, before accessing the cross sections, please call:
+  //             fnloreader->CalcCrossSection();
 
 
 
@@ -495,19 +469,19 @@ int fnlocppread(int argc, char** argv){
   //   printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
   // }
 
-  // Switch on LO & NLO, switch off anything else (to be verbose about it set last entry to "true")
-  if (! (ilo   < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 0, true, false );} 
-  if (! (inlo  < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 1, true, false );}
-  if (! (ithc2 < 0)) {fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );}
-  if (! (inpc1 < 0)) {fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false, false );}
+  // Switch on LO & NLO, switch off anything else
+  if (! (ilo   < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 0, true );} 
+  if (! (inlo  < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 1, true );}
+  if (! (ithc2 < 0)) {fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false );}
+  if (! (inpc1 < 0)) {fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false );}
   // Temporary: Also don't print the cross sections out even when existing for this example
   ithc2 = -1;
   inpc1 = -1;
 
-  // Run over all requested scale settings xmur, xmuf
+  // Run over all pre-defined scale settings xmur, xmuf
   for (int iscls=0; iscls<nscls; iscls++){
     // Set MuR and MuF scale factors
-    bool lscvar = fnloreader->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true, false);
+    bool lscvar = fnloreader->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true);
     if ( !lscvar ) {
       printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n");
       continue;

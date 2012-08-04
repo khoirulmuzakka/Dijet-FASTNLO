@@ -94,7 +94,7 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    if ( first ) {
      first = false;
      cout << endl << " " << cseps << endl;
-     printf(" # alphas-grv: First call:\n");
+     printf(" # ALPHAS-GRV: First call:\n");
      PrintInfo();
    }
    

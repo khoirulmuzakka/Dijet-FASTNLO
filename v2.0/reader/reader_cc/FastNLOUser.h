@@ -58,10 +58,10 @@ protected:
 
 
 FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
-   // --- fastNLO user: if you have interface FastNLOUser::EvolveAlphas(double,double)
-   //     it is convenient to automatically interface it here.
-   SetAlphasEvolution(kExternAs);
-   //SetAlphasEvolution(kGRV);
+  // --- fastNLO user: if you have interface FastNLOUser::EvolveAlphas(double,double)
+  //     it is convenient to automatically interface it here.
+  //SetAlphasEvolution(kExternAs);
+  SetAlphasEvolution(kGRV);
 }
 
 
@@ -70,9 +70,10 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 
 
 FastNLOUser::FastNLOUser(string name, string LHAPDFfile, int PDFset) : FastNLOReader(name) {
-   SetLHAPDFfilename(LHAPDFfile);
-   SetLHAPDFset(PDFset);
-   SetAlphasEvolution(kExternAs);
+  SetLHAPDFfilename(LHAPDFfile);
+  SetLHAPDFset(PDFset);
+  //  SetAlphasEvolution(kExternAs);
+  SetAlphasEvolution(kGRV);
 }
 
 

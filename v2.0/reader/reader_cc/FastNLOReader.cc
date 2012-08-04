@@ -25,8 +25,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <cfloat>
-#include "Alphas.h"
 #include <sstream>
+#include "Alphas.h"
+#include "CRunDec.h"
 
 using namespace std;
 
@@ -1988,10 +1989,11 @@ double FastNLOReader::CalcAlphas( double Q ){
   //
   
    switch ( fAlphasEvolution ) {
-   case kGRV: return Alphas::CalcAlphasMu( Q , fAlphasMz );
-   case kNLOJET: return CalcAlphasNLOJET ( Q , fAlphasMz );
-   case kCTEQpdf: return CalcAlphasCTEQpdf        ( Q , fAlphasMz );
-   case kExternAs: return EvolveAlphas     ( Q , fAlphasMz );
+   case kGRV: return Alphas::CalcAlphasMu ( Q , fAlphasMz );
+   case kNLOJET: return CalcAlphasNLOJET  ( Q , fAlphasMz );
+   case kCTEQpdf: return CalcAlphasCTEQpdf( Q , fAlphasMz );
+   case kCRunDec: return CalcAlphasCRunDec( Q , fAlphasMz );
+   case kExternAs: return EvolveAlphas    ( Q , fAlphasMz );
    case kFixed: return fAlphasMz;
    default: {
       error<<"No alpha_s evolution selected, aborting!\n";
@@ -2076,6 +2078,45 @@ double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
 
 }
 
+
+//______________________________________________________________________________
+
+
+double FastNLOReader::CalcAlphasCRunDec(double Q, double alphasMZ){
+  //
+  // Implementation of Alpha_s evolution as function of Mu_r.
+  //
+  // alpha_s evolution as given by the CRunDec program by
+  // Barbara Schmidt, Matthias Steinhauser;
+  // see also description in
+  //   K.~G.~Chetyrkin, J.~H.~Kuhn and M.~Steinhauser,
+  //   ``RunDec: A Mathematica package for running and decoupling of the strong
+  //   coupling and quark masses,'' Comput.\ Phys.\ Commun.\  {\bf 133} (2000) 43
+  //   [arXiv:hep-ph/0004189].
+  
+  // - do some initial print out 
+  const string csep41("#########################################");
+  const string cseps = csep41 + csep41;
+  static bool first = true;
+  if ( first ) {
+    first = false;
+    cout << endl << " " << cseps << endl;
+    printf(" # ALPHAS-CRUNDEC: First call:\n");
+    cout << " " << cseps << endl;
+    //    printf(" # ALPHAS-CRUNDEC: PI              = %#18.15f\n",twopi/2.); 
+    printf(" # ALPHAS-CRUNDEC: M_Z/GeV         = %#9.6f\n",Alphas::GetMz()); 
+    printf(" # ALPHAS-CRUNDEC: a_s(M_Z)        = %#9.6f\n",Alphas::GetAlphasMz()); 
+    printf(" # APLHAS-CRUNDEC: a_s loop        = %2i\n",Alphas::GetNLoop());
+    //    printf(" # APLHAS-CRUNDEC: flavor-matching = %s\n",(bFlavorMatching?"true":"false"));
+    printf(" # APLHAS-CRUNDEC: nf (M_Z)        = %2d\n",Alphas::GetNf());
+    cout << " " << cseps << endl;
+  }
+
+  CRunDec* pEvolObj = new CRunDec();
+  double as_crundec = pEvolObj->AlphasExact(alphasMZ, Alphas::GetMz(), Q, Alphas::GetNf(), Alphas::GetNLoop());
+  
+  return as_crundec;
+}
 
 
 //______________________________________________________________________________

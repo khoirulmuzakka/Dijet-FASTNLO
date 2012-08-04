@@ -119,6 +119,7 @@ public:
     kGRV			= 0,
     kNLOJET			= 1,      
     kCTEQpdf			= 2,      
+    kCRunDec                    = 3,
     kExternAs			= 4,	// use alphas-evolution as define in FastNLOInterface.cc
     kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
   };
@@ -229,7 +230,7 @@ public:
   FastNLOReader(const FastNLOReader& fnlo);
   virtual ~FastNLOReader(void);
 
-   static void SetVerbosity(FastNLOReader::Verbosity verbosity);
+  static void SetVerbosity(FastNLOReader::Verbosity verbosity);
   void SetFilename(string filename) ;
   void InitScalevariation();
   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
@@ -344,6 +345,7 @@ protected:
 
   double CalcAlphasNLOJET(double Q, double alphasMz);
   double CalcAlphasCTEQpdf(double Q, double alphasMz);
+  double CalcAlphasCRunDec(double Q, double alphasMz);
   
   double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
   double FuncMixedOver1 ( double scale1 , double scale2 ) ;
