@@ -472,10 +472,10 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 
    // ---------------------------- check validity of call ------------------------------------ //
    if(this->NPDFDim != 1){
-     printf("fnloBlockBNlojet::FillEventHHC: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
+     printf("fnloBlockBNlojet::FillEventHHCMuVar: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
      exit(1);   }
    if (xmin<XNode1[ObsBin][0]){
-     printf("fnloBlockBNlojet::FillEventHHC: find: xmin (%f) smaller than lowest x-node (%f) for bin #%d .\n",
+     printf("fnloBlockBNlojet::FillEventHHCMuVar: find: xmin (%f) smaller than lowest x-node (%f) for bin #%d .\n",
 	    xmin,XNode1[ObsBin][0],ObsBin);   }
    if( NscalenodeScale1<=3 || NscalenodeScale2<=3){
       printf("fnloBlockBNlojet::FillEventHHCMuVar(). Error. Sorry, but you need some more scale nodes!\n");exit(1);
@@ -595,7 +595,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    
    
 
-   // ---- calcualte weights for fini contributions ---- //
+   // ---- calculate weights for fini contributions ---- //
    nlo::amplitude_hhc::contrib_type itype = amp.contrib();
    double coef = 389385730.*prefactor;
    if(IXsectUnits!=12)  coef *= pow(10.,(IXsectUnits-12)) ;
@@ -1555,15 +1555,27 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       // --- PDF reweighting - compute weights, modify cefmax[.], cefmin[.] 
       //     but only those within grid, there are no nodes at x=1
       double pdfwgtmax = PDFwgt(xmax);
+      if (isnan(pdfwgtmax)) {
+	cout << "fastNLO: WARNING! NaN for pdfwgtmax, xmax = " << xmax << endl;
+      }
       for( int i1 = 0; i1 < 4; i1++) {
 	if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
 	  cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
+	  if (isnan(cefmax[i1])) {
+	    cout << "fastNLO: WARNING! NaN for cefmax, i1 = " << i1 << ", xnode = " << XNode1[ObsBin][nxmaxf-1+i1] << endl;
+	  }
 	}
       }
       double pdfwgtmin = PDFwgt(xmin);
+      if (isnan(pdfwgtmin)) {
+	cout << "fastNLO: WARNING! NaN for pdfwgtmin, xmin = " << xmin << endl;
+      }
       for( int i2 = 0; i2 < 4; i2++) {
 	if ((nxminf-1+i2) >= 0 && (nxminf-1+i2) < Nxtot1[ObsBin] ) {
 	  cefmin[i2] *= pdfwgtmin/PDFwgt(XNode1[ObsBin][nxminf-1+i2]);
+	  if (isnan(cefmax[i2])) {
+	    cout << "fastNLO: WARNING! NaN for cefmax, i2 = " << i2 << ", xnode = " << XNode1[ObsBin][nxminf-1+i2] << endl;
+	  }
 	} 
       }
 
