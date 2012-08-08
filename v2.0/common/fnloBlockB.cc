@@ -238,7 +238,7 @@ int fnloBlockB::Read(istream *table){
       //! v2.1 store NScaleDep here.
       //! v2.1 *table >> NScaleDep;
       
-      if ( NScaleDep != 3 ) {
+      if ( NScaleDep < 3 ) {
 	 Nscalevar.resize(NScaleDim);
 	 Nscalenode.resize(NScaleDim);
 	 for(int i=0;i<NScaleDim;i++){
@@ -322,7 +322,7 @@ int fnloBlockB::Read(istream *table){
       }
 
 
-      if ( NScaleDep == 3 ) {
+      if ( NScaleDep >= 3 ) {
 
 	 //  ---- order of reading... ---- //
 	 //    - nscalenode q2
@@ -344,9 +344,11 @@ int fnloBlockB::Read(istream *table){
  	 NscalenodeScale2 = ScaleNode2[0].size();
 
 	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true );
-	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
-	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true );
-
+	 if ( NScaleDep==3 || BlockA2->ILOord!=Npow || NScaleDep==5 ){
+	    //cout<<"Read NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tBlockA2->ILOord="<<BlockA2->ILOord<<endl;
+	    nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
+	    nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true );
+	 }
 	 nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table , true );
 	 nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table , true );
 	 nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table , true );
@@ -380,7 +382,7 @@ int fnloBlockB::Read(istream *table){
 
 // 	 ResizeTable( &SigmaRef_s2 , BlockA2->GetNObsBin() , NSubproc );
 // 	 nn3 += ReadTable  ( &SigmaRef_s2 , table );
-	 printf("  *  fnloBlockB::Read(). Read %d lines of NScaleDep==3 Tables.\n",nn3);
+	 printf("  *  fnloBlockB::Read(). Read %d lines of NScaleDep>=3 Tables.\n",nn3);
 
       }
 
@@ -411,6 +413,16 @@ int fnloBlockB::Write(ostream *table, int option){
    *table << IContrFlag2 << endl;
    //KR: IContrFlag3 replaced by NScaleDep
    //*table << IContrFlag3 << endl;	// v2.0+. for v2.1 write IContrFlag3 here, but NScaleDep only later
+   if ( NScaleDep==3 ) {
+      if ( Npow==BlockA2->ILOord) {
+	 cout<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
+	 NScaleDep=4;
+      }
+      else {
+	 cout<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
+	 NScaleDep=5;
+      }
+   }
    *table << NScaleDep << endl;
    *table << CtrbDescript.size() << endl;
    //printf("  *  fnloBlockB::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
@@ -544,7 +556,7 @@ int fnloBlockB::Write(ostream *table, int option){
       //! v2.1 store NScaleDep here
       //! *table << NScaleDep << endl;
 
-      if ( NScaleDep != 3 ){
+      if ( NScaleDep<3 ){
 	 for(int i=0;i<NScaleDim;i++){
 	    *table << Nscalevar[i] << endl;
 	    *table << Nscalenode[i] << endl;
@@ -564,16 +576,18 @@ int fnloBlockB::Write(ostream *table, int option){
 
       } // end if NScaleDep !=3.
       
-      if ( NScaleDep == 3 ) {
+      if ( NScaleDep>=3 ) {
 	 int nn3 = 0;
        
 	 nn3 += WriteFlexibleTable( &ScaleNode1 , table );
 	 nn3 += WriteFlexibleTable( &ScaleNode2 , table );
  
  	 nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
- 	 nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
- 	 nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-      
+	 if ( NScaleDep==3 || Npow!=BlockA2->ILOord || NScaleDep==5) {
+	    //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tBlockA2->ILOord="<<BlockA2->ILOord<<endl;
+	    nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+	    nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+	 }
 	 nn3 += WriteFlexibleTable( &SigmaRefMixed	, table , (bool)(option & DividebyNevt) , Nevt , true );
 	 nn3 += WriteFlexibleTable( &SigmaRef_s1	, table , (bool)(option & DividebyNevt) , Nevt , true );
 	 nn3 += WriteFlexibleTable( &SigmaRef_s2	, table , (bool)(option & DividebyNevt) , Nevt , true );
@@ -618,14 +632,17 @@ void fnloBlockB::Add(fnloBlockB* other){
    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
    Nevt += other->Nevt;
 
-   if ( NScaleDep != 3 ){
+   if ( NScaleDep<3 ){
       AddTableToAnotherTable( &SigmaTilde , &(other->SigmaTilde) ,w1 , w2 );
    }
    
-   if ( NScaleDep == 3 ){
+   if ( NScaleDep >= 3 ){
      AddTableToAnotherTable( &SigmaTildeMuIndep , &(other->SigmaTildeMuIndep) ,w1 , w2 );
-     AddTableToAnotherTable( &SigmaTildeMuFDep , &(other->SigmaTildeMuFDep) ,w1 , w2 );
-     AddTableToAnotherTable( &SigmaTildeMuRDep , &(other->SigmaTildeMuRDep) ,w1 , w2 );
+     if ( NScaleDep==3 || NScaleDep==5 || BlockA2->ILOord!=Npow) {
+	//cout<<"Adding NLO table"<<endl;
+	AddTableToAnotherTable( &SigmaTildeMuFDep , &(other->SigmaTildeMuFDep) ,w1 , w2 );
+	AddTableToAnotherTable( &SigmaTildeMuRDep , &(other->SigmaTildeMuRDep) ,w1 , w2 );
+     }
      AddTableToAnotherTable( &SigmaRefMixed , &(other->SigmaRefMixed) ,w1 , w2 );
      AddTableToAnotherTable( &SigmaRef_s1 , &(other->SigmaRef_s1) ,w1 , w2 );
      AddTableToAnotherTable( &SigmaRef_s2 , &(other->SigmaRef_s2) ,w1 , w2 );
@@ -1875,7 +1892,7 @@ void fnloBlockB::Print(){
        for(int j=0;j<ScaleDescript[i].size();j++){
 	printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
-       if ( NScaleDep != 3 ) {
+       if ( NScaleDep<3 ) {
 	  printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
 	  printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
 	  for(int j=0;j<Nscalevar[i];j++){
@@ -1890,7 +1907,7 @@ void fnloBlockB::Print(){
     if ( NScaleDep == 2 ) {
       printf(" B   No printing of SigmaTilde2Scales, and Scale2Nodes, etc... implemented yet.\n");
     }
-    if ( NScaleDep == 3 ) {
+    if ( NScaleDep>=3 ) {
       printf(" B   NscalenodeScale1              %d\n",NscalenodeScale1);
       printf(" B   NscalenodeScale2              %d\n",NscalenodeScale2);
     }    
