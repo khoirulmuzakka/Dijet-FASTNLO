@@ -82,12 +82,13 @@ public:
    bool GetSpeak() const {return !quiet;};
    void SetPrefix(std::string prefix){pref=prefix;};
    std::string GetPrefix(std::string prefix) const {return pref;};
-private:
+protected:
    std::ostream weg;
    bool quiet;
    std::string pref;
    bool errs;
 };
+
 
 
 class FastNLOReader {
@@ -295,7 +296,7 @@ public:
   string GetScaleDescription(int scalen=0) const { return BBlocksSMCalc[0][0]->ScaleDescript[0][scalen]; };		// Description of renormalization and facorization scale choice
   int GetNScaleVariations() const;					// Get number of available scale variations
   vector < double > GetScaleFactors() const;				// Get list of available scale factors
-   bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep == 3; } // Get, if this table is a 'flexible scale' table or not.
+   bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep >= 3; } // Get, if this table is a 'flexible scale' table or not.
 
 
   // ---- Print outs ---- //
@@ -379,7 +380,7 @@ protected:
   // ---- human readable strings ---- //
   static const string fContrName[20];
   static const string fOrdName[4][4];
-  static const string fNSDep[4];
+  static const string fNSDep[6];
 
 protected:
   static int WelcomeOnce;

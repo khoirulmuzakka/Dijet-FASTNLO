@@ -31,7 +31,6 @@
 
 using namespace std;
 
-
 //______________________________________________________________________________
 
 
@@ -44,7 +43,7 @@ const string FastNLOReader::fOrdName[4][4] = { { "LO",     "NLO",    "NNLO"   , 
 					       { "1-loop", "2-loop", "3-loop" , "4-loop"  },
 					       { "Undef" , "Undef" , "Undef"  , "Undef"   },
 					       { "LO MC" , "NLO MC", "NNLO MC", "N3LO MC" } };
-const string FastNLOReader::fNSDep[4] = {"v2.0","v2.0","v2.0","v2.1"};
+const string FastNLOReader::fNSDep[6] = {"v2.0","v2.0","v2.0","v2.1","v2.2","v2.2"};
 int FastNLOReader::WelcomeOnce = 0;
 speaker FastNLOReader::debug = speaker(" # fastNLO debug. ",true);
 speaker FastNLOReader::error = speaker(" # fastNLO. Error. ",false,true);
@@ -639,13 +638,13 @@ void FastNLOReader::ReadTable(void)
     }
     else if ( blockb->IRef == 1 ) { // Reference table, implemented only for LO or NLO
       if ( blockb->IContrFlag1==1 && blockb->IContrFlag2==1 ){
-	if ( blockb->NScaleDep != 3 )   blockb->SetName("BlockB. LO Reference. v2.0.");
-	if ( blockb->NScaleDep == 3 )   blockb->SetName("BlockB. LO Reference. v2.1.");
+	if ( blockb->NScaleDep < 3 )   blockb->SetName("BlockB. LO Reference. v2.0.");
+	if ( blockb->NScaleDep >= 3 )   blockb->SetName("BlockB. LO Reference. v2.1.");
 	BlockB_LO_Ref		= blockb;
       }
       else if ( blockb->IContrFlag1==1 && blockb->IContrFlag2==2 ){
-	if ( blockb->NScaleDep != 3 )   blockb->SetName("BlockB. NLO Reference. v2.0.");
-	if ( blockb->NScaleDep == 3 )   blockb->SetName("BlockB. NLO Reference. v2.1.");
+	if ( blockb->NScaleDep < 3 )   blockb->SetName("BlockB. NLO Reference. v2.0.");
+	if ( blockb->NScaleDep >= 3 )   blockb->SetName("BlockB. NLO Reference. v2.1.");
 	BlockB_NLO_Ref	= blockb;
       }
       else {
@@ -1473,7 +1472,7 @@ void FastNLOReader::PrintCrossSectionsWithReference( ){
   vector < double > xs = XSection;
   vector < double > xsref;
   
-  if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
+  if ( GetIsFlexibleScaleTable() ){
     if ( fMuFFunc == kScale1 && fMuRFunc == kScale1 )	{
       printf(" *  FastNLOReader::PrintCrossSectionsWithReference. Info. Taking reference cross sections 's1'\n");
       xsref = XSectionRef_s1;
@@ -1656,7 +1655,7 @@ void FastNLOReader::CalcReferenceCrossSection( ){
     
   }
   
-  if ( BBlocksSMCalc[0][0]->NScaleDep == 3 ){
+  if ( GetIsFlexibleScaleTable() ){
     for(int i=0;i<NObsBin;i++){
       double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
       for(int n=0;n<BBlocksSMCalc[0][1]->NSubproc;n++) {
@@ -1810,11 +1809,13 @@ void FastNLOReader::CalcCrossSectionv21( FastNLOBlockB* B , bool IsLO){
 	    if ( pdflc == 0. ) continue;
 	    double fac	= as * pdflc * unit;
 	    double xsci	=  B->SigmaTildeMuIndep[i][x][jS1][kS2][n] *                  fac;
-	    xsci		+= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2) * fac;
-	    xsci		+= B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2) * fac;
-	    if ( BBlocksSMCalc[0][0]->IPDFdef1 == 2 ) { // DIS tables use log(mu/Q2) instead of log(mu)
-	      xsci -= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(Q2) * fac;
-	      xsci -= B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(Q2) * fac;
+	    if ( B->Npow!=ILOord ) {
+	       xsci		+= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(muf2) * fac;
+	       xsci		+= B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(mur2) * fac;
+	       if ( BBlocksSMCalc[0][0]->IPDFdef1 == 2 ) { // DIS tables use log(mu/Q2) instead of log(mu)
+		  xsci -= B->SigmaTildeMuFDep [i][x][jS1][kS2][n] * std::log(Q2) * fac;
+		  xsci -= B->SigmaTildeMuRDep [i][x][jS1][kS2][n] * std::log(Q2) * fac;
+	       }
 	    }
 	    XS->at(i)	+= xsci;
 	    B->fact[i]	+= xsci;
@@ -1913,10 +1914,10 @@ void FastNLOReader::FillAlphasCache(){
 	// Check that this contribution type j and no. i should actually be used
 	// Otherwise deactivation of e.g. threshold corr. is not respected here
 	if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
-	  if ( BBlocksSMCalc[j][i]->NScaleDep != 3 ){
+	  if ( !GetIsFlexibleScaleTable() ){
 	    FillAlphasCacheInBlockBv20( BBlocksSMCalc[j][i]  );
 	  }
-	  else if ( BBlocksSMCalc[j][i]->NScaleDep == 3 ){
+	  else if ( GetIsFlexibleScaleTable() ){
 	    FillAlphasCacheInBlockBv21( BBlocksSMCalc[j][i]  );
 	  }
 	}
@@ -2171,14 +2172,14 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
 	  // ---- DIS ---- //
 	  if ( BBlocksSMCalc[j][i]->IPDFdef1 == 2 ){
 	    if ( BBlocksSMCalc[j][i]->NPDFDim == 0 ) {
-	      if	 ( BBlocksSMCalc[j][i]->NScaleDep != 3 )	FillBlockBPDFLCsDISv20(BBlocksSMCalc[j][i]);
-	      else if ( BBlocksSMCalc[j][i]->NScaleDep == 3 )	FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
+	      if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv20(BBlocksSMCalc[j][i]);
+	      else if ( GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
 	    }
 	  }
 	  // ---- pp ---- //
 	  else if (  BBlocksSMCalc[j][i]->IPDFdef1 == 3 ){
 	    if ( BBlocksSMCalc[j][i]->NPDFDim == 1 ) {
-	      if	 ( BBlocksSMCalc[j][i]->NScaleDep != 3 )	FillBlockBPDFLCsHHCv20(BBlocksSMCalc[j][i]);
+	      if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsHHCv20(BBlocksSMCalc[j][i]);
 	      else						FillBlockBPDFLCsHHCv21(BBlocksSMCalc[j][i]);
 	    }
 	    else {
@@ -2204,7 +2205,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv20( FastNLOBlockB* B ){
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
   double scalefac	= B->ScaleFac[0][scaleVar] == fScaleFacMuF ? 1. : fScaleFacMuF;
   vector<double> xfx(13); // PDFs of all partons
-  if ( B->NScaleDep != 3 ){
+  if ( !GetIsFlexibleScaleTable() ){
     for(int i=0;i<NObsBin;i++){
       int nxmax = B->GetNxmax(i);
       for(int j=0;j<B->Nscalenode[0];j++){
@@ -2274,7 +2275,7 @@ void FastNLOReader::FillBlockBPDFLCsHHCv20( FastNLOBlockB* B ){
   debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<"\tBlockB="<<B<<endl;
 
   vector < vector < double > > xfx; // PDFs of all partons
-  if ( B->NScaleDep != 3 ){
+  if ( !GetIsFlexibleScaleTable() ){
     for(int i=0;i<NObsBin;i++){
       int nxmax = B->GetNxmax(i);
       int nxbins1 = B->Nxtot1[i]; // number of columns in half matrix
