@@ -254,6 +254,8 @@ public:
   // ---- Pdf interface ---- //
   void FillPDFCache( bool ReCalcCrossSection = false );					// Prepare for recalculation of cross section with 'new'/updated pdf.
 
+   // ---- alphas cache ---- //
+   void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
   // ---- Do the cross section calculation ---- //
   void CalcCrossSection();
@@ -374,8 +376,6 @@ protected:
 
    // ---- setters for scale variation in v2.0 tables  ---- //
    double SetScaleVariation( int scalevar , bool ReFillCache = true);// Choose the MuF scale variation table
-   // ---- alphas cache ---- //
-   void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
 
   // ---- human readable strings ---- //
   static const string fContrName[20];
