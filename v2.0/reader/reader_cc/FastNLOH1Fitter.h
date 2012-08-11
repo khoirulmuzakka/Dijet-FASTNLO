@@ -16,25 +16,25 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FASTNLOUSER
-#define FASTNLOUSER
+#ifndef FASTNLOH1FITTER
+#define FASTNLOH1FITTER
 
 #include "FastNLOReader.h"
+#include "get_pdfs.h"
 
 using namespace std;
 
 
-class FastNLOUser : public FastNLOReader {
+class FastNLOH1Fitter : public FastNLOReader {
 
 public:
-   FastNLOUser(string name);
+   FastNLOH1Fitter(string name);
 
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
    void InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
-  
 };
 
 
@@ -42,12 +42,14 @@ protected:
 //______________________________________________________________________________
 
 
-FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
-   // --- fastNLO user: if you have your own alpha_s routing in FastNLOUser::EvolveAlphas(double,double)
+FastNLOH1Fitter::FastNLOH1Fitter(string name) : FastNLOReader(name) {
+   // --- fastNLO user: if you have your own alpha_s routing in FastNLOH1Fitter::EvolveAlphas(double,double)
    //     it is convenient to automatically interface it here.
    //     Otherwise the FastNLO alpha_s evolution code Alphas.cc is used, or
    //     you have to call SetAlphasEvolution.
    //     It might be also convenient to make your scale choices here!
+   
+   SetAlphasEvolution(kExternAs);
 }
 
 
@@ -55,22 +57,29 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 //______________________________________________________________________________
 
 
-double FastNLOUser::EvolveAlphas(double Q, double alphasMz ) const {
+double FastNLOH1Fitter::EvolveAlphas(double Q) const {
    // --- fastNLO user: 
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
-   return 0;
+   // This function does not make use alphasMz but is using
+   // the nominal values as defined in QCDNUM
+   //
+
+   double mu2 = Q*Q;
+   return HF_GET_ALPHAS_WRAP( &mu2 );
 }
 
 
 //______________________________________________________________________________
 
 
-void FastNLOUser::InitPDF(){
+void FastNLOH1Fitter::InitPDF(){
    // --- fastNLO user: 
    //  Initalize PDF parameters if necessary
    //
+   
+   // nothing todo
 }
 
 
@@ -78,14 +87,17 @@ void FastNLOUser::InitPDF(){
 
 
 
-vector<double> FastNLOUser::GetXFX(double xp, double muf) const {
+vector<double> FastNLOH1Fitter::GetXFX(double xp, double muf) const {
    //
    //  GetXFX is used to get the parton array from the
    //  pdf-interface. It should return a vector of 13
    //  parton flavors from tbar to t at a certain
    //  x-proton and factorisation scale.
    //
-   vector <double > xfx(13);
+   //! return  pdf grid 'xfx'
+   vector < double > xfx(13);
+   double muf2       = muf*muf;
+   HF_GET_PDFS_WRAP(&xp, &muf2, &xfx[0]);
    return xfx;
 }
 

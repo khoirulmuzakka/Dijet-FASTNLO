@@ -26,8 +26,6 @@
 #include <fstream>
 #include <cfloat>
 #include <sstream>
-#include "Alphas.h"
-#include "CRunDec.h"
 
 using namespace std;
 
@@ -45,18 +43,18 @@ const string FastNLOReader::fOrdName[4][4] = { { "LO",     "NLO",    "NNLO"   , 
 					       { "LO MC" , "NLO MC", "NNLO MC", "N3LO MC" } };
 const string FastNLOReader::fNSDep[6] = {"v2.0","v2.0","v2.0","v2.1","v2.2","v2.2"};
 int FastNLOReader::WelcomeOnce = 0;
-speaker FastNLOReader::debug = speaker(" # fastNLO debug. ",true);
-speaker FastNLOReader::error = speaker(" # fastNLO. Error. ",false,true);
-speaker FastNLOReader::warn = speaker(" # fastNLO. Warning. ",false);
-speaker FastNLOReader::info = speaker(" # fastNLO. Info. ",false);
-speaker FastNLOReader::text = speaker(" #    ",true);
 
 //______________________________________________________________________________
 
-FastNLOReader::FastNLOReader(string filename)
+FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
 {
-   info<<"New FastNLOReader reading filename="<<filename<<endl;
-   InitMembers();
+   debug["FastNLOReader"]<<"New FastNLOReader reading filename="<<filename<<endl;
+   BlockB_Data		= NULL;
+   BlockB_LO_Ref		= NULL;
+   BlockB_NLO_Ref	= NULL;
+   fUnits		= kPublicationUnits;
+   fMuRFunc		= FastNLOReader::kScale1;
+   fMuFFunc		= FastNLOReader::kScale1;
    SetFilename(filename);
 }
 
@@ -81,107 +79,6 @@ FastNLOReader::~FastNLOReader(void)
 
 
 
-void FastNLOReader::SetVerbosity(FastNLOReader::Verbosity verbosity){
-  switch (verbosity){
-  case DevelopDebug:
-     debug.DoSpeak(true);
-     text.DoSpeak(true);
-     info.DoSpeak(true);
-     warn.DoSpeak(true);
-     error.DoSpeak(true);
-     break;
-  case Debug:
-     debug.DoSpeak(false);
-     text.DoSpeak(true);
-     info.DoSpeak(true);
-     warn.DoSpeak(true);
-     error.DoSpeak(true);
-     break;
-  case Info:
-     debug.DoSpeak(false);
-     text.DoSpeak(false);
-     info.DoSpeak(true);
-     warn.DoSpeak(true);
-     error.DoSpeak(true);
-     break;
-  case Warning:
-     debug.DoSpeak(false);
-     text.DoSpeak(false);
-     info.DoSpeak(false);
-     warn.DoSpeak(true);
-     error.DoSpeak(true);
-     break;
-  case Error:
-     debug.DoSpeak(false);
-     text.DoSpeak(false);
-     info.DoSpeak(false);
-     warn.DoSpeak(false);
-     error.DoSpeak(true);
-     break;
-  case Silent:
-     debug.DoSpeak(false);
-     error.DoSpeak(false);
-     warn.DoSpeak(false);
-     info.DoSpeak(false);
-     text.DoSpeak(false);
-     break;
-  default: 
-     error<<"Unknown verbosity level."<<endl;
-  }   
-  info<<"Verbosity level set to "<<verbosity<<endl;
-}
-
-
-//______________________________________________________________________________
-
-
-
-void FastNLOReader::InitMembers(){
-   debug["InitMembers"]<<endl;
-  BlockB_Data		= NULL;
-  BlockB_LO_Ref		= NULL;
-  BlockB_NLO_Ref	= NULL;
-  fUnits		= kPublicationUnits;
-  fAlphasMz		= 0.118500001;
-  fMuRFunc		= FastNLOReader::kScale1;
-  fMuFFunc		= FastNLOReader::kScale1;
-}
-
-
-//______________________________________________________________________________
-
-
-
-void FastNLOReader::SetAlphasEvolution(EAlphasEvolution AlphasEvolution){
-  debug["SetAlphasEvolution"]<<"Setting alphas evolution from "<<fAlphasEvolution<<" to "<<AlphasEvolution<<endl;
-  if (AlphasEvolution==kExternAs ) {
-     info["SetAlphasEvolution"]<<"Alphas(Mz) is received from the derived user class."<<endl; 
-     text<<"The SetAlphasMz(double) function (and thus the internal Alphas(Mz) value) might have no more influence."<<endl;
-  }
-  fAlphasEvolution = AlphasEvolution; 
-  debug["SetAlphasEvolution"]<<"Test call: Alpha_s(91.1876) = "<<CalcAlphas(91.1876)<<endl;
-  FillAlphasCache();
-}
-
-
-//______________________________________________________________________________
-
-
-
-void FastNLOReader::SetGRVtoPDG2011_2loop(bool Print){
-   info["SetGrVtoPDF2011"]<<"Resetting GRV Alphas::Alphas evolution."<<endl;
-   Alphas::SetMz(91.1876); // PDG 2011
-   Alphas::SetNf(5);
-   Alphas::SetNLoop(2);
-   Alphas::SetFlavorMatchingOn(true);
-   if ( Print )  Alphas::PrintInfo();
-}
-
-
-//______________________________________________________________________________
-
-
-
 void FastNLOReader::SetFilename(string filename){
    debug["SetFilename"]<<"New filename="<<filename<<endl;
    ffilename	= filename;
@@ -199,7 +96,6 @@ void FastNLOReader::Init(){
    //int iprint = 2;
    //PrintFastNLOTableConstants(iprint);
    InitScalevariation();
-   //SetAlphasEvolution(FastNLOReader::kGRV);
 }
 
 
@@ -357,8 +253,8 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache){
 
    if ( GetIsFlexibleScaleTable() ){
       info["SetScaleVariation"]<<"This is a flexible-scale table. No Scalevariation tables available!"<<endl;
-      text<<"You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n";
-      text<<"Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n";
+      man<<"You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n";
+      man<<"Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n";
       return 0;
    }
 
@@ -366,8 +262,8 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache){
   int scalevarmax = GetNScaleVariations(); 
   if ( scalevar >= scalevarmax ){
      warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
-     text<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
-     text<<"Using '0' instead."<<endl;;
+     man<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
+     man<<"Using '0' instead."<<endl;;
      fScalevar = 0;
      return B_NLO()->ScaleFac[0][0];
   }
@@ -386,9 +282,9 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache){
     if ( lkth && abs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN ) {
        fScaleFacMuR = fScaleFacMuF;
        warn["SetScaleVariation."]<<"Threshold corrections do not allow variations of the renormalization scale!"<<endl;
-       text<<"The scale factor for MuR has been set equal to the one for MuF = "<<fScaleFacMuF<<endl;
-       text<<"Either select a different simultaneous scale variation i, if possible, via FastNLOReader::SetScaleVariation(i)"<<endl;
-       text<<"or deactivate first all threshold corrections using FastNLOReader::SetContributionON(kTresholdCorrections,Id,false)."<<endl;
+       man<<"The scale factor for MuR has been set equal to the one for MuF = "<<fScaleFacMuF<<endl;
+       man<<"Either select a different simultaneous scale variation i, if possible, via FastNLOReader::SetScaleVariation(i)"<<endl;
+       man<<"or deactivate first all threshold corrections using FastNLOReader::SetContributionON(kTresholdCorrections,Id,false)."<<endl;
     }
   }
 
@@ -496,9 +392,9 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
     if ( lkth && abs(xmur-xmuf) > DBL_MIN ) {
        warn["SetScaleFactorsMuRMuFSetScaleFactorsMuRMuF"]
 	  <<"Threshold corrections do not allow different scale factors for MuR and MuF, nothing changed!\n";
-       text<<"Please do only symmetric scale variation, i.e. xmur = xmuf,\n";
-       text<<"or deactivate first all threshold corrections using\n";
-       text<<"FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n";
+       man<<"Please do only symmetric scale variation, i.e. xmur = xmuf,\n";
+       man<<"or deactivate first all threshold corrections using\n";
+       man<<"FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n";
       return false;
     }
   }
@@ -541,8 +437,8 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
 
 void FastNLOReader::PrintScaleSettings(FastNLOReader::EMuX MuX){
    if ( !GetIsFlexibleScaleTable() ){
-      info<<"Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<GetScaleDescription()<<endl;
-      info<<"Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<GetScaleDescription()<<endl;
+      info<<"fastNLO. Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<GetScaleDescription()<<endl;
+      info<<"fastNLO. Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<GetScaleDescription()<<endl;
    }
    else {
       // ---- prepare printout ---- //
@@ -577,7 +473,7 @@ void FastNLOReader::PrintScaleSettings(FastNLOReader::EMuX MuX){
 	 break;
       default: error<<"unknown scale choice.\n";
       }	    
-      info<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
+      info<<"fastNLO. "<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
 	  <<sfac<<"^2 * "<<fname<<endl;
    }
 }
@@ -847,8 +743,8 @@ void FastNLOReader::ReadBlockA1(istream *table){
   *table >> Itabversion;
   if ( Itabversion < 20000 ){
      error["ReadBlockA1"]<<"This reader is only compatible with FastNLO v2.0 tables and higher. Exiting.\n";  
-     text<<"This FastNLO-table (file) is of version "<<Itabversion*1./10000.<<endl;;
-     text<<"Please download a compatible reader from the website or use the APPL_grid interface.\n";
+     man<<"This FastNLO-table (file) is of version "<<Itabversion*1./10000.<<endl;;
+     man<<"Please download a compatible reader from the website or use the APPL_grid interface.\n";
      exit(1);
   }
   *table >> ScenName;
@@ -1874,26 +1770,11 @@ void FastNLOReader::SetUnits( EUnits Unit ){
   }
 }
 
-
-
-//______________________________________________________________________________
-
-
-void FastNLOReader::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
-   debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-  //
-  //  Set the alpha_s value at M_Z
-  //
-   fAlphasMz	= AlphasMz;		// new alpha_s value
-   FillAlphasCache();
-   if ( ReCalcCrossSection ) CalcCrossSection(); 
-}
-
 //______________________________________________________________________________
 
 
 void FastNLOReader::FillAlphasCache(){
-   debug["FillAlphasCache"]<<"chosen AlphasEvolution="<<fAlphasEvolution<<endl;
+   debug["FillAlphasCache"]<<endl;
   //
   //  Fill the internal alpha_s cache.
   //  This is usally called automatically. Only if you
@@ -1903,7 +1784,7 @@ void FastNLOReader::FillAlphasCache(){
       
   // check if the alpha_s value is somehow reasonable
   double asMz = CalcAlphas(91.18);
-  if ( fAlphasEvolution != kFixed && ( asMz > 0.5 || asMz < 0.01 ) ) {
+  if ( ( asMz > 0.5 || asMz < 0.01 ) ) {
      warn["FillAlphasCache"]<<"Your alphas value seems to be unreasonably small/large."<<endl;
      warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asMz<<endl;
   }
@@ -1989,136 +1870,9 @@ double FastNLOReader::CalcAlphas( double Q ){
   // 
   //  Internal method for calculating the alpha_s(mu)
   //
-  
-   switch ( fAlphasEvolution ) {
-   case kGRV: return Alphas::CalcAlphasMu ( Q , fAlphasMz );
-   case kNLOJET: return CalcAlphasNLOJET  ( Q , fAlphasMz );
-   case kCTEQpdf: return CalcAlphasCTEQpdf( Q , fAlphasMz );
-   case kCRunDec: return CalcAlphasCRunDec( Q , fAlphasMz );
-   case kExternAs: return EvolveAlphas    ( Q , fAlphasMz );
-   case kFixed: return fAlphasMz;
-   default: {
-      error<<"No alpha_s evolution selected, aborting!\n";
-      exit (1);
-   }
-   }
+  EvolveAlphas    ( Q );
 }
 
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasNLOJET(double Q, double alphasMZ){
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r.
-  // this is the evolution, which is used by nlojet++ and cteq6m.
-  // Be aware of the Mz-value from 2001 of 91.70.
-  //
-  // Values used in nlojet++ and cteq6m:
-  //   alphasmz   = 0.1179  
-  //   double b0  = 1.2202
-  //   double b1  = 0.4897
-  //   double Mz  = 91.70
-  //
-  // as evolution by lhpdf.c 
-  // please cite the nlojet++ references.
-  //
-  // the original parameters from the cteq6 pdf
-  //   // Alpha QCD //
-  //   1, 1, 0, -1, 0.1179, 91.70, 1.3, 4.5, 180.0,
-  //   double BETA0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-  //   double BETA1 =  (51. - 19./3.*NF);
-
-  double b0  = 1.2202;
-  double b1  = 0.4897;
-  // double b2 = 0.1913;
-
-  //double Mz	= 91.187;
-  double Mz	= 91.70;
-  double L = log(Q/Mz);
-  L = (b0 + alphasMZ*b1)*L;
-
-  return alphasMZ/(1.0 + alphasMZ*L);
-
-}
-
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasCTEQpdf(double Q, double alphasMZ){
-   //
-   // Implementation of Alpha_s evolution as function of Mu_r.
-   //
-   // alpha_s evolution as it is within by cteq-pdf-1.0.4 and used in nlojet 4.1.3
-   // please notice the nlojet++ reference
-
-   double as_twopi = alphasMZ/TWOPI;
-   double Mz	= 91.187;
-   //double Mz	= 91.70;
-   //int ord=2;
-   int nf=5;
-
-   const int NF	= 5;
-   double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-   double b1 =  (51. - 19./3.*NF);
-   double t8 = 1.0/(b0*as_twopi);
-   double as0, as1, ot, lt, br = (51.0 - 19.0/3.0*nf)/(b0*b0);
-   do {
-      lt = log(2.0*t8)/t8;
-      ot = t8;
-
-      as0 = (1.0 - br*lt)/(b0*t8);
-      as1 = (-1.0 - br*(1.0/t8-2.0*lt))/(b0*t8*t8);
-      t8 += (as_twopi - as0)/as1;
-   } while(fabs(ot-t8)/ot > 1e-5);
-   double lmd = Mz*exp(-t8);
-   double t = log(Q/lmd);
-   double asMz = 1.0/(b0*t);
-
-   return asMz*(1.0-b1/b0*asMz*log(2.0*t)) *TWOPI;
-
-}
-
-
-//______________________________________________________________________________
-
-
-double FastNLOReader::CalcAlphasCRunDec(double Q, double alphasMZ){
-  //
-  // Implementation of Alpha_s evolution as function of Mu_r.
-  //
-  // alpha_s evolution as given by the CRunDec program by
-  // Barbara Schmidt, Matthias Steinhauser;
-  // see also description in
-  //   K.~G.~Chetyrkin, J.~H.~Kuhn and M.~Steinhauser,
-  //   ``RunDec: A Mathematica package for running and decoupling of the strong
-  //   coupling and quark masses,'' Comput.\ Phys.\ Commun.\  {\bf 133} (2000) 43
-  //   [arXiv:hep-ph/0004189].
-  
-  // - do some initial print out 
-  const string csep41("#########################################");
-  const string cseps = csep41 + csep41;
-  static bool first = true;
-  if ( first ) {
-    first = false;
-    cout << endl << " " << cseps << endl;
-    printf(" # ALPHAS-CRUNDEC: First call:\n");
-    cout << " " << cseps << endl;
-    //    printf(" # ALPHAS-CRUNDEC: PI              = %#18.15f\n",twopi/2.); 
-    printf(" # ALPHAS-CRUNDEC: M_Z/GeV         = %#9.6f\n",Alphas::GetMz()); 
-    printf(" # ALPHAS-CRUNDEC: a_s(M_Z)        = %#9.6f\n",Alphas::GetAlphasMz()); 
-    printf(" # APLHAS-CRUNDEC: a_s loop        = %2i\n",Alphas::GetNLoop());
-    //    printf(" # APLHAS-CRUNDEC: flavor-matching = %s\n",(bFlavorMatching?"true":"false"));
-    printf(" # APLHAS-CRUNDEC: nf (M_Z)        = %2d\n",Alphas::GetNf());
-    cout << " " << cseps << endl;
-  }
-
-  CRunDec* pEvolObj = new CRunDec();
-  double as_crundec = pEvolObj->AlphasExact(alphasMZ, Alphas::GetMz(), Q, Alphas::GetNf(), Alphas::GetNLoop());
-  
-  return as_crundec;
-}
 
 
 //______________________________________________________________________________
@@ -2540,7 +2294,7 @@ vector<double> FastNLOReader::CalcPDFLinearCombHHC( vector<double> pdfx1 , vecto
 void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)){
    if ( !GetIsFlexibleScaleTable() ) {
       warn["SetExternalFuncForMuR"]<<"This is not a flexible-scale table and SetExternalFuncForMuR has no impact.\n";
-      text<<"Please use a flexible-scale table, if you want to change your scale definition.\n";
+      man<<"Please use a flexible-scale table, if you want to change your scale definition.\n";
       return;
    }
    
@@ -2561,7 +2315,7 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)){
 void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache){
    if ( !GetIsFlexibleScaleTable() ) {
       warn["SetExternalFuncForMuF"]<<"This is not a flexible-scale table and SetExternalFuncForMuF has no impact.\n";
-      text<<"Please use a flexible-scale table, if you want to change your scale definition.\n";
+      man<<"Please use a flexible-scale table, if you want to change your scale definition.\n";
       return;
    }
 

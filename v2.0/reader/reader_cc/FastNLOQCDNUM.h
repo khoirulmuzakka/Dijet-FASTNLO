@@ -16,22 +16,29 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef FASTNLOUSER
-#define FASTNLOUSER
+#ifndef FASTNLOQCDNUM
+#define FASTNLOQCDNUM
 
 #include "FastNLOReader.h"
 
 using namespace std;
 
 
-class FastNLOUser : public FastNLOReader {
+extern "C"{
+   void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
+   void evolution_();
+   double asfunc_( double* r2, int* nf  , int* ierr);
+}
+
+
+class FastNLOQCDNUM : public FastNLOReader {
 
 public:
-   FastNLOUser(string name);
+   FastNLOQCDNUM(string name);
 
 protected:
    // inherited functions
-   double EvolveAlphas(double Q) const ;
+   double EvolveAlphas(double Q ) const ;
    void InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
   
@@ -42,12 +49,13 @@ protected:
 //______________________________________________________________________________
 
 
-FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
-   // --- fastNLO user: if you have your own alpha_s routing in FastNLOUser::EvolveAlphas(double,double)
+FastNLOQCDNUM::FastNLOQCDNUM(string name) : FastNLOReader(name) {
+   // --- fastNLO user: if you have your own alpha_s routing in FastNLOQCDNUM::EvolveAlphas(double,double)
    //     it is convenient to automatically interface it here.
    //     Otherwise the FastNLO alpha_s evolution code Alphas.cc is used, or
    //     you have to call SetAlphasEvolution.
    //     It might be also convenient to make your scale choices here!
+   FillAlphasCache();
 }
 
 
@@ -55,22 +63,33 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 //______________________________________________________________________________
 
 
-double FastNLOUser::EvolveAlphas(double Q, double alphasMz ) const {
+double FastNLOQCDNUM::EvolveAlphas(double Q) const {
    // --- fastNLO user: 
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
-   return 0;
+   // This function does not make use alphasMz but is using
+   // the nominal values as defined in QCDNUM
+   //
+   double mu2 = Q*Q;
+   int ierr = 9876;
+   int nf = 9;
+   double as = asfunc_( &mu2, &nf  , &ierr);
+   if ( ierr > 0 )
+      error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
+   return as;
 }
 
 
 //______________________________________________________________________________
 
 
-void FastNLOUser::InitPDF(){
+void FastNLOQCDNUM::InitPDF(){
    // --- fastNLO user: 
    //  Initalize PDF parameters if necessary
    //
+   // It might be necessary that the PDF grid is recalculated/generated.
+   evolution_();
 }
 
 
@@ -78,14 +97,18 @@ void FastNLOUser::InitPDF(){
 
 
 
-vector<double> FastNLOUser::GetXFX(double xp, double muf) const {
+vector<double> FastNLOQCDNUM::GetXFX(double xp, double muf) const {
    //
    //  GetXFX is used to get the parton array from the
    //  pdf-interface. It should return a vector of 13
    //  parton flavors from tbar to t at a certain
    //  x-proton and factorisation scale.
    //
-   vector <double > xfx(13);
+   int iqnset = 1;
+   int iqnchk = 0;
+   double muf2 = muf*muf;
+   vector < double > xfx(13);
+   fpdfxq_(&iqnset, &xp, &muf2, &xfx[0], &iqnchk);
    return xfx;
 }
 

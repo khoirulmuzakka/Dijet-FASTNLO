@@ -22,7 +22,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-
+#include "speaker.h"
 #include <string>
 #include <iostream>
 #include <cstdio>
@@ -32,66 +32,7 @@
 
 using namespace std;
 
-class speaker {
-public:
-   speaker(std::string prefix="",bool quiet=false,bool err=false) : 
-      weg(0) , quiet(quiet){
-      weg.clear(std::ios::badbit);
-      pref=prefix;
-      errs=err; };
-   speaker(const speaker& spk):weg(0){;}; 
-   std::ostream& operator() (std::string fct) {
-      if (quiet) return weg;
-      *this<<"In "<<fct<<". ";
-      if(errs) return std::cerr;
-      else return std::cout;
-   }
-   std::ostream& operator[] (std::string fct) {
-      if (quiet) return weg;
-      return *this<<"["<<fct<<"] ";
-      if(errs) return std::cerr;
-      else return std::cout;
-      //return *this;
-   }
-   speaker& operator+ (std::string fct){return this->prefix(fct);}
-   speaker& prefix(std::string fct) {
-      if (!quiet){
-	 if (errs) std::cerr<<fct;
-	 else std::cout<<fct;;
-      }
-      return *this;
-   }
-   template<typename T> std::ostream& operator<< (T arg) {
-      if (quiet) return weg;
-      else {	
-	 if (errs) return std::cerr<<pref<<arg;
-	 else return std::cout<<pref<<arg;
-      }
-   };
-   template<typename T> std::ostream& operator>> (T arg) {
-      return print(arg);
-   };
-   std::ostream& print(string mes) { 
-      if (quiet) return weg;
-      else {	
-	 if (errs) return std::cerr<<mes;
-	 else  return std::cout<<mes;
-      }
-   }
-   void DoSpeak(bool loud){quiet=!loud;};
-   bool GetSpeak() const {return !quiet;};
-   void SetPrefix(std::string prefix){pref=prefix;};
-   std::string GetPrefix(std::string prefix) const {return pref;};
-protected:
-   std::ostream weg;
-   bool quiet;
-   std::string pref;
-   bool errs;
-};
-
-
-
-class FastNLOReader {
+class FastNLOReader : public PrimalScream {
 
 public:
 
@@ -116,14 +57,14 @@ public:
     kExtern			= 10	// define an external function for your scale
   };
 
-  enum EAlphasEvolution {
-    kGRV			= 0,
-    kNLOJET			= 1,      
-    kCTEQpdf			= 2,      
-    kCRunDec                    = 3,
-    kExternAs			= 4,	// use alphas-evolution as define in FastNLOInterface.cc
-    kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
-  };
+//   enum EAlphasEvolution {
+//     kGRV			= 0,
+//     kNLOJET			= 1,      
+//     kCTEQpdf			= 2,      
+//     kCRunDec                    = 3,
+//     kExternAs			= 4,	// use alphas-evolution as define in FastNLOInterface.cc
+//     kFixed			= 7     // Always gives back alpha_s(Mz) for testing.
+//   };
 
   enum EUnits {
     kAbsoluteUnits		= 0,	// calculate the cross section in barn for each publicated bin
@@ -164,7 +105,7 @@ protected:
   int fScalevar;
   double fScaleFacMuR;
   double fScaleFacMuF;
-  EAlphasEvolution	fAlphasEvolution;
+   //EAlphasEvolution	fAlphasEvolution;
   EScaleFunctionalForm fMuRFunc;
   EScaleFunctionalForm fMuFFunc;
   EUnits		fUnits;
@@ -174,7 +115,7 @@ protected:
   vector < vector < bool > > bUseNewPhys;		// switch calculations ON/OFF
 
   // ---- alpha_s vars ---- //
-  double fAlphasMz;
+   //double fAlphasMz;
 
   // ---- Block A1 ---- //
   int Itabversion;
@@ -231,16 +172,15 @@ public:
   FastNLOReader(const FastNLOReader& fnlo);
   virtual ~FastNLOReader(void);
 
-  static void SetVerbosity(FastNLOReader::Verbosity verbosity);
   void SetFilename(string filename) ;
   void InitScalevariation();
-  void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
-  void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
+   //   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
+   //   void SetAlphasEvolution( EAlphasEvolution AlphasEvolution );
   void SetUnits( EUnits Unit );
   //void SetCalculationOrder( ECalculationOrder order ){ fOrder = order;};
   void SetContributionON( ESMCalculation eCalc , unsigned int Id , bool SetOn = true);	// Set contribution On/Off. Look for Id of this contribution during initialization.
   int ContrId( const ESMCalculation eCalc, const ESMOrder eOrder ) const;
-  void SetGRVtoPDG2011_2loop(bool print);
+   //void SetGRVtoPDG2011_2loop(bool print);
 
   // ---- setters for scales of MuVar tables ---- //
   void SetMuRFunctionalForm( EScaleFunctionalForm func);// Set the functional form of Mu_R
@@ -270,11 +210,11 @@ public:
   // ---- Getters for FastNLOReader member variables ---- //
   EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
   EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
-  EAlphasEvolution GetAlphasEvolution() const { return fAlphasEvolution; };
+   //EAlphasEvolution GetAlphasEvolution() const { return fAlphasEvolution; };
   EUnits GetUnits() const{ return fUnits; };
   mu_func GetExternalFuncForMuR(){ return Fct_MuR; };
   mu_func GetExternalFuncForMuF(){ return Fct_MuF; };
-  double GetAlphasMz() const { return fAlphasMz; };
+   //double GetAlphasMz() const { return fAlphasMz; };
   double GetScaleFactorMuR() const { return fScaleFacMuR;};
   double GetScaleFactorMuF() const { return fScaleFacMuF;};
   int GetScaleVariation() const { return fScalevar; };
@@ -311,18 +251,11 @@ public:
   void PrintFastNLODemo();
 
 
-   static speaker debug;
-   static speaker error;
-   static speaker warn;
-   static speaker info;
-   static speaker text;
-      
-
 protected:
 
   void Init() ;
   void ReadTable();
-  void InitMembers();
+   //void InitMembers();
   void StripWhitespace(string* s);
 
   void ReadBlockA1(istream *table);
@@ -346,9 +279,9 @@ protected:
 
   void CalcReferenceCrossSection();
 
-  double CalcAlphasNLOJET(double Q, double alphasMz);
-  double CalcAlphasCTEQpdf(double Q, double alphasMz);
-  double CalcAlphasCRunDec(double Q, double alphasMz);
+   //   double CalcAlphasNLOJET(double Q, double alphasMz);
+   //   double CalcAlphasCTEQpdf(double Q, double alphasMz);
+   //   double CalcAlphasCRunDec(double Q, double alphasMz);
   
   double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
   double FuncMixedOver1 ( double scale1 , double scale2 ) ;
@@ -372,7 +305,8 @@ protected:
    // virtual functions for the user interface
    virtual void InitPDF() = 0;
    virtual vector<double> GetXFX(double x, double muf ) const = 0;
-   virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
+   //virtual double EvolveAlphas(double Q, double alphasMz) const = 0;
+   virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
    double SetScaleVariation( int scalevar , bool ReFillCache = true);// Choose the MuF scale variation table
