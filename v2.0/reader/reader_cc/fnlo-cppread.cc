@@ -16,7 +16,11 @@
 #include <cstdlib>
 #include <cfloat>
 #include "FastNLOUser.h"
+#include "FastNLOLHAPDF.h"
+#include "FastNLOAlphas.h"
+#include "FastNLONLOJETLIKE.h"
 #include "FastNLODiffUser.h"
+#include "FastNLOCRunDec.h"
 #include "Alphas.h"
 
 // Function prototype for flexible-scale function 
@@ -139,6 +143,7 @@ int fnlocppread(int argc, char** argv){
   //     functions suitable for this fastNLO table.
 
 
+  say::SetGlobalVerbosity(say::INFO);
 
   // ------- Initialize fastNLOReader ------- //
   // --- fastNLO user: Make an instance of your class that derives
@@ -150,10 +155,32 @@ int fnlocppread(int argc, char** argv){
   //     The example class for LHAPDF has overwritten the constructor
   //     and thus takes also the PDF filename (and PDF set).
   //     TBD: ??? C++ chinese ???
-  FastNLOUser* fnloreader = new FastNLOUser( tablename , PDFFile , 0 );
-  
-  fnloreader->SetVerbosity(FastNLOReader::Warning);
 
+  
+  
+  cout<<" ================ CRunDec ================== " << endl;
+  FastNLOCRunDec* fnlocrundec = new FastNLOCRunDec( tablename , PDFFile , 0 );
+  fnlocrundec->SetAlphasMz(0.1179);
+  fnlocrundec->FillPDFCache();
+  fnlocrundec->PrintCrossSectionsDefault();
+
+  cout<<" ================ LHAPDF ================== " << endl;
+  FastNLOLHAPDF* fnlo = new FastNLOLHAPDF( tablename , PDFFile , 0 );
+  fnlo->PrintCrossSectionsDefault();
+  
+
+  cout<<" ================ Alphas ================== " << endl;
+  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
+  fnloreader->SetAlphasMz(0.1179);
+  fnloreader->PrintCrossSectionsDefault();
+
+  cout<<" ================ NLOJETLIKE ================== " << endl;
+  FastNLONLOJETLIKE* nloj = new FastNLONLOJETLIKE(tablename);
+  nloj->SetMuFFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+  nloj->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+  nloj->FillPDFCache();
+  nloj->CalcCrossSection();
+  nloj->PrintCrossSectionsWithReference();
 
 
   // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
@@ -208,51 +235,10 @@ int fnlocppread(int argc, char** argv){
 
   
   // ------- Setting Alpha_s value ------- //
-  // --- fastNLO user: With fastNLO, the user can choose the value of alpha_s(Mz).
-  //     Furthermore, there are multiple options for the evolution
-  //     code to calculate alpha_s(mu_r) according to the RGE.
-  //     To set the value of alpha_s(Mz) at the Z0 mass, please use:
-  //            fnloreader->SetAlphasMz(0.1185);
-  //     You always have to specify an alpha_s(Mz) value.
-  //    
-  //     Further you can specify the desired evolution code using
-  //            fnloreader->SetAlphasEvolution(FastNLOReader::EAlphasEvolution);
-  //
-  //     The following options can be chosen for the evolution:
-  //      - kGRV		The default option in fastNLO.
-  //                            Here you can select 2-,3- or 4-loop iterative solutions of the RGE and
-  //                            set any value for M_Z, the number of flavors, the flavor matching, etc...
-  //                            Please see the documentation in Alphas.h and Alphas.cc.
-  //                            For usage you can access the static class directly like e.g.:
-  //                                Alphas::SetNLoop(2);
-  //                                Alphas::SetMz(91.1786);
-  //				INFO: When setting kGRV, you initialize Alphas::Alphas() with
-  //				some reasonable values and overwrite previous settings in this class!
-  //      - kNLOJET		This is the alpha_s evolution, which is used by NLOJet++ as default
-  //      - kCTEQpdf		This alpha_s evolution is used in the CTEQ6 PDFs. [Sure?]
-  //      - kCRunDec            alpha_s evolution from:
-  //                            RunDec: K. G. Chetyrkin, J. H. Kuhn and M. Steinhauser, arXiv:hep-ph/0004189
-  //                            CRunDec: B. Schmidt and M. Steinhauser, arXiv:1201.6149 [hep-ph]
-  //      - kLHAPDFInternal	With this option, you access the alpha_s evolution, which is defined
-  //                            within the LHAPDF file. You cannot change alphas(Mz) here!
-  //      - kQCDNUMInternal	Using kQCDNUM as PDF evolution code, you can make use of the
-  //				QCDNUM alpha_s evolution. Please see the QCDNUM manual for options.
-  //      - kFixed		Take always the fixed value of SetAlphasMz() without any evolution code.
-  //
-  //     INFO: The choice of the 'number of flavors' in your alpha_s evolution might be 
-  //     inconsistent with the number of flavors that is used for calculating the matrix elements.
-  //     NLOJet++ typically uses 5 massless flavors.
-  //
-  fnloreader->SetAlphasEvolution(FastNLOReader::kGRV);
-  //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET); 
-  //fnloreader->SetAlphasEvolution(FastNLOReader::kLHAPDFInternal); 
-  //fnloreader->SetAlphasEvolution(FastNLOReader::kCTEQpdf);
-  //fnloreader->SetAlphasEvolution(FastNLOReader::kCRunDec);
-  //fnloreader->SetAlphasEvolution(FastNLOReader::kNLOJET);
-  //fnloreader->SetAlphasMz(0.1168);
-  //fnloreader->SetAlphasMz(0.1179);
+  // --- fastNLO user: 
+  //     The alpha_s evolution is provided in the user code
   // TBD: Use again value in released reader code for comparison
-  fnloreader->SetAlphasMz(0.1185);
+  //fnloreader->SetAlphasMz(0.1185);
 
 
 
