@@ -55,7 +55,7 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 //______________________________________________________________________________
 
 
-double FastNLOUser::EvolveAlphas(double Q, double alphasMz ) const {
+double FastNLOUser::EvolveAlphas(double Q) const {
    // --- fastNLO user: 
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
