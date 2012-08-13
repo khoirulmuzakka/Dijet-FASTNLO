@@ -1868,7 +1868,7 @@ double FastNLOReader::CalcAlphas( double Q ){
   // 
   //  Internal method for calculating the alpha_s(mu)
   //
-  EvolveAlphas    ( Q );
+   return EvolveAlphas(Q);
 }
 
 
