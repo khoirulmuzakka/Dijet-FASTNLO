@@ -21,11 +21,9 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <cfloat>
-#include <sstream>
 
 using namespace std;
 
@@ -50,11 +48,11 @@ FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
 {
    debug["FastNLOReader"]<<"New FastNLOReader reading filename="<<filename<<endl;
    BlockB_Data		= NULL;
-   BlockB_LO_Ref		= NULL;
+   BlockB_LO_Ref	= NULL;
    BlockB_NLO_Ref	= NULL;
-   fUnits		= kPublicationUnits;
-   fMuRFunc		= FastNLOReader::kScale1;
-   fMuFFunc		= FastNLOReader::kScale1;
+   fUnits		= fastNLO::kPublicationUnits;
+   fMuRFunc		= fastNLO::kScale1;
+   fMuFFunc		= fastNLO::kScale1;
    SetFilename(filename);
 }
 
@@ -104,7 +102,7 @@ void FastNLOReader::Init(){
 
 
 void FastNLOReader::InitScalevariation(){
-   debug["InitScalevariation"]<<endl;
+  debug["InitScalevariation"]<<endl;
   fScaleFacMuR	= 1.;
   fScaleFacMuF	= 1.;
   fScalevar	= -1;
@@ -165,21 +163,21 @@ double FastNLOReader::CalcMu( FastNLOReader::EMuX kMuX , double scale1, double s
    if ( kMuX == kMuR && fScaleFacMuR != scalefac ) error<<"Sth. went wrong with the scales.\n";
    if ( kMuX == kMuF && fScaleFacMuF != scalefac ) error<<"Sth. went wrong with the scales.\n";
   
-  EScaleFunctionalForm Func = (kMuX == FastNLOReader::kMuR) ? fMuRFunc : fMuFFunc;
+  EScaleFunctionalForm Func = (kMuX == kMuR) ? fMuRFunc : fMuFFunc;
   
   double mu = 0;
 
-  if		( Func == kScale1 )		mu	= scale1;
-  else if	( Func == kScale2 )		mu	= scale2;
-  else if	( Func == kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2);
-  else if	( Func == kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2);
-  else if	( Func == kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2);
-  else if	( Func == kLinearMean )		mu	= FuncLinearMean(scale1,scale2);
-  else if	( Func == kLinearSum )		mu	= FuncLinearSum(scale1,scale2);
-  else if	( Func == kScaleMax )		mu	= FuncMax(scale1,scale2);
-  else if	( Func == kScaleMin )		mu	= FuncMin(scale1,scale2);
-  else if	( Func == kExpProd2 )		mu	= FuncExpProd2(scale1,scale2);
-  else if	( Func == kExtern  )		mu	= (kMuX==FastNLOReader::kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
+  if		( Func == fastNLO::kScale1 )		mu	= scale1;
+  else if	( Func == fastNLO::kScale2 )		mu	= scale2;
+  else if	( Func == fastNLO::kQuadraticSum )	mu	= FuncMixedOver1(scale1,scale2);
+  else if	( Func == fastNLO::kQuadraticMean )	mu	= FuncMixedOver2(scale1,scale2);
+  else if	( Func == fastNLO::kQuadraticSumOver4 )	mu	= FuncMixedOver4(scale1,scale2);
+  else if	( Func == fastNLO::kLinearMean )	mu	= FuncLinearMean(scale1,scale2);
+  else if	( Func == fastNLO::kLinearSum )		mu	= FuncLinearSum(scale1,scale2);
+  else if	( Func == fastNLO::kScaleMax )		mu	= FuncMax(scale1,scale2);
+  else if	( Func == fastNLO::kScaleMin )		mu	= FuncMin(scale1,scale2);
+  else if	( Func == fastNLO::kExpProd2 )		mu	= FuncExpProd2(scale1,scale2);
+  else if	( Func == fastNLO::kExtern  )		mu	= (kMuX==kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
   else error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
   
   return scalefac * mu;
@@ -322,7 +320,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
    if	( func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 
 	  || func == kLinearMean || func == kLinearSum  ||  func == kScaleMax|| func == kScaleMin ) {
       if ( BBlocksSMCalc[0][1]->ScaleNodeScale2[0].size() <= 3){
-	 error<<"There is no second scale variable available in this table. Using FastNLOReader::kScale1 only.\n";
+	 error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
 	 SetFunctionalForm(kScale1,MuX);
       }
       for(int i=0;i<NObsBin;i++){
@@ -1107,24 +1105,24 @@ void FastNLOReader::PrintFastNLODemo(){
 
    // If flexible-scale table, set MuR and MuF functional forms
    if ( GetIsFlexibleScaleTable() ){
-      SetMuRFunctionalForm(FastNLOReader::kScale1);
-      SetMuFFunctionalForm(FastNLOReader::kScale1);
-      //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
-      //SetMuRFunctionalForm(FastNLOReader::kExpProd2);
+      SetMuRFunctionalForm(fastNLO::kScale1);
+      SetMuFFunctionalForm(fastNLO::kScale1);
+      //SetMuRFunctionalForm(fastNLO::kExpProd2);
+      //SetMuRFunctionalForm(fastNLO::kExpProd2);
   }
 
   // Check on existence of LO and NLO (Id = -1 if not existing)
-  int ilo   = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
-  int inlo  = ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);
+  int ilo   = ContrId(fastNLO::kFixedOrder, fastNLO::kLeading); 
+  int inlo  = ContrId(fastNLO::kFixedOrder, fastNLO::kNextToLeading);
   if ( ilo < 0 || inlo < 0 ){
      error["PrintFastNLODemo"]<<"LO and/or NLO not found, nothing to be done!\n";
      return;
   }
   // Check on existence of 2-loop threshold corrections
-  int ithc2 = ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
+  int ithc2 = ContrId(fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
   // Switched off by default. Don't do scale variations. Not available for the moment.
   //  if ( ithc2 > -1 ) {
-  //    SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false, false );
+  //    SetContributionON( fastNLO::kThresholdCorrection, ithc2, false, false );
   //  }
   
   // Pre-define desired order of scale variations
@@ -1160,7 +1158,7 @@ void FastNLOReader::PrintFastNLODemo(){
       vector < double > kthc;
       if ( ithc2 > -1 ) {
 	vector < double > stdk = kFactor;
-	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, true);
+	SetContributionON( fastNLO::kThresholdCorrection, ithc2, true);
 	CalcCrossSection();
 	kthc = kFactor;
 	// Threshold K factor is NLO including 2-loop vs. NLO
@@ -1171,7 +1169,7 @@ void FastNLOReader::PrintFastNLODemo(){
 	    kthc[i] = -1.;
 	  }
 	}
-	SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false);
+	SetContributionON( fastNLO::kThresholdCorrection, ithc2, false);
       }
       
       PrintCrossSectionsDefault( kthc );
@@ -1199,7 +1197,7 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
   
 
   // Check on existence of 2-loop threshold corrections
-  //const int ithc2 = kthc.empty() ? -1 : ContrId( FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
+  //const int ithc2 = kthc.empty() ? -1 : ContrId( fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
   const int ithc2 = kthc.empty() ? -1 : ContrId( kThresholdCorrection,kNextToLeading);
 
 
@@ -1211,7 +1209,7 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
   if ( NDim == 2 ){
 
      // non-perturbative corrections (just first np correction)
-     const int inpc1 = ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
+     const int inpc1 = ContrId(fastNLO::kNonPerturbativeCorrection, fastNLO::kLeading);
      const vector < double > knpc = inpc1>-1 ? BBlocksSMCalc[3][0]->fact : vector<double>(NObsBin);
      
 

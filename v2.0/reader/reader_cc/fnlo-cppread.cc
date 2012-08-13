@@ -160,8 +160,9 @@ int fnlocppread(int argc, char** argv){
   
   cout<<" ================ CRunDec ================== " << endl;
   FastNLOCRunDec* fnlocrundec = new FastNLOCRunDec( tablename , PDFFile , 0 );
-  fnlocrundec->SetAlphasMz(0.1179);
+  fnlocrundec->SetAlphasMz(0.1182);
   fnlocrundec->FillPDFCache();
+  fnlocrundec->CalcCrossSection();
   fnlocrundec->PrintCrossSectionsDefault();
 
   cout<<" ================ LHAPDF ================== " << endl;
@@ -176,8 +177,8 @@ int fnlocppread(int argc, char** argv){
 
   cout<<" ================ NLOJETLIKE ================== " << endl;
   FastNLONLOJETLIKE* nloj = new FastNLONLOJETLIKE(tablename);
-  nloj->SetMuFFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-  nloj->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+  nloj->SetMuFFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+  nloj->SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
   nloj->FillPDFCache();
   nloj->CalcCrossSection();
   nloj->PrintCrossSectionsWithReference();
@@ -189,11 +190,11 @@ int fnlocppread(int argc, char** argv){
   //     There are two possibilites:
   //       - The default option is 'publication units', i.e. divided by 
   //         bin widths if done so in the relevant publication
-  //            fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
+  //            fnloreader->SetUnits(fastNLO::kPublicationUnits);
   //       - The other option is 'absolute' units in barn, but still in
   //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
-  //fnloreader->SetUnits(FastNLOReader::kAbsoluteUnits);
-  fnloreader->SetUnits(FastNLOReader::kPublicationUnits);
+  //fnloreader->SetUnits(fastNLO::kAbsoluteUnits);
+  fnloreader->SetUnits(fastNLO::kPublicationUnits);
   
   
   
@@ -222,10 +223,10 @@ int fnlocppread(int argc, char** argv){
   //     Since the PDF evolution is typically provided in some external
   //     code, you can choose the interface to the evolution routine.
   //     By default LHAPDF is used:
-  //           fnloreader->SetPDFInterface(FastNLOReader::kLHAPDF);
+  //           fnloreader->SetPDFInterface(fastNLO::kLHAPDF);
   //	
   //   TBD: What about the PDFFile above? What to use?
-  //   TBD: Which alternatives for SetPDFInterface(FastNLOReader::kLHAPDF) ?
+  //   TBD: Which alternatives for SetPDFInterface(fastNLO::kLHAPDF) ?
   //
   //   fnloreader->SetLHAPDFfilename( PDFFile );
   //   fnloreader->SetLHAPDFset( 0 );
@@ -325,17 +326,17 @@ int fnlocppread(int argc, char** argv){
     //       - mu_f:  kScale1		-> mu_f = scale1
     //
     //     Valid calls are e.g.:
-    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_r from scale1 and scale2
-    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuRFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_r from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
     //     fnloreader->SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
-    //     fnloreader->SetMuRFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
-    //     fnloreader->SetMuFFunctionalForm(FastNLOReader::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuRFunctionalForm(fastNLO::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+    //     fnloreader->SetMuFFunctionalForm(fastNLO::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
   }
   // INFO: All above-mentioned scale changing functions automatically perform a refilling of the
   //       fastNLO internal PDF cache. To switch it off you can use a boolean, like:
-  //       fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1 , false );
+  //       fnloreader->SetMuFFunctionalForm(fastNLO::kScale1 , false );
   
   
   
@@ -432,8 +433,8 @@ int fnlocppread(int argc, char** argv){
   printf("%s",CSEPL.c_str());
 
   // Check on existence of LO and NLO (Id = -1 if not existing)
-  int ilo   = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kLeading); 
-  int inlo  = fnloreader->ContrId(FastNLOReader::kFixedOrder, FastNLOReader::kNextToLeading);
+  int ilo   = fnloreader->ContrId(fastNLO::kFixedOrder, fastNLO::kLeading); 
+  int inlo  = fnloreader->ContrId(fastNLO::kFixedOrder, fastNLO::kNextToLeading);
   if ( ilo < 0 || inlo < 0 ){
     printf("fnlo-read: ERROR! LO and/or NLO not found, nothing to be done!\n");
     exit(1);
@@ -441,14 +442,14 @@ int fnlocppread(int argc, char** argv){
     //    printf("fnlo-read: LO and NLO contributions have Id's: %i and %i\n",ilo,inlo);
   }
   // Check on existence of 2-loop threshold corrections
-  int ithc2 = fnloreader->ContrId(FastNLOReader::kThresholdCorrection, FastNLOReader::kNextToLeading);
+  int ithc2 = fnloreader->ContrId(fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
   // if ( ithc2 < 0 ){
   //   printf("fnlo-read: 2-loop threshold corrections not found!\n");
   // } else {
   //   printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
   // }
   // Check on existence of non-perturbative corrections from LO MC
-  int inpc1 = fnloreader->ContrId(FastNLOReader::kNonPerturbativeCorrection, FastNLOReader::kLeading);
+  int inpc1 = fnloreader->ContrId(fastNLO::kNonPerturbativeCorrection, fastNLO::kLeading);
   // if ( inpc1 < 0 ){
   //   printf("fnlo-read: Non-perturbative corrections not found!\n");
   // } else {
@@ -456,10 +457,10 @@ int fnlocppread(int argc, char** argv){
   // }
 
   // Switch on LO & NLO, switch off anything else
-  if (! (ilo   < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 0, true );} 
-  if (! (inlo  < 0)) {fnloreader->SetContributionON( FastNLOReader::kFixedOrder, 1, true );}
-  if (! (ithc2 < 0)) {fnloreader->SetContributionON( FastNLOReader::kThresholdCorrection, ithc2, false );}
-  if (! (inpc1 < 0)) {fnloreader->SetContributionON( FastNLOReader::kNonPerturbativeCorrection, inpc1, false );}
+  if (! (ilo   < 0)) {fnloreader->SetContributionON( fastNLO::kFixedOrder, 0, true );} 
+  if (! (inlo  < 0)) {fnloreader->SetContributionON( fastNLO::kFixedOrder, 1, true );}
+  if (! (ithc2 < 0)) {fnloreader->SetContributionON( fastNLO::kThresholdCorrection, ithc2, false );}
+  if (! (inpc1 < 0)) {fnloreader->SetContributionON( fastNLO::kNonPerturbativeCorrection, inpc1, false );}
   // Temporary: Also don't print the cross sections out even when existing for this example
   ithc2 = -1;
   inpc1 = -1;
@@ -473,10 +474,10 @@ int fnlocppread(int argc, char** argv){
       continue;
     }
     if ( fnloreader->GetIsFlexibleScaleTable() ) {
-      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale1);
-      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale1);
-      //      fnloreader->SetMuFFunctionalForm(FastNLOReader::kScale2);
-      //      fnloreader->SetMuRFunctionalForm(FastNLOReader::kScale2);
+      fnloreader->SetMuFFunctionalForm(fastNLO::kScale1);
+      fnloreader->SetMuRFunctionalForm(fastNLO::kScale1);
+      //      fnloreader->SetMuFFunctionalForm(fastNLO::kScale2);
+      //      fnloreader->SetMuRFunctionalForm(fastNLO::kScale2);
     }
     
     // Calculate cross section
