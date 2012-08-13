@@ -22,7 +22,6 @@
 
 
 #include <string>
-#include <cstdio>
 #include <vector>
 #include "FastNLOReader.h"
 
@@ -50,8 +49,6 @@ public:
    vector < double > GetReferenceCrossSection();
 
    // ---- Print outs must be overwritten ---- //
-   void PrintCrossSections();
-   void PrintCrossSectionsDefault();
    void PrintCrossSectionsWithReference();
 
    
@@ -65,7 +62,7 @@ protected:
    vector < double > fdxPoms;
 
    // inherited functions
-   virtual double EvolveAlphas(double Q, double alphasMz ) const = 0;
+   virtual double EvolveAlphas(double Q) const = 0;
    virtual void InitPDF() = 0;
    vector<double> GetXFX(double xp, double muf) const;
    virtual vector<double> GetDiffXFX(double xpom, double zpom, double muf) const = 0;

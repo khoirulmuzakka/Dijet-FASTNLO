@@ -1,8 +1,8 @@
 // Author: Daniel Britzger
-// DESY, 08/08/2012
+// DESY, 02/04/2012
 
-#ifndef FASTNLODIFFUSER
-#define FASTNLODIFFUSER
+#ifndef FASTNLODIFFH12006FITB
+#define FASTNLODIFFH12006FITB
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -28,12 +28,12 @@
 
 using namespace std;
 
-class FastNLODiffUser : public FastNLODiffReader {
+class FastNLODiffH12006FitB : public FastNLODiffReader {
 
 public:
    
-   FastNLODiffUser(string filename);
-   ~FastNLODiffUser(void){;};
+   FastNLODiffH12006FitB(string filename);
+   ~FastNLODiffH12006FitB(void){;};
   
 protected:
    
@@ -49,9 +49,18 @@ protected:
 //______________________________________________________________________________
 
 
+extern "C"{
+   void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
+}
 
 
-FastNLODiffUser::FastNLODiffUser(string filename) : FastNLODiffReader(filename)
+
+//______________________________________________________________________________
+
+
+
+
+FastNLODiffH12006FitB::FastNLODiffH12006FitB(string filename) : FastNLODiffReader(filename)
 {
 }
 
@@ -59,22 +68,33 @@ FastNLODiffUser::FastNLODiffUser(string filename) : FastNLODiffReader(filename)
 //______________________________________________________________________________
 
 
-double FastNLODiffUser::EvolveAlphas(double Q) const {
+double FastNLODiffH12006FitB::EvolveAlphas(double Q) const {
    // --- fastNLO user:
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
-   return 0;
+
+   static const int NF=4; // from h12006B_wrapper.h
+   static const double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
+   static const  double b1 =  (51. - 19./3.*NF);
+
+   //      double lmd = 0.399; // according to matthias
+   static const double lmd = 0.3395; // according to matthias
+   double t = log(Q/lmd);
+   double asMz = 1.0/(b0*t);
+
+   return asMz*(1.0-b1/b0*asMz*log(2.0*t)) *TWOPI ;
 }
 
 
 //______________________________________________________________________________
 
 
-void FastNLODiffUser::InitPDF(){
+void FastNLODiffH12006FitB::InitPDF(){
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
+   // nothing todo!
 }
 
 
@@ -82,7 +102,7 @@ void FastNLODiffUser::InitPDF(){
 
 
 
-vector<double> FastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf) const {
+vector<double> FastNLODiffH12006FitB::GetDiffXFX(double xpom, double zpom, double muf) const {
    //
    //  GetDiffXFX is used to get the parton array from the
    //  pdf-interface. It should return a vector of 13
@@ -90,9 +110,7 @@ vector<double> FastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf)
    //  xpom, zpom and factorisation scale.
    //
    vector < double > xfx(13);
-   // fastNLO user:
-   //   include some function here to fill the parton density array
-   //   xfx[0]=tbar, xfx[6]=gluon, xfx[12]=t
+   diffpdf_(&xpom,&zpom,&muf,&xfx[0]);
    //debug<<"xpom="<<xpom<<"\tzpom="<<zpom<<"\tmuf="<<muf<<"\tgluon = "<<xfx[6]<<endl;
    return xfx;
 }

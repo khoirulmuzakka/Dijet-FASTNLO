@@ -49,6 +49,7 @@ void FastNLODiffReader::SetXPomSlicing(int nSlice, double* xpom, double* dxpom)
    for ( int i = 0 ; i<nSlice ; i++ ){
       fxPoms[i]  = xpom[i];
       fdxPoms[i] = dxpom[i];
+      debug["SetXPomlicing"]<<"[i]="<<i<<"\tfxPomx[i]="<<fxPoms[i]<<"\tfdxPoms[i]="<<fdxPoms[i]<<endl;
    }
 }
 
@@ -60,9 +61,9 @@ void FastNLODiffReader::SetXPomLogSlicing(int nStep, double xpommin, double xpom
 {
 
    if ( xpommin < 1.e-4 ) {
-      printf("FastNLODiffReader::SetXPomLogSlicing. xpommin should not be too small in order to have sufficent nodes.\n");
+      warn["SetXPomLogSlicing"]<<"xpommin should not be too small in order to have sufficent nodes."<<endl;
       if ( xpommin == 0 ) {
-	 printf("FastNLODiffReader::SetXPomLogSlicing. xpommin should espc. not be '0'!\n");
+	 warn["SetXPomLogSlicing"]<<"xpommin should espc. not be '0'!"<<endl;
 	 exit(1);
       }
    }
@@ -80,10 +81,7 @@ void FastNLODiffReader::SetXPomLogSlicing(int nStep, double xpommin, double xpom
       binning[i] = pow(10.,(log10(binning[i-1])+ delta_x_log));
       dxpom[i-1] = binning[i] - binning[i-1];
       xpom[i-1]  = pow(10.,((log10(binning[i-1])+log10(binning[i]))/2.));
-      //cout << "binning[i] = "<<binning[i]<<"\tdxpom = "<<dxpom[i-1] << "\txpom = " << xpom[i-1] << endl;
    }
-
-   
    SetXPomSlicing( nStep, xpom, dxpom);
 }
 
@@ -106,7 +104,7 @@ void FastNLODiffReader::SetXPomExpSlicing(int nStep, double xpommin, double xpom
       binning[i] = log(exp(binning[i-1])+ delta_x_log);
       dxpom[i-1] = binning[i] - binning[i-1];
       xpom[i-1]  = log((exp(binning[i-1])+exp(binning[i]))/2.);
-      cout << "binning[i] = "<<binning[i]<<"\tdxpom = "<<dxpom[i-1] << "\txpom = " << xpom[i-1] << endl;
+      debug["SetXPomExpSlicing"]<< "binning[i] = "<<binning[i]<<"\tdxpom = "<<dxpom[i-1] << "\txpom = " << xpom[i-1] << endl;
    }
    
    SetXPomSlicing( nStep, xpom, dxpom);
@@ -134,23 +132,30 @@ void FastNLODiffReader::SetXPomLinSlicing(int nStep, double xpommin, double xpom
 
 //______________________________________________________________________________
 void FastNLODiffReader::FillPDFCache( bool ReCalcCrossSection ){
-   printf("FastNLODiffReader::FillPDFCache(). ERROR. PDF Cache cannot be filled in diffractive version, since xpom integration has still to be performed\n");
-   printf("  Please access directly FastNLODiffReader::GetDiffCrossSection()\n");
+   error["FillPDFCache"]<<"PDF Cache cannot be filled in diffractive version, since xpom integration has still to be performed"<<endl;
+   error>>"  Please access directly FastNLODiffReader::GetDiffCrossSection()"<<endl;
    exit(1);
 }
 
 //______________________________________________________________________________
 void FastNLODiffReader::CalcCrossSection(){
-   printf("FastNLODiffReader::CalcCrossSection(). ERROR. This method is not valid for diffractive tables.\n");
-   printf("  Please access directly FastNLODiffReader::GetDiffCrossSection()\n");
+   error["CalcCrossSection"]<<"This method is not valid for diffractive tables."<<endl;
+   error>>"  Please access directly FastNLODiffReader::GetDiffCrossSection()\n";
    exit(1);
 }
 
 //______________________________________________________________________________
 
 vector<double> FastNLODiffReader::GetReferenceCrossSection( ){
-   printf("FastNLODiffReader::GetReferenceCrossSection(). No reference cross sections in diffractive version\n");
+   error["GetReferenceCrossSection"]<<"No reference cross sections in diffractive version"<<endl;
    return vector<double>();
+}
+
+//______________________________________________________________________________
+
+void FastNLODiffReader::PrintCrossSectionsWithReference(){
+   error["PrintCrossSectionsWithReference"]<<"No reference cross sections in diffractive version"<<endl;
+   return;
 }
 
 //______________________________________________________________________________
@@ -163,31 +168,31 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
    // Get fast calculated NLO cross section
 
    vector < double > xs(NObsBin);
-   
+   if ( fxPoms.empty() ){
+      error["GetDiffCrossSection"]<<"No xpom slicing given."<<endl;
+      return xs;
+   }
+
    double interv = 0;
    // do the xpom integration
-   //fprintf(stderr," * Integration xpom in %d slices. [",fxPoms.size());
-   printf(" * Integrating xpom in %d slices. [",fxPoms.size());
+   info.prefix(" # ")["GetDiffCrossSection"]<<"Integrating xpom in "<<fxPoms.size()<<" slices. [";
    fflush(stdout);
    FillAlphasCache();
    for ( unsigned int ixp = 0 ; ixp<fxPoms.size() ; ixp++ ){
       fxpom = fxPoms[ixp];
       // always recalculate cross section
-      FastNLOReader::FillPDFCache(false);
-      FastNLOReader::CalcCrossSection();
+      FastNLOReader::FillPDFCache(false); // this calls InitPDF() once
+      FastNLOReader::CalcCrossSection(); // this calls GetXFX() very very often!
 
-      double slicesize = fdxPoms[ixp];
-      interv+=slicesize;
-      
-      printf(".");
-      fflush(stdout);
-      
       for ( int i = 0 ; i<NObsBin ; i++ ){
-	 xs[i] += XSection[i] * slicesize ;
+	 if (i==0)debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;;
+	 xs[i] += XSection[i] * fdxPoms[ixp] ;
       }
+      info>>"."; fflush(stdout);
+      interv+=fdxPoms[ixp];
    }
-   printf("]\n");
-   cout << " * Integrated interval in xpom: " << interv << endl;
+   info>>"]"<<endl;
+   info.prefix(" # ")["GetDiffCrossSection"]<< "Integrated interval in xpom: " << interv << endl;
 
    // set this cross section also to FastNLO mother class
    XSection = xs;
@@ -196,7 +201,6 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
    for ( int i = 0 ; i<NObsBin ; i++ ){
       FastNLOReader::kFactor[i] = FastNLOReader::XSection[i] / FastNLOReader::XSection_LO[i];
    }
-
 
    return xs;
 }
@@ -214,7 +218,6 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 
    // get pdf
    double zpom = xp/fxpom;
-   double xpo = fxpom;
    vector < double > a(13);
    if ( zpom > fzmin && zpom < fzmax ){
 
@@ -222,8 +225,12 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
       // find x-node index
       int nx = -1;
       int nb = -1;
-      for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
-	 for ( int ix = 0 ; nx == -1 && ix<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+      for ( unsigned int ib = 0 ; nb == -1 && ib<BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
+	 if ( BBlocksSMCalc[0][0]->GetNxmax(ib) != BBlocksSMCalc[0][1]->GetNxmax(ib) )
+	    error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have same number of x-bins."<<endl;
+	 for ( unsigned int ix = 0 ; nx == -1 && ix<BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+	    if ( BBlocksSMCalc[0][0]->XNode1[ib][ix] != BBlocksSMCalc[0][1]->XNode1[ib][ix] )
+	       error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have idnetical x-bins."<<endl;
 	    if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
 	       nx = ix;
 	       nb = ib;
@@ -235,7 +242,6 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
       bool IsLastX  = nx == (int)BBlocksSMCalc[0][0]->XNode1[nb].size()-1 ;
       bool IsFirstX = nx == 0 ;
 
-
       if ( nx == -1 || nb == -1 ) {
 	 //printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
 	 for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
@@ -245,8 +251,8 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 		  nb = ib;
 	       }
 	       if (  fabs ( 1. - xp / BBlocksSMCalc[0][0]->XNode1[ib][ix] ) < 1.e-6 ){
-		  printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
-		  printf("but a quite close one: xp = %14.10e , xnode = %14.10e\n",xp,BBlocksSMCalc[0][0]->XNode1[ib][ix]);
+		  warn["FastNLODiffReader::GetXFX"]<<"Could not find x-node index for xp = "<<xp<<endl;
+		  warn>>"   but a quite close one: xp = "<<xp<<", xnode = "<<BBlocksSMCalc[0][0]->XNode1[ib][ix]<<endl;
 	       }
 	    }
 	 }
@@ -254,11 +260,6 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 	 IsLastX = true;
 	 IsFirstX = true;
       }
-
-
-      //    if ( zpom > fzmin && zpom < fzmax ) cout << "-";
-      //    else cout << "|";
-      //    fflush(stdout);
 
       a = GetDiffXFX( fxpom, zpom, muf);
 
@@ -287,6 +288,7 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 	 }
       }
    }
+
    return a;
 }
 
