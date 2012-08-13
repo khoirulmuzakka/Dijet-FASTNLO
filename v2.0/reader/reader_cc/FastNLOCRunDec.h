@@ -1,5 +1,5 @@
 // Author: Daniel Britzger
-// DESY, 20/04/2012
+// DESY, 11/08/2012
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -21,44 +21,40 @@
 
 #include "FastNLOReader.h"
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-#include "speaker.h"
 #include "CRunDec.h"
 
 using namespace std;
 
 
 class FastNLOCRunDec : public FastNLOReader {
-
 private:
-   FastNLOCRunDec(string name);
+   FastNLOCRunDec(string name);		// don't use it! LHAPDF-name is needed.
 public:
    FastNLOCRunDec(string name, string LHAPDFfile, int PDFset = 0);
 
+   // ----- Printout ---- //
+   void PrintPDFInformation() const ;		// Print LHAPDF settings
+   void PrintRunDecValues();			// Print values, which are passed to CRunDec for alpha_s evolution
+   
+   // ---- getters and setters LHAPDF variables ---- //
    void SetLHAPDFfilename( string filename );
    void SetLHAPDFset( int set );
    int GetIPDFSet() const {return fiPDFSet;};
-   int GetNPDFSets() const {return fnPDFs;};
-   void PrintPDFInformation() const ;
-   void PrintRunDecValues();
-   
-   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
+   int GetNPDFSets() const {return fnPDFs;};	
+
+   // ---- getters and setters CRunDec variables ---- //
+   void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
    double GetAlphasMz() const { return fAlphasMz; };
-
-   void SetMz( double Mz , bool ReCalcCrossSection = false );
+   void   SetMz( double Mz , bool ReCalcCrossSection = false );
    double GetMz() const { return fMz; };
-
-   void SetNf( double nf , bool ReCalcCrossSection = false );
-   int GetNf() const { return fNf; };
-
-   void SetNloop( double nloop , bool ReCalcCrossSection = false );
-   int GetNloop() const {return fNloop;};
+   void   SetNf( double nf , bool ReCalcCrossSection = false );
+   int    GetNf() const { return fNf; };
+   void   SetNloop( double nloop , bool ReCalcCrossSection = false );
+   int    GetNloop() const {return fNloop;};
 
 protected:
    // inherited functions
-   //double EvolveAlphas(double Q, double alphasMz ) const ;
    double EvolveAlphas(double Q) const ;
    void InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
@@ -69,6 +65,7 @@ protected:
    int fiPDFSet;
    
    // ---- CRunDec ---- //
+   // declare variables as static, that all instances use same alpha_s evolution
    static double fAlphasMz;
    static double fMz;
    static int fNf;
@@ -83,7 +80,7 @@ double FastNLOCRunDec::fAlphasMz=0.1180000654;
 double FastNLOCRunDec::fMz=0.1180000654;
 int FastNLOCRunDec::fNf = 5;
 int FastNLOCRunDec::fNloop=2;
-CRunDec FastNLOCRunDec::fcrundec=CRunDec();
+CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 
 
 //______________________________________________________________________________
@@ -102,7 +99,7 @@ FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
 FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFfile, int PDFset) : FastNLOReader(name){
    SetLHAPDFfilename(LHAPDFfile);
    SetLHAPDFset(PDFset);
-   // do cross sections calculation, since everything is yet ready
+   // do cross sections calculation, since everything is ready
    InitReasonableRunDecValues();
    FillAlphasCache();
    FillPDFCache();
@@ -153,6 +150,7 @@ void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
    //  Set the number of flavors
    //
    fNf    = Nf;             // new alpha_s value
+   //fcrundec.SetConstants(fNf);
    FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
@@ -162,7 +160,7 @@ void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
 void FastNLOCRunDec::InitReasonableRunDecValues(){
    fAlphasMz = 0.11800000313;
    fMz = 91.1876;
-   fNf = 5;
+   SetNf(5);
    fNloop=2;
    if ( info.GetSpeak() ) {
       info["InitReasonableRunDecValues"]<<"Printing initialized CRunDecValues."<<endl;
@@ -219,7 +217,7 @@ double FastNLOCRunDec::EvolveAlphas(double Q) const {
 //       cout << " " << cseps << endl;
 //    }
 
-   double as_crundec = fcrundec.AlphasExact(fAlphasMz, fMz, fNf, fNloop);
+   double as_crundec = fcrundec.AlphasExact(fAlphasMz, fMz,Q, fNf, fNloop);
    return as_crundec; 
 }
 
@@ -237,7 +235,6 @@ void FastNLOCRunDec::InitPDF(){
    if ( fLHAPDFfilename == ""){
       error["InitPDF"]<<"You must specify a LHAPDF filename first.\n"; exit(1);
    }
-
    LHAPDF::setVerbosity(LHAPDF::SILENT);
    //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
@@ -249,9 +246,7 @@ void FastNLOCRunDec::InitPDF(){
    if ( fnPDFs < fiPDFSet ){
       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
    }
-
    LHAPDF::initPDF(fiPDFSet);
-
 }
 
 
