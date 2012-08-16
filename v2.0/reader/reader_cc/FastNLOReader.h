@@ -204,7 +204,7 @@ protected:
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation( int scalevar , bool ReFillCache = true);// Choose the MuF scale variation table
+   double SetScaleVariation( int scalevar , bool ReFillCache = true , bool FirstCall=false);// Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
    static const string fContrName[20];

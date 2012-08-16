@@ -46,6 +46,8 @@ int FastNLOReader::WelcomeOnce = 0;
 
 FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
 {
+   //double (FastNLOReader::*fptr)(double) const = &FastNLOReader::EvolveAlphas;//this->EvolveAlphas;
+   //double (FastNLOReader::*fptr)(double) const = &this->EvolveAlphas;
    debug["FastNLOReader"]<<"New FastNLOReader reading filename="<<filename<<endl;
    BlockB_Data		= NULL;
    BlockB_LO_Ref	= NULL;
@@ -111,7 +113,7 @@ void FastNLOReader::InitScalevariation(){
      for (int iscls=0; iscls<GetNScaleVariations(); iscls++){
 	const double muFac = BBlocksSMCalc[0][1]->ScaleFac[0][iscls];
  	if (abs(muFac-1.0) < 1.e-7){
-	   SetScaleVariation(iscls,false);
+	   SetScaleVariation(iscls,false,true);
 	   break;
 	}
      }
@@ -234,7 +236,7 @@ double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
 
 
 
-double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache){ 
+double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool FirstCall){ 
   
   // ------------------------------------------------
   //   Set the scalevariation factor for determining the
@@ -285,10 +287,9 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache){
        man<<"or deactivate first all threshold corrections using FastNLOReader::SetContributionON(kTresholdCorrections,Id,false)."<<endl;
     }
   }
-
-  FillAlphasCache();
-  if ( ReFillCache )  FillPDFCache();
-
+  
+  if (!FirstCall)FillAlphasCache(); // we can't call FillAlphasCache in the constructor!
+  if ( ReFillCache ) FillPDFCache();
   return B_NLO()->ScaleFac[0][fScalevar];
 }
 
@@ -1781,11 +1782,13 @@ void FastNLOReader::FillAlphasCache(){
   //
       
   // check if the alpha_s value is somehow reasonable
+  debug["FillAlphasCache"]<<"Sanity check!"<<endl;
   double asMz = CalcAlphas(91.18);
   if ( ( asMz > 0.5 || asMz < 0.01 ) ) {
      warn["FillAlphasCache"]<<"Your alphas value seems to be unreasonably small/large."<<endl;
      warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asMz<<endl;
   }
+  debug["FillAlphasCache"]<<"Sanity check of alpha_s(MZ=91.18) = "<<asMz<<endl;
 
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if ( !BBlocksSMCalc.empty() ){
@@ -1794,10 +1797,10 @@ void FastNLOReader::FillAlphasCache(){
 	// Otherwise deactivation of e.g. threshold corr. is not respected here
 	if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
 	  if ( !GetIsFlexibleScaleTable() ){
-	    FillAlphasCacheInBlockBv20( BBlocksSMCalc[j][i]  );
+	     FillAlphasCacheInBlockBv20( BBlocksSMCalc[j][i]  );
 	  }
 	  else if ( GetIsFlexibleScaleTable() ){
-	    FillAlphasCacheInBlockBv21( BBlocksSMCalc[j][i]  );
+	     FillAlphasCacheInBlockBv21( BBlocksSMCalc[j][i]  );
 	  }
 	}
       }
