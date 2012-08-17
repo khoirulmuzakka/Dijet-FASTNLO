@@ -168,6 +168,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
    // Get fast calculated NLO cross section
 
    vector < double > xs(NObsBin);
+   vector < double > xsLO(NObsBin);
    if ( fxPoms.empty() ){
       error["GetDiffCrossSection"]<<"No xpom slicing given."<<endl;
       return xs;
@@ -187,6 +188,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
       for ( int i = 0 ; i<NObsBin ; i++ ){
 	 if (i==0)debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;;
 	 xs[i] += XSection[i] * fdxPoms[ixp] ;
+	 xsLO[i] += XSection_LO[i] * fdxPoms[ixp] ;
       }
       info>>"."; fflush(stdout);
       interv+=fdxPoms[ixp];
@@ -196,6 +198,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
 
    // set this cross section also to FastNLO mother class
    XSection = xs;
+   XSection_LO = xs;
 
    // k-factors
    for ( int i = 0 ; i<NObsBin ; i++ ){
