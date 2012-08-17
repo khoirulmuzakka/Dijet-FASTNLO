@@ -198,7 +198,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
 
    // set this cross section also to FastNLO mother class
    XSection = xs;
-   XSection_LO = xs;
+   XSection_LO = xsLO;
 
    // k-factors
    for ( int i = 0 ; i<NObsBin ; i++ ){
