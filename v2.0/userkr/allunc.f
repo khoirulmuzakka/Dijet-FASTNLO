@@ -6,6 +6,8 @@
 * ALLUNC - Program to derive all (PDF, statistical, algorithmic,
 *          scale ...) uncertainties using fastNLO tables
 *
+* 13.08.2012 kr: Implement symmetrized eigen vector method,
+*                small bug fix in asymm. eigen vector method
 * 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 * 31.03.2011 kr: Some modifications to improve v2 compatibility
 * ---------------------------------------------------------------------
@@ -138,10 +140,13 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
             WRITE(*,*)'  alpha_s(M_Z) variation, def. = 0.D0, i.e. none'
             WRITE(*,*)'  alpha_s loop order, def. from PDF set'
-            WRITE(*,*)'  PDF uncertainties in '//
-     >           'eigen vector (1; CTEQ,MSTW,ABKM), '//
-     >           'toy MC (2; NNPDF) or mixed method (3; HERAPDF), '//
-     >           'def. = 1'
+            WRITE(*,*)'  PDF uncertainties in '
+            WRITE(*,*)'    asymmetric eigen vector (1; CTEQ,MSTW),'
+            WRITE(*,*)'    symmetrized eigen vector (2; AB(K)M),'
+            WRITE(*,*)'    toy MC (3; NNPDF),'
+            WRITE(*,*)'    mixed method (4; HERAPDF), or'
+            WRITE(*,*)'    asymmetric eigen vector including'
+            WRITE(*,*)'    same-side deviations (5), def. = 1.'
             WRITE(*,*)' '
             STOP
 ckr To be cross-checked for each new scenario
@@ -428,8 +433,7 @@ ckr      LNRM = .FALSE.
          WRITE(*,*)"ALLUNC: Using alpha_s loop order:",IASLOOP
       ENDIF
 
-*---Use eigen vector (CTEQ/MSTW) or toy MC (NNPDF) method for
-*---PDF uncertainties
+*---Determine method to use for PDF uncertainties
       NARG = NARG + 1
       CH4TMP = "X"
       IF (IARGC().GE.NARG) THEN
@@ -439,16 +443,28 @@ ckr      LNRM = .FALSE.
      >     CH4TMP(1:1).EQ."1") THEN
          IETYPE = 1
          WRITE(*,*)
-     >        "ALLUNC: Use eigen vector (CTEQ/MSTW/ABKM) method."
+     >        "ALLUNC: Use asymmetric eigen vector "//
+     >        "(CTEQ/MSTW) method."
       ELSE
          READ(CH4TMP,'(I4)'),IETYPE
          IF (IETYPE.EQ.1) THEN
             WRITE(*,*)
-     >           "ALLUNC: Use eigen vector (CTEQ/MSTW/ABKM) method."
+     >           "ALLUNC: Use asymmetric eigen vector "//
+     >           "(CTEQ/MSTW) method."
          ELSEIF (IETYPE.EQ.2) THEN
-            WRITE(*,*)"ALLUNC: Use toy MC (NNPDF) method."
+            WRITE(*,*)
+     >           "ALLUNC: Use symmetrized eigen vector method "//
+     >           "(AB(K)M) method."
          ELSEIF (IETYPE.EQ.3) THEN
-            WRITE(*,*)"ALLUNC: Use mixed (HERAPDF) method."
+            WRITE(*,*)
+     >           "ALLUNC: Use toy MC (NNPDF) method."
+         ELSEIF (IETYPE.EQ.4) THEN
+            WRITE(*,*)
+     >           "ALLUNC: Use mixed (HERAPDF) method."
+         ELSEIF (IETYPE.EQ.5) THEN
+            WRITE(*,*)
+     >           "ALLUNC: Use asymmetric eigen vector "//
+     >           "method including same-side deviations."
          ELSE
             WRITE(*,*)
      >           "ALLUNC: ERROR! Undefined PDF error method, aborted!"//
@@ -660,13 +676,18 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
          ENDDO
          PTBIN(I,NPT(I)+1) = UPBIN(IOBSPOINTER(NPT(I),I),1)
       ENDDO
-C---  Set no. of subprocesses (old: 7) to the one for NLO contribution 2
-C---  (new: 6 for 2-3 partons, 7 for 3-4 partons)
-      NSBPRC = NSUBPROC(2)
-C---  Set NORD to 2 for LO & NLO
+*---  Set NORD to 2 for LO & NLO
       NORD = 2
-C---  Contribution 2 (NLO), only 1 scale dimension
-ckr      NSCLS = NSCALEVAR(2,1)
+*---  Set no. of subprocesses to 7
+*---  v14: always 7
+*---  v20: 2-parton processes: 6   (e.g. LO dijet)
+*---  .    3-parton processes: 7   (e.g. NLO dijet or LO 3-jet)
+*---  .    4-parton processes: 7   (e.g. NLO 3-jet)
+*---  ATTENTION: Uncertainty derivation always assumes summed-up
+*---  .          subprocesses to be found in IORD bin 7 + 1 !
+*---  .          In case of LO dijet with 6 subprocesses only this has
+*---  .          to be properly initialized to 0 !
+      NSBPRC = NSUBPROC(2)
 
 *---  Define output formats
 ckr 900     FORMAT(1P,I5,3(3X,E21.14))
@@ -707,8 +728,11 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 *---  Book histograms
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
      >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
-      WRITE(*,*)"ALLUNC: The observable has",NOBSBIN," bins -",
-     >     NSBPRC," subprocesses"
+      WRITE(*,'(A,I4,A)')" ALLUNC: The observable has",NOBSBIN," bins."
+      WRITE(*,'(A,I2,A)')" ALLUNC: The  LO is subdivided into ",
+     >     NSUBPROC(1)," subprocesses and"
+      WRITE(*,'(A,I2,A)')"         the NLO is subdivided into ",
+     >     NSUBPROC(2)," subprocesses."
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       
@@ -759,7 +783,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 *---         initialization call!). For PDF uncertainty calculation from
 *---         multiple PDF sets like full HERAPDF make sure to switch back
 *---         to original one here
-            IF (IETYPE.EQ.3) THEN
+            IF (IETYPE.EQ.4) THEN
                CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
             ENDIF
 *---  NLO contribution 2 (INLO), scale dimension 1
@@ -774,7 +798,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             IMODE   = 1
             IWEIGHT = 0
             NRAP  = NRAPIDITY
-            IF (IETYPE.EQ.2) THEN
+            IF (IETYPE.EQ.3) THEN
                IMODE = 2
             ENDIF
             IF (LRAT.OR.LNRM) THEN
@@ -804,47 +828,122 @@ C---  WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-            IPHASE = 2
 
 *--- Do loop runs once even if MYPDF=0! => Avoid with IF statement
             IF (LPDF) THEN
-               DO J=1,MYPDF
-ckr               DO J=1,3
-                  CALL INITPDF(J)
-                  CALL FX9999IN(FILENAME)
-                  CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
-                  IF (LNRM) THEN
-                     ISTEP = 3
+
+*--- Pairwise +/- eigen vector evaluation (CTEQ/MSTW)
+*--- (Assumes EV1+-,EV2+-,EV3+- order of PDF members!)
+               IF (IETYPE.EQ.1) THEN
+                  DO J=1,MYPDF-1,2
+                     CALL INITPDF(J)
+                     CALL FX9999IN(FILENAME)
+                     CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+                     IPHASE = 2
+                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                     CALL INITPDF(J+1)
+                     CALL FX9999IN(FILENAME)
+                     CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+                     IPHASE = 3
+                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+Comment:                      IF (LNRM) THEN
+Comment:                         ISTEP = 3
+Comment: C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment: *--- Load normalization table with potentially different binning!
+Comment:                         IF (LTAB) THEN
+Comment:                            CALL FX9999IN(FILENAMN)
+Comment:                            CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+Comment:                         ENDIF
+Comment:                         ISTEP = 4
+Comment: C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:                         IF (LTAB) THEN
+Comment:                            CALL FX9999IN(FILENAME)
+Comment:                            CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+Comment:                         ENDIF
+Comment:                         ISTEP = 5
+Comment: C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:                      ENDIF
+Comment:                      CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                  ENDDO
+
+*---  Separate treatment of each PDF member for deviations
+*---  (AB(K)M, NNPDF, partial HERAPDF)
+               ELSE
+                  IPHASE = 4
+                  DO J=1,MYPDF
+                     CALL INITPDF(J)
+                     CALL FX9999IN(FILENAME)
+                     CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+                     IF (LNRM) THEN
+                        ISTEP = 3
 C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
-                     CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
-                     IF (LTAB) THEN
-                        CALL FX9999IN(FILENAMN)
-                        CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
-                     ENDIF
-                     ISTEP = 4
+                        IF (LTAB) THEN
+                           CALL FX9999IN(FILENAMN)
+                           CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+                        ENDIF
+                        ISTEP = 4
 C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
-                     CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
-                     IF (LTAB) THEN
-                        CALL FX9999IN(FILENAME)
-                        CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
-                     ENDIF
-                     ISTEP = 5
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+                        IF (LTAB) THEN
+                           CALL FX9999IN(FILENAME)
+                           CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
+                        ENDIF
+                        ISTEP = 5
 C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
-                     CALL CENRES(ISTEP,LRAT,LNRM,
-     >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
-                  ENDIF
-                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-               ENDDO
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+                     ENDIF
+                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                  ENDDO
+               ENDIF
+               
             ENDIF
             
-            IPHASE = 3
+            IPHASE = 9
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
+*--- Symmetrize uncertainties as required for AB(K)M
+            IF (IETYPE.EQ.2) THEN
+               IBIN = 0
+               DO IRAP=1,NRAP
+                  DO IPT=1,NPT(IRAP)
+                     IBIN = IBIN+1
+                     DO IORD=1,NORD+1
+                        DO ISUB=1,NSBPRC+1
+Comment:                            write(*,*)"AAAA: ib,is,io,up,lo,",
+Comment:      >                          ibin,isub,iord,
+Comment:      >                          WTDXU2(IBIN,ISUB,IORD),
+Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
+*--- Symmetrized upper uncertainty
+                           WTDXU2(IBIN,ISUB,IORD) =
+     >                          + SQRT(
+     >                          WTDXL2(IBIN,ISUB,IORD)**2D0 +
+     >                          WTDXU2(IBIN,ISUB,IORD)**2D0 )
+*--- Symmetrized lower uncertainty
+                           WTDXL2(IBIN,ISUB,IORD) =
+     >                          - WTDXU2(IBIN,ISUB,IORD)
+Comment:                            write(*,*)"BBBB: ib,is,io,up,lo,",
+Comment:      >                          ibin,isub,iord,
+Comment:      >                          WTDXU2(IBIN,ISUB,IORD),
+Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF
+
 *--- Part 2: Additional PDF uncertainty parts using a separate PDF set
-            IF (IETYPE.EQ.3) THEN
+            IF (IETYPE.EQ.4) THEN
                IF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
      >              "HERAPDF10_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
@@ -917,7 +1016,7 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-               IPHASE = 2
+               IPHASE = 4
                
 *--- HERAPDF1.0: Do loop runs from 1 - 8 for this part
                DO J=1,8
@@ -946,7 +1045,7 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
                
-               IPHASE = 3
+               IPHASE = 9
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Add quadratically to previously backed-up result
@@ -1005,7 +1104,7 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-               IPHASE = 2
+               IPHASE = 4
 
 *--- HERAPDF1.0: Do loop runs from 9 - 13 for this part
                DO J=9,13
@@ -1034,7 +1133,7 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
                
-               IPHASE = 3
+               IPHASE = 9
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                
 *--- Add quadratically to previously backed-up result
@@ -1154,7 +1253,7 @@ c - This is the normal table to fill the default values
             CALL FX9999CC(XMUR,XMUF,XSECT0,XSUNCOR,XSCOR)
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-            IPHASE = 2
+            IPHASE = 4
 
 c - Loop over files
             IF (IORD.EQ.0) THEN
@@ -1225,7 +1324,7 @@ c - These are the stat. tables to get the deviations
             WRITE(*,*)"########################################"//
      >           "################################"
             
-            IPHASE = 3
+            IPHASE = 9
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Special statistics output
@@ -1425,7 +1524,7 @@ Comment:             ISTEP = 2
 Comment:             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment: 
 Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-Comment:             IPHASE = 2
+Comment:             IPHASE = 4
 Comment:             
 Comment:             CALL INITPDF(IPDF-IPDFUD)
 Comment: cnew
@@ -1469,7 +1568,7 @@ Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             ENDIF
 Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:             
-Comment:             IPHASE = 3
+Comment:             IPHASE = 9
 Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment: 
 Comment: c - Give some standard output, fill histograms
@@ -1520,7 +1619,7 @@ Comment:          ISTEP = 2
 Comment:          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:          
 Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-Comment:          IPHASE = 2
+Comment:          IPHASE = 4
 Comment:          
 Comment: cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
 Comment:          ASMZVAL = ASMZVAL + ASDN
@@ -1559,7 +1658,7 @@ Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:          ENDIF
 Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:          
-Comment:          IPHASE = 3
+Comment:          IPHASE = 9
 Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment: 
 Comment:          ASMODE  = ASMODETMP
@@ -1642,7 +1741,7 @@ ckr Load normalization table with potentially different binning!
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-            IPHASE = 2
+            IPHASE = 4
 
             DO I=2,3
                ISCL = ISCLPT(I)
@@ -1672,7 +1771,7 @@ ckr Load normalization table with potentially different binning!
                ENDIF
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
             ENDDO
-            IPHASE = 3
+            IPHASE = 9
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *---  Give some standard output, fill histograms
@@ -1749,7 +1848,7 @@ ckr Load normalization table with potentially different binning!
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-            IPHASE = 2
+            IPHASE = 4
 
             DO I=2,7
                ISCL = ISCLPT(I)
@@ -1779,7 +1878,7 @@ ckr Load normalization table with potentially different binning!
                ENDIF
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
             ENDDO
-            IPHASE = 3
+            IPHASE = 9
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
@@ -1880,9 +1979,9 @@ Comment:          ISCL = 3
 Comment:          XMUR = MURSCALE(ISCL)
 Comment:          XMUF = MUFSCALE(ISCL)
 Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-Comment:          IPHASE = 2
+Comment:          IPHASE = 4
 Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-Comment:          IPHASE = 3
+Comment:          IPHASE = 9
 Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment: 
 Comment: c - Give some standard output, fill histograms
