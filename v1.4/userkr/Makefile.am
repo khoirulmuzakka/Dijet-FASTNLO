@@ -20,8 +20,9 @@ endif
 endif
 
 # All source files which go into the main target (and have to be distributed)
-allunc_v14_SOURCES = main.f allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
-	pyalps.f fn-hbook.f uncert.f fnx9999.inc strings.inc uncert.inc
+allunc_v14_SOURCES = main.f allunc.f fnx9999.f fn-interface.f \
+	alphas-grv.f alphas-grv-fnlo14.f alphst.f pyalps.f \
+	fn-hbook.f uncert.f fnx9999.inc strings.inc uncert.inc
 
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install

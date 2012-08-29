@@ -585,6 +585,7 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
 
 *---  Initialize table ... scenario information 
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
+      CALL FX9999NF(SCENARIO)
       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
      >     LRAT.OR.LNRM,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
@@ -964,9 +965,9 @@ c - Give some standard output, fill histograms
             ENDDO
             
 c - Fill histograms
-            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
-            CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
+            CALL PDFFILL(NRAP,0,-1,ISCLPT(I),MYRESN)
+            CALL PDFFILL(NRAP,1,-1,ISCLPT(I),WTDXL2)
+            CALL PDFFILL(NRAP,2,-1,ISCLPT(I),WTDXU2)
          ENDDO                     ! Loop over scales
       ENDIF
 *---  End of PDF uncertainties
@@ -1468,171 +1469,205 @@ c - (ISCL=3 in FORTRAN, refscale=2 in C++ parlance of author code)
          WRITE(*,*)"****************************************"//
      >        "********************************"
 c - 2-point scheme
-         NSCLS = NSCALEVAR
-         IF (NSCALEVAR.GT.4) THEN
-            NSCLS = 4
-         ENDIF
-         CALL INITPDF(0)
-         ISCL = 3
-         XMUR = MURSCALE(ISCL)
-         XMUF = MUFSCALE(ISCL)
-         IPHASE  = 1
-         IMODE   = 3
-         IWEIGHT = 0
-         NRAP  = NRAPIDITY
-         IF (LRAT.OR.LNRM) THEN
-            NRAP = 2*NRAPIDITY
-         ENDIF
-         CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-         ISTEP = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-         IF (LNRM) THEN
-ckr Load normalization table with potentially different binning!
-            IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
-            ISTEP = 1
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-            IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-         ENDIF
-         ISTEP = 2
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-         IPHASE = 2
-
-         DO ISCL=1,NSCLS
-ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
-ckr Ugly goto construction avoidable with f90 CYCLE command
-            IF (ISCL.EQ.1.OR.ISCL.EQ.3) GOTO 10
-            XMUR = MURSCALE(ISCL)
-            XMUF = MUFSCALE(ISCL)
-            CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-            IF (LNRM) THEN
-               ISTEP = 3
-               CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
-ckr Load normalization table with potentially different binning!
-               IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
-               ISTEP = 4
-               CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
-               IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-               ISTEP = 5
-               CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
+         IF (NSCLS.GE.3) THEN
+            CALL INITPDF(0)
+*---  Central scale
+            ISCL = ISCLPT(1)
+            XMUR = XMURS(1)
+            XMUF = XMUFS(1)
+            IPHASE  = 1
+            IMODE   = 3
+            IWEIGHT = 0
+            NRAP  = NRAPIDITY
+            IF (LRAT.OR.LNRM) THEN
+               NRAP = 2*NRAPIDITY
             ENDIF
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
- 10         CONTINUE
-         ENDDO
-         IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-ckr No log file output, but store in histograms
-         ISCL = 3
-         CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
-         CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
-
-c - 6-point scheme
-         NSCLS = NSCALEVAR
-         IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
-            NSCLS = 8
-            MURSCALE(5) = 1.0D0
-            MUFSCALE(5) = 0.5D0
-            MURSCALE(6) = 1.0D0
-            MUFSCALE(6) = 2.0D0
-            MURSCALE(7) = 0.5D0
-            MUFSCALE(7) = 1.0D0
-            MURSCALE(8) = 2.0D0
-            MUFSCALE(8) = 1.0D0
-         ENDIF
-         CALL INITPDF(0)
-         ISCL = 3
-         XMUR = MURSCALE(ISCL)
-         XMUF = MUFSCALE(ISCL)
-         IPHASE  = 1
-         IMODE   = 3
-         IWEIGHT = 0
-         NRAP  = NRAPIDITY
-         IF (LRAT.OR.LNRM) THEN
-            NRAP = 2*NRAPIDITY
-         ENDIF
-         CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-         ISTEP = 0
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-         IF (LNRM) THEN
-ckr Load normalization table with potentially different binning!
-            IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
-            ISTEP = 1
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-            IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-         ENDIF
-         ISTEP = 2
-         CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-         IPHASE = 2
-
-         DO ISCL=1,NSCLS
-ckr Do neither use scale 1 with factor of 1/4 nor default scale 3
-ckr Ugly goto construction avoidable with f90 CYCLE command
-            IF (ISCL.EQ.1.OR.ISCL.EQ.3) GOTO 11
-            XMUR = MURSCALE(ISCL)
-            XMUF = MUFSCALE(ISCL)
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+            ISTEP = 0
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
-               ISTEP = 3
-               CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
-               IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
-               ISTEP = 4
+               IF (LTAB) THEN
+                  CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+               ENDIF
+               ISTEP = 1
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
-               IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
-               ISTEP = 5
-               CALL CENRES(ISTEP,LRAT,LNRM,
-     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
+               IF (LTAB) THEN
+                  CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               ENDIF
             ENDIF
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
- 11         CONTINUE
-         ENDDO
-         IPHASE = 3
-         CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            ISTEP = 2
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            IPHASE = 2
 
-c - Give some standard output, fill histograms
-         WRITE(*,*)"========================================"//
-     >        "================================"
-         WRITE(*,*)"Relative Scale Uncertainties"
-            WRITE(*,*)"- the printed values are for the total "//
-     >           "cross section, scale no. 3, "//
-     >           "summed over all subprocesses"
-         WRITE(*,*)"- histograms contain more detailed results"
+            DO I=2,3
+               ISCL = ISCLPT(I)
+               XMUR = XMURS(I)
+               XMUF = XMUFS(I)
+               CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               IF (LNRM) THEN
+                  ISTEP = 3
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+ckr Load normalization table with potentially different binning!
+                  IF (LTAB) THEN
+                     CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+                  ENDIF
+                  ISTEP = 4
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+                  IF (LTAB) THEN
+                     CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                  ENDIF
+                  ISTEP = 5
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+               ENDIF
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
+            ENDDO
+            IPHASE = 3
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+
+*---  Give some standard output, fill histograms
+            WRITE(*,*)"========================================"//
+     >           "================================"
+            WRITE(*,*)"Relative Scale Uncertainties (2-point)"
+            WRITE(*,'(A,I2,A)')
+     >           " - the printed values are for the total "/
+     >           /"cross section, scale no. ",ISCLPT(1),","
+            WRITE(*,*)"  summed over all subprocesses"
+            WRITE(*,*)"- histograms contain more detailed results"
             WRITE(*,*)"----------------------------------------"//
      >           "--------------------------------"
-         WRITE(*,*)" bin       cross section           "//
-     >        "lower scale uncertainty upper scale uncertainty"
-         WRITE(*,*)"----------------------------------------"//
-     >        "--------------------------------"
-         WRITE(*,*)"ALLUNC: Uncertainties from",NSCLS-2,
-     >        " scale variations"
-         WRITE(*,*)"----------------------------------------"//
-     >        "--------------------------------"
-         IORD   = 0
-         ISCL = 3
-         ISUB   = 0
-         IBIN   = 0
-         DO IRAP=1,NRAP
-Comment:             IHIST = IORD*1000000 + ISCL*100000 +
-Comment:      >           ISUB*10000 + IRAP*100
-            DO IPT=1,NPT(IRAP)
-               IBIN = IBIN+1
-Comment:                PT(IBIN) = REAL(PTBIN(IRAP,IPT))
-               WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
-     >              WTDXLM(IBIN,NSUBPROC+1,NORD+1),
-     >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
+            WRITE(*,*)" bin       cross section           "//
+     >           "lower scale uncertainty upper scale uncertainty"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)"ALLUNC: Uncertainties from"//
+     >           " symmetric (2-point) scale variations"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            IORD   = 0
+            ISCL   = ISCLPT(1)
+            ISUB   = 0
+            IBIN   = 0
+            DO IRAP=1,NRAP
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXLM(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXUM(IBIN,NSUBPROC+1,NORD+1)
+               ENDDO
             ENDDO
-         ENDDO
-         CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
-         CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
+
+*---  Central scale
+            ISCL = ISCLPT(1)
+            CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
+            CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
+         ENDIF
+
+c - 6-point scheme
+         IF (NSCLS.GE.7) THEN
+            CALL INITPDF(0)
+*---  Central scale
+            ISCL = ISCLPT(1)
+            XMUR = XMURS(1)
+            XMUF = XMUFS(1)
+            IPHASE  = 1
+            IMODE   = 3
+            IWEIGHT = 0
+            NRAP  = NRAPIDITY
+            IF (LRAT.OR.LNRM) THEN
+               NRAP = 2*NRAPIDITY
+            ENDIF
+            CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+            ISTEP = 0
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            IF (LNRM) THEN
+ckr Load normalization table with potentially different binning!
+               IF (LTAB) THEN
+                  CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+               ENDIF
+               ISTEP = 1
+               CALL CENRES(ISTEP,LRAT,LNRM,
+     >              SCENARIO(1:LEN_TRIM(SCENARIO)))
+               IF (LTAB) THEN
+                  CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               ENDIF
+            ENDIF
+            ISTEP = 2
+            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            IPHASE = 2
+
+            DO I=2,7
+               ISCL = ISCLPT(I)
+               XMUR = XMURS(I)
+               XMUF = XMUFS(I)
+               CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+               IF (LNRM) THEN
+                  ISTEP = 3
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+ckr Load normalization table with potentially different binning!
+                  IF (LTAB) THEN
+                     CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
+                  ENDIF
+                  ISTEP = 4
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+                  IF (LTAB) THEN
+                     CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
+                  ENDIF
+                  ISTEP = 5
+                  CALL CENRES(ISTEP,LRAT,LNRM,
+     >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
+               ENDIF
+               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
+            ENDDO
+            IPHASE = 3
+            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+
+c - Give some standard output, fill histograms
+            WRITE(*,*)"========================================"//
+     >           "================================"
+            WRITE(*,*)"Relative Scale Uncertainties (6-point)"
+            WRITE(*,'(A,I2,A)')
+     >           " - the printed values are for the total "/
+     >           /"cross section, scale no. ",ISCLPT(1),","
+            WRITE(*,*)"  summed over all subprocesses"
+            WRITE(*,*)"- histograms contain more detailed results"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)" bin       cross section           "//
+     >           "lower scale uncertainty upper scale uncertainty"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            WRITE(*,*)"ALLUNC: Uncertainties from"//
+     >           " asymmetric (6-point) scale variations"
+            WRITE(*,*)"----------------------------------------"//
+     >           "--------------------------------"
+            IORD   = 0
+            ISCL   = ISCLPT(1)
+            ISUB   = 0
+            IBIN   = 0
+            DO IRAP=1,NRAP
+               DO IPT=1,NPT(IRAP)
+                  IBIN = IBIN+1
+                  WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXLM(IBIN,NSUBPROC+1,NORD+1),
+     >                 WTDXUM(IBIN,NSUBPROC+1,NORD+1)
+               ENDDO
+            ENDDO
+            CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
+            CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
+         ENDIF
       ENDIF
+*---  End of scale uncertainties
 
 
 

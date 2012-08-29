@@ -69,7 +69,7 @@
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER IFIRST,IORD,ISUB,I,J,K,L,M, 
+      INTEGER IORD,ISUB,I,J,K,L,M, 
      >     IPRINTFLAG,INORMFLAG, 
      >     NBIN,IXMUR,IXMUF
       CHARACTER*(*) FILENAME
@@ -78,20 +78,9 @@ ckr 01.06.2008 Allow longer paths/filenames
 ckr 30.01.2008: Define temp. CSTRNG for output
       CHARACTER*255 CSTRNG
       DOUBLE PRECISION XMUR,XMUF,SUM(3)
-      SAVE IFIRST, OLDFILENAME
+      SAVE OLDFILENAME
       INCLUDE 'strings.inc'
-      DATA IFIRST/0/, OLDFILENAME/'xxxx'/
-
-c - Output in first call
-      IF (IFIRST.EQ.0) THEN
-         DO I=1,12
-ckr 30.01.2008: Print strings only until end, not complete
-ckr             CHARACTER dimension
-ckr             Similar usage below with CSTRNG at many places
-            CSTRNG = CHEADER(I)
-            WRITE(*,5000) " #",CSTRNG(1:LEN_TRIM(CSTRNG))
-         ENDDO
-      ENDIF
+      DATA OLDFILENAME/'xxxx'/
 
 c - Read the fastNLO coefficient table
       IF (FILENAME.NE.OLDFILENAME) THEN
@@ -203,7 +192,7 @@ c - Print scale-variations available in the table
          WRITE(*,*)"#   --- the renormalization and factorization "//
      >        "scales mur, muf"
          WRITE (*,*)"#       are proportional to"
-         CSTRNG = SCALELABEL
+         CSTRNG = SCALELABEL(1)
          WRITE (*,5000)" #           mu0 = ",CSTRNG(1:LEN_TRIM(CSTRNG))
          WRITE (*,*)"#"
          WRITE (*,*)"#   --- available No. of scale",
@@ -250,12 +239,6 @@ ckr This selects the first match in contrast to previous version
          ENDDO
       ENDIF
 
-      IF (IFIRST.EQ.0) THEN
-         WRITE (*,*)"#    --> in the first call the scales are "//
-     >        "chosen to be:"
-         WRITE (*,FMT='(A,F6.2,4X,A,F6.2)')" #     (mur/mu0) =",XMUR,
-     >        "(muf/mu0) =",MUFSCALE(IXMUF)
-      ENDIF
       IF (IXMUF.EQ.0) THEN
          WRITE(*,*)"# factorization scale ",XMUF,
      >        " not available in table"
@@ -266,15 +249,6 @@ ckr This selects the first match in contrast to previous version
      >        "for threshold corrections"
          WRITE(*,*)"#                (only mur=muf)"
       ENDIF
-
-      IF (IFIRST.EQ.0) THEN
-         IFIRST = 1
-         WRITE(*,*)"#"
-         WRITE(*,*)"#################################################",
-     >        "################"
-         WRITE(*,*)"#"
-      ENDIF
-
 
 c - Reset result arrays
       DO NBIN=1,NBINTOT         ! Cont. numbering of the final array
@@ -388,16 +362,14 @@ ckr 30.01.2008: Use simple A format, string length via LEN_TRIM
       INCLUDE 'fnx9999.inc'
       INTEGER IXMUF,I,J,K,L,M,IORD,JORD,NBIN
       INTEGER IPOSITION(5)
-      DOUBLE PRECISION  MUR,AS(NSCALEBINMAX),ASPOW(5),FNALPHAS,COEFF 
-      DOUBLE PRECISION BETA0,BETA1,PI,XMUR,LOGMU,SCFAC
-ckr      DOUBLE PRECISION SCFAC2A,SCFAC2B ! For ren-scale variation
+      DOUBLE PRECISION MUR,AS(NSCALEBINMAX),ASPOW(5),FNALPHAS,COEFF 
+      DOUBLE PRECISION XMUR,LOGMU,SCFAC
       DOUBLE PRECISION MU0SCALE,LLPTLO,LLPTHI,T1,T2,BWEIGHT
-      INTEGER NF,CA
-      DOUBLE PRECISION CF
-      PARAMETER (PI=3.14159265358979323846, NF=5, CA=3, CF=4D0/3D0)
+      PARAMETER (MU0SCALE=0.25D0)
+      DOUBLE PRECISION NF, CA, CF, BETA0, BETA1
+      PARAMETER (NF=5D0, CA=3D0, CF=4D0/3D0)
       PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0) 
-      PARAMETER (BETA1=34*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
-      PARAMETER (MU0SCALE=0.25)
+      PARAMETER (BETA1=34D0*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
 
 ckr DEBUG
 Comment:       WRITE(*,*)"CCC: XMUR,XMUF",XMUR,IXMUF
@@ -575,7 +547,7 @@ ckr DEBUG
      +   reweight, NEWPDF(-6:6), XPDF(nxmax,-6:6)
 c      DOUBLE PRECISION hxinv3   ! invert h(x) for ixscheme=3: log(1/x)+x-1
       DOUBLE PRECISION mu0scale,llptlo,llpthi
-      PARAMETER (mu0scale=0.25)
+      PARAMETER (mu0scale=0.25d0)
 
       nbin=0
       do i=1,nrapidity          ! Rapidity Bins
@@ -970,7 +942,7 @@ c   -----------------------------------
       READ(2,*) i
       if (i.ne.iseparator) goto 999
 c   -----------------------------------
-      READ(2,*) SCALELABEL
+      READ(2,*) SCALELABEL(1)
       READ(2,*) NSCALEBIN
       do i=1,nrapidity
          do j=1,NPT(i)
@@ -1050,35 +1022,115 @@ c   -----------------------------------
       stop
       RETURN
 
-ckr 30.01.2008: Use free format A, string length det. by LEN_TRIM
  5000 FORMAT (A,I12,A,A) 
       END
 
-*******************************************************************
-c      Double Precision Function hxinv3(hx)
-*----------------------------------------------------------------
-*    compute inverse of: h(x)=log10(1/x)+x-1
-*      -> return x-value for given h(x) 
+
+
+      SUBROUTINE FX9999NF(SCENNAME)
+***********************************************************************
 *
-* MW 04/26/2006  early poor version - extremely slow & silly
-*                only for test purposes - not meant for real work
-*                too slow - and maybe poor precision - 
-*                and limited to x>10**-4
-*----------------------------------------------------------------
-c      implicit none
-c      Double Precision hx,x, hxtest
-c      Integer i,j,nmax
-c
-c      nmax=10000 ! defines the precision
-c
-c      do i=0,nmax
-c         x = 10d0**(-4d0*dble(i)/dble(nmax))
-c         hxtest = log10(x)+x-1d0
-c         if (hxtest.lt.hx) goto 100
-c      enddo
-c
-c 100  Continue
-c      hxinv3=x
-c
-c      Return
-c      End
+*     fastNLO user code v1.4 backported from v2 - print scenario information
+*
+***********************************************************************
+      IMPLICIT NONE
+      INCLUDE 'fnx9999.inc'
+      INCLUDE 'strings.inc'
+      INTEGER I,J,K
+      CHARACTER*80 CHTMP,CTRBDESCRIPT(2,1)
+      CHARACTER*(*) SCENNAME
+      INTEGER NSCALEDIM(2)
+      
+      WRITE(*,'(A)')
+      WRITE(*,*)CSEPS
+      WRITE(*,*)"# Information on fastNLO scenario: ",
+     >     SCENNAME(1:LEN_TRIM(SCENNAME))
+      WRITE(*,*)LSEPS
+      WRITE(*,*)"# Description:"
+      DO I=1,NNAMS
+         CHTMP = NAMELABEL(I)
+         WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+      ENDDO
+      WRITE(*,*)"#"
+      WRITE(*,*)"# Basic Settings:"
+      CHTMP = CIREACTION(IREACTION)
+      WRITE(*,'(A,A)')" #   Reaction: ",CHTMP(1:LEN_TRIM(CHTMP))
+      WRITE(*,'(A,G10.4,A)')
+     >     " #   Centre-of-mass energy Ecms: ",
+     >     ECMS," GeV"
+      CHTMP = CIPROC(IPROC)
+      WRITE(*,'(A,A)')" #   Process: ",CHTMP(1:LEN_TRIM(CHTMP))
+      CHTMP = CIALGO(IALGO)
+      WRITE(*,'(A,A)')" #   Jet Algorithm: ",CHTMP(1:LEN_TRIM(CHTMP))
+      CHTMP = CJETRES1(IALGO)
+      WRITE(*,'(A,A,A,F6.4)')
+     >     " #      Jet Size Parameter: ",CHTMP(1:LEN_TRIM(CHTMP)),
+     >     " = ",JETRES1
+      CHTMP = CJETRES2(IALGO)
+      WRITE(*,'(A,A,A,F6.4)')
+     >     " #      Jet Algo Parameter 2: ",CHTMP(1:LEN_TRIM(CHTMP)),
+     >     " = ",JETRES2
+      WRITE(*,'(A,I3,A,I1,A)')
+     >     " #   Tot. no. of observable bins: ",NBINTOT," in ",
+     >     NDIMENSION," dimensions:"
+      WRITE(*,*)"#"
+      WRITE(*,'(A,I1)')" # No. of contributions: ",NORD
+      CTRBDESCRIPT(1,1) = "LO"
+      CTRBDESCRIPT(2,1) = "NLO"
+      DO I=1,NORD         
+         WRITE(*,'(A,I1,A)')" # Contribution ",I,":"
+         CHTMP = CTRBDESCRIPT(I,1)
+         WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+         WRITE(*,'(A,I16)')" #   No. of events: ",NEVT(I)
+         WRITE(*,*)"#   provided by:"
+         DO J=1,NCODS
+            CHTMP = CODELABEL(J)
+            WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+         ENDDO
+         IF (I.EQ.1.OR.I.EQ.2) THEN
+            DO J=1,NNLOJET
+               CHTMP = CNLOJET(J)
+               WRITE(*,'(A,A)')" # ",CHTMP(1:LEN_TRIM(CHTMP))
+            ENDDO
+         ELSEIF (I.EQ.3) THEN
+            DO J=1,NTHRCOR
+               CHTMP = CTHRCOR(J)
+               WRITE(*,'(A,A)')" # ",CHTMP(1:LEN_TRIM(CHTMP))
+            ENDDO
+         ENDIF 
+         NSCALEDIM(I) = 1
+         WRITE(*,'(A,I1)')" #   Scale dimensions: ",
+     >        NSCALEDIM(I)
+         DO J=1,NSCALEDIM(I)
+            DO K=1,NSCALS
+               CHTMP = SCALELABEL(K)
+               WRITE(*,'(A,I1,A,A)')
+     >              " #     Scale description for dimension ",
+     >              J,":          ",CHTMP(1:LEN_TRIM(CHTMP))  
+            ENDDO
+            WRITE(*,'(A,I1,A,I1)')
+     >           " #     Number of scale variations for dimension ",
+     >           J,": ",NSCALEVAR
+            WRITE(*,'(A,I1,A)')
+     >           " #     Available scale settings for dimension ",
+     >           J,":"
+            DO K=1,NSCALEVAR
+               WRITE(*,'(A,I1,A,F10.4)')
+     >              " #       Scale factor number ",
+     >              K,":                   ",MUFSCALE(K)
+            ENDDO
+            WRITE(*,'(A,I1,A,I1)')
+     >           " #     Number of scale nodes for dimension ",
+     >           J,":      ",0
+ckrNSCALENODE(I,J)
+            CHTMP = POWLABEL(I)
+            WRITE(*,'(A,A)')" #      ",CHTMP(1:LEN_TRIM(CHTMP))
+            CHTMP = CODELABEL(I)
+            WRITE(*,'(A,A)')" #      by: ",CHTMP(1:LEN_TRIM(CHTMP))
+         ENDDO
+      ENDDO
+      WRITE(*,*)"#"
+      
+      RETURN
+      END
+***********************************************************************
