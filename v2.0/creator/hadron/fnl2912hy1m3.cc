@@ -247,7 +247,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     // minimal 3-jet mass for events to be considered
     double m3jmin = A2->LoBin[0][0];
     // maximal |y| of three leading jets
-    const double y3jmax = 1.0;
+    const double y3jmax = 2.0;
+    // minimal y3max for second y3jmax bin
+    const double y3jmaxlow = 1.0;
     
     // Derive 3-jet variables
     // 3-jet mass
@@ -268,7 +270,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     double ptrel = pj[3].perp()/pT12;
     
     // --- Further 3-jet phase space cuts?
-    if ( m3jmin <= m3j && y3j < y3jmax && ptrelmin <= ptrel ) {
+    if ( m3jmin <= m3j && y3jmaxlow <= y3j && y3j < y3jmax && ptrelmin <= ptrel ) {
       
       // --- set the renormalization and factorization scale to m3j / 2
       double mu = m3j / 2.;
@@ -313,7 +315,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set scenario name (no white space)
-  A1->SetScenName("fnl2912hy0m3");
+  A1->SetScenName("fnl2912hy1m3");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
@@ -345,7 +347,7 @@ void UserHHC::inittable(){
 
   // --- fastNLO user: bin definitions - here in M3j and |y|_max
   const int ndim2bins = 1;
-  const double dim2bins[ndim2bins+1] = {0.0, 1.0};
+  const double dim2bins[ndim2bins+1] = {1.0, 2.0};
   
   const int ndim1bins[ndim2bins] = { 37 };
   

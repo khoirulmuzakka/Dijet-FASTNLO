@@ -247,9 +247,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     // minimal 3-jet mass for events to be considered
     double m3jmin = A2->LoBin[0][0];
     // maximal |y| of three leading jets
-    const double y3jmax = 2.0;
+    const double y3jmax = 1.0;
     // minimal y3max for second y3jmax bin
-    const double y3jmaxlow = 1.0;
+    const double y3jmaxlow = 0.0;
     
     // Derive 3-jet variables
     // 3-jet mass
@@ -315,7 +315,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set scenario name (no white space)
-  A1->SetScenName("fnl2912hy1ptav");
+  A1->SetScenName("fnl2912hy0ptav");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
@@ -347,7 +347,7 @@ void UserHHC::inittable(){
 
   // --- fastNLO user: bin definitions - here in M3j and |y|_max
   const int ndim2bins = 1;
-  const double dim2bins[ndim2bins+1] = {1.0, 2.0};
+  const double dim2bins[ndim2bins+1] = {0.0, 1.0};
   
   const int ndim1bins[ndim2bins] = { 37 };
   
