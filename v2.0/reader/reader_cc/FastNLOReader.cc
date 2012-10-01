@@ -715,6 +715,16 @@ void FastNLOReader::SetContributionON( ESMCalculation eCalc , unsigned int Id , 
       <<" contribution '"<<fContrName[eCalc]
       <<" with Id="<<Id<<endl;
   
+  if ( !bUseSMCalc[eCalc][Id] && SetOn ) {
+     debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
+     if ( bUseSMCalc[eCalc][Id] && !BBlocksSMCalc[eCalc][Id]->IAddMultFlag ){
+	if ( !GetIsFlexibleScaleTable() )
+	   FillAlphasCacheInBlockBv20( BBlocksSMCalc[eCalc][Id]  );
+	else 
+	   FillAlphasCacheInBlockBv21( BBlocksSMCalc[eCalc][Id]  );
+     }
+  }
+  // set the new value
   bUseSMCalc[eCalc][Id] = SetOn;   
 }
 
@@ -1204,7 +1214,8 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
 
   cout << DSEP << endl;
   printf(" Cross Sections\n");
-  printf(" The scale chosen here are: mu_f = % #6.3f * %s, and mu_r = % #6.3f * %s \n",fScaleFacMuF,GetScaleDescription().c_str(),fScaleFacMuR,GetScaleDescription().c_str());
+  if ( !GetIsFlexibleScaleTable() )
+     printf(" The scale chosen here are: mu_f = % #6.3f * %s, and mu_r = % #6.3f * %s \n",fScaleFacMuF,GetScaleDescription().c_str(),fScaleFacMuR,GetScaleDescription().c_str());
   cout << SSEP << endl;
     
   if ( NDim == 2 ){
