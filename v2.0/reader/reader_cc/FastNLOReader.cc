@@ -717,7 +717,7 @@ void FastNLOReader::SetContributionON( ESMCalculation eCalc , unsigned int Id , 
   
   if ( !bUseSMCalc[eCalc][Id] && SetOn ) {
      debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
-     if ( bUseSMCalc[eCalc][Id] && !BBlocksSMCalc[eCalc][Id]->IAddMultFlag ){
+     if ( !BBlocksSMCalc[eCalc][Id]->IAddMultFlag ){
 	if ( !GetIsFlexibleScaleTable() )
 	   FillAlphasCacheInBlockBv20( BBlocksSMCalc[eCalc][Id]  );
 	else 
@@ -1211,7 +1211,6 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
   //const int ithc2 = kthc.empty() ? -1 : ContrId( fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
   const int ithc2 = kthc.empty() ? -1 : ContrId( kThresholdCorrection,kNextToLeading);
 
-
   cout << DSEP << endl;
   printf(" Cross Sections\n");
   if ( !GetIsFlexibleScaleTable() )
@@ -1224,7 +1223,6 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
      const int inpc1 = ContrId(fastNLO::kNonPerturbativeCorrection, fastNLO::kLeading);
      const vector < double > knpc = inpc1>-1 ? BBlocksSMCalc[3][0]->fact : vector<double>(NObsBin);
      
-
      string header0 = "  IObs  Bin Size IODim1 "; 
      string header1 = "   IODim2 ";
      string header2 = " LO cross section   NLO cross section   K NLO";
@@ -1244,11 +1242,11 @@ void FastNLOReader::PrintCrossSectionsDefault( const vector <double> kthc ) cons
 	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
 		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i]);
-	} else if ( inpc1<0 ) {
+	} else if ( inpc1<0 && ithc2 != -1 ) {
 	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
 		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
-	} else if ( ithc2<0 ) {
+	} else if ( inpc1>-1 && ithc2 == -1 ) {
 	   printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
 		  i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
 		  NDimBins[1],LoBin[i][1],UpBin[i][1],XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
