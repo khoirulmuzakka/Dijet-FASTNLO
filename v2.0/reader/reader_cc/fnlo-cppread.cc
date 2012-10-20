@@ -192,6 +192,10 @@ int fnlocppread(int argc, char** argv){
   //     evolution fo this PDF set. A change of the alpha_s value is only
   //     possible through the choice of the PDF file and set, e.g. CT10as.LHgrid
   //         FastNLOLHAPDF fnlolhapdf( tablename , PDFFile , PDFset );
+  //  
+  //     Print information from LHAPDF
+  //         fnlolhapdf.PrintPDFInformation()
+  //
   //
   // 1c.
   //     Initialize with PDF from LHAPDF and GRV alphas evolution (default) 
@@ -203,6 +207,7 @@ int fnlocppread(int argc, char** argv){
   //         Alphas::SetNf(5);
   //         Alphas::SetMz(91.1876);
   //     For all options see Alphas.h
+  //
   //
   // 1d.
   //     Initialize with PDF from LHAPDF and RunDec alpha_s evolution.
