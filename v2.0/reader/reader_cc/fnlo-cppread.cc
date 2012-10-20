@@ -2,11 +2,9 @@
 //     
 //     fastNLO_reader: FNLOCPPREAD
 //     Program to read fastNLO v2 tables and derive
-//     QCD cross sections using PDFs from LHAPDF
+//     QCD cross sections using PDFs e.g. from LHAPDF
 //     
 //     D. Britzger, K. Rabbertz
-//
-//     Contains:
 //
 //********************************************************************
 #include <iostream>
@@ -18,8 +16,6 @@
 #include "FastNLOUser.h"
 #include "FastNLOLHAPDF.h"
 #include "FastNLOAlphas.h"
-#include "FastNLONLOJETLIKE.h"
-#include "FastNLODiffUser.h"
 #include "FastNLOCRunDec.h"
 #include "Alphas.h"
 
@@ -117,8 +113,8 @@ int fnlocppread(int argc, char** argv){
   printf(" %s",CSEPS.c_str());
   //---  End of parsing arguments
   
-
-
+  
+  
   // ************************** fastNLO and example documentation starts here ****************************
   // --- fastNLO user: Hello!
   //     If you use fastNLO for the first time, please read through the
@@ -141,47 +137,57 @@ int fnlocppread(int argc, char** argv){
   //
   //     Please check, which type of table you are using and then refer to the comments and
   //     functions suitable for this fastNLO table.
-
-
+  
+  
+  
+  // ------- Set fastNLOReader verbosity ------- //
+  // --- fastNLO user:
+  //     The following line sets the verbosity level of fastNLOReader
+  //     Six different levels are implemented, the default is INFO:
+  //     DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
   say::SetGlobalVerbosity(say::INFO);
-
+  
+  
+  
   // ------- Initialize fastNLOReader ------- //
-  // --- fastNLO user: Make an instance of your class that derives
-  //     from the FastNLOReader class and
-  //     pass the name of the fastNLO table as an argument.
+  // --- fastNLO user:
+  //     In addition to a fastNLO table two additional ingredients are required:
+  //     - the PDF set and
+  //     - the alpha_s evolution to be used
+  //     These can be freely defined by the user by making an instance of your class
+  //     that derives from the FastNLOReader class and passing the name of the
+  //     fastNLO table as an argument.
   //
   //        FastNLOUser* fnloreader = new FastNLOUser( tablename );
   //
-  //     The example class for LHAPDF has overwritten the constructor
-  //     and thus takes also the PDF filename (and PDF set).
-  //     TBD: ??? C++ chinese ???
-
+  //     To facilitate using fastNLOReader a number of predefined user classes exist
+  //     interfacing to
+  //     LHAPDF (PDF and alpha_s, see M. Whalley, D. Bourilkov, R. Group, hep-ph/0508110),
+  //     GRV Alphas (original alpha_s evolution used in fastNLO for crosschecks,
+  //                 based on M. Glueck, E. Reya, A. Vogt, Eur.Phys.J.C5:461-470,1998, hep-ph/9806404),
+  //     CRunDec (alpha_s evolution up to 4 loops, see B. Schmidt, M. Steinhauser,
+  //              Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149). 
+  // 
+  //     They can be used as follows:
+  //
+  cout<<" ================ LHAPDF ================== " << endl;
+  FastNLOLHAPDF* fnlolhapdf = new FastNLOLHAPDF( tablename , PDFFile , 0 );
+  fnlolhapdf->FillPDFCache();
+  fnlolhapdf->CalcCrossSection();
+  fnlolhapdf->PrintCrossSectionsDefault();
   
+  cout<<" ================ GRV Alphas ================== " << endl;
+  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
+  fnloreader->SetAlphasMz(0.1179);
+  fnloreader->CalcCrossSection();
+  fnloreader->PrintCrossSectionsDefault();
   
   cout<<" ================ CRunDec ================== " << endl;
   FastNLOCRunDec* fnlocrundec = new FastNLOCRunDec( tablename , PDFFile , 0 );
   fnlocrundec->SetAlphasMz(0.1182);
-  fnlocrundec->FillPDFCache();
   fnlocrundec->CalcCrossSection();
   fnlocrundec->PrintCrossSectionsDefault();
 
-  cout<<" ================ LHAPDF ================== " << endl;
-  FastNLOLHAPDF* fnlo = new FastNLOLHAPDF( tablename , PDFFile , 0 );
-  fnlo->PrintCrossSectionsDefault();
-  
-
-  cout<<" ================ Alphas ================== " << endl;
-  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
-  fnloreader->SetAlphasMz(0.1179);
-  fnloreader->PrintCrossSectionsDefault();
-
-  cout<<" ================ NLOJETLIKE ================== " << endl;
-  FastNLONLOJETLIKE* nloj = new FastNLONLOJETLIKE(tablename);
-  nloj->SetMuFFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-  nloj->SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-  nloj->FillPDFCache();
-  nloj->CalcCrossSection();
-  nloj->PrintCrossSectionsWithReference();
 
 
   // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
@@ -470,7 +476,7 @@ int fnlocppread(int argc, char** argv){
     // Set MuR and MuF scale factors
     bool lscvar = fnloreader->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true);
     if ( !lscvar ) {
-      printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n");
+      printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n",fnloreader->GetScaleFactorMuR(),fnloreader->GetScaleFactorMuF());
       continue;
     }
     if ( fnloreader->GetIsFlexibleScaleTable() ) {
