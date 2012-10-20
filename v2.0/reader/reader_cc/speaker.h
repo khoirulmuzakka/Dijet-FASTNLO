@@ -9,7 +9,7 @@
 #include <map>
 
 namespace say {
-   enum Verbosity {DEBUG=-1000, MANUAL=-1, INFO=0, WARNING=1,ERROR=2,SILENT=1000};
+   enum Verbosity {DEBUG=-1000, MANUAL=-1, INFO=0, WARNING=1, ERROR=2, SILENT=1000};
 }
 
 class speaker {

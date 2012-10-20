@@ -85,15 +85,15 @@ int speaker::SetGlobalVerbosity(say::Verbosity volume){
 
 PrimalScream::PrimalScream(std::string classname){//,std::string prefix=""){
    cn=classname;
-   debug = speaker("Debug. ",say::DEBUG);
+   debug = speaker(" # DEBUG: ",say::DEBUG);
    debug.SetClassName(cn);
-   man   = speaker("",say::MANUAL);
+   man   = speaker(" # ",say::MANUAL);
    man.SetClassName(cn);
-   info  = speaker("Info. ",say::INFO);
+   info  = speaker(" # INFO: ",say::INFO);
    info.SetClassName(cn);
-   warn  = speaker("Warning. ",say::WARNING);
+   warn  = speaker(" # WARNING! ",say::WARNING);
    warn.SetClassName(cn);
-   error = speaker("Error! ",say::ERROR,true);
+   error = speaker(" # ERROR! ",say::ERROR,true);
    error.SetClassName(cn);
    debug["PrimalScream"]<<"Primal Scream initialized."<<std::endl;
 }
@@ -107,11 +107,11 @@ void PrimalScream::SetVerbosity(say::Verbosity volume){
 }
 
 namespace say {
-   speaker debug("Debug. ",say::DEBUG);
-   speaker man("",say::MANUAL);
-   speaker info("Info. ",say::INFO);
-   speaker warn("Warning. ",say::WARNING);
-   speaker error("Error! ",say::ERROR,true);
+   speaker debug(" # DEBUG: ",say::DEBUG);
+   speaker man(" # ",say::MANUAL);
+   speaker info(" # INFO: ",say::INFO);
+   speaker warn(" # WARNING! ",say::WARNING);
+   speaker error(" # ERROR! ",say::ERROR,true);
    //debug["namespace say"]<<"speakers initialized."<<std::endl;
    int SetGlobalVerbosity(Verbosity verbosity){ return speaker::SetGlobalVerbosity(verbosity);};
 }
