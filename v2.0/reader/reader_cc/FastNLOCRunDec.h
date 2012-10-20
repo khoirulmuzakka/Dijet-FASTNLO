@@ -173,12 +173,12 @@ void FastNLOCRunDec::InitReasonableRunDecValues(){
 
 void FastNLOCRunDec::PrintRunDecValues(){
    static const string csep41("#########################################");
-   error>>csep41<<csep41<<endl;
-   error>>"CRunDec Values: Alphas(Mz)="<<fAlphasMz
+   cout<<csep41<<csep41<<endl;
+   cout<<"CRunDec Values: Alphas(Mz)="<<fAlphasMz
 	<<"\tMZ="<<fMz
 	<<"\tn-flavors="<<fNf
 	<<"\tn-loop="<<fNloop<<endl;
-   error>>csep41<<csep41<<endl;
+   cout<<csep41<<csep41<<endl;
 }
 
 
