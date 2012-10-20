@@ -55,7 +55,7 @@
 *     using an exact, iterative solution of 2-/3-/4-loop formulas
 *     as used by GRV hep-ph/9806404
       NLOOP  = 2
-      ALPSMZ = 0.1185D0         ! Bethke 2011 (Ref. ???)
+      ALPSMZ = 0.1184D0         ! PDG 2012; previous was 0.1185D0, Bethke 2011.
       
 *---  One can also call ones own alpha_s code here ...
 *---  --> Only one has to remember to divide by 2Pi!
