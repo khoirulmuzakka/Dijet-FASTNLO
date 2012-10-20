@@ -12,7 +12,8 @@
 
   Barbara Schmidt, Matthias Steinhauser
 
-  arXiv:xxxxxx
+  Comput.Phys.Commun. 183 (2012) 1845-1848
+  arXiv:1201.6149 
   SFB/CPP-12-03
   TTP12-02
 
@@ -22,8 +23,24 @@
   coupling and quark masses,''
   Comput.\ Phys.\ Commun.\  {\bf 133} (2000) 43
   [arXiv:hep-ph/0004189].
- */
+*/
 
+/*
+License:
+
+CRunDec is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <iostream>
 #include <cmath>
