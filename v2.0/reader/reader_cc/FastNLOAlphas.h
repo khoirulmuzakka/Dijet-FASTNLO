@@ -46,7 +46,7 @@ public:
    // ---- Alphas vars ---- //
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
    double GetAlphasMz() const { return fAlphasMz; };
-   void SetGRVtoPDG2011_2loop();
+   void SetGRVtoPDG2012_2loop();
 
 
 protected:
@@ -87,8 +87,8 @@ FastNLOAlphas::FastNLOAlphas(string name, string LHAPDFfile, int PDFset) : FastN
    SetLHAPDFfilename(LHAPDFfile);
    SetLHAPDFset(PDFset);
    // set some reasonable starting values;
-   SetGRVtoPDG2011_2loop();
-   fAlphasMz = 0.118000000321;
+   SetGRVtoPDG2012_2loop();
+   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
    // do cross sections calculation, since everything is yet ready
    FillAlphasCache();
    FillPDFCache();
@@ -129,9 +129,9 @@ double FastNLOAlphas::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLOAlphas::SetGRVtoPDG2011_2loop(){
-   info["SetGrVtoPDF2011"]<<"Resetting GRV Alphas::Alphas evolution."<<endl;
-   Alphas::SetMz(91.1876); // PDG 2011
+void FastNLOAlphas::SetGRVtoPDG2012_2loop(){
+   info["SetGrVtoPDF2012"]<<"Resetting to GRV Alphas::Alphas evolution."<<endl;
+   Alphas::SetMz(91.1876); // PDG 2012
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
    Alphas::SetFlavorMatchingOn(true);
@@ -157,8 +157,8 @@ void FastNLOAlphas::InitPDF(){
       error["InitPDF"]<<"You must specify a LHAPDF filename first.\n"; exit(1);
    }
 
-   LHAPDF::setVerbosity(LHAPDF::SILENT);
-   //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
+   //LHAPDF::setVerbosity(LHAPDF::SILENT);
+   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFfilename);
@@ -212,7 +212,7 @@ void FastNLOAlphas::SetLHAPDFset( int set ) {
 
 void FastNLOAlphas::PrintPDFInformation() const {
    //
-   // print out the information about the currently used LHAPDF file.
+   // Print out the information about the currently used LHAPDF file.
    // unfortunately there is no getter for lhapdf-filename or
    // used pdf-member-id available.
    // One must take care, that one is always using the desired pdf.
@@ -222,7 +222,7 @@ void FastNLOAlphas::PrintPDFInformation() const {
    // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
    //
    printf(" ##################################################################################\n");
-   printf(" #  FastNLOAlphas::PrintCurrentLHAPDFInformation.\n");
+   printf(" #  FastNLOAlphas::PrintPDFInformation.\n");
    printf(" #      Your currently initalized pdf is called:\n");
    LHAPDF::getDescription();
    printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");

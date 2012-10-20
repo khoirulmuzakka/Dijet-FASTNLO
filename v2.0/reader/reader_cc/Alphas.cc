@@ -2,6 +2,7 @@
 #include "Alphas.h"
 #include <math.h>
 #include <cstdio>
+#include "speaker.h"
 
 using namespace std;
 
@@ -24,12 +25,12 @@ using namespace std;
 //
 //_____________________________________________________
 
-double Alphas::fMz		= 91.1876;		// mass of Z0. PDG value 2011
-double Alphas::fAlphasMz	= 0.1185;		// alpha_s at starting scale of Mz. (Bethke 2011)
+double Alphas::fMz		= 91.1876;		// mass of Z0, PDG 2012.
+double Alphas::fAlphasMz	= 0.1184;		// alpha_s at starting scale of Mz, PDG 2012; previous was 0.1185, Bethke 2011.
 int Alphas::fNf			= 5;			// MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
 int Alphas::fnLoop		= 2;			// n-loop solution of the RGE
-bool Alphas::bFlavorMatching	= true;			// switch flaovr matching on or off
-double Alphas::fTh[6]		= {0.0024 , 0.0049, 0.100, 1.29, 4.19, 172.9};	// PDG 2011
+bool Alphas::bFlavorMatching	= true;			// switch flavor matching on or off
+double Alphas::fTh[6]		= {0.0023, 0.0048, 0.095, 1.275, 4.18, 173.5};	// PDG 2012; check on pole mass, running mass when using in theory ...!
 
 
 Alphas::Alphas(){
@@ -95,6 +96,7 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
      first = false;
      cout << endl << " " << cseps << endl;
      printf(" # ALPHAS-GRV: First call:\n");
+     //     say::info["ALPHAS-GRV"] << "First call:\n";
      PrintInfo();
    }
    

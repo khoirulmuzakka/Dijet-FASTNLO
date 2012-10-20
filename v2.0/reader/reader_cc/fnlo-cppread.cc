@@ -13,11 +13,11 @@
 #include <cmath>
 #include <cstdlib>
 #include <cfloat>
-#include "FastNLOUser.h"
-#include "FastNLOLHAPDF.h"
-#include "FastNLOAlphas.h"
-#include "FastNLOCRunDec.h"
 #include "Alphas.h"
+#include "FastNLOUser.h"
+#include "FastNLOAlphas.h"
+#include "FastNLOLHAPDF.h"
+#include "FastNLOCRunDec.h"
 
 // Function prototype for flexible-scale function 
 double Function_Mu(double s1, double s2 );
@@ -162,32 +162,73 @@ int fnlocppread(int argc, char** argv){
   //
   //     To facilitate using fastNLOReader a number of predefined user classes exist
   //     interfacing to
+  //     GRV Alphas (default alpha_s evolution used in fastNLO for crosschecks,
+  //                 based on M. Glueck, E. Reya, A. Vogt, Eur.Phys.J.C5:461-470,1998, hep-ph/9806404;
+  //                 PDF from LHAPDF),
   //     LHAPDF (PDF and alpha_s, see M. Whalley, D. Bourilkov, R. Group, hep-ph/0508110),
-  //     GRV Alphas (original alpha_s evolution used in fastNLO for crosschecks,
-  //                 based on M. Glueck, E. Reya, A. Vogt, Eur.Phys.J.C5:461-470,1998, hep-ph/9806404),
   //     CRunDec (alpha_s evolution up to 4 loops, see B. Schmidt, M. Steinhauser,
-  //              Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149). 
+  //              Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149;
+  //              PDF from LHAPDF).
   // 
-  //     They can be used as follows:
+  //     Their use is explained in the following.
   //
-  cout<<" ================ LHAPDF ================== " << endl;
-  FastNLOLHAPDF* fnlolhapdf = new FastNLOLHAPDF( tablename , PDFFile , 0 );
-  fnlolhapdf->FillPDFCache();
-  fnlolhapdf->CalcCrossSection();
-  fnlolhapdf->PrintCrossSectionsDefault();
-  
-  cout<<" ================ GRV Alphas ================== " << endl;
+  //     Initialize with PDF from LHAPDF and GRV alphas evolution (default)
   FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
-  fnloreader->SetAlphasMz(0.1179);
-  fnloreader->CalcCrossSection();
-  fnloreader->PrintCrossSectionsDefault();
+  fnloreader->FillPDFCache();
+  //  For some immediate print out 
+  //  fnloreader->CalcCrossSection();
+  //  fnloreader->PrintCrossSectionsDefault();
   
-  cout<<" ================ CRunDec ================== " << endl;
-  FastNLOCRunDec* fnlocrundec = new FastNLOCRunDec( tablename , PDFFile , 0 );
-  fnlocrundec->SetAlphasMz(0.1182);
-  fnlocrundec->CalcCrossSection();
-  fnlocrundec->PrintCrossSectionsDefault();
+  //     Initialize with PDF from LHAPDF and LHAPDF internal alphas evolution of the respective PDF set
+  //  FastNLOLHAPDF* fnlolhapdf = new FastNLOLHAPDF( tablename , PDFFile , 0 );
+  //  fnlolhapdf->FillPDFCache();
+  //  For some immediate print out 
+  //  fnlolhapdf->CalcCrossSection();
+  //  fnlolhapdf->PrintCrossSectionsDefault();
+  
 
+
+  // ------- Select a another PDF set and member ------- //
+  // --- fastNLO user: You can select another PDF set and member here.
+  //     With LHAPDF, you can set the PDF set and member using e.g.:
+  //           fnloreader->SetLHAPDFfilename( PDFFile );
+  //           fnloreader->SetLHAPDFset( int PDFSet );
+  //
+  //     >>>>   WARNING  <<<< 
+  //     fastNLO communicates to LHAPDF using the LHAPDFwrap class.
+  //     This class is a global singleton class, which means, that if
+  //     it is e.g. changed to another PDF name (e.g. by a second
+  //     instance of FastNLOReader), then all FastNLOReader 
+  //     instances access this 'new' LHAPDF file or member set (of course
+  //     only after calling FillPDFCache() and CalcCrossSection()).
+  //     
+  //	 If you are not really sure, which pdf set is currently used, then
+  //     please reset the LHAPDF filename and memberset id.
+  //
+  //  fnloreader->SetLHAPDFfilename( PDFFile );
+  //  fnloreader->SetLHAPDFset( 0 );
+
+
+
+  // ------- Changing the alpha_s(M_Z) value and/or evolution ------- //
+  // --- fastNLO user: 
+  //     The alpha_s evolution is provided by the code of the chosen
+  //     interface, e.g. GRV alpha_s for the fnloreader instance here.
+  //     The value of alpha_s(M_Z) can be changed from its default PDG 2012
+  //     value (0.1184) like this:
+  //fnloreader->SetAlphasMz(0.1179);
+  //
+  //     (Note: CTEQ6M alpha_s(M_Z) = 0.1179; PDG 2012 alpha_s(M_Z) = 0.1184) 
+  //
+  //     To use a different alpha_s evolution code one has to interface it.
+  //     Here, for example, we use the above-mentioned CRunDec code:
+  // 
+  // FastNLOCRunDec* fnlocrundec = new FastNLOCRunDec( tablename , PDFFile , 0 );
+  // fnlocrundec->SetAlphasMz(0.1184);
+  // fnlocrundec->FillPDFCache();
+  // fnlocrundec->CalcCrossSection();
+  // fnlocrundec->PrintCrossSectionsDefault();
+  
 
 
   // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
@@ -204,51 +245,6 @@ int fnlocppread(int argc, char** argv){
   
   
   
-  // ------- Select a PDF set and member ------- //
-  // --- fastNLO user: You can select the PDF here.
-  //     With LHAPDF, you can set the PDF set and member using e.g.:
-  //           fnloreader->SetLHAPDFfilename( PDFFile );
-  //           fnloreader->SetLHAPDFset( int PDFSet );
-  //     Or you talk directly to LHAPDF using LHAPDF::LHAPDF().
-  //
-  //     >>>>   WARNING  <<<< 
-  //     fastNLO communicates to LHAPDF using the LHAPDFwrap class.
-  //     This class is a global singleton class, which means, that if
-  //     it is e.g. changed to another PDF name (e.g. by a second
-  //     instance of FastNLOReader), then all FastNLOReader 
-  //     instances access this 'new' LHAPDF file or member set (of course
-  //     only after calling FillPDFCache() and CalcCrossSection()).
-  //     
-  //     You can print some information about the currently initialized
-  //     LHAPDF using
-  //		fnloreader->PrintCurrentLHAPDFInformation();
-  //	
-  //	 If you are not really sure, which pdf set is currently used, then
-  //     please reset the LHAPDF filename and memberset id.
-  //
-  //     Since the PDF evolution is typically provided in some external
-  //     code, you can choose the interface to the evolution routine.
-  //     By default LHAPDF is used:
-  //           fnloreader->SetPDFInterface(fastNLO::kLHAPDF);
-  //	
-  //   TBD: What about the PDFFile above? What to use?
-  //   TBD: Which alternatives for SetPDFInterface(fastNLO::kLHAPDF) ?
-  //
-  //   fnloreader->SetLHAPDFfilename( PDFFile );
-  //   fnloreader->SetLHAPDFset( 0 );
-  //  TBD: The following doesn't work ...???
-  //  fnloreader->PrintCurrentLHAPDFInformation();
-
-
-  
-  // ------- Setting Alpha_s value ------- //
-  // --- fastNLO user: 
-  //     The alpha_s evolution is provided in the user code
-  // TBD: Use again value in released reader code for comparison
-  //fnloreader->SetAlphasMz(0.1185);
-
-
-
   // ------- Set the calculation order (if available) ------- //
   // --- fastNLO user: Each fastNLO table comes typically with
   //     various contributions.
@@ -298,6 +294,8 @@ int fnlocppread(int argc, char** argv){
   //     The return value of this function call is boolean and returns false, if the
   //     the requested scale factors can not be chosen. In this case, the last legal
   //     values remain unchanged.
+
+
   
   // ----- Additional possibilities for scales in 'flexible-scale' tables (v2.1) ----- //
   if ( fnloreader->GetIsFlexibleScaleTable() ) {
@@ -350,7 +348,7 @@ int fnlocppread(int argc, char** argv){
   // --- fastNLO user: Before you can access the fastNLO computed
   //     cross sections, you always have to call CalcCrossSection()!
   //     If you are not sure, whether you have recalculated the internal
-  //     PDF cache with your current scale choice you further can call 
+  //     PDF cache with your current PDF and scale choice you further can call 
   //     FillPDFCache() before calling CalcCrossSection().
   //     So, before accessing the cross sections, please call:
   //             fnloreader->CalcCrossSection();
@@ -387,7 +385,7 @@ int fnlocppread(int argc, char** argv){
   //             fnloreader->PrintCrossSectionsDefault();
   //     WARNING: The latter call makes implicit changes to the settings to
   //              reproduce the 'default' results. Call it BEFORE you make
-  //              your settings in case.
+  //              your settings in this case.
 
 
 
