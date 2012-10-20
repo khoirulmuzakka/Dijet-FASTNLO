@@ -33,8 +33,8 @@ using namespace std;
 class FastNLOAlphas : public FastNLOReader {
 
 private:
-   FastNLOAlphas(string name);
 public:
+   FastNLOAlphas(string name);
    FastNLOAlphas(string name, string LHAPDFfile, int PDFset = 0);
 
    void SetLHAPDFfilename( string filename );
@@ -72,11 +72,9 @@ protected:
 
 
 FastNLOAlphas::FastNLOAlphas(string name) : FastNLOReader(name) {
-   // --- fastNLO user: if you have interface FastNLOAlphas::EvolveAlphas(double,double)
-   //     it is convenient to automatically interface it here.
-   warn["FastNLOAlphas"]<<"Please set LHAPDFfilename and init the LHAPDF::PDFset."<<std::endl;
+   warn["FastNLOAlphas"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
+   warn["FastNLOAlphas"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
 }
-
 
 
 //______________________________________________________________________________
@@ -153,24 +151,22 @@ void FastNLOAlphas::InitPDF(){
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
 
-   if ( fLHAPDFfilename == ""){
-      error["InitPDF"]<<"You must specify a LHAPDF filename first.\n"; exit(1);
-   }
-
    //LHAPDF::setVerbosity(LHAPDF::SILENT);
    LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-   //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
-   // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
-   //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-   //cout << "PDF set name " << fLHAPDFfilename << endl;
-   LHAPDF::initPDFSet(fLHAPDFfilename);
-   fnPDFs = LHAPDF::numberPDF();
-   if ( fnPDFs < fiPDFSet ){
-      error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
+   if ( fLHAPDFfilename == ""){
+     error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
+     exit(1);
+   } else {
+     // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
+     //LHAPDF::initPDFSetByName(fLHAPDFfilename);
+     //cout << "PDF set name " << fLHAPDFfilename << endl;
+     LHAPDF::initPDFSet(fLHAPDFfilename);
+     fnPDFs = LHAPDF::numberPDF();
+     if ( fnPDFs < fiPDFSet ){
+       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
+     }
+     LHAPDF::initPDF(fiPDFSet);
    }
-
-   LHAPDF::initPDF(fiPDFSet);
-
 }
 
 
@@ -217,15 +213,20 @@ void FastNLOAlphas::PrintPDFInformation() const {
    // used pdf-member-id available.
    // One must take care, that one is always using the desired pdf.
    //
-   // e.g. If one has two FastNLOReader instances and one initalizes the
-   // second instance with another pdf. Then also the first one is using this
-   // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
+   // For example if one has two FastNLOReader instances and one initalizes the
+   // second instance with another pdf, then also the first one is using this
+   // pdf when doing CalcCrossSection (after a proper PDFCacheRefilling).
    //
    printf(" ##################################################################################\n");
    printf(" #  FastNLOAlphas::PrintPDFInformation.\n");
    printf(" #      Your currently initalized pdf is called:\n");
    LHAPDF::getDescription();
-   printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
+   printf(" #\n");
+   printf(" #      Please note that because of a feature in gfortran the output via your LHAPDF\n");
+   printf(" #      installation may be asynchronous to this C++ output. Usually, the gfortran\n");
+   printf(" #      output comes at the end after all C++ output, but this depends on your actual system.\n");
+   printf(" #      You can try to set the environment variable GFORTRAN_UNBUFFERED_ALL to yes\n");
+   printf(" #      in your shell to get it synchronized. Keep your fingers crossed.\n");
    printf(" #      Please use FastNLOReader::SetLHAPDFset(int) to choose a pdf-set.\n");
    printf(" ##################################################################################\n");
 }

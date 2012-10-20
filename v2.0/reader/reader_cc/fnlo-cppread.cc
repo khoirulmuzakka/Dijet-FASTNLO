@@ -149,7 +149,7 @@ int fnlocppread(int argc, char** argv){
   
   
   
-  // ------- Initialize fastNLOReader ------- //
+  // ------- Initialize table for fastNLOReader ------- //
   // --- fastNLO user:
   //     In addition to a fastNLO table two additional ingredients are required:
   //     - the PDF set and
@@ -172,8 +172,27 @@ int fnlocppread(int argc, char** argv){
   // 
   //     Their use is explained in the following.
   //
-  //     Initialize with PDF from LHAPDF and GRV alphas evolution (default)
-  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
+  //     Initialize table with GRV alphas evolution (default).
+  //     The requested PDFFile can specified immediately as well, but is
+  //     done later here to first print out the basic table information.
+  //
+  //  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename , PDFFile , 0 );
+  FastNLOAlphas* fnloreader = new FastNLOAlphas( tablename );
+
+
+
+  // -------- Table information ------- //
+  // --- fastNLO user:
+  //     Print list of contributions contained in table
+  fnloreader->PrintTableInfo();
+  //     Print detailed scenario information of attached table
+  fnloreader->PrintFastNLOTableConstants(0);
+
+
+  
+  // -------- Initialize PDF set to be used by fastNLOReader ------- //
+  //  Now define the PDF set
+  fnloreader->SetLHAPDFfilename( PDFFile );
   fnloreader->FillPDFCache();
   //  For some immediate print out 
   //  fnloreader->CalcCrossSection();
@@ -202,6 +221,16 @@ int fnlocppread(int argc, char** argv){
   //     instances access this 'new' LHAPDF file or member set (of course
   //     only after calling FillPDFCache() and CalcCrossSection()).
   //     
+  //     You can print out the info on the currently active PDF using
+  //
+  //  fnloreader->PrintPDFInformation();
+  //
+  //     but please note that because of a feature in gfortran the output via the LHAPDF
+  //     installation may be asynchronous to the C++ output! Usually, the gfortran
+  //     output comes at the end after all C++ output.
+  //     You can try to set the environment variable GFORTRAN_UNBUFFERED_ALL to "yes"
+  //     in your shell to get it synchronized. Keep your fingers crossed.
+  //
   //	 If you are not really sure, which pdf set is currently used, then
   //     please reset the LHAPDF filename and memberset id.
   //
@@ -214,8 +243,9 @@ int fnlocppread(int argc, char** argv){
   // --- fastNLO user: 
   //     The alpha_s evolution is provided by the code of the chosen
   //     interface, e.g. GRV alpha_s for the fnloreader instance here.
-  //     The value of alpha_s(M_Z) can be changed from its default PDG 2012
-  //     value (0.1184) like this:
+  //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 value
+  fnloreader->SetAlphasMz(0.1184);
+  //     like this:
   //fnloreader->SetAlphasMz(0.1179);
   //
   //     (Note: CTEQ6M alpha_s(M_Z) = 0.1179; PDG 2012 alpha_s(M_Z) = 0.1184) 
@@ -271,7 +301,6 @@ int fnlocppread(int argc, char** argv){
   //     is encoded in an enum list with names as given above: kFixedOrder, ...
   //     Within each type the contributions are counted separately starting with Id=0.
   //     The total number of contributions then counts all contributions of all types.
-  fnloreader->PrintTableInfo();
   
   
   
@@ -410,7 +439,7 @@ int fnlocppread(int argc, char** argv){
   //     INFO: NLOJet++ typically uses the NLOJet++-like alpha_s evolution with a value of 0.1179
   //     and a PDF similar to the cteq6m.LHgrid pdf-file.
   // ************************************************************************************************
-  fnloreader->PrintFastNLOTableConstants(0);
+  //  fnloreader->PrintFastNLOTableConstants(0);
   
   // The presented example is done automatically for print out here  
   //  fnloreader->PrintCrossSectionsDefault(0);

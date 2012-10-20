@@ -32,8 +32,8 @@ using namespace std;
 class FastNLOLHAPDF : public FastNLOReader {
 
 private:
-   FastNLOLHAPDF(string name);
 public:
+   FastNLOLHAPDF(string name);
    FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset = 0);
 
    void SetLHAPDFfilename( string filename );
@@ -61,11 +61,9 @@ protected:
 
 
 FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) {
-   // --- fastNLO user: if you have interface FastNLOLHAPDF::EvolveAlphas(double,double)
-   //     it is convenient to automatically interface it here.
-   warn["FastNLOLHAPDF"]<<"Please set LHAPDFfilename and init the LHAPDF::PDFset."<<std::endl;
+   warn["FastNLOLHAPDF"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
+   warn["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
 }
-
 
 
 //______________________________________________________________________________
@@ -108,24 +106,22 @@ void FastNLOLHAPDF::InitPDF(){
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
 
+   //LHAPDF::setVerbosity(LHAPDF::SILENT);
+   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    if ( fLHAPDFfilename == ""){
-      error["InitPDF"]<<"You must specify a LHAPDF filename first.\n"; exit(1);
+     error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
+     exit(1);
+   } else {
+     // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
+     //LHAPDF::initPDFSetByName(fLHAPDFfilename);
+     //cout << "PDF set name " << fLHAPDFfilename << endl;
+     LHAPDF::initPDFSet(fLHAPDFfilename);
+     fnPDFs = LHAPDF::numberPDF();
+     if ( fnPDFs < fiPDFSet ){
+       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
+     }
+     LHAPDF::initPDF(fiPDFSet);
    }
-
-   LHAPDF::setVerbosity(LHAPDF::SILENT);
-   //LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-   //cout << " * LHAPDF version: " << LHAPDF::getVersion() <<endl;
-   // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
-   //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-   //cout << "PDF set name " << fLHAPDFfilename << endl;
-   LHAPDF::initPDFSet(fLHAPDFfilename);
-   fnPDFs = LHAPDF::numberPDF();
-   if ( fnPDFs < fiPDFSet ){
-      error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
-   }
-
-   LHAPDF::initPDF(fiPDFSet);
-
 }
 
 
