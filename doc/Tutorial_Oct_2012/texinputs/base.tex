@@ -1,0 +1,33 @@
+%
+% default format and packages for pdflatex
+%
+% counteract default shifts of printers
+\setlength{\hoffset}{-1.in}
+\setlength{\voffset}{-1.in}
+\setlength{\topmargin}{2.5cm}
+\setlength{\headheight}{0.1cm}
+\setlength{\headsep}{0.1cm}
+\setlength{\textheight}{23.5cm}
+\setlength{\textwidth}{16.cm}
+\setlength{\oddsidemargin}{2.5cm}
+\setlength{\evensidemargin}{2.5cm}
+\pagestyle{empty}
+%
+% additional packages
+%
+\usepackage{amsmath,amssymb}
+\usepackage[english]{babel}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{mathpazo}
+\usepackage{palatino}
+%\DeclareGraphicsExtensions{.eps,.jpg,.pdf,.png,}
+\graphicspath{{./eps},{./pdf},{./png},{./jpg}} % Note, the additional {} are mandatory!
+\usepackage[plainpages=false,pdfpagelabels]{hyperref}
+\usepackage{psfrag}
+\usepackage{xspace}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
