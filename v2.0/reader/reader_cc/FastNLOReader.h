@@ -176,6 +176,7 @@ protected:
   void FillAlphasCacheInBlockBv20( FastNLOBlockB* B );
   void FillAlphasCacheInBlockBv21( FastNLOBlockB* B );
   double CalcAlphas(double Q);
+  double CalcReferenceAlphas();
 
   void CalcReferenceCrossSection();
   
@@ -199,7 +200,7 @@ protected:
       else return BBlocksSMCalc[fastNLO::kThresholdCorrection][n]; };
 
    // virtual functions for the user interface
-   virtual void InitPDF() = 0;
+   virtual bool InitPDF() = 0;
    virtual vector<double> GetXFX(double x, double muf ) const = 0;
    virtual double EvolveAlphas(double Q) const = 0;
 
@@ -222,6 +223,8 @@ protected:
   fastNLO::EScaleFunctionalForm fMuRFunc;
   fastNLO::EScaleFunctionalForm fMuFFunc;
   fastNLO::EUnits		fUnits;
+  bool fPDFSuccess;
+  double fAlphasCached;
   mu_func Fct_MuR;				// Function, if you define your functional form for your scale external
   mu_func Fct_MuF;				// Function, if you define your functional form for your scale external
   vector < vector < bool > > bUseSMCalc;		// switch calculations ON/OFF

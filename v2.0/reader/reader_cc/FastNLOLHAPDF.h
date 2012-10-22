@@ -45,7 +45,7 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   void InitPDF();
+   bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
@@ -61,9 +61,8 @@ protected:
 
 
 FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) {
-   warn["FastNLOLHAPDF"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
-   warn["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
-   FillAlphasCache();
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )."<<std::endl;
+   info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
 }
 
 
@@ -74,7 +73,6 @@ FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset) : FastN
    SetLHAPDFfilename(LHAPDFfile);
    SetLHAPDFset(PDFset);
    // do cross sections calculation, since everything is yet ready
-   FillAlphasCache();
    FillPDFCache();
    CalcCrossSection();
 }
@@ -85,6 +83,7 @@ FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset) : FastN
 
 
 double FastNLOLHAPDF::EvolveAlphas(double Q) const {
+   //debug<<"EvolveAlphas with Q="<<Q<<endl;
    //
    // Implementation of Alpha_s evolution as function of Mu_r only.
    //
@@ -100,10 +99,13 @@ double FastNLOLHAPDF::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::InitPDF(){
+bool FastNLOLHAPDF::InitPDF(){
    //
    //  Initalize some necessary LHAPDF parameters
+   //  return true, if successful initialization
+   //  return false, if PDF initialization failed
    //
+   // LHAPDF interface:
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
 
@@ -111,7 +113,7 @@ void FastNLOLHAPDF::InitPDF(){
    LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    if ( fLHAPDFfilename == ""){
      error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
-     exit(1);
+     return false;
    } else {
      // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
      //LHAPDF::initPDFSetByName(fLHAPDFfilename);
@@ -120,9 +122,13 @@ void FastNLOLHAPDF::InitPDF(){
      fnPDFs = LHAPDF::numberPDF();
      if ( fnPDFs < fiPDFSet ){
        error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
+       return false;
      }
      LHAPDF::initPDF(fiPDFSet);
    }
+   // Fill alpha_s since this is dependent on your PDF file and set
+   //A FillAlphasCache();
+   return true;
 }
 
 
@@ -146,7 +152,8 @@ void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
    fLHAPDFfilename = filename;
    // reset pdfset
    fiPDFSet = 0;
-   InitPDF();
+   //   InitPDF();
+   //A FillAlphasCache();
 }
 
 
@@ -155,7 +162,8 @@ void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
 
 void FastNLOLHAPDF::SetLHAPDFset( int set ) {
    fiPDFSet = set;
-   InitPDF();
+   //InitPDF();
+   //A FillAlphasCache();
 }
 
 

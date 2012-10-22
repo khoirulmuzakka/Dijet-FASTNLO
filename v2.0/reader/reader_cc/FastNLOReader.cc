@@ -55,6 +55,8 @@ FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
    fUnits		= fastNLO::kPublicationUnits;
    fMuRFunc		= fastNLO::kScale1;
    fMuFFunc		= fastNLO::kScale1;
+   fPDFSuccess		= false;
+   fAlphasCached	= 0.;
    SetFilename(filename);
 }
 
@@ -288,7 +290,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool Fi
     }
   }
   
-  if (!FirstCall)FillAlphasCache(); // we can't call FillAlphasCache in the constructor!
+  //A if (!FirstCall)FillAlphasCache(); // we can't call FillAlphasCache in the constructor!
   if ( ReFillCache ) FillPDFCache();
   return B_NLO()->ScaleFac[0][fScalevar];
 }
@@ -339,7 +341,7 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
 
 void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func){
    SetFunctionalForm(func,kMuR);
-   FillAlphasCache();
+   //A FillAlphasCache();
 }
 
 
@@ -428,7 +430,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
      PrintScaleSettings(kMuR);
      PrintScaleSettings(kMuF);
   }
-  FillAlphasCache();
+  //A FillAlphasCache();
   return true;
 }
 
@@ -1599,6 +1601,22 @@ void FastNLOReader::CalcCrossSection( ){
   kFactor.clear();
   kFactor.resize(NObsBin);
 
+  // check pdf cache
+  if ( !fPDFSuccess ) {
+     error["CalcCrossSection"]<<"Cannot calculate cross sections. PDF has not been initalized successfully."<<endl;
+     return;
+  }
+  // check alpha_s cache
+  if ( fAlphasCached == 0. || fAlphasCached != CalcReferenceAlphas() ){
+     debug["CalcCrossSection"]<<"Need for refilling of AlphasCache, since fAlphasCached="<<fAlphasCached<<endl;
+     FillAlphasCache();
+  }
+  // do we have an alphas?
+  if ( fAlphasCached != CalcReferenceAlphas() || fAlphasCached==0.){
+     error["CalcCrossSection"]<<"Filling of alpha_s cache failed!"<<endl;
+     exit(1);
+  }
+
   // perturbative (additive) contributions
   for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
     if ( !BBlocksSMCalc[j].empty() ) {
@@ -1782,7 +1800,7 @@ void FastNLOReader::SetUnits( EUnits Unit ){
 
 
 void FastNLOReader::FillAlphasCache(){
-   debug["FillAlphasCache"]<<endl;
+  debug["FillAlphasCache"]<<endl;
   //
   //  Fill the internal alpha_s cache.
   //  This is usally called automatically. Only if you
@@ -1792,29 +1810,36 @@ void FastNLOReader::FillAlphasCache(){
       
   // check if the alpha_s value is somehow reasonable
   debug["FillAlphasCache"]<<"Sanity check!"<<endl;
-  double asMz = CalcAlphas(91.18);
-  if ( ( asMz > 0.5 || asMz < 0.01 ) ) {
+  const double asNew = CalcReferenceAlphas();
+  if ( asNew < 0.01 || asNew > 0.5 ) {
      warn["FillAlphasCache"]<<"Your alphas value seems to be unreasonably small/large."<<endl;
-     warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asMz<<endl;
+     warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asNew<<endl;
   }
-  debug["FillAlphasCache"]<<"Sanity check of alpha_s(MZ=91.18) = "<<asMz<<endl;
+  debug["FillAlphasCache"]<<"Sanity check of alpha_s(MZ=91.18) = "<<asNew<<endl;
 
-  for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
-    if ( !BBlocksSMCalc.empty() ){
-      for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
-	// Check that this contribution type j and no. i should actually be used
-	// Otherwise deactivation of e.g. threshold corr. is not respected here
-	if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
-	  if ( !GetIsFlexibleScaleTable() ){
-	     FillAlphasCacheInBlockBv20( BBlocksSMCalc[j][i]  );
-	  }
-	  else if ( GetIsFlexibleScaleTable() ){
-	     FillAlphasCacheInBlockBv21( BBlocksSMCalc[j][i]  );
-	  }
+  // is there a need for a recalclation?
+  if ( asNew == fAlphasCached ){
+     debug["FillAlphasCache"]<<"No need for a refilling of AlphasCache. asNew==fAlphasCached="<<asNew<<endl;
+  } else {
+     fAlphasCached = asNew;
+     for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
+	if ( !BBlocksSMCalc.empty() ){
+	   for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
+	      // Check that this contribution type j and no. i should actually be used
+	      // Otherwise deactivation of e.g. threshold corr. is not respected here
+	      if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
+		 if ( !GetIsFlexibleScaleTable() ){
+		    FillAlphasCacheInBlockBv20( BBlocksSMCalc[j][i]  );
+		 }
+		 else if ( GetIsFlexibleScaleTable() ){
+		    FillAlphasCacheInBlockBv21( BBlocksSMCalc[j][i]  );
+		 }
+	      }
+	   }
 	}
-      }
-    }
+     }
   }
+  return ;
 }
 
 
@@ -1884,6 +1909,13 @@ double FastNLOReader::CalcAlphas( double Q ){
 }
 
 
+//______________________________________________________________________________
+
+
+double FastNLOReader::CalcReferenceAlphas(){
+   return CalcAlphas(91.1876123456789012);
+}
+
 
 //______________________________________________________________________________
 
@@ -1896,7 +1928,13 @@ void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
   //  pdf parameters and evolutions are calculated externally.
   //
 
-  InitPDF();
+   // init PDF and check success
+   fPDFSuccess = InitPDF();
+   debug["FillPDFCache"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
+   if ( !fPDFSuccess ) {
+      warn["FillPDFCache"]<<"PDF initializatoin failed. Please check PDF interface in your FastNLO user module."<<endl;
+      return;
+   }
 
   // check if the pdf is somehow reasonable
   // vector<double> pdftest = GetXFX(1.e-2,10);
@@ -2315,7 +2353,7 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)){
    info<<"Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = "<<(*Fct_MuR)(91.1876,91.1876)<<endl;
    info<<"Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = "<<(*Fct_MuR)(1,91.1876)<<endl;
    info<<"Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = "<<(*Fct_MuR)(91.1876,1)<<endl;
-   FillAlphasCache();
+   //A FillAlphasCache();
 }
 
 

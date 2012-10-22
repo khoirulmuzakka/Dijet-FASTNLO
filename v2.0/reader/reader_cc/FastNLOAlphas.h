@@ -53,7 +53,7 @@ protected:
    // inherited functions
    //double EvolveAlphas(double Q, double alphasMz ) const ;
    double EvolveAlphas(double Q) const ;
-   void InitPDF();
+   bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
@@ -72,12 +72,12 @@ protected:
 
 
 FastNLOAlphas::FastNLOAlphas(string name) : FastNLOReader(name) {
-   warn["FastNLOAlphas"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
-   warn["FastNLOAlphas"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   info["FastNLOAlphas"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
+   info["FastNLOAlphas"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
    // set some reasonable starting values;
    SetGRVtoPDG2012_2loop();
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
-   FillAlphasCache();
+   //A FillAlphasCache();
 }
 
 
@@ -92,7 +92,7 @@ FastNLOAlphas::FastNLOAlphas(string name, string LHAPDFfile, int PDFset) : FastN
    SetGRVtoPDG2012_2loop();
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
    // do cross sections calculation, since everything is yet ready
-   FillAlphasCache();
+   //A FillAlphasCache();
    FillPDFCache();
    CalcCrossSection();
 }
@@ -107,7 +107,7 @@ void FastNLOAlphas::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   FillAlphasCache();
+   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -148,9 +148,11 @@ void FastNLOAlphas::SetGRVtoPDG2012_2loop(){
 //______________________________________________________________________________
 
 
-void FastNLOAlphas::InitPDF(){
+bool FastNLOAlphas::InitPDF(){
    //
    //  Initalize some necessary LHAPDF parameters
+   //  return true, if successful initialization
+   //  return false, if PDF initialization failed
    //
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
@@ -171,6 +173,7 @@ void FastNLOAlphas::InitPDF(){
      }
      LHAPDF::initPDF(fiPDFSet);
    }
+   return true;
 }
 
 

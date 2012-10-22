@@ -56,7 +56,7 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   void InitPDF();
+   bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
@@ -87,10 +87,10 @@ CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 
 
 FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
-   warn["FastNLOCRunDec"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
-   warn["FastNLOCRunDec"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   info["FastNLOCRunDec"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
+   info["FastNLOCRunDec"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
    InitReasonableRunDecValues();
-   FillAlphasCache();
+   //A FillAlphasCache();
 }
 
 
@@ -102,7 +102,7 @@ FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFfile, int PDFset) : Fas
    SetLHAPDFset(PDFset);
    // do cross sections calculation, since everything is ready
    InitReasonableRunDecValues();
-   FillAlphasCache();
+   //A FillAlphasCache();
    FillPDFCache();
    CalcCrossSection();
 }
@@ -115,7 +115,7 @@ void FastNLOCRunDec::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   FillAlphasCache();
+   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -127,7 +127,7 @@ void FastNLOCRunDec::SetMz( double Mz , bool ReCalcCrossSection ){
    //  Set the Z-Boson mass
    //
    fMz    = Mz;             // new alpha_s value
-   FillAlphasCache();
+   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -139,7 +139,7 @@ void FastNLOCRunDec::SetNloop( double nloop, bool ReCalcCrossSection ){
    //  Set n loop calculation
    //
    fNloop    = nloop;             // new alpha_s value
-   FillAlphasCache();
+   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -152,7 +152,7 @@ void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
    //
    fNf    = Nf;             // new alpha_s value
    //fcrundec.SetConstants(fNf);
-   FillAlphasCache();
+   //A  FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -226,9 +226,11 @@ double FastNLOCRunDec::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLOCRunDec::InitPDF(){
+bool FastNLOCRunDec::InitPDF(){
    //
    //  Initalize some necessary LHAPDF parameters
+   //  return true, if successful initialization
+   //  return false, if PDF initialization failed
    //
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
@@ -249,6 +251,7 @@ void FastNLOCRunDec::InitPDF(){
      }
      LHAPDF::initPDF(fiPDFSet);
    }
+   return true;
 }
 
 
