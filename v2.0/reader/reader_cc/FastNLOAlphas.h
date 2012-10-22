@@ -73,11 +73,9 @@ protected:
 
 FastNLOAlphas::FastNLOAlphas(string name) : FastNLOReader(name) {
    info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
-   //P info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
    // set some reasonable starting values;
    SetGRVtoPDG2012_2loop();
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
-   //A FillAlphasCache();
 }
 
 
@@ -92,8 +90,6 @@ FastNLOAlphas::FastNLOAlphas(string name, string LHAPDFfile, int PDFset) : FastN
    SetGRVtoPDG2012_2loop();
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
    // do cross sections calculation, since everything is yet ready
-   //A FillAlphasCache();
-   //P FillPDFCache();
    CalcCrossSection();
 }
 
@@ -107,7 +103,6 @@ void FastNLOAlphas::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -136,7 +131,7 @@ void FastNLOAlphas::SetGRVtoPDG2012_2loop(){
    Alphas::SetMz(91.1876); // PDG 2012
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
-   Alphas::SetFlavorMatchingOn(true);
+   Alphas::SetFlavorMatchingOn(false);
    if ( info.GetSpeak() ) {
       info<<"Calling Alphas::PrintInfo()."<<endl;
       info<<"Alpha_s(Mz) value is taken from FastNLOAlphas, instead of Alphas::Alphas."<<endl;

@@ -88,9 +88,7 @@ CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 
 FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
    info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
-   //P info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
    InitReasonableRunDecValues();
-   //A FillAlphasCache();
 }
 
 
@@ -102,8 +100,6 @@ FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFfile, int PDFset) : Fas
    SetLHAPDFset(PDFset);
    // do cross sections calculation, since everything is ready
    InitReasonableRunDecValues();
-   //A FillAlphasCache();
-   //P FillPDFCache();
    CalcCrossSection();
 }
 
@@ -115,7 +111,6 @@ void FastNLOCRunDec::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -127,7 +122,6 @@ void FastNLOCRunDec::SetMz( double Mz , bool ReCalcCrossSection ){
    //  Set the Z-Boson mass
    //
    fMz    = Mz;             // new alpha_s value
-   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -139,7 +133,6 @@ void FastNLOCRunDec::SetNloop( double nloop, bool ReCalcCrossSection ){
    //  Set n loop calculation
    //
    fNloop    = nloop;             // new alpha_s value
-   //A FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 
@@ -152,7 +145,6 @@ void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
    //
    fNf    = Nf;             // new alpha_s value
    //fcrundec.SetConstants(fNf);
-   //A  FillAlphasCache();
    if ( ReCalcCrossSection ) CalcCrossSection();
 }
 

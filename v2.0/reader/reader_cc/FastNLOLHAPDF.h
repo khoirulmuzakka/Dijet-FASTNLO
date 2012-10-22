@@ -62,7 +62,6 @@ protected:
 
 FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) {
    info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
-   //P info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
 }
 
 
@@ -73,7 +72,6 @@ FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset) : FastN
    SetLHAPDFfilename(LHAPDFfile);
    SetLHAPDFset(PDFset);
    // do cross sections calculation, since everything is yet ready
-   //P FillPDFCache();
    CalcCrossSection();
 }
 
@@ -126,8 +124,6 @@ bool FastNLOLHAPDF::InitPDF(){
      }
      LHAPDF::initPDF(fiPDFSet);
    }
-   // Fill alpha_s since this is dependent on your PDF file and set
-   //A FillAlphasCache();
    return true;
 }
 
@@ -153,7 +149,6 @@ void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
    // reset pdfset
    fiPDFSet = 0;
    //   InitPDF();
-   //A FillAlphasCache();
 }
 
 
@@ -163,7 +158,6 @@ void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
 void FastNLOLHAPDF::SetLHAPDFset( int set ) {
    fiPDFSet = set;
    //InitPDF();
-   //A FillAlphasCache();
 }
 
 
