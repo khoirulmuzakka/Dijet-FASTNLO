@@ -57,6 +57,7 @@ FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
    fMuFFunc		= fastNLO::kScale1;
    fPDFSuccess		= false;
    fAlphasCached	= 0.;
+   fPDFCached		= 0.;
    SetFilename(filename);
 }
 
@@ -115,7 +116,8 @@ void FastNLOReader::InitScalevariation(){
      for (int iscls=0; iscls<GetNScaleVariations(); iscls++){
 	const double muFac = BBlocksSMCalc[0][1]->ScaleFac[0][iscls];
  	if (abs(muFac-1.0) < 1.e-7){
-	   SetScaleVariation(iscls,false,true);
+	   //P SetScaleVariation(iscls,false,true);
+	   SetScaleVariation(iscls,true);
 	   break;
 	}
      }
@@ -238,7 +240,8 @@ double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
 
 
 
-double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool FirstCall){ 
+//P double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool FirstCall){ 
+double FastNLOReader::SetScaleVariation(int scalevar , bool FirstCall){ 
   
   // ------------------------------------------------
   //   Set the scalevariation factor for determining the
@@ -291,7 +294,7 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool Fi
   }
   
   //A if (!FirstCall)FillAlphasCache(); // we can't call FillAlphasCache in the constructor!
-  if ( ReFillCache ) FillPDFCache();
+  //P if ( ReFillCache ) FillPDFCache();
   return B_NLO()->ScaleFac[0][fScalevar];
 }
 
@@ -348,9 +351,10 @@ void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func){
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache){
+//P void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache){
+void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func){
    SetFunctionalForm(func,kMuF);
-   if ( ReFillCache )  FillPDFCache();
+   //P if ( ReFillCache )  FillPDFCache();
 }
 
 
@@ -359,7 +363,8 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFil
 
 
 
-bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache){
+//P bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache){
+bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
    debug["SetScaleFactorsMuRMuF"];
   // 
   // Set renormalization and factorization scale factors simultaneously for scale variations in all v2 tables.
@@ -418,7 +423,8 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
        return false;
     }
     // set factorization scale 
-    SetScaleVariation( sf , ReFillCache);
+    //P SetScaleVariation( sf , ReFillCache);
+    SetScaleVariation( sf );
     // Now the renormalization scale
     fScaleFacMuR = xmur;
     PrintScaleSettings();
@@ -426,7 +432,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFill
   else {
      fScaleFacMuR = xmur;
      fScaleFacMuF = xmuf;
-     if ( ReFillCache )  FillPDFCache();
+     //P     if ( ReFillCache )  FillPDFCache();
      PrintScaleSettings(kMuR);
      PrintScaleSettings(kMuF);
   }
@@ -1164,7 +1170,7 @@ void FastNLOReader::PrintFastNLODemo(){
     // First result is with NLO, LO result via division by K factor
     if (ixmu[iscls] > -1){
       SetScaleVariation(ixmu[iscls]);
-      FillPDFCache();
+      //P FillPDFCache();
       CalcCrossSection();
 
       // Second result: Include threshold corrections for NLO if available
@@ -1602,17 +1608,27 @@ void FastNLOReader::CalcCrossSection( ){
   kFactor.resize(NObsBin);
 
   // check pdf cache
+  const double PDFcks = CalcPDFChecksum();
+  if ( fPDFCached==0. || (fPDFCached!=0. && fabs(PDFcks/fPDFCached -1.) > 1.e-7) ){
+     debug["CalcCrossSection"]<<"Need to refill PDFCache, since PDFCecksum="<<PDFcks<<" and fPDFCached="<<fPDFCached<<endl;
+     FillPDFCache(PDFcks);
+  } else {
+     debug["CalcCrossSection"]<<"No need to refill PDFCache."<<endl;
+  }
+  // check pdf cache
   if ( !fPDFSuccess ) {
      error["CalcCrossSection"]<<"Cannot calculate cross sections. PDF has not been initalized successfully."<<endl;
      return;
   }
+
   // check alpha_s cache
-  if ( fAlphasCached == 0. || fAlphasCached != CalcReferenceAlphas() ){
-     debug["CalcCrossSection"]<<"Need for refilling of AlphasCache, since fAlphasCached="<<fAlphasCached<<endl;
+  const double asref = CalcReferenceAlphas();
+  if ( fAlphasCached == 0. || fAlphasCached != asref ){
+     debug["CalcCrossSection"]<<"Need to refill AlphasCache, since fAlphasCached="<<fAlphasCached<<endl;
      FillAlphasCache();
   }
-  // do we have an alphas?
-  if ( fAlphasCached != CalcReferenceAlphas() || fAlphasCached==0.){
+  // do we now have an alphas?
+  if ( fAlphasCached==0. || fAlphasCached != asref ){
      error["CalcCrossSection"]<<"Filling of alpha_s cache failed!"<<endl;
      exit(1);
   }
@@ -1816,7 +1832,7 @@ void FastNLOReader::FillAlphasCache(){
      warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asNew<<endl;
   }
   debug["FillAlphasCache"]<<"Sanity check of alpha_s(MZ=91.18) = "<<asNew<<endl;
-
+  
   // is there a need for a recalclation?
   if ( asNew == fAlphasCached ){
      debug["FillAlphasCache"]<<"No need for a refilling of AlphasCache. asNew==fAlphasCached="<<asNew<<endl;
@@ -1920,82 +1936,130 @@ double FastNLOReader::CalcReferenceAlphas(){
 //______________________________________________________________________________
 
 
-void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
-   debug["FillPDFCache"]<<"ReCalcCrossSection="<<ReCalcCrossSection<<"\tCalling now virtual InitPDF()"<<endl;
-  //
-  //  Fill the internal pdf cache.
-  //  This function has to be called by the user, since the 
-  //  pdf parameters and evolutions are calculated externally.
-  //
+double FastNLOReader::CalcPDFChecksum(){
+   // calculate a PDF checksum to
+   // decide, whether PDF cache has to be refilled
 
    // init PDF and check success
    fPDFSuccess = InitPDF();
-   debug["FillPDFCache"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
+   debug["CalcPDFChecksum"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
    if ( !fPDFSuccess ) {
-      warn["FillPDFCache"]<<"PDF initializatoin failed. Please check PDF interface in your FastNLO user module."<<endl;
-      return;
+      warn["CalcPDFChecksum"]<<"PDF initializatoin failed. Please check PDF interface in your FastNLO user module."<<endl;
+      return 0.;
    }
-
-  // check if the pdf is somehow reasonable
-  // vector<double> pdftest = GetXFX(1.e-2,10);
-  // if ( pdftest.size() != 13) {
-  //   printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
-  //   exit(1);
-  // }
-  
-  // if ( pdftest[6] == 0. ) {
-  //   printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
-  // }
-  // double sum = 0;
-  // for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
-  // if ( sum== 0. ) {
-  //   printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
-  //   exit(1);
-  // }
-  // for ( int i = 0 ; i<13 ; i++ ){
-  //   if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
-  //     printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
-  //   }
-  // }
-  
-  for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
-    if (  !BBlocksSMCalc.empty() ){
-      for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
-	// Check that this contribution type j and no. i should actually be used
-	// Otherwise deactivation of e.g. threshold corr. is not respected here
-	if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
-	  if (BBlocksSMCalc[j][i]->NScaleDim>1){
-	     error<<"WOW! NScaleDim>1! This is usually not the case!\n";
-	    //scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
-	    //fScalevar2 = fScalevar % NfScalevar[1]; 
-	  }
-	       
-	  // linear: DIS-case
-	  // ---- DIS ---- //
-	  if ( BBlocksSMCalc[j][i]->IPDFdef1 == 2 ){
-	    if ( BBlocksSMCalc[j][i]->NPDFDim == 0 ) {
-	      if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv20(BBlocksSMCalc[j][i]);
-	      else if ( GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
-	    }
-	  }
-	  // ---- pp ---- //
-	  else if (  BBlocksSMCalc[j][i]->IPDFdef1 == 3 ){
-	    if ( BBlocksSMCalc[j][i]->NPDFDim == 1 ) {
-	      if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsHHCv20(BBlocksSMCalc[j][i]);
-	      else						FillBlockBPDFLCsHHCv21(BBlocksSMCalc[j][i]);
-	    }
-	    else {
-	       error<<"Only half matrices for hh is implemented.\n"; exit(1);
-	    }
-	  }
-	  else {
-	     error<<"Tables not yet implemented.\n";
-	  }
-	}   
-	if ( ReCalcCrossSection ) CalcCrossSection();
+   
+   double cks = 0.;
+   vector<double> xfx(13);
+   // calculate checksum for some scales and flavors
+   double mf[3] = { 3,10,91.18};
+   double x[3] = {1.e-1,1.e-2,1.e-3};
+   debug["CalcPDFChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values."<<endl;
+   for ( int jf = 0 ; jf<3 ; jf++ ){
+      for ( int ix = 0 ; ix<3 ; ix++ ){
+	 xfx = GetXFX(x[ix],mf[jf]);
+	 for ( unsigned int fl = 0 ; fl<xfx.size() ; fl++ ){
+	    cks+=xfx[fl];
+	 }
       }
-    }
-  }
+   }
+   debug["CalcPDFChecksum"]<<"Calculated checksum = "<<cks<<endl;
+   return cks;
+}
+
+
+
+//______________________________________________________________________________
+
+
+//P void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
+//P debug["FillPDFCache"]<<"ReCalcCrossSection="<<ReCalcCrossSection<<"\tCalling now virtual InitPDF()"<<endl;
+void FastNLOReader::FillPDFCache(double chksum){
+   debug["FillPDFCache"]<<"Passed chksum="<<chksum<<". Do not recalculate checksum (which calls InitPDF()) if chksum!=0."<<endl;
+   //
+   //  Fill the internal pdf cache.
+   //  This function has to be called by the user, since the 
+   //  pdf parameters and evolutions are calculated externally.
+   //
+
+   // reset checknum
+   // check if the alpha_s value is somehow reasonable
+   double PDFnew = chksum;
+   if ( chksum == 0. ) {
+      debug["FillPDFCache"]<<"Calculate Checksum!"<<endl;
+      PDFnew = CalcPDFChecksum();
+      if ( PDFnew==0. ) {
+	 warn["FillPDFCache"]<<"PDF Checksum is zero."<<endl;
+      }
+      debug["FillPDFCache"]<<"PDF Checksum = "<<PDFnew<<endl;
+   }
+   
+   // is there a need for a recalculation?
+   if ( fPDFCached != 0. && fabs(PDFnew/fPDFCached - 1.) < 1.e-7 ){
+      debug["FillPDFCache"]<<"No need for a refilling of PDFCache. fPDFCached=CalcPDFChecksum()"<<PDFnew<<endl;
+   } else {
+      debug["FillPDFCache"]<<"Refilling PDF cache"<<endl;
+      fPDFCached = PDFnew;
+
+      // check if the pdf is somehow reasonable
+      // vector<double> pdftest = GetXFX(1.e-2,10);
+      // if ( pdftest.size() != 13) {
+      //   printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
+      //   exit(1);
+      // }
+  
+      // if ( pdftest[6] == 0. ) {
+      //   printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
+      // }
+      // double sum = 0;
+      // for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
+      // if ( sum== 0. ) {
+      //   printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
+      //   exit(1);
+      // }
+      // for ( int i = 0 ; i<13 ; i++ ){
+      //   if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
+      //     printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
+      //   }
+      // }  
+      for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
+	 if (  !BBlocksSMCalc.empty() ){
+	    for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
+	       // Check that this contribution type j and no. i should actually be used
+	       // Otherwise deactivation of e.g. threshold corr. is not respected here
+	       if ( bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag ){
+		  if (BBlocksSMCalc[j][i]->NScaleDim>1){
+		     error<<"WOW! NScaleDim>1! This is usually not the case!\n";
+		     //scaleindex2 = 1; // If we use multiple scales, then mu_f is by convention the second scale -> index=1 
+		     //fScalevar2 = fScalevar % NfScalevar[1]; 
+		  }
+	       
+		  // linear: DIS-case
+		  // ---- DIS ---- //
+		  if ( BBlocksSMCalc[j][i]->IPDFdef1 == 2 ){
+		     if ( BBlocksSMCalc[j][i]->NPDFDim == 0 ) {
+			if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv20(BBlocksSMCalc[j][i]);
+			else if ( GetIsFlexibleScaleTable() )	FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
+		     }
+		  }
+		  // ---- pp ---- //
+		  else if (  BBlocksSMCalc[j][i]->IPDFdef1 == 3 ){
+		     if ( BBlocksSMCalc[j][i]->NPDFDim == 1 ) {
+			if	 ( !GetIsFlexibleScaleTable() )	FillBlockBPDFLCsHHCv20(BBlocksSMCalc[j][i]);
+			else						FillBlockBPDFLCsHHCv21(BBlocksSMCalc[j][i]);
+		     }
+		     else {
+			error<<"Only half matrices for hh is implemented.\n"; exit(1);
+		     }
+		  }
+		  else {
+		     error<<"Tables not yet implemented.\n";
+		  }
+	       }   
+	       //P if ( ReCalcCrossSection ) CalcCrossSection();
+	    }
+	 }
+      }
+   }
 }     
 
 
@@ -2360,7 +2424,8 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)){
 //______________________________________________________________________________
 
 
-void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache){
+//P void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache){
+void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double) ){
    if ( !GetIsFlexibleScaleTable() ) {
       warn["SetExternalFuncForMuF"]<<"This is not a flexible-scale table and SetExternalFuncForMuF has no impact.\n";
       man<<"Please use a flexible-scale table, if you want to change your scale definition.\n";
@@ -2374,7 +2439,7 @@ void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool
    info<<"Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = "<<(*Fct_MuF)(91.1876,91.1876)<<endl;
    info<<"Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = "<<(*Fct_MuF)(1,91.1876)<<endl;
    info<<"Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = "<<(*Fct_MuF)(91.1876,1)<<endl;
-   if ( ReFillCache )  FillPDFCache();
+   //P if ( ReFillCache )  FillPDFCache();
 }
 
 

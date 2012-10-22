@@ -87,8 +87,8 @@ CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 
 
 FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
-   info["FastNLOCRunDec"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
-   info["FastNLOCRunDec"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
+   //P info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
    InitReasonableRunDecValues();
    //A FillAlphasCache();
 }
@@ -103,7 +103,7 @@ FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFfile, int PDFset) : Fas
    // do cross sections calculation, since everything is ready
    InitReasonableRunDecValues();
    //A FillAlphasCache();
-   FillPDFCache();
+   //P FillPDFCache();
    CalcCrossSection();
 }
 

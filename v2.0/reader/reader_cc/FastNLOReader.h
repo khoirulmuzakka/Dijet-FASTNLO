@@ -87,15 +87,18 @@ public:
 
   // ---- setters for scales of MuVar tables ---- //
   void SetMuRFunctionalForm( fastNLO::EScaleFunctionalForm func);// Set the functional form of Mu_R
-  void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func , bool ReFillCache = true);// Set the functional form of Mu_F
+   //P void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func , bool ReFillCache = true);// Set the functional form of Mu_F
+  void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func );// Set the functional form of Mu_F
   void SetFunctionalForm( fastNLO::EScaleFunctionalForm func , FastNLOReader::EMuX kMuX);// Set functional form of MuX
-  bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true);// Set scale factors for MuR and MuF
+   //P bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true);// Set scale factors for MuR and MuF
+  bool SetScaleFactorsMuRMuF( double xmur, double xmuf);// Set scale factors for MuR and MuF
   void SetExternalFuncForMuR( mu_func);						// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true);		// Set external function for scale calculation (optional)
+   //P  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true);		// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func );		// Set external function for scale calculation (optional)
 
 
   // ---- Pdf interface ---- //
-  void FillPDFCache( bool ReCalcCrossSection = false );					// Prepare for recalculation of cross section with 'new'/updated pdf.
+  void FillPDFCache( double chksum=0. );					// Prepare for recalculation of cross section with 'new'/updated pdf.
 
    // ---- alphas cache ---- //
    void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
@@ -177,6 +180,7 @@ protected:
   void FillAlphasCacheInBlockBv21( FastNLOBlockB* B );
   double CalcAlphas(double Q);
   double CalcReferenceAlphas();
+  double CalcPDFChecksum();
 
   void CalcReferenceCrossSection();
   
@@ -205,7 +209,8 @@ protected:
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation( int scalevar , bool ReFillCache = true , bool FirstCall=false);// Choose the MuF scale variation table
+   //P double SetScaleVariation( int scalevar , bool ReFillCache = true , bool FirstCall=false);// Choose the MuF scale variation table
+   double SetScaleVariation( int scalevar , bool FirstCall=false);// Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
    static const string fContrName[20];
@@ -224,6 +229,7 @@ protected:
   fastNLO::EScaleFunctionalForm fMuFFunc;
   fastNLO::EUnits		fUnits;
   bool fPDFSuccess;
+  double fPDFCached;
   double fAlphasCached;
   mu_func Fct_MuR;				// Function, if you define your functional form for your scale external
   mu_func Fct_MuF;				// Function, if you define your functional form for your scale external

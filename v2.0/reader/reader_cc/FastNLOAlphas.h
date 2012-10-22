@@ -72,8 +72,8 @@ protected:
 
 
 FastNLOAlphas::FastNLOAlphas(string name) : FastNLOReader(name) {
-   info["FastNLOAlphas"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
-   info["FastNLOAlphas"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
+   //P info["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()."<<std::endl;
    // set some reasonable starting values;
    SetGRVtoPDG2012_2loop();
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
@@ -93,7 +93,7 @@ FastNLOAlphas::FastNLOAlphas(string name, string LHAPDFfile, int PDFset) : FastN
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
    // do cross sections calculation, since everything is yet ready
    //A FillAlphasCache();
-   FillPDFCache();
+   //P FillPDFCache();
    CalcCrossSection();
 }
 
