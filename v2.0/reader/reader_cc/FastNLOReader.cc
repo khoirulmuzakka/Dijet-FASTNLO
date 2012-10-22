@@ -419,8 +419,6 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
     // Now the renormalization scale
     fScaleFacMuR = xmur;
     PrintScaleSettings();
-    fAlphasCached = 0.;
-    fPDFCached=0.;
   }
   else {
      fScaleFacMuR = xmur;
@@ -1931,7 +1929,8 @@ double FastNLOReader::CalcAlphas( double Q ){
 
 
 double FastNLOReader::CalcReferenceAlphas(){
-   return CalcAlphas(91.1876123456789012*fScaleFacMuR);
+   double mu = 91.1876123456789012*(fScaleFacMuR+0.1)+fScalevar*0.1;
+   return CalcAlphas(mu);
 }
 
 
@@ -1957,8 +1956,9 @@ double FastNLOReader::CalcPDFChecksum(){
    double x[3] = {1.e-1,1.e-2,1.e-3};
    debug["CalcPDFChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values."<<endl;
    for ( int jf = 0 ; jf<3 ; jf++ ){
+      double mu = mf[jf]*(fScaleFacMuF+0.1)+fScalevar*0.1;
       for ( int ix = 0 ; ix<3 ; ix++ ){
-	 xfx = GetXFX(x[ix],mf[jf]*fScaleFacMuF);
+	 xfx = GetXFX(x[ix],mu);
 	 for ( unsigned int fl = 0 ; fl<xfx.size() ; fl++ ){
 	    cks+=xfx[fl];
 	 }
