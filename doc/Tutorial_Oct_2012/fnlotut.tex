@@ -27,18 +27,21 @@ terminal session:
 \begin{itemize}
 \item[1.] Download the \FASTNLO reader software and one of the
   available \FASTNLO cross-section tables from the internet
-  using {\tt wget}:\\
-  \href{http://fastnlo.hepforge.org/v21/code/fastnlo_reader-2.1.0-????.tar.gz}{\tt
-    http://fastnlo.hepforge.org/v21/code/fastnlo\_reader-2.1.0\\-????.tar.gz}\\
+  using {\tt wget} either from the indico page of today's tutorial\\
+  \href{https://indico.desy.de/contributionDisplay.py?contribId=12&confId=6225}
+  {https://indico.desy.de/contributionDisplay.py?contribId=12\&confId=6225}\\
+  or from the fastNLO web page\\
+  \href{http://fastnlo.hepforge.org/v21/code/fastnlo_reader-2.1.0-1273.tar.gz}{\tt
+    http://fastnlo.hepforge.org/v21/code/fastnlo\_reader-2.1.0\\-1273.tar.gz}\\
   \href{http://fastnlo.hepforge.org/v21/tables/fnl1014_v2_all.tab.gz}{\tt
     http://fastnlo.hepforge.org/v21/tables/fnl1014\_v2\_all.tab.gz}
 \item[2.] Decompress the \FASTNLO table\\
   {\tt  gunzip fnl1014\_v2\_all.tab.gz}\\
   and untar the archive of the reader program:\\
-  {\tt tar xzvf fastnlo\_reader-2.1.0-????.tar.gz}
+  {\tt tar xzvf fastnlo\_reader-2.1.0-1273.tar.gz}
 \item[3.] Configure, compile, link and install the reader
   program:\\
-  {\tt cd fastnlo\_reader-2.1.0-????}\\
+  {\tt cd fastnlo\_reader-2.1.0-1273}\\
   {\tt ./configure --prefix=\$HOME}\\
   {\tt make}\\
   {\tt make install}
