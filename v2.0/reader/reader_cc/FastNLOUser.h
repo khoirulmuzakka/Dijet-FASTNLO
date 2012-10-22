@@ -1,5 +1,5 @@
 // Author: Daniel Britzger
-// DESY, 20/04/2012
+// DESY, 11/08/2012
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -32,7 +32,7 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   void InitPDF();
+   bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
   
 };
@@ -67,10 +67,13 @@ double FastNLOUser::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLOUser::InitPDF(){
+bool FastNLOUser::InitPDF(){
    // --- fastNLO user: 
    //  Initalize PDF parameters if necessary
+   //  return true, if successful initialization
+   //  return false, if PDF initialization failed
    //
+   return true;
 }
 
 
@@ -84,8 +87,12 @@ vector<double> FastNLOUser::GetXFX(double xp, double muf) const {
    //  pdf-interface. It should return a vector of 13
    //  parton flavors from tbar to t at a certain
    //  x-proton and factorisation scale.
-   //
+
    vector <double > xfx(13);
+   // fastNLO user:
+   //   include some function here to fill the parton density array xfx
+   //   xfx[0]=tbar, ... ,  xfx[6]=gluon, ... , xfx[12]=t
+   //
    return xfx;
 }
 
