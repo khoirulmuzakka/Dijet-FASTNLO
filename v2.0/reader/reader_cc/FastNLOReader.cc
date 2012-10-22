@@ -428,6 +428,8 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
     // Now the renormalization scale
     fScaleFacMuR = xmur;
     PrintScaleSettings();
+    fAlphasCached = 0.;
+    fPDFChecksum=0.;
   }
   else {
      fScaleFacMuR = xmur;
@@ -437,7 +439,6 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
      PrintScaleSettings(kMuF);
   }
   //A FillAlphasCache();
-  fAlphasCached == 0.;
   return true;
 }
 
