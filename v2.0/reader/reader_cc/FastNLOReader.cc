@@ -242,7 +242,7 @@ double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
 
 //P double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool FirstCall){ 
 double FastNLOReader::SetScaleVariation(int scalevar , bool FirstCall){ 
-  
+   debug["SetScaleVariation"]<<"Setting to scalevar="<<scalevar<<endl;
   // ------------------------------------------------
   //   Set the scalevariation factor for determining the
   //   'theory'-error. Usually, you have tables stored with
@@ -410,7 +410,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
   if ( !GetIsFlexibleScaleTable() ) {
     //const double xmuf0 = B_NLO()->ScaleFac[0][fScalevar];
     const int ns = GetNScaleVariations();
-    debug<<"NScaleVarMax="<<ns<<" must be >= than B->ScaleFac[0].size()="<<B_NLO()->ScaleFac[0].size()<<endl;
+    debug["SetScaleFactorsMuRMuF"]<<"NScaleVarMax="<<ns<<" must be >= than B->ScaleFac[0].size()="<<B_NLO()->ScaleFac[0].size()<<endl;
     int sf = -1;
     for ( int is = 0 ; is<ns ; is++ ) {
       if ( abs(B_NLO()->ScaleFac[0][is]-xmuf) < DBL_MIN ){
@@ -419,7 +419,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
       }
     }
     if ( sf == -1 ) {
-       warn<<"Could not find table with given mu_f scale factor of "<<xmuf<<". Nothing changed."<<endl;
+       warn["SetScaleFactorsMuRMuF"]<<"Could not find table with given mu_f scale factor of "<<xmuf<<". Nothing changed."<<endl;
        return false;
     }
     // set factorization scale 
@@ -1941,7 +1941,7 @@ double FastNLOReader::CalcAlphas( double Q ){
 
 
 double FastNLOReader::CalcReferenceAlphas(){
-   return CalcAlphas(91.1876123456789012);
+   return CalcAlphas(91.1876123456789012*fScaleFacMuR);
 }
 
 
@@ -1968,7 +1968,7 @@ double FastNLOReader::CalcPDFChecksum(){
    debug["CalcPDFChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values."<<endl;
    for ( int jf = 0 ; jf<3 ; jf++ ){
       for ( int ix = 0 ; ix<3 ; ix++ ){
-	 xfx = GetXFX(x[ix],mf[jf]);
+	 xfx = GetXFX(x[ix],mf[jf]*fScaleFacMuF);
 	 for ( unsigned int fl = 0 ; fl<xfx.size() ; fl++ ){
 	    cks+=xfx[fl];
 	 }
