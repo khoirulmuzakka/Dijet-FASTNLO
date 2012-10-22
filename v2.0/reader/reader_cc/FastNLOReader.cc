@@ -437,6 +437,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
      PrintScaleSettings(kMuF);
   }
   //A FillAlphasCache();
+  fAlphasCached == 0.
   return true;
 }
 
