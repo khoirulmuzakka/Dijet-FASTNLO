@@ -347,7 +347,7 @@ int fnlocppread(int argc, char** argv){
   //     the scale factors for the renormalization and factorization scale must be identical. 
   //
   //     The function call to set the scale factors is:
-  //         fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf, ReFillCache);
+  //         fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
   //     where xmur, xmuf are the scale factors, and
   //     ReFillCache, by default true, should not be changed.
   //
@@ -453,7 +453,6 @@ int fnlocppread(int argc, char** argv){
   // 13.
   // ---- Example code of a quick cross section
   //      calculation using the FastNLOAlphas interface
-
   FastNLOAlphas fnloreader( tablename );
   fnloreader.PrintTableInfo();
   fnloreader.PrintFastNLOTableConstants(0);
@@ -461,14 +460,14 @@ int fnlocppread(int argc, char** argv){
   // whenever the set or member were changed!
   fnloreader.SetLHAPDFfilename( PDFFile );
   fnloreader.SetLHAPDFset( 0 );
-  fnloreader.FillPDFCache();
+  //P fnloreader.FillPDFCache();
   // Set desired value of alpha_s(M_Z)
   fnloreader.SetAlphasMz(0.1184);
   // Calculate and print cross sections
   fnloreader.CalcCrossSection();
   // Uncomment this to actually print out the result
   //    fnloreader.PrintCrossSectionsDefault();
-  
+
   // Example code to print out data points (if available)
   //    fnloreader.PrintCrossSectionsData();
   // Example code to access cross sections and K factors:
@@ -530,7 +529,8 @@ int fnlocppread(int argc, char** argv){
   // Run over all pre-defined scale settings xmur, xmuf
   for (int iscls=0; iscls<nscls; iscls++){
     // Set MuR and MuF scale factors
-    bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true);
+     //Pbool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true);
+     bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
     if ( !lscvar ) {
       printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
       continue;
