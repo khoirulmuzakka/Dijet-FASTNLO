@@ -181,6 +181,7 @@ protected:
   double CalcAlphas(double Q);
   double CalcReferenceAlphas();
   double CalcPDFChecksum();
+  bool PrepareCache();
 
   void CalcReferenceCrossSection();
   

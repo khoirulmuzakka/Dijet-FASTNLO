@@ -1590,6 +1590,37 @@ void FastNLOReader::CalcReferenceCrossSection( ){
 
 
 //______________________________________________________________________________
+bool FastNLOReader::PrepareCache(){
+   // check pdf cache
+   const double PDFcks = CalcPDFChecksum();
+   if ( fPDFCached==0. || (fPDFCached!=0. && fabs(PDFcks/fPDFCached -1.) > 1.e-7) ){
+      debug["PrepareCache"]<<"Need to refill PDFCache, since PDFCecksum="<<PDFcks<<" and fPDFCached="<<fPDFCached<<endl;
+      FillPDFCache(PDFcks);
+   } else {
+      debug["PrepareCache"]<<"No need to refill PDFCache."<<endl;
+   }
+   // check pdf cache
+   if ( !fPDFSuccess ) {
+      error["PrepareCache"]<<"Cannot calculate cross sections. PDF has not been initalized successfully."<<endl;
+      return false;
+   }
+
+   // check alpha_s cache
+   const double asref = CalcReferenceAlphas();
+   if ( fAlphasCached == 0. || fAlphasCached != asref ){
+      debug["PrepareCache"]<<"Need to refill AlphasCache, since fAlphasCached="<<fAlphasCached<<endl;
+      FillAlphasCache();
+   }
+   // do we now have an alphas?
+   if ( fAlphasCached==0. || fAlphasCached != asref ){
+      error["PrepareCache"]<<"Filling of alpha_s cache failed!"<<endl;
+      return false;
+   }
+   return true;
+}
+
+
+//______________________________________________________________________________
 
 
 void FastNLOReader::CalcCrossSection( ){
@@ -1607,30 +1638,11 @@ void FastNLOReader::CalcCrossSection( ){
   kFactor.clear();
   kFactor.resize(NObsBin);
 
-  // check pdf cache
-  const double PDFcks = CalcPDFChecksum();
-  if ( fPDFCached==0. || (fPDFCached!=0. && fabs(PDFcks/fPDFCached -1.) > 1.e-7) ){
-     debug["CalcCrossSection"]<<"Need to refill PDFCache, since PDFCecksum="<<PDFcks<<" and fPDFCached="<<fPDFCached<<endl;
-     FillPDFCache(PDFcks);
-  } else {
-     debug["CalcCrossSection"]<<"No need to refill PDFCache."<<endl;
-  }
-  // check pdf cache
-  if ( !fPDFSuccess ) {
-     error["CalcCrossSection"]<<"Cannot calculate cross sections. PDF has not been initalized successfully."<<endl;
+  // handle alpha_s and PDF Cache
+  bool CacheOK = PrepareCache();
+  if ( !CacheOK  ) {
+     error["CalcCrossSection"]<<"Caching failed. Cannot calculate cross sections."<<endl;
      return;
-  }
-
-  // check alpha_s cache
-  const double asref = CalcReferenceAlphas();
-  if ( fAlphasCached == 0. || fAlphasCached != asref ){
-     debug["CalcCrossSection"]<<"Need to refill AlphasCache, since fAlphasCached="<<fAlphasCached<<endl;
-     FillAlphasCache();
-  }
-  // do we now have an alphas?
-  if ( fAlphasCached==0. || fAlphasCached != asref ){
-     error["CalcCrossSection"]<<"Filling of alpha_s cache failed!"<<endl;
-     exit(1);
   }
 
   // perturbative (additive) contributions
