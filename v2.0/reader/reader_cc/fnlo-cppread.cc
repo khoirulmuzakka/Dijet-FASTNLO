@@ -196,6 +196,7 @@ int fnlocppread(int argc, char** argv){
   //  
   //     Print information from LHAPDF
   //         fnlolhapdf.PrintPDFInformation();
+  //         int npdf = fnlolhapdf.GetNPDFSets();
   //
   //     ( Please note that because of a feature in gfortran the output via your LHAPDF
   //       installation may be asynchronous to the C++ output. Usually, the gfortran
@@ -230,7 +231,6 @@ int fnlocppread(int argc, char** argv){
   //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184) 
   //
 
-  // CKR TODO Wieso Unterschiede in 1c und 1d ???
   
   // 2.
   // ---- Table information ---- //
@@ -258,14 +258,13 @@ int fnlocppread(int argc, char** argv){
 
 
   // 5.
-  // ------- Changing M_Z and the alpha_s(M_Z) value and/or evolution ------- //
+  // ------- Changing the alpha_s(M_Z) value and/or evolution ------- //
   // --- fastNLO user: 
   //     The alpha_s evolution is provided by the code of the chosen
   //     interface, e.g. GRV alpha_s for the fnloreader instance here.
-  //     The values of M_Z and alpha_s(M_Z) can be changed from their default PDG 2012 values
+  //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 values
   //     like this:
   //
-  //            fnloreader.SetMz(91.70);
   //            fnloreader.SetAlphasMz(0.1179);
   //
   //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
@@ -291,11 +290,10 @@ int fnlocppread(int argc, char** argv){
   //       - The other option is 'absolute' units in barn, but still in
   //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
   //    
-  //       fnloreader.SetUnits(fastNLO::kAbsoluteUnits);
+  //       fnloreader.SetUnits(kAbsoluteUnits); // in namespace fastNLO
   //     or 
-  //       fnloreader.SetUnits(kPublicationUnits);
+  //       fnloreader.SetUnits(kPublicationUnits); // in namespace fastNLO
 
-  // CKR TODO fastNLO oder nicht ???  
   
   // 7.
   // ------- Set the calculation order (if available) ------- //
@@ -451,9 +449,16 @@ int fnlocppread(int argc, char** argv){
   // Do not forget to define the PDF set and member!
   fnloreader.SetLHAPDFfilename( PDFFile );
   fnloreader.SetLHAPDFset( 0 );
+  // To check the upper limit of the PDF member numbering do
+  //    int npdf = fnloreader.GetNPDFSets();
+  // Note: Usually there is a member no. 0 corresponding to the central result
+  //
+  //  The table and PDF initialization could also be done in one step:
+  //  FastNLOAlphas fnloreader( tablename, PDFFile, 0 );
+  //
   // Set desired value of alpha_s(M_Z)
   fnloreader.SetAlphasMz(0.1184);
-  // Calculate and print cross sections
+  // Calculate cross sections
   fnloreader.CalcCrossSection();
   // Uncomment this to actually print out the result
   //    fnloreader.PrintCrossSectionsDefault();
@@ -519,8 +524,7 @@ int fnlocppread(int argc, char** argv){
   // Run over all pre-defined scale settings xmur, xmuf
   for (int iscls=0; iscls<nscls; iscls++){
     // Set MuR and MuF scale factors
-     //Pbool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls], true);
-     bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
+    bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
     if ( !lscvar ) {
       printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
       continue;
