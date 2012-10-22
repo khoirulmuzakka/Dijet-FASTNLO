@@ -116,7 +116,6 @@ void FastNLOReader::InitScalevariation(){
      for (int iscls=0; iscls<GetNScaleVariations(); iscls++){
 	const double muFac = BBlocksSMCalc[0][1]->ScaleFac[0][iscls];
  	if (abs(muFac-1.0) < 1.e-7){
-	   //P SetScaleVariation(iscls,false,true);
 	   SetScaleVariation(iscls,true);
 	   break;
 	}
@@ -240,7 +239,6 @@ double FastNLOReader::FuncExpProd2(double scale1 , double scale2 ){
 
 
 
-//P double FastNLOReader::SetScaleVariation(int scalevar , bool ReFillCache, bool FirstCall){ 
 double FastNLOReader::SetScaleVariation(int scalevar , bool FirstCall){ 
    debug["SetScaleVariation"]<<"Setting to scalevar="<<scalevar<<endl;
   // ------------------------------------------------
@@ -293,8 +291,6 @@ double FastNLOReader::SetScaleVariation(int scalevar , bool FirstCall){
     }
   }
   
-  //A if (!FirstCall)FillAlphasCache(); // we can't call FillAlphasCache in the constructor!
-  //P if ( ReFillCache ) FillPDFCache();
   return B_NLO()->ScaleFac[0][fScalevar];
 }
 
@@ -344,17 +340,14 @@ void FastNLOReader::SetFunctionalForm( EScaleFunctionalForm func , FastNLOReader
 
 void FastNLOReader::SetMuRFunctionalForm( EScaleFunctionalForm func){
    SetFunctionalForm(func,kMuR);
-   //A FillAlphasCache();
 }
 
 
 //______________________________________________________________________________
 
 
-//P void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func , bool ReFillCache){
 void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func){
    SetFunctionalForm(func,kMuF);
-   //P if ( ReFillCache )  FillPDFCache();
 }
 
 
@@ -363,7 +356,6 @@ void FastNLOReader::SetMuFFunctionalForm( EScaleFunctionalForm func){
 
 
 
-//P bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache){
 bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
    debug["SetScaleFactorsMuRMuF"];
   // 
@@ -423,7 +415,6 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
        return false;
     }
     // set factorization scale 
-    //P SetScaleVariation( sf , ReFillCache);
     SetScaleVariation( sf );
     // Now the renormalization scale
     fScaleFacMuR = xmur;
@@ -434,11 +425,9 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
   else {
      fScaleFacMuR = xmur;
      fScaleFacMuF = xmuf;
-     //P     if ( ReFillCache )  FillPDFCache();
      PrintScaleSettings(kMuR);
      PrintScaleSettings(kMuF);
   }
-  //A FillAlphasCache();
   return true;
 }
 
@@ -1172,7 +1161,6 @@ void FastNLOReader::PrintFastNLODemo(){
     // First result is with NLO, LO result via division by K factor
     if (ixmu[iscls] > -1){
       SetScaleVariation(ixmu[iscls]);
-      //P FillPDFCache();
       CalcCrossSection();
 
       // Second result: Include threshold corrections for NLO if available
@@ -1985,8 +1973,6 @@ double FastNLOReader::CalcPDFChecksum(){
 //______________________________________________________________________________
 
 
-//P void FastNLOReader::FillPDFCache( bool ReCalcCrossSection ){
-//P debug["FillPDFCache"]<<"ReCalcCrossSection="<<ReCalcCrossSection<<"\tCalling now virtual InitPDF()"<<endl;
 void FastNLOReader::FillPDFCache(double chksum){
    debug["FillPDFCache"]<<"Passed chksum="<<chksum<<". Do not recalculate checksum (which calls InitPDF()) if chksum!=0."<<endl;
    //
@@ -2069,7 +2055,6 @@ void FastNLOReader::FillPDFCache(double chksum){
 		     error<<"Tables not yet implemented.\n";
 		  }
 	       }   
-	       //P if ( ReCalcCrossSection ) CalcCrossSection();
 	    }
 	 }
       }
@@ -2431,14 +2416,12 @@ void FastNLOReader::SetExternalFuncForMuR( double (*Func)(double,double)){
    info<<"Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = "<<(*Fct_MuR)(91.1876,91.1876)<<endl;
    info<<"Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = "<<(*Fct_MuR)(1,91.1876)<<endl;
    info<<"Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = "<<(*Fct_MuR)(91.1876,1)<<endl;
-   //A FillAlphasCache();
 }
 
 
 //______________________________________________________________________________
 
 
-//P void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double)  , bool ReFillCache){
 void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double) ){
    if ( !GetIsFlexibleScaleTable() ) {
       warn["SetExternalFuncForMuF"]<<"This is not a flexible-scale table and SetExternalFuncForMuF has no impact.\n";
@@ -2453,7 +2436,6 @@ void FastNLOReader::SetExternalFuncForMuF( double (*Func)(double,double) ){
    info<<"Scale1 = 91.1876, Scale2 = 91.1876  ->  mu = func(91.1876,91.1876) = "<<(*Fct_MuF)(91.1876,91.1876)<<endl;
    info<<"Scale1 = 1,       Scale2 = 91.1876  ->  mu = func(1,91.1876)       = "<<(*Fct_MuF)(1,91.1876)<<endl;
    info<<"Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = "<<(*Fct_MuF)(91.1876,1)<<endl;
-   //P if ( ReFillCache )  FillPDFCache();
 }
 
 
