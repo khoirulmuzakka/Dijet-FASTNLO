@@ -254,14 +254,7 @@ int fnlocppread(int argc, char** argv){
   //     With LHAPDF, you can set the PDF set and member using e.g.:
   //           fnloreader.SetLHAPDFfilename( string PDFFile );
   //           fnloreader.SetLHAPDFset( int PDFMember );
-  //           fnloreader.FillPDFCache();
   //
-  //    IMPORTANT:
-  //    After any change to the LHAPDF parameters (i.e. the grid-file
-  //    or the PDFMember), one ALWAYS has to refill the fastNLO internal
-  //    PDF cache by calling:
-  //           fnloreader.FillPDFCache();
-  //    
 
 
   // 5.
@@ -348,8 +341,7 @@ int fnlocppread(int argc, char** argv){
   //
   //     The function call to set the scale factors is:
   //         fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
-  //     where xmur, xmuf are the scale factors, and
-  //     ReFillCache, by default true, should not be changed.
+  //     where xmur, xmuf are the scale factors.
   //
   //     The return value of this function call is boolean and returns false, if the
   //     the requested scale factors can not be chosen. In this case, the last legal
@@ -456,11 +448,9 @@ int fnlocppread(int argc, char** argv){
   FastNLOAlphas fnloreader( tablename );
   fnloreader.PrintTableInfo();
   fnloreader.PrintFastNLOTableConstants(0);
-  // Do not forget to define the PDF set and member and to fill the PDF cache
-  // whenever the set or member were changed!
+  // Do not forget to define the PDF set and member!
   fnloreader.SetLHAPDFfilename( PDFFile );
   fnloreader.SetLHAPDFset( 0 );
-  //P fnloreader.FillPDFCache();
   // Set desired value of alpha_s(M_Z)
   fnloreader.SetAlphasMz(0.1184);
   // Calculate and print cross sections
