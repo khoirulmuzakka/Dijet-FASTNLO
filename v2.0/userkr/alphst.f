@@ -24,7 +24,7 @@
       
       DOUBLE PRECISION BETA
 
-*---PDG 2006
+*---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
       
@@ -72,7 +72,7 @@
          WRITE(*,FMT='(A,F5.1,A,F11.8)')
      &        '  alpha_s(MUR =',MUR,') =',RALPSM
          WRITE(*,FMT='(A,F8.4,A)')
-     &        '  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+     &        '  Note: MZ PDG 2012 =',ZMPDG,' GeV'
          WRITE(*,*)'********************************************'
          WRITE(*,*)' '
 
@@ -109,7 +109,7 @@
       
       DOUBLE PRECISION BETA
       
-*---PDG 2006
+*---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
 
@@ -150,7 +150,7 @@
          WRITE(*,*)' NF =',NF,', NLOOP =',NLOOP
          WRITE(*,*)' alpha_s(MUR =',MUR,') =',RALPSL
          WRITE(*,FMT='(A,F8.4,A)')
-     &        '  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+     &        '  Note: MZ PDG 2012 =',ZMPDG,' GeV'
          WRITE(*,*)'********************************************'
          WRITE(*,*)' '
       ENDIF
@@ -183,7 +183,7 @@
       
       DOUBLE PRECISION BETA
 
-*---PDG 2006
+*---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
       
@@ -227,7 +227,7 @@
          WRITE(*,*)' MZ =',ZMASS,' GeV, alpha_s(MZ) =',ALPSMZ
          WRITE(*,*)' NF =',NF,', NLOOP =',NLOOP
          WRITE(*,*)' Lambda_5 =',LAMASZ
-         WRITE(*,1001)'  Note: MZ PDG 2006 =',ZMPDG,' GeV'
+         WRITE(*,1001)'  Note: MZ PDG 2012 =',ZMPDG,' GeV'
          WRITE(*,*)'********************************************'
          WRITE(*,*)' '
       ENDIF

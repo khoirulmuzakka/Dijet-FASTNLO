@@ -66,7 +66,7 @@ c                definition in the commonblock!!!!!
 
 ckr Old Z mass
 ckr      PARAMETER (ZMASS = 91.187D0)
-ckr Z mass from PDG 2006
+ckr Z mass from PDG 2012
       DOUBLE PRECISION ZMASS
       PARAMETER (ZMASS = 91.1876D0)
 

@@ -56,11 +56,11 @@ ckr
       INTEGER IOAS
 ckr
 
-ckr Z mass and alpha_s from PDG 2006
+ckr Z mass and alpha_s from PDG 2012
       DOUBLE PRECISION ZMASS
       PARAMETER (ZMASS = 91.1876D0)
       DOUBLE PRECISION ASMZPDG
-      PARAMETER (ASMZPDG = 0.1176D0)
+      PARAMETER (ASMZPDG = 0.1184D0)
 ckr
 
 ckr For LHC energies assume 5 flavours
@@ -224,10 +224,12 @@ ckr      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
 *     >  CALL INITPDFSET("cteq61.LHgrid")
 *     >  CALL INITPDF(0)
       CALL EVOLVEPDF(X,MUF,XPDF)
-*---  Temporary fix for lhapdf-5.8.7 bug with ABKM09 or ABM11
+ckr Temporary
+*---  Temporary fix for lhapdf-5.8.7 and lhapdf-5.8.8 bug with ABKM09 or ABM11
 *---  Set top-antitop PDF to zero
       XPDF(-6) = 0D0
       XPDF( 6) = 0D0
+ckr Temporary!
 
 *---  Here one can also call ones own PDF code
 *---  --> Only remember that these are MOMENTUM DENSITIES, i.e. x * PDF
