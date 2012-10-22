@@ -63,6 +63,7 @@ protected:
 FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) {
    warn["FastNLOLHAPDF"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
    warn["FastNLOLHAPDF"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   FillAlphasCache();
 }
 
 

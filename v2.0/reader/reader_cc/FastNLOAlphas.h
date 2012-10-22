@@ -74,6 +74,10 @@ protected:
 FastNLOAlphas::FastNLOAlphas(string name) : FastNLOReader(name) {
    warn["FastNLOAlphas"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
    warn["FastNLOAlphas"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   // set some reasonable starting values;
+   SetGRVtoPDG2012_2loop();
+   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
+   FillAlphasCache();
 }
 
 

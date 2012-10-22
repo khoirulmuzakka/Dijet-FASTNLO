@@ -85,7 +85,7 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
             WRITE(*,*)'#'
             WRITE(*,*)'# Usage: ./fnlo-fread [arguments]'
             WRITE(*,*)'# Table input file, def. = table.tab'
-            WRITE(*,*)'# PDF set, def. = cteq6mE.LHgrid'
+            WRITE(*,*)'# PDF set, def. = cteq6m.LHpdf'
             WRITE(*,*)'# Number of mu_r, mu_f scale settings to '//
      >           'investigate, if possible, def. = 1, max. = 7'
             WRITE(*,*)'#'
@@ -110,9 +110,9 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
          CALL GETARG(2,PDFSET)
       ENDIF
       IF (IARGC().LT.2.OR.PDFSET(1:1).EQ."_") THEN
-         PDFSET = "cteq6mE.LHgrid"
+         PDFSET = "cteq6m.LHpdf"
          WRITE(*,*)"# fnlo-read: WARNING! No PDF set given,"
-         WRITE(*,*)"# taking cteq6mE.LHgrid instead!"
+         WRITE(*,*)"# taking cteq6m.LHpdf instead!"
       ELSE
          WRITE(*,*)"# fnlo-read: Using PDF set   : ",
      >        PDFSET(1:LEN_TRIM(PDFSET))

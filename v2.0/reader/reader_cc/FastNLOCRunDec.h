@@ -89,6 +89,8 @@ CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
    warn["FastNLOCRunDec"]<<"Please initialize a PDF set using SetLHAPDFfilename( PDFFile )!"<<std::endl;
    warn["FastNLOCRunDec"]<<"Also do not forget to fill the PDF cache afterwards via FillPDFCache()!"<<std::endl;
+   InitReasonableRunDecValues();
+   FillAlphasCache();
 }
 
 
@@ -157,7 +159,7 @@ void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
 //______________________________________________________________________________
 
 void FastNLOCRunDec::InitReasonableRunDecValues(){
-   fAlphasMz = 0.11800000313;
+   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
    fMz = 91.1876;
    SetNf(5);
    fNloop=2;

@@ -53,7 +53,7 @@ int fnlocppread(int argc, char** argv){
       printf(" #\n");
       printf(" # Usage: ./fnlo-cppread [arguments]\n");
       printf(" # Table input file, def. = table.tab\n");
-      printf(" # PDF set, def. = cteq6mE.LHgrid\n");
+      printf(" # PDF set, def. = cteq6m.LHpdf\n");
       printf(" # Number of mu_r, mu_f scale settings to ");
       printf("investigate, if possible, def. = 1, max. = 7\n");
       printf(" #\n");
@@ -78,7 +78,7 @@ int fnlocppread(int argc, char** argv){
   if ( argc <= 2 || PDFFile == "_"){
     PDFFile = "cteq6m.LHpdf";
     printf(" # fnlo-read: WARNING! No PDF set given,\n");
-    printf(" # taking cteq6mE.LHgrid instead!\n");
+    printf(" # taking cteq6m.LHpdf instead!\n");
   } else {
     cout << " # fnlo-read: Using PDF set   : " << PDFFile << endl;
   }
@@ -139,8 +139,8 @@ int fnlocppread(int argc, char** argv){
   //     also the factorization scale by arbitrary factors and have the possiblity to
   //     change the formula according to which the scale is derived.
   //
-  //     Please check, which type of table you are using and then refer to the comments and
-  //     functions suitable for this fastNLO table.
+  //     Please check (see point 2 below), which type of table you are using and
+  //     then refer to the comments and functions suitable for this fastNLO table.
   //
   //
   //      0.  This Introduction
@@ -149,17 +149,17 @@ int fnlocppread(int argc, char** argv){
   //           b. FastNLOLHAPDF
   //           c. FastNLOAlphas
   //           d. FastNLOCRunDec
-  //      2.  Calculate cross sections
-  //      3.  Modify PDF settings for LHAPDF-interfaces
-  //      4.  Change alphas values
-  //      5.  Units of the calculation
-  //      6.  Contributions and order of calculation
-  //      7.  Scale settings
-  //      8.  Flexible-scale concept
-  //      9.  Access cross section and k-factor
-  //     10.  Print-out cross section
-  //     11.  Verbosity level 
-  //     12.  Print table information
+  //      2.  Print table information
+  //      3.  Calculate cross sections
+  //      4.  Modify PDF settings for LHAPDF-interfaces
+  //      5.  Change alphas values
+  //      6.  Units of the calculation
+  //      7.  Contributions and order of calculation
+  //      8.  Scale settings
+  //      9.  Flexible-scale concept
+  //     10.  Access cross section and k-factor
+  //     11.  Print-out cross section
+  //     12.  Verbosity level 
   //     13.  Example code
   //     14.  Example analysis
 
@@ -177,50 +177,70 @@ int fnlocppread(int argc, char** argv){
   //
   //     To facilitate using fastNLOReader a number of predefined user classes
   //     of FastNLOUser exist, interfacing to
+  //     LHAPDF (PDF and alpha_s, see M. Whalley, D. Bourilkov, R. Group, hep-ph/0508110),
   //     GRV Alphas (default alpha_s evolution used in fastNLO for crosschecks,
   //                 based on M. Glueck, E. Reya, A. Vogt, Eur.Phys.J.C5:461-470,1998, hep-ph/9806404;
   //                 PDF from LHAPDF),
-  //     LHAPDF (PDF and alpha_s, see M. Whalley, D. Bourilkov, R. Group, hep-ph/0508110),
   //     CRunDec (alpha_s evolution up to 4 loops, see B. Schmidt, M. Steinhauser,
   //              Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149;
   //              PDF from LHAPDF).
   // 
   //     Their use is explained in the following.
+  //
   //     
   // 1b.
   //     Initialize with PDF from LHAPDF and corresponding alphas value and
-  //     evolution fo this PDF set. A change of the alpha_s value is only
-  //     possible through the choice of the PDF file and set, e.g. CT10as.LHgrid
-  //         FastNLOLHAPDF fnlolhapdf( tablename , PDFFile , PDFset );
+  //     evolution for this PDF set. A change of the alpha_s value is only
+  //     possible through the choice of the PDF file/set and member, e.g. CT10as.LHgrid
+  //         FastNLOLHAPDF fnlolhapdf( tablename , PDFFile , PDFMember );
   //  
   //     Print information from LHAPDF
-  //         fnlolhapdf.PrintPDFInformation()
+  //         fnlolhapdf.PrintPDFInformation();
+  //
+  //     ( Please note that because of a feature in gfortran the output via your LHAPDF
+  //       installation may be asynchronous to the C++ output. Usually, the gfortran
+  //       output comes at the end after all C++ output, but this depends on your actual system.
+  //       You can try to set the environment variable GFORTRAN_UNBUFFERED_ALL to yes
+  //       in your shell to get it synchronized. Keep your fingers crossed. )
   //
   //
   // 1c.
   //     Initialize with PDF from LHAPDF and GRV alphas evolution (default) 
-  //         FastNLOAlphas fnlo( tablename , PDFFile , PDFset );
+  //         FastNLOAlphas fnlo( tablename , PDFFile , PDFMember );
   //
   //     Change the alpha_s value through
   //         fnlo.SetAlphasMz(0.1179);
   //     Change values of the alpha_s evolution code through:
   //         Alphas::SetNf(5);
-  //         Alphas::SetMz(91.1876);
+  //         Alphas::SetMz(91.70);
   //     For all options see Alphas.h
   //
   //
   // 1d.
   //     Initialize with PDF from LHAPDF and RunDec alpha_s evolution.
-  //        FastNLOCRundDec fnlo( tablename , PDFFile , 0 );
+  //         FastNLOCRundDec fnlo( tablename , PDFFile , PDFMember );
   //     Change the alpha_s value for all instances, by:
   //         fnlo.SetAlphasMz(0.1179);
   //     Change values of the alpha_s evolution code through:
   //         fnlo.SetNf(5);
   //         fnlo.SetNloop(4);
-  //         fnlo.SetMz(91.1876);
+  //         fnlo.SetMz(91.70);
+  //
+  //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
+  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184) 
+  //
 
+  // CKR TODO Wieso Unterschiede in 1c und 1d ???
   
   // 2.
+  // ---- Table information ---- //
+  // --- fastNLO user: For a comprehensive insight into the fastNLO variables
+  //     you can use:
+  //             fnloreader.PrintFastNLOTableConstants(0);
+  //     
+
+
+  // 3.
   // ---- (Re-)calculate cross sections ---- //
   // --- fastNLO user: Before you can access the fastNLO computed
   //     cross sections, you always have to call CalcCrossSection()!
@@ -228,42 +248,46 @@ int fnlocppread(int argc, char** argv){
   //             fnloreader.CalcCrossSection();
 
   
-  // 3.
+  // 4.
   // ------- Select another PDF set and member ------- //
   // --- fastNLO user: You can select another PDF set and member here.
   //     With LHAPDF, you can set the PDF set and member using e.g.:
   //           fnloreader.SetLHAPDFfilename( string PDFFile );
-  //           fnloreader.SetLHAPDFset( int PDFSet );
+  //           fnloreader.SetLHAPDFset( int PDFMember );
   //           fnloreader.FillPDFCache();
   //
   //    IMPORTANT:
   //    After any change to the LHAPDF parameters (i.e. the grid-file
-  //    or the PDFset), one ALWAYS has to refill the fastNLO internal
+  //    or the PDFMember), one ALWAYS has to refill the fastNLO internal
   //    PDF cache by calling:
   //           fnloreader.FillPDFCache();
   //    
 
 
-  // 4.
-  // ------- Changing the alpha_s(M_Z) value and/or evolution ------- //
+  // 5.
+  // ------- Changing M_Z and the alpha_s(M_Z) value and/or evolution ------- //
   // --- fastNLO user: 
   //     The alpha_s evolution is provided by the code of the chosen
   //     interface, e.g. GRV alpha_s for the fnloreader instance here.
-  //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 value
+  //     The values of M_Z and alpha_s(M_Z) can be changed from their default PDG 2012 values
   //     like this:
+  //
+  //            fnloreader.SetMz(91.70);
   //            fnloreader.SetAlphasMz(0.1179);
   //
-  //     (Note: CTEQ6M alpha_s(M_Z) = 0.1179; PDG 2012 alpha_s(M_Z) = 0.1184) 
+  //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
+  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184) 
   //
   //     To use a different alpha_s evolution code one has to interface it.
   //     Here, for example, we use the above-mentioned CRunDec code:
   // 
   //  FastNLOCRunDec fnlocrundec( tablename , PDFFile , 0 );
+  //  fnlocrundec.SetMz(91.1876);
   //  fnlocrundec.SetAlphasMz(0.1184);
   //  fnlocrundec.CalcCrossSection();
   
 
-  // 5.
+  // 6.
   // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
   // --- fastNLO user: You can choose the units in which you want
   //     to access (or print) your cross-section results.
@@ -277,10 +301,10 @@ int fnlocppread(int argc, char** argv){
   //       fnloreader.SetUnits(fastNLO::kAbsoluteUnits);
   //     or 
   //       fnloreader.SetUnits(kPublicationUnits);
+
+  // CKR TODO fastNLO oder nicht ???  
   
-  
-  
-  // 6.
+  // 7.
   // ------- Set the calculation order (if available) ------- //
   // --- fastNLO user: Each fastNLO table comes typically with
   //     various contributions.
@@ -310,7 +334,7 @@ int fnlocppread(int argc, char** argv){
   //     The total number of contributions then counts all contributions of all types.
   
 
-  // 7.
+  // 8.
   // ------- Selecting the scale treatment ------- //
   // --- fastNLO user: The simplest way to modify the predefined renormalization and
   //     factorization scales is to provide a scale factor by which the default scale
@@ -332,7 +356,7 @@ int fnlocppread(int argc, char** argv){
   //     values remain unchanged.
 
 
-  // 8.
+  // 9.
   // ----- Additional possibilities for scales in 'flexible-scale' tables (v2.1) ----- //
   //     First check, if your table is a flexible-scale table or not
   //          bool IsFlex = fnloreader.GetIsFlexibleScaleTable() 
@@ -380,7 +404,7 @@ int fnlocppread(int argc, char** argv){
   //       fnloreader.SetMuFFunctionalForm(fastNLO::kScale1 , false );
   
   
-  // 9.
+  // 10.
   // ---- Access cross sections ---- //
   // --- fastNLO user: To access the cross section from fastNLO
   //     you should use:
@@ -401,7 +425,7 @@ int fnlocppread(int argc, char** argv){
   //           vector < double > kFactors = fnloreader.GetKFactors();
 
 
-  // 10.
+  // 11.
   // ---- Printing ---- //
   // --- fastNLO user: For an easy overview of your cross section calculation
   //     you might use the following print methods:
@@ -411,7 +435,7 @@ int fnlocppread(int argc, char** argv){
   //             fnloreader.PrintCrossSectionsDefault();
 
 
-  // 11.
+  // 12.
   // ------- Set fastNLOReader verbosity ------- //
   // --- fastNLO user:
   //     The following line sets the verbosity level of fastNLOReader
@@ -423,28 +447,26 @@ int fnlocppread(int argc, char** argv){
   //         fnlo.SetVerbosity(level);
 
    
-  // 12.
-  // ---- Table information ---- //
-  // --- fastNLO user: For a comprehensive insight into the fastNLO variables
-  //     you can use:
-  //             fnloreader.PrintFastNLOTableConstants(0);
-  //     
   // ************************************************************************************************
-
   
 
   // 13.
   // ---- Example code of a quick cross section
-  //      calculaiton using the FastNLOAlphas interface
+  //      calculation using the FastNLOAlphas interface
 
-  FastNLOAlphas fnloreader( tablename , PDFFile , 0 );
-
+  FastNLOAlphas fnloreader( tablename );
   fnloreader.PrintTableInfo();
   fnloreader.PrintFastNLOTableConstants(0);
-
+  // Do not forget to define the PDF set and member and to fill the PDF cache
+  // whenever the set or member were changed!
+  fnloreader.SetLHAPDFfilename( PDFFile );
+  fnloreader.SetLHAPDFset( 0 );
+  fnloreader.FillPDFCache();
+  // Set desired value of alpha_s(M_Z)
+  fnloreader.SetAlphasMz(0.1184);
+  // Calculate and print cross sections
   fnloreader.CalcCrossSection();
   fnloreader.PrintCrossSectionsDefault();
-  
   
   // Example code to print out data points (if available)
   //    fnloreader.PrintCrossSectionsData();
@@ -454,7 +476,6 @@ int fnlocppread(int argc, char** argv){
   // ************************************************************************************************
 
 
-  
   // 14.
   // ---- Example to do some cross section analysis ---- //
   // Some initialization
@@ -469,7 +490,7 @@ int fnlocppread(int argc, char** argv){
   printf("fnlo-read: Calculate my cross sections\n");
   printf("%s",CSEPL.c_str());
   
-  // instance fastNLO
+  // Instance fastNLO (For this example we assume fnloreader was instantiated already above ...)
   // FastNLOAlphas fnloreader( tablename , PDFFile , 0 );
 
   // Check on existence of LO and NLO (Id = -1 if not existing)
