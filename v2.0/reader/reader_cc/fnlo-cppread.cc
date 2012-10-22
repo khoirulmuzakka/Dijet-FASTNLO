@@ -466,7 +466,8 @@ int fnlocppread(int argc, char** argv){
   fnloreader.SetAlphasMz(0.1184);
   // Calculate and print cross sections
   fnloreader.CalcCrossSection();
-  fnloreader.PrintCrossSectionsDefault();
+  // Uncomment this to actually print out the result
+  //    fnloreader.PrintCrossSectionsDefault();
   
   // Example code to print out data points (if available)
   //    fnloreader.PrintCrossSectionsData();
