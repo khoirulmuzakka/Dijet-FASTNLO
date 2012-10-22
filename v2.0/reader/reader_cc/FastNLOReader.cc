@@ -429,7 +429,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF( double xmur, double xmuf){
     fScaleFacMuR = xmur;
     PrintScaleSettings();
     fAlphasCached = 0.;
-    fPDFChecksum=0.;
+    fPDFCached=0.;
   }
   else {
      fScaleFacMuR = xmur;
