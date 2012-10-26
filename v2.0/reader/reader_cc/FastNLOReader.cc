@@ -1580,7 +1580,7 @@ void FastNLOReader::CalcReferenceCrossSection( ){
 //______________________________________________________________________________
 bool FastNLOReader::PrepareCache(){
    // check pdf cache
-   const double PDFcks = CalcPDFChecksum();
+   const double PDFcks = CalcNewPDFChecksum();
    if ( fPDFCached==0. || (fPDFCached!=0. && fabs(PDFcks/fPDFCached -1.) > 1.e-7) ){
       debug["PrepareCache"]<<"Need to refill PDFCache, since PDFCecksum="<<PDFcks<<" and fPDFCached="<<fPDFCached<<endl;
       FillPDFCache(PDFcks);
@@ -1937,26 +1937,45 @@ double FastNLOReader::CalcReferenceAlphas(){
 //______________________________________________________________________________
 
 
-double FastNLOReader::CalcPDFChecksum(){
+double FastNLOReader::CalcNewPDFChecksum(){
    // calculate a PDF checksum to
    // decide, whether PDF cache has to be refilled
 
    // init PDF and check success
+   debug["CalcNewPDFChecksum"]<<"Call InitPDF() in user module."<<endl;
    fPDFSuccess = InitPDF();
-   debug["CalcPDFChecksum"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
+   debug["CalcNewPDFChecksum"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
    if ( !fPDFSuccess ) {
       warn["CalcPDFChecksum"]<<"PDF initializatoin failed. Please check PDF interface in your FastNLO user module."<<endl;
       return 0.;
    }
-   
-   double cks = 0.;
-   vector<double> xfx(13);
+
+//    if ( !fPDFSuccess ) {
+//       if ( ReInitPDF ) {
+// 	 debug["RefreshPDFChecksum"]<<"Call InitPDF() in user module."<<endl;
+// 	 fPDFSuccess = InitPDF();
+//       }
+//       else 
+// 	 debug["RefreshPDFChecksum"]<<"PDFSuccess is false, and ReInitPDF=false. Do not call InitPDF()."<<endl;
+//    }
+
    // calculate checksum for some scales and flavors
-   double mf[3] = { 3,10,91.18};
-   double x[3] = {1.e-1,1.e-2,1.e-3};
-   debug["CalcPDFChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values."<<endl;
+   double muf = (fScaleFacMuF+0.1)+fScalevar*0.1;
+   double cks = CalcChecksum(muf);
+   return cks;
+}
+
+
+//______________________________________________________________________________
+
+double FastNLOReader::CalcChecksum(double mufac){
+   debug["CalcChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values, for scalefac="<<mufac<<endl;
+   double cks = 0;
+   vector<double> xfx(13);
+   const double mf[3] = { 3,10,91.18};
+   const double x[3] = {1.e-1,1.e-2,1.e-3};
    for ( int jf = 0 ; jf<3 ; jf++ ){
-      double mu = mf[jf]*(fScaleFacMuF+0.1)+fScalevar*0.1;
+      double mu = mf[jf]* mufac;//(fScaleFacMuF+0.1)+fScalevar*0.1;
       for ( int ix = 0 ; ix<3 ; ix++ ){
 	 xfx = GetXFX(x[ix],mu);
 	 for ( unsigned int fl = 0 ; fl<xfx.size() ; fl++ ){
@@ -1964,10 +1983,9 @@ double FastNLOReader::CalcPDFChecksum(){
 	 }
       }
    }
-   debug["CalcPDFChecksum"]<<"Calculated checksum = "<<cks<<endl;
+   debug["CalcChecksum"]<<"Calculated checksum = "<<cks<<endl;
    return cks;
 }
-
 
 
 //______________________________________________________________________________
@@ -1986,7 +2004,7 @@ void FastNLOReader::FillPDFCache(double chksum){
    double PDFnew = chksum;
    if ( chksum == 0. ) {
       debug["FillPDFCache"]<<"Calculate Checksum!"<<endl;
-      PDFnew = CalcPDFChecksum();
+      PDFnew = CalcNewPDFChecksum();
       if ( PDFnew==0. ) {
 	 warn["FillPDFCache"]<<"PDF Checksum is zero."<<endl;
       }
@@ -1995,7 +2013,7 @@ void FastNLOReader::FillPDFCache(double chksum){
    
    // is there a need for a recalculation?
    if ( fPDFCached != 0. && fabs(PDFnew/fPDFCached - 1.) < 1.e-7 ){
-      debug["FillPDFCache"]<<"No need for a refilling of PDFCache. fPDFCached=CalcPDFChecksum()"<<PDFnew<<endl;
+      debug["FillPDFCache"]<<"No need for a refilling of PDFCache. fPDFCached=RefreshPDFChecksum()"<<PDFnew<<endl;
    } else {
       debug["FillPDFCache"]<<"Refilling PDF cache"<<endl;
       fPDFCached = PDFnew;

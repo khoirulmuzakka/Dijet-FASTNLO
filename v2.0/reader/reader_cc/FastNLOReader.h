@@ -180,7 +180,8 @@ protected:
   void FillAlphasCacheInBlockBv21( FastNLOBlockB* B );
   double CalcAlphas(double Q);
   double CalcReferenceAlphas();
-  double CalcPDFChecksum();
+  double CalcNewPDFChecksum();
+  double CalcChecksum(double mu);
   bool PrepareCache();
 
   void CalcReferenceCrossSection();

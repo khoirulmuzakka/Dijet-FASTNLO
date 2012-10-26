@@ -52,6 +52,9 @@ protected:
    string fLHAPDFFilename;
    int fnPDFs;
    int fiPDFMember;
+
+   double fchksum;
+
   
 };
 
@@ -60,7 +63,7 @@ protected:
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fiPDFMember(0) {
+FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
    info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
 }
 
@@ -68,7 +71,7 @@ FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fi
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : FastNLOReader(name){
+FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : FastNLOReader(name) , fchksum(0.) {
    SetLHAPDFFilename(LHAPDFFile);
    SetLHAPDFMember(PDFMember);
    // do cross sections calculation, since everything is yet ready
@@ -110,20 +113,25 @@ bool FastNLOLHAPDF::InitPDF(){
    //LHAPDF::setVerbosity(LHAPDF::SILENT);
    LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    if ( fLHAPDFFilename == ""){
-     error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
-     return false;
-   } else {
-     // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
-     //LHAPDF::initPDFSetByName(fLHAPDFFilename);
-     //cout << "PDF set name " << fLHAPDFFilename << endl;
-     LHAPDF::initPDFSet(fLHAPDFFilename);
-     fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
-     if ( fnPDFs < fiPDFMember+1 ){
-       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
-       return false;
-     }
-     LHAPDF::initPDF(fiPDFMember);
+      error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
+      return false;
    }
+   
+   // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
+   //LHAPDF::initPDFSetByName(fLHAPDFFilename);
+   //cout << "PDF set name " << fLHAPDFFilename << endl;
+   if ( fchksum == 0 || fchksum != CalcChecksum(1.)) {
+      // need to reset LHAPDF.
+      debug["InitPDF"]<<"Need to reset lhapdf. fchksum="<<fchksum<<"\tCalcChecksum(1.)="<<CalcChecksum(1.)<<endl;
+      LHAPDF::initPDFSet(fLHAPDFFilename);
+      fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
+      if ( fnPDFs < fiPDFMember+1 ){
+	 error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
+	 return false;
+      }
+      LHAPDF::initPDF(fiPDFMember);
+   } 
+   fchksum = CalcChecksum(1.);
    return true;
 }
 
@@ -145,6 +153,7 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
 
 
 void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
+   if ( filename != fLHAPDFFilename ) fchksum = 0;
    fLHAPDFFilename = filename;
    // reset pdfset
    fiPDFMember = 0;
@@ -156,7 +165,16 @@ void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
 
 
 void FastNLOLHAPDF::SetLHAPDFMember( int set ) {
-   fiPDFMember = set;
+   if ( fchksum == CalcChecksum(1.) ){ // nothin has changed? we set only the pdfmember
+      debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
+      fiPDFMember = set;
+      LHAPDF::initPDF(fiPDFMember);
+      fchksum = CalcChecksum(1.);
+   }
+   else  {
+      debug["SetLHAPDFMember"]<<"Demanding full re-initalization of PDF."<<endl;
+      fchksum = 0;
+   }
    //InitPDF();
 }
 
