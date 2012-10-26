@@ -16,33 +16,44 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////
+//
+//  FastNLOCRunDec
+//  This class inherits the PDF interface from
+//  FastNLOLHAPDF, while the alpha_s evolution
+//  is superseeded by the CRunDec evolution code.
+//  All paramters of the evolution function are 
+//  handled as static memeber, in order to have a
+//  consistent evolution for all instances.
+//  
+//  The value of alpha_s at Mz however has to be
+//  individually specified for each FastNLOCRunDec
+//   class.
+//
+//////////////////////////////////////////////////////////////////////////
+
 #ifndef FASTNLOCRUNDEC
 #define FASTNLOCRUNDEC
 
 #include "FastNLOReader.h"
 #include <iostream>
 #include <LHAPDF/LHAPDF.h>
+#include "FastNLOLHAPDF.h"
 #include "CRunDec.h"
 
 using namespace std;
 
 
-class FastNLOCRunDec : public FastNLOReader {
+class FastNLOCRunDec : public FastNLOLHAPDF {
 private:
 public:
-   FastNLOCRunDec(string name);
-   FastNLOCRunDec(string name, string LHAPDFfile, int PDFset = 0);
+   FastNLOCRunDec(string name) ;
+   FastNLOCRunDec(string name, string LHAPDFFile, int PDFSet = 0) ;
 
    // ----- Printout ---- //
-   void PrintPDFInformation() const ;		// Print LHAPDF settings
    void PrintRunDecValues();			// Print values, which are passed to CRunDec for alpha_s evolution
    
-   // ---- getters and setters LHAPDF variables ---- //
-   void SetLHAPDFfilename( string filename );
-   void SetLHAPDFset( int set );
-   int GetIPDFSet() const {return fiPDFSet;};
-   int GetNPDFSets() const {return fnPDFs;};	
-
    // ---- getters and setters CRunDec variables ---- //
    void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
    double GetAlphasMz() const { return fAlphasMz; };
@@ -56,17 +67,10 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   bool InitPDF();
-   vector<double> GetXFX(double xp, double muf) const ;
 
-   // ---- LHAPDF vars ---- //
-   string fLHAPDFfilename;
-   int fnPDFs;
-   int fiPDFSet;
-   
    // ---- CRunDec ---- //
    // declare variables as static, that all instances use same alpha_s evolution
-   static double fAlphasMz;
+   double fAlphasMz;
    static double fMz;
    static int fNf;
    static int fNloop;
@@ -76,7 +80,7 @@ protected:
 };
 
 
-double FastNLOCRunDec::fAlphasMz=0.1180000654;
+//double FastNLOCRunDec::fAlphasMz=0.1180000654;
 double FastNLOCRunDec::fMz=0.1180000654;
 int FastNLOCRunDec::fNf = 5;
 int FastNLOCRunDec::fNloop=2;
@@ -86,8 +90,8 @@ CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
 //______________________________________________________________________________
 
 
-FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
-   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
+FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOLHAPDF(name) , fAlphasMz(0.1180000654) {
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFSet(int PDFSet)"<<std::endl;
    InitReasonableRunDecValues();
 }
 
@@ -95,9 +99,7 @@ FastNLOCRunDec::FastNLOCRunDec(string name) : FastNLOReader(name) {
 //______________________________________________________________________________
 
 
-FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFfile, int PDFset) : FastNLOReader(name){
-   SetLHAPDFfilename(LHAPDFfile);
-   SetLHAPDFset(PDFset);
+FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFFile, int PDFSet) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet) , fAlphasMz(0.1180000654)  {
    // do cross sections calculation, since everything is ready
    InitReasonableRunDecValues();
    CalcCrossSection();
@@ -216,93 +218,6 @@ double FastNLOCRunDec::EvolveAlphas(double Q) const {
 
 
 //______________________________________________________________________________
-
-
-bool FastNLOCRunDec::InitPDF(){
-   //
-   //  Initalize some necessary LHAPDF parameters
-   //  return true, if successful initialization
-   //  return false, if PDF initialization failed
-   //
-   // security, if multiple instance with different pdfs are instantiated.
-   // we always reinizialized the set PDF-set.
-
-   //LHAPDF::setVerbosity(LHAPDF::SILENT);
-   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-   if ( fLHAPDFfilename == ""){
-     error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
-     exit(1);
-   } else {
-     // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
-     //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-     //cout << "PDF set name " << fLHAPDFfilename << endl;
-     LHAPDF::initPDFSet(fLHAPDFfilename);
-     fnPDFs = LHAPDF::numberPDF();
-     if ( fnPDFs < fiPDFSet ){
-       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
-     }
-     LHAPDF::initPDF(fiPDFSet);
-   }
-   return true;
-}
-
-
-//______________________________________________________________________________
-
-
-
-vector<double> FastNLOCRunDec::GetXFX(double xp, double muf) const {
-   //
-   //  GetXFX is used to get the parton array from the
-   //  pre-defined pdf-interface.
-   //
-   return LHAPDF::xfx(xp,muf);
-}
-
-
-//______________________________________________________________________________
-
-
-void FastNLOCRunDec::SetLHAPDFfilename( string filename ) {
-   fLHAPDFfilename = filename;
-   // reset pdfset
-   fiPDFSet = 0;
-   InitPDF();
-}
-
-
-//______________________________________________________________________________
-
-
-void FastNLOCRunDec::SetLHAPDFset( int set ) {
-   fiPDFSet = set;
-   InitPDF();
-}
-
-
-//______________________________________________________________________________
-
-
-void FastNLOCRunDec::PrintPDFInformation() const {
-   //
-   // print out the information about the currently used LHAPDF file.
-   // unfortunately there is no getter for lhapdf-filename or
-   // used pdf-member-id available.
-   // One must take care, that one is always using the desired pdf.
-   //
-   // e.g. If one has two FastNLOReader instances and one initalizes the
-   // second instance with another pdf. Then also the first one is using this
-   // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
-   //
-   printf(" ##################################################################################\n");
-   printf(" #  FastNLOCRunDec::PrintCurrentLHAPDFInformation.\n");
-   printf(" #      Your currently initalized pdf is called:\n");
-   LHAPDF::getDescription();
-   printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
-   printf(" #      Please use FastNLOReader::SetLHAPDFset(int) to choose a pdf-set.\n");
-   printf(" ##################################################################################\n");
-}
-
 
 
 #endif

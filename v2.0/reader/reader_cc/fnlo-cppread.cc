@@ -252,8 +252,8 @@ int fnlocppread(int argc, char** argv){
   // ------- Select another PDF set and member ------- //
   // --- fastNLO user: You can select another PDF set and member here.
   //     With LHAPDF, you can set the PDF set and member using e.g.:
-  //           fnloreader.SetLHAPDFfilename( string PDFFile );
-  //           fnloreader.SetLHAPDFset( int PDFMember );
+  //           fnloreader.SetLHAPDFFilename( string PDFFile );
+  //           fnloreader.SetLHAPDFSet( int PDFMember );
   //
 
 
@@ -447,8 +447,8 @@ int fnlocppread(int argc, char** argv){
   fnloreader.PrintTableInfo();
   fnloreader.PrintFastNLOTableConstants(0);
   // Do not forget to define the PDF set and member!
-  fnloreader.SetLHAPDFfilename( PDFFile );
-  fnloreader.SetLHAPDFset( 0 );
+  fnloreader.SetLHAPDFFilename( PDFFile );
+  fnloreader.SetLHAPDFSet( 0 );
   // To check the upper limit of the PDF member numbering do
   //    int npdf = fnloreader.GetNPDFSets();
   // Note: Usually there is a member no. 0 corresponding to the central result

@@ -34,10 +34,10 @@ class FastNLOLHAPDF : public FastNLOReader {
 private:
 public:
    FastNLOLHAPDF(string name);
-   FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset = 0);
+   FastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
-   void SetLHAPDFfilename( string filename );
-   void SetLHAPDFset( int set );
+   void SetLHAPDFFilename( string filename );
+   void SetLHAPDFSet( int set );
    int GetIPDFSet() const {return fiPDFSet;};
    int GetNPDFSets() const {return fnPDFs;};
    void PrintPDFInformation() const ;
@@ -49,7 +49,7 @@ protected:
    vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
-   string fLHAPDFfilename;
+   string fLHAPDFFilename;
    int fnPDFs;
    int fiPDFSet;
   
@@ -60,17 +60,17 @@ protected:
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) {
-   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFfilename( PDFFile ) and a PDF set using SetLHAPDFset(int PDFset)"<<std::endl;
+FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fiPDFSet(0) {
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFSet(int PDFSet)"<<std::endl;
 }
 
 
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFfile, int PDFset) : FastNLOReader(name){
-   SetLHAPDFfilename(LHAPDFfile);
-   SetLHAPDFset(PDFset);
+FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFFile, int PDFSet) : FastNLOReader(name){
+   SetLHAPDFFilename(LHAPDFFile);
+   SetLHAPDFSet(PDFSet);
    // do cross sections calculation, since everything is yet ready
    CalcCrossSection();
 }
@@ -109,16 +109,16 @@ bool FastNLOLHAPDF::InitPDF(){
 
    //LHAPDF::setVerbosity(LHAPDF::SILENT);
    LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-   if ( fLHAPDFfilename == ""){
+   if ( fLHAPDFFilename == ""){
      error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
      return false;
    } else {
      // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
-     //LHAPDF::initPDFSetByName(fLHAPDFfilename);
-     //cout << "PDF set name " << fLHAPDFfilename << endl;
-     LHAPDF::initPDFSet(fLHAPDFfilename);
-     fnPDFs = LHAPDF::numberPDF();
-     if ( fnPDFs < fiPDFSet ){
+     //LHAPDF::initPDFSetByName(fLHAPDFFilename);
+     //cout << "PDF set name " << fLHAPDFFilename << endl;
+     LHAPDF::initPDFSet(fLHAPDFFilename);
+     fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
+     if ( fnPDFs < fiPDFSet+1 ){
        error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
        return false;
      }
@@ -144,8 +144,8 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
-   fLHAPDFfilename = filename;
+void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
+   fLHAPDFFilename = filename;
    // reset pdfset
    fiPDFSet = 0;
    //   InitPDF();
@@ -155,7 +155,7 @@ void FastNLOLHAPDF::SetLHAPDFfilename( string filename ) {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::SetLHAPDFset( int set ) {
+void FastNLOLHAPDF::SetLHAPDFSet( int set ) {
    fiPDFSet = set;
    //InitPDF();
 }
@@ -180,7 +180,7 @@ void FastNLOLHAPDF::PrintPDFInformation() const {
    printf(" #      Your currently initalized pdf is called:\n");
    LHAPDF::getDescription();
    printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
-   printf(" #      Please use FastNLOReader::SetLHAPDFset(int) to choose a pdf-set.\n");
+   printf(" #      Please use FastNLOReader::SetLHAPDFSet(int) to choose a pdf-set.\n");
    printf(" ##################################################################################\n");
 }
 
