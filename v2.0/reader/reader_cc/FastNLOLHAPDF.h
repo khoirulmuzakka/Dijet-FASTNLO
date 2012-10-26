@@ -37,9 +37,9 @@ public:
    FastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
    void SetLHAPDFFilename( string filename );
-   void SetLHAPDFSet( int set );
-   int GetIPDFSet() const {return fiPDFSet;};
-   int GetNPDFSets() const {return fnPDFs;};
+   void SetLHAPDFMember( int set );
+   int GetIPDFMember() const {return fiPDFMember;};
+   int GetNPDFMembers() const {return fnPDFs;};
    void PrintPDFInformation() const ;
 
 protected:
@@ -51,7 +51,7 @@ protected:
    // ---- LHAPDF vars ---- //
    string fLHAPDFFilename;
    int fnPDFs;
-   int fiPDFSet;
+   int fiPDFMember;
   
 };
 
@@ -60,17 +60,17 @@ protected:
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fiPDFSet(0) {
-   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFSet(int PDFSet)"<<std::endl;
+FastNLOLHAPDF::FastNLOLHAPDF(string name) : FastNLOReader(name) , fnPDFs(0) , fiPDFMember(0) {
+   info["FastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
 }
 
 
 //______________________________________________________________________________
 
 
-FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFFile, int PDFSet) : FastNLOReader(name){
+FastNLOLHAPDF::FastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : FastNLOReader(name){
    SetLHAPDFFilename(LHAPDFFile);
-   SetLHAPDFSet(PDFSet);
+   SetLHAPDFMember(PDFMember);
    // do cross sections calculation, since everything is yet ready
    CalcCrossSection();
 }
@@ -118,11 +118,11 @@ bool FastNLOLHAPDF::InitPDF(){
      //cout << "PDF set name " << fLHAPDFFilename << endl;
      LHAPDF::initPDFSet(fLHAPDFFilename);
      fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
-     if ( fnPDFs < fiPDFSet+1 ){
-       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFSet<<std::endl;
+     if ( fnPDFs < fiPDFMember+1 ){
+       error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
        return false;
      }
-     LHAPDF::initPDF(fiPDFSet);
+     LHAPDF::initPDF(fiPDFMember);
    }
    return true;
 }
@@ -147,7 +147,7 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
 void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
    fLHAPDFFilename = filename;
    // reset pdfset
-   fiPDFSet = 0;
+   fiPDFMember = 0;
    //   InitPDF();
 }
 
@@ -155,8 +155,8 @@ void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::SetLHAPDFSet( int set ) {
-   fiPDFSet = set;
+void FastNLOLHAPDF::SetLHAPDFMember( int set ) {
+   fiPDFMember = set;
    //InitPDF();
 }
 
@@ -179,8 +179,8 @@ void FastNLOLHAPDF::PrintPDFInformation() const {
    printf(" #  FastNLOLHAPDF::PrintCurrentLHAPDFInformation.\n");
    printf(" #      Your currently initalized pdf is called:\n");
    LHAPDF::getDescription();
-   printf(" #      Information about current PDFSet in current LHAPDF-file cannot be displayed.\n");
-   printf(" #      Please use FastNLOReader::SetLHAPDFSet(int) to choose a pdf-set.\n");
+   printf(" #      Information about current PDFMember in current LHAPDF-file cannot be displayed.\n");
+   printf(" #      Please use FastNLOReader::SetLHAPDFMember(int) to choose a pdf-set.\n");
    printf(" ##################################################################################\n");
 }
 

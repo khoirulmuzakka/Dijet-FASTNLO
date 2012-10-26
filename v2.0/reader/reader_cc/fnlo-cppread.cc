@@ -196,7 +196,7 @@ int fnlocppread(int argc, char** argv){
   //  
   //     Print information from LHAPDF
   //         fnlolhapdf.PrintPDFInformation();
-  //         int npdf = fnlolhapdf.GetNPDFSets();
+  //         int npdf = fnlolhapdf.GetNPDFMembers();
   //
   //     ( Please note that because of a feature in gfortran the output via your LHAPDF
   //       installation may be asynchronous to the C++ output. Usually, the gfortran
@@ -253,7 +253,7 @@ int fnlocppread(int argc, char** argv){
   // --- fastNLO user: You can select another PDF set and member here.
   //     With LHAPDF, you can set the PDF set and member using e.g.:
   //           fnloreader.SetLHAPDFFilename( string PDFFile );
-  //           fnloreader.SetLHAPDFSet( int PDFMember );
+  //           fnloreader.SetLHAPDFMember( int PDFMember );
   //
 
 
@@ -448,9 +448,9 @@ int fnlocppread(int argc, char** argv){
   fnloreader.PrintFastNLOTableConstants(0);
   // Do not forget to define the PDF set and member!
   fnloreader.SetLHAPDFFilename( PDFFile );
-  fnloreader.SetLHAPDFSet( 0 );
+  fnloreader.SetLHAPDFMember( 0 );
   // To check the upper limit of the PDF member numbering do
-  //    int npdf = fnloreader.GetNPDFSets();
+  //    int npdf = fnloreader.GetNPDFMembers();
   // Note: Usually there is a member no. 0 corresponding to the central result
   //
   //  The table and PDF initialization could also be done in one step:
