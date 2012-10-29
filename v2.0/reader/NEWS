@@ -1,5 +1,39 @@
-Release Notes for fastNLO_reader version 2.1.0:
-===============================================
+Release Notes for fastNLO_reader version 2.1.0 revision ????:
+=============================================================
+
+- Second public release of the fastNLO_reader package
+
+- Changes:
+  - Interface to use for diffractive PDF analyses added
+  - Some code improvements
+  - ???
+
+
+
+Release Notes for fastNLO_reader version 2.1.0 revision 1273:
+=============================================================
+
+- Pre-release of the fastNLO_reader package for the fastNLO tutorial 
+  at the PDF school 2012 "Proton Structure in the LHC Era" at DESY
+
+- Updates:
+  - C++ reader: Automated cache filling for alpha_s and PDFs
+  - C++ reader: Added interface to CRunDec alpha_s evolution
+  - C++ reader: Improved interface to LHAPDF
+  - C++ reader: First implementation of verbosity levels
+  - Reactivated asymmetric mu_r/mu_f scale settings in Fortran reader
+  - Small inconsistency in asymmetric mu_r/mu_f scale variations between
+    Fotran and C++ code fixed
+  - C++ reader: Made interface to set mu_r/mu_f scales more user-friendly and less
+    error prone (SetScaleFactorsMuRMuF(xmur, xmuf))
+  - Default alpha_s(M_Z) value updated to PDG2012 value
+  - Numerous further code improvements
+  - Code documentation improved
+
+
+
+Release Notes for fastNLO_reader version 2.1.0 revision 1062:
+=============================================================
 
 - First public release of the fastNLO_reader package
 

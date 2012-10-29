@@ -1,7 +1,942 @@
-Candidate for public release
+2012-10-22  Pre-release of the fastNLO_reader package for the fastNLO tutorial
+	    ==================================================================
+            at the PDF school 2012 "Proton Structure in the LHC Era" at DESY,
+            ==================================================================
+            version 2.1.0, revision 1273:
+	    =============================
 
-06.02.2012:
-Rearrange code to have autocompleted main program printing out version info etc.
+2012-10-22  rabbertz
 
-10.11.2011:
-First test version of fastNLO_reader version 2.1.0
+    * fnlo-cppread.cc: v2 reader final final changes
+
+2012-10-22  DanielBritzger
+
+    * FastNLOReader.cc: update with automated caching.
+
+2012-10-22  rabbertz
+
+    * Alphas.cc, fnlo-cppread.cc: v2 reader: Final changes for tutorial version
+
+2012-10-22  DanielBritzger
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h: Remove commented out
+      statements
+
+    * FastNLOReader.cc: remove commented out statements
+
+    * main.cc.in: go back to 2011
+
+    * FastNLOReader.cc: bugfix4
+
+    * FastNLOReader.cc: bugfix3
+
+    * FastNLOReader.cc: bugfix2
+
+    * FastNLOReader.cc: bugfix2
+
+    * FastNLOReader.cc: bugfix
+
+    * fnlo-cppread.cc: no FillPDFCache via boolean
+
+    * FastNLOReader.cc, FastNLOReader.h: New function PrepareCache()
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h, FastNLOReader.cc,
+      FastNLOReader.h: Automatize handling of PDFCache. No more need to call
+      FillPDFCache().
+
+    * FastNLOUser.h: return bool for InitPDF
+
+2012-10-22  rabbertz
+
+    * fnlo-cppread.cc: v2 reader_cc: Comment out first x section printout for
+      consistent comparison with fortran output
+
+2012-10-22  DanielBritzger
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h, FastNLOReader.cc,
+      FastNLOReader.h: AlphasCache is now completely removed from the code an
+      managed by CalcCrossSection()
+
+2012-10-22  rabbertz
+
+    * fn-interface.f: v2: reader_f comment update for temporary lhapdf top
+      density fix with AB(K)M PDFs
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h, fnlo-cppread.cc,
+      fnlo-fread.f: Small corrections for reader, make default pdf consistent
+
+2012-10-20  DanielBritzger
+
+    * fnlo-cppread.cc: update documentation
+
+    * fnlo-cppread.cc: update documentation
+
+2012-10-20  rabbertz
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h, fnlo-cppread.cc:
+      Reader: Change FastNLOLHAPDF(string name) from private to public. This is
+      exactly the functionality I looked for: First define the table, then print
+      table info, and only after that deal with PDF and alpha_s
+
+2012-10-20  DanielBritzger
+
+    * main.cc.in: update copyright 2011->2012
+
+2012-10-20  rabbertz
+
+    * Alphas.cc, FastNLOAlphas.h, fnlo-cppread.cc: reader_cc: Reworked example
+      code
+
+    * alphas-grv.f, fn-interface.f: reader_f: Set a_s to PDG2012 value
+
+2012-10-20  DanielBritzger
+
+    * FastNLOCRunDec.h: fix output level for printout.
+
+2012-10-20  rabbertz
+
+    * Makefile.am, fnlo-cppread.cc: Work in progress for fnlo-cppread
+
+    * speaker.cc, speaker.h: Small mods to speaker output
+
+    * CRunDec.cpp, CRunDec.h: GPLV3 version of CRunDec
+
+2012-10-16  DanielBritzger
+
+    * FastNLOReader.cc: two bugfixes
+
+2012-10-01  DanielBritzger
+
+    * FastNLOReader.cc: fix. Refill alpha_s cache, if contribution is set on, if
+      it was off before.
+
+2012-09-18  DanielBritzger
+
+    * LHAPDF.h, LHAPDFConfig.h: remove lhapdf files, since these are available
+      via the LHAPDFinclude directory.
+
+2012-08-17  DanielBritzger
+
+    * FastNLODiffReader.cc: Instant bugfix
+
+    * FastNLODiffReader.cc: correct LO and k-factors.
+
+2012-08-16  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: bugfix for v2.0 tables.
+
+2012-08-13  DanielBritzger
+
+    * speaker.cc: remove commented part.
+
+    * FastNLODiffDiffFit.h: User module for implementation of FastNLODiffReader
+      in H1Diffractive Fitting code.
+
+    * FastNLODiffUser_DiffPDF.h, FastNLODiffUser_Plain.h: remove old files.
+
+    * FastNLOUser_H1Fitter.h, FastNLOUser_LHAPDF.h, FastNLOUser_Plain.h,
+      FastNLOUser_QCDNUM.h: remove old files.
+
+    * FastNLODiffH12006FitB.h, FastNLODiffReader.cc, FastNLODiffReader.h,
+      FastNLODiffUser.h: Diffractive modules
+
+    * FastNLOReader.cc: bugfix
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc: Update. All enums now
+      in namespace fastNLO.
+
+    * FastNLOCRunDec.h: bugfix.
+
+2012-08-11  DanielBritzger
+
+    * FastNLOUser.h: update
+
+    * fnlo-cppread.cc: example how to use the user functions.
+
+    * Makefile.am: Update. Makefile
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOH1Fitter.h, FastNLOLHAPDF.h,
+      FastNLONLOJETLIKE.h, FastNLOQCDNUM.h, FastNLOReader.cc, FastNLOReader.h,
+      FastNLOUser.h, speaker.cc, speaker.h: Update to User functions.
+
+2012-08-09  DanielBritzger
+
+    * FastNLOReader.h: FillAlphasCache must be callable for th user, if e.g.
+      alpha_s has changed in external evolution code like QCDNUM.
+
+2012-08-08  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: Update for 'no zero' LO flexiblescale
+      table.
+
+    * FastNLOBlockB.cc, FastNLOBlockB.h: No scaledependent zero's for LO.
+      Templates for redundant vector operations.
+
+2012-08-04  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: bugfix
+
+2012-08-04  rabbertz
+
+    * Alphas.cc, CRunDec.cpp, CRunDec.h, FastNLOReader.cc, FastNLOReader.h,
+      FastNLOUser.h, Makefile.am, fnlo-cppread.cc: Reader_cc: Add CRunDec as
+      choice for alpha_s evolution
+
+2012-08-03  DanielBritzger
+
+    * FastNLOReader.cc: PrintBlock A1 and A2 in debug mode.
+
+    * FastNLOBlockB.cc, FastNLOBlockB.h, FastNLOReader.cc, FastNLOReader.h:
+      Change output to corresponding verbosity level.
+
+2012-08-02  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: Verbosity modes and error handling
+
+2012-08-02  rabbertz
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc: Reader: Kick out
+      SetScaleMuR and SetScaleMuF
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc, fnlo-fread.f: Reader:
+      Added boolean SetScaleFactors simultaneously; dramatic simplification of
+      user code
+
+2012-08-01  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: SetScaleFactorMuF return scalefactor,
+      or 0. if fails to find scalevar-table
+
+2012-07-30  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: bugfix mur-variation. FillAlphasCache
+      no longer visible to user. SetScalefactor not visible to user.
+
+2012-07-30  rabbertz
+
+    * fnx9999.f: v2 freader: Comment out additional MuRCache since wrong for
+      scale variation
+
+2012-07-26  DanielBritzger
+
+    * FastNLOReader.cc: Bugfix mu-r variation
+
+2012-07-23  rabbertz
+
+    * fnlo-convert.f, fnloBlockBNlojet.cc, fnx9999.f: v2 converter: Unify output
+      format to G24.17
+
+2012-06-19  rabbertz
+
+    * fnlo-cppread.cc: v2 reader: Add output for v2.1 tables
+
+2012-06-07  DanielBritzger
+
+    * FastNLOReader.cc: identify scalevar=1 when reading table
+
+2012-05-31  rabbertz
+
+    * fx9999rw.f: v2 reader: Added check on NOBSBIN <= MXOBSBIN
+
+    * fnx9999.inc: v2 reader: Set MXOBSBIN to 212, max usable on my laptop
+
+2012-05-29  rabbertz
+
+    * alphas-grv-fnlo14.f, fn-interface.f: v2 reader f: set ttbar to zer0; temp.
+      fix for LHPADF ABM11 bug
+
+    * FastNLOReader.cc, fnlo-cppread.cc: v2 reader cc: Bugfix for my add.
+      cmdline argument
+
+2012-05-23  rabbertz
+
+    * fnlo-fread.f: v2 reader: Trivial comment changes
+
+2012-05-15  rabbertz
+
+    * FastNLOReader.cc, fnlo-cppread.cc, fnlo-fread.f, fnx9999.f, fnx9999.inc:
+      v2: Reader Fortran and C++: Some bug fixes for threshold corr, avoid
+      segfault, asymmetric scale settings; more elaborate print out for scales
+
+2012-05-09  rabbertz
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc: Investigating problem
+      with scale settings; present already in previous version
+
+2012-05-03  DanielBritzger
+
+    * FastNLODiffReader.cc, FastNLOReader.cc: fixes
+
+    * FastNLODiffReader.cc: bugfix1
+
+2012-05-02  DanielBritzger
+
+    * fnlo-cppread.cc: GetIsFlexibleScaleTable
+
+2012-04-30  DanielBritzger
+
+    * FastNLODiffUser.h, FastNLODiffUser_Plain.h: new structure
+
+    * FastNLODiffReader.cc, FastNLODiffReader.h, FastNLODiffUser_DiffPDF.h: 1.
+      interpolate at integration edges. 2. New code structure
+
+2012-04-26  DanielBritzger
+
+    * fnlo-cppread.cc: (temporary) update
+
+2012-04-24  DanielBritzger
+
+    * FastNLODiffReader.cc, FastNLODiffUser_DiffPDF.h: remove compiler warnings
+
+    * FastNLODiffReader.cc: remove unused includes
+
+    * FastNLOUser_Plain.h: bugfix
+
+    * FastNLOReader.cc: change warning for little number of scale nodes from 5
+      to 4
+
+2012-04-23  DanielBritzger
+
+    * FastNLOReader.h: virtual destructor
+
+    * FastNLODiffReader.h, FastNLODiffUser.h: virtual destructor
+
+    * Makefile.am: include Diffractive FastNLO
+
+    * FastNLODiffUser.h, FastNLODiffUser_DiffPDF.h, FastNLODiffUser_Plain.h,
+      FastNLOUser.h, FastNLOUser_H1Fitter.h, FastNLOUser_LHAPDF.h,
+      FastNLOUser_Plain.h, FastNLOUser_QCDNUM.h: Fix endif misdeclaration.
+
+    * FastNLODiffUser_DiffPDF.h: User module for 'diffpdf' as used by H1.
+
+    * FastNLODiffUser.h, FastNLODiffUser_Plain.h: New class. User interface for
+      diffractive FastNLO.
+
+2012-04-23  rabbertz
+
+    * fnx9999.inc: Make ten lines default scenario description; this accounts
+      for the additional lines for fastNLO in table description
+
+2012-04-23  DanielBritzger
+
+    * FastNLODiffReader.cc, FastNLODiffReader.h: New classes for
+      FastNLODiffReader to read diffractive DIS tables.
+
+    * FastNLOReader.cc: updated pdf check. Old caused problems with diffractive
+      FastNLO
+
+    * FastNLOReader.h: update
+
+2012-04-21  DanielBritzger
+
+    * FastNLOReader.cc: check of Alphas evolution is reasonable
+
+    * FastNLOUser.h, FastNLOUser_LHAPDF.h: change order in initialization
+
+    * FastNLOReader.h: typo
+
+    * fnlo-cppread.cc: update for executable
+
+    * FastNLOUser_H1Fitter.h, FastNLOUser_LHAPDF.h, FastNLOUser_QCDNUM.h:
+      example classes for FastNLOUser classes, interface to QCDNUM, LHADPF,
+      H1Fitter
+
+    * FastNLOUser_Plain.h: Template for User file
+
+    * FastNLOUser.h: FastNLO User file for LHAPDF interface.
+
+    * qcdnumdummy.f: removed file
+
+    * Makefile.am: updated makefile
+
+    * FastNLOReader.cc, FastNLOReader.h: major change in structure
+
+2012-04-20  DanielBritzger
+
+    * Alphas.cc: remove compiler warning
+
+    * FastNLOReader.cc: remove compiler warnings.
+
+2012-04-18  DanielBritzger
+
+    * FastNLOReader.cc: some improved coding. slightly faster.
+
+    * FastNLOReader.cc: FillAlphasMz is now called as standard for all changes
+      in MuR. This prevents bugs and is not really slow.
+
+2012-04-12  DanielBritzger
+
+    * qcdnumdummy.f: diffpdfdummy
+
+2012-04-05  DanielBritzger
+
+    * FastNLOReader.cc: compatible with unofficial table
+
+2012-04-04  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: Update&Bugfix. 1) PrintDefault now
+      const. use PrintFastNLODemo instead. 2) Preparation for diffraction. 3)
+      New PDFinterfaces
+
+2012-03-05  DanielBritzger
+
+    * main.cc.in: gimmick. colorful fastNLO
+
+2012-02-24  DanielBritzger
+
+    * FastNLOReader.cc: bugfix
+
+2012-02-17  rabbertz
+
+    * FastNLOReader.cc: v2: Fix off-by-one bug in fordname reported by DB
+
+2012-02-17  DanielBritzger
+
+    * FastNLOReader.h: Again renaming.
+
+    * FastNLOReader.h: rename two getters _Pdf_ -> _PDF_
+
+    * FastNLOReader.cc, FastNLOReader.h: bugfix. Member variable fFuncMuR/F must
+      be initialized when making an instance of FastNLOReader. Only for some
+      compilers
+
+2012-02-16  rabbertz
+
+    * fnx9999.inc: v2: Reader: Add provisionally some internal variables
+
+    * fx9999rw.f: v2: Reader: make g77 happy
+
+2012-02-16  DanielBritzger
+
+    * FastNLOReader.cc: bugfix in PrintCrossSectionDefaults.
+
+2012-02-13  rabbertz
+
+    * FastNLOReader.cc, fnlo-fread.f, main.cc.in, main.f.in: v2: Added forgotten
+      GPLv3 copyright statement to reader; switched back on LHAPDF LOWKEY
+
+
+
+2012-02-14  First public release of fastNLO_reader version 2.1.0, revision 1062:
+            ====================================================================
+	
+2012-02-13  rabbertz
+
+    * FastNLOReader.cc, fnlo-fread.f, main.cc.in, main.f.in: v2: Added forgotten
+      GPLv3 copyright statement to reader; switched back on LHAPDF LOWKEY
+
+2012-02-13  DanielBritzger
+
+    * fnlo-cppread.cc: update documentation. Remove '@DB' comments by KR.
+
+2012-02-13  rabbertz
+
+    * fnx9999.f, fnx9999.inc: v2: Increase string lengths 64 --> 80 in freader
+
+2012-02-09  rabbertz
+
+    * Alphas.cc, FastNLOReader.cc, FastNLOReader.h, alphas-grv.f: v2: Add ATLAS
+      scale to enumaration; re-establish similarity of a_S initial output
+
+2012-02-09  DanielBritzger
+
+    * Alphas.cc, FastNLOReader.cc, FastNLOReader.h: Alphas defaults are set in
+      Alphas.cc. Removed in FastNLOReader.cc
+
+    * FastNLOReader.cc: Redo last change (redundant). Sorry.
+
+    * FastNLOReader.cc: Make sure, that FastNLOReader::fAlphasMz is used for
+      Alphas calculation.
+
+    * Alphas.cc, Alphas.h, FastNLOBlockB.cc, FastNLOBlockB.h, FastNLOReader.cc,
+      FastNLOReader.h: code cleanup. FillAlphasCache when setting/changing
+      alphas evolution. Printout information, when resetting Alphas-evolution.
+
+2012-02-09  rabbertz
+
+    * FastNLOReader.cc: v2: Reorder scale variations also in C++ reader
+
+    * Makefile.am, configure.ac: v2: Some improvements in installation setup
+
+    * fnlo-cppread.cc: v2: Clear some leftover comment lines in C++ reader
+
+2012-02-08  rabbertz
+
+    * FastNLOBlockB.cc, FastNLOReader.cc, fnlo-fread.f, fnx9999.f: v2: Reader:
+      Added Nevt printout to scen. info; added 2nd digit to dim2 print out as
+      requested by Daniel
+
+    * fn-interface.f: v2: Bug fix: Float initialization of alpha_s(M_Z) fixed
+      ==> eliminates O(10-6) differences to C++ reader; now O(10-11); clean-up
+
+    * alphas-grv.f, fnio.f, fnlo-fread.f, fnset.f, fnx9999.f, fnx9999.inc,
+      fx9999rw.f, main.f.in, strings.inc: v2: Fortran read code clean-up;
+      comments, formatting, indenting, print-outs; NO result change
+
+2012-02-08  DanielBritzger
+
+    * FastNLOReader.cc: init of fAlphasMz with reasonable value
+
+2012-02-06  rabbertz
+
+    * Makefile.am, NEWS, QUOTE, configure.ac, fnlo-convert.f, main.f.in,
+      strings.inc: v2: Bring converter installation to same level of
+      sophistication as reader
+
+2012-02-05  rabbertz
+
+    * Makefile.am: v2: Bugfix
+
+    * FastNLOReader.cc, Makefile.am, NEWS, QUOTE, alphas-grv.f, configure.ac,
+      fnlo-cppread.cc, fnlo-fread.f, fnx9999.f, fx9999rw.f, main.cc.in,
+      main.f.in, strings.inc: v2: Reader: Add main.f.in and main.cc.in for
+      autocompletion of start-up message
+
+2012-02-04  rabbertz
+
+    * fnlo-fread.f, fnset.f, fnx9999.f, fnx9999.inc: v2: FReader: Allow order
+      independent print out of scale settings to better compare with v14
+
+2012-02-04  DanielBritzger
+
+    * FastNLOReader.cc: remove compiler warning
+
+    * FastNLOReader.cc, FastNLOReader.h: simplify output messages for scale
+      settings. remove compiler warnings.
+
+2012-02-04  rabbertz
+
+    * Alphas.cc, FastNLOBlockB.cc, FastNLOReader.cc, alphas-grv.f, fnlo-fread.f,
+      fnx9999.f: v2: Reader: Some printout format changes foe even more
+      consistency
+
+2012-02-04  DanielBritzger
+
+    * Alphas.cc, Alphas.h, FastNLOReader.cc, FastNLOReader.h: Getters for all
+      member vars. Change from 'GetFoo' to 'CalcFoo' if it is not a getter.
+
+2012-02-04  rabbertz
+
+    * Alphas.cc, FastNLOBlockB.cc, FastNLOBlockB.h, FastNLOReader.cc,
+      FastNLOReader.h, Makefile.am, NEWS, QUOTE, ReadFNLOTable.cc, alphas-grv.f,
+      fnlo-cppread.cc, fnlo-fread.f, fnx9999.f, fnx9999.inc, fx9999rw.f,
+      strings.inc: v2: Reader: Fix some inconsistencies between Fortran and C++
+      version, improve text, remove superfluous comments, ...
+
+2012-02-02  DanielBritzger
+
+    * FastNLOReader.cc: fContrName
+
+    * FastNLOReader.cc: minor change of warning message.
+
+2012-02-01  rabbertz
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc, fnlo-fread.f: v20:
+      Reader reworked for IContrFlg3 --> NScaleDep transition; some small issues
+      to be addressed; C++ default output adapted to Fortran style
+
+2012-01-31  rabbertz
+
+    * FastNLOReader.cc, Makefile.am, fnlo-cppread.cc: v2.0: Reader: Attention
+      ReadFNLOTable renamed for consistency. Many textual updates.
+
+2012-01-30  DanielBritzger
+
+    * ReadFNLOTable.cc: update documentation with warning for LHAPDF usage.
+
+    * FastNLOReader.cc, FastNLOReader.h: new method:
+      PrintCurrentLHAPDFInformation and change setting of LHAPDF parameters.
+
+2012-01-30  rabbertz
+
+    * FReadFNLOTable.f, Makefile.am, NEWS, README, configure.ac, fnlo-fread.f:
+      v20: Reader: Some changes for consistency
+
+2012-01-26  rabbertz
+
+    * FReadFNLOTable.f: v2: Reader: Improve print out
+
+2012-01-26  DanielBritzger
+
+    * FastNLOReader.cc: return '1' scale variation table if asked for v2.1
+      tables
+
+2012-01-25  rabbertz
+
+    * configure.ac: v20: Fix configure problem for --with-lhapdf
+
+2012-01-25  DanielBritzger
+
+    * FastNLOReader.cc: Speed-up PDFLC also for v2.1 hhc tables. Welcome message
+      only once
+
+    * FastNLOReader.cc, FastNLOReader.h: Print welcome message only once
+
+2012-01-24  rabbertz
+
+    * FReadFNLOTable.f, FastNLOBlockB.cc, FastNLOReader.cc, Makefile.am, NEWS,
+      QUOTE, README, ReadFNLOTable.cc, ToDo_Reader.txt, fx9999rw.f: Preparation
+      for beta-release of reader code
+
+2012-01-11  DanielBritzger
+
+    * FastNLOReader.cc, ReadFNLOTable.cc: update in printout and documentation
+
+    * ReadFNLOTable.cc: Documentation update
+
+    * FastNLOReader.cc: Some warning messages for SetExternalFuncForMuX
+
+    * ReadFNLOTable.cc: Comprehensive update of documentation.
+
+2012-01-09  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: remove nlojet-like PDF linear
+      combinations
+
+    * FastNLOReader.cc, FastNLOReader.h: 1) Working 'flexible scale' HHC. 2)
+      Possibility to define external function for calculaton of scales.
+
+2012-01-06  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: First implementation of flexible-scale
+      code for HHC. Technically working, result not yet correct
+
+2011-12-20  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: cleanup of comments, cleanu of
+      calcrosssection method.
+
+2011-12-19  DanielBritzger
+
+    * FastNLOReader.h: some comments
+
+2011-12-13  rabbertz
+
+    * FReadFNLOTable.f, FastNLOReader.cc, Makefile.am, ReadFNLOTable.cc,
+      fnh5001.cc, fnh5002.cc, fnloBlockBNlojet.cc, fnx9999.f, fx9999rw.f: Remove
+      superfluous -lfastnloNlojet; fix some small compilation probs
+
+2011-12-09  DanielBritzger
+
+    * Alphas.cc, FastNLOBlockB.cc, FastNLOReader.cc: removed some compiler
+      warnings, espc. when using other compilers.
+
+    * qcdnumdummy.f: adding asfunc
+
+2011-12-08  DanielBritzger
+
+    * FastNLOReader.cc: update for qcdnum interface
+
+2011-12-07  DanielBritzger
+
+    * FastNLOReader.cc: update
+
+2011-12-06  rabbertz
+
+    * FastNLOBlockB.cc, FastNLOReader.cc, ReadFNLOTable.cc: Adapt nscale loop;
+      some trivial output changes to reflect similar ones in FREader
+
+2011-12-06  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: GetNScalevar, GetScaleVariations are
+      now 'flexible scale' safe.
+
+    * Alphas.cc, Alphas.h: Removed 'instance'. CalcNF now public.
+
+    * FastNLOReader.cc: thresholdcorrections take now nf (in beta) from
+      alphas::calcnf(mur)
+
+    * FastNLOReader.h: remove accesing BlockB_NLO
+
+2011-12-06  rabbertz
+
+    * FReadFNLOTable.f, fnset.f, fnx9999.f, fnx9999.inc, fx9999rw.f,
+      strings.inc: FReader update for NP and Data contributions; needs check
+      with CReader
+
+2011-12-05  DanielBritzger
+
+    * FastNLOReader.cc: minor bugfix for flexiblescale tables. output improved.
+
+    * FastNLOReader.cc: PrintDataCrossSections() update
+
+    * FastNLOReader.cc: PrintDataCrossSections() bugfix
+
+    * FastNLOReader.cc, FastNLOReader.h: PrintDataCrossSections()
+
+2011-12-04  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: first implementation of a posteriori
+      scale variations (NLO). not tested yet.
+
+    * FastNLOBlockB.h, FastNLOReader.cc, FastNLOReader.h: non-perturbative
+      corrections are working. some better printout
+
+2011-12-03  DanielBritzger
+
+    * FastNLOReader.cc: nicer printout.
+
+    * FastNLOBlockB.cc: Preparation for non-perturbative corrections.
+      Preparation for data. New method PrintTableInfo()
+
+    * FastNLOBlockB.h: Preparation for non-perturbative corrections. Preparation
+      for data. New method PrintTableInfo()
+
+    * FastNLOReader.cc, FastNLOReader.h: Preparation for non-perturbative
+      corrections. Preparation for data. New method PrintTableInfo()
+
+2011-12-02  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: (1) add threshold corrections. (2)
+      Possibility to switch each contribution on/off seperately
+      (SetContributionON). (3) lists of BlockB's now.
+
+2011-11-29  rabbertz
+
+    * FReadFNLOTable.f, Makefile-Markus, Makefile.am, alphas-grv-fnlo14.f,
+      example-ref.f, example.f, fn-alphas-demo.f, fn-interface.f, fnx9999.f,
+      myexample-ref.f, myexample.f, myfnx9999.f, testhhc.cc: Working common
+      version of both readers for pp incl jets
+
+    * Alphas.cc, FReadFNLOTable.f, FastNLOReader.cc, FastNLOReader.h,
+      ReadFNLOTable.cc, alphas-grv.f, myfnx9999.f: Working snapshot
+
+2011-11-29  DanielBritzger
+
+    * FastNLOReader.cc: bugfix in reading pdfs in half-matrix in order xfx2,xfx1
+
+2011-11-28  rabbertz
+
+    * 1109.1310v1.pdf, Makefile.am, Makefile.kr, alljet.tex, arXiv_1109.1310,
+      configure.ac, doc, fastnlo-fig2-ct10.eps, fastnlo-fig2-ct10.pdf,
+      fastnlo-fig2-hera15.eps, fastnlo-fig2-hera15.pdf,
+      fastnlo-fig2-nnpdf21.eps, fastnlo-fig2-nnpdf21.pdf, fastnlo-fig2.eps,
+      fastnlo-fig2.pdf, fastnlo-fig3-ct10.eps, fastnlo-fig3-ct10.pdf,
+      fastnlo-fig3-hera15.eps, fastnlo-fig3-hera15.pdf,
+      fastnlo-fig3-nnpdf21.eps, fastnlo-fig3-nnpdf21.pdf, fastnlo-fig3.eps,
+      fastnlo-fig3.pdf, figs, psfig.sty: Fix subproject distribution problem
+      with SVNREV; add doc distribution of arXiv article
+
+2011-11-26  rabbertz
+
+    * Makefile.am: Put switch --install for m4
+
+    * FastNLOBlockB.cc, FastNLOReader.cc: Fix some int vs. size_t warnings on 64
+      Bit compilation
+
+    * QUOTE, SVNREV: Fix maintainer-clean files for reader packaging
+
+    * Makefile.am, configure.ac: Add maintainer-clean files for reader packaging
+
+    * alphas-grv.f: Check on M_Z and as(M_Z)
+
+    * fn-interface.f: Check on M_Z and as(M_Z)
+
+    * ReadFNLOTable.cc: Fix problem left with argument in
+      PrintCrossSectionsLikeFreader
+
+    * Alphas.cc: Check on M_Z and as(M_Z)
+
+2011-11-21  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: PDF linear combinations is now exactly
+      the same code as in f-reader.
+
+    * FastNLOReader.cc: bugfix. LO table now also uses the scale factor that is
+      set with SetScalevar(int).
+
+2011-11-20  rabbertz
+
+    * Alphas.cc, FReadFNLOTable.f, FastNLOBlockB.cc, FastNLOBlockB.h,
+      FastNLOReader.cc, FastNLOReader.h, Makefile.am, ReadFNLOTable.cc, SVNREV,
+      alphas-grv.f, configure.ac, fnio.f, fnx9999.f, fnx9999.inc, fx9999rw.f,
+      myexample.f, myfnx9999.f, strings.inc: Many adaptations to equalize F and
+      C++ Reader output
+
+2011-11-14  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: alphas-routing kGRV was replaced by new
+      class Alphas.
+
+    * Alphas.cc, Alphas.h: bugfix.
+
+    * Alphas.cc, Alphas.h: new class for calculating alpha_s(Mz) in
+      1-,2-,3-,4-loop solution, using 3-step newton procedure.
+
+2011-11-11  DanielBritzger
+
+    * FastNLOReader.cc: bugfix. SetScaleVariation is now always using [0] for LO
+      tables, and fScalevar for all other tables.
+
+2011-11-11  rabbertz
+
+    * ReadFNLOTable.cc, SVNREV, myfnx9999.f: Changes to debug scale 1 probs in
+      C++ reader
+
+2011-11-10  rabbertz
+
+    * SVNREV, configure.ac: Fix for reader distpackage creation
+
+
+
+2011-11-10  First test version of fastNLO_reader version 2.1.0, revision 923:
+            =================================================================
+	
+2011-11-10  rabbertz
+
+    * SVNREV, configure.ac: Fix for reader distpackage creation
+
+    * m4: Added missing parts for GNU standard distribution
+
+    * AUTHORS, COPYING, FastNLOReader.h, Makefile.am, NEWS, README, SVNREV,
+      configure.ac: First try at separate distribution of fastNLO reader
+
+    * FastNLOReader.cc, myexample.f: Default output for FOR vs. CC comparison
+      almost ready
+
+2011-10-27  rabbertz
+
+    * Makefile.am, configure.ac, example-ref.f, example.f, lenocc.f,
+      myexample.f: Work on v2 Fortran Reader
+
+2011-10-25  DanielBritzger
+
+    * Makefile.orig: now lhapdf.h is taken from lhapdf include path
+
+    * FastNLOReader.cc, FastNLOReader.h: Possiblity to read v2.0 pp and ppbar
+      tables
+
+2011-10-14  DanielBritzger
+
+    * FastNLOBlockB.cc: debug in PrintFNLOConstants()
+
+2011-10-04  DanielBritzger
+
+    * ReadFNLOTable.cc: alpha_s value MUST be set
+
+    * FastNLOReader.cc: remove senseless output
+
+    * FastNLOBlockB.cc: remove output
+
+    * FastNLOReader.cc, FastNLOReader.h: no need for LHAPDFPath
+
+    * FastNLOReader.h: update
+
+    * LHAPDF.h, LHAPDFConfig.h: add LHAPDF libs to have a working program in the
+      repository.
+
+    * ReadFNLOTable.cc: update
+
+2011-10-01  DanielBritzger
+
+    * FastNLOBlockB.cc, FastNLOBlockB.h: update in ultraflexibletableformat to
+      avoid redundant storage of NSubproc
+
+    * FastNLOBlockB.cc, FastNLOBlockB.h: update in ultraflexibletableformat to
+      reduce table size
+
+    * FastNLOReader.cc: new program logic for calccrosssection and pdflc
+
+2011-09-30  DanielBritzger
+
+    * FastNLOReader.cc: Update version number to 0.6
+
+    * FastNLOReader.cc: minor updat.
+
+    * FastNLOReader.cc, FastNLOReader.h: New option. SetCalculationOrder to set
+      the order of pertubation series. The k-factor is always calculated as
+      ratio to LO.
+
+    * FastNLOBlockB.cc, FastNLOBlockB.h, FastNLOReader.cc, FastNLOReader.h:
+      ultraflexible table format implemented for v2.1. Also renaming of
+      scalenodes.
+
+2011-09-27  DanielBritzger
+
+    * FastNLOReader.cc: more explanation in PrintCrossSectionWithReference
+
+2011-09-21  DanielBritzger
+
+    * FastNLOReader.cc, FastNLOReader.h: speed up! YEAH../../creator/ep if mu_f
+      is set to one scale, we safe the loop over the other scale variable when
+      evaluating the pdf.
+
+    * ReadFNLOTable.cc: Possibility to set units (publication units or absolute
+      cross section in IPublUnits-barn
+
+    * FastNLOReader.cc, FastNLOReader.h: Possibility to set units (publication
+      units or absolute cross section in IPublUnits-barn
+
+    * FastNLOReader.cc, FastNLOReader.h: Restructured cross section calculation.
+
+    * FastNLOReader.cc, FastNLOReader.h: update to new table format. Inclusion
+      of PrintCrossSection.
+
+2011-08-22  rabbertz
+
+    * Makefile.am: v20: Restructuring cont
+
+    * Makefile.am, MyMakefile.am, myfnx9999.inc: v20: Restructuring cont
+
+    * mystrings.inc, strings.inc: v20: Restructuring cont
+
+    * strings.inc: v20: Restructuring cont
+
+    * Makefile-Markus, Makefile.am, MyMakefile.am, example-ref.f, example.f,
+      fn-alphas-demo.f, fn-interface.f, fnio.f, fnset.f, fnx9999.f, fnx9999.inc,
+      fx9999rw.f, lenocc.f, myexample-ref.f, myexample.f, myfnx9999.f,
+      myfnx9999.inc, mystrings.inc, strings.inc, testhhc.cc: v20: Restructuring
+      cont
+
+2011-08-21  rabbertz
+
+    * FastNLOReader.cc, LHAPDF.h, LHAPDFConfig.h, Makefile, Makefile.am,
+      Makefile.orig, ReadFNLOTable.cc, ToDo_Reader.txt: v20: Integrated new C++
+      reader in autotools setup
+
+    * Makefile.am: v20: Restructuring into creator, processor, reader cont.
+
+    * FastNLOBlockB.C, FastNLOBlockB.cc, FastNLOReader.C, FastNLOReader.cc,
+      Makefile, Makefile.am, ReadFNLOTable.C, ReadFNLOTable.cc, author,
+      configure.ac, creator: v20: Restructuring into creator, processor, reader
+      cont.
+
+    * FastNLOBlockB.C, FastNLOBlockB.h, FastNLOReader.C, FastNLOReader.h,
+      LHAPDF.h, LHAPDFConfig.h, Makefile, ReadFNLOTable.C, ToDo_Reader.txt,
+      converter, merger, processor, qcdnumdummy.f, tableconvert: v20: Start
+      restructuring into creator, processor, reader
+
+    * reader_cc, reader_ep, reader_f, reader_hh: v20: Rename unnecessary ep/hh
+      reader dirs to cc and f
+
+2011-08-18  DanielBritzger
+
+    * FastNLOReader.h: Bugfix for enum numbering.
+
+    * ToDo_Reader.txt: Validation of printout and class discriptions are needed
+      by MW/KR. Question on file extension.
+
+    * Makefile: Use variables for LHAPDF
+
+    * ToDo_Reader.txt: Future work. Restructure code to remove redundant things
+      with the common/FastNLOCreator.
+
+    * ToDo_Reader.txt: ToDo list for the FastNLOReader with some suggested
+      improvements.
+
+    * Makefile: Simple makefile with linking to LHAPDF from 'alliance'.
+
+    * qcdnumdummy.f: FastNLOReader. Initial commit. Can read DIS v2.0, and DIS
+      MuVar tables. Ready for release.
+
+    * FastNLOBlockB.h, FastNLOReader.h, LHAPDF.h, LHAPDFConfig.h: FastNLOReader.
+      Initial commit. Can read DIS v2.0, and DIS MuVar tables. Ready for
+      release.
+
+    * FastNLOBlockB.C, FastNLOReader.C, ReadFNLOTable.C: FastNLOReader. Initial
+      commit. Can read DIS v2.0, and DIS MuVar tables. Ready for release.
+
+2011-08-18  rabbertz
+
+    * reader, reader_ep, reader_hh: v20: Create new dir for Daniels DIS reader
+
