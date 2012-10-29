@@ -59,9 +59,9 @@ public:
    double GetAlphasMz() const { return fAlphasMz; };
    void   SetMz( double Mz , bool ReCalcCrossSection = false );
    double GetMz() const { return fMz; };
-   void   SetNf( double nf , bool ReCalcCrossSection = false );
+   void   SetNf( int nf , bool ReCalcCrossSection = false );
    int    GetNf() const { return fNf; };
-   void   SetNloop( double nloop , bool ReCalcCrossSection = false );
+   void   SetNloop( int nloop , bool ReCalcCrossSection = false );
    int    GetNloop() const {return fNloop;};
 
 protected:
@@ -129,7 +129,7 @@ void FastNLOCRunDec::SetMz( double Mz , bool ReCalcCrossSection ){
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetNloop( double nloop, bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetNloop( int nloop, bool ReCalcCrossSection ){
    debug["SetNloop"]<<"Setting n-loop="<<nloop<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set n loop calculation
@@ -140,7 +140,7 @@ void FastNLOCRunDec::SetNloop( double nloop, bool ReCalcCrossSection ){
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetNf( double Nf , bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetNf( int Nf , bool ReCalcCrossSection ){
    debug["SetNf"]<<"Setting number of flavors to "<<Nf<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the number of flavors

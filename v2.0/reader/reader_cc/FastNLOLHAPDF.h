@@ -40,6 +40,7 @@ public:
    void SetLHAPDFMember( int set );
    int GetIPDFMember() const {return fiPDFMember;};
    int GetNPDFMembers() const {return fnPDFs;};
+   int GetNPDFMaxMember() const {return fnPDFs-1;};
    void PrintPDFInformation() const ;
 
 protected:

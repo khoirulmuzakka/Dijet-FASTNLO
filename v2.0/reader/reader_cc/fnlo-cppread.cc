@@ -197,6 +197,7 @@ int fnlocppread(int argc, char** argv){
   //     Print information from LHAPDF
   //         fnlolhapdf.PrintPDFInformation();
   //         int npdf = fnlolhapdf.GetNPDFMembers();
+  //         int imaxpdf = fnlolhapdf.GetNPDFMaxMember(); // imaxpdf = npdf - 1
   //
   //     ( Please note that because of a feature in gfortran the output via your LHAPDF
   //       installation may be asynchronous to the C++ output. Usually, the gfortran
@@ -450,8 +451,9 @@ int fnlocppread(int argc, char** argv){
   fnloreader.SetLHAPDFFilename( PDFFile );
   fnloreader.SetLHAPDFMember( 0 );
   // To check the upper limit of the PDF member numbering do
-  //    int npdf = fnloreader.GetNPDFMembers();
-  // Note: Usually there is a member no. 0 corresponding to the central result
+  int imaxpdf = fnloreader.GetNPDFMaxMember();
+  // Note: Usually there is a member no. 0 corresponding to the central result,
+  //       so the total number of members (fnloreader.GetNPDFMembers()) is imaxpdf + 1
   //
   //  The table and PDF initialization could also be done in one step:
   //  FastNLOAlphas fnloreader( tablename, PDFFile, 0 );
