@@ -116,8 +116,8 @@ int fnlocppread(int argc, char** argv){
   printf(" %s",CSEPS.c_str());
   //---  End of parsing arguments
   
-  
-  
+
+
   // ************************** fastNLO and example documentation starts here ****************************
   // --- fastNLO user: Hello!
   //     If you use fastNLO for the first time, please read through the
@@ -160,8 +160,13 @@ int fnlocppread(int argc, char** argv){
   //     10.  Access cross section and k-factor
   //     11.  Print-out cross section
   //     12.  Verbosity level 
-  //     13.  Example code
-  //     14.  Example analysis
+  //     13.  FastNLO for jet-production diffractive DIS
+  //           a. Introduction
+  //           b. The FastNLOUser.h class
+  //           c. Calculate diffractive cross sections.
+  //	       d. Diffractive example code (not compiled).
+  //     14.  Example code
+  //     15.  Example analysis
 
 
   // 1a.
@@ -437,11 +442,92 @@ int fnlocppread(int argc, char** argv){
   //     to any instance:
   //         fnlo.SetVerbosity(level);
 
-   
-  // ************************************************************************************************
-  
 
   // 13.
+  // ------- FastNLO for jets in diffractive DIS ------- //
+  // 13a.
+  //  FastNLO is also applicable to jets in diffractive DIS.
+  //  The calculation of jet cross sections in diffractive 
+  //  DIS is performed by adapting the slicing method,
+  //  where the xpom integration is performed during the evaluation
+  //  of the fastNLO table. The differential cross section
+  //  in xpom is calcualted by a rescaling of the center-of-mass
+  //  energy of the incident hadron.
+  //  The boundaries of the integration interval are automatically
+  //  smoothed out.
+  //  More details on the applied method can be found on the
+  //  website, i.e.
+  //  http://fastnlo.hepforge.org/docs/talks/20120912_fastNLOv2_DBritzger_DiffractiveFastNLO.pdf
+  //
+  // 13b.
+  // --- fastNLO user:
+  //  In order to calculate diffractive DIS processes, the user
+  //  has to provide a diffractive PDF, as well as an alpha_s 
+  //  evolution code. Both pieces have to be implemented in the
+  //  FastNLODiffUser.h file, where the functions
+  //     double FastNLODiffUser::EvolveAlphas(double Q)
+  //     bool FastNLODiffUser::InitPDF()
+  //     vector<double> FastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf)
+  //  have to be implemented in a reasonable way.
+  //  Some examples and more help on this, can provide the authors.
+  //  The implementation of the alpha_s evolution code can also be 
+  //  adapted e.g. from FastNLOAlphas.h or FastNLOCRunDec.h.
+  //
+  // 13c.
+  //  The calculation of diffractive cross sections performs
+  //  an integration of xpom. This is done by a simple Riemann integration.
+  //  Four possibilities to define the slicing are implemented.
+  //  1. Use an log xpom slicing
+  //     Set the number of slices, the xpom_min and xpom_max range, e.g.:
+  //       fnlodiff->SetXPomLogSlicing( 12, pow(10.,-2.3), pow(10.,-1) );
+  //  2. Use a linear xpom slicing
+  //       fnlodiff->SetXPomLinSlicing( 12, 0.0, 0.1 );
+  //  3. Use an exponential xpom slicing
+  //  4. Set your individual xpom slicing. This basically also allows
+  //     to implement a MC integration.
+  //         nStep:     number of slices
+  //         xpom[]:    central value of each slice
+  //         dxpom[]:   width of each slice
+  //     fnlodiff->SetXPomSlicing(int nStep, double* xpom, double* dxpom);
+  //   
+  //  To calculate and access the cross sections use:
+  //        vector<double> xs = fnlodiff->GetDiffCrossSection();
+  //
+  //  If you want to calculate cross sections as fucntion of xpom,
+  //  you have to calculate each xpom bin by setting the 'xpomslicing', and
+  //  summing all bins by yourself.
+  //  WARNING: 
+  //  In this case, one always have to call SetUnits(fastNLO::kAbsoluteUnits) !
+  //
+  //  Tipp 1: Some brief studies showed, that already with ca. 10 slices, the
+  //  cross section converges sufficiently fast. The linear slicing is 
+  //  preferred over the logarithmic slicing.
+  //  Tipp 2:
+  //  Choosing Q2 (or pT) as factorization scale increases the speed significantly.
+  //
+  // 13d.
+  //  Some example code could look like:
+  //    //  we setup an instance of the FastNLODiffUser class
+  //    FastNLODiffH12006FitB fnlodiff( tablename );
+  //
+  //    //  If you want to receive your cross section in
+  //    //   pb/GeV or in pb. Here we choose pb/GeV
+  //    fnlodiff.SetUnits(fastNLO::kPublicationUnits);
+  //
+  //    // Set the xpom integration interval and method
+  //    fnlodiff.SetXPomLinSlicing( 12, 0.0, 0.1 );
+  //
+  //    // Optional:
+  //    // make your scale definition (see above)
+  //    fnlodiff.SetMuFFunctionalForm(kQuadraticSum);
+  //    fnlodiff.SetMuRFunctionalForm(kQuadraticSum);
+  //    fnlodiff.SetScaleFactorsMuRMuF(1.0,1.0);
+  //
+  //    // calculate and access the cross section
+  //    vector<double>  xs = fnlodiff.GetDiffCrossSection();
+  
+
+  // 14.
   // ---- Example code of a quick cross section
   //      calculation using the FastNLOAlphas interface
   FastNLOAlphas fnloreader( tablename );
@@ -473,7 +559,7 @@ int fnlocppread(int argc, char** argv){
   // ************************************************************************************************
 
 
-  // 14.
+  // 15.
   // ---- Example to do some cross section analysis ---- //
   // Some initialization
   string CSEP41("#########################################");
