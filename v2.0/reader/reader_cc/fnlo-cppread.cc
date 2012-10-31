@@ -525,6 +525,8 @@ int fnlocppread(int argc, char** argv){
   //
   //    // calculate and access the cross section
   //    vector<double>  xs = fnlodiff.GetDiffCrossSection();
+  //    // Print it
+  //    fnlodiff.PrintCrossSections();
   
 
   // 14.
