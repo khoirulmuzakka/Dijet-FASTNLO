@@ -176,13 +176,11 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
 
    double interv = 0;
    // do the xpom integration
-   info.prefix(" # ")["GetDiffCrossSection"]<<"Integrating xpom in "<<fxPoms.size()<<" slices. [";
+   info["GetDiffCrossSection"]<<"Integrating xpom in "<<fxPoms.size()<<" slices. [";
    fflush(stdout);
-   FillAlphasCache();
    for ( unsigned int ixp = 0 ; ixp<fxPoms.size() ; ixp++ ){
       fxpom = fxPoms[ixp];
       // always recalculate cross section
-      FastNLOReader::FillPDFCache(false); // this calls InitPDF() once
       FastNLOReader::CalcCrossSection(); // this calls GetXFX() very very often!
 
       for ( int i = 0 ; i<NObsBin ; i++ ){
@@ -194,7 +192,7 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
       interv+=fdxPoms[ixp];
    }
    info>>"]"<<endl;
-   info.prefix(" # ")["GetDiffCrossSection"]<< "Integrated interval in xpom: " << interv << endl;
+   info["GetDiffCrossSection"]<< "Integrated interval in xpom: " << interv << endl;
 
    // set this cross section also to FastNLO mother class
    XSection = xs;

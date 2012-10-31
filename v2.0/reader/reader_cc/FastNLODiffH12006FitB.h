@@ -39,7 +39,7 @@ protected:
    
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   void InitPDF();
+   bool InitPDF();
    vector<double> GetDiffXFX(double xpom, double zpom, double muf) const ;
 
 };
@@ -90,11 +90,12 @@ double FastNLODiffH12006FitB::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLODiffH12006FitB::InitPDF(){
+bool FastNLODiffH12006FitB::InitPDF(){
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
    // nothing todo!
+   return true;
 }
 
 
