@@ -164,7 +164,7 @@ int fnlocppread(int argc, char** argv){
   //           a. Introduction
   //           b. The FastNLOUser.h class
   //           c. Calculate diffractive cross sections.
-  //	       d. Diffractive example code (not compiled).
+  //	       d. Diffractive DIS example code
   //     14.  Example code
   //     15.  Example analysis
 
@@ -477,7 +477,7 @@ int fnlocppread(int argc, char** argv){
   //  The calculation of diffractive cross sections performs
   //  an integration of xpom. This is done by a simple Riemann integration.
   //  Four possibilities to define the slicing are implemented.
-  //  1. Use an log xpom slicing
+  //  1. Use a logarithmic xpom slicing
   //     Set the number of slices, the xpom_min and xpom_max range, e.g.:
   //       fnlodiff->SetXPomLogSlicing( 12, pow(10.,-2.3), pow(10.,-1) );
   //  2. Use a linear xpom slicing
