@@ -1601,7 +1601,7 @@ bool FastNLOReader::PrepareCache(){
    }
    // do we now have an alphas?
    if ( fAlphasCached==0. || fAlphasCached != asref ){
-      error["PrepareCache"]<<"Filling of alpha_s cache failed!"<<endl;
+      error["PrepareCache"]<<"Filling of alpha_s cache failed. fAlphasCached="<<fAlphasCached<<"\tasref="<<asref<<endl;
       return false;
    }
    return true;
@@ -1929,8 +1929,13 @@ double FastNLOReader::CalcAlphas( double Q ){
 
 
 double FastNLOReader::CalcReferenceAlphas(){
-   double mu = 91.1876123456789012*(fScaleFacMuR+0.1)+fScalevar*0.1;
-   return CalcAlphas(mu);
+   double mu = (fMuRFunc==kExtern) ? (*Fct_MuR)(91.,1.)*(fScaleFacMuF+0.1) : 91.1876123456789012*(fScaleFacMuR+0.1)+fScalevar*0.1;
+   double as = CalcAlphas(mu);
+   if ( isnan(as) ) {
+      error["CalcReferenceAlphas"]<<"Reference alphas is a 'nan' for scale mu="<<mu<<endl;
+      //exit(1);
+   }
+   return as;
 }
 
 
@@ -1946,21 +1951,12 @@ double FastNLOReader::CalcNewPDFChecksum(){
    fPDFSuccess = InitPDF();
    debug["CalcNewPDFChecksum"]<<"Return value InitPDF() = "<<fPDFSuccess<<endl;
    if ( !fPDFSuccess ) {
-      warn["CalcPDFChecksum"]<<"PDF initializatoin failed. Please check PDF interface in your FastNLO user module."<<endl;
+      warn["CalcPDFChecksum"]<<"PDF initialization failed. Please check PDF interface in your FastNLO user module."<<endl;
       return 0.;
    }
 
-//    if ( !fPDFSuccess ) {
-//       if ( ReInitPDF ) {
-// 	 debug["RefreshPDFChecksum"]<<"Call InitPDF() in user module."<<endl;
-// 	 fPDFSuccess = InitPDF();
-//       }
-//       else 
-// 	 debug["RefreshPDFChecksum"]<<"PDFSuccess is false, and ReInitPDF=false. Do not call InitPDF()."<<endl;
-//    }
-
    // calculate checksum for some scales and flavors
-   double muf = (fScaleFacMuF+0.1)+fScalevar*0.1;
+   double muf = (fMuFFunc==kExtern) ? (*Fct_MuF)(91.,1.)/91.*(fScaleFacMuF+0.1) : (fScaleFacMuF+0.1)+fScalevar*0.1;
    double cks = CalcChecksum(muf);
    return cks;
 }
