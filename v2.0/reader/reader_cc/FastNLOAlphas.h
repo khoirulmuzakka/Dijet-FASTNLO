@@ -45,7 +45,7 @@ class FastNLOAlphas : public FastNLOLHAPDF {
 
 public:
    FastNLOAlphas(string name) : FastNLOLHAPDF(name){;};
-   FastNLOAlphas(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet){;};
+   FastNLOAlphas(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184){;};
 
    // ---- Alphas vars ---- //
    void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
