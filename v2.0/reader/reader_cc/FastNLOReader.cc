@@ -1929,7 +1929,13 @@ double FastNLOReader::CalcAlphas( double Q ){
 
 
 double FastNLOReader::CalcReferenceAlphas(){
-   double mu = (fMuRFunc==kExtern) ? (*Fct_MuR)(91.,1.)*(fScaleFacMuF+0.1) : 91.1876123456789012*(fScaleFacMuR+0.1)+fScalevar*0.1;
+   double mu = 0;
+   if ( GetIsFlexibleScale() ){
+      if (fMuRFunc==kExtern) mu = (*Fct_MuR)(91.,1.)*(fScaleFacMuR+0.1)
+      else mu = 91.1876111111+(fMuRFunc*0.1)+(fScaleFacMuR);
+   }
+   else mu = 91.187611111115*(fScaleFacMuR+0.1)+fScalevar*0.1;
+   double mu = (fMuRFunc==kExtern) ?  : 
    double as = CalcAlphas(mu);
    if ( isnan(as) ) {
       error["CalcReferenceAlphas"]<<"Reference alphas is a 'nan' for scale mu="<<mu<<endl;
@@ -1956,7 +1962,12 @@ double FastNLOReader::CalcNewPDFChecksum(){
    }
 
    // calculate checksum for some scales and flavors
-   double muf = (fMuFFunc==kExtern) ? (*Fct_MuF)(91.,1.)/91.*(fScaleFacMuF+0.1) : (fScaleFacMuF+0.1)+fScalevar*0.1;
+   double muf = 0;
+   if ( GetIsFlexibleScale() ){
+      if (fMuFFunc==kExtern) muf = (*Fct_MuF)(91.,1.)/91.*(fScaleFacMuF+0.1) ;
+      else muf = 91.1+0.1*fMuFFunc+fScaleFacMuF;
+   }
+   else muf=(fScaleFacMuF+0.1)+fScalevar*0.1;
    double cks = CalcChecksum(muf);
    return cks;
 }
@@ -2142,6 +2153,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv21( FastNLOBlockB* B ){
       }
     }
   }
+  debug["FillBlockBPDFLCsDISv21"]<<"BlockB = "<<B->fname<<" done." <<endl;
 }
 
 
