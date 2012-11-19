@@ -2,21 +2,23 @@
 !  Steer file for program
 !     fnlo-modify
 !
-!  Alternatively, parameters can be passed to 
+!  Necessary parameters are InTable and OutTable
+!  If you do not want to modify a value, keep it empty
+!
+!
+!  Alternatively to this file, parameters can be passed to 
 !  fnlo-modify via the command line, e.g.:
 !     fnlo-modify  InTable=fnl4242.tab
-!  which will overwrite the given InTable value of 
-!  this file
+!  which will overwrite the given 'InTable' value of 
+!  this steering file.
 !
-!  Another SteerFile can be specified via the command line
+!  A different steering file can be specified via the command line
 !     fnlo-modify steerfile=AnotherSteerfile.str
 !
 !
-!  If you do not want to modify a value, keep it empty
-!
 !  You can also change any value via the command line.
 !  E.g. if you want to modify the table version:
-!     fnlo-modify InTable=in.tab OutTable-out.tab Itabversion=30000
+!     fnlo-modify InTable=in.tab OutTable=out.tab Itabversion=30000
 !
 !  In order to change Scenario Description 
 !     AttachScDescription		true ! or false if you want to replace it
@@ -36,17 +38,17 @@
 ! ------------------------
 
 InTable				fnh5001.tab
-OutTable			fnh5001Stamp.tab
+OutTable			fnh5001_modified.tab
 
 
 ! ------------------------
 !   Programm steering
 ! ------------------------
 PrintSteeringCard		true
-PrintInputA1			true 
-PrintInputA2			true 
-PrintOutputA1			true 
-PrintOutputA2			true 
+PrintInputA1			false
+PrintInputA2			false
+PrintOutputA1			false
+PrintOutputA2			false
 
 
 
@@ -81,9 +83,10 @@ ScDescript {
 
 ! ------------------------------------
 !   Remove Bins
-!  just type bin numbers to be removed. 
-!  First bin is bin 1. 
-!  Please use increasing bin numbering !!
+!     Specify bin numbers to be removed
+!     within curly brackets. 
+!     First bin is bin 1. 
+!     Please use increasing bin numbering !!
 ! ------------------------------------
 RemoveBins {		!  Please use increasing bin numbering !!
 !  5 6 7 8 40 41 42 43
