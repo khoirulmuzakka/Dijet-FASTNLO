@@ -6,6 +6,7 @@
 
 
 #include "fnloTable.h"
+#include "fnloBlockBNlojet.h"
 #include "entry.h"
 
 using namespace std;
