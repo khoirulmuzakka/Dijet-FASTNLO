@@ -43,10 +43,10 @@ OutTable			fnh5001Stamp.tab
 !   Programm steering
 ! ------------------------
 PrintSteeringCard		true
-PrintInputA1			false 
-PrintInputA2			false 
-PrintOutputA1			false 
-PrintOutputA2			false 
+PrintInputA1			true 
+PrintInputA2			true 
+PrintOutputA1			true 
+PrintOutputA2			true 
 
 
 
@@ -59,8 +59,11 @@ PrintOutputA2			false
 Itabversion			
 ScenName			
 
+
+
+
 ! ------------------------------------
-!   Block A1
+!   Block A2
 ! ------------------------------------
 	
 Ipublunits			
@@ -73,6 +76,21 @@ ScDescript {
    "Second line of the scen. desc"
    "Just attach any number of lines"
 }
+
+
+
+! ------------------------------------
+!   Remove Bins
+!  just type bin numbers to be removed. 
+!  First bin is bin 1. 
+!  Please use increasing bin numbering !!
+! ------------------------------------
+RemoveBins {		!  Please use increasing bin numbering !!
+!  5 6 7 8 40 41 42 43
+!  102 105
+!  104
+}
+
 
 
 

@@ -22,8 +22,25 @@
 
 using namespace std;
 
+
+template<typename T>
+void EraseBin(vector<T>& v, unsigned int bin, unsigned int nobs){
+   if ( v.empty() ){
+      //cout<<"nothing todo."<<endl;
+   }
+   else if ( v.size() == nobs ) {
+      //cout<<"erase."<<endl;
+      v.erase(v.begin()+bin-1);
+   } else {
+      cout<<"Different number of bins."<<endl;
+   }
+}
+
+
+
 int main(int argc, char** argv)
 {
+  
    if ( !PARSE(argc,argv) ) READ("SteerModify.str");
    if (BOOL(PrintSteeringCard) ) PRINTALL();
    
@@ -82,9 +99,62 @@ int main(int argc, char** argv)
       table.GetBlockA2()->Ecms = DOUBLE(Ecms);
    }  
 
+   if ( !INT_ARR(RemoveBins).empty() ) {  
+      cout<<"Removing Bins!"<<endl;
+      unsigned int nobs = table.GetNObsBin();
+      for ( int i = (int)INT_ARR(RemoveBins).size()-1 ; i>=0 ; i-- ){
+	 unsigned int b = INT_ARR(RemoveBins)[i];
+	 cout<<"Erasing bin "<<i<<endl;
+	 if ( b > table.GetNObsBin() ) {
+	    cout<<"Error. Cannot erase bin number "<<b<<". There are only "<<table.GetNObsBin()<<" in the table."<<endl;
+	    continue;
+	 }
+	 // A2
+	 EraseBin(table.GetBlockA2()->LoBin,b,nobs);
+	 EraseBin(table.GetBlockA2()->UpBin,b,nobs);
+	 EraseBin(table.GetBlockA2()->BinSize,b,nobs);
+	 EraseBin(table.GetBlockA2()->IDivLoPointer,b,nobs);
+	 EraseBin(table.GetBlockA2()->IDivUpPointer,b,nobs);
+ 	 for ( unsigned int idx = 0; idx<table.GetBlockA1()->GetNcontrib() ; idx++ ){
+	    EraseBin(table.GetBlockB(idx)->Xcenter,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->Value,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->fact,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->UncorLo,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->UncorHi,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->CorrLo,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->CorrHi,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->Nxtot1,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->XNode1,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->Nxtot2,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->XNode2,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->Nztot,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->ZNode,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->Xsection,b,nobs);
+
+	    EraseBin(table.GetBlockB(idx)->ScaleNode,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaTilde,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->PdfLc,b,nobs);
+
+	    EraseBin(table.GetBlockB(idx)->ScaleNode1,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->ScaleNode2,b,nobs);
+	    // 	    EraseBin(table.GetBlockB(idx)->HScaleNode,b,nobs);
+	    // 	    EraseBin(table.GetBlockB(idx)->HScaleNode1,b,nobs);
+	    // 	    EraseBin(table.GetBlockB(idx)->HScaleNode2,b,nobs);
+
+	    EraseBin(table.GetBlockB(idx)->SigmaTildeMuIndep,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaTildeMuFDep,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaTildeMuRDep,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaRefMixed,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaRef_s1,b,nobs);
+	    EraseBin(table.GetBlockB(idx)->SigmaRef_s2,b,nobs);
+ 	 }		 
+	 nobs--;
+      }
+      table.GetBlockA2()->NObsBin = nobs;
+   }
+
    if ( BOOL(PrintOutputA1) )  table.GetBlockA1()->Print();
    if ( BOOL(PrintOutputA2) )  table.GetBlockA2()->Print();
-  
 
    // writing modified table
    table.SetFilename(CHAR(OutTable));

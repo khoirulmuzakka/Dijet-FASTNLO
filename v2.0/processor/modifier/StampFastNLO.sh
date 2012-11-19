@@ -8,7 +8,12 @@
 #  with the subscript '_Stamp'  
 # 
 
-Scenario=`echo "$1" | sed 's/.tab//g'`
-fnlo-modify InTable=$Scenario.tab OutTable=${Scenario}_Stamp.tab steerfile=SteerFastNLOStamp.str
+#Scenario=`echo "$1" | sed 's/.tab//g'`
+#fnlo-modify InTable=$Scenario.tab OutTable=${Scenario}_Stamp.tab steerfile=SteerFastNLOStamp.str
+#echo 'StampFastNLO.sh.  Replacing initial file with stamped file.'
+#mv -f ${Scenario}_Stamp.tab $Scenario.tab
+
+fnlo-modify InTable=$1 OutTable=temp.tab steerfile=SteerFastNLOStamp.str
 echo 'StampFastNLO.sh.  Replacing initial file with stamped file.'
-mv -f ${Scenario}_Stamp.tab $Scenario.tab
+mv -f temp.tab $1
+
