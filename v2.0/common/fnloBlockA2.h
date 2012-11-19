@@ -18,6 +18,7 @@ class fnloBlockA2 {
    int GetNObsBin(){return NObsBin;}
    int GetILOord(){return ILOord;}
    void SetIpublunits(int unit){Ipublunits = unit;}
+   int GetIpublunits(){return Ipublunits;}
    void Print();
    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
