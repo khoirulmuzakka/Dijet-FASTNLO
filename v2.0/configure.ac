@@ -457,6 +457,7 @@ AC_CONFIG_FILES([Makefile
 	doc/Makefile
 	processor/Makefile
 	processor/merger/Makefile
+	processor/modifier/Makefile
 ])
 
 AC_OUTPUT
