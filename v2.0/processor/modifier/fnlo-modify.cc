@@ -40,7 +40,7 @@ void EraseBin(vector<T>& v, unsigned int bin, unsigned int nobs){
 
 int main(int argc, char** argv)
 {
-  
+
    if ( !PARSE(argc,argv) ) READ("SteerModify.str");
    if (BOOL(PrintSteeringCard) ) PRINTALL();
    
@@ -116,6 +116,10 @@ int main(int argc, char** argv)
 	 EraseBin(table.GetBlockA2()->IDivLoPointer,b,nobs);
 	 EraseBin(table.GetBlockA2()->IDivUpPointer,b,nobs);
  	 for ( unsigned int idx = 0; idx<table.GetBlockA1()->GetNcontrib() ; idx++ ){
+	    if ( table.GetBlockB(idx)->NErrMatrix != 0 ) {
+	       cout<<"Removing of bins in error-matrices of data is not yet implemented."<<endl;
+	       exit(1);
+	    }
 	    EraseBin(table.GetBlockB(idx)->Xcenter,b,nobs);
 	    EraseBin(table.GetBlockB(idx)->Value,b,nobs);
 	    EraseBin(table.GetBlockB(idx)->fact,b,nobs);
