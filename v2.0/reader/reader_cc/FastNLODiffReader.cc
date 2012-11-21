@@ -221,8 +221,6 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
    double zpom = xp/fxpom;
    vector < double > a(13);
    if ( zpom > fzmin && zpom < fzmax ){
-
-
       // find x-node index
       int nx = -1;
       int nb = -1;

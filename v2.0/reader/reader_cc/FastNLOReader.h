@@ -87,13 +87,10 @@ public:
 
   // ---- setters for scales of MuVar tables ---- //
   void SetMuRFunctionalForm( fastNLO::EScaleFunctionalForm func);// Set the functional form of Mu_R
-   //P void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func , bool ReFillCache = true);// Set the functional form of Mu_F
   void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func );// Set the functional form of Mu_F
   void SetFunctionalForm( fastNLO::EScaleFunctionalForm func , FastNLOReader::EMuX kMuX);// Set functional form of MuX
-   //P bool SetScaleFactorsMuRMuF( double xmur, double xmuf, bool ReFillCache = true);// Set scale factors for MuR and MuF
   bool SetScaleFactorsMuRMuF( double xmur, double xmuf);// Set scale factors for MuR and MuF
   void SetExternalFuncForMuR( mu_func);						// Set external function for scale calculation (optional)
-   //P  void SetExternalFuncForMuF( mu_func , bool ReFillCache = true);		// Set external function for scale calculation (optional)
   void SetExternalFuncForMuF( mu_func );		// Set external function for scale calculation (optional)
 
 
@@ -142,7 +139,7 @@ public:
   string GetScaleDescription(int scalen=0) const { return BBlocksSMCalc[0][0]->ScaleDescript[0][scalen]; };		// Description of renormalization and facorization scale choice
   int GetNScaleVariations() const;					// Get number of available scale variations
   vector < double > GetScaleFactors() const;				// Get list of available scale factors
-   bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep >= 3; } // Get, if this table is a 'flexible scale' table or not.
+  bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep >= 3; } // Get, if this table is a 'flexible scale' table or not.
 
 
   // ---- Print outs ---- //
@@ -153,6 +150,10 @@ public:
   void PrintCrossSectionsWithReference();
   void PrintCrossSectionsData() const;
   void PrintFastNLODemo();
+
+  // ---- Test virtual functions for reasonable values. ---- //
+  bool TestXFX();							// Test if XFX reasonable values
+  bool TestAlphas();							// Test if EvolvaAlphas returns a reasonable value
 
 
 protected:
@@ -211,7 +212,6 @@ protected:
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   //P double SetScaleVariation( int scalevar , bool ReFillCache = true , bool FirstCall=false);// Choose the MuF scale variation table
    double SetScaleVariation( int scalevar , bool FirstCall=false);// Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
