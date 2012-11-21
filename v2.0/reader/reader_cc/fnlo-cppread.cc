@@ -18,8 +18,6 @@
 #include "FastNLOAlphas.h"
 #include "FastNLOLHAPDF.h"
 #include "FastNLOCRunDec.h"
-#include "FastNLODiffH12006FitB.h"
-#include "FastNLODiffTestDummy.h"
 
 // Function prototype for flexible-scale function 
 double Function_Mu(double s1, double s2 );
@@ -117,75 +115,6 @@ int fnlocppread(int argc, char** argv){
   }
   printf(" %s",CSEPS.c_str());
   //---  End of parsing arguments
-
-
-  {
-     //  we setup an instance of the FastNLODiffUser class
-     FastNLODiffTestDummy fnlodiff( tablename );
-  
-     //  If you want to receive your cross section in
-     //   pb/GeV or in pb. Here we choose pb/GeV
-     fnlodiff.SetUnits(fastNLO::kPublicationUnits);
-  
-     // Set the xpom integration interval and method
-     fnlodiff.SetXPomLinSlicing( 12, 0.0, 0.1 );
-  
-     // Optional:
-     // make your scale definition (see above)
-     fnlodiff.SetMuFFunctionalForm(kQuadraticSum);
-     fnlodiff.SetMuRFunctionalForm(kQuadraticSum);
-     fnlodiff.SetScaleFactorsMuRMuF(1.0,1.0);
-  
-     // calculate and access the cross section
-     vector<double>  xs = fnlodiff.GetDiffCrossSection();
-     // Print it
-     fnlodiff.PrintCrossSections();
-  }
-  {
-     //  we setup an instance of the FastNLODiffUser class
-     FastNLODiffH12006FitB fnlodiff( tablename );
-  
-     //  If you want to receive your cross section in
-     //   pb/GeV or in pb. Here we choose pb/GeV
-     fnlodiff.SetUnits(fastNLO::kPublicationUnits);
-  
-     // Set the xpom integration interval and method
-     fnlodiff.SetXPomLinSlicing( 12, 0.0, 0.1 );
-  
-     // Optional:
-     // make your scale definition (see above)
-     fnlodiff.SetMuFFunctionalForm(kQuadraticSum);
-     fnlodiff.SetMuRFunctionalForm(kQuadraticSum);
-     fnlodiff.SetScaleFactorsMuRMuF(1.0,1.0);
-  
-     // calculate and access the cross section
-     vector<double>  xs = fnlodiff.GetDiffCrossSection();
-     // Print it
-     fnlodiff.PrintCrossSections();
-  }
-
-//   hier
-//   FastNLODiffH12006FitB f("/afs/desy.de/user/b/britzger/www/FastNLOtables/tables/fnh5001.tab");
-//   f.InitPDF();
-//   const int nx = 6;
-//   double x[nx] = { 3.e-1, 1.e-1, 3.e-2, 1.e-2 ,3.e-3, 1.e-3 };
-//   double muf[4] = { 1, 5 , 10, 20};
-//   for ( int ix = 0 ; ix<nx ; ix++ ){
-//      cout<< " -------------- "<<endl;
-//      for ( int ixp = 0 ; ixp<nx ; ixp++ ){
-// 	cout<< "xpom = "<<x[ixp]<<"\tzpom="<<x[ix]<<endl;
-// 	//for ( int i = 0 ; i< a.size() ; i++ ){
-
-// 	for ( int jf = 0 ; jf<4  ; jf++ )
-// 	{
-// 	   vector<double> a = f.GetDiffXFX( x[ixp] , x[ix] , muf[jf]);
-// 	   double guess = 1/x[ixp]/(-2*log10(x[ix]));//*muf/1000.;
-// 	   int i = 8;
-// 	   cout<<"\t|  "<<a[i] <<" ~ "<<guess5;
-// 	}cout<<endl;
-//      }
-//   }
-  exit(1);
 
 
   // ************************** fastNLO and example documentation starts here ****************************
