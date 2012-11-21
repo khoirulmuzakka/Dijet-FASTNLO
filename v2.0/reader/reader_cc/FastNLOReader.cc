@@ -1826,14 +1826,10 @@ void FastNLOReader::FillAlphasCache(){
       
   // check if the alpha_s value is somehow reasonable
   debug["FillAlphasCache"]<<"Sanity check!"<<endl;
-  const double asNew = CalcReferenceAlphas();
-  if ( asNew < 0.01 || asNew > 0.5 ) {
-     warn["FillAlphasCache"]<<"Your alphas value seems to be unreasonably small/large."<<endl;
-     warn["FillAlphasCache"]<<"Your evolution code calculated alphas(Mz=91.18GeV) = "<<asNew<<endl;
-  }
-  debug["FillAlphasCache"]<<"Sanity check of alpha_s(MZ=91.18) = "<<asNew<<endl;
+  TestAlphas();
   
   // is there a need for a recalclation?
+  const double asNew = CalcReferenceAlphas();
   if ( asNew == fAlphasCached ){
      debug["FillAlphasCache"]<<"No need for a refilling of AlphasCache. asNew==fAlphasCached="<<asNew<<endl;
   } else {
@@ -1997,6 +1993,43 @@ double FastNLOReader::CalcChecksum(double mufac){
 //______________________________________________________________________________
 
 
+bool FastNLOReader::TestAlphas(){
+   const double as = CalcAlphas(91.18);
+   if ( as < 0.01 || as > 0.5 ) {
+      warn["TestAlphas"]<<"The alphas value, returned by the user class seems to be unreasonably small/large."<<endl;
+      warn["TestAlphas"]<<"The evolution code calculated alphas(Mz~91.18GeV) = "<<as<<endl;
+      return false;
+   }
+   debug["TestAlphas"]<<"Sanity check of alpha_s(MZ=91.18) = "<<as<<endl;
+   return true;
+}
+
+
+//______________________________________________________________________________
+
+
+bool FastNLOReader::TestXFX(){
+   vector<double> pdftest = GetXFX(1.e-2,10);
+   if ( pdftest.size() != 13) {
+      error["TestXFX"]<<"The pdf array must have the size of 13 flavors.\n";
+      return false;
+   }
+   // if ( pdftest[6] == 0. )printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
+   // double sum = 0;
+   // for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
+   // if ( sum== 0. ) printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in the pdf interface. Please check FastNLOUser::GetXFX().\n");
+   for ( int i = 0 ; i<13 ; i++ ){
+      if ( pdftest[i] > 1.e10 || ( pdftest[i] < 1.e-10 && pdftest[i] > 1.e-15 )) {
+	 warn["TestXFX"]<<"The pdf probability of the "<<i<<"'s flavor seeems to be unreasonably large/small (pdf="<<pdftest[i]<<").\n";
+      }
+   } 
+   return true;
+}
+
+//______________________________________________________________________________
+
+
+
 void FastNLOReader::FillPDFCache(double chksum){
    debug["FillPDFCache"]<<"Passed chksum="<<chksum<<". Do not recalculate checksum (which calls InitPDF()) if chksum!=0."<<endl;
    //
@@ -2024,27 +2057,9 @@ void FastNLOReader::FillPDFCache(double chksum){
       debug["FillPDFCache"]<<"Refilling PDF cache"<<endl;
       fPDFCached = PDFnew;
 
-      // check if the pdf is somehow reasonable
-      // vector<double> pdftest = GetXFX(1.e-2,10);
-      // if ( pdftest.size() != 13) {
-      //   printf("FastNLOReader. Error. The pdf array must have the size of 13 flavors. Exiting.\n");
-      //   exit(1);
-      // }
-  
-      // if ( pdftest[6] == 0. ) {
-      //   printf("FastNLOReader. Warning. There seems to be no gluon in the pdf.\n");
-      // }
-      // double sum = 0;
-      // for ( int i = 0 ; i<13 ; i++ ) sum+=fabs(pdftest[i]);
-      // if ( sum== 0. ) {
-      //   printf("FastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in your pdf interface. Please check FastNLOUser::GetXFX().\n");
-      //   exit(1);
-      // }
-      // for ( int i = 0 ; i<13 ; i++ ){
-      //   if ( pdftest[i] > 1.e30 || ( pdftest[i] < 1.e-10 && pdftest[i] != 0. )) {
-      //     printf("FastNLOReader. Warning. The pdf probability of your %d's flavor seeems to be unreasonably large/small (pdf=%8.2e).\n",i,pdftest[i]);
-      //   }
-      // }  
+      // check (or not) if the pdf is somehow reasonable
+      TestXFX();
+
       for ( unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++ ){
 	 if (  !BBlocksSMCalc.empty() ){
 	    for ( unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++ ){
