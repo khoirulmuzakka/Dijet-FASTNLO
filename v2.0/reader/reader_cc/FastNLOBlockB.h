@@ -136,46 +136,27 @@ public:
   
    void ResizeTable( vector<double >* v, int dim0 );
    void ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 );
-   void ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI );
-   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
    void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 );
    void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 );
-   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
    void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 );
-   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
-   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
    void ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
    void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
+
+   void ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI );
+   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
+   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
+   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
+   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
    void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
    template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false);
    int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<double > >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<vector<double > > >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<vector<vector<double > > > >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<vector<vector<vector<double > > > > >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table , bool nProcLast = false );
-   //    int ReadFlexibleVector( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table , bool nProcLast = false );
    
    template<typename T> void ResizeFlexibleVector(vector<T>* v, vector<T>* nom);
    void ResizeFlexibleVector(vector<double >* v, vector<double >*nom ){ v->resize(nom->size());};
-   //    void ResizeFlexibleVector(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, vector<vector<vector<vector<vector<vector<vector<double > > > > > > >*nom );
-   //    void ResizeFlexibleVector(vector<vector<vector<vector<vector<vector<double > > > > > >* v, vector<vector<vector<vector<vector<vector<double > > > > > >*nom );
-   //    void ResizeFlexibleVector(vector<vector<vector<vector<vector<double > > > > >* v, vector<vector<vector<vector<vector<double > > > > >*nom );
-   //    void ResizeFlexibleVector(vector<vector<vector<vector<double > > > >* v, vector<vector<vector<vector<double > > > >*nom );
-   //    void ResizeFlexibleVector(vector<vector<vector<double > > >* v, vector<vector<vector<double > > >*nom );
-   //    void ResizeFlexibleVector(vector<vector<double > >* v, vector<vector<double > >*nom );
-   //    void ResizeFlexibleVector(vector<double >* v, vector<double >*nom );
    
    template<typename T> int ReadTable( vector<T>* v, istream *table );
    int ReadTable( vector<double>* v, istream *table );
-   //    int ReadTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, istream *table );
-   //    int ReadTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, istream *table );
-   //    int ReadTable( vector<vector<vector<vector<vector<double > > > > >* v, istream *table );
-   //    int ReadTable( vector<vector<vector<vector<double > > > >* v, istream *table );
-   //    int ReadTable( vector<vector<vector<double > > >* v, istream *table );
-   //    int ReadTable( vector<vector<double > >* v, istream *table );
-   //    int ReadTable( vector<double >* v, istream *table );
    
    void StripWhitespace(string* s);
     

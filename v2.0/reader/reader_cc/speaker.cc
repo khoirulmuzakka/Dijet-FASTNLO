@@ -95,7 +95,7 @@ PrimalScream::PrimalScream(std::string classname){//,std::string prefix=""){
    warn.SetClassName(cn);
    error = speaker(" # ERROR! ",say::ERROR,true);
    error.SetClassName(cn);
-   debug["PrimalScream"]<<"Primal Scream initialized."<<std::endl;
+   //debug["PrimalScream"]<<"Primal Scream initialized."<<std::endl;
 }
 
 void PrimalScream::SetVerbosity(say::Verbosity volume){
