@@ -21,7 +21,7 @@ endif
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
-libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLOBlockB.cc Alphas.cc speaker.cc CRunDec.cpp
+libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLOBlockB.cc Alphas.cc speaker.cc CRunDec.cc
 
 #
 # Preprocessor flags
@@ -34,6 +34,7 @@ libfastnloreader_la_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
 libfastnloreader_la_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/../include
 # Debug flags
 #libfastnloreader_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir}  -I${builddir}/../include
+
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"

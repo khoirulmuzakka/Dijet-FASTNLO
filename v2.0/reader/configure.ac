@@ -143,7 +143,11 @@ AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 # Output
 AC_CONFIG_FILES([Makefile
                  reader_cc/Makefile
-                 reader_cc/main.cc
+                 reader_cc/include/Makefile
+                 reader_cc/include/fastnlo/Makefile
+                 reader_cc/lib/Makefile
+                 reader_cc/src/Makefile
+                 reader_cc/src/main.cc
                  reader_f/Makefile
                  reader_f/main.f
 	        ])
