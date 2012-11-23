@@ -7,13 +7,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "FastNLOBlockB.h"
-
-#include <iostream>
-#include <vector>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
+#include <vector>
+#include "fastnlo/FastNLOBlockB.h"
 
 using namespace std;
 

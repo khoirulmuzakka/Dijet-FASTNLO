@@ -42,9 +42,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
 #include <cmath>
-#include "CRunDec.h"
+#include <iostream>
+// KR Adapt to fastnlo environment
+//#include "CRunDec.h"
+#include "fastnlo/CRunDec.h"
 
 using namespace std;
 
@@ -262,7 +264,9 @@ double CRunDec::fRungeKuttaImpl(double &x, double y,double &htry, int nl,
                               double (*f)(CRunDec, double ,double, int)){
      // Precision
      double eps=1e-10;
-     double yerr,ytemp,htemp,hdid, hnext,yscal;
+     // KR: Remove unused variables
+     //     double yerr,ytemp,htemp,hdid, hnext,yscal;
+     double yerr,ytemp,htemp,hdid, hnext;
      double h=htry;
      double k1,k2,k3,k4,k5,k6;
      for(;;){
@@ -445,16 +449,21 @@ AsmMS CRunDec::AsmMSrunexact(double mMu, double AlphaS0, double Mu0,
        Erg.mMSexact=mMu;
        return Erg;
      }
-     double yerr0, yerr1,ytemp0,ytemp1,xnew,h;
+     // KR: Remove unused variables
+     //     double yerr0, yerr1,ytemp0,ytemp1,xnew,h;
+     double yerr0,ytemp0,xnew,h;
      float eps=1e-15;
      float errmax;
      double x0=log(Mu0);
      double y0=AlphaS0/Pi;
-     double x1=y0;
-     double y1=mMu;
+     // KR: Remove unused variables
+     //     double x1=y0;
+     //     double y1=mMu;
      double xEnd=log(MuEnd);
+     // KR: WARNING, h is not itialized here!
      double yscal0=abs(x0)+abs(h*y0);
-     double yscal1=abs(x1)+abs(h*y1);
+     // KR: Remove unused variables
+     //     double yscal1=abs(x1)+abs(h*y1);
      double (*falpha)(CRunDec, double ,double);
      double (*fmMS)(CRunDec, double ,double);
      
@@ -1289,7 +1298,9 @@ double CRunDec::AlL2AlH(double asl,double mu1,TriplenfMmu decpar[],double mu2,
          RETURN  
        }
      }
-     double erg1,erg2,x,y;
+     // KR: Remove unused variables
+     //     double erg1,erg2,x,y;
+     double erg1,erg2;
      int i;
      for(i=3-n+1;i<=3;i++){
        erg1= AlphasExact(asini, muini, decpar[i].muth,decpar[i].nf-1,nl);

@@ -1,11 +1,10 @@
 // Author: Daniel Britzger
 // DESY, 06/08/2012
 
-#include "speaker.h"
-#include <string>
 #include <iostream>
 #include <map>
-
+#include <string>
+#include "fastnlo/speaker.h"
 
 using namespace std;
 

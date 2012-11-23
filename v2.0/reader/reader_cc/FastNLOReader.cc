@@ -16,14 +16,13 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "FastNLOReader.h"
-
-#include <iostream>
-#include <vector>
+#include <cfloat>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
-#include <cfloat>
+#include <iostream>
+#include <vector>
+#include "fastnlo/FastNLOReader.h"
 
 using namespace std;
 

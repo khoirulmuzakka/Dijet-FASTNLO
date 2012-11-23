@@ -7,17 +7,17 @@
 //     D. Britzger, K. Rabbertz
 //
 //********************************************************************
-#include <iostream>
-#include <iomanip>
-#include <string>
+#include <cfloat>
 #include <cmath>
 #include <cstdlib>
-#include <cfloat>
-#include "Alphas.h"
-#include "FastNLOUser.h"
-#include "FastNLOAlphas.h"
-#include "FastNLOLHAPDF.h"
-#include "FastNLOCRunDec.h"
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include "fastnlo/Alphas.h"
+#include "fastnlo/FastNLOAlphas.h"
+#include "fastnlo/FastNLOCRunDec.h"
+#include "fastnlo/FastNLOLHAPDF.h"
+#include "fastnlo/FastNLOUser.h"
 
 // Function prototype for flexible-scale function 
 double Function_Mu(double s1, double s2 );
@@ -539,7 +539,7 @@ int fnlocppread(int argc, char** argv){
   fnloreader.SetLHAPDFFilename( PDFFile );
   fnloreader.SetLHAPDFMember( 0 );
   // To check the upper limit of the PDF member numbering do
-  int imaxpdf = fnloreader.GetNPDFMaxMember();
+  //  int imaxpdf = fnloreader.GetNPDFMaxMember();
   // Note: Usually there is a member no. 0 corresponding to the central result,
   //       so the total number of members (fnloreader.GetNPDFMembers()) is imaxpdf + 1
   //
@@ -612,7 +612,7 @@ int fnlocppread(int argc, char** argv){
   inpc1 = -1;
 
   // Run over all pre-defined scale settings xmur, xmuf
-  for (int iscls=0; iscls<nscls; iscls++){
+  for (unsigned int iscls=0; iscls<nscls; iscls++){
     // Set MuR and MuF scale factors
     bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
     if ( !lscvar ) {

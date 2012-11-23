@@ -1,8 +1,8 @@
-#include <iostream>
-#include "Alphas.h"
-#include <math.h>
 #include <cstdio>
-#include "speaker.h"
+#include <iostream>
+#include <math.h>
+#include "fastnlo/Alphas.h"
+#include "fastnlo/speaker.h"
 
 using namespace std;
 
