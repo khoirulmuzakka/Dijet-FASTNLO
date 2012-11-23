@@ -19,7 +19,7 @@ AM_INIT_AUTOMAKE([1.9 -Wall])
 #LT_PREREQ([1.5])
 #LT_INIT([dlopen])
 #
-#AC_CONFIG_SRCDIR([common/fnloTable.h])
+AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -27,6 +27,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PREFIX_DEFAULT(${HOME}/local)
 
 # Checks for programs.
+AC_PROG_AWK
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
@@ -36,28 +37,31 @@ AC_PROG_FC([gfortran g77])
 #  gfortran) AC_SUBST([HAVE_GFORTRAN], [yes])
 #  g77) AC_SUBST([HAVE_G77], [yes])
 #esac
+AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
-#AC_PROG_AWK
-#AC_PROG_INSTALL
-#AC_PROG_LN_S
-#AC_PROG_MAKE_SET
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+# AC_PROG_RANLIB
 
 # Checks for sources.
 
 # Checks for libraries.
 AC_F77_LIBRARY_LDFLAGS
 AC_CHECK_LIB([g2c], [getenv_])
-# FIXME: Replace `main' with a function in `-lLHAPDF' etc.
-#AC_CHECK_LIB([LHAPDF], [LHAPDF])
+AC_CHECK_LIB([LHAPDF], [alphas])
+AC_CHECK_LIB([fastnloreader], [libfastnloreader_la-FastNLOBlockB])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
+
+# Checks for header files.
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
 
 # Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([memset pow sqrt strstr])
 
 # Announce checks particular for fastNLO_reader
