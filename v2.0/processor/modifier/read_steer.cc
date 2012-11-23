@@ -377,7 +377,7 @@ bool read_steer::ParseString(string line)
 
    // parsing statements enclosed in '"' 
    if ( !fParseTableMode>0 && !fParseFieldMode )
-      value = ParseEnclosedString(line.c_str()); // old
+      value = ParseEnclosedString(line);//line.c_str()); // old
    else 
       while ( EnclosedStringToOneEntity(line) ); // new
 
@@ -594,8 +594,8 @@ int read_steer::ReplaceVariables(string& str) {
 
 string read_steer::ParseEnclosedString(const string str) const {
    vector<size_t> occ;
-   for ( char* pch=strchr(str.c_str(),'"');pch!=NULL;pch=strchr(pch+1,'"'))
-      occ.push_back(pch-str.c_str()+1);
+   for ( size_t found = str.find_first_of('"'); found!=string::npos; found = str.find_first_of('"',found+1))
+      occ.push_back(found+1);
    if ( occ.size()>0 && occ[0] > str.find(string(str_cmt)) ) {
       //cout<<"Return. '!' before enclosed string: \" in str="<<str<<endl;
       return string();
