@@ -1699,16 +1699,10 @@ void FastNLOReader::CalcAposterioriScaleVariation( ){
      int nxmax = B_LO()->GetNxmax(i);
      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
      for(int j=0;j<B_LO()->GetTotalScalenodes();j++){
-	int scalenode1 = j;
-	int scalenode2 = j;
-	if (BBlocksSMCalc[0][1]->NScaleDim>1){
-	   scalenode1 = j / B_LO()->Nscalenode[1];
-	   scalenode2 = j % B_LO()->Nscalenode[1];
-	}
-	double asnp1 = pow(B_LO()->AlphasTwoPi_v20[i][scalenode2],(n+1)/n);//as^n+1
+	double asnp1 = pow(B_LO()->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
 	for(int k=0;k<nxmax;k++){ 
 	   for(int l=0;l<B_LO()->NSubproc;l++){ 
-	      double clo = B_LO()->SigmaTilde[i][0][scalenode2][k][l] *  B_LO()->PdfLc[i][scalenode2][k][l] * unit;
+	      double clo = B_LO()->SigmaTilde[i][0][j][k][l] *  B_LO()->PdfLc[i][j][k][l] * unit;
 	      XS->at(i)	+=  asnp1 * clo * n * L * beta0;
 	   }
 	}
@@ -1780,15 +1774,9 @@ void FastNLOReader::CalcCrossSectionv20( FastNLOBlockB* B , bool IsLO ){
     int nxmax = B->GetNxmax(i);
     double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
     for(int j=0;j<B->GetTotalScalenodes();j++){
-      int scalenode1 = j;
-      int scalenode2 = j;
-      if (B->NScaleDim>1){          
-	scalenode1 = j / B->Nscalenode[1];
-	scalenode2 = j % B->Nscalenode[1];
-      }
       for(int k=0;k<nxmax;k++){ 
 	for(int l=0;l<B->NSubproc;l++){ 
-	  double xsci	= B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][scalenode2]  *  B->PdfLc[i][scalenode2][k][l] * unit;
+	  double xsci	= B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][j]  *  B->PdfLc[i][j][k][l] * unit;
 	  XS->at(i)	+=  xsci;
 	  B->fact[i]	+=  xsci;
 	}
@@ -1874,13 +1862,7 @@ void FastNLOReader::FillAlphasCacheInBlockBv20( FastNLOBlockB* B ){
 
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<B->GetTotalScalenodes();j++){
-      int scalenode1 = j;
-      int scalenode2 = j;
-      if (B->NScaleDim>1){          
-	scalenode1 = j / B->Nscalenode[1];
-	scalenode2 = j % B->Nscalenode[1];
-      }
-      double mur	= scalefac * B->ScaleNode[i][0][scaleVar][scalenode1];
+      double mur	= scalefac * B->ScaleNode[i][0][scaleVar][j];
       double as		= CalcAlphas(mur);
       B->AlphasTwoPi_v20[i][j] = pow( as/TWOPI , B->Npow );
     }
