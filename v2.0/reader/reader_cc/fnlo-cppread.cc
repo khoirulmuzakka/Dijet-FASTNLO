@@ -532,7 +532,7 @@ int fnlocppread(int argc, char** argv){
   // ---- Example code of a quick cross section
   //      calculation using the FastNLOAlphas interface
   FastNLOAlphas fnloreader( tablename );
-  fnloreader.SetUnits(kAbsoluteUnits);
+  //fnloreader.SetUnits(kAbsoluteUnits);
   fnloreader.PrintTableInfo();
   fnloreader.PrintFastNLOTableConstants(0);
   // Do not forget to define the PDF set and member!
