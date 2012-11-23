@@ -16,6 +16,7 @@ class fnloBlockA1 {
    int Write(ostream *table);
    bool IsCompatible(fnloBlockA1* other);
    int GetItabversion(){return Itabversion;}
+   void SetItabversion(int version){Itabversion = version;}
    string GetScenName(){return ScenName;}
    int GetNcontrib(){return Ncontrib;}
    int GetNmult(){return Nmult;}
