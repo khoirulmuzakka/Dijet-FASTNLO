@@ -9,6 +9,9 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
+# Subdirectories
+SUBDIRS = include
+
 #
 # Targets
 #
@@ -31,9 +34,9 @@ libfastnloreader_la_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
 #
 # C++ compiler flags
 #
-libfastnloreader_la_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/../include
+libfastnloreader_la_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/include
 # Debug flags
-#libfastnloreader_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir}  -I${builddir}/../include
+#libfastnloreader_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir}  -I${builddir}/include
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

@@ -9,6 +9,9 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
+# Subdirectories
+SUBDIRS = fastnloreader
+
 #
 # Targets
 #
@@ -32,18 +35,18 @@ fnlo_cppread_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
 #
 # C++ compiler flags
 #
-fnlo_cppread_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/../include
+fnlo_cppread_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/fastnloreader/include
 # Debug flags
-#fnlo_cppread_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir} -I${builddir}/../include
+#fnlo_cppread_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir} -I${builddir}/fastnloreader/include
 
 #
 # Linker flags
 #
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
-   fnlo_cppread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader -L${builddir}/../lib -lfastnloreader
+   fnlo_cppread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader -L${builddir}/fastnloreader -lfastnloreader
 else
-   fnlo_cppread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader -L${builddir}/../lib -lfastnloreader
+   fnlo_cppread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader -L${builddir}/fastnloreader -lfastnloreader
 endif
 
 # Files that are required to build the project but that can be

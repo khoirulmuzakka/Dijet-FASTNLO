@@ -9,22 +9,30 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# The main target: The Fortran table reader
+#
+# Targets
+#
+# The Fortran table reader example program
+#
 if HAVE_LHAPDFCONFIG
    bin_PROGRAMS = fnlo-fread
 endif
 
-# All source files which go into the main target (and have to be distributed)
+#
+# Sources
+#
+# All source files which go into the targets (and have to be distributed)
 fnlo_fread_SOURCES = main.f fnlo-fread.f fnx9999.f fnx9999.inc strings.inc \
 	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
 
+#
 # FORTRAN compiler flags to be used for the main target
-# top_srcdir for direct compilation before install; pkgincludedir for after install
+#
 #F77 = gfortran
-AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
-#AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
-#AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
-#AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
+fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-132 -I${includedir} -I${builddir}
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
 # Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
