@@ -26,20 +26,18 @@ fnlo_fread_SOURCES = main.f fnlo-fread.f fnx9999.f fnx9999.inc strings.inc \
 	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
 
 #
-# Preprocessor flags
+# FORTRAN compiler flags
 #
-fnlo_fread_CPPFLAGS = -I${srcdir}
+my_include_dirs = -I${srcdir} -I${top_builddir} -I${top_srcdir}
+fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-132 $(my_include_dirs)
+# Debug flags
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 $(my_include_dirs)
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic $(my_include_dirs)
+#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused $(my_include_dirs)
 
 #
-# FORTRAN compiler flags to be used for the main target
+# Linker flags
 #
-#F77 = gfortran
-fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-132 -I${srcdir}
-#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -I${srcdir}
-#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -I${srcdir}
-#fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused -I${srcdir}
-
-# Libraries to be linked to the main target
 # Require lhapdf, use lhapdf-config if possible
 if HAVE_LHAPDFCONFIG 
    fnlo_fread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`

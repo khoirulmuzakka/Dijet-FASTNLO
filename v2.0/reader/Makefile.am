@@ -6,12 +6,15 @@
 # Create separate distribution and installation package for fastNLO_reader 
 #
 # -----------------------------------------------------------------------------
-# Provide local m4 macros in dir m4, copy also system-wide macros
-ACLOCAL_AMFLAGS = -I m4 --install
-#
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
-#
+
+# Subdirectories
+SUBDIRS = reader_cc reader_f
+
+# Provide local m4 macros in dir m4, copy also system-wide macros
+ACLOCAL_AMFLAGS = -I m4 --install
+
 # Add subversion revision number, recipe from Autotools by J. Calcote 
 EXTRA_DIST = m4 SVNREV
 # This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
@@ -19,9 +22,7 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 # Don't put .svn subdirs into distribution package
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
-#
-SUBDIRS = reader_cc reader_f
-#
+
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"

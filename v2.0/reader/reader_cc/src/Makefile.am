@@ -30,14 +30,15 @@ fnlo_cppread_SOURCES = main.cc fnlo-cppread.cc
 #
 # Preprocessor flags
 #
-fnlo_cppread_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
+my_include_dirs = -I${srcdir}/fastnloreader/include -I${top_builddir}/fastnloreader/include -I${top_srcdir}/fastnloreader/include
+fnlo_cppread_CPPFLAGS = -I${LHAPDFINCLUDEPATH} -I${includedir} $(my_include_dirs)
 
 #
 # C++ compiler flags
 #
-fnlo_cppread_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/fastnloreader/include
+fnlo_cppread_CXXFLAGS = -g -O0 -Wall
 # Debug flags
-#fnlo_cppread_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir} -I${builddir}/fastnloreader/include
+#fnlo_cppread_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 
 #
 # Linker flags

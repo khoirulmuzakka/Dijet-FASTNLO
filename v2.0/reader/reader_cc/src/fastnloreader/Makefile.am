@@ -29,14 +29,15 @@ libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLOBlockB.cc Alphas.cc speake
 #
 # Preprocessor flags
 #
-libfastnloreader_la_CPPFLAGS = -I${LHAPDFINCLUDEPATH}
+my_include_dirs = -I${srcdir}/include -I${top_builddir}/include -I${top_srcdir}/include
+libfastnloreader_la_CPPFLAGS = -I${LHAPDFINCLUDEPATH} -I${includedir} $(my_include_dirs)
 
 #
 # C++ compiler flags
 #
-libfastnloreader_la_CXXFLAGS = -g -O0 -Wall -I${includedir} -I${builddir}/include
+libfastnloreader_la_CXXFLAGS = -g -O0 -Wall
 # Debug flags
-#libfastnloreader_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${includedir}  -I${builddir}/include
+#libfastnloreader_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
