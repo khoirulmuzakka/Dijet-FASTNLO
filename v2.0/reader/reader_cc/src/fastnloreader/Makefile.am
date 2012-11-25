@@ -30,7 +30,7 @@ libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLOBlockB.cc Alphas.cc speake
 # Preprocessor flags
 #
 my_include_dirs = -I${srcdir}/include -I${top_builddir}/include -I${top_srcdir}/include
-libfastnloreader_la_CPPFLAGS = -I${LHAPDFINCLUDEPATH} -I${includedir} $(my_include_dirs)
+libfastnloreader_la_CPPFLAGS = -I${includedir} $(my_include_dirs)
 
 #
 # C++ compiler flags
