@@ -37,7 +37,7 @@
 *     
 ***********************************************************************
 
-      SUBROUTINE FX9999CC(XMUR,XMUF,XSECT,XSUNCOR,XSCOR)
+      SUBROUTINE FX9999CC(XMUR,XMUF,XSECT,XSCALE,XSUNCOR,XSCOR)
 ***********************************************************************
 *     
 *     fastNLO user code v2 - main routine 
@@ -55,6 +55,7 @@
 *     Output:
 *     -------
 *     XSECT(NOBSBIN)     array of cross sections 
+*     XSCALE(NOBSBIN)    array of effective scale values 
 *     XSUNCOR(NOBSBIN,2) quadr. summed uncorr. uncertainty,
 *     >                  lower (.,1), upper (.,2)
 *     XSCOR(NOBSBIN,2)   quadr. summed corr. uncertainty,
@@ -76,14 +77,16 @@
       DO I=1,MXOBSBIN
          XSECT(I)      = 0D0
          XSNORM(I)     = 0D0
+         XSCALE(I)     = 0D0
          XSUNCOR(I,1)  = 0D0
          XSUNCOR(I,2)  = 0D0
          XSCOR(I,1)    = 0D0
          XSCOR(I,2)    = 0D0
-*---  Also reset result array (in common block)
+*---  Also reset result arrays (in common block)
          DO J=0,MXSUBPROC
             DO K=0,MXCTRB
                RESULT(I,J,K) = 0D0
+               RESMUR(I,J,K) = 0D0
             ENDDO
          ENDDO
       ENDDO
@@ -116,11 +119,18 @@
 C---  DO K=1,1 ! Test - only gg 
 C---  DO K=2,2 ! Test - only g (DIS)
 C---  DO K=2,5 ! Test - only qq
-                     XSECT(J) = XSECT(J) + RESULT(J,K,I)
+                     XSECT(J)  = XSECT(J)  + RESULT(J,K,I)
+                     XSCALE(J) = XSCALE(J) + RESMUR(J,K,I)
                   ENDDO
                ENDDO
             ENDIF
          ENDDO
+         
+*---  Derive mur averages
+         DO J=1,NOBSBIN
+            XSCALE(J) = XSCALE(J) / XSECT(J)
+         ENDDO
+
 *---  Either multiply x section by multiplicative correction or ...
          I = INPC1
          IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
@@ -699,7 +709,8 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
      >     ISTORE
       DOUBLE PRECISION XMUR, XMUF, FACTOR, MUR, FNALPHAS, SCF
       DOUBLE PRECISION AS, ASPOW
-      DOUBLE PRECISION MURCACHE(MXOBSBIN,MXSCALENODE)
+c      DOUBLE PRECISION MURCACHE(MXOBSBIN,MXSCALENODE)
+      DOUBLE PRECISION SIGMAWGT
 
 *---  Set pointers to contribution in table and to scale variation
       IC = ICONTRPOINTER(ICTRB)
@@ -726,26 +737,31 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
 *---  If regular contribution (i.e. no a posteriori scale variation)
 *---  then also store MuR in cache for testing.
-            IF (IADDPOW.EQ.0) THEN
-               MURCACHE(J,K) = MUR
+c            IF (IADDPOW.EQ.0) THEN
+c               MURCACHE(J,K) = MUR
 *---  For testing retrieve previously (Check! TBD) cached MuR values
-ckr            ELSE
-ckr               MUR = MURCACHE(J,K)
-            ENDIF
+c            ELSE
+c               MUR = MURCACHE(J,K)
+c            ENDIF
 *---  Get alpha_s
             AS =  FNALPHAS(MUR)
             ASPOW = AS**DBLE(NPOW(IC)+IADDPOW)
             DO L=1,NXMAX
                DO M=1,NSUBPROC(IC)
                   IF (PREFTAB.EQ.0) THEN
-                     RESULT(J,M,ISTORE) = RESULT(J,M,ISTORE) + 
-     >                    SIGMATILDE(IC,J,1,IS,K,L,M)
+                     SIGMAWGT = SIGMATILDE(IC,J,1,IS,K,L,M)
      >                    * ASPOW
      >                    * PDF(J,K,L,M)
      >                    * FACTOR
+                     RESULT(J,M,ISTORE) = RESULT(J,M,ISTORE)
+     >                    + SIGMAWGT
+                     RESMUR(J,M,ISTORE) = RESMUR(J,M,ISTORE)
+     >                    + SIGMAWGT * MUR
                   ELSE          ! Reference Table
-                     RESULT(J,M,ISTORE) = RESULT(J,M,ISTORE) + 
-     >                    SIGMATILDE(IC,J,1,IS,K,L,M)
+                     RESULT(J,M,ISTORE) = RESULT(J,M,ISTORE)
+     >                    + SIGMATILDE(IC,J,1,IS,K,L,M)
+                     RESMUR(J,M,ISTORE) = RESMUR(J,M,ISTORE)
+     >                    + SIGMATILDE(IC,J,1,IS,K,L,M) * MUR
                   ENDIF
                ENDDO
             ENDDO
