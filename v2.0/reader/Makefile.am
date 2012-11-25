@@ -23,6 +23,10 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
+# Required for Doxygen
+include aminclude.am
+EXTRA_DIST += $(DX_CONFIG) doc/doxygen
+
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"

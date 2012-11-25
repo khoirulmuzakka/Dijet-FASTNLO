@@ -1,12 +1,12 @@
-//********************************************************************
-//     
-//     fastNLO_reader: FNLOCPPREAD
-//     Program to read fastNLO v2 tables and derive
-//     QCD cross sections using PDFs e.g. from LHAPDF
-//     
-//     D. Britzger, K. Rabbertz
-//
-//********************************************************************
+///@file********************************************************************
+///     
+///     fastNLO_reader: FNLOCPPREAD
+///     Program to read fastNLO v2 tables and derive
+///     QCD cross sections using PDFs e.g. from LHAPDF
+///     
+///     D. Britzger, K. Rabbertz
+///
+///********************************************************************
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -19,11 +19,10 @@
 #include "fastnlo/FastNLOLHAPDF.h"
 #include "fastnlo/FastNLOUser.h"
 
-// Function prototype for flexible-scale function 
+/// Function prototype for flexible-scale function 
 double Function_Mu(double s1, double s2 );
 
 //__________________________________________________________________________________________________________________________________
-
 int fnlocppread(int argc, char** argv){
 
   // namespaces

@@ -44,6 +44,17 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 
+# Use Doxygen if available
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(OFF)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(OFF)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN(fastNLO_reader, doxygen.cfg, doc/doxygen)
+
 # Checks for sources.
 
 # Checks for libraries.
