@@ -44,10 +44,11 @@ fnlo_cppread_CXXFLAGS = -g -O0 -Wall
 # Linker flags
 #
 # Require lhapdf, use lhapdf-config if possible
+my_lib_dirs = -L${srcdir}/fastnloreader -lfastnloreader
 if HAVE_LHAPDFCONFIG 
-   fnlo_cppread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader -L${builddir}/fastnloreader -lfastnloreader
+   fnlo_cppread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader $(my_lib_dirs)
 else
-   fnlo_cppread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader -L${builddir}/fastnloreader -lfastnloreader
+   fnlo_cppread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader $(my_lib_dirs)
 endif
 
 # Files that are required to build the project but that can be
