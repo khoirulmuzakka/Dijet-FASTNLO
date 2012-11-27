@@ -13,7 +13,7 @@
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
       CHARACTER*2  CH2TMP
-      CHARACTER*12 CHTMP3
+      CHARACTER*14 CHTMP3
       CHARACTER*16 CHTMP1
       CHARACTER*18 CHTMP2
       CHARACTER*255 FILENAME,PDFSET,CHRES,CHFRM
@@ -321,11 +321,11 @@ C---  ENDIF
      >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E8.2))"
          IF (LLO) THEN
             CHTMP3  = SCALEDESCRIPT(ILO,1,1)
-            CHTMP3  = "<"//CHTMP3(1:10)//">"
+            CHTMP3  = "<"//CHTMP3(1:12)//">"
             CHRES = CHRES(1:LEN_TRIM(CHRES))//
      >           CHTMP3//"  "
             CHRES = CHRES(1:LEN_TRIM(CHRES))//"  LO cross section"
-            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//"(X,G10.4),3X,(X,E18.11)"
+            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//"(X,G10.4),5X,(X,E18.11)"
             IF (LNLO) THEN
                CHRES = CHRES(1:LEN_TRIM(CHRES))/
      >              /"   NLO cross section"

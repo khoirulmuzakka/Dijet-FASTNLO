@@ -108,6 +108,7 @@ public:
   vector < double > GetCrossSection();
   vector < double > GetReferenceCrossSection();
   vector < double > GetKFactors();
+  vector < double > GetQScales();
 
 
   // ---- Getters for FastNLOReader member variables ---- //
@@ -279,6 +280,8 @@ protected:
   vector < double > XSection_LO;
   vector < double > XSection;
   vector < double > kFactor;
+  vector < double > QScale_LO;
+  vector < double > QScale;
 
   // ----  reference tables ---- //
   vector < double > XSectionRef;

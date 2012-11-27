@@ -1502,6 +1502,14 @@ vector < double > FastNLOReader::GetKFactors(){
    return kFactor;
 }
 
+//______________________________________________________________________________
+
+vector < double > FastNLOReader::GetQScales(){
+   // Get XSection weighted Q scale in bin
+   if (XSection.empty()) CalcCrossSection();
+   return QScale;
+}
+
 
 //______________________________________________________________________________
 
@@ -1624,6 +1632,10 @@ void FastNLOReader::CalcCrossSection( ){
   XSection.resize(NObsBin);
   kFactor.clear();
   kFactor.resize(NObsBin);
+  QScale_LO.clear();
+  QScale.clear();
+  QScale_LO.resize(NObsBin);
+  QScale.resize(NObsBin);
 
   // handle alpha_s and PDF Cache
   bool CacheOK = PrepareCache();
@@ -1682,6 +1694,13 @@ void FastNLOReader::CalcCrossSection( ){
   debug["CalcCrossSection"]<<"Calculate k-factors: xs/xs_LO"<<endl;
   for(int i=0;i<NObsBin;i++){
      kFactor[i]	= XSection[i] / XSection_LO[i];
+  }
+
+  // ---- Q-scale calculation ---- //
+  debug["CalcCrossSection"]<<"Calculate Q-scales: xsQ/xs"<<endl;
+  for(int i=0;i<NObsBin;i++){
+     QScale_LO[i] = QScale_LO[i]/XSection_LO[i];
+     QScale[i]    = QScale[i]/XSection[i];
   }
 }
 
@@ -1768,6 +1787,7 @@ void FastNLOReader::CalcCrossSectionv20( FastNLOBlockB* B , bool IsLO ){
    
   int scaleVar		= B->Npow == ILOord ? 0 : fScalevar;
   vector<double>* XS	= IsLO ? &XSection_LO : &XSection;
+  vector<double>* QS	= IsLO ? &QScale_LO : &QScale;
   B->fact.resize(NObsBin);
   for(int i=0;i<NObsBin;i++){
     B->fact[i] = 0;
@@ -1776,9 +1796,13 @@ void FastNLOReader::CalcCrossSectionv20( FastNLOBlockB* B , bool IsLO ){
     for(int j=0;j<B->GetTotalScalenodes();j++){
       for(int k=0;k<nxmax;k++){ 
 	for(int l=0;l<B->NSubproc;l++){ 
-	  double xsci	= B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][j]  *  B->PdfLc[i][j][k][l] * unit;
-	  XS->at(i)	+=  xsci;
-	  B->fact[i]	+=  xsci;
+	  double xsci	  = B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][j]  *  B->PdfLc[i][j][k][l] * unit;
+	  double scalefac = fScaleFacMuR/B->ScaleFac[0][scaleVar];
+	  double mur	  = scalefac * B->ScaleNode[i][0][scaleVar][j];
+	  //	  cout << "scalefac = " << scalefac << ", mur = " << mur << endl;
+	  XS->at(i)	 +=  xsci;
+	  B->fact[i]	 +=  xsci;
+	  QS->at(i)	 +=  xsci*mur;
 	}
       }
     }

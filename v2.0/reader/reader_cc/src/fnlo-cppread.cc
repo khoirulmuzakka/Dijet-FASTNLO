@@ -631,6 +631,7 @@ int fnlocppread(int argc, char** argv){
     // Get results
     vector < double > xsnlo = fnloreader.GetCrossSection();
     vector < double > kfac  = fnloreader.GetKFactors();
+    vector < double > qscl  = fnloreader.GetQScales();
     vector < double > xslo  = xsnlo;
     for (unsigned int i=0;i<xslo.size();i++){
       if ( abs(kfac[i]) > DBL_MIN ){
@@ -670,8 +671,8 @@ int fnlocppread(int argc, char** argv){
       if ( inpc1>-1 ){
 	header2 += "     K NPC";
       }
-      printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
-	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+      printf("%s [ %-12s ] %s [  %-12s  ]  <%-12.12s> %s\n",
+	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
       cout << SSEP << endl;
       for ( unsigned int i=0; i<xslo.size(); i++ ){ 
 	for ( int j=0; j<NDim; j++ ){ 
@@ -684,21 +685,21 @@ int fnlocppread(int argc, char** argv){
 	  }
 	}
 	if ( ithc2<0 && inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i]);
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
 	} else if ( inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i]);
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i]);
 	} else if ( ithc2<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc[i]);
 	} else {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
 		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
+		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
 	}
 	printf("\n");
       }
