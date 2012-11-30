@@ -166,9 +166,9 @@ void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
 
 
 void FastNLOLHAPDF::SetLHAPDFMember( int set ) {
+   fiPDFMember = set;
    if ( fchksum == CalcChecksum(1.) ){ // nothin has changed? we set only the pdfmember
       debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
-      fiPDFMember = set;
       LHAPDF::initPDF(fiPDFMember);
       fchksum = CalcChecksum(1.);
    }
