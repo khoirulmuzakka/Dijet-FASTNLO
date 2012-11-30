@@ -924,6 +924,7 @@ if ( $mode == 0 || $mode == 1 ) {
 
 #
 # 4a) Install lhpdf for Nlojet++, only for fastNLO version 2
+#     (This is used within fastNLO v2 reference jobs via the pdf-cteq6.h include file)
 #
     if ( ($vers eq "2") && ! $ENV{LHPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
@@ -970,6 +971,7 @@ if ( $mode == 0 || $mode == 1 ) {
 
 #
 # 4b) Install znpdf for Nlojet++, only for fastNLO version 2
+#     (NLOJet++ and fastNLO v2 compile and run without this. Drop ???)
 #
     if ( ($vers eq "2") && ! $ENV{ZNPDF} ) {
 	$date = `date +%d%m%Y_%H%M%S`;
