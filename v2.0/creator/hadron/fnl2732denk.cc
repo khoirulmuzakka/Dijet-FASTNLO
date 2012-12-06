@@ -1,8 +1,8 @@
 //
-// fastNLO v2 creator code for fnl2732numb:
+// fastNLO v2 creator code for fnl2732denk:
 //     CMS LHC 3-jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
-//     (numerator)
+//     (denominator)
 //
 // ============== fastNLO user: ===================================
 // To create your own scenario, it is recommended to take
@@ -133,8 +133,8 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
   // --- fastNLO user: select the number of jets of the LO process for your observable,
   //                   e.g. 2 for incl. jets, 3 for 3-jet mass
   //nj = 1U;
-  //nj = 2U;
-  nj = 3U;
+  nj = 2U;
+  //nj = 3U;
 
   // --- number of the up and down type flavours (don't touch)
   nu = 2U;
@@ -217,7 +217,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   // largest |(pseudo-)rapidity| for jets to be considered
   const double yjmax  = 5.0;
   // lowest pT for jets to be considered
-  const double ptjmin = 100.;
+  const double ptjmin = 150.;
 
   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -240,8 +240,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     }
   }
 
-  // Numerator of 3-jet ratio requires at least 3 jets
-  if (njet > 2) {
+  // Denominator of 3-jet ratio requires at least 2 jets
+  if (njet > 1) {
 
     // --- declare and initialize additional cut variables
     // highest (pseudo-)rapidity for central jets to be considered
@@ -249,44 +249,37 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     // minimal <pT_1,2> for event to be counted
     const double pTxmin = A2->LoBin[0][0];
     // minimum pT fraction of leading jet required for 3rd jet
-    const double pTrelmin = 0.00;
+    //    const double pTrelmin = 0.25;
 
     // Derive leading dijet and 3-jet quantities
     // Maximal (pseudo-)rapidity of two leading jets
     double yjjmax = max(abs(pj[1].rapidity()),abs(pj[2].rapidity()));
     // Average pT of two leading jets
     double pT12ave = (pj[1].perp()+pj[2].perp())/2.;
-    // pT fraction of 3rd jet inside yjcmax
-    double pTrel = -1.;
-    if (abs(pj[3].rapidity()) < yjcmax) {
-      pTrel = pj[3].perp()/pj[1].perp();
-    } else if (njet > 3 && abs(pj[4].rapidity()) < yjcmax) {
-      pTrel = pj[4].perp()/pj[1].perp();
-    }
 
     // --- give some debug output before further selection
     if ( doDebug ) {
       cout << "----------------------------------------------------" << endl;
-      cout << "Final selection cuts: yjcmax, pTxmin, pTrelmin: " << yjcmax << ", " << pTxmin << ", " << pTrelmin <<endl;
-      cout << "Final selection obs.: yjjmax, pT12ave, pTrel: " << yjjmax << ", " << pT12ave << ", " << pTrel << endl;
+      cout << "Final selection cuts: yjcmax, pTxmin: " << yjcmax << ", " << pTxmin << endl;
+      cout << "Final selection obs.: yjjmax, pT12ave: " << yjjmax << ", " << pT12ave << endl;
     }
 
     // --- Further phase space cuts?
     // Check that yjjmax < yjcmax
-    // Reject event if the leading jets are non-central or if 3rd jet pT fraction is too small
-    if ( pTxmin <= pT12ave && yjjmax < yjcmax && pTrelmin <= pTrel ) {
+    // Reject event if the leading jets are non-central
+    if ( pTxmin <= pT12ave && yjjmax < yjcmax ) {
 
       // --- event accepted
       if ( doDebug ) {
-	cout << "nj, njet, yjjmax, pT12ave, pTrel: " << nj << ", " << njet << ", " << yjjmax << ", " << pT12ave << ", " << pTrel << endl;
+	cout << "nj, njet, yjjmax, pT12ave: " << nj << ", " << njet << ", " << yjjmax << ", " << pT12ave << endl;
 	cout << "Event/jet accepted!" << endl;
 	cout << "==================== End of event ====================" << endl;
       }
 
-      // --- set the renormalization and factorization scale to average dijet pT
-      double mu = pT12ave;
+      // --- set the renormalization and factorization scale to pT max
+      double mu = pj[1].perp();
 
-      // --- identify bin number (dim1,dim2) here (mult = 3+,pT12ave)
+      // --- identify bin number (dim1,dim2) here (mult = 2+,pT12ave)
       // KR: Normalize to bin width in pT, but not |y| or multiplicity
       int obsbin = -1;
       for (int j = 0; j < A2->GetNObsBin(); j++) {
@@ -326,17 +319,17 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set the scenario name (no white space)
-  A1->SetScenName("fnl2732numb");
+  A1->SetScenName("fnl2732denk");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
   // --- fastNLO user: set the cross section units in barn (negative power of ten)
   A2->SetIpublunits(12);
   // --- fastNLO user: write up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[fb_GeV]");
+  A2->ScDescript.push_back("dsigma-jet2+_d<pT_1,2>_[fb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
   A2->ScDescript.push_back("E_cms=7_TeV");
-  A2->ScDescript.push_back("3-Jet_Ratio_Numerator");
+  A2->ScDescript.push_back("3-Jet_Ratio_Denominator");
   A2->ScDescript.push_back("anti-kT_R=0.7");
   A2->ScDescript.push_back("CMS-PAS-QCD-11-003");
   A2->ScDescript.push_back("provided by:");
@@ -360,9 +353,9 @@ void UserHHC::inittable(){
 
   // --- fastNLO user: define the binning
   const int ndim2bins = 1;
-  const double dim2bins[ndim2bins+1] = { 2.5, 3.5 };
+  const double dim2bins[ndim2bins+1] = { 1.5, 2.5 };
 
-  const int ndim1bins[ndim2bins] = { 40 };
+  const int ndim1bins[ndim2bins] = { 39 };
 
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -376,8 +369,8 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim0[41] = {
-    125. ,  150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
+  const double dim0[40] = {
+    150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
     390. ,  420.,  450.,  480.,  510.,  540.,  570.,  600.,  640.,  680.,
     720. ,  760.,  800.,  850.,  900.,  950., 1000., 1060., 1120., 1180.,
     1250., 1320., 1390., 1460., 1530., 1600., 1680., 1760., 1840., 1920.,
@@ -591,7 +584,7 @@ void UserHHC::inittable(){
   B->ScaleDescript.resize(B->NScaleDim);
 
   // --- fastNLO user: give the defined process scale a name and units
-  B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
+  B->ScaleDescript[0].push_back("pT_max_[GeV]");
   //B->Nscalenode.push_back(4); // number of scale nodes for pT
   B->Nscalenode.push_back(6); // number of scale nodes for pT
 

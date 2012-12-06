@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl2732numb:
+// fastNLO v2 creator code for fnl2732numa:
 //     CMS LHC 3-jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //     (numerator)
@@ -169,7 +169,8 @@ struct fNLOSelector {
   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
-// --- fastNLO user: modify the jet sorting in userfunc (default = descending in jet pt)
+// --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
+//                   (the return value must be true for jets to be UNselected)
 struct fNLOSorter {
   bool operator() (const lorentzvector<double> &a, const lorentzvector<double> &b) {return (a.perp() > b.perp());};
 };
@@ -217,7 +218,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   // largest |(pseudo-)rapidity| for jets to be considered
   const double yjmax  = 5.0;
   // lowest pT for jets to be considered
-  const double ptjmin = 100.;
+  const double ptjmin = 150.;
 
   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -308,7 +309,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	}
       } // --- end: fill fastNLO array
     } // --- end: event selection cuts
-  } // --- end: 2+ jet event selection
+  } // --- end: 3+ jet event selection
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
@@ -326,7 +327,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set the scenario name (no white space)
-  A1->SetScenName("fnl2732numb");
+  A1->SetScenName("fnl2732numa");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
@@ -362,7 +363,7 @@ void UserHHC::inittable(){
   const int ndim2bins = 1;
   const double dim2bins[ndim2bins+1] = { 2.5, 3.5 };
 
-  const int ndim1bins[ndim2bins] = { 40 };
+  const int ndim1bins[ndim2bins] = { 39 };
 
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -376,8 +377,8 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim0[41] = {
-    125. ,  150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
+  const double dim0[40] = {
+    150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
     390. ,  420.,  450.,  480.,  510.,  540.,  570.,  600.,  640.,  680.,
     720. ,  760.,  800.,  850.,  900.,  950., 1000., 1060., 1120., 1180.,
     1250., 1320., 1390., 1460., 1530., 1600., 1680., 1760., 1840., 1920.,
@@ -699,7 +700,6 @@ void UserHHC::writetable(){
     table->WriteBlockBDividebyN(i);
   }
   table->CloseFileWrite();
-
 }
 
 void UserHHC::end_of_event(){
