@@ -1,6 +1,6 @@
 //
-// fastNLO v2 creator code for fnl2622f:
-//     CMS LHC Dijet Chi Scenario, E_cms = 7 TeV
+// fastNLO v2 creator code for fnl3622g:
+//     CMS LHC Dijet Chi Scenario, E_cms = 8 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
 //
@@ -150,8 +150,8 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
   //s =   7617600.; // LHC HIpp base Run 2760 GeV
-  s =  49000000.; // LHC First Run     7000 GeV
-  //s =  64000000.; // LHC Second Run    8000 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
+  s =  64000000.; // LHC Second Run    8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
   //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -329,7 +329,7 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set the scenario name (no white space)
-  A1->SetScenName("fnl2622f");
+  A1->SetScenName("fnl3622g");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
@@ -338,10 +338,10 @@ void UserHHC::inittable(){
   // --- fastNLO user: write up to 20 strings to describe the scenario
   A2->ScDescript.push_back("d2sigma-dijet_dChidMjj_[pb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("E_cms=7_TeV");
+  A2->ScDescript.push_back("E_cms=8_TeV");
   A2->ScDescript.push_back("Dijet_Chi");
   A2->ScDescript.push_back("anti-kT_R=0.5");
-  A2->ScDescript.push_back("CMS-PAPER-EXO-11-017, arXiv:1202.5535, J. High Energy Phys. 05 (2012) 055.");
+  A2->ScDescript.push_back("CMS-PAPER-EXO-12-050");
   A2->ScDescript.push_back("provided by:");
   A2->ScDescript.push_back("fastNLO_2.1.0");
   A2->ScDescript.push_back("If you use this table, please cite:");
@@ -362,11 +362,11 @@ void UserHHC::inittable(){
   bound.resize(2);
 
   // --- fastNLO user: define the binning
-  const int ndim2bins = 9;
-  const double dim2bins[ndim2bins+1] = { 400.,  600.,  800., 1000., 1200.,
-					 1500., 1900., 2400., 3000., 4000. };
+  const int ndim2bins = 7;
+  const double dim2bins[ndim2bins+1] = { 1500., 1900., 2400., 3000.,
+					 3600., 4000., 4200., 8000. };
 
-  const int ndim1bins[ndim2bins] = { 12, 12, 12, 12, 12, 12, 12, 12, 12 };
+  const int ndim1bins[ndim2bins] = { 12, 12, 12, 12, 12, 12, 12 };
 
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;

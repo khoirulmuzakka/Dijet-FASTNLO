@@ -249,7 +249,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
     // minimal <pT_1,2> for event to be counted
     const double pTxmin = A2->LoBin[0][0];
     // minimum pT fraction of leading jet required for 3rd jet
-    //    const double pTrelmin = 0.25;
+    //    const double pTrelmin = 0.00;
 
     // Derive leading dijet and 3-jet quantities
     // Maximal (pseudo-)rapidity of two leading jets
@@ -578,7 +578,7 @@ void UserHHC::inittable(){
   }
 
   B->NScales = 2;  // two scales: mur and muf
-  B->NScaleDim = 1; // one variable used in scales: jet pT
+  B->NScaleDim = 1; // one variable used in scales
   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0
   B->ScaleDescript.resize(B->NScaleDim);
@@ -692,7 +692,6 @@ void UserHHC::writetable(){
     table->WriteBlockBDividebyN(i);
   }
   table->CloseFileWrite();
-
 }
 
 void UserHHC::end_of_event(){

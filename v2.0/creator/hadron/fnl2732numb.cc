@@ -585,7 +585,7 @@ void UserHHC::inittable(){
   }
 
   B->NScales = 2;  // two scales: mur and muf
-  B->NScaleDim = 1; // one variable used in scales: jet pT
+  B->NScaleDim = 1; // one variable used in scales
   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0
   B->ScaleDescript.resize(B->NScaleDim);
@@ -699,7 +699,6 @@ void UserHHC::writetable(){
     table->WriteBlockBDividebyN(i);
   }
   table->CloseFileWrite();
-
 }
 
 void UserHHC::end_of_event(){

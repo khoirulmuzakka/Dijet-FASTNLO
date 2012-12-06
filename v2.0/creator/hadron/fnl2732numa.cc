@@ -169,8 +169,7 @@ struct fNLOSelector {
   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
-// --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
-//                   (the return value must be true for jets to be UNselected)
+// --- fastNLO user: modify the jet sorting in userfunc (default = descending in jet pt)
 struct fNLOSorter {
   bool operator() (const lorentzvector<double> &a, const lorentzvector<double> &b) {return (a.perp() > b.perp());};
 };
@@ -586,7 +585,7 @@ void UserHHC::inittable(){
   }
 
   B->NScales = 2;  // two scales: mur and muf
-  B->NScaleDim = 1; // one variable used in scales: jet pT
+  B->NScaleDim = 1; // one variable used in scales
   B->Iscale.push_back(0);  // mur=mur(pT), pT = index 0
   B->Iscale.push_back(0);  // muf=muf(pT), pT = index 0
   B->ScaleDescript.resize(B->NScaleDim);
