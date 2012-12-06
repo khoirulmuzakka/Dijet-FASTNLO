@@ -24,7 +24,7 @@ endif
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
-libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLOBlockB.cc Alphas.cc speaker.cc CRunDec.cc
+libfastnloreader_la_SOURCES = FastNLOReader.cc FastNLODiffReader.cc FastNLOBlockB.cc Alphas.cc speaker.cc CRunDec.cc
 
 #
 # Preprocessor flags
