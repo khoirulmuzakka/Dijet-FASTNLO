@@ -61,7 +61,7 @@ C... Scale is given by MSTP(32)
 
 ckr      FUNCTION PYALPS(Q2)
       FUNCTION PYALPS(MUR,ZMASS,LAM5,MSTU112,NLOOP)
- 
+
 C...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       IMPLICIT INTEGER(I-N)
@@ -88,13 +88,13 @@ ckr Initialize pi in double precision at first call
       DOUBLE PRECISION PARU1
       SAVE IFIRST,PARU1,PARU2
       DATA IFIRST,PARU1,PARU2/0,0D0,0D0/
-      
+
       INTEGER MSTU111,MSTU112,MSTU113,MSTU114,MSTU115,MSTU118
       DOUBLE PRECISION PARU111,PARU112,PARU114,PARU115,PARU117,PARU118
       DOUBLE PRECISION PMAS(6,1)
       DATA MSTU113,MSTU114,MSTU115/3,5,0/
       DATA PARU111,PARU113,PARU114,PARU115/0.2D0,1.D0,4.D0,10.D0/
-      DATA (PMAS(I,1),I=1,6)/2*0.33D0,0.5D0,1.5D0,4.8D0,175D0/    
+      DATA (PMAS(I,1),I=1,6)/2*0.33D0,0.5D0,1.5D0,4.8D0,175D0/
 
       IF (IFIRST.EQ.0) THEN
          IFIRST = 1
@@ -102,7 +102,7 @@ ckr Initialize pi in double precision at first call
          PARU2 = 2D0 * PARU1
       ENDIF
       Q2 = MUR*MUR
-      PARU112 = LAM5 
+      PARU112 = LAM5
       MSTU111 = NLOOP
 ckr Avoid overwriting input parameter
 ckr      MSTU112 = NF
@@ -118,7 +118,7 @@ C...Constant alpha_strong trivial. Pick artificial Lambda.
          PARU118=PARU111
          RETURN
       ENDIF
- 
+
 C...Find effective Q2, number of flavours and Lambda.
       Q2EFF=Q2
       IF(MSTU115.GE.2) Q2EFF=MAX(Q2,PARU114)
@@ -146,7 +146,7 @@ ckr      NF=MSTU112
       ENDIF
       IF(MSTU115.EQ.1) Q2EFF=Q2EFF+ALAM2
       PARU117=SQRT(ALAM2)
- 
+
 C...Evaluate first or second order alpha_strong.
       B0=(33D0-2D0*NF)/6D0
       ALGQ=LOG(MAX(1.0001D0,Q2EFF/ALAM2))
@@ -159,6 +159,6 @@ C...Evaluate first or second order alpha_strong.
       ENDIF
       MSTU118=NF
       PARU118=PYALPS
-      
+
       RETURN
       END

@@ -52,5 +52,5 @@
       WRITE(*,*)CSEPS
 
       CALL ALLUNC
-      
+
       END

@@ -189,7 +189,7 @@ fi
 AM_CONDITIONAL(HAVE_CERNLIB, test "x$CERNLIBLIBPATH" != "x")
 AM_CONDITIONAL(HAVE_CERNLIBCONFIG, test "x$CERNLIBCMD" != "x")
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
+# Add subversion revision number, recipe from Autotools by J. Calcote
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
 if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];

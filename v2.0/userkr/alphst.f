@@ -18,18 +18,18 @@
 * Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
-      
+
       DOUBLE PRECISION MUR,ZMASS,ALPSMZ
       INTEGER NF,NLOOP
-      
+
       DOUBLE PRECISION BETA
 
 *---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
-      
+
       DOUBLE PRECISION BPI(0:2),LFAC,LSCALE,PI
-      
+
       LOGICAL FIRST
       SAVE FIRST
       DATA FIRST/.TRUE./
@@ -49,7 +49,7 @@
       ELSEIF (NLOOP.EQ.2) THEN
          LFAC = (BETA(0,NF)*BPI(0) + BETA(1,NF)*BPI(1)*ALPSMZ) * LSCALE
       ELSEIF (NLOOP.EQ.3) THEN
-         LFAC = (BETA(0,NF)*BPI(0) + BETA(1,NF)*BPI(1)*ALPSMZ + 
+         LFAC = (BETA(0,NF)*BPI(0) + BETA(1,NF)*BPI(1)*ALPSMZ +
      &        BETA(2,NF)*BPI(2)*ALPSMZ*ALPSMZ) * LSCALE -
      &        BETA(0,NF)*BPI(0)*BETA(1,NF)*BPI(1)/2.D0*ALPSMZ*ALPSMZ *
      &        LSCALE*LSCALE
@@ -57,7 +57,7 @@
          WRITE(*,*)'RALPSM: Illegal loop order, stopped:',NLOOP
          STOP
       ENDIF
-      
+
       RALPSM = ALPSMZ / (1.D0 + ALPSMZ * LFAC)
 
       IF (FIRST) THEN
@@ -79,7 +79,7 @@
 
 
       ENDIF
-      
+
       RETURN
       END
 
@@ -103,27 +103,27 @@
 * Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
-      
+
       DOUBLE PRECISION MUR,ZMASS,LAMBDA
       INTEGER NF,NLOOP
-      
+
       DOUBLE PRECISION BETA
-      
+
 *---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
 
       DOUBLE PRECISION LSCALE2,PI
-      
+
       LOGICAL FIRST
       SAVE FIRST
       DATA FIRST/.TRUE./
-      
+
 *---Initialization
       IF (FIRST) THEN
          PI = 4.D0*ATAN(1.D0)
       ENDIF
-      
+
 *---alpha_s
       LSCALE2 = LOG(MUR*MUR/LAMBDA/LAMBDA)
       RALPSL  = 4.D0*PI/BETA(0,NF)/LSCALE2
@@ -138,7 +138,7 @@
          WRITE(*,*)'RALPSL: Illegal loop order, stopped!'
          STOP
       ENDIF
-      
+
       IF (FIRST) THEN
          FIRST = .FALSE.
          WRITE(*,*)' '
@@ -177,22 +177,22 @@
 * Updated Z mass by K. Rabbertz, 26/03/2008
 ************************************************************************
       IMPLICIT NONE
-      
+
       DOUBLE PRECISION ZMASS,ALPSMZ
       INTEGER NF,NLOOP
-      
+
       DOUBLE PRECISION BETA
 
 *---PDG 2012
       DOUBLE PRECISION ZMPDG
       PARAMETER (ZMPDG = 91.1876D0)
-      
+
       DOUBLE PRECISION BFAC,BPRIM,EXPON,LFAC,PI
-      
+
       LOGICAL FIRST
       SAVE FIRST
       DATA FIRST/.TRUE./
-      
+
 *---Initialization
       IF (FIRST) THEN
          PI = 4.D0*ATAN(1.D0)
@@ -256,14 +256,14 @@
 * K. Rabbertz, 30/03/2001
 ************************************************************************
       IMPLICIT NONE
-      
+
       INTEGER NORD,NF
-      
+
       DOUBLE PRECISION ZETA3
       PARAMETER (ZETA3 = 1.202056903D0)
-      
+
       INTEGER NLOOP
-      
+
       NLOOP = NORD + 1
       IF (NLOOP.EQ.1) THEN
          BETA = 11.D0 - 2.D0/3.D0*NF
@@ -280,6 +280,6 @@
          WRITE(*,*)'BETA: Illegal order, stopped:',NORD
          STOP
       ENDIF
-      
+
       RETURN
       END

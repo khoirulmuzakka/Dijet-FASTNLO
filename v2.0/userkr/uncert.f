@@ -2,7 +2,7 @@
 * ---------------------------------------------------------------------
 *
 *     IPHASE: 1   Initialization
-*             2-4 Treat deviations for each bin, subprocess, order 
+*             2-4 Treat deviations for each bin, subprocess, order
 *               2 Store backup values for pairwise deviations from
 *                 +/- eigen vectors
 *               3 Evaluate pairwise deviations of +/- eigen vectors
@@ -34,7 +34,7 @@
 c - Implement sample averages with different weights
 c - Not active/well tested yet
 c - Required in case of e.g. tables with changing nos. of events
-c - Define weights to be one for 1D9 events for LO and 1D8 for NLO/total 
+c - Define weights to be one for 1D9 events for LO and 1D8 for NLO/total
 c - If all weights are identical this has to cancel out completely
       IF (FIRST) THEN
          FIRST = .FALSE.
@@ -59,7 +59,7 @@ c - This is the order counting in fnx9999 common ...
 
 
 
-*---Initialization	
+*---Initialization
       IF (IPHASE.EQ.1) THEN
          IBIN = 0
          NRAP = NRAPIDITY
@@ -93,9 +93,9 @@ c - This is the order counting in fnx9999 common ...
          IF (LRAT.OR.LNRM) NBIN = NBIN/2
          RETURN
       ENDIF
-      
-        
-        
+
+
+
 *---Loop
       IF (IPHASE.GT.1.AND.IPHASE.LT.9) THEN
          IBIN = 0
@@ -141,8 +141,8 @@ Comment:                         WRITE(*,*)"LNRM: summ,diff",SUMM,DIFF
 cdebug
                      ENDIF
                      IF (IPHASE.EQ.2) THEN
-                        MYSUMM(IBIN,ISUB,IORD) = SUMM 
-                        MYDIFF(IBIN,ISUB,IORD) = DIFF 
+                        MYSUMM(IBIN,ISUB,IORD) = SUMM
+                        MYDIFF(IBIN,ISUB,IORD) = DIFF
                      ELSEIF (IPHASE.EQ.3) THEN
                         SUMM0 = MYSUMM(IBIN,ISUB,IORD)
                         DIFF0 = MYDIFF(IBIN,ISUB,IORD)
@@ -173,7 +173,7 @@ Comment:      >                       diffmu,diffml
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
                   IF (IPHASE.EQ.2) THEN
-                     MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC 
+                     MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC
                      MYDIFF(IBIN,NSBPRC+1,IORD) = DIFFPROC
                   ELSEIF (IPHASE.EQ.3) THEN
                      SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
@@ -198,7 +198,7 @@ Comment:      >                       diffmu,diffml
      >                 MYRESN(IBIN,ISUB,IORD)
                ENDIF
                IF (IPHASE.EQ.2) THEN
-                  MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD 
+                  MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD
                   MYDIFF(IBIN,NSBPRC+1,NORD+1) = DIFFORD
                ELSEIF (IPHASE.EQ.3) THEN
                   SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
@@ -231,7 +231,7 @@ Comment:      >                       diffmu,diffml
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
                   IF (IPHASE.EQ.2) THEN
-                     MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD 
+                     MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD
                      MYDIFF(IBIN,ISUB,NORD+1) = DIFFORD
                   ELSEIF (IPHASE.EQ.3) THEN
                      SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
@@ -253,10 +253,10 @@ Comment:      >                       diffmu,diffml
             ENDDO
          ENDDO
          RETURN
-      ENDIF 
-      
-      
-      
+      ENDIF
+
+
+
 *---Final evaluation
       IF (IPHASE.EQ.9) THEN
          IBIN = 0
@@ -291,7 +291,7 @@ cdebug
                            WTDXU2(IBIN,ISUB,IORD) = -1D0
                            WTDXL2(IBIN,ISUB,IORD) = -1D0
                         ENDIF
-ckr Sampling method (as needed for statistical uncertainties or NNPDF) 
+ckr Sampling method (as needed for statistical uncertainties or NNPDF)
                      ELSEIF (IMODE.EQ.2) THEN
                         WTDXU2(IBIN,ISUB,IORD) = -1D0
                         WTDXL2(IBIN,ISUB,IORD) = -1D0
@@ -307,9 +307,9 @@ ckr Sampling method (as needed for statistical uncertainties or NNPDF)
 ckr Attention: This overwrites the precalculated result by averages
 ckr            from the sampling method as this should be considered the
 ckr            central result according to NNPDF.
-                           MYRES(IBIN,ISUB,IORD) = 
+                           MYRES(IBIN,ISUB,IORD) =
      >                          WTX(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
-                           WTDXU2(IBIN,ISUB,IORD) = 
+                           WTDXU2(IBIN,ISUB,IORD) =
      >                          (WTX2(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
      >                          -MYRES(IBIN,ISUB,IORD)
      >                          *MYRES(IBIN,ISUB,IORD))
@@ -346,7 +346,7 @@ ckr            central result according to NNPDF.
                                  IF (WTDXMN(IBIN,ISUB,IORD).GT.0.D0)
      >                                WTDXMN(IBIN,ISUB,IORD) =
      >                                WTDXMN(IBIN,ISUB,IORD) /
-     >                                DABS(MYRES(IBIN,ISUB,IORD)) 
+     >                                DABS(MYRES(IBIN,ISUB,IORD))
                                  WTDXUL(IBIN,ISUB,IORD) =
      >                                (WTXMAX(IBIN,ISUB,IORD) -
      >                                WTXMIN(IBIN,ISUB,IORD)) / 2D0
@@ -367,7 +367,7 @@ ckr            central result according to NNPDF.
                               WTDXUL(IBIN,ISUB,IORD) = -1D0
                            ENDIF
                         ENDIF
-ckr Minimax method (as needed for scale uncertainties) 
+ckr Minimax method (as needed for scale uncertainties)
                      ELSEIF (IMODE.EQ.3) THEN
 cdebug
 Comment:                         IF (DABS(MYRES(IBIN,ISUB,IORD)).GT.1D-99) THEN
@@ -389,7 +389,7 @@ cdebug
                            WTDXUM(IBIN,ISUB,IORD) = -1D0
                            WTDXLM(IBIN,ISUB,IORD) = -1D0
                         ENDIF
-ckr Deviation from reference (as needed for algorithmic uncertainties) 
+ckr Deviation from reference (as needed for algorithmic uncertainties)
                      ELSEIF (IMODE.EQ.4) THEN
                         IF (IRAP.LE.INT(NRAPIDITY/2)) THEN
                            IF (MYRES(IBIN+NBIN/2,ISUB,IORD).GT.
@@ -443,15 +443,15 @@ Comment:          ENDDO
 cdebug
 
          RETURN
-      ENDIF    
-      
+      ENDIF
+
       RETURN
       END
 
 
 
       SUBROUTINE CENRES(ISTEP,LRAT,LNRM,SCENARIO)
-      
+
       IMPLICIT NONE
       INTEGER ISTEP
       LOGICAL LRAT,LNRM
@@ -461,9 +461,9 @@ cdebug
       INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM
       INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSUBPROCN
 
-      
 
-*---Initialization	
+
+*---Initialization
 ckr Table to normalize loaded
 ckr      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
       IF (ISTEP.EQ.0.OR.ISTEP.EQ.3) THEN
@@ -519,7 +519,7 @@ ckr Normalization table loaded, if necessary
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSUBPROCN+1
 ckr Only first pT bin needed to normalize in each rapidity region
-ckr Might be required to sum up multiple bins in pT and y for CMS analysis 
+ckr Might be required to sum up multiple bins in pT and y for CMS analysis
 ckr                        IF (IPT.EQ.1) THEN
                            IF (IORD.LE.NORDN) THEN
                               MYTMP(IBIN,ISUB,IORD) =
@@ -728,7 +728,7 @@ Comment:      >                       mytmp(irap,isub,iord)
             ENDDO
          ENDIF
       ENDIF
-      
+
 
 
 ckr Reload table to normalize
@@ -742,12 +742,12 @@ ckr Reload table to normalize
                DO ISUB=1,NSBPRC
                   MYRES(IBIN,ISUB,IORD) = RESULT(IBIN,ISUB,IORD)
                   MYRES(IBIN,NSBPRC+1,IORD) =
-     >                 MYRES(IBIN,NSBPRC+1,IORD) + 
+     >                 MYRES(IBIN,NSBPRC+1,IORD) +
      >                 MYRES(IBIN,ISUB,IORD)
 ckr Centrality ratio: LRAT
 ckr Normalization: LNRM
                   IF (LRAT) THEN
-                     MYRES(IBIN+NBIN,ISUB,IORD) = 
+                     MYRES(IBIN+NBIN,ISUB,IORD) =
      >                    MYRES(IPT,ISUB,IORD) /
      >                    RESULT(IBIN,ISUB,IORD)
 Comment:                      write(*,*)"LRATA: ibin,iord,isub,irap,ipt,a,b,a/b",
@@ -761,7 +761,7 @@ Comment:                         write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n"
 Comment:      >                       ibin,iord,isub,irap,ipt,
 Comment:      >                       MYRES(IBIN,ISUB,IORD),
 Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
-                        MYRES(IBIN+NBIN,ISUB,IORD) = 
+                        MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       MYRES(IBIN,ISUB,IORD) *
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
 Comment:                         write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
@@ -771,18 +771,18 @@ Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
                      ENDIF
                   ENDIF
                   IF (ISTEP.EQ.2) THEN
-                     MYRESN(IBIN,ISUB,IORD) = 
+                     MYRESN(IBIN,ISUB,IORD) =
      >                    MYRES(IBIN,ISUB,IORD)
-                     MYRESN(IBIN+NBIN,ISUB,IORD) = 
+                     MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                    MYRES(IBIN+NBIN,ISUB,IORD)
                   ENDIF
                ENDDO
-               MYRES(IBIN,NSBPRC+1,NORD+1) = 
+               MYRES(IBIN,NSBPRC+1,NORD+1) =
      >              MYRES(IBIN,NSBPRC+1,NORD+1) +
      >              MYRES(IBIN,NSBPRC+1,IORD)
                IF (LRAT) THEN
                   MYRES(IBIN+NBIN,NSBPRC+1,IORD) =
-     >                 MYRES(IPT,NSBPRC+1,IORD) / 
+     >                 MYRES(IPT,NSBPRC+1,IORD) /
      >                 MYRES(IBIN,NSBPRC+1,IORD)
 Comment:                   write(*,*)"LRATB: ibin,iord,isub,irap,ipt,a,b,a/b",
 Comment:      >                 ibin,iord,isub,irap,ipt,
@@ -791,20 +791,20 @@ Comment:      >                 MYRES(IBIN,NSUBPROC+1,IORD),
 Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
                ELSEIF (LNRM) THEN
                   IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-                     MYRES(IBIN+NBIN,NSBPRC+1,IORD) = 
+                     MYRES(IBIN+NBIN,NSBPRC+1,IORD) =
      >                    MYRES(IBIN,NSBPRC+1,IORD) *
      >                    MYRES(IBIN+NBIN,NSBPRC+1,IORD)
                   ENDIF
                ENDIF
                IF (ISTEP.EQ.2) THEN
-                  MYRESN(IBIN,NSBPRC+1,IORD) = 
+                  MYRESN(IBIN,NSBPRC+1,IORD) =
      >                 MYRES(IBIN,NSBPRC+1,IORD)
-                  MYRESN(IBIN+NBIN,NSBPRC+1,IORD) = 
+                  MYRESN(IBIN+NBIN,NSBPRC+1,IORD) =
      >                 MYRES(IBIN+NBIN,NSBPRC+1,IORD)
                ENDIF
             ENDDO
             IF (LRAT) THEN
-               MYRES(IBIN+NBIN,NSBPRC+1,NORD+1) = 
+               MYRES(IBIN+NBIN,NSBPRC+1,NORD+1) =
      >              MYRES(IPT,NSBPRC+1,NORD+1) /
      >              MYRES(IBIN,NSBPRC+1,NORD+1)
 Comment:                write(*,*)"LRATC: ibin,iord,isub,irap,ipt,a,b,a/b",
@@ -814,25 +814,25 @@ Comment:      >              MYRES(IBIN,NSUBPROC+1,NORD+1),
 Comment:      >              MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
             ELSEIF (LNRM) THEN
                IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-                  MYRES(IBIN+NBIN,NSBPRC+1,NORD+1) = 
+                  MYRES(IBIN+NBIN,NSBPRC+1,NORD+1) =
      >                 MYRES(IBIN,NSBPRC+1,NORD+1) *
      >                 MYRES(IBIN+NBIN,NSBPRC+1,NORD+1)
                ENDIF
             ENDIF
             IF (ISTEP.EQ.2) THEN
-               MYRESN(IBIN,NSBPRC+1,NORD+1) = 
+               MYRESN(IBIN,NSBPRC+1,NORD+1) =
      >              MYRES(IBIN,NSBPRC+1,NORD+1)
-               MYRESN(IBIN+NBIN,NSBPRC+1,NORD+1) = 
+               MYRESN(IBIN+NBIN,NSBPRC+1,NORD+1) =
      >              MYRES(IBIN+NBIN,NSBPRC+1,NORD+1)
             ENDIF
             DO ISUB=1,NSBPRC
                DO IORD=1,NORD
                   MYRES(IBIN,ISUB,NORD+1) =
-     >                 MYRES(IBIN,ISUB,NORD+1) + 
+     >                 MYRES(IBIN,ISUB,NORD+1) +
      >                 MYRES(IBIN,ISUB,IORD)
                ENDDO
                IF (LRAT) THEN
-                  MYRES(IBIN+NBIN,ISUB,NORD+1) = 
+                  MYRES(IBIN+NBIN,ISUB,NORD+1) =
      >                 MYRES(IPT,ISUB,NORD+1) /
      >                 MYRES(IBIN,ISUB,NORD+1)
 Comment:                   write(*,*)"LRATD: ibin,iord,isub,irap,ipt,a,b,a/b",
@@ -842,15 +842,15 @@ Comment:      >                 MYRES(IBIN,ISUB,NORD+1),
 Comment:      >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
                ELSEIF (LNRM) THEN
                   IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-                     MYRES(IBIN+NBIN,ISUB,NORD+1) = 
+                     MYRES(IBIN+NBIN,ISUB,NORD+1) =
      >                    MYRES(IBIN,ISUB,NORD+1) *
      >                    MYRES(IBIN+NBIN,ISUB,NORD+1)
                   ENDIF
                ENDIF
                IF (ISTEP.EQ.2) THEN
-                  MYRESN(IBIN,ISUB,NORD+1) = 
+                  MYRESN(IBIN,ISUB,NORD+1) =
      >                 MYRES(IBIN,ISUB,NORD+1)
-                  MYRESN(IBIN+NBIN,ISUB,NORD+1) = 
+                  MYRESN(IBIN+NBIN,ISUB,NORD+1) =
      >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
                ENDIF
             ENDDO
@@ -883,12 +883,12 @@ cdebug
 
       RETURN
       END
-      
-      
-      
+
+
+
       SUBROUTINE SUMMUP(IVAR,IBIN,ISUB,IORD,SUMM,DIFF,WEIGHT,
      >     LRAT,IBREF,NBIN,LNRM)
-      
+
       IMPLICIT NONE
       INTEGER IVAR,IBIN,IORD,ISUB,IBREF,NBIN
       DOUBLE PRECISION SUMM,DIFF,WEIGHT
@@ -900,13 +900,13 @@ cdebug
       WRES(IBIN,ISUB,IORD) = SUMM
       NTN(IBIN,ISUB,IORD)  =
      >     NTN(IBIN,ISUB,IORD)  +
-     >     1 
+     >     1
       WT(IBIN,ISUB,IORD)   =
      >     WT(IBIN,ISUB,IORD)   +
      >     WEIGHT
       WT2(IBIN,ISUB,IORD)  =
      >     WT2(IBIN,ISUB,IORD)  +
-     >     WEIGHT*WEIGHT 
+     >     WEIGHT*WEIGHT
       WTX(IBIN,ISUB,IORD) =
      >     WTX(IBIN,ISUB,IORD)  +
      >     SUMM*WEIGHT
@@ -952,17 +952,17 @@ cdebug
          WRES(IBIN+NBIN,ISUB,IORD) = RATIO
          NTN(IBIN+NBIN,ISUB,IORD) =
      >        NTN(IBIN+NBIN,ISUB,IORD)  +
-     >        1 
+     >        1
          WT(IBIN+NBIN,ISUB,IORD) =
      >        WT(IBIN+NBIN,ISUB,IORD)   +
-     >        WEIGHT 
+     >        WEIGHT
          WT2(IBIN+NBIN,ISUB,IORD) =
      >        WT2(IBIN+NBIN,ISUB,IORD)  +
-     >        WEIGHT*WEIGHT 
-         WTX(IBIN+NBIN,ISUB,IORD) = 
+     >        WEIGHT*WEIGHT
+         WTX(IBIN+NBIN,ISUB,IORD) =
      >        WTX(IBIN+NBIN,ISUB,IORD)  +
      >        RATIO*WEIGHT
-         WTX2(IBIN+NBIN,ISUB,IORD) = 
+         WTX2(IBIN+NBIN,ISUB,IORD) =
      >        WTX2(IBIN+NBIN,ISUB,IORD) +
      >        RATIO*RATIO*WEIGHT
          IF (RATIO.LT.WTXMIN(IBIN+NBIN,ISUB,IORD)) THEN
@@ -1002,17 +1002,17 @@ Comment: ckr     >        WRES(IBIN+NBIN,ISUB,IORD)
 Comment: ckr         WRES(IBIN+NBIN,ISUB,IORD) = RATIO
 Comment:          NTN(IBIN+NBIN,ISUB,IORD) =
 Comment:      >        NTN(IBIN+NBIN,ISUB,IORD)  +
-Comment:      >        1 
+Comment:      >        1
 Comment:          WT(IBIN+NBIN,ISUB,IORD) =
 Comment:      >        WT(IBIN+NBIN,ISUB,IORD)   +
-Comment:      >        WEIGHT 
+Comment:      >        WEIGHT
 Comment:          WT2(IBIN+NBIN,ISUB,IORD) =
 Comment:      >        WT2(IBIN+NBIN,ISUB,IORD)  +
-Comment:      >        WEIGHT*WEIGHT 
-Comment:          WTX(IBIN+NBIN,ISUB,IORD) = 
+Comment:      >        WEIGHT*WEIGHT
+Comment:          WTX(IBIN+NBIN,ISUB,IORD) =
 Comment:      >        WTX(IBIN+NBIN,ISUB,IORD)  +
 Comment:      >        RATIO*WEIGHT
-Comment:          WTX2(IBIN+NBIN,ISUB,IORD) = 
+Comment:          WTX2(IBIN+NBIN,ISUB,IORD) =
 Comment:      >        WTX2(IBIN+NBIN,ISUB,IORD) +
 Comment:      >        RATIO*RATIO*WEIGHT
 Comment:          IF (RATIO.LT.WTXMIN(IBIN+NBIN,ISUB,IORD)) THEN
@@ -1043,6 +1043,6 @@ Comment:                WTDXLM(IBIN+NBIN,ISUB,IORD) = RDIFF
 Comment:             ENDIF
 Comment:          ENDIF
 Comment:       ENDIF
-      
+
       RETURN
       END
