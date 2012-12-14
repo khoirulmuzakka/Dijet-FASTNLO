@@ -640,6 +640,7 @@ ckr Counter for bin containing normalization factor
                ENDDO
             ENDDO
          ELSEIF (SCENARIO(1:7).EQ."fnl2622".OR.
+     >           SCENARIO(1:7).EQ."fnl3622".OR.
      >           SCENARIO(1:7).EQ."fnl2652") THEN
             IBIN = 0
             DO IRAP=1,NRAPIDITYN
@@ -649,15 +650,16 @@ ckr Counter for bin containing normalization factor
                      DO ISUB=1,NSUBPROCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-Comment:                            write(*,*)"AA ibin,iord,isub,irap,ipt,"//
-Comment:      >                          "mytmp,drap,dpt",
-Comment:      >                          ibin,iord,isub,irap,ipt,
-Comment:      >                          mytmp(irap,isub,iord),
-Comment:      >                          rapbin(irap+1)-rapbin(irap),
-Comment:      >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
+                           write(*,*)"AA ibin,iord,isub,irap,ipt,"//
+     >                          "mytmp,drap,dpt",
+     >                          ibin,iord,isub,irap,ipt,
+     >                          mytmp(irap,isub,iord),
+     >                          rapbin(irap+1)-rapbin(irap),
+     >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
                         ENDIF
 ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
                         IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
+ckr     >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
      >                       .OR.(SCENARIO(1:7).EQ."fnl2652"))THEN
                            IF (IORD.LE.NORDN) THEN
                               MYTMP(IRAP,ISUB,IORD) =
