@@ -1,12 +1,12 @@
 ***********************************************************************
-*     
+*
 *     fastNLO reader code
-*     
+*
 *     Initial version: T. Kluge, M. Wobisch, 2006
 *     Updated for v2:  K. Rabbertz, M. Wobisch, 2011
-*     
+*
 *     This code usually should not be edited.
-*     
+*
 *     Contains:
 *     ---------
 *     FX9999CC  main routine
@@ -21,12 +21,12 @@
 *     FX9999NF  print scenario information (physics & technical)
 *     FX9999TB  returns information on variables from the table
 *     FX9999NM  NOT IMPLEMENTED YET: norm. distr. by its own integral
-*     
+*
 *     Requires:
 *     ---------
-*     fnx9999.inc common block definitions 
+*     fnx9999.inc common block definitions
 *     fx9999rw.f  read (or write) tables
-*     
+*
 *     Scenario independent routines in :
 *     ----------------------------------
 *     fnio.f      contains routines for table I/O
@@ -34,39 +34,39 @@
 *     fn-interface.f:
 *     FNALPHAS    alpha_s interface (double precision function)
 *     FNPDF       PDF interface
-*     
+*
 ***********************************************************************
 
       SUBROUTINE FX9999CC(XMUR,XMUF,XSECT,XSCALE,XSUNCOR,XSCOR)
 ***********************************************************************
-*     
-*     fastNLO user code v2 - main routine 
-*     
+*
+*     fastNLO user code v2 - main routine
+*
 *     Input:
 *     ------
-*     XMUR  pre-factor for nominal renormalization scale     
-*     >     any choice is possible, but please note 
+*     XMUR  pre-factor for nominal renormalization scale
+*     >     any choice is possible, but please note
 *     >     that 2-loop threshold corrections work
 *     >     only for xmur=xmuf
 *     XMUF  pre-factor for nominal factorization scale
 *     >     available choices depend on scenario
 *     >     (see scenario information)
-*     
+*
 *     Output:
 *     -------
-*     XSECT(NOBSBIN)     array of cross sections 
-*     XSCALE(NOBSBIN)    array of effective scale values 
+*     XSECT(NOBSBIN)     array of cross sections
+*     XSCALE(NOBSBIN)    array of effective scale values
 *     XSUNCOR(NOBSBIN,2) quadr. summed uncorr. uncertainty,
 *     >                  lower (.,1), upper (.,2)
 *     XSCOR(NOBSBIN,2)   quadr. summed corr. uncertainty,
 *     >                  lower (.,1), upper (.,2)
-*     
+*
 *     Current restrictions:
 *     ---------------------
 *     - can deal with single scale dim. only (no DIS with muf=Q, mur=pT)
 *     - assumes same x section units (nb, pb, ...) for all contributions
 *     - assumes that max. one contribution per allowed type is present
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       DOUBLE PRECISION XMUR, XMUF
@@ -90,7 +90,7 @@
             ENDDO
          ENDDO
       ENDDO
-      
+
 *---  Determine pointers to access contributions and scales
       CALL FX9999PT(XMUR,XMUF,1)
 
@@ -104,7 +104,7 @@
 *---  Loop over logical contributions
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
-               
+
 *---  Get PDFs - multiply with perturbative coefficients and alpha_s
                CALL FX9999PM(I,XMUR,XMUF)
             ENDIF
@@ -116,7 +116,7 @@
                IPOINT = ICONTRPOINTER(I)
                DO J=1,NOBSBIN
                   DO K=1,NSUBPROC(IPOINT)
-C---  DO K=1,1 ! Test - only gg 
+C---  DO K=1,1 ! Test - only gg
 C---  DO K=2,2 ! Test - only g (DIS)
 C---  DO K=2,5 ! Test - only qq
                      XSECT(J)  = XSECT(J)  + RESULT(J,K,I)
@@ -125,7 +125,7 @@ C---  DO K=2,5 ! Test - only qq
                ENDDO
             ENDIF
          ENDDO
-         
+
 *---  Derive mur averages
          DO J=1,NOBSBIN
             XSCALE(J) = XSCALE(J) / XSECT(J)
@@ -218,11 +218,11 @@ C---  DO K=2,5 ! Test - only qq
 
       SUBROUTINE FX9999IN(FILENAME)
 ***********************************************************************
-*     
+*
 *     Initialize fastNLO table
-*     
+*
 *     Input: Filename of fastNLO table
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -241,26 +241,26 @@ C---  DO K=2,5 ! Test - only qq
          OLDFILENAME = FILENAME
       ENDIF
 
-      RETURN 
+      RETURN
       END
 ***********************************************************************
 
       SUBROUTINE FX9999PT(XMUR,XMUF,IPRINT)
 ***********************************************************************
-*     
+*
 *     Determine pointers to contributions and scales
-*     
+*
 *     Input:
-*     ------    
-*     XMUR  pre-factor for nominal renormalization scale     
-*     >     any choice is possible, but please note 
+*     ------
+*     XMUR  pre-factor for nominal renormalization scale
+*     >     any choice is possible, but please note
 *     >     that 2-loop threshold corrections work
 *     >     only for xmur=xmuf
 *     XMUF  pre-factor for nominal factorization scale
 *     >     available choices depend on scenario
 *     >     (see scenario information)
 *     IPRINT  verbosity
-*     
+*
 *     Current restrictions:
 *     ---------------------
 *     - so far it is assumed that all scales are stored in first
@@ -276,7 +276,7 @@ C---  DO K=2,5 ! Test - only qq
       INTEGER IPRINT,I,J,K,I1
       DOUBLE PRECISION XMUR,XMUF
 
-*---  Initialize counters and pointers for contribution types 
+*---  Initialize counters and pointers for contribution types
       DO I=1,MXCTRB
          NCONTRCOUNTER(I)  =  0
          ICONTRPOINTER(I)  = -1
@@ -335,7 +335,7 @@ C---  DO K=2,5 ! Test - only qq
             STOP
          ENDIF
       ENDDO
-      
+
 *---  Find particular contributions
 *---  Find LO contribution
       IF (PORDPTHY.GE.1) THEN
@@ -355,7 +355,7 @@ C---  DO K=2,5 ! Test - only qq
             ICONTRSELECTOR(ILO) = 1
          ENDIF
       ENDIF
-      
+
 *---  Find NLO contribution
       IF (PORDPTHY.GE.2) THEN
          IF (ICONTRPOINTER(INLO).EQ.-1) THEN
@@ -374,7 +374,7 @@ C---  DO K=2,5 ! Test - only qq
             ICONTRSELECTOR(INLO) = 1
          ENDIF
       ENDIF
-      
+
 *---  Find 1-loop TC
       If (PTHRESHCOR.EQ.1) THEN
          If (PORDPTHY.LT.0) THEN
@@ -458,7 +458,7 @@ C---  DO K=2,5 ! Test - only qq
             ICONTRSELECTOR(ITHC2L) = 1
          ENDIF
       ENDIF
-      
+
 *---  Find NP corrections
       IF (PNPCOR.EQ.1) THEN
          IF (ICONTRPOINTER(INPC1).EQ.-1) THEN
@@ -555,10 +555,10 @@ C---  DO K=2,5 ! Test - only qq
                   ENDDO
                   STOP
                ENDIF
-            ENDIF 
+            ENDIF
          ENDIF
       ENDDO
-      
+
 *---  For IScaleDep = 2 check if renormalization scale is directly
 *---  available, i.e. identical to factorization scale
 *---  Can be provided a posteriori otherwise
@@ -586,7 +586,7 @@ C---  DO K=2,5 ! Test - only qq
             ENDIF
          ENDDO
       ENDIF
-      
+
       RETURN
       END
 ***********************************************************************
@@ -595,18 +595,18 @@ C---  DO K=2,5 ! Test - only qq
 ***********************************************************************
 *
 *     Get PDFs and multiply with alpha_s and coefficients
-*     
+*
 *     Input:
-*     ------    
+*     ------
 *     ICTRB  number of contribution (logical - not in table!)
-*     XMUR  pre-factor for nominal renormalization scale     
-*     >     any choice is possible, but please note 
+*     XMUR  pre-factor for nominal renormalization scale
+*     >     any choice is possible, but please note
 *     >     that 2-loop threshold corrections work
 *     >     only for xmur=xmuf
 *     XMUF  pre-factor for nominal factorization scale
 *     >     available choices depend on scenario
 *     >     (see scenario information)
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -615,7 +615,7 @@ C---  DO K=2,5 ! Test - only qq
       DOUBLE PRECISION FACTOR, LOGMUR
       DOUBLE PRECISION NF, CA, CF, BETA0, BETA1
       PARAMETER (NF=5D0, CA=3D0, CF=4D0/3D0)
-      PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0) 
+      PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0)
       PARAMETER (BETA1=34D0*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
 
 *---  Compute 'standard' contribution at chosen scales
@@ -623,7 +623,7 @@ C---  DO K=2,5 ! Test - only qq
       FACTOR  = 1D0
       CALL FX9999GP(ICTRB,XMUF)
       CALL FX9999MT(ICTRB,XMUR,XMUF,IADDPOW,FACTOR)
-      
+
 *---  A posteriori MuR variation for scale dependent parts
       IC = ICONTRPOINTER(ICTRB)
       IS = ISCALEPOINTER(ICTRB)
@@ -635,7 +635,7 @@ C---  DO K=2,5 ! Test - only qq
      >           'not implemented! Stopped.'
             STOP
          ENDIF
-   
+
 *---  Abs. order of LO:     ILOORD
 *---  Abs. order in alphas: NPOW(IC)
 *---  >  NLO if (NPOW-ILOORD) = 1, NNLO if (NPOW(IC)-ILOORD) = 2
@@ -646,7 +646,7 @@ C---  DO K=2,5 ! Test - only qq
 *---  into account by first call to FX9999MT.
 *---  The MuRcache was filled in FX9999MT for tests,
 *---  BUT should NOT be used, since in general it would be wrong!
-*---  If NLO 
+*---  If NLO
          ELSEIF ( (NPOW(IC)-ILOORD).EQ.1 ) THEN
             IADDPOW = 1
             LOGMUR  = LOG(XMUR/SCALEFAC(IC,1,IS))
@@ -666,7 +666,7 @@ C---  DO K=2,5 ! Test - only qq
 C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             CALL FX9999GP(ICTRB-2,XMUF)
             CALL FX9999MT(ICTRB-2,XMUR,XMUF,2,FACTOR) ! 2: mod LO
-            
+
 C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
             CALL FX9999GP(ICTRB-1,XMUF)
             CALL FX9999MT(ICTRB-1,XMUR,XMUF,1,FACTOR) ! 1: mod NLO
@@ -683,24 +683,24 @@ C---  Factor = ...dble(ILOord)*beta0*logmur ! n beta0 logmu
 
       SUBROUTINE FX9999MT(ICTRB,XMUR,XMUF,IADDPOW,FACTOR)
 ***********************************************************************
-*     
-*     Multiply the PDFs and the perturbative coefficients 
-*     
+*
+*     Multiply the PDFs and the perturbative coefficients
+*
 *     Input:
-*     ------    
-*     ICTRB number of logical contribution 
-*     XMUR  pre-factor for nominal renormalization scale     
-*     >     any choice is possible, but please note 
+*     ------
+*     ICTRB number of logical contribution
+*     XMUR  pre-factor for nominal renormalization scale
+*     >     any choice is possible, but please note
 *     >     that 2-loop threshold corrections work
 *     >     only for xmur=xmuf
 *     XMUF  pre-factor for nominal factorization scale
 *     >     available choices depend on scenario
 *     >     (see scenario information)
 *     IADDPOW add. power in alphas - for a posteriori mur variation
-*     >       also: increment in result-contribution index where 
+*     >       also: increment in result-contribution index where
 *     >       result is stored
 *     FACTOR  =! 1 for a posteriori mur variations
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -725,16 +725,16 @@ c      DOUBLE PRECISION MURCACHE(MXOBSBIN,MXSCALENODE)
 *---  Storage loop: observable, scalebins, (get alphas), xbins, subproc
       DO J=1,NOBSBIN
          IF (NPDFDIM(IC).EQ.0) THEN ! 1-d case (DIS)
-            NXMAX =  NXTOT(IC,1,J) 
+            NXMAX =  NXTOT(IC,1,J)
          ELSEIF (NPDFDIM(IC).EQ.1) THEN ! 2-d half-matrix
-            NXMAX = (NXTOT(IC,1,J)*NXTOT(IC,1,J)+NXTOT(IC,1,J))/2 
+            NXMAX = (NXTOT(IC,1,J)*NXTOT(IC,1,J)+NXTOT(IC,1,J))/2
          ELSEIF (NPDFDIM(IC).EQ.2) THEN ! 2-d full matrix
             WRITE(*,*)'FX9999MT: ERROR! 2-d case not yet implemented!'
      >           //' Stopped.'
             STOP
          ENDIF
          DO K=1,NSCALENODE(IC,1)
-            MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K) 
+            MUR = XMUR / SCALEFAC(IC,1,IS) * SCALENODE(IC,J,1,IS,K)
 *---  If regular contribution (i.e. no a posteriori scale variation)
 *---  then also store MuR in cache for testing.
 c            IF (IADDPOW.EQ.0) THEN
@@ -767,21 +767,21 @@ c            ENDIF
             ENDDO
          ENDDO
       ENDDO
-      
-      RETURN 
+
+      RETURN
       END
 ***********************************************************************
 
       SUBROUTINE FX9999GP(ICTRB,XMUF)
 ***********************************************************************
-*     
+*
 *     Read the PDFs in all bins - at all xmax, xmin bins
 *     the default factorization scale (in GeV) is multiplied by
 *     muffactor
-*     
+*
 *     Input:
-*     ------    
-*     ICTRB number of logical contribution 
+*     ------
+*     ICTRB number of logical contribution
 *     XMUF  pre-factor for nominal factorization scale
 *     >     available choices depend on scenario
 *     >     (see scenario information)
@@ -789,14 +789,14 @@ c            ENDIF
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      DOUBLE PRECISION XMUF, X, MUF, 
+      DOUBLE PRECISION XMUF, X, MUF,
      >     TMPPDF(-6:6), XPDF1(MXNXTOT,-6:6),XPDF2(MXNXTOT,-6:6), H(10)
       INTEGER ICTRB, IC,IS, I,J,K,L,M, NX, NX2LIMIT
 
 *---  Set pointers to contribution in table and to scale variation
       IC = ICONTRPOINTER(ICTRB)
       IS = ISCALEPOINTER(ICTRB)
-      
+
       DO I=1,NOBSBIN
          DO J=1,NSCALENODE(IC,1)
 *---  For MuF independent contributions (e.g. LO) the scale factor XMUF
@@ -817,12 +817,12 @@ c            ENDIF
             ENDIF
             NX =0
             DO K=1,NXTOT(IC,1,I) ! Fill first PDF
-               X = XNODE1(IC,I,K) 
+               X = XNODE1(IC,I,K)
                CALL FNPDF(X, MUF, TMPPDF)
                DO M=-6,6
                   XPDF1(K,M) = TMPPDF(M)
                   IF (NPDF(IC).EQ.1) THEN ! DIS
-                     CONTINUE   
+                     CONTINUE
                   ELSEIF (NPDF(IC).EQ.2) THEN ! Two hadrons
                      IF (NPDFPDG(IC,1).EQ.NPDFPDG(IC,2)) THEN ! Identical hh
                         XPDF2(K,M) = TMPPDF(M)
@@ -843,7 +843,7 @@ c            ENDIF
                      STOP
                   ENDIF
                ENDDO            ! M
-            ENDDO               ! K 
+            ENDDO               ! K
             IF (NPDFDIM(IC).EQ.2) THEN ! Fill second PDF
                DO K=1,NXTOT(IC,2,I)
                   X = XNODE2(IC,I,L)
@@ -875,26 +875,26 @@ c            ENDIF
 
       SUBROUTINE FX9999PL(ICF1,ICF2,ICF3,I,J,XPDF1,XPDF2,H)
 ***********************************************************************
-*     
+*
 *     Compute PDF linear combinations - for different sets of
 *     subprocesses
-*     
+*
 *     Depending on icf1,2,3, the product of the i-th and j-th entries
-*     of the PDF array XPDF are multiplied into the relevant linear 
+*     of the PDF array XPDF are multiplied into the relevant linear
 *     combinations in the array H
-*     
+*
 *     Input:
-*     ------    
+*     ------
 *     IREACT             Flag for reaction (1:DIS, 2:pp, 3:ppbar)
-*     I                  x-index of first hadron        
+*     I                  x-index of first hadron
 *     J                  x-index of second hadron (if pp, ppbar)
 *     XPDF1(NXMAX,-6:6)  PDF array for all x-bins
 *     XPDF2(NXMAX,-6:6)  PDF array for all x-bins
-*     
+*
 *     Output:
-*     -------    
+*     -------
 *     H(10)              PDF linear combinations
-*     
+*
 *     Current restrictions:
 *     - Check order of DIS subprocesses ...!
 *
@@ -910,7 +910,7 @@ c            ENDIF
      >     S,A                  ! products S,A
 
 *---  DIS: Inclusive and jets, gammaP direct. TBD
-      IF (ICF1.EQ.2 .AND. (ICF2.EQ.0 .OR. ICF2.EQ.1)) THEN 
+      IF (ICF1.EQ.2 .AND. (ICF2.EQ.0 .OR. ICF2.EQ.1)) THEN
 C---  H(3) = 0d0             ! Delta  at O(as^0)
 C---  Do k=1,5,2
 C---  H(3) = H(3) + (XPDF1(i,k)+XPDF1(i,-k)+
@@ -968,8 +968,8 @@ C---  ENDDO
          S = 0D0
          A = 0D0
          DO K=1,6
-            S = S + (Q1(K)*Q2(K)) + (QB1(K)*QB2(K)) 
-            A = A + (Q1(K)*QB2(K)) + (QB1(K)*Q2(K)) 
+            S = S + (Q1(K)*Q2(K)) + (QB1(K)*QB2(K))
+            A = A + (Q1(K)*QB2(K)) + (QB1(K)*Q2(K))
          ENDDO
 *---  Compute seven combinations
          H(1) = G1*G2
@@ -982,7 +982,7 @@ C---  ENDDO
          IF (ICF3.EQ.1) H(6) = H(6)+H(7) ! Case: 6 subprocesses
 
 *---  gammaP: direct, jets
-      ELSEIF (ICF1.EQ.2 .AND. ICF2.EQ.2) THEN 
+      ELSEIF (ICF1.EQ.2 .AND. ICF2.EQ.2) THEN
          WRITE(*,*)'FX9999PL: gammaP to be implemented, stopped!'
          STOP
       ELSE
@@ -1000,11 +1000,11 @@ C---  ENDDO
 ***********************************************************************
 *
 *     Print fastNLO cross section array
-*     
+*
 *     Input:
 *     ------
 *     XSECT  Result array
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -1018,7 +1018,7 @@ C---  ENDDO
       MIN2OLD=-99999D0
       MAX2OLD=-99999D0
 
-      IF (NDIM.EQ.1) 
+      IF (NDIM.EQ.1)
      >     WRITE(*,*)' BINS IN ',DIMLABEL(NDIM)
 
       DO I=1,NOBSBIN
@@ -1062,7 +1062,7 @@ C---  ENDDO
       WRITE(*,*)"# Description:"
       DO I=1,NSCDESCRIPT
          CHTMP = SCDESCRIPT(I)
-         WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+         WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))
       ENDDO
       WRITE(*,*)"#"
       WRITE(*,'(A,G10.4,A)')
@@ -1074,17 +1074,17 @@ C---  ENDDO
      >     " dimensions:"
       WRITE(*,*)"#"
       WRITE(*,'(A,I1)')" # No. of contributions: ",NCONTRIB
-      DO I=1,NCONTRIB         
+      DO I=1,NCONTRIB
          WRITE(*,'(A,I1,A)')" # Contribution ",I,":"
          DO J=1,NCONTRDESCR(I)
             CHTMP = CTRBDESCRIPT(I,J)
-            WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+            WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))
          ENDDO
          WRITE(*,'(A,I16)')" #   No. of events: ",NEVT(I)
          WRITE(*,*)"#   provided by:"
          DO J=1,NCODEDESCR(I)
             CHTMP = CODEDESCRIPT(I,J)
-            WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))  
+            WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))
          ENDDO
          WRITE(*,'(A,I1)')" #   Scale dimensions: ",
      >        NSCALEDIM(I)
@@ -1093,7 +1093,7 @@ C---  ENDDO
                CHTMP = SCALEDESCRIPT(I,J,K)
                WRITE(*,'(A,I1,A,A)')
      >              " #     Scale description for dimension ",
-     >              J,":          ",CHTMP(1:LEN_TRIM(CHTMP))  
+     >              J,":          ",CHTMP(1:LEN_TRIM(CHTMP))
             ENDDO
             WRITE(*,'(A,I1,A,I1)')
      >           " #     Number of scale variations for dimension ",

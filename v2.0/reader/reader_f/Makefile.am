@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 10.11.2011
 #
-# fastNLO_reader: Fortran version 
+# fastNLO_reader: Fortran version
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
@@ -23,7 +23,7 @@ endif
 #
 # All source files which go into the targets (and have to be distributed)
 fnlo_fread_SOURCES = main.f fnlo-fread.f fnx9999.f fnx9999.inc strings.inc \
-	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f 
+	fx9999rw.f fnio.f fnset.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f
 
 #
 # FORTRAN compiler flags
@@ -39,7 +39,7 @@ fnlo_fread_FFLAGS= -O -fno-automatic -ffixed-line-length-132 $(my_include_dirs)
 # Linker flags
 #
 # Require lhapdf, use lhapdf-config if possible
-if HAVE_LHAPDFCONFIG 
+if HAVE_LHAPDFCONFIG
    fnlo_fread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
    fnlo_fread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF
@@ -49,7 +49,7 @@ endif
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
-# but not for distribution 
+# but not for distribution
 MAINTAINERCLEANFILES = Makefile.in
 
 # Add dependencies on include files by hand

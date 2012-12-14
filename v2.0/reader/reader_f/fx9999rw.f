@@ -1,23 +1,23 @@
       SUBROUTINE FX9999RW(CRW,FILENAME,ICTRB)
 ***********************************************************************
-*     
+*
 *     Read and write complete (or partial) fastNLO v2 tables
-*     
+*
 *     Input:
 *     ------
 *     CRW        'read' or 'write'
 *     FILENAME    name of table
 *     ICTRB(30)   flags for writing selected contributions
-*     >           only contributions n with ictrb(n) <> 0 are 
+*     >           only contributions n with ictrb(n) <> 0 are
 *     >           written - reading is not affected
-*     
-*     
+*
+*
 *     Current restrictions:
 *     ---------------------
 *     - The Info and debug screen print out is steered by the hardcoded
 *     > IPRINT variable, default is IPRINT = 0, i.e. no additional
 *     > print out
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       CHARACTER*(*) CRW,FILENAME
@@ -124,7 +124,7 @@
          CHTMP = "  A1    UserFloat("//CH1TMP//")"
          CALL FNIODBL(CRW,NUNIT, USERFLOAT(I),LPRINT,CHTMP)
       ENDDO
-      CALL FNIOINT(CRW,NUNIT, IMACHINE,LPRINT,"  A1  Imachine") 
+      CALL FNIOINT(CRW,NUNIT, IMACHINE,LPRINT,"  A1  Imachine")
       IF (IMACHINE.NE.0) THEN
          WRITE(*,*)'FX9999RW: Warning! Imachine different from zero - ',
      >        'not yet implemented: ',IMACHINE
@@ -144,7 +144,7 @@
          WRITE(*,*)SSEP0
       ENDIF
       CALL FNIOISEP(CRW,NUNIT,LPRINT,"  A2  ISep")
-      CALL FNIOINT(CRW,NUNIT, IPUBLUNITS,LPRINT,"  A2  IpublUnits") 
+      CALL FNIOINT(CRW,NUNIT, IPUBLUNITS,LPRINT,"  A2  IpublUnits")
       CALL FNIOINT(CRW,NUNIT, NSCDESCRIPT,LPRINT,"  A2  NscDescript")
       IF (NSCDESCRIPT .GT. MXSCDESCRIPT) THEN
          WRITE(*,*)'FX9999RW: Warning! NscDescript too large ',
@@ -203,7 +203,7 @@
       ENDIF
       IF (INORMFLAG.GT.0) THEN
          DO I=1,NOBSBIN
-            WRITE(CH3TMP,'(I3)'),I 
+            WRITE(CH3TMP,'(I3)'),I
             CHTMP = "  A2    IDivLoPointer("//CH3TMP//")"
             CALL FNIOINT(CRW,NUNIT, IDIVLOPOINTER(I),LPRINT,CHTMP)
             CHTMP = "  A2    IDivUpPointer("//CH3TMP//")"
@@ -425,14 +425,14 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
          ELSEIF (IPDFDEF(IC,1).EQ.2) THEN ! --- DIS
             CONTINUE
          ELSEIF (IPDFDEF(IC,1).EQ.3) THEN ! --- hh/hhbar
-            IF (IPDFDEF(IC,2).EQ.1) THEN 
+            IF (IPDFDEF(IC,2).EQ.1) THEN
                IF (IPDFDEF(IC,3).EQ.1) THEN
                   IF (NSUBPROC(IC).NE.6) THEN
                      WRITE(*,*)"FX9999RW: ERROR! IPDFdef(3)=1 "//
      >                    "requires 6 subprocesses for hh. Stopped."
                      STOP
                   ENDIF
-               ELSEIF (IPDFDEF(IC,3).EQ.2) THEN 
+               ELSEIF (IPDFDEF(IC,3).EQ.2) THEN
                   IF (NSUBPROC(IC).NE.7) THEN
                      WRITE(*,*)"FX9999RW: ERROR! IPDFdef(3)=2 "//
      >                    "requires 7 subprocesses for hh. Stopped."
@@ -445,13 +445,13 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
                STOP
             ENDIF
          ENDIF
-         
+
          IF (IPDFDEF(IC,1).EQ.0) THEN ! - no predefined set of PDF coefficients
             WRITE(*,*)"FX9999RW: ERROR! Case IPDFdef(1)=0 "//
      >           "not yet implemented. Stopped."
             STOP
          ENDIF
-         
+
          LPRINT = .FALSE.
          IF (IPRINT.GT.2) THEN
             LPRINT = .TRUE.
@@ -463,14 +463,14 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
          ENDIF
 
          IF (NPDF(IC).GT.0) THEN
-            
+
             DO I=1,NOBSBIN
                WRITE(CH3TMP,'(I3)'),I
                CHTMP = "  BX        Nxtot1("//
      >              CH1TMP//",1,"//CH3TMP//")"
                CALL FNIOINT(CRW,NUNIT, NXTOT(IC,1,I),LPRINT,CHTMP)
                DO J=1,NXTOT(IC,1,I)
-                  WRITE(CH2TMP,'(I2)'),J 
+                  WRITE(CH2TMP,'(I2)'),J
                   CHTMP = "  BX        XNode1("//
      >                 CH1TMP//","//CH3TMP//","//CH2TMP//")"
                   CALL FNIODBL(CRW,NUNIT, XNODE1(IC,I,J),LPRINT,CHTMP)
@@ -478,23 +478,23 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
                IF (CRW.EQ.'read') THEN
                   HXLIM1(IC,I) = -SQRT(-LOG10(XNODE1(IC,I,1))) ! for HH
                ENDIF
-            ENDDO 
+            ENDDO
 
             IF (NPDFDIM(IC).EQ.2) THEN
-               
+
                DO I=1,NOBSBIN
                   WRITE(CH3TMP,'(I3)'),I
                   CHTMP = "  BX        Nxtot2("//
      >                 CH1TMP//",2,"//CH3TMP//")"
                   CALL FNIOINT(CRW,NUNIT, NXTOT(IC,2,I),LPRINT,CHTMP)
                   DO J=1,NXTOT(IC,2,I)
-                     WRITE(CH2TMP,'(I2)'),J 
+                     WRITE(CH2TMP,'(I2)'),J
                      CHTMP = "  BX        XNode2("//
      >                    CH1TMP//","//CH3TMP//","//CH2TMP//")"
                      CALL FNIODBL(CRW,NUNIT, XNODE2(IC,I,J),LPRINT
      >                    ,CHTMP)
                   ENDDO
-               ENDDO 
+               ENDDO
 
             ENDIF
          ENDIF
@@ -580,14 +580,14 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
                      CALL FNIODBL(CRW,NUNIT, SCALENODE(IC,I,J,K,L),
      >                    LPRINT,CHTMP)
                      IF (CRW.EQ.'read') THEN
-                        HSCALENODE(IC,I,J,K,L) = 
+                        HSCALENODE(IC,I,J,K,L) =
      >                       LOG(LOG(SCALENODE(IC,I,J,K,L)/0.25D0))
                      ENDIF
                   ENDDO
                ENDDO
             ENDDO
          ENDDO
-         
+
          IF (IPRINT.GT.3) THEN
             WRITE(*,*)CSEP0
          ENDIF
@@ -617,8 +617,8 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
                      NXMAX = NXTOT(IC,1,I)
                   ELSEIF (NPDFDIM(IC).EQ.1) THEN
                      NXMAX = (NXTOT(IC,1,I)**2+NXTOT(IC,1,I))/2
-                  ELSEIF (NPDFDIM(IC).EQ.2) THEN 
-                     NXMAX = 
+                  ELSEIF (NPDFDIM(IC).EQ.2) THEN
+                     NXMAX =
      >                    NXTOT(IC,1,I)*NXTOT(IC,2,I)
                      WRITE(*,*)"FX9999RW: ERROR! NPDFdim = 2 "//
      >                    "not yet enabled. Stopped."
@@ -644,7 +644,7 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
 
          LPRINT = .FALSE.
          IF (IPRINT.GT.1) LPRINT=.TRUE.
-         
+
  100     CONTINUE               ! - end of block
       ENDDO
 

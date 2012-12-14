@@ -1,13 +1,13 @@
       SUBROUTINE FNLOFREAD
 ***********************************************************************
-*     
+*
 *     fastNLO_reader: FNLOFREAD
-*     
+*
 *     M. Wobisch, K. Rabbertz, 2011
-*     
+*
 *     Program to read fastNLO v2 tables and derive
 *     QCD cross sections using PDFs from LHAPDF
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
@@ -30,11 +30,11 @@
 *---  is (0,0) and is not to be used!
       DATA XMURS/1.0D0,0.5D0,2.0D0,0.5D0,1.0D0,1.D0,2.D0,0.0D0/
       DATA XMUFS/1.0D0,0.5D0,2.0D0,1.0D0,0.5D0,2.D0,1.D0,0.0D0/
-      
+
 *---  ATTENTION: This is the most likely source of Fortran problems!
-*---  For each scenario, the result array must be declared at least  
+*---  For each scenario, the result array must be declared at least
 *---  as large as in the definition in the common block of the
-*---  corresponding scenario. 
+*---  corresponding scenario.
 *---  See the scenario info printout "Tot. no. of observable bins"
 *---  and compare to the value of the parameter MxObsBin
 *---  in the file fnx9999.inc or [scenario].inc.
@@ -42,15 +42,15 @@
 *---  Integer MxObsBin
 *---  Parameter (MxObsBin = nnn)
 *---  We recommend to name the array according to the scenario.
-      DOUBLE PRECISION XSLO(MXOBSBIN),XSCLLO(MXOBSBIN) 
-      DOUBLE PRECISION XSNLO(MXOBSBIN),XSCLNLO(MXOBSBIN) 
+      DOUBLE PRECISION XSLO(MXOBSBIN),XSCLLO(MXOBSBIN)
+      DOUBLE PRECISION XSNLO(MXOBSBIN),XSCLNLO(MXOBSBIN)
       DOUBLE PRECISION XSTHC(MXOBSBIN),XSCLTHC(MXOBSBIN)
-      DOUBLE PRECISION DXSUCTMP(MXOBSBIN,2),DXSCORTMP(MXOBSBIN,2) 
+      DOUBLE PRECISION DXSUCTMP(MXOBSBIN,2),DXSCORTMP(MXOBSBIN,2)
       DOUBLE PRECISION XSNPC(MXOBSBIN),XSCLNPC(MXOBSBIN)
-      DOUBLE PRECISION DXSUCNPC(MXOBSBIN,2),DXSCORNPC(MXOBSBIN,2) 
+      DOUBLE PRECISION DXSUCNPC(MXOBSBIN,2),DXSCORNPC(MXOBSBIN,2)
       DOUBLE PRECISION XSDAT(MXOBSBIN),XSCLDAT(MXOBSBIN)
-      DOUBLE PRECISION DXSUCDATA(MXOBSBIN,2),DXSCORDATA(MXOBSBIN,2) 
-      DOUBLE PRECISION KFAC(MXOBSBIN),KTHC(MXOBSBIN),KNPC(MXOBSBIN) 
+      DOUBLE PRECISION DXSUCDATA(MXOBSBIN,2),DXSCORDATA(MXOBSBIN,2)
+      DOUBLE PRECISION KFAC(MXOBSBIN),KTHC(MXOBSBIN),KNPC(MXOBSBIN)
 
 *---  Initialization
 C---  *---  Fortran 90 functions for computing precision:
@@ -197,7 +197,7 @@ ckr TBD
       lnpc1 = .false.
       ldata = .false.
 
-*---  Initialize LHAPDF  
+*---  Initialize LHAPDF
 C---  CALL SETLHAPARM('SILENT')
       CALL SETLHAPARM('LOWKEY')
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
@@ -213,7 +213,7 @@ C---  CALL SETLHAPARM('SILENT')
 
 *---  Initial settings
       Call FNSET("P_RESET",0)   ! Reset all selections to zero
-      
+
 *---  Loop over pre-defined scale settings in XMURS(F)
 *---  For now assume only one scale dimension, since (MxScaleDim=1)!
       DO IS=1,NSCLS
@@ -221,7 +221,7 @@ C---  CALL SETLHAPARM('SILENT')
          SCALEF = XMUFS(IS)
 
 *---  Check on pointers to access contributions and scales for NLO and
-*---  2-loop --> otherwise skip this scale setting 
+*---  2-loop --> otherwise skip this scale setting
          IF (LNLO) CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
          IF (LTHC2L) CALL FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
          CALL FX9999PT(SCALER,SCALEF,IPRINT)
@@ -236,7 +236,7 @@ C---  CALL SETLHAPARM('SILENT')
             CALL FX9999CC(SCALER, SCALEF, XSLO, XSCLLO,
      >           DXSUCTMP, DXSCORTMP)
          ENDIF
-         
+
 *---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
 *---  output)
          IF (LLO.AND.LNLO) THEN
@@ -356,11 +356,11 @@ C---  ENDIF
          DO I=1,NOBSBIN
             DO J=1,NDIM
                IF (I.EQ.1) THEN
-                  NDIMBINS(J) = 1 
+                  NDIMBINS(J) = 1
                ELSEIF (LOBIN(I-1,J).LT.LOBIN(I,J)) THEN
-                  NDIMBINS(J) = NDIMBINS(J) + 1 
+                  NDIMBINS(J) = NDIMBINS(J) + 1
                ELSEIF (LOBIN(I,J).LT.LOBIN(I-1,J)) THEN
-                  NDIMBINS(J) = 1 
+                  NDIMBINS(J) = 1
                ENDIF
             ENDDO
 
@@ -433,11 +433,11 @@ C---  ENDIF
          DO I=1,NOBSBIN
             DO J=1,NDIM
                IF (I.EQ.1) THEN
-                  NDIMBINS(J) = 1 
+                  NDIMBINS(J) = 1
                ELSEIF (LOBIN(I-1,J).LT.LOBIN(I,J)) THEN
-                  NDIMBINS(J) = NDIMBINS(J) + 1 
+                  NDIMBINS(J) = NDIMBINS(J) + 1
                ELSEIF (LOBIN(I,J).LT.LOBIN(I-1,J)) THEN
-                  NDIMBINS(J) = 1 
+                  NDIMBINS(J) = 1
                ENDIF
             ENDDO
             WRITE(*,CHFRM)I,BINSIZE(I),
@@ -448,6 +448,6 @@ C---  ENDIF
      >           DXSCORDATA(I,2),DXSCORDATA(I,1)
          ENDDO
       ENDIF
-      
+
       RETURN
       END

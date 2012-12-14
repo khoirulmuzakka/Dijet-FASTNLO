@@ -1,14 +1,14 @@
       SUBROUTINE FNSET(VAR,IVAL)
 ***********************************************************************
-*     
+*
 *     fastNLO routines to select the contributions to be computed
 *     in subsequent calls
-*     
+*
 *     Input:
 *     ------
 *     VAR   Contribution name --> translated into integer of sim. name
 *     IVAL  Selection flag (0: not selected, 1 selected)
-*     
+*
 ***********************************************************************
       IMPLICIT NONE
       CHARACTER*(*) VAR
@@ -16,10 +16,10 @@
       INCLUDE "fnx9999.inc"
       DATA IFNFIRST/0/,
      >     PREFTAB/0/,
-     >     PORDPTHY/0/, PTHRESHCOR/0/, 
+     >     PORDPTHY/0/, PTHRESHCOR/0/,
      >     PQUARKCOMPOSITENESS/0/, PADDLED/0/, PTEVED/0/
      >     PNPCOR/0/, PUEVENT/0/, PDATA/0/
-      
+
 *---  Reset
       IF (VAR.EQ."P_RESET") THEN
          PREFTAB             = 0
@@ -37,7 +37,7 @@
 
 *---  Perturbative Contributions - Fixed Orders
       IF (VAR.EQ."P_ORDPTHY") PORDPTHY = IVAL
-      
+
 *---  Perturbative Contributions - Corrections
       IF (VAR.EQ."P_THRESHCOR") PTHRESHCOR = IVAL
 
