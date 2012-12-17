@@ -16,6 +16,18 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include "FastNLOReaderVersion.cc"
+#ifndef FNLO_VERSION
+#define FNLO_VERSION    "2.1.0"
+#define FNLO_SVNREV     "XXXX"
+#define FNLO_AUTHORS    "D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"
+#define FNLO_WEBPAGE    "http://projects.hepforge.org/fastnlo"
+#define FNLO_AUTHORSv14 "T. Kluge, K. Rabbertz, M. Wobisch"
+#define FNLO_QUOTEv14   "hep-ph/0609285"
+#define FNLO_AUTHORSv2  "D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"
+#define FNLO_QUOTEv2    "arXiv:1109.1310"
+#endif  
+
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -39,14 +51,12 @@ const string FastNLOReader::fOrdName[4][4] = { { "LO",     "NLO",    "NNLO"   , 
 					       { "Undef" , "Undef" , "Undef"  , "Undef"   },
 					       { "LO MC" , "NLO MC", "NNLO MC", "N3LO MC" } };
 const string FastNLOReader::fNSDep[6] = {"v2.0","v2.0","v2.0","v2.1","v2.2","v2.2"};
-int FastNLOReader::WelcomeOnce = 0;
+bool FastNLOReader::WelcomeOnce = false;
 
 //______________________________________________________________________________
 
 FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
 {
-   //double (FastNLOReader::*fptr)(double) const = &FastNLOReader::EvolveAlphas;//this->EvolveAlphas;
-   //double (FastNLOReader::*fptr)(double) const = &this->EvolveAlphas;
    debug["FastNLOReader"]<<"New FastNLOReader reading filename="<<filename<<endl;
    BlockB_Data		= NULL;
    BlockB_LO_Ref	= NULL;
@@ -58,6 +68,7 @@ FastNLOReader::FastNLOReader(string filename) : PrimalScream("FastNLOReader")
    fAlphasCached	= 0.;
    fPDFCached		= 0.;
    SetFilename(filename);
+   if ( !WelcomeOnce ) PrintWelcomeMessage();
 }
 
 
@@ -74,6 +85,70 @@ FastNLOReader::~FastNLOReader(void)
       BBlocksSMCalc.clear();
     }
   }
+}
+
+
+//______________________________________________________________________________
+
+
+
+void FastNLOReader::PrintWelcomeMessage(){
+   //---  Initialization for nice printing
+   const string CSEPS = " ##################################################################################\n";
+   const string LSEPS = " #---------------------------------------------------------------------------------\n";
+
+   char fnlo[100];
+   //sprintf(fnlo,"27[0;31mfast27[0;34mNLO\033[0m",27,0,31,27,0,34);
+   sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
+   char package_version[100]	= FNLO_VERSION;
+   char svnrev[100]		= FNLO_SVNREV;
+   char authors[500]		= FNLO_AUTHORS;
+   char webpage[500]	= FNLO_WEBPAGE;
+   char authorsv14[200]	= FNLO_AUTHORSv14;
+   char quotev14[200]	= FNLO_QUOTEv14;
+   char authorsv2[200]	= FNLO_AUTHORS;
+   char quotev2[200]	= FNLO_QUOTEv2;
+
+   shout<<""<<endl;
+   shout>>"\n";
+   shout>>""<<CSEPS;
+   shout<<"\n";
+   shout<<fnlo<<" Reader"<<endl;
+   shout<<"Version "<<package_version<<"."<<svnrev<<endl;
+   shout<<"\n";
+   shout<<"C++ program to read fastNLO v2 tables and"<<endl;
+   shout<<"derive QCD cross sections using PDFs, e.g. from LHAPDF"<<endl;
+   shout<<"\n";
+   shout>>""<<LSEPS;
+   shout<<"\n";
+   shout<<"Copyright (C) 2011 "<<fnlo<<" Collaboration"<<endl;
+   shout<<authors<<endl;
+   shout<<"\n";
+   info>>" # This program is free software: you can redistribute it and/or modify"<<endl;
+   info>>" # it under the terms of the GNU General Public License as published by"<<endl;
+   info>>" # the Free Software Foundation, either version 3 of the License, or"<<endl;
+   info>>" # (at your option) any later version."<<endl;
+   info>>" # \n";
+   info>>" # This program is distributed in the hope that it will be useful,"<<endl;
+   info>>" # but WITHOUT ANY WARRANTY; without even the implied warranty of"<<endl;
+   info>>" # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the"<<endl;
+   info>>" # GNU General Public License for more details."<<endl;
+   info>>" # \n";
+   info>>" # You should have received a copy of the GNU General Public License"<<endl;
+   info>>" # along with this program. If not, see <http://www.gnu.org/licenses/>"<<endl;
+   info>>" # \n";
+   info>>""<<LSEPS;
+   info>>" # \n";
+   shout<<"The projects web page can be found at:"<<endl;
+   shout<<"   "<<webpage<<endl;
+   shout<<"\n";
+   shout<<"If you use this code, please cite:"<<endl;
+   shout<<"  "<<quotev14<<", "<<authorsv14<<endl;
+   shout<<"  "<<quotev2<<", "<<authorsv2<<endl;
+   shout<<"\n";
+   shout>>""<<CSEPS;
+   WelcomeOnce = true;
+
 }
 
 
