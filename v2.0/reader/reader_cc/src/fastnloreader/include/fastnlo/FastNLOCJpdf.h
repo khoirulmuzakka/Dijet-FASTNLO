@@ -234,7 +234,7 @@ vector<double> FastNLOCJpdf::GetXFX(double xp, double muf) const {
    //
    vector<double> xfx(13);
    for ( int k = -5 ; k<=5 ; k++ ){
-      xfx[k+5] = xp * cjpdf_(&k,&xp,&muf);
+      xfx[k+6] = xp * cjpdf_(&k,&xp,&muf);
    }
    return xfx;
 }
