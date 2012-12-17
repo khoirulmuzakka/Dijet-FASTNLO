@@ -23,7 +23,7 @@
 double Function_Mu(double s1, double s2 );
 
 //__________________________________________________________________________________________________________________________________
-int fnlocppread(int argc, char** argv){
+int main(int argc, char** argv){
 
   // namespaces
   using namespace std;
