@@ -159,8 +159,8 @@ AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 AC_CONFIG_FILES([Makefile
                  reader_cc/Makefile
                  reader_cc/src/Makefile
-                 reader_cc/src/main.cc
                  reader_cc/src/fastnloreader/Makefile
+                 reader_cc/src/fastnloreader/FastNLOReaderVersion.cc
                  reader_cc/src/fastnloreader/include/Makefile
                  reader_cc/src/fastnloreader/include/fastnlo/Makefile
                  reader_f/Makefile
