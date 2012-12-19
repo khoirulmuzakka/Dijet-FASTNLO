@@ -15,17 +15,17 @@ namespace say {
 class speaker {
 public:
    speaker(std::string prefix="",say::Verbosity volume=say::INFO,bool err=false,bool quiet=false);
-   speaker(const speaker& spk){;}; 
+   speaker(const speaker& spk){;};
    ~speaker();
-   //speaker(const speaker& spk) : weg(0) {;}; 
+   //speaker(const speaker& spk) : weg(0) {;};
    std::ostream& operator[] (std::string fct) const ;
    const speaker& operator+ (std::string fct) const {return this->prefix(fct);}
    const speaker& prefix(std::string fct) const ;
    std::ostream& operator() (std::string fct) const ;
-   
+
    template<typename T> std::ostream& operator<< (T arg) const {
       if (fquiet) return *weg;
-      else {	
+      else {
 	 if (errs && fe2cerr) return std::cerr<<pref<<arg;
 	 else return std::cout<<pref<<arg;
       }
@@ -42,7 +42,7 @@ public:
    void SetVolume(say::Verbosity volume) {fvol=volume;};
    static int SetGlobalVerbosity(say::Verbosity volume);
    static void ErrorToErrStream(bool ToCerr){fe2cerr=ToCerr;};
-   
+
 protected:
    //std::ostream weg;
    static std::ostream* weg;
@@ -70,7 +70,7 @@ namespace say {
 
 
 class PrimalScream {
-public: 
+public:
    PrimalScream(std::string classname);//,std::string prefix="");
    void SetVerbosity(say::Verbosity volume);
    std::string cn;

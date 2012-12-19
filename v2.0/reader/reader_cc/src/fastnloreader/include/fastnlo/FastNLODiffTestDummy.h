@@ -31,12 +31,12 @@ using namespace std;
 class FastNLODiffTestDummy : public FastNLODiffReader {
 
 public:
-   
+
    FastNLODiffTestDummy(string filename);
    ~FastNLODiffTestDummy(void){;};
-  
+
 protected:
-   
+
    // inherited functions
    double EvolveAlphas(double Q) const ;
    bool InitPDF();

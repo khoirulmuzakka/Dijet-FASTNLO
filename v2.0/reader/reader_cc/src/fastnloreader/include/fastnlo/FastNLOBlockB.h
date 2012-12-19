@@ -18,18 +18,18 @@
 
 using namespace std;
 
-class FastNLOBlockB { 
+class FastNLOBlockB {
 
 protected:
 
    static const int tablemagicno	= 1234567890;
-  
+
 public:
 
    string fname;
    int   fNObsBins;
    int   fIcontr;
-  
+
    // ---- Block B ---- //
    static const int DividebyNevt = 1;
 
@@ -39,7 +39,7 @@ public:
    int IContrFlag1;
    int IContrFlag2;
    int IContrFlag3;
-   int NScaleDep;  
+   int NScaleDep;
 
    vector < string > CtrbDescript;
    vector < string > CodeDescript;
@@ -118,7 +118,7 @@ public:
    vector < vector < vector < vector < double > > > > PdfLc;
    vector < vector < double > > AlphasTwoPi_v20;
 
-  
+
 public:
 
    FastNLOBlockB(const char* name, const int NObsBins );
@@ -133,7 +133,7 @@ public:
    int GetNxmax(int i);
    int GetTotalScalevars();
    int GetTotalScalenodes();
-  
+
    void ResizeTable( vector<double >* v, int dim0 );
    void ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 );
    void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 );
@@ -151,19 +151,19 @@ public:
 
    template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false);
    int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false );
-   
+
    template<typename T> void ResizeFlexibleVector(vector<T>* v, vector<T>* nom);
    void ResizeFlexibleVector(vector<double >* v, vector<double >*nom ){ v->resize(nom->size());};
-   
+
    template<typename T> int ReadTable( vector<T>* v, istream *table );
    int ReadTable( vector<double>* v, istream *table );
-   
+
    void StripWhitespace(string* s);
-    
+
 
 };
 
-template<typename T> 
+template<typename T>
 int FastNLOBlockB::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast){
    int nn = 0;
    int size = 0;
@@ -176,7 +176,7 @@ int FastNLOBlockB::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLa
 };
 
 
-template<typename T> 
+template<typename T>
 void FastNLOBlockB::ResizeFlexibleVector(vector<T>* v, vector<T>* nom){
    v->resize(nom->size());
    for ( unsigned int i = 0 ; i<v->size() ; i++ ){

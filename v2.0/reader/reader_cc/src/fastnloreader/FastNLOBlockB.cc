@@ -48,7 +48,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
     printf("FastNLOBlockB::Read: Cannot read from file.\n");
     return;
   }
-   
+
   int key = 0;
   *table >> key;
   if(key != tablemagicno){
@@ -280,7 +280,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
 	}
       }
 
-      ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1 
+      ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1
       ReadTable  ( &ScaleNode , table );
       //printf("  *  FastNLOBlockB::Read(). Read %d lines of ScaleNode.\n",nsn);
 
@@ -293,7 +293,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       ResizeTable( &AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes() );
 
     }
-      
+
     if ( NScaleDep >= 3 ) {
       int nn3 = 0;
 
@@ -308,7 +308,7 @@ void FastNLOBlockB::ReadBlockB(istream *table){
       nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table , true );
       nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table , true );
       nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table , true );
-         
+
       ResizeFlexibleVector( &PdfLcMuVar  , &SigmaTildeMuIndep );
       AlphasTwoPi.resize(ScaleNodeScale1.size());
       for ( unsigned int i=0; i<AlphasTwoPi.size() ; i++ ){
@@ -479,7 +479,7 @@ void FastNLOBlockB::ResizeTable(vector<vector<vector<vector<vector<vector<vector
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-    
+
 }
 
 
@@ -593,7 +593,7 @@ void FastNLOBlockB::ResizeTable( vector<vector<vector<vector<double > > > >* v, 
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-  
+
 }
 
 

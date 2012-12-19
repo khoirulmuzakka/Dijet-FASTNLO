@@ -1,9 +1,9 @@
 ///@file********************************************************************
-///     
+///
 ///     fastNLO_reader: FNLOCPPREAD
 ///     Program to read fastNLO v2 tables and derive
 ///     QCD cross sections using PDFs e.g. from LHAPDF
-///     
+///
 ///     D. Britzger, K. Rabbertz
 ///
 ///********************************************************************
@@ -19,7 +19,7 @@
 #include "fastnlo/FastNLOLHAPDF.h"
 #include "fastnlo/FastNLOUser.h"
 
-/// Function prototype for flexible-scale function 
+/// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2 );
 
 //__________________________________________________________________________________________________________________________________
@@ -48,7 +48,7 @@ int main(int argc, char** argv){
     printf(" #   ./fnlo-cppread -h\n");
   } else {
     tablename = (const char*) argv[1];
-    if (tablename == "-h"){ 
+    if (tablename == "-h"){
       printf(" #\n");
       printf(" # Usage: ./fnlo-cppread [arguments]\n");
       printf(" # Table input file, def. = table.tab\n");
@@ -85,8 +85,8 @@ int main(int argc, char** argv){
   //--- Number of scale settings
   unsigned int nscls = 1;
   const unsigned int nsclmax = 7;
-  const double xmur[] = { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 }; 
-  const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 }; 
+  const double xmur[] = { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
+  const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
   string ch2tmp = "X";
   if ( argc > 3 ){
     ch2tmp = (const char*) argv[3];
@@ -157,7 +157,7 @@ int main(int argc, char** argv){
   //      9.  Flexible-scale concept
   //     10.  Access cross section and k-factor
   //     11.  Print-out cross section
-  //     12.  Verbosity level 
+  //     12.  Verbosity level
   //     13.  FastNLO for jet-production diffractive DIS
   //           a. Introduction
   //           b. The FastNLOUser.h class
@@ -187,16 +187,16 @@ int main(int argc, char** argv){
   //     CRunDec (alpha_s evolution up to 4 loops, see B. Schmidt, M. Steinhauser,
   //              Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149;
   //              PDF from LHAPDF).
-  // 
+  //
   //     Their use is explained in the following.
   //
-  //     
+  //
   // 1b.
   //     Initialize with PDF from LHAPDF and corresponding alphas value and
   //     evolution for this PDF set. A change of the alpha_s value is only
   //     possible through the choice of the PDF file/set and member, e.g. CT10as.LHgrid
   //         FastNLOLHAPDF fnlolhapdf( tablename , PDFFile , PDFMember );
-  //  
+  //
   //     Print information from LHAPDF
   //         fnlolhapdf.PrintPDFInformation();
   //         int npdf = fnlolhapdf.GetNPDFMembers();
@@ -210,7 +210,7 @@ int main(int argc, char** argv){
   //
   //
   // 1c.
-  //     Initialize with PDF from LHAPDF and GRV alphas evolution (default) 
+  //     Initialize with PDF from LHAPDF and GRV alphas evolution (default)
   //         FastNLOAlphas fnlo( tablename , PDFFile , PDFMember );
   //
   //     Change the alpha_s value through
@@ -232,16 +232,16 @@ int main(int argc, char** argv){
   //         fnlo.SetMz(91.70);
   //
   //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
-  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184) 
+  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
   //
 
-  
+
   // 2.
   // ---- Table information ---- //
   // --- fastNLO user: For a comprehensive insight into the fastNLO variables
   //     you can use:
   //             fnloreader.PrintFastNLOTableConstants(0);
-  //     
+  //
 
 
   // 3.
@@ -251,7 +251,7 @@ int main(int argc, char** argv){
   //     So, before accessing the cross sections, please call:
   //             fnloreader.CalcCrossSection();
 
-  
+
   // 4.
   // ------- Select another PDF set and member ------- //
   // --- fastNLO user: You can select another PDF set and member here.
@@ -263,7 +263,7 @@ int main(int argc, char** argv){
 
   // 5.
   // ------- Changing the alpha_s(M_Z) value and/or evolution ------- //
-  // --- fastNLO user: 
+  // --- fastNLO user:
   //     The alpha_s evolution is provided by the code of the chosen
   //     interface, e.g. GRV alpha_s for the fnloreader instance here.
   //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 values
@@ -272,33 +272,33 @@ int main(int argc, char** argv){
   //            fnloreader.SetAlphasMz(0.1179);
   //
   //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
-  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184) 
+  //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
   //
   //     To use a different alpha_s evolution code one has to interface it.
   //     Here, for example, we use the above-mentioned CRunDec code:
-  // 
+  //
   //  FastNLOCRunDec fnlocrundec( tablename , PDFFile , 0 );
   //  fnlocrundec.SetMz(91.1876);
   //  fnlocrundec.SetAlphasMz(0.1184);
   //  fnlocrundec.CalcCrossSection();
-  
+
 
   // 6.
   // ------- Set the units of your calculation (kPublicationUnits or kAbsoluteUnits) ------- //
   // --- fastNLO user: You can choose the units in which you want
   //     to access (or print) your cross-section results.
   //     There are two possibilites:
-  //       - The default option is 'publication units', i.e. divided by 
+  //       - The default option is 'publication units', i.e. divided by
   //         bin widths if done so in the relevant publication
   //            fnloreader.SetUnits(fastNLO::kPublicationUnits);
   //       - The other option is 'absolute' units in barn, but still in
   //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
-  //    
+  //
   //       fnloreader.SetUnits(kAbsoluteUnits); // in namespace fastNLO
-  //     or 
+  //     or
   //       fnloreader.SetUnits(kPublicationUnits); // in namespace fastNLO
 
-  
+
   // 7.
   // ------- Set the calculation order (if available) ------- //
   // --- fastNLO user: Each fastNLO table comes typically with
@@ -311,23 +311,23 @@ int main(int argc, char** argv){
   //     are used. However, each contribution can be swiched on or off separately.
   //     Please make sure to avoid combinations that do not make sense,
   //     e.g. 2-loop threshold corrections with LO pQCD.
-  //     
+  //
   //     For switching a contribution on/off, its type must be known:
   //       - kFixedOrder		  -> Fixed order calculation (in alpha_s)
   //       - kThresholdCorrection	  -> Threshold corrections
   //       - kElectroWeakCorrection	  -> Electroweak corrections (not derived yet)
   //       - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
   //     plus one must know the 'Id' of this contribution, which can be printed e.g.
-  //     by calling      
+  //     by calling
   //        fnloreader.PrintTableInfo();
   //
   //     To switch a contribution on/off please use:
-  //            fnloreader.SetContributionON( contrib, Id, on/off ) 
-  //     Here, 'contrib' is not the contribution number, but the type 
+  //            fnloreader.SetContributionON( contrib, Id, on/off )
+  //     Here, 'contrib' is not the contribution number, but the type
   //     as given above: kFixedOrder, ...
   //     Within each type the contributions are counted separately starting with Id=0.
   //     The total number of contributions then counts all contributions of all types.
-  
+
 
   // 8.
   // ------- Selecting the scale treatment ------- //
@@ -339,7 +339,7 @@ int main(int argc, char** argv){
   //     factorization scale is limited to some fixed values, usually 0.5, 1.0, and 2.0
   //     plus sometimes also 0.25, see the respective table information.
   //     Note: If threshold corrections are available and switched on for evaluation,
-  //     the scale factors for the renormalization and factorization scale must be identical. 
+  //     the scale factors for the renormalization and factorization scale must be identical.
   //
   //     The function call to set the scale factors is:
   //         fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
@@ -353,10 +353,10 @@ int main(int argc, char** argv){
   // 9.
   // ----- Additional possibilities for scales in 'flexible-scale' tables (v2.1) ----- //
   //     First check, if your table is a flexible-scale table or not
-  //          bool IsFlex = fnloreader.GetIsFlexibleScaleTable() 
+  //          bool IsFlex = fnloreader.GetIsFlexibleScaleTable()
   //     You can choose a function to define how
-  //     to compute the renormalization and factorization scale. 
-  //     Each 'flexible-scale' table comes with two variables that can be used 
+  //     to compute the renormalization and factorization scale.
+  //     Each 'flexible-scale' table comes with two variables that can be used
   //     for calculating the scales. They are called scale1 and scale2 and
   //     at least one needs to have a dimension in "GeV".
   //     DIS tables have typically stored scale1 = Q and scale2 = pt, while
@@ -374,7 +374,7 @@ int main(int argc, char** argv){
   //       - or you can pass a function pointer to FastNLOReader using
   //            fnloreader.SetExternalFuncForMuR( double (*Func)(double,double) );
   //         to pass any function using scale1 and scale2 to fastNLO.
-  //  
+  //
   //     WARNING: Some choice had to be made for the default settings. Please think
   //     carefully about the choice of the scales ...
   //     Default setting for DIS tables:
@@ -396,8 +396,8 @@ int main(int argc, char** argv){
   // INFO: All above-mentioned scale changing functions automatically perform a refilling of the
   //       fastNLO internal PDF cache. To switch it off you can use a boolean, like:
   //       fnloreader.SetMuFFunctionalForm(fastNLO::kScale1 , false );
-  
-  
+
+
   // 10.
   // ---- Access cross sections ---- //
   // --- fastNLO user: To access the cross section from fastNLO
@@ -406,14 +406,14 @@ int main(int argc, char** argv){
   //     If you want to have a pointer to an array of numbers you might use
   //           vector < double > xs = fnloreader.GetCrossSection();
   //           double* cs = &xs[0];
-  //     
+  //
   //     Further you can access the "k-factor", which is calculated with all
   //     'contributions' that are switched on (e.g. non-perturbative corrections)
   //     against the LO fixed-order contribution.
   //     Remark:
-  //          - the proverbial k-factor is NLO vs. LO  
-  //          - 1-loop threshold corrections are vs. LO  
-  //          - 2-loop threshold corrections are vs. NLO  
+  //          - the proverbial k-factor is NLO vs. LO
+  //          - 1-loop threshold corrections are vs. LO
+  //          - 2-loop threshold corrections are vs. NLO
   //          - non-perturbative corrections usually are vs. NLO
   //
   //           vector < double > kFactors = fnloreader.GetKFactors();
@@ -445,7 +445,7 @@ int main(int argc, char** argv){
   // ------- FastNLO for jets in diffractive DIS ------- //
   // 13a.
   //  FastNLO is also applicable to jets in diffractive DIS.
-  //  The calculation of jet cross sections in diffractive 
+  //  The calculation of jet cross sections in diffractive
   //  DIS is performed by adapting the slicing method,
   //  where the xpom integration is performed during the evaluation
   //  of the fastNLO table. The differential cross section
@@ -460,7 +460,7 @@ int main(int argc, char** argv){
   // 13b.
   // --- fastNLO user:
   //  In order to calculate diffractive DIS processes, the user
-  //  has to provide a diffractive PDF, as well as an alpha_s 
+  //  has to provide a diffractive PDF, as well as an alpha_s
   //  evolution code. Both pieces have to be implemented in the
   //  FastNLODiffUser.h file, where the functions
   //     double FastNLODiffUser::EvolveAlphas(double Q)
@@ -468,7 +468,7 @@ int main(int argc, char** argv){
   //     vector<double> FastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf)
   //  have to be implemented in a reasonable way.
   //  Some examples and more help on this, can provide the authors.
-  //  The implementation of the alpha_s evolution code can also be 
+  //  The implementation of the alpha_s evolution code can also be
   //  adapted e.g. from FastNLOAlphas.h or FastNLOCRunDec.h.
   //
   // 13c.
@@ -487,18 +487,18 @@ int main(int argc, char** argv){
   //         xpom[]:    central value of each slice
   //         dxpom[]:   width of each slice
   //     fnlodiff->SetXPomSlicing(int nStep, double* xpom, double* dxpom);
-  //   
+  //
   //  To calculate and access the cross sections use:
   //        vector<double> xs = fnlodiff->GetDiffCrossSection();
   //
   //  If you want to calculate cross sections as fucntion of xpom,
   //  you have to calculate each xpom bin by setting the 'xpomslicing', and
   //  summing all bins by yourself.
-  //  WARNING: 
+  //  WARNING:
   //  In this case, one always have to call SetUnits(fastNLO::kAbsoluteUnits) !
   //
   //  Tipp 1: Some brief studies showed, that already with ca. 10 slices, the
-  //  cross section converges sufficiently fast. The linear slicing is 
+  //  cross section converges sufficiently fast. The linear slicing is
   //  preferred over the logarithmic slicing.
   //  Tipp 2:
   //  Choosing Q2 (or pT) as factorization scale increases the speed significantly.
@@ -525,7 +525,7 @@ int main(int argc, char** argv){
   //    vector<double>  xs = fnlodiff.GetDiffCrossSection();
   //    // Print it
   //    fnlodiff.PrintCrossSections();
-  
+
 
   // 14.
   // ---- Example code of a quick cross section
@@ -573,12 +573,12 @@ int main(int argc, char** argv){
   printf("%s",CSEPL.c_str());
   printf("fnlo-read: Calculate my cross sections\n");
   printf("%s",CSEPL.c_str());
-  
+
   // Instance fastNLO (For this example we assume fnloreader was instantiated already above ...)
   // FastNLOAlphas fnloreader( tablename , PDFFile , 0 );
 
   // Check on existence of LO and NLO (Id = -1 if not existing)
-  int ilo   = fnloreader.ContrId(kFixedOrder, kLeading); 
+  int ilo   = fnloreader.ContrId(kFixedOrder, kLeading);
   int inlo  = fnloreader.ContrId(kFixedOrder, kNextToLeading);
   if ( ilo < 0 || inlo < 0 ){
     printf("fnlo-read: ERROR! LO and/or NLO not found, nothing to be done!\n");
@@ -602,7 +602,7 @@ int main(int argc, char** argv){
   // }
 
   // Switch on LO & NLO, switch off anything else
-  if (!(ilo   < 0)) {fnloreader.SetContributionON( kFixedOrder, 0, true );} 
+  if (!(ilo   < 0)) {fnloreader.SetContributionON( kFixedOrder, 0, true );}
   if (!(inlo  < 0)) {fnloreader.SetContributionON( kFixedOrder, 1, true );}
   if (!(ithc2 < 0)) {fnloreader.SetContributionON( kThresholdCorrection, ithc2, false );}
   if (!(inpc1 < 0)) {fnloreader.SetContributionON( kNonPerturbativeCorrection, inpc1, false );}
@@ -624,10 +624,10 @@ int main(int argc, char** argv){
       //      fnloreader.SetMuFFunctionalForm(kScale2);
       //      fnloreader.SetMuRFunctionalForm(kScale2);
     }
-    
+
     // Calculate cross section
     fnloreader.CalcCrossSection();
-    
+
     // Get results
     vector < double > xsnlo = fnloreader.GetCrossSection();
     vector < double > kfac  = fnloreader.GetKFactors();
@@ -644,13 +644,13 @@ int main(int argc, char** argv){
     vector < double > kthc;
     vector < double > xsnpc;
     vector < double > knpc;
-	
+
     // Start print out
     cout << DSEP << endl;
     printf(" My Cross Sections\n");
     printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
     cout << SSEP << endl;
-    
+
     // Get table constants relevant for print out
     // TBD: This Getter should be renamed!!!
     int NDim = fnloreader.GetNDiffBin();
@@ -659,10 +659,10 @@ int main(int argc, char** argv){
     vector < vector < double > > LoBin = fnloreader.GetLowBinEdge();
     vector < vector < double > > UpBin = fnloreader.GetUpBinEdge();
     vector < double > BinSize = fnloreader.GetBinSize();
-	
+
     // Print
     if ( NDim == 2 ){
-      string header0 = "  IObs  Bin Size IODim1 "; 
+      string header0 = "  IObs  Bin Size IODim1 ";
       string header1 = "   IODim2 ";
       string header2 = " LO cross section   NLO cross section   K NLO";
       if ( ithc2>-1 ){
@@ -674,8 +674,8 @@ int main(int argc, char** argv){
       printf("%s [ %-12s ] %s [  %-12s  ]  <%-12.12s> %s\n",
 	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
       cout << SSEP << endl;
-      for ( unsigned int i=0; i<xslo.size(); i++ ){ 
-	for ( int j=0; j<NDim; j++ ){ 
+      for ( unsigned int i=0; i<xslo.size(); i++ ){
+	for ( int j=0; j<NDim; j++ ){
 	  if ( i==0 ){
 	    NDimBins[j] = 1;
 	  } else if ( LoBin[i-1][j] < LoBin[i][j]){
@@ -718,7 +718,7 @@ int main(int argc, char** argv){
 double Function_Mu(double s1, double s2 ){
   // --- fastNLO user: This is an example function
   //     to demonstrate how you might perform the
-  //     definition of the scales using a 
+  //     definition of the scales using a
   //     'flexible-scale'-table
   double mu = s1*exp(0.3*s2);
   return mu;

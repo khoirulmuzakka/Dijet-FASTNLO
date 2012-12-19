@@ -50,7 +50,7 @@ std::ostream& speaker::operator>> (std::string arg) const {
 
 std::ostream& speaker::print(std::string mes) const {
    if (fquiet) return *weg;
-   else {	
+   else {
       if (errs&&fe2cerr) return std::cerr<<mes;
       else  return std::cout<<mes;
    }
@@ -67,7 +67,7 @@ const speaker& speaker::prefix(std::string fct) const {
       if (errs&&fe2cerr) std::cerr<<fct;
       else std::cout<<fct;
    }
-   return *this; 
+   return *this;
 }
 
 

@@ -33,7 +33,7 @@ MuF is calculated using only one scale lookup table
 
 - SetPhysUnits.
 Availability of changing units afterward in pb, fb, or anything else
-+ switch to differential units and divide by the bin size 
++ switch to differential units and divide by the bin size
 => we would need the dimension of both variables, which define the bin grid
 (like GeV and GeV^2 and 1 (for y))
 -> just implement some more switch!
@@ -57,13 +57,13 @@ KR: Not in a simple basic reader. Also requires external code ...
 
 
 - Printing
-Add additional printout for the cross sections, without showing the 
+Add additional printout for the cross sections, without showing the
 reference cross section!
-The reference cross section is actually only valuable for the authors for 
+The reference cross section is actually only valuable for the authors for
 testing and validation of the routines.
 
 
-- maybe: improve the check if the table exists and 
+- maybe: improve the check if the table exists and
 maybe improve the error handling.
 KR: Yes. And also the PDF set.
 

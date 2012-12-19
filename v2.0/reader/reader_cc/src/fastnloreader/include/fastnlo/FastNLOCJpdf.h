@@ -46,7 +46,7 @@ public:
 
    // ----- Printout ---- //
    void PrintRunDecValues();			// Print values, which are passed to CRunDec for alpha_s evolution
-   
+
    // ---- getters and setters CRunDec variables ---- //
    void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
    double GetAlphasMz() const { return fAlphasMz; };
@@ -57,7 +57,7 @@ public:
    void   SetNloop( int nloop , bool ReCalcCrossSection = false );
    int    GetNloop() const {return fNloop;};
 
-   // ---- CJpdf ---- // 
+   // ---- CJpdf ---- //
    void	  SetISet(int iset);
    int    GetISet() { return fIset;}
 
@@ -74,7 +74,7 @@ protected:
    void InitReasonableRunDecValues();
    static CRunDec fcrundec;
 
-   // ---- CJpdf ---- // 
+   // ---- CJpdf ---- //
    bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
    int fIset;
@@ -156,7 +156,7 @@ void FastNLOCJpdf::SetNf( int Nf , bool ReCalcCrossSection ){
 //______________________________________________________________________________
 
 void FastNLOCJpdf::InitReasonableRunDecValues(){
-   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
+   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value
    fMz = 91.1876;
    SetNf(5);
    fNloop=2;
@@ -166,7 +166,7 @@ void FastNLOCJpdf::InitReasonableRunDecValues(){
    }
 }
 
-   
+
 //______________________________________________________________________________
 
 void FastNLOCJpdf::PrintRunDecValues(){
@@ -198,7 +198,7 @@ double FastNLOCJpdf::EvolveAlphas(double Q) const {
    //   [arXiv:hep-ph/0004189].
 
    double as_crundec = fcrundec.AlphasExact(fAlphasMz, fMz,Q, fNf, fNloop);
-   return as_crundec; 
+   return as_crundec;
 }
 
 

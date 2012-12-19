@@ -30,10 +30,10 @@ using namespace std;
 class FastNLODiffReader : public FastNLOReader {
 
 public:
-   
+
    FastNLODiffReader(string filename);
    virtual ~FastNLODiffReader(void){};
-   
+
    void SetXPomSlicing(int nStep, double* xpom, double* dxpom);
    void SetXPomLogSlicing(int nStep, double xpommin, double xpommax );
    void SetXPomLinSlicing(int nStep, double xpommin, double xpommax );
@@ -51,9 +51,9 @@ public:
    // ---- Print outs must be overwritten ---- //
    void PrintCrossSectionsWithReference();
 
-   
+
 protected:
-   
+
    double fxpom;
    double fzmin;
    double fzmax;

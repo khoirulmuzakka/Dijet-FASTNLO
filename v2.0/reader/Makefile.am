@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 10.11.2011
 #
-# Create separate distribution and installation package for fastNLO_reader 
+# Create separate distribution and installation package for fastNLO_reader
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
@@ -15,7 +15,7 @@ SUBDIRS = reader_cc reader_f
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
+# Add subversion revision number, recipe from Autotools by J. Calcote
 EXTRA_DIST = m4 SVNREV
 # This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
 distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
@@ -31,7 +31,7 @@ dist-hook:
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
-# but NOT before distribution with "make dist"! 
+# but NOT before distribution with "make dist"!
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
 	depcomp install-sh ltmain.sh missing \
 	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \

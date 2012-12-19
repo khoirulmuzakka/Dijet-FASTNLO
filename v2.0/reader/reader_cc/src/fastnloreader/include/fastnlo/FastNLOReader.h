@@ -29,15 +29,15 @@
 
 namespace fastNLO {
    enum EScaleFunctionalForm {
-      kScale1			= 0,	// e.g. mu^2 = Q^2 
-      kScale2			= 1,	// e.g. mu^2 = pt^2 
+      kScale1			= 0,	// e.g. mu^2 = Q^2
+      kScale2			= 1,	// e.g. mu^2 = pt^2
       kQuadraticSum		= 2,	// e.g. mu^2 = ( Q^2 + pt^2 )
-      kQuadraticMean		= 3,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 2 
-      kQuadraticSumOver4	= 4,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 4 
+      kQuadraticMean		= 3,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 2
+      kQuadraticSumOver4	= 4,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 4
       kLinearMean		= 5,	// e.g. mu^2 = (( Q + pt ) / 2 )^2
       kLinearSum		= 6,	// e.g. mu^2 = (( Q + pt ))^2
       kScaleMax			= 7,	// e.g. mu^2 = max( Q^2, pt^2)
-      kScaleMin			= 8,	// e.g. mu^2 = min( Q^2, pt^2) 
+      kScaleMin			= 8,	// e.g. mu^2 = min( Q^2, pt^2)
       kExpProd2			= 9,    // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
       kExtern			= 10	// define an external function for your scale
    };
@@ -188,7 +188,7 @@ protected:
   bool PrepareCache();
 
   void CalcReferenceCrossSection();
-  
+
   double CalcMu(FastNLOReader::EMuX kMuX, double scale1 , double scale2 , double scalefactor);
   double FuncMixedOver1 ( double scale1 , double scale2 ) ;
   double FuncMixedOver2 ( double scale1 , double scale2 ) ;
@@ -201,10 +201,10 @@ protected:
 
   void CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO = false );
   void CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO = false);
-   
+
    FastNLOBlockB* B_NLO() { return BBlocksSMCalc[0][1]; };
    FastNLOBlockB* B_LO() { return BBlocksSMCalc[0][0]; };
-   FastNLOBlockB* B_ThC(int n=0) { 
+   FastNLOBlockB* B_ThC(int n=0) {
       if ( BBlocksSMCalc[fastNLO::kThresholdCorrection].empty() ) return NULL;
       else return BBlocksSMCalc[fastNLO::kThresholdCorrection][n]; };
 

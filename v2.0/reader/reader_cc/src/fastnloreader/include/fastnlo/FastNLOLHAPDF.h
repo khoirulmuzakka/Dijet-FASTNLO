@@ -56,7 +56,7 @@ protected:
 
    double fchksum;
 
-  
+
 };
 
 
@@ -117,7 +117,7 @@ bool FastNLOLHAPDF::InitPDF(){
       error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
    }
-   
+
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFFilename);
    //cout << "PDF set name " << fLHAPDFFilename << endl;
@@ -131,7 +131,7 @@ bool FastNLOLHAPDF::InitPDF(){
 	 return false;
       }
       LHAPDF::initPDF(fiPDFMember);
-   } 
+   }
    fchksum = CalcChecksum(1.);
    return true;
 }

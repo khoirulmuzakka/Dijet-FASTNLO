@@ -6,7 +6,7 @@
 //  FastNLODiffReader                                                   //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
-//  The projects web page can be found at:                              // 
+//  The projects web page can be found at:                              //
 //    http://projects.hepforge.org/fastnlo                              //
 //                                                                      //
 //  If you use this code, please cite:                                  //
@@ -71,9 +71,9 @@ void FastNLODiffReader::SetXPomLogSlicing(int nStep, double xpommin, double xpom
    double *binning = new double[nStep+1];
    double *dxpom   = new double[nStep+1];
    double *xpom    = new double[nStep+1];
-   
+
    double delta_x_log = (log10(xpommax)-log10(xpommin))/nStep;
-   
+
    binning[0]=xpommin;
    // put equidistant binwith on a logarithmic scale
    for(int i=1;i<=nStep;++i){
@@ -94,9 +94,9 @@ void FastNLODiffReader::SetXPomExpSlicing(int nStep, double xpommin, double xpom
    double *binning = new double[nStep+1];
    double *dxpom   = new double[nStep+1];
    double *xpom    = new double[nStep+1];
-   
+
    double delta_x_log = (exp(xpommax)-exp(xpommin))/nStep;
-   
+
    binning[0]=xpommin;
    // put equidistant binwith on a logarithmic scale
    for(int i=1;i<=nStep;++i){
@@ -105,7 +105,7 @@ void FastNLODiffReader::SetXPomExpSlicing(int nStep, double xpommin, double xpom
       xpom[i-1]  = log((exp(binning[i-1])+exp(binning[i]))/2.);
       debug["SetXPomExpSlicing"]<< "binning[i] = "<<binning[i]<<"\tdxpom = "<<dxpom[i-1] << "\txpom = " << xpom[i-1] << endl;
    }
-   
+
    SetXPomSlicing( nStep, xpom, dxpom);
 }
 
@@ -263,10 +263,10 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
 
       // calc reweight at integration edges
       if ( !IsLastX && !IsFirstX ){
-	 const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node 
+	 const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node
 	 const double x1 = BBlocksSMCalc[0][0]->XNode1[nb][nx-1];// prev. node
-	 const double zpom2 = x2/fxpom; 
-	 const double zpom1 = x1/fxpom; 
+	 const double zpom2 = x2/fxpom;
+	 const double zpom1 = x1/fxpom;
 	 double xSpan = 1.;
 	 // wenn jetzt der naechste bin nicht mehr in fzmax ist, dann wird gewichtet
 	 if ( zpom2 > fzmax && zpom < fzmax ){

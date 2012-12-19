@@ -48,7 +48,7 @@ FastNLOH1Fitter::FastNLOH1Fitter(string name) : FastNLOReader(name) {
    //     Otherwise the FastNLO alpha_s evolution code Alphas.cc is used, or
    //     you have to call SetAlphasEvolution.
    //     It might be also convenient to make your scale choices here!
-   
+
    SetAlphasEvolution(kExternAs);
 }
 
@@ -58,7 +58,7 @@ FastNLOH1Fitter::FastNLOH1Fitter(string name) : FastNLOReader(name) {
 
 
 double FastNLOH1Fitter::EvolveAlphas(double Q) const {
-   // --- fastNLO user: 
+   // --- fastNLO user:
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
@@ -75,10 +75,10 @@ double FastNLOH1Fitter::EvolveAlphas(double Q) const {
 
 
 void FastNLOH1Fitter::InitPDF(){
-   // --- fastNLO user: 
+   // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
-   
+
    // nothing todo
 }
 

@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 10.11.2011
 #
-# Create separate distribution and installation package for fastNLO_reader 
+# Create separate distribution and installation package for fastNLO_reader
 #
 # -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
@@ -139,7 +139,7 @@ fi
 AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
 AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
+# Add subversion revision number, recipe from Autotools by J. Calcote
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
 if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];

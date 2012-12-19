@@ -41,7 +41,7 @@ protected:
    double EvolveAlphas(double Q ) const ;
    void InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
-  
+
 };
 
 
@@ -64,7 +64,7 @@ FastNLOQCDNUM::FastNLOQCDNUM(string name) : FastNLOReader(name) {
 
 
 double FastNLOQCDNUM::EvolveAlphas(double Q) const {
-   // --- fastNLO user: 
+   // --- fastNLO user:
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
@@ -85,7 +85,7 @@ double FastNLOQCDNUM::EvolveAlphas(double Q) const {
 
 
 void FastNLOQCDNUM::InitPDF(){
-   // --- fastNLO user: 
+   // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
    // It might be necessary that the PDF grid is recalculated/generated.

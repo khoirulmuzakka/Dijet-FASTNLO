@@ -31,12 +31,12 @@ using namespace std;
 class FastNLODiffDiffFit : public FastNLODiffReader {
 
 public:
-   
+
    FastNLODiffDiffFit(string filename);
    ~FastNLODiffDiffFit(void){;};
-  
+
 protected:
-   
+
    // inherited functions
    double EvolveAlphas(double Q) const ;
    bool InitPDF();
@@ -132,7 +132,7 @@ vector<double> FastNLODiffDiffFit::GetDiffXFX(double xpom, double zpom, double m
    //  parton flavors from tbar to t at a certain
    //  xpom, zpom and factorisation scale.
    //
- 
+
    vector < double > xfx(13);
 
    double xp = zpom;

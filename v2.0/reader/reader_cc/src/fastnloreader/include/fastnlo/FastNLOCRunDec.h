@@ -23,10 +23,10 @@
 //  This class inherits the PDF interface from
 //  FastNLOLHAPDF, while the alpha_s evolution
 //  is superseeded by the CRunDec evolution code.
-//  All paramters of the evolution function are 
+//  All paramters of the evolution function are
 //  handled as static memeber, in order to have a
 //  consistent evolution for all instances.
-//  
+//
 //  The value of alpha_s at Mz however has to be
 //  individually specified for each FastNLOCRunDec
 //   class.
@@ -53,7 +53,7 @@ public:
 
    // ----- Printout ---- //
    void PrintRunDecValues();			// Print values, which are passed to CRunDec for alpha_s evolution
-   
+
    // ---- getters and setters CRunDec variables ---- //
    void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
    double GetAlphasMz() const { return fAlphasMz; };
@@ -153,7 +153,7 @@ void FastNLOCRunDec::SetNf( int Nf , bool ReCalcCrossSection ){
 //______________________________________________________________________________
 
 void FastNLOCRunDec::InitReasonableRunDecValues(){
-   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value  
+   fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value
    fMz = 91.1876;
    SetNf(5);
    fNloop=2;
@@ -163,7 +163,7 @@ void FastNLOCRunDec::InitReasonableRunDecValues(){
    }
 }
 
-   
+
 //______________________________________________________________________________
 
 void FastNLOCRunDec::PrintRunDecValues(){
@@ -213,7 +213,7 @@ double FastNLOCRunDec::EvolveAlphas(double Q) const {
 //    }
 
    double as_crundec = fcrundec.AlphasExact(fAlphasMz, fMz,Q, fNf, fNloop);
-   return as_crundec; 
+   return as_crundec;
 }
 
 

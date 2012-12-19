@@ -9,7 +9,7 @@ in unpacking directory of *.tar.gz file:
 ./configure --prefix=your_local_directory
 (should contain LHAPDF installation, otherwise specify
  separate path via --with-lhapdf=path_to_lhapdf;
- see also ./configure --help) 
+ see also ./configure --help)
 make
 make install
 make check (not yet implemented)
@@ -41,7 +41,7 @@ Scale treatment:
 Two ways of storing scale dependence:
 - Scale interpolation much improved compared to v1.4 or
 - Scale factors and functional form freely choosable a posteriori
- 
+
 Possible table content:
 fastNLO v2 Tables can contain additional contributions like
 - non-perturbative correction factors with uncertainties
@@ -65,11 +65,11 @@ Example settings for work with environment variables for LHAPDF:
 #
 # Add LHAPDF environment
 #
-setenv LHAPDF /home/rabbertz/local                                                                
-setenv LHAPDFBINPATH /home/rabbertz/local/bin                                                     
-setenv LHAPDFLIBPATH /home/rabbertz/local/lib                                                     
-setenv LHAPDFINCLUDEPATH /home/rabbertz/local/include/LHAPDF                                      
-setenv LHAPDFSETPATH /home/rabbertz/local/share/lhapdf/PDFsets                                    
+setenv LHAPDF /home/rabbertz/local
+setenv LHAPDFBINPATH /home/rabbertz/local/bin
+setenv LHAPDFLIBPATH /home/rabbertz/local/lib
+setenv LHAPDFINCLUDEPATH /home/rabbertz/local/include/LHAPDF
+setenv LHAPDFSETPATH /home/rabbertz/local/share/lhapdf/PDFsets
 
 
 For developers only: Reconfiguration, if required, with GNU autotools:
@@ -89,7 +89,7 @@ In directory containing the configure.ac file type:
 ---------------------------------------------------
 #
 # Provide initial versions of required auto-files (usually done via --install)
-# 
+#
 tar xvfz m4/reader_autoinstallfiles_ac-2.65_am-1.11.1.tar.gz -C .
 # Reinitialize for present autoconf/automake versions
 aclocal --force && autoconf && autoheader && automake && libtoolize --force -c

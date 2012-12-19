@@ -34,7 +34,7 @@ protected:
    double EvolveAlphas(double Q) const ;
    bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
-  
+
 };
 
 
@@ -56,7 +56,7 @@ FastNLOUser::FastNLOUser(string name) : FastNLOReader(name) {
 
 
 double FastNLOUser::EvolveAlphas(double Q) const {
-   // --- fastNLO user: 
+   // --- fastNLO user:
    // Implementation of Alpha_s evolution as function of the
    // factorization scale [and alphas(Mz)].
    //
@@ -68,7 +68,7 @@ double FastNLOUser::EvolveAlphas(double Q) const {
 
 
 bool FastNLOUser::InitPDF(){
-   // --- fastNLO user: 
+   // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //  return true, if successful initialization
    //  return false, if PDF initialization failed

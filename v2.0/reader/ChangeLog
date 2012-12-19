@@ -419,7 +419,7 @@
 
 2012-02-14  First public release of fastNLO_reader version 2.1.0, revision 1062:
             ====================================================================
-	
+
 2012-02-13  rabbertz
 
     * FastNLOReader.cc, fnlo-fread.f, main.cc.in, main.f.in: v2: Added forgotten
@@ -781,7 +781,7 @@
 
 2011-11-10  First test version of fastNLO_reader version 2.1.0, revision 923:
             =================================================================
-	
+
 2011-11-10  rabbertz
 
     * SVNREV, configure.ac: Fix for reader distpackage creation

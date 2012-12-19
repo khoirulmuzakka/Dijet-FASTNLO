@@ -10,15 +10,15 @@ using namespace std;
 //______________________________________________________
 //
 // Class Alphas
-// 
+//
 //  Calculation of alpha_s in the MSbar scheme for given alpha_s(Mz)
 //  using exact, iterative solution of 2-/3-/4-loop formulas
 //  as used by GRV hep-ph/9806404
-// 
-//  So far, the code is written for nf=5, and no flavor thresholds 
-//  have been implemented. Therefore the code should be used only 
+//
+//  So far, the code is written for nf=5, and no flavor thresholds
+//  have been implemented. Therefore the code should be used only
 //  for mu_r > m_bottom (which is safe for jet observables)
-// 
+//
 //
 // Authors    : D. Britzger, M. Wobisch
 // Created    : 2011
@@ -63,10 +63,10 @@ void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, 
 int Alphas::CalcNf(double mu){
    //
    //  calculate number of active flavors
-   //  if your scale would result in a larger number of 
+   //  if your scale would result in a larger number of
    //  active flavors than defined in fNf, then return
    //  'only' fNf
-   //  If flavor matching is turned of, then always use 
+   //  If flavor matching is turned of, then always use
    //  fixed number of flavors.
    //
    if ( !bFlavorMatching ) return fNf;
@@ -81,13 +81,13 @@ int Alphas::CalcNf(double mu){
 // calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
 double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
-   
+
    nLoop	= nLoop == 0 ? fnLoop : nLoop;
    double asmz	= alphasMz==0 ? fAlphasMz : alphasMz;
    int nf	= nFlavors == 0 ? CalcNf(mu) : nFlavors;
    double Q2	= pow(mu,2);
 
-   // - initialize pi and do some initial print out 
+   // - initialize pi and do some initial print out
    const string csep41("#########################################");
    const string cseps = csep41 + csep41;
    static bool first = true;
@@ -99,7 +99,7 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
      //     say::info["ALPHAS-GRV"] << "First call:\n";
      PrintInfo();
    }
-   
+
    // - initialize beta functions
    //   static const double twopi = 6.28318530717958647692528;
    const double beta0	= 11. - 2./3. * nf;
@@ -124,7 +124,7 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
       as -= F/(FP-FM)*0.02*as ;
       //printf(" i = %d , alphas = %8.6f , mu = %7.4f\n",i,as,mu);
    }
-   
+
    return as;
 }
 
@@ -135,9 +135,9 @@ void Alphas::PrintInfo(){
    const string cseps = csep41 + csep41;
    static const double twopi = 2. * 4. * atan(1.);
    cout << " " << cseps << endl;
-   printf(" # ALPHAS-GRV: PI              = %#18.15f\n",twopi/2.); 
-   printf(" # ALPHAS-GRV: M_Z/GeV         = %#9.6f\n",fMz); 
-   printf(" # ALPHAS-GRV: a_s(M_Z)        = %#9.6f\n",fAlphasMz); 
+   printf(" # ALPHAS-GRV: PI              = %#18.15f\n",twopi/2.);
+   printf(" # ALPHAS-GRV: M_Z/GeV         = %#9.6f\n",fMz);
+   printf(" # ALPHAS-GRV: a_s(M_Z)        = %#9.6f\n",fAlphasMz);
    printf(" # APLHAS-GRV: a_s loop        = %2i\n",fnLoop);
    printf(" # APLHAS-GRV: flavor-matching = %s\n",(bFlavorMatching?"true":"false"));
    printf(" # APLHAS-GRV: nf (M_Z)        = %2d\n",CalcNf(fMz));
@@ -147,7 +147,7 @@ void Alphas::PrintInfo(){
 
 
 double Alphas::FBeta(double alphasMz, int nLoop, int nf){
-   
+
    // - initialize pi and beta functions
    static const double Pi	= 3.14159265358979312;
    static const double zeta3	= 1.202056903;
@@ -162,7 +162,7 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
 
    double aspi = alphasMz/Pi;
    double aspi2 = pow(aspi,2);
-   
+
    //    if ( nLoop == 2 ){ // 1-loop
    //       return 1./( beta0 * aspi );
    //    }
@@ -173,7 +173,7 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi + (beta10*beta20 + beta103/2.)*aspi2 );
    }
    else if ( nLoop == 4 ){	// 4-loop RGE
-      double beta3	= ( (149753./6. + 3564.*zeta3) - 
+      double beta3	= ( (149753./6. + 3564.*zeta3) -
 			    (1078361./162. + 6508./27.*zeta3) * nf +
 			    (50065./162. + 6472./81.*zeta3) * pow(nf,2) +
 			    1093./729. * pow(nf,3) ) /256.;

@@ -68,7 +68,7 @@ struct TriplenfMmu{
       double Mth;
       double muth;
 };
-  
+
 struct AsmMS{
       double Asexact;
       double mMSexact;
@@ -77,33 +77,33 @@ struct AsmMS{
 // class declaration of CRunDec:
 class CRunDec
 {
-  private: 
+  private:
   // Aux. constants for implicit Runhe-Kutta-Procedure:
   static const double a2=0.2, a3=0.3, a4=0.6, a5=1., a6=0.875;
-       
-  static const double b21=0.2, b31=3./40., b32=9./40., b41=0.3, b42=-0.9, 
+
+  static const double b21=0.2, b31=3./40., b32=9./40., b41=0.3, b42=-0.9,
                       b43=6./5.;
   static const double b51=-11./54., b52=2.5, b53=-70./27., b54=35./27.;
   static const double b61=1631./55296., b62=175./512., b63=575./13824.;
   static const double b64=44275./110592., b65=253./4096.;
-       
+
   static const double c1=37./378., c2=0., c3=250./621., c4=125./594., c5=0.;
   static const double c6= 512./1771.;
-       
-  static const double dc1=37./378.-2825./27648., dc2=0.-0., 
+
+  static const double dc1=37./378.-2825./27648., dc2=0.-0.,
                       dc3=250./621.-18575./48384.;
-  static const double dc4=125./594.-13525./55296., dc5=0.-277./14336., 
+  static const double dc4=125./594.-13525./55296., dc5=0.-277./14336.,
                       dc6=512./1771.-0.25;
-  
+
   // Coefficients for diff. equations:
   double Beta[4], B[4], Gamma[4], C[4], Nf;
-  
+
   // Define constants (if not already done with constructor):
   void SetConstants(int n);
-  
+
   // R.h.s. of diff. equations:
   friend double fSetdydx(CRunDec S,double x, double A,int nl);
-  
+
   friend double fSetdydxa1(CRunDec S,double x, double A);
   friend double fSetdydxM1(CRunDec S,double A, double M);
 
@@ -112,10 +112,10 @@ class CRunDec
 
   friend double fSetdydxa3(CRunDec S,double x, double A);
   friend double fSetdydxM3(CRunDec S,double A, double M);
-  
+
   friend double fSetdydxa4(CRunDec S,double x, double A);
   friend double fSetdydxM4(CRunDec S,double A, double M);
-  
+
   // Additional aux. functions:
   int Abbruch(void);
   double fSetAsL(double Lambda, double Mu, int nl, double AlphaS);
@@ -143,27 +143,27 @@ class CRunDec
   double fas6to5os(double alpha,double mass, double mu,double nlq, double nl);
   double fmq5to6os(double A,double mass,double mu,double nlq,double nl);
   double fmq6to5os(double A,double mass,double mu,double nlq,double nl);
-  
-  double fRungeKuttaImpl(double &x, double y,double &htry, int nl, 
+
+  double fRungeKuttaImpl(double &x, double y,double &htry, int nl,
                       double (*f)(CRunDec, double ,double, int));
   double fRKSchritt(double x,double y,double h,int nl,double &yerr,
                     double (*f)(CRunDec, double ,double));
-     
+
   public:
   // constructor:
   CRunDec();
   CRunDec(int);
-  
+
   // Arrays and structs to store data:
   double mq[4];
   TriplenfMmu nfMmu[4];
   AsmMS AM;
-  
+
   // Function to obtain current number of active flavours:
   int GetNf();
   // Function to set number of active flavours:
   void SetNf(int nf);
-  
+
   // Functions for the running of alpha_s:
   double LamExpl(double asmu, double mu, int nloops);
   double LamImpl(double asmu, double mu,int nloops);
@@ -180,13 +180,13 @@ class CRunDec
   double mMS2mRGI(double mMS, double asmu, int nloops);
   double mRGI2mMS(double mRGI, double asmu, int nloops);
   double mOS2mSI(double mOS, double mq[], double asM, int nloops);
-  double mOS2mMSrun(double mOS, double mq[], double asmu, double mu, int nloops); 
-  double mMS2mOSrun(double mMS, double mq[], double asmu, double mu, int nloops); 
-  double mMS2mRI(double mMS, double asmu, int nloops); 
-  double mOS2mMSit(double mOS, double mq[], double asmu, double mu, int nloops); 
+  double mOS2mMSrun(double mOS, double mq[], double asmu, double mu, int nloops);
+  double mMS2mOSrun(double mMS, double mq[], double asmu, double mu, int nloops);
+  double mMS2mRI(double mMS, double asmu, int nloops);
+  double mOS2mMSit(double mOS, double mq[], double asmu, double mu, int nloops);
   double mMS2mRGImod(double mMS, double asmu, int nloops);
   // Solve coupled differential equations for alpha_s and mq:
-  AsmMS AsmMSrunexact(double mmu, double asmu0, double mu0, double mu1, 
+  AsmMS AsmMSrunexact(double mmu, double asmu0, double mu0, double mu1,
                       int nloops);
 
   // Decoupling relations:
@@ -202,7 +202,7 @@ class CRunDec
                int nloops);
   double mH2mL(double mqh,double ash,double mu1,TriplenfMmu decpar[],double mu2,
                int nloops);
-  
+
   // Overload functions:
   double LamExpl(double asmu, double mu, int nf, int nloops);
   double LamImpl(double asmu, double mu,int nf,int nloops);
@@ -218,11 +218,11 @@ class CRunDec
   double mMS2mRGI(double mMS, double asmu,int nf, int nloops);
   double mRGI2mMS(double mRGI, double asmu,int nf, int nloops);
   double mOS2mSI(double mOS, double mq[], double asM,int nf, int nloops);
-  double mOS2mMSrun(double mOS, double mq[], double asmu, double mu,int nf, 
-                    int nloops); 
-  double mMS2mOSrun(double mMS, double mq[], double asmu, double mu,int nf, 
-                    int nloops); 
-  double mMS2mRI(double mMS, double asmu,int nf, int nloops); 
+  double mOS2mMSrun(double mOS, double mq[], double asmu, double mu,int nf,
+                    int nloops);
+  double mMS2mOSrun(double mMS, double mq[], double asmu, double mu,int nf,
+                    int nloops);
+  double mMS2mRI(double mMS, double asmu,int nf, int nloops);
   double mOS2mMSit(double mOS, double mq[],double asmu,double mu,int nf,int nloops);
   double mMS2mRGImod(double mMS, double asmu,int nf, int nloops);
   double DecAsDownOS(double asmu, double massth, double muth,int nf, int nloops);
@@ -231,7 +231,7 @@ class CRunDec
                    int nloops);
   double DecMqDownOS(double mq, double asmu, double massth, double muth,int nf,
                      int nloops);
-  
+
 };
 
 #endif

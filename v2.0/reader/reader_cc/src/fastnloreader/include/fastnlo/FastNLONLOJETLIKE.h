@@ -89,7 +89,7 @@ double FastNLONLOJETLIKE::EvolveAlphas(double Q) const {
 
    double L = log(Q/Mz);
    L = (b0 + alphasMZ*b1)*L;
-   
+
    return alphasMZ/(1.0 + alphasMZ*L);
 }
 
