@@ -22,7 +22,7 @@ public:
 
    // Getters for Alphas at scale mu
    static double CalcAlphasMu(double mu, double alphasMz = 0, int nLoop = 0, int nFlavors = 0);
-   static double CalcAlphasMuFixedNf(double mu, int nf);		// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
+   static double CalcAlphasMuFixedNf(double mu, int nf);                // calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
    static int CalcNf(double mu);
    static void PrintInfo();
@@ -34,12 +34,12 @@ private:
    static double FBeta(double alphasMz , int nLoop , int nf);
 
 public:
-   static double fMz;			// mass of Z0, which is the nominal scale here
-   static double fAlphasMz;		// alpha_s at starting scale of Mz
-   static int fNf;			// MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
-   static int fnLoop;			// n-loop solution of the RGE
-   static bool bFlavorMatching;		// switch flaovr matching on or off
-   static double fTh[6];		// flavor thresholds (quark masses)
+   static double fMz;                   // mass of Z0, which is the nominal scale here
+   static double fAlphasMz;             // alpha_s at starting scale of Mz
+   static int fNf;                      // MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
+   static int fnLoop;                   // n-loop solution of the RGE
+   static bool bFlavorMatching;         // switch flaovr matching on or off
+   static double fTh[6];                // flavor thresholds (quark masses)
 
 };
 

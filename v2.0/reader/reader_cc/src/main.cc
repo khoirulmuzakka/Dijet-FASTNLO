@@ -27,8 +27,8 @@ int main(int argc, char** argv){
 
   // namespaces
   using namespace std;
-  using namespace say;		// namespace for 'speaker.h'-verbosity levels
-  using namespace fastNLO;	// namespace for fastNLO constants
+  using namespace say;          // namespace for 'speaker.h'-verbosity levels
+  using namespace fastNLO;      // namespace for fastNLO constants
 
   //---  Initialization for nice printing
   const string CSEPS = "##################################################################################\n";
@@ -162,7 +162,7 @@ int main(int argc, char** argv){
   //           a. Introduction
   //           b. The FastNLOUser.h class
   //           c. Calculate diffractive cross sections.
-  //	       d. Diffractive DIS example code
+  //           d. Diffractive DIS example code
   //     14.  Example code
   //     15.  Example analysis
 
@@ -313,9 +313,9 @@ int main(int argc, char** argv){
   //     e.g. 2-loop threshold corrections with LO pQCD.
   //
   //     For switching a contribution on/off, its type must be known:
-  //       - kFixedOrder		  -> Fixed order calculation (in alpha_s)
-  //       - kThresholdCorrection	  -> Threshold corrections
-  //       - kElectroWeakCorrection	  -> Electroweak corrections (not derived yet)
+  //       - kFixedOrder                  -> Fixed order calculation (in alpha_s)
+  //       - kThresholdCorrection         -> Threshold corrections
+  //       - kElectroWeakCorrection       -> Electroweak corrections (not derived yet)
   //       - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
   //     plus one must know the 'Id' of this contribution, which can be printed e.g.
   //     by calling
@@ -378,20 +378,20 @@ int main(int argc, char** argv){
   //     WARNING: Some choice had to be made for the default settings. Please think
   //     carefully about the choice of the scales ...
   //     Default setting for DIS tables:
-  //       - mu_r:  kQuadraticMean	-> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
-  //       - mu_f:  kScale1		-> mu_f = Q
+  //       - mu_r:  kQuadraticMean      -> mu_r = sqrt( (Q^2 + scale2^2)/2. ) // because scale1=Q!
+  //       - mu_f:  kScale1             -> mu_f = Q
   //     Default setting for pp and ppbar tables:
-  //       - mu_r:  kScale1		-> mu_r = scale1
-  //       - mu_f:  kScale1		-> mu_f = scale1
+  //       - mu_r:  kScale1             -> mu_r = scale1
+  //       - mu_f:  kScale1             -> mu_f = scale1
   //
   //     Valid calls are e.g.:
-  //     fnloreader.SetMuRFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_r from scale1 and scale2
-  //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
+  //     fnloreader.SetMuRFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_r from scale1 and scale2
+  //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
   //     fnloreader.SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-  //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);	 // set function how to calculate mu_f from scale1 and scale2
-  //     fnloreader.SetExternalFuncForMuR( &Function_Mu );		 // set external function to calculate mu_r from scale1 and scale2
-  //     fnloreader.SetMuRFunctionalForm(fastNLO::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
-  //     fnloreader.SetMuFFunctionalForm(fastNLO::kExpProd2);	 // set function how to calculate mu_f from scale1 and scale2
+  //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
+  //     fnloreader.SetExternalFuncForMuR( &Function_Mu );         // set external function to calculate mu_r from scale1 and scale2
+  //     fnloreader.SetMuRFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
+  //     fnloreader.SetMuFFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
   //
   // INFO: All above-mentioned scale changing functions automatically perform a refilling of the
   //       fastNLO internal PDF cache. To switch it off you can use a boolean, like:
@@ -635,9 +635,9 @@ int main(int argc, char** argv){
     vector < double > xslo  = xsnlo;
     for (unsigned int i=0;i<xslo.size();i++){
       if ( abs(kfac[i]) > DBL_MIN ){
-	xslo[i] = xslo[i]/kfac[i];
+        xslo[i] = xslo[i]/kfac[i];
       } else {
-	xslo[i] = -1.;
+        xslo[i] = -1.;
       }
     }
     vector < double > xsthc2;
@@ -666,42 +666,42 @@ int main(int argc, char** argv){
       string header1 = "   IODim2 ";
       string header2 = " LO cross section   NLO cross section   K NLO";
       if ( ithc2>-1 ){
-	header2 += "     K THC";
+        header2 += "     K THC";
       }
       if ( inpc1>-1 ){
-	header2 += "     K NPC";
+        header2 += "     K NPC";
       }
       printf("%s [ %-12s ] %s [  %-12s  ]  <%-12.12s> %s\n",
-	     header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
+             header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
       cout << SSEP << endl;
       for ( unsigned int i=0; i<xslo.size(); i++ ){
-	for ( int j=0; j<NDim; j++ ){
-	  if ( i==0 ){
-	    NDimBins[j] = 1;
-	  } else if ( LoBin[i-1][j] < LoBin[i][j]){
-	    NDimBins[j]++;
-	  } else if ( LoBin[i][j] < LoBin[i-1][j]){
-	    NDimBins[j] = 1;
-	  }
-	}
-	if ( ithc2<0 && inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
-	} else if ( inpc1<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i]);
-	} else if ( ithc2<0 ) {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc[i]);
-	} else {
-	  printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-		 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-		 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
-	}
-	printf("\n");
+        for ( int j=0; j<NDim; j++ ){
+          if ( i==0 ){
+            NDimBins[j] = 1;
+          } else if ( LoBin[i-1][j] < LoBin[i][j]){
+            NDimBins[j]++;
+          } else if ( LoBin[i][j] < LoBin[i-1][j]){
+            NDimBins[j] = 1;
+          }
+        }
+        if ( ithc2<0 && inpc1<0 ) {
+          printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F",
+                 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
+        } else if ( inpc1<0 ) {
+          printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
+                 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i]);
+        } else if ( ithc2<0 ) {
+          printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
+                 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+        } else {
+          printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+                 i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                 NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc[i],knpc[i]);
+        }
+        printf("\n");
       }
     } else {
       printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);

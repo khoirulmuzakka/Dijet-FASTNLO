@@ -45,6 +45,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <iostream>
 // KR Adapt to fastnlo environment
+// Untabify
 //#include "CRunDec.h"
 #include "fastnlo/CRunDec.h"
 
@@ -921,7 +922,7 @@ double CRunDec::fMumFromOs2(void){
 double CRunDec::fMumFromOs3(void){
      double erg;
      erg= (double) -7172965./93312. -
-	 (293.*(Nf-1))/216. - (618281.*Pi*Pi)/38880. - ((Nf-1)*Pi*Pi)/9. +
+         (293.*(Nf-1))/216. - (618281.*Pi*Pi)/38880. - ((Nf-1)*Pi*Pi)/9. +
      (695.*Pi*Pi*Pi*Pi)/7776. + (623.*Pi*Pi*log(2))/162. +
      (22.*Pi*Pi*log(2)*log(2))/81. +
      (55.*log(2)*log(2)*log(2)*log(2))/162. + (220.*A4)/27. +
@@ -963,7 +964,7 @@ double CRunDec::mOS2mSI(double mOS, double mq[], double asM, int nl){
 // Function: double CRunDec::mOS2mMSrun(double mOS, double mq[], double asmu,
 //                           double mu, int nl)
 double CRunDec::mOS2mMSrun(double mOS, double mq[], double asmu, double mu,
-			   int nl){
+                           int nl){
      double asM=0.0;
      asM= this-> AlphasExact(asmu, mu, mOS, nl);
      double mum= this-> mOS2mSI(mOS, mq, asM, nl);
@@ -975,7 +976,7 @@ double CRunDec::mOS2mMSrun(double mOS, double mq[], double asmu, double mu,
 // Function: double CRunDec::mMS2mOSrun(double mMS, double mq[], double asmu,
 //                           double mu, int nl)
 double CRunDec::mMS2mOSrun(double mMS, double mq[], double asmu, double mu,
-			   int nl){
+                           int nl){
      double mNeu = mMS2mSI(mMS, asmu, mu, nl);
      double asmNeu = AlphasExact(asmu, mu, mNeu, nl);
      return mMS2mOS(mNeu, mq, asmNeu, mNeu, nl);
@@ -1101,7 +1102,7 @@ double CRunDec::fas5to6os(double A,double mass,double mu,double nlq,double nl){
        (80507.*Zeta3)/27648.);
      sum[4]=
        + pow(A,4)*(
-		   -39.499192691910871413 + (2965705*A4)/54432. - (121*A5)/36. -
+                   -39.499192691910871413 + (2965705*A4)/54432. - (121*A5)/36. -
        (7693*pow(lmM,2))/1152. - (8371*pow(lmM,3))/10368. +
        pow(lmM,4)/1296. - (697121*Zeta2)/19440. - (49*log2*Zeta2)/54. -
        (243892631*Zeta4)/8.70912e6 + (605*Zeta2*Zeta4)/2688. +
@@ -1116,11 +1117,11 @@ double CRunDec::fas5to6os(double A,double mass,double mu,double nlq,double nl){
        nlq*(2.375194240826475 + (173*A4)/5184. + (6661*pow(lmM,2))/10368. +
           (107*pow(lmM,3))/1728. + (557*Zeta2)/162. -
           (697709*Zeta4)/165888. + (115*Zeta5)/576. + (22*Zeta2*log2)/81. -
-	    (1709*Zeta2*pow(log2,2))/20736. +
+            (1709*Zeta2*pow(log2,2))/20736. +
           (173*pow(log2,4))/124416. + (4756441*Zeta3)/995328. +
           lmM*(2.975080911351166 + (41*Zeta2)/54. + (2*log2*Zeta2)/27. +
              (132283*Zeta3)/82944.))
-		   );
+                   );
 
      double erg=0.0;
      for(int i=1;i<=nl;i++){
@@ -1156,26 +1157,26 @@ double CRunDec::fas6to5os(double A,double mass,double mu,double nlq,double nl){
                     nlq*(-2479./31104. - Zeta2/9. - (409.*lmM)/1728));
      sum[4]=A*A*A*A*
        (39.754401025244204746 + (47039*pow(lmM,2))/3456 +
-	(14149*pow(lmM,3))/10368 + pow(lmM,4)/1296 -
-	(2965705*A4)/54432 + (121  *  A5  )/36 +
-	(697121*Zeta2)/19440 + (49*log(2)*Zeta2)/54 + (243892631*Zeta4)/8709120 -
-	(605*Zeta2*Zeta4)/2688 - (330575*Zeta5)/41472 - (587*Zeta2*log(2))/81 +
-	(2057*Zeta4*log(2))/576 + (2699593*Zeta2*pow(log(2),2))/217728 +
-	(121*Zeta2*pow(log(2),3))/432 +
-	nlq*(-1773073/746496 - (9115*pow(lmM,2))/10368 -
-	     (107*pow(lmM,3))/1728 - (173*A4)/5184
-	     - (557*Zeta2)/162 + (697709*Zeta4)/165888 -
-	     (115*Zeta5)/576 - (22*Zeta2*log(2))/81 +
-	     (1709*Zeta2*pow(log(2),2))/20736 -
-	     (173*pow(log(2),4))/124416 +
-	     lmM*(-1140191/373248 - (47*Zeta2)/54 -
-		  (2*log(2)*Zeta2)/27 - (132283*Zeta3)/82944)
-	     - (4756441*Zeta3)/995328) +
-	nlq*nlq*(140825/1492992 + (493*pow(lmM,2))/20736 +
-		 lmM*(1679/186624 + Zeta2/27) +
-		 (13*Zeta2)/162 + (19*Zeta3)/1728) - (1439*Zeta2*Zeta3)/216 +
-	lmM*(21084715/746496 + (35*Zeta2)/9 + (35*log(2)*Zeta2)/27 +
-	     (2922161*Zeta3)/165888));
+        (14149*pow(lmM,3))/10368 + pow(lmM,4)/1296 -
+        (2965705*A4)/54432 + (121  *  A5  )/36 +
+        (697121*Zeta2)/19440 + (49*log(2)*Zeta2)/54 + (243892631*Zeta4)/8709120 -
+        (605*Zeta2*Zeta4)/2688 - (330575*Zeta5)/41472 - (587*Zeta2*log(2))/81 +
+        (2057*Zeta4*log(2))/576 + (2699593*Zeta2*pow(log(2),2))/217728 +
+        (121*Zeta2*pow(log(2),3))/432 +
+        nlq*(-1773073/746496 - (9115*pow(lmM,2))/10368 -
+             (107*pow(lmM,3))/1728 - (173*A4)/5184
+             - (557*Zeta2)/162 + (697709*Zeta4)/165888 -
+             (115*Zeta5)/576 - (22*Zeta2*log(2))/81 +
+             (1709*Zeta2*pow(log(2),2))/20736 -
+             (173*pow(log(2),4))/124416 +
+             lmM*(-1140191/373248 - (47*Zeta2)/54 -
+                  (2*log(2)*Zeta2)/27 - (132283*Zeta3)/82944)
+             - (4756441*Zeta3)/995328) +
+        nlq*nlq*(140825/1492992 + (493*pow(lmM,2))/20736 +
+                 lmM*(1679/186624 + Zeta2/27) +
+                 (13*Zeta2)/162 + (19*Zeta3)/1728) - (1439*Zeta2*Zeta3)/216 +
+        lmM*(21084715/746496 + (35*Zeta2)/9 + (35*log(2)*Zeta2)/27 +
+             (2922161*Zeta3)/165888));
 
      double erg=0.0;
      for(int i=1;i<=nl;i++){
@@ -1616,4 +1617,3 @@ double CRunDec::DecMqDownOS(double mq, double als, double massth,
      SetConstants(nf);
      return (this->DecMqDownOS(mq, als, massth, muth, nl));
 }
-

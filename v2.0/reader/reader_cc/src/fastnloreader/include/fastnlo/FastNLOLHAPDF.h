@@ -127,8 +127,8 @@ bool FastNLOLHAPDF::InitPDF(){
       LHAPDF::initPDFSet(fLHAPDFFilename);
       fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
       if ( fnPDFs < fiPDFMember+1 ){
-	 error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
-	 return false;
+         error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
+         return false;
       }
       LHAPDF::initPDF(fiPDFMember);
    }

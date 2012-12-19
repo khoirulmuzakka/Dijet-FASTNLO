@@ -45,7 +45,7 @@ public:
    FastNLOCJpdf(string name, int iset) ;
 
    // ----- Printout ---- //
-   void PrintRunDecValues();			// Print values, which are passed to CRunDec for alpha_s evolution
+   void PrintRunDecValues();                    // Print values, which are passed to CRunDec for alpha_s evolution
 
    // ---- getters and setters CRunDec variables ---- //
    void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
@@ -58,7 +58,7 @@ public:
    int    GetNloop() const {return fNloop;};
 
    // ---- CJpdf ---- //
-   void	  SetISet(int iset);
+   void   SetISet(int iset);
    int    GetISet() { return fIset;}
 
 protected:
@@ -173,9 +173,9 @@ void FastNLOCJpdf::PrintRunDecValues(){
    static const string csep41("#########################################");
    cout<<csep41<<csep41<<endl;
    cout<<"CRunDec Values: Alphas(Mz)="<<fAlphasMz
-	<<"\tMZ="<<fMz
-	<<"\tn-flavors="<<fNf
-	<<"\tn-loop="<<fNloop<<endl;
+        <<"\tMZ="<<fMz
+        <<"\tn-flavors="<<fNf
+        <<"\tn-loop="<<fNloop<<endl;
    cout<<csep41<<csep41<<endl;
 }
 

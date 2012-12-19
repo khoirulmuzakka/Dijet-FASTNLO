@@ -25,12 +25,12 @@ using namespace std;
 //
 //_____________________________________________________
 
-double Alphas::fMz		= 91.1876;		// mass of Z0, PDG 2012.
-double Alphas::fAlphasMz	= 0.1184;		// alpha_s at starting scale of Mz, PDG 2012; previous was 0.1185, Bethke 2011.
-int Alphas::fNf			= 5;			// MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
-int Alphas::fnLoop		= 2;			// n-loop solution of the RGE
-bool Alphas::bFlavorMatching	= false;			// switch flavor matching on or off
-double Alphas::fTh[6]		= {0.0023, 0.0048, 0.095, 1.275, 4.18, 173.5};	// PDG 2012; check on pole mass, running mass when using in theory ...!
+double Alphas::fMz              = 91.1876;              // mass of Z0, PDG 2012.
+double Alphas::fAlphasMz        = 0.1184;               // alpha_s at starting scale of Mz, PDG 2012; previous was 0.1185, Bethke 2011.
+int Alphas::fNf                 = 5;                    // MAXIMUM number of active flavours. e.g. at low scales mu, number of flavors is calculated with respecting flavor thresholds if FlavorMatching is ON.
+int Alphas::fnLoop              = 2;                    // n-loop solution of the RGE
+bool Alphas::bFlavorMatching    = false;                        // switch flavor matching on or off
+double Alphas::fTh[6]           = {0.0023, 0.0048, 0.095, 1.275, 4.18, 173.5};  // PDG 2012; check on pole mass, running mass when using in theory ...!
 
 
 Alphas::Alphas(){
@@ -82,10 +82,10 @@ int Alphas::CalcNf(double mu){
 
 double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
 
-   nLoop	= nLoop == 0 ? fnLoop : nLoop;
-   double asmz	= alphasMz==0 ? fAlphasMz : alphasMz;
-   int nf	= nFlavors == 0 ? CalcNf(mu) : nFlavors;
-   double Q2	= pow(mu,2);
+   nLoop        = nLoop == 0 ? fnLoop : nLoop;
+   double asmz  = alphasMz==0 ? fAlphasMz : alphasMz;
+   int nf       = nFlavors == 0 ? CalcNf(mu) : nFlavors;
+   double Q2    = pow(mu,2);
 
    // - initialize pi and do some initial print out
    const string csep41("#########################################");
@@ -102,9 +102,9 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
 
    // - initialize beta functions
    //   static const double twopi = 6.28318530717958647692528;
-   const double beta0	= 11. - 2./3. * nf;
-   const double beta1	= 102. - 38./3. * nf;
-   const double beta10	= beta1 / beta0 / beta0;
+   const double beta0   = 11. - 2./3. * nf;
+   const double beta1   = 102. - 38./3. * nf;
+   const double beta10  = beta1 / beta0 / beta0;
    const double MZ2 = pow(fMz,2);
 
    // - exact formula -> extract Lambda from alpha_s(Mz)
@@ -149,16 +149,16 @@ void Alphas::PrintInfo(){
 double Alphas::FBeta(double alphasMz, int nLoop, int nf){
 
    // - initialize pi and beta functions
-   static const double Pi	= 3.14159265358979312;
-   static const double zeta3	= 1.202056903;
-   const double beta0	= (11. - 2./3. * nf) / 4.;
-   const double beta1	= ( 102. - 38./3. * nf ) / 16.;
-   const double beta2	= (2857./2. - 5033./18.*nf + 325./54.*pow(nf,2)) / 64.;
-   const double beta10	= beta1 / beta0;
-   const double beta102	= pow(beta10,2);
-   const double beta103	= pow(beta10,3);
-   const double beta20	= beta2 / beta0;
-   const double C10	= beta10 / beta0 *log(beta0);
+   static const double Pi       = 3.14159265358979312;
+   static const double zeta3    = 1.202056903;
+   const double beta0   = (11. - 2./3. * nf) / 4.;
+   const double beta1   = ( 102. - 38./3. * nf ) / 16.;
+   const double beta2   = (2857./2. - 5033./18.*nf + 325./54.*pow(nf,2)) / 64.;
+   const double beta10  = beta1 / beta0;
+   const double beta102 = pow(beta10,2);
+   const double beta103 = pow(beta10,3);
+   const double beta20  = beta2 / beta0;
+   const double C10     = beta10 / beta0 *log(beta0);
 
    double aspi = alphasMz/Pi;
    double aspi2 = pow(aspi,2);
@@ -169,15 +169,15 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
    if ( nLoop == 2 ){ // 2-loop RGE
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (-beta102) * aspi + (beta103/2.)*aspi2 );
    }
-   else if ( nLoop == 3 ){	// 3-loop RGE
+   else if ( nLoop == 3 ){      // 3-loop RGE
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi + (beta10*beta20 + beta103/2.)*aspi2 );
    }
-   else if ( nLoop == 4 ){	// 4-loop RGE
-      double beta3	= ( (149753./6. + 3564.*zeta3) -
-			    (1078361./162. + 6508./27.*zeta3) * nf +
-			    (50065./162. + 6472./81.*zeta3) * pow(nf,2) +
-			    1093./729. * pow(nf,3) ) /256.;
-      double beta30	= beta3 / beta0;
+   else if ( nLoop == 4 ){      // 4-loop RGE
+      double beta3      = ( (149753./6. + 3564.*zeta3) -
+                            (1078361./162. + 6508./27.*zeta3) * nf +
+                            (50065./162. + 6472./81.*zeta3) * pow(nf,2) +
+                            1093./729. * pow(nf,3) ) /256.;
+      double beta30     = beta3 / beta0;
       return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi  + (beta30/2. - beta10*beta20 + beta103/2.)*aspi2 );
    }
    else {
@@ -186,4 +186,3 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
    }
 
 }
-

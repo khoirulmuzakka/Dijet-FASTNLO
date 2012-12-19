@@ -22,7 +22,7 @@ class FastNLOBlockB {
 
 protected:
 
-   static const int tablemagicno	= 1234567890;
+   static const int tablemagicno        = 1234567890;
 
 public:
 

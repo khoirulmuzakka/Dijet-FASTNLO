@@ -29,32 +29,32 @@
 
 namespace fastNLO {
    enum EScaleFunctionalForm {
-      kScale1			= 0,	// e.g. mu^2 = Q^2
-      kScale2			= 1,	// e.g. mu^2 = pt^2
-      kQuadraticSum		= 2,	// e.g. mu^2 = ( Q^2 + pt^2 )
-      kQuadraticMean		= 3,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 2
-      kQuadraticSumOver4	= 4,	// e.g. mu^2 = ( Q^2 + pt^2 ) / 4
-      kLinearMean		= 5,	// e.g. mu^2 = (( Q + pt ) / 2 )^2
-      kLinearSum		= 6,	// e.g. mu^2 = (( Q + pt ))^2
-      kScaleMax			= 7,	// e.g. mu^2 = max( Q^2, pt^2)
-      kScaleMin			= 8,	// e.g. mu^2 = min( Q^2, pt^2)
-      kExpProd2			= 9,    // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
-      kExtern			= 10	// define an external function for your scale
+      kScale1                   = 0,    // e.g. mu^2 = Q^2
+      kScale2                   = 1,    // e.g. mu^2 = pt^2
+      kQuadraticSum             = 2,    // e.g. mu^2 = ( Q^2 + pt^2 )
+      kQuadraticMean            = 3,    // e.g. mu^2 = ( Q^2 + pt^2 ) / 2
+      kQuadraticSumOver4        = 4,    // e.g. mu^2 = ( Q^2 + pt^2 ) / 4
+      kLinearMean               = 5,    // e.g. mu^2 = (( Q + pt ) / 2 )^2
+      kLinearSum                = 6,    // e.g. mu^2 = (( Q + pt ))^2
+      kScaleMax                 = 7,    // e.g. mu^2 = max( Q^2, pt^2)
+      kScaleMin                 = 8,    // e.g. mu^2 = min( Q^2, pt^2)
+      kExpProd2                 = 9,    // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
+      kExtern                   = 10    // define an external function for your scale
    };
    enum ESMCalculation {
-      kFixedOrder		= 0,	// Fixed order calculation (pQCD)
-      kThresholdCorrection	= 1,	// Threshold corrections
-      kElectroWeakCorrection	= 2,	// Electroweak corrections
-      kNonPerturbativeCorrection= 3	// Non-perturbative corrections|Hadronisation corrections
+      kFixedOrder               = 0,    // Fixed order calculation (pQCD)
+      kThresholdCorrection      = 1,    // Threshold corrections
+      kElectroWeakCorrection    = 2,    // Electroweak corrections
+      kNonPerturbativeCorrection= 3     // Non-perturbative corrections|Hadronisation corrections
    };
    enum ESMOrder {
-      kLeading		        = 0,	// LO,   1-loop, LO MC
-      kNextToLeading        	= 1,	// NLO,  2-loop, NLO MC
-      kNextToNextToLeading	= 2	// NNLO, 3-loop, NNLO MC
+      kLeading                  = 0,    // LO,   1-loop, LO MC
+      kNextToLeading            = 1,    // NLO,  2-loop, NLO MC
+      kNextToNextToLeading      = 2     // NNLO, 3-loop, NNLO MC
    };
    enum EUnits {
-      kAbsoluteUnits		= 0,	// calculate the cross section in barn for each publicated bin
-      kPublicationUnits		= 1	// calculate the cross section in units as given in the according publication
+      kAbsoluteUnits            = 0,    // calculate the cross section in barn for each publicated bin
+      kPublicationUnits         = 1     // calculate the cross section in units as given in the according publication
    };
 }
 
@@ -67,8 +67,8 @@ public:
 
   typedef double(*mu_func)(double,double);
   enum EMuX {
-    kMuR			= 0,	// renormalization scale
-    kMuF			= 1	// factorization scale
+    kMuR                        = 0,    // renormalization scale
+    kMuF                        = 1     // factorization scale
   };
   static const double TWOPI = 6.28318530717958647692528;
   static const double TWOPISQR = 39.47841760435743447533796;
@@ -82,7 +82,7 @@ public:
   void SetFilename(string filename) ;
   void InitScalevariation();
   void SetUnits( fastNLO::EUnits Unit );
-  void SetContributionON( fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);	// Set contribution On/Off. Look for Id of this contribution during initialization.
+  void SetContributionON( fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true); // Set contribution On/Off. Look for Id of this contribution during initialization.
   int ContrId( const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder ) const;
 
   // ---- setters for scales of MuVar tables ---- //
@@ -90,15 +90,15 @@ public:
   void SetMuFFunctionalForm( fastNLO::EScaleFunctionalForm func );// Set the functional form of Mu_F
   void SetFunctionalForm( fastNLO::EScaleFunctionalForm func , FastNLOReader::EMuX kMuX);// Set functional form of MuX
   bool SetScaleFactorsMuRMuF( double xmur, double xmuf);// Set scale factors for MuR and MuF
-  void SetExternalFuncForMuR( mu_func);						// Set external function for scale calculation (optional)
-  void SetExternalFuncForMuF( mu_func );		// Set external function for scale calculation (optional)
+  void SetExternalFuncForMuR( mu_func);                                         // Set external function for scale calculation (optional)
+  void SetExternalFuncForMuF( mu_func );                // Set external function for scale calculation (optional)
 
 
   // ---- Pdf interface ---- //
-  void FillPDFCache( double chksum=0. );					// Prepare for recalculation of cross section with 'new'/updated pdf.
+  void FillPDFCache( double chksum=0. );                                        // Prepare for recalculation of cross section with 'new'/updated pdf.
 
    // ---- alphas cache ---- //
-   void FillAlphasCache();								// prepare for recalculation of cross section with new alpha_s value.
+   void FillAlphasCache();                                                              // prepare for recalculation of cross section with new alpha_s value.
 
   // ---- Do the cross section calculation ---- //
   void CalcCrossSection();
@@ -123,23 +123,23 @@ public:
 
   // ---- Getters for FastNLO table constants ---- //
   int GetNcontrib() const { return Ncontrib; };
-  int GetIExpUnit() const { return Ipublunits; };			// exponent of xs units (like -12 for pb)
-  string GetScenarioName() const { return ScenName; };			// Get Scenario/Table name
-  vector < string > GetScenarioDescription() const { return ScDescript; };	// Get Description of scenario
-  double GetCMSEnergy() const { return Ecms; };				// Get center of mass energy
-  int GetILOord() const { return ILOord; };				// Get number of alpha_s in leading order (1 or 2 usually)
-  int GetNObsBins() const { return NObsBin; };				// Get number of measured bins
-  int GetNDiffBin() const { return NDim; };				// Get number of differential measurement. 1: single differential; 2: double differential
-  vector < int > GetRapidityIndex() const { return RapIndex;};		// Get rapidity indices
-  vector < string > GetDimensionLabel() const { return DimLabel;};	// Get label for measured dimensions
-  vector < int > GetIDiffBin() const { return IDiffBin;};		// Get number of differential bins
-  vector < vector < double > > GetLowBinEdge() const { return LoBin; };	// Get Lower Bin edge [ObsBin][DiffBin]
-  vector < vector < double > > GetUpBinEdge() const { return UpBin; };	// Get Upper Bin edge [ObsBin][DiffBin]
-  vector < double > GetBinSize() const { return BinSize; };		// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
-  int IsNormalized() const { return INormFlag; };			// Normalized Cross sections?
-  string GetScaleDescription(int scalen=0) const { return BBlocksSMCalc[0][0]->ScaleDescript[0][scalen]; };		// Description of renormalization and facorization scale choice
-  int GetNScaleVariations() const;					// Get number of available scale variations
-  vector < double > GetScaleFactors() const;				// Get list of available scale factors
+  int GetIExpUnit() const { return Ipublunits; };                       // exponent of xs units (like -12 for pb)
+  string GetScenarioName() const { return ScenName; };                  // Get Scenario/Table name
+  vector < string > GetScenarioDescription() const { return ScDescript; };      // Get Description of scenario
+  double GetCMSEnergy() const { return Ecms; };                         // Get center of mass energy
+  int GetILOord() const { return ILOord; };                             // Get number of alpha_s in leading order (1 or 2 usually)
+  int GetNObsBins() const { return NObsBin; };                          // Get number of measured bins
+  int GetNDiffBin() const { return NDim; };                             // Get number of differential measurement. 1: single differential; 2: double differential
+  vector < int > GetRapidityIndex() const { return RapIndex;};          // Get rapidity indices
+  vector < string > GetDimensionLabel() const { return DimLabel;};      // Get label for measured dimensions
+  vector < int > GetIDiffBin() const { return IDiffBin;};               // Get number of differential bins
+  vector < vector < double > > GetLowBinEdge() const { return LoBin; }; // Get Lower Bin edge [ObsBin][DiffBin]
+  vector < vector < double > > GetUpBinEdge() const { return UpBin; };  // Get Upper Bin edge [ObsBin][DiffBin]
+  vector < double > GetBinSize() const { return BinSize; };             // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+  int IsNormalized() const { return INormFlag; };                       // Normalized Cross sections?
+  string GetScaleDescription(int scalen=0) const { return BBlocksSMCalc[0][0]->ScaleDescript[0][scalen]; };             // Description of renormalization and facorization scale choice
+  int GetNScaleVariations() const;                                      // Get number of available scale variations
+  vector < double > GetScaleFactors() const;                            // Get list of available scale factors
   bool GetIsFlexibleScaleTable() const { return BBlocksSMCalc[0][0]->NScaleDep >= 3; } // Get, if this table is a 'flexible scale' table or not.
 
 
@@ -153,8 +153,8 @@ public:
   void PrintFastNLODemo();
 
   // ---- Test virtual functions for reasonable values. ---- //
-  bool TestXFX();							// Test if XFX reasonable values
-  bool TestAlphas();							// Test if EvolvaAlphas returns a reasonable value
+  bool TestXFX();                                                       // Test if XFX reasonable values
+  bool TestAlphas();                                                    // Test if EvolvaAlphas returns a reasonable value
 
 
 protected:
@@ -223,7 +223,7 @@ protected:
 
 protected:
 
-  static const int tablemagicno	= 1234567890;
+  static const int tablemagicno = 1234567890;
   static bool WelcomeOnce;
   string ffilename;
   int fScalevar;
@@ -231,14 +231,14 @@ protected:
   double fScaleFacMuF;
   fastNLO::EScaleFunctionalForm fMuRFunc;
   fastNLO::EScaleFunctionalForm fMuFFunc;
-  fastNLO::EUnits		fUnits;
+  fastNLO::EUnits               fUnits;
   bool fPDFSuccess;
   double fPDFCached;
   double fAlphasCached;
-  mu_func Fct_MuR;				// Function, if you define your functional form for your scale external
-  mu_func Fct_MuF;				// Function, if you define your functional form for your scale external
-  vector < vector < bool > > bUseSMCalc;		// switch calculations ON/OFF
-  vector < vector < bool > > bUseNewPhys;		// switch calculations ON/OFF
+  mu_func Fct_MuR;                              // Function, if you define your functional form for your scale external
+  mu_func Fct_MuF;                              // Function, if you define your functional form for your scale external
+  vector < vector < bool > > bUseSMCalc;                // switch calculations ON/OFF
+  vector < vector < bool > > bUseNewPhys;               // switch calculations ON/OFF
 
   // ---- Block A1 ---- //
   int Itabversion;
@@ -274,8 +274,8 @@ protected:
   FastNLOBlockB* BlockB_Data;
   FastNLOBlockB* BlockB_LO_Ref;
   FastNLOBlockB* BlockB_NLO_Ref;
-  vector < vector < FastNLOBlockB* > > BBlocksSMCalc;	// BlockB's for SM corrections
-  vector < vector < FastNLOBlockB* > > BBlocksNewPhys;	// BlockB's for New physics corrections
+  vector < vector < FastNLOBlockB* > > BBlocksSMCalc;   // BlockB's for SM corrections
+  vector < vector < FastNLOBlockB* > > BBlocksNewPhys;  // BlockB's for New physics corrections
 
   // ---- Cross sections ---- //
   vector < double > XSection_LO;

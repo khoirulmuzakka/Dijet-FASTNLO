@@ -86,18 +86,18 @@ AC_MSG_NOTICE([Looking for LHAPDF installation ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([lhapdf],
-	[AS_HELP_STRING([--with-lhapdf],
-	[Specify location of LHAPDF installation. This takes precedence over
-	an LHAPDF environment variable, the prefix path or other methods.
-	Please note: LHAPDF is mandatory in order to use fastNLO_reader!])],
-	[if test "x$withval" = "xno"; then
-	    AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
-	 fi
+        [AS_HELP_STRING([--with-lhapdf],
+        [Specify location of LHAPDF installation. This takes precedence over
+        an LHAPDF environment variable, the prefix path or other methods.
+        Please note: LHAPDF is mandatory in order to use fastNLO_reader!])],
+        [if test "x$withval" = "xno"; then
+            AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
+         fi
          if test "x$withval" != "xyes"; then
                AC_SUBST([LHAPDF],[$withval])
-	       AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
-	 fi],
-	[])
+               AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
+         fi],
+        [])
 
 if test "x$withval" != "xno"; then
    if test "x$LHAPDF" = "x"; then
@@ -165,6 +165,6 @@ AC_CONFIG_FILES([Makefile
                  reader_cc/src/fastnloreader/include/fastnlo/Makefile
                  reader_f/Makefile
                  reader_f/main.f
-	        ])
+                ])
 
 AC_OUTPUT

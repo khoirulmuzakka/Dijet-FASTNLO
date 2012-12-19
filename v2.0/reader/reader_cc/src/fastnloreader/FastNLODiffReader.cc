@@ -62,8 +62,8 @@ void FastNLODiffReader::SetXPomLogSlicing(int nStep, double xpommin, double xpom
    if ( xpommin < 1.e-4 ) {
       warn["SetXPomLogSlicing"]<<"xpommin should not be too small in order to have sufficent nodes."<<endl;
       if ( xpommin == 0 ) {
-	 warn["SetXPomLogSlicing"]<<"xpommin should espc. not be '0'!"<<endl;
-	 exit(1);
+         warn["SetXPomLogSlicing"]<<"xpommin should espc. not be '0'!"<<endl;
+         exit(1);
       }
    }
 
@@ -183,9 +183,9 @@ vector < double > FastNLODiffReader::GetDiffCrossSection( ){
       FastNLOReader::CalcCrossSection(); // this calls GetXFX() very very often!
 
       for ( int i = 0 ; i<NObsBin ; i++ ){
-	 if (i==0)debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;;
-	 xs[i] += XSection[i] * fdxPoms[ixp] ;
-	 xsLO[i] += XSection_LO[i] * fdxPoms[ixp] ;
+         if (i==0)debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;;
+         xs[i] += XSection[i] * fdxPoms[ixp] ;
+         xsLO[i] += XSection_LO[i] * fdxPoms[ixp] ;
       }
       info>>"."; fflush(stdout);
       interv+=fdxPoms[ixp];
@@ -224,16 +224,16 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
       int nx = -1;
       int nb = -1;
       for ( unsigned int ib = 0 ; nb == -1 && ib<BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
-	 if ( BBlocksSMCalc[0][0]->GetNxmax(ib) != BBlocksSMCalc[0][1]->GetNxmax(ib) )
-	    error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have same number of x-bins."<<endl;
-	 for ( unsigned int ix = 0 ; nx == -1 && ix<BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
-	    if ( BBlocksSMCalc[0][0]->XNode1[ib][ix] != BBlocksSMCalc[0][1]->XNode1[ib][ix] )
-	       error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have idnetical x-bins."<<endl;
-	    if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
-	       nx = ix;
-	       nb = ib;
-	    }
-	 }
+         if ( BBlocksSMCalc[0][0]->GetNxmax(ib) != BBlocksSMCalc[0][1]->GetNxmax(ib) )
+            error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have same number of x-bins."<<endl;
+         for ( unsigned int ix = 0 ; nx == -1 && ix<BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+            if ( BBlocksSMCalc[0][0]->XNode1[ib][ix] != BBlocksSMCalc[0][1]->XNode1[ib][ix] )
+               error["FastNLODiffReader::GetXFX"]<<"LO and NLO tables must have idnetical x-bins."<<endl;
+            if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
+               nx = ix;
+               nb = ib;
+            }
+         }
       }
 
       // check if this is the 'last' or 'first' xnode
@@ -241,49 +241,49 @@ vector<double> FastNLODiffReader::GetXFX(double xp, double muf) const {
       bool IsFirstX = nx == 0 ;
 
       if ( nx == -1 || nb == -1 ) {
-	 //printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
-	 for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
-	    for ( int ix = 0 ; nx == -1 && ix<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
-	       if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
-		  nx = ix;
-		  nb = ib;
-	       }
-	       if (  fabs ( 1. - xp / BBlocksSMCalc[0][0]->XNode1[ib][ix] ) < 1.e-6 ){
-		  warn["FastNLODiffReader::GetXFX"]<<"Could not find x-node index for xp = "<<xp<<endl;
-		  warn>>"   but a quite close one: xp = "<<xp<<", xnode = "<<BBlocksSMCalc[0][0]->XNode1[ib][ix]<<endl;
-	       }
-	    }
-	 }
-	 //exit(1);
-	 IsLastX = true;
-	 IsFirstX = true;
+         //printf("Warning. Could not find x-node index for xp = %12.8e.\n",xp);
+         for ( int ib = 0 ; nb == -1 && ib<(int)BBlocksSMCalc[0][0]->XNode1.size() ; ib++ ) {
+            for ( int ix = 0 ; nx == -1 && ix<(int)BBlocksSMCalc[0][0]->XNode1[ib].size(); ix++ ) {
+               if ( xp == BBlocksSMCalc[0][0]->XNode1[ib][ix] ) {
+                  nx = ix;
+                  nb = ib;
+               }
+               if (  fabs ( 1. - xp / BBlocksSMCalc[0][0]->XNode1[ib][ix] ) < 1.e-6 ){
+                  warn["FastNLODiffReader::GetXFX"]<<"Could not find x-node index for xp = "<<xp<<endl;
+                  warn>>"   but a quite close one: xp = "<<xp<<", xnode = "<<BBlocksSMCalc[0][0]->XNode1[ib][ix]<<endl;
+               }
+            }
+         }
+         //exit(1);
+         IsLastX = true;
+         IsFirstX = true;
       }
 
       a = GetDiffXFX( fxpom, zpom, muf);
 
       // calc reweight at integration edges
       if ( !IsLastX && !IsFirstX ){
-	 const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node
-	 const double x1 = BBlocksSMCalc[0][0]->XNode1[nb][nx-1];// prev. node
-	 const double zpom2 = x2/fxpom;
-	 const double zpom1 = x1/fxpom;
-	 double xSpan = 1.;
-	 // wenn jetzt der naechste bin nicht mehr in fzmax ist, dann wird gewichtet
-	 if ( zpom2 > fzmax && zpom < fzmax ){
-	    double xmax = fzmax*fxpom;
-	    double ldelx = log10(xmax) - log10(xp);
-	    double ldelx0 = log10(x2) - log10(xp);
-	    xSpan *= ldelx/ldelx0 + 0.5 ;
-	 }
-	 if ( zpom1 < fzmin && zpom > fzmin ){
-	    double xmin = fzmin*fxpom;
-	    double ldelx = log10(xp) - log10(xmin);
-	    double ldelx0 = log10(xp) - log10(x1);
-	    xSpan *= ldelx/ldelx0 + 0.5 ;
-	 }
-	 if ( xSpan != 1. ){
-	    for ( unsigned  int i = 0 ; i<a.size() ; i++ ) a[i]*=xSpan;
-	 }
+         const double x2 = BBlocksSMCalc[0][0]->XNode1[nb][nx+1];// next node
+         const double x1 = BBlocksSMCalc[0][0]->XNode1[nb][nx-1];// prev. node
+         const double zpom2 = x2/fxpom;
+         const double zpom1 = x1/fxpom;
+         double xSpan = 1.;
+         // wenn jetzt der naechste bin nicht mehr in fzmax ist, dann wird gewichtet
+         if ( zpom2 > fzmax && zpom < fzmax ){
+            double xmax = fzmax*fxpom;
+            double ldelx = log10(xmax) - log10(xp);
+            double ldelx0 = log10(x2) - log10(xp);
+            xSpan *= ldelx/ldelx0 + 0.5 ;
+         }
+         if ( zpom1 < fzmin && zpom > fzmin ){
+            double xmin = fzmin*fxpom;
+            double ldelx = log10(xp) - log10(xmin);
+            double ldelx0 = log10(xp) - log10(x1);
+            xSpan *= ldelx/ldelx0 + 0.5 ;
+         }
+         if ( xSpan != 1. ){
+            for ( unsigned  int i = 0 ; i<a.size() ; i++ ) a[i]*=xSpan;
+         }
       }
    }
 

@@ -26,8 +26,8 @@ public:
    template<typename T> std::ostream& operator<< (T arg) const {
       if (fquiet) return *weg;
       else {
-	 if (errs && fe2cerr) return std::cerr<<pref<<arg;
-	 else return std::cout<<pref<<arg;
+         if (errs && fe2cerr) return std::cerr<<pref<<arg;
+         else return std::cout<<pref<<arg;
       }
    }
    std::ostream& operator>> (std::string arg) const ;
