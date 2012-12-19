@@ -64,6 +64,7 @@ namespace say {
    extern speaker info;
    extern speaker warn;
    extern speaker error;
+   extern speaker shout; // same as error but streamed to cout
    extern int SetGlobalVerbosity(Verbosity verbosity);
 }
 
@@ -79,6 +80,7 @@ protected:
    speaker info;
    speaker warn;
    speaker error;
+   speaker shout;
 };
 
 #endif //SPEAKER_H_
