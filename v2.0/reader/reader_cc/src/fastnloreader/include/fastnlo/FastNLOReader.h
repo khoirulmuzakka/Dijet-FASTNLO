@@ -159,6 +159,7 @@ public:
 
 protected:
 
+  void PrintWelcomeMessage();
   void Init() ;
   void ReadTable();
   void StripWhitespace(string* s);
@@ -223,7 +224,7 @@ protected:
 protected:
 
   static const int tablemagicno	= 1234567890;
-  static int WelcomeOnce;
+  static bool WelcomeOnce;
   string ffilename;
   int fScalevar;
   double fScaleFacMuR;
