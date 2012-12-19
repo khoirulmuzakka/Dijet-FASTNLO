@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 22.11.2012
 #
-# fastNLO_reader: C++ version 
+# fastNLO_reader: C++ version
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
@@ -25,7 +25,7 @@ endif
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
-fnlo_cppread_SOURCES = main.cc fnlo-cppread.cc
+fnlo_cppread_SOURCES = main.cc
 
 #
 # Preprocessor flags
@@ -45,7 +45,7 @@ fnlo_cppread_CXXFLAGS = -g -O0 -Wall
 #
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/fastnloreader -lfastnloreader
-if HAVE_LHAPDFCONFIG 
+if HAVE_LHAPDFCONFIG
    fnlo_cppread_LDFLAGS = `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader $(my_lib_dirs)
 else
    fnlo_cppread_LDFLAGS = -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader $(my_lib_dirs)
@@ -55,5 +55,5 @@ endif
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
-# but not for distribution 
+# but not for distribution
 MAINTAINERCLEANFILES = Makefile.in
