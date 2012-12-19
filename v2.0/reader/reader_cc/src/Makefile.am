@@ -9,9 +9,6 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# Subdirectories
-SUBDIRS = fastnloreader
-
 #
 # Targets
 #
