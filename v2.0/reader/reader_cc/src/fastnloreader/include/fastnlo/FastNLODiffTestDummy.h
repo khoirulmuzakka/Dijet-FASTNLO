@@ -33,7 +33,9 @@ class FastNLODiffTestDummy : public FastNLODiffReader {
 public:
 
    FastNLODiffTestDummy(string filename);
-   ~FastNLODiffTestDummy(void){;};
+   ~FastNLODiffTestDummy(void) {
+      ;
+   };
 
 protected:
 
@@ -51,8 +53,7 @@ protected:
 
 
 
-FastNLODiffTestDummy::FastNLODiffTestDummy(string filename) : FastNLODiffReader(filename)
-{
+FastNLODiffTestDummy::FastNLODiffTestDummy(string filename) : FastNLODiffReader(filename) {
 }
 
 
@@ -66,8 +67,8 @@ double FastNLODiffTestDummy::EvolveAlphas(double Q) const {
    //
 
    static const int NF=4; // from h12006B_wrapper.h
-   static const double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-   static const  double b1 =  (51. - 19./3.*NF);
+   static const double b0 = (11. - 2./3.*NF);  // The beta coefficients of the QCD beta function
+   static const  double b1 = (51. - 19./3.*NF);
 
    //      double lmd = 0.399; // according to matthias
    static const double lmd = 0.3395; // according to matthias
@@ -81,7 +82,7 @@ double FastNLODiffTestDummy::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLODiffTestDummy::InitPDF(){
+bool FastNLODiffTestDummy::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
@@ -104,7 +105,7 @@ vector<double> FastNLODiffTestDummy::GetDiffXFX(double xpom, double zpom, double
    vector < double > xfx(13);
 
    double guess = 1/xpom/(-2.*log10(zpom));
-   for(int i = 2; i< 11; i++ )
+   for (int i = 2; i< 11; i++)
       xfx[i]=guess;
    return xfx;
 }

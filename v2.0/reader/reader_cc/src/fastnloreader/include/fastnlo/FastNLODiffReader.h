@@ -32,20 +32,27 @@ class FastNLODiffReader : public FastNLOReader {
 public:
 
    FastNLODiffReader(string filename);
-   virtual ~FastNLODiffReader(void){};
+   virtual ~FastNLODiffReader(void) {};
 
    void SetXPomSlicing(int nStep, double* xpom, double* dxpom);
-   void SetXPomLogSlicing(int nStep, double xpommin, double xpommax );
-   void SetXPomLinSlicing(int nStep, double xpommin, double xpommax );
-   void SetXPomExpSlicing(int nStep, double xpommin, double xpommax );
-   void SetZRange( double zmin , double zmax ) { fzmin = zmin ; fzmax = zmax; };
-   double GetZRangeMin() { return fzmin;};
-   double GetZRangeMax() { return fzmax;};
+   void SetXPomLogSlicing(int nStep, double xpommin, double xpommax);
+   void SetXPomLinSlicing(int nStep, double xpommin, double xpommax);
+   void SetXPomExpSlicing(int nStep, double xpommin, double xpommax);
+   void SetZRange(double zmin , double zmax) {
+      fzmin = zmin ;
+      fzmax = zmax;
+   };
+   double GetZRangeMin() {
+      return fzmin;
+   };
+   double GetZRangeMax() {
+      return fzmax;
+   };
 
-   vector < double > GetCrossSection( );
-   void CalcCrossSection( );
-   vector < double > GetDiffCrossSection( );
-   void FillPDFCache( bool ReCalcCrossSection = false );
+   vector < double > GetCrossSection();
+   void CalcCrossSection();
+   vector < double > GetDiffCrossSection();
+   void FillPDFCache(bool ReCalcCrossSection = false);
    vector < double > GetReferenceCrossSection();
 
    // ---- Print outs must be overwritten ---- //

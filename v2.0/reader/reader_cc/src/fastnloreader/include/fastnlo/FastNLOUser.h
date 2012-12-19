@@ -67,7 +67,7 @@ double FastNLOUser::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLOUser::InitPDF(){
+bool FastNLOUser::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //  return true, if successful initialization

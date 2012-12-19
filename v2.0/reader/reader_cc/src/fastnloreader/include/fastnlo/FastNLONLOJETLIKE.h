@@ -97,7 +97,7 @@ double FastNLONLOJETLIKE::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLONLOJETLIKE::InitPDF(){
+void FastNLONLOJETLIKE::InitPDF() {
    //
    //  Initalize some necessary LHAPDF parameters
    //

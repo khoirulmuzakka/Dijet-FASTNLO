@@ -33,7 +33,9 @@ class FastNLODiffDiffFit : public FastNLODiffReader {
 public:
 
    FastNLODiffDiffFit(string filename);
-   ~FastNLODiffDiffFit(void){;};
+   ~FastNLODiffDiffFit(void) {
+      ;
+   };
 
 protected:
 
@@ -49,22 +51,22 @@ protected:
 //______________________________________________________________________________
 
 
-extern "C"{
+extern "C" {
    void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
-   double asfunc_( double* r2, int* nf  , int* ierr);
+   double asfunc_(double* r2, int* nf  , int* ierr);
    //void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
 
-   void evolfg_(int* itype, double(*func)(double*,double*), double (*)[13] , int* iq0, double* epsi) ;
+   void evolfg_(int* itype, double(*func)(double*,double*), double(*)[13] , int* iq0, double* epsi) ;
    double func_(double*,double*);
-   extern struct{
+   extern struct {
       double xpout;
    } xpfeed_;
-   extern struct{
+   extern struct {
       int xpselect;
    } xpselection_;
 
    //common/misc/proton,def,iq0
-   extern struct{
+   extern struct {
       double proton[13];
       double def[12][13];
       int iq0;
@@ -77,8 +79,7 @@ extern "C"{
 //______________________________________________________________________________
 
 
-FastNLODiffDiffFit::FastNLODiffDiffFit(string filename) : FastNLODiffReader(filename)
-{
+FastNLODiffDiffFit::FastNLODiffDiffFit(string filename) : FastNLODiffReader(filename) {
 }
 
 
@@ -93,8 +94,8 @@ double FastNLODiffDiffFit::EvolveAlphas(double Q) const {
    double mu2 = Q*Q;
    int ierr = 9876;
    int nf = 9;
-   double as = asfunc_( &mu2, &nf  , &ierr);
-   if ( ierr > 0 )
+   double as = asfunc_(&mu2, &nf  , &ierr);
+   if (ierr > 0)
       error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
 }
@@ -103,7 +104,7 @@ double FastNLODiffDiffFit::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLODiffDiffFit::InitPDF(){
+bool FastNLODiffDiffFit::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //

@@ -36,11 +36,17 @@ public:
    FastNLOLHAPDF(string name);
    FastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
-   void SetLHAPDFFilename( string filename );
-   void SetLHAPDFMember( int set );
-   int GetIPDFMember() const {return fiPDFMember;};
-   int GetNPDFMembers() const {return fnPDFs;};
-   int GetNPDFMaxMember() const {return fnPDFs-1;};
+   void SetLHAPDFFilename(string filename);
+   void SetLHAPDFMember(int set);
+   int GetIPDFMember() const {
+      return fiPDFMember;
+   };
+   int GetNPDFMembers() const {
+      return fnPDFs;
+   };
+   int GetNPDFMaxMember() const {
+      return fnPDFs-1;
+   };
    void PrintPDFInformation() const ;
 
 protected:
@@ -101,7 +107,7 @@ double FastNLOLHAPDF::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLOLHAPDF::InitPDF(){
+bool FastNLOLHAPDF::InitPDF() {
    //
    //  Initalize some necessary LHAPDF parameters
    //  return true, if successful initialization
@@ -113,7 +119,7 @@ bool FastNLOLHAPDF::InitPDF(){
 
    //LHAPDF::setVerbosity(LHAPDF::SILENT);
    LHAPDF::setVerbosity(LHAPDF::LOWKEY);
-   if ( fLHAPDFFilename == ""){
+   if (fLHAPDFFilename == "") {
       error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
    }
@@ -121,12 +127,12 @@ bool FastNLOLHAPDF::InitPDF(){
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFFilename);
    //cout << "PDF set name " << fLHAPDFFilename << endl;
-   if ( fchksum == 0 || fchksum != CalcChecksum(1.)) {
+   if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
       // need to reset LHAPDF.
       debug["InitPDF"]<<"Need to reset lhapdf. fchksum="<<fchksum<<"\tCalcChecksum(1.)="<<CalcChecksum(1.)<<endl;
       LHAPDF::initPDFSet(fLHAPDFFilename);
       fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
-      if ( fnPDFs < fiPDFMember+1 ){
+      if (fnPDFs < fiPDFMember+1) {
          error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
          return false;
       }
@@ -153,8 +159,8 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
-   if ( filename != fLHAPDFFilename ) fchksum = 0;
+void FastNLOLHAPDF::SetLHAPDFFilename(string filename) {
+   if (filename != fLHAPDFFilename) fchksum = 0;
    fLHAPDFFilename = filename;
    // reset pdfset
    fiPDFMember = 0;
@@ -165,14 +171,13 @@ void FastNLOLHAPDF::SetLHAPDFFilename( string filename ) {
 //______________________________________________________________________________
 
 
-void FastNLOLHAPDF::SetLHAPDFMember( int set ) {
+void FastNLOLHAPDF::SetLHAPDFMember(int set) {
    fiPDFMember = set;
-   if ( fchksum == CalcChecksum(1.) ){ // nothin has changed? we set only the pdfmember
+   if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember
       debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
       LHAPDF::initPDF(fiPDFMember);
       fchksum = CalcChecksum(1.);
-   }
-   else  {
+   } else  {
       debug["SetLHAPDFMember"]<<"Demanding full re-initalization of PDF."<<endl;
       fchksum = 0;
    }

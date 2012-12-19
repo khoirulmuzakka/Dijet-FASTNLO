@@ -1,22 +1,42 @@
 #ifndef __ALPHAS_H
 #define __ALPHAS_H
 
-class Alphas{
+class Alphas {
 
 public:
    ~Alphas();
 
    // initializations
-   static void SetMz(double Mz){fMz = Mz;};
-   static double GetMz() {return fMz;};
-   static void SetAlphasMz(double alphas){fAlphasMz = alphas;};
-   static double GetAlphasMz() {return fAlphasMz;};
-   static void SetNf(int nf){fNf = nf;};
-   static int GetNf() {return fNf;};
-   static void SetNLoop(int nLoop){fnLoop = nLoop;};
-   static int GetNLoop(){return fnLoop;};
-   static void SetFlavorMatchingOn(bool FlavorMatching){bFlavorMatching = FlavorMatching;};
-   static bool GetFlavorMatchingOn(){return bFlavorMatching;};
+   static void SetMz(double Mz) {
+      fMz = Mz;
+   };
+   static double GetMz() {
+      return fMz;
+   };
+   static void SetAlphasMz(double alphas) {
+      fAlphasMz = alphas;
+   };
+   static double GetAlphasMz() {
+      return fAlphasMz;
+   };
+   static void SetNf(int nf) {
+      fNf = nf;
+   };
+   static int GetNf() {
+      return fNf;
+   };
+   static void SetNLoop(int nLoop) {
+      fnLoop = nLoop;
+   };
+   static int GetNLoop() {
+      return fnLoop;
+   };
+   static void SetFlavorMatchingOn(bool FlavorMatching) {
+      bFlavorMatching = FlavorMatching;
+   };
+   static bool GetFlavorMatchingOn() {
+      return bFlavorMatching;
+   };
    static void SetFlavorMatchingThresholds(double th1, double th2, double th3, double th4, double th5, double th6);
    static void GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, double& th4, double& th5, double& th6);
 

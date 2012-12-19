@@ -33,14 +33,14 @@ bool Alphas::bFlavorMatching    = false;                        // switch flavor
 double Alphas::fTh[6]           = {0.0023, 0.0048, 0.095, 1.275, 4.18, 173.5};  // PDG 2012; check on pole mass, running mass when using in theory ...!
 
 
-Alphas::Alphas(){
+Alphas::Alphas() {
    // private constructor since this is a Singleton class
 }
 
-Alphas::~Alphas(){
+Alphas::~Alphas() {
 }
 
-void Alphas::SetFlavorMatchingThresholds(double th1, double th2, double th3, double th4, double th5, double th6){
+void Alphas::SetFlavorMatchingThresholds(double th1, double th2, double th3, double th4, double th5, double th6) {
    // in GeV
    fTh[0] = th1;
    fTh[1] = th2;
@@ -51,7 +51,7 @@ void Alphas::SetFlavorMatchingThresholds(double th1, double th2, double th3, dou
 }
 
 
-void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, double& th4, double& th5, double& th6){
+void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, double& th4, double& th5, double& th6) {
    th1 = fTh[0];
    th2 = fTh[1];
    th3 = fTh[2];
@@ -60,7 +60,7 @@ void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, 
    th6 = fTh[5];
 }
 
-int Alphas::CalcNf(double mu){
+int Alphas::CalcNf(double mu) {
    //
    //  calculate number of active flavors
    //  if your scale would result in a larger number of
@@ -69,10 +69,10 @@ int Alphas::CalcNf(double mu){
    //  If flavor matching is turned of, then always use
    //  fixed number of flavors.
    //
-   if ( !bFlavorMatching ) return fNf;
+   if (!bFlavorMatching) return fNf;
    int nf = 0;
-   while ( mu > fTh[nf] && nf < 6 ) nf++;
-   if  ( nf > fNf ) return fNf ;
+   while (mu > fTh[nf] && nf < 6) nf++;
+   if (nf > fNf) return fNf ;
    else return nf;
 }
 
@@ -80,7 +80,7 @@ int Alphas::CalcNf(double mu){
 //static double CalcAlphasMuFixedNf(double mu, int nf);
 // calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
-double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors){
+double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors) {
 
    nLoop        = nLoop == 0 ? fnLoop : nLoop;
    double asmz  = alphasMz==0 ? fAlphasMz : alphasMz;
@@ -92,12 +92,12 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    const string cseps = csep41 + csep41;
    static bool first = true;
    static const double twopi = 2. * 4. * atan(1.);
-   if ( first ) {
-     first = false;
-     cout << endl << " " << cseps << endl;
-     printf(" # ALPHAS-GRV: First call:\n");
-     //     say::info["ALPHAS-GRV"] << "First call:\n";
-     PrintInfo();
+   if (first) {
+      first = false;
+      cout << endl << " " << cseps << endl;
+      printf(" # ALPHAS-GRV: First call:\n");
+      //     say::info["ALPHAS-GRV"] << "First call:\n";
+      PrintInfo();
    }
 
    // - initialize beta functions
@@ -108,16 +108,16 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    const double MZ2 = pow(fMz,2);
 
    // - exact formula -> extract Lambda from alpha_s(Mz)
-   double LAM2 = MZ2 / exp( FBeta(asmz,nLoop,nf));
+   double LAM2 = MZ2 / exp(FBeta(asmz,nLoop,nf));
 
 
    // - extract approx alpha_s(mu) value - 2 loop approx is fine
-   double LL2 = MZ2 * exp( -2.*twopi/beta0/asmz + beta10 * log( 2*twopi/beta0/asmz + beta10) );
-   double LQ2 = log( Q2 / LL2 );
-   double as = 2*twopi/beta0/LQ2 * ( 1. - beta10*log(LQ2)/LQ2);
+   double LL2 = MZ2 * exp(-2.*twopi/beta0/asmz + beta10 * log(2*twopi/beta0/asmz + beta10));
+   double LQ2 = log(Q2 / LL2);
+   double as = 2*twopi/beta0/LQ2 * (1. - beta10*log(LQ2)/LQ2);
 
    // - exact 4-loop value by Newton procedure
-   for ( int i = 1 ; i <=3 ; i++ ){
+   for (int i = 1 ; i <=3 ; i++) {
       double F  = log(Q2/LAM2) - FBeta(as,nLoop,nf);
       double FP = - FBeta(as*1.01,nLoop,nf);
       double FM = - FBeta(as*0.99,nLoop,nf);
@@ -129,8 +129,8 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
 }
 
 
-void Alphas::PrintInfo(){
-    // - Print info
+void Alphas::PrintInfo() {
+   // - Print info
    const string csep41("#########################################");
    const string cseps = csep41 + csep41;
    static const double twopi = 2. * 4. * atan(1.);
@@ -146,13 +146,13 @@ void Alphas::PrintInfo(){
 
 
 
-double Alphas::FBeta(double alphasMz, int nLoop, int nf){
+double Alphas::FBeta(double alphasMz, int nLoop, int nf) {
 
    // - initialize pi and beta functions
    static const double Pi       = 3.14159265358979312;
    static const double zeta3    = 1.202056903;
    const double beta0   = (11. - 2./3. * nf) / 4.;
-   const double beta1   = ( 102. - 38./3. * nf ) / 16.;
+   const double beta1   = (102. - 38./3. * nf) / 16.;
    const double beta2   = (2857./2. - 5033./18.*nf + 325./54.*pow(nf,2)) / 64.;
    const double beta10  = beta1 / beta0;
    const double beta102 = pow(beta10,2);
@@ -166,21 +166,18 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf){
    //    if ( nLoop == 2 ){ // 1-loop
    //       return 1./( beta0 * aspi );
    //    }
-   if ( nLoop == 2 ){ // 2-loop RGE
-      return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (-beta102) * aspi + (beta103/2.)*aspi2 );
-   }
-   else if ( nLoop == 3 ){      // 3-loop RGE
-      return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi + (beta10*beta20 + beta103/2.)*aspi2 );
-   }
-   else if ( nLoop == 4 ){      // 4-loop RGE
-      double beta3      = ( (149753./6. + 3564.*zeta3) -
-                            (1078361./162. + 6508./27.*zeta3) * nf +
-                            (50065./162. + 6472./81.*zeta3) * pow(nf,2) +
-                            1093./729. * pow(nf,3) ) /256.;
+   if (nLoop == 2) {  // 2-loop RGE
+      return C10 + 1./beta0 * (1./aspi + beta10 * log(aspi) + (-beta102) * aspi + (beta103/2.)*aspi2);
+   } else if (nLoop == 3) {     // 3-loop RGE
+      return C10 + 1./beta0 * (1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi + (beta10*beta20 + beta103/2.)*aspi2);
+   } else if (nLoop == 4) {     // 4-loop RGE
+      double beta3      = ((149753./6. + 3564.*zeta3) -
+                           (1078361./162. + 6508./27.*zeta3) * nf +
+                           (50065./162. + 6472./81.*zeta3) * pow(nf,2) +
+                           1093./729. * pow(nf,3)) /256.;
       double beta30     = beta3 / beta0;
-      return C10 + 1./beta0 * ( 1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi  + (beta30/2. - beta10*beta20 + beta103/2.)*aspi2 );
-   }
-   else {
+      return C10 + 1./beta0 * (1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi  + (beta30/2. - beta10*beta20 + beta103/2.)*aspi2);
+   } else {
       printf("Alphas::FBeta(). Error. Only 2-, 3- or 4-loop solution implemented.\n");
       return 0;
    }

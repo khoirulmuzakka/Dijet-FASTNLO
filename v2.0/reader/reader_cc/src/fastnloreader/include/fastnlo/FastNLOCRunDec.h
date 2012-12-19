@@ -55,14 +55,22 @@ public:
    void PrintRunDecValues();                    // Print values, which are passed to CRunDec for alpha_s evolution
 
    // ---- getters and setters CRunDec variables ---- //
-   void   SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false);
-   double GetAlphasMz() const { return fAlphasMz; };
-   void   SetMz( double Mz , bool ReCalcCrossSection = false );
-   double GetMz() const { return fMz; };
-   void   SetNf( int nf , bool ReCalcCrossSection = false );
-   int    GetNf() const { return fNf; };
-   void   SetNloop( int nloop , bool ReCalcCrossSection = false );
-   int    GetNloop() const {return fNloop;};
+   void   SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   double GetAlphasMz() const {
+      return fAlphasMz;
+   };
+   void   SetMz(double Mz , bool ReCalcCrossSection = false);
+   double GetMz() const {
+      return fMz;
+   };
+   void   SetNf(int nf , bool ReCalcCrossSection = false);
+   int    GetNf() const {
+      return fNf;
+   };
+   void   SetNloop(int nloop , bool ReCalcCrossSection = false);
+   int    GetNloop() const {
+      return fNloop;
+   };
 
 protected:
    // inherited functions
@@ -107,57 +115,57 @@ FastNLOCRunDec::FastNLOCRunDec(string name, string LHAPDFFile, int PDFSet) : Fas
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
    debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   if ( ReCalcCrossSection ) CalcCrossSection();
+   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetMz( double Mz , bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetMz(double Mz , bool ReCalcCrossSection) {
    debug["SetMz"]<<"Setting MZ-"<<Mz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the Z-Boson mass
    //
    fMz    = Mz;             // new alpha_s value
-   if ( ReCalcCrossSection ) CalcCrossSection();
+   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetNloop( int nloop, bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetNloop(int nloop, bool ReCalcCrossSection) {
    debug["SetNloop"]<<"Setting n-loop="<<nloop<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set n loop calculation
    //
    fNloop    = nloop;             // new alpha_s value
-   if ( ReCalcCrossSection ) CalcCrossSection();
+   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::SetNf( int Nf , bool ReCalcCrossSection ){
+void FastNLOCRunDec::SetNf(int Nf , bool ReCalcCrossSection) {
    debug["SetNf"]<<"Setting number of flavors to "<<Nf<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the number of flavors
    //
    fNf    = Nf;             // new alpha_s value
    //fcrundec.SetConstants(fNf);
-   if ( ReCalcCrossSection ) CalcCrossSection();
+   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::InitReasonableRunDecValues(){
+void FastNLOCRunDec::InitReasonableRunDecValues() {
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value
    fMz = 91.1876;
    SetNf(5);
    fNloop=2;
-   if ( info.GetSpeak() ) {
+   if (info.GetSpeak()) {
       info["InitReasonableRunDecValues"]<<"Printing initialized CRunDecValues."<<endl;
       PrintRunDecValues();
    }
@@ -166,13 +174,13 @@ void FastNLOCRunDec::InitReasonableRunDecValues(){
 
 //______________________________________________________________________________
 
-void FastNLOCRunDec::PrintRunDecValues(){
+void FastNLOCRunDec::PrintRunDecValues() {
    static const string csep41("#########################################");
    cout<<csep41<<csep41<<endl;
    cout<<"CRunDec Values: Alphas(Mz)="<<fAlphasMz
-<<"\tMZ="<<fMz
-        <<"\tn-flavors="<<fNf
-        <<"\tn-loop="<<fNloop<<endl;
+       <<"\tMZ="<<fMz
+       <<"\tn-flavors="<<fNf
+       <<"\tn-loop="<<fNloop<<endl;
    cout<<csep41<<csep41<<endl;
 }
 

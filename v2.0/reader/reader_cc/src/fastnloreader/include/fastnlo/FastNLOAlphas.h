@@ -44,12 +44,18 @@ using namespace std;
 class FastNLOAlphas : public FastNLOLHAPDF {
 
 public:
-   FastNLOAlphas(string name) : FastNLOLHAPDF(name){;};
-   FastNLOAlphas(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184){;};
+   FastNLOAlphas(string name) : FastNLOLHAPDF(name) {
+      ;
+   };
+   FastNLOAlphas(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
+      ;
+   };
 
    // ---- Alphas vars ---- //
-   void SetAlphasMz( double AlphasMz , bool ReCalcCrossSection = false );
-   double GetAlphasMz() const { return fAlphasMz; };
+   void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   double GetAlphasMz() const {
+      return fAlphasMz;
+   };
    void SetGRVtoPDG2012_2loop();
 
 
@@ -66,13 +72,13 @@ protected:
 //______________________________________________________________________________
 
 
-void FastNLOAlphas::SetAlphasMz( double AlphasMz , bool ReCalcCrossSection ){
+void FastNLOAlphas::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
    debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the alpha_s value at M_Z
    //
    fAlphasMz    = AlphasMz;             // new alpha_s value
-   if ( ReCalcCrossSection ) CalcCrossSection();
+   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 
@@ -88,20 +94,20 @@ double FastNLOAlphas::EvolveAlphas(double Q) const {
    // WARNING: You cannot change alpha_s(Mz), but is is
    // defined with the pdf. 'alphasMz' is not used here!
    //
-   return Alphas::CalcAlphasMu ( Q , fAlphasMz );
+   return Alphas::CalcAlphasMu(Q , fAlphasMz);
 }
 
 
 //______________________________________________________________________________
 
 
-void FastNLOAlphas::SetGRVtoPDG2012_2loop(){
+void FastNLOAlphas::SetGRVtoPDG2012_2loop() {
    info["SetGrVtoPDF2012"]<<"Resetting to GRV Alphas::Alphas evolution."<<endl;
    Alphas::SetMz(91.1876); // PDG 2012
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
    Alphas::SetFlavorMatchingOn(false);
-   if ( info.GetSpeak() ) {
+   if (info.GetSpeak()) {
       info<<"Calling Alphas::PrintInfo()."<<endl;
       info<<"Alpha_s(Mz) value is taken from FastNLOAlphas, instead of Alphas::Alphas."<<endl;
       Alphas::PrintInfo();

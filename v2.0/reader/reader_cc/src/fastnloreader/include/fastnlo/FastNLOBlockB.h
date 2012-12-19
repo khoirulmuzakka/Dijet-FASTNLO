@@ -121,42 +121,50 @@ public:
 
 public:
 
-   FastNLOBlockB(const char* name, const int NObsBins );
-   FastNLOBlockB(const char* name, const int NObsBins , istream* table );
+   FastNLOBlockB(const char* name, const int NObsBins);
+   FastNLOBlockB(const char* name, const int NObsBins , istream* table);
    ~FastNLOBlockB();
    void ReadBlockB(istream *table);
    void Print(const int i, const int iprint = 0);
-   void SetName(const char* name) { fname = name;};
-   void SetIc(const int i) { fIcontr = i; };
-   int GetIc() { return fIcontr; };
+   void SetName(const char* name) {
+      fname = name;
+   };
+   void SetIc(const int i) {
+      fIcontr = i;
+   };
+   int GetIc() {
+      return fIcontr;
+   };
    void FillPDFCache();
    int GetNxmax(int i);
    int GetTotalScalevars();
    int GetTotalScalenodes();
 
-   void ResizeTable( vector<double >* v, int dim0 );
-   void ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 );
-   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 );
-   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 );
-   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 );
-   void ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
-   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
+   void ResizeTable(vector<double >* v, int dim0);
+   void ResizeTable(vector<vector<double > >*  v, int dim0 , int dim1);
+   void ResizeTable(vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2);
+   void ResizeTable(vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3);
+   void ResizeTable(vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4);
+   void ResizeTable(vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5);
+   void ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6);
 
-   void ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI );
-   void ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
-   void ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
-   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
-   void ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
-   void ResizeTable( vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
+   void ResizeTable(vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI);
+   void ResizeTable(vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2);
+   void ResizeTable(vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3);
+   void ResizeTable(vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4);
+   void ResizeTable(vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4);
+   void ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6);
 
    template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false);
-   int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false );
+   int ReadFlexibleVector(vector<double >* v, istream *table , bool nProcLast = false);
 
    template<typename T> void ResizeFlexibleVector(vector<T>* v, vector<T>* nom);
-   void ResizeFlexibleVector(vector<double >* v, vector<double >*nom ){ v->resize(nom->size());};
+   void ResizeFlexibleVector(vector<double >* v, vector<double >*nom) {
+      v->resize(nom->size());
+   };
 
-   template<typename T> int ReadTable( vector<T>* v, istream *table );
-   int ReadTable( vector<double>* v, istream *table );
+   template<typename T> int ReadTable(vector<T>* v, istream *table);
+   int ReadTable(vector<double>* v, istream *table);
 
    void StripWhitespace(string* s);
 
@@ -164,12 +172,13 @@ public:
 };
 
 template<typename T>
-int FastNLOBlockB::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast){
+int FastNLOBlockB::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast) {
    int nn = 0;
    int size = 0;
-   *table >> size; nn++;
+   *table >> size;
+   nn++;
    v->resize(size);
-   for(unsigned int i0=0;i0<v->size();i0++){
+   for (unsigned int i0=0; i0<v->size(); i0++) {
       nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
    }
    return nn;
@@ -177,16 +186,16 @@ int FastNLOBlockB::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLa
 
 
 template<typename T>
-void FastNLOBlockB::ResizeFlexibleVector(vector<T>* v, vector<T>* nom){
+void FastNLOBlockB::ResizeFlexibleVector(vector<T>* v, vector<T>* nom) {
    v->resize(nom->size());
-   for ( unsigned int i = 0 ; i<v->size() ; i++ ){
+   for (unsigned int i = 0 ; i<v->size() ; i++) {
       ResizeFlexibleVector(&((*v)[i]),&((*nom)[i]));
    }
 };
 
-template<typename T> int FastNLOBlockB::ReadTable( vector<T>* v, istream *table ){
+template<typename T> int FastNLOBlockB::ReadTable(vector<T>* v, istream *table) {
    int nn = 0;
-   for(unsigned int i0=0;i0<v->size();i0++){
+   for (unsigned int i0=0; i0<v->size(); i0++) {
       nn+= ReadTable(&(*v)[i0],table);
    }
    return nn;

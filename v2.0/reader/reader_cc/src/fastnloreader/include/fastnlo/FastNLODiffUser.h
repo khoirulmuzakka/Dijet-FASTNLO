@@ -33,7 +33,9 @@ class FastNLODiffUser : public FastNLODiffReader {
 public:
 
    FastNLODiffUser(string filename);
-   ~FastNLODiffUser(void){;};
+   ~FastNLODiffUser(void) {
+      ;
+   };
 
 protected:
 
@@ -51,8 +53,7 @@ protected:
 
 
 
-FastNLODiffUser::FastNLODiffUser(string filename) : FastNLODiffReader(filename)
-{
+FastNLODiffUser::FastNLODiffUser(string filename) : FastNLODiffReader(filename) {
 }
 
 
@@ -71,7 +72,7 @@ double FastNLODiffUser::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLODiffUser::InitPDF(){
+bool FastNLODiffUser::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //

@@ -24,10 +24,10 @@
 using namespace std;
 
 
-extern "C"{
+extern "C" {
    void fpdfxq_(int *iset, const double *x, const double *q2, double *pdfs,int *ichk);
    void evolution_();
-   double asfunc_( double* r2, int* nf  , int* ierr);
+   double asfunc_(double* r2, int* nf  , int* ierr);
 }
 
 
@@ -38,7 +38,7 @@ public:
 
 protected:
    // inherited functions
-   double EvolveAlphas(double Q ) const ;
+   double EvolveAlphas(double Q) const ;
    void InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
 
@@ -74,8 +74,8 @@ double FastNLOQCDNUM::EvolveAlphas(double Q) const {
    double mu2 = Q*Q;
    int ierr = 9876;
    int nf = 9;
-   double as = asfunc_( &mu2, &nf  , &ierr);
-   if ( ierr > 0 )
+   double as = asfunc_(&mu2, &nf  , &ierr);
+   if (ierr > 0)
       error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
 }
@@ -84,7 +84,7 @@ double FastNLOQCDNUM::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-void FastNLOQCDNUM::InitPDF(){
+void FastNLOQCDNUM::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //

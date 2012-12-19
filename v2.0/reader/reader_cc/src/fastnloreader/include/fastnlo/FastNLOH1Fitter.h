@@ -67,14 +67,14 @@ double FastNLOH1Fitter::EvolveAlphas(double Q) const {
    //
 
    double mu2 = Q*Q;
-   return HF_GET_ALPHAS_WRAP( &mu2 );
+   return HF_GET_ALPHAS_WRAP(&mu2);
 }
 
 
 //______________________________________________________________________________
 
 
-void FastNLOH1Fitter::InitPDF(){
+void FastNLOH1Fitter::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //

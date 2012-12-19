@@ -33,7 +33,9 @@ class FastNLODiffH12006FitB : public FastNLODiffReader {
 public:
 
    FastNLODiffH12006FitB(string filename);
-   ~FastNLODiffH12006FitB(void){;};
+   ~FastNLODiffH12006FitB(void) {
+      ;
+   };
 
 protected:
 
@@ -49,7 +51,7 @@ protected:
 //______________________________________________________________________________
 
 
-extern "C"{
+extern "C" {
    void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
 }
 
@@ -60,8 +62,7 @@ extern "C"{
 
 
 
-FastNLODiffH12006FitB::FastNLODiffH12006FitB(string filename) : FastNLODiffReader(filename)
-{
+FastNLODiffH12006FitB::FastNLODiffH12006FitB(string filename) : FastNLODiffReader(filename) {
 }
 
 
@@ -75,8 +76,8 @@ double FastNLODiffH12006FitB::EvolveAlphas(double Q) const {
    //
 
    static const int NF=4; // from h12006B_wrapper.h
-   static const double b0 =  (11. - 2./3.*NF); // The beta coefficients of the QCD beta function
-   static const  double b1 =  (51. - 19./3.*NF);
+   static const double b0 = (11. - 2./3.*NF);  // The beta coefficients of the QCD beta function
+   static const  double b1 = (51. - 19./3.*NF);
 
    //      double lmd = 0.399; // according to matthias
    static const double lmd = 0.3395; // according to matthias
@@ -90,7 +91,7 @@ double FastNLODiffH12006FitB::EvolveAlphas(double Q) const {
 //______________________________________________________________________________
 
 
-bool FastNLODiffH12006FitB::InitPDF(){
+bool FastNLODiffH12006FitB::InitPDF() {
    // --- fastNLO user:
    //  Initalize PDF parameters if necessary
    //
