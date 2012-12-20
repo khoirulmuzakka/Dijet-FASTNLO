@@ -15,7 +15,7 @@
       WRITE(*,*)"#"
       WRITE(*,*)LSEPS
       WRITE(*,*)"#"
-      WRITE(*,*)"# Copyright (C) 2011 fastNLO Collaboration"
+      WRITE(*,*)"# Copyright (C) 2011,2012 fastNLO Collaboration"
       WRITE(*,*)"# @AUTHORSv2@ "
       WRITE(*,*)"#"
       WRITE(*,*)"# This program is free software: "//

@@ -530,6 +530,7 @@ int main(int argc, char** argv) {
    // 14.
    // ---- Example code of a quick cross section
    //      calculation using the FastNLOAlphas interface
+   SetGlobalVerbosity(WARNING);
    FastNLOAlphas fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
    fnloreader.PrintTableInfo();
