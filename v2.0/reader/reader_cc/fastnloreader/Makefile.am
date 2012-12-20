@@ -16,6 +16,7 @@ SUBDIRS = include
 # Targets
 #
 # The C++ table reader library
+# TODO: LHAPDF presumably not necessary for building this lib
 if HAVE_LHAPDFCONFIG
    lib_LTLIBRARIES = libfastnloreader.la
 endif
