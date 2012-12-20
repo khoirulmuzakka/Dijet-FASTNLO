@@ -108,7 +108,7 @@ public:
    vector < double > GetCrossSection();
    vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
-   vector < double > GetQScales();
+   vector < double > GetQScales(int irelord); // Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
 
 
    // ---- Getters for FastNLOReader member variables ---- //
@@ -152,16 +152,16 @@ public:
    };      // Get Description of scenario
    double GetCMSEnergy() const {
       return Ecms;
-   };                         // Get center of mass energy
+   };                          // Get center of mass energy
    int GetILOord() const {
       return ILOord;
-   };                             // Get number of alpha_s in leading order (1 or 2 usually)
+   };                          // Get power of alpha_s in leading order (1, 2 or 3 usually)
    int GetNObsBins() const {
       return NObsBin;
    };                          // Get number of measured bins
    int GetNDiffBin() const {
       return NDim;
-   };                             // Get number of differential measurement. 1: single differential; 2: double differential
+   };                          // Get number of differential measurement. 1: single differential; 2: double differential
    vector < int > GetRapidityIndex() const {
       return RapIndex;
    };          // Get rapidity indices

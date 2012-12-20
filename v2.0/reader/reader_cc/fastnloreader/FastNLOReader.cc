@@ -1574,10 +1574,14 @@ vector < double > FastNLOReader::GetKFactors() {
 
 //______________________________________________________________________________
 
-vector < double > FastNLOReader::GetQScales() {
+vector < double > FastNLOReader::GetQScales(int irelord) {
    // Get XSection weighted Q scale in bin
    if (XSection.empty()) CalcCrossSection();
-   return QScale;
+   if (irelord == 0) {
+      return QScale_LO;
+   } else {
+      return QScale;
+   }
 }
 
 
@@ -1780,6 +1784,7 @@ void FastNLOReader::CalcAposterioriScaleVariation() {
    double scalefac       = fScaleFacMuR/fScaleFacMuF;
    debug["CalcAposterioriScaleVariation"]<<"scalefac="<<scalefac<<endl;
    vector<double>* XS    = &XSection;
+   vector<double>* QS    = &QScale;
    const double n     = B_LO()->Npow;
    const double L     = std::log(scalefac);
    const double beta0 = (11.*3.-2.*5)/3.;
@@ -1790,8 +1795,11 @@ void FastNLOReader::CalcAposterioriScaleVariation() {
          double asnp1 = pow(B_LO()->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<B_LO()->NSubproc; l++) {
-               double clo = B_LO()->SigmaTilde[i][0][j][k][l] *  B_LO()->PdfLc[i][j][k][l] * unit;
-               XS->at(i) +=  asnp1 * clo * n * L * beta0;
+               double clo  = B_LO()->SigmaTilde[i][0][j][k][l] *  B_LO()->PdfLc[i][j][k][l] * unit;
+               double xsci = asnp1 * clo * n * L * beta0;
+               double mur  = fScaleFacMuR * B_LO()->ScaleNode[i][0][0][j];
+               XS->at(i) +=  xsci;
+               QS->at(i) +=  xsci*mur;
             }
          }
       }
@@ -1809,6 +1817,7 @@ void FastNLOReader::CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO) {
    //
 
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;
+   vector<double>* QS = IsLO ? &QScale_LO : &QScale;
    B->fact.resize(NObsBin);
    for (int i=0; i<NObsBin; i++) {
       B->fact[i]=0;
@@ -1838,6 +1847,7 @@ void FastNLOReader::CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO) {
                   }
                   XS->at(i)   += xsci;
                   B->fact[i]  += xsci;
+                  QS->at(i)   += xsci*mur;
                }
             }
          }
@@ -1868,7 +1878,6 @@ void FastNLOReader::CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO) {
                double xsci     = B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][j]  *  B->PdfLc[i][j][k][l] * unit;
                double scalefac = fScaleFacMuR/B->ScaleFac[0][scaleVar];
                double mur      = scalefac * B->ScaleNode[i][0][scaleVar][j];
-               //      cout << "scalefac = " << scalefac << ", mur = " << mur << endl;
                XS->at(i)      +=  xsci;
                B->fact[i]     +=  xsci;
                QS->at(i)      +=  xsci*mur;

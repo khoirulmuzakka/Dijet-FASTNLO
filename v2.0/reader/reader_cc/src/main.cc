@@ -639,7 +639,9 @@ int main(int argc, char** argv) {
       // Get results
       vector < double > xsnlo = fnloreader.GetCrossSection();
       vector < double > kfac  = fnloreader.GetKFactors();
-      vector < double > qscl  = fnloreader.GetQScales();
+      // Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
+      int irelord = 1;
+      vector < double > qscl  = fnloreader.GetQScales(irelord);
       vector < double > xslo  = xsnlo;
       for (unsigned int i=0; i<xslo.size(); i++) {
          if (abs(kfac[i]) > DBL_MIN) {
