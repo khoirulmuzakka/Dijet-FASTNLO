@@ -13,7 +13,7 @@ AUTOMAKE_OPTIONS = gnu
 # Include files to be distributed
 #
 fastnloincludedir = $(includedir)/fastnlo
-fastnloinclude_HEADERS = FastNLOReader.h FastNLODiffReader.h FastNLOBlockB.h Alphas.h speaker.h \
+fastnloinclude_HEADERS = FastNLOReader.h FastNLODiffReader.h FastNLODiffUser.h FastNLOBlockB.h Alphas.h speaker.h \
 	FastNLOUser.h FastNLOAlphas.h FastNLOLHAPDF.h FastNLOCRunDec.h CRunDec.h
 
 # Files that are required to build the project but that can be
