@@ -164,7 +164,7 @@ AC_CONFIG_FILES([Makefile
                  reader_cc/fastnloreader/include/fastnlo/Makefile
                  reader_cc/src/Makefile
                  reader_f/Makefile
-                 reader_f/main.f
+                 reader_f/fnlo-fread.f
                 ])
 
 AC_OUTPUT

@@ -1,7 +1,7 @@
-      SUBROUTINE FNLOFREAD
+      PROGRAM MAIN
 ***********************************************************************
 *
-*     fastNLO_reader: FNLOFREAD
+*     fastNLO_reader: MAIN
 *
 *     M. Wobisch, K. Rabbertz, 2011
 *
@@ -160,13 +160,14 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
       ENDIF
       WRITE(*,*)CSEPS
 
+*---  Print header
+      Call FNLOFREAD()
+
 *---  Initialize table
       Call FX9999IN(FILENAME)
 
-*---  Initial call to alpha_s interface
-      ALPS = FNALPHAS(91.1876D0)
-
-*---  Print out contribution list
+*---  Determine pointers to contributions and print out contribution list
+      Call FX9999PT(1D0,1D0,1)
       Call FX9999CL
 
 *---  Print out scenario information
@@ -204,6 +205,9 @@ C---  CALL SETLHAPARM('SILENT')
 
 *---  Initialize one member, 0=best fit member
       CALL INITPDF(0)
+
+*---  Initial call to alpha_s interface
+      ALPS = FNALPHAS(91.1876D0)
 
 *---  Compute the cross sections
       WRITE(*,'(A)')""
@@ -449,5 +453,4 @@ C---  ENDIF
          ENDDO
       ENDIF
 
-      RETURN
       END

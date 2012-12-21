@@ -504,7 +504,7 @@ C---  DO K=2,5 ! Test - only qq
          WRITE(*,'(A)')
      >        " FX9999PT: Name  ,  Enum, IPoint, NCount, ISelct"
          DO I=ILO,IDATA
-            WRITE(*,'(A,I6,I8,I8,I8)')" FX9999PT: "//CNAME(I)//":",
+            WRITE(*,'(A,I6,I8,I8,I8)')" FX9999PT: "//CCONNAME(I)//":",
      >           I,ICONTRPOINTER(I),NCONTRCOUNTER(I),
      >           ICONTRSELECTOR(I)
          ENDDO
@@ -1160,8 +1160,8 @@ C---  ENDDO
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
-      INTEGER I,J,K
-      CHARACTER*80 CHTMP
+      INTEGER I,J,K,ID(NTYPE),NCONT
+      CHARACTER*80 CHTMP1,CHTMP2,CHTMP3
 
       WRITE(*,'(A)')
       WRITE(*,*)CSEPS
@@ -1169,10 +1169,24 @@ C---  ENDDO
      >     "numbers contained in table:"
       WRITE(*,*)LSEPS
       WRITE(*,'(A,I2)')" # Number of contributions: ",Ncontrib
+
+      NCONT = 0
+      DO I=1,NTYPE
+         ID(I) = -1
+      ENDDO
       DO I=ILO,IDATA
-         WRITE(*,'(A,I2)')" #   No.: ",I
-ckr TBD     >        I,ICONTRPOINTER(I),NCONTRCOUNTER(I),
-ckr TBD     >        ICONTRSELECTOR(I)
+         IF (ICONTRPOINTER(I).NE.-1) THEN
+            NCONT = NCONT+1
+            ID(ICONTRTYPE(I)) = ID(ICONTRTYPE(I))+1
+            CHTMP1 = CTYPNAME(ICONTRTYPE(I))
+            CHTMP2 = CTRBDESCRIPT(ICONTRPOINTER(I),1)
+            CHTMP3 = CODEDESCRIPT(ICONTRPOINTER(I),1)
+            WRITE(*,'(A,I2,A,A,A,I2,A,A,A,A)')" #   No.:",NCONT,
+     >           ", type: ",CHTMP1(1:LEN_TRIM(CHTMP1)),
+     >           ", Id:",ID(ICONTRTYPE(I)),
+     >           ", order: ",CHTMP2(1:LEN_TRIM(CHTMP2)),
+     >           ", by: ",CHTMP3(1:LEN_TRIM(CHTMP3))
+         ENDIF
       ENDDO
       WRITE(*,*)CSEPS
 

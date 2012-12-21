@@ -1,22 +1,28 @@
 *     --- force emacs to fortran mode -*-fortran-*-
-      PROGRAM MAIN
+      SUBROUTINE FNLOFREAD
 
       IMPLICIT NONE
+      CHARACTER*25 FNLO
       INCLUDE 'strings.inc'
 
 *---  Initial output
+      FNLO = achar(27)//"[0;31mfast"//
+     >     achar(27)//"[0;34mNLO"//
+     >     achar(27)//"[0m"
       WRITE(*,'(A)')""
       WRITE(*,*)CSEPS
       WRITE(*,*)"#"
-      WRITE(*,*)"# @PACKAGE_NAME@_@PACKAGE_VERSION@_@SVNREV@ "
+      WRITE(*,*)"# "//FNLO//"_reader"
+      WRITE(*,*)"# Version @PACKAGE_VERSION@_@SVNREV@"
       WRITE(*,*)"#"
       WRITE(*,*)"# Fortran program to read fastNLO v2 tables and"
-      WRITE(*,*)"# derive QCD cross sections using PDFs from LHAPDF"
+      WRITE(*,*)"# derive QCD cross sections using PDFs, "//
+     >     "e.g. from LHAPDF"
       WRITE(*,*)"#"
       WRITE(*,*)LSEPS
       WRITE(*,*)"#"
-      WRITE(*,*)"# Copyright (C) 2011,2012 fastNLO Collaboration"
-      WRITE(*,*)"# @AUTHORSv2@ "
+      WRITE(*,*)"# Copyright © 2011,2012 "//FNLO//" Collaboration"
+      WRITE(*,*)"# @AUTHORSv2@"
       WRITE(*,*)"#"
       WRITE(*,*)"# This program is free software: "//
      >     "you can redistribute it and/or modify"
@@ -50,6 +56,5 @@
       WRITE(*,*)"#"
       WRITE(*,*)CSEPS
 
-      CALL FNLOFREAD
-
+      RETURN
       END

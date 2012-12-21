@@ -15,10 +15,25 @@
      >     PNPCOR, PUEVENT, PDATA
 
 *---  Define numbering and naming scheme of contribution types
-      INTEGER ILO, INLO, ITHC1L, ITHC2L, INPC1, IDATA
-      PARAMETER(ILO=1,INLO=2,ITHC1L=3,ITHC2L=4,INPC1=5,IDATA=6)
-      CHARACTER*6 CNAME(6)
-      DATA CNAME/"LO    ","NLO   ","THC1L ","THC2L ","NPC1  ","DATA  "/
+      INTEGER NTYPE, ILO, INLO, ITHC1L, ITHC2L, INPC1, IDATA
+      PARAMETER(NTYPE=6,ILO=1,INLO=2,ITHC1L=3,ITHC2L=4,INPC1=5,IDATA=6)
+      CHARACTER*6  CCONNAME(6)
+      CHARACTER*40 CTYPNAME(20)
+      CHARACTER*10 CORDNAME(4,4)
+      INTEGER ICONTRTYPE(NTYPE),ICONTRORD(NTYPE)
+      DATA CCONNAME/"LO","NLO","THC1L","THC2L","NPC1","DATA"/
+      DATA CTYPNAME/"Fixed order calculation","Threshold corrections",
+     >     "Electroweak corrections","Non-perturbative corrections",
+     >     "Undefined", "Data", "Undefined", "Undefined",
+     >     "Undefined", "Undefined", "Undefined",
+     >     "Quark compositeness", "ADD-LED", "TeV 1-ED", "Unknown",
+     >     "Unknown", "Unknown", "Unknown", "Unknown", "Unknown"/
+      DATA CORDNAME/"LO","NLO","NNLO","N3LO",
+     >     "1-loop","2-loop","3-loop","4-loop",
+     >     "Undef","Undef","Undef","Undef",
+     >     "LO MC","NLO MC","NNLO MC","N3LO MC"/
+      DATA ICONTRTYPE/1,1,2,2,4,6/
+      DATA ICONTRORD/1,2,1,2,1,0/
 
 *---  Fundamental parameters - scenario dependent
       INTEGER MXOBSBIN, MXCTRB, MXNXTOT, MXSCALES, MXSCALENODE,

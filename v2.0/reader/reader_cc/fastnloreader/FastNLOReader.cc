@@ -109,42 +109,41 @@ void FastNLOReader::PrintWelcomeMessage() {
    char authorsv2[200]  = FNLO_AUTHORS;
    char quotev2[200]    = FNLO_QUOTEv2;
 
-   shout<<""<<endl;
    shout>>"\n";
    shout>>""<<CSEPS;
    shout<<"\n";
-   shout<<fnlo<<" Reader"<<endl;
-   shout<<"Version "<<package_version<<"."<<svnrev<<endl;
+   shout<<" "<<fnlo<<"_reader"<<endl;
+   shout<<" Version "<<package_version<<"_"<<svnrev<<endl;
    shout<<"\n";
-   shout<<"C++ program to read fastNLO v2 tables and"<<endl;
-   shout<<"derive QCD cross sections using PDFs, e.g. from LHAPDF"<<endl;
+   shout<<" C++ program to read fastNLO v2 tables and"<<endl;
+   shout<<" derive QCD cross sections using PDFs, e.g. from LHAPDF"<<endl;
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<"Copyright (C) 2011,2012 "<<fnlo<<" Collaboration"<<endl;
-   shout<<authors<<endl;
+   shout<<" Copyright © 2011,2012 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
    shout>>" # it under the terms of the GNU General Public License as published by"<<endl;
    shout>>" # the Free Software Foundation, either version 3 of the License, or"<<endl;
    shout>>" # (at your option) any later version."<<endl;
-   shout>>" # \n";
+   shout>>" #\n";
    shout>>" # This program is distributed in the hope that it will be useful,"<<endl;
    shout>>" # but WITHOUT ANY WARRANTY; without even the implied warranty of"<<endl;
    shout>>" # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the"<<endl;
    shout>>" # GNU General Public License for more details."<<endl;
-   shout>>" # \n";
+   shout>>" #\n";
    shout>>" # You should have received a copy of the GNU General Public License"<<endl;
-   shout>>" # along with this program. If not, see <http://www.gnu.org/licenses/>"<<endl;
-   shout>>" # \n";
+   shout>>" # along with this program. If not, see <http://www.gnu.org/licenses/>."<<endl;
+   shout>>" #\n";
    shout>>""<<LSEPS;
-   shout>>" # \n";
-   shout<<"The projects web page can be found at:"<<endl;
+   shout>>" #\n";
+   shout<<" The projects web page can be found at:"<<endl;
    shout<<"   "<<webpage<<endl;
    shout<<"\n";
-   shout<<"If you use this code, please cite:"<<endl;
-   shout<<"  "<<quotev14<<", "<<authorsv14<<endl;
-   shout<<"  "<<quotev2<<", "<<authorsv2<<endl;
+   shout<<" If you use this code, please cite:"<<endl;
+   shout<<"   "<<authorsv14<<", "<<quotev14<<endl;
+   shout<<"   "<<authorsv2<<", "<<quotev2<<endl;
    shout<<"\n";
    shout>>""<<CSEPS;
    WelcomeOnce = true;
@@ -752,8 +751,9 @@ void FastNLOReader::PrintTableInfo(const int iprint) const {
 
    if (BlockB_Data) {
       icnt++;
-      cout << " # "<< "  No.: " << icnt << ", type: Data, Id: 0, by: "
-           << BlockB_Data->CodeDescript[0] << endl;
+      cout << " # "<< "  No.: " << icnt << ", type: Data, Id: 0" <<
+         ", order: " << BlockB_Data->CtrbDescript[0] <<
+         ", by: " << BlockB_Data->CodeDescript[0] << endl;
       if (iprint > 0) {
          for (unsigned int k = 0 ; k<BlockB_Data->CodeDescript.size(); k++) {
             printf(" * \t\t%s\n",BlockB_Data->CodeDescript[k].c_str());

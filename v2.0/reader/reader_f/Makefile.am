@@ -53,8 +53,8 @@ endif
 MAINTAINERCLEANFILES = Makefile.in
 
 # Add dependencies on include files by hand
-main.o:                   strings.inc
-fnlo-fread.o: fnx9999.inc strings.inc
+main.o:       fnx9999.inc strings.inc
+fnlo-fread.o:             strings.inc
 fx9999rw.o:   fnx9999.inc strings.inc
 fnx9999.o:    fnx9999.inc strings.inc
 fnset.o:      fnx9999.inc

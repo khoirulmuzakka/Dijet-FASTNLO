@@ -44,7 +44,7 @@
 *---  Print info
          WRITE(*,'(A)')""
          WRITE(*,'(X,A)')CSEPS
-         WRITE(*,'(X,A)')"# alphas-grv: First call:"
+         WRITE(*,'(X,A)')"# ALPHAS-GRV: First call:"
          WRITE(*,'(X,A)')CSEPS
          WRITE(*,'(X,A,F18.15)')"# ALPHAS-GRV: PI              = ",
      >        PI4/4D0
