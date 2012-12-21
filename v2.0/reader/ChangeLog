@@ -1,3 +1,236 @@
+2012-12-21  World's end Xmas release of the fastNLO_reader package including
+            ==================================================================
+            experimental support for diffractive PDFs,
+            ==================================================================
+            version 2.1.0, revision 1354:
+            =============================
+
+2012-12-21  rabbertz
+
+    * Makefile.am: Reader: Add missinfg header for distro
+
+    * FastNLOCRunDec.h, main.cc: Reader: Add copyright statement for CRunDec;
+      replace some printf by Daniels speaker
+
+    * main.cc: Reader: Add two comments
+
+2012-12-21  DanielBritzger
+
+    * main.cc: update diffractive documentation
+
+2012-12-21  rabbertz
+
+    * FastNLOReader.cc, Makefile.am, alphas-grv.f, configure.ac, fnlo-fread.f,
+      fnlo-fread.f.in, fnx9999.f, fnx9999.inc, main.f, main.f.in, speaker.cc:
+      Reader: Finish Fortran/C++ output unification
+
+2012-12-20  rabbertz
+
+    * FastNLOReader.cc, main.cc, main.f.in: Reader: Some adaptations for output
+
+    * Makefile.am: Reader: Add todo comment
+
+    * FastNLOReader.cc, FastNLOReader.h, main.cc: Reader: Bugfix for <Q> scale
+      calculation with a posteriori mur or v21 tables
+
+2012-12-19  rabbertz
+
+    * Makefile.am: Reader: Adaptations for move of fastnloreader dir
+
+    * Makefile.am, configure.ac: Reader: Adaptations for move of fastnloreader
+      dir
+
+    * fastnloreader: Reader: Move fastnloreader dir
+
+    * Alphas.cc, Alphas.h, FastNLOAlphas.h, FastNLOBlockB.cc, FastNLOBlockB.h,
+      FastNLOCJpdf.h, FastNLOCRunDec.h, FastNLODiffDiffFit.h,
+      FastNLODiffH12006FitB.h, FastNLODiffReader.cc, FastNLODiffReader.h,
+      FastNLODiffTestDummy.h, FastNLODiffUser.h, FastNLOH1Fitter.h,
+      FastNLOLHAPDF.h, FastNLONLOJETLIKE.h, FastNLOQCDNUM.h, FastNLOReader.cc,
+      FastNLOReader.h, FastNLOUser.h, main.cc, speaker.cc, speaker.h: Reader:
+      Unify C++ formatting using astyle -A2 -s3 -HUZ; indent by 3 spaces; tabs
+      are forbidden; avoid trailing whitespace
+
+    * Alphas.cc, Alphas.h, CRunDec.cc, FastNLOBlockB.cc, FastNLOBlockB.h,
+      FastNLOCJpdf.h, FastNLOCRunDec.h, FastNLODiffReader.cc, FastNLOLHAPDF.h,
+      FastNLOReader.cc, FastNLOReader.h, ToDo_Reader.txt, configure.ac, main.cc,
+      speaker.h: Reader: Untabify all text and code; tabs are EVIL outside
+      Makefiles
+
+    * Alphas.cc, Alphas.h, CRunDec.cc, CRunDec.h, FastNLOBlockB.cc,
+      FastNLOBlockB.h, FastNLOCJpdf.h, FastNLOCRunDec.h, FastNLODiffDiffFit.h,
+      FastNLODiffH12006FitB.h, FastNLODiffReader.cc, FastNLODiffReader.h,
+      FastNLODiffTestDummy.h, FastNLODiffUser.h, FastNLOH1Fitter.h,
+      FastNLOLHAPDF.h, FastNLONLOJETLIKE.h, FastNLOQCDNUM.h, FastNLOReader.cc,
+      FastNLOReader.h, FastNLOUser.h, Makefile.am, Makefile.orig, NEWS, README,
+      ToDo_Reader.txt, configure.ac, main.cc, speaker.cc, speaker.h: Reader:
+      Globally remove trailing blanks
+
+    * Makefile.am: Reader: Fix Makefile.am s
+
+2012-12-19  DanielBritzger
+
+    * speaker.cc: update
+
+    * speaker.h: update
+
+    * FastNLOReader.h: bugfix
+
+2012-12-17  DanielBritzger
+
+    * FastNLOCJpdf.h: fix
+
+    * FastNLOCJpdf.h: TestInterface to CJ12
+
+    * configure.ac: update splash-screen
+
+    * fnlo-cppread.cc, main.cc, main.cc.in: updated executable
+
+    * FastNLOReader.cc, FastNLOReaderVersion.cc.in: include SVN Version in
+      fnlo-class/library
+
+2012-12-14  rabbertz
+
+    * Makefile.am, alphas-grv-fnlo14.f, alphas-grv.f, fn-interface.f, fnio.f,
+      fnlo-fread.f, fnset.f, fnx9999.f, fnx9999.inc, fx9999rw.f, main.f.in,
+      strings.inc: freader: Remove globally trailing blanks
+
+2012-12-06  DanielBritzger
+
+    * Makefile.am: include Diffractive Version
+
+2012-11-30  DanielBritzger
+
+    * FastNLOLHAPDF.h: bugfix
+
+2012-11-27  rabbertz
+
+    * FastNLOReader.cc, FastNLOReader.h, fnlo-cppread.cc, fnlo-fread.f:
+      reader_cc: Implement average mur scale printout in C++ reader as well
+
+    * Makefile.am, configure.ac: reader: Comment out doxygen, doesnt work with
+      prehistoric autotools of slc5; distcheck doesnt work either with slc5
+
+2012-11-25  rabbertz
+
+    * fnlo-fread.f: reader_f: Remove superfluosu declaration
+
+    * fnlo-fread.f, fnx9999.f, fnx9999.inc: reader_f: In addition to x section
+      derive Q scale per bin and print out
+
+    * Makefile.am: reader: Remove superfluous LHAPDF conditional for
+      fastnloreader lib
+
+    * Makefile.am, aminclude.am, configure.ac, doxygen.cfg, fnlo-cppread.cc:
+      reader: Add rudimentary doxygen support for testing
+
+2012-11-24  rabbertz
+
+    * Makefile.am: reader: All works from autoreconf via configure make make
+      distcheck up to make dist
+
+    * Makefile.am: Last fix in freader Makefile.am; make distcheck works for the
+      first time! Yuhu.
+
+2012-11-23  rabbertz
+
+    * Makefile.am, configure.ac: Adapt configure.ac and Makefile.am s
+
+    * fastnloreader, include, lib: reader reorganization again
+
+    * configure.ac: Small additions to reader configure.ac
+
+2012-11-23  DanielBritzger
+
+    * FastNLOReader.cc: remove NScaleDim>1 variables
+
+2012-11-23  rabbertz
+
+    * CRunDec.cc, CRunDec.cpp, Makefile.am, configure.ac: Part 3 of modification
+      to produce a reader lib plus exe linked to it
+
+    * Alphas.cc, Alphas.h, CRunDec.cpp, CRunDec.h, FastNLOAlphas.h,
+      FastNLOBlockB.cc, FastNLOBlockB.h, FastNLOCRunDec.h, FastNLODiffDiffFit.h,
+      FastNLODiffH12006FitB.h, FastNLODiffReader.cc, FastNLODiffReader.h,
+      FastNLODiffTestDummy.h, FastNLODiffUser.h, FastNLOH1Fitter.h,
+      FastNLOLHAPDF.h, FastNLONLOJETLIKE.h, FastNLOQCDNUM.h, FastNLOReader.cc,
+      FastNLOReader.h, FastNLOUser.h, Makefile.am, fnlo-cppread.cc, lib,
+      main.cc.in, speaker.cc, speaker.h, src: Part 2 of modification to produce
+      a reader lib plus exe linked to it
+
+    * Alphas.cc, CRunDec.cpp, FastNLOBlockB.cc, FastNLODiffReader.cc,
+      FastNLOReader.cc, Makefile.am, fastnlo, fnlo-cppread.cc, include,
+      speaker.cc: Part 1 of modification to produce a reader lib plus exe linked
+      to it
+
+2012-11-23  DanielBritzger
+
+    * fnlo-cppread.cc: remove SetUnits(kAbsoluteUnits)
+
+2012-11-21  DanielBritzger
+
+    * Makefile.am: fix makefile
+
+    * diffpdf.f: test module for diffractive version.
+
+    * fnlo-cppread.cc: test module for diffractive version.
+
+    * FastNLODiffReader.cc, FastNLODiffTestDummy.h, FastNLOReader.h,
+      Makefile.am, diffpdf.f, fnlo-cppread.cc: test module for diffractive
+      version.
+
+    * FastNLOReader.cc: code cleanup
+
+    * FastNLOBlockB.h, speaker.cc: code cleanup
+
+2012-11-12  DanielBritzger
+
+    * FastNLOBlockB.cc: remove commented code
+
+2012-11-01  DanielBritzger
+
+    * FastNLOReader.cc: caching for flexible scale
+
+    * FastNLOReader.cc: caching for flexible scale
+
+    * FastNLOAlphas.h: init default value.
+
+2012-10-31  DanielBritzger
+
+    * fnlo-cppread.cc: update
+
+    * fnlo-cppread.cc: update docu
+
+    * fnlo-cppread.cc: update documentation with diffractive stuff
+
+    * FastNLODiffDiffFit.h, FastNLODiffH12006FitB.h, FastNLODiffReader.cc,
+      FastNLODiffReader.h, FastNLODiffUser.h: update diffractive FastNLO
+
+    * FastNLOReader.cc: Upadate caching
+
+2012-10-29  rabbertz
+
+    * NEWS: Reader: Updated ChangeLog and NEWS file
+
+    * FastNLOCRunDec.h, FastNLOLHAPDF.h, README, fnlo-cppread.cc,
+      reader_autoinstallfiles_ac-2.65_am-1.11.1.tar.gz: reader: Fix problem with
+      conflict in double vs. int of fNloop, fNf in FastNLOCRunDec.h; add
+      GetNPDFMaxMember(); update README file; add some autotool files for use
+      with antique versions
+
+2012-10-26  DanielBritzger
+
+    * FastNLOLHAPDF.h, FastNLOReader.cc, FastNLOReader.h: Finale Loesung fuer
+      redundantes einlesen von LHAPDFs
+
+    * FastNLOLHAPDF.h, fnlo-cppread.cc: PDFSet -> PDFMember
+
+    * FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOLHAPDF.h, fnlo-cppread.cc: Fix
+      fnPDFSet initialization bug. ..Alphas and ..CRunDec now inherit the
+      PDF-interface from FastNLOLHAPDF. Updated naming convention: PDFSet... .
+      FastNLOCRunDec::fAlphas no more static. GetNPDFSets returns now c++ style
+      counting 45 if 0-44 sets are availabe.
+
 2012-10-22  Pre-release of the fastNLO_reader package for the fastNLO tutorial
             ==================================================================
             at the PDF school 2012 "Proton Structure in the LHC Era" at DESY,
