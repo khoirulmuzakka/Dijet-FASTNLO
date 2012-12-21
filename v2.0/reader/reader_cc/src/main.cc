@@ -509,7 +509,8 @@ int main(int argc, char** argv) {
    //  replaced by a specific interface class to a diffractive PDF (see 13b). This class
    //  has to be added to the include statements above, e.g.:
    //     #include "fastnlo/FastNLODiffUser.h"
-   //  Some example code could look like (uncomment the following lines and recompile):
+   //  Some example code could look like (uncomment the following lines,
+   //  comment out the other examples under 14. and 15., and recompile):
    //
    //    // ---- Example code for jet-cross sections in diffractive DIS ---- //
    //    //  we setup an instance of the FastNLODiffUser class
@@ -538,6 +539,7 @@ int main(int argc, char** argv) {
    // 14.
    // ---- Example code of a quick cross section
    //      calculation using the FastNLOAlphas interface
+   // For the purpose of this example override default verbosity level INFO
    SetGlobalVerbosity(WARNING);
    FastNLOAlphas fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
