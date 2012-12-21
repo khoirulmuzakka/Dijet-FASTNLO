@@ -18,6 +18,7 @@
 #include "fastnlo/FastNLOCRunDec.h"
 #include "fastnlo/FastNLOLHAPDF.h"
 #include "fastnlo/FastNLOUser.h"
+#include "fastnlo/FastNLODiffUser.h"
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -504,9 +505,15 @@ int main(int argc, char** argv) {
    //  Choosing Q2 (or pT) as factorization scale increases the speed significantly.
    //
    // 13d.
-   //  Some example code could look like:
+   //  In the following example code the class description FastNLODiffUser may be
+   //  replaced by a specific interface class to a diffractive PDF (see 13b). This class
+   //  has to be added to the include statements above, e.g.:
+   //     #include "fastnlo/FastNLODiffUser.h"
+   //  Some example code could look like (uncomment the following lines and recompile):
+   //
+   //    // ---- Example code for jet-cross sections in diffractive DIS ---- //
    //    //  we setup an instance of the FastNLODiffUser class
-   //    FastNLODiffH12006FitB fnlodiff( tablename );
+   //    FastNLODiffUser fnlodiff( tablename );
    //
    //    //  If you want to receive your cross section in
    //    //   pb/GeV or in pb. Here we choose pb/GeV
@@ -525,6 +532,7 @@ int main(int argc, char** argv) {
    //    vector<double>  xs = fnlodiff.GetDiffCrossSection();
    //    // Print it
    //    fnlodiff.PrintCrossSections();
+   //    // ------------------------------------------------------------------ //
 
 
    // 14.
