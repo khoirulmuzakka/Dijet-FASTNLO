@@ -161,10 +161,55 @@ void FastNLOCRunDec::SetNf(int Nf , bool ReCalcCrossSection) {
 //______________________________________________________________________________
 
 void FastNLOCRunDec::InitReasonableRunDecValues() {
+   //---  Initialization for nice printing
+   const string CSEPS = " ##################################################################################\n";
+   const string LSEPS = " #---------------------------------------------------------------------------------\n";
+   bool WelcomeOnce = false;
+
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value
    fMz = 91.1876;
    SetNf(5);
    fNloop=2;
+
+   if (! WelcomeOnce) {
+      shout>>"\n";
+      shout>>""<<CSEPS;
+      shout<<"\n";
+      shout<<" CRunDec"<<endl;
+      shout<<" Version as of 13.08.2012"<<endl;
+      shout<<"\n";
+      shout<<" CRunDec: a C++ package for running and decoupling of the"<<endl;
+      shout<<"          strong coupling and quark masses"<<endl;
+      shout<<"\n";
+      shout>>""<<LSEPS;
+      shout<<"\n";
+      shout<<" Copyright © 2012 Barbara Schmidt, Matthias Steinhauser"<<endl;
+      shout<<"\n";
+      shout>>" # CRunDec is free software: you can redistribute it and/or modify"<<endl;
+      shout>>" # it under the terms of the GNU General Public License as published by"<<endl;
+      shout>>" # the Free Software Foundation, either version 3 of the License, or"<<endl;
+      shout>>" # (at your option) any later version."<<endl;
+      shout>>" #\n";
+      shout>>" # This program is distributed in the hope that it will be useful,"<<endl;
+      shout>>" # but WITHOUT ANY WARRANTY; without even the implied warranty of"<<endl;
+      shout>>" # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the"<<endl;
+      shout>>" # GNU General Public License for more details."<<endl;
+      shout>>" #\n";
+      shout>>" # You should have received a copy of the GNU General Public License"<<endl;
+      shout>>" # along with this program. If not, see <http://www.gnu.org/licenses/>."<<endl;
+      shout>>" #\n";
+      shout>>""<<LSEPS;
+      shout>>" #\n";
+      shout<<" The projects web page can be found at:"<<endl;
+      shout<<"   http://www-ttp.particle.uni-karlsruhe.de/Progdata/ttp12/ttp12-002/"<<endl;
+      shout<<"\n";
+      shout<<" If you use this code, please cite:"<<endl;
+      shout<<"   B. Schmidt, M. Steinhauser, arXiv:1201.6149, Comput.Phys.Commun. 183 (2012) 1845-1848."<<endl;
+      shout<<"\n";
+      shout>>""<<CSEPS;
+      WelcomeOnce = true;
+   }
+
    if (info.GetSpeak()) {
       info["InitReasonableRunDecValues"]<<"Printing initialized CRunDecValues."<<endl;
       PrintRunDecValues();

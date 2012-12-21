@@ -37,16 +37,18 @@ int main(int argc, char** argv) {
    const string CSEPL = "####################################################################################################################################################################\n";
 
    //---  Parse commmand line
-   printf("\n");
-   printf(" %s",CSEPS.c_str());
-   printf(" # fnlo-read: Program Steering\n");
-   printf(" %s",LSEPS.c_str());
+   // Avoid most output
+   //   SetGlobalVerbosity(SILENT);
+   shout>>"\n";
+   shout>>" "<<CSEPS;
+   shout<<" fnlo-read: Program Steering"<<endl;
+   shout>>" "<<LSEPS;
    string tablename = "table.tab";
    if (argc <= 1) {
-      printf(" # fnlo-read: WARNING! No table name given,\n");
-      printf(" # taking the default table.tab instead!\n");
-      printf(" #   For an explanation of command line arguments type:\n");
-      printf(" #   ./fnlo-cppread -h\n");
+      shout<<" fnlo-read: WARNING! No table name given,"<<endl;
+      shout<<" taking the default table.tab instead!"<<endl;
+      shout<<"   For an explanation of command line arguments type:"<<endl;
+      shout<<"   ./fnlo-cppread -h"<<endl;
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
@@ -63,10 +65,10 @@ int main(int argc, char** argv) {
          return 0;
       } else if (tablename == "_") {
          tablename = "table.tab";
-         printf("\n # fnlo-read: WARNING! No table name given,\n");
-         printf(" # taking the default table.tab instead!\n");
+         shout<<" fnlo-read: WARNING! No table name given,"<<endl;
+         shout<<" taking the default table.tab instead!"<<endl;
       } else {
-         cout << " # fnlo-read: Evaluating table: " << tablename << endl;
+         shout<<" fnlo-read: Evaluating table: " << tablename << endl;
       }
    }
 
@@ -77,10 +79,10 @@ int main(int argc, char** argv) {
    }
    if (argc <= 2 || PDFFile == "_") {
       PDFFile = "cteq6m.LHpdf";
-      printf(" # fnlo-read: WARNING! No PDF set given,\n");
-      printf(" # taking cteq6m.LHpdf instead!\n");
+      shout<<" fnlo-read: WARNING! No PDF set given,"<<endl;
+      shout<<" taking cteq6m.LHpdf instead!"<<endl;
    } else {
-      cout << " # fnlo-read: Using PDF set   : " << PDFFile << endl;
+      shout<<" fnlo-read: Using PDF set   : " << PDFFile << endl;
    }
 
    //--- Number of scale settings
@@ -93,8 +95,8 @@ int main(int argc, char** argv) {
       ch2tmp = (const char*) argv[3];
    }
    if (argc <= 3 || ch2tmp == "_") {
-      printf(" # fnlo-read: No request given for number of scale settings,\n");
-      printf(" #            investigating primary scale only.\n");
+      shout<<" fnlo-read: No request given for number of scale settings,"<<endl;
+      shout<<"            investigating primary scale only."<<endl;
    } else {
       nscls = atoi(argv[3]);
       if (nscls < 1) {
@@ -104,7 +106,7 @@ int main(int argc, char** argv) {
          printf(" # fnlo-read: ERROR! Too many scale settings requested, aborting! nscls = %i\n",nscls);
          exit(1);
       } else {
-         printf(" # fnlo-read: If possible, will try to do %i scale setting(s).\n",nscls);
+         shout<<" fnlo-read: If possible, will try to do "<<nscls<<" scale setting(s)."<<endl;
       }
    }
 
@@ -113,7 +115,7 @@ int main(int argc, char** argv) {
       printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
       return 1;
    }
-   printf(" %s",CSEPS.c_str());
+   shout>>" "<<CSEPS;
    //---  End of parsing arguments
 
 
@@ -224,7 +226,7 @@ int main(int argc, char** argv) {
    //
    // 1d.
    //     Initialize with PDF from LHAPDF and RunDec alpha_s evolution.
-   //         FastNLOCRundDec fnlo( tablename , PDFFile , PDFMember );
+   //         FastNLOCRunDec fnlo( tablename , PDFFile , PDFMember );
    //     Change the alpha_s value for all instances, by:
    //         fnlo.SetAlphasMz(0.1179);
    //     Change values of the alpha_s evolution code through:
@@ -542,6 +544,7 @@ int main(int argc, char** argv) {
    // For the purpose of this example override default verbosity level INFO
    SetGlobalVerbosity(WARNING);
    FastNLOAlphas fnloreader(tablename);
+   //   FastNLOCRunDec fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
    fnloreader.PrintTableInfo();
    fnloreader.PrintFastNLOTableConstants(0);
