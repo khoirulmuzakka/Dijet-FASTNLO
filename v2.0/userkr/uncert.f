@@ -451,7 +451,18 @@ cdebug
 
 
       SUBROUTINE CENRES(ISTEP,LRAT,LNRM,SCENARIO)
-
+* ---------------------------------------------------------------------
+*
+*     ISTEP: 0   Initialization
+*            2-4 Treat deviations for each bin, subprocess, order
+*              2 Store backup values for pairwise deviations from
+*                +/- eigen vectors
+*              3 Evaluate pairwise deviations of +/- eigen vectors
+*              4 Evaluate each deviation separately
+*            5-8 Not used
+*            9   Final evaluation
+*
+* ---------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER ISTEP
       LOGICAL LRAT,LNRM
@@ -465,7 +476,7 @@ cdebug
 
 *---Initialization
 ckr Table to normalize loaded
-ckr      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
+cdebug      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
       IF (ISTEP.EQ.0.OR.ISTEP.EQ.3) THEN
          IBIN = 0
          DO IRAP=1,NRAPIDITY
@@ -473,7 +484,7 @@ ckr      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
                IBIN = IBIN+1
                DO IORD=1,NORD+1
                   DO ISUB=1,NSBPRC+1
-                     MYRES(IBIN,ISUB,IORD)  = 0D0
+                     MYRES(IBIN,ISUB,IORD)     = 0D0
                      IF (ISTEP.EQ.0) THEN
                         MYRESN(IBIN,ISUB,IORD) = 0D0
                      ENDIF
@@ -659,7 +670,7 @@ ckr Counter for bin containing normalization factor
                         ENDIF
 ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
                         IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
-ckr     >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
+     >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
      >                       .OR.(SCENARIO(1:7).EQ."fnl2652"))THEN
                            IF (IORD.LE.NORDN) THEN
                               MYTMP(IRAP,ISUB,IORD) =
@@ -673,10 +684,15 @@ ckr     >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
      >                             RESULT(IBIN,ISUB,2)) *
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ENDIF
+                           IF (ISUB.LE.NSUBPROCN) THEN
+                              MYTMP(IRAP,NSUBPROCN+1,IORD) =
+     >                             MYTMP(IRAP,NSUBPROCN+1,IORD) +
+     >                             MYTMP(IRAP,ISUB,IORD)
+                           ENDIF
                         ENDIF
-Comment:                         write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       mytmp(irap,isub,iord)
+                        write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
+     >                       ibin,iord,isub,irap,ipt,
+     >                       mytmp(irap,isub,iord)
                      ENDDO
                   ENDDO
                ENDDO
@@ -687,8 +703,11 @@ Comment:      >                       mytmp(irap,isub,iord)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSUBPROCN+1
-                        MYRES(IBIN+NBIN,ISUB,IORD) =
-     >                       1D0/MYTMP(IRAP,ISUB,IORD)
+                        IF (ABS(MYRES(IBIN+NBIN,ISUB,IORD)).GT.
+     >                       TINY(1D0)) THEN
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                          1D0/MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                         IF (ISTEP.EQ.1) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
@@ -757,17 +776,17 @@ Comment:      >                    RESULT(IBIN,ISUB,IORD),
 Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
                   ELSEIF (LNRM) THEN
                      IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-Comment:                         write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       MYRES(IBIN,ISUB,IORD),
-Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
+     >                       ibin,iord,isub,irap,ipt,
+     >                       MYRES(IBIN,ISUB,IORD),
+     >                       MYRES(IBIN+NBIN,ISUB,IORD)
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       MYRES(IBIN,ISUB,IORD) *
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
-Comment:                         write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       MYRES(IBIN,ISUB,IORD),
-Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
+     >                       ibin,iord,isub,irap,ipt,
+     >                       MYRES(IBIN,ISUB,IORD),
+     >                       MYRES(IBIN+NBIN,ISUB,IORD)
                      ENDIF
                   ENDIF
                   IF (ISTEP.EQ.2) THEN
@@ -865,16 +884,18 @@ Comment:       DO IRAP=1,NRAPIDITY
 Comment:          DO IPT=1,NPT(IRAP)
 Comment:             IBIN = IBIN+1
 Comment:             DO IORD=1,NORD+1
-Comment:                DO ISUB=1,NSUBPROC+1
+Comment:                DO ISUB=1,NSBPRC+1
 Comment:                   WRITE(*,*)"DEBUG: IBIN,IRAP,IPT,IORD,ISUB,I+N",
 Comment:      >                 IBIN,IRAP,IPT,IORD,ISUB,IBIN+NBIN
 Comment:                   WRITE(*,*)"DEBUG: "//
 Comment:      >                 "MYRES(IBIN), MYRESN(IBIN)",
 Comment:      >                 MYRES(IBIN,ISUB,IORD),MYRESN(IBIN,ISUB,IORD)
-Comment:                   WRITE(*,*)"DEBUG: "//
-Comment:      >                 "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
-Comment:      >                 MYRES(IBIN+NBIN,ISUB,IORD),
-Comment:      >                 MYRESN(IBIN+NBIN,ISUB,IORD)
+Comment:                   IF (LNRM) THEN
+Comment:                      WRITE(*,*)"DEBUG: "//
+Comment:      >                    "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
+Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD),
+Comment:      >                    MYRESN(IBIN+NBIN,ISUB,IORD)
+Comment:                   ENDIF
 Comment:                ENDDO
 Comment:             ENDDO
 Comment:          ENDDO

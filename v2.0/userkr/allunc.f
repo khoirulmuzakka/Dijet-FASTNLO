@@ -498,6 +498,19 @@ ckr      LNRM = .FALSE.
          STOP
       ENDIF
 
+*---  Check primary table existence
+      FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
+      WRITE(*,*)"ALLUNC: Checking primary table: "//
+     >     FILENAME(1:LEN_TRIM(FILENAME))
+      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
+      IF (ISTAT.NE.0) THEN
+         WRITE(*,*)"ALLUNC: ERROR! Primary table not found, "//
+     >        "aborting! IOSTAT = ",ISTAT
+         STOP
+      ELSE
+         CLOSE(2)
+      ENDIF
+
 *---  Initialize LHAPDF, no PDF set printout after first call
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL SETLHAPARM('SILENT')
@@ -522,19 +535,6 @@ ckr      LNRM = .FALSE.
      >     "-loop order in the PDF"
       WRITE(*,*) "ALLUNC: The lambda_4 value for member 0 is",QLAM4
       WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
-
-*---  Check primary table existence
-      FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
-      WRITE(*,*)"ALLUNC: Checking primary table: "//
-     >     FILENAME(1:LEN_TRIM(FILENAME))
-      OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=ISTAT)
-      IF (ISTAT.NE.0) THEN
-         WRITE(*,*)"ALLUNC: ERROR! Primary table not found, "//
-     >        "aborting! IOSTAT = ",ISTAT
-         STOP
-      ELSE
-         CLOSE(2)
-      ENDIF
 
 *---  Check uncertainties to derive
       LONE  = MYPDF.LE.1
@@ -626,7 +626,8 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
 *---  Initial call to alpha_s interface
       ALPS = FNALPHAS(91.1876D0)
 
-*---  Print out contribution list
+*---  Determine pointers to contributions and print out contribution list
+      Call FX9999PT(1D0,1D0,1)
       Call FX9999CL
 
 *---  Print out scenario information
@@ -825,7 +826,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             ENDIF
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
             ISTEP = 0
-C---  WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
+cdebug            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -834,7 +835,7 @@ C---  WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                ENDIF
                ISTEP = 1
-C---  WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
+cdebug               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) THEN
@@ -843,7 +844,7 @@ C---  WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
                ENDIF
             ENDIF
             ISTEP = 2
-C---  WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
+cdebug            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
@@ -867,30 +868,30 @@ C---  WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
      >                    XSUNCOR,XSCOR)
                      IPHASE = 3
                      CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-Comment:                      IF (LNRM) THEN
-Comment:                         ISTEP = 3
-Comment: C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
-Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
-Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
-Comment: *--- Load normalization table with potentially different binning!
-Comment:                         IF (LTAB) THEN
-Comment:                            CALL FX9999IN(FILENAMN)
-Comment:                            CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
-Comment:                         ENDIF
-Comment:                         ISTEP = 4
-Comment: C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
-Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
-Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
-Comment:                         IF (LTAB) THEN
-Comment:                            CALL FX9999IN(FILENAME)
-Comment:                            CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
-Comment:                         ENDIF
-Comment:                         ISTEP = 5
-Comment: C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
-Comment:                         CALL CENRES(ISTEP,LRAT,LNRM,
-Comment:      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
-Comment:                      ENDIF
-Comment:                      CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                     IF (LNRM) THEN
+                        ISTEP = 3
+cdebug                        WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+*--- Load normalization table with potentially different binning!
+                        IF (LTAB) THEN
+                           CALL FX9999IN(FILENAMN)
+                           CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
+                        ENDIF
+                        ISTEP = 4
+cdebug                        WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+                        IF (LTAB) THEN
+                           CALL FX9999IN(FILENAME)
+                           CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
+                        ENDIF
+                        ISTEP = 5
+cdebug                        WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+                        CALL CENRES(ISTEP,LRAT,LNRM,
+     >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
+                     ENDIF
+                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                   ENDDO
 
 *---  Separate treatment of each PDF member for deviations
