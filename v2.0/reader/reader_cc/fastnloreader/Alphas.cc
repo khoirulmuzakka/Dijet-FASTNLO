@@ -60,6 +60,7 @@ void Alphas::GetFlavorMatchingThresholds(double& th1, double& th2, double& th3, 
    th6 = fTh[5];
 }
 
+
 int Alphas::CalcNf(double mu) {
    //
    //  calculate number of active flavors
@@ -76,9 +77,6 @@ int Alphas::CalcNf(double mu) {
    else return nf;
 }
 
-
-//static double CalcAlphasMuFixedNf(double mu, int nf);
-// calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
 
 double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors) {
 

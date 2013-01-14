@@ -42,7 +42,9 @@ public:
 
    // Getters for Alphas at scale mu
    static double CalcAlphasMu(double mu, double alphasMz = 0, int nLoop = 0, int nFlavors = 0);
-   static double CalcAlphasMuFixedNf(double mu, int nf);                // calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
+   static double CalcAlphasMuFixedNf(double mu, int nf) {                // calculate alpha_s as scale mu for fixed number of flavors nf. Ignore flavor matching thresholds.
+      return CalcAlphasMu(mu, fAlphasMz, fnLoop, nf);
+   }; 
 
    static int CalcNf(double mu);
    static void PrintInfo();
