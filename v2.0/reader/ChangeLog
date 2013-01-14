@@ -1,3 +1,29 @@
+2013-01-14  Micro update release version 2.1.0, revision 1360:
+            ==================================================
+            To avoid the problem of an uninitialized top PDF when accessing
+            ABKM09 or ABM11 PDFs via Fortran in LHAPDF (versions 5.8.7 and
+            5.8.8), the top PDF has been set to zero explicitly in the Fortran
+            reader. Otherwise one could observe crashes or - even worse -
+            arbitrarily wrong cross sections. This problem was not found with
+            the C++ reader. As a consequence some differences between the
+            reader programs can show up when using a PDF set with top PDFs > 0
+            like NNPDF 2.1 and scales Q > M_top.
+
+            This problem has been fixed in LHAPDF version 5.8.9b1 such that
+            the workaround could be deactivated here. Use this Fortran
+            reader ONLY with LHAPDF 5.8.9b1 or later when accessing PDF sets
+            ABKM09 or ABM11 !
+
+
+2013-01-14  rabbertz
+
+    * fn-interface.f: Reader: Remove workaround for AB(K)M PDFs in LHAPDF 5.8.7
+      - 5.8.8; fixed in LHAPDF 5.8.9b1
+
+2013-01-14  DanielBritzger
+
+    * Alphas.cc, Alphas.h: bugfix calcalphasfixednf
+
 2012-12-21  World's end Xmas release of the fastNLO_reader package including
             ==================================================================
             experimental support for diffractive PDFs,
