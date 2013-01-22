@@ -592,15 +592,20 @@ ckr Counter for bin containing normalization factor
                      DO ISUB=1,NSBPRCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-                           write(*,*)"AA1 ibin,iord,isub,irap,ipt,"//
-     >                          "mytmp",
-     >                          ibin,iord,isub,irap,ipt,
-     >                          mytmp(irap,isub,iord)
+                           IF (IDEBUG.GT.2) THEN
+                              WRITE(*,*)"DEBUG3: AA1 IBIN,IORD,ISUB,"//
+     >                             "IRAP,IPT,MYTMP",
+     >                             IBIN,IORD,ISUB,IRAP,IPT,
+     >                             MYTMP(IRAP,ISUB,IORD)
+                           ENDIF
                         ENDIF
-                        write(*,*)"AA2 ibin,irap,ipt,drap,dpt",
-     >                       ibin,irap,ipt,
-     >                       rapbin(irap+1)-rapbin(irap),
-     >                       ptbin(irap,ipt+1)-ptbin(irap,ipt)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: AA2 IBIN,IRAP,IPT,"//
+     >                          "DRAP,DPT",
+     >                          IBIN,IRAP,IPT,
+     >                          RAPBIN(IRAP+1)-RAPBIN(IRAP),
+     >                          PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT)
+                        ENDIF
 ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
                         IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
      >                       .OR.(SCENARIO(1:7).EQ."fnl2652"))THEN
@@ -617,9 +622,12 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ENDIF
                         ENDIF
-                        write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
-     >                       ibin,iord,isub,irap,ipt,
-     >                       mytmp(irap,isub,iord)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: BB IBIN,IORD,ISUB,"//
+     >                          "IRAP,IPT,MYTMP",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                      ENDDO
                   ENDDO
                ENDDO
@@ -630,16 +638,22 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSBPRCN+1
-                        write(*,*)"ZZZ1: ibin,myres,myres2,mytmp",ibin,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD),
-     >                       MYTMP(IRAP,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: ZZ1 IBIN,MYRES,MYRES2,"//
+     >                          "MYTMP",
+     >                          IBIN,MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD),
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       1D0/MYTMP(IRAP,ISUB,IORD)
-                        write(*,*)"ZZZ2: ibin,myres,myres2,mytmp",ibin,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD),
-     >                       MYTMP(IRAP,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: ZZ2 IBIN,MYRES,MYRES2,"//
+     >                          "MYTMP",
+     >                          IBIN,MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD),
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                         IF (ISTEP.EQ.1) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
@@ -708,17 +722,22 @@ Comment:      >                    RESULT(IBIN,ISUB,IORD),
 Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
                   ELSEIF (LNRM) THEN
                      IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-Comment:                         write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       MYRES(IBIN,ISUB,IORD),
-Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: EE "//
+     >                          "IBIN,IORD,ISUB,IRAP,IPT,MI,MI+N",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,MYRES(IBIN,ISUB,
+     >                          IORD),MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       MYRES(IBIN,ISUB,IORD) *
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
-Comment:                         write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
-Comment:      >                       ibin,iord,isub,irap,ipt,
-Comment:      >                       MYRES(IBIN,ISUB,IORD),
-Comment:      >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: FF "//
+     >                          "IBIN,IORD,ISUB,IRAP,IPT,MI,MI+N",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
                      ENDIF
                   ENDIF
                   IF (ISTEP.EQ.2) THEN
@@ -809,28 +828,32 @@ Comment:      >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
       ENDDO
       ENDIF
 
-cdebug
-Comment:       WRITE(*,*)"BBBBB: CENRES STEP = ",ISTEP
-Comment:       IBIN = 0
-Comment:       DO IRAP=1,NRAPIDITY
-Comment:          DO IPT=1,NPT(IRAP)
-Comment:             IBIN = IBIN+1
-Comment:             DO IORD=1,NORD+1
-Comment:                DO ISUB=1,NSBPRC+1
-Comment:                   WRITE(*,*)"DEBUG: IBIN,IRAP,IPT,IORD,ISUB,I+N",
-Comment:      >                 IBIN,IRAP,IPT,IORD,ISUB,IBIN+NBIN
-Comment:                   WRITE(*,*)"DEBUG: "//
-Comment:      >                 "MYRES(IBIN), MYRESN(IBIN)",
-Comment:      >                 MYRES(IBIN,ISUB,IORD),MYRESN(IBIN,ISUB,IORD)
-Comment:                   WRITE(*,*)"DEBUG: "//
-Comment:      >                 "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
-Comment:      >                 MYRES(IBIN+NBIN,ISUB,IORD),
-Comment:      >                 MYRESN(IBIN+NBIN,ISUB,IORD)
-Comment:                ENDDO
-Comment:             ENDDO
-Comment:          ENDDO
-Comment:       ENDDO
-cdebug
+      IF (IDEBUG.GT.0) THEN
+         WRITE(*,*)"DEBUG1: BBB CENRES STEP = ",ISTEP
+         IBIN = 0
+ckr         DO IRAP=1,NRAPIDITY
+ckr            DO IPT=1,NPT(IRAP)
+         DO IRAP=1,1
+            DO IPT=1,1
+               IBIN = IBIN+1
+               DO IORD=1,NORD+1
+                  DO ISUB=1,NSBPRC+1
+                     WRITE(*,*)"DEBUG1: IBIN,IRAP,IPT,IORD,ISUB,I+N",
+     >                    IBIN,IRAP,IPT,IORD,ISUB,IBIN+NBIN
+                     WRITE(*,*)"DEBUG1: "//
+     >                    "MYRES(IBIN), MYRESN(IBIN)",
+     >                    MYRES(IBIN,ISUB,IORD),MYRESN(IBIN,ISUB,IORD)
+                     IF (LNRM) THEN
+                        WRITE(*,*)"DEBUG1: "//
+     >                       "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
+     >                       MYRES(IBIN+NBIN,ISUB,IORD),
+     >                       MYRESN(IBIN+NBIN,ISUB,IORD)
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 
       RETURN
       END

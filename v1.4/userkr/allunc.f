@@ -28,6 +28,8 @@
       INTEGER IHIST,IPHASE,ISTEP,IETYPE
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
 cnew
+      INTEGER IPRINT
+      LOGICAL LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
       DOUBLE PRECISION ALPS,FNALPHAS,ALPHASPDF,ASMZPDF,ASUP,ASDN
       DOUBLE PRECISION XMUR,XMUF,QLAM4,QLAM5,BWGT
       DOUBLE PRECISION DSTMP(4)
@@ -70,6 +72,9 @@ ckr Z mass from PDG 2006
       DOUBLE PRECISION ASMZVAL,DASMZVAL,ASMZTMP
       INTEGER IASLOOP
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
+
+c --- Set debug printout level
+      IDEBUG = 0
 
 c --- Parse command line
       WRITE(*,*)"########################################"//
@@ -713,19 +718,25 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             ENDIF
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
-C---  WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
+            IF (IDEBUG.GT.0)
+     >           WRITE(*,*)"DEBUG1: AAA ALLUNC STEP = ",
+     >           ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                ISTEP = 1
-C---  WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
+               IF (IDEBUG.GT.0)
+     >              WRITE(*,*)"DEBUG1: BBB ALLUNC STEP = ",
+     >              ISTEP
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ENDIF
             ISTEP = 2
-C---  WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
+            IF (IDEBUG.GT.0)
+     >           WRITE(*,*)"DEBUG1: CCC ALLUNC STEP = ",
+     >           ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
@@ -739,20 +750,26 @@ ckr               DO J=1,3
                   CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                   IF (LNRM) THEN
                      ISTEP = 3
-C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+                     IF (IDEBUG.GT.0)
+     >                    WRITE(*,*)"DEBUG1: DD1 ALLUNC STEP = ",
+     >                    ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSECT0)
                      ISTEP = 4
-C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+                     IF (IDEBUG.GT.0)
+     >                    WRITE(*,*)"DEBUG1: EE1 ALLUNC STEP = ",
+     >                    ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB)
      >                    CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
                      ISTEP = 5
-C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+                     IF (IDEBUG.GT.0)
+     >                    WRITE(*,*)"DEBUG1: FF1 ALLUNC STEP = ",
+     >                    ISTEP
                      CALL CENRES(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
