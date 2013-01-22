@@ -14,6 +14,7 @@
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       CHARACTER*255 SCENARIO,TABPATH,TABNAME,REFNAME
       CHARACTER*255 FILENAME,FILENAMES,HISTFILE
       CHARACTER*255 TABNAMN,FILENAMN
@@ -695,12 +696,31 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
             PTBIN(I,J) = LOBIN(IOBSPOINTER(J,I),1)
          ENDDO
          PTBIN(I,NPT(I)+1) = UPBIN(IOBSPOINTER(NPT(I),I),1)
+         RAPBIN(I) = LOBIN(IOBSPOINTER(1,I),2)
       ENDDO
-*---  Set NORD to 2 for LO & NLO
+      RAPBIN(NRAPIDITY+1) = UPBIN(IOBSPOINTER(1,NRAPIDITY),2)
+cdebug
+      write(*,*)"QQQ1: nbincounter 1, 2  = ",nbincounter(1)
+     >     ,nbincounter(2)
+      do i=1,nobsbin
+         write(*,*)"QQQ2: iobs, lobin i,1-2 = ",i,lobin(i,1),lobin(i,2)
+         write(*,*)"QQQ3: iobs, upbin i,1-2 = ",i,upbin(i,1),upbin(i,2)
+      enddo
+      do i=1,nrapidity
+         npt(i) = ndivcounter(i)
+         write(*,*)"QQQ4: irap, rapbin, npt = ",i,rapbin(i),npt(i)
+         do j=1,npt(i)+1
+            write(*,*)"QQQ5: irap, ipt, ptbin  = ",i,j,ptbin(i,j)
+         enddo
+      enddo
+      write(*,*)"QQQ4: irap, rapbin      = ",nrapidity+1,rapbin(nrapidity+1)
+cdebug
+
+*---  Set v14 variable NORD to 2 for LO & NLO
       NORD = 2
-*---  Set no. of subprocesses to 7
-*---  v14: always 7
-*---  v20: 2-parton processes: 6   (e.g. LO dijet)
+*---  Store no. of subprocesses in NSBPRC
+*---  v14 NSUBPROC       : always 7
+*---  v20 NSUBPROC(iCtrb): 2-parton processes: 6   (e.g. LO dijet)
 *---  .    3-parton processes: 7   (e.g. NLO dijet or LO 3-jet)
 *---  .    4-parton processes: 7   (e.g. NLO 3-jet)
 *---  ATTENTION: Uncertainty derivation always assumes summed-up
@@ -2076,6 +2096,7 @@ c
       INCLUDE "fnx9999.inc"
       INCLUDE "strings.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       REAL PT(NPTMAX)
 
 c - HBOOK common
@@ -2363,6 +2384,7 @@ c
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       INTEGER NRAP,IOFF,IORDFIL,ISCL
       DOUBLE PRECISION DVAL(MXOBSBIN,MXSUBPROC+1,4)
       INTEGER I,J,IBIN,IORD,IORD2,ISUB,ISUB2,IHIST

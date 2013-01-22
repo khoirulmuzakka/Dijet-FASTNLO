@@ -22,6 +22,7 @@
       LOGICAL LRAT,LNRM
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       DOUBLE PRECISION DIFF,SUMM,RATIO,SUMM0,DIFF0,DIFFMU,DIFFML
       DOUBLE PRECISION DIFFPROC,SUMMPROC,DIFFORD,SUMMORD
       DOUBLE PRECISION TWGT(3),TEVTS,WEIGHT,NEFF
@@ -419,7 +420,7 @@ Comment:          DO IRAP=1,NRAPIDITY
 Comment:             DO IPT=1,NPT(IRAP)
 Comment:                IBIN = IBIN+1
 Comment:                DO IORD=1,NORD+1
-Comment:                   DO ISUB=1,NSUBPROC+1
+Comment:                   DO ISUB=1,NSBPRC+1
 Comment:                      if (iord.eq.3.and.isub.eq.8.and.ibin.eq.151)then
 Comment:                      write(*,*)"ZZZZ: ibin,irap,ipt,iord,isub,i+n",
 Comment:      >                    ibin,irap,ipt,iord,isub,ibin+nbin
@@ -469,8 +470,9 @@ cdebug
       CHARACTER*255 SCENARIO
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM
-      INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSUBPROCN
+      INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSBPRCN
 
 
 
@@ -513,8 +515,8 @@ ckr Save basic structure of table to normalize
                DO IRAP=1,NRAPIDITY
                   NPTN(IRAP) = NPT(IRAP)
                ENDDO
-               NORDN      = NORD
-               NSUBPROCN  = NSBPRC
+               NORDN   = NORD
+               NSBPRCN = NSBPRC
             ENDIF
          ENDIF
       ENDIF
@@ -528,7 +530,7 @@ ckr Normalization table loaded, if necessary
                   IBIN = IBIN+1
                   IF (IPT.EQ.1) IBNRM=IBIN
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
 ckr Only first pT bin needed to normalize in each rapidity region
 ckr Might be required to sum up multiple bins in pT and y for CMS analysis
 ckr                        IF (IPT.EQ.1) THEN
@@ -562,7 +564,7 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       1D0/MYTMP(IBNRM,ISUB,IORD)
                         IF (ISTEP.EQ.1) THEN
@@ -580,7 +582,7 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         IF (IRAP.EQ.2) THEN
                            IF (IORD.LE.NORDN) THEN
                               MYTMP(IBIN,ISUB,IORD) =
@@ -600,7 +602,7 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       1D0/MYTMP(NPTN(1)+IPT,ISUB,IORD)
                         IF (ISTEP.EQ.1) THEN
@@ -629,7 +631,7 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         IF (IORD.LE.NORDN) THEN
                            MYRES(IBIN+NBIN,ISUB,IORD) =
      >                          1D0/RESULT(IBINN,ISUB,IORD)
@@ -658,16 +660,18 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         IF (IPT.EQ.1) THEN
                            MYTMP(IRAP,ISUB,IORD) = 0.D0
-                           write(*,*)"AA ibin,iord,isub,irap,ipt,"//
-     >                          "mytmp,drap,dpt",
+                           write(*,*)"AA1 ibin,iord,isub,irap,ipt,"//
+     >                          "mytmp",
      >                          ibin,iord,isub,irap,ipt,
-     >                          mytmp(irap,isub,iord),
-     >                          rapbin(irap+1)-rapbin(irap),
-     >                          ptbin(irap,ipt+1)-ptbin(irap,ipt)
+     >                          mytmp(irap,isub,iord)
                         ENDIF
+                        write(*,*)"AA2 ibin,irap,ipt,drap,dpt",
+     >                       ibin,irap,ipt,
+     >                       rapbin(irap+1)-rapbin(irap),
+     >                       ptbin(irap,ipt+1)-ptbin(irap,ipt)
 ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
                         IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
      >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
@@ -684,9 +688,9 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
      >                             RESULT(IBIN,ISUB,2)) *
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ENDIF
-                           IF (ISUB.LE.NSUBPROCN) THEN
-                              MYTMP(IRAP,NSUBPROCN+1,IORD) =
-     >                             MYTMP(IRAP,NSUBPROCN+1,IORD) +
+                           IF (ISUB.LE.NSBPRCN) THEN
+                              MYTMP(IRAP,NSBPRCN+1,IORD) =
+     >                             MYTMP(IRAP,NSBPRCN+1,IORD) +
      >                             MYTMP(IRAP,ISUB,IORD)
                            ENDIF
                         ENDIF
@@ -702,12 +706,22 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
-                        IF (ABS(MYRES(IBIN+NBIN,ISUB,IORD)).GT.
+                     DO ISUB=1,NSBPRCN+1
+                        write(*,*)"ZZZ1: ibin,myres,myres2,mytmp",ibin,
+     >                       MYRES(IBIN,ISUB,IORD),
+     >                       MYRES(IBIN+NBIN,ISUB,IORD),
+     >                       MYTMP(IRAP,ISUB,IORD)
+                        IF (ABS(MYTMP(IRAP,ISUB,IORD)).GT.
      >                       TINY(1D0)) THEN
                            MYRES(IBIN+NBIN,ISUB,IORD) =
-     >                          1D0/MYTMP(IRAP,ISUB,IORD)
+     >                          1D0/ABS(MYTMP(IRAP,ISUB,IORD))
+                        ELSE
+                           MYRES(IBIN+NBIN,ISUB,IORD) = -1D0
                         ENDIF
+                        write(*,*)"ZZZ2: ibin,myres,myres2,mytmp",ibin,
+     >                       MYRES(IBIN,ISUB,IORD),
+     >                       MYRES(IBIN+NBIN,ISUB,IORD),
+     >                       MYTMP(IRAP,ISUB,IORD)
                         IF (ISTEP.EQ.1) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
@@ -724,7 +738,7 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSUBPROCN+1
+                     DO ISUB=1,NSBPRCN+1
                         IF (IORD.LE.NORDN) THEN
                            MYRES(IBIN+NBIN,ISUB,IORD) =
      >                          1D0/RESULT(IBIN,ISUB,IORD)
@@ -805,9 +819,9 @@ Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
      >                 MYRES(IBIN,NSBPRC+1,IORD)
 Comment:                   write(*,*)"LRATB: ibin,iord,isub,irap,ipt,a,b,a/b",
 Comment:      >                 ibin,iord,isub,irap,ipt,
-Comment:      >                 MYRES(IPT,NSUBPROC+1,IORD),
-Comment:      >                 MYRES(IBIN,NSUBPROC+1,IORD),
-Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
+Comment:      >                 MYRES(IPT,NSBPRC+1,IORD),
+Comment:      >                 MYRES(IBIN,NSBPRC+1,IORD),
+Comment:      >                 MYRES(IBIN+NBIN,NSBPRC+1,IORD)
                ELSEIF (LNRM) THEN
                   IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
                      MYRES(IBIN+NBIN,NSBPRC+1,IORD) =
@@ -828,9 +842,9 @@ Comment:      >                 MYRES(IBIN+NBIN,NSUBPROC+1,IORD)
      >              MYRES(IBIN,NSBPRC+1,NORD+1)
 Comment:                write(*,*)"LRATC: ibin,iord,isub,irap,ipt,a,b,a/b",
 Comment:      >              ibin,iord,isub,irap,ipt,
-Comment:      >              MYRES(IPT,NSUBPROC+1,NORD+1),
-Comment:      >              MYRES(IBIN,NSUBPROC+1,NORD+1),
-Comment:      >              MYRES(IBIN+NBIN,NSUBPROC+1,NORD+1)
+Comment:      >              MYRES(IPT,NSBPRC+1,NORD+1),
+Comment:      >              MYRES(IBIN,NSBPRC+1,NORD+1),
+Comment:      >              MYRES(IBIN+NBIN,NSBPRC+1,NORD+1)
             ELSEIF (LNRM) THEN
                IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
                   MYRES(IBIN+NBIN,NSBPRC+1,NORD+1) =
@@ -916,6 +930,7 @@ cdebug
       LOGICAL LRAT,LNRM
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
+      INCLUDE "v14unc.inc"
       DOUBLE PRECISION RATIO,RDIFF
 
       WRES(IBIN,ISUB,IORD) = SUMM
@@ -1038,13 +1053,13 @@ Comment:      >        WTX2(IBIN+NBIN,ISUB,IORD) +
 Comment:      >        RATIO*RATIO*WEIGHT
 Comment:          IF (RATIO.LT.WTXMIN(IBIN+NBIN,ISUB,IORD)) THEN
 Comment:             WTXMIN(IBIN+NBIN,ISUB,IORD) = RATIO
-Comment:             IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+Comment:             IF (ISUB.EQ.NSBPRC+1.AND.IORD.EQ.NORD+1) THEN
 Comment:                IJMIN(IBIN+NBIN) = IVAR
 Comment:             ENDIF
 Comment:          ENDIF
 Comment:          IF (RATIO.GT.WTXMAX(IBIN+NBIN,ISUB,IORD)) THEN
 Comment:             WTXMAX(IBIN+NBIN,ISUB,IORD) = RATIO
-Comment:             IF (ISUB.EQ.NSUBPROC+1.AND.IORD.EQ.NORD+1) THEN
+Comment:             IF (ISUB.EQ.NSBPRC+1.AND.IORD.EQ.NORD+1) THEN
 Comment:                IJMAX(IBIN+NBIN) = IVAR
 Comment:             ENDIF
 Comment:          ENDIF

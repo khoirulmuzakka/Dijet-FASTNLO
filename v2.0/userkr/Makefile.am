@@ -21,7 +21,7 @@ endif
 
 # All source files which go into the main target (and have to be distributed)
 allunc_SOURCES = main.f allunc.f fnx9999.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f alphst.f \
-	pyalps.f fx9999rw.f fnio.f uncert.f fnset.f fnx9999.inc strings.inc uncert.inc
+	pyalps.f fx9999rw.f fnio.f uncert.f fnset.f fnx9999.inc strings.inc uncert.inc v14unc.inc
 
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
@@ -61,8 +61,8 @@ MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Mak
 
 # Add dependencies on include files by hand
 main.o:                   strings.inc
-allunc.o:     fnx9999.inc strings.inc uncert.inc
-uncert.o:     fnx9999.inc             uncert.inc
+allunc.o:     fnx9999.inc strings.inc uncert.inc v14unc.inc
+uncert.o:     fnx9999.inc             uncert.inc v14unc.inc
 fx9999rw.o:   fnx9999.inc strings.inc
 fnx9999.o:    fnx9999.inc strings.inc
 fnset.o:      fnx9999.inc

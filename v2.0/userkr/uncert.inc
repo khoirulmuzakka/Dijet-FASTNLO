@@ -1,8 +1,9 @@
 *     --- force emacs to fortran mode -*-fortran-*-
 ***********************************************************************
-*     
+*
 *     Common block definition for uncertainty evaluation
-*     
+*     Needs fnx9999.inc to be included!
+*
 ***********************************************************************
       INTEGER NMAXORD
       PARAMETER (NMAXORD=3)
@@ -30,8 +31,5 @@
      >     WTDXL2,WTDXU2,WTDXLM,WTDXUM,WTDXMN,WTDXUL,
      >     NTN,IJMIN,IJMAX
 
-      INTEGER NPTMAX,NRAPMAX,NSCALEMAX
-      PARAMETER(NPTMAX=MXOBSBIN,NRAPMAX=MXOBSBIN,NSCALEMAX=8)
-      INTEGER NRAPIDITY,NPT(NRAPMAX),NORD,NSBPRC,NSCLS
-      DOUBLE PRECISION RAPBIN(NRAPMAX+1),PTBIN(NRAPMAX,NPTMAX+1)
-      COMMON/V14/RAPBIN,PTBIN,NRAPIDITY,NPT,NORD,NSBPRC,NSCLS
+      INTEGER NSBPRC
+      COMMON/V14TOV20/NSBPRC
