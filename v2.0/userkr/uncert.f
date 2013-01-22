@@ -141,28 +141,25 @@ Comment:      >                       MYRESN(IBIN,ISUB,IORD)
 Comment:                         WRITE(*,*)"LNRM: summ,diff",SUMM,DIFF
 cdebug
                      ENDIF
-                     IF (IPHASE.EQ.2) THEN
-                        MYSUMM(IBIN,ISUB,IORD) = SUMM
-                        MYDIFF(IBIN,ISUB,IORD) = DIFF
-                     ELSEIF (IPHASE.EQ.3) THEN
-                        SUMM0 = MYSUMM(IBIN,ISUB,IORD)
-                        DIFF0 = MYDIFF(IBIN,ISUB,IORD)
-                        DIFFMU = MAX(DIFF0,DIFF,0D0)
-                        DIFFML = MIN(DIFF0,DIFF,0D0)
-Comment:                         write(*,*)"ib,is,io,du,dl",
-Comment:      >                       ibin,isub,iord,
-Comment:      >                       diffmu,diffml
-                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
-     >                       SUMM0,DIFFMU,WEIGHT,
-     >                       LRAT,IPT,NBIN,LNRM)
-                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
-     >                       SUMM,DIFFML,WEIGHT,
-     >                       LRAT,IPT,NBIN,LNRM)
-                     ELSEIF (IPHASE.EQ.4) THEN
+Comment:                      IF (IPHASE.EQ.2) THEN
+Comment:                         MYSUMM(IBIN,ISUB,IORD) = SUMM
+Comment:                         MYDIFF(IBIN,ISUB,IORD) = DIFF
+Comment:                      ELSEIF (IPHASE.EQ.3) THEN
+Comment:                         SUMM0 = MYSUMM(IBIN,ISUB,IORD)
+Comment:                         DIFF0 = MYDIFF(IBIN,ISUB,IORD)
+Comment:                         DIFFMU = MAX(DIFF0,DIFF,0D0)
+Comment:                         DIFFML = MIN(DIFF0,DIFF,0D0)
+Comment:                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+Comment:      >                       SUMM0,DIFFMU,WEIGHT,
+Comment:      >                       LRAT,IPT,NBIN,LNRM)
+Comment:                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+Comment:      >                       SUMM,DIFFML,WEIGHT,
+Comment:      >                       LRAT,IPT,NBIN,LNRM)
+Comment:                      ELSEIF (IPHASE.EQ.4) THEN
                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
      >                       SUMM,DIFF,WEIGHT,
      >                       LRAT,IPT,NBIN,LNRM)
-                     ENDIF
+Comment:                      ENDIF
                   ENDDO
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
@@ -173,50 +170,50 @@ Comment:      >                       diffmu,diffml
                      DIFFPROC = MYRES(IBIN,ISUB,IORD) -
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
-                  IF (IPHASE.EQ.2) THEN
-                     MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC
-                     MYDIFF(IBIN,NSBPRC+1,IORD) = DIFFPROC
-                  ELSEIF (IPHASE.EQ.3) THEN
-                     SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
-                     DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
-                     DIFFMU = MAX(DIFF0,DIFFPROC,0D0)
-                     DIFFML = MIN(DIFF0,DIFFPROC,0D0)
-                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
-     >                    SUMM0,DIFFMU,WEIGHT,
-     >                    LRAT,IPT,NBIN,LNRM)
-                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
-     >                    SUMMPROC,DIFFML,WEIGHT,
-     >                    LRAT,IPT,NBIN,LNRM)
-                  ELSEIF (IPHASE.EQ.4) THEN
+Comment:                   IF (IPHASE.EQ.2) THEN
+Comment:                      MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC
+Comment:                      MYDIFF(IBIN,NSBPRC+1,IORD) = DIFFPROC
+Comment:                   ELSEIF (IPHASE.EQ.3) THEN
+Comment:                      SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
+Comment:                      DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
+Comment:                      DIFFMU = MAX(DIFF0,DIFFPROC,0D0)
+Comment:                      DIFFML = MIN(DIFF0,DIFFPROC,0D0)
+Comment:                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+Comment:      >                    SUMM0,DIFFMU,WEIGHT,
+Comment:      >                    LRAT,IPT,NBIN,LNRM)
+Comment:                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+Comment:      >                    SUMMPROC,DIFFML,WEIGHT,
+Comment:      >                    LRAT,IPT,NBIN,LNRM)
+Comment:                   ELSEIF (IPHASE.EQ.4) THEN
                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
      >                    SUMMPROC,DIFFPROC,WEIGHT,
      >                    LRAT,IPT,NBIN,LNRM)
-                  ENDIF
+Comment:                   ENDIF
                ENDDO
                IF (LNRM) THEN
                   SUMMORD = MYRES(IBIN,ISUB,IORD)
                   DIFFORD = MYRES(IBIN,ISUB,IORD) -
      >                 MYRESN(IBIN,ISUB,IORD)
                ENDIF
-               IF (IPHASE.EQ.2) THEN
-                  MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD
-                  MYDIFF(IBIN,NSBPRC+1,NORD+1) = DIFFORD
-               ELSEIF (IPHASE.EQ.3) THEN
-                  SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
-                  DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
-                  DIFFMU = MAX(DIFF0,DIFFORD,0D0)
-                  DIFFML = MIN(DIFF0,DIFFORD,0D0)
-                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
-     >                 SUMM0,DIFFMU,WEIGHT,
-     >                 LRAT,IPT,NBIN,LNRM)
-                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
-     >                 SUMMORD,DIFFML,WEIGHT,
-     >                 LRAT,IPT,NBIN,LNRM)
-               ELSEIF (IPHASE.EQ.4) THEN
+Comment:                IF (IPHASE.EQ.2) THEN
+Comment:                   MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD
+Comment:                   MYDIFF(IBIN,NSBPRC+1,NORD+1) = DIFFORD
+Comment:                ELSEIF (IPHASE.EQ.3) THEN
+Comment:                   SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
+Comment:                   DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
+Comment:                   DIFFMU = MAX(DIFF0,DIFFORD,0D0)
+Comment:                   DIFFML = MIN(DIFF0,DIFFORD,0D0)
+Comment:                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+Comment:      >                 SUMM0,DIFFMU,WEIGHT,
+Comment:      >                 LRAT,IPT,NBIN,LNRM)
+Comment:                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+Comment:      >                 SUMMORD,DIFFML,WEIGHT,
+Comment:      >                 LRAT,IPT,NBIN,LNRM)
+Comment:                ELSEIF (IPHASE.EQ.4) THEN
                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
      >                 SUMMORD,DIFFORD,WEIGHT,
      >                 LRAT,IPT,NBIN,LNRM)
-               ENDIF
+Comment:                ENDIF
                DO ISUB=1,NSBPRC
                   SUMMORD = 0D0
                   DIFFORD = 0D0
@@ -231,25 +228,25 @@ Comment:      >                       diffmu,diffml
                      DIFFORD = MYRES(IBIN,ISUB,IORD) -
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
-                  IF (IPHASE.EQ.2) THEN
-                     MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD
-                     MYDIFF(IBIN,ISUB,NORD+1) = DIFFORD
-                  ELSEIF (IPHASE.EQ.3) THEN
-                     SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
-                     DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
-                     DIFFMU = MAX(DIFF0,DIFFORD,0D0)
-                     DIFFML = MIN(DIFF0,DIFFORD,0D0)
-                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
-     >                    SUMM0,DIFFMU,WEIGHT,
-     >                    LRAT,IPT,NBIN,LNRM)
-                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
-     >                    SUMMORD,DIFFML,WEIGHT,
-     >                    LRAT,IPT,NBIN,LNRM)
-                  ELSEIF (IPHASE.EQ.4) THEN
+Comment:                   IF (IPHASE.EQ.2) THEN
+Comment:                      MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD
+Comment:                      MYDIFF(IBIN,ISUB,NORD+1) = DIFFORD
+Comment:                   ELSEIF (IPHASE.EQ.3) THEN
+Comment:                      SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
+Comment:                      DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
+Comment:                      DIFFMU = MAX(DIFF0,DIFFORD,0D0)
+Comment:                      DIFFML = MIN(DIFF0,DIFFORD,0D0)
+Comment:                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+Comment:      >                    SUMM0,DIFFMU,WEIGHT,
+Comment:      >                    LRAT,IPT,NBIN,LNRM)
+Comment:                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+Comment:      >                    SUMMORD,DIFFML,WEIGHT,
+Comment:      >                    LRAT,IPT,NBIN,LNRM)
+Comment:                   ELSEIF (IPHASE.EQ.4) THEN
                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
      >                    SUMMORD,DIFFORD,WEIGHT,
      >                    LRAT,IPT,NBIN,LNRM)
-                  ENDIF
+Comment:                   ENDIF
                ENDDO
             ENDDO
          ENDDO
@@ -344,8 +341,8 @@ ckr            central result according to NNPDF.
                                  WTDXL2(IBIN,ISUB,IORD) =
      >                                WTDXL2(IBIN,ISUB,IORD) /
      >                                DABS(MYRES(IBIN,ISUB,IORD))
-                                 IF (WTDXMN(IBIN,ISUB,IORD).GT.0.D0)
-     >                                WTDXMN(IBIN,ISUB,IORD) =
+ckr                                 IF (WTDXMN(IBIN,ISUB,IORD).GT.0.D0)
+                                      WTDXMN(IBIN,ISUB,IORD) =
      >                                WTDXMN(IBIN,ISUB,IORD) /
      >                                DABS(MYRES(IBIN,ISUB,IORD))
                                  WTDXUL(IBIN,ISUB,IORD) =
@@ -660,18 +657,24 @@ ckr Counter for bin containing normalization factor
                DO IPT=1,NPTN(IRAP)
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
-                     DO ISUB=1,NSBPRCN+1
+                     DO ISUB=1,NSBPRCN
                         IF (IPT.EQ.1) THEN
-                           MYTMP(IRAP,ISUB,IORD) = 0.D0
-                           write(*,*)"AA1 ibin,iord,isub,irap,ipt,"//
-     >                          "mytmp",
-     >                          ibin,iord,isub,irap,ipt,
-     >                          mytmp(irap,isub,iord)
+                           IF (ISUB.EQ.1) THEN
+                              MYTMP(IRAP,NSBPRCN+1,IORD) = 0.D0
+                           ENDIF
                         ENDIF
-                        write(*,*)"AA2 ibin,irap,ipt,drap,dpt",
-     >                       ibin,irap,ipt,
-     >                       rapbin(irap+1)-rapbin(irap),
-     >                       ptbin(irap,ipt+1)-ptbin(irap,ipt)
+                        MYTMP(IRAP,ISUB,IORD) = 0.D0
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: AA1 IBIN,IORD,ISUB,"//
+     >                          "IRAP,IPT,MYTMP",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYTMP(IRAP,ISUB,IORD)
+                           WRITE(*,*)"DEBUG3: AA2 IBIN,IRAP,IPT,"//
+     >                          "DRAP,DPT",
+     >                          IBIN,IRAP,IPT,
+     >                          RAPBIN(IRAP+1)-RAPBIN(IRAP),
+     >                          PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT)
+                        ENDIF
 ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysis!
                         IF ((SCENARIO(1:7).EQ."fnl2622".AND.IPT.LT.13)
      >                       .OR.(SCENARIO(1:7).EQ."fnl3622")
@@ -688,15 +691,16 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
      >                             RESULT(IBIN,ISUB,2)) *
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ENDIF
-                           IF (ISUB.LE.NSBPRCN) THEN
-                              MYTMP(IRAP,NSBPRCN+1,IORD) =
-     >                             MYTMP(IRAP,NSBPRCN+1,IORD) +
-     >                             MYTMP(IRAP,ISUB,IORD)
-                           ENDIF
+                           MYTMP(IRAP,NSBPRCN+1,IORD) =
+     >                          MYTMP(IRAP,NSBPRCN+1,IORD) +
+     >                          MYTMP(IRAP,ISUB,IORD)
                         ENDIF
-                        write(*,*)"BB ibin,iord,isub,irap,ipt,mytmp",
-     >                       ibin,iord,isub,irap,ipt,
-     >                       mytmp(irap,isub,iord)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: BB IBIN,IORD,ISUB,"//
+     >                          "IRAP,IPT,MYTMP",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                      ENDDO
                   ENDDO
                ENDDO
@@ -707,21 +711,27 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSBPRCN+1
-                        write(*,*)"ZZZ1: ibin,myres,myres2,mytmp",ibin,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD),
-     >                       MYTMP(IRAP,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: ZZ1 IBIN,MYRES,MYRES2,"//
+     >                          "MYTMP",
+     >                          IBIN,MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD),
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                         IF (ABS(MYTMP(IRAP,ISUB,IORD)).GT.
      >                       TINY(1D0)) THEN
                            MYRES(IBIN+NBIN,ISUB,IORD) =
      >                          1D0/ABS(MYTMP(IRAP,ISUB,IORD))
                         ELSE
-                           MYRES(IBIN+NBIN,ISUB,IORD) = -1D0
+                           MYRES(IBIN+NBIN,ISUB,IORD) = 0D0
                         ENDIF
-                        write(*,*)"ZZZ2: ibin,myres,myres2,mytmp",ibin,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD),
-     >                       MYTMP(IRAP,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: ZZ2 IBIN,MYRES,MYRES2,"//
+     >                          "MYTMP",
+     >                          IBIN,MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD),
+     >                          MYTMP(IRAP,ISUB,IORD)
+                        ENDIF
                         IF (ISTEP.EQ.1) THEN
                            MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                          MYRES(IBIN+NBIN,ISUB,IORD)
@@ -790,17 +800,22 @@ Comment:      >                    RESULT(IBIN,ISUB,IORD),
 Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD)
                   ELSEIF (LNRM) THEN
                      IF (ISTEP.EQ.2.OR.ISTEP.EQ.5) THEN
-                        write(*,*)"EE: ibin,iord,isub,irap,ipt,mi,mi+n",
-     >                       ibin,iord,isub,irap,ipt,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: EE "//
+     >                          "IBIN,IORD,ISUB,IRAP,IPT,MI,MI+N",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,MYRES(IBIN,ISUB,
+     >                          IORD),MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
                         MYRES(IBIN+NBIN,ISUB,IORD) =
      >                       MYRES(IBIN,ISUB,IORD) *
      >                       MYRES(IBIN+NBIN,ISUB,IORD)
-                        write(*,*)"FF: ibin,iord,isub,irap,ipt,mi,mi+n",
-     >                       ibin,iord,isub,irap,ipt,
-     >                       MYRES(IBIN,ISUB,IORD),
-     >                       MYRES(IBIN+NBIN,ISUB,IORD)
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3: FF "//
+     >                          "IBIN,IORD,ISUB,IRAP,IPT,MI,MI+N",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYRES(IBIN,ISUB,IORD),
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
                      ENDIF
                   ENDIF
                   IF (ISTEP.EQ.2) THEN
@@ -891,30 +906,32 @@ Comment:      >                 MYRES(IBIN+NBIN,ISUB,NORD+1)
       ENDDO
       ENDIF
 
-cdebug
-Comment:       WRITE(*,*)"BBBBB: CENRES STEP = ",ISTEP
-Comment:       IBIN = 0
-Comment:       DO IRAP=1,NRAPIDITY
-Comment:          DO IPT=1,NPT(IRAP)
-Comment:             IBIN = IBIN+1
-Comment:             DO IORD=1,NORD+1
-Comment:                DO ISUB=1,NSBPRC+1
-Comment:                   WRITE(*,*)"DEBUG: IBIN,IRAP,IPT,IORD,ISUB,I+N",
-Comment:      >                 IBIN,IRAP,IPT,IORD,ISUB,IBIN+NBIN
-Comment:                   WRITE(*,*)"DEBUG: "//
-Comment:      >                 "MYRES(IBIN), MYRESN(IBIN)",
-Comment:      >                 MYRES(IBIN,ISUB,IORD),MYRESN(IBIN,ISUB,IORD)
-Comment:                   IF (LNRM) THEN
-Comment:                      WRITE(*,*)"DEBUG: "//
-Comment:      >                    "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
-Comment:      >                    MYRES(IBIN+NBIN,ISUB,IORD),
-Comment:      >                    MYRESN(IBIN+NBIN,ISUB,IORD)
-Comment:                   ENDIF
-Comment:                ENDDO
-Comment:             ENDDO
-Comment:          ENDDO
-Comment:       ENDDO
-cdebug
+      IF (IDEBUG.GT.0) THEN
+         WRITE(*,*)"DEBUG1: BBB CENRES STEP = ",ISTEP
+         IBIN = 0
+ckr         DO IRAP=1,NRAPIDITY
+ckr            DO IPT=1,NPT(IRAP)
+         DO IRAP=1,1
+            DO IPT=1,1
+               IBIN = IBIN+1
+               DO IORD=1,NORD+1
+                  DO ISUB=1,NSBPRC+1
+                     WRITE(*,*)"DEBUG1: IBIN,IRAP,IPT,IORD,ISUB,I+N",
+     >                    IBIN,IRAP,IPT,IORD,ISUB,IBIN+NBIN
+                     WRITE(*,*)"DEBUG1: "//
+     >                    "MYRES(IBIN), MYRESN(IBIN)",
+     >                    MYRES(IBIN,ISUB,IORD),MYRESN(IBIN,ISUB,IORD)
+                     IF (LNRM) THEN
+                        WRITE(*,*)"DEBUG1: "//
+     >                       "MYRES(IBIN+NBIN), MYRESN(IBIN+NBIN)",
+     >                       MYRES(IBIN+NBIN,ISUB,IORD),
+     >                       MYRESN(IBIN+NBIN,ISUB,IORD)
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 
       RETURN
       END

@@ -94,6 +94,9 @@ ckr Z mass from PDG 2012
       INTEGER IASLOOP
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
 
+c --- Set debug printout level
+      IDEBUG = 0
+
 c --- Parse command line
       WRITE(*,*)"########################################"//
      >     "################################"
@@ -699,22 +702,28 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
          RAPBIN(I) = LOBIN(IOBSPOINTER(1,I),2)
       ENDDO
       RAPBIN(NRAPIDITY+1) = UPBIN(IOBSPOINTER(1,NRAPIDITY),2)
-cdebug
-      write(*,*)"QQQ1: nbincounter 1, 2  = ",nbincounter(1)
-     >     ,nbincounter(2)
-      do i=1,nobsbin
-         write(*,*)"QQQ2: iobs, lobin i,1-2 = ",i,lobin(i,1),lobin(i,2)
-         write(*,*)"QQQ3: iobs, upbin i,1-2 = ",i,upbin(i,1),upbin(i,2)
-      enddo
-      do i=1,nrapidity
-         npt(i) = ndivcounter(i)
-         write(*,*)"QQQ4: irap, rapbin, npt = ",i,rapbin(i),npt(i)
-         do j=1,npt(i)+1
-            write(*,*)"QQQ5: irap, ipt, ptbin  = ",i,j,ptbin(i,j)
-         enddo
-      enddo
-      write(*,*)"QQQ4: irap, rapbin      = ",nrapidity+1,rapbin(nrapidity+1)
-cdebug
+
+      IF (IDEBUG.GT.1) THEN
+         WRITE(*,*)"DEBUG2: QQQ1 NBINCOUNTER 1, 2  = ",
+     >        NBINCOUNTER(1),NBINCOUNTER(2)
+         DO I=1,NOBSBIN
+            WRITE(*,*)"DEBUG2: QQQ2: IOBS, LOBIN I,1-2 = ",
+     >           I,LOBIN(I,1),LOBIN(I,2)
+            WRITE(*,*)"DEBUG2: QQQ3: IOBS, UPBIN I,1-2 = ",
+     >           I,UPBIN(I,1),UPBIN(I,2)
+         ENDDO
+         DO I=1,NRAPIDITY
+            NPT(I) = NDIVCOUNTER(I)
+            WRITE(*,*)"DEBUG2: QQQ4: IRAP, RAPBIN, NPT = ",
+     >           I,RAPBIN(I),NPT(I)
+            DO J=1,NPT(I)+1
+               WRITE(*,*)"DEBUG2: QQQ5: IRAP, IPT, PTBIN  = ",
+     >              I,J,PTBIN(I,J)
+            ENDDO
+         ENDDO
+         WRITE(*,*)"DEBUG2: QQQ4: IRAP, RAPBIN      = ",
+     >        NRAPIDITY+1,RAPBIN(NRAPIDITY+1)
+      ENDIF
 
 *---  Set v14 variable NORD to 2 for LO & NLO
       NORD = 2
@@ -846,7 +855,9 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             ENDIF
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
             ISTEP = 0
-cdebug            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
+            IF (IDEBUG.GT.0)
+     >           WRITE(*,*)"DEBUG1: AAA ALLUNC STEP = ",
+     >           ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -855,7 +866,9 @@ cdebug            WRITE(*,*)"AAAAA: ALLUNC STEP = ",ISTEP
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                ENDIF
                ISTEP = 1
-cdebug               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
+               IF (IDEBUG.GT.0)
+     >              WRITE(*,*)"DEBUG1: BBB ALLUNC STEP = ",
+     >              ISTEP
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) THEN
@@ -864,9 +877,10 @@ cdebug               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
                ENDIF
             ENDIF
             ISTEP = 2
-cdebug            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
+            IF (IDEBUG.GT.0)
+     >           WRITE(*,*)"DEBUG1: CCC ALLUNC STEP = ",
+     >           ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Do loop runs once even if MYPDF=0! => Avoid with IF statement
@@ -890,7 +904,9 @@ cdebug            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
                      CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                      IF (LNRM) THEN
                         ISTEP = 3
-cdebug                        WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: DD1 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
@@ -899,7 +915,9 @@ cdebug                        WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
                            CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                         ENDIF
                         ISTEP = 4
-cdebug                        WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: EE1 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                         IF (LTAB) THEN
@@ -907,7 +925,9 @@ cdebug                        WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
                            CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                         ENDIF
                         ISTEP = 5
-cdebug                        WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: FF1 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                      ENDIF
@@ -925,7 +945,9 @@ cdebug                        WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
      >                    XSUNCOR,XSCOR)
                      IF (LNRM) THEN
                         ISTEP = 3
-C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: DD2 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
@@ -935,7 +957,9 @@ C---  WRITE(*,*)"DDDDD: ALLUNC STEP = ",ISTEP
      >                          XSUNCOR,XSCOR)
                         ENDIF
                         ISTEP = 4
-C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: EE2 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                         IF (LTAB) THEN
@@ -944,7 +968,9 @@ C---  WRITE(*,*)"EEEEE: ALLUNC STEP = ",ISTEP
      >                          XSUNCOR,XSCOR)
                         ENDIF
                         ISTEP = 5
-C---  WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
+                        IF (IDEBUG.GT.0)
+     >                       WRITE(*,*)"DEBUG1: FF2 ALLUNC STEP = ",
+     >                       ISTEP
                         CALL CENRES(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                      ENDIF
