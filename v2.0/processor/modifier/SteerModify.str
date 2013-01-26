@@ -37,9 +37,10 @@
 !   Input and output
 ! ------------------------
 
-InTable				fnh5001.tab
-OutTable			fnh5001_modified.tab
-
+!InTable				fnh5001.tab
+!OutTable			fnh5001_modified.tab
+InTable				../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2.tab
+OutTable			../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2_HS12.tab
 
 ! ------------------------
 !   Programm steering
@@ -74,9 +75,9 @@ Ecms
 
 AttachScDescription		true
 ScDescript {
-   "first line which is added"
-   "Second line of the scen. desc"
-   "Just attach any number of lines"
+!   "first line which is added"
+!   "Second line of the scen. desc"
+!   "Just attach any number of lines"
 }
 
 
@@ -95,5 +96,10 @@ RemoveBins {		!  Please use increasing bin numbering !!
 }
 
 
-
+! ------------------------------------
+!   Multiplicative factors
+!     Specify Multiplicative factor for each bin
+! ------------------------------------
+MultFac { 
+}
 

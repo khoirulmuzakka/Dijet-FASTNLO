@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "fnloTable.h"
+#include "fnloBlockB.h"
 #include "read_steer.h"
 
 using namespace std;
@@ -155,6 +156,71 @@ int main(int argc, char** argv)
 	 nobs--;
       }
       table.GetBlockA2()->NObsBin = nobs;
+   }
+
+   if ( !DOUBLE_ARR(MultFac).empty() ){
+      vector<double> fac = DOUBLE_ARR(MultFac);
+      cout<<"Applying multiplicative Factors!"<<endl;
+      unsigned int nobs = table.GetNObsBin();
+      if ( nobs!=fac.size() ){
+	 cout<<"ERROR. You need same number of multiplicative factors, than bins in the table."<<endl;
+	 exit(1);
+      }
+      // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
+      //    vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuIndep; 
+      //    vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuFDep; 
+      //    vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuRDep; 
+      // SigmaRef [NObsBins] [nsubproc]
+      //    vector < vector < double > > SigmaRefMixed; 
+      //    vector < vector < double > > SigmaRef_s1; 
+      //    vector < vector < double > > SigmaRef_s2; 
+      //    vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
+      for ( unsigned int idx = 0; idx<table.GetBlockA1()->GetNcontrib() ; idx++ ){
+	 fnloBlockB* b = table.GetBlockB(idx);
+	 for ( int i = 0 ; i<nobs;i++ ){
+	    if ( !b->SigmaTildeMuIndep.empty() ) {
+	       for ( unsigned int j = 0 ; j < b->SigmaTildeMuIndep[i].size() ; j++ ){
+		  for ( unsigned int k = 0 ; k < b->SigmaTildeMuIndep[i][j].size() ; k++ ){
+		     for ( unsigned int l = 0 ; l < b->SigmaTildeMuIndep[i][j][k].size() ; l++ ){
+			for ( unsigned int m = 0 ; m < b->SigmaTildeMuIndep[i][j][k][l].size() ; m++ ){
+			   b->SigmaTildeMuIndep[i][j][k][l][m] *= fac[i];
+			   if ( !b->SigmaTildeMuFDep.empty() )
+			      b->SigmaTildeMuFDep[i][j][k][l][m] *= fac[i];
+			   if ( !b->SigmaTildeMuRDep.empty() )
+			      b->SigmaTildeMuRDep[i][j][k][l][m] *= fac[i];
+			}
+		     }
+		  }
+	       }
+	    }
+	    if ( !b->SigmaTilde.empty() ) {
+	       for ( unsigned int j = 0 ; j < b->SigmaTilde[i].size() ; j++ ){
+		  for ( unsigned int k = 0 ; k < b->SigmaTilde[i][j].size() ; k++ ){
+		     for ( unsigned int l = 0 ; l < b->SigmaTilde[i][j][k].size() ; l++ ){
+			for ( unsigned int m = 0 ; m < b->SigmaTilde[i][j][k][l].size() ; m++ ){
+			   b->SigmaTilde[i][j][k][l][m] *= fac[i];
+			}
+		     }
+		  }
+	       }
+	    }
+	    if ( !b->SigmaRefMixed.empty() ) {
+	       for ( unsigned int j = 0 ; j < b->SigmaRefMixed[i].size() ; j++ ){
+		     b->SigmaRefMixed[i][j] *= fac[i];
+	       }
+	    }
+	    if ( !b->SigmaRef_s1.empty() ) {
+	       for ( unsigned int j = 0 ; j < b->SigmaRef_s1[i].size() ; j++ ){
+		  b->SigmaRef_s1[i][j] *= fac[i];
+	       }
+	    }
+	    if ( !b->SigmaRef_s2.empty() ) {
+	       for ( unsigned int j = 0 ; j < b->SigmaRef_s2[i].size() ; j++ ){
+		  b->SigmaRef_s2[i][j] *= fac[i];
+	       }
+	    }
+	 }	    
+      }
    }
 
    if ( BOOL(PrintOutputA1) )  table.GetBlockA1()->Print();
