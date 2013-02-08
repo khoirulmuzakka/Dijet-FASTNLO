@@ -224,12 +224,13 @@ ckr      ASMZPDF = ANINT(ASMZPDF*1D6)/1D6
 *     >  CALL INITPDFSET("cteq61.LHgrid")
 *     >  CALL INITPDF(0)
       CALL EVOLVEPDF(X,MUF,XPDF)
-ckr Temporary
+
 *---  Temporary fix for lhapdf-5.8.7 and lhapdf-5.8.8 bug with ABKM09 or ABM11
 *---  Set top-antitop PDF to zero
-      XPDF(-6) = 0D0
-      XPDF( 6) = 0D0
-ckr Temporary!
+*---  Fixed in LHAPDF-5.8.9b1
+C      XPDF(-6) = 0D0
+C      XPDF( 6) = 0D0
+
 
 *---  Here one can also call ones own PDF code
 *---  --> Only remember that these are MOMENTUM DENSITIES, i.e. x * PDF
