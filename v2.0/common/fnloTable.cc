@@ -1,5 +1,7 @@
 // KR: Add include because of header clean-up in gcc-4.3
+// KR: Add second include needed with gcc-4.7.2
 #include <cstdlib>
+#include <unistd.h>
 
 #include "fnloTable.h"
 
@@ -7,7 +9,7 @@ int fnloTable::ReadTable(){
    OpenFileRead();
    ReadBlockA1();
    ReadBlockA2();
-   fnloBlockA1 *blocka1 = GetBlockA1();  
+   fnloBlockA1 *blocka1 = GetBlockA1();
    int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
    for(int i=0;i<nblocks;i++){
       ReadBlockB(i);
@@ -73,7 +75,7 @@ int fnloTable::GetBinNumber( double var1, double var2 ){
    //
    //  returns the bin number, that has to be passse to FillEvent()
    //  return -1 if values are out of bin-ranges
-   // 
+   //
 
    fnloBlockA2* A2 =  this->GetBlockA2();
    if ( var2==0 && A2->NDim!=1){
@@ -82,7 +84,7 @@ int fnloTable::GetBinNumber( double var1, double var2 ){
    if ( var2!=0 && A2->NDim!=2){
       printf("fnloTable::GetBinNumber(%6.3f,%6.3f). Error. A double differential table only needs two variables.\n",var1,var2);exit(1);
    }
-   
+
    int bin = -1;
    if ( A2->NDim == 2) {
 	for(int j = 0; j < A2->GetNObsBin(); j++) {
@@ -112,7 +114,7 @@ int fnloTable::GetBinNumber( double var1, double var2 ){
 int fnloTable::FillEventDIS(int ObsBin, double x, double M1, double M2, double mu, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& dummypdf, nlo::pdf_and_coupling_dis& realpdf, double fac ){
    //
    //  FillEvent(). Fills one event into the FastNLO table.
-   // 
+   //
    //  input:
    //     ObsBin	BinNumber (as calculated by GetBinNumber())
    //     x		the x-bin
@@ -204,7 +206,7 @@ int fnloTable::WriteBlockB(int no){
    }else{
       printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
-      
+
    }
    return blockb->Write(ofilestream);
 }
@@ -216,7 +218,7 @@ int fnloTable::WriteBlockBDividebyN(int no){
    }else{
       printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
-      
+
    }
    return blockb->Write(ofilestream,fnloBlockB::DividebyNevt);
 }
@@ -229,7 +231,7 @@ int fnloTable::WriteBlockB(int no,ofstream* outstream ){
    }else{
       printf("fnloTable::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
       exit(2);
-      
+
    }
    return blockb->Write(outstream);
 }

@@ -1,5 +1,7 @@
 // KR: Add include because of header clean-up in gcc-4.3
+// KR: Add second include needed with gcc-4.7.2
 #include <cstdlib>
+#include <unistd.h>
 
 #include "stdio.h"
 #include <vector>
@@ -31,30 +33,30 @@ int main(int argc, char** argv)
         table_list.push_back(thistable);
         thistable->OpenFileRead();
         if(thistable->ReadBlockA1() != 0){
-           printf("Invalid format in %s, skipping.\n",path);      
+           printf("Invalid format in %s, skipping.\n",path);
            table_list.pop_back();
            delete thistable;
            break;
         }
         if(thistable->GetBlockA1()->GetItabversion() != 20000){
-           printf("This Merger likes only tableformat V20.000, skipping %s.\n",path);      
+           printf("This Merger likes only tableformat V20.000, skipping %s.\n",path);
            table_list.pop_back();
            delete thistable;
            break;
         }
         if(thistable->ReadBlockA2() != 0){
-           printf("Invalid format in %s, skipping.\n",path);      
+           printf("Invalid format in %s, skipping.\n",path);
            table_list.pop_back();
            delete thistable;
            break;
         }
-        
+
 
      }else{
-        printf("Cannot access %s, skipping.\n",path);      
+        printf("Cannot access %s, skipping.\n",path);
      }
   }
-  
+
   int ntables = table_list.size();
   printf("Found %d table file(s).\n",ntables);
   if(ntables<1) exit(1);
@@ -84,7 +86,7 @@ int main(int argc, char** argv)
 
   // extract the contribution types from all the block Bs of the tablefiles
   for( table=table_list.begin(); table!=table_list.end();  table++){
-     fnloBlockA1 *blocka1 = (*table)->GetBlockA1();  
+     fnloBlockA1 *blocka1 = (*table)->GetBlockA1();
      int nblocks = blocka1->GetNcontrib()+blocka1->GetNdata();
      (*table)->RewindRead();
      (*table)->SkipBlockA1A2();
@@ -147,7 +149,7 @@ int main(int argc, char** argv)
      printf(" %zu file(s) containing",entries[i]->tables.size());
      printf(" %s %s",entries[i]->contribution.GetName1().c_str(),entries[i]->contribution.GetName2(table_list[0]->GetBlockA2()->GetILOord()).c_str());
      vector <fnloTable*>::iterator table = entries[i]->tables[0].table;
-     // Addition 
+     // Addition
      for(int j=1;j<entries[i]->tables.size();j++){
         fnloBlockB *otherblock = (*(entries[i]->tables[j].table))->GetBlockB(entries[i]->tables[j].blockbno);
         (*table)->GetBlockB(entries[i]->tables[0].blockbno)->Add(otherblock);
@@ -155,7 +157,7 @@ int main(int argc, char** argv)
      (*table)->WriteBlockB(entries[i]->tables[0].blockbno,outstream);
      long long int nevents = (*table)->GetBlockB(entries[i]->tables[0].blockbno)->GetNevt();
      printf("  (%#4.2g events).\n",(double)nevents);
-     
+
   }
   result->CloseFileWrite();
   printf("Done.\n");
