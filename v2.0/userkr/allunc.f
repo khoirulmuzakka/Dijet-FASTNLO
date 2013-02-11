@@ -28,7 +28,7 @@
       INTEGER I,J,MYPDF,IPDF,IPDFUD,MYPDFAS,IOPDF,IOAS
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCL,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT,NTMP
-      INTEGER IHIST,IPHASE,ISTEP,IETYPE
+      INTEGER IHIST,IPHASE,ISTEP,IETYPE,NPDFPAR
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
 cnew
       INTEGER IPRINT
@@ -1019,12 +1019,12 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >              "HERAPDF10_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF10_VAR.LHgrid"
+                  NPDFPAR = 13
                ELSEIF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
      >                 "HERAPDF15_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF15_VAR.LHgrid"
-ckr                  WRITE(*,*)"ALLUNC: Taking second HERAPDF set: "//
-ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
+                  NPDFPAR = 12
                ELSE
                   WRITE(*,*)"ALLUNC: Illegal HERAPDF set, aborted! "//
      >                 "PDFNAM: ",PDFNAM(1:LEN_TRIM(PDFNAM))
@@ -1091,7 +1091,7 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 4
 
-*--- HERAPDF1.0: Do loop runs from 1 - 8 for this part
+*--- HERAPDF1.0 & 1.5: Do loop runs from 1 - 8 for this part
                DO J=1,8
                   CALL INITPDF(J)
                   CALL FX9999IN(FILENAME)
@@ -1186,7 +1186,8 @@ ckr     >                 PDFSET2(1:LEN_TRIM(PDFSET2))
                IPHASE = 4
 
 *--- HERAPDF1.0: Do loop runs from 9 - 13 for this part
-               DO J=9,13
+*--- HERAPDF1.5: Do loop runs from 9 - 12 for this part
+               DO J=9,NPDFPAR
                   CALL INITPDF(J)
                   CALL FX9999IN(FILENAME)
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,
