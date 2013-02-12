@@ -42,20 +42,20 @@ OBJFILESREF  = $(REFFILES:.f=.o)
 # Derive all uncertainties in one go
 allunc:	$(OBJFILESALL) fnx9999.inc strings.inc uncert.inc
 	$(FC) -o $@ $(FFLAGS) $(OBJFILESALL) \
-	-L $(LHAPDF) -lLHAPDF \
-	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib
+	-L $(LHAPDF)/lib -lLHAPDF \
+	-L $(CERNLIB)/lib -lmathlib -lpacklib -lkernlib
 
 # Example job
 example: $(OBJFILESEXA) fnx9999.inc strings.inc
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESEXA) \
-	-L $(LHAPDF) -lLHAPDF \
-	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib
+	-L $(LHAPDF)/lib -lLHAPDF \
+	-L $(CERNLIB)/lib -lmathlib -lpacklib -lkernlib
 
 # Analyze algorithmic uncertainty from reference jobs with
 # original CTEQ PDF code
 example-ref: $(OBJFILESREF) fnx9999.inc
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESREF) \
-	-L $(CERNLIB) -lmathlib -lpacklib -lkernlib
+	-L $(CERNLIB)/lib -lmathlib -lpacklib -lkernlib
 
 
 
