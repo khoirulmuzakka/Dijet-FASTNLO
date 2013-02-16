@@ -2,12 +2,17 @@
 * ---------------------------------------------------------------------
 *
 *     IPHASE: 1   Initialization
-*             2-4 Treat deviations for each bin, subprocess, order
+*             2-5 Treat deviations for each bin, subprocess, order
 *               2 Store backup values for pairwise deviations from
 *                 +/- eigen vectors
 *               3 Evaluate pairwise deviations of +/- eigen vectors
-*               4 Evaluate each deviation separately
-*             5-8 Not used
+*                 a la CTEQ/MSTW
+*               4 Evaluate pairwise deviations of +/- eigen vectors
+*                 adding also same side deviations
+*               5 Evaluate pairwise deviations of +/- eigen vectors
+*                 a la HERAPDF
+*               6 Evaluate each deviation separately
+*             7-8 Not used
 *             9   Final evaluation
 *
 *     IMODE: 1 Separate quadratic addition of upwards and downwards
@@ -141,25 +146,49 @@ Comment:      >                       MYRESN(IBIN,ISUB,IORD)
 Comment:                         WRITE(*,*)"LNRM: summ,diff",SUMM,DIFF
 cdebug
                      ENDIF
-Comment:                      IF (IPHASE.EQ.2) THEN
-Comment:                         MYSUMM(IBIN,ISUB,IORD) = SUMM
-Comment:                         MYDIFF(IBIN,ISUB,IORD) = DIFF
-Comment:                      ELSEIF (IPHASE.EQ.3) THEN
-Comment:                         SUMM0 = MYSUMM(IBIN,ISUB,IORD)
-Comment:                         DIFF0 = MYDIFF(IBIN,ISUB,IORD)
-Comment:                         DIFFMU = MAX(DIFF0,DIFF,0D0)
-Comment:                         DIFFML = MIN(DIFF0,DIFF,0D0)
-Comment:                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
-Comment:      >                       SUMM0,DIFFMU,WEIGHT,
-Comment:      >                       LRAT,IPT,NBIN,LNRM)
-Comment:                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
-Comment:      >                       SUMM,DIFFML,WEIGHT,
-Comment:      >                       LRAT,IPT,NBIN,LNRM)
-Comment:                      ELSEIF (IPHASE.EQ.4) THEN
+                     IF (IPHASE.EQ.2) THEN
+                        MYSUMM(IBIN,ISUB,IORD) = SUMM
+                        MYDIFF(IBIN,ISUB,IORD) = DIFF
+                     ELSEIF (IPHASE.EQ.3) THEN
+                        SUMM0 = MYSUMM(IBIN,ISUB,IORD)
+                        DIFF0 = MYDIFF(IBIN,ISUB,IORD)
+                        DIFFMU = MAX(DIFF0,DIFF,0D0)
+                        DIFFML = MIN(DIFF0,DIFF,0D0)
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM0,DIFFMU,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM,DIFFML,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                     ELSEIF (IPHASE.EQ.4) THEN
+                        SUMM0 = MYSUMM(IBIN,ISUB,IORD)
+                        DIFF0 = MYDIFF(IBIN,ISUB,IORD)
+                        DIFFMU = + SQRT((MAX(DIFF0,0D0))**2D0 +
+     >                       (MAX(DIFF,0D0))**2D0)
+                        DIFFML = - SQRT((MIN(DIFF0,0D0))**2D0 +
+     >                       (MIN(DIFF,0D0))**2D0)
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM0,DIFFMU,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM,DIFFML,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                     ELSEIF (IPHASE.EQ.5) THEN
+                        SUMM0 = MYSUMM(IBIN,ISUB,IORD)
+                        DIFF0 = MYDIFF(IBIN,ISUB,IORD)
+                        DIFFMU = ABS(DIFF0-DIFF)/2D0
+                        DIFFML = -DIFFMU
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM0,DIFFMU,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                        CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
+     >                       SUMM,DIFFML,WEIGHT,
+     >                       LRAT,IPT,NBIN,LNRM)
+                     ELSEIF (IPHASE.EQ.6) THEN
                         CALL SUMMUP(IVAR,IBIN,ISUB,IORD,
      >                       SUMM,DIFF,WEIGHT,
      >                       LRAT,IPT,NBIN,LNRM)
-Comment:                      ENDIF
+                     ENDIF
                   ENDDO
                   SUMM = SUMMPROC
                   SUMMORD = SUMMORD + SUMMPROC
@@ -170,50 +199,98 @@ Comment:                      ENDIF
                      DIFFPROC = MYRES(IBIN,ISUB,IORD) -
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
-Comment:                   IF (IPHASE.EQ.2) THEN
-Comment:                      MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC
-Comment:                      MYDIFF(IBIN,NSBPRC+1,IORD) = DIFFPROC
-Comment:                   ELSEIF (IPHASE.EQ.3) THEN
-Comment:                      SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
-Comment:                      DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
-Comment:                      DIFFMU = MAX(DIFF0,DIFFPROC,0D0)
-Comment:                      DIFFML = MIN(DIFF0,DIFFPROC,0D0)
-Comment:                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
-Comment:      >                    SUMM0,DIFFMU,WEIGHT,
-Comment:      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
-Comment:      >                    SUMMPROC,DIFFML,WEIGHT,
-Comment:      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                   ELSEIF (IPHASE.EQ.4) THEN
+                  IF (IPHASE.EQ.2) THEN
+                     MYSUMM(IBIN,NSBPRC+1,IORD) = SUMMPROC
+                     MYDIFF(IBIN,NSBPRC+1,IORD) = DIFFPROC
+                  ELSEIF (IPHASE.EQ.3) THEN
+                     SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
+                     DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
+                     DIFFMU = MAX(DIFF0,DIFFPROC,0D0)
+                     DIFFML = MIN(DIFF0,DIFFPROC,0D0)
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMMPROC,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.4) THEN
+                     SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
+                     DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
+                     DIFFMU = + SQRT((MAX(DIFF0,0D0))**2D0 +
+     >                    (MAX(DIFFPROC,0D0))**2D0)
+                     DIFFML = - SQRT((MIN(DIFF0,0D0))**2D0 +
+     >                    (MIN(DIFFPROC,0D0))**2D0)
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMMPROC,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.5) THEN
+                     SUMM0 = MYSUMM(IBIN,NSBPRC+1,IORD)
+                     DIFF0 = MYDIFF(IBIN,NSBPRC+1,IORD)
+                     DIFFMU = ABS(DIFF0-DIFFPROC)/2D0
+                     DIFFML = -DIFFMU
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
+     >                    SUMMPROC,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.6) THEN
                      CALL SUMMUP(IVAR,IBIN,NSBPRC+1,IORD,
      >                    SUMMPROC,DIFFPROC,WEIGHT,
      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                   ENDIF
+                  ENDIF
                ENDDO
                IF (LNRM) THEN
                   SUMMORD = MYRES(IBIN,ISUB,IORD)
                   DIFFORD = MYRES(IBIN,ISUB,IORD) -
      >                 MYRESN(IBIN,ISUB,IORD)
                ENDIF
-Comment:                IF (IPHASE.EQ.2) THEN
-Comment:                   MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD
-Comment:                   MYDIFF(IBIN,NSBPRC+1,NORD+1) = DIFFORD
-Comment:                ELSEIF (IPHASE.EQ.3) THEN
-Comment:                   SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
-Comment:                   DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
-Comment:                   DIFFMU = MAX(DIFF0,DIFFORD,0D0)
-Comment:                   DIFFML = MIN(DIFF0,DIFFORD,0D0)
-Comment:                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
-Comment:      >                 SUMM0,DIFFMU,WEIGHT,
-Comment:      >                 LRAT,IPT,NBIN,LNRM)
-Comment:                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
-Comment:      >                 SUMMORD,DIFFML,WEIGHT,
-Comment:      >                 LRAT,IPT,NBIN,LNRM)
-Comment:                ELSEIF (IPHASE.EQ.4) THEN
+               IF (IPHASE.EQ.2) THEN
+                  MYSUMM(IBIN,NSBPRC+1,NORD+1) = SUMMORD
+                  MYDIFF(IBIN,NSBPRC+1,NORD+1) = DIFFORD
+               ELSEIF (IPHASE.EQ.3) THEN
+                  SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
+                  DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
+                  DIFFMU = MAX(DIFF0,DIFFORD,0D0)
+                  DIFFML = MIN(DIFF0,DIFFORD,0D0)
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMM0,DIFFMU,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMMORD,DIFFML,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+               ELSEIF (IPHASE.EQ.4) THEN
+                  SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
+                  DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
+                  DIFFMU = + SQRT((MAX(DIFF0,0D0))**2D0 +
+     >                 (MAX(DIFFORD,0D0))**2D0)
+                  DIFFML = - SQRT((MIN(DIFF0,0D0))**2D0 +
+     >                 (MIN(DIFFORD,0D0))**2D0)
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMM0,DIFFMU,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMMORD,DIFFML,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+               ELSEIF (IPHASE.EQ.5) THEN
+                  SUMM0 = MYSUMM(IBIN,NSBPRC+1,NORD+1)
+                  DIFF0 = MYDIFF(IBIN,NSBPRC+1,NORD+1)
+                  DIFFMU = ABS(DIFF0-DIFFORD)/2D0
+                  DIFFML = -DIFFMU
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMM0,DIFFMU,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+                  CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
+     >                 SUMMORD,DIFFML,WEIGHT,
+     >                 LRAT,IPT,NBIN,LNRM)
+               ELSEIF (IPHASE.EQ.6) THEN
                   CALL SUMMUP(IVAR,IBIN,NSBPRC+1,NORD+1,
      >                 SUMMORD,DIFFORD,WEIGHT,
      >                 LRAT,IPT,NBIN,LNRM)
-Comment:                ENDIF
+               ENDIF
                DO ISUB=1,NSBPRC
                   SUMMORD = 0D0
                   DIFFORD = 0D0
@@ -228,25 +305,49 @@ Comment:                ENDIF
                      DIFFORD = MYRES(IBIN,ISUB,IORD) -
      >                    MYRESN(IBIN,ISUB,IORD)
                   ENDIF
-Comment:                   IF (IPHASE.EQ.2) THEN
-Comment:                      MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD
-Comment:                      MYDIFF(IBIN,ISUB,NORD+1) = DIFFORD
-Comment:                   ELSEIF (IPHASE.EQ.3) THEN
-Comment:                      SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
-Comment:                      DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
-Comment:                      DIFFMU = MAX(DIFF0,DIFFORD,0D0)
-Comment:                      DIFFML = MIN(DIFF0,DIFFORD,0D0)
-Comment:                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
-Comment:      >                    SUMM0,DIFFMU,WEIGHT,
-Comment:      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
-Comment:      >                    SUMMORD,DIFFML,WEIGHT,
-Comment:      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                   ELSEIF (IPHASE.EQ.4) THEN
+                  IF (IPHASE.EQ.2) THEN
+                     MYSUMM(IBIN,ISUB,NORD+1) = SUMMORD
+                     MYDIFF(IBIN,ISUB,NORD+1) = DIFFORD
+                  ELSEIF (IPHASE.EQ.3) THEN
+                     SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
+                     DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
+                     DIFFMU = MAX(DIFF0,DIFFORD,0D0)
+                     DIFFML = MIN(DIFF0,DIFFORD,0D0)
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMMORD,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.4) THEN
+                     SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
+                     DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
+                     DIFFMU = + SQRT((MAX(DIFF0,0D0))**2D0 +
+     >                    (MAX(DIFFORD,0D0))**2D0)
+                     DIFFML = - SQRT((MIN(DIFF0,0D0))**2D0 +
+     >                    (MIN(DIFFORD,0D0))**2D0)
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMMORD,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.5) THEN
+                     SUMM0 = MYSUMM(IBIN,ISUB,NORD+1)
+                     DIFF0 = MYDIFF(IBIN,ISUB,NORD+1)
+                     DIFFMU = ABS(DIFF0-DIFFORD)/2D0
+                     DIFFML = -DIFFMU
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMM0,DIFFMU,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                     CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
+     >                    SUMMORD,DIFFML,WEIGHT,
+     >                    LRAT,IPT,NBIN,LNRM)
+                  ELSEIF (IPHASE.EQ.6) THEN
                      CALL SUMMUP(IVAR,IBIN,ISUB,NORD+1,
      >                    SUMMORD,DIFFORD,WEIGHT,
      >                    LRAT,IPT,NBIN,LNRM)
-Comment:                   ENDIF
+                  ENDIF
                ENDDO
             ENDDO
          ENDDO
@@ -305,7 +406,9 @@ ckr Sampling method (as needed for statistical uncertainties or NNPDF)
 ckr Attention: This overwrites the precalculated result by averages
 ckr            from the sampling method as this should be considered the
 ckr            central result according to NNPDF.
-                           MYRES(IBIN,ISUB,IORD) =
+                           MYRES(IBIN,ISUB,IORD)  =
+     >                          WTX(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
+                           MYRESN(IBIN,ISUB,IORD) =
      >                          WTX(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
                            WTDXU2(IBIN,ISUB,IORD) =
      >                          (WTX2(IBIN,ISUB,IORD)/WT(IBIN,ISUB,IORD)
@@ -457,7 +560,8 @@ cdebug
 *                +/- eigen vectors
 *              3 Evaluate pairwise deviations of +/- eigen vectors
 *              4 Evaluate each deviation separately
-*            5-8 Not used
+*              5 ?
+*            6-8 Not used
 *            9   Final evaluation
 *
 * ---------------------------------------------------------------------
