@@ -29,7 +29,7 @@
       INTEGER I,J,MYPDF,IPDF,IPDFUD,MYPDFAS,IOPDF,IOAS
       INTEGER ITAB,NTAB,NFOUND,NFAIL
       INTEGER ISTAT,ISCL,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT,NTMP
-      INTEGER IHIST,IPHASE,ISTEP,IETYPE,NPDFPAR
+      INTEGER IHIST,IPHASE,ISTEP,IETYPE,NPDFMOD,NPDFPAR
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
 
       INTEGER IPRINT
@@ -44,11 +44,12 @@
 *---  Arrays for crosscheck on PDF uncertainties
       INTEGER K
       DOUBLE PRECISION XS0(2*MXOBSBIN),DXU(2*MXOBSBIN),DXL(2*MXOBSBIN)
-      DOUBLE PRECISION DXU2(2*MXOBSBIN),DXL2(2*MXOBSBIN),DELTA2
+      DOUBLE PRECISION DXU2(2*MXOBSBIN),DXL2(2*MXOBSBIN)
+      DOUBLE PRECISION DXS0U,DXS0L,DELTA1,DELTA2,DELTA3
 
 c - To unify quoted uncertainties (CL68,CL90,special)
 c - Convert from CL68 to CL90 values
-c - TOCL90 = 1.64485D0 ! SQRT(2.D0)/InvERF(0.9D0)
+c - TOCL90 = 1.64485D0 ! SQRT(2.D0)*InvERF(0.9D0)
 c - Convert from GJR to CTEQ (CL90) values ?
 c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
       DOUBLE PRECISION TOCL90,TOCL90GJR
@@ -929,6 +930,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 *--- Initialize arrays for crosscheck on PDF uncertainties, part 2 (normalized)
             IF (LNRM) THEN
                DO K=NOBSBIN+1,2*NOBSBIN
+*--- After CENRES STEP2: MYRESN = MYRES
                   XS0(K)  = MYRES(K,NSBPRC+1,NORD+1)
                   DXU(K)  = 0D0
                   DXL(K)  = 0D0
@@ -992,6 +994,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                      ENDIF
 
 *--- Fill EV+ into arrays for crosscheck on PDF uncertainties, part 2 (normalized)
+*--- Needs to be MYRES here after CENRES STEP 5 to give result for the
+*--- actual PDF
                      IF (LNRM) THEN
                         DO K=NOBSBIN+1,2*NOBSBIN
                            DXU(K) = MAX(MYRES(K,NSBPRC+1,NORD+1)-XS0(K),
@@ -1069,6 +1073,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                      ENDIF
 
 *--- Fill EV+/EV- difference into arrays for crosscheck on PDF uncertainties, part 2 (normalized)
+*--- Needs to be MYRES here after CENRES STEP 5 to give result for the
+*--- actual PDF
                      IF (LNRM) THEN
                         DO K=NOBSBIN+1,2*NOBSBIN
                            IF (MOD(IETYPE,10).EQ.1) THEN
@@ -1184,6 +1190,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                      ENDIF
 
 *--- Fill member into arrays for crosscheck on PDF uncertainties, part 2 (normalized)
+*--- Needs to be MYRES here after CENRES STEP 5 to give result for the
+*--- actual PDF
                      IF (LNRM) THEN
                         IF (MOD(IETYPE,10).NE.4) THEN
                            DO K=NOBSBIN+1,2*NOBSBIN
@@ -1266,12 +1274,26 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >              "HERAPDF10_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF10_VAR.LHgrid"
+                  NPDFMOD = 8
                   NPDFPAR = 13
                ELSEIF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
      >                 "HERAPDF15_EIG.LHgrid") THEN
                   PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
      >                 "/HERAPDF15_VAR.LHgrid"
+                  NPDFMOD = 8
                   NPDFPAR = 12
+               ELSEIF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
+     >                 "HERAPDF15NLO_EIG.LHgrid") THEN
+                  PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
+     >                 "/HERAPDF15NLO_VAR.LHgrid"
+                  NPDFMOD = 8
+                  NPDFPAR = 12
+               ELSEIF (PDFNAM(1:LEN_TRIM(PDFNAM)).EQ.
+     >                 "HERAPDF15NNLO_EIG.LHgrid") THEN
+                  PDFSET2 = PDFPATH(1:LEN_TRIM(PDFPATH))//
+     >                 "/HERAPDF15NNLO_VAR.LHgrid"
+                  NPDFMOD = 8
+                  NPDFPAR = 10
                ELSE
                   WRITE(*,*)"ALLUNC: Illegal HERAPDF set, aborted! "//
      >                 "PDFNAM: ",PDFNAM(1:LEN_TRIM(PDFNAM))
@@ -1286,7 +1308,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                         DO ISUB=1,NSBPRC+1
 *--- Central result
                            WTXTMP(IBIN,ISUB,IORD) =
-     >                          MYRES(IBIN,ISUB,IORD)
+     >                          MYRESN(IBIN,ISUB,IORD)
 *--- Rel. lower uncertainty
                            WTXLTMP(IBIN,ISUB,IORD) =
      >                          WTDXL2(IBIN,ISUB,IORD)
@@ -1338,8 +1360,8 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 6
 
-*--- HERAPDF1.0 & 1.5: Do loop runs from 1 - 8 for this part
-               DO J=1,8
+*--- HERAPDF1.0 & 1.5: Do loop runs from 1 - 8 (NPDFMOD) for this part
+               DO J=1,NPDFMOD
                   CALL INITPDF(J)
                   CALL FX9999IN(FILENAME)
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,
@@ -1432,9 +1454,10 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 6
 
-*--- HERAPDF1.0: Do loop runs from 9 - 13 for this part
-*--- HERAPDF1.5: Do loop runs from 9 - 12 for this part
-               DO J=9,NPDFPAR
+*--- HERAPDF1.0:               Do loop runs from 9 - 13 for this part (NPDFMOD+1,NPDFPAR)
+*--- HERAPDF1.5,HERAPDF1.5NLO: Do loop runs from 9 - 12 for this part
+*--- HERAPDF1.5NNLO:           Do loop runs from 9 - 10 for this part
+               DO J=NPDFMOD+1,NPDFPAR
                   CALL INITPDF(J)
                   CALL FX9999IN(FILENAME)
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,
@@ -1495,7 +1518,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                      DO IORD=1,NORD+1
                         DO ISUB=1,NSBPRC+1
 *--- Central result
-                           MYRES(IBIN,ISUB,IORD) =
+                           MYRESN(IBIN,ISUB,IORD) =
      >                          WTXTMP(IBIN,ISUB,IORD)
 *--- Rel. lower uncertainty
                            WTDXL2(IBIN,ISUB,IORD) =
@@ -1522,19 +1545,21 @@ ckr                  WRITE(*,900) IBIN,MYRES(IBIN,NSBPRC+1,NORD+1),
      >                 WTDXU2(IBIN,NSBPRC+1,NORD+1)
 c - Debug: Output should be identical in single PDF set case!
                   IF (INT(IETYPE/10).EQ.0) THEN
-                     DELTA2 = ((MYRESN(IBIN,NSBPRC+1,NORD+1) - XS0(IBIN))
-ckr                     DELTA2 = ((MYRES(IBIN,NSBPRC+1,NORD+1) - XS0(IBIN))
-     >                    **2D0 +
-     >                    ((WTDXL2(IBIN,NSBPRC+1,NORD+1)*XS0(IBIN))**2D0
-     >                    - DXL2(IBIN))**2D0 +
-     >                    ((WTDXU2(IBIN,NSBPRC+1,NORD+1)*XS0(IBIN))**2D0
-     >                    -DXU2(IBIN))**2D0)
-                     IF (DELTA2.GT.1D-25) THEN
+                     DXS0L = -SQRT(DXL2(IBIN))/XS0(IBIN)
+                     DXS0U = +SQRT(DXU2(IBIN))/XS0(IBIN)
+                     DELTA1 = ABS(MYRESN(IBIN,NSBPRC+1,NORD+1) -
+     >                    XS0(IBIN)) / XS0(IBIN)
+                     DELTA2 = ABS(WTDXL2(IBIN,NSBPRC+1,NORD+1) -
+     >                    DXS0L) / (-DXS0L)
+                     DELTA3 = ABS(WTDXU2(IBIN,NSBPRC+1,NORD+1) -
+     >                    DXS0U) / DXS0U
+                     IF (DELTA1.GT.1D-12.OR.
+     >                    DELTA2.GT.1D-12.OR.
+     >                    DELTA3.GT.1D-12) THEN
                         WRITE(*,*)"ALLUNC: WARNING! Potential mismatch"/
-     >                       /" in PDF uncertainty calculation!",DELTA2
-                        WRITE(*,900) IBIN,XS0(IBIN),
-     >                       -SQRT(DXL2(IBIN))/XS0(IBIN),
-     >                       +SQRT(DXU2(IBIN))/XS0(IBIN)
+     >                       /" in PDF uncertainty calculation!",
+     >                       DELTA1,DELTA2,DELTA3
+                        WRITE(*,900) IBIN,XS0(IBIN),DXS0L,DXS0U
                      ENDIF
                   ENDIF
                ENDDO
@@ -1542,7 +1567,7 @@ ckr                     DELTA2 = ((MYRES(IBIN,NSBPRC+1,NORD+1) - XS0(IBIN))
 
 c - Fill histograms
 ckr            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            CALL PDFFILL(NRAP,0,-1,I,MYRES)
+            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
             CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales

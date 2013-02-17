@@ -554,15 +554,15 @@ cdebug
       SUBROUTINE CENRES(ISTEP,LRAT,LNRM,SCENARIO)
 * ---------------------------------------------------------------------
 *
-*     ISTEP: 0   Initialization
-*            2-4 Treat deviations for each bin, subprocess, order
-*              2 Store backup values for pairwise deviations from
-*                +/- eigen vectors
-*              3 Evaluate pairwise deviations of +/- eigen vectors
-*              4 Evaluate each deviation separately
-*              5 ?
-*            6-8 Not used
-*            9   Final evaluation
+*     ISTEP:   0 Initialization, set MYRES & MYRESN to 0
+*              1 LNRM: With loaded normalization table:
+*                Derive and store normalization factors in
+*                MYRES(N+I ... 2N)
+*              2 With normal table: Apply normalization
+*                MYRES(N+I) = MYRES(I)*MYRES(N+I) copy to MYRESN
+*              3 As step 0, but keep MYRESN
+*              4 As step 1, but keep MYRESN
+*              5 As step 2, but keep MYRESN
 *
 * ---------------------------------------------------------------------
       IMPLICIT NONE
