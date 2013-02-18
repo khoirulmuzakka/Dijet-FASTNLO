@@ -1553,9 +1553,9 @@ c - Debug: Output should be identical in single PDF set case!
      >                    DXS0L) / (-DXS0L)
                      DELTA3 = ABS(WTDXU2(IBIN,NSBPRC+1,NORD+1) -
      >                    DXS0U) / DXS0U
-                     IF (DELTA1.GT.1D-12.OR.
-     >                    DELTA2.GT.1D-12.OR.
-     >                    DELTA3.GT.1D-12) THEN
+                     IF (DELTA1.GT.1D-10.OR.
+     >                    DELTA2.GT.1D-10.OR.
+     >                    DELTA3.GT.1D-10) THEN
                         WRITE(*,*)"ALLUNC: WARNING! Potential mismatch"/
      >                       /" in PDF uncertainty calculation!",
      >                       DELTA1,DELTA2,DELTA3
