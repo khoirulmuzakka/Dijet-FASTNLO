@@ -1462,6 +1462,10 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
+   if (isnan(prefactor)) {
+      cout << "fastNLO.FillEventHHC: WARNING! NaN for prefactor!" << endl;
+   }
+
    // ---
    // --- Warm-Up Run to identify extreme x, mu values
    // ---
@@ -1529,6 +1533,12 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       double hxmin  = -sqrt(-log10(xmin));
       double hxmax  = -sqrt(-log10(xmax));
       double hxone   = 0.0;
+      if (isnan(hxmin)) {
+         cout << "fastNLO.FillEventHHC: WARNING! NaN for hxmin, xmin = " << xmin << endl;
+      }
+      if (isnan(hxmax)) {
+         cout << "fastNLO.FillEventHHC: WARNING! NaN for hxmax, xmax = " << xmax << endl;
+      }
 
       // --- define the x-node numbers in the range: 0 <= nxnode < Nxtot1
       double hxlimit = Hxlim1[ObsBin];
@@ -1592,6 +1602,9 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 
          // --- compute renormalization=factorization scale squared
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
+         if (isnan(mu2)) {
+            cout << "fastNLO: WARNING! NaN for mu2, scalevar = " << scalevar << endl;
+         }
          //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
          nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
          // - rearrange subprocesses

@@ -299,6 +299,21 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // --- fill fastNLO arrays - don't touch this piece of code!
          if (obsbin >= 0) {
             double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
+            if (isnan(obsbin)) {
+               cout << "fastNLO: WARNING! NaN for obsbin no. " << obsbin << endl;
+            }
+            if (isnan(x1)) {
+               cout << "fastNLO: WARNING! NaN for x1 in obsbin no. " << obsbin << endl;
+            }
+            if (isnan(x2)) {
+               cout << "fastNLO: WARNING! NaN for x2 in obsbin no. " << obsbin << endl;
+            }
+            if (isnan(mu)) {
+               cout << "fastNLO: WARNING! NaN for mu in obsbin no. " << obsbin << endl;
+            }
+            if (isnan(prefactor)) {
+               cout << "fastNLO: WARNING! NaN for prefactor in obsbin no. " << obsbin << ", the bin size is " << A2->BinSize[obsbin] << endl;
+            }
             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
                if(table->GetBlockB(k)->GetIRef()>0){
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
