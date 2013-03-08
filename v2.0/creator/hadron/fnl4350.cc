@@ -1,8 +1,8 @@
 //
-// fastNLO v2 creator code for fnl2732denk:
-//     CMS LHC 3-jet Ratio Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.7 in E-scheme
-//     (denominator)
+// fastNLO v2 creator code for fnl4350:
+//     CMS LHC Inclusive Jets Scenario, E_cms = 2.76 TeV
+//     for fastjet anti-kT algo with R=0.2, 0.3, 0.4 in E-scheme
+//
 //
 // ============== fastNLO user: ===================================
 // To create your own scenario, it is recommended to take
@@ -149,8 +149,8 @@ void psinput(phasespace_hhc *ps, double& s)
   //s =   3841600.; // TeV Run II        1960 GeV
   //s =    810000.; // LHC Injection Run  900 GeV
   //s =   5569600.; // LHC Initial Run   2360 GeV
-  //s =   7617600.; // LHC HIpp base Run 2760 GeV
-  s =  49000000.; // LHC First Run     7000 GeV
+  s =   7617600.; // LHC HIpp base Run 2760 GeV
+  //s =  49000000.; // LHC First Run     7000 GeV
   //s =  64000000.; // LHC Second Run    8000 GeV
   //s = 100000000.; // LHC Start-up Run 10000 GeV
   //s = 196000000.; // LHC Design Run   14000 GeV
@@ -162,11 +162,12 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //                   (the return value must be true for jets to be UNselected)
+// fnl4350: use pseudorapidity eta
 struct fNLOSelector {
   fNLOSelector(double ymin, double ymax, double ptmin):
     _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
   double _ymin, _ymax, _ptmin;
-  bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
+  bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.prapidity()) && abs(a.prapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
 // --- fastNLO user: modify the jet sorting in userfunc (default = descending in jet pt)
@@ -182,109 +183,85 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   double x1 = p[-1].Z()/p[hadron(-1)].Z();
   double x2 = p[0].Z()/p[hadron(0)].Z();
 
-  // --- fastNLO user: set the jet size and run the jet algorithm
-  double jetsize = 0.7;
-  pj = jetclus(p,jetsize);
-  unsigned int nj = pj.upper();
+  // --- fastNLO user: in this scenario run jet algo with three different jet sizes R
+  const unsigned int ndim1bins = 11;
+  const unsigned int ndim2bins = 3;
+  const double Rjet[ndim2bins] = { 0.2, 0.3, 0.4 };
+  for (unsigned int k=0; k<ndim2bins; k++) {
 
-  // --- give some debug output before selection and sorting
-  if ( doDebug ) {
-    for (unsigned int i=1; i<=nj; i++) {
-      double pti  = pj[i].perp();
-      double yi   = pj[i].rapidity();
-      double etai = pj[i].prapidity();
-      cout << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
-    }
-  }
+    // --- fastNLO user: set the jet size and run the jet algorithm
+    double jetsize = Rjet[k];
+    pj = jetclus(p,jetsize);
+    unsigned int nj = pj.upper();
 
-  // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
-  if (nj > 4) {
-    cout << "fastNLO: ERROR! This scenario is not suited for " << nj <<
-      " jets. Aborted!" << endl;
-    exit(1);
-  }
-
-  // --- fastNLO user:
-  //     Here is your playground where you compute your observable
-  //     and the bin number ("obsbin"), which gets passed to
-  //     fastNLO's table filling code.
-  //     Usually, pT and E are in GeV, but this may be changed.
-  //     ATTENTION: Scales must always be in GeV!
-
-  // --- declare and initialize phase space cut variables
-  // smallest |(pseudo-)rapidity| for jets to be considered
-  const double yjmin  = 0.0;
-  // largest |(pseudo-)rapidity| for jets to be considered
-  const double yjmax  = 5.0;
-  // lowest pT for jets to be considered
-  const double ptjmin = 150.;
-
-  // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
-  static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
-  // --- count number of selected jets left at this stage
-  size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
-
-  // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-  static fNLOSorter SortJets;
-  std::sort(pj.begin(), pj.begin() + njet, SortJets);
-
-  // --- give some debug output after selection and sorting
-  if ( doDebug ) {
-    cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
-    cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
-    for (unsigned int i=1; i<=njet; i++) {
-      double pti  = pj[i].perp();
-      double yi   = pj[i].rapidity();
-      double etai = pj[i].prapidity();
-      cout << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
-    }
-  }
-
-  // Denominator of 3-jet ratio requires at least 2 jets
-  if (njet > 1) {
-
-    // --- declare and initialize additional cut variables
-    // highest (pseudo-)rapidity for central jets to be considered
-    const double yjcmax = 2.5;
-    // minimal <pT_1,2> for event to be counted
-    const double pTxmin = A2->LoBin[0][0];
-    // minimum pT fraction of leading jet required for 3rd jet
-    //    const double pTrelmin = 0.00;
-
-    // Derive leading dijet and 3-jet quantities
-    // Maximal (pseudo-)rapidity of two leading jets
-    double yjjmax = max(abs(pj[1].rapidity()),abs(pj[2].rapidity()));
-    // Average pT of two leading jets
-    double pT12ave = (pj[1].perp()+pj[2].perp())/2.;
-
-    // --- give some debug output before further selection
+    // --- give some debug output before selection and sorting
     if ( doDebug ) {
-      cout << "----------------------------------------------------" << endl;
-      cout << "Final selection cuts: yjcmax, pTxmin: " << yjcmax << ", " << pTxmin << endl;
-      cout << "Final selection obs.: yjjmax, pT12ave: " << yjjmax << ", " << pT12ave << endl;
+      for (unsigned int i=1; i<=nj; i++) {
+	double pti  = pj[i].perp();
+	double yi   = pj[i].rapidity();
+	double etai = pj[i].prapidity();
+	cout << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+      }
     }
 
-    // --- Further phase space cuts?
-    // Check that yjjmax < yjcmax
-    // Reject event if the leading jets are non-central
-    if ( pTxmin <= pT12ave && yjjmax < yjcmax ) {
+    // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
+    if (nj > 4) {
+      cout << "fastNLO: ERROR! This scenario is not suited for " << nj <<
+	" jets. Aborted!" << endl;
+      exit(1);
+    }
 
-      // --- event accepted
-      if ( doDebug ) {
-	cout << "nj, njet, yjjmax, pT12ave: " << nj << ", " << njet << ", " << yjjmax << ", " << pT12ave << endl;
-	cout << "Event/jet accepted!" << endl;
-	cout << "==================== End of event ====================" << endl;
+    // --- fastNLO user:
+    //     Here is your playground where you compute your observable
+    //     and the bin number ("obsbin"), which gets passed to
+    //     fastNLO's table filling code.
+    //     Usually, pT and E are in GeV, but this may be changed.
+    //     ATTENTION: Scales must always be in GeV!
+
+    // --- declare and initialize phase space cut variables
+    // smallest |(pseudo-)rapidity| for jets to be considered
+    const double yjmin  = 0.0;
+    // largest |(pseudo-)rapidity| for jets to be considered
+    const double yjmax  = 2.0;
+    // lowest pT for jets to be considered
+    const double ptjmin = A2->LoBin[0][0];
+
+    // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
+    static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
+    // --- count number of selected jets left at this stage
+    size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
+
+    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
+    // fnl4350: Not required for inclusive jets
+    //  static fNLOSorter SortJets;
+    //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
+
+    // --- give some debug output after selection and sorting
+    if ( doDebug ) {
+      cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+      cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
+      for (unsigned int i=1; i<=njet; i++) {
+	double pti  = pj[i].perp();
+	double yi   = pj[i].rapidity();
+	double etai = pj[i].prapidity();
+	cout << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
+    }
 
-      // --- set the renormalization and factorization scale to pT max
-      double mu = pj[1].perp();
+    // Analyze inclusive jets in jet loop
+    for (unsigned int i = 1; i <= njet; i++) {
 
-      // --- identify bin number (dim1,dim2) here (mult = 2+,pT12ave)
-      // KR: Normalize to bin width in pT, but not |y| or multiplicity
+      // Get jet quantities
+      double pt  = pj[i].perp();
+
+      // --- set the renormalization and factorization scale to jet pT
+      double mu = pt;
+
+      // --- identify bin number (dim1,dim2) here (pT,R)
       int obsbin = -1;
-      for (int j = 0; j < A2->GetNObsBin(); j++) {
-	if (A2->LoBin[j][0] <= pT12ave && pT12ave < A2->UpBin[j][0] ) {
-	  obsbin = j;
+      for (unsigned int j = 0; j < ndim1bins; j++) {
+	if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0]) {
+	  obsbin = j + k*ndim1bins;
 	  break;
 	}
       }
@@ -300,8 +277,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 	  }
 	}
       } // --- end: fill fastNLO array
-    } // --- end: event selection cuts
-  } // --- end: 2+ jet event selection
+    } // --- end: jet loop
+  } // --- end: jet size loop
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
@@ -319,19 +296,19 @@ void UserHHC::inittable(){
   fnloBlockA1 *A1 = table->GetBlockA1();
   A1->SetHeaderDefaults();
   // --- fastNLO user: set the scenario name (no white space)
-  A1->SetScenName("fnl2732denk");
+  A1->SetScenName("fnl4350");
 
   // --- fastNLO: fill variables for table header block A2
   fnloBlockA2 *A2 = table->GetBlockA2();
   // --- fastNLO user: set the cross section units in barn (negative power of ten)
   A2->SetIpublunits(12);
   // --- fastNLO user: write up to 20 strings to describe the scenario
-  A2->ScDescript.push_back("dsigma-jet2+_d<pT_1,2>_[fb_GeV]");
+  A2->ScDescript.push_back("d2sigma-jet_dpTd|eta|_[pb_GeV]");
   A2->ScDescript.push_back("CMS_Collaboration");
-  A2->ScDescript.push_back("E_cms=7_TeV");
-  A2->ScDescript.push_back("3-Jet_Ratio_Denominator");
-  A2->ScDescript.push_back("anti-kT_R=0.7");
-  A2->ScDescript.push_back("CMS-PAS-QCD-11-003");
+  A2->ScDescript.push_back("E_cms=2.76_TeV");
+  A2->ScDescript.push_back("Inclusive_Jet_pT");
+  A2->ScDescript.push_back("anti-kT_R=0.2,0.3,0.4");
+  A2->ScDescript.push_back("CMS-PAS-HIN");
   A2->ScDescript.push_back("provided by:");
   A2->ScDescript.push_back("fastNLO_2.1.0");
   A2->ScDescript.push_back("If you use this table, please cite:");
@@ -343,19 +320,19 @@ void UserHHC::inittable(){
 
   // --- fastNLO user: no. and names of dimensions in which the observable is binned
   A2->NDim = 2;
-  A2->DimLabel.push_back("<pT_1,2>_[GeV]");
+  A2->DimLabel.push_back("pT_[GeV]");
   A2->IDiffBin.push_back(2);
-  A2->DimLabel.push_back("N_Jet_Min");
+  A2->DimLabel.push_back("R");
   A2->IDiffBin.push_back(2);
 
   vector <double> bound;
   bound.resize(2);
 
   // --- fastNLO user: define the binning
-  const int ndim2bins = 1;
-  const double dim2bins[ndim2bins+1] = { 1.5, 2.5 };
+  const int ndim2bins = 3;
+  const double dim2bins[ndim2bins+1] = { 0.15, 0.25, 0.35, 0.45 };
 
-  const int ndim1bins[ndim2bins] = { 39 };
+  const int ndim1bins[ndim2bins] = { 11, 11, 11 };
 
   cout << endl << "------------------------" << endl;
   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -369,14 +346,13 @@ void UserHHC::inittable(){
   for (int i=0; i<ndim2bins; i++) {
     dim1bins[i].resize(ndim1bins[i]+1);
   }
-  const double dim0[40] = {
-    150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
-    390. ,  420.,  450.,  480.,  510.,  540.,  570.,  600.,  640.,  680.,
-    720. ,  760.,  800.,  850.,  900.,  950., 1000., 1060., 1120., 1180.,
-    1250., 1320., 1390., 1460., 1530., 1600., 1680., 1760., 1840., 1920.,
-    2000. };
-  for (int j=0; j<ndim1bins[0]+1; j++) {
-    dim1bins[0][j] = dim0[j];
+  const double dim0[12] = {
+    100. ,  110.,  120.,  130.,  140.,  150.,  160.,  170.,  180.,  200.,
+    240. ,  300. };
+  for (int i=0; i<ndim2bins; i++) {
+    for (int j=0; j<ndim1bins[i]+1; j++) {
+      dim1bins[i][j] = dim0[j];
+    }
   }
 
   cout << endl << "------------------------" << endl;
@@ -395,8 +371,9 @@ void UserHHC::inittable(){
   //     Default: divide by bin width in dim. 1 and dim. 2
   //     ATTENTION: Don't forget to include a factor of 2 e.g. for abs. rapidity |y| !
   //
-  //     fnl27nn: Divide by bin width in pT (1st dimension)
-  //              Do NOT divide by bin width in 2nd dimension which is min. jet multiplicity
+  //     fnl4350: Divide by bin width in pT (1st dimension)
+  //              Do NOT divide by bin width in 2nd dimension which is jet size R
+  //              DO divide by bin width in eta = 2 * 2.0
   //
   int nbins = 0;   // --- count total No. bins
   for (int i=0;i<ndim2bins;i++){
@@ -410,8 +387,8 @@ void UserHHC::inittable(){
       bound[1] = dim2bins[i+1];
       A2->UpBin.push_back(bound);
       binsize = binsize
-	* (dim1bins[i][j+1]-dim1bins[i][j]); // ... times dpT
-      //	* (dim2bins[i+1]-dim2bins[i]); // ... times 2nd dimension (not in fnl27nn)
+	* (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dpT
+	* 2. * 2.0; // ... times d|eta|
       A2->BinSize.push_back(binsize);
     }
   }
@@ -584,7 +561,7 @@ void UserHHC::inittable(){
   B->ScaleDescript.resize(B->NScaleDim);
 
   // --- fastNLO user: give the defined process scale a name and units
-  B->ScaleDescript[0].push_back("pT_max_[GeV]");
+  B->ScaleDescript[0].push_back("pT_jet_[GeV]");
   //B->Nscalenode.push_back(4); // number of scale nodes for pT
   B->Nscalenode.push_back(6); // number of scale nodes for pT
 

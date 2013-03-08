@@ -16,7 +16,7 @@ if HAVE_FASTJET
    lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la
    lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la
    lib_LTLIBRARIES += libfnl3332y0.la libfnl3332y1.la libfnl3332y2.la libfnl3332y3.la libfnl3332y4.la libfnl3332y5.la libfnl3332y6.la
-   lib_LTLIBRARIES += libfnl4332y0.la libfnl4332y1.la libfnl4332y2.la libfnl4332y3.la libfnl4332y4.la libfnl4332y5.la libfnl4332y6.la
+   lib_LTLIBRARIES += libfnl4332y0.la libfnl4332y1.la libfnl4332y2.la libfnl4332y3.la libfnl4332y4.la libfnl4332y5.la libfnl4332y6.la libfnl4350.la
    lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
    lib_LTLIBRARIES += libfnl2732dena.la libfnl2732denb.la libfnl2732denk.la
    lib_LTLIBRARIES += libfnl2732numa.la libfnl2732numb.la libfnl2732numk.la
@@ -101,6 +101,7 @@ libfnl4332y3_la_SOURCES        = fnl4332y3.cc        $(AM_SOURCES)
 libfnl4332y4_la_SOURCES        = fnl4332y4.cc        $(AM_SOURCES)
 libfnl4332y5_la_SOURCES        = fnl4332y5.cc        $(AM_SOURCES)
 libfnl4332y6_la_SOURCES        = fnl4332y6.cc        $(AM_SOURCES)
+libfnl4350_la_SOURCES          = fnl4350.cc          $(AM_SOURCES)
 # v21
 libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
 libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
