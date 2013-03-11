@@ -48,6 +48,13 @@ public:
       retval[4] = 1./x1/x2;
       retval[5] = 1./x1/x2;
       retval[6] = 1./x1/x2;
+
+      for (int i=0; i<7; i++) {
+	 if (isnan(retval[i])){
+	    cout << "fastNLO.pdf_hhc_dummy: WARNING! NaN for 1/x1/x2 in no. " << i << ", x1 = " << x1 << ", x2 = " << x2 << endl;
+	 }
+      }
+
     
       return retval;
    }

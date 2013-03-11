@@ -1623,6 +1623,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
             // Add check on NaN for weights and print warning
             if (isnan(wgt)) {
                cout << "fastNLO: WARNING! NaN for wgt for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << endl;
+               cout << "fastNLO: ObsBin, scalevar, prefactor: " << ObsBin << ", " << scalevar << ", " << prefactor << endl;
             }
          }
 
