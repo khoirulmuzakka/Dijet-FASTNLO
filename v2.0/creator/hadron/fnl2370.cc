@@ -585,7 +585,7 @@ void UserHHC::inittable(){
    // --- fastNLO user: give the defined process scale a name and units
    B->ScaleDescript[0].push_back("pT_bin_center_[GeV]");
    //B->Nscalenode.push_back(4); // number of scale nodes for pT
-   B->Nscalenode.push_back(6); // number of scale nodes for pT
+   B->Nscalenode.push_back(1); // number of scale nodes for pT
 
    B->ScaleFac.resize(B->NScaleDim);
 
