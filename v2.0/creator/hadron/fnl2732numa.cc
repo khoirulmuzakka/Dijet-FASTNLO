@@ -512,8 +512,8 @@ void UserHHC::inittable(){
    //     Remember to disable the reference-mode during Warm-Up runs:
    //     "doReference = false" (above) if setting manually.
    //     Otherwise this is caught automatically in an error condition.
-   B->IWarmUpPrint = 1000000;
-   //B->IWarmUpPrint = 10000;
+   //B->IWarmUpPrint = 1000000;
+   B->IWarmUpPrint = 10000;
    B->xlo.resize(A2->NObsBin);
    B->scalelo.resize(A2->NObsBin);
    B->scalehi.resize(A2->NObsBin);

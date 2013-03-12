@@ -287,6 +287,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       if (nRdiff[j] != 0) {
          obsbin = j;
          prefactor = prefactor/A2->BinSize[obsbin]; // - divide by binwidth
+         nlo::weight_hhc wttest = amp(dummypdf,mu*mu,mu*mu,prefactor);
+         for (int k=0; k<7; k++) {
+            double weight = wttest[k];
+            if (isnan(weight)) {
+               cout << "fastNLO: WARNING! NaN for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << endl;
+               exit(1);
+            }
+         }
          for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
             if(table->GetBlockB(k)->GetIRef()>0){
                ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
@@ -671,7 +679,8 @@ void UserHHC::initfunc(unsigned int)
    // --- Initialize event counters
    nevents = 0;
    // Set some defaults
-   if (nwrite==0) nwrite = 5000000;
+   //   if (nwrite==0) nwrite = 5000000;
+   if (nwrite==0) nwrite = 100000;
    start_time = std::time(0);
 }
 
