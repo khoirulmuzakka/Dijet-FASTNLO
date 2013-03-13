@@ -288,12 +288,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          obsbin = j;
          prefactor = prefactor/A2->BinSize[obsbin]; // - divide by binwidth
          nlo::weight_hhc wttest = amp(dummypdf,mu*mu,mu*mu,prefactor);
+         int isnancnt = 0;
          for (int k=0; k<7; k++) {
             double weight = wttest[k];
             if (isnan(weight)) {
                cout << "fastNLO: WARNING! NaN for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << endl;
-               exit(1);
+               isnancnt++;
             }
+         }
+         if (isnancnt > 0) {
+            exit(0);
          }
          for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
             if(table->GetBlockB(k)->GetIRef()>0){
