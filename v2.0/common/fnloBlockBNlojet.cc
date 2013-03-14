@@ -22,6 +22,11 @@ fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :
 void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
+   if (Nscalenode[0]<4) {
+     cout << "fastNLO.FillEventDIS: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl; 
+     exit(1);
+   }
+
    // ---
    // --- Warm-Up Run to identify extreme x, mu values
    // ---
@@ -32,7 +37,7 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    }
 
    // --- select interpolation kernel for x and for mu
-   //             1:CatmulRom   2:Lagrangian
+   //             1:Catmull-Rom   2:Lagrangian
    const int ikernx = 1;
    const int ikernmu = 1;
 
@@ -151,10 +156,10 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
 
             // --- check: all elements should end up within grid
             if (is < 0){
-               printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fastNLO.FillEventHHC: scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             } else if (is > Nscalenode[0]-1){
-               printf(" is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fastNLO.FillEventHHC: scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             }
             // --- loop over all 4 x-nodes that receive contributions
@@ -433,7 +438,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
    // ------------------------------------------------------------------------------------------------------- //
 
    // --- select interpolation kernel for x and for mu
-   //             1:CatmulRom   2:Lagrangian
+   //             1:Catmull-Rom   2:Lagrangian
    const EInterpolKernel eIkernx  = kCatmulRom;    // kLagrangian ?!?!
    const EInterpolKernel eIkernmu = kCatmulRom;    // kLagrangian ?!?!
 
@@ -1462,6 +1467,11 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
+   if (Nscalenode[0]<4) {
+     cout << "fastNLO.FillEventHHC: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl; 
+     exit(1);
+   }
+
    if (isnan(prefactor)) {
       cout << "fastNLO.FillEventHHC: WARNING! NaN for prefactor!" << endl;
    }
@@ -1476,7 +1486,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    }
 
    // --- select interpolation kernel for x and for mu
-   //             1:CatmulRom   2:Lagrangian
+   //             1:Catmull-Rom   2:Lagrangian
    const int ikernx = 2;
    const int ikernmu = 2;
 
@@ -1684,10 +1694,10 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 
             // --- check: all elements should end up within grid
             if (is < 0){
-               printf(" is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fastNLO.FillEventHHC: scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             } else if (is > Nscalenode[0]-1){
-               printf(" is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fastNLO.FillEventHHC: scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             }
             // --- loop over all 16 xmin,xmax points that receive contributions
@@ -1733,7 +1743,7 @@ void fnloBlockBNlojet::Interpol(int nnode, int nmax, double delta, int ikern, in
    // nnode: number of the next node to the left of the current value
    // nmax:  number of the last node which could lie to the left of a potential value
    // delta: relative distance of value to node 'nnode'
-   // ikern: select interpolation kernel   1:Catmul Rom  2: Lagrange
+   // ikern: select interpolation kernel   1:Catmull-Rom  2: Lagrange
    // nmod:  modified number of next node to the left (to be used for storage - relevant only at boundaries)
    // kernel: array(4) containing the interpolation kernel
 
@@ -1746,7 +1756,7 @@ void fnloBlockBNlojet::Interpol(int nnode, int nmax, double delta, int ikern, in
 
    vector<double> &kern = *kernel;   // --- to make acces via "[]" more easy
 
-   if (ikern == 1) {         // --- Catmul Rom interpolation kernel
+   if (ikern == 1) {         // --- Catmull-Rom interpolation kernel
       if (nnode == 0 ) { // --- left boundary
          kern[0] = 1.0 - 7.0/6.0*delta - 1.0/6.0*delta*delta + 1.0/3.0*delta*delta*delta;
          kern[1] = 4.0/3.0*delta + 1.0/3.0*delta*delta - 2.0/3.0*delta*delta*delta;
@@ -1814,7 +1824,7 @@ vector < double > fnloBlockBNlojet::Interpol(int nnode, int nmax, double delta, 
    // return vector
    vector < double > kern(4);
 
-   if ( eIkern == kCatmulRom) {         // --- Catmul Rom interpolation kernel
+   if ( eIkern == kCatmulRom) {         // --- Catmull-Rom interpolation kernel
       Interpol(nnode, nmax, delta, 1, nmod , &kern );
    }
 
