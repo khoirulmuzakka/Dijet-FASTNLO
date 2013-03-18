@@ -103,7 +103,12 @@
 
 *---  Loop over logical contributions
          DO I=ILO,ITHC2L
-            IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
+            IF (ICONTRSELECTOR(I).EQ.1) THEN
+               IF (ICONTRPOINTER(I).EQ.-1) THEN
+                  WRITE(*,*)"FX9999CC: ERROR! Contribution selected "//
+     >                 "for output not defined, aborted. I = ",I
+                  STOP
+               ENDIF
 
 *---  Get PDFs - multiply with perturbative coefficients and alpha_s
                CALL FX9999PM(I,XMUR,XMUF)
