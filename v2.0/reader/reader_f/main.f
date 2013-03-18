@@ -22,7 +22,7 @@
       INTEGER MXSCALECOMB
       PARAMETER (MXSCALECOMB=2*MXSCALEVAR)
       LOGICAL LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
-      LOGICAL LTHCSEP,LNPCSEP
+      LOGICAL LTHC1SEP,LTHC2SEP,LNPC1SEP
       DOUBLE PRECISION ALPS,FNALPHAS,SCALER,SCALEF
       DOUBLE PRECISION XMURS(MXSCALECOMB),XMUFS(MXSCALECOMB)
       DATA IPRINT/0/
@@ -44,13 +44,15 @@
 *---  We recommend to name the array according to the scenario.
       DOUBLE PRECISION XSLO(MXOBSBIN),XSCLLO(MXOBSBIN)
       DOUBLE PRECISION XSNLO(MXOBSBIN),XSCLNLO(MXOBSBIN)
-      DOUBLE PRECISION XSTHC(MXOBSBIN),XSCLTHC(MXOBSBIN)
+      DOUBLE PRECISION XSTHC1(MXOBSBIN),XSCLTHC1(MXOBSBIN)
+      DOUBLE PRECISION XSTHC2(MXOBSBIN),XSCLTHC2(MXOBSBIN)
       DOUBLE PRECISION DXSUCTMP(MXOBSBIN,2),DXSCORTMP(MXOBSBIN,2)
       DOUBLE PRECISION XSNPC(MXOBSBIN),XSCLNPC(MXOBSBIN)
       DOUBLE PRECISION DXSUCNPC(MXOBSBIN,2),DXSCORNPC(MXOBSBIN,2)
       DOUBLE PRECISION XSDAT(MXOBSBIN),XSCLDAT(MXOBSBIN)
       DOUBLE PRECISION DXSUCDATA(MXOBSBIN,2),DXSCORDATA(MXOBSBIN,2)
-      DOUBLE PRECISION KFAC(MXOBSBIN),KTHC(MXOBSBIN),KNPC(MXOBSBIN)
+      DOUBLE PRECISION KFAC(MXOBSBIN),KTHC1(MXOBSBIN)
+      DOUBLE PRECISION KTHC2(MXOBSBIN),KNPC(MXOBSBIN)
 
 *---  Initialization
 C---  *---  Fortran 90 functions for computing precision:
@@ -58,15 +60,18 @@ C---  *---  tiny(x), huge(x), precision(x)
 C---  Write(*,*)"fnlo-fread: F90 double tiny, huge, precision = ",
 C---  >     tiny(1d0),huge(1d0),precision(1d0)
       DO I=1,NOBSBIN
-         XSLO(I)  = -1.D0
-         XSNLO(I) = -1.D0
-         XSTHC(I) = -1.D0
-         KFAC(I)  =  0.D0
-         KTHC(I)  =  0.D0
-         KNPC(I)  =  0.D0
+         XSLO(I)   = -1.D0
+         XSNLO(I)  = -1.D0
+         XSTHC1(I) = -1.D0
+         XSTHC2(I) = -1.D0
+         KFAC(I)   =  0.D0
+         KTHC1(I)  =  0.D0
+         KTHC2(I)  =  0.D0
+         KNPC(I)   =  0.D0
       ENDDO
-      LTHCSEP = .FALSE.
-      LNPCSEP = .FALSE.
+      LTHC1SEP = .FALSE.
+      LTHC2SEP = .FALSE.
+      LNPC1SEP = .FALSE.
 
 *---  Parse command line
       WRITE(*,'(A)')
@@ -192,11 +197,6 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
      >        IDATAFLAG(I).EQ.1)
      >        LDATA = .TRUE.
       ENDDO
-ckr TBD
-      lthc1l = .false.
-      lthc2l = .false.
-      lnpc1 = .false.
-      ldata = .false.
 
 *---  Initialize LHAPDF
 C---  CALL SETLHAPARM('SILENT')
@@ -225,52 +225,72 @@ C---  CALL SETLHAPARM('SILENT')
          SCALEF = XMUFS(IS)
 
 *---  Check on pointers to access contributions and scales for NLO and
-*---  2-loop --> otherwise skip this scale setting
+*---  THC --> otherwise skip this scale setting
+         IF (LLO) CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+         IF (LTHC1L) CALL FNSET("P_THRESHCOR",1) ! select no. of loops in threshold correction
+         CALL FX9999PT(SCALER,SCALEF,IPRINT)
+         IF (LTHC1L.AND..NOT.ISCALEPOINTER(ITHC1L).GT.0) CYCLE
+         CALL FNSET("P_RESET",0) ! Reset all selections to zero
          IF (LNLO) CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
          IF (LTHC2L) CALL FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
          CALL FX9999PT(SCALER,SCALEF,IPRINT)
          IF (LNLO.AND..NOT.ISCALEPOINTER(INLO).GT.0) CYCLE
          IF (LTHC2L.AND..NOT.ISCALEPOINTER(ITHC2L).GT.0) CYCLE
+
+*---  Reset all selections
          CALL FNSET("P_RESET",0) ! Reset all selections to zero
 
-*---  Calculate LO cross sections (set IPRINT to 1 for more verbose
-*---  output)
+*---  In the following, set IPRINT to 1 for more verbose output
+*---  Calculate LO cross sections
          IF (LLO) THEN
             CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
             CALL FX9999CC(SCALER, SCALEF, XSLO, XSCLLO,
      >           DXSUCTMP, DXSCORTMP)
          ENDIF
 
-*---  Calculate NLO cross sections (set IPRINT to 1 for more verbose
-*---  output)
+*---  Calculate NLO cross sections
          IF (LLO.AND.LNLO) THEN
             CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
             CALL FX9999CC(SCALER, SCALEF, XSNLO, XSCLNLO,
      >           DXSUCTMP, DXSCORTMP)
          ENDIF
 
-*---  Calculate NLO cross section incl. 2-loop threshold corrections
+*---  Calculate LO cross section incl. 1-loop threshold corrections
 *---  Only xmur = xmuf allowed here!
-*---  (set IPRINT to 1 for more verbose output)
-         IF (LLO.AND.LNLO.AND.LTHC2L) THEN
-            CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-            CALL FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
-            CALL FX9999CC(SCALEF, SCALEF, XSTHC, XSCLTHC,
+         IF (LLO.AND.LTHC1L.AND..NOT.LTHC1SEP) THEN
+            CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
+            CALL FNSET("P_THRESHCOR",1) ! select no. of loops in threshold correction
+            CALL FX9999CC(SCALEF, SCALEF, XSTHC1, XSCLTHC1,
      >           DXSUCTMP, DXSCORTMP)
          ENDIF
 
-*---  Print out 2-loop threshold corrections (set IPRINT to 1 for more
-*---  verbose output)
-C---  IF (LTHC2L) THEN
-C---  CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
-C---  CALL FNSET("P_THRESHCOR",2) ! select no. of loops in thr. corr.
-C---  CALL FX9999CC(SCALEF, SCALEF, XSTHC, XSCLTHC, DXSUCTMP, DXSCORTMP)
-C---  LTHCSEP = .TRUE.
-C---  ENDIF
+*---  Print out 1-loop threshold corrections separately
+         IF (LTHC1L.AND.LTHC1SEP) THEN
+            CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+            CALL FNSET("P_THRESHCOR",1) ! select no. of loops in thr. corr.
+            CALL FX9999CC(SCALEF, SCALEF, XSTHC1, XSCLTHC1,
+     >           DXSUCTMP,DXSCORTMP)
+         ENDIF
 
-*---  Apply non-perturbative corrections to NLO cross section (set
-*---  IPRINT to 1 for more verbose output)
-         IF (LLO.AND.LNLO.AND.LNPC1) THEN
+*---  Calculate NLO cross section incl. 2-loop threshold corrections
+*---  Only xmur = xmuf allowed here!
+         IF (LLO.AND.LNLO.AND.LTHC2L.AND..NOT.LTHC2SEP) THEN
+            CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
+            CALL FNSET("P_THRESHCOR",2) ! select no. of loops in threshold correction
+            CALL FX9999CC(SCALEF, SCALEF, XSTHC2, XSCLTHC2,
+     >           DXSUCTMP, DXSCORTMP)
+         ENDIF
+
+*---  Print out 2-loop threshold corrections separately
+         IF (LTHC2L.AND.LTHC2SEP) THEN
+            CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+            CALL FNSET("P_THRESHCOR",2) ! select no. of loops in thr. corr.
+            CALL FX9999CC(SCALEF, SCALEF, XSTHC2, XSCLTHC2,
+     >           DXSUCTMP,DXSCORTMP)
+         ENDIF
+
+*---  Apply non-perturbative corrections to NLO cross section
+         IF (LLO.AND.LNLO.AND.LNPC1.AND..NOT.LNPC1SEP) THEN
             CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
             CALL FNSET("P_THRESHCOR",0) ! deselect threshold corrections
             CALL FNSET("P_NPCOR",1) ! select non-perturbative corrections
@@ -278,32 +298,43 @@ C---  ENDIF
      >           DXSUCNPC, DXSCORNPC)
          ENDIF
 
-*---  Print out non-perturbative corrections (set IPRINT to 1 for more
-*---  verbose output)
-C---  IF (LNPC1) THEN
-C---  CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
-C---  CALL FNSET("P_THRESHCOR",0) ! deselect threshold corrections
-C---  CALL FNSET("P_NPCOR",1) ! select non-perturbative corrections
-C---  CALL FX9999CC(SCALER, SCALEF, XSNPC, XSCLNPC, DXSUCNPC, DXSCORNPC)
-C---  LNPCSEP = .TRUE.
-C---  ENDIF
+*---  Print out non-perturbative corrections separately
+         IF (LNPC1.AND.LNPC1SEP) THEN
+            CALL FNSET("P_ORDPTHY",0) ! select order pert. theory: 1=LO, 2=NLO
+            CALL FNSET("P_THRESHCOR",0) ! deselect threshold corrections
+            CALL FNSET("P_NPCOR",1) ! select non-perturbative corrections
+            CALL FX9999CC(SCALER, SCALEF, XSNPC, XSCLNPC,
+     >           DXSUCNPC,DXSCORNPC)
+            LNPC1SEP = .TRUE.
+         ENDIF
 
 *---  Reset selection for within scale loop
          CALL FNSET("P_RESET",0) ! Reset all selections to zero
 
 *---  Cross section printout
          DO I=1,NOBSBIN
-            IF ((ABS(XSLO(I)).GT.TINY(1D0))) THEN
+            IF (LLO.AND.LNLO.AND.(ABS(XSLO(I)).GT.TINY(1D0))) THEN
                KFAC(I) = XSNLO(I) / XSLO(I)
             ENDIF
-            IF (LTHCSEP) THEN
-               KTHC(I) = XSTHC(I)
-            ELSE
-               IF ((ABS(XSNLO(I)).GT.TINY(1D0))) THEN
-                  KTHC(I) = XSTHC(I) / XSNLO(I)
+            IF (LTHC1L) THEN
+               IF (LTHC1SEP) THEN
+                  KTHC1(I) = XSTHC1(I)
+               ELSE
+                  IF ((ABS(XSLO(I)).GT.TINY(1D0))) THEN
+                     KTHC1(I) = XSTHC1(I) / XSLO(I)
+                  ENDIF
                ENDIF
             ENDIF
-            IF (LNPCSEP) THEN
+            IF (LTHC2L) THEN
+               IF (LTHC2SEP) THEN
+                  KTHC2(I) = XSTHC2(I)
+               ELSE
+                  IF ((ABS(XSNLO(I)).GT.TINY(1D0))) THEN
+                     KTHC2(I) = XSTHC2(I) / XSNLO(I)
+                  ENDIF
+               ENDIF
+            ENDIF
+            IF (LNPC1SEP) THEN
                KNPC(I) = XSNPC(I)
             ELSE
                IF ((ABS(XSNLO(I)).GT.TINY(1D0))) THEN
@@ -322,29 +353,45 @@ C---  ENDIF
          CHTMP2 = "[  "//CHTMP2(1:12)//"  ]"
          CHRES  = ""
          CHFRM  =
-     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E8.2))"
+     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E8.2)),0P"
          IF (LLO) THEN
             CHTMP3  = SCALEDESCRIPT(ILO,1,1)
             CHTMP3  = "<"//CHTMP3(1:12)//">"
             CHRES = CHRES(1:LEN_TRIM(CHRES))//
      >           CHTMP3//"  "
-            CHRES = CHRES(1:LEN_TRIM(CHRES))//"  LO cross section"
-            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//"(X,G10.4),5X,(X,E18.11)"
+            CHRES = CHRES(1:LEN_TRIM(CHRES))//
+     >           "  LO cross section"
+            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >           ",1P,(X,G10.4),5X,(X,E18.11),0P"
+            IF (LTHC1L) THEN
+               CHRES =
+     >              CHRES(1:LEN_TRIM(CHRES))//
+     >              "    KTHC1"
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >              ",(X,F9.5)"
+            ENDIF
             IF (LNLO) THEN
                CHRES = CHRES(1:LEN_TRIM(CHRES))/
      >              /"   NLO cross section"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,E18.11)"
-               CHRES = CHRES(1:LEN_TRIM(CHRES))//"   K NLO"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",0P,(X,F9.5)"
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >              ",1P,(X,E18.11),0P"
+               CHRES = CHRES(1:LEN_TRIM(CHRES))//
+     >              "   KNLO "
+               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >              ",(X,F9.5)"
                IF (LTHC2L) THEN
                   CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//"     K THC"
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,F9.5)"
+     >                 CHRES(1:LEN_TRIM(CHRES))//
+     >                 "      KTHC2"
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >                 ",(X,F9.5)"
                ENDIF
                IF (LNPC1) THEN
                   CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//"     K NPC"
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",(X,F9.5)"
+     >                 CHRES(1:LEN_TRIM(CHRES))//
+     >                 "     KNPC "
+                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
+     >                 ",(X,F9.5)"
                ENDIF
             ENDIF
          ENDIF
@@ -373,25 +420,37 @@ C---  ENDIF
      >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
      >              XSCLNPC(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KTHC(I),KNPC(I)
+     >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I),KNPC(I)
             ELSEIF (LLO.AND.LNLO.AND.LTHC2L) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
      >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              XSCLTHC(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KTHC(I)
+     >              XSCLTHC2(I),
+     >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I)
             ELSEIF (LLO.AND.LNLO.AND.LNPC1) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
      >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
      >              XSCLNPC(I),
      >              XSLO(I),XSNLO(I),KFAC(I),KNPC(I)
+            ELSEIF (LLO.AND.LNLO.AND.LTHC1L) THEN
+               WRITE(*,CHFRM)I,BINSIZE(I),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
+     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              XSCLNLO(I),
+     >              XSLO(I),XSNLO(I),KFAC(I),KTHC1(I)
             ELSEIF (LLO.AND.LNLO) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
      >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I)
+            ELSEIF (LLO.AND.LTHC1L) THEN
+               WRITE(*,CHFRM)I,BINSIZE(I),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
+     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              XSCLLO(I),
+     >              XSLO(I),KTHC1(I)
             ELSEIF (LLO) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
      >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
