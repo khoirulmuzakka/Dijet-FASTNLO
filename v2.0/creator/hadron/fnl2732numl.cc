@@ -1,9 +1,9 @@
 //
-// fastNLO v2 creator code for fnl2732numk:
+// fastNLO v2 creator code for fnl2732numl:
 //     CMS LHC 3-jet Ratio Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //     (numerator)
-//
+//     Limit of M_top --> 0, i.e. N_f = 6
 // ============== fastNLO user: ===================================
 // To create your own scenario, it is recommended to take
 // this code, make a copy and edit the relevant changes.
@@ -138,7 +138,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    nj = 3U;
 
    // --- number of the up and down type flavours (don't touch)
-   nu = 2U;
+   nu = 3U;
    nd = 3U;
 }
 
@@ -285,8 +285,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
             cout << "==================== End of event ====================" << endl;
          }
 
-         // --- set the renormalization and factorization scale to pT max
-         double mu = pj[1].perp();
+         // --- set the renormalization and factorization scale to average dijet pT
+         double mu = pT12ave;
 
          // --- identify bin number (dim1,dim2) here (mult = 3+,pT12ave)
          // KR: Normalize to bin width in pT, but not |y| or multiplicity
@@ -355,7 +355,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2732numk");
+   A1->SetScenName("fnl2732numl");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
@@ -367,6 +367,7 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Ratio_Numerator");
    A2->ScDescript.push_back("anti-kT_R=0.7");
+   A2->ScDescript.push_back("M_top=0;N_f=6");
    A2->ScDescript.push_back("CMS-PAS-QCD-11-003");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
@@ -447,7 +448,7 @@ void UserHHC::inittable(){
          A2->UpBin.push_back(bound);
          binsize = binsize
             * (dim1bins[i][j+1]-dim1bins[i][j]); // ... times dpT
-         //	* (dim2bins[i+1]-dim2bins[i]); // ... times 2nd dimension (not in fnl27nn)
+         //        * (dim2bins[i+1]-dim2bins[i]); // ... times 2nd dimension (not in fnl27nn)
          A2->BinSize.push_back(binsize);
       }
    }
@@ -620,7 +621,7 @@ void UserHHC::inittable(){
    B->ScaleDescript.resize(B->NScaleDim);
 
    // --- fastNLO user: give the defined process scale a name and units
-   B->ScaleDescript[0].push_back("pT_max_[GeV]");
+   B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
    // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 

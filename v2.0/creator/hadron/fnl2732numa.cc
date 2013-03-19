@@ -120,6 +120,7 @@ private:
 
    void inittable();
    void writetable();
+   void CheckAmpIsnan(const amplitude_hhc& amp);
    double GetEcms();
    unsigned int GetNj();
 };
@@ -176,6 +177,7 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
+   void CheckAmpIsnan(const amplitude_hhc& amp);
 
    // --- fastNLO: Don't touch this piece of code!
    fnloBlockA2 *A2 =  table->GetBlockA2();
@@ -619,7 +621,7 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: give the defined process scale a name and units
    B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
-   //B->Nscalenode.push_back(4); // number of scale nodes for pT
+   // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 
    B->ScaleFac.resize(B->NScaleDim);
@@ -715,7 +717,7 @@ void UserHHC::initfunc(unsigned int)
    nevents = 0;
    // Set some defaults
    //   if (nwrite==0) nwrite = 5000000;
-   if (nwrite==0) nwrite = 100000;
+   nwrite = 100000;
    start_time = std::time(0);
 }
 
@@ -815,4 +817,51 @@ double UserHHC::GetEcms(){
    double ecms = 0;
    psinput(NULL,ecms);
    return sqrt(ecms);
+}
+
+
+void UserHHC::CheckAmpIsnan(const amplitude_hhc& amp){
+   // calculate the amplitudes !
+   nlo::weight_hhc wtorg = amp(dummypdf,91*91,91*91,1.);
+
+   // check amplitude for isnan
+   nlo::amplitude_hhc::contrib_type itype = amp.contrib();
+
+   // ----- check single contributions ----- //
+   int NSubproc = 7;
+   double c[7][7];
+   for(int ic=0;ic<7;ic++){
+      for(int proc=0;proc<NSubproc;proc++){
+         c[ic][proc] = amp._M_fini.amp[ic][proc];
+         //  One may check each contribution here!
+         if ( isnan(c[ic][proc]) ) {
+            cout<<"ic="<<ic<<"\tproc="<<proc<<"\tc="<<c[ic][proc]<<endl;
+         }
+
+         // ------ go through each contribution ----- //
+         if(itype == nlo::amplitude_hhc::fini) {
+            if (amp._M_fini.mode==0) { //finix1
+               for(int proc=0;proc<NSubproc;proc++) {
+                  if ( isnan(c[0][proc]) ) cout<<"c0="<<c[0][proc]<<"\tproc="<<proc<<endl;
+                  if ( isnan(c[3][proc]) ) cout<<"c3="<<c[3][proc]<<"\tproc="<<proc<<endl;
+               }
+            }
+            else if (amp._M_fini.mode==1) { //finix2
+               for(int proc=0;proc<NSubproc;proc++){
+                  if ( isnan(c[1][proc]) ) cout<<"c1="<<c[1][proc]<<"\tproc="<<proc<<endl;
+                  if ( isnan(c[4][proc]) ) cout<<"c4="<<c[4][proc]<<"\tproc="<<proc<<endl;
+               }
+            }
+            else if(amp._M_fini.mode==2){ //fini1
+               for(int proc=0;proc<NSubproc;proc++){
+                  if ( isnan(c[2][proc]) ) cout<<"c2="<<c[2][proc]<<"\tproc="<<proc<<endl;
+                  if ( isnan(c[5][proc]) ) cout<<"c5="<<c[5][proc]<<"\tproc="<<proc<<endl;
+                  if ( isnan(c[6][proc]) ) cout<<"c6="<<c[6][proc]<<"\tproc="<<proc<<endl;
+               }
+            }
+         } else { // no fini contribution
+            // there should be no 'nan'
+         }
+      }
+   }
 }
