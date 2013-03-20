@@ -187,44 +187,45 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'    uncertainties.'
             WRITE(*,*)' '
             STOP
+         ELSE
+            WRITE(*,*)"ALLUNC: Evaluating scenario: ",
+     >           SCENARIO(1:LEN_TRIM(SCENARIO))
 ckr To be cross-checked for each new scenario
-         ELSEIF (SCENARIO(1:8).EQ."fnl2332c") THEN
-            LNRM = .TRUE.
-            LTAB = .FALSE.
-            WRITE(*,*)
-     >           "ALLUNC: Deriving x section ratios"
-         ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
+            IF (SCENARIO(1:8).EQ."fnl2332c") THEN
+               LNRM = .TRUE.
+               LTAB = .FALSE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving x section ratios"
+            ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
 ckr Original version for fnl2442: Works fine, trivial division in rap 3
-            LRAT = .FALSE.
+               LRAT = .FALSE.
 ckr New norm. version for fnl2442: Works fine, trivial division in rap 4
-            LNRM = .TRUE.
-            LTAB = .FALSE.
-            WRITE(*,*)
-     >           "ALLUNC: Deriving x section ratios"
-         ELSEIF (SCENARIO(1:11).EQ."fnl2522diff") THEN
-            LNRM = .TRUE.
-            LTAB = .TRUE.
-            WRITE(*,*)
-     >           "ALLUNC: Deriving normalized distributions"
-         ELSEIF (SCENARIO(1:7).EQ."fnl2622".OR.
-     >           SCENARIO(1:7).EQ."fnl3622".OR.
-     >           SCENARIO(1:7).EQ."fnl2652") THEN
-            LNRM = .TRUE.
-            LTAB = .FALSE.
-            WRITE(*,*)
-     >           "ALLUNC: Deriving normalized distributions"
-         ELSEIF (SCENARIO(1:10).EQ."fnl2722num".OR.
-     >           SCENARIO(1:10).EQ."fnl2732num".OR.
-     >           SCENARIO(1:10).EQ."fnl2742num") THEN
-            LNRM = .TRUE.
-            LTAB = .TRUE.
-            WRITE(*,*)
-     >           "ALLUNC: Deriving normalized distributions"
+               LNRM = .TRUE.
+               LTAB = .FALSE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving x section ratios"
+            ELSEIF (SCENARIO(1:11).EQ."fnl2522diff") THEN
+               LNRM = .TRUE.
+               LTAB = .TRUE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving normalized distributions"
+            ELSEIF (SCENARIO(1:7).EQ."fnl2622".OR.
+     >              SCENARIO(1:7).EQ."fnl3622".OR.
+     >              SCENARIO(1:7).EQ."fnl2652") THEN
+               LNRM = .TRUE.
+               LTAB = .FALSE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving normalized distributions"
+            ELSEIF (SCENARIO(1:10).EQ."fnl2722num".OR.
+     >              SCENARIO(1:10).EQ."fnl2732num".OR.
+     >              SCENARIO(1:10).EQ."fnl2742num") THEN
+               LNRM = .TRUE.
+               LTAB = .TRUE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving normalized distributions"
+            ENDIF
          ENDIF
-         WRITE(*,*)"ALLUNC: Evaluating scenario: ",
-     >        SCENARIO(1:LEN_TRIM(SCENARIO))
       ENDIF
-ckr      LNRM = .FALSE.
       TABNAME = SCENARIO(1:LEN_TRIM(SCENARIO))//".tab"
       IF (LNRM.AND.LTAB) THEN
          TABNAMN = SCENARIO(1:7)//"norm"//".tab"
@@ -573,6 +574,15 @@ ckr      LNRM = .FALSE.
 *---  Check uncertainties to derive
       LONE  = MYPDF.LE.1
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
+      IF ((LALG.OR.LNRM.OR.LRAT).AND.LSTAT) THEN
+         LALG = .FALSE.
+         LNRM = .FALSE.
+         LRAT = .FALSE.
+         WRITE(*,*)
+     >        "ALLUNC: WARNING! Statistics mode!"
+         WRITE(*,*)"        Algorithmic, normalization "//
+     >        "or ratio uncertainties are not possible!"
+      ENDIF
       IF (LALG) THEN
          FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//REFNAME
          WRITE(*,*)"ALLUNC: Checking reference table: "//
