@@ -1,7 +1,7 @@
 //
 // fastNLO v2 creator code for fnl2370:
 //     ATLAS LHC Inclusive Jets R Difference Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.4, 0.6 in E-scheme
+//     for fastjet anti-kT algo with R=0.6, 0.4 in E-scheme
 //     (numerator)
 //
 // ============== fastNLO user: ===================================
@@ -184,7 +184,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // --- fastNLO user: in this scenario run jet algo with two different jet sizes R
    const unsigned int nRjet = 2;
-   const double Rjet[nRjet] = { 0.4, 0.6 };
+   const double Rjet[nRjet] = { 0.6, 0.4 };
    const int nbins = 16;
    if (nbins != A2->GetNObsBin()) {
       cout << "fastNLO: Error! Inconsistent binning, nbins = " << nbins << ", nobsbin = " << A2->GetNObsBin() << endl;
@@ -332,11 +332,11 @@ void UserHHC::inittable(){
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("(d2sigma-jet-R=0.4_dpTd|y|-d2sigma-jet-R=0.6_dpTd|y|)_[pb_GeV]");
+   A2->ScDescript.push_back("(d2sigma-jet-R=0.6_dpTd|y|-d2sigma-jet-R=0.4_dpTd|y|)_[pb_GeV]");
    A2->ScDescript.push_back("ATLAS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("Inclusive_Jet_pT_R_Difference");
-   A2->ScDescript.push_back("anti-kT_R=0.4,0.6");
+   A2->ScDescript.push_back("anti-kT_R=0.6,0.4");
    A2->ScDescript.push_back("Publ.:TBD");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
