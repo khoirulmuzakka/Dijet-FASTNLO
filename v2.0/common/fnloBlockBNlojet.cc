@@ -1472,8 +1472,8 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
      exit(1);
    }
 
-   if (isnan(prefactor)) {
-      cout << "fastNLO.FillEventHHC: WARNING! NaN for prefactor!" << endl;
+   if (isnan(prefactor) || isinf(prefactor)) {
+      cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for prefactor! prefactor = " << prefactor << endl;
    }
 
    // ---
@@ -1543,11 +1543,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       double hxmin  = -sqrt(-log10(xmin));
       double hxmax  = -sqrt(-log10(xmax));
       double hxone   = 0.0;
-      if (isnan(hxmin)) {
-         cout << "fastNLO.FillEventHHC: WARNING! NaN for hxmin, xmin = " << xmin << endl;
+      if (isnan(hxmin) || isinf(hxmin)) {
+         cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for hxmin, xmin = " << xmin << ", hxmin = " << hxmin << endl;
       }
-      if (isnan(hxmax)) {
-         cout << "fastNLO.FillEventHHC: WARNING! NaN for hxmax, xmax = " << xmax << endl;
+      if (isnan(hxmax) || isinf(hxmax)) {
+         cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for hxmax, xmax = " << xmax << ", hxmax = " << hxmax << endl;
       }
 
       // --- define the x-node numbers in the range: 0 <= nxnode < Nxtot1
@@ -1575,26 +1575,26 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       // --- PDF reweighting - compute weights, modify cefmax[.], cefmin[.]
       //     but only those within grid, there are no nodes at x=1
       double pdfwgtmax = PDFwgt(xmax);
-      if (isnan(pdfwgtmax)) {
-         cout << "fastNLO: WARNING! NaN for pdfwgtmax, xmax = " << xmax << endl;
+      if (isnan(pdfwgtmax) || isinf(pdfwgtmax)) {
+         cout << "fastNLO: WARNING! NaN or Inf for pdfwgtmax, xmax = " << xmax << ", pdfwgtmax = " << pdfwgtmax << endl;
       }
       for( int i1 = 0; i1 < 4; i1++) {
          if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
             cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
-            if (isnan(cefmax[i1])) {
-               cout << "fastNLO: WARNING! NaN for cefmax, i1 = " << i1 << ", xnode = " << XNode1[ObsBin][nxmaxf-1+i1] << endl;
+            if (isnan(cefmax[i1]) || isinf(cefmax[i1])) {
+               cout << "fastNLO: WARNING! NaN or Inf for cefmax, i1 = " << i1 << ", xnode = " << XNode1[ObsBin][nxmaxf-1+i1] << ", cefmax = " << cefmax[i1] << endl;
             }
          }
       }
       double pdfwgtmin = PDFwgt(xmin);
-      if (isnan(pdfwgtmin)) {
-         cout << "fastNLO: WARNING! NaN for pdfwgtmin, xmin = " << xmin << endl;
+      if (isnan(pdfwgtmin) || isinf(pdfwgtmin)) {
+         cout << "fastNLO: WARNING! NaN or Inf for pdfwgtmin, xmin = " << xmin << ", pdfwgtmin = " << pdfwgtmin << endl;
       }
       for( int i2 = 0; i2 < 4; i2++) {
          if ((nxminf-1+i2) >= 0 && (nxminf-1+i2) < Nxtot1[ObsBin] ) {
             cefmin[i2] *= pdfwgtmin/PDFwgt(XNode1[ObsBin][nxminf-1+i2]);
-            if (isnan(cefmax[i2])) {
-               cout << "fastNLO: WARNING! NaN for cefmax, i2 = " << i2 << ", xnode = " << XNode1[ObsBin][nxminf-1+i2] << endl;
+            if (isnan(cefmax[i2]) || isinf(cefmax[i2])) {
+               cout << "fastNLO: WARNING! NaN or Inf for cefmax, i2 = " << i2 << ", xnode = " << XNode1[ObsBin][nxminf-1+i2] << ", cefmax = " << cefmax[i2] << endl;
             }
          }
       }
@@ -1612,8 +1612,8 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 
          // --- compute renormalization=factorization scale squared
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         if (isnan(mu2)) {
-            cout << "fastNLO: WARNING! NaN for mu2, scalevar = " << scalevar << endl;
+         if (isnan(mu2) || isinf(mu2)) {
+            cout << "fastNLO: WARNING! NaN or Inf for mu2, scalevar = " << scalevar << ", mu2 = " << mu2 << endl;
          }
          //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
          nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
@@ -1631,8 +1631,8 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          for ( int iwgt = 0; iwgt<7 ; iwgt++ ){
             double wgt = wt[iwgt];
             // Add check on NaN for weights and print warning
-            if (isnan(wgt)) {
-               cout << "fastNLO: WARNING! NaN for wgt for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << endl;
+            if (isnan(wgt) || isinf(wgt)) {
+               cout << "fastNLO: WARNING! NaN or Inf for wgt for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << ", wgt = " << wgt << endl;
                cout << "fastNLO: ObsBin, scalevar, prefactor: " << ObsBin << ", " << scalevar << ", " << prefactor << endl;
             }
          }

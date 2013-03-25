@@ -120,9 +120,9 @@ private:
 
    void inittable();
    void writetable();
-   void CheckAmpIsnan(const amplitude_hhc& amp);
    double GetEcms();
    unsigned int GetNj();
+   void CheckAmp(const amplitude_hhc& amp, double mur2, double muf2, double pref, double nev);
 };
 
 user_base_hhc * userfunc() {
@@ -177,8 +177,6 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
-   void CheckAmpIsnan(const amplitude_hhc& amp);
-
    // --- fastNLO: Don't touch this piece of code!
    fnloBlockA2 *A2 =  table->GetBlockA2();
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
@@ -301,39 +299,52 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // --- fill fastNLO arrays - don't touch this piece of code!
          if (obsbin >= 0) {
             double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
-            if (isnan(obsbin)) {
-               cout << "fastNLO: WARNING! NaN for obsbin no. " << obsbin << endl;
+            if (isnan(obsbin) || isinf(obsbin)) {
+               cout << "fastNLO: WARNING! NaN or Inf for obsbin: " << obsbin << endl;
             }
-            if (isnan(x1)) {
-               cout << "fastNLO: WARNING! NaN for x1 in obsbin no. " << obsbin << endl;
+            if (isnan(x1) || isinf(x1)) {
+               cout << "fastNLO: WARNING! NaN or Inf for x1 in obsbin no. " << obsbin << ", x1 = " << x1 << endl;
             }
-            if (isnan(x2)) {
-               cout << "fastNLO: WARNING! NaN for x2 in obsbin no. " << obsbin << endl;
+            if (isnan(x2) || isinf(x2)) {
+               cout << "fastNLO: WARNING! NaN or Inf for x2 in obsbin no. " << obsbin << ", x2 = " << x2 << endl;
             }
-            if (isnan(mu)) {
-               cout << "fastNLO: WARNING! NaN for mu in obsbin no. " << obsbin << endl;
+            if (isnan(mu) || isinf(mu)) {
+               cout << "fastNLO: WARNING! NaN or Inf for mu in obsbin no. " << obsbin << ", mu = " << mu <<endl;
             }
-            if (isnan(prefactor)) {
-               cout << "fastNLO: WARNING! NaN for prefactor in obsbin no. " << obsbin << ", the bin size is " << A2->BinSize[obsbin] << endl;
+            if (isnan(prefactor) || isinf(prefactor)) {
+               cout << "fastNLO: WARNING! NaN or Inf for prefactor in obsbin no. " << obsbin << ", the bin size is " << A2->BinSize[obsbin] << endl;
             }
+
+            CheckAmp(amp,mu*mu,mu*mu,prefactor,nevents);
+
             nlo::weight_hhc wttest = amp(dummypdf,mu*mu,mu*mu,prefactor);
-            int isnancnt = 0;
-            for (int k=0; k<7; k++) {
-               double weight = wttest[k];
-               if (isnan(weight)) {
-                  cout << "fastNLO: WARNING! NaN for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << endl;
-                  isnancnt++;
+            if (nevents > 247028) {
+               for (int k=0; k<7; k++) {
+                  double weight = wttest[k];
+                  cout << "BBB: nev = " << nevents << ", k = " << k << ", wttest = " << wttest[k] << ", weight = " << weight << endl;
                }
             }
-            if (isnancnt > 0) {
-               exit(0);
+
+            int isnaninfcnt = 0;
+            for (int k=0; k<7; k++) {
+               double weight = wttest[k];
+               if (isnan(weight) || isinf(weight)) {
+                  cout << "fastNLO: WARNING! NaN or Inf for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << ", weight = " << weight << endl;
+                  isnaninfcnt++;
+               }
             }
+//             if (isnaninfcnt > 0) {
+//                exit(0);
+//             }
             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
                if(table->GetBlockB(k)->GetIRef()>0){
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
                }else{
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
                }
+            }
+            if (isnaninfcnt > 0) {
+               exit(0);
             }
          } // --- end: fill fastNLO array
       } // --- end: event selection cuts
@@ -819,49 +830,84 @@ double UserHHC::GetEcms(){
    return sqrt(ecms);
 }
 
-
-void UserHHC::CheckAmpIsnan(const amplitude_hhc& amp){
-   // calculate the amplitudes !
-   nlo::weight_hhc wtorg = amp(dummypdf,91*91,91*91,1.);
-
-   // check amplitude for isnan
+void UserHHC::CheckAmp(const amplitude_hhc& amp, double mur2, double muf2, double pref, double nev){
+   // check amplitude for isnan or isinf
    nlo::amplitude_hhc::contrib_type itype = amp.contrib();
+   if ( nev > 247028 ) {
+      cout << "CheckAmp: Contribution type contrib-type = " << itype << endl;
+   }
+
+   // calculate the amplitudes !
+   nlo::weight_hhc wttest = amp(dummypdf,mur2,muf2,pref);
+//   double wttest2[7][7]; // weights[amp_i][proc]
+   if ( nev > 247028 ) {
+      for (int k=0; k<7; k++) {
+         double weight = wttest[k];
+         cout << "AAA: nev = " << nev << ", k = " << k << ", wttest = " << wttest[k] << ", weight = " << weight << endl;
+      }
+//       if (itype == nlo::amplitude_hhc::fini) {
+//          for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
+//             for ( int iwgt = 0; iwgt<7 ; iwgt++ ){
+//                // Add check on NaN for weights and print warning
+//                if (isnan(amp._M_fini.amp[kk][iwgt])) {
+//                   cout << "CCC: NaN for amp._M_fini.amp for weight iwgt no. " << iwgt << " in contribution kk no. " << kk << " in mode " << amp._M_fini.mode << endl;
+//                } else {
+//                   wttest2[kk][iwgt] = amp._M_fini.amp[kk][iwgt];
+//                   cout << "DDD: wttest2 = " << wttest2[kk][iwgt] << ", kk = " << kk << ", iwgt = " << iwgt << endl;
+//                }
+//             }
+//          }
+//       } else {
+//          cout << "Not fini ..." << endl;
+//       }
+   }
 
    // ----- check single contributions ----- //
-   int NSubproc = 7;
-   double c[7][7];
-   for(int ic=0;ic<7;ic++){
-      for(int proc=0;proc<NSubproc;proc++){
-         c[ic][proc] = amp._M_fini.amp[ic][proc];
-         //  One may check each contribution here!
-         if ( isnan(c[ic][proc]) ) {
-            cout<<"ic="<<ic<<"\tproc="<<proc<<"\tc="<<c[ic][proc]<<endl;
-         }
+//    int NSubproc = 7;
+//    double c[7][7];
+//    int cnt[7][7] = { {0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0}};
+//    for (int ic=0; ic<7; ic++) {
+//       for (int ip=0; ip<NSubproc; ip++){
+//          c[ic][ip] = amp._M_fini.amp[ic][ip];
+//          //  One may check each contribution here!
+//          if ( isnan(c[ic][ip]) ) {
+//             cnt[ic][ip]++;
+//             cout << "CheckAmp: FINIERROR! nev = " << nev << ", mur2 = " << mur2 << ", muf2 = " << muf2 << ", pref = " << pref << endl;
+//             cout << "CheckAmp: FINIERROR! NaN for ic = " << ic << ", ip = " << ip << ", c = " << c[ic][ip] << ", counter = " << cnt[ic][ip] << endl;
 
-         // ------ go through each contribution ----- //
-         if(itype == nlo::amplitude_hhc::fini) {
-            if (amp._M_fini.mode==0) { //finix1
-               for(int proc=0;proc<NSubproc;proc++) {
-                  if ( isnan(c[0][proc]) ) cout<<"c0="<<c[0][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[3][proc]) ) cout<<"c3="<<c[3][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-            else if (amp._M_fini.mode==1) { //finix2
-               for(int proc=0;proc<NSubproc;proc++){
-                  if ( isnan(c[1][proc]) ) cout<<"c1="<<c[1][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[4][proc]) ) cout<<"c4="<<c[4][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-            else if(amp._M_fini.mode==2){ //fini1
-               for(int proc=0;proc<NSubproc;proc++){
-                  if ( isnan(c[2][proc]) ) cout<<"c2="<<c[2][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[5][proc]) ) cout<<"c5="<<c[5][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[6][proc]) ) cout<<"c6="<<c[6][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-         } else { // no fini contribution
-            // there should be no 'nan'
-         }
-      }
-   }
+//             // ------ go through each contribution ----- //
+//             if (itype == nlo::amplitude_hhc::fini) {
+//                cout << "FINI-MODE!" << endl;
+//                if (amp._M_fini.mode==0) { //finix1
+//                   for (int ip=0; ip<NSubproc; ip++) {
+//                      if ( isnan(c[0][ip]) ) cout << "CheckAmpB: c0 = " << c[0][ip] << ", ip=" << ip << endl;
+//                      if ( isnan(c[3][ip]) ) cout << "CheckAmpB: c3 = " << c[3][ip] << ", ip=" << ip << endl;
+//                   }
+//                }
+//                else if (amp._M_fini.mode==1) { //finix2
+//                   for (int ip=0; ip<NSubproc; ip++) {
+//                      if ( isnan(c[1][ip]) ) cout << "CheckAmpB: c1 = " << c[1][ip] << ", ip=" << ip << endl;
+//                      if ( isnan(c[4][ip]) ) cout << "CheckAmpB: c4 = " << c[4][ip] << ", ip=" << ip << endl;
+//                   }
+//                }
+//                else if (amp._M_fini.mode==2){ //fini1
+//                   for (int ip=0; ip<NSubproc; ip++) {
+//                      if ( isnan(c[2][ip]) ) cout << "CheckAmpB: c2 = " << c[2][ip] << ", ip=" << ip << endl;
+//                      if ( isnan(c[5][ip]) ) cout << "CheckAmpB: c5 = " << c[5][ip] << ", ip=" << ip << endl;
+//                      if ( isnan(c[6][ip]) ) cout << "CheckAmpB: c6 = " << c[6][ip] << ", ip=" << ip << endl;
+//                   }
+//                }
+//             } else { // no fini contribution
+//                cout << "NOT FINI-MODE!" << endl;
+//             }
+
+//          } else {
+//             if ( nev > 245000 ) {
+//                cout << "CheckAmp: FINI! nev = " << nev << ", mur2 = " << mur2 << ", muf2 = " << muf2 << ", pref = " << pref << endl;
+//                cout << "CheckAmp: FINI! ic = " << ic << ", ip = " << ip << ", c = " << c[ic][ip] << ", counter = " << cnt[ic][ip] << endl;
+//             }
+//          }
+
+//       }
+//    }
 }
