@@ -120,7 +120,6 @@ private:
 
    void inittable();
    void writetable();
-   void CheckAmpIsnan(const amplitude_hhc& amp);
    double GetEcms();
    unsigned int GetNj();
 };
@@ -177,7 +176,6 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
-   void CheckAmpIsnan(const amplitude_hhc& amp);
 
    // --- fastNLO: Don't touch this piece of code!
    fnloBlockA2 *A2 =  table->GetBlockA2();
@@ -301,33 +299,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // --- fill fastNLO arrays - don't touch this piece of code!
          if (obsbin >= 0) {
             double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
-            if (isnan(obsbin)) {
-               cout << "fastNLO: WARNING! NaN for obsbin no. " << obsbin << endl;
-            }
-            if (isnan(x1)) {
-               cout << "fastNLO: WARNING! NaN for x1 in obsbin no. " << obsbin << endl;
-            }
-            if (isnan(x2)) {
-               cout << "fastNLO: WARNING! NaN for x2 in obsbin no. " << obsbin << endl;
-            }
-            if (isnan(mu)) {
-               cout << "fastNLO: WARNING! NaN for mu in obsbin no. " << obsbin << endl;
-            }
-            if (isnan(prefactor)) {
-               cout << "fastNLO: WARNING! NaN for prefactor in obsbin no. " << obsbin << ", the bin size is " << A2->BinSize[obsbin] << endl;
-            }
-            nlo::weight_hhc wttest = amp(dummypdf,mu*mu,mu*mu,prefactor);
-            int isnancnt = 0;
-            for (int k=0; k<7; k++) {
-               double weight = wttest[k];
-               if (isnan(weight)) {
-                  cout << "fastNLO: WARNING! NaN for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << endl;
-                  isnancnt++;
-               }
-            }
-            if (isnancnt > 0) {
-               exit(0);
-            }
             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
                if(table->GetBlockB(k)->GetIRef()>0){
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
@@ -362,7 +333,7 @@ void UserHHC::inittable(){
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[fb_GeV]");
+   A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Ratio_Numerator");
@@ -518,8 +489,8 @@ void UserHHC::inittable(){
    //     Remember to disable the reference-mode during Warm-Up runs:
    //     "doReference = false" (above) if setting manually.
    //     Otherwise this is caught automatically in an error condition.
-   //B->IWarmUpPrint = 1000000;
-   B->IWarmUpPrint = 10000;
+   B->IWarmUpPrint = 1000000;
+   //B->IWarmUpPrint = 10000;
    B->xlo.resize(A2->NObsBin);
    B->scalelo.resize(A2->NObsBin);
    B->scalehi.resize(A2->NObsBin);
@@ -716,8 +687,7 @@ void UserHHC::initfunc(unsigned int)
    // --- Initialize event counters
    nevents = 0;
    // Set some defaults
-   //   if (nwrite==0) nwrite = 5000000;
-   nwrite = 100000;
+   if (nwrite==0) nwrite = 5000000;
    start_time = std::time(0);
 }
 
@@ -817,51 +787,4 @@ double UserHHC::GetEcms(){
    double ecms = 0;
    psinput(NULL,ecms);
    return sqrt(ecms);
-}
-
-
-void UserHHC::CheckAmpIsnan(const amplitude_hhc& amp){
-   // calculate the amplitudes !
-   nlo::weight_hhc wtorg = amp(dummypdf,91*91,91*91,1.);
-
-   // check amplitude for isnan
-   nlo::amplitude_hhc::contrib_type itype = amp.contrib();
-
-   // ----- check single contributions ----- //
-   int NSubproc = 7;
-   double c[7][7];
-   for(int ic=0;ic<7;ic++){
-      for(int proc=0;proc<NSubproc;proc++){
-         c[ic][proc] = amp._M_fini.amp[ic][proc];
-         //  One may check each contribution here!
-         if ( isnan(c[ic][proc]) ) {
-            cout<<"ic="<<ic<<"\tproc="<<proc<<"\tc="<<c[ic][proc]<<endl;
-         }
-
-         // ------ go through each contribution ----- //
-         if(itype == nlo::amplitude_hhc::fini) {
-            if (amp._M_fini.mode==0) { //finix1
-               for(int proc=0;proc<NSubproc;proc++) {
-                  if ( isnan(c[0][proc]) ) cout<<"c0="<<c[0][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[3][proc]) ) cout<<"c3="<<c[3][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-            else if (amp._M_fini.mode==1) { //finix2
-               for(int proc=0;proc<NSubproc;proc++){
-                  if ( isnan(c[1][proc]) ) cout<<"c1="<<c[1][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[4][proc]) ) cout<<"c4="<<c[4][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-            else if(amp._M_fini.mode==2){ //fini1
-               for(int proc=0;proc<NSubproc;proc++){
-                  if ( isnan(c[2][proc]) ) cout<<"c2="<<c[2][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[5][proc]) ) cout<<"c5="<<c[5][proc]<<"\tproc="<<proc<<endl;
-                  if ( isnan(c[6][proc]) ) cout<<"c6="<<c[6][proc]<<"\tproc="<<proc<<endl;
-               }
-            }
-         } else { // no fini contribution
-            // there should be no 'nan'
-         }
-      }
-   }
 }

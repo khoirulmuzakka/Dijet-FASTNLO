@@ -308,7 +308,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
             }
          } // --- end: fill fastNLO array
       } // --- end: event selection cuts
-   } // --- end: 2+ jet event selection
+   } // --- end: 3+ jet event selection
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
@@ -333,7 +333,7 @@ void UserHHC::inittable(){
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[fb_GeV]");
+   A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Ratio_Numerator");
@@ -592,7 +592,7 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: give the defined process scale a name and units
    B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
-   //B->Nscalenode.push_back(4); // number of scale nodes for pT
+   // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 
    B->ScaleFac.resize(B->NScaleDim);

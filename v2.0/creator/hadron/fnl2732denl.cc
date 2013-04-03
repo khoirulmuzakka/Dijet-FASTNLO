@@ -292,35 +292,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // --- fill fastNLO arrays - don't touch this piece of code!
          if (obsbin >= 0) {
             double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
-
-            if (isnan(obsbin) || isinf(obsbin)) {
-               cout << "fastNLO: WARNING! NaN or Inf for obsbin: " << obsbin << endl;
-            }
-            if (isnan(x1) || isinf(x1)) {
-               cout << "fastNLO: WARNING! NaN or Inf for x1 in obsbin no. " << obsbin << ", x1 = " << x1 << endl;
-            }
-            if (isnan(x2) || isinf(x2)) {
-               cout << "fastNLO: WARNING! NaN or Inf for x2 in obsbin no. " << obsbin << ", x2 = " << x2 << endl;
-            }
-            if (isnan(mu) || isinf(mu)) {
-               cout << "fastNLO: WARNING! NaN or Inf for mu in obsbin no. " << obsbin << ", mu = " << mu <<endl;
-            }
-            if (isnan(prefactor) || isinf(prefactor)) {
-               cout << "fastNLO: WARNING! NaN or Inf for prefactor in obsbin no. " << obsbin << ", the bin size is " << A2->BinSize[obsbin] << endl;
-            }
-            nlo::weight_hhc wttest = amp(dummypdf,mu*mu,mu*mu,prefactor);
-            int isnaninfcnt = 0;
-            for (int k=0; k<7; k++) {
-               double weight = wttest[k];
-               if (isnan(weight) || isinf(weight)) {
-                  cout << "fastNLO: WARNING! NaN or Inf for weight k = " << k << ", in amp for mu = " << mu << " and prefactor = " << prefactor << ", weight = " << weight << endl;
-                  isnaninfcnt++;
-               }
-            }
-            if (isnaninfcnt > 0) {
-               exit(0);
-            }
-
             for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
                if(table->GetBlockB(k)->GetIRef()>0){
                   ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
@@ -355,7 +326,7 @@ void UserHHC::inittable(){
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("dsigma-jet2+_d<pT_1,2>_[fb_GeV]");
+   A2->ScDescript.push_back("dsigma-jet2+_d<pT_1,2>_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Ratio_Denominator");
@@ -615,7 +586,7 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: give the defined process scale a name and units
    B->ScaleDescript[0].push_back("<pT_1,2>_[GeV]");
-   //B->Nscalenode.push_back(4); // number of scale nodes for pT
+   // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 
    B->ScaleFac.resize(B->NScaleDim);
