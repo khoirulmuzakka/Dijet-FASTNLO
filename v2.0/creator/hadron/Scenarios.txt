@@ -19,12 +19,13 @@ CMS Inclusive Jets 2010:
  - Additional table:
    v21: fnl2342bptmax, rev. 1398: Scale pT_jet ==> pT_max
 
+
 CMS Inclusive Jets 2011:
 ------------------------
  - Development versions:
    v14: MoriondQCD2012: fnl2332c
 
- - Final versions with exact binning:
+ - Final version with exact binning:
    v21: fnl2332d, rev. 1192
 
  - Updated code version:
@@ -32,3 +33,45 @@ CMS Inclusive Jets 2011:
 
  - Additional table:
    v21: fnl2332dptmax, rev. 1398: Scale pT_jet ==> pT_max
+
+
+CMS Inclusive Jets 2012:
+------------------------
+ - Development versions:
+   v21: ICHEP2012: fnl3332y0 - fnl3332y6
+
+ - Final version with exact binning:
+   v21: TBD
+
+
+CMS Dijet Mass 2010:
+--------------------
+ - Development versions:
+   v14: ICHEP2010: fnl2412
+   v14: Intermediate: fnl2412a
+   v14: Publication: fnl2412b
+
+ - Final versions with exact binning:
+   v14: fnl2412c, rev.  768
+   v21: fnl2412c, rev. 1006
+
+ - Updated code version:
+   v21: fnl2412c, rev. 1401
+
+
+CMS Dijet Mass 2011:
+--------------------
+ - Development versions:
+   v14: MoriondQCD2012: fnl2412d
+
+ - Final versions with exact binning:
+   v21: fnl2412e, rev. 1172
+
+ - Updated code version:
+   v21: fnl2412e, rev. 1401
+
+
+CMS Dijet Mass 2012:
+--------------------
+ - Development versions:
+   v21: TBD
