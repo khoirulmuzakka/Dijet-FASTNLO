@@ -14,10 +14,10 @@ CMS Inclusive Jets 2010:
    fnl2342b ==> fnl1014 on HepForge
 
  - Updated code version:
-   v21: fnl2342b, rev. 1397
+   v21: fnl2342b, rev. 1398
 
  - Additional table:
-   v21: fnl2342bptmax, rev. 1397: Scale pT_jet ==> pT_max
+   v21: fnl2342bptmax, rev. 1398: Scale pT_jet ==> pT_max
 
 CMS Inclusive Jets 2011:
 ------------------------
@@ -28,7 +28,7 @@ CMS Inclusive Jets 2011:
    v21: fnl2332d, rev. 1192
 
  - Updated code version:
-   v21: fnl2332d, rev. 1397
+   v21: fnl2332d, rev. 1398
 
  - Additional table:
-   v21: fnl2332dptmax, rev. 1397: Scale pT_jet ==> pT_max
+   v21: fnl2332dptmax, rev. 1398: Scale pT_jet ==> pT_max
