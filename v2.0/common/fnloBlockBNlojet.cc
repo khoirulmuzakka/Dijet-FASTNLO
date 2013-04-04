@@ -8,6 +8,9 @@
 // the two routines FillEventDIS, and FillEventHHC are running
 // the other routines (DIS2scale and photoproduction) still need some work
 //
+// note (Apr 1, 2013) - KR:
+// included several nan and inf sanity checks into FillEventHHC
+// to i.a. work around NLOJet++ complex 0/0 problem
 
 fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :fnloBlockB(blocka1,blocka2) {
    _S_gauleg(20, _M_xb, _M_wb);
@@ -23,14 +26,13 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
    fnloBlockA2 *A2 =  BlockA2;
 
    if (Nscalenode[0]<4) {
-     cout << "fastNLO.FillEventDIS: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl; 
-     exit(1);
+      cout << "fnloBlockBNlojet::FillEventDIS: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl;
+      exit(1);
    }
 
    // ---
    // --- Warm-Up Run to identify extreme x, mu values
    // ---
-   // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
       WarmUp( ObsBin , x , scale1 , 0 , "xlim" , "mu" );
       return;
@@ -156,10 +158,10 @@ void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const n
 
             // --- check: all elements should end up within grid
             if (is < 0){
-               printf("fastNLO.FillEventHHC: scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventDIS: scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             } else if (is > Nscalenode[0]-1){
-               printf("fastNLO.FillEventHHC: scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventDIS: scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
                exit(1);
             }
             // --- loop over all 4 x-nodes that receive contributions
@@ -1467,34 +1469,62 @@ void fnloBlockBNlojet::_S_gauleg(unsigned int n, double *x, double *w)
 void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double scale1, const nlo::amplitude_hhc& amp, nlo::pdf_and_coupling_hhc& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
+   // ---
+   // --- Some general input sanity checks, amp(pdf) checked further below
+   // ---
    if (Nscalenode[0]<4) {
-     cout << "fastNLO.FillEventHHC: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl; 
-     exit(1);
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Aborting ..." << endl;
+      exit(1);
    }
 
+   if (isnan(ObsBin) || isinf(ObsBin)) {
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for ObsBin: " << ObsBin << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+      exit(0);
+   }
+   if (isnan(x1) || isinf(x1)) {
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for x1 in ObsBin no. " << ObsBin << ", x1 = " << x1 << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+      exit(0);
+   }
+   if (isnan(x2) || isinf(x2)) {
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for x2 in ObsBin no. " << ObsBin << ", x2 = " << x2 << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+      exit(0);
+   }
+   if (isnan(scale1) || isinf(scale1)) {
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for scale in ObsBin no. " << ObsBin << ", scale1 = " << scale1 <<endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+      exit(0);
+   }
    if (isnan(prefactor) || isinf(prefactor)) {
-      cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for prefactor! prefactor = " << prefactor << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for prefactor in ObsBin no. " << ObsBin << ", prefactor = " << prefactor << endl;
+      cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+      exit(0);
    }
 
    // ---
    // --- Warm-Up Run to identify extreme x, mu values
    // ---
-   // KR: Add file output for later automatic read in
    if (IWarmUp == 1) {
       WarmUp( ObsBin , min(x1,x2) , scale1 , 0 , "xlim" , "mu" );
       return;
    }
 
-   // --- select interpolation kernel for x and for mu
-   //             1:Catmull-Rom   2:Lagrangian
-   const int ikernx = 2;
+   // ---
+   // --- Select interpolation kernels for x and mu
+   // --- 1: Catmull-Rom, 2: Lagrangian
+   const int ikernx  = 2;
    const int ikernmu = 2;
 
-   if(this->IRef>0){
+   if (this->IRef>0) {
+      // ---
+      // --- Reference table with real pdf
+      // ---
 
-      for(int scalevar=0; scalevar<Nscalevar[0]; scalevar++){
+      for (int scalevar=0; scalevar<Nscalevar[0]; scalevar++) {
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
-         //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
          nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
          nlo::weight_hhc wt;
          wt[0] = wtorg[0];
@@ -1506,21 +1536,25 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          wt[6] = wtorg[2];
 
          if (NSubproc == 6) {
-            wt[5] += wt[6];    // -- sum is correct in ref-mode
+            wt[5] += wt[6];   // --- Sum is correct in reference mode
          }
 
          wt *= 389385730.;
-         if(IXsectUnits!=12){
+         if (IXsectUnits != 12) {
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
 
-         for(int proc=0;proc<NSubproc;proc++){
+         for (int proc=0; proc<NSubproc; proc++) {
             SigmaTilde[ObsBin][scalevar][0][0][proc] += wt[proc];
          }
       }
-   }else{
-      if(this->NPDFDim != 1){
-         printf("fnloBlockBNlojet::FillEventHHC: Error, only NPDFDim=1 (half matrix) implemented so far.\n");
+   } else {
+      // ---
+      // --- fastNLO table with dummy pdf
+      // ---
+      if (this->NPDFDim != 1) {
+         cout << "fnloBlockBNlojet::FillEventHHC: ERROR! Only NPDFDim=1 (half matrix) implemented so far!" << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: Aborting ..." << endl;
          exit(1);
       }
 
@@ -1533,21 +1567,44 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          xmax = x2;
          xmin = x1;
       }
-      if (xmin<XNode1[ObsBin][0]){
-         printf("fnloBlockBNlojet::FillEventHHC: find: xmin (%f) smaller than lowest x-node (%f) for bin #%d .\n",
-                xmin,XNode1[ObsBin][0],ObsBin);
-      }
 
+      // ---
       // **********  determine x_ij position in grid  ************
       // --- determine fractional contributions
-      double hxmin  = -sqrt(-log10(xmin));
-      double hxmax  = -sqrt(-log10(xmax));
+      // --- initialize with safe delimiting values [10^-100,1] and count out of bounds occurences
+      const double xlow = 1e-100;
+      const double xupp = 1.;
+      static int nxlow   = 0;
+      static int nxupp   = 0;
+      static int nxsmall = 0;
+      double hxmin = -10.;
+      if (xmin <= xlow) {
+         nxlow++;
+         printf("fnloBlockBNlojet::FillEventHHC: WARNING! In observable bin (#%d): (#%d)th occurence of xmin (%f) smaller than lower bound (%f).\n",ObsBin,nxlow,xmin,xlow);
+      } else {
+         hxmin  = -sqrt(-log10(xmin));
+         if (xmin<XNode1[ObsBin][0]) {
+            nxsmall++;
+            printf("fnloBlockBNlojet::FillEventHHC: WARNING! In observable bin (#%d): (#%d)th occurence of xmin (%f) smaller than lowest x-node (%f).\n",ObsBin,nxsmall,xmin,XNode1[ObsBin][0]);
+         }
+      }
+      double hxmax = 0.;
+      if (xmax >= 1.) {
+         nxupp++;
+         printf("fnloBlockBNlojet::FillEventHHC: WARNING! In observable bin (#%d): (#%d)th occurence of xmax (%f) larger than upper bound (%f).\n",ObsBin,nxupp,xmax,xupp);
+      } else {
+         hxmax  = -sqrt(-log10(xmax));
+      }
       double hxone   = 0.0;
       if (isnan(hxmin) || isinf(hxmin)) {
-         cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for hxmin, xmin = " << xmin << ", hxmin = " << hxmin << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for hxmin, xmin = " << xmin << ", hxmin = " << hxmin << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+         exit(0);
       }
       if (isnan(hxmax) || isinf(hxmax)) {
-         cout << "fastNLO.FillEventHHC: WARNING! NaN or Inf for hxmax, xmax = " << xmax << ", hxmax = " << hxmax << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for hxmax, xmax = " << xmax << ", hxmax = " << hxmax << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+         exit(0);
       }
 
       // --- define the x-node numbers in the range: 0 <= nxnode < Nxtot1
@@ -1576,25 +1633,36 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
       //     but only those within grid, there are no nodes at x=1
       double pdfwgtmax = PDFwgt(xmax);
       if (isnan(pdfwgtmax) || isinf(pdfwgtmax)) {
-         cout << "fastNLO: WARNING! NaN or Inf for pdfwgtmax, xmax = " << xmax << ", pdfwgtmax = " << pdfwgtmax << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for pdfwgtmax, xmax = " << xmax << ", pdfwgtmax = " << pdfwgtmax << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+         exit(0);
       }
+
       for( int i1 = 0; i1 < 4; i1++) {
          if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
             cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
             if (isnan(cefmax[i1]) || isinf(cefmax[i1])) {
-               cout << "fastNLO: WARNING! NaN or Inf for cefmax, i1 = " << i1 << ", xnode = " << XNode1[ObsBin][nxmaxf-1+i1] << ", cefmax = " << cefmax[i1] << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for cefmax, i1 = " << i1 << ", xnode = " << XNode1[ObsBin][nxmaxf-1+i1] << ", cefmax = " << cefmax[i1] << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+               exit(0);
             }
          }
       }
+
       double pdfwgtmin = PDFwgt(xmin);
       if (isnan(pdfwgtmin) || isinf(pdfwgtmin)) {
-         cout << "fastNLO: WARNING! NaN or Inf for pdfwgtmin, xmin = " << xmin << ", pdfwgtmin = " << pdfwgtmin << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for pdfwgtmin, xmin = " << xmin << ", pdfwgtmin = " << pdfwgtmin << endl;
+         cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+         exit(0);
       }
+
       for( int i2 = 0; i2 < 4; i2++) {
          if ((nxminf-1+i2) >= 0 && (nxminf-1+i2) < Nxtot1[ObsBin] ) {
             cefmin[i2] *= pdfwgtmin/PDFwgt(XNode1[ObsBin][nxminf-1+i2]);
             if (isnan(cefmax[i2]) || isinf(cefmax[i2])) {
-               cout << "fastNLO: WARNING! NaN or Inf for cefmax, i2 = " << i2 << ", xnode = " << XNode1[ObsBin][nxminf-1+i2] << ", cefmax = " << cefmax[i2] << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for cefmax, i2 = " << i2 << ", xnode = " << XNode1[ObsBin][nxminf-1+i2] << ", cefmax = " << cefmax[i2] << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+               exit(0);
             }
          }
       }
@@ -1613,9 +1681,10 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          // --- compute renormalization=factorization scale squared
          double mu2 = ScaleFac[0][scalevar]*ScaleFac[0][scalevar]*scale1*scale1;
          if (isnan(mu2) || isinf(mu2)) {
-            cout << "fastNLO: WARNING! NaN or Inf for mu2, scalevar = " << scalevar << ", mu2 = " << mu2 << endl;
+            cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for mu2, scalevar = " << scalevar << ", mu2 = " << mu2 << endl;
+            cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+            exit(0);
          }
-         //nlo::weight_hhc wt = amp(pdf,mu2,mu2,prefactor);
          nlo::weight_hhc wtorg = amp(pdf,mu2,mu2,prefactor);
          // - rearrange subprocesses
          nlo::weight_hhc wt;
@@ -1626,30 +1695,28 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
          wt[4] = wtorg[6];
          wt[5] = wtorg[1];
          wt[6] = wtorg[2];
-         // -- case NSubproc=6: see below
 
-         for ( int iwgt = 0; iwgt<7 ; iwgt++ ){
+         // -- case NSubproc=6: see below
+         for ( int iwgt = 0; iwgt<7 ; iwgt++ ) {
             double wgt = wt[iwgt];
             // Add check on NaN for weights and print warning
             if (isnan(wgt) || isinf(wgt)) {
-               cout << "fastNLO: WARNING! NaN or Inf for wgt for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << ", wgt = " << wgt << endl;
-               cout << "fastNLO: ObsBin, scalevar, prefactor: " << ObsBin << ", " << scalevar << ", " << prefactor << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: ERROR! NaN or Inf for wgt for weight iwgt no. " << iwgt << " in mode " << amp._M_fini.mode << ", wgt = " << wgt << endl;
+               cout << "fnloBlockBNlojet::FillEventHHC: Stopping ..." << endl;
+               exit(0);
             }
          }
 
          wt *= 389385730.;
-         if(IXsectUnits!=12){
+         if (IXsectUnits!=12) {
             wt *= pow(10.,(IXsectUnits-12)) ;
          }
 
          // deal with subprocesses 2 and 3 -> moved to 6 and 7
          //    - if x1>x2 -> o.k.
          //    - if x2>x1 -> swap weights for subprocesses 2,3 -> now 6,7
-         if(x2>x1){
+         if (x2>x1) {
             double buffer;
-            //buffer = wt[1];
-            //wt[1] = wt[2];
-            //wt[2] = buffer;
             buffer = wt[5];
             wt[5] = wt[6];
             wt[6] = buffer;
@@ -1694,10 +1761,12 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
 
             // --- check: all elements should end up within grid
             if (is < 0){
-               printf("fastNLO.FillEventHHC: scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventHHC: ERROR! scalenode is<0     %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventHHC: Aborting ...\n");
                exit(1);
             } else if (is > Nscalenode[0]-1){
-               printf("fastNLO.FillEventHHC: scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventHHC: ERROR! scalenode is>max   %d %d %f \n",nscale,i3,cefscale[i3]);
+               printf("fnloBlockBNlojet::FillEventHHC: Aborting ...\n");
                exit(1);
             }
             // --- loop over all 16 xmin,xmax points that receive contributions
@@ -1713,9 +1782,6 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
                         xmaxbin = xmaxbin + di;   // modify indicees
                         xminbin = xminbin - di;
                         double buffer;
-                        //buffer = wtmp[1]; // swap subprocesses 2,3
-                        //wtmp[1] = wtmp[2];
-                        //wtmp[2] = buffer;
                         // new ordering (1,2)->(5,6)
                         buffer  = wtmp[5]; // swap subprocesses 6,7
                         wtmp[5] = wtmp[6];
