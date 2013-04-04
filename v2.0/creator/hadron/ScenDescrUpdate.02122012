@@ -1,0 +1,34 @@
+Table production info:
+======================
+
+
+CMS Inclusive Jets 2010:
+------------------------
+ - Development versions:
+   v14: ICHEP2010:   fnl2342
+   v14: Publication: fnl2342a
+
+ - Final versions with exact binning:
+   v14: fnl2342b, rev.  767
+   v21: fnl2342b, rev. 1006
+   fnl2342b ==> fnl1014 on HepForge
+
+ - Updated code version:
+   v21: fnl2342b, rev. 1397
+
+ - Additional table:
+   v21: fnl2342bptmax, rev. 1397: Scale pT_jet ==> pT_max
+
+CMS Inclusive Jets 2011:
+------------------------
+ - Development versions:
+   v14: MoriondQCD2012: fnl2332c
+
+ - Final versions with exact binning:
+   v21: fnl2332d, rev. 1192
+
+ - Updated code version:
+   v21: fnl2332d, rev. 1397
+
+ - Additional table:
+   v21: fnl2332dptmax, rev. 1397: Scale pT_jet ==> pT_max

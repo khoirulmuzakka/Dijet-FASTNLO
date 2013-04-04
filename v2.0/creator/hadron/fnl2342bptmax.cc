@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl2342b:
+// fastNLO v2 creator code for fnl2342bptmax:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
@@ -228,9 +228,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-   // fnl2342: Not required for inclusive jets
-   //   static fNLOSorter SortJets;
-   //   std::sort(pj.begin(), pj.begin() + njet, SortJets);
+   // fnl2342bptmax: Required here to determine pTmax
+   static fNLOSorter SortJets;
+   std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
    // --- give some debug output after selection and sorting
    if ( doDebug ) {
@@ -251,8 +251,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       double pt  = pj[i].perp();
       double rap = abs(pj[i].rapidity());
 
-      // --- set the renormalization and factorization scale to jet pT
-      double mu = pt;
+      // --- set the renormalization and factorization scale to pT max
+      double mu = pj[1].perp();
 
       // --- identify bin number (dim1,dim2) here (pT,|y|)
       int obsbin = -1;
@@ -293,7 +293,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2342b");
+   A1->SetScenName("fnl2342bptmax");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 =  table->GetBlockA2();
@@ -596,7 +596,7 @@ void UserHHC::inittable(){
    B->ScaleDescript.resize(B->NScaleDim);
 
    // --- fastNLO user: give the defined process scale a name and units
-   B->ScaleDescript[0].push_back("pT_jet_[GeV]");
+   B->ScaleDescript[0].push_back("pT_max_[GeV]");
    // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 

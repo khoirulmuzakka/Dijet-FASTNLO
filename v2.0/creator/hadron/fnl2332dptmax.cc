@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2342b:
+// fastNLO v2 creator code for fnl2332dptmax:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.5 in E-scheme
+//     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 //
 // ============== fastNLO user: ===================================
@@ -141,7 +141,6 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    nd = 3U;
 }
 
-
 void psinput(phasespace_hhc *ps, double& s)
 {
    // --- fastNLO user: set the total c.m. energy squared in GeV^2
@@ -152,7 +151,7 @@ void psinput(phasespace_hhc *ps, double& s)
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =   7617600.; // LHC HIpp base Run 2760 GeV
    s =  49000000.; // LHC First Run     7000 GeV
-   //s =  64000000.; // LHC Second Run    8000 GeV
+   //s =  64000000.; // LHC Second Run     8000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -184,7 +183,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
    // --- fastNLO user: set the jet size and run the jet algorithm
-   double jetsize = 0.5;
+   double jetsize = 0.7;
    pj = jetclus(p,jetsize);
    unsigned int nj = pj.upper();
 
@@ -228,9 +227,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-   // fnl2342: Not required for inclusive jets
-   //   static fNLOSorter SortJets;
-   //   std::sort(pj.begin(), pj.begin() + njet, SortJets);
+   // fnl2332dptmax: Required here to determine pTmax
+   static fNLOSorter SortJets;
+   std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
    // --- give some debug output after selection and sorting
    if ( doDebug ) {
@@ -251,8 +250,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       double pt  = pj[i].perp();
       double rap = abs(pj[i].rapidity());
 
-      // --- set the renormalization and factorization scale to jet pT
-      double mu = pt;
+      // --- set the renormalization and factorization scale to pT max
+      double mu = pj[1].perp();
 
       // --- identify bin number (dim1,dim2) here (pT,|y|)
       int obsbin = -1;
@@ -293,10 +292,10 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2342b");
+   A1->SetScenName("fnl2332dptmax");
 
    // --- fastNLO: fill variables for table header block A2
-   fnloBlockA2 *A2 =  table->GetBlockA2();
+   fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
 
@@ -305,8 +304,8 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("Inclusive_Jet_pT");
-   A2->ScDescript.push_back("anti-kT_R=0.5");
-   A2->ScDescript.push_back("CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107 (2011) 132001.");
+   A2->ScDescript.push_back("anti-kT_R=0.7");
+   A2->ScDescript.push_back("CMS-PAPER-QCD-11-004, arXiv:1212.6660, Phys. Rev. D ??? (2013) ???.");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
@@ -327,10 +326,10 @@ void UserHHC::inittable(){
    bound.resize(2);
 
    // --- fastNLO user: define the binning
-   const int ndim2bins = 6;
-   const double dim2bins[ndim2bins+1] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0 };
+   const int ndim2bins = 5;
+   const double dim2bins[ndim2bins+1] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5 };
 
-   const int ndim1bins[ndim2bins] = { 34, 33, 32, 29, 26, 22 };
+   const int ndim1bins[ndim2bins] = { 33, 30, 27, 24, 19 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -344,29 +343,27 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[35] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,  846., 1684. };
-   const double dim1[34] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  790., 1684. };
-   const double dim2[33] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686., 1410. };
-   const double dim3[30] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548., 1032. };
-   const double dim4[27] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  737. };
-   const double dim5[23] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  468. };
+   const double dim0[34] = {
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,
+      790. ,  846.,  905.,  967., 1032., 1101., 1172., 1248., 1327., 1410.,
+      1497., 1588., 1784., 2116. };
+   const double dim1[31] = {
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,
+      790. ,  846.,  905.,  967., 1032., 1101., 1172., 1248., 1327., 1410.,
+      1784. };
+   const double dim2[28] = {
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,
+      790. ,  846.,  905.,  967., 1032., 1101., 1172., 1684. };
+   const double dim3[25] = {
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,
+      790. ,  846.,  905.,  967., 1248. };
+   const double dim4[20] = {
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  905. };
    for (int j=0; j<ndim1bins[0]+1; j++) {
       dim1bins[0][j] = dim0[j];
    }
@@ -381,9 +378,6 @@ void UserHHC::inittable(){
    }
    for (int j=0; j<ndim1bins[4]+1; j++) {
       dim1bins[4][j] = dim4[j];
-   }
-   for (int j=0; j<ndim1bins[5]+1; j++) {
-      dim1bins[5][j] = dim5[j];
    }
 
    cout << endl << "------------------------" << endl;
@@ -402,7 +396,7 @@ void UserHHC::inittable(){
    //     Default: divide by bin width in dim. 1 and dim. 2
    //     ATTENTION: Don't forget to include a factor of 2 e.g. for abs. rapidity |y| !
    //
-   //     fnl2342: Divide by bin width in pT (1st dimension) and y (2nd dimension)
+   //     fnl2332: Divide by bin width in pT (1st dimension) and y (2nd dimension)
    //
 
    int nbins = 0;   // --- count total No. bins
@@ -578,7 +572,6 @@ void UserHHC::inittable(){
 
    for(int i=0;i<A2->NObsBin;i++){
       int nxtot = 15;
-      if (i == ((A2->NObsBin)-1)) nxtot += 1; // Exceptional, don't use elsewhere
       B->Nxtot1.push_back(nxtot);
       double hxlim = -sqrt(-log10(xlim[i]));   // use value from Warm-Up run
       //printf("%d %g %g \n",i,pow(10,-pow(hxlim,2)),xlim[i]);
@@ -596,7 +589,7 @@ void UserHHC::inittable(){
    B->ScaleDescript.resize(B->NScaleDim);
 
    // --- fastNLO user: give the defined process scale a name and units
-   B->ScaleDescript[0].push_back("pT_jet_[GeV]");
+   B->ScaleDescript[0].push_back("pT_max_[GeV]");
    // --- fastNLO user: minimal number of scale nodes is 4
    B->Nscalenode.push_back(6); // number of scale nodes for pT
 
@@ -704,6 +697,7 @@ void UserHHC::writetable(){
       table->WriteBlockBDividebyN(i);
    }
    table->CloseFileWrite();
+
 }
 
 void UserHHC::end_of_event(){
