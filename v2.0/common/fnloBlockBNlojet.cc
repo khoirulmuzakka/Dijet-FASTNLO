@@ -25,7 +25,7 @@ fnloBlockBNlojet::fnloBlockBNlojet(fnloBlockA1 *blocka1, fnloBlockA2 *blocka2) :
 void fnloBlockBNlojet::FillEventDIS(int ObsBin, double x, double scale1, const nlo::amplitude_dis& amp, nlo::pdf_and_coupling_dis& pdf, double prefactor){
    fnloBlockA2 *A2 =  BlockA2;
 
-   if (Nscalenode[0]<4) {
+   if (this->IRef==0 && Nscalenode[0]<4) {
       cout << "fnloBlockBNlojet::FillEventDIS: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl;
       exit(1);
    }
@@ -1472,7 +1472,7 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    // ---
    // --- Some general input sanity checks, amp(pdf) checked further below
    // ---
-   if (Nscalenode[0]<4) {
+   if (this->IRef==0 && Nscalenode[0]<4) {
       cout << "fnloBlockBNlojet::FillEventHHC: ERROR! Minimal number of scalenodes is 4, Nscalenode[0] = " << Nscalenode[0] << endl;
       cout << "fnloBlockBNlojet::FillEventHHC: Aborting ..." << endl;
       exit(1);
