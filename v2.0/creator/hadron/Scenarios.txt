@@ -14,7 +14,7 @@ CMS Inclusive Jets 2010:
    fnl2342b ==> fnl1014 on HepForge
 
  - Updated code version:
-   v21: fnl2342b, rev. 1398
+   v21: fnl2342b, rev. 1403
 
  - Additional table:
    v21: fnl2342bptmax, rev. 1398: Scale pT_jet ==> pT_max
@@ -29,7 +29,7 @@ CMS Inclusive Jets 2011:
    v21: fnl2332d, rev. 1192
 
  - Updated code version:
-   v21: fnl2332d, rev. 1398
+   v21: fnl2332d, rev. 1403
 
  - Additional table:
    v21: fnl2332dptmax, rev. 1398: Scale pT_jet ==> pT_max
@@ -56,7 +56,7 @@ CMS Dijet Mass 2010:
    v21: fnl2412c, rev. 1006
 
  - Updated code version:
-   v21: fnl2412c, rev. 1401
+   v21: fnl2412c, rev. 1403
 
 
 CMS Dijet Mass 2011:
@@ -68,7 +68,7 @@ CMS Dijet Mass 2011:
    v21: fnl2412e, rev. 1172
 
  - Updated code version:
-   v21: fnl2412e, rev. 1401
+   v21: fnl2412e, rev. 1403
 
 
 CMS Dijet Mass 2012:

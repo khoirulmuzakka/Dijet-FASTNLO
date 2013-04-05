@@ -544,8 +544,7 @@ void UserHHC::inittable(){
          // Now read all limits
          int i = 0;
          while ( fgets(line,sizeof(line),infile) ) {
-            i++;
-            if (i > A2->NObsBin ) {
+            if (i == A2->NObsBin ) {
                cerr << "fastNLO: ERROR! Number of x limits exceed NObsBin: i = " << i << ", NObsBin = " << A2->NObsBin << endl;
                exit(1);
             }
@@ -556,6 +555,7 @@ void UserHHC::inittable(){
                printf("%s",line);
                exit(1);
             }
+            i++;
          }
          if (i != A2->NObsBin ) {
             cerr << "fastNLO: ERROR! Number of x limits read != NObsBin: i = " << i << ", NObsBin = " << A2->NObsBin << endl;
