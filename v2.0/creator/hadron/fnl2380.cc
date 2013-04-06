@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2370:
-//     ATLAS LHC Inclusive Jets R Difference Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.6, 0.4 in E-scheme
+// fastNLO v2 creator code for fnl2380:
+//     CMS LHC Inclusive Jets R Difference Scenario, E_cms = 7 TeV
+//     for fastjet anti-kT algo with R=0.7, 0.5 in E-scheme
 //     (numerator)
 //
 // ============== fastNLO user: ===================================
@@ -184,13 +184,13 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // --- fastNLO user: in this scenario run jet algo with two different jet sizes R
    const unsigned int nRjet = 2;
-   const double Rjet[nRjet] = { 0.6, 0.4 };
-   const int nbins = 16;
+   const double Rjet[nRjet] = { 0.7, 0.5 };
+   const int nbins = 36;
    if (nbins != A2->GetNObsBin()) {
       cout << "fastNLO: Error! Inconsistent binning, nbins = " << nbins << ", nobsbin = " << A2->GetNObsBin() << endl;
       exit(1);
    }
-   int nRdiff[nbins] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+   int nRdiff[nbins] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    for (unsigned int k=0; k<nRjet; k++) {
 
       // --- fastNLO user: set the jet size and run the jet algorithm
@@ -238,7 +238,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
       // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-      // fnl2370: Not required for inclusive jets
+      // fnl2380: Not required for inclusive jets
       //  static fNLOSorter SortJets;
       //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
@@ -317,19 +317,19 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2370");
+   A1->SetScenName("fnl2380");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("(d2sigma-jet-R=0.6_dpTdy-d2sigma-jet-R=0.4_dpTdy)_[pb_GeV]");
-   A2->ScDescript.push_back("ATLAS_Collaboration");
+   A2->ScDescript.push_back("(d2sigma-jet-R=0.7_dpTdy-d2sigma-jet-R=0.5_dpTdy)_[pb_GeV]");
+   A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("Inclusive_Jet_pT_R_Difference");
-   A2->ScDescript.push_back("anti-kT_R=0.6,0.4");
-   A2->ScDescript.push_back("Publ.:TBD");
+   A2->ScDescript.push_back("anti-kT_R=0.7,0.5");
+   A2->ScDescript.push_back("CMS-PAPER-SMP-13-002");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
@@ -351,9 +351,9 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: define the binning
    const int ndim2bins = 1;
-   const double dim2bins[ndim2bins+1] = { 0.0, 0.3 };
+   const double dim2bins[ndim2bins+1] = { 0.0, 0.5 };
 
-   const int ndim1bins[ndim2bins] = { 16 };
+   const int ndim1bins[ndim2bins] = { 36 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -367,8 +367,13 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[17] = { 20., 30., 45., 60., 80., 110., 160., 210., 260., 310.,
-                             400., 500., 600., 800., 1000., 1200., 1500. };
+
+   const double dim0[37] = {
+      49.  ,   56.,   64.,   74.,   84.,   97.,
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,
+      790. ,  846.,  905.,  967., 1032., 1101., 1172., 1248., 1327., 1410.,
+      2500. };
    for (int i=0; i<ndim2bins; i++) {
       for (int j=0; j<ndim1bins[i]+1; j++) {
          dim1bins[i][j] = dim0[j];

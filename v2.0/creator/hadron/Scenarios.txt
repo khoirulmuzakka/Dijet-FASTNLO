@@ -74,4 +74,19 @@ CMS Dijet Mass 2011:
 CMS Dijet Mass 2012:
 --------------------
  - Development versions:
-   v21: TBD
+   v21: fnl3412e
+
+
+ATLAS Inclusive Jets R Difference 2010:
+---------------------------------------
+ - Development versions:
+   v21: fnl2370, rev. 1391
+
+ - Updated code version:
+   v21: fnl2370, rev. 1404
+
+
+CMS Inclusive Jets R Difference 2011:
+-------------------------------------
+ - Development versions:
+   v21: fnl2380, rev. 1404
