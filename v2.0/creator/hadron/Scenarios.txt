@@ -74,7 +74,7 @@ CMS Dijet Mass 2011:
 CMS Dijet Mass 2012:
 --------------------
  - Development versions:
-   v21: fnl3412e
+   v21: fnl3412e, rev. 1405
 
 
 ATLAS Inclusive Jets R Difference 2010:
@@ -90,3 +90,4 @@ CMS Inclusive Jets R Difference 2011:
 -------------------------------------
  - Development versions:
    v21: fnl2380, rev. 1404
+        fnl2380ak05, fnl2380ak07, rev. 1407

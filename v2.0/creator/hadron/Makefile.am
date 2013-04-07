@@ -23,7 +23,7 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2912b.la libfnl2912h.la libfnl2912bptavm3.la
    lib_LTLIBRARIES += libfnl2912by0ptav.la libfnl2912by0m3.la libfnl2912by0ptavm3.la libfnl2912hy0ptav.la libfnl2912hy0m3.la libfnl2912hy0ptavm3.la libfnl2912by1ptav.la libfnl2912by1m3.la libfnl2912by1ptavm3.la libfnl2912hy1ptav.la libfnl2912hy1m3.la libfnl2912hy1ptavm3.la libfnl2912by2ptav.la
    lib_LTLIBRARIES += libfnl2932by0ptav.la libfnl2932by0m3.la libfnl2932by1ptav.la libfnl2932by1m3.la
-   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la
+   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 endif
 
 #
@@ -110,6 +110,8 @@ libfnl4332y6_la_SOURCES        = fnl4332y6.cc        $(AM_SOURCES)
 libfnl4350_la_SOURCES          = fnl4350.cc          $(AM_SOURCES)
 libfnl2370_la_SOURCES          = fnl2370.cc          $(AM_SOURCES)
 libfnl2380_la_SOURCES          = fnl2380.cc          $(AM_SOURCES)
+libfnl2380ak05_la_SOURCES      = fnl2380ak05.cc      $(AM_SOURCES)
+libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
 # v21
 libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
 libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
