@@ -27,6 +27,7 @@ CMS Inclusive Jets 2011:
 
  - Final version with exact binning:
    v21: fnl2332d, rev. 1192
+        fnl2332e, fnl2342e, rev 14??
 
  - Updated code version:
    v21: fnl2332d, rev. 1403
