@@ -6,6 +6,7 @@
 * ALLUNC - Program to derive all (PDF, statistical, algorithmic,
 *          scale ...) uncertainties using fastNLO tables
 *
+* 09.04.2013 kr: Write out killfile for largest fluctuations
 * 14.02.2013 kr: Improve PDF uncertainty setup
 * 13.08.2012 kr: Implement symmetrized eigen vector method,
 *                small bug fix in asymm. eigen vector method
@@ -17,7 +18,7 @@
       INCLUDE "uncert.inc"
       INCLUDE "v14unc.inc"
       CHARACTER*255 SCENARIO,TABPATH,TABNAME,REFNAME
-      CHARACTER*255 FILENAME,FILENAMES,HISTFILE
+      CHARACTER*255 FILENAME,FILENAMES,HISTFILE,KILLFILE
       CHARACTER*255 TABNAMN,FILENAMN
       CHARACTER*255 PDFNAM,PDFSET,PDFSET2,PDFPATH,LHAPDF,CHTMP
       CHARACTER*255 FILEBASE,LOFILE,NLOFILE
@@ -27,7 +28,7 @@
       CHARACTER*4 NO
       INTEGER BORNN,NLON
       INTEGER I,J,MYPDF,IPDF,IPDFUD,MYPDFAS,IOPDF,IOAS
-      INTEGER ITAB,NTAB,NFOUND,NFAIL
+      INTEGER ITAB,NTAB,NFOUND,NFAIL,IOPEN
       INTEGER ISTAT,ISCL,IORD,IORD2,IBIN,NBIN,ISUB,IRAP,IPT,NTMP
       INTEGER IHIST,IPHASE,ISTEP,IETYPE,NPDFMOD,NPDFPAR
       LOGICAL LONE,LPDF,LSTAT,LSER,LSCL,LRAT,LALG,LNRM,LTAB
@@ -36,7 +37,7 @@
       LOGICAL LLO,LNLO,LTHC1L,LTHC2L,LNPC1,LDATA
       DOUBLE PRECISION ALPS,FNALPHAS,ALPHASPDF,ASMZPDF,ASUP,ASDN
       DOUBLE PRECISION XMUR,XMUF,QLAM4,QLAM5,BWGT
-      DOUBLE PRECISION DSTMP(4)
+      DOUBLE PRECISION DSTMP(MXOBSBIN,4)
       DOUBLE PRECISION WTXTMP(MXOBSBIN,MXSUBPROC+1,NMAXORD+1)
       DOUBLE PRECISION WTXLTMP(MXOBSBIN,MXSUBPROC+1,NMAXORD+1)
       DOUBLE PRECISION WTXUTMP(MXOBSBIN,MXSUBPROC+1,NMAXORD+1)
@@ -1630,8 +1631,9 @@ ckr         XMUF = SCALEFAC(2,1,ISCL)
             NFAIL  = 0
             IPHASE  = 1
             IMODE   = 1
-ckr            IWEIGHT = 1
-            IWEIGHT = 0
+ckr Account for different event numbers in the merged tables
+            IWEIGHT = 1
+ckr            IWEIGHT = 0
 c - This is the normal table to fill the default values
             CALL FX9999IN(FILENAME)
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
@@ -1712,13 +1714,6 @@ c - These are the stat. tables to get the deviations
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Special statistics output
-
-ckr            WRITE(*,*
-ckr     >           )"\n *************************************************"
-ckr            WRITE(*,*)"ALLUNC: No looping over scales for order:",IORD
-ckr            WRITE(*,*
-ckr     >           )"*************************************************"
-
             WRITE(*,*)"========================================"//
      >           "===================================="//
      >           "=========================="//
@@ -1731,36 +1726,35 @@ ckr     >           )"*************************************************"
      >           "------------------------------------"//
      >           "--------------------------"//
      >           "---------------------------"
-
             IBIN = 0
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  DSTMP(3) = -1D0
-                  DSTMP(4) = -1D0
+                  DSTMP(IBIN,3) = -1D0
+                  DSTMP(IBIN,4) = -1D0
                   IF (MYRES(IBIN,NSBPRC+1,IORD2).GE.0.D0) THEN
-                     DSTMP(1) = (WTXMIN(IBIN,NSBPRC+1,IORD2)-1D0)
+                     DSTMP(IBIN,1) = (WTXMIN(IBIN,NSBPRC+1,IORD2)-1D0)
      >                    *100D0
-                     DSTMP(2) = (WTXMAX(IBIN,NSBPRC+1,IORD2)-1D0)
+                     DSTMP(IBIN,2) = (WTXMAX(IBIN,NSBPRC+1,IORD2)-1D0)
      >                    *100D0
                      IF (WTDXU2(IBIN,NSBPRC+1,IORD2).GT.1D-99) THEN
-                        DSTMP(3) =
+                        DSTMP(IBIN,3) =
      >                       (WTXMIN(IBIN,NSBPRC+1,IORD2)-1D0) /
      >                       WTDXU2(IBIN,NSBPRC+1,IORD2)
-                        DSTMP(4) =
+                        DSTMP(IBIN,4) =
      >                       (WTXMAX(IBIN,NSBPRC+1,IORD2)-1D0) /
      >                       WTDXU2(IBIN,NSBPRC+1,IORD2)
                      ENDIF
                   ELSE
-                     DSTMP(1) = (WTXMIN(IBIN,NSBPRC+1,IORD2)+1D0)
+                     DSTMP(IBIN,1) = (WTXMIN(IBIN,NSBPRC+1,IORD2)+1D0)
      >                    *100D0
-                     DSTMP(2) = (WTXMAX(IBIN,NSBPRC+1,IORD2)+1D0)
+                     DSTMP(IBIN,2) = (WTXMAX(IBIN,NSBPRC+1,IORD2)+1D0)
      >                    *100D0
                      IF (WTDXU2(IBIN,NSBPRC+1,IORD2).GT.1D-99) THEN
-                        DSTMP(3) =
+                        DSTMP(IBIN,3) =
      >                       (WTXMIN(IBIN,NSBPRC+1,IORD2)+1D0) /
      >                       WTDXU2(IBIN,NSBPRC+1,IORD2)
-                        DSTMP(4) =
+                        DSTMP(IBIN,4) =
      >                       (WTXMAX(IBIN,NSBPRC+1,IORD2)+1D0) /
      >                       WTDXU2(IBIN,NSBPRC+1,IORD2)
                      ENDIF
@@ -1774,11 +1768,62 @@ ckr     >           )"*************************************************"
      >                 WTXMAX(IBIN,NSBPRC+1,IORD2) *
      >                 DABS(MYRES(IBIN,NSBPRC+1,IORD2)),
      >                 WTDXMN(IBIN,NSBPRC+1,IORD2)*100D0,
-     >                 DSTMP(1),DSTMP(2),
-     >                 DSTMP(3),DSTMP(4)
+     >                 DSTMP(IBIN,1),DSTMP(IBIN,2),
+     >                 DSTMP(IBIN,3),DSTMP(IBIN,4)
                ENDDO
             ENDDO
 
+c - Write out list of files with largest fluctuations
+* ---
+* Could replace the DO 10 CONTINUE and GOTO with named DO-loop and CYCLE
+* here, but then the fixed-format source code doesn't work with emacs
+* f90-mode indentation :-(
+* ---
+            IOPEN = 0
+            KILLFILE = SCENARIO(1:LEN_TRIM(SCENARIO))//"_kill.txt"
+            IF (IORD.EQ.0) THEN
+               DO 10 ITAB=0,NTAB
+                  WRITE(NO,'(I4.4)'),ITAB
+                  FILENAMES = FILEBASE(1:LEN_TRIM(FILEBASE))//"2jet_"/
+     >                 /NO//".tab"
+                  OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
+                  IF (ISTAT.NE.0) THEN
+                     FILENAMES = FILEBASE(1:LEN_TRIM(FILEBASE))//"3jet_"
+     >                    //NO//".tab"
+                  ENDIF
+                  CLOSE(2)
+                  IBIN = 0
+                  DO IRAP=1,NRAP
+                     DO IPT=1,NPT(IRAP)
+                        IBIN = IBIN+1
+                        IF ((ITAB.EQ.IJMIN(IBIN).AND.
+     >                       DSTMP(IBIN,3).LE.-10D0).OR.
+     >                       (ITAB.EQ.IJMAX(IBIN).AND.
+     >                       DSTMP(IBIN,4).GE.10D0)) THEN
+                           IF (IOPEN.EQ.0) THEN
+                              OPEN(99,
+     >                             FILE=KILLFILE(1:LEN_TRIM(KILLFILE)),
+     >                             IOSTAT=ISTAT)
+                              IF (ISTAT.EQ.0) THEN
+                                 IOPEN = 1
+                              ELSE
+                                 WRITE(*,*)"ALLUNC: ERROR! Could not "//
+     >                                "open killfile, aborted!"
+                                 STOP
+                              ENDIF
+                           ENDIF
+                           WRITE(99,'(A)')
+     >                          FILENAMES(1:LEN_TRIM(FILENAMES))
+                           GOTO 10
+                           WRITE(99,'(A)')
+     >                          FILENAMES(1:LEN_TRIM(FILENAMES))
+                           GOTO 10
+                        ENDIF
+                     ENDDO
+                  ENDDO
+ 10            CONTINUE
+            ENDIF
+            IF (IOPEN.EQ.1) CLOSE(99)
 c - End special statistics output
 
 
