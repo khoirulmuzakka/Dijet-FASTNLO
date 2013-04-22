@@ -367,7 +367,6 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-
    const double dim0[37] = {
       49.  ,   56.,   64.,   74.,   84.,   97.,
       114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,

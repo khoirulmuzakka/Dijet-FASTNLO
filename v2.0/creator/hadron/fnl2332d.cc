@@ -151,7 +151,7 @@ void psinput(phasespace_hhc *ps, double& s)
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =   7617600.; // LHC HIpp base Run 2760 GeV
    s =  49000000.; // LHC First Run     7000 GeV
-   //s =  64000000.; // LHC Second Run     8000 GeV
+   //s =  64000000.; // LHC Second Run    8000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -398,7 +398,6 @@ void UserHHC::inittable(){
    //
    //     fnl2332: Divide by bin width in pT (1st dimension) and y (2nd dimension)
    //
-
    int nbins = 0;   // --- count total No. bins
    for (int i=0;i<ndim2bins;i++){
       for (int j=0;j<ndim1bins[i];j++){
@@ -697,7 +696,6 @@ void UserHHC::writetable(){
       table->WriteBlockBDividebyN(i);
    }
    table->CloseFileWrite();
-
 }
 
 void UserHHC::end_of_event(){

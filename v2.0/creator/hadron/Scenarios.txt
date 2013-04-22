@@ -30,7 +30,7 @@ CMS Inclusive Jets 2011:
         fnl2332e, fnl2342e, rev 14??
 
  - Updated code version:
-   v21: fnl2332d, rev. 1403
+   v21: fnl2332d, rev. 1412
 
  - Additional table:
    v21: fnl2332dptmax, rev. 1398: Scale pT_jet ==> pT_max
@@ -78,6 +78,28 @@ CMS Dijet Mass 2012:
    v21: fnl3412e, rev. 1405
 
 
+CMS 3-Jet Ratio 2011:
+---------------------
+ - Development versions:
+   v14: HCP2012: fnl2732numa, fnl2732dena
+
+ - Final versions with exact binning:
+   v14: fnl2732numa, fnl2732dena, rev. 1322
+   v21: fnl2732numa, fnl2732dena, rev. 1389
+
+ - Updated code version:
+   v21: fnl2732numa, fnl2732dena, rev. 1412
+
+
+CMS 3-Jet Mass 2011:
+--------------------
+ - Development versions:
+   v21: fnl2932by0m3, fnl2932by1m3, fnl2932by0ptav, fnl2932by1ptav
+
+ - Final versions with exact binning:
+   v21: fnl2932bm3, rev. 1412
+
+
 ATLAS Inclusive Jets R Difference 2010:
 ---------------------------------------
  - Development versions:
@@ -92,3 +114,6 @@ CMS Inclusive Jets R Difference 2011:
  - Development versions:
    v21: fnl2380, rev. 1404
         fnl2380ak05, fnl2380ak07, rev. 1407
+
+ - Updated code version:
+   v21: fnl2380, fnl2380ak05, fnl2380ak07, rev. 1412

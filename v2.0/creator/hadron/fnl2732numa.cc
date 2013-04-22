@@ -176,6 +176,7 @@ struct fNLOSorter {
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
+
    // --- fastNLO: Don't touch this piece of code!
    fnloBlockA2 *A2 =  table->GetBlockA2();
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
@@ -211,12 +212,13 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //     ATTENTION: Scales must always be in GeV!
 
    // --- declare and initialize phase space cut variables
+   // can partially be taken from table binning for this scenario
    // smallest |(pseudo-)rapidity| for jets to be considered
    const double yjmin  = 0.0;
    // largest |(pseudo-)rapidity| for jets to be considered
    const double yjmax  = 5.0;
    // lowest pT for jets to be considered
-   const double ptjmin = 150.;
+   const double ptjmin = A2->LoBin[0][0];
 
    // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
    static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -331,17 +333,18 @@ void UserHHC::inittable(){
    fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
+
    // --- fastNLO user: write up to 20 strings to describe the scenario
    A2->ScDescript.push_back("dsigma-jet3+_d<pT_1,2>_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Ratio_Numerator");
    A2->ScDescript.push_back("anti-kT_R=0.7");
-   A2->ScDescript.push_back("CMS-PAS-QCD-11-003");
+   A2->ScDescript.push_back("CMS-PAPER-QCD-11-003");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
-   A2->ScDescript.push_back("  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310");
+   A2->ScDescript.push_back("  D. Britzger, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1208.3641");
    A2->NScDescript = A2->ScDescript.size();
 
    A2->Ecms = GetEcms();
@@ -376,7 +379,7 @@ void UserHHC::inittable(){
       dim1bins[i].resize(ndim1bins[i]+1);
    }
    const double dim0[40] = {
-      150.,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
+      150. ,  175.,  200.,  225.,  250.,  275.,  300.,  330.,  360.,
       390. ,  420.,  450.,  480.,  510.,  540.,  570.,  600.,  640.,  680.,
       720. ,  760.,  800.,  850.,  900.,  950., 1000., 1060., 1120., 1180.,
       1250., 1320., 1390., 1460., 1530., 1600., 1680., 1760., 1840., 1920.,
@@ -549,6 +552,10 @@ void UserHHC::inittable(){
          // Now read all limits
          int i = 0;
          while ( fgets(line,sizeof(line),infile) ) {
+            if (i == A2->NObsBin ) {
+               cerr << "fastNLO: ERROR! Number of x limits exceed NObsBin: i = " << i << ", NObsBin = " << A2->NObsBin << endl;
+               exit(1);
+            }
             int nvar = sscanf(line,"      xlim[ %*u ] = %le , mulo[ %*u ] = %le , muup[ %*u ] = %le ;",
                               &xlim[i],&mulo[i],&muup[i]);
             if (nvar != 3) {
