@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2932bm3:
+// fastNLO v2 creator code for fnl2912bm3:
 //     CMS LHC 3-jet Mass Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.7 in E-scheme
+//     for fastjet anti-kT algo with R=0.5 in E-scheme
 //
 //
 // ============== fastNLO user: ===================================
@@ -183,7 +183,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
    // --- fastNLO user: set the jet size and run the jet algorithm
-   double jetsize = 0.7;
+   double jetsize = 0.5;
    pj = jetclus(p,jetsize);
    unsigned int nj = pj.upper();
 
@@ -325,7 +325,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2932bm3");
+   A1->SetScenName("fnl2912bm3");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
@@ -336,7 +336,7 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Mass");
-   A2->ScDescript.push_back("anti-kT_R=0.7");
+   A2->ScDescript.push_back("anti-kT_R=0.5");
    A2->ScDescript.push_back("CMS-PAPER-SMP-12-027");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
