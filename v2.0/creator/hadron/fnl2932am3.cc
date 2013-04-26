@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl2932bm3:
+// fastNLO v2 creator code for fnl2932am3:
 //     CMS LHC 3-jet Mass Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
@@ -248,7 +248,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // can partially be taken from table binning for this scenario
       const unsigned int nobs = A2->GetNObsBin();
       // minimum pT required for 3rd jet
-      const double pT3min = 100.;
+      const double pT3min = 150.;
       // minimal 3-jet mass for events to be considered
       double m3jmin = A2->LoBin[0][0];
       // maximal |y| of three leading jets
@@ -334,7 +334,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2932bm3");
+   A1->SetScenName("fnl2932am3");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();

@@ -1,9 +1,9 @@
 //
-// fastNLO v2 creator code for fnl2932bm3:
+// fastNLO v2 creator code for fnl2932bm3nf6:
 //     CMS LHC 3-jet Mass Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
-//
+//     Limit of M_top --> 0, i.e. N_f = 6
 // ============== fastNLO user: ===================================
 // To create your own scenario, it is recommended to take
 // this code, make a copy and edit the relevant changes.
@@ -137,7 +137,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    nj = 3U;
 
    // --- number of the up and down type flavours (don't touch)
-   nu = 2U;
+   nu = 3U;
    nd = 3U;
 }
 
@@ -279,14 +279,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          if ( doDebug ) {
             cout << "nj, njet, pT3, m3j, y3j: " << nj << ", " << njet << ", " << pT3 << ", " << m3j << ", " << y3j << endl;
             cout << "Event/jet accepted!" << endl;
+            cout << "==================== End of event ====================" << endl;
          }
 
          // --- set the renormalization and factorization scale to m3j / 2
          double mu = m3j / 2.;
-         if ( doDebug ) {
-            cout << "mu_r, mu_f = " << mu << endl;
-            cout << "==================== End of event ====================" << endl;
-         }
 
          // --- identify bin number (dim1,dim2) here (m3j,y3jmax)
          int obsbin = -1;
@@ -309,12 +306,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
                }
             }
          } // --- end: fill fastNLO array
-      } else {
-         // --- event rejected
-         if ( doDebug ) {
-            cout << "Event/jet rejected!" << endl;
-            cout << "==================== End of event ====================" << endl;
-         }
       } // --- end: event selection cuts
    } // --- end: 3+ jet event selection
 } // --- end: fastNLO user playground
@@ -334,7 +325,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2932bm3");
+   A1->SetScenName("fnl2932bm3nf6");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
@@ -346,6 +337,7 @@ void UserHHC::inittable(){
    A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("3-Jet_Mass");
    A2->ScDescript.push_back("anti-kT_R=0.7");
+   A2->ScDescript.push_back("M_top=0;N_f=6");
    A2->ScDescript.push_back("CMS-PAPER-SMP-12-027");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
