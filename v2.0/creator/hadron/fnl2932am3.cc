@@ -370,7 +370,7 @@ void UserHHC::inittable(){
    const int ndim2bins = 2;
    const double dim2bins[ndim2bins+1] = {0.0, 1.0, 2.0};
 
-   const int ndim1bins[ndim2bins] = { 37, 37 };
+   const int ndim1bins[ndim2bins] = { 34, 34 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -384,9 +384,9 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[38] = {
-      313.,   354.,  398.,  445.,  495.,  548.,  604.,  664.,  727.,  794.,
-      864.,   938., 1016., 1098., 1184., 1274., 1369., 1469., 1573., 1682.,
+   const double dim0[35] = {
+      445. ,  495.,  548.,  604.,  664.,  727.,  794.,
+      864. ,  938., 1016., 1098., 1184., 1274., 1369., 1469., 1573., 1682.,
       1796., 1916., 2041., 2172., 2309., 2452., 2602., 2758., 2921., 3092.,
       3270., 3456., 3650., 3852., 4063., 4283., 4513., 4753. };
    for (int i=0; i<ndim2bins; i++) {
