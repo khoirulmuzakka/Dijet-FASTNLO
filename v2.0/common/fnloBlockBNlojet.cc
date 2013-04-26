@@ -892,13 +892,6 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
    //
    // -------------------------------------------------------------------------- //
 
-   //static unsigned long counter = 0;
-   //    static double* axlo = NULL;
-   //    static double* a1lo = NULL;
-   //    static double* a1up = NULL;
-   //    static double* a2lo = NULL;
-   //    static double* a2up = NULL;
-
    // init arrays
    if ( counter == 0 ){
       axlo = new double[BlockA2->GetNObsBin()];
@@ -936,8 +929,10 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       printf("      // %16lu contributions (!= events) in warm-up run \n",counter);
       for (int i=0;i<BlockA2->GetNObsBin();i++){
          printf("      %s[ %d ] = %8.2e", sx.data(), i, axlo[i] ); // xmin
-         if ( a1lo[0] != 0 ) {     printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",     s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );  }
-         if ( a2lo[0] != 0 ) {     printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",     s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );  }
+         printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",    s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] ); // mu or scale1
+         if ( ! s2.empty() ) {
+            printf(" , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] ); // scale2 if used
+         }
          printf(" ;\n");
       }
 
@@ -951,8 +946,10 @@ void fnloBlockBNlojet::WarmUp( int ObsBin, double x, double M1, double M2, strin
       fprintf(ofile,"      // %16lu contributions (!= events) in warm-up run \n",counter);
       for (unsigned int i=0;i<BlockA2->GetNObsBin();i++){
          fprintf(ofile,"      %s[ %d ] = %8.2e", sx.data(), i, axlo[i] );
-         if ( a1lo[0] != 0 ) {     fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",     s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );  }
-         if ( a2lo[0] != 0 ) {     fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",     s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );  }
+         fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f",    s1.data(),  i, a1lo[i], s1.data(),  i, a1up[i] );
+         if ( ! s2.empty() ) {
+            fprintf(ofile," , %slo[ %d ] = %9.4f , %sup[ %d ] = %9.4f", s2.data(),  i, a2lo[i], s2.data(),  i, a2up[i] );
+         }
          fprintf(ofile," ;\n");
       }
       fclose(ofile);
