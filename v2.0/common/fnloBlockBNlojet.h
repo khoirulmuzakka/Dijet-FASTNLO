@@ -44,12 +44,12 @@ class fnloBlockBNlojet : public fnloBlockB {
    void SetWarmUpPrint( unsigned long PrintAfter ) { IWarmUpPrint = PrintAfter; };
    unsigned long GetWarmUpPrint() { return IWarmUpPrint; };
 
-private:
+ private:
    // This is for gammaP in ep, for NLOJET++ integration
    //
    //    gauss-legendre base point and weights
-   //    20 base point must be enough but if you 
-   //    think you need more fell free to change 
+   //    20 base point must be enough but if you
+   //    think you need more fell free to change
    double _M_xb[20], _M_wb[20];
    void _S_gauleg(unsigned int n, double *x, double *w);
 
@@ -67,13 +67,13 @@ private:
    double* a1up;
    double* a2lo;
    double* a2up;
-   
+
    void InitScaleNode( fnloBlockA2* A2, double* slo, double* shi, int iScale  );
-   double (fnloBlockBNlojet::*Fct_H_Scale[2])(double);		// functions (member-function pointers) for function in which the scales are binned
+   double (fnloBlockBNlojet::*Fct_H_Scale[2])(double);          // functions (member-function pointers) for function in which the scales are binned
    double (fnloBlockBNlojet::*Fct_H_Scale_Inv[2])(double);
-   double (fnloBlockBNlojet::*Fct_H_XNode)(double);		// functions (member-function pointers) for function in which the x-nodes are binned
+   double (fnloBlockBNlojet::*Fct_H_XNode)(double);             // functions (member-function pointers) for function in which the x-nodes are binned
    double (fnloBlockBNlojet::*Fct_H_XNode_Inv)(double);
-   double (*Fct_MuR_Ref[3])(double,double);				// function for calculating the scales for the reference cross sections
+   double (*Fct_MuR_Ref[3])(double,double);                             // function for calculating the scales for the reference cross sections
    double (*Fct_MuF_Ref[3])(double,double);
 
    double Function_loglog025( double mu );
@@ -84,8 +84,8 @@ private:
    double Function_log10_inv( double x );
    double Function_sqrtlog10( double x );
    double Function_sqrtlog10_inv( double x );
-   
-public:
+
+ public:
    // variables for warm-up run
    int IWarmUp;
    unsigned long IWarmUpCounter;
@@ -100,6 +100,5 @@ public:
    vector < double > scale2lo;
 
 };
-
 
 #endif
