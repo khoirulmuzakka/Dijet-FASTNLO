@@ -6,10 +6,10 @@
 !  If you do not want to modify a value, keep it empty
 !
 !
-!  Alternatively to this file, parameters can be passed to 
+!  Alternatively to this file, parameters can be passed to
 !  fnlo-modify via the command line, e.g.:
 !     fnlo-modify  InTable=fnl4242.tab
-!  which will overwrite the given 'InTable' value of 
+!  which will overwrite the given 'InTable' value of
 !  this steering file.
 !
 !  A different steering file can be specified via the command line
@@ -20,15 +20,15 @@
 !  E.g. if you want to modify the table version:
 !     fnlo-modify InTable=in.tab OutTable=out.tab Itabversion=30000
 !
-!  In order to change Scenario Description 
-!     AttachScDescription		true ! or false if you want to replace it
+!  In order to change Scenario Description
+!     AttachScDescription  true ! or false if you want to replace it
 !     ScDescript {
 !       "first line which is added"
 !       "Second line of the scen. desc"
 !       "Just attach any number of lines"
 !     }
-!  
-!  
+!
+!
 ! ------------------------------------------------------
 
 
@@ -37,19 +37,19 @@
 !   Input and output
 ! ------------------------
 
-!InTable				fnh5001.tab
-!OutTable			fnh5001_modified.tab
-InTable				../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2.tab
-OutTable			../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2_HS12.tab
+!InTable    fnh5001.tab
+!OutTable   fnh5001_modified.tab
+InTable    ../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2.tab
+OutTable   ../../creator/ep/finaltables/fnh501x_final_3jetdPtdQ2_HS12.tab
 
 ! ------------------------
 !   Programm steering
 ! ------------------------
-PrintSteeringCard		true
-PrintInputA1			false
-PrintInputA2			false
-PrintOutputA1			false
-PrintOutputA2			false
+PrintSteeringCard  true
+PrintInputA1    false
+PrintInputA2    false
+PrintOutputA1   false
+PrintOutputA2   false
 
 
 
@@ -59,8 +59,8 @@ PrintOutputA2			false
 !   Block A1
 !   Leave value empty for no modification
 ! ------------------------------------
-Itabversion			
-ScenName			
+Itabversion
+ScenName
 
 
 
@@ -68,12 +68,12 @@ ScenName
 ! ------------------------------------
 !   Block A2
 ! ------------------------------------
-	
-Ipublunits			
-ILOord				
-Ecms				
 
-AttachScDescription		true
+Ipublunits
+ILOord
+Ecms
+
+AttachScDescription   true
 ScDescript {
 !   "first line which is added"
 !   "Second line of the scen. desc"
@@ -85,11 +85,11 @@ ScDescript {
 ! ------------------------------------
 !   Remove Bins
 !     Specify bin numbers to be removed
-!     within curly brackets. 
-!     First bin is bin 1. 
+!     within curly brackets.
+!     First bin is bin 1.
 !     Please use increasing bin numbering !!
 ! ------------------------------------
-RemoveBins {		!  Please use increasing bin numbering !!
+RemoveBins {   !  Please use increasing bin numbering !!
 !  5 6 7 8 40 41 42 43
 !  102 105
 !  104
@@ -100,6 +100,5 @@ RemoveBins {		!  Please use increasing bin numbering !!
 !   Multiplicative factors
 !     Specify Multiplicative factor for each bin
 ! ------------------------------------
-MultFac { 
+MultFac {
 }
-

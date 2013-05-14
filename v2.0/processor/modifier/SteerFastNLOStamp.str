@@ -2,10 +2,10 @@
 !  Steer file for program
 !     fnlo-modify
 !
-!  Alternatively, parameters can be passed to 
+!  Alternatively, parameters can be passed to
 !  fnlo-modify via the command line, e.g.:
 !     fnlo-modify  InTable=fnl4242.tab
-!  which will overwrite the given InTable value of 
+!  which will overwrite the given InTable value of
 !  this file
 !
 !  Another SteerFile can be specified via the command line
@@ -18,15 +18,15 @@
 !  E.g. if you want to modify the table version:
 !     fnlo-modify InTable=in.tab OutTable-out.tab Itabversion=30000
 !
-!  In order to change Scenario Description 
-!     AttachScDescription		true ! or false if you want to replace it
+!  In order to change Scenario Description
+!     AttachScDescription   true ! or false if you want to replace it
 !     ScDescript {
 !       "first line which is added"
 !       "Second line of the scen. desc"
 !       "Just attach any number of lines"
 !     }
-!  
-!  
+!
+!
 ! ------------------------------------------------------
 
 
@@ -35,18 +35,18 @@
 !   Input and output
 ! ------------------------
 
-InTable				InTable.tab
-OutTable			OutTable.tab
+InTable    InTable.tab
+OutTable   OutTable.tab
 
 
 ! ------------------------
 !   Programm steering
 ! ------------------------
-PrintSteeringCard		true
-PrintInputA1			false 
-PrintInputA2			false 
-PrintOutputA1			false 
-PrintOutputA2			false 
+PrintSteeringCard   true
+PrintInputA1        false
+PrintInputA2        false
+PrintOutputA1       false
+PrintOutputA2       false
 
 
 
@@ -56,24 +56,21 @@ PrintOutputA2			false
 !   Block A1
 !   Leave value empty for no modification
 ! ------------------------------------
-Itabversion			
-ScenName			
+Itabversion
+ScenName
 
 ! ------------------------------------
 !   Block A1
 ! ------------------------------------
-	
-Ipublunits			
-ILOord				
-Ecms				
 
-AttachScDescription		true
+Ipublunits
+ILOord
+Ecms
+
+AttachScDescription   true
 ScDescript {
-	"provided by:"
-	"fastNLO Collaboration"
-	"If you use this table, please cite:"
-	"  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
+   "provided by:"
+   "fastNLO Collaboration"
+   "If you use this table, please cite:"
+   "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
-
-
-
