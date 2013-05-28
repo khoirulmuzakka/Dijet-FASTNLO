@@ -102,11 +102,17 @@ CMS 3-Jet Mass 2011:
 
  - Additional tables:
    v21: fnl2912bm3, rev. 1412:    R      = 0.5
-        fnl2932am3, rev. 1416:    pT3min = 150.
+        fnl2932am3, rev. 1417:    pT3min = 150.
         fnl2932bm3nf6, rev. 1414: Nf     = 6
 
  - Updated code versions:
    v21: fnl2932bm3, rev. 1416
+
+
+CMS 3-Jet Vars 2011:
+--------------------
+ - Development versions:
+   v21: fnl2950m3
 
 
 ATLAS Inclusive Jets R Difference 2010:

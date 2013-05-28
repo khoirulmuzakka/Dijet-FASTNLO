@@ -4,27 +4,27 @@ AUTOMAKE_OPTIONS = gnu
 # The main targets, here the libtool plugin libraries to build
 # TBD: Better select the "main" targets ...
 # TBD: Uncomment here or below to install additional scenarios
-lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
+#lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #
 if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2222b.la
-   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la libfnl2352.la
-   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
+#   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la libfnl2352.la
+#   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
 #   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
-   lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la
-   lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la libfnl2332dptmax.la libfnl2332dnf6.la
-   lib_LTLIBRARIES += libfnl3332y0.la libfnl3332y1.la libfnl3332y2.la libfnl3332y3.la libfnl3332y4.la libfnl3332y5.la libfnl3332y6.la
-   lib_LTLIBRARIES += libfnl4332y0.la libfnl4332y1.la libfnl4332y2.la libfnl4332y3.la libfnl4332y4.la libfnl4332y5.la libfnl4332y6.la libfnl4350.la
-   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
-   lib_LTLIBRARIES += libfnl2732dena.la libfnl2732denb.la libfnl2732denk.la libfnl2732denl.la
-   lib_LTLIBRARIES += libfnl2732numa.la libfnl2732numb.la libfnl2732numk.la libfnl2732numl.la
+#   lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la
+#   lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la libfnl2332dptmax.la libfnl2332dnf6.la
+#   lib_LTLIBRARIES += libfnl3332y0.la libfnl3332y1.la libfnl3332y2.la libfnl3332y3.la libfnl3332y4.la libfnl3332y5.la libfnl3332y6.la
+#   lib_LTLIBRARIES += libfnl4332y0.la libfnl4332y1.la libfnl4332y2.la libfnl4332y3.la libfnl4332y4.la libfnl4332y5.la libfnl4332y6.la libfnl4350.la
+#   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
+#   lib_LTLIBRARIES += libfnl2732dena.la libfnl2732denb.la libfnl2732denk.la libfnl2732denl.la
+#   lib_LTLIBRARIES += libfnl2732numa.la libfnl2732numb.la libfnl2732numk.la libfnl2732numl.la
 #   lib_LTLIBRARIES += libfnl2912b.la libfnl2912h.la libfnl2912bptavm3.la
 #   lib_LTLIBRARIES += libfnl2912by0ptav.la libfnl2912by0m3.la libfnl2912by0ptavm3.la libfnl2912hy0ptav.la libfnl2912hy0m3.la libfnl2912hy0ptavm3.la libfnl2912by1ptav.la libfnl2912by1m3.la libfnl2912by1ptavm3.la libfnl2912hy1ptav.la libfnl2912hy1m3.la libfnl2912hy1ptavm3.la libfnl2912by2ptav.la libfnl2932by0ptav.la libfnl2932by0m3.la libfnl2932by1ptav.la libfnl2932by1m3.la
-   lib_LTLIBRARIES += libfnl2912bm3.la libfnl2932am3.la libfnl2932bm3.la libfnl2932bm3nf6.la
-   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
-   lib_LTLIBRARIES += libfnl3var.la
+#   lib_LTLIBRARIES += libfnl2912bm3.la libfnl2932am3.la libfnl2932bm3.la libfnl2932bm3nf6.la
+#   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
+   lib_LTLIBRARIES = libfnl2950m3.la
 endif
 
 #
@@ -118,7 +118,7 @@ libfnl2370_la_SOURCES          = fnl2370.cc          $(AM_SOURCES)
 libfnl2380_la_SOURCES          = fnl2380.cc          $(AM_SOURCES)
 libfnl2380ak05_la_SOURCES      = fnl2380ak05.cc      $(AM_SOURCES)
 libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
-libfnl3var_la_SOURCES          = fnl3var.cc          $(AM_SOURCES)
+libfnl2950m3_la_SOURCES        = fnl2950m3.cc        $(AM_SOURCES)
 # v21
 libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
 libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
