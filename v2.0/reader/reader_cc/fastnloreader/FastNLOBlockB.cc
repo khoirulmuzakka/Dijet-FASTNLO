@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include "fastnlo/FastNLOBlockB.h"
+#include "fastnlo/speaker.h"
 
 using namespace std;
 
@@ -61,7 +62,8 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
    *table >> NScaleDep;
    int NContrDescr;
    *table >> NContrDescr;
-   // printf("# FastNLOBlockB::Read(): IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
+   //say::debug["FastNLOBlockB::ReadBlockB"]<<endl;
+   // printf(" # FastNLOBlockB::Read(): IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
    //     IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
    CtrbDescript.resize(NContrDescr);
    char buffer[257];

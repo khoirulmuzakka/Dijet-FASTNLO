@@ -624,21 +624,21 @@ void FastNLOReader::ReadTable(void) {
       } else if (blockb->IRef == 0 && !blockb->IAddMultFlag) { // Additive corrections
          if (blockb->IContrFlag1==1) {   // Fixed order
             if (blockb->IContrFlag2==1) {  // LO
-               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->IContrFlag2-1].c_str(),fNSDep[blockb->NScaleDep].c_str());
                blockb->SetName(nbuf);
                BlockB_LO  = blockb;
             } else if (blockb->IContrFlag2==2) { //NLO
-               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->IContrFlag2-1].c_str(),fNSDep[blockb->NScaleDep].c_str());
                blockb->SetName(nbuf);
                BlockB_NLO = blockb;
             }
          } else if (blockb->IContrFlag1==2) { // Threshold corrections
             if (blockb->IContrFlag2==1) {  // 1-loop
-               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->IContrFlag2-1].c_str(),fNSDep[blockb->NScaleDep].c_str());
                blockb->SetName(nbuf);
                BlockB_THC1 = blockb;
             } else if (blockb->IContrFlag2==2) { // 2-loop
-               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->Npow-ILOord].c_str(),fNSDep[blockb->NScaleDep].c_str());
+               sprintf(nbuf,"BlockB. %s %s %s",fContrName[blockb->IContrFlag1-1].c_str(),fOrdName[blockb->IContrFlag1-1][blockb->IContrFlag2-1].c_str(),fNSDep[blockb->NScaleDep].c_str());
                blockb->SetName(nbuf);
                BlockB_THC2 = blockb;
             } else {
@@ -676,13 +676,13 @@ void FastNLOReader::ReadTable(void) {
    }
 
    // Assign THC, switch off by default
-   if (BlockB_THC2) {
-      BBlocksSMCalc[BlockB_THC2->IContrFlag1-1].push_back(BlockB_THC2);
-      bUseSMCalc[BlockB_THC2->IContrFlag1-1].push_back(false);
-   }
    if (BlockB_THC1) {
       BBlocksSMCalc[BlockB_THC1->IContrFlag1-1].push_back(BlockB_THC1);
       bUseSMCalc[BlockB_THC1->IContrFlag1-1].push_back(false);
+   }
+   if (BlockB_THC2) {
+      BBlocksSMCalc[BlockB_THC2->IContrFlag1-1].push_back(BlockB_THC2);
+      bUseSMCalc[BlockB_THC2->IContrFlag1-1].push_back(false);
    }
 
    // Assign fixed order calculations (LO must be [0]), switch on by default
@@ -785,12 +785,42 @@ void FastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
        <<" with Id="<<Id<<endl;
 
    if (!bUseSMCalc[eCalc][Id] && SetOn) {
-      debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
       if (!BBlocksSMCalc[eCalc][Id]->IAddMultFlag) {
-         if (!GetIsFlexibleScaleTable())
+         // Fill alpha_s cache
+         debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
+         if (!GetIsFlexibleScaleTable()) {
             FillAlphasCacheInBlockBv20(BBlocksSMCalc[eCalc][Id]);
-         else
+         } else {
             FillAlphasCacheInBlockBv21(BBlocksSMCalc[eCalc][Id]);
+         }
+         // Fill PDF cache
+         debug["SetContributionON"]<<"Call FillPDFCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
+         // linear: DIS-case
+         // ---- DIS ---- //
+         if (BBlocksSMCalc[eCalc][Id]->IPDFdef1 == 2) {
+            if (BBlocksSMCalc[eCalc][Id]->NPDFDim == 0) {
+               if (!GetIsFlexibleScaleTable()) {
+                  FillBlockBPDFLCsDISv20(BBlocksSMCalc[eCalc][Id]);
+               } else {
+                  FillBlockBPDFLCsDISv21(BBlocksSMCalc[eCalc][Id]);
+               }
+            }
+         }
+         // ---- pp ---- //
+         else if (BBlocksSMCalc[eCalc][Id]->IPDFdef1 == 3) {
+            if (BBlocksSMCalc[eCalc][Id]->NPDFDim == 1) {
+               if (!GetIsFlexibleScaleTable()) {
+                  FillBlockBPDFLCsHHCv20(BBlocksSMCalc[eCalc][Id]);
+               } else {
+                  FillBlockBPDFLCsHHCv21(BBlocksSMCalc[eCalc][Id]);
+               }
+            } else {
+               error<<"Only half matrices for hh is implemented.\n";
+               exit(1);
+            }
+         } else {
+            error<<"Tables not yet implemented.\n";
+         }
       }
    }
    // set the new value
@@ -1722,10 +1752,11 @@ void FastNLOReader::CalcCrossSection() {
       if (!BBlocksSMCalc[j].empty()) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
             if (bUseSMCalc[j][i] && !BBlocksSMCalc[j][i]->IAddMultFlag) {
-               if (!GetIsFlexibleScaleTable())
+               if (!GetIsFlexibleScaleTable()) {
                   CalcCrossSectionv20(BBlocksSMCalc[j][i]);
-               else
+               } else {
                   CalcCrossSectionv21(BBlocksSMCalc[j][i]);
+               }
             }
          }
       }
@@ -1875,6 +1906,8 @@ void FastNLOReader::CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO) {
       for (int j=0; j<B->GetTotalScalenodes(); j++) {
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<B->NSubproc; l++) {
+               // cout << "CKR: i,j,k,l = " << i << ", " << j << ", " << k << ", " << l << endl;
+               // cout << "CKR: sigmatilde, as2pi, pdf, unit = " << B->SigmaTilde[i][scaleVar][j][k][l] << ",  " << B->AlphasTwoPi_v20[i][j] << ", " << B->PdfLc[i][j][k][l] << ", " << unit << endl;
                double xsci     = B->SigmaTilde[i][scaleVar][j][k][l] *  B->AlphasTwoPi_v20[i][j]  *  B->PdfLc[i][j][k][l] * unit;
                double scalefac = fScaleFacMuR/B->ScaleFac[0][scaleVar];
                double mur      = scalefac * B->ScaleNode[i][0][scaleVar][j];
@@ -2156,14 +2189,14 @@ void FastNLOReader::FillPDFCache(double chksum) {
                   if (BBlocksSMCalc[j][i]->IPDFdef1 == 2) {
                      if (BBlocksSMCalc[j][i]->NPDFDim == 0) {
                         if (!GetIsFlexibleScaleTable()) FillBlockBPDFLCsDISv20(BBlocksSMCalc[j][i]);
-                        else if (GetIsFlexibleScaleTable())   FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
+                        else FillBlockBPDFLCsDISv21(BBlocksSMCalc[j][i]);
                      }
                   }
                   // ---- pp ---- //
                   else if (BBlocksSMCalc[j][i]->IPDFdef1 == 3) {
                      if (BBlocksSMCalc[j][i]->NPDFDim == 1) {
                         if (!GetIsFlexibleScaleTable()) FillBlockBPDFLCsHHCv20(BBlocksSMCalc[j][i]);
-                        else                                            FillBlockBPDFLCsHHCv21(BBlocksSMCalc[j][i]);
+                        else FillBlockBPDFLCsHHCv21(BBlocksSMCalc[j][i]);
                      } else {
                         error<<"Only half matrices for hh is implemented.\n";
                         exit(1);
