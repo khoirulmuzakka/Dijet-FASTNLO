@@ -39,7 +39,7 @@ c - If all weights are identical this has to cancel out completely
       IF (FIRST) THEN
          FIRST = .FALSE.
 c - This is the order counting in fnx9999 common ...
-         IF (NORD.GT.2) THEN
+         IF (NORD.GT.3) THEN
             WRITE(*,*)"UNCERT: ERROR! Orders higher than ",NORD,
      >           " are currently not supported with LSTAT, stopped!"
             STOP
@@ -401,8 +401,9 @@ cdebug
       CHARACTER*255 SCENARIO
       INCLUDE "fnx9999.inc"
       INCLUDE "uncert.inc"
-      INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM
+      INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM,ITMP
       INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSBPRCN
+      DOUBLE PRECISION DTMP
 
 
 
@@ -468,9 +469,11 @@ ckr                        IF (IPT.EQ.1) THEN
                               MYTMP(IBIN,ISUB,IORD) =
      >                             RESULT(IBIN,ISUB,IORD)
                            ELSE
-                              MYTMP(IBIN,ISUB,IORD) =
-     >                             (RESULT(IBIN,ISUB,1) +
-     >                             RESULT(IBIN,ISUB,2))
+                              DTMP = 0D0
+                              DO ITMP=1,NORDN
+                                 DTMP = DTMP + RESULT(IBIN,ISUB,ITMP)
+                              ENDDO
+                              MYTMP(IBIN,ISUB,IORD) = DTMP
                            ENDIF
 ckr                        ENDIF
                            IF (IPT.EQ.13) THEN
@@ -518,9 +521,11 @@ ckr Counter for bin containing normalization factor
                               MYTMP(IBIN,ISUB,IORD) =
      >                             RESULT(IBIN,ISUB,IORD)
                            ELSE
-                              MYTMP(IBIN,ISUB,IORD) =
-     >                             (RESULT(IBIN,ISUB,1) +
-     >                             RESULT(IBIN,ISUB,2))
+                              DTMP = 0D0
+                              DO ITMP=1,NORDN
+                                 DTMP = DTMP + RESULT(IBIN,ISUB,ITMP)
+                              ENDDO
+                              MYTMP(IBIN,ISUB,IORD) = DTMP
                            ENDIF
                         ENDIF
                      ENDDO
@@ -570,9 +575,12 @@ ckr Counter for bin containing normalization factor
      >                             MYRES(IBIN+NBIN,ISUB,IORD)
                            ENDIF
                         ELSE
+                           DTMP = 0D0
+                           DO ITMP=1,NORDN
+                              DTMP = DTMP + RESULT(IBIN,ISUB,ITMP)
+                           ENDDO
                            MYRES(IBIN+NBIN,ISUB,IORD) =
-     >                          1D0/(RESULT(IBINN,ISUB,1) +
-     >                          RESULT(IBINN,ISUB,2))
+     >                          1D0 / DTMP
                            IF (ISTEP.EQ.1) THEN
                               MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                             MYRES(IBIN+NBIN,ISUB,IORD)
@@ -615,10 +623,13 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
      >                             RESULT(IBIN,ISUB,IORD) *
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ELSE
+                              DTMP = 0D0
+                              DO ITMP=1,NORDN
+                                 DTMP = DTMP + RESULT(IBIN,ISUB,ITMP)
+                              ENDDO
                               MYTMP(IRAP,ISUB,IORD) =
      >                             MYTMP(IRAP,ISUB,IORD) +
-     >                             (RESULT(IBIN,ISUB,1) +
-     >                             RESULT(IBIN,ISUB,2)) *
+     >                             DTMP *
      >                             (PTBIN(IRAP,IPT+1)-PTBIN(IRAP,IPT))
                            ENDIF
                         ENDIF
@@ -679,9 +690,12 @@ ckr Attention: For CMS Publ. normalize only up to 16 in Chi like in exp. analysi
      >                             MYRES(IBIN+NBIN,ISUB,IORD)
                            ENDIF
                         ELSE
+                           DTMP = 0D0
+                           DO ITMP=1,NORDN
+                              DTMP = DTMP + RESULT(IBIN,ISUB,ITMP)
+                           ENDDO
                            MYRES(IBIN+NBIN,ISUB,IORD) =
-     >                          1D0/(RESULT(IBIN,ISUB,1) +
-     >                          RESULT(IBIN,ISUB,2))
+     >                          1D0 / DTMP
                            IF (ISTEP.EQ.1) THEN
                               MYRESN(IBIN+NBIN,ISUB,IORD) =
      >                             MYRES(IBIN+NBIN,ISUB,IORD)

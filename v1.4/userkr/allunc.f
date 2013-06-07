@@ -619,6 +619,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900  FORMAT(1P,I5,3(6X,E18.11))
  901  FORMAT(1P,I5,2(6X,E18.11))
  902  FORMAT(3I6,3E16.5,5(F10.3,3X))
+ 910  FORMAT(1P,I5,3(6X,E18.11),0P,1(3X,F9.5))
+ 920  FORMAT(1P,I5,3(6X,E18.11),0P,2(3X,F9.5))
 
 *---  Look for pointers matching requested scale settings
       DO ISCL=1,NSCLS
@@ -718,9 +720,12 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             ENDIF
             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
             ISTEP = 0
-            IF (IDEBUG.GT.0)
-     >           WRITE(*,*)"DEBUG1: AAA ALLUNC STEP = ",
-     >           ISTEP
+            IF (IDEBUG.GT.0) THEN
+               WRITE(*,*)"DEBUG1: AAA ALLUNC STEP = ",
+     >              ISTEP
+               WRITE(*,*)"DEBUG1: AAA ALLUNC XSECT0(1,1:3) =",
+     >              XSECT0(1,1),XSECT0(1,2),XSECT0(1,3)
+            ENDIF
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -1004,9 +1009,28 @@ c - Give some standard output, fill histograms
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
+                  IF (NORD.EQ.1) THEN
+                     WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1)
+                  ELSEIF (NORD.EQ.2) THEN
+                     WRITE(*,910) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1),
+     >                    MYRESN(IBIN,NSUBPROC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2))
+                  ELSEIF (NORD.EQ.3) THEN
+                     WRITE(*,920) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1),
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2)) /
+     >                    MYRESN(IBIN,NSUBPROC+1,1),
+     >                    MYRESN(IBIN,NSUBPROC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2))
+                  ENDIF
                ENDDO
             ENDDO
 

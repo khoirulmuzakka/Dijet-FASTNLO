@@ -281,7 +281,10 @@ c - Sum subprocesses / fill result array / fill 'XSECT' array
 ckr DEBUG
 Comment:       DO NBIN=1,NBINTOT
 Comment:          WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
-Comment:      >        nbin,0,xsect(nbin,1)+xsect(nbin,2)
+Comment:      >        nbin,0,xsect(nbin,1)+xsect(nbin,2)+xsect(nbin,3)
+Comment:          WRITE(*,*)"FX9999CC: IOBS,ICONTR,KTHC: ",
+Comment:      >        nbin,0,(xsect(nbin,1)+xsect(nbin,2)+xsect(nbin,3)) /
+Comment:      >        (xsect(nbin,1)+xsect(nbin,2))
 Comment:          DO IORD=1,NORD
 Comment:             WRITE(*,*)"FX9999CC: IOBS,ICONTR,XSECT: ",
 Comment:      >           nbin,iord,xsect(nbin,iord)
@@ -1037,7 +1040,7 @@ c   -----------------------------------
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
       INTEGER I,J,K
-      CHARACTER*80 CHTMP,CTRBDESCRIPT(2,1)
+      CHARACTER*80 CHTMP,CTRBDESCRIPT(3,1)
       CHARACTER*(*) SCENNAME
       INTEGER NSCALEDIM(2)
 
@@ -1077,6 +1080,7 @@ c   -----------------------------------
       WRITE(*,'(A,I1)')" # No. of contributions: ",NORD
       CTRBDESCRIPT(1,1) = "LO"
       CTRBDESCRIPT(2,1) = "NLO"
+      CTRBDESCRIPT(3,1) = "THC2"
       DO I=1,NORD
          WRITE(*,'(A,I1,A)')" # Contribution ",I,":"
          CHTMP = CTRBDESCRIPT(I,1)
