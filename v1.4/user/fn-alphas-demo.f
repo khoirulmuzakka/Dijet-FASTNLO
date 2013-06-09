@@ -18,7 +18,7 @@
       DOUBLE PRECISION B0, B1, B10 , PI4, F, FP,FM,
      +     ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2
       INTEGER  NLOOP, NF, IFIRST, I
-ckr 30.01.2008: Initialize Z mass in double precision 
+ckr 30.01.2008: Initialize Z mass in double precision
 ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
       PARAMETER (ZMASS = 91.187D0)
       SAVE IFIRST, NF, PI4, B0, B1, B10, ZMASS2
@@ -48,29 +48,29 @@ c         WRITE(*,*) '  *   ALPS_IT:  exact 2-loop result for alpha_s'
 
 c - exact formula to extract Lambda from alpha_s(Mz)
       Q2 = MU**2
-      LAM2 = ZMASS2 * EXP( -PI4/B0/ALPSMZ + 
+      LAM2 = ZMASS2 * EXP( -PI4/B0/ALPSMZ +
      +     B10 * DLOG( PI4/B0/ALPSMZ + B10) )
 
-c - extract approx. alpha_s(mu) value 
-      LQ2 = DLOG( Q2 / LAM2 ) 
+c - extract approx. alpha_s(mu) value
+      LQ2 = DLOG( Q2 / LAM2 )
       ASAPPROX = PI4/B0/LQ2 * (1D0 - B10*DLOG(LQ2)/LQ2)
       ALPHAS = ASAPPROX
 
 c - exact 2loop value by Newton procedure
       DO I=1,6
          F  = LQ2 - PI4/B0/ALPHAS + B10*DLOG(PI4/B0/ALPHAS + B10)
-         FP = - PI4/B0/(ALPHAS*1.01D0) + 
+         FP = - PI4/B0/(ALPHAS*1.01D0) +
      +        B10 * DLOG(PI4/B0/(ALPHAS*1.01D0) + B10)
-         FM = - PI4/B0/(ALPHAS*0.99D0) + 
+         FM = - PI4/B0/(ALPHAS*0.99D0) +
      +        B10 * DLOG(PI4/B0/(ALPHAS*0.99D0) + B10)
-         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
+         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS
 c      WRITE(*,*) ' LAMDA/a_s_approx/a_s = ',sqrt(lam2),ASAPPROX,ALPHAS
       ENDDO
 
 c - that's it!
       ALPS_IT = ALPHAS
 
-      RETURN 
+      RETURN
       END
 
 C --------------------------------------------------------------------
@@ -86,7 +86,7 @@ C --------------------------------------------------------------------
      +     ONED, ZMASS, ZMASS2, ALPHAS, ASAPPROX, Q2, LAM2, LQ2,
      +     MUCACHE,ASCACHE,ASMZCACHE
       INTEGER  NLOOP, NF, IFIRST, I
-ckr 30.01.2008: Initialize Z mass in double precision 
+ckr 30.01.2008: Initialize Z mass in double precision
 ckr      PARAMETER (ZMASS = 91.187)        ! PDG data book '98
       PARAMETER (ZMASS = 91.187D0)
       SAVE IFIRST, NF, ONED, PI4, B0, B1, B10, ZMASS2, ASCACHE,
@@ -122,7 +122,7 @@ c - exact formula -> extract Lambda from alpha_s(Mz)
       LAM2 = ZMASS2 / DEXP(FBETA(ALPSMZ))
 
 c - extract approx alpha_s(mu) value - 2 loop approx is fine
-      LL2 = ZMASS2 * DEXP( -PI4/B0/ALPSMZ + 
+      LL2 = ZMASS2 * DEXP( -PI4/B0/ALPSMZ +
      +     B10 * DLOG( PI4/B0/ALPSMZ + B10) )
       LQ2 = DLOG( Q2 / LL2 )
       ASAPPROX = PI4/B0/LQ2 * (ONED - B10*DLOG(LQ2)/LQ2)
@@ -133,7 +133,7 @@ c - exact 4-loop value by Newton procedure
          F  = DLOG(Q2/LAM2) - FBETA(ALPHAS)
          FP = - FBETA(ALPHAS*1.01D0)
          FM = - FBETA(ALPHAS*0.99D0)
-         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS 
+         ALPHAS = ALPHAS - F/(FP-FM)*0.02D0*ALPHAS
 c         WRITE(*,*) ' i,alphas,q2 = ',i,alphas,real(q2)
       ENDDO
 
@@ -143,7 +143,7 @@ c - that's it - modify cache - set function - return
       ASCACHE = ALPHAS
       ALPS4_IT = ALPHAS
 
-      RETURN 
+      RETURN
       END
 
 C ------------------------------------------------------------------
@@ -167,9 +167,9 @@ c - initialize pi and beta functions
          ZETA3 = 1.202056903D0
          B0  = (11D0 - 2D0/3D0 * DBLE(NF)) / 4D0
          B1  = (102D0 - 38D0 / 3D0 * DBLE(NF)) /16D0
-         B2  = (2857D0/2D0 - 5033D0/18D0*DBLE(NF) + 
+         B2  = (2857D0/2D0 - 5033D0/18D0*DBLE(NF) +
      +        325D0/54D0*DBLE(NF)**2) / 64D0
-         B3  = ((149753D0/6D0 + 3564D0*ZETA3) - 
+         B3  = ((149753D0/6D0 + 3564D0*ZETA3) -
      +        (1078361D0/162D0 + 6508D0/27D0*ZETA3) * DBLE(NF) +
      +        (50065D0/162D0 + 6472D0/81D0*ZETA3) * DBLE(NF)**2 +
      +        1093D0/729D0 * DBLE(NF)**3 ) /256D0
@@ -177,12 +177,12 @@ c - initialize pi and beta functions
          B10 = B1 / B0
          B20 = B2 / B0
          B30 = B3 / B0
-         C = B10 / B0 * DLOG(B0) 
+         C = B10 / B0 * DLOG(B0)
       ENDIF
 
       ALPI = ALPHAS / PI
-      FBETA = C + ONED/B0 * ( 
-     +     ONED/ALPI + B10 * DLOG(ALPI) + (B20-B10**2) * ALPI 
+      FBETA = C + ONED/B0 * (
+     +     ONED/ALPI + B10 * DLOG(ALPI) + (B20-B10**2) * ALPI
      +     + (B30/TWOD - B10*B20 + B10**3/TWOD)*ALPI**2 )
 
       RETURN

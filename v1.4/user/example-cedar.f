@@ -20,10 +20,10 @@
       COMMON /FNCEDAR/ ASMZ
 
 
-c - Attention!!! - this mus be declared consistent with its 
+c - Attention!!! - this mus be declared consistent with its
 c                  definition in the commonblock!!!!!
-      double precision xst1001(900,3) 
- 
+      double precision xst1001(900,3)
+
 
 c --- parse command line
       IF ( IARGC().LT.1)  FILENAME = 'table.txt.gz'
@@ -49,7 +49,7 @@ c --- parse command line
 
 c      write(*,*) 'fastNLO input parameters',filename,pdfset,alphas,muf,mur
 
-c - Initialize LHAPDF    - for CTEQ6.1M   
+c - Initialize LHAPDF    - for CTEQ6.1M
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid')
 c
 c      call InitPDFset('/h1/h1gen/lhapdf/LHAPDFv4/PDFsets/cteq61.LHgrid')
@@ -66,7 +66,7 @@ c      write(*,*) '     fastNLO: compute the cross section'
 c- new call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
-c                              any choice is possible, but please note 
+c                              any choice is possible, but please note
 c                              that NNLO-NLL works only for xmur=xmuf
 c         3rd argument:  xmuf  prefactor for nominal fact-scale
 c                              only a few choices are possible
@@ -79,7 +79,7 @@ c         5th argument:  array to return results
 
 c - the results of the last call can be accessed in the array:  xst1001(n,iord)
 c      n: continuous bin number for all D0/CDF bins (see documentation)
-c   iord: order  1 LO, 
+c   iord: order  1 LO,
 c                2 NLO correction (add 1,2 to get the NLO x-section)
 c                3 NNLO-NLL correction (add 1,2,3 to get full prediction)
 

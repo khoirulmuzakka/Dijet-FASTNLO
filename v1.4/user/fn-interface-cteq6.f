@@ -3,7 +3,7 @@
 *
 *   fastNLO user interface to PDF and alpha_s code
 *
-* included:    
+* included:
 *      DOUBLE PRECISION FUNCTION FNALPHAS(MUR)
 *      SUBROUTINE FNPDF(X,MUF,XPDF)
 *
@@ -37,7 +37,7 @@ c
 c     FNALPHAS = MY_FAVOURITE-ALPHAS(MUR)
 c
 
-c === example: an exact, iterative solution of the 2-loop RGE 
+c === example: an exact, iterative solution of the 2-loop RGE
       nloop=2
       alpsmz=0.118              ! set here the value of alpha_s(Mz)
       FNALPHAS = ALPS_IT(MUR,ALPSMZ,NLOOP)/2d0/PI
@@ -50,11 +50,11 @@ C *****************************************************************
 
       SUBROUTINE FNPDF(X,MUF,XPDF)
 *-----------------------------------------------------------------
-* MW 06/29/2005 
+* MW 06/29/2005
 *
 * PDF interface to the fastNLO usercode
 *
-*   input   X       parton momentum fraction 
+*   input   X       parton momentum fraction
 *           MUF     factorization scale in GeV
 *   output  XPDF(-6:6) array of PDF momentum densities i.e. x*pdf!
 *                      using the LHAPDF numbering convention:
@@ -74,7 +74,7 @@ c     call MY-FAVORITE-PDFS(....)
 c
 
 
-c - use the CTEQ6 original code 
+c - use the CTEQ6 original code
       DOUBLE PRECISION Ctq6Pdf
       XPDF(-6) =0d0
       XPDF(-5) = X * Ctq6Pdf (-5, X, muf)
@@ -98,7 +98,7 @@ c             call InitPDFset("cteq61.LHgrid")
 c             call InitPDF(0)
 c
 c - get ALL pdfs in one call
-c - note: the momentum densities are returned, i.e. x X pdf! 
+c - note: the momentum densities are returned, i.e. x X pdf!
 c - the LHAPDF numbering convention:
 c - tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t
 c -  -6 ,  -5 ,  -4 ,  -3 ,  -2 ,  -1 , 0, 1, 2, 3, 4, 5, 6

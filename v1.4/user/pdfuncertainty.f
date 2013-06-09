@@ -116,7 +116,7 @@ c - Initialize path to LHAPDF libs
          STOP
       ENDIF
 
-c - Initialization      
+c - Initialization
       CALL INITPDFSET(PDFSET(1:LEN_TRIM(PDFSET)))
       CALL NUMBERPDF(NPDF)
       CALL GETORDERPDF(IOPDF)
@@ -138,7 +138,7 @@ c - One initial call - to fill commonblock -> for histo-booking
 c - New call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
-c                              any choice is possible, but please note 
+c                              any choice is possible, but please note
 c                              that NNLO-NLL works only for xmur=xmuf
 c         3rd argument:  xmuf  prefactor for nominal fact-scale
 c                              only a few choices are possible
@@ -155,13 +155,13 @@ c - Compute PDF uncertainties for all available scales
          CALL FX9999CC(FILENAME,MUR,MUF,0,XSECT1)
 
 c - Save the result array from the first call (= central result)
-c   and reset result arrays   
+c   and reset result arrays
          WRITE(*,*)"PDFUNC: The observable has",NBINTOT," bins -",
      >        NSUBPROC," subprocesses"
          DO L1=1,NBINTOT
             DO L2=1,(NSUBPROC+1)
                DO L3=1,NORD
-                  RES0(L1,L2,L3) = 0D0 
+                  RES0(L1,L2,L3) = 0D0
                   DO L4=1,L3
                      RES0(L1,L2,L3) = RES0(L1,L2,L3)+RESULT(L1,L2,L4)
                   ENDDO
@@ -182,7 +182,7 @@ c - For all bins/subproc/orders: Add negative/positive variations
                      DO L3=1,NORD
                         DIFF = - RES0(L1,L2,L3)
                         DO L4=1,L3
-                           DIFF = DIFF + RESULT(L1,L2,L4) 
+                           DIFF = DIFF + RESULT(L1,L2,L4)
                         ENDDO
                         IF (DIFF.GT.0D0) THEN
                            RES1HI(L1,L2,L3) =
@@ -222,7 +222,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 
 c - Fill histograms
          CALL PDFFILL(I,RES0,RES1HI,RES1LO)
-         
+
       ENDDO                     ! Loop over scales
 
       WRITE(*,*)"Bin    x-sect       lower PDF    upper PDF unc."
@@ -247,8 +247,8 @@ c
       INTEGER IORD,ISUB,ISCALE,IRAP,IHIST,NHIST
       INCLUDE "fnx9999.inc"
       REAL PT(NPTMAX)
-      
-c - HBOOK common 
+
+c - HBOOK common
       INTEGER NWPAWC
       PARAMETER (NWPAWC=2500000)
       REAL HMEMOR(NWPAWC)
@@ -264,7 +264,7 @@ c - Open & book
      >           ISTAT2," Aborted!"
             STOP
          ENDIF
-         
+
          NHIST = 0
          DO IORD=0,NORD         ! Order: tot, LO, NLO-corr, NNLO-corr
             DO ISCALE=1,NSCALEVAR ! Scale variations
@@ -288,7 +288,7 @@ c - Open & book
                   ENDDO
                ENDDO
             ENDDO
-         ENDDO        
+         ENDDO
          WRITE(*,*)"Number of histograms booked:",NHIST
 
 c - Close HBOOK file
@@ -307,13 +307,13 @@ c
       IMPLICIT NONE
       INCLUDE "fnx9999.inc"
       INTEGER NSCALE
-      DOUBLE PRECISION 
+      DOUBLE PRECISION
      >     RES0(NBINTOTMAX,NMAXSUBPROC+1,3),
      >     RES1HI(NBINTOTMAX,NMAXSUBPROC+1,3),
      >     RES1LO(NBINTOTMAX,NMAXSUBPROC+1,3)
       INTEGER I,J,NBIN,IORD,ISUB,ISUB2,ISCALE,IHIST
       REAL VAL0,VALLO,VALHI
-      
+
       IF (NSCALE.LT.1 .OR. NSCALE.GT.NSCALEVAR) THEN
          WRITE(*,*) "\nPDFFILL: ERROR! NSCALE ",NSCALE,
      >        " is out of range, aborted!"
@@ -328,7 +328,7 @@ c - Fill all histograms for the given scale
             ISUB=ISUB2
             IF (ISUB.EQ.8) ISUB=0
             NBIN=0
-            DO I=1,NRAPIDITY                   
+            DO I=1,NRAPIDITY
                DO J=1,NPT(I)
                   NBIN = NBIN + 1
                   IF (IORD.GT.0) THEN
@@ -350,6 +350,6 @@ ckr Recall: HBOOK understands only single precision
             ENDDO               ! rap-loop
          ENDDO                  ! isub-loop
       ENDDO                     ! iord-loop
-      
+
       RETURN
       END

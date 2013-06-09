@@ -18,7 +18,7 @@ C
       DATA CIALGO/"kT","MP","MP_RSEP","SISCone","anti-kT","C/A"/
       DATA CJETRES1/"R","R","R","R","R","R"/
       DATA CJETRES2/"n/a","f_overlap","Rsep","f_overlap","n/a","n/a"/
-      
+
       DATA CHEADER/
      >     "##########################################################",
      >     " ",

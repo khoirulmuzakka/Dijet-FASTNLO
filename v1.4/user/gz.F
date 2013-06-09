@@ -1,6 +1,6 @@
-*  
+*
 * $Id: gzopen.F,v 1.2 2002/11/12 11:51:30 hvogt Exp $
-*  
+*
 * $Log: gzopen.F,v $
 * Revision 1.2  2002/11/12 11:51:30  hvogt
 * gzio modified for several I/O streams
@@ -8,7 +8,7 @@
 * Revision 1.1.1.1  2002/06/05 16:48:52  hvogt
 * Initial Installation
 *
-*  
+*
       SUBROUTINE GZOPEN (LUN, MODE, FILNAM, ISTAT)
 *
 ************************************************************************
@@ -101,9 +101,9 @@ ckr      SAVE          NLUNS
 *
       END
 *
-*  
+*
 * $Id: gzclose.F,v 1.4 2003/01/21 14:51:39 hvogt Exp $
-*  
+*
 * $Log: gzclose.F,v $
 * Revision 1.4  2003/01/21 14:51:39  hvogt
 * reset lun table if lun closed successfully
@@ -117,7 +117,7 @@ ckr      SAVE          NLUNS
 * Revision 1.1.1.1  2002/06/05 16:48:52  hvogt
 * Initial Installation
 *
-*  
+*
       SUBROUTINE GZCLOSE (LUN, ISTAT)
 *
 *
@@ -155,7 +155,7 @@ ckr      SAVE          NLUNS
         ELSE
           LUNS(ILUN) = 0
         END IF
-      ELSE 
+      ELSE
         CALL GZCLOS (FILDES(1,ILUN),'w',ISTAT)
         IF (ISTAT .NE. 0)  THEN
           WRITE (STDLUN,'(A,A,I4)')
@@ -170,9 +170,9 @@ ckr      SAVE          NLUNS
 *
       END
 *
-*  
+*
 * $Id: gzread.F,v 1.3 2003/05/13 15:04:40 hvogt Exp $
-*  
+*
 * $Log: gzread.F,v $
 * Revision 1.3  2003/05/13 15:04:40  hvogt
 * exit replaced by CERN/packlib's exitf
@@ -183,7 +183,7 @@ ckr      SAVE          NLUNS
 * Revision 1.1.1.1  2002/06/05 16:48:52  hvogt
 * Initial Installation
 *
-*  
+*
       SUBROUTINE GZREAD (LUN, CHBUF, NBBUF, ISTAT)
 ************************************************************************
 *
@@ -221,9 +221,9 @@ ckr      SAVE          NLUNS
 *
       END
 *
-*  
+*
 * $Id: gzfindl.F,v 1.2 2003/05/13 15:04:40 hvogt Exp $
-*  
+*
 * $Log: gzfindl.F,v $
 * Revision 1.2  2003/05/13 15:04:40  hvogt
 * exit replaced by CERN/packlib's exitf
@@ -231,7 +231,7 @@ ckr      SAVE          NLUNS
 * Revision 1.1  2002/11/12 11:50:39  hvogt
 * gzio modified for several I/O streams
 *
-*  
+*
       INTEGER FUNCTION GZFINDL (LUN)
 ************************************************************************
 *
@@ -249,7 +249,7 @@ ckr      SAVE          NLUNS
       INTEGER         LUN, J
 *
       IF (LUN .LT. 1 .OR. LUN .GT. 99)  THEN
-        WRITE (STDLUN,'(A,I4)') 
+        WRITE (STDLUN,'(A,I4)')
      &         'GZFINDL: Error - LUN outside limits LUN =', LUN
         CALL EXITF (1)
       END IF

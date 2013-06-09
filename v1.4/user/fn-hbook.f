@@ -37,7 +37,7 @@
 
       write(*,*) '   #     store HBOOK histograms in file >>',
      >     histofile,'<<'
- 
+
 c - reset result arrays
       nbin = 0                  ! continuos numbering for the final array
       do i=1,nrapidity          ! (Pseudo-)Rapidity Bins
@@ -45,16 +45,16 @@ c - reset result arrays
             nbin=nbin+1
             do l=1,Nord         ! all orders LO, NLO, NNLO, ...
                do m=1,(Nsubproc+1) ! No.of Subproc + 1 for sigma-tot
-                  result(nbin,m,l)=0d0 ! reset 
+                  result(nbin,m,l)=0d0 ! reset
                enddo
-               xsect(nbin,l)=0d0 ! reset 
+               xsect(nbin,l)=0d0 ! reset
             enddo
          enddo
       enddo
 
 c - open Hbook file & book histograms
       write(*,*)'FNHIST: booking histograms'
-      call FNHBOOK(1,histofile,ix) 
+      call FNHBOOK(1,histofile,ix)
 c - loop over all scale variations
       do i=1,nscalevar
          mur = murscale(i)
@@ -70,7 +70,7 @@ c - fill x-histos for all scales
       if (ix.eq.2) call FNHFILLX
 
 c - and close Hbook file
-      call FNHBOOK(2,histofile,ix)  
+      call FNHBOOK(2,histofile,ix)
 
       RETURN
       END
@@ -82,7 +82,7 @@ C -------------------------------------------------------------
 * MW 12/15/2005 add histograms for higher orders
 * MW 08/26/2005 change to new array structure
 * MW 04/18/2005
-*   
+*
 *  input:  nscale   No of scale choice where results are to be stored
 *
 * fill HBOOK histograms
@@ -100,14 +100,14 @@ c - identify the scale bin
          stop
       endif
       iscale = nscale
-         
+
 c - fill all histograms for the given scale
       do iord=0,Nord            ! order: tot, LO, NLO-corr, 3 NNLOcorr
          do isub2=1,(Nsubproc+1) ! subprocess: Nsubproc + 1 tot
             isub=isub2
             if (isub.eq.(Nsubproc+1)) isub=0
             nbin=0
-            do i=1,nrapidity                   
+            do i=1,nrapidity
                do j=1,npt(i)
                   nbin = nbin + 1
                   if (iord.gt.0) then
@@ -147,11 +147,11 @@ C -------------------------------------------------------------
 * MW 12/15/2005 -> x-histos are only for NLO (no higher orders yet)
 * MW 08/26/2005 change to new array structure
 * MW 04/18/2005
-*   
+*
 * fill HBOOK histograms
 *-----------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER I,J,K,L,P,iord,isub, iscale,  nx2limit    
+      INTEGER I,J,K,L,P,iord,isub, iscale,  nx2limit
       Integer  nbin,nx , index ,ihist,ihi2,ihi3,ihi4
       INCLUDE 'fnx9999.inc'
       double precision FNALPHAS,as(nscalebinmax),mur,contr,sum
@@ -170,14 +170,14 @@ c - first get PDFs at right scale
          nbin = 0               ! continuos numbering for the final array
          do i=1,nrapidity       ! (Pseudo-)Rapidity Bins
             do j=1,NPT(i)       ! ET/pT Bins
-               nbin=nbin+1                           
+               nbin=nbin+1
                llptlo = log(log(murscale(iscale) *
      >              murval(i,j,1)/mu0scale))
                llpthi = log(log(murscale(iscale) *
      >              murval(i,j,NSCALEBIN)/mu0scale))
-            
+
                sum = 0d0
-               
+
                nx=0
                do k=1,NXTOT     ! Nxmax
                   nx2limit = k
@@ -203,14 +203,14 @@ c - first get PDFs at right scale
                            elseif(nscalebin.eq.2) then
                               if(p.eq.1) bweight =  as(1)
                               if(p.eq.2) bweight =  as(2)
-                           elseif(nscalebin.eq.3) then 
+                           elseif(nscalebin.eq.3) then
                               t1 = 1./2.
                               if(p.eq.1) bweight =  as(1)
                               if(p.eq.2) bweight = 1./(2.*(1.-t1)*t1)*
      >                             (as(2)-as(1)*(1.-t1)**2-
      >                             as(3)*(t1)**2)
                               if(p.eq.3) bweight = as(3)
-                           elseif(nscalebin.eq.4) then 
+                           elseif(nscalebin.eq.4) then
                               t1 = 1./3.
                               t2 = 2./3.
                               if (p.eq.1) bweight = as(1)
@@ -226,7 +226,7 @@ c - first get PDFs at right scale
      >                             3.*(1.-t2)**2*t2 * 3.*(1.-t1)*
      >                             (t1)**2)
      >                             *(3.*(1.-t1)**2*(t1)*(as(3)-as(1)*
-     >                             (1.-t2)**3-as(4)*(t2)**3) 
+     >                             (1.-t2)**3-as(4)*(t2)**3)
      >                             - 3.*(1.-t2)**2*(t2)*(as(2)-as(1)*
      >                             (1.-t1)**3-as(4)*(t1)**3))
                               if (p.eq.4) bweight = as(4)
@@ -339,7 +339,7 @@ c - open & book
          do iord=0,Nord         ! order: tot, LO, NLO-corr, NNLO-corr -> Nord
             do iscale=1,NSCALEVAR ! scale variations
                do isub=0,Nsubproc      ! subprocess: 0 tot + 7 subproc
-               
+
                   do irap=1, nrapidity
                      do j=1,(npt(irap)+1)
 
@@ -348,7 +348,7 @@ c                        write(*,*) "  irap,j=",irap,j,"  pt=",pt(j)
                         ihist = iord*1000000+iscale*100000+isub*10000+
      >                       irap*100
 
-c --------------------- x-distributions in pT-bins 
+c --------------------- x-distributions in pT-bins
                         if (ix.eq.2 .and.j.ne.(npt(irap)+1)) then
                            if (ixscheme.eq.2) then    ! default
                               hxlimit = - sqrt(log10(1D0/

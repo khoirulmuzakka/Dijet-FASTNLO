@@ -13,7 +13,7 @@
 *******************************************************************
       SUBROUTINE FNPAPDF(X1,X2,MUF,PDF)
 *-----------------------------------------------------------------
-* MW 05/12/2005  
+* MW 05/12/2005
 *
 * interface to PDFs from LHAPDF - for proton-antiproton collisions
 * input   X1,X2   values for both hadrons
@@ -24,7 +24,7 @@
       IMPLICIT NONE
       DOUBLE PRECISION X1,X2,MUF,PDF(7)
       INTEGER i
-      DOUBLE PRECISION 
+      DOUBLE PRECISION
      +     G1, G2,              ! gluon densities from both hadrons
      +     SumQ1, SumQ2,        ! sum of quark densities
      +     SumQB1, SumQB2,      ! sum of anti-quark densities
@@ -39,7 +39,7 @@ c - define variables for PDF cache
       DATA SumQ1,SumQB1,Q1,QB1,G1 /15*0d0/
 
 c - define pdf arrays for LHAPDF
-      DOUBLE PRECISION XPDF1(-6:6), XPDF2(-6:6) 
+      DOUBLE PRECISION XPDF1(-6:6), XPDF2(-6:6)
 
 c - get PDFs for first Hadron (always Proton)
 c         apply the strategy as used in DISENT:
@@ -47,7 +47,7 @@ c          - make a cache for X1,MUF (the PDFs are SAVE-ed)
 c          - first: check if X1 and MUF are the same as in prev. call
       if (abs(X1-XCACHE).gt.DIFF .or. abs(MUF-MUFCACHE).gt.DIFF) then
 
-c  - note: the momentum densities are returned, i.e. x X pdf! 
+c  - note: the momentum densities are returned, i.e. x X pdf!
 c  - tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t
 c  -  -6 ,  -5 ,  -4 ,  -3 ,  -2 ,  -1 , 0, 1, 2, 3, 4, 5, 6
 
@@ -74,13 +74,13 @@ c - get PDFs for second Hadron    (no cache needed here)
          SumQB2 = SumQB2 + QB2(i)
       enddo
       G2     = XPDF2(0)
-        
+
 c - compute S,A
       S = 0d0
       A = 0d0
       do i=1,6
-         S = S + (Q1(i)*Q2(i)) + (QB1(i)*QB2(i)) 
-         A = A + (Q1(i)*QB2(i)) + (QB1(i)*Q2(i)) 
+         S = S + (Q1(i)*Q2(i)) + (QB1(i)*QB2(i))
+         A = A + (Q1(i)*QB2(i)) + (QB1(i)*Q2(i))
       enddo
 
 c - compute seven combinatins  (for pp)
@@ -98,7 +98,7 @@ c   - for p-pbar: swap 4<->7 and 5<->6
       PDF(5) = A
       PDF(4) = SumQ1*SumQB2 + SumQB1*SumQ2 - A
 
-c - test phase: for tables that already include PDF info 
+c - test phase: for tables that already include PDF info
 c      do i=1,7
 c         PDF(i)=1d0
 c      enddo
@@ -108,7 +108,7 @@ c      enddo
 *******************************************************************
       SUBROUTINE FNPPPDF(X1,X2,MUF,PDF)
 *-----------------------------------------------------------------
-* MW 07/25/2005  
+* MW 07/25/2005
 *
 * interface to PDFs from LHAPDF - for proton-proton collisions
 * input   X1,X2   values for both hadrons
@@ -119,7 +119,7 @@ c      enddo
       IMPLICIT NONE
       DOUBLE PRECISION X1,X2,MUF,PDF(7)
       INTEGER i
-      DOUBLE PRECISION 
+      DOUBLE PRECISION
      +     G1, G2,              ! gluon densities from both hadrons
      +     SumQ1, SumQ2,        ! sum of quark densities
      +     SumQB1, SumQB2,      ! sum of anti-quark densities
@@ -134,7 +134,7 @@ c - define variables for PDF cache
       DATA SumQ1,SumQB1,Q1,QB1,G1 /15*0d0/
 
 c - define pdf arrays for LHAPDF
-      DOUBLE PRECISION XPDF1(-6:6), XPDF2(-6:6) 
+      DOUBLE PRECISION XPDF1(-6:6), XPDF2(-6:6)
 
 c - get PDFs for first Hadron (always Proton)
 c         apply the strategy as used in DISENT:
@@ -142,7 +142,7 @@ c          - make a cache for X1,MUF (the PDFs are SAVE-ed)
 c          - first: check if X1 and MUF are the same as in prev. call
       if (abs(X1-XCACHE).gt.DIFF .or. abs(MUF-MUFCACHE).gt.DIFF) then
 
-c  - note: the momentum densities are returned, i.e. x X pdf! 
+c  - note: the momentum densities are returned, i.e. x X pdf!
 c  - tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t
 c  -  -6 ,  -5 ,  -4 ,  -3 ,  -2 ,  -1 , 0, 1, 2, 3, 4, 5, 6
 
@@ -169,13 +169,13 @@ c - get PDFs for second Hadron    (no cache needed here)
          SumQB2 = SumQB2 + QB2(i)
       enddo
       G2     = XPDF2(0)
-        
+
 c - compute S,A
       S = 0d0
       A = 0d0
       do i=1,6
-         S = S + (Q1(i)*Q2(i)) + (QB1(i)*QB2(i)) 
-         A = A + (Q1(i)*QB2(i)) + (QB1(i)*Q2(i)) 
+         S = S + (Q1(i)*Q2(i)) + (QB1(i)*QB2(i))
+         A = A + (Q1(i)*QB2(i)) + (QB1(i)*Q2(i))
       enddo
 
 c - compute seven combinatins  (for pp)
@@ -192,7 +192,7 @@ c - compute seven combinatins  (for pp)
 *******************************************************************
       SUBROUTINE FNEPPDF(X,MUF,PDF)
 *-----------------------------------------------------------------
-* MW 07/25/2005  
+* MW 07/25/2005
 *
 * interface to PDFs from LHAPDF - for electron-proton collisions
 * input   X       momentum fraction of hadron
@@ -209,13 +209,13 @@ c - compute seven combinatins  (for pp)
 c - define pdf array for LHAPDF
       DOUBLE PRECISION XPDF(-6:6)
 
-c  - note: the momentum densities are returned, i.e. x X pdf! 
+c  - note: the momentum densities are returned, i.e. x X pdf!
 c  - tbar, bbar, cbar, sbar, ubar, dbar, g, d, u, s, c, b, t
 c  -  -6 ,  -5 ,  -4 ,  -3 ,  -2 ,  -1 , 0, 1, 2, 3, 4, 5, 6
-     
+
       call FNPDF(X,MUF,XPDF)
       PDF(1) = XPDF(0)          ! gluon
-      PDF(2) = 0d0              ! Sigma 
+      PDF(2) = 0d0              ! Sigma
       PDF(3) = 0d0              ! Delta
       do i=1,6
          PDF(2) = PDF(2)+ XPDF(i)+XPDF(-i)

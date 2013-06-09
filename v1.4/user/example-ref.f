@@ -3,7 +3,7 @@
 * M. Wobisch 01/18/2006
 *
 * fastNLO - example program to evaluate reference jobs
-*           using PDFs from CTEQ6 code (to be consistent 
+*           using PDFs from CTEQ6 code (to be consistent
 *           reference table)
 * -------------------------------------------------------------------
       implicit none
@@ -12,9 +12,9 @@
 
       double precision h1incl(4,4) , h1dijet(4,5) ! for FNH0001
 
-c - Attention!!! - this mus be declared consistent with its 
+c - Attention!!! - this mus be declared consistent with its
 c                  definition in the commonblock!!!!!
-      double precision xst1001(600,3,4) 
+      double precision xst1001(600,3,4)
 
 
 c --- parse command line
@@ -27,11 +27,11 @@ c --- parse command line
          RETURN
       ENDIF
 
-      
+
 c - Initialize CTEQ code - needs table file:  ctq61.00.tbl
       Call SetCtq6(200)         ! for CTEQ6.1M
 
-c - Initialize LHAPDF    - for CTEQ6.1M   
+c - Initialize LHAPDF    - for CTEQ6.1M
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid')
 c
 c      call InitPDFset('/h1/h1gen/lhapdf/LHAPDFv4/PDFsets/cteq61.LHgrid')
@@ -45,7 +45,7 @@ c - compute the cross sections
 c- new call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
-c                              any choice is possible, but please note 
+c                              any choice is possible, but please note
 c                              that NNLO-NLL works only for xmur=xmuf
 c         3rd argument:  xmuf  prefactor for nominal fact-scale
 c                              only a few choices are possible
@@ -60,7 +60,7 @@ c      call FX9999CC(FILENAME, 2.0d0 , 2.0d0, 1 , XST1001)
 
 
 c - book, fill and store histograms - works now for v1.4! (Feb 8, 2006 MW)
-c     Histogram-code books & fills histos only for all default scales, 
+c     Histogram-code books & fills histos only for all default scales,
 c     independent of previous FX9999CC calls.
 c     -> But at least one previous call of  FX9999CC is required
 c        because the commonblock needs to be filled before the call

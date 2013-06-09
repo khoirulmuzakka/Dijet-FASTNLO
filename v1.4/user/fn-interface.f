@@ -2,10 +2,10 @@
 * M. Wobisch - July 26, 2005           fn-interface.f
 *
 *   fastNLO user interface to PDF and alpha_s code
-*   --> to be edited by user 
+*   --> to be edited by user
 *       to interface own PDF/alphas code
 *
-* included:    
+* included:
 *      DOUBLE PRECISION FUNCTION FNALPHAS(MUR)
 *      SUBROUTINE FNPDF(X,MUF,XPDF)
 *
@@ -33,7 +33,7 @@
       DOUBLE PRECISION ASMZVAL
       INTEGER IASLOOP
       COMMON/STEER/ASMZVAL,IASLOOP,ASMODE
-      
+
       DOUBLE PRECISION ALPS_IT,ALPHASPDF,RALPSM,PYALPS
       DOUBLE PRECISION AS,ASMZ,ASMZPDF,QLAM4,QLAM5
       INTEGER IOAS,NLOOP
@@ -60,7 +60,7 @@ ckr      PARAMETER (PI=3.1415927D0)
       SAVE IFIRST,PI
       DATA IFIRST,PI/0,0.D0/
 
-c - Get info from PDF set      
+c - Get info from PDF set
       CALL GETORDERAS(IOAS)
       CALL GETLAM4(0,QLAM4)
       CALL GETLAM5(0,QLAM5)
@@ -73,29 +73,29 @@ c - Print info
       IF (IFIRST.EQ.0) THEN
          IFIRST = 1
          PI = 4D0 * ATAN(1D0)
-         WRITE(*,*)"FNALPHAS: PI =",PI 
-         WRITE(*,*)"FNALPHAS: M_Z_PDG/GeV =",ZMASS 
-         WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDG (parameter) =",ASMZPDG 
-         WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDF (1st call)  =",ASMZPDF 
-         WRITE(*,*)"FNALPHAS: Lambda_4_PDF (1st call)  =",QLAM4 
-         WRITE(*,*)"FNALPHAS: Lambda_5_PDF (1st call)  =",QLAM5 
+         WRITE(*,*)"FNALPHAS: PI =",PI
+         WRITE(*,*)"FNALPHAS: M_Z_PDG/GeV =",ZMASS
+         WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDG (parameter) =",ASMZPDG
+         WRITE(*,*)"FNALPHAS: a_s(M_Z)_PDF (1st call)  =",ASMZPDF
+         WRITE(*,*)"FNALPHAS: Lambda_4_PDF (1st call)  =",QLAM4
+         WRITE(*,*)"FNALPHAS: Lambda_5_PDF (1st call)  =",QLAM5
          IF (ASMZVAL.GT.0.D0) THEN
             IF (ASMODE.EQ."PY") THEN
-               WRITE(*,*)"FNALPHAS: Lambda_4 requested       =",ASMZVAL 
+               WRITE(*,*)"FNALPHAS: Lambda_4 requested       =",ASMZVAL
             ELSE
-               WRITE(*,*)"FNALPHAS: a_s(M_Z) requested       =",ASMZVAL 
+               WRITE(*,*)"FNALPHAS: a_s(M_Z) requested       =",ASMZVAL
             ENDIF
          ENDIF
          WRITE(*,*)"FNALPHAS: a_s was used in",NLOOP,
      >        "-loop order in PDF"
          IF (IASLOOP.GT.0) THEN
             WRITE(*,*)"FNALPHAS: a_s requested to be in",IASLOOP,
-     >           "-loop order" 
+     >           "-loop order"
          ENDIF
       ENDIF
 
 c - ASMODE "PDF": Take alpha_s etc. from PDF set
-      IF (ASMODE.EQ."PDF") THEN 
+      IF (ASMODE.EQ."PDF") THEN
          IF (ASMZVAL.GT.0.D0.OR.IASLOOP.GT.0) THEN
             WRITE(*,*)"fastNLO: ERROR! In a_s mode PDF "//
      >           "alpha_s(M_Z) and the loop order cannot be changed!"
@@ -144,7 +144,7 @@ c - Only NLOOP=1,2,3 allowed
          AS = RALPSM(MUR,ZMASS,ASMZ,NF,NLOOP)
 
 c - ASMODE "MW": Use Markus original example code
-c -              Exact, iterative solution of the 2-loop RGE 
+c -              Exact, iterative solution of the 2-loop RGE
       ELSEIF (ASMODE.EQ."MW") THEN
 c   ASMZ = 0.1185             ! for H1-2000 MSbar
 c   ASMZ = 0.1205             ! for MRST2004
@@ -179,11 +179,11 @@ C *****************************************************************
 
       SUBROUTINE FNPDF(X,MUF,XPDF)
 *-----------------------------------------------------------------
-* MW 06/29/2005 
+* MW 06/29/2005
 *
 * PDF interface to the fastNLO usercode
 *
-*   input   X       parton momentum fraction 
+*   input   X       parton momentum fraction
 *           MUF     factorization scale in GeV
 *
 *   output  XPDF(-6:6) array of PDF momentum densities i.e. x*pdf!

@@ -1,7 +1,7 @@
       PROGRAM STATERR
 * -------------------------------------------------------------------
-* M. Wobisch 12/27/2005 
-* 
+* M. Wobisch 12/27/2005
+*
 * fastNLO - program to compute statistical errors from a large set
 *           of LO/NLO tables
 *
@@ -17,7 +17,7 @@
 * -------------------------------------------------------------------
       implicit none
 
-c - Initialize LHAPDF    - for CTEQ6.1M   
+c - Initialize LHAPDF    - for CTEQ6.1M
       call InitPDFset('/work/shootingstar-clued0/wobisch/lhapdf500/share/lhapdf/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/disk2/work/wobisch/lhapdf-4.1/PDFsets/cteq61.LHgrid')
 c      call InitPDFset('/h1/h1gen/lhapdf/LHAPDFv4/PDFsets/cteq61.LHgrid')
@@ -27,7 +27,7 @@ c - initialize one member, 0=best fit member
 
 c --- call statistical error-code for each scenario
 c
-c     arguments:   
+c     arguments:
 c      - No of Born tables minus 1 (start tables from 00)
 c      - name of Born tables  (+ 2digit number + '.stc')
 c      - No of NLO tables minus 1 (start tables from 00)
@@ -39,7 +39,7 @@ c      - name of histogram file for output
       CALL STATCODE(   4, 'path/fnt1001/ft11ml-born-',
      +     12, 'path/fnt1001/ft11mn-nlo-',     'fnt1001-stat.hbk')
 
- 
+
       CALL STATCODE(4, 'path/fnt1003/ft13ml-born-',
      +     19, 'path/fnt1003/ft13mn-nlo-',     'fnt1003-stat.hbk')
 
@@ -99,7 +99,7 @@ c          78/79 are copied to 11,11
  544  continue
 
 
-c -> 
+c ->
       CALL STATCODE(29, 'path/fnt2001/ft21dl-born-',
      +     282, 'path/fnt2001/ft21dn-nlo-',     'fnt2001-stat.hbk')
 
@@ -107,7 +107,7 @@ c ->
 
 
 c---------------------------------------
-      
+
 c      CALL STATCODE(9, 'path/fnl000a/fl0aml-born-',
 c     +     21, 'path/fnl000a/fl0amn-nlo-',     'fnl000a-stat.hbk')
 
@@ -121,9 +121,9 @@ C -----------------------------------------------------------------
 
       SUBROUTINE STATCODE(nborn,cborntab,nnlo,cnlotab,chist)
       implicit none
-c - Attention!!! - this must be declared consistent with its 
+c - Attention!!! - this must be declared consistent with its
 c                  definition in the commonblock!!!!!
-      double precision xsect(900,3) 
+      double precision xsect(900,3)
 
       CHARACTER*(*) cborntab
       CHARACTER*(*) cnlotab
@@ -222,11 +222,11 @@ c -   loop over files
 c - loop over scales
          do k=1,4
             call FX9999CC(FILENAME, mu(k) , mu(k), 0 , XSECT)
-            if (i.eq.0 .and. k.eq.1) then 
+            if (i.eq.0 .and. k.eq.1) then
                ntotal = nmax(1)
                write(*,*) ' this file has ',ntotal,' bins'
             endif
-            
+
             nv = NEVTS(1)/1000d0
             if (k.eq.1) nvtot = nvtot + nv
             do j=1,ntotal
@@ -253,7 +253,7 @@ c -   extract mean values and standard deviations
      +           100d0*(lmin1(j,k)-mean1(j,k))/mean1(j,k),
      +           100d0*(lmax1(j,k)-mean1(j,k))/mean1(j,k)
          enddo
-      enddo 
+      enddo
 
 
 c ==================================================================
@@ -342,7 +342,7 @@ c - open & book
           WRITE(*,*) ' FNHBOOK: could not open histofile ',istat2
        endif
 
-c  -  LO only at single scale -  NLO at four scales       
+c  -  LO only at single scale -  NLO at four scales
        call hbook1(101,'bin number',ntotal,0.5,real(ntotal+0.5),0)
        do i=1,4  ! scales
           call hbook1(200+i,'bin number',ntotal,0.5,real(ntotal+0.5),0)
@@ -351,7 +351,7 @@ c  -  LO only at single scale -  NLO at four scales
        do j=1,ntotal
           call hfill(101,real(j),0.0,real(100d0*sigma1(j,1)/mean1(j,1)))
           do k=1,4
-             call hfill(200+k, real(j) ,0.0, 
+             call hfill(200+k, real(j) ,0.0,
      +            real(100d0*sigma2(j,k)/mean2(j,k)))
           enddo
        enddo
