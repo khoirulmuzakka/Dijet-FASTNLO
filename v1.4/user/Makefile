@@ -7,13 +7,13 @@
 # Extra:
 #   - Sum table of scenario from reference calculations, e.g. fnl1007ref.tab,
 #     ==> algorithmic uncertainty
-#   - Collection of sum tables for each NLO job combined with all LO jobs  
+#   - Collection of sum tables for each NLO job combined with all LO jobs
 #     ==> statistical uncertainty of NLO calculation
 #
 # 10.06.2011 kr: Replace CERNLIB function LENOCC by f95 Standard LEN_TRIM
 #                CERNLIB only needed for HBOOK histograms
 #
-NAME= allunc
+NAME= allunc.old
 
 ALLFILES= allunc.f fnx9999.f fn-interface.f fn-alphas-demo.f alphst.f \
 	pyalps.f fn-hbook.f uncert.f
@@ -40,7 +40,7 @@ OBJFILESEXA  = $(EXAFILES:.f=.o)
 OBJFILESREF  = $(REFFILES:.f=.o)
 
 # Derive all uncertainties in one go
-allunc:	$(OBJFILESALL) fnx9999.inc strings.inc uncert.inc
+allunc.old:	$(OBJFILESALL) fnx9999.inc strings.inc uncert.inc
 	$(FC) -o $@ $(FFLAGS) $(OBJFILESALL) \
 	-L $(LHAPDF)/lib -lLHAPDF \
 	-L $(CERNLIB)/lib -lmathlib -lpacklib -lkernlib
