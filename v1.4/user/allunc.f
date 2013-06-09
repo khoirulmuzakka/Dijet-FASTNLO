@@ -41,7 +41,7 @@ c - Convert from GJR to CTEQ (CL90) values ?
 c - TOCL90GJR = 2.12766D0! 1.D0/0.47D0
       DOUBLE PRECISION TOCL90,TOCL90GJR
       PARAMETER (TOCL90 = 1.64485D0, TOCL90GJR = 2.12766D0)
-      
+
 c - Attention!!! This must be declared consistent with the
 c                definition in the commonblock!!!!!
       DOUBLE PRECISION XSECT0(NBINTOTMAX,3)
@@ -97,7 +97,7 @@ c --- Parse command line
             WRITE(*,*)'  Scenario name, def. = fnt2003'
             WRITE(*,*)'  Table path, def. = .'
             WRITE(*,*)'     Table names have to be of style:'
-c --- Use '...' with \", otherwise gfortran complains 
+c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'     \"scenario\".tab'
             WRITE(*,*)'     \"scenario\"ref.tab'
             WRITE(*,*)'     The statistics tables named e.g.:'
@@ -109,7 +109,7 @@ c --- Use '...' with \", otherwise gfortran complains
             WRITE(*,*)'  Last NLO stat. table number, def. = -1'
             WRITE(*,*)'  PDF set, def. = cteq66.LHgrid'
             WRITE(*,*)'  PDF path, def. = $(LHAPDF)/'//
-     >           '../share/lhapdf/PDFsets'
+     >           'share/lhapdf/PDFsets'
             WRITE(*,*)'  alpha_s calc., def. = PDF (from PDF set)'
             WRITE(*,*)'    alt. = PY: 0-, 1- and 2-loop '//
      >           '(from Pythia 6.4 using Lambda_4 from PDF)'
@@ -231,7 +231,7 @@ ckr      LNRM = .FALSE.
          ENDIF
       ENDIF
 
-*---Last LO table to use 
+*---Last LO table to use
       CH4TMP = "X"
       IF (IARGC().GE.5) THEN
          CALL GETARG(5,CH4TMP)
@@ -247,7 +247,7 @@ ckr      LNRM = .FALSE.
          WRITE(*,*)"ALLUNC: Last LO table number: ",BORNN
       ENDIF
 
-*---Last NLO table to use 
+*---Last NLO table to use
       CH4TMP = "X"
       IF (IARGC().GE.6) THEN
          CALL GETARG(6,CH4TMP)
@@ -285,7 +285,7 @@ ckr      LNRM = .FALSE.
          CALL GETARG(8,CHTMP)
       ENDIF
       IF (IARGC().LT.8.OR.CHTMP(1:1).EQ."_") THEN
-         PDFPATH = "/../share/lhapdf/PDFsets"
+         PDFPATH = "/share/lhapdf/PDFsets"
          WRITE(*,*)
      >        "ALLUNC: No PDF path given, "//
      >        "assuming: $(LHAPDF)"//PDFPATH(1:LEN_TRIM(PDFPATH))
@@ -298,7 +298,7 @@ c - Initialize path to LHAPDF libs
          PDFPATH = LHAPDF(1:LEN_TRIM(LHAPDF))//
      >        PDFPATH(1:LEN_TRIM(PDFPATH))
       ELSE
-         PDFPATH = CHTMP(1:LEN_TRIM(CHTMP)) 
+         PDFPATH = CHTMP(1:LEN_TRIM(CHTMP))
       ENDIF
       WRITE(*,*)"ALLUNC: Looking for LHAPDF PDF sets in path: "//
      >     PDFPATH(1:LEN_TRIM(PDFPATH))
@@ -410,7 +410,7 @@ c - Initialize LHAPDF, no PDF set printout after first call
 c - Initialize one member, 0=best fit member
       CALL INITPDF(0)
 
-c - Write out some info on best fit member      
+c - Write out some info on best fit member
       WRITE(*,*)"----------------------------------------"//
      >     "--------------------------------"
       WRITE(*,*)"ALLUNC: PDF Set Info"
@@ -427,7 +427,7 @@ c - Write out some info on best fit member
      >     "-loop order in the PDF"
       WRITE(*,*) "ALLUNC: The lambda_4 value for member 0 is",QLAM4
       WRITE(*,*) "ALLUNC: The lambda_5 value for member 0 is",QLAM5
-      
+
 c - Check primary table existence
       FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
       WRITE(*,*)"ALLUNC: Checking primary table: "//
@@ -441,7 +441,7 @@ c - Check primary table existence
          CLOSE(2)
       ENDIF
 
-c - Check uncertainties to derive 
+c - Check uncertainties to derive
       LONE  = MYPDF.LE.1
       LSTAT = BORNN.GE.2.OR.NLON.GE.2
       IF (LALG) THEN
@@ -515,9 +515,9 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
          WRITE(*,*)"ALLUNC: Deriving uncertainties for normalized "//
      >        "distributions"
       ENDIF
-      
 
-      
+
+
 c - One initial call - to fill commonblock -> for histo-booking
 c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       WRITE(*,*)"----------------------------------------"//
@@ -528,13 +528,13 @@ c - Use primary table for this (recall: ref. table has 2 x rap. bins)
       FILENAME = TABPATH(1:LEN_TRIM(TABPATH))//"/"//TABNAME
 ckr      CALL FX9999CC(FILENAME,1D0,1D0,1,XSECT0)
       CALL FX9999CC(FILENAME,1D0,1D0,0,XSECT0)
-      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
-     >     LRAT.OR.LNRM,LSCL)
+CKR      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
+CKR     >     LRAT.OR.LNRM,LSCL)
       WRITE(*,*)"ALLUNC: The observable has",NBINTOT," bins -",
      >     NSUBPROC," subprocesses"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-      
+
 
 
 c - Define output formats
@@ -542,15 +542,15 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900        FORMAT(1P,I5,3(6X,E18.11))
  901        FORMAT(1P,I5,2(6X,E18.11))
  902        FORMAT(3I6,3E16.5,5(F10.3,3X))
-      
 
-      
+
+
 c - PDF part
 c - Use primary table
 c - New call: a single call for each scale
 c         1st argument:  name of table
 c         2nd argument:  xmur  prefactor for nominal ren-scale
-c                              any choice is possible, but please note 
+c                              any choice is possible, but please note
 c                              that NNLO-NLL works only for xmur=xmuf
 c         3rd argument:  xmuf  prefactor for nominal fact-scale
 c                              only a few choices are possible
@@ -625,7 +625,7 @@ ckr               WRITE(*,*)"BBBBB: ALLUNC STEP = ",ISTEP
             ISTEP = 2
 ckr            WRITE(*,*)"CCCCC: ALLUNC STEP = ",ISTEP
             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-            
+
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
 
@@ -657,7 +657,7 @@ ckr                     WRITE(*,*)"FFFFF: ALLUNC STEP = ",ISTEP
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
             ENDIF
-            
+
             IPHASE = 3
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
@@ -701,7 +701,7 @@ ckr Rel. upper uncertainty
 
 ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
 ckr             with quadratic addition of
-ckr             all lower/upper deviations 
+ckr             all lower/upper deviations
                CALL INITPDFSET(PDFSET2(1:LEN_TRIM(PDFSET2)))
                CALL INITPDF(0)
                IPHASE  = 1
@@ -728,10 +728,10 @@ ckr Load normalization table with potentially different binning!
                ISTEP = 2
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
-               
+
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
-               
+
 ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
                DO J=1,8
                   CALL INITPDF(J)
@@ -753,7 +753,7 @@ ckr HERAPDF1.0: Do loop runs from 1 - 8 for this part
                   ENDIF
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
-               
+
                IPHASE = 3
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
@@ -780,7 +780,7 @@ ckr Rel. upper uncertainty
 
 ckr HERAPDF1.0: 2nd PDF set for additional PDF uncertainty
 ckr             with quadratic addition of
-ckr             minimal/maximal lower/upper deviations 
+ckr             minimal/maximal lower/upper deviations
                CALL INITPDF(0)
                IPHASE  = 1
                IMODE   = 3
@@ -806,7 +806,7 @@ ckr Load normalization table with potentially different binning!
                ISTEP = 2
                CALL CENRES(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
-               
+
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 2
 
@@ -831,10 +831,10 @@ ckr HERAPDF1.0: Do loop runs from 9 - 13 for this part
                   ENDIF
                   CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
-               
+
                IPHASE = 3
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-               
+
 ckr Add quadratically to previously backed-up result
                IBIN = 0
                DO IRAP=1,NRAP
@@ -890,11 +890,11 @@ c - Give some standard output, fill histograms
      >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
                ENDDO
             ENDDO
-            
+
 c - Fill histograms
-            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
-            CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
+CKR            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
+CKR            CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
+CKR            CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales
       ENDIF
 c - Make sure to use again the central PDF!
@@ -946,7 +946,7 @@ c - This is the normal table to fill the default values
 c - Loop over files
             IF (IORD.EQ.0) THEN
 c - Total x section
-               NTAB = NLON 
+               NTAB = NLON
                BWGT = 1D0/1D8
                FILEBASE = NLONAME(1:LEN_TRIM(NLONAME))
             ELSEIF (IORD.EQ.1) THEN
@@ -982,7 +982,7 @@ ckr                     WRITE(*,*)"Filename for order",IORD,":",FILENAMES
                      ENDIF
 ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
 ckr instead of GOTO. However, EXIT leaves the loop!
-ckr To continue the loop use CYCLE instead! 
+ckr To continue the loop use CYCLE instead!
                      GOTO 20
 ckr            CYCLE
                   ENDIF
@@ -992,7 +992,7 @@ ckr            CYCLE
                IF (NFOUND.LT.2) THEN
                   WRITE(*,*)"Filename for order",IORD,":",FILENAMES
                ENDIF
-               
+
                NRAP  = NRAPIDITY
                IMODE = 2
                IF (LRAT) THEN
@@ -1003,14 +1003,14 @@ c - These are the stat. tables to get the deviations
                CALL UNCERT(IPHASE,IMODE,IWEIGHT,ITAB,LRAT,LNRM)
  20            CONTINUE
             ENDDO
-            
+
             WRITE(*,*)"########################################"//
      >           "################################"
             WRITE(*,*)"No. of filenames skipped:",NFAIL
             WRITE(*,*)"No. of filenames analyzed:",NFOUND
             WRITE(*,*)"########################################"//
      >           "################################"
-            
+
             IPHASE = 3
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
@@ -1047,10 +1047,10 @@ ckr     >           )"*************************************************"
                      DSTMP(2) = (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0)
      >                    *100D0
                      IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
-                        DSTMP(3) = 
+                        DSTMP(3) =
      >                       (WTXMIN(IBIN,NSUBPROC+1,IORD2)-1D0) /
      >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
-                        DSTMP(4) = 
+                        DSTMP(4) =
      >                       (WTXMAX(IBIN,NSUBPROC+1,IORD2)-1D0) /
      >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
                      ENDIF
@@ -1060,10 +1060,10 @@ ckr     >           )"*************************************************"
                      DSTMP(2) = (WTXMAX(IBIN,NSUBPROC+1,IORD2)+1D0)
      >                    *100D0
                      IF (WTDXU2(IBIN,NSUBPROC+1,IORD2).GT.1D-99) THEN
-                        DSTMP(3) = 
+                        DSTMP(3) =
      >                       (WTXMIN(IBIN,NSUBPROC+1,IORD2)+1D0) /
      >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
-                        DSTMP(4) = 
+                        DSTMP(4) =
      >                       (WTXMAX(IBIN,NSUBPROC+1,IORD2)+1D0) /
      >                       WTDXU2(IBIN,NSUBPROC+1,IORD2)
                      ENDIF
@@ -1113,15 +1113,15 @@ c - Give some standard output, fill histograms
             ENDDO
 c - Fill histograms
 ckr Replaces STATCODE
-            CALL PDFFILL(NRAP,3,IORD,ISCL,WTDXMN)
+CKR            CALL PDFFILL(NRAP,3,IORD,ISCL,WTDXMN)
 ckr Put replacement for STATCODE here
-            CALL PDFFILL(NRAP,4,IORD,ISCL,WTDXUL)
-            
+CKR            CALL PDFFILL(NRAP,4,IORD,ISCL,WTDXUL)
+
          ENDDO
       ENDIF
-      
-      
-      
+
+
+
 c - alpha_s uncertainty part
 c - Use primary table
 c - Check that FILENAME is still the primary table here ...!!!
@@ -1141,7 +1141,7 @@ ckr                              cteq66alphas:           2 +- up to  2
 ckr                              CT10as:                 5 +- up to  5
 ckr                              MSTW2008nlo_asmzrange: 11 +- up to 10
 ckr Central member number  : Integer part of DASMZVAL
-ckr Up/down member numbers : Integer part of (DASMZVAL-NINT(DASMZVAL)) times 1000 
+ckr Up/down member numbers : Integer part of (DASMZVAL-NINT(DASMZVAL)) times 1000
 ckr alpha_s variation alone: (DASMZVAL-NINT(DASMZVAL))
          CALL INITPDF(0)
          CALL NUMBERPDF(MYPDFAS)
@@ -1179,7 +1179,7 @@ ckr alpha_s variation alone: (DASMZVAL-NINT(DASMZVAL))
      >        "lower a_s uncertainty   upper a_s uncertainty"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         
+
          ISCL = 3
          XMUR = MURSCALE(ISCL)
          XMUF = MUFSCALE(ISCL)
@@ -1213,7 +1213,7 @@ ckr Load normalization table with potentially different binning!
 
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 2
-            
+
             CALL INITPDF(IPDF-IPDFUD)
 cnew
             ASMZTMP = ALPHASPDF(ZMASS)
@@ -1234,7 +1234,7 @@ cnew
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-            
+
             CALL INITPDF(IPDF+IPDFUD)
 cnew
             ASMZTMP = ALPHASPDF(ZMASS)
@@ -1255,7 +1255,7 @@ cnew
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
             ENDIF
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-            
+
             IPHASE = 3
             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
@@ -1274,9 +1274,9 @@ c - Give some standard output, fill histograms
      >                 WTDXUM(IBIN,NSUBPROC+1,NORD+1)
                ENDDO
             ENDDO
-            CALL PDFFILL(NRAP,0,-1,ISCL,MYRESN)
-            CALL PDFFILL(NRAP,1,-1,ISCL,WTDXLM)
-            CALL PDFFILL(NRAP,2,-1,ISCL,WTDXUM)
+CKR            CALL PDFFILL(NRAP,0,-1,ISCL,MYRESN)
+CKR            CALL PDFFILL(NRAP,1,-1,ISCL,WTDXLM)
+CKR            CALL PDFFILL(NRAP,2,-1,ISCL,WTDXUM)
          ENDIF
 
 ckr Standalone alpha_s variations
@@ -1305,10 +1305,10 @@ ckr Load normalization table with potentially different binning!
          ENDIF
          ISTEP = 2
          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-         
+
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
          IPHASE = 2
-         
+
 cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
          ASMZVAL = ASMZVAL + ASDN
          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSECT0)
@@ -1326,7 +1326,7 @@ cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
          ENDIF
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-         
+
 ckr Add twice to correct previous subtraction!
 cnew         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
          ASMZVAL = ASMZVAL - ASDN + ASUP
@@ -1345,7 +1345,7 @@ cnew         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
          ENDIF
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
-         
+
          IPHASE = 3
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
@@ -1368,12 +1368,12 @@ c - Give some standard output, fill histograms
             ENDDO
          ENDDO
          IF (.NOT.ASMODE.EQ."PDF") THEN
-            CALL PDFFILL(NRAP,0,-1,ISCL,MYRESN)
+CKR            CALL PDFFILL(NRAP,0,-1,ISCL,MYRESN)
          ENDIF
-         CALL PDFFILL(NRAP,3,-1,ISCL,WTDXLM)
-         CALL PDFFILL(NRAP,4,-1,ISCL,WTDXUM)
+CKR         CALL PDFFILL(NRAP,3,-1,ISCL,WTDXLM)
+CKR         CALL PDFFILL(NRAP,4,-1,ISCL,WTDXUM)
       ENDIF
-      
+
 
 
 c - Scale uncertainty part
@@ -1453,8 +1453,8 @@ ckr Load normalization table with potentially different binning!
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 ckr No log file output, but store in histograms
          ISCL = 3
-         CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
-         CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
+CKR         CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
+CKR         CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
 
 c - 6-point scheme
          NSCLS = NSCALEVAR
@@ -1556,8 +1556,8 @@ Comment:                PT(IBIN) = REAL(PTBIN(IRAP,IPT))
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
-         CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
+CKR         CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
+CKR         CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
       ENDIF
 
 
@@ -1648,14 +1648,14 @@ c - Give some standard output, fill histograms
      >              WTDXUM(IBIN,NSUBPROC+1,NORD+1)
             ENDDO
          ENDDO
-         CALL PDFFILL(NRAPIDITY,5,-1,ISCL,WTDXUM)
+CKR         CALL PDFFILL(NRAPIDITY,5,-1,ISCL,WTDXUM)
       ENDIF
 
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
-     >     LRAT.OR.LNRM,LSCL)
+CKR      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
+CKR     >     LRAT.OR.LNRM,LSCL)
       END
 
 
@@ -1676,9 +1676,9 @@ c
       INCLUDE "fnx9999.inc"
       INCLUDE "strings.inc"
       REAL PT(NPTMAX)
-      
 
-c - HBOOK common 
+
+c - HBOOK common
       INTEGER NWPAWC
       PARAMETER (NWPAWC=2500000)
       REAL HMEMOR(NWPAWC)
@@ -1698,7 +1698,7 @@ c - Open & book
      >           ISTAT2," Aborted!"
             STOP
          ENDIF
-         
+
          NRAP = NRAPIDITY
          IF (LRAT) THEN
             NRAP = 2*NRAPIDITY
@@ -1958,19 +1958,19 @@ c
       DOUBLE PRECISION DVAL(NBINTOTMAX,NMAXSUBPROC+1,4)
       INTEGER I,J,IBIN,IORD,IORD2,ISUB,ISUB2,IHIST
       REAL RVAL
-      
+
       IF (ISCL.LT.1 .OR. ISCL.GT.NSCALEVAR) THEN
          WRITE(*,*) "\nPDFFILL: ERROR! ISCL ",ISCL,
      >        " is out of range, aborted!"
          WRITE(*,*) "PDFFILL: Max. ISCL: ",NSCALEVAR
          STOP
       ENDIF
-      
+
 c - Fill all histograms for the given scale
 c - Fill sums over subprocesses and/or orders into zero factors for IHIST
       DO IORD2=1,NORD+1         ! Order: LO, NLO-corr, NNLO-corr, ... , tot
          IORD = IORD2
-         IF (IORD2.EQ.NORD+1) IORD = 0 
+         IF (IORD2.EQ.NORD+1) IORD = 0
          IF (IORDFIL.EQ.-1.OR.IORDFIL.EQ.IORD) THEN
             DO ISUB2=1,NSUBPROC+1 ! Subprocesses hh: 7 subprocesses + total
                ISUB = ISUB2
@@ -1989,6 +1989,6 @@ ckr Recall: HBOOK understands only single precision
             ENDDO               ! isub-loop
          ENDIF
       ENDDO                     ! iord-loop
-      
+
       RETURN
       END
