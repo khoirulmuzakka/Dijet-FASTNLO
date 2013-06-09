@@ -1,7 +1,7 @@
 /*
-*  
+*
 * $Id: ftn_gzio.c,v 1.2 2004/05/04 07:41:58 hvogt Exp $
-*  
+*
 * $Log: ftn_gzio.c,v $
 * Revision 1.2  2004/05/04 07:41:58  hvogt
 * modified for x86_64 Architectures
@@ -9,7 +9,7 @@
 * Revision 1.1.1.1  2002/06/05 16:48:52  hvogt
 * Initial Installation
 *
-*  
+*
 */
 /* ftn_gzio - usage of the zlib compression library by fortran calls
  * Copyright (C) 2001 Harald Vogt
