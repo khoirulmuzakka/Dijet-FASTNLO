@@ -57,8 +57,15 @@ example-ref: $(OBJFILESREF) fnx9999.inc
 	 $(FC) -o $@ $(FFLAGS) $(OBJFILESREF) \
 	-L $(CERNLIB)/lib -lmathlib -lpacklib -lkernlib
 
+# Build everyhing
+EXEFILES= allunc.old example example-ref
+all: $(EXEFILES)
+
 
 
 clean:
 	'rm' -f *.o
 	'rm' -f *.so
+
+maintainer-clean: clean
+	'rm' -f $(EXEFILES)

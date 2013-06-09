@@ -22,9 +22,9 @@ c - If all weights are identical this has to cancel out completely
       IF (FIRST) THEN
          FIRST = .FALSE.
 c - This is the order counting in fnx9999 common ...
-         IF (LSTAT.AND.NORD.GT.3) THEN
+         IF (NORD.GT.3) THEN
             WRITE(*,*)"UNCERT: ERROR! Orders higher than ",NORD,
-     >           " are currently not supported with LSTAT, stopped!"
+     >           " are not supported, stopped!"
             STOP
          ENDIF
          DO IORD=0,NORD
