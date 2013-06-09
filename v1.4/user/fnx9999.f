@@ -2,17 +2,17 @@
 ***********************************************************************
 * fastNLO user code                 T. Kluge, M. Wobisch 02/01/2006
 * Cleaned up and improved version   K. Rabbertz          01/06/2008
-*                            
+*
 *   >> this code should not be edited
-*   >> if you have questions, please contact 
+*   >> if you have questions, please contact
 *      the authors at:  fastnlo@cedar.ac.uk
 *
-* fnxNNNN.f     
+* fnxNNNN.f
 *     -> where "Xnnnn" is the respective fastNLO scenario name
 *            "X" is an abbreviation for the collider
 *                   "L" LHC
 *                   "T" Tevatron
-*                   "H" HERA 
+*                   "H" HERA
 *                   "R" RHIC
 *            "nnnn" is a scenario number
 *
@@ -21,7 +21,7 @@
 *     fXnnnnGP        gets the PDF values for all x-bins
 *     fXnnnnPL        computes PDF linear combinations
 *     fXnnnnMT        multiply PDF array and coefficient array
-*     fXnnnnPR        prints x-section results 
+*     fXnnnnPR        prints x-section results
 *     fXnnnnRD        reads coefficient tables
 *
 * uses commonblock definitions in: fnXNNNN.inc
@@ -39,12 +39,12 @@
 ***********************************************************************
       SUBROUTINE FX9999CC(FILENAME, XMUR, XMUF, IPRINTFLAG, XSECT)
 *----------------------------------------------------------------------
-* fastNLO user code - main routine 
+* fastNLO user code - main routine
 *
 * input:
 *   FILENAME    name of input table
-*   XMUR        prefactor for nominal renormalization scale     
-*                    any choice is possible, but please note 
+*   XMUR        prefactor for nominal renormalization scale
+*                    any choice is possible, but please note
 *                    that 2-loop threshold corrections work
 *                    only for xmur=xmuf
 *   XMUF        prefactor for nominal fact-scale
@@ -53,24 +53,24 @@
 *   IPRINTFLAG  =1 print results / =0 don't print
 *
 * output:
-*   XSECT(nbin,3)    array of cross sections 
+*   XSECT(nbin,3)    array of cross sections
 *                      first dimension: Bin number
-*                      second dimension: 1 LO   2 NLO   
+*                      second dimension: 1 LO   2 NLO
 *                        3 NNLO / or other correction (if available)
 *
 * MW 04/15/2005 initial version
 * MW 09/02/2005 implement flexible scale variations
 * TK 12/07/2005 table format now LO + NLO with 5 scale variations
 * MW 2006/01/17 implement tableformat version 1c
-* MW 2006/02/01 implement tableformat version 1.4 
+* MW 2006/02/01 implement tableformat version 1.4
 * TK 2006/08/06 implement scalebins for N>2
-* MW 2006/08/09 add normalization feature: 1/sigma dsigma/d[s.th.] 
+* MW 2006/08/09 add normalization feature: 1/sigma dsigma/d[s.th.]
 * KR 2010/09/06 use iprintflag also to suppress output in FX9999RD
 *-----------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER IFIRST,IORD,ISUB,I,J,K,L,M, 
-     >     IPRINTFLAG,INORMFLAG, 
+      INTEGER IFIRST,IORD,ISUB,I,J,K,L,M,
+     >     IPRINTFLAG,INORMFLAG,
      >     NBIN,IXMUR,IXMUF
       CHARACTER*(*) FILENAME
 ckr 01.06.2008 Allow longer paths/filenames
@@ -97,9 +97,9 @@ c - Read the fastNLO coefficient table
       IF (FILENAME.NE.OLDFILENAME) THEN
          CALL FX9999RD(FILENAME,IPRINTFLAG)
          OLDFILENAME = FILENAME
-         
+
 c - Check again consistency of array dimensions / commonblock parameters
-c - Partially done already while reading in FX9999RD 
+c - Partially done already while reading in FX9999RD
          IF (NXSUM.GT.NXMAX) THEN
             WRITE(*,*)"fastNLO: ERROR! Inconsistent x binning,"//
      >           " NXSUM =",NXSUM," > NXMAX =",NXMAX
@@ -116,7 +116,7 @@ c - Partially done already while reading in FX9999RD
             STOP
          ENDIF
          DO I=1,NRAPIDITY
-            IF (NPT(I).GT.NPTMAX) THEN 
+            IF (NPT(I).GT.NPTMAX) THEN
                WRITE(*,*)"fastNLO: ERROR! Inconsistent pt binning,"//
      >              " NPT(",I,") =",NPT(I)," > NPTMAX =",NPTMAX
                STOP
@@ -190,13 +190,13 @@ ckr 30.01.2008: Use explicit format for comparisons
                CSTRNG = CNLOJET(I)
                WRITE(*,5000)" # ",CSTRNG(1:LEN_TRIM(CSTRNG))
             ENDDO
-         ENDIF 
+         ENDIF
          IF (NORD.EQ.3) THEN
             DO I=1,5
                CSTRNG = CTHRCOR(I)
                WRITE(*,5000)" # ",CSTRNG(1:LEN_TRIM(CSTRNG))
             ENDDO
-         ENDIF 
+         ENDIF
 
 c - Print scale-variations available in the table
          WRITE(*,*)"#"
@@ -232,7 +232,7 @@ c - Identify the scales chosen in this call
       IXMUR = 0
       IXMUF = 0
       DO I=1,NSCALEVAR
-ckr Give priority to precalculated table for a particular xmur, xmuf combination 
+ckr Give priority to precalculated table for a particular xmur, xmuf combination
          IF (ABS(XMUR/MURSCALE(I)-1D0).LT.1.D-6 .AND.
      >        ABS(XMUF/MUFSCALE(I)-1D0).LT.1.D-6) THEN
             IXMUR=I
@@ -280,15 +280,15 @@ c - Reset result arrays
       DO NBIN=1,NBINTOT         ! Cont. numbering of the final array
          DO L=1,NORD            ! All orders LO, NLO, NNLO, ...
             DO M=1,(NSUBPROC+1) ! No. of Subproc + 1 for total sum
-               RESULT(NBIN,M,L) = 0D0 ! Reset 
+               RESULT(NBIN,M,L) = 0D0 ! Reset
             ENDDO
-            XSECT(NBIN,L) = 0D0 ! Reset 
+            XSECT(NBIN,L) = 0D0 ! Reset
          ENDDO
       ENDDO
 
 c - Now get the PDFs ...
       CALL FX9999GP(MUFSCALE(IXMUF))
-c - ... and multiply with perturbative coefficients 
+c - ... and multiply with perturbative coefficients
       CALL FX9999MT(XMUR,IXMUF)
 
 c ----------------- final touches ------------------------------------
@@ -325,10 +325,10 @@ c
 c --- Assume: observable has been divided by binwidth in 2nd dimension
 c     here: normalize LO & NLO results (the NLO numbers are normalized
 c                    such that the sum (LO+NLO) is properly normalized)
-c   
+c
          DO ISUB=1,(NSUBPROC+1) ! subprocess: Nsubproc + 1 tot
             NBIN=0
-            DO I=1,NRAPIDITY                   
+            DO I=1,NRAPIDITY
                DO IORD=1,NORD
                   SUM(IORD) = 0D0
                ENDDO
@@ -336,7 +336,7 @@ c
                   NBIN = NBIN + 1
                   DO IORD=1,NORD ! Order: tot, LO, NLO-corr, 3 NNLOcorr
                      DO K=1,IORD ! Sum over all lower orders
-                        SUM(IORD) = SUM(IORD) +  
+                        SUM(IORD) = SUM(IORD) +
      >                       RESULT(NBIN,ISUB,K)*(PTBIN(I,J+1) -
      >                       PTBIN(I,J))
                      ENDDO
@@ -350,7 +350,7 @@ c
                   IF (NORD.GE.2) RESULT(NBIN,ISUB,2) =
      >                 (RESULT(NBIN,ISUB,1)*(SUM(1)-SUM(2))
      >                 + RESULT(NBIN,ISUB,2))  / SUM(2)
-               ENDDO 
+               ENDDO
             ENDDO               ! Rapidity-Loop (or: 1st Dimension)
          ENDDO                  ! Subprocess-Loop
 c - Fill "xsect" array
@@ -379,7 +379,7 @@ ckr 30.01.2008: Use simple A format, string length via LEN_TRIM
 * MW 08/26/2005
 *
 * multiply the PDFs and the coefficients for a single scale setting
-* 
+*
 * input:   XMUR  prefactor for nominal renormalization scale
 *          IXMUF No.of factorization scale setting (as stored in table)
 *
@@ -388,14 +388,14 @@ ckr 30.01.2008: Use simple A format, string length via LEN_TRIM
       INCLUDE 'fnx9999.inc'
       INTEGER IXMUF,I,J,K,L,M,IORD,JORD,NBIN
       INTEGER IPOSITION(5)
-      DOUBLE PRECISION  MUR,AS(NSCALEBINMAX),ASPOW(5),FNALPHAS,COEFF 
+      DOUBLE PRECISION  MUR,AS(NSCALEBINMAX),ASPOW(5),FNALPHAS,COEFF
       DOUBLE PRECISION BETA0,BETA1,PI,XMUR,LOGMU,SCFAC
 ckr      DOUBLE PRECISION SCFAC2A,SCFAC2B ! For ren-scale variation
       DOUBLE PRECISION MU0SCALE,LLPTLO,LLPTHI,T1,T2,BWEIGHT
       INTEGER NF,CA
       DOUBLE PRECISION CF
       PARAMETER (PI=3.14159265358979323846, NF=5, CA=3, CF=4D0/3D0)
-      PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0) 
+      PARAMETER (BETA0=(11D0*CA-2D0*NF)/3D0)
       PARAMETER (BETA1=34*CA*CA/3D0-2D0*NF*(CF+5D0*CA/3D0))
       PARAMETER (MU0SCALE=0.25)
 
@@ -415,7 +415,7 @@ Comment:      >     SCFAC,LOGMU
 ckr DEBUG
 ckr 30.01.2008: Comment unused defs
 c      scfac2a= dble(jord+1)*beta0 *logmu          ! NNLO contrib.
-c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu  
+c      scfac2b= dble(jord*(jord+1))/2d0*beta0*beta0*logmu*logmu
 c     +     + dble(jord)*beta1/2d0*logmu           ! NNLO contrib.cont.
 
 c - MW:  we may save time if we make the mur-variation later
@@ -449,28 +449,28 @@ c - Loop over coefficient array
                ELSEIF (NSCALEBIN.EQ.2) THEN
                   IF (L.EQ.1) BWEIGHT = AS(1)
                   IF (L.EQ.2) BWEIGHT = AS(2)
-               ELSEIF (NSCALEBIN.EQ.3) THEN 
+               ELSEIF (NSCALEBIN.EQ.3) THEN
                   T1 = 1./2.
                   IF (L.EQ.1) BWEIGHT = AS(1)
                   IF (L.EQ.2) BWEIGHT = 1./(2.*(1.-T1)*T1)*
      >                 (AS(2)-AS(1)*(1.-T1)**2-AS(3)*(T1)**2)
                   IF (L.EQ.3) BWEIGHT = AS(3)
-               ELSEIF (NSCALEBIN.EQ.4) THEN 
+               ELSEIF (NSCALEBIN.EQ.4) THEN
                   T1 = 1./3.
                   T2 = 2./3.
                   IF (L.EQ.1) BWEIGHT = AS(1)
-                  IF (L.EQ.2) BWEIGHT = 1./(3.*(1.-T1)**2*T1 * 
-     >                 3.*(1.-T2)*(T2)**2 - 3.*(1.-T2)**2*T2 * 
+                  IF (L.EQ.2) BWEIGHT = 1./(3.*(1.-T1)**2*T1 *
+     >                 3.*(1.-T2)*(T2)**2 - 3.*(1.-T2)**2*T2 *
      >                 3.*(1.-T1)*(T1)**2)
      >                 *(3.*(1.-T2)*(T2)**2*(AS(2)-AS(1)*(1.-T1)**3
-     >                 -AS(4)*(T1)**3) 
+     >                 -AS(4)*(T1)**3)
      >                 - 3.*(1.-T1)*(T1)**2*(AS(3)-AS(1)*(1.-T2)**3
      >                 -AS(4)*(T2)**3))
                   IF (L.EQ.3) BWEIGHT = 1./(3.*(1.-T1)**2*T1 *
      >                 3.*(1.-T2)*(T2)**2
      >                 - 3.*(1.-T2)**2*T2 * 3.*(1.-T1)*(T1)**2)
      >                 *(3.*(1.-T1)**2*(T1)*(AS(3)-AS(1)*(1.-T2)**3
-     >                 -AS(4)*(T2)**3) 
+     >                 -AS(4)*(T2)**3)
      >                 - 3.*(1.-T2)**2*(T2)*(AS(2)-AS(1)*(1.-T1)**3
      >                 -AS(4)*(T1)**3))
                   IF (L.EQ.4) BWEIGHT = AS(4)
@@ -492,19 +492,19 @@ ckr DEBUG
                         IF (IORD.EQ.1) THEN ! LO contribution
                            COEFF = ARRAY(NBIN,K,M,IPOSITION(1),L)
                         ELSEIF (IORD.EQ.2) THEN ! NLO CONTRIBUTIONS
-                           COEFF = 
+                           COEFF =
      >                          ARRAY(NBIN,K,M,IPOSITION(2),L)
-     >                          + SCFAC*ARRAY(NBIN,K,M,1,L) 
+     >                          + SCFAC*ARRAY(NBIN,K,M,1,L)
                         ELSEIF (IORD.EQ.3) THEN !2-LOOP THRESHOLD CORR.
 c
 c     - the following works only for "true" higher orders (NNLO)
 c     -> not for 2-loop threshold corrections (N. Kidonakis,10.01.2006)
-c     coeff = 
+c     coeff =
 c     +                       array(nbin,k,m,(1+ixmuf+(iord-2)*nscalevar),l)
 c     +                       array(nbin,k,m,iposition(3),l)
 c     +                       + scfac2a*array(nbin,k,m,(1+ixmuf))
-c     +                       + scfac2b*array(nbin,k,m,1) 
-c     
+c     +                       + scfac2b*array(nbin,k,m,1)
+c
 c     ... therefore the NLLO-NLL contributions are only available for mu_r=mu_f
 c     -           in other words: for  log(mur/muf)=0
                            IF (LOGMU.EQ.0D0) THEN
@@ -514,10 +514,10 @@ c     -           in other words: for  log(mur/muf)=0
                            ENDIF
                         ENDIF
 
-c - For 'standard' fastNLO tables 
-                        IF (IREF.EQ.0 .OR. I.LE.(NRAPIDITY/2)) THEN 
+c - For 'standard' fastNLO tables
+                        IF (IREF.EQ.0 .OR. I.LE.(NRAPIDITY/2)) THEN
                            RESULT(NBIN,M,IORD) = RESULT(NBIN,M,IORD)
-     >                          + COEFF 
+     >                          + COEFF
      >                          * ASPOW(IORD) ! Mult.w.(alpha_s/2Pi)**N
      >                          * PDF(NBIN,K,M,L) ! Mult.with PDFs
 c - For 'reference' fastNLO tables including PDF/alphas
@@ -534,7 +534,7 @@ c - Only relevant for fastNLO authors -> for precision studies
             ENDDO               ! k x-bin
          ENDDO                  ! j pt
       ENDDO                     ! i rapidity
-      
+
 ckr DEBUG
 Comment:       DO IORD=1,NORD
 Comment:          NBIN = 0
@@ -635,7 +635,7 @@ c                     x1 = hxinv3(hx)    ! inefficient: log10(1/x)+x-1
                   do l=-6,6
                      XPDF(k,l) = newpdf(l) * reweight
                   enddo
-               enddo  
+               enddo
 
 c - now fill main PDF array - compute different lin. comb for diff sub-proc
                nx = 0
@@ -649,13 +649,13 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
                         pdf(nbin,nx,m,p) = H(m)
                      enddo
                   enddo
-               enddo 
+               enddo
 
             enddo
          enddo
       enddo
 
-      RETURN 
+      RETURN
       END
 
 *******************************************************************
@@ -665,22 +665,22 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
 * compute PDF linear combinations - for different reactions
 *
 * depending on ireaction, the product of the i-th and j-th entries
-* of the PDF array XPDF are multiplied into the relevant linear 
+* of the PDF array XPDF are multiplied into the relevant linear
 * combinations in the array H
 *
 * input:
 *    ireact             flag for reaction (1:DIS, 2:pp-jets, 3:ppbar-jets)
-*    i                  x-index of first hadron        
+*    i                  x-index of first hadron
 *    j                  x-index for second hadron (if two-hadron process)
 *    XPDF(nxmax,-6:6)   PDF array for all x-bins
 *
 * output:
-*    H(10)              PDF linear combinations
+*    H(7)              PDF linear combinations
 * ---------------------------------------------------------------
       Implicit None
       INCLUDE 'fnx9999.inc'
       Integer ireact, i,j,k
-      Double Precision XPDF(nxmax,-6:6), H(10),
+      Double Precision XPDF(nxmax,-6:6), H(7),
      +     G1, G2,              ! gluon densities from both hadrons
      +     SumQ1, SumQ2,        ! sum of quark densities
      +     SumQB1, SumQB2,      ! sum of anti-quark densities
@@ -688,7 +688,7 @@ c - now fill main PDF array - compute different lin. comb for diff sub-proc
      +     S,A                  ! products S,A
 
 c --- for DIS ---
-      if (Ireaction .eq. 1) then 
+      if (Ireaction .eq. 1) then
          H(1) = XPDF(i,0)       ! Gluon
          H(2) = 0d0             ! Sigma
          H(3) = 0d0             ! Delta
@@ -722,8 +722,8 @@ c  -  compute S,A
          S = 0d0
          A = 0d0
          do k=1,6
-            S = S + (Q1(k)*Q2(k)) + (QB1(k)*QB2(k)) 
-            A = A + (Q1(k)*QB2(k)) + (QB1(k)*Q2(k)) 
+            S = S + (Q1(k)*Q2(k)) + (QB1(k)*QB2(k))
+            A = A + (Q1(k)*QB2(k)) + (QB1(k)*Q2(k))
          enddo
 c  - compute seven combinations
          H(1) = G1*G2
@@ -748,7 +748,7 @@ c  - for p-pbar: swap combinations 4<->7 and 5<->6
          stop
       endif
 
-      RETURN 
+      RETURN
       END
 *******************************************************************
 
@@ -785,7 +785,7 @@ c      nproc = 1                 ! print only gg->jets subprocess
 
       WRITE(*,FMT='(A,F6.2,A,F6.2)')"--------  muf/mu0=",
      >     mufscale(imufflag),"     mur/mu0=",xmur
-   
+
       nbin = 0                  ! linear bin for the final observable
       do i=1,nrapidity          ! Rapidity Bins
          if (RAPBIN(i).lt.RAPBIN(i+1)) then
@@ -924,7 +924,7 @@ c   -----------------------------------
       do i=1,ndimension
          READ(2,*) DIMLABEL(i)
       enddo
-      
+
       READ(2,*) NRAPIDITY
       IF (NRAPIDITY.GT.NRAPMAX) THEN
          WRITE(*,*)"fastNLO: ERROR! Too many rap. bins in this table!"
@@ -999,7 +999,7 @@ c   -----------------------------------
       do i=1,NSCALEVAR
          READ(2,*) MUFSCALE(i)
       enddo
-      
+
       READ(2,*) i
       if (i.ne.iseparator) goto 999
 c   -----------------------------------
@@ -1043,7 +1043,7 @@ c   -----------------------------------
       RETURN
  999  continue
 
-      close (2) 
+      close (2)
       WRITE(*,*)" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
       WRITE(*,*)" >>>>>   fastNLO error in table format "
       WRITE(*,*)" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
@@ -1051,18 +1051,18 @@ c   -----------------------------------
       RETURN
 
 ckr 30.01.2008: Use free format A, string length det. by LEN_TRIM
- 5000 FORMAT (A,I12,A,A) 
+ 5000 FORMAT (A,I12,A,A)
       END
 
 *******************************************************************
 c      Double Precision Function hxinv3(hx)
 *----------------------------------------------------------------
 *    compute inverse of: h(x)=log10(1/x)+x-1
-*      -> return x-value for given h(x) 
+*      -> return x-value for given h(x)
 *
 * MW 04/26/2006  early poor version - extremely slow & silly
 *                only for test purposes - not meant for real work
-*                too slow - and maybe poor precision - 
+*                too slow - and maybe poor precision -
 *                and limited to x>10**-4
 *----------------------------------------------------------------
 c      implicit none
