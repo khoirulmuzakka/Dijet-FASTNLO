@@ -782,6 +782,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900  FORMAT(1P,I5,3(6X,E18.11))
  901  FORMAT(1P,I5,2(6X,E18.11))
  902  FORMAT(3I6,3E16.5,5(F10.3,3X))
+ 910  FORMAT(1P,I5,3(6X,E18.11),0P,2X,1(3X,F9.5))
+ 920  FORMAT(1P,I5,3(6X,E18.11),0P,2X,2(3X,F9.5))
 
 *---  Initial settings
       CALL FNSET("P_RESET",0)   ! Reset all selections to zero
@@ -879,7 +881,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
-     >        "lower PDF uncertainty   upper PDF uncertainty"
+     >        "lower PDF uncertainty   upper PDF uncertainty"//
+     >        "   KNLO        KTHC"
 
 *---  Only primary scale
          DO I=1,1
@@ -1567,10 +1570,28 @@ c - Give some standard output, fill histograms
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  WRITE(*,900) IBIN,MYRESN(IBIN,NSBPRC+1,NORD+1),
-ckr                  WRITE(*,900) IBIN,MYRES(IBIN,NSBPRC+1,NORD+1),
-     >                 WTDXL2(IBIN,NSBPRC+1,NORD+1),
-     >                 WTDXU2(IBIN,NSBPRC+1,NORD+1)
+                  IF (NORD.EQ.1) THEN
+                     WRITE(*,900) IBIN,MYRESN(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSBPRC+1,NORD+1)
+                  ELSEIF (NORD.EQ.2) THEN
+                     WRITE(*,910) IBIN,MYRESN(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSBPRC+1,NORD+1),
+     >                    MYRESN(IBIN,NSBPRC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSBPRC+1,1) +
+     >                    MYRESN(IBIN,NSBPRC+1,2))
+                  ELSEIF (NORD.GE.3) THEN
+                     WRITE(*,920) IBIN,MYRESN(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSBPRC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSBPRC+1,NORD+1),
+     >                    (MYRESN(IBIN,NSBPRC+1,1) +
+     >                    MYRESN(IBIN,NSBPRC+1,2)) /
+     >                    MYRESN(IBIN,NSBPRC+1,1),
+     >                    MYRESN(IBIN,NSBPRC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSBPRC+1,1) +
+     >                    MYRESN(IBIN,NSBPRC+1,2))
+                  ENDIF
 c - Debug: Output should be identical in single PDF set case!
                   IF (INT(IETYPE/10).EQ.0) THEN
                      DXS0L = -SQRT(DXL2(IBIN))/XS0(IBIN)
@@ -1594,7 +1615,6 @@ c - Debug: Output should be identical in single PDF set case!
             ENDDO
 
 c - Fill histograms
-ckr            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
             CALL PDFFILL(NRAP,0,-1,I,MYRESN)
             CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)

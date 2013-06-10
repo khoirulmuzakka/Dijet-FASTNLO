@@ -619,8 +619,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900  FORMAT(1P,I5,3(6X,E18.11))
  901  FORMAT(1P,I5,2(6X,E18.11))
  902  FORMAT(3I6,3E16.5,5(F10.3,3X))
- 910  FORMAT(1P,I5,3(6X,E18.11),0P,1(3X,F9.5))
- 920  FORMAT(1P,I5,3(6X,E18.11),0P,2(3X,F9.5))
+ 910  FORMAT(1P,I5,3(6X,E18.11),0P,2X,1(3X,F9.5))
+ 920  FORMAT(1P,I5,3(6X,E18.11),0P,2X,2(3X,F9.5))
 
 *---  Look for pointers matching requested scale settings
       DO ISCL=1,NSCLS
@@ -686,7 +686,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
-     >        "lower PDF uncertainty   upper PDF uncertainty"
+     >        "lower PDF uncertainty   upper PDF uncertainty"//
+     >        "   KNLO        KTHC"
 
 *---  Only primary scale
          DO I=1,1

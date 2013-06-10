@@ -542,6 +542,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
  900        FORMAT(1P,I5,3(6X,E18.11))
  901        FORMAT(1P,I5,2(6X,E18.11))
  902        FORMAT(3I6,3E16.5,5(F10.3,3X))
+ 910        FORMAT(1P,I5,3(6X,E18.11),0P,2X,1(3X,F9.5))
+ 920        FORMAT(1P,I5,3(6X,E18.11),0P,2X,2(3X,F9.5))
 
 
 
@@ -580,9 +582,10 @@ c - all precalculated scale variations
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
          WRITE(*,*)" bin       cross section           "//
-     >        "lower PDF uncertainty   upper PDF uncertainty"
-         DO I=1,NSCALEVAR
-ckr         DO I=1,1
+     >        "lower PDF uncertainty   upper PDF uncertainty"//
+     >        "   KNLO        KTHC"
+ckr         DO I=1,NSCALEVAR
+         DO I=3,3
 ckr Part 1: Basic PDF uncertainty using a single PDF set (and only one
 ckr         initialization call!). For PDF uncertainty calculation from
 ckr         multiple PDF sets like full HERAPDF make sure to switch back
@@ -885,9 +888,28 @@ c - Give some standard output, fill histograms
             DO IRAP=1,NRAP
                DO IPT=1,NPT(IRAP)
                   IBIN = IBIN+1
-                  WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXL2(IBIN,NSUBPROC+1,NORD+1),
-     >                 WTDXU2(IBIN,NSUBPROC+1,NORD+1)
+                  IF (NORD.EQ.1) THEN
+                     WRITE(*,900) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1)
+                  ELSEIF (NORD.EQ.2) THEN
+                     WRITE(*,910) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1),
+     >                    MYRESN(IBIN,NSUBPROC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2))
+                  ELSEIF (NORD.EQ.3) THEN
+                     WRITE(*,920) IBIN,MYRESN(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXL2(IBIN,NSUBPROC+1,NORD+1),
+     >                    WTDXU2(IBIN,NSUBPROC+1,NORD+1),
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2)) /
+     >                    MYRESN(IBIN,NSUBPROC+1,1),
+     >                    MYRESN(IBIN,NSUBPROC+1,NORD+1) /
+     >                    (MYRESN(IBIN,NSUBPROC+1,1) +
+     >                    MYRESN(IBIN,NSUBPROC+1,2))
+                  ENDIF
                ENDDO
             ENDDO
 
@@ -1451,12 +1473,14 @@ ckr Load normalization table with potentially different binning!
          ENDDO
          IPHASE = 3
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
-ckr No log file output, but store in histograms
+ckr Store in histograms, log file output only, if 6-point scheme impossible
+ckr e.g. because of threshold corrections
          ISCL = 3
 CKR         CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
 CKR         CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
 
 c - 6-point scheme
+         IF (NORD.LT.3) THEN
          NSCLS = NSCALEVAR
          IF (NSCALEMAX.GE.8.AND.NSCALEVAR.EQ.4) THEN
             NSCLS = 8
@@ -1522,6 +1546,7 @@ ckr Load normalization table with potentially different binning!
          ENDDO
          IPHASE = 3
          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+         ENDIF
 
 c - Give some standard output, fill histograms
          WRITE(*,*)"========================================"//
@@ -1541,10 +1566,10 @@ c - Give some standard output, fill histograms
      >        " scale variations"
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         IORD   = 0
+         IORD = 0
          ISCL = 3
-         ISUB   = 0
-         IBIN   = 0
+         ISUB = 0
+         IBIN = 0
          DO IRAP=1,NRAP
 Comment:             IHIST = IORD*1000000 + ISCL*100000 +
 Comment:      >           ISUB*10000 + IRAP*100
