@@ -115,7 +115,8 @@
             ENDIF
          ENDDO
 
-*---  Add results in output array
+*---  Add results in output array, skip unselected or non-existing
+*---  ones in result numbering
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
                IPOINT = ICONTRPOINTER(I)
