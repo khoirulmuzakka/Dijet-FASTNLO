@@ -766,8 +766,6 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
      >        NRAPIDITY+1,RAPBIN(NRAPIDITY+1)
       ENDIF
 
-*---  Set v14 variable NORD to 2 for LO & NLO
-      NORD = 2
 *---  Store no. of subprocesses in NSBPRC
 *---  v14 NSUBPROC       : always 7
 *---  v20 NSUBPROC(iCtrb): 2-parton processes: 6   (e.g. LO dijet)
@@ -787,17 +785,36 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 
 *---  Initial settings
       CALL FNSET("P_RESET",0)   ! Reset all selections to zero
-      IF (LLO) THEN
-         CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
-      ELSE
-         WRITE(*,*)"ALLUNC: ERROR! No LO found, stopped."
+
+*---  Set v14 variable NORD to maximal numbering value of
+*---  ILO, INLO, ITHC1L, ITHC2L
+*---  Make sure that:
+*---  1. NORD is equal to maximal ICONT counter
+*---  2. Unwanted contributions in result() array are filled with zeros
+*---  ==> avoid double counting of 1- and 2-loop threshold corrections!
+      IF (.NOT.LLO) THEN
+         WRITE(*,*)"ALLUNC: ERROR! No LO found, stopped!"
          STOP
+      ELSE
+         NORD = ILO
+         CALL FNSET("P_ORDPTHY",1) ! select order pert. theory: 1=LO, 2=NLO
       ENDIF
       IF (LNLO) THEN
+         NORD = INLO
          CALL FNSET("P_ORDPTHY",2) ! select order pert. theory: 1=LO, 2=NLO
-      ELSE
-         WRITE(*,*)"ALLUNC: ERROR! No NLO found, stopped."
-         STOP
+         WRITE(*,*)"ALLUNC: INFO! Evaluating NLO."
+      ENDIF
+      IF (LNLO.AND.LTHC2L) THEN
+         NORD = ITHC2L
+         CALL FNSET("P_THRESHCOR",2) ! select 2-loop threshold corrections
+         WRITE(*,*)"ALLUNC: INFO! "//
+     >        "Evaluating 2-loop threshold corrections."
+      ENDIF
+      IF (.NOT.LNLO.AND.LTHC1L) THEN
+         NORD = ITHC1L
+         CALL FNSET("P_THRESHCOR",1) ! select 1-loop threshold corrections
+         WRITE(*,*)"ALLUNC: INFO! "//
+     >        "Evaluating 1-loop threshold corrections."
       ENDIF
 
 *---  Look for pointers matching requested scale settings
@@ -841,7 +858,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
 *     4th argument:  0: no ascii output       1: print results
 *     5th argument:  array to return results
 
-*---  Compute central result (LO+NLO) and PDF uncertainties
+*---  Compute central result and PDF uncertainties
       IF (LONE.OR.LPDF) THEN
          WRITE(*,*)"****************************************"//
      >        "********************************"
@@ -2243,8 +2260,8 @@ ckr Load normalization table with potentially different binning!
             CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
          ENDIF
 
-c - 6-point scheme
-         IF (NSCLS.GE.7) THEN
+c - 6-point scheme, only if possible, e.g. not in case of threshold corrections
+         IF (NSCLS.GE.7.AND.NORD.LT.3) THEN
             CALL INITPDF(0)
 *---  Central scale
             ISCL = ISCLPT(1)
