@@ -603,16 +603,16 @@ int main(int argc, char** argv) {
    // Check on existence of threshold corrections
    int ithc1 = fnloreader.ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnloreader.ContrId(kThresholdCorrection, kNextToLeading);
-   if ( ithc1 < 0 ){
-      printf("fnlo-read: 1-loop threshold corrections not found!\n");
-   } else {
-      printf("fnlo-read: 1-loop threshold corrections have Id: %i\n",ithc1);
-   }
-   if ( ithc2 < 0 ){
-      printf("fnlo-read: 2-loop threshold corrections not found!\n");
-   } else {
-      printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
-   }
+   // if ( ithc1 < 0 ){
+   //    printf("fnlo-read: 1-loop threshold corrections not found!\n");
+   // } else {
+   //    printf("fnlo-read: 1-loop threshold corrections have Id: %i\n",ithc1);
+   // }
+   // if ( ithc2 < 0 ){
+   //    printf("fnlo-read: 2-loop threshold corrections not found!\n");
+   // } else {
+   //    printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
+   // }
    // Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnloreader.ContrId(kNonPerturbativeCorrection, kLeading);
    // if ( inpc1 < 0 ){
@@ -623,10 +623,13 @@ int main(int argc, char** argv) {
 
    // Switch on LO & NLO, switch off anything else
    if (!(ilo   < 0)) {
-      fnloreader.SetContributionON(kFixedOrder, 0, true);
+      fnloreader.SetContributionON(kFixedOrder, ilo, true);
    }
    if (!(inlo  < 0)) {
-      fnloreader.SetContributionON(kFixedOrder, 1, true);
+      fnloreader.SetContributionON(kFixedOrder, inlo, true);
+   }
+   if (!(ithc1 < 0)) {
+      fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
    }
    if (!(ithc2 < 0)) {
       fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
@@ -636,7 +639,7 @@ int main(int argc, char** argv) {
    }
    // Temporary: Also don't print the cross sections out even when existing for this example
    //   ithc2 = -1;
-   inpc1 = -1;
+   //   inpc1 = -1;
 
    // Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
@@ -665,8 +668,12 @@ int main(int argc, char** argv) {
       vector < double > kthc1;
       vector < double > xsthc2;
       vector < double > kthc2;
-      vector < double > xsnpc;
-      vector < double > knpc;
+      vector < double > xsnpc1;
+      vector < double > knpc1;
+      vector < double > xsnpc2;
+      vector < double > knpc2;
+      vector < double > xsewk1;
+      vector < double > kewk1;
 
       // Get LO & NLO results
       xsnlo = fnloreader.GetCrossSection();
@@ -697,7 +704,7 @@ int main(int argc, char** argv) {
             }
          }
       } else if ( !(ilo < 0 || ithc1 < 0)) {
-         fnloreader.SetContributionON(kFixedOrder, 1, false);
+         if ( !(inlo < 0) ) fnloreader.SetContributionON(kFixedOrder, inlo, false);
          fnloreader.SetContributionON(kThresholdCorrection, ithc1, true);
          fnloreader.CalcCrossSection();
          xsthc1 = fnloreader.GetCrossSection();
@@ -707,6 +714,24 @@ int main(int argc, char** argv) {
                kthc1[i] = xsthc1[i]/xslo[i];
             } else {
                kthc1[i] = -1.;
+            }
+         }
+      }
+
+      // Get non-perturbative corrections
+      if ( !(inpc1 < 0) ) {
+         if ( !(inlo < 0) ) fnloreader.SetContributionON(kFixedOrder, inlo, true);
+         if ( !(ithc1 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
+         if ( !(ithc2 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
+         fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+         fnloreader.CalcCrossSection();
+         xsnpc1 = fnloreader.GetCrossSection();
+         knpc1  = fnloreader.GetKFactors();
+         for (unsigned int i=0; i<kfac.size(); i++) {
+            if (abs(kfac[i]) > DBL_MIN) {
+               knpc1[i] = knpc1[i]/kfac[i];
+            } else {
+               knpc1[i] = -1.;
             }
          }
       }
@@ -735,7 +760,7 @@ int main(int argc, char** argv) {
             header2 += "      KTHC2";
          }
          if (inpc1>-1) {
-            header2 += "      KNPC";
+            header2 += "     KNPC1";
          }
          printf("%s [ %-12s ] %s [  %-12s  ]  <%-12.12s> %s\n",
                 header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
@@ -761,11 +786,11 @@ int main(int argc, char** argv) {
             } else if (ithc2<0) {
                printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
             } else {
                printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
             }
             printf("\n");
          }

@@ -137,7 +137,7 @@ void Alphas::PrintInfo() {
    printf(" # ALPHAS-GRV: M_Z/GeV         = %#9.6f\n",fMz);
    printf(" # ALPHAS-GRV: a_s(M_Z)        = %#9.6f\n",fAlphasMz);
    printf(" # APLHAS-GRV: a_s loop        = %2i\n",fnLoop);
-   printf(" # APLHAS-GRV: flavor-matching = %s\n",(bFlavorMatching?"true":"false"));
+   printf(" # APLHAS-GRV: flavor-matching = %s\n",(bFlavorMatching?"   T":"   F"));
    printf(" # APLHAS-GRV: nf (M_Z)        = %2d\n",CalcNf(fMz));
    cout << " " << cseps << endl;
 }
