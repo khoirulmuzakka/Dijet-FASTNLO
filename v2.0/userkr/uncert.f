@@ -577,13 +577,17 @@ cdebug
       INCLUDE "v14unc.inc"
       INTEGER IBIN,IRAP,IPT,ISUB,IORD,NBIN,IBINN,IBNRM,ITMP
       INTEGER NRAPIDITYN,NPTN(NRAPMAX),NORDN,NSBPRCN
-      DOUBLE PRECISION DTMP
+      DOUBLE PRECISION DTMP,DSUM(MXSUBPROC+1,NMAXORD+1),dtmpb
 
 
 
 *---Initialization
 ckr Table to normalize loaded
-cdebug      WRITE(*,*)"AAAAA: CENRES STEP = ",ISTEP
+      IF (IDEBUG.GT.2) THEN
+         WRITE(*,*)"DEBUG2: AAAAA CENRES STEP = ",ISTEP
+         WRITE(*,*)"DEBUG2: AAAAA CENRES SCENARIO = ",
+     >        SCENARIO(1:LEN_TRIM(SCENARIO))
+      ENDIF
       IF (ISTEP.EQ.0.OR.ISTEP.EQ.3) THEN
          IBIN = 0
          DO IRAP=1,NRAPIDITY
@@ -683,6 +687,59 @@ ckr Counter for bin containing normalization factor
                ENDDO
                IBNRM = IBNRM + NPTN(IRAP)
             ENDDO
+         ELSEIF (SCENARIO(1:7).EQ."fnl2380") THEN
+*---  Calculate normalization factor (sigma_R=0.5 or R=0.7) for each bin
+            IBIN = 0
+            DO IRAP=1,NRAPIDITYN
+               DO IPT=1,NPTN(IRAP)
+                  IBIN = IBIN+1
+*---  Subsummation over all --> DSUM(NSBPRCN+1,NORDN+1)
+                  DSUM(NSBPRCN+1,NORDN+1) = 0D0
+                  DO IORD=1,NORDN
+*---  Subsummation over subprocesses --> DSUM(NSBPRCN+1,IORD)
+                     DSUM(NSBPRCN+1,IORD) = 0D0
+                     DO ISUB=1,NSBPRCN
+                        DSUM(ISUB,IORD) = RESULT(IBIN,ISUB,IORD)
+                        DSUM(NSBPRCN+1,IORD) = DSUM(NSBPRCN+1,IORD) +
+     >                       RESULT(IBIN,ISUB,IORD)
+                     ENDDO
+                     DSUM(NSBPRCN+1,NORDN+1) = DSUM(NSBPRCN+1,NORDN+1) +
+     >                    DSUM(NSBPRCN+1,IORD)
+                  ENDDO
+                  DO ISUB=1,NSBPRCN
+*---  Subsummation over orders --> DSUM(ISUB,NORDN+1)
+                     DSUM(ISUB,NORDN+1) = 0D0
+                     DO IORD=1,NORDN
+                        DSUM(ISUB,NORDN+1) = DSUM(ISUB,NORDN+1) +
+     >                       RESULT(IBIN,ISUB,IORD)
+                     ENDDO
+                  ENDDO
+*---  Store normalization factor as 1/DSUM
+                  DO IORD=1,NORDN+1
+                     DO ISUB=1,NSBPRCN+1
+*---  Set to zero by hand in case of empty 7th subprocess for LO part
+                        IF (IORD.EQ.1.AND.ISUB.EQ.7) THEN
+                           MYRES(IBIN+NBIN,ISUB,IORD) = 0D0
+                        ELSE
+                           MYRES(IBIN+NBIN,ISUB,IORD) =
+     >                          1D0/DSUM(ISUB,IORD)
+                        ENDIF
+                        IF (ISTEP.EQ.1) THEN
+                           MYRESN(IBIN+NBIN,ISUB,IORD) =
+     >                          MYRES(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
+                        IF (IDEBUG.GT.2) THEN
+                           WRITE(*,*)"DEBUG3_fnl2380: AA1 "//
+     >                          "IBIN,IORD,ISUB,IRAP,IPT,"//
+     >                          "MYRES,MYRESN",
+     >                          IBIN,IORD,ISUB,IRAP,IPT,
+     >                          MYRES(IBIN+NBIN,ISUB,IORD),
+     >                          MYRESN(IBIN+NBIN,ISUB,IORD)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
          ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
             IBIN = 0
             DO IRAP=1,NRAPIDITYN
@@ -690,6 +747,7 @@ ckr Counter for bin containing normalization factor
                   IBIN = IBIN+1
                   DO IORD=1,NORDN+1
                      DO ISUB=1,NSBPRCN+1
+
                         IF (IRAP.EQ.2) THEN
                            IF (IORD.LE.NORDN) THEN
                               MYTMP(IBIN,ISUB,IORD) =
@@ -702,6 +760,8 @@ ckr Counter for bin containing normalization factor
                               MYTMP(IBIN,ISUB,IORD) = DTMP
                            ENDIF
                         ENDIF
+
+
                      ENDDO
                   ENDDO
                ENDDO

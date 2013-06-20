@@ -197,6 +197,11 @@ ckr To be cross-checked for each new scenario
                LTAB = .FALSE.
                WRITE(*,*)
      >              "ALLUNC: Deriving x section ratios"
+            ELSEIF (SCENARIO(1:7).EQ."fnl2380") THEN
+               LNRM = .TRUE.
+               LTAB = .TRUE.
+               WRITE(*,*)
+     >              "ALLUNC: Deriving x section ratios"
             ELSEIF (SCENARIO(1:7).EQ."fnl2442") THEN
 ckr Original version for fnl2442: Works fine, trivial division in rap 3
                LRAT = .FALSE.
