@@ -51,6 +51,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
+
+// Aux. constants for implicit Runhe-Kutta-Procedure:
+const double CRunDec::a2=0.2, CRunDec::a3=0.3, CRunDec::a4=0.6, CRunDec::a5=1., CRunDec::a6=0.875;
+
+const double CRunDec::b21=0.2, CRunDec::b31=3./40., CRunDec::b32=9./40., CRunDec::b41=0.3, CRunDec::b42=-0.9, CRunDec::b43=6./5.;
+const double CRunDec::b51=-11./54., CRunDec::b52=2.5, CRunDec::b53=-70./27., CRunDec::b54=35./27.;
+const double CRunDec::b61=1631./55296., CRunDec::b62=175./512., CRunDec::b63=575./13824.;
+const double CRunDec::b64=44275./110592., CRunDec::b65=253./4096.;
+
+const double CRunDec::c1=37./378., CRunDec::c2=0., CRunDec::c3=250./621., CRunDec::c4=125./594., CRunDec::c5=0.;
+const double CRunDec::c6= 512./1771.;
+
+const double CRunDec::dc1=37./378.-2825./27648., CRunDec::dc2=0.-0., CRunDec::dc3=250./621.-18575./48384.;
+const double CRunDec::dc4=125./594.-13525./55296., CRunDec::dc5=0.-277./14336., CRunDec::dc6=512./1771.-0.25;
+
 // Default constructor:
 CRunDec::CRunDec(){
      for(int i=0; i<4; i++){

@@ -79,21 +79,18 @@ class CRunDec
 {
   private:
   // Aux. constants for implicit Runhe-Kutta-Procedure:
-  static const double a2=0.2, a3=0.3, a4=0.6, a5=1., a6=0.875;
+  static const double a2, a3, a4, a5, a6;
 
-  static const double b21=0.2, b31=3./40., b32=9./40., b41=0.3, b42=-0.9,
-                      b43=6./5.;
-  static const double b51=-11./54., b52=2.5, b53=-70./27., b54=35./27.;
-  static const double b61=1631./55296., b62=175./512., b63=575./13824.;
-  static const double b64=44275./110592., b65=253./4096.;
+  static const double b21, b31, b32, b41, b42, b43;
+  static const double b51, b52, b53, b54;
+  static const double b61, b62, b63;
+  static const double b64, b65;
 
-  static const double c1=37./378., c2=0., c3=250./621., c4=125./594., c5=0.;
-  static const double c6= 512./1771.;
+  static const double c1, c2, c3, c4, c5;
+  static const double c6;
 
-  static const double dc1=37./378.-2825./27648., dc2=0.-0.,
-                      dc3=250./621.-18575./48384.;
-  static const double dc4=125./594.-13525./55296., dc5=0.-277./14336.,
-                      dc6=512./1771.-0.25;
+  static const double dc1, dc2, dc3;
+  static const double dc4, dc5, dc6;
 
   // Coefficients for diff. equations:
   double Beta[4], B[4], Gamma[4], C[4], Nf;
