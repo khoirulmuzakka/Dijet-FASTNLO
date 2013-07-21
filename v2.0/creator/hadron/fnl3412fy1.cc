@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl3412fy0:
+// fastNLO v2 creator code for fnl3412fy1:
 //     CMS LHC Dijet Mass Scenario, E_cms = 8 TeV
 //     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
@@ -315,7 +315,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl3412fy0");
+   A1->SetScenName("fnl3412fy1");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
@@ -350,9 +350,9 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: define the binning
    const int ndim2bins = 1;
-   const double dim2bins[ndim2bins+1] = { 0.0, 0.5 };
+   const double dim2bins[ndim2bins+1] = { 0.5, 1.0 };
 
-   const int ndim1bins[ndim2bins] = { 55 };
+   const int ndim1bins[ndim2bins] = { 53 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -366,13 +366,13 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[56] = {
-      197. ,  220.,  244.,  270.,  296.,  325.,  354.,  386.,  419.,  453.,
-      489. ,  526.,  565.,  606.,  649.,  693.,  740.,  788.,  838.,  890.,
-      944. , 1000., 1058., 1118., 1181., 1246., 1313., 1383., 1455., 1530.,
-      1607., 1687., 1770., 1856., 1945., 2037., 2132., 2231., 2332., 2438.,
-      2546., 2659., 2775., 2895., 3019., 3147., 3279., 3416., 3558., 3704.,
-      3854., 4010., 4171., 4337., 4509., 4686.
+   const double dim0[54] = {
+      244. ,  270.,  296.,  325.,  354.,  386.,  419.,  453.,  489.,  526.,
+      565. ,  606.,  649.,  693.,  740.,  788.,  838.,  890.,  944., 1000.,
+      1058., 1118., 1181., 1246., 1313., 1383., 1455., 1530., 1607., 1687.,
+      1770., 1856., 1945., 2037., 2132., 2231., 2332., 2438., 2546., 2659.,
+      2775., 2895., 3019., 3147., 3279., 3416., 3558., 3704., 3854., 4010.,
+      4171., 4337., 4509., 4686.
    };
    for (int j=0; j<ndim1bins[0]+1; j++) {
       dim1bins[0][j] = dim0[j];
