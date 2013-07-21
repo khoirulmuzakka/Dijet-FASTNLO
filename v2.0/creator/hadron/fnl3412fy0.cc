@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2622f:
-//     CMS LHC Dijet Chi Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.5 in E-scheme
+// fastNLO v2 creator code for fnl3412fy0:
+//     CMS LHC Dijet Mass Scenario, E_cms = 8 TeV
+//     for fastjet anti-kT algo with R=0.7 in E-scheme
 //
 //
 // ============== fastNLO user: ===================================
@@ -150,8 +150,8 @@ void psinput(phasespace_hhc *ps, double& s)
    //s =    810000.; // LHC Injection Run  900 GeV
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =   7617600.; // LHC HIpp base Run 2760 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
-   //s =  64000000.; // LHC Second Run    8000 GeV
+   //s =  49000000.; // LHC First Run     7000 GeV
+   s =  64000000.; // LHC Second Run    8000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
 
@@ -161,7 +161,7 @@ void psinput(phasespace_hhc *ps, double& s)
 }
 
 // --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
-//                   (the return value must be true for jets to be UNselected)
+//     (the return value must be true for jets to be UNselected)
 struct fNLOSelector {
    fNLOSelector(double ymin, double ymax, double ptmin):
       _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
@@ -183,7 +183,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
    // --- fastNLO user: set the jet size and run the jet algorithm
-   double jetsize = 0.5;
+   double jetsize = 0.7;
    pj = jetclus(p,jetsize);
    unsigned int nj = pj.upper();
 
@@ -212,12 +212,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //     ATTENTION: Scales must always be in GeV!
 
    // --- declare and initialize phase space cut variables
+   // can partially be taken from table binning for this scenario
+   // const unsigned int nobs = A2->GetNObsBin();
    // smallest |(pseudo-)rapidity| for jets to be considered
-   const double yjmin  = 0.0;
+   const double yjmin  = A2->LoBin[0][1];
    // largest |(pseudo-)rapidity| for jets to be considered
-   const double yjmax  = 5.0;
+   const double yjmax  = 3.0;
    // lowest pT for jets to be considered
-   const double ptjmin = 0.;
+   const double ptjmin = 30.;
 
    // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
    static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -244,56 +246,40 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    if (njet > 1) {
 
       // --- declare and initialize additional cut variables
-      // highest (pseudo-)rapidity for central jets to be considered
-      const double yjcmax = 2.5;
+      // lowest pT of leading jet for event to be considered (trigger threshold)
+      const double ptj1min = 60.;
       // minimal dijet mass for events to be considered
       const double mjjmin = A2->LoBin[0][0];
-      // maximal allowed y_boost = 0.5 * |y1 + y2|
-      const double yboostmax = 1.11;
-      // maximal allowed y_star = 0.5 * |y1 - y2|
-      const double ystarmax  = 1.5;
 
-      // Derive leading dijet variables
+      // Derive dijet variables
       // Dijet mass
       lorentzvector<double> pj12 = pj[1] + pj[2];
       double mjj = pj12.mag();
-      if (mjj < 0.) {cout << "Warning!: Negative Mass" << mjj << endl;}
+      if (mjj < 0.) {cout << "fastNLO: WARNING! Negative mass encountered: " << mjj << endl;}
+
       // Rapidities of two leading jets
       double y1 = pj[1].rapidity();
       double y2 = pj[2].rapidity();
-      // Max, sum, diff and chi for these rapidities
+
+      // Maximal (pseudo-)rapidity
       double maxyjj  = max(abs(y1),abs(y2));
-      double sumyjj  = abs(y1+y2);
-      double difyjj  = abs(y1-y2);
-      double chijj   = exp(difyjj);
 
-      // --- give some debug output before further selection
-      if ( doDebug ) {
-         cout << "----------------------------------------------------" << endl;
-         cout << "Final selection cuts: yjcmax, mjjmin, yboostmax, ystarmax: " << yjcmax << ", " << mjjmin << ", " << yboostmax << ", " << ystarmax << endl;
-         cout << "Final selection obs.: maxyjj, mjj, sumyjj/2., difyjj/2.: " << maxyjj << ", " << mjj << ", " << sumyjj/2. << ", " << difyjj/2. << endl;
-      }
+      // Average pTs of leading jets
+      double pT1   = (pj[1].perp()) / 1.0;
+      double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
+      //    double pT123 = (pj[1].perp() + pj[2].perp() + pj[3].perp()) / 3.0;
 
-      // --- Further phase space cuts?
-      if ( maxyjj < yjcmax && mjjmin <= mjj &&
-           sumyjj < 2.*yboostmax &&
-           difyjj < 2.*ystarmax ) {
-
-         // --- event accepted
-         if ( doDebug ) {
-            cout << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << maxyjj << ", " << mjj << ", " << sumyjj/2. << ", " << difyjj/2. << endl;
-            cout << "Event/jet accepted!" << endl;
-            cout << "==================== End of event ====================" << endl;
-         }
+      // --- Further dijet phase space cuts?
+      if ( ptj1min <= pT1 && mjjmin <= mjj ) {
 
          // --- set the renormalization and factorization scale to average dijet pT
-         double mu = (pj[1].perp() + pj[2].perp()) / 2.0;
+         double mu = pT12;
 
-         // --- identify bin number (dim1,dim2) here (chijj,mjj)
+         // --- identify bin number (dim1,dim2) here (mjj,|y_max|)
          int obsbin = -1;
          for (int j = 0; j < A2->GetNObsBin(); j++) {
-            if (A2->LoBin[j][0] <= chijj && chijj < A2->UpBin[j][0] &&
-                A2->LoBin[j][1] <= mjj   && mjj   < A2->UpBin[j][1]) {
+            if (A2->LoBin[j][0] <= mjj    && mjj    < A2->UpBin[j][0] &&
+                A2->LoBin[j][1] <= maxyjj && maxyjj < A2->UpBin[j][1]) {
                obsbin = j;
                break;
             }
@@ -310,8 +296,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
                }
             }
          } // --- end: fill fastNLO array
-      } // --- end: event selection
-   } // --- end: dijet+ event selection
+      } // --- end: final selection
+   } // --- end: dijet+ events only
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
@@ -329,19 +315,20 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2622f");
+   A1->SetScenName("fnl3412fy0");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
+
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("d2sigma-dijet_dChidMjj_[pb_GeV]");
+   A2->ScDescript.push_back("d2sigma-dijet_dMjjdy_max_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
-   A2->ScDescript.push_back("E_cms=7_TeV");
-   A2->ScDescript.push_back("Dijet_Chi");
-   A2->ScDescript.push_back("anti-kT_R=0.5");
-   A2->ScDescript.push_back("CMS-PAPER-EXO-11-017, arXiv:1202.5535, J. High Energy Phys. 05 (2012) 055.");
+   A2->ScDescript.push_back("E_cms=8_TeV");
+   A2->ScDescript.push_back("Dijet_Mass");
+   A2->ScDescript.push_back("anti-kT_R=0.7");
+   A2->ScDescript.push_back("CMS-PAPER-SMP-??-???.");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
@@ -353,20 +340,19 @@ void UserHHC::inittable(){
 
    // --- fastNLO user: no. and names of dimensions in which the observable is binned
    A2->NDim = 2;
-   A2->DimLabel.push_back("Chi");
+   A2->DimLabel.push_back("Mjj_[GeV]");  // --- fastNLO user: label of 1st dimension
    A2->IDiffBin.push_back(2);
-   A2->DimLabel.push_back("Mjj_[GeV]");
+   A2->DimLabel.push_back("|y_max|");   // --- fastNLO user: label of 2nd dimension
    A2->IDiffBin.push_back(2);
 
    vector <double> bound;
    bound.resize(2);
 
    // --- fastNLO user: define the binning
-   const int ndim2bins = 9;
-   const double dim2bins[ndim2bins+1] = { 400.,  600.,  800., 1000., 1200.,
-                                          1500., 1900., 2400., 3000., 4000. };
+   const int ndim2bins = 1;
+   const double dim2bins[ndim2bins+1] = { 0.0, 0.5 };
 
-   const int ndim1bins[ndim2bins] = { 12, 12, 12, 12, 12, 12, 12, 12, 12 };
+   const int ndim1bins[ndim2bins] = { 13 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -380,12 +366,17 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[13] = { 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.,
-                             12., 14., 16. };
-   for (int i=0; i<ndim2bins; i++) {
-      for (int j=0; j<ndim1bins[i]+1; j++) {
-         dim1bins[i][j] = dim0[j];
-      }
+   const double dim0[14] = {
+      197,220,244,270,296,325,354,386,419,453,489,526,565,606,649,
+      693,740,788,838,890,944,1000, 1058, 1118, 1181,1246, 1313, 1383, 1455,
+      1530, 1607,1687, 1770, 1856, 1945,2037, 2132, 2231, 2332, 2438, 2546,
+      2659, 2775, 2895, 3019,3147, 3279, 3416, 3558, 3704, 3854,4010, 4171, 4337, 4509,4686
+
+      197. ,  296.,  419.,  565.,  740.,  944., 1181., 1455., 1770., 2132.,
+      2546., 3019., 3416., 4010.
+   };
+   for (int j=0; j<ndim1bins[0]+1; j++) {
+      dim1bins[0][j] = dim0[j];
    }
 
    cout << endl << "------------------------" << endl;
@@ -404,8 +395,9 @@ void UserHHC::inittable(){
    //     Default: divide by bin width in dim. 1 and dim. 2
    //     ATTENTION: Don't forget to include a factor of 2 e.g. for abs. rapidity |y| !
    //
-   //     fnl26nn: Divide by bin width in Chi (1st dimension) and Mjj (2nd dimension)
+   //     fnl3412: Divide by bin width in Mjj (1st dimension) and y_max (2nd dimension)
    //
+
    int nbins = 0;   // --- count total No. bins
    for (int i=0;i<ndim2bins;i++){
       for (int j=0;j<ndim1bins[i];j++){
@@ -418,8 +410,8 @@ void UserHHC::inittable(){
          bound[1] = dim2bins[i+1];
          A2->UpBin.push_back(bound);
          binsize = binsize
-            * (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dChi
-            * (dim2bins[i+1]-dim2bins[i]); // ... times dMjj
+            * (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dMjj
+            * 2. * (dim2bins[i+1]-dim2bins[i]); // ... times dy_max
          A2->BinSize.push_back(binsize);
       }
    }
@@ -551,6 +543,10 @@ void UserHHC::inittable(){
          // Now read all limits
          int i = 0;
          while ( fgets(line,sizeof(line),infile) ) {
+            if (i == A2->NObsBin ) {
+               cerr << "fastNLO: ERROR! Number of x limits exceed NObsBin: i = " << i << ", NObsBin = " << A2->NObsBin << endl;
+               exit(1);
+            }
             int nvar = sscanf(line,"      xlim[ %*u ] = %le , mulo[ %*u ] = %le , muup[ %*u ] = %le ;",
                               &xlim[i],&mulo[i],&muup[i]);
             if (nvar != 3) {
@@ -700,6 +696,7 @@ void UserHHC::writetable(){
       table->WriteBlockBDividebyN(i);
    }
    table->CloseFileWrite();
+
 }
 
 void UserHHC::end_of_event(){
