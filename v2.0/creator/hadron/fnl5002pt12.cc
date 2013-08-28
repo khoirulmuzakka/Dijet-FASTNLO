@@ -88,6 +88,11 @@ extern "C"{
 #include "fnloTable.h"
 #include "fnloBlockBNlojet.h"
 
+// fastNLO includes
+#include "../NewFastNLO/fastNLOCreate.h"
+#include "fastNLOInterfaceToNLOJET.cc"
+
+
 class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
 {
 public:
@@ -121,6 +126,9 @@ private:
   //     if filename matches "deb", "ref", or "wrm" the respective flag is set to true
   bool doDebug, doReference, doWarmUp;
   bool nlo;
+   
+   fastNLOCreate *ftable;
+   void InitFastNLO(const std::basic_string<char>& fname);
 
   void inittable();
   void writetable();
@@ -252,17 +260,40 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
   // calculate observables
   // this publication is published in TeV
   double ypsstar 	= fabs(jet1->rapidity()-jet2->rapidity())/2.;
-  //  double ptmean_TeV	= ( jet1->perp() + jet2->perp() ) /2./1000.;
+  double ptmean_TeV	= ( jet1->perp() + jet2->perp() ) /2./1000.;
   //  double ptsum_TeV 	= ( jet1->perp() + jet2->perp() ) /2./1000.;
   double M12_TeV	= ((*jet1)+(*jet2)).mag()/1000.;
   double ptmax_TeV	= jet1->perp()/1000.;
   double pt2_TeV	= jet2->perp()/1000.;
    
+  // remove everything with x>0.8;
+  //   double x1 = p[-1].Z()/p[hadron(-1)].Z();
+  //   double x2 = p[0].Z()/p[hadron(0)].Z();   
+  //   if ( x1>0.8 || x2>0.8 ) return;
+     
   // --- fill fastNLO arrays
   //     Scales must be in GeV or dimensionless (at least one in GeV)
   //     Values must be in same dimension as your binning is defined
+  //cout<<"\n ------------------------------------------------    alt   ------------------------------------------------------- \n"<<endl;
   FillEvent( M12_TeV, ypsstar , ptmax_TeV*1000. , pt2_TeV*1000. , p , amp );
+
+  //cout<<"\n ------------------------------------------------    neu   ------------------------------------------------------- \n"<<endl;
+  {
+     // nlojet-event
+     vector<fnloEvent> contribs = UsefulNlojetTools::GetFlexibleScaleNlojetContribHHC(p,amp,dummypdf);
+     
+     // scenario specific quantites
+     fnloScenario scen;
+     scen.SetObservableDimI( ypsstar , 0 );
+     scen.SetObservableDimI( M12_TeV , 1 );
+     scen.SetObsScale1( ptmax_TeV*1000. );
+     scen.SetObsScale2( pt2_TeV*1000. );
+     
+     ftable->FillAllSubprocesses(contribs,scen); 
+  }
+  //cout<<"\n ----------------------------------------------------------------------------------------------------------------- \n"<<endl;
 } // --- end userfunc
+
 
 int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , const event_hhc& p, const nlo::amplitude_hhc& amp ){
   // ---- Fill FastNLO Array ---- //
@@ -276,10 +307,25 @@ int UserHHC::FillEvent( double val1 , double val2 , double mu1, double mu2 , con
   //     user has to perform calculation of bin number 'obsbin' by himself.
   int obsbin = table->GetBlockA2()->GetBinNumber( val1 , val2  );
   if (obsbin >= 0) {
-    double prefactor = 1./table->GetBlockA2()->BinSize[obsbin]; 
-    for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-      ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHCMuVar(obsbin,x1,x2,mu1,mu2,amp,dummypdf,pdf_pp,prefactor);// scales in GeV!
-    }
+     // 
+     // 
+     //
+     // 
+     //
+     //  WARNING !! THIS TABLE WILL PRODOCE WRONG RESULTS, because prefactor is not considered
+     // 
+     //
+     // 
+     //
+     // 
+     double prefactor = 1.;//1./table->GetBlockA2()->BinSize[obsbin]; 
+     // 
+     //
+     // 
+     //
+     for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+	((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHCMuVar(obsbin,x1,x2,mu1,mu2,amp,dummypdf,pdf_pp,prefactor);// scales in GeV!
+     }
   } // - end: fill fastNLO array
   return 0;
 }
@@ -341,7 +387,7 @@ void UserHHC::inittable(){
   //     choices for B->SetDoWarmUp((bool))
   //	    -  B->SetDoWarmUp(true)   ->  Do the Warm-Up run
   //	    -  B->SetDoWarmUp(false)  ->  Do a production run
-  B->SetDoWarmUp(doWarmUp);
+  B->SetDoWarmUp(false);//doWarmUp);
 
   // --- fastNLO user: You can set the number of contributions
   //     after which the WarmUp values are printed
@@ -357,15 +403,15 @@ void UserHHC::inittable(){
   B->InitLHCConstants(A2,nlo);
 
   // ---- set number-of x-nodes ---- //
-  B->SetNumberOfXNodesPerMagnitude( 8 , xlim );
+  B->SetNumberOfXNodesPerMagnitude( 5 , xlim );
 
   // ---- number of scale nodes for mu ---- //
-  B->SetNumberOfScaleNodesScale1( 6 );
-  B->SetNumberOfScaleNodesScale2( 5 );
+  B->SetNumberOfScaleNodesScale1( 5 );
+  B->SetNumberOfScaleNodesScale2( 4 );
 
   // ---- set names for the two possible scale variables (according to variables used in FillEvent()) ---- //
-  B->SetScale1Name( "pT_max_[GeV]" );
-  B->SetScale2Name( "pT_2_[GeV]" );
+  B->SetScale1Name( "<pT> [GeV]" );
+  B->SetScale2Name( "pT_2 [GeV]" );
 
   // ---- Choose function for ScaleNode distances ---- //
   // --- fastNLO user: possibility to choose function which
@@ -403,11 +449,9 @@ void UserHHC::inittable(){
   //                Otherwise you might find "NaN"'s in your reference tables
   //                rendering them unusable in the fastNLO merge step.  
   //
-  if(doReference){
-    //B->SetFuncMuForReference( Fct_x_exp03y , Fct_x_exp03y , 0 );
-    B->SetFuncMuForReference( Fct_x , Fct_x , 1 );
-    B->SetFuncMuForReference( Fct_y , Fct_y , 2 );
-  }
+  //  B->SetFuncMuForReference( Fct_x_exp03y , Fct_x_exp03y , 0 );
+  //B->SetFuncMuForReference( Fct_x , Fct_x , 1 );
+  //B->SetFuncMuForReference( Fct_y , Fct_y , 2 );
 }
 
 void UserHHC::DefineBinning(){
@@ -494,12 +538,12 @@ void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
       scale2lo[i] = 1.0, scale2hi[i]=9.9e10;
     }
   } else {
-    cout << endl << "fastNLO: Initializing x limits ..." << endl;
-    FILE * infile;
-    infile = fopen("fastNLO-warmup.dat","r");
-    if ( ! infile ) {
-      cout << "fastNLO: WARNING! Could not read x limits from file: fastNLO-warmup.dat" << endl;
-      cout << "         Trying to find and use x limits included in scenario author code ..." << endl;
+     cout << endl << "fastNLO: Initializing x limits ..." << endl;
+     //     FILE * infile;
+     //     infile = fopen("fastNLO-warmup.dat","r");
+     //     if ( ! infile ) {
+     //cout << "fastNLO: WARNING! Could not read x limits from file: fastNLO-warmup.dat" << endl;
+     //cout << "         Trying to find and use x limits included in scenario author code ..." << endl;
       // --------- fastNLO: Warm-Up run results (start)
       // fastNLO user: paste warm-up run results here ...
       // 7191000000 contributions (!= events) in warm-up run
@@ -647,40 +691,40 @@ void UserHHC::GetWarmupValues( fnloBlockBNlojet* B ){
       // Count no. of xlim values > 0 (should be equal to NObsBin!)   
       int nxlim = 0;
       for (int i=0; i<NObsBin; i++) {
-	if (xlim[i] > 0.) {nxlim++;}
+	 if (xlim[i] > 0.) {nxlim++;}
       }
       if (nxlim != NObsBin ) {
 	cerr << "fastNLO: ERROR! Could not find proper x limits in scenario code!" << endl;
 	cerr << "         Do a warm-up run first." << endl;
 	exit(1);
       }
-    } else {
-      cout << "fastNLO: Reading x limits from file fastNLO-warmup.dat ..." << endl;
-      char line[256];
-      // Ignore first documentation line
-      if ( ! fgets(line,sizeof(line),infile) ) {
-	cerr << "fastNLO: ERROR! Reading empty file: fastNLO-warmup.dat" << endl;
-	exit(1);
-      }
-      printf("fastNLO: Read first, documentation line from file: fastNLO-warmup.dat\n");
-      printf("%s",line);
-      // Now read all limits
-      int i = 0;
-      while ( fgets(line,sizeof(line),infile) ) {
-	int nvar = sscanf(line,"      xlim[ %*u ] = %le , scale1lo[ %*u ] = %le , scale1hi[ %*u ] = %le , scale2lo[ %*u ] = %le , scale2hi[ %*u ] = %le;",
-			  &xlim[i],&scale1lo[i],&scale1hi[i],&scale2lo[i],&scale2hi[i]);
-	if (nvar != 5) {
-	  cerr << "fastNLO: ERROR! x limits line did not match expected format:" << endl;
-	  printf("%s",line);
-	  exit(1);
-	}
-	i++;
-      }
-      if (i != NObsBin ) {
-	cerr << "fastNLO: ERROR! Number of x limits read != NObsBin: i = " << i << ", NObsBin = " << NObsBin << endl;
-	exit(1);
-      }
-    }
+//   } else {
+//       cout << "fastNLO: Reading x limits from file fastNLO-warmup.dat ..." << endl;
+//       char line[256];
+//       // Ignore first documentation line
+//       if ( ! fgets(line,sizeof(line),infile) ) {
+// 	cerr << "fastNLO: ERROR! Reading empty file: fastNLO-warmup.dat" << endl;
+// 	exit(1);
+//       }
+//       printf("fastNLO: Read first, documentation line from file: fastNLO-warmup.dat\n");
+//       printf("%s",line);
+//       // Now read all limits
+//       int i = 0;
+//       while ( fgets(line,sizeof(line),infile) ) {
+// 	int nvar = sscanf(line,"      xlim[ %*u ] = %le , scale1lo[ %*u ] = %le , scale1hi[ %*u ] = %le , scale2lo[ %*u ] = %le , scale2hi[ %*u ] = %le;",
+// 			  &xlim[i],&scale1lo[i],&scale1hi[i],&scale2lo[i],&scale2hi[i]);
+// 	if (nvar != 5) {
+// 	  cerr << "fastNLO: ERROR! x limits line did not match expected format:" << endl;
+// 	  printf("%s",line);
+// 	  exit(1);
+// 	}
+// 	i++;
+//       }
+//       if (i != NObsBin ) {
+// 	cerr << "fastNLO: ERROR! Number of x limits read != NObsBin: i = " << i << ", NObsBin = " << NObsBin << endl;
+// 	exit(1);
+//       }
+//     }
   }
   // --- print initialized values 
   cout << endl << "fastNLO: Print initialized x and mu limits:" << endl;
@@ -731,17 +775,25 @@ void UserHHC::end_of_event(){
     for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
       table->GetBlockB(k)->Nevt = (long long int)nevents;
     }
+    //cout<<" EXITING in fnl5002 to shorten."<<endl; exit(1);
     writetable();
-    printf("fastNLO: Table written.\n");
+    printf("fastNLO: Old table written.\n");
+    ftable->SetNumberOfEvents(nevents);
+    ftable->WriteTable();    
+    printf("fastNLO: New table written.\n");
   }
 }
 
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
+
+  InitFastNLO(__file_name);
+
   tablefilename.assign(__file_name.c_str());
   tablefilename += ".tab";
    
+
   // --- determine whether we are running LO or NLO
   const char* const file = __file_name.c_str(); 
 
@@ -760,23 +812,23 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
 
   // --- determine whether this is a debug, reference, or warm-up run
   doDebug = false;
-  if (strstr(file,"deb")!=NULL) {
-    doDebug = true;
-    printf("fastNLO: This is a debug run. Attention, huge output!\n");
-  }
+  //   if (strstr(file,"deb")!=NULL) {
+  //     doDebug = true;
+  //     printf("fastNLO: This is a debug run. Attention, huge output!\n");
+  //   }
   doReference = false;
-  if (strstr(file,"ref")!=NULL) {
-    doReference = true;
-    printf("fastNLO: This is a reference run!\n");
-  }
+  //   if (strstr(file,"ref")!=NULL) {
+  //     doReference = true;
+  //     printf("fastNLO: This is a reference run!\n");
+  //   }
   doWarmUp = false;
-  if (strstr(file,"wrm")!=NULL) {
-    doWarmUp = true;
-    printf("fastNLO: This is a warm-up run!\n");
-    if ( ! nlo ) {
-      printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
-    }
-  }
+  //   if (strstr(file,"wrm")!=NULL) {
+  //     doWarmUp = true;
+  //     printf("fastNLO: This is a warm-up run!\n");
+  //     if ( ! nlo ) {
+  //       printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
+  //     }
+  //   }
   if ( doWarmUp && doReference ) {
     printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
     printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
@@ -797,4 +849,25 @@ double UserHHC::GetEcms(){
   double ecms = 0;
   psinput(NULL,ecms);
   return sqrt(ecms);
+}
+
+
+void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
+{
+   // create table and read in steering...
+   cout<<"\n ---------------------------------------------------------------\n"<<endl;
+   ftable = new fastNLOCreate("fnl5002pt12.str");
+
+   // obtain relevant variables from nlojet
+   ftable->SetEcms(UsefulNlojetTools::GetEcms());
+   ftable->SetLoOrder(UsefulNlojetTools::GetNj());
+   ftable->SetOrderOfAlphasOfCalculation(UsefulNlojetTools::GetOrderOfRun(__file_name));
+
+   // set filename, which is specified through command line
+   string tabFilename = __file_name.c_str();
+   tabFilename += "_neu.tab";
+   ftable->SetFilename(tabFilename);
+
+   // give information to hb.
+   //ftable->Print();
 }
