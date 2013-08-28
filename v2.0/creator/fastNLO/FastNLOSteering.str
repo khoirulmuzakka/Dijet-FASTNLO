@@ -1,0 +1,124 @@
+!
+!  A first steering file for creating a fastNLO table
+!
+
+	
+FlexibleScaleTable	true
+
+NumberOfScaleNodes_Scale1	5
+NumberOfScaleNodes_Scale2	5
+
+! -------------------------------
+!   Unit of barn of the publication
+! -------------------------------
+PublicationUnits	12
+
+
+
+
+! -------------------------------
+!  Description of scenario
+!  (Write each line of description in quotation marks)
+! -------------------------------
+ScenarioName		fnhTest
+ScenarioDescription {
+"Blabla erster"
+"Testscnenario"
+"arXiv::432u0482"
+"trallala"
+}
+
+! -------------------------------
+!   Center of masse energy
+! -------------------------------
+CenterOfMassEnergy	319
+
+! -------------------------------
+!   Order of alpha_s of the leading-order process
+! -------------------------------
+LeadingOrder			1
+
+
+
+
+! -------------------------------
+!  How many differential dimensions 
+!  are measured.
+!  Number must be consistent with DimensionLabels, and DimensionIsDifferential, ...
+!    - 1: read in 'SingleDiffBinning'
+!    - 2: read in 'DoubleDifferentialBinning'
+!    - 3: read in 'TripleDifferentialBinning'
+! -------------------------------
+DifferentialDimension	2
+
+
+! -------------------------------
+!  Labels for the measurement dimension
+! -------------------------------
+DimensionLabels {
+"Q2"
+"P_T" "gjdkfla"
+}
+
+
+! --------------------------------
+!   Binning
+! - - - - - - - - - - - - - - - - 
+! Use either 'SingleDiffBinning' or
+! 'DoubleDifferentialBinning' according to
+! specification of 'DifferentialDimension'
+! (Triple-differential, and non-differential measurements not yet implemented)
+! --------------------------------
+
+! Example !!
+SingleDiffBinning {
+ 7 11 18 30 50 100
+}
+
+! Example !!
+DoubleDifferentialBinning {{
+  1stDimLo  1stDimUp    "----- Array of bin-grid for 2nd dimension ----"
+   100       150            7 11 18 30 50 	
+   150       200            7 11 18 30 50 	
+   200       400            7 11 18 30 50
+   400       700            7 11 18 30 50
+   700       5000           7 11 18 30 50
+   5000      15000          7 11 18 30 50
+}}
+
+! Example !! Triple differetial implementation not fully tested yet (29.07.13)
+TripleDifferentialBinning {{
+  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3nd dimension ----"
+   100       150         -1        0.           7 11 18 30 50 	
+   150       200         -1.       0.           7 11 18 30 50 	
+   200       400         0.       1.5           7 11 18 30 50
+   400       700         0.       1.5           7 11 18 30 50
+   700       5000        1.5      2.5          7 11 18 30 50
+   5000      15000       1.5      2.5          7 11 18 30 50
+}}
+
+
+! -------------------------------
+!  Is this a differential measurement in dimension X?
+!    - 0:  NO
+!    - 1:  YES
+!    - 2:  Divide Cross Section by bin width of that dimension
+! -------------------------------
+DimensionIsDifferential { 
+ 2  2 2
+}
+
+! --------------------------------
+!  Calculate bin width from lower and upper bin boundary
+!    - if 'false':
+!       specify a table the widts of every bin:
+!        BinWidth { x1 x2 x3 ... }
+!    - if 'true':
+!      Specify a multiplicative factor for bin width (useful for |y|-measurements)
+!
+!  If the measurement is not divided by the bin width, then specify
+!   'CalculateBinWidth  true' and use 'DimensionIsDifferential' equal '0' for each dimension.
+! --------------------------------
+
+CalculateBinWidth	true
+BinWidthFactor		1.
