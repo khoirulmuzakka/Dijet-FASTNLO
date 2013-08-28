@@ -29,12 +29,9 @@ public:
    fastNLOInterpolBase(double min, double max);
    virtual ~fastNLOInterpolBase(void);
    
-//    virtual const vector<pair<int,double> >& GetNodeValues(double val) = 0;
-//    virtual vector<pair<int,double> > GetCopyOfNodeValues(double val) = 0;
    vector<pair<int,double> > GetNodeValues(double val);
    
    void MakeGrids(fastNLOGrid::GridType type, int nNodes);
-   //void MakeGrid(double min, double max);
    void MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodes);
    void RemoveLastNode();
 
@@ -86,8 +83,6 @@ protected:
    vector<pair<int,double> > fNodes;
    double fLastVal;
 
-
-public:
    double fvalmax;
    double fvalmin;
    fastNLOGrid::GridType fdm; // distance measure
@@ -96,9 +91,6 @@ public:
    int fnmod ; // variable for final nodes. Has to be filled by inherited algorithm
    bool fLastGridPointWasRemoved; // odd boolean to agree with original code;
    
-   //vector<pair<int,double> > fRetNodes;
-private:
-
 };
 
 
