@@ -113,12 +113,12 @@ protected:
    void StripWhitespace(string* s);
 
    void PrintScaleSettings(EMuX kMuX=kMuR);
-   void FillBlockBPDFLCsDISv20(fastNLOCoeffAddPert* B);
+   void FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B);
-   void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddPert* B);
+   void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* B);
    void CalcAposterioriScaleVariation();
-   void FillAlphasCacheInBlockBv20(fastNLOCoeffAddPert* B);
+   void FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* B);
    void FillAlphasCacheInBlockBv21(fastNLOCoeffAddFlex* B);
    double CalcAlphas(double Q);
    double CalcReferenceAlphas();
@@ -139,7 +139,7 @@ protected:
    double FuncExpProd2(double scale1 , double scale2) ;
 
    void CalcCrossSectionv21(fastNLOCoeffAddFlex* B , bool IsLO = false);
-   void CalcCrossSectionv20(fastNLOCoeffAddPert* B , bool IsLO = false);
+   void CalcCrossSectionv20(fastNLOCoeffAddFix* B , bool IsLO = false);
 
    fastNLOCoeffAddBase* B_NLO() const {
       return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];

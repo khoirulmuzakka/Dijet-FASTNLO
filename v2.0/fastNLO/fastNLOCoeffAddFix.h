@@ -1,25 +1,25 @@
-#ifndef __fastNLOCoeffAddPert__
-#define __fastNLOCoeffAddPert__
+#ifndef __fastNLOCoeffAddFix__
+#define __fastNLOCoeffAddFix__
 
 #include "fastNLOCoeffAddBase.h"
 #include "fastNLOConstants.h"
 
 using namespace std;
 
-class fastNLOCoeffAddPert : public fastNLOCoeffAddBase {
+class fastNLOCoeffAddFix : public fastNLOCoeffAddBase {
 
    friend class fastNLOReader;
    friend class fastNLOCreate;
 
 public:
-   fastNLOCoeffAddPert(int NObsBin);
-   fastNLOCoeffAddPert(const fastNLOCoeffBase&);
+   fastNLOCoeffAddFix(int NObsBin);
+   fastNLOCoeffAddFix(const fastNLOCoeffBase&);
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    void ReadRest(istream *table);
    virtual int Write(ostream *table, int option = 0);
-   virtual int Copy(fastNLOCoeffAddPert* other);
-   void Add(fastNLOCoeffAddPert* other);
+   virtual int Copy(fastNLOCoeffAddFix* other);
+   void Add(fastNLOCoeffAddFix* other);
    virtual void Print() const;
    
    int GetTotalScalevars() const ;
@@ -36,8 +36,8 @@ public:
    double GetScaleNode(int iObs, int iSvar, int iNode ) const { return ScaleNode[iObs][0][iSvar][iNode];}
 
 protected:
-   fastNLOCoeffAddPert();
-   int ReadCoeffAddPert(istream *table);
+   fastNLOCoeffAddFix();
+   int ReadCoeffAddFix(istream *table);
 
    vector < int > Nscalevar;
    vector < int > Nscalenode;

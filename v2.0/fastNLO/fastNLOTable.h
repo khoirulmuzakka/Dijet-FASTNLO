@@ -15,7 +15,7 @@
 
 #include "fastNLOCoeffData.h"
 #include "fastNLOCoeffMult.h"
-#include "fastNLOCoeffAddPert.h"
+#include "fastNLOCoeffAddFix.h"
 #include "fastNLOCoeffAddFlex.h"
 
 using namespace std;

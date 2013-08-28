@@ -59,9 +59,9 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
       cN->ReadRest(table);
       return cN;
    }
-   else if ( fastNLOCoeffAddPert::CheckCoeffConstants(&cB,quiet) ) {
+   else if ( fastNLOCoeffAddFix::CheckCoeffConstants(&cB,quiet) ) {
       debug["ReadRestOfCoeffTable"]<<"Found additive fixed order contribution (v2.0). Now reading in."<<endl;
-      fastNLOCoeffAddPert* cN = new fastNLOCoeffAddPert(cB);
+      fastNLOCoeffAddFix* cN = new fastNLOCoeffAddFix(cB);
       cN->ReadRest(table);
       return cN;
    }

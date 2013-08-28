@@ -6,7 +6,7 @@
 #include "read_steer.h"
 
 #include "fastNLOCoeffAddFlex.h"
-#include "fastNLOCoeffAddPert.h"
+#include "fastNLOCoeffAddFix.h"
 
 using namespace std;
 
@@ -109,13 +109,13 @@ void fastNLOCreate::InitCoeffTable(){
 int fastNLOCreate::CreateCoeffTable(){
    debug["CreateCoeffTable"]<<endl;
    if ( !fCoeff.empty() ){
-      error["CreateCoeffAddPert"]<<"Vector of coefficients must be empty, since only one coefficient table is allowed."<<endl;
+      error["CreateCoeffAddFix"]<<"Vector of coefficients must be empty, since only one coefficient table is allowed."<<endl;
       exit(1);
    }
    if (fIsFlexibleScale )	
       return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFlex(NObsBin,ILOord) );
    else				
-      return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddPert(NObsBin) );
+      return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFix(NObsBin) );
 }
 
 
@@ -794,7 +794,7 @@ void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
       }
    }
    else {
-      fastNLOCoeffAddPert* c = (fastNLOCoeffAddPert*)GetTheCoeffTable();
+      fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
 	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
 	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
@@ -832,7 +832,7 @@ void fastNLOCreate::DivideCoefficientsByBinWidth() {
       }
    }
    else {
-      fastNLOCoeffAddPert* c = (fastNLOCoeffAddPert*)GetTheCoeffTable();
+      fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
 	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
 	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
@@ -869,7 +869,7 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
       }
    }
    else {
-      fastNLOCoeffAddPert* c = (fastNLOCoeffAddPert*)GetTheCoeffTable();
+      fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
 	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
 	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {

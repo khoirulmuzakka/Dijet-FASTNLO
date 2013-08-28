@@ -7,7 +7,7 @@
 #include "read_steer.h"
 
 #include "fastNLOCoeffAddFlex.h"
-#include "fastNLOCoeffAddPert.h"
+#include "fastNLOCoeffAddFix.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -92,12 +92,12 @@ void fastNLOReader::Init() {
 	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) { 
 	    debug["Init"]<<"Found reference table."<<endl;
 	    if ( c->IsLO() ) {
-// 	       if ( fastNLOCoeffAddPert::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.0.");
+// 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.1."); // not forseen
 	       Coeff_LO_Ref           = (fastNLOCoeffAddBase*)c;
 	    } 
 	    else if ( c->IsNLO() ) {
-// 	       if ( fastNLOCoeffAddPert::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.0.");
+// 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.1."); // not foreseen
 	       Coeff_NLO_Ref  = (fastNLOCoeffAddBase*)c;
 	    } else {
@@ -179,7 +179,7 @@ void fastNLOReader::InitScalevariation() {
    fScalevar     = -1;
 
    if (!GetIsFlexibleScaleTable()) {
-      fastNLOCoeffAddPert* cNLO = (fastNLOCoeffAddPert*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
       for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
          const double muFac = cNLO->GetScaleFactor(iscls);
          if (fabs(muFac-1.0) < 1.e-7) {
@@ -250,7 +250,7 @@ double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
    else {
       // Check for maximal scale variation of all rel. and active SM calcs
       int scalevarmax = GetNScaleVariations();
-      fastNLOCoeffAddPert* cNLO = (fastNLOCoeffAddPert*)B_NLO();  
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();  
 	 if (scalevar >= scalevarmax) {
 	    warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
 	    man<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
@@ -317,7 +317,7 @@ void fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
          // Fill alpha_s cache
          debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
          if (!GetIsFlexibleScaleTable(c)) {
-            FillAlphasCacheInBlockBv20((fastNLOCoeffAddPert*)c);
+            FillAlphasCacheInBlockBv20((fastNLOCoeffAddFix*)c);
          } else {
             FillAlphasCacheInBlockBv21((fastNLOCoeffAddFlex*)c);
          }
@@ -328,7 +328,7 @@ void fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
          if (c->GetIPDFdef1() == 2) {
             if (c->GetNPDFDim() == 0) {
                if (!GetIsFlexibleScaleTable(c)) {
-                  FillBlockBPDFLCsDISv20((fastNLOCoeffAddPert*)c);
+                  FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
                } else {
                   FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
                }
@@ -338,7 +338,7 @@ void fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
          else if (c->GetIPDFdef1() == 3) {
             if (c->GetNPDFDim() == 1) {
                if (!GetIsFlexibleScaleTable()) {
-                  FillBlockBPDFLCsHHCv20((fastNLOCoeffAddPert*)c);
+                  FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
                } else {
                   FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
                }
@@ -372,7 +372,7 @@ int fastNLOReader::GetNScaleVariations() const {
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
 	 if (!BBlocksSMCalc.empty()) {
 	    for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-	       fastNLOCoeffAddPert* c = (fastNLOCoeffAddPert*)BBlocksSMCalc[j][i];
+	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
 	       // Do not check pQCD LO or mult. corrections
 	       if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
 		   !(j==kFixedOrder && i==kLeading)) {
@@ -398,7 +398,7 @@ vector < double > fastNLOReader::GetScaleFactors() const {
       return vector<double>();
    }
    else 
-      return ((fastNLOCoeffAddPert*)BBlocksSMCalc[kFixedOrder][kNextToLeading])->GetAvailableScaleFactors();
+      return ((fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading])->GetAvailableScaleFactors();
 }
 
 
@@ -474,10 +474,10 @@ void fastNLOReader::CalcReferenceCrossSection() {
 	 for (int i=0; i<NObsBin; i++) {
 	    double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
 	    for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
-	       XSectionRef[i] +=  ((fastNLOCoeffAddPert*)Coeff_LO_Ref)->GetSigmaTilde(i,0,0,0,l) * unit; // no scalevariations in LO tables
+	       XSectionRef[i] +=  ((fastNLOCoeffAddFix*)Coeff_LO_Ref)->GetSigmaTilde(i,0,0,0,l) * unit; // no scalevariations in LO tables
 	    }
 	    for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
-	       XSectionRef[i] +=  ((fastNLOCoeffAddPert*)Coeff_NLO_Ref)->GetSigmaTilde(i,fScalevar,0,0,l) * unit;
+	       XSectionRef[i] +=  ((fastNLOCoeffAddFix*)Coeff_NLO_Ref)->GetSigmaTilde(i,fScalevar,0,0,l) * unit;
 	    }
 	 }
       }
@@ -573,8 +573,8 @@ void fastNLOReader::CalcCrossSection() {
 	 if ( bUseSMCalc[j][i] ) {
 	    if ( fastNLOCoeffAddFlex::CheckCoeffConstants(BBlocksSMCalc[j][i],true) )
 	       CalcCrossSectionv21((fastNLOCoeffAddFlex*)BBlocksSMCalc[j][i]);
-	    else if ( fastNLOCoeffAddPert::CheckCoeffConstants(BBlocksSMCalc[j][i],true) )
-	       CalcCrossSectionv20((fastNLOCoeffAddPert*)BBlocksSMCalc[j][i]);
+	    else if ( fastNLOCoeffAddFix::CheckCoeffConstants(BBlocksSMCalc[j][i],true) )
+	       CalcCrossSectionv20((fastNLOCoeffAddFix*)BBlocksSMCalc[j][i]);
 	 }
       }
    }
@@ -582,7 +582,7 @@ void fastNLOReader::CalcCrossSection() {
 
    // contributions from the a-posteriori scale variation
    if (!GetIsFlexibleScaleTable()) {
-      fastNLOCoeffAddPert* cNLO = (fastNLOCoeffAddPert*)B_NLO();
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
       if ( fabs( fScaleFacMuR - cNLO->GetScaleFactor(fScalevar) ) > DBL_MIN ) {
 	 CalcAposterioriScaleVariation();
       }
@@ -590,7 +590,7 @@ void fastNLOReader::CalcCrossSection() {
 
    // calculate LO cross sections
    if (!GetIsFlexibleScaleTable())
-      CalcCrossSectionv20((fastNLOCoeffAddPert*)B_LO(),true);
+      CalcCrossSectionv20((fastNLOCoeffAddFix*)B_LO(),true);
    else
       CalcCrossSectionv21((fastNLOCoeffAddFlex*)B_LO(),true);
 
@@ -637,7 +637,7 @@ void fastNLOReader::CalcAposterioriScaleVariation() {
    double scalefac       = fScaleFacMuR/fScaleFacMuF;
    debug["CalcAposterioriScaleVariation"]<<"scalefac="<<scalefac<<endl;
    if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariation"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
-   fastNLOCoeffAddPert* cLO  = (fastNLOCoeffAddPert*) B_LO();
+   fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;
    const double n     = cLO->GetNpow();
@@ -715,7 +715,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
 //______________________________________________________________________________
 
 
-void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddPert* c , bool IsLO) {
+void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    debug["CalcCrossSectionv20"]<<"Npow="<<c->GetNpow()<<"\tIsLO="<<IsLO<<endl;
    //
    //  Cross section calculation in v2.0 format
@@ -788,8 +788,8 @@ void fastNLOReader::FillAlphasCache() {
 	       fastNLOCoeffBase* c = BBlocksSMCalc[j][i];
 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
 		  FillAlphasCacheInBlockBv21((fastNLOCoeffAddFlex*)c);
-	       else if ( fastNLOCoeffAddPert::CheckCoeffConstants(c,true) )
-		  FillAlphasCacheInBlockBv20((fastNLOCoeffAddPert*)c);
+	       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
+		  FillAlphasCacheInBlockBv20((fastNLOCoeffAddFix*)c);
 	       else {
 		  error["FillAlphasCache"]<<"Could not identify contribution. Printing."<<endl;
 		  c->Print();
@@ -804,7 +804,7 @@ void fastNLOReader::FillAlphasCache() {
 //______________________________________________________________________________
 
 
-void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddPert* c) {
+void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    //
    //  Internal method for filling alpha_s cache
    //
@@ -1017,7 +1017,7 @@ void fastNLOReader::FillPDFCache(double chksum) {
 	       if (c->GetIPDFdef1() == 2) {
 		  if (c->GetNPDFDim() == 0) {
 		     if (!GetIsFlexibleScaleTable(c)) 
-			FillBlockBPDFLCsDISv20((fastNLOCoeffAddPert*)c);
+			FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
 		     else 
 			FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
 		  }
@@ -1025,7 +1025,7 @@ void fastNLOReader::FillPDFCache(double chksum) {
 	       // ---- pp ---- //
 	       else if (c->GetIPDFdef1() == 3) {
 		  if (c->GetNPDFDim() == 1) {
-		     if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddPert*)c);
+		     if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
 		     else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
 		  } else {
 		     error<<"Only half matrices for hh is implemented.\n";
@@ -1044,7 +1044,7 @@ void fastNLOReader::FillPDFCache(double chksum) {
 //______________________________________________________________________________
 
 
-void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddPert* c) {
+void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsDISv20"]<<endl;
    // todo: flag IScaleDep should indicate whether scale variations may exist or not.
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
@@ -1126,7 +1126,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
 //______________________________________________________________________________
 
 
-void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddPert* c) {
+void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar; // Use IScaleDep
    double scalefac       = fScaleFacMuF/c->GetScaleFactor(scaleVar);
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
