@@ -5,10 +5,10 @@
 ###########################################################################################
 
 OBJS 	= main.cc speaker.cc fastNLOInterpolBase.cc fastNLOInterpolCatmulRom.cc fastNLOBase.cc fastNLOTable.cc fastNLOCoefficients.cc fastNLOCreate.cc read_steer.cc
-OBJS	+= fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddPert.cc fastNLOCoeffAddFlex.cc
+OBJS	+= fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddFix.cc fastNLOCoeffAddFlex.cc
 OBJS	+= fastNLOReader.cc fastNLOCoeffAddEvalBase.cc fastNLOCoeffAddFlexEval.cc fastNLOPDFLinearCombinations.cc
 OBJS_LIB = speaker.o fastNLOInterpolBase.o fastNLOInterpolCatmulRom.o fastNLOBase.o fastNLOTable.o fastNLOCoefficients.o fastNLOCreate.o read_steer.o
-OBJS_LIB +=  fastNLOCoeffBase.o fastNLOCoeffData.o fastNLOCoeffMult.o fastNLOCoeffAddBase.o fastNLOCoeffAddPert.o fastNLOCoeffAddFlex.o
+OBJS_LIB +=  fastNLOCoeffBase.o fastNLOCoeffData.o fastNLOCoeffMult.o fastNLOCoeffAddBase.o fastNLOCoeffAddFix.o fastNLOCoeffAddFlex.o
 OBJS_LIB += fastNLOReader.o fastNLOCoeffAddEvalBase.o fastNLOCoeffAddFlexEval.o fastNLOPDFLinearCombinations.o
 #PlotContributions.o FastNLOBlockB.o FastNLOReader.o Alphas.o qcdnumdummy.o
 #OBJS 	= PlotContributions.o FastNLOBlockB.cc FastNLOReader.cc Alphas.cc qcdnumdummy.f
