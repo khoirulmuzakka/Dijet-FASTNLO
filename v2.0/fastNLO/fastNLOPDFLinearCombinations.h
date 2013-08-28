@@ -8,7 +8,6 @@
 using namespace std;
 
 class fastNLOPDFLinearCombinations {
-   //: public PrimalScream {
 
 public:
    fastNLOPDFLinearCombinations();
