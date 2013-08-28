@@ -17,8 +17,6 @@ fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), ofil
 
 fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), ofilestream(0), fPrecision(8)  {
    if (!fWelcomeOnce) PrintWelcomeMessage();
-   //fastNLOBase::fastNLOBase(string name) : fastNLOBase() , ffilename(name) {
-   //ReadTable();
 }
  
 fastNLOBase::~fastNLOBase(){
@@ -40,7 +38,6 @@ bool fastNLOBase::ReadMagicNo(istream *table) {
    *table >> key;
    if(key != tablemagicno){
       error["ReadMagicNo"]<<"Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
-      //cerr<<"ReadMagicNo. Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
       return false;
    };
    return true;
@@ -168,60 +165,6 @@ void fastNLOBase::CloseFileWrite(){
 void fastNLOBase::CloseStream(){
    ofilestream->close();
 }
-
-/*
-int fastNLOBase::CreateBlockB(int no){
-   fastNLOBlockB* blockb = new fastNLOBlockB(&fScenario);
-   if((no+1)>(int)BlockB.size()){
-      BlockB.resize(no+1);
-   }
-   BlockB[no] = blockb;
-   return 0;
-}
-
-int fastNLOBase::CreateBlockB(int no,fastNLOBlockB *newblockb){
-   if((no+1)>(int)BlockB.size()){
-      BlockB.resize(no+1);
-   }
-   BlockB[no] = newblockb;
-   return 0;
-}
-
-int fastNLOBase::WriteBlockB(int no){
-   if((no)<(int)BlockB.size()){
-      return BlockB[no]->Write(ofilestream);
-   }else{
-      printf("fastNLOBase::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
-      exit(2);
-   }
-}
-
-int fastNLOBase::WriteBlockBDividebyN(int no){
-   if((no)<(int)BlockB.size()){
-      return BlockB[no]->Write(ofilestream,fastNLOBlockB::DividebyNevt);
-   }else{
-      printf("fastNLOBase::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
-      exit(2);
-   }
-}
-
-
-int fastNLOBase::WriteBlockB(int no,ofstream* outstream ){
-   if((no)<(int)BlockB.size()){
-      return BlockB[no]->Write(outstream);
-   }else{
-      printf("fastNLOBase::WriteBlockB: Table no. %d does not exist, only up to %zu. Stopping.\n",no,BlockB.size());
-      exit(2);
-   }
-}
-
-
-void fastNLOBase::DeleteAllBlockB(){
-   for (size_t i = 0; i < BlockB.size(); ++i)
-      delete BlockB[i];
-   BlockB.clear();
-}
-*/
 
 
 
