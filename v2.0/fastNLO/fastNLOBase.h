@@ -17,45 +17,27 @@ public:
    ~fastNLOBase();
 
    // i/o
-   int ReadTable();
-   int ReadHeader(istream *table);
+   int ReadTable();							// read table
+   int ReadHeader(istream *table);					// read header of table (BlockA1)
    
-   int OpenFileRead();
-   void WriteTable();
-   int WriteHeader(ostream *table);
-   void RewindRead();
+   int OpenFileRead();							// open stream
+   void WriteTable();							// write full table to disk
+   int WriteHeader(ostream *table);					// write hader using ostream
+   void RewindRead();							
    void SkipBlockA1A2();
    ofstream *OpenFileWrite();
    ofstream *OpenFileRewrite();
    void CloseFileWrite();
    void CloseStream();
-   //    int WriteBlockB(int no);
-//    int WriteBlockB(int no,ofstream* outstream );
-//    int WriteBlockBDividebyN(int no);
-//    void DeleteAllBlockB(); // FIX: Correct way would be to fix object ownership
-//    int CreateBlockB(int no);
-//    int CreateBlockB(int no,fastNLOBlockB *newblock);
-
-
-   // useful getters
-   //fastNLOBlockB* GetBlockB(int no){return BlockB[no];}
-   //    int GetNObsBin(){return fScenario.GetNObsBin();}
-   //    int GetNScaleVar(int dimension){return BlockB[0]->Nscalevar[dimension];}
-   //    int GetNScaleVar(){return BlockB[0]->GetTotalScalevars();}
-   //    int GetIscale(int scale){return BlockB[0]->Iscale[scale];}
-   //    double GetScaleFac(int dimension,int scalevar){return BlockB[0]->ScaleFac[dimension][scalevar];}
-   //    string GetScaleDescript(int dimension,int line){return BlockB[0]->ScaleDescript[dimension][line];}
-   //    double GetLoBin(int bin, int dimension){return fScenario.LoBin[bin][dimension];}
-   //    double GetUpBin(int bin, int dimension){return fScenario.UpBin[bin][dimension];}
 
    virtual void Print() const;
    
    // header
-   void PrintHeader() const;
-   void SetHeaderDefaults();
-   void ResetHeader();
-   void SetContributionHeader();
-   bool IsCompatibleHeader(fastNLOBase* other) const;
+   void PrintHeader() const;						// Print header variables (BlockA1) to screen
+   void SetHeaderDefaults();						// Set some default values 
+   void ResetHeader();							// Reset variables to default values
+   void SetContributionHeader();					// 	
+   bool IsCompatibleHeader(fastNLOBase* other) const;			// Compare header with header of another table
 
    // getter/setters
    string GetFilename() const {return ffilename;}
@@ -93,10 +75,10 @@ public:
 
 
 protected:
-   void StripWhitespace(string &str) const;
-   void PutBackMagicNo(istream* table);
-   bool ReadMagicNo(istream *table);
-   void PrintWelcomeMessage();
+   void StripWhitespace(string &str) const;					
+   void PutBackMagicNo(istream* table);					// Reset magic number, such that it can be recognized by other reading routines
+   bool ReadMagicNo(istream *table);					// read and crosscheck magic number
+   void PrintWelcomeMessage();						// Say hello to fastNLO user
 
    string ffilename;
    ifstream *ifilestream;
