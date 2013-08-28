@@ -790,6 +790,12 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
                if (xmaxbin < Nxtot1[ObsBin] && xminbin < Nxtot1[ObsBin]) {
 
                   nlo::weight_hhc wtmp = wt;  // - a working copy of the weights
+		  double weightstmp[7][7];  // - a working copy of the weights
+		  for ( int kk = 0 ; kk<7 ; kk ++ ){ 
+		     for ( int p = 0 ; p<7 ; p ++ ){
+			weightstmp[kk][p]=weights[kk][p];
+		     }
+		  }
                   // --- check if above diagonal? project back and swap qg<->gq
                   if (xminbin>xmaxbin) {
                      int di = xminbin - xmaxbin;
@@ -804,13 +810,12 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
                      wtmp[5] = wtmp[6];
                      wtmp[6] = buffer;
                      for ( int kk = 0 ; kk<7 ; kk ++ ){ // contrib amp_i
-                        double weightsbuffer;
                         //    weightsbuffer = weights[kk][1];
                         //    weights[kk][1] = weights[kk][2];
                         //    weights[kk][2] = weightsbuffer;
-                        weightsbuffer = weights[kk][5];
-                        weights[kk][5] = weights[kk][6];
-                        weights[kk][6] = weightsbuffer;
+			buffer = weightstmp[kk][5];
+                        weightstmp[kk][5] = weightstmp[kk][6];
+                        weightstmp[kk][6] = buffer;
                      }
                      //         // new ordering (1,2)->(5,6)
                      //         buffer  = wtmp[5]; // swap subprocesses 6,7
