@@ -49,7 +49,7 @@ public:
    int GetNxtot2(int iBin ) const { return XNode2[iBin].size(); }
 
    double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; } 
-   double  GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; } 
+   double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; } 
 
    void Add(fastNLOCoeffAddBase* other);
    bool IsReference() const {return IRef>0;};

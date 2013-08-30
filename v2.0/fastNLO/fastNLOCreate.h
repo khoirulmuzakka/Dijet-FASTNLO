@@ -60,9 +60,15 @@ struct fnloEvent {
    void SetWeight_MuIndependent(double w) {_w=w;}						// weights must be mutliplied with dummypdf (1/x)
    void SetWeight_log_mur(double w) {_wr=w;}							// set weight w, which will contribute with log_e(mur^2)*w
    void SetWeight_log_muf(double w) {_wf=w;}							// set weight w, which will contribute with log_e(muf^2)*w
+   void SetWeight_log_murr(double w) {_wrr=w;}							// set weight w, which will contribute with log^2_e(mur^2)*w
+   void SetWeight_log_muff(double w) {_wff=w;}							// set weight w, which will contribute with log^2_e(muf^2)*w
+   void SetWeight_log_murf(double w) {_wrf=w;}							// set weight w, which will contribute with log_e(mur^2)*log_e(muf^2)*w
    void AddWeight_MuIndependent(double w) {_w+=w;}						// weights must be mutliplied with dummypdf (1/x)
    void AddWeight_log_mur(double w) {_wr+=w;}							// set weight w, which will contribute with log_e(mur^2)*w
    void AddWeight_log_muf(double w) {_wf+=w;}							// set weight w, which will contribute with log_e(muf^2)*w
+   void AddWeight_log_murr(double w) {_wrr+=w;}							// set weight w, which will contribute with log^2_e(mur^2)*w
+   void AddWeight_log_muff(double w) {_wff+=w;}							// set weight w, which will contribute with log^2_e(muf^2)*w
+   void AddWeight_log_murf(double w) {_wrf+=w;}							// set weight w, which will contribute with log_e(mur^2)*log_e(muf^2)*w
 private:
    double _x1, _x2;										// an event has always identical x1 and x2;
    double _w, _wf, _wr, _wrr, _wff, _wrf;							// weights	
@@ -130,6 +136,8 @@ protected:
    void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid );
    double CalcPDFReweight(double x);
    void FillContribution();									// fill contribution into table
+   void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in pp/ppbar
+   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin);				// fill fixed scale table in pp/ppbar
    void ReadSteering(string steerfile);								// read steering file
    void ReadBinning();
    void ReadCoefficientSpecificVariables();
@@ -141,7 +149,7 @@ protected:
    void GetWarmupValues();
    int GetBin();										// get bin number from 'scenario' observables
    int GetXIndex(int Obsbin,int x1bin,int x2bin);						// get x-index in case of two hadrons.
-   int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2 =NULL);		// get maximum x-index	
+   int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2);			// get maximum x-index	
    bool fIsWarmup;										// is it a warmup run?
    int  fIOrd;											// order of alpha_s of run
    bool fIsFlexibleScale;									// is it a flexible scale table?

@@ -111,9 +111,13 @@ int fastNLOCoeffAddFlex::Write(ostream *table, int option){
 	 info["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
 	 NScaleDep=4;
       }
-      else {
+      else if ( Npow==fILOord+1 ) {
 	 info["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
 	 NScaleDep=5;
+      }
+      else if ( Npow==fILOord+2 ) {
+	 info["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
+	 NScaleDep=6;
       }
    }
    fastNLOCoeffAddBase::Write(table,option);
@@ -127,7 +131,7 @@ int fastNLOCoeffAddFlex::Write(ostream *table, int option){
       //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;
       nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-      if ( NScaleDep==3 || NScaleDep==5) {
+      if ( NScaleDep>=6) {
 	 nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
 	 nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
 	 nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
