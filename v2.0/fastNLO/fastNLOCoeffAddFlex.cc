@@ -70,9 +70,14 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
 
    nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true );
    //if ( NScaleDep==3 || fScen->ILOord!=Npow || NScaleDep==5 ){
-   if ( NScaleDep==3 || NScaleDep==5 ){
+   if ( NScaleDep==3 || NScaleDep>=5 ){
       nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
       nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true );
+      if ( NScaleDep>=6 ){
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRRDep , table , true );
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuFFDep , table , true );
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRFDep , table , true );
+      }
    }
    // fixing old convention
    if ( NScaleDep == 3 ) {
@@ -118,10 +123,15 @@ int fastNLOCoeffAddFlex::Write(ostream *table, int option){
    nn3 += WriteFlexibleTable( &ScaleNode2 , table );
    nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
    //if ( NScaleDep==3 || Npow!=fScen->ILOord || NScaleDep==5) {
-   if ( NScaleDep==3 || NScaleDep==5) {
+   if ( NScaleDep==3 || NScaleDep>=5) {
       //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;
       nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+      if ( NScaleDep==3 || NScaleDep==5) {
+	 nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+	 nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+	 nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+      }
    }
    if ( SigmaRefMixed.empty() ) fastNLOCoeffBase::ResizeTable(&SigmaRefMixed,fNObsBins,NSubproc);
    if ( SigmaRef_s1.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s1,fNObsBins,NSubproc);
@@ -153,9 +163,14 @@ void fastNLOCoeffAddFlex::Add(fastNLOCoeffAddFlex* other){
    CheckCoeffConstants(this);
 
    AddTableToAnotherTable( &SigmaTildeMuIndep , &(other->SigmaTildeMuIndep) ,w1 , w2 );
-   if ( NScaleDep==3 || NScaleDep==5 ) {
+   if ( NScaleDep==3 || NScaleDep>=5 ) {
       AddTableToAnotherTable( &SigmaTildeMuFDep , &(other->SigmaTildeMuFDep) ,w1 , w2 );
       AddTableToAnotherTable( &SigmaTildeMuRDep , &(other->SigmaTildeMuRDep) ,w1 , w2 );
+      if ( NScaleDep>=6 ) {
+	 AddTableToAnotherTable( &SigmaTildeMuRRDep , &(other->SigmaTildeMuRRDep) ,w1 , w2 );
+	 AddTableToAnotherTable( &SigmaTildeMuFFDep , &(other->SigmaTildeMuFFDep) ,w1 , w2 );
+	 AddTableToAnotherTable( &SigmaTildeMuRFDep , &(other->SigmaTildeMuRFDep) ,w1 , w2 );
+      }
    }
    AddTableToAnotherTable( &SigmaRefMixed , &(other->SigmaRefMixed) ,w1 , w2 );
    AddTableToAnotherTable( &SigmaRef_s1 , &(other->SigmaRef_s1) ,w1 , w2 );

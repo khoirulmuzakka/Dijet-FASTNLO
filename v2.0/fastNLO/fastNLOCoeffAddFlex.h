@@ -42,6 +42,9 @@ protected:
    v5d SigmaTildeMuIndep; 
    v5d SigmaTildeMuFDep; 
    v5d SigmaTildeMuRDep; 
+   v5d SigmaTildeMuRRDep; 
+   v5d SigmaTildeMuFFDep; 
+   v5d SigmaTildeMuRFDep; 
    // SigmaRef [NObsBins] [nsubproc]
    v2d SigmaRefMixed; 
    v2d SigmaRef_s1; 

@@ -659,6 +659,15 @@ void fastNLOCreate::FillContribution(){
 		     // 		     cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
 		     c->SigmaTildeMuRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
 		  }
+   		  if ( fEvent._wrr != 0 ) {
+		     c->SigmaTildeMuRRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
+		  }
+   		  if ( fEvent._wff != 0 ) {
+		     c->SigmaTildeMuFFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
+		  }
+   		  if ( fEvent._wrf != 0 ) {
+		     c->SigmaTildeMuRFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
+		  }
 	       }
 	    }
 	 }
@@ -786,6 +795,11 @@ void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
 		     if ( c->GetNScaleDep() >= 5 ) {
 			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= BinSize[i];
 			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= BinSize[i];
+			if ( c->GetNScaleDep() >= 6 ) {
+			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= BinSize[i];
+			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= BinSize[i];
+			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= BinSize[i];
+			}
 		     }
 		  }
 	       }
@@ -824,6 +838,11 @@ void fastNLOCreate::DivideCoefficientsByBinWidth() {
 		     if ( c->GetNScaleDep() >= 5 ) {
 			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] /= BinSize[i];
 			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] /= BinSize[i];
+			if ( c->GetNScaleDep() >= 6 ) {
+			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
+			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
+			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
+			}
 		     }
 		  }
 	       }
@@ -861,6 +880,11 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
 		     if ( c->GetNScaleDep() >= 5 ) {
 			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
 			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
+			if ( c->GetNScaleDep() >= 6 ) {
+			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
+			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
+			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
+			}
 		     }
 		  }
 	       }
@@ -1088,6 +1112,10 @@ void  fastNLOCreate::InitGrids() {
       c->SigmaTildeMuIndep	= stype;
       c->SigmaTildeMuRDep	= stype;
       c->SigmaTildeMuFDep	= stype;
+
+      c->SigmaTildeMuRRDep	= stype;
+      c->SigmaTildeMuFFDep	= stype;
+      c->SigmaTildeMuRFDep	= stype;
       //c->SigmaTildeMuIndep(GetNObsBin());///
    }
    

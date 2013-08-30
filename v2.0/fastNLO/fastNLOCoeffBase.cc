@@ -126,31 +126,6 @@ int fastNLOCoeffBase::Copy(fastNLOCoeffBase* other){
 }
 
 
-//
-//  Add is only available for perturbative coefficients !
-// void fastNLOCoeffBase::Add(fastNLOCoeffBase* other){
-//    double w1 = (double)Nevt / (Nevt+other->Nevt);
-//    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
-//    Nevt += other->Nevt;
-
-//    if ( NScaleDep<3 ){
-//       AddTableToAnotherTable( &SigmaTilde , &(other->SigmaTilde) ,w1 , w2 );
-//    }
-   
-//    if ( NScaleDep >= 3 ){
-//      AddTableToAnotherTable( &SigmaTildeMuIndep , &(other->SigmaTildeMuIndep) ,w1 , w2 );
-//      //if ( NScaleDep==3 || NScaleDep==5 || fScen->ILOord!=Npow) {
-//      if ( NScaleDep==3 || NScaleDep==5 ) {
-// 	//cout<<"Adding NLO table"<<endl;
-// 	AddTableToAnotherTable( &SigmaTildeMuFDep , &(other->SigmaTildeMuFDep) ,w1 , w2 );
-// 	AddTableToAnotherTable( &SigmaTildeMuRDep , &(other->SigmaTildeMuRDep) ,w1 , w2 );
-//      }
-//      AddTableToAnotherTable( &SigmaRefMixed , &(other->SigmaRefMixed) ,w1 , w2 );
-//      AddTableToAnotherTable( &SigmaRef_s1 , &(other->SigmaRef_s1) ,w1 , w2 );
-//      AddTableToAnotherTable( &SigmaRef_s2 , &(other->SigmaRef_s2) ,w1 , w2 );
-//    }
-
-// }
 
 void fastNLOCoeffBase::StripWhitespace(string &str) const {
    for(string::iterator achar = str.end(); achar>str.begin();achar--) {
