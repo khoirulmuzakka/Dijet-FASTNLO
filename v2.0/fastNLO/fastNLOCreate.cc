@@ -495,13 +495,13 @@ int fastNLOCreate::GetBin(){
 // ___________________________________________________________________________________________________
 
 
-void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen){
+void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar){
    if ( (int)events.size() != GetNSubprocesses() ){
       error["FillAllSubprocess"]<<"This table expects "<<GetNSubprocesses()<<" subprocesses, but only "<<events.size()<<" are provided. Exiting."<<endl;
       exit(1);
    }
    for ( unsigned int p = 0 ; p<events.size() ; p++ ) {
-      FillOneSubprocess(events[p],scen);
+      FillOneSubprocess(events[p],scen,scalevar);
    }
 }
 
@@ -510,17 +510,17 @@ void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const f
 
 
 
-void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen){
+void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar){
    fEvent = event;
    fScenario = scen;
-   Fill();
+   Fill(scalevar);
 }
 
 
 // ___________________________________________________________________________________________________
 
 
-void fastNLOCreate::Fill(){
+void fastNLOCreate::Fill(int scalevar){
    //
    // Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
    //
@@ -530,7 +530,7 @@ void fastNLOCreate::Fill(){
    fStats._nProc++; //keep statistics
 
    if ( fIsWarmup ) UpdateWarmupArrays();
-   else FillContribution();
+   else FillContribution(scalevar);
    
    fEvent.Reset();
 }
@@ -539,7 +539,7 @@ void fastNLOCreate::Fill(){
 // ___________________________________________________________________________________________________
 
 
-void fastNLOCreate::FillContribution(){
+void fastNLOCreate::FillContribution(int scalevar){
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -567,7 +567,7 @@ void fastNLOCreate::FillContribution(){
    else if ( c->GetNPDF() == 2 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
       FillContributionFlexHHC((fastNLOCoeffAddFlex*)GetTheCoeffTable(),  ObsBin);
    else if ( c->GetNPDF() == 2 && fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) 
-      FillContributionFixHHC((fastNLOCoeffAddFix*)GetTheCoeffTable(),  ObsBin);
+      FillContributionFixHHC((fastNLOCoeffAddFix*)GetTheCoeffTable(),  ObsBin, scalevar);
    else {
       error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1);
    }
@@ -576,7 +576,7 @@ void fastNLOCreate::FillContribution(){
 
 // ___________________________________________________________________________________________________
 
-void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin){
+void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar){
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -584,7 +584,6 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin){
 
    error["FillContributionFixHHC"]<<"This is a code stump and not tested or verified for sanity."<<endl; exit(1);
    error["FillContributionFixHHC"]<<"In particular the 'scalevar' treatment is not solved."<<endl; exit(1);
-   int scalevar = 0; // todo. Needs to obtain a reasonable value
    
    if ( fEvent._w == 0 ) return; // nothing todo.
 

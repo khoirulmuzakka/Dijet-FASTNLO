@@ -111,9 +111,9 @@ public:
    //       furthermore all vectors have to be 'resized'
    //void SetBinGrid(vector < vector <pair<double,double> > > BinGrid, vector <int> IDiffBin, vector <string> DimLabel, vector <double> BinSize = vector <double>() );
  
-   void Fill();											// fill event quantities in fastNLO table. Call it for every subprocess.
-   void FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen);			// same function as 'Fill()', but uses content of member fScenario and fEvent
-   void FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen);		// Fill a selection (vector) of events/processes/channels, which all have the identic scenario
+   void Fill(int scalevar=0);									// fill event quantities in fastNLO table. Call it for every subprocess.
+   void FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar=0);	// same function as 'Fill()', but uses content of member fScenario and fEvent
+   void FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar=0);	// Fill a selection (vector) of events/processes/channels, which all have the identic scenario
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}			// The number of subprocesses (channels)
 
    int WriteTable(string filename);								// Write fastNLO table to file <filename>
@@ -135,9 +135,9 @@ protected:
 
    void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid );
    double CalcPDFReweight(double x);
-   void FillContribution();									// fill contribution into table
+   void FillContribution(int scalevar = 0);							// fill contribution into table
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in pp/ppbar
-   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin);				// fill fixed scale table in pp/ppbar
+   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);		// fill fixed scale table in pp/ppbar
    void ReadSteering(string steerfile);								// read steering file
    void ReadBinning();
    void ReadCoefficientSpecificVariables();
