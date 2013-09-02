@@ -14,7 +14,7 @@ class fastNLOBase : public PrimalScream {
 public:
    fastNLOBase();
    fastNLOBase(string name);
-   ~fastNLOBase();
+   virtual ~fastNLOBase();
 
    // i/o
    int ReadTable();							// read table
