@@ -6,6 +6,7 @@
 ///
 ///     D. Britzger, K. Rabbertz
 ///
+/// TBD: Test PrintFastNLODemo
 ///********************************************************************
 #include <cfloat>
 #include <cmath>
@@ -325,7 +326,8 @@ int main(int argc, char** argv) {
    //        fnloreader.PrintTableInfo();
    //
    //     To switch a contribution on/off please use:
-   //            fnloreader.SetContributionON( contrib, Id, on/off )
+   //            bool SetOn = fnloreader.SetContributionON( contrib, Id, on/off )
+   //     and in particular for switching on check on the return value SetOn that it actually worked.
    //     Here, 'contrib' is not the contribution number, but the type
    //     as given above: kFixedOrder, ...
    //     Within each type the contributions are counted separately starting with Id=0.
@@ -345,8 +347,9 @@ int main(int argc, char** argv) {
    //     the scale factors for the renormalization and factorization scale must be identical.
    //
    //     The function call to set the scale factors is:
-   //         fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
-   //     where xmur, xmuf are the scale factors.
+   //         bool SetScales = fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
+   //     where xmur, xmuf are the scale factors. Check the return value in order to verify
+   //     that the selected scale factors could actually be activated.
    //
    //     The return value of this function call is boolean and returns false, if the
    //     the requested scale factors can not be chosen. In this case, the last legal
@@ -562,9 +565,9 @@ int main(int argc, char** argv) {
    // Set desired value of alpha_s(M_Z)
    fnloreader.SetAlphasMz(0.1184);
    // Calculate cross sections
-   fnloreader.CalcCrossSection();
+   //   fnloreader.CalcCrossSection();
    // Uncomment this to actually print out the result
-   //    fnloreader.PrintCrossSectionsDefault();
+   //   fnloreader.PrintCrossSectionsDefault();
 
    // Example code to print out data points (if available)
    //    fnloreader.PrintCrossSectionsData();
@@ -591,19 +594,25 @@ int main(int argc, char** argv) {
    // Instance fastNLO (For this example we assume fnloreader was instantiated already above ...)
    // FastNLOAlphas fnloreader( tablename , PDFFile , 0 );
 
-   // Check on existence of LO and NLO (Id = -1 if not existing)
+   // Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnloreader.ContrId(kFixedOrder, kLeading);
-   int inlo  = fnloreader.ContrId(kFixedOrder, kNextToLeading);
-   if (ilo < 0 || inlo < 0) {
-      printf("fnlo-read: ERROR! LO and/or NLO not found, nothing to be done!\n");
+   if (ilo < 0) {
+      printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
       exit(1);
-      //  } else {
-      //    printf("fnlo-read: LO and NLO contributions have Id's: %i and %i\n",ilo,inlo);
+   } else {
+      //      printf("fnlo-read: The LO contribution has Id: %i\n",ilo);
    }
+   // Check on existence of NLO (Id = -1 if not existing)
+   int inlo  = fnloreader.ContrId(kFixedOrder, kNextToLeading);
+   // if (inlo < 0) {
+   //    printf("fnlo-read: No NLO contribution found!\n");
+   // } else {
+   //    printf("fnlo-read: The NLO contribution has Id: %i\n",inlo);
+   // }
    // Check on existence of threshold corrections
    int ithc1 = fnloreader.ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnloreader.ContrId(kThresholdCorrection, kNextToLeading);
-   // if ( ithc1 < 0 ){
+   // if ( ithc1 < 0 ) {
    //    printf("fnlo-read: 1-loop threshold corrections not found!\n");
    // } else {
    //    printf("fnlo-read: 1-loop threshold corrections have Id: %i\n",ithc1);
@@ -616,50 +625,44 @@ int main(int argc, char** argv) {
    // Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnloreader.ContrId(kNonPerturbativeCorrection, kLeading);
    // if ( inpc1 < 0 ){
-   //   printf("fnlo-read: Non-perturbative corrections not found!\n");
+   //    printf("fnlo-read: Non-perturbative corrections not found!\n");
    // } else {
-   //   printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
+   //    printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
    // }
-
-   // Switch on LO & NLO, switch off anything else
-   if (!(ilo   < 0)) {
-      fnloreader.SetContributionON(kFixedOrder, ilo, true);
-   }
-   if (!(inlo  < 0)) {
-      fnloreader.SetContributionON(kFixedOrder, inlo, true);
-   }
-   if (!(ithc1 < 0)) {
-      fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
-   }
-   if (!(ithc2 < 0)) {
-      fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
-   }
-   if (!(inpc1 < 0)) {
-      fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, false);
-   }
-   // Temporary: Also don't print the cross sections out even when existing for this example
-   //   ithc2 = -1;
-   //   inpc1 = -1;
 
    // Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
-      // Set MuR and MuF scale factors
-      bool lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
-      if (!lscvar) {
-         printf("fnlo-cppread: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible, skipped!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
-         continue;
-      }
-      if (fnloreader.GetIsFlexibleScaleTable()) {
-         fnloreader.SetMuFFunctionalForm(kScale1);
-         fnloreader.SetMuRFunctionalForm(kScale1);
-         //      fnloreader.SetMuFFunctionalForm(kScale2);
-         //      fnloreader.SetMuRFunctionalForm(kScale2);
-      }
 
-      // Calculate cross section
-      fnloreader.CalcCrossSection();
+      // Switch on LO & NLO, switch off anything else
+      if (!(ilo   < 0)) {
+         bool SetOn = fnloreader.SetContributionON(kFixedOrder, ilo, true);
+         if (!SetOn) {
+            printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
+            printf("fnlo-read: This should have been caught before!\n");
+            exit(1);
+         }
+      }
+      if (!(inlo  < 0)) {
+         bool SetOn = fnloreader.SetContributionON(kFixedOrder, inlo, true);
+         if (!SetOn) {
+            printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
+            printf("fnlo-read: This should have been caught before!\n");
+            exit(1);
+         }
+      }
+      if (!(ithc1 < 0)) {
+         fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
+      }
+      if (!(ithc2 < 0)) {
+         fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
+      }
+      if (!(inpc1 < 0)) {
+         fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, false);
+      }
 
       // Define result vectors
+      bool lscvar = false;
+      bool lthcvar = false;
       vector < double > qscl;
       vector < double > xslo;
       vector < double > xsnlo;
@@ -674,6 +677,23 @@ int main(int argc, char** argv) {
       vector < double > knpc2;
       vector < double > xsewk1;
       vector < double > kewk1;
+
+      // Set MuR and MuF scale factors for pQCD cross sections and test availability
+      lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
+      if (!lscvar) {
+         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+         // skip completely
+         continue;
+      }
+      if (fnloreader.GetIsFlexibleScaleTable()) {
+         fnloreader.SetMuFFunctionalForm(kScale1);
+         fnloreader.SetMuRFunctionalForm(kScale1);
+         //      fnloreader.SetMuFFunctionalForm(kScale2);
+         //      fnloreader.SetMuRFunctionalForm(kScale2);
+      }
+
+      // Calculate cross section
+      fnloreader.CalcCrossSection();
 
       // Get LO & NLO results
       xsnlo = fnloreader.GetCrossSection();
@@ -692,38 +712,71 @@ int main(int argc, char** argv) {
 
       // Get threshold corrections
       if ( !(inlo < 0 || ithc2 < 0) ) {
-         fnloreader.SetContributionON(kThresholdCorrection, ithc2, true);
-         fnloreader.CalcCrossSection();
-         xsthc2 = fnloreader.GetCrossSection();
-         kthc2  = fnloreader.GetKFactors();
-         for (unsigned int i=0; i<xsnlo.size(); i++) {
-            if (abs(xsnlo[i]) > DBL_MIN) {
-               kthc2[i] = xsthc2[i]/xsnlo[i];
-            } else {
-               kthc2[i] = -1.;
+         bool SetOn = fnloreader.SetContributionON(kThresholdCorrection, ithc2, true);
+         if (!SetOn) {
+            printf("fnlo-read: WARNING! 2-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
+         }
+
+         // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
+         lthcvar = SetOn ? fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         if (!lthcvar) {
+            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+            // skip this part, check on lthcvar later for proper, i.e. no printout
+         } else {
+            fnloreader.CalcCrossSection();
+            xsthc2 = fnloreader.GetCrossSection();
+            kthc2  = fnloreader.GetKFactors();
+            for (unsigned int i=0; i<xsnlo.size(); i++) {
+               if (abs(xsnlo[i]) > DBL_MIN) {
+                  kthc2[i] = xsthc2[i]/xsnlo[i];
+               } else {
+                  kthc2[i] = -1.;
+               }
             }
          }
       } else if ( !(ilo < 0 || ithc1 < 0)) {
          if ( !(inlo < 0) ) fnloreader.SetContributionON(kFixedOrder, inlo, false);
-         fnloreader.SetContributionON(kThresholdCorrection, ithc1, true);
-         fnloreader.CalcCrossSection();
-         xsthc1 = fnloreader.GetCrossSection();
-         kthc1  = fnloreader.GetKFactors();
-         for (unsigned int i=0; i<xslo.size(); i++) {
-            if (abs(xslo[i]) > DBL_MIN) {
-               kthc1[i] = xsthc1[i]/xslo[i];
-            } else {
-               kthc1[i] = -1.;
+         bool SetOn = fnloreader.SetContributionON(kThresholdCorrection, ithc1, true);
+         if (!SetOn) {
+            printf("fnlo-read: WARNING! 1-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
+         }
+
+         // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
+         lthcvar = SetOn ? fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         if (!lthcvar) {
+            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+            // skip this part, check on lthcvar later for proper, i.e. no printout
+         } else {
+            fnloreader.CalcCrossSection();
+            xsthc1 = fnloreader.GetCrossSection();
+            kthc1  = fnloreader.GetKFactors();
+            for (unsigned int i=0; i<xslo.size(); i++) {
+               if (abs(xslo[i]) > DBL_MIN) {
+                  kthc1[i] = xsthc1[i]/xslo[i];
+               } else {
+                  kthc1[i] = -1.;
+               }
             }
          }
       }
-
       // Get non-perturbative corrections
       if ( !(inpc1 < 0) ) {
-         if ( !(inlo < 0) ) fnloreader.SetContributionON(kFixedOrder, inlo, true);
+         if ( !(inlo < 0) ) {
+            bool SetOn = fnloreader.SetContributionON(kFixedOrder, inlo, true);
+            if (!SetOn) {
+               printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
+               printf("fnlo-read: This should have been caught before!\n");
+               exit(1);
+            }
+         }
          if ( !(ithc1 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
          if ( !(ithc2 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
-         fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+         bool SetOn = fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+         if (!SetOn) {
+            printf("fnlo-read: ERROR! NPC1 not found, nothing to be done!\n");
+            printf("fnlo-read: This should have been caught before!\n");
+            exit(1);
+         }
          fnloreader.CalcCrossSection();
          xsnpc1 = fnloreader.GetCrossSection();
          knpc1  = fnloreader.GetKFactors();
@@ -755,8 +808,12 @@ int main(int argc, char** argv) {
       if (NDim == 2) {
          string header0 = "  IObs  Bin Size IODim1 ";
          string header1 = "   IODim2 ";
-         string header2 = " LO cross section   NLO cross section   KNLO";
-         if (ithc2>-1) {
+         string header2 = " LO cross section";
+         //         string header2 = " LO cross section   NLO cross section   KNLO";
+         if (inlo>-1) {
+            header2 += "   NLO cross section   KNLO";
+         }
+         if (ithc2>-1 && lthcvar) {
             header2 += "      KTHC2";
          }
          if (inpc1>-1) {
@@ -775,7 +832,11 @@ int main(int argc, char** argv) {
                   NDimBins[j] = 1;
                }
             }
-            if (ithc2<0 && inpc1<0) {
+            if ((ithc2<0 || !lthcvar) && inpc1<0 && inlo < 0) {
+               printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i]);
+            } else if ((ithc2<0 || !lthcvar) && inpc1<0) {
                printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
@@ -783,7 +844,7 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
-            } else if (ithc2<0) {
+            } else if (ithc2<0 || !lthcvar) {
                printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E % -#10.4g      %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
@@ -798,6 +859,10 @@ int main(int argc, char** argv) {
          printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
       }
    }
+
+   // Print data if available, checks on availability internally
+   fnloreader.PrintCrossSectionsData();
+
    return 0;
 }
 
