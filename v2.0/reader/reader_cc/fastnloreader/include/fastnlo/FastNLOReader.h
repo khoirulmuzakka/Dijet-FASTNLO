@@ -82,7 +82,7 @@ public:
    void SetFilename(string filename) ;
    void InitScalevariation();
    void SetUnits(fastNLO::EUnits Unit);
-   void SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
+   bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
    int ContrId(const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder) const;
 
    // ---- setters for scales of MuVar tables ---- //
@@ -268,8 +268,8 @@ protected:
    virtual vector<double> GetXFX(double x, double muf) const = 0;
    virtual double EvolveAlphas(double Q) const = 0;
 
-   // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation(int scalevar , bool FirstCall=false); // Choose the MuF scale variation table
+   // ---- setter for scale variation in v2.0 tables  ---- //
+   bool SetScaleVariation(int scalevar); // Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
    static const string fContrName[20];
