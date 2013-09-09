@@ -245,6 +245,61 @@ C---  DO K=2,5 ! Test - only qq
       IF (FILENAME.NE.OLDFILENAME) THEN
          CALL FX9999RW('read',FILENAME,ICTRB)
          OLDFILENAME = FILENAME
+
+*---  Initialize counters and pointers for contribution types
+         DO I=1,MXCTRB
+            LCONTR(I) = .FALSE.
+            NCONTRCOUNTER(I)  =  0
+            ICONTRPOINTER(I)  = -1
+         ENDDO
+
+*---  Loop once over all contributions and register types
+         DO I=1,NCONTRIB
+            IF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.1.AND.
+     >           IREF(I).EQ.PREFTAB) THEN
+               LCONTR(ILO) = .TRUE.
+               NCONTRCOUNTER(ILO) = NCONTRCOUNTER(ILO) + 1
+               ICONTRPOINTER(ILO) = I
+            ELSEIF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.2.AND.
+     >              IREF(I).EQ.PREFTAB) THEN
+               LCONTR(INLO) = .TRUE.
+               NCONTRCOUNTER(INLO) = NCONTRCOUNTER(INLO) + 1
+               ICONTRPOINTER(INLO) = I
+            ELSEIF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.1.AND.
+     >              IREF(I).EQ.PREFTAB) THEN
+               LCONTR(ITHC1L) = .TRUE.
+               NCONTRCOUNTER(ITHC1L) = NCONTRCOUNTER(ITHC1L) + 1
+               ICONTRPOINTER(ITHC1L) = I
+            ELSEIF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.2.AND.
+     >              IREF(I).EQ.PREFTAB) THEN
+               LCONTR(ITHC2L) = .TRUE.
+               NCONTRCOUNTER(ITHC2L) = NCONTRCOUNTER(ITHC2L) + 1
+               ICONTRPOINTER(ITHC2L) = I
+            ELSEIF (ICONTRFLAG1(I).EQ.4.AND.ICONTRFLAG2(I).EQ.1.AND.
+     >              IADDMULTFLAG(I).EQ.1.AND.
+     >              IREF(I).EQ.PREFTAB) THEN
+               LCONTR(INPC1) = .TRUE.
+               NCONTRCOUNTER(INPC1) = NCONTRCOUNTER(INPC1) + 1
+               ICONTRPOINTER(INPC1) = I
+            ELSEIF (ICONTRFLAG1(I).EQ.0.AND.ICONTRFLAG2(I).EQ.0.AND.
+     >              IDATAFLAG(I).EQ.1.AND.
+     >              IREF(I).EQ.PREFTAB) THEN
+               LCONTR(IDATA) = .TRUE.
+               NCONTRCOUNTER(IDATA) = NCONTRCOUNTER(IDATA) + 1
+               ICONTRPOINTER(IDATA) = I
+            ELSE
+               WRITE(*,*)"FX9999PT: ERROR! Unknown contribution type "//
+     >              "encountered, stopped!"
+               WRITE(*,*)"          IContrFlag1, IContrFlag2 = ",
+     >              ICONTRFLAG1(I),ICONTRFLAG2(I)
+               WRITE(*,*)"          IAddMultFlag,IDataFlag = ",
+     >              IADDMULTFLAG(I),IDATAFLAG(I)
+               WRITE(*,*)"          Iref = ",
+     >              IREF(I)
+               STOP
+            ENDIF
+         ENDDO
+
       ENDIF
 
       RETURN
@@ -255,6 +310,7 @@ C---  DO K=2,5 ! Test - only qq
 ***********************************************************************
 *
 *     Determine pointers to contributions and scales
+*     Moved the "once per table part" to the initialization FX9999IN
 *
 *     Input:
 *     ------
@@ -281,14 +337,7 @@ C---  DO K=2,5 ! Test - only qq
       INCLUDE 'fnx9999.inc'
       INTEGER IPRINT,I,J,K,I1
       DOUBLE PRECISION XMUR,XMUF
-
-*---  Initialize counters and pointers for contribution types
-      DO I=1,MXCTRB
-         NCONTRCOUNTER(I)  =  0
-         ICONTRPOINTER(I)  = -1
-         ICONTRSELECTOR(I) =  0
-         ISCALEPOINTER(I)  = -1
-      ENDDO
+      LOGICAL LFIRST
 
 *---  Check input
       IF (XMUR.LT.1D-3.OR.XMUF.LT.1D-3) THEN
@@ -301,45 +350,10 @@ C---  DO K=2,5 ! Test - only qq
          STOP
       ENDIF
 
-*---  Loop once over all contributions and register types
-      DO I=1,NCONTRIB
-         IF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.1.AND.
-     >        IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(ILO) = NCONTRCOUNTER(ILO) + 1
-            ICONTRPOINTER(ILO) = I
-         ELSEIF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.2.AND.
-     >           IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(INLO) = NCONTRCOUNTER(INLO) + 1
-            ICONTRPOINTER(INLO) = I
-         ELSEIF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.1.AND.
-     >           IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(ITHC1L) = NCONTRCOUNTER(ITHC1L) + 1
-            ICONTRPOINTER(ITHC1L) = I
-         ELSEIF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.2.AND.
-     >           IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(ITHC2L) = NCONTRCOUNTER(ITHC2L) + 1
-            ICONTRPOINTER(ITHC2L) = I
-         ELSEIF (ICONTRFLAG1(I).EQ.4.AND.ICONTRFLAG2(I).EQ.1.AND.
-     >           IADDMULTFLAG(I).EQ.1.AND.
-     >           IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(INPC1) = NCONTRCOUNTER(INPC1) + 1
-            ICONTRPOINTER(INPC1) = I
-         ELSEIF (ICONTRFLAG1(I).EQ.0.AND.ICONTRFLAG2(I).EQ.0.AND.
-     >           IDATAFLAG(I).EQ.1.AND.
-     >           IREF(I).EQ.PREFTAB) THEN
-            NCONTRCOUNTER(IDATA) = NCONTRCOUNTER(IDATA) + 1
-            ICONTRPOINTER(IDATA) = I
-         ELSE
-            WRITE(*,*)"FX9999PT: ERROR! Unknown contribution type "//
-     >           "encountered, stopped!"
-            WRITE(*,*)"          IContrFlag1, IContrFlag2 = ",
-     >           ICONTRFLAG1(I),ICONTRFLAG2(I)
-            WRITE(*,*)"          IAddMultFlag,IDataFlag = ",
-     >           IADDMULTFLAG(I),IDATAFLAG(I)
-            WRITE(*,*)"          Iref = ",
-     >           IREF(I)
-            STOP
-         ENDIF
+*---  Initialize selectors and scale pointers for contribution types
+      DO I=1,MXCTRB
+         ICONTRSELECTOR(I) =  0
+         ISCALEPOINTER(I)  = -1
       ENDDO
 
 *---  Find particular contributions
@@ -559,7 +573,6 @@ C---  DO K=2,5 ! Test - only qq
                   DO J=1,NCONTRDESCR(I1)
                      WRITE(*,*)'  ',CTRBDESCRIPT(I1,J)
                   ENDDO
-                  STOP
                ENDIF
             ENDIF
          ENDIF
@@ -577,12 +590,11 @@ C---  DO K=2,5 ! Test - only qq
                   IF (IPRINT.GT.0) THEN
                      WRITE(*,*)"FX9999PT: WARNING! The requested "//
      >                    " renormalization scale xmur = ",XMUR
-                     WRITE(*,*)"          is not available, stopped!"
+                     WRITE(*,*)"          is not available!"
                      WRITE(*,*)"          Only xmur=xmuf is possible."
                      DO J=1,NCONTRDESCR(I1)
                         WRITE(*,*)'  ',CTRBDESCRIPT(I1,J)
                      ENDDO
-                     STOP
                   ENDIF
                ENDIF
             ENDIF
