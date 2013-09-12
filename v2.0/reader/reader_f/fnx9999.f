@@ -567,11 +567,14 @@ C---  DO K=2,5 ! Test - only qq
             ENDIF
             IF (ISCALEPOINTER(I).EQ.0) THEN
                IF (IPRINT.GT.0) THEN
-                  WRITE(*,*)"FX9999PT: WARNING! The requested "//
-     >                 " factorization scale xmuf = ",xmuf
-                  WRITE(*,*)"          is not available!"
+                  WRITE(*,'(A,F10.3,A)')" FX9999PT: WARNING! "//
+     >                 "The requested factorization scale "//
+     >                 "xmuf =",XMUF," is not available!"
+                  WRITE(*,*)"FX9999PT: WARNING! The following "//
+     >                 "requested contribution should be skipped:"
                   DO J=1,NCONTRDESCR(I1)
-                     WRITE(*,*)'  ',CTRBDESCRIPT(I1,J)
+                     WRITE(*,*)'          ',
+     >                    CTRBDESCRIPT(I1,J)
                   ENDDO
                ENDIF
             ENDIF
@@ -588,12 +591,15 @@ C---  DO K=2,5 ! Test - only qq
                IF (ISCALEDEP(I1).EQ.2) THEN
                   ISCALEPOINTER(I) = -1
                   IF (IPRINT.GT.0) THEN
-                     WRITE(*,*)"FX9999PT: WARNING! The requested "//
-     >                    " renormalization scale xmur = ",XMUR
-                     WRITE(*,*)"          is not available!"
-                     WRITE(*,*)"          Only xmur=xmuf is possible."
+                     WRITE(*,'(A,F10.3,A)')" FX9999PT: WARNING! "//
+     >                    "The requested renormalization scale "//
+     >                    "xmur =",XMUR," is not available!"
+                     WRITE(*,*)"FX9999PT: WARNING! Only xmur=xmuf "//
+     >                    " is possible with the requested "//
+     >                    "contributions:"
                      DO J=1,NCONTRDESCR(I1)
-                        WRITE(*,*)'  ',CTRBDESCRIPT(I1,J)
+                        WRITE(*,*)'          ',
+     >                       CTRBDESCRIPT(I1,J)
                      ENDDO
                   ENDIF
                ENDIF

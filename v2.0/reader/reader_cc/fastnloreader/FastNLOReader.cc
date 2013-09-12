@@ -120,7 +120,7 @@ void FastNLOReader::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright © 2011,2012 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" Copyright © 2011,2012,2013 "<<fnlo<<" Collaboration"<<endl;
    shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
@@ -1401,13 +1401,15 @@ void FastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
 
 
    // Check on existence of 2-loop threshold corrections
-   //const int ithc2 = kthc.empty() ? -1 : ContrId( fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
    const int ithc2 = kthc.empty() ? -1 : ContrId(kThresholdCorrection,kNextToLeading);
 
    cout << DSEP << endl;
    printf(" Cross Sections\n");
-   if (!GetIsFlexibleScaleTable())
-      printf(" The scale chosen here are: mu_f = % #6.3f * %s, and mu_r = % #6.3f * %s \n",fScaleFacMuF,GetScaleDescription().c_str(),fScaleFacMuR,GetScaleDescription().c_str());
+   if (!GetIsFlexibleScaleTable()) {
+      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fScaleFacMuF,GetScaleDescription().c_str(),fScaleFacMuR,GetScaleDescription().c_str());
+   } else {
+      warn["PrintCrossSectionsDefault"]<<"Print out not implemented for flexible-scale tables, no output yet."<<endl;
+   }
    cout << SSEP << endl;
 
    if (NDim == 2) {

@@ -6,7 +6,6 @@
 ///
 ///     D. Britzger, K. Rabbertz
 ///
-/// TBD: Test PrintFastNLODemo
 ///********************************************************************
 #include <cfloat>
 #include <cmath>
@@ -38,8 +37,8 @@ int main(int argc, char** argv) {
    const string CSEPL = "####################################################################################################################################################################\n";
 
    //---  Parse commmand line
-   // Avoid most output
-   //   SetGlobalVerbosity(SILENT);
+   // Don't miss help output, default is INFO
+   SetGlobalVerbosity(MANUAL);
    shout>>"\n";
    shout>>" "<<CSEPS;
    shout<<" fnlo-read: Program Steering"<<endl;
@@ -53,16 +52,15 @@ int main(int argc, char** argv) {
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
-         printf(" #\n");
-         printf(" # Usage: ./fnlo-cppread [arguments]\n");
-         printf(" # Table input file, def. = table.tab\n");
-         printf(" # PDF set, def. = cteq6m.LHpdf\n");
-         printf(" # Number of mu_r, mu_f scale settings to ");
-         printf("investigate, if possible, def. = 1, max. = 7\n");
-         printf(" #\n");
-         printf(" # Give full path(s) if these are not in the cwd.\n");
-         printf(" # Use \"_\" to skip changing a default argument.\n");
-         printf(" #\n");
+         man<<""<<endl;
+         man<<"Usage: ./fnlo-cppread [arguments]"<<endl;
+         man<<"Table input file, def. = table.tab"<<endl;
+         man<<"PDF set, def. = cteq6m.LHpdf"<<endl;
+         man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
+         man<<""<<endl;
+         man<<"Give full path(s) if these are not in the cwd."<<endl;
+         man<<"Use \"_\" to skip changing a default argument."<<endl;
+         man<<""<<endl;
          return 0;
       } else if (tablename == "_") {
          tablename = "table.tab";
@@ -544,7 +542,7 @@ int main(int argc, char** argv) {
    // 14.
    // ---- Example code of a quick cross section
    //      calculation using the FastNLOAlphas interface
-   // For the purpose of this example override default verbosity level INFO
+   // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
    FastNLOAlphas fnloreader(tablename);
    //   FastNLOLHAPDF fnloreader(tablename);
@@ -566,14 +564,12 @@ int main(int argc, char** argv) {
    // Set desired value of alpha_s(M_Z)
    fnloreader.SetAlphasMz(0.1184);
    // Calculate cross sections
-   //   fnloreader.CalcCrossSection();
+   fnloreader.CalcCrossSection();
    // Uncomment this to actually print out the result
    //   fnloreader.PrintCrossSectionsDefault();
-
+   //
    // Example code to print out data points (if available)
-   //    fnloreader.PrintCrossSectionsData();
-   // Example code to access cross sections and K factors:
-   //    fnloreader.PrintFastNLODemo();
+   //   fnloreader.PrintCrossSectionsData();
    //
    // ************************************************************************************************
 
@@ -793,6 +789,7 @@ int main(int argc, char** argv) {
       // Start print out
       cout << DSEP << endl;
       printf(" My Cross Sections\n");
+      //      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleDescription().c_str(),fnloreader.GetScaleFactorMuF(),fnloreader.GetScaleDescription().c_str());
       printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
       cout << SSEP << endl;
 
