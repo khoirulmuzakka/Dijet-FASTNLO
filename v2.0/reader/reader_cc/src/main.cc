@@ -547,6 +547,7 @@ int main(int argc, char** argv) {
    // For the purpose of this example override default verbosity level INFO
    SetGlobalVerbosity(WARNING);
    FastNLOAlphas fnloreader(tablename);
+   //   FastNLOLHAPDF fnloreader(tablename);
    //   FastNLOCRunDec fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
    fnloreader.PrintTableInfo();
