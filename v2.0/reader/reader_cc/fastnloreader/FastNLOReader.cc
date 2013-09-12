@@ -531,7 +531,7 @@ bool FastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
             <<"The method returns 'false', please check the return code and act appropriately.\n";
          return false;
       }
-      if (lkthc && sfnlo != sfthc) {
+      if (lkthc && lknlo && sfnlo != sfthc) {
          warn["SetScaleFactorsMuRMuF"]<<"Order of scale variation tables different in NLO and ThC tables, "<<sfnlo<<" != "<<sfthc<<" !"<<endl;
          warn["SetScaleFactorsMuRMuF"]<<"This is currently not supported, nothing changed!"<<endl;
          warn["SetScaleFactorsMuRMuF"]
