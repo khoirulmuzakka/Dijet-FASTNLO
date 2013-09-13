@@ -165,7 +165,7 @@ c --- Use '...' with \", otherwise gfortran complains
      >           '(from Pythia 6.4 using Lambda_4 from PDF)'
             WRITE(*,*)'    alt. = KR: 1-, 2- and 3-loop '//
      >           '(from hep-ph/9506442)'
-            WRITE(*,*)'    alt. = MW: 2- and 4-loop '//
+            WRITE(*,*)'    alt. = MW: 2-, 3- and 4-loop '//
      >           '(from hep-ph/9806404)'
             WRITE(*,*)'  alpha_s(M_Z), def. from PDF set'
             WRITE(*,*)'     (in mode PY this has to be Lambda_4/GeV!)'
@@ -885,9 +885,17 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
          ENDIF
          WRITE(*,*)"----------------------------------------"//
      >        "--------------------------------"
-         WRITE(*,*)" bin       cross section           "//
-     >        "lower PDF uncertainty   upper PDF uncertainty"//
-     >        "   KNLO        KTHC"
+         CHTMP = " bin       cross section           "//
+     >        "lower PDF uncertainty   upper PDF uncertainty"
+         IF (LNLO) THEN
+            CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//"   KNLO"
+         ENDIF
+         IF (LNLO.AND.LTHC2L) THEN
+            CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//"        KTHC"
+         ELSEIF (LLO.AND.LTHC1L) THEN
+            CHTMP = CHTMP(1:LEN_TRIM(CHTMP))//"   KTHC"
+         ENDIF
+         WRITE(*,*)CHTMP(1:LEN_TRIM(CHTMP))
 
 *---  Only primary scale
          DO I=1,1
