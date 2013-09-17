@@ -152,15 +152,14 @@ void fastNLOReader::Init() {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_LO);
       bUseSMCalc[kFixedOrder].push_back(true);
    } else {
-      error["Init"]<<"Could not find any LO Calculation. Exiting!\n";
+      error["Init"]<<"Could not find any LO Calculation. Exiting!"<<endl;
       exit(1);
    }
    if (Coeff_NLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NLO);
       bUseSMCalc[kFixedOrder].push_back(true);
    } else {
-      error["Init"]<<"Could not find any NLO Calculation. Exiting!\n";
-      exit(1);
+      info["Init"]<<"Could not find any NLO calculation."<<endl;
    }
 
    //int iprint = 2;
@@ -177,39 +176,43 @@ void fastNLOReader::InitScalevariation() {
    fScaleFacMuR  = 1.;
    fScaleFacMuF  = 1.;
    fScalevar     = -1;
-
    if (!GetIsFlexibleScaleTable()) {
-      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
-      for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
-         const double muFac = cNLO->GetScaleFactor(iscls);
-         if (fabs(muFac-1.0) < 1.e-7) {
-            SetScaleVariation(iscls,true);
-            break;
-         }
-      }
-      if (fScalevar == -1) {
-         error["InitScalevariation"]<<"Could not found scale variation with scale factor 1.0. Exiting.\n";
-         exit(1);
+      if ( !B_NLO() ) { 
+	 fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+	 for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
+	    const double muFac = cNLO->GetScaleFactor(iscls);
+	    if (fabs(muFac-1.0) < 1.e-7) {
+	       SetScaleVariation(iscls,true);
+	       break;
+	    }
+	 }
+	 if (fScalevar == -1) {
+	    error["InitScalevariation"]<<"Could not found scale variation with scale factor 1.0. Exiting.\n";
+	    exit(1);
+	 }
+      } else {
+	 // no NLO table -> no scale dependent contribrutions
       }
    } else {
       // this is a MuVar table. You can vary mu_f and mu_r independently by any factor
       // and you can choose the functional form of mu_f and mu_r as functions of
       // scale1 and scale1 (called partly scaleQ2 and scalePt).
 
-      fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
+      fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
+      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
       if (cNLO->GetScaleDescr()[0].size() <0) { // ???
          warn["InitScalevariation"]<<"No scaledescription available.\n"; 
          SetFunctionalForm(kScale1 , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
          return;
       }
-
-      // ---- DIS ---- //
+      // --- Default values --- //
+      // DIS
       if (cNLO->GetNPDF() == 1) {
          SetFunctionalForm(kQuadraticMean , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
       }
-      // ---- HHC --- //
+      // HHC
       else if (cNLO->GetNPDF() == 2) {
          SetFunctionalForm(kScale1 , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
@@ -245,6 +248,10 @@ double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
       info["SetScaleVariation"]<<"This is a flexible-scale table. No Scalevariation tables available!"<<endl;
       man<<"You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n";
       man<<"Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n";
+      return 0;
+   }
+   else if ( !B_NLO() ) {
+      info["SetScaleVariation"]<<"No NLO table available. Please use SetScaleFactorsMuRMuF(double,double)"<<endl;
       return 0;
    }
    else {
@@ -370,15 +377,13 @@ int fastNLOReader::GetNScaleVariations() const {
       // Assume a maximum of 10!
       unsigned int scalevarmax = 10;
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
-	 if (!BBlocksSMCalc.empty()) {
-	    for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
-	       // Do not check pQCD LO or mult. corrections
-	       if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
-		   !(j==kFixedOrder && i==kLeading)) {
-		  if (c->GetNScalevar() < (int)scalevarmax) {
-		     scalevarmax = c->GetNScalevar();
-		  }
+	 for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
+	    fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
+	    // Do not check pQCD LO or mult. corrections
+	    if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
+		!(j==kFixedOrder && i==kLeading)) {
+	       if (c->GetNScalevar() < (int)scalevarmax) {
+		  scalevarmax = c->GetNScalevar();
 	       }
 	    }
 	 }
@@ -1316,13 +1321,16 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
    // ---- cross check ---- //
    if (func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4
        || func == kLinearMean || func == kLinearSum  ||  func == kScaleMax|| func == kScaleMin) {
-      int nnode = ((fastNLOCoeffAddFlex*)BBlocksSMCalc[0][1])->GetNScaleNode2(0);
+
+      fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
+      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
+      int nnode = cNLO->GetNScaleNode2(0);
       if (nnode <= 3) {
          error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
          SetFunctionalForm(kScale1,MuX);
       }
       for (int i=0; i<NObsBin; i++) {
-	 nnode = ((fastNLOCoeffAddFlex*)BBlocksSMCalc[0][1])->GetNScaleNode2(i);
+	 nnode = cNLO->GetNScaleNode2(i);
 	 if (nnode < 4) {
             warn<<"Scale2 has only very little nodes (n="<<nnode<<") in bin "<<i<<".\n";
          }

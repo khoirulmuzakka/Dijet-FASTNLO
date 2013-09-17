@@ -112,7 +112,8 @@ protected:
    void CalcCrossSectionv20(fastNLOCoeffAddFix* B , bool IsLO = false);
 
    fastNLOCoeffAddBase* B_NLO() const {
-      return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];
+      if ( BBlocksSMCalc[fastNLO::kFixedOrder].size() < 2 ) return NULL;
+      else return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];
    };
    fastNLOCoeffAddBase* B_LO() const {
       return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kLeading];
