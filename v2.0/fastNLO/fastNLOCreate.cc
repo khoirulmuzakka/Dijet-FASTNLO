@@ -164,7 +164,7 @@ void fastNLOCreate::ReadBinning(){
 	    exit(1);
 	 }
       }
-      if ( AllBinInt ) {
+      if ( AllBinInt ) { // bin integrated bin grid
 	 NObsBin = bgrid.size()-1;
 	 Bin.resize(NObsBin);
 	 for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
@@ -172,10 +172,10 @@ void fastNLOCreate::ReadBinning(){
 	    Bin[i][0] = make_pair(bgrid[i],bgrid[i+1] );
 	 }
       }
-      else {
+      else { // truly differential bin grid
 	 NObsBin = bgrid.size();
 	 Bin.resize(NObsBin);
-	 for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
+	 for ( unsigned int i = 0 ; i<bgrid.size() ; i++ ){
 	    Bin[i].resize(1);
 	    Bin[i][0] = make_pair(bgrid[i],bgrid[i]) ;
 	 }
@@ -476,7 +476,8 @@ int fastNLOCreate::GetBin(){
    else {
       error["GetBin"]<<"Sorry. triple-differential binning not yet implemented. exiting."<<endl;
    }
-      
+
+
    // -------------------------------
    // calc bin number and keep Observables
    if ( idiff == 1 ) fObsBin = GetBinNumber(fScenario._o[0]);
@@ -1064,8 +1065,9 @@ void fastNLOCreate::PrintWarmupValues(){
 void fastNLOCreate::OutWarmup(string file){
    if ( fWx.empty() ) {
       warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
-      warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
-      InitWarmupArrays();
+//       warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
+//       InitWarmupArrays();
+      error["OutWarmup"]<<" Do not write out unreasonable warmup table. Exiting."<<endl; exit(1);
    }
    std::ostream& sout = file == "" ?
       std::cout : (*ofilestream);
