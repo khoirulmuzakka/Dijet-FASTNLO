@@ -15,7 +15,7 @@ class fastNLOCoeffAddBase : public fastNLOCoeffBase {
 public:
    fastNLOCoeffAddBase(int NObsBin);
    fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
-   virtual ~fastNLOCoeffAddBase();
+   virtual ~fastNLOCoeffAddBase(){;}
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    virtual int Write(ostream *table, int option = 0);

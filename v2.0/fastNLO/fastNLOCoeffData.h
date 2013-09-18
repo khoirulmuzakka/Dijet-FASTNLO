@@ -13,7 +13,7 @@ class fastNLOCoeffData : public fastNLOCoeffBase {
 public:
    fastNLOCoeffData(int NObsBin);
    fastNLOCoeffData(const fastNLOCoeffBase&);
-   virtual ~fastNLOCoeffData();
+   virtual ~fastNLOCoeffData(){;};
    int  Read(istream *table);
    void ReadRest(istream *table);
    virtual int Write(ostream *table, int option = 0);

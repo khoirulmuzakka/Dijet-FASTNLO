@@ -20,7 +20,7 @@ class fastNLOCoeffBase : public PrimalScream {
 
 public:
    fastNLOCoeffBase(int NObsBin);
-   virtual ~fastNLOCoeffBase();
+   virtual ~fastNLOCoeffBase(){;};
    //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);
    int Read(istream *table);
    int ReadBase(istream *table);
