@@ -13,6 +13,7 @@ using namespace fastNLO;
 bool fastNLOBase::fWelcomeOnce = false;
 
 fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), ofilestream(0), fPrecision(8) {
+   if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), ofilestream(0), fPrecision(8)  {
