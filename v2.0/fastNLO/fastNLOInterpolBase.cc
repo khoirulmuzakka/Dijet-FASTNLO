@@ -188,7 +188,7 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
    double del = hi-lo;
    for(int l=0;l<nNodes;l++){
       hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
-      if ( isngan(hgrid[l]) ) {
+      if ( isnan(hgrid[l]) ) {
 	 error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
       }
    }
