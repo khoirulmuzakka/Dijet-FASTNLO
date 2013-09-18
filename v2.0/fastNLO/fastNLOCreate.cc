@@ -1003,12 +1003,12 @@ void fastNLOCreate::InitWarmupArrays(){
    fWMu2.resize(GetNObsBin());
    fWx.resize(GetNObsBin());
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-      fWMu1[i].first	= 10e14;
-      fWMu1[i].second	= -10e14;
-      fWMu2[i].first	= 10e14;
-      fWMu2[i].second	= -10e14;
-      fWx[i].first	= 10e14;
-      fWx[i].second	= -10e14;
+      fWMu1[i].first	= 10e10;
+      fWMu1[i].second	= -10e10;
+      fWMu2[i].first	= 10e10;
+      fWMu2[i].second	= -10e10;
+      fWx[i].first	= 10e10;
+      fWx[i].second	= -10e10;
    }
 }
 
@@ -1062,6 +1062,11 @@ void fastNLOCreate::PrintWarmupValues(){
    OutWarmup("");
 }
 void fastNLOCreate::OutWarmup(string file){
+   if ( fWx.empty() ) {
+      warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
+      warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
+      InitWarmupArrays();
+   }
    std::ostream& sout = file == "" ?
       std::cout : (*ofilestream);
    
@@ -1084,11 +1089,12 @@ void fastNLOCreate::OutWarmup(string file){
    if ( fIsFlexibleScale ) { 
       sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"  \"%16s\"  \"%16s\"",
 	      "x_min","x_max",
-	      GetWarmupHeader(0,"min"),
-	      GetWarmupHeader(0,"max"),
-	      GetWarmupHeader(1,"min"),
-	      GetWarmupHeader(1,"max"));
+	      GetWarmupHeader(0,"min").c_str(),
+	      GetWarmupHeader(0,"max").c_str(),
+	      GetWarmupHeader(1,"min").c_str(),
+	      GetWarmupHeader(1,"max").c_str());
       sout<<buf<<endl;
+      cout<<"nbins="<<GetNObsBin()<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
 	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
 		 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
@@ -1100,8 +1106,8 @@ void fastNLOCreate::OutWarmup(string file){
       if ( GetTheCoeffTable()->ScaleDescript[0].empty() ){ error["OutWarmup"]<<"Scale description is empty. but needed. Probalby this has to be implemented."<<endl; exit(1);};
       sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"",
 	      "x_min","x_max",
-	      GetWarmupHeader(0,"min"),
-	      GetWarmupHeader(0,"max") );
+	      GetWarmupHeader(0,"min").c_str(),
+	      GetWarmupHeader(0,"max").c_str() );
       sout<<buf<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
 	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
@@ -1113,7 +1119,7 @@ void fastNLOCreate::OutWarmup(string file){
    //*(new ofstream(filename.Data()));
 }
 
-const char* fastNLOCreate::GetWarmupHeader(int iScale, string minmax ){
+string fastNLOCreate::GetWarmupHeader(int iScale, string minmax ){
    string Descript = GetTheCoeffTable()->ScaleDescript[0][iScale];
    //   string ret = "\"";
    string ret = "";
@@ -1121,7 +1127,7 @@ const char* fastNLOCreate::GetWarmupHeader(int iScale, string minmax ){
    ret += "_";
    ret += minmax;
    //ret += "\"";
-   return ret.c_str();
+   return ret;
 }
 
 
@@ -1207,6 +1213,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
    }
 
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+      cout<<"i="<<i<<endl;
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------

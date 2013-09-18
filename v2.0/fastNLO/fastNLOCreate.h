@@ -171,7 +171,7 @@ protected:
    void UpdateWarmupArrays();
    void InitWarmupArrays();
    void OutWarmup(string file);
-   const char* GetWarmupHeader(int iScale, string minmax );
+   string GetWarmupHeader(int iScale, string minmax );
    vector<pair<double,double> > fWMu1;								// array of warmup-up values
    vector<pair<double,double> > fWMu2;								// array of warmup-values
    vector<pair<double,double> > fWx;								// array of warmup-values

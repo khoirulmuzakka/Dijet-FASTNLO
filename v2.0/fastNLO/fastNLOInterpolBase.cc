@@ -77,7 +77,7 @@ void fastNLOInterpolBase::RemoveLastNode(){
 
 void fastNLOInterpolBase::MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodesPerMag){
    if ( fvalmin >= fvalmax ){
-      warn["MakeGrid"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
+      warn["MakeGridsWithNNodesPerMagnitude"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
    }
    int nxtot = (int)(fabs(log10(fvalmax)-log10(fvalmin))*nNodesPerMag);
    if ( nxtot < nNodesPerMag ) nxtot = nNodesPerMag; // at least nxPerMagnitude points
@@ -156,7 +156,11 @@ vector<double> fastNLOInterpolBase::MakeLinearGrid(double min, double max, int n
 void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
    // first make fhgrid and then make fgrid
    vector<double> hgrid(nNodes);
-   double lo=0, hi=0;
+   if ( isnan(min) || isnan(max) || nNodes <= 0 ) {
+      error["MakeGrids"]<<"Cannot make unreasoanble grid! Requested: nNodes="<<nNodes<<", min="<<min<<", max="<<max<<". Exiting."<<endl;
+      exit(1);
+   }
+   double lo=min, hi=max;
    switch (fdm) {
    case fastNLOGrid::kLinear:
       lo = min;
@@ -177,9 +181,16 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
    default:
       error["MakeGrid"]<<"Unknown grid type."<<endl;
    }   
+   if ( isnan(lo) || isnan(hi) ) {
+      error["MakeGrids"]<<"Cannot convert min and max value to 'H'-space. min="<<min<<", H(min)="<<lo<<", max="<<max<<", H(max)="<<hi<<". Exiting."<<endl;
+      exit(1);
+   }
    double del = hi-lo;
    for(int l=0;l<nNodes;l++){
       hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
+      if ( isngan(hgrid[l]) ) {
+	 error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
+      }
    }
 
    SetHGrid(hgrid);
