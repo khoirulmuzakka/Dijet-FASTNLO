@@ -1213,7 +1213,6 @@ void  fastNLOCreate::InitInterpolationKernels() {
    }
 
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-      cout<<"i="<<i<<endl;
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
