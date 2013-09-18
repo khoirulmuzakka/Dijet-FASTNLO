@@ -1094,7 +1094,6 @@ void fastNLOCreate::OutWarmup(string file){
 	      GetWarmupHeader(1,"min").c_str(),
 	      GetWarmupHeader(1,"max").c_str());
       sout<<buf<<endl;
-      cout<<"nbins="<<GetNObsBin()<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
 	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
 		 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
