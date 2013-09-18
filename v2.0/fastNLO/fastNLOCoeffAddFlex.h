@@ -15,6 +15,7 @@ class fastNLOCoeffAddFlex : public fastNLOCoeffAddBase {
 public:
    fastNLOCoeffAddFlex(int NObsBin, int iLOord);
    fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord);
+   virtual ~fastNLOCoeffAddFlex();
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
    int Read(istream *table);
    void ReadRest(istream *table);

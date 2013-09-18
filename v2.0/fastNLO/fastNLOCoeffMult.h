@@ -15,6 +15,7 @@ public:
    fastNLOCoeffMult();
    fastNLOCoeffMult(int NObsBin);
    fastNLOCoeffMult(const fastNLOCoeffBase&);
+   virtual ~fastNLOCoeffMult(); 
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    void ReadRest(istream *table);
