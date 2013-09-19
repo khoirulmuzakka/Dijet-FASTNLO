@@ -342,9 +342,9 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
    c->Npow = ord;
    c->IContrFlag2 = ord-GetLoOrder()+1;
    c->CtrbDescript.resize(1);
-   string ss[4] = {"LO","NLO","NNLO","NNNLO"};
-   c->CtrbDescript[0] = ss[ord-GetLoOrder()];
-
+   string ss[5] = {"LO","NLO","NNLO","NNNLO","unknown"};
+   int iContrb = ord-GetLoOrder() <4 ? ord-GetLoOrder() : 4;
+   c->CtrbDescript[0] = ss[iContrb];
    if ( !(GetLoOrder() == 1 || GetLoOrder() == 2 || GetLoOrder() == 3 || GetLoOrder() == 4) ) {
       warn["SetOrderOfAlphasOfCalculation"]<<"The leading order is of order of "<<GetLoOrder()<<" in alpha_s."<<endl;
       warn>>"\tThis may be unreasonable."<<endl;
