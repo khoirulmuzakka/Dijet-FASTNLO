@@ -40,6 +40,7 @@ public:
    const vector<double>* const GetGridPtr() const { return &fgrid;}
    vector<double> GetHGrid() const { return fHgrid;}
    double GetDelta(double);
+   bool CheckX(double&);
 
    static fastNLOGrid::GridType TranslateGridType(string in);
 
@@ -75,7 +76,6 @@ protected:
    vector<double> HGrid_loglog025_inv(vector<double> grid);
    vector<double> HGrid_log10_inv(vector<double> grid);
    vector<double> HGrid_sqrtlog10_inv(vector<double> grid);
-   bool CheckX(double&);
    int GetNMod() const {return fnmod;}
    double GetHx(double);
 
