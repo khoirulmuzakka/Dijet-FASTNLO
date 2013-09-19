@@ -533,7 +533,7 @@ void fastNLOCreate::Fill(int scalevar){
    if ( fIsWarmup ) UpdateWarmupArrays();
    else FillContribution(scalevar);
    
-   fEvent.Reset();
+   fEvent.ResetButX();
 }
 
 
@@ -597,7 +597,8 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    vector<pair<int,double> > nmu  = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
 
    if ( fApplyPDFReweight ) {
-      //void fastNLOCreate::ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid ){
+      fKernX[ObsBin]->CheckX(xmin);
+      fKernX[ObsBin]->CheckX(xmax);
       ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr());
       ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr());
    }
@@ -675,7 +676,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
 //       cout<<"     ScaleNode[0]="<<fKernMu2[ObsBin]->fgrid[0]<<", Node[1]="<<fKernMu2[ObsBin]->fgrid[1]<<", Node[2]="<<fKernMu2[ObsBin]->fgrid[2]<<", Node[3]="<<fKernMu2[ObsBin]->fgrid[3]<<", ScaleNode[4]="<<fKernMu2[ObsBin]->fgrid[4]<<endl;
      
    if ( fApplyPDFReweight ) {
-      //void fastNLOCreate::ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid ){
+      fKernX[ObsBin]->CheckX(xmin);
+      fKernX[ObsBin]->CheckX(xmax);
       ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr());
       ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr());
    }
@@ -705,6 +707,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
 		  fKernX[ObsBin]->PrintGrid();
 		  fKernMu1[ObsBin]->PrintGrid();
 		  fKernMu2[ObsBin]->PrintGrid();
+		  cout<<"ix1="<<x1<<", ix2="<<x2<<", im1="<<m1<<", im2="<<mu2<<endl;
 		  cout<<"x1="<<nxlo[x1].second<<", x1="<<x1<<", xval="<<xmin<<endl;
 		  cout<<"x2="<<nxup[x2].second<<", x2="<<x2<<", xval="<<xmax<<endl;
 		  cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
@@ -828,12 +831,14 @@ void fastNLOCreate::ApplyPDFWeight(vector<pair<int,double> >& nodes, const doubl
    for( unsigned int in = 0; in < nodes.size(); in++) {
       double wgtn = CalcPDFReweight(grid->at(nodes[in].first));
       if ( wgtn==0 ) {error["ApplyPDFWeight"]<<"Cannot divide by 0."<<endl; exit(1);}
+      //cout<<"in="<<in<<" wgtx="<<wgtx<<", x="<<x<<", wgtn="<<wgtn<<", nod="<<grid->at(nodes[in].first)<<endl;
       nodes[in].second *= wgtx/wgtn;
    }
 }
 
 
 double fastNLOCreate::CalcPDFReweight(double x){
+   if ( x<=0 ) { error["CalcPDFReweight"]<<"Cannot calculate sqrt of negative numbers or divide by zero. x="<<x<<endl; exit(1);}
    double w=(1.-0.99*x)/sqrt(x); 
    return w*w*w;
 }
@@ -1207,14 +1212,14 @@ void  fastNLOCreate::InitInterpolationKernels() {
    vector<double> wrmMu1Up, wrmMu1Dn;
    wrmMu1Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"min"));
    wrmMu1Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"max"));
-   if ( wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin() ){
+   if ( (int)wrmMu1Dn.size()!=GetNObsBin() || (int)wrmMu1Up.size()!= GetNObsBin() ){
       error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl; exit(1);
    }
    vector<double> wrmMu2Up, wrmMu2Dn;
    if ( fIsFlexibleScale ){
       wrmMu2Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"min"));
       wrmMu2Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"max"));
-      if ( wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin() ){
+      if ( (int)wrmMu2Dn.size()!=GetNObsBin() || (int)wrmMu2Up.size()!= GetNObsBin() ){
 	 error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl; exit(1);
       }
    }

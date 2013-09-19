@@ -47,6 +47,11 @@ struct fnloEvent {
       _p=-1;
       _n=-1;
    }
+   void ResetButX(){
+      _w=0,_wf=0,_wr=0,_wrr=0,_wff=0,_wrf=0;
+      _p=-1;
+      _n=-1;
+   }
    fnloEvent(){Reset();}
    // event specific quantites, which are required for every 'Fill()' step.
    void SetX(double x) {_x1=x;}									// set x-value of first hadron (if e.g. DIS)
