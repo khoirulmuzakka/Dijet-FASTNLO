@@ -1207,16 +1207,23 @@ void  fastNLOCreate::InitInterpolationKernels() {
    vector<double> wrmMu1Up, wrmMu1Dn;
    wrmMu1Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"min"));
    wrmMu1Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"max"));
+   if ( wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin() ){
+      error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl; exit(1);
+   }
    vector<double> wrmMu2Up, wrmMu2Dn;
    if ( fIsFlexibleScale ){
       wrmMu2Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"min"));
       wrmMu2Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"max"));
+      if ( wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin() ){
+	 error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl; exit(1);
+      }
    }
 
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
+      debug["InitGrids"]<<"Make x grid for obsbin="<<i<<endl;
       fKernX[i] = MakeInterpolationKernels(STRING(X_Kernel),wrmX[i],1);
 
       if ( BOOL(X_NoOfNodesPerMagnitude) ) 
@@ -1229,6 +1236,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init scale1-interpolation kernels
       // ------------------------------------------------
+      debug["InitGrids"]<<"Make Mu1 grid for obsbin="<<i<<endl;
       fKernMu1[i] = MakeInterpolationKernels(STRING(Mu1_Kernel),wrmMu1Dn[i],wrmMu1Up[i]);
       fKernMu1[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu1_DistanceMeasure)), INT(Mu1_NNodes));
       //fKernMu1[i]->PrintGrid();
@@ -1237,6 +1245,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // init scale2-interpolation kernels
       // ------------------------------------------------
       if ( fIsFlexibleScale ){
+	 debug["InitGrids"]<<"Make Mu2 grid for obsbin="<<i<<endl;
 	 fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
 	 fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
       } 
