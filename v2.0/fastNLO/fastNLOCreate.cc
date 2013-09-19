@@ -1102,6 +1102,10 @@ void fastNLOCreate::OutWarmup(string file){
 	      GetWarmupHeader(1,"max").c_str());
       sout<<buf<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+	 if ( fWx[i].first < 1.e-4 ) {
+	    warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
+	    fWx[i].first=1.e-4;
+	 }
 	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
 		 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
 	 sout<<buf<<endl;
