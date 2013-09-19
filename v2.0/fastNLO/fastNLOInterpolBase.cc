@@ -209,19 +209,15 @@ vector<double> fastNLOInterpolBase::MakeGridFromHGrid(vector<double> hg){
    vector<double> grid;
    switch (fdm) {
    case fastNLOGrid::kLinear:
-      cout<<" && & &  linear."<<endl;
       grid = hg;
       break;
    case fastNLOGrid::kLogLog025:
-      cout<<" && & &  loglog025."<<endl;
       grid = HGrid_loglog025_inv(hg);
       break;
    case fastNLOGrid::kLog10:
-      cout<<" && & &  log10."<<endl;
       grid = HGrid_log10_inv(hg);
       break;
    case fastNLOGrid::kSqrtLog10:
-      cout<<" && & &  sqrtlog."<<endl;
       grid = HGrid_sqrtlog10_inv(hg);
       break;
    default:
@@ -264,7 +260,7 @@ void fastNLOInterpolBase::SetHGrid(vector<double> hgrid){
 bool fastNLOInterpolBase::CheckX(double& x) {
    bool sanity = false;
    if ( x < fgrid[0] ) {
-      if ( x!=fLastVal ) warn["CheckX"]<<"Value "<<x<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
+      if ( fabs(x-fLastVal)>1.e-8 ) warn["CheckX"]<<"Value "<<x<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
       x = fgrid[0];
    }
    else if ( x > fgrid.back() ) {
@@ -275,7 +271,7 @@ bool fastNLOInterpolBase::CheckX(double& x) {
 	 }
       }
       else {
-	 if ( fabs(x-fgrid.back())>1.e-9 ) warn["CheckX"]<<"Value "<<x<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
+	 if ( fabs(x-fgrid.back())>1.e-4 ) warn["CheckX"]<<"Value "<<x<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
 	 x = fgrid.back();
       }
    }
