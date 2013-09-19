@@ -330,7 +330,7 @@ double fastNLOInterpolBase::GetDelta(double x ){
    }
    double del = fHgrid[node1+1] - fHgrid[node1];
    if ( del == 0 ){
-      warn["GetDelta"]<<"Distance between nodes is zero."<<endl;
+      //warn["GetDelta"]<<"Distance between nodes is zero."<<endl;
       return 0;
    }
    return (Hx - fHgrid[node1]) / del;
