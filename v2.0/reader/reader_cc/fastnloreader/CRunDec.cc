@@ -51,7 +51,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-
+// DB/KR Moved initialization from CRunDec.h to avoid compile problem on Mac
+//       reported by H. Prosper
 // Aux. constants for implicit Runhe-Kutta-Procedure:
 const double CRunDec::a2=0.2, CRunDec::a3=0.3, CRunDec::a4=0.6, CRunDec::a5=1., CRunDec::a6=0.875;
 

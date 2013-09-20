@@ -78,6 +78,8 @@ struct AsmMS{
 class CRunDec
 {
   private:
+  // DB/KR Moved initialization to CRunDec.cc to avoid compile problem on Mac
+  //       reported by H. Prosper
   // Aux. constants for implicit Runhe-Kutta-Procedure:
   static const double a2, a3, a4, a5, a6;
 
