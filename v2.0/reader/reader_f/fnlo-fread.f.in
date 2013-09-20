@@ -6,9 +6,9 @@
       INCLUDE 'strings.inc'
 
 *---  Initial output
-      FNLO = achar(27)//"[0;31mfast"//
-     >     achar(27)//"[0;34mNLO"//
-     >     achar(27)//"[0m"
+      FNLO = char(27)//"[0;31mfast"//
+     >     char(27)//"[0;34mNLO"//
+     >     char(27)//"[0m"
       WRITE(*,'(A)')""
       WRITE(*,*)CSEPS
       WRITE(*,*)"#"
