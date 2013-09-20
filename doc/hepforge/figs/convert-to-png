@@ -1,0 +1,2 @@
+convert $1.eps -background white -resize 200% -flatten $1.png
+
