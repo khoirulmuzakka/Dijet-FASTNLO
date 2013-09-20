@@ -27,6 +27,13 @@
 #include <vector>
 #include "FastNLOBlockB.h"
 
+// KR: Replace by precompiler defines
+//   static const double TWOPI = 6.28318530717958647692528;
+//   static const double TWOPISQR = 39.47841760435743447533796;
+#define Pi M_PI
+#define TWOPI (2.*Pi)
+#define TWOPISQR (4.*Pi*Pi)
+
 namespace fastNLO {
 enum EScaleFunctionalForm {
    kScale1                   = 0,    // e.g. mu^2 = Q^2
@@ -70,8 +77,9 @@ public:
       kMuR                        = 0,    // renormalization scale
       kMuF                        = 1     // factorization scale
    };
-   static const double TWOPI = 6.28318530717958647692528;
-   static const double TWOPISQR = 39.47841760435743447533796;
+   // KR: Replace by precompiler defines
+   //   static const double TWOPI = 6.28318530717958647692528;
+   //   static const double TWOPISQR = 39.47841760435743447533796;
 
 public:
 
