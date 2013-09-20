@@ -14,6 +14,9 @@
 
     * Edit change log for reader
 
+    * CRunDec.h.hbp, FastNLOReader.h.hbp, NEWS: v2 reader: Update news and
+      changes
+
     * FastNLOReader.h: v2 reader: Initialize TWOPI & TWOPISQR with precompiler
       define now; avoids Mac compilation problem reported by H. Prosper
 
