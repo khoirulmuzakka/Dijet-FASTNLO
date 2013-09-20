@@ -1,3 +1,91 @@
+2013-09-20  New release of the fastNLO_reader package version 2.1.0, revision 1488:
+            =======================================================================
+            - Enables calculation with LO table alone or with 1-loop
+              threshold corrections
+            - Gives consistent results between Fortran & C++ code with
+              1- or 2-loop threshold corrections
+            - Small changes in FastNLOReader and CRunDec to avoid compilation problem
+              on Mac as reported by H. Prosper
+            - Some rearrangement in default output, in particular for K factors
+            - SetContributionON now has boolean return value
+
+
+2013-09-20  rabbertz
+
+    * Edit change log for reader
+
+    * FastNLOReader.h: v2 reader: Initialize TWOPI & TWOPISQR with precompiler
+      define now; avoids Mac compilation problem reported by H. Prosper
+
+    * CRunDec.cc, CRunDec.h: v2 reader: Added comments to explain Daniels change
+      in CRunDec; static const double initialization moved to .cc file; avoids
+      Mac compilation problem reported by H. Prosper
+
+    * fnlo-fread.f.in: v2 reader: Fix small issue with printing escape in
+      fortran
+
+2013-09-12  rabbertz
+
+    * FastNLOReader.cc, fnlo-fread.f.in, fnx9999.f, main.cc: v2 reader: Some
+      small print out changes
+
+    * FastNLOReader.cc: v2 reader_cpp: Fixed small scale factor issue
+
+    * main.cc: v2 reader_cpp: Adapted printout logic to fortran version
+
+    * main.cc: v2 reader: Add commented LHAPDF reader ex.
+
+2013-09-09  rabbertz
+
+    * main.cc: v2 cppreader: Rearrange output to give useful results for
+      LO,NLO,1-loop,2-loop etc.
+
+    * FastNLOReader.cc: v2 cppreader: Many changes to make it work properly with
+      LO only, threshold corrections with and without scale variations; in
+      particular SetContributionON, SetScaleFactorsMuRMuF and SetScaleVariation
+      adapted.
+
+    * FastNLOReader.h: v2 cppreader: Change SetContributionON and
+      SetScaleVariation to boolean return value
+
+    * main.f: v2 freader: Rearrange output to give useful results for
+      LO,NLO,1-loop,2-loop etc.
+
+    * fnx9999.f, fnx9999.inc: v2 freader: Move some table initilization part to
+      where it belongs: FX9999IN
+
+2013-06-27  DanielBritzger
+
+    * CRunDec.cc, CRunDec.h: Inititialize static const double in .cc
+
+2013-06-24  rabbertz
+
+    * CRunDec.h.hbp, FastNLOReader.h.hbp: Requested changed for linking on Mac's
+
+2013-06-20  rabbertz
+
+    * Alphas.cc, main.cc: v2 reader: more adaption for thc conv tables
+
+2013-06-10  rabbertz
+
+    * fnx9999.f: v2 reader: comment added
+
+2013-06-06  rabbertz
+
+    * FastNLOBlockB.cc, FastNLOReader.cc, main.cc: v2: Fix problem with missing
+      PDF cache initilization when switching on threshold corrections
+
+2013-03-20  rabbertz
+
+    * fnx9999.inc: v2 reader f: increase max docu lines
+
+2013-03-18  rabbertz
+
+    * main.f: v2:freader: Correction for use with Markus 1-loop table
+
+    * fnx9999.f: v2 reader: Transform check into error abort
+
+
 2013-01-14  Micro update release version 2.1.0, revision 1360:
             ==================================================
             To avoid the problem of an uninitialized top PDF when accessing

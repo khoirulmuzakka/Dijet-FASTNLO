@@ -1,12 +1,14 @@
-Release Notes for fastNLO_reader version 2.1.0 revision ????:
-=============================================================
+Release Notes for fastNLO_reader version 2.1.0, revision 1488:
+==============================================================
 
-- Second public release of the fastNLO_reader package
-
-- Changes:
-  - Interface to use for diffractive PDF analyses added
-  - Some code improvements
-  - ???
+- Enables calculation with LO table alone or with 1-loop
+  threshold corrections
+- Gives consistent results between Fortran & C++ code with
+  1- or 2-loop threshold corrections
+- Small changes in FastNLOReader and CRunDec to avoid compilation problem
+  on Mac as reported by H. Prosper
+- Some rearrangement in default output, in particular for K factors
+- SetContributionON now has boolean return value
 
 
 
