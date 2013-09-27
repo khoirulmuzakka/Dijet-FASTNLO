@@ -3,8 +3,8 @@ fastNLO_reader version 2.1.0:
 
 Installation of distribution package:
 -------------------------------------
-Via GNU autotools (NOT required for installation) setup,
-in unpacking directory of *.tar.gz file:
+Via GNU autotools setup (NOT required for installation),
+in unpacking directory of the *.tar.gz file do:
 
 ./configure --prefix=your_local_directory
 (should contain LHAPDF installation, otherwise specify
