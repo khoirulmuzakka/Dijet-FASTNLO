@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "fastNLOInterpolBase.h"
+#include "fastnlotk/fastNLOInterpolBase.h"
 
 using namespace std;
 
@@ -83,7 +83,7 @@ void fastNLOInterpolBase::MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType 
    int nxtot = (int)(fabs(log10(fvalmax)-log10(fvalmin))*nNodesPerMag);
    if ( nxtot < nNodesPerMag ) nxtot = nNodesPerMag; // at least nxPerMagnitude points
    debug["MakeGridWithNNodesPerMagnitude"]<<"Create "<<nxtot<<" nodes (valmin="<<fvalmin<<",valmax="<<fvalmax<<")."<<endl;
-   MakeGrids(type,nxtot+1); // plus 1. We have now a node at 1 
+   MakeGrids(type,nxtot+1); // plus 1. We have now a node at 1
 }
 
 void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
@@ -98,7 +98,7 @@ void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
    if ( nNodes <= 1 ) {
       warn["MakeGrid"]<<"Number of nodes must be larger than 2."<<endl;
    }
-   
+
    if ( nNodes <= 3 ) {
       warn["MakeGrid"]<<"A reasonable grid typicaly has more than 3 nodes. nNodes="<<nNodes<<endl;
    }
@@ -108,7 +108,7 @@ void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
    }
 
    MakeGrids(fvalmin,fvalmax,nNodes);
-  
+
 }
 
 int fastNLOInterpolBase::FindLargestPossibleNode(double x){
@@ -125,7 +125,7 @@ int fastNLOInterpolBase::FindLargestPossibleNode(double x){
    if ( x > fgrid.back() ) {
       if ( !fLastGridPointWasRemoved )
 	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node. Using last node. This may bias the result! x="<<x<<endl;
-      else if ( x > fvalmax ) 
+      else if ( x > fvalmax )
 	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node and than largest grid value. Using last node. Interpolation kernel may lead unreasonable values! x="<<x<<endl;
       return node1;
    }
@@ -184,7 +184,7 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
       break;
    default:
       error["MakeGrid"]<<"Unknown grid type."<<endl;
-   }   
+   }
    if ( isnan(lo) || isnan(hi) ) {
       error["MakeGrids"]<<"Cannot convert min and max value to 'H'-space. min="<<min<<", H(min)="<<lo<<", max="<<max<<", H(max)="<<hi<<". Exiting."<<endl;
       exit(1);
@@ -222,7 +222,7 @@ vector<double> fastNLOInterpolBase::MakeGridFromHGrid(vector<double> hg){
       break;
    default:
       error["MakeGridFromHGrid"]<<"Unknown grid type."<<endl;
-   }  
+   }
    return grid;
 }
 

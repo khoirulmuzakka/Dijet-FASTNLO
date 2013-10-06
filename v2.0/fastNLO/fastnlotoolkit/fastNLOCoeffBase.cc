@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffBase.h"
+#include "fastnlotk/fastNLOCoeffBase.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -20,7 +20,7 @@ int fastNLOCoeffBase::Read(istream *table){
    debug["Read"]<<endl;
    ReadBase(table);
    EndReadCoeff(table);
-   return 0; 
+   return 0;
 }
 
 
@@ -59,7 +59,7 @@ int fastNLOCoeffBase::ReadBase(istream *table){
       //      StripWhitespace(CtrbDescript[i]);
    }
    int NCodeDescr;
-   *table >> NCodeDescr;   
+   *table >> NCodeDescr;
    CodeDescript.resize(NCodeDescr);
    table->getline(buffer,256);
    for(int i=0;i<NCodeDescr;i++){
@@ -104,7 +104,7 @@ int fastNLOCoeffBase::Write(ostream *table, int option){
    for(unsigned int i=0;i<CtrbDescript.size();i++){
       *table << CtrbDescript[i] << endl;
    }
-   *table << CodeDescript.size() << endl;   
+   *table << CodeDescript.size() << endl;
    for(unsigned int i=0;i<CodeDescript.size();i++){
       *table << CodeDescript[i] << endl;
    }
@@ -114,7 +114,7 @@ int fastNLOCoeffBase::Write(ostream *table, int option){
 
 int fastNLOCoeffBase::Copy(fastNLOCoeffBase* other){
    debug["Copy"]<<endl;
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;
@@ -411,7 +411,7 @@ int fastNLOCoeffBase::WriteFlexibleTable(vector<double >* v, ostream *table , bo
 void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
    if ( vSum->size() != vAdd->size() ) {cout<<"Error in fastNLOCoeffBase::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
-    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i]; 
+    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
   }
 }
 
@@ -434,7 +434,7 @@ void fastNLOCoeffBase::SetNlojetDescr(){
    CodeDescript.push_back("NLOJet++_4.1.3");
    CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
    CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
- }   
+ }
 
 
 void fastNLOCoeffBase::Print() const {

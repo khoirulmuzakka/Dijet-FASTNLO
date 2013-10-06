@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffAddFix.h"
+#include "fastnlotk/fastNLOCoeffAddFix.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -11,7 +11,7 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
    bool ret = fastNLOCoeffAddBase::CheckCoeffConstants(c,quiet);
    if ( ret && c->GetNScaleDep() == 0 ) return true;
    else if ( c->GetNScaleDep() >= 3 ) {
-      if ( !quiet) 
+      if ( !quiet)
 	 say::error["fastNLOCoeffAddFix::CheckCoeffConstants"]
 	    <<"This is not a fixed order v2.0  table. NScaleDep must be equal 0 but is NScaleDep="
 	    <<c->GetNScaleDep()<<endl;
@@ -71,7 +71,7 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    fastNLOCoeffBase::ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
    int nsn = ReadTable  ( &ScaleNode , table );
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of ScaleNode.\n",nsn);
-	 
+
    int XmaxFromI[1] = {0};
    //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n", fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
    fastNLOCoeffAddBase::ResizeTable( &SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
@@ -82,8 +82,8 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
 
    // prepare members for evaluation
    fastNLOCoeffAddBase::ResizeTable(&PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc);
-   fastNLOCoeffBase::ResizeTable(&AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());  
-	 
+   fastNLOCoeffBase::ResizeTable(&AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());
+
    return 0;
 }
 
@@ -110,7 +110,7 @@ int fastNLOCoeffAddFix::Write(ostream *table, int option){
 }
 
 int fastNLOCoeffAddFix::Copy(fastNLOCoeffAddFix* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;

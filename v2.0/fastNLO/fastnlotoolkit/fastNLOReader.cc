@@ -3,11 +3,11 @@
 #include <string>
 #include <algorithm>
 #include <cfloat>
-#include "fastNLOReader.h"
-#include "read_steer.h"
+#include "fastnlotk/fastNLOReader.h"
+#include "fastnlotk/read_steer.h"
 
-#include "fastNLOCoeffAddFlex.h"
-#include "fastNLOCoeffAddFix.h"
+#include "fastnlotk/fastNLOCoeffAddFlex.h"
+#include "fastnlotk/fastNLOCoeffAddFix.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -89,13 +89,13 @@ void fastNLOReader::Init() {
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
 	 // Reference table, implemented only for LO or NLO
-	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) { 
+	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
 	    debug["Init"]<<"Found reference table."<<endl;
 	    if ( c->IsLO() ) {
 // 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.1."); // not forseen
 	       Coeff_LO_Ref           = (fastNLOCoeffAddBase*)c;
-	    } 
+	    }
 	    else if ( c->IsNLO() ) {
 // 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.1."); // not foreseen
@@ -177,7 +177,7 @@ void fastNLOReader::InitScalevariation() {
    fScaleFacMuF  = 1.;
    fScalevar     = -1;
    if (!GetIsFlexibleScaleTable()) {
-      if ( !B_NLO() ) { 
+      if ( !B_NLO() ) {
 	 fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
 	 for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
 	    const double muFac = cNLO->GetScaleFactor(iscls);
@@ -201,7 +201,7 @@ void fastNLOReader::InitScalevariation() {
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
       if (cNLO->GetScaleDescr()[0].size() <0) { // ???
-         warn["InitScalevariation"]<<"No scaledescription available.\n"; 
+         warn["InitScalevariation"]<<"No scaledescription available.\n";
          SetFunctionalForm(kScale1 , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
          return;
@@ -257,7 +257,7 @@ double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
    else {
       // Check for maximal scale variation of all rel. and active SM calcs
       int scalevarmax = GetNScaleVariations();
-      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();  
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
 	 if (scalevar >= scalevarmax) {
 	    warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
 	    man<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
@@ -402,7 +402,7 @@ vector < double > fastNLOReader::GetScaleFactors() const {
       info["GetScaleFactors"]<<"This is a 'flexible scale table', therefore you can choose all desired scale variations."<<endl;
       return vector<double>();
    }
-   else 
+   else
       return ((fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading])->GetAvailableScaleFactors();
 }
 
@@ -486,7 +486,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
 	    }
 	 }
       }
-      else 
+      else
 	 warn["CalcReferenceCrossSection"]<<"No reference cross sections for LO and NLO available.\n";
    }
    else {
@@ -693,7 +693,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
             double muf2		= pow(muf,2);
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
-		  double as		= c->AlphasTwoPi[i][jS1][kS2]; 
+		  double as		= c->AlphasTwoPi[i][jS1][kS2];
 		  double pdflc		= c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
                   double fac  = as * pdflc * unit;
@@ -818,7 +818,7 @@ void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    //
    //  Internal method for filling alpha_s cache
    //
-   
+
    // todo: the flag IScaleDep should also indicate whether this contribution may contain scale variations
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
 
@@ -1026,9 +1026,9 @@ void fastNLOReader::FillPDFCache(double chksum) {
 	       fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[j][i];
 	       if (c->GetIPDFdef1() == 2) {
 		  if (c->GetNPDFDim() == 0) {
-		     if (!GetIsFlexibleScaleTable(c)) 
+		     if (!GetIsFlexibleScaleTable(c))
 			FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
-		     else 
+		     else
 			FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
 		  }
 	       }
@@ -1105,7 +1105,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
 		  //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
                }
             }
-         } 
+         }
 	 else if (fMuFFunc == kScale2) { // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
@@ -1115,7 +1115,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
                   c->PdfLcMuVar[i][x][jS1][kS2] = buffer;
                }
             }
-         } 
+         }
 	 else if (fMuFFunc == kScale1) { // speed up
 	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
@@ -1142,7 +1142,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
    if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"full matrix notation not implemented."<<endl;exit(1);}
-   
+
    vector < vector < double > > xfx; // PDFs of all partons
    for (int i=0; i<NObsBin; i++) {
       int nxmax = c->GetNxmax(i);
@@ -1180,7 +1180,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
       exit(1);
    }
    if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"'full matrix notation not implemented."<<endl;exit(1);}
-  
+
    vector < vector < double > > xfx; // PDFs of all partons
    for (int i=0; i<NObsBin; i++) {
       int nxmax = c->GetNxmax(i);
@@ -1574,7 +1574,7 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
    printf(" #  In any other case your reference cross section is calculated using mu_r=mu_f=sqrt((%s^2+%s^2)/2).\n",
 	  B_NLO()->GetScaleDescription(0).c_str(),B_NLO()->GetScaleDescription(1).c_str());
    printf(" #  To be fully consistent with the nlojet++ reference cross section, you also have to adjust alpha_s and the alpha_s evolution accordingly.\n\n");
-   
+
    printf("\n");
    printf(" #\n");
 
@@ -1681,7 +1681,7 @@ void fastNLOReader::RunFastNLODemo() {
    // settings of this instance!
    //
    // PrintFastNLODemo is changing settings (like scale choices) of this reader.
-   // 
+   //
 
    info["PrintFastNLODemo"]<<"PrintFastNLODemo is changing settings (like scale choices) of this reader."<<endl;
 

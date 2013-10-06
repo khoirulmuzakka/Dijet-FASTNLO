@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include "speaker.h"
+#include "fastnlotk/speaker.h"
 
 using namespace std;
 

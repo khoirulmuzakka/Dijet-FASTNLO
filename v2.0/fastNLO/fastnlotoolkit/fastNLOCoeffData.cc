@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffData.h"
+#include "fastnlotk/fastNLOCoeffData.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -10,7 +10,7 @@ using namespace fastNLO;
 bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
    if ( c->GetIDataFlag() == 1 ) return true;
    else {
-      if ( !quiet ) 
+      if ( !quiet )
 	 say::error["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
       return false;
    }
@@ -90,7 +90,7 @@ int fastNLOCoeffData::ReadCoeffData(istream *table){
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
 	 *table >> matrixelement[i][j];
       }
-   }   
+   }
    return 0;
 }
 
@@ -130,7 +130,7 @@ int fastNLOCoeffData::Write(ostream *table, int option){
 }
 
 int fastNLOCoeffData::Copy(fastNLOCoeffData* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;

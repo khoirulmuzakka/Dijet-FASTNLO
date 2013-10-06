@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffMult.h"
+#include "fastnlotk/fastNLOCoeffMult.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -10,17 +10,17 @@ using namespace fastNLO;
 bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet)  {
    if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==1 ) return true;
    else if ( c->GetIAddMultFlag()!=1 ) {
-      if ( !quiet) 
+      if ( !quiet)
 	 say::error["fastNLOCoeffMult::CheckCoeffConstants"]
 	    <<"This is not an additive contribution (IAddMultFlag="<<c->GetIAddMultFlag()<<", but must be equals 1)."<<endl;
       return false;
-   }   
+   }
    else if ( c->GetIDataFlag()!=0) {
       say::error["fastNLOCoeffMult::CheckCoeffConstants"]
 	 <<"This seems to be an additive contribution, but is also labeled as data table. (IAddMultFlag="<<c->GetIAddMultFlag()<<", IDataFlag="<<c->GetIDataFlag()<<endl;
       exit(1);
       return false;
-   } 
+   }
    else return true;
 }
 
@@ -122,7 +122,7 @@ int fastNLOCoeffMult::Write(ostream *table, int option){
 }
 
 int fastNLOCoeffMult::Copy(fastNLOCoeffMult* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;

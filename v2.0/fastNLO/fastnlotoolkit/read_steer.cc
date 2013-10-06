@@ -8,8 +8,8 @@
 //
 //
 //**********************************************************************************
- 
-#include "read_steer.h"
+
+#include "fastnlotk/read_steer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -25,11 +25,11 @@ map<string,read_steer*>* read_steer::instances = NULL;
 //const string& read_steer::stdID = *(new string("SingleFileMode"));
 const string read_steer::stdID = "SingleFileMode";
 
-read_steer::read_steer() : 
+read_steer::read_steer() :
    str_sep(" \t")     , str_cmt ("!"),
    str_arrbeg("{")    , str_arrend("}"),
-   str_tabbeg("{{")   , str_tabend("}}"), 
-   str_nmspcbeg("{{{"), str_nmspcend("}}}"), 
+   str_tabbeg("{{")   , str_tabend("}}"),
+   str_nmspcbeg("{{{"), str_nmspcend("}}}"),
    str_inc("#include:"), fParseIncMode(0),
    oW(" # read_steer. Warning. "), oI(" # read_steer. Info. "), oE(" # read_steer. ERROR. "){
 }
@@ -39,7 +39,7 @@ read_steer* read_steer::Steering(string steerID)
    if ( instances==NULL ) instances = new std::map<string,read_steer*>();
    // get singleton class
    if ( !(*instances)[steerID] ){//new instance
-      if ( steerID.compare(read_steer::stdID)!=0 ) 
+      if ( steerID.compare(read_steer::stdID)!=0 )
  	 cout<<" # read_steer. Info. Initalizing new read_steer instance with steerID = '"<<steerID<<"'."<<endl;
       (*instances)[steerID] = new read_steer();
    }
@@ -107,7 +107,7 @@ void read_steer::prt()
    //single values
    cout<<l<<"Single values"<<endl;
    for(map<string,string>::iterator ii=fstrings.begin();ii!=fstrings.end();++ii)
-      if ( (*ii).first!="") 
+      if ( (*ii).first!="")
 	 printf("%s   %-27s\t\t%s\n",l.c_str(),(*ii).first.c_str(),(*ii).second.c_str());
    // arrays
    if ( !ffields.empty() ) {
@@ -183,11 +183,11 @@ int read_steer::read_stdin(string filename)
       cerr<<oE<<" Could not open file ('"<<filename<<"')."<<endl;
       return EXIT_FAILURE;
    }
-   int n = readstrm(ffile); 
+   int n = readstrm(ffile);
    ffile.close();
    return n;
 };
-  
+
 
 vector<bool> read_steer::getbf(string label) {
    vector<string> sf = ffields[label];
@@ -203,7 +203,7 @@ vector<int> read_steer::getif(string label) {
    for ( unsigned int i = 0 ; i<sf.size() ; i++ ){
       string val = sf[i];
       bool isnan = CheckInt(val.c_str());
-      if ( !isnan ) 
+      if ( !isnan )
 	 cout<<oW<<"Value number "<< i<<" of label='"<<label<<"' does not seem to be an integer number. value="<<val<<endl;
       ret.push_back( atoi(val.c_str()));
    }
@@ -216,7 +216,7 @@ vector<double> read_steer::getdf(string label) {
    for ( unsigned int i = 0 ; i<sf.size() ; i++ ){
       string val = sf[i];
       bool isnan = CheckNumber(val.c_str());
-      if ( !isnan ) 
+      if ( !isnan )
 	 cout<<oW<<"Value number "<< i<<" of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
       ret.push_back( atof(val.c_str()));
    }
@@ -264,7 +264,7 @@ vector<int> read_steer::getitcol(string label,string col) {
    vector<string> scol = getstcol(label,col);
    for(vector<string>::size_type i = 0; i != scol.size(); i++) {
       string val = scol[i];
-      if ( !CheckInt(val.c_str()) ) 
+      if ( !CheckInt(val.c_str()) )
 	 cout<<oW<<"Value number "<<i<<" of table='"<<label
 	     <<"' in column '"<<col<<"' does not seem to be an integer number. value="<<val<<endl;
       ret.push_back(atoi(val.c_str()));
@@ -278,7 +278,7 @@ vector<double> read_steer::getdtcol(string label,string col) {
    vector<string> scol = getstcol(label,col);
    for(vector<string>::size_type i = 0; i != scol.size(); i++) {
       string val = scol[i];
-      if ( !CheckNumber(val.c_str()) ) 
+      if ( !CheckNumber(val.c_str()) )
 	 cout<<oW<<"Value number "<<i<<" of table='"<<label
 	     <<"' in column '"<<col<<"' does not seem to be a numeric number. value="<<val<<endl;
       ret.push_back(atof(val.c_str()));
@@ -310,7 +310,7 @@ vector<vector<double> > read_steer::getdt(string label) {
       ret.push_back(vector<double>());
       for ( unsigned int j = 0 ; j<sf[i].size() ; j++ ){
 	 string val = sf[i][j];
-	 if ( !CheckNumber(val.c_str()) ) 
+	 if ( !CheckNumber(val.c_str()) )
 	    cout<<oW<<"Value number ("<<i<<","<<j<<") of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
 	 ret[i].push_back( atof(val.c_str()));
       }
@@ -319,7 +319,7 @@ vector<vector<double> > read_steer::getdt(string label) {
 }
 
 
-vector<vector<int> > read_steer::getit(string label) { 
+vector<vector<int> > read_steer::getit(string label) {
    // get table values as integers
    vector<vector<int> > ret;
    vector<vector<string> > sf = getst(label);
@@ -345,7 +345,7 @@ string read_steer::gets(string label) {
 
 double read_steer::getd(string label) {
    string val = gets(label);
-   if ( !CheckNumber(val.c_str()) ) 
+   if ( !CheckNumber(val.c_str()) )
       cout<<oW<<"Value of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
    return atof(val.c_str());
 }
@@ -364,9 +364,9 @@ bool read_steer::getb(string label) {
 
 bool read_steer::StringToBool(const string sval, const string label) const {
    if ( sval!="0" && sval!="1" && sval!="true" && sval!="false" && sval!=""){
-      if ( label=="" ) 
+      if ( label=="" )
 	 cout<<oW<<"Expecting value '0','1','true', 'false' or no value for boolean values.  value='"<<sval<<"'. Using 'true'."<<endl;
-      else 
+      else
 	 cout<<oW<<"Expecting value '0','1','true', 'false' or no value for boolean values for label="<<label<<" and its value='"<<sval<<"'. Using 'true'."<<endl;
       return true;
    }
@@ -403,10 +403,10 @@ bool read_steer::ParseString(string line)
    // keep the string for error messages
    const string orgl=line;
 
-   // parsing statements enclosed in '"' 
+   // parsing statements enclosed in '"'
    if ( !fParseTableMode>0 && !fParseFieldMode )
       value = ParseEnclosedString(line.c_str()); // old
-   else 
+   else
       while ( EnclosedStringToOneEntity(line) ); // new
 
    // count
@@ -438,7 +438,7 @@ bool read_steer::ParseString(string line)
 	       cerr<<oE<<" Could not open file ('"<<incfile<<"') from #include statement."<<endl;
 	       return EXIT_FAILURE;
 	    }
-	    readstrm(incstrm,is,ie,true); 
+	    readstrm(incstrm,is,ie,true);
 	    incstrm.close();
 	    break;
 	 }
@@ -499,7 +499,7 @@ bool read_steer::ParseString(string line)
 	       ffieldvalues.push_back(val);
 	       break;
 	    }
-	 } 
+	 }
 	 else {
 	    // look for a namespace
 	    if ( ParseFindString(pch,str_nmspcend) ){
@@ -516,7 +516,7 @@ bool read_steer::ParseString(string line)
 	    // look for a table
 	    if ( ParseFindString(pch,str_tabbeg) ){
 	       fParseTableMode = 1;
-	       if ( label=="" ) 
+	       if ( label=="" )
 		  cout << oW<<"Table found, starting with ' "<<str_tabbeg<<"' but no label was found."<< endl;
 	       ffieldlabel = label;
 	       break;
@@ -524,7 +524,7 @@ bool read_steer::ParseString(string line)
 	    // look for an array of values
 	    if (ParseFindString(pch,str_arrbeg) ){
 	       fParseFieldMode = true;
-	       if ( label=="" ) 
+	       if ( label=="" )
 		  cout << oW<<"Array found, starting with ' "<<str_arrbeg<<"' but no label was found."<< endl;
 	       ffieldlabel = label;
 	       continue;
@@ -539,7 +539,7 @@ bool read_steer::ParseString(string line)
 	    if ( i==0 )  label = pch;
 	    else if ( i==1 && value != "" ) { // value was already filled with enclosed string
 	       break;
-	    } 
+	    }
 	    else if ( i==1 && value=="" ){ // set value
 	       value = pch;
 	    }
@@ -553,7 +553,7 @@ bool read_steer::ParseString(string line)
       } // for parse
 
 
-   
+
    strcpy(str,line.c_str());
    char* pch=strtok (str,str_sep.c_str());
    if ( fParseTableMode>0 ) {
@@ -561,7 +561,7 @@ bool read_steer::ParseString(string line)
       fParseTableMode++;
    }
    if ( fParseTableMode>2 ) { // check number of columns in table
-      if ( ftablevalues.size() > 1 ) 
+      if ( ftablevalues.size() > 1 )
 	 if ( ftablevalues.back().size() != ftablevalues[0].size() )
 	    cout <<oW<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()+1
 		 <<" has a different number of columns (n="<< ftablevalues.back().size()
@@ -571,15 +571,15 @@ bool read_steer::ParseString(string line)
       if ( fstrings[label] == "" ) {
 	 ReplaceVariables(value);
 	 fstrings[label] = value;
-      }  else 
+      }  else
 	 cout << oW<<"Label '"<<  label <<"' already found. Ignoring value ('"<<value<<"'.)"<< endl;
    }
    return true;
 }
 
 int read_steer::ReplaceVariables(string& str) {
-   // replace all occurences of ${<sth>} by 
-   // the stringvalue of the label <sth> 
+   // replace all occurences of ${<sth>} by
+   // the stringvalue of the label <sth>
    // return the number of replaced variables
 
    // remove all '$' which could come from enclosed statements in tablemode.
@@ -634,7 +634,7 @@ string read_steer::ParseEnclosedString(const string str) const {
       if ( occ[1]-occ[0]-1 > 0 ) return str.substr(occ[0],occ[1]-occ[0]-1);
       else return "$$%$$";
    } else {
-      if ( !occ.empty() ) 
+      if ( !occ.empty() )
 	 cout<<oW<<"Only lines more than two \" symbols are allowed in substring '"<<str<<"'."<<endl;
    }
    return string();
@@ -652,7 +652,7 @@ bool read_steer::EnclosedStringToOneEntity(string& str) const {
    if ( one!=string::npos ) str.erase(two,1);
    string substr = str.substr(one,two-one);
    const string sub = str.substr(one,two-one);
-   
+
    if ( one==two){ // it is only "" -> we tag it.
       str.insert(two,"$$%$$");
    }
@@ -682,7 +682,7 @@ int read_steer::separatetag(string& vallhs, string& valrhs, const string sep) {
    // input:  vallhs, sep
    // output: vallhs, valrhs
    // if no separator was found return vallhs and valrhs untouched
-   // otherwise vallhs is replaced by left-hand-side of separator, and 
+   // otherwise vallhs is replaced by left-hand-side of separator, and
    //  valrhs is replace by right-hand-side of separator
    // return -1, if no separator was found,
    // return position of separato string in vallhs
@@ -725,7 +725,7 @@ bool read_steer::parsecommandline(int argc,char** argv){
 	 }
       }
    }
-   
+
    // if already StdId found -> replace values
    // else create new StdID namespace with cmd-line arguments
    if ( instances==NULL ) read_steer::Steering(stdID);

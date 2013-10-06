@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "fastNLOInterpolCatmulRom.h"
+#include "fastnlotk/fastNLOInterpolCatmulRom.h"
 
 using namespace std;
 
@@ -62,7 +62,7 @@ vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
    // ikern: select interpolation kernel   1:Catmul Rom  2: Lagrange
    // nmod:  modified number of next node to the left (to be used for storage - relevant only at boundaries)
    // kernel: array(4) containing the interpolation kernel
-   
+
 
    vector <double> kern(nS);
    // --- Catmul Rom interpolation kernel
@@ -85,12 +85,12 @@ vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
       kern[3] = 2.0 - 4.0*dist[3] + 2.5*dist[3]*dist[3] - 0.5*dist[3]*dist[3]*dist[3];
       nmod = nnode;
    }
-   
+
    // keep value for next time.
    fnmod = nmod;
- 
+
    //    cout<<"   x="<<x<<"\tdelta="<<delta<<"\tnnode="<<nnode<<"\tk[3]="<<kern[3]<<"\tg-max="<<fgrid.back()<<"\tnx="<<fgrid.size()<<"\tnf="<<fnmod<<"\tx0b="<<nmod-1<<endl;
-  
+
    // generate return values
    vector<pair<int,double> >  ret(nS);
    for ( int i = 0 ; i<nS ; i++ ){

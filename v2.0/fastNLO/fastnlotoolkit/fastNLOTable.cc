@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include "fastNLOTable.h"
+#include "fastnlotk/fastNLOTable.h"
 
 
 using namespace std;
@@ -43,7 +43,7 @@ int fastNLOTable::ReadCoeffTables(istream* table){
 fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB, istream *table){
    // take coeffbase and identify type of contribution.
    //  - create instance of correct full coefficient table
-   //  - read in 'rest' of coeff table 
+   //  - read in 'rest' of coeff table
 
    // identify coeff-table:
    bool quiet = true;
@@ -165,7 +165,7 @@ int fastNLOTable::ReadScenario(istream *table){
 	  RapIndex.push_back(i);
 	  //	  irap++;
 	  //	  cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
-	} 
+	}
       }
    }
 
@@ -178,19 +178,19 @@ int fastNLOTable::ReadScenario(istream *table){
       // 	 if ( IDiffBin[0] == 2 ) binsize *=  UpBin[i][0] - LoBin[i][0];
       // 	 printf(" binszie bin %d  = %7.4f\n",i,binsize);
       // 	 BinSize[i] = binsize;
-	 
+
       //    }
       //    else if ( NDim == 2 || NDim == 3 ){
       //       // warning: the variables are exchanged here!
       //       // what is bound[0] corresponds to bingrid2[nBins][nBins2]
       //       // what is bound[1] corresponds to bingrid1[nBins]
-      
+
       //       double binsize = 1;
       //       // warning: the variables are exchanged here!
       //       // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
       //       // what is DimLabel[1] corresponds to bingrid1[nBins]
       //       printf("UpBin[.][0] =  %7.4f, LoBin[.][0] =  %7.4f , UpBin[.][1] =  %7.4f  LoBin[.][1] =  %7.4f\n",
-      // 	     UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]); 
+      // 	     UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]);
       //       if ( IDiffBin[0] == 2 ) binsize *= UpBin[i][0] - LoBin[i][0];
       //       if ( IDiffBin[1] == 2 ) binsize *= UpBin[i][1] - LoBin[i][1];
       //       printf(" binszie 2Dim bin %d  = %7.4f\n",i,binsize);
@@ -267,31 +267,31 @@ bool fastNLOTable::IsCompatible(fastNLOTable* other) const {
    if(ScDescript != other->ScDescript){
       warn["IsCompatible"]<<"Differing ScDescript found."<<endl;
       return false;
-   }  
+   }
    if(!cmp(Ecms,other->Ecms)){
       warn["IsCompatible"]<<"Differing Ecms found: "<<Ecms<<" and "<<other->Ecms<<endl;
       return false;
-   }  
+   }
    if(ILOord != other->ILOord){
       warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other->GetLoOrder()<<endl;
       return false;
-   }  
+   }
    if(NObsBin != other->NObsBin){
       warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other->NObsBin<<endl;
       return false;
-   }  
+   }
    if(NDim != other->NDim){
       warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other->NDim<<endl;
       return false;
-   }  
+   }
    if(DimLabel != other->DimLabel){
       warn["IsCompatible"]<<"Differing DimLabel found."<<endl;
       return false;
-   }  
+   }
    if(IDiffBin != other->IDiffBin){
       warn["IsCompatible"]<<"Differing IDiffBin found."<<endl;
       return false;
-   }  
+   }
 //    if(!cmp(LoBin,other->LoBin)){
    if(!cmp(Bin,other->Bin)){
       warn["IsCompatible"]<<"Differing Bin boundaries found."<<endl;
@@ -308,7 +308,7 @@ bool fastNLOTable::IsCompatible(fastNLOTable* other) const {
    if(INormFlag != other->INormFlag){
       warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other->INormFlag<<endl;
       return false;
-   }  
+   }
    if(INormFlag>1){
       if(DenomTable != other->DenomTable){
          warn["IsCompatible"]<<"Differing DenomTable found."<<endl;
@@ -326,8 +326,8 @@ bool fastNLOTable::IsCompatible(fastNLOTable* other) const {
             return false;
          }
       }
-   }  
-   
+   }
+
    return true;
 };
 
@@ -428,9 +428,9 @@ void fastNLOTable::SetLoOrder(int LOOrd){
 
 void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
    // Set label for dimension
-   // 
+   //
    // In this method, we also set IDiffBin.
-   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder 
+   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder
    // binned distribution (=2).
    // Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
    // use binned distributions, we use IDiffBin to identify, if the publication
@@ -449,7 +449,7 @@ void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
       error["SetDimLabel"]<<"The dimension must be a natural number. iDim="<<iDim<<endl;
       exit(1);
    }
-   
+
    if ( (int)DimLabel.size() != NDim ){
       error["SetDimLabel"]<<"You have to call SetNumDiffBin with a reasonable number before."<<endl;
       exit(1);
@@ -489,7 +489,7 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    //    if ( val2!==-42 && NDim!=2){
    //       printf("fastNLOTable::GetBinNumber(%6.3f,%6.3f). Error. A double differential table only needs two variables.\n",var1,var2);exit(1);
    //    }
-   
+
    if ( (val2 == -42 && NDim != 1 ) || ( val2 != -42 && NDim != 2 ) ) {
       error["GetBinNumber"]<<"This function can calculate the bin number only for single and double differential binnings (NDim = "<<NDim<<" )."<<endl;
       exit(1);
@@ -554,10 +554,10 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    //
    //   We must know NDim before calling InitBinning.
    //	NDim tells us, in how many dimensions/variables the measurement was performed
-   //   this method only supports two dimensional measurements and a third dimension for 
+   //   this method only supports two dimensional measurements and a third dimension for
    //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
    //   Still, fastNLO could support higher dimensional binnings.
-   // 
+   //
    //  input.
    //     nBins1	number of bins in 1st dimension
    //     bingrid1	binning in 1st dimension
@@ -576,7 +576,7 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    //
    //  logic for binwidth
    //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
-   //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the binwidth by this 
+   //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the binwidth by this
    //        dimensional width.
    //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
    //        the bingrid since the 'ObsBin' is binned in this binning.
@@ -594,7 +594,7 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
 
    if ( (int)DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
    if ( (int)IDiffBin.size() != NDim ) printf("Error. you do not have the same number of IDiffBin than NDim.\n");
- 
+
    if ( NDim == 1 ){
       for(int i=0;i<nBins1;i++){
 	 nbins++;
@@ -608,7 +608,7 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
       }
       // here we always assume, that all dimensions are
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
       IDiffBin[0] = 2 ;
    }
@@ -630,28 +630,28 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
 	    //if ( NDim == 3 ) bound[2] = binwidth3;
 	    if ( NDim == 3 ) bound[2] = 0;
 	    //if ( binwidth3 != 0 ) bound[2] = binwidth3;
-	    
+
 	    double binsize = 1;
-	
+
 	    // warning: the variables are exchanged here!
 	    // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
 	    // what is DimLabel[1] corresponds to bingrid1[nBins]
 	    if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
 	    if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
-	    if ( NDim==3 ) { 
-	       //if (IDiffBin[2] == 2 ) 
+	    if ( NDim==3 ) {
+	       //if (IDiffBin[2] == 2 )
 		  binsize *= binwidth3;
 	    }
 	    else if ( binwidth3 != 0 && NDim != 3 ) {
 	       binsize *= binwidth3;
 	    }
 	    BinSize.push_back(binsize);
-	    
+
 	 }
       }
       // here we always assume, that all dimensions are
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
       // The 'third' dimension in this method however, is NOT a binned distribution
       IDiffBin[0] = 2 ;
@@ -664,16 +664,16 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    info["InitBinning"]<<"Tot. No. observable bins = "<<nbins<<endl;
 
    NObsBin = nbins;
- 
-   INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
+
+   INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is
 			 //     to be normalized by own integral (in 1st dimension)
 			 //     see documentation for details and for other options
-   
+
 }
 
 
 void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, const int* nBins2, vector< vector<double> > bingrid2, const double bwfactor ){
-  
+
   // ------------------------------------------------------------------- //
   //
   //  InitBinning. This method initalizes and (partly) checks the binning
@@ -681,10 +681,10 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
   //
   //   We must know NDim before calling InitBinning.
   //	NDim tells us, in how many dimensions/variables the measurement was performed
-  //   this method only supports two dimensional measurements and a third dimension for 
+  //   this method only supports two dimensional measurements and a third dimension for
   //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
   //   Still, fastNLO could support higher dimensional binnings.
-  // 
+  //
   //  input.
   //     nBins1	number of bins in 1st dimension
   //     bingrid1	binning in 1st dimension
@@ -701,7 +701,7 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
   //
   //  logic for binwidth
   //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
-  //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the binwidth by this 
+  //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the binwidth by this
   //        dimensional width.
   //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
   //        the bingrid since the 'ObsBin' is binned in this binning.
@@ -719,7 +719,7 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
 
   if ( (int)DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
   if ( (int)IDiffBin.size() != NDim ) printf("Error. you do not have the same number of IDiffBin than NDim.\n");
- 
+
   if ( NDim == 1 ){
     for(int i=0;i<nBins1;i++){
       nbins++;
@@ -749,7 +749,7 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
 	bound[0] = bingrid2[i][j+1];
 	bound[1] = bingrid1[i+1];
 	UpBin.push_back(bound);
-	    
+
 	if ( bwfactor > 0. ) {
 	  binsize = bwfactor;
 	} else {
@@ -765,15 +765,15 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
     }
   }
   else error["InitBinningKR"]<<"Error. unknown NDim."<<endl;;
-  
+
   info["InitBinningKR"]<<" tot. No. observable bins = "<<nbins<<endl;
 
   NObsBin = nbins;
- 
-  INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
+
+  INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is
   //     to be normalized by own integral (in 1st dimension)
   //     see documentation for details and for other options
-   
+
 }
 */
 
@@ -801,7 +801,7 @@ void fastNLOTable::PrintScenario() const {
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<NDim;j++){
       printf("     -  - LoBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].first);
-      if(IDiffBin[j]==2) 
+      if(IDiffBin[j]==2)
 	printf("     -  - UpBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].second);
     }
    }
@@ -809,7 +809,7 @@ void fastNLOTable::PrintScenario() const {
      printf("     - BinSize[%d]                %7.4f\n", i,BinSize[i]);
    }
    printf("    INormFlag                     %d\n",INormFlag);
-   
+
    if(INormFlag>1){
      printf("    DenomTable                    %s\n",DenomTable.data());
    }
@@ -820,7 +820,7 @@ void fastNLOTable::PrintScenario() const {
       }
    }
    printf("\n ********************************************************\n\n");
-  
+
 }
 
 
@@ -891,8 +891,8 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
    for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
       string coeffname = fastNLO::_ContrName[fCoeff[j]->GetIContrFlag1()-1];
       fastNLOCoeffBase* c = fCoeff[j];
-      cout << " # "<< "  No.: " << j << ", type: " << coeffname <<", Id: " << c->GetIContrFlag1()-1 
-	   << ", order: " << c->GetContributionDescription()[0] 
+      cout << " # "<< "  No.: " << j << ", type: " << coeffname <<", Id: " << c->GetIContrFlag1()-1
+	   << ", order: " << c->GetContributionDescription()[0]
 	   << ", by: " << c->GetCodeDescription()[0] << endl;
       if (iprint > 0) {
 	 for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {

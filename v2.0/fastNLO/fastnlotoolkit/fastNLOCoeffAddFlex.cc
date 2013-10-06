@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffAddFlex.h"
+#include "fastnlotk/fastNLOCoeffAddFlex.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -62,7 +62,7 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
    //    - sigmaref scale 2
    // ------------------------------ //
    int nn3 = 0;
-	  
+
    nn3 += ReadFlexibleVector  ( &ScaleNode1 , table );
    nn3 += ReadFlexibleVector  ( &ScaleNode2 , table );
    //NscalenodeScale1 = ScaleNode1[0].size();
@@ -149,7 +149,7 @@ int fastNLOCoeffAddFlex::Write(ostream *table, int option){
 }
 
 int fastNLOCoeffAddFlex::Copy(fastNLOCoeffAddFlex* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;

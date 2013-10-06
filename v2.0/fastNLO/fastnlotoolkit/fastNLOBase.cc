@@ -4,8 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
-#include "fastNLOConstants.h"
-#include "fastNLOBase.h"
+#include "fastnlotk/fastNLOConstants.h"
+#include "fastnlotk/fastNLOBase.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -19,7 +19,7 @@ fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), ofil
 fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), ofilestream(0), fPrecision(8)  {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
- 
+
 fastNLOBase::~fastNLOBase(){
    if(ifilestream) delete ifilestream;
    if(ofilestream) delete ofilestream;
@@ -113,7 +113,7 @@ void fastNLOBase::WriteTable (){
    // WriteTable(). writes the full FastNLO table to
    // the previously defined ffilename on disk.
    //
-   // this function should be overwritten by 
+   // this function should be overwritten by
    // fastNLOTable::WriteTable();
    //
    OpenFileRewrite();
@@ -247,14 +247,14 @@ void fastNLOBase::PrintWelcomeMessage() {
    char fnlo[100];
    //sprintf(fnlo,"27[0;31mfast27[0;34mNLO\033[0m",27,0,31,27,0,34);
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
-   char package_version[100]    = _FNLO_VERSION;
-   char svnrev[100]             = _FNLO_SVNREV;
-   char authors[500]            = _FNLO_AUTHORS;
-   char webpage[500]    = _FNLO_WEBPAGE;
-   char authorsv14[200] = _FNLO_AUTHORSv14;
-   char quotev14[200]   = _FNLO_QUOTEv14;
-   char authorsv2[200]  = _FNLO_AUTHORS;
-   char quotev2[200]    = _FNLO_QUOTEv2;
+   char package_version[100]    = FNLO_VERSION;
+   char svnrev[100]             = FNLO_SVNREV;
+   char authors[500]            = FNLO_AUTHORS;
+   char webpage[500]    = FNLO_WEBPAGE;
+   char authorsv14[200] = FNLO_AUTHORSv14;
+   char quotev14[200]   = FNLO_QUOTEv14;
+   char authorsv2[200]  = FNLO_AUTHORS;
+   char quotev2[200]    = FNLO_QUOTEv2;
 
    shout>>"\n";
    shout>>""<<CSEPS;

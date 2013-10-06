@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cstdlib>
-#include "fastNLOConstants.h"
-#include "fastNLOPDFLinearCombinations.h"
+#include "fastnlotk/fastNLOConstants.h"
+#include "fastnlotk/fastNLOPDFLinearCombinations.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -21,12 +21,12 @@ fastNLOPDFLinearCombinations::~fastNLOPDFLinearCombinations(){
 
 vector<double > fastNLOPDFLinearCombinations::CalcPDFLinearCombination(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1, const vector<double>& pdfx2 , bool pdf2IsAntiParticle ) const {
    //
-   // return vector of PDF linear combinations which can be used 
+   // return vector of PDF linear combinations which can be used
    // to calculate the cross section.
    //
    // bool pdf2IsAntiParticle specifies, if pdfx2 still has to be 'inverted' or not
    //
-   
+
    switch ( c->GetNPDF() ) {
    case 0:	// no PDF involved in process; e.g. e+e-
       return vector<double >();
@@ -57,7 +57,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCOneHadron(const fastNLOCo
    //
    // Calculate PDF linear combinations for DIS processes
    //
-   
+
    // ---- check for ep-DIS ---- //
    bool IsONEPDF = ( c->GetNPDF() == 1 );
    bool IsDIS    = ( c->GetIPDFdef1() == 2 );
@@ -90,14 +90,14 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //    if ( IsDrellYan ) CalcPDFLinearCombDrellYan(c,pdfx1,pdfx2);
    // and implement a new function called CalcPDFLinearCombDrellYan(...)
    // -----------------------------------------------
-   
+
    // ---- check for jet-productions  ---- //
    bool IsTwoPDF = ( c->GetNPDF() == 2 );
    bool IsTwoIdenticHadrons = (c->GetIPDFdef1() == 3  &&  c->GetPDFPDG(0) == fabs(c->GetPDFPDG(1)) );
    bool IsHHJets = ( c->GetIPDFdef2() == 1 );
 
    if ( IsTwoPDF && IsTwoIdenticHadrons && IsHHJets ) {
-      return CalcPDFLinearCombHHC(c,pdfx1,pdfx2);      
+      return CalcPDFLinearCombHHC(c,pdfx1,pdfx2);
    }
    // else if (...)  //space for other processes
    // ---- (yet) unknown process ---- //
@@ -135,7 +135,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombDIS(const fastNLOC
    //  according to the used subprocesses of your
    //  calculation/table.
    //
-  
+
    int NSubproc = c->GetNSubproc();
 
    vector < double > pdflc(3);
@@ -230,7 +230,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombttbar(const fastNL
    // DB 24.08.13
    //
 
-   
+
    vector <double> pdflc(2);
    pdflc[0] += pdfx1[6]*pdfx2[6]; // gg
    // qq

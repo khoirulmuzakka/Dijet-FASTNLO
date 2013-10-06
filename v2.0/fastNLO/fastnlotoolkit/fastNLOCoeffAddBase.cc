@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoeffAddBase.h"
+#include "fastnlotk/fastNLOCoeffAddBase.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -16,7 +16,7 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
 	 <<c->GetIDataFlag()<<", IAddMultFlag="<<c->GetIAddMultFlag()
 	 <<", but none is allowed to be 1."<<endl;
       return false;
-   }  
+   }
    else return false;
 }
 
@@ -54,7 +54,7 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       NPDFPDG.resize(NPDF);
       for(int i=0;i<NPDF;i++){
 	 *table >>  NPDFPDG[i];
-      }      
+      }
    }
    *table >> NPDFDim;
    int NFragFunc;
@@ -63,7 +63,7 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       NFFPDG.resize(NFragFunc);
       for(int i=0;i<NFragFunc;i++){
 	 *table >>  NFFPDG[i];
-      }      
+      }
    }
    *table >> NFFDim;
    *table >> NSubproc;
@@ -92,8 +92,8 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       XNode1[i].resize(xtot);
       for(int j=0;j<xtot;j++){
 	 *table >> XNode1[i][j];
-      }         
-   }      
+      }
+   }
    if(NPDFDim==2){
       //Nxtot2.resize(fNObsBins);
       XNode2.resize(fNObsBins);
@@ -105,8 +105,8 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
 	 //XNode2[i].resize(Nxtot2[i]);
 	 for(int j=0;j<xtot;j++){
 	    *table >> XNode2[i][j];
-	 }         
-      }      
+	 }
+      }
    }
    if(NFragFunc>0){
       Nztot.resize(fNObsBins);
@@ -116,8 +116,8 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
 	 ZNode[i].resize(Nztot[i]);
 	 for(int j=0;j<Nztot[i];j++){
 	    *table >> ZNode[i][j];
-	 }         
-      }               
+	 }
+      }
    }
 
    *table >> NScales;
@@ -125,7 +125,7 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
    Iscale.resize(NScales);
    for(int i=0;i<NScales;i++){
       *table >> Iscale[i];
-   }      
+   }
    int NscaleDescript;
    ScaleDescript.resize(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
@@ -153,14 +153,14 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
    *table << NPDFPDG.size() << endl;
    for(unsigned int i=0;i<NPDFPDG.size();i++){
       *table <<  NPDFPDG[i] << endl;
-   }      
+   }
    *table << NPDFDim << endl;
    int NFragFunc = NFFPDG.size();
    *table << NFragFunc << endl;
    if(NFragFunc>0){
       for(int i=0;i<NFragFunc;i++){
 	 *table <<  NFFPDG[i] << endl;
-      }      
+      }
    }
    *table << NFFDim << endl;
    *table << NSubproc << endl;
@@ -181,15 +181,15 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
       *table << XNode1[i].size() << endl;
       for(unsigned int j=0;j<XNode1[i].size();j++){
 	 *table << XNode1[i][j] << endl;
-      }         
-   }      
+      }
+   }
    if(NPDFDim==2){
       for(int i=0;i<fNObsBins;i++){
 	 *table << XNode2[i].size() << endl;
 	 for(unsigned int j=0;j<XNode2[i].size();j++){
 	    *table << XNode2[i][j] << endl;
-	 }         
-      }      
+	 }
+      }
    }
    cout<<" 10"<<endl;
    if(NFragFunc>0){
@@ -197,14 +197,14 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
 	 *table << Nztot[i] << endl;
 	 for(int j=0;j<Nztot[i];j++){
 	    *table << ZNode[i][j] << endl;
-	 }         
-      }               
+	 }
+      }
    }
    *table << NScales << endl;
    *table << NScaleDim << endl;
    for(int i=0;i<NScales;i++){
       *table << Iscale[i] << endl;
-   }      
+   }
    for(int i=0;i<NScaleDim;i++){
       *table << ScaleDescript[i].size() << endl;
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
@@ -219,7 +219,7 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
 }
 
 int fastNLOCoeffAddBase::Copy(fastNLOCoeffAddBase* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;
@@ -284,7 +284,7 @@ void fastNLOCoeffAddBase::ResizeTable(vector<vector<vector<vector<vector<vector<
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-    
+
 }
 
 
@@ -345,7 +345,7 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<double > > > 
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-  
+
 }
 
 
@@ -402,12 +402,12 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" B   NPDF                          %d\n",NPDFPDG.size());
    for(unsigned int i=0;i<NPDFPDG.size();i++){
       printf(" B    - NPDFPDG[%d]                 %d\n",i,NPDFPDG[i]);
-   }      
+   }
    printf(" B   NPDFDim                       %d\n",NPDFDim);
    printf(" B   NFragFunc                     %d\n",NFFPDG.size());
    for(unsigned int i=0;i<NFFPDG.size();i++){
       printf(" B    - NFFPDG[%d]               %d\n",i,NFFPDG[i]);
-   }      
+   }
    printf(" B   NFFDim                        %d\n",NFFDim);
    printf(" B   NSubproc                      %d\n",NSubproc);
    printf(" B   IPDFdef1                      %d\n",IPDFdef1);
@@ -416,13 +416,13 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" B   Nxtot1[0-%d]             ",fNObsBins);
    for(int i=0;i<fNObsBins;i++){
       printf("%d ,",XNode1[i].size());
-   } 
+   }
    printf("\n");
    //     for(int i=0;i<fNObsBins;i++){
    //       printf(" B    XNode1[%d]             ",i);
    //       for(int j=0;j<Nxtot1[i];j++){
    // 	printf(" B   %8.4f ,",XNode1[i][j]);
-   //       } 
+   //       }
    //       printf(" B   \n");
    //     }
    printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);

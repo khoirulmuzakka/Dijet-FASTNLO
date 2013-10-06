@@ -7,11 +7,11 @@
 #include <vector>
 #include <utility>
 #include <iostream>
-#include "fastNLOInterpolCatmulRom.h"
-#include "fastNLOTable.h" 
-#include "fastNLOCreate.h"
+#include "fastnlotk/fastNLOInterpolCatmulRom.h"
+#include "fastnlotk/fastNLOTable.h"
+#include "fastnlotk/fastNLOCreate.h"
 
-#include "fastNLOLHAPDF.h"
+#include "fastnlotk/fastNLOLHAPDF.h"
 
 //__________________________________________________________________________________________________________________________________
 int main()
@@ -19,13 +19,13 @@ int main()
    // namespaces
    using namespace std;
 
-   
+
 //    fastNLOCreate tt("fnlttbar000.str");
 //    tt.Print();
 //    return 0;
    /*
    fastNLOTable table();
-   
+
    fastNLOTable tab("../ep/finaltables/fnh5001.tab");
    //fastNLOTable tab("../hadron/tt.tab");
    tab.Print();
@@ -42,7 +42,7 @@ int main()
    //fastNLOLHAPDF  r1("/afs/desy.de/user/b/britzger/www/FastNLOForKumar/fastNLOv2/fnl1014_v2_all.tab","CT10.LHgrid",0);
 
    //fastNLOLHAPDF  r1("../hadron/output/files_fnl5002ak06/fnl5002ak06_final_20G_2jet.tab","CT10.LHgrid",0);
-   
+
 
    //say::SetGlobalVerbosity(say::DEBUG);
 
@@ -50,7 +50,7 @@ int main()
    fastNLOLHAPDF  r1("../creator/ep/output/fnh5304kt_LO.tab","CT10.LHgrid",0);
    r1.CalcCrossSection();
    r1.PrintCrossSections();
-   
+
 //    r1.Print();
 //    r1.SetUnits(fastNLO::kAbsoluteUnits);
 //    //   r1.SetContributionON(fastNLO::kFixedOrder, 1, false);
@@ -59,7 +59,7 @@ int main()
    return 0;
 
    fastNLOCreate t("FastNLOSteering.str");
-   
+
 
    fastNLOInterpolCatmulRom inter(10,100);
    inter.MakeGrids(fastNLOGrid::kLinear, 20);
@@ -101,7 +101,7 @@ int main()
    p = inter.GetNodeValues(10000);
    for ( int i = 0 ; i<4 ; i++ )
       cout<<p[i].first<<"\t"<<p[i].second<<endl;
-   
+
    return 0;
 }
 

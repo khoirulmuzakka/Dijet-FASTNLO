@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastNLOCoefficients.h"
+#include "fastnlotk/fastNLOCoefficients.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -54,7 +54,7 @@ int fastNLOCoefficients::Read(istream *table){
       //      StripWhitespace(CtrbDescript[i]);
    }
    int NCodeDescr;
-   *table >> NCodeDescr;   
+   *table >> NCodeDescr;
    CodeDescript.resize(NCodeDescr);
    table->getline(buffer,256);
    for(int i=0;i<NCodeDescr;i++){
@@ -159,7 +159,7 @@ int fastNLOCoefficients::Read(istream *table){
          NPDFPDG.resize(NPDF);
          for(int i=0;i<NPDF;i++){
             *table >>  NPDFPDG[i];
-         }      
+         }
       }
       *table >> NPDFDim;
       *table >> NFragFunc;
@@ -167,7 +167,7 @@ int fastNLOCoefficients::Read(istream *table){
          NFFPDG.resize(NFragFunc);
          for(int i=0;i<NFragFunc;i++){
             *table >>  NFFPDG[i];
-         }      
+         }
       }
       *table >> NFFDim;
       *table >> NSubproc;
@@ -196,8 +196,8 @@ int fastNLOCoefficients::Read(istream *table){
          XNode1[i].resize(xtot);
          for(int j=0;j<xtot;j++){
             *table >> XNode1[i][j];
-         }         
-      }      
+         }
+      }
       if(NPDFDim==2){
          //Nxtot2.resize(fNObsBins);
          XNode2.resize(fNObsBins);
@@ -209,8 +209,8 @@ int fastNLOCoefficients::Read(istream *table){
             //XNode2[i].resize(Nxtot2[i]);
             for(int j=0;j<xtot;j++){
                *table >> XNode2[i][j];
-            }         
-         }      
+            }
+         }
       }
       if(NFragFunc>0){
          Nztot.resize(fNObsBins);
@@ -220,8 +220,8 @@ int fastNLOCoefficients::Read(istream *table){
             ZNode[i].resize(Nztot[i]);
             for(int j=0;j<Nztot[i];j++){
                *table >> ZNode[i][j];
-            }         
-         }               
+            }
+         }
       }
 
       *table >> NScales;
@@ -229,7 +229,7 @@ int fastNLOCoefficients::Read(istream *table){
       Iscale.resize(NScales);
       for(int i=0;i<NScales;i++){
          *table >> Iscale[i];
-      }      
+      }
       int NscaleDescript;
       ScaleDescript.resize(NScaleDim);
       for(int i=0;i<NScaleDim;i++){
@@ -246,7 +246,7 @@ int fastNLOCoefficients::Read(istream *table){
 
       //! v2.1 store NScaleDep here.
       //! v2.1 *table >> NScaleDep;
-      
+
       if ( NScaleDep < 3 ) {
 	 Nscalevar.resize(NScaleDim);
 	 Nscalenode.resize(NScaleDim);
@@ -254,11 +254,11 @@ int fastNLOCoefficients::Read(istream *table){
 	    *table >> Nscalevar[i];
 	    *table >> Nscalenode[i];
 	 }
-	 
+
 	 // 	 printf("  *  fastNLOCoefficients::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
 	 // 	 fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
 
-	 
+
 	 ScaleFac.resize(NScaleDim);
 	 for(int i=0;i<NScaleDim;i++){
 	    ScaleFac[i].resize(Nscalevar[i]);
@@ -266,21 +266,21 @@ int fastNLOCoefficients::Read(istream *table){
 	       *table >> ScaleFac[i][j];
 	    }
 	 }
-	 
+
 	 //printf("  *  fastNLOCoefficients::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
 	 //fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
 	 ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
 	 int nsn = ReadTable  ( &ScaleNode , table );
 	 //printf("  *  fastNLOCoefficients::Read(). Read %d lines of ScaleNode.\n",nsn);
-	 
+
 	 int XmaxFromI[1] = {0};
-	 //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n", 
+	 //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n",
 	 //fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
 	 ResizeTable( &SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
 	 int nst = ReadTable  ( &SigmaTilde , table );
 	 //printf("  *  fastNLOCoefficients::Read(). Read %d lines of SigmaTilde.\n",nst);
 	 printf("  *  fastNLOCoefficients::Read(). Read %d lines of FASTNLO v2.0 tables.\n",nst+nsn);
-	 
+
       }
 
 
@@ -299,7 +299,7 @@ int fastNLOCoefficients::Read(istream *table){
 	 //    - sigmaref scale 2
 	 // ------------------------------ //
 	 int nn3 = 0;
-	  
+
 	 nn3 += ReadFlexibleVector  ( &ScaleNode1 , table );
 	 nn3 += ReadFlexibleVector  ( &ScaleNode2 , table );
  	 NscalenodeScale1 = ScaleNode1[0].size();
@@ -392,7 +392,7 @@ int fastNLOCoefficients::Write(ostream *table, int option){
    for(unsigned int i=0;i<CtrbDescript.size();i++){
       *table << CtrbDescript[i] << endl;
    }
-   *table << CodeDescript.size() << endl;   
+   *table << CodeDescript.size() << endl;
    for(unsigned int i=0;i<CodeDescript.size();i++){
       *table << CodeDescript[i] << endl;
    }
@@ -448,7 +448,7 @@ int fastNLOCoefficients::Write(ostream *table, int option){
          }
       }
    }// end of IAddMultFlag==1
-   
+
    if(!(IDataFlag==1) && !(IAddMultFlag==1)){
       *table << IRef << endl;
       *table << IScaleDep << endl;
@@ -458,14 +458,14 @@ int fastNLOCoefficients::Write(ostream *table, int option){
       if(NPDF>0){
          for(int i=0;i<NPDF;i++){
             *table <<  NPDFPDG[i] << endl;
-         }      
+         }
       }
       *table << NPDFDim << endl;
       *table << NFragFunc << endl;
     if(NFragFunc>0){
          for(int i=0;i<NFragFunc;i++){
             *table <<  NFFPDG[i] << endl;
-         }      
+         }
       }
       *table << NFFDim << endl;
       *table << NSubproc << endl;
@@ -486,15 +486,15 @@ int fastNLOCoefficients::Write(ostream *table, int option){
          *table << XNode1[i].size() << endl;
          for(unsigned int j=0;j<XNode1[i].size();j++){
             *table << XNode1[i][j] << endl;
-         }         
-      }      
+         }
+      }
       if(NPDFDim==2){
          for(int i=0;i<fNObsBins;i++){
             *table << XNode2[i].size() << endl;
             for(unsigned int j=0;j<XNode2[i].size();j++){
                *table << XNode2[i][j] << endl;
-            }         
-         }      
+            }
+         }
       }
       cout<<" 10"<<endl;
      if(NFragFunc>0){
@@ -502,14 +502,14 @@ int fastNLOCoefficients::Write(ostream *table, int option){
             *table << Nztot[i] << endl;
             for(int j=0;j<Nztot[i];j++){
                *table << ZNode[i][j] << endl;
-            }         
-         }               
+            }
+         }
       }
       *table << NScales << endl;
       *table << NScaleDim << endl;
       for(int i=0;i<NScales;i++){
          *table << Iscale[i] << endl;
-      }      
+      }
      for(int i=0;i<NScaleDim;i++){
          *table << ScaleDescript[i].size() << endl;
          for(unsigned int j=0;j<ScaleDescript[i].size();j++){
@@ -531,7 +531,7 @@ int fastNLOCoefficients::Write(ostream *table, int option){
 	       *table << ScaleFac[i][j] << endl;
 	    }
 	 }
-	 
+
 	int nsn = WriteTable( &ScaleNode  , table );
 	//printf("  *  fastNLOCoefficients::Write(). Wrote %d lines of ScaleNode.\n",nsn);
 	int nst = WriteTable( &SigmaTilde , table , (bool)(option & DividebyNevt) , Nevt );
@@ -540,10 +540,10 @@ int fastNLOCoefficients::Write(ostream *table, int option){
 
 
       } // end if NScaleDep !=3.
-      
+
       if ( NScaleDep>=3 ) {
 	 int nn3 = 0;
-       
+
 	 nn3 += WriteFlexibleTable( &ScaleNode1 , table );
 	 nn3 += WriteFlexibleTable( &ScaleNode2 , table );
  	 nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
@@ -559,20 +559,20 @@ int fastNLOCoefficients::Write(ostream *table, int option){
 
 // 	 *table << NscalenodeScale1 << endl;
 // 	 nn3 += WriteTable( &ScaleNode1 , table );
-     
+
 // 	 *table << NscalenodeScale2 << endl;
 // 	 nn3 += WriteTable( &ScaleNode2 , table );
- 
+
 // 	 nn3 += WriteTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt );
 // 	 nn3 += WriteTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt );
 // 	 nn3 += WriteTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt );
-      
+
 // 	 nn3 += WriteTable( &SigmaRefMixed	, table , (bool)(option & DividebyNevt) , Nevt );
 // 	 nn3 += WriteTable( &SigmaRef_s1	, table , (bool)(option & DividebyNevt) , Nevt );
 // 	 nn3 += WriteTable( &SigmaRef_s2	, table , (bool)(option & DividebyNevt) , Nevt );
 
 	 printf("  *  fastNLOCoefficients::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
-	  
+
       } // if(NScaleDep==3)
    }// end of not data and not corrections
 
@@ -581,7 +581,7 @@ int fastNLOCoefficients::Write(ostream *table, int option){
 
 int fastNLOCoefficients::Copy(fastNLOCoefficients* other){
 
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out); 
+   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
    iostream* buffer = new iostream(streambuf);
    other->Write(buffer);
    *buffer << tablemagicno << endl;
@@ -600,7 +600,7 @@ void fastNLOCoefficients::Add(fastNLOCoefficients* other){
    if ( NScaleDep<3 ){
       AddTableToAnotherTable( &SigmaTilde , &(other->SigmaTilde) ,w1 , w2 );
    }
-   
+
    if ( NScaleDep >= 3 ){
      AddTableToAnotherTable( &SigmaTildeMuIndep , &(other->SigmaTildeMuIndep) ,w1 , w2 );
      //if ( NScaleDep==3 || NScaleDep==5 || fScen->ILOord!=Npow) {
@@ -691,7 +691,7 @@ void fastNLOCoefficients::ResizeTable(vector<vector<vector<vector<vector<vector<
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-    
+
 }
 
 
@@ -795,7 +795,7 @@ void fastNLOCoefficients::ResizeTable( vector<vector<vector<vector<double > > > 
     cout << "Error in Resize Table." << endl;
     exit(1);
   }
-  
+
 }
 
 
@@ -1197,7 +1197,7 @@ void fastNLOCoefficients::AddTableToAnotherTable( vector<vector<double > >* vSum
 void fastNLOCoefficients::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
    if ( vSum->size() != vAdd->size() ) {cout<<"Error in fastNLOCoefficients::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
   for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
-    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i]; 
+    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
   }
 }
 
@@ -1254,15 +1254,15 @@ void fastNLOCoefficients::Print() const {
     if(NPDF>0){
       for(int i=0;i<NPDF;i++){
 	printf(" B    - NPDFPDG[%d]                 %d\n",i,NPDFPDG[i]);
-      }      
+      }
     }
     printf(" B   NPDFDim                       %d\n",NPDFDim);
     printf(" B   NFragFunc                     %d\n",NFragFunc);
     if(NFragFunc>0){
       for(int i=0;i<NFragFunc;i++){
 	printf(" B    - NFFPDG[%d]               %d\n",i,NFFPDG[i]);
-      }      
-    } 
+      }
+    }
     printf(" B   NFFDim                        %d\n",NFFDim);
     printf(" B   NSubproc                      %d\n",NSubproc);
     printf(" B   IPDFdef1                      %d\n",IPDFdef1);
@@ -1271,14 +1271,14 @@ void fastNLOCoefficients::Print() const {
     printf(" B   Nxtot1[0-%d]             ",fNObsBins);
     for(int i=0;i<fNObsBins;i++){
        printf("%d ,",XNode1[i].size());
-    } 
+    }
     printf(" B   \n");
 
 //     for(int i=0;i<fNObsBins;i++){
 //       printf(" B    XNode1[%d]             ",i);
 //       for(int j=0;j<Nxtot1[i];j++){
 // 	printf(" B   %8.4f ,",XNode1[i][j]);
-//       } 
+//       }
 //       printf(" B   \n");
 //     }
     printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
@@ -1303,7 +1303,7 @@ void fastNLOCoefficients::Print() const {
     }
     printf(" B   No printing of ScaleNode implemented yet.\n");
     printf(" B   No printing of SigmaTilde implemented yet.\n");
-    if ( NScaleDep == 2 )  
+    if ( NScaleDep == 2 )
       printf(" B   NScaleDep == 2 :              yes.\n");
     if ( NScaleDep == 2 ) {
       printf(" B   No printing of SigmaTilde2Scales, and Scale2Nodes, etc... implemented yet.\n");
@@ -1311,12 +1311,12 @@ void fastNLOCoefficients::Print() const {
     if ( NScaleDep>=3 ) {
       printf(" B   NscalenodeScale1              %d\n",NscalenodeScale1);
       printf(" B   NscalenodeScale2              %d\n",NscalenodeScale2);
-    }    
+    }
 
   }
   printf("\n *******************************************************\n\n");
 
-  
+
 }
 
 
