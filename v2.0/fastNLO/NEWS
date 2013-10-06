@@ -1,0 +1,11 @@
+Notes for very first autotools version of fastNLO_toolkit version 2.1.0, revision 1494:
+=======================================================================================
+
+- Restructured like fastNLO_reader C++ part
+- src contains code for one excutable to be made
+- fastnlotoolkit contains code for linkable library libfastnlotoolkit to be compiled and linked
+- subdir include/fastnlotk contains header files
+==> All include statements in code had to be complemented with "fastnlotk/"
+==> Change in library name and fastnlotk include directory allows simultaneous
+    installation and use of reader library AND toolkit library without problems
+    caused by identically named header files

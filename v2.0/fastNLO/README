@@ -1,0 +1,26 @@
+fastNLO_toolkit version 2.1.0:
+==============================
+
+Installation of distribution package:
+-------------------------------------
+Via GNU autotools setup (NOT required for installation),
+in unpacking directory of the *.tar.gz file do:
+
+./configure --prefix=your_local_directory
+(should contain LHAPDF installation, otherwise specify
+ separate path via --with-lhapdf=path_to_lhapdf;
+ see also ./configure --help)
+make
+make install
+make check (not yet implemented)
+
+
+Requirements:
+-------------
+For installation of toolkit package: LHAPDF
+For running executable: fastNLO table, PDF set from LHAPDF
+
+
+Content:
+--------
+Generic C++ linkable library and code to create, read, and evaluate fastNLO v2 tables
