@@ -63,6 +63,10 @@ public:
    double GetMz() const {
       return fMz;
    };
+   void   SetMt(double Mt , bool ReCalcCrossSection = false);
+   double GetMt() const {
+      return fMt;
+   };
    void   SetNf(int nf , bool ReCalcCrossSection = false);
    int    GetNf() const {
       return fNf;
@@ -75,11 +79,13 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
+   double EvolveAlphasL(double Q) const ;
 
    // ---- CRunDec ---- //
    // declare variables as static, that all instances use same alpha_s evolution
    double fAlphasMz;
    static double fMz;
+   static double fMt;
    static int fNf;
    static int fNloop;
    void InitReasonableRunDecValues();
@@ -90,6 +96,7 @@ protected:
 
 //double FastNLOCRunDec::fAlphasMz=0.1180000654;
 double FastNLOCRunDec::fMz=0.1180000654;
+double FastNLOCRunDec::fMt=173.07;
 int FastNLOCRunDec::fNf = 5;
 int FastNLOCRunDec::fNloop=2;
 CRunDec FastNLOCRunDec::fcrundec=CRunDec(FastNLOCRunDec::fNf);
@@ -136,6 +143,16 @@ void FastNLOCRunDec::SetMz(double Mz , bool ReCalcCrossSection) {
 }
 
 //______________________________________________________________________________
+void FastNLOCRunDec::SetMt(double Mt , bool ReCalcCrossSection) {
+   debug["SetMt"]<<"Setting Mt-"<<Mt<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
+   //
+   //  Set the top quark mass
+   //
+   fMt    = Mt;             // new alpha_s value
+   if (ReCalcCrossSection) CalcCrossSection();
+}
+
+//______________________________________________________________________________
 
 void FastNLOCRunDec::SetNloop(int nloop, bool ReCalcCrossSection) {
    debug["SetNloop"]<<"Setting n-loop="<<nloop<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
@@ -168,6 +185,7 @@ void FastNLOCRunDec::InitReasonableRunDecValues() {
 
    fAlphasMz = 0.11840000000042; // PDG 2012 + epsilon(THE ANSWER ...) to avoid uninitialized a_s cache when explicitly setting the PDG2012 value
    fMz = 91.1876;
+   fMt = 173.07;
    SetNf(5);
    fNloop=2;
 
@@ -224,6 +242,7 @@ void FastNLOCRunDec::PrintRunDecValues() {
    cout<<csep41<<csep41<<endl;
    cout<<"CRunDec Values: Alphas(Mz)="<<fAlphasMz
        <<"\tMZ="<<fMz
+       <<"\tMt="<<fMt
        <<"\tn-flavors="<<fNf
        <<"\tn-loop="<<fNloop<<endl;
    cout<<csep41<<csep41<<endl;
@@ -232,7 +251,7 @@ void FastNLOCRunDec::PrintRunDecValues() {
 
 //______________________________________________________________________________
 
-double FastNLOCRunDec::EvolveAlphas(double Q) const {
+double FastNLOCRunDec::EvolveAlphasL(double Q) const {
    //
    // Implementation of Alpha_s evolution as function of Mu_r only.
    //
@@ -267,6 +286,19 @@ double FastNLOCRunDec::EvolveAlphas(double Q) const {
 
    double as_crundec = fcrundec.AlphasExact(fAlphasMz, fMz,Q, fNf, fNloop);
    return as_crundec;
+}
+
+double FastNLOCRunDec::EvolveAlphas(double Q) const {
+
+   //   TriplenfMmu* decpar;
+   //   decpar->nf   = 5;
+   //   decpar->Mth  = 175.;
+   //   decpar->muth = 177.;
+   double as_crundec1 = fcrundec.AlphasExact(fAlphasMz, fMz,Q, fNf, fNloop);
+   double as_crundec2 = fcrundec.AlL2AlH(fAlphasMz, fMz, fcrundec.nfMmu, Q, fNloop);
+   double as_crundec3 = fcrundec.AlH2AlL(fAlphasMz, fMz, fcrundec.nfMmu, Q, fNloop);
+   cout << "asc1 = " << as_crundec1 << ", asc2 = " << as_crundec2 << ", asc3 = " << as_crundec3 << endl;
+   return as_crundec1;
 }
 
 

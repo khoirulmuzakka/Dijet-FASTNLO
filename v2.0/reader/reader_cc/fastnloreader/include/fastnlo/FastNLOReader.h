@@ -214,6 +214,7 @@ public:
    bool TestXFX();                                                       // Test if XFX reasonable values
    bool TestAlphas();                                                    // Test if EvolvaAlphas returns a reasonable value
 
+   double CalcAlphas(double Q);
 
 protected:
 
@@ -239,7 +240,7 @@ protected:
    vector<double> CalcPDFLinearCombHHC(vector<double> pdfx1, vector<double> pdfx2, int NSubproc);
    void FillAlphasCacheInBlockBv20(FastNLOBlockB* B);
    void FillAlphasCacheInBlockBv21(FastNLOBlockB* B);
-   double CalcAlphas(double Q);
+   //   double CalcAlphas(double Q);
    double CalcReferenceAlphas();
    double CalcNewPDFChecksum();
    double CalcChecksum(double mu);

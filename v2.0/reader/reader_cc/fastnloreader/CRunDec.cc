@@ -331,6 +331,7 @@ double CRunDec::fRungeKuttaImpl(double &x, double y,double &htry, int nl,
 //                           double MuEnd, int nl)
 // Compute \alpha_s using eq.(1) of [RunDec]
 double CRunDec::AlphasExact(double AlphaS0, double Mu0, double MuEnd, int nl){
+   cout << "CRunDec: nf = " << GetNf() << endl;
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
        RETURN
@@ -1287,6 +1288,7 @@ double CRunDec::AlL2AlH(double asl,double mu1,TriplenfMmu decpar[],double mu2,
      double help2;
      double asini=asl;
      double muini=mu1;
+     cout << "RRRR AlL2AlH" << endl;
      for(int i=0; i<4; i++){
        if(decpar[i].nf!=0){
          n+=1;
@@ -1315,17 +1317,20 @@ double CRunDec::AlL2AlH(double asl,double mu1,TriplenfMmu decpar[],double mu2,
          RETURN
        }
      }
+     cout << "SSSS AlL2AlH" << endl;
      // KR: Remove unused variables
      //     double erg1,erg2,x,y;
      double erg1,erg2;
      int i;
      for(i=3-n+1;i<=3;i++){
        erg1= AlphasExact(asini, muini, decpar[i].muth,decpar[i].nf-1,nl);
+       cout << "i = " << i << ", asini = " << asini << ", muini = " << muini << ", muth = " << decpar[i].muth << ", nf = " << decpar[i].nf-1 << ", nl = " << nl << endl;
        erg2= DecAsUpOS(erg1,decpar[i].Mth,decpar[i].muth,decpar[i].nf-1,nl);
        asini=erg2;
        muini=decpar[i].muth;
      }
      double alpha= AlphasExact(asini,muini,mu2,decpar[i-1].nf,nl);
+     cout << "asini = " << asini << ", muini = " << muini << ", mu2 = " << mu2 << ", nf = " << decpar[i-1].nf << ", nl = " << nl << endl;
      for(int j=0;j<=3;j++){
        decpar[j].nf=0;
        decpar[j].Mth=0.;

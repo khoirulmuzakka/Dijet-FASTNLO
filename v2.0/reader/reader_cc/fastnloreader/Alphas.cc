@@ -85,6 +85,8 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    int nf       = nFlavors == 0 ? CalcNf(mu) : nFlavors;
    double Q2    = pow(mu,2);
 
+
+   cout << "Alphas: nf = " << nf << endl;
    // - initialize pi and do some initial print out
    const string csep41("#########################################");
    const string cseps = csep41 + csep41;
