@@ -58,20 +58,6 @@ public:
    };
    void SetGRVtoPDG2012_2loop();
 
-   // ---- getters and setters alphas variables ---- //
-   void   SetMz(double Mz , bool ReCalcCrossSection = false);
-   double GetMz() const {
-      return fMz;
-   };
-   void   SetNf(int nf , bool ReCalcCrossSection = false);
-   int    GetNf() const {
-      return fNf;
-   };
-   void   SetNloop(int nloop , bool ReCalcCrossSection = false);
-   int    GetNloop() const {
-      return fNloop;
-   };
-
 
 protected:
    // inherited functions
@@ -79,9 +65,7 @@ protected:
 
    // ---- Alphas vars ---- //
    double fAlphasMz;
-   double fMz;
-   double fNf;
-   double fNloop;
+
 };
 
 
@@ -97,37 +81,6 @@ void FastNLOAlphas::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
    if (ReCalcCrossSection) CalcCrossSection();
 }
 
-void FastNLOAlphas::SetMz(double Mz , bool ReCalcCrossSection) {
-   debug["SetMz"]<<"Setting MZ-"<<Mz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-   //
-   //  Set the Z-Boson mass
-   //
-   fMz    = Mz;             // new alpha_s value
-   if (ReCalcCrossSection) CalcCrossSection();
-}
-
-//______________________________________________________________________________
-
-void FastNLOAlphas::SetNloop(int nloop, bool ReCalcCrossSection) {
-   debug["SetNloop"]<<"Setting n-loop="<<nloop<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-   //
-   //  Set n loop calculation
-   //
-   fNloop    = nloop;             // new alpha_s value
-   if (ReCalcCrossSection) CalcCrossSection();
-}
-
-//______________________________________________________________________________
-
-void FastNLOAlphas::SetNf(int Nf , bool ReCalcCrossSection) {
-   debug["SetNf"]<<"Setting number of flavors to "<<Nf<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-   //
-   //  Set the number of flavors
-   //
-   fNf    = Nf;             // new alpha_s value
-   //fcrundec.SetConstants(fNf);
-   if (ReCalcCrossSection) CalcCrossSection();
-}
 
 //______________________________________________________________________________
 

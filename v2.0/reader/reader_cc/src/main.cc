@@ -544,33 +544,9 @@ int main(int argc, char** argv) {
    //      calculation using the FastNLOAlphas interface
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
-   //      FastNLOAlphas fnloreader(tablename);
+   FastNLOAlphas fnloreader(tablename);
    //   FastNLOLHAPDF fnloreader(tablename);
-         FastNLOCRunDec fnloreader(tablename);
-
-      //fnloreader.PrintRunDecValues();
-   //         FastNLOCRunDec fnlo( tablename , PDFFile , PDFMember );
-   //     Change the alpha_s value for all instances, by:
-   //         fnlo.SetAlphasMz(0.1179);
-   //     Change values of the alpha_s evolution code through:
-      fnloreader.SetNloop(4);
-      fnloreader.SetNf(5);
-      fnloreader.SetMz(91.1876);
-      //      fnloreader.SetAlphasMz(0.1184);
-      fnloreader.SetAlphasMz(0.118);
-      //   fnloreader.PrintRunDecValues();
-
-      double as = fnloreader.CalcAlphas(91.1876);
-      int nf = fnloreader.GetNf();
-      cout << "AAA: Q = M_Z, Nf = " << nf << ", as = " << as << endl;
-      as = fnloreader.CalcAlphas(170.);
-      nf = fnloreader.GetNf();
-      cout << "BBB: Q = 170, Nf = " << nf << ", as = " << as << endl;
-      as = fnloreader.CalcAlphas(500.);
-      nf = fnloreader.GetNf();
-      cout << "CCC: Q = 500, Nf = " << nf << ", as = " << as << endl;
-
-
+   //   FastNLOCRunDec fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
    fnloreader.PrintTableInfo();
    fnloreader.PrintFastNLOTableConstants(0);
@@ -900,7 +876,7 @@ int main(int argc, char** argv) {
    }
 
    // Print data if available, checks on availability internally
-   //   fnloreader.PrintCrossSectionsData();
+   fnloreader.PrintCrossSectionsData();
 
    return 0;
 }
