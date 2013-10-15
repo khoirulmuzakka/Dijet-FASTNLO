@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = fastnloreader src
+SUBDIRS = fastnloreader src pyext
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

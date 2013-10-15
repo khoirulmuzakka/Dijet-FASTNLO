@@ -563,14 +563,14 @@ int main(int argc, char** argv) {
    //  The table and PDF initialization could also be done in one step:
    //  FastNLOAlphas fnloreader( tablename, PDFFile, 0 );
    //
-
+   // Set desired value of alpha_s(M_Z)
    fnloreader.SetMz(91.1876);
-   fnloreader.SetNFlavor(0);
+   fnloreader.SetAlphasMz(0.1184);
+
+   fnloreader.SetNFlavor(5);
    fnloreader.FillPDFCache();
    fnloreader.InitQCDNUM();
 
-   // Set desired value of alpha_s(M_Z)
-   fnloreader.SetAlphasMz(0.1184);
    // Calculate cross sections
    fnloreader.CalcCrossSection();
    // Uncomment this to actually print out the result

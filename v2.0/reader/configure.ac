@@ -193,6 +193,34 @@ else
 fi
 AM_CONDITIONAL(HAVE_QCDNUM, test "x$QCDNUMPREFIX" != "x")
 
+# Python extension
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether Python extension is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_ENABLE([pyext],
+        [AC_HELP_STRING([--enable-pyext],
+        [Optionally build Python module to interface C++ library. Default is no.])],
+        [],
+        [enable_pyext="no"])
+# Basic Python checks
+if test "x$enable_pyext" == "xyes"; then
+   AX_PYTHON_DEVEL([">='2.3'"])
+   AM_PATH_PYTHON
+fi
+# SWIG version checks
+if test "x$enable_pyext" == "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
+   AC_PATH_PROG(SWIG, swig)
+fi
+AC_MSG_NOTICE([******************************************])
+if test "x$enable_pyext" == "xyes"; then
+   AC_MSG_NOTICE([All Python checks successful. Requested Python extension will be built.])
+else
+   AC_MSG_NOTICE([No Python extension requested. Continue without pyext.])
+fi
+AC_MSG_NOTICE([******************************************])
+AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" == "xyes"])
+
 # Add subversion revision number, recipe from Autotools by J. Calcote
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
@@ -216,6 +244,8 @@ AC_CONFIG_FILES([Makefile
                  reader_cc/fastnloreader/FastNLOReaderVersion.cc
                  reader_cc/fastnloreader/include/Makefile
                  reader_cc/fastnloreader/include/fastnlo/Makefile
+                 reader_cc/pyext/Makefile
+                 reader_cc/pyext/setup.py
                  reader_cc/src/Makefile
                  reader_f/Makefile
                  reader_f/fnlo-fread.f
