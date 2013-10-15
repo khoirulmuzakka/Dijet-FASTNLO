@@ -43,15 +43,13 @@ fnlo_cppread_CXXFLAGS = -g -O0 -Wall
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnloreader -lfastnloreader -L${top_builddir}/reader_cc/fastnloreader -lfastnloreader -L${top_srcdir}/reader_cc/fastnloreader -lfastnloreader
 if HAVE_LHAPDFCONFIG
-if HAVE_QCDNUM
-fnlo_cppread_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${HOME}/local/src/qcdnum-17-00-06/lib ${QCDNUMLIBS} -L${libdir} -lfastnloreader
-endif
+fnlo_cppread_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnloreader
 else
    fnlo_cppread_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader
 endif
-#if HAVE_QCDNUM
-#   fnlo_cppread_LDFLAGS += -L${HOME}/local/lib ${QCDNUMLIBS}
-#endif
+if HAVE_QCDNUM
+   fnlo_cppread_LDFLAGS += -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

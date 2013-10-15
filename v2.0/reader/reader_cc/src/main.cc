@@ -565,9 +565,10 @@ int main(int argc, char** argv) {
    //
    // Set desired value of alpha_s(M_Z)
    fnloreader.SetMz(91.1876);
-   fnloreader.SetAlphasMz(0.1184);
+   //   fnloreader.SetAlphasMz(0.1184);
+   fnloreader.SetAlphasMz(0.1190);
 
-   fnloreader.SetNFlavor(5);
+   fnloreader.SetNFlavor(0);
    fnloreader.FillPDFCache();
    fnloreader.InitQCDNUM();
 
