@@ -54,8 +54,8 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
       // ---- Alphas vars ---- //
       // Setters
       void SetMz(double Mz);
-      void SetNFlavor(double nflavor);
-      void SetNLoop(double nloop);
+      void SetNFlavor(int  nflavor);
+      void SetNLoop(int nloop);
       void SetQMass(int pdgid, double qmass);
       void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
       void SetLHAPDFValues();
@@ -66,10 +66,10 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
       double GetQMass(int pdgid) const {
          return QMass[pdgid];
       }
-      double GetNFlavor(double nflavor) const {
+      int GetNFlavor() const {
          return fnFlavor;
       }
-      double GetNLoop(double nloop) const {
+      int GetNLoop() const {
          return fnLoop;
       }
       double GetAlphasMz() const {
@@ -88,8 +88,8 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
    void InitCRunDecPDG();
    double fAlphasMz;
    double fMz;
-   double fnFlavor;
-   double fnLoop;
+   int fnFlavor;
+   int fnLoop;
    double QMass[6];
 
 
@@ -126,11 +126,11 @@ void FastNLOCRunDec::SetMz(double Mz) {
    fMz = Mz;
 }
 
-void FastNLOCRunDec::SetNFlavor(double nflavor) {
+void FastNLOCRunDec::SetNFlavor(int nflavor) {
    fnFlavor = nflavor;
 }
 
-void FastNLOCRunDec::SetNLoop(double nloop) {
+void FastNLOCRunDec::SetNLoop(int  nloop) {
    fnLoop = nloop;
 }
 
