@@ -45,22 +45,23 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
 
    public:
       FastNLOCRunDec(string name) : FastNLOLHAPDF(name) {
-         InitCRunDecPDG();
+         InitCRunDec();
       };
       FastNLOCRunDec(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
-         InitCRunDecPDG();
+         InitCRunDec();
       };
 
       // ---- Alphas vars ---- //
       // Setters
       void SetMz(double Mz);
-      void SetNFlavor(int  nflavor);
+      void SetNFlavor(int nflavor);
       void SetNLoop(int nloop);
       void SetQMass(int pdgid, double qmass);
       void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
       void SetLHAPDFValues();
+      void SetPDGValues();
       // Getters
-      double GetMz(double Mz) const {
+      double GetMz() const {
          return fMz;
       }
       double GetQMass(int pdgid) const {
@@ -85,7 +86,7 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
 
    // ---- Alphas vars ---- //
    CRunDec *crundec;
-   void InitCRunDecPDG();
+   void InitCRunDec();
    double fAlphasMz;
    double fMz;
    int fnFlavor;
@@ -97,8 +98,13 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
 
 
 //______________________________________________________________________________
-void FastNLOCRunDec::InitCRunDecPDG() {
+void FastNLOCRunDec::InitCRunDec() {
+
    crundec = new CRunDec();
+   SetPDGValues();
+}
+
+void FastNLOCRunDec::SetPDGValues() {
    // Initialize with PDG values
    QMass[0]  = PDG_MD;
    QMass[1]  = PDG_MU;
