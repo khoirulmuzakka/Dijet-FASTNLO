@@ -41,21 +41,14 @@
 
 using namespace std;
 
-//should not be defined here...
-namespace PDG {
-   static const double Mz = 91.1876;
-   static const double AlphasMz = 0.1184;
-   static const double QMass[6] = {0.0023, 0.0048, 0.0035, 1.275, 4.18, 173.03};
-}
-
 class FastNLOCRunDec : public FastNLOLHAPDF {
 
    public:
       FastNLOCRunDec(string name) : FastNLOLHAPDF(name) {
-         InitCRunDec();
+         InitCRunDecPDG();
       };
       FastNLOCRunDec(string name, string LHAPDFFile, int PDFSet = 0) : FastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
-         InitCRunDec();
+         InitCRunDecPDG();
       };
 
       // ---- Alphas vars ---- //
@@ -92,7 +85,7 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
 
    // ---- Alphas vars ---- //
    CRunDec *crundec;
-   void InitCRunDec();
+   void InitCRunDecPDG();
    double fAlphasMz;
    double fMz;
    double fnFlavor;
@@ -104,15 +97,21 @@ class FastNLOCRunDec : public FastNLOLHAPDF {
 
 
 //______________________________________________________________________________
-void FastNLOCRunDec::InitCRunDec() {
+void FastNLOCRunDec::InitCRunDecPDG() {
    crundec = new CRunDec();
-   fMz = PDG::Mz;
-   fAlphasMz = PDG::AlphasMz;
-   //Variable Flavors
+   // Initialize with PDG values
+   QMass[0]  = PDG_MD;
+   QMass[1]  = PDG_MU;
+   QMass[2]  = PDG_MS;
+   QMass[3]  = PDG_MC;
+   QMass[4]  = PDG_MB;
+   QMass[5]  = PDG_MT;
+   fMz       = PDG_MZ;
+   fAlphasMz = PDG_ASMZ;
+   //Variable flavor number scheme
    fnFlavor = 0;
+   //2-loop alpha_s evolution
    fnLoop = 2;
-   for (int i = 0; i < 6; i++)
-      QMass[i] = PDG::QMass[i];
 }
 
 void FastNLOCRunDec::SetLHAPDFValues() {
@@ -121,7 +120,6 @@ void FastNLOCRunDec::SetLHAPDFValues() {
    fnLoop = LHAPDF::getOrderAlphaS() + 1;
    for (int i = 0; i < 6; i++)
       QMass[i] = LHAPDF::getQMass(i+1);
-  
 }
 
 void FastNLOCRunDec::SetMz(double Mz) {

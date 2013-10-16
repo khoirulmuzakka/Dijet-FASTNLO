@@ -33,6 +33,17 @@
 #define Pi M_PI
 #define TWOPI (2.*Pi)
 #define TWOPISQR (4.*Pi*Pi)
+// PDG values 2012/2013
+#define PDG_MU   (0.0023)
+#define PDG_MD   (0.0048)
+#define PDG_MS   (0.095)
+#define PDG_MC   (1.275)
+#define PDG_MB   (4.18)
+#define PDG_MT   (173.07)
+#define PDG_MZ   (91.1876)
+#define PDG_ASMZ (0.1184)
+
+
 
 namespace fastNLO {
 enum EScaleFunctionalForm {
