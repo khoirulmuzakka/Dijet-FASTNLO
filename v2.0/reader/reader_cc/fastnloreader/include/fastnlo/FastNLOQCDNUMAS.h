@@ -194,7 +194,7 @@ void FastNLOQCDNUMAS::InitQCDNUM() {
    int iqb = iqfrmq_(&Q2Mass[4]);
    int iqt = iqfrmq_(&Q2Mass[5]);
 
-   cout << iqc << " " << iqb << " " << iqt << endl;
+   //cout << iqc << " " << iqb << " " << iqt << endl;
    //When fNFlavor = 0 VFNS if >0 then FFNS
    //iqc,b,t are neglected if fnflavor =0
    setcbt_(&fnFlavor, &iqc, &iqb, &iqt);
@@ -212,7 +212,7 @@ double FastNLOQCDNUMAS::EvolveAlphas(double Q) const {
    //Number of really used flavors
    int nf = 9;
    double as = asfunc_(&mu2, &nf , &ierr);
-   cout << as << "  " << mu2 << " " << nf << endl;
+   //cout << as << "  " << mu2 << " " << nf << endl;
    if (ierr > 0)
       error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
