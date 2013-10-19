@@ -3,11 +3,13 @@
 #include <string>
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/read_steer.h"
 
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
+
 
 using namespace std;
 using namespace fastNLO;
@@ -89,13 +91,13 @@ void fastNLOReader::Init() {
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
 	 // Reference table, implemented only for LO or NLO
-	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
+	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) { 
 	    debug["Init"]<<"Found reference table."<<endl;
 	    if ( c->IsLO() ) {
 // 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.1."); // not forseen
 	       Coeff_LO_Ref           = (fastNLOCoeffAddBase*)c;
-	    }
+	    } 
 	    else if ( c->IsNLO() ) {
 // 	       if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.0.");
 // 	       if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.1."); // not foreseen
@@ -177,7 +179,7 @@ void fastNLOReader::InitScalevariation() {
    fScaleFacMuF  = 1.;
    fScalevar     = -1;
    if (!GetIsFlexibleScaleTable()) {
-      if ( !B_NLO() ) {
+      if ( !B_NLO() ) { 
 	 fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
 	 for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
 	    const double muFac = cNLO->GetScaleFactor(iscls);
@@ -201,7 +203,7 @@ void fastNLOReader::InitScalevariation() {
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
       if (cNLO->GetScaleDescr()[0].size() <0) { // ???
-         warn["InitScalevariation"]<<"No scaledescription available.\n";
+         warn["InitScalevariation"]<<"No scaledescription available.\n"; 
          SetFunctionalForm(kScale1 , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
          return;
@@ -257,7 +259,7 @@ double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
    else {
       // Check for maximal scale variation of all rel. and active SM calcs
       int scalevarmax = GetNScaleVariations();
-      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();  
 	 if (scalevar >= scalevarmax) {
 	    warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
 	    man<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
@@ -402,7 +404,7 @@ vector < double > fastNLOReader::GetScaleFactors() const {
       info["GetScaleFactors"]<<"This is a 'flexible scale table', therefore you can choose all desired scale variations."<<endl;
       return vector<double>();
    }
-   else
+   else 
       return ((fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading])->GetAvailableScaleFactors();
 }
 
@@ -486,7 +488,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
 	    }
 	 }
       }
-      else
+      else 
 	 warn["CalcReferenceCrossSection"]<<"No reference cross sections for LO and NLO available.\n";
    }
    else {
@@ -693,7 +695,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
             double muf2		= pow(muf,2);
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
-		  double as		= c->AlphasTwoPi[i][jS1][kS2];
+		  double as		= c->AlphasTwoPi[i][jS1][kS2]; 
 		  double pdflc		= c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
                   double fac  = as * pdflc * unit;
@@ -818,7 +820,7 @@ void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    //
    //  Internal method for filling alpha_s cache
    //
-
+   
    // todo: the flag IScaleDep should also indicate whether this contribution may contain scale variations
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
 
@@ -1026,9 +1028,9 @@ void fastNLOReader::FillPDFCache(double chksum) {
 	       fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[j][i];
 	       if (c->GetIPDFdef1() == 2) {
 		  if (c->GetNPDFDim() == 0) {
-		     if (!GetIsFlexibleScaleTable(c))
+		     if (!GetIsFlexibleScaleTable(c)) 
 			FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
-		     else
+		     else 
 			FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
 		  }
 	       }
@@ -1105,7 +1107,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
 		  //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
                }
             }
-         }
+         } 
 	 else if (fMuFFunc == kScale2) { // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
@@ -1115,7 +1117,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
                   c->PdfLcMuVar[i][x][jS1][kS2] = buffer;
                }
             }
-         }
+         } 
 	 else if (fMuFFunc == kScale1) { // speed up
 	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
@@ -1142,7 +1144,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
    if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"full matrix notation not implemented."<<endl;exit(1);}
-
+   
    vector < vector < double > > xfx; // PDFs of all partons
    for (int i=0; i<NObsBin; i++) {
       int nxmax = c->GetNxmax(i);
@@ -1180,7 +1182,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
       exit(1);
    }
    if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"'full matrix notation not implemented."<<endl;exit(1);}
-
+  
    vector < vector < double > > xfx; // PDFs of all partons
    for (int i=0; i<NObsBin; i++) {
       int nxmax = c->GetNxmax(i);
@@ -1354,6 +1356,196 @@ void fastNLOReader::SetMuFFunctionalForm(EScaleFunctionalForm func) {
 //______________________________________________________________________________
 
 
+bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
+   debug["SetScaleFactorsMuRMuF"]<<"Setting to scale factors xmur = "<<xmur<<" and xmuf = "<<xmuf<<endl;
+   //
+   // Set renormalization and factorization scale factors simultaneously for scale variations in all v2 tables.
+   // You have to ReFill your cache!
+   // This is done automatically, but if you want to do it by yourself set ReFillCache = false.
+   //
+   // The function aborts the whole program if non-sensical scale factors < 1.E-6 are requested.
+   // The function returns true if the requested scale factors can be used with the available table:
+   //
+   //   If it is NOT a flexibleScaleTable and there is no NLO scalevar table for xmuf,
+   //   xmur and xmuf are unchanged, a warning is printed and the function returns false!
+   //   If threshold corrections are selected, then
+   //   - only symmetric scale variations, i.e. xmur / xmuf = 1., are allowed,
+   //   - the scale variations for xmuf must be stored in IDENTICAL order
+   //     for the NLO and the threshold corrections (there is only one fScalevar!)
+   //   If either is not the case, xmur and xmuf are unchanged,
+   //   a warning is printed and the function returns false!
+
+   // Check whether xmur and xmuf are positive and at least larger than 1.E-6
+   if (xmur < 1.E-6 || xmuf < 1.E-6) {
+      error<<"Selected scale factors too small ( < 1.E-6 )! Ignoring call."<<endl;
+      return false;
+   }
+
+   // Check whether pQCD contributions beyond LO exist and are activated
+   bool lknlo = false;
+   if (!BBlocksSMCalc[kFixedOrder].empty()) {
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
+         int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
+         if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
+            lknlo = true;
+            break;
+         }
+      }
+   }
+
+
+   // Check whether threshold corrections exist and are activated
+   bool lkthc = false;
+   if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
+         if (bUseSMCalc[kThresholdCorrection][i]) {
+            lkthc = true;
+            break;
+         }
+      }
+   }
+   if (lkthc && fabs(xmur-xmuf) > DBL_MIN) {
+      warn["SetScaleFactorsMuRMuF"]
+         <<"Threshold corrections do not allow different scale factors for MuR and MuF, nothing changed!\n";
+      warn["SetScaleFactorsMuRMuF"]
+         <<"The method returns 'false', please check the return code and act appropriately.\n";
+      man<<"Please do only symmetric scale variations, i.e. xmur = xmuf, with threshold corrections switched on\n";
+      man<<"or deactivate threshold corrections first using\n";
+      man<<"FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n";
+      return false;
+   }
+   // Check whether corresponding xmuf variation exists in case of v2.0 table
+   if (!GetIsFlexibleScaleTable()) {
+      const int ns = GetNScaleVariations();
+      debug["SetScaleFactorsMuRMuF"]<<"Found "<<ns<<" scale variations for contributions switched ON."<<endl;
+      int sfnlo = -1;
+      if (lknlo) {
+         for (int is = 0 ; is<ns ; is++) {
+	       if (fabs(((fastNLOCoeffAddFix*)B_NLO())->GetScaleFactor(is)-xmuf) < DBL_MIN) {
+               sfnlo = is;
+               break;
+            }
+         }
+      }
+      int sfthc = -1;
+      if (lkthc) {
+         for (int is = 0 ; is<ns ; is++) {
+            if (fabs(((fastNLOCoeffAddFix*)B_ThC())->GetScaleFactor(is)-xmuf) < DBL_MIN) {
+               sfthc = is;
+               break;
+            }
+         }
+      }
+      if (lknlo && sfnlo == -1) {
+         warn["SetScaleFactorsMuRMuF"]<<"Could not find NLO table with given mu_f scale factor of "<<xmuf<<", nothing changed!"<<endl;
+         warn["SetScaleFactorsMuRMuF"]
+            <<"The method returns 'false', please check the return code and act appropriately.\n";
+         return false;
+      }
+      if (lkthc && sfthc == -1) {
+         warn["SetScaleFactorsMuRMuF"]<<"Could not find ThC table with given mu_f scale factor of "<<xmuf<<", nothing changed!"<<endl;
+         warn["SetScaleFactorsMuRMuF"]
+            <<"The method returns 'false', please check the return code and act appropriately.\n";
+         return false;
+      }
+      if (lkthc && lknlo && sfnlo != sfthc) {
+         warn["SetScaleFactorsMuRMuF"]<<"Order of scale variation tables different in NLO and ThC tables, "<<sfnlo<<" != "<<sfthc<<" !"<<endl;
+         warn["SetScaleFactorsMuRMuF"]<<"This is currently not supported, nothing changed!"<<endl;
+         warn["SetScaleFactorsMuRMuF"]
+            <<"The method returns 'false', please check the return code and act appropriately.\n";
+         return false;
+      }
+
+      fScaleFacMuR = xmur;
+
+      // Now set factorization scale
+      fScaleFacMuF = xmuf;
+      bool bSetScales = false;
+      if (lknlo) {
+         bSetScales = SetScaleVariation(sfnlo);
+         if (!bSetScales) {
+            error["SetScaleFactorsMuRMuF"]<<"NLO scale variation table "<<sfnlo<<" could not be selected, stopped!"<<endl;
+            exit(1);
+         }
+      } else { // LO only
+         bSetScales = SetScaleVariation(0);
+         if (!bSetScales) {
+            error["SetScaleFactorsMuRMuF"]<<"LO scale variation table "<< 0 <<" could not be selected, stopped!"<<endl;
+            exit(1);
+         }
+      }
+      PrintScaleSettings();
+   } else {
+      fScaleFacMuR = xmur;
+      fScaleFacMuF = xmuf;
+      PrintScaleSettings(kMuR);
+      PrintScaleSettings(kMuF);
+   }
+   return true;
+}
+
+
+//______________________________________________________________________________
+
+
+
+void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
+   if (!GetIsFlexibleScaleTable()) {
+      info<<"fastNLO. Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_LO()->GetScaleDescription()<<endl;
+      info<<"fastNLO. Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<B_LO()->GetScaleDescription()<<endl;
+   } else {
+      // ---- prepare printout ---- //
+      static const string sname[2] = {"Renormalization","Factorization"};
+      static const string smu[2] = {"mu_r","  mu_f"};
+      const int isc = MuX==kMuR?0:1;
+      const double sfac = MuX==kMuR?fScaleFacMuR:fScaleFacMuF;
+      EScaleFunctionalForm func = MuX==kMuR?fMuRFunc:fMuFFunc;
+      char fname[100];
+      switch (func) {
+      case kScale1:
+         sprintf(fname,"%s^2",B_LO()->GetScaleDescription(0).c_str());
+         break;
+      case kScale2:
+         sprintf(fname,"%s^2",B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kQuadraticSum:
+         sprintf(fname,"(%s^2 + %s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kQuadraticMean:
+         sprintf(fname,"(%s^2 + %s^2)/2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kQuadraticSumOver4:
+         sprintf(fname,"(%s^2 + %s^2)/4",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kLinearMean:
+         sprintf(fname,"((%s+%s)/2)^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kLinearSum:
+         sprintf(fname,"(%s+%s)^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kScaleMax:
+         sprintf(fname,"max(%s^2,%s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kScaleMin:
+         sprintf(fname,"min(%s^2,%s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kExpProd2:
+         sprintf(fname,"(%s*exp(0.3*%s)^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kExtern:
+         sprintf(fname,"f_ext(%s,%s)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      default:
+         error<<"unknown scale choice.\n";
+
+      }
+      info<<"fastNLO. "<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
+          <<sfac<<"^2 * "<<fname<<endl;
+   }
+}
+
+
+//_____________________________________________________________________________
 
 double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, double scalefac) {
    //
@@ -1574,7 +1766,7 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
    printf(" #  In any other case your reference cross section is calculated using mu_r=mu_f=sqrt((%s^2+%s^2)/2).\n",
 	  B_NLO()->GetScaleDescription(0).c_str(),B_NLO()->GetScaleDescription(1).c_str());
    printf(" #  To be fully consistent with the nlojet++ reference cross section, you also have to adjust alpha_s and the alpha_s evolution accordingly.\n\n");
-
+   
    printf("\n");
    printf(" #\n");
 
@@ -1681,7 +1873,7 @@ void fastNLOReader::RunFastNLODemo() {
    // settings of this instance!
    //
    // PrintFastNLODemo is changing settings (like scale choices) of this reader.
-   //
+   // 
 
    info["PrintFastNLODemo"]<<"PrintFastNLODemo is changing settings (like scale choices) of this reader."<<endl;
 

@@ -45,7 +45,7 @@ public:
    vector < double > GetKFactors();
    vector < double > GetQScales(int irelord);						// Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
 
-   // ---- Getters for FastNLOReader member variables ---- //
+   // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
    fastNLO::EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
    fastNLO::EUnits GetUnits() const { return fUnits; };
@@ -82,7 +82,7 @@ protected:
    //void ReadTable();
    void StripWhitespace(string* s);
 
-   void PrintScaleSettings(EMuX kMuX=kMuR);
+   void PrintScaleSettings(fastNLO::EMuX kMuX=kMuR);
    void FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B);
    void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* B);
