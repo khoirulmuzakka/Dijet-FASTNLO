@@ -179,7 +179,7 @@ void fastNLOReader::InitScalevariation() {
    fScaleFacMuF  = 1.;
    fScalevar     = -1;
    if (!GetIsFlexibleScaleTable()) {
-      if ( !B_NLO() ) {
+      if ( B_NLO() ) {
          fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
          for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
             const double muFac = cNLO->GetScaleFactor(iscls);
