@@ -8,7 +8,7 @@ using namespace std;
 
 class fastNLOReader : public fastNLOTable , public fastNLOPDFLinearCombinations {
    //
-   // fastNLOReader. 
+   // fastNLOReader.
    //
 
 public:
@@ -19,19 +19,19 @@ public:
    void SetFilename(string filename) ;
    void InitScalevariation();
    void SetUnits(fastNLO::EUnits Unit);
-   void SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
+   bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
    int ContrId(const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder) const;
 
    // ---- setters for scales of MuVar tables ---- //
-   void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);			// Set the functional form of Mu_R
-   void SetMuFFunctionalForm(fastNLO::EScaleFunctionalForm func);			// Set the functional form of Mu_F
-   void SetFunctionalForm(fastNLO::EScaleFunctionalForm func , fastNLO::EMuX kMuX);	// Set functional form of MuX
-   bool SetScaleFactorsMuRMuF(double xmur, double xmuf);				// Set scale factors for MuR and MuF
-   void SetExternalFuncForMuR(mu_func);							// Set external function for scale calculation (optional)
-   void SetExternalFuncForMuF(mu_func);							// Set external function for scale calculation (optional)
+   void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_R
+   void SetMuFFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_F
+   void SetFunctionalForm(fastNLO::EScaleFunctionalForm func , fastNLO::EMuX kMuX);     // Set functional form of MuX
+   bool SetScaleFactorsMuRMuF(double xmur, double xmuf);                                // Set scale factors for MuR and MuF
+   void SetExternalFuncForMuR(mu_func);                                                 // Set external function for scale calculation (optional)
+   void SetExternalFuncForMuF(mu_func);                                                 // Set external function for scale calculation (optional)
 
    // ---- Pdf interface ---- //
-   void FillPDFCache(double chksum=0.);							// Prepare for recalculation of cross section with 'new'/updated pdf.
+   void FillPDFCache(double chksum=0.);                                                 // Prepare for recalculation of cross section with 'new'/updated pdf.
 
    // ---- alphas cache ---- //
    void FillAlphasCache();                                                              // prepare for recalculation of cross section with new alpha_s value.
@@ -43,7 +43,7 @@ public:
    vector < double > GetCrossSection();
    vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
-   vector < double > GetQScales(int irelord);						// Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
+   vector < double > GetQScales(int irelord);                                           // Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
 
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
@@ -55,25 +55,25 @@ public:
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };
 
-   int GetNScaleVariations() const;							// Get number of available scale variations
-   vector < double > GetScaleFactors() const;						// Get list of available scale factors
-   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* c=NULL) const {			// Get, if this table is a 'flexible scale' table or not.
+   int GetNScaleVariations() const;                                                     // Get number of available scale variations
+   vector < double > GetScaleFactors() const;                                           // Get list of available scale factors
+   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* c=NULL) const {                    // Get, if this table is a 'flexible scale' table or not.
       if ( c ) return  c->GetNScaleDep() >= 3;
       else return BBlocksSMCalc[0][0]->GetNScaleDep() >= 3;
    }
 
    // ---- Print outs ---- //
-   void PrintTableInfo(const int iprint = 0) const;					//  Print basic info about fastNLO table and its contributions
-   void PrintFastNLOTableConstants(const int iprint = 2) const;				//  Print (technical) constants of fastNLO table (use iprint) for level of details.
-   void PrintCrossSections() const;							//  Print cross sections (optimized for double-differential tables)
-   void PrintCrossSectionsDefault(vector<double> kthc = vector<double>()) const;	//  Print cross sections in the same format as in the fortran version.
-   void PrintCrossSectionsWithReference();					
-   void PrintCrossSectionsData() const;							//  Print data table. (if available)
+   void PrintTableInfo(const int iprint = 0) const;                                     //  Print basic info about fastNLO table and its contributions
+   void PrintFastNLOTableConstants(const int iprint = 2) const;                         //  Print (technical) constants of fastNLO table (use iprint) for level of details.
+   void PrintCrossSections() const;                                                     //  Print cross sections (optimized for double-differential tables)
+   void PrintCrossSectionsDefault(vector<double> kthc = vector<double>()) const;        //  Print cross sections in the same format as in the fortran version.
+   void PrintCrossSectionsWithReference();
+   void PrintCrossSectionsData() const;                                                 //  Print data table. (if available)
 
-   void RunFastNLODemo();								//  Run an example of fastNLO for educational purposes, i.e. calculate and print cross sections for several scale variations
+   void RunFastNLODemo();                                                               //  Run an example of fastNLO for educational purposes, i.e. calculate and print cross sections for several scale variations
    // ---- Test virtual functions for reasonable values. ---- //
-   bool TestXFX();									// Test if XFX reasonable values
-   bool TestAlphas();									// Test if EvolvaAlphas returns a reasonable value
+   bool TestXFX();                                                                      // Test if XFX reasonable values
+   bool TestAlphas();                                                                   // Test if EvolvaAlphas returns a reasonable value
 
 
 protected:
@@ -129,7 +129,7 @@ protected:
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation(int scalevar , bool FirstCall=false);			// Choose the MuF scale variation table
+   double SetScaleVariation(int scalevar , bool FirstCall=false);                       // Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
    static const string fContrName[20];
@@ -148,10 +148,10 @@ protected:
    bool fPDFSuccess;
    double fPDFCached;
    double fAlphasCached;
-   mu_func Fct_MuR;									// Function, if you define your functional form for your scale external
-   mu_func Fct_MuF;									// Function, if you define your functional form for your scale external
-   vector < vector < bool > > bUseSMCalc;						// switch calculations ON/OFF
-   vector < vector < bool > > bUseNewPhys;						// switch calculations ON/OFF
+   mu_func Fct_MuR;                                                                     // Function, if you define your functional form for your scale external
+   mu_func Fct_MuF;                                                                     // Function, if you define your functional form for your scale external
+   vector < vector < bool > > bUseSMCalc;                                               // switch calculations ON/OFF
+   vector < vector < bool > > bUseNewPhys;                                              // switch calculations ON/OFF
 
    // ---- pointers to coefftables in fCoeff ---- //
    fastNLOCoeffData* fCoeffData;
@@ -159,8 +159,8 @@ protected:
    fastNLOCoeffAddBase* Coeff_NLO_Ref;
    //    vector< vector < fastNLOCoeffAddBase* > > fCoAdd;
    //    vector< vector < fastNLOCoeffMult* > > fCoMult;
-   vector < vector < fastNLOCoeffBase* > > BBlocksSMCalc;				// BlockB's for SM corrections
-   vector < vector < fastNLOCoeffBase* > > BBlocksNewPhys;				// BlockB's for New physics corrections
+   vector < vector < fastNLOCoeffBase* > > BBlocksSMCalc;                               // BlockB's for SM corrections
+   vector < vector < fastNLOCoeffBase* > > BBlocksNewPhys;                              // BlockB's for New physics corrections
 
    // ---- Cross sections ---- //
    vector < double > XSection_LO;

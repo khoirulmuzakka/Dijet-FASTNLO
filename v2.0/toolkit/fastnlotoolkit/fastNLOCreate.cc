@@ -67,12 +67,12 @@ void fastNLOCreate::ReadSteering(string steerfile) {
    SetItabversion(20000);
 
    // scenario specific things
-   Ipublunits	= INT(PublicationUnits);
-   ScDescript	= STRING_ARR(ScenarioDescription);
-   Ecms		= DOUBLE(CenterOfMassEnergy);	// is often superseeded by generator-specific code.
-   ILOord	= INT(LeadingOrder);		// is often superseeded by generator-specific code.
-   INormFlag	= 0;
-   fIOrd	= INT(OrderInAlphasOfCalculation);// is often superseeded by generator-specific code.
+   Ipublunits   = INT(PublicationUnits);
+   ScDescript   = STRING_ARR(ScenarioDescription);
+   Ecms         = DOUBLE(CenterOfMassEnergy);   // is often superseeded by generator-specific code.
+   ILOord       = INT(LeadingOrder);            // is often superseeded by generator-specific code.
+   INormFlag    = 0;
+   fIOrd        = INT(OrderInAlphasOfCalculation);// is often superseeded by generator-specific code.
    SetFilename(STRING(OutputFilename));
 
    fIsFlexibleScale = BOOL(FlexibleScaleTable);
@@ -127,18 +127,18 @@ void fastNLOCreate::ReadBinning(){
    // optimize read-in of bin grids
    // ToDo. Check sanity of bin-grid
 
-   NDim		= INT(DifferentialDimension);
+   NDim         = INT(DifferentialDimension);
    //Scenario.SetNDim(NDim);
    if ( (int)STRING_ARR(DimensionLabels).size() < NDim ){
       error["ReadBinning"]<<"Each dimension needs a bin label. Exiting."<<endl;
       exit(1);
    }
-   DimLabel	= STRING_ARR(DimensionLabels);
+   DimLabel     = STRING_ARR(DimensionLabels);
    if ( (int)INT_ARR(DimensionIsDifferential).size() < NDim ){
       error["ReadBinning"]<<"Each dimension need to specify if differential or not. Exiting."<<endl;
       exit(1);
    }
-   IDiffBin	= INT_ARR(DimensionIsDifferential);
+   IDiffBin     = INT_ARR(DimensionIsDifferential);
    DimLabel.resize(NDim); //safety
    IDiffBin.resize(NDim);
 
@@ -159,26 +159,26 @@ void fastNLOCreate::ReadBinning(){
    if ( NDim == 1 ) {
       vector<double> bgrid = DOUBLE_ARR(SingleDiffBinning);
       for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
-	 if ( bgrid[i] >= bgrid[i+1] ) {
-	    error["ReadBinning"]<<"The upper bin edge is below the lower one in bin "<<i+1<<". Exiting."<<endl;
-	    exit(1);
-	 }
+         if ( bgrid[i] >= bgrid[i+1] ) {
+            error["ReadBinning"]<<"The upper bin edge is below the lower one in bin "<<i+1<<". Exiting."<<endl;
+            exit(1);
+         }
       }
       if ( AllBinInt ) { // bin integrated bin grid
-	 NObsBin = bgrid.size()-1;
-	 Bin.resize(NObsBin);
-	 for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
-	    Bin[i].resize(1);
-	    Bin[i][0] = make_pair(bgrid[i],bgrid[i+1] );
-	 }
+         NObsBin = bgrid.size()-1;
+         Bin.resize(NObsBin);
+         for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
+            Bin[i].resize(1);
+            Bin[i][0] = make_pair(bgrid[i],bgrid[i+1] );
+         }
       }
       else { // truly differential bin grid
-	 NObsBin = bgrid.size();
-	 Bin.resize(NObsBin);
-	 for ( unsigned int i = 0 ; i<bgrid.size() ; i++ ){
-	    Bin[i].resize(1);
-	    Bin[i][0] = make_pair(bgrid[i],bgrid[i]) ;
-	 }
+         NObsBin = bgrid.size();
+         Bin.resize(NObsBin);
+         for ( unsigned int i = 0 ; i<bgrid.size() ; i++ ){
+            Bin[i].resize(1);
+            Bin[i][0] = make_pair(bgrid[i],bgrid[i]) ;
+         }
       }
    }
 
@@ -188,34 +188,34 @@ void fastNLOCreate::ReadBinning(){
       NObsBin=0;
       Bin.clear();
       for ( unsigned int r = 0 ; r<in.size() ; r++ ){
-	 unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
-	 for ( unsigned int c = 2 ; c<nBin2Max ; c++ ){
-	    Bin.push_back(vector<pair<double,double> >(NDim));
-	    // sanity dim 1:
-	    if ( AllBinInt ) {
-	       if ( in[r][0]>=in[r][1] ){
-		  error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-		  exit(1);
-	       }
-	       if ( AllBinInt && r>0 && in[r][0]!=in[r-1][1] ) {
-		  error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
-				      <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
-		  exit(1);
-	       }
-	       Bin[NObsBin][1] = make_pair(in[r][0],in[r][1]);
-	       // sanity dim 0:
-	       if ( in[r][c] >= in[r][c+1] ) {
-		  error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-		  exit(1);
-	       }
-	       Bin[NObsBin][0] = make_pair(in[r][c],in[r][c+1]);
-	    }
-	    else {
-	       Bin[NObsBin][1] = make_pair(in[r][0],in[r][0]);
-	       Bin[NObsBin][0] = make_pair(in[r][c],in[r][c]);
-	    }
-	    NObsBin++; // count
-	 }
+         unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
+         for ( unsigned int c = 2 ; c<nBin2Max ; c++ ){
+            Bin.push_back(vector<pair<double,double> >(NDim));
+            // sanity dim 1:
+            if ( AllBinInt ) {
+               if ( in[r][0]>=in[r][1] ){
+                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+                  exit(1);
+               }
+               if ( AllBinInt && r>0 && in[r][0]!=in[r-1][1] ) {
+                  error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
+                                      <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
+                  exit(1);
+               }
+               Bin[NObsBin][1] = make_pair(in[r][0],in[r][1]);
+               // sanity dim 0:
+               if ( in[r][c] >= in[r][c+1] ) {
+                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+                  exit(1);
+               }
+               Bin[NObsBin][0] = make_pair(in[r][c],in[r][c+1]);
+            }
+            else {
+               Bin[NObsBin][1] = make_pair(in[r][0],in[r][0]);
+               Bin[NObsBin][0] = make_pair(in[r][c],in[r][c]);
+            }
+            NObsBin++; // count
+         }
       }
    }
 
@@ -226,31 +226,31 @@ void fastNLOCreate::ReadBinning(){
       NObsBin=0;
       Bin.clear();
       for ( unsigned int r = 0 ; r<in.size() ; r++ ){
-	 if ( in[r].size() < 6 ) {
-	    warn["ReadBinning"]<<"At least six numbers are necessary to specify a 3-dimensional binning in row"<<r+1<<endl;
-	 }
-	 for ( unsigned int c = 4 ; c<in[r].size()-1 ; c++ ){
-	    NObsBin++;
-	    Bin.push_back(vector<pair<double,double> >(NDim));
-	    // sanity dim 2:
-	    if ( in[r][0]>=in[r][1] ){
-	       error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-	       exit(1);
- 	    }
- 	    Bin[NObsBin-1][2] = make_pair(in[r][0],in[r][1]);
-	    // sanity dim 1:
-	    if ( in[r][2]>=in[r][3] ){
-	       error["ReadBinning"]<<"The upper bin edge ("<<in[r][3]<<") is below the lower one ("<<in[r][2]<<") in row "<<r+1<<". Exiting."<<endl;
-	       exit(1);
- 	    }
- 	    Bin[NObsBin-1][1] = make_pair(in[r][2],in[r][3]);
-	    // sanity dim 0:
-	    if ( in[r][c] >= in[r][c+1] ) {
-	       error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-	       exit(1);
- 	    }
- 	    Bin[NObsBin-1][0] = make_pair(in[r][c],in[r][c+1]);
-	 }
+         if ( in[r].size() < 6 ) {
+            warn["ReadBinning"]<<"At least six numbers are necessary to specify a 3-dimensional binning in row"<<r+1<<endl;
+         }
+         for ( unsigned int c = 4 ; c<in[r].size()-1 ; c++ ){
+            NObsBin++;
+            Bin.push_back(vector<pair<double,double> >(NDim));
+            // sanity dim 2:
+            if ( in[r][0]>=in[r][1] ){
+               error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+               exit(1);
+            }
+            Bin[NObsBin-1][2] = make_pair(in[r][0],in[r][1]);
+            // sanity dim 1:
+            if ( in[r][2]>=in[r][3] ){
+               error["ReadBinning"]<<"The upper bin edge ("<<in[r][3]<<") is below the lower one ("<<in[r][2]<<") in row "<<r+1<<". Exiting."<<endl;
+               exit(1);
+            }
+            Bin[NObsBin-1][1] = make_pair(in[r][2],in[r][3]);
+            // sanity dim 0:
+            if ( in[r][c] >= in[r][c+1] ) {
+               error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+               exit(1);
+            }
+            Bin[NObsBin-1][0] = make_pair(in[r][c],in[r][c+1]);
+         }
       }
    }
    else {
@@ -266,22 +266,22 @@ void fastNLOCreate::ReadBinning(){
       BinSize.resize(NObsBin);
       bool idi = false;
       for ( int i = 0 ; i<NObsBin ; i++ ){
-	 BinSize[i] = 1;
-	 for ( int d=0 ; d<NDim ; d++ ){
-	    if (IDiffBin[d]==0 ) {
-	       // nothing todo
-	    }
-	    else if ( IDiffBin[d]==1) {
-	       // nothing todo
-	       //warn["ReadBinning"]<<"Don't know how to handle truly differential bins for bin widths."<<endl;
-	    }
-	    else if (IDiffBin[d]==2 ) {
-	       BinSize[i] *= Bin[i][d].second-Bin[i][d].first;//UpBin[i][d]-LoBin[i][d];
-	       idi = true;
-	    }
-	 }
-	 // divide by binwidthfactor, but only if at least one dimension is differential
-	 if ( idi ) BinSize[i] *= DOUBLE(BinWidthFactor);
+         BinSize[i] = 1;
+         for ( int d=0 ; d<NDim ; d++ ){
+            if (IDiffBin[d]==0 ) {
+               // nothing todo
+            }
+            else if ( IDiffBin[d]==1) {
+               // nothing todo
+               //warn["ReadBinning"]<<"Don't know how to handle truly differential bins for bin widths."<<endl;
+            }
+            else if (IDiffBin[d]==2 ) {
+               BinSize[i] *= Bin[i][d].second-Bin[i][d].first;//UpBin[i][d]-LoBin[i][d];
+               idi = true;
+            }
+         }
+         // divide by binwidthfactor, but only if at least one dimension is differential
+         if ( idi ) BinSize[i] *= DOUBLE(BinWidthFactor);
       }
       if (!idi) info["CalculateBinWidth"]<<"BinWidthFactor is not being used, since no observable is calculated differential."<<endl;
    }
@@ -307,8 +307,8 @@ void fastNLOCreate::GetWarmupValues(){
    // try again, with hard-coded convention:
    if ( fIsWarmup ) {
       info["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
-      READ(GetWarmupTableFilename());		// todo: change to usability with multiple files!
-      warmup = DOUBLE_TAB(WarmupValues);	// todo: change to usability with multiple files!
+      READ(GetWarmupTableFilename());           // todo: change to usability with multiple files!
+      warmup = DOUBLE_TAB(WarmupValues);        // todo: change to usability with multiple files!
       fIsWarmup = warmup.empty();
       if ( !fIsWarmup ) info["GetWarmupValues"]<<"Reading of file "<<GetWarmupTableFilename()<<" contained warmup values!"<<endl;
    }
@@ -317,8 +317,8 @@ void fastNLOCreate::GetWarmupValues(){
    // make use of warmup values (if found)
    if ( !fIsWarmup ) {
       if ( (int)warmup.size() != NObsBin ) {
-	 error["GetWarmupValues"]<<"Table of warmup values is not compatible with steering file. Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<". Exiting."<<endl;
-	 exit(1);
+         error["GetWarmupValues"]<<"Table of warmup values is not compatible with steering file. Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<". Exiting."<<endl;
+         exit(1);
       }
       //fWarmupValues = warmup; // access warmup-values through read_steer!
       // todo. make use of warmup values.
@@ -350,16 +350,16 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
       warn>>"\tThis may be unreasonable."<<endl;
    }
    if      ( (ord-GetLoOrder()) == 0 ) {
-      c->NSubproc		= INT(NSubProcessesLO);
-      c->IPDFdef3		= INT(IPDFdef3LO);
+      c->NSubproc               = INT(NSubProcessesLO);
+      c->IPDFdef3               = INT(IPDFdef3LO);
    }
    else if ( (ord-GetLoOrder()) == 1 ) {
-      c->NSubproc		= INT(NSubProcessesNLO);
-      c->IPDFdef3		= INT(IPDFdef3NLO);
+      c->NSubproc               = INT(NSubProcessesNLO);
+      c->IPDFdef3               = INT(IPDFdef3NLO);
    }
    else if ( (ord-GetLoOrder()) == 2 ) {
-      c->NSubproc		= INT(NSubProcessesNNLO);
-      c->IPDFdef3		= INT(IPDFdef3NNLO);
+      c->NSubproc               = INT(NSubProcessesNNLO);
+      c->IPDFdef3               = INT(IPDFdef3NNLO);
    }
    else {
       error["SetOrderOfAlphasOfCalculation"]<<"Unknown order of pertubation theory: order="<<ord-GetLoOrder()<<" (ord="<<ord<<",ILOord="<<ILOord<<"). Exiting."<<endl;
@@ -396,17 +396,17 @@ void fastNLOCreate::SetLoOrder(int LOOrd){
 void fastNLOCreate::InitVariablesInCoefficientTable(){
    debug["InitVariablesInCoefficientTable"]<<endl;
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
-   c->IDataFlag = 0;		// No data, but theory
-   c->IAddMultFlag = 0;		// additive contribution.
-   c->IContrFlag1 = 1;		// fixed order: 1
-   c->IContrFlag2 = 42; 	// init with arbitrary number. to be specified later.
-   c->IRef  = 0;		// it is not a reference calculation
+   c->IDataFlag = 0;            // No data, but theory
+   c->IAddMultFlag = 0;         // additive contribution.
+   c->IContrFlag1 = 1;          // fixed order: 1
+   c->IContrFlag2 = 42;         // init with arbitrary number. to be specified later.
+   c->IRef  = 0;                // it is not a reference calculation
    c->IScaleDep = 100;
    c->NScaleDep = 0;
-   //c->NFragFunc		= 0;
-   c->NFFDim		= 0;
-   c->Nevt		= 0;
-   c->SetIXsectUnits(12);	// it is often pb
+   //c->NFragFunc               = 0;
+   c->NFFDim            = 0;
+   c->Nevt              = 0;
+   c->SetIXsectUnits(12);       // it is often pb
 }
 
 
@@ -421,12 +421,12 @@ void fastNLOCreate::ReadCoefficientSpecificVariables(){
    c->NPDFPDG.resize(INT(NPDF));
    if ( c->NPDFPDG.size() >0 ) c->NPDFPDG[0] = INT(PDF1);
    if ( c->NPDFPDG.size() >1 ) c->NPDFPDG[1] = INT(PDF2);
-   c->NPDFDim		= INT(NPDFDim);
-   c->CodeDescript	= STRING_ARR(CodeDescription);
-   c->IPDFdef1		= INT(IPDFdef1);
-   c->IPDFdef2		= INT(IPDFdef2);
-   c->IPDFdef3		= -1 ;		// safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int); INT(IPDFdef3);
-   c->NSubproc		= -1;		// safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int);
+   c->NPDFDim           = INT(NPDFDim);
+   c->CodeDescript      = STRING_ARR(CodeDescription);
+   c->IPDFdef1          = INT(IPDFdef1);
+   c->IPDFdef2          = INT(IPDFdef2);
+   c->IPDFdef3          = -1 ;          // safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int); INT(IPDFdef3);
+   c->NSubproc          = -1;           // safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int);
    c->SetIXsectUnits(INT(UnitsOfCoefficients));
    c->NScaleDim = 1;  // NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
    c->ScaleDescript.resize(1);
@@ -434,7 +434,7 @@ void fastNLOCreate::ReadCoefficientSpecificVariables(){
    //IPDFdef3 = NSubproc == 7 ? 2 : 1;
    //printf("         Set IPDFdef3 = %d, consistent with %d subprocesses.\n",IPDFdef3,NSubproc);
    if ( fIsFlexibleScale ){
-      c->NScaleDep		= 3; // temporaily. Until known if generator runs in LO, NLO or NNLO.
+      c->NScaleDep              = 3; // temporaily. Until known if generator runs in LO, NLO or NNLO.
 
       // ---- those numbers are partly not ambigously defined in v2.1 ---- //
       c->NScales = 1;  //
@@ -461,7 +461,7 @@ int fastNLOCreate::GetBin(){
    // get bin number, using
    // observables from Scenario
 
-   const int idiff = GetNumDiff();
+   const int idiff = GetNumDiffBin();
    // -------------------------------
    // check cache and return if available
    if ( idiff == 1 ) {
@@ -607,17 +607,17 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    if ( CheckWeightIsNan() ) return;
    for ( unsigned int x1 = 0 ; x1<nxup.size() ; x1++ ) {
       for ( unsigned int x2 = 0 ; x2<nxlo.size() ; x2++ ) {
-	 int xmaxbin = nxup[x1].first;
-	 int xminbin = nxlo[x2].first;
-	 int p = fEvent._p;
-	 HalfMatrixCheck(xminbin,xmaxbin,p);
-	 int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+         int xmaxbin = nxup[x1].first;
+         int xminbin = nxlo[x2].first;
+         int p = fEvent._p;
+         HalfMatrixCheck(xminbin,xmaxbin,p);
+         int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
-	 for ( unsigned int m1 = 0 ; m1<nmu.size() ; m1++ ) {
-	    double wfnlo = nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
-	    // 		     cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
-	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p]  += fEvent._w  * wfnlo;
-	 }
+         for ( unsigned int m1 = 0 ; m1<nmu.size() ; m1++ ) {
+            double wfnlo = nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
+            //               cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+            c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p]  += fEvent._w  * wfnlo;
+         }
       }
    }
 }
@@ -652,7 +652,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
 
 //       cout<<" - - - - - x-grid - - - - "<<endl;
 //       for ( unsigned int k = 0 ; k<fKernX[ObsBin]->fgrid.size() ; k ++ ) {
-// 	 cout<<"k="<<k<<"\tXNode="<<fKernX[ObsBin]->fgrid[k]<<endl;
+//       cout<<"k="<<k<<"\tXNode="<<fKernX[ObsBin]->fgrid[k]<<endl;
 //       }
 //       cout<<" ---- scalenodes -----"<<endl;
 //       cout<<"     mu1="<<nmu1[0].second<<"\tmu1="<<nmu1[1].second<<"\tmu1="<<nmu1[2].second<<"\tmu1="<<nmu1[3].second<<endl;
@@ -693,53 +693,53 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
    if ( CheckWeightIsNan() ) return;
    for ( unsigned int x1 = 0 ; x1<nxup.size() ; x1++ ) {
       for ( unsigned int x2 = 0 ; x2<nxlo.size() ; x2++ ) {
-	 int xmaxbin = nxup[x1].first;
-	 int xminbin = nxlo[x2].first;
-	 int p = fEvent._p;
-	 HalfMatrixCheck(xminbin,xmaxbin,p);
-	 int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+         int xmaxbin = nxup[x1].first;
+         int xminbin = nxlo[x2].first;
+         int p = fEvent._p;
+         HalfMatrixCheck(xminbin,xmaxbin,p);
+         int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
-	 for ( unsigned int m1 = 0 ; m1<nmu1.size() ; m1++ ) {
-	    for ( unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++ ) {
-	       double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second;
-	       if ( isnan(wfnlo) ) {
-		  error[""]<<"wfnlo is a nan."<<endl;
-		  fKernX[ObsBin]->PrintGrid();
-		  fKernMu1[ObsBin]->PrintGrid();
-		  fKernMu2[ObsBin]->PrintGrid();
-		  cout<<"ix1="<<x1<<", ix2="<<x2<<", im1="<<m1<<", im2="<<mu2<<endl;
-		  cout<<"x1="<<nxlo[x1].second<<", x1="<<x1<<", xval="<<xmin<<endl;
-		  cout<<"x2="<<nxup[x2].second<<", x2="<<x2<<", xval="<<xmax<<endl;
-		  cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
-		  cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
-		  exit(1);
-	       }
-	       // 		  cout<<"ObsBin="<<ObsBin<<", ixHM="<<ixHM<<", m1="<<nmu1[m1].first<<", m2="<< nmu2[mu2].first<<", p="<<p
-	       // 		  <<" ,i(x="<<x1<<",x2="<<x2<<",m1="<<m1<<",m2="<<mu2<<") [xlo="<<xmin<<",xup="<<xmax<<",m1="<<fScenario._m1<<",m2="<<fScenario._m2<<"]"<<endl;
-	       // 		  cout<<" ggg-n-  : O="<<ObsBin<<", ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", wfnlo="<<wfnlo<<", wxu="<<nxup[x1].second<<", wxd="<<nxlo[x2].second<<", wm1="<<nmu1[m1].second<<", wm2="<<nmu2[mu2].second<<endl;
-	       if ( fEvent._w  != 0 ) {
-		  // 		     cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
-		  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
-	       }
-	       if ( fEvent._wf != 0 ){
-		  // 		     cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
-		  c->SigmaTildeMuFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
-	       }
-	       if ( fEvent._wr != 0 ) {
-		  // 		     cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
-		  c->SigmaTildeMuRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
-	       }
-	       if ( fEvent._wrr != 0 ) {
-		  c->SigmaTildeMuRRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
-	       }
-	       if ( fEvent._wff != 0 ) {
-		  c->SigmaTildeMuFFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
-	       }
-	       if ( fEvent._wrf != 0 ) {
-		  c->SigmaTildeMuRFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
-	       }
-	    }
-	 }
+         for ( unsigned int m1 = 0 ; m1<nmu1.size() ; m1++ ) {
+            for ( unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++ ) {
+               double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second;
+               if ( isnan(wfnlo) ) {
+                  error[""]<<"wfnlo is a nan."<<endl;
+                  fKernX[ObsBin]->PrintGrid();
+                  fKernMu1[ObsBin]->PrintGrid();
+                  fKernMu2[ObsBin]->PrintGrid();
+                  cout<<"ix1="<<x1<<", ix2="<<x2<<", im1="<<m1<<", im2="<<mu2<<endl;
+                  cout<<"x1="<<nxlo[x1].second<<", x1="<<x1<<", xval="<<xmin<<endl;
+                  cout<<"x2="<<nxup[x2].second<<", x2="<<x2<<", xval="<<xmax<<endl;
+                  cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
+                  cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
+                  exit(1);
+               }
+               //                 cout<<"ObsBin="<<ObsBin<<", ixHM="<<ixHM<<", m1="<<nmu1[m1].first<<", m2="<< nmu2[mu2].first<<", p="<<p
+               //                 <<" ,i(x="<<x1<<",x2="<<x2<<",m1="<<m1<<",m2="<<mu2<<") [xlo="<<xmin<<",xup="<<xmax<<",m1="<<fScenario._m1<<",m2="<<fScenario._m2<<"]"<<endl;
+               //                 cout<<" ggg-n-  : O="<<ObsBin<<", ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", wfnlo="<<wfnlo<<", wxu="<<nxup[x1].second<<", wxd="<<nxlo[x2].second<<", wm1="<<nmu1[m1].second<<", wm2="<<nmu2[mu2].second<<endl;
+               if ( fEvent._w  != 0 ) {
+                  //                 cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+                  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
+               }
+               if ( fEvent._wf != 0 ){
+                  //                 cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
+                  c->SigmaTildeMuFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
+               }
+               if ( fEvent._wr != 0 ) {
+                  //                 cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
+                  c->SigmaTildeMuRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
+               }
+               if ( fEvent._wrr != 0 ) {
+                  c->SigmaTildeMuRRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
+               }
+               if ( fEvent._wff != 0 ) {
+                  c->SigmaTildeMuFFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
+               }
+               if ( fEvent._wrf != 0 ) {
+                  c->SigmaTildeMuRFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
+               }
+            }
+         }
       }
    }
 }
@@ -753,14 +753,14 @@ void fastNLOCreate::HalfMatrixCheck(int& xminbin, int& xmaxbin, int& subproc){
    //
    if ( GetTheCoeffTable()->GetNPDFDim() == 1 ) { // half-matrix notation (otherwise nothing todo)
       if ( xminbin > xmaxbin  ) {
-	 if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
-	    error["HalfMatrixCheck"]<<"Necessary array with symmetric processes for half-matrix notation not initialized."<<endl;
+         if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
+            error["HalfMatrixCheck"]<<"Necessary array with symmetric processes for half-matrix notation not initialized."<<endl;
 
-	 //cout<<"exchange supbrpc. xminbin="<<xminbin<<", xmaxbin="<<xmaxbin<<", p="<<subproc<<", pAsym="<<fSymProc[subproc]<<endl;
-	 int di = xminbin - xmaxbin;
-	 xmaxbin = xmaxbin + di;	// modify indicees
-	 xminbin = xminbin - di;
-	 subproc = fSymProc[subproc];		// exchange asymmetric process
+         //cout<<"exchange supbrpc. xminbin="<<xminbin<<", xmaxbin="<<xmaxbin<<", p="<<subproc<<", pAsym="<<fSymProc[subproc]<<endl;
+         int di = xminbin - xmaxbin;
+         xmaxbin = xmaxbin + di;        // modify indicees
+         xminbin = xminbin - di;
+         subproc = fSymProc[subproc];           // exchange asymmetric process
       }
    }
 }
@@ -852,39 +852,39 @@ void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 int nxmax = c->GetNxmax(i);
-	 for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	       for (int x=0; x<nxmax; x++) {
-		  for (int n=0; n<c->GetNSubproc(); n++) {
-		     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= BinSize[i];
-		     if ( c->GetNScaleDep() >= 5 ) {
-			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= BinSize[i];
-			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= BinSize[i];
-			if ( c->GetNScaleDep() >= 6 ) {
-			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= BinSize[i];
-			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= BinSize[i];
-			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= BinSize[i];
-			}
-		     }
-		  }
-	       }
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               for (int x=0; x<nxmax; x++) {
+                  for (int n=0; n<c->GetNSubproc(); n++) {
+                     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= BinSize[i];
+                     if ( c->GetNScaleDep() >= 5 ) {
+                        c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= BinSize[i];
+                        c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= BinSize[i];
+                        if ( c->GetNScaleDep() >= 6 ) {
+                           c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= BinSize[i];
+                           c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= BinSize[i];
+                           c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= BinSize[i];
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
    }
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
-	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
-	       for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
-		  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
-		     c->SigmaTilde[i][s][x][l][m] *= BinSize[i];
-		  }
-	       }
-	    }
-	 }
+         for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
+            for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
+               for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
+                  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
+                     c->SigmaTilde[i][s][x][l][m] *= BinSize[i];
+                  }
+               }
+            }
+         }
       }
    }
 }
@@ -895,39 +895,39 @@ void fastNLOCreate::DivideCoefficientsByBinWidth() {
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 int nxmax = c->GetNxmax(i);
-	 for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	       for (int x=0; x<nxmax; x++) {
-		  for (int n=0; n<c->GetNSubproc(); n++) {
-		     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] /= BinSize[i];
-		     if ( c->GetNScaleDep() >= 5 ) {
-			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] /= BinSize[i];
-			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] /= BinSize[i];
-			if ( c->GetNScaleDep() >= 6 ) {
-			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
-			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
-			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
-			}
-		     }
-		  }
-	       }
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               for (int x=0; x<nxmax; x++) {
+                  for (int n=0; n<c->GetNSubproc(); n++) {
+                     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] /= BinSize[i];
+                     if ( c->GetNScaleDep() >= 5 ) {
+                        c->SigmaTildeMuFDep [i][x][jS1][kS2][n] /= BinSize[i];
+                        c->SigmaTildeMuRDep [i][x][jS1][kS2][n] /= BinSize[i];
+                        if ( c->GetNScaleDep() >= 6 ) {
+                           c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
+                           c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
+                           c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
    }
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
-	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
-	       for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
-		  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
-		     c->SigmaTilde[i][s][x][l][m] /= BinSize[i];
-		  }
-	       }
-	    }
-	 }
+         for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
+            for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
+               for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
+                  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
+                     c->SigmaTilde[i][s][x][l][m] /= BinSize[i];
+                  }
+               }
+            }
+         }
       }
    }
 }
@@ -937,39 +937,39 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 int nxmax = c->GetNxmax(i);
-	 for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	       for (int x=0; x<nxmax; x++) {
-		  for (int n=0; n<c->GetNSubproc(); n++) {
-		     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
-		     if ( c->GetNScaleDep() >= 5 ) {
-			c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
-			c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
-			if ( c->GetNScaleDep() >= 6 ) {
-			   c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
-			   c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
-			   c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
-			}
-		     }
-		  }
-	       }
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               for (int x=0; x<nxmax; x++) {
+                  for (int n=0; n<c->GetNSubproc(); n++) {
+                     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
+                     if ( c->GetNScaleDep() >= 5 ) {
+                        c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
+                        c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
+                        if ( c->GetNScaleDep() >= 6 ) {
+                           c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
+                           c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
+                           c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
    }
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
-	 for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
-	    for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
-	       for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
-		  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
-		     c->SigmaTilde[i][s][x][l][m] *= coef;
-		  }
-	       }
-	    }
-	 }
+         for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
+            for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
+               for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
+                  for ( unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++ ) {
+                     c->SigmaTilde[i][s][x][l][m] *= coef;
+                  }
+               }
+            }
+         }
       }
    }
 }
@@ -983,19 +983,19 @@ void fastNLOCreate::UpdateWarmupArrays(){
    const int ObsBin = GetBin();
    debug["UpdateWarmupArrays"]<<"ObsBin="<<ObsBin<<"\tmu1="<<fScenario._m1<<"\tmu2="<<fScenario._m2<<"\tx1="<<fEvent._x1<<"\tx2="<<fEvent._x2<<endl;
    if ( ObsBin >= 0 ) {
-      fWMu1[ObsBin].first	= std::min(fScenario._m1,fWMu1[ObsBin].first) ;
-      fWMu1[ObsBin].second	= std::max(fScenario._m1,fWMu1[ObsBin].second) ;
+      fWMu1[ObsBin].first       = std::min(fScenario._m1,fWMu1[ObsBin].first) ;
+      fWMu1[ObsBin].second      = std::max(fScenario._m1,fWMu1[ObsBin].second) ;
       if ( GetTheCoeffTable()->IPDFdef1 == 3 ) {
-	 fWx[ObsBin].first	= std::min(std::min(fEvent._x1,fEvent._x2),fWx[ObsBin].first) ;
-	 fWx[ObsBin].second	= std::max(std::max(fEvent._x1,fEvent._x2),fWx[ObsBin].second) ;
+         fWx[ObsBin].first      = std::min(std::min(fEvent._x1,fEvent._x2),fWx[ObsBin].first) ;
+         fWx[ObsBin].second     = std::max(std::max(fEvent._x1,fEvent._x2),fWx[ObsBin].second) ;
       } else if (GetTheCoeffTable()->IPDFdef1 == 2 ){
-	 fWx[ObsBin].first	= std::min(fEvent._x1,fWx[ObsBin].first) ;
-	 fWx[ObsBin].second	= std::max(fEvent._x1,fWx[ObsBin].second) ;
+         fWx[ObsBin].first      = std::min(fEvent._x1,fWx[ObsBin].first) ;
+         fWx[ObsBin].second     = std::max(fEvent._x1,fWx[ObsBin].second) ;
       } else
-	 error["UpdateWarmupArrays"]<<"nothing reasonable implemented yet."<<endl;
+         error["UpdateWarmupArrays"]<<"nothing reasonable implemented yet."<<endl;
       if ( fIsFlexibleScale ) {
-	 fWMu2[ObsBin].first	= std::min(fScenario._m2,fWMu2[ObsBin].first) ;
-	 fWMu2[ObsBin].second	= std::max(fScenario._m2,fWMu2[ObsBin].second) ;
+         fWMu2[ObsBin].first    = std::min(fScenario._m2,fWMu2[ObsBin].first) ;
+         fWMu2[ObsBin].second   = std::max(fScenario._m2,fWMu2[ObsBin].second) ;
       }
    }
 }
@@ -1009,12 +1009,12 @@ void fastNLOCreate::InitWarmupArrays(){
    fWMu2.resize(GetNObsBin());
    fWx.resize(GetNObsBin());
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-      fWMu1[i].first	= 10e10;
-      fWMu1[i].second	= -10e10;
-      fWMu2[i].first	= 10e10;
-      fWMu2[i].second	= -10e10;
-      fWx[i].first	= 10e10;
-      fWx[i].second	= -10e10;
+      fWMu1[i].first    = 10e10;
+      fWMu1[i].second   = -10e10;
+      fWMu2[i].first    = 10e10;
+      fWMu2[i].second   = -10e10;
+      fWx[i].first      = 10e10;
+      fWx[i].second     = -10e10;
    }
 }
 
@@ -1095,34 +1095,34 @@ void fastNLOCreate::OutWarmup(string file){
    //sout<<"   xmin      xmax     mu1min    m1max     mu2min    mu2max "<<endl;
    if ( fIsFlexibleScale ) {
       sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"  \"%16s\"  \"%16s\"",
-	      "x_min","x_max",
-	      GetWarmupHeader(0,"min").c_str(),
-	      GetWarmupHeader(0,"max").c_str(),
-	      GetWarmupHeader(1,"min").c_str(),
-	      GetWarmupHeader(1,"max").c_str());
+              "x_min","x_max",
+              GetWarmupHeader(0,"min").c_str(),
+              GetWarmupHeader(0,"max").c_str(),
+              GetWarmupHeader(1,"min").c_str(),
+              GetWarmupHeader(1,"max").c_str());
       sout<<buf<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-	 if ( fWx[i].first < 1.e-4 ) {
-	    warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
-	    fWx[i].first=1.e-4;
-	 }
-	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
-		 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
-	 sout<<buf<<endl;
+         if ( fWx[i].first < 1.e-4 ) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
+            fWx[i].first=1.e-4;
+         }
+         sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
+                 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
+         sout<<buf<<endl;
       }
    }
    else {
       // is ScaleDescript available?
       if ( GetTheCoeffTable()->ScaleDescript[0].empty() ){ error["OutWarmup"]<<"Scale description is empty. but needed. Probalby this has to be implemented."<<endl; exit(1);};
       sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"",
-	      "x_min","x_max",
-	      GetWarmupHeader(0,"min").c_str(),
-	      GetWarmupHeader(0,"max").c_str() );
+              "x_min","x_max",
+              GetWarmupHeader(0,"min").c_str(),
+              GetWarmupHeader(0,"max").c_str() );
       sout<<buf<<endl;
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-	 sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
-		 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second);
-	 sout<<buf<<endl;
+         sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
+                 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second);
+         sout<<buf<<endl;
       }
    }
    sout<<"}}"<<endl;
@@ -1168,30 +1168,30 @@ void  fastNLOCreate::InitGrids() {
       c->XNode1.resize(GetNObsBin());
       vector<vector<vector<vector<vector<double> > > > > stype(GetNObsBin());
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-	 c->ScaleNode1[i] = fKernMu1[i]->GetGrid();
-	 c->ScaleNode2[i] = fKernMu2[i]->GetGrid();
-	 c->XNode1[i]	  = fKernX[i]->GetGrid();
+         c->ScaleNode1[i] = fKernMu1[i]->GetGrid();
+         c->ScaleNode2[i] = fKernMu2[i]->GetGrid();
+         c->XNode1[i]     = fKernX[i]->GetGrid();
 
-	 // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
-	 int nxmax = GetNxmax (fKernX[i]->GetGridPtr() , fKernX[i]->GetGridPtr() );
-	 stype[i].resize(nxmax);
-	 for ( unsigned int x = 0 ; x<stype[i].size() ; x++ ) {
-	    stype[i][x].resize(c->ScaleNode1[i].size());
-	    for ( unsigned int m1 = 0 ; m1<stype[i][x].size() ; m1++ ) {
-	       stype[i][x][m1].resize(c->ScaleNode2[i].size());
-	       for ( unsigned int mu2 = 0 ; mu2<stype[i][x][m1].size() ; mu2++ ) {
-		  stype[i][x][m1][mu2].resize(GetNSubprocesses());
-	       }
-	    }
-	 }
+         // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
+         int nxmax = GetNxmax (fKernX[i]->GetGridPtr() , fKernX[i]->GetGridPtr() );
+         stype[i].resize(nxmax);
+         for ( unsigned int x = 0 ; x<stype[i].size() ; x++ ) {
+            stype[i][x].resize(c->ScaleNode1[i].size());
+            for ( unsigned int m1 = 0 ; m1<stype[i][x].size() ; m1++ ) {
+               stype[i][x][m1].resize(c->ScaleNode2[i].size());
+               for ( unsigned int mu2 = 0 ; mu2<stype[i][x][m1].size() ; mu2++ ) {
+                  stype[i][x][m1][mu2].resize(GetNSubprocesses());
+               }
+            }
+         }
       }
-      c->SigmaTildeMuIndep	= stype;
-      c->SigmaTildeMuRDep	= stype;
-      c->SigmaTildeMuFDep	= stype;
+      c->SigmaTildeMuIndep      = stype;
+      c->SigmaTildeMuRDep       = stype;
+      c->SigmaTildeMuFDep       = stype;
 
-      c->SigmaTildeMuRRDep	= stype;
-      c->SigmaTildeMuFFDep	= stype;
-      c->SigmaTildeMuRFDep	= stype;
+      c->SigmaTildeMuRRDep      = stype;
+      c->SigmaTildeMuFFDep      = stype;
+      c->SigmaTildeMuRFDep      = stype;
       //c->SigmaTildeMuIndep(GetNObsBin());///
    }
 
@@ -1224,7 +1224,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       wrmMu2Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"min"));
       wrmMu2Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"max"));
       if ( (int)wrmMu2Dn.size()!=GetNObsBin() || (int)wrmMu2Up.size()!= GetNObsBin() ){
-	 error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl; exit(1);
+         error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl; exit(1);
       }
    }
 
@@ -1236,9 +1236,9 @@ void  fastNLOCreate::InitInterpolationKernels() {
       fKernX[i] = MakeInterpolationKernels(STRING(X_Kernel),wrmX[i],1);
 
       if ( BOOL(X_NoOfNodesPerMagnitude) )
-	 fKernX[i]->MakeGridsWithNNodesPerMagnitude( fastNLOInterpolBase::TranslateGridType(STRING(X_DistanceMeasure)), INT(X_NNodes)  );
+         fKernX[i]->MakeGridsWithNNodesPerMagnitude( fastNLOInterpolBase::TranslateGridType(STRING(X_DistanceMeasure)), INT(X_NNodes)  );
       else
-	 fKernX[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(X_DistanceMeasure)), INT(X_NNodes));
+         fKernX[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(X_DistanceMeasure)), INT(X_NNodes));
 
       fKernX[i]->RemoveLastNode();
 
@@ -1254,9 +1254,9 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // init scale2-interpolation kernels
       // ------------------------------------------------
       if ( fIsFlexibleScale ){
-	 debug["InitGrids"]<<"Make Mu2 grid for obsbin="<<i<<endl;
-	 fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
-	 fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
+         debug["InitGrids"]<<"Make Mu2 grid for obsbin="<<i<<endl;
+         fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
+         fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
       }
    }
 }
@@ -1277,4 +1277,3 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
    }
    return NULL; // default return
 }
-

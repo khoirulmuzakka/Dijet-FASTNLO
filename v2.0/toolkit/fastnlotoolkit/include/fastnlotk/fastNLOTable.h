@@ -29,8 +29,8 @@ class fastNLOTable : public fastNLOBase {
 
    virtual void Print() const;
    void PrintScenario() const;
-   void PrintFastNLOTableConstants(const int iprint = 2) const;					//  Print (technical) constants of fastNLO table (use iprint) for level of details.
-   void PrintTableInfo(const int iprint = 0) const;						//  Print basic info about fastNLO table and its contributions
+   void PrintFastNLOTableConstants(const int iprint = 2) const;                                 //  Print (technical) constants of fastNLO table (use iprint) for level of details.
+   void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
 
    int ReadTable();
    int WriteTable();
@@ -39,11 +39,15 @@ class fastNLOTable : public fastNLOBase {
 
    int GetNObsBin() const {return NObsBin;}
 
-   double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}		// Get lower bin boundary
-   double GetUpBin(int bin, int dimension) const {return Bin[bin][dimension].second;}		// Get upper bin boundary	
+   double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
+   double GetUpBin(int bin, int dimension) const {return Bin[bin][dimension].second;}           // Get upper bin boundary
 
-   void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}	// Set dimension of calculation. (Singledifferential, double-differntial, etc...)
-   int GetNumDiff() const { return NDim; }							// Get dimension of calculation. (Singledifferential, double-differntial, etc...)
+   vector < double > GetBinSize() const {
+      return BinSize;
+   };             // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+
+   void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Singledifferential, double-differntial, etc...)
+   int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Singledifferential, double-differntial, etc...)
 
    void SetDimLabel( string label, int iDim , bool IsDiff = true );
    string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};
@@ -65,7 +69,7 @@ class fastNLOTable : public fastNLOBase {
    // useful functions
    //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
    //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
-   int GetBinNumber(double val1 , double val2 = -42. ) const ;					// calculate bin number (iObsBin)
+   int GetBinNumber(double val1 , double val2 = -42. ) const ;                                  // calculate bin number (iObsBin)
 
    // handle coefficient tables
    int WriteCoeffTable(int no);
@@ -81,7 +85,7 @@ private:
    bool cmp(const vector < double > x1, const vector < double > x2) const;
    bool cmp(const vector < vector < double > > x1,const vector < vector < double > > x2) const;
    bool cmp(const vector < vector < pair<double,double > > > x1,const vector < vector < pair<double,double > > > x2) const;
-   
+
 
 protected:
    int WriteScenario(ostream *table);
@@ -104,7 +108,7 @@ protected:
    vector < vector <pair<double,double> > > Bin; // every bin has a lower and upper bin boundary and belongs to a 'dimension'. If a truely differential measurment, then upper bin boundary is equal lower one
    vector <double> BinSize;
 
-   vector <int> RapIndex;		//KR: Added possibility to store and read start of new rapidity bin in nobs
+   vector <int> RapIndex;               //KR: Added possibility to store and read start of new rapidity bin in nobs
 
    // contributions for normalization
    int INormFlag;
