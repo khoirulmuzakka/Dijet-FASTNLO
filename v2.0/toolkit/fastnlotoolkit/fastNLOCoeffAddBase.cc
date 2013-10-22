@@ -120,6 +120,7 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       }
    }
 
+   int NScales;
    *table >> NScales;
    *table >> NScaleDim;
    Iscale.resize(NScales);
@@ -200,6 +201,7 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
 	 }
       }
    }
+   int NScales = Iscale.size();
    *table << NScales << endl;
    *table << NScaleDim << endl;
    for(int i=0;i<NScales;i++){
@@ -427,8 +429,8 @@ void fastNLOCoeffAddBase::Print() const {
    //     }
    printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
    printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %d)\n",NFFPDG.size());
-   printf(" B   NScales                       %d\n",NScales);
-   for(int i=0;i<NScales;i++){
+   printf(" B   NScales                       %d\n",Iscale.size());
+   for(int i=0;i<Iscale.size();i++){
       printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
    }
    printf(" B   NScaleDim                     %d\n",NScaleDim);

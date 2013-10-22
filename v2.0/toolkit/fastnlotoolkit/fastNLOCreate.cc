@@ -437,7 +437,7 @@ void fastNLOCreate::ReadCoefficientSpecificVariables(){
       c->NScaleDep              = 3; // temporaily. Until known if generator runs in LO, NLO or NNLO.
 
       // ---- those numbers are partly not ambigously defined in v2.1 ---- //
-      c->NScales = 1;  //
+      //c->NScales = 1;  // no longer used
       c->Iscale.resize(1);
       c->Iscale[0] = 0;  // mur=mur(ET), ET = index 0
 

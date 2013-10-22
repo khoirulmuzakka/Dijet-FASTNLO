@@ -44,7 +44,7 @@ public:
    int GetIPDFdef3() const { return IPDFdef3; }
    int GetNpow() const {return Npow;}
    //vector<string > GetScaleDescript(int iScale=0) const { return ScaleDescript[iScale]; };
-   string GetScaleDescription(int iScale=0) const { return ScaleDescript[iScale][0]; };		// getter for scale description of scale iScale
+   string GetScaleDescription(int iScale=0) const { return ScaleDescript[0][iScale]; };		// getter for scale description of scale iScale
    vector<vector<string > > GetScaleDescr() const { return ScaleDescript; }
    int GetNxtot1(int iBin ) const { return XNode1[iBin].size(); }
    int GetNxtot2(int iBin ) const { return XNode2[iBin].size(); }
@@ -81,9 +81,8 @@ protected:
    vector < int > Nztot;
    vector < double > Hzlim;
    v2d ZNode;
-   int NScales;
    int NScaleDim;
-   vector < int > Iscale;
+   vector < int > Iscale;									// not used
    vector < vector < string > > ScaleDescript;
 
 };

@@ -1384,25 +1384,21 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
    // Check whether pQCD contributions beyond LO exist and are activated
    bool lknlo = false;
-   if (!BBlocksSMCalc[kFixedOrder].empty()) {
-      for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
-         int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
-         if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
-            lknlo = true;
-            break;
-         }
+   for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
+      int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
+      if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
+	 lknlo = true;
+	 break;
       }
    }
 
 
    // Check whether threshold corrections exist and are activated
    bool lkthc = false;
-   if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
-      for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         if (bUseSMCalc[kThresholdCorrection][i]) {
-            lkthc = true;
-            break;
-         }
+   for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
+      if (bUseSMCalc[kThresholdCorrection][i]) {
+	 lkthc = true;
+	 break;
       }
    }
    if (lkthc && fabs(xmur-xmuf) > DBL_MIN) {
