@@ -860,7 +860,7 @@ bool FastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
       return false;
    }
    // existence of scale variation for additive contributions (otherwise cache filling will fail!)
-   if (!BBlocksSMCalc[eCalc][Id]->IAddMultFlag) {
+   if (!GetIsFlexibleScaleTable() && !BBlocksSMCalc[eCalc][Id]->IAddMultFlag) {
       int scaleVar = BBlocksSMCalc[eCalc][Id]->Npow == ILOord ? 0 : fScalevar;
       // check that scaleVar is in allowed range, can otherwise lead to segfaults!
       if (scaleVar >= GetNScaleVariations()) {

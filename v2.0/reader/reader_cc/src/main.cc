@@ -19,7 +19,7 @@
 #include "fastnlo/FastNLOLHAPDF.h"
 #include "fastnlo/FastNLOUser.h"
 #include "fastnlo/FastNLODiffUser.h"
-#include "fastnlo/FastNLOQCDNUMAS.h"
+//#include "fastnlo/FastNLOQCDNUMAS.h"
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -545,10 +545,10 @@ int main(int argc, char** argv) {
    //      calculation using the FastNLOAlphas interface
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
-   //   FastNLOAlphas fnloreader(tablename);
+   FastNLOAlphas fnloreader(tablename);
    //   FastNLOLHAPDF fnloreader(tablename);
    //   FastNLOCRunDec fnloreader(tablename);
-   FastNLOQCDNUMAS fnloreader(tablename);
+   //   FastNLOQCDNUMAS fnloreader(tablename);
    //fnloreader.SetUnits(kAbsoluteUnits);
    fnloreader.PrintTableInfo();
    fnloreader.PrintFastNLOTableConstants(0);
@@ -564,13 +564,13 @@ int main(int argc, char** argv) {
    //  FastNLOAlphas fnloreader( tablename, PDFFile, 0 );
    //
    // Set desired value of alpha_s(M_Z)
-   fnloreader.SetMz(91.1876);
-   //   fnloreader.SetAlphasMz(0.1184);
-   fnloreader.SetAlphasMz(0.1190);
+   //   fnloreader.SetMz(91.1876);
+   fnloreader.SetAlphasMz(0.1184);
+   //   fnloreader.SetAlphasMz(0.1190);
 
-   fnloreader.SetNFlavor(0);
-   fnloreader.FillPDFCache();
-   fnloreader.InitQCDNUM();
+   // fnloreader.SetNFlavor(0);
+   // fnloreader.FillPDFCache();
+   // fnloreader.InitQCDNUM();
 
    // Calculate cross sections
    fnloreader.CalcCrossSection();
