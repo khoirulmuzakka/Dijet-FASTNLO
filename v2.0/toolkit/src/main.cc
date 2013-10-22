@@ -552,7 +552,6 @@ int main(int argc, char** argv) {
    // ---- Example code of a quick cross section
    //      calculation using the FastNLOAlphas interface
    // For the purpose of this example only show WARNINGs or worse.
-   SetGlobalVerbosity(WARNING);
    //   FastNLOAlphas fnloreader(tablename);
    fastNLOLHAPDF fnloreader(tablename);
    //   FastNLOCRunDec fnloreader(tablename);
@@ -808,22 +807,26 @@ int main(int argc, char** argv) {
       int NDim = fnloreader.GetNumDiffBin();
       unsigned int NDimBins[NDim];
       //      vector < string > DimLabel = fnloreader.GetDimensionLabel();
-      vector < string > DimLabel;
+      vector < string > DimLabel(NDim);
       for (int i=0; i<NDim; i++) {
          DimLabel[i] = fnloreader.GetDimLabel(i);
       }
       //      vector < vector < double > > LoBin = fnloreader.GetLowBinEdge();
       //      vector < vector < double > > UpBin = fnloreader.GetUpBinEdge();
       int NObsBin = fnloreader.GetNObsBin();
-      vector < vector < double > > LoBin;
-      vector < vector < double > > UpBin;
+      vector < vector < double > > LoBin(NObsBin);
+      vector < vector < double > > UpBin(NObsBin);
       for (int i=0; i<NObsBin; i++) {
+	 LoBin[i].resize(2);
+	 UpBin[i].resize(2);
          for (int j=0; j<2; j++) {
             LoBin[i][j]= fnloreader.GetLoBin(i,j);
             UpBin[i][j]= fnloreader.GetUpBin(i,j);
          }
       }
+      cout<<"lobin ok."<<endl;
       vector < double > BinSize = fnloreader.GetBinSize();
+      cout<<"BinSize.size-"<<BinSize.size()<<endl;
 
       // Print
       if (NDim == 2) {
