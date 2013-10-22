@@ -804,16 +804,10 @@ int main(int argc, char** argv) {
       // Get table constants relevant for print out
       // TBD: This Getter should be renamed!!!
       //      int NDim = fnloreader.GetNDiffBin();
-      int NDim = fnloreader.GetNumDiffBin();
+      const int NDim = fnloreader.GetNumDiffBin();
       unsigned int NDimBins[NDim];
-      //      vector < string > DimLabel = fnloreader.GetDimensionLabel();
-      vector < string > DimLabel(NDim);
-      for (int i=0; i<NDim; i++) {
-         DimLabel[i] = fnloreader.GetDimLabel(i);
-      }
-      //      vector < vector < double > > LoBin = fnloreader.GetLowBinEdge();
-      //      vector < vector < double > > UpBin = fnloreader.GetUpBinEdge();
-      int NObsBin = fnloreader.GetNObsBin();
+      vector < string > DimLabel = fnloreader.GetDimLabels();
+      const int NObsBin = fnloreader.GetNObsBin();
       vector < vector < double > > LoBin(NObsBin);
       vector < vector < double > > UpBin(NObsBin);
       for (int i=0; i<NObsBin; i++) {
@@ -824,9 +818,7 @@ int main(int argc, char** argv) {
             UpBin[i][j]= fnloreader.GetUpBin(i,j);
          }
       }
-      cout<<"lobin ok."<<endl;
       vector < double > BinSize = fnloreader.GetBinSize();
-      cout<<"BinSize.size-"<<BinSize.size()<<endl;
 
       // Print
       if (NDim == 2) {
