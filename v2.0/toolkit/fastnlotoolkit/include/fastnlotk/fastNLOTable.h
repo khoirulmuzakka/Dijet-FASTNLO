@@ -42,15 +42,15 @@ class fastNLOTable : public fastNLOBase {
    double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
    double GetUpBin(int bin, int dimension) const {return Bin[bin][dimension].second;}           // Get upper bin boundary
 
-   vector < double > GetBinSize() const {
-      return BinSize;
-   };             // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+   vector < double > GetBinSize() const {return BinSize;};					// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+   double GetBinSize(int bin) const {return BinSize[bin];};					// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
 
    void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Singledifferential, double-differntial, etc...)
    int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Singledifferential, double-differntial, etc...)
 
    void SetDimLabel( string label, int iDim , bool IsDiff = true );
-   string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};
+   string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};				// Get label (name) of observable in dimension iDim
+   vector<string > GetDimLabels() const {return DimLabel;};					// Get label (name) of all observables
 
    void SetIpublunits(int unit){Ipublunits = unit;}
    int GetIpublunits() const {return Ipublunits;}
