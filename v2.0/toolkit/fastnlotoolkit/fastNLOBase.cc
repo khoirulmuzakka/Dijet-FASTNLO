@@ -267,7 +267,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright 2011,2012 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" Copyright © 2011,2012,2013 "<<fnlo<<" Collaboration"<<endl;
    shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
