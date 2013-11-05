@@ -32,12 +32,21 @@ fastNLOCreate::fastNLOCreate(string steerfile) {
    ResetHeader();
    ReadSteering(steerfile);
 
+   // Try to get warm-up values.
+   // Otherwise a warm-up run will be initialized.
+   GetWarmupValues();
+   
+   // init bin grid
+   if ( fIsWarmup )   ReadBinning();			// if warmup, then always read binning from steering.
+   else if ( BOOL(ReadBinningFromSteering) ) {
+      ReadBinning();
+      CheckWarmupConsistency();
+   }
+   else  UseBinGridFromWarmup();
+
    // now create one coefficient tasble.
    InitCoeffTable();
    SetOrderOfAlphasOfCalculation(fIOrd);
-
-   // try to get warm-up values. Otherwise a warm-up run will be initialized.
-   GetWarmupValues();
 
    // Init interpolation kernels
    if ( !fIsWarmup ) {
@@ -79,8 +88,6 @@ void fastNLOCreate::ReadSteering(string steerfile) {
    fApplyPDFReweight = BOOL(ApplyPDFReweighting);
    SetOutputPrecision(INT(OutputPrecision));
 
-   if ( BOOL(ReadBinningFromSteering) )
-      ReadBinning();
    //    //KR: Added possibility to store and read start of new rapidity bin in nobs
    //    //vector <int> RapIndex; ?
 }
@@ -301,33 +308,180 @@ void fastNLOCreate::ReadBinning(){
 
 
 void fastNLOCreate::GetWarmupValues(){
+   //
+   // GetWarmupValues.
+   // Checks if warmup-table exists and initialized
+   // member variable fIsWarmup
+   //
    debug["GetWarmupValues"]<<endl;
+
+   // try to get warmup values
    vector<vector<double> > warmup = DOUBLE_TAB(WarmupValues);
    fIsWarmup = warmup.empty();
+
    // try again, with hard-coded convention:
    if ( fIsWarmup ) {
       info["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
-      READ(GetWarmupTableFilename());           // todo: change to usability with multiple files!
-      warmup = DOUBLE_TAB(WarmupValues);        // todo: change to usability with multiple files!
+      READ(GetWarmupTableFilename());   
+      warmup = DOUBLE_TAB(WarmupValues);
       fIsWarmup = warmup.empty();
       if ( !fIsWarmup ) info["GetWarmupValues"]<<"Reading of file "<<GetWarmupTableFilename()<<" contained warmup values!"<<endl;
    }
+   
+   // inform user about success
    info["GetWarmupValues"]<<"This will be "<<(fIsWarmup?"":"not")<<" a warmup run."<<endl;
+}
 
-   // make use of warmup values (if found)
-   if ( !fIsWarmup ) {
-      if ( (int)warmup.size() != NObsBin ) {
-         error["GetWarmupValues"]<<"Table of warmup values is not compatible with steering file. Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<". Exiting."<<endl;
-         exit(1);
+
+// ___________________________________________________________________________________________________
+
+
+void fastNLOCreate::UseBinGridFromWarmup(){
+   // initialialize all binning related variables
+   // with values stored in the warmup file.
+   vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
+   NObsBin	= warmup.size();
+   NDim		= INT(Warmup.DifferentialDimension);
+   if ( (int)warmup[0].size() != (7+2*NDim) && (int)warmup[0].size() != (5+2*NDim) ) {
+      error["UseBinGridFromWarmup"]<<"This warmup table has an unknown size of columns. Expecting "<<(7+2*NDim)<<" for flexible-scale, or "<<(5+2*NDim)<<" for fixed-scale tables. Exiting."<<endl;
+      exit(1);
+   }
+   fIsFlexibleScale = ((int)warmup[0].size() == (7+2*NDim));
+   IDiffBin     = INT_ARR(Warmup.DimensionIsDifferential);
+   DimLabel	= STRING_ARR(Warmup.DimensionLabels);
+   
+   // make binning 
+   const int i0 = fIsFlexibleScale ? 6 : 4;
+   Bin.resize(NObsBin);
+   BinSize.resize(NObsBin);
+   for ( int i = 0 ; i < NObsBin ; i ++ ) {
+      Bin[i].resize(NDim);
+      if ( NDim==1 ) {
+	 Bin[i][0] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
       }
-      //fWarmupValues = warmup; // access warmup-values through read_steer!
-      // todo. make use of warmup values.
-      // vector<double>  xlim = DOUBLE_COL(WarmupValues,xlim);
-      //       double scale1lo[A2->NObsBin], scale1hi[A2->NObsBin];
-      //       double scale2lo[A2->NObsBin], scale2hi[A2->NObsBin];
+      else if ( NDim==2 ) {
+	 Bin[i][1] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
+	 Bin[i][0] = make_pair(warmup[i][i0+2],warmup[i][i0+3]) ;
+      }
+      else if ( NDim==3 ) {
+	 Bin[i][2] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
+	 Bin[i][1] = make_pair(warmup[i][i0+2],warmup[i][i0+3]) ;
+	 Bin[i][0] = make_pair(warmup[i][i0+4],warmup[i][i0+5]) ;
+      }
+      BinSize[i] = warmup[i][i0+NDim*2];
    }
 }
 
+
+// ___________________________________________________________________________________________________
+
+
+bool fastNLOCreate::CheckWarmupConsistency(){
+   // check if warmup values are consistent with steering card
+   // check if number of bins is consistent
+
+   vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
+   bool ret = true;
+   cout<<endl;
+   const string wrmuphelp = "Please remove warmup-file in order to calculate a new warmup-file which is compatible to your steering,\nor alternatively use 'ReadBinningFromSteering=false', then all binning-related information is taken from the warmup file.\n";
+   
+   if ( (int)warmup.size() != NObsBin ) {
+      error["GetWarmupValues"]
+	 <<"Table of warmup values is not compatible with steering file.\n"
+	 <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<".\n"
+	 <<wrmuphelp
+	 <<"Exiting."<<endl;
+      ret = false;
+      exit(1);
+   }
+   if ( INT(Warmup.DifferentialDimension) != NDim  ) {
+      error["GetWarmupValues"]
+	 <<"Table of warmup values is not compatible with steering file.\n"
+	 <<"Found different number of dimensions. NDim="<<NDim<<", Warmup.DifferentialDimension="<<INT(Warmup.DifferentialDimension)<<".\n"
+	 <<wrmuphelp
+	 <<"Exiting."<<endl;
+      ret = false;
+      exit(1);
+   }
+
+   // CoeffTable is not available during intialization
+   //    if ( STRING(Warmup.ScaleDescriptionScale1) != GetTheCoeffTable()->ScaleDescript[0][0] ) {
+   //       warn["GetWarmupValues"]
+   // 	 <<"Table of warmup values is potentially incompatible with steering file.\n"
+   // 	 <<"Found different scale description (ScaleDescriptionScale1). ScaleDescriptionScale1="<<GetTheCoeffTable()->ScaleDescript[0][0]
+   // 	 <<", but Warmup.ScaleDescriptionScale1='"<<STRING(Warmup.ScaleDescriptionScale1)<<"'."<<endl<<endl;
+   //       ret = false;
+   //    }
+   //    if ( fIsFlexibleScale && STRING(Warmup.ScaleDescriptionScale2) != GetTheCoeffTable()->ScaleDescript[0][1] ){
+   //       warn["GetWarmupValues"]
+   // 	 <<"Table of warmup values is potentially incompatible with steering file.\n"
+   // 	 <<"Found different scale description (ScaleDescriptionScale2). ScaleDescriptionScale2='"<<GetTheCoeffTable()->ScaleDescript[0][0]<<"'"
+   // 	 <<", but Warmup.ScaleDescriptionScale2='"<<STRING(Warmup.ScaleDescriptionScale1)<<"'."<<endl<<endl;
+   //       ret = false;
+   //    }
+
+   if ( INT_ARR(Warmup.DimensionIsDifferential)[0] != IDiffBin[0]  ) {
+      warn["GetWarmupValues"]
+	 <<"Table of warmup values seems to be incompatible with steering file.\n"
+	 <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[0]<<"'"
+	 <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR(Warmup.DimensionIsDifferential)[0]<<"'. Exiting."<<endl;
+      ret = false;
+      exit(1);
+   }
+   if ( NDim > 1 && INT_ARR(Warmup.DimensionIsDifferential)[1] != IDiffBin[1]  ) {
+      warn["GetWarmupValues"]
+	 <<"Table of warmup values seems to be incompatible with steering file.\n"
+	 <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
+	 <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR(Warmup.DimensionIsDifferential)[1]<<"'. Exiting."<<endl;
+      ret = false;
+      exit(1);
+   }
+	 
+   // check bining in detail
+   for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+      int i0 = fIsFlexibleScale ? 6 : 4;
+      if ( NDim == 1 ) {
+	 if ( Bin[i][0].first != warmup[i][i0] || Bin[i][0].second != warmup[i][i0+1] ) {
+	    error["GetWarmupValues"]
+	       <<"Table of warmup values seems to be incompatible with steering file.\n"
+	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
+	       <<",], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"].\n"
+	       <<wrmuphelp
+	       <<"Exiting."<<endl;
+	    ret = false;
+	    exit(1);
+	 }
+      }
+      else if ( NDim == 2 ) {
+	 if ( Bin[i][1].first != warmup[i][i0] || Bin[i][1].second != warmup[i][i0+1] 
+	      || Bin[i][0].first != warmup[i][i0+2] || Bin[i][0].second != warmup[i][i0+3] ) {
+	    error["GetWarmupValues"]
+	       <<"Table of warmup values seems to be incompatible with steering file.\n"
+	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][1].first<<","<<Bin[i][1].second<<",] ["<<Bin[i][0].first<<","<<Bin[i][0].second
+	       <<"], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"] ["<<warmup[i][i0+2]<<","<<warmup[i][i0+3]<<"].\n"
+	       <<wrmuphelp
+	       <<"Exiting."<<endl;
+	    ret = false;
+	    exit(1);
+	 }
+      }
+      //check bin width
+      double bwwrm = 0;
+      if ( NDim == 1 ) bwwrm = warmup[i][i0+2];
+      else if ( NDim == 2 ) bwwrm = warmup[i][i0+4];
+      else if ( NDim == 3 ) bwwrm = warmup[i][i0+6];
+      if ( fabs(BinSize[i] - bwwrm ) > 1.e-6 ) {
+	 warn["GetWarmupValues"]
+	    <<"Table of warmup values seems to be incompatible with steering file.\n"
+	    <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
+	    <<", warmup: "<<bwwrm<<".\n"
+	    <<wrmuphelp
+	    <<"Please check consistency!"<<endl<<endl;
+	 ret = false;
+      }
+   }
+   return ret;
+}
 
 // ___________________________________________________________________________________________________
 
@@ -429,24 +583,44 @@ void fastNLOCreate::ReadCoefficientSpecificVariables(){
    c->NSubproc          = -1;           // safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int);
    c->SetIXsectUnits(INT(UnitsOfCoefficients));
    c->NScaleDim = 1;  // NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
-   c->ScaleDescript.resize(1);
 
    //IPDFdef3 = NSubproc == 7 ? 2 : 1;
    //printf("         Set IPDFdef3 = %d, consistent with %d subprocesses.\n",IPDFdef3,NSubproc);
+   const int NScales = 1;  
+   c->Iscale.resize(NScales);
+   c->Iscale[0] = 0;
+   c->ScaleDescript.resize(NScales);
+
    if ( fIsFlexibleScale ){
       c->NScaleDep              = 3; // temporaily. Until known if generator runs in LO, NLO or NNLO.
-
-      // ---- those numbers are partly not ambigously defined in v2.1 ---- //
-      //c->NScales = 1;  // no longer used
-      c->Iscale.resize(1);
-      c->Iscale[0] = 0;  // mur=mur(ET), ET = index 0
-
-      c->ScaleDescript[0].push_back(STRING(ScaleDescriptionScale1));
-      c->ScaleDescript[0].push_back(STRING(ScaleDescriptionScale2));
+      c->ScaleDescript[0].resize(2);
+      if ( BOOL(ReadBinningFromSteering) ) {
+	 c->ScaleDescript[0][0] = STRING(ScaleDescriptionScale1);
+	 c->ScaleDescript[0][1] = STRING(ScaleDescriptionScale2);
+      } else {
+	 c->ScaleDescript[0][0] = STRING(Warmup.ScaleDescriptionScale1);
+	 c->ScaleDescript[0][1] = STRING(Warmup.ScaleDescriptionScale2);
+      }
+      // ---- those numbers are partly ambigously defined in v2.1 ---- //
+      // proper code would be, but needs also adjustment in reading, writing and getter functions!
+      //       int NScales = 2;  
+      //       c->Iscale.resize(NScales);	// Iscale is not used, but kept for consistency
+      //       c->ScaleDescript.resize(NScales);
+      //       c->Iscale[0] = 0;
+      //       c->Iscale[1] = 1;
+      //       c->ScaleDescript[0].resize(1);
+      //       c->ScaleDescript[1].resize(1);
+      //       c->ScaleDescript[0][0] = STRING(ScaleDescriptionScale1);
+      //       c->ScaleDescript[1][0] = STRING(ScaleDescriptionScale2);
    } else {
       error["ReadCoefficientSpecificVariables"]<<"Only flexible scale tables are so-far implemented."<<endl;
       exit(1);
-      c->ScaleDescript[0].push_back(STRING(ScaleDescriptionScale1));
+
+      c->ScaleDescript[0].resize(1);
+      if ( BOOL(ReadBinningFromSteering) )
+	 c->ScaleDescript[0][0] = STRING(ScaleDescriptionScale1);
+      else 
+	 c->ScaleDescript[0][0] = STRING(Warmup.ScaleDescriptionScale1);
       // if not a flexible scale table. LO coefficients have different number of subprocesses than NLO coefficents.
    }
 
@@ -1079,8 +1253,8 @@ void fastNLOCreate::OutWarmup(string file){
 
    sout<<"! This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
    sout<<"! The values are valid for the scenario "<<GetScenName() << endl;
-   sout<<"! and if calcualted with the steerfile: "<< fSteerfile <<endl;
-   sout<<"! and if no serious changes have been performed since its creation."<<endl;
+   sout<<"! and if calculated with the steerfile: "<< fSteerfile <<endl;
+   sout<<"! but only if no serious changes have been performed since its creation."<<endl;
    sout<<"! "<<endl;
    sout<<"! Delete this file, if you want fastNLO to calculate a new one."<<endl;
    sout<<"! "<<endl;
@@ -1089,54 +1263,120 @@ void fastNLOCreate::OutWarmup(string file){
    sout<<"! Please check by eye for reasonability of the values."<<endl;
    sout<<" " <<endl;
 
+   // write variables of warmup run
+   sout<<"Warmup.OrderInAlphasOfCalculation\t"<<  fIOrd <<endl;
+   sout<<"Warmup.ScaleDescriptionScale1\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
+   if ( fIsFlexibleScale ) 
+      sout<<"Warmup.ScaleDescriptionScale2\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
+   sout<<"Warmup.DifferentialDimension\t\t"<< NDim <<endl;
+   sout<<"Warmup.DimensionLabels {\n  ";
+   for ( int i = 0 ; i < NDim; i ++ ) sout<<"\""<<DimLabel[i]<<"\"  ";
+   sout<<"\n} "<<endl;
+   
+   sout<<"Warmup.DimensionIsDifferential {\n  ";
+   for ( int i = 0 ; i < NDim; i ++ ) sout<<"\""<<IDiffBin[i]<<"\"  ";
+   sout<<"\n} "<<endl;
+   sout<<endl;
+
    // write readable table
    char buf[4000];
    sout<<"WarmupValues {{"<<endl;
    //sout<<"   xmin      xmax     mu1min    m1max     mu2min    mu2max "<<endl;
    if ( fIsFlexibleScale ) {
-      sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"  \"%16s\"  \"%16s\"",
+      // table header
+      sprintf(buf,"   %9s  %9s  %14s  %14s  %14s  %14s",
               "x_min","x_max",
               GetWarmupHeader(0,"min").c_str(),
               GetWarmupHeader(0,"max").c_str(),
               GetWarmupHeader(1,"min").c_str(),
               GetWarmupHeader(1,"max").c_str());
+      sout<<buf; 
+      if ( NDim == 1 )  
+	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      else if ( NDim == 2 )
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      else if ( NDim == 3 )
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
+		 DimLabel[2].c_str() ,DimLabel[2].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      sout<<buf; 
+      sprintf(buf,"  %12s","BinWidth"); 
       sout<<buf<<endl;
+      
+      // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          if ( fWx[i].first < 1.e-4 ) {
             warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
             fWx[i].first=1.e-4;
          }
-         sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f  %16.3f  %16.3f",
+         sprintf(buf,"   %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
                  fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
+	 sout<<buf; 
+	 if ( NDim == 1 )  
+	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second); 
+	 else if ( NDim == 2 )
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f",Bin[i][1].first , Bin[i][1].second, Bin[i][0].first , Bin[i][0].second); 
+	 else if ( NDim == 3 )
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
+		    Bin[i][2].first , Bin[i][1].second,Bin[i][2].first , Bin[i][1].second, Bin[i][0].first , Bin[i][0].second);
+	 sout<<buf; 
+	 sprintf(buf,"  %12.3f",BinSize[i]);
          sout<<buf<<endl;
       }
    }
    else {
       // is ScaleDescript available?
-      if ( GetTheCoeffTable()->ScaleDescript[0].empty() ){ error["OutWarmup"]<<"Scale description is empty. but needed. Probalby this has to be implemented."<<endl; exit(1);};
-      sprintf(buf,"   %9s  %9s  \"%16s\"  \"%16s\"",
+      if ( GetTheCoeffTable()->ScaleDescript[0].empty() ){ error["OutWarmup"]<<"Scale description is empty. but needed. Probably this has to be implemented."<<endl; exit(1);};
+      // table header
+      sprintf(buf,"   %9s  %9s  %16s  %16s",
               "x_min","x_max",
               GetWarmupHeader(0,"min").c_str(),
               GetWarmupHeader(0,"max").c_str() );
       sout<<buf<<endl;
+      if ( NDim == 1 )  
+	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      else if ( NDim == 2 )
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      else if ( NDim == 3 )
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
+		 DimLabel[2].c_str() ,DimLabel[2].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+      sout<<buf; 
+      sprintf(buf,"  %12s","BinWidth"); 
+
+      // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+         if ( fWx[i].first < 1.e-4 ) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
+            fWx[i].first=1.e-4;
+         }
          sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
-                 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second);
-         sout<<buf<<endl;
+                 fWx[i].first, fWx[i].second, fWMu1[i].first, fWMu1[i].second);
+ 	 sout<<buf; 
+	 if ( NDim == 1 )  
+	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first, Bin[i][0].second); 
+	 else if ( NDim == 2 )
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f", Bin[i][1].first, Bin[i][1].second, Bin[i][0].first, Bin[i][0].second); 
+	 else if ( NDim == 3 )
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
+		    Bin[i][2].first , Bin[i][2].second, Bin[i][1].first, Bin[i][1].second, Bin[i][0].first, Bin[i][0].second);
+	 sout<<buf; 
+	 sprintf(buf,"  %12.3f",BinSize[i]);
+	 sout<<buf<<endl;
       }
    }
    sout<<"}}"<<endl;
    //*(new ofstream(filename.Data()));
 }
 
+
 string fastNLOCreate::GetWarmupHeader(int iScale, string minmax ){
    string Descript = GetTheCoeffTable()->ScaleDescript[0][iScale];
-   //   string ret = "\"";
+   // replace all 'spaces' with _
+   replace(Descript.begin(), Descript.end(), ' ', '_');
+   // add 'minmax'
    string ret = "";
    ret += Descript;
    ret += "_";
    ret += minmax;
-   //ret += "\"";
    return ret;
 }
 

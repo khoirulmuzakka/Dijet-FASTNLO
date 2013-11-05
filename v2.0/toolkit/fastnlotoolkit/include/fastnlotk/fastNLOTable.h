@@ -48,6 +48,8 @@ class fastNLOTable : public fastNLOBase {
    void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Singledifferential, double-differntial, etc...)
    int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Singledifferential, double-differntial, etc...)
 
+   int GetIDiffBin(int bin) const { return IDiffBin[bin]; }					// Get if dimension is 'truly differential' or bin-integrated (divided by bin-width or not)
+
    void SetDimLabel( string label, int iDim , bool IsDiff = true );
    string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};				// Get label (name) of observable in dimension iDim
    vector<string > GetDimLabels() const {return DimLabel;};					// Get label (name) of all observables

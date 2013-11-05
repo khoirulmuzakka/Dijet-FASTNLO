@@ -152,6 +152,8 @@ protected:
    fastNLOInterpolBase* MakeInterpolationKernels(string KernelName, double xdn, double xup);
    void InitGrids();
    void GetWarmupValues();
+   bool CheckWarmupConsistency();								// Check consistency of warmup bin-grid and variables with steering values.
+   void UseBinGridFromWarmup();									// Use bin grid as given in the warmup table
    int GetBin();										// get bin number from 'scenario' observables
    int GetXIndex(int Obsbin,int x1bin,int x2bin);						// get x-index in case of two hadrons.
    int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2);			// get maximum x-index	
