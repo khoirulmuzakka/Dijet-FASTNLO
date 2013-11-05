@@ -50,6 +50,10 @@ endif
 if HAVE_QCDNUM
    fnlo_cppread_LDFLAGS += -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
 endif
+if HAVE_HOPPET
+   fnlo_cppread_LDFLAGS +=  ${HOPPETLDFLAGS}
+   fnlo_cppread_CPPFLAGS += ${HOPPETCPPFLAGS}
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

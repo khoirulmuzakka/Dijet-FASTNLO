@@ -162,7 +162,7 @@ if test "x$with_qcdnum" != "xno"; then
       [preqcdnum="$ac_cv_file_$prefix/lib/libqcdnum.a"],
       [preqcdnum=""])
       if test "x$preqcdnum" == "x"; then
-         AC_MSG_NOTICE([No QCDNUM library found in prefix path. Try to link with system's QCDNUM ...])
+         AC_MSG_NOTICE([No QCDNUM library found in prefix path. Try to link with systems QCDNUM ...])
          AC_CHECK_LIB([qcdnum],[libqcdnum_a-qcdnum],
          [sysqcdnum=$ac_cv_lib_libqcdnum_a-qcdnum],
          [sysqcdnum=""])
@@ -192,6 +192,62 @@ else
    AC_MSG_NOTICE([******************************************])
 fi
 AM_CONDITIONAL(HAVE_QCDNUM, test "x$QCDNUMPREFIX" != "x")
+
+# Hoppet
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether Hoppet support is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([hoppet],
+        [AS_HELP_STRING([--with-hoppet],
+        [Specify location of Hoppet installation. This takes precedence over
+        a HOPPET environment variable, the prefix path or other methods.
+        Please note: Hoppet can optionally be used in fastNLO_reader!])],
+        [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
+            AC_SUBST([HOPPET],[$withval])
+            AC_MSG_NOTICE([Using given path $HOPPET as location of HOPPET installation.])
+        fi],
+        [with_hoppet="no"])
+
+if test "x$with_hoppet" != "xno"; then
+   if test "x$HOPPET" == "x"; then
+      AC_MSG_NOTICE([No Hoppet installation path set. Try to find Hoppet in prefix path ...])
+      AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
+      [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
+      [prehoppet=""])
+      if test "x$prehoppet" == "x"; then
+         AC_MSG_NOTICE([No Hoppet library found in prefix path. Try to link with systems Hoppet ...])
+         AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
+         [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
+         [syshoppet=""])
+         if test "x$syshoppet" == "x"; then
+            AC_MSG_ERROR([No Hoppet library found. Please install Hoppet first. Configuration aborted!])
+         else
+            AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
+         fi
+      else
+         AC_SUBST([HOPPETLIBPATH], [`dirname $prehoppet`])
+      fi
+      AC_SUBST([HOPPET], [`dirname $HOPPETLIBPATH`])
+   else
+      AC_CHECK_FILE([$HOPPET/lib/libhoppet_v1.a],
+      [],
+      [AC_MSG_ERROR([HOPPET library not found at given path $HOPPET/lib. Please install Hoppet first. Configuration aborted!])])
+   fi
+   AC_SUBST([HOPPETPREFIX], ["$HOPPET"])
+   AC_SUBST([HOPPETBIN], ["$HOPPETPREFIX/bin"])
+   AC_SUBST([HOPPETLDFLAGS], ["$($HOPPETBIN/hoppet-config --libs)"])
+   AC_SUBST([HOPPETCPPFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([Hoppet settings:])
+   AC_MSG_RESULT([Using $HOPPETPREFIX for the Hoppet installation path])
+   AC_MSG_RESULT([Using $HOPPETBIN for the Hoppet bin path])
+   AC_MSG_RESULT([Using $HOPPETLDFLAGS for the libraries])
+else
+   AC_MSG_NOTICE([No Hoppet support requested. Continue without Hoppet.])
+   AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_HOPPET, test "x$HOPPETPREFIX" != "x")
 
 # Python extension
 AC_MSG_NOTICE([******************************************])
