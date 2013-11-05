@@ -545,6 +545,12 @@ int main(int argc, char** argv) {
    //      calculation using the FastNLOAlphas interface
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
+
+   FastNLOLHAPDF fnlo(tablename,PDFFile,0);
+   fnlo.SetContributionON(fastNLO::kFixedOrder,fastNLO::kNextToLeading,false);
+   fnlo.CalcCrossSection();
+   fnlo.PrintCrossSections();
+
    FastNLOAlphas fnloreader(tablename);
    //   FastNLOLHAPDF fnloreader(tablename);
    //   FastNLOCRunDec fnloreader(tablename);
