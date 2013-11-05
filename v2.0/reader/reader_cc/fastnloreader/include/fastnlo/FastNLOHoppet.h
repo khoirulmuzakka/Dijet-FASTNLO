@@ -49,11 +49,11 @@ class FastNLOHoppet : public FastNLOLHAPDF {
          SetPDGValues();
       };
       FastNLOHoppet(string name, string LHAPDFFile, int PDFSet = 0) : 
-                   FastNLOLHAPDF(name,LHAPDFFile,PDFSet), 
-                   fAlphasMz(0.1184) {
-         //Set some meaningful values
-         SetPDGValues();
-      };
+         FastNLOLHAPDF(name,LHAPDFFile,PDFSet), 
+         fAlphasMz(0.1184) {
+            //Set some meaningful values
+            SetPDGValues();
+         };
 
       // ---- Alphas vars ---- //
       void InitHoppet();
@@ -86,18 +86,18 @@ class FastNLOHoppet : public FastNLOLHAPDF {
 
    protected:
 
-   // inherited functions
-   double EvolveAlphas(double Q) const ;
-   //bool InitPDF();
-   vector<double> GetXFX(double xp, double muf) const ;
-   static void LHAsub(const double&, const double&, double*);
-   // ---- Alphas vars ---- //
-   double fAlphasMz;
-   double fMz;
-   int fnFlavor;
-   int fnLoop;
-   double QMass[6];
-   // ___ //
+      // inherited functions
+      double EvolveAlphas(double Q) const ;
+      //bool InitPDF();
+      vector<double> GetXFX(double xp, double muf) const ;
+      static void LHAsub(const double&, const double&, double*);
+      // ---- Alphas vars ---- //
+      double fAlphasMz;
+      double fMz;
+      int fnFlavor;
+      int fnLoop;
+      double QMass[6];
+      // ___ //
 
 };
 
@@ -183,18 +183,16 @@ void FastNLOHoppet::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
 
 void FastNLOHoppet::LHAsub(const double & x, const double & Q, double * pdf) {
    //
-   //Dummy interface which provides PDFSet for PDF Evolution
-   for (int i=0; i<13; i++)
-   {
-        //pdf[i] = LHAPDF::xfx(x, Q, i-6);
-        pdf[i] = 0.;
-    }
+   //Provides PDF for Hoppet
+   //for (int i=0; i<13; i++)
+   //{
+   //pdf[i] = LHAPDF::xfx(x, Q, i-6);
+   //}
 }
 
 double FastNLOHoppet::EvolveAlphas(double Q ) const {
    return hoppetalphas_(Q);
 }
-
 
 vector<double> FastNLOHoppet::GetXFX(double xp, double muf) const {
    //
