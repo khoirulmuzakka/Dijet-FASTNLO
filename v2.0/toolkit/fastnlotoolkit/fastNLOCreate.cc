@@ -492,6 +492,7 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
    // it must be: iLeadingOrder + iHigherOrder ;
    // for instance: 3-jet-production in NLO = 4!
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
+   int IOrdInitial = fIOrd;
    fIOrd = ord;
    c->Npow = ord;
    c->IContrFlag2 = ord-GetLoOrder()+1;
@@ -503,15 +504,15 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
       warn["SetOrderOfAlphasOfCalculation"]<<"The leading order is of order of "<<GetLoOrder()<<" in alpha_s."<<endl;
       warn>>"\tThis may be unreasonable."<<endl;
    }
-   if      ( (ord-GetLoOrder()) == 0 ) {
+   if      ( ( ord - GetLoOrder()) == 0 ) {
       c->NSubproc               = INT(NSubProcessesLO);
       c->IPDFdef3               = INT(IPDFdef3LO);
    }
-   else if ( (ord-GetLoOrder()) == 1 ) {
+   else if ( ( ord - GetLoOrder()) == 1 ) {
       c->NSubproc               = INT(NSubProcessesNLO);
       c->IPDFdef3               = INT(IPDFdef3NLO);
    }
-   else if ( (ord-GetLoOrder()) == 2 ) {
+   else if ( ( ord - GetLoOrder()) == 2 ) {
       c->NSubproc               = INT(NSubProcessesNNLO);
       c->IPDFdef3               = INT(IPDFdef3NNLO);
    }
@@ -527,9 +528,15 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
       fSymProc.resize(c->NSubproc);
       for ( int p = 0 ; p<c->NSubproc ; p++ ) fSymProc[p]=p;
       vector<vector<int> > asym = INT_TAB(AsymmetricProcesses);
-      for ( unsigned int i = 0 ; i<asym.size() ; i ++ ) fSymProc[asym[i][0]] = asym[i][1];
+      for ( unsigned int i = 0 ; i<asym.size() ; i ++ ) {
+	 if ( asym[i][0]<(int)fSymProc.size() ) // safety
+	    fSymProc[asym[i][0]] = asym[i][1];
+      }
    }
-
+   
+   // NSubproc may have changed. We have to reinitialize the grids
+   if ( IOrdInitial!= fIOrd) InitGrids();
+   
 }
 
 
@@ -731,8 +738,8 @@ void fastNLOCreate::FillContribution(int scalevar){
    // --- DIS ---
    if ( c->GetNPDF() == 1 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true)) {
       // todo
-      //FillContributionFlexDIS((fastNLOCoeffAddFlex*)GetTheCoeffTable(),  ObsBin);
-      {error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1); }
+      FillContributionFlexDIS((fastNLOCoeffAddFlex*)GetTheCoeffTable(),  ObsBin);
+      //{error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1); }
    }
    else if ( c->GetNPDF() == 1 && fastNLOCoeffAddFix::CheckCoeffConstants(c,true)) {
       // todo
@@ -888,19 +895,19 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
                   cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
                   exit(1);
                }
-               //                 cout<<"ObsBin="<<ObsBin<<", ixHM="<<ixHM<<", m1="<<nmu1[m1].first<<", m2="<< nmu2[mu2].first<<", p="<<p
-               //                 <<" ,i(x="<<x1<<",x2="<<x2<<",m1="<<m1<<",m2="<<mu2<<") [xlo="<<xmin<<",xup="<<xmax<<",m1="<<fScenario._m1<<",m2="<<fScenario._m2<<"]"<<endl;
-               //                 cout<<" ggg-n-  : O="<<ObsBin<<", ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", wfnlo="<<wfnlo<<", wxu="<<nxup[x1].second<<", wxd="<<nxlo[x2].second<<", wm1="<<nmu1[m1].second<<", wm2="<<nmu2[mu2].second<<endl;
+	       // 	       cout<<"ObsBin="<<ObsBin<<", ixHM="<<ixHM<<", m1="<<nmu1[m1].first<<", m2="<< nmu2[mu2].first<<", p="<<p
+	       // 		   <<" ,i(x="<<x1<<",x2="<<x2<<",m1="<<m1<<",m2="<<mu2<<") [xlo="<<xmin<<",xup="<<xmax<<",m1="<<fScenario._m1<<",m2="<<fScenario._m2<<"]"<<endl;
+	       // 	       cout<<" ggg-n-  : O="<<ObsBin<<", ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", wfnlo="<<wfnlo<<", wxu="<<nxup[x1].second<<", wxd="<<nxlo[x2].second<<", wm1="<<nmu1[m1].second<<", wm2="<<nmu2[mu2].second<<endl;
                if ( fEvent._w  != 0 ) {
-                  //                 cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
-                  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
+		  //cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+		  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
                }
                if ( fEvent._wf != 0 ){
-                  //                 cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
-                  c->SigmaTildeMuFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
+		  //cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
+		  c->SigmaTildeMuFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
                }
                if ( fEvent._wr != 0 ) {
-                  //                 cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
+		  //cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
                   c->SigmaTildeMuRDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
                }
                if ( fEvent._wrr != 0 ) {
@@ -914,6 +921,70 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
                }
             }
          }
+      }
+   }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin){
+   // read informatio from 'Event' and 'Scenario'
+   // do the interpolation
+   // and fill into the tables.
+   debug["FillContributionFlexHHC"]<<endl;
+   
+   if ( fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0 ) return; // nothing todo.
+
+   // do interpolation
+   //cout<<"try to interpol. ObsBin="<<ObsBin<<" ,x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", mu1="<<Scenario._m1<<", mu2="<<Scenario._m2<<endl;
+
+   // todo, just: 'x'
+   double x = fEvent._x1;
+   vector<pair<int,double> > nx = fKernX[ObsBin]->GetNodeValues(x);
+   vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
+   vector<pair<int,double> > nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
+
+
+   if ( fApplyPDFReweight ) {
+      fKernX[ObsBin]->CheckX(x);
+      ApplyPDFWeight(nx,x,fKernX[ObsBin]->GetGridPtr());
+   }
+
+   // fill grid
+   if ( CheckWeightIsNan() ) return;
+   for ( unsigned int ix = 0 ; ix<nx.size() ; ix++ ) {
+      int p = fEvent._p;
+      int xIdx = nx[ix].first;
+      //HalfMatrixCheck(xminbin,xmaxbin,p);
+      //int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+
+      for ( unsigned int m1 = 0 ; m1<nmu1.size() ; m1++ ) {
+	 for ( unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++ ) {
+	    double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second;
+	    if ( isnan(wfnlo) ) {
+	       error[""]<<"wfnlo is a nan."<<endl;
+	       fKernX[ObsBin]->PrintGrid();
+	       fKernMu1[ObsBin]->PrintGrid();
+	       fKernMu2[ObsBin]->PrintGrid();
+	       cout<<"ix1="<<ix<<", im1="<<m1<<", im2="<<mu2<<endl;
+	       cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
+	       cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
+	       cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
+	       exit(1);
+	    }
+	    if ( fEvent._w  != 0 ) {
+	       //                 cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+	       c->SigmaTildeMuIndep[ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
+	    }
+	    if ( fEvent._wf != 0 ){
+	       //                 cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
+	       c->SigmaTildeMuFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
+	    }
+	    if ( fEvent._wr != 0 ) {
+	       //                 cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
+	       c->SigmaTildeMuRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
+	    }
+	 }
       }
    }
 }
@@ -1402,7 +1473,10 @@ void  fastNLOCreate::InitGrids() {
    fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
    if ( fKernX.empty() ) error["InitGrids"]<<"Interpolation kernels must be initialized before calling this function."<<endl;
    if ( fIsFlexibleScale ) {
-      if ( c->NPDFDim!=1 ) {error["InitGrids"]<<"Only half-matrix or DIS implemented."<<endl; exit(1);}
+      if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1) || (c->GetNPDF()==1)   ) {;} // ok!
+      else {
+	 error["InitGrids"]<<"Only half-matrix or DIS implemented."<<endl; exit(1);
+      }
       c->ScaleNode1.resize(GetNObsBin());
       c->ScaleNode2.resize(GetNObsBin());
       c->XNode1.resize(GetNObsBin());
@@ -1472,7 +1546,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
-      debug["InitGrids"]<<"Make x grid for obsbin="<<i<<endl;
+      debug["InitInterpolationKernels"]<<"Make x grid for obsbin="<<i<<endl;
       fKernX[i] = MakeInterpolationKernels(STRING(X_Kernel),wrmX[i],1);
 
       if ( BOOL(X_NoOfNodesPerMagnitude) )
@@ -1485,7 +1559,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init scale1-interpolation kernels
       // ------------------------------------------------
-      debug["InitGrids"]<<"Make Mu1 grid for obsbin="<<i<<endl;
+      debug["InitInterpolationKernels"]<<"Make Mu1 grid for obsbin="<<i<<endl;
       fKernMu1[i] = MakeInterpolationKernels(STRING(Mu1_Kernel),wrmMu1Dn[i],wrmMu1Up[i]);
       fKernMu1[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu1_DistanceMeasure)), INT(Mu1_NNodes));
       //fKernMu1[i]->PrintGrid();
@@ -1494,7 +1568,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // init scale2-interpolation kernels
       // ------------------------------------------------
       if ( fIsFlexibleScale ){
-         debug["InitGrids"]<<"Make Mu2 grid for obsbin="<<i<<endl;
+         debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
          fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
          fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
       }

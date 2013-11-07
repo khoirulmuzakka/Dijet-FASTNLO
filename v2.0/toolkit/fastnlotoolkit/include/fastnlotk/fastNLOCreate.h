@@ -142,6 +142,7 @@ protected:
    double CalcPDFReweight(double x);
    void FillContribution(int scalevar = 0);							// fill contribution into table
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in pp/ppbar
+   void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in DIS
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);		// fill fixed scale table in pp/ppbar
    void ReadSteering(string steerfile);								// read steering file
    void ReadBinning();

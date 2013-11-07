@@ -126,6 +126,7 @@ int fastNLOCoeffAddFlex::Write(ostream *table, int option){
    nn3 += WriteFlexibleTable( &ScaleNode1 , table );
    nn3 += WriteFlexibleTable( &ScaleNode2 , table );
    nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
+
    //if ( NScaleDep==3 || Npow!=fScen->ILOord || NScaleDep==5) {
    if ( NScaleDep==3 || NScaleDep>=5) {
       //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;

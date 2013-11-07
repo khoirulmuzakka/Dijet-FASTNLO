@@ -66,7 +66,7 @@ vector<pair<int,double> > fastNLOInterpolBase::GetNodeValues(double x){
 
 
 void fastNLOInterpolBase::RemoveLastNode(){
-   warn["RemoveLastNode"]<<"Removing last node with highest value, but keep maximum value at fvalmax="<<fvalmax<<endl;
+   debug["RemoveLastNode"]<<"Removing last node with highest value, but keep maximum value at fvalmax="<<fvalmax<<endl;
    fgrid.resize(fgrid.size()-1);
    fHgrid.resize(fHgrid.size()-1);
    fLastGridPointWasRemoved = true;
