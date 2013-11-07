@@ -52,6 +52,9 @@
 using namespace nlo;
 using namespace std;
 
+// ---- fastNLO ----
+#include <fastnlotk/fastNLOCreate.h>
+
 //----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
 void psinput(phasespace_hhc *, double&);
@@ -88,8 +91,7 @@ extern "C"{
 #include "fnloTable.h"
 #include "fnloBlockBNlojet.h"
 
-// fastNLO includes
-#include "fastnlotk/fastNLOCreate.h"
+// ---- fastNLO ----
 #include "fastNLOInterfaceToNLOJET.cc"
 
 
