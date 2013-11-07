@@ -414,8 +414,19 @@ void fnloBlockBNlojet::FillEventDISMuVar(int ObsBin, double x, double M1, double
                      SigmaTildeMuIndep[ObsBin][idxX][idxQ][idxPt][proc] += cefm[iX] * cefscale1[iNode1] * cefscale2[iNode2] * wt[proc];
                   }
                } // if fini
+
+	       for(int proc=0;proc<NSubproc;proc++){
+		  bool bnan =false;
+		  if (  isnan(SigmaTildeMuIndep[ObsBin][idxX][idxQ][idxPt][proc]) ) { bnan = true; cout<<"isnan. 0 .proc="<<proc<<",\tfini="<<amp._M_fini.mode<<endl;}
+		  if (  isnan(SigmaTildeMuFDep[ObsBin][idxX][idxQ][idxPt][proc]) )  { bnan = true; cout<<"isnan. F .proc="<<proc<<",\tfini="<<amp._M_fini.mode<<endl;}
+		  if (  isnan(SigmaTildeMuRDep[ObsBin][idxX][idxQ][idxPt][proc]) )  { bnan = true; cout<<"isnan. R .proc="<<proc<<",\tfini="<<amp._M_fini.mode<<endl;}
+		  if ( bnan ) {
+		     cout<<"NAN! ObsBin="<<ObsBin<<",\t x="<<x<<",\tm1="<<M1<<",\tm2="<<M2<<endl;
+		  }
+	       }
+
             } // if idxX
-         } // of 4-xnodes
+	 }
       } // for 4 scale2 nodes
    } // for 4 scale2 nodes
 }
@@ -835,34 +846,46 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 
                   int im = GetXIndex(ObsBin,xminbin,xmaxbin);
                   // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
-
-                  double fac = bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2];
+		  
+		  
+		  double fac = bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2];
+		  
+			   
                   if(itype == nlo::amplitude_hhc::fini) {
                      if (amp._M_fini.mode==0) { //finix1
                         for(int proc=0;proc<NSubproc;proc++){
-                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[0][proc];
-                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[3][proc];
+			   // 			   cout<<"   old  * : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[0][proc]<<endl;
+			   // 			   cout<<"   old  F : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[3][proc]<<endl;
+                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[0][proc];
+                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[3][proc];
                         }
                      }
                      else if (amp._M_fini.mode==1) { //finix2
                         for(int proc=0;proc<NSubproc;proc++){
-                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[1][proc];
-                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[4][proc];
+			   // 			   cout<<"   old  * : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[1][proc]<<endl;
+			   // 			   cout<<"   old  F : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[4][proc]<<endl;
+                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[1][proc];
+                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[4][proc];
                         }
                      }
                      else if(amp._M_fini.mode==2){ //fini1
                         for(int proc=0;proc<NSubproc;proc++){
-                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weights[2][proc];
-                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[5][proc];
-                           SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  fac * weights[6][proc];
+			   // 			   cout<<"   old  * : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[2][proc]<<endl;
+			   // 			   cout<<"   old  F : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[5][proc]<<endl;
+			   // 			   cout<<"   old  R : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * weightstmp[6][proc]<<endl;
+                           SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[2][proc];
+                           SigmaTildeMuFDep [ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[5][proc];
+                           SigmaTildeMuRDep [ObsBin][im][idx1][idx2][proc] +=  fac * weightstmp[6][proc];
                         }
                      }
                   }
                   else { // no fini contribution
                      for(int proc=0;proc<NSubproc;proc++){
+			// 			cout<<"   old  * : ix="<<im<<", im1="<<idx1<<", im2="<<idx2<<", p="<<proc<<", w="<<fac * wtmp[proc]<<endl;
                         SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * wtmp[proc];
                      }
                   }
+		  
                }
             }
          }
