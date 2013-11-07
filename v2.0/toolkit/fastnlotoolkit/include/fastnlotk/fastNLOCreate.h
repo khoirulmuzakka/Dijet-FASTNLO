@@ -41,16 +41,14 @@ struct fnloEvent {
    // useful class to keep all process related variables.
    // e.g x-values, weights, process identifiers, etc...
    friend class fastNLOCreate;
-   void Reset(){
-      _x1=0,_x2=0;
-      _w=0,_wf=0,_wr=0,_wrr=0,_wff=0,_wrf=0;
-      _p=-1;
-      _n=-1;
-   }
    void ResetButX(){
       _w=0,_wf=0,_wr=0,_wrr=0,_wff=0,_wrf=0;
       _p=-1;
       _n=-1;
+   }
+   void Reset(){
+      ResetButX();
+      _x1=0,_x2=0;
    }
    fnloEvent(){Reset();}
    // event specific quantites, which are required for every 'Fill()' step.

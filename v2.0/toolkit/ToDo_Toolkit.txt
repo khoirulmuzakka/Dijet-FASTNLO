@@ -1,0 +1,30 @@
+
+Toolkit todo:
+-----------------------------------------------------
+ - implement fixed-scale hhc for nlojet
+ - Division by binsize for coefficients ?!
+ - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
+ - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion'
+ - reader testen fuer NNLO
+ - full-matrix schreibweise
+ - merger aktualisieren
+ - modifier aktualisieren
+ - converter aktualisieren ??
+ - Benutzbarkeit gewaehrleisten, wenn binning- und bin-suche im generator gemacht werden (ist teils implementiert bspw 'fnloEvent::_iOB')
+ - fastNLOCreate fuer mehrere Tabellen - alse mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
+   oder mehrere Coeffizienten Tabellen
+ - Linear interpolation
+ - bi-cubic interpolation
+ - 'one-point' interpolation (very useful)
+ - fast Warmup-run (just some events and then 'guess' PS boundaries)
+ - 11x11 = 121 PDF-LiCos
+ - 13x13 PDF-LiCos
+ - 'automatisches' Erkennen von PDF-LiCos beim warm-up run
+ - Codieren der LiCo's in Tabelle (und lesen im reader)
+ - implement DIS fixed-scale (desired?)
+
+
+Toolkit done
+------------------------------------------------------
+ - implement DIS flexible-scale
+ - Write out constants of warmup-run into warmup-file
