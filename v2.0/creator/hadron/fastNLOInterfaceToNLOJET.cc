@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <algorithm> //c++98
 #include <utility>   //c++11
-#include "../NewFastNLO/fastNLOCreate.h"
+#include "fastnlotk/fastNLOCreate.h"
 
 namespace UsefulNlojetTools {
 

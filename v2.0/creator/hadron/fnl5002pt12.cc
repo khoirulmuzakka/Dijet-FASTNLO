@@ -89,7 +89,7 @@ extern "C"{
 #include "fnloBlockBNlojet.h"
 
 // fastNLO includes
-#include "../NewFastNLO/fastNLOCreate.h"
+#include "fastnlotk/fastNLOCreate.h"
 #include "fastNLOInterfaceToNLOJET.cc"
 
 

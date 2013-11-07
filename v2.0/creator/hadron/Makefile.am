@@ -26,6 +26,7 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2912bm3.la libfnl2932am3.la libfnl2932bm3.la libfnl2932bm3nf6.la
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
+   lib_LTLIBRARIES += libfnl5002pt12.la
 endif
 
 #
@@ -127,12 +128,14 @@ libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
 libfnl2950m3_la_SOURCES        = fnl2950m3.cc        $(AM_SOURCES)
 # v21
 libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
-libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
+#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
 libfnl2912bptavm3_la_SOURCES   = fnl2912bptavm3.cc   $(AM_SOURCES)
 libfnl2912by0ptavm3_la_SOURCES = fnl2912by0ptavm3.cc $(AM_SOURCES)
 libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
 libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
+# v22
+libfnl5002pt12_la_SOURCES	= fnl5002pt12.cc $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
@@ -176,6 +179,9 @@ if HAVE_FASTJET
    AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
 endif
 endif
+
+#v22 force 
+libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 
 # Example of individual specification of LDFLAGS
 #libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnlo -L${LHPDFLIBPATH} -llhpdf_cteq6
