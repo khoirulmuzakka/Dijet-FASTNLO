@@ -6,7 +6,9 @@ Toolkit todo:
  - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
  - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion'
  - reader testen fuer NNLO
+ - Write documentation (e.g. twiki)
  - full-matrix schreibweise
+ - Creator for Referenztabellen
  - merger aktualisieren
  - modifier aktualisieren
  - converter aktualisieren ??

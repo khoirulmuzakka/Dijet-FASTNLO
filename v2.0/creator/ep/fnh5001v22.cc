@@ -69,10 +69,7 @@ extern "C"{
 #include <kT_clus.h>
 #include "pdf-cteq6.h"
 #include "pdf-dis-dummy.h"
-#include "fnloTable.h"
-#include "fnloBlockBNlojet.h"
 //#include "fj-ak.h"   // fastNLO user: .h file for jet algorithm
-
 
 // ---- fastNLO ----
 #include "fastNLOInterfaceNLOJETDIS.cc"
@@ -90,10 +87,10 @@ public:
   
 private:
    //   pdf
-   pdf_cteq6dis pdf;
+   //pdf_cteq6dis pdf;
    pdf_dis_dummy dummypdf;
 
-   // algorithms
+   // jet algorithms
    kT_clus_long jetclus;
    //fj_ak fjclus; 
    
@@ -316,7 +313,7 @@ void UserDIS::InitFastNLO(const std::basic_string<char>& __file_name)
 
    // set filename, which is specified through command line
    string tabFilename = __file_name.c_str();
-   tabFilename += "_neu.tab";
+   tabFilename += ".tab";
    ftable->SetFilename(tabFilename);
 
    // give information to hb.
