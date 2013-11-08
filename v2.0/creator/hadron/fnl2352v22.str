@@ -13,7 +13,7 @@
 !
 ! -------------------------------------------------------------- !
 OutputPrecision			8	! Number of decimal values in output table
-FlexibleScaleTable		true	! currently only flexible scale tables implemented.
+FlexibleScaleTable		false	! currently only flexible scale tables implemented.
 ApplyPDFReweighting		true	! Apply reweighting of pdfs for an optimized interpolation. (true)
 NPDF				2	! number of PDFs involved (only 2 is implemented)
 PDF1				2212	! PDF of first hadron (following PDG convention). Must agree with values from nlojet-module.
@@ -23,7 +23,7 @@ UnitsOfCoefficients		12	! Units of coeffients as passed to fastNLO (negative pow
 
 ! number of subprocesses of the considered process.
 ! Since the calculation order is obtained from generator, only the necessary variable is used.
-NSubProcessesLO			7	! Flexible scale tables store 7 number of processes in LO, although only 6 are required.
+NSubProcessesLO			6	! Flexible scale tables store 7 number of processes in LO, although only 6 are required.
 NSubProcessesNLO		7	
 NSubProcessesNNLO		7	
 AsymmetricProcesses {{		! specify processes that need to to be exchanged in half-matrix notation, when xmin>xmax
@@ -34,7 +34,7 @@ AsymmetricProcesses {{		! specify processes that need to to be exchanged in half
 
 IPDFdef1			3	! Define PDF linear combinations corresponding to partonic subprocesses (hadron-hadron: 3)
 IPDFdef2			1	! Flag to define PDF linear combinations (dependent on IPDFdef1. Use 1 for jet-production in pp/ppbar)
-IPDFdef3LO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
+IPDFdef3LO			1	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
 IPDFdef3NLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
 IPDFdef3NNLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
 
@@ -91,18 +91,18 @@ OutputFilename			test.tab
 !    - log10
 !    - sqrtlog10	eq. to sqrt(log_10(x))	
 ! -------------------------------------------------------------- !
-X_Kernel		"CatmulRom"
-X_DistanceMeasure	"sqrtlog10"
-X_NNodes		5		! 
-X_NoOfNodesPerMagnitude	true		! 
+X_Kernel			"CatmulRom"
+X_DistanceMeasure		"sqrtlog10"
+X_NNodes			16		! 
+X_NoOfNodesPerMagnitude		false		! 
 
-Mu1_Kernel		"CatmulRom"
-Mu1_DistanceMeasure	"loglog025"
-Mu1_NNodes		5		
-
-Mu2_Kernel		"CatmulRom"
-Mu2_DistanceMeasure	loglog025
-Mu2_NNodes		4		
+Mu1_Kernel			"CatmulRom"
+Mu1_DistanceMeasure		"loglog025"
+Mu1_NNodes			6		
+	
+! Mu2_Kernel			"CatmulRom"	! Scale2 not used for fixed-scale tables
+! Mu2_DistanceMeasure		loglog025
+! Mu2_NNodes			4		
 
 
 
@@ -121,7 +121,7 @@ Mu2_NNodes		4
 !   pb: 12
 !   fb: 15
 ! -------------------------------
-PublicationUnits	12
+PublicationUnits		12
 
 
 
@@ -130,17 +130,17 @@ PublicationUnits	12
 !  Description of scenario
 !  (Write each line of description in quotation marks)
 ! -------------------------------
-ScenarioName		fnl5002pt12
+ScenarioName			fnl2352v22
 ScenarioDescription {
- "d2sigma-dijet_dm12dy*_[pb_TeV]"
- "ATLAS_Collaboration"
- "Dijet_Mass"
- "anti-kT_R=0.6"
- "arXiv:1112.6297"
- "provided by:"
- "fastNLO_2.1.0"
- "If you use this table, please cite:"
- "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
+   "d2sigma-jet_dpTdy_[pb_GeV]"
+   "ATLAS_Collaboration"
+   "Inclusive_Jet_pT"
+   "anti-kT_R=0.6"
+   "arXiv:1112.6297"
+   "provided by:"
+   "fastNLO_2.1.0"
+   "If you use this table, please cite:"
+   "  D. Britzger, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1208.3641"
 }
 
 
@@ -166,14 +166,14 @@ DifferentialDimension		2
 !  Labels for the measurement dimension
 ! -------------------------------
 DimensionLabels {
-"m12_[TeV]"
-"y*"
+"pT_[GeV]"
+"|y|"
 }
 
 ! If flexible-scale table: specify name of the variable of the two scales.
 ! If standard table is demanded, only 'ScaleDescriptionScale1' is required.
-ScaleDescriptionScale1		"<pT> [GeV]"
-ScaleDescriptionScale2		"pT_2 [GeV]"
+ScaleDescriptionScale1		"pT_jet_[GeV]"
+! ScaleDescriptionScale2		"pT_2 [GeV]"	! scale2 not used for fixed-scale tables
 
 
 ! --------------------------------
@@ -193,16 +193,14 @@ SingleDiffBinning {
 ! Example !!
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension ----"
-    0		0.5	  0.07 0.11 0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.94 2.78
-   0.5		1.0	  0.11 0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 2.12, 2.31
-   1.0		1.5	  0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.55, 3.61
-   1.5		2.0	  0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.78 3.93
-   2.0		2.5	  0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 3.04 4.27
-   2.5		3.0	  0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.31 4.64
-   3.0		3.5	  1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.04, 3.61 5.04 
-   3.5		4.0	  1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.04, 3.31 3.93 5.47 
-   4.0          4.4	  2.55 3.04, 4.27 
-}}
+    0.0         0.3      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  400.  500.  600.  800.  1000.  1200.  1500.
+    0.3         0.8      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  400.  500.  600.  800.  1000.  1200.  1500.
+    0.8         1.2      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  400.  500.  600.  800.  1000.  1200.  1500.
+    1.2         2.1      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  400.  500.  600.  800.  1000.  1200. 
+    2.1         2.8      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  400.  500.  600.  
+    2.8         3.6      20.  30.  45.  60.  80.  110.  160.  210.  260.  310.  
+    3.6         4.4      20.  30.  45.  60.  80.  110.  160.  
+ }}
 
 ! Example !! Triple differetial implementation not fully tested yet (29.07.13)
 TripleDifferentialBinning {{
@@ -224,7 +222,7 @@ TripleDifferentialBinning {{
 !    - 2:  Divide Cross Section by bin width of that dimension
 ! -------------------------------
 DimensionIsDifferential { 
- 2  2  2
+ 2  2 
 }
 
 
@@ -241,7 +239,7 @@ DimensionIsDifferential {
 ! --------------------------------
 
 CalculateBinWidth	true
-BinWidthFactor		1.
+BinWidthFactor		2.
 
 
 

@@ -349,7 +349,7 @@ void UserHHC::inittable(){
   // ---- Define your bingrid in method DefineBinning() ---- //
   // --- fastNLO user: Modifiy function DefineBinning() below according to your bin grid.
   DefineBinning();
-
+  
   // ---- initialize variables for WarmUp run ---- //
   // KR: Now written via filename string match to "wrm" into bool variable doWarmUp 
   // --- fastNLO user: Start "Warm-Up" or "Production" run.
@@ -628,6 +628,7 @@ void UserHHC::end_of_event(){
 void UserHHC::phys_output(const std::basic_string<char>& __file_name, 
                           unsigned long __save, bool __txt) 
 {
+
   tablefilename.assign(__file_name.c_str());
   tablefilename += ".tab";
    

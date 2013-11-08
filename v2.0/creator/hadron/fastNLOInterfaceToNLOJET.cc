@@ -29,26 +29,39 @@ namespace UsefulNlojetTools {
    }
    
    //_______________________________________________________________________
+   unsigned int GetLoOrder(){
+      return GetNj();
+   }  
+
+   //_______________________________________________________________________
    unsigned int GetOrderOfRun(const std::basic_string<char>& __file_name){ 
       // --- determine whether we are running LO or NLO
       // and add order of expansion to leading-order .
-      const char* const file = __file_name.c_str(); 
+      static int ord = -1;
       
-      if(strstr(file,"born")!=NULL){
-	 //IsNLO = false;
-	 printf("fastNLO: This is a LO run!\n");
-	 return GetNj();
-      }else{
-	 if(strstr(file,"nlo")!=NULL){
-	    //IsNLO = true;
-	    printf("fastNLO: This is a NLO run!\n");
-	    return GetNj() + 1;
+      if ( ord == -1 ) {
+	 const char* const file = __file_name.c_str(); 
+	 if(strstr(file,"born")!=NULL){
+	    //IsNLO = false;
+	    printf("fastNLO: This is a LO run!\n");
+	    ord = GetNj();
+	    return ord;
 	 }else{
-	    // it is 'nlojet'
-	    printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
-	    exit(1);
+	    if(strstr(file,"nlo")!=NULL){
+	       //IsNLO = true;
+	       printf("fastNLO: This is a NLO run!\n");
+	       ord = GetNj() + 1;
+	       return ord;
+	    }else{
+	       // it is 'nlojet'
+	       printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
+	       exit(1);
+	    }
 	 }
+	 cout<<"\nfastNLO: Found order of calculation to be: ord="<<ord<<endl;
+	 return ord;
       }
+      else return ord;
    }
 
    //_______________________________________________________________________
@@ -144,6 +157,65 @@ namespace UsefulNlojetTools {
 	 }
       }
 
+      return ev;
+   }
+
+   //_______________________________________________________________________
+   unsigned int GetNSubproc() {
+      static int nSubproc = -1;
+      if ( nSubproc == -1 ) {
+	 int nord = GetOrderOfRun("bla");
+	 int loord = GetLoOrder() ;
+	 if ( nord == loord ) nSubproc = 6 ;
+	 else nSubproc = 7;
+      }
+      return nSubproc;
+   }
+
+
+   //_______________________________________________________________________
+   vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp , nlo::pdf_and_coupling_hhc& dummypdf){
+      const int nSubproc = GetNSubproc() ;
+      static const double dummyMu2 = 100.*100.;
+      
+      // make events
+      vector<fnloEvent> ev(nSubproc);
+
+      // fill relevant event quantities
+      double x1 = p[-1].Z()/p[hadron(-1)].Z();
+      double x2 = p[0].Z()/p[hadron(0)].Z();
+      for ( int p = 0 ; p<nSubproc ; p++ )  {
+	 ev[p].SetProcessId( p );
+	 ev[p].SetX1( x1 );
+	 ev[p].SetX2( x2 );
+      }
+
+      // weights
+      // access perturbative coefficients
+      static const double coef = 389385730.;
+
+      // todo: calculate wt and wtorg from 'weights'
+      nlo::weight_hhc wtorg = amp(dummypdf,dummyMu2,dummyMu2, 1.);
+      nlo::weight_hhc wt = wtorg;
+      // - rearrange subprocesses
+      for ( int fid = 0 ; fid<7 ; fid ++ ) {
+	 int nid = FastnloIdToNlojetIdHHC(fid);
+	 wt[fid] = wtorg[nid];
+      }
+      wt *= coef;
+   
+      if(x2>x1){
+	 // swap subprocesses 6,7
+	 swap(wt[5],wt[6]);
+      }	       
+      if (nSubproc==6 ) {
+	 wt[5] = (wt[5]+wt[6])/2;
+	 wt[6] = wt[5];
+      }
+
+      for(int p=0 ; p<nSubproc ; p++){
+	 ev[p].AddWeight_MuIndependent( wt[p] );
+      }
       return ev;
    }
 
