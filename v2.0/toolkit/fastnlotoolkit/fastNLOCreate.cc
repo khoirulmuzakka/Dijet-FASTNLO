@@ -535,7 +535,7 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
    }
    
    // NSubproc may have changed. We have to reinitialize the grids
-   if ( IOrdInitial!= fIOrd) InitGrids();
+   if ( IOrdInitial!= fIOrd && !fIsWarmup ) InitGrids();
    
 }
 
