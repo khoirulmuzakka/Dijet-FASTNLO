@@ -162,7 +162,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
   
   //  number of the up and down type flavours
   nu = 2U;
-  nd = 2U; // just 2 here !
+  nd = 3U;
 } 
 
 void psinput(phasespace_dis *ps, double& el, double& eh, double& q2min, double& q2max, 
@@ -496,7 +496,7 @@ void UserDIS::inittable(){
 
    // ---- set scenario name and description ---- //
    // --- fastNLO user: set scenario name (no whitespaces!)
-   table->GetBlockA1()->SetScenName("fnhd0001");
+   table->GetBlockA1()->SetScenName("fnhd1002");
 
    // --- fastNLO user: up to 20 strings and any number of lines to describe the scenario
    A2->ScDescript.push_back("H1 Diffractive Dijets - d2sigma/dQ2 [pb/GeV2]");
@@ -504,8 +504,8 @@ void UserDIS::inittable(){
    A2->ScDescript.push_back("Diffractive dijet cross sections in DIS");
    A2->ScDescript.push_back("kT-algorithm R=1, Low Q2, Hera-II");
    A2->ScDescript.push_back("DESY 11-166");
-   //A2->ScDescript.push_back("Fig. 6a, Tab. 4a");
-   A2->ScDescript.push_back("Fig. 5a");
+   A2->ScDescript.push_back("Fig. 6a, Tab. 4a");
+   //A2->ScDescript.push_back("Fig. 5a");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
@@ -551,7 +551,7 @@ void UserDIS::inittable(){
 
    
    // ---- set number-of x-nodes ---- //
-   B->SetNumberOfXNodesPerMagnitude(11,xlim);
+   B->SetNumberOfXNodesPerMagnitude(12,xlim);
 
 
    // ---- scale description ---- //
@@ -561,8 +561,8 @@ void UserDIS::inittable(){
    
    // ---- number of scale nodes for mu ---- //
    // please watch the warm-up values to see the covered interval
-   B->SetNumberOfScaleNodesScale1( 5 );
-   B->SetNumberOfScaleNodesScale2( 4 );
+   B->SetNumberOfScaleNodesScale1( 4 );
+   B->SetNumberOfScaleNodesScale2( 16 );
 
    
    // ---- Choose function for ScaleNode distances ---- //
@@ -677,11 +677,11 @@ void UserDIS::GetWarmupValues( fnloBlockBNlojet* B ){
 //       // -------------------------
 //       //   dQ2
 //       // 9700000 contributions (!= events) in warm-up run
-//         xlim [0] = 2.10e-03 , scale1lo [0] =    2.0000 , scale1hi [0] =    2.8284 , scale2lo [0] =    4.50 , scale2hi [0] =   132.;
-//         xlim [1] = 2.13e-03 , scale1lo [1] =    2.8284 , scale1hi [1] =    4.0000 , scale2lo [1] =    4.50 , scale2hi [1] =   132.;
-//         xlim [2] = 2.28e-03 , scale1lo [2] =    4.0000 , scale1hi [2] =    5.6569 , scale2lo [2] =    4.50 , scale2hi [2] =   132.;
-//         xlim [3] = 2.53e-03 , scale1lo [3] =    5.6569 , scale1hi [3] =    7.7460 , scale2lo [3] =    4.50 , scale2hi [3] =   132.;
-//         xlim [4] = 2.96e-03 , scale1lo [4] =    7.7460 , scale1hi [4] =   10.4881 , scale2lo [4] =    4.50 , scale2hi [4] =   132.;
+//       xlim [0] = 2.10e-03 , scale1lo [0] =    2.0000 , scale1hi [0] =    2.8284 , scale2lo [0] =    4.50 , scale2hi [0] =   133.;
+//       xlim [1] = 2.13e-03 , scale1lo [1] =    2.8284 , scale1hi [1] =    4.0000 , scale2lo [1] =    4.50 , scale2hi [1] =   133.;
+//       xlim [2] = 2.28e-03 , scale1lo [2] =    4.0000 , scale1hi [2] =    5.6569 , scale2lo [2] =    4.50 , scale2hi [2] =   133.;
+//       xlim [3] = 2.53e-03 , scale1lo [3] =    5.6569 , scale1hi [3] =    7.7460 , scale2lo [3] =    4.50 , scale2hi [3] =   133.;
+//       xlim [4] = 2.96e-03 , scale1lo [4] =    7.7460 , scale1hi [4] =   10.4881 , scale2lo [4] =    4.50 , scale2hi [4] =   133.;
 //       //----------------------------
 
 
@@ -694,15 +694,15 @@ void UserDIS::GetWarmupValues( fnloBlockBNlojet* B ){
 //       //----------------------------
       
       
-//       //----------------------------
-//       // dP*T,1
-      // 37000000 contributions (!= events) in warm-up run
-      xlim [0] = 2.07e-03 , scale1lo [0] =    2.0000 , scale1hi [0] =   10.4881 , scale2lo [0] =    5.0000 , scale2hi [0] =    6.5000;
-      xlim [1] = 2.69e-03 , scale1lo [1] =    2.0000 , scale1hi [1] =   10.4881 , scale2lo [1] =    6.5000 , scale2hi [1] =    8.5000;
-      xlim [2] = 4.13e-03 , scale1lo [2] =    2.0000 , scale1hi [2] =   10.4881 , scale2lo [2] =    8.5000 , scale2hi [2] =   12.0000;
-      xlim [3] = 8.20e-03 , scale1lo [3] =    2.0000 , scale1hi [3] =   10.4881 , scale2lo [3] =   12.0000 , scale2hi [3] =  133.2620;
-      //       //----------------------------
-
+     //----------------------------
+     // dP*T,1
+     // 37000000 contributions (!= events) in warm-up run
+     xlim [0] = 2.07e-03 , scale1lo [0] =    2.0000 , scale1hi [0] =   10.4881 , scale2lo [0] =    5.0000 , scale2hi [0] =    6.5000;
+     xlim [1] = 2.69e-03 , scale1lo [1] =    2.0000 , scale1hi [1] =   10.4881 , scale2lo [1] =    6.5000 , scale2hi [1] =    8.5000;
+     xlim [2] = 4.13e-03 , scale1lo [2] =    2.0000 , scale1hi [2] =   10.4881 , scale2lo [2] =    8.5000 , scale2hi [2] =   12.0000;
+     xlim [3] = 8.20e-03 , scale1lo [3] =    2.0000 , scale1hi [3] =   10.4881 , scale2lo [3] =   12.0000 , scale2hi [3] =  133.2620;
+     //       //----------------------------
+      
       // --------- fastNLO: Warm-Up run results (end)
    }
    else {

@@ -48,12 +48,12 @@ namespace UsefulNlojetTools {
       if ( ord == -1 ) {
 	 if(strstr(file,"born")!=NULL){
 	    //IsNLO = false;
-	    printf("fastNLO: This is a LO run!\n");
+	    printf("\nfastNLO: This is a LO run!\n");
 	    ord = GetLoOrder();
 	 }else{
 	    if(strstr(file,"nlo")!=NULL){
 	       //IsNLO = true;
-	       printf("fastNLO: This is a NLO run!\n");
+	       printf("\nfastNLO: This is a NLO run!\n");
 	       ord = GetLoOrder();
 	       ord += 1;
 	    }else{
@@ -62,7 +62,7 @@ namespace UsefulNlojetTools {
 	       exit(1);
 	    }
 	 }
-	 cout<<"\n\n Found order: ord="<<ord<<endl;
+	 cout<<"\nfastNLO: Found order of calculation to be: ord="<<ord<<endl;
 	 return ord;
       }
       else return ord;
@@ -90,8 +90,7 @@ namespace UsefulNlojetTools {
 
       // fill relevant event quantities
       double x = (p[-1]*p[0])/(p[-1]*p[hadron(0)]);
-      double Q2 = -((p[-1] - p[-2]).mag2());
-      double Q = sqrt(Q2);
+      //double Q2 = -((p[-1] - p[-2]).mag2());
       for ( int p = 0 ; p<nSubproc ; p++ )  {
 	 ev[p].SetProcessId( p );
 	 ev[p].SetX1( x );

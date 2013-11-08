@@ -605,7 +605,7 @@ void UserDIS::inittabledXi(string tablefilename){
    fnloBlockA2 *A2 =  tabledXi->GetBlockA2();
 
    // --- fastNLO user: up to 30 strings to describe the scenario
-   A2->ScDescript.push_back("Trijets - d2sigma/dXi (pb/1)");
+   A2->ScDescript.push_back("Trijets - dsigma/dXi (pb/1)");
    A2->ScDescript.push_back("H1 Collaboration");
    A2->ScDescript.push_back("Trijet cross section in DIS");
    A2->ScDescript.push_back("kT-algorithm, R=1, HighQ2, HERA-II");

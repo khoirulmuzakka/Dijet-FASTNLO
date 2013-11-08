@@ -39,8 +39,8 @@ public:
 
   //   the parton distribution function
   void hadron(double x, double Q2, unsigned int, unsigned int, double *f) {
-    double __f[13]; _M_pdf(x, sqrt(Q2), __f+6);
-    for(int i=-6; i <= 6; i++) f[i] = __f[6+i]/x;
+     double __f[13]; _M_pdf(x, sqrt(Q2), __f+6);
+     for(int i=-6; i <= 6; i++) f[i] = __f[6+i]/x;
   }
   
 private:
