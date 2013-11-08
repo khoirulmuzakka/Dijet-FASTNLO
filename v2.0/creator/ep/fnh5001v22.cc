@@ -162,16 +162,16 @@ void psinput(phasespace_dis *ps, double& el, double& eh, double& q2min, double& 
 } 
 
 // --------- alpha_em running --------- //
-// extern"C" double xalfaem_(double *);	// 'old' nlojet++ alpha_em-routine
-// double xalpha_em(double mq2) { return xalfaem_(&mq2); }
-// ------------------------------------ //
-extern"C" double aemrun_(double *);
-extern"C" void eprc_init_(int *);
-extern"C" void setpar_(int *);
-extern"C" void readewpar_();
-double xalpha_em(double mq2) {
-   return aemrun_(&mq2);
-}
+extern"C" double xalfaem_(double *);	// 'old' nlojet++ alpha_em-routine
+double xalpha_em(double mq2) { return xalfaem_(&mq2); }
+// -------- Spiesberger 2012 ---------- //
+// extern"C" double aemrun_(double *);
+// extern"C" void eprc_init_(int *);
+// extern"C" void setpar_(int *);
+// extern"C" void readewpar_();
+// double xalpha_em(double mq2) {
+//    return aemrun_(&mq2);
+// }
 // ------------------------------------ //
 
 
