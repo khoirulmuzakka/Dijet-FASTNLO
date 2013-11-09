@@ -9,8 +9,13 @@
 #include <algorithm> //c++98
 #include <utility>   //c++11
 #include <fastnlotk/fastNLOCreate.h>
+#include "pdf-hhc-dummy.h"
 
 namespace UsefulNlojetTools {
+
+   //_______________________________________________________________________
+   // 
+   pdf_hhc_dummy dummypdf;
 
    //_______________________________________________________________________
    unsigned int GetNj(){
@@ -86,9 +91,9 @@ namespace UsefulNlojetTools {
 
 
    //_______________________________________________________________________
-   vector<fnloEvent> GetFlexibleScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp , nlo::pdf_and_coupling_hhc& dummypdf){
+   vector<fnloEvent> GetFlexibleScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp ){
       static const int nSubproc = 7 ; // nlojet must have 7 subprocesses.
-      static const double dummyMu2 = 100.*100.;
+      static const double dummyMu2 = 91.*91.;
       
       // make events
       vector<fnloEvent> ev(nSubproc);
@@ -174,9 +179,9 @@ namespace UsefulNlojetTools {
 
 
    //_______________________________________________________________________
-   vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp , nlo::pdf_and_coupling_hhc& dummypdf){
+   vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp, double mu ){
       const int nSubproc = GetNSubproc() ;
-      static const double dummyMu2 = 100.*100.;
+      const double Mu2 = mu*mu;
       
       // make events
       vector<fnloEvent> ev(nSubproc);
@@ -195,7 +200,7 @@ namespace UsefulNlojetTools {
       static const double coef = 389385730.;
 
       // todo: calculate wt and wtorg from 'weights'
-      nlo::weight_hhc wtorg = amp(dummypdf,dummyMu2,dummyMu2, 1.);
+      nlo::weight_hhc wtorg = amp(dummypdf,Mu2,Mu2, 1.);
       nlo::weight_hhc wt = wtorg;
       // - rearrange subprocesses
       for ( int fid = 0 ; fid<7 ; fid ++ ) {
@@ -217,6 +222,19 @@ namespace UsefulNlojetTools {
 	 ev[p].AddWeight_MuIndependent( wt[p] );
       }
       return ev;
+   }
+
+
+   //_______________________________________________________________________
+   vector<vector<fnloEvent> > GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp, double mu, const vector<double>& scalevar ){
+      // return contributions for each scale variation
+      // return value can directly passed to fastNLOCreate
+      vector<vector<fnloEvent> > ctrbs(scalevar.size());
+      for ( unsigned int is = 0 ; is<scalevar.size() ; is++ ) {
+	 double smu = mu * scalevar[is];
+	 ctrbs[is] = GetFixedScaleNlojetContribHHC(p,amp,smu);
+      }
+      return ctrbs;
    }
 
 }
