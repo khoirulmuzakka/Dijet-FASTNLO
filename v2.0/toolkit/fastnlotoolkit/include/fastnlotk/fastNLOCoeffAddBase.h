@@ -36,6 +36,7 @@ public:
    int GetNxmax(int Obsbin) const ;
    int GetXIndex(int Obsbin,int x1bin,int x2bin =0) const ;
    int GetNSubproc() const { return NSubproc;}
+   int GetIScaleDep() const { return IScaleDep;}
    int GetNPDF() const {return NPDFPDG.size();}
    int GetPDFPDG(int iPDF) const {return NPDFPDG[iPDF];}
    int GetNPDFDim() const {return NPDFDim;}

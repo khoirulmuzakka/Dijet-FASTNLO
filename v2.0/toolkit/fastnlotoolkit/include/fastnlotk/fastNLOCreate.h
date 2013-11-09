@@ -117,7 +117,9 @@ public:
    void Fill(int scalevar=0);									// fill event quantities in fastNLO table. Call it for every subprocess.
    void FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar=0);	// same function as 'Fill()', but uses content of member fScenario and fEvent
    void FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar=0);	// Fill a selection (vector) of events/processes/channels, which all have the identic scenario
+   void FillAllSubprocesses(const vector<vector<fnloEvent> >& events, const fnloScenario& scen);	// Fill a list of subprocesses for various scale-variations into a fixed-scale table
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}			// The number of subprocesses (channels)
+   const vector<double>& GetScaleVariations() const { return fScaleFac; }			// Get list of scale variations
 
    int WriteTable(string filename);								// Write fastNLO table to file <filename>
    int WriteTable();										// Write fastNLO table to disk.
@@ -145,6 +147,7 @@ protected:
    void ReadSteering(string steerfile);								// read steering file
    void ReadBinning();
    void ReadCoefficientSpecificVariables();
+   void ReadScaleFactors();
    void InitVariablesInCoefficientTable();
    void InitCoeffTable();
    void InitInterpolationKernels();
@@ -167,11 +170,13 @@ protected:
    bool CheckWeightIsNan();									// Check if weight is reasonable.
    void HalfMatrixCheck(int& xmin, int& xmax, int& subproc);					// check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
    vector<int> fSymProc;									// necessary for half-matrix notation
+   vector<double> fScaleFac;									// Scale factors. Needed for fixed-scale tables
 
    // interpolation kernels
    vector<fastNLOInterpolBase*> fKernX;								// Interpolation kernel for x-interpolation
    vector<fastNLOInterpolBase*> fKernMu1;							// Interpolation kernel for mu1-interpolation
    vector<fastNLOInterpolBase*> fKernMu2;							// Interpolation kernel for mu2-interpolation
+   vector<vector<fastNLOInterpolBase*> > fKernMuS;						// Interpolation kernels for each scale var for fixed-scale tables
 
    // arrays for warmup
    void UpdateWarmupArrays();

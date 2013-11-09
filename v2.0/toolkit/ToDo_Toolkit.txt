@@ -5,7 +5,10 @@ Toolkit todo:
  - Division by binsize for coefficients ?!
  - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
  - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion'
+ - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - reader testen fuer NNLO
+ - Use 'const reference' or pointers as return values of interpolation grids
+ - Use 'const reference' for 'FillContribution' functions
  - Write documentation (e.g. twiki)
  - full-matrix schreibweise
  - Creator for Referenztabellen

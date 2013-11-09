@@ -15,11 +15,14 @@ using namespace std;
 
 int fastNLOCreate::nInst = 0;
 
-fastNLOCreate::fastNLOCreate() {
+fastNLOCreate::fastNLOCreate() 
+{
    SetClassName("fastNLOCreate");
 }
 
-fastNLOCreate::fastNLOCreate(string steerfile) {
+
+fastNLOCreate::fastNLOCreate(string steerfile) 
+{
    //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    nInst++;
@@ -56,16 +59,18 @@ fastNLOCreate::fastNLOCreate(string steerfile) {
 }
 
 
-fastNLOCreate::~fastNLOCreate(){
+
+fastNLOCreate::~fastNLOCreate()
+{
    // todo. cleanup arrays of kernels.
 }
 
 
+
+
 // ___________________________________________________________________________________________________
-
-
-
-void fastNLOCreate::ReadSteering(string steerfile) {
+void fastNLOCreate::ReadSteering(string steerfile) 
+{
    debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
    fSteerfile =  steerfile;
    READ(steerfile);
@@ -88,15 +93,82 @@ void fastNLOCreate::ReadSteering(string steerfile) {
    fApplyPDFReweight = BOOL(ApplyPDFReweighting);
    SetOutputPrecision(INT(OutputPrecision));
 
+   //if ( !fIsFlexibleScale )  ReadScaleFactors() ; // is called only when setting order of calculation
+
    //    //KR: Added possibility to store and read start of new rapidity bin in nobs
    //    //vector <int> RapIndex; ?
 }
 
 
+
 // ___________________________________________________________________________________________________
+void fastNLOCreate::ReadScaleFactors()
+{
+   // read scale factors from steering
+   // and init member fScaleFac
+
+   if ( fIsFlexibleScale ) {warn["ReadScaleFactors"]<<"This function is only reasonable for fixed-scale tables!"<<endl;}
+   vector<double> svar = DOUBLE_ARR(ScaleVariationFactors);
+   fScaleFac.resize(svar.size());
+   if ( svar.empty() ) { 
+      // 'ScaleVariationFactors' not found -> using default
+      warn["ReadScaleFactors"]<<"No list of scale-factors found in steering file. Using only scale-factor of '1'."<<endl;
+      fScaleFac.push_back(1.0);
+   }
+   else if (  GetTheCoeffTable() && GetTheCoeffTable()->IsLO() ) {
+      // scale-factors not needed -> using default of 1.0
+      info["ReadScaleFactors"]<<"This is a leading-order run. There is no scale dependence in LO. Using only scalefactor of 1."<<endl;
+      fScaleFac.resize(1);
+      fScaleFac[0] = 1.0;
+   }
+   else if ( fIsWarmup ) {
+      // scale-factors not needed -> using default of 1.0
+      info["ReadScaleFactors"]<<"This is a warmup run. Using only scalefactor of 1."<<endl;
+      fScaleFac.resize(1);
+      fScaleFac[0] = 1.0;
+   }
+   else  {
+      // sort list according to fastNLO conventions
+      //  0:  1.0
+      //  1-n:  nmin...nmax (without 1.0)
+      vector<double> vtemp;
+      bool foundunity = false;
+      for ( unsigned int k = 0 ;k<svar.size(); k++ ){
+	 if ( fabs(svar[k]-1.0)<1.e-8  && foundunity ) {
+	    info["ReadScaleFactors"]<<"Found scale factor 1.0 two times in list ScaleVariationFactors. Ignoring second appearance."<<endl;
+	    fScaleFac.resize(fScaleFac.size()-1);
+	 }
+	 else if ( fabs(svar[k]-1.0)<1.e-8 ) foundunity = true;
+	 else vtemp.push_back(svar[k]);
+      }
+      if (!foundunity ) {
+	 error["ReadScaleFactors"]<<"Could not found scalefactor of 1.0 in list ScaleVariationFactors. Exiting."<<endl;
+	 exit(1);
+      }
+      sort(vtemp.begin(),vtemp.end());
+
+      fScaleFac[0] = 1.0;
+      int s = 0;
+      for ( unsigned int k = 0 ;k<vtemp.size(); k++ ) {
+	 fScaleFac[s+1] = vtemp[k];
+	 if ( fScaleFac[s+1] == fScaleFac[s] ) {
+	    info["ReadScaleFactors"]<<"Found scale factor '"<<fScaleFac[k+1]<<"' two times in list ScaleVariationFactors. Ignoring second appearance."<<endl;
+	    fScaleFac.resize(fScaleFac.size()-1);
+	    s--;
+	 }
+	 s++;
+      }
+   }
+   info["ReadScaleFactors"]<<"Using following scale factors:"<<endl;
+   for ( unsigned int k = 0 ;k<fScaleFac.size(); k++ )
+      info>>"\tiScaleVar "<<k<<":\t"<< fScaleFac[k]<<endl;
+}
 
 
-void fastNLOCreate::InitCoeffTable(){
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::InitCoeffTable()
+{
    debug["InitCoeffTable"]<<endl;
    // create a coeff table
    //CreateCoeffTable(0);
@@ -110,10 +182,10 @@ void fastNLOCreate::InitCoeffTable(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-int fastNLOCreate::CreateCoeffTable(){
+int fastNLOCreate::CreateCoeffTable()
+{
    debug["CreateCoeffTable"]<<endl;
    if ( !fCoeff.empty() ){
       error["CreateCoeffAddFix"]<<"Vector of coefficients must be empty, since only one coefficient table is allowed."<<endl;
@@ -126,11 +198,10 @@ int fastNLOCreate::CreateCoeffTable(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-
-void fastNLOCreate::ReadBinning(){
+void fastNLOCreate::ReadBinning()
+{
    // optimize read-in of bin grids
    // ToDo. Check sanity of bin-grid
 
@@ -304,10 +375,10 @@ void fastNLOCreate::ReadBinning(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::GetWarmupValues(){
+void fastNLOCreate::GetWarmupValues()
+{
    //
    // GetWarmupValues.
    // Checks if warmup-table exists and initialized
@@ -333,10 +404,10 @@ void fastNLOCreate::GetWarmupValues(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::UseBinGridFromWarmup(){
+void fastNLOCreate::UseBinGridFromWarmup()
+{
    // initialialize all binning related variables
    // with values stored in the warmup file.
    vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
@@ -373,10 +444,10 @@ void fastNLOCreate::UseBinGridFromWarmup(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-bool fastNLOCreate::CheckWarmupConsistency(){
+bool fastNLOCreate::CheckWarmupConsistency()
+{
    // check if warmup values are consistent with steering card
    // check if number of bins is consistent
 
@@ -483,16 +554,17 @@ bool fastNLOCreate::CheckWarmupConsistency(){
    return ret;
 }
 
+
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
+void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
+{
    debug["SetOrderOfAlphasOfCalculation"]<<"ord="<<ord<<endl;
    // set order of alpha_s of this calculation
    // it must be: iLeadingOrder + iHigherOrder ;
    // for instance: 3-jet-production in NLO = 4!
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
-   int IOrdInitial = fIOrd;
+   const int IOrdInitial = fIOrd;
    fIOrd = ord;
    c->Npow = ord;
    c->IContrFlag2 = ord-GetLoOrder()+1;
@@ -529,21 +601,30 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord){
       for ( int p = 0 ; p<c->NSubproc ; p++ ) fSymProc[p]=p;
       vector<vector<int> > asym = INT_TAB(AsymmetricProcesses);
       for ( unsigned int i = 0 ; i<asym.size() ; i ++ ) {
-	 if ( asym[i][0]<(int)fSymProc.size() ) // safety
-	    fSymProc[asym[i][0]] = asym[i][1];
+	 if ( asym[i][0]<(int)fSymProc.size() ) { // safety
+	    if ( asym[i][1] >= GetNSubprocesses() || fSymProc[asym[i][0]] >= GetNSubprocesses() ) {
+	       warn["AsymmetricProcesses"]<<"Subprocess "<<fSymProc[asym[i][0]]<<" is requested to be asymmetric with subprocess "<<asym[i][1]<<", but there are only "<<GetNSubprocesses()-1<<" subprocesses in this calculation. Ignoring call."<<endl;
+	    }
+	    else fSymProc[asym[i][0]] = asym[i][1];
+	 }
       }
    }
    
+   // Scale factors have to be updated, since this may be either a lo or nlo run.
+   if ( !fIsFlexibleScale )  ReadScaleFactors();
    // NSubproc may have changed. We have to reinitialize the grids
-   if ( IOrdInitial!= fIOrd && !fIsWarmup ) InitGrids();
-   
+   //const int nSFInitial = fScaleFac.size();
+   if ( IOrdInitial!= fIOrd && !fIsWarmup ) {
+      if ( !fIsFlexibleScale ) InitInterpolationKernels();
+      InitGrids();
+   }
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::SetLoOrder(int LOOrd){
+void fastNLOCreate::SetLoOrder(int LOOrd)
+{
    debug["SetLoOrder"]<<endl;
    fastNLOTable::SetLoOrder(LOOrd);
    if ( fIsFlexibleScale )
@@ -551,10 +632,10 @@ void fastNLOCreate::SetLoOrder(int LOOrd){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::InitVariablesInCoefficientTable(){
+void fastNLOCreate::InitVariablesInCoefficientTable()
+{
    debug["InitVariablesInCoefficientTable"]<<endl;
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
    c->IDataFlag = 0;            // No data, but theory
@@ -571,10 +652,10 @@ void fastNLOCreate::InitVariablesInCoefficientTable(){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::ReadCoefficientSpecificVariables(){
+void fastNLOCreate::ReadCoefficientSpecificVariables()
+{
     debug["ReadCoefficientSpecificVariables"]<<endl;
    // todo: make it more user friendly
    // todo: include some sanity checks
@@ -627,11 +708,12 @@ void fastNLOCreate::ReadCoefficientSpecificVariables(){
 	 c->ScaleDescript[0][0] = STRING(Warmup.ScaleDescriptionScale1);
       c->SetNScaleDep(0);		// This is a fixed-scale table
    }
-
-   if ( c->IsLO() ) c->IScaleDep = 0;
-   else c->IScaleDep = 1;
-
+   
+   //    if ( c->IsLO() ) c->IScaleDep = 0;
+   //    else c->IScaleDep = 1;
+   c->IScaleDep = 1;
 }
+
 
 
 // ___________________________________________________________________________________________________
@@ -672,9 +754,24 @@ int fastNLOCreate::GetBin(){
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events, const fnloScenario& scen)
+{
+   // fill all subprocessess for all scale variations (into a fixed-scale table)
+   // events is expected to be of the form:
+   //   events[nscalevar][nsubproc]
+
+   for ( unsigned int is = 0 ; is<events.size() ; is++ ) {
+      FillAllSubprocesses( events[is], scen, is );
+   }
+}
 
 
-void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar){
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar)
+{
+   // fill a list of subprocesses into the fastNLO table
+
    if ( (int)events.size() != GetNSubprocesses() ){
       error["FillAllSubprocess"]<<"This table expects "<<GetNSubprocesses()<<" subprocesses, but only "<<events.size()<<" are provided. Exiting."<<endl;
       exit(1);
@@ -685,21 +782,20 @@ void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const f
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-
-void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar){
+void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar)
+{
    fEvent = event;
    fScenario = scen;
    Fill(scalevar);
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::Fill(int scalevar){
+void fastNLOCreate::Fill(int scalevar)
+{
    //
    // Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
    //
@@ -715,10 +811,10 @@ void fastNLOCreate::Fill(int scalevar){
 }
 
 
+
 // ___________________________________________________________________________________________________
-
-
-void fastNLOCreate::FillContribution(int scalevar){
+void fastNLOCreate::FillContribution(int scalevar)
+{
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -753,9 +849,10 @@ void fastNLOCreate::FillContribution(int scalevar){
 }
 
 
-// ___________________________________________________________________________________________________
 
-void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar){
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar)
+{
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -768,7 +865,8 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    double xmax = std::max(fEvent._x1,fEvent._x2);
    vector<pair<int,double> > nxlo = fKernX[ObsBin]->GetNodeValues(xmin);
    vector<pair<int,double> > nxup = fKernX[ObsBin]->GetNodeValues(xmax);
-   vector<pair<int,double> > nmu  = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
+   const double mu = fScenario._m1 * fScaleFac[scalevar];
+   vector<pair<int,double> > nmu  = fKernMuS[ObsBin][scalevar]->GetNodeValues(mu);
 
    if ( fApplyPDFReweight ) {
       fKernX[ObsBin]->CheckX(xmin);
@@ -776,6 +874,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
       ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr());
       ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr());
    }
+
 
    // fill grid
    if ( CheckWeightIsNan() ) return;
@@ -789,8 +888,8 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 
          for ( unsigned int m1 = 0 ; m1<nmu.size() ; m1++ ) {
 	    double wfnlo = nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
-// 	    cout<<"   Fill * : i="<<ObsBin<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo
-// 		<<",\twnlo="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
+//   	    cout<<"   Fill * : i="<<ObsBin<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo
+//   		<<",\twnlo="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
 	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p]  += fEvent._w  * wfnlo / BinSize[ObsBin];
          }
       }
@@ -798,9 +897,10 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 }
 
 
-// ___________________________________________________________________________________________________
 
-void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
+{
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -920,8 +1020,10 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin){
 }
 
 
+
 // ___________________________________________________________________________________________________
-void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin){
+void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
+{
    // read informatio from 'Event' and 'Scenario'
    // do the interpolation
    // and fill into the tables.
@@ -1506,26 +1608,27 @@ void  fastNLOCreate::InitGrids() {
 
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-     if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1)  ) {;} // ok!
+      if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1)  ) {;} // ok!
       else {
 	 error["InitGrids"]<<"Only half-matrix is implemented for grids for fixed-scale tables."<<endl; exit(1);
       }
-     
-      int nscalevar = 1;
+      
+      int nscalevar = fScaleFac.size();
+      if (nscalevar==0 ) {
+	 error["InitGrids"]<<"No scale factors found."<<endl;
+      }
       c->Nscalevar.resize(1);			// 1 = NScaleDim
       c->Nscalevar[0]  = nscalevar;		// testing
 
       c->ScaleFac.resize(1);			// 1 = NScaleDim
-      c->ScaleFac[0].resize(nscalevar);
-      cout<<"\n todo. Scalefactors must be stored in table.\n"<<endl;
+      c->ScaleFac[0] = fScaleFac;
       c->XNode1.resize(GetNObsBin());
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          c->XNode1[i]     = fKernX[i]->GetGrid();
       }
 
-      cout<<"\n\n temporarily: restricting number of scalevariations to one!\n\n"<<endl;
-      int nscalenode = fKernMu1[0]->GetGrid().size();
-      cout<<"\n remove not needed nscalenode! "<<endl;
+      int nscalenode = fKernMuS[0][0]->GetGrid().size();
+      cout<<"\n remove not needed variabel nscalenode throughout the code! "<<endl;
       c->Nscalenode.resize(1);			// 1 = NScaleDim
       c->Nscalenode[0] = nscalenode;		// do we need this ?!
 
@@ -1534,14 +1637,13 @@ void  fastNLOCreate::InitGrids() {
       c->fastNLOCoeffBase::ResizeTable( &c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          for(int k=0;k<nscalevar;k++){
-	    c->ScaleNode[i][0][k] = fKernMu1[i]->GetGrid();
+	    c->ScaleNode[i][0][k] = fKernMuS[i][k]->GetGrid();
 	 }
       }
 
       // ResizeTable works if x-nodes are initialized
       int XmaxFromI[1] = {0};
       c->ResizeTable( &c->SigmaTilde, GetNObsBin(), c->GetTotalScalevars(), c->GetTotalScalenodes(), XmaxFromI, c->GetNSubproc() );
-
    }
 
 }
@@ -1554,8 +1656,16 @@ void  fastNLOCreate::InitInterpolationKernels() {
    }
 
    fKernX.resize(GetNObsBin());
-   fKernMu1.resize(GetNObsBin());
-   fKernMu2.resize(GetNObsBin());
+   if ( fIsFlexibleScale ) {
+      fKernMu1.resize(GetNObsBin());
+      fKernMu2.resize(GetNObsBin());
+   }
+   else {
+      fKernMuS.resize(GetNObsBin());
+      for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+	 fKernMuS[i].resize(fScaleFac.size());
+      }
+   }
    // todo. clean up memory
    vector<double> wrmX = DOUBLE_COL(WarmupValues,x_min);
    vector<double> wrmMu1Up, wrmMu1Dn;
@@ -1590,18 +1700,26 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init scale1-interpolation kernels
       // ------------------------------------------------
-      debug["InitInterpolationKernels"]<<"Make Mu1 grid for obsbin="<<i<<endl;
-      fKernMu1[i] = MakeInterpolationKernels(STRING(Mu1_Kernel),wrmMu1Dn[i],wrmMu1Up[i]);
-      fKernMu1[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu1_DistanceMeasure)), INT(Mu1_NNodes));
-      //fKernMu1[i]->PrintGrid();
-
-      // ------------------------------------------------
-      // init scale2-interpolation kernels
-      // ------------------------------------------------
       if ( fIsFlexibleScale ){
-         debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
-         fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
-         fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
+	 debug["InitInterpolationKernels"]<<"Make Mu1 grid for obsbin="<<i<<endl;
+	 fKernMu1[i] = MakeInterpolationKernels(STRING(Mu1_Kernel),wrmMu1Dn[i],wrmMu1Up[i]);
+	 fKernMu1[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu1_DistanceMeasure)), INT(Mu1_NNodes));
+	 //fKernMu1[i]->PrintGrid();
+	 
+	 // ------------------------------------------------
+	 // init scale2-interpolation kernels
+	 // ------------------------------------------------
+	    debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
+	    fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
+	    fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
+      }
+      else {
+	 for ( unsigned int k = 0 ; k<fScaleFac.size() ; k++ ) {
+	    double muDn = fScaleFac[k]*wrmMu1Dn[i];
+	    double muUp = fScaleFac[k]*wrmMu1Up[i];
+	    fKernMuS[i][k] = MakeInterpolationKernels(STRING(Mu1_Kernel),muDn,muUp);
+	    fKernMuS[i][k]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu1_DistanceMeasure)), INT(Mu1_NNodes));
+ 	 }
       }
    }
 }
