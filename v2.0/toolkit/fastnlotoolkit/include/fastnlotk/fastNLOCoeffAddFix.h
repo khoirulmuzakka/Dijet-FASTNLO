@@ -25,9 +25,9 @@ public:
    
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;
+   int GetNScaleNode() const { return GetTotalScalenodes(); }
    int GetNScalevar() const { return Nscalevar[0];}
    v1d GetAvailableScaleFactors() const { return ScaleFac[0]; }
-   int GetNScaleNode() const { return Nscalenode[0]; }
    double GetScaleFactor(int iVar) const { 
       if ( iVar >= (int)ScaleFac[0].size() ) error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
       return ScaleFac[0][iVar];
@@ -41,8 +41,8 @@ protected:
    int ReadCoeffAddFix(istream *table);
 
    vector < int > Nscalevar;
-   vector < int > Nscalenode;
-   v2d  ScaleFac;
+   //vector < int > Nscalenode;
+   v2d ScaleFac;
    v4d ScaleNode;
    v5d SigmaTilde;
 

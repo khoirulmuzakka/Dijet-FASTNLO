@@ -52,7 +52,7 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    CheckCoeffConstants(this);
 
    Nscalevar.resize(NScaleDim);
-   Nscalenode.resize(NScaleDim);
+   vector<int> Nscalenode(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
       *table >> Nscalevar[i];
       *table >> Nscalenode[i];
@@ -94,7 +94,7 @@ int fastNLOCoeffAddFix::Write(ostream *table, int option){
 
    for(int i=0;i<NScaleDim;i++){
       *table << Nscalevar[i] << endl;
-      *table << Nscalenode[i] << endl;
+      *table << GetNScaleNode() << endl;
    }
    for(int i=0;i<NScaleDim;i++){
       for(int j=0;j<Nscalevar[i];j++){
@@ -140,11 +140,15 @@ int fastNLOCoeffAddFix::GetTotalScalevars() const {
 }
 
 int fastNLOCoeffAddFix::GetTotalScalenodes() const {
-   int totalscalenodes=1;
-   for(int scaledim=0;scaledim<NScaleDim;scaledim++){
-      totalscalenodes *= Nscalenode[scaledim];
-   }
-   return totalscalenodes;
+   if ( !ScaleNode.empty() ) return ScaleNode[0][0][0].size();
+   else return 0;
+   //    int totalscalenodes=1;
+   //    for(int scaledim=0;scaledim<NScaleDim;scaledim++){
+   //       if ( !ScaleNode.empty() )
+   // 	 totalscalenodes *= ScaleNode[0][0][0].size();
+   //       //Nscalenode[scaledim];
+   //    }
+   //    return totalscalenodes;
 }
 
 
@@ -152,7 +156,7 @@ void fastNLOCoeffAddFix::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFix ****************\n");
    for(int i=0;i<NScaleDim;i++){
-      printf(" B    - Nscalenode[%d]              %d\n",i,Nscalenode[i]);
+      printf(" B    - Nscalenode[%d]              %d\n",i,GetNScaleNode());
       printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
       for(int j=0;j<Nscalevar[i];j++){
 	 printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);

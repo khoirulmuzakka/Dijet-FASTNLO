@@ -1628,11 +1628,6 @@ void  fastNLOCreate::InitGrids() {
       }
 
       int nscalenode = fKernMuS[0][0]->GetGrid().size();
-      cout<<"\n remove not needed variabel nscalenode throughout the code! "<<endl;
-      c->Nscalenode.resize(1);			// 1 = NScaleDim
-      c->Nscalenode[0] = nscalenode;		// do we need this ?!
-
-      
       // scale nodes
       c->fastNLOCoeffBase::ResizeTable( &c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
