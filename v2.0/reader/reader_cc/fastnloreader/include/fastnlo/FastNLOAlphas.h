@@ -52,7 +52,12 @@ public:
    };
 
    // ---- Alphas vars ---- //
+   // Setters
+   void SetMz(double Mz);
+   void SetNFlavor(int nflavor);
+   void SetNLoop(int nloop);
    void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   // Getters
    double GetAlphasMz() const {
       return fAlphasMz;
    };
@@ -70,7 +75,17 @@ protected:
 
 
 //______________________________________________________________________________
+void FastNLOAlphas::SetMz(double Mz) {
+   Alphas::SetMz(Mz);
+}
 
+void FastNLOAlphas::SetNFlavor(int nflavor) {
+   Alphas::SetNf(nflavor);
+}
+
+void FastNLOAlphas::SetNLoop(int nloop) {
+   Alphas::SetNLoop(nloop);
+}
 
 void FastNLOAlphas::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
    debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;

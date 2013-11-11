@@ -1,8 +1,13 @@
-#Rabbertz, 10.11.2011
+#                                               -*- Automake -*-
+# -----------------------------------------------------------------------------
 #
-## fastNLO_reader: C++ version~
+# K. Rabbertz, 08.11.2013
 #
-## -----------------------------------------------------------------------------
+# fastNLO_reader: C++ version
+#
+# -----------------------------------------------------------------------------
+# Use GNU standards
+AUTOMAKE_OPTIONS = gnu
 
 if ENABLE_PYEXT
 
@@ -11,8 +16,6 @@ fastnloreader_wrap.cpp fastnloreader.py: fastnloreader.i
 	swig -c++ -python -I$(top_srcdir)/include -o fastnloreader_wrap.cpp $<
 
 AM_CXXFLAGS = -Wno-long-long
-
-MAINTAINERCLEANFILES = fastnloreader.py fastnloreader_wrap.cpp
 
 all-local: fastnloreader_wrap.cpp
 	$(PYTHON) setup.py build
@@ -29,3 +32,9 @@ clean-local:
 
 endif
 
+# Files that are required to build the project but that can be
+# recreated IF the necessary autotools etc. are available by:
+# "autoreconf -i; ./configure"
+# Use "make maintainer-clean" (on a build machine) before svn commits,
+# but not for distribution
+MAINTAINERCLEANFILES = Makefile.in fastnloreader.py fastnloreader_wrap.cpp

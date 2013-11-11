@@ -36,6 +36,12 @@ public:
    FastNLOLHAPDF(string name);
    FastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
+   // Pseudo-Setters. Don´t work with LHAPDF, but print warning instead.
+   void SetMz(double Mz);
+   void SetNFlavor(int nflavor);
+   void SetNLoop(int nloop);
+   void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   // Setters
    void SetLHAPDFFilename(string filename);
    void SetLHAPDFMember(int set);
    int GetIPDFMember() const {
@@ -208,6 +214,20 @@ void FastNLOLHAPDF::PrintPDFInformation() const {
    printf(" ##################################################################################\n");
 }
 
+void FastNLOLHAPDF::SetMz(double Mz) {
+   warn["SetMz"]<<"WARNING! The Z mass cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
 
+void FastNLOLHAPDF::SetNFlavor(int nflavor) {
+   warn["SetNFlavor"]<<"WARNING! The no. of active flavors cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void FastNLOLHAPDF::SetNLoop(int nloop) {
+   warn["SetNLoop"]<<"WARNING! The no. of loops cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void FastNLOLHAPDF::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
+   warn["SetAlphasMz"]<<"WARNING! alpha_s(M_Z) cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
 
 #endif
