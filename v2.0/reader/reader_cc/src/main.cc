@@ -17,9 +17,10 @@
 #include "fastnlo/FastNLOAlphas.h"
 #include "fastnlo/FastNLOCRunDec.h"
 #include "fastnlo/FastNLOLHAPDF.h"
+#include "fastnlo/FastNLOQCDNUMAS.h"
+#include "fastnlo/FastNLOHoppet.h"
 #include "fastnlo/FastNLOUser.h"
 #include "fastnlo/FastNLODiffUser.h"
-//#include "fastnlo/FastNLOQCDNUMAS.h"
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -57,9 +58,11 @@ int main(int argc, char** argv) {
          man<<"Usage: ./fnlo-cppread [arguments]"<<endl;
          man<<"Table input file, def. = table.tab"<<endl;
          man<<"PDF set, def. = cteq6m.LHpdf"<<endl;
+         man<<"   Give full path(s) if these are not in the cwd."<<endl;
          man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
+         man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
+         man<<"   Alternatives are: LHAPDF, RunDec, QCDNUM, or HOPPET."<<endl;
          man<<""<<endl;
-         man<<"Give full path(s) if these are not in the cwd."<<endl;
          man<<"Use \"_\" to skip changing a default argument."<<endl;
          man<<""<<endl;
          return 0;
@@ -110,8 +113,20 @@ int main(int argc, char** argv) {
       }
    }
 
-   //---  Too many arguments
+   //--- alpha_s evolution code
+   string AsEvolCode = "GRV";
    if (argc > 4) {
+      AsEvolCode = (const char*) argv[4];
+   }
+   if (argc <= 4 || AsEvolCode == "_") {
+      shout<<" fnlo-read: No request given for alpha_s evolution code,"<<endl;
+      shout<<"            using GRV default."<<endl;
+   } else {
+      shout<<" fnlo-read: Using alpha_s evolution code: " << AsEvolCode << endl;
+   }
+
+   //--- Too many arguments!
+   if (argc > 5) {
       printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
       return 1;
    }
@@ -179,7 +194,7 @@ int main(int argc, char** argv) {
    //     These can be freely defined by the user by making an instance of your class
    //     that derives from the FastNLOReader class and passing the name of the
    //     fastNLO table as an argument, e.g.:
-   //        FastNLOUser* fnloreader = new FastNLOUser( tablename );
+   //        FastNLOUser* fnlo = new FastNLOUser( tablename );
    //
    //     To facilitate using fastNLOReader a number of predefined user classes
    //     of FastNLOUser exist, interfacing to
@@ -243,7 +258,7 @@ int main(int argc, char** argv) {
    // ---- Table information ---- //
    // --- fastNLO user: For a comprehensive insight into the fastNLO variables
    //     you can use:
-   //             fnloreader.PrintFastNLOTableConstants(0);
+   //             fnlo.PrintFastNLOTableConstants(0);
    //
 
 
@@ -252,15 +267,15 @@ int main(int argc, char** argv) {
    // --- fastNLO user: Before you can access the fastNLO computed
    //     cross sections, you always have to call CalcCrossSection()!
    //     So, before accessing the cross sections, please call:
-   //             fnloreader.CalcCrossSection();
+   //             fnlo.CalcCrossSection();
 
 
    // 4.
    // ------- Select another PDF set and member ------- //
    // --- fastNLO user: You can select another PDF set and member here.
    //     With LHAPDF, you can set the PDF set and member using e.g.:
-   //           fnloreader.SetLHAPDFFilename( string PDFFile );
-   //           fnloreader.SetLHAPDFMember( int PDFMember );
+   //           fnlo.SetLHAPDFFilename( string PDFFile );
+   //           fnlo.SetLHAPDFMember( int PDFMember );
    //
 
 
@@ -268,11 +283,11 @@ int main(int argc, char** argv) {
    // ------- Changing the alpha_s(M_Z) value and/or evolution ------- //
    // --- fastNLO user:
    //     The alpha_s evolution is provided by the code of the chosen
-   //     interface, e.g. GRV alpha_s for the fnloreader instance here.
+   //     interface, e.g. GRV alpha_s for the fnlo instance here.
    //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 values
    //     like this:
    //
-   //            fnloreader.SetAlphasMz(0.1179);
+   //            fnlo.SetAlphasMz(0.1179);
    //
    //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
    //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
@@ -293,13 +308,13 @@ int main(int argc, char** argv) {
    //     There are two possibilites:
    //       - The default option is 'publication units', i.e. divided by
    //         bin widths if done so in the relevant publication
-   //            fnloreader.SetUnits(fastNLO::kPublicationUnits);
+   //            fnlo.SetUnits(fastNLO::kPublicationUnits);
    //       - The other option is 'absolute' units in barn, but still in
    //         the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
    //
-   //       fnloreader.SetUnits(kAbsoluteUnits); // in namespace fastNLO
+   //       fnlo.SetUnits(kAbsoluteUnits); // in namespace fastNLO
    //     or
-   //       fnloreader.SetUnits(kPublicationUnits); // in namespace fastNLO
+   //       fnlo.SetUnits(kPublicationUnits); // in namespace fastNLO
 
 
    // 7.
@@ -322,10 +337,10 @@ int main(int argc, char** argv) {
    //       - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
    //     plus one must know the 'Id' of this contribution, which can be printed e.g.
    //     by calling
-   //        fnloreader.PrintTableInfo();
+   //        fnlo.PrintTableInfo();
    //
    //     To switch a contribution on/off please use:
-   //            bool SetOn = fnloreader.SetContributionON( contrib, Id, on/off )
+   //            bool SetOn = fnlo.SetContributionON( contrib, Id, on/off )
    //     and in particular for switching on check on the return value SetOn that it actually worked.
    //     Here, 'contrib' is not the contribution number, but the type
    //     as given above: kFixedOrder, ...
@@ -346,7 +361,7 @@ int main(int argc, char** argv) {
    //     the scale factors for the renormalization and factorization scale must be identical.
    //
    //     The function call to set the scale factors is:
-   //         bool SetScales = fnloreader.SetScaleFactorsMuRMuF(xmur, xmuf);
+   //         bool SetScales = fnlo.SetScaleFactorsMuRMuF(xmur, xmuf);
    //     where xmur, xmuf are the scale factors. Check the return value in order to verify
    //     that the selected scale factors could actually be activated.
    //
@@ -358,7 +373,7 @@ int main(int argc, char** argv) {
    // 9.
    // ----- Additional possibilities for scales in 'flexible-scale' tables (v2.1) ----- //
    //     First check, if your table is a flexible-scale table or not
-   //          bool IsFlex = fnloreader.GetIsFlexibleScaleTable()
+   //          bool IsFlex = fnlo.GetIsFlexibleScaleTable()
    //     You can choose a function to define how
    //     to compute the renormalization and factorization scale.
    //     Each 'flexible-scale' table comes with two variables that can be used
@@ -372,12 +387,12 @@ int main(int argc, char** argv) {
    //     There are two possibilities, how you can define your scale now:
    //
    //       - use predefined functions using e.g.
-   //            fnloreader.SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm);
+   //            fnlo.SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm);
    //         for changing the calculation of the renormalizatoin scale.
    //         Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
    //
    //       - or you can pass a function pointer to FastNLOReader using
-   //            fnloreader.SetExternalFuncForMuR( double (*Func)(double,double) );
+   //            fnlo.SetExternalFuncForMuR( double (*Func)(double,double) );
    //         to pass any function using scale1 and scale2 to fastNLO.
    //
    //     WARNING: Some choice had to be made for the default settings. Please think
@@ -390,26 +405,26 @@ int main(int argc, char** argv) {
    //       - mu_f:  kScale1             -> mu_f = scale1
    //
    //     Valid calls are e.g.:
-   //     fnloreader.SetMuRFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_r from scale1 and scale2
-   //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
-   //     fnloreader.SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
-   //     fnloreader.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
-   //     fnloreader.SetExternalFuncForMuR( &Function_Mu );         // set external function to calculate mu_r from scale1 and scale2
-   //     fnloreader.SetMuRFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
-   //     fnloreader.SetMuFFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
+   //     fnlo.SetMuRFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_r from scale1 and scale2
+   //     fnlo.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
+   //     fnlo.SetMuRFunctionalForm(fastNLO::kQuadraticMean); // set function how to calculate mu_r from scale1 and scale2
+   //     fnlo.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
+   //     fnlo.SetExternalFuncForMuR( &Function_Mu );         // set external function to calculate mu_r from scale1 and scale2
+   //     fnlo.SetMuRFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
+   //     fnlo.SetMuFFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
    //
    // INFO: All above-mentioned scale changing functions automatically perform a refilling of the
    //       fastNLO internal PDF cache. To switch it off you can use a boolean, like:
-   //       fnloreader.SetMuFFunctionalForm(fastNLO::kScale1 , false );
+   //       fnlo.SetMuFFunctionalForm(fastNLO::kScale1 , false );
 
 
    // 10.
    // ---- Access cross sections ---- //
    // --- fastNLO user: To access the cross section from fastNLO
    //     you should use:
-   //           vector < double > xs = fnloreader.GetCrossSection();
+   //           vector < double > xs = fnlo.GetCrossSection();
    //     If you want to have a pointer to an array of numbers you might use
-   //           vector < double > xs = fnloreader.GetCrossSection();
+   //           vector < double > xs = fnlo.GetCrossSection();
    //           double* cs = &xs[0];
    //
    //     Further you can access the "k-factor", which is calculated with all
@@ -421,17 +436,17 @@ int main(int argc, char** argv) {
    //          - 2-loop threshold corrections are vs. NLO
    //          - non-perturbative corrections usually are vs. NLO
    //
-   //           vector < double > kFactors = fnloreader.GetKFactors();
+   //           vector < double > kFactors = fnlo.GetKFactors();
 
 
    // 11.
    // ---- Printing ---- //
    // --- fastNLO user: For an easy overview of your cross section calculation
    //     you might use the following print methods:
-   //             fnloreader.PrintCrossSections();
+   //             fnlo.PrintCrossSections();
    //
    //     Or print it like the Fortran reader code:
-   //             fnloreader.PrintCrossSectionsDefault();
+   //             fnlo.PrintCrossSectionsDefault();
 
 
    // 12.
@@ -546,45 +561,61 @@ int main(int argc, char** argv) {
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
 
-   FastNLOLHAPDF fnlo(tablename,PDFFile,0);
-   fnlo.SetContributionON(fastNLO::kFixedOrder,fastNLO::kNextToLeading,false);
-   fnlo.CalcCrossSection();
-   fnlo.PrintCrossSections();
+   //   FastNLOLHAPDF fnlo(tablename,PDFFile,0);
+   //   fnlo.SetContributionON(fastNLO::kFixedOrder,fastNLO::kNextToLeading,false);
+   //   fnlo.CalcCrossSection();
+   //   fnlo.PrintCrossSections();
 
-   FastNLOAlphas fnloreader(tablename);
-   //   FastNLOLHAPDF fnloreader(tablename);
-   //   FastNLOCRunDec fnloreader(tablename);
-   //   FastNLOQCDNUMAS fnloreader(tablename);
-   //fnloreader.SetUnits(kAbsoluteUnits);
-   fnloreader.PrintTableInfo();
-   fnloreader.PrintFastNLOTableConstants(0);
+   // Create pointer to yet unfilled fnlo table using FastNLOLHAPDF class.
+   // (The other classes inherit interface structure from FastNLOLHAPDF!)
+   // Difference to previous example:
+   //   Instead of accessing members of objects via fnlo.memberfunction()
+   //   we now have to dereference the pointer  via fnlo->memberfunction()!
+   FastNLOLHAPDF* fnlo = NULL;
+   if (AsEvolCode == "GRV") {
+      fnlo = new FastNLOAlphas(tablename);
+   } else if (AsEvolCode == "LHAPDF") {
+      fnlo = new FastNLOLHAPDF(tablename);
+   } else if (AsEvolCode == "RunDec") {
+      fnlo = new FastNLOCRunDec(tablename);
+   } else if (AsEvolCode == "QCDNUM") {
+      fnlo = new FastNLOQCDNUMAS(tablename);
+   } else if (AsEvolCode == "HOPPET") {
+      fnlo = new FastNLOHoppet(tablename);
+   } else {
+      printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
+      exit(1);
+   }
+
+   //   fnlo->SetUnits(kAbsoluteUnits);
+   fnlo->PrintTableInfo();
+   fnlo->PrintFastNLOTableConstants(0);
    // Do not forget to define the PDF set and member!
-   fnloreader.SetLHAPDFFilename(PDFFile);
-   fnloreader.SetLHAPDFMember(0);
+   fnlo->SetLHAPDFFilename(PDFFile);
+   fnlo->SetLHAPDFMember(0);
    // To check the upper limit of the PDF member numbering do
-   //  int imaxpdf = fnloreader.GetNPDFMaxMember();
+   //  int imaxpdf = fnlo->GetNPDFMaxMember();
    // Note: Usually there is a member no. 0 corresponding to the central result,
-   //       so the total number of members (fnloreader.GetNPDFMembers()) is imaxpdf + 1
+   //       so the total number of members (fnlo->GetNPDFMembers()) is imaxpdf + 1
    //
    //  The table and PDF initialization could also be done in one step:
-   //  FastNLOAlphas fnloreader( tablename, PDFFile, 0 );
+   //  FastNLOAlphas fnlo( tablename, PDFFile, 0 );
    //
-   // Set desired value of alpha_s(M_Z)
-   //   fnloreader.SetMz(91.1876);
-   fnloreader.SetAlphasMz(0.1184);
-   //   fnloreader.SetAlphasMz(0.1190);
-
-   // fnloreader.SetNFlavor(0);
-   // fnloreader.FillPDFCache();
-   // fnloreader.InitQCDNUM();
+   fnlo->SetNLoop(2);// NLO
+   fnlo->SetNFlavor(5);// CT10
+   //   fnlo->SetNFlavor(0);// NNPDF
+   //   fnlo->SetMz(91.1876);// PDG 2013
+   fnlo->SetMz(91.188);// CT10-NLO
+   //   fnlo->SetAlphasMz(0.1184);// PDG 2013
+   fnlo->SetAlphasMz(0.1180);// CT10-NLO
 
    // Calculate cross sections
-   fnloreader.CalcCrossSection();
+   fnlo->CalcCrossSection();
    // Uncomment this to actually print out the result
-   //   fnloreader.PrintCrossSectionsDefault();
+   //   fnlo->PrintCrossSectionsDefault();
    //
    // Example code to print out data points (if available)
-   //   fnloreader.PrintCrossSectionsData();
+   //   fnlo->PrintCrossSectionsData();
    //
    // ************************************************************************************************
 
@@ -603,11 +634,11 @@ int main(int argc, char** argv) {
    printf("fnlo-read: Calculate my cross sections\n");
    printf("%s",CSEPL.c_str());
 
-   // Instance fastNLO (For this example we assume fnloreader was instantiated already above ...)
-   // FastNLOAlphas fnloreader( tablename , PDFFile , 0 );
+   // Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
+   // FastNLOAlphas fnlo( tablename , PDFFile , 0 );
 
    // Check on existence of LO (Id = -1 if not existing)
-   int ilo   = fnloreader.ContrId(kFixedOrder, kLeading);
+   int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
       printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
       exit(1);
@@ -615,15 +646,15 @@ int main(int argc, char** argv) {
       //      printf("fnlo-read: The LO contribution has Id: %i\n",ilo);
    }
    // Check on existence of NLO (Id = -1 if not existing)
-   int inlo  = fnloreader.ContrId(kFixedOrder, kNextToLeading);
+   int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    // if (inlo < 0) {
    //    printf("fnlo-read: No NLO contribution found!\n");
    // } else {
    //    printf("fnlo-read: The NLO contribution has Id: %i\n",inlo);
    // }
    // Check on existence of threshold corrections
-   int ithc1 = fnloreader.ContrId(kThresholdCorrection, kLeading);
-   int ithc2 = fnloreader.ContrId(kThresholdCorrection, kNextToLeading);
+   int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
+   int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
    // if ( ithc1 < 0 ) {
    //    printf("fnlo-read: 1-loop threshold corrections not found!\n");
    // } else {
@@ -635,7 +666,7 @@ int main(int argc, char** argv) {
    //    printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
    // }
    // Check on existence of non-perturbative corrections from LO MC
-   int inpc1 = fnloreader.ContrId(kNonPerturbativeCorrection, kLeading);
+   int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    // if ( inpc1 < 0 ){
    //    printf("fnlo-read: Non-perturbative corrections not found!\n");
    // } else {
@@ -647,7 +678,7 @@ int main(int argc, char** argv) {
 
       // Switch on LO & NLO, switch off anything else
       if (!(ilo   < 0)) {
-         bool SetOn = fnloreader.SetContributionON(kFixedOrder, ilo, true);
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
             printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
             printf("fnlo-read: This should have been caught before!\n");
@@ -655,7 +686,7 @@ int main(int argc, char** argv) {
          }
       }
       if (!(inlo  < 0)) {
-         bool SetOn = fnloreader.SetContributionON(kFixedOrder, inlo, true);
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
          if (!SetOn) {
             printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
             printf("fnlo-read: This should have been caught before!\n");
@@ -663,13 +694,13 @@ int main(int argc, char** argv) {
          }
       }
       if (!(ithc1 < 0)) {
-         fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
+         fnlo->SetContributionON(kThresholdCorrection, ithc1, false);
       }
       if (!(ithc2 < 0)) {
-         fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
+         fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
       }
       if (!(inpc1 < 0)) {
-         fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, false);
+         fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, false);
       }
 
       // Define result vectors
@@ -691,28 +722,28 @@ int main(int argc, char** argv) {
       vector < double > kewk1;
 
       // Set MuR and MuF scale factors for pQCD cross sections and test availability
-      lscvar = fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
+      lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
       if (!lscvar) {
-         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
          // skip completely
          continue;
       }
-      if (fnloreader.GetIsFlexibleScaleTable()) {
-         fnloreader.SetMuFFunctionalForm(kScale1);
-         fnloreader.SetMuRFunctionalForm(kScale1);
-         //      fnloreader.SetMuFFunctionalForm(kScale2);
-         //      fnloreader.SetMuRFunctionalForm(kScale2);
+      if (fnlo->GetIsFlexibleScaleTable()) {
+         fnlo->SetMuFFunctionalForm(kScale1);
+         fnlo->SetMuRFunctionalForm(kScale1);
+         //      fnlo->SetMuFFunctionalForm(kScale2);
+         //      fnlo->SetMuRFunctionalForm(kScale2);
       }
 
       // Calculate cross section
-      fnloreader.CalcCrossSection();
+      fnlo->CalcCrossSection();
 
       // Get LO & NLO results
-      xsnlo = fnloreader.GetCrossSection();
-      kfac  = fnloreader.GetKFactors();
+      xsnlo = fnlo->GetCrossSection();
+      kfac  = fnlo->GetKFactors();
       // Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
       int irelord = 1;
-      qscl  = fnloreader.GetQScales(irelord);
+      qscl  = fnlo->GetQScales(irelord);
       xslo  = xsnlo;
       for (unsigned int i=0; i<xslo.size(); i++) {
          if (abs(kfac[i]) > DBL_MIN) {
@@ -724,20 +755,20 @@ int main(int argc, char** argv) {
 
       // Get threshold corrections
       if ( !(inlo < 0 || ithc2 < 0) ) {
-         bool SetOn = fnloreader.SetContributionON(kThresholdCorrection, ithc2, true);
+         bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
             printf("fnlo-read: WARNING! 2-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
-         lthcvar = SetOn ? fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
             // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
-            fnloreader.CalcCrossSection();
-            xsthc2 = fnloreader.GetCrossSection();
-            kthc2  = fnloreader.GetKFactors();
+            fnlo->CalcCrossSection();
+            xsthc2 = fnlo->GetCrossSection();
+            kthc2  = fnlo->GetKFactors();
             for (unsigned int i=0; i<xsnlo.size(); i++) {
                if (abs(xsnlo[i]) > DBL_MIN) {
                   kthc2[i] = xsthc2[i]/xsnlo[i];
@@ -747,21 +778,21 @@ int main(int argc, char** argv) {
             }
          }
       } else if ( !(ilo < 0 || ithc1 < 0)) {
-         if ( !(inlo < 0) ) fnloreader.SetContributionON(kFixedOrder, inlo, false);
-         bool SetOn = fnloreader.SetContributionON(kThresholdCorrection, ithc1, true);
+         if ( !(inlo < 0) ) fnlo->SetContributionON(kFixedOrder, inlo, false);
+         bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc1, true);
          if (!SetOn) {
             printf("fnlo-read: WARNING! 1-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
-         lthcvar = SetOn ? fnloreader.SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
             // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
-            fnloreader.CalcCrossSection();
-            xsthc1 = fnloreader.GetCrossSection();
-            kthc1  = fnloreader.GetKFactors();
+            fnlo->CalcCrossSection();
+            xsthc1 = fnlo->GetCrossSection();
+            kthc1  = fnlo->GetKFactors();
             for (unsigned int i=0; i<xslo.size(); i++) {
                if (abs(xslo[i]) > DBL_MIN) {
                   kthc1[i] = xsthc1[i]/xslo[i];
@@ -774,24 +805,24 @@ int main(int argc, char** argv) {
       // Get non-perturbative corrections
       if ( !(inpc1 < 0) ) {
          if ( !(inlo < 0) ) {
-            bool SetOn = fnloreader.SetContributionON(kFixedOrder, inlo, true);
+            bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
             if (!SetOn) {
                printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
                printf("fnlo-read: This should have been caught before!\n");
                exit(1);
             }
          }
-         if ( !(ithc1 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc1, false);
-         if ( !(ithc2 < 0) ) fnloreader.SetContributionON(kThresholdCorrection, ithc2, false);
-         bool SetOn = fnloreader.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+         if ( !(ithc1 < 0) ) fnlo->SetContributionON(kThresholdCorrection, ithc1, false);
+         if ( !(ithc2 < 0) ) fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
+         bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
          if (!SetOn) {
             printf("fnlo-read: ERROR! NPC1 not found, nothing to be done!\n");
             printf("fnlo-read: This should have been caught before!\n");
             exit(1);
          }
-         fnloreader.CalcCrossSection();
-         xsnpc1 = fnloreader.GetCrossSection();
-         knpc1  = fnloreader.GetKFactors();
+         fnlo->CalcCrossSection();
+         xsnpc1 = fnlo->GetCrossSection();
+         knpc1  = fnlo->GetKFactors();
          for (unsigned int i=0; i<kfac.size(); i++) {
             if (abs(kfac[i]) > DBL_MIN) {
                knpc1[i] = knpc1[i]/kfac[i];
@@ -804,18 +835,18 @@ int main(int argc, char** argv) {
       // Start print out
       cout << DSEP << endl;
       printf(" My Cross Sections\n");
-      //      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleDescription().c_str(),fnloreader.GetScaleFactorMuF(),fnloreader.GetScaleDescription().c_str());
-      printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnloreader.GetScaleFactorMuR(),fnloreader.GetScaleFactorMuF());
+      //      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleDescription().c_str(),fnlo->GetScaleFactorMuF(),fnlo->GetScaleDescription().c_str());
+      printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       cout << SSEP << endl;
 
       // Get table constants relevant for print out
       // TBD: This Getter should be renamed!!!
-      int NDim = fnloreader.GetNDiffBin();
+      int NDim = fnlo->GetNDiffBin();
       unsigned int NDimBins[NDim];
-      vector < string > DimLabel = fnloreader.GetDimensionLabel();
-      vector < vector < double > > LoBin = fnloreader.GetLowBinEdge();
-      vector < vector < double > > UpBin = fnloreader.GetUpBinEdge();
-      vector < double > BinSize = fnloreader.GetBinSize();
+      vector < string > DimLabel = fnlo->GetDimensionLabel();
+      vector < vector < double > > LoBin = fnlo->GetLowBinEdge();
+      vector < vector < double > > UpBin = fnlo->GetUpBinEdge();
+      vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
       if (NDim == 2) {
@@ -839,7 +870,7 @@ int main(int argc, char** argv) {
             header2 += "     KNPC1";
          }
          printf("%s [ %-12s ] %s [  %-12s  ]  <%-12.12s> %s\n",
-                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnloreader.GetScaleDescription(0).c_str(),header2.c_str());
+                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
          cout << SSEP << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             for (int j=0; j<NDim; j++) {
@@ -891,7 +922,7 @@ int main(int argc, char** argv) {
    }
 
    // Print data if available, checks on availability internally
-   fnloreader.PrintCrossSectionsData();
+   fnlo->PrintCrossSectionsData();
 
    return 0;
 }
