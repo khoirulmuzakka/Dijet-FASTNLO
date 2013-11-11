@@ -37,10 +37,10 @@ public:
    FastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
    // Pseudo-Setters. Don´t work with LHAPDF, but print warning instead.
-   void SetMz(double Mz);
-   void SetNFlavor(int nflavor);
-   void SetNLoop(int nloop);
-   void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   virtual void SetMz(double Mz);
+   virtual void SetNFlavor(int nflavor);
+   virtual void SetNLoop(int nloop);
+   virtual void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
    // Setters
    void SetLHAPDFFilename(string filename);
    void SetLHAPDFMember(int set);
