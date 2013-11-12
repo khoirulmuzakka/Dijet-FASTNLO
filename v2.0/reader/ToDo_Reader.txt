@@ -1,3 +1,7 @@
+make distcheck fails with "Unversioned Directory" problem ...!?
+
+
+
 LHAPDF:
 - InitPDFSetByName needs LHAPDF properly installed with PDF sets
   expected where put at install time
@@ -8,24 +12,9 @@ LHAPDF:
   path, e.g. ./cteq66.LHgrid
 
 
-  Done List for FastNLOReader
------------------------------
-- KR: Doesn't have an extra Makefile anymore. Included now in usual
-      autotools setup with Makefile.am
-- KR: Kicked out LHAPDF header files which should be included from
-      the LHAPDF installation anyway.
-- KR: Kicked out the hardwired absolute path for LHAPDF. Have
-      to find better solution. Current directory is assumed now.
-
-
 
   ToDo List for FastNLOReader
 -----------------------------
-
-- shall we use *.cc to have it consistent with
-the rest of FastNLO and nlojet++?
-KR: Yes. Done.
-
 
 - Implement some 'read fast' switch and 'readfast' PDFLC if
 MuF is calculated using only one scale lookup table
@@ -42,11 +31,6 @@ KR: If I understand this correctly then this exists already in v2 format.
 
 - @MW, @KR
 Please validate the:
-  1) printout
-KR: Unfortunately get NAN for my pp inclusive jets :-(
-    In any case: Need to equalize printout of cc and f version
-  2) references given when initalizing
-KR: Need to equalize with f version.
   3) Comments/documentation throughout the reader
   4) Class description at the beginning *C *h files
 
@@ -85,3 +69,4 @@ should be some cross check implemented, if you really use the correct LHAPDF.
 -- future work:
 restructure the code in such a way, that the SAME code/routines/classes/methods are used
 for the FastNLOReader, than within common/author/creator directory.
+DONE: Now cross check with this code
