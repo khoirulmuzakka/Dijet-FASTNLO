@@ -63,7 +63,7 @@ public:
    //inherited
    void CalcCrossSection();
 
-   void InitQCDNUM();
+   void InitEvolveAlphas();
    // ---- Alphas vars ---- //
    // Setters
    void SetMz(double Mz);
@@ -159,7 +159,7 @@ void FastNLOQCDNUMAS::SetLHAPDFValues() {
       QMass[i] = LHAPDF::getQMass(i+1);
 }
 
-void FastNLOQCDNUMAS::InitQCDNUM() {
+void FastNLOQCDNUMAS::InitEvolveAlphas() {
    //Ensure reasonable values are set
    //TODO Really neccessary?
    char filename[] = " ";
@@ -220,7 +220,7 @@ double FastNLOQCDNUMAS::EvolveAlphas(double Q) const {
 }
 
 void FastNLOQCDNUMAS::CalcCrossSection() {
-   InitQCDNUM();
+   InitEvolveAlphas();
    FastNLOLHAPDF::CalcCrossSection();
 }
 

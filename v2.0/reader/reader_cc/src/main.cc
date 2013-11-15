@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
          man<<"   Give full path(s) if these are not in the cwd."<<endl;
          man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
          man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
-         man<<"   Alternatives are: LHAPDF, RunDec, QCDNUM, or HOPPET."<<endl;
+         man<<"   Alternatives are: LHAPDF, RUNDEC, QCDNUM, or HOPPET."<<endl;
          man<<""<<endl;
          man<<"Use \"_\" to skip changing a default argument."<<endl;
          man<<""<<endl;
@@ -556,27 +556,25 @@ int main(int argc, char** argv) {
 
 
    // 14.
-   // ---- Example code of a quick cross section
-   //      calculation using the FastNLOAlphas interface
+   // ---- Example of a cross section calculation with some nice standardized output
+
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
 
-   //   FastNLOLHAPDF fnlo(tablename,PDFFile,0);
-   //   fnlo.SetContributionON(fastNLO::kFixedOrder,fastNLO::kNextToLeading,false);
-   //   fnlo.CalcCrossSection();
-   //   fnlo.PrintCrossSections();
-
-   // Create pointer to yet unfilled fnlo table using FastNLOLHAPDF class.
-   // (The other classes inherit interface structure from FastNLOLHAPDF!)
-   // Difference to previous example:
-   //   Instead of accessing members of objects via fnlo.memberfunction()
-   //   we now have to dereference the pointer  via fnlo->memberfunction()!
+   // Instead of instantiating a class via e.g.
+   //   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
+   // and accessing member functions via fnlo.memberfunction()
+   // we create a pointer to the yet unfilled fnlo table using the FastNLOLHAPDF class.
+   // (The other classes inherit the interface structure from FastNLOLHAPDF!)
+   // As a difference to previous examples we now have to dereference the pointer via
+   //   fnlo->memberfunction()!
+   //
    FastNLOLHAPDF* fnlo = NULL;
    if (AsEvolCode == "GRV") {
       fnlo = new FastNLOAlphas(tablename);
    } else if (AsEvolCode == "LHAPDF") {
       fnlo = new FastNLOLHAPDF(tablename);
-   } else if (AsEvolCode == "RunDec") {
+   } else if (AsEvolCode == "RUNDEC") {
       fnlo = new FastNLOCRunDec(tablename);
    } else if (AsEvolCode == "QCDNUM") {
       fnlo = new FastNLOQCDNUMAS(tablename);
@@ -587,29 +585,77 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   //   fnlo->SetUnits(kAbsoluteUnits);
+   // Print some fastNLO table info
    fnlo->PrintTableInfo();
    fnlo->PrintFastNLOTableConstants(0);
-   // Do not forget to define the PDF set and member!
+
+   // Define the PDF set and member
    fnlo->SetLHAPDFFilename(PDFFile);
    fnlo->SetLHAPDFMember(0);
-   // To check the upper limit of the PDF member numbering do
-   //  int imaxpdf = fnlo->GetNPDFMaxMember();
+
+   // The table and PDF initialization could also be done in one step, e.g.:
+   //   FastNLOAlphas fnlo(tablename, PDFFile, 0);
+   //
+   // From here on parameter settings can be read from LHAPDF, e.g.
+   // to check the upper limit of the PDF member numbering do
+   //   int imaxpdf = fnlo->GetNPDFMaxMember();
    // Note: Usually there is a member no. 0 corresponding to the central result,
    //       so the total number of members (fnlo->GetNPDFMembers()) is imaxpdf + 1
    //
-   //  The table and PDF initialization could also be done in one step:
-   //  FastNLOAlphas fnlo( tablename, PDFFile, 0 );
+   // Some remarks:
+   // 1) Values returned via LHAPDF are not always coherent or consistent
+   //    between the different PDF sets. Take care if you want to use them
+   //    for more than just information.
    //
-   fnlo->SetNLoop(2);// NLO
-   fnlo->SetNFlavor(5);// CT10
+   // 2) Astonishingly, there are no functions to access the value used for M_Z or
+   //    directly the value for alpha_s(M_Z).
+   //
+   // 3) The PDF sets within LHAPDF are usually available in the form of
+   //    precalculated interpolation grids. Changing of parameters therefore
+   //    is not possible.
+   //    However, with fastNLO that separates matrix-element coefficients,
+   //    PDF weights, and factors of alpha_s^n it is possible to replace
+   //    the alpha_s evolution and the parameters therein. By setting one of
+   //    the parameters below this effects ONLY the alpha_s evolution, if
+   //    allowed by the corresponding code. For LHAPDF this has no effect.
+
+   // The number of loops used for the alpha_s evolution; the LO is nloop = 1, i.e
+   // this number corresponds to LHAPDF: getOrderAlphaS + 1
+   // Order n PDFs usually should be accompanied by an alpha_s evolution of the same order.
+   int nloop = fnlo->GetNLoop();
+   cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
+   //   fnlo->SetNLoop(2);// NLO
+
+   int nflavor = fnlo->GetNFlavor();
+   cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
+   //   fnlo->SetNFlavor(5);// CTEQ
    //   fnlo->SetNFlavor(0);// NNPDF
-   //   fnlo->SetMz(91.1876);// PDG 2013
-   fnlo->SetMz(91.188);// CT10-NLO
+
+   // Unfortunately, LHAPDF5 has no function to access M_Z!
+   //   double Mz = 91.174;  // ABM11
+   double Mz = 91.188;  // CTEQ
+   //   double Mz = 91.187;  // HERAPDF
+   //   double Mz = 91.1876; // MSTW, PDG 2013
+   //   double Mz = 91.2;    // NNPDF
+   fnlo->SetMz(Mz);
+
+   // Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
+   double asmz = fnlo->GetAlphasMz(Mz);
+   cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
    //   fnlo->SetAlphasMz(0.1184);// PDG 2013
    fnlo->SetAlphasMz(0.1180);// CT10-NLO
+   //   fnlo->SetAlphasMz(0.1190);// NNPDF21-NLO
+
+   // Read quark masses
+   for (int iq=1;iq<7;iq++) {
+      double mq = fnlo->GetQMass(iq);
+      cout << "Read from LHAPDF: For quark PDG code " << iq << " the quark mass is = " << mq << endl;
+   }
+   //   double mt = fnlo->GetQMass(6);
+   //   fnlo->SetQMass(6,mt);
 
    // Calculate cross sections
+   fnlo->InitEvolveAlphas();
    fnlo->CalcCrossSection();
    // Uncomment this to actually print out the result
    //   fnlo->PrintCrossSectionsDefault();
@@ -617,6 +663,11 @@ int main(int argc, char** argv) {
    // Example code to print out data points (if available)
    //   fnlo->PrintCrossSectionsData();
    //
+   for (int iq = 10; iq < 2010; iq = iq + 10) {
+      double mu = iq;
+      double as = fnlo->CalcAlphas(mu);
+      printf("%#18.11E %#18.11E\n",mu,as);
+   }
    // ************************************************************************************************
 
 

@@ -80,7 +80,17 @@ void FastNLOAlphas::SetMz(double Mz) {
 }
 
 void FastNLOAlphas::SetNFlavor(int nflavor) {
-   Alphas::SetNf(nflavor);
+   if (nflavor == 0) {
+      Alphas::SetFlavorMatchingOn(true);
+      Alphas::SetNf(6);
+      warn["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
+      warn["SetNFlavor"]<<"You chose a variable Nf with Nfmax=6, i.e. results for Nf other than 5 presumably are wrong!\n";
+   } else if (nflavor == 5) {
+      Alphas::SetNf(nflavor);
+   } else {
+      error["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
+      exit(1);
+   }
 }
 
 void FastNLOAlphas::SetNLoop(int nloop) {

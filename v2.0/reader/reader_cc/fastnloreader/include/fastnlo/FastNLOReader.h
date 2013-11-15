@@ -113,14 +113,14 @@ public:
 
 
    // ---- Pdf interface ---- //
-   void FillPDFCache(double chksum=0.);                                          // Prepare for recalculation of cross section with 'new'/updated pdf.
+   void FillPDFCache(double chksum=0.);   // Prepare for recalculation of cross section with 'new'/updated pdf.
 
-   // ---- alphas cache ---- //
-   void FillAlphasCache();                                                              // prepare for recalculation of cross section with new alpha_s value.
+   // ---- alphas interface ---- //
+   void FillAlphasCache();                // Prepare for recalculation of cross section with new alpha_s value.
+   double CalcAlphas(double Q);           // Allow external access to actual alpha_s(Q) value
 
    // ---- Do the cross section calculation ---- //
    void CalcCrossSection();
-
 
    // ---- Getters for results---- //
    vector < double > GetCrossSection();
@@ -249,7 +249,6 @@ protected:
    vector<double> CalcPDFLinearCombHHC(vector<double> pdfx1, vector<double> pdfx2, int NSubproc);
    void FillAlphasCacheInBlockBv20(FastNLOBlockB* B);
    void FillAlphasCacheInBlockBv21(FastNLOBlockB* B);
-   double CalcAlphas(double Q);
    double CalcReferenceAlphas();
    double CalcNewPDFChecksum();
    double CalcChecksum(double mu);
