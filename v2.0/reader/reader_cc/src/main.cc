@@ -17,8 +17,12 @@
 #include "fastnlo/FastNLOAlphas.h"
 #include "fastnlo/FastNLOCRunDec.h"
 #include "fastnlo/FastNLOLHAPDF.h"
-#include "fastnlo/FastNLOQCDNUMAS.h"
-#include "fastnlo/FastNLOHoppet.h"
+#if HAVE_HOPPET
+#  include "fastnlo/FastNLOQCDNUMAS.h"
+#endif
+#if HAVE_HOPPET
+#  include "fastnlo/FastNLOHoppet.h"
+#endif
 #include "fastnlo/FastNLOUser.h"
 #include "fastnlo/FastNLODiffUser.h"
 
@@ -576,10 +580,14 @@ int main(int argc, char** argv) {
       fnlo = new FastNLOLHAPDF(tablename);
    } else if (AsEvolCode == "RUNDEC") {
       fnlo = new FastNLOCRunDec(tablename);
+#if HAVE_QCDNUM
    } else if (AsEvolCode == "QCDNUM") {
       fnlo = new FastNLOQCDNUMAS(tablename);
+#endif
+#if HAVE_HOPPET
    } else if (AsEvolCode == "HOPPET") {
       fnlo = new FastNLOHoppet(tablename);
+#endif
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
       exit(1);
