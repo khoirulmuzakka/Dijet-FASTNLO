@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = gnu
 # The main targets, here the libtool plugin libraries to build
 # TBD: Better select the "main" targets ...
 # TBD: Uncomment here or below to install additional scenarios
-#lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
+lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #
@@ -12,9 +12,9 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2222b.la
 #   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
 #   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
-   lib_LTLIBRARIES = libfnl3412fy0.la libfnl3412fy1.la libfnl3412fy2.la libfnl3412fy3.la libfnl3412fy4.la
+#   lib_LTLIBRARIES = libfnl3412fy0.la libfnl3412fy1.la libfnl3412fy2.la libfnl3412fy3.la libfnl3412fy4.la
    lib_LTLIBRARIES += libfnl2352.la
-#   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 #   lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la
 #   lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la libfnl2332dptmax.la libfnl2332dnf6.la
 #   lib_LTLIBRARIES += libfnl3332y0.la libfnl3332y1.la libfnl3332y2.la libfnl3332y3.la libfnl3332y4.la libfnl3332y5.la libfnl3332y6.la
@@ -28,8 +28,8 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
 # v22
-   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
-   lib_LTLIBRARIES += libfnl2352v20andv22.la
+#   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
+#   lib_LTLIBRARIES += libfnl2352v20andv22.la
 endif
 
 #
@@ -138,9 +138,9 @@ libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
 libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
 # v22
-libfnl5002pt12_la_SOURCES	= fnl5002pt12.cc $(AM_SOURCES)
-libfnl2352v22_la_SOURCES        = fnl2352v22.cc          $(AM_SOURCES)
-libfnl2352v20andv22_la_SOURCES        = fnl2352v20andv22.cc          $(AM_SOURCES)
+#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc $(AM_SOURCES)
+#libfnl2352v22_la_SOURCES        = fnl2352v22.cc          $(AM_SOURCES)
+#libfnl2352v20andv22_la_SOURCES        = fnl2352v20andv22.cc          $(AM_SOURCES)
 
 
 # Example how to add a jet algo interface locally in this directory
@@ -186,7 +186,7 @@ if HAVE_FASTJET
 endif
 endif
 
-#v22 force 
+#v22 force
 libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v20andv22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit

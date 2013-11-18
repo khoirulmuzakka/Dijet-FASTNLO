@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 06.02.2009
 #
-# Create distribution and installation package for fastNLO v2 
+# Create distribution and installation package for fastNLO v2
 #
 # -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
@@ -146,7 +146,7 @@ if test "x$ZNPDF" = "x"; then
          AC_MSG_ERROR([No CTEQ-PDF library found. Please install CTEQ-PDF first. Configuration aborted!])
       else
          AC_SUBST([ZNPDFLIBPATH], [`dirname $syscteqpdf`])
-      fi 
+      fi
    else
       AC_SUBST([ZNPDFLIBPATH], [`dirname $precteqpdf`])
    fi
@@ -198,7 +198,7 @@ if test "x$LHPDF" = "x"; then
          AC_MSG_ERROR([No LHPDF library found. Please install LHPDF first. Configuration aborted!])
       else
          AC_SUBST([LHPDFLIBPATH], [`dirname $syslhpdf`])
-      fi 
+      fi
    else
       AC_SUBST([LHPDFLIBPATH], [`dirname $prelhpdf`])
    fi
@@ -431,7 +431,7 @@ fi
 AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" != "x")
 AM_CONDITIONAL(HAVE_LATEXDVIPDFM, test "x$LATEX" != "x" && test "x$DVIPDFM" != "x")
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
+# Add subversion revision number, recipe from Autotools by J. Calcote
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
 if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];
