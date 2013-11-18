@@ -17,7 +17,7 @@
 #include "fastnlo/FastNLOAlphas.h"
 #include "fastnlo/FastNLOCRunDec.h"
 #include "fastnlo/FastNLOLHAPDF.h"
-#if HAVE_HOPPET
+#if HAVE_QCDNUM
 #  include "fastnlo/FastNLOQCDNUMAS.h"
 #endif
 #if HAVE_HOPPET
