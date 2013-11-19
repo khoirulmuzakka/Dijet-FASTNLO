@@ -9,6 +9,9 @@ namespace std {
    %template(vectord2) vector<vector<double> >;
 };
 
+%ignore *::operator[];
+%rename("PrintMessage") speaker::print;
+
 %{
 #include "../fastnloreader/include/fastnlo/FastNLOReader.h"
 #include "../fastnloreader/include/fastnlo/FastNLOUser.h"
@@ -24,6 +27,3 @@ namespace std {
 %include "../fastnloreader/include/fastnlo/FastNLOAlphas.h"
 %include "../fastnloreader/include/fastnlo/CRunDec.h"
 %include "../fastnloreader/include/fastnlo/Alphas.h"
-
-
-
