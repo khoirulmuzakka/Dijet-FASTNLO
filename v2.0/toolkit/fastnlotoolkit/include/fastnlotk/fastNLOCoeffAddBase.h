@@ -18,8 +18,8 @@ public:
    virtual ~fastNLOCoeffAddBase(){;}
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
-   virtual int Write(ostream *table, int option = 0);
-   virtual int Copy(fastNLOCoeffAddBase* other);
+   virtual void Write(ostream *table,double n=1);
+   virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
 
 
@@ -53,9 +53,8 @@ public:
    double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; } 
    double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; } 
 
-   void Add(fastNLOCoeffAddBase* other);
    bool IsReference() const {return IRef>0;};
-
+   bool IsCompatible(const fastNLOCoeffAddBase& other) const;
 
 protected:
    fastNLOCoeffAddBase();

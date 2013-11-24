@@ -29,7 +29,8 @@ public:
    fastNLOInterpolBase(double min, double max);
    virtual ~fastNLOInterpolBase(void);
    
-   vector<pair<int,double> > GetNodeValues(double val);
+   const vector<pair<int,double> >& GetNodeValues(double val);
+   vector<pair<int,double> >* GetNodeValuesPtr(double val);
    
    void MakeGrids(fastNLOGrid::GridType type, int nNodes);
    void MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodes);
@@ -52,7 +53,8 @@ protected:
    vector<double> MakeGridFromHGrid(vector<double> g);
    vector<double> MakeLinearGrid(double min, double max, int nNodes);
 
-   virtual vector<pair<int,double> > CalcNodeValues(double val) = 0;
+   //virtual vector<pair<int,double> > CalcNodeValues(double val) = 0;
+   virtual void CalcNodeValues(vector<pair<int,double> >& nodes, double val) = 0;
 
    int FindLargestPossibleNode(double);
 

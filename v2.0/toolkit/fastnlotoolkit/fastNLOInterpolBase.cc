@@ -46,7 +46,22 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
 //______________________________________________________________________________
 
 
-vector<pair<int,double> > fastNLOInterpolBase::GetNodeValues(double x){
+ 
+vector<pair<int,double> >* fastNLOInterpolBase::GetNodeValuesPtr(double x){
+   if ( x==fLastVal ) return &fNodes; // nothing todo. I know the nodes already.
+   else {
+      bool InRange = CheckX(x);
+      //       if ( !InRange ) { // standard return, if there is no
+      // 	 //fRetNodes = vector<pair<int,double> > ()
+      // 	 //return fRetNodes;
+      //       }
+      fLastVal = x;
+      CalcNodeValues(fNodes,x);
+      return &fNodes;
+   }
+}
+
+const vector<pair<int,double> >& fastNLOInterpolBase::GetNodeValues(double x){
    if ( fHgrid.empty() ) warn["GetNodeValues"]<<"There is no grid."<<endl;
 
    if ( x==fLastVal ) return fNodes; // nothing todo. I know the nodes already.
@@ -58,7 +73,7 @@ vector<pair<int,double> > fastNLOInterpolBase::GetNodeValues(double x){
    }
 
    fLastVal = x;
-   fNodes = CalcNodeValues(x);
+   CalcNodeValues(fNodes,x);
    return fNodes;
 }
 

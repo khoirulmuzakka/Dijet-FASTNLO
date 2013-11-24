@@ -16,11 +16,15 @@ using namespace fastNLO;
 using namespace say;
 
 
+//______________________________________________________________________________
 fastNLOReader::fastNLOReader(): fastNLOTable() {
    SetClassName("fastNLOReader");
 }
 
+
+//______________________________________________________________________________
 fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
+   //SetGlobalVerbosity(DEBUG);
    SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
    fCoeffData          = NULL;
@@ -33,18 +37,16 @@ fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
    fAlphasCached        = 0.;
    fPDFCached           = 0.;
    SetFilename(filename);
- }
+}
+
 
 //______________________________________________________________________________
-
-
-
 fastNLOReader::~fastNLOReader(void) {
 }
 
 
 
-
+//______________________________________________________________________________
 void fastNLOReader::SetFilename(string filename) {
    debug["SetFilename"]<<"New filename="<<filename<<endl;
    ffilename    = filename;
@@ -53,9 +55,6 @@ void fastNLOReader::SetFilename(string filename) {
 
 
 //______________________________________________________________________________
-
-
-
 void fastNLOReader::Init() {
    debug["Init"]<<endl;
 
@@ -171,8 +170,6 @@ void fastNLOReader::Init() {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::InitScalevariation() {
    debug["InitScalevariation"]<<endl;
    fScaleFacMuR  = 1.;
@@ -226,11 +223,7 @@ void fastNLOReader::InitScalevariation() {
 }
 
 
-
-
 //______________________________________________________________________________
-
-
 double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
    debug["SetScaleVariation"]<<"Setting to scalevar="<<scalevar<<endl;
    // ------------------------------------------------
@@ -295,9 +288,7 @@ double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
 }
 
 
-
 //______________________________________________________________________________
-
 bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , bool SetOn) {
    //
    // 'Activate' contribution to be considered in the calculation
@@ -368,8 +359,6 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
 
 
 //______________________________________________________________________________
-
-
 int fastNLOReader::GetNScaleVariations() const {
    if (GetIsFlexibleScaleTable()) {
       info["GetNScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can choose all desired scale variations."<<endl;
@@ -397,9 +386,8 @@ int fastNLOReader::GetNScaleVariations() const {
    }
 }
 
+
 //______________________________________________________________________________
-
-
 vector < double > fastNLOReader::GetScaleFactors() const {
    if (GetIsFlexibleScaleTable()) {
       info["GetScaleFactors"]<<"This is a 'flexible scale table', therefore you can choose all desired scale variations."<<endl;
@@ -411,8 +399,6 @@ vector < double > fastNLOReader::GetScaleFactors() const {
 
 
 //______________________________________________________________________________
-
-
 vector < double > fastNLOReader::GetCrossSection() {
    // Get fast calculated NLO cross section
    if (XSection.empty()) CalcCrossSection();
@@ -421,16 +407,14 @@ vector < double > fastNLOReader::GetCrossSection() {
 
 
 //______________________________________________________________________________
-
-
 vector < double > fastNLOReader::GetKFactors() {
    // Get ratio of fast calculated NLO to LO cross section
    if (XSection.empty()) CalcCrossSection();
    return kFactor;
 }
 
-//______________________________________________________________________________
 
+//______________________________________________________________________________
 vector < double > fastNLOReader::GetQScales(int irelord) {
    // Get XSection weighted Q scale in bin
    if (XSection.empty()) CalcCrossSection();
@@ -441,9 +425,8 @@ vector < double > fastNLOReader::GetQScales(int irelord) {
    }
 }
 
+
 //______________________________________________________________________________
-
-
 vector < double > fastNLOReader::GetReferenceCrossSection() {
    // Get reference cross section from direct nlojet++ calculation
    if (XSectionRef.empty() && XSectionRef_s1.empty()) {
@@ -458,10 +441,8 @@ vector < double > fastNLOReader::GetReferenceCrossSection() {
    return XSectionRef;
 }
 
+
 //______________________________________________________________________________
-
-
-
 void fastNLOReader::CalcReferenceCrossSection() {
    //
    //  Initialize the internal arrays for the reference cross
@@ -513,8 +494,6 @@ void fastNLOReader::CalcReferenceCrossSection() {
 
 
 //______________________________________________________________________________
-
-
 bool fastNLOReader::PrepareCache() {
    // check pdf cache
    const double PDFcks = CalcNewPDFChecksum();
@@ -545,9 +524,6 @@ bool fastNLOReader::PrepareCache() {
 
 
 //______________________________________________________________________________
-
-
-
 void fastNLOReader::CalcCrossSection() {
    debug["CalcCrossSection"]<<endl;
    //
@@ -638,9 +614,9 @@ void fastNLOReader::CalcCrossSection() {
       QScale[i]    = QScale[i]/XSection[i];
    }
 }
+
+
 //______________________________________________________________________________
-
-
 void fastNLOReader::CalcAposterioriScaleVariation() {
    double scalefac       = fScaleFacMuR/fScaleFacMuF;
    debug["CalcAposterioriScaleVariation"]<<"scalefac="<<scalefac<<endl;
@@ -670,10 +646,7 @@ void fastNLOReader::CalcAposterioriScaleVariation() {
 }
 
 
-
 //______________________________________________________________________________
-
-
 void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    //debug["CalcCrossSectionv21"]<<"B->fname="<<B->GetName()<<"\tNpow="<<B->GetNpow()<<"\tIsLO="<<IsLO<<endl;
    //
@@ -726,8 +699,6 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    debug["CalcCrossSectionv20"]<<"Npow="<<c->GetNpow()<<"\tIsLO="<<IsLO<<endl;
    //
@@ -758,9 +729,8 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    }
 }
 
+
 //______________________________________________________________________________
-
-
 void fastNLOReader::SetUnits(EUnits Unit) {
    if (fUnits != Unit) {
       fUnits  = Unit;
@@ -772,8 +742,6 @@ void fastNLOReader::SetUnits(EUnits Unit) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillAlphasCache() {
    debug["FillAlphasCache"]<<endl;
    //
@@ -815,8 +783,6 @@ void fastNLOReader::FillAlphasCache() {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    //
    //  Internal method for filling alpha_s cache
@@ -846,8 +812,6 @@ ist in total. Aborted."<<endl;
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillAlphasCacheInBlockBv21(fastNLOCoeffAddFlex* c) {
    //
    //  Internal method for filling alpha_s cache
@@ -867,9 +831,6 @@ void fastNLOReader::FillAlphasCacheInBlockBv21(fastNLOCoeffAddFlex* c) {
 
 
 //______________________________________________________________________________
-
-
-
 double fastNLOReader::CalcAlphas(double Q) {
    //
    //  Internal method for calculating the alpha_s(mu)
@@ -879,8 +840,6 @@ double fastNLOReader::CalcAlphas(double Q) {
 
 
 //______________________________________________________________________________
-
-
 double fastNLOReader::CalcReferenceAlphas() {
    double mu = 0;
    if (GetIsFlexibleScaleTable()) {
@@ -897,8 +856,6 @@ double fastNLOReader::CalcReferenceAlphas() {
 
 
 //______________________________________________________________________________
-
-
 double fastNLOReader::CalcNewPDFChecksum() {
    // calculate a PDF checksum to
    // decide, whether PDF cache has to be refilled
@@ -924,8 +881,6 @@ double fastNLOReader::CalcNewPDFChecksum() {
 
 
 //______________________________________________________________________________
-
-
 double fastNLOReader::CalcChecksum(double mufac) {
    debug["CalcChecksum"]<<"Calculate checksum of 13 flavors, 3 mu_f values, and 3 x-values, for scalefac="<<mufac<<endl;
    double cks = 0;
@@ -947,9 +902,6 @@ double fastNLOReader::CalcChecksum(double mufac) {
 
 
 //______________________________________________________________________________
-
-
-
 bool fastNLOReader::TestAlphas() {
    const double as = CalcAlphas(91.18);
    if (as < 0.01 || as > 0.5) {
@@ -963,9 +915,6 @@ bool fastNLOReader::TestAlphas() {
 
 
 //______________________________________________________________________________
-
-
-
 bool fastNLOReader::TestXFX() {
    vector<double> pdftest = GetXFX(1.e-2,10);
    if (pdftest.size() != 13) {
@@ -987,8 +936,6 @@ bool fastNLOReader::TestXFX() {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillPDFCache(double chksum) {
    debug["FillPDFCache"]<<"Passed chksum="<<chksum<<". Do not recalculate checksum (which calls InitPDF()) if chksum!=0."<<endl;
    //
@@ -1055,8 +1002,6 @@ void fastNLOReader::FillPDFCache(double chksum) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsDISv20"]<<endl;
    // todo: flag IScaleDep should indicate whether scale variations may exist or not.
@@ -1084,8 +1029,6 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
    debug["FillBlockBPDFLCsDISv21"]<<endl;//<<"CoeffTable = "<<endl;
 
@@ -1137,8 +1080,6 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar; // Use IScaleDep
    double scalefac       = fScaleFacMuF/c->GetScaleFactor(scaleVar);
@@ -1174,8 +1115,6 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    debug["FillBlockBPDFLCsHHCv21"]<<endl;
    if (c->PdfLcMuVar.empty()) {
@@ -1260,7 +1199,6 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
 
 
 //______________________________________________________________________________
-
 void fastNLOReader::SetExternalFuncForMuR(double(*Func)(double,double)) {
    if (!GetIsFlexibleScaleTable()) {
       warn["SetExternalFuncForMuR"]<<"This is not a flexible-scale table and SetExternalFuncForMuR has no impact.\n";
@@ -1279,8 +1217,6 @@ void fastNLOReader::SetExternalFuncForMuR(double(*Func)(double,double)) {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::SetExternalFuncForMuF(double(*Func)(double,double)) {
    if (!GetIsFlexibleScaleTable()) {
       warn["SetExternalFuncForMuF"]<<"This is not a flexible-scale table and SetExternalFuncForMuF has no impact.\n";
@@ -1299,10 +1235,6 @@ void fastNLOReader::SetExternalFuncForMuF(double(*Func)(double,double)) {
 
 
 //______________________________________________________________________________
-
-
-
-
 void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX MuX) {
    //
    //  For MuVar tables this method sets the functional form of
@@ -1344,19 +1276,18 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::SetMuRFunctionalForm(EScaleFunctionalForm func) {
    SetFunctionalForm(func,kMuR);
 }
+
+
+//______________________________________________________________________________
 void fastNLOReader::SetMuFFunctionalForm(EScaleFunctionalForm func) {
    SetFunctionalForm(func,kMuF);
 }
 
 
 //______________________________________________________________________________
-
-
 bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    debug["SetScaleFactorsMuRMuF"]<<"Setting to scale factors xmur = "<<xmur<<" and xmuf = "<<xmuf<<endl;
    //
@@ -1483,9 +1414,6 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
 
 //______________________________________________________________________________
-
-
-
 void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
    if (!GetIsFlexibleScaleTable()) {
       info<<"fastNLO. Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_LO()->GetScaleDescription()<<endl;
@@ -1543,7 +1471,6 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
 
 
 //_____________________________________________________________________________
-
 double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, double scalefac) {
    //
    //  Calculate the scales with the defined function and the
@@ -1576,30 +1503,37 @@ double fastNLOReader::FuncMixedOver1(double scale1 , double scale2) {
    return (sqrt((pow(scale1,2) + pow(scale2,2))  / 1.));
 }
 
+
 //______________________________________________________________________________
 double fastNLOReader::FuncMixedOver2(double scale1 , double scale2) {
    return (sqrt((pow(scale1,2) + pow(scale2,2))  / 2.));
 }
+
 
 //______________________________________________________________________________
 double fastNLOReader::FuncMixedOver4(double scale1 , double scale2) {
    return (sqrt((pow(scale1,2) + pow(scale2,2))  / 4.));
 }
 
+
 //______________________________________________________________________________
 double fastNLOReader::FuncLinearMean(double scale1 , double scale2) {
    return (scale1 + scale2) / 2.;
 }
 
+
 //______________________________________________________________________________
 double fastNLOReader::FuncLinearSum(double scale1 , double scale2) {
    return scale1 + scale2;
 }
+
+
 //______________________________________________________________________________
 double fastNLOReader::FuncMax(double scale1 , double scale2) {
    if (scale1 > scale2) return scale1;
    else return scale2;
 }
+
 
 //______________________________________________________________________________
 double fastNLOReader::FuncMin(double scale1 , double scale2) {
@@ -1607,17 +1541,14 @@ double fastNLOReader::FuncMin(double scale1 , double scale2) {
    else return scale2;
 }
 
+
 //______________________________________________________________________________
 double fastNLOReader::FuncExpProd2(double scale1 , double scale2) {
    return (scale1 * exp(0.3*scale2));
 }
 
 
-
 //______________________________________________________________________________
-
-
-
 int fastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) const {
    int Id = -1;
    if (BBlocksSMCalc.empty() || bUseSMCalc[eCalc].empty()) {
@@ -1647,10 +1578,13 @@ int fastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) co
 //______________________________________________________________________________
 
 
+
+//______________________________________________________________________________
 void fastNLOReader::PrintTableInfo(const int iprint) const {
    // this function is inherited from fastNLOTable.
    fastNLOTable::PrintTableInfo(iprint);
 }
+
 
 //______________________________________________________________________________
 void fastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
@@ -1711,8 +1645,6 @@ void fastNLOReader::PrintCrossSections() const {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOReader::PrintCrossSectionsWithReference() {
    //
    //  Print Cross sections in NLO, k-factors and Reference table cross sections

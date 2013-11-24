@@ -169,22 +169,21 @@ void fastNLOBase::CloseStream(){
 
 
 
-bool fastNLOBase::IsCompatibleHeader(fastNLOBase* other) const {
-   if(Itabversion!= other->GetItabversion()){
-      printf("fastNLOBase::IsCompatible: Differing Versions of table format: %d and %d\n",Itabversion,other->GetItabversion());
+bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
+   if(Itabversion!= other.GetItabversion()){
+      warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
       return false;
    }
-   if(ScenName!= other->GetScenName()){
-      printf("fastNLOBase::IsCompatible: Differing Names of Scenarios: %s and %s\n",ScenName.c_str(),other->ScenName.c_str());
+   if(Ndata + other.GetNdata() > 1){
+      warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
       return false;
    }
-   if(Ndata + other->GetNdata() > 1){
-      printf("fastNLOBase::IsCompatible: Two tables containing both experimental data are incompatible\n");
-      return false;
+   if(ScenName!= other.GetScenName()){
+      warn["IsCompatibleHeader"]<<"Differing names of scenarios: "<<ScenName.c_str()<<" and "<<other.ScenName.c_str()<<endl;
+      // continue...
    }
-
    return true;
-};
+}
 
 
 // KR: Could replace SetContributionHeader
@@ -192,7 +191,7 @@ void fastNLOBase::SetHeaderDefaults(){
    // TableMagicNo and ITabVersion are defined as constant in fastNLOConstants.h
    SetScenName("tns2000");
    SetContributionHeader();
-};
+}
 
 
 void fastNLOBase::SetContributionHeader(){
@@ -203,7 +202,7 @@ void fastNLOBase::SetContributionHeader(){
    SetNuserInt(0);
    SetNuserFloat(0);
    SetImachine(0);
-};
+}
 
 void fastNLOBase::ResetHeader(){
    debug["ResetHeader"]<<endl;

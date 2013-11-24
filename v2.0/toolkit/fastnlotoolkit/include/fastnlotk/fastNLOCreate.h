@@ -121,8 +121,8 @@ public:
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}			// The number of subprocesses (channels)
    const vector<double>& GetScaleVariations() const { return fScaleFac; }			// Get list of scale variations
 
-   int WriteTable(string filename);								// Write fastNLO table to file <filename>
-   int WriteTable();										// Write fastNLO table to disk.
+   void WriteTable(string filename);								// Write fastNLO table to file <filename>
+   void WriteTable();										// Write fastNLO table to disk.
    void WriteWarmupTable();									// Write the warmup table to disk.
    void MultiplyCoefficientsByBinWidth();							// Multiply all coefficients by binwidth 
    void DivideCoefficientsByBinWidth();								// Divide all coefficients by binwidth 
@@ -138,8 +138,8 @@ protected:
    fastNLOCreate();										// don't use the default constructor. fastNLOCreate is only reasonable with input steering.
    int CreateCoeffTable();									// Create the one (and only) coefficient table
 
-   void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid );
-   double CalcPDFReweight(double x);
+   inline void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid ) const;
+   inline double CalcPDFReweight(double x) const;
    void FillContribution(int scalevar = 0);							// fill contribution into table
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in pp/ppbar
    void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);				// fill flexible scale contribution in DIS
@@ -157,7 +157,7 @@ protected:
    bool CheckWarmupConsistency();								// Check consistency of warmup bin-grid and variables with steering values.
    void UseBinGridFromWarmup();									// Use bin grid as given in the warmup table
    int GetBin();										// get bin number from 'scenario' observables
-   int GetXIndex(int Obsbin,int x1bin,int x2bin);						// get x-index in case of two hadrons.
+   inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;		// get x-index in case of two hadrons.
    int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2);			// get maximum x-index	
    bool fIsWarmup;										// is it a warmup run?
    int  fIOrd;											// order of alpha_s of run
@@ -168,7 +168,7 @@ protected:
    fnloScenario fLastScen;									// keep information of scenario from last 'Fill()'-call
    
    bool CheckWeightIsNan();									// Check if weight is reasonable.
-   void HalfMatrixCheck(int& xmin, int& xmax, int& subproc);					// check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
+   inline void HalfMatrixCheck(int& xmin, int& xmax, int& subproc) const;			// check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
    vector<int> fSymProc;									// necessary for half-matrix notation
    vector<double> fScaleFac;									// Scale factors. Needed for fixed-scale tables
 

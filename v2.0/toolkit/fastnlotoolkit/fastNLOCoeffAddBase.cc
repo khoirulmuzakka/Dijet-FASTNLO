@@ -7,6 +7,7 @@
 using namespace std;
 using namespace fastNLO;
 
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
    //   if(!(!(IDataFlag==1) && !(IAddMultFlag==1))){
    if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==0 ) return true;
@@ -20,18 +21,24 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
    else return false;
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddBase::fastNLOCoeffAddBase(){
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin) : fastNLOCoeffBase(NObsBin) {
    NScaleDep = 0;
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddBase::fastNLOCoeffAddBase(const fastNLOCoeffBase& base ) : fastNLOCoeffBase(base) {
 }
 
 
-
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    CheckCoeffConstants(this);
@@ -41,6 +48,7 @@ int fastNLOCoeffAddBase::Read(istream *table){
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
    CheckCoeffConstants(this);
    char buffer[5257];
@@ -142,11 +150,12 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
    return 0;
 }
 
-int fastNLOCoeffAddBase::Write(ostream *table, int option){
-   cout<<"fastNLOCoeffAddBase::Write(), calling Base::Write()."<<endl;
-   fastNLOCoeffBase::Write(table,option);
-   CheckCoeffConstants(this);
 
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddBase::Write(ostream *table,double) {
+   cout<<"fastNLOCoeffAddBase::Write(), calling Base::Write()."<<endl;
+   fastNLOCoeffBase::Write(table);
+   CheckCoeffConstants(this);
    *table << IRef << endl;
    *table << IScaleDep << endl;
    *table << Nevt << endl;
@@ -192,7 +201,6 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
 	 }
       }
    }
-   cout<<" 10"<<endl;
    if(NFragFunc>0){
       for(int i=0;i<fNObsBins;i++){
 	 *table << Nztot[i] << endl;
@@ -213,31 +221,47 @@ int fastNLOCoeffAddBase::Write(ostream *table, int option){
 	 *table << ScaleDescript[i][j] << endl;
       }
    }
-
-   //! v2.1 store NScaleDep here
-   //! *table << NScaleDep << endl;
-   cout<<"fastNLOCoeffAddBase. Writing coefficients."<<endl;
-   return 0;
-}
-
-int fastNLOCoeffAddBase::Copy(fastNLOCoeffAddBase* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
-   iostream* buffer = new iostream(streambuf);
-   other->Write(buffer);
-   *buffer << tablemagicno << endl;
-   this->Read(buffer);
-   delete buffer;
-   delete streambuf;
-   return(0);
-}
-
-void fastNLOCoeffAddBase::Add(fastNLOCoeffAddBase* other){
-   //    double w1 = (double)Nevt / (Nevt+other->Nevt);
-   //    double w2 = (double)other->Nevt / (Nevt+other->Nevt);
-   Nevt += other->Nevt;
 }
 
 
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other){
+   //    double w1 = (double)Nevt / (Nevt+other.Nevt);
+   //    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
+   Nevt += other.Nevt;
+}
+
+
+//________________________________________________________________________________________________________________ //
+bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
+   // chek CoeffBase variables
+   if ( ! ((fastNLOCoeffBase*)this)->IsCompatible(other)) return false;
+   if ( IRef != other.GetIRef() ) {
+      //warn["IsCompatible"]<<""<<endl;
+      return false;
+   }
+   if ( IScaleDep != other.GetIScaleDep() ) {
+      //warn["IsCompatible"]<<""<<endl;
+      return false;
+   }
+   if ( Npow != other.GetNpow() ) {
+      //warn["IsCompatible"]<<""<<endl;
+      return false;
+   }
+   if ( GetNPDF() != other.GetNPDF() ) {
+      //warn["IsCompatible"]<<""<<endl;
+      return false;
+   }
+   if ( NSubproc != other.GetNSubproc() ) {
+      //warn["IsCompatible"]<<""<<endl;
+      return false;
+   }
+   // succesful!
+   return true;
+}
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::GetNxmax(int i) const {
    int nxmax = 0;
    switch (NPDFDim) {
@@ -253,6 +277,8 @@ int fastNLOCoeffAddBase::GetNxmax(int i) const {
    return nxmax;
 };
 
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
    int xbin = 0;
    switch (NPDFDim) {
@@ -391,9 +417,8 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<double > >*  v, int dim0 , 
   }
 }
 
+
 //________________________________________________________________________________________________________________ //
-
-
 void fastNLOCoeffAddBase::Print() const {
    fastNLOCoeffBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddBase ****************\n");

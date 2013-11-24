@@ -7,6 +7,8 @@
 using namespace std;
 using namespace fastNLO;
 
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
    bool ret = fastNLOCoeffAddBase::CheckCoeffConstants(c,quiet);
    if ( ret && c->GetNScaleDep() == 0 ) return true;
@@ -20,25 +22,34 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
    else return false;
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFix::fastNLOCoeffAddFix(){
    SetClassName("fastNLOCoeffAddFix");
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) : fastNLOCoeffAddBase(NObsBin) {
    SetClassName("fastNLOCoeffAddFix");
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFix::fastNLOCoeffAddFix(const fastNLOCoeffBase& base) : fastNLOCoeffAddBase(base) {
    SetClassName("fastNLOCoeffAddFix");
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
    return 0;
 }
 
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::ReadRest(istream *table){
    CheckCoeffConstants(this);
    fastNLOCoeffAddBase::ReadCoeffAddBase(table);
@@ -47,7 +58,7 @@ void fastNLOCoeffAddFix::ReadRest(istream *table){
 }
 
 
-
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    CheckCoeffConstants(this);
 
@@ -88,9 +99,10 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
 }
 
 
-int fastNLOCoeffAddFix::Write(ostream *table, int option){
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::Write(ostream* table,double Nevt){
    CheckCoeffConstants(this);
-   fastNLOCoeffAddBase::Write(table,option);
+   fastNLOCoeffAddBase::Write(table);
 
    for(int i=0;i<NScaleDim;i++){
       *table << Nscalevar[i] << endl;
@@ -101,36 +113,28 @@ int fastNLOCoeffAddFix::Write(ostream *table, int option){
 	 *table << ScaleFac[i][j] << endl;
       }
    }
-   int nsn = WriteTable( &ScaleNode  , table );
+
+   int nsn = WriteTable( ScaleNode  , table , Nevt);
    //printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of ScaleNode.\n",nsn);
-   int nst = WriteTable( &SigmaTilde , table , (bool)(option & DividebyNevt) , Nevt );
+   //int nst = WriteTable( &SigmaTilde , table , Nevt );
+   int nst = WriteTable( SigmaTilde , table , Nevt);
    //printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of SigmaTilde.\n",nst);
    printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of FASTNLO v2.0 tables.\n",nst+nsn);
-   return 0;
 }
 
-int fastNLOCoeffAddFix::Copy(fastNLOCoeffAddFix* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
-   iostream* buffer = new iostream(streambuf);
-   other->Write(buffer);
-   *buffer << tablemagicno << endl;
-   this->Read(buffer);
-   delete buffer;
-   delete streambuf;
 
-   return(0);
-}
-
-void fastNLOCoeffAddFix::Add(fastNLOCoeffAddFix* other){
-   double w1 = (double)Nevt / (Nevt+other->Nevt);
-   double w2 = (double)other->Nevt / (Nevt+other->Nevt);
-   Nevt += other->Nevt;
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddFix& other){
    CheckCoeffConstants(this);
-   AddTableToAnotherTable( &SigmaTilde , &(other->SigmaTilde) ,w1 , w2 );
+   double w1 = (double)Nevt / (Nevt+other.Nevt);
+   double w2 = (double)other.Nevt / (Nevt+other.Nevt);
+   Nevt += other.Nevt;
+   AddTableToAnotherTable( SigmaTilde , other.SigmaTilde ,w1 , w2 );
 }
 
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::GetTotalScalevars() const {
    int totalscalevars=1;
    for(int scaledim=0;scaledim<NScaleDim;scaledim++){
@@ -139,6 +143,8 @@ int fastNLOCoeffAddFix::GetTotalScalevars() const {
    return totalscalevars;
 }
 
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::GetTotalScalenodes() const {
    if ( !ScaleNode.empty() ) return ScaleNode[0][0][0].size();
    else return 0;
@@ -152,6 +158,7 @@ int fastNLOCoeffAddFix::GetTotalScalenodes() const {
 }
 
 
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFix ****************\n");

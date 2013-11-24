@@ -7,14 +7,19 @@
 using namespace std;
 using namespace fastNLO;
 
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffBase::fastNLOCoeffBase() : PrimalScream("fastNLOCoeffBase"){
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) : PrimalScream("fastNLOCoeffBase") {
    fNObsBins = NObsBin;
 }
 
-int fastNLOCoeffBase::Read(istream *table){
+
+//________________________________________________________________________________________________________________ //
+int fastNLOCoeffBase::Read(istream* table){
    // basic read function.
    // reads in only 'base'-variables.
    debug["Read"]<<endl;
@@ -24,7 +29,8 @@ int fastNLOCoeffBase::Read(istream *table){
 }
 
 
-int fastNLOCoeffBase::ReadBase(istream *table){
+//________________________________________________________________________________________________________________ //
+int fastNLOCoeffBase::ReadBase(istream* table){
    debug["ReadBase"]<<endl;
    table->peek();
    if (table->eof()){
@@ -71,7 +77,8 @@ int fastNLOCoeffBase::ReadBase(istream *table){
 }
 
 
-int fastNLOCoeffBase::EndReadCoeff(istream *table){
+//________________________________________________________________________________________________________________ //
+int fastNLOCoeffBase::EndReadCoeff(istream* table){
    //debug["EndReadCoeff"]<<endl;
    int key = 0;
    *table >> key;
@@ -89,7 +96,8 @@ int fastNLOCoeffBase::EndReadCoeff(istream *table){
 }
 
 
-int fastNLOCoeffBase::Write(ostream *table, int option){
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffBase::Write(ostream* table,double) {
    debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
    *table << tablemagicno << endl;
    *table << IXsectUnits << endl;
@@ -108,25 +116,48 @@ int fastNLOCoeffBase::Write(ostream *table, int option){
    for(unsigned int i=0;i<CodeDescript.size();i++){
       *table << CodeDescript[i] << endl;
    }
-
-   return 0;
-}
-
-int fastNLOCoeffBase::Copy(fastNLOCoeffBase* other){
-   debug["Copy"]<<endl;
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
-   iostream* buffer = new iostream(streambuf);
-   other->Write(buffer);
-   *buffer << tablemagicno << endl;
-   this->Read(buffer);
-   delete buffer;
-   delete streambuf;
-
-   return(0);
 }
 
 
+//________________________________________________________________________________________________________________ //
+bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
+   if( fNObsBins != other.GetNObsBin() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( IXsectUnits != other.GetIXsectUnits() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( IDataFlag != other.GetIDataFlag() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( IAddMultFlag != other.GetIAddMultFlag() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( IContrFlag1 != other.GetIContrFlag1() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( IContrFlag2 != other.GetIContrFlag2() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   if( NScaleDep != other.GetNScaleDep() ){
+      //warn["IsCompatible"]<<"."<<endl;
+      return false;
+   }
+   // chcekc descripts here ?!
+   //bool potentialcompatible = true;
+   //vector < string > CtrbDescript;
+   //vector < string > CodeDescript;
+   return true;
+}
 
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::StripWhitespace(string &str) const {
    for(string::iterator achar = str.end(); achar>str.begin();achar--) {
       if (*achar==0x20 || *achar==0x00){
@@ -136,9 +167,6 @@ void fastNLOCoeffBase::StripWhitespace(string &str) const {
       }
    }
 }
-
-
-
 
 
 //________________________________________________________________________________________________________________ //
@@ -250,158 +278,27 @@ int fastNLOCoeffBase::ReadTable(vector<double >* v, istream *table ){
   return nn;
 }
 
-/*
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, ostream *table , bool DivByNevt , int Nevt  ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
- 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
-	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
-	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
-	      for(unsigned int i6=0;i6<v->at(i0)[i1][i2][i3][i4][i5].size();i6++){
-		if( DivByNevt && Nevt>0){
- 		  *table << v->at(i0)[i1][i2][i3][i4][i5][i6] / Nevt << endl;
- 		}else{
- 		  *table << v->at(i0)[i1][i2][i3][i4][i5][i6] << endl;
-		}
-		nn++;
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
-  return nn;
-}
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<vector<vector<vector<vector<double > > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
- 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
-	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
-	    for(unsigned int i5=0;i5<v->at(i0)[i1][i2][i3][i4].size();i5++){
-	      if( DivByNevt && Nevt>0){
- 		*table << v->at(i0)[i1][i2][i3][i4][i5] / Nevt << endl;
-	      }else{
-		*table << v->at(i0)[i1][i2][i3][i4][i5] << endl;
-	      }
-	      nn++;
-	    }
-	  }
-	}
-      }
-    }
-  }
-  return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<vector<vector<vector<double > > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
- 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
-	  for(unsigned int i4=0;i4<v->at(i0)[i1][i2][i3].size();i4++){
-	    if( DivByNevt && Nevt>0){
- 	      *table << v->at(i0)[i1][i2][i3][i4] / Nevt << endl;
-		}else{
-	      *table << v->at(i0)[i1][i2][i3][i4] << endl;
-	    }
-	    nn++;
-	  }
-	}
-      }
-    }
-  }
-  return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<vector<vector<double > > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
- 	for(unsigned int i3=0;i3<v->at(i0)[i1][i2].size();i3++){
-	  if( DivByNevt && Nevt>0){
- 	    *table << v->at(i0)[i1][i2][i3] / Nevt << endl;
-	  }else{
-	    *table << v->at(i0)[i1][i2][i3] << endl;
-	  }
-	  nn++;
-	}
-      }
-    }
-  }
-  return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<vector<double > > >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      for(unsigned int i2=0;i2<v->at(i0)[i1].size();i2++){
-	if( DivByNevt && Nevt>0){
-	  *table << v->at(i0)[i1][i2] / Nevt << endl;
-	}else{
-	  *table << v->at(i0)[i1][i2] << endl;
-	}
-	nn++;
-      }
-    }
-  }
-  return nn;
-}
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<vector<double > >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    for(unsigned int i1=0;i1<v->at(i0).size();i1++){
-      if( DivByNevt && Nevt>0){
-	*table << v->at(i0)[i1] / Nevt << endl;
-      }else{
-	*table << v->at(i0)[i1] << endl;
-      }
+int fastNLOCoeffBase::WriteTable( const vector<double >& v, ostream *table , double Nevt ) const {
+   if( Nevt == 0) return -1000;
+   int nn = 0;
+   for(unsigned int i0=0;i0<v.size();i0++){
+      *table << v[i0] / Nevt << endl;
       nn++;
-    }
-  }
-  return nn;
-}
-
-*/
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable(vector<double >* v, ostream *table , bool DivByNevt , int Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    if( DivByNevt && Nevt>0){
-      *table << v->at(i0) / Nevt << endl;
-    }else{
-      *table << v->at(i0) << endl;
-    }
-    nn++;
-  }
-  return nn;
+   }
+   return nn;
 }
 
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteFlexibleTable(vector<double >* v, ostream *table , bool DivByNevt , int Nevt , bool nProcLast ){
+int fastNLOCoeffBase::WriteFlexibleTable(const vector<double >& v, ostream *table, bool nProcLast, double Nevt) const {
    int nn = 1;
-   if ( !nProcLast )*table << v->size() << endl;
-   for(unsigned int i0=0;i0<v->size();i0++){
-      if( DivByNevt && Nevt>0)	*table << v->at(i0) / Nevt << endl;
-      else			*table << v->at(i0) << endl;
+   if ( Nevt == 0 ) return -1000;
+   if ( !nProcLast )*table << v.size() << endl;
+   for(unsigned int i0=0;i0<v.size();i0++){
+      *table << v[i0] / Nevt << endl;
       nn++;
    }
    return nn;
@@ -413,6 +310,19 @@ void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >* vSum, vector<dou
   for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
     (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
   }
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >& vSum, const vector<double >& vAdd, double w1, double w2) const {
+   if ( vSum.size() != vAdd.size() ) {
+      error["AddTableToAnotherTable"]<<"Cannot add tables with different size. [v1] s1="<<vSum.size()<<", s2="<<vAdd.size()<<endl;
+   }
+   else {
+      for ( unsigned int i = 0 ; i<vSum.size() ; i++ ){
+	 vSum[i] =  w1*vSum[i] + w2*vAdd[i];
+      }
+   }
 }
 
 

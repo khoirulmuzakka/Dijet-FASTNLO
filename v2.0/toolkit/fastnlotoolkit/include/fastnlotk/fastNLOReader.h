@@ -21,7 +21,11 @@ public:
    void SetUnits(fastNLO::EUnits Unit);
    bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
    int ContrId(const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder) const;
-
+   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* c=NULL) const {                            // Get, if this table is a 'flexible scale' table or not.
+      if ( c ) return  c->GetNScaleDep() >= 3;
+      else return c->GetIsFlexibleScale();
+   }
+ 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_R
    void SetMuFFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_F
@@ -57,10 +61,6 @@ public:
 
    int GetNScaleVariations() const;                                                     // Get number of available scale variations
    vector < double > GetScaleFactors() const;                                           // Get list of available scale factors
-   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* c=NULL) const {                    // Get, if this table is a 'flexible scale' table or not.
-      if ( c ) return  c->GetNScaleDep() >= 3;
-      else return BBlocksSMCalc[0][0]->GetNScaleDep() >= 3;
-   }
 
    // ---- Print outs ---- //
    void PrintTableInfo(const int iprint = 0) const;                                     //  Print basic info about fastNLO table and its contributions

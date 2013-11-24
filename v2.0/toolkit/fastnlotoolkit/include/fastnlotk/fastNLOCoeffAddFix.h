@@ -18,9 +18,8 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    void ReadRest(istream *table);
-   virtual int Write(ostream *table, int option = 0);
-   virtual int Copy(fastNLOCoeffAddFix* other);
-   void Add(fastNLOCoeffAddFix* other);
+   virtual void Write(ostream *table, double Nevt=1);
+   virtual void Add(const fastNLOCoeffAddFix& other);
    virtual void Print() const;
    
    int GetTotalScalevars() const ;

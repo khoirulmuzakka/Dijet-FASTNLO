@@ -16,8 +16,7 @@ public:
    virtual ~fastNLOCoeffData(){;};
    int  Read(istream *table);
    void ReadRest(istream *table);
-   virtual int Write(ostream *table, int option = 0);
-   virtual int Copy(fastNLOCoeffData* other);
+   virtual void Write(ostream *table,double n=1) ;
    virtual void Print() const;
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
 

@@ -19,10 +19,9 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
    int Read(istream *table);
    void ReadRest(istream *table);
-   virtual int Write(ostream *table, int option = 0);
-   virtual int Copy(fastNLOCoeffAddFlex* other);
+   virtual void Write(ostream *table, double Nevt=1);
    virtual void Print() const;
-   void Add(fastNLOCoeffAddFlex* other);
+   virtual void Add(const fastNLOCoeffAddFlex& other);
 
    template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false);
    int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false );

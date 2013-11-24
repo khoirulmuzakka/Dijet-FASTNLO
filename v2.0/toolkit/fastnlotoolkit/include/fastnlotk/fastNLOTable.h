@@ -33,9 +33,9 @@ class fastNLOTable : public fastNLOBase {
    void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
 
    int ReadTable();
-   int WriteTable();
-   int WriteTable(string filename);
-   bool IsCompatible(fastNLOTable* other) const;
+   void WriteTable(double Nevt=1);
+   void WriteTable(string filename);
+   bool IsCompatible(const fastNLOTable& other) const;
 
    int GetNObsBin() const {return NObsBin;}
 
@@ -78,15 +78,16 @@ class fastNLOTable : public fastNLOBase {
    int WriteCoeffTable(int no,ofstream* outstream );
    int WriteCoeffTableDividebyN(int no);
    void DeleteAllCoeffTable();
-   int CreateCoeffBase(int no);
+   //int CreateCoeffBase(int no);
    int CreateCoeffTable(int no,fastNLOCoeffBase *newcoeff);
+   void AddTable(const fastNLOTable& rhs);
 
 
 private:
    bool cmp(const double x1, const double x2) const;
-   bool cmp(const vector < double > x1, const vector < double > x2) const;
-   bool cmp(const vector < vector < double > > x1,const vector < vector < double > > x2) const;
-   bool cmp(const vector < vector < pair<double,double > > > x1,const vector < vector < pair<double,double > > > x2) const;
+   bool cmp(const vector<double>& x1, const vector<double >& x2) const;
+   bool cmp(const vector<vector<double> >& x1,const vector<vector<double > >& x2) const;
+   bool cmp(const vector<vector<pair<double,double> > >&  x1,const vector<vector<pair<double,double> > >& x2) const;
 
 
 protected:

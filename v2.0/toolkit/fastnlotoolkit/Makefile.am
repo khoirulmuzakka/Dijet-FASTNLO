@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = include
+SUBDIRS =
 
 #
 # Targets
@@ -35,7 +35,9 @@ libfastnlotoolkit_la_CPPFLAGS = $(my_include_dirs) -I${includedir}
 #
 # C++ compiler flags
 #
-libfastnlotoolkit_la_CXXFLAGS = -g -O0 -Wall
+libfastnlotoolkit_la_CXXFLAGS = 
+#-g -O2
+# -Wall
 # Debug flags
 #libfastnlotoolkit_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 

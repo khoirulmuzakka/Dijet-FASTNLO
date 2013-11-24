@@ -7,8 +7,10 @@
 using namespace std;
 using namespace fastNLO;
 
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet)  {
-   if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==1 ) return true;
+  if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==1 ) return true;
    else if ( c->GetIAddMultFlag()!=1 ) {
       if ( !quiet)
 	 say::error["fastNLOCoeffMult::CheckCoeffConstants"]
@@ -24,26 +26,35 @@ bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    else return true;
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffMult::fastNLOCoeffMult(){
    SetClassName("fastNLOCoeffMult");
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin) : fastNLOCoeffBase(NObsBin){
    SetClassName("fastNLOCoeffMult");
    fNObsBins = NObsBin;
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffMult::fastNLOCoeffMult(const fastNLOCoeffBase& base) : fastNLOCoeffBase(base) {
    SetClassName("fastNLOCoeffMult");
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffMult::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
    return 0;
 }
 
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffMult::ReadRest(istream *table){
    CheckCoeffConstants(this);
    ReadCoeffMult(table);
@@ -51,6 +62,7 @@ void fastNLOCoeffMult::ReadRest(istream *table){
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffMult::ReadCoeffMult(istream *table){
    char buffer[5257];
    *table >> Nuncorrel;
@@ -94,10 +106,10 @@ int fastNLOCoeffMult::ReadCoeffMult(istream *table){
 }
 
 
-int fastNLOCoeffMult::Write(ostream *table, int option){
-   fastNLOCoeffBase::Write(table,option);
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffMult::Write(ostream *table,double) {
+   fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
-
    *table << Nuncorrel << endl;
    for(int i=0;i<Nuncorrel;i++){
       *table << UncDescr[i]  << endl;
@@ -117,22 +129,10 @@ int fastNLOCoeffMult::Write(ostream *table, int option){
 	 *table << CorrHi[i][j] << endl;
       }
    }
-   // end of IAddMultFlag==1
-   return 0;
-}
-
-int fastNLOCoeffMult::Copy(fastNLOCoeffMult* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
-   iostream* buffer = new iostream(streambuf);
-   other->Write(buffer);
-   *buffer << tablemagicno << endl;
-   this->Read(buffer);
-   delete buffer;
-   delete streambuf;
-   return(0);
 }
 
 
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffMult::Print() const {
   printf(" **************** FastNLO Table: CoeffMult ****************\n");
   fastNLOCoeffBase::Print();

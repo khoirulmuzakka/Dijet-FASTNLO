@@ -37,7 +37,7 @@ public:
    void SetHeaderDefaults();						// Set some default values 
    void ResetHeader();							// Reset variables to default values
    void SetContributionHeader();					// 	
-   bool IsCompatibleHeader(fastNLOBase* other) const;			// Compare header with header of another table
+   bool IsCompatibleHeader(const fastNLOBase& other) const;		// Compare header with header of another table
 
    // getter/setters
    string GetFilename() const {return ffilename;}

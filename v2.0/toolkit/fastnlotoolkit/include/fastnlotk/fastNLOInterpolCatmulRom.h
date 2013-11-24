@@ -25,7 +25,8 @@ public:
    fastNLOInterpolCatmulRom(double min, double max);
    ~fastNLOInterpolCatmulRom(void);
    
-   vector<pair<int,double> > CalcNodeValues(double val);
+   //   vector<pair<int,double> > CalcNodeValues(double val);
+   void CalcNodeValues(vector<pair<int,double> >& nodes, double val);
 
 protected:
 

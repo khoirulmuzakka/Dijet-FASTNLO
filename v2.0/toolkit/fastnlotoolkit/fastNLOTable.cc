@@ -5,20 +5,27 @@
 using namespace std;
 using namespace fastNLO;
 
+// ___________________________________________________________________________________________________
 //fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
 fastNLOTable::fastNLOTable(){
    SetClassName("fastNLOTable");
 }
 
+
+// ___________________________________________________________________________________________________
 fastNLOTable::fastNLOTable(string name) : fastNLOBase(name) {
    SetClassName("fastNLOTable");
    ReadTable();
 }
 
+
+// ___________________________________________________________________________________________________
 fastNLOTable::~fastNLOTable(){
    // delete fCoeff tables...
 }
 
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::ReadTable(){
    // open file and read header
    fastNLOBase::ReadTable();
@@ -29,6 +36,8 @@ int fastNLOTable::ReadTable(){
    return 0;
 }
 
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::ReadCoeffTables(istream* table){
    int nblocks = GetNcontrib()+GetNdata();
    for(int i=0;i<nblocks;i++){
@@ -40,6 +49,8 @@ int fastNLOTable::ReadCoeffTables(istream* table){
    return 0;
 }
 
+
+// ___________________________________________________________________________________________________
 fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB, istream *table){
    // take coeffbase and identify type of contribution.
    //  - create instance of correct full coefficient table
@@ -80,7 +91,8 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
 }
 
 
-int fastNLOTable::WriteTable() {
+// ___________________________________________________________________________________________________
+void fastNLOTable::WriteTable(double Nevt) {
    info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
    OpenFileRewrite();
    fastNLOBase::WriteHeader(ofilestream);
@@ -90,20 +102,22 @@ int fastNLOTable::WriteTable() {
    WriteScenario(ofilestream);
    for(int i=0;i<GetNcontrib();i++){
       info["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
-      WriteCoeffTableDividebyN(i);
+      GetCoeffTable(i)->Write(ofilestream,Nevt);
    }
    CloseFileWrite();
-   return 0;
 }
 
-int fastNLOTable::WriteTable(string filename) {
+
+// ___________________________________________________________________________________________________
+void fastNLOTable::WriteTable(string filename) {
    string tempfilename = filename;
    SetFilename(filename);
-   int ret = WriteTable();
+   WriteTable();
    SetFilename(tempfilename);
-   return ret;
 }
 
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::ReadScenario(istream *table){
    table->peek();
    if (table->eof()){
@@ -216,6 +230,8 @@ int fastNLOTable::ReadScenario(istream *table){
    return 0;
 }
 
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::WriteScenario(ostream *table){
    *table << tablemagicno << endl;
    *table << Ipublunits << endl;
@@ -259,85 +275,156 @@ int fastNLOTable::WriteScenario(ostream *table){
 }
 
 
-bool fastNLOTable::IsCompatible(fastNLOTable* other) const {
-   if(Ipublunits != other->Ipublunits){
-      warn["IsCompatible"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other->Ipublunits<<endl;
+// ___________________________________________________________________________________________________
+bool fastNLOTable::IsCompatible(const fastNLOTable& other) const {
+   if ( !IsCompatibleHeader(other) ) return false;
+   bool potentialcompatible = true;
+   if(Ipublunits != other.Ipublunits){
+      warn["IsCompatible"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
       return false;
    }
-   if(ScDescript != other->ScDescript){
-      warn["IsCompatible"]<<"Differing ScDescript found."<<endl;
+   if(ScDescript != other.ScDescript){
+      warn["IsCompatible"]<<"Differing scale description found."<<endl;
+      potentialcompatible = false;
+   }
+   if(!cmp(Ecms,other.Ecms)){
+      warn["IsCompatible"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
       return false;
    }
-   if(!cmp(Ecms,other->Ecms)){
-      warn["IsCompatible"]<<"Differing Ecms found: "<<Ecms<<" and "<<other->Ecms<<endl;
+   if(ILOord != other.ILOord){
+      warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
       return false;
    }
-   if(ILOord != other->ILOord){
-      warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other->GetLoOrder()<<endl;
+   if(NObsBin != other.NObsBin){
+      warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other.NObsBin<<endl;
       return false;
    }
-   if(NObsBin != other->NObsBin){
-      warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other->NObsBin<<endl;
+   if(NDim != other.NDim){
+      warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
       return false;
    }
-   if(NDim != other->NDim){
-      warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other->NDim<<endl;
-      return false;
+   if(DimLabel != other.DimLabel){
+      warn["IsCompatible"]<<"Differing label of observables found."<<endl;
+      potentialcompatible = false;
    }
-   if(DimLabel != other->DimLabel){
-      warn["IsCompatible"]<<"Differing DimLabel found."<<endl;
-      return false;
-   }
-   if(IDiffBin != other->IDiffBin){
+   if(IDiffBin != other.IDiffBin){
       warn["IsCompatible"]<<"Differing IDiffBin found."<<endl;
       return false;
    }
-//    if(!cmp(LoBin,other->LoBin)){
-   if(!cmp(Bin,other->Bin)){
+   //    if(!cmp(LoBin,other.LoBin)){
+   if(!cmp(Bin,other.Bin)){
       warn["IsCompatible"]<<"Differing Bin boundaries found."<<endl;
       return false;
    }
-   //    if(!cmp(UpBin,other->UpBin)){
+   //    if(!cmp(UpBin,other.UpBin)){
    //       warn["IsCompatible"]<<"Differing UpBin found."<<endl;
    //       return false;
    //    }
-   if(!cmp(BinSize,other->BinSize)){
-      warn["IsCompatible"]<<"Differing BinSize found."<<endl;
+   if(!cmp(BinSize,other.BinSize)){
+      warn["IsCompatible"]<<"Differing bin sizes found."<<endl;
       return false;
    }
-   if(INormFlag != other->INormFlag){
-      warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other->INormFlag<<endl;
+   if(INormFlag != other.INormFlag){
+      warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
       return false;
    }
    if(INormFlag>1){
-      if(DenomTable != other->DenomTable){
+      if(DenomTable != other.DenomTable){
          warn["IsCompatible"]<<"Differing DenomTable found."<<endl;
          return false;
       }
    }
    if(INormFlag>0){
       for(int i=0;i<NObsBin;i++){
-         if(IDivLoPointer[i] != other->IDivLoPointer[i]){
+         if(IDivLoPointer[i] != other.IDivLoPointer[i]){
             warn["IsCompatible"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
             return false;
          }
-         if(IDivUpPointer[i] != other->IDivUpPointer[i]){
+         if(IDivUpPointer[i] != other.IDivUpPointer[i]){
             warn["IsCompatible"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
             return false;
          }
       }
    }
-
+   if ( !potentialcompatible ) warn["IsCompatible"]<<"Some labels have differing values, but relevant variables seem to be compatible. Continuing."<<endl;
    return true;
-};
+
+}
 
 
 // ___________________________________________________________________________________________________
-int fastNLOTable::CreateCoeffBase(int no){
-   //fastNLOCoefficients* blockb = new fastNLOCoefficients(NObsBin,ILOord);
-   fastNLOCoeffBase* blockb = new fastNLOCoeffBase(NObsBin);
-   return CreateCoeffTable(no,blockb);
+void fastNLOTable::AddTable(const fastNLOTable& other){
+   // add another table to this table.
+   // Add either further contributions (higher-orders, data, non-pert corr, etc...)
+   // or increase statistics of fixed-order calc.
+   //
+   if ( !IsCompatible(other) ) {
+      warn["AddTable"]<<"Table not compatible with this table. Ignoring command."<<endl;
+      return;
+   }
+
+   // loop over all contributions from 'other'-table
+   const bool quiet = true;
+   const int nc = other.GetNcontrib() + other.GetNdata();
+   for ( int ic=0 ; ic<nc; ic++ ) {
+      bool wasAdded = false;
+      
+      // is additive? 
+      if ( other.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
+	 fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
+
+	 // find compatible contribution, or add
+	 for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
+	    fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
+	    if ( lhs->IsCompatible(*cadd) ) { // found compatible table
+	       if ( wasAdded ) 
+		  error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
+	       else {
+		  debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
+		  if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
+		     ((fastNLOCoeffAddFlex*)lhs)->Add((fastNLOCoeffAddFlex&)*cadd);
+		  wasAdded = true;
+	       }
+	    }
+	 }
+      }
+      else {
+	 // check if this data or 'mult' contribution already exists (which should not happen)
+	 cout<<"todo. Check if data table already exists!."<<endl;
+      }
+
+      // couldn't find a corresponding contribution.
+      // add this contribution as new contrib.
+      if ( !wasAdded ) {
+	 debug["AddTable"]<<"Adding new contribution to table."<<endl;
+	 cout<<"Adding this contrib as new contbi."<<endl;
+	 fastNLOCoeffBase* add = other.GetCoeffTable(ic);
+	 if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
+	    add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
+	    Ndata++;
+	 }
+	 else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) ) 
+	    add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
+	 else if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) ) 
+	    add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
+  	 else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) ) 
+ 	    add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
+ 	 CreateCoeffTable(fCoeff.size(),add);
+	 ///	 Ndata++, and ncontrib++, n
+      }
+   }
 }
+   
+
+// // ___________________________________________________________________________________________________
+// int fastNLOTable::CreateCoeffBase(int no){
+//    //fastNLOCoefficients* blockb = new fastNLOCoefficients(NObsBin,ILOord);
+//    fastNLOCoeffBase* blockb = new fastNLOCoeffBase(NObsBin);
+//    return CreateCoeffTable(no,blockb);
+// }
+
+
+// ___________________________________________________________________________________________________
 //int fastNLOTable::CreateCoeffTable(int no,fastNLOCoefficients *newblockb){
 int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
    if((no+1)>(int)fCoeff.size())
@@ -347,32 +434,9 @@ int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
    Ncontrib = fCoeff.size();
    return 0;
 }
-int fastNLOTable::WriteCoeffTable(int no){
-   if((no)<(int)fCoeff.size()){
-      return fCoeff[no]->Write(ofilestream);
-   }else{
-      error["WriteCoeffTable"]<<"Table no. "<<no<<" does not exist, only up to "<<fCoeff.size()<<". Stopping."<<endl;
-      exit(2);
-   }
-}
-int fastNLOTable::WriteCoeffTable(int no,ofstream* outstream ){
-   if((no)<(int)fCoeff.size()){
-      return fCoeff[no]->Write(outstream);
-   }else{
-      error["WriteCoeffTable"]<<"Table no. "<<no<<" does not exist, only up to "<<fCoeff.size()<<". Stopping."<<endl;
-      exit(2);
-   }
-}
-int fastNLOTable::WriteCoeffTableDividebyN(int no){
-   if((no)<(int)fCoeff.size()){
-      //return fCoeff[no]->Write(ofilestream,fastNLOCoefficients::DividebyNevt);
-      fCoeff[no]->Print();
-      return fCoeff[no]->Write(ofilestream,fastNLOCoeffBase::DividebyNevt);
-   }else{
-      error["WriteCoeffTable"]<<"Table no. "<<no<<" does not exist, only up to "<<fCoeff.size()<<". Stopping."<<endl;
-      exit(2);
-   }
-}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOTable::DeleteAllCoeffTable(){
    for (size_t i = 0; i < fCoeff.size(); ++i)
       delete fCoeff[i];
@@ -381,7 +445,7 @@ void fastNLOTable::DeleteAllCoeffTable(){
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOTable::cmp(const double x1, const double x2) const{
+bool fastNLOTable::cmp(const double x1, const double x2) const {
    double norm;
    if (x1>0.){
       norm = x1;
@@ -391,7 +455,7 @@ bool fastNLOTable::cmp(const double x1, const double x2) const{
    return((fabs(x1-x2)/norm)<1e-7);
 }
 
-bool fastNLOTable::cmp(const vector < double > x1,const vector < double > x2) const{
+bool fastNLOTable::cmp(const vector<double>& x1,const vector<double>& x2) const {
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
       result = result & cmp (x1[i],x2[i]);
@@ -399,7 +463,7 @@ bool fastNLOTable::cmp(const vector < double > x1,const vector < double > x2) co
    return result;
 }
 
-bool fastNLOTable::cmp(vector < vector < double > > x1,  vector < vector < double > > x2) const{
+bool fastNLOTable::cmp(const vector<vector<double> >& x1, const vector<vector<double> >& x2) const {
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
       result = result & cmp (x1[i],x2[i]);
@@ -407,7 +471,7 @@ bool fastNLOTable::cmp(vector < vector < double > > x1,  vector < vector < doubl
    return result;
 }
 
-bool fastNLOTable::cmp(vector < vector < pair<double,double > > > x1,  vector < vector < pair<double,double > > > x2) const{
+bool fastNLOTable::cmp(const vector<vector<pair<double,double> > >& x1, const vector<vector<pair<double,double> > >& x2) const {
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
       for(unsigned int j = 0; j<x1[i].size() ;j++ ){
@@ -418,6 +482,7 @@ bool fastNLOTable::cmp(vector < vector < pair<double,double > > > x1,  vector < 
 }
 
 
+// ___________________________________________________________________________________________________
 void fastNLOTable::SetLoOrder(int LOOrd){
    ILOord = LOOrd;
    //    for(unsigned int i = 0; i<fCoeff.size() ;i++ ){
@@ -426,6 +491,7 @@ void fastNLOTable::SetLoOrder(int LOOrd){
 }
 
 
+// ___________________________________________________________________________________________________
 void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
    // Set label for dimension
    //
@@ -460,6 +526,7 @@ void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
 }
 
 
+// ___________________________________________________________________________________________________
 //fastNLOCoefficients* fastNLOTable::GetCoeffTable(int no) const {
 fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
    if ( no >= (int)fCoeff.size() ){
@@ -471,6 +538,7 @@ fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
 }
 
 
+// ___________________________________________________________________________________________________
 int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    // Get Bin number of this event if you use a single or double differential binning
    // return -1 if no bin was found
@@ -777,11 +845,15 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
 }
 */
 
+
+// ___________________________________________________________________________________________________
 void fastNLOTable::Print() const {
    fastNLOBase::Print();
    PrintScenario();
 }
 
+
+// ___________________________________________________________________________________________________
 void fastNLOTable::PrintScenario() const {
   printf("\n **************** FastNLO Table: Scenario ****************\n\n");
   printf("    Ipublunits                    %d\n",Ipublunits);

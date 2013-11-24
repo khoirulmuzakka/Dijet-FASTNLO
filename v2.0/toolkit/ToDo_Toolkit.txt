@@ -1,14 +1,13 @@
 
 Toolkit todo:
 -----------------------------------------------------
- - implement fixed-scale hhc for nlojet
+ - fix labels in header of warmup-table bin-grid (dim1 <-> dim2)
+ - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
  - Division by binsize for coefficients ?!
  - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
  - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion'
  - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - reader testen fuer NNLO
- - Use 'const reference' or pointers as return values of interpolation grids
- - Use 'const reference' for 'FillContribution' functions
  - Write documentation (e.g. twiki)
  - full-matrix schreibweise
  - Creator for Referenztabellen
@@ -33,3 +32,6 @@ Toolkit done
 ------------------------------------------------------
  - implement DIS flexible-scale
  - Write out constants of warmup-run into warmup-file
+ - implement fixed-scale hhc for nlojet
+ - Use 'const reference' or pointers as return values of interpolation grids
+ - Use 'const reference' for 'FillContribution' functions

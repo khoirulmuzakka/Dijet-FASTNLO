@@ -33,7 +33,8 @@ fastNLOInterpolCatmulRom::~fastNLOInterpolCatmulRom(void) {
 //    return ret;
 // }
 
-vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
+//vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
+void fastNLOInterpolCatmulRom::CalcNodeValues(vector<pair<int,double> >& nodes, double x) {
    // Performs interpolation of value value on grid 'fgrid'.
    // uses distance measure 'fdm'
    // returns for for all relevant grid points
@@ -41,7 +42,7 @@ vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
    //    the vale, that this node obtains.
    //
 
-   const int nS = 4; // number of nodes that receive contributions from this interpolation
+   static const unsigned int nS = 4; // number of nodes that receive contributions from this interpolation
 
    // --- relative distance delta - in function fdm H(x)
    // deltascale (Interpol(.,.,.delta,.): relative distance of value to node 'nnode'
@@ -63,8 +64,7 @@ vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
    // nmod:  modified number of next node to the left (to be used for storage - relevant only at boundaries)
    // kernel: array(4) containing the interpolation kernel
 
-
-   vector <double> kern(nS);
+   static vector <double> kern(nS);
    // --- Catmul Rom interpolation kernel
    if (nnode == 0 ) { // --- left boundary
       kern[0] = 1.0 - 7.0/6.0*delta - 1.0/6.0*delta*delta + 1.0/3.0*delta*delta*delta;
@@ -92,18 +92,27 @@ vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
    //    cout<<"   x="<<x<<"\tdelta="<<delta<<"\tnnode="<<nnode<<"\tk[3]="<<kern[3]<<"\tg-max="<<fgrid.back()<<"\tnx="<<fgrid.size()<<"\tnf="<<fnmod<<"\tx0b="<<nmod-1<<endl;
 
    // generate return values
-   vector<pair<int,double> >  ret(nS);
-   for ( int i = 0 ; i<nS ; i++ ){
-      ret[i] = make_pair(nmod-1+i,kern[i]);
+   //vector<pair<int,double> >  ret(nS);
+
+
+   nodes.resize(nS);
+   for ( unsigned int i = 0 ; i<nS ; i++ ){
+      nodes[i] = make_pair(nmod-1+i,kern[i]);
    }
 
    if (fLastGridPointWasRemoved ) {
-      if ( ret.back().first==(int)fgrid.size() ) ret.resize(3);
-      if ( ret.back().first==(int)fgrid.size() ) ret.resize(2);
-      if ( ret.back().first==(int)fgrid.size() ) ret.resize(1);
-      if ( ret.back().first==(int)fgrid.size() ) ret.resize(0);
+      if ( nodes.back().first==(int)fgrid.size() ) {
+	 nodes.resize(3);
+	 if ( nodes.back().first==(int)fgrid.size() ) {
+	    nodes.resize(2);
+	    if ( nodes.back().first==(int)fgrid.size() ) {
+	       nodes.resize(1);
+	       if ( nodes.back().first==(int)fgrid.size() ) {
+		  nodes.resize(0);
+	       }
+	    }
+	 }
+      }
    }
-
-   return ret;
 }
 

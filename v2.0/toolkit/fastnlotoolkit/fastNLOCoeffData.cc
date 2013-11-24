@@ -7,6 +7,8 @@
 using namespace std;
 using namespace fastNLO;
 
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
    if ( c->GetIDataFlag() == 1 ) return true;
    else {
@@ -16,25 +18,34 @@ bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    }
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffData::fastNLOCoeffData(){
    SetClassName("fastNLOCoeffData");
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffData::fastNLOCoeffData(int NObsBin) : fastNLOCoeffBase(NObsBin) {
    SetClassName("fastNLOCoeffData");
 }
 
+
+//________________________________________________________________________________________________________________ //
 fastNLOCoeffData::fastNLOCoeffData(const fastNLOCoeffBase& base) : fastNLOCoeffBase(base) {
    SetClassName("fastNLOCoeffData");
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffData::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
    return 0;
 }
 
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffData::ReadRest(istream *table){
    CheckCoeffConstants(this);
    ReadCoeffData(table);
@@ -42,6 +53,7 @@ void fastNLOCoeffData::ReadRest(istream *table){
 }
 
 
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffData::ReadCoeffData(istream *table){
    char buffer[5257];
    CheckCoeffConstants(this);
@@ -95,8 +107,9 @@ int fastNLOCoeffData::ReadCoeffData(istream *table){
 }
 
 
-int fastNLOCoeffData::Write(ostream *table, int option){
-   fastNLOCoeffBase::Write(table,option);
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffData::Write(ostream *table,double) {
+   fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
 
    //if(IDataFlag==1){
@@ -126,21 +139,10 @@ int fastNLOCoeffData::Write(ostream *table, int option){
 	 *table << matrixelement[i][j] << endl;
       }
    }
-   return 0;
-}
-
-int fastNLOCoeffData::Copy(fastNLOCoeffData* other){
-   streambuf* streambuf = new stringbuf(ios_base::in | ios_base::out);
-   iostream* buffer = new iostream(streambuf);
-   other->Write(buffer);
-   *buffer << tablemagicno << endl;
-   this->Read(buffer);
-   delete buffer;
-   delete streambuf;
-   return 0;
 }
 
 
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffData::Print() const {
    fastNLOCoeffBase::Print();
    printf("\n **************** FastNLO Table: CoeffData ****************\n\n");
