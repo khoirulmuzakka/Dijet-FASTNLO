@@ -17,14 +17,15 @@
 #include "fastnlo/FastNLOAlphas.h"
 #include "fastnlo/FastNLOCRunDec.h"
 #include "fastnlo/FastNLOLHAPDF.h"
-#if HAVE_QCDNUM
-#  include "fastnlo/FastNLOQCDNUMAS.h"
-#endif
-#if HAVE_HOPPET
-#  include "fastnlo/FastNLOHoppet.h"
-#endif
 #include "fastnlo/FastNLOUser.h"
 #include "fastnlo/FastNLODiffUser.h"
+// Optional:
+// If compiled --with-qcdnum support the following line(s) can be commented in
+//#include "fastnlo/FastNLOQCDNUMAS.h"
+// End --with-qcdnum
+// If compiled --with-hoppet support the following line(s) can be commented in
+//#include "fastnlo/FastNLOHoppet.h"
+// End --with-hoppet
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -65,7 +66,9 @@ int main(int argc, char** argv) {
          man<<"   Give full path(s) if these are not in the cwd."<<endl;
          man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
          man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
-         man<<"   Alternatives are: LHAPDF, RUNDEC, QCDNUM, or HOPPET."<<endl;
+         man<<"   Alternatives are: LHAPDF, RUNDEC, and"<<endl;
+         man<<"                     QCDNUM, or HOPPET, IF compiled with these options!"<<endl;
+         man<<"                     In the latter case please comment in the optional lines in main.cc!"<<endl;
          man<<""<<endl;
          man<<"Use \"_\" to skip changing a default argument."<<endl;
          man<<""<<endl;
@@ -580,16 +583,19 @@ int main(int argc, char** argv) {
       fnlo = new FastNLOLHAPDF(tablename);
    } else if (AsEvolCode == "RUNDEC") {
       fnlo = new FastNLOCRunDec(tablename);
-#if HAVE_QCDNUM
-   } else if (AsEvolCode == "QCDNUM") {
-      fnlo = new FastNLOQCDNUMAS(tablename);
-#endif
-#if HAVE_HOPPET
-   } else if (AsEvolCode == "HOPPET") {
-      fnlo = new FastNLOHoppet(tablename);
-#endif
+      // Optional:
+      // If compiled --with-qcdnum support the following line(s) can be commented in
+      //   } else if (AsEvolCode == "QCDNUM") {
+      //      fnlo = new FastNLOQCDNUMAS(tablename);
+      // End --with-qcdnum
+      // If compiled --with-hoppet support the following line(s) can be commented in
+      //   } else if (AsEvolCode == "HOPPET") {
+      //      fnlo = new FastNLOHoppet(tablename);
+      // End --with-hoppet
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
+      printf("           If you compiled with optional QCDNUM or HOPPET support, please\n");
+      printf("           do not forget to comment in the marked lines in main.cc!\n");
       exit(1);
    }
 
@@ -630,13 +636,13 @@ int main(int argc, char** argv) {
    // The number of loops used for the alpha_s evolution; the LO is nloop = 1, i.e
    // this number corresponds to LHAPDF: getOrderAlphaS + 1
    // Order n PDFs usually should be accompanied by an alpha_s evolution of the same order.
-   int nloop = fnlo->GetNLoop();
-   cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
-   //   fnlo->SetNLoop(2);// NLO
+   // int nloop = fnlo->GetNLoop();
+   // cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
+   fnlo->SetNLoop(2);// NLO
 
-   int nflavor = fnlo->GetNFlavor();
-   cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
-   //   fnlo->SetNFlavor(5);// CTEQ
+   // int nflavor = fnlo->GetNFlavor();
+   // cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
+   fnlo->SetNFlavor(5);// CTEQ
    //   fnlo->SetNFlavor(0);// NNPDF
 
    // Unfortunately, LHAPDF5 has no function to access M_Z!
@@ -648,17 +654,17 @@ int main(int argc, char** argv) {
    fnlo->SetMz(Mz);
 
    // Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
-   double asmz = fnlo->GetAlphasMz(Mz);
-   cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
+   // double asmz = fnlo->GetAlphasMz(Mz);
+   // cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
    //   fnlo->SetAlphasMz(0.1184);// PDG 2013
    fnlo->SetAlphasMz(0.1180);// CT10-NLO
    //   fnlo->SetAlphasMz(0.1190);// NNPDF21-NLO
 
    // Read quark masses
-   for (int iq=1;iq<7;iq++) {
-      double mq = fnlo->GetQMass(iq);
-      cout << "Read from LHAPDF: For quark PDG code " << iq << " the quark mass is = " << mq << endl;
-   }
+   // for (int iq=1;iq<7;iq++) {
+   //    double mq = fnlo->GetQMass(iq);
+   //    cout << "Read from LHAPDF: For quark PDG code " << iq << " the quark mass is = " << mq << endl;
+   // }
    //   double mt = fnlo->GetQMass(6);
    //   fnlo->SetQMass(6,mt);
 
