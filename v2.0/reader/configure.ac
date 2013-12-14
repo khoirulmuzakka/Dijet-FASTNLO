@@ -261,7 +261,8 @@ AC_ARG_ENABLE([pyext],
         [enable_pyext="no"])
 # Basic Python checks
 if test "x$enable_pyext" == "xyes"; then
-   AX_PYTHON_DEVEL([>='2.3.1'])
+# Skip for the moment. AX_PYTHON_DEVEL doesn't work with SLC5!
+#   AX_PYTHON_DEVEL([>='2.3.1'])
    AM_PATH_PYTHON
 fi
 # Check on existence of SWIG to interface to Python
