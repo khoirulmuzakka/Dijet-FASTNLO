@@ -48,10 +48,10 @@ else
    fnlo_cppread_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnloreader
 endif
 if HAVE_QCDNUM
-   fnlo_cppread_LDFLAGS += -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
+   fnlo_cppread_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
 endif
 if HAVE_HOPPET
-   fnlo_cppread_LDFLAGS +=  ${HOPPETLDFLAGS}
+   fnlo_cppread_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
    fnlo_cppread_CPPFLAGS += ${HOPPETCPPFLAGS}
 endif
 
