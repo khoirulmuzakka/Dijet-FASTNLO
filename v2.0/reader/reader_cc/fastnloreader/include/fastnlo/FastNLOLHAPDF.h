@@ -71,8 +71,13 @@ protected:
 
    // ---- LHAPDF vars ---- //
    string fLHAPDFFilename;
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   LHAPDF::PDFSet* PDFSet;
+   LHAPDF::PDF* PDF;
+   #endif
    int fnPDFs;
    int fiPDFMember;
+
 
    double fchksum;
 
@@ -116,7 +121,11 @@ double FastNLOLHAPDF::EvolveAlphas(double Q) const {
    // WARNING: You cannot change alpha_s(Mz), but is is
    // defined with the pdf. 'alphasMz' is not used here!
    //
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   return PDF->alphasQ(Q);
+   #else
    return LHAPDF::alphasPDF(Q);
+   #endif
 }
 
 
@@ -140,6 +149,11 @@ bool FastNLOLHAPDF::InitPDF() {
       return false;
    }
 
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   //Not needed in LHAPDF6 case
+   return true;
+
+   #else
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFFilename);
    //cout << "PDF set name " << fLHAPDFFilename << endl;
@@ -156,6 +170,7 @@ bool FastNLOLHAPDF::InitPDF() {
    }
    fchksum = CalcChecksum(1.);
    return true;
+   #endif
 }
 
 
@@ -168,7 +183,15 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
    //  GetXFX is used to get the parton array from the
    //  pre-defined pdf-interface.
    //
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   vector <double> xfx;
+   for (int id=-6; id<7; id++) {
+      xfx.push_back(PDF->xfxQ(id, xp, muf));
+   }
+   return xfx;
+   #else
    return LHAPDF::xfx(xp,muf);
+   #endif
 }
 
 
@@ -176,13 +199,19 @@ vector<double> FastNLOLHAPDF::GetXFX(double xp, double muf) const {
 
 
 void FastNLOLHAPDF::SetLHAPDFFilename(string filename) {
-   if (filename != fLHAPDFFilename) fchksum = 0;
+
    fLHAPDFFilename = filename;
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = new LHAPDF::PDFSet(filename);
+   fnPDFs = PDFSet->size();
+   #else
+   if (filename != fLHAPDFFilename) fchksum = 0;
    // Reset pdfset member to zero
    fiPDFMember = 0;
    // KR: Reactivated this. Why was it switched off?
    // --> Mass settings etc. can be read from LHAPDF after setting the filename, i.e. the set.
    InitPDF();
+   #endif
 }
 
 
@@ -190,6 +219,9 @@ void FastNLOLHAPDF::SetLHAPDFFilename(string filename) {
 
 
 void FastNLOLHAPDF::SetLHAPDFMember(int set) {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDF = PDFSet->mkPDF(set);
+   #else
    fiPDFMember = set;
    if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember
       debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
@@ -200,6 +232,7 @@ void FastNLOLHAPDF::SetLHAPDFMember(int set) {
       fchksum = 0;
    }
    //InitPDF();
+   #endif
 }
 
 
@@ -217,6 +250,10 @@ void FastNLOLHAPDF::PrintPDFInformation() const {
    // second instance with another pdf. Then also the first one is using this
    // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
    //
+
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   cout << PDFSet->description();
+   #else
    printf(" ##################################################################################\n");
    printf(" #  FastNLOLHAPDF::PrintCurrentLHAPDFInformation.\n");
    printf(" #      Your currently initalized pdf is called:\n");
@@ -224,6 +261,7 @@ void FastNLOLHAPDF::PrintPDFInformation() const {
    printf(" #      Information about current PDFMember in current LHAPDF-file cannot be displayed.\n");
    printf(" #      Please use FastNLOReader::SetLHAPDFMember(int) to choose a pdf-set.\n");
    printf(" ##################################################################################\n");
+   #endif
 }
 
 void FastNLOLHAPDF::SetMz(double Mz) {
