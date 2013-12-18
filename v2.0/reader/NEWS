@@ -1,4 +1,4 @@
-Release Notes for fastNLO_reader version 2.1.0, revision 1562:
+Release Notes for fastNLO_reader version 2.1.0, revision 1563:
 ==============================================================
 
 - Provides optional python interface to C++ library (--enable-pyext)

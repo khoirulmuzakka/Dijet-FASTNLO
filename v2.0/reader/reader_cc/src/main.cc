@@ -678,11 +678,12 @@ int main(int argc, char** argv) {
    // Example code to print out data points (if available)
    //   fnlo->PrintCrossSectionsData();
    //
-   for (int iq = 10; iq < 2010; iq = iq + 10) {
-      double mu = iq;
-      double as = fnlo->CalcAlphas(mu);
-      printf("%#18.11E %#18.11E\n",mu,as);
-   }
+   // Example code to print out alpha_s(Q) values
+   // for (int iq = 10; iq < 2010; iq = iq + 10) {
+   //    double mu = iq;
+   //    double as = fnlo->CalcAlphas(mu);
+   //    printf("%#18.11E %#18.11E\n",mu,as);
+   // }
    // ************************************************************************************************
 
 

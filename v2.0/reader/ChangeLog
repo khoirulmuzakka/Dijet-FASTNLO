@@ -1,4 +1,4 @@
-2013-12-18  New release of the fastNLO_reader package version 2.1.0, revision 1562:
+2013-12-18  New release of the fastNLO_reader package version 2.1.0, revision 1563:
             =======================================================================
             - Provides optional python interface to C++ library (--enable-pyext)
             - Enables optional use of alternative alpha_s evolutions (in C++ only)
