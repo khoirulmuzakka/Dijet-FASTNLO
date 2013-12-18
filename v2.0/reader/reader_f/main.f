@@ -92,6 +92,11 @@ C---  >     tiny(1d0),huge(1d0),precision(1d0)
             WRITE(*,*)'# Usage: ./fnlo-fread [arguments]'
             WRITE(*,*)'# Table input file, def. = table.tab'
             WRITE(*,*)'# PDF set, def. = cteq6m.LHpdf'
+            WRITE(*,*)'#    For LHAPDF5: Give full path(s), '//
+     >           'if the PDF file is not in the cwd.'
+            WRITE(*,*)'#    For LHAPDF6: Drop filename extensions '//
+     >           'and give PDF directory instead.'
+            WRITE(*,*)'# PDF set, def. = cteq6m.LHpdf'
             WRITE(*,*)'# Number of mu_r, mu_f scale settings to '//
      >           'investigate, if possible, def. = 1, max. = 7'
             WRITE(*,*)'#'

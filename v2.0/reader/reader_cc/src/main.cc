@@ -63,7 +63,8 @@ int main(int argc, char** argv) {
          man<<"Usage: ./fnlo-cppread [arguments]"<<endl;
          man<<"Table input file, def. = table.tab"<<endl;
          man<<"PDF set, def. = cteq6m.LHpdf"<<endl;
-         man<<"   Give full path(s) if these are not in the cwd."<<endl;
+         man<<"   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd."<<endl;
+         man<<"   For LHAPDF6: Drop filename extensions and give PDF directory instead."<<endl;
          man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
          man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
          man<<"   Alternatives are: LHAPDF, RUNDEC, and"<<endl;
@@ -647,17 +648,17 @@ int main(int argc, char** argv) {
 
    // Unfortunately, LHAPDF5 has no function to access M_Z!
    //   double Mz = 91.174;  // ABM11
-   double Mz = 91.188;  // CTEQ
+   //   double Mz = 91.188;  // CTEQ
    //   double Mz = 91.187;  // HERAPDF
-   //   double Mz = 91.1876; // MSTW, PDG 2013
+   double Mz = 91.1876; // MSTW, PDG 2013
    //   double Mz = 91.2;    // NNPDF
    fnlo->SetMz(Mz);
 
    // Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
    // double asmz = fnlo->GetAlphasMz(Mz);
    // cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
-   //   fnlo->SetAlphasMz(0.1184);// PDG 2013
-   fnlo->SetAlphasMz(0.1180);// CT10-NLO
+   fnlo->SetAlphasMz(0.1184);// PDG 2013
+   //   fnlo->SetAlphasMz(0.1180);// CT10-NLO
    //   fnlo->SetAlphasMz(0.1190);// NNPDF21-NLO
 
    // Read quark masses

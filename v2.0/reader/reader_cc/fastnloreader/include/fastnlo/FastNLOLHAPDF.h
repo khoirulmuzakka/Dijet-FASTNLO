@@ -142,8 +142,6 @@ bool FastNLOLHAPDF::InitPDF() {
    // security, if multiple instance with different pdfs are instantiated.
    // we always reinizialized the set PDF-set.
 
-   //LHAPDF::setVerbosity(LHAPDF::SILENT);
-   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    if (fLHAPDFFilename == "") {
       error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
@@ -154,6 +152,8 @@ bool FastNLOLHAPDF::InitPDF() {
    return true;
 
    #else
+   //LHAPDF::setVerbosity(LHAPDF::SILENT);
+   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFFilename);
    //cout << "PDF set name " << fLHAPDFFilename << endl;

@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <math.h>
 #include "fastnlo/Alphas.h"
@@ -177,7 +178,7 @@ double Alphas::FBeta(double alphasMz, int nLoop, int nf) {
       return C10 + 1./beta0 * (1./aspi + beta10 * log(aspi) + (beta20-beta102) * aspi  + (beta30/2. - beta10*beta20 + beta103/2.)*aspi2);
    } else {
       printf("Alphas::FBeta(). Error. Only 2-, 3- or 4-loop solution implemented.\n");
-      return 0;
+      exit(1);
    }
 
 }
