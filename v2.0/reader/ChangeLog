@@ -1,3 +1,158 @@
+2013-12-18  New release of the fastNLO_reader package version 2.1.0, revision 1562:
+            =======================================================================
+            - Provides optional python interface to C++ library (--enable-pyext)
+            - Enables optional use of alternative alpha_s evolutions (in C++ only)
+              from RunDec, QCDNUM (--with-qcdnum), or HOPPET (--with-hoppet)
+            - Works with LHAPDF5 or LHAPDF6
+
+
+2013-12-18  rabbertz
+
+    * ChangeLog, NEWS, ToDo_Reader.txt, configure.ac: reader: Update release text files,
+      fix bug for Unversioned directory output of svnversion
+    * Alphas.cc, FastNLOLHAPDF.h, main.cc, main.f: reader: Test release
+
+2013-12-17  sieber
+
+    * FastNLOLHAPDF.h, FastNLOLHAPDF6.h: FastNLOLHAPDF now compatible with
+      LHAPDF5/6Depending which LHAPDF is used, the correct code is
+      compiled.Support for the fortran reader comes for free, nothing has to be
+      changedthere. But beware that cross sections will change due to improved
+      interpolationroutine in LHAPDF.
+
+2013-12-15  rabbertz
+
+    * Makefile.am: reader: Add missing gfortran libs to QCDNUM and HOPPET deps
+
+2013-12-14  rabbertz
+
+    * configure.ac: reader: Drop AX_PYTHON_DEVEL from configure.ac; doesnt work
+      on SLC5
+
+    * main.cc: reader: Deal with optional QCDNUM or HOPPET support
+
+2013-11-19  stober
+
+    * fastnloreader.i: removed swig warning
+
+2013-11-18  rabbertz
+
+    * main.cc: reader: Correct conditional include, thanks to Daniel
+
+    * main.cc: reader: Add some missing #include conditionals for optional libs
+
+2013-11-15  rabbertz
+
+    * FastNLOAlphas.h, FastNLOLHAPDF.h, FastNLOQCDNUMAS.h, FastNLOReader.h,
+      main.cc: reader: some necessary changes to get the alphas interface
+      working in multiple cases
+
+2013-11-12  rabbertz
+
+    * ToDo_Reader.txt, configure.ac: reader: only text changes
+
+2013-11-11  sieber
+
+    * FastNLOLHAPDF.h: make functions virtual
+
+2013-11-11  rabbertz
+
+    * main.cc: reader: work
+
+    * FastNLOAlphas.h, FastNLOLHAPDF.h, Makefile.am: reader: Fix to pyext make;
+      added some setters to GRV and LHAPDF
+
+2013-11-05  sieber
+
+    * Makefile.am, configure.ac: Added with-hoppet option to configure.ac and
+      src Makefile
+
+    * FastNLOHoppet.h: minor changes to Hoppet interface
+
+2013-11-05  rabbertz
+
+    * main.cc: reader: Test main
+
+2013-11-04  sieber
+
+    * FastNLOLHAPDF6.h: First Test with LHAPDF:Works, but cross section is about
+      0.1% differentLHAPDF6 is substantially faster:LHAPDF5: lhgrid + fnlotab
+      read + xs calculation 2.00 sLHAPDF6: lhgrid + fnlotab read + xs
+      calculation 1.20 s
+
+    * FastNLOHoppet.h: Hoppet Interface:Currently onle the Alpha_S evolution of
+      Hoppet is used and a dummy pdf is providedto Hoppet. Nothing changed in
+      the Makefiles and the configure.ac scripts
+
+2013-10-22  rabbertz
+
+    * FastNLOReader.cc, main.cc: reader: Skip check on scalevar existence for
+      flexscale tables; not necessary
+
+2013-10-21  DanielBritzger
+
+    * FastNLOReader.h: remove pi as precompiler variable, due to name-conflict
+      with TMath.h and since a renaming of this variable is not reasonable
+
+2013-10-16  rabbertz
+
+    * reader_autoinstallfiles_ac-2.65_am-1.11.1.tar.gz: Add ax_python macro to
+      slc5 install tarball
+
+2013-10-16  sieber
+
+    * FastNLOQCDNUMAS.h: remove debug statements
+
+    * FastNLOCRunDec.h, FastNLOQCDNUMAS.h: fix some types in crundec and using
+      similar interface in qcdnumas
+
+    * FastNLOCRunDec.h: Fix type of nflavor and nloop
+
+2013-10-16  rabbertz
+
+    * Makefile.am: reader: Add new m4 macro to extra removes
+
+    * FastNLOCRunDec.h, FastNLOReader.h: reader: crundec adaptations
+
+    * configure.ac: reader config, correction for python/swig checks
+
+2013-10-15  rabbertz
+
+    * Makefile.am, main.cc: reader: revert back to original qcdnum ldlibpath
+
+2013-10-15  sieber
+
+    * FastNLOCRunDec.h: FastNLOCrunDec with variable flavors
+
+2013-10-15  rabbertz
+
+    * Makefile.am, configure.ac, main.cc: reader: Add autotools install for
+      Freds and Georg Python extension
+
+2013-10-15  sieber
+
+    * Makefile.am, fastnloreader.i, pyext, setup.py.in: Initial commit of Python
+      extension. Not Yet in reader makefile or in configure.ac
+
+2013-10-15  rabbertz
+
+    * FastNLOQCDNUMAS.h, Makefile.am, configure.ac, main.cc: reader: Add first
+      test version optionally using alpha_s from QCDNUM
+
+2013-10-06  rabbertz
+
+    * Alphas.cc, CRunDec.cc, FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOReader.h,
+      main.cc: Revert unwanted reader changes back to released version 1488
+
+    * Alphas.cc, CRunDec.cc, FastNLOAlphas.h, FastNLOCRunDec.h, FastNLOReader.h,
+      NEWS, README, fastNLO, fastNLOVersion.cc, main.cc, toolkit: Renamed!
+      Daniel's toolkit resides now in toolkit subdir of fastNLO.
+
+2013-09-27  rabbertz
+
+    * NEWS, README: reader: Add missing updates to NEWS and README
+
+
 2013-09-20  New release of the fastNLO_reader package version 2.1.0, revision 1488:
             =======================================================================
             - Enables calculation with LO table alone or with 1-loop

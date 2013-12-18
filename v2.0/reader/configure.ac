@@ -284,11 +284,11 @@ AC_MSG_NOTICE([******************************************])
 AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" == "xyes"])
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
-SVNREV=`svnversion $srcdir | sed 's/:.*//'`
-which svnversion > /dev/null; \
-if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];
+# Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
+SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
+if { ! ( svnversion ) >/dev/null 2>&1 || test "x$SVNREV" = "xexported" || test "x$SVNREV" = "xUnversioned directory"; } ;
   then SVNREV=`cat $srcdir/SVNREV`
-  else echo -n $SVNREV>$srcdir/SVNREV
+  else echo $SVNREV>$srcdir/SVNREV
 fi
 AC_SUBST(SVNREV)
 

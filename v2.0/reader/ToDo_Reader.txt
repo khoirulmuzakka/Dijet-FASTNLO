@@ -1,72 +1,15 @@
-make distcheck fails with "Unversioned Directory" problem ...!?
-
-
-
-LHAPDF:
-- InitPDFSetByName needs LHAPDF properly installed with PDF sets
-  expected where put at install time
-  ---> fails for improper installation
-  ---> fails on the grid where simple the PDF file should be necessary
-
-- InitPDFSet needs local filename to be give with at least rel
-  path, e.g. ./cteq66.LHgrid
-
-
-
-  ToDo List for FastNLOReader
------------------------------
-
-- Implement some 'read fast' switch and 'readfast' PDFLC if
-MuF is calculated using only one scale lookup table
-
-
-- SetPhysUnits.
-Availability of changing units afterward in pb, fb, or anything else
-+ switch to differential units and divide by the bin size
-=> we would need the dimension of both variables, which define the bin grid
-(like GeV and GeV^2 and 1 (for y))
--> just implement some more switch!
-KR: If I understand this correctly then this exists already in v2 format.
-
-
-- @MW, @KR
-Please validate the:
-  3) Comments/documentation throughout the reader
-  4) Class description at the beginning *C *h files
-
-
-- QCDNUM as-evolution
-implement the usage of the internal qcdnum as-evolution.
-KR: Not in a simple basic reader. Also requires external code ...
-
-
-- Printing
-Add additional printout for the cross sections, without showing the
-reference cross section!
-The reference cross section is actually only valuable for the authors for
-testing and validation of the routines.
-
-
-- maybe: improve the check if the table exists and
-maybe improve the error handling.
-KR: Yes. And also the PDF set.
-
-
-- new iostream -> do we need some 'delete iostream'??
-
-
+ToDo List for FastNLOReader
+---------------------------
 
 - LHAPDF name and set
 IMPORTANT!!! since LHAPDF is a singleton, you have to crosscheck if the
 pdf at accessing time (when you calc xfx) is still the same as when initalizing the
 fastNLO reader.
-This is always true for simpel usages. But if smb might want to compare different pdfs, there
+This is always true for simple usages. But if smb might want to compare different pdfs, there
 should be some cross check implemented, if you really use the correct LHAPDF.
 (safe pdf-name and set for cross checks when returning and recalculating cross sections!!!)
 
-
-
--- future work:
+-- future work: fastNLO_toolkit
 restructure the code in such a way, that the SAME code/routines/classes/methods are used
 for the FastNLOReader, than within common/author/creator directory.
 DONE: Now cross check with this code

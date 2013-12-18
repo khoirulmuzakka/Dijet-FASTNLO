@@ -1,3 +1,13 @@
+Release Notes for fastNLO_reader version 2.1.0, revision 1562:
+==============================================================
+
+- Provides optional python interface to C++ library (--enable-pyext)
+- Enables optional use of alternative alpha_s evolutions (C++ only)
+  from RunDec, QCDNUM (--with-qcdnum), or HOPPET (--with-hoppet)
+- Works with LHAPDF5 or LHAPDF6
+
+
+
 Release Notes for fastNLO_reader version 2.1.0, revision 1488:
 ==============================================================
 
