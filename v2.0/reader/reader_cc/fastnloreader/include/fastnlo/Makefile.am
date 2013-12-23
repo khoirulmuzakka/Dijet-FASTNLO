@@ -14,7 +14,7 @@ AUTOMAKE_OPTIONS = gnu
 #
 fastnloincludedir = $(includedir)/fastnlo
 fastnloinclude_HEADERS = FastNLOReader.h FastNLODiffReader.h FastNLODiffUser.h FastNLOBlockB.h Alphas.h speaker.h \
-	FastNLOUser.h FastNLOAlphas.h FastNLOLHAPDF.h FastNLOCRunDec.h CRunDec.h FastNLOQCDNUMAS.h
+	FastNLOUser.h FastNLOAlphas.h FastNLOLHAPDF.h FastNLOCRunDec.h CRunDec.h FastNLOQCDNUMAS.h FastNLOHoppet.h
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
