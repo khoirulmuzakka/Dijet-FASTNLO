@@ -10,7 +10,7 @@
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
 # Define project fastNLO
-AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SUBDIRS([reader processor/converter])
@@ -442,7 +442,7 @@ AC_SUBST(SVNREV)
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
-AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
+AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"])
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
