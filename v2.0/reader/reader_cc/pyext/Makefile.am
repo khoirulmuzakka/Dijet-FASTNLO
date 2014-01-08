@@ -11,7 +11,7 @@ AUTOMAKE_OPTIONS = gnu
 
 if ENABLE_PYEXT
 
-EXTRA_DIST = fastnloreader.i fastnloreader_wrap.cpp fastnloreader.py
+EXTRA_DIST = fastnloreader.i
 fastnloreader_wrap.cpp fastnloreader.py: fastnloreader.i
 	swig -c++ -python -I$(top_srcdir)/include -o fastnloreader_wrap.cpp $<
 
