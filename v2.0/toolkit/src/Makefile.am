@@ -15,30 +15,33 @@ AUTOMAKE_OPTIONS = gnu
 # The C++ fastnlo toolkit example program
 #
 if HAVE_LHAPDFCONFIG
-   bin_PROGRAMS = fnlo-cppread fnlo-merge fastNLO
+# Some stuff not checked in ...!
+#   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-merge fastNLO
+   bin_PROGRAMS = fnlo-tk-cppread
 endif
 
 #
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
-fnlo_cppread_SOURCES = fnlo-cppread.cc
-fnlo_merge_SOURCES = fnlo-merge.cc
-fastNLO_SOURCES = fastNLO.cc
+fnlo_tk_cppread_SOURCES = fnlo-cppread.cc
+# Some stuff not checked in ...!
+#fnlo_tk_merge_SOURCES = fnlo-merge.cc
+#fastNLO_SOURCES = fastNLO.cc
 
 #
 # Preprocessor flags
 #
 my_include_dirs = -I${srcdir}/../fastnlotoolkit/include -I${top_builddir}/fastnlotoolkit/include -I${top_srcdir}/fastnlotoolkit/include
-fnlo_cppread_CPPFLAGS = $(my_include_dirs) -I${LHAPDFINCLUDEPATH} -I${includedir}
-fnlo_merge_CPPFLAGS = $(my_include_dirs) -I${includedir}
+fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${LHAPDFINCLUDEPATH} -I${includedir}
+fnlo_tk_merge_CPPFLAGS = $(my_include_dirs) -I${includedir}
 fastNLO_CPPFLAGS = $(my_include_dirs) -I${LHAPDFINCLUDEPATH} -I${includedir}
 
 #
 # C++ compiler flags
 #
-fnlo_cppread_CXXFLAGS = -g -O2 -Wall
-fnlo_merge_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_merge_CXXFLAGS = -g -O2 -Wall
 fastNLO_CXXFLAGS = -g -O2 -Wall
 # Debug flags
 #fnlo_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
@@ -48,12 +51,12 @@ fastNLO_CXXFLAGS = -g -O2 -Wall
 #
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
-fnlo_merge_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
+fnlo_tk_merge_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
 if HAVE_LHAPDFCONFIG
-   fnlo_cppread_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnlotoolkit
+   fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnlotoolkit
    fastNLO_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnlotoolkit
 else
-   fnlo_cppread_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnlotoolkit
+   fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnlotoolkit
    fastNLO_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnlotoolkit
 endif
 

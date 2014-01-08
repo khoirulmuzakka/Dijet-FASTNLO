@@ -68,10 +68,10 @@ public:
    void SetIAddMultFlag(int n){IAddMultFlag = n;}
 
    int GetIContrFlag1() const {return IContrFlag1;}
-   void SetIContrFlag1(int n){IContrFlag1 = n;} 
+   void SetIContrFlag1(int n){IContrFlag1 = n;}
 
    int GetIContrFlag2() const {return IContrFlag2;}
-   void SetIContrFlag2(int n){IContrFlag2 = n;} 
+   void SetIContrFlag2(int n){IContrFlag2 = n;}
 
    int GetNScaleDep() const {return NScaleDep;}
    void SetNScaleDep(int n){NScaleDep = n;}
@@ -81,12 +81,12 @@ public:
 
    int GetNObsBin() const { return fNObsBins;}
 
-   bool GetIsFlexibleScale() const { return (NScaleDep>=3)&&(IAddMultFlag==0); }
+   bool GetIsFlexibleScale() const { return (NScaleDep>=3) && (IAddMultFlag==0); }
 
    vector<string > GetContributionDescription() const { return CtrbDescript; }
    vector<string > GetCodeDescription() const { return CodeDescript; }
 
-   
+
    bool IsLO() const {return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO() const {return IContrFlag1==1 && IContrFlag2==2;}
 
@@ -121,7 +121,7 @@ void fastNLOCoeffBase::ResizeFlexibleVector(vector<T>* v, vector<T>* nom) {
 };
 
 
-template<typename T> 
+template<typename T>
 int fastNLOCoeffBase::ReadTable( vector<T>* v, istream *table ){
    int nn = 0;
    for(unsigned int i0=0;i0<v->size();i0++){
@@ -131,17 +131,17 @@ int fastNLOCoeffBase::ReadTable( vector<T>* v, istream *table ){
 };
 
 
-template<typename T> 
+template<typename T>
 int fastNLOCoeffBase::WriteTable( const vector<T>& v, ostream *table , double Nevt) const {
    int nn = 0;
    for(unsigned int i=0;i<v.size();i++){
       nn += WriteTable( v[i] , table , Nevt );
-   }   
+   }
    return nn;
 };
 
 
-template<typename T> 
+template<typename T>
 int fastNLOCoeffBase::WriteFlexibleTable( const vector<T>& v, ostream *table , bool nProcLast, double Nevt ) const {
    if ( Nevt== 0 ) return -1000;
    int nn = 1;
@@ -151,9 +151,9 @@ int fastNLOCoeffBase::WriteFlexibleTable( const vector<T>& v, ostream *table , b
    }
    return nn;
 };
- 
 
-template<typename T> 
+
+template<typename T>
 void fastNLOCoeffBase::AddTableToAnotherTable( vector<T>* vSum, vector<T>* vAdd, double w1, double w2 ){
    if ( vSum->size() != vAdd->size() ) {error["AddTableToAnotherTable"]<<"Cannot add tables with different size. s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
    for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
@@ -161,10 +161,10 @@ void fastNLOCoeffBase::AddTableToAnotherTable( vector<T>* vSum, vector<T>* vAdd,
    }
 }
 
-template<typename T> 
+template<typename T>
 void fastNLOCoeffBase::AddTableToAnotherTable( vector<T>& vSum, const vector<T>& vAdd, double w1, double w2 ) const{
    if ( vSum.size() != vAdd.size() ) {
-      error["AddTableToAnotherTable"]<<"Cannot add tables with different size. s1="<<vSum.size()<<", s2="<<vAdd.size()<<endl; 
+      error["AddTableToAnotherTable"]<<"Cannot add tables with different size. s1="<<vSum.size()<<", s2="<<vAdd.size()<<endl;
       return;
    }
    for ( unsigned int i = 0 ; i<vSum.size() ; i++ ){

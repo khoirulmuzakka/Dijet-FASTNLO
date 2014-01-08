@@ -21,11 +21,11 @@ public:
    void SetUnits(fastNLO::EUnits Unit);
    bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  // Set contribution On/Off. Look for Id of this contribution during initialization.
    int ContrId(const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder) const;
-   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* c=NULL) const {                            // Get, if this table is a 'flexible scale' table or not.
-      if ( c ) return  c->GetNScaleDep() >= 3;
-      else return c->GetIsFlexibleScale();
+   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const { // Get, if this table is a 'flexible scale' table or not.
+      if ( ctest ) return  ctest->GetNScaleDep() >= 3;
+      else return B_LO()->GetIsFlexibleScale();
    }
- 
+
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_R
    void SetMuFFunctionalForm(fastNLO::EScaleFunctionalForm func);                       // Set the functional form of Mu_F
@@ -109,7 +109,7 @@ protected:
    double FuncExpProd2(double scale1 , double scale2) ;
 
    void CalcCrossSectionv21(fastNLOCoeffAddFlex* B , bool IsLO = false);
-   void CalcCrossSectionv20(fastNLOCoeffAddFix* B , bool IsLO = false);
+   void CalcCrossSectionv20(fastNLOCoeffAddFix*  B , bool IsLO = false);
 
    fastNLOCoeffAddBase* B_NLO() const {
       if ( BBlocksSMCalc[fastNLO::kFixedOrder].size() < 2 ) return NULL;

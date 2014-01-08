@@ -1,35 +1,37 @@
 // Author: Daniel Britzger
 // DESY, 14/08/2013
-#include <string>
+// Updated: Klaus Rabbertz
+// KIT, 01/2014
+
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <string>
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/read_steer.h"
-
-#include "fastnlotk/fastNLOCoeffAddFlex.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
-
+#include "fastnlotk/fastNLOCoeffAddFlex.h"
 
 using namespace std;
 using namespace fastNLO;
 using namespace say;
 
-
 //______________________________________________________________________________
+
 fastNLOReader::fastNLOReader(): fastNLOTable() {
    SetClassName("fastNLOReader");
 }
 
 
 //______________________________________________________________________________
+
 fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
-   //SetGlobalVerbosity(DEBUG);
+   SetGlobalVerbosity(DEBUG); // Temporary for debugging
    SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
-   fCoeffData          = NULL;
-   Coeff_LO_Ref        = NULL;
-   Coeff_NLO_Ref       = NULL;
+   fCoeffData           = NULL;
+   Coeff_LO_Ref         = NULL;
+   Coeff_NLO_Ref        = NULL;
    fUnits               = fastNLO::kPublicationUnits;
    fMuRFunc             = fastNLO::kScale1;
    fMuFFunc             = fastNLO::kScale1;
@@ -41,12 +43,14 @@ fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
 
 
 //______________________________________________________________________________
+
 fastNLOReader::~fastNLOReader(void) {
 }
 
 
 
 //______________________________________________________________________________
+
 void fastNLOReader::SetFilename(string filename) {
    debug["SetFilename"]<<"New filename="<<filename<<endl;
    ffilename    = filename;
@@ -55,6 +59,7 @@ void fastNLOReader::SetFilename(string filename) {
 
 
 //______________________________________________________________________________
+
 void fastNLOReader::Init() {
    debug["Init"]<<endl;
 
@@ -170,33 +175,42 @@ void fastNLOReader::Init() {
 
 
 //______________________________________________________________________________
+
+
+
 void fastNLOReader::InitScalevariation() {
-   debug["InitScalevariation"]<<endl;
-   fScaleFacMuR  = 1.;
-   fScaleFacMuF  = 1.;
-   fScalevar     = -1;
+   // Initialize to scale factors of (MuR,MuF) = (1,1)
+   debug["InitScalevariation"]<<"Try to initialize scale factors MuR and MuF to (1,1)."<<endl;
+
    if (!GetIsFlexibleScaleTable()) {
-      if ( B_NLO() ) {
-         fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
-         for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
-            const double muFac = cNLO->GetScaleFactor(iscls);
-            if (fabs(muFac-1.0) < 1.e-7) {
-               SetScaleVariation(iscls,true);
-               break;
-            }
-         }
-         if (fScalevar == -1) {
-            error["InitScalevariation"]<<"Could not found scale variation with scale factor 1.0. Exiting.\n";
-            exit(1);
-         }
-      } else {
-         // no NLO table -> no scale dependent contribrutions
+      bool SetScales = SetScaleFactorsMuRMuF(1.,1.);
+      if (!SetScales){
+         error["InitScalevariation"]<<"Could not find scale variation with scale factor 1.0, stopped!"<<endl;
+         exit(1);
       }
+   // if (!GetIsFlexibleScaleTable()) {
+   //    if ( B_NLO() ) {
+   //       fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+   //       for (int iscls=0; iscls< GetNScaleVariations(); iscls++) {
+   //          const double muFac = cNLO->GetScaleFactor(iscls);
+   //          if (fabs(muFac-1.0) < 1.e-7) {
+   //             SetScaleVariation(iscls,true);
+   //             break;
+   //          }
+   //       }
+   //       if (fScalevar == -1) {
+   //          error["InitScalevariation"]<<"Could not found scale variation with scale factor 1.0. Exiting.\n";
+   //          exit(1);
+   //       }
+   //    } else {
+   //       // no NLO table -> no scale dependent contribrutions
+   //    }
    } else {
       // this is a MuVar table. You can vary mu_f and mu_r independently by any factor
       // and you can choose the functional form of mu_f and mu_r as functions of
       // scale1 and scale1 (called partly scaleQ2 and scalePt).
-
+      fScaleFacMuR = 1.;
+      fScaleFacMuF = 1.;
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
       if (cNLO->GetScaleDescr()[0].size() <0) { // ???
@@ -205,13 +219,13 @@ void fastNLOReader::InitScalevariation() {
          SetFunctionalForm(kScale1 , kMuF);
          return;
       }
-      // --- Default values --- //
-      // DIS
+
+      // ---- DIS ---- //
       if (cNLO->GetNPDF() == 1) {
          SetFunctionalForm(kQuadraticMean , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
       }
-      // HHC
+      // ---- HHC --- //
       else if (cNLO->GetNPDF() == 2) {
          SetFunctionalForm(kScale1 , kMuR);
          SetFunctionalForm(kScale1 , kMuF);
@@ -1288,6 +1302,9 @@ void fastNLOReader::SetMuFFunctionalForm(EScaleFunctionalForm func) {
 
 
 //______________________________________________________________________________
+
+
+
 bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    debug["SetScaleFactorsMuRMuF"]<<"Setting to scale factors xmur = "<<xmur<<" and xmuf = "<<xmuf<<endl;
    //
@@ -1318,8 +1335,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
       int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
       if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
-	 lknlo = true;
-	 break;
+         lknlo = true;
+         break;
       }
    }
 
@@ -1328,8 +1345,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lkthc = false;
    for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
       if (bUseSMCalc[kThresholdCorrection][i]) {
-	 lkthc = true;
-	 break;
+         lkthc = true;
+         break;
       }
    }
    if (lkthc && fabs(xmur-xmuf) > DBL_MIN) {
