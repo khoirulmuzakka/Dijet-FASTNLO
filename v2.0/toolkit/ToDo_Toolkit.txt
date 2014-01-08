@@ -1,11 +1,12 @@
 
-Toolkit todo:
+Toolkit todo (orderd by priority):
 -----------------------------------------------------
+ - Division by binsize for coefficients
+ - Ensure NNLO compatiblity of reader
  - fix labels in header of warmup-table bin-grid (dim1 <-> dim2)
  - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
- - Division by binsize for coefficients ?!
  - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
- - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion'
+ - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion' (ordentliche Klassendefinitionen??)
  - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - reader testen fuer NNLO
  - Write documentation (e.g. twiki)
