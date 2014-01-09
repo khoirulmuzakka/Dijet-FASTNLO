@@ -320,7 +320,7 @@ void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >& vSum, const vect
    }
    else {
       for ( unsigned int i = 0 ; i<vSum.size() ; i++ ){
-	 vSum[i] =  w1*vSum[i] + w2*vAdd[i];
+         vSum[i] =  w1*vSum[i] + w2*vAdd[i];
       }
    }
 }

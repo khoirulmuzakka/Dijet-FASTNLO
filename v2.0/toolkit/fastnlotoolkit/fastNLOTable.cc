@@ -168,18 +168,18 @@ int fastNLOTable::ReadScenario(istream *table){
       for(int j=0;j<NDim;j++){
          //*table >>  LoBin[i][j];
          //if(IDiffBin[j]==2) *table >>  UpBin[i][j];
-	 *table >>  Bin[i][j].first;
+         *table >>  Bin[i][j].first;
          if(IDiffBin[j]==2) *table >>  Bin[i][j].second;
       }
       //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if ( i > 0 ) {
-	 //if ( LoBin[i][1] != LoBin[i-1][1] ) {
-	if ( Bin[i][1].first != Bin[i-1][1].first ) {
-	  //	  cout << "iobs2: " << i << ", LoBin i-1: " << LoBin[i-1][1] << ", LoBin i: " << LoBin[i][1] << endl;
-	  RapIndex.push_back(i);
-	  //	  irap++;
-	  //	  cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
-	}
+         //if ( LoBin[i][1] != LoBin[i-1][1] ) {
+        if ( Bin[i][1].first != Bin[i-1][1].first ) {
+          //      cout << "iobs2: " << i << ", LoBin i-1: " << LoBin[i-1][1] << ", LoBin i: " << LoBin[i][1] << endl;
+          RapIndex.push_back(i);
+          //      irap++;
+          //      cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
+        }
       }
    }
 
@@ -188,10 +188,10 @@ int fastNLOTable::ReadScenario(istream *table){
       *table >> BinSize[i];
       // maxime pre-v2.0 conversion
       //    if ( NDim == 1 ){
-      // 	 double binsize = 1;
-      // 	 if ( IDiffBin[0] == 2 ) binsize *=  UpBin[i][0] - LoBin[i][0];
-      // 	 printf(" binszie bin %d  = %7.4f\n",i,binsize);
-      // 	 BinSize[i] = binsize;
+      //         double binsize = 1;
+      //         if ( IDiffBin[0] == 2 ) binsize *=  UpBin[i][0] - LoBin[i][0];
+      //         printf(" binszie bin %d  = %7.4f\n",i,binsize);
+      //         BinSize[i] = binsize;
 
       //    }
       //    else if ( NDim == 2 || NDim == 3 ){
@@ -204,7 +204,7 @@ int fastNLOTable::ReadScenario(istream *table){
       //       // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
       //       // what is DimLabel[1] corresponds to bingrid1[nBins]
       //       printf("UpBin[.][0] =  %7.4f, LoBin[.][0] =  %7.4f , UpBin[.][1] =  %7.4f  LoBin[.][1] =  %7.4f\n",
-      // 	     UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]);
+      //             UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]);
       //       if ( IDiffBin[0] == 2 ) binsize *= UpBin[i][0] - LoBin[i][0];
       //       if ( IDiffBin[1] == 2 ) binsize *= UpBin[i][1] - LoBin[i][1];
       //       printf(" binszie 2Dim bin %d  = %7.4f\n",i,binsize);
@@ -253,8 +253,8 @@ int fastNLOTable::WriteScenario(ostream *table){
    for(int i=0;i<NObsBin;i++){
       for(int j=0;j<NDim;j++){
          *table <<  Bin[i][j].first  << endl;
-	 //         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
-	 if(IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
+         //         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
+         if(IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
       }
    }
    for(int i=0;i<NObsBin;i++){
@@ -368,53 +368,53 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
    const int nc = other.GetNcontrib() + other.GetNdata();
    for ( int ic=0 ; ic<nc; ic++ ) {
       bool wasAdded = false;
-      
-      // is additive? 
-      if ( other.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
-	 fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
 
-	 // find compatible contribution, or add
-	 for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-	    fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
-	    if ( lhs->IsCompatible(*cadd) ) { // found compatible table
-	       if ( wasAdded ) 
-		  error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
-	       else {
-		  debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
-		  if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
-		     ((fastNLOCoeffAddFlex*)lhs)->Add((fastNLOCoeffAddFlex&)*cadd);
-		  wasAdded = true;
-	       }
-	    }
-	 }
+      // is additive?
+      if ( other.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
+         fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
+
+         // find compatible contribution, or add
+         for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
+            fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
+            if ( lhs->IsCompatible(*cadd) ) { // found compatible table
+               if ( wasAdded )
+                  error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
+               else {
+                  debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
+                  if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
+                     ((fastNLOCoeffAddFlex*)lhs)->Add((fastNLOCoeffAddFlex&)*cadd);
+                  wasAdded = true;
+               }
+            }
+         }
       }
       else {
-	 // check if this data or 'mult' contribution already exists (which should not happen)
-	 cout<<"todo. Check if data table already exists!."<<endl;
+         // check if this data or 'mult' contribution already exists (which should not happen)
+         cout<<"todo. Check if data table already exists!."<<endl;
       }
 
       // couldn't find a corresponding contribution.
       // add this contribution as new contrib.
       if ( !wasAdded ) {
-	 debug["AddTable"]<<"Adding new contribution to table."<<endl;
-	 cout<<"Adding this contrib as new contbi."<<endl;
-	 fastNLOCoeffBase* add = other.GetCoeffTable(ic);
-	 if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
-	    add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
-	    Ndata++;
-	 }
-	 else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) ) 
-	    add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
-	 else if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) ) 
-	    add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
-  	 else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) ) 
- 	    add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
- 	 CreateCoeffTable(fCoeff.size(),add);
-	 ///	 Ndata++, and ncontrib++, n
+         debug["AddTable"]<<"Adding new contribution to table."<<endl;
+         cout<<"Adding this contrib as new contbi."<<endl;
+         fastNLOCoeffBase* add = other.GetCoeffTable(ic);
+         if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
+            Ndata++;
+         }
+         else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) )
+            add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
+         else if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) )
+            add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
+         else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) )
+            add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
+         CreateCoeffTable(fCoeff.size(),add);
+         ///     Ndata++, and ncontrib++, n
       }
    }
 }
-   
+
 
 // // ___________________________________________________________________________________________________
 // int fastNLOTable::CreateCoeffBase(int no){
@@ -475,7 +475,7 @@ bool fastNLOTable::cmp(const vector<vector<pair<double,double> > >& x1, const ve
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
       for(unsigned int j = 0; j<x1[i].size() ;j++ ){
-	 result = result & (cmp(x1[i][j].first,x2[i][j].first) && cmp(x1[i][j].second,x2[i][j].second));
+         result = result & (cmp(x1[i][j].first,x2[i][j].first) && cmp(x1[i][j].second,x2[i][j].second));
       }
    }
    return result;
@@ -567,39 +567,39 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    static const double eps = 1.e-8;
    if ( NDim == 2 ) {
       if ( IDiffBin[0] != 1 || IDiffBin[1] != 1 ) { // bin integrated calculation
- 	 for(int j = 0; j < NObsBin; j++) {
-	    if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second &&
-		 val2 >= Bin[j][1].first  && val2 <  Bin[j][1].second) {
-	       obsbin=j;
-	       break;
-	    }
-	 }
+         for(int j = 0; j < NObsBin; j++) {
+            if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second &&
+                 val2 >= Bin[j][1].first  && val2 <  Bin[j][1].second) {
+               obsbin=j;
+               break;
+            }
+         }
       }
       else {  // truly differential calculation
-	 for(int j = 0; j < NObsBin; j++) {
-	    if ( fabs(val1 - Bin[j][0].first ) < eps  && fabs(val2 - Bin[j][1].first) < eps ) {
-	       obsbin=j;
-	       break;
-	    }
-	 }
+         for(int j = 0; j < NObsBin; j++) {
+            if ( fabs(val1 - Bin[j][0].first ) < eps  && fabs(val2 - Bin[j][1].first) < eps ) {
+               obsbin=j;
+               break;
+            }
+         }
       }
    }
    else if ( NDim == 1 ) {
       if ( IDiffBin[0] != 1 ) { // bin integrated calculation
-	 for(int j = 0; j < NObsBin; j++) {
-	    if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second ){
-	       obsbin = j;
-	       break;
-	    }
-	 }
+         for(int j = 0; j < NObsBin; j++) {
+            if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second ){
+               obsbin = j;
+               break;
+            }
+         }
       }
       else {  // truly differential calculation
-	 for(int j = 0; j < NObsBin; j++) {
-	    if ( fabs(val1 - Bin[j][0].first ) < eps ) {
-	       obsbin=j;
-	       break;
-	    }
-	 }
+         for(int j = 0; j < NObsBin; j++) {
+            if ( fabs(val1 - Bin[j][0].first ) < eps ) {
+               obsbin=j;
+               break;
+            }
+         }
       }
    }
    else {
@@ -621,18 +621,18 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    //  that is used in the scenario.
    //
    //   We must know NDim before calling InitBinning.
-   //	NDim tells us, in how many dimensions/variables the measurement was performed
+   //   NDim tells us, in how many dimensions/variables the measurement was performed
    //   this method only supports two dimensional measurements and a third dimension for
    //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
    //   Still, fastNLO could support higher dimensional binnings.
    //
    //  input.
-   //     nBins1	number of bins in 1st dimension
-   //     bingrid1	binning in 1st dimension
-   //     nBins2	number of bins of second dimension for each 1st-dimension variable
-   //     bingrid	binning in 2nd dimension for each 1st dimension bin
-   //     binwidth3	binwidth for a 3rd dimension. If the publ. cross sections are e.g. divided by the eta-range.
-   //			   if this is dependent on 1st or 2nd dimension binning, this method has to be updated.
+   //     nBins1        number of bins in 1st dimension
+   //     bingrid1      binning in 1st dimension
+   //     nBins2        number of bins of second dimension for each 1st-dimension variable
+   //     bingrid       binning in 2nd dimension for each 1st dimension bin
+   //     binwidth3     binwidth for a 3rd dimension. If the publ. cross sections are e.g. divided by the eta-range.
+   //                      if this is dependent on 1st or 2nd dimension binning, this method has to be updated.
    //                   or you can use binwidth3 as a scalling factor if your binning is e.g. in TeV, but you want to have pb/GeV
    //
    //  output.
@@ -665,13 +665,13 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
 
    if ( NDim == 1 ){
       for(int i=0;i<nBins1;i++){
-	 nbins++;
-	 bound[0] = bingrid1[i];
+         nbins++;
+         bound[0] = bingrid1[i];
          LoBin.push_back(bound);
          bound[0] = bingrid1[i+1];
          UpBin.push_back(bound);
 
-	 double binsize = IDiffBin[0] == 2 ? (UpBin.back())[0] - (LoBin.back())[0] : 1;
+         double binsize = IDiffBin[0] == 2 ? (UpBin.back())[0] - (LoBin.back())[0] : 1;
          BinSize.push_back(binsize);
       }
       // here we always assume, that all dimensions are
@@ -682,40 +682,40 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    }
    else if ( NDim == 2 || NDim == 3 ){
       for(int i=0;i<nBins1;i++){
-	 for(int j=0;j<nBins2[i];j++){
-	    nbins ++;
-	    // warning: the variables are exchanged here!
-	    // what is bound[0] corresponds to bingrid2[nBins][nBins2]
-	    // what is bound[1] corresponds to bingrid1[nBins]
-	    bound[0] = bingrid2[i][j];
-	    bound[1] = bingrid1[i];
-	    //if ( NDim == 3 ) bound[2] = 0;
-	    if ( NDim == 3 ) bound[2] = binwidth3;
-	    LoBin.push_back(bound);
-	    bound[0] = bingrid2[i][j+1];
-	    bound[1] = bingrid1[i+1];
-	    UpBin.push_back(bound);
-	    //if ( NDim == 3 ) bound[2] = binwidth3;
-	    if ( NDim == 3 ) bound[2] = 0;
-	    //if ( binwidth3 != 0 ) bound[2] = binwidth3;
+         for(int j=0;j<nBins2[i];j++){
+            nbins ++;
+            // warning: the variables are exchanged here!
+            // what is bound[0] corresponds to bingrid2[nBins][nBins2]
+            // what is bound[1] corresponds to bingrid1[nBins]
+            bound[0] = bingrid2[i][j];
+            bound[1] = bingrid1[i];
+            //if ( NDim == 3 ) bound[2] = 0;
+            if ( NDim == 3 ) bound[2] = binwidth3;
+            LoBin.push_back(bound);
+            bound[0] = bingrid2[i][j+1];
+            bound[1] = bingrid1[i+1];
+            UpBin.push_back(bound);
+            //if ( NDim == 3 ) bound[2] = binwidth3;
+            if ( NDim == 3 ) bound[2] = 0;
+            //if ( binwidth3 != 0 ) bound[2] = binwidth3;
 
-	    double binsize = 1;
+            double binsize = 1;
 
-	    // warning: the variables are exchanged here!
-	    // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
-	    // what is DimLabel[1] corresponds to bingrid1[nBins]
-	    if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
-	    if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
-	    if ( NDim==3 ) {
-	       //if (IDiffBin[2] == 2 )
-		  binsize *= binwidth3;
-	    }
-	    else if ( binwidth3 != 0 && NDim != 3 ) {
-	       binsize *= binwidth3;
-	    }
-	    BinSize.push_back(binsize);
+            // warning: the variables are exchanged here!
+            // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
+            // what is DimLabel[1] corresponds to bingrid1[nBins]
+            if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
+            if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
+            if ( NDim==3 ) {
+               //if (IDiffBin[2] == 2 )
+                  binsize *= binwidth3;
+            }
+            else if ( binwidth3 != 0 && NDim != 3 ) {
+               binsize *= binwidth3;
+            }
+            BinSize.push_back(binsize);
 
-	 }
+         }
       }
       // here we always assume, that all dimensions are
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
@@ -725,7 +725,7 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
       IDiffBin[0] = 2 ;
       IDiffBin[1] = 2 ;
       if ( NDim==3 )
-	 IDiffBin[2] = 1 ;
+         IDiffBin[2] = 1 ;
    }
    else error["InitBinning"]<<"Unknown NDim."<<endl;
 
@@ -734,8 +734,8 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    NObsBin = nbins;
 
    INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is
-			 //     to be normalized by own integral (in 1st dimension)
-			 //     see documentation for details and for other options
+                         //     to be normalized by own integral (in 1st dimension)
+                         //     see documentation for details and for other options
 
 }
 
@@ -748,17 +748,17 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
   //  that is used in the scenario.
   //
   //   We must know NDim before calling InitBinning.
-  //	NDim tells us, in how many dimensions/variables the measurement was performed
+  //    NDim tells us, in how many dimensions/variables the measurement was performed
   //   this method only supports two dimensional measurements and a third dimension for
   //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
   //   Still, fastNLO could support higher dimensional binnings.
   //
   //  input.
-  //     nBins1	number of bins in 1st dimension
-  //     bingrid1	binning in 1st dimension
-  //     nBins2	number of bins of second dimension for each 1st-dimension variable
-  //     bingrid	binning in 2nd dimension for each 1st dimension bin
-  //     bwfactor	additional factor to take into account e.g. factors of 2 for binning in abs. rapidity
+  //     nBins1 number of bins in 1st dimension
+  //     bingrid1       binning in 1st dimension
+  //     nBins2 number of bins of second dimension for each 1st-dimension variable
+  //     bingrid        binning in 2nd dimension for each 1st dimension bin
+  //     bwfactor       additional factor to take into account e.g. factors of 2 for binning in abs. rapidity
   //
   //  output.
   //     no output
@@ -797,9 +797,9 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
       UpBin.push_back(bound);
 
       if ( bwfactor > 0. ) {
-	binsize = bwfactor;
+        binsize = bwfactor;
       } else {
-	binsize = 1;
+        binsize = 1;
       }
       if ( IDiffBin[0] == 2 ) binsize *=  ((UpBin.back())[0] - (LoBin.back())[0]);
       BinSize.push_back(binsize);
@@ -807,28 +807,28 @@ void fastNLOTable::InitBinningKR( const int nBins1, const double* bingrid1, cons
   } else if ( NDim == 2 ){
     for(int i=0;i<nBins1;i++){
       for(int j=0;j<nBins2[i];j++){
-	nbins ++;
-	// warning: the variables are exchanged here!
-	// what is bound[0] corresponds to bingrid2[nBins][nBins2]
-	// what is bound[1] corresponds to bingrid1[nBins]
-	bound[0] = bingrid2[i][j];
-	bound[1] = bingrid1[i];
-	LoBin.push_back(bound);
-	bound[0] = bingrid2[i][j+1];
-	bound[1] = bingrid1[i+1];
-	UpBin.push_back(bound);
+        nbins ++;
+        // warning: the variables are exchanged here!
+        // what is bound[0] corresponds to bingrid2[nBins][nBins2]
+        // what is bound[1] corresponds to bingrid1[nBins]
+        bound[0] = bingrid2[i][j];
+        bound[1] = bingrid1[i];
+        LoBin.push_back(bound);
+        bound[0] = bingrid2[i][j+1];
+        bound[1] = bingrid1[i+1];
+        UpBin.push_back(bound);
 
-	if ( bwfactor > 0. ) {
-	  binsize = bwfactor;
-	} else {
-	  binsize = 1;
-	}
-	// warning: the variables are exchanged here!
-	// what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
-	// what is DimLabel[1] corresponds to bingrid1[nBins]
-	if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
-	if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
-	BinSize.push_back(binsize);
+        if ( bwfactor > 0. ) {
+          binsize = bwfactor;
+        } else {
+          binsize = 1;
+        }
+        // warning: the variables are exchanged here!
+        // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
+        // what is DimLabel[1] corresponds to bingrid1[nBins]
+        if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
+        if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
+        BinSize.push_back(binsize);
       }
     }
   }
@@ -874,7 +874,7 @@ void fastNLOTable::PrintScenario() const {
     for(int j=0;j<NDim;j++){
       printf("     -  - LoBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].first);
       if(IDiffBin[j]==2)
-	printf("     -  - UpBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].second);
+        printf("     -  - UpBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].second);
     }
    }
    for(int i=0;i<NObsBin;i++){
@@ -888,7 +888,7 @@ void fastNLOTable::PrintScenario() const {
    if(INormFlag>0){
       for(int i=0;i<NObsBin;i++){
         printf("     - IDivLoPointer[%d]               %d\n",i,IDivLoPointer[i]);
-	printf("     - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
+        printf("     - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
       }
    }
    printf("\n ********************************************************\n\n");
@@ -932,8 +932,36 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    printf(" #\n");
    printf(" # No. of contributions: %1i\n",Ncontrib);
    for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-      if ( iprint == 0 ) fCoeff[j]->fastNLOCoeffBase::Print();
-      else               fCoeff[j]->Print();
+      fastNLOCoeffBase* c = fCoeff[j];
+      if ( iprint == 0 ) {
+         printf(" # Contribution %1i:\n",j+1);
+         for (unsigned int i=0; i<c->CtrbDescript.size(); i++) {
+            printf(" #   %s\n",c->CtrbDescript[i].data());
+         }
+         //         printf(" #   No. of events: %16llu\n",c->GetNevt);
+         printf(" #   provided by:\n");
+         for (unsigned int i=0; i<c->CodeDescript.size(); i++) {
+            printf(" #   %s\n",c->CodeDescript[i].data());
+         }
+
+         if (c->NScaleDep<3) {
+            // printf(" #   Scale dimensions: %1i\n",c->NScaleDim);
+            // for (int i=0; i<c->NScaleDim; i++) {
+            //    for (unsigned int j=0; j<ScaleDescript[i].size(); j++) {
+            //       printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
+            //    }
+            //    printf(" #     Number of scale variations for dimension %1i: %1i\n",i+1,Nscalevar[i]);
+            //    printf(" #     Available scale settings for dimension %1i:\n",i+1);
+            //    for (int k=0; k<Nscalevar[i]; k++) {
+            //       printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,ScaleFac[i][k]);
+            //    }
+            //    printf(" #     Number of scale nodes for dimension %1i:      %1i\n",i+1,Nscalenode[i]);
+            // }
+         }
+
+      } else {
+         fCoeff[j]->Print();
+      }
    }
    if (iprint > 0) {
       Print();
@@ -945,6 +973,7 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
 
 //______________________________________________________________________________
 void fastNLOTable::PrintTableInfo(const int iprint) const {
+   debug["PrintTableInfo"]<<"iprint="<<iprint<<endl;
    //
    //  Print basic info about fastNLO table and its contributions
    //   - iprint: iprint > 0: print also contribution descriptions
@@ -959,17 +988,26 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
    printf(" %s",LSEPS.c_str());
    printf(" # Number of contributions: %2i\n",Ncontrib);
 
-
+   int iccount[21] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+   int ictype = 0;
+   string coeffname;
    for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-      string coeffname = fastNLO::_ContrName[fCoeff[j]->GetIContrFlag1()-1];
       fastNLOCoeffBase* c = fCoeff[j];
-      cout << " # "<< "  No.: " << j << ", type: " << coeffname <<", Id: " << c->GetIContrFlag1()-1
-	   << ", order: " << c->GetContributionDescription()[0]
-	   << ", by: " << c->GetCodeDescription()[0] << endl;
+      if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
+         ictype = 20;
+         coeffname = "Data";
+      } else {
+         ictype = fCoeff[j]->GetIContrFlag1()-1;
+         coeffname = fastNLO::_ContrName[ictype];
+      }
+      iccount[ictype]++;
+      cout << " # "<< "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
+           << ", order: " << c->GetContributionDescription()[0]
+           << ", by: " << c->GetCodeDescription()[0] << endl;
       if (iprint > 0) {
-	 for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {
-	    printf(" # \t\t%s\n",c->GetCodeDescription()[k].c_str());
-	 }
+         for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {
+            printf(" # \t\t%s\n",c->GetCodeDescription()[k].c_str());
+         }
       }
    }
    printf(" %s",CSEPS.c_str());
