@@ -1448,7 +1448,9 @@ void fastNLOCreate::WriteTable() {
       }
       // Number of events must be counted correctly.
       // I.e. the counting should be performed by the generator.
+      // ->Divide by BinWidth
       fastNLOTable::WriteTable(GetTheCoeffTable()->Nevt);
+      // ->Multiply by BinWidth
    }
 }
 

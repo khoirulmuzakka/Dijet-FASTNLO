@@ -10,22 +10,37 @@
 using namespace std;
 using namespace fastNLO;
 
+
+//______________________________________________________________________________
 bool fastNLOBase::fWelcomeOnce = false;
 
+
+//______________________________________________________________________________
 fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), ofilestream(0), fPrecision(8) {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
+
+//______________________________________________________________________________
 fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), ofilestream(0), fPrecision(8)  {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
+
+//______________________________________________________________________________
 fastNLOBase::~fastNLOBase(){
    if(ifilestream) delete ifilestream;
    if(ofilestream) delete ofilestream;
 }
 
+
+//______________________________________________________________________________
 int fastNLOBase::ReadTable(){
+   // does file exist?
+   if (access(ffilename.c_str(), R_OK) == 0) {
+      error["ReadTable"]<<"File does not exist! Was looking for: "<<ffilename<<endl;
+      return 1;
+   }
    // open file
    ifilestream = new ifstream(ffilename.c_str(),ios::in);
    // read header
@@ -34,6 +49,7 @@ int fastNLOBase::ReadTable(){
 }
 
 
+//______________________________________________________________________________
 bool fastNLOBase::ReadMagicNo(istream *table) {
    int key = 0;
    *table >> key;
@@ -44,6 +60,8 @@ bool fastNLOBase::ReadMagicNo(istream *table) {
    return true;
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::PutBackMagicNo(istream* table){
    // Put magic number back
    for(int i=0;i<(int)(log10((double)tablemagicno)+1);i++){
@@ -51,6 +69,8 @@ void fastNLOBase::PutBackMagicNo(istream* table){
    }
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::StripWhitespace(string &str) const{
    for(string::iterator achar = str.end(); achar>str.begin();achar--) {
       if (*achar==0x20 || *achar==0x00){
@@ -61,6 +81,8 @@ void fastNLOBase::StripWhitespace(string &str) const{
    }
 }
 
+
+//______________________________________________________________________________
 int fastNLOBase::ReadHeader(istream *table){
    table->peek();
    if (table->eof()){
@@ -84,11 +106,15 @@ int fastNLOBase::ReadHeader(istream *table){
    return 0;
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::RewindRead(){
    ifilestream->close();
    ifilestream->open(ffilename.c_str(),ios::in);
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::SkipBlockA1A2(){
    char buffer[257];
    int key;
@@ -108,6 +134,8 @@ void fastNLOBase::SkipBlockA1A2(){
    }
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::WriteTable (){
    //
    // WriteTable(). writes the full FastNLO table to
@@ -121,6 +149,8 @@ void fastNLOBase::WriteTable (){
    CloseFileWrite();
 }
 
+
+//______________________________________________________________________________
 int fastNLOBase::WriteHeader(ostream *table){
    *table << tablemagicno << endl;
    *table << Itabversion << endl;
@@ -136,7 +166,7 @@ int fastNLOBase::WriteHeader(ostream *table){
 }
 
 
-
+//______________________________________________________________________________
 ofstream *fastNLOBase::OpenFileWrite(){
    // do not overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0){
@@ -146,6 +176,8 @@ ofstream *fastNLOBase::OpenFileWrite(){
    return OpenFileRewrite();
 }
 
+
+//______________________________________________________________________________
 ofstream *fastNLOBase::OpenFileRewrite(){
    ofilestream = new ofstream(ffilename.c_str(),ios::out);
    if(!ofilestream->good()){
@@ -157,18 +189,23 @@ ofstream *fastNLOBase::OpenFileRewrite(){
    return ofilestream;
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::CloseFileWrite(){
    *ofilestream << tablemagicno << endl;
    *ofilestream << tablemagicno << endl;
    CloseStream();
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::CloseStream(){
    ofilestream->close();
 }
 
 
 
+//______________________________________________________________________________
 bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
    if(Itabversion!= other.GetItabversion()){
       warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
@@ -186,7 +223,7 @@ bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
 }
 
 
-// KR: Could replace SetContributionHeader
+//______________________________________________________________________________
 void fastNLOBase::SetHeaderDefaults(){
    // TableMagicNo and ITabVersion are defined as constant in fastNLOConstants.h
    SetScenName("tns2000");
@@ -194,6 +231,7 @@ void fastNLOBase::SetHeaderDefaults(){
 }
 
 
+//______________________________________________________________________________
 void fastNLOBase::SetContributionHeader(){
    SetNcontrib(1);
    SetNmult(0);
@@ -204,6 +242,8 @@ void fastNLOBase::SetContributionHeader(){
    SetImachine(0);
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::ResetHeader(){
    debug["ResetHeader"]<<endl;
    SetNcontrib(0);
@@ -215,10 +255,14 @@ void fastNLOBase::ResetHeader(){
    SetImachine(0);
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::Print() const {
    PrintHeader();
 }
 
+
+//______________________________________________________________________________
 void fastNLOBase::PrintHeader() const {
    printf("\n **************** FastNLO Table Header ******************\n\n");
    printf("   tablemagicno                  %d\n",tablemagicno);
@@ -236,8 +280,6 @@ void fastNLOBase::PrintHeader() const {
 
 
 //______________________________________________________________________________
-
-
 void fastNLOBase::PrintWelcomeMessage() {
    //---  Initialization for nice printing
    const string CSEPS = " ##################################################################################\n";

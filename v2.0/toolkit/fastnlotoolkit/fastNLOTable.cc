@@ -944,20 +944,23 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
             printf(" #   %s\n",c->CodeDescript[i].data());
          }
 
-         if (c->NScaleDep<3) {
-            // printf(" #   Scale dimensions: %1i\n",c->NScaleDim);
-            // for (int i=0; i<c->NScaleDim; i++) {
-            //    for (unsigned int j=0; j<ScaleDescript[i].size(); j++) {
-            //       printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
-            //    }
-            //    printf(" #     Number of scale variations for dimension %1i: %1i\n",i+1,Nscalevar[i]);
-            //    printf(" #     Available scale settings for dimension %1i:\n",i+1);
-            //    for (int k=0; k<Nscalevar[i]; k++) {
-            //       printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,ScaleFac[i][k]);
-            //    }
-            //    printf(" #     Number of scale nodes for dimension %1i:      %1i\n",i+1,Nscalenode[i]);
-            // }
-         }
+	 if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) {
+	    fastNLOCoeffAddFix* cF = (fastNLOCoeffAddFix*)c;
+	    //if (c->NScaleDep<3) {
+	    //printf(" #   Scale dimensions: %1i\n",c->NScaleDim); // NScaleDim is ALWAYS 1
+	    //for (int i=0; i<c->NScaleDim; i++) { // NScaleDim is ALWAYS 1
+	    //for (unsigned int j=0; j<c->ScaleDescript[i].size(); j++) { //Scale description always consists of one line
+	    //printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
+	    //}
+	    printf(" #     Scale description                             %s\n",cF->GetScaleDescription(0).c_str()); // get scale description of the only scale (0)
+	    printf(" #     Number of scale variations                    %1i\n",cF->GetNScalevar());
+	    printf(" #     Available scale settings:\n");
+	    for (int k=0; k<cF->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
+	       printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cF->GetScaleFactor(k)); // shall we printout 'k' instead of 'k+1' ??
+	    }
+	    printf(" #     Number of scale nodes:                        %1i\n",cF->GetNScaleNode());
+	    //}
+	 }
 
       } else {
          fCoeff[j]->Print();
