@@ -37,7 +37,7 @@ fastNLOBase::~fastNLOBase(){
 //______________________________________________________________________________
 int fastNLOBase::ReadTable(){
    // does file exist?
-   if (access(ffilename.c_str(), R_OK) == 0) {
+   if (access(ffilename.c_str(), R_OK) != 0) {
       error["ReadTable"]<<"File does not exist! Was looking for: "<<ffilename<<endl;
       return 1;
    }
