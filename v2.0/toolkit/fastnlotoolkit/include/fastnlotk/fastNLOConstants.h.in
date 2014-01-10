@@ -15,6 +15,21 @@
 #define FNLO_QUOTEv2    "@QUOTEv2@"
 #endif
 
+// KR: Replace by precompiler defines
+//   static const double TWOPI = 6.28318530717958647692528;
+//   static const double TWOPISQR = 39.47841760435743447533796;
+#define TWOPI (2.*M_PI)
+#define TWOPISQR (4.*M_PI*M_PI)
+// PDG values 2012/2013
+#define PDG_MU   (0.0023)
+#define PDG_MD   (0.0048)
+#define PDG_MS   (0.095)
+#define PDG_MC   (1.275)
+#define PDG_MB   (4.18)
+#define PDG_MT   (173.07)
+#define PDG_MZ   (91.1876)
+#define PDG_ASMZ (0.1184)
+
 namespace fastNLO {
 
    // ---- typedefs ---- //
@@ -29,7 +44,7 @@ namespace fastNLO {
    // ---- constants ---- //
    const int tabversion   = 20000;
    const int tablemagicno = 1234567890;
-   const double TWOPI = 6.28318530717958647692528;
+   //   const double TWOPI = 6.28318530717958647692528;
 
 
    // ---- enumerators ---- //

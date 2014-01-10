@@ -24,9 +24,17 @@
 
 #include "fastnlotk/Alphas.h"
 #include "fastnlotk/fastNLOAlphas.h"
-//#include "fastnlo/FastNLOCRunDec.h"
-//#include "fastnlo/FastNLOUser.h"
-//#include "fastnlo/FastNLODiffUser.h"
+#include "fastnlotk/fastNLOCRunDec.h"
+#include "fastnlotk/fastNLOLHAPDF.h"
+//#include "fastnlotk/fastNLOUser.h"
+//#include "fastnlotk/fastNLODiffUser.h"
+// Optional:
+// If compiled --with-qcdnum support the following line(s) can be commented in
+#include "fastnlotk/fastNLOQCDNUMAS.h"
+// End --with-qcdnum
+// If compiled --with-hoppet support the following line(s) can be commented in
+#include "fastnlotk/fastNLOHoppet.h"
+// End --with-hoppet
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -135,7 +143,7 @@ int main(int argc, char** argv) {
    }
 
    //---  Too many arguments
-   if (argc > 4) {
+   if (argc > 5) {
       printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
       return 1;
    }
@@ -569,7 +577,6 @@ int main(int argc, char** argv) {
 
    // For the purpose of this example only show WARNINGs or worse.
    SetGlobalVerbosity(WARNING);
-   cout << "AAAAAAA" << endl;
 
    // Instead of instantiating a class via e.g.
    //   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
@@ -584,16 +591,16 @@ int main(int argc, char** argv) {
       fnlo = new fastNLOAlphas(tablename);
    } else if (AsEvolCode == "LHAPDF") {
       fnlo = new fastNLOLHAPDF(tablename);
-      //   } else if (AsEvolCode == "RUNDEC") {
-      //      fnlo = new FastNLOCRunDec(tablename);
+   } else if (AsEvolCode == "RUNDEC") {
+      fnlo = new fastNLOCRunDec(tablename);
       // Optional:
       // If compiled --with-qcdnum support the following line(s) can be commented in
-      //   } else if (AsEvolCode == "QCDNUM") {
-      //      fnlo = new FastNLOQCDNUMAS(tablename);
+   } else if (AsEvolCode == "QCDNUM") {
+      fnlo = new fastNLOQCDNUMAS(tablename);
       // End --with-qcdnum
       // If compiled --with-hoppet support the following line(s) can be commented in
-      //   } else if (AsEvolCode == "HOPPET") {
-      //      fnlo = new FastNLOHoppet(tablename);
+   } else if (AsEvolCode == "HOPPET") {
+      fnlo = new fastNLOHoppet(tablename);
       // End --with-hoppet
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());

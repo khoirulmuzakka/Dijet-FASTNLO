@@ -99,7 +99,7 @@ AC_ARG_WITH([lhapdf],
          fi],
         [])
 
-if test "x$withval" != "xno"; then
+if test "x$with_lhapdf" != "xno"; then
    if test "x$LHAPDF" = "x"; then
       AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
@@ -139,12 +139,122 @@ fi
 AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
 AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
+# QCDNUM
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether QCDNUM support is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([qcdnum],
+        [AS_HELP_STRING([--with-qcdnum],
+        [Specify location of QCDNUM installation. This takes precedence over
+        a QCDNUM environment variable, the prefix path or other methods.
+        Please note: QCDNUM can optionally be used in fastNLO_reader!])],
+        [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
+            AC_SUBST([QCDNUM],[$withval])
+            AC_MSG_NOTICE([Using given path $QCDNUM as location of QCDNUM installation.])
+        fi],
+        [with_qcdnum="no"])
+
+if test "x$with_qcdnum" != "xno"; then
+   if test "x$QCDNUM" = "x"; then
+      AC_MSG_NOTICE([No QCDNUM installation path set. Try to find QCDNUM in prefix path ...])
+      AC_CHECK_FILE([$prefix/lib/libqcdnum.a],
+      [preqcdnum="$ac_cv_file_$prefix/lib/libqcdnum.a"],
+      [preqcdnum=""])
+      if test "x$preqcdnum" = "x"; then
+         AC_MSG_NOTICE([No QCDNUM library found in prefix path. Try to link with systems QCDNUM ...])
+         AC_CHECK_LIB([qcdnum],[libqcdnum_a-qcdnum],
+         [sysqcdnum=$ac_cv_lib_libqcdnum_a-qcdnum],
+         [sysqcdnum=""])
+         if test "x$sysqcdnum" = "x"; then
+            AC_MSG_ERROR([No QCDNUM library found. Please install QCDNUM first. Configuration aborted!])
+         else
+            AC_SUBST([QCDNUMLIBPATH], [`dirname $sysqcdnum`])
+         fi
+      else
+         AC_SUBST([QCDNUMLIBPATH], [`dirname $preqcdnum`])
+      fi
+      AC_SUBST([QCDNUM], [`dirname $QCDNUMLIBPATH`])
+   else
+      AC_CHECK_FILE([$QCDNUM/lib/libqcdnum.a],
+      [],
+      [AC_MSG_ERROR([QCDNUM library not found at given path $QCDNUM/lib. Please install QCDNUM first. Configuration aborted!])])
+   fi
+   AC_SUBST([QCDNUMPREFIX], "$QCDNUM")
+   AC_SUBST([QCDNUMLIBPATH], "$QCDNUMPREFIX/lib")
+   AC_SUBST([QCDNUMLIBS], ["-lzmstf -lhqstf -lqcdnum -lmbutil"])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([QCDNUM settings:])
+   AC_MSG_RESULT([Using $QCDNUMPREFIX for the QCDNUM installation path])
+   AC_MSG_RESULT([Using $QCDNUMLIBPATH for the libraries])
+else
+   AC_MSG_NOTICE([No QCDNUM support requested. Continue without QCDNUM.])
+   AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_QCDNUM, test "x$QCDNUMPREFIX" != "x")
+
+# HOPPET
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether HOPPET support is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([hoppet],
+        [AS_HELP_STRING([--with-hoppet],
+        [Specify location of HOPPET installation. This takes precedence over
+        a HOPPET environment variable, the prefix path or other methods.
+        Please note: HOPPET can optionally be used in fastNLO_reader!])],
+        [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
+            AC_SUBST([HOPPET],[$withval])
+            AC_MSG_NOTICE([Using given path $HOPPET as location of HOPPET installation.])
+        fi],
+        [with_hoppet="no"])
+
+if test "x$with_hoppet" != "xno"; then
+   if test "x$HOPPET" = "x"; then
+      AC_MSG_NOTICE([No HOPPET installation path set. Try to find HOPPET in prefix path ...])
+      AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
+      [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
+      [prehoppet=""])
+      if test "x$prehoppet" = "x"; then
+         AC_MSG_NOTICE([No HOPPET library found in prefix path. Try to link with systems HOPPET ...])
+         AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
+         [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
+         [syshoppet=""])
+         if test "x$syshoppet" = "x"; then
+            AC_MSG_ERROR([No HOPPET library found. Please install HOPPET first. Configuration aborted!])
+         else
+            AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
+         fi
+      else
+         AC_SUBST([HOPPETLIBPATH], [`dirname $prehoppet`])
+      fi
+      AC_SUBST([HOPPET], [`dirname $HOPPETLIBPATH`])
+   else
+      AC_CHECK_FILE([$HOPPET/lib/libhoppet_v1.a],
+      [],
+      [AC_MSG_ERROR([HOPPET library not found at given path $HOPPET/lib. Please install HOPPET first. Configuration aborted!])])
+   fi
+   AC_SUBST([HOPPETPREFIX], ["$HOPPET"])
+   AC_SUBST([HOPPETBIN], ["$HOPPETPREFIX/bin"])
+   AC_SUBST([HOPPETLDFLAGS], ["$($HOPPETBIN/hoppet-config --libs)"])
+   AC_SUBST([HOPPETCPPFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([HOPPET settings:])
+   AC_MSG_RESULT([Using $HOPPETPREFIX for the HOPPET installation path])
+   AC_MSG_RESULT([Using $HOPPETBIN for the HOPPET bin path])
+   AC_MSG_RESULT([Using $HOPPETLDFLAGS for the libraries])
+else
+   AC_MSG_NOTICE([No HOPPET support requested. Continue without HOPPET.])
+   AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_HOPPET, test "x$HOPPETPREFIX" != "x")
+
 # Add subversion revision number, recipe from Autotools by J. Calcote
-SVNREV=`svnversion $srcdir | sed 's/:.*//'`
-which svnversion > /dev/null; \
-if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];
+# Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
+SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
+if { ! ( svnversion ) >/dev/null 2>&1 || test "x$SVNREV" = "xexported" || test "x$SVNREV" = "xUnversioned directory"; } ;
   then SVNREV=`cat $srcdir/SVNREV`
-  else echo -n $SVNREV>$srcdir/SVNREV
+  else echo $SVNREV>$srcdir/SVNREV
 fi
 AC_SUBST(SVNREV)
 

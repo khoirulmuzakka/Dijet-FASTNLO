@@ -969,7 +969,7 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
                   for (int k=0; k<cF->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
                      printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cF->GetScaleFactor(k));
                   }
-                  printf(" #     Number of scale nodes for dimension %1i:                        %1i\n",NScaleDim,cF->GetNScaleNode());
+                  printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cF->GetNScaleNode());
                }
             }
          } else {
