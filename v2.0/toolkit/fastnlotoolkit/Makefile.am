@@ -24,7 +24,7 @@ endif
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
-libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOInterpolBase.cc fastNLOInterpolCatmulRom.cc fastNLOBase.cc fastNLOTable.cc fastNLOCoefficients.cc fastNLOCreate.cc read_steer.cc fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddFix.cc fastNLOCoeffAddFlex.cc fastNLOReader.cc fastNLOPDFLinearCombinations.cc
+libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOInterpolBase.cc fastNLOInterpolCatmulRom.cc fastNLOBase.cc fastNLOTable.cc fastNLOCoefficients.cc fastNLOCreate.cc read_steer.cc fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddFix.cc fastNLOCoeffAddFlex.cc fastNLOReader.cc fastNLOPDFLinearCombinations.cc Alphas.cc
 
 #
 # Preprocessor flags
@@ -35,7 +35,7 @@ libfastnlotoolkit_la_CPPFLAGS = $(my_include_dirs) -I${includedir}
 #
 # C++ compiler flags
 #
-libfastnlotoolkit_la_CXXFLAGS = 
+libfastnlotoolkit_la_CXXFLAGS =
 #-g -O2
 # -Wall
 # Debug flags

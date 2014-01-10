@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffAddFix.h"
+#include "fastnlotk/speaker.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -14,9 +15,9 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
    if ( ret && c->GetNScaleDep() == 0 ) return true;
    else if ( c->GetNScaleDep() >= 3 ) {
       if ( !quiet)
-	 say::error["fastNLOCoeffAddFix::CheckCoeffConstants"]
-	    <<"This is not a fixed order v2.0  table. NScaleDep must be equal 0 but is NScaleDep="
-	    <<c->GetNScaleDep()<<endl;
+         say::error["fastNLOCoeffAddFix::CheckCoeffConstants"]
+            <<"This is not a fixed order v2.0  table. NScaleDep must be equal 0 but is NScaleDep="
+            <<c->GetNScaleDep()<<endl;
       return false;
    }
    else return false;
@@ -68,13 +69,13 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
       *table >> Nscalevar[i];
       *table >> Nscalenode[i];
    }
-   // 	 printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
-   // 	 fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+   //    printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
+   //    fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
    ScaleFac.resize(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
       ScaleFac[i].resize(Nscalevar[i]);
       for(int j=0;j<Nscalevar[i];j++){
-	 *table >> ScaleFac[i][j];
+         *table >> ScaleFac[i][j];
       }
    }
    //printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
@@ -89,7 +90,7 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    int nst = ReadTable  ( &SigmaTilde , table );
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of SigmaTilde.\n",nst);
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of fastNLO v2.0 tables.\n",nst+nsn);
-   info["Read"]<<"Read "<<nst+nsn<<" lines of fastNLO v2.0 tables."<<endl;
+   //   info["Read"]<<"Read "<<nst+nsn<<" lines of fastNLO v2.0 tables."<<endl;
 
    // prepare members for evaluation
    fastNLOCoeffAddBase::ResizeTable(&PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc);
@@ -110,7 +111,7 @@ void fastNLOCoeffAddFix::Write(ostream* table,double Nevt){
    }
    for(int i=0;i<NScaleDim;i++){
       for(int j=0;j<Nscalevar[i];j++){
-	 *table << ScaleFac[i][j] << endl;
+         *table << ScaleFac[i][j] << endl;
       }
    }
 
@@ -151,7 +152,7 @@ int fastNLOCoeffAddFix::GetTotalScalenodes() const {
    //    int totalscalenodes=1;
    //    for(int scaledim=0;scaledim<NScaleDim;scaledim++){
    //       if ( !ScaleNode.empty() )
-   // 	 totalscalenodes *= ScaleNode[0][0][0].size();
+   //  totalscalenodes *= ScaleNode[0][0][0].size();
    //       //Nscalenode[scaledim];
    //    }
    //    return totalscalenodes;
@@ -166,7 +167,7 @@ void fastNLOCoeffAddFix::Print() const {
       printf(" B    - Nscalenode[%d]              %d\n",i,GetNScaleNode());
       printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
       for(int j=0;j<Nscalevar[i];j++){
-	 printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
+         printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
       }
    }
    printf(" B   No printing of ScaleNode implemented yet.\n");

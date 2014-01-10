@@ -909,6 +909,10 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    // iprint = 0: No additional printout
    //          1: Print Block A1 & A2 (A1, A2)
    //          2: Also print values of Block B (B0)
+   //          Not implemented yet
+   //          3: Also print x nodes of Block B for each contribution (BX)
+   //          4: Also print scale nodes of Block B for each contribution (BS)
+   //          5: Also print sigma tilde of Block B (not implemented yet)
 
    //---  Initialization for nice printing
    const string CSEPS = "##################################################################################\n";
@@ -931,6 +935,10 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    printf(" # Tot. no. of observable bins: %3i in %1i dimensions:\n",NObsBin,NDim);
    printf(" #\n");
    printf(" # No. of contributions: %1i\n",Ncontrib);
+
+   //
+   // Print basic contribution information (always)
+   //
    for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
       fastNLOCoeffBase* c = fCoeff[j];
       if ( iprint == 0 ) {
@@ -938,30 +946,36 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
          for (unsigned int i=0; i<c->CtrbDescript.size(); i++) {
             printf(" #   %s\n",c->CtrbDescript[i].data());
          }
-         //         printf(" #   No. of events: %16llu\n",c->GetNevt);
+         printf(" #   No. of events: %16llu\n",0);
          printf(" #   provided by:\n");
          for (unsigned int i=0; i<c->CodeDescript.size(); i++) {
             printf(" #   %s\n",c->CodeDescript[i].data());
          }
 
-	 if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) {
-	    fastNLOCoeffAddFix* cF = (fastNLOCoeffAddFix*)c;
-	    //if (c->NScaleDep<3) {
-	    //printf(" #   Scale dimensions: %1i\n",c->NScaleDim); // NScaleDim is ALWAYS 1
-	    //for (int i=0; i<c->NScaleDim; i++) { // NScaleDim is ALWAYS 1
-	    //for (unsigned int j=0; j<c->ScaleDescript[i].size(); j++) { //Scale description always consists of one line
-	    //printf(" #     Scale description for dimension %1i:          %s\n",i+1,ScaleDescript[i][j].data());
-	    //}
-	    printf(" #     Scale description                             %s\n",cF->GetScaleDescription(0).c_str()); // get scale description of the only scale (0)
-	    printf(" #     Number of scale variations                    %1i\n",cF->GetNScalevar());
-	    printf(" #     Available scale settings:\n");
-	    for (int k=0; k<cF->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
-	       printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cF->GetScaleFactor(k)); // shall we printout 'k' instead of 'k+1' ??
-	    }
-	    printf(" #     Number of scale nodes:                        %1i\n",cF->GetNScaleNode());
-	    //}
-	 }
-
+         if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) {
+            fastNLOCoeffAddFix* cF = (fastNLOCoeffAddFix*)c;
+            // TODO: NScaleDim is NOT always 1. It is zero for NP and data for example and
+            //       it is an entry of the v2 table format and hence should be accessible.
+            //       Even if only to throw an error and exit.
+            int NScaleDim = 1;
+            printf(" #   Scale dimensions: %1i\n",NScaleDim);
+            for (int i=0; i<NScaleDim; i++) {
+               // TODO: Again: The v2 table format allows n lines of description ...
+               unsigned int NScaleDescriptSize = 1;
+               for (unsigned int j=0; j<NScaleDescriptSize; j++) { //Scale description always consists of one line. NO
+                  printf(" #     Scale description for dimension %1i:          %s\n",i+1,cF->GetScaleDescription(i).c_str());
+                  printf(" #     Number of scale variations for dimension %1i: %1i\n",NScaleDim,cF->GetNScalevar());
+                  printf(" #     Available scale settings for dimension %1i:\n",NScaleDim);
+                  for (int k=0; k<cF->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
+                     printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cF->GetScaleFactor(k));
+                  }
+                  printf(" #     Number of scale nodes for dimension %1i:                        %1i\n",NScaleDim,cF->GetNScaleNode());
+               }
+            }
+         } else {
+            int NScaleDim = 0;
+            printf(" #   Scale dimensions: %1i\n",NScaleDim);
+         }
       } else {
          fCoeff[j]->Print();
       }

@@ -36,8 +36,18 @@ public:
    fastNLOLHAPDF(string name);
    fastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
+   // Initializer. Necessary for some alternative evolutions.
+   virtual void InitEvolveAlphas();
+   // Pseudo-Setters. Don´t work with LHAPDF, but print warning instead.
+   virtual void SetMz(double Mz);
+   virtual void SetNFlavor(int nflavor);
+   virtual void SetNLoop(int nloop);
+   virtual void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   virtual void SetQMass(int pdgid, double mq);
+   // Setters
    void SetLHAPDFFilename(string filename);
    void SetLHAPDFMember(int set);
+   // Getters
    int GetIPDFMember() const {
       return fiPDFMember;
    };
@@ -48,6 +58,10 @@ public:
       return fnPDFs-1;
    };
    void PrintPDFInformation() const ;
+   virtual double GetQMass(int pdgid);
+   int GetNLoop();
+   int GetNFlavor();
+   double GetAlphasMz(double Q);
 
 protected:
    // inherited functions
@@ -57,6 +71,10 @@ protected:
 
    // ---- LHAPDF vars ---- //
    string fLHAPDFFilename;
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   LHAPDF::PDFSet* PDFSet;
+   LHAPDF::PDF* PDF;
+   #endif
    int fnPDFs;
    int fiPDFMember;
 
@@ -81,7 +99,9 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name) , fnPDFs(0) , fi
 fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fastNLOReader(name) , fchksum(0.) {
    SetLHAPDFFilename(LHAPDFFile);
    SetLHAPDFMember(PDFMember);
-   // do cross sections calculation, since everything is yet ready
+   // Call additional initialization. Not necessary for LHAPDF.
+   InitEvolveAlphas();
+   // Everything set. Do cross sections calculation.
    CalcCrossSection();
 }
 
@@ -100,7 +120,11 @@ double fastNLOLHAPDF::EvolveAlphas(double Q) const {
    // WARNING: You cannot change alpha_s(Mz), but is is
    // defined with the pdf. 'alphasMz' is not used here!
    //
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   return PDF->alphasQ(Q);
+   #else
    return LHAPDF::alphasPDF(Q);
+   #endif
 }
 
 
@@ -115,15 +139,20 @@ bool fastNLOLHAPDF::InitPDF() {
    //
    // LHAPDF interface:
    // security, if multiple instance with different pdfs are instantiated.
-   // we always reinizialized the set PDF-set.
+   // we always reinitialized the set PDF-set.
 
-   //LHAPDF::setVerbosity(LHAPDF::SILENT);
-   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    if (fLHAPDFFilename == "") {
       error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
    }
 
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   //Not needed in LHAPDF6 case
+   return true;
+
+   #else
+   //LHAPDF::setVerbosity(LHAPDF::SILENT);
+   LHAPDF::setVerbosity(LHAPDF::LOWKEY);
    // Do not use the ByName feature, destroys ease of use on the grid without LHAPDF
    //LHAPDF::initPDFSetByName(fLHAPDFFilename);
    //cout << "PDF set name " << fLHAPDFFilename << endl;
@@ -140,6 +169,7 @@ bool fastNLOLHAPDF::InitPDF() {
    }
    fchksum = CalcChecksum(1.);
    return true;
+   #endif
 }
 
 
@@ -152,7 +182,15 @@ vector<double> fastNLOLHAPDF::GetXFX(double xp, double muf) const {
    //  GetXFX is used to get the parton array from the
    //  pre-defined pdf-interface.
    //
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   vector <double> xfx;
+   for (int id=-6; id<7; id++) {
+      xfx.push_back(PDF->xfxQ(id, xp, muf));
+   }
+   return xfx;
+   #else
    return LHAPDF::xfx(xp,muf);
+   #endif
 }
 
 
@@ -160,11 +198,18 @@ vector<double> fastNLOLHAPDF::GetXFX(double xp, double muf) const {
 
 
 void fastNLOLHAPDF::SetLHAPDFFilename(string filename) {
-   if (filename != fLHAPDFFilename) fchksum = 0;
    fLHAPDFFilename = filename;
-   // reset pdfset
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = new LHAPDF::PDFSet(filename);
+   fnPDFs = PDFSet->size();
+   #else
+   if (filename != fLHAPDFFilename) fchksum = 0;
+   // Reset pdfset member to zero
    fiPDFMember = 0;
-   //   InitPDF();
+   // KR: Reactivated this. Why was it switched off?
+   // --> Mass settings etc. can be read from LHAPDF after setting the filename, i.e. the set.
+   InitPDF();
+   #endif
 }
 
 
@@ -172,6 +217,9 @@ void fastNLOLHAPDF::SetLHAPDFFilename(string filename) {
 
 
 void fastNLOLHAPDF::SetLHAPDFMember(int set) {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDF = PDFSet->mkPDF(set);
+   #else
    fiPDFMember = set;
    if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember
       debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
@@ -182,6 +230,7 @@ void fastNLOLHAPDF::SetLHAPDFMember(int set) {
       fchksum = 0;
    }
    //InitPDF();
+   #endif
 }
 
 
@@ -199,6 +248,10 @@ void fastNLOLHAPDF::PrintPDFInformation() const {
    // second instance with another pdf. Then also the first one is using this
    // pdf when evaluating CalcCrossSection (after a PDFCacheRefilling).
    //
+
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   cout << PDFSet->description();
+   #else
    printf(" ##################################################################################\n");
    printf(" #  fastNLOLHAPDF::PrintCurrentLHAPDFInformation.\n");
    printf(" #      Your currently initalized pdf is called:\n");
@@ -206,8 +259,51 @@ void fastNLOLHAPDF::PrintPDFInformation() const {
    printf(" #      Information about current PDFMember in current LHAPDF-file cannot be displayed.\n");
    printf(" #      Please use fastNLOReader::SetLHAPDFMember(int) to choose a pdf-set.\n");
    printf(" ##################################################################################\n");
+   #endif
 }
 
+void fastNLOLHAPDF::SetMz(double Mz) {
+   warn["SetMz"]<<"WARNING! The Z mass cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
 
+void fastNLOLHAPDF::SetQMass(int pdgid, double mq) {
+   warn["SetQMass"]<<"WARNING! The quark masses cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void fastNLOLHAPDF::SetNFlavor(int nflavor) {
+   warn["SetNFlavor"]<<"WARNING! The no. of active flavors cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void fastNLOLHAPDF::SetNLoop(int nloop) {
+   warn["SetNLoop"]<<"WARNING! The no. of loops cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void fastNLOLHAPDF::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
+   warn["SetAlphasMz"]<<"WARNING! alpha_s(M_Z) cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+}
+
+void fastNLOLHAPDF::InitEvolveAlphas() {
+   // For LHAPDF do nothing
+}
+
+double fastNLOLHAPDF::GetQMass(int pdgid) {
+   if (pdgid < 1 || pdgid > 6 ) {
+      error["GetQMass"]<<"PDG code out of quark range 1-6! Aborted\n";
+      exit(1);
+   }
+   return LHAPDF::getQMass(pdgid);
+}
+
+int fastNLOLHAPDF::GetNLoop() {
+   return (LHAPDF::getOrderAlphaS() + 1);
+}
+
+int fastNLOLHAPDF::GetNFlavor() {
+   return (LHAPDF::getNf());
+}
+
+double fastNLOLHAPDF::GetAlphasMz(double Q) {
+   return LHAPDF::alphasPDF(Q);
+}
 
 #endif

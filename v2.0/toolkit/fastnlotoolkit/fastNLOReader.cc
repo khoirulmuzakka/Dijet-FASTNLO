@@ -26,7 +26,7 @@ fastNLOReader::fastNLOReader(): fastNLOTable() {
 //______________________________________________________________________________
 
 fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
-   SetGlobalVerbosity(DEBUG); // Temporary for debugging
+   //   SetGlobalVerbosity(DEBUG); // Temporary for debugging
    SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
    fCoeffData           = NULL;
