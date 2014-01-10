@@ -35,7 +35,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLinearCombination(const fas
       return CalcPDFLCOneHadron(c,pdfx1);
       break;
    case 2:	// two PDFs involved in process: e.g. pp, ppbar
-      if ( !pdf2IsAntiParticle ) {
+      if ( pdf2IsAntiParticle ) {
 	 vector<double> Antipdf2 = MakeAntiHadron(pdfx2);
 	 return CalcPDFLCTwoHadrons(c,pdfx1,Antipdf2);
       }
@@ -86,7 +86,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //
    // -----------------------------------------------
    // implement other processes e.g. like this:
-   //    bool IsDrellYan = (...)   // check for the identifier(s) (most likely IPDFDef2
+   //    bool IsDrellYan = (...)   // check for the identifier(s) (most likely IPDFDef2)
    //    if ( IsDrellYan ) CalcPDFLinearCombDrellYan(c,pdfx1,pdfx2);
    // and implement a new function called CalcPDFLinearCombDrellYan(...)
    // -----------------------------------------------
