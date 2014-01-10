@@ -90,7 +90,7 @@ AC_ARG_WITH([lhapdf],
         [Specify location of LHAPDF installation. This takes precedence over
         an LHAPDF environment variable, the prefix path or other methods.
         Please note: LHAPDF is mandatory in order to use fastNLO_reader!])],
-        [if test "x$withval" == "xno"; then
+        [if test "x$withval" = "xno"; then
             AC_MSG_ERROR([fastNLO_reader CANNOT be used without LHAPDF! Configuration aborted!])
          fi
          if test "x$withval" != "xyes"; then
@@ -100,19 +100,19 @@ AC_ARG_WITH([lhapdf],
         [])
 
 if test "x$with_lhapdf" != "xno"; then
-   if test "x$LHAPDF" == "x"; then
+   if test "x$LHAPDF" = "x"; then
       AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
-      if test "x$LHAPDFBIN" == "x"; then
+      if test "x$LHAPDFBIN" = "x"; then
          AC_MSG_NOTICE([No LHAPDF installation found in prefix path. Try to find LHAPDF in system path ...])
          AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
-         if test "x$LHAPDFBIN" == "x"; then
+         if test "x$LHAPDFBIN" = "x"; then
             AC_MSG_ERROR([No LHAPDF library found. Configuration aborted!])
          fi
       fi
    else
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$LHAPDF/bin])
-      if test "x$LHAPDFBIN" == "x"; then
+      if test "x$LHAPDFBIN" = "x"; then
          AC_MSG_ERROR([lhapdf-config not found in given path to LHAPDF! Configuration aborted!])
       fi
    fi
@@ -156,17 +156,17 @@ AC_ARG_WITH([qcdnum],
         [with_qcdnum="no"])
 
 if test "x$with_qcdnum" != "xno"; then
-   if test "x$QCDNUM" == "x"; then
+   if test "x$QCDNUM" = "x"; then
       AC_MSG_NOTICE([No QCDNUM installation path set. Try to find QCDNUM in prefix path ...])
       AC_CHECK_FILE([$prefix/lib/libqcdnum.a],
       [preqcdnum="$ac_cv_file_$prefix/lib/libqcdnum.a"],
       [preqcdnum=""])
-      if test "x$preqcdnum" == "x"; then
+      if test "x$preqcdnum" = "x"; then
          AC_MSG_NOTICE([No QCDNUM library found in prefix path. Try to link with systems QCDNUM ...])
          AC_CHECK_LIB([qcdnum],[libqcdnum_a-qcdnum],
          [sysqcdnum=$ac_cv_lib_libqcdnum_a-qcdnum],
          [sysqcdnum=""])
-         if test "x$sysqcdnum" == "x"; then
+         if test "x$sysqcdnum" = "x"; then
             AC_MSG_ERROR([No QCDNUM library found. Please install QCDNUM first. Configuration aborted!])
          else
             AC_SUBST([QCDNUMLIBPATH], [`dirname $sysqcdnum`])
@@ -210,17 +210,17 @@ AC_ARG_WITH([hoppet],
         [with_hoppet="no"])
 
 if test "x$with_hoppet" != "xno"; then
-   if test "x$HOPPET" == "x"; then
+   if test "x$HOPPET" = "x"; then
       AC_MSG_NOTICE([No HOPPET installation path set. Try to find HOPPET in prefix path ...])
       AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
       [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
       [prehoppet=""])
-      if test "x$prehoppet" == "x"; then
+      if test "x$prehoppet" = "x"; then
          AC_MSG_NOTICE([No HOPPET library found in prefix path. Try to link with systems HOPPET ...])
          AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
          [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
          [syshoppet=""])
-         if test "x$syshoppet" == "x"; then
+         if test "x$syshoppet" = "x"; then
             AC_MSG_ERROR([No HOPPET library found. Please install HOPPET first. Configuration aborted!])
          else
             AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
@@ -260,28 +260,28 @@ AC_ARG_ENABLE([pyext],
         [],
         [enable_pyext="no"])
 # Basic Python checks
-if test "x$enable_pyext" == "xyes"; then
+if test "x$enable_pyext" = "xyes"; then
 # Skip for the moment. AX_PYTHON_DEVEL doesn't work with SLC5!
 #   AX_PYTHON_DEVEL([>='2.3.1'])
    AM_PATH_PYTHON
 fi
 # Check on existence of SWIG to interface to Python
-if test "x$enable_pyext" == "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
+if test "x$enable_pyext" = "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
    AC_PATH_PROG(SWIG, swig)
-   if test "x$SWIG" ==  "x"; then
+   if test "x$SWIG" =  "x"; then
       AC_MSG_ERROR([swig not found, interfacing to Python not possible! Please install swig first or disable Python extension. Configuration aborted!])
    else
       AC_MSG_NOTICE([swig found, interface to Python possible.])
    fi
 fi
 AC_MSG_NOTICE([******************************************])
-if test "x$enable_pyext" == "xyes"; then
+if test "x$enable_pyext" = "xyes"; then
    AC_MSG_NOTICE([All Python checks successful. Requested Python extension will be built.])
 else
    AC_MSG_NOTICE([No Python extension requested. Continue without pyext.])
 fi
 AC_MSG_NOTICE([******************************************])
-AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" == "xyes"])
+AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes"])
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"

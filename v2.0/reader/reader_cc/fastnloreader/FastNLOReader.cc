@@ -1122,12 +1122,26 @@ void FastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
    printf(" # Tot. no. of observable bins: %3i in %1i dimensions:\n",NObsBin,NDim);
    printf(" #\n");
    printf(" # No. of contributions: %1i\n",Ncontrib);
+
+   //
+   // Print basic contribution information (always)
+   //
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       if (!BBlocksSMCalc.empty()) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
             if (BBlocksSMCalc[j][i]) {
                int iContr = BBlocksSMCalc[j][i]->GetIc();
                BBlocksSMCalc[j][i]->Print(iContr,iprint);
+            }
+         }
+      }
+   }
+   for (unsigned int j = 0 ; j<BBlocksNewPhys.size() ; j++) {
+      if (!BBlocksNewPhys.empty()) {
+         for (unsigned int i = 0 ; i<BBlocksNewPhys[j].size() ; i++) {
+            if (BBlocksNewPhys[j][i]) {
+               int iContr = BBlocksNewPhys[j][i]->GetIc();
+               BBlocksNewPhys[j][i]->Print(iContr,iprint);
             }
          }
       }

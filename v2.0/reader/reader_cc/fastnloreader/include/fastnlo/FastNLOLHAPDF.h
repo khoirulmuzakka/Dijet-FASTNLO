@@ -140,7 +140,7 @@ bool FastNLOLHAPDF::InitPDF() {
    //
    // LHAPDF interface:
    // security, if multiple instance with different pdfs are instantiated.
-   // we always reinizialized the set PDF-set.
+   // we always reinitialized the set PDF-set.
 
    if (fLHAPDFFilename == "") {
       error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
