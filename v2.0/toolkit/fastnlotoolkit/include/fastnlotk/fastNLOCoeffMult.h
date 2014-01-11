@@ -19,7 +19,7 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    void ReadRest(istream *table);
-   virtual void Write(ostream *table,double n=1);
+   virtual void Write(ostream *table);
    virtual void Print() const;
    
    double GetMultFactor(int iObs) const { return fact[iObs]; }

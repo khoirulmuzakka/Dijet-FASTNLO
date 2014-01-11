@@ -152,7 +152,7 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::Write(ostream *table,double) {
+void fastNLOCoeffAddBase::Write(ostream *table) {
    cout<<"fastNLOCoeffAddBase::Write(), calling Base::Write()."<<endl;
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);

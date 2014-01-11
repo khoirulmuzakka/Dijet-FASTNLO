@@ -18,7 +18,7 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
    void ReadRest(istream *table);
-   virtual void Write(ostream *table, double Nevt=1);
+   virtual void Write(ostream *table);
    virtual void Add(const fastNLOCoeffAddFix& other);
    virtual void Print() const;
    
@@ -43,7 +43,7 @@ protected:
    //vector < int > Nscalenode;
    v2d ScaleFac;
    v4d ScaleNode;
-   v5d SigmaTilde;
+   v5d SigmaTilde; // units are (p)barn * Nevt / BinSize
 
 public:
    v2d AlphasTwoPi_v20;

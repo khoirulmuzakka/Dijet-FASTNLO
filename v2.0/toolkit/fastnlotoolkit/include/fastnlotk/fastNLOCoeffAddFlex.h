@@ -19,12 +19,12 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
    int Read(istream *table);
    void ReadRest(istream *table);
-   virtual void Write(ostream *table, double Nevt=1);
+   virtual void Write(ostream *table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddFlex& other);
 
-   template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false);
-   int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false );
+   template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false , unsigned long long nevts = 1);
+   int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false , unsigned long long nevts = 1 );
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };
@@ -39,14 +39,14 @@ protected:
    int fILOord;   // obtained from Scenario
    
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
-   v5d SigmaTildeMuIndep; 
+   v5d SigmaTildeMuIndep; // units are (p)barn * Nevt / BinSize
    v5d SigmaTildeMuFDep; 
    v5d SigmaTildeMuRDep; 
    v5d SigmaTildeMuRRDep; 
    v5d SigmaTildeMuFFDep; 
    v5d SigmaTildeMuRFDep; 
    // SigmaRef [NObsBins] [nsubproc]
-   v2d SigmaRefMixed; 
+   v2d SigmaRefMixed;  // units are (p)barn * Nevt / BinSize
    v2d SigmaRef_s1; 
    v2d SigmaRef_s2; 
    //int NscalenodeScale1;
@@ -63,13 +63,13 @@ public:
 
 
 template<typename T>
-int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast){
+int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast, unsigned long long nevts ){
    int nn = 0;
    int size = 0;
    *table >> size; nn++;
    v->resize(size);
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast);
+      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast,nevts);
    }
    return nn;
 };

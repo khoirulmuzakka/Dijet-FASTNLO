@@ -26,7 +26,7 @@ fastNLOReader::fastNLOReader(): fastNLOTable() {
 //______________________________________________________________________________
 
 fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
-   //   SetGlobalVerbosity(DEBUG); // Temporary for debugging
+   //SetGlobalVerbosity(DEBUG); // Temporary for debugging
    SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
    fCoeffData           = NULL;
@@ -477,10 +477,12 @@ void fastNLOReader::CalcReferenceCrossSection() {
          for (int i=0; i<NObsBin; i++) {
             double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
-               XSectionRef[i] +=  ((fastNLOCoeffAddFix*)Coeff_LO_Ref)->GetSigmaTilde(i,0,0,0,l) * unit; // no scalevariations in LO tables
+	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
+               XSectionRef[i] +=  c->GetSigmaTilde(i,0,0,0,l) * unit / c->GetNevt(i,l) ; // no scalevariations in LO tables
             }
             for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
-               XSectionRef[i] +=  ((fastNLOCoeffAddFix*)Coeff_NLO_Ref)->GetSigmaTilde(i,fScalevar,0,0,l) * unit;
+	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
+               XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
             }
          }
       }
@@ -492,15 +494,15 @@ void fastNLOReader::CalcReferenceCrossSection() {
          double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
          fastNLOCoeffAddFlex* cLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kLeading];
          for (int n=0; n<cLO->GetNSubproc(); n++) {
-            XSectionRefMixed[i]             += cLO->SigmaRefMixed[i][n] * unit;
-            XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit;
-            XSectionRef_s2[i]               += cLO->SigmaRef_s2[i][n] * unit;
+            XSectionRefMixed[i]             += cLO->SigmaRefMixed[i][n] * unit / cLO->GetNevt(i,n);
+            XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit / cLO->GetNevt(i,n);
+            XSectionRef_s2[i]               += cLO->SigmaRef_s2[i][n] * unit / cLO->GetNevt(i,n);
          }
          fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kLeading][kNextToLeading];
          for (int n=0; n<cNLO->GetNSubproc(); n++) {
-            XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit;
-            XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit;
-            XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit;
+            XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit / cNLO->GetNevt(i,n);
+            XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
+            XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit / cNLO->GetNevt(i,n);
          }
       }
    }
@@ -648,7 +650,7 @@ void fastNLOReader::CalcAposterioriScaleVariation() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
-               double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *  cLO->PdfLc[i][j][k][l] * unit;
+               double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *  cLO->PdfLc[i][j][k][l] * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * clo * n * L * beta0;
                double mur  = fScaleFacMuR * cLO->GetScaleNode(i,0,j);
                XS->at(i) +=  xsci;
@@ -687,18 +689,18 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   double pdflc          = c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
                   double fac  = as * pdflc * unit;
-                  double xsci =  c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac;
+                  double xsci =  c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if ( c->GetNScaleDep() >= 5 ) {
-                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac;
-                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac;
+                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
+                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
                      if ( c->GetIPDFdef1() == 2 ) {   // DIS tables use log(mu/Q2) instead of log(mu)
-                        xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac;
-                        xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac;
+                        xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
+                        xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                      }
                      if ( c->GetNScaleDep() >= 6 ) {
-                        xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * pow(log(mur2),2) * fac;
-                        xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * pow(log(muf2),2) * fac;
-                        xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * log(mur2) * log(muf2) * fac;
+                        xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * pow(log(mur2),2) * fac / c->GetNevt(i,n);
+                        xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * pow(log(muf2),2) * fac / c->GetNevt(i,n);
+                        xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * log(mur2) * log(muf2) * fac / c->GetNevt(i,n);
                      }
                   }
                   XS->at(i)   += xsci;
@@ -732,8 +734,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<c->GetNSubproc(); l++) {
-               // hier hier todo
-               double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit;
+               double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
                //B->fact[i]     +=  xsci;
                QS->at(i)      +=  xsci*mur;

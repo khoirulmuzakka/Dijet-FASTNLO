@@ -107,7 +107,7 @@ int fastNLOCoeffMult::ReadCoeffMult(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffMult::Write(ostream *table,double) {
+void fastNLOCoeffMult::Write(ostream *table) {
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
    *table << Nuncorrel << endl;

@@ -97,7 +97,7 @@ int fastNLOCoeffBase::EndReadCoeff(istream* table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::Write(ostream* table,double) {
+void fastNLOCoeffBase::Write(ostream* table) {
    debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
    *table << tablemagicno << endl;
    *table << IXsectUnits << endl;
@@ -269,10 +269,11 @@ void fastNLOCoeffBase::ResizeTable( vector<double >* v, int dim0 ){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::ReadTable(vector<double >* v, istream *table ){
+int fastNLOCoeffBase::ReadTable(vector<double >* v, istream *table , unsigned long long Nevt ){
   int nn = 0;
   for(unsigned int i0=0;i0<v->size();i0++){
     *table >> v->at(i0);
+    v->at(i0) *= Nevt;
     nn++;
   }
   return nn;
@@ -280,7 +281,7 @@ int fastNLOCoeffBase::ReadTable(vector<double >* v, istream *table ){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable( const vector<double >& v, ostream *table , double Nevt ) const {
+int fastNLOCoeffBase::WriteTable( const vector<double >& v, ostream *table , unsigned long long Nevt ) const {
    if( Nevt == 0) return -1000;
    int nn = 0;
    for(unsigned int i0=0;i0<v.size();i0++){
@@ -304,12 +305,14 @@ int fastNLOCoeffBase::WriteFlexibleTable(const vector<double >& v, ostream *tabl
    return nn;
 }
 
+
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
-   if ( vSum->size() != vAdd->size() ) {cout<<"Error in fastNLOCoeffBase::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
-  for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
-    (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
-  }
+   AddTableToAnotherTable( *vSum, *vAdd, w1, w2 );
+   //    if ( vSum->size() != vAdd->size() ) {cout<<"Error in fastNLOCoeffBase::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
+   //   for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
+   //     (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
+   //   }
 }
 
 

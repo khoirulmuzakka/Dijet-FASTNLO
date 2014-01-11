@@ -92,7 +92,7 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::WriteTable(double Nevt) {
+void fastNLOTable::WriteTable() {
    info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
    OpenFileRewrite();
    fastNLOBase::WriteHeader(ofilestream);
@@ -102,7 +102,7 @@ void fastNLOTable::WriteTable(double Nevt) {
    WriteScenario(ofilestream);
    for(int i=0;i<GetNcontrib();i++){
       info["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
-      GetCoeffTable(i)->Write(ofilestream,Nevt);
+      GetCoeffTable(i)->Write(ofilestream);
    }
    CloseFileWrite();
 }

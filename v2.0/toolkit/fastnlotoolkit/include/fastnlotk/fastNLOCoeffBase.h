@@ -24,7 +24,7 @@ public:
    //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);
    int Read(istream *table);
    int ReadBase(istream *table);
-   virtual void Write(ostream *table,double n=1) ;
+   virtual void Write(ostream *table);
    //void Add(fastNLOCoeffBase* other);
    int EndReadCoeff(istream *table);
    virtual void Print() const;
@@ -46,8 +46,8 @@ public:
    template<typename T> void ResizeFlexibleVector(vector<T>* v, vector<T>* nom);
    void ResizeFlexibleVector(vector<double >* v, vector<double >*nom) { v->resize(nom->size());}
 
-   template<typename T> int ReadTable( vector<T>* v, istream *table );
-   int ReadTable( vector<double>* v, istream *table );
+   template<typename T> int ReadTable( vector<T>* v, istream *table , unsigned long long Nevt = 1);
+   int ReadTable( vector<double>* v, istream *table , unsigned long long Nevt = 1);
 
    template<typename T> void AddTableToAnotherTable( vector<T>* vSum, vector<T>* vAdd, double w1 = 1, double w2 = 1 );
    void AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1 = 1, double w2 = 1 );
@@ -58,8 +58,8 @@ public:
    template<typename T> int WriteFlexibleTable( const vector<T>& v, ostream *table , bool nProcLast=true, double Nevt=1 ) const ;
    int WriteFlexibleTable( const vector<double >& v, ostream *table , bool nProcLast=true, double Nevt=1 ) const ;
 
-   template<typename T> int WriteTable( const vector<T>& v, ostream *table , double Nevt=1 ) const;
-   int WriteTable( const vector<double >& v, ostream *table , double Nevt=1 ) const;
+   template<typename T> int WriteTable( const vector<T>& v, ostream *table , unsigned long long Nevt=1 ) const;
+   int WriteTable( const vector<double >& v, ostream *table , unsigned long long Nevt=1 ) const;
 
    int GetIDataFlag() const {return IDataFlag;}
    void SetIDataFlag(int n){IDataFlag = n;}
@@ -122,17 +122,17 @@ void fastNLOCoeffBase::ResizeFlexibleVector(vector<T>* v, vector<T>* nom) {
 
 
 template<typename T>
-int fastNLOCoeffBase::ReadTable( vector<T>* v, istream *table ){
+int fastNLOCoeffBase::ReadTable( vector<T>* v, istream *table , unsigned long long Nevt){
    int nn = 0;
    for(unsigned int i0=0;i0<v->size();i0++){
-      nn+= ReadTable(&(*v)[i0],table);
+      nn+= ReadTable(&(*v)[i0],table, Nevt);
    }
    return nn;
 };
 
 
 template<typename T>
-int fastNLOCoeffBase::WriteTable( const vector<T>& v, ostream *table , double Nevt) const {
+int fastNLOCoeffBase::WriteTable( const vector<T>& v, ostream *table , unsigned long long Nevt) const {
    int nn = 0;
    for(unsigned int i=0;i<v.size();i++){
       nn += WriteTable( v[i] , table , Nevt );

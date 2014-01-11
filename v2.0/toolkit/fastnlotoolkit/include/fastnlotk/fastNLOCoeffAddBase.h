@@ -18,7 +18,7 @@ public:
    virtual ~fastNLOCoeffAddBase(){;}
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    int Read(istream *table);
-   virtual void Write(ostream *table,double n=1);
+   virtual void Write(ostream *table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
 
@@ -32,7 +32,10 @@ public:
 
 
    int GetIRef() const {return IRef;}
-   long long int GetNevt() const {return Nevt;}
+   long long int GetNevt(int NObsBin, int NSubproc) const {
+      if ( Nevt > 0 ) return Nevt;
+      else {cout<<"Todo. Preparation for v2.2."<<endl; return Nevt;}
+   }
    int GetNxmax(int Obsbin) const ;
    int GetXIndex(int Obsbin,int x1bin,int x2bin =0) const ;
    int GetNSubproc() const { return NSubproc;}

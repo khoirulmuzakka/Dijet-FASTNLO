@@ -98,6 +98,27 @@ int fastNLOBase::ReadHeader(istream *table){
    *table >> Ndata;
    *table >> NuserString;
    *table >> NuserInt;
+   for ( int i = 0 ; i<NuserInt ; i++ ) {
+      int IUserLines;
+      *table >> IUserLines;
+      // future code if 'user-blocks' are used ...
+      // int NUserFlag;
+      // string NUserBlockDescr;
+      // *table >> NUserFlag;
+      // *table >> NUserBlockDescr;;
+      // if ( known-user-block ) { read-known-userblock... }
+      // else { // skip meaningful reading
+      //    for ( int i = 2 ; i<NuserInt ; i++ ) {
+      //       double devnull;
+      //       *table >> devnull;
+      //    }
+      // }
+      // ...sofar skip reading
+      for ( int i = 0 ; i<NuserInt ; i++ ) {
+	 double devnull;
+	 *table >> devnull;
+      }
+   }
    *table >> NuserFloat;
    *table >> Imachine;
 

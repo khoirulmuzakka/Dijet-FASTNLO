@@ -82,15 +82,15 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
    //NscalenodeScale1 = ScaleNode1[0].size();
    //NscalenodeScale2 = ScaleNode2[0].size();
 
-   nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true );
+   nn3 += ReadFlexibleVector  ( &SigmaTildeMuIndep , table , true , Nevt );
    //if ( NScaleDep==3 || fScen->ILOord!=Npow || NScaleDep==5 ){
    if ( NScaleDep==3 || NScaleDep>=5 ){
-      nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true );
-      nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true );
+      nn3 += ReadFlexibleVector  ( &SigmaTildeMuFDep , table , true , Nevt );
+      nn3 += ReadFlexibleVector  ( &SigmaTildeMuRDep , table , true , Nevt );
       if ( NScaleDep>=6 ){
-	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRRDep , table , true );
-	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuFFDep , table , true );
-	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRFDep , table , true );
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRRDep , table , true , Nevt );
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuFFDep , table , true , Nevt );
+	 nn3 += ReadFlexibleVector  ( &SigmaTildeMuRFDep , table , true , Nevt );
       }
    }
    // fixing old convention
@@ -99,10 +99,10 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
       if (Npow!=fILOord) NScaleDep = 5;
       else NScaleDep = 3;
    }
-   nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table , true );
-   nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table , true );
-   nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table , true );
-   printf("  *  fastNLOCoeffAddFlex::Read(). Read %d lines of NScaleDep>=3 Tables.\n",nn3);
+   nn3 += ReadFlexibleVector  ( &SigmaRefMixed , table , true , Nevt );
+   nn3 += ReadFlexibleVector  ( &SigmaRef_s1 , table , true , Nevt );
+   nn3 += ReadFlexibleVector  ( &SigmaRef_s2 , table , true , Nevt );
+   printf("  *  fastNLOCoeffAddFlex::Read(). Read %d lines of flexible-scale tables.\n",nn3);
 
    // init table for evaluation
    ResizeFlexibleVector(&PdfLcMuVar  , &SigmaTildeMuIndep);
@@ -119,7 +119,7 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Write(ostream *table, double Nevt) {
+void fastNLOCoeffAddFlex::Write(ostream *table) {
    CheckCoeffConstants(this);
    // update to latest version
     if ( NScaleDep==3 ) {
@@ -189,10 +189,11 @@ void fastNLOCoeffAddFlex::Write(ostream *table, double Nevt) {
 void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddFlex& other){
    cout<<"Adding! fastNLOCoeffAddFlex::Add"<<endl;
    CheckCoeffConstants(this);
+   Nevt += other.Nevt;
+   
+   /*
    double w1 = (double)Nevt / (Nevt+other.Nevt);
    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
-   Nevt += other.Nevt;
-
    AddTableToAnotherTable( SigmaTildeMuIndep , other.SigmaTildeMuIndep ,w1 , w2 );
    if ( NScaleDep==3 || NScaleDep>=5 ) {
       AddTableToAnotherTable( SigmaTildeMuFDep , other.SigmaTildeMuFDep ,w1 , w2 );
@@ -206,11 +207,26 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddFlex& other){
    AddTableToAnotherTable( SigmaRefMixed , other.SigmaRefMixed ,w1 , w2 );
    AddTableToAnotherTable( SigmaRef_s1 , other.SigmaRef_s1 ,w1 , w2 );
    AddTableToAnotherTable( SigmaRef_s2 , other.SigmaRef_s2 ,w1 , w2 );
+   */
+
+   AddTableToAnotherTable( SigmaTildeMuIndep , other.SigmaTildeMuIndep );
+   if ( NScaleDep==3 || NScaleDep>=5 ) {
+      AddTableToAnotherTable( SigmaTildeMuFDep , other.SigmaTildeMuFDep );
+      AddTableToAnotherTable( SigmaTildeMuRDep , other.SigmaTildeMuRDep );
+      if ( NScaleDep>=6 ) {
+	 AddTableToAnotherTable( SigmaTildeMuRRDep , other.SigmaTildeMuRRDep );
+	 AddTableToAnotherTable( SigmaTildeMuFFDep , other.SigmaTildeMuFFDep );
+	 AddTableToAnotherTable( SigmaTildeMuRFDep , other.SigmaTildeMuRFDep );
+      }
+   }
+   AddTableToAnotherTable( SigmaRefMixed , other.SigmaRefMixed );
+   AddTableToAnotherTable( SigmaRef_s1 , other.SigmaRef_s1 );
+   AddTableToAnotherTable( SigmaRef_s2 , other.SigmaRef_s2 );
 }
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<double >* v, istream *table , bool nProcLast ){
+int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<double >* v, istream *table , bool nProcLast , unsigned long long nevts ){
    int nn = 0;
    if ( !nProcLast ) {
       int size = 0;
@@ -222,6 +238,7 @@ int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<double >* v, istream *table ,
    }
    for(unsigned int i0=0;i0<v->size();i0++){
       *table >> v->at(i0);
+      v->at(i0) *= nevts;
       nn++;
    }
    return nn;

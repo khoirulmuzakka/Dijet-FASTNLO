@@ -33,7 +33,7 @@ class fastNLOTable : public fastNLOBase {
    void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
 
    int ReadTable();
-   void WriteTable(double Nevt=1);
+   void WriteTable();
    void WriteTable(string filename);
    bool IsCompatible(const fastNLOTable& other) const;
 

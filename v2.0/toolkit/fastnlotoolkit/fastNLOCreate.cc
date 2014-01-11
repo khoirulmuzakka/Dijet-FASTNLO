@@ -946,7 +946,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for ( unsigned int m1 = 0 ; m1<nmu.size() ; m1++ ) {
-	    double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second;
+	    double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin];
 //   	    cout<<"   Fill * : i="<<ObsBin<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo
 //   		<<",\twnlo="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
 	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
@@ -1035,7 +1035,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 
          for ( unsigned int m1 = 0 ; m1<nmu1.size() ; m1++ ) {
             for ( unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++ ) {
-               double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second;
+               double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                if ( isnan(wfnlo) ) {
                   error[""]<<"wfnlo is a nan."<<endl;
                   fKernX[ObsBin]->PrintGrid();
@@ -1115,7 +1115,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
 
       for ( unsigned int m1 = 0 ; m1<nmu1.size() ; m1++ ) {
 	 for ( unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++ ) {
-	    double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second;
+	    double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
 	    if ( isnan(wfnlo) ) {
 	       error[""]<<"wfnlo is a nan."<<endl;
 	       fKernX[ObsBin]->PrintGrid();
@@ -1433,7 +1433,8 @@ void fastNLOCreate::InitWarmupArrays(){
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::WriteTable() {
-   if ( GetTheCoeffTable()->GetNevt() <= 0 ) {
+   //if ( GetTheCoeffTable()->GetNevt(0,0) <= 0 ) {
+   if ( GetTheCoeffTable()->Nevt <= 0 ) {
       warn["WriteTable"]<<"Number of events seems to be not filled. Please use SetNumberOfEvents(int) before writing table."<<endl;
    }
    fStats.PrintStats();
@@ -1449,7 +1450,7 @@ void fastNLOCreate::WriteTable() {
       // Number of events must be counted correctly.
       // I.e. the counting should be performed by the generator.
       // ->Divide by BinWidth
-      fastNLOTable::WriteTable(GetTheCoeffTable()->Nevt);
+      fastNLOTable::WriteTable();
       // ->Multiply by BinWidth
    }
 }
@@ -1503,7 +1504,7 @@ void fastNLOCreate::OutWarmup(string file){
    sout<<"! "<<endl;
    sout<<"! Delete this file, if you want fastNLO to calculate a new one."<<endl;
    sout<<"! "<<endl;
-   sout<<"! This file has been calculated using "<<GetTheCoeffTable()->GetNevt()<<" contributions."<<endl;
+   sout<<"! This file has been calculated using "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
    sout<<"!   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
    sout<<"! Please check by eye for reasonability of the values."<<endl;
    sout<<" " <<endl;

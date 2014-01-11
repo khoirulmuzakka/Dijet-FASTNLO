@@ -108,7 +108,7 @@ int fastNLOCoeffData::ReadCoeffData(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffData::Write(ostream *table,double) {
+void fastNLOCoeffData::Write(ostream *table) {
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
 
