@@ -10,8 +10,10 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
+#include <unistd.h>
 #include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOTable.h"
+
 
 using namespace std;
 using namespace say;
