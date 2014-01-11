@@ -15,9 +15,7 @@ AUTOMAKE_OPTIONS = gnu
 # The C++ fastnlo toolkit example program
 #
 if HAVE_LHAPDFCONFIG
-# Some stuff not checked in ...!
-#   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-merge fastNLO
-   bin_PROGRAMS = fnlo-tk-cppread
+   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-merge fastNLO
 endif
 
 #
@@ -25,9 +23,8 @@ endif
 #
 # All source files which go into the targets (and have to be distributed)
 fnlo_tk_cppread_SOURCES = fnlo-tk-cppread.cc
-# Some stuff not checked in ...!
-#fnlo_tk_merge_SOURCES = fnlo-merge.cc
-#fastNLO_SOURCES = fastNLO.cc
+fnlo_tk_merge_SOURCES = fnlo-merge.cc
+fastNLO_SOURCES = fastNLO.cc
 
 #
 # Preprocessor flags
