@@ -2023,7 +2023,7 @@ void FastNLOReader::CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO) {
 
 
 void FastNLOReader::CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO) {
-   debug["CalcCrossSectionv20"]<<"B->fname="<<B->fname<<"\tNpow="<<B->Npow<<"\tIsLO="<<IsLO<<endl;
+   debug["CalcCrossSectionv20"]<<"Npow="<<B->Npow<<"\tIsLO="<<IsLO<<endl;
    //
    //  Cross section calculation in v2.0 format
    //
@@ -2424,7 +2424,7 @@ void FastNLOReader::FillBlockBPDFLCsDISv21(FastNLOBlockB* B) {
 void FastNLOReader::FillBlockBPDFLCsHHCv20(FastNLOBlockB* B) {
    int scaleVar          = B->Npow == ILOord ? 0 : fScalevar;
    double scalefac       = fScaleFacMuF/B->ScaleFac[0][scaleVar];
-   debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<"\tBlockB="<<B<<endl;
+   debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
    vector < vector < double > > xfx; // PDFs of all partons
    if (!GetIsFlexibleScaleTable()) {
