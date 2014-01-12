@@ -238,95 +238,132 @@ void fastNLOReader::InitScalevariation() {
 
 
 //______________________________________________________________________________
-double fastNLOReader::SetScaleVariation(int scalevar , bool FirstCall) {
-   debug["SetScaleVariation"]<<"Setting to scalevar="<<scalevar<<endl;
+
+
+
+bool fastNLOReader::SetScaleVariation(int scalevar) {
    // ------------------------------------------------
-   //   Set the scalevariation factor for determining the
-   //   'theory'-error. Usually, you have tables stored with
-   //   factors of 0.5, 1 and 2 times the nominal scale.
-   //     corresponding to:
+   //   NEVER call this setter directly, only via
+   //   the method SetScaleFactorsMuRMuF!
+   //
+   //   Set the scale variation table to correspond
+   //   to the selected MuF factor if possible.
+   //   Usually, v2.0 tables are stored for multiple
+   //   MuF settings like factors of 0.5, 1.0 and 2.0
+   //   times the nominal scale, e.g.
    //     scalevar -> scalefactor
-   //        '0'   ->   1.00
-   //        '1'   ->   0.50
-   //        '2'   ->   2.00
-   //   This method returns the scalefactor correspoding to
-   //   the chosen 'scalevar'.
+   //        '0'   ->   1.0
+   //        '1'   ->   0.5
+   //        '2'   ->   2.0
+   //   If tables for multiple MuF factors are present,
+   //   then they MUST correspond to exactly the same
+   //   factors in the SAME order for all such contrbutions,
+   //   e.g. NLO plus 2-loop threshold corrections!
+   //
+   //   This method returns true if the chosen
+   //   'scalevar' table exists for all selected
+   //   contributions with extra scale tables.
    // ------------------------------------------------
+   debug["SetScaleVariation"]<<"Setting to scalevar table "<<scalevar<<endl;
 
    if (GetIsFlexibleScaleTable()) {
-      info["SetScaleVariation"]<<"This is a flexible-scale table. No Scalevariation tables available!"<<endl;
-      man<<"You can choose freely (within reason) a factorization scale factor. Your Scalevar has to be '0'.\n";
-      man<<"Please use SetScaleFacMuR(double) and SetScaleFacMuF(double) to set scale factors.\n";
-      return 0;
+      warn["SetScaleVariation"]<<"WARNING! This is a flexible-scale table. MuF scale variation tables are not necessary!"<<endl;
+      warn["SetScaleVariation"]<<"You should not have called this method for the active table. Nothing changed!"<<endl;
+      return false;
    }
-   else if ( !B_NLO() ) {
-      info["SetScaleVariation"]<<"No NLO table available. Please use SetScaleFactorsMuRMuF(double,double)"<<endl;
-      return 0;
+
+   // Check for maximal scale variation of all active SM calcs
+   int scalevarmax = GetNScaleVariations();
+   if (scalevar >= scalevarmax) {
+      error["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored for all active contributions!"<<endl;
+      error["SetScaleVariation"]<<"You wanted to access the non-existing number "<<scalevar<<", stopped!"<<endl;
+      exit(1);
    }
-   else {
-      // Check for maximal scale variation of all rel. and active SM calcs
-      int scalevarmax = GetNScaleVariations();
-      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
-         if (scalevar >= scalevarmax) {
-            warn["SetScaleVariation"]<<"This table has only "<<scalevarmax<<" scale variation(s) stored!"<<endl;
-            man<<"For the currently active contributions. You wanted to access the non-existing number "<<scalevar<<endl;
-            man<<"Using '0' instead."<<endl;;
-            fScalevar = 0;
-            return cNLO->GetScaleFactor(0);
-         }
 
-      fScalevar     = scalevar;
-      fScaleFacMuF  = cNLO->GetScaleFactor(fScalevar);
-      info["SetScaleVariation"]
-         <<"Selecting MuF table according to a multiplicative scale factor of the factorization scale of "
-         <<fScaleFacMuF<<" times the nominal scale."<<endl;
+   fScalevar     = scalevar;
 
-      // check for threshold corrections.
-      if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
-         bool lkth = false;
-         for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-            if (bUseSMCalc[kThresholdCorrection][i]) {
-               lkth = true;
-            }
-         }
-         if (lkth && fabs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN) {
-            fScaleFacMuR = fScaleFacMuF;
-            warn["SetScaleVariation."]<<"Threshold corrections do not allow variations of the renormalization scale!"<<endl;
-            man<<"The scale factor for MuR has been set equal to the one for MuF = "<<fScaleFacMuF<<endl;
-            man<<"Either select a different simultaneous scale variation i, if possible, via fastNLOReader::SetScaleVariation(i)"<<endl;
-            man<<"or deactivate first all threshold corrections using fastNLOReader::SetContributionON(kTresholdCorrections,Id,false)."<<endl;
+   // TBD
+   // The following is only reasonable if called from SetScaleFactorsMuRMuF
+   // Is it necessary here ?
+   fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+   double fScaleFacMuF = cNLO->GetScaleFactor(fScalevar);
+   info["SetScaleVariation"]
+      <<"Selecting MuF table according to a multiplicative scale factor of the factorization scale of "
+      <<fScaleFacMuF<<" times the nominal scale."<<endl;
+
+   // check for threshold corrections.
+   if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
+      bool lkthc = false;
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
+         if (bUseSMCalc[kThresholdCorrection][i]) {
+            lkthc = true;
          }
       }
-      return cNLO->GetScaleFactor(fScalevar);
+
+      if (lkthc) {
+         if (abs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN) {
+            error["SetScaleVariation."]<<"Threshold corrections only allow for symmetric variations of the renormalization and factorization scales,"<<endl;
+            error["SetScaleVariation."]<<"but fScaleFacMuR = "<<fScaleFacMuR<<" is different from fScaleFacMuF = "<<fScaleFacMuF<<", stopped!"<<endl;
+            exit(1);
+         }
+         fastNLOCoeffAddFix* cThC = (fastNLOCoeffAddFix*)B_ThC();
+         double fScaleFacMuF2 = cThC->GetScaleFactor(fScalevar);
+         if (abs(fScaleFacMuF2-fScaleFacMuF) > DBL_MIN) {
+            error["SetScaleVariation."]<<"Scale variations different for NLO and ThC contributions. This should never happen!"<<endl;
+            error["SetScaleVariation."]<<"Please do not use this method directly but only via SetScaleFactorsMuRMuF and check the return code!"<<endl;
+            exit(1);
+         }
+      }
    }
+
+   return true;
 }
 
 
 //______________________________________________________________________________
-bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , bool SetOn) {
-   //
-   // 'Activate' contribution to be considered in the calculation
-   // of the cross section.
-   //
 
-   // sanity check
+
+bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , bool SetOn) {
+
+   info<<(SetOn?"Activating":"Deactivating")<<" contribution "<<_ContrName[eCalc]<<" with Id = "<<Id<<endl;
+
+   // backup original value
+   bool SetOld = bUseSMCalc[eCalc][Id];
+   // set the new value immediately, otherwise GetNScaleVariations(), which is used in FillAlphasCache, will give wrong result.
+   bUseSMCalc[eCalc][Id] = SetOn;
+   fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
+
+   // sanity checks 1
+   // existence of contribution
    if (bUseSMCalc[eCalc].empty() || BBlocksSMCalc.empty()) {
       warn["SetContributionON"]
-         <<"This contribution ("<<_ContrName[eCalc]<<") does not exist in this table. Cannot switch it On/Off. Ignoring call.\n";
+         <<"Contribution "<<_ContrName[eCalc]<<" does not exist in this table, cannot switch it On/Off! Ignoring call."<<endl;
+      // set to backed up original value
+      bUseSMCalc[eCalc][Id] = SetOld;
       return false;
    }
+   // existence of contribution number
    if (bUseSMCalc[eCalc].size() < Id || BBlocksSMCalc[eCalc].size() < Id || !BBlocksSMCalc[eCalc][Id]) {
       warn["SetContributionON"]
-            <<"This Id="<<Id<<" does not exist for this contribtion. Cannot switch it On/Off. Ignoring call.\n";
+         <<"Id "<<Id<<" of contribution "<<_ContrName[eCalc]<<" does not exist, cannot switch it On/Off! Ignoring call."<<endl;
+      // set to backed up original value
+      bUseSMCalc[eCalc][Id] = SetOld;
       return false;
    }
+   // existence of scale variation for additive contributions (otherwise cache filling will fail!)
+   if (!GetIsFlexibleScaleTable(c) && !c->GetIAddMultFlag()) {
+      int scaleVar = c->GetNpow() == ILOord ? 0 : fScalevar;
+      // check that scaleVar is in allowed range, can otherwise lead to segfaults!
+      if (scaleVar >= GetNScaleVariations()) {
+         warn["SetContributionON"]
+            <<"Scale variation "<<scaleVar<<" of contribution "<<_ContrName[eCalc]<<" , Id = "<<Id<<", is > number of available scale variations "<<GetNScaleVariations()<<"! Ignoring call."<<endl;
+         // set to backed up original value
+         bUseSMCalc[eCalc][Id] = SetOld;
+         return false;
+      }
+   }
 
-   info<<(SetOn?"Activating":"Deactivating")
-       <<" contribution '"<<_ContrName[eCalc]
-       <<" with Id="<<Id<<endl;
-
-   if (!bUseSMCalc[eCalc][Id] && SetOn) {
-      fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
+   if (!SetOld && SetOn) {
       if (!c->GetIAddMultFlag()) {
          // Fill alpha_s cache
          debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
@@ -357,47 +394,62 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
                   FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
                }
             } else {
-               error<<"Only half matrices for hh is implemented.\n";
+               // set to backed up original value because of problems (not really necessary here since exiting anyway)
+               bUseSMCalc[eCalc][Id] = SetOld;
+               error["SetContributionON"]<<"Only half matrices are implemented for hh, exiting!\n";
                exit(1);
             }
          } else {
-            error<<"Tables not yet implemented.\n";
+            // set to backed up original value because of problems (not really necessary here since exiting anyway)
+            bUseSMCalc[eCalc][Id] = SetOld;
+            error["SetContributionON"]<<"Table type not yet implemented, exiting!\n";
+            exit(1);
          }
       }
    }
+   // Needs to be done in the beginning!
    // set the new value
-   bUseSMCalc[eCalc][Id] = SetOn;
+   //   bUseSMCalc[eCalc][Id] = SetOn;
    return true;
-
 }
 
 
 //______________________________________________________________________________
+
+
 int fastNLOReader::GetNScaleVariations() const {
    if (GetIsFlexibleScaleTable()) {
       info["GetNScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can choose all desired scale variations."<<endl;
       return 0;
    }
-   else {
-      // Check for maximal scale variation of all rel. and active SM calcs
-      // Assume a maximum of 10!
-      unsigned int scalevarmax = 10;
-      for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
+
+   // Check whether only contributions without extra scale tables (LO, multiplicative) are present
+   bool NoExtra = true;
+   // Check for maximal scale variation of all active SM calcs with extra scale tables
+   // Assume a maximum of 10!
+   unsigned int scalevarmax = 10;
+   for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
+      if (!BBlocksSMCalc.empty()) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
             fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
-            // Do not check pQCD LO or mult. corrections
+            // Check on contributions with extra scale tables (NLO, threshold corrections)
+            int kType  = c->GetIContrFlag1()-1;
+            int kOrder = c->GetIContrFlag2()-1;
+            debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
+            // Do not check pQCD LO or multiplicative corrections
             if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
-                !(j==kFixedOrder && i==kLeading)) {
+                !(kType == kFixedOrder && kOrder == kLeading)) {
+               NoExtra = false;
                if (c->GetNScalevar() < (int)scalevarmax) {
                   scalevarmax = c->GetNScalevar();
                }
             }
          }
       }
-      debug["GetNScaleVariations"]<<"Found "<<scalevarmax<<" scale variations."<<endl;
-      return scalevarmax;
-      return 0;
    }
+   if (NoExtra) {scalevarmax = 1;}
+   debug["GetNScaleVariations"]<<"Found "<<scalevarmax<<" scale variations."<<endl;
+   return scalevarmax;
 }
 
 
@@ -1333,21 +1385,24 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
    // Check whether pQCD contributions beyond LO exist and are activated
    bool lknlo = false;
-   for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
-      int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
-      if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
-         lknlo = true;
-         break;
+   if (!BBlocksSMCalc[kFixedOrder].empty()) {
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
+         int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
+         if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
+            lknlo = true;
+            break;
+         }
       }
    }
 
-
    // Check whether threshold corrections exist and are activated
    bool lkthc = false;
-   for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-      if (bUseSMCalc[kThresholdCorrection][i]) {
-         lkthc = true;
-         break;
+   if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
+         if (bUseSMCalc[kThresholdCorrection][i]) {
+            lkthc = true;
+            break;
+         }
       }
    }
    if (lkthc && fabs(xmur-xmuf) > DBL_MIN) {
@@ -1360,6 +1415,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       man<<"FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).\n";
       return false;
    }
+
+   // Deal with factorization scale first
    // Check whether corresponding xmuf variation exists in case of v2.0 table
    if (!GetIsFlexibleScaleTable()) {
       const int ns = GetNScaleVariations();
@@ -1367,7 +1424,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       int sfnlo = -1;
       if (lknlo) {
          for (int is = 0 ; is<ns ; is++) {
-               if (fabs(((fastNLOCoeffAddFix*)B_NLO())->GetScaleFactor(is)-xmuf) < DBL_MIN) {
+            if (fabs(((fastNLOCoeffAddFix*)B_NLO())->GetScaleFactor(is)-xmuf) < DBL_MIN) {
                sfnlo = is;
                break;
             }
@@ -1402,8 +1459,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          return false;
       }
 
+      // Finally change renormalization scale first. Otherwise safety check in SetScaleVariation fails!
       fScaleFacMuR = xmur;
-
       // Now set factorization scale
       fScaleFacMuF = xmuf;
       bool bSetScales = false;
@@ -1819,10 +1876,10 @@ void fastNLOReader::RunFastNLODemo() {
    // variation tables. Though it also changes the currently stored
    // settings of this instance!
    //
-   // PrintFastNLODemo is changing settings (like scale choices) of this reader.
+   // RunFastNLODemo is changing settings (like scale choices) of this reader.
    //
 
-   info["PrintFastNLODemo"]<<"PrintFastNLODemo is changing settings (like scale choices) of this reader."<<endl;
+   info["RunFastNLODemo"]<<"RunFastNLODemo is changing settings (like scale choices) of this reader."<<endl;
 
    // If flexible-scale table, set MuR and MuF functional forms
    if (GetIsFlexibleScaleTable()) {
@@ -1841,10 +1898,6 @@ void fastNLOReader::RunFastNLODemo() {
    }
    // Check on existence of 2-loop threshold corrections
    int ithc2 = ContrId(fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
-   // Switched off by default. Don't do scale variations. Not available for the moment.
-   //  if ( ithc2 > -1 ) {
-   //    SetContributionON( fastNLO::kThresholdCorrection, ithc2, false, false );
-   //  }
 
    // Pre-define desired order of scale variations
    const int nxmu = 4;
@@ -1878,7 +1931,11 @@ void fastNLOReader::RunFastNLODemo() {
          vector < double > kthc;
          if (ithc2 > -1) {
             vector < double > stdk = kFactor;
-            SetContributionON(fastNLO::kThresholdCorrection, ithc2, true);
+            bool SetOn = SetContributionON(fastNLO::kThresholdCorrection, ithc2, true);
+            if (!SetOn) {
+               warn["RunFastNLODemo"]<<"Contribution "<<_ContrName[fastNLO::kThresholdCorrection]<<" could not be switched on for scale variation number "<<iscls<<", skipped!"<<endl;
+               continue;
+            }
             CalcCrossSection();
             kthc = kFactor;
             // Threshold K factor is NLO including 2-loop vs. NLO

@@ -129,7 +129,7 @@ protected:
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
-   double SetScaleVariation(int scalevar , bool FirstCall=false);                       // Choose the MuF scale variation table
+   bool SetScaleVariation(int scalevar);                       // Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
    static const string fContrName[20];
