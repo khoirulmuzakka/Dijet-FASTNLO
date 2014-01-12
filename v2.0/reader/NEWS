@@ -1,3 +1,11 @@
+Release Notes for fastNLO_reader version 2.1.0, revision 1567:
+==============================================================
+
+- Same as 1563; only added one missing header file and
+  removed two files to rebuild in make steps
+
+
+
 Release Notes for fastNLO_reader version 2.1.0, revision 1563:
 ==============================================================
 
