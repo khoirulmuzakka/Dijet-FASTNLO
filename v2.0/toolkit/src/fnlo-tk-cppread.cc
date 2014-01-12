@@ -30,10 +30,10 @@
 //#include "fastnlotk/fastNLODiffUser.h"
 // Optional:
 // If compiled --with-qcdnum support the following line(s) can be commented in
-#include "fastnlotk/fastNLOQCDNUMAS.h"
+//#include "fastnlotk/fastNLOQCDNUMAS.h"
 // End --with-qcdnum
 // If compiled --with-hoppet support the following line(s) can be commented in
-#include "fastnlotk/fastNLOHoppet.h"
+//#include "fastnlotk/fastNLOHoppet.h"
 // End --with-hoppet
 
 /// Function prototype for flexible-scale function
@@ -595,12 +595,12 @@ int main(int argc, char** argv) {
       fnlo = new fastNLOCRunDec(tablename);
       // Optional:
       // If compiled --with-qcdnum support the following line(s) can be commented in
-   } else if (AsEvolCode == "QCDNUM") {
-      fnlo = new fastNLOQCDNUMAS(tablename);
+      //   } else if (AsEvolCode == "QCDNUM") {
+      //      fnlo = new fastNLOQCDNUMAS(tablename);
       // End --with-qcdnum
       // If compiled --with-hoppet support the following line(s) can be commented in
-   } else if (AsEvolCode == "HOPPET") {
-      fnlo = new fastNLOHoppet(tablename);
+      //   } else if (AsEvolCode == "HOPPET") {
+      //      fnlo = new fastNLOHoppet(tablename);
       // End --with-hoppet
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
