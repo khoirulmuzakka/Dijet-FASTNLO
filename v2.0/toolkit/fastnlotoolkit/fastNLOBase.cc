@@ -38,8 +38,9 @@ fastNLOBase::~fastNLOBase(){
 int fastNLOBase::ReadTable(){
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
-      error["ReadTable"]<<"File does not exist! Was looking for: "<<ffilename<<endl;
-      return 1;
+      error["ReadTable"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
+      exit(1);
+      //return 1;
    }
    // open file
    ifilestream = new ifstream(ffilename.c_str(),ios::in);

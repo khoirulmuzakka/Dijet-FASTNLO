@@ -43,12 +43,12 @@ int main(int argc, char** argv)
    fastNLOTable* resultTable = NULL;
 
    // loop over arguments and check existence of files
-   int nValidTables = 1;
+   int nValidTables = 0;
    for (int idxFile=0; idxFile<nFiles-1; idxFile++) {
       string path = argv[idxFile+1];
       // File there?
       if (access(path.c_str(), R_OK) != 0) {
-	 error["fnlo-merge"]<<"Unable to access file. Skipping "<<path<<endl;
+	 warn["fnlo-merge"]<<"Unable to access file. Skipping "<<path<<endl;
       }
       else { //ok, file exists
 	 // reading table
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
       }
    }
    info["fnlo-merge"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
-   //if (nValidTables == 1) exit(1);
+   if (nValidTables < 1) exit(1);
 
    // Write result
    string outfile = argv[nFiles];
