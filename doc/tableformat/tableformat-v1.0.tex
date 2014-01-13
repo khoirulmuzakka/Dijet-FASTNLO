@@ -1,0 +1,219 @@
+{\small \footnotesize
+\begin{verbatim} 
+******************************************************************************
+The table contains the following blocks (separated by ``1234567890''):
+- version No and date
+- scenario description
+- observable-specific flags (reaction, ECM, jet algo, order, available orders...)
+- details about the QCD calculation
+- technical fastNLO details (Nevt, Nxtot, Ixscheme, Ipdfwgt, ...)
+- structure of observable: tot No. of bins, and structure of dimensions in binning
+- bin boundaries 
+- xmin values
+- renormalization scales
+- factorization scales
+- scale variations
+- the sigma-tilde
+******************************************************************************
+*******                fastNLO  -  general definition of tableformat
+*******                            for raw (Nord=1,etc) and sum tables
+******************************************************************************
+VersionNo          ! dbl: Version of Table - for compatibility check (e.g.1.01)
+idate              ! int: date when sum table was created (yyyymmdd)
+* ---- these first two entries are added to the table by nlofast-add !!!!! <<<<<<<
+*      they are not contained in the raw tables
+
+1234567890         ! --- End-of-block --- now the scenario description
+ScenName           ! string:  name of scenario  (e.g. "fnt1001")
+iSDescr            ! int:     No. of Strings for Description of scenario
+ScenDescr[1]       ! string:  Description of scenario
+...                !      (e.g. hep-ex No., Collaboration, ...)
+ScenDescr[iSDescr] ! 
+
+1234567890      ! --- End-of-block --- now some observable-specific flags
+ireaction       ! int: reaction: 1 ep, 2 pp, 3ppbar,4gamma-p(dir), 5gamma-p(resolved)
+Ecms            ! dbl: center-of-mass energy in GeV
+iproc           ! int: process type   1 incl jets, 2 dijets, ... (just a little info...)
+ialgo           ! int: jet algo 1 kT, 2 midpoint cone, 3 rsep cone, 4 search cone 
+JetResol1       ! dbl: jet resolution paramter (kT distance D / R_cone)
+JetResol2       ! dbl: 2nd parameter for jet algo (e.g. f_overlap, Rsep, search cone)
+
+1234567890          ! --- End-of-block --- now some info on the QCD calculation
+iasflg              ! int:  Flag (0: w/o alphas   1: alphas already contained in table)
+asMZ                ! dble: for iasflg=1:  asMZ is alphas(Mz)
+ipdfflg             ! int:  Flag (0: w/o PDFs     1: PDFs already included in table)
+PDFset              ! string: for ipdfflg=1:  PDF set included in table (eg:"CTEQ6.1")
+>> for resolved Photoproduction only:
+  igampdfflg        ! int:  Flag (0: w/o photonPDFs   1: photon-PDFs already included in table)
+  gamPDFset         ! string: for igampdfflg=1:  photon-PDF set included in table
+nFlav               ! int: No of active quark flavors used in calculation
+Nord                ! int:  * in raw table: No. of this table in sum table
+                    !                          / usually = relative order 
+                    !                          in alpha_s:  1: LO, 2: NLO, 
+                    !                          3:NNLO or other correction
+                    !       * in sum table:  tot. No. of single tables in sum table 
+                    !                        in fixed-order calculations =
+                    !                        highest relative order available
+* in raw table:
+Npow                ! int: absolute order in alpha_s of this raw table
+* in sum table:
+Npow1               ! int: absolute order in alpha_s for each contribution [1,...,Nord]
+...                 !      (to be used in usercode as power of alpha_s) 
+Npow[Nord]
+* in raw table:
+Powlabel        ! string: label for the order, e.g ``LO''
+* in sum table:
+Powlabel1       ! string: label for the order, for each contribution [1,...,Nord]
+...                
+Powlabel[Nord]
+ScaleA        ! string: default scale  (e.g. "pT", "ETmax", "Q", "Mjj"       <<<<<<<<<<<<<<<<< new
+ScaleB        ! string: short description (e.g. computed from two highest pT jets) <<<<<<<<<<< new
+ScaleC        ! string: more description (e.g. "taken at 40% of the bin")    <<<<<<<<<<<<<<<<< new
+
+1234567890      ! --- End-of-block --- now come some technical fastNLO details
+* in raw table:
+Nevt            ! dbl: No of events for this raw table
+* in sum table:
+Nevt1           ! dbl: No of events for contribution 1 (usually LO)
+Nevt2           ! dbl: No of events for contribution 2 (usually NLO)
+...             ! dbl: No of events for higher order contributions 
+Nevt[Nord]      !                   (or resummed correction)
+Nxtot           ! int: No of eigenfunctions in that cover the x-ranges 
+
+ixscheme        ! int: No of scheme for EF x-binning  1 log 1/x  2 sqrt(log 1/x)
+ipdfwgt         ! int: No of scheme for PDF weighting  0 no weigthing  1 'standard weighting'
+>> for resolved Photoproduction only:
+  igampdfwgt    ! int: No of scheme for photon-PDF weighting  0 no weigthing  1 'standard weighting'
+
+*** previously we had the No of rap bins together with the rapidity boundaries
+*** -> this is now separated: first come all array sizes - afterwards we
+***    declare all values (upper & lower values for each interval)
+
+1234567890            ! --- End-of-block --- now: structure of the dimensions
+Nbintot               ! int: total Number of observable bins
+Ndimension            ! int: No. of dimensions in variable is binned
+                      !    3-d example: Jet Shape Psi as function of (y,pT,r)
+Cdim[1]               ! string: which variable corresponds to 1st dimension (eg: ``y'')
+...                   !
+Cdim[Ndimension]      ! string: which variable corresponds to lasst dimension
+                      !
+Ndim1                 ! int: No. of intervals in first dimension 
+                      !           (e.g.: No. of y-ranges)
+
+Ndim2[1]              ! int: No. of intervals in 2nd dim for each interval in 1st dim 
+....                  !           (e.g.: No. of pT ranges in each y-range)
+Ndim2[Ndim1]          !    
+
+
+Ndim3-[1]-[1]            ! int: No. of intervals in 3rd dim for each interval in 2nd dim 
+...                      !       - for each interval in 1st dim 
+Ndim3-[1]-[Ndim2[1]]     !    (e.g.: No. of r bins in each pT range - in each y-range)
+...                       !
+...                         !
+Ndim3-[Ndim1]-[1]            !
+...                          !
+Ndim3-[Ndim1]-[Ndim2[Ndim1]] !
+
+
+Ndim'Ndimension'- ..-..-..-..-..
+
+   *********** I don't want to write out more than the third dimension   :-)
+
+1234567890     ! --- End-of-block --- now come the bin boundaries - for all dimensions
+
+************* not sure: should we first fill all lower values - then all higher values?
+************* or: always pairs low/high?   I choose the second one for now
+Dim1lo[1]      ! dbl:    lower and higher boundary for 1st interval in dim 1
+Dim1hi[1]      !
+...            !
+Dim1lo[Ndim1]  !         lower and higher boundary for last interval in dim 1
+Dim1hi[Ndim1]  ! 
+
+Dim2lo[1]-[1]        ! dbl:  lower and higher boundary for 1st interval in dim1/dim2
+Dim2hi[1]-[1]        !
+...
+Dim2lo[1]-[Ndim2[1]] ! dbl:  lower and higher boundary for 1st interval in dim 1
+Dim2hi[1]-[Ndim2[1]] !
+...
+...
+...           
+Dim2lo[Ndim1]-[1] 
+Dim2hi[Ndim1]-[1] 
+...
+Dim2lo[Ndim1]-[Ndim2[Ndim1]]
+Dim2hi[Ndim1]-[Ndim2[Ndim1]]
+
+     *** 3rd dimension - if available ...
+
+Dim3lo[1]-[1]-[1]      ! dbl:    lower and higher boundary for 1st interval in dim1/dim2
+Dim3hi[1]-[1]-[1]      !
+...
+Dim3lo[1]-[1]-[Ndim3[1]-[1]]
+Dim3hi[1]-[1]-[Ndim3[1]-[1]] 
+...
+...
+...
+Dim3lo[1]-[Ndim2[1]-[1]     
+Dim3hi[1]-[Ndim2[1]-[1]     
+...
+Dim3lo[1]-[Ndim2[1]-[Ndim3[1]-[[1]]
+Dim3hi[1]-[Ndim2[1]-[Ndim3[1]-[[1]] 
+....
+       ************ I'm getting lost here ......
+
+1234567890    ! --- End-of-block --- now come the x_min values for all bins
+xmin-1-1-?    ! dbl:  xmin in 1st rapidity bin / 1st pT bin / 1st r bin
+....          !          and all other xmin-values 
+              !          - same structure as bin-boundaries
+>> for resolved Photoproduction only:
+  xgammamin-1-1-?    ! dbl:  xmin in 1st rapidity bin / 1st pT bin / 1st r bin
+  ....          !          and all other xmin-values 
+                !          - same structure as bin-boundaries
+
+1234567890    ! --- End-of-block --- now come the renorm. scales for all bins
+murval-1-1-?  ! dbl: Array for all mu_r values - 
+...           !             (same structure as bin-boundaries)
+
+1234567890    ! --- End-of-block --- now come the factoriz. scales for all bins
+mufval-1-1-?  ! dbl: Array for all mu_f values - for all (y,pT) bins
+  ...           !             (same structure as bin-boundaries)
+>> for resolved Photoproduction only:
+  mufvalgamma-1-1-?  ! dbl: Array for all mu_f-gamma values - for all (y,pT) bins
+  ...                !             (same structure as bin-boundaries)
+
+
+* - the following is not used in LO tables - only in higher order raw tables and in sum tables
+1234567890            ! --- End-of-block --- now come the scale variations
+nscalevar             ! int: No of scale variations for mu_r and mu_f
+murscale[1]           ! dbl: renormalisation scale factors with respect to standard scale 
+...                   !
+murscale[nscalevar]   !
+mufscale[1]           ! dbl: factorisation scale factors with respect to standard scale 
+...                   !
+mufscale[nscalevar]   ! 
+>> for resolved Photoproduction only:
+  mufscalegamma[1]         ! dbl: factorisation scale factors with respect to standard scale 
+  ...                      !
+  mufscalegamma[nscalevar] ! 
+
+1234567890            ! --- End-of-block --- now come the sigma_tilde
+...                   ! dbl: each range in dimension 1
+...                   !        each range in dimension 2
+...                   !          ... each range in dimension n
+...                   !            loop over xmax bins
+...                   !              loop over xmin bins (not for ep)
+...                   !                     -> for pp from xmin->xmax             
+...                   !                     -> for photoproduction from xmin->1  
+...                   !                loop over scale variations (not for LO table, i.e. Nord=1)
+...                   !                  loop over subprocesses (ep:3, pp:7)
+
+???????????? there is a difference in authorcode and nlofast-add:
+???????????? authorcode first loops over scales - then subprocesses (as above)
+???????????? nlofast-add first loops over subprocesses (when writing!) - then scales
+???????????? --> should be the same!!!
+
+1234567890            ! --- End of Table ------------------------------------
+\end{verbatim}
+}
+
+
