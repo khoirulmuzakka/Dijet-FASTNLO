@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = fastnlotoolkit src
+SUBDIRS = doc fastnlotoolkit src
 
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
@@ -24,8 +24,12 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
 # Required for Doxygen (doesn't work with autotools from SLC5)
-#include aminclude.am
-#EXTRA_DIST += $(DX_CONFIG) doc/doxygen
+if DX_COND_doc
+include aminclude.am
+EXTRA_DIST += aminclude.am doxygen.cfg
+DX_CLEANFILES += $(DOCDIR)/fastnlo_toolkit.pdf
+MOSTLYCLEANFILES = $(DX_CLEANFILES)
+endif DX_COND_doc
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

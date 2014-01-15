@@ -44,17 +44,6 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 
-# Use Doxygen if available (doesn't work with autotools from SLC5)
-#DX_HTML_FEATURE(ON)
-#DX_CHM_FEATURE(OFF)
-#DX_CHI_FEATURE(OFF)
-#DX_MAN_FEATURE(OFF)
-#DX_RTF_FEATURE(OFF)
-#DX_XML_FEATURE(OFF)
-#DX_PDF_FEATURE(OFF)
-#DX_PS_FEATURE(OFF)
-#DX_INIT_DOXYGEN(fastNLO_toolkit, doxygen.cfg, doc/doxygen)
-
 # Checks for sources.
 
 # Checks for libraries.
@@ -249,6 +238,66 @@ else
 fi
 AM_CONDITIONAL(HAVE_HOPPET, test "x$HOPPETPREFIX" != "x")
 
+# Create code documentation?
+# Check on DOXYGEN (doesn't work with autotools from SLC5)
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Check for presence of doxygen ...])
+AC_MSG_NOTICE([******************************************])
+AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
+if test "x$DOXYGEN" = "x"; then
+   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
+else
+   AC_MSG_NOTICE([Creating code documentation using doxygen.])
+   AC_MSG_NOTICE([******************************************])
+   DX_DOT_FEATURE(ON)
+   AC_CHECK_PROGS(DOT, dot, dot)
+   if test "x$DOT" = "x"; then
+      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
+      DX_DOT_FEATURE(OFF)
+   fi
+   DX_HTML_FEATURE(ON)
+   DX_CHM_FEATURE(OFF)
+   DX_CHI_FEATURE(OFF)
+   DX_MAN_FEATURE(OFF)
+   DX_RTF_FEATURE(OFF)
+   DX_XML_FEATURE(OFF)
+   DX_PDF_FEATURE(ON)
+   DX_PS_FEATURE(OFF)
+   DX_INIT_DOXYGEN(fastNLO_toolkit, doxygen.cfg, doc/doxygen)
+fi
+AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
+
+# Create documentation?
+# First PDFLATEX ...
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Check for presence of pdflatex ...])
+AC_MSG_NOTICE([******************************************])
+AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+if test "x$PDFLATEX" = "x"; then
+  AC_MSG_WARN([Unable to create PDF documentation with pdflatex, check for latex & dvipdfm.])
+# Then LATEX & DVIPDFM
+  AC_MSG_NOTICE([******************************************])
+  AC_MSG_NOTICE([Check for presence of latex & dvipdfm ...])
+  AC_MSG_NOTICE([******************************************])
+  AC_CHECK_PROG(LATEX, latex, latex)
+  if test "x$LATEX" = "x"; then
+    AC_MSG_WARN([Unable to create PDF documentation with latex & dvipdfm, continue without.])
+  else
+    AC_CHECK_PROG(DVIPDFM, dvipdfm, dvipdfm)
+    if test "x$DVIPDFM" = "x"; then
+      AC_MSG_WARN([Unable to create PDF documentation with latex & dvipdfm, continue without.])
+    else
+      AC_MSG_NOTICE([Creating PDF documentation using latex & dvipdfm.])
+      AC_MSG_NOTICE([******************************************])
+    fi
+  fi
+else
+  AC_MSG_NOTICE([Creating PDF documentation using pdflatex.])
+  AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" != "x")
+AM_CONDITIONAL(HAVE_LATEXDVIPDFM, test "x$LATEX" != "x" && test "x$DVIPDFM" != "x")
+
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
 SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
@@ -267,11 +316,14 @@ AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 
 # Output
 AC_CONFIG_FILES([Makefile
+                 doc/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
                  src/Makefile
                 ])
+#AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/doxygen/Makefile])])
+#AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/doxygen/Makefile doc/doxygen/doxyfile])])
 
 AC_OUTPUT
