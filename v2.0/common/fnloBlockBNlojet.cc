@@ -802,7 +802,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 
                   nlo::weight_hhc wtmp = wt;  // - a working copy of the weights
 		  double weightstmp[7][7];  // - a working copy of the weights
-		  for ( int kk = 0 ; kk<7 ; kk ++ ){ 
+		  for ( int kk = 0 ; kk<7 ; kk ++ ){
 		     for ( int p = 0 ; p<7 ; p ++ ){
 			weightstmp[kk][p]=weights[kk][p];
 		     }
@@ -846,11 +846,11 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
 
                   int im = GetXIndex(ObsBin,xminbin,xmaxbin);
                   // printf("fastNLO: index %d in xmaxbin #%d xminbin #%d\n",im,xmaxbin,xminbin);
-		  
-		  
+
+
 		  double fac = bicef[i1][i2] * cefscale1[iNode1] * cefscale2[iNode2];
-		  
-			   
+
+
                   if(itype == nlo::amplitude_hhc::fini) {
                      if (amp._M_fini.mode==0) { //finix1
                         for(int proc=0;proc<NSubproc;proc++){
@@ -885,7 +885,7 @@ void fnloBlockBNlojet::FillEventHHCMuVar(int ObsBin, double x1, double x2, doubl
                         SigmaTildeMuIndep[ObsBin][im][idx1][idx2][proc] +=  fac * wtmp[proc];
                      }
                   }
-		  
+
                }
             }
          }
@@ -1540,8 +1540,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    // ---
    // --- Select interpolation kernels for x and mu
    // --- 1: Catmull-Rom, 2: Lagrangian
-   const int ikernx  = 2;
-   const int ikernmu = 2;
+   // ATTENTION: KR: Set back to Catmull-Rom for comparison with toolkit production
+   //   const int ikernx  = 2;
+   //   const int ikernmu = 2;
+   const int ikernx  = 1;
+   const int ikernmu = 1;
 
    if (this->IRef>0) {
       // ---
