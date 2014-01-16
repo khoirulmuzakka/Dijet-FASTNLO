@@ -105,8 +105,8 @@ void fastNLOCreate::ReadSteering(string steerfile)
 // ___________________________________________________________________________________________________
 void fastNLOCreate::ReadScaleFactors()
 {
-   // read scale factors from steering
-   // and init member fScaleFac
+   //! read scale factors from steering
+   //! and init member fScaleFac
 
    if ( fIsFlexibleScale ) {warn["ReadScaleFactors"]<<"This function is only reasonable for fixed-scale tables!"<<endl;}
    vector<double> svar = DOUBLE_ARR(ScaleVariationFactors);
@@ -170,14 +170,14 @@ void fastNLOCreate::ReadScaleFactors()
 void fastNLOCreate::InitCoeffTable()
 {
    debug["InitCoeffTable"]<<endl;
-   // create a coeff table
+   //! create a coeff table
    //CreateCoeffTable(0);
    CreateCoeffTable();
 
-   // set 'usual' variables for perturbative calculations
+   //! set 'usual' variables for perturbative calculations
    InitVariablesInCoefficientTable();
 
-   // read in process specific variables
+   //! read in process specific variables
    ReadCoefficientSpecificVariables();
 }
 
@@ -379,11 +379,11 @@ void fastNLOCreate::ReadBinning()
 // ___________________________________________________________________________________________________
 void fastNLOCreate::GetWarmupValues()
 {
-   //
-   // GetWarmupValues.
-   // Checks if warmup-table exists and initialized
-   // member variable fIsWarmup
-   //
+   //!
+   //! GetWarmupValues.
+   //! Checks if warmup-table exists and initialized
+   //! member variable fIsWarmup
+   //!
    debug["GetWarmupValues"]<<endl;
 
    // try to get warmup values
@@ -408,8 +408,8 @@ void fastNLOCreate::GetWarmupValues()
 // ___________________________________________________________________________________________________
 void fastNLOCreate::UseBinGridFromWarmup()
 {
-   // initialialize all binning related variables
-   // with values stored in the warmup file.
+   //! initialialize all binning related variables
+   //! with values stored in the warmup file.
    vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
    NObsBin	= warmup.size();
    NDim		= INT(Warmup.DifferentialDimension);
@@ -448,8 +448,8 @@ void fastNLOCreate::UseBinGridFromWarmup()
 // ___________________________________________________________________________________________________
 bool fastNLOCreate::CheckWarmupConsistency()
 {
-   // check if warmup values are consistent with steering card
-   // check if number of bins is consistent
+   //! check if warmup values are consistent with steering card
+   //! check if number of bins is consistent
 
    vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
    bool ret = true;
@@ -560,9 +560,9 @@ bool fastNLOCreate::CheckWarmupConsistency()
 void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
 {
    debug["SetOrderOfAlphasOfCalculation"]<<"ord="<<ord<<endl;
-   // set order of alpha_s of this calculation
-   // it must be: iLeadingOrder + iHigherOrder ;
-   // for instance: 3-jet-production in NLO = 4!
+   //! set order of alpha_s of this calculation
+   //! it must be: iLeadingOrder + iHigherOrder ;
+   //! for instance: 3-jet-production in NLO = 4!
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
    const int IOrdInitial = fIOrd;
    fIOrd = ord;
@@ -718,8 +718,8 @@ void fastNLOCreate::ReadCoefficientSpecificVariables()
 
 // ___________________________________________________________________________________________________
 int fastNLOCreate::GetBin(){
-   // get bin number, using
-   // observables from Scenario
+   //! get bin number, using
+   //! observables from Scenario
 
    const int idiff = GetNumDiffBin();
    // -------------------------------
@@ -756,9 +756,9 @@ int fastNLOCreate::GetBin(){
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events, const fnloScenario& scen)
 {
-   // fill all subprocessess for all scale variations (into a fixed-scale table)
-   // events is expected to be of the form:
-   //   events[nscalevar][nsubproc]
+   //! fill all subprocessess for all scale variations (into a fixed-scale table)
+   //! events is expected to be of the form:
+   //!   events[nscalevar][nsubproc]
 
    const bool bFasterCode = true; // experimental developement: try to make code faster
    if ( bFasterCode && !fIsWarmup && !fIsFlexibleScale) {
@@ -828,7 +828,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar)
 {
-   // fill a list of subprocesses into the fastNLO table
+   //! fill a list of subprocesses into the fastNLO table
 
    if ( (int)events.size() != GetNSubprocesses() ){
       error["FillAllSubprocess"]<<"This table expects "<<GetNSubprocesses()<<" subprocesses, but only "<<events.size()<<" are provided. Exiting."<<endl;
@@ -854,9 +854,9 @@ void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario
 // ___________________________________________________________________________________________________
 void fastNLOCreate::Fill(int scalevar)
 {
-   //
-   // Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
-   //
+   //!
+   //! Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
+   //!
    //debug["Fill"]<<"Filling subprocess contributions into table."<<endl;
 
    //GetTheCoeffTable()->Nevt++; // todo: counting of events must be properly implemented
@@ -873,9 +873,9 @@ void fastNLOCreate::Fill(int scalevar)
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillContribution(int scalevar)
 {
-   // read information from 'Event' and 'Scenario'
-   // do the interpolation
-   // and fill into the tables.
+   //! read information from 'Event' and 'Scenario'
+   //! do the interpolation
+   //! and fill into the tables.
 
    if ( fEvent._n > 0 ) SetNumberOfEvents(fEvent._n);
 
@@ -911,9 +911,9 @@ void fastNLOCreate::FillContribution(int scalevar)
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar)
 {
-   // read informatio from 'Event' and 'Scenario'
-   // do the interpolation
-   // and fill into the tables.
+   //! read informatio from 'Event' and 'Scenario'
+   //! do the interpolation
+   //! and fill into the tables.
    debug["FillContributionFixHHC"]<<endl;
 
    if ( fEvent._w == 0 ) return; // nothing todo.
@@ -960,9 +960,9 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 {
-   // read informatio from 'Event' and 'Scenario'
-   // do the interpolation
-   // and fill into the tables.
+   //! read informatio from 'Event' and 'Scenario'
+   //! do the interpolation
+   //! and fill into the tables.
    debug["FillContributionFlexHHC"]<<endl;
 
    if ( fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0 && fEvent._wrr==0 && fEvent._wff==0 && fEvent._wrf==0 ) return; // nothing todo.
@@ -1083,9 +1083,9 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
 {
-   // read informatio from 'Event' and 'Scenario'
-   // do the interpolation
-   // and fill into the tables.
+   //! read information from 'Event' and 'Scenario'
+   //! do the interpolation
+   //! and fill into the tables.
    debug["FillContributionFlexHHC"]<<endl;
    
    if ( fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0 ) return; // nothing todo.
@@ -1147,10 +1147,10 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
 
 // ___________________________________________________________________________________________________
 inline void fastNLOCreate::HalfMatrixCheck(int& xminbin, int& xmaxbin, int& subproc) const {
-   // check if half-matrix notation
-   // if half-matrix notation, and xmin-node is larger than xmax-node
-   // exchange suprocesses according to fSymProc and adjust x-nodes.
-   //
+   //! check if half-matrix notation
+   //! if half-matrix notation, and xmin-node is larger than xmax-node
+   //! exchange suprocesses according to fSymProc and adjust x-nodes.
+   //!
    if ( xminbin > xmaxbin  ) {
       if ( GetTheCoeffTable()->GetNPDFDim() == 1 ) { // half-matrix notation (otherwise nothing todo)
 //          if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
@@ -1168,7 +1168,7 @@ inline void fastNLOCreate::HalfMatrixCheck(int& xminbin, int& xmaxbin, int& subp
 
 // ___________________________________________________________________________________________________
 bool fastNLOCreate::CheckWeightIsNan() {
-   // check if weights contain isnan
+   //! check if weights contain isnan
    if ( isnan(fEvent._w)) {
       error["CheckWeightIsNan"]<<"(Scale-independent) weight is 'nan'"<<endl;
       return true;
@@ -1187,7 +1187,7 @@ bool fastNLOCreate::CheckWeightIsNan() {
 
 // ___________________________________________________________________________________________________
 inline int fastNLOCreate::GetXIndex(const int& ObsBin,const int& x1bin,const int& x2bin) const {
-   // get index if 1 or two hadrons are involved
+   //! get index if 1 or two hadrons are involved
    //switch (GetTheCoeffTable()->GetNPDFDim() ) {
    // faster code ?
    //       if ( ((fastNLOCoeffAddBase*)fCoeff[0])->NPDFDim == 1 ) return x1bin + (x2bin*(x2bin+1)/2);
@@ -1255,7 +1255,7 @@ inline double fastNLOCreate::CalcPDFReweight(double x) const {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
-// Multiply all coefficients by binwidth
+   //! Multiply all coefficients by binwidth
 
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
@@ -1300,7 +1300,7 @@ void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::DivideCoefficientsByBinWidth() {
-// Divide all coefficients by binwidth
+//! Divide all coefficients by binwidth
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
@@ -1344,7 +1344,7 @@ void fastNLOCreate::DivideCoefficientsByBinWidth() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
-// Divide all coefficients by binwidth
+//! Divide all coefficients by binwidth
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
@@ -1388,7 +1388,7 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::UpdateWarmupArrays(){
-   // Update the warmup-arrays fWMu1, fWx und fWMu2
+   //! Update the warmup-arrays fWMu1, fWx und fWMu2
    if ( fWx.empty() ) InitWarmupArrays();
 
    const int ObsBin = GetBin();
@@ -1415,8 +1415,8 @@ void fastNLOCreate::UpdateWarmupArrays(){
 // ___________________________________________________________________________________________________
 void fastNLOCreate::InitWarmupArrays(){
    debug["InitWarmupArrays"]<<endl;
-   // initialize arrays to store and determined warm-up values
-   // initialize with reasonable values
+   //! initialize arrays to store and determined warm-up values
+   //! initialize with reasonable values
    fWMu1.resize(GetNObsBin());
    fWMu2.resize(GetNObsBin());
    fWx.resize(GetNObsBin());
@@ -1804,8 +1804,8 @@ void  fastNLOCreate::InitInterpolationKernels() {
 
 // ___________________________________________________________________________________________________
 fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, double xdn, double xup) {
-   // This function identifies the string-identifier
-   // and creates the corresponding fastNLO Interpolation kernel
+   //! This function identifies the string-identifier
+   //! and creates the corresponding fastNLO Interpolation kernel
 
    if ( KernelName == "CatmulRom" )
       return (fastNLOInterpolBase*)(new fastNLOInterpolCatmulRom(xdn,xup));
