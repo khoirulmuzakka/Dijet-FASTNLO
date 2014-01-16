@@ -26,9 +26,11 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2912by0ptav.la libfnl2912by0m3.la libfnl2912by0ptavm3.la libfnl2912hy0ptav.la libfnl2912hy0m3.la libfnl2912hy0ptavm3.la libfnl2912by1ptav.la libfnl2912by1m3.la libfnl2912by1ptavm3.la libfnl2912hy1ptav.la libfnl2912hy1m3.la libfnl2912hy1ptavm3.la libfnl2912by2ptav.la libfnl2932by0ptav.la libfnl2932by0m3.la libfnl2932by1ptav.la libfnl2932by1m3.la
 #   lib_LTLIBRARIES += libfnl2912bm3.la libfnl2932am3.la libfnl2932bm3.la libfnl2932bm3nf6.la
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
+   lib_LTLIBRARIES += libfnl2380ak0507y0.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
 # v22
-   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
+#   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
+   lib_LTLIBRARIES += libfnl2352v22.la
    lib_LTLIBRARIES += libfnl2352v20andv22.la
 endif
 
@@ -128,6 +130,7 @@ libfnl2370_la_SOURCES          = fnl2370.cc          $(AM_SOURCES)
 libfnl2380_la_SOURCES          = fnl2380.cc          $(AM_SOURCES)
 libfnl2380ak05_la_SOURCES      = fnl2380ak05.cc      $(AM_SOURCES)
 libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
+libfnl2380ak0507y0_la_SOURCES  = fnl2380ak0507y0.cc  $(AM_SOURCES)
 libfnl2950m3_la_SOURCES        = fnl2950m3.cc        $(AM_SOURCES)
 # v21
 libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
@@ -138,10 +141,9 @@ libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
 libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
 # v22
-libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc $(AM_SOURCES)
-libfnl2352v22_la_SOURCES        = fnl2352v22.cc          $(AM_SOURCES)
-libfnl2352v20andv22_la_SOURCES        = fnl2352v20andv22.cc          $(AM_SOURCES)
-
+#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
+libfnl2352v22_la_SOURCES       = fnl2352v22.cc       $(AM_SOURCES)
+libfnl2352v20andv22_la_SOURCES = fnl2352v20andv22.cc $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
@@ -187,7 +189,7 @@ endif
 endif
 
 #v22 force
-libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
+#libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v20andv22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 
