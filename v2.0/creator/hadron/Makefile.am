@@ -28,8 +28,8 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
 # v22
-#   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
-#   lib_LTLIBRARIES += libfnl2352v20andv22.la
+   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
+   lib_LTLIBRARIES += libfnl2352v20andv22.la
 endif
 
 #
@@ -138,9 +138,9 @@ libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
 libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
 # v22
-#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc $(AM_SOURCES)
-#libfnl2352v22_la_SOURCES        = fnl2352v22.cc          $(AM_SOURCES)
-#libfnl2352v20andv22_la_SOURCES        = fnl2352v20andv22.cc          $(AM_SOURCES)
+libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc $(AM_SOURCES)
+libfnl2352v22_la_SOURCES        = fnl2352v22.cc          $(AM_SOURCES)
+libfnl2352v20andv22_la_SOURCES        = fnl2352v20andv22.cc          $(AM_SOURCES)
 
 
 # Example how to add a jet algo interface locally in this directory
