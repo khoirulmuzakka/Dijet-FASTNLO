@@ -14,7 +14,7 @@
 
 
 //______________________________________________________________________________________________________________
-int main(int argc, char** argv) { 
+int main(int argc, char** argv) {
    // usage: fastNLO <fastNLO-table.tab> [<LHAPDFfile>]
    using namespace std;
    using namespace fastNLO;      // namespace for fastNLO constants
@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
       exit(1);
    }
    // --- fastNLO table
-   string tablename =  (const char*) argv[1];   
+   string tablename =  (const char*) argv[1];
    //---  PDF set
    string PDFFile = "MSTW2008lo68cl.LHgrid";
    if (argc > 2)    PDFFile = (const char*) argv[2];
@@ -49,4 +49,3 @@ int main(int argc, char** argv) {
 
    return 0;
 }
-

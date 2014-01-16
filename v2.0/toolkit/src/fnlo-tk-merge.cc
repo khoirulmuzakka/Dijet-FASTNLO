@@ -5,7 +5,7 @@
 //     identical contributions into one table.
 //
 //********************************************************************
-// DB, 13.11.13, (re)write fnlo-merge for the toolkit 
+// DB, 13.11.13, (re)write fnlo-merge for the toolkit
 
 #include <cstdlib>
 #include <vector>
@@ -18,20 +18,20 @@
 using namespace std;
 using namespace say;
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
    // ----------------------------------------------------------------------//
    // Program to merge fastNLO tables.
    // Input can be LO, NLO or other contributions (non-pert., data, etc)
    // for the identical scenario.
    // ----------------------------------------------------------------------//
-   
+
    // check parameters
    if (argc < 3) {
       error["fnlo-merge"]<<"Usage: fnlo-merge file1.txt [filex.txt]+ result.txt"<<endl;
       return 1;
    }
-   
+
    // check if output file already exists
    int nFiles = argc - 1;
    if (access(argv[nFiles], R_OK) == 0) {
@@ -48,23 +48,23 @@ int main(int argc, char** argv)
       string path = argv[idxFile+1];
       // File there?
       if (access(path.c_str(), R_OK) != 0) {
-	 warn["fnlo-merge"]<<"Unable to access file. Skipping "<<path<<endl;
+         warn["fnlo-merge"]<<"Unable to access file. Skipping "<<path<<endl;
       }
       else { //ok, file exists
-	 // reading table
-	 fastNLOTable tab(path);
-	 //! Todo: check validity of table, here!
-	 if ( !resultTable )  
-	    resultTable = new fastNLOTable(tab);
-	 else { // adding table to result table 
-	    // check if 'scenario' is compatible
-	    if ( !resultTable->IsCompatible(tab) ) 
-	       warn["fnlo-merge"]<<"Table '"<<path<<"' is not compatible with initial table '"<<resultTable->GetFilename()<<"'. Skipping table."<<endl;
-	    else { // adding tables
-	       resultTable->AddTable(tab);
-	       nValidTables++;
-	    }
-	 }
+         // reading table
+         fastNLOTable tab(path);
+         //! Todo: check validity of table, here!
+         if ( !resultTable )
+            resultTable = new fastNLOTable(tab);
+         else { // adding table to result table
+            // check if 'scenario' is compatible
+            if ( !resultTable->IsCompatible(tab) )
+               warn["fnlo-merge"]<<"Table '"<<path<<"' is not compatible with initial table '"<<resultTable->GetFilename()<<"'. Skipping table."<<endl;
+            else { // adding tables
+               resultTable->AddTable(tab);
+               nValidTables++;
+            }
+         }
       }
    }
    info["fnlo-merge"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
