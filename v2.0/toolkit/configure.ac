@@ -137,7 +137,7 @@ AC_ARG_WITH([qcdnum],
         [AS_HELP_STRING([--with-qcdnum],
         [Specify location of QCDNUM installation. This takes precedence over
         a QCDNUM environment variable, the prefix path or other methods.
-        Please note: QCDNUM can optionally be used in fastNLO_reader!])],
+        Please note: QCDNUM can optionally be used in fastNLO_toolkit!])],
         [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
             AC_SUBST([QCDNUM],[$withval])
             AC_MSG_NOTICE([Using given path $QCDNUM as location of QCDNUM installation.])
@@ -191,7 +191,7 @@ AC_ARG_WITH([hoppet],
         [AS_HELP_STRING([--with-hoppet],
         [Specify location of HOPPET installation. This takes precedence over
         a HOPPET environment variable, the prefix path or other methods.
-        Please note: HOPPET can optionally be used in fastNLO_reader!])],
+        Please note: HOPPET can optionally be used in fastNLO_toolkit!])],
         [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
             AC_SUBST([HOPPET],[$withval])
             AC_MSG_NOTICE([Using given path $HOPPET as location of HOPPET installation.])
@@ -323,7 +323,5 @@ AC_CONFIG_FILES([Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
                  src/Makefile
                 ])
-#AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/doxygen/Makefile])])
-#AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/doxygen/Makefile doc/doxygen/doxyfile])])
 
 AC_OUTPUT
