@@ -35,6 +35,10 @@ public:
    double GetSigmaTilde(int iObs, int iSvar, int ix, int is, int iN ) const { return SigmaTilde[iObs][iSvar][ix][is][iN];}
    double GetScaleNode(int iObs, int iSvar, int iNode ) const { return ScaleNode[iObs][0][iSvar][iNode];}
 
+   void ResizePdfLC();
+   void ResizeSigmaTilde();
+
+
 protected:
    fastNLOCoeffAddFix();
    int ReadCoeffAddFix(istream *table);

@@ -27,12 +27,6 @@ namespace fastNLO {
    void ResizeVector( v5d& v, int dim0 , int dim1, int dim2, int dim3, int dim4 );
    void ResizeVector( v6d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
    void ResizeVector( v7d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
-   //    void ResizeVector( v2d& v, int dim0 , int* dim1GetNxmaxFromDimI );
-   //    void ResizeVector( v3d& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
-   //    void ResizeVector( v4d& v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
-   //    void ResizeVector( v5d& v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
-   //    void ResizeVector( v5d& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
-   //    void ResizeVector( v7d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
 
    //! - Writing tables to disk

@@ -1710,17 +1710,13 @@ void  fastNLOCreate::InitGrids() {
 
       int nscalenode = fKernMuS[0][0]->GetGrid().size();
       // scale nodes
-      //c->fastNLOCoeffBase::ResizeTable( &c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
       fastNLO::ResizeVector( c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          for(int k=0;k<nscalevar;k++){
 	    c->ScaleNode[i][0][k] = fKernMuS[i][k]->GetGrid();
 	 }
       }
-
-      // ResizeTable works if x-nodes are initialized
-      int XmaxFromI[1] = {0};
-      c->ResizeTable( c->SigmaTilde, GetNObsBin(), c->GetTotalScalevars(), c->GetTotalScalenodes(), XmaxFromI, c->GetNSubproc() );
+      c->ResizeSigmaTilde();
    }
 
 }
