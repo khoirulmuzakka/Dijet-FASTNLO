@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 
 using namespace std;
@@ -105,7 +106,7 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
    printf("  *  fastNLOCoeffAddFlex::Read(). Read %d lines of flexible-scale tables.\n",nn3);
 
    // init table for evaluation
-   ResizeFlexibleVector(&PdfLcMuVar  , &SigmaTildeMuIndep);
+   ResizeFlexibleVector( PdfLcMuVar , SigmaTildeMuIndep );
    AlphasTwoPi.resize(ScaleNode1.size());
    for (unsigned int i=0; i<AlphasTwoPi.size() ; i++) {
       AlphasTwoPi[i].resize(ScaleNode1[i].size());
@@ -139,26 +140,26 @@ void fastNLOCoeffAddFlex::Write(ostream *table) {
    fastNLOCoeffAddBase::Write(table);
 
    int nn3 = 0;
-   nn3 += WriteFlexibleTable( ScaleNode1 , table , false);
-   nn3 += WriteFlexibleTable( ScaleNode2 , table , false);
+   nn3 += WriteFlexibleVector( ScaleNode1 , table );
+   nn3 += WriteFlexibleVector( ScaleNode2 , table );
 
-   nn3 += WriteFlexibleTable( SigmaTildeMuIndep, table , Nevt);
+   nn3 += WriteFlexibleVector( SigmaTildeMuIndep, table , NSubproc , Nevt);
    if ( NScaleDep==3 || NScaleDep>=5) {
       //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;
-      nn3 += WriteFlexibleTable( SigmaTildeMuFDep , table , Nevt);
-      nn3 += WriteFlexibleTable( SigmaTildeMuRDep , table , Nevt);
+      nn3 += WriteFlexibleVector( SigmaTildeMuFDep , table , NSubproc, Nevt);
+      nn3 += WriteFlexibleVector( SigmaTildeMuRDep , table , NSubproc, Nevt);
       if ( NScaleDep>=6) {
-	 nn3 += WriteFlexibleTable( SigmaTildeMuRRDep , table , Nevt);
-	 nn3 += WriteFlexibleTable( SigmaTildeMuFFDep , table , Nevt);
-	 nn3 += WriteFlexibleTable( SigmaTildeMuRFDep , table , Nevt);
+	 nn3 += WriteFlexibleVector( SigmaTildeMuRRDep , table , NSubproc, Nevt);
+	 nn3 += WriteFlexibleVector( SigmaTildeMuFFDep , table , NSubproc, Nevt);
+	 nn3 += WriteFlexibleVector( SigmaTildeMuRFDep , table , NSubproc, Nevt);
       }
    }
-   if ( SigmaRefMixed.empty() ) fastNLOCoeffBase::ResizeTable(&SigmaRefMixed,fNObsBins,NSubproc);
-   if ( SigmaRef_s1.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s1,fNObsBins,NSubproc);
-   if ( SigmaRef_s2.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s2,fNObsBins,NSubproc);
-   nn3 += WriteFlexibleTable( SigmaRefMixed	, table , Nevt);
-   nn3 += WriteFlexibleTable( SigmaRef_s1	, table , Nevt);
-   nn3 += WriteFlexibleTable( SigmaRef_s2	, table , Nevt);
+   if ( SigmaRefMixed.empty() ) fastNLO::ResizeVector(SigmaRefMixed,fNObsBins,NSubproc);
+   if ( SigmaRef_s1.empty() )   fastNLO::ResizeVector(SigmaRef_s1,fNObsBins,NSubproc);
+   if ( SigmaRef_s2.empty() )   fastNLO::ResizeVector(SigmaRef_s2,fNObsBins,NSubproc);
+   nn3 += WriteFlexibleVector( SigmaRefMixed	, table , NSubproc, Nevt);
+   nn3 += WriteFlexibleVector( SigmaRef_s1	, table , NSubproc, Nevt);
+   nn3 += WriteFlexibleVector( SigmaRef_s2	, table , NSubproc, Nevt);
 
    /*
    nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
@@ -209,19 +210,19 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddFlex& other){
    AddTableToAnotherTable( SigmaRef_s2 , other.SigmaRef_s2 ,w1 , w2 );
    */
 
-   AddTableToAnotherTable( SigmaTildeMuIndep , other.SigmaTildeMuIndep );
+   AddVectors( SigmaTildeMuIndep , other.SigmaTildeMuIndep );
    if ( NScaleDep==3 || NScaleDep>=5 ) {
-      AddTableToAnotherTable( SigmaTildeMuFDep , other.SigmaTildeMuFDep );
-      AddTableToAnotherTable( SigmaTildeMuRDep , other.SigmaTildeMuRDep );
+      AddVectors( SigmaTildeMuFDep , other.SigmaTildeMuFDep );
+      AddVectors( SigmaTildeMuRDep , other.SigmaTildeMuRDep );
       if ( NScaleDep>=6 ) {
-	 AddTableToAnotherTable( SigmaTildeMuRRDep , other.SigmaTildeMuRRDep );
-	 AddTableToAnotherTable( SigmaTildeMuFFDep , other.SigmaTildeMuFFDep );
-	 AddTableToAnotherTable( SigmaTildeMuRFDep , other.SigmaTildeMuRFDep );
+	 AddVectors( SigmaTildeMuRRDep , other.SigmaTildeMuRRDep );
+	 AddVectors( SigmaTildeMuFFDep , other.SigmaTildeMuFFDep );
+	 AddVectors( SigmaTildeMuRFDep , other.SigmaTildeMuRFDep );
       }
    }
-   AddTableToAnotherTable( SigmaRefMixed , other.SigmaRefMixed );
-   AddTableToAnotherTable( SigmaRef_s1 , other.SigmaRef_s1 );
-   AddTableToAnotherTable( SigmaRef_s2 , other.SigmaRef_s2 );
+   AddVectors( SigmaRefMixed , other.SigmaRefMixed );
+   AddVectors( SigmaRef_s1 , other.SigmaRef_s1 );
+   AddVectors( SigmaRef_s2 , other.SigmaRef_s2 );
 }
 
 

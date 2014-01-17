@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/speaker.h"
 
@@ -80,21 +81,26 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    }
    //printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
    //fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
-   fastNLOCoeffBase::ResizeTable( &ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
-   int nsn = ReadTable( &ScaleNode , table );
+   //fastNLOCoeffBase::ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
+   ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
+   int nsn = ReadVector( ScaleNode , table );
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of ScaleNode.\n",nsn);
 
    int XmaxFromI[1] = {0};
    //printf(" &SigmaTilde  %i  %i  %i  *%i  %i\n", fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI[0], NSubproc);
-   fastNLOCoeffAddBase::ResizeTable( &SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
-   int nst = ReadTable( &SigmaTilde , table , Nevt);
+   fastNLOCoeffAddBase::ResizeTable( SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
+   //ResizeVector( SigmaTilde , fNObsBins, GetTotalScalevars(), GetTotalScalenodes(), XmaxFromI, NSubproc );
+   int nst = ReadVector( SigmaTilde , table , Nevt);
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of SigmaTilde.\n",nst);
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of fastNLO v2.0 tables.\n",nst+nsn);
    //   info["Read"]<<"Read "<<nst+nsn<<" lines of fastNLO v2.0 tables."<<endl;
 
    // prepare members for evaluation
-   fastNLOCoeffAddBase::ResizeTable(&PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc);
-   fastNLOCoeffBase::ResizeTable(&AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());
+   fastNLOCoeffAddBase::ResizeTable( PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc);
+   //ResizeVector(PdfLc , fNObsBins, GetTotalScalenodes(), XmaxFromI, NSubproc);
+   //fastNLOCoeffBase::ResizeVector(AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());
+   ResizeVector(AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());
+
 
    return 0;
 }
@@ -115,10 +121,10 @@ void fastNLOCoeffAddFix::Write(ostream* table){
       }
    }
 
-   int nsn = WriteTable( ScaleNode , table );
+   int nsn = fastNLO::WriteVector( ScaleNode , table );
    //printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of ScaleNode.\n",nsn);
    //int nst = WriteTable( &SigmaTilde , table , Nevt );
-   int nst = WriteTable( SigmaTilde , table , Nevt);
+   int nst = fastNLO::WriteVector( SigmaTilde , table , Nevt);
    //printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of SigmaTilde.\n",nst);
    printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of FASTNLO v2.0 tables.\n",nst+nsn);
 }
@@ -128,7 +134,8 @@ void fastNLOCoeffAddFix::Write(ostream* table){
 void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddFix& other){
    CheckCoeffConstants(this);
    Nevt += other.Nevt;
-   AddTableToAnotherTable( SigmaTilde , other.SigmaTilde);
+   AddVectors( SigmaTilde , other.SigmaTilde);
+   //AddTableToAnotherTable( SigmaTilde , other.SigmaTilde);
    /*
    double w1 = (double)Nevt / (Nevt+other.Nevt);
    double w2 = (double)other.Nevt / (Nevt+other.Nevt);

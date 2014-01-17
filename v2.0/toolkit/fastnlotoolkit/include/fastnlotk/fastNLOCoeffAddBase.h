@@ -22,13 +22,12 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
 
-
-   void ResizeTable( v2d*  v, int dim0 , int* dim1GetNxmaxFromDimI );
-   void ResizeTable( v3d* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
-   void ResizeTable( v4d* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
-   void ResizeTable( v5d* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
-   void ResizeTable( v5d* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
-   void ResizeTable( v7d* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
+   void ResizeTable( v2d& v, int dim0 , int* dim1GetNxmaxFromDimI );
+   void ResizeTable( v3d& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 );
+   void ResizeTable( v4d& v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 );
+   void ResizeTable( v5d& v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 );
+   void ResizeTable( v5d& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 );
+   void ResizeTable( v7d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 );
 
 
    int GetIRef() const {return IRef;}

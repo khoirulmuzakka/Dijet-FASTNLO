@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffAddBase.h"
+#include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -296,12 +297,12 @@ int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 ){
+void fastNLOCoeffAddBase::ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int* dim5GetNxmaxFromDimI , int dim6 ){
   if ( dim0 > 0 ){
     if ( dim5GetNxmaxFromDimI[0] == 0 ) {
-      v->resize(dim0);
+      v.resize(dim0);
       for ( int i= 0 ; i<dim0 ; i++){
-	fastNLOCoeffBase::ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, GetNxmax(i), dim6 );
+	 fastNLO::ResizeVector( v[i] , dim1, dim2, dim3, dim4, GetNxmax(i), dim6 );
       }
     }
     else if ( dim5GetNxmaxFromDimI[0] != 0 ){
@@ -317,12 +318,12 @@ void fastNLOCoeffAddBase::ResizeTable(vector<vector<vector<vector<vector<vector<
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 ){
+void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double > > > > >& v, int dim0 , int dim1, int dim2, int* dim3GetNxmaxFromDimI, int dim4 ){
    if ( dim0 > 0 ){
       if ( dim3GetNxmaxFromDimI[0] == 0 ) {
-	 v->resize(dim0);
+	 v.resize(dim0);
 	 for ( int i= 0 ; i<dim0 ; i++){
-	    fastNLOCoeffBase::ResizeTable( &(v->at(i)) , dim1, dim2, GetNxmax(i), dim4 );
+	    fastNLO::ResizeVector( v[i] , dim1, dim2, GetNxmax(i), dim4 );
 	 }
       }
       else if ( dim3GetNxmaxFromDimI[0] != 0 ){
@@ -337,12 +338,12 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 ){
+void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double > > > > >& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2, int dim3, int dim4 ){
   if ( dim0 > 0 ){
     if ( dim1GetNxmaxFromDimI[0] == 0 ) {
-      v->resize(dim0);
+      v.resize(dim0);
       for ( int i= 0 ; i<dim0 ; i++){
-	fastNLOCoeffBase::ResizeTable( &(v->at(i)) , GetNxmax(i), dim2, dim3, dim4 );
+	 fastNLO::ResizeVector( v[i] , GetNxmax(i), dim2, dim3, dim4 );
       }
     }
     else if ( dim1GetNxmaxFromDimI[0] != 0 ){
@@ -357,12 +358,12 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<vector<double
 }
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 ){
+void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<double > > > >& v, int dim0 , int dim1, int* dim2GetNxmaxFromDimI, int dim3 ){
   if ( dim0 > 0 ){
     if ( dim2GetNxmaxFromDimI[0] == 0 ) {
-      v->resize(dim0);
+      v.resize(dim0);
       for ( int i= 0 ; i<dim0 ; i++){
-	fastNLOCoeffBase::ResizeTable( &(v->at(i)) , dim1, GetNxmax(i), dim3 );
+	fastNLO::ResizeVector( v[i] , dim1, GetNxmax(i), dim3 );
       }
     }
     else if ( dim2GetNxmaxFromDimI[0] != 0 ){
@@ -378,12 +379,12 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<vector<double > > > 
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 ){
+void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<double > > >& v, int dim0 , int* dim1GetNxmaxFromDimI, int dim2 ){
   if ( dim0 > 0 ){
     if ( dim1GetNxmaxFromDimI[0] == 0 ) {
-      v->resize(dim0);
+      v.resize(dim0);
       for ( int i= 0 ; i<dim0 ; i++){
-	fastNLOCoeffBase::ResizeTable( &(v->at(i)) , GetNxmax(i), dim2 );
+	fastNLO::ResizeVector( v[i] , GetNxmax(i), dim2 );
       }
     }
     else if ( dim1GetNxmaxFromDimI[0] != 0 ){
@@ -399,12 +400,12 @@ void fastNLOCoeffAddBase::ResizeTable( vector<vector<vector<double > > >* v, int
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ResizeTable( vector<vector<double > >*  v, int dim0 , int* dim1GetNxmaxFromDimI ){
+void fastNLOCoeffAddBase::ResizeTable( vector<vector<double > >&  v, int dim0 , int* dim1GetNxmaxFromDimI ){
   if ( dim0 > 0 ){
     if ( dim1GetNxmaxFromDimI[0] == 0 ) {
-      v->resize(dim0);
+      v.resize(dim0);
       for ( int i= 0 ; i<dim0 ; i++){
-	fastNLOCoeffBase::ResizeTable( &(v->at(i)) , GetNxmax(i) );
+	fastNLO::ResizeVector( v[i] , GetNxmax(i) );
       }
     }
     else if ( dim1GetNxmaxFromDimI[0] != 0 ){

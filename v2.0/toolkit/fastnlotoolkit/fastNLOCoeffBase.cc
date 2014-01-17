@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffBase.h"
+#include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -158,179 +159,6 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::StripWhitespace(string &str) const {
-   for(string::iterator achar = str.end(); achar>str.begin();achar--) {
-      if (*achar==0x20 || *achar==0x00){
-         str.erase(achar);
-      }else{
-         break;
-      }
-   }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable(vector<vector<vector<vector<vector<vector<vector<double > > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, dim5, dim6 );
-    }
-  } else{
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<vector<vector<vector<vector<vector<double > > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4, dim5 );
-    }
-  } else {
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<vector<vector<vector<vector<double > > > > >* v, int dim0 , int dim1, int dim2, int dim3, int dim4 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1, dim2, dim3, dim4 );
-    }
-  } else {
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<vector<vector<vector<double > > > >* v, int dim0 , int dim1, int dim2, int dim3 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1, dim2, dim3 );
-    }
-  } else {
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<vector<vector<double > > >* v, int dim0 , int dim1, int dim2 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1, dim2 );
-    }
-  } else {
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<vector<double > >*  v, int dim0 , int dim1 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-    for ( int i= 0 ; i<dim0 ; i++){
-      ResizeTable( &(v->at(i)) , dim1 );
-    }
-  } else {
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::ResizeTable( vector<double >* v, int dim0 ){
-  if ( dim0 > 0 ){
-    v->resize(dim0);
-  }
-  else{
-    cout << "Error in Resize Table." << endl;
-    exit(1);
-  }
-}
-
-
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::ReadTable(vector<double >* v, istream *table , unsigned long long Nevt ){
-  int nn = 0;
-  for(unsigned int i0=0;i0<v->size();i0++){
-    *table >> v->at(i0);
-    v->at(i0) *= Nevt;
-    nn++;
-  }
-  return nn;
-}
-
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteTable( const vector<double >& v, ostream *table , unsigned long long Nevt ) const {
-   if( Nevt == 0) return -1000;
-   int nn = 0;
-   for(unsigned int i0=0;i0<v.size();i0++){
-      *table << v[i0] / Nevt << endl;
-      nn++;
-   }
-   return nn;
-}
-
-
-
-//________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::WriteFlexibleTable(const vector<double >& v, ostream *table, bool nProcLast, double Nevt) const {
-   int nn = 1;
-   if ( Nevt == 0 ) return -1000;
-   if ( !nProcLast )*table << v.size() << endl;
-   for(unsigned int i0=0;i0<v.size();i0++){
-      *table << v[i0] / Nevt << endl;
-      nn++;
-   }
-   return nn;
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >* vSum, vector<double >* vAdd, double w1, double w2){
-   AddTableToAnotherTable( *vSum, *vAdd, w1, w2 );
-   //    if ( vSum->size() != vAdd->size() ) {cout<<"Error in fastNLOCoeffBase::AddTableToAnotherTable. Cannot add tables with different size. [v1] s1="<<vSum->size()<<", s2="<<vAdd->size()<<endl; return;}
-   //   for ( unsigned int i = 0 ; i<vSum->size() ; i++ ){
-   //     (*vSum)[i] =  w1*(*vSum)[i] + w2*(*vAdd)[i];
-   //   }
-}
-
-
-//________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::AddTableToAnotherTable( vector<double >& vSum, const vector<double >& vAdd, double w1, double w2) const {
-   if ( vSum.size() != vAdd.size() ) {
-      error["AddTableToAnotherTable"]<<"Cannot add tables with different size. [v1] s1="<<vSum.size()<<", s2="<<vAdd.size()<<endl;
-   }
-   else {
-      for ( unsigned int i = 0 ; i<vSum.size() ; i++ ){
-         vSum[i] =  w1*vSum[i] + w2*vAdd[i];
-      }
-   }
-}
-
-
-
-//________________________________________________________________________________________________________________ //
 
 
 void fastNLOCoeffBase::SetNlojetDefaults(){
@@ -343,11 +171,18 @@ void fastNLOCoeffBase::SetNlojetDefaults(){
   SetNlojetDescr();
 };
 
+
+//________________________________________________________________________________________________________________ //
+
+
 void fastNLOCoeffBase::SetNlojetDescr(){
    CodeDescript.push_back("NLOJet++_4.1.3");
    CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
    CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
  }
+
+
+//________________________________________________________________________________________________________________ //
 
 
 void fastNLOCoeffBase::Print() const {
@@ -358,15 +193,9 @@ void fastNLOCoeffBase::Print() const {
   printf(" B   IAddMultFlag                  %d\n",IAddMultFlag);
   printf(" B   IContrFlag1                   %d\n",IContrFlag1);
   printf(" B   IContrFlag2                   %d\n",IContrFlag2);
-  //  printf(" B   IContrFlag3 (always 0)        %d\n",IContrFlag3);
   printf(" B   NScaleDep                     %d\n",NScaleDep);
-  for(unsigned int i=0;i<CtrbDescript.size();i++){
-    printf(" B   CtrbDescript[%d]               %s\n",i,CtrbDescript[i].data());
-  }
-  //printf(" B   NCodeDescr                    %d\n",NCodeDescr);
-  for(unsigned int i=0;i<CodeDescript.size();i++){
-    printf(" B   CodeDescript[%d]               %s\n",i,CodeDescript[i].data());
-  }
+  fastNLO::PrintVector(CtrbDescript,"CtrbDescript","B");
+  fastNLO::PrintVector(CodeDescript,"CodeDescript","B");
   printf(" *******************************************************\n");
 
 }

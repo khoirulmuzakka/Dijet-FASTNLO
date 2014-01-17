@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include "fastnlotk/fastNLOTable.h"
+#include "fastnlotk/fastNLOTools.h"
 
 
 using namespace std;

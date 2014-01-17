@@ -75,9 +75,6 @@ public:
 
 
 protected:
-   void StripWhitespace(string &str) const;					
-   void PutBackMagicNo(istream* table);					// Reset magic number, such that it can be recognized by other reading routines
-   bool ReadMagicNo(istream *table);					// read and crosscheck magic number
    void PrintWelcomeMessage();						// Say hello to fastNLO user
 
    string ffilename;

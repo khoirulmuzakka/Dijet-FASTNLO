@@ -6,6 +6,7 @@
 #include <cmath>
 #include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOBase.h"
+#include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -47,39 +48,6 @@ int fastNLOBase::ReadTable(){
    // read header
    ReadHeader(ifilestream);
    return 0;
-}
-
-
-//______________________________________________________________________________
-bool fastNLOBase::ReadMagicNo(istream *table) {
-   int key = 0;
-   *table >> key;
-   if(key != tablemagicno){
-      error["ReadMagicNo"]<<"Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
-      return false;
-   };
-   return true;
-}
-
-
-//______________________________________________________________________________
-void fastNLOBase::PutBackMagicNo(istream* table){
-   // Put magic number back
-   for(int i=0;i<(int)(log10((double)tablemagicno)+1);i++){
-      table->unget();
-   }
-}
-
-
-//______________________________________________________________________________
-void fastNLOBase::StripWhitespace(string &str) const{
-   for(string::iterator achar = str.end(); achar>str.begin();achar--) {
-      if (*achar==0x20 || *achar==0x00){
-         str.erase(achar);
-      }else{
-         break;
-      }
-   }
 }
 
 
