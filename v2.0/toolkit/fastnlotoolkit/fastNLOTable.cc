@@ -384,7 +384,9 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
                   debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
                   if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
                      ((fastNLOCoeffAddFlex*)lhs)->Add((fastNLOCoeffAddFlex&)*cadd);
-                  wasAdded = true;
+		  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
+                     ((fastNLOCoeffAddFix*)lhs)->Add((fastNLOCoeffAddFix&)*cadd);
+		  wasAdded = true;
                }
             }
          }
