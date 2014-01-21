@@ -61,8 +61,8 @@ namespace fastNLO {
    template<typename T> void PrintVector( const vector<T>& v, string name, string prefix="");
 
    //! - useful i/o
-   bool ReadMagicNo(istream *table);
-   void PutBackMagicNo(istream* table);					// Reset magic number, such that it can be recognized by other reading routines
+   bool ReadMagicNo(istream *table);					//!< Read and check magic number from table.	
+   void PutBackMagicNo(istream* table);					//!< Reset magic number, such that it can be recognized by other reading routines
 
 };
 
