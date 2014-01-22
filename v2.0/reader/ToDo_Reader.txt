@@ -1,15 +1,6 @@
 ToDo List for FastNLOReader
 ---------------------------
 
-- LHAPDF name and set
-IMPORTANT!!! since LHAPDF is a singleton, you have to crosscheck if the
-pdf at accessing time (when you calc xfx) is still the same as when initalizing the
-fastNLO reader.
-This is always true for simple usages. But if smb might want to compare different pdfs, there
-should be some cross check implemented, if you really use the correct LHAPDF.
-(safe pdf-name and set for cross checks when returning and recalculating cross sections!!!)
-
--- future work: fastNLO_toolkit
-restructure the code in such a way, that the SAME code/routines/classes/methods are used
-for the FastNLOReader, than within common/author/creator directory.
-DONE: Now cross check with this code
+ - Copy correct usage of relative cross section units from Ipublunits at the
+   beginning of BlockA2 and IXsectUnits at the beginning of each BlockB
+   from Toolkit and add to Fortran code as well

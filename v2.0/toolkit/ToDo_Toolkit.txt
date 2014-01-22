@@ -27,6 +27,9 @@ Toolkit todo (orderd by priority):
  - 'automatisches' Erkennen von PDF-LiCos beim warm-up run
  - Codieren der LiCo's in Tabelle (und lesen im reader)
  - implement DIS fixed-scale (desired?)
+ - Implement correct usage of relative cross section units from Ipublunits at the
+   beginning of BlockA2 and IXsectUnits at the beginning of each BlockB
+
 
 
 Toolkit done
