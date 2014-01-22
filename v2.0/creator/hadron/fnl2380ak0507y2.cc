@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl2380ak0507y0:
+// fastNLO v2 creator code for fnl2380ak0507y2:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 and 0.7 in E-scheme
 //
@@ -183,7 +183,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
    // --- fastNLO user: in this scenario run jet algo with two different jet sizes R
-   const unsigned int ndim1bins = 33;
+   const unsigned int ndim1bins = 30;
    const unsigned int ndim2bins = 2;
    const double Rjet[ndim2bins] = { 0.5, 0.7 };
    for (unsigned int k=0; k<ndim2bins; k++) {
@@ -220,9 +220,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // --- declare and initialize phase space cut variables
       // can partially be taken from table binning for this scenario
       // smallest |(pseudo-)rapidity| for jets to be considered
-      const double yjmin  = 0.0;
+      const double yjmin  = 1.0;
       // largest |(pseudo-)rapidity| for jets to be considered
-      const double yjmax  = 0.5;
+      const double yjmax  = 1.5;
       // lowest pT for jets to be considered
       const double ptjmin = A2->LoBin[0][0];
 
@@ -299,7 +299,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2380ak0507y0");
+   A1->SetScenName("fnl2380ak0507y2");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
@@ -334,7 +334,7 @@ void UserHHC::inittable(){
    const int ndim2bins = 2;
    const double dim2bins[ndim2bins+1] = { 0.4, 0.6, 0.8 };
 
-   const int ndim1bins[ndim2bins] = { 33, 33 };
+   const int ndim1bins[ndim2bins] = { 30, 30 };
 
    cout << endl << "------------------------" << endl;
    cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
@@ -348,11 +348,11 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim2bins; i++) {
       dim1bins[i].resize(ndim1bins[i]+1);
    }
-   const double dim0[34] = {
+   const double dim0[31] = {
       56.  ,   64.,   74.,   84.,   97., 114. ,  133.,  153.,  174.,  196.,
       220. ,  245.,  272.,  300.,  330., 362. ,  395.,  430.,  468.,  507.,
       548. ,  592.,  638.,  686.,  737., 790. ,  846.,  905.,  967., 1032.,
-      1101., 1172., 1248., 1327. };
+      1101. };
    for (int i=0; i<ndim2bins; i++) {
       for (int j=0; j<ndim1bins[i]+1; j++) {
          dim1bins[i][j] = dim0[j];

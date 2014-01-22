@@ -1,5 +1,5 @@
 //
-// fastNLO v2 creator code for fnl2380ak0507y0:
+// fastNLO v2 creator code for fnl2380ak0507y1:
 //     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
 //     for fastjet anti-kT algo with R=0.5 and 0.7 in E-scheme
 //
@@ -220,9 +220,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // --- declare and initialize phase space cut variables
       // can partially be taken from table binning for this scenario
       // smallest |(pseudo-)rapidity| for jets to be considered
-      const double yjmin  = 0.0;
+      const double yjmin  = 0.5;
       // largest |(pseudo-)rapidity| for jets to be considered
-      const double yjmax  = 0.5;
+      const double yjmax  = 1.0;
       // lowest pT for jets to be considered
       const double ptjmin = A2->LoBin[0][0];
 
@@ -299,7 +299,7 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2380ak0507y0");
+   A1->SetScenName("fnl2380ak0507y1");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
