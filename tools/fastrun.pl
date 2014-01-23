@@ -328,8 +328,8 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{root}[1]       = "root";
     $install{fastjet}[0]    = "fastjet-3.0.3";
     $install{fastjet}[1]    = "fastjet-3.0.3";
-    $install{lhapdf}[0]     = "lhapdf-5.8.9b1";
-    $install{lhapdf}[1]     = "lhapdf-5.8.9b1";
+    $install{lhapdf}[0]     = "lhapdf-5.8.9";
+    $install{lhapdf}[1]     = "lhapdf-5.8.9";
     $install{lhapdffix}[0]  = "";
     $install{lhapdffix}[1]  = "";
     $install{lhpdf}[0]      = "lhpdf-1.0.0";
