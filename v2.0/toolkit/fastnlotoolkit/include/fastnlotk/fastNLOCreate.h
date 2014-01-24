@@ -131,8 +131,17 @@ public:
    void PrintWarmupValues();									//!< Print the warmup values to the screen
    string GetWarmupTableFilename();								//!< Get the filename, which is used for storage of the warmup-table.
    
-   fastNLOCoeffAddBase* GetTheCoeffTable() const {						//!< Getter for the one (and only) coefficient table
-      return (fastNLOCoeffAddBase*)GetCoeffTable(0);}
+   fastNLOCoeffAddBase* GetTheCoeffTable() const {						
+      return (fastNLOCoeffAddBase*)GetCoeffTable(0);}						//!< Getter for the one (and only) coefficient table
+
+   bool GetParameterFromSteering(string label, bool& val);					//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, int& val);					//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, double& val);					//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, string& val);					//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, vector<int>& val);				//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, vector<double>& val);				//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, vector<string>& val);				//!< Get user-defined parameter from steering file.
+   
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.

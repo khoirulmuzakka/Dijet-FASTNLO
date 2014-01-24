@@ -1842,3 +1842,152 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
    }
    return NULL; // default return
 }
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, bool& val){
+   //! Get boolean value from steering with label 'label'.
+   //! Alternatively, also BOOL(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, one should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static bool IsCMS;
+   //! static bool gotval = GetParameterFromSteering("MjjCut",IsCMS);
+   //! if (!gotval) cout<<"Error! Could not find boolean parameter MjjCut in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getbool(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, int& val){
+   //! Get integer value from steering with label 'label'.
+   //! Alternatively, also INT(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static int nJetMin;
+   //! static bool gotval = GetParameterFromSteering("nJetMin",nJetMin);
+   //! if (!gotval) cout<<"Error! Could not find integer parameter nJetMin in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getint(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, double& val){
+   //! Get boolean value from steering with label 'label'.
+   //! Alternatively, also DOUBLE(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static double MjjCut;
+   //! static bool gotval = GetParameterFromSteering("MjjCut",MjjCut);
+   //! if (!gotval) cout<<"Error! Could not find parameter MjjCut in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getdouble(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, string& val){
+   //! Get string value from steering with label 'label'.
+   //! Alternatively, also STRING(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static string text;
+   //! static bool gotval = GetParameterFromSteering("MyText",text);
+   //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getstring(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, vector<int>& val){
+   //! Get integer vector from steering with label 'label'.
+   //! Alternatively, also INT_ARR(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getintarray(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, vector<double>& val){
+   //! Get vector of doubles from steering with label 'label'.
+   //! Alternatively, also DOUBLE_ARR(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static vector<double> FlexiCuts;
+   //! static bool gotval = GetParameterFromSteering("FlexiCuts",FlexiCuts);
+   //! if (!gotval) cout<<"Error! Could not find vector FlexiCuts in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getdoublearray(label);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, vector<string>& val){
+   //! Get vector of strings from steering with label 'label'.
+   //! Alternatively, also STRING_ARR(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static string text;
+   //! static bool gotval = GetParameterFromSteering("MyText",text);
+   //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label);
+   val = read_steer::getstringarray(label);
+   return !temp.empty();
+}

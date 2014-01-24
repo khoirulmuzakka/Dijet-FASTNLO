@@ -506,7 +506,7 @@ void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
    //! At the end of ::InitBinning() we have to set IDiffBin then always to 2
    //! to identify this dimension to be a 'binned' dimension.
    //!
-   //! int iDim: counting starts from 1
+   //! int iDim: counting starts from 0
 
 
    // check validity of call
@@ -524,8 +524,8 @@ void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
       exit(1);
    }
 
-   DimLabel[iDim-1] = label;
-   IDiffBin[iDim-1] = IsDiff ? 2 : 0 ;
+   DimLabel[iDim] = label;
+   IDiffBin[iDim] = IsDiff ? 2 : 0 ;
 }
 
 
