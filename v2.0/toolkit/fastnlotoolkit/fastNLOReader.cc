@@ -1698,21 +1698,21 @@ void fastNLOReader::PrintCrossSections() const {
 
    if (NDim == 2) {
       double lobindim2 = -42;
-      printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |\n",GetDimLabel(0).c_str(),unit[Ipublunits].c_str());
+      printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |\n",GetDimLabel(1).c_str(),unit[Ipublunits].c_str());
       printf(" #  --------------------------------------------------------------------\n");
       for (unsigned int i=0; i<xs.size(); i++) {
          if (GetLoBin(i,1) != lobindim2) {
-            printf(" #                  ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,1),GetUpBin(i,1),GetDimLabel(1).c_str());
-            lobindim2 = GetLoBin(i,1);
+            printf(" #                  ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,0),GetUpBin(i,0),GetDimLabel(0).c_str());
+            lobindim2 = GetLoBin(i,0);
          }
-         printf(" #   %4.0f   | %9.3f - %9.3f       % 9.4e           % 5.2f      |\n",i*1.,GetLoBin(i,0),GetUpBin(i,0),xs[i],kFactor[i]);
+         printf(" #   %4.0f   | %9.3f - %9.3f       % 9.4e           % 5.2f      |\n",i*1.,GetLoBin(i,1),GetUpBin(i,1),xs[i],kFactor[i]);
       }
    }
 
    else {
-      printf("   ---  %5s  ---        - Bin -       -- XS-FNLO --  \n",GetDimLabel(0).c_str());
+      printf("   ---  %5s  ---        - Bin -       -- XS-FNLO --  \n",GetDimLabel(NDim-1).c_str());
       for (unsigned int i=0; i<xs.size(); i++) {
-         printf("  %9.3f - %9.3f   %3.0f         % 9.4e\n",GetLoBin(i,0),GetUpBin(i,0),i*1.,xs[i]);
+         printf("  %9.3f - %9.3f   %3.0f         % 9.4e\n",GetLoBin(i,NDim-1),GetUpBin(i,NDim-1),i*1.,xs[i]);
       }
    }
    printf(" #  --------------------------------------------------------------------\n");
@@ -1758,8 +1758,8 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
    }
    printf(" #  at sqrt(s) = %8.2f GeV\n", Ecms);
    printf(" #  \n");
-   printf(" #  This is a %s-differential table in %s", ((NDim==1)?"single":"double"),DimLabel[0].c_str());
-   if (NDim==2) printf(" and %s",DimLabel[1].c_str());
+   printf(" #  This is a %s-differential table in %s", ((NDim==1)?"single":"double"),GetDimLabel(0).c_str());
+   if (NDim==2) printf(" and %s",GetDimLabel(1).c_str());
    printf(" #  \n");
    printf(" #  Please mention, that the reference cross section can easily deviating up to more\n *  than 20%% due to different scale choices, alhpa_s value/evolution, PDFs, etc.");
    printf(" #  This does not mean, that this FastNLO table is wrong!\n\n");
@@ -1780,23 +1780,23 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
 
    if (NDim == 2) {
       double lobindim2 = -321312;
-      printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |  -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str(),unit[Ipublunits].c_str());
+      printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |  -- XS-ref (NLOJET++) --    Diff [%%]\n",GetDimLabel(NDim-1).c_str(),unit[Ipublunits].c_str());
       printf(" #  -----------------------------------------------------------------------------------------------------------\n");
       for (unsigned int i=0; i<xs.size(); i++) {
-         if (GetLoBin(i,1) != lobindim2) {
-            printf(" #                    ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,1),GetUpBin(i,1),GetDimLabel(1).c_str());
-            lobindim2 = GetLoBin(i,1);
+         if (GetLoBin(i,0) != lobindim2) {
+            printf(" #                    ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,0),GetUpBin(i,0),GetDimLabel(0).c_str());
+            lobindim2 = GetLoBin(i,0);
          }
          printf(" #   %4.0f   | %9.3f - %9.3f      % 9.4e           % 5.3f      |     % 9.4e            % 5.4f\n",
-                i*1.,GetLoBin(i,0),GetUpBin(i,0),xs[i],kFactor[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
+                i*1.,GetLoBin(i,1),GetUpBin(i,1),xs[i],kFactor[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
       }
    }
 
    else {
       printf("FastNLOReader::PrintCrossSections( ). Info. Single differential printing of cross sections not yet nicely implemented.\n");
-      printf("   ---  %s  ---        - Bin -    -- XS-FNLO  --       -- XS-ref (NLOJET++) --    Diff [%%]\n",DimLabel[0].c_str());
+      printf("   ---  %s  ---        - Bin -    -- XS-FNLO  --       -- XS-ref (NLOJET++) --    Diff [%%]\n",GetDimLabel(NDim-1).c_str());
       for (unsigned int i=0; i<xs.size(); i++) {
-         printf("  %9.3f - %9.3f   %3.0f         % 9.4e           % 9.4e          % 5.4f\n",GetLoBin(i,0),GetUpBin(i,0),i*1.,xs[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
+         printf("  %9.3f - %9.3f   %3.0f         % 9.4e           % 9.4e          % 5.4f\n",GetLoBin(i,NDim-1),GetUpBin(i,NDim-1),i*1.,xs[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
       }
    }
    printf(" #  ------------------------------------------------------------------------------------------------------------\n");
@@ -1835,7 +1835,7 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       if (inpc1>-1)header2 += "     K NPC";
       unsigned int NDimBins[NDim];
       printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
-             header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),header2.c_str());
+             header0.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[0].c_str(),header2.c_str());
       cout << _SSEP << endl;
       for (int i=0; i<NObsBin; i++) {
          for (int j=0; j<NDim; j++) {
@@ -1845,20 +1845,20 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
          }
          if (ithc2<0 && inpc1<0) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
-                   NDimBins[1],GetLoBin(i,1),GetUpBin(i,1),XSection_LO[i],XSection[i],kFactor[i]);
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
+                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i]);
          } else if (inpc1<0 && ithc2 != -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
-                   NDimBins[1],GetLoBin(i,1),GetUpBin(i,1),XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
+                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
          } else if (inpc1>-1 && ithc2 == -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
-                   NDimBins[1],GetLoBin(i,1),GetUpBin(i,1),XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
+                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
          } else {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
-                   NDimBins[1],GetLoBin(i,1),GetUpBin(i,1),XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
+                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
          }
          printf("\n");
       }

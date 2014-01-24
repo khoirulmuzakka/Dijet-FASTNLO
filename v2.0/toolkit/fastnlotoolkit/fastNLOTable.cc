@@ -146,14 +146,13 @@ int fastNLOTable::ReadScenario(istream *table){
    *table >> NDim;
    DimLabel.resize(NDim);
    table->getline(buffer,256);
-   for(int i=0;i<NDim;i++){
+   for(int i=NDim-1;i>=0;i--){
       table->getline(buffer,256);
       DimLabel[i] = buffer;
-      //      StripWhitespace(DimLabel[i]);
    }
 
    IDiffBin.resize(NDim);
-   for(int i=0;i<NDim;i++){
+   for(int i=NDim-1;i>=0;i--){
       *table >>  IDiffBin[i];
    }
    Bin.resize(NObsBin);
@@ -166,7 +165,7 @@ int fastNLOTable::ReadScenario(istream *table){
       Bin[i].resize(NDim);
 //       LoBin[i].resize(NDim);
 //       UpBin[i].resize(NDim);
-      for(int j=0;j<NDim;j++){
+      for(int j=NDim-1;j>=0;j--){
          //*table >>  LoBin[i][j];
          //if(IDiffBin[j]==2) *table >>  UpBin[i][j];
          *table >>  Bin[i][j].first;
@@ -245,14 +244,14 @@ int fastNLOTable::WriteScenario(ostream *table){
    *table << ILOord << endl;
    *table << NObsBin << endl;
    *table << NDim << endl;
-   for(int i=0;i<NDim;i++){
+   for(int i=NDim-1;i>=0;i--){
       *table << DimLabel[i] << endl;
    }
-   for(int i=0;i<NDim;i++){
+   for(int i=NDim-1;i>=0;i--){
       *table << IDiffBin[i] << endl;
    }
    for(int i=0;i<NObsBin;i++){
-      for(int j=0;j<NDim;j++){
+      for(int j=NDim-1;j>=0;j--){
          *table <<  Bin[i][j].first  << endl;
          //         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
          if(IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
@@ -496,17 +495,18 @@ void fastNLOTable::SetLoOrder(int LOOrd){
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
-   // Set label for dimension
-   //
-   // In this method, we also set IDiffBin.
-   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder
-   // binned distribution (=2).
-   // Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
-   // use binned distributions, we use IDiffBin to identify, if the publication
-   // was divided by this bin(-width) (=2) or not.
-   // At the end of ::InitBinning() we have to set IDiffBin then always to 2
-   // to identify this dimension to be a 'binned' dimension.
-   //
+   //! Set label for dimension
+   //!
+   //! In this method, we also set IDiffBin.
+   //! IDiffBin defines, if this dimension is a ('truely') differential (=1) oder
+   //! binned distribution (=2).
+   //! Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
+   //! use binned distributions, we use IDiffBin to identify, if the publication
+   //! was divided by this bin(-width) (=2) or not.
+   //! At the end of ::InitBinning() we have to set IDiffBin then always to 2
+   //! to identify this dimension to be a 'binned' dimension.
+   //!
+   //! int iDim: counting starts from 1
 
 
    // check validity of call

@@ -11,8 +11,35 @@
 
 using namespace std;
 
+/**
+   fastNLOCreate
 
-// fastNLOCreate* fastNLOCreate::fInstance = NULL;
+   This class can generate/fill one single contribution for a fastNLO table.
+   It supports fixed scale and flexible-scale tables.
+   fastNLOCreate inherits from fastNLOTable, but is only able to hold one
+   coefficient table as member. 
+   fastNLOCreate no enables to fill this coefficient talbe, i.e.  to add further
+   contributions, e.g. from a MC generator.
+   
+   fastNLOCreate works only with a steering file. Example steering files
+   are provided together with this class. 
+   The steering specifies, which kind of process are stored and also
+   the binning is read in.
+
+   fastNLOCreate also handles the warmup runs. If no warmup table is found
+   it automatically runs in warmup mode. If warmup values are available, it
+   runs in 'production' mode.
+
+   In order ot obtain a full fastNLO table, i.e. a table with LO and NLO contributions,
+   several contributions have to be merged, using the fnlo-merge (or fnlo-tk-merge)
+   tools.   
+
+   For example applications, please contact the authors.
+   In the current implementation, only one instance of fastNLOCreate can be 
+   instantiated for a program call.
+
+*/
+
 
 int fastNLOCreate::nInst = 0;
 
@@ -279,17 +306,17 @@ void fastNLOCreate::ReadBinning()
                                       <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
                   exit(1);
                }
-               Bin[NObsBin][1] = make_pair(in[r][0],in[r][1]);
+               Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
                // sanity dim 0:
                if ( in[r][c] >= in[r][c+1] ) {
                   error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
                   exit(1);
                }
-               Bin[NObsBin][0] = make_pair(in[r][c],in[r][c+1]);
+               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
             }
             else {
-               Bin[NObsBin][1] = make_pair(in[r][0],in[r][0]);
-               Bin[NObsBin][0] = make_pair(in[r][c],in[r][c]);
+               Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
+               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
             }
             NObsBin++; // count
          }
@@ -314,7 +341,7 @@ void fastNLOCreate::ReadBinning()
                error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
                exit(1);
             }
-            Bin[NObsBin-1][2] = make_pair(in[r][0],in[r][1]);
+            Bin[NObsBin-1][0] = make_pair(in[r][0],in[r][1]);
             // sanity dim 1:
             if ( in[r][2]>=in[r][3] ){
                error["ReadBinning"]<<"The upper bin edge ("<<in[r][3]<<") is below the lower one ("<<in[r][2]<<") in row "<<r+1<<". Exiting."<<endl;
@@ -326,7 +353,7 @@ void fastNLOCreate::ReadBinning()
                error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
                exit(1);
             }
-            Bin[NObsBin-1][0] = make_pair(in[r][c],in[r][c+1]);
+            Bin[NObsBin-1][2] = make_pair(in[r][c],in[r][c+1]);
          }
       }
    }
@@ -432,13 +459,13 @@ void fastNLOCreate::UseBinGridFromWarmup()
 	 Bin[i][0] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
       }
       else if ( NDim==2 ) {
-	 Bin[i][1] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
-	 Bin[i][0] = make_pair(warmup[i][i0+2],warmup[i][i0+3]) ;
+	 Bin[i][0] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
+	 Bin[i][1] = make_pair(warmup[i][i0+2],warmup[i][i0+3]) ;
       }
       else if ( NDim==3 ) {
-	 Bin[i][2] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
+	 Bin[i][0] = make_pair(warmup[i][i0],warmup[i][i0+1]) ;
 	 Bin[i][1] = make_pair(warmup[i][i0+2],warmup[i][i0+3]) ;
-	 Bin[i][0] = make_pair(warmup[i][i0+4],warmup[i][i0+5]) ;
+	 Bin[i][2] = make_pair(warmup[i][i0+4],warmup[i][i0+5]) ;
       }
       BinSize[i] = warmup[i][i0+NDim*2];
    }
@@ -458,7 +485,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
    const string wrmuphelp = "Please remove warmup-file in order to calculate a new warmup-file which is compatible to your steering,\nor alternatively use 'ReadBinningFromSteering=false', then all binning-related information is taken from the warmup file.\n";
    
    if ( (int)warmup.size() != NObsBin ) {
-      error["GetWarmupValues"]
+      error["CheckWarmupConsistency"]
 	 <<"Table of warmup values is not compatible with steering file.\n"
 	 <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<".\n"
 	 <<wrmuphelp
@@ -467,7 +494,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
       exit(1);
    }
    if ( INT(Warmup.DifferentialDimension) != NDim  ) {
-      error["GetWarmupValues"]
+      error["CheckWarmupConsistency"]
 	 <<"Table of warmup values is not compatible with steering file.\n"
 	 <<"Found different number of dimensions. NDim="<<NDim<<", Warmup.DifferentialDimension="<<INT(Warmup.DifferentialDimension)<<".\n"
 	 <<wrmuphelp
@@ -478,14 +505,14 @@ bool fastNLOCreate::CheckWarmupConsistency()
 
    // CoeffTable is not available during intialization
    //    if ( STRING(Warmup.ScaleDescriptionScale1) != GetTheCoeffTable()->ScaleDescript[0][0] ) {
-   //       warn["GetWarmupValues"]
+   //       warn["CheckWarmupConsistency"]
    // 	 <<"Table of warmup values is potentially incompatible with steering file.\n"
    // 	 <<"Found different scale description (ScaleDescriptionScale1). ScaleDescriptionScale1="<<GetTheCoeffTable()->ScaleDescript[0][0]
    // 	 <<", but Warmup.ScaleDescriptionScale1='"<<STRING(Warmup.ScaleDescriptionScale1)<<"'."<<endl<<endl;
    //       ret = false;
    //    }
    //    if ( fIsFlexibleScale && STRING(Warmup.ScaleDescriptionScale2) != GetTheCoeffTable()->ScaleDescript[0][1] ){
-   //       warn["GetWarmupValues"]
+   //       warn["CheckWarmupConsistency"]
    // 	 <<"Table of warmup values is potentially incompatible with steering file.\n"
    // 	 <<"Found different scale description (ScaleDescriptionScale2). ScaleDescriptionScale2='"<<GetTheCoeffTable()->ScaleDescript[0][0]<<"'"
    // 	 <<", but Warmup.ScaleDescriptionScale2='"<<STRING(Warmup.ScaleDescriptionScale1)<<"'."<<endl<<endl;
@@ -493,7 +520,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
    //    }
 
    if ( INT_ARR(Warmup.DimensionIsDifferential)[0] != IDiffBin[0]  ) {
-      warn["GetWarmupValues"]
+      warn["CheckWarmupConsistency"]
 	 <<"Table of warmup values seems to be incompatible with steering file.\n"
 	 <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[0]<<"'"
 	 <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR(Warmup.DimensionIsDifferential)[0]<<"'. Exiting."<<endl;
@@ -501,7 +528,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
       exit(1);
    }
    if ( NDim > 1 && INT_ARR(Warmup.DimensionIsDifferential)[1] != IDiffBin[1]  ) {
-      warn["GetWarmupValues"]
+      warn["CheckWarmupConsistency"]
 	 <<"Table of warmup values seems to be incompatible with steering file.\n"
 	 <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
 	 <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR(Warmup.DimensionIsDifferential)[1]<<"'. Exiting."<<endl;
@@ -514,7 +541,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
       int i0 = fIsFlexibleScale ? 6 : 4;
       if ( NDim == 1 ) {
 	 if ( Bin[i][0].first != warmup[i][i0] || Bin[i][0].second != warmup[i][i0+1] ) {
-	    error["GetWarmupValues"]
+	    error["CheckWarmupConsistency"]
 	       <<"Table of warmup values seems to be incompatible with steering file.\n"
 	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
 	       <<",], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"].\n"
@@ -525,11 +552,11 @@ bool fastNLOCreate::CheckWarmupConsistency()
 	 }
       }
       else if ( NDim == 2 ) {
-	 if ( Bin[i][1].first != warmup[i][i0] || Bin[i][1].second != warmup[i][i0+1] 
-	      || Bin[i][0].first != warmup[i][i0+2] || Bin[i][0].second != warmup[i][i0+3] ) {
-	    error["GetWarmupValues"]
+	 if ( Bin[i][0].first != warmup[i][i0] || Bin[i][0].second != warmup[i][i0+1] 
+	      || Bin[i][1].first != warmup[i][i0+2] || Bin[i][1].second != warmup[i][i0+3] ) {
+	    error["CheckWarmupConsistency"]
 	       <<"Table of warmup values seems to be incompatible with steering file.\n"
-	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][1].first<<","<<Bin[i][1].second<<",] ["<<Bin[i][0].first<<","<<Bin[i][0].second
+	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
 	       <<"], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"] ["<<warmup[i][i0+2]<<","<<warmup[i][i0+3]<<"].\n"
 	       <<wrmuphelp
 	       <<"Exiting."<<endl;
@@ -543,7 +570,7 @@ bool fastNLOCreate::CheckWarmupConsistency()
       else if ( NDim == 2 ) bwwrm = warmup[i][i0+4];
       else if ( NDim == 3 ) bwwrm = warmup[i][i0+6];
       if ( fabs(BinSize[i] - bwwrm ) > 1.e-6 ) {
-	 warn["GetWarmupValues"]
+	 warn["CheckWarmupConsistency"]
 	    <<"Table of warmup values seems to be incompatible with steering file.\n"
 	    <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
 	    <<", warmup: "<<bwwrm<<".\n"
@@ -742,7 +769,7 @@ int fastNLOCreate::GetBin(){
    // -------------------------------
    // calc bin number and keep Observables
    if ( idiff == 1 ) fObsBin = GetBinNumber(fScenario._o[0]);
-   else if ( idiff == 2 )  fObsBin = GetBinNumber(fScenario._o[1],fScenario._o[0]);
+   else if ( idiff == 2 )  fObsBin = GetBinNumber(fScenario._o[0],fScenario._o[1]);
    //else if ( idiff == 3 )  fObsBin = GetBinNumber(fScenario._o[2],fScenario._o[1],fScenario._o[0]);
    else {
       error["GetBin"]<<"Sorry. triple-differential binning not yet implemented. exiting."<<endl;
@@ -1541,10 +1568,10 @@ void fastNLOCreate::OutWarmup(string file){
       if ( NDim == 1 )  
 	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
       else if ( NDim == 2 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str()); 
       else if ( NDim == 3 )
 	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
-		 DimLabel[2].c_str() ,DimLabel[2].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
       sout<<buf; 
       sprintf(buf,"  %12s","BinWidth"); 
       sout<<buf<<endl;
@@ -1561,10 +1588,10 @@ void fastNLOCreate::OutWarmup(string file){
 	 if ( NDim == 1 )  
 	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second); 
 	 else if ( NDim == 2 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f",Bin[i][1].first , Bin[i][1].second, Bin[i][0].first , Bin[i][0].second); 
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second, Bin[i][1].first , Bin[i][1].second); 
 	 else if ( NDim == 3 )
 	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
-		    Bin[i][2].first , Bin[i][1].second,Bin[i][2].first , Bin[i][1].second, Bin[i][0].first , Bin[i][0].second);
+		    Bin[i][0].first , Bin[i][0].second,Bin[i][1].first , Bin[i][1].second, Bin[i][2].first , Bin[i][2].second);
 	 sout<<buf; 
 	 sprintf(buf,"  %12.3f",BinSize[i]);
          sout<<buf<<endl;
@@ -1582,10 +1609,10 @@ void fastNLOCreate::OutWarmup(string file){
       if ( NDim == 1 )  
 	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
       else if ( NDim == 2 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str()); 
       else if ( NDim == 3 )
 	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
-		 DimLabel[2].c_str() ,DimLabel[2].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[0].c_str() ,DimLabel[0].c_str()); 
+		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
       sout<<buf; 
       sprintf(buf,"  %12s","BinWidth"); 
       sout<<buf<<endl;
@@ -1602,10 +1629,10 @@ void fastNLOCreate::OutWarmup(string file){
 	 if ( NDim == 1 )  
 	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first, Bin[i][0].second); 
 	 else if ( NDim == 2 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f", Bin[i][1].first, Bin[i][1].second, Bin[i][0].first, Bin[i][0].second); 
+	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f", Bin[i][0].first, Bin[i][0].second, Bin[i][1].first, Bin[i][1].second); 
 	 else if ( NDim == 3 )
 	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
-		    Bin[i][2].first , Bin[i][2].second, Bin[i][1].first, Bin[i][1].second, Bin[i][0].first, Bin[i][0].second);
+		    Bin[i][0].first , Bin[i][0].second, Bin[i][1].first, Bin[i][1].second, Bin[i][2].first, Bin[i][2].second);
 	 sout<<buf; 
 	 sprintf(buf,"  %12.3f",BinSize[i]);
 	 sout<<buf<<endl;
