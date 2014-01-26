@@ -6,8 +6,9 @@
 
 using namespace std;
 using namespace say;
+using namespace fastNLO;
 
-namespace fastNLO {
+namespace fastNLOTools {
 
    //________________________________________________________________________________________________________________ //
    int ReadVector(vector<double >& v, istream *table , unsigned long long Nevt ){
@@ -18,6 +19,26 @@ namespace fastNLO {
 	 v[i] *= Nevt;
       }
       return v.size();
+   }
+
+   
+   //________________________________________________________________________________________________________________ //
+   int ReadFlexibleVector(vector<double >& v, istream *table , int nProcLast , unsigned long long nevts ){
+      int nn = 0;
+      if ( nProcLast==0 ) {
+	 int size = 0;
+	 *table >> size; nn++;
+	 v.resize(size);
+      }
+      else {
+	 v.resize(nProcLast);
+      }
+      for(unsigned int i0=0;i0<v.size();i0++){
+	 *table >> v[i0];
+	 v[i0] *= nevts;
+	 nn++;
+      }
+      return nn;
    }
 
 

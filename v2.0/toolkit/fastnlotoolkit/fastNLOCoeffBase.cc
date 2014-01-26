@@ -4,9 +4,9 @@
 
 #include "fastnlotk/fastNLOCoeffBase.h"
 #include "fastnlotk/fastNLOTools.h"
+#include "fastnlotk/fastNLOGeneratorConstants.h"
 
 using namespace std;
-using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase::fastNLOCoeffBase() : PrimalScream("fastNLOCoeffBase"){
@@ -161,26 +161,14 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
 //________________________________________________________________________________________________________________ //
 
 
-void fastNLOCoeffBase::SetNlojetDefaults(){
+void fastNLOCoeffBase::SetCoeffAddDefaults(){
   SetIDataFlag(0);
   SetIAddMultFlag(0);
   SetIContrFlag1(1);
   SetIContrFlag2(100); // specify if LO or NLO
   SetNScaleDep(0);
   SetIXsectUnits(12);
-  SetNlojetDescr();
 };
-
-
-//________________________________________________________________________________________________________________ //
-
-
-void fastNLOCoeffBase::SetNlojetDescr(){
-   CodeDescript.push_back("NLOJet++_4.1.3");
-   CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
-   CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
- }
-
 
 //________________________________________________________________________________________________________________ //
 
@@ -194,8 +182,8 @@ void fastNLOCoeffBase::Print() const {
   printf(" B   IContrFlag1                   %d\n",IContrFlag1);
   printf(" B   IContrFlag2                   %d\n",IContrFlag2);
   printf(" B   NScaleDep                     %d\n",NScaleDep);
-  fastNLO::PrintVector(CtrbDescript,"CtrbDescript","B");
-  fastNLO::PrintVector(CodeDescript,"CodeDescript","B");
+  fastNLOTools::PrintVector(CtrbDescript,"CtrbDescript","B");
+  fastNLOTools::PrintVector(CodeDescript,"CodeDescript","B");
   printf(" *******************************************************\n");
 
 }

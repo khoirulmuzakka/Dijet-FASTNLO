@@ -9,8 +9,6 @@
 #include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
-using namespace fastNLO;
-
 
 //______________________________________________________________________________
 bool fastNLOBase::fWelcomeOnce = false;
@@ -59,7 +57,7 @@ int fastNLOBase::ReadHeader(istream *table){
       return(2);
    }
 
-   ReadMagicNo(table);
+   fastNLOTools::ReadMagicNo(table);
    *table >> Itabversion;
    *table >> ScenName;
    *table >> Ncontrib;
@@ -91,8 +89,8 @@ int fastNLOBase::ReadHeader(istream *table){
    *table >> NuserFloat;
    *table >> Imachine;
 
-   ReadMagicNo(table);
-   PutBackMagicNo(table);
+   fastNLOTools::ReadMagicNo(table);
+   fastNLOTools::PutBackMagicNo(table);
    return 0;
 }
 
@@ -112,7 +110,7 @@ void fastNLOBase::SkipBlockA1A2(){
    while(!ifilestream->eof()){
       ifilestream->getline(buffer,256);
       sscanf(buffer,"%d",&key);
-      if(key == tablemagicno) count++;
+      if(key == fastNLO::tablemagicno) count++;
       if(count == 3){
          // Put magic number back
          ifilestream->unget();
@@ -142,7 +140,7 @@ void fastNLOBase::WriteTable (){
 
 //______________________________________________________________________________
 int fastNLOBase::WriteHeader(ostream *table){
-   *table << tablemagicno << endl;
+   *table << fastNLO::tablemagicno << endl;
    *table << Itabversion << endl;
    *table << ScenName << endl;
    *table << Ncontrib << endl;
@@ -182,8 +180,8 @@ ofstream *fastNLOBase::OpenFileRewrite(){
 
 //______________________________________________________________________________
 void fastNLOBase::CloseFileWrite(){
-   *ofilestream << tablemagicno << endl;
-   *ofilestream << tablemagicno << endl;
+   *ofilestream << fastNLO::tablemagicno << endl;
+   *ofilestream << fastNLO::tablemagicno << endl;
    CloseStream();
 }
 
@@ -255,7 +253,7 @@ void fastNLOBase::Print() const {
 //______________________________________________________________________________
 void fastNLOBase::PrintHeader() const {
    printf("\n **************** FastNLO Table Header ******************\n\n");
-   printf("   tablemagicno                  %d\n",tablemagicno);
+   printf("   tablemagicno                  %d\n",fastNLO::tablemagicno);
    printf("   Itabversion                   %d\n",Itabversion);
    printf("   ScenName                      %s\n",ScenName.data());
    printf("   Ncontrib                      %d\n",Ncontrib);

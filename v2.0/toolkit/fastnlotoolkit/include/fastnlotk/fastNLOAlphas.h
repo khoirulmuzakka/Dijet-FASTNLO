@@ -40,8 +40,7 @@
 
 using namespace std;
 
-
-class fastNLOAlphas : public fastNLOLHAPDF {
+class fastNLOAlphas : public fastNLOLHAPDF {   
 
 public:
    fastNLOAlphas(string name) : fastNLOLHAPDF(name) {

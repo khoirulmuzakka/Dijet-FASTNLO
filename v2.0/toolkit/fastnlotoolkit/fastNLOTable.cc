@@ -4,7 +4,6 @@
 
 
 using namespace std;
-using namespace fastNLO;
 
 // ___________________________________________________________________________________________________
 //fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
@@ -126,7 +125,7 @@ int fastNLOTable::ReadScenario(istream *table){
       return(2);
    }
 
-   ReadMagicNo(table);
+   fastNLOTools::ReadMagicNo(table);
 
    *table >> Ipublunits;
    int  NScDescript = 0;
@@ -225,8 +224,8 @@ int fastNLOTable::ReadScenario(istream *table){
       }
    }
 
-   ReadMagicNo(table);
-   PutBackMagicNo(table);
+   fastNLOTools::ReadMagicNo(table);
+   fastNLOTools::PutBackMagicNo(table);
    return 0;
 }
 

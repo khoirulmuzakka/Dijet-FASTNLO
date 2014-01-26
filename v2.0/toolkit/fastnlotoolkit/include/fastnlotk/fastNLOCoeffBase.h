@@ -15,8 +15,8 @@ using namespace std;
 using namespace fastNLO;
 
 class fastNLOCoeffBase : public PrimalScream {
-   friend class fastNLOTable;
 
+   friend class fastNLOTable;
 
 public:
    fastNLOCoeffBase(int NObsBin);
@@ -29,8 +29,7 @@ public:
    int EndReadCoeff(istream *table);
    virtual void Print() const;
 
-   void SetNlojetDefaults();
-   void SetNlojetDescr();
+   void SetCoeffAddDefaults();
 
    int GetIDataFlag() const {return IDataFlag;}
    void SetIDataFlag(int n){IDataFlag = n;}

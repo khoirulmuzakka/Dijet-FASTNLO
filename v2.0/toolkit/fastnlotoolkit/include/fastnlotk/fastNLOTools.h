@@ -6,14 +6,18 @@
 #include "fastnlotk/fastNLOConstants.h"
 #include "speaker.h"
 
-using namespace std;
-using namespace say;
+namespace fastNLOTools {
 
-namespace fastNLO {
+   using namespace std;
+   using namespace say;
+   using namespace fastNLO;
 
    //! - Reading vectors from disk
    template<typename T> int ReadVector( vector<T>& v, istream *table , unsigned long long Nevt = 1);
    int ReadVector( vector<double>& v, istream *table , unsigned long long Nevt = 1);
+
+   template<typename T>  int ReadFlexibleVector(vector<T>& v, istream* table, int nProcLast=0 , unsigned long long nevts = 1);
+   int ReadFlexibleVector( vector<double >& v, istream *table , int nProcLast = 0 , unsigned long long nevts = 1 );
 
    //! - Resizing tools
    template<typename T> void ResizeFlexibleVector(vector<T>& v, const vector<T>& nom);
@@ -71,7 +75,7 @@ namespace fastNLO {
 //________________________________________________________________________________________________________________
 // Reading functions
 template<typename T>
-int fastNLO::ReadVector( vector<T>& v, istream *table , unsigned long long Nevt){
+int fastNLOTools::ReadVector( vector<T>& v, istream *table , unsigned long long Nevt){
    //! Read values according to the size() of the given vector
    //! from table (v2.0 format).
    int nn = 0;
@@ -82,10 +86,22 @@ int fastNLO::ReadVector( vector<T>& v, istream *table , unsigned long long Nevt)
 };
 
 
+template<typename T>
+int fastNLOTools::ReadFlexibleVector(vector<T>& v, istream* table, int nProcLast, unsigned long long nevts ){
+   int nn = 0;
+   int size = 0;
+   *table >> size; nn++;
+   v.resize(size);
+   for(unsigned int i0=0;i0<v.size();i0++){
+      nn += ReadFlexibleVector(v[i0],table,nProcLast,nevts);
+   }
+   return nn;
+};
+
 //________________________________________________________________________________________________________________
 // Resizing functions
 template<typename T>
-void fastNLO::ResizeFlexibleVector(vector<T>& v, const vector<T>& nom) {
+void fastNLOTools::ResizeFlexibleVector(vector<T>& v, const vector<T>& nom) {
    v.resize(nom.size());
    for (unsigned int i = 0 ; i<v.size() ; i++) {
       ResizeFlexibleVector(v[i],nom[i]);
@@ -96,7 +112,7 @@ void fastNLO::ResizeFlexibleVector(vector<T>& v, const vector<T>& nom) {
 //________________________________________________________________________________________________________________
 // Writing functions
 template<typename T>
-int fastNLO::WriteVector( const vector<T>& v, ostream *table , unsigned long long Nevt) {
+int fastNLOTools::WriteVector( const vector<T>& v, ostream *table , unsigned long long Nevt) {
    //! Write values of vector v to table (v2.0 format) .
    int nn = 0;
    for(unsigned int i=0;i<v.size();i++)
@@ -105,7 +121,7 @@ int fastNLO::WriteVector( const vector<T>& v, ostream *table , unsigned long lon
 }
 
 template<typename T>
-int fastNLO::_Write1DVectorByN( const vector<T>& v, ostream *table , unsigned long long Nevt) {
+int fastNLOTools::_Write1DVectorByN( const vector<T>& v, ostream *table , unsigned long long Nevt) {
    if( Nevt == 0) return -1000;
    for(unsigned int i0=0;i0<v.size();i0++)
       *table << v[i0] / Nevt << endl;
@@ -113,14 +129,14 @@ int fastNLO::_Write1DVectorByN( const vector<T>& v, ostream *table , unsigned lo
 }
 
 template<typename T>
-int fastNLO::_Write1DVector( const vector<T>& v, ostream *table ) {
+int fastNLOTools::_Write1DVector( const vector<T>& v, ostream *table ) {
    for(unsigned int i0=0;i0<v.size();i0++)
       *table << v[i0] << endl;
    return v.size();
 }
 
 template<typename T>
-int fastNLO::WriteFlexibleVector( const vector<T>& v, ostream *table, int nProcLast , unsigned long long Nevt ) {
+int fastNLOTools::WriteFlexibleVector( const vector<T>& v, ostream *table, int nProcLast , unsigned long long Nevt ) {
    if ( Nevt == 0 ) {
       error["fastNLOTools::WriteFlexibleVector"]<<"Cannot divide by zero."<<endl;
       return -1000;
@@ -137,7 +153,7 @@ int fastNLO::WriteFlexibleVector( const vector<T>& v, ostream *table, int nProcL
 //________________________________________________________________________________________________________________
 // Adding functions
 template<typename T>
-void fastNLO::AddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, double w2 ) {
+void fastNLOTools::AddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, double w2 ) {
    //! Add the values of the vector vAdd to the vector vSum
    //! if weights w1 and w1 are specified, the values are weighted accordingly
    //! i.e.: vSum[i] = w1*vSum[i] + w2*vAdd[i];
@@ -152,7 +168,7 @@ void fastNLO::AddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, dou
 }
 
 template<typename T>
-void fastNLO::_DoAddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, double w2 ) {
+void fastNLOTools::_DoAddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, double w2 ) {
    //! This function infact does the addition
    if ( vSum.size() != vAdd.size() ) {
       error["fastNLOTools::_DoAddVectors"]
@@ -169,7 +185,7 @@ void fastNLO::_DoAddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1, 
 }
 
 template<typename T>
-void fastNLO::PrintVector( const vector<T>& v, string name, string prefix){
+void fastNLOTools::PrintVector( const vector<T>& v, string name, string prefix){
    cout<<" "<<prefix<<"   "<<name<<endl;
    for(unsigned int i=0;i<v.size();i++){
       cout<<" "<<prefix<<"     "<<i<<"\t"<<v[i]<<endl;

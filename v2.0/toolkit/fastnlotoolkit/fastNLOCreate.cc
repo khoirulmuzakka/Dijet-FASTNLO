@@ -9,8 +9,6 @@
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 
-using namespace std;
-
 /**
    fastNLOCreate
 
@@ -40,8 +38,13 @@ using namespace std;
 
 */
 
+using namespace std;
 
+
+
+// ___________________________________________________________________________________________________
 int fastNLOCreate::nInst = 0;
+
 
 
 // ___________________________________________________________________________________________________
@@ -50,6 +53,27 @@ fastNLOCreate::fastNLOCreate()
    SetClassName("fastNLOCreate");
 }
 
+
+// ___________________________________________________________________________________________________
+fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) 
+{
+   //speaker::SetGlobalVerbosity(say::DEBUG);
+   SetClassName("fastNLOCreate");
+   nInst++;
+   if ( nInst > 1 ) {
+      error["fastNLOCreate"]<<"Only one instance of fastNLOCreate is currently possible in one program call."<<endl;
+      error>>"This is due to lazy implementation of the reading of the parser-values from 'read_steer'."<<endl;
+      error>>"To fix this limitation, read in every steerfile/fastNLOCreate into a dedicated read_steer-namespace and access the values from there."<<endl;
+      exit(1);
+   }
+   ResetHeader();
+   ReadSteering(steerfile);
+
+   fGenConsts = GenConsts;
+   fProcConsts = ProcConsts;
+
+   Instantiate();
+}
 
 
 // ___________________________________________________________________________________________________
@@ -67,6 +91,55 @@ fastNLOCreate::fastNLOCreate(string steerfile)
    ResetHeader();
    ReadSteering(steerfile);
 
+   ReadGenAndProcConstsFromSteering();
+
+   Instantiate();
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
+   //! ReadGenAndProcConstsFromSteering()
+   //! If generator and process constants have not been set in
+   //! the constructor, then obtain these values from the steering
+   //! file.
+
+   debug["ReadGenAndProcConstsFromSteering"]<<endl;
+
+   // Generator constants
+   fGenConsts.UnitsOfCoefficients = INT(UnitsOfCoefficients);
+   vector<string > CodeDescr = STRING_ARR(CodeDescription);
+   fGenConsts.Name = CodeDescr[0];
+   if ( CodeDescr.size() > 1 ) {
+      fGenConsts.References.resize(CodeDescr.size()-1);
+      for ( int i = 0 ; i< fGenConsts.References.size() ; i++ ) 
+	 fGenConsts.References [i] = CodeDescr[i+1];
+   }
+
+   // Process constants
+   fProcConsts.NPDF = INT(NPDF);
+   fProcConsts.NSubProcessesLO = INT(NSubProcessesLO);
+   fProcConsts.NSubProcessesNLO = INT(NSubProcessesNLO);
+   fProcConsts.NSubProcessesNNLO = INT(NSubProcessesNNLO);
+   fProcConsts.IPDFdef1 = INT(IPDFdef1);
+   fProcConsts.IPDFdef2 = INT(IPDFdef2);
+   fProcConsts.IPDFdef3LO = INT(IPDFdef3LO);
+   fProcConsts.IPDFdef3NLO = INT(IPDFdef3NLO);
+   fProcConsts.IPDFdef3NNLO = INT(IPDFdef3NNLO);
+   fProcConsts.NPDFDim = INT(NPDFDim);
+   if ( fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1 ) {
+      vector<vector<int> > asym = INT_TAB(AsymmetricProcesses);
+      for ( int i = 0 ; i<asym.size() ; i++ ) { 
+	 if ( asym[i].size()!=2 ) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
+	 fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+      }
+   }
+
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::Instantiate(){
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
    GetWarmupValues();
@@ -605,16 +678,18 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
       warn>>"\tThis may be unreasonable."<<endl;
    }
    if      ( ( ord - GetLoOrder()) == 0 ) {
-      c->NSubproc               = INT(NSubProcessesLO);
-      c->IPDFdef3               = INT(IPDFdef3LO);
+      c->NSubproc               = fProcConsts.NSubProcessesLO;
+      // fix different convention of flexible scale tables:
+      if ( fIsFlexibleScale &&  c->NSubproc==6 && fProcConsts.NSubProcessesNLO==7 ) c->NSubproc = fProcConsts.NSubProcessesNLO; // 6 -> 7
+      c->IPDFdef3               = fProcConsts.IPDFdef3LO;
    }
    else if ( ( ord - GetLoOrder()) == 1 ) {
-      c->NSubproc               = INT(NSubProcessesNLO);
-      c->IPDFdef3               = INT(IPDFdef3NLO);
+      c->NSubproc               = fProcConsts.NSubProcessesNLO;
+      c->IPDFdef3               = fProcConsts.IPDFdef3NLO;
    }
    else if ( ( ord - GetLoOrder()) == 2 ) {
-      c->NSubproc               = INT(NSubProcessesNNLO);
-      c->IPDFdef3               = INT(IPDFdef3NNLO);
+      c->NSubproc               = fProcConsts.NSubProcessesNNLO;
+      c->IPDFdef3               = fProcConsts.IPDFdef3NNLO;
    }
    else {
       error["SetOrderOfAlphasOfCalculation"]<<"Unknown order of pertubation theory: order="<<ord-GetLoOrder()<<" (ord="<<ord<<",ILOord="<<ILOord<<"). Exiting."<<endl;
@@ -627,15 +702,28 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
    if ( c->NPDFPDG.size() == 2 && c->NPDFDim == 1 ){
       fSymProc.resize(c->NSubproc);
       for ( int p = 0 ; p<c->NSubproc ; p++ ) fSymProc[p]=p;
-      vector<vector<int> > asym = INT_TAB(AsymmetricProcesses);
-      for ( unsigned int i = 0 ; i<asym.size() ; i ++ ) {
-	 if ( asym[i][0]<(int)fSymProc.size() ) { // safety
-	    if ( asym[i][1] >= GetNSubprocesses() || fSymProc[asym[i][0]] >= GetNSubprocesses() ) {
-	       warn["AsymmetricProcesses"]<<"Subprocess "<<fSymProc[asym[i][0]]<<" is requested to be asymmetric with subprocess "<<asym[i][1]<<", but there are only "<<GetNSubprocesses()-1<<" subprocesses in this calculation. Ignoring call."<<endl;
+
+      for ( int i = 0 ; i<fProcConsts.AsymmetricProcesses.size() ; i++ ) {
+	 if ( fProcConsts.AsymmetricProcesses[i].first<c->NSubproc ) { // safety
+	    if ( fProcConsts.AsymmetricProcesses[i].second >= GetNSubprocesses() || fSymProc[fProcConsts.AsymmetricProcesses[i].first] >= GetNSubprocesses() ) {
+	       warn["AsymmetricProcesses"]<<"Subprocess "<<fSymProc[fProcConsts.AsymmetricProcesses[i].first]<<" is requested to be asymmetric with subprocess "<<fProcConsts.AsymmetricProcesses[i].second<<", but there are only "<<GetNSubprocesses()-1<<" subprocesses in this calculation. Ignoring call."<<endl;
 	    }
-	    else fSymProc[asym[i][0]] = asym[i][1];
+	    else fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
 	 }
       }
+
+      //       vector<vector<int> > asym = INT_TAB(AsymmetricProcesses);
+      //       for ( unsigned int i = 0 ; i<asym.size() ; i ++ ) {
+      // 	 if ( asym[i][0]<(int)fSymProc.size() ) { // safety
+      //        	    if ( asym[i][1] >= GetNSubprocesses() || fSymProc[asym[i][0]] >= GetNSubprocesses() ) {
+      //        	       warn["AsymmetricProcesses"]<<"Subprocess "<<fSymProc[asym[i][0]]<<" is requested to be asymmetric with subprocess "<<asym[i][1]<<", but there are only "<<GetNSubprocesses()-1<<" subprocesses in this calculation. Ignoring call."<<endl;
+      //        	    }
+      //        	    else fSymProc[asym[i][0]] = asym[i][1];
+      //        	 }
+      //       }
+
+      //      for ( int p = 0 ; p<c->NSubproc ; p++ ) cout<<"p="<<p<<",\tfSymProc="<<fSymProc[p]<<endl;
+
    }
    
    // Scale factors have to be updated, since this may be either a lo or nlo run.
@@ -688,17 +776,21 @@ void fastNLOCreate::ReadCoefficientSpecificVariables()
    // todo: make it more user friendly
    // todo: include some sanity checks
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
-   c->NPDFPDG.resize(INT(NPDF));
-   if ( c->NPDFPDG.size() >0 ) c->NPDFPDG[0] = INT(PDF1);
-   if ( c->NPDFPDG.size() >1 ) c->NPDFPDG[1] = INT(PDF2);
-   c->NPDFDim           = INT(NPDFDim);
-   c->CodeDescript      = STRING_ARR(CodeDescription);
-   c->IPDFdef1          = INT(IPDFdef1);
-   c->IPDFdef2          = INT(IPDFdef2);
+
+   // generator constants
+   c->CodeDescript      = fGenConsts.GetCodeDescription();
+   c->SetIXsectUnits(fGenConsts.UnitsOfCoefficients);
+
+   // (some) process constants constants
+   c->NPDFPDG.resize(fProcConsts.NPDF);
+   if ( c->NPDFPDG.size() >0 ) c->NPDFPDG[0] = INT(PDF1); // from steering
+   if ( c->NPDFPDG.size() >1 ) c->NPDFPDG[1] = INT(PDF2); // from steering
+   c->NPDFDim           = fProcConsts.NPDFDim;
+   c->IPDFdef1          = fProcConsts.IPDFdef1;
+   c->IPDFdef2          = fProcConsts.IPDFdef2;
    c->IPDFdef3          = -1 ;          // safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int); INT(IPDFdef3);
    c->NSubproc          = -1;           // safe initialization, is initialized in SetOrderOfAlphasOfCalculation(int);
-   c->SetIXsectUnits(INT(UnitsOfCoefficients));
-   c->NScaleDim = 1;  // NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
+   c->NScaleDim		= 1;  // NEVER SET NScaleDim TO ANY OTHER VALUE THAN 1 !!!
 
    //IPDFdef3 = NSubproc == 7 ? 2 : 1;
    //printf("         Set IPDFdef3 = %d, consistent with %d subprocesses.\n",IPDFdef3,NSubproc);
@@ -1223,7 +1315,7 @@ inline int fastNLOCreate::GetXIndex(const int& ObsBin,const int& x1bin,const int
    //       else return x1bin + x2bin * GetTheCoeffTable()->GetNxtot1(ObsBin); // full matrix
 
    //    switch (GetTheCoeffTable()->GetNPDFDim() ) {
-   switch (((fastNLOCoeffAddBase*)fCoeff[0])->NPDFDim) {
+   switch (((fastNLOCoeffAddBase*)fCoeff[0])->GetNPDFDim()) {
    case 1:
       return x1bin + (x2bin*(x2bin+1)/2);    // half matrix
    case 0:
@@ -1737,7 +1829,7 @@ void  fastNLOCreate::InitGrids() {
 
       int nscalenode = fKernMuS[0][0]->GetGrid().size();
       // scale nodes
-      fastNLO::ResizeVector( c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
+      fastNLOTools::ResizeVector( c->ScaleNode, GetNObsBin(), 1, nscalevar, nscalenode );
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          for(int k=0;k<nscalevar;k++){
 	    c->ScaleNode[i][0][k] = fKernMuS[i][k]->GetGrid();

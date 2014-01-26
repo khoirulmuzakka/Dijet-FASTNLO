@@ -10,75 +10,16 @@
 #include <map>
 #include <ctime>
 #include "fastNLOTable.h"
+#include "fastNLOEvent.h"
 #include "read_steer.h"
 
 #include "fastNLOInterpolBase.h"
 #include "fastNLOInterpolCatmulRom.h"
 #include "fastNLOCoeffAddBase.h"
+#include "fastNLOGeneratorConstants.h"
+
 
 using namespace std;
-
-struct fnloScenario {
-   //! useful class to keep all scenario specific quantities.
-   //! e.g. observables and scales
-   friend class fastNLOCreate;
-   fnloScenario() : _iOB(-1){;}
-   void SetObservableDimI(double o, int iDim) {_o[iDim]=o;}					//!< Set observable of dimension iDim (e.g. in case of multidimensional measurements)
-   void SetObsBin(int iBin) {_iOB = iBin; }							//!< [optional] Set ObsBin (e.g. if binning is performed by generator, no other observables are then needed.)
-   //! flexible scale table:
-   void SetObsScale1(double mu) {_m1=mu;}							//!< For flexible-scale tables. Set scale 1 (should be in 'GeV').
-   void SetObsScale2(double mu) {_m2=mu;}							//!< For flexible-scale tables. Set scale 2
-   //! if not a flexible-scale table
-   void SetScale(double mu) {_m1=mu;}								//!< the ren. and fact. scale (not mu^2)
-private:
-   map<int,double> _o;
-   double _m1, _m2;
-   int _iOB;
-};
-
-
-struct fnloEvent {
-   //! useful class to keep all process related variables.
-   //! e.g x-values, weights, process identifiers, etc...
-   friend class fastNLOCreate;
-   void ResetButX(){
-      _w=0,_wf=0,_wr=0,_wrr=0,_wff=0,_wrf=0;
-      _p=-1;
-      _n=-1;
-   }
-   void Reset(){
-      ResetButX();
-      _x1=0,_x2=0;
-   }
-   fnloEvent(){Reset();}
-   // event specific quantites, which are required for every 'Fill()' step.
-   void SetX(double x) {_x1=x;}									//!< set x-value of first hadron (if e.g. DIS)
-   void SetX1(double x) {_x1=x;}								//!< setx-value of first hadron
-   void SetX2(double x) {_x2=x;}								//!< set x-value of second hadron
-   void SetProcessId(int n){_p=n;}								//!< set identifier of specific subprocess (0<n<NSubproc), according to the corresponding PDF linear combination
-   void SetEventCounter(long long int n){_n=n;}							//!< Set event counter
-   //! if not a flexible-scale table
-   void SetWeight(double w) {_w=w;}								//!< weights must be mutliplied with dummypdf (1/x)
-   //! flexible scale table:
-   void SetWeight_MuIndependent(double w) {_w=w;}						//!< weights must be mutliplied with dummypdf (1/x)
-   void SetWeight_log_mur(double w) {_wr=w;}							//!< set weight w, which will contribute with log_e(mur^2)*w
-   void SetWeight_log_muf(double w) {_wf=w;}							//!< set weight w, which will contribute with log_e(muf^2)*w
-   void SetWeight_log_murr(double w) {_wrr=w;}							//!< set weight w, which will contribute with log^2_e(mur^2)*w
-   void SetWeight_log_muff(double w) {_wff=w;}							//!< set weight w, which will contribute with log^2_e(muf^2)*w
-   void SetWeight_log_murf(double w) {_wrf=w;}							//!< set weight w, which will contribute with log_e(mur^2)*log_e(muf^2)*w
-   void AddWeight_MuIndependent(double w) {_w+=w;}						//!< weights must be mutliplied with dummypdf (1/x)
-   void AddWeight_log_mur(double w) {_wr+=w;}							//!< set weight w, which will contribute with log_e(mur^2)*w
-   void AddWeight_log_muf(double w) {_wf+=w;}							//!< set weight w, which will contribute with log_e(muf^2)*w
-   void AddWeight_log_murr(double w) {_wrr+=w;}							//!< set weight w, which will contribute with log^2_e(mur^2)*w
-   void AddWeight_log_muff(double w) {_wff+=w;}							//!< set weight w, which will contribute with log^2_e(muf^2)*w
-   void AddWeight_log_murf(double w) {_wrf+=w;}							//!< set weight w, which will contribute with log_e(mur^2)*log_e(muf^2)*w
-private:
-   double _x1, _x2;										//!< an event has always identical x1 and x2;
-   double _w, _wf, _wr, _wrr, _wff, _wrf;							//!< weights	
-   int _p;											//!< processId/channel. Must be consistent with PDF linear combination
-   long long int _n;										//!< event count
-}; 
-
 
 
 class fastNLOCreate : public fastNLOTable {
@@ -97,6 +38,7 @@ class fastNLOCreate : public fastNLOTable {
 
 public:
    fastNLOCreate(string steerfile);
+   fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts);
    ~fastNLOCreate();
    static int nInst;										//!< limit the number of instance to one (until more flexible access of parser values is implemented)
 
@@ -145,6 +87,7 @@ public:
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
+   void Instantiate();
    int CreateCoeffTable();									//!< Create the one (and only) coefficient table
 
    inline void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid ) const;
@@ -154,6 +97,7 @@ protected:
    void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);				//!< fill flexible scale contribution in DIS
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);		//!< fill fixed scale table in pp/ppbar
    void ReadSteering(string steerfile);								//!< read steering file
+   void ReadGenAndProcConstsFromSteering();
    void ReadBinning();
    void ReadCoefficientSpecificVariables();
    void ReadScaleFactors();
@@ -176,6 +120,9 @@ protected:
    int fObsBin;											//!< ObsBin from 'last' 'Fill()'-call
    fnloScenario fLastScen;									//!< keep information of scenario from last 'Fill()'-call
    
+   fastNLO::GeneratorConstants fGenConsts;							//!< Generator specific constants
+   fastNLO::ProcessConstants fProcConsts;							//!< Process specific constants
+ 
    bool CheckWeightIsNan();									//!< Check if weight is reasonable.
    inline void HalfMatrixCheck(int& xmin, int& xmax, int& subproc) const;			//!< check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
    vector<int> fSymProc;									//!< necessary for half-matrix notation

@@ -5,6 +5,7 @@
 #include "fastNLOConstants.h"
 
 using namespace std;
+using namespace fastNLO;
 
 class fastNLOCoeffAddFlex : public fastNLOCoeffAddBase {
 
@@ -22,9 +23,6 @@ public:
    virtual void Write(ostream *table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddFlex& other);
-
-   template<typename T>  int ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast=false , unsigned long long nevts = 1);
-   int ReadFlexibleVector( vector<double >* v, istream *table , bool nProcLast = false , unsigned long long nevts = 1 );
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };
@@ -59,19 +57,6 @@ public:
    v3d AlphasTwoPi;
    v5d PdfLcMuVar;
 
-};
-
-
-template<typename T>
-int fastNLOCoeffAddFlex::ReadFlexibleVector(vector<T>* v, istream* table, bool nProcLast, unsigned long long nevts ){
-   int nn = 0;
-   int size = 0;
-   *table >> size; nn++;
-   v->resize(size);
-   for(unsigned int i0=0;i0<v->size();i0++){
-      nn += ReadFlexibleVector(&(v->at(i0)),table,nProcLast,nevts);
-   }
-   return nn;
 };
 
 #endif
