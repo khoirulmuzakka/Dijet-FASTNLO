@@ -1,20 +1,57 @@
-//
-// UsefulNlojetTools
-//
-// Collection of useful functions for the fastNLO interface
-// to NLOJET++.
-//
+//!
+//! UsefulNlojetTools
+//! 
+//! Collection of useful functions for the fastNLO interface
+//! to NLOJET++.
+//!
 
 #include <cstdio>
 #include <algorithm> //c++98
 #include <utility>   //c++11
 #include "fastnlotk/fastNLOCreate.h"
+#include <fastnlotk/fastNLOGeneratorConstants.h>
 #include "pdf-hhc-dummy.h"
 
 namespace UsefulNlojetTools {
+   /**
+      namespace UsefulNlojetTools
+
+      Collection of useful functions and constant for the interface
+      between nlojet++ and fastNLO, if nlojet++ is run in hhc-mode 
+      (i.e. for pp and ppbar collisions).
+   */
+
 
    //_______________________________________________________________________
-   //
+   fastNLO::GeneratorConstants GenConsts() { 
+      fastNLO::GeneratorConstants GenConsts;
+      GenConsts.UnitsOfCoefficients = 12;
+      GenConsts.Name = "NLOJet++ 4.1.3";
+      GenConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
+      GenConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
+      return GenConsts;
+   }
+
+
+   //_______________________________________________________________________
+   fastNLO::ProcessConstants ProcConsts() {
+      fastNLO::ProcessConstants ProcConsts;
+      ProcConsts.NPDF = 2;
+      ProcConsts.NSubProcessesLO = 6;
+      ProcConsts.NSubProcessesNLO = 7;
+      ProcConsts.NSubProcessesNNLO = 7;
+      ProcConsts.IPDFdef1 = 3;
+      ProcConsts.IPDFdef2 = 1;
+      ProcConsts.IPDFdef3LO = 1;
+      ProcConsts.IPDFdef3NLO = 2;
+      ProcConsts.IPDFdef3NNLO = 2;
+      ProcConsts.NPDFDim = 1;
+      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
+      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
+      return ProcConsts;
+   }
+   
+   //_______________________________________________________________________
    pdf_hhc_dummy dummypdf;
 
    //_______________________________________________________________________
@@ -92,7 +129,7 @@ namespace UsefulNlojetTools {
 
    //_______________________________________________________________________
    vector<fnloEvent> GetFlexibleScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp ){
-      static const int nSubproc = 7 ; // nlojet must have 7 subprocesses.
+      static const unsigned int nSubproc = 7 ; // nlojet must have 7 subprocesses.
       static const double dummyMu2 = 91.*91.;
 
       // make events
@@ -101,7 +138,7 @@ namespace UsefulNlojetTools {
       // fill relevant event quantities
       double x1 = p[-1].Z()/p[hadron(-1)].Z();
       double x2 = p[0].Z()/p[hadron(0)].Z();
-      for ( int p = 0 ; p<nSubproc ; p++ )  {
+      for ( unsigned int p = 0 ; p<nSubproc ; p++ )  {
          ev[p].SetProcessId( p );
          ev[p].SetX1( x1 );
          ev[p].SetX2( x2 );
@@ -109,18 +146,18 @@ namespace UsefulNlojetTools {
 
       // weights
       double weights[7][7]; // weights[amp_i][proc]
-      for ( int kk = 0 ; kk<7 ; kk ++ )  for ( int p = 0 ; p<nSubproc ; p ++ ) weights[kk][p] = 0;
-
+      for ( int kk = 0 ; kk<7 ; kk ++ )	 for ( unsigned int p = 0 ; p<nSubproc ; p ++ ) weights[kk][p] = 0; 
+      
       // access perturbative coefficients
       nlo::amplitude_hhc::contrib_type itype = amp.contrib();
       nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,dummyMu2,2,3); // 1/x1/x2
       static const double coef = 389385730.;
 
       for ( int kk = 0 ; kk<7 ; kk ++ ) {
-         for ( int fid = 0 ; fid<nSubproc ; fid ++ ) {
-            int nid = FastnloIdToNlojetIdHHC(fid);
-            weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
-         }
+	 for ( unsigned int fid = 0 ; fid<nSubproc ; fid ++ ) {
+	    int nid = FastnloIdToNlojetIdHHC(fid);
+	    weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
+	 }
       }
 
       // todo: calculate wt and wtorg from 'weights'
@@ -140,7 +177,7 @@ namespace UsefulNlojetTools {
             swap(weights[kk][5],weights[kk][6]);
       }
 
-      for(int p=0 ; p<nSubproc ; p++){
+      for(unsigned int p=0 ; p<nSubproc ; p++){
          // decompose nlojet-event
          if(itype == nlo::amplitude_hhc::fini) {
             if (amp._M_fini.mode==0) { //finix1

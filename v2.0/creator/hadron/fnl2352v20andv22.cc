@@ -51,6 +51,7 @@ using namespace std;
 
 // ---- fastNLO ----
 #include <fastnlotk/fastNLOCreate.h>
+#include <fastnlotk/fastNLOEvent.h>
 
 //----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
@@ -254,7 +255,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    }
 
 
-
    // Analyze inclusive jets in jet loop
    for (unsigned int i = 1; i <= njet; i++) {
 
@@ -288,6 +288,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       } // --- end: fill fastNLO array
    } // --- end: jet loop
    
+  
+
    // ---- fastNLO v2.2
    // Analyze inclusive jets in jet loop
    const vector<double>& scalevars = ftable->GetScaleVariations();
@@ -312,7 +314,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       scen.SetObservableDimI( pt , 1 );
       scen.SetObsScale1( mu );		// must be consistent with 'mu' from contribs
       ftable->FillAllSubprocesses(contribs,scen); 
-   }     
+   }
 }
 
 
@@ -717,11 +719,12 @@ void UserHHC::end_of_event(){
       time -= hour*3600L;
       min  = time/60L;
       time -= min*60L;
-
+      cout<<"time="<<time<<endl;
       std::cout<<"--->     "
                <<(hour < 10 ? "0" : "")<<hour
                <<(min < 10 ? ":0" : ":")<<min
                <<(time < 10 ? ":0" : ":")<<time<<std::endl;
+
       printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
       cout.flush();
       for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
@@ -806,7 +809,8 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
 {
    // create table and read in steering...
    cout<<"\n ---------------------------------------------------------------\n"<<endl;
-   ftable = new fastNLOCreate("fnl2352v22.str");
+   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
+   //ftable = new fastNLOCreate("fnl2352v22_alt.str");
 
    // obtain relevant variables from nlojet
    ftable->SetEcms(UsefulNlojetTools::GetEcms());

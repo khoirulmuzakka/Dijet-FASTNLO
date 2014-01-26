@@ -15,39 +15,9 @@
 OutputPrecision			8	! Number of decimal values in output table
 FlexibleScaleTable		false	! currently only flexible scale tables implemented.
 ApplyPDFReweighting		true	! Apply reweighting of pdfs for an optimized interpolation. (true)
-NPDF				2	! number of PDFs involved (only 2 is implemented)
-PDF1				2212	! PDF of first hadron (following PDG convention). Must agree with values from nlojet-module.
-PDF2				2212	! PDF of second hadron (following PDG convention). Must agree with values from nlojet-module.
-NPDFDim				1	! Internal way to store PDF linear combinations. Use 1 for hadron-hadron collisions (half-matrix storage)	
-UnitsOfCoefficients		12	! Units of coeffients as passed to fastNLO (negative power of 10: pb->12, fb->15)
-
-! number of subprocesses of the considered process.
-! Since the calculation order is obtained from generator, only the necessary variable is used.
-NSubProcessesLO			6	! Flexible scale tables store 7 number of processes in LO, although only 6 are required.
-NSubProcessesNLO		7	
-NSubProcessesNNLO		7	
-AsymmetricProcesses {{		! specify processes that need to to be exchanged in half-matrix notation, when xmin>xmax
-   ProcID	AsymProcID
-     5               6
-     6               5
-}}
-
-IPDFdef1			3	! Define PDF linear combinations corresponding to partonic subprocesses (hadron-hadron: 3)
-IPDFdef2			1	! Flag to define PDF linear combinations (dependent on IPDFdef1. Use 1 for jet-production in pp/ppbar)
-IPDFdef3LO			1	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
-IPDFdef3NLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
-IPDFdef3NNLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
-
-
-!  Descritption of used generator code. Include also citations here!
-!  Embrace each single line in quotation marks.
-CodeDescription {
-   "NLOJet++_4.1.3"
-   "Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),"
-   "Z. Nagy, Phys. Rev. D68, 094002 (2003)."
-}
+PDF1				2212	! PDF of first hadron (following PDG convention).
+PDF2				2212	! PDF of first hadron (following PDG convention).
 ! -------------------------------------------------------------- !
-
 
 
 
@@ -176,8 +146,8 @@ DifferentialDimension		2
 !  Labels for the measurement dimension
 ! -------------------------------
 DimensionLabels {
-"pT_[GeV]"
 "|y|"
+"pT_[GeV]"
 }
 
 ! If flexible-scale table: specify name of the variable of the two scales.
@@ -214,13 +184,13 @@ DoubleDifferentialBinning {{
 
 ! Example !! Triple differetial implementation not fully tested yet (29.07.13)
 TripleDifferentialBinning {{
-  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3nd dimension ----"
+  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3rd dimension ----"
    100       150         -1        0.           7 11 18 30 50 	
    150       200         -1.       0.           7 11 18 30 50 	
    200       400         0.       1.5           7 11 18 30 50
    400       700         0.       1.5           7 11 18 30 50
-   700       5000        1.5      2.5          7 11 18 30 50
-   5000      15000       1.5      2.5          7 11 18 30 50
+   700       5000        1.5      2.5           7 11 18 30 50
+   5000      15000       1.5      2.5           7 11 18 30 50
 }}
 
 

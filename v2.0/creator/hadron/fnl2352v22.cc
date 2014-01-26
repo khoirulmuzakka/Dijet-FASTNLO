@@ -36,6 +36,7 @@ using namespace std;
 
 // ---- fastNLO ----
 #include <fastnlotk/fastNLOCreate.h>
+#include <fastnlotk/fastNLOEvent.h>
 
 //----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
@@ -185,7 +186,7 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
 {
    // create table and read in steering...
    cout<<"\n ---------------------------------------------------------------\n"<<endl;
-   ftable = new fastNLOCreate("fnl2352v22.str");
+   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
 
    // obtain relevant variables from nlojet
    ftable->SetEcms(UsefulNlojetTools::GetEcms());
