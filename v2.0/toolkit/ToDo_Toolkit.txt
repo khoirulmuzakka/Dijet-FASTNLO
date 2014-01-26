@@ -1,22 +1,18 @@
 
 Toolkit todo (orderd by priority):
 -----------------------------------------------------
- - Division by binsize for coefficients
- - Ensure NNLO compatiblity of reader
- - fix labels in header of warmup-table bin-grid (dim1 <-> dim2)
- - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
- - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
- - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion' (ordentliche Klassendefinitionen??)
- - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - reader testen fuer NNLO
+ - Ensure NNLO compatibility of reader
+ - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
+ - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
+ - punktweise-differentielle gemischt mit bin-integrierten doppelt-differentiellen tabllen
  - Write documentation (e.g. twiki)
  - full-matrix schreibweise
  - Creator for Referenztabellen
- - merger aktualisieren
- - modifier aktualisieren
+ - modifier aktualisieren ??
  - converter aktualisieren ??
  - Benutzbarkeit gewaehrleisten, wenn binning- und bin-suche im generator gemacht werden (ist teils implementiert bspw 'fnloEvent::_iOB')
- - fastNLOCreate fuer mehrere Tabellen - alse mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
+ - fastNLOCreate fuer mehrere Tabellen - also (bspw.) mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
    oder mehrere Coeffizienten Tabellen
  - Linear interpolation
  - bi-cubic interpolation
@@ -27,8 +23,8 @@ Toolkit todo (orderd by priority):
  - 'automatisches' Erkennen von PDF-LiCos beim warm-up run
  - Codieren der LiCo's in Tabelle (und lesen im reader)
  - implement DIS fixed-scale (desired?)
- - Implement correct usage of relative cross section units from Ipublunits at the
-   beginning of BlockA2 and IXsectUnits at the beginning of each BlockB
+ - 'Generator-stamps': konsistente beschreibung und zitate fuer CodeDescr[]. Bspw: fastNLO::CodeDescr::NLOJET_hhc(vector<string>& contrdescr)
+ - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion' (ordentliche Klassendefinitionen??)
 
 
 
@@ -39,3 +35,11 @@ Toolkit done
  - implement fixed-scale hhc for nlojet
  - Use 'const reference' or pointers as return values of interpolation grids
  - Use 'const reference' for 'FillContribution' functions
+ - Division by binsize for coefficients
+ - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
+ - merger aktualisieren
+ - fix labels in header of warmup-table bin-grid (dim1 <-> dim2)
+ - fnloEvent, fnloScenario: are now classes (stumps) instead of structs
+ - Steering file optionally without generator/interface specific quantitites
+ - fastNLOCreate::GetSteerParameter(string ... , double&);
+
