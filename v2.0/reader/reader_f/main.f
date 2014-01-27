@@ -408,9 +408,9 @@ C---  CALL SETLHAPARM('SILENT')
          CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",X)"
 
          WRITE(*,'(A)')"  IObs  Bin Size "//
-     >        "IODim1  "//
+     >        "IODimO  "//
      >        CHTMP1//"    "//
-     >        "IODim2  "//
+     >        "IODimI  "//
      >        CHTMP2//"  "//CHRES(1:LEN_TRIM(CHRES))
          WRITE(*,'(A)')LSEPL
 
@@ -428,49 +428,49 @@ C---  CALL SETLHAPARM('SILENT')
             IF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC2L).AND.LTHC
      >           .AND.LCONTR(INPC1)) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
 ckr     >              XSCLNPC1(I),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I),KNPC1(I)
             ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC2L)
      >              .AND.LTHC) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
 ckr     >              XSCLTHC2(I),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I)
             ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(INPC1)) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
 ckr     >              XSCLNPC1(I),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I),KNPC1(I)
             ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC1L)
      >              .AND.LTHC) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I),KTHC1(I)
             ELSEIF (LCONTR(ILO).AND.LCONTR(INLO)) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              XSCLNLO(I),
      >              XSLO(I),XSNLO(I),KFAC(I)
             ELSEIF (LCONTR(ILO).AND.LCONTR(ITHC1L).AND.LTHC) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              XSCLLO(I),
      >              XSLO(I),KTHC1(I)
             ELSEIF (LCONTR(ILO)) THEN
                WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >              XSCLLO(I),
      >              XSLO(I)
             ELSE
@@ -520,8 +520,8 @@ ckr     >              XSCLNPC1(I),
                ENDIF
             ENDDO
             WRITE(*,CHFRM)I,BINSIZE(I),
-     >           NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >           NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
+     >           NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
      >           XSDAT(I),
      >           DXSUCDATA(I,2),DXSUCDATA(I,1),
      >           DXSCORDATA(I,2),DXSCORDATA(I,1)
