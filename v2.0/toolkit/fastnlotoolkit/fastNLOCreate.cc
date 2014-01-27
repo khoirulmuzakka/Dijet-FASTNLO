@@ -1,14 +1,6 @@
 // Author: Daniel Britzger
 // DESY, 29/07/2013
-#include <string>
-#include <algorithm>
-#include "fastnlotk/fastNLOCreate.h"
-#include "fastnlotk/fastNLOTools.h"
-#include "fastnlotk/read_steer.h"
-
-#include "fastnlotk/fastNLOCoeffAddFlex.h"
-#include "fastnlotk/fastNLOCoeffAddFix.h"
-
+// ___________________________________________________________________________________________________
 /**
    fastNLOCreate
 
@@ -37,9 +29,18 @@
    instantiated for a program call.
 
 */
+// ___________________________________________________________________________________________________
+
+#include <string>
+#include <algorithm>
+#include "fastnlotk/fastNLOCreate.h"
+#include "fastnlotk/fastNLOTools.h"
+#include "fastnlotk/read_steer.h"
+
+#include "fastnlotk/fastNLOCoeffAddFlex.h"
+#include "fastnlotk/fastNLOCoeffAddFix.h"
 
 using namespace std;
-
 
 
 // ___________________________________________________________________________________________________
@@ -57,6 +58,7 @@ fastNLOCreate::fastNLOCreate()
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) 
 {
+
    //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    nInst++;
@@ -1271,10 +1273,10 @@ inline void fastNLOCreate::HalfMatrixCheck(int& xminbin, int& xmaxbin, int& subp
    //! if half-matrix notation, and xmin-node is larger than xmax-node
    //! exchange suprocesses according to fSymProc and adjust x-nodes.
    //!
-   if ( xminbin > xmaxbin  ) {
-      if ( GetTheCoeffTable()->GetNPDFDim() == 1 ) { // half-matrix notation (otherwise nothing todo)
-//          if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
-//             error["HalfMatrixCheck"]<<"Necessary array with symmetric processes for half-matrix notation not initialized."<<endl;
+   if ( GetTheCoeffTable()->GetNPDFDim() == 1 ) { // half-matrix notation (otherwise nothing todo)
+      if ( xminbin > xmaxbin  ) {
+	 //          if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
+	 //             error["HalfMatrixCheck"]<<"Necessary array with symmetric processes for half-matrix notation not initialized."<<endl;
 
          //cout<<"exchange supbrpc. xminbin="<<xminbin<<", xmaxbin="<<xmaxbin<<", p="<<subproc<<", pAsym="<<fSymProc[subproc]<<endl;
          int di = xminbin - xmaxbin;
@@ -1770,18 +1772,23 @@ void  fastNLOCreate::InitGrids() {
    if ( fKernX.empty() ) error["InitGrids"]<<"Interpolation kernels must be initialized before calling this function."<<endl;
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
-      if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1) || (c->GetNPDF()==1)   ) {;} // ok!
-      else {
-	 error["InitGrids"]<<"Only half-matrix or DIS implemented."<<endl; exit(1);
-      }
+      //       if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1) || (c->GetNPDF()==1)   ) {;} // ok!
+      //       else {
+      // 	 error["InitGrids"]<<"Only half-matrix or DIS implemented."<<endl; exit(1);
+      //       }
       c->ScaleNode1.resize(GetNObsBin());
       c->ScaleNode2.resize(GetNObsBin());
       c->XNode1.resize(GetNObsBin());
+      if ( c->GetNPDFDim() == 2 ) 
+	 c->XNode2.resize(GetNObsBin());
+
       vector<vector<vector<vector<vector<double> > > > > stype(GetNObsBin());
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          c->ScaleNode1[i] = fKernMu1[i]->GetGrid();
          c->ScaleNode2[i] = fKernMu2[i]->GetGrid();
          c->XNode1[i]     = fKernX[i]->GetGrid();
+	 if ( c->GetNPDFDim() == 2 ) 
+	    c->XNode2[i]     = fKernX[i]->GetGrid();
 
          // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
          int nxmax = GetNxmax (fKernX[i]->GetGridPtr() , fKernX[i]->GetGridPtr() );
@@ -1808,10 +1815,10 @@ void  fastNLOCreate::InitGrids() {
 
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-      if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1)  ) {;} // ok!
-      else {
-	 //error["InitGrids"]<<"Only half-matrix is implemented for grids for fixed-scale tables."<<endl; exit(1);
-      }
+      //       if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1)  ) {;} // ok!
+      //       else {
+      // 	 //error["InitGrids"]<<"Only half-matrix is implemented for grids for fixed-scale tables."<<endl; exit(1);
+      //       }
       
       int nscalevar = fScaleFac.size();
       if (nscalevar==0 ) {
