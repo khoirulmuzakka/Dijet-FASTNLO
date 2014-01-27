@@ -1035,7 +1035,7 @@ void FastNLOReader::ReadBlockA2(istream *table) {
       UpBin[i].resize(NDim);
       for (int j=0; j<NDim; j++) {
          *table >>  LoBin[i][j];
-         if (IDiffBin[j]==2) *table >>  UpBin[i][j];
+         if (IDiffBin[j]==0 || IDiffBin[j]==2) *table >>  UpBin[i][j];
       }
       debug << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if (i > 0) {
@@ -1235,7 +1235,7 @@ void FastNLOReader::PrintBlockA2() const {
    for (int i=0; i<NObsBin; i++) {
       for (int j=0; j<NDim; j++) {
          printf("  A2      LoBin(%3i,%1i)              % #10.4g\n", i+1,j+1,LoBin[i][j]);
-         if (IDiffBin[j]==2)
+         if (IDiffBin[j]==0 || IDiffBin[j]==2)
             printf("  A2      UpBin(%3i,%1i)              % #10.4g\n", i+1,j+1,UpBin[i][j]);
       }
    }

@@ -185,7 +185,7 @@
             CHTMP = "  A2      LoBin("//
      >           CH3TMP//","//CH1TMP//")"
             CALL FNIODBL(CRW,NUNIT, LOBIN(I,J),LPRINT,CHTMP)
-            IF (IDIFFBIN(J).EQ.2) THEN
+            IF (IDIFFBIN(J).EQ.0.OR.IDIFFBIN(J).EQ.2) THEN
                CHTMP = "  A2      UpBin("//
      >              CH3TMP//","//CH1TMP//")"
                CALL FNIODBL(CRW,NUNIT, UPBIN(I,J),LPRINT,CHTMP)
