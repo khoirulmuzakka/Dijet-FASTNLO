@@ -1810,7 +1810,7 @@ void  fastNLOCreate::InitGrids() {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1)  ) {;} // ok!
       else {
-	 error["InitGrids"]<<"Only half-matrix is implemented for grids for fixed-scale tables."<<endl; exit(1);
+	 //error["InitGrids"]<<"Only half-matrix is implemented for grids for fixed-scale tables."<<endl; exit(1);
       }
       
       int nscalevar = fScaleFac.size();
@@ -1826,6 +1826,9 @@ void  fastNLOCreate::InitGrids() {
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          c->XNode1[i]     = fKernX[i]->GetGrid();
       }
+      if ( c->GetNPDFDim() == 2 ) { // both hadrons have same x-grid in this implementation
+	 c->XNode2 = c->XNode1;
+      }
 
       int nscalenode = fKernMuS[0][0]->GetGrid().size();
       // scale nodes
@@ -1835,6 +1838,7 @@ void  fastNLOCreate::InitGrids() {
 	    c->ScaleNode[i][0][k] = fKernMuS[i][k]->GetGrid();
 	 }
       }
+
       c->ResizeSigmaTilde();
    }
 

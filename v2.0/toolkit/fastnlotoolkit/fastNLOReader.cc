@@ -1055,11 +1055,14 @@ void fastNLOReader::FillPDFCache(double chksum) {
                      if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
                      else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
                   } else {
-                     error<<"Only half matrices for hh is implemented.\n";
-                     exit(1);
+		     warn["FillPDFCache"]<<"Only half matrices for hh is fully tested and verified.\n";
+		     //exit(1);
+		     // 		     cout<<"Test: NPDFDim=2 is not yet tested and may yield a crash."<<endl;
+		     if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
+		     else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
                   }
                } else {
-                  error<<"IPDFdef of tables must be 1 or 2.\n";
+                  error["FillPDFCache"]<<"IPDFdef of tables must be 1 or 2.\n";
                }
             }
          }
@@ -1152,30 +1155,64 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    double scalefac       = fScaleFacMuF/c->GetScaleFactor(scaleVar);
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
-   if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"full matrix notation not implemented."<<endl;exit(1);}
+   //if ( c->GetNPDFDim() != 1 ) { error["FillBlockBPDFLCsHHCv20"]<<"full matrix notation not implemented."<<endl;exit(1);}
+   if ( c->GetNPDFDim() == 2 ){warn["FillBlockBPDFLCsHHCv20"]<<"full matrix notation not yet fully verified."<<endl;}
 
-   vector < vector < double > > xfx; // PDFs of all partons
-   for (int i=0; i<NObsBin; i++) {
-      int nxmax = c->GetNxmax(i);
-      int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
-      xfx.resize(nxbins1);
-      for (int j=0; j<c->GetNScaleNode(); j++) {
-         // determine all pdfs of hadron1
-         for (int k=0; k<nxbins1; k++) {
-            double xp     = c->GetXNode1(i,k);
-            double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
-            xfx[k]        = GetXFX(xp,muf);
-         }
-         int x1bin = 0;
-         int x2bin = 0;
-         for (int k=0; k<nxmax; k++) {
-            c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-            x1bin++;
-            if (x1bin>x2bin) {
-               x1bin = 0;
-               x2bin++;
-            }
-         }
+   if ( c->GetNPDFDim() == 1 ) { // half matrix notation
+      vector < vector < double > > xfx; // PDFs of all partons
+      for (int i=0; i<NObsBin; i++) {
+	 int nxmax = c->GetNxmax(i);
+	 int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
+	 xfx.resize(nxbins1);
+	 for (int j=0; j<c->GetNScaleNode(); j++) {
+	    // determine all pdfs of hadron1
+	    for (int k=0; k<nxbins1; k++) {
+	       double xp     = c->GetXNode1(i,k);
+	       double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
+	       xfx[k]        = GetXFX(xp,muf);
+	    }
+	    int x1bin = 0;
+	    int x2bin = 0;
+	    for (int k=0; k<nxmax; k++) {
+	       c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+	       x1bin++;
+	       if (x1bin>x2bin) {
+		  x1bin = 0;
+		  x2bin++;
+	       }
+	    }
+	 }
+      }
+   }
+
+   else if ( c->GetNPDFDim() == 2 ){ // full matrix notation
+      vector < vector < double > > xfx1; // PDFs of all partons
+      vector < vector < double > > xfx2; // PDFs of all partons
+      for (int i=0; i<NObsBin; i++) {
+	 int nxmax = c->GetNxmax(i);
+	 int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
+	 int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
+	 xfx1.resize(nxbins1);
+	 xfx2.resize(nxbins2);
+	 for (int j=0; j<c->GetNScaleNode(); j++) {
+	    // determine all pdfs of hadron1
+	    for (int k=0; k<nxbins1; k++) {
+	       double xp     = c->GetXNode1(i,k);
+	       double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
+	       xfx1[k]        = GetXFX(xp,muf);
+	    }
+	    // determine all pdfs of hadron2
+	    for (int k=0; k<nxbins2; k++) {
+	       double xp     = c->GetXNode2(i,k);
+	       double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
+	       xfx2[k]       = GetXFX(xp,muf);
+	    }
+	    for (int k=0; k<nxmax; k++) {
+	       int x1bin = k % c->GetNxtot1(i);
+	       int x2bin = k / c->GetNxtot1(i);
+	       c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+	    }
+	 }
       }
    }
 }
