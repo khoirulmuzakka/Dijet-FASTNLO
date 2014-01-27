@@ -168,7 +168,7 @@ int fastNLOTable::ReadScenario(istream *table){
          //*table >>  LoBin[i][j];
          //if(IDiffBin[j]==2) *table >>  UpBin[i][j];
          *table >>  Bin[i][j].first;
-         if(IDiffBin[j]==2) *table >>  Bin[i][j].second;
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table >>  Bin[i][j].second;
       }
       //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if ( i > 0 ) {
@@ -253,7 +253,7 @@ int fastNLOTable::WriteScenario(ostream *table){
       for(int j=NDim-1;j>=0;j--){
          *table <<  Bin[i][j].first  << endl;
          //         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
-         if(IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
       }
    }
    for(int i=0;i<NObsBin;i++){
@@ -495,17 +495,17 @@ void fastNLOTable::SetLoOrder(int LOOrd){
 // ___________________________________________________________________________________________________
 void fastNLOTable::SetDimLabel( string label, int iDim , bool IsDiff ){
    //! Set label for dimension
-   //!
    //! In this method, we also set IDiffBin.
-   //! IDiffBin defines, if this dimension is a ('truely') differential (=1) oder
-   //! binned distribution (=2).
-   //! Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
-   //! use binned distributions, we use IDiffBin to identify, if the publication
-   //! was divided by this bin(-width) (=2) or not.
-   //! At the end of ::InitBinning() we have to set IDiffBin then always to 2
-   //! to identify this dimension to be a 'binned' dimension.
-   //!
-   //! int iDim: counting starts from 0
+   //! The IDiffBin flag defines, if this dimension is
+   //!    0 (not differential, two bin borders required),
+   //!    1 (pointwise differential, one value required), (not yet completely implemented)
+   //!    2 (binwise differential, two bin borders required)
+   //!    In case 2 the cross section is divided by the corresponding bin width in this dimension.
+   //
+   // TODO: KR: The IsDiff boolean should be changed into an int to accommodate IDiffBin 0,1,2
+   //           possibility!
+   //
+   // int iDim: counting starts from 0
 
 
    // check validity of call
@@ -566,9 +566,10 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    }
    int obsbin = -1;
 
+   // TODO KR: This part is lacking flexibility of different normalizations for different dimensions
    static const double eps = 1.e-8;
    if ( NDim == 2 ) {
-      if ( IDiffBin[0] != 1 || IDiffBin[1] != 1 ) { // bin integrated calculation
+      if ( IDiffBin[0] != 1 || IDiffBin[1] != 1 ) { // binned dimensions
          for(int j = 0; j < NObsBin; j++) {
             if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second &&
                  val2 >= Bin[j][1].first  && val2 <  Bin[j][1].second) {
@@ -577,7 +578,8 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
             }
          }
       }
-      else {  // truly differential calculation
+      // TODO KR: The "else" doesn´t account for the mixed case
+      else {  // point-wise differential dimension
          for(int j = 0; j < NObsBin; j++) {
             if ( fabs(val1 - Bin[j][0].first ) < eps  && fabs(val2 - Bin[j][1].first) < eps ) {
                obsbin=j;
@@ -587,7 +589,7 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
       }
    }
    else if ( NDim == 1 ) {
-      if ( IDiffBin[0] != 1 ) { // bin integrated calculation
+      if ( IDiffBin[0] != 1 ) { // binned dimension
          for(int j = 0; j < NObsBin; j++) {
             if ( val1 >= Bin[j][0].first  && val1 <  Bin[j][0].second ){
                obsbin = j;
@@ -595,7 +597,7 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
             }
          }
       }
-      else {  // truly differential calculation
+      else {  // point-wise differential dimension
          for(int j = 0; j < NObsBin; j++) {
             if ( fabs(val1 - Bin[j][0].first ) < eps ) {
                obsbin=j;
@@ -646,10 +648,12 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
    //
    //  logic for binwidth
    //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
-   //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the binwidth by this
-   //        dimensional width.
-   //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
+   //     if IDiffBin==0, then this is a binned dimension, but the cross section is not divided (normalized) to this
+   //        dimensions bin width.
+   //     if IDiffBin==1, then the cross section is not divided by this dimensions bin width. However, we store
    //        the bingrid since the 'ObsBin' is binned in this binning.
+   //     if IDiffBin==2, then you divide the 'final' fastNLO-cross section by this number too -> we multiply the bin width by this
+   //        dimensions bin width.
    //        MENTION: the UpBin is the NOT stored in the table!
    //
    // ------------------------------------------------------------------- //
@@ -680,7 +684,8 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
       // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
-      IDiffBin[0] = 2 ;
+      // TODO KR: Why this statement here ? Commented out.
+      //      IDiffBin[0] = 2 ;
    }
    else if ( NDim == 2 || NDim == 3 ){
       for(int i=0;i<nBins1;i++){
@@ -723,11 +728,12 @@ void fastNLOTable::InitBinning( const int nBins1 , double* bingrid1 , const int*
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
       // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
+      // TODO KR: Why these statements here ? Commented out.
       // The 'third' dimension in this method however, is NOT a binned distribution
-      IDiffBin[0] = 2 ;
-      IDiffBin[1] = 2 ;
-      if ( NDim==3 )
-         IDiffBin[2] = 1 ;
+      //      IDiffBin[0] = 2 ;
+      //      IDiffBin[1] = 2 ;
+      //      if ( NDim==3 )
+      //         IDiffBin[2] = 1 ;
    }
    else error["InitBinning"]<<"Unknown NDim."<<endl;
 

@@ -2338,8 +2338,8 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       const int inpc1 = ContrId(kNonPerturbativeCorrection,kLeading);
       const vector < double > knpc = inpc1>-1 ? ((fastNLOCoeffMult*)BBlocksSMCalc[kNonPerturbativeCorrection][kLeading])->GetMultFactor() : vector<double>(NObsBin);
 
-      string header0 = "  IObs  Bin Size IODim1 ";
-      string header1 = "   IODim2 ";
+      string header0 = "  IObs  Bin Size IODimO ";
+      string header1 = "   IODimI ";
       string header2 = " LO cross section   NLO cross section   K NLO";
       if (ithc2>-1)header2 += "     K THC";
       if (inpc1>-1)header2 += "     K NPC";
