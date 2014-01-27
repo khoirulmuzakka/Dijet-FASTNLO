@@ -54,7 +54,7 @@ int fnloBlockA2::Read(istream *table){
       UpBin[i].resize(NDim);
       for(int j=0;j<NDim;j++){
          *table >>  LoBin[i][j];
-         if(IDiffBin[j]==2) *table >>  UpBin[i][j];
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table >>  UpBin[i][j];
       }
       //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if ( i > 0 ) {
@@ -143,7 +143,7 @@ int fnloBlockA2::Write(ostream *table){
    for(int i=0;i<NObsBin;i++){
       for(int j=0;j<NDim;j++){
          *table <<  LoBin[i][j]  << endl;
-         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
       }
    }
    for(int i=0;i<NObsBin;i++){
@@ -410,7 +410,7 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
       // to tag, if the publication was divided by this binwidth or not, so we have 
       // to set NOW IDiffBin = 2
-      IDiffBin[0] = 2 ;
+      //      IDiffBin[0] = 2 ;
    }
    else if ( NDim == 2 || NDim == 3 ){
       for(int i=0;i<nBins1;i++){
@@ -454,10 +454,10 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
       // to tag, if the publication was divided by this binwidth or not, so we have 
       // to set NOW IDiffBin = 2
       // The 'third' dimension in this method however, is NOT a binned distribution
-      IDiffBin[0] = 2 ;
-      IDiffBin[1] = 2 ;
-      if ( NDim==3 )
-	 IDiffBin[2] = 1 ;
+      //      IDiffBin[0] = 2 ;
+      //      IDiffBin[1] = 2 ;
+      //      if ( NDim==3 )
+         //	 IDiffBin[2] = 1 ;
    }
    else printf("fnloBlockA2::InitBinning. Error. unknown NDim.\n");
 
@@ -598,7 +598,7 @@ void fnloBlockA2::Print(){
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<NDim;j++){
       printf(" A2   -  - LoBin[%d][%d]             %7.4f\n", i,j,LoBin[i][j]);
-      if(IDiffBin[j]==2) 
+      if(IDiffBin[j]==0 || IDiffBin[j]==2) 
 	printf(" A2   -  - UpBin[%d][%d]             %7.4f\n", i,j,UpBin[i][j]);
     }
    }
