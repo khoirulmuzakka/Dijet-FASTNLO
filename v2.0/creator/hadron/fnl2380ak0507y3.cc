@@ -183,10 +183,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
    // --- fastNLO user: in this scenario run jet algo with two different jet sizes R
-   const unsigned int ndim1bins = 26;
-   const unsigned int ndim2bins = 2;
-   const double Rjet[ndim2bins] = { 0.5, 0.7 };
-   for (unsigned int k=0; k<ndim2bins; k++) {
+   const unsigned int ndim2bins = 26;
+   const unsigned int ndim1bins = 2;
+   const double Rjet[ndim1bins] = { 0.5, 0.7 };
+   for (unsigned int k=0; k<ndim1bins; k++) {
 
       // --- fastNLO user: set the jet size and run the jet algorithm
       double jetsize = Rjet[k];
@@ -258,11 +258,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // --- (can get overwritten below with jet pT bin center -> other scenario)
          double mu = pt;
 
-         // --- identify bin number (dim1,dim2) here (pT,R)
+         // --- identify bin number (dim2,dim1) here (pT,R)
          int obsbin = -1;
-         for (unsigned int j = 0; j < ndim1bins; j++) {
+         for (unsigned int j = 0; j < ndim2bins; j++) {
             if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0]) {
-               obsbin = j + k*ndim1bins;
+               obsbin = j + k*ndim2bins;
                // --- set the renormalization and factorization scale to jet pT bin center
                //               mu = 0.5 * (A2->LoBin[j][0] + A2->UpBin[j][0]);
                break;
@@ -320,53 +320,53 @@ void UserHHC::inittable(){
    A2->Ecms = GetEcms();
    A2->ILOord = GetNj();
 
-   // --- fastNLO user: no. and names of dimensions in which the observable is binned
+   // --- fastNLO user: no. and names of dimensions, from outer to inner loop, in which the observable is binned
    A2->NDim = 2;
    A2->DimLabel.push_back("pT_[GeV]");
    A2->IDiffBin.push_back(2);
    A2->DimLabel.push_back("R");
-   A2->IDiffBin.push_back(2);
+   A2->IDiffBin.push_back(0);
 
    vector <double> bound;
    bound.resize(2);
 
    // --- fastNLO user: define the binning
-   const int ndim2bins = 2;
-   const double dim2bins[ndim2bins+1] = { 0.4, 0.6, 0.8 };
+   const int ndim1bins = 2;
+   const double dim1bins[ndim1bins+1] = { 0.4, 0.6, 0.8 };
 
-   const int ndim1bins[ndim2bins] = { 26, 26 };
+   const int ndim2bins[ndim1bins] = { 26, 26 };
 
-   cout << endl << "------------------------" << endl;
-   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
-   cout << "------------------------" << endl;
-   for (int i=0; i<ndim2bins+1; i++) {
-      cout << "i, dim2bins: " << i << ", " << dim2bins[i] << endl;
+   cout << endl << "--------------------------------" << endl;
+   cout << "Binning in outer-most dimension: " << A2->DimLabel[1] << endl;
+   cout << "--------------------------------" << endl;
+   for (int i=0; i<ndim1bins+1; i++) {
+      cout << "i, dim1bins: " << i << ", " << dim1bins[i] << endl;
    }
 
-   vector< vector<double> >dim1bins;
-   dim1bins.resize(ndim2bins);
-   for (int i=0; i<ndim2bins; i++) {
-      dim1bins[i].resize(ndim1bins[i]+1);
+   vector< vector<double> >dim2bins;
+   dim2bins.resize(ndim1bins);
+   for (int i=0; i<ndim1bins; i++) {
+      dim2bins[i].resize(ndim2bins[i]+1);
    }
    const double dim0[27] = {
       56.  ,   64.,   74.,   84.,   97., 114. ,  133.,  153.,  174.,  196.,
       220. ,  245.,  272.,  300.,  330., 362. ,  395.,  430.,  468.,  507.,
       548. ,  592.,  638.,  686.,  737., 790. ,  846. };
-   for (int i=0; i<ndim2bins; i++) {
-      for (int j=0; j<ndim1bins[i]+1; j++) {
-         dim1bins[i][j] = dim0[j];
+   for (int i=0; i<ndim1bins; i++) {
+      for (int j=0; j<ndim2bins[i]+1; j++) {
+         dim2bins[i][j] = dim0[j];
       }
    }
 
-   cout << endl << "------------------------" << endl;
-   cout << "Binning in dimension 1: " << A2->DimLabel[0] << endl;
-   cout << "------------------------" << endl;
-   for (int i=0; i<ndim2bins; i++) {
-      for (int j=0; j<ndim1bins[i]+1; j++) {
-         cout << "i, j, dim1bins: " << i << ", " << j << ", " << dim1bins[i][j] << endl;
+   cout << endl << "--------------------------------" << endl;
+   cout << "Binning in inner-most dimension: " << A2->DimLabel[0] << endl;
+   cout << "--------------------------------" << endl;
+   for (int i=0; i<ndim1bins; i++) {
+      for (int j=0; j<ndim2bins[i]+1; j++) {
+         cout << "i, j, dim2bins: " << i << ", " << j << ", " << dim2bins[i][j] << endl;
       }
    }
-   cout << "========================" << endl;
+   cout << "================================" << endl;
 
    // --- fastNLO user:
    //     Define below the bin width ("binsize") by which the cross section is divided
@@ -379,18 +379,18 @@ void UserHHC::inittable(){
    //              DO divide by bin width in y = 2 * 0.5
    //
    int nbins = 0;   // --- count total No. bins
-   for (int i=0;i<ndim2bins;i++){
-      for (int j=0;j<ndim1bins[i];j++){
+   for (int i=0;i<ndim1bins;i++){
+      for (int j=0;j<ndim2bins[i];j++){
          double binsize = 1.; // --- start each bin with preset value = 1.
          nbins += 1;
-         bound[0] = dim1bins[i][j];
-         bound[1] = dim2bins[i];
+         bound[0] = dim2bins[i][j];
+         bound[1] = dim1bins[i];
          A2->LoBin.push_back(bound);
-         bound[0] = dim1bins[i][j+1];
-         bound[1] = dim2bins[i+1];
+         bound[0] = dim2bins[i][j+1];
+         bound[1] = dim1bins[i+1];
          A2->UpBin.push_back(bound);
          binsize = binsize
-            * (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dpT
+            * (dim2bins[i][j+1]-dim2bins[i][j]) // ... times dpT
             * 2. * 0.5; // ... times dy
          A2->BinSize.push_back(binsize);
       }
