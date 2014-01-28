@@ -167,8 +167,13 @@ int fastNLOTable::ReadScenario(istream *table){
       for(int j=NDim-1;j>=0;j--){
          //*table >>  LoBin[i][j];
          //if(IDiffBin[j]==2) *table >>  UpBin[i][j];
-         *table >>  Bin[i][j].first;
-         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table >>  Bin[i][j].second;
+         *table >> Bin[i][j].first;
+         if (IDiffBin[j]==0 || IDiffBin[j]==2) {
+            *table >> Bin[i][j].second;
+         } else {
+            // For point-wise differential, IDiffBin = 1, set UpBin equal to LoBin
+            Bin[i][j].second = Bin[i][j].first;
+         }
       }
       //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if ( i > 0 ) {

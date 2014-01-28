@@ -1034,8 +1034,13 @@ void FastNLOReader::ReadBlockA2(istream *table) {
       LoBin[i].resize(NDim);
       UpBin[i].resize(NDim);
       for (int j=0; j<NDim; j++) {
-         *table >>  LoBin[i][j];
-         if (IDiffBin[j]==0 || IDiffBin[j]==2) *table >>  UpBin[i][j];
+         *table >>  LoBin[i][j] ;
+         if (IDiffBin[j]==0 || IDiffBin[j]==2) {
+            *table >>  UpBin[i][j];
+         } else {
+            // For point-wise differential, IDiffBin = 1, set UpBin equal to LoBin
+            UpBin[i][j] = LoBin[i][j];
+         }
       }
       debug << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if (i > 0) {

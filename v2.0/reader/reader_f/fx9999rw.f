@@ -189,6 +189,9 @@
                CHTMP = "  A2      UpBin("//
      >              CH3TMP//","//CH1TMP//")"
                CALL FNIODBL(CRW,NUNIT, UPBIN(I,J),LPRINT,CHTMP)
+            ELSEIF (CRW.EQ.'read') THEN
+*---  For point-wise differential, IDiffBin = 1, set UpBin equal to LoBin
+               UPBIN(I,J) = LOBIN(I,J)
             ENDIF
          ENDDO
       ENDDO
