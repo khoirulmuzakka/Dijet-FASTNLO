@@ -14,8 +14,9 @@
       INCLUDE 'strings.inc'
       CHARACTER*2  CH2TMP
       CHARACTER*14 CHTMP3
-      CHARACTER*16 CHTMP1
-      CHARACTER*18 CHTMP2
+*---      CHARACTER*16 CHTMP1
+*---      CHARACTER*18 CHTMP2
+      CHARACTER*21 CHTMP1,CHTMP2
       CHARACTER*255 FILENAME,PDFSET,CHRES,CHFRM
       INTEGER I, J, IS, IPRINT, NDIMBINS(MXDIM), NBLANK
       INTEGER NSCDM, NSCLS
@@ -354,13 +355,13 @@ C---  CALL SETLHAPARM('SILENT')
          WRITE(*,'(2(A,F10.3))')" The scale factors xmur, "//
      >        "xmuf chosen here are: ",SCALER,", ",SCALEF
          WRITE(*,'(A)')LSEPL
-         CHTMP1 = DIMLABEL(1)
-         CHTMP1 = "[ "//CHTMP1(1:12)//" ]"
-         CHTMP2 = DIMLABEL(2)
-         CHTMP2 = "[  "//CHTMP2(1:12)//"  ]"
+         CHTMP1 = DIMLABEL(2)
+         CHTMP1 = "[ "//CHTMP1(1:MAX(17,LEN_TRIM(CHTMP1)))//" ]"
+         CHTMP2 = DIMLABEL(1)
+         CHTMP2 = "[ "//CHTMP2(1:MAX(17,LEN_TRIM(CHTMP2)))//" ]"
          CHRES  = ""
          CHFRM  =
-     >        "(1P,X,I5,X,G10.4,(X,I5,2(X,G10.4)),(X,I5,2(2X,E8.2)),0P"
+     >   "(1P,X,I5,X,G10.4,(X,I5,X,2(2X,G10.4)),(X,I5,2(2X,G10.4)),0P"
          IF (LCONTR(ILO)) THEN
             CHTMP3  = SCALEDESCRIPT(ILO,1,1)
             CHTMP3  = "<"//CHTMP3(1:12)//">"
@@ -369,7 +370,7 @@ C---  CALL SETLHAPARM('SILENT')
             CHRES = CHRES(1:LEN_TRIM(CHRES))//
      >           "  LO cross section"
             CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >           ",1P,(X,G10.4),5X,(X,E18.11),0P"
+     >           ",1P,(X,G10.4),4X,(X,E18.11),0P"
             IF (LCONTR(ITHC1L).AND.LTHC) THEN
                CHRES =
      >              CHRES(1:LEN_TRIM(CHRES))//
@@ -409,7 +410,7 @@ C---  CALL SETLHAPARM('SILENT')
 
          WRITE(*,'(A)')"  IObs  Bin Size "//
      >        "IODimO  "//
-     >        CHTMP1//"    "//
+     >        CHTMP1//"  "//
      >        "IODimI  "//
      >        CHTMP2//"  "//CHRES(1:LEN_TRIM(CHRES))
          WRITE(*,'(A)')LSEPL
