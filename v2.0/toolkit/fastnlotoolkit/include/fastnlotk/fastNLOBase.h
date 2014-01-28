@@ -20,7 +20,7 @@ public:
    int ReadTable();							// read table
    int ReadHeader(istream *table);					// read header of table (BlockA1)
    
-   int OpenFileRead();							// open stream
+   //int OpenFileRead();							// open stream
    void WriteTable();							// write full table to disk
    int WriteHeader(ostream *table);					// write hader using ostream
    void RewindRead();							

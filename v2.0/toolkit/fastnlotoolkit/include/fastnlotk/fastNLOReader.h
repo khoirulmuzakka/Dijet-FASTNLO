@@ -68,7 +68,7 @@ public:
    void PrintCrossSections() const;                                                     //  Print cross sections (optimized for double-differential tables)
    void PrintCrossSectionsDefault(vector<double> kthc = vector<double>()) const;        //  Print cross sections in the same format as in the fortran version.
    void PrintCrossSectionsWithReference();
-   void PrintCrossSectionsData() const;                                                 //  Print data table. (if available)
+   //void PrintCrossSectionsData() const;                                                 //  Print data table. (if available)
 
    void RunFastNLODemo();                                                               //  Run an example of fastNLO for educational purposes, i.e. calculate and print cross sections for several scale variations
    // ---- Test virtual functions for reasonable values. ---- //

@@ -74,9 +74,9 @@ class fastNLOTable : public fastNLOBase {
    int GetBinNumber(double val1 , double val2 = -42. ) const ;                                  // calculate bin number (iObsBin)
 
    // handle coefficient tables
-   int WriteCoeffTable(int no);
-   int WriteCoeffTable(int no,ofstream* outstream );
-   int WriteCoeffTableDividebyN(int no);
+   //int WriteCoeffTable(int no);
+   //int WriteCoeffTable(int no,ofstream* outstream );
+   //int WriteCoeffTableDividebyN(int no);
    void DeleteAllCoeffTable();
    //int CreateCoeffBase(int no);
    int CreateCoeffTable(int no,fastNLOCoeffBase *newcoeff);
