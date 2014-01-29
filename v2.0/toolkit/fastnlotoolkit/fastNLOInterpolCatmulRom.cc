@@ -14,7 +14,7 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOInterpolCatmulRom::fastNLOInterpolCatmulRom(double min, double max) : fastNLOInterpolBase(min,max) {
+fastNLOInterpolCatmulRom::fastNLOInterpolCatmulRom(double min, double max) : fastNLOInterpolBase(min,max,4) {
    debug["fastNLOInterpolCatmulRom"]<<"New fastNLOInterpolCatmulRom instance."<<endl;
 }
 

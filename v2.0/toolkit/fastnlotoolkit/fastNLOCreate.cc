@@ -41,6 +41,7 @@
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOInterpolCatmulRom.h"
 #include "fastnlotk/fastNLOInterpolLagrange.h"
+#include "fastnlotk/fastNLOInterpolOneNode.h"
 
 using namespace std;
 
@@ -1915,9 +1916,9 @@ void  fastNLOCreate::InitInterpolationKernels() {
 	 // ------------------------------------------------
 	 // init scale2-interpolation kernels
 	 // ------------------------------------------------
-	    debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
-	    fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
-	    fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
+	 debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
+	 fKernMu2[i] = MakeInterpolationKernels(STRING(Mu2_Kernel),wrmMu2Dn[i],wrmMu2Up[i]);
+	 fKernMu2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING(Mu2_DistanceMeasure)), INT(Mu2_NNodes));
       }
       else {
 	 for ( unsigned int k = 0 ; k<fScaleFac.size() ; k++ ) {
@@ -1941,6 +1942,8 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
       return new fastNLOInterpolCatmulRom(xdn,xup);
    else if ( KernelName == "Lagrange")
       return new fastNLOInterpolLagrange(xdn,xup);
+   else if ( KernelName == "OneNode" )
+      return new fastNLOInterpolOneNode(xdn,xup);
    // else if ( KernelName == "...") // todo implement other kernels here!
    //   return ...
    else {

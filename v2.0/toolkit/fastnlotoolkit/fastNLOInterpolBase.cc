@@ -14,10 +14,9 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOInterpolBase::fastNLOInterpolBase(double min, double max) : PrimalScream("fastNLOInterpol") {
+fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) : 
+   fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) , PrimalScream("fastNLOInterpol") {
    debug["fastNLOInterpolBase"]<<"New fastNLOInterpolBase instance."<<endl;
-   fvalmin = min;
-   fvalmax = max;
    fLastVal = -34729.432;
    fLastGridPointWasRemoved=false;
 }
@@ -110,16 +109,22 @@ void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
    debug["MakeGrid"]<<"Distance measure = "<<type<<endl;
    fdm = type;
 
-   if ( nNodes <= 1 ) {
-      warn["MakeGrid"]<<"Number of nodes must be larger than 2."<<endl;
+   // check number of nodes
+   if ( nNodes == -1 ) {
+      error["MakeGrid"]<<"Minimum number of nodes not initialized. It seems that the (inherited) interpolation routine is missing."<<endl;
+      exit(1);
+   }
+   if ( nNodes < fNMinNodes ) {
+      error["MakeGrid"]<<"Number of nodes must be larger than "<<fNMinNodes<<" for this interpolation method."<<endl;
+      exit(1);
+   }
+   else if ( nNodes == fNMinNodes ) {
+      warn["MakeGrid"]<<"This grid has only the minimum number of required nodes. nNodes="<<nNodes<<endl;
    }
 
-   if ( nNodes <= 3 ) {
-      warn["MakeGrid"]<<"A reasonable grid typicaly has more than 3 nodes. nNodes="<<nNodes<<endl;
-   }
-
-   if ( fvalmin >= fvalmax ){
-      warn["MakeGrid"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
+   // check min and max values
+   if ( fvalmin > fvalmax ){
+      error["MakeGrid"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
    }
 
    MakeGrids(fvalmin,fvalmax,nNodes);
@@ -174,11 +179,15 @@ vector<double> fastNLOInterpolBase::MakeLinearGrid(double min, double max, int n
 
 void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
    // first make fhgrid and then make fgrid
-   vector<double> hgrid(nNodes);
    if ( isnan(min) || isnan(max) || nNodes <= 0 ) {
       error["MakeGrids"]<<"Cannot make unreasoanble grid! Requested: nNodes="<<nNodes<<", min="<<min<<", max="<<max<<". Exiting."<<endl;
       exit(1);
    }
+   if ( fNMinNodes==1 && nNodes != 1) {
+      warn["MakeGrids"]<<"Minimum number of nodes is 1. Number of nodes requested is "<<nNodes<<". Expecting, that this is a one-point grid. Therefore using only one node."<<endl;
+      nNodes=1;
+   }
+   vector<double> hgrid(nNodes);
    double lo=min, hi=max;
    switch (fdm) {
    case fastNLOGrid::kLinear:
@@ -205,10 +214,15 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
       exit(1);
    }
    double del = hi-lo;
-   for(int l=0;l<nNodes;l++){
-      hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
-      if ( isnan(hgrid[l]) ) {
-	 error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
+   if ( nNodes==1 ) {
+      hgrid[0] = lo+del/2.;
+   }
+   else if ( nNodes > 1 ) {
+      for(int l=0;l<nNodes;l++){
+	 hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
+	 if ( isnan(hgrid[l]) ) {
+	    error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
+	 }
       }
    }
 
@@ -274,6 +288,10 @@ void fastNLOInterpolBase::SetHGrid(vector<double> hgrid){
 
 bool fastNLOInterpolBase::CheckX(double& x) {
    bool sanity = false;
+   if ( fgrid.size() == 1 ) {
+      //x = fgrid[0];
+      return true;
+   }
    if ( x < fgrid[0] ) {
       if ( fabs(x-fLastVal)>1.e-8 ) warn["CheckX"]<<"Value "<<x<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
       x = fgrid[0];
@@ -282,7 +300,7 @@ bool fastNLOInterpolBase::CheckX(double& x) {
       if ( fLastGridPointWasRemoved ) {
 	 if ( x > fvalmax ) {
 	    if ( x!=fLastVal ) warn["CheckX"]<<"Value "<<x<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
-	    x = fvalmax;
+	       x = fvalmax;
 	 }
       }
       else {
@@ -349,12 +367,12 @@ double fastNLOInterpolBase::GetDelta(double x ){
 
 
 void fastNLOInterpolBase::PrintGrid() {
-   warn["PrintGrid"]<<" ---------- printing grid -------------- " <<endl;
+   warn["PrintGrid"]<<"\n ---------- printing grid -------------- " <<endl;
    warn>>"n grid nodes: " <<fgrid.size()<<endl;
    for (  unsigned int i = 0 ; i<fgrid.size() ; i++ ) {
       warn>>"i="<<i<<"\tnode="<<fgrid[i]<<endl;
    }
-   warn["PrintGrid"]<<" ---------- printing Hgrid -------------- " <<endl;
+   warn["PrintGrid"]<<"\n ---------- printing Hgrid -------------- " <<endl;
    warn>>"n Hgrid nodes: " <<fHgrid.size()<<endl;
    for (  unsigned int i = 0 ; i<fHgrid.size() ; i++ ) {
       warn>>"i="<<i<<"\tnode="<<fHgrid[i]<<endl;

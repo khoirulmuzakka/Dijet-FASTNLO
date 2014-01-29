@@ -26,7 +26,7 @@ class fastNLOInterpolBase : public PrimalScream {
 
 public:
 
-   fastNLOInterpolBase(double min, double max);
+   fastNLOInterpolBase(double min, double max, int nMinNodes);
    virtual ~fastNLOInterpolBase(void);
    
    const vector<pair<int,double> >& GetNodeValues(double val);
@@ -87,6 +87,7 @@ protected:
 
    double fvalmax;
    double fvalmin;
+   int fNMinNodes;
    fastNLOGrid::GridType fdm; // distance measure
    vector<double> fgrid;
    vector<double> fHgrid;
