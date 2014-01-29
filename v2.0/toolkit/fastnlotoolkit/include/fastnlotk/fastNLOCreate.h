@@ -14,7 +14,6 @@
 #include "read_steer.h"
 
 #include "fastNLOInterpolBase.h"
-#include "fastNLOInterpolCatmulRom.h"
 #include "fastNLOCoeffAddBase.h"
 #include "fastNLOGeneratorConstants.h"
 

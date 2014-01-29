@@ -743,8 +743,20 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
 
 //______________________________________________________________________________
 bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , bool SetOn) {
+   //! Enable or disable a contribution to be considered in the cross section calculation
+   //!  - Use SetOn=true, to switch contribution ON,
+   //!  - Use SetOn=false, to switch a contribution off
+   //!
+   //! Each contribution is identified by an ESMCalculation and by a universal Id.
+   //! For all available contributions in your table, call PrintTableInfo().
+   //!
+   //! The LO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=0);
+   //! The NLO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=1);
+   //! 
+   //! If an additional additive contribution is switched on, then the PDFCache and AlphasCache
+   //! are refilled.
 
-   info<<(SetOn?"Activating":"Deactivating")<<" contribution "<<_ContrName[eCalc]<<" with Id = "<<Id<<endl;
+   info["SetContributionON"]<<(SetOn?"Activating":"Deactivating")<<" contribution "<<_ContrName[eCalc]<<" with Id = "<<Id<<endl;
 
    // backup original value
    bool SetOld = bUseSMCalc[eCalc][Id];
@@ -1246,8 +1258,7 @@ void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    // Sanity check that scaleVar is in allowed range
    // For thresh. corr. can otherwise lead to inf and then segfault!
    if (scaleVar >= GetNScaleVariations()) {
-      error<<"Trying to refresh  cache for non-existing scale variation no. "<<scaleVar<<" while only "<<GetNScaleVariations()<<" ex\
-ist in total. Aborted."<<endl;
+      error<<"Trying to refresh cache for non-existing scale variation no. "<<scaleVar<<" while only "<<GetNScaleVariations()<<" exist in total. Exiting."<<endl;
       exit(1);
    }
    double scalefac       = fScaleFacMuR/c->GetScaleFactor(scaleVar);

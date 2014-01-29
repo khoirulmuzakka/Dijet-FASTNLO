@@ -39,6 +39,8 @@
 
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
+#include "fastnlotk/fastNLOInterpolCatmulRom.h"
+#include "fastnlotk/fastNLOInterpolLagrange.h"
 
 using namespace std;
 
@@ -1935,8 +1937,10 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
    //! This function identifies the string-identifier
    //! and creates the corresponding fastNLO Interpolation kernel
 
-   if ( KernelName == "CatmulRom" )
-      return (fastNLOInterpolBase*)(new fastNLOInterpolCatmulRom(xdn,xup));
+   if ( KernelName == "CatmulRom" || KernelName == "Catmull"  )
+      return new fastNLOInterpolCatmulRom(xdn,xup);
+   else if ( KernelName == "Lagrange")
+      return new fastNLOInterpolLagrange(xdn,xup);
    // else if ( KernelName == "...") // todo implement other kernels here!
    //   return ...
    else {
