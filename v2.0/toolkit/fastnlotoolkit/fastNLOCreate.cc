@@ -41,6 +41,7 @@
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOInterpolCatmulRom.h"
 #include "fastnlotk/fastNLOInterpolLagrange.h"
+#include "fastnlotk/fastNLOInterpolLinear.h"
 #include "fastnlotk/fastNLOInterpolOneNode.h"
 
 using namespace std;
@@ -1942,6 +1943,8 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
       return new fastNLOInterpolCatmulRom(xdn,xup);
    else if ( KernelName == "Lagrange")
       return new fastNLOInterpolLagrange(xdn,xup);
+   else if ( KernelName == "Linear")
+      return new fastNLOInterpolLinear(xdn,xup);
    else if ( KernelName == "OneNode" )
       return new fastNLOInterpolOneNode(xdn,xup);
    // else if ( KernelName == "...") // todo implement other kernels here!
