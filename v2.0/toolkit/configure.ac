@@ -298,6 +298,42 @@ fi
 AM_CONDITIONAL(HAVE_PDFLATEX, test "x$PDFLATEX" != "x")
 AM_CONDITIONAL(HAVE_LATEXDVIPDFM, test "x$LATEX" != "x" && test "x$DVIPDFM" != "x")
 
+# Python extension
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether Python extension is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_ENABLE([pyext],
+        [AC_HELP_STRING([--enable-pyext],
+        [Optionally build Python module to interface C++ library. Default is no.])],
+        [],
+        [enable_pyext="no"])
+# Basic Python checks
+if test "x$enable_pyext" = "xyes"; then
+# Skip for the moment. AX_PYTHON_DEVEL doesn't work with SLC5!
+#   AX_PYTHON_DEVEL([>='2.3.1'])
+   AM_PATH_PYTHON
+fi
+# Check on existence of SWIG to interface to Python
+if test "x$enable_pyext" = "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
+   AC_PATH_PROG(SWIG, swig)
+   if test "x$SWIG" =  "x"; then
+      AC_MSG_ERROR([swig not found, interfacing to Python not possible! Please install swig first or disable Python extension. Configuration aborted!])
+   else
+      AC_MSG_NOTICE([swig found, interface to Python possible.])
+   fi
+fi
+AC_MSG_NOTICE([******************************************])
+if test "x$enable_pyext" = "xyes"; then
+   AC_MSG_NOTICE([All Python checks successful. Requested Python extension will be built.])
+else
+   AC_MSG_NOTICE([No Python extension requested. Continue without pyext.])
+fi
+AC_MSG_NOTICE([******************************************])
+AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes"])
+
+
+
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
 SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
@@ -321,6 +357,8 @@ AC_CONFIG_FILES([Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
+                 pyext/Makefile
+                 pyext/setup.py
                  src/Makefile
                 ])
 

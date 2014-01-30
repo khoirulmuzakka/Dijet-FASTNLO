@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = doc fastnlotoolkit src
+SUBDIRS = doc fastnlotoolkit src pyext
 
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
