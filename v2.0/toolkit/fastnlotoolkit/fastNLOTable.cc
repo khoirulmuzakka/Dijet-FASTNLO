@@ -22,6 +22,20 @@ fastNLOTable::fastNLOTable(string name) : fastNLOBase(name) {
 // ___________________________________________________________________________________________________
 fastNLOTable::~fastNLOTable(){
    // delete fCoeff tables...
+   DeleteAllCoeffTable();
+}
+// ___________________________________________________________________________________________________
+fastNLOTable::fastNLOTable(const fastNLOTable& tab)
+  : fastNLOBase(tab), fCoeff(tab.fCoeff.size()),
+    Ecms(tab.Ecms), ILOord(tab.ILOord), Ipublunits(tab.Ipublunits),
+    ScDescript(tab.ScDescript), NObsBin(tab.NObsBin), NDim(tab.NDim),
+    DimLabel(tab.DimLabel), IDiffBin(tab.IDiffBin), Bin(tab.Bin),
+    BinSize(tab.BinSize), RapIndex(tab.RapIndex), INormFlag(tab.INormFlag),
+    DenomTable(tab.DenomTable), IDivLoPointer(tab.IDivLoPointer),
+    IDivUpPointer(tab.IDivUpPointer)
+{
+    for (std::size_t i = 0; i < tab.fCoeff.size(); ++i)
+        fCoeff[i] = new fastNLOCoeffBase(*tab.fCoeff[i]);
 }
 
 

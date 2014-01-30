@@ -26,6 +26,7 @@ class fastNLOTable : public fastNLOBase {
    fastNLOTable();
    fastNLOTable(string filename);
    ~fastNLOTable();
+   fastNLOTable(const fastNLOTable&);
 
    virtual void Print() const;
    void PrintScenario() const;
