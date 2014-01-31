@@ -15,6 +15,7 @@ public:
    typedef double(*mu_func)(double,double);
 
    fastNLOReader(string filename);
+   fastNLOReader(const fastNLOReader&);
    virtual ~fastNLOReader();
    void SetFilename(string filename) ;
    void InitScalevariation();

@@ -479,6 +479,14 @@ fastNLOReader::~fastNLOReader(void) {
 
 
 //______________________________________________________________________________
+fastNLOReader::fastNLOReader(const fastNLOReader& other) :
+   fastNLOTable(other) {
+   cout<<"todo. reassign pointers Coeff_LO_Ref, Coeff_NLO_Ref, fCoeffData, BBlocksSMCalc[][], BBlocksNewPhys[][], here."<<endl;
+}
+
+
+
+//______________________________________________________________________________
 void fastNLOReader::SetFilename(string filename) {
    debug["SetFilename"]<<"New filename="<<filename<<endl;
    ffilename    = filename;
