@@ -26,7 +26,7 @@ fastNLOTable::~fastNLOTable(){
 }
 // ___________________________________________________________________________________________________
 fastNLOTable::fastNLOTable(const fastNLOTable& tab)
-  : fastNLOBase(tab), fCoeff(tab.fCoeff.size()),
+   : fastNLOBase(tab), fCoeff(tab.fCoeff.size()),
     Ecms(tab.Ecms), ILOord(tab.ILOord), Ipublunits(tab.Ipublunits),
     ScDescript(tab.ScDescript), NObsBin(tab.NObsBin), NDim(tab.NDim),
     DimLabel(tab.DimLabel), IDiffBin(tab.IDiffBin), Bin(tab.Bin),
@@ -34,8 +34,18 @@ fastNLOTable::fastNLOTable(const fastNLOTable& tab)
     DenomTable(tab.DenomTable), IDivLoPointer(tab.IDivLoPointer),
     IDivUpPointer(tab.IDivUpPointer)
 {
-    for (std::size_t i = 0; i < tab.fCoeff.size(); ++i)
-        fCoeff[i] = new fastNLOCoeffBase(*tab.fCoeff[i]);
+   //! Copy constructor
+   for (std::size_t i = 0; i < tab.fCoeff.size(); ++i) {
+      fastNLOCoeffBase* c = tab.fCoeff[i];
+      if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
+	 fCoeff[i] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
+      else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
+	 fCoeff[i] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
+      else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
+ 	 fCoeff[i] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
+      else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
+	 fCoeff[i] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
+   }
 }
 
 
@@ -458,7 +468,7 @@ int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::DeleteAllCoeffTable(){
-   for (size_t i = 0; i < fCoeff.size(); ++i)
+   for (size_t i = 0; i < fCoeff.size(); ++i) 
       delete fCoeff[i];
    fCoeff.clear();
 }
