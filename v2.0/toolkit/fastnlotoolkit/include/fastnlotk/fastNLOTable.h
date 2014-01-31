@@ -68,6 +68,8 @@ class fastNLOTable : public fastNLOBase {
    string GetDenomTable() const {return DenomTable;}
 
    fastNLOCoeffBase* GetCoeffTable(int no) const;
+   fastNLOCoeffData* GetDataTable() const;							//!< returns pointer to data table if available, else returns NULL pointer
+   fastNLOCoeffAddBase* GetReferenceTable(ESMOrder eOrder) const;				//!< returns pointer to reference table if available, else returns NULL pointer
 
    // useful functions
    //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );

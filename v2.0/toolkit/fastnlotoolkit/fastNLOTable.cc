@@ -570,6 +570,37 @@ fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
 
 
 // ___________________________________________________________________________________________________
+fastNLOCoeffData* fastNLOTable::GetDataTable() const {
+   for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
+      fastNLOCoeffBase* c = GetCoeffTable(i);
+      if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
+	 return (fastNLOCoeffData*)c;
+      }
+   }
+   return NULL;
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(ESMOrder eOrder) const {
+   for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
+      fastNLOCoeffBase* c = GetCoeffTable(i);
+      if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
+	    if ( eOrder == fastNLO::kLeading && c->IsLO() )
+	       return (fastNLOCoeffAddBase*)c;
+	    else if ( eOrder == fastNLO::kNextToLeading && c->IsNLO() )
+	       return (fastNLOCoeffAddBase*)c;
+	    else if ( eOrder == fastNLO::kNextToNextToLeading && c->IsNNLO() )
+	       return (fastNLOCoeffAddBase*)c;
+	 }
+      }
+   }
+   return NULL;
+}
+
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    // Get Bin number of this event if you use a single or double differential binning
    // return -1 if no bin was found

@@ -14,15 +14,16 @@ class fastNLOBase : public PrimalScream {
 public:
    fastNLOBase();
    fastNLOBase(string name);
+   fastNLOBase(const fastNLOBase&);
    virtual ~fastNLOBase();
 
    // i/o
-   int ReadTable();							// read table
-   int ReadHeader(istream *table);					// read header of table (BlockA1)
+   int ReadTable();							//!< read table
+   int ReadHeader(istream *table);					//!< read header of table (BlockA1)
    
    //int OpenFileRead();							// open stream
-   void WriteTable();							// write full table to disk
-   int WriteHeader(ostream *table);					// write hader using ostream
+   void WriteTable();							//!< write full table to disk
+   int WriteHeader(ostream *table);					//!< write hader using ostream
    void RewindRead();							
    void SkipBlockA1A2();
    ofstream *OpenFileWrite();
@@ -33,11 +34,11 @@ public:
    virtual void Print() const;
    
    // header
-   void PrintHeader() const;						// Print header variables (BlockA1) to screen
-   void SetHeaderDefaults();						// Set some default values 
-   void ResetHeader();							// Reset variables to default values
+   void PrintHeader() const;						//!< Print header variables (BlockA1) to screen
+   void SetHeaderDefaults();						//!< Set some default values 
+   void ResetHeader();							//!< Reset variables to default values
    void SetContributionHeader();					// 	
-   bool IsCompatibleHeader(const fastNLOBase& other) const;		// Compare header with header of another table
+   bool IsCompatibleHeader(const fastNLOBase& other) const;		//!< Compare header with header of another table
 
    // getter/setters
    string GetFilename() const {return ffilename;}
@@ -75,7 +76,7 @@ public:
 
 
 protected:
-   void PrintWelcomeMessage();						// Say hello to fastNLO user
+   void PrintWelcomeMessage();						//!< Say hello to fastNLO user
 
    string ffilename;
    ifstream *ifilestream;

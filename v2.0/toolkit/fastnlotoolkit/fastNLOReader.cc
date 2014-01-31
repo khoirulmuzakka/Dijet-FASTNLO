@@ -459,9 +459,9 @@ fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
    //SetGlobalVerbosity(DEBUG); // Temporary for debugging
    SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
-   fCoeffData           = NULL;
-   Coeff_LO_Ref         = NULL;
-   Coeff_NLO_Ref        = NULL;
+   //fCoeffData           = NULL;
+   //    Coeff_LO_Ref         = NULL;
+   //    Coeff_NLO_Ref        = NULL;
    fUnits               = fastNLO::kPublicationUnits;
    fMuRFunc             = fastNLO::kScale1;
    fMuFFunc             = fastNLO::kScale1;
@@ -481,47 +481,17 @@ fastNLOReader::~fastNLOReader(void) {
 //______________________________________________________________________________
 fastNLOReader::fastNLOReader(const fastNLOReader& other) :
    fastNLOTable(other),
-   ffilename(other.ffilename), fScalevar(fScalevar), fScaleFacMuR(other.fScaleFacMuR),
+   ffilename(other.ffilename), fScalevar(other.fScalevar), fScaleFacMuR(other.fScaleFacMuR),
    fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
    fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
    bUseSMCalc(other.bUseSMCalc), bUseNewPhys(other.bUseNewPhys), 
-   fCoeffData( new fastNLOCoeffData(*other.fCoeffData)),
-   Coeff_LO_Ref( new fastNLOCoeffAddBase(*other.Coeff_LO_Ref)),
-   Coeff_NLO_Ref( new fastNLOCoeffAddBase(*other.Coeff_NLO_Ref)),
-   BBlocksSMCalc(other.BBlocksSMCalc.size()), BBlocksNewPhys(other.BBlocksNewPhys.size()),
    XSection_LO(other.XSection_LO), XSection(other.XSection), kFactor(other.kFactor),
    QScale_LO(other.QScale_LO), QScale(other.QScale), XSectionRef(other.XSectionRef),
    XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
    XSectionRef_s2(other.XSectionRef_s2)
 {
    //! Copy constructor
-   for (std::size_t i = 0; i < other.BBlocksSMCalc.size(); ++i) {
-      for (std::size_t j = 0; j < other.BBlocksSMCalc[i].size(); ++j) {
-       fastNLOCoeffBase* c = other.BBlocksSMCalc[i][j];
-       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
-          BBlocksSMCalc[i][j] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
-       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
-          BBlocksSMCalc[i][j] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
-       else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
-          BBlocksSMCalc[i][j] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
-       else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
-          BBlocksSMCalc[i][j] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
-      }
-   }
-   for (std::size_t i = 0; i < other.BBlocksNewPhys.size(); ++i) {
-      for (std::size_t j = 0; j < other.BBlocksNewPhys[i].size(); ++j) {
-       fastNLOCoeffBase* c = other.BBlocksNewPhys[i][j];
-       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
-          BBlocksNewPhys[i][j] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
-       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
-          BBlocksNewPhys[i][j] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
-       else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
-          BBlocksNewPhys[i][j] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
-       else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
-          BBlocksNewPhys[i][j] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
-      }
-   }
-
+   OrderCoefficients(); // initialize pointers to fCoeff's
 }
 
 
@@ -530,23 +500,20 @@ fastNLOReader::fastNLOReader(const fastNLOReader& other) :
 void fastNLOReader::SetFilename(string filename) {
    debug["SetFilename"]<<"New filename="<<filename<<endl;
    ffilename    = filename;
-   Init();
+   OrderCoefficients();
+   SetCoefficientUsageDefault();
+   InitScalevariation();
 }
 
 
 //______________________________________________________________________________
-void fastNLOReader::Init() {
-   debug["Init"]<<endl;
-
-   // Initialize lists for BlockB's
-   BBlocksSMCalc.resize(10);
-   BBlocksNewPhys.resize(10);
-   bUseSMCalc.resize(BBlocksSMCalc.size());
-   bUseNewPhys.resize(BBlocksNewPhys.size());
+void fastNLOReader::OrderCoefficients() {
+   debug["OrderCoefficients"]<<endl;
 
    // Initialize Coeff's
    fastNLOCoeffBase* Coeff_LO   = NULL;
    fastNLOCoeffBase* Coeff_NLO  = NULL;
+   fastNLOCoeffBase* Coeff_NNLO = NULL;
    fastNLOCoeffBase* Coeff_THC1 = NULL;
    fastNLOCoeffBase* Coeff_THC2 = NULL;
    fastNLOCoeffBase* Coeff_NPC1 = NULL;
@@ -562,41 +529,28 @@ void fastNLOReader::Init() {
 
       // data
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
-         debug["Init"]<<"Found data table."<<endl;
-         //c->SetName("Data");
-         if ( fCoeffData ) warn["Init"]<<"Already one data table present. Substituting."<<endl;
-         fCoeffData = (fastNLOCoeffData*)c;
+         debug["OderCoefficients"]<<"Found data table."<<endl;
+         if ( GetDataTable() ) 
+	    warn["OderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
-         // Reference table, implemented only for LO or NLO
+         // Reference table
          if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
-            debug["Init"]<<"Found reference table."<<endl;
-            if ( c->IsLO() ) {
-//             if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.0.");
-//             if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. LO Reference. v2.1."); // not forseen
-               Coeff_LO_Ref           = (fastNLOCoeffAddBase*)c;
-            }
-            else if ( c->IsNLO() ) {
-//             if ( fastNLOCoeffAddFix::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.0.");
-//             if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&c,true) )   c->SetName("Coeff. NLO Reference. v2.1."); // not foreseen
-               Coeff_NLO_Ref  = (fastNLOCoeffAddBase*)c;
-            } else {
-               error["ReadTable"]<<"Reference tables are only implemented for fixed order (LO and NLO), stopped!\n";
-               exit(1);
-            }
+            debug["OderCoefficients"]<<"Found reference table."<<endl;
          }
          // Additive fixed order (perturbative) contribution
          else if ( c->GetIContrFlag1() == 1 ) {
             if ( c->IsLO() )            Coeff_LO  = c;
             else if ( c->IsNLO() )      Coeff_NLO = c;
+            else if ( c->IsNNLO() )     Coeff_NNLO = c;
          }
          // Threshold corrections
          else if ( c->GetIContrFlag1() == 2 ) {
             if ( c->GetIContrFlag2() == 1 )             Coeff_THC1 = c;
             else if ( c->GetIContrFlag2() == 2 )        Coeff_THC2 = c;
             else {
-               error["Init"]<<"Threshold correction implemented only up to 2-loops, exiting!\n";
+               error["OderCoefficients"]<<"Threshold correction implemented only up to 2-loops, exiting!\n";
                exit(1);
             }
          }
@@ -612,40 +566,72 @@ void fastNLOReader::Init() {
       }
    }
 
-   // Assign NPC, switch off by default
+   // Delete and re-initialize lists for BlockB's
+   const int defsize = 10;
+   BBlocksSMCalc.clear();
+   BBlocksNewPhys.clear();
+   BBlocksSMCalc.resize(defsize);
+   BBlocksNewPhys.resize(defsize);
+
+   // Assign non-perturbative corrections, switch off by default
    if (Coeff_NPC1) {
       BBlocksSMCalc[kNonPerturbativeCorrection].push_back(Coeff_NPC1);
-      bUseSMCalc[kNonPerturbativeCorrection].push_back(false);
    }
 
-   // Assign THC, switch off by default
+   // Assign threshold corrections, switch off by default
    if (Coeff_THC1) {
       BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC1);
-      bUseSMCalc[kThresholdCorrection].push_back(false);
    }
    if (Coeff_THC2) {
       BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC2);
-      bUseSMCalc[kThresholdCorrection].push_back(false);
    }
 
    // Assign fixed order calculations (LO must be [0]), switch on by default
    if (Coeff_LO)  {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_LO);
-      bUseSMCalc[kFixedOrder].push_back(true);
    } else {
-      error["Init"]<<"Could not find any LO Calculation. Exiting!"<<endl;
+      error["OderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
       exit(1);
    }
    if (Coeff_NLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NLO);
-      bUseSMCalc[kFixedOrder].push_back(true);
    } else {
-      info["Init"]<<"Could not find any NLO calculation."<<endl;
+      info["OderCoefficients"]<<"Could not find any NLO calculation."<<endl;
+   }
+   if (Coeff_NNLO) {
+      BBlocksSMCalc[kFixedOrder].push_back(Coeff_NNLO);
    }
 
    //int iprint = 2;
    //PrintFastNLOTableConstants(iprint);
-   InitScalevariation();
+}
+
+
+//______________________________________________________________________________
+void fastNLOReader::SetCoefficientUsageDefault() {
+   //! Switch on LO and NLO contribution.
+   //! Deactivate all other contributions
+   bUseSMCalc.clear();
+   bUseNewPhys.clear();
+   bUseSMCalc.resize(BBlocksSMCalc.size());
+   bUseNewPhys.resize(BBlocksNewPhys.size());
+  
+   //switch all off
+   for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
+      for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
+	 bUseSMCalc[j].push_back(false);
+      }
+   }
+   //switch all off
+   for (unsigned int j = 0 ; j<BBlocksNewPhys.size() ; j++) {
+      for (unsigned int i = 0 ; i<BBlocksNewPhys[j].size() ; i++) {
+	 bUseNewPhys[j].push_back(false);
+      }
+   }
+   // active LO and NLO
+   bUseSMCalc[kFixedOrder][kLeading] = true; //LO
+   bUseSMCalc[kFixedOrder][kNextToLeading] = true;//NLO
+
 }
 
 
@@ -874,22 +860,20 @@ int fastNLOReader::GetNScaleVariations() const {
    // Assume a maximum of 10!
    unsigned int scalevarmax = 10;
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
-      if (!BBlocksSMCalc.empty()) {
-         for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-            fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
-            // Check on contributions with extra scale tables (NLO, threshold corrections)
-            int kType  = c->GetIContrFlag1()-1;
-            int kOrder = c->GetIContrFlag2()-1;
-            debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
-            // Do not check pQCD LO or multiplicative corrections
-            if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
-                !(kType == kFixedOrder && kOrder == kLeading)) {
-               NoExtra = false;
-               if (c->GetNScalevar() < (int)scalevarmax) {
-                  scalevarmax = c->GetNScalevar();
-               }
-            }
-         }
+      for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
+	 fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
+	 // Check on contributions with extra scale tables (NLO, threshold corrections)
+	 int kType  = c->GetIContrFlag1()-1;
+	 int kOrder = c->GetIContrFlag2()-1;
+	 debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
+	 // Do not check pQCD LO or multiplicative corrections
+	 if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
+	     !(kType == kFixedOrder && kOrder == kLeading)) {
+	    NoExtra = false;
+	    if (c->GetNScalevar() < (int)scalevarmax) {
+	       scalevarmax = c->GetNScalevar();
+	    }
+	 }
       }
    }
    if (NoExtra) {scalevarmax = 1;}
@@ -970,6 +954,11 @@ void fastNLOReader::CalcReferenceCrossSection() {
    XSectionRef_s2.resize(NObsBin);
 
    if (!GetIsFlexibleScaleTable()) {
+      fastNLOCoeffAddBase* Coeff_LO_Ref = GetReferenceTable(kLeading);
+      fastNLOCoeffAddBase* Coeff_NLO_Ref = GetReferenceTable(kNextToLeading);
+      fastNLOCoeffAddBase* Coeff_NNLO_Ref = GetReferenceTable(kNextToNextToLeading);
+      if ( Coeff_LO_Ref && Coeff_NLO_Ref && Coeff_NNLO_Ref )  
+	 warn["CalcReferenceCrossSection"]<<"Found NNLO reference cross section. Returning reference of LO+NLO+NNLO.\n";
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
          for (int i=0; i<NObsBin; i++) {
             double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
@@ -981,6 +970,12 @@ void fastNLOReader::CalcReferenceCrossSection() {
 	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
                XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
             }
+	    if ( Coeff_NNLO_Ref ) {
+	       for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
+		  fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
+		  XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
+	       }
+	    }
          }
       }
       else
@@ -995,12 +990,13 @@ void fastNLOReader::CalcReferenceCrossSection() {
             XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cLO->SigmaRef_s2[i][n] * unit / cLO->GetNevt(i,n);
          }
-         fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kLeading][kNextToLeading];
+         fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
          for (int n=0; n<cNLO->GetNSubproc(); n++) {
             XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit / cNLO->GetNevt(i,n);
          }
+	 // todo: nnlo reference cross section
       }
    }
 }

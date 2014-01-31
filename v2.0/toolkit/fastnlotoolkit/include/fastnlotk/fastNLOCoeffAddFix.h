@@ -28,7 +28,8 @@ public:
    int GetNScalevar() const { return Nscalevar[0];}
    v1d GetAvailableScaleFactors() const { return ScaleFac[0]; }
    double GetScaleFactor(int iVar) const { 
-      if ( iVar >= (int)ScaleFac[0].size() ) error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
+      if ( iVar >= (int)ScaleFac[0].size() ) 
+	 this->error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
       return ScaleFac[0][iVar];
    }
 

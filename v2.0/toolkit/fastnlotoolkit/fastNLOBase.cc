@@ -27,6 +27,20 @@ fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(
 
 
 //______________________________________________________________________________
+fastNLOBase::fastNLOBase(const fastNLOBase& other) : 
+   PrimalScream("fastNLOBase"), 
+   ffilename(other.ffilename), fPrecision(other.fPrecision), 
+   Itabversion(other.Itabversion), ScenName(other.ScenName), 
+   Ncontrib(other.Ncontrib), Nmult(other.Nmult), 
+   Ndata(other.Ndata), NuserString(other.NuserString), 
+   NuserInt(other.NuserInt), NuserFloat(other.NuserFloat), 
+   Imachine(other.Imachine) ,ifilestream(NULL) , ofilestream(NULL)
+{
+   //! copy constructor
+}
+
+
+//______________________________________________________________________________
 fastNLOBase::~fastNLOBase(){
    if(ifilestream) delete ifilestream;
    if(ofilestream) delete ofilestream;
