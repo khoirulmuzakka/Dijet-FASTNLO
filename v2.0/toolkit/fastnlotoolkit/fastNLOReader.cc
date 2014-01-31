@@ -480,8 +480,48 @@ fastNLOReader::~fastNLOReader(void) {
 
 //______________________________________________________________________________
 fastNLOReader::fastNLOReader(const fastNLOReader& other) :
-   fastNLOTable(other) {
-   cout<<"todo. reassign pointers Coeff_LO_Ref, Coeff_NLO_Ref, fCoeffData, BBlocksSMCalc[][], BBlocksNewPhys[][], here."<<endl;
+   fastNLOTable(other),
+   ffilename(other.ffilename), fScalevar(fScalevar), fScaleFacMuR(other.fScaleFacMuR),
+   fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
+   fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
+   bUseSMCalc(other.bUseSMCalc), bUseNewPhys(other.bUseNewPhys), 
+   fCoeffData( new fastNLOCoeffData(*other.fCoeffData)),
+   Coeff_LO_Ref( new fastNLOCoeffAddBase(*other.Coeff_LO_Ref)),
+   Coeff_NLO_Ref( new fastNLOCoeffAddBase(*other.Coeff_NLO_Ref)),
+   BBlocksSMCalc(other.BBlocksSMCalc.size()), BBlocksNewPhys(other.BBlocksNewPhys.size()),
+   XSection_LO(other.XSection_LO), XSection(other.XSection), kFactor(other.kFactor),
+   QScale_LO(other.QScale_LO), QScale(other.QScale), XSectionRef(other.XSectionRef),
+   XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
+   XSectionRef_s2(other.XSectionRef_s2)
+{
+   //! Copy constructor
+   for (std::size_t i = 0; i < other.BBlocksSMCalc.size(); ++i) {
+      for (std::size_t j = 0; j < other.BBlocksSMCalc[i].size(); ++j) {
+       fastNLOCoeffBase* c = other.BBlocksSMCalc[i][j];
+       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
+          BBlocksSMCalc[i][j] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
+       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
+          BBlocksSMCalc[i][j] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
+       else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
+          BBlocksSMCalc[i][j] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
+       else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
+          BBlocksSMCalc[i][j] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
+      }
+   }
+   for (std::size_t i = 0; i < other.BBlocksNewPhys.size(); ++i) {
+      for (std::size_t j = 0; j < other.BBlocksNewPhys[i].size(); ++j) {
+       fastNLOCoeffBase* c = other.BBlocksNewPhys[i][j];
+       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
+          BBlocksNewPhys[i][j] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
+       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
+          BBlocksNewPhys[i][j] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
+       else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
+          BBlocksNewPhys[i][j] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
+       else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
+          BBlocksNewPhys[i][j] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
+      }
+   }
+
 }
 
 
