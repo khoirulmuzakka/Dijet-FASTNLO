@@ -1,9 +1,9 @@
 #ifndef __fastNLOBase__
 #define __fastNLOBase__
 
-#include <fstream>
-#include <iostream>
-#include <istream>
+// #include <fstream>
+// #include <iostream>
+// #include <istream>
 #include <string>
 #include "speaker.h"
 
@@ -24,8 +24,6 @@ public:
    //int OpenFileRead();							// open stream
    void WriteTable();							//!< write full table to disk
    int WriteHeader(ostream *table);					//!< write hader using ostream
-   void RewindRead();							
-   void SkipBlockA1A2();
    ofstream *OpenFileWrite();
    ofstream *OpenFileRewrite();
    void CloseFileWrite();

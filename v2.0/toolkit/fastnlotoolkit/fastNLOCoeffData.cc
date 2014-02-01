@@ -38,6 +38,13 @@ fastNLOCoeffData::fastNLOCoeffData(const fastNLOCoeffBase& base) : fastNLOCoeffB
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffBase* fastNLOCoeffData::Clone() const {
+   //! Use has to take care to delete this object later
+   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffData(*this));
+}
+
+
+///________________________________________________________________________________________________________________ //
 int fastNLOCoeffData::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);

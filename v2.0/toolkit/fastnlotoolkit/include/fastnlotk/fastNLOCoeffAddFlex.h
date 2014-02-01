@@ -17,12 +17,13 @@ public:
    fastNLOCoeffAddFlex(int NObsBin, int iLOord);
    fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord);
    virtual ~fastNLOCoeffAddFlex(){;}
-   static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
+   virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
+    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
    int Read(istream *table);
    void ReadRest(istream *table);
    virtual void Write(ostream *table);
    virtual void Print() const;
-   virtual void Add(const fastNLOCoeffAddFlex& other);
+   virtual void Add(const fastNLOCoeffAddBase& other);
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };

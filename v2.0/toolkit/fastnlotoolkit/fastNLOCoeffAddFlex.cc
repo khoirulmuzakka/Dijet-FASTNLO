@@ -43,6 +43,13 @@ fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOo
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffBase* fastNLOCoeffAddFlex::Clone() const {
+   //! Use has to take care to delete this object later
+   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddFlex(*this));
+}
+
+
+///________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFlex::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
@@ -186,22 +193,26 @@ void fastNLOCoeffAddFlex::Write(ostream *table) {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddFlex& other){
-   CheckCoeffConstants(this);
-   Nevt += other.Nevt;
-   fastNLOTools::AddVectors( SigmaTildeMuIndep , other.SigmaTildeMuIndep );
+void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
+   bool ok = CheckCoeffConstants(this);
+   if ( !ok ) {
+      error["Add"]<<"Incompatible table."<<endl;
+   }
+   const fastNLOCoeffAddFlex& othflex = (const fastNLOCoeffAddFlex&) other;
+   Nevt += othflex.Nevt;
+   fastNLOTools::AddVectors( SigmaTildeMuIndep , othflex.SigmaTildeMuIndep );
    if ( NScaleDep==3 || NScaleDep>=5 ) {
-      fastNLOTools::AddVectors( SigmaTildeMuFDep , other.SigmaTildeMuFDep );
-      fastNLOTools::AddVectors( SigmaTildeMuRDep , other.SigmaTildeMuRDep );
+      fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
+      fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
       if ( NScaleDep>=6 ) {
-	 fastNLOTools::AddVectors( SigmaTildeMuRRDep , other.SigmaTildeMuRRDep );
-	 fastNLOTools::AddVectors( SigmaTildeMuFFDep , other.SigmaTildeMuFFDep );
-	 fastNLOTools::AddVectors( SigmaTildeMuRFDep , other.SigmaTildeMuRFDep );
+	 fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
+	 fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
+	 fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
       }
    }
-   fastNLOTools::AddVectors( SigmaRefMixed , other.SigmaRefMixed );
-   fastNLOTools::AddVectors( SigmaRef_s1 , other.SigmaRef_s1 );
-   fastNLOTools::AddVectors( SigmaRef_s2 , other.SigmaRef_s2 );
+   fastNLOTools::AddVectors( SigmaRefMixed , othflex.SigmaRefMixed );
+   fastNLOTools::AddVectors( SigmaRef_s1 , othflex.SigmaRef_s1 );
+   fastNLOTools::AddVectors( SigmaRef_s2 , othflex.SigmaRef_s2 );
 }
 
 

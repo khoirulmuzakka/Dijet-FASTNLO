@@ -40,6 +40,13 @@ fastNLOCoeffAddBase::fastNLOCoeffAddBase(const fastNLOCoeffBase& base ) : fastNL
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffBase* fastNLOCoeffAddBase::Clone() const {
+   //! Use has to take care to delete this object later
+   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddBase(*this));
+}
+
+
+///________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    CheckCoeffConstants(this);

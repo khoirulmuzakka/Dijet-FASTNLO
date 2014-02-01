@@ -20,6 +20,13 @@ fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) : PrimalScream("fastNLOCoeffBase
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
+   //! Use has to take care to delete this object later
+   return new fastNLOCoeffBase(*this);
+}
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffBase::Read(istream* table){
    // basic read function.
    // reads in only 'base'-variables.

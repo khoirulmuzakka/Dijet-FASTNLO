@@ -43,6 +43,13 @@ fastNLOCoeffAddFix::fastNLOCoeffAddFix(const fastNLOCoeffBase& base) : fastNLOCo
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffBase* fastNLOCoeffAddFix::Clone() const {
+   //! Use has to take care to delete this object later
+   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddFix(*this));
+}
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::Read(istream *table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
@@ -152,11 +159,16 @@ void fastNLOCoeffAddFix::Write(ostream* table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddFix& other){
+void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other){
    //! Add another coefficient table to this table
-   CheckCoeffConstants(this);
-   Nevt += other.Nevt;
-   fastNLOTools::AddVectors( SigmaTilde , other.SigmaTilde);
+   bool ok = CheckCoeffConstants(this);
+   if ( !ok ) {
+      error["Add"]<<"Cannot add tables."<<endl;
+      return;
+   }
+   const fastNLOCoeffAddFix& othfix = (const fastNLOCoeffAddFix&)other;
+   Nevt += othfix.Nevt;
+   fastNLOTools::AddVectors( SigmaTilde , othfix.SigmaTilde);
 }
 
 

@@ -36,15 +36,7 @@ fastNLOTable::fastNLOTable(const fastNLOTable& tab)
 {
    //! Copy constructor
    for (std::size_t i = 0; i < tab.fCoeff.size(); ++i) {
-      fastNLOCoeffBase* c = tab.fCoeff[i];
-      if ( fastNLOCoeffData::CheckCoeffConstants(c,true) )
-	 fCoeff[i] = new fastNLOCoeffData((fastNLOCoeffData&)*c);
-      else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
-	 fCoeff[i] = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*c);
-      else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) )
- 	 fCoeff[i] = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*c);
-      else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
-	 fCoeff[i] = new fastNLOCoeffMult((fastNLOCoeffMult&)*c); 
+      fCoeff[i] = tab.fCoeff[i]->Clone();
    }
 }
 
@@ -410,9 +402,9 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
                else {
                   debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
                   if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
-                     ((fastNLOCoeffAddFlex*)lhs)->Add((fastNLOCoeffAddFlex&)*cadd);
+                     lhs->Add(*cadd);
 		  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
-                     ((fastNLOCoeffAddFix*)lhs)->Add((fastNLOCoeffAddFix&)*cadd);
+                     lhs->Add(*cadd);
 		  wasAdded = true;
                }
             }

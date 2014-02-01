@@ -110,34 +110,6 @@ int fastNLOBase::ReadHeader(istream *table){
 
 
 //______________________________________________________________________________
-void fastNLOBase::RewindRead(){
-   ifilestream->close();
-   ifilestream->open(ffilename.c_str(),ios::in);
-}
-
-
-//______________________________________________________________________________
-void fastNLOBase::SkipBlockA1A2(){
-   char buffer[257];
-   int key;
-   int count = 0;
-   while(!ifilestream->eof()){
-      ifilestream->getline(buffer,256);
-      sscanf(buffer,"%d",&key);
-      if(key == fastNLO::tablemagicno) count++;
-      if(count == 3){
-         // Put magic number back
-         ifilestream->unget();
-         for(int i=0;i<(int)(log10((double)key)+1);i++){
-            ifilestream->unget();
-         }
-         break;
-      }
-   }
-}
-
-
-//______________________________________________________________________________
 void fastNLOBase::WriteTable (){
    //
    // WriteTable(). writes the full FastNLO table to

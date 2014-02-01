@@ -19,9 +19,11 @@ class fastNLOCoeffBase : public PrimalScream {
    friend class fastNLOTable;
 
 public:
-   fastNLOCoeffBase(int NObsBin);
-   virtual ~fastNLOCoeffBase(){;};
-   //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);
+   fastNLOCoeffBase(int NObsBin);						//! Use this constructor
+   virtual ~fastNLOCoeffBase(){;};						//! destructor	
+   //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);				//! Use compiler-default
+   virtual fastNLOCoeffBase* Clone() const;					//!< returns 'new' copy of this instance.
+   
    int Read(istream *table);
    int ReadBase(istream *table);
    virtual void Write(ostream *table);
