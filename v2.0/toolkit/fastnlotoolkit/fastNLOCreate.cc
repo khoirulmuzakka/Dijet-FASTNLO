@@ -1595,12 +1595,15 @@ void fastNLOCreate::WriteWarmupTable(){
    string warmupfile = GetWarmupTableFilename();
    info["WriteWarmupTable"]<<"Writing warmup table to: "<<warmupfile<<endl;
    SetFilename(warmupfile);
+
    // open stream;
-   OpenFileRewrite();
+   ofstream* table = OpenFileWrite();
    // write to disk
-   OutWarmup(warmupfile);
+   OutWarmup(*table);
    // close file
-   CloseStream();
+   table->close();
+   delete table;
+   // reset filename
    SetFilename(tempfn);
 }
 
@@ -1608,52 +1611,51 @@ void fastNLOCreate::WriteWarmupTable(){
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::PrintWarmupValues(){
-   OutWarmup("");
+   OutWarmup(std::cout);
 }
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::OutWarmup(string file){
+void fastNLOCreate::OutWarmup(ostream& strm){
    if ( fWx.empty() ) {
       warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
 //       warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
 //       InitWarmupArrays();
       error["OutWarmup"]<<" Do not write out unreasonable warmup table. Exiting."<<endl; exit(1);
    }
-   std::ostream& sout = file == "" ?
-      std::cout : (*ofilestream);
+   
 
-   sout<<"! This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
-   sout<<"! The values are valid for the scenario "<<GetScenName() << endl;
-   sout<<"! and if calculated with the steerfile: "<< fSteerfile <<endl;
-   sout<<"! but only if no serious changes have been performed since its creation."<<endl;
-   sout<<"! "<<endl;
-   sout<<"! Delete this file, if you want fastNLO to calculate a new one."<<endl;
-   sout<<"! "<<endl;
-   sout<<"! This file has been calculated using "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
-   sout<<"!   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
-   sout<<"! Please check by eye for reasonability of the values."<<endl;
-   sout<<" " <<endl;
+   strm<<"! This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
+   strm<<"! The values are valid for the scenario "<<GetScenName() << endl;
+   strm<<"! and if calculated with the steerfile: "<< fSteerfile <<endl;
+   strm<<"! but only if no serious changes have been performed since its creation."<<endl;
+   strm<<"! "<<endl;
+   strm<<"! Delete this file, if you want fastNLO to calculate a new one."<<endl;
+   strm<<"! "<<endl;
+   strm<<"! This file has been calculated using "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
+   strm<<"!   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
+   strm<<"! Please check by eye for reasonability of the values."<<endl;
+   strm<<" " <<endl;
 
    // write variables of warmup run
-   sout<<"Warmup.OrderInAlphasOfCalculation\t"<<  fIOrd <<endl;
-   sout<<"Warmup.ScaleDescriptionScale1\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
+   strm<<"Warmup.OrderInAlphasOfCalculation\t"<<  fIOrd <<endl;
+   strm<<"Warmup.ScaleDescriptionScale1\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
    if ( fIsFlexibleScale ) 
-      sout<<"Warmup.ScaleDescriptionScale2\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
-   sout<<"Warmup.DifferentialDimension\t\t"<< NDim <<endl;
-   sout<<"Warmup.DimensionLabels {\n  ";
-   for ( int i = 0 ; i < NDim; i ++ ) sout<<"\""<<DimLabel[i]<<"\"  ";
-   sout<<"\n} "<<endl;
+      strm<<"Warmup.ScaleDescriptionScale2\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
+   strm<<"Warmup.DifferentialDimension\t\t"<< NDim <<endl;
+   strm<<"Warmup.DimensionLabels {\n  ";
+   for ( int i = 0 ; i < NDim; i ++ ) strm<<"\""<<DimLabel[i]<<"\"  ";
+   strm<<"\n} "<<endl;
    
-   sout<<"Warmup.DimensionIsDifferential {\n  ";
-   for ( int i = 0 ; i < NDim; i ++ ) sout<<"\""<<IDiffBin[i]<<"\"  ";
-   sout<<"\n} "<<endl;
-   sout<<endl;
+   strm<<"Warmup.DimensionIsDifferential {\n  ";
+   for ( int i = 0 ; i < NDim; i ++ ) strm<<"\""<<IDiffBin[i]<<"\"  ";
+   strm<<"\n} "<<endl;
+   strm<<endl;
 
    // write readable table
    char buf[4000];
-   sout<<"WarmupValues {{"<<endl;
-   //sout<<"   xmin      xmax     mu1min    m1max     mu2min    mu2max "<<endl;
+   strm<<"WarmupValues {{"<<endl;
+   //strm<<"   xmin      xmax     mu1min    m1max     mu2min    mu2max "<<endl;
    if ( fIsFlexibleScale ) {
       // table header
       sprintf(buf,"   %9s  %9s  %14s  %14s  %14s  %14s",
@@ -1662,7 +1664,7 @@ void fastNLOCreate::OutWarmup(string file){
               GetWarmupHeader(0,"max").c_str(),
               GetWarmupHeader(1,"min").c_str(),
               GetWarmupHeader(1,"max").c_str());
-      sout<<buf; 
+      strm<<buf; 
       if ( NDim == 1 )  
 	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
       else if ( NDim == 2 )
@@ -1670,9 +1672,9 @@ void fastNLOCreate::OutWarmup(string file){
       else if ( NDim == 3 )
 	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
 		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
-      sout<<buf; 
+      strm<<buf; 
       sprintf(buf,"  %12s","BinWidth"); 
-      sout<<buf<<endl;
+      strm<<buf<<endl;
       
       // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
@@ -1682,7 +1684,7 @@ void fastNLOCreate::OutWarmup(string file){
          }
          sprintf(buf,"   %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
                  fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
-	 sout<<buf; 
+	 strm<<buf; 
 	 if ( NDim == 1 )  
 	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second); 
 	 else if ( NDim == 2 )
@@ -1690,9 +1692,9 @@ void fastNLOCreate::OutWarmup(string file){
 	 else if ( NDim == 3 )
 	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
 		    Bin[i][0].first , Bin[i][0].second,Bin[i][1].first , Bin[i][1].second, Bin[i][2].first , Bin[i][2].second);
-	 sout<<buf; 
+	 strm<<buf; 
 	 sprintf(buf,"  %12.3f",BinSize[i]);
-         sout<<buf<<endl;
+         strm<<buf<<endl;
       }
    }
    else {
@@ -1703,7 +1705,7 @@ void fastNLOCreate::OutWarmup(string file){
               "x_min","x_max",
               GetWarmupHeader(0,"min").c_str(),
               GetWarmupHeader(0,"max").c_str() );
-      sout<<buf;
+      strm<<buf;
       if ( NDim == 1 )  
 	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
       else if ( NDim == 2 )
@@ -1711,9 +1713,9 @@ void fastNLOCreate::OutWarmup(string file){
       else if ( NDim == 3 )
 	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
 		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
-      sout<<buf; 
+      strm<<buf; 
       sprintf(buf,"  %12s","BinWidth"); 
-      sout<<buf<<endl;
+      strm<<buf<<endl;
 
       // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
@@ -1723,7 +1725,7 @@ void fastNLOCreate::OutWarmup(string file){
          }
          sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
                  fWx[i].first, fWx[i].second, fWMu1[i].first, fWMu1[i].second);
- 	 sout<<buf; 
+ 	 strm<<buf; 
 	 if ( NDim == 1 )  
 	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first, Bin[i][0].second); 
 	 else if ( NDim == 2 )
@@ -1731,13 +1733,12 @@ void fastNLOCreate::OutWarmup(string file){
 	 else if ( NDim == 3 )
 	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
 		    Bin[i][0].first , Bin[i][0].second, Bin[i][1].first, Bin[i][1].second, Bin[i][2].first, Bin[i][2].second);
-	 sout<<buf; 
+	 strm<<buf; 
 	 sprintf(buf,"  %12.3f",BinSize[i]);
-	 sout<<buf<<endl;
+	 strm<<buf<<endl;
       }
    }
-   sout<<"}}"<<endl;
-   //*(new ofstream(filename.Data()));
+   strm<<"}}"<<endl;
 }
 
 

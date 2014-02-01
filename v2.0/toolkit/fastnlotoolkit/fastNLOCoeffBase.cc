@@ -105,24 +105,24 @@ int fastNLOCoeffBase::EndReadCoeff(istream* table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::Write(ostream* table) {
+void fastNLOCoeffBase::Write(ostream& table) {
    debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
-   *table << tablemagicno << endl;
-   *table << IXsectUnits << endl;
-   *table << IDataFlag << endl;
-   *table << IAddMultFlag << endl;
-   *table << IContrFlag1 << endl;
-   *table << IContrFlag2 << endl;
-   *table << NScaleDep << endl;
-   *table << CtrbDescript.size() << endl;
+   table << tablemagicno << endl;
+   table << IXsectUnits << endl;
+   table << IDataFlag << endl;
+   table << IAddMultFlag << endl;
+   table << IContrFlag1 << endl;
+   table << IContrFlag2 << endl;
+   table << NScaleDep << endl;
+   table << CtrbDescript.size() << endl;
    //printf("  *  fastNLOCoeffBase::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
    for(unsigned int i=0;i<CtrbDescript.size();i++){
-      *table << CtrbDescript[i] << endl;
+      table << CtrbDescript[i] << endl;
    }
-   *table << CodeDescript.size() << endl;
+   table << CodeDescript.size() << endl;
    for(unsigned int i=0;i<CodeDescript.size();i++){
-      *table << CodeDescript[i] << endl;
+      table << CodeDescript[i] << endl;
    }
 }
 

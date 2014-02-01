@@ -15,13 +15,13 @@ bool fastNLOBase::fWelcomeOnce = false;
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), ofilestream(0), fPrecision(8) {
+fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), fPrecision(8) {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), ofilestream(0), fPrecision(8)  {
+fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), fPrecision(8)  {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
@@ -34,7 +34,7 @@ fastNLOBase::fastNLOBase(const fastNLOBase& other) :
    Ncontrib(other.Ncontrib), Nmult(other.Nmult), 
    Ndata(other.Ndata), NuserString(other.NuserString), 
    NuserInt(other.NuserInt), NuserFloat(other.NuserFloat), 
-   Imachine(other.Imachine) ,ifilestream(NULL) , ofilestream(NULL)
+   Imachine(other.Imachine) ,ifilestream(NULL) 
 {
    //! copy constructor
 }
@@ -43,7 +43,7 @@ fastNLOBase::fastNLOBase(const fastNLOBase& other) :
 //______________________________________________________________________________
 fastNLOBase::~fastNLOBase(){
    if(ifilestream) delete ifilestream;
-   if(ofilestream) delete ofilestream;
+   //   if(ofilestream) delete ofilestream;
 }
 
 
@@ -111,72 +111,61 @@ int fastNLOBase::ReadHeader(istream *table){
 
 //______________________________________________________________________________
 void fastNLOBase::WriteTable (){
-   //
-   // WriteTable(). writes the full FastNLO table to
-   // the previously defined ffilename on disk.
-   //
-   // this function should be overwritten by
-   // fastNLOTable::WriteTable();
-   //
-   OpenFileRewrite();
-   WriteHeader(ofilestream);
-   CloseFileWrite();
+   //!
+   //! WriteTable(). writes the full FastNLO table to
+   //! the previously defined ffilename on disk.
+   //!
+   //! this function is overwritten by
+   //! fastNLOTable::WriteTable();
+   //!
+   ofstream* table = OpenFileWrite();
+   WriteHeader(*table);
+   CloseFileWrite(*table);
 }
 
 
 //______________________________________________________________________________
-int fastNLOBase::WriteHeader(ostream *table){
-   *table << fastNLO::tablemagicno << endl;
-   *table << Itabversion << endl;
-   *table << ScenName << endl;
-   *table << Ncontrib << endl;
-   *table << Nmult << endl;
-   *table << Ndata << endl;
-   *table << NuserString << endl;
-   *table << NuserInt << endl;
-   *table << NuserFloat << endl;
-   *table << Imachine << endl;
-   return 0;
+void fastNLOBase::WriteHeader(ostream& table){
+   table << fastNLO::tablemagicno << endl;
+   table << Itabversion << endl;
+   table << ScenName << endl;
+   table << Ncontrib << endl;
+   table << Nmult << endl;
+   table << Ndata << endl;
+   table << NuserString << endl;
+   table << NuserInt << endl;
+   table << NuserFloat << endl;
+   table << Imachine << endl;
 }
 
 
 //______________________________________________________________________________
-ofstream *fastNLOBase::OpenFileWrite(){
-   // do not overwrite existing table
+ofstream* fastNLOBase::OpenFileWrite(){
+   //! open ofstream for writing tables to
+   //! write to ffilename.
+   //! do not overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0){
-      printf("fastNLOBase::OpenFileWrite: File for writing the table exists: %s.\nPlease remove it.\n",ffilename.c_str());
+      error["OpenFileWrite"]<<"File for writing the table exists: "<<ffilename<<".\nPlease remove it."<<endl;
       exit(2);
    }
-   return OpenFileRewrite();
+   ofstream* stream = new ofstream(ffilename.c_str(),ios::out);
+   if(!stream->good()){
+      error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Stopping."<<endl;
+      exit(2);
+   }
+   stream->precision(fPrecision);
+   return stream;
 }
 
 
 //______________________________________________________________________________
-ofstream *fastNLOBase::OpenFileRewrite(){
-   ofilestream = new ofstream(ffilename.c_str(),ios::out);
-   if(!ofilestream->good()){
-       printf("fastNLOBase::OpenFileWrite: Cannot open %s for writing. Stopping.\n",ffilename.c_str());
-       exit(2);
-    }
-   ofilestream->precision(fPrecision);
-   //ofilestream->precision(18);
-   return ofilestream;
+void fastNLOBase::CloseFileWrite(ofstream& table){
+   //! close stream and delete object;
+   table << fastNLO::tablemagicno << endl;
+   table << fastNLO::tablemagicno << endl;
+   table.close();
+   delete &table;
 }
-
-
-//______________________________________________________________________________
-void fastNLOBase::CloseFileWrite(){
-   *ofilestream << fastNLO::tablemagicno << endl;
-   *ofilestream << fastNLO::tablemagicno << endl;
-   CloseStream();
-}
-
-
-//______________________________________________________________________________
-void fastNLOBase::CloseStream(){
-   ofilestream->close();
-}
-
 
 
 //______________________________________________________________________________

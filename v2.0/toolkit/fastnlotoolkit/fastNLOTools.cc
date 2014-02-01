@@ -141,7 +141,7 @@ namespace fastNLOTools {
 
 
    //______________________________________________________________________________
-   int WriteVector( const vector<string >& v, ostream *table , unsigned long long Nevt ) {
+   int WriteVector( const vector<string >& v, ostream& table , unsigned long long Nevt ) {
       if ( Nevt != 0 ) {
 	 error["fastNLOTools::WriteVector"]<<"Cannot scale a string table by Nevt (Nevt="<<Nevt<<")."<<endl;
 	 return -1000;
@@ -149,15 +149,15 @@ namespace fastNLOTools {
       else return _Write1DVector(v,table);
    }
    //______________________________________________________________________________
-   int WriteVector( const vector<double >& v, ostream *table , unsigned long long Nevt ) {
+   int WriteVector( const vector<double >& v, ostream& table , unsigned long long Nevt ) {
       return _Write1DVectorByN(v,table,Nevt);
    }
    //______________________________________________________________________________
-   int WriteVector( const vector<int >& v, ostream *table , unsigned long long Nevt ) {
+   int WriteVector( const vector<int >& v, ostream& table , unsigned long long Nevt ) {
       return _Write1DVectorByN(v,table,Nevt);
    }
    //______________________________________________________________________________
-   int WriteVector( const vector<unsigned long long >& v, ostream *table , unsigned long long Nevt ) {
+   int WriteVector( const vector<unsigned long long >& v, ostream& table , unsigned long long Nevt ) {
       return _Write1DVectorByN(v,table,Nevt);
    }
 
@@ -177,7 +177,7 @@ namespace fastNLOTools {
 
 
    //______________________________________________________________________________
-   int WriteFlexibleVector(const vector<double >& v, ostream *table, int nProcLast, unsigned long long Nevt) {
+   int WriteFlexibleVector(const vector<double >& v, ostream& table, int nProcLast, unsigned long long Nevt) {
       //! Write 1-dimensional flexible table to disk
       //! Nevt: Divide all values by Nevt
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
@@ -187,7 +187,7 @@ namespace fastNLOTools {
 	 return -1000;
       }
       if ( nProcLast == 0 ) 
-	 *table << v.size() << endl;
+	 table << v.size() << endl;
       if ( nProcLast!=0 && nProcLast != v.size() ) 
 	 warn["fastNLOTools::WriteFlexibleVector(double)"]
 	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -197,7 +197,7 @@ namespace fastNLOTools {
 
 
    //______________________________________________________________________________
-   int WriteFlexibleVector(const vector<string >& v, ostream *table, int nProcLast, unsigned long long Nevt) {
+   int WriteFlexibleVector(const vector<string >& v, ostream& table, int nProcLast, unsigned long long Nevt) {
       //! Write 1-dimensional flexible table to disk
       //! Nevt: ignoring Nevt !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
@@ -205,7 +205,7 @@ namespace fastNLOTools {
       if ( Nevt!= 1 ) warn["fastNLOTools::WriteFlexibleVector(string)"]
 	 <<"String variable cannot be divided by integer number! Ignoring Nevt="<<Nevt<<endl;
       if ( nProcLast == 0 ) 
-	 *table << v.size() << endl;
+	 table << v.size() << endl;
       if ( nProcLast!=0 && nProcLast != v.size() ) 
 	 warn["fastNLOTools::WriteFlexibleVector(string)"]
 	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -214,7 +214,7 @@ namespace fastNLOTools {
    }
 
    //______________________________________________________________________________
-   int WriteFlexibleVector(const vector<unsigned long long >& v, ostream *table, int nProcLast, unsigned long long Nevt) {
+   int WriteFlexibleVector(const vector<unsigned long long >& v, ostream& table, int nProcLast, unsigned long long Nevt) {
       //! Write 1-dimensional flexible table to disk
       //! Nevt: ignoring Nevt !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
@@ -222,7 +222,7 @@ namespace fastNLOTools {
       if ( Nevt!= 1 ) warn["fastNLOTools::WriteFlexibleVector(unsigned long long)"]
 	 <<"String variable cannot be divided by integer number! Ignoring Nevt="<<Nevt<<endl;
       if ( nProcLast == 0 ) 
-	 *table << v.size() << endl;
+	 table << v.size() << endl;
       if ( nProcLast!=0 && nProcLast != v.size() ) 
 	 warn["fastNLOTools::WriteFlexibleVector(string)"]
 	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -231,7 +231,7 @@ namespace fastNLOTools {
    }
 
    //______________________________________________________________________________
-   int WriteFlexibleVector(const vector<int >& v, ostream *table, int nProcLast, unsigned long long Nevt) {
+   int WriteFlexibleVector(const vector<int >& v, ostream& table, int nProcLast, unsigned long long Nevt) {
       //! Write 1-dimensional flexible table to disk
       //! Nevt: ignoring Nevt !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
@@ -239,7 +239,7 @@ namespace fastNLOTools {
       if ( Nevt!= 1 ) warn["fastNLOTools::WriteFlexibleVector(int)"]
 	 <<"Refusing dividing integer numbers by each other! Ignoring Nevt="<<Nevt<<endl;
       if ( nProcLast == 0 ) 
-	 *table << v.size() << endl;
+	 table << v.size() << endl;
       if ( nProcLast!=0 && nProcLast != v.size() ) 
 	 warn["fastNLOTools::WriteFlexibleVector(int)"]
 	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;

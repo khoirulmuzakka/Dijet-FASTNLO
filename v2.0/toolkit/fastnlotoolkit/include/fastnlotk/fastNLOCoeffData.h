@@ -17,7 +17,7 @@ public:
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    int  Read(istream *table);
    void ReadRest(istream *table);
-   virtual void Write(ostream *table);
+   virtual void Write(ostream& table);
    virtual void Print() const;
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
 

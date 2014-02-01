@@ -115,35 +115,35 @@ int fastNLOCoeffData::ReadCoeffData(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffData::Write(ostream *table) {
+void fastNLOCoeffData::Write(ostream& table) {
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
 
    //if(IDataFlag==1){
-   *table << Nuncorrel << endl;
+   table << Nuncorrel << endl;
    for(int i=0;i<Nuncorrel;i++){
-      *table << UncDescr[i] << endl;
+      table << UncDescr[i] << endl;
    }
-   *table << Ncorrel << endl;
+   table << Ncorrel << endl;
    for(int i=0;i<Ncorrel;i++){
-      *table << CorDescr[i]  << endl;
+      table << CorDescr[i]  << endl;
    }
    for(int i=0;i<fNObsBins;i++){
-      *table << Xcenter[i] << endl;
-      *table << Value[i] << endl;
+      table << Xcenter[i] << endl;
+      table << Value[i] << endl;
       for(int j=0;j<Nuncorrel;j++){
-	 *table << UncorLo[i][j] << endl;
-	 *table << UncorHi[i][j] << endl;
+	 table << UncorLo[i][j] << endl;
+	 table << UncorHi[i][j] << endl;
       }
       for(int j=0;j<Ncorrel;j++){
-	 *table << CorrLo[i][j] << endl;
-	 *table << CorrHi[i][j] << endl;
+	 table << CorrLo[i][j] << endl;
+	 table << CorrHi[i][j] << endl;
       }
    }
-   *table << NErrMatrix << endl;
+   table << NErrMatrix << endl;
    for(int i=0;i<NErrMatrix;i++){
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
-	 *table << matrixelement[i][j] << endl;
+	 table << matrixelement[i][j] << endl;
       }
    }
 }

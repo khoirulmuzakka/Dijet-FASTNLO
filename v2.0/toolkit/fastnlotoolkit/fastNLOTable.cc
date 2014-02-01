@@ -109,24 +109,23 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteTable() {
+   //! Write fastNLO table to file 'ffilename' (member)
    info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
-   OpenFileRewrite();
-   fastNLOBase::WriteHeader(ofilestream);
-   //    for (int k=0;k<GetNcontrib();k++){
-   //       GetBlockB(k)->Nevt = (long long int)nevents;
-   //    }
-   WriteScenario(ofilestream);
+   ofstream* table = OpenFileWrite();
+   WriteHeader(*table);
+   WriteScenario(*table);
    for(int i=0;i<GetNcontrib();i++){
-      info["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
-      GetCoeffTable(i)->Write(ofilestream);
+      debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
+      GetCoeffTable(i)->Write(*table);
    }
-   CloseFileWrite();
+   CloseFileWrite(*table);
 }
 
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteTable(string filename) {
-   string tempfilename = filename;
+   //! Write fastNLO table to file 'filename'
+   string tempfilename = ffilename;
    SetFilename(filename);
    WriteTable();
    SetFilename(tempfilename);
@@ -252,46 +251,45 @@ int fastNLOTable::ReadScenario(istream *table){
 
 
 // ___________________________________________________________________________________________________
-int fastNLOTable::WriteScenario(ostream *table){
-   *table << tablemagicno << endl;
-   *table << Ipublunits << endl;
+void fastNLOTable::WriteScenario(ostream& table){
+   table << tablemagicno << endl;
+   table << Ipublunits << endl;
    int NScDescript =  ScDescript.size();
-   *table << NScDescript << endl;
+   table << NScDescript << endl;
    for(int i=0;i<NScDescript;i++){
-      *table << ScDescript[i] << endl;
+      table << ScDescript[i] << endl;
    }
-   *table << Ecms << endl;
-   *table << ILOord << endl;
-   *table << NObsBin << endl;
-   *table << NDim << endl;
+   table << Ecms << endl;
+   table << ILOord << endl;
+   table << NObsBin << endl;
+   table << NDim << endl;
    for(int i=NDim-1;i>=0;i--){
-      *table << DimLabel[i] << endl;
+      table << DimLabel[i] << endl;
    }
    for(int i=NDim-1;i>=0;i--){
-      *table << IDiffBin[i] << endl;
+      table << IDiffBin[i] << endl;
    }
    for(int i=0;i<NObsBin;i++){
       for(int j=NDim-1;j>=0;j--){
-         *table <<  Bin[i][j].first  << endl;
-         //         if(IDiffBin[j]==2) *table <<  UpBin[i][j]  << endl;
-         if(IDiffBin[j]==0 || IDiffBin[j]==2) *table <<  Bin[i][j].second  << endl;
+         table <<  Bin[i][j].first  << endl;
+         //         if(IDiffBin[j]==2) table <<  UpBin[i][j]  << endl;
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) table <<  Bin[i][j].second  << endl;
       }
    }
    for(int i=0;i<NObsBin;i++){
-     *table << BinSize[i]  << endl;
+     table << BinSize[i]  << endl;
    }
 
-   *table << INormFlag << endl;
+   table << INormFlag << endl;
    if(INormFlag>1){
-      *table << DenomTable << endl;
+      table << DenomTable << endl;
    }
    if(INormFlag>0){
       for(int i=0;i<NObsBin;i++){
-         *table << IDivLoPointer[i] << endl;
-         *table << IDivUpPointer[i] << endl;
+         table << IDivLoPointer[i] << endl;
+         table << IDivUpPointer[i] << endl;
       }
    }
-   return 0;
 }
 
 

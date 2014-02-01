@@ -136,7 +136,7 @@ protected:
    // arrays for warmup
    void UpdateWarmupArrays();
    void InitWarmupArrays();
-   void OutWarmup(string file);
+   void OutWarmup(ostream& = std::cout);
    string GetWarmupHeader(int iScale, string minmax );
    vector<pair<double,double> > fWMu1;								//!< array of warmup-up values
    vector<pair<double,double> > fWMu2;								//!< array of warmup-values

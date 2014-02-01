@@ -26,7 +26,7 @@ public:
    
    int Read(istream *table);
    int ReadBase(istream *table);
-   virtual void Write(ostream *table);
+   virtual void Write(ostream& table);
    //void Add(fastNLOCoeffBase* other);
    int EndReadCoeff(istream *table);
    virtual void Print() const;

@@ -1,9 +1,9 @@
 #ifndef __fastNLOBase__
 #define __fastNLOBase__
 
-// #include <fstream>
-// #include <iostream>
-// #include <istream>
+#include <fstream>
+#include <iostream>
+#include <istream>
 #include <string>
 #include "speaker.h"
 
@@ -20,15 +20,7 @@ public:
    // i/o
    int ReadTable();							//!< read table
    int ReadHeader(istream *table);					//!< read header of table (BlockA1)
-   
-   //int OpenFileRead();							// open stream
-   void WriteTable();							//!< write full table to disk
-   int WriteHeader(ostream *table);					//!< write hader using ostream
-   ofstream *OpenFileWrite();
-   ofstream *OpenFileRewrite();
-   void CloseFileWrite();
-   void CloseStream();
-
+   virtual void WriteTable();							//!< write full table to disk
    virtual void Print() const;
    
    // header
@@ -75,10 +67,15 @@ public:
 
 protected:
    void PrintWelcomeMessage();						//!< Say hello to fastNLO user
+   ofstream* OpenFileWrite();						//!< open ofstream for writing tables to ffilename
+   //ofstream *OpenFileRewrite();
+   void WriteHeader(ostream& table);					//!< write (or cout) hader using ostream
+   void CloseFileWrite(ofstream& table);						
+   //void CloseStream();
 
    string ffilename;
    ifstream *ifilestream;
-   ofstream *ofilestream;
+   //ofstream *ofilestream;
    int fPrecision;
    // header
    int Itabversion;

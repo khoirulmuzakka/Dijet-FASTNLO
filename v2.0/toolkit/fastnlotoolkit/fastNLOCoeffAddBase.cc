@@ -160,31 +160,31 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::Write(ostream *table) {
+void fastNLOCoeffAddBase::Write(ostream& table) {
    cout<<"fastNLOCoeffAddBase::Write(), calling Base::Write()."<<endl;
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
-   *table << IRef << endl;
-   *table << IScaleDep << endl;
-   *table << Nevt << endl;
-   *table << Npow << endl;
-   *table << NPDFPDG.size() << endl;
+   table << IRef << endl;
+   table << IScaleDep << endl;
+   table << Nevt << endl;
+   table << Npow << endl;
+   table << NPDFPDG.size() << endl;
    for(unsigned int i=0;i<NPDFPDG.size();i++){
-      *table <<  NPDFPDG[i] << endl;
+      table <<  NPDFPDG[i] << endl;
    }
-   *table << NPDFDim << endl;
+   table << NPDFDim << endl;
    int NFragFunc = NFFPDG.size();
-   *table << NFragFunc << endl;
+   table << NFragFunc << endl;
    if(NFragFunc>0){
       for(int i=0;i<NFragFunc;i++){
-	 *table <<  NFFPDG[i] << endl;
+	 table <<  NFFPDG[i] << endl;
       }
    }
-   *table << NFFDim << endl;
-   *table << NSubproc << endl;
-   *table << IPDFdef1 << endl;
-   *table << IPDFdef2 << endl;
-   *table << IPDFdef3 << endl;
+   table << NFFDim << endl;
+   table << NSubproc << endl;
+   table << IPDFdef1 << endl;
+   table << IPDFdef2 << endl;
+   table << IPDFdef3 << endl;
    if(IPDFdef1==0){
       for(int i=0;i<NSubproc;i++){
 	 // Missing: linear PDF combinations for IPDFdef1=0
@@ -196,37 +196,37 @@ void fastNLOCoeffAddBase::Write(ostream *table) {
       }
    }
    for(int i=0;i<fNObsBins;i++){
-      *table << XNode1[i].size() << endl;
+      table << XNode1[i].size() << endl;
       for(unsigned int j=0;j<XNode1[i].size();j++){
-	 *table << XNode1[i][j] << endl;
+	 table << XNode1[i][j] << endl;
       }
    }
    if(NPDFDim==2){
       for(int i=0;i<fNObsBins;i++){
-	 *table << XNode2[i].size() << endl;
+	 table << XNode2[i].size() << endl;
 	 for(unsigned int j=0;j<XNode2[i].size();j++){
-	    *table << XNode2[i][j] << endl;
+	    table << XNode2[i][j] << endl;
 	 }
       }
    }
    if(NFragFunc>0){
       for(int i=0;i<fNObsBins;i++){
-	 *table << Nztot[i] << endl;
+	 table << Nztot[i] << endl;
 	 for(int j=0;j<Nztot[i];j++){
-	    *table << ZNode[i][j] << endl;
+	    table << ZNode[i][j] << endl;
 	 }
       }
    }
    int NScales = Iscale.size();
-   *table << NScales << endl;
-   *table << NScaleDim << endl;
+   table << NScales << endl;
+   table << NScaleDim << endl;
    for(int i=0;i<NScales;i++){
-      *table << Iscale[i] << endl;
+      table << Iscale[i] << endl;
    }
    for(int i=0;i<NScaleDim;i++){
-      *table << ScaleDescript[i].size() << endl;
+      table << ScaleDescript[i].size() << endl;
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
-	 *table << ScaleDescript[i][j] << endl;
+	 table << ScaleDescript[i][j] << endl;
       }
    }
 }

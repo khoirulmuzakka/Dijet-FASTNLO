@@ -143,13 +143,13 @@ void fastNLOCoeffAddFix::ResizePdfLC(){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::Write(ostream* table){
+void fastNLOCoeffAddFix::Write(ostream& table){
    //! Write coefficient table to disk (ostream)
    CheckCoeffConstants(this);
    fastNLOCoeffAddBase::Write(table);
    for(int i=0;i<NScaleDim;i++){
-      *table << Nscalevar[i] << endl;
-      *table << GetNScaleNode() << endl;
+      table << Nscalevar[i] << endl;
+      table << GetNScaleNode() << endl;
    }
    fastNLOTools::WriteVector( ScaleFac , table );
    int nsn = fastNLOTools::WriteVector( ScaleNode , table );

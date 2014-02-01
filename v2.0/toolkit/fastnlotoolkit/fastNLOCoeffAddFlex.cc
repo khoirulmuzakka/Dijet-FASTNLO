@@ -126,7 +126,7 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Write(ostream *table) {
+void fastNLOCoeffAddFlex::Write(ostream& table) {
    CheckCoeffConstants(this);
    // update to latest version
     if ( NScaleDep==3 ) {

@@ -94,7 +94,7 @@ private:
 
 
 protected:
-   int WriteScenario(ostream *table);
+   void WriteScenario(ostream& table);
    int ReadScenario(istream *table);
    int ReadCoeffTables(istream *table);
    fastNLOCoeffBase* ReadRestOfCoeffTable(const fastNLOCoeffBase& cB, istream *table);
