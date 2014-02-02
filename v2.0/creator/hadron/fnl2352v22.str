@@ -53,7 +53,10 @@ OutputFilename			test.tab
 !  Choose interpolation kernel and distance measure
 !
 !  Currently implemented interpolation kernels
-!    - CatmulRom
+!    - Catmull
+!    - Lagrange
+!    - OneNode
+!    - Linear
 !
 !  Currently implemented distance measures
 !    - linear
@@ -61,12 +64,12 @@ OutputFilename			test.tab
 !    - log10
 !    - sqrtlog10	eq. to sqrt(log_10(x))	
 ! -------------------------------------------------------------- !
-X_Kernel			"CatmulRom"
+X_Kernel			Catmull
 X_DistanceMeasure		"sqrtlog10"
 X_NNodes			16		! 
 X_NoOfNodesPerMagnitude		false		! 
 
-Mu1_Kernel			"CatmulRom"
+Mu1_Kernel			Catmull
 Mu1_DistanceMeasure		"loglog025"
 Mu1_NNodes			6		
 	
@@ -210,16 +213,16 @@ DimensionIsDifferential {
 !  Calculate bin width from lower and upper bin boundary
 !    - if 'false':
 !       specify a table of the width of every bin:
-!        BinWidth { x1 x2 x3 ... }
+!        BinSize { x1 x2 x3 ... }
 !    - if 'true':
 !      Specify a multiplicative factor for bin width (useful for |y|-measurements)
 !
 !  If the measurement is not divided by the bin width, then specify
-!   'CalculateBinWidth  true' and use 'DimensionIsDifferential' equal '0' for each dimension.
+!   'CalculateBinSize  true' and use 'DimensionIsDifferential' equal '0' for each dimension.
 ! --------------------------------
 
-CalculateBinWidth	true
-BinWidthFactor		2.
+CalculateBinSize	true
+BinSizeFactor		2.
 
 
 
