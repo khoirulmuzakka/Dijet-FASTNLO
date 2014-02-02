@@ -29,6 +29,16 @@ speaker::speaker(std::string prefix,say::Verbosity volume,bool err,bool quiet) {
    fquiet= (quiet || fvol<fverb);
 }
 
+
+speaker::speaker(const speaker& other) :
+   fquiet(other.fquiet), pref(other.pref),
+   errs(other.errs), fvol(other.fvol),
+   cn(other.cn)
+{
+   (*list)[ct++] = this;
+}
+
+
 speaker::~speaker() {
    list->erase(fii);
    if (list->empty()) {

@@ -45,15 +45,14 @@ fastNLOCoeffBase* fastNLOCoeffData::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-int fastNLOCoeffData::Read(istream *table){
+void fastNLOCoeffData::Read(istream& table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffData::ReadRest(istream *table){
+void fastNLOCoeffData::ReadRest(istream& table){
    CheckCoeffConstants(this);
    ReadCoeffData(table);
    EndReadCoeff(table);
@@ -61,22 +60,22 @@ void fastNLOCoeffData::ReadRest(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffData::ReadCoeffData(istream *table){
+void fastNLOCoeffData::ReadCoeffData(istream& table){
    char buffer[5257];
    CheckCoeffConstants(this);
-   *table >> Nuncorrel;
+   table >> Nuncorrel;
    UncDescr.resize(Nuncorrel);
-   table->getline(buffer,5256);
+   table.getline(buffer,5256);
    for(int i=0;i<Nuncorrel;i++){
-      table->getline(buffer,5256);
+      table.getline(buffer,5256);
       UncDescr[i] = buffer;
       //         StripWhitespace(UncDescr[i]);
    }
-   *table >> Ncorrel;
+   table >> Ncorrel;
    CorDescr.resize(Ncorrel);
-   table->getline(buffer,5256);
+   table.getline(buffer,5256);
    for(int i=0;i<Ncorrel;i++){
-      table->getline(buffer,256);
+      table.getline(buffer,256);
       CorDescr[i] = buffer;
       //         StripWhitespace(CorDescr[i]);
    }
@@ -87,30 +86,29 @@ int fastNLOCoeffData::ReadCoeffData(istream *table){
    CorrLo.resize(fNObsBins);
    CorrHi.resize(fNObsBins);
    for(int i=0;i<fNObsBins;i++){
-      *table >> Xcenter[i];
-      *table >> Value[i];
+      table >> Xcenter[i];
+      table >> Value[i];
       UncorLo[i].resize(Nuncorrel);
       UncorHi[i].resize(Nuncorrel);
       for(int j=0;j<Nuncorrel;j++){
-	 *table >> UncorLo[i][j];
-	 *table >> UncorHi[i][j];
+	 table >> UncorLo[i][j];
+	 table >> UncorHi[i][j];
       }
       CorrLo[i].resize(Ncorrel);
       CorrHi[i].resize(Ncorrel);
       for(int j=0;j<Ncorrel;j++){
-	 *table >> CorrLo[i][j];
-	 *table >> CorrHi[i][j];
+	 table >> CorrLo[i][j];
+	 table >> CorrHi[i][j];
       }
    }
-   *table >> NErrMatrix;
+   table >> NErrMatrix;
    matrixelement.resize(NErrMatrix);
    for(int i=0;i<NErrMatrix;i++){
       matrixelement[i].resize((int)pow((double)fNObsBins,2));
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
-	 *table >> matrixelement[i][j];
+	 table >> matrixelement[i][j];
       }
    }
-   return 0;
 }
 
 

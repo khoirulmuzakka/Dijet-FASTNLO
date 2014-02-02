@@ -50,15 +50,14 @@ fastNLOCoeffBase* fastNLOCoeffAddFix::Clone() const {
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddFix::Read(istream *table){
+void fastNLOCoeffAddFix::Read(istream& table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::ReadRest(istream *table){
+void fastNLOCoeffAddFix::ReadRest(istream& table){
    CheckCoeffConstants(this);
    fastNLOCoeffAddBase::ReadCoeffAddBase(table);
    ReadCoeffAddFix(table);
@@ -67,14 +66,14 @@ void fastNLOCoeffAddFix::ReadRest(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
+void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
    CheckCoeffConstants(this);
 
    Nscalevar.resize(NScaleDim);
    vector<int> Nscalenode(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
-      *table >> Nscalevar[i];
-      *table >> Nscalenode[i];
+      table >> Nscalevar[i];
+      table >> Nscalenode[i];
    }
    //    printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
    //    fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
@@ -82,7 +81,7 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
    for(int i=0;i<NScaleDim;i++){
       ScaleFac[i].resize(Nscalevar[i]);
       for(int j=0;j<Nscalevar[i];j++){
-         *table >> ScaleFac[i][j];
+         table >> ScaleFac[i][j];
       }
    }
    //printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
@@ -98,7 +97,6 @@ int fastNLOCoeffAddFix::ReadCoeffAddFix(istream *table){
 
    // prepare members for evaluation
    fastNLOTools::ResizeVector(AlphasTwoPi_v20 , fNObsBins, GetTotalScalenodes());
-   return 0;
 }
 
 
@@ -154,7 +152,7 @@ void fastNLOCoeffAddFix::Write(ostream& table){
    fastNLOTools::WriteVector( ScaleFac , table );
    int nsn = fastNLOTools::WriteVector( ScaleNode , table );
    int nst = fastNLOTools::WriteVector( SigmaTilde , table , Nevt);
-   printf("  *  fastNLOCoeffAddFix::Write(). Wrote %d lines of FASTNLO v2.0 tables.\n",nst+nsn);
+   info["Write"]<<"Wrote "<<nst+nsn<<" lines into fastNLO table."<<endl;
 }
 
 

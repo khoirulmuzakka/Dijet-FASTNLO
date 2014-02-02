@@ -1,3 +1,4 @@
+
 #ifndef __fastNLOCoeffAddBase__
 #define __fastNLOCoeffAddBase__
 
@@ -18,7 +19,7 @@ public:
    virtual ~fastNLOCoeffAddBase(){;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   int Read(istream *table);
+   void Read(istream& table);
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
@@ -53,7 +54,7 @@ public:
 
 protected:
    fastNLOCoeffAddBase();
-   int ReadCoeffAddBase(istream *table);
+   void ReadCoeffAddBase(istream& table);
    int GetScaledimfromvar(int scalevar) const;
 
    int IRef;

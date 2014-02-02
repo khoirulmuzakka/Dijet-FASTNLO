@@ -65,8 +65,8 @@ public:
    void WriteTable(string filename);								//!< Write fastNLO table to file <filename>
    void WriteTable();										//!< Write fastNLO table to disk.
    void WriteWarmupTable();									//!< Write the warmup table to disk.
-   void MultiplyCoefficientsByBinWidth();							//!< Multiply all coefficients by binwidth 
-   void DivideCoefficientsByBinWidth();								//!< Divide all coefficients by binwidth 
+   void MultiplyCoefficientsByBinSize();							//!< Multiply all coefficients by bin size
+   void DivideCoefficientsByBinSize();								//!< Divide all coefficients by bin size
    void MultiplyCoefficientsByConstant(double c);						//!< Multiply all coefficients with a constant factor c
 
    void PrintWarmupValues();									//!< Print the warmup values to the screen
@@ -82,7 +82,8 @@ public:
    bool GetParameterFromSteering(string label, vector<int>& val);				//!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, vector<double>& val);				//!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, vector<string>& val);				//!< Get user-defined parameter from steering file.
-   
+
+   void AdjustWarmupValues();									//!< Round warmup values to more likely values.
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
@@ -108,6 +109,10 @@ protected:
    void GetWarmupValues();
    bool CheckWarmupConsistency();								//!< Check consistency of warmup bin-grid and variables with steering values.
    void UseBinGridFromWarmup();									//!< Use bin grid as given in the warmup table
+   int CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,double> >& wrmmu );		//!< Check if warmup values are possibly identical with bin grid
+   int RoundValues(vector<pair<double,double> >& wrmmu , int nth);				//!< Round values to closes value by at most 1%	
+   int GetNthRelevantDigit(double val, int n);
+
    int GetBin();										//!< get bin number from 'scenario' observables
    inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;		//!< get x-index in case of two hadrons.
    int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2);			//!< get maximum x-index	

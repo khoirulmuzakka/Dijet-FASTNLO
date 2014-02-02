@@ -18,9 +18,9 @@ public:
    fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord);
    virtual ~fastNLOCoeffAddFlex(){;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
-    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
-   int Read(istream *table);
-   void ReadRest(istream *table);
+   static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
+   virtual void Read(istream& table);
+   void ReadRest(istream& table);
    virtual void Write(ostream& table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddBase& other);
@@ -33,7 +33,7 @@ public:
 protected:
 
    fastNLOCoeffAddFlex();
-   int ReadCoeffAddFlex(istream *table);
+   void ReadCoeffAddFlex(istream& table);
    
    int fILOord;   // obtained from Scenario
    

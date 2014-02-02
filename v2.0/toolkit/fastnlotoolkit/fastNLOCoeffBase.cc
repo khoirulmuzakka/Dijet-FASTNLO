@@ -27,86 +27,66 @@ fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::Read(istream* table){
+void fastNLOCoeffBase::Read(istream& table){
    // basic read function.
    // reads in only 'base'-variables.
    debug["Read"]<<endl;
    ReadBase(table);
    EndReadCoeff(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::ReadBase(istream* table){
+void fastNLOCoeffBase::ReadBase(istream& table){
    debug["ReadBase"]<<endl;
-   table->peek();
-   if (table->eof()){
+   table.peek();
+   if (table.eof()){
       //printf("fastNLOCoeffBase::Read: Cannot read from file.\n");
       error["ReadBase"]<<"Cannot read from file."<<endl;
-      return(2);
    }
 
-   int key = 0;
-   *table >> key;
-   if(key != tablemagicno){
-      //printf("fastNLOCoeffBase::Read: At beginning of block found %d instead of %d.\n",key,tablemagicno);
-      warn["ReadBase"]<<"At beginning of block found "<<key<<" instead of "<<tablemagicno<<endl;
-      return 1;
-   };
+   fastNLOTools::ReadMagicNo(table);
 
-   *table >> IXsectUnits;
-   *table >> IDataFlag;
-   *table >> IAddMultFlag;
-   *table >> IContrFlag1;
-   *table >> IContrFlag2;
-   *table >> NScaleDep;
+   table >> IXsectUnits;
+   table >> IDataFlag;
+   table >> IAddMultFlag;
+   table >> IContrFlag1;
+   table >> IContrFlag2;
+   table >> NScaleDep;
    int NContrDescr;
-   *table >> NContrDescr;
+   table >> NContrDescr;
    //   printf("  *  fastNLOCoeffBase::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
    CtrbDescript.resize(NContrDescr);
    char buffer[5257];
-   table->getline(buffer,5256);
+   table.getline(buffer,5256);
    for(int i=0;i<NContrDescr;i++){
-      table->getline(buffer,256);
+      table.getline(buffer,256);
       CtrbDescript[i] = buffer;
       //      StripWhitespace(CtrbDescript[i]);
    }
    int NCodeDescr;
-   *table >> NCodeDescr;
+   table >> NCodeDescr;
    CodeDescript.resize(NCodeDescr);
-   table->getline(buffer,256);
+   table.getline(buffer,256);
    for(int i=0;i<NCodeDescr;i++){
-      table->getline(buffer,256);
+      table.getline(buffer,256);
       CodeDescript[i] = buffer;
       //      StripWhitespace(CodeDescript[i]);
    }
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffBase::EndReadCoeff(istream* table){
+void fastNLOCoeffBase::EndReadCoeff(istream& table){
    //debug["EndReadCoeff"]<<endl;
-   int key = 0;
-   *table >> key;
-   if(key != tablemagicno){
-      //printf("fastNLOCoeffBase::Read: At end of block found %d instead of %d.\n",key,tablemagicno);
-      //printf("                  You might have 'nan' in your table.\n");
-      error["EndReadCoeff"]<<"At end of block found "<<key<<" instead of "<<tablemagicno<<endl;
-      return 1;
-   };
-   // Put magic number back
-   for(int i=0;i<(int)(log10((double)key)+1);i++){
-      table->unget();
-   }
-   return 0;
+   fastNLOTools::ReadMagicNo(table);
+   fastNLOTools::PutBackMagicNo(table);
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::Write(ostream& table) {
-   debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
+   say::debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
    table << tablemagicno << endl;
    table << IXsectUnits << endl;
    table << IDataFlag << endl;

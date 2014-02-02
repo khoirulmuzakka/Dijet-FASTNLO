@@ -24,11 +24,9 @@ public:
    //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);				//! Use compiler-default
    virtual fastNLOCoeffBase* Clone() const;					//!< returns 'new' copy of this instance.
    
-   int Read(istream *table);
-   int ReadBase(istream *table);
+   virtual void Read(istream& table);
    virtual void Write(ostream& table);
    //void Add(fastNLOCoeffBase* other);
-   int EndReadCoeff(istream *table);
    virtual void Print() const;
 
    void SetCoeffAddDefaults();
@@ -69,6 +67,8 @@ public:
 
 protected:
    fastNLOCoeffBase();
+   void ReadBase(istream& table);
+   void EndReadCoeff(istream& table);
 
    int fNObsBins; // obtained from Scenario
 

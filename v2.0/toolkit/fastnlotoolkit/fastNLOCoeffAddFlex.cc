@@ -50,15 +50,14 @@ fastNLOCoeffBase* fastNLOCoeffAddFlex::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddFlex::Read(istream *table){
+void fastNLOCoeffAddFlex::Read(istream& table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::ReadRest(istream *table){
+void fastNLOCoeffAddFlex::ReadRest(istream& table){
    CheckCoeffConstants(this);
    fastNLOCoeffAddBase::ReadCoeffAddBase(table);
    ReadCoeffAddFlex(table);
@@ -67,7 +66,7 @@ void fastNLOCoeffAddFlex::ReadRest(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
+void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
    CheckCoeffConstants(this);
 
    //  ---- order of reading... ---- //
@@ -109,7 +108,7 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRefMixed , table , NSubproc , Nevt );
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRef_s1 , table , NSubproc , Nevt );
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRef_s2 , table , NSubproc , Nevt );
-   printf("  *  fastNLOCoeffAddFlex::Read(). Read %d lines of flexible-scale tables.\n",nn3);
+   info["ReadCoeffAddFlex"]<<"Read "<<nn3<<" lines of flexible-scale coefficients."<<endl;
 
    // init table for evaluation
    fastNLOTools::ResizeFlexibleVector( PdfLcMuVar , SigmaTildeMuIndep );
@@ -120,8 +119,6 @@ int fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream *table){
 	 AlphasTwoPi[i][j].resize(ScaleNode2[i].size());
       }
    }
-
-   return 0;
 }
 
 

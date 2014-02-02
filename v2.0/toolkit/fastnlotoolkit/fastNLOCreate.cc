@@ -445,7 +445,7 @@ void fastNLOCreate::ReadBinning()
    // ---------------------------------
    //       Bin width
    // ---------------------------------
-   if ( BOOL(CalculateBinWidth) ){
+   if ( BOOL(CalculateBinSize) ){
       BinSize.resize(NObsBin);
       bool idi = false;
       for ( int i = 0 ; i<NObsBin ; i++ ){
@@ -463,16 +463,16 @@ void fastNLOCreate::ReadBinning()
                idi = true;
             }
          }
-         // divide by binwidthfactor, but only if at least one dimension is differential
-         if ( idi ) BinSize[i] *= DOUBLE(BinWidthFactor);
+         // divide by binsizefactor, but only if at least one dimension is differential
+         if ( idi ) BinSize[i] *= DOUBLE(BinSizeFactor);
       }
-      if (!idi) info["CalculateBinWidth"]<<"BinWidthFactor is not being used, since no observable is calculated differential."<<endl;
+      if (!idi) info["ReadBinning"]<<"BinSizeFactor is not being used, since no observable is calculated differential."<<endl;
    }
    else {
       // read in bin width
       warn["ReadBinning"]<<"Reading of bindwidth only poorly  implemented! Improve it and remove this message."<<endl;
-      if ( (int)DOUBLE_ARR(BinWidth).size()!=NObsBin) warn["ReadBinning"]<<"Number of bins of 'BinWidth' not consistent with bin grid."<<endl;
-      BinSize=DOUBLE_ARR(BinWidth);
+      if ( (int)DOUBLE_ARR(BinSize).size()!=NObsBin) warn["ReadBinning"]<<"Number of bins of 'BinSize' not consistent with bin grid."<<endl;
+      BinSize=DOUBLE_ARR(BinSize);
       BinSize.resize(NObsBin);
       for ( int i = 0 ; i<NObsBin ; i++ ){
 	 if ( BinSize[i]==0 ) BinSize[i] = 1.0;
@@ -494,14 +494,14 @@ void fastNLOCreate::GetWarmupValues()
    debug["GetWarmupValues"]<<endl;
 
    // try to get warmup values
-   vector<vector<double> > warmup = DOUBLE_TAB(WarmupValues);
+   vector<vector<double> > warmup = DOUBLE_TAB(Warmup.Values);
    fIsWarmup = warmup.empty();
 
    // try again, with hard-coded convention:
    if ( fIsWarmup ) {
       info["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
       READ(GetWarmupTableFilename());   
-      warmup = DOUBLE_TAB(WarmupValues);
+      warmup = DOUBLE_TAB(Warmup.Values);
       fIsWarmup = warmup.empty();
       if ( !fIsWarmup ) info["GetWarmupValues"]<<"Reading of file "<<GetWarmupTableFilename()<<" contained warmup values!"<<endl;
    }
@@ -517,7 +517,7 @@ void fastNLOCreate::UseBinGridFromWarmup()
 {
    //! initialialize all binning related variables
    //! with values stored in the warmup file.
-   vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
+   vector<vector<double> > warmup =  DOUBLE_TAB(Warmup.Binning);
    NObsBin	= warmup.size();
    NDim		= INT(Warmup.DifferentialDimension);
    if ( (int)warmup[0].size() != (7+2*NDim) && (int)warmup[0].size() != (5+2*NDim) ) {
@@ -529,7 +529,7 @@ void fastNLOCreate::UseBinGridFromWarmup()
    DimLabel	= STRING_ARR(Warmup.DimensionLabels);
    
    // make binning 
-   const int i0 = fIsFlexibleScale ? 6 : 4;
+   const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
    Bin.resize(NObsBin);
    BinSize.resize(NObsBin);
    for ( int i = 0 ; i < NObsBin ; i ++ ) {
@@ -558,7 +558,8 @@ bool fastNLOCreate::CheckWarmupConsistency()
    //! check if warmup values are consistent with steering card
    //! check if number of bins is consistent
 
-   vector<vector<double> > warmup =  DOUBLE_TAB(WarmupValues);
+   vector<vector<double> > warmup =  DOUBLE_TAB(Warmup.Values);
+   vector<vector<double> > wrmbin =  DOUBLE_TAB(Warmup.Binning);
    bool ret = true;
    cout<<endl;
    const string wrmuphelp = "Please remove warmup-file in order to calculate a new warmup-file which is compatible to your steering,\nor alternatively use 'ReadBinningFromSteering=false', then all binning-related information is taken from the warmup file.\n";
@@ -617,13 +618,13 @@ bool fastNLOCreate::CheckWarmupConsistency()
 	 
    // check bining in detail
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-      int i0 = fIsFlexibleScale ? 6 : 4;
+      const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
       if ( NDim == 1 ) {
-	 if ( Bin[i][0].first != warmup[i][i0] || Bin[i][0].second != warmup[i][i0+1] ) {
-	    error["CheckWarmupConsistency"]
+	 if ( Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1] ) {
+	    error["CheckWrmbinConsistency"]
 	       <<"Table of warmup values seems to be incompatible with steering file.\n"
 	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
-	       <<",], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"].\n"
+	       <<",], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"].\n"
 	       <<wrmuphelp
 	       <<"Exiting."<<endl;
 	    ret = false;
@@ -631,12 +632,12 @@ bool fastNLOCreate::CheckWarmupConsistency()
 	 }
       }
       else if ( NDim == 2 ) {
-	 if ( Bin[i][0].first != warmup[i][i0] || Bin[i][0].second != warmup[i][i0+1] 
-	      || Bin[i][1].first != warmup[i][i0+2] || Bin[i][1].second != warmup[i][i0+3] ) {
+	 if ( Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1] 
+	      || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3] ) {
 	    error["CheckWarmupConsistency"]
 	       <<"Table of warmup values seems to be incompatible with steering file.\n"
 	       <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
-	       <<"], warmup: ["<<warmup[i][i0]<<","<<warmup[i][i0+1]<<"] ["<<warmup[i][i0+2]<<","<<warmup[i][i0+3]<<"].\n"
+	       <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"].\n"
 	       <<wrmuphelp
 	       <<"Exiting."<<endl;
 	    ret = false;
@@ -645,9 +646,9 @@ bool fastNLOCreate::CheckWarmupConsistency()
       }
       //check bin width
       double bwwrm = 0;
-      if ( NDim == 1 ) bwwrm = warmup[i][i0+2];
-      else if ( NDim == 2 ) bwwrm = warmup[i][i0+4];
-      else if ( NDim == 3 ) bwwrm = warmup[i][i0+6];
+      if ( NDim == 1 ) bwwrm = wrmbin[i][i0+2];
+      else if ( NDim == 2 ) bwwrm = wrmbin[i][i0+4];
+      else if ( NDim == 3 ) bwwrm = wrmbin[i][i0+6];
       if ( fabs(BinSize[i] - bwwrm ) > 1.e-6 ) {
 	 warn["CheckWarmupConsistency"]
 	    <<"Table of warmup values seems to be incompatible with steering file.\n"
@@ -1380,8 +1381,8 @@ inline double fastNLOCreate::CalcPDFReweight(double x) const {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
-   //! Multiply all coefficients by binwidth
+void fastNLOCreate::MultiplyCoefficientsByBinSize() {
+   //! Multiply all coefficients by binsize
 
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
@@ -1425,8 +1426,8 @@ void fastNLOCreate::MultiplyCoefficientsByBinWidth() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::DivideCoefficientsByBinWidth() {
-//! Divide all coefficients by binwidth
+void fastNLOCreate::DivideCoefficientsByBinSize() {
+//! Divide all coefficients by binsize
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
@@ -1470,7 +1471,7 @@ void fastNLOCreate::DivideCoefficientsByBinWidth() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
-//! Divide all coefficients by binwidth
+//! Divide all coefficients by binsize
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {
@@ -1566,6 +1567,9 @@ void fastNLOCreate::WriteTable() {
    fStats.PrintStats();
    if ( fIsWarmup ) {
       info["WriteTable"]<<"Writing warmup table instead of coefficient table."<<endl;
+      // round warmup values and try to guess bin boundaries
+      AdjustWarmupValues();
+      // write table to disk
       WriteWarmupTable();
    }
    else {
@@ -1575,9 +1579,9 @@ void fastNLOCreate::WriteTable() {
       }
       // Number of events must be counted correctly.
       // I.e. the counting should be performed by the generator.
-      // ->Divide by BinWidth
+      // ->Divide by BinSize
       fastNLOTable::WriteTable();
-      // ->Multiply by BinWidth
+      // ->Multiply by BinSize
    }
 }
 
@@ -1654,46 +1658,22 @@ void fastNLOCreate::OutWarmup(ostream& strm){
 
    // write readable table
    char buf[4000];
-   strm<<"WarmupValues {{"<<endl;
-   //strm<<"   xmin      xmax     mu1min    m1max     mu2min    mu2max "<<endl;
+   strm<<"Warmup.Values {{"<<endl;
    if ( fIsFlexibleScale ) {
       // table header
-      sprintf(buf,"   %9s  %9s  %14s  %14s  %14s  %14s",
+      sprintf(buf,"   ObsBin  %9s  %9s  %14s  %14s  %14s  %14s",
               "x_min","x_max",
-              GetWarmupHeader(0,"min").c_str(),
-              GetWarmupHeader(0,"max").c_str(),
-              GetWarmupHeader(1,"min").c_str(),
-              GetWarmupHeader(1,"max").c_str());
-      strm<<buf; 
-      if ( NDim == 1 )  
-	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
-      else if ( NDim == 2 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str()); 
-      else if ( NDim == 3 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
-		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
-      strm<<buf; 
-      sprintf(buf,"  %12s","BinWidth"); 
+              GetWarmupHeader(0,"min").c_str(), GetWarmupHeader(0,"max").c_str(),
+              GetWarmupHeader(1,"min").c_str(), GetWarmupHeader(1,"max").c_str());
       strm<<buf<<endl;
-      
       // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-         if ( fWx[i].first < 1.e-4 ) {
-            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
-            fWx[i].first=1.e-4;
+         if ( fWx[i].first < 1.e-6 ) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
+            fWx[i].first=1.e-6;
          }
-         sprintf(buf,"   %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
-                 fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
-	 strm<<buf; 
-	 if ( NDim == 1 )  
-	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second); 
-	 else if ( NDim == 2 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f",Bin[i][0].first , Bin[i][0].second, Bin[i][1].first , Bin[i][1].second); 
-	 else if ( NDim == 3 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
-		    Bin[i][0].first , Bin[i][0].second,Bin[i][1].first , Bin[i][1].second, Bin[i][2].first , Bin[i][2].second);
-	 strm<<buf; 
-	 sprintf(buf,"  %12.3f",BinSize[i]);
+         sprintf(buf,"   %4d    %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
+                 i,fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
          strm<<buf<<endl;
       }
    }
@@ -1701,44 +1681,48 @@ void fastNLOCreate::OutWarmup(ostream& strm){
       // is ScaleDescript available?
       if ( GetTheCoeffTable()->ScaleDescript[0].empty() ){ error["OutWarmup"]<<"Scale description is empty. but needed. Probably this has to be implemented."<<endl; exit(1);};
       // table header
-      sprintf(buf,"   %9s  %9s  %16s  %16s",
-              "x_min","x_max",
-              GetWarmupHeader(0,"min").c_str(),
-              GetWarmupHeader(0,"max").c_str() );
-      strm<<buf;
-      if ( NDim == 1 )  
-	 sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str()); 
-      else if ( NDim == 2 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str()); 
-      else if ( NDim == 3 )
-	 sprintf(buf,"  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up  %9s_Lo  %9s_Up",
-		 DimLabel[0].c_str() ,DimLabel[0].c_str(), DimLabel[1].c_str() ,DimLabel[1].c_str(), DimLabel[2].c_str() ,DimLabel[2].c_str()); 
-      strm<<buf; 
-      sprintf(buf,"  %12s","BinWidth"); 
+      sprintf(buf,"   ObsBin   %9s  %9s  %16s  %16s",
+              "x_min","x_max", GetWarmupHeader(0,"min").c_str(), GetWarmupHeader(0,"max").c_str() );
       strm<<buf<<endl;
-
       // table values
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-         if ( fWx[i].first < 1.e-4 ) {
-            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-4 instead."<<endl;
-            fWx[i].first=1.e-4;
+         if ( fWx[i].first < 1.e-6 ) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
+            fWx[i].first=1.e-6;
          }
-         sprintf(buf,"   %9.2e  %9.2e  %16.2f  %16.2f",
-                 fWx[i].first, fWx[i].second, fWMu1[i].first, fWMu1[i].second);
- 	 strm<<buf; 
-	 if ( NDim == 1 )  
-	    sprintf(buf,"  %12.3f  %12.3f",Bin[i][0].first, Bin[i][0].second); 
-	 else if ( NDim == 2 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f", Bin[i][0].first, Bin[i][0].second, Bin[i][1].first, Bin[i][1].second); 
-	 else if ( NDim == 3 )
-	    sprintf(buf,"  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f  %12.3f",
-		    Bin[i][0].first , Bin[i][0].second, Bin[i][1].first, Bin[i][1].second, Bin[i][2].first, Bin[i][2].second);
-	 strm<<buf; 
-	 sprintf(buf,"  %12.3f",BinSize[i]);
+         sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2f  %16.2f",
+                 i,fWx[i].first, fWx[i].second, fWMu1[i].first, fWMu1[i].second);
 	 strm<<buf<<endl;
       }
    }
    strm<<"}}"<<endl;
+
+   strm<<endl<<endl;
+
+   // BinGrid
+   strm<<"Warmup.Binning {{"<<endl;
+   // table header
+   strm<<"    ObsBin";
+   for ( int idim = 0 ; idim<NDim ; idim++ ) {
+      sprintf(buf,"  %9s_Lo  %9s_Up",DimLabel[idim].c_str() ,DimLabel[idim].c_str()); 
+      strm<<buf; 
+   }
+   sprintf(buf,"  %12s","BinSize"); 
+   strm<<buf<<endl;
+   
+   // table values
+   for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+      sprintf(buf,"    %4d ",i); // obsbin
+      strm<<buf;
+      for ( int idim = 0 ; idim<NDim ; idim++ ) {
+	 sprintf(buf,"  %12.3f  %12.3f",Bin[i][idim].first , Bin[i][idim].second);
+	 strm<<buf;
+      }
+      sprintf(buf,"  %12.3f",BinSize[i]);
+      strm<<buf<<endl;
+   }
+   strm<<"}}"<<endl;
+
 }
 
 
@@ -1769,6 +1753,153 @@ string fastNLOCreate::GetWarmupTableFilename(){
    ret += "_warmup.txt";
    return ret;
 }
+
+
+      
+// ___________________________________________________________________________________________________
+void fastNLOCreate::AdjustWarmupValues(){
+   //! Adjust warmup-values found to supposely
+   //! more reasonable values.
+   //!
+   //! 1. Round warm-up values up/down, if they are
+   //!    4% close to the bin boundary
+   //!    -> if more than 70% of all bins are
+   //!       close to the bin boundary, then round all
+   //! 2. Round values up/down, by mostly 3%
+   //!    to next reasonable value
+   //! 3. Round lower x-values down by 20%
+   
+   //------------------------------------------
+   // 1. Are warmup-values identical to bin-boundaries ?
+   int ident1=-1, ident2=-1;
+   if ( fIsFlexibleScale ) {
+      ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+      ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
+   }
+   else {
+      ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+   }
+
+   // ---------------------------------------
+   // 2. round values to 3rd digit if applicable
+   if (fIsFlexibleScale){
+      if ( ident1==-1 )
+	 RoundValues(fWMu1,3);
+      if ( ident2==-1 )
+	 RoundValues(fWMu2,3);
+   }
+   else {
+      if ( ident1==-1 )
+	 RoundValues(fWMu1,3);
+   }
+
+   // ---------------------------------------
+   // 3. round lower x-values down
+   const double xdown = 0.20;
+   for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+      fWx[i].first *= (1.-xdown);
+   }
+   
+}
+
+
+
+// ___________________________________________________________________________________________________
+int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit){
+   //! Round warmup values up (down) if third relevant
+   //! digit is a 9 (0)
+   //! lower values are only rounded down,
+   //! upper values are only rounded up
+   for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+      int lon = GetNthRelevantDigit(wrmmu[i].first,nthdigit);
+      int upn = GetNthRelevantDigit(wrmmu[i].second,nthdigit);
+      // lo value
+      if ( lon==0 ) {
+	 int ord = log10(wrmmu[i].first);
+	 wrmmu[i].first -= fmod(wrmmu[i].first,pow(10,ord-nthdigit+1));
+      }
+      // up value
+      if ( upn==9 ) {
+	 int ord = log10(wrmmu[i].second);
+	 wrmmu[i].second += pow(10,ord-nthdigit+1)-fmod(wrmmu[i].second,pow(10,ord-nthdigit+1));
+      }
+   }
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOCreate::GetNthRelevantDigit(double val, int n){
+   int ord = log10(val);
+   double res = fmod(val,pow(10,ord-n+2));
+   double resres=res-fmod(res,pow(10,ord-n+1));
+   double valn=resres/pow(10,ord-n+1);
+   return (int)valn+0.999;
+}
+
+      
+// ___________________________________________________________________________________________________
+int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,double> >& wrmmu ){
+   //! Check, where scale variable is identical
+   //! with measured variable and hence
+   //! warmu-values should be identical with
+   //! bin grid.
+   //!
+   //! returns idim, if identity was found
+   //! returns -1 else.
+   //!
+   //! If more than 70% of all bins are
+   //! closer than 4% to the bin boundary, then 
+   //! identity is assumed
+   const double bclose = 0.04;
+   const double minallbins = 0.7;
+
+   vector<int > nbinlo(NDim);
+   vector<int > nbinup(NDim);;
+   for ( int idim = NDim-1 ; idim>=0 ; idim-- ) {
+      for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+	 // todo: check for Bin[i][idim] != 0
+	 double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
+	 // lo-bin
+	 if ( diff < bclose  && diff > 0.)
+	    nbinlo[idim]++;
+	 // up-bin
+	 diff = 1. - wrmmu[i].second/Bin[i][idim].second;
+	 if ( diff < bclose && diff > 0 ) 
+	    nbinup[idim]++;
+      }
+   }
+   // // sanity check (round only in one dimension
+   //    for ( int idim = 0 ; idim<NDim ; idim++ ) {
+   //       for ( int jdim = idim+1 ; jdim<NDim ; jdim++ ) {
+   // 	 int nbri = nbinlo[idim]+nbinup[idim];
+   // 	 int nbrj = nbinlo[jdim]+nbinup[jdim];
+   // 	 if ( nbri>0 && nbrj>0 ){
+   // 	    cout<<endl;
+   // 	    warn["CheckWarmupValuesIdenticalWithBinGrid"]
+   // 	       <<"Adjusted warmup values to bin boundaries in different observables.\n"
+   // 	       <<"\t\tThis may yield unreasonable results. Please check warmup-table carefully!\n"<<endl;
+   // 	 }
+   //       }
+   //    }
+   // round all bins if applicable
+   for ( int idim = 0 ; idim<NDim ; idim++ ) {
+      debug["CheckWarmupValuesIdenticalWithBinGrid"]<<"found nbinlo="<<nbinlo[idim]<<" and nbinup="<<nbinup[idim]<<endl;
+      double frac= (nbinlo[idim]+nbinup[idim])/(2.*GetNObsBin());
+      if ( frac>minallbins ) { // round all bins
+	 info["CheckWarmupValuesIdenticalWithBinGrid"]
+	    <<"Found that more than "<<frac*100<<"% of the warmup values are close (<"<<bclose*100.<<"%) to a bin boundary in '"
+	    << DimLabel[idim]<<"' (Dim "<<idim<<").\n"
+	    <<"Using these bin boundaries as warm-up values."<<endl;
+	 for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
+	    wrmmu[i].first = Bin[i][idim].first;
+	    wrmmu[i].second = Bin[i][idim].second;
+	 }
+	 return idim;
+      }
+   }
+   return -1;
+}
+
 
 
 // ___________________________________________________________________________________________________
@@ -1876,17 +2007,17 @@ void  fastNLOCreate::InitInterpolationKernels() {
       }
    }
    // todo. clean up memory
-   vector<double> wrmX = DOUBLE_COL(WarmupValues,x_min);
+   vector<double> wrmX = DOUBLE_COL(Warmup.Values,x_min);
    vector<double> wrmMu1Up, wrmMu1Dn;
-   wrmMu1Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"min"));
-   wrmMu1Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(0,"max"));
+   wrmMu1Dn = read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"));
+   wrmMu1Up = read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"max"));
    if ( (int)wrmMu1Dn.size()!=GetNObsBin() || (int)wrmMu1Up.size()!= GetNObsBin() ){
       error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl; exit(1);
    }
    vector<double> wrmMu2Up, wrmMu2Dn;
    if ( fIsFlexibleScale ){
-      wrmMu2Dn = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"min"));
-      wrmMu2Up = read_steer::getdoublecolumn("WarmupValues",GetWarmupHeader(1,"max"));
+      wrmMu2Dn = read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"));
+      wrmMu2Up = read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"));
       if ( (int)wrmMu2Dn.size()!=GetNObsBin() || (int)wrmMu2Up.size()!= GetNObsBin() ){
          error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl; exit(1);
       }

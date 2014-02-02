@@ -13,11 +13,11 @@ namespace fastNLOTools {
    using namespace fastNLO;
 
    //! - Reading vectors from disk
-   template<typename T> int ReadVector( vector<T>& v, istream *table , unsigned long long Nevt = 1);
-   int ReadVector( vector<double>& v, istream *table , unsigned long long Nevt = 1);
+   template<typename T> int ReadVector( vector<T>& v, istream& table , unsigned long long Nevt = 1);
+   int ReadVector( vector<double>& v, istream& table , unsigned long long Nevt = 1);
 
-   template<typename T>  int ReadFlexibleVector(vector<T>& v, istream* table, int nProcLast=0 , unsigned long long nevts = 1);
-   int ReadFlexibleVector( vector<double >& v, istream *table , int nProcLast = 0 , unsigned long long nevts = 1 );
+   template<typename T>  int ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast=0 , unsigned long long nevts = 1);
+   int ReadFlexibleVector( vector<double >& v, istream& table , int nProcLast = 0 , unsigned long long nevts = 1 );
 
    //! - Resizing tools
    template<typename T> void ResizeFlexibleVector(vector<T>& v, const vector<T>& nom);
@@ -65,8 +65,8 @@ namespace fastNLOTools {
    template<typename T> void PrintVector( const vector<T>& v, string name, string prefix="");
 
    //! - useful i/o
-   bool ReadMagicNo(istream *table);					//!< Read and check magic number from table.	
-   void PutBackMagicNo(istream* table);					//!< Reset magic number, such that it can be recognized by other reading routines
+   bool ReadMagicNo(istream& table);					//!< Read and check magic number from table.	
+   void PutBackMagicNo(istream& table);					//!< Reset magic number, such that it can be recognized by other reading routines
 
 };
 
@@ -75,7 +75,7 @@ namespace fastNLOTools {
 //________________________________________________________________________________________________________________
 // Reading functions
 template<typename T>
-int fastNLOTools::ReadVector( vector<T>& v, istream *table , unsigned long long Nevt){
+int fastNLOTools::ReadVector( vector<T>& v, istream& table , unsigned long long Nevt){
    //! Read values according to the size() of the given vector
    //! from table (v2.0 format).
    int nn = 0;
@@ -87,10 +87,10 @@ int fastNLOTools::ReadVector( vector<T>& v, istream *table , unsigned long long 
 
 
 template<typename T>
-int fastNLOTools::ReadFlexibleVector(vector<T>& v, istream* table, int nProcLast, unsigned long long nevts ){
+int fastNLOTools::ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast, unsigned long long nevts ){
    int nn = 0;
    int size = 0;
-   *table >> size; nn++;
+   table >> size; nn++;
    v.resize(size);
    for(unsigned int i0=0;i0<v.size();i0++){
       nn += ReadFlexibleVector(v[i0],table,nProcLast,nevts);

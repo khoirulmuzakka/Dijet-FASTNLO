@@ -47,45 +47,44 @@ fastNLOCoeffBase* fastNLOCoeffAddBase::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddBase::Read(istream *table){
+void fastNLOCoeffAddBase::Read(istream& table){
    fastNLOCoeffBase::ReadBase(table);
    CheckCoeffConstants(this);
    ReadCoeffAddBase(table);
    EndReadCoeff(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
+void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    CheckCoeffConstants(this);
    char buffer[5257];
-   *table >> IRef;
-   *table >> IScaleDep;
-   *table >> Nevt;
-   *table >> Npow;
+   table >> IRef;
+   table >> IScaleDep;
+   table >> Nevt;
+   table >> Npow;
    int NPDF;
-   *table >> NPDF;
+   table >> NPDF;
    if(NPDF>0){
       NPDFPDG.resize(NPDF);
       for(int i=0;i<NPDF;i++){
-	 *table >>  NPDFPDG[i];
+	 table >>  NPDFPDG[i];
       }
    }
-   *table >> NPDFDim;
+   table >> NPDFDim;
    int NFragFunc;
-   *table >> NFragFunc;
+   table >> NFragFunc;
    if(NFragFunc>0){
       NFFPDG.resize(NFragFunc);
       for(int i=0;i<NFragFunc;i++){
-	 *table >>  NFFPDG[i];
+	 table >>  NFFPDG[i];
       }
    }
-   *table >> NFFDim;
-   *table >> NSubproc;
-   *table >> IPDFdef1;
-   *table >> IPDFdef2;
-   *table >> IPDFdef3;
+   table >> NFFDim;
+   table >> NSubproc;
+   table >> IPDFdef1;
+   table >> IPDFdef2;
+   table >> IPDFdef3;
    //printf("  *  fastNLOCoeffAddBase::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
    if(IPDFdef1==0){
@@ -102,12 +101,12 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
    XNode1.resize(fNObsBins);
    for(int i=0;i<fNObsBins;i++){
       int xtot;
-      *table >> xtot;
-      //*table >> Nxtot1[i];
+      table >> xtot;
+      //table >> Nxtot1[i];
       //XNode1[i].resize(Nxtot1[i]);
       XNode1[i].resize(xtot);
       for(int j=0;j<xtot;j++){
-	 *table >> XNode1[i][j];
+	 table >> XNode1[i][j];
       }
    }
    if(NPDFDim==2){
@@ -115,12 +114,12 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       XNode2.resize(fNObsBins);
       for(int i=0;i<fNObsBins;i++){
 	 int xtot;
-	 *table >> xtot;
+	 table >> xtot;
 	 XNode2[i].resize(xtot);
-	 //*table >> Nxtot2[i];
+	 //table >> Nxtot2[i];
 	 //XNode2[i].resize(Nxtot2[i]);
 	 for(int j=0;j<xtot;j++){
-	    *table >> XNode2[i][j];
+	    table >> XNode2[i][j];
 	 }
       }
    }
@@ -128,40 +127,39 @@ int fastNLOCoeffAddBase::ReadCoeffAddBase(istream *table){
       Nztot.resize(fNObsBins);
       ZNode.resize(fNObsBins);
       for(int i=0;i<fNObsBins;i++){
-	 *table >> Nztot[i];
+	 table >> Nztot[i];
 	 ZNode[i].resize(Nztot[i]);
 	 for(int j=0;j<Nztot[i];j++){
-	    *table >> ZNode[i][j];
+	    table >> ZNode[i][j];
 	 }
       }
    }
 
    int NScales;
-   *table >> NScales;
-   *table >> NScaleDim;
+   table >> NScales;
+   table >> NScaleDim;
    Iscale.resize(NScales);
    for(int i=0;i<NScales;i++){
-      *table >> Iscale[i];
+      table >> Iscale[i];
    }
    int NscaleDescript;
    ScaleDescript.resize(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
-      *table >> NscaleDescript;
+      table >> NscaleDescript;
       ScaleDescript[i].resize(NscaleDescript);
-      table->getline(buffer,256);
+      table.getline(buffer,256);
       for(int j=0;j<NscaleDescript;j++){
-	 table->getline(buffer,256);
+	 table.getline(buffer,256);
 	 ScaleDescript[i][j] = buffer;
 	 //            StripWhitespace(ScaleDescript[i][j]);
       }
    }
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::Write(ostream& table) {
-   cout<<"fastNLOCoeffAddBase::Write(), calling Base::Write()."<<endl;
+   debug["Write"]<<"Calling fastNLOCoeffBase::Write()"<<endl;
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
    table << IRef << endl;

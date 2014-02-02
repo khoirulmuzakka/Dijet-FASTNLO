@@ -11,11 +11,11 @@ using namespace fastNLO;
 namespace fastNLOTools {
 
    //________________________________________________________________________________________________________________ //
-   int ReadVector(vector<double >& v, istream *table , unsigned long long Nevt ){
+   int ReadVector(vector<double >& v, istream& table , unsigned long long Nevt ){
       //! Read values according to the size() of the given vector
       //! from table (v2.0 format).
       for( unsigned int i=0 ; i<v.size() ; i++){
-	 *table >> v[i];
+	 table >> v[i];
 	 v[i] *= Nevt;
       }
       return v.size();
@@ -23,18 +23,18 @@ namespace fastNLOTools {
 
    
    //________________________________________________________________________________________________________________ //
-   int ReadFlexibleVector(vector<double >& v, istream *table , int nProcLast , unsigned long long nevts ){
+   int ReadFlexibleVector(vector<double >& v, istream& table , int nProcLast , unsigned long long nevts ){
       int nn = 0;
       if ( nProcLast==0 ) {
 	 int size = 0;
-	 *table >> size; nn++;
+	 table >> size; nn++;
 	 v.resize(size);
       }
       else {
 	 v.resize(nProcLast);
       }
       for(unsigned int i0=0;i0<v.size();i0++){
-	 *table >> v[i0];
+	 table >> v[i0];
 	 v[i0] *= nevts;
 	 nn++;
       }
@@ -260,19 +260,19 @@ namespace fastNLOTools {
    }
 
    //________________________________________________________________________________________________________________ //
-   void PutBackMagicNo(istream* table){
+   void PutBackMagicNo(istream& table){
    //! Put magic number back
       for(int i=0;i<(int)(log10((double)tablemagicno)+1);i++){
-	 table->unget();
+	 table.unget();
       }
    }
 
 
    //______________________________________________________________________________
-   bool ReadMagicNo(istream *table) {
+   bool ReadMagicNo(istream& table) {
       //! read and crosscheck magic number
       int key = 0;
-      *table >> key;
+      table >> key;
       if(key != tablemagicno){
 	 error["ReadMagicNo"]<<"Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
 	 return false;

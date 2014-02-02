@@ -17,8 +17,8 @@ public:
    virtual ~fastNLOCoeffAddFix(){;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   int Read(istream *table);
-   void ReadRest(istream *table);
+   virtual void Read(istream&table);
+   void ReadRest(istream& table);
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
@@ -43,7 +43,7 @@ public:
 
 protected:
    fastNLOCoeffAddFix();
-   int ReadCoeffAddFix(istream *table);
+   void ReadCoeffAddFix(istream& table);
 
    vector < int > Nscalevar;
    //vector < int > Nscalenode;

@@ -15,9 +15,7 @@ enum Verbosity {DEBUG=-1000, MANUAL=-1, INFO=0, WARNING=1, ERROR=2, SILENT=1000}
 class speaker {
 public:
    speaker(std::string prefix="",say::Verbosity volume=say::INFO,bool err=false,bool quiet=false);
-   speaker(const speaker& spk) {
-      ;
-   };
+   speaker(const speaker& spk);
    ~speaker();
    //speaker(const speaker& spk) : weg(0) {;};
    std::ostream& operator[](std::string fct) const ;

@@ -54,15 +54,14 @@ fastNLOCoeffBase* fastNLOCoeffMult::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-int fastNLOCoeffMult::Read(istream *table){
+void fastNLOCoeffMult::Read(istream& table){
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
-   return 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffMult::ReadRest(istream *table){
+void fastNLOCoeffMult::ReadRest(istream& table){
    CheckCoeffConstants(this);
    ReadCoeffMult(table);
    EndReadCoeff(table);
@@ -70,21 +69,21 @@ void fastNLOCoeffMult::ReadRest(istream *table){
 
 
 //________________________________________________________________________________________________________________ //
-int fastNLOCoeffMult::ReadCoeffMult(istream *table){
+void fastNLOCoeffMult::ReadCoeffMult(istream& table){
    char buffer[5257];
-   *table >> Nuncorrel;
+   table >> Nuncorrel;
    UncDescr.resize(Nuncorrel);
-   table->getline(buffer,5256);
+   table.getline(buffer,5256);
    for(int i=0;i<Nuncorrel;i++){
-      table->getline(buffer,5256);
+      table.getline(buffer,5256);
       UncDescr[i] = buffer;
       //         StripWhitespace(UncDescr[i]);
    }
-   *table >> Ncorrel;
+   table >> Ncorrel;
    CorDescr.resize(Ncorrel);
-   table->getline(buffer,5256);
+   table.getline(buffer,5256);
    for(int i=0;i<Ncorrel;i++){
-      table->getline(buffer,5256);
+      table.getline(buffer,5256);
       CorDescr[i] = buffer;
       //         StripWhitespace(CorDescr[i]);
    }
@@ -94,22 +93,21 @@ int fastNLOCoeffMult::ReadCoeffMult(istream *table){
    CorrLo.resize(fNObsBins);
    CorrHi.resize(fNObsBins);
    for(int i=0;i<fNObsBins;i++){
-      *table >> fact[i];
+      table >> fact[i];
       UncorLo[i].resize(Nuncorrel);
       UncorHi[i].resize(Nuncorrel);
       for(int j=0;j<Nuncorrel;j++){
-	 *table >> UncorLo[i][j];
-	 *table >> UncorHi[i][j];
+	 table >> UncorLo[i][j];
+	 table >> UncorHi[i][j];
       }
       CorrLo[i].resize(Ncorrel);
       CorrHi[i].resize(Ncorrel);
       for(int j=0;j<Ncorrel;j++){
-	 *table >> CorrLo[i][j];
-	 *table >> CorrHi[i][j];
+	 table >> CorrLo[i][j];
+	 table >> CorrHi[i][j];
       }
    }
    // end of IAddMultFlag==1
-   return 0;
 }
 
 

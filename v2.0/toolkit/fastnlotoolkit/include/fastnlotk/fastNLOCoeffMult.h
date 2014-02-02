@@ -18,8 +18,7 @@ public:
    virtual ~fastNLOCoeffMult(){;};
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   int Read(istream *table);
-   void ReadRest(istream *table);
+   virtual void Read(istream& table);
    virtual void Write(ostream& table);
    virtual void Print() const;
    
@@ -33,7 +32,8 @@ public:
    v2d GetCorrHi()  const { return CorrHi; };
 
 protected:
-   int ReadCoeffMult(istream *table);
+   void ReadCoeffMult(istream& table);
+   void ReadRest(istream& table);
 
    int Nuncorrel;
    vector < string > UncDescr;

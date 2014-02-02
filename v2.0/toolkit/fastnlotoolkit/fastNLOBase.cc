@@ -15,13 +15,13 @@ bool fastNLOBase::fWelcomeOnce = false;
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  ifilestream(0), fPrecision(8) {
+fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  fPrecision(8) {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), ifilestream(0), fPrecision(8)  {
+fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), fPrecision(8)  {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
@@ -34,7 +34,7 @@ fastNLOBase::fastNLOBase(const fastNLOBase& other) :
    Ncontrib(other.Ncontrib), Nmult(other.Nmult), 
    Ndata(other.Ndata), NuserString(other.NuserString), 
    NuserInt(other.NuserInt), NuserFloat(other.NuserFloat), 
-   Imachine(other.Imachine) ,ifilestream(NULL) 
+   Imachine(other.Imachine)
 {
    //! copy constructor
 }
@@ -42,70 +42,82 @@ fastNLOBase::fastNLOBase(const fastNLOBase& other) :
 
 //______________________________________________________________________________
 fastNLOBase::~fastNLOBase(){
-   if(ifilestream) delete ifilestream;
-   //   if(ofilestream) delete ofilestream;
 }
 
 
 //______________________________________________________________________________
-int fastNLOBase::ReadTable(){
+ifstream* fastNLOBase::OpenFileRead(){
+   //! Open file-stream for reading table
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
-      error["ReadTable"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
+      error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
       exit(1);
-      //return 1;
    }
-   // open file
-   ifilestream = new ifstream(ffilename.c_str(),ios::in);
-   // read header
-   ReadHeader(ifilestream);
-   return 0;
+   ifstream* strm = new ifstream(ffilename.c_str(),ios::in);
+   return strm;
 }
 
 
 //______________________________________________________________________________
-int fastNLOBase::ReadHeader(istream *table){
-   table->peek();
-   if (table->eof()){
-      error["ReadHeader"]<<"Cannot read from file."<<endl;
-      return(2);
+void fastNLOBase::CloseFileRead(ifstream& strm){
+   //! Close file-stream 
+   strm.close();
+   delete &strm;
+}
+
+
+//______________________________________________________________________________
+void fastNLOBase::ReadTable(){
+   // does file exist?
+   // open file
+   ifstream* strm = OpenFileRead();
+   // read header
+   ReadHeader(*strm);
+   // close stream
+   CloseFileRead(*strm);
+}
+
+
+//______________________________________________________________________________
+void fastNLOBase::ReadHeader(istream& table){
+   table.peek();
+   if (table.eof()){
+      error["ReadHeader"]<<"Cannot read from stream."<<endl;
    }
 
    fastNLOTools::ReadMagicNo(table);
-   *table >> Itabversion;
-   *table >> ScenName;
-   *table >> Ncontrib;
-   *table >> Nmult;
-   *table >> Ndata;
-   *table >> NuserString;
-   *table >> NuserInt;
+   table >> Itabversion;
+   table >> ScenName;
+   table >> Ncontrib;
+   table >> Nmult;
+   table >> Ndata;
+   table >> NuserString;
+   table >> NuserInt;
    for ( int i = 0 ; i<NuserInt ; i++ ) {
       int IUserLines;
-      *table >> IUserLines;
+      table >> IUserLines;
       // future code if 'user-blocks' are used ...
       // int NUserFlag;
       // string NUserBlockDescr;
-      // *table >> NUserFlag;
-      // *table >> NUserBlockDescr;;
+      // table >> NUserFlag;
+      // table >> NUserBlockDescr;;
       // if ( known-user-block ) { read-known-userblock... }
       // else { // skip meaningful reading
       //    for ( int i = 2 ; i<NuserInt ; i++ ) {
       //       double devnull;
-      //       *table >> devnull;
+      //       table >> devnull;
       //    }
       // }
       // ...sofar skip reading
       for ( int i = 0 ; i<NuserInt ; i++ ) {
 	 double devnull;
-	 *table >> devnull;
+	 table >> devnull;
       }
    }
-   *table >> NuserFloat;
-   *table >> Imachine;
-
+   table >> NuserFloat;
+   table >> Imachine;
    fastNLOTools::ReadMagicNo(table);
    fastNLOTools::PutBackMagicNo(table);
-   return 0;
 }
 
 

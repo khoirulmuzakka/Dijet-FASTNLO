@@ -15,15 +15,15 @@ public:
    fastNLOCoeffData(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffData(){;};
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
-   int  Read(istream *table);
-   void ReadRest(istream *table);
+   virtual void Read(istream& table);
    virtual void Write(ostream& table);
    virtual void Print() const;
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
 
 protected:
    fastNLOCoeffData();
-   int ReadCoeffData(istream *table);
+   void ReadCoeffData(istream& table);
+   void ReadRest(istream& table);
 
    int Nuncorrel;
    vector<string > UncDescr;

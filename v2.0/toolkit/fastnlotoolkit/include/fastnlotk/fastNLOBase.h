@@ -18,8 +18,7 @@ public:
    virtual ~fastNLOBase();
 
    // i/o
-   int ReadTable();							//!< read table
-   int ReadHeader(istream *table);					//!< read header of table (BlockA1)
+   virtual void ReadTable();							//!< read table
    virtual void WriteTable();							//!< write full table to disk
    virtual void Print() const;
    
@@ -68,13 +67,16 @@ public:
 protected:
    void PrintWelcomeMessage();						//!< Say hello to fastNLO user
    ofstream* OpenFileWrite();						//!< open ofstream for writing tables to ffilename
+   ifstream* OpenFileRead();						//!< open ifstream for reading table
    //ofstream *OpenFileRewrite();
    void WriteHeader(ostream& table);					//!< write (or cout) hader using ostream
+   void ReadHeader(istream& table);					//!< read header of table (BlockA1)
    void CloseFileWrite(ofstream& table);						
+   void CloseFileRead(ifstream& table);						
    //void CloseStream();
 
    string ffilename;
-   ifstream *ifilestream;
+   //ifstream *ifilestream;
    //ofstream *ofilestream;
    int fPrecision;
    // header

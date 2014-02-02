@@ -33,9 +33,9 @@ class fastNLOTable : public fastNLOBase {
    void PrintFastNLOTableConstants(const int iprint = 2) const;                                 //  Print (technical) constants of fastNLO table (use iprint) for level of details.
    void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
 
-   int ReadTable();
-   void WriteTable();
-   void WriteTable(string filename);
+   virtual void ReadTable();
+   virtual void WriteTable();
+   virtual void WriteTable(string filename);
    bool IsCompatible(const fastNLOTable& other) const;
 
    int GetNObsBin() const {return NObsBin;}
@@ -95,9 +95,9 @@ private:
 
 protected:
    void WriteScenario(ostream& table);
-   int ReadScenario(istream *table);
-   int ReadCoeffTables(istream *table);
-   fastNLOCoeffBase* ReadRestOfCoeffTable(const fastNLOCoeffBase& cB, istream *table);
+   void ReadScenario(istream& table);
+   void ReadCoeffTables(istream& table);
+   fastNLOCoeffBase* ReadRestOfCoeffTable(const fastNLOCoeffBase& cB, istream& table);
 
    vector < fastNLOCoeffBase* > fCoeff;
    //fastNLOCoeffData* fData;
