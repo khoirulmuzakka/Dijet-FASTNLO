@@ -54,8 +54,10 @@ int main(int argc, char** argv)
          // reading table
          fastNLOTable tab(path);
          //! Todo: check validity of table, here!
-         if ( !resultTable )
+         if ( !resultTable ) {
             resultTable = new fastNLOTable(tab);
+	    nValidTables++;
+	 }
          else { // adding table to result table
             // check if 'scenario' is compatible
             if ( !resultTable->IsCompatible(tab) )
