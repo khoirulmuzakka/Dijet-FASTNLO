@@ -40,7 +40,7 @@ read_steer* read_steer::Steering(string steerID)
    // get singleton class
    if ( !(*instances)[steerID] ){//new instance
       if ( steerID.compare(read_steer::stdID)!=0 )
- 	 cout<<" # read_steer. Info. Initalizing new read_steer instance with steerID = '"<<steerID<<"'."<<endl;
+ 	 cout<<" # read_steer. Info. Initalizing new read_steer namespace with steerID = '"<<steerID<<"'."<<endl;
       (*instances)[steerID] = new read_steer();
    }
    return (read_steer*)((*instances)[steerID]);

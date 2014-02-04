@@ -39,7 +39,6 @@ public:
    fastNLOCreate(string steerfile);
    fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts);
    ~fastNLOCreate();
-   static int nInst;										//!< limit the number of instance to one (until more flexible access of parser values is implemented)
 
    fnloEvent fEvent;										//!< Structure, which holds all relevant variables related to event observables
    fnloScenario fScenario;									//!< Structure, which holds perturbative (wilson) coefficients/weights and x-values
@@ -84,6 +83,7 @@ public:
    bool GetParameterFromSteering(string label, vector<string>& val);				//!< Get user-defined parameter from steering file.
 
    void AdjustWarmupValues();									//!< Round warmup values to more likely values.
+   void PrintAllSteeringValues() const { PRINTALL();};						//!< Print all steering values obtained from steering files (of all fastNLOCreate instances);
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.

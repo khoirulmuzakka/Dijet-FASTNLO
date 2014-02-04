@@ -321,8 +321,10 @@
 //update to unordered_map in C++11 in gcc4.7
 #include <vector>
 
-// use the pre-processor
+// use the pre-processor for accessing values 
+// in 'single-file' mode
 #define READ(X) read_steer::readfile(X)
+
 #define BOOL(X) read_steer::getbool(#X)
 #define INT(X) read_steer::getint(#X)
 #define DOUBLE(X) read_steer::getdouble(#X)
@@ -343,8 +345,36 @@
 #define DOUBLE_TAB(X) read_steer::getdoubletable(#X)
 #define STRING_TAB(X) read_steer::getstringtable(#X)
 
+// use the pre-processor for accessing values 
+// in 'multi-file' mode
+// NS specifies the steerID-namespace
+#define READ_NS(X,NS) read_steer::readfile(X,NS)
+
+#define BOOL_NS(X,NS) read_steer::getbool(#X,NS)
+#define INT_NS(X,NS) read_steer::getint(#X,NS)
+#define DOUBLE_NS(X,NS) read_steer::getdouble(#X,NS)
+#define CHAR_NS(X,NS) read_steer::getstring(#X,NS).c_str()
+#define STRING_NS(X,NS) read_steer::getstring(#X,NS)
+
+#define BOOL_ARR_NS(X,NS) read_steer::getboolarray(#X,NS)
+#define INT_ARR_NS(X,NS) read_steer::getintarray(#X,NS)
+#define DOUBLE_ARR_NS(X,NS) read_steer::getdoublearray(#X,NS)
+#define STRING_ARR_NS(X,NS) read_steer::getstringarray(#X,NS)
+
+#define BOOL_COL_NS(X,Y,NS) read_steer::getboolcolumn(#X,#Y,NS)
+#define INT_COL_NS(X,Y,NS) read_steer::getintcolumn(#X,#Y,NS)
+#define DOUBLE_COL_NS(X,Y,NS) read_steer::getdoublecolumn(#X,#Y,NS)
+#define STRING_COL_NS(X,Y,NS) read_steer::getstringcolumn(#X,#Y,NS)
+
+#define INT_TAB_NS(X,NS) read_steer::getinttable(#X,NS)
+#define DOUBLE_TAB_NS(X,NS) read_steer::getdoubletable(#X,NS)
+#define STRING_TAB_NS(X,NS) read_steer::getstringtable(#X,NS)
+
+// shortcuts for parsing command line and printing
 #define PARSE(X,Y) read_steer::parsecommandline(X,Y)
 #define PRINTALL() read_steer::printall()
+
+
 
 using namespace std;
 
