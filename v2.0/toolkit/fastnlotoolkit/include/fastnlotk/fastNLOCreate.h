@@ -133,7 +133,8 @@ protected:
    vector<double> fScaleFac;									//!< Scale factors. Needed for fixed-scale tables
 
    // interpolation kernels
-   vector<fastNLOInterpolBase*> fKernX;								//!< Interpolation kernel for x-interpolation
+   vector<fastNLOInterpolBase*> fKernX1;							//!< Interpolation kernel for x-interpolation
+   vector<fastNLOInterpolBase*> fKernX2;							//!< Interpolation kernel for x-interpolation
    vector<fastNLOInterpolBase*> fKernMu1;							//!< Interpolation kernel for mu1-interpolation
    vector<fastNLOInterpolBase*> fKernMu2;							//!< Interpolation kernel for mu2-interpolation
    vector<vector<fastNLOInterpolBase*> > fKernMuS;						//!< Interpolation kernels for each scale var for fixed-scale tables

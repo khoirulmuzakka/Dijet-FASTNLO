@@ -47,6 +47,7 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
 
  
 vector<pair<int,double> >* fastNLOInterpolBase::GetNodeValuesPtr(double x){
+   cout<<"x="<<x<<",\tfLastVal="<<fLastVal<<endl;
    if ( x==fLastVal ) return &fNodes; // nothing todo. I know the nodes already.
    else {
       bool InRange = CheckX(x);
@@ -62,15 +63,13 @@ vector<pair<int,double> >* fastNLOInterpolBase::GetNodeValuesPtr(double x){
 
 const vector<pair<int,double> >& fastNLOInterpolBase::GetNodeValues(double x){
    if ( fHgrid.empty() ) warn["GetNodeValues"]<<"There is no grid."<<endl;
-
+   //cout<<"GetNodeValues for (x="<<x<<"), [fLastVal="<<fLastVal<<")"<<endl;
    if ( x==fLastVal ) return fNodes; // nothing todo. I know the nodes already.
-
    bool InRange = CheckX(x);
    if ( !InRange ) { // standard return, if there is no
       //fRetNodes = vector<pair<int,double> > ()
       //return fRetNodes;
    }
-
    fLastVal = x;
    CalcNodeValues(fNodes,x);
    return fNodes;
@@ -145,7 +144,7 @@ int fastNLOInterpolBase::FindLargestPossibleNode(double x){
    if ( x > fgrid.back() ) {
       if ( !fLastGridPointWasRemoved )
 	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node. Using last node. This may bias the result! x="<<x<<endl;
-      else if ( x > fvalmax )
+      else if ( x > fvalmax)
 	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node and than largest grid value. Using last node. Interpolation kernel may lead unreasonable values! x="<<x<<endl;
       return node1;
    }
@@ -293,22 +292,29 @@ bool fastNLOInterpolBase::CheckX(double& x) {
       return true;
    }
    if ( x < fgrid[0] ) {
-      if ( fabs(x-fLastVal)>1.e-8 ) warn["CheckX"]<<"Value "<<x<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
+      double xin = x;
       x = fgrid[0];
+      if ( x!=fLastVal )
+	 warn["CheckX"]<<"Value "<<xin<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
    }
    else if ( x > fgrid.back() ) {
+      double xin = x;
       if ( fLastGridPointWasRemoved ) {
 	 if ( x > fvalmax ) {
-	    if ( x!=fLastVal ) warn["CheckX"]<<"Value "<<x<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
-	       x = fvalmax;
+	    x = fvalmax;
+	    if ( x!=fLastVal )
+	       warn["CheckX"]<<"Value "<<xin<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
 	 }
       }
       else {
-	 if ( fabs(x-fgrid.back())>1.e-4 ) warn["CheckX"]<<"Value "<<x<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
 	 x = fgrid.back();
+	 if ( fabs(x-fgrid.back())>1.e-4 && x!=fLastVal) 
+	       warn["CheckX"]<<"Value "<<xin<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
       }
    }
-   else sanity = true;
+   else 
+      sanity = true;
+
    return sanity;
 }
 

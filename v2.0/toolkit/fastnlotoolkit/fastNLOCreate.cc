@@ -888,14 +888,14 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       // do interpolation
       double xmin = std::min(fEvent._x1,fEvent._x2);
       double xmax = std::max(fEvent._x1,fEvent._x2);
-      vector<pair<int,double> > nxlo = fKernX[ObsBin]->GetNodeValues(xmin);
-      vector<pair<int,double> > nxup = fKernX[ObsBin]->GetNodeValues(xmax);
+      vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
+      vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
 
       if ( fApplyPDFReweight ) {
-	 fKernX[ObsBin]->CheckX(xmin);
-	 fKernX[ObsBin]->CheckX(xmax);
-	 ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr()); // changes node values
-	 ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr()); // changes node values
+	 fKernX1[ObsBin]->CheckX(xmin);
+	 fKernX2[ObsBin]->CheckX(xmax);
+	 ApplyPDFWeight(nxlo,xmin,fKernX1[ObsBin]->GetGridPtr()); // changes node values
+	 ApplyPDFWeight(nxup,xmax,fKernX2[ObsBin]->GetGridPtr()); // changes node values
       }
 
 
@@ -926,7 +926,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       }
    }
    else {
-      for ( unsigned int is = 0 ; is<events.size() ; is++ ) {
+      for ( unsigned int is = 0 ; is<events.size() ; is++ ) { // all scalevars
 	 FillAllSubprocesses( events[is], scen, is );
       }
    }
@@ -1026,20 +1026,23 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    debug["FillContributionFixHHC"]<<endl;
 
    if ( fEvent._w == 0 ) return; // nothing todo.
+   
 
    // do interpolation
    double xmin = std::min(fEvent._x1,fEvent._x2);
    double xmax = std::max(fEvent._x1,fEvent._x2);
-   vector<pair<int,double> > nxlo = fKernX[ObsBin]->GetNodeValues(xmin);
-   vector<pair<int,double> > nxup = fKernX[ObsBin]->GetNodeValues(xmax);
+   //cout<<"\n NEW Contribution ! xmin="<<xmin<<",\t xmax="<<xmax<<",\t mu1="<<fScenario._m1 * fScaleFac[scalevar]<<"\n"<<endl;
+
+   vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
+   vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
    const double mu = fScenario._m1 * fScaleFac[scalevar];
    const vector<pair<int,double> >& nmu  = fKernMuS[ObsBin][scalevar]->GetNodeValues(mu);
 
    if ( fApplyPDFReweight ) {
-      fKernX[ObsBin]->CheckX(xmin);
-      fKernX[ObsBin]->CheckX(xmax);
-      ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr());
-      ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr());
+      fKernX1[ObsBin]->CheckX(xmin);
+      fKernX2[ObsBin]->CheckX(xmax);
+      ApplyPDFWeight(nxlo,xmin,fKernX1[ObsBin]->GetGridPtr());
+      ApplyPDFWeight(nxup,xmax,fKernX2[ObsBin]->GetGridPtr());
    }
 
 
@@ -1080,8 +1083,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
    //cout<<"try to interpol. ObsBin="<<ObsBin<<" ,x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", mu1="<<Scenario._m1<<", mu2="<<Scenario._m2<<endl;
    double xmin = std::min(fEvent._x1,fEvent._x2);
    double xmax = std::max(fEvent._x1,fEvent._x2);
-   vector<pair<int,double> > nxlo = fKernX[ObsBin]->GetNodeValues(xmin);
-   vector<pair<int,double> > nxup = fKernX[ObsBin]->GetNodeValues(xmax);
+   vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
+   vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
    vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
    vector<pair<int,double> > nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
 
@@ -1119,10 +1122,10 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 //       cout<<"     ScaleNode[0]="<<fKernMu2[ObsBin]->fgrid[0]<<", Node[1]="<<fKernMu2[ObsBin]->fgrid[1]<<", Node[2]="<<fKernMu2[ObsBin]->fgrid[2]<<", Node[3]="<<fKernMu2[ObsBin]->fgrid[3]<<", ScaleNode[4]="<<fKernMu2[ObsBin]->fgrid[4]<<endl;
 
    if ( fApplyPDFReweight ) {
-      fKernX[ObsBin]->CheckX(xmin);
-      fKernX[ObsBin]->CheckX(xmax);
-      ApplyPDFWeight(nxlo,xmin,fKernX[ObsBin]->GetGridPtr());
-      ApplyPDFWeight(nxup,xmax,fKernX[ObsBin]->GetGridPtr());
+      fKernX1[ObsBin]->CheckX(xmin);
+      fKernX2[ObsBin]->CheckX(xmax);
+      ApplyPDFWeight(nxlo,xmin,fKernX1[ObsBin]->GetGridPtr());
+      ApplyPDFWeight(nxup,xmax,fKernX2[ObsBin]->GetGridPtr());
    }
    //       cout<<" --  after reweight: --  "<<endl;
    //       cout<<"     n1min="<<nxlo[0].second<<"\ttn1min="<<nxlo[1].second<<"\txlo="<<nxlo[2].second<<"\txlo="<<nxlo[3].second<<endl;
@@ -1147,7 +1150,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
                double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                if ( isnan(wfnlo) ) {
                   error[""]<<"wfnlo is a nan."<<endl;
-                  fKernX[ObsBin]->PrintGrid();
+                  fKernX1[ObsBin]->PrintGrid();
+                  fKernX2[ObsBin]->PrintGrid();
                   fKernMu1[ObsBin]->PrintGrid();
                   fKernMu2[ObsBin]->PrintGrid();
                   cout<<"ix1="<<x1<<", ix2="<<x2<<", im1="<<m1<<", im2="<<mu2<<endl;
@@ -1204,14 +1208,14 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
 
    // todo, just: 'x'
    double x = fEvent._x1;
-   vector<pair<int,double> > nx = fKernX[ObsBin]->GetNodeValues(x);
+   vector<pair<int,double> > nx = fKernX1[ObsBin]->GetNodeValues(x);
    vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
    vector<pair<int,double> > nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
 
 
    if ( fApplyPDFReweight ) {
-      fKernX[ObsBin]->CheckX(x);
-      ApplyPDFWeight(nx,x,fKernX[ObsBin]->GetGridPtr());
+      fKernX1[ObsBin]->CheckX(x);
+      ApplyPDFWeight(nx,x,fKernX1[ObsBin]->GetGridPtr());
    }
 
    // fill grid
@@ -1227,7 +1231,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin)
 	    double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
 	    if ( isnan(wfnlo) ) {
 	       error[""]<<"wfnlo is a nan."<<endl;
-	       fKernX[ObsBin]->PrintGrid();
+	       fKernX1[ObsBin]->PrintGrid();
 	       fKernMu1[ObsBin]->PrintGrid();
 	       fKernMu2[ObsBin]->PrintGrid();
 	       cout<<"ix1="<<ix<<", im1="<<m1<<", im2="<<mu2<<endl;
@@ -1887,7 +1891,7 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
 // ___________________________________________________________________________________________________
 void  fastNLOCreate::InitGrids() {
    debug["InitGrids"]<<endl;
-   if ( fKernX.empty() ) error["InitGrids"]<<"Interpolation kernels must be initialized before calling this function."<<endl;
+   if ( fKernX1.empty() ) error["InitGrids"]<<"Interpolation kernels must be initialized before calling this function."<<endl;
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       //       if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1) || (c->GetNPDF()==1)   ) {;} // ok!
@@ -1904,12 +1908,12 @@ void  fastNLOCreate::InitGrids() {
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
          c->ScaleNode1[i] = fKernMu1[i]->GetGrid();
          c->ScaleNode2[i] = fKernMu2[i]->GetGrid();
-         c->XNode1[i]     = fKernX[i]->GetGrid();
+         c->XNode1[i]     = fKernX1[i]->GetGrid();
 	 if ( c->GetNPDFDim() == 2 ) 
-	    c->XNode2[i]     = fKernX[i]->GetGrid();
+	    c->XNode2[i]     = fKernX2[i]->GetGrid();
 
          // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
-         int nxmax = GetNxmax (fKernX[i]->GetGridPtr() , fKernX[i]->GetGridPtr() );
+         int nxmax = GetNxmax (fKernX1[i]->GetGridPtr() , fKernX2[i]->GetGridPtr() );
          stype[i].resize(nxmax);
          for ( unsigned int x = 0 ; x<stype[i].size() ; x++ ) {
             stype[i][x].resize(c->ScaleNode1[i].size());
@@ -1949,7 +1953,7 @@ void  fastNLOCreate::InitGrids() {
       c->ScaleFac[0] = fScaleFac;
       c->XNode1.resize(GetNObsBin());
       for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-         c->XNode1[i]     = fKernX[i]->GetGrid();
+         c->XNode1[i]     = fKernX1[i]->GetGrid();
       }
       if ( c->GetNPDFDim() == 2 ) { // both hadrons have same x-grid in this implementation
 	 c->XNode2 = c->XNode1;
@@ -1977,7 +1981,8 @@ void  fastNLOCreate::InitInterpolationKernels() {
       error["InitInterpolationKernels"]<<"Interpolation kernels can only be initialized in production runs. Warmup values must be known."<<endl;
    }
 
-   fKernX.resize(GetNObsBin());
+   fKernX1.resize(GetNObsBin());
+   fKernX2.resize(GetNObsBin());
    if ( fIsFlexibleScale ) {
       fKernMu1.resize(GetNObsBin());
       fKernMu2.resize(GetNObsBin());
@@ -2005,20 +2010,31 @@ void  fastNLOCreate::InitInterpolationKernels() {
       }
    }
 
+   int npdf = GetTheCoeffTable()->GetNPDF();
+
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
       debug["InitInterpolationKernels"]<<"Make x grid for obsbin="<<i<<endl;
-      fKernX[i] = MakeInterpolationKernels(STRING_NS(X_Kernel,fSteerfile),wrmX[i],1);
-
-      if ( BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile) )
-         fKernX[i]->MakeGridsWithNNodesPerMagnitude( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile)  );
-      else
-         fKernX[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile));
-
-      fKernX[i]->RemoveLastNode();
-
+      fKernX1[i] = MakeInterpolationKernels(STRING_NS(X_Kernel,fSteerfile),wrmX[i],1); // use 1 as upper x-value
+      if ( npdf == 2 )
+	 fKernX2[i] = MakeInterpolationKernels(STRING_NS(X_Kernel,fSteerfile),wrmX[i],1);
+	 
+      if ( BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile) ) {
+         fKernX1[i]->MakeGridsWithNNodesPerMagnitude( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile)  );
+	 if ( npdf == 2 )
+	    fKernX2[i]->MakeGridsWithNNodesPerMagnitude( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile)  );
+      }
+      else {
+         fKernX1[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile));
+	 if ( npdf == 2 )
+	    fKernX2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile));
+      }
+      fKernX1[i]->RemoveLastNode();
+      if ( npdf == 2 )
+	 fKernX2[i]->RemoveLastNode();
+	 
       // ------------------------------------------------
       // init scale1-interpolation kernels
       // ------------------------------------------------
