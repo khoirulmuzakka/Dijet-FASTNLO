@@ -14,8 +14,8 @@ bool fastNLOCoeffAddFlex::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
    if ( ret &&  c->GetNScaleDep() >= 3) return true;
    else if ( c->GetNScaleDep() < 3 ) {
       if ( !quiet )
-	 say::error["CheckCoeffConstants"]<<"This is not a flexible scale table. NScaleDep must be >= 3 but is NScaleDep="
-					  <<c->GetNScaleDep()<<endl;
+         say::error["CheckCoeffConstants"]<<"This is not a flexible scale table. NScaleDep must be >= 3 but is NScaleDep="
+                                          <<c->GetNScaleDep()<<endl;
       return false;
    }
    else return false;
@@ -94,9 +94,9 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
       nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuFDep , table , NSubproc , Nevt );
       nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRDep , table , NSubproc , Nevt );
       if ( NScaleDep>=6 ){
-	 nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRRDep , table , NSubproc , Nevt );
-	 nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuFFDep , table , NSubproc , Nevt );
-	 nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRFDep , table , NSubproc , Nevt );
+         nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRRDep , table , NSubproc , Nevt );
+         nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuFFDep , table , NSubproc , Nevt );
+         nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRFDep , table , NSubproc , Nevt );
       }
    }
    // fixing old convention
@@ -116,7 +116,7 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
    for (unsigned int i=0; i<AlphasTwoPi.size() ; i++) {
       AlphasTwoPi[i].resize(ScaleNode1[i].size());
       for (unsigned int j=0; j<AlphasTwoPi[i].size() ; j++) {
-	 AlphasTwoPi[i][j].resize(ScaleNode2[i].size());
+         AlphasTwoPi[i][j].resize(ScaleNode2[i].size());
       }
    }
 }
@@ -128,16 +128,16 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
    // update to latest version
     if ( NScaleDep==3 ) {
        if ( Npow==fILOord) {
- 	 info["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
- 	 NScaleDep=4;
+         info["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
+         NScaleDep=4;
        }
        else if ( Npow==fILOord+1 ) {
- 	 info["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
- 	 NScaleDep=5;
+         info["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
+         NScaleDep=5;
        }
        else if ( Npow==fILOord+2 ) {
- 	 info["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
- 	 NScaleDep=6;
+         info["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
+         NScaleDep=6;
        }
     }
    fastNLOCoeffAddBase::Write(table);
@@ -152,17 +152,17 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
       nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuFDep , table , NSubproc, Nevt);
       nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRDep , table , NSubproc, Nevt);
       if ( NScaleDep>=6) {
-	 nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRRDep , table , NSubproc, Nevt);
-	 nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuFFDep , table , NSubproc, Nevt);
-	 nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRFDep , table , NSubproc, Nevt);
+         nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRRDep , table , NSubproc, Nevt);
+         nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuFFDep , table , NSubproc, Nevt);
+         nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRFDep , table , NSubproc, Nevt);
       }
    }
    if ( SigmaRefMixed.empty() ) fastNLOTools::ResizeVector(SigmaRefMixed,fNObsBins,NSubproc);
    if ( SigmaRef_s1.empty() )   fastNLOTools::ResizeVector(SigmaRef_s1,fNObsBins,NSubproc);
    if ( SigmaRef_s2.empty() )   fastNLOTools::ResizeVector(SigmaRef_s2,fNObsBins,NSubproc);
-   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRefMixed	, table , NSubproc, Nevt);
-   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s1	, table , NSubproc, Nevt);
-   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s2	, table , NSubproc, Nevt);
+   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRefMixed      , table , NSubproc, Nevt);
+   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s1        , table , NSubproc, Nevt);
+   nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s2        , table , NSubproc, Nevt);
 
    /*
    nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
@@ -173,17 +173,17 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
       nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       if ( NScaleDep>=6) {
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-	 nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+         nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+         nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+         nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
       }
    }
    if ( SigmaRefMixed.empty() ) fastNLOCoeffBase::ResizeTable(&SigmaRefMixed,fNObsBins,NSubproc);
    if ( SigmaRef_s1.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s1,fNObsBins,NSubproc);
    if ( SigmaRef_s2.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s2,fNObsBins,NSubproc);
-   nn3 += WriteFlexibleTable( &SigmaRefMixed	, table , (bool)(option & DividebyNevt) , Nevt , true );
-   nn3 += WriteFlexibleTable( &SigmaRef_s1	, table , (bool)(option & DividebyNevt) , Nevt , true );
-   nn3 += WriteFlexibleTable( &SigmaRef_s2	, table , (bool)(option & DividebyNevt) , Nevt , true );
+   nn3 += WriteFlexibleTable( &SigmaRefMixed    , table , (bool)(option & DividebyNevt) , Nevt , true );
+   nn3 += WriteFlexibleTable( &SigmaRef_s1      , table , (bool)(option & DividebyNevt) , Nevt , true );
+   nn3 += WriteFlexibleTable( &SigmaRef_s2      , table , (bool)(option & DividebyNevt) , Nevt , true );
    */
    printf("  *  fastNLOCoeffAddFlex::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
 }
@@ -202,9 +202,9 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
       fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
       fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
       if ( NScaleDep>=6 ) {
-	 fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
-	 fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
-	 fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
+         fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
+         fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
+         fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
       }
    }
    fastNLOTools::AddVectors( SigmaRefMixed , othflex.SigmaRefMixed );

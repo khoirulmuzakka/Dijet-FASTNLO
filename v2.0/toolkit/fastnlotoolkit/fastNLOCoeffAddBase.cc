@@ -308,12 +308,12 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" B   IScaleDep                     %d\n",IScaleDep);
    printf(" B   Nevt                          %llu\n",Nevt);
    printf(" B   Npow                          %d\n",Npow);
-   printf(" B   NPDF                          %d\n",NPDFPDG.size());
+   printf(" B   NPDF                          %lu\n",NPDFPDG.size());
    for(unsigned int i=0;i<NPDFPDG.size();i++){
       printf(" B    - NPDFPDG[%d]                 %d\n",i,NPDFPDG[i]);
    }
    printf(" B   NPDFDim                       %d\n",NPDFDim);
-   printf(" B   NFragFunc                     %d\n",NFFPDG.size());
+   printf(" B   NFragFunc                     %lu\n",NFFPDG.size());
    for(unsigned int i=0;i<NFFPDG.size();i++){
       printf(" B    - NFFPDG[%d]               %d\n",i,NFFPDG[i]);
    }
@@ -324,7 +324,7 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" B   IPDFdef3                      %d\n",IPDFdef3);
    printf(" B   Nxtot1[0-%d]             ",fNObsBins);
    for(int i=0;i<fNObsBins;i++){
-      printf("%d ,",XNode1[i].size());
+      printf("%lu ,",XNode1[i].size());
    }
    printf("\n");
    //     for(int i=0;i<fNObsBins;i++){
@@ -335,8 +335,8 @@ void fastNLOCoeffAddBase::Print() const {
    //       printf(" B   \n");
    //     }
    printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
-   printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %d)\n",NFFPDG.size());
-   printf(" B   NScales                       %d\n",Iscale.size());
+   printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %lu)\n",NFFPDG.size());
+   printf(" B   NScales                       %lu\n",Iscale.size());
    for(int i=0;i<Iscale.size();i++){
       printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
    }
