@@ -14,9 +14,9 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
    if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==0 ) return true;
    else if ( c->GetIDataFlag()==1 || c->GetIAddMultFlag()==1 ) {
       if ( !quiet)say::error["fastNLOCoeffAddBase::CheckCoeffConstants"]
-	 <<"This must be a table with multiplicative perturbative coefficients. IDataFlag="
-	 <<c->GetIDataFlag()<<", IAddMultFlag="<<c->GetIAddMultFlag()
-	 <<", but none is allowed to be 1."<<endl;
+         <<"This must be a table with multiplicative perturbative coefficients. IDataFlag="
+         <<c->GetIDataFlag()<<", IAddMultFlag="<<c->GetIAddMultFlag()
+         <<", but none is allowed to be 1."<<endl;
       return false;
    }
    else return false;
@@ -68,7 +68,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    if(NPDF>0){
       NPDFPDG.resize(NPDF);
       for(int i=0;i<NPDF;i++){
-	 table >>  NPDFPDG[i];
+         table >>  NPDFPDG[i];
       }
    }
    table >> NPDFDim;
@@ -77,7 +77,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    if(NFragFunc>0){
       NFFPDG.resize(NFragFunc);
       for(int i=0;i<NFragFunc;i++){
-	 table >>  NFFPDG[i];
+         table >>  NFFPDG[i];
       }
    }
    table >> NFFDim;
@@ -89,12 +89,12 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
 
    if(IPDFdef1==0){
       for(int i=0;i<NSubproc;i++){
-	 // Missing: linear PDF combinations for IPDFdef1=0
-	 if(NPDF==1){
-	 }else{
-	    if(NPDF==2){
-	    }
-	 }
+         // Missing: linear PDF combinations for IPDFdef1=0
+         if(NPDF==1){
+         }else{
+            if(NPDF==2){
+            }
+         }
       }
    }
    //Nxtot1.resize(fNObsBins);
@@ -106,32 +106,32 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       //XNode1[i].resize(Nxtot1[i]);
       XNode1[i].resize(xtot);
       for(int j=0;j<xtot;j++){
-	 table >> XNode1[i][j];
+         table >> XNode1[i][j];
       }
    }
    if(NPDFDim==2){
       //Nxtot2.resize(fNObsBins);
       XNode2.resize(fNObsBins);
       for(int i=0;i<fNObsBins;i++){
-	 int xtot;
-	 table >> xtot;
-	 XNode2[i].resize(xtot);
-	 //table >> Nxtot2[i];
-	 //XNode2[i].resize(Nxtot2[i]);
-	 for(int j=0;j<xtot;j++){
-	    table >> XNode2[i][j];
-	 }
+         int xtot;
+         table >> xtot;
+         XNode2[i].resize(xtot);
+         //table >> Nxtot2[i];
+         //XNode2[i].resize(Nxtot2[i]);
+         for(int j=0;j<xtot;j++){
+            table >> XNode2[i][j];
+         }
       }
    }
    if(NFragFunc>0){
       Nztot.resize(fNObsBins);
       ZNode.resize(fNObsBins);
       for(int i=0;i<fNObsBins;i++){
-	 table >> Nztot[i];
-	 ZNode[i].resize(Nztot[i]);
-	 for(int j=0;j<Nztot[i];j++){
-	    table >> ZNode[i][j];
-	 }
+         table >> Nztot[i];
+         ZNode[i].resize(Nztot[i]);
+         for(int j=0;j<Nztot[i];j++){
+            table >> ZNode[i][j];
+         }
       }
    }
 
@@ -149,9 +149,9 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       ScaleDescript[i].resize(NscaleDescript);
       table.getline(buffer,256);
       for(int j=0;j<NscaleDescript;j++){
-	 table.getline(buffer,256);
-	 ScaleDescript[i][j] = buffer;
-	 //            StripWhitespace(ScaleDescript[i][j]);
+         table.getline(buffer,256);
+         ScaleDescript[i][j] = buffer;
+         //            StripWhitespace(ScaleDescript[i][j]);
       }
    }
 }
@@ -175,7 +175,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    table << NFragFunc << endl;
    if(NFragFunc>0){
       for(int i=0;i<NFragFunc;i++){
-	 table <<  NFFPDG[i] << endl;
+         table <<  NFFPDG[i] << endl;
       }
    }
    table << NFFDim << endl;
@@ -185,34 +185,34 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    table << IPDFdef3 << endl;
    if(IPDFdef1==0){
       for(int i=0;i<NSubproc;i++){
-	 // Missing: linear PDF combinations for IPDFdef1=0
-	 if(NPDFPDG.size()==1){
-	 }else{
-	    if(NPDFPDG.size()==2){
-	    }
-	 }
+         // Missing: linear PDF combinations for IPDFdef1=0
+         if(NPDFPDG.size()==1){
+         }else{
+            if(NPDFPDG.size()==2){
+            }
+         }
       }
    }
    for(int i=0;i<fNObsBins;i++){
       table << XNode1[i].size() << endl;
       for(unsigned int j=0;j<XNode1[i].size();j++){
-	 table << XNode1[i][j] << endl;
+         table << XNode1[i][j] << endl;
       }
    }
    if(NPDFDim==2){
       for(int i=0;i<fNObsBins;i++){
-	 table << XNode2[i].size() << endl;
-	 for(unsigned int j=0;j<XNode2[i].size();j++){
-	    table << XNode2[i][j] << endl;
-	 }
+         table << XNode2[i].size() << endl;
+         for(unsigned int j=0;j<XNode2[i].size();j++){
+            table << XNode2[i][j] << endl;
+         }
       }
    }
    if(NFragFunc>0){
       for(int i=0;i<fNObsBins;i++){
-	 table << Nztot[i] << endl;
-	 for(int j=0;j<Nztot[i];j++){
-	    table << ZNode[i][j] << endl;
-	 }
+         table << Nztot[i] << endl;
+         for(int j=0;j<Nztot[i];j++){
+            table << ZNode[i][j] << endl;
+         }
       }
    }
    int NScales = Iscale.size();
@@ -224,7 +224,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    for(int i=0;i<NScaleDim;i++){
       table << ScaleDescript[i].size() << endl;
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
-	 table << ScaleDescript[i][j] << endl;
+         table << ScaleDescript[i][j] << endl;
       }
    }
 }
@@ -330,7 +330,7 @@ void fastNLOCoeffAddBase::Print() const {
    //     for(int i=0;i<fNObsBins;i++){
    //       printf(" B    XNode1[%d]             ",i);
    //       for(int j=0;j<Nxtot1[i];j++){
-   // 	printf(" B   %8.4f ,",XNode1[i][j]);
+   //   printf(" B   %8.4f ,",XNode1[i][j]);
    //       }
    //       printf(" B   \n");
    //     }
@@ -344,7 +344,7 @@ void fastNLOCoeffAddBase::Print() const {
    for(int i=0;i<NScaleDim;i++){
       //printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
-	 printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
+         printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
    }
    printf(" *******************************************************\n");

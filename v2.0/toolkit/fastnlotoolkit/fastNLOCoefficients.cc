@@ -1270,7 +1270,7 @@ void fastNLOCoefficients::Print() const {
     printf(" B   IPDFdef3                      %d\n",IPDFdef3);
     printf(" B   Nxtot1[0-%d]             ",fNObsBins);
     for(int i=0;i<fNObsBins;i++){
-       printf("%d ,",XNode1[i].size());
+       printf("%lu ,",XNode1[i].size());
     }
     printf(" B   \n");
 
