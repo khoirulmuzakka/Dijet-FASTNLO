@@ -58,12 +58,12 @@ int fnloBlockA2::Read(istream *table){
       }
       //      cout << "iobs1: " << i << ", LoBin i: " << LoBin[i][1] << endl;
       if ( i > 0 ) {
-	if ( LoBin[i][1] != LoBin[i-1][1] ) {
-	  //	  cout << "iobs2: " << i << ", LoBin i-1: " << LoBin[i-1][1] << ", LoBin i: " << LoBin[i][1] << endl;
-	  RapIndex.push_back(i);
-	  //	  irap++;
-	  //	  cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
-	} 
+        if ( LoBin[i][1] != LoBin[i-1][1] ) {
+          //      cout << "iobs2: " << i << ", LoBin i-1: " << LoBin[i-1][1] << ", LoBin i: " << LoBin[i][1] << endl;
+          RapIndex.push_back(i);
+          //      irap++;
+          //      cout << "irap: " << irap << ", RapIndex: " << RapIndex[irap] << endl;
+        }
       }
    }
 
@@ -72,23 +72,23 @@ int fnloBlockA2::Read(istream *table){
       *table >> BinSize[i];
       // maxime pre-v2.0 conversion
       //    if ( NDim == 1 ){
-      // 	 double binsize = 1;
-      // 	 if ( IDiffBin[0] == 2 ) binsize *=  UpBin[i][0] - LoBin[i][0];
-      // 	 printf(" binszie bin %d  = %7.4f\n",i,binsize);
-      // 	 BinSize[i] = binsize;
-	 
+      //         double binsize = 1;
+      //         if ( IDiffBin[0] == 2 ) binsize *=  UpBin[i][0] - LoBin[i][0];
+      //         printf(" binszie bin %d  = %7.4f\n",i,binsize);
+      //         BinSize[i] = binsize;
+
       //    }
       //    else if ( NDim == 2 || NDim == 3 ){
       //       // warning: the variables are exchanged here!
       //       // what is bound[0] corresponds to bingrid2[nBins][nBins2]
       //       // what is bound[1] corresponds to bingrid1[nBins]
-      
+
       //       double binsize = 1;
       //       // warning: the variables are exchanged here!
       //       // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
       //       // what is DimLabel[1] corresponds to bingrid1[nBins]
       //       printf("UpBin[.][0] =  %7.4f, LoBin[.][0] =  %7.4f , UpBin[.][1] =  %7.4f  LoBin[.][1] =  %7.4f\n",
-      // 	     UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]); 
+      //             UpBin[i][0],LoBin[i][0],UpBin[i][1],LoBin[i][1]);
       //       if ( IDiffBin[0] == 2 ) binsize *= UpBin[i][0] - LoBin[i][0];
       //       if ( IDiffBin[1] == 2 ) binsize *= UpBin[i][1] - LoBin[i][1];
       //       printf(" binszie 2Dim bin %d  = %7.4f\n",i,binsize);
@@ -125,7 +125,7 @@ int fnloBlockA2::Read(istream *table){
 int fnloBlockA2::Write(ostream *table){
    *table << tablemagicno << endl;
    *table << Ipublunits << endl;
-   NScDescript	= ScDescript.size();
+   NScDescript  = ScDescript.size();
    *table << NScDescript << endl;
    for(int i=0;i<NScDescript;i++){
       *table << ScDescript[i] << endl;
@@ -172,35 +172,35 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
    if(NScDescript != other->NScDescript){
       printf("fnloBlockA2::IsCompatible: Differing NScDescript found: %d and %d\n",NScDescript,other->NScDescript);
       return false;
-   }  
+   }
    if(ScDescript != other->ScDescript){
       printf("fnloBlockA2::IsCompatible: Differing ScDescript found.\n");
       return false;
-   }  
+   }
    if(!cmp(Ecms,other->Ecms)){
       printf("fnloBlockA2::IsCompatible: Differing Ecms found: %f and %f.\n",Ecms,other->Ecms);
       return false;
-   }  
+   }
    if(ILOord != other->ILOord){
       printf("fnloBlockA2::IsCompatible: Differing ILOord found: %d and %d\n",ILOord,other->ILOord);
       return false;
-   }  
+   }
    if(NObsBin != other->NObsBin){
       printf("fnloBlockA2::IsCompatible: Differing NObsBin found: %d and %d\n",NObsBin,other->NObsBin);
       return false;
-   }  
+   }
    if(NDim != other->NDim){
       printf("fnloBlockA2::IsCompatible: Differing NDim found: %d and %d\n",NDim,other->NDim);
       return false;
-   }  
+   }
    if(DimLabel != other->DimLabel){
       printf("fnloBlockA2::IsCompatible: Differing DimLabel found.\n");
       return false;
-   }  
+   }
    if(IDiffBin != other->IDiffBin){
       printf("fnloBlockA2::IsCompatible: Differing IDiffBin found.\n");
       return false;
-   }  
+   }
    if(!cmp(LoBin,other->LoBin)){
       printf("fnloBlockA2::IsCompatible: Differing LoBin found.\n");
       return false;
@@ -216,7 +216,7 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
    if(INormFlag != other->INormFlag){
       printf("fnloBlockA2::IsCompatible: Differing INormFlag found: %d and %d\n",INormFlag,other->INormFlag);
       return false;
-   }  
+   }
    if(INormFlag>1){
       if(DenomTable != other->DenomTable){
          printf("fnloBlockA2::IsCompatible: Differing DenomTable found.\n");
@@ -234,8 +234,8 @@ bool fnloBlockA2::IsCompatible(fnloBlockA2* other){
             return false;
          }
       }
-   }  
-   
+   }
+
    return true;
 };
 
@@ -279,9 +279,9 @@ bool fnloBlockA2::cmp(vector < vector < double > > x1,  vector < vector < double
 
 void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
    // Set label for dimension
-   // 
+   //
    // In this method, we also set IDiffBin.
-   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder 
+   // IDiffBin defines, if this dimension is a ('truely') differential (=1) oder
    // binned distribution (=2).
    // Since we assume here (in ::SetDimLabel and ::InitBinning) that we only
    // use binned distributions, we use IDiffBin to identify, if the publication
@@ -297,10 +297,10 @@ void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
       exit(1);
    }
    if ( iDim < 1) {
-      printf("fnloBlockA2::SetDimLabel. Error. Your dimension must be a natural number.\n",iDim);
+      printf("fnloBlockA2::SetDimLabel. Error. Your dimension %i must be a positive natural number.\n",iDim);
       exit(1);
    }
-   
+
    if ( DimLabel.size() != NDim ){
       printf("fnloBlockA2::SetDimLabel. Error. You have to call SetNumDiffBin with a reasonable number before.\n");
       exit(1);
@@ -315,7 +315,7 @@ void fnloBlockA2::SetDimLabel( string label, int iDim , bool IsDiff ){
 int fnloBlockA2::GetBinNumber( double val1 , double val2 ){
    // Get Bin number of this event if you use a single or double differential binning
    // return -1 if no bin was found
-   
+
    if ( (val2 == -42 && NDim != 1 ) || ( val2 != -42 && NDim != 2 ) ) {
       printf("fnloBlockA2::GetBinNumber. Error. This function can calculate the bin number only for single and double differential binnings (NDim = %d ).\n",NDim);
       exit(1);
@@ -324,19 +324,19 @@ int fnloBlockA2::GetBinNumber( double val1 , double val2 ){
 
    if ( NDim == 2 ) {
       for(int j = 0; j < NObsBin; j++) {
-	 if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] &&
-	      val2 >= LoBin[j][1]  && val2 <  UpBin[j][1]) {
-	    obsbin=j;
-	    break;
-	 }
+         if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] &&
+              val2 >= LoBin[j][1]  && val2 <  UpBin[j][1]) {
+            obsbin=j;
+            break;
+         }
       }
    }
    else if ( NDim == 1 ) {
       for(int j = 0; j < NObsBin; j++) {
-	 if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] ){
-	    obsbin = j;
-	    break;
-	 }
+         if ( val1 >= LoBin[j][0]  && val1 <  UpBin[j][0] ){
+            obsbin = j;
+            break;
+         }
       }
    }
    return obsbin;
@@ -353,18 +353,18 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
    //  that is used in the scenario.
    //
    //   We must know NDim before calling InitBinning.
-   //	NDim tells us, in how many dimensions/variables the measurement was performed
-   //   this method only supports two dimensional measurements and a third dimension for 
+   //   NDim tells us, in how many dimensions/variables the measurement was performed
+   //   this method only supports two dimensional measurements and a third dimension for
    //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
    //   Still, fastNLO could support higher dimensional binnings.
-   // 
+   //
    //  input.
-   //     nBins1	number of bins in 1st dimension
-   //     bingrid1	binning in 1st dimension
-   //     nBins2	number of bins of second dimension for each 1st-dimension variable
-   //     bingrid	binning in 2nd dimension for each 1st dimension bin
-   //     binwidth3	binwidth for a 3rd dimension. If the publ. cross sections are e.g. divided by the eta-range.
-   //			   if this is dependent on 1st or 2nd dimension binning, this method has to be updated.
+   //     nBins1        number of bins in 1st dimension
+   //     bingrid1      binning in 1st dimension
+   //     nBins2        number of bins of second dimension for each 1st-dimension variable
+   //     bingrid       binning in 2nd dimension for each 1st dimension bin
+   //     binwidth3     binwidth for a 3rd dimension. If the publ. cross sections are e.g. divided by the eta-range.
+   //                      if this is dependent on 1st or 2nd dimension binning, this method has to be updated.
    //                   or you can use binwidth3 as a scalling factor if your binning is e.g. in TeV, but you want to have pb/GeV
    //
    //  output.
@@ -376,7 +376,7 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
    //
    //  logic for binwidth
    //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
-   //     if IDiffBin==2, then you divide the 'final' fnlo-cross section by this number too -> we multiply the binwidth by this 
+   //     if IDiffBin==2, then you divide the 'final' fnlo-cross section by this number too -> we multiply the binwidth by this
    //        dimensional width.
    //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
    //        the bingrid since the 'ObsBin' is binned in this binning.
@@ -394,103 +394,103 @@ void fnloBlockA2::InitBinning( const int nBins1 , double* bingrid1 , const int* 
 
    if ( DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
    if ( IDiffBin.size() != NDim ) printf("Error. you do not have the same number of IDiffBin than NDim.\n");
- 
+
    if ( NDim == 1 ){
       for(int i=0;i<nBins1;i++){
-	 nbins++;
-	 bound[0] = bingrid1[i];
+         nbins++;
+         bound[0] = bingrid1[i];
          LoBin.push_back(bound);
          bound[0] = bingrid1[i+1];
          UpBin.push_back(bound);
 
-	 double binsize = IDiffBin[0] == 2 ? (UpBin.back())[0] - (LoBin.back())[0] : 1;
+         double binsize = IDiffBin[0] == 2 ? (UpBin.back())[0] - (LoBin.back())[0] : 1;
          BinSize.push_back(binsize);
       }
       // here we always assume, that all dimensions are
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
       //      IDiffBin[0] = 2 ;
    }
    else if ( NDim == 2 || NDim == 3 ){
       for(int i=0;i<nBins1;i++){
-	 for(int j=0;j<nBins2[i];j++){
-	    nbins ++;
-	    // warning: the variables are exchanged here!
-	    // what is bound[0] corresponds to bingrid2[nBins][nBins2]
-	    // what is bound[1] corresponds to bingrid1[nBins]
-	    bound[0] = bingrid2[i][j];
-	    bound[1] = bingrid1[i];
-	    //if ( NDim == 3 ) bound[2] = 0;
-	    if ( NDim == 3 ) bound[2] = binwidth3;
-	    LoBin.push_back(bound);
-	    bound[0] = bingrid2[i][j+1];
-	    bound[1] = bingrid1[i+1];
-	    UpBin.push_back(bound);
-	    //if ( NDim == 3 ) bound[2] = binwidth3;
-	    if ( NDim == 3 ) bound[2] = 0;
-	    //if ( binwidth3 != 0 ) bound[2] = binwidth3;
-	    
-	    double binsize = 1;
-	
-	    // warning: the variables are exchanged here!
-	    // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
-	    // what is DimLabel[1] corresponds to bingrid1[nBins]
-	    if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
-	    if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
-	    if ( NDim==3 ) { 
-	       //if (IDiffBin[2] == 2 ) 
-		  binsize *= binwidth3;
-	    }
-	    else if ( binwidth3 != 0 && NDim != 3 ) {
-	       binsize *= binwidth3;
-	    }
-	    BinSize.push_back(binsize);
-	    
-	 }
+         for(int j=0;j<nBins2[i];j++){
+            nbins ++;
+            // warning: the variables are exchanged here!
+            // what is bound[0] corresponds to bingrid2[nBins][nBins2]
+            // what is bound[1] corresponds to bingrid1[nBins]
+            bound[0] = bingrid2[i][j];
+            bound[1] = bingrid1[i];
+            //if ( NDim == 3 ) bound[2] = 0;
+            if ( NDim == 3 ) bound[2] = binwidth3;
+            LoBin.push_back(bound);
+            bound[0] = bingrid2[i][j+1];
+            bound[1] = bingrid1[i+1];
+            UpBin.push_back(bound);
+            //if ( NDim == 3 ) bound[2] = binwidth3;
+            if ( NDim == 3 ) bound[2] = 0;
+            //if ( binwidth3 != 0 ) bound[2] = binwidth3;
+
+            double binsize = 1;
+
+            // warning: the variables are exchanged here!
+            // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
+            // what is DimLabel[1] corresponds to bingrid1[nBins]
+            if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
+            if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
+            if ( NDim==3 ) {
+               //if (IDiffBin[2] == 2 )
+                  binsize *= binwidth3;
+            }
+            else if ( binwidth3 != 0 && NDim != 3 ) {
+               binsize *= binwidth3;
+            }
+            BinSize.push_back(binsize);
+
+         }
       }
       // here we always assume, that all dimensions are
       // 'binned' dimensions (and not 'differential'). We were using IDiffBin
-      // to tag, if the publication was divided by this binwidth or not, so we have 
+      // to tag, if the publication was divided by this binwidth or not, so we have
       // to set NOW IDiffBin = 2
       // The 'third' dimension in this method however, is NOT a binned distribution
       //      IDiffBin[0] = 2 ;
       //      IDiffBin[1] = 2 ;
       //      if ( NDim==3 )
-         //	 IDiffBin[2] = 1 ;
+         //      IDiffBin[2] = 1 ;
    }
    else printf("fnloBlockA2::InitBinning. Error. unknown NDim.\n");
 
    printf(" tot. No. observable bins = %d\n",nbins);
 
    NObsBin = nbins;
- 
-   INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
-			 //     to be normalized by own integral (in 1st dimension)
-			 //     see documentation for details and for other options
-   
+
+   INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is
+                         //     to be normalized by own integral (in 1st dimension)
+                         //     see documentation for details and for other options
+
 }
 
 
 void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const int* nBins2, vector< vector<double> > bingrid2, const double bwfactor ){
-  
+
   // ------------------------------------------------------------------- //
   //
   //  InitBinning. This method initalizes and (partly) checks the binning
   //  that is used in the scenario.
   //
   //   We must know NDim before calling InitBinning.
-  //	NDim tells us, in how many dimensions/variables the measurement was performed
-  //   this method only supports two dimensional measurements and a third dimension for 
+  //    NDim tells us, in how many dimensions/variables the measurement was performed
+  //   this method only supports two dimensional measurements and a third dimension for
   //   a pseudo-dimensional binning (if only one bin was measured e.g. in the pseudorapidity).
   //   Still, fastNLO could support higher dimensional binnings.
-  // 
+  //
   //  input.
-  //     nBins1	number of bins in 1st dimension
-  //     bingrid1	binning in 1st dimension
-  //     nBins2	number of bins of second dimension for each 1st-dimension variable
-  //     bingrid	binning in 2nd dimension for each 1st dimension bin
-  //     bwfactor	additional factor to take into account e.g. factors of 2 for binning in abs. rapidity
+  //     nBins1 number of bins in 1st dimension
+  //     bingrid1       binning in 1st dimension
+  //     nBins2 number of bins of second dimension for each 1st-dimension variable
+  //     bingrid        binning in 2nd dimension for each 1st dimension bin
+  //     bwfactor       additional factor to take into account e.g. factors of 2 for binning in abs. rapidity
   //
   //  output.
   //     no output
@@ -501,7 +501,7 @@ void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const
   //
   //  logic for binwidth
   //     using IDiffBin you can specify, if the publ cross section was divided by this bin.
-  //     if IDiffBin==2, then you divide the 'final' fnlo-cross section by this number too -> we multiply the binwidth by this 
+  //     if IDiffBin==2, then you divide the 'final' fnlo-cross section by this number too -> we multiply the binwidth by this
   //        dimensional width.
   //     if IDiffBin==1. then the cross section is not divided by this dimensional-binning width. However, we store
   //        the bingrid since the 'ObsBin' is binned in this binning.
@@ -519,7 +519,7 @@ void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const
 
   if ( DimLabel.size() != NDim ) printf("Error. you do not have the same number of DimLabel than NDim.\n");
   if ( IDiffBin.size() != NDim ) printf("Error. you do not have the same number of IDiffBin than NDim.\n");
- 
+
   if ( NDim == 1 ){
     for(int i=0;i<nBins1;i++){
       nbins++;
@@ -529,9 +529,9 @@ void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const
       UpBin.push_back(bound);
 
       if ( bwfactor > 0. ) {
-	binsize = bwfactor;
+        binsize = bwfactor;
       } else {
-	binsize = 1;
+        binsize = 1;
       }
       if ( IDiffBin[0] == 2 ) binsize *=  ((UpBin.back())[0] - (LoBin.back())[0]);
       BinSize.push_back(binsize);
@@ -539,41 +539,41 @@ void fnloBlockA2::InitBinningKR( const int nBins1, const double* bingrid1, const
   } else if ( NDim == 2 ){
     for(int i=0;i<nBins1;i++){
       for(int j=0;j<nBins2[i];j++){
-	nbins ++;
-	// warning: the variables are exchanged here!
-	// what is bound[0] corresponds to bingrid2[nBins][nBins2]
-	// what is bound[1] corresponds to bingrid1[nBins]
-	bound[0] = bingrid2[i][j];
-	bound[1] = bingrid1[i];
-	LoBin.push_back(bound);
-	bound[0] = bingrid2[i][j+1];
-	bound[1] = bingrid1[i+1];
-	UpBin.push_back(bound);
-	    
-	if ( bwfactor > 0. ) {
-	  binsize = bwfactor;
-	} else {
-	  binsize = 1;
-	}
-	// warning: the variables are exchanged here!
-	// what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
-	// what is DimLabel[1] corresponds to bingrid1[nBins]
-	if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
-	if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
-	BinSize.push_back(binsize);
+        nbins ++;
+        // warning: the variables are exchanged here!
+        // what is bound[0] corresponds to bingrid2[nBins][nBins2]
+        // what is bound[1] corresponds to bingrid1[nBins]
+        bound[0] = bingrid2[i][j];
+        bound[1] = bingrid1[i];
+        LoBin.push_back(bound);
+        bound[0] = bingrid2[i][j+1];
+        bound[1] = bingrid1[i+1];
+        UpBin.push_back(bound);
+
+        if ( bwfactor > 0. ) {
+          binsize = bwfactor;
+        } else {
+          binsize = 1;
+        }
+        // warning: the variables are exchanged here!
+        // what is DimLabel[0] corresponds to bingrid2[nBins][nBins2]
+        // what is DimLabel[1] corresponds to bingrid1[nBins]
+        if ( IDiffBin[0] == 2 ) binsize *= bingrid2[i][j+1] - bingrid2[i][j];
+        if ( IDiffBin[1] == 2 ) binsize *= bingrid1[i+1] - bingrid1[i];
+        BinSize.push_back(binsize);
       }
     }
   }
   else printf("fnloBlockA2::InitBinning. Error. unknown NDim.\n");
-  
+
   printf(" tot. No. observable bins = %d\n",nbins);
 
   NObsBin = nbins;
- 
-  INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is 
+
+  INormFlag = 0;    // --- fastNLO user: default=0 - set =1 if observable is
   //     to be normalized by own integral (in 1st dimension)
   //     see documentation for details and for other options
-   
+
 }
 
 
@@ -598,24 +598,24 @@ void fnloBlockA2::Print(){
   for(int i=0;i<NObsBin;i++){
     for(int j=0;j<NDim;j++){
       printf(" A2   -  - LoBin[%d][%d]             %7.4f\n", i,j,LoBin[i][j]);
-      if(IDiffBin[j]==0 || IDiffBin[j]==2) 
-	printf(" A2   -  - UpBin[%d][%d]             %7.4f\n", i,j,UpBin[i][j]);
+      if(IDiffBin[j]==0 || IDiffBin[j]==2)
+        printf(" A2   -  - UpBin[%d][%d]             %7.4f\n", i,j,UpBin[i][j]);
     }
    }
    for(int i=0;i<NObsBin;i++){
      printf(" A2   - BinSize[%d]                %7.4f\n", i,BinSize[i]);
    }
    printf(" A2  INormFlag                     %d\n",INormFlag);
-   
+
    if(INormFlag>1){
      printf(" A2  DenomTable                    %s\n",DenomTable.data());
    }
    if(INormFlag>0){
       for(int i=0;i<NObsBin;i++){
         printf(" A2   - IDivLoPointer[%d]               %d\n",i,IDivLoPointer[i]);
-	printf(" A2   - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
+        printf(" A2   - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
       }
    }
    printf("\n ********************************************************\n\n");
-  
+
 }
