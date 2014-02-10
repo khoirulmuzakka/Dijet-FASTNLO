@@ -217,8 +217,8 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
 void fastNLOCoeffAddFlex::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFlex ****************\n");
-   printf(" B   NscalenodeScale1              %d\n",ScaleNode1[0].size());
-   printf(" B   NscalenodeScale2              %d\n",ScaleNode2[0].size());
+   printf(" B   NscalenodeScale1              %lu\n",ScaleNode1[0].size());
+   printf(" B   NscalenodeScale2              %lu\n",ScaleNode2[0].size());
    printf(" *******************************************************\n");
 }
 
