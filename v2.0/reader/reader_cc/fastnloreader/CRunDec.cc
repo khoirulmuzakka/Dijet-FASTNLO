@@ -283,7 +283,7 @@ double CRunDec::fRungeKuttaImpl(double &x, double y,double &htry, int nl,
      double eps=1e-10;
      // KR: Remove unused variables
      //     double yerr,ytemp,htemp,hdid, hnext,yscal;
-     double yerr,ytemp,htemp,hdid, hnext;
+     double yerr,ytemp,htemp,hnext;
      double h=htry;
      double k1,k2,k3,k4,k5,k6;
      for(;;){
@@ -318,7 +318,8 @@ double CRunDec::fRungeKuttaImpl(double &x, double y,double &htry, int nl,
            hnext=5.*h;
          }
          x+=h;
-         hdid=h;
+         // KR: Remove unused code
+         //         hdid=h;
          y=ytemp;
          htry=hnext;
          break;
@@ -478,7 +479,10 @@ AsmMS CRunDec::AsmMSrunexact(double mMu, double AlphaS0, double Mu0,
      //     double y1=mMu;
      double xEnd=log(MuEnd);
      // KR: WARNING, h is not itialized here!
-     double yscal0=abs(x0)+abs(h*y0);
+     //     Below h is either 1e-2 or -1e-2
+     //     So set yscal0 correspondingly here
+     //     double yscal0=abs(x0)+abs(h*y0);
+     double yscal0=abs(x0)+abs(1e-2*y0);
      // KR: Remove unused variables
      //     double yscal1=abs(x1)+abs(h*y1);
      double (*falpha)(CRunDec, double ,double);
