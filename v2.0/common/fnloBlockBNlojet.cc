@@ -1541,10 +1541,11 @@ void fnloBlockBNlojet::FillEventHHC(int ObsBin, double x1, double x2, double sca
    // --- Select interpolation kernels for x and mu
    // --- 1: Catmull-Rom, 2: Lagrangian
    // ATTENTION: KR: Set back to Catmull-Rom for comparison with toolkit production
-   //   const int ikernx  = 2;
-   //   const int ikernmu = 2;
-   const int ikernx  = 1;
-   const int ikernmu = 1;
+   //            KR: Back to Lagrange after Daniel´s implementation into toolkit
+   const int ikernx  = 2;
+   const int ikernmu = 2;
+   //   const int ikernx  = 1;
+   //   const int ikernmu = 1;
 
    if (this->IRef>0) {
       // ---
