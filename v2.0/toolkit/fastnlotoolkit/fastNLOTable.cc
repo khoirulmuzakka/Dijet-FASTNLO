@@ -32,7 +32,7 @@ fastNLOTable::fastNLOTable(const fastNLOTable& tab)
     DimLabel(tab.DimLabel), IDiffBin(tab.IDiffBin), Bin(tab.Bin),
     BinSize(tab.BinSize), RapIndex(tab.RapIndex), INormFlag(tab.INormFlag),
     DenomTable(tab.DenomTable), IDivLoPointer(tab.IDivLoPointer),
-    IDivUpPointer(tab.IDivUpPointer) 
+    IDivUpPointer(tab.IDivUpPointer)
 {
    //! Copy constructor
    SetClassName("fastNLOTable");
@@ -402,9 +402,9 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
                   debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
                   if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
                      lhs->Add(*cadd);
-		  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
+                  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
                      lhs->Add(*cadd);
-		  wasAdded = true;
+                  wasAdded = true;
                }
             }
          }
@@ -459,7 +459,7 @@ int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::DeleteAllCoeffTable(){
-   for (size_t i = 0; i < fCoeff.size(); ++i) 
+   for (size_t i = 0; i < fCoeff.size(); ++i)
       delete fCoeff[i];
    fCoeff.clear();
 }
@@ -565,7 +565,7 @@ fastNLOCoeffData* fastNLOTable::GetDataTable() const {
    for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
       fastNLOCoeffBase* c = GetCoeffTable(i);
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
-	 return (fastNLOCoeffData*)c;
+         return (fastNLOCoeffData*)c;
       }
    }
    return NULL;
@@ -577,14 +577,14 @@ fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(ESMOrder eOrder) const {
    for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
       fastNLOCoeffBase* c = GetCoeffTable(i);
       if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
-	 if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
-	    if ( eOrder == fastNLO::kLeading && c->IsLO() )
-	       return (fastNLOCoeffAddBase*)c;
-	    else if ( eOrder == fastNLO::kNextToLeading && c->IsNLO() )
-	       return (fastNLOCoeffAddBase*)c;
-	    else if ( eOrder == fastNLO::kNextToNextToLeading && c->IsNNLO() )
-	       return (fastNLOCoeffAddBase*)c;
-	 }
+         if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
+            if ( eOrder == fastNLO::kLeading && c->IsLO() )
+               return (fastNLOCoeffAddBase*)c;
+            else if ( eOrder == fastNLO::kNextToLeading && c->IsNLO() )
+               return (fastNLOCoeffAddBase*)c;
+            else if ( eOrder == fastNLO::kNextToNextToLeading && c->IsNNLO() )
+               return (fastNLOCoeffAddBase*)c;
+         }
       }
    }
    return NULL;
@@ -767,7 +767,9 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
          for (unsigned int i=0; i<c->CtrbDescript.size(); i++) {
             printf(" #   %s\n",c->CtrbDescript[i].data());
          }
-         printf(" #   No. of events: %16llu\n",0);
+         // TODO: KR How to print out event number here ?
+         //         printf(" #   No. of events: %16llu\n",0);
+         printf(" #   No. of events: %i\n",0);
          printf(" #   provided by:\n");
          for (unsigned int i=0; i<c->CodeDescript.size(); i++) {
             printf(" #   %s\n",c->CodeDescript[i].data());
