@@ -4,7 +4,11 @@ AUTOMAKE_OPTIONS = gnu
 # The main targets, here the libtool plugin libraries to build
 # TBD: Better select the "main" targets ...
 # TBD: Uncomment here or below to install additional scenarios
-lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
+#
+# No fastjet, have at least for starter
+#
+lib_LTLIBRARIES = libfnt1001midp.la
+#   lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #
@@ -13,25 +17,27 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
 #   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
 #   lib_LTLIBRARIES = libfnl3412fy0.la libfnl3412fy1.la libfnl3412fy2.la libfnl3412fy3.la libfnl3412fy4.la
-   lib_LTLIBRARIES += libfnl2352.la
-   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
+#   lib_LTLIBRARIES += libfnl2352.la
+#   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
 #   lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la
 #   lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la libfnl2332dptmax.la libfnl2332dnf6.la
 #   lib_LTLIBRARIES += libfnl3332y0.la libfnl3332y1.la libfnl3332y2.la libfnl3332y3.la libfnl3332y4.la libfnl3332y5.la libfnl3332y6.la
 #   lib_LTLIBRARIES += libfnl4332y0.la libfnl4332y1.la libfnl4332y2.la libfnl4332y3.la libfnl4332y4.la libfnl4332y5.la libfnl4332y6.la libfnl4350.la
-#   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
 #   lib_LTLIBRARIES += libfnl2732dena.la libfnl2732denb.la libfnl2732denk.la libfnl2732denl.la
 #   lib_LTLIBRARIES += libfnl2732numa.la libfnl2732numb.la libfnl2732numk.la libfnl2732numl.la
 #   lib_LTLIBRARIES += libfnl2912b.la libfnl2912h.la libfnl2912bptavm3.la
 #   lib_LTLIBRARIES += libfnl2912by0ptav.la libfnl2912by0m3.la libfnl2912by0ptavm3.la libfnl2912hy0ptav.la libfnl2912hy0m3.la libfnl2912hy0ptavm3.la libfnl2912by1ptav.la libfnl2912by1m3.la libfnl2912by1ptavm3.la libfnl2912hy1ptav.la libfnl2912hy1m3.la libfnl2912hy1ptavm3.la libfnl2912by2ptav.la libfnl2932by0ptav.la libfnl2932by0m3.la libfnl2932by1ptav.la libfnl2932by1m3.la
 #   lib_LTLIBRARIES += libfnl2912bm3.la libfnl2932am3.la libfnl2932bm3.la libfnl2932bm3nf6.la
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
-   lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
+# v21
+#   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
+# compare to v22
+   lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
+   lib_LTLIBRARIES += libfnl5350eta0.la
 # v22
-#   lib_LTLIBRARIES += libfnl5002pt12.la libfnl2352v22.la
-   lib_LTLIBRARIES += libfnl2352v22.la
-   lib_LTLIBRARIES += libfnl2352v20andv22.la
+   lib_LTLIBRARIES += libfnl2352v22.la libfnl2352v20andv22.la
+   lib_LTLIBRARIES += libfnl5350eta0v22.la
 endif
 
 #
@@ -45,36 +51,36 @@ AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
 # cteq6.h is included from lhpdf installation which is different from original
 # Individual sources
 libfnt1001midp_la_SOURCES      = fnt1001midp.cc      $(AM_SOURCES)
-libfnt2009midp_la_SOURCES      = fnt2009midp.cc      $(AM_SOURCES)
-libfnt2012test_la_SOURCES      = fnt2012test.cc      $(AM_SOURCES)
-libfnt2013norm_la_SOURCES      = fnt2013norm.cc      $(AM_SOURCES)
-libfnt2014norm_la_SOURCES      = fnt2014norm.cc      $(AM_SOURCES)
+#libfnt2009midp_la_SOURCES      = fnt2009midp.cc      $(AM_SOURCES)
+#libfnt2012test_la_SOURCES      = fnt2012test.cc      $(AM_SOURCES)
+#libfnt2013norm_la_SOURCES      = fnt2013norm.cc      $(AM_SOURCES)
+#libfnt2014norm_la_SOURCES      = fnt2014norm.cc      $(AM_SOURCES)
 #libfnt2015norm_la_SOURCES      = fnt2015norm.cc      $(AM_SOURCES)
-libfnl1001_la_SOURCES          = fnl1001.cc          $(AM_SOURCES)
+#libfnl1001_la_SOURCES          = fnl1001.cc          $(AM_SOURCES)
 # Require fastjet
-libfnl1001ak07_la_SOURCES      = fnl1001ak07.cc      $(AM_SOURCES)
-libfnl1001sc07_la_SOURCES      = fnl1001sc07.cc      $(AM_SOURCES)
-libfnl1001d0r207_la_SOURCES    = fnl1001d0r207.cc    $(AM_SOURCES)
-libfnt2012_la_SOURCES          = fnt2012.cc          $(AM_SOURCES)
-libfnl2222b_la_SOURCES         = fnl2222b.cc         $(AM_SOURCES)
-libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
-libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
-libfnl2352_la_SOURCES          = fnl2352.cc          $(AM_SOURCES)
-libfnl2452_la_SOURCES          = fnl2452.cc          $(AM_SOURCES)
-libfnl2412c_la_SOURCES         = fnl2412c.cc         $(AM_SOURCES)
-libfnl2412e_la_SOURCES         = fnl2412e.cc         $(AM_SOURCES)
-libfnl2422_la_SOURCES          = fnl2422.cc          $(AM_SOURCES)
-libfnl2622f_la_SOURCES         = fnl2622f.cc         $(AM_SOURCES)
-libfnl2732dena_la_SOURCES      = fnl2732dena.cc      $(AM_SOURCES)
-libfnl2732denb_la_SOURCES      = fnl2732denb.cc      $(AM_SOURCES)
-libfnl2732denk_la_SOURCES      = fnl2732denk.cc      $(AM_SOURCES)
-libfnl2732denl_la_SOURCES      = fnl2732denl.cc      $(AM_SOURCES)
-libfnl2732numa_la_SOURCES      = fnl2732numa.cc      $(AM_SOURCES)
-libfnl2732numb_la_SOURCES      = fnl2732numb.cc      $(AM_SOURCES)
-libfnl2732numk_la_SOURCES      = fnl2732numk.cc      $(AM_SOURCES)
-libfnl2732numl_la_SOURCES      = fnl2732numl.cc      $(AM_SOURCES)
-libfnl2822den_la_SOURCES       = fnl2822den.cc       $(AM_SOURCES)
-libfnl2822num_la_SOURCES       = fnl2822num.cc       $(AM_SOURCES)
+#libfnl1001ak07_la_SOURCES      = fnl1001ak07.cc      $(AM_SOURCES)
+#libfnl1001sc07_la_SOURCES      = fnl1001sc07.cc      $(AM_SOURCES)
+#libfnl1001d0r207_la_SOURCES    = fnl1001d0r207.cc    $(AM_SOURCES)
+#libfnt2012_la_SOURCES          = fnt2012.cc          $(AM_SOURCES)
+#libfnl2222b_la_SOURCES         = fnl2222b.cc         $(AM_SOURCES)
+#libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
+#libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
+#libfnl2352_la_SOURCES          = fnl2352.cc          $(AM_SOURCES)
+#libfnl2452_la_SOURCES          = fnl2452.cc          $(AM_SOURCES)
+#libfnl2412c_la_SOURCES         = fnl2412c.cc         $(AM_SOURCES)
+#libfnl2412e_la_SOURCES         = fnl2412e.cc         $(AM_SOURCES)
+#libfnl2422_la_SOURCES          = fnl2422.cc          $(AM_SOURCES)
+#libfnl2622f_la_SOURCES         = fnl2622f.cc         $(AM_SOURCES)
+#libfnl2732dena_la_SOURCES      = fnl2732dena.cc      $(AM_SOURCES)
+#libfnl2732denb_la_SOURCES      = fnl2732denb.cc      $(AM_SOURCES)
+#libfnl2732denk_la_SOURCES      = fnl2732denk.cc      $(AM_SOURCES)
+#libfnl2732denl_la_SOURCES      = fnl2732denl.cc      $(AM_SOURCES)
+#libfnl2732numa_la_SOURCES      = fnl2732numa.cc      $(AM_SOURCES)
+#libfnl2732numb_la_SOURCES      = fnl2732numb.cc      $(AM_SOURCES)
+#libfnl2732numk_la_SOURCES      = fnl2732numk.cc      $(AM_SOURCES)
+#libfnl2732numl_la_SOURCES      = fnl2732numl.cc      $(AM_SOURCES)
+#libfnl2822den_la_SOURCES       = fnl2822den.cc       $(AM_SOURCES)
+#libfnl2822num_la_SOURCES       = fnl2822num.cc       $(AM_SOURCES)
 #libfnl2912b_la_SOURCES         = fnl2912b.cc         $(AM_SOURCES)
 #libfnl2912by0ptav_la_SOURCES   = fnl2912by0ptav.cc   $(AM_SOURCES)
 #libfnl2912by0m3_la_SOURCES     = fnl2912by0m3.cc     $(AM_SOURCES)
@@ -85,70 +91,72 @@ libfnl2822num_la_SOURCES       = fnl2822num.cc       $(AM_SOURCES)
 #libfnl2912hy0m3_la_SOURCES     = fnl2912hy0m3.cc     $(AM_SOURCES)
 #libfnl2912hy1ptav_la_SOURCES   = fnl2912hy1ptav.cc   $(AM_SOURCES)
 #libfnl2912hy1m3_la_SOURCES     = fnl2912hy1m3.cc     $(AM_SOURCES)
-libfnl2912bm3_la_SOURCES       = fnl2912bm3.cc       $(AM_SOURCES)
+#libfnl2912bm3_la_SOURCES       = fnl2912bm3.cc       $(AM_SOURCES)
 #libfnl2932by0ptav_la_SOURCES   = fnl2932by0ptav.cc   $(AM_SOURCES)
 #libfnl2932by0m3_la_SOURCES     = fnl2932by0m3.cc     $(AM_SOURCES)
 #libfnl2932by1ptav_la_SOURCES   = fnl2932by1ptav.cc   $(AM_SOURCES)
 #libfnl2932by1m3_la_SOURCES     = fnl2932by1m3.cc     $(AM_SOURCES)
-libfnl2932am3_la_SOURCES       = fnl2932am3.cc       $(AM_SOURCES)
-libfnl2932bm3_la_SOURCES       = fnl2932bm3.cc       $(AM_SOURCES)
-libfnl2932bm3nf6_la_SOURCES    = fnl2932bm3nf6.cc    $(AM_SOURCES)
-libfnl2912h_la_SOURCES         = fnl2912h.cc         $(AM_SOURCES)
-libfnl2332y0_la_SOURCES        = fnl2332y0.cc        $(AM_SOURCES)
-libfnl2332y1_la_SOURCES        = fnl2332y1.cc        $(AM_SOURCES)
-libfnl2332y2_la_SOURCES        = fnl2332y2.cc        $(AM_SOURCES)
-libfnl2332y3_la_SOURCES        = fnl2332y3.cc        $(AM_SOURCES)
-libfnl2332y4_la_SOURCES        = fnl2332y4.cc        $(AM_SOURCES)
-libfnl2332y5_la_SOURCES        = fnl2332y5.cc        $(AM_SOURCES)
-libfnl2332y6_la_SOURCES        = fnl2332y6.cc        $(AM_SOURCES)
-libfnl2332d_la_SOURCES         = fnl2332d.cc         $(AM_SOURCES)
-libfnl2332dptmax_la_SOURCES    = fnl2332dptmax.cc    $(AM_SOURCES)
-libfnl2332dnf6_la_SOURCES      = fnl2332dnf6.cc      $(AM_SOURCES)
-libfnl3332y0_la_SOURCES        = fnl3332y0.cc        $(AM_SOURCES)
-libfnl3332y1_la_SOURCES        = fnl3332y1.cc        $(AM_SOURCES)
-libfnl3332y2_la_SOURCES        = fnl3332y2.cc        $(AM_SOURCES)
-libfnl3332y3_la_SOURCES        = fnl3332y3.cc        $(AM_SOURCES)
-libfnl3332y4_la_SOURCES        = fnl3332y4.cc        $(AM_SOURCES)
-libfnl3332y5_la_SOURCES        = fnl3332y5.cc        $(AM_SOURCES)
-libfnl3332y6_la_SOURCES        = fnl3332y6.cc        $(AM_SOURCES)
-libfnl3412e_la_SOURCES         = fnl3412e.cc         $(AM_SOURCES)
-libfnl3412fy0_la_SOURCES       = fnl3412fy0.cc       $(AM_SOURCES)
-libfnl3412fy1_la_SOURCES       = fnl3412fy1.cc       $(AM_SOURCES)
-libfnl3412fy2_la_SOURCES       = fnl3412fy2.cc       $(AM_SOURCES)
-libfnl3412fy3_la_SOURCES       = fnl3412fy3.cc       $(AM_SOURCES)
-libfnl3412fy4_la_SOURCES       = fnl3412fy4.cc       $(AM_SOURCES)
-libfnl3622g_la_SOURCES         = fnl3622g.cc         $(AM_SOURCES)
-libfnl4332y0_la_SOURCES        = fnl4332y0.cc        $(AM_SOURCES)
-libfnl4332y1_la_SOURCES        = fnl4332y1.cc        $(AM_SOURCES)
-libfnl4332y2_la_SOURCES        = fnl4332y2.cc        $(AM_SOURCES)
-libfnl4332y3_la_SOURCES        = fnl4332y3.cc        $(AM_SOURCES)
-libfnl4332y4_la_SOURCES        = fnl4332y4.cc        $(AM_SOURCES)
-libfnl4332y5_la_SOURCES        = fnl4332y5.cc        $(AM_SOURCES)
-libfnl4332y6_la_SOURCES        = fnl4332y6.cc        $(AM_SOURCES)
-libfnl4350_la_SOURCES          = fnl4350.cc          $(AM_SOURCES)
-libfnl2370_la_SOURCES          = fnl2370.cc          $(AM_SOURCES)
-libfnl2380_la_SOURCES          = fnl2380.cc          $(AM_SOURCES)
-libfnl2380ak05_la_SOURCES      = fnl2380ak05.cc      $(AM_SOURCES)
-libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
+#libfnl2932am3_la_SOURCES       = fnl2932am3.cc       $(AM_SOURCES)
+#libfnl2932bm3_la_SOURCES       = fnl2932bm3.cc       $(AM_SOURCES)
+#libfnl2932bm3nf6_la_SOURCES    = fnl2932bm3nf6.cc    $(AM_SOURCES)
+#libfnl2912h_la_SOURCES         = fnl2912h.cc         $(AM_SOURCES)
+#libfnl2332y0_la_SOURCES        = fnl2332y0.cc        $(AM_SOURCES)
+#libfnl2332y1_la_SOURCES        = fnl2332y1.cc        $(AM_SOURCES)
+#libfnl2332y2_la_SOURCES        = fnl2332y2.cc        $(AM_SOURCES)
+#libfnl2332y3_la_SOURCES        = fnl2332y3.cc        $(AM_SOURCES)
+#libfnl2332y4_la_SOURCES        = fnl2332y4.cc        $(AM_SOURCES)
+#libfnl2332y5_la_SOURCES        = fnl2332y5.cc        $(AM_SOURCES)
+#libfnl2332y6_la_SOURCES        = fnl2332y6.cc        $(AM_SOURCES)
+#libfnl2332d_la_SOURCES         = fnl2332d.cc         $(AM_SOURCES)
+#libfnl2332dptmax_la_SOURCES    = fnl2332dptmax.cc    $(AM_SOURCES)
+#libfnl2332dnf6_la_SOURCES      = fnl2332dnf6.cc      $(AM_SOURCES)
+#libfnl3332y0_la_SOURCES        = fnl3332y0.cc        $(AM_SOURCES)
+#libfnl3332y1_la_SOURCES        = fnl3332y1.cc        $(AM_SOURCES)
+#libfnl3332y2_la_SOURCES        = fnl3332y2.cc        $(AM_SOURCES)
+#libfnl3332y3_la_SOURCES        = fnl3332y3.cc        $(AM_SOURCES)
+#libfnl3332y4_la_SOURCES        = fnl3332y4.cc        $(AM_SOURCES)
+#libfnl3332y5_la_SOURCES        = fnl3332y5.cc        $(AM_SOURCES)
+#libfnl3332y6_la_SOURCES        = fnl3332y6.cc        $(AM_SOURCES)
+#libfnl3412e_la_SOURCES         = fnl3412e.cc         $(AM_SOURCES)
+#libfnl3412fy0_la_SOURCES       = fnl3412fy0.cc       $(AM_SOURCES)
+#libfnl3412fy1_la_SOURCES       = fnl3412fy1.cc       $(AM_SOURCES)
+#libfnl3412fy2_la_SOURCES       = fnl3412fy2.cc       $(AM_SOURCES)
+#libfnl3412fy3_la_SOURCES       = fnl3412fy3.cc       $(AM_SOURCES)
+#libfnl3412fy4_la_SOURCES       = fnl3412fy4.cc       $(AM_SOURCES)
+#libfnl3622g_la_SOURCES         = fnl3622g.cc         $(AM_SOURCES)
+#libfnl4332y0_la_SOURCES        = fnl4332y0.cc        $(AM_SOURCES)
+#libfnl4332y1_la_SOURCES        = fnl4332y1.cc        $(AM_SOURCES)
+#libfnl4332y2_la_SOURCES        = fnl4332y2.cc        $(AM_SOURCES)
+#libfnl4332y3_la_SOURCES        = fnl4332y3.cc        $(AM_SOURCES)
+#libfnl4332y4_la_SOURCES        = fnl4332y4.cc        $(AM_SOURCES)
+#libfnl4332y5_la_SOURCES        = fnl4332y5.cc        $(AM_SOURCES)
+#libfnl4332y6_la_SOURCES        = fnl4332y6.cc        $(AM_SOURCES)
+#libfnl4350_la_SOURCES          = fnl4350.cc          $(AM_SOURCES)
+#libfnl2370_la_SOURCES          = fnl2370.cc          $(AM_SOURCES)
+#libfnl2380_la_SOURCES          = fnl2380.cc          $(AM_SOURCES)
+#libfnl2380ak05_la_SOURCES      = fnl2380ak05.cc      $(AM_SOURCES)
+#libfnl2380ak07_la_SOURCES      = fnl2380ak07.cc      $(AM_SOURCES)
+#libfnl2950m3_la_SOURCES        = fnl2950m3.cc        $(AM_SOURCES)
+#libfnl2912bptavm3_la_SOURCES   = fnl2912bptavm3.cc   $(AM_SOURCES)
+#libfnl2912by0ptavm3_la_SOURCES = fnl2912by0ptavm3.cc $(AM_SOURCES)
+#libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
+#libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
+#libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
+# v21
+#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
+#libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
+# compare to v22
 libfnl2380ak0507y0_la_SOURCES  = fnl2380ak0507y0.cc  $(AM_SOURCES)
 libfnl2380ak0507y1_la_SOURCES  = fnl2380ak0507y1.cc  $(AM_SOURCES)
 libfnl2380ak0507y2_la_SOURCES  = fnl2380ak0507y2.cc  $(AM_SOURCES)
 libfnl2380ak0507y3_la_SOURCES  = fnl2380ak0507y3.cc  $(AM_SOURCES)
 libfnl2380ak0507y4_la_SOURCES  = fnl2380ak0507y4.cc  $(AM_SOURCES)
 libfnl2380ak0507y5_la_SOURCES  = fnl2380ak0507y5.cc  $(AM_SOURCES)
-libfnl2950m3_la_SOURCES        = fnl2950m3.cc        $(AM_SOURCES)
-# v21
-libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
-#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
-libfnl2912bptavm3_la_SOURCES   = fnl2912bptavm3.cc   $(AM_SOURCES)
-libfnl2912by0ptavm3_la_SOURCES = fnl2912by0ptavm3.cc $(AM_SOURCES)
-libfnl2912hy0ptavm3_la_SOURCES = fnl2912hy0ptavm3.cc $(AM_SOURCES)
-libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
-libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
+libfnl5350eta0_la_SOURCES      = fnl5350eta0.cc      $(AM_SOURCES)
 # v22
-#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
 libfnl2352v22_la_SOURCES       = fnl2352v22.cc       $(AM_SOURCES)
 libfnl2352v20andv22_la_SOURCES = fnl2352v20andv22.cc $(AM_SOURCES)
+libfnl5350eta0v22_la_SOURCES   = fnl5350eta0v22.cc   $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
@@ -197,6 +205,7 @@ endif
 #libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 libfnl2352v20andv22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
+libfnl5350eta0v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 
 # Example of individual specification of LDFLAGS
 #libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnlo -L${LHPDFLIBPATH} -llhpdf_cteq6

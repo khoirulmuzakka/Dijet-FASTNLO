@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2380ak0507y0:
-//     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.5 and 0.7 in E-scheme
+// fastNLO v2 creator code for fnl5350eta0:
+//     CMS LHC Inclusive Jets Scenario, E_cms = 5.02 TeV
+//     for fastjet anti-kT algo with R=0.2, 0.3, 0.4 in E-scheme
 //
 //
 // ============== fastNLO user: ===================================
@@ -150,7 +150,8 @@ void psinput(phasespace_hhc *ps, double& s)
    //s =    810000.; // LHC Injection Run  900 GeV
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =   7617600.; // LHC HIpp base Run 2760 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
+   s =  25200400.; // LHC HIpp base Run 5020 GeV
+   //s =  49000000.; // LHC First Run     7000 GeV
    //s =  64000000.; // LHC Second Run    8000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
@@ -162,11 +163,12 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //                   (the return value must be true for jets to be UNselected)
+// fnl5350eta0: use pseudorapidity eta
 struct fNLOSelector {
    fNLOSelector(double ymin, double ymax, double ptmin):
       _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
    double _ymin, _ymax, _ptmin;
-   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
+   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.prapidity()) && abs(a.prapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
 // --- fastNLO user: modify the jet sorting in userfunc (default = descending in jet pt)
@@ -182,10 +184,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
-   // --- fastNLO user: in this scenario run jet algo with two different jet sizes R
-   const unsigned int ndim2bins = 33;
-   const unsigned int ndim1bins = 2;
-   const double Rjet[ndim1bins] = { 0.5, 0.7 };
+   // --- fastNLO user: in this scenario run jet algo with three different jet sizes R
+   const unsigned int ndim2bins = 29;
+   const unsigned int ndim1bins = 3;
+   const double Rjet[ndim1bins] = { 0.2, 0.3, 0.4 };
    for (unsigned int k=0; k<ndim1bins; k++) {
 
       // --- fastNLO user: set the jet size and run the jet algorithm
@@ -222,7 +224,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // smallest |(pseudo-)rapidity| for jets to be considered
       const double yjmin  = 0.0;
       // largest |(pseudo-)rapidity| for jets to be considered
-      const double yjmax  = 0.5;
+      const double yjmax  = 0.3;
       // lowest pT for jets to be considered
       const double ptjmin = A2->LoBin[0][0];
 
@@ -232,7 +234,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
       // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-      // fnl2380: Not required for inclusive jets
+      // fnl5350eta0: Not required for inclusive jets
       //  static fNLOSorter SortJets;
       //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
@@ -254,8 +256,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          // Get jet quantities
          double pt  = pj[i].perp();
 
-         // --- preset the renormalization and factorization scale to jet pT
-         // --- (can get overwritten below with jet pT bin center -> other scenario)
+         // --- set the renormalization and factorization scale to jet pT
          double mu = pt;
 
          // --- identify bin number (dim2,dim1) here (pT,R)
@@ -263,8 +264,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          for (unsigned int j = 0; j < ndim2bins; j++) {
             if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0]) {
                obsbin = j + k*ndim2bins;
-               // --- set the renormalization and factorization scale to jet pT bin center
-               //               mu = 0.5 * (A2->LoBin[j][0] + A2->UpBin[j][0]);
                break;
             }
          }
@@ -299,18 +298,18 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2380ak0507y0");
+   A1->SetScenName("fnl5350eta0");
 
    // --- fastNLO: fill variables for table header block A2
    fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("d2sigma-jet_dpTdy_[pb_GeV]");
+   A2->ScDescript.push_back("d2sigma-jet_dpTdeta_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
    A2->ScDescript.push_back("Inclusive_Jet_pT");
-   A2->ScDescript.push_back("anti-kT_R=0.5,0.7");
-   A2->ScDescript.push_back("CMS-PAPER-SMP-13-002");
+   A2->ScDescript.push_back("anti-kT_R=0.2,0.3,0.4");
+   A2->ScDescript.push_back("CMS-PAS-HIN");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
@@ -325,16 +324,16 @@ void UserHHC::inittable(){
    A2->DimLabel.push_back("pT_[GeV]");
    A2->IDiffBin.push_back(2);
    A2->DimLabel.push_back("R");
-   A2->IDiffBin.push_back(0);
+   A2->IDiffBin.push_back(2);
 
    vector <double> bound;
    bound.resize(2);
 
    // --- fastNLO user: define the binning
-   const int ndim1bins = 2;
-   const double dim1bins[ndim1bins+1] = { 0.4, 0.6, 0.8 };
+   const int ndim1bins = 3;
+   const double dim1bins[ndim1bins+1] = { 0.15, 0.25, 0.35, 0.45 };
 
-   const int ndim2bins[ndim1bins] = { 33, 33 };
+   const int ndim2bins[ndim1bins] = { 29, 29, 29 };
 
    cout << endl << "--------------------------------" << endl;
    cout << "Binning in outer-most dimension: " << A2->DimLabel[1] << endl;
@@ -348,11 +347,10 @@ void UserHHC::inittable(){
    for (int i=0; i<ndim1bins; i++) {
       dim2bins[i].resize(ndim2bins[i]+1);
    }
-   const double dim0[34] = {
-      56.  ,   64.,   74.,   84.,   97., 114. ,  133.,  153.,  174.,  196.,
-      220. ,  245.,  272.,  300.,  330., 362. ,  395.,  430.,  468.,  507.,
-      548. ,  592.,  638.,  686.,  737., 790. ,  846.,  905.,  967., 1032.,
-      1101., 1172., 1248., 1327. };
+   const double dim0[30] = {
+      22.  ,   27.,   33.,   39.,   47.,   55.,   64.,   74.,   84.,   97.,
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  790.,  967. };
    for (int i=0; i<ndim1bins; i++) {
       for (int j=0; j<ndim2bins[i]+1; j++) {
          dim2bins[i][j] = dim0[j];
@@ -375,9 +373,9 @@ void UserHHC::inittable(){
    //     Default: divide by bin width in dim. 1 and dim. 2
    //     ATTENTION: Don't forget to include a factor of 2 e.g. for abs. rapidity |y| !
    //
-   //     fnl2380: Divide by bin width in pT (inner dimension)
+   //     fnl5350eta0: Divide by bin width in pT (inner dimension)
    //              Do NOT divide by bin width in outer dimension which is jet size R
-   //              DO divide by bin width in y = 2 * 0.5
+   //              DO divide by bin width in eta = 2 * 0.3
    //
    int nbins = 0;   // --- count total No. bins
    for (int i=0;i<ndim1bins;i++){
@@ -392,7 +390,7 @@ void UserHHC::inittable(){
          A2->UpBin.push_back(bound);
          binsize = binsize
             * (dim2bins[i][j+1]-dim2bins[i][j]) // ... times dpT
-            * 2. * 0.5; // ... times dy
+            * 2. * 0.3; // ... times deta
          A2->BinSize.push_back(binsize);
       }
    }
