@@ -30,7 +30,8 @@ read_steer::read_steer() :
    str_arrbeg("{")    , str_arrend("}"),
    str_tabbeg("{{")   , str_tabend("}}"),
    str_nmspcbeg("{{{"), str_nmspcend("}}}"),
-   str_inc("#include:"), fParseIncMode(0),
+   //   str_inc("#include:"), fParseIncMode(0),
+   str_inc(">>"), fParseIncMode(0),
    oW(" # read_steer. Warning. "), oI(" # read_steer. Info. "), oE(" # read_steer. ERROR. "){
 }
 
@@ -297,8 +298,10 @@ vector<string> read_steer::getsthead(string label) {
 vector<vector<string> > read_steer::getst(string label) {
    // get table values as strings
    vector<vector<string> > ret = ftables[label];
-   if (ret.empty())
-      cout << oW<<"Label '"<<  label <<"' was not found in list or has no values."<< endl;
+   if (ret.empty() && ftableheaders[label].empty() )
+      cout << oW<<"Label '"<<  label <<"' was not found as a table."<< endl;
+   else if (ret.empty() )
+      cout << oI<<"Table '"<<  label <<"' is empty."<< endl;
    return ret;
 }
 
@@ -432,10 +435,9 @@ bool read_steer::ParseString(string line)
 	    unsigned int is = atoi(ls.c_str());
 	    unsigned int ie = atoi(le.c_str());
 	    ifstream incstrm;
-	    //cout<<"read file: " <<incfile<<endl;
 	    incstrm.open(incfile.c_str());
 	    if (!incstrm){
-	       cerr<<oE<<" Could not open file ('"<<incfile<<"') from #include statement."<<endl;
+	       cerr<<oE<<" Could not open file ('"<<incfile<<"') from include  statement ("<<str_inc<<")."<<endl;
 	       return EXIT_FAILURE;
 	    }
 	    readstrm(incstrm,is,ie,true);

@@ -139,7 +139,11 @@ void fastNLOCreate::Instantiate(){
 
    // now create one coefficient tasble.
    InitCoeffTable();
+   // no info output for the following calls
+   bool vol = info.GetSpeak();
+   info.DoSpeak(false);
    SetOrderOfAlphasOfCalculation(fIOrd);
+   info.DoSpeak(vol);//reset verbosity level
 
    // Init interpolation kernels
    if ( !fIsWarmup ) {
@@ -448,7 +452,7 @@ void fastNLOCreate::ReadBinning()
          // divide by binsizefactor, but only if at least one dimension is differential
          if ( idi ) BinSize[i] *= DOUBLE_NS(BinSizeFactor,fSteerfile);
       }
-      if (!idi) info["ReadBinning"]<<"BinSizeFactor is not being used, since no observable is calculated differential."<<endl;
+      if (!idi) debug["ReadBinning"]<<"BinSizeFactor is not being used, since no observable is calculated differential."<<endl;
    }
    else {
       // read in bin width
@@ -474,22 +478,33 @@ void fastNLOCreate::GetWarmupValues()
    //! member variable fIsWarmup
    //!
    debug["GetWarmupValues"]<<endl;
-
+   
+   std::cout.setstate(std::ios::failbit) ; // no cout in the following
+   std::cerr.setstate(std::ios::failbit) ; // no cout in the following
+   info>>"\n";
+   info>> _SSEP41+_SSEP41+_SSEP41 << endl;
+   info["GetWarmupValues"]<<"Trying to get warmup values. Please ignore following messages from parser."<<endl;
    // try to get warmup values
    vector<vector<double> > warmup = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
    fIsWarmup = warmup.empty();
 
    // try again, with hard-coded convention:
    if ( fIsWarmup ) {
-      info["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
+      debug["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
       READ_NS(GetWarmupTableFilename(),fSteerfile);    // put the warmup-values into same read_steer 'namespace'
       warmup = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
       fIsWarmup = warmup.empty();
-      if ( !fIsWarmup ) info["GetWarmupValues"]<<"Reading of file "<<GetWarmupTableFilename()<<" contained warmup values!"<<endl;
+      if ( !fIsWarmup ) 
+	 info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
    }
    
    // inform user about success
+   info>> _SSEP41+_SSEP41+_SSEP41 << endl;
+   std::cout.clear() ; // recover cout to screen
+   std::cerr.clear() ; // recover cout to screen
+   info>>"\n";
    info["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
+   info>>"\n";
 }
 
 
@@ -662,10 +677,10 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
    string ss[5] = {"LO","NLO","NNLO","NNNLO","unknown"};
    int iContrb = ord-GetLoOrder() <4 ? ord-GetLoOrder() : 4;
    c->CtrbDescript[0] = ss[iContrb];
-   if ( !(GetLoOrder() == 1 || GetLoOrder() == 2 || GetLoOrder() == 3 || GetLoOrder() == 4) ) {
-      warn["SetOrderOfAlphasOfCalculation"]<<"The leading order is of order of "<<GetLoOrder()<<" in alpha_s."<<endl;
-      warn>>"\tThis may be unreasonable."<<endl;
-   }
+   //    if ( !(GetLoOrder() == 1 || GetLoOrder() == 2 || GetLoOrder() == 3 || GetLoOrder() == 4) ) {
+   //       warn["SetOrderOfAlphasOfCalculation"]<<"The leading order is of order of "<<GetLoOrder()<<" in alpha_s."<<endl;
+   //       warn>>"\tThis may be unreasonable."<<endl;
+   //    }
    if      ( ( ord - GetLoOrder()) == 0 ) {
       c->NSubproc               = fProcConsts.NSubProcessesLO;
       // fix different convention of flexible scale tables:
@@ -684,7 +699,7 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
       error["SetOrderOfAlphasOfCalculation"]<<"Unknown order of pertubation theory: order="<<ord-GetLoOrder()<<" (ord="<<ord<<",ILOord="<<ILOord<<"). Exiting."<<endl;
       exit(1);
    }
-   info["SetOrderOfAlphasOfCalculation"]<<"Using "<<c->NSubproc<<" subprocesses and IPDFdef3="<<c->IPDFdef3<<endl;
+   info["SetOrderOfAlphasOfCalculation"]<<"Using "<<c->NSubproc<<" subprocesses and PDF flags: "<<c->IPDFdef1<<", "<<c->IPDFdef2<<", "<<c->IPDFdef3<<"."<<endl;
 
 
    // init array with counter processes (symmetric and asymmetric ones)
@@ -695,7 +710,8 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord)
       for ( int i = 0 ; i<fProcConsts.AsymmetricProcesses.size() ; i++ ) {
 	 if ( fProcConsts.AsymmetricProcesses[i].first<c->NSubproc ) { // safety
 	    if ( fProcConsts.AsymmetricProcesses[i].second >= GetNSubprocesses() || fSymProc[fProcConsts.AsymmetricProcesses[i].first] >= GetNSubprocesses() ) {
-	       warn["AsymmetricProcesses"]<<"Subprocess "<<fSymProc[fProcConsts.AsymmetricProcesses[i].first]<<" is requested to be asymmetric with subprocess "<<fProcConsts.AsymmetricProcesses[i].second<<", but there are only "<<GetNSubprocesses()-1<<" subprocesses in this calculation. Ignoring call."<<endl;
+	       if ( !(c->IPDFdef1==3&&c->IPDFdef2==1&&c->IPDFdef3==1) ) // it is normal in pp->jets in LO
+		  warn["SetOrderOfAlphasOfCalculation"]<<"Subprocess "<<fSymProc[fProcConsts.AsymmetricProcesses[i].first]<<" is requested to be asymmetric with subprocess "<<fProcConsts.AsymmetricProcesses[i].second<<", but there are only "<<GetNSubprocesses()<<" subprocesses in this calculation. Ignoring call."<<endl;
 	    }
 	    else fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
 	 }
@@ -1645,7 +1661,7 @@ void fastNLOCreate::OutWarmup(ostream& strm){
       error["OutWarmup"]<<" Do not write out unreasonable warmup table. Exiting."<<endl; exit(1);
    }
    
-
+   strm<<"# --- Use emacs in sh mode -*-sh-*- #"<<endl;
    strm<<"# This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
    strm<<"# The values are valid for the scenario "<<GetScenName() << endl;
    strm<<"# and if calculated with the steerfile: "<< fSteerfile <<endl;

@@ -117,9 +117,9 @@ void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
       error["MakeGrid"]<<"Number of nodes must be larger than "<<fNMinNodes<<" for this interpolation method."<<endl;
       exit(1);
    }
-   else if ( nNodes == fNMinNodes ) {
-      warn["MakeGrid"]<<"This grid has only the minimum number of required nodes. nNodes="<<nNodes<<endl;
-   }
+   //    else if ( nNodes == fNMinNodes ) {
+   //     info["MakeGrid"]<<"This grid has only the minimum number of required nodes. nNodes="<<nNodes<<endl;
+   //    }
 
    // check min and max values
    if ( fvalmin > fvalmax ){
