@@ -26,7 +26,7 @@ map<string,read_steer*>* read_steer::instances = NULL;
 const string read_steer::stdID = "SingleFileMode";
 
 read_steer::read_steer() :
-   str_sep(" \t")     , str_cmt ("!"),
+   str_sep(" \t")     , str_cmt ("#"),
    str_arrbeg("{")    , str_arrend("}"),
    str_tabbeg("{{")   , str_tabend("}}"),
    str_nmspcbeg("{{{"), str_nmspcend("}}}"),
@@ -447,8 +447,7 @@ bool read_steer::ParseString(string line)
 	    if ( ParseFindString(pch,str_tabend) ) { // store table
 	       fParseTableMode = 0;
 	       if ( !ftablevalues.empty() && !ffieldvalues.empty() && ffieldvalues.size() != ftablevalues[0].size() )
-		  cout<< oW<<"Table ('"<<ffieldlabel<<"'): header has a different number of columns (n="
-		      <<ffieldvalues.size()<<") than table (n="<<ftablevalues[0].size()<<")."<<endl;
+		  cout<< oI<<"Expected a 'table' with "<<ffieldvalues.size()<<" columns for label '"<<ffieldlabel<<"', but found a differing number of entries in at least one row."<<endl;
 	       ftableheaders[ffieldlabel] = ffieldvalues;
 	       ftables[ffieldlabel]	= ftablevalues;
 	       ffieldvalues.clear();
