@@ -95,10 +95,13 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    bool IsTwoPDF = ( c->GetNPDF() == 2 );
    bool IsTwoIdenticHadrons = (c->GetIPDFdef1() == 3  &&  c->GetPDFPDG(0) == fabs(c->GetPDFPDG(1)) );
    bool IsHHJets = ( c->GetIPDFdef2() == 1 );
+   bool IsTTBar = ( c->GetIPDFdef2() == 2 );
 
    if ( IsTwoPDF && IsTwoIdenticHadrons && IsHHJets ) {
       return CalcPDFLinearCombHHC(c,pdfx1,pdfx2);
    }
+   else if ( IsTwoPDF && IsTwoIdenticHadrons && IsTTBar )
+      return CalcPDFLinearCombttbar(c,pdfx1,pdfx2);
    // else if (...)  //space for other processes
    // ---- (yet) unknown process ---- //
    else {
@@ -230,14 +233,33 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombttbar(const fastNL
    // DB 24.08.13
    //
 
-
-   vector <double> pdflc(2);
-   pdflc[0] += pdfx1[6]*pdfx2[6]; // gg
-   // qq
-   for (int k = 0 ; k<6 ; k++) {
-      pdflc[1] += pdfx1[k]*pdfx2[12-k];
-      pdflc[1] += pdfx1[12-k]*pdfx2[k];
+   //int NSubproc = c->GetNSubproc();
+   int IPDF3 = c->GetIPDFdef3();
+   if ( IPDF3==0 ) { //NSubproc==2
+      vector <double> pdflc(2);
+      pdflc[0] += pdfx1[6]*pdfx2[6]; // gg
+      // qq
+      for (int k = 0 ; k<6 ; k++) {
+	 pdflc[1] += pdfx1[k]*pdfx2[12-k];
+	 pdflc[1] += pdfx1[12-k]*pdfx2[k];
+      }
+      return pdflc;
    }
-   return pdflc;
+   else if ( IPDF3==1 ) { //NSubproc==4
+      // 0,1: gg, qq (inelastic)
+      // 2,3: gg, qq (elastic)
+      vector <double> pdflc(4);
+      pdflc[0] += pdfx1[6]*pdfx2[6]; // gg
+      pdflc[2]=pdflc[0];
+      // qq
+      for (int k = 0 ; k<6 ; k++) {
+         pdflc[1] += pdfx1[k]*pdfx2[12-k];
+         pdflc[1] += pdfx1[12-k]*pdfx2[k];
+      }
+      pdflc[3]=pdflc[1];
+      return pdflc;
+   }
+ 
+   return vector<double>();
 
 }

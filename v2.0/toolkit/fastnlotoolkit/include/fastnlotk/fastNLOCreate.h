@@ -46,7 +46,7 @@ public:
    void SetOrderOfAlphasOfCalculation(unsigned int ord);					//!< set absolute order of alpha_s 
    void SetScenario(const fnloScenario scen) {fScenario = scen;}				//!< set the member fScenario, which will be used when calling Fill()
    void SetEvent(const fnloEvent ev) {fEvent = ev;}						//!< set the member fEvent, which will be used when calling Fill()
-   void SetNumberOfEvents(long long int n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};	//!< set number of events. This is only mandatory, before calling WriteTable().	
+   void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};		//!< set number of events. This is only mandatory, before calling WriteTable().	
    void SetLoOrder(int LOOrd);									//!< set order of alpha_s for leading order process.
 
    // SetBinGrid()
@@ -67,6 +67,7 @@ public:
    void MultiplyCoefficientsByBinSize();							//!< Multiply all coefficients by bin size
    void DivideCoefficientsByBinSize();								//!< Divide all coefficients by bin size
    void MultiplyCoefficientsByConstant(double c);						//!< Multiply all coefficients with a constant factor c
+   void NormalizeCoefficients();								//!< Set number of events to 1 and adjust coefficients accordingly
 
    void PrintWarmupValues();									//!< Print the warmup values to the screen
    string GetWarmupTableFilename();								//!< Get the filename, which is used for storage of the warmup-table.
@@ -81,9 +82,14 @@ public:
    bool GetParameterFromSteering(string label, vector<int>& val);				//!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, vector<double>& val);				//!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, vector<string>& val);				//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, vector<vector<int > >& val);			//!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(string label, vector<vector<double > >& val);			//!< Get user-defined parameter from steering file.
 
    void AdjustWarmupValues();									//!< Round warmup values to more likely values.
    void PrintAllSteeringValues() const { PRINTALL();};						//!< Print all steering values obtained from steering files (of all fastNLOCreate instances);
+
+   void Clear() { GetTheCoeffTable()->Clear();};						//!< Clear coefficient table
+   void PrintStats() const { fStats.PrintStats();}						//!< Print statistics
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
@@ -151,24 +157,25 @@ protected:
    struct fnloStats {
       //! structre to keep track of statisics. Just for fun and information.
       std::time_t _time;
-      long long int _nProc, _nEv, _nEvPS;
-      fnloStats() : _nProc(0), _nEv(0) , _nEvPS(0){ _time = std::time(0);}
-      void PrintStats() {
+      fnloStats() : _nProc(0), _nEvPS(0), _nEv(0)  { _time = std::time(0);}
+      long long int _nProc, _nEvPS;
+      double _nEv;
+      void PrintStats() const {
 	 time_t hour, min, time = std::time(0) - _time;
 	 hour = time/3600L;
 	 time -= hour*3600L;
 	 min  = time/60L;
 	 time -= min*60L;
 	 std::cout<<std::endl;
-	 std::cout<<"------------ fastNLOstats ------------"<<std::endl;
+	 std::cout<<" ------------- fastNLOstats -------------"<<std::endl;
 	 std::cout<<"  Time elapsed:       "
 		  <<(hour < 10 ? "0" : "")<<hour
 		  <<(min < 10 ? ":0" : ":")<<min
 		  <<(time < 10 ? ":0" : ":")<<time<<std::endl;
-	 if ( _nEv!=0)   std::cout<<"  Events filled:      "<<_nEv<<std::endl;
-	 if ( _nEvPS!=0) std::cout<<"  Phase space events: "<<_nEvPS<<std::endl;
-	 if ( _nProc!=0) std::cout<<"  Number of calls:    "<<_nProc<<std::endl;
-	 std::cout<<"--------------------------------------"<<std::endl;
+	 if ( _nEv!=0)   std::cout<<"  Event weight (NEvt):  "<<_nEv<<std::endl;
+	 if ( _nEvPS!=0) std::cout<<"  Phase space events:   "<<_nEvPS<<std::endl;
+	 if ( _nProc!=0) std::cout<<"  Number of calls:      "<<_nProc<<std::endl;
+	 std::cout<<" ----------------------------------------"<<std::endl;
 	 std::cout.flush();
       }
    } fStats;

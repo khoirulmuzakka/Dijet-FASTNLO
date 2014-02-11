@@ -792,30 +792,22 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
 
    info["SetContributionON"]<<(SetOn?"Activating":"Deactivating")<<" contribution "<<_ContrName[eCalc]<<" with Id = "<<Id<<endl;
 
+   // sanity checks 1
+   // existence of contribution
+   if (bUseSMCalc[eCalc].size()<=Id || BBlocksSMCalc[eCalc].size() <=Id) {
+      warn["SetContributionON"]
+         <<"Contribution "<<_ContrName[eCalc]<<" does not exist in this table, cannot switch it On/Off! Ignoring call."<<endl;
+      // set to backed up original value
+      return false;
+   }
+
    // backup original value
    bool SetOld = bUseSMCalc[eCalc][Id];
    // set the new value immediately, otherwise GetNScaleVariations(), which is used in FillAlphasCache, will give wrong result.
    bUseSMCalc[eCalc][Id] = SetOn;
-   fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
 
-   // sanity checks 1
-   // existence of contribution
-   if (bUseSMCalc[eCalc].empty() || BBlocksSMCalc.empty()) {
-      warn["SetContributionON"]
-         <<"Contribution "<<_ContrName[eCalc]<<" does not exist in this table, cannot switch it On/Off! Ignoring call."<<endl;
-      // set to backed up original value
-      bUseSMCalc[eCalc][Id] = SetOld;
-      return false;
-   }
-   // existence of contribution number
-   if (bUseSMCalc[eCalc].size() < Id || BBlocksSMCalc[eCalc].size() < Id || !BBlocksSMCalc[eCalc][Id]) {
-      warn["SetContributionON"]
-         <<"Id "<<Id<<" of contribution "<<_ContrName[eCalc]<<" does not exist, cannot switch it On/Off! Ignoring call."<<endl;
-      // set to backed up original value
-      bUseSMCalc[eCalc][Id] = SetOld;
-      return false;
-   }
    // existence of scale variation for additive contributions (otherwise cache filling will fail!)
+   fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
    if (!GetIsFlexibleScaleTable(c) && !c->GetIAddMultFlag()) {
       int scaleVar = c->GetNpow() == ILOord ? 0 : fScalevar;
       // check that scaleVar is in allowed range, can otherwise lead to segfaults!
@@ -1184,8 +1176,8 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   double fac  = as * pdflc * unit;
                   double xsci =  c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if ( c->GetNScaleDep() >= 5 ) {
-                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
-                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
+ 		     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
+ 		     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
                      if ( c->GetIPDFdef1() == 2 ) {   // DIS tables use log(mu/Q2) instead of log(mu)
                         xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                         xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);

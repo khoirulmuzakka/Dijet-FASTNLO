@@ -24,6 +24,7 @@ public:
    virtual void Write(ostream& table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddBase& other);
+   virtual void Clear();							//!< Clear all coefficients and event counters
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };

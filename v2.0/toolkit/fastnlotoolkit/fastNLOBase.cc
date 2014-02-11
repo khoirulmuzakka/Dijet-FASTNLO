@@ -157,8 +157,8 @@ ofstream* fastNLOBase::OpenFileWrite(){
    //! write to ffilename.
    //! do not overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0){
-      error["OpenFileWrite"]<<"File for writing the table exists: "<<ffilename<<".\nPlease remove it."<<endl;
-      exit(2);
+      warn["OpenFileWrite"]<<"File for writing the table exists: "<<ffilename<<"\nOverwriting it."<<endl;
+      //exit(2);
    }
    ofstream* stream = new ofstream(ffilename.c_str(),ios::out);
    if(!stream->good()){

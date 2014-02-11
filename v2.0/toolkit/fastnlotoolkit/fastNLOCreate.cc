@@ -489,7 +489,7 @@ void fastNLOCreate::GetWarmupValues()
    }
    
    // inform user about success
-   info["GetWarmupValues"]<<"This will be "<<(fIsWarmup?"":"not")<<" a warmup run."<<endl;
+   info["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
 }
 
 
@@ -986,9 +986,16 @@ void fastNLOCreate::FillContribution(int scalevar)
    //! do the interpolation
    //! and fill into the tables.
 
+
    if ( fEvent._n > 0 ) SetNumberOfEvents(fEvent._n);
 
    const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
+   // hier
+//    cout<<"Fill! ObsBin="<<ObsBin<<", w="<<fEvent._w<<", x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", o0="<<fScenario._o[0]<<endl;
+//    static double wsum = 0;
+//    wsum+= fEvent._w; //hier
+//    cout<<" * wSum = "<<wsum<<endl;
+
    if ( ObsBin < 0 ) return;
    if ( ObsBin >= GetNObsBin() ) return;
    fStats._nEvPS++;
@@ -1088,7 +1095,6 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
    vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
    vector<pair<int,double> > nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
 
-
 //       cout<<"neu: ObsBin = "<<ObsBin<<", Mu1="<<fScenario._m1<<", Mu2="<<fScenario._m2<<endl;
 //       cout<<"     xmin="<<xmin<<"\txmax="<<xmax<<endl;
 //       cout<<"     deltamin="<<fKernX[ObsBin]->GetDelta(xmin)<<"\tdeltamax="<<fKernX[ObsBin]->GetDelta(xmax)<<endl;
@@ -1121,18 +1127,23 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 //       cout<<"     HScaleNode[0]="<<fKernMu2[ObsBin]->fHgrid[0]<<", HNode[1]="<<fKernMu2[ObsBin]->fHgrid[1]<<", HNode[2]="<<fKernMu2[ObsBin]->fHgrid[2]<<", HNode[3]="<<fKernMu2[ObsBin]->fHgrid[3]<<", HScaleNode[4]="<<fKernMu2[ObsBin]->fHgrid[4]<<endl;
 //       cout<<"     ScaleNode[0]="<<fKernMu2[ObsBin]->fgrid[0]<<", Node[1]="<<fKernMu2[ObsBin]->fgrid[1]<<", Node[2]="<<fKernMu2[ObsBin]->fgrid[2]<<", Node[3]="<<fKernMu2[ObsBin]->fgrid[3]<<", ScaleNode[4]="<<fKernMu2[ObsBin]->fgrid[4]<<endl;
 
+
    if ( fApplyPDFReweight ) {
       fKernX1[ObsBin]->CheckX(xmin);
       fKernX2[ObsBin]->CheckX(xmax);
       ApplyPDFWeight(nxlo,xmin,fKernX1[ObsBin]->GetGridPtr());
       ApplyPDFWeight(nxup,xmax,fKernX2[ObsBin]->GetGridPtr());
    }
+
+
    //       cout<<" --  after reweight: --  "<<endl;
    //       cout<<"     n1min="<<nxlo[0].second<<"\ttn1min="<<nxlo[1].second<<"\txlo="<<nxlo[2].second<<"\txlo="<<nxlo[3].second<<endl;
    //       cout<<"     n1max="<<nxup[0].second<<"\ttn1max="<<nxup[1].second<<"\txup="<<nxup[2].second<<"\txup="<<nxup[3].second<<endl;
    //       cout<<"     mu1="<<nmu1[0].second<<"\tmu1="<<nmu1[1].second<<"\tmu1="<<nmu1[2].second<<"\tmu1="<<nmu1[3].second<<endl;
    //       cout<<"     mu2="<<nmu2[0].second<<"\tmu2="<<nmu2[1].second<<"\tmu2="<<nmu2[2].second<<"\tmu2="<<nmu2[3].second<<endl;
    //       cout<<"  0-nodes: mi1="<< nmu1[0].first<<",  mi2="<< nmu2[0].first<<", xup1="<<nxup[0].first<<", xdn1="<<nxlo[0].first<<endl;
+
+   //   static double wsum;
 
 
    // fill grid
@@ -1166,8 +1177,9 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
 	       // 	       cout<<" ggg-n-  : O="<<ObsBin<<", ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", wfnlo="<<wfnlo<<", wxu="<<nxup[x1].second<<", wxd="<<nxlo[x2].second<<", wm1="<<nmu1[m1].second<<", wm2="<<nmu2[mu2].second<<endl;
                if ( fEvent._w  != 0 ) {
 		  //cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
-		  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
-               }
+		  c->SigmaTildeMuIndep[ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo; 
+		  //wsum+= fEvent._w * wfnlo;
+	       }
                if ( fEvent._wf != 0 ){
 		  //cout<<"   Fill F : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
 		  c->SigmaTildeMuFDep [ObsBin][ixHM][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
@@ -1189,6 +1201,9 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin)
          }
       }
    }
+
+   //cout<<" * wSumW = "<<wsum<<endl;
+
 }
 
 
@@ -1367,6 +1382,18 @@ inline double fastNLOCreate::CalcPDFReweight(double x) const {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::NormalizeCoefficients() {
+   //! Set number of events to 1 and weight coefficients in sigmatilde
+   //! accordingly
+   //! This means, that the information about the 
+   //! number of events is essentially lost
+   double nev = GetTheCoeffTable()->GetNevt(0,0);
+   MultiplyCoefficientsByConstant(1./nev);
+   SetNumberOfEvents(1.);
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByBinSize() {
    //! Multiply all coefficients by binsize
 
@@ -1416,17 +1443,19 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
 //! Divide all coefficients by binsize
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
-      for (int i=0; i<GetNObsBin(); i++) {
+      for (int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
          int nxmax = c->GetNxmax(i);
          for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                for (int x=0; x<nxmax; x++) {
                   for (int n=0; n<c->GetNSubproc(); n++) {
                      c->SigmaTildeMuIndep[i][x][jS1][kS2][n] /= BinSize[i];
-                     if ( c->GetNScaleDep() >= 5 ) {
+                     //if ( c->GetNScaleDep() >= 5 ) {
+                     if ( !c->SigmaTildeMuFDep.empty() ) {
                         c->SigmaTildeMuFDep [i][x][jS1][kS2][n] /= BinSize[i];
                         c->SigmaTildeMuRDep [i][x][jS1][kS2][n] /= BinSize[i];
-                        if ( c->GetNScaleDep() >= 6 ) {
+			//if ( c->GetNScaleDep() >= 6 ) {
+                        if ( !c->SigmaTildeMuRRDep.empty() ) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
@@ -1440,7 +1469,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
    }
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-      for (int i=0; i<GetNObsBin(); i++) {
+      for (int i=0; i<c->SigmaTilde.size(); i++) {
          for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
             for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
                for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
@@ -1460,17 +1489,19 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
 //! Divide all coefficients by binsize
    if ( fIsFlexibleScale ) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
-      for (int i=0; i<GetNObsBin(); i++) {
+      for (int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
          int nxmax = c->GetNxmax(i);
          for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                for (int x=0; x<nxmax; x++) {
                   for (int n=0; n<c->GetNSubproc(); n++) {
                      c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
-                     if ( c->GetNScaleDep() >= 5 ) {
+                     //if ( c->GetNScaleDep() >= 5 ) {
+                     if ( !c->SigmaTildeMuFDep.empty() ) {
                         c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
                         c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
-                        if ( c->GetNScaleDep() >= 6 ) {
+                        //if ( c->GetNScaleDep() >= 6 ) {
+                        if ( !c->SigmaTildeMuRRDep.empty() ) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
@@ -1484,7 +1515,7 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
    }
    else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-      for (int i=0; i<GetNObsBin(); i++) {
+      for (int i=0; i<c->SigmaTilde.size(); i++) {
          for ( unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++ ) {
             for ( unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++ ) {
                for ( unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++ ) {
@@ -1873,7 +1904,7 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
       double frac= (nbinlo[idim]+nbinup[idim])/(2.*GetNObsBin());
       if ( frac>minallbins ) { // round all bins
 	 info["CheckWarmupValuesIdenticalWithBinGrid"]
-	    <<"Found that more than "<<frac*100<<"% of the warmup values are close (<"<<bclose*100.<<"%) to a bin boundary in '"
+	    <<"Found that "<<frac*100<<"% of the warmup values are close (<"<<bclose*100.<<"%) to a bin boundary in '"
 	    << DimLabel[idim]<<"' (Dim "<<idim<<").\n"
 	    <<"Using these bin boundaries as warm-up values."<<endl;
 	 for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
@@ -2031,9 +2062,11 @@ void  fastNLOCreate::InitInterpolationKernels() {
 	 if ( npdf == 2 )
 	    fKernX2[i]->MakeGrids( fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)), INT_NS(X_NNodes,fSteerfile));
       }
+
+      
       fKernX1[i]->RemoveLastNode();
       if ( npdf == 2 )
-	 fKernX2[i]->RemoveLastNode();
+ 	 fKernX2[i]->RemoveLastNode();
 	 
       // ------------------------------------------------
       // init scale1-interpolation kernels
@@ -2232,5 +2265,49 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<string>& val){
    
    string temp = read_steer::getstring(label,fSteerfile);
    val = read_steer::getstringarray(label,fSteerfile);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<int > >& val){
+   //! Get vector of vectors of ints from steering with label 'label'.
+   //! Alternatively, also INT_TAB_NS(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static string text;
+   //! static bool gotval = GetParameterFromSteering("MyText",text);
+   //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label,fSteerfile);
+   val = read_steer::getinttable(label,fSteerfile);
+   return !temp.empty();
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<double > >& val){
+   //! Get vector of vector of doubles from steering with label 'label'.
+   //! Alternatively, also DOUBLE_TAB_NS(`label`) could be used if read_steer.h is included
+   //!
+   //! Since a string (or a hash-map-access) has to be performed
+   //! during access of the steering labels, you  should not
+   //! call this function too frequently.
+   //!
+   //! Use for istance:
+   //! static string text;
+   //! static bool gotval = GetParameterFromSteering("MyText",text);
+   //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
+   //!
+   //! Function returns 'false' if label was not found in steering file
+   
+   string temp = read_steer::getstring(label,fSteerfile);
+   val = read_steer::getdoubletable(label,fSteerfile);
    return !temp.empty();
 }

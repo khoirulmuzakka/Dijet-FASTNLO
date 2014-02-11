@@ -145,6 +145,7 @@ void fastNLOCoeffAddFix::Write(ostream& table){
    //! Write coefficient table to disk (ostream)
    CheckCoeffConstants(this);
    fastNLOCoeffAddBase::Write(table);
+
    for(int i=0;i<NScaleDim;i++){
       table << Nscalevar[i] << endl;
       table << GetNScaleNode() << endl;
@@ -194,6 +195,14 @@ int fastNLOCoeffAddFix::GetTotalScalenodes() const {
    //       //Nscalenode[scaledim];
    //    }
    //    return totalscalenodes;
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::Clear() {
+   //! Set all elelments of SigmaTilde to zero.
+   fastNLOCoeffAddBase::Clear();
+   fastNLOTools::ClearVector(SigmaTilde);
 }
 
 

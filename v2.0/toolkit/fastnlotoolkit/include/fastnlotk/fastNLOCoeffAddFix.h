@@ -22,7 +22,8 @@ public:
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
-   
+   virtual void Clear();							//!< Clear all coefficients and event counters
+  
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;
    int GetNScaleNode() const { return GetTotalScalenodes(); }

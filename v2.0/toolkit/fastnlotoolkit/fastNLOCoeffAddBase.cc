@@ -268,6 +268,13 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
 
 
 //________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddBase::Clear() {
+   //! Clear all coefficients and event counts
+   Nevt = 0;
+}
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::GetNxmax(int i) const {
    int nxmax = 0;
    switch (NPDFDim) {
@@ -306,7 +313,7 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" **************** FastNLO Table: fastNLOCoeffAddBase ****************\n");
    printf(" B   IRef                          %d\n",IRef);
    printf(" B   IScaleDep                     %d\n",IScaleDep);
-   printf(" B   Nevt                          %llu\n",Nevt);
+   printf(" B   Nevt                          %d\n",Nevt);
    printf(" B   Npow                          %d\n",Npow);
    printf(" B   NPDF                          %lu\n",NPDFPDG.size());
    for(unsigned int i=0;i<NPDFPDG.size();i++){

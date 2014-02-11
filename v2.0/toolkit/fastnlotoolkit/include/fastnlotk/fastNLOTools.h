@@ -13,15 +13,19 @@ namespace fastNLOTools {
    using namespace fastNLO;
 
    //! - Reading vectors from disk
-   template<typename T> int ReadVector( vector<T>& v, istream& table , unsigned long long Nevt = 1);
-   int ReadVector( vector<double>& v, istream& table , unsigned long long Nevt = 1);
+   template<typename T> int ReadVector( vector<T>& v, istream& table , double nevts = 1);
+   int ReadVector( vector<double>& v, istream& table , double nevts = 1);
 
-   template<typename T>  int ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast=0 , unsigned long long nevts = 1);
-   int ReadFlexibleVector( vector<double >& v, istream& table , int nProcLast = 0 , unsigned long long nevts = 1 );
+   template<typename T>  int ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast=0 , double nevts = 1);
+   int ReadFlexibleVector( vector<double >& v, istream& table , int nProcLast = 0 , double nevts = 1 );
 
    //! - Resizing tools
    template<typename T> void ResizeFlexibleVector(vector<T>& v, const vector<T>& nom);
    void ResizeFlexibleVector( vector<double >& v, const vector<double >& nom);
+
+   //! - Clearing tools
+   template<typename T> void ClearVector(vector<vector<T > >& v);
+   template<typename T> void ClearVector(vector<T>& v);
 
    // there are nicer  options in c++11
    void ResizeVector( v1d& v, int dim0 );
@@ -34,23 +38,22 @@ namespace fastNLOTools {
 
 
    //! - Writing tables to disk
-   //! use 'fastNLO::WriteVector(vector..., *table, Nevt=1) to write fastNLO table in v2.0 format to disk
-   //! use 'fastNLO::WriteFlexibleVector(vector..., *table, int nProcLast=0, Nevt=1) to write 'flexible' table
-   template<typename T> int WriteVector( const vector<T>& v, ostream& table , unsigned long long Nevt=1 );
-   template<typename T> int _Write1DVectorByN( const vector<T>& v, ostream& table , unsigned long long Nevt );
+   //! use 'fastNLO::WriteVector(vector..., *table, nevts=1) to write fastNLO table in v2.0 format to disk
+   //! use 'fastNLO::WriteFlexibleVector(vector..., *table, int nProcLast=0, nevts=1) to write 'flexible' table
+   template<typename T> int WriteVector( const vector<T>& v, ostream& table , double nevts=1 );
+   template<typename T> int _Write1DVectorByN( const vector<T>& v, ostream& table , double nevts );
    template<typename T> int _Write1DVector( const vector<T>& v, ostream& table);
-   int WriteVector( const vector<double >& v, ostream& table , unsigned long long Nevt=1 );
-   int WriteVector( const vector<string >& v, ostream& table , unsigned long long Nevt=1 );
-   int WriteVector( const vector<int >& v, ostream& table , unsigned long long Nevt=1 ) ;
-   int WriteVector( const vector<unsigned long long >& v, ostream& table , unsigned long long Nevt=1 );
+   int WriteVector( const vector<double >& v, ostream& table , double nevts=1 );
+   int WriteVector( const vector<string >& v, ostream& table , double nevts=1 );
+   int WriteVector( const vector<int >& v, ostream& table , double nevts=1 ) ;
+   int WriteVector( const vector<unsigned long long >& v, ostream& table , double nevts=1 );
    
-   template<typename T> int WriteFlexibleVector( const vector<T>& v, ostream& table, int nProcLast = 0, unsigned long long Nevt=1 );
-   int WriteFlexibleVector( const vector<double >& v, ostream& table, int nProcLast = 0 , unsigned long long Nevt=1 );
-   int WriteFlexibleVector( const vector<string >& v, ostream& table, int nProcLast = 0 , unsigned long long Nevt=1 );
-   int WriteFlexibleVector( const vector<int >& v, ostream& table, int nProcLast = 0 , unsigned long long Nevt=1 );
-   int WriteFlexibleVector( const vector<unsigned long long >& v, ostream& table, int nProcLast = 0 , unsigned long long Nevt=1 );
+   template<typename T> int WriteFlexibleVector( const vector<T>& v, ostream& table, int nProcLast = 0, double nevts=1 );
+   int WriteFlexibleVector( const vector<double >& v, ostream& table, int nProcLast = 0 , double nevts=1 );
+   int WriteFlexibleVector( const vector<string >& v, ostream& table, int nProcLast = 0 , double nevts=1 );
+   int WriteFlexibleVector( const vector<int >& v, ostream& table, int nProcLast = 0 , double nevts=1 );
+   int WriteFlexibleVector( const vector<unsigned long long >& v, ostream& table, int nProcLast = 0 , double nevts=1 );
    
-
    //! - adding vectors
    template<typename T> void AddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1 = 1, double w2 = 1 );
    template<typename T> void _DoAddVectors( vector<T>& vSum, const vector<T>& vAdd, double w1 = 1, double w2 = 1 );
@@ -75,19 +78,19 @@ namespace fastNLOTools {
 //________________________________________________________________________________________________________________
 // Reading functions
 template<typename T>
-int fastNLOTools::ReadVector( vector<T>& v, istream& table , unsigned long long Nevt){
+int fastNLOTools::ReadVector( vector<T>& v, istream& table , double nevts){
    //! Read values according to the size() of the given vector
    //! from table (v2.0 format).
    int nn = 0;
    for( unsigned int i=0 ; i<v.size() ; i++ ){
-      nn += ReadVector(v[i],table, Nevt);
+      nn += ReadVector(v[i],table, nevts);
    }
    return nn;
 };
 
 
 template<typename T>
-int fastNLOTools::ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast, unsigned long long nevts ){
+int fastNLOTools::ReadFlexibleVector(vector<T>& v, istream& table, int nProcLast, double nevts ){
    int nn = 0;
    int size = 0;
    table >> size; nn++;
@@ -110,21 +113,38 @@ void fastNLOTools::ResizeFlexibleVector(vector<T>& v, const vector<T>& nom) {
 
 
 //________________________________________________________________________________________________________________
+// Clearing 
+template<typename T>
+void fastNLOTools::ClearVector(vector<vector<T > >& v) {
+   for (unsigned int i = 0 ; i<v.size() ; i++) {
+      ClearVector(v[i]);
+   }
+};
+
+template<typename T>
+void fastNLOTools::ClearVector(vector<T >& v) {
+   for (unsigned int i = 0 ; i<v.size() ; i++) {
+      v[i]=0;
+   }
+};
+
+
+//________________________________________________________________________________________________________________
 // Writing functions
 template<typename T>
-int fastNLOTools::WriteVector( const vector<T>& v, ostream& table , unsigned long long Nevt) {
+int fastNLOTools::WriteVector( const vector<T>& v, ostream& table , double nevts) {
    //! Write values of vector v to table (v2.0 format) .
    int nn = 0;
    for(unsigned int i=0;i<v.size();i++)
-      nn += WriteVector( v[i] , table , Nevt );
+      nn += WriteVector( v[i] , table , nevts );
    return nn;
 }
 
 template<typename T>
-int fastNLOTools::_Write1DVectorByN( const vector<T>& v, ostream& table , unsigned long long Nevt) {
-   if( Nevt == 0) return -1000;
+int fastNLOTools::_Write1DVectorByN( const vector<T>& v, ostream& table , double nevts) {
+   if( nevts == 0) return -1000;
    for(unsigned int i0=0;i0<v.size();i0++)
-      table << v[i0] / Nevt << endl;
+      table << v[i0] / nevts << endl;
    return v.size();
 }
 
@@ -135,16 +155,17 @@ int fastNLOTools::_Write1DVector( const vector<T>& v, ostream& table ) {
    return v.size();
 }
 
+
 template<typename T>
-int fastNLOTools::WriteFlexibleVector( const vector<T>& v, ostream& table, int nProcLast , unsigned long long Nevt ) {
-   if ( Nevt == 0 ) {
+int fastNLOTools::WriteFlexibleVector( const vector<T>& v, ostream& table, int nProcLast , double nevts ) {
+   if ( nevts == 0 ) {
       error["fastNLOTools::WriteFlexibleVector"]<<"Cannot divide by zero."<<endl;
       return -1000;
    }
    int nn = 1;
    table << v.size() << endl;
    for(unsigned int i0=0;i0<v.size();i0++){
-      nn += WriteFlexibleVector( v[i0] , table , nProcLast , Nevt );
+      nn += WriteFlexibleVector( v[i0] , table , nProcLast , nevts );
    }
    return nn;
 };

@@ -23,9 +23,10 @@ public:
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
+   virtual void Clear();							//!< Clear all coefficients and event counters
 
    int GetIRef() const {return IRef;}
-   long long int GetNevt(int NObsBin, int NSubproc) const {
+   double GetNevt(int NObsBin, int NSubproc) const {
       if ( Nevt > 0 ) return Nevt;
       else {cout<<"Todo. Preparation for v2.2."<<endl; return Nevt;}
    }
@@ -59,7 +60,7 @@ protected:
 
    int IRef;
    int IScaleDep;
-   unsigned long long int Nevt;
+   double Nevt;
    int Npow;
    vector < int > NPDFPDG;
    int NPDFDim;

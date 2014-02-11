@@ -214,6 +214,22 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
 
 
 //________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::Clear() {
+   //! Set all elements of sigma tilde to zero
+   fastNLOCoeffAddBase::Clear();
+   fastNLOTools::ClearVector(SigmaTildeMuIndep);
+   fastNLOTools::ClearVector(SigmaTildeMuFDep); 
+   fastNLOTools::ClearVector(SigmaTildeMuRDep); 
+   fastNLOTools::ClearVector(SigmaTildeMuRRDep); 
+   fastNLOTools::ClearVector(SigmaTildeMuFFDep); 
+   fastNLOTools::ClearVector(SigmaTildeMuRFDep); 
+   fastNLOTools::ClearVector(SigmaRefMixed);
+   fastNLOTools::ClearVector(SigmaRef_s1); 
+   fastNLOTools::ClearVector(SigmaRef_s2); 
+}
+
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFlex ****************\n");
