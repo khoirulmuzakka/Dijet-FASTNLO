@@ -1646,16 +1646,16 @@ void fastNLOCreate::OutWarmup(ostream& strm){
    }
    
 
-   strm<<"! This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
-   strm<<"! The values are valid for the scenario "<<GetScenName() << endl;
-   strm<<"! and if calculated with the steerfile: "<< fSteerfile <<endl;
-   strm<<"! but only if no serious changes have been performed since its creation."<<endl;
-   strm<<"! "<<endl;
-   strm<<"! Delete this file, if you want fastNLO to calculate a new one."<<endl;
-   strm<<"! "<<endl;
-   strm<<"! This file has been calculated using "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
-   strm<<"!   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
-   strm<<"! Please check by eye for reasonability of the values."<<endl;
+   strm<<"# This is a automatically generated file by fastNLO and holds the values of the warmup run. "<<endl;
+   strm<<"# The values are valid for the scenario "<<GetScenName() << endl;
+   strm<<"# and if calculated with the steerfile: "<< fSteerfile <<endl;
+   strm<<"# but only if no serious changes have been performed since its creation."<<endl;
+   strm<<"# "<<endl;
+   strm<<"# Delete this file, if you want fastNLO to calculate a new one."<<endl;
+   strm<<"# "<<endl;
+   strm<<"# This file has been calculated using "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
+   strm<<"#   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
+   strm<<"# Please check by eye for reasonability of the values."<<endl;
    strm<<" " <<endl;
 
    // write variables of warmup run
