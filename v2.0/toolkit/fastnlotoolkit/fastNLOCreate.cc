@@ -175,9 +175,9 @@ void fastNLOCreate::ReadSteering(string steerfile)
    Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
    ScDescript   = STRING_ARR_NS(ScenarioDescription,fSteerfile);
    Ecms         = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);   // is often superseeded by generator-specific code.
-   ILOord       = INT_NS(LeadingOrder,fSteerfile);            // is often superseeded by generator-specific code.
+   ILOord       = 0;//INT_NS(LeadingOrder,fSteerfile);            // is often superseeded by generator-specific code.
    INormFlag    = 0;
-   fIOrd        = INT_NS(OrderInAlphasOfCalculation,fSteerfile);// is often superseeded by generator-specific code.
+   fIOrd        = 0;//INT_NS(OrderInAlphasOfCalculation,fSteerfile);// is often superseeded by generator-specific code.
    SetFilename(STRING_NS(OutputFilename,fSteerfile));
 
    fIsFlexibleScale = BOOL_NS(FlexibleScaleTable,fSteerfile);
