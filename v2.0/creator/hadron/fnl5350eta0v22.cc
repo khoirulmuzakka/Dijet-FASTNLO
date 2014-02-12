@@ -163,7 +163,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
 
    // --- fastNLO user: in this scenario run jet algo with three different jet sizes R
-   const unsigned int ndim2bins = 29;
+   //   const unsigned int ndim2bins = 29;
    const unsigned int ndim1bins = 3;
    const double Rjet[ndim1bins] = { 0.2, 0.3, 0.4 };
    for (unsigned int k=0; k<ndim1bins; k++) {
@@ -204,7 +204,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // largest |(pseudo-)rapidity| for jets to be considered
       const double yjmax  = 0.3;
       // lowest pT for jets to be considered
-      const double ptjmin = 22. // A2->LoBin[0][0];
+      const double ptjmin = 22.; // A2->LoBin[0][0];
 
       // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
       static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
@@ -301,7 +301,7 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
 {
    // create table and read in steering...
    cout<<"\n ---------------------------------------------------------------\n"<<endl;
-   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
+   ftable = new fastNLOCreate("fnl5350eta0v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
 
    // obtain relevant variables from nlojet
    ftable->SetEcms(UsefulNlojetTools::GetEcms());
