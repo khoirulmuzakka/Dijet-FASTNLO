@@ -10,7 +10,7 @@
 //     Tiny reading tool to read steering values from one or more steering files.
 //
 //     This class reads in values, which are stored in a file. New variables
-//     can be included without changes of the steering class. 
+//     can be included without changes of the steering class.
 //
 //     Features
 //     ------------------------------
@@ -21,7 +21,7 @@
 //              int, double, string (with empty spaces)
 //            - Tables/matrices
 //              int, double, string
-//       o  Multiple files can be read in and handled individually or together. 
+//       o  Multiple files can be read in and handled individually or together.
 //       o  Namespaces can be defined (e.g. same variable name in different namesapces).
 //       o  Variables within a steer-file can be defined similar to shell skripts.
 //       o  Command line arguments can be parsed and can superseed values from files.
@@ -41,11 +41,11 @@
 //     ------------------------------
 //     To access the values, simply use the adequate getter functions
 //     for the desired variable type and the label of this variable.
-//     To speed up the code and to avoid repeated string comparisions, 
-//     use static variables, e.g if you want to access the value in 
+//     To speed up the code and to avoid repeated string comparisions,
+//     use static variables, e.g if you want to access the value in
 //     your steering file with the label 'pi' or 'name', use:
 //        static double pi   = read_steer::getdouble("pi");
-//     or 
+//     or
 //        static string name = read_steer::getstring("name");
 //        static int    age  = read_steer::getint("age");
 //        static bool   sex  = read_steer::getbool("female");
@@ -58,46 +58,46 @@
 //
 //
 //
-//     Syntax of steering file 
+//     Syntax of steering file
 //     ------------------------------
 //     The steering file can consist of an arbitrary number of lines, where
 //     the syntax should follow:
-//         <label>		<value>		[!comment]
+//         <label>              <value>         [!comment]
 //     where 'label' and 'value' are necessary tags and comments are
 //     beginning with the '!' character and are ignored by the read_steer class.
 //     As seperator between the <label> and the <value> empty spaces or tabstops
 //     are recognized. Complete lines can beginn with '!' to mark comments.
 //     If string values should contain empty spaces, enclose them in double quotes
 //     like:
-//         Name			"Peter Higgs"
+//         Name                 "Peter Higgs"
 //         Age                  137
 //     Boolean values can be assigned by 0, 1, true or false, e.g.
-//         WithHiggs		true
+//         WithHiggs            true
 //
 //
 //     Arrays
 //     ------------------------------
-//     To read in an array of values, assign a label and enclose the following 
+//     To read in an array of values, assign a label and enclose the following
 //     values in curly brackets { }, with a leading empty space [" {" and "}"].
 //     Within curly brackets, each separated (by an empty space or tabstop)
 //     value is stored in the array as an element, or each line when double quotes are
 //     used (only one occurence of double quotes per line is recognized).
 //     The steering file should look like:
 //
-//	  !Numbers 1-9 are read into an array (9 elements)
-//        Array1 {			!array starts here
-//          1 2 3 4 5			! integers from 1 to 5
+//        !Numbers 1-9 are read into an array (9 elements)
+//        Array1 {                      !array starts here
+//          1 2 3 4 5                   ! integers from 1 to 5
 //          6 7 8 9
 //        }
 //        !Eleven Names of famous musicians (11 elements)
 //        FamousMusicians {
-//          John Paul Ringo George	!The Beatles
-//          Beethoven Bach Mozart	!Famous componists
-//          Mick Keith Ron Charlie	!The Rolling Stones
+//          John Paul Ringo George      !The Beatles
+//          Beethoven Bach Mozart       !Famous componists
+//          Mick Keith Ron Charlie      !The Rolling Stones
 //        }
 //        !Full sentences or documentations (2 string-elements)
 //        Array3 {
-//          "Hello World!"		!Sentences are great
+//          "Hello World!"              !Sentences are great
 //          "Was the first scream."
 //        }
 //
@@ -118,38 +118,38 @@
 //     of a table is always expected to be the row-header. The row headers are
 //     separated by empty spaces or tabstops. If matrices are necessary
 //     keep the first line empty or add a comment there. The steering file should look like:
-//    
-//        Crossections {{
-//		Q2min	Q2max	cs[pb]	stat[%]			!header tags should not contain emtpy spaces
-//		100	200	22.12	1.2
-//		200	300	12.72	2.7
-//		300	500	23.22	5.3
-//	  }}
-//        Participants {{
-//		Name		Surname		Country		! first line is always the header
-//		Obama		Barack		U.S.A.
-//		Merkel		Angela		Germany
-//		Benedikt	XVI		Vatican
-//	  }}
-//        Matrix {{
-//	        !the first line is ignored. Keep it empty.
-//		11 12
-//		21 22
-//	   }}
 //
-//	To access the table use e.g.:
-//	    static vector<vector<string> > guys = read_steer::getstringtable("Participants");
-//	    static vector<vector<double> > cs   = read_steer::getdoubletable("Crossections");
-//	    static vector<vector<int> >    mat  = read_steer::getinttable("Matrix");
+//        Crossections {{
+//              Q2min   Q2max   cs[pb]  stat[%]                 !header tags should not contain emtpy spaces
+//              100     200     22.12   1.2
+//              200     300     12.72   2.7
+//              300     500     23.22   5.3
+//        }}
+//        Participants {{
+//              Name            Surname         Country         ! first line is always the header
+//              Obama           Barack          U.S.A.
+//              Merkel          Angela          Germany
+//              Benedikt        XVI             Vatican
+//        }}
+//        Matrix {{
+//              !the first line is ignored. Keep it empty.
+//              11 12
+//              21 22
+//         }}
+//
+//      To access the table use e.g.:
+//          static vector<vector<string> > guys = read_steer::getstringtable("Participants");
+//          static vector<vector<double> > cs   = read_steer::getdoubletable("Crossections");
+//          static vector<vector<int> >    mat  = read_steer::getinttable("Matrix");
 //      To access the table header use:
-//         static vector<string>	   head = read_steer::gettableheader("Crossections);
-//	To access a single column of a table use:
-//	    static vector<double> xs		= read_steer::getdoublecolumn("Crossections","cs[pb]");
-//	    static vector<string> nick		= read_steer::getstringcolumn("Participants","Surname");
+//         static vector<string>           head = read_steer::gettableheader("Crossections);
+//      To access a single column of a table use:
+//          static vector<double> xs            = read_steer::getdoublecolumn("Crossections","cs[pb]");
+//          static vector<string> nick          = read_steer::getstringcolumn("Participants","Surname");
 //     or equivalently
-//	    static vector<double> xs		= DOUBLE_COL("Crossections","cs[pb]");
-//	    static vector<string> nick		= STRING_COL("Participants","Surname");
-//         
+//          static vector<double> xs            = DOUBLE_COL("Crossections","cs[pb]");
+//          static vector<string> nick          = STRING_COL("Participants","Surname");
+//
 //
 //
 //     Multiple steering files.
@@ -162,7 +162,7 @@
 //     To access values, pass the steerID to the getter methods, e.g.:
 //          static double pi   = read_steer::getdouble("pi","constants");
 //          static string name = read_steer::getstring("name","file1");
-//	    static vector<vector<string> > ConfIchepNames = read_steer::getstringcolumn("Participants","Surname","file1")
+//          static vector<vector<string> > ConfIchepNames = read_steer::getstringcolumn("Participants","Surname","file1")
 //     You can access the values at any place within your code.
 //
 //     If different labels should be read in from multiple files, just call
@@ -177,35 +177,35 @@
 //     various occasions, one can use namespaces instead. Namespaces are
 //     handled identically to multiple files, but can be defined within
 //     one single steering file. Each namespace is assigned a steerID.
-//     Namespaces are defined by a label, which is used as the steerID 
+//     Namespaces are defined by a label, which is used as the steerID
 //     and start with the '{{{' tag and end with the '}}}' tag.
 //     A steerfile could look like:
-//	 HostInstitute		CERN		! standard variabel
-//       ATLAS {{{				! namespace ATLAS starts here
-//          length	45			! define variables as usual
-//	    height	22
-//          weight	7000
-//	    Crossection {{			! also tables are possible
-//	 	bin	cs[pb]	stat[%]
-//	 	1	32.2	1.2
-//		2	12.2	3.2
+//       HostInstitute          CERN            ! standard variabel
+//       ATLAS {{{                              ! namespace ATLAS starts here
+//          length      45                      ! define variables as usual
+//          height      22
+//          weight      7000
+//          Crossection {{                      ! also tables are possible
+//              bin     cs[pb]  stat[%]
+//              1       32.2    1.2
+//              2       12.2    3.2
 //          }}
-//	 }}}					! namespace ATLAS ends here
+//       }}}                                    ! namespace ATLAS ends here
 //       CMS {{{
-//          length	21
-//	    height	16
-//          weight	12500
-//	    Crossection {{
-//		bin	cs[pb]	stat[%]
-//		1	33.1	0.8
-//		2	13.6	3.4
+//          length      21
+//          height      16
+//          weight      12500
+//          Crossection {{
+//              bin     cs[pb]  stat[%]
+//              1       33.1    0.8
+//              2       13.6    3.4
 //          }}
-//	 }}}
+//       }}}
 //
 //     To access the values, use the steerID which is the label of the namespace
-//          static double ATLASheight	  = read_steer::getdouble("height","ATLAS");
-//          static double CMSheight	  = read_steer::getdouble("height","CMS");
-//          static vector<double> CMSxs	  = read_steer::getdoublecolumn("Crossection","cs[pb]","CMS");
+//          static double ATLASheight     = read_steer::getdouble("height","ATLAS");
+//          static double CMSheight       = read_steer::getdouble("height","CMS");
+//          static vector<double> CMSxs   = read_steer::getdoublecolumn("Crossection","cs[pb]","CMS");
 //          static vector<double> ATLASxs = read_steer::getdoublecolumn("Crossection","cs[pb]","ATLAS");
 //
 //     Warning: Namespace steerID and file steerID might conflict if identically!
@@ -222,10 +222,10 @@
 //
 //     It is possible to access previously defined variables foo by ${foo}.
 //     An example steering file can look like:
-//	     !Home directories of famous physicists
-//           HomeDir			/afs/cern.ch/user
-//           UserEinstein		${HomeDir}/e/einstein
-//           UserNewton			"${HomeDir}/i/isaac"
+//           !Home directories of famous physicists
+//           HomeDir                    /afs/cern.ch/user
+//           UserEinstein               ${HomeDir}/e/einstein
+//           UserNewton                 "${HomeDir}/i/isaac"
 //
 //     Local variables are only valid within the defined namespace.
 //
@@ -233,7 +233,7 @@
 //     Parse command line
 //     ------------------------------
 //     It is possible to read in steering values and specify steering files
-//     via the command line of the program. 
+//     via the command line of the program.
 //     To read in values over the command line, one has to call
 //            read_steer::parsecommandline(argc,argv);
 //        or
@@ -261,17 +261,17 @@
 //     The file steerfile2.str in this example is handled like all its content would be at
 //     this position of the base-steerfile. This is useful if e.g. cross section
 //     tables should be read in:
-//            CrossSections {{    
+//            CrossSections {{
 //                #include:HiggsCrossSection.txt
 //            }}
 //     If only certain lines of an external file should be read in, these could be
 //     specified, with a separated ':'-symbol.
-//            CrossSections {{    
+//            CrossSections {{
 //                #include:HiggsCrossSection.txt:2:12
 //            }}
 //      Here, only lines 2-12 are read in. It is also possible, to specify only the first line.
 //
-//      Mention: Although the content of the included file is exactly treated like its content 
+//      Mention: Although the content of the included file is exactly treated like its content
 //      would stand in the base steefile, it is not possible to define namespaces within included files.
 //      However, brackets, local variables, table definitions, etc. are all treated the same way.
 //
@@ -280,7 +280,7 @@
 //     Printing
 //     ------------------------------
 //     Print all steering information in SingleFileMode by calling
-//	    read_steer::print();
+//          read_steer::print();
 //     If multiple files are used, print all information using:
 //          read_steer::printall();
 //        or
@@ -310,7 +310,7 @@
 //
 //
 // ********************************************************************************** */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -321,7 +321,7 @@
 //update to unordered_map in C++11 in gcc4.7
 #include <vector>
 
-// use the pre-processor for accessing values 
+// use the pre-processor for accessing values
 // in 'single-file' mode
 #define READ(X) read_steer::readfile(X)
 
@@ -345,7 +345,7 @@
 #define DOUBLE_TAB(X) read_steer::getdoubletable(#X)
 #define STRING_TAB(X) read_steer::getstringtable(#X)
 
-// use the pre-processor for accessing values 
+// use the pre-processor for accessing values
 // in 'multi-file' mode
 // NS specifies the steerID-namespace
 #define READ_NS(X,NS) read_steer::readfile(X,NS)
@@ -385,9 +385,9 @@ public:
 
 public:
    ~read_steer() {;};
-   static read_steer* Steering(string steerID=read_steer::stdID);			// get an object!
-   static void destroy();						// destroy all instances
-   
+   static read_steer* Steering(string steerID=read_steer::stdID);                       // get an object!
+   static void destroy();                                               // destroy all instances
+
 public:
    // getters for single instance
    // values
@@ -416,7 +416,7 @@ public:
    void inits(string filename);
    int initnmspc(ifstream& strm, string filename);
    void prt();
-   static void initnamespace(ifstream& strm,string filename, string steerID=read_steer::stdID) {	// set the steer-filename
+   static void initnamespace(ifstream& strm,string filename, string steerID=read_steer::stdID) {        // set the steer-filename
       read_steer::Steering(steerID)->initnmspc(strm,filename); }
 
 
@@ -467,7 +467,7 @@ private:
 
 public:
    // static member function
-   static void readfile(string filename,string steerID=read_steer::stdID) {	// set the steer-filename
+   static void readfile(string filename,string steerID=read_steer::stdID) {     // set the steer-filename
       read_steer::Steering(steerID)->inits(filename); }
    // getters
    // values
@@ -507,13 +507,12 @@ public:
       return read_steer::Steering(steerID)->getdtcol(label,column); }
    static vector<string> getstringcolumn(string label,string column,string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getstcol(label,column); }
-   
-   static void printall();						// print values of all files
-   static void print(string steerID=read_steer::stdID);				// print values
+
+   static void printall();                                              // print values of all files
+   static void print(string steerID=read_steer::stdID);                         // print values
    static bool parsecommandline(int argc,char** argv);
 
 
 };
 
 #endif
-
