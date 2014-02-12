@@ -7,34 +7,34 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "fastnlotk/fastNLOInterpolCatmulRom.h"
+#include "fastnlotk/fastNLOInterpolCatmullRom.h"
 
 using namespace std;
 
 //______________________________________________________________________________
 
 
-fastNLOInterpolCatmulRom::fastNLOInterpolCatmulRom(double min, double max) : fastNLOInterpolBase(min,max,4) {
-   debug["fastNLOInterpolCatmulRom"]<<"New fastNLOInterpolCatmulRom instance."<<endl;
+fastNLOInterpolCatmullRom::fastNLOInterpolCatmullRom(double min, double max) : fastNLOInterpolBase(min,max,4) {
+   debug["fastNLOInterpolCatmullRom"]<<"New fastNLOInterpolCatmullRom instance."<<endl;
 }
 
 
 //______________________________________________________________________________
 
 
-fastNLOInterpolCatmulRom::~fastNLOInterpolCatmulRom(void) {
+fastNLOInterpolCatmullRom::~fastNLOInterpolCatmullRom(void) {
 }
 
 
 //______________________________________________________________________________
 
-// vector<pair<int,double> > fastNLOInterpolCatmulRom::GetCopyOfNodeValues(double x) {
+// vector<pair<int,double> > fastNLOInterpolCatmullRom::GetCopyOfNodeValues(double x) {
 //    vector<pair<int,double> > ret = GetNodeValues(x);
 //    return ret;
 // }
 
-//vector<pair<int,double> > fastNLOInterpolCatmulRom::CalcNodeValues(double x) {
-void fastNLOInterpolCatmulRom::CalcNodeValues(vector<pair<int,double> >& nodes, double x) {
+//vector<pair<int,double> > fastNLOInterpolCatmullRom::CalcNodeValues(double x) {
+void fastNLOInterpolCatmullRom::CalcNodeValues(vector<pair<int,double> >& nodes, double x) {
    // Performs interpolation of value value on grid 'fgrid'.
    // uses distance measure 'fdm'
    // returns for for all relevant grid points
@@ -102,17 +102,16 @@ void fastNLOInterpolCatmulRom::CalcNodeValues(vector<pair<int,double> >& nodes, 
 
    if (fLastGridPointWasRemoved ) {
       if ( nodes.back().first==(int)fgrid.size() ) {
-	 nodes.resize(3);
-	 if ( nodes.back().first==(int)fgrid.size() ) {
-	    nodes.resize(2);
-	    if ( nodes.back().first==(int)fgrid.size() ) {
-	       nodes.resize(1);
-	       if ( nodes.back().first==(int)fgrid.size() ) {
-		  nodes.resize(0);
-	       }
-	    }
-	 }
+         nodes.resize(3);
+         if ( nodes.back().first==(int)fgrid.size() ) {
+            nodes.resize(2);
+            if ( nodes.back().first==(int)fgrid.size() ) {
+               nodes.resize(1);
+               if ( nodes.back().first==(int)fgrid.size() ) {
+                  nodes.resize(0);
+               }
+            }
+         }
       }
    }
 }
-

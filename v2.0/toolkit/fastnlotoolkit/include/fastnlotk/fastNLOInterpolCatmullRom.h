@@ -1,8 +1,8 @@
 // Author: Daniel Britzger
 // DESY, 28/06/2013
 
-#ifndef __fastNLOInterpolCatmulRom__
-#define __fastNLOInterpolCatmulRom__
+#ifndef __fastNLOInterpolCatmullRom__
+#define __fastNLOInterpolCatmullRom__
 
 #include "speaker.h"
 #include <string>
@@ -12,13 +12,13 @@
 
 using namespace std;
 
-class fastNLOInterpolCatmulRom : public fastNLOInterpolBase {
-   
+class fastNLOInterpolCatmullRom : public fastNLOInterpolBase {
+
 public:
 
-   fastNLOInterpolCatmulRom(double min, double max);
-   ~fastNLOInterpolCatmulRom(void);
-   
+   fastNLOInterpolCatmullRom(double min, double max);
+   ~fastNLOInterpolCatmullRom(void);
+
    //   vector<pair<int,double> > CalcNodeValues(double val);
    void CalcNodeValues(vector<pair<int,double> >& nodes, double val);
 
@@ -29,6 +29,4 @@ private:
 
 
 };
-
-
 #endif

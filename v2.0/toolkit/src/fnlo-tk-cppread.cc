@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "fastnlotk/fastNLOInterpolCatmulRom.h"
+#include "fastnlotk/fastNLOInterpolCatmullRom.h"
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOReader.h"
