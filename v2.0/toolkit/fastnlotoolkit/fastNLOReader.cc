@@ -11,7 +11,7 @@
         a reasonable cross section.
         All comments that start with '--- fastNLO user:' are intended as a
         short documentation for various options, that can be changed by you.
-   
+
         In fastNLO version 2, there are two different types of tables.
         Although internally they are implemented slightly differently, both are called
         v2 for their larger flexiblity compared to version 1.4.
@@ -24,11 +24,11 @@
         These tables give you the possibility to change in addition to the renormalization
         also the factorization scale by arbitrary factors and have the possiblity to
         change the formula according to which the scale is derived.
-   
+
         Please check (see point 2 below), which type of table you are using and
         then refer to the comments and functions suitable for this fastNLO table.
-   
-   
+
+
          0.  This Introduction
          1.  Instantiation of fastNLO classes
               a. basic FastNLOUser class
@@ -65,7 +65,7 @@
         that derives from the FastNLOReader class and passing the name of the
         fastNLO table as an argument, e.g.:
            FastNLOUser* fnlo = new FastNLOUser( tablename );
-   
+
         To facilitate using fastNLOReader a number of predefined user classes
         of FastNLOUser exist, interfacing to
         LHAPDF (PDF and alpha_s, see M. Whalley, D. Bourilkov, R. Group, hep-ph/0508110),
@@ -75,40 +75,40 @@
         CRunDec (alpha_s evolution up to 4 loops, see B. Schmidt, M. Steinhauser,
                  Comput.Phys.Commun. 183 (2012) 1845-1848, arXiv:1201.6149;
                  PDF from LHAPDF).
-   
+
         Their use is explained in the following.
-   
-   
+
+
     1b.
         Initialize with PDF from LHAPDF and corresponding alphas value and
         evolution for this PDF set. A change of the alpha_s value is only
         possible through the choice of the PDF file/set and member, e.g. CT10as.LHgrid
             FastNLOLHAPDF fnlolhapdf( tablename , PDFFile , PDFMember );
-   
+
         Print information from LHAPDF
             fnlolhapdf.PrintPDFInformation();
             int npdf = fnlolhapdf.GetNPDFMembers();
             int imaxpdf = fnlolhapdf.GetNPDFMaxMember(); // imaxpdf = npdf - 1
-   
+
         ( Please note that because of a feature in gfortran the output via your LHAPDF
           installation may be asynchronous to the C++ output. Usually, the gfortran
           output comes at the end after all C++ output, but this depends on your actual system.
           You can try to set the environment variable GFORTRAN_UNBUFFERED_ALL to yes
           in your shell to get it synchronized. Keep your fingers crossed. )
-   
-   
+
+
     1c.
         Initialize with PDF from LHAPDF and GRV alphas evolution (default)
             fastNLOAlphas fnlo( tablename , PDFFile , PDFMember );
-   
+
         Change the alpha_s value through
             fnlo.SetAlphasMz(0.1179);
         Change values of the alpha_s evolution code through:
             Alphas::SetNf(5);
             Alphas::SetMz(91.70);
         For all options see Alphas.h
-   
-   
+
+
     1d.
         Initialize with PDF from LHAPDF and RunDec alpha_s evolution.
             FastNLOCRunDec fnlo( tablename , PDFFile , PDFMember );
@@ -118,10 +118,10 @@
             fnlo.SetNf(5);
             fnlo.SetNloop(4);
             fnlo.SetMz(91.70);
-   
+
         (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
                PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
-   
+
 
 
     2.
@@ -129,7 +129,7 @@
     --- fastNLO user: For a comprehensive insight into the fastNLO variables
         you can use:
                 fnlo.PrintFastNLOTableConstants(0);
-   
+
 
 
     3.
@@ -146,7 +146,7 @@
         With LHAPDF, you can set the PDF set and member using e.g.:
               fnlo.SetLHAPDFFilename( string PDFFile );
               fnlo.SetLHAPDFMember( int PDFMember );
-   
+
 
 
     5.
@@ -156,15 +156,15 @@
         interface, e.g. GRV alpha_s for the fnlo instance here.
         The value of alpha_s(M_Z) can be changed from its default PDG 2012 values
         like this:
-   
+
                fnlo.SetAlphasMz(0.1179);
-   
+
         (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
                PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
-   
+
         To use a different alpha_s evolution code one has to interface it.
         Here, for example, we use the above-mentioned CRunDec code:
-   
+
      FastNLOCRunDec fnlocrundec( tablename , PDFFile , 0 );
      fnlocrundec.SetMz(91.1876);
      fnlocrundec.SetAlphasMz(0.1184);
@@ -181,7 +181,7 @@
                fnlo.SetUnits(fastNLO::kPublicationUnits);
           - The other option is 'absolute' units in barn, but still in
             the same magnitude as in the publication (e.g. pb, fb, nb, etc.)
-   
+
           fnlo.SetUnits(kAbsoluteUnits); // in namespace fastNLO
         or
           fnlo.SetUnits(kPublicationUnits); // in namespace fastNLO
@@ -199,7 +199,7 @@
         are used. However, each contribution can be swiched on or off separately.
         Please make sure to avoid combinations that do not make sense,
         e.g. 2-loop threshold corrections with LO pQCD.
-   
+
         For switching a contribution on/off, its type must be known:
           - kFixedOrder                  -> Fixed order calculation (in alpha_s)
           - kThresholdCorrection         -> Threshold corrections
@@ -208,7 +208,7 @@
         plus one must know the 'Id' of this contribution, which can be printed e.g.
         by calling
            fnlo.PrintTableInfo();
-   
+
         To switch a contribution on/off please use:
                bool SetOn = fnlo.SetContributionON( contrib, Id, on/off )
         and in particular for switching on check on the return value SetOn that it actually worked.
@@ -229,12 +229,12 @@
         plus sometimes also 0.25, see the respective table information.
         Note: If threshold corrections are available and switched on for evaluation,
         the scale factors for the renormalization and factorization scale must be identical.
-   
+
         The function call to set the scale factors is:
             bool SetScales = fnlo.SetScaleFactorsMuRMuF(xmur, xmuf);
         where xmur, xmuf are the scale factors. Check the return value in order to verify
         that the selected scale factors could actually be activated.
-   
+
         The return value of this function call is boolean and returns false, if the
         the requested scale factors can not be chosen. In this case, the last legal
         values remain unchanged.
@@ -253,18 +253,18 @@
         hadron-hadron tables might have for example scale1 = pt and scale2 = y.
         Other settings are imaginable. Please check, which obervables exactly
         are stored as scale variables!
-   
+
         There are two possibilities, how you can define your scale now:
-   
+
           - use predefined functions using e.g.
                fnlo.SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm);
             for changing the calculation of the renormalizatoin scale.
             Please refer to FastNLOReader.h for all options of EScaleFunctionalForm.
-   
+
           - or you can pass a function pointer to FastNLOReader using
                fnlo.SetExternalFuncForMuR( double (*Func)(double,double) );
             to pass any function using scale1 and scale2 to fastNLO.
-   
+
         WARNING: Some choice had to be made for the default settings. Please think
         carefully about the choice of the scales ...
         Default setting for DIS tables:
@@ -273,7 +273,7 @@
         Default setting for pp and ppbar tables:
           - mu_r:  kScale1             -> mu_r = scale1
           - mu_f:  kScale1             -> mu_f = scale1
-   
+
         Valid calls are e.g.:
         fnlo.SetMuRFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_r from scale1 and scale2
         fnlo.SetMuFFunctionalForm(fastNLO::kScale1);        // set function how to calculate mu_f from scale1 and scale2
@@ -282,7 +282,7 @@
         fnlo.SetExternalFuncForMuR( &Function_Mu );         // set external function to calculate mu_r from scale1 and scale2
         fnlo.SetMuRFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
         fnlo.SetMuFFunctionalForm(fastNLO::kExpProd2);      // set function how to calculate mu_f from scale1 and scale2
-   
+
     INFO: All above-mentioned scale changing functions automatically perform a refilling of the
           fastNLO internal PDF cache. To switch it off you can use a boolean, like:
           fnlo.SetMuFFunctionalForm(fastNLO::kScale1 , false );
@@ -296,7 +296,7 @@
         If you want to have a pointer to an array of numbers you might use
               vector < double > xs = fnlo.GetCrossSection();
               double* cs = &xs[0];
-   
+
         Further you can access the "k-factor", which is calculated with all
         'contributions' that are switched on (e.g. non-perturbative corrections)
         against the LO fixed-order contribution.
@@ -305,7 +305,7 @@
              - 1-loop threshold corrections are vs. LO
              - 2-loop threshold corrections are vs. NLO
              - non-perturbative corrections usually are vs. NLO
-   
+
               vector < double > kFactors = fnlo.GetKFactors();
 
 
@@ -314,7 +314,7 @@
     --- fastNLO user: For an easy overview of your cross section calculation
         you might use the following print methods:
                 fnlo.PrintCrossSections();
-   
+
         Or print it like the Fortran reader code:
                 fnlo.PrintCrossSectionsDefault();
 
@@ -346,7 +346,7 @@
      More details on the applied method can be found on the
      website, i.e.
      http://fastnlo.hepforge.org/docs/talks/20120912_fastNLOv2_DBritzger_DiffractiveFastNLO.pdf
-   
+
     13b.
     --- fastNLO user:
      In order to calculate diffractive DIS processes, the user
@@ -360,7 +360,7 @@
      Some examples and more help on this, can provide the authors.
      The implementation of the alpha_s evolution code can also be
      adapted e.g. from fastNLOAlphas.h or FastNLOCRunDec.h.
-   
+
     13c.
      The calculation of diffractive cross sections performs
      an integration of xpom. This is done by a simple Riemann integration.
@@ -377,22 +377,22 @@
             xpom[]:    central value of each slice
             dxpom[]:   width of each slice
         fnlodiff->SetXPomSlicing(int nStep, double* xpom, double* dxpom);
-   
+
      To calculate and access the cross sections use:
            vector<double> xs = fnlodiff->GetDiffCrossSection();
-   
+
      If you want to calculate cross sections as fucntion of xpom,
      you have to calculate each xpom bin by setting the 'xpomslicing', and
      summing all bins by yourself.
      WARNING:
      In this case, one always have to call SetUnits(fastNLO::kAbsoluteUnits) !
-   
+
      Tipp 1: Some brief studies showed, that already with ca. 10 slices, the
      cross section converges sufficiently fast. The linear slicing is
      preferred over the logarithmic slicing.
      Tipp 2:
      Choosing Q2 (or pT) as factorization scale increases the speed significantly.
-   
+
     13d.
      In the following example code the class description FastNLODiffUser may be
      replaced by a specific interface class to a diffractive PDF (see 13b). This class
@@ -400,24 +400,24 @@
         #include "fastnlo/FastNLODiffUser.h"
      Some example code could look like (uncomment the following lines,
      comment out the other examples under 14. and 15., and recompile):
-   
+
        // ---- Example code for jet-cross sections in diffractive DIS ---- //
        //  we setup an instance of the FastNLODiffUser class
        FastNLODiffUser fnlodiff( tablename );
-   
+
        //  If you want to receive your cross section in
        //   pb/GeV or in pb. Here we choose pb/GeV
        fnlodiff.SetUnits(fastNLO::kPublicationUnits);
-   
+
        // Set the xpom integration interval and method
        fnlodiff.SetXPomLinSlicing( 12, 0.0, 0.1 );
-   
+
        // Optional:
        // make your scale definition (see above)
        fnlodiff.SetMuFFunctionalForm(kQuadraticSum);
        fnlodiff.SetMuRFunctionalForm(kQuadraticSum);
        fnlodiff.SetScaleFactorsMuRMuF(1.0,1.0);
-   
+
        // calculate and access the cross section
        vector<double>  xs = fnlodiff.GetDiffCrossSection();
        // Print it
@@ -430,7 +430,7 @@
     fastNLOLHAPDF fnlo(tablename,"cteq6m.LHpdf",0);
     fnlo.CalcCrossSection();
     fnlo.PrintCrossSectionsDefault();
-    
+
 */
 //______________________________________________________________________________
 
@@ -484,7 +484,7 @@ fastNLOReader::fastNLOReader(const fastNLOReader& other) :
    ffilename(other.ffilename), fScalevar(other.fScalevar), fScaleFacMuR(other.fScaleFacMuR),
    fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
    fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
-   bUseSMCalc(other.bUseSMCalc), bUseNewPhys(other.bUseNewPhys), 
+   bUseSMCalc(other.bUseSMCalc), bUseNewPhys(other.bUseNewPhys),
    XSection_LO(other.XSection_LO), XSection(other.XSection), kFactor(other.kFactor),
    QScale_LO(other.QScale_LO), QScale(other.QScale), XSectionRef(other.XSectionRef),
    XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
@@ -530,7 +530,7 @@ void fastNLOReader::OrderCoefficients() {
       // data
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
          debug["OderCoefficients"]<<"Found data table."<<endl;
-         if ( GetDataTable() ) 
+         if ( GetDataTable() )
 	    warn["OderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
@@ -615,7 +615,7 @@ void fastNLOReader::SetCoefficientUsageDefault() {
    bUseNewPhys.clear();
    bUseSMCalc.resize(BBlocksSMCalc.size());
    bUseNewPhys.resize(BBlocksNewPhys.size());
-  
+
    //switch all off
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
@@ -786,7 +786,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
    //!
    //! The LO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=0);
    //! The NLO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=1);
-   //! 
+   //!
    //! If an additional additive contribution is switched on, then the PDFCache and AlphasCache
    //! are refilled.
 
@@ -949,7 +949,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
       fastNLOCoeffAddBase* Coeff_LO_Ref = GetReferenceTable(kLeading);
       fastNLOCoeffAddBase* Coeff_NLO_Ref = GetReferenceTable(kNextToLeading);
       fastNLOCoeffAddBase* Coeff_NNLO_Ref = GetReferenceTable(kNextToNextToLeading);
-      if ( Coeff_LO_Ref && Coeff_NLO_Ref && Coeff_NNLO_Ref )  
+      if ( Coeff_LO_Ref && Coeff_NLO_Ref && Coeff_NNLO_Ref )
 	 warn["CalcReferenceCrossSection"]<<"Found NNLO reference cross section. Returning reference of LO+NLO+NNLO.\n";
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
          for (int i=0; i<NObsBin; i++) {
@@ -1589,7 +1589,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
    // half matrix notation
-   if ( c->GetNPDFDim() == 1 ) { 
+   if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
 	 int nxmax = c->GetNxmax(i);
@@ -1616,8 +1616,8 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
       }
    }
 
-   // full matrix notation  
-   else if ( c->GetNPDFDim() == 2 ){ 
+   // full matrix notation
+   else if ( c->GetNPDFDim() == 2 ){
       vector < vector < double > > xfx1; // PDFs of all partons
       vector < vector < double > > xfx2; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
@@ -1652,7 +1652,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
 //______________________________________________________________________________
 void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    //! Fill member variables in fastNLOCoeffAddFlex with PDFCache
-   //! The calculation is improved, if the factorization scale is 
+   //! The calculation is improved, if the factorization scale is
    //! calculated from only one scale variable (i.e. kScale1 or kScale2)
    debug["FillBlockBPDFLCsHHCv21"]<<endl;
    if (c->PdfLcMuVar.empty()) {
@@ -1661,7 +1661,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    }
 
    // half-matrix notation
-   if ( c->GetNPDFDim() == 1 ) { 
+   if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
 	 int nxmax = c->GetNxmax(i);
@@ -1690,7 +1690,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
 		  }
 	       }
 	    }
-	 } 
+	 }
 	 else if (fMuFFunc == kScale2) {   // speed up
 	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
 	       // determine all pdfs of hadron1
@@ -1712,7 +1712,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
 		  }
 	       }
 	    }
-	 } 
+	 }
 	 else if (fMuFFunc == kScale1) {   // speed up
 	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
 	       // determine all pdfs of hadron1
@@ -1739,7 +1739,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    }
 
    // full-matrix notation
-   else if ( c->GetNPDFDim() == 2 ) { 
+   else if ( c->GetNPDFDim() == 2 ) {
       vector < vector < double > > xfx1; // hadron1
       vector < vector < double > > xfx2; // hadron2
       for (int i=0; i<NObsBin; i++) {
@@ -1792,7 +1792,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
 		  }
 	       }
 	    }
-	 } 
+	 }
 	 else if (fMuFFunc == kScale1) {   // speed up
 	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
 	       // determine all pdfs of hadron1
@@ -2380,7 +2380,41 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
              fScaleFacMuF, B_LO()->GetScaleDescription().c_str(), fScaleFacMuR, B_LO()->GetScaleDescription().c_str());
    cout << _SSEP << endl;
 
-   if (NDim == 2) {
+   if (NDim == 1) {
+      // non-perturbative corrections (just first np correction)
+      const int inpc1 = ContrId(kNonPerturbativeCorrection,kLeading);
+      const vector < double > knpc = inpc1>-1 ? ((fastNLOCoeffMult*)BBlocksSMCalc[kNonPerturbativeCorrection][kLeading])->GetMultFactor() : vector<double>(NObsBin);
+
+      string header0 = "  IObs  Bin Size IODimO   ";
+      string header2 = "   LO cross section   NLO cross section   K NLO";
+      if (ithc2>-1)header2 += "     K THC";
+      if (inpc1>-1)header2 += "     K NPC";
+      unsigned int NDimBins[NDim];
+      printf("%s [ %-12s ] %s\n",
+             header0.c_str(),DimLabel[0].c_str(),header2.c_str());
+      cout << _SSEP << endl;
+      for (int i=0; i<NObsBin; i++) {
+         NDimBins[0] = 1;
+         if (ithc2<0 && inpc1<0) {
+            printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F",
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   XSection_LO[i],XSection[i],kFactor[i]);
+         } else if (inpc1<0 && ithc2 != -1) {
+            printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F",
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
+         } else if (inpc1>-1 && ithc2 == -1) {
+            printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F",
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
+         } else {
+            printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
+         }
+         printf("\n");
+      }
+   } else if (NDim == 2) {
       // non-perturbative corrections (just first np correction)
       const int inpc1 = ContrId(kNonPerturbativeCorrection,kLeading);
       const vector < double > knpc = inpc1>-1 ? ((fastNLOCoeffMult*)BBlocksSMCalc[kNonPerturbativeCorrection][kLeading])->GetMultFactor() : vector<double>(NObsBin);

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
    fnlo.SetExternalFuncForMuF( &Function_Mu );
    fnlo.CalcCrossSection();
    fnlo.PrintCrossSections();
-   //fnlo.PrintCrossSectionsDefault();
+   fnlo.PrintCrossSectionsDefault();
    vector<double > xs = fnlo.GetCrossSection();
    return 0;
 
