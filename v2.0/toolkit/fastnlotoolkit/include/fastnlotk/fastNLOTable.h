@@ -30,7 +30,7 @@ class fastNLOTable : public fastNLOBase {
 
    virtual void Print() const;
    void PrintScenario() const;
-   void PrintFastNLOTableConstants(const int iprint = 2) const;                                 //  Print (technical) constants of fastNLO table (use iprint) for level of details.
+   void PrintFastNLOTableConstants(const int iprint = 0) const;                                 //  Print (technical) constants of fastNLO table (use iprint) for level of details.
    void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
 
    virtual void ReadTable();
