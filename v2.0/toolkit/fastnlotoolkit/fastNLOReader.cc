@@ -531,7 +531,7 @@ void fastNLOReader::OrderCoefficients() {
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
          debug["OderCoefficients"]<<"Found data table."<<endl;
          if ( GetDataTable() )
-	    warn["OderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
+            warn["OderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
@@ -619,13 +619,13 @@ void fastNLOReader::SetCoefficientUsageDefault() {
    //switch all off
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-	 bUseSMCalc[j].push_back(false);
+         bUseSMCalc[j].push_back(false);
       }
    }
    //switch all off
    for (unsigned int j = 0 ; j<BBlocksNewPhys.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksNewPhys[j].size() ; i++) {
-	 bUseNewPhys[j].push_back(false);
+         bUseNewPhys[j].push_back(false);
       }
    }
    // active LO and NLO
@@ -824,12 +824,12 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
       if (!c->GetIAddMultFlag()) { // if 'new' additive contribution, then refill PDF and alpha_s cache.
          // Fill alpha_s cache
          debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
-	 fAlphasCached = 0;
-	 FillAlphasCache();
+         fAlphasCached = 0;
+         FillAlphasCache();
          // Fill PDF cache
          debug["SetContributionON"]<<"Call FillPDFCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
-	 fPDFCached = 0;
-	 FillPDFCache();
+         fPDFCached = 0;
+         FillPDFCache();
       }
    }
    // Needs to be done in the beginning!
@@ -853,19 +853,19 @@ int fastNLOReader::GetNScaleVariations() const {
    unsigned int scalevarmax = 10;
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-	 fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
-	 // Check on contributions with extra scale tables (NLO, threshold corrections)
-	 int kType  = c->GetIContrFlag1()-1;
-	 int kOrder = c->GetIContrFlag2()-1;
-	 debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
-	 // Do not check pQCD LO or multiplicative corrections
-	 if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
-	     !(kType == kFixedOrder && kOrder == kLeading)) {
-	    NoExtra = false;
-	    if (c->GetNScalevar() < (int)scalevarmax) {
-	       scalevarmax = c->GetNScalevar();
-	    }
-	 }
+         fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)BBlocksSMCalc[j][i];
+         // Check on contributions with extra scale tables (NLO, threshold corrections)
+         int kType  = c->GetIContrFlag1()-1;
+         int kOrder = c->GetIContrFlag2()-1;
+         debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
+         // Do not check pQCD LO or multiplicative corrections
+         if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
+             !(kType == kFixedOrder && kOrder == kLeading)) {
+            NoExtra = false;
+            if (c->GetNScalevar() < (int)scalevarmax) {
+               scalevarmax = c->GetNScalevar();
+            }
+         }
       }
    }
    if (NoExtra) {scalevarmax = 1;}
@@ -950,24 +950,24 @@ void fastNLOReader::CalcReferenceCrossSection() {
       fastNLOCoeffAddBase* Coeff_NLO_Ref = GetReferenceTable(kNextToLeading);
       fastNLOCoeffAddBase* Coeff_NNLO_Ref = GetReferenceTable(kNextToNextToLeading);
       if ( Coeff_LO_Ref && Coeff_NLO_Ref && Coeff_NNLO_Ref )
-	 warn["CalcReferenceCrossSection"]<<"Found NNLO reference cross section. Returning reference of LO+NLO+NNLO.\n";
+         warn["CalcReferenceCrossSection"]<<"Found NNLO reference cross section. Returning reference of LO+NLO+NNLO.\n";
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
          for (int i=0; i<NObsBin; i++) {
             double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
-	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
+               fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
                XSectionRef[i] +=  c->GetSigmaTilde(i,0,0,0,l) * unit / c->GetNevt(i,l) ; // no scalevariations in LO tables
             }
             for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
-	       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
+               fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
                XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
             }
-	    if ( Coeff_NNLO_Ref ) {
-	       for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
-		  fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
-		  XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
-	       }
-	    }
+            if ( Coeff_NNLO_Ref ) {
+               for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
+                  fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
+                  XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
+               }
+            }
          }
       }
       else
@@ -988,7 +988,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
             XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit / cNLO->GetNevt(i,n);
          }
-	 // todo: nnlo reference cross section
+         // todo: nnlo reference cross section
       }
    }
 }
@@ -1176,8 +1176,8 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   double fac  = as * pdflc * unit;
                   double xsci =  c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if ( c->GetNScaleDep() >= 5 ) {
- 		     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
- 		     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
+                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
+                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
                      if ( c->GetIPDFdef1() == 2 ) {   // DIS tables use log(mu/Q2) instead of log(mu)
                         xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                         xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
@@ -1489,8 +1489,8 @@ void fastNLOReader::FillPDFCache(double chksum) {
                }
                // ---- pp ---- //
                else if (c->GetIPDFdef1() == 3) {
-		  if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
-		  else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
+                  if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
+                  else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
                } else {
                   error["FillPDFCache"]<<"IPDFdef of tables must be 1 or 2.\n";
                }
@@ -1592,27 +1592,27 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
-	 int nxmax = c->GetNxmax(i);
-	 int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
-	 xfx.resize(nxbins1);
-	 for (int j=0; j<c->GetNScaleNode(); j++) {
-	    // determine all pdfs of hadron1
-	    for (int k=0; k<nxbins1; k++) {
-	       double xp     = c->GetXNode1(i,k);
-	       double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
-	       xfx[k]        = GetXFX(xp,muf);
-	    }
-	    int x1bin = 0;
-	    int x2bin = 0;
-	    for (int k=0; k<nxmax; k++) {
-	       c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-	       x1bin++;
-	       if (x1bin>x2bin) {
-		  x1bin = 0;
-		  x2bin++;
-	       }
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
+         xfx.resize(nxbins1);
+         for (int j=0; j<c->GetNScaleNode(); j++) {
+            // determine all pdfs of hadron1
+            for (int k=0; k<nxbins1; k++) {
+               double xp     = c->GetXNode1(i,k);
+               double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
+               xfx[k]        = GetXFX(xp,muf);
+            }
+            int x1bin = 0;
+            int x2bin = 0;
+            for (int k=0; k<nxmax; k++) {
+               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+               x1bin++;
+               if (x1bin>x2bin) {
+                  x1bin = 0;
+                  x2bin++;
+               }
+            }
+         }
       }
    }
 
@@ -1621,29 +1621,29 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
       vector < vector < double > > xfx1; // PDFs of all partons
       vector < vector < double > > xfx2; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
-	 int nxmax = c->GetNxmax(i);
-	 int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
-	 int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
-	 xfx1.resize(nxbins1);
-	 xfx2.resize(nxbins2);
-	 for (int j=0; j<c->GetNScaleNode(); j++) {
-	    // determine all pdfs of hadron1
-	    double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
-	    for (int k=0; k<nxbins1; k++) {
-	       double xp     = c->GetXNode1(i,k);
-	       xfx1[k]        = GetXFX(xp,muf);
-	    }
-	    // determine all pdfs of hadron2
-	    for (int k=0; k<nxbins2; k++) {
-	       double xp     = c->GetXNode2(i,k);
-	       xfx2[k]       = GetXFX(xp,muf);
-	    }
-	    for (int k=0; k<nxmax; k++) {
-	       int x1bin = k % c->GetNxtot1(i);
-	       int x2bin = k / c->GetNxtot1(i);
-	       c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
+         int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
+         xfx1.resize(nxbins1);
+         xfx2.resize(nxbins2);
+         for (int j=0; j<c->GetNScaleNode(); j++) {
+            // determine all pdfs of hadron1
+            double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
+            for (int k=0; k<nxbins1; k++) {
+               double xp     = c->GetXNode1(i,k);
+               xfx1[k]        = GetXFX(xp,muf);
+            }
+            // determine all pdfs of hadron2
+            for (int k=0; k<nxbins2; k++) {
+               double xp     = c->GetXNode2(i,k);
+               xfx2[k]       = GetXFX(xp,muf);
+            }
+            for (int k=0; k<nxmax; k++) {
+               int x1bin = k % c->GetNxtot1(i);
+               int x2bin = k / c->GetNxtot1(i);
+               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+            }
+         }
       }
    }
 }
@@ -1664,77 +1664,77 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
       for (int i=0; i<NObsBin; i++) {
-	 int nxmax = c->GetNxmax(i);
-	 int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
-	 xfx.resize(nxbins1);
+         int nxmax = c->GetNxmax(i);
+         int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
+         xfx.resize(nxbins1);
 
-	 if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
-	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	       for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-		  // determine all pdfs of hadron1
-		  for (int k=0; k<nxbins1; k++) {
-		     double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-		     double xp   = c->GetXNode1(i,k);
-		     xfx[k] = GetXFX(xp,muf);
-		  }
-		  int x1bin = 0;
-		  int x2bin = 0;
-		  for (int x=0; x<nxmax; x++) {
-		     // CalcPDFLinearCombination calculats Anti-proton from proton
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-		     x1bin++;
-		     if (x1bin>x2bin) {
-			x1bin = 0;
-			x2bin++;
-		     }
-		  }
-	       }
-	    }
-	 }
-	 else if (fMuFFunc == kScale2) {   // speed up
-	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	       // determine all pdfs of hadron1
-	       for (int k=0; k<nxbins1; k++) {
-		  double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-		  double xp     = c->GetXNode1(i,k);
-		  xfx[k] = GetXFX(xp,muf);
-	       }
-	       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-		  int x1bin = 0;
-		  int x2bin = 0;
-		  for (int x=0; x<nxmax; x++) {
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-		     x1bin++;
-		     if (x1bin>x2bin) {
-			x1bin = 0;
-			x2bin++;
-		     }
-		  }
-	       }
-	    }
-	 }
-	 else if (fMuFFunc == kScale1) {   // speed up
-	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	       // determine all pdfs of hadron1
-	       for (int k=0; k<nxbins1; k++) {
-		  double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
-		  double xp     = c->GetXNode1(i,k);
-		  xfx[k] = GetXFX(xp,muf);
-	       }
-	       for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-		  int x1bin = 0;
-		  int x2bin = 0;
-		  for (int x=0; x<nxmax; x++) {
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-		     x1bin++;
-		     if (x1bin>x2bin) {
-			x1bin = 0;
-			x2bin++;
-		     }
-		  }
-	       }
-	    }
-	 }
+         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+               for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+                  // determine all pdfs of hadron1
+                  for (int k=0; k<nxbins1; k++) {
+                     double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+                     double xp   = c->GetXNode1(i,k);
+                     xfx[k] = GetXFX(xp,muf);
+                  }
+                  int x1bin = 0;
+                  int x2bin = 0;
+                  for (int x=0; x<nxmax; x++) {
+                     // CalcPDFLinearCombination calculats Anti-proton from proton
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+                     x1bin++;
+                     if (x1bin>x2bin) {
+                        x1bin = 0;
+                        x2bin++;
+                     }
+                  }
+               }
+            }
+         }
+         else if (fMuFFunc == kScale2) {   // speed up
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               // determine all pdfs of hadron1
+               for (int k=0; k<nxbins1; k++) {
+                  double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+                  double xp     = c->GetXNode1(i,k);
+                  xfx[k] = GetXFX(xp,muf);
+               }
+               for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+                  int x1bin = 0;
+                  int x2bin = 0;
+                  for (int x=0; x<nxmax; x++) {
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+                     x1bin++;
+                     if (x1bin>x2bin) {
+                        x1bin = 0;
+                        x2bin++;
+                     }
+                  }
+               }
+            }
+         }
+         else if (fMuFFunc == kScale1) {   // speed up
+            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+               // determine all pdfs of hadron1
+               for (int k=0; k<nxbins1; k++) {
+                  double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
+                  double xp     = c->GetXNode1(i,k);
+                  xfx[k] = GetXFX(xp,muf);
+               }
+               for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+                  int x1bin = 0;
+                  int x2bin = 0;
+                  for (int x=0; x<nxmax; x++) {
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+                     x1bin++;
+                     if (x1bin>x2bin) {
+                        x1bin = 0;
+                        x2bin++;
+                     }
+                  }
+               }
+            }
+         }
       }
    }
 
@@ -1743,78 +1743,78 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
       vector < vector < double > > xfx1; // hadron1
       vector < vector < double > > xfx2; // hadron2
       for (int i=0; i<NObsBin; i++) {
-	 int nxmax = c->GetNxmax(i);
-	 int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
-	 int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
-	 xfx1.resize(nxbins1);
-	 xfx2.resize(nxbins2);
-	 if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
-	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	       for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-		  // determine all pdfs of hadron1
-		  double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-		  for (int k=0; k<nxbins1; k++) {
-		     double xp   = c->GetXNode1(i,k);
-		     xfx1[k] = GetXFX(xp,muf);
-		  }
-		  // determine all pdfs of hadron2
-		  for (int k=0; k<nxbins2; k++) {
-		     double xp   = c->GetXNode2(i,k);
-		     xfx2[k] = GetXFX(xp,muf);
-		  }
-		  for (int x=0; x<nxmax; x++) {
-		     // CalcPDFLinearCombination calculats Anti-proton from proton
-		     int x1bin = x % c->GetNxtot1(i);
-		     int x2bin = x / c->GetNxtot1(i);
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
-		  }
-	       }
-	    }
-	 }
-	 else if (fMuFFunc == kScale2) {   // speed up
-	    for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	       double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-	       // determine all pdfs of hadron1
-	       for (int k=0; k<nxbins1; k++) {
-		  double xp  = c->GetXNode1(i,k);
-		  xfx1[k] = GetXFX(xp,muf);
-	       }
-	       // determine all pdfs of hadron2
-	       for (int k=0; k<nxbins2; k++) {
-		  double xp  = c->GetXNode2(i,k);
-		  xfx2[k] = GetXFX(xp,muf);
-	       }
-	       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-		  for (int x=0; x<nxmax; x++) {
-		     int x1bin = x % c->GetNxtot1(i);
-		     int x2bin = x / c->GetNxtot1(i);
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
-		  }
-	       }
-	    }
-	 }
-	 else if (fMuFFunc == kScale1) {   // speed up
-	    for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-	       // determine all pdfs of hadron1
-	       double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
-	       for (int k=0; k<nxbins1; k++) {
-		  double xp   = c->GetXNode1(i,k);
-		  xfx1[k] = GetXFX(xp,muf);
-	       }
-	       // determine all pdfs of hadron2
-	       for (int k=0; k<nxbins2; k++) {
-		  double xp   = c->GetXNode2(i,k);
-		  xfx2[k] = GetXFX(xp,muf);
-	       }
-	       for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-		  for (int x=0; x<nxmax; x++) {
-		     int x1bin = x % c->GetNxtot1(i);
-		     int x2bin = x / c->GetNxtot1(i);
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
-		  }
-	       }
-	    }
-	 }
+         int nxmax = c->GetNxmax(i);
+         int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
+         int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
+         xfx1.resize(nxbins1);
+         xfx2.resize(nxbins2);
+         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+               for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+                  // determine all pdfs of hadron1
+                  double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+                  for (int k=0; k<nxbins1; k++) {
+                     double xp   = c->GetXNode1(i,k);
+                     xfx1[k] = GetXFX(xp,muf);
+                  }
+                  // determine all pdfs of hadron2
+                  for (int k=0; k<nxbins2; k++) {
+                     double xp   = c->GetXNode2(i,k);
+                     xfx2[k] = GetXFX(xp,muf);
+                  }
+                  for (int x=0; x<nxmax; x++) {
+                     // CalcPDFLinearCombination calculats Anti-proton from proton
+                     int x1bin = x % c->GetNxtot1(i);
+                     int x2bin = x / c->GetNxtot1(i);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+                  }
+               }
+            }
+         }
+         else if (fMuFFunc == kScale2) {   // speed up
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+               // determine all pdfs of hadron1
+               for (int k=0; k<nxbins1; k++) {
+                  double xp  = c->GetXNode1(i,k);
+                  xfx1[k] = GetXFX(xp,muf);
+               }
+               // determine all pdfs of hadron2
+               for (int k=0; k<nxbins2; k++) {
+                  double xp  = c->GetXNode2(i,k);
+                  xfx2[k] = GetXFX(xp,muf);
+               }
+               for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+                  for (int x=0; x<nxmax; x++) {
+                     int x1bin = x % c->GetNxtot1(i);
+                     int x2bin = x / c->GetNxtot1(i);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+                  }
+               }
+            }
+         }
+         else if (fMuFFunc == kScale1) {   // speed up
+            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+               // determine all pdfs of hadron1
+               double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
+               for (int k=0; k<nxbins1; k++) {
+                  double xp   = c->GetXNode1(i,k);
+                  xfx1[k] = GetXFX(xp,muf);
+               }
+               // determine all pdfs of hadron2
+               for (int k=0; k<nxbins2; k++) {
+                  double xp   = c->GetXNode2(i,k);
+                  xfx2[k] = GetXFX(xp,muf);
+               }
+               for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+                  for (int x=0; x<nxmax; x++) {
+                     int x1bin = x % c->GetNxtot1(i);
+                     int x2bin = x / c->GetNxtot1(i);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+                  }
+               }
+            }
+         }
       }
    }
 

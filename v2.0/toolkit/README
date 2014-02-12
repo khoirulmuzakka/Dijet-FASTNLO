@@ -24,3 +24,11 @@ For running executable: fastNLO table, PDF set from LHAPDF
 Content:
 --------
 Generic C++ linkable library and code to create, read, and evaluate fastNLO v2 tables
+
+
+Usage:
+------
+Please see executables in folder ./src, e.g. run
+'fnlo-tk-example tablename PDF.LHgrid'
+For more details see also description in fastnlotoolkit/fastNLOReader.cc
+
