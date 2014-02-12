@@ -169,7 +169,10 @@ void fastNLOCreate::ReadSteering(string steerfile)
    debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
    fSteerfile =  steerfile;
    READ_NS(steerfile,steerfile);
-   PRINTALL();
+   
+   SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
+   if ( info.GetSpeak() ) 
+      PRINTALL();
 
    // header
    SetScenName(STRING_NS(ScenarioName,fSteerfile));
@@ -192,6 +195,27 @@ void fastNLOCreate::ReadSteering(string steerfile)
 
    //    //KR: Added possibility to store and read start of new rapidity bin in nobs
    //    //vector <int> RapIndex; ?
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetGlobalVerbosity(string sverb)
+{
+   if ( sverb=="DEBUG" || sverb=="Debug" || sverb=="debug" )
+      speaker::SetGlobalVerbosity(say::DEBUG);
+   else if ( sverb=="MANUAL" || sverb=="Manual" || sverb=="manual" )
+      speaker::SetGlobalVerbosity(say::MANUAL);
+   else if ( sverb=="INFO" || sverb=="Info" || sverb=="info" )
+      speaker::SetGlobalVerbosity(say::INFO);
+   else if ( sverb=="WARNING" || sverb=="Warning" || sverb=="warning" )
+      speaker::SetGlobalVerbosity(say::WARNING);
+   else if ( sverb=="ERROR" || sverb=="Error" || sverb=="error" )
+      speaker::SetGlobalVerbosity(say::ERROR);
+   else if ( sverb=="SILENT" || sverb=="Silent" || sverb=="silent" )
+      speaker::SetGlobalVerbosity(say::SILENT);
+   else
+      speaker::SetGlobalVerbosity(say::INFO);
+   
 }
 
 

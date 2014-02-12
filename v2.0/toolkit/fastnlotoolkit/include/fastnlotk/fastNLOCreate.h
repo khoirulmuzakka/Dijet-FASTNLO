@@ -90,6 +90,7 @@ public:
 
    void Clear() { GetTheCoeffTable()->Clear();};						//!< Clear coefficient table
    void PrintStats() const { fStats.PrintStats();}						//!< Print statistics
+   void SetGlobalVerbosity(string sverb);							//!< Set GlobalVerbosity using string variable
 
 protected:
    fastNLOCreate();										//!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
