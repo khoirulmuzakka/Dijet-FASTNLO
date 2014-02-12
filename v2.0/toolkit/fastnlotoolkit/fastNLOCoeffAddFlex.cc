@@ -108,7 +108,7 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRefMixed , table , NSubproc , Nevt );
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRef_s1 , table , NSubproc , Nevt );
    nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaRef_s2 , table , NSubproc , Nevt );
-   info["ReadCoeffAddFlex"]<<"Read "<<nn3<<" lines of flexible-scale coefficients."<<endl;
+   debug["ReadCoeffAddFlex"]<<"Read "<<nn3<<" lines of flexible-scale coefficients."<<endl;
 
    // init table for evaluation
    fastNLOTools::ResizeFlexibleVector( PdfLcMuVar , SigmaTildeMuIndep );
@@ -126,20 +126,20 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
 void fastNLOCoeffAddFlex::Write(ostream& table) {
    CheckCoeffConstants(this);
    // update to latest version
-    if ( NScaleDep==3 ) {
-       if ( Npow==fILOord) {
-         info["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
-         NScaleDep=4;
-       }
-       else if ( Npow==fILOord+1 ) {
-         info["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
-         NScaleDep=5;
-       }
-       else if ( Npow==fILOord+2 ) {
-         info["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
-         NScaleDep=6;
-       }
-    }
+   if ( NScaleDep==3 ) {
+      if ( Npow==fILOord) {
+	 debug["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
+	 NScaleDep=4;
+      }
+      else if ( Npow==fILOord+1 ) {
+	 debug["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
+	 NScaleDep=5;
+      }
+      else if ( Npow==fILOord+2 ) {
+	 debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
+	  NScaleDep=6;
+      }
+   }
    fastNLOCoeffAddBase::Write(table);
 
    int nn3 = 0;
@@ -185,7 +185,8 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
    nn3 += WriteFlexibleTable( &SigmaRef_s1      , table , (bool)(option & DividebyNevt) , Nevt , true );
    nn3 += WriteFlexibleTable( &SigmaRef_s2      , table , (bool)(option & DividebyNevt) , Nevt , true );
    */
-   printf("  *  fastNLOCoeffAddFlex::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
+   //printf("  *  fastNLOCoeffAddFlex::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
+   debug["Write"]<<"Wrote "<<nn3<<" lines of v2.1 Tables."<<endl;
 }
 
 
