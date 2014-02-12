@@ -350,7 +350,7 @@ void fastNLOCreate::ReadBinning()
 
    // read single-differential bin grid
    if ( NDim == 1 ) {
-      vector<double> bgrid = DOUBLE_ARR_NS(SingleDiffBinning,fSteerfile);
+      vector<double> bgrid = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
       for ( unsigned int i = 0 ; i<bgrid.size()-1 ; i++ ){
          if ( bgrid[i] >= bgrid[i+1] ) {
             error["ReadBinning"]<<"The upper bin edge is below the lower one in bin "<<i+1<<". Exiting."<<endl;
@@ -1699,11 +1699,12 @@ void fastNLOCreate::OutWarmup(ostream& strm){
    strm<<" " <<endl;
 
    // write variables of warmup run
-   strm<<"Warmup.OrderInAlphasOfCalculation\t"<<  fIOrd <<endl;
-   strm<<"Warmup.ScaleDescriptionScale1\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
+   strm<<"Warmup.OrderInAlphasOfCalculation \t"<<  fIOrd <<endl;
+   strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<<(BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile)?"true":"false")<<endl;
+   strm<<"Warmup.ScaleDescriptionScale1     \t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
    if ( fIsFlexibleScale )
-      strm<<"Warmup.ScaleDescriptionScale2\t\t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
-   strm<<"Warmup.DifferentialDimension\t\t"<< NDim <<endl;
+      strm<<"Warmup.ScaleDescriptionScale2  \t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
+   strm<<"Warmup.DifferentialDimension      \t"<< NDim <<endl;
    strm<<"Warmup.DimensionLabels {\n  ";
    for ( int i = 0 ; i < NDim; i ++ ) strm<<"\""<<DimLabel[i]<<"\"  ";
    strm<<"\n} "<<endl;
@@ -1829,13 +1830,17 @@ void fastNLOCreate::AdjustWarmupValues(){
    //------------------------------------------
    // 1. Are warmup-values identical to bin-boundaries ?
    int ident1=-1, ident2=-1;
-   if ( fIsFlexibleScale ) {
-      ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
-      ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
-   }
-   else {
-      ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
-   }
+   //if ( BOOL_NS(CheckScaleLimitsAgainstBins ,fSteerfile) ) {
+      if ( fIsFlexibleScale ) {
+	 ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+	 ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
+      }
+      else {
+	 ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+      }
+      //}
+
+   cout<<"ident1="<<ident1<<", ident2="<<ident2<<endl;
 
    // ---------------------------------------
    // 2. round values to 3rd digit if applicable
@@ -1868,12 +1873,12 @@ int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit
    //! lower values are only rounded down,
    //! upper values are only rounded up
    for ( int i = 0 ; i < GetNObsBin() ; i ++ ) {
-      int lon = GetNthRelevantDigit(wrmmu[i].first,nthdigit);
-      int upn = GetNthRelevantDigit(wrmmu[i].second,nthdigit);
+      int lon = GetNthRelevantDigit(wrmmu[i].first *1.0000001,nthdigit);
+      int upn = GetNthRelevantDigit(wrmmu[i].second*0.9999999,nthdigit);
       // lo value
       if ( lon==0 ) {
-         int ord = log10(wrmmu[i].first);
-         wrmmu[i].first -= fmod(wrmmu[i].first,pow(10,ord-nthdigit+1));
+	 int wrmrnd = wrmmu[i].first*pow(10,nthdigit-2);
+	 wrmmu[i].first = (double)wrmrnd / pow(10,nthdigit-2);
       }
       // up value
       if ( upn==9 ) {
