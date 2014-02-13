@@ -25,10 +25,9 @@ namespace UsefulNlojetTools {
    //_______________________________________________________________________
    fastNLO::GeneratorConstants GenConsts() { 
       fastNLO::GeneratorConstants GenConsts;
-      GenConsts.UnitsOfCoefficients = 12;
       GenConsts.Name = "NLOJet++ 4.1.3";
-      GenConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
-      GenConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
+      //GenConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
+      //GenConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
       return GenConsts;
    }
 
@@ -36,7 +35,11 @@ namespace UsefulNlojetTools {
    //_______________________________________________________________________
    fastNLO::ProcessConstants ProcConsts_HHC_2Jet() {
       fastNLO::ProcessConstants ProcConsts;
+      ProcConsts.Name = "pp -> 2jet";
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
       ProcConsts.LeadingOrder = 2;
+      ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
       ProcConsts.NSubProcessesLO = 6;
       ProcConsts.NSubProcessesNLO = 7;
@@ -56,7 +59,11 @@ namespace UsefulNlojetTools {
    //_______________________________________________________________________
    fastNLO::ProcessConstants ProcConsts_HHC_3Jet() {
       fastNLO::ProcessConstants ProcConsts;
+      ProcConsts.Name = "pp -> 3jet";
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
       ProcConsts.LeadingOrder = 3;
+      ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
       ProcConsts.NSubProcessesLO = 6;
       ProcConsts.NSubProcessesNLO = 7;
