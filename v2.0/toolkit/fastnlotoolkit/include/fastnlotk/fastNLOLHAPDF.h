@@ -198,12 +198,12 @@ vector<double> fastNLOLHAPDF::GetXFX(double xp, double muf) const {
 
 
 void fastNLOLHAPDF::SetLHAPDFFilename(string filename) {
+   if (filename != fLHAPDFFilename) fchksum = 0;
    fLHAPDFFilename = filename;
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    PDFSet = new LHAPDF::PDFSet(filename);
    fnPDFs = PDFSet->size();
    #else
-   if (filename != fLHAPDFFilename) fchksum = 0;
    // Reset pdfset member to zero
    fiPDFMember = 0;
    // KR: Reactivated this. Why was it switched off?
