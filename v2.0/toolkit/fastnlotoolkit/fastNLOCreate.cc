@@ -92,7 +92,6 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    debug["ReadGenAndProcConstsFromSteering"]<<endl;
 
    // Generator constants
-   fGenConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
    vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
    fGenConsts.Name = CodeDescr[0];
    if ( CodeDescr.size() > 1 ) {
@@ -103,6 +102,7 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 
    // Process constants
    fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
+   fProcConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
    fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
    fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
@@ -809,7 +809,10 @@ void fastNLOCreate::ReadCoefficientSpecificVariables()
 
    // generator constants
    c->CodeDescript      = fGenConsts.GetCodeDescription();
-   c->SetIXsectUnits(fGenConsts.UnitsOfCoefficients);
+   for ( int i = 0 ; i<fProcConsts.GetProcessDescription().size() ; i++ ){
+      c->CodeDescript.push_back(fProcConsts.GetProcessDescription()[i]);
+   }
+   c->SetIXsectUnits(fProcConsts.UnitsOfCoefficients);
 
    // (some) process constants constants
    c->NPDFPDG.resize(fProcConsts.NPDF);
@@ -1841,8 +1844,6 @@ void fastNLOCreate::AdjustWarmupValues(){
       }
       //}
 
-   cout<<"ident1="<<ident1<<", ident2="<<ident2<<endl;
-
    // ---------------------------------------
    // 2. round values to 3rd digit if applicable
    if (fIsFlexibleScale){
@@ -1878,13 +1879,17 @@ int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit
       int upn = GetNthRelevantDigit(wrmmu[i].second*0.9999999,nthdigit);
       // lo value
       if ( lon==0 ) {
-	 int wrmrnd = wrmmu[i].first*pow(10,nthdigit-2);
-	 wrmmu[i].first = (double)wrmrnd / pow(10,nthdigit-2);
+	 int wrmrnd = wrmmu[i].first*pow(10.,nthdigit-2);
+	 wrmmu[i].first = (double)wrmrnd / pow(10.,nthdigit-2);
       }
       // up value
       if ( upn==9 ) {
-         int ord = log10(wrmmu[i].second);
-         wrmmu[i].second += pow(10,ord-nthdigit+1)-fmod(wrmmu[i].second,pow(10,ord-nthdigit+1));
+	 int ord = log10(wrmmu[i].second);
+	 //          wrmmu[i].second += pow(10,ord-nthdigit+1)-fmod(wrmmu[i].second,pow(10,ord-nthdigit+1));
+	 cout<<"ord="<<ord<<", adding: "<<0.99999*pow(10.,ord-nthdigit+2)<<endl;
+	 int wrmrnd = (wrmmu[i].first+0.99999*pow(10.,ord-nthdigit+2))*pow(10.,nthdigit-2);
+	 cout<<"wrmrnd="<<wrmrnd<<endl;
+	 wrmmu[i].second = (double)wrmrnd/pow(10.,nthdigit-2);
       }
    }
 }
@@ -1893,9 +1898,9 @@ int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit
 // ___________________________________________________________________________________________________
 int fastNLOCreate::GetNthRelevantDigit(double val, int n){
    int ord = log10(val);
-   double res = fmod(val,pow(10,ord-n+2));
-   double resres=res-fmod(res,pow(10,ord-n+1));
-   double valn=resres/pow(10,ord-n+1);
+   double res = fmod(val,pow(10.,ord-n+2));
+   double resres=res-fmod(res,pow(10.,ord-n+1));
+   double valn=resres/pow(10.,ord-n+1);
    return (int)valn+0.999;
 }
 
