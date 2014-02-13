@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <algorithm> //c++98
 #include <utility>   //c++11
-#include "fastnlotk/fastNLOEvent.h"
+#include <fastnlotk/fastNLOEvent.h>
 #include <fastnlotk/fastNLOGeneratorConstants.h>
 #include "pdf-hhc-dummy.h"
 
@@ -34,8 +34,29 @@ namespace UsefulNlojetTools {
 
 
    //_______________________________________________________________________
-   fastNLO::ProcessConstants ProcConsts() {
+   fastNLO::ProcessConstants ProcConsts_HHC_2Jet() {
       fastNLO::ProcessConstants ProcConsts;
+      ProcConsts.LeadingOrder = 2;
+      ProcConsts.NPDF = 2;
+      ProcConsts.NSubProcessesLO = 6;
+      ProcConsts.NSubProcessesNLO = 7;
+      ProcConsts.NSubProcessesNNLO = 7;
+      ProcConsts.IPDFdef1 = 3;
+      ProcConsts.IPDFdef2 = 1;
+      ProcConsts.IPDFdef3LO = 1;
+      ProcConsts.IPDFdef3NLO = 2;
+      ProcConsts.IPDFdef3NNLO = 2;
+      ProcConsts.NPDFDim = 1;
+      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
+      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
+      return ProcConsts;
+   }
+   
+
+   //_______________________________________________________________________
+   fastNLO::ProcessConstants ProcConsts_HHC_3Jet() {
+      fastNLO::ProcessConstants ProcConsts;
+      ProcConsts.LeadingOrder = 3;
       ProcConsts.NPDF = 2;
       ProcConsts.NSubProcessesLO = 6;
       ProcConsts.NSubProcessesNLO = 7;
