@@ -130,6 +130,9 @@ void fastNLOCreate::Instantiate(){
    // Otherwise a warm-up run will be initialized.
    GetWarmupValues();
 
+   ILOord = fProcConsts.LeadingOrder; 
+   fIOrd = ILOord; // initialize with LO
+
    // init bin grid
    if ( fIsWarmup )   ReadBinning();                    // if warmup, then always read binning from steering.
    else if ( BOOL_NS(ReadBinningFromSteering,fSteerfile) ) {
@@ -183,7 +186,7 @@ void fastNLOCreate::ReadSteering(string steerfile)
    Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
    ScDescript   = STRING_ARR_NS(ScenarioDescription,fSteerfile);
    Ecms         = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);   // is often superseeded by generator-specific code.
-   ILOord       = fProcConsts.LeadingOrder; 
+   ILOord       = 0;
    INormFlag    = 0;
    fIOrd        = 0;// has to be set by generator
    SetFilename(STRING_NS(OutputFilename,fSteerfile));
