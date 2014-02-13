@@ -38,6 +38,7 @@ namespace fastNLO {
       //! a detailed explanation.
       //! 
       //! AsymmetricProcesses may only be required if NPDFDim=1 is chosen.
+      int LeadingOrder; //!< Order in alpha_s of leading order process
       int NPDF; //!< Number of PDFs involved
       int NSubProcessesLO; //!< Number of subprocesses of the considered process in LO run.
       int NSubProcessesNLO; //!< Number of subprocesses of the considered process in NLO run.

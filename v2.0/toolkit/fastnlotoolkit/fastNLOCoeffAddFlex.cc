@@ -202,7 +202,7 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
    if ( NScaleDep==3 || NScaleDep>=5 ) {
       fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
       fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
-      if ( NScaleDep>=6 ) {
+      if ( NScaleDep>=6 || !SigmaTildeMuRRDep.empty()) {
          fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
          fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
          fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );

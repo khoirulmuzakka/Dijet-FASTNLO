@@ -102,6 +102,7 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    }
 
    // Process constants
+   fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
    fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
    fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
@@ -182,9 +183,9 @@ void fastNLOCreate::ReadSteering(string steerfile)
    Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
    ScDescript   = STRING_ARR_NS(ScenarioDescription,fSteerfile);
    Ecms         = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);   // is often superseeded by generator-specific code.
-   ILOord       = 0;//INT_NS(LeadingOrder,fSteerfile);            // is often superseeded by generator-specific code.
+   ILOord       = fProcConsts.LeadingOrder; 
    INormFlag    = 0;
-   fIOrd        = 0;//INT_NS(OrderInAlphasOfCalculation,fSteerfile);// is often superseeded by generator-specific code.
+   fIOrd        = 0;// has to be set by generator
    SetFilename(STRING_NS(OutputFilename,fSteerfile));
 
    fIsFlexibleScale = BOOL_NS(FlexibleScaleTable,fSteerfile);
@@ -1703,7 +1704,7 @@ void fastNLOCreate::OutWarmup(ostream& strm){
    strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<<(BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile)?"true":"false")<<endl;
    strm<<"Warmup.ScaleDescriptionScale1     \t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
    if ( fIsFlexibleScale )
-      strm<<"Warmup.ScaleDescriptionScale2  \t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
+      strm<<"Warmup.ScaleDescriptionScale2     \t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
    strm<<"Warmup.DifferentialDimension      \t"<< NDim <<endl;
    strm<<"Warmup.DimensionLabels {\n  ";
    for ( int i = 0 ; i < NDim; i ++ ) strm<<"\""<<DimLabel[i]<<"\"  ";

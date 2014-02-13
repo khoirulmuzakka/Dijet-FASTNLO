@@ -529,15 +529,15 @@ void fastNLOReader::OrderCoefficients() {
 
       // data
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
-         debug["OderCoefficients"]<<"Found data table."<<endl;
+         debug["OrderCoefficients"]<<"Found data table."<<endl;
          if ( GetDataTable() )
-            warn["OderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
+	    warn["OrderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
          // Reference table
          if ( ((fastNLOCoeffAddBase*)c)->IsReference() ) {
-            debug["OderCoefficients"]<<"Found reference table."<<endl;
+            debug["OrderCoefficients"]<<"Found reference table."<<endl;
          }
          // Additive fixed order (perturbative) contribution
          else if ( c->GetIContrFlag1() == 1 ) {
@@ -550,7 +550,7 @@ void fastNLOReader::OrderCoefficients() {
             if ( c->GetIContrFlag2() == 1 )             Coeff_THC1 = c;
             else if ( c->GetIContrFlag2() == 2 )        Coeff_THC2 = c;
             else {
-               error["OderCoefficients"]<<"Threshold correction implemented only up to 2-loops, exiting!\n";
+               error["OrderCoefficients"]<<"Threshold correction implemented only up to 2-loops, exiting!\n";
                exit(1);
             }
          }
@@ -590,13 +590,13 @@ void fastNLOReader::OrderCoefficients() {
    if (Coeff_LO)  {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_LO);
    } else {
-      error["OderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
+      error["OrderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
       exit(1);
    }
    if (Coeff_NLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NLO);
    } else {
-      info["OderCoefficients"]<<"Could not find any NLO calculation."<<endl;
+      info["OrderCoefficients"]<<"Could not find any NLO calculation."<<endl;
    }
    if (Coeff_NNLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NNLO);
