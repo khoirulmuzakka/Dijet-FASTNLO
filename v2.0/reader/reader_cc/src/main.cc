@@ -902,12 +902,10 @@ int main(int argc, char** argv) {
       // Start print out
       cout << DSEP << endl;
       printf(" My Cross Sections\n");
-      //      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleDescription().c_str(),fnlo->GetScaleFactorMuF(),fnlo->GetScaleDescription().c_str());
       printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       cout << SSEP << endl;
 
       // Get table constants relevant for print out
-      // TBD: This Getter should be renamed!!!
       int NDim = fnlo->GetNDiffBin();
       unsigned int NDimBins[NDim];
       vector < string > DimLabel = fnlo->GetDimensionLabel();
@@ -916,29 +914,67 @@ int main(int argc, char** argv) {
       vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
-      if (NDim == 2) {
-         string header0 = "  IObs  Bin Size IODimO ";
-         string header1 = " IODimI ";
-         string header2 = " LO cross section";
-         //         string header2 = " LO cross section   NLO cross section   KNLO";
+      string header0 = "  IObs  Bin Size IODimO ";
+      string header1 = " IODimI ";
+      string header2 = " LO cross section";
+      if (inlo>-1) {
+         header2 += "   NLO cross section   KNLO";
+      }
+      if (ithc2>-1 && lthcvar) {
+         header2 += "      KTHC2";
+      } else if (ithc1>-1 && lthcvar) {
          if (inlo>-1) {
-            header2 += "   NLO cross section   KNLO";
+            header2 += "      KTHC1";
+         } else {
+            header2 += "    KTHC1";
          }
-         if (ithc2>-1 && lthcvar) {
-            header2 += "      KTHC2";
-         } else if (ithc1>-1 && lthcvar) {
-            if (inlo>-1) {
-               header2 += "      KTHC1";
+      }
+      if (inpc1>-1) {
+         header2 += "     KNPC1";
+      }
+      if (NDim == 1) {
+         printf("%s [ %-17s ]  <%-12.12s> %s\n",
+                header0.c_str(),DimLabel[0].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
+         cout << SSEP << endl;
+         NDimBins[0] = 0;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            NDimBins[0]++;
+            if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
+            } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1 && ithc1 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+            } else if (ilo > -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i]);
+            } else if (ilo > -1 && ithc1 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],kthc1[i]);
+            } else if (ilo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i]);
             } else {
-               header2 += "    KTHC1";
+               printf("fnlo-read: Nothing to report!\n");
+               continue;
             }
+            printf("\n");
          }
-         if (inpc1>-1) {
-            header2 += "     KNPC1";
-         }
+      } else if (NDim == 2) {
          printf("%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s\n",
-                //                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
-                // Invert dimension numbering to from outer to inner
                 header0.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[0].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
          cout << SSEP << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
@@ -986,7 +1022,7 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else {
-         printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+         printf("fnlo-read: WARNING! Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
       }
    }
 
