@@ -1,3 +1,14 @@
+Release Notes for fastNLO_reader version 2.1.0, revision 1689:
+==============================================================
+
+- ATTENTION: Bug fix: Second call to set a new LHAPDF file didn´t refill PDF cache
+             ==> PDF set effectively not changed!
+- Added output for 1-dim cross section to cpp reader
+- Reordered binning dimensions in standard output of example program
+- Implemented correct behaviour for point-wise differential cross sections
+
+
+
 Release Notes for fastNLO_reader version 2.1.0, revision 1567:
 ==============================================================
 

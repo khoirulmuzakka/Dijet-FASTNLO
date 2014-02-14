@@ -1,3 +1,78 @@
+2014-02-14  New release of the fastNLO_reader package version 2.1.0, revision 1689:
+            =======================================================================
+            - ATTENTION: Bug fix: Second call to set a new LHAPDF file didn´t refill PDF cache
+                         ==> PDF set effectively not changed!
+            - Added output for 1-dim cross section to cpp reader
+            - Reordered binning dimensions in standard output of example program
+            - Implemented correct behaviour for point-wise differential cross sections
+
+
+2014-02-14  rabbertz
+
+    * configure.ac, main.cc: reader: Add 1-dim output; fix quote issue
+
+2014-02-13  DanielBritzger
+
+    * FastNLOLHAPDF.h: bugfix when reading an new lhapdffile
+
+2014-02-10  rabbertz
+
+    * CRunDec.cc: Fix two warnings in CRunDec
+
+2014-01-28  rabbertz
+
+    * FastNLOReader.cc, fastNLOTable.cc, fx9999rw.f: reader & tk: unify printout
+      for each dimension; for idiffbin=1 initialize upbin to be equal to lobin
+      ==> always defined, but divbyzero if blindly dividing by this bin width
+      (shouldn't be done anyway)
+
+    * main.cc, main.f: reader: output changes
+
+2014-01-27  rabbertz
+
+    * main.cc, main.f: reader: Account for inverted dim ordering in output
+
+    * FastNLOReader.cc, fx9999rw.f: reader: Implement correct IDiffBin=0
+      behaviour
+
+2014-01-22  rabbertz
+
+    * ToDo_Reader.txt, ToDo_Toolkit.txt: Updated todo lists for toolkit and
+      reader
+
+2014-01-12  rabbertz
+
+    * NEWS: reader: Add news line for 1567 release
+
+    * FastNLOReader.cc: reader: Adapt two debug output lines
+
+2014-01-10  rabbertz
+
+    * Alphas.h, FastNLOLHAPDF.h, FastNLOReader.cc, Makefile.am, configure.ac:
+      reader: some trivial changes
+
+
+2014-01-08  New release of the fastNLO_reader package version 2.1.0, revision 1567:
+            =======================================================================
+            - Add missing FastNLOHoppet.h include
+            - Remove two superfluous files
+
+
+2014-01-08  rabbertz
+
+    * FastNLOReader.cc, Makefile.am: Neuer reader release: Diesmal hatte ich 2
+      files zu viel drin ...
+
+2014-01-07  rabbertz
+
+    * AUTHORS, configure.ac: Add Georg to relevant files as author
+
+2013-12-23  rabbertz
+
+    * Makefile.am: Reader fix: Add missing FastNLOHoppet.h include to
+      distribution tarball
+
+
 2013-12-18  New release of the fastNLO_reader package version 2.1.0, revision 1563:
             =======================================================================
             - Provides optional python interface to C++ library (--enable-pyext)
@@ -8,8 +83,11 @@
 
 2013-12-18  rabbertz
 
-    * ChangeLog, NEWS, ToDo_Reader.txt, configure.ac: reader: Update release text files,
+    * NEWS, main.cc: reader release: Remove some forgotten printout lines
+
+    * NEWS, ToDo_Reader.txt, configure.ac: reader: Update release text files,
       fix bug for Unversioned directory output of svnversion
+
     * Alphas.cc, FastNLOLHAPDF.h, main.cc, main.f: reader: Test release
 
 2013-12-17  sieber
