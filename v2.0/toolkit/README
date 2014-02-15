@@ -1,34 +1,88 @@
-fastNLO_toolkit version 2.1.0:
-==============================
+# -*-sh-*-
+# fastNLO_toolkit version 2.1.0:
+# ==============================
 
-Installation of distribution package:
--------------------------------------
-Via GNU autotools setup (NOT required for installation),
-in unpacking directory of the *.tar.gz file do:
+# Content:
+# --------
+# Generic C++ linkable library and code to create, read, and evaluate fastNLO v2 tables
 
-./configure --prefix=your_local_directory
-(should contain LHAPDF installation, otherwise specify
- separate path via --with-lhapdf=path_to_lhapdf;
- see also ./configure --help)
-make
+
+# Requirements:
+# -------------
+# For installation of toolkit package: LHAPDF version 5 or 6, see also http://lhapdf.hepforge.org
+# For running executable: fastNLO table, PDF set from LHAPDF, see also http://fastnlo.hepforge.org
+
+
+# Basic installation of distribution package fastnlo_toolkit-2.1.0-nnnn.tar.gz in six simple steps:
+# -------------------------------------------------------------------------------------------------
+# 1. Unpack distribution tarball in directory of your choice:
+tar xzvf fastnlo_toolkit-2.1.0-nnnn.tar.gz
+#
+# 2. Descend into created subdirectory:
+cd fastnlo_toolkit-2.1.0-nnnn
+
+# 3. Configure the installation:
+#    (Prepared using the GNU autotools setup, which is NOT required for the installation itself.)
+./configure --prefix=/path/to/your/local/installation_directory
+
+#    If the same installation directory or other system-wide known installation directories
+#    contain already a version of LHAPDF version 5 or 6, LHAPDF will be found and used
+#    automatically.
+#    If not, please specify the path to where LHAPDF is installed, i.e. where
+#    'bin/lhapdf-config' can be found:
+./configure --prefix=/path/to/your/local/installation_directory --with-lhapdf=/path/to/your/lhapdf/installation
+
+#    To see all available configure options do:
+./configure --help
+
+# 4. Compile and link the project, use the '-j n' option to specify,
+#    how many cores, e.g. n=2, should be used in parallel in this step:
+make -j n
+
+# 5. Not yet implemented, please skip! Run functionality test suite:
+#make check
+
+# 6. Install the products into the configured target directory:
 make install
-make check (not yet implemented)
 
 
-Requirements:
--------------
-For installation of toolkit package: LHAPDF
-For running executable: fastNLO table, PDF set from LHAPDF
+# Optional features:
+# ------------------
+# 1. The fastNLO_toolkit supports multiple alternatives for the evolution of the strong coupling.
+#    Some of them require additional external software: HOPPET and QCDNUM, see also
+#    http://hoppet.hepforge.org and http://qcdnum.hepforge.org
+#    If these packages are found in the same installation directory or
+#    other system-wide known installation directories, the options
+--with-hoppet
+#    or
+--with-qcdnum
+#    can be used to support their alpha_s evolutions.
+#    Otherwise their installation paths have to be specified explicitly like
+--with-hoppet=/path/to/your/hoppet/installation
+#    or
+--with-qcdnum=/path/to/your/qcdnum/installation
+
+# 2. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
+#    If you have PYTHON and SWIG installed, the PYTHON extension can be enabled via
+--enable-pyext
 
 
-Content:
---------
-Generic C++ linkable library and code to create, read, and evaluate fastNLO v2 tables
+# Usage:
+# ------
+# Please see the executables in the folder 'src', e.g. run
+fnlo-tk-example tablename PDF.LHgrid
+# or
+fnlo-tk-cppread tablename PDF.LHgrid
+# for some sample cross-section print-out.
+# For more details see also the description in fastnlotoolkit/fastNLOReader.cc
 
 
-Usage:
-------
-Please see executables in folder ./src, e.g. run
-'fnlo-tk-example tablename PDF.LHgrid'
-For more details see also description in fastnlotoolkit/fastNLOReader.cc
-
+# For developers only:
+# --------------------
+# If you have the GNU autotools installed, the project gets automatically reconfigured properly
+# if you e.g. add something new to a Makefile.am to be compiled or linked.
+#
+# The GNU autotools also support incremental installations. If you modify something in or add something
+# to the fastNLO_toolkit that requires recompilation or relinking, the install step can be restricted
+# to only install updated files:
+make install "INSTALL=/path/to/install-sh -C"

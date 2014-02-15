@@ -4,7 +4,6 @@ Toolkit todo (orderd by priority):
  - reader testen fuer NNLO
  - Ensure NNLO compatibility of reader
  - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
- - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - Write documentation (e.g. twiki)
  - Creator for Referenztabellen
  - converter aktualisieren ??
@@ -25,6 +24,7 @@ Toolkit todo (orderd by priority):
 
 Toolkit done
 ------------------------------------------------------
+ - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - implement DIS flexible-scale
  - Write out constants of warmup-run into warmup-file
  - implement fixed-scale hhc for nlojet
@@ -42,4 +42,3 @@ Toolkit done
  - bi-cubic interpolation
  - 'one-point' interpolation (very useful)
  - Linear interpolation
-

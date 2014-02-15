@@ -840,6 +840,7 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
          ictype = fCoeff[j]->GetIContrFlag1()-1;
          coeffname = fastNLO::_ContrName[ictype];
       }
+      // KR: How can I access ContrId from here ???
       iccount[ictype]++;
       cout << " # "<< "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
            << ", order: " << c->GetContributionDescription()[0]
