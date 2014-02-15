@@ -576,7 +576,7 @@ int main(int argc, char** argv) {
    // ---- Example of a cross section calculation with some nice standardized output
 
    // For the purpose of this example only show WARNINGs or worse.
-   SetGlobalVerbosity(WARNING);
+   SetGlobalVerbosity(INFO);
 
    // Instead of instantiating a class via e.g.
    //   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
@@ -716,38 +716,38 @@ int main(int argc, char** argv) {
    // Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
-      printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
+      error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
       exit(1);
    } else {
-      //      printf("fnlo-read: The LO contribution has Id: %i\n",ilo);
+      info["fnlo-read"] << "The LO contribution has Id: " << ilo << endl;
    }
    // Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
-   // if (inlo < 0) {
-   //    printf("fnlo-read: No NLO contribution found!\n");
-   // } else {
-   //    printf("fnlo-read: The NLO contribution has Id: %i\n",inlo);
-   // }
+   if (inlo < 0) {
+      info["fnlo-read"] << "No NLO contribution found!" << endl;
+   } else {
+      info["fnlo-read"] << "The NLO contribution has Id: " << inlo << endl;
+   }
    // Check on existence of threshold corrections
    int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
-   // if ( ithc1 < 0 ) {
-   //    printf("fnlo-read: 1-loop threshold corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: 1-loop threshold corrections have Id: %i\n",ithc1);
-   // }
-   // if ( ithc2 < 0 ){
-   //    printf("fnlo-read: 2-loop threshold corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
-   // }
+   if (ithc1 < 0) {
+      info["fnlo-read"] << "1-loop threshold corrections not found!" << endl;
+   } else {
+      info["fnlo-read"] << "1-loop threshold corrections have Id: " << ithc1 << endl;
+   }
+   if (ithc2 < 0) {
+      info["fnlo-read"] << "2-loop threshold corrections not found!" << endl;
+   } else {
+      info["fnlo-read"] << "2-loop threshold corrections have Id: " << ithc2 << endl;
+   }
    // Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
-   // if ( inpc1 < 0 ){
-   //    printf("fnlo-read: Non-perturbative corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
-   // }
+   if (inpc1 < 0) {
+      info["fnlo-read"] << "Non-perturbative corrections not found!" << endl;
+   } else {
+      info["fnlo-read"] << "Non-perturbative corrections have Id: " << inpc1 << endl;
+   }
 
    // Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
@@ -756,16 +756,16 @@ int main(int argc, char** argv) {
       if (!(ilo   < 0)) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
-            printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
-            printf("fnlo-read: This should have been caught before!\n");
+            error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
             exit(1);
          }
       }
       if (!(inlo  < 0)) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
          if (!SetOn) {
-            printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
-            printf("fnlo-read: This should have been caught before!\n");
+            error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
             exit(1);
          }
       }
@@ -800,7 +800,10 @@ int main(int argc, char** argv) {
       // Set MuR and MuF scale factors for pQCD cross sections and test availability
       lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
       if (!lscvar) {
-         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+         warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+                           << fnlo->GetScaleFactorMuR() << ","
+                           << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
+         //         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
          // skip completely
          continue;
       }
@@ -833,13 +836,17 @@ int main(int argc, char** argv) {
       if ( !(inlo < 0 || ithc2 < 0) ) {
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
-            printf("fnlo-read: WARNING! 2-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
+            warn["fnlo-read"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
+            //            printf("fnlo-read: WARNING! 2-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+            warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+                              << fnlo->GetScaleFactorMuR() << ","
+                              << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
+            //            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
             // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
             fnlo->CalcCrossSection();
@@ -857,13 +864,17 @@ int main(int argc, char** argv) {
          if ( !(inlo < 0) ) fnlo->SetContributionON(kFixedOrder, inlo, false);
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc1, true);
          if (!SetOn) {
-            printf("fnlo-read: WARNING! 1-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
+            warn["fnlo-read"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
+            //            printf("fnlo-read: WARNING! 1-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+            warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+                              << fnlo->GetScaleFactorMuR() << ","
+                              << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
+            //            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
             // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
             fnlo->CalcCrossSection();
@@ -883,8 +894,8 @@ int main(int argc, char** argv) {
          if ( !(inlo < 0) ) {
             bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
             if (!SetOn) {
-               printf("fnlo-read: ERROR! NLO not found, nothing to be done!\n");
-               printf("fnlo-read: This should have been caught before!\n");
+               error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
+               error["fnlo-read"] << "This should have been caught before!" << endl;
                exit(1);
             }
          }
@@ -892,8 +903,8 @@ int main(int argc, char** argv) {
          if ( !(ithc2 < 0) ) fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
          bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
          if (!SetOn) {
-            printf("fnlo-read: ERROR! NPC1 not found, nothing to be done!\n");
-            printf("fnlo-read: This should have been caught before!\n");
+            error["fnlo-read"] << "NPC1 not found, nothing to be done!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
             exit(1);
          }
          fnlo->CalcCrossSection();
@@ -911,13 +922,10 @@ int main(int argc, char** argv) {
       // Start print out
       cout << DSEP << endl;
       printf(" My Cross Sections\n");
-      //      printf(" The scales chosen here are: mu_r = % #6.3f * %s, and mu_f = % #6.3f * %s \n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleDescription().c_str(),fnlo->GetScaleFactorMuF(),fnlo->GetScaleDescription().c_str());
       printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       cout << SSEP << endl;
 
       // Get table constants relevant for print out
-      // TBD: This Getter should be renamed!!!
-      //      int NDim = fnlo->GetNDiffBin();
       const int NDim = fnlo->GetNumDiffBin();
       unsigned int NDimBins[NDim];
       vector < string > DimLabel = fnlo->GetDimLabels();
@@ -935,26 +943,67 @@ int main(int argc, char** argv) {
       vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
-      if (NDim == 2) {
-         string header0 = "  IObs  Bin Size IODimO ";
-         string header1 = " IODimI ";
-         string header2 = " LO cross section";
-         //         string header2 = " LO cross section   NLO cross section   KNLO";
+      string header0 = "  IObs  Bin Size IODimO ";
+      string header1 = " IODimI ";
+      string header2 = " LO cross section";
+      if (inlo>-1) {
+         header2 += "   NLO cross section   KNLO";
+      }
+      if (ithc2>-1 && lthcvar) {
+         header2 += "      KTHC2";
+      } else if (ithc1>-1 && lthcvar) {
          if (inlo>-1) {
-            header2 += "   NLO cross section   KNLO";
+            header2 += "      KTHC1";
+         } else {
+            header2 += "    KTHC1";
          }
-         if (ithc2>-1 && lthcvar) {
-            header2 += "      KTHC2";
-         } else if (ithc1>-1 && lthcvar) {
-            if (inlo>-1) {
-               header2 += "      KTHC1";
+      }
+      if (inpc1>-1) {
+         header2 += "     KNPC1";
+      }
+      if (NDim == 1) {
+         printf("%s [ %-17s ]  <%-12.12s> %s\n",
+                // TODO: ScaleDescription Murks
+                header0.c_str(),DimLabel[0].c_str(),"pT_jet_[GeV]",header2.c_str());
+         cout << SSEP << endl;
+         NDimBins[0] = 0;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            NDimBins[0]++;
+            if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
+            } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1 && ithc1 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+            } else if (ilo > -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i]);
+            } else if (ilo > -1 && ithc1 > -1 && lthcvar) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],kthc1[i]);
+            } else if (ilo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i]);
             } else {
-               header2 += "    KTHC1";
+               printf("fnlo-read: Nothing to report!\n");
+               continue;
             }
+            printf("\n");
          }
-         if (inpc1>-1) {
-            header2 += "     KNPC1";
-         }
+      } else if (NDim == 2) {
          printf("%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s\n",
                 // header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
                 // TODO: ScaleDescription Murks
@@ -1006,7 +1055,7 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else {
-         printf("fnlo-read: WARNING! Print out optimized for two dimensions. No output for %1.i dimensions.\n",NDim);
+         printf("fnlo-read: WARNING! Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
       }
    }
 
