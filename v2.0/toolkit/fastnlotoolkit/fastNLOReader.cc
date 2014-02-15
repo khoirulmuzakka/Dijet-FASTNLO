@@ -1,5 +1,5 @@
 // Author: Daniel Britzger
-// DESY, 14/08/2013
+// DESY, 08/2013
 // Updated: Klaus Rabbertz
 // KIT, 01/2014
 
@@ -484,7 +484,7 @@ fastNLOReader::fastNLOReader(const fastNLOReader& other) :
    ffilename(other.ffilename), fScalevar(other.fScalevar), fScaleFacMuR(other.fScaleFacMuR),
    fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
    fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
-   bUseSMCalc(other.bUseSMCalc), bUseNewPhys(other.bUseNewPhys),
+   bUseSMCalc(other.bUseSMCalc),
    XSection_LO(other.XSection_LO), XSection(other.XSection), kFactor(other.kFactor),
    QScale_LO(other.QScale_LO), QScale(other.QScale), XSectionRef(other.XSectionRef),
    XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
@@ -531,7 +531,7 @@ void fastNLOReader::OrderCoefficients() {
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
          debug["OrderCoefficients"]<<"Found data table."<<endl;
          if ( GetDataTable() )
-	    warn["OrderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
+            warn["OrderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
@@ -569,9 +569,7 @@ void fastNLOReader::OrderCoefficients() {
    // Delete and re-initialize lists for BlockB's
    const int defsize = 10;
    BBlocksSMCalc.clear();
-   BBlocksNewPhys.clear();
    BBlocksSMCalc.resize(defsize);
-   BBlocksNewPhys.resize(defsize);
 
    // Assign non-perturbative corrections, switch off by default
    if (Coeff_NPC1) {
@@ -612,26 +610,17 @@ void fastNLOReader::SetCoefficientUsageDefault() {
    //! Switch on LO and NLO contribution.
    //! Deactivate all other contributions
    bUseSMCalc.clear();
-   bUseNewPhys.clear();
    bUseSMCalc.resize(BBlocksSMCalc.size());
-   bUseNewPhys.resize(BBlocksNewPhys.size());
 
-   //switch all off
+   // Switch all off
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
          bUseSMCalc[j].push_back(false);
       }
    }
-   //switch all off
-   for (unsigned int j = 0 ; j<BBlocksNewPhys.size() ; j++) {
-      for (unsigned int i = 0 ; i<BBlocksNewPhys[j].size() ; i++) {
-         bUseNewPhys[j].push_back(false);
-      }
-   }
-   // active LO and NLO
+   // Activate LO and NLO
    bUseSMCalc[kFixedOrder][kLeading] = true; //LO
    bUseSMCalc[kFixedOrder][kNextToLeading] = true;//NLO
-
 }
 
 

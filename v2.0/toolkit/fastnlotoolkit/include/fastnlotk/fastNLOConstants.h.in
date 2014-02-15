@@ -71,7 +71,8 @@ namespace fastNLO {
       kFixedOrder               = 0,    // Fixed order calculation (pQCD)
       kThresholdCorrection      = 1,    // Threshold corrections
       kElectroWeakCorrection    = 2,    // Electroweak corrections
-      kNonPerturbativeCorrection= 3     // Non-perturbative corrections|Hadronisation corrections
+      kNonPerturbativeCorrection= 3,    // Non-perturbative corrections|Hadronisation corrections
+      kContactInteraction       = 10    // Contact interactions
    };
 
    enum ESMOrder {

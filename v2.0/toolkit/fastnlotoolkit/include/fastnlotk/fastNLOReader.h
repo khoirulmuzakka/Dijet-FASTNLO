@@ -26,7 +26,7 @@ public:
       if ( ctest ) return  ctest->GetNScaleDep() >= 3;
       else return B_LO()->GetIsFlexibleScale();
    }
-   void SetCoefficientUsageDefault();							//!< Switch on LO and NLO contributions, deactivate other contributions.
+   void SetCoefficientUsageDefault();                                                   //!< Switch on LO and NLO contributions, deactivate other contributions.
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       //!< Set the functional form of Mu_R
@@ -153,13 +153,11 @@ protected:
    mu_func Fct_MuR;                                                                     //!< Function, if you define your functional form for your scale external
    mu_func Fct_MuF;                                                                     //!< Function, if you define your functional form for your scale external
    vector < vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
-   vector < vector < bool > > bUseNewPhys;                                              //!< switch calculations ON/OFF
 
    // ---- pointers to coefftables in fCoeff ---- //
    //    vector< vector < fastNLOCoeffAddBase* > > fCoAdd;
    //    vector< vector < fastNLOCoeffMult* > > fCoMult;
    vector < vector < fastNLOCoeffBase* > > BBlocksSMCalc;                               //!< BlockB's for SM corrections
-   vector < vector < fastNLOCoeffBase* > > BBlocksNewPhys;                              //!< BlockB's for New physics corrections
 
    // ---- Cross sections ---- //
    vector < double > XSection_LO;
