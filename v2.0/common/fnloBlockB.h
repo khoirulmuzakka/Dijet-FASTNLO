@@ -99,9 +99,10 @@ public:
    void SetIContrFlag1(int n){IContrFlag1 = n;}
    void SetNScaleDep(int n){NScaleDep = n;}
    void SetNlojetDescr(){CodeDescript.push_back("NLOJet++_4.1.3");
+     CodeDescript.push_back("pp -> 2jet");
      CodeDescript.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
      CodeDescript.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");}
-   
+
    void Add(fnloBlockB* other);
    bool IsLO(){return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO(){return IContrFlag1==1 && IContrFlag2==2;}
@@ -189,40 +190,40 @@ public:
    vector < vector < vector < vector < double > > > > HScaleNode;
 
    // DB: todo: those variables should end up in a new class fnloBlockBXS : public fnloBlockB
-   vector < vector < vector < vector < vector < double > > > > > SigmaTilde; 
-   vector < vector < vector < vector < double > > > > PdfLc; 
-   vector < double > Xsection; 
+   vector < vector < vector < vector < vector < double > > > > > SigmaTilde;
+   vector < vector < vector < vector < double > > > > PdfLc;
+   vector < double > Xsection;
 
    // --------------------------- mu_f, mu_r variaton scheme --------------------------- //
    // ---- members to write to disc ---- //
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
-   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuIndep; 
-   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuFDep; 
-   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuRDep; 
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuIndep;
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuFDep;
+   vector < vector < vector < vector < vector < double > > > > > SigmaTildeMuRDep;
    // SigmaRef [NObsBins] [nsubproc]
-   vector < vector < double > > SigmaRefMixed; 
-   vector < vector < double > > SigmaRef_s1; 
-   vector < vector < double > > SigmaRef_s2; 
-  
+   vector < vector < double > > SigmaRefMixed;
+   vector < vector < double > > SigmaRef_s1;
+   vector < vector < double > > SigmaRef_s2;
+
    int NscalenodeScale1;
    int NscalenodeScale2;
-   // ScaleNodeXY [ObsBin] [NscalenodeScaleX]  
+   // ScaleNodeXY [ObsBin] [NscalenodeScaleX]
    vector < vector < double > > ScaleNode1;
    vector < vector < double > > ScaleNode2;
    vector < vector < double > > HScaleNode1;
    vector < vector < double > > HScaleNode2;
-  
+
    // ---- stuff for reading the table ---- //
    //    // @MW, @KR: if we provide a separate reader: we don't need variables here for reading the table.
-   //    vector < double > XsectionRef_s1; 
-   //    vector < double > XsectionRef_s2; 
-   //    vector < double > XsectionRefMixed; 
-   //    vector < double > XsectionRefMuf1_MuRMixed; 
-   //    vector < double > XsectionMuVar; 
+   //    vector < double > XsectionRef_s1;
+   //    vector < double > XsectionRef_s2;
+   //    vector < double > XsectionRefMixed;
+   //    vector < double > XsectionRefMuf1_MuRMixed;
+   //    vector < double > XsectionMuVar;
    //    // PdfLcMuVar [ObsBins] [NxNodes] [NQNodes] [NPtNodes] [nsubproc]
-   //    vector < vector < vector < vector < vector <double > > > > > PdfLcMuVar; 
+   //    vector < vector < vector < vector < vector <double > > > > > PdfLcMuVar;
    //    // AlphasTwoPi [ObsBins] [N s1-Nodes] [N s2-Nodes]
-   //    vector < vector < vector <double > > > AlphasTwoPi; 
-  
+   //    vector < vector < vector <double > > > AlphasTwoPi;
+
 };
 #endif
