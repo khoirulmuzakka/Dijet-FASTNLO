@@ -1,6 +1,6 @@
 //!
 //! UsefulNlojetTools
-//! 
+//!
 //! Collection of useful functions for the fastNLO interface
 //! to NLOJET++.
 //!
@@ -17,15 +17,15 @@ namespace UsefulNlojetTools {
       namespace UsefulNlojetTools
 
       Collection of useful functions and constant for the interface
-      between nlojet++ and fastNLO, if nlojet++ is run in hhc-mode 
+      between nlojet++ and fastNLO, if nlojet++ is run in hhc-mode
       (i.e. for pp and ppbar collisions).
    */
 
 
    //_______________________________________________________________________
-   fastNLO::GeneratorConstants GenConsts() { 
+   fastNLO::GeneratorConstants GenConsts() {
       fastNLO::GeneratorConstants GenConsts;
-      GenConsts.Name = "NLOJet++ 4.1.3";
+      GenConsts.Name = "NLOJet++_4.1.3";
       //GenConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
       //GenConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
       return GenConsts;
@@ -36,8 +36,8 @@ namespace UsefulNlojetTools {
    fastNLO::ProcessConstants ProcConsts_HHC_2Jet() {
       fastNLO::ProcessConstants ProcConsts;
       ProcConsts.Name = "pp -> 2jet";
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
       ProcConsts.LeadingOrder = 2;
       ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
@@ -54,7 +54,7 @@ namespace UsefulNlojetTools {
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
       return ProcConsts;
    }
-   
+
 
    //_______________________________________________________________________
    fastNLO::ProcessConstants ProcConsts_HHC_3Jet() {
@@ -78,7 +78,7 @@ namespace UsefulNlojetTools {
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
       return ProcConsts;
    }
-   
+
    //_______________________________________________________________________
    pdf_hhc_dummy dummypdf;
 
@@ -111,27 +111,29 @@ namespace UsefulNlojetTools {
 
       if ( ord == -1 ) {
          const char* const file = __file_name.c_str();
-         if(strstr(file,"born")!=NULL){
+         if (strstr(file,"born") != NULL) {
             //IsNLO = false;
-            printf("fastNLO: This is a LO run!\n");
+            say::info["GetOrderOfRun"] << "This is a LO run." << endl;
             ord = GetNj();
-            return ord;
-         }else{
-            if(strstr(file,"nlo")!=NULL){
-               //IsNLO = true;
-               printf("fastNLO: This is a NLO run!\n");
-               ord = GetNj() + 1;
-               return ord;
-            }else{
-               // it is 'nlojet'
-               printf("fastNLO: ERROR! This module can only be run at Born level or at NLO.\n");
-               exit(1);
-            }
+         } else if (strstr(file,"nlo") != NULL) {
+            //IsNLO = true;
+            say::info["GetOrderOfRun"] << "This is a NLO run." << endl;
+            ord = GetNj() + 1;
+         } else if (strlen(file) == 0) {
+            //Order is wrongly assumed to be initialized already;
+            say::error["GetOrderOfRun"] << "Order of run not properly initialized." << endl;
+            exit(1);
+         } else {
+            //No alternatives implemented with NLOJet++ version 4
+            say::error["GetOrderOfRun"] << "This module can only be run at Born level or at NLO!" << endl;
+            exit(1);
          }
-         cout<<"\nfastNLO: Found order of calculation to be: ord="<<ord<<endl;
+         say::info["GetOrderOfRun"] << "Found order of calculation to be: ord = " << ord << endl;
+         return ord;
+      } else {
+         // Return previously initialized value
          return ord;
       }
-      else return ord;
    }
 
    //_______________________________________________________________________
@@ -174,18 +176,18 @@ namespace UsefulNlojetTools {
 
       // weights
       double weights[7][7]; // weights[amp_i][proc]
-      for ( int kk = 0 ; kk<7 ; kk ++ )	 for ( unsigned int p = 0 ; p<nSubproc ; p ++ ) weights[kk][p] = 0; 
-      
+      for ( int kk = 0 ; kk<7 ; kk ++ )  for ( unsigned int p = 0 ; p<nSubproc ; p ++ ) weights[kk][p] = 0;
+
       // access perturbative coefficients
       nlo::amplitude_hhc::contrib_type itype = amp.contrib();
       nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,dummyMu2,2,3); // 1/x1/x2
       static const double coef = 389385730.;
 
       for ( int kk = 0 ; kk<7 ; kk ++ ) {
-	 for ( unsigned int fid = 0 ; fid<nSubproc ; fid ++ ) {
-	    int nid = FastnloIdToNlojetIdHHC(fid);
-	    weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
-	 }
+         for ( unsigned int fid = 0 ; fid<nSubproc ; fid ++ ) {
+            int nid = FastnloIdToNlojetIdHHC(fid);
+            weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
+         }
       }
 
       // todo: calculate wt and wtorg from 'weights'
@@ -234,7 +236,9 @@ namespace UsefulNlojetTools {
    unsigned int GetNSubproc() {
       static int nSubproc = -1;
       if ( nSubproc == -1 ) {
-         int nord = GetOrderOfRun("bla");
+         // Order should have already been initialized --> redemand with empty string
+         // If order not yet determined --> stop with error message in GetOrderOfRun
+         int nord = GetOrderOfRun("");
          int loord = GetLoOrder() ;
          if ( nord == loord ) nSubproc = 6 ;
          else nSubproc = 7;
