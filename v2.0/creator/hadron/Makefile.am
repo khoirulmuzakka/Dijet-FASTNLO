@@ -36,7 +36,7 @@ if HAVE_FASTJET
    lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
    lib_LTLIBRARIES += libfnl5350eta0.la
 # v22
-   lib_LTLIBRARIES += libfnl2352v22.la libfnl2352v20andv22.la
+#   lib_LTLIBRARIES += libfnl2352v22.la libfnl2352v20andv22.la
    lib_LTLIBRARIES += libfnl5350eta0v22.la
 endif
 
