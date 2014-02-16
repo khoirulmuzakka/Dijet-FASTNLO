@@ -135,7 +135,6 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       }
    }
 
-   int NScales;
    table >> NScales;
    table >> NScaleDim;
    Iscale.resize(NScales);

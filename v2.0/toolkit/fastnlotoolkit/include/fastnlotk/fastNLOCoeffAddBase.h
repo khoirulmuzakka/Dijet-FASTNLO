@@ -16,18 +16,18 @@ class fastNLOCoeffAddBase : public fastNLOCoeffBase {
 public:
    fastNLOCoeffAddBase(int NObsBin);
    fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
-   virtual ~fastNLOCoeffAddBase(){;}
+   virtual ~fastNLOCoeffAddBase() {;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    void Read(istream& table);
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
-   virtual void Clear();							//!< Clear all coefficients and event counters
+   virtual void Clear();                                                        //!< Clear all coefficients and event counters
 
    int GetIRef() const {return IRef;}
    double GetNevt(int NObsBin, int NSubproc) const {
-      if ( Nevt > 0 ) return Nevt;
+      if (Nevt > 0) return Nevt;
       else {cout<<"Todo. Preparation for v2.2."<<endl; return Nevt;}
    }
    int GetNxmax(int Obsbin) const ;
@@ -41,14 +41,16 @@ public:
    int GetIPDFdef2() const { return IPDFdef2; }
    int GetIPDFdef3() const { return IPDFdef3; }
    int GetNpow() const {return Npow;}
+   int GetNScales() const {return NScales;}
+   int GetNScaleDim() const {return NScaleDim;}
    //vector<string > GetScaleDescript(int iScale=0) const { return ScaleDescript[iScale]; };
-   string GetScaleDescription(int iScale=0) const { return ScaleDescript[0][iScale]; };		// getter for scale description of scale iScale
+   string GetScaleDescription(int iScale=0) const { return ScaleDescript[0][iScale]; };         // getter for scale description of scale iScale
    vector<vector<string > > GetScaleDescr() const { return ScaleDescript; }
-   int GetNxtot1(int iBin ) const { return XNode1[iBin].size(); }
-   int GetNxtot2(int iBin ) const { return XNode2[iBin].size(); }
+   int GetNxtot1(int iBin) const { return XNode1[iBin].size(); }
+   int GetNxtot2(int iBin) const { return XNode2[iBin].size(); }
 
-   double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; } 
-   double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; } 
+   double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; }
+   double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; }
 
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;
@@ -78,8 +80,9 @@ protected:
    vector < int > Nztot;
    vector < double > Hzlim;
    v2d ZNode;
+   int NScales;
    int NScaleDim;
-   vector < int > Iscale;									// not used
+   vector < int > Iscale;                                                                       // not used
    vector < vector < string > > ScaleDescript;
 
 };

@@ -575,7 +575,7 @@ int main(int argc, char** argv) {
    // 14.
    // ---- Example of a cross section calculation with some nice standardized output
 
-   // For the purpose of this example only show WARNINGs or worse.
+   // Select verbosity level
    SetGlobalVerbosity(INFO);
 
    // Instead of instantiating a class via e.g.

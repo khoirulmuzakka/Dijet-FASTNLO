@@ -344,6 +344,7 @@ fi
 AC_SUBST(SVNREV)
 
 # Define project substitution variables (to be replaced e.g. in config files below)
+AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
 AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
 AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])

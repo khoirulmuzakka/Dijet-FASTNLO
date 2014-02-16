@@ -7,7 +7,7 @@
 #ifndef FNLO_VERSION
 #define FNLO_VERSION    "@PACKAGE_VERSION@"
 #define FNLO_SVNREV     "@SVNREV@"
-#define FNLO_AUTHORS    "@AUTHORSv2@"
+#define FNLO_AUTHORS    "@AUTHORS@"
 #define FNLO_WEBPAGE    "@WEBPAGE@"
 #define FNLO_AUTHORSv14 "@AUTHORSv14@"
 #define FNLO_QUOTEv14   "@QUOTEv14@"

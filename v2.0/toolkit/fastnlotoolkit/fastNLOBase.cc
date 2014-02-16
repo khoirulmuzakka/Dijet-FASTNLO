@@ -27,26 +27,25 @@ fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase(const fastNLOBase& other) : 
-   PrimalScream("fastNLOBase"), 
-   ffilename(other.ffilename), fPrecision(other.fPrecision), 
-   Itabversion(other.Itabversion), ScenName(other.ScenName), 
-   Ncontrib(other.Ncontrib), Nmult(other.Nmult), 
-   Ndata(other.Ndata), NuserString(other.NuserString), 
-   NuserInt(other.NuserInt), NuserFloat(other.NuserFloat), 
-   Imachine(other.Imachine)
-{
+fastNLOBase::fastNLOBase(const fastNLOBase& other) :
+   PrimalScream("fastNLOBase"),
+   ffilename(other.ffilename), fPrecision(other.fPrecision),
+   Itabversion(other.Itabversion), ScenName(other.ScenName),
+   Ncontrib(other.Ncontrib), Nmult(other.Nmult),
+   Ndata(other.Ndata), NuserString(other.NuserString),
+   NuserInt(other.NuserInt), NuserFloat(other.NuserFloat),
+   Imachine(other.Imachine) {
    //! copy constructor
 }
 
 
 //______________________________________________________________________________
-fastNLOBase::~fastNLOBase(){
+fastNLOBase::~fastNLOBase() {
 }
 
 
 //______________________________________________________________________________
-ifstream* fastNLOBase::OpenFileRead(){
+ifstream* fastNLOBase::OpenFileRead() {
    //! Open file-stream for reading table
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
@@ -59,15 +58,15 @@ ifstream* fastNLOBase::OpenFileRead(){
 
 
 //______________________________________________________________________________
-void fastNLOBase::CloseFileRead(ifstream& strm){
-   //! Close file-stream 
+void fastNLOBase::CloseFileRead(ifstream& strm) {
+   //! Close file-stream
    strm.close();
    delete &strm;
 }
 
 
 //______________________________________________________________________________
-void fastNLOBase::ReadTable(){
+void fastNLOBase::ReadTable() {
    // does file exist?
    // open file
    ifstream* strm = OpenFileRead();
@@ -79,9 +78,9 @@ void fastNLOBase::ReadTable(){
 
 
 //______________________________________________________________________________
-void fastNLOBase::ReadHeader(istream& table){
+void fastNLOBase::ReadHeader(istream& table) {
    table.peek();
-   if (table.eof()){
+   if (table.eof()) {
       error["ReadHeader"]<<"Cannot read from stream."<<endl;
    }
 
@@ -93,7 +92,7 @@ void fastNLOBase::ReadHeader(istream& table){
    table >> Ndata;
    table >> NuserString;
    table >> NuserInt;
-   for ( int i = 0 ; i<NuserInt ; i++ ) {
+   for (int i = 0 ; i<NuserInt ; i++) {
       int IUserLines;
       table >> IUserLines;
       // future code if 'user-blocks' are used ...
@@ -109,9 +108,9 @@ void fastNLOBase::ReadHeader(istream& table){
       //    }
       // }
       // ...sofar skip reading
-      for ( int i = 0 ; i<NuserInt ; i++ ) {
-	 double devnull;
-	 table >> devnull;
+      for (int i = 0 ; i<NuserInt ; i++) {
+         double devnull;
+         table >> devnull;
       }
    }
    table >> NuserFloat;
@@ -122,7 +121,7 @@ void fastNLOBase::ReadHeader(istream& table){
 
 
 //______________________________________________________________________________
-void fastNLOBase::WriteTable (){
+void fastNLOBase::WriteTable() {
    //!
    //! WriteTable(). writes the full FastNLO table to
    //! the previously defined ffilename on disk.
@@ -137,7 +136,7 @@ void fastNLOBase::WriteTable (){
 
 
 //______________________________________________________________________________
-void fastNLOBase::WriteHeader(ostream& table){
+void fastNLOBase::WriteHeader(ostream& table) {
    table << fastNLO::tablemagicno << endl;
    table << Itabversion << endl;
    table << ScenName << endl;
@@ -152,17 +151,15 @@ void fastNLOBase::WriteHeader(ostream& table){
 
 
 //______________________________________________________________________________
-ofstream* fastNLOBase::OpenFileWrite(){
-   //! open ofstream for writing tables to
-   //! write to ffilename.
-   //! do not overwrite existing table
-   if (access(ffilename.c_str(), F_OK) == 0){
-      warn["OpenFileWrite"]<<"File for writing the table exists: "<<ffilename<<"\nOverwriting it."<<endl;
-      //exit(2);
+ofstream* fastNLOBase::OpenFileWrite() {
+   //! open ofstream for writing tables
+   //! do overwrite existing table
+   if (access(ffilename.c_str(), F_OK) == 0) {
+      info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
    ofstream* stream = new ofstream(ffilename.c_str(),ios::out);
-   if(!stream->good()){
-      error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Stopping."<<endl;
+   if (!stream->good()) {
+      error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);
    }
    stream->precision(fPrecision);
@@ -171,7 +168,7 @@ ofstream* fastNLOBase::OpenFileWrite(){
 
 
 //______________________________________________________________________________
-void fastNLOBase::CloseFileWrite(ofstream& table){
+void fastNLOBase::CloseFileWrite(ofstream& table) {
    //! close stream and delete object;
    table << fastNLO::tablemagicno << endl;
    table << fastNLO::tablemagicno << endl;
@@ -182,15 +179,15 @@ void fastNLOBase::CloseFileWrite(ofstream& table){
 
 //______________________________________________________________________________
 bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
-   if(Itabversion!= other.GetItabversion()){
+   if (Itabversion!= other.GetItabversion()) {
       warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
       return false;
    }
-   if(Ndata + other.GetNdata() > 1){
+   if (Ndata + other.GetNdata() > 1) {
       warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
       return false;
    }
-   if(ScenName!= other.GetScenName()){
+   if (ScenName!= other.GetScenName()) {
       warn["IsCompatibleHeader"]<<"Differing names of scenarios: "<<ScenName.c_str()<<" and "<<other.ScenName.c_str()<<endl;
       // continue...
    }
@@ -199,7 +196,7 @@ bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
 
 
 //______________________________________________________________________________
-void fastNLOBase::SetHeaderDefaults(){
+void fastNLOBase::SetHeaderDefaults() {
    // TableMagicNo and ITabVersion are defined as constant in fastNLOConstants.h
    SetScenName("tns2000");
    SetContributionHeader();
@@ -207,7 +204,7 @@ void fastNLOBase::SetHeaderDefaults(){
 
 
 //______________________________________________________________________________
-void fastNLOBase::SetContributionHeader(){
+void fastNLOBase::SetContributionHeader() {
    SetNcontrib(1);
    SetNmult(0);
    SetNdata(0);
@@ -219,7 +216,7 @@ void fastNLOBase::SetContributionHeader(){
 
 
 //______________________________________________________________________________
-void fastNLOBase::ResetHeader(){
+void fastNLOBase::ResetHeader() {
    debug["ResetHeader"]<<endl;
    SetNcontrib(0);
    SetNmult(0);
@@ -269,7 +266,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    char webpage[500]    = FNLO_WEBPAGE;
    char authorsv14[200] = FNLO_AUTHORSv14;
    char quotev14[200]   = FNLO_QUOTEv14;
-   char authorsv2[200]  = FNLO_AUTHORS;
+   char authorsv2[200]  = FNLO_AUTHORSv2;
    char quotev2[200]    = FNLO_QUOTEv2;
 
    shout>>"\n";
@@ -283,7 +280,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright © 2011,2012,2013 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" Copyright © 2011,2012,2013,2014 "<<fnlo<<" Collaboration"<<endl;
    shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
