@@ -417,8 +417,7 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
       // couldn't find a corresponding contribution.
       // add this contribution as new contrib.
       if ( !wasAdded ) {
-         debug["AddTable"]<<"Adding new contribution to table."<<endl;
-         cout<<"Adding this contrib as new contbi."<<endl;
+         info["AddTable"]<<"Adding new contribution to table."<<endl;
          fastNLOCoeffBase* add = other.GetCoeffTable(ic);
          if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
             add = new fastNLOCoeffData((fastNLOCoeffData&)*add);

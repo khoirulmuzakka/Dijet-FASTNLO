@@ -180,7 +180,6 @@ void fastNLOCreate::ReadSteering(string steerfile) {
    Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
    ScDescript   = STRING_ARR_NS(ScenarioDescription,fSteerfile);
    Ecms         = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);   // is often superseeded by generator-specific code.
-   ILOord       = 0;
    INormFlag    = 0;
    fIOrd        = 0;// has to be set by generator
    SetFilename(STRING_NS(OutputFilename,fSteerfile));
@@ -1659,7 +1658,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
    strm<<" " <<endl;
 
    // write variables of warmup run
-   strm<<"Warmup.OrderInAlphasOfCalculation \t"<<  fIOrd <<endl;
+   strm<<"Warmup.OrderInAlphasOfWarmupRunWas\t"<<  fIOrd <<endl;
    strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<<(BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile)?"true":"false")<<endl;
    strm<<"Warmup.ScaleDescriptionScale1     \t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
    if (fIsFlexibleScale)
@@ -1797,7 +1796,7 @@ void fastNLOCreate::AdjustWarmupValues() {
       ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
    }
    //}
-
+      
    // ---------------------------------------
    // 2. round values to 3rd digit if applicable
    if (fIsFlexibleScale) {
@@ -1828,21 +1827,23 @@ int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit
    //! lower values are only rounded down,
    //! upper values are only rounded up
    for (int i = 0 ; i < GetNObsBin() ; i ++) {
-      int lon = GetNthRelevantDigit(wrmmu[i].first *1.0000001,nthdigit);
-      int upn = GetNthRelevantDigit(wrmmu[i].second*0.9999999,nthdigit);
+      int nthlo = nthdigit;
+      int nthup = nthdigit;
+      if ( wrmmu[i].first<1 ) nthlo+=1;
+      if ( wrmmu[i].second<1 ) nthup+=1;
+      int lon = GetNthRelevantDigit(wrmmu[i].first,nthlo);
+      int upn = GetNthRelevantDigit(wrmmu[i].second*(1+1.e-7),nthup);
       // lo value
-      if (lon==0) {
-         int wrmrnd = wrmmu[i].first*pow(10.,nthdigit-2);
-         wrmmu[i].first = (double)wrmrnd / pow(10.,nthdigit-2);
+      if ( lon==0 && wrmmu[i].first>1.e-6 ) {
+         int ord = log10(wrmmu[i].first);
+         int wrmrnd = wrmmu[i].first*pow(10.,-ord+nthlo-1);
+         wrmmu[i].first = (double)wrmrnd / pow(10.,-ord+nthlo-1);
       }
       // up value
-      if (upn==9) {
+      if ( upn==9 && wrmmu[i].second>1.e-6 ) {
          int ord = log10(wrmmu[i].second);
-         //          wrmmu[i].second += pow(10,ord-nthdigit+1)-fmod(wrmmu[i].second,pow(10,ord-nthdigit+1));
-         cout<<"ord="<<ord<<", adding: "<<0.99999*pow(10.,ord-nthdigit+2)<<endl;
-         int wrmrnd = (wrmmu[i].first+0.99999*pow(10.,ord-nthdigit+2))*pow(10.,nthdigit-2);
-         cout<<"wrmrnd="<<wrmrnd<<endl;
-         wrmmu[i].second = (double)wrmrnd/pow(10.,nthdigit-2);
+         int wrmrnd = wrmmu[i].second*pow(10.,-ord+nthup-1) + 1;
+         wrmmu[i].second = (double)wrmrnd / pow(10.,-ord+nthup-1);
       }
    }
 }
@@ -1854,7 +1855,7 @@ int fastNLOCreate::GetNthRelevantDigit(double val, int n) {
    double res = fmod(val,pow(10.,ord-n+2));
    double resres=res-fmod(res,pow(10.,ord-n+1));
    double valn=resres/pow(10.,ord-n+1);
-   return (int)valn+0.999;
+   return (int)(valn+0.999);
 }
 
 
@@ -1878,15 +1879,26 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    vector<int > nbinup(NDim);;
    for (int idim = NDim-1 ; idim>=0 ; idim--) {
       for (int i = 0 ; i < GetNObsBin() ; i ++) {
-         // todo: check for Bin[i][idim] != 0
-         double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
-         // lo-bin
-         if (diff < bclose  && diff > 0.)
-            nbinlo[idim]++;
-         // up-bin
-         diff = 1. - wrmmu[i].second/Bin[i][idim].second;
-         if (diff < bclose && diff > 0)
-            nbinup[idim]++;
+	 if ( Bin[i][idim].first != 0 ) {
+	    double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
+	    // lo-bin
+	    if ( diff < bclose  && diff >= 0.)
+	       nbinlo[idim]++;
+	 }
+	 else {
+	    if ( wrmmu[i].first < 1.e-4 )
+	       nbinlo[idim]++;
+	 }	    
+	 if ( Bin[i][idim].second != 0 ) {
+	    // up-bin
+	    double diff = 1. - wrmmu[i].second/Bin[i][idim].second;
+	    if ( diff < bclose && diff >= 0 )
+	       nbinup[idim]++;
+	 }
+	 else {
+	    if ( wrmmu[i].second < 1.e-4 )
+	       nbinup[idim]++;
+	 }
       }
    }
    // // sanity check (round only in one dimension
