@@ -730,6 +730,11 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
    // The following is only reasonable if called from SetScaleFactorsMuRMuF
    // Is it necessary here ?
    fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+   if ( !cNLO ) {
+      info["SetScaleVariation"]<<"No NLO calculation available."<<endl;
+      return true;
+   }
+
    double fScaleFacMuF = cNLO->GetScaleFactor(fScalevar);
    info["SetScaleVariation"]
       <<"Selecting MuF table according to a multiplicative scale factor of the factorization scale of "
@@ -759,7 +764,6 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
          }
       }
    }
-
    return true;
 }
 
@@ -1056,17 +1060,24 @@ void fastNLOReader::CalcCrossSection() {
 
    // contributions from the a-posteriori scale variation
    if (!GetIsFlexibleScaleTable()) {
-      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
-      if ( fabs( fScaleFacMuR - cNLO->GetScaleFactor(fScalevar) ) > DBL_MIN ) {
-         CalcAposterioriScaleVariation();
+      if ( B_NLO() ) { 
+	 // if no NLO table is available: then always calculate aposteriori scale variation. 
+	 // otherwise check, if this calculation is needed.
+	 fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+	 if ( fabs( fScaleFacMuR - cNLO->GetScaleFactor(fScalevar) ) > DBL_MIN ) {
+	    CalcAposterioriScaleVariation();
+	 }
       }
+      else
+	 CalcAposterioriScaleVariation();
    }
 
+
    // calculate LO cross sections
-   if (!GetIsFlexibleScaleTable())
-      CalcCrossSectionv20((fastNLOCoeffAddFix*)B_LO(),true);
-   else
+   if (GetIsFlexibleScaleTable())
       CalcCrossSectionv21((fastNLOCoeffAddFlex*)B_LO(),true);
+   else
+      CalcCrossSectionv20((fastNLOCoeffAddFix*)B_LO(),true);
 
 
    // non-perturbative corrections (multiplicative corrections)
@@ -1103,6 +1114,7 @@ void fastNLOReader::CalcCrossSection() {
       QScale_LO[i] = QScale_LO[i]/XSection_LO[i];
       QScale[i]    = QScale[i]/XSection[i];
    }
+
 }
 
 
@@ -2247,7 +2259,7 @@ void fastNLOReader::PrintCrossSections() const {
       printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |\n",GetDimLabel(1).c_str(),unit[Ipublunits].c_str());
       printf(" #  --------------------------------------------------------------------\n");
       for (unsigned int i=0; i<xs.size(); i++) {
-         if (GetLoBin(i,1) != lobindim2) {
+         if (GetLoBin(i,0) != lobindim2) {
             printf(" #                  ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,0),GetUpBin(i,0),GetDimLabel(0).c_str());
             lobindim2 = GetLoBin(i,0);
          }

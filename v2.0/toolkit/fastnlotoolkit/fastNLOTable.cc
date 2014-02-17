@@ -24,6 +24,7 @@ fastNLOTable::~fastNLOTable(){
    // delete fCoeff tables...
    DeleteAllCoeffTable();
 }
+
 // ___________________________________________________________________________________________________
 fastNLOTable::fastNLOTable(const fastNLOTable& tab)
    : fastNLOBase(tab), fCoeff(tab.fCoeff.size()),
@@ -39,6 +40,15 @@ fastNLOTable::fastNLOTable(const fastNLOTable& tab)
    for (std::size_t i = 0; i < tab.fCoeff.size(); ++i) {
       fCoeff[i] = tab.fCoeff[i]->Clone();
    }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOTable::DeleteAllCoeffTable(){
+   for (size_t i = 0; i < fCoeff.size(); ++i) {
+      delete fCoeff[i];
+   }
+   fCoeff.clear();
 }
 
 
@@ -453,14 +463,6 @@ int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
    //Ncontrib++; // member of fastNLOBase
    Ncontrib = fCoeff.size();
    return 0;
-}
-
-
-// ___________________________________________________________________________________________________
-void fastNLOTable::DeleteAllCoeffTable(){
-   for (size_t i = 0; i < fCoeff.size(); ++i)
-      delete fCoeff[i];
-   fCoeff.clear();
 }
 
 

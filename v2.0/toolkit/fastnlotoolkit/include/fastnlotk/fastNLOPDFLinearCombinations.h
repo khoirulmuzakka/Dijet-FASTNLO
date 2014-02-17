@@ -22,8 +22,9 @@ private:
    vector<double > CalcPDFLCTwoHadrons(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1, const vector<double>& pdfx2 ) const ;
    vector<double > CalcPDFLCOneHadron(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 ) const;
 
-   vector<double> CalcPDFLinearCombDIS(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1) const;
-   vector<double> CalcPDFLinearCombHHC(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // jets in hh
-   vector<double> CalcPDFLinearCombttbar(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // ttbar
+   vector<double> CalcPDFDIS(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1) const;
+   vector<double> CalcPDFHHC(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // jets in hh
+   vector<double> CalcPDFttbar(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // ttbar
+   vector<double> CalcPDFThreshold(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // pp->2jets 
 };
 #endif

@@ -44,7 +44,7 @@ fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOo
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase* fastNLOCoeffAddFlex::Clone() const {
-   //! Use has to take care to delete this object later
+   //! User has to take care to delete this object later
    return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddFlex(*this));
 }
 

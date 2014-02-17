@@ -296,9 +296,9 @@ int fastNLOCreate::CreateCoeffTable() {
       error["CreateCoeffAddFix"]<<"Vector of coefficients must be empty, since only one coefficient table is allowed."<<endl;
       exit(1);
    }
-   if (fIsFlexibleScale)
+   if (fIsFlexibleScale) 
       return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFlex(NObsBin,ILOord));
-   else
+   else 
       return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFix(NObsBin));
 }
 
@@ -1007,6 +1007,12 @@ void fastNLOCreate::FillContribution(int scalevar) {
 
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
 
+   int p = fEvent._p;
+   if ( p<0 || p > c->GetNSubproc() ) {
+      error["FillContributionFixHHC"]<<"Unknown process id p="<<p<<endl;
+      exit(1);
+   }
+
    // ---- DIS ---- //
    if (c->GetNPDF() == 1 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true)) {
       // todo
@@ -1037,7 +1043,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    debug["FillContributionFixHHC"]<<endl;
 
    if (fEvent._w == 0) return;   // nothing todo.
-
+   int p = fEvent._p;
 
    // do interpolation
    double xmin = std::min(fEvent._x1,fEvent._x2);
@@ -1064,15 +1070,14 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
       for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
          int xmaxbin = nxup[x1].first;
          int xminbin = nxlo[x2].first;
-         int p = fEvent._p;
          HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
             double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin];
-//          cout<<"   Fill * : i="<<ObsBin<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo
-//              <<",\twnlo="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
-            c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
+	    //  	    cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
+	    // 		<<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
+	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
          }
       }
    }
@@ -1150,12 +1155,12 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
 
    // fill grid
+   int p = fEvent._p;
    if (CheckWeightIsNan()) return;
    for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
          int xmaxbin = nxup[x1].first;
          int xminbin = nxlo[x2].first;
-         int p = fEvent._p;
          HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
@@ -1398,7 +1403,6 @@ void fastNLOCreate::NormalizeCoefficients() {
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByBinSize() {
    //! Multiply all coefficients by binsize
-
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (int i=0; i<GetNObsBin(); i++) {

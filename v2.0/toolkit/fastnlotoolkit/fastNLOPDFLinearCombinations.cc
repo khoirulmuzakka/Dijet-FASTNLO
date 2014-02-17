@@ -63,7 +63,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCOneHadron(const fastNLOCo
    bool IsDIS    = ( c->GetIPDFdef1() == 2 );
    bool IsNCDIS  = ( c->GetIPDFdef2() == 1 );
    bool IsProton = ( c->GetPDFPDG(0) == 2212 );
-   if ( IsDIS && IsONEPDF && IsNCDIS && IsProton ) return CalcPDFLinearCombDIS(c,pdfx1);
+   if ( IsDIS && IsONEPDF && IsNCDIS && IsProton ) return CalcPDFDIS(c,pdfx1);
    // ---- unknown process ---- //
    else {
       //error["CalcPDFLCDIS"]<<"Could not identify process. Printing and exiting"<<endl;
@@ -92,23 +92,25 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    // -----------------------------------------------
 
    // ---- check for jet-productions  ---- //
-   bool IsTwoPDF = ( c->GetNPDF() == 2 );
-   bool IsTwoIdenticHadrons = (c->GetIPDFdef1() == 3  &&  c->GetPDFPDG(0) == fabs(c->GetPDFPDG(1)) );
-   bool IsHHJets = ( c->GetIPDFdef2() == 1 );
-   bool IsTTBar = ( c->GetIPDFdef2() == 2 );
-
-   if ( IsTwoPDF && IsTwoIdenticHadrons && IsHHJets ) {
-      return CalcPDFLinearCombHHC(c,pdfx1,pdfx2);
-   }
-   else if ( IsTwoPDF && IsTwoIdenticHadrons && IsTTBar )
-      return CalcPDFLinearCombttbar(c,pdfx1,pdfx2);
+   //bool IsTwoPDF = ( c->GetNPDF() == 2 );
+   //bool IsTwoIdenticHadrons = (c->GetIPDFdef1() == 3  &&  c->GetPDFPDG(0) == fabs(c->GetPDFPDG(1)) );
+   //bool IsHHJets = ( c->GetIPDFdef2() == 1 );
+   //bool IsTTBar  = ( c->GetIPDFdef2() == 2 );
+   
+   if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef2()==2)) 
+      return CalcPDFHHC(c,pdfx1,pdfx2);
+   else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
+      return CalcPDFThreshold(c,pdfx1,pdfx2);
+   else if ( c->GetIPDFdef2()==2 ) { // IPDFdef3==0 !
+      return CalcPDFttbar(c,pdfx1,pdfx2);
    // else if (...)  //space for other processes
    // ---- (yet) unknown process ---- //
+   }
    else {
       say::error<<"[CalcPDFLinearCombination] Could not identify process. Printing and exiting..."<<endl;
-      say::error<<"IsTwoPDF = "<<IsTwoPDF<<endl;
-      say::error<<"IsTwoIdenticHadrons = "<<IsTwoIdenticHadrons<<endl;
-      say::error<<"IsHHJets = "<<IsHHJets<<endl;
+      say::error<<"PDFFlag1="<<c->GetIPDFdef1()<<endl;
+      say::error<<"PDFFlag2="<<c->GetIPDFdef2()<<endl;
+      say::error<<"PDFFlag3="<<c->GetIPDFdef3()<<endl;
       c->Print();
       exit(1);
       return vector<double >();
@@ -130,7 +132,7 @@ vector<double > fastNLOPDFLinearCombinations::MakeAntiHadron(const vector<double
 //______________________________________________________________________________
 
 
-vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombDIS(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1) const {
+vector<double> fastNLOPDFLinearCombinations::CalcPDFDIS(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1) const {
    //
    //  Internal method.
    //  CalcPDFLinearComb is used to calculate the
@@ -160,7 +162,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombDIS(const fastNLOC
 //______________________________________________________________________________
 
 
-vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombHHC(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
+vector<double> fastNLOPDFLinearCombinations::CalcPDFHHC(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
    //
    //  Internal method.
    //  CalcPDFLinearComb is used to calculate the
@@ -222,7 +224,33 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombHHC(const fastNLOC
 //______________________________________________________________________________
 
 
-vector<double> fastNLOPDFLinearCombinations::CalcPDFLinearCombttbar(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
+vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
+   //
+   //  Internal method.
+   //  CalcPDFLinearComb is used to calculate the
+   //  linear combinations of different parton flavors
+   //  according to the used subprocesses of your
+   //  calculation/table.
+   //
+
+   int NSubproc = c->GetNSubproc(); // MUST BE 10 here !
+   
+   vector <double> H(NSubproc);
+   
+   double G1     = pdfx1[6];
+   double G2     = pdfx2[6];
+   H[7] = G1*G2;
+   H[8] = G1*G2;
+   
+   return H;
+
+}
+
+
+//______________________________________________________________________________
+
+
+vector<double> fastNLOPDFLinearCombinations::CalcPDFttbar(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
    //
    // Calculate pdf-lcs for ttbar cross sections in pp/ppbar
    // Used by NNLO generator of Marco Guzzi

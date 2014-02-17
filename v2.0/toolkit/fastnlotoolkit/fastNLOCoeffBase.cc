@@ -18,7 +18,6 @@ fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) : PrimalScream("fastNLOCoeffBase
    fNObsBins = NObsBin;
 }
 
-
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
    //! Use has to take care to delete this object later
