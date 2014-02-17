@@ -13,7 +13,8 @@ AC_PREREQ([2.59])
 AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
-AC_CONFIG_SUBDIRS([reader processor/converter])
+# Decouple again the 'reader' and 'processor/converter' subprojects
+# AC_CONFIG_SUBDIRS([reader processor/converter])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
@@ -441,8 +442,9 @@ fi
 AC_SUBST(SVNREV)
 
 # Define project substitution variables (to be replaced e.g. in config files below)
+AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
 AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
-AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"])
+AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
@@ -455,9 +457,9 @@ AC_CONFIG_FILES([Makefile
 	creator/Makefile
 	doc/arXiv_1109.1310/Makefile
 	doc/Makefile
-	processor/Makefile
-	processor/merger/Makefile
-	processor/modifier/Makefile
 ])
+#	processor/Makefile
+#	processor/merger/Makefile
+#	processor/modifier/Makefile
 
 AC_OUTPUT
