@@ -1074,7 +1074,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
-            double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin];
+            double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
 	    //  	    cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
 	    // 		<<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
 	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
