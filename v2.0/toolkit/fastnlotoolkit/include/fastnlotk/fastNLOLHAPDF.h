@@ -58,9 +58,9 @@ public:
       return fnPDFs-1;
    };
    void PrintPDFInformation() const ;
-   virtual double GetQMass(int pdgid);
-   int GetNLoop();
-   int GetNFlavor();
+   virtual double GetQMass(int pdgid) const;
+   int GetNLoop() const;
+   int GetNFlavor() const;
    double GetAlphasMz(double Q);
 
 protected:
@@ -286,7 +286,7 @@ void fastNLOLHAPDF::InitEvolveAlphas() {
    // For LHAPDF do nothing
 }
 
-double fastNLOLHAPDF::GetQMass(int pdgid) {
+double fastNLOLHAPDF::GetQMass(int pdgid) const {
    if (pdgid < 1 || pdgid > 6 ) {
       error["GetQMass"]<<"PDG code out of quark range 1-6! Aborted\n";
       exit(1);
@@ -294,11 +294,11 @@ double fastNLOLHAPDF::GetQMass(int pdgid) {
    return LHAPDF::getQMass(pdgid);
 }
 
-int fastNLOLHAPDF::GetNLoop() {
+int fastNLOLHAPDF::GetNLoop() const {
    return (LHAPDF::getOrderAlphaS() + 1);
 }
 
-int fastNLOLHAPDF::GetNFlavor() {
+int fastNLOLHAPDF::GetNFlavor() const {
    return (LHAPDF::getNf());
 }
 
