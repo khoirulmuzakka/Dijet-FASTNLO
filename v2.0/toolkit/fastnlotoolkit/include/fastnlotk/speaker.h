@@ -43,7 +43,7 @@ public:
    void SetPrefix(std::string prefix) {
       pref=prefix;
    };
-   std::string GetPrefix(std::string prefix) const {
+   std::string GetPrefix() const {
       return pref;
    };
    void SetClassName(std::string classname) {
