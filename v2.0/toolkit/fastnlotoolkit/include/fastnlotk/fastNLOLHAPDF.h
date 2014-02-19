@@ -20,11 +20,10 @@
 #define FASTNLOLHAPDF
 
 #include "fastNLOReader.h"
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <LHAPDF/LHAPDF.h>
-#include "speaker.h"
+//#include <iostream>
+//#include <cstdio>
+//#include <cstdlib>
+//#include "speaker.h"
 
 using namespace std;
 

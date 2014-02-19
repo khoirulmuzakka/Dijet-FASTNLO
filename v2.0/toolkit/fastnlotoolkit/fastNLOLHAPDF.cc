@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-#include "fastnlotk/speaker.h"
+//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 

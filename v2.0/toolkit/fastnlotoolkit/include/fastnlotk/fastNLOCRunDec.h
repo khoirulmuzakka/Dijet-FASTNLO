@@ -29,12 +29,12 @@
 #ifndef FASTNLOCRUNDEC
 #define FASTNLOCRUNDEC
 
-#include "fastNLOReader.h"
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <LHAPDF/LHAPDF.h>
-#include "speaker.h"
+//#include "fastNLOReader.h"
+//#include <iostream>
+//#include <cstdio>
+//#include <cstdlib>
+//#include <LHAPDF/LHAPDF.h>
+//#include "speaker.h"
 #include "fastNLOLHAPDF.h"
 #include "CRunDec.h"
 

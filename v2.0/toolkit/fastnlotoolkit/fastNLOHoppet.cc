@@ -30,8 +30,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-#include "fastnlotk/fastNLOReader.h"
-#include "fastnlotk/speaker.h"
+//#include "fastnlotk/fastNLOReader.h"
+//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOHoppet.h"
 #include "hoppet_v1.h"

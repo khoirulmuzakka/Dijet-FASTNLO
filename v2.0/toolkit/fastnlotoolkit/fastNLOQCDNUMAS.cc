@@ -31,8 +31,8 @@
 #include <cstdlib>
 #include <string.h>
 #include <LHAPDF/LHAPDF.h>
-#include "fastnlotk/fastNLOReader.h"
-#include "fastnlotk/speaker.h"
+//#include "fastnlotk/fastNLOReader.h"
+//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOQCDNUMAS.h"
 

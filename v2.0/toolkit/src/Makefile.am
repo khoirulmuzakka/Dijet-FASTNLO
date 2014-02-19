@@ -14,7 +14,7 @@ AUTOMAKE_OPTIONS = gnu
 #
 # The C++ fastnlo toolkit example program
 #
-if HAVE_LHAPDFCONFIG
+if HAVE_LHAPDF
    bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge
 endif
 
@@ -30,9 +30,9 @@ fnlo_tk_merge_SOURCES = fnlo-tk-merge.cc
 # Preprocessor flags
 #
 my_include_dirs = -I${srcdir}/../fastnlotoolkit/include -I${top_builddir}/fastnlotoolkit/include -I${top_srcdir}/fastnlotoolkit/include
-fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${LHAPDFINCLUDEPATH} -I${includedir}
+fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir}
 fnlo_tk_merge_CPPFLAGS = $(my_include_dirs) -I${includedir}
-fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${LHAPDFINCLUDEPATH} -I${includedir}
+fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir}
 
 #
 # C++ compiler flags
@@ -49,20 +49,8 @@ fnlo_tk_example_CXXFLAGS = -g -O2 -Wall
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
 fnlo_tk_merge_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
-if HAVE_LHAPDFCONFIG
-   fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnlotoolkit
-   fnlo_tk_example_LDFLAGS = $(my_lib_dirs) `${LHAPDFBINPATH}/lhapdf-config --ldflags` -L${libdir} -lfastnlotoolkit
-else
-   fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnlotoolkit
-   fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L$(LHAPDFLIBPATH) -lLHAPDF -L${libdir} -lfastnlotoolkit
-endif
-if HAVE_QCDNUM
-   fnlo_tk_cppread_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
-endif
-if HAVE_HOPPET
-   fnlo_tk_cppread_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
-   fnlo_tk_cppread_CPPFLAGS += ${HOPPETCPPFLAGS}
-endif
+fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
+fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

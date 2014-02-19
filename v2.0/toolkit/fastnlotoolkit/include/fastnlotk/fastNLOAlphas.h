@@ -29,14 +29,14 @@
 #ifndef FASTNLOALPHAS
 #define FASTNLOALPHAS
 
-#include "fastNLOReader.h"
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <LHAPDF/LHAPDF.h>
-#include "speaker.h"
+//#include "fastNLOReader.h"
+//#include <iostream>
+//#include <cstdio>
+//#include <cstdlib>
+//#include <LHAPDF/LHAPDF.h>
+//#include "speaker.h"
 #include "fastNLOLHAPDF.h"
-#include "Alphas.h"
+//#include "Alphas.h"
 
 using namespace std;
 

@@ -29,13 +29,13 @@
 #ifndef FASTNLOQCDNUMAS
 #define FASTNLOQCDNUMAS
 
-#include "fastNLOReader.h"
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <string.h>
-#include <LHAPDF/LHAPDF.h>
-#include "speaker.h"
+//#include "fastNLOReader.h"
+//#include <iostream>
+//#include <cstdio>
+//#include <cstdlib>
+//#include <string.h>
+//#include <LHAPDF/LHAPDF.h>
+//#include "speaker.h"
 #include "fastNLOLHAPDF.h"
 
 
