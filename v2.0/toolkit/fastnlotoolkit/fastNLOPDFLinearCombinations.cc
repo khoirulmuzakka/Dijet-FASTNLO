@@ -97,7 +97,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //bool IsHHJets = ( c->GetIPDFdef2() == 1 );
    //bool IsTTBar  = ( c->GetIPDFdef2() == 2 );
    
-   if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef2()==2)) 
+   if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
       return CalcPDFHHC(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
       return CalcPDFThreshold(c,pdfx1,pdfx2);
@@ -232,15 +232,148 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeff
    //  according to the used subprocesses of your
    //  calculation/table.
    //
+   /*c---------------------------------------------------------------
+     c       subprocess id : is = 1           ! q q' --> q  q'
+     c       subprocess id : is = 2           ! q qb --> q' qb'
+     c       subprocess id : is = 3           ! q qb --> q  qb
+     c       subprocess id : is = 4           ! q q  --> q  q
+     c       subprocess id : is = 5           ! q qb --> g  g
+     c       subprocess id : is = 6           ! q g  --> q  g
+     c       subprocess id : is = 7           ! g q  --> q  g
+     c       subprocess id : is = 8           ! g g  --> q  qb
+     c       subprocess id : is = 9           ! g g  --> g  g
+     c       subprocess id : is = 10          ! q qb'--> q  qb'
+     c---------------------------------------------------------------*/
 
    int NSubproc = c->GetNSubproc(); // MUST BE 10 here !
    
+   double D1  = pdfx1[+1+6];
+   double U1  = pdfx1[+2+6];
+   double S1  = pdfx1[+3+6];
+   double C1  = pdfx1[+4+6];
+   double B1  = pdfx1[+5+6];
+   double T1  = pdfx1[+6+6];
+   double G1  = pdfx1[ 0+6];
+   double D1b = pdfx1[-1+6];
+   double U1b = pdfx1[-2+6];
+   double S1b = pdfx1[-3+6];
+   double C1b = pdfx1[-4+6];
+   double B1b = pdfx1[-5+6];
+   double T1b = pdfx1[-6+6];
+
+   double D2  = pdfx2[+1+6];
+   double U2  = pdfx2[+2+6];
+   double S2  = pdfx2[+3+6];
+   double C2  = pdfx2[+4+6];
+   double B2  = pdfx2[+5+6];
+   double T2  = pdfx2[+6+6];
+   double G2  = pdfx2[ 0+6];
+   double D2b = pdfx2[-1+6];
+   double U2b = pdfx2[-2+6];
+   double S2b = pdfx2[-3+6];
+   double C2b = pdfx2[-4+6];
+   double B2b = pdfx2[-5+6];
+   double T2b = pdfx2[-6+6];
+
    vector <double> H(NSubproc);
+
    
-   double G1     = pdfx1[6];
-   double G2     = pdfx2[6];
+   // 'q1q2 --> q1q2'
+   //  q q'  + qb qb'
+   // fqqp
+   H[0] = D1*(U2+S2+C2+B2)
+      +U1*(D2+S2+C2+B2)
+      +S1*(D2+U2+C2+B2)
+      +C1*(D2+U2+S2+B2)
+      +B1*(D2+U2+S2+C2)
+      +D1b*(U2b+S2b+C2b+B2b)
+      +U1b*(D2b+S2b+C2b+B2b)
+      +S1b*(D2b+U2b+C2b+B2b)
+      +C1b*(D2b+U2b+S2b+B2b)
+      +B1b*(D2b+U2b+S2b+C2b);
+
+   //  'q1q1b --> q2q2b'
+   // (xlqqb + xlqbq)
+   //     q q + qb qb
+   double fqq =  D1*D2+D1b*D2b
+      +U1*U2+U1b*U2b
+      +S1*S2+S1b*S2b
+      +C1*C2+C1b*C2b
+      +B1*B2+B1b*B2b;
+
+   //     q qb + qb q
+   double fqqb= D1*D2b
+      +U1*U2b
+      +S1*S2b
+      +C1*C2b
+      +B1*B2b;
+   // c     qb q
+   double fqbq= D1b*D2
+      +U1b*U2
+      +S1b*S2
+      +C1b*C2
+      +B1b*B2;
+
+   ///   g*q pdfs are not working ?!?! no idea why!
+   //        G1*G2 is working
+   //        D1*D2 is working
+   //         ...
+   ////c     q g + qb g
+   //    double fqg = (D1+U1+S1+C1+B1)*G2
+   //       +(D1b+U1b+S1b+C1b+B1b)*G2;
+   ////c     g q + g qb
+   //    double fgq=  G1*(D2+U2+S2+C2+B2)
+   //       +G1*(D2b+U2b+S2b+C2b+B2b);
+   double fqg = 0;
+   double fgq=  0;
+   
+      
+   //c     q qb' + qb q'
+   double fqqbp=D1*(U2b+S2b+C2b+B2b)
+      +U1*(D2b+S2b+C2b+B2b)
+      +S1*(D2b+U2b+C2b+B2b)
+      +C1*(D2b+U2b+S2b+B2b)
+      +B1*(D2b+U2b+S2b+C2b);
+   
+   double fqbpq=D1b*(U2+S2+C2+B2)
+      +U1b*(D2+S2+C2+B2)
+      +S1b*(D2+U2+C2+B2)
+      +C1b*(D2+U2+S2+B2)
+      +B1b*(D2+U2+S2+C2);
+   
+
+   H[1] = fqqb+fqbq;
+   H[2] = fqqb+fqbq;
+   H[3] = fqq;
+   H[4] = fqqb+fqbq;
+   
+   H[5] = fqg; //geht nicht (s.o)
+   H[6] = fgq; //geht nicht (s.o)
+   
    H[7] = G1*G2;
    H[8] = G1*G2;
+   H[9] = fqbpq+fqqbp;
+
+   //       if (is .eq. 1) then
+   //         sub_process = 'q1q2 --> q1q2'
+   // 	 elseif (is .eq. 2) then
+   //         sub_process = 'q1q1b --> q2q2b'
+   // 	 elseif (is .eq. 3) then
+   //         sub_process = 'q1q1b --> q1q1b'
+   // 	 elseif (is .eq. 4) then
+   //         sub_process = 'q1q1 --> q1q1'
+   // 	 elseif (is .eq. 5) then
+   //         sub_process = 'q1q1b --> gg'
+   // 	 elseif (is .eq. 6) then
+   //         sub_process = 'qg --> qg'
+   // 	 elseif (is .eq. 7) then
+   //         sub_process = 'gq --> qg'
+   // 	 elseif (is .eq. 8) then
+   //         sub_process = 'gg --> qqb'
+   // 	 elseif (is .eq. 9) then
+   //         sub_process = 'gg --> gg'
+   // 	 elseif (is .eq. 10) then
+   //         sub_process = 'q1q2b --> q1q2b'
    
    return H;
 
