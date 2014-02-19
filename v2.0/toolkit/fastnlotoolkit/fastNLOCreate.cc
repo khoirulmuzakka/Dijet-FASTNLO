@@ -1,9 +1,8 @@
 // Author: Daniel Britzger
 // DESY, 29/07/2013
 // ___________________________________________________________________________________________________
-/**
-   fastNLOCreate
-
+//! The fastNLOCreate class
+/*!
    This class can generate/fill one single contribution for a fastNLO table.
    It supports fixed scale and flexible-scale tables.
    fastNLOCreate inherits from fastNLOTable, but is only able to hold one
