@@ -43,7 +43,7 @@ libfastnlotoolkit_la_CXXFLAGS =
 
 #Compile only if LHAPDF is available
 if HAVE_LHAPDF
-libfastnlotoolkit_la_SOURCES += fastNLOLHAPDF.cc fastNLOAlphas.cc
+libfastnlotoolkit_la_SOURCES += fastNLOLHAPDF.cc fastNLOAlphas.cc fastNLOCRunDec.cc
 libfastnlotoolkit_la_CPPFLAGS += -I${LHAPDFINCLUDEPATH}
 if HAVE_LHAPDFCONFIG
    libfastnlotoolkit_la_LDFLAGS += `${LHAPDFBINPATH}/lhapdf-config --ldflags`
