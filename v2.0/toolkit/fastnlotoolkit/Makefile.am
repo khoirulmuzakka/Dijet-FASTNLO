@@ -31,7 +31,7 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 #
 my_include_dirs = -I${srcdir}/include -I${top_builddir}/include -I${top_srcdir}/include
 libfastnlotoolkit_la_CPPFLAGS = $(my_include_dirs) -I${includedir}
-
+libfastnlotoolkit_la_LDFLAGS =
 #
 # C++ compiler flags
 #
@@ -40,6 +40,28 @@ libfastnlotoolkit_la_CXXFLAGS =
 # -Wall
 # Debug flags
 #libfastnlotoolkit_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
+
+#Compile only if LHAPDF is available
+if HAVE_LHAPDF
+libfastnlotoolkit_la_SOURCES += fastNLOLHAPDF.cc
+libfastnlotoolkit_la_CPPFLAGS += -I${LHAPDFINCLUDEPATH}
+if HAVE_LHAPDFCONFIG
+   libfastnlotoolkit_la_LDFLAGS += `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+else
+   libfastnlotoolkit_la_LDFLAGS += -L$(LHAPDFLIBPATH) -lLHAPDF
+endif
+
+
+if HAVE_QCDNUM
+   libfastnlotoolkit_la_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
+endif
+
+if HAVE_HOPPET
+   libfastnlotoolkit_la_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
+   libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
+endif
+
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
