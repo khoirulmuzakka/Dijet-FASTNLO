@@ -53,10 +53,12 @@ endif
 
 
 if HAVE_QCDNUM
+   libfastnlotoolkit_la_SOURCES += fastNLOQCDNUMAS.cc
    libfastnlotoolkit_la_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
 endif
 
 if HAVE_HOPPET
+   libfastnlotoolkit_la_SOURCES += fastNLOHoppet.cc
    libfastnlotoolkit_la_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
    libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
 endif
