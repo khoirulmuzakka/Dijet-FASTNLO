@@ -43,7 +43,7 @@
 
 
 
-\begin{document} 
+\begin{document}
 \maketitle
 \flushbottom
 
@@ -93,7 +93,7 @@ The references will work as you'd expect: \eqref{eq:y:1},
 \eqref{eq:y:2} and \eqref{eq:y:3} are all part of \eqref{eq:y}.
 
 A similar solution is available for figures via the \texttt{subfigure}
-package (not loaded by default and not shown here). 
+package (not loaded by default and not shown here).
 All figures and tables should be referenced in the text and should be
 placed at the top of the page where they are first cited or in
 subsequent pages. Positioning them in the source file
@@ -102,9 +102,9 @@ results. See figure~\ref{fig:i} and table~\ref{tab:i}.
 
 \begin{figure}[tbp]
 \centering % \begin{center}/\end{center} takes some additional vertical space
-\includegraphics[width=.45\textwidth,trim=0 380 0 200,clip]{img1.pdf}
+%\includegraphics[width=.45\textwidth,trim=0 380 0 200,clip]{img1.pdf}
 \hfill
-\includegraphics[width=.45\textwidth,origin=c,angle=180]{img2.pdf}
+%\includegraphics[width=.45\textwidth,origin=c,angle=180]{img2.pdf}
 % "\includegraphics" is very powerful; the graphicx package is already loaded
 \caption{\label{fig:i} Always give a caption.}
 \end{figure}
@@ -114,7 +114,7 @@ results. See figure~\ref{fig:i} and table~\ref{tab:i}.
 \begin{tabular}{|lr|c|}
 \hline
 x&y&x and y\\
-\hline 
+\hline
 a & b & a and b\\
 1 & 2 & 1 and 2\\
 $\alpha$ & $\beta$ & $\alpha$ and $\beta$\\

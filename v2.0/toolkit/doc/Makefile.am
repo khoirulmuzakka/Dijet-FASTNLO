@@ -8,7 +8,7 @@
 # -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
-# Only include doxygen subdirectory for now
+# Only include paper subdirectory for now
 SUBDIRS = paper
 #SUBDIRS = doxygen paper
 #

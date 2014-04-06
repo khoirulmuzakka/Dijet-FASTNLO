@@ -354,6 +354,7 @@ AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 # Output
 AC_CONFIG_FILES([Makefile
                  doc/Makefile
+                 doc/paper/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
