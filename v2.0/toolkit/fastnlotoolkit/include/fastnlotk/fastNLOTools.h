@@ -36,6 +36,9 @@ namespace fastNLOTools {
    void ResizeVector( v6d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 );
    void ResizeVector( v7d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 );
 
+   //! - Check if vector is empty
+   template<typename T> bool IsEmptyVector(const vector<vector<T > >& v);
+   template<typename T> bool IsEmptyVector(const vector<T>& v);
 
    //! - Writing tables to disk
    //! use 'fastNLO::WriteVector(vector..., *table, nevts=1) to write fastNLO table in v2.0 format to disk
@@ -127,6 +130,29 @@ void fastNLOTools::ClearVector(vector<T >& v) {
       v[i]=0;
    }
 };
+
+
+//________________________________________________________________________________________________________________
+// Check if vector is empty
+template<typename T> 
+bool fastNLOTools::IsEmptyVector(const vector<vector<T > >& v){
+   //! check if vector is 'empty', or if sum of all elements is 0.
+   if ( v.empty() ) return true;
+   for (unsigned int i = 0 ; i<v.size() ; i++) {
+      if ( !IsEmptyVector(v[i]) ) return false;
+   }
+   return true;
+}
+
+template<typename T> 
+bool fastNLOTools::IsEmptyVector(const vector<T>& v){
+   //! check if vector is 'empty', or if sum of all elements is 0.
+   if ( v.empty() ) return true;
+   for (unsigned int i = 0 ; i<v.size() ; i++) {
+      if ( v[i] != 0 ) return false;
+   }
+   return true;
+}
 
 
 //________________________________________________________________________________________________________________

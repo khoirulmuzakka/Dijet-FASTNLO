@@ -95,6 +95,8 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
       nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRDep , table , NSubproc , Nevt );
       if ( NScaleDep>=6 ){
          nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRRDep , table , NSubproc , Nevt );
+      }
+      if ( NScaleDep>=7 ){
          nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuFFDep , table , NSubproc , Nevt );
          nn3 += fastNLOTools::ReadFlexibleVector  ( SigmaTildeMuRFDep , table , NSubproc , Nevt );
       }
@@ -132,12 +134,18 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
 	 NScaleDep=4;
       }
       else if ( Npow==fILOord+1 ) {
-	 debug["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
 	 NScaleDep=5;
+	 if ( !fastNLOTools::IsEmptyVector(SigmaTildeMuRRDep) ) {
+	    NScaleDep=6;
+	    debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NLO and log^2(mur) terms!"<<endl;
+	 }
+	 else 
+	    debug["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
+
       }
       else if ( Npow==fILOord+2 ) {
 	 debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
-	  NScaleDep=6;
+	  NScaleDep=7;
       }
    }
    fastNLOCoeffAddBase::Write(table);
@@ -153,6 +161,8 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
       nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRDep , table , NSubproc, Nevt);
       if ( NScaleDep>=6) {
          nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRRDep , table , NSubproc, Nevt);
+      }
+      if ( NScaleDep>=7) {
          nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuFFDep , table , NSubproc, Nevt);
          nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRFDep , table , NSubproc, Nevt);
       }
@@ -204,6 +214,8 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
       fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
       if ( NScaleDep>=6 || !SigmaTildeMuRRDep.empty()) {
          fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
+      }
+      if ( NScaleDep>=7 || !SigmaTildeMuFFDep.empty()) {
          fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
          fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
       }

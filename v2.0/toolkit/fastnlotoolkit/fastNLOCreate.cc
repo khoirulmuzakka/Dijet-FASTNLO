@@ -1416,6 +1416,8 @@ void fastNLOCreate::MultiplyCoefficientsByBinSize() {
                         c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= BinSize[i];
                         if (c->GetNScaleDep() >= 6) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= BinSize[i];
+			}
+                        if (c->GetNScaleDep() >= 7) {
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= BinSize[i];
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= BinSize[i];
                         }
@@ -1461,6 +1463,8 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
                         //if ( c->GetNScaleDep() >= 6 ) {
                         if (!c->SigmaTildeMuRRDep.empty()) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
+			}
+                        if (!c->SigmaTildeMuFFDep.empty()) {
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
                         }
@@ -1506,6 +1510,8 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
                         //if ( c->GetNScaleDep() >= 6 ) {
                         if (!c->SigmaTildeMuRRDep.empty()) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
+			}
+                        if (!c->SigmaTildeMuFFDep.empty()) {
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
                         }

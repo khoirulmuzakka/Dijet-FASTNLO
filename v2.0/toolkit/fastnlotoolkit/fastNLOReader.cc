@@ -1185,6 +1185,8 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                      }
                      if ( c->GetNScaleDep() >= 6 ) {
                         xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * pow(log(mur2),2) * fac / c->GetNevt(i,n);
+		     }
+                     if ( c->GetNScaleDep() >= 7 ) {
                         xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * pow(log(muf2),2) * fac / c->GetNevt(i,n);
                         xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * log(mur2) * log(muf2) * fac / c->GetNevt(i,n);
                      }
