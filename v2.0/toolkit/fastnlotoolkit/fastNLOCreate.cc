@@ -1548,10 +1548,10 @@ void fastNLOCreate::UpdateWarmupArrays() {
    if (ObsBin >= 0) {
       fWMu1[ObsBin].first       = std::min(fScenario._m1,fWMu1[ObsBin].first) ;
       fWMu1[ObsBin].second      = std::max(fScenario._m1,fWMu1[ObsBin].second) ;
-      if (GetTheCoeffTable()->IPDFdef1 == 3) {
+      if (GetTheCoeffTable()->IPDFdef1 == 3) { // pp/ppbar
          fWx[ObsBin].first      = std::min(std::min(fEvent._x1,fEvent._x2),fWx[ObsBin].first) ;
          fWx[ObsBin].second     = std::max(std::max(fEvent._x1,fEvent._x2),fWx[ObsBin].second) ;
-      } else if (GetTheCoeffTable()->IPDFdef1 == 2) {
+      } else if (GetTheCoeffTable()->IPDFdef1 == 2) {  // DIS
          fWx[ObsBin].first      = std::min(fEvent._x1,fWx[ObsBin].first) ;
          fWx[ObsBin].second     = std::max(fEvent._x1,fWx[ObsBin].second) ;
       } else

@@ -72,6 +72,7 @@ protected:
    int IPDFdef1;
    int IPDFdef2;
    int IPDFdef3;
+   vector<vector<pair<int,int> > > fPDFCoeff;							//! fPDFCoeff[iSubProc][iPartonPair][pair]
    // Missing: linear PDF combinations for IPDFdef1=0
    vector < double > Hxlim1;
    v2d XNode1;
