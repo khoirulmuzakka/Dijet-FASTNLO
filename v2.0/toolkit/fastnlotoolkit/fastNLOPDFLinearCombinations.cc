@@ -97,10 +97,14 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //bool IsHHJets = ( c->GetIPDFdef2() == 1 );
    //bool IsTTBar  = ( c->GetIPDFdef2() == 2 );
    
-   if ( c->GetIPDFdef2()==0 )
+   if ( c->GetIPDFdef2()==0 ) // LiCos are stored in table
       return CalcPDFHHCFromTable(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
-      return CalcPDFHHC(c,pdfx1,pdfx2);
+      return CalcPDFHHC(c,pdfx1,pdfx2); 
+   else if ( c->GetIPDFdef2()==169 ) // default 121 PDF LiCos
+      return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
+   else if ( c->GetIPDFdef2()==121 ) // default 169 PDF LiCos
+      return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
       return CalcPDFThreshold(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==2 ) { // IPDFdef3==0 !
@@ -129,6 +133,74 @@ vector<double > fastNLOPDFLinearCombinations::MakeAntiHadron(const vector<double
       xfxbar[p] = xfx[12-p];
    }
    return xfxbar;
+}
+
+
+//______________________________________________________________________________
+
+
+vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
+   //! calculate default 121 or 169 PDF linear combinations
+   //!
+   //! Format is following for 121 subprocesses:
+   //! iSubProc  parton1  parton2 
+   //! 0           -5       -5    #bbarbbar
+   //! 1           -5       -4
+   //! 2           -5       -3
+   //! 3           -5       -2
+   //! 4           -5       -1
+   //! 5           -5        0
+   //! 6           -5        1
+   //! 7           -5        2
+   //! 8           -5        3
+   //! 9           -5        4
+   //! 10          -5        5
+   //! 11          -4       -5
+   //! 12          -4       -4
+   //! ...	       	    
+   //! 60           0        0   #gg
+   //! ...	       	    
+   //! 120          5        5
+
+   //! Format is following for 169 subprocesses:
+   //! iSubProc  parton1  parton2 
+   //! 0        -6     -6
+   //! 1        -6     -5
+   //! 2        -6     -4
+   //! 3        -6     -3
+   //! 4        -6     -2
+   //! 5        -6     -1
+   //! 6        -6      0
+   //! 7        -6      1
+   //! 8        -6      2
+   //! 9        -6      3
+   //! 10       -6      4
+   //! 11       -6      5
+   //! 12       -6      6
+   //! 13       -5     -6
+   //! 14       -5     -5
+   //! 15       -5     -4
+   //! 16       -5     -3
+   //! 17       -5     -2
+   //! 18       -5     -1
+   //! 19       -5      0
+   //! 20       -5      1
+   //!  ...
+   //! 84        0      0   #gg
+   //! ...	       	    
+   //! 168       6      6
+   int nSubproc = c->GetIPDFdef2();
+   vector < double > pdflc(nSubproc);
+   int istart = nSubproc==121 ? 1 : 0;
+   int iend   = nSubproc==121 ? 12 : 13;
+   int n=0;
+   for ( int p1 = istart ; p1<iend ; p1++ ) {
+      for ( int p2 = istart ; p2<iend ; p2++ ) {
+	 pdflc[n] = pdfx1[p1] * pdfx2[p2];
+	 n++;
+      }
+   }
+   return pdflc;
 }
 
 
