@@ -47,6 +47,9 @@ namespace fastNLO {
       int IPDFdef3LO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
       int IPDFdef3NLO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
       int IPDFdef3NNLO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations. 
+      vector<vector<pair<int,int> > > PDFCoeffLO; //! PDF Linear combinations for LO calculation (used only if IPDFdef2==0)
+      vector<vector<pair<int,int> > > PDFCoeffNLO; //! PDF Linear combinations for NLO calculation (used only if IPDFdef2==0)
+      vector<vector<pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
       int NPDFDim; //!< Internal way to store PDF linear combinations. Use 1 (half-matrix storage) or 2 (full-matrix storage) for hadron-hadron collisions.
       std::vector<std::pair<int,int> > AsymmetricProcesses; //!< (if NPDFDim=1) Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax
       std::string Name; //!< Name of process (e.g. pp->2jets) (add 'run-mode' or more details)

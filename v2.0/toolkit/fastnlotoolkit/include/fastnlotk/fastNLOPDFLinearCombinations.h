@@ -23,6 +23,7 @@ private:
    vector<double > CalcPDFLCOneHadron(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 ) const;
 
    vector<double> CalcPDFDIS(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1) const;
+   vector<double> CalcPDFHHCFromTable(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // hh collisions. PDFLiCos are stored in table
    vector<double> CalcPDFHHC(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // jets in hh
    vector<double> CalcPDFttbar(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // ttbar
    vector<double> CalcPDFThreshold(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const ; // pp->2jets 

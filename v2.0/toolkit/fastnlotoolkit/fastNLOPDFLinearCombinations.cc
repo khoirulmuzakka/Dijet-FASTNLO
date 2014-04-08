@@ -97,7 +97,9 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //bool IsHHJets = ( c->GetIPDFdef2() == 1 );
    //bool IsTTBar  = ( c->GetIPDFdef2() == 2 );
    
-   if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
+   if ( c->GetIPDFdef2()==0 )
+      return CalcPDFHHCFromTable(c,pdfx1,pdfx2);
+   else if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
       return CalcPDFHHC(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
       return CalcPDFThreshold(c,pdfx1,pdfx2);
@@ -128,6 +130,28 @@ vector<double > fastNLOPDFLinearCombinations::MakeAntiHadron(const vector<double
    }
    return xfxbar;
 }
+
+
+//______________________________________________________________________________
+
+
+vector<double> fastNLOPDFLinearCombinations::CalcPDFHHCFromTable(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
+   // calculate PDF linear combinations as stored in table
+   if ( c->GetNSubproc() != c->GetIPDFdef3() || c->GetIPDFdef3() != c->GetPDFCoeff().size()) {
+      say::error["fastNLOPDFLinearCombinations::CalcPDFHHCFromTable"]
+	 <<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<c->GetIPDFdef3()<<", NSubproc="<<c->GetNSubproc()<<"). Exiting."<<endl;
+      exit(1);
+   }
+   const vector<vector<pair<int,int> > >& PDFCoeff = c->GetPDFCoeff();
+   vector < double > pdflc(PDFCoeff.size());
+   for ( unsigned int k = 0 ; k<PDFCoeff.size() ; k++ ){
+      for ( unsigned int i = 0 ; i<PDFCoeff[k].size() ; i++ ){
+	 pdflc[k] += pdfx1[PDFCoeff[k][i].first+6] * pdfx2[PDFCoeff[k][i].second+6];
+      }
+   }
+   return pdflc;
+}
+
 
 //______________________________________________________________________________
 

@@ -55,6 +55,8 @@ public:
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;
 
+   const vector<vector<pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
+
 protected:
    fastNLOCoeffAddBase();
    void ReadCoeffAddBase(istream& table);

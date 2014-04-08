@@ -108,6 +108,12 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    fProcConsts.IPDFdef3LO = INT_NS(IPDFdef3LO,fSteerfile);
    fProcConsts.IPDFdef3NLO = INT_NS(IPDFdef3NLO,fSteerfile);
    fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
+   if ( fProcConsts.IPDFdef2==0 ) {
+      fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
+      fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
+      if ( fProcConsts.IPDFdef3NNLO > 0 )
+	 fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
+   }
    fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
    if (fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1) {
       vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
@@ -191,6 +197,113 @@ void fastNLOCreate::ReadSteering(string steerfile) {
 
    //    //KR: Added possibility to store and read start of new rapidity bin in nobs
    //    //vector <int> RapIndex; ?
+}
+
+
+// ___________________________________________________________________________________________________
+vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
+   //! Read PDF linear combinations from steering file
+   //! and convert to internal format
+   
+   
+   vector<vector<int> > PartonCombinations;
+   if ( ord==0 )      {
+      PartonCombinations = INT_TAB_NS(PartonCombinationsLO,fSteerfile);
+      if ( PartonCombinations.size() != fProcConsts.NSubProcessesLO ) {
+	 error["ReadPartonCombinations"]<<"Number of parton combinations for LO processes must be identical to number of subprocesses. NSubProcessesLO="
+					<<fProcConsts.NSubProcessesLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+	 cout<<"PartonCombinations.size()="<<PartonCombinations.size()<<",  fProcConsts.NSubProcessesLO="<<fProcConsts.NSubProcessesLO<<endl;
+	 exit(1);
+      }
+   }
+   else if ( ord==1 ) {
+      PartonCombinations = INT_TAB_NS(PartonCombinationsNLO,fSteerfile);
+      if ( PartonCombinations.size() != fProcConsts.NSubProcessesNLO ) {
+	 error["ReadPartonCombinations"]<<"Number of parton combinations for NLO processes must be identical to number of subprocesses.  NSubProcessesNLO="
+					<<fProcConsts.NSubProcessesNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+	 exit(1);
+      }
+   }
+   else if ( ord==2 ) {
+      PartonCombinations = INT_TAB_NS(PartonCombinationsNNLO,fSteerfile);
+      if ( PartonCombinations.size() != fProcConsts.NSubProcessesNNLO ) {
+	 error["ReadPartonCombinations"]<<"Number of parton combinations for NNLO processes must be identical to number of subprocesses.  NSubProcessesNNLO="
+					<<fProcConsts.NSubProcessesNNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+	 exit(1);
+      }
+   }
+   
+   string sord[3] = {"LO","NLO","NNLO"};
+   vector<vector<pair<int,int> > > PDFCoeff(PartonCombinations.size());
+   // check if all partons are used
+   vector<bool> b1(13);
+   vector<bool> b2(13);
+   for ( int i = 0 ; i<13 ; i++ ) {
+      b1[i] = false;
+      b2[i] = false;
+   }
+   for ( unsigned int k=0 ; k<PartonCombinations.size() ; k++ ) {
+      if ( PartonCombinations[k].empty() ) {
+	 error["ReadPartonCombinations"]<<"Row "<<k<<" PartonCombinations"<<sord[ord]<<" does not contain any information. Exiting."<<endl;
+	 exit(1);
+      }
+      int iSubProc = PartonCombinations[k][0];
+      if ( iSubProc >= PDFCoeff.size() ) {
+	 error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" in row "<<k+1<<" of PartonCombinations"<<sord[ord]<<" is larger than the total number of subprocesses. Exiting."<<endl;
+	 exit(1);
+      }
+      if ( PartonCombinations[k].size()%2 != 1 || PartonCombinations[k].size()<=1) {
+	 error["ReadPartonCombinations"]<<"Row "<<k<<" of PartonCombinations"<<sord[ord]<<" does not fit format: 'iProc [pair0] [pair1] ... [pairN]. Exiting"<<endl;
+	 exit(1);
+      }
+      if ( !PDFCoeff[iSubProc].empty() ) {
+	 error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" appears twice in the PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+	 exit(1);
+      }
+      
+      for ( unsigned int i=1 ; i<PartonCombinations[k].size() ; i+=2 ) {
+	 debug["ReadPartonCombinations"]<<"Adding to subprocess "<<iSubProc<<" parton pair (" << PartonCombinations[k][i]<<","<<PartonCombinations[k][i+1]<<")."<<endl;
+	 int iPart1 = PartonCombinations[k][i];
+	 int iPart2 = PartonCombinations[k][i+1];
+	 if ( abs(iPart1) > 6 || abs(iPart2) > 6 ) {
+	    error["ReadPartonCombinations"]<<"Parton flavor is larger than 6. There is nothing beyond the top-quark. Exiting."<<endl;
+	    exit(1);
+	 }
+	 if (  b1[iPart1+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+	 if (  b2[iPart2+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+	 
+	 b1[iPart1+6] = true;
+	 b2[iPart2+6] = true;
+	 PDFCoeff[iSubProc].push_back(std::make_pair(iPart1,iPart2));
+      }
+   }
+    
+   // check if all subprocesses are filled
+   for ( unsigned int k=1 ; k<PDFCoeff.size() ; k++ ) {
+      if ( PDFCoeff[k].empty() ) {
+	 error["ReadPartonCombinations"]<<"PartonCombinations"<<sord[ord]<<" does not conatain any information about PDF for subprocess "<<k<<". Exiting."<<endl;
+	 exit(1);
+      }
+   }
+   for ( int p = 1 ; p<12 ; p++ ) {
+      // check if all partons are used
+      if ( !b1[p] ) {
+	 error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+      }
+      if ( !b2[p] ) {
+	 error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+      }
+   }
+   // check if all partons are used
+   int p = 0;
+   if ( !b1[p] )       warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+   if ( !b2[p] )       warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+   p = 12;
+   if ( !b1[p] )       warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;;
+   if ( !b2[p] )       warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;;
+
+
+   return PDFCoeff;
 }
 
 
@@ -682,15 +795,27 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
       // fix different convention of flexible scale tables:
       if (fIsFlexibleScale &&  c->NSubproc==6 && fProcConsts.NSubProcessesNLO==7) c->NSubproc = fProcConsts.NSubProcessesNLO;   // 6 -> 7
       c->IPDFdef3               = fProcConsts.IPDFdef3LO;
+      if ( c->IPDFdef2==0 ) {
+	 c->fPDFCoeff = fProcConsts.PDFCoeffLO;
+	 c->IPDFdef3               = c->NSubproc ;
+      }
    } else {
       c->IScaleDep = 1;
       info["SetOrderOfAlphasOfCalculation"] << "NLO scale dependence: Dependent on MuR and MuF. IScaleDep = " << c->IScaleDep << endl;
       if ((ord - GetLoOrder()) == 1) {
          c->NSubproc               = fProcConsts.NSubProcessesNLO;
          c->IPDFdef3               = fProcConsts.IPDFdef3NLO;
+	 if ( c->IPDFdef2==0 ) {
+	    c->fPDFCoeff = fProcConsts.PDFCoeffNLO;
+	    c->IPDFdef3  = c->NSubproc ;
+	 }
       } else if ((ord - GetLoOrder()) == 2) {
          c->NSubproc               = fProcConsts.NSubProcessesNNLO;
          c->IPDFdef3               = fProcConsts.IPDFdef3NNLO;
+	 if ( c->IPDFdef2==0 ) {
+	    c->fPDFCoeff = fProcConsts.PDFCoeffNNLO;
+	    c->IPDFdef3  = c->NSubproc ;
+	 }
       } else {
          error["SetOrderOfAlphasOfCalculation"]<<"Unknown order of perturbation theory: order="<<ord-GetLoOrder()<<" (ord="<<ord<<",ILOord="<<ILOord<<"). Exiting."<<endl;
          exit(1);
