@@ -10,7 +10,7 @@
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
 # Define subproject fastNLO_toolkit
-AC_INIT([fastNLO_toolkit], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO_toolkit], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version of 1.9, switch on warnings

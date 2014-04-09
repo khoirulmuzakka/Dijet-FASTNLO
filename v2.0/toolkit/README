@@ -1,6 +1,9 @@
 # -*-sh-*-
-# fastNLO_toolkit version 2.1.0:
-# ==============================
+# fastNLO_toolkit version 2.1.3pre:
+# =================================
+# This is a prerelease for testing, do not distribute!
+# Please contact the authors for any questions or problems.
+
 
 # Content:
 # --------
@@ -13,13 +16,13 @@
 # For running executable: fastNLO table, PDF set from LHAPDF, see also http://fastnlo.hepforge.org
 
 
-# Basic installation of distribution package fastnlo_toolkit-2.1.0-nnnn.tar.gz in six simple steps:
+# Basic installation of distribution package fastnlo_toolkit-v.v.v-nnnn.tar.gz in six simple steps:
 # -------------------------------------------------------------------------------------------------
 # 1. Unpack distribution tarball in directory of your choice:
-tar xzvf fastnlo_toolkit-2.1.0-nnnn.tar.gz
+tar xzvf fastnlo_toolkit-v.v.v-nnnn.tar.gz
 #
 # 2. Descend into created subdirectory:
-cd fastnlo_toolkit-2.1.0-nnnn
+cd fastnlo_toolkit-v.v.v-nnnn
 
 # 3. Configure the installation:
 #    (Prepared using the GNU autotools setup, which is NOT required for the installation itself.)

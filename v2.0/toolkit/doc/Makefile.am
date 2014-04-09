@@ -9,7 +9,6 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 # Only include paper subdirectory for now
-SUBDIRS = paper
 #SUBDIRS = doxygen paper
 #
 # Files that are required to build the project but that can be

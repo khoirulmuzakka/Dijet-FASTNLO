@@ -21,7 +21,7 @@ DOCSRC = $(DOCNAM).tex
 DOCAUX = $(DOCNAM).aux
 DOCPDF = $(DOCNAM).pdf
 
-EXTRA_DIST += $(DOCSRC) psfig.sty figs fnlo-paper.pdf
+EXTRA_DIST += $(DOCSRC) figs fnlo-paper.pdf
 CLEANFILES = $(DOCAUX) $(DOCPDF) $(DOCNAM).log
 
 #
