@@ -352,9 +352,9 @@ AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 
 # Output
+#                 doc/Makefile
+#                 doc/paper/Makefile
 AC_CONFIG_FILES([Makefile
-                 doc/Makefile
-                 doc/paper/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
