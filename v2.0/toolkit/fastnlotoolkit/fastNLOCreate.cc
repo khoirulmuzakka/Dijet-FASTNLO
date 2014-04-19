@@ -52,7 +52,6 @@ fastNLOCreate::fastNLOCreate() {
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) {
-
    //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    ResetHeader();
@@ -115,7 +114,27 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 	 fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
    }
    fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
-   if (fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1) {
+   
+   // read asymmetric processes if half-matrix notation is requested
+   // force half-matrix notation for 121 or 169 subprocesses
+   if (fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
+      fProcConsts.NPDFDim = 1; 
+      const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
+      int p1 = 0;
+      int p2 = 0;
+      for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
+	 int pid = p1*(np)+p2;
+	 int asympid = p2*(np)+p1;
+	 if ( pid != asympid )  // actually not needed necessarily
+	    fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
+	 p2++;
+	 if ( p2 == np ) {
+	    p2=0;
+	    p1++;
+	 }
+      }
+   }
+   else if (fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1) {
       vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
       for (int i = 0 ; i<asym.size() ; i++) {
          if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
