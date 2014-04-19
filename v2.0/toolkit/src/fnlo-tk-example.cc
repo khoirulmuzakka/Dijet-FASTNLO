@@ -46,10 +46,10 @@ int main(int argc, char** argv) {
 
    //--- example calculation
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);     // initialize a fastNLO instance with interface to LHAPDF.
-   //fnlo.PrintFastNLOTableConstants();		// print even more information
    //fnlo.PrintTableInfo();			// print some valuable information
+   //fnlo.PrintFastNLOTableConstants();		// print even more information
    //fnlo.SetUnits(kAbsoluteUnits);		// Use units as specified in the publication or in barns.
-   //fnlo.SetContributionON(fastNLO::kFixedOrder,0,true); // switch contributions on/off. By default LO and NLO.
+   //fnlo.SetContributionON(fastNLO::kFixedOrder,0,false); // switch contributions on/off. By default LO and NLO.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,1,true);
    //fnlo.SetContributionON(fastNLO::kFixedOrder,2,true); // NNLO must be switched on explicitly
    fnlo.CalcCrossSection();			// Calculate the cross section
