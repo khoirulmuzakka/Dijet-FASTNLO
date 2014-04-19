@@ -207,6 +207,32 @@ void fastNLOCoeffAddFix::Clear() {
 
 
 //________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::NormalizeCoefficients(){
+   //!< Set number of events to 1 and normalize coefficients accordingly.
+   //! This means, that the information about the
+   //! number of events is essentially lost
+   MultiplyCoefficientsByConstant(1./Nevt);
+   Nevt = 1;
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double coef) {
+   for (int i=0; i<SigmaTilde.size(); i++) {
+      for (unsigned int s=0 ; s<SigmaTilde[i].size() ; s++) {
+	 for (unsigned int x=0 ; x<SigmaTilde[i][s].size() ; x++) {
+	    for (unsigned int l=0 ; l<SigmaTilde[i][s][x].size() ; l++) {
+	       for (unsigned int m=0 ; m<SigmaTilde[i][s][x][m].size() ; m++) {
+		  SigmaTilde[i][s][x][l][m] *= coef;
+	       }
+	    }
+	 }
+      }
+   }
+}
+
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFix ****************\n");

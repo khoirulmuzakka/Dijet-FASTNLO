@@ -171,11 +171,11 @@ protected:
          time -= min*60L;
          std::cout<<std::endl;
          std::cout<<" ------------- fastNLOstats -------------"<<std::endl;
-         std::cout<<"  Time elapsed                : "
+         std::cout<<"  Time elapsed:                 "
                   << (hour < 10 ? "0" : "")   << hour
                   << (min < 10 ? ":0" : ":")  << min
                   << (time < 10 ? ":0" : ":") << time << std::endl;
-         if (_nEv!=0)   std::cout << "  Total event weight (NEvt)   : " << _nEv   << std::endl;
+         if (_nEv!=0)   std::cout << "  Total event weight (NEvt):    " << _nEv   << std::endl;
          if (_nEvPS!=0) std::cout << "  Contributions in phase space: " << _nEvPS << std::endl;
          if (_nProc!=0) std::cout << "  Number of calls:      " << _nProc << std::endl;
          std::cout << " ----------------------------------------" << std::endl;

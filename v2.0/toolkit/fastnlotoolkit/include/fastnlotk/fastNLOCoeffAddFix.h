@@ -23,6 +23,8 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
    virtual void Clear();							//!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
+   virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
   
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;

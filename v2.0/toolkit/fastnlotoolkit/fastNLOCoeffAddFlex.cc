@@ -243,6 +243,45 @@ void fastNLOCoeffAddFlex::Clear() {
 
 
 //________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::NormalizeCoefficients(){
+   //!< Set number of events to 1 and normalize coefficients accordingly.
+   //! This means, that the information about the
+   //! number of events is essentially lost
+   MultiplyCoefficientsByConstant(1./Nevt);
+   Nevt = 1;
+}
+
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
+   for (int i=0; i<SigmaTildeMuIndep.size(); i++) {
+      int nxmax = GetNxmax(i);
+      for (unsigned int jS1=0; jS1<GetNScaleNode1(i); jS1++) {
+	 for (unsigned int kS2=0; kS2<GetNScaleNode2(i); kS2++) {
+	    for (int x=0; x<nxmax; x++) {
+	       for (int n=0; n<GetNSubproc(); n++) {
+		  SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
+		  //if ( GetNScaleDep() >= 5 ) {
+		  if (!SigmaTildeMuFDep.empty()) {
+		     SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
+		     SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
+		     //if ( GetNScaleDep() >= 6 ) {
+		     if (!SigmaTildeMuRRDep.empty()) {
+			SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
+		     }
+		     if (!SigmaTildeMuFFDep.empty()) {
+			SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
+			SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
+		     }
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+}
+   
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Print() const {
    fastNLOCoeffAddBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddFlex ****************\n");

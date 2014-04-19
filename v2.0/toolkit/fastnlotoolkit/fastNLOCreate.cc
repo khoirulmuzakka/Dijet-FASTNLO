@@ -1518,9 +1518,11 @@ void fastNLOCreate::NormalizeCoefficients() {
    //! accordingly
    //! This means, that the information about the
    //! number of events is essentially lost
-   double nev = GetTheCoeffTable()->GetNevt(0,0);
-   MultiplyCoefficientsByConstant(1./nev);
-   SetNumberOfEvents(1.);
+   GetTheCoeffTable()->NormalizeCoefficients();
+   fStats._nEv=1;
+   //    double nev = GetTheCoeffTable()->GetNevt(0,0);
+   //    MultiplyCoefficientsByConstant(1./nev);
+   //    SetNumberOfEvents(1.);
 }
 
 
@@ -1621,44 +1623,10 @@ void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
 //! Divide all coefficients by binsize
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
-      for (int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
-         int nxmax = c->GetNxmax(i);
-         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-               for (int x=0; x<nxmax; x++) {
-                  for (int n=0; n<c->GetNSubproc(); n++) {
-                     c->SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
-                     //if ( c->GetNScaleDep() >= 5 ) {
-                     if (!c->SigmaTildeMuFDep.empty()) {
-                        c->SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
-                        c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
-                        //if ( c->GetNScaleDep() >= 6 ) {
-                        if (!c->SigmaTildeMuRRDep.empty()) {
-                           c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
-			}
-                        if (!c->SigmaTildeMuFFDep.empty()) {
-                           c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
-                           c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
+      c->MultiplyCoefficientsByConstant(coef);
    } else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-      for (int i=0; i<c->SigmaTilde.size(); i++) {
-         for (unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++) {
-            for (unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++) {
-               for (unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++) {
-                  for (unsigned int m=0 ; m<c->SigmaTilde[i][s][x][m].size() ; m++) {
-                     c->SigmaTilde[i][s][x][l][m] *= coef;
-                  }
-               }
-            }
-         }
-      }
+      c->MultiplyCoefficientsByConstant(coef);
    }
 }
 

@@ -25,6 +25,8 @@ public:
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Clear();							//!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
+   virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };

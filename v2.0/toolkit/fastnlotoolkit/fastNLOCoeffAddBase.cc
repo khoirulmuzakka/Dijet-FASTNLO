@@ -327,6 +327,12 @@ void fastNLOCoeffAddBase::Clear() {
 
 
 //________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddBase::NormalizeCoefficients() {
+   Nevt = 1;
+}
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddBase::GetNxmax(int i) const {
    int nxmax = 0;
    switch (NPDFDim) {

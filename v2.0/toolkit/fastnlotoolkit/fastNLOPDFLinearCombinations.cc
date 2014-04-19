@@ -101,9 +101,9 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
       return CalcPDFHHCFromTable(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
       return CalcPDFHHC(c,pdfx1,pdfx2); 
-   else if ( c->GetIPDFdef2()==169 ) // default 121 PDF LiCos
+   else if ( c->GetIPDFdef2()==169 ) // default 169 PDF LiCos
       return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
-   else if ( c->GetIPDFdef2()==121 ) // default 169 PDF LiCos
+   else if ( c->GetIPDFdef2()==121 ) // default 121 PDF LiCos
       return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
       return CalcPDFThreshold(c,pdfx1,pdfx2);

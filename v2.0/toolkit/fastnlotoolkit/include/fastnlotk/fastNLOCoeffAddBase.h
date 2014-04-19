@@ -1,4 +1,3 @@
-
 #ifndef __fastNLOCoeffAddBase__
 #define __fastNLOCoeffAddBase__
 
@@ -24,12 +23,14 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients();					//!< Set number of events to 1 and normalize coefficients accordingly.	
 
    int GetIRef() const {return IRef;}
    double GetNevt(int NObsBin, int NSubproc) const {
       if (Nevt > 0) return Nevt;
-      else {cout<<"Todo. Preparation for v2.2."<<endl; return Nevt;}
+      else {cout<<"Todo. Preparation for v2.3."<<endl; return Nevt;}
    }
+   void SetNevt(double nevt) { Nevt = nevt;}					//!< Set number of events
    int GetNxmax(int Obsbin) const ;
    int GetXIndex(int Obsbin,int x1bin,int x2bin =0) const ;
    int GetNSubproc() const { return NSubproc;}
