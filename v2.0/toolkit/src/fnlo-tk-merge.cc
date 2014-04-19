@@ -53,10 +53,35 @@ int main(int argc, char** argv)
       else { //ok, file exists
          // reading table
          fastNLOTable tab(path);
-         //! Todo: check validity of table, here!
+         // Todo: check validity of table, here!
+	 { 
+	    // Check if one additive contribution has number of events == 1
+	    // this indicates, that this contributions cannot be merged because
+	    // number of event information got lost
+	    const int nc = tab.GetNcontrib() + tab.GetNdata();
+	    for ( int ic=0 ; ic<nc; ic++ ) {
+	       if ( tab.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
+		  fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)tab.GetCoeffTable(ic);
+		  if ( cadd->GetNevt(0,0) == 1 ) {
+		     error["fnlo-merge"]<<"Contribution #"<<ic<<" in table "<<path<<endl;
+		     error>>"     cannot be merged, because no valid number-of-events information"<<endl;
+		     error>>"     is available: Nevt=1."<<endl;
+		     error>>"     Please use program fnlo-tk-append instead."<<endl;
+		     error>>"     Exiting."<<endl;
+		     exit(1);
+		  }
+	       }
+	    }
+	 }
          if ( !resultTable ) {
             resultTable = new fastNLOTable(tab);
 	    nValidTables++;
+	    // Hint to use fnlo-merge correctly.
+	    info>>"\n";
+	    info["fnlo-merge"]<<"\n";
+	    info>>"     The user has to ensure, that merged input tables are statistically independent."<<endl;
+	    info>>"     This is not checked by the program."<<endl;
+	    info>>"\n";
 	 }
          else { // adding table to result table
             // check if 'scenario' is compatible
