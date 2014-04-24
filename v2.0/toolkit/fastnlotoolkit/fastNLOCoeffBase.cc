@@ -109,33 +109,38 @@ void fastNLOCoeffBase::Write(ostream& table) {
 //________________________________________________________________________________________________________________ //
 bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
    if( fNObsBins != other.GetNObsBin() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"fNObsBins != other.GetNObsBin()"<<endl;
       return false;
    }
    if( IXsectUnits != other.GetIXsectUnits() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"IXsectUnits != other.GetIXsectUnits()"<<endl;
       return false;
    }
    if( IDataFlag != other.GetIDataFlag() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"IDataFlag != other.GetIDataFlag()"<<endl;
       return false;
    }
    if( IAddMultFlag != other.GetIAddMultFlag() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"IAddMultFlag != other.GetIAddMultFlag()"<<endl;
       return false;
    }
    if( IContrFlag1 != other.GetIContrFlag1() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"IContrFlag1 != other.GetIContrFlag1()"<<endl;
       return false;
    }
    if( IContrFlag2 != other.GetIContrFlag2() ){
-      //warn["IsCompatible"]<<"."<<endl;
+      debug["IsCompatible"]<<"IContrFlag2 != other.GetIContrFlag2()"<<endl;
       return false;
    }
    if( NScaleDep != other.GetNScaleDep() ){
-      //warn["IsCompatible"]<<"."<<endl;
-      return false;
+      debug["IsCompatible"]<<"NScaleDep != other.GetNScaleDep()"<<endl;
+      if ( NScaleDep==5 && other.GetNScaleDep()==6 ||  NScaleDep==6 && other.GetNScaleDep()==5 ) {
+	 debug["IsCompatible"]<<"One table with NScale=5 and one with NScaleDep=6"<<endl;
+	 // continue;
+      }
+      else return false;
    }
+   debug["IsCompatible"]<<"Both tables are compatible"<<endl;
    // chcekc descripts here ?!
    //bool potentialcompatible = true;
    //vector < string > CtrbDescript;

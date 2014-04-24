@@ -370,6 +370,7 @@ void fastNLOCoeffAddBase::Print() const {
    fastNLOCoeffBase::Print();
    printf(" **************** FastNLO Table: fastNLOCoeffAddBase ****************\n");
    printf(" B   IRef                          %d\n",IRef);
+   printf(" B   NScaleDep                     %d\n",NScaleDep);
    printf(" B   IScaleDep                     %d\n",IScaleDep);
    printf(" B   Nevt                          %f\n",Nevt);
    printf(" B   Npow                          %d\n",Npow);

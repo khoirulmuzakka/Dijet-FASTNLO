@@ -212,8 +212,16 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
    if ( NScaleDep==3 || NScaleDep>=5 ) {
       fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
       fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
-      if ( NScaleDep>=6 || !SigmaTildeMuRRDep.empty()) {
+      if (( NScaleDep>=6 || !SigmaTildeMuRRDep.empty())  // both tables contain log^2 contributions (default case)
+	  && (othflex.NScaleDep>=6 || !othflex.SigmaTildeMuRRDep.empty()) ) {
          fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
+      }
+      else if ( NScaleDep==6 && othflex.NScaleDep==5 ) { // this tables contains log^2 contributions, but the other does not
+	 // nothing todo.
+      }
+      else if ( NScaleDep==5 && othflex.NScaleDep==6 ) { // this tables does not contain log^2 contributions, but the other does !
+	 SigmaTildeMuRRDep = othflex.SigmaTildeMuRRDep;
+	 NScaleDep = 6;
       }
       if ( NScaleDep>=7 || !SigmaTildeMuFFDep.empty()) {
          fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
@@ -254,6 +262,9 @@ void fastNLOCoeffAddFlex::NormalizeCoefficients(){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
+   const bool WithMuR = !SigmaTildeMuFDep.empty();
+   const bool WithMuRR = !SigmaTildeMuRRDep.empty(); 
+   const bool WithMuFF = !SigmaTildeMuFFDep.empty();
    for (int i=0; i<SigmaTildeMuIndep.size(); i++) {
       int nxmax = GetNxmax(i);
       for (unsigned int jS1=0; jS1<GetNScaleNode1(i); jS1++) {
@@ -262,14 +273,14 @@ void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
 	       for (int n=0; n<GetNSubproc(); n++) {
 		  SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
 		  //if ( GetNScaleDep() >= 5 ) {
-		  if (!SigmaTildeMuFDep.empty()) {
+		  if (WithMuR) {
 		     SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
 		     SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
 		     //if ( GetNScaleDep() >= 6 ) {
-		     if (!SigmaTildeMuRRDep.empty()) {
+		     if (WithMuRR) {
 			SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
 		     }
-		     if (!SigmaTildeMuFFDep.empty()) {
+		     if (WithMuFF) {
 			SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
 			SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
 		     }

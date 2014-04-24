@@ -54,6 +54,7 @@ public:
    bool GetIsFlexibleScale() const { return (NScaleDep>=3) && (IAddMultFlag==0); }
 
    vector<string > GetContributionDescription() const { return CtrbDescript; }
+   void SetContributionDescription(vector<string > descr ) { CtrbDescript = descr; };		//! Set contribution description
    vector<string > GetCodeDescription() const { return CodeDescript; }
 
 
