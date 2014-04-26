@@ -16,6 +16,9 @@ public:
    ~fnloScenario() {;};
 
    void SetObservableDimI(double o, int iDim) {_o[iDim]=o;}					//!< Set observable of dimension iDim (e.g. in case of multidimensional measurements)
+   void SetObservable0(double o) {SetObservableDimI(o,0);}				        //!< Set observable for '0th' dimension for single-differential calculation
+   void SetObservable1(double o) {SetObservableDimI(o,1);}				        //!< Set observable for '1st' dimension for single and double-differential calculations
+   void SetObservable2(double o) {SetObservableDimI(o,2);}	                	        //!< Set observable for '2nd' dimension for single/double/triple differential calculations
    void SetObsBin(int iBin) {_iOB = iBin; }							//!< [optional] Set ObsBin (e.g. if binning is performed by generator, no other observables are then needed.)
    //! flexible scale table:
    void SetObsScale1(double mu) {_m1=mu;}							//!< For flexible-scale tables. Set scale 1 (should be in 'GeV').
