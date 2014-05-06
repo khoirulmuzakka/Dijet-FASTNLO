@@ -17,9 +17,9 @@ namespace fastNLO {
       //!    be included in References)
       std::string Name; //!< Name of generator
       std::vector<std::string> References; //!< References for generator. Include additional information here (e.g. 'run-mode' or process)
-      std::vector<string > GetCodeDescription() {
+      std::vector<std::string > GetCodeDescription() {
 	 //! Get 'CodeDescription' usable for fastNLO table
-	 std::vector<string > CodeDescr(References.size()+1);
+	 std::vector<std::string > CodeDescr(References.size()+1);
 	 CodeDescr[0] = Name;
 	 for ( unsigned int i = 0 ; i<References.size() ; i++ ) 
 	    CodeDescr[i+1] = References[i];
@@ -47,16 +47,16 @@ namespace fastNLO {
       int IPDFdef3LO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
       int IPDFdef3NLO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
       int IPDFdef3NNLO; //!< Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations. 
-      vector<vector<pair<int,int> > > PDFCoeffLO; //! PDF Linear combinations for LO calculation (used only if IPDFdef2==0)
-      vector<vector<pair<int,int> > > PDFCoeffNLO; //! PDF Linear combinations for NLO calculation (used only if IPDFdef2==0)
-      vector<vector<pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
+      std::vector<std::vector<std::pair<int,int> > > PDFCoeffLO; //! PDF Linear combinations for LO calculation (used only if IPDFdef2==0)
+      std::vector<std::vector<std::pair<int,int> > > PDFCoeffNLO; //! PDF Linear combinations for NLO calculation (used only if IPDFdef2==0)
+      std::vector<std::vector<std::pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
       int NPDFDim; //!< Internal way to store PDF linear combinations. Use 1 (half-matrix storage) or 2 (full-matrix storage) for hadron-hadron collisions.
       std::vector<std::pair<int,int> > AsymmetricProcesses; //!< (if NPDFDim=1) Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax
       std::string Name; //!< Name of process (e.g. pp->2jets) (add 'run-mode' or more details)
       std::vector<std::string> References; //!< References for process (also other plain text lines can be included here)
-      std::vector<string > GetProcessDescription() {
+      std::vector<std::string > GetProcessDescription() {
 	 //! Get 'CodeDescription' usable for fastNLO table
-	 std::vector<string > ProcDescr(References.size()+1);
+	 std::vector<std::string > ProcDescr(References.size()+1);
 	 ProcDescr[0] = Name;
 	 for ( unsigned int i = 0 ; i<References.size() ; i++ ) 
 	    ProcDescr[i+1] = References[i];

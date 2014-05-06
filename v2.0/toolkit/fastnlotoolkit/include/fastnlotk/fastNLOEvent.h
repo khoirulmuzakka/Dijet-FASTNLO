@@ -27,7 +27,7 @@ public:
    //! if not a flexible-scale table
    void SetScale(double mu) {_m1=mu;}								//!< the ren. and fact. scale (not mu^2)
 private:
-   map<int,double> _o;
+   std::map<int,double> _o;
    double _m1, _m2;
    int _iOB;
 };
