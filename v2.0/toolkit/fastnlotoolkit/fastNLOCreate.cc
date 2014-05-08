@@ -114,11 +114,11 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 	 fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
    }
    fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
-   
+
    // read asymmetric processes if half-matrix notation is requested
    // force half-matrix notation for 121 or 169 subprocesses
    if (fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
-      fProcConsts.NPDFDim = 1; 
+      fProcConsts.NPDFDim = 1;
       const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
       int p1 = 0;
       int p2 = 0;
@@ -198,7 +198,7 @@ void fastNLOCreate::ReadSteering(string steerfile) {
 
    // header
    SetScenName(STRING_NS(ScenarioName,fSteerfile));
-   SetItabversion(20000);
+   SetItabversion(22000);
 
    // scenario specific things
    Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
@@ -223,8 +223,8 @@ void fastNLOCreate::ReadSteering(string steerfile) {
 vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
    //! Read PDF linear combinations from steering file
    //! and convert to internal format
-   
-   
+
+
    vector<vector<int> > PartonCombinations;
    if ( ord==0 )      {
       PartonCombinations = INT_TAB_NS(PartonCombinationsLO,fSteerfile);
@@ -251,7 +251,7 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
 	 exit(1);
       }
    }
-   
+
    string sord[3] = {"LO","NLO","NNLO"};
    vector<vector<pair<int,int> > > PDFCoeff(PartonCombinations.size());
    // check if all partons are used
@@ -279,7 +279,7 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
 	 error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" appears twice in the PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
 	 exit(1);
       }
-      
+
       for ( unsigned int i=1 ; i<PartonCombinations[k].size() ; i+=2 ) {
 	 debug["ReadPartonCombinations"]<<"Adding to subprocess "<<iSubProc<<" parton pair (" << PartonCombinations[k][i]<<","<<PartonCombinations[k][i+1]<<")."<<endl;
 	 int iPart1 = PartonCombinations[k][i];
@@ -290,13 +290,13 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
 	 }
 	 if (  b1[iPart1+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
 	 if (  b2[iPart2+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
-	 
+
 	 b1[iPart1+6] = true;
 	 b2[iPart2+6] = true;
 	 PDFCoeff[iSubProc].push_back(std::make_pair(iPart1,iPart2));
       }
    }
-    
+
    // check if all subprocesses are filled
    for ( unsigned int k=1 ; k<PDFCoeff.size() ; k++ ) {
       if ( PDFCoeff[k].empty() ) {
@@ -427,9 +427,9 @@ int fastNLOCreate::CreateCoeffTable() {
       error["CreateCoeffAddFix"]<<"Vector of coefficients must be empty, since only one coefficient table is allowed."<<endl;
       exit(1);
    }
-   if (fIsFlexibleScale) 
+   if (fIsFlexibleScale)
       return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFlex(NObsBin,ILOord));
-   else 
+   else
       return fastNLOTable::CreateCoeffTable(fCoeff.size(), new fastNLOCoeffAddFix(NObsBin));
 }
 
@@ -1917,7 +1917,7 @@ void fastNLOCreate::AdjustWarmupValues() {
       ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
    }
    //}
-      
+
    // ---------------------------------------
    // 2. round values to 3rd digit if applicable
    if (fIsFlexibleScale) {
@@ -2009,7 +2009,7 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
 	 else {
 	    if ( wrmmu[i].first < 1.e-4 )
 	       nbinlo[idim]++;
-	 }	    
+	 }
 	 if ( Bin[i][idim].second != 0 ) {
 	    // up-bin
 	    double diff = 1. - wrmmu[i].second/Bin[i][idim].second;
