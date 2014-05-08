@@ -1130,7 +1130,7 @@ C---  ENDDO
      >              " #       Scale factor number ",
      >              K,":                   ",SCALEFAC(I,J,K)
             ENDDO
-            WRITE(*,'(A,I1,A,I1)')
+            WRITE(*,'(A,I1,A,I2)')
      >           " #     Number of scale nodes for dimension ",
      >           J,":      ",NSCALENODE(I,J)
          ENDDO
