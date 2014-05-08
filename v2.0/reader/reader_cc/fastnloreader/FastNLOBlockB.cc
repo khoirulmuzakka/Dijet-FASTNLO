@@ -174,7 +174,14 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
    if (!(IDataFlag==1) && !(IAddMultFlag==1)) {
       *table >> IRef;
       *table >> IScaleDep;
-      *table >> Nevt;
+      //      if (Itabversion == 20000) {
+      double Devt;
+      *table >> Devt;
+      Nevt = 0;
+      //      } else {
+      //         *table >> Devt;
+      //         Nevt = 0;
+      //      }
       *table >> Npow;
       *table >> NPDF;
       if (NPDF>0) {
@@ -197,7 +204,7 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
       *table >> IPDFdef1;
       *table >> IPDFdef2;
       *table >> IPDFdef3;
-      //printf("  *  FastNLOBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
+      printf("  *  FastNLOBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
       if (IPDFdef1==0) {
          for (int i=0; i<NSubproc; i++) {
@@ -269,7 +276,7 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
             *table >> Nscalevar[i];
             *table >> Nscalenode[i];
          }
-         //printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+         printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
 
          ScaleFac.resize(NScaleDim);
          for (int i=0; i<NScaleDim; i++) {

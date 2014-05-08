@@ -24,9 +24,9 @@
       INTEGER ICTRB(30)
       INTEGER NUNIT,IFILE,IC,I,J,K,L,N,M,NXMAX,NSELCTRB
       INTEGER IMULT
-      CHARACTER*1 CH1TMP,CH1TMP2,CH1TMP3,CH1TMP4
-      CHARACTER*2 CH2TMP
-      CHARACTER*3 CH3TMP
+      CHARACTER*1 CH1TMP,CH1TMP2,CH1TMP3,CH1TMP4,CH1TMP5
+      CHARACTER*2 CH2TMP,CH2TMP2
+      CHARACTER*3 CH3TMP,CH3TMP2
       CHARACTER*4 CH4TMP
       CHARACTER*40 CHTMP
       INTEGER IPRINT
@@ -40,8 +40,8 @@
 *     >        2: Also print basic values of Block B (B0)
 *     >        3: Also print x nodes of Block B for each contr. (BX)
 *     >        4: Also print scale nodes of Block B for each contr. (BS)
-*     >        5: Also print sigma tilde of Block B (not implemented)
-      IPRINT = 0
+*     >        5: Also print sigma tilde of Block B (BT)
+      IPRINT = 5
       LPRINT = .FALSE.
       NUNIT=2
 
@@ -245,6 +245,14 @@
          CALL FNIOINT(CRW,NUNIT, ICONTRFLAG2(IC),LPRINT,CHTMP)
          CHTMP = "  B0    NScaleDep("//CH1TMP//")"
          CALL FNIOINT(CRW,NUNIT, NSCALEDEP(IC),LPRINT,CHTMP)
+         IF (NSCALEDEP(IC).NE.0) THEN
+            WRITE(*,*)"FX9999RW: ERROR! The Fortran reader cannot"//
+     >           " deal with flexible-scale tables,"
+            WRITE(*,*)"          please use the C++ version instead!"
+            WRITE(*,*)"          Contribution no. IC = ",IC
+            WRITE(*,*)"          NSCALEDEP(IC) = ",NSCALEDEP(IC)
+            STOP
+         ENDIF
          CHTMP = "  B0    NContrDescr("//CH1TMP//")"
          CALL FNIOINT(CRW,NUNIT, NCONTRDESCR(IC),LPRINT,CHTMP)
          DO I=1,NCONTRDESCR(IC)
@@ -389,8 +397,14 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
          CALL FNIOINT(CRW,NUNIT, IREF(IC),LPRINT,CHTMP)
          CHTMP = "  B0    IScaleDep("//CH1TMP//")"
          CALL FNIOINT(CRW,NUNIT, ISCALEDEP(IC),LPRINT,CHTMP)
-         CHTMP = "  B0    Nevt("//CH1TMP//")"
-         CALL FNIOLINT(CRW,NUNIT, NEVT(IC),LPRINT,CHTMP)
+         IF (ITABVERSION.LT.20200) THEN
+            CHTMP = "  B0    Nevt("//CH1TMP//")"
+            CALL FNIOLINT(CRW,NUNIT, NEVT(IC),LPRINT,CHTMP)
+         ELSE
+            CHTMP = "  B0    Devt("//CH1TMP//")"
+            CALL FNIODBL(CRW,NUNIT, DEVT(IC),LPRINT,CHTMP)
+            NEVT(IC) = 0
+         ENDIF
          CHTMP = "  B0    Npow("//CH1TMP//")"
          CALL FNIOINT(CRW,NUNIT, NPOW(IC),LPRINT,CHTMP)
          CHTMP = "  B0    NPDF("//CH1TMP//")"
@@ -547,7 +561,18 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
             CHTMP = "  B0      NScaleNode("//
      >           CH1TMP//","//CH1TMP2//")"
             CALL FNIOINT(CRW,NUNIT, NSCALENODE(IC,I),LPRINT,CHTMP)
+            IF (NSCALENODE(IC,I).GT.MXSCALENODE) THEN
+               WRITE(*,*)"FX9999RW: ERROR! NScaleNode > MXScaleNode:",
+     >              NSCALENODE(IC,I),MXSCALENODE
+               WRITE(*,*)"          Recompile and link with larger "//
+     >              "array dimensions for this table. Stopped."
+               STOP
+            ENDIF
          ENDDO
+
+         IF (IPRINT.GT.1) THEN
+            WRITE(*,*)CSEP0
+         ENDIF
 
          LPRINT = .FALSE.
          IF (IPRINT.GT.3) THEN
@@ -600,11 +625,9 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
             LPRINT = .TRUE.
             WRITE(*,'(A)')""
             WRITE(*,*)SSEP0
-            WRITE(*,*)"* fastNLO Table: Block B ic = ",ic
+            WRITE(*,*)"* fastNLO Table: Block B ic = ",IC
             WRITE(*,*)"*    Sigma Tilde"
-            WRITE(*,*)"* Not implemented yet!"
             WRITE(*,*)SSEP0
-            LPRINT = .FALSE.
          ENDIF
 
          DO I=1,NOBSBIN
@@ -631,8 +654,26 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
      >                    "not enabled. Stopped."
                      STOP
                   ENDIF
+
+                  IF (NXMAX.GT.MXNXMAX) THEN
+                     WRITE(*,*)"FX9999RW: ERROR! NxMax > MXNxMax:",
+     >                    NXMAX,MXNXMAX
+                     WRITE(*,*)"          Recompile and link with "//
+     >                    "larger array dimensions for this table. "//
+     >                    "Stopped."
+                     STOP
+                  ENDIF
+
                   DO M=1,NXMAX
                      DO N=1,NSUBPROC(IC)
+                        WRITE(CH3TMP,'(I3)'),I
+                        WRITE(CH1TMP,'(I1)'),K
+                        WRITE(CH2TMP,'(I2)'),L
+                        WRITE(CH3TMP2,'(I3)'),M
+                        WRITE(CH1TMP2,'(I1)'),N
+                        CHTMP = "  BT          SigmaTilde("//
+     >                       CH3TMP//","//CH1TMP//","//
+     >                       CH2TMP//","//CH3TMP2//","//CH1TMP2//")"
                         CALL FNIODBL(CRW,NUNIT,
      >                       SIGMATILDE(IC,I,1,K,L,M,N),LPRINT,CHTMP)
                      ENDDO

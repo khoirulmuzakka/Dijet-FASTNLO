@@ -949,6 +949,9 @@ void FastNLOReader::ReadBlockA1(istream *table) {
       man<<"This FastNLO-table (file) is of version "<<Itabversion*1./10000.<<endl;;
       man<<"Please download a compatible reader from the website or use the APPL_grid interface.\n";
       exit(1);
+   } else if (Itabversion > 20000) {
+      warn["ReadBlockA1"]<<"This reader is replaced by the fastNLO Toolkit Reader for fastNLO v2.2 tables and higher. Continuing without guarantee ...\n"<<endl;
+      warn["ReadBlockA1"]<<"The table version here is: "<<Itabversion*1./10000.<<endl;
    }
    *table >> ScenName;
    //--- Ncontrib: All contributions including additive, multiplicative or data
@@ -2768,4 +2771,3 @@ int FastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) co
 }
 
 //______________________________________________________________________________
-

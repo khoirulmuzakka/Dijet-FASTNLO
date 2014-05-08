@@ -567,7 +567,7 @@ int main(int argc, char** argv) {
    // ---- Example of a cross section calculation with some nice standardized output
 
    // For the purpose of this example only show WARNINGs or worse.
-   SetGlobalVerbosity(WARNING);
+   SetGlobalVerbosity(DEBUG);
 
    // Instead of instantiating a class via e.g.
    //   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);

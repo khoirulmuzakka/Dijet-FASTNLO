@@ -63,6 +63,8 @@ public:
    int IRef;
    int IScaleDep;
    unsigned long long int Nevt;
+   // Compatibility change for table version 22000
+   double Devt;
    int Npow;
    int NPDF;
    vector < int > NPDFPDG;
