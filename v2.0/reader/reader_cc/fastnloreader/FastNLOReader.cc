@@ -666,7 +666,7 @@ void FastNLOReader::ReadTable(void) {
 
    for (int i=0; i<nblocks; i++) {
       // Read block
-      FastNLOBlockB* blockb = new FastNLOBlockB("ReadingBlockB", NObsBin , instream);
+      FastNLOBlockB* blockb = new FastNLOBlockB("ReadingBlockB", NObsBin , Itabversion, instream);
       blockb->SetIc(i+1);
       char nbuf[400];
       if (blockb->IDataFlag && !BlockB_Data) {   // Data
@@ -945,13 +945,13 @@ void FastNLOReader::ReadBlockA1(istream *table) {
    }
    *table >> Itabversion;
    if (Itabversion < 20000) {
-      error["ReadBlockA1"]<<"This reader is only compatible with FastNLO v2.0 tables and higher. Exiting.\n";
-      man<<"This FastNLO-table (file) is of version "<<Itabversion*1./10000.<<endl;;
-      man<<"Please download a compatible reader from the website or use the APPL_grid interface.\n";
+      error["ReadBlockA1"]<<"Antiquated table version detected: "<<Itabversion/10000.<<endl;
+      error["ReadBlockA1"]<<"Cannot deal with v1 tables, please use old Fortran reader. Stopped!"<<endl;
       exit(1);
-   } else if (Itabversion > 20000) {
-      warn["ReadBlockA1"]<<"This reader is replaced by the fastNLO Toolkit Reader for fastNLO v2.2 tables and higher. Continuing without guarantee ...\n"<<endl;
-      warn["ReadBlockA1"]<<"The table version here is: "<<Itabversion*1./10000.<<endl;
+   } else if (Itabversion > 22000) {
+      error["ReadBlockA1"]<<"Unknown table version detected: "<<Itabversion/10000.<<endl;
+      error["ReadBlockA1"]<<"Compatibility of this reader has not been tested, please upgrade!"<<endl;
+      exit(1);
    }
    *table >> ScenName;
    //--- Ncontrib: All contributions including additive, multiplicative or data

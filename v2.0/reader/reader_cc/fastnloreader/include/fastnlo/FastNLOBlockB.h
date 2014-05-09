@@ -29,6 +29,7 @@ public:
    string fname;
    int   fNObsBins;
    int   fIcontr;
+   int   fItabversion;
 
    // ---- Block B ---- //
    static const int DividebyNevt = 1;
@@ -123,8 +124,8 @@ public:
 
 public:
 
-   FastNLOBlockB(const char* name, const int NObsBins);
-   FastNLOBlockB(const char* name, const int NObsBins , istream* table);
+   FastNLOBlockB(const char* name, const int NObsBins, const int Itabversion);
+   FastNLOBlockB(const char* name, const int NObsBins, const int Itabversion, istream* table);
    ~FastNLOBlockB();
    void ReadBlockB(istream *table);
    void Print(const int i, const int iprint = 0);

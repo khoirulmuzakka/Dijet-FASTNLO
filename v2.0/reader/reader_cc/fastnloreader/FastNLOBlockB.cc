@@ -22,15 +22,17 @@ using namespace std;
 
 
 
-FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins) {
+FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins, const int Itabversion) {
    fname         = name;
    fNObsBins     = NObsBins;
+   fItabversion  = Itabversion;
 }
 
 
-FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins , istream* table) {
+FastNLOBlockB::FastNLOBlockB(const char* name , const int NObsBins, const int Itabversion, istream* table) {
    fname         = name;
    fNObsBins     = NObsBins;
+   fItabversion  = Itabversion;
    ReadBlockB(table);
 }
 
@@ -174,14 +176,21 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
    if (!(IDataFlag==1) && !(IAddMultFlag==1)) {
       *table >> IRef;
       *table >> IScaleDep;
-      //      if (Itabversion == 20000) {
-      double Devt;
-      *table >> Devt;
-      Nevt = 0;
-      //      } else {
-      //         *table >> Devt;
-      //         Nevt = 0;
-      //      }
+      if (fItabversion < 20000) {
+         say::error["ReadBlockB"]<<"Antiquated table version detected: "<<fItabversion/10000.<<endl;
+         say::error["ReadBlockB"]<<"Cannot deal with v1 tables, please use old Fortran reader. Stopped!"<<endl;
+         exit(1);
+      } else if (fItabversion < 22000) {
+         *table >> Nevt;
+         Devt = -1.;
+      } else if (fItabversion == 22000) {
+         *table >> Devt;
+         Nevt = 0;
+      } else {
+         say::error["ReadBlockB"]<<"Unknown table version detected: "<<fItabversion/10000.<<endl;
+         say::error["ReadBlockB"]<<"Compatibility of this reader has not been tested, please upgrade!"<<endl;
+         exit(1);
+      }
       *table >> Npow;
       *table >> NPDF;
       if (NPDF>0) {
@@ -204,7 +213,6 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
       *table >> IPDFdef1;
       *table >> IPDFdef2;
       *table >> IPDFdef3;
-      printf("  *  FastNLOBlockB::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
       if (IPDFdef1==0) {
          for (int i=0; i<NSubproc; i++) {
