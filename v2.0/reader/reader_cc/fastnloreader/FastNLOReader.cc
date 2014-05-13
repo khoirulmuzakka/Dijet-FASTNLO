@@ -20,11 +20,11 @@
 #ifndef FNLO_VERSION
 #define FNLO_VERSION    "2.1.0"
 #define FNLO_SVNREV     "XXXX"
-#define FNLO_AUTHORS    "D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"
+#define FNLO_AUTHORS    "D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"
 #define FNLO_WEBPAGE    "http://projects.hepforge.org/fastnlo"
 #define FNLO_AUTHORSv14 "T. Kluge, K. Rabbertz, M. Wobisch"
 #define FNLO_QUOTEv14   "hep-ph/0609285"
-#define FNLO_AUTHORSv2  "D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"
+#define FNLO_AUTHORSv2  "D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"
 #define FNLO_QUOTEv2    "arXiv:1109.1310"
 #endif
 
@@ -120,7 +120,7 @@ void FastNLOReader::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright © 2011,2012,2013 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" Copyright © 2011,2012,2013,2014 "<<fnlo<<" Collaboration"<<endl;
    shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
