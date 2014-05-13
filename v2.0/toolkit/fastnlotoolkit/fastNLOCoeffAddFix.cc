@@ -108,17 +108,17 @@ void fastNLOCoeffAddFix::ResizeSigmaTilde(){
       int nxmax = GetNxmax(i);
       SigmaTilde[i].resize(GetTotalScalevars());
       for( int k=0 ; k<GetTotalScalevars() ; k++ ){
-	 SigmaTilde[i][k].resize(GetTotalScalenodes());
-	 for( int l=0 ; l<GetTotalScalenodes() ; l++ ){
-	    //ResizeVector(SigmaTilde[i][k][l],nxmax,NSubproc);
-	    SigmaTilde[i][k][l].resize(nxmax);
-	    for( int m=0 ; m<nxmax ; m++ ){
-	       SigmaTilde[i][k][l][m].resize(NSubproc);
-	       for( int n=0 ; n<NSubproc ; n++ ){
-		  SigmaTilde[i][k][l][m][n] = 0.;
-	       }
-	    }
-	 }
+         SigmaTilde[i][k].resize(GetTotalScalenodes());
+         for( int l=0 ; l<GetTotalScalenodes() ; l++ ){
+            //ResizeVector(SigmaTilde[i][k][l],nxmax,NSubproc);
+            SigmaTilde[i][k][l].resize(nxmax);
+            for( int m=0 ; m<nxmax ; m++ ){
+               SigmaTilde[i][k][l][m].resize(NSubproc);
+               for( int n=0 ; n<NSubproc ; n++ ){
+                  SigmaTilde[i][k][l][m][n] = 0.;
+               }
+            }
+         }
       }
    }
 }
@@ -133,7 +133,7 @@ void fastNLOCoeffAddFix::ResizePdfLC(){
       int totalscalenodes = GetTotalScalenodes();
       PdfLc[i].resize(totalscalenodes);
       for( int l=0 ; l<totalscalenodes ; l++ ){
-	 fastNLOTools::ResizeVector(PdfLc[i][l],nxmax,NSubproc);
+         fastNLOTools::ResizeVector(PdfLc[i][l],nxmax,NSubproc);
       }
    }
 }
@@ -220,13 +220,13 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(){
 void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double coef) {
    for (int i=0; i<SigmaTilde.size(); i++) {
       for (unsigned int s=0 ; s<SigmaTilde[i].size() ; s++) {
-	 for (unsigned int x=0 ; x<SigmaTilde[i][s].size() ; x++) {
-	    for (unsigned int l=0 ; l<SigmaTilde[i][s][x].size() ; l++) {
-	       for (unsigned int m=0 ; m<SigmaTilde[i][s][x][m].size() ; m++) {
-		  SigmaTilde[i][s][x][l][m] *= coef;
-	       }
-	    }
-	 }
+         for (unsigned int x=0 ; x<SigmaTilde[i][s].size() ; x++) {
+            for (unsigned int l=0 ; l<SigmaTilde[i][s][x].size() ; l++) {
+               for (unsigned int m=0 ; m<SigmaTilde[i][s][x][m].size() ; m++) {
+                  SigmaTilde[i][s][x][l][m] *= coef;
+               }
+            }
+         }
       }
    }
 }

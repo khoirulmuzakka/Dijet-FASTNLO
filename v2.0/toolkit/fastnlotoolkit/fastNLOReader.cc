@@ -1024,7 +1024,7 @@ void fastNLOReader::CalcCrossSection() {
    //!  with the information from the FastNLO file, the pdf and
    //!  the defined alpha_s
    //!
-   // xs = (sum(all active additive (perturbative) contr,) + sum(all active SM corrections) + sum(all active new physics contr.) ) * prod(all active multipl. contr.)
+   // xs = (sum(all active add. (perturbative) contr.) + sum(all other active add. contr.) * prod(all active multipl. contr.)
    debug["CalcCrossSection"]<<endl;
 
    XSection_LO.clear();
@@ -1045,7 +1045,7 @@ void fastNLOReader::CalcCrossSection() {
       return;
    }
 
-   // perturbative (additive) contributions
+   // Perturbative (additive) contributions
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
          if ( bUseSMCalc[j][i] ) {
@@ -1057,21 +1057,25 @@ void fastNLOReader::CalcCrossSection() {
       }
    }
 
-
-   // contributions from the a-posteriori scale variation
-   if (!GetIsFlexibleScaleTable()) {
-      if ( B_NLO() ) { 
-	 // if no NLO table is available: then always calculate aposteriori scale variation. 
-	 // otherwise check, if this calculation is needed.
-	 fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
-	 if ( fabs( fScaleFacMuR - cNLO->GetScaleFactor(fScalevar) ) > DBL_MIN ) {
-	    CalcAposterioriScaleVariation();
-	 }
+   // Check whether pQCD contributions beyond LO exist and are activated
+   bool lknlo = false;
+   if (!BBlocksSMCalc[kFixedOrder].empty()) {
+      for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
+         int kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
+         if (bUseSMCalc[kFixedOrder][i] && kOrder > 0) {
+            lknlo = true;
+            break;
+         }
       }
-      else
-	 CalcAposterioriScaleVariation();
    }
 
+   // Contributions from the a-posteriori scale variation
+   if (!GetIsFlexibleScaleTable() && lknlo) {
+      fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+      if ( fabs(fScaleFacMuR - cNLO->GetScaleFactor(fScalevar)) > DBL_MIN ) {
+         CalcAposterioriScaleVariation();
+      }
+   }
 
    // calculate LO cross sections
    if (GetIsFlexibleScaleTable())
@@ -1153,13 +1157,12 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    //!
    //!  Cross section calculation for DIS and HHC tables in v2.1 format
    //!
-   //debug["CalcCrossSectionv21"]<<"B->fname="<<B->GetName()<<"\tNpow="<<B->GetNpow()<<"\tIsLO="<<IsLO<<endl;
+   debug["CalcCrossSectionv21"]<<"Npow="<<c->GetNpow()<<"\tIsLO="<<IsLO<<endl;
 
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS = IsLO ? &QScale_LO : &QScale;
-   //c->fact.resize(NObsBin);
+
    for (int i=0; i<NObsBin; i++) {
-      //B->fact[i]=0;
       int nxmax = c->GetNxmax(i);
       double unit = (fUnits==kAbsoluteUnits) ? BinSize[i] : 1.;
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
@@ -1185,14 +1188,13 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                      }
                      if ( c->GetNScaleDep() >= 6 ) {
                         xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * pow(log(mur2),2) * fac / c->GetNevt(i,n);
-		     }
+                     }
                      if ( c->GetNScaleDep() >= 7 ) {
                         xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * pow(log(muf2),2) * fac / c->GetNevt(i,n);
                         xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * log(mur2) * log(muf2) * fac / c->GetNevt(i,n);
                      }
                   }
                   XS->at(i)   += xsci;
-                  //B->fact[i]  += xsci;
                   QS->at(i)   += xsci*mur;
                }
             }
@@ -1204,17 +1206,16 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
 
 //______________________________________________________________________________
 void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
-   debug["CalcCrossSectionv20"]<<"Npow="<<c->GetNpow()<<"\tIsLO="<<IsLO<<endl;
    //!
    //!  Cross section calculation in v2.0 format
    //!
+   debug["CalcCrossSectionv20"]<<"Npow="<<c->GetNpow()<<"\tIsLO="<<IsLO<<endl;
 
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
    vector<double>* XS    = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS    = IsLO ? &QScale_LO : &QScale;
-   //B->fact.resize(NObsBin);
+
    for (int i=0; i<NObsBin; i++) {
-      //B->fact[i] = 0;
       int nxmax = c->GetNxmax(i);
       double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
       for (int j=0; j<c->GetTotalScalenodes(); j++) {
@@ -1224,7 +1225,6 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
             for (int l=0; l<c->GetNSubproc(); l++) {
                double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
-               //B->fact[i]     +=  xsci;
                QS->at(i)      +=  xsci*mur;
             }
          }
@@ -1258,7 +1258,7 @@ void fastNLOReader::FillAlphasCache() {
    debug["FillAlphasCache"]<<"Sanity check!"<<endl;
    TestAlphas();
 
-   // is there a need for a recalclation?
+   // is there a need for a recalculation?
    const double asNew = CalcReferenceAlphas();
    if (asNew == fAlphasCached) {
       debug["FillAlphasCache"]<<"No need for a refilling of AlphasCache. asNew==fAlphasCached="<<asNew<<endl;
