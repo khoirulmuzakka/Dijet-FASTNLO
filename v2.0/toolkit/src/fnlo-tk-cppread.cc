@@ -28,8 +28,13 @@
 #include "fastnlotk/fastNLOLHAPDF.h"
 //#include "fastnlotk/fastNLOUser.h"
 //#include "fastnlotk/fastNLODiffUser.h"
-#include "fastnlotk/fastNLOQCDNUMAS.h"
-#include "fastnlotk/fastNLOHoppet.h"
+// Optional:
+// If compiled --with-qcdnum support the following line(s) can be commented in
+//#include "fastnlotk/fastNLOQCDNUMAS.h"
+// End --with-qcdnum
+// If compiled --with-hoppet support the following line(s) can be commented in
+//#include "fastnlotk/fastNLOHoppet.h"
+// End --with-hoppet
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
