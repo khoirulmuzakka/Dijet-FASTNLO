@@ -41,7 +41,7 @@
 *     >        3: Also print x nodes of Block B for each contr. (BX)
 *     >        4: Also print scale nodes of Block B for each contr. (BS)
 *     >        5: Also print sigma tilde of Block B (BT)
-      IPRINT = 5
+      IPRINT = 0
       LPRINT = .FALSE.
       NUNIT=2
 
@@ -400,6 +400,7 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
          IF (ITABVERSION.LT.20200) THEN
             CHTMP = "  B0    Nevt("//CH1TMP//")"
             CALL FNIOLINT(CRW,NUNIT, NEVT(IC),LPRINT,CHTMP)
+            DEVT(IC) = 0D0
          ELSE
             CHTMP = "  B0    Devt("//CH1TMP//")"
             CALL FNIODBL(CRW,NUNIT, DEVT(IC),LPRINT,CHTMP)
