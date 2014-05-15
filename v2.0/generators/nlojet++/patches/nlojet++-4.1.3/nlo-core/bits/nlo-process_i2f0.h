@@ -239,6 +239,13 @@ namespace nlo {
       
       void finix2(_Weight& res) const { 
 	res = amp[1] + amp[4]*lxf;
+	if (mode==1) {
+	   int NSubproc = 7;
+	   for(int proc=0;proc<NSubproc;proc++){
+	      if ( isnan(amp[1][proc]) ) std::cout<<"NLOJet++: ERROR! NaN in finix2 for M_proc=1, proc="<<proc<<std::endl;
+	      if ( isnan(amp[4][proc]) ) std::cout<<"NLOJet++: ERROR! NaN in finix2 for M_proc=4, proc="<<proc<<std::endl;
+	   }
+	}
       }
       
       void fini1(_Weight& res) const { 

@@ -31,8 +31,8 @@ AC_PROG_AWK
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
-#AC_PROG_F77([gfortran g77])
-#AC_PROG_FC([gfortran g77])
+AC_PROG_F77([gfortran g77])
+AC_PROG_FC([gfortran g77])
 #case $FC in
 #  gfortran) AC_SUBST([HAVE_GFORTRAN], [yes])
 #  g77) AC_SUBST([HAVE_G77], [yes])
@@ -47,7 +47,7 @@ AC_PROG_MAKE_SET
 # Checks for sources.
 
 # Checks for libraries.
-#AC_F77_LIBRARY_LDFLAGS
+AC_F77_LIBRARY_LDFLAGS
 AC_CHECK_LIB([g2c], [getenv_])
 AC_CHECK_LIB([LHAPDF], [alphas])
 #AC_CHECK_LIB([fastnlotoolkit], [libfastnlotoolkit_la-FastNLOBlockB])
@@ -350,6 +350,7 @@ AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
+AC_SUBST([YEARS],[2011,2012,2013,2014])
 
 # Output
 #                 doc/Makefile
