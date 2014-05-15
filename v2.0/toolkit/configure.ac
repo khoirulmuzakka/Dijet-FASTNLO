@@ -66,97 +66,160 @@ AC_CHECK_FUNCS([memset pow sqrt strstr])
 
 # Announce checks particular for fastNLO_toolkit
 AC_MSG_NOTICE([*************************************************])
-AC_MSG_NOTICE([Starting checks particular for fastNLO_toolkit ...])
+AC_MSG_NOTICE([Starting checks particular for $PACKAGE_NAME ...])
 AC_MSG_NOTICE([*************************************************])
 
 # LHAPDF
+AC_SUBST([TMPNAM],["LHAPDF"])
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Looking for LHAPDF installation ...])
+AC_MSG_NOTICE([Looking for $TMPNAM installation ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([lhapdf],
         [AS_HELP_STRING([--with-lhapdf],
-        [Specify location of LHAPDF installation. This takes precedence over
+        [Specify location of $TMPNAM installation. This takes precedence over
         an LHAPDF environment variable, the prefix path or other methods.
-        Please note: LHAPDF is mandatory in order to use fastNLO_toolkit!])],
+        Please note: $TMPNAM is mandatory in order to use $PACKAGE_NAME!])],
         [if test "x$withval" = "xno"; then
-            AC_MSG_ERROR([fastNLO_toolkit CANNOT be used without LHAPDF! Configuration aborted!])
+            AC_MSG_ERROR([$PACKAGE_NAME CANNOT be used without $TMPNAM! Configuration aborted!])
          fi
          if test "x$withval" != "xyes"; then
                AC_SUBST([LHAPDF],[$withval])
-               AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
+               AC_MSG_NOTICE([Using given path $LHAPDF as location of $TMPNAM installation.])
          fi],
         [])
 
 if test "x$with_lhapdf" != "xno"; then
    if test "x$LHAPDF" = "x"; then
-      AC_MSG_NOTICE([No LHAPDF installation path set. Try to find LHAPDF in prefix path ...])
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
       if test "x$LHAPDFBIN" = "x"; then
-         AC_MSG_NOTICE([No LHAPDF installation found in prefix path. Try to find LHAPDF in system path ...])
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
          AC_PATH_PROG([LHAPDFBIN],[lhapdf-config])
          if test "x$LHAPDFBIN" = "x"; then
-            AC_MSG_ERROR([No LHAPDF library found. Configuration aborted!])
+            AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
          fi
       fi
    else
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$LHAPDF/bin])
       if test "x$LHAPDFBIN" = "x"; then
-         AC_MSG_ERROR([lhapdf-config not found in given path to LHAPDF! Configuration aborted!])
+         AC_MSG_ERROR([lhapdf-config not found in given path to $TMPNAM! Configuration aborted!])
       fi
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$LHAPDFBIN" != "x"; then
-      AC_MSG_NOTICE([LHAPDF settings:])
+      AC_MSG_NOTICE([$TMPNAM settings:])
       AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
       AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
       AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
       AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
       AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
-      AC_MSG_RESULT([Using $LHAPDFPREFIX for the LHAPDF installation path])
+      AC_MSG_RESULT([Using $LHAPDFPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
       AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
       AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
       AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
    else
-      AC_MSG_ERROR([No LHAPDF library found. Configuration aborted!])
+      AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
    fi
 else
    AC_MSG_NOTICE([******************************************])
-   AC_MSG_ERROR([fastNLO_toolkit CANNOT be used without LHAPDF! Configuration aborted!])
+   AC_MSG_ERROR([$PACKAGE_NAME CANNOT be used without $TMPNAM! Configuration aborted!])
 fi
 AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
 AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
+# FastJet
+#AC_SUBST([TMPNAM],["FastJet"])
+#AC_MSG_NOTICE([******************************************])
+#AC_MSG_NOTICE([Looking for $TMPNAM installation ...])
+#AC_MSG_NOTICE([******************************************])
+#
+#AC_ARG_WITH([fastjet],
+#        [AS_HELP_STRING([--with-fastjet],
+#         [Specify location of $TMPNAM installation. This takes precedence over
+#          a FASTJET environment variable, the prefix path or other methods.
+#          Please note: $TMPNAM is not required but warmly recommended in order to apply jet algorithms!])],
+#        [if test "x$withval" = "xno"; then
+#            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
+#         else
+#            if test "x$withval" != "xyes"; then
+#               AC_SUBST([FASTJET],[$withval])
+#               AC_MSG_NOTICE([Using given path $FASTJET as location of $TMPNAM installation.])
+#            fi
+#         fi],
+#        [])
+#
+#if test "x$withval" != "xno"; then
+#   if test "x$FASTJET" = "x"; then
+#      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
+#      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$prefix/bin])
+#      if test "x$FASTJETBIN" = "x"; then
+#         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+#         AC_PATH_PROG([FASTJETBIN],[fastjet-config])
+#         if test "x$FASTJETBIN" = "x"; then
+#            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
+#         fi
+#      fi
+#   else
+#      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
+#      if test "x$FASTJETBIN" = "x"; then
+#         AC_MSG_ERROR([fastjet-config not found in given path to $TMPNAM! Configuration aborted!])
+#      fi
+#   fi
+#   AC_MSG_NOTICE([******************************************])
+#   if test "x$FASTJETBIN" != "x"; then
+#      AC_MSG_NOTICE([$TMPNAM settings:])
+#      AC_SUBST([FASTJETPREFIX],  [`$FASTJETBIN --prefix`])
+#      AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
+#      AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
+#      AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
+#      AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
+#      AC_MSG_RESULT([Using $FASTJETPREFIX for the $TMPNAM installation path])
+#      AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
+#      AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
+#      AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
+#      AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
+#   else
+#      AC_MSG_NOTICE([No $TMPNAM library found. Building $PACKAGE_NAME without $TMPNAM!])
+#   fi
+#else
+#   AC_MSG_NOTICE([******************************************])
+#   AC_MSG_NOTICE([$TMPNAM support switched off by user. Building $PACKAGE_NAME without $TMPNAM!])
+#fi
+#AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
+#AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
+
 # QCDNUM
+AC_SUBST([TMPNAM],["QCDNUM"])
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Checking whether QCDNUM support is requested ...])
+AC_MSG_NOTICE([Checking whether $TMPNAM support is requested ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([qcdnum],
         [AS_HELP_STRING([--with-qcdnum],
-        [Specify location of QCDNUM installation. This takes precedence over
+        [Specify location of $TMPNAM installation. This takes precedence over
         a QCDNUM environment variable, the prefix path or other methods.
-        Please note: QCDNUM can optionally be used in fastNLO_toolkit!])],
+        Please note: $TMPNAM can optionally be used in $PACKAGE_NAME!])],
         [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
             AC_SUBST([QCDNUM],[$withval])
-            AC_MSG_NOTICE([Using given path $QCDNUM as location of QCDNUM installation.])
+            AC_MSG_NOTICE([Using given path $QCDNUM as location of $TMPNAM installation.])
         fi],
         [with_qcdnum="no"])
 
 if test "x$with_qcdnum" != "xno"; then
    if test "x$QCDNUM" = "x"; then
-      AC_MSG_NOTICE([No QCDNUM installation path set. Try to find QCDNUM in prefix path ...])
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
       AC_CHECK_FILE([$prefix/lib/libqcdnum.a],
       [preqcdnum="$ac_cv_file_$prefix/lib/libqcdnum.a"],
       [preqcdnum=""])
       if test "x$preqcdnum" = "x"; then
-         AC_MSG_NOTICE([No QCDNUM library found in prefix path. Try to link with systems QCDNUM ...])
+         AC_MSG_NOTICE([No $TMPNAM library found in prefix path. Try to link with systems $TMPNAM ...])
          AC_CHECK_LIB([qcdnum],[libqcdnum_a-qcdnum],
          [sysqcdnum=$ac_cv_lib_libqcdnum_a-qcdnum],
          [sysqcdnum=""])
          if test "x$sysqcdnum" = "x"; then
-            AC_MSG_ERROR([No QCDNUM library found. Please install QCDNUM first. Configuration aborted!])
+            AC_MSG_ERROR([No $TMPNAM library found. Please install $TMPNAM first. Configuration aborted!])
          else
             AC_SUBST([QCDNUMLIBPATH], [`dirname $sysqcdnum`])
          fi
@@ -167,50 +230,51 @@ if test "x$with_qcdnum" != "xno"; then
    else
       AC_CHECK_FILE([$QCDNUM/lib/libqcdnum.a],
       [],
-      [AC_MSG_ERROR([QCDNUM library not found at given path $QCDNUM/lib. Please install QCDNUM first. Configuration aborted!])])
+      [AC_MSG_ERROR([$TMPNAM library not found at given path $QCDNUM/lib. Please install $TMPNAM first. Configuration aborted!])])
    fi
    AC_SUBST([QCDNUMPREFIX], "$QCDNUM")
    AC_SUBST([QCDNUMLIBPATH], "$QCDNUMPREFIX/lib")
    AC_SUBST([QCDNUMLIBS], ["-lzmstf -lhqstf -lqcdnum -lmbutil"])
    AC_MSG_NOTICE([******************************************])
-   AC_MSG_NOTICE([QCDNUM settings:])
-   AC_MSG_RESULT([Using $QCDNUMPREFIX for the QCDNUM installation path])
+   AC_MSG_NOTICE([$TMPNAM settings:])
+   AC_MSG_RESULT([Using $QCDNUMPREFIX for the $TMPNAM installation path])
    AC_MSG_RESULT([Using $QCDNUMLIBPATH for the libraries])
 else
-   AC_MSG_NOTICE([No QCDNUM support requested. Continue without QCDNUM.])
+   AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
    AC_MSG_NOTICE([******************************************])
 fi
 AM_CONDITIONAL(HAVE_QCDNUM, test "x$QCDNUMPREFIX" != "x")
 
 # HOPPET
+AC_SUBST([TMPNAM],["HOPPET"])
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Checking whether HOPPET support is requested ...])
+AC_MSG_NOTICE([Checking whether $TMPNAM support is requested ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([hoppet],
         [AS_HELP_STRING([--with-hoppet],
-        [Specify location of HOPPET installation. This takes precedence over
+        [Specify location of $TMPNAM installation. This takes precedence over
         a HOPPET environment variable, the prefix path or other methods.
-        Please note: HOPPET can optionally be used in fastNLO_toolkit!])],
+        Please note: $TMPNAM can optionally be used in $PACKAGE_NAME!])],
         [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
             AC_SUBST([HOPPET],[$withval])
-            AC_MSG_NOTICE([Using given path $HOPPET as location of HOPPET installation.])
+            AC_MSG_NOTICE([Using given path $HOPPET as location of $TMPNAM installation.])
         fi],
         [with_hoppet="no"])
 
 if test "x$with_hoppet" != "xno"; then
    if test "x$HOPPET" = "x"; then
-      AC_MSG_NOTICE([No HOPPET installation path set. Try to find HOPPET in prefix path ...])
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
       AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
       [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
       [prehoppet=""])
       if test "x$prehoppet" = "x"; then
-         AC_MSG_NOTICE([No HOPPET library found in prefix path. Try to link with systems HOPPET ...])
+         AC_MSG_NOTICE([No $TMPNAM library found in prefix path. Try to link with systems $TMPNAM ...])
          AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
          [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
          [syshoppet=""])
          if test "x$syshoppet" = "x"; then
-            AC_MSG_ERROR([No HOPPET library found. Please install HOPPET first. Configuration aborted!])
+            AC_MSG_ERROR([No $TMPNAM library found. Please install $TMPNAM first. Configuration aborted!])
          else
             AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
          fi
@@ -221,19 +285,19 @@ if test "x$with_hoppet" != "xno"; then
    else
       AC_CHECK_FILE([$HOPPET/lib/libhoppet_v1.a],
       [],
-      [AC_MSG_ERROR([HOPPET library not found at given path $HOPPET/lib. Please install HOPPET first. Configuration aborted!])])
+      [AC_MSG_ERROR([$TMPNAM library not found at given path $HOPPET/lib. Please install $TMPNAM first. Configuration aborted!])])
    fi
    AC_SUBST([HOPPETPREFIX], ["$HOPPET"])
    AC_SUBST([HOPPETBIN], ["$HOPPETPREFIX/bin"])
    AC_SUBST([HOPPETLDFLAGS], ["$($HOPPETBIN/hoppet-config --libs)"])
    AC_SUBST([HOPPETCPPFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
    AC_MSG_NOTICE([******************************************])
-   AC_MSG_NOTICE([HOPPET settings:])
-   AC_MSG_RESULT([Using $HOPPETPREFIX for the HOPPET installation path])
-   AC_MSG_RESULT([Using $HOPPETBIN for the HOPPET bin path])
+   AC_MSG_NOTICE([$TMPNAM settings:])
+   AC_MSG_RESULT([Using $HOPPETPREFIX for the $TMPNAM installation path])
+   AC_MSG_RESULT([Using $HOPPETBIN for the $TMPNAM bin path])
    AC_MSG_RESULT([Using $HOPPETLDFLAGS for the libraries])
 else
-   AC_MSG_NOTICE([No HOPPET support requested. Continue without HOPPET.])
+   AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
    AC_MSG_NOTICE([******************************************])
 fi
 AM_CONDITIONAL(HAVE_HOPPET, test "x$HOPPETPREFIX" != "x")
@@ -263,7 +327,7 @@ else
    DX_XML_FEATURE(OFF)
    DX_PDF_FEATURE(ON)
    DX_PS_FEATURE(OFF)
-   DX_INIT_DOXYGEN(fastNLO_toolkit, doxygen.cfg, doc/doxygen)
+   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
 fi
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
 
