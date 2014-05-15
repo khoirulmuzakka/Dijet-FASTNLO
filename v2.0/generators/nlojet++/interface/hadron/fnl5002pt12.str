@@ -1,0 +1,265 @@
+! -------------------------------------------------------------- !
+!
+!  A steering file for creating a fastNLO table (with nlojet++)
+!
+! -------------------------------------------------------------- !
+
+
+
+! -------------------------------------------------------------- !
+! 
+!   Generator and process specific variables.
+!   ( A change of these variable partly requires new coding. )
+!
+! -------------------------------------------------------------- !
+OutputPrecision			8	! Number of decimal values in output table
+FlexibleScaleTable		true	! currently only flexible scale tables implemented.
+ApplyPDFReweighting		true	! Apply reweighting of pdfs for an optimized interpolation. (true)
+NPDF				2	! number of PDFs involved (only 2 is implemented)
+PDF1				2212	! PDF of first hadron (following PDG convention). Must agree with values from nlojet-module.
+PDF2				2212	! PDF of second hadron (following PDG convention). Must agree with values from nlojet-module.
+NPDFDim				1	! Internal way to store PDF linear combinations. Use 1 for hadron-hadron collisions (half-matrix storage)	
+UnitsOfCoefficients		12	! Units of coeffients as passed to fastNLO (negative power of 10: pb->12, fb->15)
+
+! number of subprocesses of the considered process.
+! Since the calculation order is obtained from generator, only the necessary variable is used.
+NSubProcessesLO			7	! Flexible scale tables store 7 number of processes in LO, although only 6 are required.
+NSubProcessesNLO		7	
+NSubProcessesNNLO		7	
+AsymmetricProcesses {{		! specify processes that need to to be exchanged in half-matrix notation, when xmin>xmax
+   ProcID	AsymProcID
+     5               6
+     6               5
+}}
+
+IPDFdef1			3	! Define PDF linear combinations corresponding to partonic subprocesses (hadron-hadron: 3)
+IPDFdef2			1	! Flag to define PDF linear combinations (dependent on IPDFdef1. Use 1 for jet-production in pp/ppbar)
+IPDFdef3LO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
+IPDFdef3NLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
+IPDFdef3NNLO			2	! Unique identifier (dependent on IPDFdef1, IPDFdef2) for specifying the PDF linear combinations.
+
+
+!  Descritption of used generator code. Include also citations here!
+!  Embrace each single line in quotation marks.
+CodeDescription {
+   "NLOJet++_4.1.3"
+   "Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),"
+   "Z. Nagy, Phys. Rev. D68, 094002 (2003)."
+}
+! -------------------------------------------------------------- !
+
+
+
+
+! -------------------------------------------------------------- !
+!   Variables which are obtained and superseeded from NLOJET++, but may be 
+!   useful for other generators.
+! -------------------------------------------------------------- !
+
+! -------------------------------
+!   Center of mass energy (is obtained from nlojet)
+CenterOfMassEnergy		
+
+! -------------------------------
+!   Order of alpha_s of the leading-order process (is obtained from nlojet)
+LeadingOrder			2
+
+! -------------------------------
+!   Order of alpha_s of the calculation (is obtained from nlojet)
+OrderInAlphasOfCalculation	2
+
+! -------------------------------
+!   Specify filename of output fastNLO table
+OutputFilename			test.tab
+
+! -------------------------------------------------------------- !
+
+
+
+
+
+
+! -------------------------------------------------------------- !
+!  Choose interpolation kernel and distance measure
+!
+!  Currently implemented interpolation kernels
+!    - CatmulRom
+!
+!  Currently implemented distance measures
+!    - linear
+!    - loglog025	eq. to (log(log(4*x)))
+!    - log10
+!    - sqrtlog10	eq. to sqrt(log_10(x))	
+! -------------------------------------------------------------- !
+X_Kernel		"CatmulRom"
+X_DistanceMeasure	"sqrtlog10"
+X_NNodes		5		! 
+X_NoOfNodesPerMagnitude	true		! 
+
+Mu1_Kernel		"CatmulRom"
+Mu1_DistanceMeasure	"loglog025"
+Mu1_NNodes		5		
+
+Mu2_Kernel		"CatmulRom"
+Mu2_DistanceMeasure	loglog025
+Mu2_NNodes		4		
+
+
+
+
+
+! -------------------------------------------------------------- !
+!
+!   Scenario specific variables
+!
+! -------------------------------------------------------------- !
+
+
+! -------------------------------
+!   Unit in barns of the publication
+!   (negative power of 10)
+!   pb: 12
+!   fb: 15
+! -------------------------------
+PublicationUnits	12
+
+
+
+
+! -------------------------------
+!  Description of scenario
+!  (Write each line of description in quotation marks)
+! -------------------------------
+ScenarioName		fnl5002pt12
+ScenarioDescription {
+ "d2sigma-dijet_dm12dy*_[pb_TeV]"
+ "ATLAS_Collaboration"
+ "Dijet_Mass"
+ "anti-kT_R=0.6"
+ "arXiv:1112.6297"
+ "provided by:"
+ "fastNLO_2.1.0"
+ "If you use this table, please cite:"
+ "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
+}
+
+
+
+! -------------------------------
+!  Specify if binning is read from this file
+! -------------------------------
+ReadBinningFromSteering		true
+
+
+! -------------------------------
+!  How many differential dimensions 
+!  are measured.
+!  Number must be consistent with DimensionLabels, and DimensionIsDifferential, ...
+!    - 1: read in 'SingleDiffBinning'
+!    - 2: read in 'DoubleDifferentialBinning'
+!    - 3: read in 'TripleDifferentialBinning'
+! -------------------------------
+DifferentialDimension		2
+
+
+! -------------------------------
+!  Labels for the measurement dimension
+! -------------------------------
+DimensionLabels {
+"m12_[TeV]"
+"y*"
+}
+
+! If flexible-scale table: specify name of the variable of the two scales.
+! If standard table is demanded, only 'ScaleDescriptionScale1' is required.
+ScaleDescriptionScale1		"<pT> [GeV]"
+ScaleDescriptionScale2		"pT_2 [GeV]"
+
+
+! --------------------------------
+!   Binning
+! - - - - - - - - - - - - - - - - 
+! Use either 'SingleDiffBinning' or
+! 'DoubleDifferentialBinning' according to
+! specification of 'DifferentialDimension'
+! (Triple-differential, and non-differential measurements not yet implemented)
+! --------------------------------
+
+! Example !!
+SingleDiffBinning {
+ 7 11 18 30 50 100
+}
+
+! Example !!
+DoubleDifferentialBinning {{
+  1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension ----"
+    0		0.5	  0.07 0.11 0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.94 2.78
+   0.5		1.0	  0.11 0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 2.12, 2.31
+   1.0		1.5	  0.16 0.21 0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.55, 3.61
+   1.5		2.0	  0.26 0.31 0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.78 3.93
+   2.0		2.5	  0.37 0.44 0.51 0.59 0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 3.04 4.27
+   2.5		3.0	  0.67 0.76 0.85 0.95 1.06 1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.31 4.64
+   3.0		3.5	  1.18 1.31 1.45 1.60 1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.04, 3.61 5.04 
+   3.5		4.0	  1.76 1.94, 2.12, 2.33, 2.55 2.78, 3.04, 3.31 3.93 5.47 
+   4.0          4.4	  2.55 3.04, 4.27 
+}}
+
+! Example !! Triple differetial implementation not fully tested yet (29.07.13)
+TripleDifferentialBinning {{
+  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3nd dimension ----"
+   100       150         -1        0.           7 11 18 30 50 	
+   150       200         -1.       0.           7 11 18 30 50 	
+   200       400         0.       1.5           7 11 18 30 50
+   400       700         0.       1.5           7 11 18 30 50
+   700       5000        1.5      2.5          7 11 18 30 50
+   5000      15000       1.5      2.5          7 11 18 30 50
+}}
+
+
+! -------------------------------
+!  Is this a differential measurement in dimension X?
+!  Specify flag for each dimension.
+!    - 0:  NO
+!    - 1:  YES
+!    - 2:  Divide Cross Section by bin width of that dimension
+! -------------------------------
+DimensionIsDifferential { 
+ 2  2  2
+}
+
+
+! --------------------------------
+!  Calculate bin width from lower and upper bin boundary
+!    - if 'false':
+!       specify a table of the width of every bin:
+!        BinWidth { x1 x2 x3 ... }
+!    - if 'true':
+!      Specify a multiplicative factor for bin width (useful for |y|-measurements)
+!
+!  If the measurement is not divided by the bin width, then specify
+!   'CalculateBinWidth  true' and use 'DimensionIsDifferential' equal '0' for each dimension.
+! --------------------------------
+
+CalculateBinWidth	true
+BinWidthFactor		1.
+
+
+
+! ----------------------------------------------------------!
+!   Include automatically generated warm-up
+!   by convention it must be:
+!     <steerfile>_<ScenarioName>_warmup.txt
+!   with 
+!     -  <steerfile>	name if this file, without .str and .steer
+!     -  <ScenarioName> as given above
+!
+!   If no Warmup file found, fastNLO seeks for warmup file
+!   by itsself.
+!   It is also possible to copy the warmup values directly 
+!   into this file (in order to keep information together).
+!
+!   Ignore 'error' message from 'read_steer'.
+! ----------------------------------------------------------!
+#include:FastNLOExample_${ScenarioName}_warmup.txt
+
+
