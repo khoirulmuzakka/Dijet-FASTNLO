@@ -48,7 +48,7 @@ endif
 if HAVE_FASTJETCONFIG
    libfastnlojetalgos_la_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs`
 else
-   libfastnlojetalgos_la_LDFLAGS += -L$(FASTJETLIBPATH) -lfastjet
+   libfastnlojetalgos_la_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
 endif
 
 # Files that are required to build the project but that can be
