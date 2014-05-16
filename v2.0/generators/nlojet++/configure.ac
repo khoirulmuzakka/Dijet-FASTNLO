@@ -10,8 +10,8 @@
 # Process this file with autoconf to produce a configure script.
 # Require minimal autoconf version of 2.59
 AC_PREREQ([2.59])
-# Define subproject fastNLO_interface_nlojet++
-AC_INIT([fastNLO_interface_nlojet++], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+# Define subproject fastNLO_interface_nlojet
+AC_INIT([fastNLO_interface_nlojet], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version of 1.9, switch on warnings
@@ -65,7 +65,7 @@ AC_C_INLINE
 AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([memset pow sqrt strstr])
 
-# Announce checks particular for fastNLO_interface_nlojet++
+# Announce checks particular for fastNLO_interface_nlojet
 AC_MSG_NOTICE([*************************************************])
 AC_MSG_NOTICE([Starting checks particular for $PACKAGE_NAME ...])
 AC_MSG_NOTICE([*************************************************])
@@ -244,9 +244,11 @@ else
    AC_MSG_NOTICE([******************************************])
    AC_MSG_NOTICE([$TMPNAM support switched off by user. Building $PACKAGE_NAME without $TMPNAM!])
 fi
-AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
+AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" == "x")
 AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
-#AC_MSG_ERROR([STOPP])
+AC_MSG_RESULT([HAVE_FASTJET is $HAVE_FASTJET])
+AC_MSG_RESULT([HAVE_FASTJETCONFIG is $HAVE_FASTJETCONFIG])
+AC_MSG_ERROR([STOPP])
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"

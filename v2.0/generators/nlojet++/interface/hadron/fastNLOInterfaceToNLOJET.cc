@@ -8,9 +8,9 @@
 #include <cstdio>
 #include <algorithm> //c++98
 #include <utility>   //c++11
-#include <fastnlotk/fastNLOEvent.h>
-#include <fastnlotk/fastNLOGeneratorConstants.h>
-#include "pdf-hhc-dummy.h"
+#include "fastnlotk/fastNLOEvent.h"
+#include "fastnlotk/fastNLOGeneratorConstants.h"
+#include "fastnloja/pdf-hhc-dummy.h"
 
 namespace UsefulNlojetTools {
    /**

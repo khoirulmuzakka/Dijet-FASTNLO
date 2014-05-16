@@ -16,7 +16,7 @@ SUBDIRS = include
 # Targets
 #
 # The fastNLO library with the jet algos and interfaces inside
-lib_LTLIBRARIES = libfastnlojetalgos.la
+pkglib_LTLIBRARIES = libfastnlojetalgos.la
 
 #
 # Sources
