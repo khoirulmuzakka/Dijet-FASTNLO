@@ -13,10 +13,10 @@
 
 namespace fastNLOGrid {
    enum GridType {
-      kLinear           = 0,		// linear grid
-      kLogLog025	= 1,		// loglog grid
-      kLog10		= 2,		// log10 grid
-      kSqrtLog10	= 3		// sqrt(logarithmic) grid
+      kLinear           = 0,            // linear grid
+      kLogLog025        = 1,            // loglog grid
+      kLog10            = 2,            // log10 grid
+      kSqrtLog10        = 3             // sqrt(logarithmic) grid
    };
 }
 
@@ -28,10 +28,10 @@ public:
 
    fastNLOInterpolBase(double min, double max, int nMinNodes);
    virtual ~fastNLOInterpolBase(void);
-   
+
    const vector<pair<int,double> >& GetNodeValues(double val);
    vector<pair<int,double> >* GetNodeValuesPtr(double val);
-   
+
    void MakeGrids(fastNLOGrid::GridType type, int nNodes);
    void MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodes);
    void RemoveLastNode();
@@ -83,18 +83,17 @@ protected:
 
 protected:
    vector<pair<int,double> > fNodes;
-   double fLastVal;
 
-   double fvalmax;
-   double fvalmin;
    int fNMinNodes;
+   double fvalmin;
+   double fvalmax;
+   double fLastVal;
+   bool fLastGridPointWasRemoved; // odd boolean to agree with original code;
    fastNLOGrid::GridType fdm; // distance measure
    vector<double> fgrid;
    vector<double> fHgrid;
    int fnmod ; // variable for final nodes. Has to be filled by inherited algorithm
-   bool fLastGridPointWasRemoved; // odd boolean to agree with original code;
-   
-};
 
+};
 
 #endif

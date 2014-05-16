@@ -15,28 +15,28 @@ namespace fastNLOTools {
       //! Read values according to the size() of the given vector
       //! from table (v2.0 format).
       for( unsigned int i=0 ; i<v.size() ; i++){
-	 table >> v[i];
-	 v[i] *= nevts;
+         table >> v[i];
+         v[i] *= nevts;
       }
       return v.size();
    }
 
-   
+
    //________________________________________________________________________________________________________________ //
    int ReadFlexibleVector(vector<double >& v, istream& table , int nProcLast , double nevts ){
       int nn = 0;
-      if ( nProcLast==0 ) {
-	 int size = 0;
-	 table >> size; nn++;
-	 v.resize(size);
+      if ( nProcLast == 0 ) {
+         int size = 0;
+         table >> size; nn++;
+         v.resize(size);
       }
       else {
-	 v.resize(nProcLast);
+         v.resize(nProcLast);
       }
       for(unsigned int i0=0;i0<v.size();i0++){
-	 table >> v[i0];
-	 v[i0] *= nevts;
-	 nn++;
+         table >> v[i0];
+         v[i0] *= nevts;
+         nn++;
       }
       return nn;
    }
@@ -45,12 +45,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v7d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5, int dim6 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1, dim2, dim3, dim4, dim5, dim6 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1, dim2, dim3, dim4, dim5, dim6 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -58,12 +58,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v6d& v, int dim0 , int dim1, int dim2, int dim3, int dim4, int dim5 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1, dim2, dim3, dim4, dim5 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1, dim2, dim3, dim4, dim5 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -73,12 +73,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v5d& v, int dim0 , int dim1, int dim2, int dim3, int dim4 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1, dim2, dim3, dim4 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1, dim2, dim3, dim4 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -86,12 +86,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v4d& v, int dim0 , int dim1, int dim2, int dim3 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1, dim2, dim3 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1, dim2, dim3 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -99,12 +99,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v3d& v, int dim0 , int dim1, int dim2 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1, dim2 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1, dim2 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -112,12 +112,12 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v2d&  v, int dim0 , int dim1 ){
       if ( dim0 > 0 ){
-	 v.resize(dim0);
-	 for ( int i= 0 ; i<dim0 ; i++)
-	    ResizeVector( v[i] , dim1 );
+         v.resize(dim0);
+         for ( int i= 0 ; i<dim0 ; i++)
+            ResizeVector( v[i] , dim1 );
       } else {
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
@@ -125,17 +125,17 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    void ResizeVector( v1d& v, int dim0 ){
       if ( dim0 > 0 )
-	 v.resize(dim0);
+         v.resize(dim0);
       else{
-	 error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
-	 exit(1);
+         error["fastNLOTools::ResizeVector"]<<"Cannot resize table, because dimension is <= zero (dim0="<<dim0<<"). Exiting"<<endl;
+         exit(1);
       }
    }
 
 
 
    //______________________________________________________________________________
-   void ResizeFlexibleVector(vector<double >& v, const vector<double >& nom) { 
+   void ResizeFlexibleVector(vector<double >& v, const vector<double >& nom) {
       v.resize(nom.size());
    }
 
@@ -143,8 +143,8 @@ namespace fastNLOTools {
    //______________________________________________________________________________
    int WriteVector( const vector<string >& v, ostream& table , double nevts ) {
       if ( nevts != 0 ) {
-	 error["fastNLOTools::WriteVector"]<<"Cannot scale a string table by nevts (nevts="<<nevts<<")."<<endl;
-	 return -1000;
+         error["fastNLOTools::WriteVector"]<<"Cannot scale a string table by nevts (nevts="<<nevts<<")."<<endl;
+         return -1000;
       }
       else return _Write1DVector(v,table);
    }
@@ -161,7 +161,7 @@ namespace fastNLOTools {
       return _Write1DVectorByN(v,table,nevts);
    }
 
-   
+
    //______________________________________________________________________________
    void AddVectors( vector<double >& vSum, const vector<double >& vAdd, double w1, double w2 ) {
       _DoAddVectors(vSum,vAdd,w1,w2);
@@ -181,16 +181,16 @@ namespace fastNLOTools {
       //! Write 1-dimensional flexible table to disk
       //! nevts: Divide all values by nevts
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
-      //! if nProcLast!=0, skip the fist line
+      //! if nProcLast != 0, skip the first line
       if ( nevts == 0 ) {
-	 error["fastNLOTools::WriteFlexibleVector"]<<"Cannot divide by zero. nProcLast="<<nProcLast<<endl;
-	 return -1000;
+         error["fastNLOTools::WriteFlexibleVector"]<<"Cannot divide by zero. nProcLast ="<<nProcLast<<endl;
+         return -1000;
       }
-      if ( nProcLast == 0 ) 
-	 table << v.size() << endl;
-      if ( nProcLast!=0 && nProcLast != v.size() ) 
-	 warn["fastNLOTools::WriteFlexibleVector(double)"]
-	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
+      if ( nProcLast == 0 )
+         table << v.size() << endl;
+      if ( nProcLast != 0 && nProcLast != (int)v.size() )
+         warn["fastNLOTools::WriteFlexibleVector(double)"]
+            <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
       int n = _Write1DVectorByN(v,table,nevts);
       return ( nProcLast == 0 ) ? n+1 : n;
    }
@@ -201,14 +201,14 @@ namespace fastNLOTools {
       //! Write 1-dimensional flexible table to disk
       //! nevts: ignoring nevts !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
-      //! if nProcLast!=0, skip the fist line
+      //! if nProcLast != 0, skip the fist line
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(string)"]
-	 <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
-      if ( nProcLast == 0 ) 
-	 table << v.size() << endl;
-      if ( nProcLast!=0 && nProcLast != v.size() ) 
-	 warn["fastNLOTools::WriteFlexibleVector(string)"]
-	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
+         <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
+      if ( nProcLast == 0 )
+         table << v.size() << endl;
+      if ( nProcLast != 0 && nProcLast != (int)v.size() )
+         warn["fastNLOTools::WriteFlexibleVector(string)"]
+            <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
       int n = _Write1DVector(v,table);
       return ( nProcLast == 0 ) ? n+1 : n;
    }
@@ -218,14 +218,14 @@ namespace fastNLOTools {
       //! Write 1-dimensional flexible table to disk
       //! nevts: ignoring nevts !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
-      //! if nProcLast!=0, skip the fist line
+      //! if nProcLast != 0, skip the fist line
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(unsigned long long)"]
-	 <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
-      if ( nProcLast == 0 ) 
-	 table << v.size() << endl;
-      if ( nProcLast!=0 && nProcLast != v.size() ) 
-	 warn["fastNLOTools::WriteFlexibleVector(string)"]
-	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
+         <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
+      if ( nProcLast == 0 )
+         table << v.size() << endl;
+      if ( nProcLast != 0 && nProcLast != (int)v.size() )
+         warn["fastNLOTools::WriteFlexibleVector(string)"]
+            <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
       int n = _Write1DVector(v,table);
       return ( nProcLast == 0 ) ? n+1 : n;
    }
@@ -235,14 +235,14 @@ namespace fastNLOTools {
       //! Write 1-dimensional flexible table to disk
       //! nevts: ignoring nevts !!
       //! nProcLast: Specify, if the size of the vector should be written in the first line.
-      //! if nProcLast!=0, skip the fist line
+      //! if nProcLast != 0, skip the fist line
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(int)"]
-	 <<"Refusing dividing integer numbers by each other! Ignoring nevts="<<nevts<<endl;
-      if ( nProcLast == 0 ) 
-	 table << v.size() << endl;
-      if ( nProcLast!=0 && nProcLast != v.size() ) 
-	 warn["fastNLOTools::WriteFlexibleVector(int)"]
-	    <<"Dimension of this vector is not compatible with its size (i.e. nProclast="<<nProcLast<<", v.size()="<<v.size()<<endl;
+         <<"Refusing dividing integer numbers by each other! Ignoring nevts="<<nevts<<endl;
+      if ( nProcLast == 0 )
+         table << v.size() << endl;
+      if ( nProcLast != 0 && nProcLast != (int)v.size() )
+         warn["fastNLOTools::WriteFlexibleVector(int)"]
+            <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
       int n = _Write1DVector(v,table);
       return ( nProcLast == 0 ) ? n+1 : n;
    }
@@ -251,11 +251,11 @@ namespace fastNLOTools {
    void StripWhitespace(string& str) {
       //! remove white spaces from string
       for(string::iterator achar = str.end(); achar>str.begin();achar--) {
-	 if (*achar==0x20 || *achar==0x00){
-	    str.erase(achar);
-	 }else{
-	    break;
-	 }
+         if (*achar==0x20 || *achar==0x00){
+            str.erase(achar);
+         }else{
+            break;
+         }
       }
    }
 
@@ -263,7 +263,7 @@ namespace fastNLOTools {
    void PutBackMagicNo(istream& table){
    //! Put magic number back
       for(int i=0;i<(int)(log10((double)tablemagicno)+1);i++){
-	 table.unget();
+         table.unget();
       }
    }
 
@@ -274,8 +274,8 @@ namespace fastNLOTools {
       int key = 0;
       table >> key;
       if(key != tablemagicno){
-	 error["ReadMagicNo"]<<"Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
-	 return false;
+         error["ReadMagicNo"]<<"Found "<<key<<" instead of "<<tablemagicno<<"."<<endl;
+         return false;
       };
       return true;
    }

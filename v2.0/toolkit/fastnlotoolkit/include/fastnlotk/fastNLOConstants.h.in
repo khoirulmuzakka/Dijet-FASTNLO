@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-#ifndef FNLO_VERSION
+#ifndef FNLO_NAME
+#define FNLO_NAME       "@PACKAGE_NAME@"
 #define FNLO_VERSION    "@PACKAGE_VERSION@"
 #define FNLO_SVNREV     "@SVNREV@"
 #define FNLO_AUTHORS    "@AUTHORS@"
@@ -13,6 +14,7 @@
 #define FNLO_QUOTEv14   "@QUOTEv14@"
 #define FNLO_AUTHORSv2  "@AUTHORSv2@"
 #define FNLO_QUOTEv2    "@QUOTEv2@"
+#define FNLO_YEARS      "@YEARS@"
 #endif
 
 // KR: Replace by precompiler defines
@@ -111,6 +113,5 @@ namespace fastNLO {
    const std::string _SSEP = _SSEP41 + _SSEP41 + _SSEP41 + _SSEP41;
 
 }
-
 
 #endif

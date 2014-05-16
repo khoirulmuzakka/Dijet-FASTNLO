@@ -91,7 +91,7 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    fGenConsts.Name = CodeDescr[0];
    if (CodeDescr.size() > 1) {
       fGenConsts.References.resize(CodeDescr.size()-1);
-      for (int i = 0 ; i< fGenConsts.References.size() ; i++)
+      for (unsigned int i = 0 ; i< fGenConsts.References.size() ; i++)
          fGenConsts.References [i] = CodeDescr[i+1];
    }
 
@@ -111,7 +111,7 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
       fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
       fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
       if ( fProcConsts.IPDFdef3NNLO > 0 )
-	 fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
    }
    fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
 
@@ -123,20 +123,20 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
       int p1 = 0;
       int p2 = 0;
       for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
-	 int pid = p1*(np)+p2;
-	 int asympid = p2*(np)+p1;
-	 if ( pid != asympid )  // actually not needed necessarily
-	    fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
-	 p2++;
-	 if ( p2 == np ) {
-	    p2=0;
-	    p1++;
-	 }
+         int pid = p1*(np)+p2;
+         int asympid = p2*(np)+p1;
+         if ( pid != asympid )  // actually not needed necessarily
+            fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
+         p2++;
+         if ( p2 == np ) {
+            p2=0;
+            p1++;
+         }
       }
    }
    else if (fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1) {
       vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
-      for (int i = 0 ; i<asym.size() ; i++) {
+      for (unsigned int i = 0 ; i<asym.size() ; i++) {
          if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
          fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
       }
@@ -228,27 +228,27 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
    vector<vector<int> > PartonCombinations;
    if ( ord==0 )      {
       PartonCombinations = INT_TAB_NS(PartonCombinationsLO,fSteerfile);
-      if ( PartonCombinations.size() != fProcConsts.NSubProcessesLO ) {
-	 error["ReadPartonCombinations"]<<"Number of parton combinations for LO processes must be identical to number of subprocesses. NSubProcessesLO="
-					<<fProcConsts.NSubProcessesLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
-	 cout<<"PartonCombinations.size()="<<PartonCombinations.size()<<",  fProcConsts.NSubProcessesLO="<<fProcConsts.NSubProcessesLO<<endl;
-	 exit(1);
+      if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesLO ) {
+         error["ReadPartonCombinations"]<<"Number of parton combinations for LO processes must be identical to number of subprocesses. NSubProcessesLO="
+                                        <<fProcConsts.NSubProcessesLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+         cout<<"PartonCombinations.size()="<<PartonCombinations.size()<<",  fProcConsts.NSubProcessesLO="<<fProcConsts.NSubProcessesLO<<endl;
+         exit(1);
       }
    }
    else if ( ord==1 ) {
       PartonCombinations = INT_TAB_NS(PartonCombinationsNLO,fSteerfile);
-      if ( PartonCombinations.size() != fProcConsts.NSubProcessesNLO ) {
-	 error["ReadPartonCombinations"]<<"Number of parton combinations for NLO processes must be identical to number of subprocesses.  NSubProcessesNLO="
-					<<fProcConsts.NSubProcessesNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
-	 exit(1);
+      if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesNLO ) {
+         error["ReadPartonCombinations"]<<"Number of parton combinations for NLO processes must be identical to number of subprocesses.  NSubProcessesNLO="
+                                        <<fProcConsts.NSubProcessesNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+         exit(1);
       }
    }
    else if ( ord==2 ) {
       PartonCombinations = INT_TAB_NS(PartonCombinationsNNLO,fSteerfile);
-      if ( PartonCombinations.size() != fProcConsts.NSubProcessesNNLO ) {
-	 error["ReadPartonCombinations"]<<"Number of parton combinations for NNLO processes must be identical to number of subprocesses.  NSubProcessesNNLO="
-					<<fProcConsts.NSubProcessesNNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
-	 exit(1);
+      if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesNNLO ) {
+         error["ReadPartonCombinations"]<<"Number of parton combinations for NNLO processes must be identical to number of subprocesses.  NSubProcessesNNLO="
+                                        <<fProcConsts.NSubProcessesNNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
+         exit(1);
       }
    }
 
@@ -263,54 +263,54 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
    }
    for ( unsigned int k=0 ; k<PartonCombinations.size() ; k++ ) {
       if ( PartonCombinations[k].empty() ) {
-	 error["ReadPartonCombinations"]<<"Row "<<k<<" PartonCombinations"<<sord[ord]<<" does not contain any information. Exiting."<<endl;
-	 exit(1);
+         error["ReadPartonCombinations"]<<"Row "<<k<<" PartonCombinations"<<sord[ord]<<" does not contain any information. Exiting."<<endl;
+         exit(1);
       }
       int iSubProc = PartonCombinations[k][0];
-      if ( iSubProc >= PDFCoeff.size() ) {
-	 error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" in row "<<k+1<<" of PartonCombinations"<<sord[ord]<<" is larger than the total number of subprocesses. Exiting."<<endl;
-	 exit(1);
+      if ( iSubProc >= (int)PDFCoeff.size() ) {
+         error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" in row "<<k+1<<" of PartonCombinations"<<sord[ord]<<" is larger than the total number of subprocesses. Exiting."<<endl;
+         exit(1);
       }
       if ( PartonCombinations[k].size()%2 != 1 || PartonCombinations[k].size()<=1) {
-	 error["ReadPartonCombinations"]<<"Row "<<k<<" of PartonCombinations"<<sord[ord]<<" does not fit format: 'iProc [pair0] [pair1] ... [pairN]. Exiting"<<endl;
-	 exit(1);
+         error["ReadPartonCombinations"]<<"Row "<<k<<" of PartonCombinations"<<sord[ord]<<" does not fit format: 'iProc [pair0] [pair1] ... [pairN]. Exiting"<<endl;
+         exit(1);
       }
       if ( !PDFCoeff[iSubProc].empty() ) {
-	 error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" appears twice in the PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
-	 exit(1);
+         error["ReadPartonCombinations"]<<"Subprocess "<<iSubProc<<" appears twice in the PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+         exit(1);
       }
 
       for ( unsigned int i=1 ; i<PartonCombinations[k].size() ; i+=2 ) {
-	 debug["ReadPartonCombinations"]<<"Adding to subprocess "<<iSubProc<<" parton pair (" << PartonCombinations[k][i]<<","<<PartonCombinations[k][i+1]<<")."<<endl;
-	 int iPart1 = PartonCombinations[k][i];
-	 int iPart2 = PartonCombinations[k][i+1];
-	 if ( abs(iPart1) > 6 || abs(iPart2) > 6 ) {
-	    error["ReadPartonCombinations"]<<"Parton flavor is larger than 6. There is nothing beyond the top-quark. Exiting."<<endl;
-	    exit(1);
-	 }
-	 if (  b1[iPart1+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
-	 if (  b2[iPart2+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+         debug["ReadPartonCombinations"]<<"Adding to subprocess "<<iSubProc<<" parton pair (" << PartonCombinations[k][i]<<","<<PartonCombinations[k][i+1]<<")."<<endl;
+         int iPart1 = PartonCombinations[k][i];
+         int iPart2 = PartonCombinations[k][i+1];
+         if ( abs(iPart1) > 6 || abs(iPart2) > 6 ) {
+            error["ReadPartonCombinations"]<<"Parton flavor is larger than 6. There is nothing beyond the top-quark. Exiting."<<endl;
+            exit(1);
+         }
+         if (  b1[iPart1+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+         if (  b2[iPart2+6]  ) warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
 
-	 b1[iPart1+6] = true;
-	 b2[iPart2+6] = true;
-	 PDFCoeff[iSubProc].push_back(std::make_pair(iPart1,iPart2));
+         b1[iPart1+6] = true;
+         b2[iPart2+6] = true;
+         PDFCoeff[iSubProc].push_back(std::make_pair(iPart1,iPart2));
       }
    }
 
    // check if all subprocesses are filled
    for ( unsigned int k=1 ; k<PDFCoeff.size() ; k++ ) {
       if ( PDFCoeff[k].empty() ) {
-	 error["ReadPartonCombinations"]<<"PartonCombinations"<<sord[ord]<<" does not conatain any information about PDF for subprocess "<<k<<". Exiting."<<endl;
-	 exit(1);
+         error["ReadPartonCombinations"]<<"PartonCombinations"<<sord[ord]<<" does not conatain any information about PDF for subprocess "<<k<<". Exiting."<<endl;
+         exit(1);
       }
    }
    for ( int p = 1 ; p<12 ; p++ ) {
       // check if all partons are used
       if ( !b1[p] ) {
-	 error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+         error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
       }
       if ( !b2[p] ) {
-	 error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+         error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
       }
    }
    // check if all partons are used
@@ -618,7 +618,7 @@ void fastNLOCreate::GetWarmupValues() {
    std::cout.setstate(std::ios::failbit) ; // no cout in the following
    std::cerr.setstate(std::ios::failbit) ; // no cout in the following
    info>>"\n";
-   info>> _SSEP41+_SSEP41+_SSEP41 << endl;
+   info>> (_SSEP41+_SSEP41+_SSEP41) << endl;
    info["GetWarmupValues"]<<"Trying to get warmup values. Please ignore following messages from parser."<<endl;
    // try to get warmup values
    vector<vector<double> > warmup = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
@@ -635,7 +635,7 @@ void fastNLOCreate::GetWarmupValues() {
    }
 
    // inform user about success
-   info>> _SSEP41+_SSEP41+_SSEP41 << endl;
+   info>> (_SSEP41+_SSEP41+_SSEP41) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
    info["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
@@ -815,8 +815,8 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
       if (fIsFlexibleScale &&  c->NSubproc==6 && fProcConsts.NSubProcessesNLO==7) c->NSubproc = fProcConsts.NSubProcessesNLO;   // 6 -> 7
       c->IPDFdef3               = fProcConsts.IPDFdef3LO;
       if ( c->IPDFdef2==0 ) {
-	 c->fPDFCoeff = fProcConsts.PDFCoeffLO;
-	 c->IPDFdef3               = c->NSubproc ;
+         c->fPDFCoeff = fProcConsts.PDFCoeffLO;
+         c->IPDFdef3               = c->NSubproc ;
       }
    } else {
       c->IScaleDep = 1;
@@ -824,17 +824,17 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
       if ((ord - GetLoOrder()) == 1) {
          c->NSubproc               = fProcConsts.NSubProcessesNLO;
          c->IPDFdef3               = fProcConsts.IPDFdef3NLO;
-	 if ( c->IPDFdef2==0 ) {
-	    c->fPDFCoeff = fProcConsts.PDFCoeffNLO;
-	    c->IPDFdef3  = c->NSubproc ;
-	 }
+         if ( c->IPDFdef2==0 ) {
+            c->fPDFCoeff = fProcConsts.PDFCoeffNLO;
+            c->IPDFdef3  = c->NSubproc ;
+         }
       } else if ((ord - GetLoOrder()) == 2) {
          c->NSubproc               = fProcConsts.NSubProcessesNNLO;
          c->IPDFdef3               = fProcConsts.IPDFdef3NNLO;
-	 if ( c->IPDFdef2==0 ) {
-	    c->fPDFCoeff = fProcConsts.PDFCoeffNNLO;
-	    c->IPDFdef3  = c->NSubproc ;
-	 }
+         if ( c->IPDFdef2==0 ) {
+            c->fPDFCoeff = fProcConsts.PDFCoeffNNLO;
+            c->IPDFdef3  = c->NSubproc ;
+         }
       } else {
          error["SetOrderOfAlphasOfCalculation"]<<"Unknown order of perturbation theory: order="<<ord-GetLoOrder()<<" (ord="<<ord<<",ILOord="<<ILOord<<"). Exiting."<<endl;
          exit(1);
@@ -848,7 +848,7 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
       fSymProc.resize(c->NSubproc);
       for (int p = 0 ; p<c->NSubproc ; p++) fSymProc[p]=p;
 
-      for (int i = 0 ; i<fProcConsts.AsymmetricProcesses.size() ; i++) {
+      for (unsigned int i = 0 ; i<fProcConsts.AsymmetricProcesses.size() ; i++) {
          if (fProcConsts.AsymmetricProcesses[i].first<c->NSubproc) {   // safety
             if (fProcConsts.AsymmetricProcesses[i].second >= GetNSubprocesses() || fSymProc[fProcConsts.AsymmetricProcesses[i].first] >= GetNSubprocesses()) {
                if (!(c->IPDFdef1==3&&c->IPDFdef2==1&&c->IPDFdef3==1))   // it is normal in pp->jets in LO
@@ -921,7 +921,7 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
 
    // generator constants
    c->CodeDescript      = fGenConsts.GetCodeDescription();
-   for (int i = 0 ; i<fProcConsts.GetProcessDescription().size() ; i++) {
+   for (unsigned int i = 0 ; i<fProcConsts.GetProcessDescription().size() ; i++) {
       c->CodeDescript.push_back(fProcConsts.GetProcessDescription()[i]);
    }
    c->SetIXsectUnits(fProcConsts.UnitsOfCoefficients);
@@ -1218,9 +1218,9 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
             double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
-	    //  	    cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
-	    // 		<<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
-	    c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
+            //              cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
+            //          <<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
+            c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
          }
       }
    }
@@ -1562,7 +1562,7 @@ void fastNLOCreate::MultiplyCoefficientsByBinSize() {
                         c->SigmaTildeMuRDep [i][x][jS1][kS2][n] *= BinSize[i];
                         if (c->GetNScaleDep() >= 6) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= BinSize[i];
-			}
+                        }
                         if (c->GetNScaleDep() >= 7) {
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= BinSize[i];
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= BinSize[i];
@@ -1595,7 +1595,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
 //! Divide all coefficients by binsize
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
-      for (int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
+      for (unsigned int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
          int nxmax = c->GetNxmax(i);
          for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
@@ -1609,7 +1609,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
                         //if ( c->GetNScaleDep() >= 6 ) {
                         if (!c->SigmaTildeMuRRDep.empty()) {
                            c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] /= BinSize[i];
-			}
+                        }
                         if (!c->SigmaTildeMuFFDep.empty()) {
                            c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] /= BinSize[i];
                            c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] /= BinSize[i];
@@ -1622,7 +1622,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
       }
    } else {
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
-      for (int i=0; i<c->SigmaTilde.size(); i++) {
+      for (unsigned int i=0; i<c->SigmaTilde.size(); i++) {
          for (unsigned int s=0 ; s<c->SigmaTilde[i].size() ; s++) {
             for (unsigned int x=0 ; x<c->SigmaTilde[i][s].size() ; x++) {
                for (unsigned int l=0 ; l<c->SigmaTilde[i][s][x].size() ; l++) {
@@ -2000,26 +2000,26 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    vector<int > nbinup(NDim);;
    for (int idim = NDim-1 ; idim>=0 ; idim--) {
       for (int i = 0 ; i < GetNObsBin() ; i ++) {
-	 if ( Bin[i][idim].first != 0 ) {
-	    double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
-	    // lo-bin
-	    if ( diff < bclose  && diff >= 0.)
-	       nbinlo[idim]++;
-	 }
-	 else {
-	    if ( wrmmu[i].first < 1.e-4 )
-	       nbinlo[idim]++;
-	 }
-	 if ( Bin[i][idim].second != 0 ) {
-	    // up-bin
-	    double diff = 1. - wrmmu[i].second/Bin[i][idim].second;
-	    if ( diff < bclose && diff >= 0 )
-	       nbinup[idim]++;
-	 }
-	 else {
-	    if ( wrmmu[i].second < 1.e-4 )
-	       nbinup[idim]++;
-	 }
+         if ( Bin[i][idim].first != 0 ) {
+            double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
+            // lo-bin
+            if ( diff < bclose  && diff >= 0.)
+               nbinlo[idim]++;
+         }
+         else {
+            if ( wrmmu[i].first < 1.e-4 )
+               nbinlo[idim]++;
+         }
+         if ( Bin[i][idim].second != 0 ) {
+            // up-bin
+            double diff = 1. - wrmmu[i].second/Bin[i][idim].second;
+            if ( diff < bclose && diff >= 0 )
+               nbinup[idim]++;
+         }
+         else {
+            if ( wrmmu[i].second < 1.e-4 )
+               nbinup[idim]++;
+         }
       }
    }
    // // sanity check (round only in one dimension

@@ -130,22 +130,22 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
    // update to latest version
    if ( NScaleDep==3 ) {
       if ( Npow==fILOord) {
-	 debug["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
-	 NScaleDep=4;
+         debug["Write"]<<" * Increase NScaleDep from 3 to 4, because LO!"<<endl;
+         NScaleDep=4;
       }
       else if ( Npow==fILOord+1 ) {
-	 NScaleDep=5;
-	 if ( !fastNLOTools::IsEmptyVector(SigmaTildeMuRRDep) ) {
-	    NScaleDep=6;
-	    debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NLO and log^2(mur) terms!"<<endl;
-	 }
-	 else 
-	    debug["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
+         NScaleDep=5;
+         if ( !fastNLOTools::IsEmptyVector(SigmaTildeMuRRDep) ) {
+            NScaleDep=6;
+            debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NLO and log^2(mur) terms!"<<endl;
+         }
+         else
+            debug["Write"]<<" * Increase NScaleDep from 3 to 5 because NLO!"<<endl;
 
       }
       else if ( Npow==fILOord+2 ) {
-	 debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
-	  NScaleDep=7;
+         debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
+          NScaleDep=7;
       }
    }
    fastNLOCoeffAddBase::Write(table);
@@ -213,15 +213,15 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
       fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
       fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
       if (( NScaleDep>=6 || !SigmaTildeMuRRDep.empty())  // both tables contain log^2 contributions (default case)
-	  && (othflex.NScaleDep>=6 || !othflex.SigmaTildeMuRRDep.empty()) ) {
+          && (othflex.NScaleDep>=6 || !othflex.SigmaTildeMuRRDep.empty()) ) {
          fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
       }
       else if ( NScaleDep==6 && othflex.NScaleDep==5 ) { // this tables contains log^2 contributions, but the other does not
-	 // nothing todo.
+         // nothing todo.
       }
       else if ( NScaleDep==5 && othflex.NScaleDep==6 ) { // this tables does not contain log^2 contributions, but the other does !
-	 SigmaTildeMuRRDep = othflex.SigmaTildeMuRRDep;
-	 NScaleDep = 6;
+         SigmaTildeMuRRDep = othflex.SigmaTildeMuRRDep;
+         NScaleDep = 6;
       }
       if ( NScaleDep>=7 || !SigmaTildeMuFFDep.empty()) {
          fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
@@ -239,14 +239,14 @@ void fastNLOCoeffAddFlex::Clear() {
    //! Set all elements of sigma tilde to zero
    fastNLOCoeffAddBase::Clear();
    fastNLOTools::ClearVector(SigmaTildeMuIndep);
-   fastNLOTools::ClearVector(SigmaTildeMuFDep); 
-   fastNLOTools::ClearVector(SigmaTildeMuRDep); 
-   fastNLOTools::ClearVector(SigmaTildeMuRRDep); 
-   fastNLOTools::ClearVector(SigmaTildeMuFFDep); 
-   fastNLOTools::ClearVector(SigmaTildeMuRFDep); 
+   fastNLOTools::ClearVector(SigmaTildeMuFDep);
+   fastNLOTools::ClearVector(SigmaTildeMuRDep);
+   fastNLOTools::ClearVector(SigmaTildeMuRRDep);
+   fastNLOTools::ClearVector(SigmaTildeMuFFDep);
+   fastNLOTools::ClearVector(SigmaTildeMuRFDep);
    fastNLOTools::ClearVector(SigmaRefMixed);
-   fastNLOTools::ClearVector(SigmaRef_s1); 
-   fastNLOTools::ClearVector(SigmaRef_s2); 
+   fastNLOTools::ClearVector(SigmaRef_s1);
+   fastNLOTools::ClearVector(SigmaRef_s2);
 }
 
 
@@ -263,35 +263,35 @@ void fastNLOCoeffAddFlex::NormalizeCoefficients(){
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
    const bool WithMuR = !SigmaTildeMuFDep.empty();
-   const bool WithMuRR = !SigmaTildeMuRRDep.empty(); 
+   const bool WithMuRR = !SigmaTildeMuRRDep.empty();
    const bool WithMuFF = !SigmaTildeMuFFDep.empty();
-   for (int i=0; i<SigmaTildeMuIndep.size(); i++) {
+   for (unsigned int i=0; i<SigmaTildeMuIndep.size(); i++) {
       int nxmax = GetNxmax(i);
       for (unsigned int jS1=0; jS1<GetNScaleNode1(i); jS1++) {
-	 for (unsigned int kS2=0; kS2<GetNScaleNode2(i); kS2++) {
-	    for (int x=0; x<nxmax; x++) {
-	       for (int n=0; n<GetNSubproc(); n++) {
-		  SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
-		  //if ( GetNScaleDep() >= 5 ) {
-		  if (WithMuR) {
-		     SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
-		     SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
-		     //if ( GetNScaleDep() >= 6 ) {
-		     if (WithMuRR) {
-			SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
-		     }
-		     if (WithMuFF) {
-			SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
-			SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
-		     }
-		  }
-	       }
-	    }
-	 }
+         for (unsigned int kS2=0; kS2<GetNScaleNode2(i); kS2++) {
+            for (int x=0; x<nxmax; x++) {
+               for (int n=0; n<GetNSubproc(); n++) {
+                  SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
+                  //if ( GetNScaleDep() >= 5 ) {
+                  if (WithMuR) {
+                     SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
+                     SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
+                     //if ( GetNScaleDep() >= 6 ) {
+                     if (WithMuRR) {
+                        SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
+                     }
+                     if (WithMuFF) {
+                        SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
+                        SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
+                     }
+                  }
+               }
+            }
+         }
       }
    }
 }
-   
+
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Print() const {
    fastNLOCoeffAddBase::Print();

@@ -14,7 +14,7 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) : 
+fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) :
    fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) , PrimalScream("fastNLOInterpol") {
    debug["fastNLOInterpolBase"]<<"New fastNLOInterpolBase instance."<<endl;
    fLastVal = -34729.432;
@@ -45,16 +45,16 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
 //______________________________________________________________________________
 
 
- 
+
 vector<pair<int,double> >* fastNLOInterpolBase::GetNodeValuesPtr(double x){
    cout<<"x="<<x<<",\tfLastVal="<<fLastVal<<endl;
    if ( x==fLastVal ) return &fNodes; // nothing todo. I know the nodes already.
    else {
       bool InRange = CheckX(x);
-      //       if ( !InRange ) { // standard return, if there is no
-      // 	 //fRetNodes = vector<pair<int,double> > ()
-      // 	 //return fRetNodes;
-      //       }
+      if ( !InRange ) { // standard return, if there is no
+      //         //fRetNodes = vector<pair<int,double> > ()
+      //         //return fRetNodes;
+      }
       fLastVal = x;
       CalcNodeValues(fNodes,x);
       return &fNodes;
@@ -143,9 +143,9 @@ int fastNLOInterpolBase::FindLargestPossibleNode(double x){
    }
    if ( x > fgrid.back() ) {
       if ( !fLastGridPointWasRemoved )
-	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node. Using last node. This may bias the result! x="<<x<<endl;
+         warn["FindLargestPossibleNode"]<<"Value is larger than largest node. Using last node. This may bias the result! x="<<x<<endl;
       else if ( x > fvalmax)
-	 warn["FindLargestPossibleNode"]<<"Value is larger than largest node and than largest grid value. Using last node. Interpolation kernel may lead unreasonable values! x="<<x<<endl;
+         warn["FindLargestPossibleNode"]<<"Value is larger than largest node and than largest grid value. Using last node. Interpolation kernel may lead unreasonable values! x="<<x<<endl;
       return node1;
    }
    //    if ( x > fvalmax ) {
@@ -156,9 +156,9 @@ int fastNLOInterpolBase::FindLargestPossibleNode(double x){
    //for( unsigned int iNode=1 ; iNode<fgrid.size()-2 ; iNode++ ){
    for( unsigned int iNode=1 ; iNode<fgrid.size() ; iNode++ ){
       if ( x <= fgrid[iNode]) {
-	 return iNode-1;
-	 // 	 node1=iNode-1;
-	 // 	 return node1; //done
+         return iNode-1;
+         //      node1=iNode-1;
+         //      return node1; //done
       }
    }
    //error["FindLargestPossibleNode"]<<"Could not find largest node. x="<<x<<endl;
@@ -218,10 +218,10 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
    }
    else if ( nNodes > 1 ) {
       for(int l=0;l<nNodes;l++){
-	 hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
-	 if ( isnan(hgrid[l]) ) {
-	    error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
-	 }
+         hgrid[l]   = lo +  double(l)/double(nNodes-1)*del;
+         if ( isnan(hgrid[l]) ) {
+            error["MakeGrids"]<<"Grid point could not be calculated. Hnode="<<hgrid[l]<<endl;
+         }
       }
    }
 
@@ -295,24 +295,24 @@ bool fastNLOInterpolBase::CheckX(double& x) {
       double xin = x;
       x = fgrid[0];
       if ( x!=fLastVal )
-	 warn["CheckX"]<<"Value "<<xin<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
+         warn["CheckX"]<<"Value "<<xin<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
    }
    else if ( x > fgrid.back() ) {
       double xin = x;
       if ( fLastGridPointWasRemoved ) {
-	 if ( x > fvalmax ) {
-	    x = fvalmax;
-	    if ( x!=fLastVal )
-	       warn["CheckX"]<<"Value "<<xin<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
-	 }
+         if ( x > fvalmax ) {
+            x = fvalmax;
+            if ( x!=fLastVal )
+               warn["CheckX"]<<"Value "<<xin<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
+         }
       }
       else {
-	 x = fgrid.back();
-	 if ( fabs(x-fgrid.back())>1.e-4 && x!=fLastVal) 
-	       warn["CheckX"]<<"Value "<<xin<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
+         x = fgrid.back();
+         if ( fabs(x-fgrid.back())>1.e-4 && x!=fLastVal)
+               warn["CheckX"]<<"Value "<<xin<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
       }
    }
-   else 
+   else
       sanity = true;
 
    return sanity;
@@ -348,19 +348,19 @@ double fastNLOInterpolBase::GetDelta(double x ){
    // check if node next to largest node is also in grid
    if ( node1+1>= (int)fHgrid.size() ) {
       if ( fLastGridPointWasRemoved ) {
-	 //warn["GetDelta"]<<"Last grid point was removed. I assume this point was at x="<<fvalmax<<endl;
-	 double Hxone = GetHx(fvalmax);
-	 //cout<<"fHgrid[node1+1="<<fHgrid[node1+1]<<endl;
-	 double del = Hxone - fHgrid[node1];
-	 if ( del == 0 ){
-	    //warn["GetDelta"]<<"Distance between nodes is zero."<<endl;
-	    return 0;
-	 }
-	 return (Hx - fHgrid[node1]) / del;
+         //warn["GetDelta"]<<"Last grid point was removed. I assume this point was at x="<<fvalmax<<endl;
+         double Hxone = GetHx(fvalmax);
+         //cout<<"fHgrid[node1+1="<<fHgrid[node1+1]<<endl;
+         double del = Hxone - fHgrid[node1];
+         if ( del == 0 ){
+            //warn["GetDelta"]<<"Distance between nodes is zero."<<endl;
+            return 0;
+         }
+         return (Hx - fHgrid[node1]) / del;
       }
       else {
-	 error["GetDelta"]<<" node next to 'largest possible node' is outside of grid."<<endl;
-	 exit(1);
+         error["GetDelta"]<<" node next to 'largest possible node' is outside of grid."<<endl;
+         exit(1);
       }
    }
    double del = fHgrid[node1+1] - fHgrid[node1];

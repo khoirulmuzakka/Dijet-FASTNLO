@@ -88,34 +88,34 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    //printf("  *  fastNLOCoeffAddBase::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
-      if ( IPDFdef3 != NSubproc ){ 
+      if ( IPDFdef3 != NSubproc ){
          error["ReadCoeffAddBase"]<<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<IPDFdef3<<", NSubproc="<<NSubproc<<"). Exiting."<<endl;
-	 exit(1);	 
+         exit(1);
       }
       int IPDFCoeffFormat = -1;
       table >> IPDFCoeffFormat;
       if ( IPDFCoeffFormat == 0 ) {
-	 fPDFCoeff.resize(NSubproc);
-	 for(int k=0;k<NSubproc;k++){
-	    int NPartonPairs = -1;
-	    table >> NPartonPairs;
-	    for(int n=0;n<NPartonPairs;n++){
-	       int PDF1Flavor=-100, PDF2Flavor=-100;
-	       if ( IPDFdef1>=3 ) {
-		  table >> PDF1Flavor;
-		  table >> PDF2Flavor;
-	       }
-	       else if ( IPDFdef1>=3 ) {
-		  table >> PDF1Flavor;
-		  PDF2Flavor = PDF1Flavor;
-	       }
-	       fPDFCoeff[k].push_back(make_pair(PDF1Flavor,PDF2Flavor));
-	    }
-	 }
+         fPDFCoeff.resize(NSubproc);
+         for(int k=0;k<NSubproc;k++){
+            int NPartonPairs = -1;
+            table >> NPartonPairs;
+            for(int n=0;n<NPartonPairs;n++){
+               int PDF1Flavor=-100, PDF2Flavor=-100;
+               if ( IPDFdef1>=3 ) {
+                  table >> PDF1Flavor;
+                  table >> PDF2Flavor;
+               }
+               else if ( IPDFdef1>=3 ) {
+                  table >> PDF1Flavor;
+                  PDF2Flavor = PDF1Flavor;
+               }
+               fPDFCoeff[k].push_back(make_pair(PDF1Flavor,PDF2Flavor));
+            }
+         }
       }
       else {
-	 error["ReadCoeffAddBase"]<<"Only IPDFCoeffFormat==0 is implemented, but IPDFCoeffFormat="<<IPDFCoeffFormat<<". Exiting."<<endl;
-	 exit(1);
+         error["ReadCoeffAddBase"]<<"Only IPDFCoeffFormat==0 is implemented, but IPDFCoeffFormat="<<IPDFCoeffFormat<<". Exiting."<<endl;
+         exit(1);
       }
    }
    if(IPDFdef1==0){
@@ -215,23 +215,23 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    table << IPDFdef3 << endl;
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
-      if ( IPDFdef3 != NSubproc ){ 
+      if ( IPDFdef3 != NSubproc ){
          error["Write"]<<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<IPDFdef3<<", NSubproc="<<NSubproc<<"). Exiting."<<endl;
-	 exit(1);	 
+         exit(1);
       }
       int IPDFCoeffFormat = 0 ; // this is format style 0
       table <<  IPDFCoeffFormat << endl;
       for(int k=0;k<NSubproc;k++){
-	 table << fPDFCoeff[k].size() <<endl; // NPartonParis
-	 for( unsigned int n=0;n<fPDFCoeff[k].size();n++){
-	    if ( IPDFdef1>=3 ) {
-	       table << fPDFCoeff[k][n].first << endl;
-	       table << fPDFCoeff[k][n].second << endl;
-	    }
-	    else if ( IPDFdef1>=3 ) {
-	       table << fPDFCoeff[k][n].first << endl;
-	    }
-	 }
+         table << fPDFCoeff[k].size() <<endl; // NPartonParis
+         for( unsigned int n=0;n<fPDFCoeff[k].size();n++){
+            if ( IPDFdef1>=3 ) {
+               table << fPDFCoeff[k][n].first << endl;
+               table << fPDFCoeff[k][n].second << endl;
+            }
+            else if ( IPDFdef1>=3 ) {
+               table << fPDFCoeff[k][n].first << endl;
+            }
+         }
       }
    }
 
@@ -403,7 +403,7 @@ void fastNLOCoeffAddBase::Print() const {
    printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
    printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %lu)\n",NFFPDG.size());
    printf(" B   NScales                       %lu\n",Iscale.size());
-   for(int i=0;i<Iscale.size();i++){
+   for(unsigned int i=0;i<Iscale.size();i++){
       printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
    }
    printf(" B   NScaleDim                     %d\n",NScaleDim);

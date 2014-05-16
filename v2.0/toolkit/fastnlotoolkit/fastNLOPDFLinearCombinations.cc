@@ -28,16 +28,16 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLinearCombination(const fas
    //
 
    switch ( c->GetNPDF() ) {
-   case 0:	// no PDF involved in process; e.g. e+e-
+   case 0:      // no PDF involved in process; e.g. e+e-
       return vector<double >();
       break;
-   case 1:	// one PDF invovled in process: e.g. DIS
+   case 1:      // one PDF invovled in process: e.g. DIS
       return CalcPDFLCOneHadron(c,pdfx1);
       break;
-   case 2:	// two PDFs involved in process: e.g. pp, ppbar
+   case 2:      // two PDFs involved in process: e.g. pp, ppbar
       if ( pdf2IsAntiParticle ) {
-	 vector<double> Antipdf2 = MakeAntiHadron(pdfx2);
-	 return CalcPDFLCTwoHadrons(c,pdfx1,Antipdf2);
+         vector<double> Antipdf2 = MakeAntiHadron(pdfx2);
+         return CalcPDFLCTwoHadrons(c,pdfx1,Antipdf2);
       }
       else return CalcPDFLCTwoHadrons(c,pdfx1,pdfx2);
       break;
@@ -96,16 +96,16 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
    //bool IsTwoIdenticHadrons = (c->GetIPDFdef1() == 3  &&  c->GetPDFPDG(0) == fabs(c->GetPDFPDG(1)) );
    //bool IsHHJets = ( c->GetIPDFdef2() == 1 );
    //bool IsTTBar  = ( c->GetIPDFdef2() == 2 );
-   
+
    if ( c->GetIPDFdef2()==0 ) // LiCos are stored in table
       return CalcPDFHHCFromTable(c,pdfx1,pdfx2);
-   else if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2)) 
-      return CalcPDFHHC(c,pdfx1,pdfx2); 
+   else if ( c->GetIPDFdef2()==1 &&  (c->GetIPDFdef3()==1 || c->GetIPDFdef3()==2))
+      return CalcPDFHHC(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==169 ) // default 169 PDF LiCos
       return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==121 ) // default 121 PDF LiCos
       return CalcDefaultPDFLiCos(c,pdfx1,pdfx2);
-   else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 ) 
+   else if ( c->GetIPDFdef2()==1 &&  c->GetIPDFdef3()==3 )
       return CalcPDFThreshold(c,pdfx1,pdfx2);
    else if ( c->GetIPDFdef2()==2 ) { // IPDFdef3==0 !
       return CalcPDFttbar(c,pdfx1,pdfx2);
@@ -143,7 +143,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCo
    //! calculate default 121 or 169 PDF linear combinations
    //!
    //! Format is following for 121 subprocesses:
-   //! iSubProc  parton1  parton2 
+   //! iSubProc  parton1  parton2
    //! 0           -5       -5    #bbarbbar
    //! 1           -5       -4
    //! 2           -5       -3
@@ -157,13 +157,13 @@ vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCo
    //! 10          -5        5
    //! 11          -4       -5
    //! 12          -4       -4
-   //! ...	       	    
+   //! ...
    //! 60           0        0   #gg
-   //! ...	       	    
+   //! ...
    //! 120          5        5
 
    //! Format is following for 169 subprocesses:
-   //! iSubProc  parton1  parton2 
+   //! iSubProc  parton1  parton2
    //! 0        -6     -6
    //! 1        -6     -5
    //! 2        -6     -4
@@ -187,7 +187,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCo
    //! 20       -5      1
    //!  ...
    //! 84        0      0   #gg
-   //! ...	       	    
+   //! ...
    //! 168       6      6
    int nSubproc = c->GetIPDFdef2();
    vector < double > pdflc(nSubproc);
@@ -196,8 +196,8 @@ vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCo
    int n=0;
    for ( int p1 = istart ; p1<iend ; p1++ ) {
       for ( int p2 = istart ; p2<iend ; p2++ ) {
-	 pdflc[n] = pdfx1[p1] * pdfx2[p2];
-	 n++;
+         pdflc[n] = pdfx1[p1] * pdfx2[p2];
+         n++;
       }
    }
    return pdflc;
@@ -209,16 +209,16 @@ vector<double> fastNLOPDFLinearCombinations::CalcDefaultPDFLiCos(const fastNLOCo
 
 vector<double> fastNLOPDFLinearCombinations::CalcPDFHHCFromTable(const fastNLOCoeffAddBase* c, const vector<double>& pdfx1 , const vector<double>& pdfx2) const {
    // calculate PDF linear combinations as stored in table
-   if ( c->GetNSubproc() != c->GetIPDFdef3() || c->GetIPDFdef3() != c->GetPDFCoeff().size()) {
+   if ( c->GetNSubproc() != c->GetIPDFdef3() || c->GetIPDFdef3() != (int)c->GetPDFCoeff().size()) {
       say::error["fastNLOPDFLinearCombinations::CalcPDFHHCFromTable"]
-	 <<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<c->GetIPDFdef3()<<", NSubproc="<<c->GetNSubproc()<<"). Exiting."<<endl;
+         <<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<c->GetIPDFdef3()<<", NSubproc="<<c->GetNSubproc()<<"). Exiting."<<endl;
       exit(1);
    }
    const vector<vector<pair<int,int> > >& PDFCoeff = c->GetPDFCoeff();
    vector < double > pdflc(PDFCoeff.size());
    for ( unsigned int k = 0 ; k<PDFCoeff.size() ; k++ ){
       for ( unsigned int i = 0 ; i<PDFCoeff[k].size() ; i++ ){
-	 pdflc[k] += pdfx1[PDFCoeff[k][i].first+6] * pdfx2[PDFCoeff[k][i].second+6];
+         pdflc[k] += pdfx1[PDFCoeff[k][i].first+6] * pdfx2[PDFCoeff[k][i].second+6];
       }
    }
    return pdflc;
@@ -342,7 +342,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeff
      c---------------------------------------------------------------*/
 
    int NSubproc = c->GetNSubproc(); // MUST BE 10 here !
-   
+
    double D1  = pdfx1[+1+6];
    double U1  = pdfx1[+2+6];
    double S1  = pdfx1[+3+6];
@@ -373,7 +373,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeff
 
    vector <double> H(NSubproc);
 
-   
+
    // 'q1q2 --> q1q2'
    //  q q'  + qb qb'
    // fqqp
@@ -422,55 +422,55 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeff
    //       +G1*(D2b+U2b+S2b+C2b+B2b);
    double fqg = 0;
    double fgq=  0;
-   
-      
+
+
    //c     q qb' + qb q'
    double fqqbp=D1*(U2b+S2b+C2b+B2b)
       +U1*(D2b+S2b+C2b+B2b)
       +S1*(D2b+U2b+C2b+B2b)
       +C1*(D2b+U2b+S2b+B2b)
       +B1*(D2b+U2b+S2b+C2b);
-   
+
    double fqbpq=D1b*(U2+S2+C2+B2)
       +U1b*(D2+S2+C2+B2)
       +S1b*(D2+U2+C2+B2)
       +C1b*(D2+U2+S2+B2)
       +B1b*(D2+U2+S2+C2);
-   
+
 
    H[1] = fqqb+fqbq;
    H[2] = fqqb+fqbq;
    H[3] = fqq;
    H[4] = fqqb+fqbq;
-   
+
    H[5] = fqg; //geht nicht (s.o)
    H[6] = fgq; //geht nicht (s.o)
-   
+
    H[7] = G1*G2;
    H[8] = G1*G2;
    H[9] = fqbpq+fqqbp;
 
    //       if (is .eq. 1) then
    //         sub_process = 'q1q2 --> q1q2'
-   // 	 elseif (is .eq. 2) then
+   //    elseif (is .eq. 2) then
    //         sub_process = 'q1q1b --> q2q2b'
-   // 	 elseif (is .eq. 3) then
+   //    elseif (is .eq. 3) then
    //         sub_process = 'q1q1b --> q1q1b'
-   // 	 elseif (is .eq. 4) then
+   //    elseif (is .eq. 4) then
    //         sub_process = 'q1q1 --> q1q1'
-   // 	 elseif (is .eq. 5) then
+   //    elseif (is .eq. 5) then
    //         sub_process = 'q1q1b --> gg'
-   // 	 elseif (is .eq. 6) then
+   //    elseif (is .eq. 6) then
    //         sub_process = 'qg --> qg'
-   // 	 elseif (is .eq. 7) then
+   //    elseif (is .eq. 7) then
    //         sub_process = 'gq --> qg'
-   // 	 elseif (is .eq. 8) then
+   //    elseif (is .eq. 8) then
    //         sub_process = 'gg --> qqb'
-   // 	 elseif (is .eq. 9) then
+   //    elseif (is .eq. 9) then
    //         sub_process = 'gg --> gg'
-   // 	 elseif (is .eq. 10) then
+   //    elseif (is .eq. 10) then
    //         sub_process = 'q1q2b --> q1q2b'
-   
+
    return H;
 
 }
@@ -497,8 +497,8 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFttbar(const fastNLOCoeffAddB
       pdflc[0] += pdfx1[6]*pdfx2[6]; // gg
       // qq
       for (int k = 0 ; k<6 ; k++) {
-	 pdflc[1] += pdfx1[k]*pdfx2[12-k];
-	 pdflc[1] += pdfx1[12-k]*pdfx2[k];
+         pdflc[1] += pdfx1[k]*pdfx2[12-k];
+         pdflc[1] += pdfx1[12-k]*pdfx2[k];
       }
       return pdflc;
    }
@@ -516,7 +516,7 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFttbar(const fastNLOCoeffAddB
       pdflc[3]=pdflc[1];
       return pdflc;
    }
- 
+
    return vector<double>();
 
 }

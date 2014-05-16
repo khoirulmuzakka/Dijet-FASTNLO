@@ -134,9 +134,9 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
    }
    if( NScaleDep != other.GetNScaleDep() ){
       debug["IsCompatible"]<<"NScaleDep != other.GetNScaleDep()"<<endl;
-      if ( NScaleDep==5 && other.GetNScaleDep()==6 ||  NScaleDep==6 && other.GetNScaleDep()==5 ) {
-	 debug["IsCompatible"]<<"One table with NScale=5 and one with NScaleDep=6"<<endl;
-	 // continue;
+      if ( (NScaleDep==5 && other.GetNScaleDep()==6) || (NScaleDep==6 && other.GetNScaleDep()==5) ) {
+         debug["IsCompatible"]<<"One table with NScale=5 and one with NScaleDep=6"<<endl;
+         // continue;
       }
       else return false;
    }

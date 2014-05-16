@@ -218,7 +218,7 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double coef) {
-   for (int i=0; i<SigmaTilde.size(); i++) {
+   for (unsigned int i=0; i<SigmaTilde.size(); i++) {
       for (unsigned int s=0 ; s<SigmaTilde[i].size() ; s++) {
          for (unsigned int x=0 ; x<SigmaTilde[i][s].size() ; x++) {
             for (unsigned int l=0 ; l<SigmaTilde[i][s][x].size() ; l++) {

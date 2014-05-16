@@ -215,10 +215,10 @@ vector<double> fastNLODiffReader::GetXFX(double xp, double muf) const {
       // find x-node index
       int nx = -1;
       int nb = -1;
-      for (unsigned int ib = 0 ; nb == -1 && ib<B_LO()->GetNObsBin() ; ib++) {
+      for (int ib = 0 ; nb == -1 && ib<B_LO()->GetNObsBin() ; ib++) {
           if (B_LO()->GetNxmax(ib) != B_NLO()->GetNxmax(ib))
              error["fastNLODiffReader::GetXFX"]<<"LO and NLO tables must have same number of x-bins."<<endl;
-          for (unsigned int ix = 0 ; nx == -1 && ix<B_LO()->GetNxtot1(ib); ix++) {
+          for (int ix = 0 ; nx == -1 && ix<B_LO()->GetNxtot1(ib); ix++) {
              if (B_LO()->GetXNode1(ib,ix) != B_NLO()->GetXNode1(ib,ix))
                 error["fastNLODiffReader::GetXFX"]<<"LO and NLO tables must have idnetical x-bins."<<endl;
              if ( xp == B_LO()->GetXNode1(ib,ix) ) {

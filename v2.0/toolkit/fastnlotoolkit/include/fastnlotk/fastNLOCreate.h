@@ -120,7 +120,7 @@ protected:
    int CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,double> >& wrmmu);              //!< Check if warmup values are possibly identical with bin grid
    int RoundValues(vector<pair<double,double> >& wrmmu , int nth);                              //!< Round values to closes value by at most 1%
    int GetNthRelevantDigit(double val, int n);
-   vector<vector<pair<int,int> > > ReadPartonCombinations(int ord);				//!< Read PDFCoeff from steering
+   vector<vector<pair<int,int> > > ReadPartonCombinations(int ord);                             //!< Read PDFCoeff from steering
 
    int GetBin();                                                                                //!< get bin number from 'scenario' observables
    inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;           //!< get x-index in case of two hadrons.
