@@ -172,7 +172,7 @@ if test "x$with_fnlotoolkit" != "xno"; then
       AC_SUBST([FNLOTOOLKITPREFIX], [`dirname $FNLOTOOLKIT`])
       AC_SUBST([FNLOTOOLKITBINPATH], ["$FNLOTOOLKITPREFIX/bin"])
       AC_SUBST([FNLOTOOLKITLIBPATH], ["$FNLOTOOLKITPREFIX/lib"])
-      AC_SUBST([FNLOTOOLKITINCLUDEPATH],["$FNLOTOOLKITPREFIX/include/fastnlotk"])
+      AC_SUBST([FNLOTOOLKITINCLUDEPATH],["$FNLOTOOLKITPREFIX/include"])
       AC_MSG_RESULT([Using $FNLOTOOLKITPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $FNLOTOOLKITBINPATH for the binaries])
       AC_MSG_RESULT([Using $FNLOTOOLKITLIBPATH for the library])
@@ -244,11 +244,8 @@ else
    AC_MSG_NOTICE([******************************************])
    AC_MSG_NOTICE([$TMPNAM support switched off by user. Building $PACKAGE_NAME without $TMPNAM!])
 fi
-AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" == "x")
+AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
 AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
-AC_MSG_RESULT([HAVE_FASTJET is $HAVE_FASTJET])
-AC_MSG_RESULT([HAVE_FASTJETCONFIG is $HAVE_FASTJETCONFIG])
-AC_MSG_ERROR([STOPP])
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"

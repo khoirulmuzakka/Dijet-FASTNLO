@@ -34,14 +34,14 @@ libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc   $(AM_SOURCES)
 # Preprocessor flags
 #
 my_include_dirs = -I${srcdir}/fastnlojetalgos/include/fastnloja -I${top_builddir}/fastnlojetalgos/include/fastnloja -I${top_srcdir}/fastnlojetalgos/include/fastnloja
-AM_CPPFLAGS = $(my_include_dirs) -I${includedir} -I${NLOJETINCLUDEPATH}
+AM_CPPFLAGS = $(my_include_dirs) -I${includedir} -I${NLOJETINCLUDEPATH} 
 
 #
 # C++ compiler flags
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 # All targets
-AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${top_srcdir}/fastnlojetalgos/include/fastnloja -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH}
+AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${top_srcdir}/fastnlojetalgos/include/fastnloja -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH}
 if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`
 else
@@ -70,7 +70,7 @@ AM_LDFLAGS += -L${top_builddir}/interface/hadron/.libs -L${top_builddir}/fastnlo
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #v22 force
 #libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit -lfastnlojetalgos
+libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit -L${FNLOTOOLKITLIBPATH} -lfastnlojetalgos
 
 
 # Example of individual specification of LDFLAGS
