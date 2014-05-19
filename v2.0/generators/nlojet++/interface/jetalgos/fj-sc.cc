@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/fj-sc.h"
+#include "fnlo_int_nlojet/fj-sc.h"
 #include "fastjet/SISConePlugin.hh"
 #include <cmath>
 using namespace std;

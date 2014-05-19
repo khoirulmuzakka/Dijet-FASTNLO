@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/cone-e.h"
+#include "fnlo_int_nlojet/cone-e.h"
 #include <cmath>
 
 

@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/fj-kt.h"
+#include "fnlo_int_nlojet/fj-kt.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <cmath>

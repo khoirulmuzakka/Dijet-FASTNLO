@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/kt-e.h"
+#include "fnlo_int_nlojet/kt-e.h"
 #include <cmath>
 using namespace std;
 

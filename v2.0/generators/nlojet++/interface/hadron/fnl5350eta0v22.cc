@@ -82,10 +82,10 @@ extern "C"{
 #include <algorithm>
 
 // --- fastNLO user: include the header file for the jet algorithm
-#include "fastnlo_interface_nlojet/fj-ak.h"
+#include "fnlo_int_nlojet/fj-ak.h"
 
 // --- fastNLO ---
-#include "fastnlo_interface_nlojet/fastNLOInterfaceToNLOJET.cc"
+#include "fnlo_int_nlojet/fnlo_int_nlojet.cc"
 
 // --- fastNLO v2.2
 fastNLOCreate *ftable = NULL;

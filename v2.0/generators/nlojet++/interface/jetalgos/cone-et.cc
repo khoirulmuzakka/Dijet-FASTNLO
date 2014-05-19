@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/cone-et.h"
+#include "fnlo_int_nlojet/cone-et.h"
 #include <cmath>
 
 const bounded_vector<lorentzvector<double> >&

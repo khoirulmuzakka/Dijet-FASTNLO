@@ -1,4 +1,4 @@
-#include "fastnlo_interface_nlojet/fj-d0r2.h"
+#include "fnlo_int_nlojet/fj-d0r2.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/D0RunIIConePlugin.hh"
