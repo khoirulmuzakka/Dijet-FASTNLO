@@ -35,7 +35,7 @@ libfastnlotoolkit_la_LDFLAGS =
 #
 # C++ compiler flags
 #
-libfastnlotoolkit_la_CXXFLAGS = -g -O2 -Wall -fPIC
+libfastnlotoolkit_la_CXXFLAGS = -g -O2 -Wall
 # Debug flags
 #libfastnlotoolkit_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 
