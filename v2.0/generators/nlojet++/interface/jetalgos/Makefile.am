@@ -72,4 +72,4 @@ endif
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution
-MAINTAINERCLEANFILES =
+MAINTAINERCLEANFILES = Makefile.in
