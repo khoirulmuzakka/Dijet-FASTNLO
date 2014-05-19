@@ -10,7 +10,7 @@
 #include <utility>   //c++11
 #include "fastnlotk/fastNLOEvent.h"
 #include "fastnlotk/fastNLOGeneratorConstants.h"
-#include "fastnlo_interface_nlojet/pdf-hhc-dummy.h"
+#include "fastnlo_int_nlojet/pdf-hhc-dummy.h"
 
 namespace UsefulNlojetTools {
    /**
