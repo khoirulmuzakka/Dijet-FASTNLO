@@ -30,7 +30,7 @@ endif
 AM_SOURCES =
 # Individual sources
 libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
-libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      $(AM_SOURCES)
+libfnl5350eta0v22_la_SOURCES      = fnl5350eta0v22.cc      $(AM_SOURCES)
 
 #
 # Preprocessor flags
@@ -80,7 +80,7 @@ endif
 # -L$(pkglibdir) -lfastnlo -lfastnlojetalgos
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #v22 force
-#libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
+#libfnl5350eta0v22_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 #libfnl5350eta0v22conee_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 
 # Example of individual specification of LDFLAGS
