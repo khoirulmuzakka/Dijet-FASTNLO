@@ -12,8 +12,8 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Include files to be distributed
 #
-fastnloincludedir = $(includedir)/fastnlo_int_nlojet
-fastnloinclude_HEADERS = pdf-hhc-dummy.h fastNLOInterfaceToNLOJET.h cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h
+fastnloincludedir = $(includedir)/fnlo_int_nlojet
+fastnloinclude_HEADERS = fnlo_int_nlojet.cc pdf-hhc-dummy.h cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
