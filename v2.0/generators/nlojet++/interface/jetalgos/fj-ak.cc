@@ -1,11 +1,11 @@
-#include "fastnloja/fj-kt.h"
+#include "fastnlo_interface_nlojet/fj-ak.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <cmath>
 using namespace std;
 
 const bounded_vector<lorentzvector<double> >&
-fj_kt::operator()(const event_hhc& ev, double jetsize)
+fj_ak::operator()(const event_hhc& ev, double jetsize)
 {
   int nt = ev.upper();
 
@@ -28,7 +28,7 @@ fj_kt::operator()(const event_hhc& ev, double jetsize)
   }
 
   fastjet::Strategy strategy = fastjet::Best;
-  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, jetsize, strategy);
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, jetsize, strategy);
   fastjet::ClusterSequence clust_seq(input_objects, jet_def);
 
   double ptmin = 1.0;

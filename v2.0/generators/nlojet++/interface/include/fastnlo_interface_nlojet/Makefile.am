@@ -3,14 +3,18 @@
 #
 # K. Rabbertz, 15.05.2014
 #
-# fastNLO_toolkit
+# Header files for fastNLO interface to NLOJet++
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-# Subdirectories
-SUBDIRS = fastnloja
+#
+# Include files to be distributed
+#
+fastnloincludedir = $(includedir)/fastnlo_interface_nlojet
+fastnloinclude_HEADERS = fastNLOInterfaceToNLOJET.cc pdf-hhc-dummy.h \
+	cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

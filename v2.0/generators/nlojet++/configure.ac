@@ -269,12 +269,11 @@ AC_SUBST([YEARS],[2011,2012,2013,2014])
 
 # Output
 AC_CONFIG_FILES([Makefile
-                 fastnlojetalgos/Makefile
-                 fastnlojetalgos/include/Makefile
-                 fastnlojetalgos/include/fastnloja/Makefile
                  interface/Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
+                 interface/include/fastnlo_interface_nlojet/Makefile
+                 interface/jetalgos/Makefile
                 ])
 
 AC_OUTPUT

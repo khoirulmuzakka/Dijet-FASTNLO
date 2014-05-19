@@ -1,4 +1,4 @@
-#include "fastnloja/cone-e.h"
+#include "fastnlo_interface_nlojet/cone-e.h"
 #include <cmath>
 
 

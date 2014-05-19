@@ -1,36 +1,36 @@
+#                                               -*- Automake -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 19.05.2014
+#
+# fastNLO interface library with scenarios for NLOJet++
+#
+# -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
 #
-# The main targets, here the libtool plugin libraries to build
+# Targets
 #
-# For starter without fastjet
+# Without fastjet
 #
 lib_LTLIBRARIES = libfnl5350eta0v22conee.la
 #
 # Require fastjet
 #
 if HAVE_FASTJET
-#   lib_LTLIBRARIES += libfnl5350eta0v22new.la
+   lib_LTLIBRARIES += libfnl5350eta0v22new.la
 endif
 
 #
-# All source files which go into the main targets (and have to be distributed)
-# Note: All standard jet algo interfaces for NLOJet++ like fj-ak.cc and fj-ak.h reside in the
-#       fastnlojetalgos directory and are collected into the common library libfastnlojetalgos.
-#       An example how to add one locally here can be found below.
+# Sources
 #
-# All targets
-#AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
-AM_SOURCES = cone-e.cc
-# cteq6.h is included from lhpdf installation which is different from original
+# All source files which go into the targets (and have to be distributed)
+# Common sources
+AM_SOURCES =
 # Individual sources
-libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
-libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      $(AM_SOURCES)
-
-# Example how to add a jet algo interface locally in this directory
-# Should only be done temporarily
-#libfnl5350eta0v22_la_SOURCES   = fnl5350eta0v22.cc fj-ak.h fj-ak.cc $(AM_SOURCES)
+libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc cone-e.cc $(AM_SOURCES)
+libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      fj-ak.cc  $(AM_SOURCES)
 
 #
 # Preprocessor flags
@@ -80,8 +80,7 @@ endif
 # -L$(pkglibdir) -lfastnlo -lfastnlojetalgos
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #v22 force
-#libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-#libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
+libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 libfnl5350eta0v22conee_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 
 
