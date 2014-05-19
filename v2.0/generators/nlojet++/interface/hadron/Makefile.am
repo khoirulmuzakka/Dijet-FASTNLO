@@ -71,7 +71,8 @@ if HAVE_FASTJET
 endif
 endif
 
-AM_LDFLAGS += -L${top_builddir}/../../common/.libs -L${top_srcdir}/../../common -L$(pkglibdir) -lfastnlo -lfastnloJetAlgos
+#AM_LDFLAGS += -L$(pkglibdir) -lfastnlo -lfastnloJetAlgos
+# AM_LDFLAGS += -L${top_builddir}/../../common/.libs -L${top_srcdir}/../../common -L$(pkglibdir) -lfastnlo -lfastnloJetAlgos
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #AM_LDFLAGS =
 
