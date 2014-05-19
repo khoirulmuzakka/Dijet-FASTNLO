@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = fastnlo_interface_nlojet
+SUBDIRS = fnlo_int_nlojet
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
