@@ -22,7 +22,7 @@ endif
 #
 # All targets
 #AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
-AM_SOURCES = pdf-hhc-dummy.h cone-e.h
+AM_SOURCES = cone-e.cc
 # cteq6.h is included from lhpdf installation which is different from original
 # Individual sources
 libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
