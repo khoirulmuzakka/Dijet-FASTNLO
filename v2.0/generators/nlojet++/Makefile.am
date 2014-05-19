@@ -31,6 +31,6 @@ dist-hook:
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but NOT before distribution with "make dist"!
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
-	depcomp install-sh ltmain.sh missing \
+	depcomp install-sh ltmain.sh missing compile \
 	aclocal.m4 m4/ax_python_devel.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
 	SVNREV
