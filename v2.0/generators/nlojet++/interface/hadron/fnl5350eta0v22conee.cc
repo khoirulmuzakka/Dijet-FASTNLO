@@ -82,10 +82,10 @@ extern "C"{
 #include <algorithm>
 
 // --- fastNLO user: include the header file for the jet algorithm
-#include "cone-e.h"
+#include "fastnlo_interface_nlojet/cone-e.h"
 
 // --- fastNLO ---
-#include "fastNLOInterfaceToNLOJET.cc"
+#include "fastnlo_interface_nlojet/fastNLOInterfaceToNLOJET.cc"
 
 // --- fastNLO v2.2
 fastNLOCreate *ftable = NULL;

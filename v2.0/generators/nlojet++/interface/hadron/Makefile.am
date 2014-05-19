@@ -19,7 +19,7 @@ lib_LTLIBRARIES = libfnl5350eta0v22conee.la
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl5350eta0v22new.la
+   lib_LTLIBRARIES += libfnl5350eta0v22.la
 endif
 
 #
@@ -29,8 +29,8 @@ endif
 # Common sources
 AM_SOURCES =
 # Individual sources
-libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc cone-e.cc $(AM_SOURCES)
-libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      fj-ak.cc  $(AM_SOURCES)
+libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
+libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      $(AM_SOURCES)
 
 #
 # Preprocessor flags
@@ -42,12 +42,12 @@ libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      fj-ak.cc  $(AM_SOURCE
 # C++ compiler flags
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
-# All targets
-AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I../include
-
 # -I${top_srcdir}/../../common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
-#AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${top_srcdir}/fastnlojetalgos/include/fastnloja
-# -I${pkginclud#edir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH}
+# All targets
+AM_CXXFLAGS = -g -O2 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I../include
+# Debug flags
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I../include
+# With FastJet
 if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`
 else
@@ -62,7 +62,7 @@ endif
 #
 # All targets
 
-AM_LDFLAGS =
+AM_LDFLAGS = -L$(pkglibdir) -ljetalgos -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 if HAVE_FASTJETCONFIG
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else
@@ -80,9 +80,8 @@ endif
 # -L$(pkglibdir) -lfastnlo -lfastnlojetalgos
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #v22 force
-libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
-libfnl5350eta0v22conee_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
-
+#libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
+#libfnl5350eta0v22conee_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 
 # Example of individual specification of LDFLAGS
 #libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnlo -L${LHPDFLIBPATH} -llhpdf_cteq6
