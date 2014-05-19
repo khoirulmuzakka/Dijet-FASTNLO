@@ -1,0 +1,394 @@
+diff -urN nlojet++-4.1.3_original/nlo-core/bits/nlo-basic_user.h nlojet++-4.1.3_new/nlo-core/bits/nlo-basic_user.h
+--- nlojet++-4.1.3_original/nlo-core/bits/nlo-basic_user.h	2010-05-11 17:06:00.000000000 +0200
++++ nlojet++-4.1.3_new/nlo-core/bits/nlo-basic_user.h	2014-05-16 11:42:12.645025735 +0200
+@@ -41,20 +41,20 @@
+     virtual ~basic_user_base() {}
+   
+     //   set the output (file name saving mode)
+-    void phys_output(const char *fname, unsigned long nsave = 10000UL, bool txt = false) {
++    virtual void phys_output(const char *fname, unsigned long nsave = 10000UL, bool txt = false) {
+       _M_ofile = fname; _M_txt = txt; _M_nsave = nsave;
+     }
+     
+-    void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false) {
++    virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false) {
+       _M_ofile = fname; _M_txt = txt; _M_nsave = nsave;
+     }
+     
+-    void phys_output(unsigned long nsave, bool txt) {
++    virtual void phys_output(unsigned long nsave, bool txt) {
+       _M_txt = txt; _M_nsave = nsave;
+     }
+      
+     // operations at the end of the event and saving the results
+-    void end_of_event();
++    virtual void end_of_event();
+     
+   protected:
+     //   do any operetaions at the end of the event
+diff -urN nlojet++-4.1.3_original/nlo-core/bits/nlo-process_i1f0.h nlojet++-4.1.3_new/nlo-core/bits/nlo-process_i1f0.h
+--- nlojet++-4.1.3_original/nlo-core/bits/nlo-process_i1f0.h	2010-05-11 17:06:00.000000000 +0200
++++ nlojet++-4.1.3_new/nlo-core/bits/nlo-process_i1f0.h	2014-05-16 11:42:12.645025735 +0200
+@@ -173,7 +173,8 @@
+     contrib_type contrib() const { return _M_contr;}
+     integral_type integral() const { return _M_itype;}
+ 
+-  private:
++    //private:
++  public:
+     //   pointer to the process
+     process_type *_M_proc;
+     
+diff -urN nlojet++-4.1.3_original/nlo-core/bits/nlo-process_i2f0.h nlojet++-4.1.3_new/nlo-core/bits/nlo-process_i2f0.h
+--- nlojet++-4.1.3_original/nlo-core/bits/nlo-process_i2f0.h	2010-05-11 17:06:00.000000000 +0200
++++ nlojet++-4.1.3_new/nlo-core/bits/nlo-process_i2f0.h	2014-05-16 11:42:12.645025735 +0200
+@@ -184,7 +184,8 @@
+     contrib_type contrib() const { return _M_contr;}
+     integral_type integral() const { return _M_itype;}
+ 
+-  private:
++//   private:
++  public:
+     //   pointer to the process
+     process_type *_M_proc;
+     
+@@ -238,6 +239,13 @@
+       
+       void finix2(_Weight& res) const { 
+ 	res = amp[1] + amp[4]*lxf;
++	if (mode==1) {
++	   int NSubproc = 7;
++	   for(int proc=0;proc<NSubproc;proc++){
++	      if ( isnan(amp[1][proc]) ) std::cout<<"NLOJet++: ERROR! NaN in finix2 for M_proc=1, proc="<<proc<<std::endl;
++	      if ( isnan(amp[4][proc]) ) std::cout<<"NLOJet++: ERROR! NaN in finix2 for M_proc=4, proc="<<proc<<std::endl;
++	   }
++	}
+       }
+       
+       void fini1(_Weight& res) const { 
+diff -urN nlojet++-4.1.3_original/nlo-core/split.cc nlojet++-4.1.3_new/nlo-core/split.cc
+--- nlojet++-4.1.3_original/nlo-core/split.cc	2010-05-11 17:06:00.000000000 +0200
++++ nlojet++-4.1.3_new/nlo-core/split.cc	2014-05-16 11:42:12.645025735 +0200
+@@ -40,6 +40,23 @@
+     lorentzvector<double> qij = pi + pj - yijk/(1.0 - yijk)*pk;
+     
+     hij = pm(pi,pj)*mp(qij,pi)*mp(qij,pj)/(mp(pi,pj)*pm(qij,pi)*pm(qij,pj));
++
++//     static int hijfffcnt = 0;
++//     hijfffcnt++;
++//     if (hijfffcnt > 168000 ) {
++//        std::cout << "Nlojet++:splitfff: hijfffcnt = " << hijfffcnt << std::endl;
++//        std::cout << "Nlojet++:splitfff: Numerator: pm(pi,pj) = " << pm(pi,pj) << ", mp(qij,pi) = " << mp(qij,pi) << ", mp(qij,pj) = " << mp(qij,pj) << ", numerator = " << (pm(pi,pj)*mp(qij,pi)*mp(qij,pj)) << std::endl;
++//        std::cout << "Nlojet++:splitfff: Denominator: mp(pi,pj) = " << mp(pi,pj) << ", pm(qij,pi) = " << pm(qij,pi) << ", pm(qij,pj) = " << pm(qij,pj) << ", denominator = " << (mp(pi,pj)*pm(qij,pi)*pm(qij,pj)) << std::endl;
++//     }
++
++    static int hijfffnaninfcnt = 0;
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       hijfffnaninfcnt++;
++       std::cout << "NloJet++_splitfff: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++       std::cout << "NloJet++_splitfff: NaN or Inf in hij occurrence # = " << hijfffnaninfcnt << std::endl;
++       std::cout << "Nlojet++:splitfff: Numerator: pm(pi,pj) = " << pm(pi,pj) << ", mp(qij,pi) = " << mp(qij,pi) << ", mp(qij,pj) = " << mp(qij,pj) << ", numerator = " << (pm(pi,pj)*mp(qij,pi)*mp(qij,pj)) << std::endl;
++       std::cout << "Nlojet++:splitfff: Denominator: mp(pi,pj) = " << mp(pi,pj) << ", pm(qij,pi) = " << pm(qij,pi) << ", pm(qij,pj) = " << pm(qij,pj) << ", denominator = " << (mp(pi,pj)*pm(qij,pi)*pm(qij,pj)) << std::endl;
++    }
+   }
+ 
+   pair_type splitfff::Vqg() const {
+@@ -52,7 +69,10 @@
+     double color = 0.5/Nc;
+     double vd = -color*(1.0 - 2.0*zi*(1.0 - zi))/sij;
+     std::complex<double> vc = -2.0*color*zi*(1.0 - zi)*hij/sij;
+-    
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       std::cout << "NloJet++_splitfff_Vqa: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++    }
++
+     return pair_type(vd, vc);
+   }
+ 
+@@ -61,7 +81,10 @@
+     double oy = 1.0-yijk, zj = 1.0-zi;
+     double vd = -(2.0/(1.0-zi*oy) + 2.0/(1.0-zj*oy) - 4.0 + 2.0*zi*zj)/sij;
+     std::complex<double> vc = 2.0*zi*zj*hij/sij;
+-    
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       std::cout << "NloJet++_splitfff_Vgg: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++    }
++
+     return pair_type(vd, vc);
+   }
+ 
+@@ -76,6 +99,24 @@
+     lorentzvector<double> qij = pi + pj - (1.0 - xija)*pa;
+ 
+     hij = pm(pi,pj)*mp(qij,pi)*mp(qij,pj)/(mp(pi,pj)*pm(qij,pi)*pm(qij,pj));
++
++//     static int hijfficnt = 0;
++//     hijfficnt++;
++//     if (hijfficnt > 168000 ) {
++//        std::cout << "Nlojet++:splitffi: hijfficnt = " << hijfficnt << std::endl;
++//        std::cout << "Nlojet++:splitffi: Numerator: pm(pi,pj) = " << pm(pi,pj) << ", mp(qij,pi) = " << mp(qij,pi) << ", mp(qij,pj) = " << mp(qij,pj) << ", numerator = " << (pm(pi,pj)*mp(qij,pi)*mp(qij,pj)) << std::endl;
++//        std::cout << "Nlojet++:splitffi: Denominator: mp(pi,pj) = " << mp(pi,pj) << ", pm(qij,pi) = " << pm(qij,pi) << ", pm(qij,pj) = " << pm(qij,pj) << ", denominator = " << (mp(pi,pj)*pm(qij,pi)*pm(qij,pj)) << std::endl;
++//     }
++
++    static int hijffinaninfcnt = 0;
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       hijffinaninfcnt++;
++       std::cout << "NloJet++_splitffi: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++       std::cout << "NloJet++_splitffi: NaN or Inf in hij occurrence # = " << hijffinaninfcnt << std::endl;
++       std::cout << "Nlojet++:splitffi: Numerator: pm(pi,pj) = " << pm(pi,pj) << ", mp(qij,pi) = " << mp(qij,pi) << ", mp(qij,pj) = " << mp(qij,pj) << ", numerator = " << (pm(pi,pj)*mp(qij,pi)*mp(qij,pj)) << std::endl;
++       std::cout << "Nlojet++:splitffi: Denominator: mp(pi,pj) = " << mp(pi,pj) << ", pm(qij,pi) = " << pm(qij,pi) << ", pm(qij,pj) = " << pm(qij,pj) << ", denominator = " << (mp(pi,pj)*pm(qij,pi)*pm(qij,pj)) << std::endl;
++    }
++
+   }
+ 
+   pair_type splitffi::Vqg() const {
+@@ -88,7 +129,10 @@
+     double color = 0.5/Nc, zj = 1.0 - zi;
+     double vd = -color*(1.0 - 2.0*zi*zj)/(sij*xija);
+     std::complex<double> vc = -2.0*color*zi*zj*hij/(sij*xija);
+-    
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       std::cout << "NloJet++_splitffi_Vqa: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++    }
++
+     return pair_type(vd, vc);
+   }
+ 
+@@ -96,6 +140,9 @@
+     double ox = 1.0 - xija, zj = 1.0 - zi;
+     double vd = -(2.0/(zj + ox) + 2.0/(zi + ox) - 4.0 + 2.0*zi*zj)/(sij*xija);
+     std::complex<double> vc = 2.0*zi*zj*hij/(sij*xija);
++    if (isnan(real(hij)) || isnan(imag(hij)) || isinf(real(hij)) || isinf(imag(hij)) ) {
++       std::cout << "NloJet++_splitffi_Vgg: ERROR! NaN or Inf in hij, hij = " << hij << std::endl;
++    }
+ 
+     return pair_type(vd, vc);
+   }
+diff -urN nlojet++-4.1.3_original/proc-dis/bits/dis-process.h nlojet++-4.1.3_new/proc-dis/bits/dis-process.h
+--- nlojet++-4.1.3_original/proc-dis/bits/dis-process.h	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/proc-dis/bits/dis-process.h	2014-05-16 11:42:12.645025735 +0200
+@@ -30,6 +30,7 @@
+   class pdf_and_coupling_dis
+     : public pdf_and_coupling<weight_dis,1U,0U>
+   {
++  public:
+     virtual void hadron(double, double, unsigned int, unsigned int, double *) = 0;
+     weight_dis pdf(double, double, unsigned int=2U, unsigned int=3U);
+   };
+diff -urN nlojet++-4.1.3_original/proc-hhc/bits/hhc-process.h nlojet++-4.1.3_new/proc-hhc/bits/hhc-process.h
+--- nlojet++-4.1.3_original/proc-hhc/bits/hhc-process.h	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/proc-hhc/bits/hhc-process.h	2014-05-16 11:42:12.645025735 +0200
+@@ -30,6 +30,7 @@
+   class pdf_and_coupling_hhc
+     : public pdf_and_coupling<weight_hhc,2U,0U>
+   {
++  public:
+     virtual void hadronA(double, double, unsigned int, unsigned int, double *) = 0;
+     virtual void hadronB(double, double, unsigned int, unsigned int, double *) = 0;
+     weight_hhc pdf(double, double, double, unsigned int=2U, unsigned int=3U);
+diff -urN nlojet++-4.1.3_original/proc-hhc/hhc2jet.cc nlojet++-4.1.3_new/proc-hhc/hhc2jet.cc
+--- nlojet++-4.1.3_original/proc-hhc/hhc2jet.cc	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/proc-hhc/hhc2jet.cc	2014-05-16 11:42:12.645025735 +0200
+@@ -64,6 +64,13 @@
+     _M_ip.calculate(p);
+     amp_tree(_M_g4, _M_q2g2, _M_q4, 0, res.begin());
+     res *= PI_FAC4;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc2jet_born_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++       }
++    }
++
+   }
+   
+   void hhc2jet::real_term(const event_type& p, weight_type& res) 
+@@ -71,6 +78,13 @@
+     _M_ip.calculate(p);
+     amp_tree(_M_g5, _M_q2g3, _M_q4g1, 0, res.begin());
+     res *= PI_FAC5;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc2jet_real_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++       }
++    }
++
+   }
+ 
+ 
+@@ -105,6 +119,15 @@
+     //---- overall Pi factors ----
+     for(unsigned int i=0; i < 7; i++)
+       res[i] *= PI_FAC4;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       for (int jkr = 0; jkr<7; jkr++) {
++          if (isnan(res[ikr][jkr]) || isinf(res[ikr][jkr])) {
++             std::cout << "NLOJet++_hhc2jet_fini_term: NaN or Inf ERROR for ikr = " << ikr << ", jkr =" << jkr << ", res[ikr][jkr] = " << res[ikr][jkr] << std::endl;
++          }
++       }
++    }
++
+   }
+   
+   void hhc2jet::dipole_term(const event_type& p, const event_type& dp,
+@@ -127,6 +150,14 @@
+     _M_ip.calculate(dp); 
+     (this ->* _S_dipole[idx])(kt, i, res);
+     res *= PI_FAC5;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc2jet_dipole_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++          std::cout << "NLOJet++_hhc2jet_dipole_term: kt = " << kt << ", idx = " << idx << std::endl;
++       }
++    }
++
+   }
+ 
+   //
+diff -urN nlojet++-4.1.3_original/proc-hhc/hhc3jet.cc nlojet++-4.1.3_new/proc-hhc/hhc3jet.cc
+--- nlojet++-4.1.3_original/proc-hhc/hhc3jet.cc	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/proc-hhc/hhc3jet.cc	2014-05-16 11:42:12.645025735 +0200
+@@ -69,6 +69,13 @@
+     _M_ip.calculate(p);
+     amp_tree(_M_g5, _M_q2g3, _M_q4g1, 0, res.begin());
+     res *= PI_FAC5;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc3jet_born_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++       }
++    }
++
+   }
+   
+   void hhc3jet::real_term(const event_type& p, weight_type& res) 
+@@ -76,6 +83,13 @@
+     _M_ip.calculate(p);
+     amp_tree(_M_g6, _M_q2g4, _M_q4g2, _M_q6, 0, res.begin());
+     res *= PI_FAC6;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc3jet_real_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++       }
++    }
++
+   }
+ 
+   void hhc3jet::fini_term(double x1, double xjac1, double x2, double xjac2, 
+@@ -109,6 +123,14 @@
+     //---- overall Pi factors ----
+     for(unsigned int i=0; i < 7; i++)
+       res[i] *= PI_FAC5;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       for (int jkr = 0; jkr<7; jkr++) {
++          if (isnan(res[ikr][jkr]) || isinf(res[ikr][jkr])) {
++             std::cout << "NLOJet++_hhc3jet_fini_term: NaN or Inf ERROR for ikr = " << ikr << ", jkr =" << jkr << ", res[ikr][jkr] = " << res[ikr][jkr] << std::endl;
++          }
++       }
++    }
+   }
+     
+   void hhc3jet::dipole_term(const event_type& p, const event_type& dp,
+@@ -116,20 +138,28 @@
+   {
+     typedef split_fin<lorentzvector<double> > _SplitF;
+     typedef split_ini<lorentzvector<double> > _SplitI;
+-    
+-    if(i <= 0) {      
++
++    if(i <= 0) {
+       _M_sini = (k <= 0 ? (_SplitI *) &_M_sifi : (_SplitI *) &_M_siff);
+       _M_sini -> set(p[i], p[j], p[k]);
+     } else {
+       _M_sfin = (k <= 0 ? (_SplitF *)  &_M_sffi : (_SplitF *)  &_M_sfff);
+       _M_sfin -> set(p[i], p[j], p[k]);
+     }
+-    
++
+     int kt = (k == 4 ? j : k);
+     int idx = (i==-1 ? j-1 : 3*i-(i*i-i)/2 + j+3);
+ 
+     _M_ip.calculate(dp);    
+     (this ->* _S_dipole[idx])(kt, i, res);
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc3jet_dipole_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++          std::cout << "NLOJet++_hhc3jet_dipole_term: kt = " << kt << ", idx = " << idx << std::endl;
++       }
++    }
++
+     res *= PI_FAC6;
+   }
+ 
+@@ -490,6 +520,7 @@
+    
+     HHC_CCQ4G1(1,-1,0,2,3);
+     d[6] = (Vqg*q4g1[0])/2.0;
++
+   }
+ 
+   void hhc3jet::_M_d14(int kt, int i, weight_type& d) 
+@@ -605,12 +636,13 @@
+   void hhc3jet::_M_d34(int kt, int i, weight_type& d) 
+   {
+     _Pair cc[7], q4g1[2], HHC_FGG, HHC_FQA, HHC_FQG;
+-   
++
+     HHC_CCGG(_M_g5,1,2,3);
+     HHC_CCQG(_M_q2g3,1,2,3);
+     HHC_CCGQ(_M_q2g3,1,2,3);
+     HHC_CCQA(_M_q2g3,1,2,3);
+     HHC_CCQ4G1(3,-1,1,2,0);
++
+     d[0] = (Vgg*cc[0])/24.0; 
+     d[1] = (Vgg*cc[1])/6.0 + (Nf-1)*(Vqg*q4g1[0]) + (Vqg*q4g1[1])/2.0;
+     d[2] = (Vgg*cc[2])/6.0;
+@@ -632,5 +664,6 @@
+     HHC_CCQ4G1(1,-1,0,2,3);
+     d[6]  = (Vgg*q4g1[0])/2.0;
+     d[6] += (Nf-1)*(Vqa*q4g1[0]);
++
+   }
+ }  //  namespace nlo
+diff -urN nlojet++-4.1.3_original/proc-hhc/hhc4jet.cc nlojet++-4.1.3_new/proc-hhc/hhc4jet.cc
+--- nlojet++-4.1.3_original/proc-hhc/hhc4jet.cc	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/proc-hhc/hhc4jet.cc	2014-05-16 11:42:12.645025735 +0200
+@@ -50,6 +50,13 @@
+     _M_ip.calculate(p);
+     amp_tree(_M_g6, _M_q2g4, _M_q4g2, _M_q6, 0, res.begin());
+     res *= PI_FAC6;
++
++    for (int ikr = 0; ikr<7; ikr++) {
++       if (isnan(res[ikr]) || isinf(res[ikr])) {
++          std::cout << "NLOJet++_hhc4jet_born_term: NaN or Inf ERROR for ikr = " << ikr << ", res[ikr] = " << res[ikr] << std::endl;
++       }
++    }
++
+   }
+   
+   void hhc4jet::real_term(const event_type&, weight_type&) 
+diff -urN nlojet++-4.1.3_original/src/main_calc.cc nlojet++-4.1.3_new/src/main_calc.cc
+--- nlojet++-4.1.3_original/src/main_calc.cc	2010-05-11 17:06:01.000000000 +0200
++++ nlojet++-4.1.3_new/src/main_calc.cc	2014-05-16 11:42:12.645025735 +0200
+@@ -138,6 +138,7 @@
+   //  initialize the random seed
+   srand(seed);
+   
++  // KR: Add random seed printout
+   cout<<"User module        : "<<usr<<"\n"
+       <<"Contribution       : "<<contbl[in.contr]<<"\n"
+       <<"MC helicity sum    : "<<(in.mchel ? "true" : "false")<<"\n"
+@@ -147,6 +148,7 @@
+       <<"Saving mode        : "<<(in.txtout ? "text" : "binary")<<"\n"
+       <<"Save after         : "<<in.nsave<<" events\n"
+       <<"Time rate In+1:In  : "<<in.time<<":1\n"
++      <<"Random seed        : "<<seed<<"\n"
+       <<endl;
+   
+   //----- open the user defined file -----
