@@ -62,7 +62,7 @@ endif
 #
 # All targets
 
-AM_LDFLAGS = -L$(pkglibdir) -ljetalgos -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
+AM_LDFLAGS = -L$(pkglibdir) -L${top_srcdir}/interface/jetalgos -ljetalgos -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 if HAVE_FASTJETCONFIG
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else
