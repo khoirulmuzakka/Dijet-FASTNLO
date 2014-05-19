@@ -6,12 +6,12 @@ AUTOMAKE_OPTIONS = gnu
 #
 # For starter without fastjet
 #
-lib_LTLIBRARIES =
+lib_LTLIBRARIES = libfnl5350eta0v22conee.la
 #
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl5350eta0v22new.la
+#   lib_LTLIBRARIES += libfnl5350eta0v22new.la
 endif
 
 #
@@ -21,10 +21,12 @@ endif
 #       An example how to add one locally here can be found below.
 #
 # All targets
-AM_SOURCES =
+#AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
+AM_SOURCES = pdf-hhc-dummy.h cone-e.h
 # cteq6.h is included from lhpdf installation which is different from original
 # Individual sources
-libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc   $(AM_SOURCES)
+libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
+libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc      $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
@@ -33,15 +35,19 @@ libfnl5350eta0v22new_la_SOURCES   = fnl5350eta0v22.cc   $(AM_SOURCES)
 #
 # Preprocessor flags
 #
-my_include_dirs = -I${srcdir}/fastnlojetalgos/include/fastnloja -I${top_builddir}/fastnlojetalgos/include/fastnloja -I${top_srcdir}/fastnlojetalgos/include/fastnloja
-AM_CPPFLAGS = $(my_include_dirs) -I${includedir} -I${NLOJETINCLUDEPATH} 
+#my_include_dirs = -I${srcdir}/fastnlojetalgos/include/fastnloja -I${top_builddir}/fastnlojetalgos/include/fastnloja -I${top#_srcdir}/fastnlojetalgos/include/fastnloja
+#AM_CPPFLAGS = $(my_include_dirs) -I${includedir} -I${NLOJETINCLUDEPATH}
 
 #
 # C++ compiler flags
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 # All targets
-AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${top_srcdir}/fastnlojetalgos/include/fastnloja -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH}
+AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I../include
+
+# -I${top_srcdir}/../../common -I${pkgincludedir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH}
+#AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${top_srcdir}/fastnlojetalgos/include/fastnloja
+# -I${pkginclud#edir} -I${NLOJETINCLUDEPATH} -I${LHPDFINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH}
 if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`
 else
@@ -65,12 +71,17 @@ if HAVE_FASTJET
 endif
 endif
 
-AM_LDFLAGS += -L${top_builddir}/interface/hadron/.libs -L${top_builddir}/fastnlojetalgos/.libs -L${top_srcdir}/interface/hadron -L${top_srcdir}/fastnlojetalgos -L$(pkglibdir)
+AM_LDFLAGS += -L${top_builddir}/../../common/.libs -L${top_srcdir}/../../common -L$(pkglibdir) -lfastnlo -lfastnloJetAlgos
+# -L${LHPDFLIBPATH} -llhpdf_cteq6
+#AM_LDFLAGS =
+
+#AM_LDFLAGS += -L${top_builddir}/interface/hadron/.libs -L${top_builddir}/fastnlojetalgos/.libs -L${top_srcdir}/interface/hadron -L${top_srcdir}/fastnlojetalgos -L$(pkglibdir)
 # -L$(pkglibdir) -lfastnlo -lfastnlojetalgos
 # -L${LHPDFLIBPATH} -llhpdf_cteq6
 #v22 force
 #libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit -L${FNLOTOOLKITLIBPATH} -lfastnlojetalgos
+#libfnl5350eta0v22new_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
+libfnl5350eta0v22conee_la_LDFLAGS = ${AM_LDFLAGS} -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
 
 
 # Example of individual specification of LDFLAGS

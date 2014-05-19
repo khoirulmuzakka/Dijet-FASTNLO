@@ -71,7 +71,7 @@ AC_MSG_NOTICE([Starting checks particular for $PACKAGE_NAME ...])
 AC_MSG_NOTICE([*************************************************])
 
 # NLOJet++
-AC_SUBST([TMPNAM],["fastNLO toolkit"])
+AC_SUBST([TMPNAM],["NLOJet++"])
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Looking for $TMPNAM installation ...])
 AC_MSG_NOTICE([******************************************])
@@ -246,6 +246,8 @@ else
 fi
 AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
 AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
+#AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" == "x")
+#AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" == "x")
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
@@ -272,6 +274,7 @@ AC_CONFIG_FILES([Makefile
                  fastnlojetalgos/include/fastnloja/Makefile
                  interface/Makefile
                  interface/hadron/Makefile
+                 interface/include/Makefile
                 ])
 
 AC_OUTPUT

@@ -48,8 +48,8 @@ using namespace nlo;
 using namespace std;
 
 // ---- fastNLO ----
-#include <fastnlotk/fastNLOCreate.h>
-#include <fastnlotk/fastNLOEvent.h>
+#include "fastnlotk/fastNLOCreate.h"
+#include "fastnlotk/fastNLOEvent.h"
 
 //----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);

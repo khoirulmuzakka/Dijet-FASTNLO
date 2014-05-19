@@ -35,8 +35,8 @@ using namespace nlo;
 using namespace std;
 
 // ---- fastNLO ----
-#include <fastnlotk/fastNLOCreate.h>
-#include <fastnlotk/fastNLOEvent.h>
+#include "fastnlotk/fastNLOCreate.h"
+#include "fastnlotk/fastNLOEvent.h"
 
 //----- declaration of the user defined functions -----
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
@@ -150,8 +150,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       scen.SetObservableDimI( rap , 0 );
       scen.SetObservableDimI( pt , 1 );
       scen.SetObsScale1( mu );		// must be consistent with 'mu' from contribs
-      ftable->FillAllSubprocesses(contribs,scen); 
-   }     
+      ftable->FillAllSubprocesses(contribs,scen);
+   }
 }
 
 
@@ -170,7 +170,7 @@ void UserHHC::end_of_event(){
    if (( (unsigned long)nevents % nwrite)==0){
       printf ("fastNLO: No. events: %.3G writing table ...\n",nevents);
       ftable->SetNumberOfEvents(nevents);
-      ftable->WriteTable();    
+      ftable->WriteTable();
    }
 }
 
