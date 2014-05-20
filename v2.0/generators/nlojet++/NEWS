@@ -1,1 +1,9 @@
-Initial version
+Release Notes for fastnlo_interface_nlojet version 2.3.1pre revision 1785:
+==========================================================================
+
+- First public pre-release of the NLOJet++ interface to the fastNLO toolkit
+
+- Content:
+  - Library for running jet algorithms from within NLOJet++ libtool libraries
+    including interface to FastJet
+  - Example NLOJet++ libtool libraries for filling fastNLO v2 tables

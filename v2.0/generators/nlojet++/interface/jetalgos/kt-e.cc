@@ -12,16 +12,16 @@ kt_e::operator()(const event_hhc& ev, double jetsize)
   _M_pj.resize(1,0); _M_p.resize(1, nt);
 
   for(int ip = 1; ip <= nt; ip++) {
-    _M_p[ip] = ev[ip];
-    const double px = ev[ip].X();
-    const double py = ev[ip].Y();
-    const double pz = ev[ip].Z();
-    const double E  = ev[ip].T();
-//     cout << "**************************\n";
-//     cout << "Input objects:\n";
-//     printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
-//         ip, px, py, pz, E, nt);
-//     cout << "**************************\n";
+     _M_p[ip] = ev[ip];
+     // const double px = ev[ip].X();
+     // const double py = ev[ip].Y();
+     // const double pz = ev[ip].Z();
+     // const double E  = ev[ip].T();
+     // cout << "**************************\n";
+     // cout << "Input objects:\n";
+     // printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n",
+     //        ip, px, py, pz, E, nt);
+     // cout << "**************************\n";
   }
 
   unsigned int nj = 1;

@@ -85,7 +85,7 @@ extern "C"{
 #include "fnlo_int_nlojet/cone-e.h"
 
 // --- fastNLO ---
-#include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.cc"
+#include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 // --- fastNLO v2.2
 fastNLOCreate *ftable = NULL;
