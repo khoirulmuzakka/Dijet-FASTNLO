@@ -17,27 +17,27 @@ class pdf_hhc_dummy
 public:
   //   constructor
   pdf_hhc_dummy(unsigned int mem = 0) { ;}
-  
+
   //   strong coupling
   double alpha_qcd(unsigned int nf, double mr2) {
     return 1.0;
   }
-  
+
   //   parton in lepton distribution function
-  void hadronA(double x, double Q2, unsigned int, unsigned int, double *f) 
+  void hadronA(double x, double Q2, unsigned int, unsigned int, double *f)
   {
       printf("pdf_hhc_dummy::hadronA : PDF in dummy should never be called.\n");
       exit(1);
 
   }
-    
+
    //   the parton in the hadron distribution function
    void hadronB(double x, double Q2, unsigned int, unsigned int, double *f) {
       printf("pdf_hhc_dummy::hadronB : PDF in dummy should never be called.\n");
       exit(1);
    }
 
-   weight_hhc pdf(double x1, double x2, double mf2, unsigned int nu, unsigned int nd) 
+   weight_hhc pdf(double x1, double x2, double mf2, unsigned int nu, unsigned int nd)
    {
       weight_hhc retval;
 
@@ -50,19 +50,11 @@ public:
       retval[6] = 1./x1/x2;
 
       for (int i=0; i<7; i++) {
-	 if (isnan(retval[i])){
-	    cout << "fastNLO.pdf_hhc_dummy: WARNING! NaN for 1/x1/x2 in no. " << i << ", x1 = " << x1 << ", x2 = " << x2 << endl;
-	 }
+         if (isnan(retval[i])){
+            cout << "fastNLO.pdf_hhc_dummy: WARNING! NaN for 1/x1/x2 in no. " << i << ", x1 = " << x1 << ", x2 = " << x2 << endl;
+         }
       }
-
-    
       return retval;
    }
-
-  
-
 };
-
-
-
 #endif

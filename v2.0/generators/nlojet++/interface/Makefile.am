@@ -1,3 +1,11 @@
+#                                               -*- Automake -*-
+# -----------------------------------------------------------------------------
+#
+# K. Rabbertz, 15.05.2014
+#
+# NLOJet++ interface to fastNLO toolkit
+#
+# -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 # Nothing to do here, just go to subdirectories

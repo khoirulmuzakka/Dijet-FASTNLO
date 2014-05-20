@@ -31,8 +31,8 @@ endif
 #
 # Preprocessor flags
 #
-#my_include_dirs = -I${srcdir}/include -I${top_builddir}/include -I${top_srcdir}/include
-#libjetalgos_la_CPPFLAGS = $(my_include_dirs) -I${includedir}
+# All targets
+# AM_CPPFLAGS =
 
 #
 # C++ compiler flags
@@ -50,8 +50,6 @@ if HAVE_FASTJET
    AM_CXXFLAGS += -I${FASTJETINCLUDEPATH}
 endif
 endif
-# Individual targets
-#libjetalgos_la_CXXFLAGS =
 
 #
 # Linker flags
@@ -72,4 +70,5 @@ endif
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution
-MAINTAINERCLEANFILES = Makefile.in
+MAINTAINERCLEANFILES = .deps .obj .libs *.la \
+	Makefile.in Makefile.gen Makefile

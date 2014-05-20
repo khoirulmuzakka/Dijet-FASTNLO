@@ -117,7 +117,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    say::debug["inputfunc"] << "---------- inputfunc called ----------" << endl;
    // --- create fastNLO table and read in steering ... (if not done already)
    if (!ftable) {
-      ftable = new fastNLOCreate("fnl5350eta0v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet());
+      ftable = new fastNLOCreate("fnl2342bv22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet());
    }
 
    // --- fastNLO user: select the number of jets of the LO process for your observable,
@@ -145,12 +145,12 @@ void InitFastNLO(const std::basic_string<char>& __file_name)
 
 // --- fastNLO user: modify the jet selection in UserHHC::userfunc (default = cutting in |y| min, |y| max and pt min)
 //                   (the return value must be true for jets to be UNselected)
-// fnl5350eta0: use pseudorapidity eta
+// fnl2342b: use rapidity eta
 struct fNLOSelector {
    fNLOSelector(double ymin, double ymax, double ptmin):
       _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
    double _ymin, _ymax, _ptmin;
-   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.prapidity()) && abs(a.prapidity()) < _ymax && _ptmin <= a.perp());};
+   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
 // --- fastNLO user: modify the jet sorting in UserHHC::userfunc (default = descending in jet pt)
@@ -163,12 +163,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
 
    // --- fastNLO user: in this scenario run jet algo with three different jet sizes R
-   const unsigned int ndim1bins = 3;
-   const double Rjet[ndim1bins] = { 0.2, 0.3, 0.4 };
+
+
+   const unsigned int ndim1bins = 5;
+   const double ybin[ndim1bins+1] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5 };
    for (unsigned int k=0; k<ndim1bins; k++) {
 
       // --- fastNLO user: set the jet size and run the jet algorithm
-      double jetsize = Rjet[k];
+      double jetsize = 0.7;
       pj = jetclus(p,jetsize);
       unsigned int nj = pj.upper();
 
@@ -199,14 +201,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // --- declare and initialize phase space cut variables
       // can partially be taken from table binning for this scenario ???
       // smallest |(pseudo-)rapidity| for jets to be considered
-      const double yjmin  = 0.0;
+      const double yjmin  = ybin[0];
       // largest |(pseudo-)rapidity| for jets to be considered
-      const double yjmax  = 0.3;
+      const double yjmax  = ybin[ndim1bins+1];
       // lowest pT for jets to be considered
       const double ptjmin = 22.; // A2->LoBin[0][0];
 
       // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
-      static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
+      static fNLOSelector SelJets(0,3.,ptjmin);
       // --- count number of selected jets left at this stage
       size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
@@ -234,17 +236,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
          // Get jet quantities
          double pt  = pj[i].perp();
-
+	 double yjet = pj[i].rapidity();
          // --- set the renormalization and factorization scale to jet pT
          double mu = pt;
-
+	 //if()
          // get matrix elements
          //vector<fnloEvent> contribs = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu);
          vector<vector<fnloEvent> > contribs = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu,scalevars);
 
-         // scenario specific quantites
+	  // scenario specific quantites
          fnloScenario scen;
-         scen.SetObservableDimI( Rjet[k] , 0 );
+         scen.SetObservableDimI( yjet , 0 );
          scen.SetObservableDimI( pt , 1 );
          scen.SetObsScale1( mu );   // must be consistent with 'mu' from contribs
          ftable->FillAllSubprocesses(contribs,scen);
