@@ -24,8 +24,6 @@
 //  is superseeded by the Alphas.h class.
 //
 //////////////////////////////////////////////////////////////////////////
-#ifdef HAVEQCDNUM
-
 #ifndef FASTNLOQCDNUMAS
 #define FASTNLOQCDNUMAS
 
@@ -92,5 +90,4 @@ protected:
 
 };
 
-#endif
 #endif

@@ -25,8 +25,6 @@
 //lhasub
 //////////////////////////////////////////////////////////////////////////
 
-#ifdef HAVEHOPPET
-
 #ifndef FASTNLOHOPPET
 #define FASTNLOHOPPET
 
@@ -83,5 +81,4 @@ class fastNLOHoppet : public fastNLOLHAPDF {
 
 };
 
-#endif
 #endif
