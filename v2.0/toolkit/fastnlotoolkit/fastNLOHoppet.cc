@@ -150,10 +150,10 @@ void fastNLOHoppet::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
 void fastNLOHoppet::LHAsub(const double & x, const double & Q, double * pdf) {
    //
    //Provides PDF for Hoppet
-   //for (int i=0; i<13; i++)
-   //{
-   //pdf[i] = LHAPDF::xfx(x, Q, i-6);
-   //}
+   for (int i=0; i<13; i++)
+   {
+   pdf[i] = LHAPDF::xfx(x, Q, i-6);
+   }
 }
 
 double fastNLOHoppet::EvolveAlphas(double Q ) const {
@@ -167,7 +167,6 @@ vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {
    //
    vector<double> xfx(13);
    //Hoppet PDF Evolution
-   //hoppeteval_(xp, muf, &xfx[0]);
-   xfx = LHAPDF::xfx(xp, muf);
+   hoppeteval_(xp, muf, &xfx[0]);
    return xfx;
 }

@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
       // End --with-qcdnum
       // If compiled --with-hoppet support the following line(s) can be commented in
       //   } else if (AsEvolCode == "HOPPET") {
-      //      fnlo = new fastNLOHoppet(tablename);
+      //      fnlo = new fastNLOHoppetAs(tablename);
       // End --with-hoppet
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());

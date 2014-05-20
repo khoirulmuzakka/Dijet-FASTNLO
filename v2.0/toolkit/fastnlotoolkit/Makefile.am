@@ -58,7 +58,7 @@ endif
 
 if HAVE_HOPPET
    libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
-   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc
+   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc
    libfastnlotoolkit_la_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
    libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
 endif
