@@ -1942,7 +1942,7 @@ void fastNLOCreate::AdjustWarmupValues() {
 
 
 // ___________________________________________________________________________________________________
-int fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit) {
+void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit) {
    //! Round warmup values up (down) if third relevant
    //! digit is a 9 (0)
    //! lower values are only rounded down,
