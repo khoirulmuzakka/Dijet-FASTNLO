@@ -85,7 +85,7 @@ extern "C"{
 #include "fnlo_int_nlojet/cone-e.h"
 
 // --- fastNLO ---
-#include "fnlo_int_nlojet/fnlo_int_nlojet.cc"
+#include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 // --- fastNLO v2.2
 fastNLOCreate *ftable = NULL;
@@ -117,7 +117,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    say::debug["inputfunc"] << "---------- inputfunc called ----------" << endl;
    // --- create fastNLO table and read in steering ... (if not done already)
    if (!ftable) {
-      ftable = new fastNLOCreate("fnl2342bv22flex.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet());
+      ftable = new fastNLOCreate("InclusiveJets.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet());
    }
 
    // --- fastNLO user: select the number of jets of the LO process for your observable,
@@ -170,128 +170,142 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    // --- fastNLO user: one R, 5 y-bins
 
 
-   const unsigned int ndim1bins = 5;
-   //const double ybin[ndim1bins] = { 0., 0.5, 1.0,1.5,2.0 };
-   for (unsigned int k=0; k<ndim1bins; k++) {
 
-      // --- fastNLO user: set the jet size and run the jet algorithm
-      double jetsize = 0.7;
-      pj = jetclus(p,jetsize);
-      unsigned int nj = pj.upper();
+   // --- fastNLO user: set the jet size and run the jet algorithm
+   double jetsize = 0.7;
+   pj = jetclus(p,jetsize);
+   unsigned int nj = pj.upper();
 
-      // --- give some debug output before selection and sorting
-      if ( say::debug.GetSpeak() ) {
-         for (unsigned int i=1; i<=nj; i++) {
-            double pti  = pj[i].perp();
-            double yi   = pj[i].rapidity();
-            double etai = pj[i].prapidity();
-            say::debug["fnl-scenario"] << "Before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
-         }
-      }
-
-      // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
-      if (nj > 4) {
-         say::error["fnl-scenario"] << "This scenario is not suited for " << nj <<
-            " jets. Aborted!" << endl;
-         exit(1);
-      }
-
-      // --- fastNLO user:
-      //     Here is your playground where you compute your observable
-      //     and the bin number ("obsbin"), which gets passed to
-      //     fastNLO's table filling code.
-      //     Usually, pT and E are in GeV, but this may be changed.
-      //     ATTENTION: Scales must always be in GeV!
-
-      // --- declare and initialize phase space cut variables
-      // can partially be taken from table binning for this scenario ???
-      // smallest |(pseudo-)rapidity| for jets to be considered
-//      const double yjmin  = ybin[k];
-//      // largest |(pseudo-)rapidity| for jets to be considered
-//      const double yjmax  = ybin[k]+0.5;
-      // lowest pT for jets to be considered
-      double ptjmin;
-      static bool got_ptjmin = ftable->GetParameterFromSteering("ptjmin",ptjmin);
-
-      if(!got_ptjmin){
-         say::error["fnl-scenario"] << "No ptjmin defined, STOPPED." << endl;
-         exit(1);
-      }
-
-      double yjmin;
-      static bool got_yjmin = ftable->GetParameterFromSteering("yjmin",yjmin);
-      double yjmax;
-      static bool got_yjmax = ftable->GetParameterFromSteering("yjmax",yjmax);
-      double etajmin;
-      static bool got_etajmin = ftable->GetParameterFromSteering("etajmin",etajmin);
-      double etajmax;
-      static bool got_etajmax = ftable->GetParameterFromSteering("etajmax",etajmax);
-
-      bool flexsctab;
-      static bool got_flex = ftable->GetParameterFromSteering("FlexibleScaleTable",flexsctab);
-
-
-        if( !(got_yjmin&&got_yjmax) && !(got_etajmin&&got_etajmax) ){
-            say::error["fnl-scenario"] << "No (pseudo)rapidity limits defined, STOPPED." << endl;
-            exit(1);
-
-        }
-
-      // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
-      static fNLOSelector SelJets(yjmin,yjmax,ptjmin,false);
-      //if(got_yjmin && got_yjmax)    SelJets(yjmin,yjmax,ptjmin,false);
-      //if(got_etajmin && got_etajmax)  SelJets(etajmin,etajmax,ptjmin,true);
-
-
-      // --- count number of selected jets left at this stage
-      size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
-     // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-     static fNLOSorter SortJets;
-     std::sort(pj.begin(), pj.begin() + njet, SortJets);
-
-
-
-
-      // ---- fastNLO v2.2
-      // Analyze inclusive jets in jet loop
-      //const vector<double>& scalevars = ftable->GetScaleVariations();
-       double ptmax  = pj[1].perp();
-       double mu2 = ptmax;
-       const vector<double>& scalevars = ftable->GetScaleVariations();
-       //if(!flexsctab)   scalevars = ftable->GetScaleVariations();
-
-      for (unsigned int i = 1; i <= njet; i++) {
-         // Get jet quantities
-         double pt  = pj[i].perp();
-//         double yjet;
-//
-//         if(got_yjmin) yjet = pj[i].rapidity();
-//         else          yjet = pj[i].prapidity();
-
-         // --- set the renormalization and factorization scale to jet pT
-         double mu1 = pt;
-
-         // get matrix elements
-         vector<fnloEvent>  contribsflex;
-         vector< vector<fnloEvent> > contribsfix;
-         if(flexsctab) contribsflex = UsefulNlojetTools::GetFlexibleScaleNlojetContribHHC(p,amp);
-         else          contribsfix = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu1,scalevars);
-
-         // scenario specific quantites
-         fnloScenario scen;
-
-         if(got_yjmin)  scen.SetObservableDimI( pj[i].rapidity() , 0 );
-         else           scen.SetObservableDimI( pj[i].prapidity() , 0 );
-
-         scen.SetObservableDimI( pt , 1 );
-         scen.SetObsScale1( mu1 );   // must be consistent with 'mu' from contribs
-         if(flexsctab)  {
-             scen.SetObsScale2( mu2 );
-             ftable->FillAllSubprocesses(contribsflex,scen);}
-         else   ftable->FillAllSubprocesses(contribsfix,scen);
-
+   // --- give some debug output before selection and sorting
+   if ( say::debug.GetSpeak() ) {
+      for (unsigned int i=1; i<=nj; i++) {
+         double pti  = pj[i].perp();
+         double yi   = pj[i].rapidity();
+         double etai = pj[i].prapidity();
+         say::debug["fnl-scenario"] << "Before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
+
+   // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
+   if (nj > 4) {
+      say::error["fnl-scenario"] << "This scenario is not suited for " << nj <<
+         " jets. Aborted!" << endl;
+      exit(1);
+   }
+
+   // --- fastNLO user:
+   //     Here is your playground where you compute your observable
+   //     and the bin number ("obsbin"), which gets passed to
+   //     fastNLO's table filling code.
+   //     Usually, pT and E are in GeV, but this may be changed.
+   //     ATTENTION: Scales must always be in GeV!
+
+   // --- declare and initialize phase space cut variables
+   // can partially be taken from table binning for this scenario ???
+   // smallest |(pseudo-)rapidity| for jets to be considered
+   //      const double yjmin  = ybin[k];
+   //      // largest |(pseudo-)rapidity| for jets to be considered
+   //      const double yjmax  = ybin[k]+0.5;
+   // lowest pT for jets to be considered
+   double ptjmin;
+   static bool got_ptjmin = ftable->GetParameterFromSteering("ptjmin",ptjmin);
+
+   if(!got_ptjmin){
+      say::error["fnl-scenario"] << "No ptjmin defined, STOPPED." << endl;
+      exit(1);
+   }
+
+   //Move out of event loop
+   double yjmin;
+   static bool got_yjmin = ftable->GetParameterFromSteering("yjmin",yjmin);
+   double yjmax;
+   static bool got_yjmax = ftable->GetParameterFromSteering("yjmax",yjmax);
+   double etajmin;
+   static bool got_etajmin = ftable->GetParameterFromSteering("etajmin",etajmin);
+   double etajmax;
+   static bool got_etajmax = ftable->GetParameterFromSteering("etajmax",etajmax);
+
+   bool flexsctab;
+   ftable->GetParameterFromSteering("FlexibleScaleTable",flexsctab);
+
+   if( !(got_yjmin&&got_yjmax) && !(got_etajmin&&got_etajmax) ){
+      say::error["fnl-scenario"] << "No (pseudo)rapidity limits defined, STOPPED." << endl;
+      exit(1);
+   }
+
+   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
+   fNLOSelector *SelJets;
+   if(got_yjmin && got_yjmax) SelJets = new fNLOSelector(yjmin,yjmax,ptjmin,false);
+   if(got_etajmin && got_etajmax)  SelJets = new fNLOSelector(etajmin,etajmax,ptjmin,true);
+
+
+   // --- count number of selected jets left at this stage
+   size_t njet = std::remove_if(pj.begin(), pj.end(), *SelJets) - pj.begin();
+   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
+   static fNLOSorter SortJets;
+   std::sort(pj.begin(), pj.begin() + njet, SortJets);
+
+
+
+
+   // ---- fastNLO v2.2
+   // Analyze inclusive jets in jet loop
+   //const vector<double>& scalevars = ftable->GetScaleVariations();
+   double ptmax  = pj[1].perp();
+   double mu2 = ptmax;
+   vector<double> scalevars;
+   if (!flexsctab)
+      scalevars = ftable->GetScaleVariations();
+
+   // --- give some debug after selection and sorting
+   if ( say::debug.GetSpeak() ) {
+      for (unsigned int i=1; i<=nj; i++) {
+         double pti  = pj[i].perp();
+         double yi   = pj[i].rapidity();
+         double etai = pj[i].prapidity();
+         say::debug["fnl-scenario"] << "After cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+      }
+   }
+
+
+
+   for (unsigned int i = 1; i <= njet; i++) {
+      // Get jet quantities
+      double pt  = pj[i].perp();
+      //         double yjet;
+      //
+      //         if(got_yjmin) yjet = pj[i].rapidity();
+      //         else          yjet = pj[i].prapidity();
+
+      // --- set the renormalization and factorization scale to jet pT
+      double mu1 = pt;
+
+      // get matrix elements
+      vector<fnloEvent>  contribsflex;
+      vector< vector<fnloEvent> > contribsfix;
+      if(flexsctab)
+         contribsflex = UsefulNlojetTools::GetFlexibleScaleNlojetContribHHC(p,amp);
+      else
+         contribsfix = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu1,scalevars);
+
+      // scenario specific quantites
+      fnloScenario scen;
+
+      if (got_yjmin)
+         scen.SetObservableDimI( pj[i].rapidity() , 0 );
+      else
+         scen.SetObservableDimI( pj[i].prapidity() , 0 );
+
+      scen.SetObservableDimI( pt , 1 );
+      scen.SetObsScale1( mu1 );   // must be consistent with 'mu' from contribs
+      if(flexsctab)  {
+         scen.SetObsScale2( mu2 );
+         ftable->FillAllSubprocesses(contribsflex,scen);}
+      else
+         ftable->FillAllSubprocesses(contribsfix,scen);
+
+   }
+   delete SelJets;
 }
 
 
