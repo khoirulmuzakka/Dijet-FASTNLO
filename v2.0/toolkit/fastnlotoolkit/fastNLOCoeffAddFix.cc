@@ -87,12 +87,12 @@ void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
    //printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
    //fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
    fastNLOTools::ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
-   //int nsn = fastNLOTools::ReadVector( ScaleNode , table );
+   int nsn = fastNLOTools::ReadVector( ScaleNode , table );
    //printf("  *  fastNLOCoeffAddFix::Read(). Read %d lines of ScaleNode.\n",nsn);
 
    ResizeSigmaTilde();
    ResizePdfLC();
-   // int nst = fastNLOTools::ReadVector( SigmaTilde , table , Nevt);
+   int nst = fastNLOTools::ReadVector( SigmaTilde , table , Nevt);
    // info["Read"]<<"Read "<<nst+nsn<<" lines of fastNLO v2.0 tables."<<endl;
 
    // prepare members for evaluation
