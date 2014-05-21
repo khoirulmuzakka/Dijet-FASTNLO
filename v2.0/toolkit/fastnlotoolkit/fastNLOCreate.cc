@@ -1932,10 +1932,10 @@ void fastNLOCreate::AdjustWarmupValues() {
 
    // ---------------------------------------
    // 3. 'round' lower x-values down
-   const double xdown = 0.20;
-   for (int i = 0 ; i < GetNObsBin() ; i ++) {
-      fWx[i].first *= (1.-xdown);
-   }
+   // const double xdown = 0.20;
+   // for (int i = 0 ; i < GetNObsBin() ; i ++) {
+   //    fWx[i].first *= (1.-xdown);
+   // }
 
 }
 
