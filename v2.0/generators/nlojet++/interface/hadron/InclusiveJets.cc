@@ -283,9 +283,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       double pt  = pj[i].perp();
       double yeta;
       if ( read_yjmin ) {
-         yeta = pj[i].rapidity();
+         yeta = abs(pj[i].rapidity());
       } else {
-         yeta = pj[i].prapidity();
+         yeta = abs(pj[i].prapidity());
       }
 
       // --- set first choice for the renormalization and factorization scale to jet pT
