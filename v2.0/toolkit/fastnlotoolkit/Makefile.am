@@ -31,22 +31,19 @@ AM_SOURCES =
 libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc fastNLOInterpolCatmullRom.cc fastNLOInterpolLagrange.cc fastNLOInterpolLinear.cc fastNLOInterpolOneNode.cc fastNLOBase.cc fastNLOTable.cc fastNLOCoefficients.cc fastNLOCreate.cc read_steer.cc fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddFix.cc fastNLOCoeffAddFlex.cc fastNLOReader.cc fastNLOPDFLinearCombinations.cc fastNLODiffReader.cc fastNLODiffUser.cc Alphas.cc CRunDec.cc $(AM_SOURCES)
 
 #
-# Preprocessor flags
-#
-# All targets
-# AM_CPPFLAGS =
-
-#
-# C++ compiler and linker flags
+# Preprocessor, C++ compiler and linker flags
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
+# AM_CPPFLAGS =
 # AM_CXXFLAGS = -g -O2 -Wall
 # Debug flags
 # AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 # Individual targets
+libfastnlotoolkit_la_CPPFLAGS =
 libfastnlotoolkit_la_CXXFLAGS = -g -O2 -Wall
+libfastnlotoolkit_la_LDFLAGS  =
 # Debug flags
 #libfastnlotoolkit_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 # Require LHAPDF
@@ -54,9 +51,9 @@ if HAVE_LHAPDF
    libfastnlotoolkit_la_SOURCES  += fastNLOLHAPDF.cc fastNLOAlphas.cc fastNLOCRunDec.cc
    libfastnlotoolkit_la_CXXFLAGS += -I${LHAPDFINCLUDEPATH}
 if HAVE_LHAPDFCONFIG
-   libfastnlotoolkit_la_LDFLAGS += `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+   libfastnlotoolkit_la_LDFLAGS  += `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
-   libfastnlotoolkit_la_LDFLAGS += -L$(LHAPDFLIBPATH) -lLHAPDF
+   libfastnlotoolkit_la_LDFLAGS  += -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
 
 # With QCDNUM
