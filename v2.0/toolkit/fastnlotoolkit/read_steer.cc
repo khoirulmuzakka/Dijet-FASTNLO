@@ -551,7 +551,7 @@ bool read_steer::ParseString(string line) {
    if (fParseTableMode>2) {   // check number of columns in table
       if (ftablevalues.size() > 1)
          if (ftablevalues.back().size() != ftablevalues[0].size())
-            cout <<oW<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()+1
+            cout <<oI<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()
                  <<" has a different number of columns (n="<< ftablevalues.back().size()
                  <<") than first row (n="<<ftablevalues[0].size()<<")."<<endl;
    }

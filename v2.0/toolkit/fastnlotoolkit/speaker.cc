@@ -95,11 +95,11 @@ int speaker::SetGlobalVerbosity(say::Verbosity volume) {
 
 
 PrimalScream::PrimalScream(std::string classname) { //,std::string prefix=""){
-   debug = speaker(" # DEBUG: ",say::DEBUG);
-   man   = speaker(" # ",say::MANUAL);
-   info  = speaker(" # INFO: ",say::INFO);
+   debug = speaker(" # DEBUG:   ",say::DEBUG);
+   man   = speaker(" # MANUAL:  ",say::MANUAL);
+   info  = speaker(" # INFO:    ",say::INFO);
    warn  = speaker(" # WARNING! ",say::WARNING);
-   error = speaker(" # ERROR! ",say::ERROR,true);
+   error = speaker(" # ERROR!   ",say::ERROR,true);
    shout = speaker(" #",say::ERROR,false);
    shout.SetClassName(___cn);
    SetClassName(classname);
@@ -137,4 +137,3 @@ int SetGlobalVerbosity(Verbosity verbosity) {
    return speaker::SetGlobalVerbosity(verbosity);
 };
 }
-

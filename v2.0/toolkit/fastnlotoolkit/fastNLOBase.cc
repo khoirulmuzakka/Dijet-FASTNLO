@@ -268,6 +268,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    char quotev14[200]   = FNLO_QUOTEv14;
    char authorsv2[200]  = FNLO_AUTHORSv2;
    char quotev2[200]    = FNLO_QUOTEv2;
+   char years[100]      = FNLO_YEARS;
 
    shout>>"\n";
    shout>>""<<CSEPS;
@@ -280,7 +281,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright © 2011,2012,2013,2014 "<<fnlo<<" Collaboration"<<endl;
+   shout<<" Copyright © "<<years<<" "<<fnlo<<" Collaboration"<<endl;
    shout<<" "<<authors<<endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
@@ -308,4 +309,3 @@ void fastNLOBase::PrintWelcomeMessage() {
    shout>>""<<CSEPS;
    fWelcomeOnce = true;
 }
-
