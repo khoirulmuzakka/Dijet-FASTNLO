@@ -21,7 +21,7 @@ lib_LTLIBRARIES = libfnl5350eta0v22conee.la
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libfnl5350eta0v22.la
+   lib_LTLIBRARIES += libfnl5350eta0v22.la libInclusiveJets.la
 # libfnl2342bv22.la
 endif
 
@@ -34,6 +34,7 @@ AM_SOURCES =
 # Individual sources
 libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
 libfnl5350eta0v22_la_SOURCES      = fnl5350eta0v22.cc      $(AM_SOURCES)
+libInclusiveJets_la_SOURCES       = InclusiveJets.cc       $(AM_SOURCES)
 # libfnl2342bv22_la_SOURCES         = fnl2342bv22.cc      $(AM_SOURCES)
 
 #
