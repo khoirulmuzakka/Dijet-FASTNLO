@@ -130,65 +130,65 @@ AM_CONDITIONAL(HAVE_LHAPDF, test "x$LHAPDFPREFIX" != "x")
 AM_CONDITIONAL(HAVE_LHAPDFCONFIG, test "x$LHAPDFBIN" != "x")
 
 # FastJet
-#AC_SUBST([TMPNAM],["FastJet"])
-#AC_MSG_NOTICE([******************************************])
-#AC_MSG_NOTICE([Looking for $TMPNAM installation ...])
-#AC_MSG_NOTICE([******************************************])
-#
-#AC_ARG_WITH([fastjet],
-#        [AS_HELP_STRING([--with-fastjet],
-#         [Specify location of $TMPNAM installation. This takes precedence over
-#          a FASTJET environment variable, the prefix path or other methods.
-#          Please note: $TMPNAM is not required but warmly recommended in order to apply jet algorithms!])],
-#        [if test "x$withval" = "xno"; then
-#            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
-#         else
-#            if test "x$withval" != "xyes"; then
-#               AC_SUBST([FASTJET],[$withval])
-#               AC_MSG_NOTICE([Using given path $FASTJET as location of $TMPNAM installation.])
-#            fi
-#         fi],
-#        [])
-#
-#if test "x$withval" != "xno"; then
-#   if test "x$FASTJET" = "x"; then
-#      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
-#      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$prefix/bin])
-#      if test "x$FASTJETBIN" = "x"; then
-#         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
-#         AC_PATH_PROG([FASTJETBIN],[fastjet-config])
-#         if test "x$FASTJETBIN" = "x"; then
-#            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
-#         fi
-#      fi
-#   else
-#      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
-#      if test "x$FASTJETBIN" = "x"; then
-#         AC_MSG_ERROR([fastjet-config not found in given path to $TMPNAM! Configuration aborted!])
-#      fi
-#   fi
-#   AC_MSG_NOTICE([******************************************])
-#   if test "x$FASTJETBIN" != "x"; then
-#      AC_MSG_NOTICE([$TMPNAM settings:])
-#      AC_SUBST([FASTJETPREFIX],  [`$FASTJETBIN --prefix`])
-#      AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
-#      AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
-#      AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
-#      AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
-#      AC_MSG_RESULT([Using $FASTJETPREFIX for the $TMPNAM installation path])
-#      AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
-#      AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
-#      AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
-#      AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
-#   else
-#      AC_MSG_NOTICE([No $TMPNAM library found. Building $PACKAGE_NAME without $TMPNAM!])
-#   fi
-#else
-#   AC_MSG_NOTICE([******************************************])
-#   AC_MSG_NOTICE([$TMPNAM support switched off by user. Building $PACKAGE_NAME without $TMPNAM!])
-#fi
-#AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
-#AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
+AC_SUBST([TMPNAM],["FastJet"])
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Looking for $TMPNAM installation ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([fastjet],
+        [AS_HELP_STRING([--with-fastjet],
+         [Specify location of $TMPNAM installation. This takes precedence over
+          a FASTJET environment variable, the prefix path or other methods.
+          Please note: $TMPNAM is not required but warmly recommended in order to apply jet algorithms!])],
+        [if test "x$withval" = "xno"; then
+            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
+         else
+            if test "x$withval" != "xyes"; then
+               AC_SUBST([FASTJET],[$withval])
+               AC_MSG_NOTICE([Using given path $FASTJET as location of $TMPNAM installation.])
+            fi
+         fi],
+        [])
+
+if test "x$withval" != "xno"; then
+   if test "x$FASTJET" = "x"; then
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
+      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$prefix/bin])
+      if test "x$FASTJETBIN" = "x"; then
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+         AC_PATH_PROG([FASTJETBIN],[fastjet-config])
+         if test "x$FASTJETBIN" = "x"; then
+            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([FASTJETBIN],[fastjet-config],[],[$FASTJET/bin])
+      if test "x$FASTJETBIN" = "x"; then
+         AC_MSG_ERROR([fastjet-config not found in given path to $TMPNAM! Configuration aborted!])
+      fi
+   fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$FASTJETBIN" != "x"; then
+      AC_MSG_NOTICE([$TMPNAM settings:])
+      AC_SUBST([FASTJETPREFIX],  [`$FASTJETBIN --prefix`])
+      AC_SUBST([FASTJETBINPATH], ["$FASTJETPREFIX/bin"])
+      AC_SUBST([FASTJETLIBPATH], ["$FASTJETPREFIX/lib"])
+      AC_SUBST([FASTJETINCLUDEPATH],["$FASTJETPREFIX/include"])
+      AC_SUBST([FASTJETLIBS],[`$FASTJETBINPATH/fastjet-config --libs`])
+      AC_MSG_RESULT([Using $FASTJETPREFIX for the $TMPNAM installation path])
+      AC_MSG_RESULT([Using $FASTJETBINPATH for the binaries])
+      AC_MSG_RESULT([Using $FASTJETLIBPATH for the library])
+      AC_MSG_RESULT([Using $FASTJETINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $FASTJETLIBS for the linker flags])
+   else
+      AC_MSG_NOTICE([No $TMPNAM library found. Building $PACKAGE_NAME without $TMPNAM!])
+   fi
+else
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([$TMPNAM support switched off by user. Building $PACKAGE_NAME without $TMPNAM!])
+fi
+AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
+AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
 
 # QCDNUM
 AC_SUBST([TMPNAM],["QCDNUM"])
@@ -395,8 +395,6 @@ else
 fi
 AC_MSG_NOTICE([******************************************])
 AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes"])
-
-
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
