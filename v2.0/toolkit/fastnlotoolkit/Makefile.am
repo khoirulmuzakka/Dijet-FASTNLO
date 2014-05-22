@@ -31,45 +31,70 @@ AM_SOURCES =
 libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc fastNLOInterpolCatmullRom.cc fastNLOInterpolLagrange.cc fastNLOInterpolLinear.cc fastNLOInterpolOneNode.cc fastNLOBase.cc fastNLOTable.cc fastNLOCoefficients.cc fastNLOCreate.cc read_steer.cc fastNLOCoeffBase.cc fastNLOCoeffData.cc fastNLOCoeffMult.cc fastNLOCoeffAddBase.cc fastNLOCoeffAddFix.cc fastNLOCoeffAddFlex.cc fastNLOReader.cc fastNLOPDFLinearCombinations.cc fastNLODiffReader.cc fastNLODiffUser.cc Alphas.cc CRunDec.cc $(AM_SOURCES)
 
 #
-# Preprocessor, C++ compiler and linker flags
+# Preprocessor flags
+#
+# All targets
+AM_CPPFLAGS =
+# Individual targets
+libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
+# With HOPPET
+if HAVE_HOPPET
+   libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
+   libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
+endif
+# With QCDNUM
+if HAVE_QCDNUM
+   libfastnlotoolkit_la_CPPFLAGS += -DHAVEQCDNUM
+endif
+
+#
+# C++ compiler flags
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
-# AM_CPPFLAGS =
-# AM_CXXFLAGS = -g -O2 -Wall
+AM_CXXFLAGS = -g -O2 -Wall -I./include
 # Debug flags
-# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I./include
 # Individual targets
-libfastnlotoolkit_la_CPPFLAGS =
-libfastnlotoolkit_la_CXXFLAGS = -g -O2 -Wall
-libfastnlotoolkit_la_LDFLAGS  =
-# Debug flags
-#libfastnlotoolkit_la_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
+libfastnlotoolkit_la_CXXFLAGS = $(AM_CXXFLAGS)
 # Require LHAPDF
 if HAVE_LHAPDF
    libfastnlotoolkit_la_SOURCES  += fastNLOLHAPDF.cc fastNLOAlphas.cc fastNLOCRunDec.cc
    libfastnlotoolkit_la_CXXFLAGS += -I${LHAPDFINCLUDEPATH}
+endif
+# With HOPPET
+if HAVE_HOPPET
+   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc
+endif
+# With QCDNUM
+if HAVE_QCDNUM
+   libfastnlotoolkit_la_SOURCES  += fastNLOQCDNUMAS.cc
+endif
+
+#
+# Linker flags
+# top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
+#
+# All targets
+AM_LDFLAGS =
+# Individual targets
+libfastnlotoolkit_la_LDFLAGS = $(AM_LDFLAGS)
+# Require LHAPDF
+if HAVE_LHAPDF
 if HAVE_LHAPDFCONFIG
    libfastnlotoolkit_la_LDFLAGS  += `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 else
    libfastnlotoolkit_la_LDFLAGS  += -L$(LHAPDFLIBPATH) -lLHAPDF
 endif
-
-# With QCDNUM
-if HAVE_QCDNUM
-   libfastnlotoolkit_la_CPPFLAGS += -DHAVEQCDNUM
-   libfastnlotoolkit_la_SOURCES  += fastNLOQCDNUMAS.cc
-   libfastnlotoolkit_la_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
 endif
-
 # With HOPPET
 if HAVE_HOPPET
-   libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
-   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc
    libfastnlotoolkit_la_LDFLAGS  += -lgfortran ${HOPPETLDFLAGS}
-   libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
 endif
+# With QCDNUM
+if HAVE_QCDNUM
+   libfastnlotoolkit_la_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
 endif
 
 # Files that are required to build the project but that can be
