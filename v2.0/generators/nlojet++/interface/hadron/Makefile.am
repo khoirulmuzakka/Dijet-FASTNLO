@@ -51,7 +51,7 @@ libInclusiveJets_la_SOURCES       = InclusiveJets.cc       $(AM_SOURCES)
 # All targets
 AM_CXXFLAGS = -g -O2 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
 # Debug flags
-# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I../include
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
 # With FastJet
 if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`

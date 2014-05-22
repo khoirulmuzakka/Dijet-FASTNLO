@@ -55,7 +55,7 @@ endif
 # All targets
 AM_CXXFLAGS = -g -O2 -Wall -I$(srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/include
 # Debug flags
-# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I./include
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I$(srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/include
 # Individual targets
 libfastnlotoolkit_la_CXXFLAGS = $(AM_CXXFLAGS)
 # Require LHAPDF
