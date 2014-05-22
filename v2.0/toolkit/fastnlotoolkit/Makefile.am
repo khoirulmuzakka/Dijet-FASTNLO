@@ -53,7 +53,7 @@ endif
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
-AM_CXXFLAGS = -g -O2 -Wall -I./include
+AM_CXXFLAGS = -g -O2 -Wall -I$(srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/include
 # Debug flags
 # AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I./include
 # Individual targets
