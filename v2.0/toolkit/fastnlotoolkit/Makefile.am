@@ -53,9 +53,9 @@ endif
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
-AM_CXXFLAGS = -g -O2 -Wall -I$(srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/include
+AM_CXXFLAGS = -g -O2 -Wall -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
 # Debug flags
-# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I$(srcdir)/include -I$(top_builddir)/include -I$(top_srcdir)/include
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall  -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
 # Individual targets
 libfastnlotoolkit_la_CXXFLAGS = $(AM_CXXFLAGS)
 # Require LHAPDF

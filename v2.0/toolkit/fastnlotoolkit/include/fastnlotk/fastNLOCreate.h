@@ -156,6 +156,9 @@ protected:
    vector<pair<double,double> > fWMu1;                                                          //!< array of warmup-up values
    vector<pair<double,double> > fWMu2;                                                          //!< array of warmup-values
    vector<pair<double,double> > fWx;                                                            //!< array of warmup-values
+   vector<pair<double,double> > fWMu1Rnd;                                                       //!< copy of warm-up array for rounding
+   vector<pair<double,double> > fWMu2Rnd;                                                       //!< copy of warm-up array for rounding
+   vector<pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
 
    struct fnloStats {
       //! structre to keep track of statisics. Just for fun and information.

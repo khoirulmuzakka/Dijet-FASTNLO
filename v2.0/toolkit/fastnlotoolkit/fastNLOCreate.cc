@@ -1679,18 +1679,28 @@ void fastNLOCreate::UpdateWarmupArrays() {
 // ___________________________________________________________________________________________________
 void fastNLOCreate::InitWarmupArrays() {
    debug["InitWarmupArrays"]<<endl;
-   //! initialize arrays to store and determined warm-up values
+   //! initialize arrays to store and determine warm-up values
+   //! including copy for later rounding and write out
    //! initialize with reasonable values
    fWMu1.resize(GetNObsBin());
    fWMu2.resize(GetNObsBin());
    fWx.resize(GetNObsBin());
+   fWMu1Rnd.resize(GetNObsBin());
+   fWMu2Rnd.resize(GetNObsBin());
+   fWxRnd.resize(GetNObsBin());
    for (int i = 0 ; i < GetNObsBin() ; i ++) {
-      fWMu1[i].first    = 10e10;
-      fWMu1[i].second   = -10e10;
-      fWMu2[i].first    = 10e10;
-      fWMu2[i].second   = -10e10;
-      fWx[i].first      = 10e10;
-      fWx[i].second     = -10e10;
+      fWMu1[i].first     =  10e10;
+      fWMu1[i].second    = -10e10;
+      fWMu2[i].first     =  10e10;
+      fWMu2[i].second    = -10e10;
+      fWx[i].first       =  10e10;
+      fWx[i].second      = -10e10;
+      fWMu1Rnd[i].first  =  10e10;
+      fWMu1Rnd[i].second = -10e10;
+      fWMu2Rnd[i].first  =  10e10;
+      fWMu2Rnd[i].second = -10e10;
+      fWxRnd[i].first    =  10e10;
+      fWxRnd[i].second   = -10e10;
    }
 }
 
@@ -1757,7 +1767,7 @@ void fastNLOCreate::PrintWarmupValues() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::OutWarmup(ostream& strm) {
-   if (fWx.empty()) {
+   if (fWxRnd.empty()) {
       warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
 //       warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
 //       InitWarmupArrays();
@@ -1806,12 +1816,12 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
       strm<<buf<<endl;
       // table values
       for (int i = 0 ; i < GetNObsBin() ; i ++) {
-         if (fWx[i].first < 1.e-6) {
-            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
-            fWx[i].first=1.e-6;
+         if (fWxRnd[i].first < 1.e-6) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
+            fWxRnd[i].first=1.e-6;
          }
          sprintf(buf,"   %4d    %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
-                 i,fWx[i].first,fWx[i].second,fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
+                 i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
          strm<<buf<<endl;
       }
    } else {
@@ -1823,12 +1833,12 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
       strm<<buf<<endl;
       // table values
       for (int i = 0 ; i < GetNObsBin() ; i ++) {
-         if (fWx[i].first < 1.e-6) {
-            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWx[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
-            fWx[i].first=1.e-6;
+         if (fWxRnd[i].first < 1.e-6) {
+            warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
+            fWxRnd[i].first=1.e-6;
          }
          sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2f  %16.2f",
-                 i,fWx[i].first, fWx[i].second, fWMu1[i].first, fWMu1[i].second);
+                 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
          strm<<buf<<endl;
       }
    }
@@ -1895,8 +1905,11 @@ string fastNLOCreate::GetWarmupTableFilename() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::AdjustWarmupValues() {
-   //! Adjust warmup-values found to supposely
+   //! Adjust warmup-values found to supposedly
    //! more reasonable values.
+   //!
+   //! Do this ONLY ONCE on COPY of actual values
+   //! just before writing out to the warm-up table.
    //!
    //! 1. Round warm-up values up/down, if they are
    //!    4% close to the bin boundary
@@ -1920,22 +1933,33 @@ void fastNLOCreate::AdjustWarmupValues() {
 
    // ---------------------------------------
    // 2. round values to 3rd digit if applicable
+   for (int i = 0 ; i < GetNObsBin() ; i ++) {
+      fWMu1Rnd[i].first  = fWMu1[i].first;
+      fWMu1Rnd[i].second = fWMu1[i].second;
+   }
+   if (ident1 == -1) {
+      RoundValues(fWMu1Rnd,3);
+   }
    if (fIsFlexibleScale) {
-      if (ident1==-1)
-         RoundValues(fWMu1,3);
-      if (ident2==-1)
-         RoundValues(fWMu2,3);
-   } else {
-      if (ident1==-1)
-         RoundValues(fWMu1,3);
+      for (int i = 0 ; i < GetNObsBin() ; i ++) {
+         fWMu2Rnd[i].first  = fWMu2[i].first;
+         fWMu2Rnd[i].second = fWMu2[i].second;
+      }
+      if (ident2 == -1) {
+         RoundValues(fWMu2Rnd,3);
+      }
    }
 
    // ---------------------------------------
    // 3. 'round' lower x-values down
-   // const double xdown = 0.20;
-   // for (int i = 0 ; i < GetNObsBin() ; i ++) {
-   //    fWx[i].first *= (1.-xdown);
-   // }
+   const double xdown = 0.20;
+   for (int i = 0 ; i < GetNObsBin() ; i ++) {
+      fWxRnd[i].first  = fWx[i].first;
+      fWxRnd[i].second = fWx[i].second;
+   }
+   for (int i = 0 ; i < GetNObsBin() ; i ++) {
+      fWxRnd[i].first *= (1.-xdown);
+   }
 
 }
 
