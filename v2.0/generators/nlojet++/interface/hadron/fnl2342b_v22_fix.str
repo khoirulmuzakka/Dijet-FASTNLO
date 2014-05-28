@@ -130,7 +130,7 @@ PDF2                            2212        # PDF of 2nd hadron (following PDG c
 #   General fastNLO settings
 #
 # ==================================================================== #
-GlobalVerbosity                 INFO        # Global output verbosity of fastNLO toolkit, def.=INFO,
+GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
 OutputFilename          InclusiveJets.tab   # Filename of fastNLO output table
