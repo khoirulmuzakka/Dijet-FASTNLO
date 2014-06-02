@@ -34,7 +34,7 @@
 //#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOHoppet.h"
-#include "hoppet_v1.h"
+#include "fastnlotk/HoppetInterface.h"
 
 using namespace std;
 
@@ -42,47 +42,47 @@ using namespace std;
 
 fastNLOHoppet::fastNLOHoppet(string name) : fastNLOLHAPDF(name) {
     //Set some meaningful values
-    SetPDGValues();
+    SetLHAPDFValues();
 };
 fastNLOHoppet::fastNLOHoppet(string name, string LHAPDFFile, int PDFSet = 0) :
-    fastNLOLHAPDF(name,LHAPDFFile,PDFSet),
-    fAlphasMz(0.1184) {
+    fastNLOLHAPDF(name,LHAPDFFile,PDFSet)
+    {
         //Set some meaningful values
-        SetPDGValues();
+        SetLHAPDFValues();
     };
 // Getters
 double fastNLOHoppet::GetMz() const {
-    return fMz;
+    return HoppetInterface::fMz;
 }
 double fastNLOHoppet::GetQMass(int pdgid) const {
-    return QMass[pdgid];
+    return HoppetInterface::QMass[pdgid];
 }
 int fastNLOHoppet::GetNFlavor() const {
-    return fnFlavor;
+    return HoppetInterface::fnFlavor;
 }
 int fastNLOHoppet::GetNLoop() const {
-    return fnLoop;
+    return HoppetInterface::fnLoop;
 }
 double fastNLOHoppet::GetAlphasMz() const {
-    return fAlphasMz;
+    return HoppetInterface::fAlphasMz;
 };
 
 
 void fastNLOHoppet::SetPDGValues() {
    // Initialize with PDG values
-   QMass[0]  = PDG_MD;
-   QMass[1]  = PDG_MU;
-   QMass[2]  = PDG_MS;
-   QMass[3]  = PDG_MC;
-   QMass[4]  = PDG_MB;
-   QMass[5]  = PDG_MT;
-   fMz       = PDG_MZ;
-   fAlphasMz = PDG_ASMZ;
+   HoppetInterface::QMass[0]  = PDG_MD;
+   HoppetInterface::QMass[1]  = PDG_MU;
+   HoppetInterface::QMass[2]  = PDG_MS;
+   HoppetInterface::QMass[3]  = PDG_MC;
+   HoppetInterface::QMass[4]  = PDG_MB;
+   HoppetInterface::QMass[5]  = PDG_MT;
+   HoppetInterface::fMz       = PDG_MZ;
+   HoppetInterface::fAlphasMz = PDG_ASMZ;
    //Variable flavor number scheme
-   fnFlavor = -1;
+   HoppetInterface::fnFlavor = 5;
    //2-loop alpha_s evolution
-   fnLoop = 2;
-   InitHoppet();
+   HoppetInterface::fnLoop = 2;
+   HoppetInterface::InitHoppet();
 }
 
 void fastNLOHoppet::SetLHAPDFValues() {
@@ -91,73 +91,44 @@ void fastNLOHoppet::SetLHAPDFValues() {
       InitPDF();
    }
    //How to read LHAPDF Mz???
-   fMz = PDG_MZ;
-   fAlphasMz = LHAPDF::alphasPDF(fMz);
-   fnLoop = LHAPDF::getOrderAlphaS() + 1;
-   fnFlavor = LHAPDF::getNf();
+   HoppetInterface::fMz = PDG_MZ;
+   HoppetInterface::fAlphasMz = LHAPDF::alphasPDF(HoppetInterface::fMz);
+   HoppetInterface::fnLoop = LHAPDF::getOrderAlphaS();
+   HoppetInterface::fnFlavor = LHAPDF::getNf();
    for (int i = 0; i < 6; i++)
-      QMass[i] = LHAPDF::getQMass(i+1);
-   InitHoppet();
-}
-
-void fastNLOHoppet::InitHoppet() {
-
-   //Define Grid for alphaS and PDF evolution
-   double ymax = 12.0;
-   double dy = 0.1;
-   int order = -6;
-   double dlnlnQ = dy/4.0;
-   double Qmin = 1.0;
-   double Qmax = 28000;
-   hoppetStartExtended( ymax, dy, Qmin, Qmax, dlnlnQ, fnLoop, order, factscheme_MSbar);
-
-   //If fnFlavor smaller than 1 use VFNS (NNPDF reports nf=-1)
-   if (fnFlavor >= 1)
-      hoppetsetffn_(fnFlavor);
-   else
-      hoppetsetpolemassvfn_(QMass[3], QMass[4], QMass[5]);
-   //Init PDF/As evolution once with dummy LHAsub
-   //Evolved PDFs with Hoppet will be nonsense
-   hoppetevolve_(fAlphasMz, fMz, fnLoop, 1.0, &LHAsub, 2.00001);
+      HoppetInterface::QMass[i] = LHAPDF::getQMass(i+1);
+   HoppetInterface::InitHoppet();
 }
 
 void fastNLOHoppet::SetMz(double Mz) {
-   fMz = Mz;
-   InitHoppet();
+   HoppetInterface::fMz = Mz;
+   HoppetInterface::InitHoppet();
 }
 
 void fastNLOHoppet::SetNFlavor(int nflavor) {
-   fnFlavor = nflavor;
-   InitHoppet();
+   HoppetInterface::fnFlavor = nflavor;
+   HoppetInterface::InitHoppet();
 }
 
 void fastNLOHoppet::SetNLoop(int  nloop) {
-   fnLoop = nloop;
-   InitHoppet();
+   HoppetInterface::fnLoop = nloop;
+   HoppetInterface::InitHoppet();
 }
 
 void fastNLOHoppet::SetQMass(int pdgid, double qmass) {
-   QMass[pdgid] = qmass;
-   InitHoppet();
+   HoppetInterface::QMass[pdgid] = qmass;
+   HoppetInterface::InitHoppet();
 }
 
-void fastNLOHoppet::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
+void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
 
-   fAlphasMz    = AlphasMz;             // new alpha_s value
-   InitHoppet();
-}
-
-void fastNLOHoppet::LHAsub(const double & x, const double & Q, double * pdf) {
-   //
-   //Provides PDF for Hoppet
-   for (int i=0; i<13; i++)
-   {
-   pdf[i] = LHAPDF::xfx(x, Q, i-6);
-   }
+   HoppetInterface::fAlphasMz    = AlphasMz;             // new alpha_s value
+   HoppetInterface::InitHoppet();
 }
 
 double fastNLOHoppet::EvolveAlphas(double Q ) const {
-   return hoppetalphas_(Q);
+   //return HoppetInterface::EvolveAlphas(Q);
+   return LHAPDF::alphasPDF(Q);
 }
 
 vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {
@@ -165,8 +136,5 @@ vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {
    //  GetXFX is used to get the parton array from the
    //  pre-defined pdf-interface.
    //
-   vector<double> xfx(13);
-   //Hoppet PDF Evolution
-   hoppeteval_(xp, muf, &xfx[0]);
-   return xfx;
+   return HoppetInterface::GetXFX(xp, muf);
 }

@@ -46,13 +46,12 @@ class fastNLOHoppet : public fastNLOLHAPDF {
       fastNLOHoppet(string name);
       fastNLOHoppet(string name, string LHAPDFFile, int PDFSet);
       // ---- Alphas vars ---- //
-      void InitHoppet();
       // Setters
       void SetMz(double Mz);
       void SetNFlavor(int nflavor);
       void SetNLoop(int nloop);
       void SetQMass(int pdgid, double qmass);
-      void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection);
+      void SetAlphasMz(double AlphasMz);
       void SetLHAPDFValues();
       void SetPDGValues();
       // Getters
@@ -70,15 +69,7 @@ class fastNLOHoppet : public fastNLOLHAPDF {
       double EvolveAlphas(double Q) const ;
       //bool InitPDF();
       vector<double> GetXFX(double xp, double muf) const ;
-      static void LHAsub(const double&, const double&, double*);
       // ---- Alphas vars ---- //
-      double fAlphasMz;
-      double fMz;
-      int fnFlavor;
-      int fnLoop;
-      double QMass[6];
-      // ___ //
-
 };
 
 #endif
