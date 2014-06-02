@@ -65,7 +65,7 @@ if HAVE_LHAPDF
 endif
 # With HOPPET
 if HAVE_HOPPET
-   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc
+   libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc HoppetInterface.cc
 endif
 # With QCDNUM
 if HAVE_QCDNUM
