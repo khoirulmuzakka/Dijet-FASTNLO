@@ -10,6 +10,7 @@ namespace std {
 };
 
 %ignore *::operator[];
+%ignore *operator>>;
 %rename("PrintMessage") speaker::print;
 
 %{

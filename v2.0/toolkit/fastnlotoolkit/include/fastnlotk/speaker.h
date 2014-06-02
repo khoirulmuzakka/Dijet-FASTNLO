@@ -32,7 +32,9 @@ public:
          else return std::cout<<pref<<arg;
       }
    }
+#ifndef SWIG 
    std::ostream& operator>> (std::string arg) const ;
+#endif
    std::ostream& print(std::string mes) const ;
    void DoSpeak(bool loud) {
       fquiet=!loud;
