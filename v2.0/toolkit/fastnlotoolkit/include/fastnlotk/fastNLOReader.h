@@ -36,6 +36,7 @@ public:
    void SetExternalFuncForMuR(mu_func);                                                 //!< Set external function for scale calculation (optional)
    void SetExternalFuncForMuF(mu_func);                                                 //!< Set external function for scale calculation (optional)
 
+   void UseHoppetScaleVariations(bool);
    // ---- Pdf interface ---- //
    void FillPDFCache(double chksum=0.);                                                 //!< Prepare for recalculation of cross section with 'new'/updated pdf.
 
@@ -89,7 +90,8 @@ protected:
    void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B);
    void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* B);
-   void CalcAposterioriScaleVariation();
+   void CalcAposterioriScaleVariationMuR();
+   void CalcAposterioriScaleVariationMuF();
    void FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* B);
    void FillAlphasCacheInBlockBv21(fastNLOCoeffAddFlex* B);
    double CalcAlphas(double Q);
@@ -153,6 +155,8 @@ protected:
    mu_func Fct_MuR;                                                                     //!< Function, if you define your functional form for your scale external
    mu_func Fct_MuF;                                                                     //!< Function, if you define your functional form for your scale external
    vector < vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
+
+   bool fUseHoppet;
 
    // ---- pointers to coefftables in fCoeff ---- //
    //    vector< vector < fastNLOCoeffAddBase* > > fCoAdd;

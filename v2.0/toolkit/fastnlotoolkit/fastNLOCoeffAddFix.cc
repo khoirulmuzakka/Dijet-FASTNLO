@@ -92,6 +92,7 @@ void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
 
    ResizeSigmaTilde();
    ResizePdfLC();
+   ResizePdfSplLC();
    int nst = fastNLOTools::ReadVector( SigmaTilde , table , Nevt);
    // info["Read"]<<"Read "<<nst+nsn<<" lines of fastNLO v2.0 tables."<<endl;
 
@@ -134,6 +135,23 @@ void fastNLOCoeffAddFix::ResizePdfLC(){
       PdfLc[i].resize(totalscalenodes);
       for( int l=0 ; l<totalscalenodes ; l++ ){
          fastNLOTools::ResizeVector(PdfLc[i][l],nxmax,NSubproc);
+      }
+   }
+}
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::ResizePdfSplLC(){
+   //! resize PdfSplLC
+   PdfSplLc1.resize(fNObsBins);
+   PdfSplLc2.resize(fNObsBins);
+   for( int i=0 ; i<fNObsBins ; i++ ){
+      int nxmax = GetNxmax(i);
+      int totalscalenodes = GetTotalScalenodes();
+      PdfSplLc1[i].resize(totalscalenodes);
+      PdfSplLc2[i].resize(totalscalenodes);
+      for( int l=0 ; l<totalscalenodes ; l++ ){
+         fastNLOTools::ResizeVector(PdfSplLc1[i][l],nxmax,NSubproc);
+         fastNLOTools::ResizeVector(PdfSplLc2[i][l],nxmax,NSubproc);
       }
    }
 }

@@ -442,6 +442,9 @@
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
+//#ifdef HAVEHOPPET
+#include "fastnlotk/HoppetInterface.h"
+//#endif
 
 using namespace std;
 using namespace fastNLO;
@@ -468,6 +471,7 @@ fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
    fPDFSuccess          = false;
    fAlphasCached        = 0.;
    fPDFCached           = 0.;
+   fUseHoppet            = false;
    SetFilename(filename);
 }
 
@@ -767,6 +771,22 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
    return true;
 }
 
+
+void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
+#ifndef HAVEHOPPET
+   error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
+                                     << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
+   exit(1);
+#endif
+   if (useHoppet) {
+      info["UseHoppetScaleVariation"] << "Hoppet will be used to calculate scale variations." << std::endl;
+      fUseHoppet = true;
+   }
+   else {
+      info["UseHoppetScaleVariation"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
+      fUseHoppet = false;
+   }
+}
 
 //______________________________________________________________________________
 bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , bool SetOn) {
@@ -1072,8 +1092,15 @@ void fastNLOReader::CalcCrossSection() {
    // Contributions from the a-posteriori scale variation
    if (!GetIsFlexibleScaleTable() && lknlo) {
       fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+      if ( fabs(fScaleFacMuF - cNLO->GetScaleFactor(fScalevar)) > DBL_MIN ) {
+         if (!fUseHoppet){
+            error["CalcCrossSection"] << "Inconsistent choice of chosen factorization scale table and fScaleFacMuF." << endl;
+            exit(1);
+         }
+         CalcAposterioriScaleVariationMuF();
+      }
       if ( fabs(fScaleFacMuR - cNLO->GetScaleFactor(fScalevar)) > DBL_MIN ) {
-         CalcAposterioriScaleVariation();
+         CalcAposterioriScaleVariationMuR();
       }
    }
 
@@ -1123,10 +1150,14 @@ void fastNLOReader::CalcCrossSection() {
 
 
 //______________________________________________________________________________
-void fastNLOReader::CalcAposterioriScaleVariation() {
-   double scalefac       = fScaleFacMuR/fScaleFacMuF;
-   debug["CalcAposterioriScaleVariation"]<<"scalefac="<<scalefac<<endl;
-   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariation"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
+void fastNLOReader::CalcAposterioriScaleVariationMuR() {
+
+   fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+   int scaleVar          = cNLO->GetNpow() == ILOord ? 0 : fScalevar;
+   double scalefac       = fScaleFacMuR / cNLO->GetScaleFactor(scaleVar);
+
+   debug["CalcAposterioriScaleVariationMuR"]<<"scalefac="<<scalefac<<endl;
+   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariationMuR"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
    fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;
@@ -1151,7 +1182,35 @@ void fastNLOReader::CalcAposterioriScaleVariation() {
    }
 }
 
+//______________________________________________________________________________
+void fastNLOReader::CalcAposterioriScaleVariationMuF() {
 
+   fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
+   int scaleVar          = cNLO->GetNpow() == ILOord ? 0 : fScalevar;
+   double scalefac       = fScaleFacMuF / cNLO->GetScaleFactor(scaleVar);
+
+   debug["CalcAposterioriScaleVariationMuF"]<<"scalefac="<<scalefac<<endl;
+   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariationMuF"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
+   fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
+   vector<double>* XS    = &XSection;
+   const double n     = cLO->GetNpow();
+   debug["CalcAposterioriScaleVariationMuF"] << "Npow=" << n <<endl;
+   for (int i=0; i<NObsBin; i++) {
+      int nxmax = cLO->GetNxmax(i);
+      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+      for (int j=0; j<cLO->GetTotalScalenodes(); j++) {
+         double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
+         for (int k=0; k<nxmax; k++) {
+            for (int l=0; l<cLO->GetNSubproc(); l++) {
+               double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *(cLO->PdfSplLc1[i][j][k][l] + cLO->PdfSplLc2[i][j][k][l]) * unit / cLO->GetNevt(i,l);
+               double xsci = asnp1 * n * log(scalefac) * clo; 
+               //double xsci = asnp1 * n * log(scalefac) * clo; 
+               XS->at(i) -= xsci;
+            }
+         }
+      }
+   }
+}
 //______________________________________________________________________________
 void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    //!
@@ -1473,6 +1532,10 @@ void fastNLOReader::FillPDFCache(double chksum) {
 
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
+      #ifdef HAVEHOPPET
+      //Also refill Hoppet cache and assign new PDF
+      HoppetInterface::InitHoppet();
+      #endif
 
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
@@ -1594,21 +1657,35 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    // half matrix notation
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
+      #ifdef HAVEHOPPET
+      vector < vector < double > > xfxspl; // PDFs splitting functions of all partons
+      #endif
       for (int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
+
+         #ifdef HAVEHOPPET
+         xfxspl.resize(nxbins1);
+         #endif
          for (int j=0; j<c->GetNScaleNode(); j++) {
             // determine all pdfs of hadron1
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
+               #ifdef HAVEHOPPET
+               xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
+               #endif
             }
             int x1bin = 0;
             int x2bin = 0;
             for (int k=0; k<nxmax; k++) {
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
+               #ifdef HAVEHOPPET
+               c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx[x1bin], xfxspl[x2bin]);
+               c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl[x1bin], xfx[x2bin]);
+               #endif
                x1bin++;
                if (x1bin>x2bin) {
                   x1bin = 0;
@@ -1978,7 +2055,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
    // Deal with factorization scale first
    // Check whether corresponding xmuf variation exists in case of v2.0 table
-   if (!GetIsFlexibleScaleTable()) {
+   if (!GetIsFlexibleScaleTable() && !fUseHoppet) {
       const int ns = GetNScaleVariations();
       debug["SetScaleFactorsMuRMuF"]<<"Found "<<ns<<" scale variations for contributions switched ON."<<endl;
       int sfnlo = -1;
@@ -2038,7 +2115,37 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          }
       }
       PrintScaleSettings();
-   } else {
+   } 
+   else if (fUseHoppet) {
+
+      debug["SetScaleFactorsMuRMuF"]<< "UseHoppet==true: Default factorization scale variation table (muF=1.0) will be enabled and " 
+         << "Hoppet will be used to calculate scale variation contributions on the fly." << endl;
+
+      const int ns = GetNScaleVariations();
+      debug["SetScaleFactorsMuRMuF"]<<"Found "<<ns<<" scale variations for contributions switched ON."<<endl;
+      int sfnlo = -1;
+      if (lknlo) {
+         for (int is = 0 ; is<ns ; is++) {
+            if (fabs(((fastNLOCoeffAddFix*)B_NLO())->GetScaleFactor(is) - 1.0) < DBL_MIN) {
+               sfnlo = is;
+               break;
+            }
+         }
+      }
+
+      bool bSetScales = false;
+      if (lknlo) {
+         bSetScales = SetScaleVariation(sfnlo);
+         if (!bSetScales) {
+            error["SetScaleFactorsMuRMuF"]<<"NLO scale variation table "<<sfnlo<<" could not be selected, stopped!"<<endl;
+            exit(1);
+         }
+      }
+      fScaleFacMuR = xmur;
+      fScaleFacMuF = xmuf;
+      PrintScaleSettings();
+   }
+   else {
       fScaleFacMuR = xmur;
       fScaleFacMuF = xmuf;
       PrintScaleSettings(kMuR);

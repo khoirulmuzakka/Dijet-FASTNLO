@@ -41,6 +41,7 @@ public:
    double GetScaleNode(int iObs, int iSvar, int iNode ) const { return ScaleNode[iObs][0][iSvar][iNode];}
 
    void ResizePdfLC();
+   void ResizePdfSplLC();
    void ResizeSigmaTilde();
 
 
@@ -57,6 +58,8 @@ protected:
 public:
    v2d AlphasTwoPi_v20;
    v4d PdfLc;
+   v4d PdfSplLc1;
+   v4d PdfSplLc2;
 };
 
 #endif
