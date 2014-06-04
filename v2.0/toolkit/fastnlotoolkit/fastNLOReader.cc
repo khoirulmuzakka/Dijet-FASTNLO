@@ -1534,7 +1534,7 @@ void fastNLOReader::FillPDFCache(double chksum) {
       TestXFX();
       #ifdef HAVEHOPPET
       //Also refill Hoppet cache and assign new PDF
-      HoppetInterface::InitHoppet();
+      HoppetInterface::InitHoppet(*this);
       #endif
 
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {

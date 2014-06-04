@@ -39,6 +39,7 @@ public:
    void UseHoppetScaleVariations(bool);
    // ---- Pdf interface ---- //
    void FillPDFCache(double chksum=0.);                                                 //!< Prepare for recalculation of cross section with 'new'/updated pdf.
+   virtual vector<double> GetXFX(double x, double muf) const = 0;
 
    // ---- alphas cache ---- //
    void FillAlphasCache();                                                              //!< prepare for recalculation of cross section with new alpha_s value.
@@ -129,7 +130,6 @@ protected:
 
    // virtual functions for the user interface
    virtual bool InitPDF() = 0;
-   virtual vector<double> GetXFX(double x, double muf) const = 0;
    virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //

@@ -4,7 +4,7 @@ class fastNLOReader;
 
 class HoppetInterface {
    public:
-      static void InitHoppet();
+      static void InitHoppet(fastNLOReader&);
       static std::vector<double> GetSpl(double, double);
       static std::vector<double> GetXFX(double, double);
       static double EvolveAlphas(double);
@@ -18,4 +18,6 @@ class HoppetInterface {
       // ____ //
    private:
       static void StartHoppet();
+      static void LHAsub(const double &, const double &, double*);
+      static fastNLOReader *fnlo;
 };
