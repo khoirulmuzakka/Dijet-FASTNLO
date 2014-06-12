@@ -1,0 +1,7 @@
+--style=java
+--pad-header
+--unpad-paren
+--keep-one-line-blocks
+--convert-tabs
+--indent=spaces=3
+-A2
