@@ -16,23 +16,15 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Without fastjet
 #
-#lib_LTLIBRARIES = libfnl5350eta0v22conee.la
-lib_LTLIBRARIES =
+# pkglib_LTLIBRARIES = libfnl5350eta0v22conee.la
+pkglib_LTLIBRARIES =
 #
 # Require fastjet
 #
 if HAVE_FASTJET
-   lib_LTLIBRARIES += libInclusiveJets.la
+   pkglib_LTLIBRARIES += libInclusiveJets.la
 # libfnl2342bv22.la libfnl5350eta0v22.la
 endif
-
-#
-# To be done in a more systematic way
-# To use the InclusiveJets make a link from InclusiveJets.str to the desired steering file
-#
-EXTRA_DIST = fnl2342b_v22_fix.str fnl2342b_v22_flex.str
-
-
 
 #
 # Sources
@@ -41,8 +33,8 @@ EXTRA_DIST = fnl2342b_v22_fix.str fnl2342b_v22_flex.str
 # Common sources
 AM_SOURCES =
 # Individual sources
-libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
-libfnl5350eta0v22_la_SOURCES      = fnl5350eta0v22.cc      $(AM_SOURCES)
+# libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
+# libfnl5350eta0v22_la_SOURCES      = fnl5350eta0v22.cc      $(AM_SOURCES)
 libInclusiveJets_la_SOURCES       = InclusiveJets.cc       $(AM_SOURCES)
 # libfnl2342bv22_la_SOURCES         = fnl2342bv22.cc      $(AM_SOURCES)
 

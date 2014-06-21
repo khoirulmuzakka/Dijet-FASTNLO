@@ -51,10 +51,10 @@ fnlo_tk_example_CXXFLAGS = -g -O2 -Wall
 #
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
-fnlo_tk_merge_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
-fnlo_tk_append_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
-fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
-fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L${libdir} -lfastnlotoolkit
+fnlo_tk_merge_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_append_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

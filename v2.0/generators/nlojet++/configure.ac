@@ -268,6 +268,7 @@ AC_SUBST([YEARS],["2011-`date +%Y`"])
 # Output
 AC_CONFIG_FILES([Makefile
                  interface/Makefile
+                 interface/data/Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
                  interface/include/fnlo_int_nlojet/Makefile

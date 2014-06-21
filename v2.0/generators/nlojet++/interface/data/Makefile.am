@@ -1,22 +1,22 @@
 #                                               -*- Automake -*-
 # -----------------------------------------------------------------------------
 #
-# K. Rabbertz, 15.05.2014
+# K. Rabbertz, 21.06.2014
 #
-# Header files for fastNLO interface to NLOJet++
+# NLOJet++ interface to fastNLO toolkit
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
 #
-# Include files to be distributed
+# Data files to be distributed
 #
-pkginclude_HEADERS = fnlo_int_hhc_nlojet.h pdf-hhc-dummy.h cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h
+pkgdata_DATA = fnl2342b_v22_fix.str fnl2342b_v22_flex.str
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
 # Use "make maintainer-clean" (on a build machine) before svn commits,
-# but not for distribution
+# but NOT before distribution with "make dist"!
 MAINTAINERCLEANFILES = Makefile.in

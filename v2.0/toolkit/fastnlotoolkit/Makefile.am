@@ -18,7 +18,7 @@ SUBDIRS = include
 # The C++ fastnlo toolkit library
 #
 if HAVE_LHAPDFCONFIG
-   lib_LTLIBRARIES = libfastnlotoolkit.la
+   pkglib_LTLIBRARIES = libfastnlotoolkit.la
 endif
 
 #
