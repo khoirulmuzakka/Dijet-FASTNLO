@@ -1,0 +1,3 @@
+svn propset svn:ignore -RF .svnignore.recursive .
+svn propset svn:ignore -F .svnignore.autotools `find . -name configure.ac -exec dirname '{}' \;`
+svn propset svn:ignore -F .svnignore.autotools `find . -name m4`
