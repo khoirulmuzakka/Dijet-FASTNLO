@@ -12,7 +12,9 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Include files to be distributed
 #
-pkginclude_HEADERS = fastNLOBase.h fastNLOCoeffAddBase.h fastNLOCoeffAddFix.h fastNLOCoeffAddFlex.h fastNLOEvent.h \
+# pkginclude_HEADERS would install to $(includedir)/$(PACKAGE_NAME) instead
+fastnloincludedir = $(includedir)/fastnlotk
+fastnloinclude_HEADERS = fastNLOBase.h fastNLOCoeffAddBase.h fastNLOCoeffAddFix.h fastNLOCoeffAddFlex.h fastNLOEvent.h \
 	fastNLOCoeffBase.h fastNLOCoeffData.h fastNLOCoeffMult.h fastNLOCoefficients.h fastNLOConstants.h fastNLOGeneratorConstants.h \
 	fastNLOCreate.h fastNLOInterpolBase.h fastNLOInterpolCatmullRom.h fastNLOInterpolLagrange.h fastNLOInterpolLinear.h fastNLOInterpolOneNode.h \
 	fastNLOAlphas.h fastNLOLHAPDF.h fastNLOPDFLinearCombinations.h fastNLOTools.h \
