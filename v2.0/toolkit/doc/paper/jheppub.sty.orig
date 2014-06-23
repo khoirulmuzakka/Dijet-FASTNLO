@@ -38,8 +38,7 @@
 ,pagecolor=blue
 ,linktocpage=true
 ,pdfproducer=medialab
-% Option not available in LaTeX of SLC6
-%,pdfa=true
+,pdfa=true
 ]{hyperref}
 
 \newif\ifnotoc\notocfalse
