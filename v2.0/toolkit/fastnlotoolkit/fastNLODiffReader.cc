@@ -157,6 +157,15 @@ vector < double > fastNLODiffReader::GetCrossSection() {
 vector < double > fastNLODiffReader::GetDiffCrossSection() {
    // Get fast calculated NLO cross section
 
+   // check cached values:
+   const double asNew = CalcReferenceAlphas();
+   bool IsAsCached = fAlphasCached == CalcReferenceAlphas();
+   bool IsPDFCached = fPDFCached == CalcNewPDFChecksum();
+   if ( IsAsCached && IsPDFCached ) {
+      debug["GetDiffCrossSection"]<<"No need for re-calculation of cross section. All values cached."<<endl;
+      return XSection;
+   }
+
    vector < double > xs(NObsBin);
    vector < double > xsLO(NObsBin);
    if (fxPoms.empty()) {
