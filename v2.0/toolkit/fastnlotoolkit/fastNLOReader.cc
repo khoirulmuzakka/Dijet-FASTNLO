@@ -781,6 +781,8 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
    if (useHoppet) {
       info["UseHoppetScaleVariation"] << "Hoppet will be used to calculate scale variations." << std::endl;
       fUseHoppet = true;
+      HoppetInterface::InitHoppet(*this);
+      FillPDFCache(1.);
    }
    else {
       info["UseHoppetScaleVariation"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
@@ -842,7 +844,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
          // Fill PDF cache
          debug["SetContributionON"]<<"Call FillPDFCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
          fPDFCached = 0;
-         FillPDFCache();
+         FillPDFCache(0.);
       }
    }
    // Needs to be done in the beginning!
@@ -1533,8 +1535,10 @@ void fastNLOReader::FillPDFCache(double chksum) {
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
       #ifdef HAVEHOPPET
-      //Also refill Hoppet cache and assign new PDF
-      HoppetInterface::InitHoppet(*this);
+      if (fUseHoppet){
+         //Also refill Hoppet cache and assign new PDF
+         HoppetInterface::InitHoppet(*this);
+      }
       #endif
 
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
@@ -1657,35 +1661,33 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    // half matrix notation
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
-      #ifdef HAVEHOPPET
       vector < vector < double > > xfxspl; // PDFs splitting functions of all partons
-      #endif
       for (int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
 
-         #ifdef HAVEHOPPET
-         xfxspl.resize(nxbins1);
-         #endif
+         if (fUseHoppet){
+            xfxspl.resize(nxbins1);
+         }
          for (int j=0; j<c->GetNScaleNode(); j++) {
             // determine all pdfs of hadron1
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
-               #ifdef HAVEHOPPET
-               xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
-               #endif
+               if (fUseHoppet){
+                  xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
+               }
             }
             int x1bin = 0;
             int x2bin = 0;
             for (int k=0; k<nxmax; k++) {
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin]);
-               #ifdef HAVEHOPPET
-               c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx[x1bin], xfxspl[x2bin]);
-               c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl[x1bin], xfx[x2bin]);
-               #endif
+               if (fUseHoppet){
+                  c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx[x1bin], xfxspl[x2bin]);
+                  c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl[x1bin], xfx[x2bin]);
+               }
                x1bin++;
                if (x1bin>x2bin) {
                   x1bin = 0;
