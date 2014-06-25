@@ -1,12 +1,15 @@
 %module fastnlo
 %include "std_string.i"
 %include "std_vector.i"
+%include <std_pair.i>
 
 namespace std {
    %template(vectori) vector<int>;
    %template(vectors) vector<string>;
    %template(vectord) vector<double>;
    %template(vectord2) vector<vector<double> >;
+   %template() pair<double,double>;
+   %template(pairvector) vector<pair<double,double> >;
 };
 
 %ignore *::operator[];

@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <set>
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOTools.h"
 
@@ -66,6 +67,64 @@ void fastNLOTable::ReadTable(){
    CloseFileRead(*strm);
 }
 
+// ___________________________________________________________________________________________________
+vector < pair <double, double > > fastNLOTable::GetObsBinDim(int dimension) const {
+   //! Get binning of dimension 'dimension' for all observable bins
+   std::vector< std::pair<double, double > > Bins;
+   for (size_t i = 0; i < Bin.size(); ++i)
+      Bins.push_back(Bin[i][dimension]);
+   return Bins;
+}
+// ___________________________________________________________________________________________________
+vector < pair < double, double > >  fastNLOTable::GetBinDimI() const {
+   //! Get binning of first dimension
+   std::vector< std::pair<double, double > > Bins = GetObsBinDim(0);
+   std::set< pair< double,double>  > set (Bins.begin(), Bins.end());
+   Bins.assign(set.begin(), set.end());
+   return Bins;
+}
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNBinDimI() const {
+   //! Get number of bins of first dimension
+   return GetBinDimI().size();
+}
+// ___________________________________________________________________________________________________
+vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const {
+   //! Get binning of second dimension for bin 'DimIBin' of first dimension
+   if (GetNumDiffBin() < 2)
+      error["GetCrossSection2Dim"]<<"This function is only valid for NDiffBin=2."<<endl;
+   pair< double, double> bin = GetBinDimI()[DimIBin];
+   std::vector< std::pair<double, double > > Bins;
+   for (size_t i = 0; i < Bin.size(); ++i) {
+      if (Bin[i][0] == bin)
+         Bins.push_back(Bin[i][1]);
+   }
+   return Bins;
+}
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNBinDimII(int DimIBin) const {
+   //! Get number of bins of second dimension for bin 'DimIBin' of first dimension
+   return GetBinDimII(DimIBin).size();
+}
+
+
+// ___________________________________________________________________________________________________
+
+vector < double > fastNLOTable::GetLoBin( int dimension) const {
+   //! Get lower bin edge of all observable bins for dimension 'dimension'
+   vector < double > LoBin;
+   for (size_t i = 0; i < Bin.size(); ++i)
+      LoBin.push_back(Bin[i][dimension].first);
+   return LoBin;
+}
+// ___________________________________________________________________________________________________
+vector < double > fastNLOTable::GetUpBin( int dimension) const {
+   //! Get upper bin edge of all observable bins for dimension 'dimension'
+   vector < double > UpBin;
+   for (size_t i = 0; i < Bin.size(); ++i)
+      UpBin.push_back(Bin[i][dimension].second);
+   return UpBin;
+}
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadCoeffTables(istream& table){

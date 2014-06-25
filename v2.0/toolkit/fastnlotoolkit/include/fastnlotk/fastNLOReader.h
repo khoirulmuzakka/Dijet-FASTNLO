@@ -49,6 +49,7 @@ public:
 
    // ---- Getters for results---- //
    vector < double > GetCrossSection();
+   vector < vector < double > > GetCrossSection2Dim();
    vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
    vector < double > GetQScales(int irelord);                                           //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO

@@ -38,10 +38,21 @@ class fastNLOTable : public fastNLOBase {
    virtual void WriteTable(string filename);
    bool IsCompatible(const fastNLOTable& other) const;
 
-   int GetNObsBin() const {return NObsBin;}
+   int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
+   std::vector < std::pair < double, double > > GetObsBin(int bin) const { return Bin[bin];}    // Get obversable binning for all dimensions for given bin
+   std::pair < double, double > GetObsBin(int bin, int dim) const { return Bin[bin][dim];}      // Get observable binning for given dimension and given bin
+   std::vector < std::pair < double, double > > GetObsBinDim(int dimension) const;              // Get observable binning of given dimension
+
+   int GetNBinDimI() const;                                                                     // Number of bins in first dimension
+   int GetNBinDimII(int DimIBin) const;                                                         // Number of bins in second dimension for given first dimension
+
+   std::vector < std::pair < double, double > > GetBinDimI() const;                             // Get binning of first dimension
+   std::vector < std::pair < double, double > > GetBinDimII(int DimIBin) const;                 // Get binning os second dimension
 
    double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
+   std::vector < double > GetLoBin(int dimension) const;
    double GetUpBin(int bin, int dimension) const {return Bin[bin][dimension].second;}           // Get upper bin boundary
+   std::vector < double > GetUpBin(int dimension) const;
 
    vector < double > GetBinSize() const {return BinSize;};					// Get Binsize = BinSizeDim1 < * BinSizeDim2 >
    double GetBinSize(int bin) const {return BinSize[bin];};					// Get Binsize = BinSizeDim1 < * BinSizeDim2 >

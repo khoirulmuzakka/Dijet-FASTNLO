@@ -907,7 +907,24 @@ vector < double > fastNLOReader::GetCrossSection() {
    return XSection;
 }
 
-
+//______________________________________________________________________________
+vector< vector < double > > fastNLOReader::GetCrossSection2Dim() {
+   //! Get cross section as 2-dimensional vector according to defined binning
+   if (GetNumDiffBin() != 2)
+      error["GetCrossSection2Dim"]<<"This function is only valid for NDiffBin=2"<<endl;
+   // Get fast calculated NLO cross section
+   if (XSection.empty()) CalcCrossSection();
+   vector< vector < double > > XSection2Dim;
+   int k = 0;
+   for (int i = 0; i < GetNBinDimI(); i++) {
+      XSection2Dim.push_back(vector < double >());
+      for (int j = 0; j < GetNBinDimII(i); j++) {
+         XSection2Dim[i].push_back(XSection[k]);
+         k++;
+      }
+   }
+   return XSection2Dim;
+}
 //______________________________________________________________________________
 vector < double > fastNLOReader::GetKFactors() {
    // Get ratio of fast calculated NLO to LO cross section
