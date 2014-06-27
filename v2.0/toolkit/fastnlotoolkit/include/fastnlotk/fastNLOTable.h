@@ -38,6 +38,8 @@ class fastNLOTable : public fastNLOBase {
    virtual void WriteTable(string filename);
    bool IsCompatible(const fastNLOTable& other) const;
 
+   std::string GetRivetId() const;
+
    int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
    std::vector < std::pair < double, double > > GetObsBin(int bin) const { return Bin[bin];}    // Get obversable binning for all dimensions for given bin
    std::pair < double, double > GetObsBin(int bin, int dim) const { return Bin[bin][dim];}      // Get observable binning for given dimension and given bin

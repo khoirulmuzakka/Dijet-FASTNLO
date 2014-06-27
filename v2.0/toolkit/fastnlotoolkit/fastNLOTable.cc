@@ -68,6 +68,22 @@ void fastNLOTable::ReadTable(){
 }
 
 // ___________________________________________________________________________________________________
+std::string fastNLOTable::GetRivetId() const {
+   std::string identifier("RIVET_ID");
+   std::string found;
+   for (size_t i=0; i < ScDescript.size(); ++i) {
+      if (ScDescript[i].find(identifier) != std::string::npos){
+         size_t RivetIdx = ScDescript[i].find(identifier);
+         size_t RivetValIdx = ScDescript[i].find("=", RivetIdx) + 1;
+         size_t RivetValLen = ScDescript[i].find(",", RivetValIdx) - RivetValIdx;
+         found = ScDescript[i].substr(RivetValIdx, RivetValLen);
+         break;
+      }
+   }
+   return found;
+}
+
+// ___________________________________________________________________________________________________
 vector < pair <double, double > > fastNLOTable::GetObsBinDim(int dimension) const {
    //! Get binning of dimension 'dimension' for all observable bins
    std::vector< std::pair<double, double > > Bins;
