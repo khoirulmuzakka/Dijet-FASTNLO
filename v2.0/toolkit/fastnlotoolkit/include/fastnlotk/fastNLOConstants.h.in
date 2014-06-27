@@ -18,10 +18,10 @@
 #endif
 
 // KR: Replace by precompiler defines
-//   static const double TWOPI = 6.28318530717958647692528;
-//   static const double TWOPISQR = 39.47841760435743447533796;
-#define TWOPI (2.*M_PI)
-#define TWOPISQR (4.*M_PI*M_PI)
+const double TWOPI = 6.28318530717958647692528;
+const double TWOPISQR = 39.47841760435743447533796;
+//#define TWOPI (2.*M_PI)
+//#define TWOPISQR (4.*M_PI*M_PI)
 // PDG values 2012/2013
 #define PDG_MU   (0.0023)
 #define PDG_MD   (0.0048)
