@@ -91,7 +91,7 @@ AC_ARG_WITH([lhapdf],
 
 if test "x$with_lhapdf" != "xno"; then
    if test "x$LHAPDF" = "x"; then
-      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path $prefix/bin ...])
       AC_PATH_PROG([LHAPDFBIN],[lhapdf-config],[],[$prefix/bin])
       if test "x$LHAPDFBIN" = "x"; then
          AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
@@ -343,8 +343,8 @@ if test "x$with_yoda" != "xno"; then
       AC_SUBST([YODABINPATH], ["$YODAPREFIX/bin"])
       AC_SUBST([YODALIBPATH], [`$YODABIN --libdir`])
       AC_SUBST([YODAINCLUDEPATH],[`$YODABIN --includedir`])
-      AC_SUBST([YODACPPFLAGS], ["$($YODABIN/yoda-config --cppflags)"])
-      AC_SUBST([YODALDFLAGS], ["$($YODABIN/yoda-config --libs)"])
+      AC_SUBST([YODACPPFLAGS], [`$YODABIN --cppflags`])
+      AC_SUBST([YODALDFLAGS], [`$YODABIN --libs`])
       AC_MSG_RESULT([Using $YODAPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $YODABINPATH for the binaries])
       AC_MSG_RESULT([Using $YODALIBPATH for the library])
