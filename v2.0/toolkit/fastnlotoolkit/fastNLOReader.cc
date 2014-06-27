@@ -777,7 +777,7 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
    error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
                                      << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
    exit(1);
-#endif
+#else
    if (useHoppet) {
       info["UseHoppetScaleVariation"] << "Hoppet will be used to calculate scale variations." << std::endl;
       fUseHoppet = true;
@@ -788,6 +788,7 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
       info["UseHoppetScaleVariation"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
       fUseHoppet = false;
    }
+#endif
 }
 
 //______________________________________________________________________________
@@ -1693,9 +1694,11 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
+               #ifdef HAVEHOPPET
                if (fUseHoppet){
                   xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
                }
+               #endif
             }
             int x1bin = 0;
             int x2bin = 0;
