@@ -302,33 +302,91 @@ else
 fi
 AM_CONDITIONAL(HAVE_HOPPET, test "x$HOPPETPREFIX" != "x")
 
+# YODA
+AC_SUBST([TMPNAM],["YODA"])
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether $TMPNAM support is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([yoda],
+        [AS_HELP_STRING([--with-yoda],
+        [Specify location of $TMPNAM installation. This takes precedence over
+        a YODA environment variable, the prefix path or other methods.
+        Please note: $TMPNAM can optionally be used in $PACKAGE_NAME!])],
+        [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
+            AC_SUBST([YODA],[$withval])
+            AC_MSG_NOTICE([Using given path $YODA as location of $TMPNAM installation.])
+        fi],
+        [with_yoda="no"])
+
+if test "x$with_yoda" != "xno"; then
+   if test "x$YODA" = "x"; then
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
+      AC_PATH_PROG([YODABIN],[yoda-config],[],[$prefix/bin])
+      if test "x$YODABIN" = "x"; then
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+         AC_PATH_PROG([YODABIN],[yoda-config])
+         if test "x$YODABIN" = "x"; then
+            AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([YODABIN],[yoda-config],[],[$YODA/bin])
+      if test "x$YODABIN" = "x"; then
+         AC_MSG_ERROR([yoda-config not found in given path to $TMPNAM! Configuration aborted!])
+      fi
+   fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$YODABIN" != "x"; then
+      AC_MSG_NOTICE([$TMPNAM settings:])
+      AC_SUBST([YODAPREFIX],  [`$YODABIN --prefix`])
+      AC_SUBST([YODABINPATH], ["$YODAPREFIX/bin"])
+      AC_SUBST([YODALIBPATH], [`$YODABIN --libdir`])
+      AC_SUBST([YODAINCLUDEPATH],[`$YODABIN --includedir`])
+      AC_SUBST([YODACPPFLAGS], ["$($YODABIN/yoda-config --cppflags)"])
+      AC_SUBST([YODALDFLAGS], ["$($YODABIN/yoda-config --libs)"])
+      AC_MSG_RESULT([Using $YODAPREFIX for the $TMPNAM installation path])
+      AC_MSG_RESULT([Using $YODABINPATH for the binaries])
+      AC_MSG_RESULT([Using $YODALIBPATH for the library])
+      AC_MSG_RESULT([Using $YODAINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $YODACPPFLAGS for the CPP flags])
+      AC_MSG_RESULT([Using $YODALDFLAGS for the libraries])
+   else
+      AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+   fi
+else
+   AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
+   AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_YODA, test "x$YODAPREFIX" != "x")
+
 # Create code documentation?
 # Check on DOXYGEN (doesn't work with autotools from SLC5)
-AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Check for presence of doxygen ...])
-AC_MSG_NOTICE([******************************************])
-AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
-if test "x$DOXYGEN" = "x"; then
-   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
-else
-   AC_MSG_NOTICE([Creating code documentation using doxygen.])
-   AC_MSG_NOTICE([******************************************])
-   DX_DOT_FEATURE(ON)
-   AC_CHECK_PROGS(DOT, dot, dot)
-   if test "x$DOT" = "x"; then
-      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
-      DX_DOT_FEATURE(OFF)
-   fi
-   DX_HTML_FEATURE(ON)
-   DX_CHM_FEATURE(OFF)
-   DX_CHI_FEATURE(OFF)
-   DX_MAN_FEATURE(OFF)
-   DX_RTF_FEATURE(OFF)
-   DX_XML_FEATURE(OFF)
-   DX_PDF_FEATURE(ON)
-   DX_PS_FEATURE(OFF)
-   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
-fi
+#AC_MSG_NOTICE([******************************************])
+#AC_MSG_NOTICE([Check for presence of doxygen ...])
+#AC_MSG_NOTICE([******************************************])
+#AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
+#if test "x$DOXYGEN" = "x"; then
+#   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
+#else
+#   AC_MSG_NOTICE([Creating code documentation using doxygen.])
+#   AC_MSG_NOTICE([******************************************])
+#   DX_DOT_FEATURE(ON)
+#   AC_CHECK_PROGS(DOT, dot, dot)
+#   if test "x$DOT" = "x"; then
+#      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
+#      DX_DOT_FEATURE(OFF)
+#   fi
+#   DX_HTML_FEATURE(ON)
+#   DX_CHM_FEATURE(OFF)
+#   DX_CHI_FEATURE(OFF)
+#   DX_MAN_FEATURE(OFF)
+#   DX_RTF_FEATURE(OFF)
+#   DX_XML_FEATURE(OFF)
+#   DX_PDF_FEATURE(ON)
+#   DX_PS_FEATURE(OFF)
+#   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
+#fi
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
 
 # Create documentation?
