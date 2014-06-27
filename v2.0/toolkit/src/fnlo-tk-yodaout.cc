@@ -70,22 +70,17 @@ int main(int argc, char** argv) {
 // First we find the point of change of the rapidity value, then for each one we create a histogram which we store in a vector and
 // in the end save it in a yoda file
 
-   std::vector<int> rapidity_bins;                                      // vector that will accept the values of of the positions of the first different y value
-   rapidity_bins.push_back(fnlo.GetLoBin(0,0));                         // put first value by hand, as next loop brakes down for 0-1 value
 
-
-   for (unsigned int z=1; z<fnlo.GetCrossSection().size(); z++) {       //finding the positions where y changes //for all z in cross section table
-        if (fnlo.GetLoBin(z,0) != fnlo.GetLoBin(z-1,0) ) {              // if the y value is changed
-                rapidity_bins.push_back(z);                             // insert the position of the bin in the vector
-        }                                                               // now we have the ending points of all histograms
-   }
+   std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
 
    YODA::Writer & writer = YODA::WriterYODA::create();                  // creat the writer for the yoda fiel
    std::vector< YODA::AnalysisObject * > ao;                            // vector that will accept the pointers of the histograms for each rapidity value
 
 
-   for (unsigned int i=0; i<rapidity_bins.size(); i++) {                // for all rapidity bins
+   int y_change = 0;							// the width od the y bin in pT bins, i.e. where y changes value (-1)
+
+   for (unsigned int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
 
         std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
@@ -93,22 +88,24 @@ int main(int argc, char** argv) {
         histno << i+1;                                                  // to a string for the naming
 
 
-        for (unsigned int j = rapidity_bins[i] ; j<fnlo.GetCrossSection().size(); j++) {                // starting from the first pT bin of each rapidity
-                if ( fnlo.GetLoBin(j,0) != fnlo.GetLoBin(rapidity_bins[i] , 0) ) { break; }             // ending when we reach new rapidity value
+   	for (unsigned int j = y_change ; j< y_change + fnlo.GetNBinDimII(i) ; j++) {                // starting from the first pT bin of each rapidity
                 bins.push_back(YODA::HistoBin1D( fnlo.GetLoBin(j,1) , fnlo.GetUpBin(j,1) ));            // insert pT bin into the vector
         }
 
 
-        YODA::Histo1D * hist = new YODA::Histo1D(bins, std::string("/CMS_2011_S9086218/d0") + histno.str() + std::string("-x01-y01"), "histogram");     //create histogram pointer
+
+
+        YODA::Histo1D * hist = new YODA::Histo1D(bins, std::string("/CMS_2011_S9086218/d0") + histno.str() + std::string("-x01-y01"), "histogram");  
+	//create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
 
-        for (unsigned int k=0; k<bins.size(); k++) {                                                    // for all pT bins for this rapidity value
+        for (unsigned int k = y_change ; k< y_change + fnlo.GetNBinDimII(i) ; k++) {                                                    // for all pT bins for this rapidity value
                 hist->fill( (fnlo.GetLoBin(k,1) + fnlo.GetUpBin(k,1))/2.0 ,
                            fnlo.GetCrossSection()[k]*(fnlo.GetUpBin(k,1) - fnlo.GetLoBin(k,1)) );       // fill in the histogram (*length as we fill area, not height)
         }
 
-
+	y_change += fnlo.GetNBinDimII(i);				//next position after all the pT bins of this rapidity
         ao.push_back(hist);                                             // insert the histogram pointer into the vector
    }
 
@@ -116,6 +113,10 @@ int main(int argc, char** argv) {
 
    //delete ao;                                                         // need to find a way to delete hists from memory now
 
+
+cout<< fnlo.GetNBinDimI() << "\n";
+cout<< fnlo.GetNBinDimII(1) << "\n";
+//cout<< fnlo.GetBinDimII(0) << "\n";
 
 //-------------------------- yodaout code - end
 
