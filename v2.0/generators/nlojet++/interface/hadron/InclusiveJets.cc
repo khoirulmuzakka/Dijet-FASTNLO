@@ -139,7 +139,7 @@ void InitFastNLO(const std::basic_string<char>& __file_name)
 
    // --- set fastNLO filename according to NLOJet++ command line arguments
    string tabFilename = __file_name.c_str();
-   tabFilename += "_v22.tab";
+   tabFilename += ".tab";
    ftable->SetFilename(tabFilename);
 }
 
