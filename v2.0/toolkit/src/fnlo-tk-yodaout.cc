@@ -57,8 +57,7 @@ int main(int argc, char** argv) {
    //fnlo.SetContributionON(fastNLO::kFixedOrder,1,true);
    //fnlo.SetContributionON(fastNLO::kFixedOrder,2,true); // NNLO must be switched on explicitly
    fnlo.CalcCrossSection();                     // Calculate the cross section
-//   fnlo.PrintCrossSections();                 // Print cross section to screen
-
+   fnlo.PrintCrossSections();                 // Print cross section to screen
 
 
 
@@ -77,47 +76,46 @@ int main(int argc, char** argv) {
    YODA::Writer & writer = YODA::WriterYODA::create();                  // creat the writer for the yoda fiel
    std::vector< YODA::AnalysisObject * > ao;                            // vector that will accept the pointers of the histograms for each rapidity value
 
-
-   int y_change = 0;							// the width od the y bin in pT bins, i.e. where y changes value (-1)
+  
 
    for (unsigned int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
-
-        std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
+	std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
         stringstream histno;                                            // just to make i+1 from int
         histno << i+1;                                                  // to a string for the naming
 
-
-   	for (unsigned int j = y_change ; j< y_change + fnlo.GetNBinDimII(i) ; j++) {                // starting from the first pT bin of each rapidity
-                bins.push_back(YODA::HistoBin1D( fnlo.GetLoBin(j,1) , fnlo.GetUpBin(j,1) ));            // insert pT bin into the vector
-        }
-
-
+   
+ 	 for (unsigned int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
+                bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );            // insert pT bin into the vector
+     	 }
 
 
-        YODA::Histo1D * hist = new YODA::Histo1D(bins, std::string("/CMS_2011_S9086218/d0") + histno.str() + std::string("-x01-y01"), "histogram");  
+
+        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + fnlo.GetRivetId() + "/d0" + histno.str() + "-x01-y01", "fastNLO" );  
 	//create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
 
-        for (unsigned int k = y_change ; k< y_change + fnlo.GetNBinDimII(i) ; k++) {                                                    // for all pT bins for this rapidity value
-                hist->fill( (fnlo.GetLoBin(k,1) + fnlo.GetUpBin(k,1))/2.0 ,
-                           fnlo.GetCrossSection()[k]*(fnlo.GetUpBin(k,1) - fnlo.GetLoBin(k,1)) );       // fill in the histogram (*length as we fill area, not height)
+
+     	for (unsigned int k =0 ; k< fnlo.GetNBinDimII(i) ; k++) { 
+	      hist->fill( (fnlo.GetBinDimII(i)[k].first + fnlo.GetBinDimII(i)[k].second)/2.0 ,
+                           fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetBinDimII(i)[k].second - fnlo.GetBinDimII(i)[k].first) ); 
+									// fill in the histogram (*length as we fill area,not height)
         }
 
-	y_change += fnlo.GetNBinDimII(i);				//next position after all the pT bins of this rapidity
+
         ao.push_back(hist);                                             // insert the histogram pointer into the vector
    }
 
-   writer.write( "Histogram.yoda", ao );                                // save histograms into the yoda file
+
+
+   writer.write( "fastNLO_Histograms.yoda", ao );                                // save histograms into the yoda file
+
+   cout << "fastNLO_Histograms.yoda was succesfully produced" << "\n \n";
+
+
 
    //delete ao;                                                         // need to find a way to delete hists from memory now
-
-
-cout<< fnlo.GetNBinDimI() << "\n";
-cout<< fnlo.GetNBinDimII(1) << "\n";
-//cout<< fnlo.GetBinDimII(0) << "\n";
-
 //-------------------------- yodaout code - end
 
 
@@ -126,54 +124,54 @@ cout<< fnlo.GetNBinDimII(1) << "\n";
 
 
 
-    vector<double> cs = fnlo.GetCrossSection(); // Access cross sections for later usage
+//    vector<double> cs = fnlo.GetCrossSection(); // Access cross sections for later usage
 
    // finish:
-   return 0;
+//   return 0;
 
 
    // example code how to loop over all PDF eigenvectors
-   cout<<"\n fnlo-tk-yodaout: Now we want to loop over the eigenvectors of "<<PDFFile<<"."<<endl<<endl;
-   fnlo.SetLHAPDFFilename(PDFFile); // we use again the 'nominal' PDF-file
-   int nEig = fnlo.GetNPDFMembers(); // How many eigenvectors are there?
-   cout<<" fnlo-tk-yodaout: There are "<<nEig<<" Eigenvalue sets in "<<PDFFile<<endl;
-   for ( int i = 0 ; i<nEig ; i++ ) { // start with 0
-      cout<<" fnlo-tk-yodaout: Setting PDF member: "<<i<<" ***"<<endl;
-      fnlo.SetLHAPDFMember(i);  // specify the PDF member
-      fnlo.CalcCrossSection();  // redo cross section calculation
-      fnlo.PrintCrossSections(); // print new cross sections to screen
+//   cout<<"\n fnlo-tk-yodaout: Now we want to loop over the eigenvectors of "<<PDFFile<<"."<<endl<<endl;
+//   fnlo.SetLHAPDFFilename(PDFFile); // we use again the 'nominal' PDF-file
+//   int nEig = fnlo.GetNPDFMembers(); // How many eigenvectors are there?
+//   cout<<" fnlo-tk-yodaout: There are "<<nEig<<" Eigenvalue sets in "<<PDFFile<<endl;
+//   for ( int i = 0 ; i<nEig ; i++ ) { // start with 0
+//      cout<<" fnlo-tk-yodaout: Setting PDF member: "<<i<<" ***"<<endl;
+//      fnlo.SetLHAPDFMember(i);  // specify the PDF member
+//      fnlo.CalcCrossSection();  // redo cross section calculation
+//      fnlo.PrintCrossSections(); // print new cross sections to screen
       // write tot file
-      vector<double> cs = fnlo.GetCrossSection(); // get cross setions for further usage (i.e. printing to file)
-   }
+//      vector<double> cs = fnlo.GetCrossSection(); // get cross setions for further usage (i.e. printing to file)
+//   }
 
    // finish
-   return 0;
+ //  return 0;
 
    // example to use different scale factors
-   cout<<"\n fnlo-tk-yodaout: Now we use a scale factor of 2."<<endl;
-   fnlo.SetScaleFactorsMuRMuF(2.0,2.0);
-   fnlo.CalcCrossSection();
-   fnlo.PrintCrossSections();
+//   cout<<"\n fnlo-tk-yodaout: Now we use a scale factor of 2."<<endl;
+//   fnlo.SetScaleFactorsMuRMuF(2.0,2.0);
+//   fnlo.CalcCrossSection();
+//   fnlo.PrintCrossSections();
 
 
-   cout<<"\n fnlo-tk-yodaout: Now we use a scale factor of 0.5."<<endl;
-   fnlo.SetScaleFactorsMuRMuF(0.5,0.5);
-   fnlo.CalcCrossSection();
-   fnlo.PrintCrossSections();
+//   cout<<"\n fnlo-tk-yodaout: Now we use a scale factor of 0.5."<<endl;
+//   fnlo.SetScaleFactorsMuRMuF(0.5,0.5);
+//   fnlo.CalcCrossSection();
+//   fnlo.PrintCrossSections();
 
 
-   cout<<"\n fnlo-tk-yodaout: Now we go back to the nominal result: 1."<<endl;
-   fnlo.SetScaleFactorsMuRMuF(1.0,1.0);
-   fnlo.CalcCrossSection();
-   fnlo.PrintCrossSections();
+//   cout<<"\n fnlo-tk-yodaout: Now we go back to the nominal result: 1."<<endl;
+//   fnlo.SetScaleFactorsMuRMuF(1.0,1.0);
+//   fnlo.CalcCrossSection();
+ //  fnlo.PrintCrossSections();
 
    // finish
-   return 0;
+//   return 0;
 
-}
+//}
 
 
-double Function_Mu(double s1, double s2) {
+//double Function_Mu(double s1, double s2) {
    // --- fastNLO user: This is an example function
    //     to demonstrate how you might perform the
    //     definition of the scales using a
@@ -181,6 +179,6 @@ double Function_Mu(double s1, double s2) {
    //     of s1 and s2 can be used.
    //     Which variables s1 and s2 stand for are
    //     coded in the fastNLO table.
-   double mu = 173.;
-   return mu;
+//   double mu = 173.;
+//   return mu;
 }
