@@ -438,6 +438,7 @@
 #include <cfloat>
 #include <cmath>
 #include <string>
+#include "fastnlotk/fastNLOTools.h" 
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
@@ -836,7 +837,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
       }
    }
 
-   if (!SetOld && SetOn) {
+   if (!SetOld && SetOn && !fastNLOTools::IsEmptyVector(XSection_LO) ) { 
       if (!c->GetIAddMultFlag()) { // if 'new' additive contribution, then refill PDF and alpha_s cache.
          // Fill alpha_s cache
          debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
