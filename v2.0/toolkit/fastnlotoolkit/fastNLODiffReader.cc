@@ -162,7 +162,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
    bool IsAsCached = fAlphasCached == CalcReferenceAlphas();
    bool IsPDFCached = fPDFCached == CalcNewPDFChecksum();
    if ( IsAsCached && IsPDFCached ) {
-      debug["GetDiffCrossSection"]<<"No need for re-calculation of cross section. All values cached."<<endl;
+      debug["GetDiffCrossSection"]<<"No need for re-calculation of cross section. All values cached. asNew = "<<asNew<<endl;
       return XSection;
    }
 

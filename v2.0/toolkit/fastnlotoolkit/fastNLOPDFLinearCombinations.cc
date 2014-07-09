@@ -348,28 +348,28 @@ vector<double> fastNLOPDFLinearCombinations::CalcPDFThreshold(const fastNLOCoeff
    double S1  = pdfx1[+3+6];
    double C1  = pdfx1[+4+6];
    double B1  = pdfx1[+5+6];
-   double T1  = pdfx1[+6+6];
+   //   double T1  = pdfx1[+6+6];
    double G1  = pdfx1[ 0+6];
    double D1b = pdfx1[-1+6];
    double U1b = pdfx1[-2+6];
    double S1b = pdfx1[-3+6];
    double C1b = pdfx1[-4+6];
    double B1b = pdfx1[-5+6];
-   double T1b = pdfx1[-6+6];
+   //   double T1b = pdfx1[-6+6];
 
    double D2  = pdfx2[+1+6];
    double U2  = pdfx2[+2+6];
    double S2  = pdfx2[+3+6];
    double C2  = pdfx2[+4+6];
    double B2  = pdfx2[+5+6];
-   double T2  = pdfx2[+6+6];
+   //   double T2  = pdfx2[+6+6];
    double G2  = pdfx2[ 0+6];
    double D2b = pdfx2[-1+6];
    double U2b = pdfx2[-2+6];
    double S2b = pdfx2[-3+6];
    double C2b = pdfx2[-4+6];
    double B2b = pdfx2[-5+6];
-   double T2b = pdfx2[-6+6];
+   //   double T2b = pdfx2[-6+6];
 
    vector <double> H(NSubproc);
 

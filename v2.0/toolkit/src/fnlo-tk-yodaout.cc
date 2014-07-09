@@ -78,14 +78,14 @@ int main(int argc, char** argv) {
 
 
 
-   for (unsigned int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
+   for (int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
         std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
         stringstream histno;                                            // just to make i+1 from int
         histno << i+1;                                                  // to a string for the naming
 
 
-         for (unsigned int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
+         for (int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
                 bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );            // insert pT bin into the vector
          }
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 
 
 
-        for (unsigned int k =0 ; k< fnlo.GetNBinDimII(i) ; k++) {
+        for (int k =0 ; k< fnlo.GetNBinDimII(i) ; k++) {
               hist->fill( (fnlo.GetBinDimII(i)[k].first + fnlo.GetBinDimII(i)[k].second)/2.0 ,
                            fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetBinDimII(i)[k].second - fnlo.GetBinDimII(i)[k].first) );
                                                                         // fill in the histogram (*length as we fill area,not height)
