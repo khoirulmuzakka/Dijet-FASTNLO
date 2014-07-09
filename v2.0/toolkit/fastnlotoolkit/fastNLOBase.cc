@@ -259,7 +259,7 @@ void fastNLOBase::PrintWelcomeMessage() {
 
    char fnlo[100];
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
-   char title[100]           = FNLO_TITLE;
+   char subproject[100]      = FNLO_SUBPROJECT;
    char package_version[100] = FNLO_VERSION;
    char svnrev[100]          = FNLO_SVNREV;
    char authors[500]         = FNLO_AUTHORS;
@@ -273,7 +273,7 @@ void fastNLOBase::PrintWelcomeMessage() {
    shout>>"\n";
    shout>>""<<CSEPS;
    shout<<"\n";
-   shout<<" "<<fnlo<<" "<<title<<endl;
+   shout<<" "<<fnlo<<"_"<<subproject<<endl;
    shout<<" Version "<<package_version<<"_"<<svnrev<<endl;
    shout<<"\n";
    shout<<" C++ program and toolkit to read and create fastNLO v2 tables and"<<endl;

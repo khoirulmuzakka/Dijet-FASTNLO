@@ -5,8 +5,8 @@
 #include <vector>
 
 #ifndef FNLO_NAME
-#define FNLO_TITLE      "@TITLE@"
 #define FNLO_NAME       "@PACKAGE_NAME@"
+#define FNLO_SUBPROJECT "@SUBPROJECT@"
 #define FNLO_VERSION    "@PACKAGE_VERSION@"
 #define FNLO_SVNREV     "@SVNREV@"
 #define FNLO_AUTHORS    "@AUTHORS@"
