@@ -903,14 +903,16 @@ vector < double > fastNLOReader::GetScaleFactors() const {
 
 //______________________________________________________________________________
 string fastNLOReader::GetScaleDescription(const ESMOrder eOrder, int iScale) const {
-   // TODO: check that the requested order is available
-   fastNLOCoeffAddBase * coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
-   std::string ScaleLabel;
-   if (coeff != NULL)
-      ScaleLabel = coeff->GetScaleDescription(iScale);
-   else
-      warn["GetScaleDescription"]<< "No NLO Contribution found" << endl;
-   return ScaleLabel;
+   //! Get label of scale iScale for order eOrder of the fixed order calculation.
+   fastNLOCoeffAddBase* coeff = NULL;
+   if (eOrder < BBlocksSMCalc[kFixedOrder].size()){
+   coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
+   }
+   else {
+      error["GetScaleDescription"]<<"Requested contribution not found." << endl;
+      exit(1);
+   }
+   return coeff->GetScaleDescription(iScale);
 }
 
 //______________________________________________________________________________
