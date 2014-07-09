@@ -610,6 +610,7 @@ int main(int argc, char** argv) {
    }
 
    // Print some fastNLO table info
+   // TODO: Add print out of scale info, in particular for flex-scale tables
    fnlo->PrintTableInfo();
    fnlo->PrintFastNLOTableConstants(0);
 
@@ -803,8 +804,6 @@ int main(int argc, char** argv) {
          warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
                            << fnlo->GetScaleFactorMuR() << ","
                            << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
-         //         printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skipped completely!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
-         // skip completely
          continue;
       }
       if (fnlo->GetIsFlexibleScaleTable()) {
@@ -812,6 +811,10 @@ int main(int argc, char** argv) {
          fnlo->SetMuRFunctionalForm(kScale1);
          //      fnlo->SetMuFFunctionalForm(kScale2);
          //      fnlo->SetMuRFunctionalForm(kScale2);
+         warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
+                           << "from only the first scale of this flexible-scale table "
+                           << "and may be misleading." << endl
+                           << "                        Please check how this table was filled!" << endl;
       }
 
       // Calculate cross section
@@ -963,8 +966,8 @@ int main(int argc, char** argv) {
       }
       if (NDim == 1) {
          printf("%s [ %-17s ]  <%-12.12s> %s\n",
-                // TODO: ScaleDescription Murks
-                header0.c_str(),DimLabel[0].c_str(),"pT_jet_[GeV]",header2.c_str());
+                // TODO: Put proper scale description here instead of mu1_[GeV]
+                header0.c_str(),DimLabel[0].c_str(),"mu1_[GeV]",header2.c_str());
          cout << SSEP << endl;
          NDimBins[0] = 0;
          for (unsigned int i=0; i<xslo.size(); i++) {
@@ -1005,10 +1008,10 @@ int main(int argc, char** argv) {
          }
       } else if (NDim == 2) {
          printf("%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s\n",
+                // TODO: Put proper scale description here instead of mu1_[GeV]
                 // header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
-                // TODO: ScaleDescription Murks
-                // Invert dimension numbering to from outer to inner
-                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),"pT_jet_[GeV]",header2.c_str());
+                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),"mu1_[GeV]",header2.c_str());
+         // Invert dimension numbering to from outer to inner
          cout << SSEP << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             for (int j=0; j<NDim; j++) {

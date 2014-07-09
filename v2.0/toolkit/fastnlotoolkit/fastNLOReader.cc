@@ -1178,7 +1178,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    double scalefac       = fScaleFacMuR / cNLO->GetScaleFactor(scaleVar);
 
    debug["CalcAposterioriScaleVariationMuR"]<<"scalefac="<<scalefac<<endl;
-   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariationMuR"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
+   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariationMuR"]<<"This function is applicable only to non-flexible scale tables."<<endl; exit(1);}
    fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;
@@ -1224,8 +1224,8 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *(cLO->PdfSplLc1[i][j][k][l] + cLO->PdfSplLc2[i][j][k][l]) * unit / cLO->GetNevt(i,l);
-               double xsci = asnp1 * n * log(scalefac) * clo; 
-               //double xsci = asnp1 * n * log(scalefac) * clo; 
+               double xsci = asnp1 * n * log(scalefac) * clo;
+               //double xsci = asnp1 * n * log(scalefac) * clo;
                XS->at(i) -= xsci;
             }
          }
@@ -2166,10 +2166,10 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          }
       }
       PrintScaleSettings();
-   } 
+   }
    else if (fUseHoppet) {
 
-      debug["SetScaleFactorsMuRMuF"]<< "UseHoppet==true: Default factorization scale variation table (muF=1.0) will be enabled and " 
+      debug["SetScaleFactorsMuRMuF"]<< "UseHoppet==true: Default factorization scale variation table (muF=1.0) will be enabled and "
          << "Hoppet will be used to calculate scale variation contributions on the fly." << endl;
 
       const int ns = GetNScaleVariations();
