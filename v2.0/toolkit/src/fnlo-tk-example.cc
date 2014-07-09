@@ -46,17 +46,17 @@ int main(int argc, char** argv) {
 
    //--- example calculation
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);     // initialize a fastNLO instance with interface to LHAPDF.
-   //fnlo.PrintTableInfo();			// print some valuable information
-   //fnlo.PrintFastNLOTableConstants();		// print even more information
-   //fnlo.SetUnits(kAbsoluteUnits);		// Use units as specified in the publication or in barns.
+   fnlo.PrintTableInfo();                       // print some valuable information
+   //fnlo.PrintFastNLOTableConstants();         // print even more information
+   //fnlo.SetUnits(kAbsoluteUnits);             // Use units as specified in the publication or in barns.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,0,false); // switch contributions on/off. By default LO and NLO.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,1,true);
    //fnlo.SetContributionON(fastNLO::kFixedOrder,2,true); // NNLO must be switched on explicitly
-   fnlo.CalcCrossSection();			// Calculate the cross section
-   fnlo.PrintCrossSections();			// Print cross section to screen
+   fnlo.CalcCrossSection();                     // Calculate the cross section
+   fnlo.PrintCrossSections();                   // Print cross section to screen
 
 
-   vector<double> cs = fnlo.GetCrossSection();	// Access cross sections for later usage
+   vector<double> cs = fnlo.GetCrossSection();  // Access cross sections for later usage
 
    // finish:
    return 0;
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
    cout<<" fnlo-tk-example: There are "<<nEig<<" Eigenvalue sets in "<<PDFFile<<endl;
    for ( int i = 0 ; i<nEig ; i++ ) { // start with 0
       cout<<" fnlo-tk-example: Setting PDF member: "<<i<<" ***"<<endl;
-      fnlo.SetLHAPDFMember(i);	// specify the PDF member
+      fnlo.SetLHAPDFMember(i);  // specify the PDF member
       fnlo.CalcCrossSection();  // redo cross section calculation
       fnlo.PrintCrossSections(); // print new cross sections to screen
       // write tot file
@@ -84,19 +84,19 @@ int main(int argc, char** argv) {
    fnlo.SetScaleFactorsMuRMuF(2.0,2.0);
    fnlo.CalcCrossSection();
    fnlo.PrintCrossSections();
-   
+
 
    cout<<"\n fnlo-tk-example: Now we use a scale factor of 0.5."<<endl;
    fnlo.SetScaleFactorsMuRMuF(0.5,0.5);
    fnlo.CalcCrossSection();
    fnlo.PrintCrossSections();
-   
+
 
    cout<<"\n fnlo-tk-example: Now we go back to the nominal result: 1."<<endl;
    fnlo.SetScaleFactorsMuRMuF(1.0,1.0);
    fnlo.CalcCrossSection();
    fnlo.PrintCrossSections();
-   
+
    // finish
    return 0;
 
@@ -114,4 +114,3 @@ double Function_Mu(double s1, double s2) {
    double mu = 173.;
    return mu;
 }
-

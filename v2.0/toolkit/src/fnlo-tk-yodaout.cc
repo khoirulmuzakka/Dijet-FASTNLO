@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
    //--- example calculation
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);     // initialize a fastNLO instance with interface to LHAPDF.
-   //fnlo.PrintTableInfo();                     // print some valuable information
+   fnlo.PrintTableInfo();                     // print some valuable information
    //fnlo.PrintFastNLOTableConstants();         // print even more information
    //fnlo.SetUnits(kAbsoluteUnits);             // Use units as specified in the publication or in barns.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,0,false); // switch contributions on/off. By default LO and NLO.
@@ -76,31 +76,31 @@ int main(int argc, char** argv) {
    YODA::Writer & writer = YODA::WriterYODA::create();                  // creat the writer for the yoda fiel
    std::vector< YODA::AnalysisObject * > ao;                            // vector that will accept the pointers of the histograms for each rapidity value
 
-  
+
 
    for (unsigned int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
-	std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
+        std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
         stringstream histno;                                            // just to make i+1 from int
         histno << i+1;                                                  // to a string for the naming
 
-   
- 	 for (unsigned int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
+
+         for (unsigned int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
                 bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );            // insert pT bin into the vector
-     	 }
+         }
 
 
 
-        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + fnlo.GetRivetId() + "/d0" + histno.str() + "-x01-y01", "fastNLO" );  
-	//create histogram pointer
+        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + fnlo.GetRivetId() + "/d0" + histno.str() + "-x01-y01", "fastNLO" );
+        //create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
 
 
-     	for (unsigned int k =0 ; k< fnlo.GetNBinDimII(i) ; k++) { 
-	      hist->fill( (fnlo.GetBinDimII(i)[k].first + fnlo.GetBinDimII(i)[k].second)/2.0 ,
-                           fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetBinDimII(i)[k].second - fnlo.GetBinDimII(i)[k].first) ); 
-									// fill in the histogram (*length as we fill area,not height)
+        for (unsigned int k =0 ; k< fnlo.GetNBinDimII(i) ; k++) {
+              hist->fill( (fnlo.GetBinDimII(i)[k].first + fnlo.GetBinDimII(i)[k].second)/2.0 ,
+                           fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetBinDimII(i)[k].second - fnlo.GetBinDimII(i)[k].first) );
+                                                                        // fill in the histogram (*length as we fill area,not height)
         }
 
 

@@ -469,8 +469,9 @@ AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
 AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
+AC_SUBST([TITLE],["Toolkit"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
-AC_SUBST([YEARS],["2011-`date +%Y`"])
+AC_SUBST([YEARS],["2005-`date +%Y`"])
 
 # Output
 AC_CONFIG_FILES([Makefile

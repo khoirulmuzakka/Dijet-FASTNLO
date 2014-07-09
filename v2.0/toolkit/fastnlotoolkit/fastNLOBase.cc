@@ -258,22 +258,22 @@ void fastNLOBase::PrintWelcomeMessage() {
    const string LSEPS = " #---------------------------------------------------------------------------------\n";
 
    char fnlo[100];
-   //sprintf(fnlo,"27[0;31mfast27[0;34mNLO\033[0m",27,0,31,27,0,34);
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
-   char package_version[100]    = FNLO_VERSION;
-   char svnrev[100]             = FNLO_SVNREV;
-   char authors[500]            = FNLO_AUTHORS;
-   char webpage[500]    = FNLO_WEBPAGE;
-   char authorsv14[200] = FNLO_AUTHORSv14;
-   char quotev14[200]   = FNLO_QUOTEv14;
-   char authorsv2[200]  = FNLO_AUTHORSv2;
-   char quotev2[200]    = FNLO_QUOTEv2;
-   char years[100]      = FNLO_YEARS;
+   char title[100]           = FNLO_TITLE;
+   char package_version[100] = FNLO_VERSION;
+   char svnrev[100]          = FNLO_SVNREV;
+   char authors[500]         = FNLO_AUTHORS;
+   char webpage[500]         = FNLO_WEBPAGE;
+   char authorsv14[200]      = FNLO_AUTHORSv14;
+   char quotev14[200]        = FNLO_QUOTEv14;
+   char authorsv2[200]       = FNLO_AUTHORSv2;
+   char quotev2[200]         = FNLO_QUOTEv2;
+   char years[100]           = FNLO_YEARS;
 
    shout>>"\n";
    shout>>""<<CSEPS;
    shout<<"\n";
-   shout<<" "<<fnlo<<endl;
+   shout<<" "<<fnlo<<" "<<title<<endl;
    shout<<" Version "<<package_version<<"_"<<svnrev<<endl;
    shout<<"\n";
    shout<<" C++ program and toolkit to read and create fastNLO v2 tables and"<<endl;
