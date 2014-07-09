@@ -15,7 +15,7 @@ using namespace std;
 
 
 fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) :
-   fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) , PrimalScream("fastNLOInterpol") {
+   PrimalScream("fastNLOInterpol"),fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) {
    debug["fastNLOInterpolBase"]<<"New fastNLOInterpolBase instance."<<endl;
    fLastVal = -34729.432;
    fLastGridPointWasRemoved=false;
