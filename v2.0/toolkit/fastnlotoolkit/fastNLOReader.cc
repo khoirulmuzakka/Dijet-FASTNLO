@@ -901,6 +901,17 @@ vector < double > fastNLOReader::GetScaleFactors() const {
       return ((fastNLOCoeffAddFix*)BBlocksSMCalc[kFixedOrder][kNextToLeading])->GetAvailableScaleFactors();
 }
 
+//______________________________________________________________________________
+string fastNLOReader::GetScaleDescription(const ESMOrder eOrder, int iScale) const {
+   // TODO: check that the requested order is available
+   fastNLOCoeffAddBase * coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
+   std::string ScaleLabel;
+   if (coeff != NULL)
+      ScaleLabel = coeff->GetScaleDescription(iScale);
+   else
+      warn["GetScaleDescription"]<< "No NLO Contribution found" << endl;
+   return ScaleLabel;
+}
 
 //______________________________________________________________________________
 vector < double > fastNLOReader::GetCrossSection() {
