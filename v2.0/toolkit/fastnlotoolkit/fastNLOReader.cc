@@ -438,7 +438,7 @@
 #include <cfloat>
 #include <cmath>
 #include <string>
-#include "fastnlotk/fastNLOTools.h" 
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
@@ -837,7 +837,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
       }
    }
 
-   if (!SetOld && SetOn && !fastNLOTools::IsEmptyVector(XSection_LO) ) { 
+   if (!SetOld && SetOn && !fastNLOTools::IsEmptyVector(XSection_LO) ) {
       if (!c->GetIAddMultFlag()) { // if 'new' additive contribution, then refill PDF and alpha_s cache.
          // Fill alpha_s cache
          debug["SetContributionON"]<<"Call FillAlphasCache for contribution eCalc="<<eCalc<<"\tId="<<Id<<endl;
@@ -1678,15 +1678,18 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    debug["FillBlockBPDFLCsHHCv20"]<<"scalefac="<<scalefac<<endl;
 
    bool IsPPBar;
+   // ----- if ppbar ---- //
+   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && abs(c->NPDFPDG[0]) == 2212) {
+      IsPPBar = true;
+   }
    // ----- if pp ---- //
-   if (c->NPDFPDG[0] == c->NPDFPDG[1]) {
+   else if (c->NPDFPDG[0] == c->NPDFPDG[1] && (c->NPDFPDG[0] == 2212 || c->NPDFPDG[1] == 2212)) {
       IsPPBar = false;
    }
-   // ----- if ppbar ---- //
-   else if (c->NPDFPDG[0] == -c->NPDFPDG[1]) {
-      IsPPBar = true;
-   } else {
-      printf("FastNLOReader::FillBlockBPDFLCsHHCv20(). This is not pp, nor ppbar, nor pbarpbar!\n");
+   // ----- anything else ---- //
+   else {
+      error<<"Found beam particles to have PDG codes " << c->NPDFPDG[0] << " and " << c->NPDFPDG[1] << ",\n";
+      error<<"but cannot deal with tables other than pp or ppbar, aborting! \n";
       exit(1);
    }
 
@@ -1778,15 +1781,18 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    }
 
    bool IsPPBar;
+   // ----- if ppbar ---- //
+   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && abs(c->NPDFPDG[0]) == 2212) {
+      IsPPBar = true;
+   }
    // ----- if pp ---- //
-   if (c->NPDFPDG[0] == c->NPDFPDG[1]) {
+   else if (c->NPDFPDG[0] == c->NPDFPDG[1] && (c->NPDFPDG[0] == 2212 || c->NPDFPDG[1] == 2212)) {
       IsPPBar = false;
    }
-   // ----- if ppbar ---- //
-   else if (c->NPDFPDG[0] == -c->NPDFPDG[1]) {
-      IsPPBar = true;
-   } else {
-      printf("FastNLOReader::FillBlockBPDFLCsHHCv20(). This is not pp, nor ppbar, nor pbarpbar!\n");
+   // ----- anything else ---- //
+   else {
+      error<<"Found beam particles to have PDG codes " << c->NPDFPDG[0] << " and " << c->NPDFPDG[1] << ",\n";
+      error<<"but cannot deal with tables other than pp or ppbar, aborting! \n";
       exit(1);
    }
 
