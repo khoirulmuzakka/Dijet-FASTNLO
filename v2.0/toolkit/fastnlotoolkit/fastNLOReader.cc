@@ -1247,6 +1247,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
+               // TODO: Not implemented correctly. Need to fix DIS case.
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *(cLO->PdfSplLc1[i][j][k][l] + cLO->PdfSplLc2[i][j][k][l]) * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * n * log(scalefac) * clo;
                //double xsci = asnp1 * n * log(scalefac) * clo;
@@ -1622,6 +1623,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
    double scalefac       = (c->GetScaleFactor(scaleVar) == fScaleFacMuF) ? 1. : fScaleFacMuF;
    vector<double> xfx(13); // PDFs of all partons
+   vector<double> xfxspl(13); // PDFs splitting functions of all partons
    if (!GetIsFlexibleScaleTable(c)) {
       for (int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
@@ -1630,7 +1632,14 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx = GetXFX(xp,muf);
+               #ifdef HAVEHOPPET
+               if (fUseHoppet)
+                  xfxspl        = HoppetInterface::GetSpl(xp,muf);
+               #endif
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx);
+               if (fUseHoppet){
+                  c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfxspl);
+               }
                //                vector < double > buffer = CalcPDFLinearCombDIS(xfx , c->GetNSubproc());
                //                for (int l=0; l<c->GetNSubproc(); l++) {
                //                   c->PdfLc[i][j][k][l] = buffer[l];
@@ -1737,9 +1746,8 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
                #ifdef HAVEHOPPET
-               if (fUseHoppet){
+               if (fUseHoppet)
                   xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
-               }
                #endif
             }
             int x1bin = 0;
@@ -1764,28 +1772,49 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    else if ( c->GetNPDFDim() == 2 ){
       vector < vector < double > > xfx1; // PDFs of all partons
       vector < vector < double > > xfx2; // PDFs of all partons
+      vector < vector < double > > xfxspl1; // PDFs splitting functions of all partons
+      vector < vector < double > > xfxspl2; // PDFs splitting functions of all partons
       for (int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
          int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
          xfx1.resize(nxbins1);
          xfx2.resize(nxbins2);
+         if (fUseHoppet){
+            xfxspl1.resize(nxbins1);
+            xfxspl2.resize(nxbins1);
+         }
          for (int j=0; j<c->GetNScaleNode(); j++) {
             // determine all pdfs of hadron1
             double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                xfx1[k]        = GetXFX(xp,muf);
+               #ifdef HAVEHOPPET
+               if (fUseHoppet)
+                  xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
+               #endif
+
             }
             // determine all pdfs of hadron2
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
                xfx2[k]       = GetXFX(xp,muf);
+               #ifdef HAVEHOPPET
+               if (fUseHoppet)
+                  xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
+               #endif
+
             }
             for (int k=0; k<nxmax; k++) {
                int x1bin = k % c->GetNxtot1(i);
                int x2bin = k / c->GetNxtot1(i);
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin], IsPPBar);
+               if (fUseHoppet){
+                  c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx1[x1bin], xfxspl2[x2bin], IsPPBar);
+                  c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl1[x1bin], xfx2[x2bin], IsPPBar);
+               }
+
             }
          }
       }
