@@ -64,6 +64,7 @@ public:
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };
    std::string GetScaleDescription(const ESMOrder eOrder, int iScale=0) const;
+   double GetNevt(const ESMOrder eOrder) const;
 
    int GetNScaleVariations() const;                                                     //!< Get number of available scale variations
    vector < double > GetScaleFactors() const;                                           //!< Get list of available scale factors

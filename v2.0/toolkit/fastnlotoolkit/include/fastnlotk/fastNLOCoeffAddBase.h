@@ -26,6 +26,7 @@ public:
    virtual void NormalizeCoefficients();					//!< Set number of events to 1 and normalize coefficients accordingly.	
 
    int GetIRef() const {return IRef;}
+   double GetNevt() const { return Nevt; }
    double GetNevt(int NObsBin, int NSubproc) const {
       if (Nevt > 0) return Nevt;
       else {cout<<"Todo. Preparation for v2.3."<<endl; return Nevt;}
