@@ -729,6 +729,13 @@ int main(int argc, char** argv) {
    } else {
       info["fnlo-read"] << "The NLO contribution has Id: " << inlo << endl;
    }
+   // Check on existence of NNLO (Id = -1 if not existing)
+   int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
+   if (innlo < 0) {
+      info["fnlo-read"] << "No NNLO contribution found!" << endl;
+   } else {
+      info["fnlo-read"] << "The NNLO contribution has Id: " << innlo << endl;
+   }
    // Check on existence of threshold corrections
    int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
@@ -753,7 +760,7 @@ int main(int argc, char** argv) {
    // Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
 
-      // Switch on LO & NLO, switch off anything else
+      // Switch on LO & NLO & NNLO, switch off anything else
       if (!(ilo   < 0)) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
@@ -766,6 +773,14 @@ int main(int argc, char** argv) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
          if (!SetOn) {
             error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
+            exit(1);
+         }
+      }
+      if (!(innlo  < 0)) {
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, true);
+         if (!SetOn) {
+            error["fnlo-read"] << "NNLO not found, nothing to be done!" << endl;
             error["fnlo-read"] << "This should have been caught before!" << endl;
             exit(1);
          }
@@ -787,6 +802,8 @@ int main(int argc, char** argv) {
       vector < double > xslo;
       vector < double > xsnlo;
       vector < double > kfac;
+      vector < double > xsnnlo;
+      vector < double > kfac2;
       vector < double > xsthc1;
       vector < double > kthc1;
       vector < double > xsthc2;
@@ -819,7 +836,18 @@ int main(int argc, char** argv) {
       // Calculate cross section
       fnlo->CalcCrossSection();
 
-      // Get LO & NLO results
+      // Get LO & NLO & NNLO results
+      if (!(innlo  < 0)) {
+         xsnnlo = fnlo->GetCrossSection();
+         kfac2  = fnlo->GetKFactors();
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, false);
+         if (!SetOn) {
+            error["fnlo-read"] << "Couldn´t switch off NNLO, this is strange!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
+            exit(1);
+         }
+         fnlo->CalcCrossSection();
+      }
       xsnlo = fnlo->GetCrossSection();
       kfac  = fnlo->GetKFactors();
       // Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
@@ -949,7 +977,16 @@ int main(int argc, char** argv) {
       string header1 = " IODimI ";
       string header2 = " LO cross section";
       if (inlo>-1) {
-         header2 += "   NLO cross section   KNLO";
+         header2 += "   NLO cross section";
+      }
+      if (innlo>-1) {
+         header2 += "  NNLO cross section";
+      }
+      if (inlo>-1) {
+         header2 += "  KNLO";
+      }
+      if (innlo>-1) {
+         header2 += "      KNNLO";
       }
       if (ithc2>-1 && lthcvar) {
          header2 += "      KTHC2";
@@ -987,6 +1024,10 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+            } else if (ilo > -1 && inlo > -1 && innlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],xsnnlo[i],kfac[i],kfac2[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
