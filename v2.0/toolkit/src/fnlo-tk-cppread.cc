@@ -812,8 +812,7 @@ int main(int argc, char** argv) {
          //      fnlo->SetMuFFunctionalForm(kScale2);
          //      fnlo->SetMuRFunctionalForm(kScale2);
          warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
-                           << "from only the first scale of this flexible-scale table "
-                           << "and may be misleading." << endl
+                           << "from only the first scale of this flexible-scale table." << endl
                            << "                        Please check how this table was filled!" << endl;
       }
 
