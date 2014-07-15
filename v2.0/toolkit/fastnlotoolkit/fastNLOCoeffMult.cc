@@ -10,20 +10,23 @@ using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
 bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet)  {
-  if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==1 ) return true;
-   else if ( c->GetIAddMultFlag()!=1 ) {
-      if ( !quiet)
-	 say::error["fastNLOCoeffMult::CheckCoeffConstants"]
-	    <<"This is not an additive contribution (IAddMultFlag="<<c->GetIAddMultFlag()<<", but must be equals 1)."<<endl;
+   if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==0 ) {
+      // Additive contribution
       return false;
-   }
-   else if ( c->GetIDataFlag()!=0) {
+   } else if ( c->GetIAddMultFlag()==1 && c->GetIDataFlag()==0 ) {
+      // Multiplicative contribution
+      return true;
+   } else if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==1 ) {
+      // Data contribution
+      return false;
+   } else {
+      // Unknown contribution
       say::error["fastNLOCoeffMult::CheckCoeffConstants"]
-	 <<"This seems to be an additive contribution, but is also labeled as data table. (IAddMultFlag="<<c->GetIAddMultFlag()<<", IDataFlag="<<c->GetIDataFlag()<<endl;
+         << "Unknown contribution type, aborting! "
+         << "IAddMultFlag = " << c->GetIAddMultFlag()
+         << ", IDataFlag ="   << c->GetIDataFlag() <<endl;
       exit(1);
-      return false;
    }
-   else return true;
 }
 
 
@@ -97,14 +100,14 @@ void fastNLOCoeffMult::ReadCoeffMult(istream& table){
       UncorLo[i].resize(Nuncorrel);
       UncorHi[i].resize(Nuncorrel);
       for(int j=0;j<Nuncorrel;j++){
-	 table >> UncorLo[i][j];
-	 table >> UncorHi[i][j];
+         table >> UncorLo[i][j];
+         table >> UncorHi[i][j];
       }
       CorrLo[i].resize(Ncorrel);
       CorrHi[i].resize(Ncorrel);
       for(int j=0;j<Ncorrel;j++){
-	 table >> CorrLo[i][j];
-	 table >> CorrHi[i][j];
+         table >> CorrLo[i][j];
+         table >> CorrHi[i][j];
       }
    }
    // end of IAddMultFlag==1
@@ -126,12 +129,12 @@ void fastNLOCoeffMult::Write(ostream& table) {
    for(int i=0;i<fNObsBins;i++){
       table << fact[i] << endl;
       for(int j=0;j<Nuncorrel;j++){
-	 table << UncorLo[i][j] << endl;
-	 table << UncorHi[i][j] << endl;
+         table << UncorLo[i][j] << endl;
+         table << UncorHi[i][j] << endl;
       }
       for(int j=0;j<Ncorrel;j++){
-	 table << CorrLo[i][j] << endl;
-	 table << CorrHi[i][j] << endl;
+         table << CorrLo[i][j] << endl;
+         table << CorrHi[i][j] << endl;
       }
    }
 }

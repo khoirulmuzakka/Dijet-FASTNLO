@@ -983,7 +983,7 @@ int main(int argc, char** argv) {
          header2 += "  NNLO cross section";
       }
       if (inlo>-1) {
-         header2 += "  KNLO";
+         header2 += "   KNLO";
       }
       if (innlo>-1) {
          header2 += "      KNNLO";
@@ -1025,7 +1025,7 @@ int main(int argc, char** argv) {
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
             } else if (ilo > -1 && inlo > -1 && innlo > -1) {
-               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#18.11E %#9.5F %#9.5F",
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#18.11E  %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qscl[i],xslo[i],xsnlo[i],xsnnlo[i],kfac[i],kfac2[i]);
             } else if (ilo > -1 && inlo > -1) {

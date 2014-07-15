@@ -21,7 +21,7 @@ public:
    virtual void Read(istream& table);
    virtual void Write(ostream& table);
    virtual void Print() const;
-   
+
    double GetMultFactor(int iObs) const { return fact[iObs]; }
    vector<double > GetMultFactor() const { return fact; }
    vector<string> GetUncDescription() const { return UncDescr; }

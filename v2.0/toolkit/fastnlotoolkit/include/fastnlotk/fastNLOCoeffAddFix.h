@@ -22,18 +22,18 @@ public:
    virtual void Write(ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
-   virtual void Clear();							//!< Clear all coefficients and event counters
+   virtual void Clear();                                                        //!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
    virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
-  
+
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;
    int GetNScaleNode() const { return GetTotalScalenodes(); }
    int GetNScalevar() const { return Nscalevar[0];}
    v1d GetAvailableScaleFactors() const { return ScaleFac[0]; }
-   double GetScaleFactor(int iVar) const { 
-      if ( iVar >= (int)ScaleFac[0].size() ) 
-	 this->error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
+   double GetScaleFactor(int iVar) const {
+      if ( iVar >= (int)ScaleFac[0].size() )
+         this->error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
       return ScaleFac[0][iVar];
    }
 

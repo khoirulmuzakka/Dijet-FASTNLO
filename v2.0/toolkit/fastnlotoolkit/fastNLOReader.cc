@@ -603,6 +603,8 @@ void fastNLOReader::OrderCoefficients() {
    }
    if (Coeff_NNLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NNLO);
+   } else {
+      info["OrderCoefficients"]<<"Could not find any NNLO calculation."<<endl;
    }
 
    //int iprint = 2;

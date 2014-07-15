@@ -23,7 +23,7 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
-   virtual void NormalizeCoefficients();					//!< Set number of events to 1 and normalize coefficients accordingly.	
+   virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
 
    int GetIRef() const {return IRef;}
    double GetNevt() const { return Nevt; }
@@ -31,7 +31,7 @@ public:
       if (Nevt > 0) return Nevt;
       else {cout<<"Todo. Preparation for v2.3."<<endl; return Nevt;}
    }
-   void SetNevt(double nevt) { Nevt = nevt;}					//!< Set number of events
+   void SetNevt(double nevt) { Nevt = nevt;}                                    //!< Set number of events
    int GetNxmax(int Obsbin) const ;
    int GetXIndex(int Obsbin,int x1bin,int x2bin =0) const ;
    int GetNSubproc() const { return NSubproc;}
@@ -76,7 +76,7 @@ protected:
    int IPDFdef1;
    int IPDFdef2;
    int IPDFdef3;
-   vector<vector<pair<int,int> > > fPDFCoeff;							//! fPDFCoeff[iSubProc][iPartonPair][pair]
+   vector<vector<pair<int,int> > > fPDFCoeff;                                                   //! fPDFCoeff[iSubProc][iPartonPair][pair]
    // Missing: linear PDF combinations for IPDFdef1=0
    vector < double > Hxlim1;
    v2d XNode1;

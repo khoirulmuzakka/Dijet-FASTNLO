@@ -843,37 +843,54 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
          for (unsigned int i=0; i<c->CtrbDescript.size(); i++) {
             printf(" #   %s\n",c->CtrbDescript[i].data());
          }
-         // TODO: KR How to print out event number here ?
-         //         printf(" #   No. of events: %16llu\n",0);
-         printf(" #   No. of events: %i\n",0);
+         if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+            fastNLOCoeffAddBase* cA = (fastNLOCoeffAddBase*)c;
+            double nevt = cA->GetNevt();
+            printf(" #   No. of events: %#17.0F\n",nevt);
+         }
          printf(" #   provided by:\n");
          for (unsigned int i=0; i<c->CodeDescript.size(); i++) {
             printf(" #   %s\n",c->CodeDescript[i].data());
          }
 
          if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) {
-            fastNLOCoeffAddFix* cF = (fastNLOCoeffAddFix*)c;
-            // TODO: NScaleDim is NOT always 1. It is zero for NP and data for example and
-            //       it is an entry of the v2 table format and hence should be accessible.
-            //       Even if only to throw an error and exit.
-            int NScaleDim = 1;
+            fastNLOCoeffAddFix* cFix = (fastNLOCoeffAddFix*)c;
+            int NScaleDim = cFix->GetNScaleDim();
             printf(" #   Scale dimensions: %1i\n",NScaleDim);
             for (int i=0; i<NScaleDim; i++) {
-               // TODO: Again: The v2 table format allows n lines of description ...
-               unsigned int NScaleDescriptSize = 1;
-               for (unsigned int j=0; j<NScaleDescriptSize; j++) { //Scale description always consists of one line. NO
-                  printf(" #     Scale description for dimension %1i:          %s\n",i+1,cF->GetScaleDescription(i).c_str());
-                  printf(" #     Number of scale variations for dimension %1i: %1i\n",NScaleDim,cF->GetNScalevar());
-                  printf(" #     Available scale settings for dimension %1i:\n",NScaleDim);
-                  for (int k=0; k<cF->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
-                     printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cF->GetScaleFactor(k));
-                  }
-                  printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cF->GetNScaleNode());
+               for (unsigned int j=0; j<cFix->ScaleDescript[i].size(); j++) {
+                  printf(" #     Scale description for dimension %1i:          %s\n",i+1,cFix->ScaleDescript[i][j].data());
                }
+               printf(" #     Number of scale variations for dimension %1i: %1i\n",NScaleDim,cFix->GetNScalevar());
+               printf(" #     Available scale settings for dimension %1i:\n",NScaleDim);
+               for (int k=0; k<cFix->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
+                  printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cFix->GetScaleFactor(k));
+               }
+               printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cFix->GetNScaleNode());
+            }
+         } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) ) {
+            fastNLOCoeffAddFlex* cFlex = (fastNLOCoeffAddFlex*)c;
+            int NScaleDim = cFlex->GetNScaleDim();
+            if (! (NScaleDim == 1)) {
+               error["PrintFastNLOTableConstants"] << "Flex-scale tables must have scale dimensions of one, aborting! "
+                                                   << "NScaleDim = " << NScaleDim <<endl;
+               exit(1);
+            }
+            //            printf(" #   Scale dimensions: %1i\n",NScaleDim);
+            for (int i=0; i<NScaleDim; i++) {
+               //               unsigned int NFlexScales = cFlex->ScaleDescript[i].size();
+               //               for (unsigned int j=0; j<NFlexScales; j++) {
+               //                  printf(" #   Scale description for flexible scale %1i:          %s\n",j+1,cFlex->ScaleDescript[i][j].data());
+               //               }
+               printf(" #   Scale description for flexible scale %1i:          %s\n",1,cFlex->ScaleDescript[i][0].data());
+               printf(" #     Number of scale nodes in first observable bin:      %2i\n",cFlex->GetNScaleNode1(0));
+               printf(" #     Number of scale nodes in last  observable bin:      %2i\n",cFlex->GetNScaleNode1(NObsBin-1));
+               printf(" #   Scale description for flexible scale %1i:          %s\n",2,cFlex->ScaleDescript[i][1].data());
+               printf(" #     Number of scale nodes in first observable bin:      %2i\n",cFlex->GetNScaleNode2(0));
+               printf(" #     Number of scale nodes in last  observable bin:      %2i\n",cFlex->GetNScaleNode2(NObsBin-1));
             }
          } else {
-            int NScaleDim = 0;
-            printf(" #   Scale dimensions: %1i\n",NScaleDim);
+            // Anything else to write for multiplicative or data contributions?
          }
       } else {
          fCoeff[j]->Print();

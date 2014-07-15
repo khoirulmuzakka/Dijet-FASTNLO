@@ -24,7 +24,7 @@ public:
    virtual void Write(ostream& table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddBase& other);
-   virtual void Clear();							//!< Clear all coefficients and event counters
+   virtual void Clear();                                                        //!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
    virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
 
@@ -37,26 +37,26 @@ protected:
 
    fastNLOCoeffAddFlex();
    void ReadCoeffAddFlex(istream& table);
-   
+
    int fILOord;   // obtained from Scenario
-   
+
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
    v5d SigmaTildeMuIndep; // units are (p)barn * Nevt / BinSize
-   v5d SigmaTildeMuFDep; 
-   v5d SigmaTildeMuRDep; 
-   v5d SigmaTildeMuRRDep; 
-   v5d SigmaTildeMuFFDep; 
-   v5d SigmaTildeMuRFDep; 
+   v5d SigmaTildeMuFDep;
+   v5d SigmaTildeMuRDep;
+   v5d SigmaTildeMuRRDep;
+   v5d SigmaTildeMuFFDep;
+   v5d SigmaTildeMuRFDep;
    // SigmaRef [NObsBins] [nsubproc]
    v2d SigmaRefMixed;  // units are (p)barn * Nevt / BinSize
-   v2d SigmaRef_s1; 
-   v2d SigmaRef_s2; 
+   v2d SigmaRef_s1;
+   v2d SigmaRef_s2;
    //int NscalenodeScale1;
    //int NscalenodeScale2;
-   // ScaleNodeXY [ObsBin] [NscalenodeScaleX]  
+   // ScaleNodeXY [ObsBin] [NscalenodeScaleX]
    v2d ScaleNode1;
    v2d ScaleNode2;
-   
+
 public:
    v3d AlphasTwoPi;
    v5d PdfLcMuVar;

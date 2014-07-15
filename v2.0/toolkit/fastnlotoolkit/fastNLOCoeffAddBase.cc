@@ -10,16 +10,23 @@ using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
-   //   if(!(!(IDataFlag==1) && !(IAddMultFlag==1))){
-   if ( c->GetIDataFlag()==0 && c->GetIAddMultFlag()==0 ) return true;
-   else if ( c->GetIDataFlag()==1 || c->GetIAddMultFlag()==1 ) {
-      if ( !quiet)say::error["fastNLOCoeffAddBase::CheckCoeffConstants"]
-         <<"This must be a table with multiplicative perturbative coefficients. IDataFlag="
-         <<c->GetIDataFlag()<<", IAddMultFlag="<<c->GetIAddMultFlag()
-         <<", but none is allowed to be 1."<<endl;
+   if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==0 ) {
+      // Additive contribution
+      return true;
+   } else if ( c->GetIAddMultFlag()==1 && c->GetIDataFlag()==0 ) {
+      // Multiplicative contribution
       return false;
+   } else if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==1 ) {
+      // Data contribution
+      return false;
+   } else {
+      // Unknown contribution
+      say::error["fastNLOCoeffAddBase::CheckCoeffConstants"]
+         << "Unknown contribution type, aborting! "
+         << "IAddMultFlag = " << c->GetIAddMultFlag()
+         << ", IDataFlag ="   << c->GetIDataFlag() <<endl;
+      exit(1);
    }
-   else return false;
 }
 
 
@@ -408,7 +415,6 @@ void fastNLOCoeffAddBase::Print() const {
    }
    printf(" B   NScaleDim                     %d\n",NScaleDim);
    for(int i=0;i<NScaleDim;i++){
-      //printf(" B    -  NscaleDescript[%d]         %d\n",i,NscaleDescript[i]);
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
          printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
       }
