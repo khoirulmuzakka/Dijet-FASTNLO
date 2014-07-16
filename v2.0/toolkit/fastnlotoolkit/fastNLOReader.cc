@@ -782,13 +782,24 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
    exit(1);
 #else
    if (useHoppet) {
-      info["UseHoppetScaleVariation"] << "Hoppet will be used to calculate scale variations." << std::endl;
+      if (GetIsFlexibleScaleTable()) {
+         info["UseHoppetScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can already choose all desired scale variations without Hoppet."<<endl;
+         fUseHoppet = false;
+         return;
+      }
+      fastNLOCoeffAddBase * c = (fastNLOCoeffAddBase*)B_LO();
+      if (c->GetIPDFdef1() == 2) {
+         error["UseHoppetScaleVariations"] << "Hoppet scale variations not yet implemented for DIS." << std::endl;
+         exit(1);
+      }
+
+      info["UseHoppetScaleVariations"] << "Hoppet will be used to calculate scale variations." << std::endl;
       fUseHoppet = true;
       HoppetInterface::InitHoppet(*this);
       FillPDFCache(1.);
    }
    else {
-      info["UseHoppetScaleVariation"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
+      info["UseHoppetScaleVariations"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
       fUseHoppet = false;
    }
 #endif
