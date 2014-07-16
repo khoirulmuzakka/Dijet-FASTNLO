@@ -1,13 +1,13 @@
 # -*-sh-*-
 # fastNLO_toolkit version 2.1.3pre:
 # =================================
-# This is a prerelease for testing, do not distribute!
+# This is a prerelease for testing!
 # Please contact the authors for any questions or problems.
 
 
 # Content:
 # --------
-# Generic C++ linkable library and code to create, read, and evaluate fastNLO v2 tables
+# Generic C++ linkable library and code to create, fill, read, and evaluate fastNLO v2 tables
 
 
 # Requirements:
@@ -65,7 +65,11 @@ make install
 #    or
 --with-qcdnum=/path/to/your/qcdnum/installation
 
-# 2. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
+# 2. There is work in progress to provide output in YODA format for comparisons to data
+#    using Rivet analyses and rivet-mkhtml
+--with-yoda
+
+# 3. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
 #    If you have PYTHON and SWIG installed, the PYTHON extension can be enabled via
 --enable-pyext
 
