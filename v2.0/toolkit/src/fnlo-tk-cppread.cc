@@ -33,7 +33,7 @@
 //#include "fastnlotk/fastNLOQCDNUMAS.h"
 // End --with-qcdnum
 // If compiled --with-hoppet support the following line(s) can be commented in
-//#include "fastnlotk/fastNLOHoppet.h"
+//#include "fastnlotk/fastNLOHoppetAs.h"
 // End --with-hoppet
 
 /// Function prototype for flexible-scale function
