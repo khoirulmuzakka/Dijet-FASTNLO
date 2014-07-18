@@ -15,26 +15,19 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOInterpolCatmullRom.h"
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOReader.h"
-
-#include "fastnlotk/fastNLOLHAPDF.h"
-
 #include "fastnlotk/Alphas.h"
 #include "fastnlotk/fastNLOAlphas.h"
 #include "fastnlotk/fastNLOCRunDec.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 //#include "fastnlotk/fastNLOUser.h"
 //#include "fastnlotk/fastNLODiffUser.h"
-// Optional:
-// If compiled --with-qcdnum support the following line(s) can be commented in
-//#include "fastnlotk/fastNLOQCDNUMAS.h"
-// End --with-qcdnum
-// If compiled --with-hoppet support the following line(s) can be commented in
-//#include "fastnlotk/fastNLOHoppetAs.h"
-// End --with-hoppet
+#include "fastnlotk/fastNLOQCDNUMAS.h"
+#include "fastnlotk/fastNLOHoppetAs.h"
 
 /// Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
@@ -593,15 +586,28 @@ int main(int argc, char** argv) {
       fnlo = new fastNLOLHAPDF(tablename);
    } else if (AsEvolCode == "RUNDEC") {
       fnlo = new fastNLOCRunDec(tablename);
-      // Optional:
-      // If compiled --with-qcdnum support the following line(s) can be commented in
-      //   } else if (AsEvolCode == "QCDNUM") {
-      //      fnlo = new fastNLOQCDNUMAS(tablename);
-      // End --with-qcdnum
-      // If compiled --with-hoppet support the following line(s) can be commented in
-      //   } else if (AsEvolCode == "HOPPET") {
-      //      fnlo = new fastNLOHoppetAs(tablename);
-      // End --with-hoppet
+   } else if (AsEvolCode == "QCDNUM") {
+      // ONLY if compiled --with-qcdnum support!
+      cout << "QCDNUM = " << FNLO_QCDNUM << endl;
+      if ( FNLO_QCDNUM[0] != '\0' ) {
+         fnlo = new fastNLOQCDNUMAS(tablename);
+      } else {
+         printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+         printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
+         printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
+         exit(1);
+      }
+   } else if (AsEvolCode == "HOPPET") {
+      // ONLY if compiled --with-hoppet support!
+      cout << "HOPPET = " << FNLO_HOPPET << endl;
+      if ( FNLO_HOPPET[0] != '\0' ) {
+         fnlo = new fastNLOHoppetAs(tablename);
+      } else {
+         printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+         printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
+         printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
+         exit(1);
+      }
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
       printf("           If you compiled with optional QCDNUM or HOPPET support, please\n");

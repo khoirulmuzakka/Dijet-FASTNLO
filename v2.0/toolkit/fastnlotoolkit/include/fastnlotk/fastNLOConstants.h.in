@@ -18,6 +18,10 @@
 #define FNLO_YEARS      "@YEARS@"
 #endif
 
+// KR: Define variables for optional parts
+#define FNLO_HOPPET     "@HOPPET@"
+#define FNLO_QCDNUM     "@QCDNUM@"
+
 // KR: Replace by precompiler defines
 const double TWOPI = 6.28318530717958647692528;
 const double TWOPISQR = 39.47841760435743447533796;
