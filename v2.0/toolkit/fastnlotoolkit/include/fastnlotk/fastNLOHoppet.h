@@ -66,9 +66,9 @@ class fastNLOHoppet : public fastNLOLHAPDF {
    protected:
 
       // inherited functions
-      double EvolveAlphas(double Q) const ;
+      virtual double EvolveAlphas(double Q) const ;
       //bool InitPDF();
-      vector<double> GetXFX(double xp, double muf) const ;
+      virtual vector<double> GetXFX(double xp, double muf) const ;
       // ---- Alphas vars ---- //
 };
 

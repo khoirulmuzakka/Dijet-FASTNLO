@@ -127,8 +127,8 @@ void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
 }
 
 double fastNLOHoppet::EvolveAlphas(double Q ) const {
-   //return HoppetInterface::EvolveAlphas(Q);
-   return LHAPDF::alphasPDF(Q);
+   return HoppetInterface::EvolveAlphas(Q);
+   //return LHAPDF::alphasPDF(Q);
 }
 
 vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {

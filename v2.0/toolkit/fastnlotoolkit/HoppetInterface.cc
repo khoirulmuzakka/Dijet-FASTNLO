@@ -28,7 +28,7 @@ void HoppetInterface::InitHoppet(fastNLOReader& lfnlo) {
    else
       hoppetsetpolemassvfn_(QMass[3], QMass[4], QMass[5]);
    // Carry out evolution
-   //hoppetEvolve(fAlphasMz, fMz, fnLoop, 1.0, &LHAsub, 2.00001);
+   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &LHAsub, 2.00001);
    // Fills the HOPPET PDF represenation using PDF provided by LHAPDF.
    hoppetAssign(&LHAsub);
 }
