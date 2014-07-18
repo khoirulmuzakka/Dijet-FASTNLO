@@ -38,19 +38,27 @@
 
 using namespace std;
 
-
-
+//______________________________________________________________________________
+//
+//
 fastNLOHoppetAs::fastNLOHoppetAs(string name) : fastNLOHoppet(name) {
-    //Set some meaningful values
-    SetPDGValues();
+   //Set some meaningful values
+   SetPDGValues();
+   // KR: Note: LHAPDF values cannot be taken here, since the class instantiation may
+   //     happen before defining the PDF set!
+   //   SetLHAPDFValues();
 };
-fastNLOHoppetAs::fastNLOHoppetAs(string name, string LHAPDFFile, int PDFSet = 0) :
-    fastNLOHoppet(name,LHAPDFFile,PDFSet)
-    {
-        //Set some meaningful values
-        SetPDGValues();
-    };
 
+fastNLOHoppetAs::fastNLOHoppetAs(string name, string LHAPDFFile, int PDFSet = 0) : fastNLOHoppet(name,LHAPDFFile,PDFSet) {
+   //Set some meaningful initial values
+   SetPDGValues();
+   // KR: For consistency with usage above.
+   //   SetLHAPDFValues();
+};
+
+
+
+// Evolution
 vector<double> fastNLOHoppetAs::GetXFX(double xp, double muf) const {
    //
    //  GetXFX is used to get the parton array from the

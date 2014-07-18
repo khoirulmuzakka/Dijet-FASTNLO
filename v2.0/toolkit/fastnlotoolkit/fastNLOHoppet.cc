@@ -38,36 +38,70 @@
 
 using namespace std;
 
-
-
+//______________________________________________________________________________
+//
+//
 fastNLOHoppet::fastNLOHoppet(string name) : fastNLOLHAPDF(name) {
-    //Set some meaningful values
-    SetLHAPDFValues();
+   //Set some meaningful initial values
+   SetPDGValues();
+   // KR: Note: LHAPDF values cannot be taken here, since the class instantiation may
+   //     happen before defining the PDF set!
+   //   SetLHAPDFValues();
 };
-fastNLOHoppet::fastNLOHoppet(string name, string LHAPDFFile, int PDFSet = 0) :
-    fastNLOLHAPDF(name,LHAPDFFile,PDFSet)
-    {
-        //Set some meaningful values
-        SetLHAPDFValues();
-    };
+
+fastNLOHoppet::fastNLOHoppet(string name, string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet) {
+   //Set some meaningful initial values
+   SetPDGValues();
+   // KR: For consistency with usage above.
+   //   SetLHAPDFValues();
+};
+
+
+
 // Getters
-double fastNLOHoppet::GetMz() const {
-    return HoppetInterface::fMz;
-}
 double fastNLOHoppet::GetQMass(int pdgid) const {
-    return HoppetInterface::QMass[pdgid];
+   return HoppetInterface::QMass[pdgid];
+}
+double fastNLOHoppet::GetMz() const {
+   return HoppetInterface::fMz;
 }
 int fastNLOHoppet::GetNFlavor() const {
-    return HoppetInterface::fnFlavor;
+   return HoppetInterface::fnFlavor;
 }
 int fastNLOHoppet::GetNLoop() const {
-    return HoppetInterface::fnLoop;
+   return HoppetInterface::fnLoop;
 }
 double fastNLOHoppet::GetAlphasMz() const {
-    return HoppetInterface::fAlphasMz;
+   return HoppetInterface::fAlphasMz;
 };
 
 
+
+// Setters
+void fastNLOHoppet::SetQMass(int pdgid, double qmass) {
+   HoppetInterface::QMass[pdgid] = qmass;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetMz(double Mz) {
+   HoppetInterface::fMz = Mz;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetNFlavor(int nflavor) {
+   HoppetInterface::fnFlavor = nflavor;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetNLoop(int  nloop) {
+   HoppetInterface::fnLoop = nloop;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
+   HoppetInterface::fAlphasMz    = AlphasMz;
+   HoppetInterface::InitHoppet(*this);
+}
+
+
+
+// Combined Setters
 void fastNLOHoppet::SetPDGValues() {
    // Initialize with PDG values
    HoppetInterface::QMass[0]  = PDG_MD;
@@ -77,58 +111,41 @@ void fastNLOHoppet::SetPDGValues() {
    HoppetInterface::QMass[4]  = PDG_MB;
    HoppetInterface::QMass[5]  = PDG_MT;
    HoppetInterface::fMz       = PDG_MZ;
-   HoppetInterface::fAlphasMz = PDG_ASMZ;
    //Variable flavor number scheme
-   HoppetInterface::fnFlavor = 5;
+   HoppetInterface::fnFlavor = 0;
    //2-loop alpha_s evolution
    HoppetInterface::fnLoop = 2;
+   HoppetInterface::fAlphasMz = PDG_ASMZ;
    HoppetInterface::InitHoppet(*this);
 }
 
 void fastNLOHoppet::SetLHAPDFValues() {
    //Be sure LHAPDF is initialized when reading the properties
    if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
-      InitPDF();
+      if ( ! InitPDF() ) {
+         error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
+         exit(1);
+      } else {
+         FillPDFCache();
+      }
+   }
+
+   for (int i = 0; i < 6; i++) {
+      HoppetInterface::QMass[i] = LHAPDF::getQMass(i+1);
    }
    //How to read LHAPDF Mz???
    HoppetInterface::fMz = PDG_MZ;
-   HoppetInterface::fAlphasMz = LHAPDF::alphasPDF(HoppetInterface::fMz);
-   HoppetInterface::fnLoop = LHAPDF::getOrderAlphaS();
    HoppetInterface::fnFlavor = LHAPDF::getNf();
-   for (int i = 0; i < 6; i++)
-      HoppetInterface::QMass[i] = LHAPDF::getQMass(i+1);
+   HoppetInterface::fnLoop = LHAPDF::getOrderAlphaS();
+   HoppetInterface::fAlphasMz = LHAPDF::alphasPDF(HoppetInterface::fMz);
    HoppetInterface::InitHoppet(*this);
 }
 
-void fastNLOHoppet::SetMz(double Mz) {
-   HoppetInterface::fMz = Mz;
-   HoppetInterface::InitHoppet(*this);
-}
 
-void fastNLOHoppet::SetNFlavor(int nflavor) {
-   HoppetInterface::fnFlavor = nflavor;
-   HoppetInterface::InitHoppet(*this);
-}
 
-void fastNLOHoppet::SetNLoop(int  nloop) {
-   HoppetInterface::fnLoop = nloop;
-   HoppetInterface::InitHoppet(*this);
-}
-
-void fastNLOHoppet::SetQMass(int pdgid, double qmass) {
-   HoppetInterface::QMass[pdgid] = qmass;
-   HoppetInterface::InitHoppet(*this);
-}
-
-void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
-
-   HoppetInterface::fAlphasMz    = AlphasMz;             // new alpha_s value
-   HoppetInterface::InitHoppet(*this);
-}
-
+// Evolution
 double fastNLOHoppet::EvolveAlphas(double Q ) const {
    return HoppetInterface::EvolveAlphas(Q);
-   //return LHAPDF::alphasPDF(Q);
 }
 
 vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {

@@ -36,25 +36,28 @@
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOQCDNUMAS.h"
 
-
 using namespace std;
-
 
 //______________________________________________________________________________
 //
 //
 fastNLOQCDNUMAS::fastNLOQCDNUMAS(string name) : fastNLOLHAPDF(name) {
-    SetPDGValues();
+   //Set some meaningful initial values
+   SetPDGValues();
 };
 fastNLOQCDNUMAS::fastNLOQCDNUMAS(string name, string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
-    SetPDGValues();
+   //Set some meaningful initial values
+   SetPDGValues();
 };
+
+
+
 // Getters
-double fastNLOQCDNUMAS::GetMz() const {
-    return fMz;
-}
 double fastNLOQCDNUMAS::GetQMass(int pdgid) const {
     return QMass[pdgid];
+}
+double fastNLOQCDNUMAS::GetMz() const {
+    return fMz;
 }
 int fastNLOQCDNUMAS::GetNFlavor(int nflavor) const {
     return nflavor;
@@ -66,32 +69,30 @@ double fastNLOQCDNUMAS::GetAlphasMz() const {
     return fAlphasMz;
 };
 
-void fastNLOQCDNUMAS::SetMz(double Mz) {
-   fMz = Mz;
-}
 
-void fastNLOQCDNUMAS::SetNFlavor(int  nflavor) {
-   fnFlavor = nflavor;
-}
 
-void fastNLOQCDNUMAS::SetNLoop(int  nloop) {
-   fnLoop = nloop;
-}
-
+// Setters
 void fastNLOQCDNUMAS::SetQMass(int pdgid, double qmass) {
    QMass[pdgid] = qmass;
 }
-
+void fastNLOQCDNUMAS::SetMz(double Mz) {
+   fMz = Mz;
+}
+void fastNLOQCDNUMAS::SetNFlavor(int  nflavor) {
+   fnFlavor = nflavor;
+}
+void fastNLOQCDNUMAS::SetNLoop(int  nloop) {
+   fnLoop = nloop;
+}
 void fastNLOQCDNUMAS::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
    debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-   //
-   //  Set the alpha_s value at M_Z
-   //
-   fAlphasMz    = AlphasMz;             // new alpha_s value
+   fAlphasMz    = AlphasMz;
    if (ReCalcCrossSection) CalcCrossSection();
-
 }
 
+
+
+// Combined Setters
 void fastNLOQCDNUMAS::SetPDGValues() {
    // Initialize with PDG values
    QMass[0]  = PDG_MD;
@@ -101,21 +102,36 @@ void fastNLOQCDNUMAS::SetPDGValues() {
    QMass[4]  = PDG_MB;
    QMass[5]  = PDG_MT;
    fMz       = PDG_MZ;
-   fAlphasMz = PDG_ASMZ;
    //Variable flavor number scheme
    fnFlavor = 0;
    //2-loop alpha_s evolution
    fnLoop = 2;
+   fAlphasMz = PDG_ASMZ;
 }
 
 void fastNLOQCDNUMAS::SetLHAPDFValues() {
-   FillPDFCache();
-   fAlphasMz = LHAPDF::alphasPDF(fMz);
-   fnLoop = LHAPDF::getOrderAlphaS() + 1;
-   for (int i = 0; i < 6; i++)
+   //Be sure LHAPDF is initialized when reading the properties
+   if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
+      if ( ! InitPDF() ) {
+         error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
+         exit(1);
+      } else {
+         FillPDFCache();
+      }
+   }
+   for (int i = 0; i < 6; i++) {
       QMass[i] = LHAPDF::getQMass(i+1);
+   }
+   //How to read LHAPDF Mz???
+   fMz = PDG_MZ;
+   fnFlavor = LHAPDF::getNf();
+   fnLoop = LHAPDF::getOrderAlphaS() + 1;
+   fAlphasMz = LHAPDF::alphasPDF(fMz);
 }
 
+
+
+// Evolution
 void fastNLOQCDNUMAS::InitEvolveAlphas() {
    //Ensure reasonable values are set
    //TODO Really neccessary?
@@ -123,7 +139,6 @@ void fastNLOQCDNUMAS::InitEvolveAlphas() {
    int len_filename = strlen(filename);
    int lun = 6;
    qcinit_(&lun, filename, len_filename);
-
 
    //LHAPDF LO=0 while QCDNUM LO=1
    int iord = fnLoop;
@@ -155,11 +170,8 @@ void fastNLOQCDNUMAS::InitEvolveAlphas() {
    //When fNFlavor = 0 VFNS if >0 then FFNS
    //iqc,b,t are neglected if fnflavor =0
    setcbt_(&fnFlavor, &iqc, &iqb, &iqt);
-
 }
 
-
-//______________________________________________________________________________
 double fastNLOQCDNUMAS::EvolveAlphas(double Q) const {
    //
    // Implementation of Alpha_s evolution as function of Mu_r only.
@@ -173,12 +185,9 @@ double fastNLOQCDNUMAS::EvolveAlphas(double Q) const {
    if (ierr > 0)
       error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
-
 }
 
 void fastNLOQCDNUMAS::CalcCrossSection() {
    InitEvolveAlphas();
    fastNLOLHAPDF::CalcCrossSection();
 }
-
-//______________________________________________________________________________

@@ -95,7 +95,7 @@ bool fastNLOLHAPDF::InitPDF() {
    // we always reinitialized the set PDF-set.
 
    if (fLHAPDFFilename == "") {
-      error["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
+      warn["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
    }
 
