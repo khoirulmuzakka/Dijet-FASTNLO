@@ -9,9 +9,10 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
+EXTRA_DIST = fastnlo.i
+
 if ENABLE_PYEXT
 
-EXTRA_DIST = fastnlo.i
 fastnlo_wrap.cc fastnlo.py: fastnlo.i
 	swig -c++ -python -I${srcdir}/../fastnlotoolkit/include/fastnlotk -I${top_builddir}/fastnlotoolkit/include/fastnlotk -I${top_srcdir}/fastnlotoolkit/include/fastnlotk -o fastnlo_wrap.cc $<
 
