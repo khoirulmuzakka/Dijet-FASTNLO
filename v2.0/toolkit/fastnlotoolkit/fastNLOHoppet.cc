@@ -142,6 +142,11 @@ void fastNLOHoppet::SetLHAPDFValues() {
 }
 
 
+bool fastNLOHoppet::InitPDF() {
+   bool init = fastNLOLHAPDF::InitPDF();
+   HoppetInterface::InitHoppet(*this);
+   return init;
+}
 
 // Evolution
 double fastNLOHoppet::EvolveAlphas(double Q ) const {

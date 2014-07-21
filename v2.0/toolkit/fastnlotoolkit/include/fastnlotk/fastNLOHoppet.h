@@ -54,6 +54,7 @@ class fastNLOHoppet : public fastNLOLHAPDF {
       void SetAlphasMz(double AlphasMz);
       void SetLHAPDFValues();
       void SetPDGValues();
+      bool InitPDF();
       // Getters
       double GetMz() const;
       double GetQMass(int pdgid) const;

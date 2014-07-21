@@ -59,7 +59,7 @@ public:
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
-   bool InitPDF();
+   virtual bool InitPDF();
    vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //

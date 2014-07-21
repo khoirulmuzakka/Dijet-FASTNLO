@@ -11,7 +11,7 @@ bool HoppetInterface::IsInitialized = false;
 fastNLOReader *HoppetInterface::fnlo = NULL;
 double HoppetInterface::fAlphasMz = PDG_ASMZ;
 double HoppetInterface::fMz = PDG_MZ;
-int HoppetInterface::fnFlavor = 5;
+int HoppetInterface::fnFlavor = -1;
 int HoppetInterface::fnLoop = 1;
 double HoppetInterface::QMass[6] = {PDG_MD, PDG_MU, PDG_MS, PDG_MC, PDG_MB, PDG_MT};
 
@@ -28,9 +28,9 @@ void HoppetInterface::InitHoppet(fastNLOReader& lfnlo) {
    else
       hoppetsetpolemassvfn_(QMass[3], QMass[4], QMass[5]);
    // Carry out evolution
-   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &LHAsub, 2.00001);
+   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &evolvepdf_, 2.00001);
    // Fills the HOPPET PDF represenation using PDF provided by LHAPDF.
-   hoppetAssign(&LHAsub);
+   //hoppetAssign(&evolvepdf_);
 }
 
 void HoppetInterface::StartHoppet(){
