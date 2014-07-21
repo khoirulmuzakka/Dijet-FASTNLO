@@ -776,33 +776,34 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
 
 
 void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
-#ifndef FNLO_HOPPET
-   error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
-                                     << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
-   exit(1);
-#else
-   if (useHoppet) {
-      if (GetIsFlexibleScaleTable()) {
-         info["UseHoppetScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can already choose all desired scale variations without Hoppet."<<endl;
-         fUseHoppet = false;
-         return;
-      }
-      fastNLOCoeffAddBase * c = (fastNLOCoeffAddBase*)B_LO();
-      if (c->GetIPDFdef1() == 2) {
-         error["UseHoppetScaleVariations"] << "Hoppet scale variations not yet implemented for DIS." << std::endl;
-         exit(1);
-      }
 
-      info["UseHoppetScaleVariations"] << "Hoppet will be used to calculate scale variations." << std::endl;
-      fUseHoppet = true;
-      HoppetInterface::InitHoppet(*this);
-      FillPDFCache(1.);
+   if ( FNLO_HOPPET[0] == '\0' ) {
+      error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
+         << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
+      exit(1);
+   } else {
+      if (useHoppet) {
+         if (GetIsFlexibleScaleTable()) {
+            info["UseHoppetScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can already choose all desired scale variations without Hoppet."<<endl;
+            fUseHoppet = false;
+            return;
+         }
+         fastNLOCoeffAddBase * c = (fastNLOCoeffAddBase*)B_LO();
+         if (c->GetIPDFdef1() == 2) {
+            error["UseHoppetScaleVariations"] << "Hoppet scale variations not yet implemented for DIS." << std::endl;
+            exit(1);
+         }
+
+         info["UseHoppetScaleVariations"] << "Hoppet will be used to calculate scale variations." << std::endl;
+         fUseHoppet = true;
+         HoppetInterface::InitHoppet(*this);
+         FillPDFCache(1.);
+      }
+      else {
+         info["UseHoppetScaleVariations"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
+         fUseHoppet = false;
+      }
    }
-   else {
-      info["UseHoppetScaleVariations"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
-      fUseHoppet = false;
-   }
-#endif
 }
 
 //______________________________________________________________________________
@@ -1591,12 +1592,12 @@ void fastNLOReader::FillPDFCache(double chksum) {
 
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
-      #ifdef FNLO_HOPPET
-      if (fUseHoppet){
-         //Also refill Hoppet cache and assign new PDF
-         HoppetInterface::InitHoppet(*this);
+      if ( FNLO_HOPPET[0] != '\0' ) {
+         if (fUseHoppet){
+            //Also refill Hoppet cache and assign new PDF
+            HoppetInterface::InitHoppet(*this);
+         }
       }
-      #endif
 
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
@@ -1645,10 +1646,11 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx = GetXFX(xp,muf);
-               #ifdef FNLO_HOPPET
-               if (fUseHoppet)
-                  xfxspl        = HoppetInterface::GetSpl(xp,muf);
-               #endif
+
+               if ( FNLO_HOPPET[0] != '\0' ) {
+                  if (fUseHoppet)
+                     xfxspl        = HoppetInterface::GetSpl(xp,muf);
+               }
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx);
                if (fUseHoppet){
                   c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfxspl);
@@ -1758,10 +1760,10 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
-               #ifdef FNLO_HOPPET
-               if (fUseHoppet)
-                  xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
-               #endif
+               if ( FNLO_HOPPET[0] != '\0' ) {
+                  if (fUseHoppet)
+                     xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
+               }
             }
             int x1bin = 0;
             int x2bin = 0;
@@ -1803,20 +1805,20 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                xfx1[k]        = GetXFX(xp,muf);
-               #ifdef FNLO_HOPPET
-               if (fUseHoppet)
-                  xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
-               #endif
+               if ( FNLO_HOPPET[0] != '\0' ) {
+                  if (fUseHoppet)
+                     xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
+               }
 
             }
             // determine all pdfs of hadron2
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
                xfx2[k]       = GetXFX(xp,muf);
-               #ifdef FNLO_HOPPET
-               if (fUseHoppet)
-                  xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
-               #endif
+               if ( FNLO_HOPPET[0] != '\0' ) {
+                  if (fUseHoppet)
+                     xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
+               }
 
             }
             for (int k=0; k<nxmax; k++) {
