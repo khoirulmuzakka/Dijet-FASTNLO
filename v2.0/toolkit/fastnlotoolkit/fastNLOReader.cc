@@ -443,7 +443,7 @@
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
-//#ifdef HAVEHOPPET
+//#ifdef FNLO_HOPPET
 #include "fastnlotk/HoppetInterface.h"
 //#endif
 
@@ -776,7 +776,7 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
 
 
 void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
-#ifndef HAVEHOPPET
+#ifndef FNLO_HOPPET
    error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
                                      << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
    exit(1);
@@ -1591,7 +1591,7 @@ void fastNLOReader::FillPDFCache(double chksum) {
 
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
-      #ifdef HAVEHOPPET
+      #ifdef FNLO_HOPPET
       if (fUseHoppet){
          //Also refill Hoppet cache and assign new PDF
          HoppetInterface::InitHoppet(*this);
@@ -1645,7 +1645,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx = GetXFX(xp,muf);
-               #ifdef HAVEHOPPET
+               #ifdef FNLO_HOPPET
                if (fUseHoppet)
                   xfxspl        = HoppetInterface::GetSpl(xp,muf);
                #endif
@@ -1758,7 +1758,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scaleVar,j);
                xfx[k]        = GetXFX(xp,muf);
-               #ifdef HAVEHOPPET
+               #ifdef FNLO_HOPPET
                if (fUseHoppet)
                   xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
                #endif
@@ -1803,7 +1803,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                xfx1[k]        = GetXFX(xp,muf);
-               #ifdef HAVEHOPPET
+               #ifdef FNLO_HOPPET
                if (fUseHoppet)
                   xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
                #endif
@@ -1813,7 +1813,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
                xfx2[k]       = GetXFX(xp,muf);
-               #ifdef HAVEHOPPET
+               #ifdef FNLO_HOPPET
                if (fUseHoppet)
                   xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
                #endif

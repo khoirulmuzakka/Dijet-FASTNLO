@@ -600,14 +600,14 @@ int main(int argc, char** argv) {
    } else if (AsEvolCode == "HOPPET") {
       // ONLY if compiled --with-hoppet support!
       cout << "HOPPET = " << FNLO_HOPPET << endl;
-      if ( FNLO_HOPPET[0] != '\0' ) {
-         fnlo = new fastNLOHoppetAs(tablename);
-      } else {
-         printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
-         printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
-         printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
-         exit(1);
-      }
+      //if ( FNLO_HOPPET[0] != '\0' ) {
+      fnlo = new fastNLOHoppetAs(tablename);
+      //} else {
+      //   printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+      //   printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
+      //   printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
+      //   exit(1);
+      //}
    } else {
       printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
       printf("           If you compiled with optional QCDNUM or HOPPET support, please\n");
