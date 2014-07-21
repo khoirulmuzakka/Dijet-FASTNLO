@@ -18,7 +18,10 @@
 #define FNLO_YEARS      "@YEARS@"
 #endif
 
-// KR: Define variables for optional parts
+// Define variables fixed by precompiler for optional parts.
+// Compilers like gcc usually drop unreachable statements
+// anyway such that unnecessary if-else-endif calls or
+// "unresolved symbol" errors are avoided.
 #define FNLO_HOPPET     "@HOPPET@"
 #define FNLO_QCDNUM     "@QCDNUM@"
 

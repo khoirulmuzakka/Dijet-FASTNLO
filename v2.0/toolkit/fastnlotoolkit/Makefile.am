@@ -37,14 +37,17 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 AM_CPPFLAGS =
 # Individual targets
 libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
+#
+# Use precompiler-defined char constant FNLO_SOMETHING in fastNLOConstants.h.in
+# instead of precompiler idfdef's via -DHAVESOMETHING in the code
 # With HOPPET
 if HAVE_HOPPET
-   libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
+#   libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
    libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
 endif
 # With QCDNUM
 if HAVE_QCDNUM
-   libfastnlotoolkit_la_CPPFLAGS += -DHAVEQCDNUM
+#   libfastnlotoolkit_la_CPPFLAGS += -DHAVEQCDNUM
 endif
 
 #

@@ -438,14 +438,15 @@
 #include <cfloat>
 #include <cmath>
 #include <string>
-#include "fastnlotk/fastNLOTools.h"
+#include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOReader.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
-//#ifdef FNLO_HOPPET
+#ifdef FNLO_HOPPET
 #include "fastnlotk/HoppetInterface.h"
-//#endif
+#endif
 
 using namespace std;
 using namespace fastNLO;
@@ -2283,8 +2284,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 //______________________________________________________________________________
 void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
    if (!GetIsFlexibleScaleTable()) {
-      info<<"fastNLO. Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_LO()->GetScaleDescription()<<endl;
-      info<<"fastNLO. Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<B_LO()->GetScaleDescription()<<endl;
+      info["PrintScaleSettings"]<<"Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_LO()->GetScaleDescription()<<endl;
+      info["PrintScaleSettings"]<<"Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<B_LO()->GetScaleDescription()<<endl;
    } else {
       // ---- prepare printout ---- //
       static const string sname[2] = {"Renormalization","Factorization"};
@@ -2331,7 +2332,7 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
          error<<"unknown scale choice.\n";
 
       }
-      info<<"fastNLO. "<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
+      info["PrintScaleSettings"]<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
           <<sfac<<"^2 * "<<fname<<endl;
    }
 }

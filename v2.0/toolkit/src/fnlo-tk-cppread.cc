@@ -71,7 +71,6 @@ int main(int argc, char** argv) {
          man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
          man<<"   Alternatives are: LHAPDF, RUNDEC, and"<<endl;
          man<<"                     QCDNUM, or HOPPET, IF compiled with these options!"<<endl;
-         man<<"                     In the latter case please comment in the optional lines in main.cc!"<<endl;
          man<<""<<endl;
          man<<"Use \"_\" to skip changing a default argument."<<endl;
          man<<""<<endl;
@@ -588,7 +587,7 @@ int main(int argc, char** argv) {
       fnlo = new fastNLOCRunDec(tablename);
    } else if (AsEvolCode == "QCDNUM") {
       // ONLY if compiled --with-qcdnum support!
-      cout << "QCDNUM = " << FNLO_QCDNUM << endl;
+      debug["fnlo-read"] << "The FNLO_QCDNUM precompiler constant is: " << FNLO_QCDNUM << endl;
       if ( FNLO_QCDNUM[0] != '\0' ) {
          fnlo = new fastNLOQCDNUMAS(tablename);
       } else {
@@ -599,7 +598,7 @@ int main(int argc, char** argv) {
       }
    } else if (AsEvolCode == "HOPPET") {
       // ONLY if compiled --with-hoppet support!
-      cout << "HOPPET = " << FNLO_HOPPET << endl;
+      debug["fnlo-read"] << "The FNLO_HOPPET precompiler constant is: " << FNLO_HOPPET << endl;
       if ( FNLO_HOPPET[0] != '\0' ) {
          fnlo = new fastNLOHoppetAs(tablename);
       } else {
