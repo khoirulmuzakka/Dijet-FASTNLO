@@ -23,10 +23,9 @@ void HoppetInterface::InitHoppet(fastNLOReader& lfnlo) {
    }
 
    //If fnFlavor smaller than 1 use VFNS (NNPDF reports nf=-1)
-   if (fnFlavor >= 1)
-      hoppetsetffn_(fnFlavor);
-   else
-      hoppetsetpolemassvfn_(QMass[3], QMass[4], QMass[5]);
+   hoppetsetpolemassvfn_(QMass[3], QMass[4], 10000000000.0);
+   say::info["InitHoppet"] << "Using variable-flavour number scheme with the the given masses."
+                          << " M_Top is set to 10000000000.0 GeV, so effectively nf_max = 5." <<  std::endl;
    // Carry out evolution
    hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &evolvepdf_, 2.00001);
    // Fills the HOPPET PDF represenation using PDF provided by LHAPDF.
