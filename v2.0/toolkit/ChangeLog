@@ -1,7 +1,74 @@
+2014-07-24  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1871
+            ================================================================================
+
+2014-07-24  rabbertz
+
+    * fastNLOInterpolBase.h: Remove meaningless type qualifier on return type
+      (found by icc compiler)
+
+2014-07-24  sieber
+
+    * fastNLOHoppet.cc, fastNLOHoppet.h: remove warning
+
+2014-07-24  rabbertz
+
+    * fastNLOReader.cc, read_steer.cc: Fix two warnings from clang compiler
+
+2014-07-22  sieber
+
+    * HoppetInterface.cc: Always use nfmax=5 + VFNS for Hoppet as default choice
+
+2014-07-21  sieber
+
+    * HoppetInterface.cc, HoppetInterface.h, fastNLOHoppet.cc, fastNLOHoppet.h,
+      fastNLOLHAPDF.h: Modified Hoppet so it is always reinitialized when
+      InitPDF() is calledNot fully happy yet with initialization of nf.
+
+2014-07-21  rabbertz
+
+    * Makefile.am, fastNLOConstants.h.in, fastNLOReader.cc, fnlo-tk-cppread.cc:
+      Some more changes to use FNLO_SOMETHING for the optional stuff
+
+2014-07-21  sieber
+
+    * fastNLOReader.cc: removed all preprocessor #ifdefs and changed it to the
+      way Klaus implemented it in thefastNLOConstants. This works because gcc
+      removes constant conditionals which cannot the reached.Therefore no symbol
+      lookup error is thrown.
+
+    * fnlo-tk-cppread.cc: accidentally committed commented code partaccidentally
+      committed commented code parts. Reverted.
+
+    * fastNLOReader.cc, fnlo-tk-cppread.cc: renamed HAVEHOPPET
+
+2014-07-18  rabbertz
+
+    * fastNLOConstants.h.in, fnlo-tk-cppread.cc: Found solution for tk-cppread
+      executable taking into account qcdnum and hoppet options
+
+    * fastNLOHoppet.cc, fastNLOHoppetAs.cc, fastNLOLHAPDF.cc,
+      fastNLOQCDNUMAS.cc: Removed initialization to LHAPDF values for HOPPET,
+      because PDF might not yet be defined; use PDG instead as for QCDNUM
+
+2014-07-18  sieber
+
+    * HoppetInterface.cc, fastNLOHoppet.cc, fastNLOHoppet.h, fastNLOHoppetAs.h:
+      made some function calls virtual. Instead of Hoppet As evolutionthe LHAPDF
+      evolution has been called.
+
+    * fnlo-tk-cppread.cc: fixed commented include
+
+2014-07-18  rabbertz
+
+    * Makefile.am: Always distribute fastnlo.i of pyext, also if I didnt use
+      --with-pyext myself for the distribution package
+
 2014-07-17  First public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1854
             ======================================================================================
 
 2014-07-16  rabbertz
+
+    * NEWS, README: Update README etc.
 
     * configure.ac: No doc for prerelease
 

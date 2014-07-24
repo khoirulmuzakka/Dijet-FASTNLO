@@ -54,6 +54,12 @@ make install
 # 1. The fastNLO_toolkit supports multiple alternatives for the evolution of the strong coupling.
 #    Some of them require additional external software: HOPPET and QCDNUM, see also
 #    http://hoppet.hepforge.org and http://qcdnum.hepforge.org
+#
+#    Note: On x86_64 systems the QCDNUM libraries must be compiled with the -fPIC option.
+#          Since this has to be adapted manually for each "makelibs" script in the original
+#          release qcdnum-17.00.06.tar.gz, we provide an already patched version from our
+#          web site: qcdnum-17.00.06-patched.tar.gz
+#
 #    If these packages are found in the same installation directory or
 #    other system-wide known installation directories, the options
 --with-hoppet
@@ -64,6 +70,9 @@ make install
 --with-hoppet=/path/to/your/hoppet/installation
 #    or
 --with-qcdnum=/path/to/your/qcdnum/installation
+#    The libraries are then expected to be in /path/to/your/installation/lib and
+#    include files in /path/to/your/installation/include
+
 
 # 2. There is work in progress to provide output in YODA format for comparisons to data
 #    using Rivet analyses and rivet-mkhtml

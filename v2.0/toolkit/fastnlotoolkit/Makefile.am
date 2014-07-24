@@ -41,14 +41,13 @@ libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 # Use precompiler-defined char constant FNLO_SOMETHING in fastNLOConstants.h.in
 # instead of precompiler idfdef's via -DHAVESOMETHING in the code
 # With HOPPET
-if HAVE_HOPPET
+#if HAVE_HOPPET
 #   libfastnlotoolkit_la_CPPFLAGS += -DHAVEHOPPET
-   libfastnlotoolkit_la_CPPFLAGS += ${HOPPETCPPFLAGS}
-endif
+#endif
 # With QCDNUM
-if HAVE_QCDNUM
+#if HAVE_QCDNUM
 #   libfastnlotoolkit_la_CPPFLAGS += -DHAVEQCDNUM
-endif
+#endif
 
 #
 # C++ compiler flags
@@ -69,6 +68,7 @@ endif
 # With HOPPET
 if HAVE_HOPPET
    libfastnlotoolkit_la_SOURCES  += fastNLOHoppet.cc fastNLOHoppetAs.cc HoppetInterface.cc
+   libfastnlotoolkit_la_CXXFLAGS += ${HOPPETCXXFLAGS}
 endif
 # With QCDNUM
 if HAVE_QCDNUM

@@ -1,3 +1,11 @@
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1870:
+=================================================================================================
+Only small changes to eliminate some installation hiccups for the optional parts and
+to remove some additional warnings found by the clang and icc compilers.
+Don't hesitate to contact the authors for any questions or problems.
+
+
+
 Notes for first public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1854:
 =================================================================================================
 This is a prerelease for testing and numerous things are still in progress.

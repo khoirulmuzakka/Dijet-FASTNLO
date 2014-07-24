@@ -290,11 +290,12 @@ if test "x$with_hoppet" != "xno"; then
    AC_SUBST([HOPPETPREFIX], ["$HOPPET"])
    AC_SUBST([HOPPETBIN], ["$HOPPETPREFIX/bin"])
    AC_SUBST([HOPPETLDFLAGS], ["$($HOPPETBIN/hoppet-config --libs)"])
-   AC_SUBST([HOPPETCPPFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
+   AC_SUBST([HOPPETCXXFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
    AC_MSG_NOTICE([******************************************])
    AC_MSG_NOTICE([$TMPNAM settings:])
    AC_MSG_RESULT([Using $HOPPETPREFIX for the $TMPNAM installation path])
    AC_MSG_RESULT([Using $HOPPETBIN for the $TMPNAM bin path])
+   AC_MSG_RESULT([Using $HOPPETCXXFLAGS for the compilation])
    AC_MSG_RESULT([Using $HOPPETLDFLAGS for the libraries])
 else
    AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
