@@ -38,7 +38,7 @@ public:
 
    void PrintGrid();
    vector<double> GetGrid() const { return fgrid;}
-   const vector<double>* const GetGridPtr() const { return &fgrid;}
+   const vector<double>* GetGridPtr() const { return &fgrid;}
    vector<double> GetHGrid() const { return fHgrid;}
    double GetDelta(double);
    bool CheckX(double&);
