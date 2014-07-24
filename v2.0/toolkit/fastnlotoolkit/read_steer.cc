@@ -399,7 +399,9 @@ bool read_steer::ParseString(string line) {
    const string orgl=line;
 
    // parsing statements enclosed in '"'
-   if (!fParseTableMode>0 && !fParseFieldMode)
+   // KR: Put fParseTableMode>0 in brackets since negation otherwise acts on
+   //     fParseTableMode variable (warning from clang compiler)!
+   if (!(fParseTableMode>0) && !fParseFieldMode)
       value = ParseEnclosedString(line.c_str()); // old
    else
       while (EnclosedStringToOneEntity(line));   // new

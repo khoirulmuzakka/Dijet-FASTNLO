@@ -668,12 +668,15 @@ void fastNLOReader::InitScalevariation() {
       fScaleFacMuF = 1.;
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
-      if (cNLO->GetScaleDescr()[0].size() <0) { // ???
-         warn["InitScalevariation"]<<"No scaledescription available.\n";
-         SetFunctionalForm(kScale1 , kMuR);
-         SetFunctionalForm(kScale1 , kMuF);
-         return;
-      }
+      // KR: Commented out since anyway always false (warning from clang compiler)!
+      //     cNLO->GetScaleDescr()[0].size() is of type unsigned int
+      //     The functional form for scale variations is set below.
+      // if (cNLO->GetScaleDescr()[0].size() <0) { // ???
+      //    warn["InitScalevariation"]<<"No scaledescription available.\n";
+      //    SetFunctionalForm(kScale1 , kMuR);
+      //    SetFunctionalForm(kScale1 , kMuF);
+      //    return;
+      // }
 
       // ---- DIS ---- //
       if (cNLO->GetNPDF() == 1) {
