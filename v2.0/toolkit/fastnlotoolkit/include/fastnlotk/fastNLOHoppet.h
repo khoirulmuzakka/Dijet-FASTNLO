@@ -51,10 +51,10 @@ class fastNLOHoppet : public fastNLOLHAPDF {
       void SetNFlavor(int nflavor);
       void SetNLoop(int nloop);
       void SetQMass(int pdgid, double qmass);
-      void SetAlphasMz(double AlphasMz);
+      void SetAlphasMz(double AlphasMz, bool ReCalcCrossSection = false);
       void SetLHAPDFValues();
       void SetPDGValues();
-      bool InitPDF();
+      virtual bool InitPDF();
       // Getters
       double GetMz() const;
       double GetQMass(int pdgid) const;

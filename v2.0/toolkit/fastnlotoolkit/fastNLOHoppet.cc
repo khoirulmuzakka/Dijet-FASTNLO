@@ -94,7 +94,7 @@ void fastNLOHoppet::SetNLoop(int  nloop) {
    HoppetInterface::fnLoop = nloop;
    HoppetInterface::InitHoppet(*this);
 }
-void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
+void fastNLOHoppet::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
    HoppetInterface::fAlphasMz    = AlphasMz;
    HoppetInterface::InitHoppet(*this);
 }
@@ -140,7 +140,6 @@ void fastNLOHoppet::SetLHAPDFValues() {
    HoppetInterface::fAlphasMz = LHAPDF::alphasPDF(HoppetInterface::fMz);
    HoppetInterface::InitHoppet(*this);
 }
-
 
 bool fastNLOHoppet::InitPDF() {
    bool init = fastNLOLHAPDF::InitPDF();
