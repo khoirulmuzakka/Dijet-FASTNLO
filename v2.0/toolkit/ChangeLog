@@ -4,7 +4,6 @@
 2014-07-24  rabbertz
 
     * fastNLOInterpolBase.h: Remove meaningless type qualifier on return type
-      (found by icc compiler)
 
 2014-07-24  sieber
 
