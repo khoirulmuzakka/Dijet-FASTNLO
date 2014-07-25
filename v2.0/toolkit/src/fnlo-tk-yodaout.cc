@@ -76,6 +76,15 @@ int main(int argc, char** argv) {
    YODA::Writer & writer = YODA::WriterYODA::create();                  // creat the writer for the yoda fiel
    std::vector< YODA::AnalysisObject * > ao;                            // vector that will accept the pointers of the histograms for each rapidity value
 
+   int capital_pos;							//RivetId capital letter where the histogram counter runs
+   string RivetId = fnlo.GetRivetId();
+   for  ( int i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++){
+   	if (isupper(fnlo.GetRivetId()[i])){				//find capital letter
+                RivetId[i] = tolower(RivetId[i]);			//and lower it
+                capital_pos = i;
+                break;
+        }
+   } 
 
 
    for (int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
@@ -84,6 +93,7 @@ int main(int argc, char** argv) {
         stringstream histno;                                            // just to make i+1 from int
         histno << i+1;                                                  // to a string for the naming
 
+	RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());		// next histogram name
 
          for (int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
                 bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );            // insert pT bin into the vector
@@ -91,7 +101,7 @@ int main(int argc, char** argv) {
 
 
 
-        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + fnlo.GetRivetId() + "/d0" + histno.str() + "-x01-y01", "fastNLO" );
+        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, "fastNLO" );
         //create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
@@ -115,7 +125,8 @@ int main(int argc, char** argv) {
 
 
 
-   //delete ao;                                                         // need to find a way to delete hists from memory now
+
+ //delete ao;                                                         // need to find a way to delete hists from memory now
 //-------------------------- yodaout code - end
 
 
