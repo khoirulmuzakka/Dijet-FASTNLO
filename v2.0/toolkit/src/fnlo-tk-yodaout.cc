@@ -43,6 +43,26 @@ int main(int argc, char** argv) {
    cout<<" fnlo-tk-yodaout: Using PDF set   : " << PDFFile << endl;
 
 
+//--------------------------- yodaout code - start
+
+// First we find the point of change of the rapidity value, then for each one we create a histogram which we store in a vector and
+// in the end save it in a yoda file
+
+   float xmur = 1.0;
+   float xmuf = 1.0;
+   
+   if (argc > 3){
+   	string scalefactors = argv[3];
+	xmur = (float)::atof(scalefactors.substr( 0, scalefactors.find(",") ).c_str());
+	xmuf = (float)::atof(scalefactors.substr( scalefactors.find(",")+1, scalefactors.size()-scalefactors.find(",")-1 ).c_str());
+   }
+  
+   cout << " fnlo-tk-yodaout: Renormalization and factorization scale factors: " << xmur << " and " << xmuf << "\n";
+
+
+
+
+
    // --- this is your playgroud to use fastNLO
    //  Calculate cross setions and/or test some options
    //  For a documentation and function calls, please see
@@ -56,18 +76,12 @@ int main(int argc, char** argv) {
    //fnlo.SetContributionON(fastNLO::kFixedOrder,0,false); // switch contributions on/off. By default LO and NLO.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,1,true);
    //fnlo.SetContributionON(fastNLO::kFixedOrder,2,true); // NNLO must be switched on explicitly
+   
+   fnlo.SetScaleFactorsMuRMuF(xmur,xmuf);
+
    fnlo.CalcCrossSection();                     // Calculate the cross section
    fnlo.PrintCrossSections();                 // Print cross section to screen
 
-
-
-
-
-
-//--------------------------- yodaout code - start
-
-// First we find the point of change of the rapidity value, then for each one we create a histogram which we store in a vector and
-// in the end save it in a yoda file
 
 
    std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
