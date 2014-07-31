@@ -15,30 +15,30 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2342b_v23_fix
+ScenarioName fnl4352_v23_fix
 ScenarioDescription {
-    "d2sigma-jet_dpTdy_[pb_GeV]"
-    "CMS_Collaboration"
+    "d2sigma-jet_dpTdy_[nb_GeV]"
+    "ATLAS_Collaboration"
     "Inclusive_Jet_pT"
-    "anti-kT_R=0.5"
-    "CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107, 132001 (2011)."
-    "SPIRES_ID=9086218,INSPIRE_RECORD=902309"
+    "anti-kT_R=0.6"
+    "ATLAS-PAPER-STDM-2012-08, arXiv:1304.4739, Eur. Phys. J. C 73, 2509 (2013)."
+    "INSPIRE_RECORD=1228693"
     "provided by:"
     "fastNLO_2.3.1"
     "If you use this table, please cite:"
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
-PublicationUnits                12               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
+PublicationUnits                 9               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
 ScaleDescriptionScale1          "pT_jet_[GeV]"   # Specify scale name and unit
 ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
 # -------------------------------------------------------------------- #
-Rjet                            0.5              # Jet size parameter (anti-kT)
-ptjmin                          18.              # Minimal jet pT
+Rjet                            0.6              # Jet size parameter (anti-kT)
+ptjmin                          20.              # Minimal jet pT
 yjmin                           0.0              # Minimal jet rapidity
-yjmax                           3.0              # Maximal jet rapidity
+yjmax                           4.4              # Maximal jet rapidity
 #etajmin                         0.0              # Minimal jet pseudorapidity
 #etajmax                         3.0              # Maximal jet pseudorapidity
 
@@ -85,12 +85,13 @@ BinSizeFactor                    2.              # Possibility to provide additi
 # Example for DoubleDifferentialBinning:
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  846. 1684.
-    0.5        1.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  790. 1684.
-    1.0        1.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686. 1410.
-    1.5        2.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  1032.
-    2.0        2.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  737.
-    2.5        3.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  468.
+    0.0        0.3          20.   30.   45.   60.   80.  110.  160.  210.  260.  310.  400.  500.
+    0.3        0.8          20.   30.   45.   60.   80.  110.  160.  210.  260.  310.  400.  500.
+    0.8        1.2          20.   30.   45.   60.   80.  110.  160.  210.  260.  310.  400.
+    1.2        2.1          20.   30.   45.   60.   80.  110.  160.  210.  260.  310.  400.
+    2.1        2.8          20.   30.   45.   60.   80.  110.  160.  210.  260.
+    2.8        3.6          20.   30.   45.   60.   80.  110.  160.
+    3.6        4.4          20.   30.   45.   60.
 }}
 
 # Example for TripleDifferentialBinning:
@@ -110,7 +111,7 @@ DoubleDifferentialBinning {{
 #   dependent settings
 #
 # ==================================================================== #
-CenterOfMassEnergy              7000.       # Center-of-mass energy in GeV.
+CenterOfMassEnergy              2760.       # Center-of-mass energy in GeV.
 # Some examples from the past:   200.       # RHIC
 #                               1800.       # TeV Run I
 #                               1960.       # TeV Run II

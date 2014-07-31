@@ -24,7 +24,7 @@ ScenarioDescription {
     "CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107, 132001 (2011)."
     "SPIRES_ID=9086218,INSPIRE_RECORD=902309"
     "provided by:"
-    "fastNLO_2.1.0"
+    "fastNLO_2.3.1"
     "If you use this table, please cite:"
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
