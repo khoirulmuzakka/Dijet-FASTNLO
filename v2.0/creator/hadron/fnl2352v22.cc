@@ -186,7 +186,7 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
 {
    // create table and read in steering...
    cout<<"\n ---------------------------------------------------------------\n"<<endl;
-   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
+   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet() );
 
    // obtain relevant variables from nlojet
    ftable->SetEcms(UsefulNlojetTools::GetEcms());

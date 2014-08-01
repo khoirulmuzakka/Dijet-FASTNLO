@@ -163,7 +163,7 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //                   (the return value must be true for jets to be UNselected)
-// fnl5350eta0: use pseudorapidity eta
+// fnl5350: use pseudorapidity eta
 struct fNLOSelector {
    fNLOSelector(double ymin, double ymax, double ptmin):
       _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
@@ -234,7 +234,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
 
       // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-      // fnl5350eta0: Not required for inclusive jets
+      // fnl5350: Not required for inclusive jets
       //  static fNLOSorter SortJets;
       //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
 

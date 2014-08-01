@@ -1,7 +1,7 @@
 //
-// fastNLO v2 creator code for fnl2342b:
-//     CMS LHC Inclusive Jets Scenario, E_cms = 7 TeV
-//     for fastjet anti-kT algo with R=0.5 in E-scheme
+// fastNLO v2 creator code for fnl5350eta2:
+//     CMS LHC Inclusive Jets Scenario, E_cms = 5.02 TeV
+//     for fastjet anti-kT algo with R=0.2, 0.3, 0.4 in E-scheme
 //
 //
 // ============== fastNLO user: ===================================
@@ -122,7 +122,6 @@ private:
    void writetable();
    double GetEcms();
    unsigned int GetNj();
-   void CheckAmpIsnan(const amplitude_hhc& amp);
 };
 
 user_base_hhc * userfunc() {
@@ -142,7 +141,6 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
    nd = 3U;
 }
 
-
 void psinput(phasespace_hhc *ps, double& s)
 {
    // --- fastNLO user: set the total c.m. energy squared in GeV^2
@@ -152,7 +150,8 @@ void psinput(phasespace_hhc *ps, double& s)
    //s =    810000.; // LHC Injection Run  900 GeV
    //s =   5569600.; // LHC Initial Run   2360 GeV
    //s =   7617600.; // LHC HIpp base Run 2760 GeV
-   s =  49000000.; // LHC First Run     7000 GeV
+   s =  25200400.; // LHC HIpp base Run 5020 GeV
+   //s =  49000000.; // LHC First Run     7000 GeV
    //s =  64000000.; // LHC Second Run    8000 GeV
    //s = 100000000.; // LHC Start-up Run 10000 GeV
    //s = 196000000.; // LHC Design Run   14000 GeV
@@ -164,162 +163,124 @@ void psinput(phasespace_hhc *ps, double& s)
 
 // --- fastNLO user: modify the jet selection in userfunc (default = cutting in |y| min, |y| max and pt min)
 //                   (the return value must be true for jets to be UNselected)
+// fnl5350: use pseudorapidity eta
 struct fNLOSelector {
    fNLOSelector(double ymin, double ymax, double ptmin):
       _ymin (ymin), _ymax (ymax), _ptmin (ptmin){};
    double _ymin, _ymax, _ptmin;
-   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.rapidity()) && abs(a.rapidity()) < _ymax && _ptmin <= a.perp());};
+   bool operator() (const lorentzvector<double> &a) {return ! (_ymin <= abs(a.prapidity()) && abs(a.prapidity()) < _ymax && _ptmin <= a.perp());};
 };
 
-void UserHHC::CheckAmpIsnan(const amplitude_hhc& amp){
-   // calculate the amplitudes !
-   nlo::weight_hhc wtorg = amp(dummypdf,91*91,91*91,1.);
-
-   // check amplitude for isnan
-   nlo::amplitude_hhc::contrib_type itype = amp.contrib();
-
-   // ----- check single contributions ----- //
-   int NSubproc = 7;
-   double c[7][7];
-   for(int ic=0;ic<7;ic++){
-      for(int proc=0;proc<NSubproc;proc++){
-         c[ic][proc] = amp._M_fini.amp[ic][proc];
-         //  One may check each contribution here!
-         //  if ( isnan(c[ic][proc] ) ...
-         //  cout<<"ic="<<ic<<"\tproc="<<proc<<"\tc="<<c[ic][proc]<<endl;
-      }
-   }
-
-   // ------ go through each contribution ----- //
-   if(itype == nlo::amplitude_hhc::fini) {
-      if (amp._M_fini.mode==0) { //finix1
-         for(int proc=0;proc<NSubproc;proc++) {
-            if ( isnan(c[0][proc]) ) cout<<"c0="<<c[0][proc]<<"\tproc="<<proc<<endl;
-            if ( isnan(c[3][proc]) ) cout<<"c3="<<c[3][proc]<<"\tproc="<<proc<<endl;
-         }
-      }
-      else if (amp._M_fini.mode==1) { //finix2
-         for(int proc=0;proc<NSubproc;proc++){
-            if ( isnan(c[1][proc]) ) cout<<"c1="<<c[1][proc]<<"\tproc="<<proc<<endl;
-            if ( isnan(c[4][proc]) ) cout<<"c4="<<c[4][proc]<<"\tproc="<<proc<<endl;
-         }
-      }
-      else if(amp._M_fini.mode==2){ //fini1
-         for(int proc=0;proc<NSubproc;proc++){
-            if ( isnan(c[2][proc]) ) cout<<"c2="<<c[2][proc]<<"\tproc="<<proc<<endl;
-            if ( isnan(c[5][proc]) ) cout<<"c5="<<c[5][proc]<<"\tproc="<<proc<<endl;
-            if ( isnan(c[6][proc]) ) cout<<"c6="<<c[6][proc]<<"\tproc="<<proc<<endl;
-         }
-      }
-   }
-   else { // no fini contribution
-    // there should be no 'nan'
-   }
-}
-
+// --- fastNLO user: modify the jet sorting in userfunc (default = descending in jet pt)
+struct fNLOSorter {
+   bool operator() (const lorentzvector<double> &a, const lorentzvector<double> &b) {return (a.perp() > b.perp());};
+};
 
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 {
-   CheckAmpIsnan(amp);
 
    // --- fastNLO: Don't touch this piece of code!
    fnloBlockA2 *A2 =  table->GetBlockA2();
    double x1 = p[-1].Z()/p[hadron(-1)].Z();
    double x2 = p[0].Z()/p[hadron(0)].Z();
 
-   // --- fastNLO user: set the jet size and run the jet algorithm
-   double jetsize = 0.5;
-   pj = jetclus(p,jetsize);
-   unsigned int nj = pj.upper();
+   // --- fastNLO user: in this scenario run jet algo with three different jet sizes R
+   const unsigned int ndim2bins = 29;
+   const unsigned int ndim1bins = 3;
+   const double Rjet[ndim1bins] = { 0.2, 0.3, 0.4 };
+   for (unsigned int k=0; k<ndim1bins; k++) {
 
-   // --- give some debug output before selection and sorting
-   if ( doDebug ) {
-      for (unsigned int i=1; i<=nj; i++) {
-         double pti  = pj[i].perp();
-         double yi   = pj[i].rapidity();
-         double etai = pj[i].prapidity();
-         cout << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
-      }
-   }
+      // --- fastNLO user: set the jet size and run the jet algorithm
+      double jetsize = Rjet[k];
+      pj = jetclus(p,jetsize);
+      unsigned int nj = pj.upper();
 
-   // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
-   if (nj > 4) {
-      cout << "fastNLO: ERROR! This scenario is not suited for " << nj <<
-         " jets. Aborted!" << endl;
-      exit(1);
-   }
-
-   // --- fastNLO user:
-   //     Here is your playground where you compute your observable
-   //     and the bin number ("obsbin"), which gets passed to
-   //     fastNLO's table filling code.
-   //     Usually, pT and E are in GeV, but this may be changed.
-   //     ATTENTION: Scales must always be in GeV!
-
-   // --- declare and initialize phase space cut variables
-   // can be taken from table binning for this scenario
-   const unsigned int nobs = A2->GetNObsBin();
-   // smallest |(pseudo-)rapidity| for jets to be considered
-   const double yjmin  = A2->LoBin[0][1];
-   // largest |(pseudo-)rapidity| for jets to be considered
-   const double yjmax  = A2->UpBin[nobs-1][1];
-   // lowest pT for jets to be considered
-   const double ptjmin = A2->LoBin[0][0];
-
-   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
-   static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
-   // --- count number of selected jets left at this stage
-   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
-
-   // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
-   // fnl2342: Not required for inclusive jets
-   //   static fNLOSorter SortJets;
-   //   std::sort(pj.begin(), pj.begin() + njet, SortJets);
-
-   // --- give some debug output after selection and sorting
-   if ( doDebug ) {
-      cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
-      cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
-      for (unsigned int i=1; i<=njet; i++) {
-         double pti  = pj[i].perp();
-         double yi   = pj[i].rapidity();
-         double etai = pj[i].prapidity();
-         cout << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
-      }
-   }
-
-   // Analyze inclusive jets in jet loop
-   for (unsigned int i = 1; i <= njet; i++) {
-
-      // Get jet quantities
-      double pt  = pj[i].perp();
-      double rap = abs(pj[i].rapidity());
-
-      // --- set the renormalization and factorization scale to jet pT
-      double mu = pt;
-
-      // --- identify bin number (dim1,dim2) here (pT,|y|)
-      int obsbin = -1;
-      for (int j = 0; j < A2->GetNObsBin(); j++) {
-         if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0] &&
-             A2->LoBin[j][1] <= rap && rap < A2->UpBin[j][1]) {
-            obsbin = j;
-            break;
+      // --- give some debug output before selection and sorting
+      if ( doDebug ) {
+         for (unsigned int i=1; i<=nj; i++) {
+            double pti  = pj[i].perp();
+            double yi   = pj[i].rapidity();
+            double etai = pj[i].prapidity();
+            cout << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
          }
       }
 
-      // --- fill fastNLO arrays - don't touch this piece of code!
-      if (obsbin >= 0) {
-         double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
-         for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
-            if(table->GetBlockB(k)->GetIRef()>0){
-               ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
-            }else{
-               ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
+      // --- check on maximal no. of jets: 4 (should never be more in NLOJet++)
+      if (nj > 4) {
+         cout << "fastNLO: ERROR! This scenario is not suited for " << nj <<
+            " jets. Aborted!" << endl;
+         exit(1);
+      }
+
+      // --- fastNLO user:
+      //     Here is your playground where you compute your observable
+      //     and the bin number ("obsbin"), which gets passed to
+      //     fastNLO's table filling code.
+      //     Usually, pT and E are in GeV, but this may be changed.
+      //     ATTENTION: Scales must always be in GeV!
+
+      // --- declare and initialize phase space cut variables
+      // can partially be taken from table binning for this scenario
+      // smallest |(pseudo-)rapidity| for jets to be considered
+      const double yjmin  = 0.7;
+      // largest |(pseudo-)rapidity| for jets to be considered
+      const double yjmax  = 1.0;
+      // lowest pT for jets to be considered
+      const double ptjmin = A2->LoBin[0][0];
+
+      // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
+      static fNLOSelector SelJets(yjmin,yjmax,ptjmin);
+      // --- count number of selected jets left at this stage
+      size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
+
+      // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
+      // fnl5350: Not required for inclusive jets
+      //  static fNLOSorter SortJets;
+      //  std::sort(pj.begin(), pj.begin() + njet, SortJets);
+
+      // --- give some debug output after selection and sorting
+      if ( doDebug ) {
+         cout << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+         cout << "phase space cuts: yjmin, yjmax, ptjmin: " << yjmin << ", " << yjmax << ", " << ptjmin << endl;
+         for (unsigned int i=1; i<=njet; i++) {
+            double pti  = pj[i].perp();
+            double yi   = pj[i].rapidity();
+            double etai = pj[i].prapidity();
+            cout << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         }
+      }
+
+      // Analyze inclusive jets in jet loop
+      for (unsigned int i = 1; i <= njet; i++) {
+
+         // Get jet quantities
+         double pt  = pj[i].perp();
+
+         // --- set the renormalization and factorization scale to jet pT
+         double mu = pt;
+
+         // --- identify bin number (dim2,dim1) here (pT,R)
+         int obsbin = -1;
+         for (unsigned int j = 0; j < ndim2bins; j++) {
+            if (A2->LoBin[j][0] <= pt  && pt  < A2->UpBin[j][0]) {
+               obsbin = j + k*ndim2bins;
+               break;
             }
          }
-      } // --- end: fill fastNLO array
-   } // --- end: jet loop
+
+         // --- fill fastNLO arrays - don't touch this piece of code!
+         if (obsbin >= 0) {
+            double prefactor = 1./A2->BinSize[obsbin]; // - divide by binwidth
+            for (int k=0;k<table->GetBlockA1()->GetNcontrib();k++){
+               if(table->GetBlockB(k)->GetIRef()>0){
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,pdf,prefactor);
+               }else{
+                  ((fnloBlockBNlojet*)(table->GetBlockB(k)))->FillEventHHC(obsbin,x1,x2,mu,amp,dummypdf,prefactor);
+               }
+            }
+         } // --- end: fill fastNLO array
+      } // --- end: jet loop
+   } // --- end: jet size loop
 } // --- end: fastNLO user playground
 
 void UserHHC::inittable(){
@@ -337,125 +298,74 @@ void UserHHC::inittable(){
    fnloBlockA1 *A1 = table->GetBlockA1();
    A1->SetHeaderDefaults();
    // --- fastNLO user: set the scenario name (no white space)
-   A1->SetScenName("fnl2342b");
+   A1->SetScenName("fnl5350eta2");
 
    // --- fastNLO: fill variables for table header block A2
-   fnloBlockA2 *A2 =  table->GetBlockA2();
+   fnloBlockA2 *A2 = table->GetBlockA2();
    // --- fastNLO user: set the cross section units in barn (negative power of ten)
    A2->SetIpublunits(12);
-
    // --- fastNLO user: write up to 20 strings to describe the scenario
-   A2->ScDescript.push_back("d2sigma-jet_dpTdy_[pb_GeV]");
+   A2->ScDescript.push_back("d2sigma-jet_dpTdeta_[pb_GeV]");
    A2->ScDescript.push_back("CMS_Collaboration");
-   A2->ScDescript.push_back("E_cms=7_TeV");
    A2->ScDescript.push_back("Inclusive_Jet_pT");
-   A2->ScDescript.push_back("anti-kT_R=0.5");
-   A2->ScDescript.push_back("CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107 (2011) 132001.");
+   A2->ScDescript.push_back("anti-kT_R=0.2,0.3,0.4");
+   A2->ScDescript.push_back("CMS-PAS-HIN");
    A2->ScDescript.push_back("provided by:");
    A2->ScDescript.push_back("fastNLO_2.1.0");
    A2->ScDescript.push_back("If you use this table, please cite:");
    A2->ScDescript.push_back("  D. Britzger, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1208.3641");
    A2->NScDescript = A2->ScDescript.size();
 
-  // --- determine whether this is a warm-up or reference job
-  doWarmUp = true;//false;
-//   if (strstr(file,"wrm")!=NULL) {
-//     doWarmUp = true;
-//     printf("fastNLO: This is a warm-up run!\n");
-//     if ( ! nlo ) {
-//       printf("fastNLO: WARNING! Warm-up runs are better done at NLO!\n");
-//     }
-//   }
-  doReference = false;
-  if (strstr(file,"ref")!=NULL) {
-    doReference = true;
-    printf("fastNLO: This is a reference run!\n");
-  }
-  if ( doWarmUp && doReference ) {
-    printf("fastNLO: ERROR! Warm-up and reference runs cannot be done simultaneously:\n");
-    printf("         doWarmUp = %i, doReference = %i\n",doWarmUp,doReference);
-    exit(2);
-  }
+   A2->Ecms = GetEcms();
+   A2->ILOord = GetNj();
 
-   // --- fastNLO user: no. and names of dimensions in which the observable is binned
+   // --- fastNLO user: no. and names of dimensions, from outer to inner loop, in which the observable is binned
    A2->NDim = 2;
    A2->DimLabel.push_back("pT_[GeV]");
    A2->IDiffBin.push_back(2);
-   A2->DimLabel.push_back("|y|");
+   A2->DimLabel.push_back("R");
    A2->IDiffBin.push_back(2);
 
    vector <double> bound;
    bound.resize(2);
 
    // --- fastNLO user: define the binning
-   const int ndim2bins = 6;
-   const double dim2bins[ndim2bins+1] = { 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0 };
+   const int ndim1bins = 3;
+   const double dim1bins[ndim1bins+1] = { 0.15, 0.25, 0.35, 0.45 };
 
-   const int ndim1bins[ndim2bins] = { 34, 33, 32, 29, 26, 22 };
+   const int ndim2bins[ndim1bins] = { 29, 29, 29 };
 
-   cout << endl << "------------------------" << endl;
-   cout << "Binning in dimension 2: " << A2->DimLabel[1] << endl;
-   cout << "------------------------" << endl;
-   for (int i=0; i<ndim2bins+1; i++) {
-      cout << "i, dim2bins: " << i << ", " << dim2bins[i] << endl;
-   }
-
-   vector< vector<double> >dim1bins;
-   dim1bins.resize(ndim2bins);
-   for (int i=0; i<ndim2bins; i++) {
-      dim1bins[i].resize(ndim1bins[i]+1);
-   }
-   const double dim0[35] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  737.,  846., 1684. };
-   const double dim1[34] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686.,  790., 1684. };
-   const double dim2[33] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548.,  592.,  638.,  686., 1410. };
-   const double dim3[30] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  468.,  507.,  548., 1032. };
-   const double dim4[27] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,  362.,
-      395. ,  430.,  737. };
-   const double dim5[23] = {
-      18.  ,   21.,   24.,   28.,   32.,   37.,   43.,   49.,   56.,   64.,   74.,   84.,
-      97.  ,  114.,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  468. };
-   for (int j=0; j<ndim1bins[0]+1; j++) {
-      dim1bins[0][j] = dim0[j];
-   }
-   for (int j=0; j<ndim1bins[1]+1; j++) {
-      dim1bins[1][j] = dim1[j];
-   }
-   for (int j=0; j<ndim1bins[2]+1; j++) {
-      dim1bins[2][j] = dim2[j];
-   }
-   for (int j=0; j<ndim1bins[3]+1; j++) {
-      dim1bins[3][j] = dim3[j];
-   }
-   for (int j=0; j<ndim1bins[4]+1; j++) {
-      dim1bins[4][j] = dim4[j];
-   }
-   for (int j=0; j<ndim1bins[5]+1; j++) {
-      dim1bins[5][j] = dim5[j];
+   cout << endl << "--------------------------------" << endl;
+   cout << "Binning in outer-most dimension: " << A2->DimLabel[1] << endl;
+   cout << "--------------------------------" << endl;
+   for (int i=0; i<ndim1bins+1; i++) {
+      cout << "i, dim1bins: " << i << ", " << dim1bins[i] << endl;
    }
 
-   cout << endl << "------------------------" << endl;
-   cout << "Binning in dimension 1: " << A2->DimLabel[0] << endl;
-   cout << "------------------------" << endl;
-   for (int i=0; i<ndim2bins; i++) {
-      for (int j=0; j<ndim1bins[i]+1; j++) {
-         cout << "i, j, dim1bins: " << i << ", " << j << ", " << dim1bins[i][j] << endl;
+   vector< vector<double> >dim2bins;
+   dim2bins.resize(ndim1bins);
+   for (int i=0; i<ndim1bins; i++) {
+      dim2bins[i].resize(ndim2bins[i]+1);
+   }
+   const double dim0[30] = {
+      22.  ,   27.,   33.,   39.,   47.,   55.,   64.,   74.,   84.,   97.,
+      114. ,  133.,  153.,  174.,  196.,  220.,  245.,  272.,  300.,  330.,
+      362. ,  395.,  430.,  468.,  507.,  548.,  592.,  638.,  790.,  967. };
+   for (int i=0; i<ndim1bins; i++) {
+      for (int j=0; j<ndim2bins[i]+1; j++) {
+         dim2bins[i][j] = dim0[j];
       }
    }
-   cout << "========================" << endl;
+
+   cout << endl << "--------------------------------" << endl;
+   cout << "Binning in inner-most dimension: " << A2->DimLabel[0] << endl;
+   cout << "--------------------------------" << endl;
+   for (int i=0; i<ndim1bins; i++) {
+      for (int j=0; j<ndim2bins[i]+1; j++) {
+         cout << "i, j, dim2bins: " << i << ", " << j << ", " << dim2bins[i][j] << endl;
+      }
+   }
+   cout << "================================" << endl;
 
    // --- fastNLO user:
    //     Define below the bin width ("binsize") by which the cross section is divided
@@ -463,23 +373,24 @@ void UserHHC::inittable(){
    //     Default: divide by bin width in dim. 1 and dim. 2
    //     ATTENTION: Don't forget to include a factor of 2 e.g. for abs. rapidity |y| !
    //
-   //     fnl2342: Divide by bin width in pT (1st dimension) and y (2nd dimension)
+   //     fnl5350eta2: Divide by bin width in pT (inner dimension)
+   //              Do NOT divide by bin width in outer dimension which is jet size R
+   //              DO divide by bin width in eta = 2 * 0.3
    //
-
    int nbins = 0;   // --- count total No. bins
-   for (int i=0;i<ndim2bins;i++){
-      for (int j=0;j<ndim1bins[i];j++){
+   for (int i=0;i<ndim1bins;i++){
+      for (int j=0;j<ndim2bins[i];j++){
          double binsize = 1.; // --- start each bin with preset value = 1.
          nbins += 1;
-         bound[0] = dim1bins[i][j];
-         bound[1] = dim2bins[i];
+         bound[0] = dim2bins[i][j];
+         bound[1] = dim1bins[i];
          A2->LoBin.push_back(bound);
-         bound[0] = dim1bins[i][j+1];
-         bound[1] = dim2bins[i+1];
+         bound[0] = dim2bins[i][j+1];
+         bound[1] = dim1bins[i+1];
          A2->UpBin.push_back(bound);
          binsize = binsize
-            * (dim1bins[i][j+1]-dim1bins[i][j]) // ... times dpT
-            * 2. * (dim2bins[i+1]-dim2bins[i]); // ... times dy
+            * (dim2bins[i][j+1]-dim2bins[i][j]) // ... times dpT
+            * 2. * 0.3; // ... times deta
          A2->BinSize.push_back(binsize);
       }
    }
@@ -639,7 +550,6 @@ void UserHHC::inittable(){
 
    for(int i=0;i<A2->NObsBin;i++){
       int nxtot = 15;
-      if (i == ((A2->NObsBin)-1)) nxtot += 1; // Exceptional, don't use elsewhere
       B->Nxtot1.push_back(nxtot);
       double hxlim = -sqrt(-log10(xlim[i]));   // use value from Warm-Up run
       //printf("%d %g %g \n",i,pow(10,-pow(hxlim,2)),xlim[i]);
@@ -659,7 +569,7 @@ void UserHHC::inittable(){
    // --- fastNLO user: give the defined process scale a name and units
    B->ScaleDescript[0].push_back("pT_jet_[GeV]");
    // --- fastNLO user: minimal number of scale nodes is 4
-   B->Nscalenode.push_back(6); // number of scale nodes for pT
+   B->Nscalenode.push_back(6); // number of scale nodes
 
    B->ScaleFac.resize(B->NScaleDim);
 

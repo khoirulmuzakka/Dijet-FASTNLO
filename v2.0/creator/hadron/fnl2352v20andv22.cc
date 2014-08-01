@@ -132,6 +132,7 @@ private:
 
    // --- fastNLO v2.2
    fastNLOCreate *ftable;
+   fastNLOCreate *ftable2;
    void InitFastNLO(const std::basic_string<char>& fname);
 };
 
@@ -293,6 +294,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    // ---- fastNLO v2.2
    // Analyze inclusive jets in jet loop
    const vector<double>& scalevars = ftable->GetScaleVariations();
+   const vector<double>& scalevars2 = ftable2->GetScaleVariations();
    //    vector<double> scalevars;
    //    scalevars.push_back(1.0);
    //    scalevars.push_back(0.5);
@@ -307,6 +309,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       double mu = pt;
       //vector<fnloEvent> contribs = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu);
       vector<vector<fnloEvent> > contribs = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu,scalevars);
+      vector<vector<fnloEvent> > contribs2 = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu,scalevars2);
 
       // scenario specific quantites
       fnloScenario scen;
@@ -314,6 +317,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       scen.SetObservableDimI( pt , 1 );
       scen.SetObsScale1( mu );		// must be consistent with 'mu' from contribs
       ftable->FillAllSubprocesses(contribs,scen); 
+      //ftable2->FillAllSubprocesses(contribs2,scen); 
    }
 }
 
@@ -735,6 +739,10 @@ void UserHHC::end_of_event(){
       printf("fastNLO: Old table written.\n");
       ftable->SetNumberOfEvents(nevents);
       ftable->WriteTable();    
+      printf("fastNLO: fnloCreate1 table written.\n");
+      ftable2->SetNumberOfEvents(nevents);
+      ftable2->WriteTable();    
+      printf("fastNLO: fnloCreate2 table written.\n");
       printf("fastNLO: New table written.\n");
    }
 }
@@ -809,7 +817,7 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
 {
    // create table and read in steering...
    cout<<"\n ---------------------------------------------------------------\n"<<endl;
-   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts() );
+   ftable = new fastNLOCreate("fnl2352v22.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet() );
    //ftable = new fastNLOCreate("fnl2352v22_alt.str");
 
    // obtain relevant variables from nlojet
@@ -821,6 +829,16 @@ void UserHHC::InitFastNLO(const std::basic_string<char>& __file_name)
    string tabFilename = __file_name.c_str();
    tabFilename += "_v22.tab";
    ftable->SetFilename(tabFilename);
+
+
+   // second table
+   ftable2 = new fastNLOCreate("fnl2352v222.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC_2Jet() );
+   ftable2->SetEcms(UsefulNlojetTools::GetEcms());
+   ftable2->SetLoOrder(UsefulNlojetTools::GetNj());
+   ftable2->SetOrderOfAlphasOfCalculation(UsefulNlojetTools::GetOrderOfRun(__file_name));
+   string tabFilename2 = __file_name.c_str();
+   tabFilename2 += "_v222.tab";
+   ftable2->SetFilename(tabFilename2);
 
    // give information to hb.
    //ftable->Print();
