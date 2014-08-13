@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
    fnlo.SetScaleFactorsMuRMuF(xmur,xmuf);
 
    fnlo.CalcCrossSection();                     // Calculate the cross section
-   fnlo.PrintCrossSections();                 // Print cross section to screen
+   //fnlo.PrintCrossSections();                 // Print cross section to screen
 
 
 
@@ -101,6 +101,13 @@ int main(int argc, char** argv) {
    } 
 
 
+	string PDFName = PDFFile.substr(0, PDFFile.size() - 7);				//naming the file with PDF and scaling factors
+        stringstream Xmur, Xmuf;
+        Xmur << xmur;
+        Xmuf << xmuf;
+        string FileName = "fastNLO_" + PDFName + "(" + Xmur.str() + "," + Xmuf.str() + ")";
+
+
    for (int i=0; i<fnlo.GetNBinDimI(); i++) {                // for all rapidity bins
         std::vector<YODA::HistoBin1D> bins;                             // vector that will accept the pT bins
 
@@ -112,10 +119,8 @@ int main(int argc, char** argv) {
          for (int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                // starting from the first pT bin of each rapidity
                 bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );            // insert pT bin into the vector
          }
-
-
-
-        YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, "fastNLO" );
+        
+	YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, "fastNLO"   );
         //create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
@@ -133,14 +138,14 @@ int main(int argc, char** argv) {
 
 
 
-   writer.write( "fastNLO_Histograms.yoda", ao );                                // save histograms into the yoda file
+   writer.write( FileName + ".yoda", ao );                                // save histograms into the yoda file
 
-   cout << "fastNLO_Histograms.yoda was succesfully produced" << "\n \n";
+   cout << "###################################################################################" << "\n \n";
+   cout << FileName + ".yoda was succesfully produced" << "\n \n";
 
 
 
-
- //delete ao;                                                         // need to find a way to delete hists from memory now
+ //TODO: need to find a way to delete hists from memory now
 //-------------------------- yodaout code - end
 
 
