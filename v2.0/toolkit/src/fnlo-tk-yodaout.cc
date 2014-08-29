@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
    // in the end save it in a yoda file
 
    float xmur = 1.0;
-   float xmuf = 1.0;   
+   float xmuf = 1.0;
    if (argc > 3){									//getting the scale factors from input in form xmur,xmuf
    	string scalefactors = argv[3];
 	xmur = (float)::atof(scalefactors.substr( 0, scalefactors.find(",") ).c_str());
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
 
    //Get RivetID and running number in histogram name by spotting the capital letter in "RIVETID=" in the fnlotable
-   int capital_pos;									//RivetId capital letter where the histogram counter runs
+   int capital_pos = -1;									//RivetId capital letter where the histogram counter runs
    string RivetId = fnlo.GetRivetId();
    for  ( int i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++){
    	if (isupper(fnlo.GetRivetId()[i])){						//find capital letter
@@ -82,11 +82,15 @@ int main(int argc, char** argv) {
                 capital_pos = i;
                 break;
         }
-   } 
+   }
+   if (capital_pos < 0) {
+      cout << "Did not find Rivet ID to define histograms Blafasel" << endl;
+      exit(1);
+   }
 
 
    //naming the file with PDF and scaling factors
-   string PDFName = PDFFile.substr(0, PDFFile.size() - 7);			
+   string PDFName = PDFFile.substr(0, PDFFile.size() - 7);
    stringstream Xmur, Xmuf;
    Xmur << xmur;
    Xmuf << xmuf;
@@ -106,7 +110,7 @@ int main(int argc, char** argv) {
         for (int k = 0 ; k< fnlo.GetNBinDimII(i) ; k++) {                						// starting from the first pT bin of each rapidity
         	bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) );    	// insert pT bin into the vector
         }
-        
+
 	YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, FileName   );					//create histogram pointer
         // pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
 
