@@ -118,9 +118,17 @@ c - 2. Unwanted contributions in result() array are filled with zeros!
                DIFFORD = 0D0
                DO IORD=1,NORD
                   IF (IORD.LT.NORD) THEN
-                     TEVTS = DBLE(NEVT(IORD))
+                     IF (ITABVERSION.LT.20200) THEN
+                        TEVTS = DBLE(NEVT(IORD))
+                     ELSE
+                        TEVTS = DEVT(IORD)
+                     ENDIF
                   ELSE
-                     TEVTS = DBLE(NEVT(2))
+                     IF (ITABVERSION.LT.20200) THEN
+                        TEVTS = DBLE(NEVT(2))
+                     ELSE
+                        TEVTS = DEVT(2)
+                     ENDIF
                   ENDIF
                   WEIGHT = 1D0
                   IF (IWEIGHT.EQ.1) WEIGHT = TWGT(IORD)*TEVTS
