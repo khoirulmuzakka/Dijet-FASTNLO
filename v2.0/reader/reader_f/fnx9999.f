@@ -1104,7 +1104,11 @@ C---  ENDDO
             CHTMP = CTRBDESCRIPT(I,J)
             WRITE(*,*)"#   ",CHTMP(1:LEN_TRIM(CHTMP))
          ENDDO
-         WRITE(*,'(A,I16)')" #   No. of events: ",NEVT(I)
+         IF (ITABVERSION.LT.20200) THEN
+            WRITE(*,'(A,I16)')" #   No. of events: ",NEVT(I)
+         ELSE
+            WRITE(*,'(A,F17.0)')" #   No. of events: ",DEVT(I)
+         ENDIF
          WRITE(*,*)"#   provided by:"
          DO J=1,NCODEDESCR(I)
             CHTMP = CODEDESCRIPT(I,J)
