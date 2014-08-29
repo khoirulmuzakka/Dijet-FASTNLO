@@ -26,19 +26,23 @@ allunc_SOURCES = main.f allunc.f fnx9999.f fn-interface.f alphas-grv.f alphas-gr
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #F77 = gfortran
-AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
+#AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132 -mcmodel=medium
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic
 #AM_FFLAGS= -O -fno-automatic -ffixed-line-length-72 -fpedantic -Wunused
 
 # Libraries to be linked to the main target
 # Require lhapdf and cernlib, use lhapdf-config and cernlib command if possible
+allunc_LDFLAGS =
 #if HAVE_LHAPDFCONFIG
-allunc_LDFLAGS = -Wl,--static `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+#allunc_LDFLAGS += -Wl,--static `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 #else
-allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} -G Motif pawlib`
+#allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} -G Motif pawlib`
 #allunc_LDFLAGS  += -L/usr/lib/x86_64-linux-gnu -Wl,--static -lmathlib -lkernlib -lpawlib -lpacklib
-#allunc_LDFLAGS += -L$(LHAPDFLIBPATH) -lLHAPDF
+#allunc_LDFLAGS  += -L$(LHAPDFLIBPATH) -Wl,-static -lLHAPDF
+allunc_LDFLAGS  += -L$(LHAPDFLIBPATH)  -lLHAPDF
+allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
 #endif
 # To avoid 32-64-bit compatibility problems 64-bit systems require static linking of at least kernlib
 # (Tried to use "--as-needed" option instead of "--static" but didn't work as intended.)
