@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
    stringstream Xmur, Xmuf;
    Xmur << xmur;
    Xmuf << xmuf;
-   string FileName = "fastNLO_" + PDFName + "_" + Xmur.str() + "_" + Xmuf.str();
+   string FileName = PDFName + "_" + Xmur.str() + "_" + Xmuf.str();
 
 
 
