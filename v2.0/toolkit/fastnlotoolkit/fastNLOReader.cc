@@ -1284,10 +1284,24 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
 
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS = IsLO ? &QScale_LO : &QScale;
+   // KR: Having different IXsectUnits in different contributions only works when
+   //     everything always scaled to Ipublunits (unique per table)
+   // Get x section units of each contribution
+   int xUnits = c->GetIXsectUnits();
+   debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
    for (int i=0; i<NObsBin; i++) {
+      double unit = 1.;
+      if (fUnits == kAbsoluteUnits) {
+         // For kAbsoluteUnits remove division by BinSize
+         unit = BinSize[i];
+      } else {
+         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
+         if ( xUnits != Ipublunits ) {
+            unit = unit / pow(10.,xUnits-Ipublunits);
+         }
+      }
       int nxmax = c->GetNxmax(i);
-      double unit = (fUnits==kAbsoluteUnits) ? BinSize[i] : 1.;
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
          for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
             double Q2           = pow(c->GetScaleNode1(i,jS1),2);
@@ -1337,10 +1351,24 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    int scaleVar          = c->GetNpow() == ILOord ? 0 : fScalevar;
    vector<double>* XS    = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS    = IsLO ? &QScale_LO : &QScale;
+   // KR: Having different IXsectUnits in different contributions only works when
+   //     everything always scaled to Ipublunits (unique per table)
+   // Get x section units of each contribution
+   int xUnits = c->GetIXsectUnits();
+   debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
    for (int i=0; i<NObsBin; i++) {
+      double unit = 1.;
+      if (fUnits == kAbsoluteUnits) {
+         // For kAbsoluteUnits remove division by BinSize
+         unit = BinSize[i];
+      } else {
+         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
+         if ( xUnits != Ipublunits ) {
+            unit = unit / pow(10.,xUnits-Ipublunits);
+         }
+      }
       int nxmax = c->GetNxmax(i);
-      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
       for (int j=0; j<c->GetTotalScalenodes(); j++) {
          double scalefac = fScaleFacMuR/c->GetScaleFactor(scaleVar);
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
