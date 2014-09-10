@@ -1,11 +1,12 @@
-#include "fnlo_int_nlojet/fj-sc.h"
-#include "fastjet/SISConePlugin.hh"
+#include "fnlo_int_nlojet/fj-cdfmp.h"
+#include "fastjet/ClusterSequence.hh"
+#include "fastjet/CDFMidPointPlugin.hh"
 #include <cstdio>
 #include <iostream>
 using namespace std;
 
 const bounded_vector<lorentzvector<double> >&
-fj_sc::operator()(const event_hhc& ev, double jetsize) {
+fj_cdfmp::operator()(const event_hhc& ev, double jetsize, double overlapthreshold) {
 
    int np = ev.upper();
 
@@ -38,18 +39,9 @@ fj_sc::operator()(const event_hhc& ev, double jetsize) {
    // define a generic plugin pointer
    fastjet::JetDefinition::Plugin * plugin = 0;
 
-   // allocate a new plugin for SISCone
-   double ovthr = 0.75;
-   //   int n_pass_max = 0;
-   //   double protojet_ptmin = 0.0;
-   //   bool caching = false;
-   //   fastjet::SISConePlugin::SplitMergeScale split_merge_scale = fastjet::SISConePlugin::SM_pttilde;
-   plugin = new fastjet::SISConePlugin(jetsize,
-                                       ovthr);
-   //                                  n_pass_max,
-   //                                  protojet_ptmin,
-   //                                  caching,
-   //                                  split_merge_scale);
+   // allocate a new plugin for CDFMidPointCone
+   plugin = new fastjet::CDFMidPointPlugin(jetsize,
+                                           overlapthreshold);
 
    // create a jet-definition based on the plugin
    fastjet::JetDefinition jet_def(plugin);

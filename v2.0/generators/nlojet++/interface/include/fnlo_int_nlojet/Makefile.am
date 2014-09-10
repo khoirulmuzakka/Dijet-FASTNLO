@@ -14,7 +14,7 @@ AUTOMAKE_OPTIONS = gnu
 #
 # pkginclude_HEADERS would install to $(includedir)/$(PACKAGE_NAME) instead
 fastnloincludedir = $(includedir)/fnlo_int_nlojet
-fastnloinclude_HEADERS = fnlo_int_hhc_nlojet.h pdf-hhc-dummy.h cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h
+fastnloinclude_HEADERS = fnlo_int_hhc_nlojet.h pdf-hhc-dummy.h cone-e.h cone-et.h kt-e.h fj-ak.h fj-kt.h fj-sc.h fj-d0r2.h fj-cdfmp.h fj-jets.h
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

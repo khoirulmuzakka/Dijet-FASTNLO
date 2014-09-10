@@ -1,5 +1,5 @@
-#ifndef __fj_d0r2_h__
-#define __fj_d0r2_h__ 1
+#ifndef __fj_cdfmp_h__
+#define __fj_cdfmp_h__ 1
 
 #include <bits/hhc-event.h>
 #include <bits/hep-bounded_vector.h>
@@ -7,7 +7,7 @@
 using namespace std;
 using namespace nlo;
 
-class fj_d0r2 {
+class fj_cdfmp {
 
    //   private types
    typedef lorentzvector<double> _Lv;
