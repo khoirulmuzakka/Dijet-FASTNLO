@@ -80,11 +80,6 @@ extern "C"{
 #include <algorithm>
 
 // --- fastNLO user: include the header file for the jet algorithm
-#include "fnlo_int_nlojet/fj-ak.h"
-#include "fnlo_int_nlojet/fj-kt.h"
-#include "fnlo_int_nlojet/fj-sc.h"
-#include "fnlo_int_nlojet/fj-cdfmp.h"
-#include "fnlo_int_nlojet/fj-d0r2.h"
 #include "fnlo_int_nlojet/fj-jets.h"
 
 // --- fastNLO ---
@@ -105,11 +100,6 @@ public:
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
-   fj_ak    jetclusak;
-   fj_kt    jetcluskt;
-   fj_sc    jetclussc;
-   fj_cdfmp jetcluscdfmp;
-   fj_d0r2  jetclusd0r2;
    fj_jets  jetclusfj;
 
    // --- define the jet structure
@@ -122,7 +112,7 @@ private:
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
-   say::SetGlobalVerbosity(say::INFO);
+   say::SetGlobalVerbosity(say::DEBUG);
    say::debug["inputfunc"] << "---------- inputfunc called ----------" << endl;
    // --- create fastNLO table and read in steering ... (if not done already)
    if (!ftable) {
@@ -240,21 +230,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    // apply the jet algorithm to partonic 4-vector array p of NLOJet++
    // fastjet clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
    // fastjet cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-   //    if ( jetalgo == 0) {
-   //       pj = jetcluskt(p,jetsize);
-   //    } else if ( jetalgo == 2 ) {
-   //       pj = jetclusak(p,jetsize);
-   //    } else if ( jetalgo == 10 ) {
-   //       pj = jetclussc(p,jetsize);
-   //    } else if ( jetalgo == 11 ) {
-   //       pj = jetcluscdfmp(p,jetsize,overlapthreshold);
-   //    } else if ( jetalgo == 12 ) {
-   //       pj = jetclusd0r2(p,jetsize,overlapthreshold);
-   //    } else {
-   pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
-   //      say::error["fnl-scenario"] << "Undefined jet algorithm jetalgo = " << jetalgo << ", aborted!" << endl;
-   //      exit(1);
-   //   }
+   if ( jetalgo == 0 || jetalgo == 1 || jetalgo == 2 || jetalgo == 10 || jetalgo == 11 || jetalgo == 12 ) {
+      pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
+   } else {
+      say::error["fnl-scenario"] << "Undefined jet algorithm jetalgo = " << jetalgo << ", aborted!" << endl;
+      exit(1);
+   }
    unsigned int nj = pj.upper();
 
    // --- give some debug output before selection and sorting
