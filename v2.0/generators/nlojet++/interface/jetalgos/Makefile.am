@@ -25,9 +25,7 @@ AM_SOURCES =
 libjetalgos_la_SOURCES = cone-e.cc cone-et.cc kt-e.cc $(AM_SOURCES)
 # With FastJet
 if HAVE_FASTJET
-# PDFSCHOOL: Comment out D0 cone missing in PDF school fastjet
-#   libjetalgos_la_SOURCES += fj-ak.cc fj-kt.cc fj-sc.cc fj-d0r2.cc fj-cdfmp.cc fj-jets.cc
-   libjetalgos_la_SOURCES += fj-ak.cc fj-kt.cc fj-sc.cc fj-cdfmp.cc fj-jets.cc
+   libjetalgos_la_SOURCES += fj-ak.cc fj-kt.cc fj-sc.cc fj-d0r2.cc fj-cdfmp.cc fj-jets.cc
 endif
 
 #

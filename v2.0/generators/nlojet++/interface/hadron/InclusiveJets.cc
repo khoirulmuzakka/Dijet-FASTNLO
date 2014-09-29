@@ -84,8 +84,7 @@ extern "C"{
 #include "fnlo_int_nlojet/fj-kt.h"
 #include "fnlo_int_nlojet/fj-sc.h"
 #include "fnlo_int_nlojet/fj-cdfmp.h"
-//# PDFSCHOOL: Comment out D0 cone missing in PDF school fastjet
-//#include "fnlo_int_nlojet/fj-d0r2.h"
+#include "fnlo_int_nlojet/fj-d0r2.h"
 #include "fnlo_int_nlojet/fj-jets.h"
 
 // --- fastNLO ---
@@ -110,7 +109,7 @@ private:
    fj_kt    jetcluskt;
    fj_sc    jetclussc;
    fj_cdfmp jetcluscdfmp;
-   //   fj_d0r2  jetclusd0r2;
+   fj_d0r2  jetclusd0r2;
    fj_jets  jetclusfj;
 
    // --- define the jet structure

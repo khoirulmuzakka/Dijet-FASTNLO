@@ -4,8 +4,7 @@
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/CDFMidPointPlugin.hh"
-//# PDFSCHOOL: Comment out D0 cone missing in PDF school fastjet
-//#include "fastjet/D0RunIIConePlugin.hh"
+#include "fastjet/D0RunIIConePlugin.hh"
 #include "fastjet/SISConePlugin.hh"
 #include <cstdio>
 #include <iostream>
