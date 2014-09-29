@@ -12,7 +12,9 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Data files to be distributed
 #
-fnlo_steering_files = fnl2342b_v23_fix.str fnl2342b_v23_flex.str
+# PDFSCHOOL: Comment out for PDF school
+#fnlo_steering_files = fnl2342b_v23_fix.str fnl2342b_v23_flex.str
+fnlo_steering_files = fnl2342b_v23_fix.str
 pkgdata_DATA = $(fnlo_steering_files)
 EXTRA_DIST =   $(fnlo_steering_files)
 
