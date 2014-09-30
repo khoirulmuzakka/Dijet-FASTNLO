@@ -112,7 +112,7 @@ private:
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
 {
-   say::SetGlobalVerbosity(say::DEBUG);
+   //   say::SetGlobalVerbosity(say::INFO);
    say::debug["inputfunc"] << "---------- inputfunc called ----------" << endl;
    // --- create fastNLO table and read in steering ... (if not done already)
    if (!ftable) {
