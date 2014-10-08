@@ -1806,6 +1806,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 
    // write readable table
    char buf[4000];
+   static const double RoundXDown = 0.96; // to avoid rounding warning messages and have some 'x' in spare.
    strm<<"Warmup.Values {{"<<endl;
    if (fIsFlexibleScale) {
       // table header
@@ -1821,7 +1822,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             fWxRnd[i].first=1.e-6;
          }
          sprintf(buf,"   %4d    %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
-                 i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+                 i,fWxRnd[i].first*RoundXDown,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
          strm<<buf<<endl;
       }
    } else {
@@ -1838,7 +1839,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             fWxRnd[i].first=1.e-6;
          }
          sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2f  %16.2f",
-                 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+                 i,fWxRnd[i].first*RoundXDown, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
          strm<<buf<<endl;
       }
    }
