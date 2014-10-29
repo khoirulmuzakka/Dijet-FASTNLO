@@ -25,7 +25,7 @@
         also the factorization scale by arbitrary factors and have the possiblity to
         change the formula according to which the scale is derived.
 
-        Please check (see point 2 below), which type of table you are using and
+        Please chek (see point 2 below), which type of table you are using and
         then refer to the comments and functions suitable for this fastNLO table.
 
 
@@ -1598,8 +1598,8 @@ double fastNLOReader::CalcNewPDFChecksum() {
    // calculate checksum for some scales and flavors
    double muf = 0;
    if (GetIsFlexibleScaleTable()) {
-      if (fMuFFunc==kExtern) muf = (*Fct_MuF)(91.,1.)/91.*(fScaleFacMuF+0.1) ;
-      else muf = 91.1+0.1*fMuFFunc+fScaleFacMuF;
+      if (fMuFFunc==kExtern) muf = (*Fct_MuF)(91.,10.)/91.*(fScaleFacMuF+0.5) ;
+      else muf = (91.1+0.1*fMuFFunc)/91.+fScaleFacMuF;
    } else muf=(fScaleFacMuF+0.1)+fScalevar*0.1;
    double cks = CalcChecksum(muf);
    return cks;
