@@ -50,9 +50,9 @@ libInclusiveJets_la_SOURCES       = InclusiveJets.cc       $(AM_SOURCES)
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
-AM_CXXFLAGS = -g -O2 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
+AM_CXXFLAGS = -g -O2 -Wall -I${NLOJETINCLUDEPATH} `${FNLOTOOLKITBINPATH}/fnlo-tk-config --cppflags` -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
 # Debug flags
-# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} -I${FNLOTOOLKITINCLUDEPATH} -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} `${FNLOTOOLKITBINPATH}/fnlo-tk-config --cppflags` -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
 # With FastJet
 if HAVE_FASTJETCONFIG
    AM_CXXFLAGS += `${FASTJETBINPATH}/fastjet-config --plugins --cxxflags`
@@ -67,7 +67,7 @@ endif
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
 #
 # All targets
-AM_LDFLAGS = -L${top_builddir}/interface/jetalgos/.libs -L${top_srcdir}/interface/jetalgos -L$(pkglibdir) -ljetalgos -L${FNLOTOOLKITLIBPATH} -lfastnlotoolkit
+AM_LDFLAGS = -L${top_builddir}/interface/jetalgos/.libs -L${top_srcdir}/interface/jetalgos -L$(pkglibdir) -ljetalgos `${FNLOTOOLKITBINPATH}/fnlo-tk-config --ldflags`
 if HAVE_FASTJETCONFIG
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else

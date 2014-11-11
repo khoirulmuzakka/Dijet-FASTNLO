@@ -137,8 +137,8 @@ AC_MSG_NOTICE([******************************************])
 AC_ARG_WITH([fnlotoolkit],
         [AS_HELP_STRING([--with-fnlotoolkit],
         [Specify location of $TMPNAM installation. This takes precedence over
-        an FNLOTOOLKIT environment variable, the prefix path or other methods.
-        Please note: $TMPNAM is mandatory in order to use $PACKAGE_NAME!])],
+         an FNLOTOOLKIT environment variable, the prefix path or other methods.
+         Please note: $TMPNAM is mandatory in order to use $PACKAGE_NAME!])],
         [if test "x$withval" = "xno"; then
             AC_MSG_ERROR([$PACKAGE_NAME CANNOT be used without $TMPNAM! Configuration aborted!])
          fi
@@ -151,28 +151,29 @@ AC_ARG_WITH([fnlotoolkit],
 if test "x$with_fnlotoolkit" != "xno"; then
    if test "x$FNLOTOOLKIT" = "x"; then
       AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
-      AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-cppread],[],[$prefix/bin])
+      AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-config],[],[$prefix/bin])
       if test "x$FNLOTOOLKITBIN" = "x"; then
          AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
-         AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-cppread])
+         AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-config])
          if test "x$FNLOTOOLKITBIN" = "x"; then
             AC_MSG_ERROR([No $TMPNAM installation found. Please install $TMPNAM first. Configuration aborted!])
          fi
       fi
    else
-      AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-cppread],[],[$FNLOTOOLKIT/bin])
+      AC_PATH_PROG([FNLOTOOLKITBIN],[fnlo-tk-config],[],[$FNLOTOOLKIT/bin])
       if test "x$FNLOTOOLKITBIN" = "x"; then
-         AC_MSG_ERROR([fnlo-tk-cppread not found in given path to $TMPNAM! Configuration aborted!])
+         AC_MSG_ERROR([fnlo-tk-config not found in given path to $TMPNAM! Configuration aborted!])
       fi
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$FNLOTOOLKITBIN" != "x"; then
       AC_MSG_NOTICE([$TMPNAM settings:])
-      AC_SUBST([FNLOTOOLKIT], [`dirname $FNLOTOOLKITBIN`])
-      AC_SUBST([FNLOTOOLKITPREFIX], [`dirname $FNLOTOOLKIT`])
+#      AC_SUBST([FNLOTOOLKIT], [`dirname $FNLOTOOLKITBIN`])
+#      AC_SUBST([FNLOTOOLKITPREFIX], [`dirname $FNLOTOOLKIT`])
+      AC_SUBST([FNLOTOOLKITPREFIX],  [`$FNLOTOOLKITBIN --prefix`])
       AC_SUBST([FNLOTOOLKITBINPATH], ["$FNLOTOOLKITPREFIX/bin"])
-      AC_SUBST([FNLOTOOLKITLIBPATH], ["$FNLOTOOLKITPREFIX/lib"])
-      AC_SUBST([FNLOTOOLKITINCLUDEPATH],["$FNLOTOOLKITPREFIX/include"])
+      AC_SUBST([FNLOTOOLKITLIBPATH], [`$FNLOTOOLKITBIN --libdir`])
+      AC_SUBST([FNLOTOOLKITINCLUDEPATH],[`$FNLOTOOLKITBIN --incdir`])
       AC_MSG_RESULT([Using $FNLOTOOLKITPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $FNLOTOOLKITBINPATH for the binaries])
       AC_MSG_RESULT([Using $FNLOTOOLKITLIBPATH for the library])
