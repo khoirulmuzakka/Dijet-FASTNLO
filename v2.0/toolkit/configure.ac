@@ -483,6 +483,7 @@ AC_CONFIG_FILES([Makefile
                  pyext/Makefile
                  pyext/setup.py
                  src/Makefile
+                 src/fnlo-tk-config
                 ])
 #                 doc/Makefile
 #                 doc/paper/Makefile

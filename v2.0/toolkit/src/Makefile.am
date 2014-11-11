@@ -12,10 +12,11 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Targets
 #
-# The C++ fastnlo toolkit example programs
+# The C++ fastnlo toolkit utility and example programs
 #
 if HAVE_LHAPDF
    bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append
+   bin_SCRIPTS  = fnlo-tk-config
 if HAVE_YODA
    bin_PROGRAMS += fnlo-tk-yodaout
 endif
@@ -25,6 +26,9 @@ endif
 # Sources
 #
 # All source files which go into the targets (and have to be distributed)
+# Scripts
+EXTRA_DIST = fnlo-tk-config.in
+# Programs to be compiled
 fnlo_tk_cppread_SOURCES = fnlo-tk-cppread.cc
 fnlo_tk_example_SOURCES = fnlo-tk-example.cc
 fnlo_tk_yodaout_SOURCES = fnlo-tk-yodaout.cc

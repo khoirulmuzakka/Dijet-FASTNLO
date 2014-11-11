@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# fastNLO Toolkit config script
+#
+# created by K. Rabbertz: 11.11.2014
+# following an example from LHAPDF
+#
+#-----------------------------------------------------------------------
+
+# Define necessary variables
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+if [[ $# -eq 0 || -n $( echo $* | egrep -- "--help|-h" ) ]]; then
+    echo "fnlo-tk-config: Configuration tool for the fastNLO Toolkit"
+    echo "                http://fastnlo.hepforge.org/"
+    echo
+    echo "Usage: fnlo-tk-config [[--help|-h] | [--option]]"
+    echo "Options:"
+    echo "  --help | -h : Show this help message."
+    echo "  --prefix    : Show the installation prefix."
+    echo "  --incdir    : Show the path to the include directory for fastNLO Toolkit header files."
+    echo "  --libdir    : Show the path to the directory for the fastNLO Toolkit libraries."
+    echo
+    echo "  --cppflags  : Get compiler flags to use with the C preprocessor stage of C++ compilation"
+    echo "  --ldflags   : Get compiler flags to use with the linker stage of any compilation"
+    echo
+    echo "  --version   : Return the fastNLO Toolkit version and revision number"
+fi
+
+OUT=""
+
+tmp=$( echo "$*" | egrep -- '--\<prefix\>')
+test -n "$tmp" && OUT="$OUT @prefix@"
+
+tmp=$( echo "$*" | egrep -- '--\<incdir\>')
+test -n "$tmp" && OUT="$OUT @includedir@"
+
+tmp=$( echo "$*" | egrep -- '--\<cppflags\>')
+test -n "$tmp" && OUT="$OUT -I@includedir@"
+
+tmp=$( echo "$*" | egrep -- '--\<libdir\>')
+test -n "$tmp" && OUT="$OUT @libdir@"
+
+tmp=$( echo "$*" | egrep -- '--\<ldflags\>')
+test -n "$tmp" && OUT="$OUT -L@libdir@ -lfastnlotoolkit"
+
+## Version& revision number
+tmp=$( echo "$*" | egrep -- '--\<version\>')
+test -n "$tmp" && OUT="$OUT @PACKAGE_VERSION@_@SVNREV@"
+
+echo $OUT
