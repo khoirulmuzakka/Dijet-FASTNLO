@@ -45,11 +45,11 @@ class fastNLOTable : public fastNLOBase {
    std::pair < double, double > GetObsBin(int bin, int dim) const { return Bin[bin][dim];}      // Get observable binning for given dimension and given bin
    std::vector < std::pair < double, double > > GetObsBinDim(int dimension) const;              // Get observable binning of given dimension
 
-   int GetNBinDimI() const;                                                                     // Number of bins in first dimension
-   int GetNBinDimII(int DimIBin) const;                                                         // Number of bins in second dimension for given first dimension
+   unsigned int GetNBinDimI() const;                                                            // Number of bins in first dimension
+   unsigned int GetNBinDimII(int DimIBin) const;                                                // Number of bins in second dimension for given first dimension
 
    std::vector < std::pair < double, double > > GetBinDimI() const;                             // Get binning of first dimension
-   std::vector < std::pair < double, double > > GetBinDimII(int DimIBin) const;                 // Get binning os second dimension
+   std::vector < std::pair < double, double > > GetBinDimII(int DimIBin) const;                 // Get binning of second dimension
 
    double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
    std::vector < double > GetLoBin(int dimension) const;

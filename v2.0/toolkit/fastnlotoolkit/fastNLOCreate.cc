@@ -618,7 +618,7 @@ void fastNLOCreate::GetWarmupValues() {
    std::cout.setstate(std::ios::failbit) ; // no cout in the following
    std::cerr.setstate(std::ios::failbit) ; // no cout in the following
    info>>"\n";
-   info>> (_SSEP41+_SSEP41+_SSEP41) << endl;
+   info>> (_SSEP40+_SSEP40+_SSEP40) << endl;
    info["GetWarmupValues"]<<"Trying to get warmup values. Please ignore following messages from parser."<<endl;
    // try to get warmup values
    vector<vector<double> > warmup = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
@@ -635,7 +635,7 @@ void fastNLOCreate::GetWarmupValues() {
    }
 
    // inform user about success
-   info>> (_SSEP41+_SSEP41+_SSEP41) << endl;
+   info>> (_SSEP40+_SSEP40+_SSEP40) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
    info["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;

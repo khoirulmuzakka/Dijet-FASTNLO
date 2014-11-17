@@ -253,9 +253,6 @@ void fastNLOBase::PrintHeader() const {
 
 //______________________________________________________________________________
 void fastNLOBase::PrintWelcomeMessage() {
-   //---  Initialization for nice printing
-   const string CSEPS = " ##################################################################################\n";
-   const string LSEPS = " #---------------------------------------------------------------------------------\n";
 
    char fnlo[100];
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
@@ -270,42 +267,42 @@ void fastNLOBase::PrintWelcomeMessage() {
    char quotev2[200]         = FNLO_QUOTEv2;
    char years[100]           = FNLO_YEARS;
 
-   shout>>"\n";
-   shout>>""<<CSEPS;
-   shout<<"\n";
-   shout<<" "<<fnlo<<"_"<<subproject<<endl;
-   shout<<" Version "<<package_version<<"_"<<svnrev<<endl;
-   shout<<"\n";
-   shout<<" C++ program and toolkit to read and create fastNLO v2 tables and"<<endl;
-   shout<<" derive QCD cross sections using PDFs, e.g. from LHAPDF"<<endl;
-   shout<<"\n";
-   shout>>""<<LSEPS;
-   shout<<"\n";
-   shout<<" Copyright © "<<years<<" "<<fnlo<<" Collaboration"<<endl;
-   shout<<" "<<authors<<endl;
-   shout<<"\n";
-   shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
-   shout>>" # it under the terms of the GNU General Public License as published by"<<endl;
-   shout>>" # the Free Software Foundation, either version 3 of the License, or"<<endl;
-   shout>>" # (at your option) any later version."<<endl;
-   shout>>" #\n";
-   shout>>" # This program is distributed in the hope that it will be useful,"<<endl;
-   shout>>" # but WITHOUT ANY WARRANTY; without even the implied warranty of"<<endl;
-   shout>>" # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the"<<endl;
-   shout>>" # GNU General Public License for more details."<<endl;
-   shout>>" #\n";
-   shout>>" # You should have received a copy of the GNU General Public License"<<endl;
-   shout>>" # along with this program. If not, see <http://www.gnu.org/licenses/>."<<endl;
-   shout>>" #\n";
-   shout>>""<<LSEPS;
-   shout>>" #\n";
-   shout<<" The projects web page can be found at:"<<endl;
-   shout<<"   "<<webpage<<endl;
-   shout<<"\n";
-   shout<<" If you use this code, please cite:"<<endl;
-   shout<<"   "<<authorsv14<<", "<<quotev14<<endl;
-   shout<<"   "<<authorsv2<<", "<<quotev2<<endl;
-   shout<<"\n";
-   shout>>""<<CSEPS;
+   cout  << endl;
+   cout  << fastNLO::_CSEPSC << endl;
+   shout << "" << endl;
+   shout << fnlo << "_" << subproject << endl;
+   shout << "Version " << package_version << "_" << svnrev << endl;
+   shout << "" << endl;
+   shout << "C++ program and toolkit to read and create fastNLO v2 tables and" << endl;
+   shout << "derive QCD cross sections using PDFs, e.g. from LHAPDF" << endl;
+   shout << "" << endl;
+   cout  << fastNLO::_SSEPSC << endl;
+   shout << "" << endl;
+   shout << "Copyright © " << years << " " << fnlo << " Collaboration" << endl;
+   shout << authors << endl;
+   shout << "" << endl;
+   shout << "This program is free software: you can redistribute it and/or modify" << endl;
+   shout << "it under the terms of the GNU General Public License as published by" << endl;
+   shout << "the Free Software Foundation, either version 3 of the License, or" << endl;
+   shout << "(at your option) any later version." << endl;
+   shout << "" << endl;
+   shout << "This program is distributed in the hope that it will be useful," << endl;
+   shout << "but WITHOUT ANY WARRANTY; without even the implied warranty of" << endl;
+   shout << "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the" << endl;
+   shout << "GNU General Public License for more details." << endl;
+   shout << "" << endl;
+   shout << "You should have received a copy of the GNU General Public License" << endl;
+   shout << "along with this program. If not, see <http://www.gnu.org/licenses/>." << endl;
+   shout << "" << endl;
+   cout  << fastNLO::_SSEPSC << endl;
+   shout << "" << endl;
+   shout << "The projects web page can be found at:" << endl;
+   shout << "  " << webpage << endl;
+   shout << "" << endl;
+   shout << "If you use this code, please cite:" << endl;
+   shout << "  " << authorsv14 << ", " << quotev14 << endl;
+   shout << "  " << authorsv2 << ", " << quotev2 << endl;
+   shout << "" << endl;
+   cout  << fastNLO::_CSEPSC << endl;
    fWelcomeOnce = true;
 }

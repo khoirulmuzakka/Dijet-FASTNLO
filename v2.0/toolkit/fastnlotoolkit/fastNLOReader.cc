@@ -960,9 +960,10 @@ vector< vector < double > > fastNLOReader::GetCrossSection2Dim() {
    if (XSection.empty()) CalcCrossSection();
    vector< vector < double > > XSection2Dim;
    int k = 0;
-   for (int i = 0; i < GetNBinDimI(); i++) {
+   for (unsigned int i = 0; i < GetNBinDimI(); i++) {
       XSection2Dim.push_back(vector < double >());
-      for (int j = 0; j < GetNBinDimII(i); j++) {
+      int  NBinDim  = GetNBinDimII(i);
+      for (int j = 0; j < NBinDim; j++) {
          XSection2Dim[i].push_back(XSection[k]);
          k++;
       }
@@ -2713,12 +2714,12 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
    //const int ithc2 = kthc.empty() ? -1 : ContrId( fastNLO::kThresholdCorrection, fastNLO::kNextToLeading);
    const int ithc2 = kthc.empty() ? -1 : ContrId(kThresholdCorrection,kNextToLeading);
 
-   cout << _DSEP << endl;
+   cout << _DSEPLC << endl;
    printf(" Cross Sections\n");
    if (!GetIsFlexibleScaleTable())
       printf(" The scale chosen here are: mu_f = % #6.3f * %s, and mu_r = % #6.3f * %s \n",
              fScaleFacMuF, B_LO()->GetScaleDescription().c_str(), fScaleFacMuR, B_LO()->GetScaleDescription().c_str());
-   cout << _SSEP << endl;
+   cout << _SSEPLC << endl;
 
    if (NDim == 1) {
       // non-perturbative corrections (just first np correction)
@@ -2732,7 +2733,7 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       unsigned int NDimBins[NDim];
       printf("%s [ %-12s ] %s\n",
              header0.c_str(),DimLabel[0].c_str(),header2.c_str());
-      cout << _SSEP << endl;
+      cout << _SSEPLC << endl;
       for (int i=0; i<NObsBin; i++) {
          NDimBins[0] = 1;
          if (ithc2<0 && inpc1<0) {
@@ -2767,7 +2768,7 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       unsigned int NDimBins[NDim];
       printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
              header0.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[0].c_str(),header2.c_str());
-      cout << _SSEP << endl;
+      cout << _SSEPLC << endl;
       for (int i=0; i<NObsBin; i++) {
          for (int j=0; j<NDim; j++) {
             if (i==0)                                  NDimBins[j] = 1;

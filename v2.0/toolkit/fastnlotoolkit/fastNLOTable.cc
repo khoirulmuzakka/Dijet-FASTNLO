@@ -100,17 +100,19 @@ vector < pair < double, double > >  fastNLOTable::GetBinDimI() const {
    return Bins;
 }
 // ___________________________________________________________________________________________________
-int fastNLOTable::GetNBinDimI() const {
+unsigned int fastNLOTable::GetNBinDimI() const {
    //! Get number of bins of first dimension
    return GetBinDimI().size();
 }
 // ___________________________________________________________________________________________________
 vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const {
    //! Get binning of second dimension for bin 'DimIBin' of first dimension
-   if (GetNumDiffBin() < 2)
-      error["GetCrossSection2Dim"]<<"This function is only valid for NDiffBin=2."<<endl;
-   pair< double, double> bin = GetBinDimI()[DimIBin];
    std::vector< std::pair<double, double > > Bins;
+   if (GetNumDiffBin() < 2) {
+      warn["GetCrossSection2Dim"]<<"This function is only valid for NDiffBin=2."<<endl;
+      return Bins;
+   }
+   pair< double, double> bin = GetBinDimI()[DimIBin];
    for (size_t i = 0; i < Bin.size(); ++i) {
       if (Bin[i][0] == bin)
          Bins.push_back(Bin[i][1]);
@@ -118,8 +120,12 @@ vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const
    return Bins;
 }
 // ___________________________________________________________________________________________________
-int fastNLOTable::GetNBinDimII(int DimIBin) const {
+unsigned int fastNLOTable::GetNBinDimII(int DimIBin) const {
    //! Get number of bins of second dimension for bin 'DimIBin' of first dimension
+   if (GetNumDiffBin() < 2) {
+      warn["GetNBinDimII"]<<"This function is only valid for NDiffBin>=2."<<endl;
+      return 0;
+   }
    return GetBinDimII(DimIBin).size();
 }
 
@@ -811,18 +817,17 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    //          4: Also print scale nodes of Block B for each contribution (BS)
    //          5: Also print sigma tilde of Block B (not implemented yet)
 
-   //---  Initialization for nice printing
-   const string CSEPS = "##################################################################################\n";
-   const string LSEPS = "#---------------------------------------------------------------------------------\n";
-
    //
    // Print basic scenario information (always)
    //
-   printf("\n");
-   printf(" %s",CSEPS.c_str());
-   printf(" # Information on fastNLO scenario: %s\n",ScenName.data());
-   printf(" %s",LSEPS.c_str());
-   printf(" # Description:\n");
+   char buffer[1024];
+   cout  << endl;
+   cout  << _CSEPSC << endl;
+   snprintf(buffer, sizeof(buffer), "Information on fastNLO scenario: %s",ScenName.data());
+   shout << buffer << endl;
+   cout  << _SSEPSC << endl;
+   snprintf(buffer, sizeof(buffer), "Description:");
+   shout << buffer << endl;
    for (unsigned int i=0; i<ScDescript.size(); i++) {
       printf(" #   %s\n",ScDescript[i].data());
    }
@@ -899,27 +904,26 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    if (iprint > 0) {
       Print();
    }
-   printf(" #\n");
-   printf(" %s",CSEPS.c_str());
+   shout << "" << endl;
+   cout  << _CSEPSC << endl;
 }
 
 
 //______________________________________________________________________________
 void fastNLOTable::PrintTableInfo(const int iprint) const {
-   debug["PrintTableInfo"]<<"iprint="<<iprint<<endl;
+   debug["PrintTableInfo"] << "Printing flag iprint = " << iprint << endl;
    //
    //  Print basic info about fastNLO table and its contributions
    //   - iprint: iprint > 0: print also contribution descriptions
    //
 
-   //---  Initialization for nice printing
-   const string CSEPS = "##################################################################################\n";
-   const string LSEPS = "#---------------------------------------------------------------------------------\n";
-   printf("\n");
-   printf(" %s",CSEPS.c_str());
-   printf(" # Overview on contribution types and numbers contained in table:\n");
-   printf(" %s",LSEPS.c_str());
-   printf(" # Number of contributions: %2i\n",Ncontrib);
+   char buffer[1024];
+   cout  << endl;
+   cout  << _CSEPSC << endl;
+   shout << "Overview on contribution types and numbers contained in table:" << endl;
+   cout  << _SSEPSC << endl;
+   snprintf(buffer, sizeof(buffer), "Number of contributions: %2i", Ncontrib);
+   shout << buffer << endl;
 
    int iccount[21] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
    int ictype = 0;
@@ -935,15 +939,16 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
       }
       // KR: How can I access ContrId from here ???
       iccount[ictype]++;
-      cout << " # "<< "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
-           << ", order: " << c->GetContributionDescription()[0]
-           << ", by: " << c->GetCodeDescription()[0] << endl;
+      shout << "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
+            << ", order: " << c->GetContributionDescription()[0]
+            << ", by: " << c->GetCodeDescription()[0] << endl;
       if (iprint > 0) {
          for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {
-            printf(" # \t\t%s\n",c->GetCodeDescription()[k].c_str());
+            snprintf(buffer, sizeof(buffer), "\t\t%s",c->GetCodeDescription()[k].c_str());
+            shout << buffer << endl;
          }
       }
    }
-   printf(" %s",CSEPS.c_str());
+   cout << _CSEPSC << endl;
 
 }

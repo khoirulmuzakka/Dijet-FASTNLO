@@ -100,7 +100,7 @@ PrimalScream::PrimalScream(std::string classname) { //,std::string prefix=""){
    info  = speaker(" # INFO:    ",say::INFO);
    warn  = speaker(" # WARNING! ",say::WARNING);
    error = speaker(" # ERROR!   ",say::ERROR,true);
-   shout = speaker(" #",say::ERROR,false);
+   shout = speaker(" # ",say::ERROR,false);
    shout.SetClassName(___cn);
    SetClassName(classname);
    //debug["PrimalScream"]<<"Primal Scream initialized."<<std::endl;
@@ -131,7 +131,7 @@ speaker man(" # ",say::MANUAL);
 speaker info(" # INFO: ",say::INFO);
 speaker warn(" # WARNING! ",say::WARNING);
 speaker error(" # ERROR! ",say::ERROR,true);
-speaker shout(" #",say::ERROR,false);
+speaker shout(" # ",say::ERROR,false);
 //debug["namespace say"]<<"speakers initialized."<<std::endl;
 int SetGlobalVerbosity(Verbosity verbosity) {
    return speaker::SetGlobalVerbosity(verbosity);

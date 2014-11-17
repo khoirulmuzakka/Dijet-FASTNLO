@@ -4,6 +4,7 @@
 #include <math.h>
 #include "fastnlotk/Alphas.h"
 #include "fastnlotk/speaker.h"
+#include "fastnlotk/fastNLOConstants.h"
 
 using namespace std;
 
@@ -87,15 +88,13 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
    double Q2    = pow(mu,2);
 
    // - initialize pi and do some initial print out
-   const string csep41("#########################################");
-   const string cseps = csep41 + csep41;
    static bool first = true;
    static const double twopi = 2. * 4. * atan(1.);
    if (first) {
       first = false;
-      cout << endl << " " << cseps << endl;
-      printf(" # ALPHAS-GRV: First call:\n");
-      //     say::info["ALPHAS-GRV"] << "First call:\n";
+      cout << endl;
+      cout << fastNLO::_CSEPSC << endl;
+      say::shout["ALPHAS-GRV"] << "First call:\n";
       PrintInfo();
    }
 
@@ -130,17 +129,22 @@ double Alphas::CalcAlphasMu(double mu, double alphasMz, int nLoop, int nFlavors)
 
 void Alphas::PrintInfo() {
    // - Print info
-   const string csep41("#########################################");
-   const string cseps = csep41 + csep41;
+   char buffer[1024];
    static const double twopi = 2. * 4. * atan(1.);
-   cout << " " << cseps << endl;
-   printf(" # ALPHAS-GRV: PI              = %#18.15f\n",twopi/2.);
-   printf(" # ALPHAS-GRV: M_Z/GeV         = %#9.6f\n",fMz);
-   printf(" # ALPHAS-GRV: a_s(M_Z)        = %#9.6f\n",fAlphasMz);
-   printf(" # APLHAS-GRV: a_s loop        = %2i\n",fnLoop);
-   printf(" # APLHAS-GRV: flavor-matching = %s\n",(bFlavorMatching?"   T":"   F"));
-   printf(" # APLHAS-GRV: nf (M_Z)        = %2d\n",CalcNf(fMz));
-   cout << " " << cseps << endl;
+   cout << fastNLO::_CSEPSC << endl;
+   snprintf(buffer, sizeof(buffer), "PI              = %#18.15f",twopi/2.);
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   snprintf(buffer, sizeof(buffer), "M_Z/GeV         = %#9.6f",fMz);
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   snprintf(buffer, sizeof(buffer), "a_s(M_Z)        = %#9.6f",fAlphasMz);
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   snprintf(buffer, sizeof(buffer), "a_s loop        = %2i",fnLoop);
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   snprintf(buffer, sizeof(buffer), "flavor-matching = %s",(bFlavorMatching?"   T":"   F"));
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   snprintf(buffer, sizeof(buffer), "nf (M_Z)        = %2d",CalcNf(fMz));
+   say::shout["ALPHAS-GRV"] << buffer << endl;
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 

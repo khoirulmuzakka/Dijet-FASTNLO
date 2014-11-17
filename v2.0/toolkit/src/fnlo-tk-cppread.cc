@@ -1,4 +1,4 @@
-///@file********************************************************************
+///********************************************************************
 ///
 ///     fastNLO_reader: FNLOCPPREAD
 ///     Program to read fastNLO v2 tables and derive
@@ -40,63 +40,56 @@ int main(int argc, char** argv) {
    using namespace say;          // namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      // namespace for fastNLO constants
 
-   //---  Initialization for nice printing
-   const string CSEPS = "##################################################################################\n";
-   const string LSEPS = "#---------------------------------------------------------------------------------\n";
-   const string CSEPL = "####################################################################################################################################################################\n";
-
    //---  Parse commmand line
-   // Don't miss help output, default is INFO
-   SetGlobalVerbosity(MANUAL);
-   shout>>"\n";
-   shout>>" "<<CSEPS;
-   shout<<" fnlo-read: Program Steering"<<endl;
-   shout>>" "<<LSEPS;
+   char buffer[1024];
+   cout << endl;
+   cout << _CSEPSC << endl;
+   shout["fnlo-read"] << "Program Steering"<<endl;
+   cout << _SSEPSC << endl;
+   // --- fastNLO table
    string tablename = "table.tab";
    if (argc <= 1) {
-      shout<<" fnlo-read: WARNING! No table name given,"<<endl;
-      shout<<" taking the default table.tab instead!"<<endl;
-      shout<<"   For an explanation of command line arguments type:"<<endl;
-      shout<<"   ./fnlo-tk-cppread -h"<<endl;
+      warn ["fnlo-read"] << "No table name given," << endl;
+      shout["fnlo-read"] << "taking the default table.tab instead!" << endl;
+      shout["fnlo-read"] << "  For an explanation of command line arguments type:" << endl;
+      shout["fnlo-read"] << "  ./fnlo-tk-cppread -h" << endl;
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
-         man<<""<<endl;
-         man<<"Usage: ./fnlo-tk-cppread [arguments]"<<endl;
-         man<<"Table input file, def. = table.tab"<<endl;
-         man<<"PDF set, def. = cteq6m.LHpdf"<<endl;
-         man<<"   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd."<<endl;
-         man<<"   For LHAPDF6: Drop filename extensions and give PDF directory instead."<<endl;
-         man<<"Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7"<<endl;
-         man<<"Name of desired alpha_s evolution code, def. = GRV."<<endl;
-         man<<"   Alternatives are: LHAPDF, RUNDEC, and"<<endl;
-         man<<"                     QCDNUM, or HOPPET, IF compiled with these options!"<<endl;
-         man<<""<<endl;
-         man<<"Use \"_\" to skip changing a default argument."<<endl;
-         man<<""<<endl;
+         shout << "" << endl;
+         shout << "Usage: ./fnlo-tk-cppread [arguments]" << endl;
+         shout << "Table input file, def. = table.tab" << endl;
+         shout << "PDF set, def. = CT10nlo.LHgrid" << endl;
+         shout << "   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd." << endl;
+         shout << "   For LHAPDF6: Drop filename extensions and give PDF directory instead." << endl;
+         shout << "Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
+         shout << "Name of desired alpha_s evolution code, def. = GRV." << endl;
+         shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
+         shout << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
+         shout << "" << endl;
+         shout << "Use \"_\" to skip changing a default argument." << endl;
+         shout << "" << endl;
          return 0;
       } else if (tablename == "_") {
          tablename = "table.tab";
-         shout<<" fnlo-read: WARNING! No table name given,"<<endl;
-         shout<<" taking the default table.tab instead!"<<endl;
+         warn ["fnlo-read"] << "No table name given," << endl;
+         shout["fnlo-read"] << " taking the default table.tab instead!" << endl;
       } else {
-         shout<<" fnlo-read: Evaluating table: " << tablename << endl;
+         shout["fnlo-read"] << "Evaluating table: " << tablename << endl;
       }
    }
-
    //---  PDF set
    string PDFFile = "X";
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
    }
    if (argc <= 2 || PDFFile == "_") {
-      PDFFile = "cteq6m.LHpdf";
-      shout<<" fnlo-read: WARNING! No PDF set given,"<<endl;
-      shout<<" taking cteq6m.LHpdf instead!"<<endl;
+      PDFFile = "CT10nlo.LHgrid";
+      warn ["fnlo-read"] << "No PDF set given," << endl;
+      shout["fnlo-read"] <<" taking CT10nlo.LHgrid instead!" << endl;
    } else {
-      shout<<" fnlo-read: Using PDF set   : " << PDFFile << endl;
+      shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
    }
-
    //--- Number of scale settings
    unsigned int nscls = 1;
    const unsigned int nsclmax = 7;
@@ -107,18 +100,20 @@ int main(int argc, char** argv) {
       ch2tmp = (const char*) argv[3];
    }
    if (argc <= 3 || ch2tmp == "_") {
-      shout<<" fnlo-read: No request given for number of scale settings,"<<endl;
-      shout<<"            investigating primary scale only."<<endl;
+      shout["fnlo-read"] << "No request given for number of scale settings," << endl;
+      shout << "            investigating primary scale only." << endl;
    } else {
       nscls = atoi(argv[3]);
       if (nscls < 1) {
-         printf(" # fnlo-read: ERROR! No scale setting or even less??? Aborting! nscls = %i\n",nscls);
+         snprintf(buffer, sizeof(buffer), "No scale setting or even less??? Aborting! nscls = %i",nscls);
+         error["fnlo-read"] << buffer << endl;
          exit(1);
       } else if (nscls > nsclmax) {
-         printf(" # fnlo-read: ERROR! Too many scale settings requested, aborting! nscls = %i\n",nscls);
+         snprintf(buffer, sizeof(buffer), "Too many scale settings requested, aborting! nscls = %i\n",nscls);
+         error["fnlo-read"] << buffer << endl;
          exit(1);
       } else {
-         shout<<" fnlo-read: If possible, will try to do "<<nscls<<" scale setting(s)."<<endl;
+         shout["fnlo-read"] << "If possible, will try to do " << nscls << " scale setting(s)." << endl;
       }
    }
 
@@ -128,18 +123,18 @@ int main(int argc, char** argv) {
       AsEvolCode = (const char*) argv[4];
    }
    if (argc <= 4 || AsEvolCode == "_") {
-      shout<<" fnlo-read: No request given for alpha_s evolution code,"<<endl;
-      shout<<"            using GRV default."<<endl;
+      shout["fnlo-read"] << "No request given for alpha_s evolution code," << endl;
+      shout << "            using GRV default." << endl;
    } else {
-      shout<<" fnlo-read: Using alpha_s evolution code: " << AsEvolCode << endl;
+      shout["fnlo-read"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
    }
 
    //---  Too many arguments
    if (argc > 5) {
-      printf("fnlo-read: ERROR! Too many arguments, aborting!\n");
-      return 1;
+      error["fnlo-read"] << "Too many arguments, aborting!" << endl;
+      exit(1);
    }
-   shout>>" "<<CSEPS;
+   cout << _CSEPSC << endl;
    //---  End of parsing arguments
 
 
@@ -259,7 +254,8 @@ int main(int argc, char** argv) {
    //         fnlo.SetMz(91.70);
    //
    //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
-   //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
+   //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184;
+   //            PDG 2014: M_Z = 91.1876, alpha_s(M_Z) = 0.1185)
    //
 
 
@@ -293,13 +289,14 @@ int main(int argc, char** argv) {
    // --- fastNLO user:
    //     The alpha_s evolution is provided by the code of the chosen
    //     interface, e.g. GRV alpha_s for the fnlo instance here.
-   //     The value of alpha_s(M_Z) can be changed from its default PDG 2012 values
+   //     The value of alpha_s(M_Z) can be changed from its default PDG 2014 value
    //     like this:
    //
    //            fnlo.SetAlphasMz(0.1179);
    //
    //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
-   //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184)
+   //            PDG 2012: M_Z = 91.1876, alpha_s(M_Z) = 0.1184;
+   //            PDG 2014: M_Z = 91.1876, alpha_s(M_Z) = 0.1185)
    //
    //     To use a different alpha_s evolution code one has to interface it.
    //     Here, for example, we use the above-mentioned CRunDec code:
@@ -665,7 +662,7 @@ int main(int argc, char** argv) {
    //   double Mz = 91.174;  // ABM11
    //   double Mz = 91.188;  // CTEQ
    //   double Mz = 91.187;  // HERAPDF
-   double Mz = 91.1876; // MSTW, PDG 2013
+   double Mz = 91.1876; // MSTW, PDG 2012-2014
    //   double Mz = 91.2;    // NNPDF
    fnlo->SetMz(Mz);
 
@@ -673,6 +670,7 @@ int main(int argc, char** argv) {
    // double asmz = fnlo->GetAlphasMz(Mz);
    // cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
    fnlo->SetAlphasMz(0.1184);// PDG 2013
+   //   fnlo->SetAlphasMz(0.1185);// PDG 2014
    //   fnlo->SetAlphasMz(0.1180);// CT10-NLO
    //   fnlo->SetAlphasMz(0.1190);// NNPDF21-NLO
 
@@ -705,16 +703,10 @@ int main(int argc, char** argv) {
    // 15.
    // ---- Example to do some cross section analysis ---- //
    // Some initialization
-   string CSEP41("#########################################");
-   string DSEP41("=========================================");
-   string SSEP41("-----------------------------------------");
-   string CSEP = CSEP41 + CSEP41 + CSEP41 + CSEP41;
-   string DSEP = DSEP41 + DSEP41 + DSEP41 + DSEP41;
-   string SSEP = SSEP41 + SSEP41 + SSEP41 + SSEP41;
-   printf("\n");
-   printf("%s",CSEPL.c_str());
-   printf("fnlo-read: Calculate my cross sections\n");
-   printf("%s",CSEPL.c_str());
+   cout << endl;
+   cout << _CSEPLC << endl;
+   shout["fnlo-read"] << "Calculate my cross sections" << endl;
+   cout << _CSEPLC << endl;
 
    // Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
    // fastNLOAlphas fnlo( tablename , PDFFile , 0 );
@@ -872,7 +864,6 @@ int main(int argc, char** argv) {
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
             warn["fnlo-read"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
-            //            printf("fnlo-read: WARNING! 2-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
@@ -881,8 +872,6 @@ int main(int argc, char** argv) {
             warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
                               << fnlo->GetScaleFactorMuR() << ","
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
-            //            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
-            // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
             fnlo->CalcCrossSection();
             xsthc2 = fnlo->GetCrossSection();
@@ -900,7 +889,6 @@ int main(int argc, char** argv) {
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc1, true);
          if (!SetOn) {
             warn["fnlo-read"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
-            //            printf("fnlo-read: WARNING! 1-loop threshold corrections could not be switched on, skip threshold correction factors!\n");
          }
 
          // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
@@ -909,8 +897,6 @@ int main(int argc, char** argv) {
             warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
                               << fnlo->GetScaleFactorMuR() << ","
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
-            //            printf("fnlo-read: WARNING! The selected scale variation (xmur, xmuf) = (% #10.3f, % #10.3f) is not possible with this table, skip threshold correction factors!\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
-            // skip this part, check on lthcvar later for proper, i.e. no printout
          } else {
             fnlo->CalcCrossSection();
             xsthc1 = fnlo->GetCrossSection();
@@ -955,10 +941,11 @@ int main(int argc, char** argv) {
       }
 
       // Start print out
-      cout << DSEP << endl;
-      printf(" My Cross Sections\n");
-      printf(" The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f\n",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
-      cout << SSEP << endl;
+      cout  << _DSEPLC << endl;
+      shout << "My Cross Sections" << endl;
+      snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+      shout << buffer << endl;
+      cout  << _SSEPLC << endl;
 
       // Get table constants relevant for print out
       const int NDim = fnlo->GetNumDiffBin();
@@ -978,7 +965,7 @@ int main(int argc, char** argv) {
       vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
-      string header0 = "  IObs  Bin Size IODimO ";
+      string header0 = " #IObs  Bin Size IODimO ";
       string header1 = " IODimI ";
       string header2 = " LO cross section";
       if (inlo>-1) {
@@ -1006,10 +993,11 @@ int main(int argc, char** argv) {
          header2 += "     KNPC1";
       }
       if (NDim == 1) {
-         printf("%s [ %-17s ]  <%-12.12s> %s\n",
-                // TODO: Put proper scale description here instead of mu1_[GeV]
-                header0.c_str(),DimLabel[0].c_str(),"mu1_[GeV]",header2.c_str());
-         cout << SSEP << endl;
+         snprintf(buffer, sizeof(buffer), "%s [ %-17s ]  <%-12.12s> %s",
+                  // TODO: Put proper scale description here instead of mu1_[GeV]
+                  header0.c_str(),DimLabel[0].c_str(),"mu1_[GeV]",header2.c_str());
+         cout << buffer << endl;
+         cout << _SSEPLC << endl;
          NDimBins[0] = 0;
          for (unsigned int i=0; i<xslo.size(); i++) {
             NDimBins[0]++;
@@ -1052,12 +1040,13 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else if (NDim == 2) {
-         printf("%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s\n",
-                // TODO: Put proper scale description here instead of mu1_[GeV]
-                // header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
-                header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),"mu1_[GeV]",header2.c_str());
+         snprintf(buffer, sizeof(buffer), "%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+                  // TODO: Put proper scale description here instead of mu1_[GeV]
+                  // header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
+                  header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),"mu1_[GeV]",header2.c_str());
          // Invert dimension numbering to from outer to inner
-         cout << SSEP << endl;
+         cout << buffer << endl;
+         cout << _SSEPLC << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             for (int j=0; j<NDim; j++) {
                if (i==0) {
@@ -1103,7 +1092,8 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else {
-         printf("fnlo-read: WARNING! Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
+         snprintf(buffer, sizeof(buffer), "Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
+         warn["fnlo-read"] << buffer << endl;
       }
    }
 
