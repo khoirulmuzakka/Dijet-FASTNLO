@@ -32,8 +32,12 @@ public:
       ;
    };
 
+   void SetTIntegratedRange(double tmax) { ftint = tmax;}
+   double GetTIntegratedRange() const {return  ftint;}
+
 protected:
 
+   double ftint;
    // inherited functions
    double EvolveAlphas(double Q) const ;
    bool InitPDF();
@@ -47,7 +51,8 @@ protected:
 
 
 extern "C" {
-   void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs);
+   // tint is the 'maximum t'
+   void diffpdf_(double* xpom, double*  zpom, double*  Q2, double *pdfs, double *tint);
 }
 
 
@@ -57,7 +62,7 @@ extern "C" {
 
 
 
-fastNLODiffH12006FitB::fastNLODiffH12006FitB(string filename) : fastNLODiffReader(filename) {
+fastNLODiffH12006FitB::fastNLODiffH12006FitB(string filename) : fastNLODiffReader(filename) , fint(-1.) {
 }
 
 
@@ -107,7 +112,7 @@ vector<double> fastNLODiffH12006FitB::GetDiffXFX(double xpom, double zpom, doubl
    //  xpom, zpom and factorisation scale.
    //
    vector < double > xfx(13);
-   diffpdf_(&xpom,&zpom,&muf,&xfx[0]);
+   diffpdf_(&xpom,&zpom,&muf,&xfx[0],&ftint);
    //debug<<"xpom="<<xpom<<"\tzpom="<<zpom<<"\tmuf="<<muf<<"\tgluon = "<<xfx[6]<<endl;
    return xfx;
 }
