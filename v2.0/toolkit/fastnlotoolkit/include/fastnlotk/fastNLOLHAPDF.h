@@ -20,10 +20,6 @@
 #define FASTNLOLHAPDF
 
 #include "fastNLOReader.h"
-//#include <iostream>
-//#include <cstdio>
-//#include <cstdlib>
-//#include "speaker.h"
 
 using namespace std;
 
@@ -54,7 +50,7 @@ public:
    virtual double GetQMass(int pdgid) const;
    int GetNLoop() const;
    int GetNFlavor() const;
-   double GetAlphasMz(double Q);
+   double GetAlphasMz() const;
 
 protected:
    // inherited functions

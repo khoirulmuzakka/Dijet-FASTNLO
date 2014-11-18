@@ -20,7 +20,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 
@@ -255,6 +254,6 @@ int fastNLOLHAPDF::GetNFlavor() const {
    return (LHAPDF::getNf());
 }
 
-double fastNLOLHAPDF::GetAlphasMz(double Q) {
-   return LHAPDF::alphasPDF(Q);
+double fastNLOLHAPDF::GetAlphasMz() const {
+   return LHAPDF::alphasPDF(91.1876);
 }
