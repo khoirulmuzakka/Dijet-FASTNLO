@@ -18,6 +18,7 @@ public:
    speaker(const speaker& spk);
    ~speaker();
    //speaker(const speaker& spk) : weg(0) {;};
+   const speaker& operator=(const speaker& other);
    std::ostream& operator[](std::string fct) const ;
    const speaker& operator+ (std::string fct) const {
       return this->prefix(fct);

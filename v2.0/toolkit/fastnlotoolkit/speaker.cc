@@ -49,6 +49,20 @@ speaker::~speaker() {
    }
 }
 
+const speaker& speaker::operator=(const speaker& other)
+{
+   list->erase(fii);
+   fii=ct;
+   (*list)[ct++] = this;
+ 
+   fquiet=other.fquiet;
+   pref=other.pref;
+   errs=other.errs;
+   fvol=other.fvol;
+   cn=other.cn;
+   return *this;
+}
+
 std::ostream& speaker::operator()(std::string fct) const {
    if (fquiet) return *weg;
    //       *this<<"In "<<fct<<". ";
@@ -93,7 +107,7 @@ int speaker::SetGlobalVerbosity(say::Verbosity volume) {
    return c;
 }
 
-
+\
 PrimalScream::PrimalScream(std::string classname) { //,std::string prefix=""){
    debug = speaker(" # DEBUG:   ",say::DEBUG);
    man   = speaker(" # MANUAL:  ",say::MANUAL);
