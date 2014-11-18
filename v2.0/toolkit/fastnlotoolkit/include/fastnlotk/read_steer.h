@@ -54,7 +54,11 @@
 //        static int     age = INT(age);
 //        static bool    sex = BOOL(female);
 //
-//     Labels are case sensitive!
+//     Labels are case sensitive.
+//  
+//     Check existence of label using:
+//         bool IsPresent = EXIST(name);
+//         bool IsPresent = read_steer::exist("name");
 //
 //
 //
@@ -207,6 +211,10 @@
 //          static double CMSheight       = read_steer::getdouble("height","CMS");
 //          static vector<double> CMSxs   = read_steer::getdoublecolumn("Crossection","cs[pb]","CMS");
 //          static vector<double> ATLASxs = read_steer::getdoublecolumn("Crossection","cs[pb]","ATLAS");
+//
+//     Check existence of labels in namespaces using:
+//         bool IsPresent = EXIST_NS(name,"ATLAS");
+//         bool IsPresent = read_steer::getexist("name","ATLAS");
 //
 //     Warning: Namespace steerID and file steerID might conflict if identically!
 //     It is NOT possible to read in multiple files, wherein identical namespaces are define!
@@ -374,142 +382,149 @@
 #define PARSE(X,Y) read_steer::parsecommandline(X,Y)
 #define PRINTALL() read_steer::printall()
 
-
-
-using namespace std;
+// check if key exists
+#define EXIST(X) read_steer::exist(#X)
+#define EXIST_NS(X,NS) read_steer::getexist(#X,NS)
 
 class read_steer {
 
 public:
-   static const string stdID;
+   static const std::string stdID;
 
 public:
    ~read_steer() {;};
-   static read_steer* Steering(string steerID=read_steer::stdID);                       // get an object!
+   static read_steer* Steering(std::string steerID=read_steer::stdID);                       // get an object!
    static void destroy();                                               // destroy all instances
 
 public:
    // getters for single instance
    // values
-   bool getb(string label);
-   int geti(string label);
-   double getd(string label);
-   string gets(string label);
+   bool getb(std::string label);
+   int geti(std::string label);
+   double getd(std::string label);
+   std::string gets(std::string label);
    // arrays
-   vector<bool> getbf(string label);
-   vector<int> getif(string label);
-   vector<double> getdf(string label);
-   vector<string> getsf(string label);
+   std::vector<bool> getbf(std::string label);
+   std::vector<int> getif(std::string label);
+   std::vector<double> getdf(std::string label);
+   std::vector<std::string> getsf(std::string label);
    // tables/matrices
-   vector<string> getsthead(string label);
-   vector<vector<int> > getit(string label);
-   vector<vector<double> > getdt(string label);
-   vector<vector<string> > getst(string label);
-   vector<bool> getbtcol(string label,string col);
-   vector<int> getitcol(string label,string col);
-   vector<double> getdtcol(string label,string col);
-   vector<string> getstcol(string label,string col);
+   std::vector<std::string> getsthead(std::string label);
+   std::vector<std::vector<int> > getit(std::string label);
+   std::vector<std::vector<double> > getdt(std::string label);
+   std::vector<std::vector<std::string> > getst(std::string label);
+   std::vector<bool> getbtcol(std::string label,std::string col);
+   std::vector<int> getitcol(std::string label,std::string col);
+   std::vector<double> getdtcol(std::string label,std::string col);
+   std::vector<std::string> getstcol(std::string label,std::string col);
 
+   // check if key exists
+   bool exist(const std::string& label) {
+      return fstrings.count(label) > 0;}
    // setter
-   void addlabel(const string lab, const string val);
+   void addlabel(const std::string lab, const std::string val);
    // controls
-   void inits(string filename);
-   int initnmspc(ifstream& strm, string filename);
+   void inits(std::string filename);
+   int initnmspc(std::ifstream& strm, std::string filename);
    void prt();
-   static void initnamespace(ifstream& strm,string filename, string steerID=read_steer::stdID) {        // set the steer-filename
+   static void initnamespace(std::ifstream& strm,std::string filename, std::string steerID=read_steer::stdID) {        // set the steer-filename
       read_steer::Steering(steerID)->initnmspc(strm,filename); }
 
 
 private:
    read_steer();
    read_steer(const read_steer& ) {;};
-   static map<string,read_steer*>* instances;
+   static std::map<std::string,read_steer*>* instances;
 
-   int read_stdin(string filename);
-   int readstrm(ifstream& strm,unsigned int lstart=0,unsigned int lend=0, bool incfile=false);
-   bool ParseString(string value);
-   bool ParseFindString(const string str, const string tag) const;
-   string ParseEnclosedString(const string) const;
-   bool EnclosedStringToOneEntity(string&) const;
-   int ReplaceVariables(string& value);
-   bool CheckNumber(const string str) const;
-   bool CheckInt(const string str) const;
-   bool StringToBool(const string str, const string label="") const;
-   static int cmdlinetag(const char* arg, string& label, string& value);
-   static int separatetag(string& vallhs, string& valrhs, const string sep);
+   int read_stdin(std::string filename);
+   int readstrm(std::ifstream& strm,unsigned int lstart=0,unsigned int lend=0, bool incfile=false);
+   bool ParseString(std::string value);
+   bool ParseFindString(const std::string str, const std::string tag) const;
+   std::string ParseEnclosedString(const std::string) const;
+   bool EnclosedStringToOneEntity(std::string&) const;
+   int ReplaceVariables(std::string& value);
+   bool CheckNumber(const std::string str) const;
+   bool CheckInt(const std::string str) const;
+   bool StringToBool(const std::string str, const std::string label="") const;
+   static int cmdlinetag(const char* arg, std::string& label, std::string& value);
+   static int separatetag(std::string& vallhs, std::string& valrhs, const std::string sep);
 
-   map<string,string> fstrings;
-   map<string,vector<string> > ffields;
-   map<string,vector<vector<string> > > ftables;
-   map<string,vector<string> > ftableheaders;
+   std::map<std::string,std::string> fstrings;
+   std::map<std::string,std::vector<std::string> > ffields;
+   std::map<std::string,std::vector<std::vector<std::string> > > ftables;
+   std::map<std::string,std::vector<std::string> > ftableheaders;
    bool fParseFieldMode;
    int  fParseTableMode;
-   string ffieldlabel;
-   vector<string> ffieldvalues;
-   vector<vector<string> > ftablevalues;
-   string ffilename;
-   string fcurrentfilename;
-   ifstream ffile;
+   std::string ffieldlabel;
+   std::vector<std::string> ffieldvalues;
+   std::vector<std::vector<std::string> > ftablevalues;
+   std::string ffilename;
+   std::string fcurrentfilename;
+   std::ifstream ffile;
 
-   const string str_sep;
-   const string str_cmt;
-   const string str_arrbeg;
-   const string str_arrend;
-   const string str_tabbeg;
-   const string str_tabend;
-   const string str_nmspcbeg;
-   const string str_nmspcend;
-   const string str_inc;
+   const std::string str_sep;
+   const std::string str_cmt;
+   const std::string str_arrbeg;
+   const std::string str_arrend;
+   const std::string str_tabbeg;
+   const std::string str_tabend;
+   const std::string str_nmspcbeg;
+   const std::string str_nmspcend;
+   const std::string str_inc;
    int fParseIncMode;
-   const string oW;
-   const string oI;
-   const string oE;
+   const std::string oW;
+   const std::string oI;
+   const std::string oE;
 
 public:
    // static member function
-   static void readfile(string filename,string steerID=read_steer::stdID) {     // set the steer-filename
+   static void readfile(std::string filename,std::string steerID=read_steer::stdID) {     // set the steer-filename
       read_steer::Steering(steerID)->inits(filename); }
    // getters
    // values
-   static bool getbool(string label,string steerID=read_steer::stdID) {
+   static bool getbool(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getb(label); }
-   static int getint(string label,string steerID=read_steer::stdID) {
+   static int getint(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->geti(label); }
-   static double getdouble(string label,string steerID=read_steer::stdID) {
+   static double getdouble(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getd(label); }
-   static string getstring(string label,string steerID=read_steer::stdID) {
+   static std::string getstring(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->gets(label); }
    // arrays
-   static vector<bool> getboolarray(string label,string steerID=read_steer::stdID) {
+   static std::vector<bool> getboolarray(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getbf(label); }
-   static vector<int> getintarray(string label,string steerID=read_steer::stdID) {
+   static std::vector<int> getintarray(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getif(label); }
-   static vector<double> getdoublearray(string label,string steerID=read_steer::stdID) {
+   static std::vector<double> getdoublearray(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getdf(label); }
-   static vector<string> getstringarray(string label,string steerID=read_steer::stdID) {
+   static std::vector<std::string> getstringarray(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getsf(label); }
    // tables header
-   static vector<string> gettableheader(string label,string steerID=read_steer::stdID) {
+   static std::vector<std::string> gettableheader(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getsthead(label); }
    // tables/matrices
-   static vector<vector<int> > getinttable(string label,string steerID=read_steer::stdID) {
+   static std::vector<std::vector<int> > getinttable(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getit(label); }
-   static vector<vector<double> > getdoubletable(string label,string steerID=read_steer::stdID) {
+   static std::vector<std::vector<double> > getdoubletable(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getdt(label); }
-   static vector<vector<string> > getstringtable(string label,string steerID=read_steer::stdID) {
+   static std::vector<std::vector<std::string> > getstringtable(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getst(label); }
    // table columns
-   static vector<bool> getboolcolumn(string label,string column,string steerID=read_steer::stdID) {
+   static std::vector<bool> getboolcolumn(std::string label,std::string column,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getbtcol(label,column); }
-   static vector<int> getintcolumn(string label,string column,string steerID=read_steer::stdID) {
+   static std::vector<int> getintcolumn(std::string label,std::string column,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getitcol(label,column); }
-   static vector<double> getdoublecolumn(string label,string column,string steerID=read_steer::stdID) {
+   static std::vector<double> getdoublecolumn(std::string label,std::string column,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getdtcol(label,column); }
-   static vector<string> getstringcolumn(string label,string column,string steerID=read_steer::stdID) {
+   static std::vector<std::string> getstringcolumn(std::string label,std::string column,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getstcol(label,column); }
+   // check existence of value
+   static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
+      if ( read_steer::instances->count(label) == 0 ) return false;
+      return read_steer::Steering(steerID)->exist(label);}
 
    static void printall();                                              // print values of all files
-   static void print(string steerID=read_steer::stdID);                         // print values
+   static void print(std::string steerID=read_steer::stdID);                         // print values
    static bool parsecommandline(int argc,char** argv);
 
 
