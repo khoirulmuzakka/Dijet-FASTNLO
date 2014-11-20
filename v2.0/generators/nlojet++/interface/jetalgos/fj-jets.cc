@@ -101,5 +101,11 @@ fj_jets::operator()(const event_hhc& ev, int jetalgo, double jetsize, double ove
    }
    say::debug["fj-jets"] << "**************************\n";
 
+   // todo: it is much more efficient to construct plugin and jet definition only once per run
+   if (jet_def)
+      delete jet_def;
+   if (plugin)
+      delete plugin;
+
    return _M_pj;
 }
