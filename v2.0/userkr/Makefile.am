@@ -38,11 +38,12 @@ allunc_LDFLAGS =
 #if HAVE_LHAPDFCONFIG
 #allunc_LDFLAGS += -Wl,--static `${LHAPDFBINPATH}/lhapdf-config --ldflags`
 #else
-#allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} -G Motif pawlib`
-#allunc_LDFLAGS  += -L/usr/lib/x86_64-linux-gnu -Wl,--static -lmathlib -lkernlib -lpawlib -lpacklib
 #allunc_LDFLAGS  += -L$(LHAPDFLIBPATH) -Wl,-static -lLHAPDF
+allunc_LDFLAGS  += -L/home/rabbertz/tmp/2005/lib -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
+#allunc_LDFLAGS  += -L/usr/lib/x86_64-linux-gnu -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
 allunc_LDFLAGS  += -L$(LHAPDFLIBPATH)  -lLHAPDF
-allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
+#allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
+#allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} -G Motif pawlib`
 #endif
 # To avoid 32-64-bit compatibility problems 64-bit systems require static linking of at least kernlib
 # (Tried to use "--as-needed" option instead of "--static" but didn't work as intended.)

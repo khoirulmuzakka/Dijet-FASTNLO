@@ -307,6 +307,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       } else {
          yeta = abs(pj[i].prapidity());
       }
+      double phi = atan2( pj[i].Y(), pj[i].X());
 
       // --- set first choice for the renormalization and factorization scale to jet pT
       double mu1 = pt;
@@ -321,9 +322,22 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       }
 
       // scenario specific quantites
+      static int read_ndim = ftable->GetParameterFromSteering("DifferentialDimension",read_ndim);
       fnloScenario scen;
-      scen.SetObservableDimI( yeta, 0 );
-      scen.SetObservableDimI( pt  , 1 );
+      if ( read_ndim == 1 ) {        // 1D binning
+         scen.SetObservableDimI( pt  , 0 );
+      } else if ( read_ndim == 2 ) { // 2D binning
+         scen.SetObservableDimI( yeta, 0 );
+         scen.SetObservableDimI( pt  , 1 );
+      } else if ( read_ndim == 3 ) { // 3D binning
+         scen.SetObservableDimI( phi , 0 );
+         scen.SetObservableDimI( yeta, 1 );
+         scen.SetObservableDimI( pt  , 2 );
+      } else {
+         say::error["InclusiveJets"] << "More than 3D binning not implemented for inclusive jets, aborted!" << endl;
+         say::error["InclusiveJets"] << "DifferentialDimension NDim = " << read_ndim << endl;
+         exit(1);
+      }
       scen.SetObsScale1( mu1 );   // must be consistent with 'mu' from contribs
 
       if (lflextable) {

@@ -13,8 +13,8 @@ AC_PREREQ([2.59])
 AC_INIT([fastNLO], [2.1.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
-# Decouple again the 'reader' and 'processor/converter' subprojects
-# AC_CONFIG_SUBDIRS([reader processor/converter])
+# Decouple the 'reader' and 'processor/converter' subprojects ?
+AC_CONFIG_SUBDIRS([reader processor/converter])
 # Require minimal automake version of 1.9, switch on warnings
 AM_INIT_AUTOMAKE([1.9 -Wall])
 # Require minimal libtool version of 1.5
@@ -457,9 +457,8 @@ AC_CONFIG_FILES([Makefile
 	creator/Makefile
 	doc/arXiv_1109.1310/Makefile
 	doc/Makefile
+	processor/Makefile
+	processor/modifier/Makefile
 ])
-#	processor/Makefile
-#	processor/merger/Makefile
-#	processor/modifier/Makefile
 
 AC_OUTPUT

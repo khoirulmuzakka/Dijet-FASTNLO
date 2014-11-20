@@ -8,8 +8,10 @@
 # -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
-# Nothing to do here, just go to subdirectories
-SUBDIRS = converter merger modifier
+
+# Subdirectories
+SUBDIRS = modifier
+# converter merger
 #
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
