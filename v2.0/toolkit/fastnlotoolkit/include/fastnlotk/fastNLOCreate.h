@@ -107,6 +107,16 @@ protected:
    void ReadSteering(string steerfile);                                                         //!< read steering file
    void ReadGenAndProcConstsFromSteering();
    void ReadBinning();
+   ///
+   void SetBinning1D(vector<double> bgrid, string label, unsigned int idiff);
+   void SetBinning1D(vector<double> bgrid, string label, unsigned int idiff, double norm);
+   void SetBinning1D(vector<double> bgrid, string label, unsigned int idiff, vector<double> vnorm);
+   void SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff);
+   void SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff, double norm);
+   void SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff, vector<double> vnorm);
+   void SetBinningND(vector<double> bgrid, unsigned int ndim, vector<int> idiff);
+   void SetBinningND(vector<vector<double> > bgrid, unsigned int ndim, vector<int> idiff);
+   ///
    void ReadCoefficientSpecificVariables();
    void ReadScaleFactors();
    void InitVariablesInCoefficientTable();

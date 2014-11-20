@@ -28,8 +28,9 @@
 */
 // ___________________________________________________________________________________________________
 
-#include <string>
 #include <algorithm>
+#include <cfloat>
+#include <string>
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/read_steer.h"
@@ -470,98 +471,81 @@ void fastNLOCreate::ReadBinning() {
    // read single-differential bin grid
    if (NDim == 1) {
       vector<double> bgrid = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
-      for (unsigned int i = 0 ; i<bgrid.size()-1 ; i++) {
-         if (bgrid[i] >= bgrid[i+1]) {
-            error["ReadBinning"]<<"The upper bin edge is below the lower one in bin "<<i+1<<". Exiting."<<endl;
-            exit(1);
-         }
-      }
-      if (AllBinInt) {   // bin integrated bin grid
-         NObsBin = bgrid.size()-1;
-         Bin.resize(NObsBin);
-         for (unsigned int i = 0 ; i<bgrid.size()-1 ; i++) {
-            Bin[i].resize(1);
-            Bin[i][0] = make_pair(bgrid[i],bgrid[i+1]);
-         }
-      } else { // truly differential bin grid
-         NObsBin = bgrid.size();
-         Bin.resize(NObsBin);
-         for (unsigned int i = 0 ; i<bgrid.size() ; i++) {
-            Bin[i].resize(1);
-            Bin[i][0] = make_pair(bgrid[i],bgrid[i]) ;
-         }
-      }
+      //      SetBinning1D(bgrid, DimLabel[0], IDiffBin[0]);
+      SetBinningND(bgrid, NDim, IDiffBin);
    }
 
    // read double-differential bin grid
    else if (NDim==2) {
       vector<vector<double> > in = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
-      NObsBin=0;
-      Bin.clear();
-      for (unsigned int r = 0 ; r<in.size() ; r++) {
-         unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
-         for (unsigned int c = 2 ; c<nBin2Max ; c++) {
-            Bin.push_back(vector<pair<double,double> >(NDim));
-            // sanity dim 1:
-            if (AllBinInt) {
-               if (in[r][0]>=in[r][1]) {
-                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-                  exit(1);
-               }
-               if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
-                  error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
-                                      <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
-                  exit(1);
-               }
-               Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
-               // sanity dim 0:
-               if (in[r][c] >= in[r][c+1]) {
-                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-                  exit(1);
-               }
-               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
-            } else {
-               Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
-               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
-            }
-            NObsBin++; // count
-         }
-      }
+      SetBinningND(in, NDim, IDiffBin);
+      // NObsBin=0;
+      // Bin.clear();
+      // for (unsigned int r = 0 ; r<in.size() ; r++) {
+      //    unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
+      //    for (unsigned int c = 2 ; c<nBin2Max ; c++) {
+      //       Bin.push_back(vector<pair<double,double> >(NDim));
+      //       // sanity dim 1:
+      //       if (AllBinInt) {
+      //          if (in[r][0]>=in[r][1]) {
+      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
+      //             error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
+      //                                 <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
+      //          // sanity dim 0:
+      //          if (in[r][c] >= in[r][c+1]) {
+      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
+      //       } else {
+      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
+      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
+      //       }
+      //       NObsBin++; // count
+      //    }
+      // }
    }
 
    // read in triple-differential binning
    else if (NDim==3) {
       warn["ReadBinning"]<<"The code for reading of "<<NDim<<"-dimensional binnings was not fully tested. Please verify the code an remove this statement."<<endl;
       vector<vector<double> > in = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
-      NObsBin=0;
-      Bin.clear();
-      for (unsigned int r = 0 ; r<in.size() ; r++) {
-         if (in[r].size() < 6) {
-            warn["ReadBinning"]<<"At least six numbers are necessary to specify a 3-dimensional binning in row"<<r+1<<endl;
-         }
-         for (unsigned int c = 4 ; c<in[r].size()-1 ; c++) {
-            NObsBin++;
-            Bin.push_back(vector<pair<double,double> >(NDim));
-            // sanity dim 2:
-            if (in[r][0]>=in[r][1]) {
-               error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-               exit(1);
-            }
-            Bin[NObsBin-1][0] = make_pair(in[r][0],in[r][1]);
-            // sanity dim 1:
-            if (in[r][2]>=in[r][3]) {
-               error["ReadBinning"]<<"The upper bin edge ("<<in[r][3]<<") is below the lower one ("<<in[r][2]<<") in row "<<r+1<<". Exiting."<<endl;
-               exit(1);
-            }
-            Bin[NObsBin-1][1] = make_pair(in[r][2],in[r][3]);
-            // sanity dim 0:
-            if (in[r][c] >= in[r][c+1]) {
-               error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-               exit(1);
-            }
-            Bin[NObsBin-1][2] = make_pair(in[r][c],in[r][c+1]);
-         }
-      }
+      SetBinningND(in, NDim, IDiffBin);
+      // NObsBin=0;
+      // Bin.clear();
+      // for (unsigned int r = 0 ; r<in.size() ; r++) {
+      //    if (in[r].size() < 6) {
+      //       warn["ReadBinning"]<<"At least six numbers are necessary to specify a 3-dimensional binning in row"<<r+1<<endl;
+      //    }
+      //    for (unsigned int c = 4 ; c<in[r].size()-1 ; c++) {
+      //       NObsBin++;
+      //       Bin.push_back(vector<pair<double,double> >(NDim));
+      //       // sanity dim 2:
+      //       if (in[r][0]>=in[r][1]) {
+      //          error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+      //          exit(1);
+      //       }
+      //       Bin[NObsBin-1][0] = make_pair(in[r][0],in[r][1]);
+      //       // sanity dim 1:
+      //       if (in[r][2]>=in[r][3]) {
+      //          error["ReadBinning"]<<"The upper bin edge ("<<in[r][3]<<") is below the lower one ("<<in[r][2]<<") in row "<<r+1<<". Exiting."<<endl;
+      //          exit(1);
+      //       }
+      //       Bin[NObsBin-1][1] = make_pair(in[r][2],in[r][3]);
+      //       // sanity dim 0:
+      //       if (in[r][c] >= in[r][c+1]) {
+      //          error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+      //          exit(1);
+      //       }
+      //       Bin[NObsBin-1][2] = make_pair(in[r][c],in[r][c+1]);
+      //    }
+      // }
    } else {
       error["ReadBinning"]<<"Reading of "<<NDim<<"-binnings from steering is not yet implemented. Exiting"<<endl;
       exit(1);
@@ -604,6 +588,296 @@ void fastNLOCreate::ReadBinning() {
 
    info["ReadBinning"]<<"Read in successfully "<<NDim<<"-dimensional bin grid with "<<NObsBin<<" bins."<<endl;
 }
+
+///////////////////////////////////////////////
+
+// ___________________________________________________________________________________________________
+
+//
+// Set continuous 1D binning via one vector containing all (n+1) bin edges
+//
+void fastNLOCreate::SetBinning1D(vector<double> bgrid, string label, unsigned int idiff) {
+
+   // Create and set normalization vector to one
+   vector<double> vnorm;
+   unsigned int nbins = bgrid.size()-1;
+   if ( idiff == 1 ) { nbins = bgrid.size(); }// Point-wise differential
+   vnorm.assign(nbins,1.);
+
+   // Give task to more general method
+   SetBinning1D(bgrid, label, idiff, vnorm);
+   info["SetBinning1D"] << "VSI: Set all normalization factors to one." << endl;
+}
+
+//
+// Set continuous 1D binning via one vector containing all (n+1) bin edges with normalization factor
+//
+void fastNLOCreate::SetBinning1D(vector<double> bgrid, string label, unsigned int idiff, double norm) {
+
+   // Create and set normalization vector to norm
+   vector<double> vnorm;
+   unsigned int nbins = bgrid.size()-1;
+   if ( idiff == 1 ) { nbins = bgrid.size(); }// Point-wise differential
+   vnorm.assign(nbins,norm);
+
+   // Give task to more general method
+   SetBinning1D(bgrid, label, idiff, vnorm);
+   info["SetBinning1D"] << "VSID: Set all normalization factors to norm." << endl;
+}
+
+//
+// Set continuous 1D binning via one vector containing all (n+1) bin edges with normalization factors in extra vector
+//
+void fastNLOCreate::SetBinning1D(vector<double> bgrid, string label, unsigned int idiff, vector<double> vnorm) {
+
+   // Create and set two vectors with lower and upper bin edges
+   vector<double> blow;
+   vector<double> bupp;
+   for (unsigned int i = 0; i<bgrid.size()-1; i++) {
+      blow.push_back(bgrid[i]);
+      bupp.push_back(bgrid[i+1]);
+   }
+
+   // Give task to more general method
+   SetBinning1D(blow, bupp, label, idiff, vnorm);
+   info["SetBinning1D"] << "VSIV: Set vectors of lower and upper bin edges." << endl;
+}
+
+//
+// Set 1D binning allowing gaps via two vectors containing lower and upper bin edges
+//
+void fastNLOCreate::SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff) {
+
+   // Create and set normalization vector to one
+   vector<double> vnorm;
+   vnorm.assign(blow.size(),1.);
+
+   // Give task to more general method
+   SetBinning1D(blow, bupp, label, idiff, vnorm);
+   info["SetBinning1D"] << "VVSI: Set all normalization factors to one." << endl;
+}
+
+//
+// Set 1D binning allowing gaps via two vectors containing lower and upper bin edges with normalization factor
+//
+void fastNLOCreate::SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff, double norm) {
+
+   // Create and set normalization vector to norm
+   vector<double> vnorm;
+   vnorm.assign(blow.size(),norm);
+
+   // Give task to more general method
+   SetBinning1D(blow, bupp, label, idiff, vnorm);
+   info["SetBinning1D"] << "VVSID: Set all normalization factors to norm." << endl;
+}
+
+//
+// Set 1D binning allowing gaps via two vectors containing lower and upper bin edges with normalization factors in extra vector
+//
+void fastNLOCreate::SetBinning1D(vector<double> blow, vector<double> bupp, string label, unsigned int idiff, vector<double> vnorm) {
+
+   // Define 1-dimensional observable binning
+   NDim = 1;
+   DimLabel.resize(NDim);
+   IDiffBin.resize(NDim);
+
+   // Check input: Type of differential binning
+   DimLabel[0] = label;
+   IDiffBin[0] = idiff;
+   if (idiff > 2 ) {
+      error["SetBinning1D"] << "Illegal choice of differentiality, idiff = " << idiff << ", aborted!" << endl;
+      error["SetBinning1D"] << "Dimension must either be non-differential (idiff=0), " << endl;
+      error["SetBinning1D"] << "point-wise differential (idiff=1), or bin-wise differential (idiff=2)." << endl;
+      exit(1);
+   }
+
+   // Check input: Gaps are fine, overlaps are not. Overlaps might lead to double-counting in normalization.
+   if ( blow.size() != bupp.size() ) {
+      error["SetBinning1D"] << "Unequal size of bin border vectors, blow.size() = " << blow.size() <<
+         ", bupp.size() = " << bupp.size() << ", aborted!" << endl;
+      exit(1);
+   }
+   for (unsigned int i = 0; i<blow.size(); i++) {
+      if (idiff == 1) { // Point-wise differential
+         if (blow[i] != bupp[i]) {
+            error["SetBinning1D"] << "Illegal binning, lower and upper bin edges must be equal for point-wise differential binnings, aborted!" << endl;
+            error["SetBinning1D"] << "i = " << i << ", lower edge = " << blow[i] <<
+               ", and upper edge = " << bupp[i] << endl;
+            exit(1);
+         }
+      } else { // Non- and bin-wise differential
+         if (blow[i] >= bupp[i]) {
+            error["SetBinning1D"] << "Illegal binning, lower bin edge larger or equal to upper one, aborted!" << endl;
+            error["SetBinning1D"] << "i = " << i << ", lower edge = " << blow[i] <<
+               ", and upper edge = " << bupp[i] << endl;
+            exit(1);
+         }
+         if (i<blow.size()-1 && bupp[i] > blow[i+1]) {
+            error["SetBinning1D"] << "Illegal binning, overlapping bins, aborted!" << endl;
+            error["SetBinning1D"] << "i = " << i << ", upper edge = " << bupp[i] <<
+               ", and lower edge of i+1 = " << blow[i+1] << endl;
+            exit(1);
+         }
+      }
+   }
+
+   // Check input: Normalization factor must be larger than zero for all bins
+   if ( blow.size() != vnorm.size() ) {
+      error["SetBinning1D"] << "Unequal size of bin border and normalization vectors, blow.size() = " << blow.size() <<
+         ", vnorm.size() = " << vnorm.size() << ", aborted!" << endl;
+      exit(1);
+   }
+   for (unsigned int i = 0; i<vnorm.size(); i++) {
+      if ( vnorm[i] < DBL_MIN ) {
+         error["SetBinning1D"] << "Normalization factor is too small, aborted!" << endl;
+         error["SetBinning1D"] << "i = " << i << ", vnorm[i] = " << vnorm[i] << endl;
+         exit(1);
+      }
+   }
+
+   // Set differential binning and normalization
+   NObsBin = blow.size();
+   Bin.resize(NObsBin);
+   BinSize.resize(NObsBin);
+   for (unsigned int i = 0; i<blow.size(); i++) {
+      Bin[i].resize(1);
+      Bin[i][0] = make_pair(blow[i],bupp[i]);
+      BinSize[i] = 1;
+      if (idiff == 2) { // Divide by bin width times additional normalization factor
+         BinSize[i] *= (Bin[i][0].second-Bin[i][0].first) * vnorm[i];
+      }
+   }
+   info["SetBinning1D"] << "VVSIV: Set binning successfully for " << NObsBin << " bins in " << NDim << "dimensions." << endl;
+}
+
+/////////////////// ND
+
+//
+// Set continuous N-D binning via a vector of vectors with bin edges
+//
+void fastNLOCreate::SetBinningND(vector<double> bgrid, unsigned int ndim, vector<int> idiff) {
+
+   // Create and set vector of vector pairs
+   vector<vector<double> > bgrid2;
+   bgrid2.push_back(bgrid);
+
+   // Give task to more general method
+   SetBinningND(bgrid2, ndim, idiff);
+   info["SetBinningND"] << "VIV: Set vector of vector pairs." << endl;
+}
+
+//
+// Set continuous N-D binning via a vector of vectors with bin edges (pairs)
+//
+void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndim, vector<int> idiff) {
+
+   // Check input: Dimensions, labels and idiff settings
+   if ( ndim < 1 || ndim > 3 ) {
+      error["SetBinningND"] << "Illegal # of dimensions, aborted!" << endl;
+      error["SetBinningND"] << "ndim = " << ndim << endl;
+      exit(1);
+   }
+   if ( ndim != idiff.size() ) {
+      error["SetBinningND"] << "Inconsistent vector lengths, aborted!" << endl;
+      error["SetBinningND"] << "Number of dimensions ndim = " << ndim << ", # of idiff settings = " << idiff.size() << endl;
+      exit(1);
+   }
+
+   // Check input: Type of differential binning
+   for ( unsigned int i=0; i<ndim; i++ ) {
+      //      cout << "iDim = " << i << ", IDiffBin = " << idiff[i] << endl;
+      if ( idiff[i] < 0 || idiff[i] > 2 ) {
+         error["SetBinningND"] << "Illegal choice of differentiality, idim = " << i << ", idiff = " << idiff[i] << ", aborted!" << endl;
+         error["SetBinningND"] << "Each dimension must either be non-differential (idiff=0), " << endl;
+         error["SetBinningND"] << "point-wise differential (idiff=1), or bin-wise differential (idiff=2)." << endl;
+         exit(1);
+      }
+   }
+
+   // Write ND binning to vector[NObsBin] with bin edges in pairs, one for each dimension (for idiff=1, edges are defined identical)
+   NObsBin = 0;
+   Bin.clear();
+   int ishift = 0;
+   int istep  = 0;
+   for ( unsigned int i = 0; i<ndim-1; i++ ) { // No shift for 1D
+      istep  = 2;                              // Shift by two for non- or bin-wise differential
+      if ( idiff[i] == 1 ) {istep = 1;}        // else shift by one for point-wise differential
+      ishift += istep;
+   }
+   //   cout << "ishift = " << ishift << endl;
+
+   // Loop over input vectors with two (one, for idiff=1) entries per dimension plus n+1 entries for n bins of innermost dimension
+   for ( unsigned int i = 0; i<bgrid.size(); i++ ) {
+      debug["SetBinningND"] << "i = " << i << ", iObsBin = " << NObsBin << ", ishift = " << ishift << endl;
+
+      for (unsigned int j = ishift ; j<bgrid[i].size()-1; j++) {
+         Bin.push_back(vector<pair<double,double> >(ndim));
+
+         for ( unsigned int k = 0; k<ndim-1; k++ ) {
+            if ( idiff[k] == 1 ) { // Point-wise differential --> one bin center
+               Bin[NObsBin][k] = make_pair(bgrid[i][k],bgrid[i][k]);
+            } else {               // Non- or bin-wise differential --> two bin edges
+               if ( !(bgrid[i][k] < bgrid[i][k+1]) ) {
+                  error["SetBinningND"] << "Illegal binning, lower bin edge larger or equal to upper one, aborted!" << endl;
+                  error["SetBinningND"] << "i, k = " << i << ", " << k << ", lower edge = " << bgrid[i][k] <<
+                     ", and upper edge = " << bgrid[i][k+1] << endl;
+                  exit(1);
+               }
+               Bin[NObsBin][k] = make_pair(bgrid[i][k],bgrid[i][k+1]);
+            }
+         }
+
+         if ( idiff[ndim-1] == 1 ) { // Point-wise differential --> one bin center
+            Bin[NObsBin][ndim-1] = make_pair(bgrid[i][j],bgrid[i][j]);
+         } else {                    // Non- or bin-wise differential --> two bin edges
+            //            cout << "i = " << i << ", j = " << j << ", bgrid i,j = " << bgrid[i][j] << endl;
+            //            cout << "i = " << i << ", j = " << j << ", bgrid i,j+1 = " << bgrid[i][j+1] << endl;
+            if ( !(bgrid[i][j] < bgrid[i][j+1]) ) {
+               error["SetBinningND"] << "Illegal binning, lower bin edge larger or equal to upper one, aborted!" << endl;
+               error["SetBinningND"] << "i, j = " << i << ", " << j << ", lower edge = " << bgrid[i][j] <<
+                  ", and upper edge = " << bgrid[i][j+1] << endl;
+               exit(1);
+            }
+            Bin[NObsBin][ndim-1] = make_pair(bgrid[i][j],bgrid[i][j+1]);
+         }
+         NObsBin++;
+      }
+   }
+
+   // // Check input: Normalization factor must be larger than zero for all bins
+   // int nnorm = vnorm.size();
+   // if ( NObsBin != nnorm ) {
+   //    error["SetBinningND"] << "Unequal number of observable bins and normalization factors, NObsBin = " << NObsBin <<
+   //       ", vnorm.size() = " << vnorm.size() << ", aborted!" << endl;
+   //    exit(1);
+   // }
+   // for (unsigned int i = 0; i<vnorm.size(); i++) {
+   //    if ( vnorm[i] < DBL_MIN ) {
+   //       error["SetBinningND"] << "Normalization factor is too small, aborted!" << endl;
+   //       error["SetBinningND"] << "i = " << i << ", vnorm[i] = " << vnorm[i] << endl;
+   //       exit(1);
+   //    }
+   // }
+
+   // // Set normalization factors
+   // BinSize.resize(NObsBin);
+   // for (unsigned int i = 0; i<vnorm.size(); i++) {
+   //    BinSize[i] = vnorm[i];
+   //    for (int j = 0; j<NDim; j++) {
+   //       if (idiff[j] == 2) {
+   //          BinSize[i] *= fabs(Bin[i][j].second-Bin[i][j].first);
+   //       }
+   //    }
+   // }
+
+   // for ( int i=0; i<NObsBin; i++ ) {
+   //    cout << "i = " << i << ", Bin[i][0] = " << Bin[i][0].first << ", " << Bin[i][0].second << endl;
+   // }
+   info["SetBinningND"] << "Set binning successfully for " << NObsBin << " bins in " << NDim << "dimensions." << endl;
+}
+
+
+/////////////////////////////////////////////
 
 
 // ___________________________________________________________________________________________________
@@ -1005,7 +1279,7 @@ int fastNLOCreate::GetBin() {
    // calc bin number and keep Observables
    if (idiff == 1) fObsBin = GetBinNumber(fScenario._o[0]);
    else if (idiff == 2)  fObsBin = GetBinNumber(fScenario._o[0],fScenario._o[1]);
-   //else if ( idiff == 3 )  fObsBin = GetBinNumber(fScenario._o[2],fScenario._o[1],fScenario._o[0]);
+   else if ( idiff == 3 )  fObsBin = GetBinNumber(fScenario._o[2],fScenario._o[1],fScenario._o[0]);
    else {
       error["GetBin"]<<"Sorry. triple-differential binning not yet implemented. exiting."<<endl;
    }

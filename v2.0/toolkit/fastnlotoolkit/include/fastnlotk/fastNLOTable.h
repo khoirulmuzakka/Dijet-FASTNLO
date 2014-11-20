@@ -87,7 +87,7 @@ class fastNLOTable : public fastNLOBase {
    // useful functions
    //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
    //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
-   int GetBinNumber(double val1 , double val2 = -42. ) const ;                                  // calculate bin number (iObsBin)
+   int GetBinNumber(double val1, double val2 = -42., double val3 = -42.) const ;                                  // calculate bin number (iObsBin)
 
    // handle coefficient tables
    //int WriteCoeffTable(int no);

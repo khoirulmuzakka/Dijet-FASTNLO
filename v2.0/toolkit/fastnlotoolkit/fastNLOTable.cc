@@ -674,7 +674,7 @@ fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(ESMOrder eOrder) const {
 
 
 // ___________________________________________________________________________________________________
-int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
+int fastNLOTable::GetBinNumber( double val1 , double val2, double val3 ) const {
    // Get Bin number of this event if you use a single or double differential binning
    // return -1 if no bin was found
 
@@ -692,6 +692,8 @@ int fastNLOTable::GetBinNumber( double val1 , double val2 ) const {
    //    if ( val2!==-42 && NDim!=2){
    //       printf("fastNLOTable::GetBinNumber(%6.3f,%6.3f). Error. A double differential table only needs two variables.\n",var1,var2);exit(1);
    //    }
+
+   //   cout << "GetBinNumber: val1 = " << val1 << ", val2 = " << val2 << endl;
 
    if ( (val2 == -42 && NDim != 1 ) || ( val2 != -42 && NDim != 2 ) ) {
       error["GetBinNumber"]<<"This function can calculate the bin number only for single and double differential binnings (NDim = "<<NDim<<" )."<<endl;
