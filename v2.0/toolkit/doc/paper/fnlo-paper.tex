@@ -7,6 +7,8 @@
 
 \usepackage[T1]{fontenc} % if needed
 
+%% lisings package for c++ code syntax highlighting
+\input{listingsinclude2.tex}
 
 
 \title{\boldmath A title with some math: $x=1$}
@@ -154,8 +156,46 @@ USE THEM WITH CARE !
 \subsubsection{fastNLO stand-alone programs using LHAPDF}
 \paragraph{fnlo-tk-cppread}
 \paragraph{fnlo-tk-example}
+
 \paragraph{fnlo-tk-minexample}
+
 \subsubsection{fastNLO c++ functionality}
+
+How to use fastNLOReader:
+%\lstinputlisting[label=yourLabel,caption=Your caption]{
+%%sourceCode/yourcode.c}
+
+\begin{lstlisting}[language=C++]{Name=test2}
+/*
+ * Project: ATFOC -> Autonomous Trainer For Object Classification
+ * Name:    Main.cc 
+ * Autor:   Bla Blub
+ * Date:    03.09.2013
+ * Description: main class for 
+ *          1) executing a web search for images and store them
+ *          2) and image comparison to filter good from bad samples
+ */
+
+#include ``stdafx.h''
+
+#include ``WebSearch.h''
+#include ``ImageComparison.h''
+
+using namespace std;
+
+#define NUMBER_OF_IMAGES 50 // default
+#define NUMBER_OF_QUERIES 3 // default
+
+int main(int argc, char** argv)
+{
+    vector<string> input_vector;
+    string input;
+
+    uint i;
+
+ \end{lstlisting}
+
+
 \paragraph{Inheritance structure of fastNLOReader}
 \paragraph{fastNLOReader}
 \subsubsection{Predefined fastNLOReader interfaces}

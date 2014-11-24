@@ -1127,7 +1127,9 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
             if (fProcConsts.AsymmetricProcesses[i].second >= GetNSubprocesses() || fSymProc[fProcConsts.AsymmetricProcesses[i].first] >= GetNSubprocesses()) {
                if (!(c->IPDFdef1==3&&c->IPDFdef2==1&&c->IPDFdef3==1))   // it is normal in pp->jets in LO
                   warn["SetOrderOfAlphasOfCalculation"]<<"Subprocess "<<fSymProc[fProcConsts.AsymmetricProcesses[i].first]<<" is requested to be asymmetric with subprocess "<<fProcConsts.AsymmetricProcesses[i].second<<", but there are only "<<GetNSubprocesses()<<" subprocesses in this calculation. Ignoring call."<<endl;
-            } else fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
+            } 
+	    else 
+	       fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
          }
       }
 
@@ -2555,6 +2557,13 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
       exit(1);
    }
    return NULL; // default return
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::GetIfParameterExistsInSteering(const string& label) {
+   //! Get flag if parameter exists in steering card
+   return read_steer::getexist(label, fSteerfile);
 }
 
 
