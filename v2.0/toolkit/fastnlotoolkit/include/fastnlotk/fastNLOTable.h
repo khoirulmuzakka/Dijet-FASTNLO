@@ -40,8 +40,43 @@ class fastNLOTable : public fastNLOBase {
 
    std::string GetRivetId() const;
 
+   // getters for 'ObsBin': ObsBin runs from 0-NObsBin
    int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
-   std::vector < std::pair < double, double > > GetObsBin(int bin) const { return Bin[bin];}    // Get obversable binning for all dimensions for given bin
+   int GetObsBin(double var0, double var1=0, double var2=0) const;
+   std::vector < std::pair < double, double > > GetObsBinBoundaries(int iObsBin) const { return Bin[bin];}    // Get binning for a given ObsBin
+
+   // getters for dimension specific bins, here called Dim<I>Bins
+   unsigned int GetNDim0Bins() const;                                                           // Number of bins in first dimension
+   unsigned int GetNDim1Bins(int iDim1Bin) const;                                               // Number of bins in second dimension for a first-dimension-bin
+   unsigned int GetNDim2Bins(int iDim1Bin, int iDim2Bin) const;                                 // Number of bins in third dimension for a second and first-dimension-bin
+   int GetDim0Bin(double var0) const;
+   int GetDim1Bin(double var0, double var1) const;
+   int GetDim2Bin(double var0, double var1, double var2) const;
+   std::vector < std::pair < double, double > > GetBinBoundaries(int iDim0Bin, int iDim1Bin = -1, int iDim2Bin = -1);
+   //!  
+   //! Get bin boundaries for first, second and third dimenstion
+   //!    Assuming for instance following 2-dimensional binning scheme:
+   //!
+   //!    iDim0Bin  ________________________________
+   //!       0      |___|___|___|_______|__|__|____|
+   //!  D    1      |____|____|____|_____|____|____|
+   //!  I    2      |__|__|___|__|__|___|__|___|___|
+   //!  M    3      |______|_______|_________|_____|
+   //!       4      |__________|_______|_________|_|
+   //!  0    5      |______________|______|___|____|
+   //!       6      |_______|_______|______|_______|
+   //!                            DIM 1
+   //!  iDim1Bin may be different for each iDim0Bin
+   //! 
+   //! usage e.g.:
+   //! int LowerBoundary = GetBinBoundaries(ibin)[dim].first;
+   //! int UpperBoundary = GetBinBoundaries(ibin)[dim].second;
+   //! 'dim' must be smaller than number of parameters passed to GetBinBoundaries
+   //! usage e.g.:
+   //! int LoYBin  = GetBinBoundaries(2)[0].first;
+   //! int UpPtBin = GetBinBoundaries(2,5)[1].second;
+   //! int LoYBin  = GetBinBoundaries(2,5)[0].second;
+
    std::pair < double, double > GetObsBin(int bin, int dim) const { return Bin[bin][dim];}      // Get observable binning for given dimension and given bin
    std::vector < std::pair < double, double > > GetObsBinDim(int dimension) const;              // Get observable binning of given dimension
 
