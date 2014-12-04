@@ -1,3 +1,4 @@
+#include <cfloat>
 #include <cstdlib>
 #include <set>
 #include "fastnlotk/fastNLOTable.h"
@@ -92,7 +93,18 @@ vector < pair <double, double > > fastNLOTable::GetObsBinDim(int dimension) cons
    return Bins;
 }
 // ___________________________________________________________________________________________________
-vector < pair < double, double > >  fastNLOTable::GetBinDimI() const {
+// vector < pair <double, double > > fastNLOTable::GetUniqBinsDim(int idim) const {
+//    //! Get binning in dimension 'idim' (requires monotonously increasing bin borders)
+//    std::vector< std::pair<double, double > > Bins;
+//    unsigned int
+//    double lastlow = Bin[0][idim].first;
+//    double lastupp = Bin[0][idim].second;
+//    for (size_t i = 0; i < Bin.size(); ++i)
+//       Bins.push_back(Bin[i][dimension]);
+//    return Bins;
+// }
+// ___________________________________________________________________________________________________
+vector < pair < double, double > > fastNLOTable::GetBinDimI() const {
    //! Get binning of first dimension
    std::vector< std::pair<double, double > > Bins = GetObsBinDim(0);
    std::set< pair< double,double>  > set (Bins.begin(), Bins.end());
@@ -749,6 +761,58 @@ int fastNLOTable::GetBinNumber( double val1 , double val2, double val3 ) const {
    return obsbin;
 
 }
+
+
+// ___________________________________________________________________________________________________
+// int fastNLOTable::GetBinNumberV(vector<double> obsvals) {
+//    // Get Bin number of this event if you use a single or double differential binning
+//    // return -1 if no bin was found
+
+//    //
+//    //  calculate the bin number as define in Scenario::LoBin and Scenario::UpBin
+//    //  initialized by Scenario::InitBinning.
+//    //
+//    //  returns the bin number, that has to be passse to FillEvent()
+//    //  return -1 if values are out of bin-ranges
+//    //
+
+//    bool lobsbin = false;
+//    vector <bool> lobs;
+//    int obsdim = obsvals.size();
+//    if (obsdim != NDim) {
+//       error["GetBinNumberV"] << "Number of observable values not equal dimensionality of the binning, aborted" << endl;
+//       error["GetBinNumberV"] << "NDim = " << NDim << ", obsvals.size() = " << obsvals.size() << endl;
+//       exit(1);
+//    }
+
+//    int iobsbin = 0;
+//    for (int i=0; i<NDim; i++) {
+//       lobs.push_back(false);
+//       std::vector< std::pair<double, double > > Bins;
+//       Bins = GetObsBinDim(i);
+//       for (int j=0; j<Bins[iobsbin] ;j++) {
+//          if ( IDiffBin[i] == 1 ) { // Point-wise
+//             if ( fabs(Bin[iobsbin][i].first - obsval[i]) < DBL_MIN ) {
+//                lobs[i] = true;
+//             }
+//          } else {
+//             if ( Bin[iobsbin][i].first <= obsval[i] && obsval[i] < Bin[iobsbin][i].second ) {
+//                lobs[i] = true;
+//             }
+//          }
+//          if ( lobs[i] ) {
+//             iobsbin = iobsbin;
+//             continue;
+//          } else {
+//             iobsbin++;
+//          }
+//          cout << "iobsbin = " << iobsbin;
+//       }
+//    }
+
+//    return iobsbin;
+
+// }
 
 
 // ___________________________________________________________________________________________________
