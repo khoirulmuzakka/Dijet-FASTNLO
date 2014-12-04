@@ -117,29 +117,29 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
 
    // read asymmetric processes if half-matrix notation is requested
-   // force half-matrix notation for 121 or 169 subprocesses
-   if (fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
-      fProcConsts.NPDFDim = 1;
-      const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
-      int p1 = 0;
-      int p2 = 0;
-      for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
-         int pid = p1*(np)+p2;
-         int asympid = p2*(np)+p1;
-         if ( pid != asympid )  // actually not needed necessarily
-            fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
-         p2++;
-         if ( p2 == np ) {
-            p2=0;
-            p1++;
-         }
+   if ( fProcConsts.NPDFDim==1 ) {
+      if ( fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
+	 const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
+	 int p1 = 0;
+	 int p2 = 0;
+	 for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
+	    int pid = p1*(np)+p2;
+	    int asympid = p2*(np)+p1;
+	    if ( pid != asympid )  // actually not needed necessarily
+	       fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
+	    p2++;
+	    if ( p2 == np ) {
+	       p2=0;
+	       p1++;
+	    }
+	 }
       }
-   }
-   else if (fProcConsts.NPDF == 2 && fProcConsts.NPDFDim == 1) {
-      vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
-      for (unsigned int i = 0 ; i<asym.size() ; i++) {
-         if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
-         fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+      else if (fProcConsts.NPDF == 2 ) {
+	 vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
+	 for (unsigned int i = 0 ; i<asym.size() ; i++) {
+	    if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
+	    fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+	 }
       }
    }
 
@@ -1468,12 +1468,13 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    int p = fEvent._p;
 
    // do interpolation
-   double xmin = std::min(fEvent._x1,fEvent._x2);
-   double xmax = std::max(fEvent._x1,fEvent._x2);
+   double xmin = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::min(fEvent._x1,fEvent._x2) : fEvent._x1;
+   double xmax = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::max(fEvent._x1,fEvent._x2) : fEvent._x2;
    //cout<<"\n NEW Contribution ! xmin="<<xmin<<",\t xmax="<<xmax<<",\t mu1="<<fScenario._m1 * fScaleFac[scalevar]<<"\n"<<endl;
 
    vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
    vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
+   
    const double mu = fScenario._m1 * fScaleFac[scalevar];
    const vector<pair<int,double> >& nmu  = fKernMuS[ObsBin][scalevar]->GetNodeValues(mu);
 
@@ -1488,15 +1489,15 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    // fill grid
    if (CheckWeightIsNan()) return;
    double wgt = fEvent._w / BinSize[ObsBin];
-   for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
-      for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
-         int xmaxbin = nxup[x1].first;
-         int xminbin = nxlo[x2].first;
+   for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
+      for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
+         int xminbin = nxlo[x1].first;
+         int xmaxbin = nxup[x2].first;
          HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
-            double w = wgt * nxup[x1].second * nxlo[x2].second * nmu[m1].second ;
+            double w = wgt * nxlo[x1].second * nxup[x2].second * nmu[m1].second ;
             //              cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
             //          <<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
             c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
