@@ -812,26 +812,29 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
 
       for (unsigned int j = ishift ; j<bgrid[i].size()-1; j++) {
          Bin.push_back(vector<pair<double,double> >(ndim));
-
+         int kshift = 0;
          for ( unsigned int k = 0; k<ndim-1; k++ ) {
+            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k = " << bgrid[i][k+kshift] << endl;
+            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k+1 = " << bgrid[i][k+kshift+1] << endl;
             if ( idiff[k] == 1 ) { // Point-wise differential --> one bin center
-               Bin[NObsBin][k] = make_pair(bgrid[i][k],bgrid[i][k]);
+               Bin[NObsBin][k] = make_pair(bgrid[i][k+kshift],bgrid[i][k+kshift]);
             } else {               // Non- or bin-wise differential --> two bin edges
-               if ( !(bgrid[i][k] < bgrid[i][k+1]) ) {
+               if ( !(bgrid[i][k+kshift] < bgrid[i][k+kshift+1]) ) {
                   error["SetBinningND"] << "Illegal binning, lower bin edge larger or equal to upper one, aborted!" << endl;
                   error["SetBinningND"] << "i, k = " << i << ", " << k << ", lower edge = " << bgrid[i][k] <<
                      ", and upper edge = " << bgrid[i][k+1] << endl;
                   exit(1);
                }
                Bin[NObsBin][k] = make_pair(bgrid[i][k],bgrid[i][k+1]);
+               kshift++;
             }
          }
 
          if ( idiff[ndim-1] == 1 ) { // Point-wise differential --> one bin center
             Bin[NObsBin][ndim-1] = make_pair(bgrid[i][j],bgrid[i][j]);
          } else {                    // Non- or bin-wise differential --> two bin edges
-            //            cout << "i = " << i << ", j = " << j << ", bgrid i,j = " << bgrid[i][j] << endl;
-            //            cout << "i = " << i << ", j = " << j << ", bgrid i,j+1 = " << bgrid[i][j+1] << endl;
+            cout << "i = " << i << ", j = " << j << ", bgrid i,j = " << bgrid[i][j] << endl;
+            cout << "i = " << i << ", j = " << j << ", bgrid i,j+1 = " << bgrid[i][j+1] << endl;
             if ( !(bgrid[i][j] < bgrid[i][j+1]) ) {
                error["SetBinningND"] << "Illegal binning, lower bin edge larger or equal to upper one, aborted!" << endl;
                error["SetBinningND"] << "i, j = " << i << ", " << j << ", lower edge = " << bgrid[i][j] <<
