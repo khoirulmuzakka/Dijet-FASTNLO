@@ -2079,7 +2079,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                      // CalcPDFLinearCombination calculats Anti-proton from proton
                      int x1bin = x % c->GetNxtot1(i);
                      int x2bin = x / c->GetNxtot1(i);
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin], IsPPBar);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx1[x1bin],xfx2[x2bin], IsPPBar);
                   }
                }
             }
@@ -2101,7 +2101,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   for (int x=0; x<nxmax; x++) {
                      int x1bin = x % c->GetNxtot1(i);
                      int x2bin = x / c->GetNxtot1(i);
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx1[x1bin],xfx2[x2bin]);
                   }
                }
             }
@@ -2123,7 +2123,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   for (int x=0; x<nxmax; x++) {
                      int x1bin = x % c->GetNxtot1(i);
                      int x2bin = x / c->GetNxtot1(i);
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin]);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx1[x1bin],xfx2[x2bin]);
                   }
                }
             }
