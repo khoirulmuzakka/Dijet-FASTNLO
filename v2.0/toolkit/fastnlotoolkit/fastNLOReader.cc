@@ -1873,6 +1873,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             }
             int x1bin = 0;
             int x2bin = 0;
+	    // half-matrix notation
             for (int k=0; k<nxmax; k++) {
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
                if (fUseHoppet){
@@ -1927,10 +1928,11 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                }
 
             }
+	    // full matrix notation
             for (int k=0; k<nxmax; k++) {
                int x1bin = k % c->GetNxtot1(i);
                int x2bin = k / c->GetNxtot1(i);
-               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx2[x2bin],xfx1[x1bin], IsPPBar);
+               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx1[x1bin],xfx2[x2bin], IsPPBar);
                if (fUseHoppet){
                   c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx1[x1bin], xfxspl2[x2bin], IsPPBar);
                   c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl1[x1bin], xfx2[x2bin], IsPPBar);
