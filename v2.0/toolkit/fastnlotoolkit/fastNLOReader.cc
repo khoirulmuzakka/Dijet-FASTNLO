@@ -1875,15 +1875,33 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             int x2bin = 0;
 	    // half-matrix notation
             for (int k=0; k<nxmax; k++) {
-               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
+               // Original code calling (x2, x1) cancelling the inverted naming below --> OK in original version
+               //               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
+               // Fixed code: With correct naming of x1bin, x2bin below (x1, x2) has to be called
+               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
+               // TODO: Georg was using (x1, x2) that was wrong with original x1bin, x2bin naming
+               // TODO: Check with Georg what is correct now after the fix
                if (fUseHoppet){
                   c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfx[x1bin], xfxspl[x2bin], IsPPBar);
                   c->PdfSplLc2[i][j][k] = CalcPDFLinearCombination(c, xfxspl[x1bin], xfx[x2bin], IsPPBar);
                }
-               x1bin++;
-               if (x1bin>x2bin) {
-                  x1bin = 0;
-                  x2bin++;
+               // Original code: But x1bin, x2bin are exchanged with respect to GetXIndex for filling.
+               //                This is wrong!
+               // The 2-dim. x1, x2 bins are mapped onto ix like this:
+               //    [0,0] --> [0]
+               //    [1,0] --> [1]
+               //    [1,1] --> [2]
+               //    [2,0] --> [3]
+               //    etc.
+               // x1bin++;
+               // if (x1bin>x2bin) {
+               //    x1bin = 0;
+               //    x2bin++;
+               // Invert naming of x1bin and x2bin
+               x2bin++;
+               if (x2bin>x1bin) {
+                  x2bin = 0;
+                  x1bin++;
                }
             }
          }
