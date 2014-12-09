@@ -119,27 +119,27 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    // read asymmetric processes if half-matrix notation is requested
    if ( fProcConsts.NPDFDim==1 ) {
       if ( fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
-	 const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
-	 int p1 = 0;
-	 int p2 = 0;
-	 for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
-	    int pid = p1*(np)+p2;
-	    int asympid = p2*(np)+p1;
-	    if ( pid != asympid )  // actually not needed necessarily
-	       fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
-	    p2++;
-	    if ( p2 == np ) {
-	       p2=0;
-	       p1++;
-	    }
-	 }
+         const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
+         int p1 = 0;
+         int p2 = 0;
+         for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
+            int pid = p1*(np)+p2;
+            int asympid = p2*(np)+p1;
+            if ( pid != asympid )  // actually not needed necessarily
+               fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
+            p2++;
+            if ( p2 == np ) {
+               p2=0;
+               p1++;
+            }
+         }
       }
       else if (fProcConsts.NPDF == 2 ) {
-	 vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
-	 for (unsigned int i = 0 ; i<asym.size() ; i++) {
-	    if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
-	    fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
-	 }
+         vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
+         for (unsigned int i = 0 ; i<asym.size() ; i++) {
+            if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
+            fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+         }
       }
    }
 
@@ -478,38 +478,38 @@ void fastNLOCreate::ReadBinning() {
    // read double-differential bin grid
    else if (NDim==2) {
       vector<vector<double> > in = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
-      SetBinningND(in, NDim, IDiffBin);
-      // NObsBin=0;
-      // Bin.clear();
-      // for (unsigned int r = 0 ; r<in.size() ; r++) {
-      //    unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
-      //    for (unsigned int c = 2 ; c<nBin2Max ; c++) {
-      //       Bin.push_back(vector<pair<double,double> >(NDim));
-      //       // sanity dim 1:
-      //       if (AllBinInt) {
-      //          if (in[r][0]>=in[r][1]) {
-      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-      //             exit(1);
-      //          }
-      //          if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
-      //             error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
-      //                                 <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
-      //             exit(1);
-      //          }
-      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
-      //          // sanity dim 0:
-      //          if (in[r][c] >= in[r][c+1]) {
-      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-      //             exit(1);
-      //          }
-      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
-      //       } else {
-      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
-      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
-      //       }
-      //       NObsBin++; // count
-      //    }
-      // }
+      //      SetBinningND(in, NDim, IDiffBin);
+      NObsBin=0;
+      Bin.clear();
+      for (unsigned int r = 0 ; r<in.size() ; r++) {
+         unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
+         for (unsigned int c = 2 ; c<nBin2Max ; c++) {
+            Bin.push_back(vector<pair<double,double> >(NDim));
+            // sanity dim 1:
+            if (AllBinInt) {
+               if (in[r][0]>=in[r][1]) {
+                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+                  exit(1);
+               }
+               if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
+                  error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
+                                      <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
+                  exit(1);
+               }
+               Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
+               // sanity dim 0:
+               if (in[r][c] >= in[r][c+1]) {
+                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+                  exit(1);
+               }
+               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
+            } else {
+               Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
+               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
+            }
+            NObsBin++; // count
+         }
+      }
    }
 
    // read in triple-differential binning
@@ -1130,9 +1130,9 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
             if (fProcConsts.AsymmetricProcesses[i].second >= GetNSubprocesses() || fSymProc[fProcConsts.AsymmetricProcesses[i].first] >= GetNSubprocesses()) {
                if (!(c->IPDFdef1==3&&c->IPDFdef2==1&&c->IPDFdef3==1))   // it is normal in pp->jets in LO
                   warn["SetOrderOfAlphasOfCalculation"]<<"Subprocess "<<fSymProc[fProcConsts.AsymmetricProcesses[i].first]<<" is requested to be asymmetric with subprocess "<<fProcConsts.AsymmetricProcesses[i].second<<", but there are only "<<GetNSubprocesses()<<" subprocesses in this calculation. Ignoring call."<<endl;
-            } 
-	    else 
-	       fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
+            }
+            else
+               fSymProc[fProcConsts.AsymmetricProcesses[i].first] = fProcConsts.AsymmetricProcesses[i].second;
          }
       }
 
@@ -1474,7 +1474,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 
    vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
    vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
-   
+
    const double mu = fScenario._m1 * fScaleFac[scalevar];
    const vector<pair<int,double> >& nmu  = fKernMuS[ObsBin][scalevar]->GetNodeValues(mu);
 
@@ -1755,7 +1755,10 @@ inline int fastNLOCreate::GetXIndex(const int& ObsBin,const int& x1bin,const int
    //    switch (GetTheCoeffTable()->GetNPDFDim() ) {
    switch (((fastNLOCoeffAddBase*)fCoeff[0])->GetNPDFDim()) {
    case 1:
+      // Daniel´s original
       return x1bin + (x2bin*(x2bin+1)/2);    // half matrix
+      // Exchange x1 with x2
+      //      return x2bin + (x1bin*(x1bin+1)/2);    // half matrix
    case 0:
       return x1bin; // linear
    case 2:
@@ -2565,7 +2568,7 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetIfParameterExistsInSteering(const string& label) {
+bool fastNLOCreate::TestParameterInSteering(const string& label) {
    //! Get flag if parameter exists in steering card
    return read_steer::getexist(label, fSteerfile);
 }

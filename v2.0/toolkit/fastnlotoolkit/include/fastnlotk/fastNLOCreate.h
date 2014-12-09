@@ -76,7 +76,7 @@ public:
       return (fastNLOCoeffAddBase*)GetCoeffTable(0);
    }                                            //!< Getter for the one (and only) coefficient table
 
-   bool GetIfParameterExistsInSteering(const string& label);                                    //!< Get flag if parameter exists in steering card
+   bool TestParameterInSteering(const string& label);                                           //!< Test on existence of user-defined parameter name in steering card.
    bool GetParameterFromSteering(string label, bool& val);                                      //!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, int& val);                                       //!< Get user-defined parameter from steering file.
    bool GetParameterFromSteering(string label, double& val);                                    //!< Get user-defined parameter from steering file.
