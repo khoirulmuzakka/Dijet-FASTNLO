@@ -1873,7 +1873,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             }
             int x1bin = 0;
             int x2bin = 0;
-	    // half-matrix notation
+            // half-matrix notation
             for (int k=0; k<nxmax; k++) {
                // Original code calling (x2, x1) cancelling the inverted naming below --> OK in original version
                //               c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
