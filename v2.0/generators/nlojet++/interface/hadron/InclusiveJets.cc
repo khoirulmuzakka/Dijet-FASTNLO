@@ -268,6 +268,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // --- count number of selected jets left at this stage
    size_t njet = std::remove_if(pj.begin(), pj.end(), *SelJets) - pj.begin();
+   if ( njet < 1 ) return;
 
    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
    static fNLOSorter SortJets;
