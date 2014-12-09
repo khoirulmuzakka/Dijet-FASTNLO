@@ -42,6 +42,7 @@ JetAlgo                           2              # fastjet jet algorithm
 Rjet                            0.5              # Jet size parameter: Required for all jets
 #OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
 ptjmin                          18.              # Minimal jet pT
+# Use either rapidity or pseudorapidity but not both! If both are set, only rapidity cuts are applied.
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           3.0              # Maximal jet rapidity
 #etajmin                         0.0              # Minimal jet pseudorapidity

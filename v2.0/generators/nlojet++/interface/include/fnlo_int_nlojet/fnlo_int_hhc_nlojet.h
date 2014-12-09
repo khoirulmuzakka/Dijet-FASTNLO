@@ -26,8 +26,6 @@ namespace UsefulNlojetTools {
    fastNLO::GeneratorConstants GenConsts() {
       fastNLO::GeneratorConstants GenConsts;
       GenConsts.Name = "NLOJet++_4.1.3";
-      //GenConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
-      //GenConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
       return GenConsts;
    }
 
@@ -49,6 +47,9 @@ namespace UsefulNlojetTools {
       ProcConsts.IPDFdef3LO = 1;
       ProcConsts.IPDFdef3NLO = 2;
       ProcConsts.IPDFdef3NNLO = 2;
+      // Test full-matrix storage
+      //      ProcConsts.NPDFDim = 2;
+      // Half-matrix storage
       ProcConsts.NPDFDim = 1;
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
