@@ -97,6 +97,8 @@ public:
    void initfunc(unsigned int);
    void userfunc(const event_hhc&, const amplitude_hhc&);
    virtual void end_of_event();
+   // 'nsave' is initialized by NLOJet++ with 10000 or to the command line number given via --save-after
+   // in fastNLO this number is logarithmically increased by factors of 10 up to nwritemax = 10M
    virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
 
 private:
@@ -107,8 +109,9 @@ private:
    bounded_vector<lorentzvector<double> > pj;
 
    // --- fastNLO definitions (not for user)
-   double nevents;        // No. of events calculated so far
-   unsigned long nwrite;  // No. of events after which to write out the table
+   double nevents;           // No. of events calculated so far
+   unsigned long nwrite;     // Actual no. of events after which to write out the table
+   unsigned long nwritemax;  // Maximal no. of events after which to write out the table
 };
 
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd)
@@ -418,16 +421,22 @@ void UserHHC::initfunc(unsigned int)
    // --- Initialize event counters
    nevents = 0;
    // Set some defaults
-   if (nwrite==0) nwrite = 1000000;
+   nwritemax = 10000000;
 }
 
 void UserHHC::end_of_event(){
    say::debug["UserHHC::end_of_event"] << "---------- UserHHC::end_of_event called ----------" << endl;
    nevents += 1;
    // --- store table
+   say::debug["UserHHC::end_of_event"] << " nevents = " << nevents << ", nwrite = " << nwrite << endl;
    if (( (unsigned long)nevents % nwrite)==0){
       ftable->SetNumberOfEvents(nevents);
       ftable->WriteTable();
+      if ( nwrite < nwritemax ) {
+         nwrite *= 10;
+      } else {
+         nwrite = nwritemax;
+      }
    }
 }
 
@@ -435,6 +444,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name,
                           unsigned long __save, bool __txt)
 {
    say::debug["UserHHC::phys_output"] << "---------- UserHHC::phys_output called ----------" << endl;
+   say::debug["UserHHC::phys_output"] << "Before: __save = " << __save << ", nwrite = " << nwrite << endl;
    nwrite = __save;
    InitFastNLO(__file_name);
 }
