@@ -37,6 +37,7 @@
 
 //------ DON'T TOUCH THIS PART! ------
 #include <iostream>
+#include <map>
 #include <bits/hhc-phasespace.h>
 #include <bits/hhc-process.h>
 #include <bits/hhc-jetfunc.h>
@@ -173,84 +174,124 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
    //     Usually, pT and E are in GeV, but this may be changed.
    //     ATTENTION: Scales must always be in GeV!
 
-   // --- fastNLO user: get steering parameters once and store into static vars
-   // general steering parameters (with defaults)
-   static bool lFlexibleScaleTable = false;
-   //   if ( ftable->TestParameterInSteering("FlexibleScaleTable") ) {
-      ftable->GetParameterFromSteering("FlexibleScaleTable",lFlexibleScaleTable);
-   //   }
+   // --- fastNLO user: check and get steering parameters once and store into static vars
+   static std::map < std::string, bool > SteeringPars;
 
-   // user-defined steering parameters (without defaults)
-   // --- fastNLO user: set the jet algorithm and size
+   // get general steering parameters needed here from steering file
+   SteeringPars["FlexibleScaleTable"] = ftable->TestParameterInSteering("FlexibleScaleTable");
+   static bool lFlexibleScaleTable = false; // default
+   if ( SteeringPars["FlexibleScaleTable"] ) {
+      ftable->GetParameterFromSteering("FlexibleScaleTable",lFlexibleScaleTable);
+   }
+   SteeringPars["DifferentialDimension"] = ftable->TestParameterInSteering("DifferentialDimension");
+   static int read_ndim; // no default
+   if ( SteeringPars["DifferentialDimension"] ) {
+      ftable->GetParameterFromSteering("DifferentialDimension",read_ndim);
+   } else {
+      say::error["InclusiveJets"] << "Dimensioning of binning not set, aborted!" << endl;
+      exit(1);
+   }
+
+   // definition of jet algorithm and overall phase space limits (no defaults)
+   //
+   // --- fastNLO user: set the jet algorithm and size via steering file
    // fastjet clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
    // fastjet cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
+   SteeringPars["JetAlgo"] = ftable->TestParameterInSteering("JetAlgo");
    static int jetalgo;
-   //   if ( ftable->TestParameterInSteering("JetAlgo") ) {
+   if ( SteeringPars["JetAlgo"] ) {
       ftable->GetParameterFromSteering("JetAlgo",jetalgo);
       if ( jetalgo < 0 || (2 < jetalgo && jetalgo < 10) || 12 < jetalgo ) {
-         say::error["fnl-scenario"] << "Unknown jet algorithm " << jetalgo << ", aborted!" << endl;
+         say::error["InclusiveJets"] << "Unknown jet algorithm " << jetalgo << ", aborted!" << endl;
          exit(1);
       }
-   // } else {
-   //    say::error["fnl-scenario"] << "No jet algorithm selected, aborted!" << endl;
-   //    exit(1);
-   // }
+   } else {
+      say::error["InclusiveJets"] << "No jet algorithm selected, aborted!" << endl;
+      exit(1);
+   }
+   SteeringPars["Rjet"] = ftable->TestParameterInSteering("Rjet");
    static double jetsize;
-   //   if ( ftable->TestParameterInSteering("Rjet") ) {
+   if ( SteeringPars["Rjet"] ) {
       ftable->GetParameterFromSteering("Rjet",jetsize);
-   // } else {
-   //    say::error["fnl-scenario"] << "Jet size R not defined, aborted!" << endl;
-   //    exit(1);
-   // }
+   } else {
+      say::error["InclusiveJets"] << "Jet size R not defined, aborted!" << endl;
+      exit(1);
+   }
+   SteeringPars["OvThr"] = ftable->TestParameterInSteering("OvThr");
    static double overlapthreshold = 0.5;
-   //   if ( ftable->TestParameterInSteering("OvThr") ) {
+   if ( SteeringPars["OvThr"] ) {
       ftable->GetParameterFromSteering("OvThr",overlapthreshold);
-   // } else if ( jetalgo > 9 ) {
-   //    say::error["fnl-scenario"] << "Overlap threshold not defined for jet algorithm " << jetalgo << ", aborted!" << endl;
-   //    exit(1);
-   // }
-   // --- fastNLO user: declare and initialize phase space cut variables
-   // lowest pT for jets to be considered
+   } else if ( jetalgo > 9 ) {
+      say::error["InclusiveJets"] << "Overlap threshold not defined for jet algorithm " << jetalgo << ", aborted!" << endl;
+      exit(1);
+   }
+   // --- fastNLO user: declare and initialize overall phase space cuts via steering file
+   // overall lowest pT for jets to be considered
+   SteeringPars["ptjmin"] = ftable->TestParameterInSteering("ptjmin");
    static double ptjmin;
-   //   if ( ftable->TestParameterInSteering("ptjmin") ) {
+   if ( SteeringPars["ptjmin"] ) {
       ftable->GetParameterFromSteering("ptjmin",ptjmin);
-   // } else {
-   //    say::error["fnl-scenario"] << "Minimal jet pT (ptjmin) not defined, aborted!" << endl;
-   //    exit(1);
-   // }
-   // smallest |(pseudo-)rapidity| for jets to be considered
+   } else {
+      say::error["InclusiveJets"] << "Minimal jet pT (ptjmin) not defined, aborted!" << endl;
+      exit(1);
+   }
+   // overall highest pT for jets not implemented, since uncritical with respect to CPU time consumption
+   // overall smallest |(pseudo-)rapidity| for jets to be considered, use either y or eta but not both
+   SteeringPars["yjmin"]   = ftable->TestParameterInSteering("yjmin");
+   SteeringPars["etajmin"] = ftable->TestParameterInSteering("etajmin");
    static double yetajmin;
-   //   if ( ftable->TestParameterInSteering("yjmin") ) {
+   if ( SteeringPars["yjmin"] && !SteeringPars["etajmin"] ) {
       ftable->GetParameterFromSteering("yjmin",yetajmin);
-   // } else if ( ftable->TestParameterInSteering("etajmin") ) {
-   //    ftable->GetParameterFromSteering("etajmin",yetajmin);
-   // } else {
-   //    say::error["fnl-scenario"] << "Minimal jet (pseudo)rapidity (yjmin or etajmin) not defined, aborted!" << endl;
-   //    exit(1);
-   // }
-   // largest  |(pseudo-)rapidity| for jets to be considered
+   } else if ( !SteeringPars["yjmin"] && SteeringPars["etajmin"] ) {
+      ftable->GetParameterFromSteering("etajmin",yetajmin);
+   } else {
+      say::error["InclusiveJets"] << "Minimal jet (pseudo)rapidity (yjmin or etajmin) not uniquely defined, aborted!" << endl;
+      exit(1);
+   }
+   // overall largest |(pseudo-)rapidity| for jets to be considered, use either y or eta but not both
+   SteeringPars["yjmax"]   = ftable->TestParameterInSteering("yjmax");
+   SteeringPars["etajmax"] = ftable->TestParameterInSteering("etajmax");
    static double yetajmax;
-   //   if ( ftable->TestParameterInSteering("yjmax") ) {
+   if ( SteeringPars["yjmax"] && !SteeringPars["etajmax"] ) {
       ftable->GetParameterFromSteering("yjmax",yetajmax);
-   // } else if ( ftable->TestParameterInSteering("etajmax") ) {
-   //    ftable->GetParameterFromSteering("etajmax",yetajmax);
-   // } else {
-   //    say::error["fnl-scenario"] << "Maximal jet (pseudo)rapidity (yjmax or etajmax) not defined, aborted!" << endl;
-   //    exit(1);
-   // }
+   } else if ( !SteeringPars["yjmax"] && SteeringPars["etajmax"] ) {
+      ftable->GetParameterFromSteering("etajmax",yetajmax);
+   } else {
+      say::error["InclusiveJets"] << "Maximal jet (pseudo)rapidity (yjmax or etajmax) not uniquely defined, aborted!" << endl;
+      exit(1);
+   }
+   // define logical for decision on cuts in (pseudo-)rapidity, no mixing allowed here
+   static bool lpseudo;
+   if ( SteeringPars["yjmin"] && SteeringPars["yjmax"] ) {
+      lpseudo = false;
+   } else if ( SteeringPars["etajmin"] && SteeringPars["etajmax"] ) {
+      lpseudo = true;
+   } else {
+      say::error["InclusiveJets"] << "Phase space cuts mixed in (pseudo-)rapidity, aborted!" << endl;
+      say::error["InclusiveJets"] << "Booleans for cut selections are" <<
+         " yjmin "    << SteeringPars["yjmin"] <<
+         ", yjmax "   << SteeringPars["yjmax"] <<
+         ", etajmin " << SteeringPars["etajmin"] <<
+         ", etajmax " << SteeringPars["etajmax"] << endl;
+      say::error["InclusiveJets"] << "If you really want to mix, the code needs to be adapted." << endl;
+      exit(1);
+   }
 
    // apply the jet algorithm to partonic 4-vector array p of NLOJet++
    pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
    unsigned int nj = pj.upper();
 
    // --- check on minimal and maximal no. of jets
-   // In principle, without cuts, there should always be two, but occasionally NLOJet++ gives back none
-   // There should never be more than four in NLOJet++
+   // ATTENTION: In principle, without cuts, there should always be two.
+   //            For efficiency reasons though, our interface to the fastjet algorithms
+   //            requires a minimal jet pT of 1 GeV. If this is a problem, the ptmin value
+   //            in fj-jets.cc needs to be changed.
+   // There should never be more than four jets in NLOJet++
    if (nj < 1) {
-      say::warn["fnl-scenario"] << "This event from NLOJet++ has no jets. Skipped!" << endl;
+      say::info["InclusiveJets"] << "This event from NLOJet++ has no jets with pT > 1 GeV. Skipped!" << endl;
       return;
    } else if (nj > 4) {
-      say::error["fnl-scenario"] << "This event from NLOJet++ has more than four jets, which should never happen. Aborted!" << endl;
+      say::error["InclusiveJets"] << "This event from NLOJet++ has more than four jets, which should never happen. Aborted!" << endl;
       exit(1);
    }
 
@@ -260,16 +301,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["fnl-scenario"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["InclusiveJets"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
    // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
    fNLOSelector *SelJets;
-   bool lpseudo = false;
-   if (ftable->TestParameterInSteering("etajmin") && ftable->TestParameterInSteering("etajmax")) {
-      lpseudo = true;
-   }
    SelJets = new fNLOSelector(yetajmin,yetajmax,ptjmin,lpseudo);
 
    // --- count number of selected jets left at this stage
@@ -282,17 +319,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
 
    // --- give some debug output after selection and sorting
    if ( say::debug.GetSpeak() ) {
-      say::debug["fnl-scenario"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+      say::debug["InclusiveJets"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
       if ( ! lpseudo ) {
-         say::debug["fnl-scenario"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["InclusiveJets"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       } else {
-         say::debug["fnl-scenario"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["InclusiveJets"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       }
       for (unsigned int i=1; i<=njet; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["fnl-scenario"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["InclusiveJets"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -329,7 +366,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       }
 
       // scenario specific quantites
-      static int read_ndim = ftable->GetParameterFromSteering("DifferentialDimension",read_ndim);
       fnloScenario scen;
       if ( read_ndim == 1 ) {        // 1D binning
          scen.SetObservableDimI( pt  , 0 );
