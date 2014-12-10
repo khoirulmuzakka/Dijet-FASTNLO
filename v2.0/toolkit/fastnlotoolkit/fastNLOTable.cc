@@ -103,6 +103,8 @@ vector < pair <double, double > > fastNLOTable::GetObsBinDim(int dimension) cons
 //       Bins.push_back(Bin[i][dimension]);
 //    return Bins;
 // }
+
+
 // ___________________________________________________________________________________________________
 vector < pair < double, double > > fastNLOTable::GetBinDimI() const {
    //! Get binning of first dimension
@@ -111,11 +113,15 @@ vector < pair < double, double > > fastNLOTable::GetBinDimI() const {
    Bins.assign(set.begin(), set.end());
    return Bins;
 }
+
+
 // ___________________________________________________________________________________________________
 unsigned int fastNLOTable::GetNBinDimI() const {
    //! Get number of bins of first dimension
    return GetBinDimI().size();
 }
+
+
 // ___________________________________________________________________________________________________
 vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const {
    //! Get binning of second dimension for bin 'DimIBin' of first dimension
@@ -131,6 +137,8 @@ vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const
    }
    return Bins;
 }
+
+
 // ___________________________________________________________________________________________________
 unsigned int fastNLOTable::GetNBinDimII(int DimIBin) const {
    //! Get number of bins of second dimension for bin 'DimIBin' of first dimension
@@ -143,7 +151,6 @@ unsigned int fastNLOTable::GetNBinDimII(int DimIBin) const {
 
 
 // ___________________________________________________________________________________________________
-
 vector < double > fastNLOTable::GetLoBin( int dimension) const {
    //! Get lower bin edge of all observable bins for dimension 'dimension'
    vector < double > LoBin;
@@ -151,6 +158,8 @@ vector < double > fastNLOTable::GetLoBin( int dimension) const {
       LoBin.push_back(Bin[i][dimension].first);
    return LoBin;
 }
+
+
 // ___________________________________________________________________________________________________
 vector < double > fastNLOTable::GetUpBin( int dimension) const {
    //! Get upper bin edge of all observable bins for dimension 'dimension'
@@ -159,6 +168,210 @@ vector < double > fastNLOTable::GetUpBin( int dimension) const {
       UpBin.push_back(Bin[i][dimension].second);
    return UpBin;
 }
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::CalcObsBin(double obs0, double obs1, double obs2) const {
+   //! Get 'ObsBin' for a particular set of observables
+   //! Returns -1 if observables are not within phase space
+   return GetBinNumber(obs0,obs1,obs2);
+}
+
+
+// ___________________________________________________________________________________________________
+unsigned int fastNLOTable::GetNDim0Bins() const {
+   //! Returns number of bins in first dimension
+   //! Valid for single, double and triple differential binnings
+   unsigned int ret = 0;
+   double lobin = -999999;
+   for ( unsigned int j = 0 ; j<Bin.size() ; j++ ) {
+      if ( Bin[j][0].first != lobin ) {
+	 ret++;
+	 lobin=Bin[j][0].first;
+      }
+   }
+   return ret;
+}
+
+
+// ___________________________________________________________________________________________________
+unsigned int fastNLOTable::GetNDim1Bins(int iDim0Bin) const {
+   //! Returns number of bins in second dimension.
+   //! Valid for double and triple differential binnings
+
+   unsigned int ret = 0;
+   const int idiff = GetNumDiffBin();
+   if ( idiff < 2 ) return 0;
+   else if ( idiff==2) {
+      int jDim0 = 0;
+      double lobin = -999999;
+      for ( unsigned int j = 0 ; j<Bin.size() ; j++ ) {
+	 if ( Bin[j][0].first != lobin ) {
+	    jDim0++;
+	    lobin=Bin[j][0].first;
+	    if ( jDim0-1 == iDim0Bin) {
+	       ret++;
+	    }
+	    if ( jDim0==iDim0Bin) return ret;// done
+	 }
+      }
+   }
+   else if ( idiff ==3 ) {
+      // todo
+      cout<<"todo fastNLOTable::GetNDim1Bins idiff==3"<<endl;
+      unsigned int jDim0 = 0;
+      unsigned int jDim1 = 0;
+      double lobin0 = -999999;
+      double lobin1 = -999999;
+   }
+   return ret;
+   
+}
+
+
+// ___________________________________________________________________________________________________
+unsigned int fastNLOTable::GetNDim2Bins(int iDim0Bin, int iDim1Bin) const {
+   // Number of bins in third dimension.
+   //! Valid for triple differential binnings
+   const int idiff = GetNumDiffBin();
+   if ( idiff < 3 ) return 0;
+   unsigned int jDim0 = 0;
+   unsigned int jDim1 = 0;
+   double lobin0 = -999999;
+   double lobin1 = -999999;
+   
+   cout<<"todo fastNLOTable::GetNDim2Bin."<<endl;
+
+   return 0;
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetDim0Bin(double obs0) const {
+   //! Get dim-specific bin-number for observable in dim-0
+   //! see example bin-grid in GetBinBoundaries()
+   unsigned int n = 0;
+   double lobin = -999999;
+   for ( unsigned int j = 0 ; j<Bin.size() ; j++ ) {
+      if ( Bin[j][0].first != lobin ) {
+	 n++;
+	 lobin=Bin[j][0].first;
+	 if ( IDiffBin[0] == 1 ) {
+	    if ( Bin[j][0].first == obs0 )
+	       return n-1;
+	 }
+	 else {
+	    if ( obs0 >= Bin[j][0].first && obs0<Bin[j][0].second )
+	       return n-1;
+	 }
+      }
+   }
+   return -1;
+   
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetDim1Bin(double obs0, double obs1) const {
+   //! Get dim-specific bin-number for observables in dim-1
+   //! see example bin-grid in GetBinBoundaries()
+
+   cout<<"todo fastNLOTable::GetDim1Bin()."<<endl;
+   return -1;
+
+}
+
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetDim2Bin(double obs0, double obs1, double obs2) const {
+   //! Get dim-specific bin-number for observables in dim-2
+   //! see example bin-grid in GetBinBoundaries()
+
+   cout<<"todo fastNLOTable::GetDim2Bin()."<<endl;
+   return -1;
+
+}
+
+
+// ___________________________________________________________________________________________________
+std::vector < std::pair < double, double > > fastNLOTable::GetBinBoundaries(int iDim0Bin, int iDim1Bin, int iDim2Bin) {
+   //!                                                                              
+   //! Get bin boundaries for first, second and third dimenstion                    
+   //!    Assuming for instance following 2-dimensional binning scheme:             
+   //!                                                                              
+   //!    iDim0Bin  ________________________________                                
+   //!       0      |___|___|___|_______|__|__|____|                                
+   //!  D    1      |____|____|____|_____|____|____|                                
+   //!  I    2      |__|__|___|__|__|___|__|___|___|                                
+   //!  M    3      |______|_______|_________|_____|                                
+   //!       4      |__________|_______|_________|_|                                
+   //!  0    5      |______________|______|___|____|                                
+   //!       6      |_______|_______|______|_______|                                
+   //!                            DIM 1                                             
+   //!  iDim1Bin may be different for each iDim0Bin                                 
+   //!                                                                              
+   //! usage e.g.:                                                                  
+   //! int LowerBoundary = GetBinBoundaries(ibin)[dim].first;                       
+   //! int UpperBoundary = GetBinBoundaries(ibin)[dim].second;                      
+   //! 'dim' must be smaller than number of parameters passed to GetBinBoundaries   
+   //! usage e.g.:                                                                  
+   //! int LoYBin  = GetBinBoundaries(2)[0].first;                                  
+   //! int UpPtBin = GetBinBoundaries(2,5)[1].second;                               
+   //! int LoYBin  = GetBinBoundaries(2,5)[0].second;                               
+
+   cout<<"todo.GetBinBoundaries() ."<<endl;
+   vector<pair<double,double> > BinRet(NDim);
+   const int idiff = GetNumDiffBin();
+   
+   if ( idiff==1 ) {
+      if ( iDim0Bin<0 || iDim0Bin>=NObsBin ) {
+	 warn["GetBinBoundaries"]<<"0th dimension does only have "<<NObsBin<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+	 return BinRet;
+      }
+      return Bin[iDim0Bin];
+   }
+   else if ( idiff==2) {
+      unsigned int nDim1 = GetNDim1Bins(iDim0Bin);
+      unsigned int nDim0 = GetNDim0Bins();
+      // sanity
+      if ( iDim0Bin < 0 || iDim0Bin >= nDim0 ) {
+	 warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+      }
+      if ( iDim1Bin < 0 || iDim1Bin >= nDim1 ) {
+	 warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
+      }
+      int iObs = 0;
+      for ( int i0 = 0 ; i0<iDim0Bin ; i0++ ) {
+	 iObs += GetNDim1Bins(i0);
+      }
+      iObs += iDim1Bin;
+      return Bin[iObs];
+   }
+   else if ( idiff == 3 ) {
+      unsigned int nDim0 = GetNDim0Bins();
+      unsigned int nDim1 = GetNDim1Bins(iDim0Bin);
+      unsigned int nDim2 = GetNDim2Bins(iDim0Bin,iDim1Bin);
+      // sanity
+      if ( iDim0Bin < 0 || iDim0Bin >= nDim0 ) {
+	 warn["GetBinBoundaries"]<<"Dimension 0 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+      }
+      if ( iDim1Bin < 0 || iDim1Bin >= nDim1 ) {
+	 warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
+      }
+      if ( iDim2Bin < 0 || iDim2Bin >= nDim2 ) {
+	 warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim2<<" but bin "<<iDim2Bin<<" was requested."<<endl;
+      }
+      error["GetBinBoundaries"]<<"todo. Further code no yet implemented."<<endl;
+      
+   }
+   else {
+      error["GetBinBoundaries"]<<"Higher than triple-differential binnings are not implemented."<<endl;
+   }
+   return BinRet;
+
+}
+
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadCoeffTables(istream& table){

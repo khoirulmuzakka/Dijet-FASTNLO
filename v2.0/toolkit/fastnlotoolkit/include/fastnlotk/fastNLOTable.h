@@ -42,13 +42,13 @@ class fastNLOTable : public fastNLOBase {
 
    // getters for 'ObsBin': ObsBin runs from 0-NObsBin
    int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
-   int GetObsBin(double var0, double var1=0, double var2=0) const;
+   int CalcObsBin(double obs0, double obs1=0, double obs2=0) const;
    std::vector < std::pair < double, double > > GetObsBinBoundaries(int iObsBin) const { return Bin[iObsBin];}    // Get binning for a given ObsBin
 
    // getters for dimension specific bins, here called Dim<I>Bins
    unsigned int GetNDim0Bins() const;                                                           // Number of bins in first dimension
-   unsigned int GetNDim1Bins(int iDim1Bin) const;                                               // Number of bins in second dimension for a first-dimension-bin
-   unsigned int GetNDim2Bins(int iDim1Bin, int iDim2Bin) const;                                 // Number of bins in third dimension for a second and first-dimension-bin
+   unsigned int GetNDim1Bins(int iDim0Bin) const;                                               // Number of bins in second dimension for a first-dimension-bin
+   unsigned int GetNDim2Bins(int iDim0Bin, int iDim1Bin) const;                                 // Number of bins in third dimension for a second and first-dimension-bin
    int GetDim0Bin(double var0) const;
    int GetDim1Bin(double var0, double var1) const;
    int GetDim2Bin(double var0, double var1, double var2) const;
