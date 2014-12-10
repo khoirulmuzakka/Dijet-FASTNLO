@@ -478,45 +478,49 @@ void fastNLOCreate::ReadBinning() {
    // read double-differential bin grid
    else if (NDim==2) {
       vector<vector<double> > in = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
-      //      SetBinningND(in, NDim, IDiffBin);
-      NObsBin=0;
-      Bin.clear();
-      for (unsigned int r = 0 ; r<in.size() ; r++) {
-         unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
-         for (unsigned int c = 2 ; c<nBin2Max ; c++) {
-            Bin.push_back(vector<pair<double,double> >(NDim));
-            // sanity dim 1:
-            if (AllBinInt) {
-               if (in[r][0]>=in[r][1]) {
-                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
-                  exit(1);
-               }
-               if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
-                  error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
-                                      <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
-                  exit(1);
-               }
-               Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
-               // sanity dim 0:
-               if (in[r][c] >= in[r][c+1]) {
-                  error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
-                  exit(1);
-               }
-               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
-            } else {
-               Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
-               Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
-            }
-            NObsBin++; // count
-         }
-      }
+      // New binning code
+      SetBinningND(in, NDim, IDiffBin);
+      // Old binning code
+      // NObsBin=0;
+      // Bin.clear();
+      // for (unsigned int r = 0 ; r<in.size() ; r++) {
+      //    unsigned int nBin2Max = AllBinInt ? in[r].size()-1 : in[r].size();
+      //    for (unsigned int c = 2 ; c<nBin2Max ; c++) {
+      //       Bin.push_back(vector<pair<double,double> >(NDim));
+      //       // sanity dim 1:
+      //       if (AllBinInt) {
+      //          if (in[r][0]>=in[r][1]) {
+      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][1]<<") is below the lower one ("<<in[r][0]<<") in row "<<r+1<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          if (AllBinInt && r>0 && in[r][0]!=in[r-1][1]) {
+      //             error["ReadBinning"]<<"The lower bin edge ("<<in[r][0]
+      //                                 <<") is not identical to the upper bin edge to the previous bin ("<<in[r-1][1]<<") around row "<<r+2<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][1]);
+      //          // sanity dim 0:
+      //          if (in[r][c] >= in[r][c+1]) {
+      //             error["ReadBinning"]<<"The upper bin edge ("<<in[r][c+1]<<") is below the lower one ("<<in[r][c]<<") in row "<<r+1<<" and column "<<c+1<<". Exiting."<<endl;
+      //             exit(1);
+      //          }
+      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c+1]);
+      //       } else {
+      //          Bin[NObsBin][0] = make_pair(in[r][0],in[r][0]);
+      //          Bin[NObsBin][1] = make_pair(in[r][c],in[r][c]);
+      //       }
+      //       NObsBin++; // count
+      //    }
+      // }
    }
 
    // read in triple-differential binning
    else if (NDim==3) {
-      warn["ReadBinning"]<<"The code for reading of "<<NDim<<"-dimensional binnings was not fully tested. Please verify the code an remove this statement."<<endl;
+      warn["ReadBinning"]<<"The code for reading of "<<NDim<<"-dimensional binnings was not fully tested. Please verify the code and remove this statement."<<endl;
       vector<vector<double> > in = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
+      // New binning code
       SetBinningND(in, NDim, IDiffBin);
+      // Old binning code
       // NObsBin=0;
       // Bin.clear();
       // for (unsigned int r = 0 ; r<in.size() ; r++) {
