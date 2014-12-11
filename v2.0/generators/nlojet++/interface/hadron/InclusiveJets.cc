@@ -103,7 +103,7 @@ public:
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
-   fj_jets  jetclusfj;
+   fj_jets jetclusfj;
 
    // --- define the jet structure
    bounded_vector<lorentzvector<double> > pj;
@@ -308,12 +308,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       }
    }
 
-   // --- select jets in y or eta and ptjmin (failing jets are moved to the end of the jet array pj!)
-   fNLOSelector *SelJets;
-   SelJets = new fNLOSelector(yetajmin,yetajmax,ptjmin,lpseudo);
+   // --- select jets in y (lpseudo = false) or eta (lpseudo = true) and ptjmin
+   //     note: failing jets are not deleted but moved to the end of the jet array pj!
+   fNLOSelector SelJets (yetajmin,yetajmax,ptjmin,lpseudo);
 
    // --- count number of selected jets left at this stage
-   size_t njet = std::remove_if(pj.begin(), pj.end(), *SelJets) - pj.begin();
+   size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
    if ( njet < 1 ) return; // Nothing to be done
 
    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
@@ -393,7 +393,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
          ftable->FillAllSubprocesses(contribsfix,scen);
       }
    }
-   delete SelJets;
 }
 
 
