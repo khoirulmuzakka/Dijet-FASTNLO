@@ -40,7 +40,7 @@ read_steer* read_steer::Steering(string steerID) {
    // get singleton class
    if (!(*instances)[steerID]) { //new instance
       if (steerID.compare(read_steer::stdID)!=0)
-         cout<<" # read_steer. Info. Initalizing new read_steer namespace with steerID = '"<<steerID<<"'."<<endl;
+         cout<<" # read_steer. Info. Initializing new read_steer namespace with steerID = '"<<steerID<<"'."<<endl;
       (*instances)[steerID] = new read_steer();
    }
    return (read_steer*)((*instances)[steerID]);
@@ -439,10 +439,12 @@ bool read_steer::ParseString(string line) {
       }
       // tables
       if (fParseTableMode>0) {
-         if (ParseFindString(pch,str_tabend)) {   // store table
+         if (ParseFindString(pch,str_tabend)) {
             fParseTableMode = 0;
-            if (!ftablevalues.empty() && !ffieldvalues.empty() && ffieldvalues.size() != ftablevalues[0].size())
-               cout<< oI<<"Expected a 'table' with "<<ffieldvalues.size()<<" columns for label '"<<ffieldlabel<<"', but found a differing number of entries in at least one row."<<endl;
+            // CKR: The following check doesn't make sense. Usually, one has only ONE label for the innermost dimension
+            //      like "----- Array of bin-grid ..." ==> message appears always.
+            //            if (!ftablevalues.empty() && !ffieldvalues.empty() && ffieldvalues.size() != ftablevalues[0].size())
+            //               cout<< oI<<"Expected a 'table' with "<<ffieldvalues.size()<<" columns for label '"<<ffieldlabel<<"', but found a differing number of entries in at least one row."<<endl;
             ftableheaders[ffieldlabel] = ffieldvalues;
             ftables[ffieldlabel]     = ftablevalues;
             ffieldvalues.clear();
@@ -550,13 +552,15 @@ bool read_steer::ParseString(string line) {
       if (fParseTableMode>2 && pch==NULL) return true;
       fParseTableMode++;
    }
-   if (fParseTableMode>2) {   // check number of columns in table
-      if (ftablevalues.size() > 1)
-         if (ftablevalues.back().size() != ftablevalues[0].size())
-            cout <<oI<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()
-                 <<" has a different number of columns (n="<< ftablevalues.back().size()
-                 <<") than first row (n="<<ftablevalues[0].size()<<")."<<endl;
-   }
+   // if (fParseTableMode>2) {   // check number of columns in table
+   //    if (ftablevalues.size() > 1)
+   //       // CKR: The following check doesn't make sense, since it´s perfectly fine to
+   //       //      have a different number of bins per defining line in steering.
+   //       if (ftablevalues.back().size() != ftablevalues[0].size())
+   //          cout <<oI<<"Table ('"<<ffieldlabel<<"'): row "<<ftablevalues.size()
+   //               <<" has a different number of columns (n="<< ftablevalues.back().size()
+   //               <<") than first row (n="<<ftablevalues[0].size()<<")."<<endl;
+   // }
    if (!fParseFieldMode && fParseTableMode==0) {
       if (fstrings[label] == "") {
          ReplaceVariables(value);
