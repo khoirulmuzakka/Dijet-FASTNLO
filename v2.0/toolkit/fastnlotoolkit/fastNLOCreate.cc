@@ -808,7 +808,7 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
       if ( idiff[i] == 1 ) {istep = 1;}        // else shift by one for point-wise differential
       ishift += istep;
    }
-   //   cout << "ishift = " << ishift << endl;
+   cout << "ishift = " << ishift << endl;
 
    // Loop over input vectors with two (one, for idiff=1) entries per dimension plus n+1 entries for n bins of innermost dimension
    for ( unsigned int i = 0; i<bgrid.size(); i++ ) {
@@ -818,8 +818,8 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
          Bin.push_back(vector<pair<double,double> >(ndim));
          int kshift = 0;
          for ( unsigned int k = 0; k<ndim-1; k++ ) {
-            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k = " << bgrid[i][k+kshift] << endl;
-            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k+1 = " << bgrid[i][k+kshift+1] << endl;
+            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k+kshift = " << bgrid[i][k+kshift] << endl;
+            cout << "i = " << i << ", j = " << j << ",k+kshift = " << k+kshift << ", bgrid i,k+kshift+1 = " << bgrid[i][k+kshift+1] << endl;
             if ( idiff[k] == 1 ) { // Point-wise differential --> one bin center
                Bin[NObsBin][k] = make_pair(bgrid[i][k+kshift],bgrid[i][k+kshift]);
             } else {               // Non- or bin-wise differential --> two bin edges
@@ -829,7 +829,8 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
                      ", and upper edge = " << bgrid[i][k+1] << endl;
                   exit(1);
                }
-               Bin[NObsBin][k] = make_pair(bgrid[i][k],bgrid[i][k+1]);
+               cout << "iobs, kdim, lo, up = " << NObsBin << ", " << k << ", " << bgrid[i][k+kshift] << ", " << bgrid[i][k+kshift+1] << endl;
+               Bin[NObsBin][k] = make_pair(bgrid[i][k+kshift],bgrid[i][k+kshift+1]);
                kshift++;
             }
          }
@@ -850,36 +851,51 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
          NObsBin++;
       }
    }
+   // Test Daniel´s new binning code
+   unsigned int ndim0 = 0;
+   unsigned int ndim1 = 0;
+   unsigned int ndim2 = 0;
+   if (NDim > 0) {
+      ndim0 = GetNDim0Bins();
+      cout << "ndim0 = " << ndim0 << endl;
+   }
+   if (NDim > 1) {
+      for ( unsigned int i=0; i<ndim0; i++ ) {
+         ndim1 = GetNDim1Bins(i);
+         cout << "ndim0, ndim1 = " << ndim0 << ", " << ndim1 << endl;
+      }
+   }
+   if (NDim > 2) {
+      for ( unsigned int i=0; i<ndim0; i++ ) {
+         ndim1 = GetNDim1Bins(i);
+         for ( unsigned int j=0; i<ndim1; i++ ) {
+            ndim2 = GetNDim2Bins(i,j);
+            cout << "ndim0, ndim1, ndim2 = " << ndim0 << ", " << ndim1 << ", " << ndim2 << endl;
+         }
+      }
+   }
+   for (unsigned int iobs=0; iobs<NObsBin; iobs++) {
+      //      cout << "ZZZ: iobs, ibin0, ibin1, ibin2 = " << iobs << ", " << GetDim0Bin(iobs) << ", " << GetDim1Bin(iobs) << ", " << GetDim2Bin(iobs) << endl;
+   }
 
-   // // Check input: Normalization factor must be larger than zero for all bins
-   // int nnorm = vnorm.size();
-   // if ( NObsBin != nnorm ) {
-   //    error["SetBinningND"] << "Unequal number of observable bins and normalization factors, NObsBin = " << NObsBin <<
-   //       ", vnorm.size() = " << vnorm.size() << ", aborted!" << endl;
-   //    exit(1);
-   // }
-   // for (unsigned int i = 0; i<vnorm.size(); i++) {
-   //    if ( vnorm[i] < DBL_MIN ) {
-   //       error["SetBinningND"] << "Normalization factor is too small, aborted!" << endl;
-   //       error["SetBinningND"] << "i = " << i << ", vnorm[i] = " << vnorm[i] << endl;
-   //       exit(1);
-   //    }
-   // }
-
-   // // Set normalization factors
-   // BinSize.resize(NObsBin);
-   // for (unsigned int i = 0; i<vnorm.size(); i++) {
-   //    BinSize[i] = vnorm[i];
-   //    for (int j = 0; j<NDim; j++) {
-   //       if (idiff[j] == 2) {
-   //          BinSize[i] *= fabs(Bin[i][j].second-Bin[i][j].first);
-   //       }
-   //    }
-   // }
-
-   // for ( int i=0; i<NObsBin; i++ ) {
-   //    cout << "i = " << i << ", Bin[i][0] = " << Bin[i][0].first << ", " << Bin[i][0].second << endl;
-   // }
+   for ( unsigned int i = 0; i<NObsBin; i++ ) {
+      cout << "dim0 lo/up = " << Bin[i][0].first << ", " << Bin[i][0].second
+           << ", dim1 lo/up = " << Bin[i][1].first << ", " << Bin[i][1].second << endl;
+      //           << ", dim2 lo/up = " << Bin[i][2].first << ", " << Bin[i][2].second << endl;
+      if (NDim == 1) {cout << "obs0 = " << Bin[i][0].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << endl;}
+      if (NDim == 2) {cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << endl;}
+      if (NDim == 3) {cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", obs2 = " << Bin[i][2].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << ", Dim2Bin = " << GetODim2Bin(Bin[i][0].second,Bin[i][1].second,Bin[i][2].second) << endl;}
+      // double LowerBoundary = GetBinBoundaries(i)[0].first;
+      // double UpperBoundary = GetBinBoundaries(i)[0].second;
+      // cout << "iobs = " << i << ", low = " << LowerBoundary << ", upp = " << UpperBoundary << endl;
+      // int i1 = GetIDim0Bin(i);
+      // int i2 = GetIDimBin(i,0);
+      // int i3 = GetIDim1Bin(i);
+      // int i4 = GetIDimBin(i,1);
+      // int i5 = GetIDim2Bin(i);
+      // int i6 = GetIDimBin(i,2);
+      // cout << "i1, i2 = " << i1 << ", " << i2 << ", i3, i4 = " << i3 << ", " << i4 << ", i5, i6 = " << i5 << ", " << i6 << endl;
+   }
    info["SetBinningND"] << "Set binning successfully for " << NObsBin << " bins in " << NDim << "dimensions." << endl;
 }
 

@@ -46,14 +46,21 @@ class fastNLOTable : public fastNLOBase {
    std::vector < std::pair < double, double > > GetObsBinBoundaries(int iObsBin) const { return Bin[iObsBin];}    // Get binning for a given ObsBin
 
    // getters for dimension specific bins, here called Dim<I>Bins
-   unsigned int GetNDim0Bins() const;                                                           // Number of bins in first dimension
-   unsigned int GetNDim1Bins(int iDim0Bin) const;                                               // Number of bins in second dimension for a first-dimension-bin
-   unsigned int GetNDim2Bins(int iDim0Bin, int iDim1Bin) const;                                 // Number of bins in third dimension for a second and first-dimension-bin
-   int GetDim0Bin(double var0) const;
-   int GetDim1Bin(double var0, double var1) const;
-   int GetDim2Bin(double var0, double var1, double var2) const;
+   unsigned int GetIDim0Bin(unsigned int iobs) const;                                           // Bin number in first dimension for given ObsBin
+   unsigned int GetNDim0Bins() const;                                                           // Bin number +1 in first dimension for last ObsBin
+                                                                                                // ==> Number of bins in first dimension
+   unsigned int GetIDim1Bin(unsigned int iobs) const;                                           // Bin number in second dimension for given ObsBin
+   unsigned int GetNDim1Bins(unsigned int iDim0Bin) const;                                      // Number of bins in second dimension for given bin in first dimension
+   unsigned int GetIDim2Bin(unsigned int iobs) const;                                           // Bin number in third dimension for given ObsBin
+   unsigned int GetNDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;               // Number of bins in third dimension for a second and f
+
+   unsigned int GetIDimBin(unsigned int iobs, unsigned int iDim) const;                         // Bin number in third dimension for given ObsBin
+
+   int GetODim0Bin(double var0) const;
+   int GetODim1Bin(double var0, double var1) const;
+   int GetODim2Bin(double var0, double var1, double var2) const;
    std::vector < std::pair < double, double > > GetBinBoundaries(int iDim0Bin, int iDim1Bin = -1, int iDim2Bin = -1);
-   //!  
+   //!
    //! Get bin boundaries for first, second and third dimenstion
    //!    Assuming for instance following 2-dimensional binning scheme:
    //!
@@ -67,7 +74,7 @@ class fastNLOTable : public fastNLOBase {
    //!       6      |_______|_______|______|_______|
    //!                            DIM 1
    //!  iDim1Bin may be different for each iDim0Bin
-   //! 
+   //!
    //! usage e.g.:
    //! int LowerBoundary = GetBinBoundaries(ibin)[dim].first;
    //! int UpperBoundary = GetBinBoundaries(ibin)[dim].second;
