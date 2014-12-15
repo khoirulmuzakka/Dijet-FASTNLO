@@ -960,9 +960,9 @@ vector< vector < double > > fastNLOReader::GetCrossSection2Dim() {
    if (XSection.empty()) CalcCrossSection();
    vector< vector < double > > XSection2Dim;
    int k = 0;
-   for (unsigned int i = 0; i < GetNBinDimI(); i++) {
+   for (unsigned int i = 0; i < GetNDim0Bins(); i++) {
       XSection2Dim.push_back(vector < double >());
-      int  NBinDim  = GetNBinDimII(i);
+      int  NBinDim  = GetNDim1Bins(i);
       for (int j = 0; j < NBinDim; j++) {
          XSection2Dim[i].push_back(XSection[k]);
          k++;

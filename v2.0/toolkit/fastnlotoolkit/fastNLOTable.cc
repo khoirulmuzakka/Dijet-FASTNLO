@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cfloat>
 #include <cstdlib>
 #include <set>
@@ -84,69 +85,87 @@ std::string fastNLOTable::GetRivetId() const {
    return found;
 }
 
+
 // ___________________________________________________________________________________________________
-vector < pair <double, double > > fastNLOTable::GetObsBinDim(int dimension) const {
-   //! Get binning of dimension 'dimension' for all observable bins
-   std::vector< std::pair<double, double > > Bins;
-   for (size_t i = 0; i < Bin.size(); ++i)
-      Bins.push_back(Bin[i][dimension]);
-   return Bins;
-}
-// ___________________________________________________________________________________________________
-// vector < pair <double, double > > fastNLOTable::GetUniqBinsDim(int idim) const {
-//    //! Get binning in dimension 'idim' (requires monotonously increasing bin borders)
-//    std::vector< std::pair<double, double > > Bins;
-//    unsigned int
-//    double lastlow = Bin[0][idim].first;
-//    double lastupp = Bin[0][idim].second;
-//    for (size_t i = 0; i < Bin.size(); ++i)
-//       Bins.push_back(Bin[i][dimension]);
-//    return Bins;
+// vector < pair <double, double > > fastNLOTable::GetUniqBinsDim(unsigned int iDim) const {
+//    //! Get unique binning in dimension 'iDim' (requires monotonously increasing bins edges)
+//    std::vector< std::pair<double, double > > DimBins;
+//    std::vector< std::pair<double, double > > UniqDimBins;
+//    for (size_t i = 0; i < Bin.size(); ++i) {
+//       DimBins.push_back(Bin[i][iDim]);
+//       cout << "DimBins[i].first = " << DimBins[i].first << ", DimBins[i].second = " << DimBins[i].second << endl;
+//    }
+//    std::sort(DimBins.begin(),DimBins.end());
+//    UniqDimBins.push_back(DimBins[0]);
+//    for (size_t i = 1; i < DimBins.size(); ++i) {
+//       if (DimBins[i] != DimBins[i-1] ) {
+//          UniqDimBins.push_back(DimBins[i]);
+//       }
+//    }
+//    return UniqDimBins;
 // }
 
 
 // ___________________________________________________________________________________________________
-vector < pair < double, double > > fastNLOTable::GetBinDimI() const {
-   //! Get binning of first dimension
-   std::vector< std::pair<double, double > > Bins = GetObsBinDim(0);
-   std::set< pair< double,double>  > set (Bins.begin(), Bins.end());
-   Bins.assign(set.begin(), set.end());
-   return Bins;
-}
-
-
-// ___________________________________________________________________________________________________
-unsigned int fastNLOTable::GetNBinDimI() const {
-   //! Get number of bins of first dimension
-   return GetBinDimI().size();
-}
-
-
-// ___________________________________________________________________________________________________
-vector < pair < double, double > >  fastNLOTable::GetBinDimII(int DimIBin) const {
-   //! Get binning of second dimension for bin 'DimIBin' of first dimension
+vector < pair <double, double > > fastNLOTable::GetDimBins(unsigned int iDim) const {
+   //! Get all bins for given dimension 'iDim'
    std::vector< std::pair<double, double > > Bins;
-   if (GetNumDiffBin() < 2) {
-      warn["GetCrossSection2Dim"]<<"This function is only valid for NDiffBin=2."<<endl;
-      return Bins;
-   }
-   pair< double, double> bin = GetBinDimI()[DimIBin];
-   for (size_t i = 0; i < Bin.size(); ++i) {
-      if (Bin[i][0] == bin)
-         Bins.push_back(Bin[i][1]);
-   }
+   for (size_t i = 0; i < Bin.size(); ++i)
+      Bins.push_back(Bin[i][iDim]);
    return Bins;
 }
 
 
 // ___________________________________________________________________________________________________
-unsigned int fastNLOTable::GetNBinDimII(int DimIBin) const {
-   //! Get number of bins of second dimension for bin 'DimIBin' of first dimension
-   if (GetNumDiffBin() < 2) {
-      warn["GetNBinDimII"]<<"This function is only valid for NDiffBin>=2."<<endl;
-      return 0;
+vector < pair < double, double > > fastNLOTable::GetDim0Bins() const {
+   //! Get binning of first dimension
+   std::vector< std::pair<double, double > > Bins = GetDimBins(0);
+   std::set< pair< double,double> > set (Bins.begin(), Bins.end());
+   Bins.assign(set.begin(),set.end());
+   return Bins;
+}
+
+
+// ___________________________________________________________________________________________________
+vector < pair < double, double > > fastNLOTable::GetDim1Bins(unsigned int iDim0Bin) const {
+   //! Get binning of second dimension for bin 'iDim0Bin' of first dimension
+   std::vector< std::pair<double, double > > Bins;
+   const int idiff = GetNumDiffBin();
+   if ( idiff < 2 ) {
+      error["fastNLOTable::GetDim1Bins"] << "No second dimension available, aborted!" << endl;
+      exit(1);
    }
-   return GetBinDimII(DimIBin).size();
+   pair< double, double> bin0 = GetDim0Bins()[iDim0Bin];
+   for (size_t iobs = 0; iobs < Bin.size(); iobs++) {
+      if (Bin[iobs][0] == bin0) {
+         Bins.push_back(Bin[iobs][1]);
+      }
+   }
+   std::set< pair< double,double> > set (Bins.begin(), Bins.end());
+   Bins.assign(set.begin(),set.end());
+   return Bins;
+}
+
+
+// ___________________________________________________________________________________________________
+vector < pair < double, double > > fastNLOTable::GetDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const {
+   //! Get binning of third dimension for bins 'iDim0Bin' and 'iDim1Bin' of first two dimensions
+   std::vector< std::pair<double, double > > Bins;
+   const int idiff = GetNumDiffBin();
+   if ( idiff < 3 ) {
+      error["fastNLOTable::GetDim2Bins"] << "No third dimension available, aborted!" << endl;
+      exit(1);
+   }
+   pair< double, double> bin0 = GetDim0Bins()[iDim0Bin];
+   pair< double, double> bin1 = GetDim1Bins(iDim0Bin)[iDim1Bin];
+   for (size_t iobs = 0; iobs < Bin.size(); iobs++) {
+      if (Bin[iobs][0] == bin0 && Bin[iobs][1] == bin1) {
+         Bins.push_back(Bin[iobs][2]);
+      }
+   }
+   std::set< pair< double,double> > set (Bins.begin(), Bins.end());
+   Bins.assign(set.begin(),set.end());
+   return Bins;
 }
 
 
@@ -170,12 +189,22 @@ vector < double > fastNLOTable::GetUpBin( int dimension) const {
 }
 
 
+
+
+
 // ___________________________________________________________________________________________________
 int fastNLOTable::CalcObsBin(double obs0, double obs1, double obs2) const {
    //! Get 'ObsBin' for a particular set of observables
    //! Returns -1 if observables are not within phase space
    return GetBinNumber(obs0,obs1,obs2);
 }
+
+
+
+
+
+
+
 
 
 // ___________________________________________________________________________________________________
@@ -1210,7 +1239,7 @@ int fastNLOTable::GetBinNumber( double val1 , double val2, double val3 ) const {
 //    for (int i=0; i<NDim; i++) {
 //       lobs.push_back(false);
 //       std::vector< std::pair<double, double > > Bins;
-//       Bins = GetObsBinDim(i);
+//       Bins = GetDimBins(i);
 //       for (int j=0; j<Bins[iobsbin] ;j++) {
 //          if ( IDiffBin[i] == 1 ) { // Point-wise
 //             if ( fabs(Bin[iobsbin][i].first - obsval[i]) < DBL_MIN ) {

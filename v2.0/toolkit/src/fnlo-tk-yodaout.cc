@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
       stringstream histno;                                                                              // To make i+1 from int
       histno << offset+(NDim-1);                                                                        // to a string for the naming
       RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());        // Next histogram name
-      NDimBins[0] = fnlo.GetNBinDimI();
+      NDimBins[0] = fnlo.GetNDim0Bins();
       for (int k = 0; k<NDimBins[0]; k++) {
          bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimI()[k].first , fnlo.GetBinDimI()[k].second ) ); // Insert bin into the vector
       }
@@ -151,13 +151,13 @@ int main(int argc, char** argv) {
       ao.push_back(hist);                                                                                               // insert the histogram pointer into the vector
    } else if (NDim == 2) {
       unsigned int iobs = 0;
-      for (size_t i=0; i < fnlo.GetNBinDimI(); i++) {                                               // For all bins in outer (first) dimension
+      for (size_t i=0; i < fnlo.GetNDim0Bins(); i++) {                                               // For all bins in outer (first) dimension
          std::vector<YODA::HistoBin1D> bins;                                                        // Vector for 1D histogram binning
          stringstream histno;                                                                       // To make i+1 from int
          histno << offset+i;                                                                        // to a string for the naming
          RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str()); // Next histogram name
-         NDimBins[1] = fnlo.GetNBinDimII(i);
-         cout << "nbindim1 = " << fnlo.GetNBinDimI() << ", nbindim2 = " << fnlo.GetNBinDimII(i) << endl;
+         NDimBins[1] = fnlo.GetNDim1Bins(i);
+         cout << "nbindim1 = " << fnlo.GetNDim0Bins() << ", nbindim2 = " << fnlo.GetNDim1Bins(i) << endl;
          for (int k = 0; k<NDimBins[1]; k++) {                                                      // Starting from the first bin in outer (first) dimension
             bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) ); // Insert bin into the vector
          }

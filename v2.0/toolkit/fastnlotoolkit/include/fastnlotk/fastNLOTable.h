@@ -84,14 +84,15 @@ class fastNLOTable : public fastNLOBase {
    //! int UpPtBin = GetBinBoundaries(2,5)[1].second;
    //! int LoYBin  = GetBinBoundaries(2,5)[0].second;
 
-   std::pair < double, double > GetObsBin(int bin, int dim) const { return Bin[bin][dim];}      // Get observable binning for given dimension and given bin
-   std::vector < std::pair < double, double > > GetObsBinDim(int dimension) const;              // Get observable binning of given dimension
+   std::pair < double, double > GetObsDimBin(unsigned int iobs, unsigned int iDim) const        // Get binning for given observable and dimension
+   {return Bin[iobs][iDim];}
+   std::vector < std::pair < double, double > > GetDimBins(unsigned int iDim) const;            // Get all bins for given dimension
 
-   unsigned int GetNBinDimI() const;                                                            // Number of bins in first dimension
-   unsigned int GetNBinDimII(int DimIBin) const;                                                // Number of bins in second dimension for given first dimension
+   std::vector < std::pair < double, double > > GetUniqBinsDim(unsigned int iDim) const;                  // Get observable binning of given dimension
 
-   std::vector < std::pair < double, double > > GetBinDimI() const;                             // Get binning of first dimension
-   std::vector < std::pair < double, double > > GetBinDimII(int DimIBin) const;                 // Get binning of second dimension
+   std::vector < std::pair < double, double > > GetDim0Bins() const;                            // Get binning of 1st dimension
+   std::vector < std::pair < double, double > > GetDim1Bins(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
+   std::vector < std::pair < double, double > > GetDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
 
    double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
    std::vector < double > GetLoBin(int dimension) const;
