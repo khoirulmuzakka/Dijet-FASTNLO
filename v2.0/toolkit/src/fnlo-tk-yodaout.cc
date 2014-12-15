@@ -140,12 +140,12 @@ int main(int argc, char** argv) {
       RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());        // Next histogram name
       NDimBins[0] = fnlo.GetNDim0Bins();
       for (int k = 0; k<NDimBins[0]; k++) {
-         bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimI()[k].first , fnlo.GetBinDimI()[k].second ) ); // Insert bin into the vector
+         bins.push_back(YODA::HistoBin1D( fnlo.GetDim0Bins()[k].first , fnlo.GetDim0Bins()[k].second ) ); // Insert bin into the vector
       }
       YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, FileName);                          // Create histogram pointer
       for (int k =0 ; k<NDimBins[0] ; k++) {                                                            // Fill in the histogram (* bin size factor as we fill area)
-         hist->fill( (fnlo.GetBinDimI()[k].first + fnlo.GetBinDimI()[k].second)/2.0 ,
-                     fnlo.GetCrossSection()[k]*(fnlo.GetBinDimI()[k].second - fnlo.GetBinDimI()[k].first) );
+         hist->fill( (fnlo.GetDim0Bins()[k].first + fnlo.GetDim0Bins()[k].second)/2.0 ,
+                     fnlo.GetCrossSection()[k]*(fnlo.GetDim0Bins()[k].second - fnlo.GetDim0Bins()[k].first) );
          //                     fnlo.GetCrossSection()[k]*fnlo.GetBinSize(k) );
       }
       ao.push_back(hist);                                                                                               // insert the histogram pointer into the vector
@@ -159,15 +159,15 @@ int main(int argc, char** argv) {
          NDimBins[1] = fnlo.GetNDim1Bins(i);
          cout << "nbindim1 = " << fnlo.GetNDim0Bins() << ", nbindim2 = " << fnlo.GetNDim1Bins(i) << endl;
          for (int k = 0; k<NDimBins[1]; k++) {                                                      // Starting from the first bin in outer (first) dimension
-            bins.push_back(YODA::HistoBin1D( fnlo.GetBinDimII(i)[k].first , fnlo.GetBinDimII(i)[k].second ) ); // Insert bin into the vector
+            bins.push_back(YODA::HistoBin1D( fnlo.GetDim1Bins(i)[k].first , fnlo.GetDim1Bins(i)[k].second ) ); // Insert bin into the vector
          }
          // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
          YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, FileName);                              // Create histogram pointer
          for (int k = 0; k<NDimBins[1]; k++) {                                                      // Fill in the histogram (* bin size factor as we fill area)
             iobs++;
-            cout << "iobs = " << iobs << ", first = " << fnlo.GetBinDimII(i)[k].first << ", second = " << fnlo.GetBinDimII(i)[k].second << endl;
-            hist->fill( (fnlo.GetBinDimII(i)[k].first + fnlo.GetBinDimII(i)[k].second)/2.0 ,
-                        fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetBinDimII(i)[k].second - fnlo.GetBinDimII(i)[k].first) );
+            cout << "iobs = " << iobs << ", first = " << fnlo.GetDim1Bins(i)[k].first << ", second = " << fnlo.GetDim1Bins(i)[k].second << endl;
+            hist->fill( (fnlo.GetDim1Bins(i)[k].first + fnlo.GetDim1Bins(i)[k].second)/2.0 ,
+                        fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetDim1Bins(i)[k].second - fnlo.GetDim1Bins(i)[k].first) );
             //                        fnlo.GetCrossSection2Dim()[i][k]*fnlo.GetBinSize(iobs) );
          }
          ao.push_back(hist);                                                                        // Insert the histogram pointer into the vector

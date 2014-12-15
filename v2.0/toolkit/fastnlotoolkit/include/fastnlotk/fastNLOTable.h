@@ -88,8 +88,6 @@ class fastNLOTable : public fastNLOBase {
    {return Bin[iobs][iDim];}
    std::vector < std::pair < double, double > > GetDimBins(unsigned int iDim) const;            // Get all bins for given dimension
 
-   std::vector < std::pair < double, double > > GetUniqBinsDim(unsigned int iDim) const;                  // Get observable binning of given dimension
-
    std::vector < std::pair < double, double > > GetDim0Bins() const;                            // Get binning of 1st dimension
    std::vector < std::pair < double, double > > GetDim1Bins(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
    std::vector < std::pair < double, double > > GetDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension

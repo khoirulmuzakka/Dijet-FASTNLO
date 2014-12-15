@@ -87,26 +87,6 @@ std::string fastNLOTable::GetRivetId() const {
 
 
 // ___________________________________________________________________________________________________
-// vector < pair <double, double > > fastNLOTable::GetUniqBinsDim(unsigned int iDim) const {
-//    //! Get unique binning in dimension 'iDim' (requires monotonously increasing bins edges)
-//    std::vector< std::pair<double, double > > DimBins;
-//    std::vector< std::pair<double, double > > UniqDimBins;
-//    for (size_t i = 0; i < Bin.size(); ++i) {
-//       DimBins.push_back(Bin[i][iDim]);
-//       cout << "DimBins[i].first = " << DimBins[i].first << ", DimBins[i].second = " << DimBins[i].second << endl;
-//    }
-//    std::sort(DimBins.begin(),DimBins.end());
-//    UniqDimBins.push_back(DimBins[0]);
-//    for (size_t i = 1; i < DimBins.size(); ++i) {
-//       if (DimBins[i] != DimBins[i-1] ) {
-//          UniqDimBins.push_back(DimBins[i]);
-//       }
-//    }
-//    return UniqDimBins;
-// }
-
-
-// ___________________________________________________________________________________________________
 vector < pair <double, double > > fastNLOTable::GetDimBins(unsigned int iDim) const {
    //! Get all bins for given dimension 'iDim'
    std::vector< std::pair<double, double > > Bins;
