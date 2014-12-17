@@ -1100,16 +1100,16 @@ int main(int argc, char** argv) {
          // Invert dimension numbering to from outer to inner
          cout << buffer << endl;
          cout << _SSEPLC << endl;
-         for (unsigned int i=0; i<xslo.size(); i++) {
-            for (int j=0; j<NDim; j++) {
-               if (i==0) {
-                  NDimBins[j] = 1;
-               } else if (LoBin[i-1][j] < LoBin[i][j]) {
-                  NDimBins[j]++;
-               } else if (LoBin[i][j] < LoBin[i-1][j]) {
-                  NDimBins[j] = 1;
-               }
-            }
+         // for (unsigned int i=0; i<xslo.size(); i++) {
+         //    for (int j=0; j<NDim; j++) {
+         //       if (i==0) {
+         //          NDimBins[j] = 1;
+         //       } else if (LoBin[i-1][j] < LoBin[i][j]) {
+         //          NDimBins[j]++;
+         //       } else if (LoBin[i][j] < LoBin[i-1][j]) {
+         //          NDimBins[j] = 1;
+         //       }
+         //    }
       } else {
          snprintf(buffer, sizeof(buffer), "Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
          warn["fnlo-read"] << buffer << endl;

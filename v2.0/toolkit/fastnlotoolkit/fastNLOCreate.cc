@@ -839,46 +839,46 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
    }
 
    // Test new binning code
-   unsigned int ndim0 = 0;
-   unsigned int ndim1 = 0;
-   unsigned int ndim2 = 0;
-   unsigned int ndim0b = 0;
-   unsigned int ndim1b = 0;
-   unsigned int ndim2b = 0;
-   std::vector< std::pair<double, double > > DimBins;
-   if (NDim > 0) {
-      ndim0   = GetNDim0Bins();
-      DimBins = GetDim0Bins();
-      ndim0b  = DimBins.size();
-      cout << "ndim0, ndim0b = " << ndim0 << ", " << ndim0b << endl;
-      for (unsigned int k=0; k<ndim0; k++) {
-         cout << "dim0 k, low, up  " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
-      }
-   }
-   if (NDim > 1) {
-      for ( unsigned int i=0; i<ndim0; i++ ) {
-         ndim1   = GetNDim1Bins(i);
-         DimBins = GetDim1Bins(i);
-         ndim1b  = DimBins.size();
-         cout << "ndim1, ndim1b = " << ndim1 << ", " << ndim1b << endl;
-         for (unsigned int k=0; k<ndim1; k++) {
-            cout << "dim1 k, low, up   " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
-         }
-      }
-   }
-   if (NDim > 2) {
-      for ( unsigned int i=0; i<ndim0; i++ ) {
-         for ( unsigned int j=0; j<ndim1; j++ ) {
-            ndim2   = GetNDim2Bins(i,j);
-            DimBins = GetDim2Bins(i,j);
-            ndim2b  = DimBins.size();
-            cout << "ndim2, ndim2b = " << ndim2 << ", " << ndim2b << endl;
-            for (unsigned int k=0; k<ndim2; k++) {
-               cout << "dim2 k, low, up   " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
-            }
-         }
-      }
-   }
+   // unsigned int ndim0 = 0;
+   // unsigned int ndim1 = 0;
+   // unsigned int ndim2 = 0;
+   // unsigned int ndim0b = 0;
+   // unsigned int ndim1b = 0;
+   // unsigned int ndim2b = 0;
+   // std::vector< std::pair<double, double > > DimBins;
+   // if (NDim > 0) {
+   //    ndim0   = GetNDim0Bins();
+   //    DimBins = GetDim0Bins();
+   //    ndim0b  = DimBins.size();
+   //    cout << "ndim0, ndim0b = " << ndim0 << ", " << ndim0b << endl;
+   //    for (unsigned int k=0; k<ndim0; k++) {
+   //       cout << "dim0 k, low, up  " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
+   //    }
+   // }
+   // if (NDim > 1) {
+   //    for ( unsigned int i=0; i<ndim0; i++ ) {
+   //       ndim1   = GetNDim1Bins(i);
+   //       DimBins = GetDim1Bins(i);
+   //       ndim1b  = DimBins.size();
+   //       cout << "ndim1, ndim1b = " << ndim1 << ", " << ndim1b << endl;
+   //       for (unsigned int k=0; k<ndim1; k++) {
+   //          cout << "dim1 k, low, up   " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
+   //       }
+   //    }
+   // }
+   // if (NDim > 2) {
+   //    for ( unsigned int i=0; i<ndim0; i++ ) {
+   //       for ( unsigned int j=0; j<ndim1; j++ ) {
+   //          ndim2   = GetNDim2Bins(i,j);
+   //          DimBins = GetDim2Bins(i,j);
+   //          ndim2b  = DimBins.size();
+   //          cout << "ndim2, ndim2b = " << ndim2 << ", " << ndim2b << endl;
+   //          for (unsigned int k=0; k<ndim2; k++) {
+   //             cout << "dim2 k, low, up   " << k << ", " << DimBins[k].first << ", " << DimBins[k].second << endl;
+   //          }
+   //       }
+   //    }
+   // }
 
    // unsigned int nbins = DimBins.size();
    // cout << "ZZZ iDim = " << i << ", nbins = " << nbins << endl;
@@ -886,27 +886,27 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
    //    cout << "ZZZ uniqbins first = " << DimBins[j].first << ", uniqbins second = " << DimBins[j].second << endl;
    // }
 
-   for ( unsigned int i = 0; i<NObsBin; i++ ) {
-      cout << "dim0 lo/up = " << Bin[i][0].first << ", " << Bin[i][0].second
-           << ", dim1 lo/up = " << Bin[i][1].first << ", " << Bin[i][1].second << endl;
-      //           << ", dim2 lo/up = " << Bin[i][2].first << ", " << Bin[i][2].second << endl;
-      if (NDim == 1) {
-         cout << "obs0 = " << Bin[i][0].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << endl;
-      }
-      if (NDim == 2) {
-         cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << endl;
-         for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
-         }
-      }
-      if (NDim == 3) {
-         cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", obs2 = " << Bin[i][2].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << ", Dim2Bin = " << GetODim2Bin(Bin[i][0].second,Bin[i][1].second,Bin[i][2].second) << endl;
-         for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
-         }
-         for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
-            for ( unsigned int k=0; k<GetNDim1Bins(j); k++ ) {
-            }
-         }
-      }
+   // for ( unsigned int i = 0; i<NObsBin; i++ ) {
+   //    cout << "dim0 lo/up = " << Bin[i][0].first << ", " << Bin[i][0].second
+   //         << ", dim1 lo/up = " << Bin[i][1].first << ", " << Bin[i][1].second << endl;
+   //    //           << ", dim2 lo/up = " << Bin[i][2].first << ", " << Bin[i][2].second << endl;
+   //    if (NDim == 1) {
+   //       cout << "obs0 = " << Bin[i][0].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << endl;
+   //    }
+   //    if (NDim == 2) {
+   //       cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << endl;
+   //       for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
+   //       }
+   //    }
+   //    if (NDim == 3) {
+   //       cout << "obs0 = " << Bin[i][0].second << ", obs1 = " << Bin[i][1].second << ", obs2 = " << Bin[i][2].second << ", Dim0Bin = " << GetODim0Bin(Bin[i][0].second) << ", Dim1Bin = " << GetODim1Bin(Bin[i][0].second,Bin[i][1].second) << ", Dim2Bin = " << GetODim2Bin(Bin[i][0].second,Bin[i][1].second,Bin[i][2].second) << endl;
+   //       for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
+   //       }
+   //       for ( unsigned int j=0; j<GetNDim0Bins(); j++ ) {
+   //          for ( unsigned int k=0; k<GetNDim1Bins(j); k++ ) {
+   //          }
+   //       }
+   //    }
       // double LowerBoundary = GetBinBoundaries(i)[0].first;
       // double UpperBoundary = GetBinBoundaries(i)[0].second;
       // cout << "iobs = " << i << ", low = " << LowerBoundary << ", upp = " << UpperBoundary << endl;
@@ -917,7 +917,7 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
       // int i5 = GetIDim2Bin(i);
       // int i6 = GetIDimBin(i,2);
       // cout << "i1, i2 = " << i1 << ", " << i2 << ", i3, i4 = " << i3 << ", " << i4 << ", i5, i6 = " << i5 << ", " << i6 << endl;
-   }
+   //   }
 
    info["SetBinningND"] << "Set binning successfully for " << NObsBin << " bins in " << NDim << " dimensions." << endl;
 }
@@ -1319,7 +1319,7 @@ int fastNLOCreate::GetBin() {
    } else if (idiff == 3) {
       if (fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] && fLastScen._o[2] == fScenario._o[2])  return fObsBin;
    } else {
-      error["GetBin"]<<"Sorry. triple-differential binning not yet implemented. exiting."<<endl;
+      error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
    }
 
 
@@ -1327,14 +1327,10 @@ int fastNLOCreate::GetBin() {
    // calc bin number and keep Observables
    if ( idiff == 1 ) {
       fObsBin = GetObsBinNumber(fScenario._o[0]);
-      cout << "OOO: 1-dim: iobsbin a,b = " << GetBinNumber(fScenario._o[0]) << ", " << fObsBin << endl;
    } else if ( idiff == 2 ) {
       fObsBin = GetObsBinNumber(fScenario._o[0],fScenario._o[1]);
-      cout << "OOO: 2-dim: iobsbin a,b = " << GetBinNumber(fScenario._o[0],fScenario._o[1]) << ", " << fObsBin << endl;
    } else if ( idiff == 3 ) {
       fObsBin = GetObsBinNumber(fScenario._o[0],fScenario._o[1],fScenario._o[2]);
-      // GetBinNumber(fScenario._o[2],fScenario._o[1],fScenario._o[0])
-      cout << "OOO: 3-dim: iobsbin b = " << fObsBin << endl;
    } else {
       error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
    }

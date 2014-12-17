@@ -85,7 +85,6 @@ class fastNLOTable : public fastNLOBase {
 
    //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
    //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
-   int GetBinNumber(double val1, double val2 = -42., double val3 = -42.) const ;                                  // calculate bin number (iObsBin)
 
    int GetObsBinNumber( vector < double > vobs ) const ;                                        // Calculate observable bin number (iObsBin)
    int GetObsBinNumber( double obs1 ) const ;
