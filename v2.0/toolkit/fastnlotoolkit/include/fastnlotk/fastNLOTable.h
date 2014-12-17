@@ -41,8 +41,7 @@ class fastNLOTable : public fastNLOBase {
    std::string GetRivetId() const;
 
    // getters for 'ObsBin': ObsBin runs from 0-NObsBin
-   int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
-   int CalcObsBin(double obs0, double obs1=0, double obs2=0) const;
+   unsigned int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
    std::vector < std::pair < double, double > > GetObsBinBoundaries(int iObsBin) const { return Bin[iObsBin];}    // Get binning for a given ObsBin
 
    // getters for dimension specific bins, here called Dim<I>Bins
@@ -84,6 +83,15 @@ class fastNLOTable : public fastNLOBase {
    //! int UpPtBin = GetBinBoundaries(2,5)[1].second;
    //! int LoYBin  = GetBinBoundaries(2,5)[0].second;
 
+   //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
+   //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
+   int GetBinNumber(double val1, double val2 = -42., double val3 = -42.) const ;                                  // calculate bin number (iObsBin)
+
+   int GetObsBinNumber( vector < double > vobs ) const ;                                        // Calculate observable bin number (iObsBin)
+   int GetObsBinNumber( double obs1 ) const ;
+   int GetObsBinNumber( double obs1, double obs2 ) const ;
+   int GetObsBinNumber( double obs1, double obs2, double obs3 ) const ;
+
    std::pair < double, double > GetObsDimBin(unsigned int iobs, unsigned int iDim) const        // Get binning for given observable and dimension
    {return Bin[iobs][iDim];}
    std::vector < std::pair < double, double > > GetDimBins(unsigned int iDim) const;            // Get all bins for given dimension
@@ -101,11 +109,11 @@ class fastNLOTable : public fastNLOBase {
    double GetBinSize(int bin) const {return BinSize[bin];};                                     // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
 
    void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Singledifferential, double-differntial, etc...)
-   int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Singledifferential, double-differntial, etc...)
+   unsigned int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Singledifferential, double-differntial, etc...)
 
    int GetIDiffBin(int bin) const { return IDiffBin[bin]; }                                     // Get if dimension is 'truly differential' or bin-integrated (divided by bin-width or not)
 
-   void SetDimLabel( string label, int iDim , bool IsDiff = true );
+   void SetDimLabel( string label, unsigned int iDim , bool IsDiff = true );
    string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};                              // Get label (name) of observable in dimension iDim
    vector<string > GetDimLabels() const {return DimLabel;};                                     // Get label (name) of all observables
 
@@ -126,9 +134,6 @@ class fastNLOTable : public fastNLOBase {
    fastNLOCoeffAddBase* GetReferenceTable(ESMOrder eOrder) const;                               //!< returns pointer to reference table if available, else returns NULL pointer
 
    // useful functions
-   //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
-   //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
-   int GetBinNumber(double val1, double val2 = -42., double val3 = -42.) const ;                                  // calculate bin number (iObsBin)
 
    // handle coefficient tables
    //int WriteCoeffTable(int no);
@@ -161,14 +166,14 @@ protected:
    int Ipublunits;
    vector <string> ScDescript;
 
-   int NObsBin;
-   int NDim;
+   // CKR: Changed to unsigned int
+   unsigned int NObsBin;
+   unsigned int NDim;
+
    vector <string> DimLabel;
    vector <int> IDiffBin;
    vector < vector <pair<double,double> > > Bin; // every bin has a lower and upper bin boundary and belongs to a 'dimension'. If a truely differential measurment, then upper bin boundary is equal lower one
    vector <double> BinSize;
-
-   vector <int> RapIndex;               //KR: Added possibility to store and read start of new rapidity bin in nobs
 
    // contributions for normalization
    int INormFlag;

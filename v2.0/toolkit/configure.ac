@@ -363,31 +363,31 @@ AM_CONDITIONAL(HAVE_YODA, test "x$YODAPREFIX" != "x")
 
 # Create code documentation?
 # Check on DOXYGEN (doesn't work with autotools from SLC5)
-#AC_MSG_NOTICE([******************************************])
-#AC_MSG_NOTICE([Check for presence of doxygen ...])
-#AC_MSG_NOTICE([******************************************])
-#AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
-#if test "x$DOXYGEN" = "x"; then
-#   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
-#else
-#   AC_MSG_NOTICE([Creating code documentation using doxygen.])
-#   AC_MSG_NOTICE([******************************************])
-#   DX_DOT_FEATURE(ON)
-#   AC_CHECK_PROGS(DOT, dot, dot)
-#   if test "x$DOT" = "x"; then
-#      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
-#      DX_DOT_FEATURE(OFF)
-#   fi
-#   DX_HTML_FEATURE(ON)
-#   DX_CHM_FEATURE(OFF)
-#   DX_CHI_FEATURE(OFF)
-#   DX_MAN_FEATURE(OFF)
-#   DX_RTF_FEATURE(OFF)
-#   DX_XML_FEATURE(OFF)
-#   DX_PDF_FEATURE(ON)
-#   DX_PS_FEATURE(OFF)
-#   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
-#fi
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Check for presence of doxygen ...])
+AC_MSG_NOTICE([******************************************])
+AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
+if test "x$DOXYGEN" = "x"; then
+   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
+else
+   AC_MSG_NOTICE([Creating code documentation using doxygen.])
+   AC_MSG_NOTICE([******************************************])
+   DX_DOT_FEATURE(ON)
+   AC_CHECK_PROGS(DOT, dot, dot)
+   if test "x$DOT" = "x"; then
+      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
+      DX_DOT_FEATURE(OFF)
+   fi
+   DX_HTML_FEATURE(ON)
+   DX_CHM_FEATURE(OFF)
+   DX_CHI_FEATURE(OFF)
+   DX_MAN_FEATURE(OFF)
+   DX_RTF_FEATURE(OFF)
+   DX_XML_FEATURE(OFF)
+   DX_PDF_FEATURE(ON)
+   DX_PS_FEATURE(OFF)
+   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
+fi
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
 
 # Create documentation?
@@ -476,6 +476,8 @@ AC_SUBST([YEARS],["2005-`date +%Y`"])
 
 # Output
 AC_CONFIG_FILES([Makefile
+                 doc/Makefile
+                 doc/paper/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
@@ -485,7 +487,5 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/fnlo-tk-config
                 ])
-#                 doc/Makefile
-#                 doc/paper/Makefile
 
 AC_OUTPUT

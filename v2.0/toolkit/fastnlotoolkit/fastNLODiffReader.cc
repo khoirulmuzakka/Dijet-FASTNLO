@@ -182,7 +182,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
       // always recalculate cross section
       fastNLOReader::CalcCrossSection(); // this calls GetXFX() very very often!
 
-      for (int i = 0 ; i<NObsBin ; i++) {
+      for (unsigned int i = 0 ; i<NObsBin ; i++) {
          if (i==0)debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;;
          xs[i] += XSection[i] * fdxPoms[ixp] ;
          xsLO[i] += XSection_LO[i] * fdxPoms[ixp] ;
@@ -199,7 +199,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
    XSection_LO = xsLO;
 
    // k-factors
-   for (int i = 0 ; i<NObsBin ; i++) {
+   for (unsigned int i = 0 ; i<NObsBin ; i++) {
       fastNLOReader::kFactor[i] = fastNLOReader::XSection[i] / fastNLOReader::XSection_LO[i];
    }
 

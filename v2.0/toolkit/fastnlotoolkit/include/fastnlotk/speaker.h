@@ -18,7 +18,7 @@ public:
    speaker(const speaker& spk);
    ~speaker();
    //speaker(const speaker& spk) : weg(0) {;};
-   const speaker& operator=(const speaker& other);
+   const speaker& operator= (const speaker& other);
    std::ostream& operator[](std::string fct) const ;
    const speaker& operator+ (std::string fct) const {
       return this->prefix(fct);
@@ -33,7 +33,7 @@ public:
          else return std::cout<<pref<<arg;
       }
    }
-#ifndef SWIG 
+#ifndef SWIG
    std::ostream& operator>> (std::string arg) const ;
 #endif
    std::ostream& print(std::string mes) const ;

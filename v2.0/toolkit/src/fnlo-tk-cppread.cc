@@ -965,9 +965,10 @@ int main(int argc, char** argv) {
       vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
-      string header0 = " #IObs  Bin Size IODimO ";
-      string header1 = " IODimI ";
-      string header2 = " LO cross section";
+      string header0  = " #IObs  Bin Size IODimO ";
+      string header0b = " IODimM ";
+      string header1  = " IODimI ";
+      string header2  = " LO cross section";
       if (inlo>-1) {
          header2 += "   NLO cross section";
       }
@@ -1091,6 +1092,24 @@ int main(int argc, char** argv) {
             }
             printf("\n");
          }
+      } else if (NDim == 3) {
+         snprintf(buffer, sizeof(buffer), "%s [ %-17s ] %s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+                  // TODO: Put proper scale description here instead of mu1_[GeV]
+                  // header0.c_str(),DimLabel[0].c_str(),header1.c_str(),DimLabel[1].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
+                  header0.c_str(),DimLabel[0].c_str(),header0b.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[2].c_str(),"mu1_[GeV]",header2.c_str());
+         // Invert dimension numbering to from outer to inner
+         cout << buffer << endl;
+         cout << _SSEPLC << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            for (int j=0; j<NDim; j++) {
+               if (i==0) {
+                  NDimBins[j] = 1;
+               } else if (LoBin[i-1][j] < LoBin[i][j]) {
+                  NDimBins[j]++;
+               } else if (LoBin[i][j] < LoBin[i-1][j]) {
+                  NDimBins[j] = 1;
+               }
+            }
       } else {
          snprintf(buffer, sizeof(buffer), "Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
          warn["fnlo-read"] << buffer << endl;

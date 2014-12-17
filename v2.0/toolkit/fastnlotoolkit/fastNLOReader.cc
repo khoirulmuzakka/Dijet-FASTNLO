@@ -1029,7 +1029,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
       if ( Coeff_LO_Ref && Coeff_NLO_Ref && Coeff_NNLO_Ref )
          warn["CalcReferenceCrossSection"]<<"Found NNLO reference cross section. Returning reference of LO+NLO+NNLO.\n";
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
-         for (int i=0; i<NObsBin; i++) {
+         for (unsigned int i=0; i<NObsBin; i++) {
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
                int xUnits = c->GetIXsectUnits();
@@ -1083,7 +1083,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          warn["CalcReferenceCrossSection"]<<"No reference cross sections for LO and NLO available.\n";
    }
    else {
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          fastNLOCoeffAddFlex* cLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kLeading];
          int xUnits = cLO->GetIXsectUnits();
          double unit = 1.;
@@ -1236,7 +1236,7 @@ void fastNLOReader::CalcCrossSection() {
                fastNLOCoeffMult* cMult = (fastNLOCoeffMult*) BBlocksSMCalc[j][i];
                if ( cMult->GetIContrFlag1() == 4 && cMult->GetIContrFlag2() == 1) {
                   debug["CalcCrossSection"]<<"Adding multiplicative non-perturbative correction."<<endl;
-                  for (int iB=0; iB<NObsBin; iB++) {
+                  for (unsigned int iB=0; iB<NObsBin; iB++) {
                      XSection[iB] *= cMult->GetMultFactor(iB);
                      //            XSection_LO[iB]     *= BBlocksSMCalc[j][i]->fact[iB];
                   }
@@ -1252,13 +1252,13 @@ void fastNLOReader::CalcCrossSection() {
 
    // ---- k-factor calculation ---- //
    debug["CalcCrossSection"]<<"Calculate k-factors: xs/xs_LO"<<endl;
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       kFactor[i] = XSection[i] / XSection_LO[i];
    }
 
    // ---- Q-scale calculation ---- //
    debug["CalcCrossSection"]<<"Calculate Q-scales: xsQ/xs"<<endl;
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       QScale_LO[i] = QScale_LO[i]/XSection_LO[i];
       QScale[i]    = QScale[i]/XSection[i];
    }
@@ -1282,7 +1282,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    const double n     = cLO->GetNpow();
    const double L     = log(scalefac);
    const double beta0 = (11.*3.-2.*5)/3.;
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       double unit = 1.;
       if (fUnits == kAbsoluteUnits) {
          // For kAbsoluteUnits remove division by BinSize
@@ -1323,7 +1323,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
    int xUnits = cLO->GetIXsectUnits();
    const double n     = cLO->GetNpow();
    debug["CalcAposterioriScaleVariationMuF"] << "Npow=" << n <<endl;
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       double unit = 1.;
       if (fUnits == kAbsoluteUnits) {
          // For kAbsoluteUnits remove division by BinSize
@@ -1364,7 +1364,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    int xUnits = c->GetIXsectUnits();
    debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       double unit = 1.;
       if (fUnits == kAbsoluteUnits) {
          // For kAbsoluteUnits remove division by BinSize
@@ -1431,7 +1431,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    int xUnits = c->GetIXsectUnits();
    debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       double unit = 1.;
       if (fUnits == kAbsoluteUnits) {
          // For kAbsoluteUnits remove division by BinSize
@@ -1528,7 +1528,7 @@ void fastNLOReader::FillAlphasCacheInBlockBv20(fastNLOCoeffAddFix* c) {
    double scalefac       = fScaleFacMuR/c->GetScaleFactor(scaleVar);
    debug["FillAlphasCacheInBlockBv20"]<<"scalefac="<<scalefac<<"\tscaleVar="<<scaleVar<<endl;
 
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       for (int j=0; j<c->GetTotalScalenodes(); j++) {
          double mur        = scalefac * c->GetScaleNode(i,scaleVar,j);
          double as         = CalcAlphas(mur);
@@ -1544,7 +1544,7 @@ void fastNLOReader::FillAlphasCacheInBlockBv21(fastNLOCoeffAddFlex* c) {
    //!  Internal method for filling alpha_s cache
    //!
 
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
          for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
             double mur              = CalcMu(kMuR , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuR);
@@ -1745,7 +1745,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
    vector<double> xfx(13); // PDFs of all partons
    vector<double> xfxspl(13); // PDFs splitting functions of all partons
    if (!GetIsFlexibleScaleTable(c)) {
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          for (int j=0; j<c->GetNScaleNode(); j++) {
             for (int k=0; k<nxmax; k++) {
@@ -1783,7 +1783,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
       exit(1);
    }
 
-   for (int i=0; i<NObsBin; i++) {
+   for (unsigned int i=0; i<NObsBin; i++) {
       // speed up! if mu_f is only dependent on one variable, we can safe the loop over the other one
       for (int x=0; x<c->GetNxmax(i); x++) {
          //double xp = c->GetXNode1(i,x);
@@ -1852,7 +1852,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
       vector < vector < double > > xfxspl; // PDFs splitting functions of all partons
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
@@ -1914,7 +1914,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
       vector < vector < double > > xfx2; // PDFs of all partons
       vector < vector < double > > xfxspl1; // PDFs splitting functions of all partons
       vector < vector < double > > xfxspl2; // PDFs splitting functions of all partons
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
          int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
@@ -1994,7 +1994,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    // half-matrix notation
    if ( c->GetNPDFDim() == 1 ) {
       vector < vector < double > > xfx; // PDFs of all partons
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
@@ -2073,7 +2073,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
    else if ( c->GetNPDFDim() == 2 ) {
       vector < vector < double > > xfx1; // hadron1
       vector < vector < double > > xfx2; // hadron2
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of xnodes ( == nxmax / Nxtot2[i] )
          int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
@@ -2218,7 +2218,7 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
          error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
          SetFunctionalForm(kScale1,MuX);
       }
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          nnode = cNLO->GetNScaleNode2(i);
          if (nnode < 4) {
             warn<<"Scale2 has only very little nodes (n="<<nnode<<") in bin "<<i<<".\n";
@@ -2754,7 +2754,7 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       printf("%s [ %-12s ] %s\n",
              header0.c_str(),DimLabel[0].c_str(),header2.c_str());
       cout << _SSEPLC << endl;
-      for (int i=0; i<NObsBin; i++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
          NDimBins[0] = 1;
          if (ithc2<0 && inpc1<0) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F",
@@ -2789,8 +2789,8 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       printf("%s [ %-12s ] %s [  %-12s  ] %s\n",
              header0.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[0].c_str(),header2.c_str());
       cout << _SSEPLC << endl;
-      for (int i=0; i<NObsBin; i++) {
-         for (int j=0; j<NDim; j++) {
+      for (unsigned int i=0; i<NObsBin; i++) {
+         for (unsigned int j=0; j<NDim; j++) {
             if (i==0)                                  NDimBins[j] = 1;
             else if (GetLoBin(i-1,j) < GetLoBin(i,j))       NDimBins[j]++;
             else if (GetLoBin(i,j) < GetLoBin(i-1,j))       NDimBins[j] = 1;
