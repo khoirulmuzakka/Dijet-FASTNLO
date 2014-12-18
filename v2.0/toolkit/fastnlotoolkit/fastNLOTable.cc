@@ -69,22 +69,6 @@ void fastNLOTable::ReadTable(){
    CloseFileRead(*strm);
 }
 
-// ___________________________________________________________________________________________________
-std::string fastNLOTable::GetRivetId() const {
-   std::string identifier("RIVET_ID");
-   std::string found;
-   for (size_t i=0; i < ScDescript.size(); ++i) {
-      if (ScDescript[i].find(identifier) != std::string::npos){
-         size_t RivetIdx = ScDescript[i].find(identifier);
-         size_t RivetValIdx = ScDescript[i].find("=", RivetIdx) + 1;
-         size_t RivetValLen = ScDescript[i].find(",", RivetValIdx) - RivetValIdx;
-         found = ScDescript[i].substr(RivetValIdx, RivetValLen);
-         break;
-      }
-   }
-   return found;
-}
-
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadCoeffTables(istream& table){
@@ -1351,6 +1335,27 @@ int fastNLOTable::GetObsBinNumber( double obs1, double obs2, double obs3 ) const
    vobs.push_back(obs2);
    vobs.push_back(obs3);
    return GetObsBinNumber(vobs);
+}
+
+
+// ___________________________________________________________________________________________________
+// Some info getters
+// ___________________________________________________________________________________________________
+
+// ___________________________________________________________________________________________________
+std::string fastNLOTable::GetRivetId() const {
+   std::string identifier("RIVET_ID");
+   std::string found;
+   for (size_t i=0; i < ScDescript.size(); ++i) {
+      if (ScDescript[i].find(identifier) != std::string::npos){
+         size_t RivetIdx = ScDescript[i].find(identifier);
+         size_t RivetValIdx = ScDescript[i].find("=", RivetIdx) + 1;
+         size_t RivetValLen = ScDescript[i].find(",", RivetValIdx) - RivetValIdx;
+         found = ScDescript[i].substr(RivetValIdx, RivetValLen);
+         break;
+      }
+   }
+   return found;
 }
 
 
