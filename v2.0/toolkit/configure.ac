@@ -7,8 +7,8 @@
 #
 # -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
-# Require minimal autoconf version of 2.59
-AC_PREREQ([2.59])
+# Require minimal autoconf version of 2.62
+AC_PREREQ([2.62])
 # Define subproject fastNLO_toolkit
 AC_INIT([fastNLO_toolkit], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 # Properly include subprojects
@@ -361,8 +361,8 @@ else
 fi
 AM_CONDITIONAL(HAVE_YODA, test "x$YODAPREFIX" != "x")
 
-# Create code documentation?
-# Check on DOXYGEN (doesn't work with autotools from SLC5)
+# Create code documentation
+# Check on DOXYGEN
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Check for presence of doxygen ...])
 AC_MSG_NOTICE([******************************************])
@@ -386,12 +386,11 @@ else
    DX_XML_FEATURE(OFF)
    DX_PDF_FEATURE(ON)
    DX_PS_FEATURE(OFF)
-   DX_INIT_DOXYGEN($PACKAGE_NAME, doxygen.cfg, doc/doxygen)
 fi
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
 
-# Create documentation?
-# First PDFLATEX ...
+# Create documentation
+# Check first on PDFLATEX ...
 AC_MSG_NOTICE([******************************************])
 AC_MSG_NOTICE([Check for presence of pdflatex ...])
 AC_MSG_NOTICE([******************************************])
@@ -433,8 +432,7 @@ AC_ARG_ENABLE([pyext],
         [enable_pyext="no"])
 # Basic Python checks
 if test "x$enable_pyext" = "xyes"; then
-# Skip for the moment. AX_PYTHON_DEVEL doesn't work with SLC5!
-#   AX_PYTHON_DEVEL([>='2.3.1'])
+   AX_PYTHON_DEVEL([>='2.3.1'])
    AM_PATH_PYTHON
 fi
 # Check on existence of SWIG to interface to Python
@@ -463,6 +461,11 @@ if { ! ( svnversion ) >/dev/null 2>&1 || test "x$SVNREV" = "xexported" || test "
   else echo $SVNREV>$srcdir/SVNREV
 fi
 AC_SUBST(SVNREV)
+
+# Initialize Doxygen doc
+if test "x$DOXYGEN" != "x"; then
+   DX_INIT_DOXYGEN($PACKAGE_NAME_$SVNREV, doxygen.cfg, doc/doxygen)
+fi
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])

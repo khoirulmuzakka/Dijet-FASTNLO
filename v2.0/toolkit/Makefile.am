@@ -24,15 +24,38 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
-# Required for Doxygen (doesn't work with autotools from SLC5)
-DX_CLEANFILES =
+# Installation of DOXYGEN documentation
+if HAVE_DOXYGEN
 if DX_COND_doc
-#  include aminclude.am
-#  EXTRA_DIST += aminclude.am doxygen.cfg
-  EXTRA_DIST += doxygen.cfg
-  DX_CLEANFILES += $(DOCDIR)/fastnlo_toolkit.pdf
-  MOSTLYCLEANFILES = $(DX_CLEANFILES)
+include aminclude.am
+EXTRA_DIST += aminclude.am doxygen.cfg
+all-local-doxygen: doxygen-doc
+.PHONY: all-local-doxygen
+all-local: all-local-doxygen
+
+## This rule requires Autoconf 2.62 or newer
+install-data-local:
+	@$(NORMAL_INSTALL)
+	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/html/search
+	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/latex
+	$(INSTALL_DATA) doc/doxygen/html/search/* $(DESTDIR)$(pkgdatadir)/html/search
+	$(INSTALL_DATA) doc/doxygen/html/*.* $(DESTDIR)$(pkgdatadir)/html
+	$(INSTALL_DATA) doc/doxygen/latex/* $(DESTDIR)$(pkgdatadir)/latex
+	$(INSTALL_DATA) doc/doxygen/*.* $(DESTDIR)$(pkgdatadir)
+
+uninstall-local:
+	@$(NORMAL_UNINSTALL)
+	rm -f $(DESTDIR)$(pkgdatadir)/html/search/*
+	rmdir $(DESTDIR)$(pkgdatadir)/html/search
+	rm -f $(DESTDIR)$(pkgdatadir)/html/*
+	rmdir $(DESTDIR)$(pkgdatadir)/html
+	rm -f $(DESTDIR)$(pkgdatadir)/latex/*
+	rmdir $(DESTDIR)$(pkgdatadir)/latex
+	rm -f $(DESTDIR)$(pkgdatadir)/*
+	rmdir $(DESTDIR)$(pkgdatadir)
+
 endif DX_COND_doc
+endif HAVE_DOXYGEN
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
