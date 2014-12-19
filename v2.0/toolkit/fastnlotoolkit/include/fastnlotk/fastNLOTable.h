@@ -59,45 +59,19 @@ class fastNLOTable : public fastNLOBase {
    int GetODim1Bin(double var0, double var1) const;
    int GetODim2Bin(double var0, double var1, double var2) const;
    std::vector < std::pair < double, double > > GetBinBoundaries(int iDim0Bin, int iDim1Bin = -1, int iDim2Bin = -1);
-   //!
-   //! Get bin boundaries for first, second and third dimenstion
-   //!    Assuming for instance following 2-dimensional binning scheme:
-   //!
-   //!    iDim0Bin  ________________________________
-   //!       0      |___|___|___|_______|__|__|____|
-   //!  D    1      |____|____|____|_____|____|____|
-   //!  I    2      |__|__|___|__|__|___|__|___|___|
-   //!  M    3      |______|_______|_________|_____|
-   //!       4      |__________|_______|_________|_|
-   //!  0    5      |______________|______|___|____|
-   //!       6      |_______|_______|______|_______|
-   //!                            DIM 1
-   //!  iDim1Bin may be different for each iDim0Bin
-   //!
-   //! usage e.g.:
-   //! int LowerBoundary = GetBinBoundaries(ibin)[dim].first;
-   //! int UpperBoundary = GetBinBoundaries(ibin)[dim].second;
-   //! 'dim' must be smaller than number of parameters passed to GetBinBoundaries
-   //! usage e.g.:
-   //! int LoYBin  = GetBinBoundaries(2)[0].first;
-   //! int UpPtBin = GetBinBoundaries(2,5)[1].second;
-   //! int LoYBin  = GetBinBoundaries(2,5)[0].second;
 
-   //    void InitBinning( const int nBins1 , double* bingrid1 , const int* nBins2 = NULL , vector<double*> bingrid2 = vector<double*>() , double binwidth3 = 0 );
-   //    void InitBinningKR( const int nBins1 , const double* bingrid1 , const int* nBins2 = NULL , vector< vector<double> > bingrid2 = vector< vector<double> >() , const double bwfactor = 0. );
-
-   int GetObsBinNumber( vector < double > vobs ) const ;                                        // Calculate observable bin number (iObsBin)
-   int GetObsBinNumber( double obs1 ) const ;
-   int GetObsBinNumber( double obs1, double obs2 ) const ;
-   int GetObsBinNumber( double obs1, double obs2, double obs3 ) const ;
+   int GetObsBinNumber( const vector < double >& vobs ) const ;                                 // Calculate observable bin number (iObsBin)
+   int GetObsBinNumber( double obs0 ) const ;
+   int GetObsBinNumber( double obs0, double obs1 ) const ;
+   int GetObsBinNumber( double obs0, double obs1, double obs2 ) const ;
 
    std::pair < double, double > GetObsDimBin(unsigned int iobs, unsigned int iDim) const        // Get binning for given observable and dimension
    {return Bin[iobs][iDim];}
-   std::vector < std::pair < double, double > > GetDimBins(unsigned int iDim) const;            // Get all bins for given dimension
+   std::vector < std::pair < double, double > > GetDimBinBoundaries(unsigned int iDim) const;            // Get all bins for given dimension
 
-   std::vector < std::pair < double, double > > GetDim0Bins() const;                            // Get binning of 1st dimension
-   std::vector < std::pair < double, double > > GetDim1Bins(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
-   std::vector < std::pair < double, double > > GetDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
+   std::vector < std::pair < double, double > > GetDim0BinBoundaries() const;                            // Get binning of 1st dimension
+   std::vector < std::pair < double, double > > GetDim1BinBoundaries(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
+   std::vector < std::pair < double, double > > GetDim2BinBoundaries(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
 
    double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
    std::vector < double > GetLoBin(int dimension) const;
