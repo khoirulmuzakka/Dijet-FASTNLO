@@ -1325,12 +1325,14 @@ int fastNLOCreate::GetBin() {
 
    // -------------------------------
    // calc bin number and keep Observables
-   if (idiff == 1) fObsBin = GetBinNumber(fScenario._o[0]);
-   else if (idiff == 2)  fObsBin = GetBinNumber(fScenario._o[0],fScenario._o[1]);
-   // else if ( idiff == 3 )  fObsBin = GetBinNumber(fScenario._o[2],fScenario._o[1],fScenario._o[0]);
-   // else if ( idiff == 3 )  fObsBin = GetBinNumber(fScenario._o[0],fScenario._o[1],fScenario._o[2]);
-   else {
-      error["GetBin"]<<"Sorry. triple-differential binning not yet implemented. exiting."<<endl;
+   if ( idiff == 1 ) {
+      fObsBin = GetObsBinNumber(fScenario._o[0]);
+   } else if ( idiff == 2 ) {
+      fObsBin = GetObsBinNumber(fScenario._o[0],fScenario._o[1]);
+   } else if ( idiff == 3 ) {
+      fObsBin = GetObsBinNumber(fScenario._o[0],fScenario._o[1],fScenario._o[2]);
+   } else {
+      error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
    }
    fLastScen = fScenario;
 
