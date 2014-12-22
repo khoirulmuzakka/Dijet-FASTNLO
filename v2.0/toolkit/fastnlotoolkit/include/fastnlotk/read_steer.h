@@ -284,6 +284,24 @@
 //      However, brackets, local variables, table definitions, etc. are all treated the same way.
 //
 //
+//      Adding values during runtime with setters
+//      -------------------------------------------
+//      It is possible to add values with a key during runtime, i.e. using functions
+//      instead of a steering file. Using this option it is also possible
+//      to modify and replace values.
+//      For adding a single value, array or table, the shorthand notations are respectively:
+//         ADD(K,Y);
+//         ADDARRAY(K,Y);
+//         ADDTABLE(K,H,Y);
+//      For instance to add a value "76" for the key "age"
+//         ADD("age",76);
+//      The full notation woule be:
+//         read_steer::Steering()->AddLabel("age",76);
+//
+//      To add a key to a specific namespace use ADD_NS, ADDARRAY_NS or ADDTABLE_NS. For instance:
+//         ADD_NS("age",76,"MyMom")
+//      which adds the value 76 for the label 'age' to the namespace 'MyMom'.
+//
 //
 //     Printing
 //     ------------------------------
@@ -328,7 +346,7 @@
 #include <map>
 //update to unordered_map in C++11 in gcc4.7
 #include <vector>
-
+#include <sstream>
 // use the pre-processor for accessing values
 // in 'single-file' mode
 #define READ(X) read_steer::readfile(X)
@@ -352,6 +370,10 @@
 #define INT_TAB(X) read_steer::getinttable(#X)
 #define DOUBLE_TAB(X) read_steer::getdoubletable(#X)
 #define STRING_TAB(X) read_steer::getstringtable(#X)
+
+#define ADD(X,Y) read_steer::addvalue(X,Y)
+#define ADDARRAY(X,Y) read_steer::addarray(X,Y)
+#define ADDTABLE(X,Y,Z) read_steer::addtable(X,Y,Z)
 
 // use the pre-processor for accessing values
 // in 'multi-file' mode
@@ -377,6 +399,10 @@
 #define INT_TAB_NS(X,NS) read_steer::getinttable(#X,NS)
 #define DOUBLE_TAB_NS(X,NS) read_steer::getdoubletable(#X,NS)
 #define STRING_TAB_NS(X,NS) read_steer::getstringtable(#X,NS)
+
+#define ADD_NS(X,Y,NS) read_steer::addvalue(X,Y,NS)
+#define ADDARRAY_NS(X,Y,NS) read_steer::addarray(X,Y,NS)
+#define ADDTABLE_NS(X,Y,Z,NS) read_steer::addtable(X,Y,Z,NS)
 
 // shortcuts for parsing command line and printing
 #define PARSE(X,Y) read_steer::parsecommandline(X,Y)
@@ -422,7 +448,12 @@ public:
    bool exist(const std::string& label) {
       return fstrings.count(label) > 0;}
    // setter
-   void addlabel(const std::string lab, const std::string val);
+   void AddLabel(const std::string& key, const std::string& value);
+   template <typename T> void AddLabel ( const std::string& key, T value);
+   void AddArray(const std::string& key, const std::vector<std::string>& values);
+   template <typename T> void AddArray ( const std::string& key, const std::vector<T>& values);
+   void AddTable(const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<std::string> >& values);
+   template <typename T> void AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values);
    // controls
    void inits(std::string filename);
    int initnmspc(std::ifstream& strm, std::string filename);
@@ -443,8 +474,8 @@ private:
    std::string ParseEnclosedString(const std::string) const;
    bool EnclosedStringToOneEntity(std::string&) const;
    int ReplaceVariables(std::string& value);
-   bool CheckNumber(const std::string str) const;
-   bool CheckInt(const std::string str) const;
+   bool CheckNumber(const std::string& str) const;
+   bool CheckInt(const std::string& str) const;
    bool StringToBool(const std::string str, const std::string label="") const;
    static int cmdlinetag(const char* arg, std::string& label, std::string& value);
    static int separatetag(std::string& vallhs, std::string& valrhs, const std::string sep);
@@ -522,6 +553,16 @@ public:
    static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
       if ( read_steer::instances->count(steerID) == 0 ) return false;
       return read_steer::Steering(steerID)->exist(label);}
+   // add values
+   template <typename T>
+   static void addvalue(const std::string& key,const T& val,std::string steerID=read_steer::stdID) {
+      read_steer::Steering(steerID)->AddLabel(key,val); }
+   template <typename T>
+   static void addarray(const std::string& key,const std::vector<T>& val,std::string steerID=read_steer::stdID) {
+      read_steer::Steering(steerID)->AddArray(key,val); }
+   template <typename T>
+   static void addtable(const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values,std::string steerID=read_steer::stdID) {
+      read_steer::Steering(steerID)->AddTable(key,header,values); }
 
    static void printall();                                              // print values of all files
    static void print(std::string steerID=read_steer::stdID);                         // print values
@@ -529,5 +570,39 @@ public:
 
 
 };
+
+
+template <typename T> 
+void read_steer::AddLabel ( const std::string& key, T val) {
+   std::stringstream ss;
+   ss << val;
+   AddLabel(key,ss.str());
+}
+
+template <typename T> 
+void read_steer::AddArray ( const std::string& key, const std::vector<T>& val) {
+   std::vector<std::string> str(val.size());
+   for ( unsigned int i = 0 ; i<val.size() ; i++ ) {
+      std::stringstream ss;
+      ss << val[i];
+      str[i] = ss.str();      
+   }
+   AddArray(key,str);
+}
+
+template <typename T> 
+void read_steer::AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values) {
+   std::vector<std::vector<std::string> > str(values.size());
+   for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
+      str[i].resize(values[i].size());
+      for ( unsigned int j = 0 ; j<values[i].size() ; j++ ) {
+	 std::stringstream ss;
+	 ss << values[i][j];
+	 str[i][j]=ss.str();
+      }
+   }   
+   AddTable(key,header,str);
+}
+
 
 #endif

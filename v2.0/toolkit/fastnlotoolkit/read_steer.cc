@@ -372,19 +372,34 @@ bool read_steer::StringToBool(const string sval, const string label) const {
    else return atoi(sval.c_str());
 }
 
-void read_steer::addlabel(const string label, const string value) {
-   if (fstrings[label]!="") cout<<" # read_steer. Replacing label '"<<label<<"' with value '"<<value<<"'."<<endl;
-   fstrings[label]      = value;
+void read_steer::AddLabel(const string& key, const string& value) {
+   if (fstrings.count(key)>0) 
+      cout<<" # read_steer. Replacing label '"<<key<<"' with value '"<<value<<"'."<<endl;
+   fstrings[key]      = value;
 }
 
 
+void read_steer::AddArray(const string& key, const vector<string>& values) {
+   if (ffields.count(key)>0) 
+      cout<<" # read_steer. Replacing label '"<<key<<"' with an array of size '"<<values.size()<<"'."<<endl;
+   ffields[key]      = values;
+}
 
-bool read_steer::CheckNumber(const string str) const {
+
+void read_steer::AddTable(const string& key, const vector<string>& header, const vector<vector<string> >& values) {
+   if (ftables.count(key)>0 ||  ftableheaders.count(key)>0 )  
+      cout<<" # read_steer. Replacing label '"<<key<<"' with a table of '"<<values.size()<<"' columns."<<endl;
+   ftableheaders[key]      = header;
+   ftables[key] = values;
+}
+
+
+bool read_steer::CheckNumber(const string& str) const {
    return str.find_first_of("-+1234567890")==0;
 }
 
 
-bool read_steer::CheckInt(const string str) const {
+bool read_steer::CheckInt(const string& str) const {
    return str.find_first_of(".eE")==string::npos && CheckNumber(str);
 }
 
@@ -725,7 +740,7 @@ bool read_steer::parsecommandline(int argc,char** argv) {
       string val = (*ii).second;
       string fID = stdID;
       separatetag(val, fID ,":");
-      read_steer::Steering(fID)->addlabel((*ii).first, val);
+      read_steer::Steering(fID)->AddLabel((*ii).first, val);
    }
    return gotfile;
 }
