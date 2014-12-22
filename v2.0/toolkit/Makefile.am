@@ -25,34 +25,37 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
 # Installation of DOXYGEN documentation
+# TBD: Docu is always remade! Check tag file mechanism.
 if HAVE_DOXYGEN
 if DX_COND_doc
 include aminclude.am
 EXTRA_DIST += aminclude.am doxygen.cfg
 all-local-doxygen: doxygen-doc
-.PHONY: all-local-doxygen
+	touch all-local-doxygen
+#.PHONY: all-local-doxygen
 all-local: all-local-doxygen
+MOSTLYCLEANFILES = $(DX_CLEANFILES) all-local-doxygen
 
-## This rule requires Autoconf 2.62 or newer
+## This rule requires autoconf 2.62 or newer
 install-data-local:
 	@$(NORMAL_INSTALL)
-	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/html/search
-	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/latex
-	$(INSTALL_DATA) doc/doxygen/html/search/* $(DESTDIR)$(pkgdatadir)/html/search
-	$(INSTALL_DATA) doc/doxygen/html/*.* $(DESTDIR)$(pkgdatadir)/html
-	$(INSTALL_DATA) doc/doxygen/latex/* $(DESTDIR)$(pkgdatadir)/latex
-	$(INSTALL_DATA) doc/doxygen/*.* $(DESTDIR)$(pkgdatadir)
+	$(MKDIR_P) $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html/search
+	$(MKDIR_P) $(DESTDIR)$(datadir)/doc/$(PACKAGE)/latex
+	$(INSTALL_DATA) doc/doxygen/html/search/* $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html/search
+	$(INSTALL_DATA) doc/doxygen/html/*.* $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html
+	$(INSTALL_DATA) doc/doxygen/latex/* $(DESTDIR)$(datadir)/doc/$(PACKAGE)/latex
+	$(INSTALL_DATA) doc/doxygen/*.* $(DESTDIR)$(datadir)/doc/$(PACKAGE)
 
 uninstall-local:
 	@$(NORMAL_UNINSTALL)
-	rm -f $(DESTDIR)$(pkgdatadir)/html/search/*
-	rmdir $(DESTDIR)$(pkgdatadir)/html/search
-	rm -f $(DESTDIR)$(pkgdatadir)/html/*
-	rmdir $(DESTDIR)$(pkgdatadir)/html
-	rm -f $(DESTDIR)$(pkgdatadir)/latex/*
-	rmdir $(DESTDIR)$(pkgdatadir)/latex
-	rm -f $(DESTDIR)$(pkgdatadir)/*
-	rmdir $(DESTDIR)$(pkgdatadir)
+	rm -f $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html/search/*
+	rmdir $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html/search
+	rm -f $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html/*
+	rmdir $(DESTDIR)$(datadir)/doc/$(PACKAGE)/html
+	rm -f $(DESTDIR)$(datadir)/doc/$(PACKAGE)/latex/*
+	rmdir $(DESTDIR)$(datadir)/doc/$(PACKAGE)/latex
+	rm -f $(DESTDIR)$(datadir)/doc/$(PACKAGE)/*
+	rmdir $(DESTDIR)$(datadir)/doc/$(PACKAGE)
 
 endif DX_COND_doc
 endif HAVE_DOXYGEN

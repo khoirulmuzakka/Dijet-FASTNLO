@@ -9,8 +9,6 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-EXTRA_DIST =
-
 # Normally, it's not necessary to define docdir! Accommodate feature
 # lacking in autoconf-2.59, automake-1.9.6
 #docdir = ${datadir}/doc/${PACKAGE}
@@ -21,7 +19,7 @@ DOCSRC = $(DOCNAM).tex
 DOCAUX = $(DOCNAM).aux
 DOCPDF = $(DOCNAM).pdf
 
-EXTRA_DIST += $(DOCSRC) figs fnlo-paper.pdf
+EXTRA_DIST = $(DOCSRC) figs fnlo-paper.pdf
 CLEANFILES = $(DOCAUX) $(DOCPDF) $(DOCNAM).log
 
 #

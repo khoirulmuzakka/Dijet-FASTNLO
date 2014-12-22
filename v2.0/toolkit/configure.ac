@@ -464,7 +464,7 @@ AC_SUBST(SVNREV)
 
 # Initialize Doxygen doc
 if test "x$DOXYGEN" != "x"; then
-   DX_INIT_DOXYGEN($PACKAGE_NAME_$SVNREV, doxygen.cfg, doc/doxygen)
+   DX_INIT_DOXYGEN($PROJECT, doxygen.cfg, doc/doxygen)
 fi
 
 # Define project substitution variables (to be replaced e.g. in config files below)
