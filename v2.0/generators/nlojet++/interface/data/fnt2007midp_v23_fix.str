@@ -20,7 +20,7 @@ ScenarioDescription {
     "d2sigma-jet_dpT_dy_[nb_GeV]"
     "CDF_Collaboration"
     "Inclusive_Jet_pT"
-    "MP_R=0.7"
+    "MP_R=0.7,OvThr=0.75"
     "FERMILAB-PUB-08-243-E, arXiv:0807.2204, Phys. Rev. D 78, 052006 (2008)."
     "RIVET_ID=CDF_2008_S7828950/D01-x01-y01,SPIRES_ID=7828950,INSPIRE_RECORD=790693"
     "THEORY_LABEL=NLOJet++"
@@ -40,7 +40,7 @@ JetAlgo                          11              # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.7              # Jet size parameter: Required for all jets
-OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
+OvThr                           0.75             # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
 ptjmin                         62.               # Minimal jet pT
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           2.1              # Maximal jet rapidity
