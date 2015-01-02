@@ -15,12 +15,12 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl4352_v23_fix
+ScenarioName fnl4362_v23_fix
 ScenarioDescription {
     "d2sigma-jet_dpT_dy_[nb_GeV]"
     "ATLAS_Collaboration"
     "Inclusive_Jet_pT"
-    "anti-kT_R=0.6"
+    "anti-kT_R=0.4"
     "ATLAS-STDM-2012-08, arXiv:1304.4739, Eur. Phys. J. C 73, 2509 (2013)."
     "INSPIRE_RECORD=1228693"
     "THEORY_LABEL=NLOJet++"
@@ -39,7 +39,7 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 JetAlgo                           2              # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-Rjet                            0.6              # Jet size parameter: Required for all jets
+Rjet                            0.4              # Jet size parameter: Required for all jets
 #OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
 ptjmin                          20.              # Minimal jet pT
 # Use either rapidity or pseudorapidity but not both! If both are set, only rapidity cuts are applied.
