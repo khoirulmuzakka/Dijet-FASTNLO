@@ -15,14 +15,14 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2342b_v23_fix
+ScenarioName fnl2332e_v23_fix
 ScenarioDescription {
     "d2sigma-jet_dpT_dy_[pb_GeV]"
     "CMS_Collaboration"
     "Inclusive_Jet_pT"
-    "anti-kT_R=0.5"
-    "CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107, 132001 (2011)."
-    "RIVET_ID=CMS_2011_S9086218/D01-x01-y01,SPIRES_ID=9086218,INSPIRE_RECORD=902309"
+    "anti-kT_R=0.7"
+    "CMS-PAPER-SMP-13-002, arXiv:1406.0324, Phys. Rev. D 90, 072006 (2014)."
+    "INSPIRE_RECORD=1298810"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -39,9 +39,9 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 JetAlgo                           2              # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-Rjet                            0.5              # Jet size parameter: Required for all jets
+Rjet                            0.7              # Jet size parameter: Required for all jets
 #OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
-ptjmin                          18.              # Minimal jet pT
+ptjmin                          56.              # Minimal jet pT
 # Use either rapidity or pseudorapidity but not both! If both are set, only rapidity cuts are applied.
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           3.0              # Maximal jet rapidity
@@ -85,12 +85,12 @@ BinSizeFactor                    2.              # Possibility to provide additi
 # -------------------------------------------------------------------- #
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  846. 1684.
-    0.5        1.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  790. 1684.
-    1.0        1.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686. 1410.
-    1.5        2.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  1032.
-    2.0        2.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  737.
-    2.5        3.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  468.
+    0.0        0.5          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  790.  846.  905.  967.  1032.  1101.  1172.  1248.  1327.
+    0.5        1.0          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  790.  846.  905.  967.  1032.  1101.  1172.  1248.  1327.
+    1.0        1.5          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  790.  846.  905.  967.  1032.  1101.
+    1.5        2.0          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  790.  846.
+    2.0        2.5          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.
+    2.5        3.0          56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.
 }}
 
 # ==================================================================== #

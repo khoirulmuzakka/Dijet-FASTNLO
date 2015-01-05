@@ -83,6 +83,12 @@ BinSizeFactor                    2.              # Possibility to provide additi
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
+# Example for SingleDifferentialBinning:
+#SingleDifferentialBinning {
+# 7. 11. 18. 30. 50. 100.
+#}
+
+# Example for DoubleDifferentialBinning:
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
     0.0        0.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  846. 1684.
@@ -92,6 +98,17 @@ DoubleDifferentialBinning {{
     2.0        2.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  737.
     2.5        3.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  468.
 }}
+
+# Example for TripleDifferentialBinning:
+#TripleDifferentialBinning {{
+#  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3rd dimension -----"
+#    100.      150.       -1.0       0.0       7. 11. 18. 30. 50.
+#    150.      200.       -1.0       0.0       7. 11. 18. 30. 50.
+#    200.      400.        0.0       1.5       7. 11. 18. 30. 50.
+#    400.      700.        0.0       1.5       7. 11. 18. 30. 50.
+#    700.     5000.        1.5       2.5       7. 11. 18. 30. 50.
+#   5000.    15000.        1.5       2.5       7. 11. 18. 30. 50.
+#}}
 
 # ==================================================================== #
 #
