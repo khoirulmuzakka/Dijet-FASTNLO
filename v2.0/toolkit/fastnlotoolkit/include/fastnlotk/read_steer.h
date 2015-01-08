@@ -55,7 +55,7 @@
 //        static bool    sex = BOOL(female);
 //
 //     Labels are case sensitive.
-//  
+//
 //     Check existence of label using:
 //         bool IsPresent = EXIST(name);
 //         bool IsPresent = read_steer::exist("name");
@@ -446,7 +446,8 @@ public:
 
    // check if key exists
    bool exist(const std::string& label) {
-      return fstrings.count(label) > 0;}
+      bool ret = ( fstrings.count(label) > 0 || ffields.count(label) > 0 || ftables.count(label) > 0 );
+      return ret;}
    // setter
    void AddLabel(const std::string& key, const std::string& value);
    template <typename T> void AddLabel ( const std::string& key, T value);
@@ -551,6 +552,7 @@ public:
       return read_steer::Steering(steerID)->getstcol(label,column); }
    // check existence of value
    static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
+      std::cout << "label = " << label << ", instances = " << read_steer::instances->count(steerID) << ", exist = " << read_steer::Steering(steerID)->exist(label) << std::endl;
       if ( read_steer::instances->count(steerID) == 0 ) return false;
       return read_steer::Steering(steerID)->exist(label);}
    // add values
@@ -572,25 +574,25 @@ public:
 };
 
 
-template <typename T> 
+template <typename T>
 void read_steer::AddLabel ( const std::string& key, T val) {
    std::stringstream ss;
    ss << val;
    AddLabel(key,ss.str());
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AddArray ( const std::string& key, const std::vector<T>& val) {
    std::vector<std::string> str(val.size());
    for ( unsigned int i = 0 ; i<val.size() ; i++ ) {
       std::stringstream ss;
       ss << val[i];
-      str[i] = ss.str();      
+      str[i] = ss.str();
    }
    AddArray(key,str);
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values) {
    std::vector<std::vector<std::string> > str(values.size());
    for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
@@ -600,7 +602,7 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
 	 ss << values[i][j];
 	 str[i][j]=ss.str();
       }
-   }   
+   }
    AddTable(key,header,str);
 }
 
