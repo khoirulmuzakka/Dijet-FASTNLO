@@ -30,7 +30,7 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name) , fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), PDFSet(NULL) , PDF(NULL), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
    info["fastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
 }
 
@@ -38,7 +38,7 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name) , fnPDFs(0) , fi
 //______________________________________________________________________________
 
 
-fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fastNLOReader(name) , fchksum(0.) {
+fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fastNLOReader(name), PDFSet(NULL) , PDF(NULL), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
    SetLHAPDFFilename(LHAPDFFile);
    SetLHAPDFMember(PDFMember);
    // Call additional initialization. Not necessary for LHAPDF.
@@ -135,10 +135,10 @@ vector<double> fastNLOLHAPDF::GetXFX(double xp, double muf) const {
    //  pre-defined pdf-interface.
    //
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   vector <double> xfx;
-   for (int id=-6; id<7; id++) {
-      xfx.push_back(PDF->xfxQ(id, xp, muf));
-   }
+   // vector<double> xfx(13);
+   // PDF->xfxQ(xp, muf, xfx);
+   vector <double> xfx(13);
+   PDF->xfxQ(xp,muf,xfx);
    return xfx;
    #else
    return LHAPDF::xfx(xp,muf);
@@ -153,8 +153,10 @@ void fastNLOLHAPDF::SetLHAPDFFilename(string filename) {
    if (filename != fLHAPDFFilename) fchksum = 0;
    fLHAPDFFilename = filename;
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   if ( PDFSet ) delete PDFSet;
    PDFSet = new LHAPDF::PDFSet(filename);
    fnPDFs = PDFSet->size();
+   SetLHAPDFMember(0);
    #else
    // Reset pdfset member to zero
    fiPDFMember = 0;
@@ -170,6 +172,7 @@ void fastNLOLHAPDF::SetLHAPDFFilename(string filename) {
 
 void fastNLOLHAPDF::SetLHAPDFMember(int set) {
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   if ( PDF ) delete PDF;
    PDF = PDFSet->mkPDF(set);
    #else
    fiPDFMember = set;

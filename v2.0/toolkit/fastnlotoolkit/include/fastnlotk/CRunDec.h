@@ -48,20 +48,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 /* #define mub  4.163 */
 /* #define Mtau 1.777 */
 
-// Some constants:
-static const double cf = 4./3.;
-static const double ca = 3.;
-static const double tr = 1./2.;
-static const double B4 = -1.762800087073770864061897634679818807215137274389016762629478603776;
-static const double A4 = 0.5174790616738993863307581618988629456223774751413792582443193479770;
-static const double A5 = 0.5084005792422687074591088492585899413195411256648216487244977963526;
-static const double Pi = M_PI;
-static const double Zeta2 = (Pi*Pi)/6.;
-static const double Zeta3 = 1.20205690315959428539973816151144999076498629234049888179227155534;
-static const double Zeta4 = (Pi*Pi*Pi*Pi)/90.;
-static const double Zeta5 = 1.03692775514336992633136548645703416805708091950191281197419267790;
-
-
 // Struct for triple {nf, Mth, Muth}:
 struct TriplenfMmu{
       int nf;
@@ -82,6 +68,9 @@ class CRunDec
   //       reported by H. Prosper
   // Aux. constants for implicit Runhe-Kutta-Procedure:
   static const double a2, a3, a4, a5, a6;
+
+  // Some constants:
+  static const double cf,ca,tr,B4,A4,A5,Zeta2,Zeta3,Zeta4,Zeta5;
 
   static const double b21, b31, b32, b41, b42, b43;
   static const double b51, b52, b53, b54;

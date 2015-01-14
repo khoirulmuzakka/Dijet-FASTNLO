@@ -55,7 +55,7 @@
 //        static bool    sex = BOOL(female);
 //
 //     Labels are case sensitive.
-//
+//  
 //     Check existence of label using:
 //         bool IsPresent = EXIST(name);
 //         bool IsPresent = read_steer::exist("name");
@@ -425,26 +425,26 @@ public:
 public:
    // getters for single instance
    // values
-   bool getb(std::string label);
-   int geti(std::string label);
-   double getd(std::string label);
-   std::string gets(std::string label);
+   bool getb(const std::string& label);
+   int geti(const std::string& label);
+   double getd(const std::string& label);
+   std::string gets(const std::string& label);
    // arrays
-   std::vector<bool> getbf(std::string label);
-   std::vector<int> getif(std::string label);
-   std::vector<double> getdf(std::string label);
-   std::vector<std::string> getsf(std::string label);
+   std::vector<bool> getbf(const std::string& label);
+   std::vector<int> getif(const std::string& label);
+   std::vector<double> getdf(const std::string& label);
+   std::vector<std::string> getsf(const std::string& label);
    // tables/matrices
-   std::vector<std::string> getsthead(std::string label);
-   std::vector<std::vector<int> > getit(std::string label);
-   std::vector<std::vector<double> > getdt(std::string label);
-   std::vector<std::vector<std::string> > getst(std::string label);
-   std::vector<bool> getbtcol(std::string label,std::string col);
-   std::vector<int> getitcol(std::string label,std::string col);
-   std::vector<double> getdtcol(std::string label,std::string col);
-   std::vector<std::string> getstcol(std::string label,std::string col);
+   std::vector<std::string> getsthead(const std::string& label);
+   std::vector<std::vector<int> > getit(const std::string& label);
+   std::vector<std::vector<double> > getdt(const std::string& label);
+   std::vector<std::vector<std::string> > getst(const std::string& label);
+   std::vector<bool> getbtcol(const std::string& label,const std::string& col);
+   std::vector<int> getitcol(const std::string& label,const std::string& col);
+   std::vector<double> getdtcol(const std::string& label,const std::string& col);
+   std::vector<std::string> getstcol(const std::string& label,const std::string& col);
 
-   // check if key exists
+   // check if key exists                                                                                                                                                            
    bool exist(const std::string& label) {
       bool ret = ( fstrings.count(label) > 0 || ffields.count(label) > 0 || ftables.count(label) > 0 );
       return ret;}
@@ -462,24 +462,29 @@ public:
    static void initnamespace(std::ifstream& strm,std::string filename, std::string steerID=read_steer::stdID) {        // set the steer-filename
       read_steer::Steering(steerID)->initnmspc(strm,filename); }
 
+   // get labels
+   std::vector<std::string> GetAvailableLabels() const;
+   std::vector<std::string> GetAvailableArrrays() const;
+   std::vector<std::string> GetAvailableTables() const;
+
+   static bool CheckNumber(const std::string& str);
+   static bool CheckInt(const std::string& str);
 
 private:
    read_steer();
    read_steer(const read_steer& ) {;};
    static std::map<std::string,read_steer*>* instances;
 
-   int read_stdin(std::string filename);
+   int read_stdin(const std::string& filename);
    int readstrm(std::ifstream& strm,unsigned int lstart=0,unsigned int lend=0, bool incfile=false);
    bool ParseString(std::string value);
-   bool ParseFindString(const std::string str, const std::string tag) const;
-   std::string ParseEnclosedString(const std::string) const;
+   bool ParseFindString(const std::string& str, const std::string& tag) const;
+   std::string ParseEnclosedString(const std::string&) const;
    bool EnclosedStringToOneEntity(std::string&) const;
    int ReplaceVariables(std::string& value);
-   bool CheckNumber(const std::string& str) const;
-   bool CheckInt(const std::string& str) const;
-   bool StringToBool(const std::string str, const std::string label="") const;
+   bool StringToBool(const std::string& str, const std::string& label="") const;
    static int cmdlinetag(const char* arg, std::string& label, std::string& value);
-   static int separatetag(std::string& vallhs, std::string& valrhs, const std::string sep);
+   static int separatetag(std::string& vallhs, std::string& valrhs, const std::string& sep);
 
    std::map<std::string,std::string> fstrings;
    std::map<std::string,std::vector<std::string> > ffields;
@@ -552,7 +557,6 @@ public:
       return read_steer::Steering(steerID)->getstcol(label,column); }
    // check existence of value
    static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
-      //      std::cout << "label = " << label << ", instances = " << read_steer::instances->count(steerID) << ", exist = " << read_steer::Steering(steerID)->exist(label) << std::endl;
       if ( read_steer::instances->count(steerID) == 0 ) return false;
       return read_steer::Steering(steerID)->exist(label);}
    // add values
@@ -574,25 +578,25 @@ public:
 };
 
 
-template <typename T>
+template <typename T> 
 void read_steer::AddLabel ( const std::string& key, T val) {
    std::stringstream ss;
    ss << val;
    AddLabel(key,ss.str());
 }
 
-template <typename T>
+template <typename T> 
 void read_steer::AddArray ( const std::string& key, const std::vector<T>& val) {
    std::vector<std::string> str(val.size());
    for ( unsigned int i = 0 ; i<val.size() ; i++ ) {
       std::stringstream ss;
       ss << val[i];
-      str[i] = ss.str();
+      str[i] = ss.str();      
    }
    AddArray(key,str);
 }
 
-template <typename T>
+template <typename T> 
 void read_steer::AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values) {
    std::vector<std::vector<std::string> > str(values.size());
    for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
@@ -602,9 +606,8 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
 	 ss << values[i][j];
 	 str[i][j]=ss.str();
       }
-   }
+   }   
    AddTable(key,header,str);
 }
-
 
 #endif

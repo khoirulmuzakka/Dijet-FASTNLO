@@ -53,7 +53,18 @@ using namespace std;
 
 // DB/KR Moved initialization from CRunDec.h to avoid compile problem on Mac
 //       reported by H. Prosper
-// Aux. constants for implicit Runhe-Kutta-Procedure:
+// Aux. constants for implicit Runge-Kutta-Procedure:
+const double CRunDec::cf = 4./3.;
+const double CRunDec::ca = 3.;
+const double CRunDec::tr = 1./2.;
+const double CRunDec::B4 = -1.762800087073770864061897634679818807215137274389016762629478603776;
+const double CRunDec::A4 = 0.5174790616738993863307581618988629456223774751413792582443193479770;
+const double CRunDec::A5 = 0.5084005792422687074591088492585899413195411256648216487244977963526;
+const double CRunDec::Zeta2 = (M_PI*M_PI)/6.;
+const double CRunDec::Zeta3 = 1.20205690315959428539973816151144999076498629234049888179227155534;
+const double CRunDec::Zeta4 = (M_PI*M_PI*M_PI*M_PI)/90.;
+const double CRunDec::Zeta5 = 1.03692775514336992633136548645703416805708091950191281197419267790;
+
 const double CRunDec::a2=0.2, CRunDec::a3=0.3, CRunDec::a4=0.6, CRunDec::a5=1., CRunDec::a6=0.875;
 
 const double CRunDec::b21=0.2, CRunDec::b31=3./40., CRunDec::b32=9./40., CRunDec::b41=0.3, CRunDec::b42=-0.9, CRunDec::b43=6./5.;
@@ -157,7 +168,7 @@ void CRunDec::SetNf(int nf){
 
 // Aux. function to exit function.
 int CRunDec::Abbruch(void){
-     RETURN
+     return 0;
 }
 
 // Function double CRunDec::LamExpl(double AlphaS, double Mu, int nl)
@@ -165,9 +176,9 @@ int CRunDec::Abbruch(void){
 double CRunDec::LamExpl(double AlphaS, double Mu, int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
-     double A=AlphaS/Pi;
+     double A=AlphaS/M_PI;
      double sum[4];
      sum[0]= 1./(A*Beta[0]);
      sum[1]= (B[1]*log(A))/Beta[0]
@@ -189,12 +200,12 @@ double CRunDec::LamExpl(double AlphaS, double Mu, int nl){
 double CRunDec::AlphasLam(double Lambda, double Mu, int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      if(Mu/Lambda<1.5){
        cout<<"WARNING: the ratio \\mu/\\lambda = "<< Mu/Lambda
              <<" is very small!"<<endl;
-       RETURN
+       return 0;
      }
      double L=log(Mu*Mu/(Lambda*Lambda));
      double h=1/(L*Beta[0]);
@@ -209,7 +220,7 @@ double CRunDec::AlphasLam(double Lambda, double Mu, int nl){
      for(int i=1; i<=nl; i++){
        a+=sum[i-1];
      }
-     return a*Pi;
+     return a*M_PI;
 }
 
 // Eq.(5) rewritten in a form suitable to determine zero.
@@ -225,7 +236,7 @@ double CRunDec::fSetAsL(double Lambda, double Mu, int nl, double AlphaS){
                    -3*B[1]*B[2]*c +0.5*B[3]);
      double Add=0.0;
      for(int i=1; i<=nl; i++) Add+=sum[i-1];
-     return (Add-(AlphaS/Pi));
+     return (Add-(AlphaS/M_PI));
 }
 
 // Function double CRunDec::LamImpl(double AlphaS, double Mu,int nl)
@@ -233,7 +244,7 @@ double CRunDec::fSetAsL(double Lambda, double Mu, int nl, double AlphaS){
 double CRunDec::LamImpl(double AlphaS, double Mu,int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double epsilonX= 1e-8;
      double Lambda0=LamExpl(AlphaS,Mu,nl);
@@ -243,7 +254,7 @@ double CRunDec::LamImpl(double AlphaS, double Mu,int nl){
      double f1= this->fSetAsL(x1,Mu,nl,AlphaS);
      if(f0*f1>0){
        cout<<"WARNING: No root can be calculatet!"<<endl;
-       RETURN
+       return 0;
      }
      double xTest;
      double fTest;
@@ -334,17 +345,17 @@ double CRunDec::fRungeKuttaImpl(double &x, double y,double &htry, int nl,
 double CRunDec::AlphasExact(double AlphaS0, double Mu0, double MuEnd, int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double Lambda=LamExpl(AlphaS0,Mu0,nl);
      if(MuEnd/Lambda<1.5){
        cout<<"WARNING: the ratio \\mu/\\lambda = "<< MuEnd/Lambda
          <<" is very small!"<<endl;
-       RETURN
+       return 0;
      }
      double x,y;
      x=log(Mu0);
-     y=AlphaS0/Pi;
+     y=AlphaS0/M_PI;
      double h;
 
      if(Mu0<MuEnd){
@@ -355,7 +366,7 @@ double CRunDec::AlphasExact(double AlphaS0, double Mu0, double MuEnd, int nl){
            h=log(MuEnd)-x;
          }
        }
-     return(y*Pi);
+     return(y*M_PI);
      }
      else{h=-1e-4;}
      while(x>(log(MuEnd))){
@@ -364,7 +375,7 @@ double CRunDec::AlphasExact(double AlphaS0, double Mu0, double MuEnd, int nl){
          h=log(MuEnd)-x;
        }
      }
-     return(y*Pi);
+     return(y*M_PI);
 }
 
 // Eq.(10) of [RunDec]
@@ -391,13 +402,13 @@ double CRunDec::fSetcx(double x, int nl){
 double CRunDec::mMS2mMS(double Mu0, double AlphaS0, double AlphaSEnd, int nl){
      if(nl<0||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      if(nl==0){
        return Mu0;
      }
-     double cAlphaS0= this->fSetcx(AlphaS0/Pi, nl);
-     double cAlphaSEnd= this->fSetcx(AlphaSEnd/Pi, nl);
+     double cAlphaS0= this->fSetcx(AlphaS0/M_PI, nl);
+     double cAlphaSEnd= this->fSetcx(AlphaSEnd/M_PI, nl);
      return Mu0*cAlphaSEnd/cAlphaS0;
 }
 
@@ -473,7 +484,7 @@ AsmMS CRunDec::AsmMSrunexact(double mMu, double AlphaS0, double Mu0,
      float eps=1e-15;
      float errmax;
      double x0=log(Mu0);
-     double y0=AlphaS0/Pi;
+     double y0=AlphaS0/M_PI;
      // KR: Remove unused variables
      //     double x1=y0;
      //     double y1=mMu;
@@ -531,9 +542,9 @@ AsmMS CRunDec::AsmMSrunexact(double mMu, double AlphaS0, double Mu0,
            h=xEnd-x0;
          }//if
        }//while
-       Erg.Asexact=y0*Pi;
+       Erg.Asexact=y0*M_PI;
 
-       x0=AlphaS0/Pi;
+       x0=AlphaS0/M_PI;
        xEnd=y0;
        y0=mMu;
        yscal0=abs(x0)+abs(h*y0);
@@ -593,9 +604,9 @@ AsmMS CRunDec::AsmMSrunexact(double mMu, double AlphaS0, double Mu0,
            h=xEnd-x0;
          }//if
        }//while
-       Erg.Asexact=y0*Pi;
+       Erg.Asexact=y0*M_PI;
 
-       x0=AlphaS0/Pi;
+       x0=AlphaS0/M_PI;
        xEnd=y0;
        y0=mMu;
        yscal0=abs(x0)+abs(h*y0);
@@ -703,15 +714,15 @@ double CRunDec::fZmM(double nl){
 double CRunDec::mOS2mMS(double mOS, double mq[], double asmu,double Mu,int nl){
      if(nl<0||nl>3){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double sum[4];
      sum[0]=(double) 1.;
-     sum[1]=asmu*(this ->fMsFromOs1(Mu, mOS))/Pi;
+     sum[1]=asmu*(this ->fMsFromOs1(Mu, mOS))/M_PI;
      sum[2]=asmu*asmu*((this-> fMsFromOs2(Mu, mOS, Nf-1))
-           -4.*(this->fDelta(mOS,mq)/3.))/(Pi*Pi);
+           -4.*(this->fDelta(mOS,mq)/3.))/(M_PI*M_PI);
      sum[3]=asmu*asmu*asmu*(this-> fMsFromOs3(Mu, mOS,Nf-1)+
-     this->fZmM(Nf-1))/(Pi*Pi*Pi);
+     this->fZmM(Nf-1))/(M_PI*M_PI*M_PI);
      double erg=0.0;
      if(nl==0){
        erg=1;
@@ -757,13 +768,13 @@ double CRunDec::fMsFromRi3(void){
 double CRunDec::mRI2mMS(double mRI, double asmu, int nl){
      if(nl<0||nl>3){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double sum[4];
      sum[0]=(double) 1.;
-     sum[1]=asmu*(this ->fMsFromRi1())/Pi;
-     sum[2]=asmu*asmu*(this-> fMsFromRi2())/(Pi*Pi);
-     sum[3]=asmu*asmu*asmu*(this-> fMsFromRi3())/(Pi*Pi*Pi);
+     sum[1]=asmu*(this ->fMsFromRi1())/M_PI;
+     sum[2]=asmu*asmu*(this-> fMsFromRi2())/(M_PI*M_PI);
+     sum[3]=asmu*asmu*asmu*(this-> fMsFromRi3())/(M_PI*M_PI*M_PI);
      double erg=0.0;
      if(nl==0){
        erg=1;
@@ -780,13 +791,13 @@ double CRunDec::mRI2mMS(double mRI, double asmu, int nl){
 double CRunDec::mMS2mRGI(double mMS, double asmu, int nl){
      if(nl<0||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      if(nl==0){
        return (double) mMS;
      }
      else{
-       double cAsmu= this->fSetcx(asmu/Pi, nl);
+       double cAsmu= this->fSetcx(asmu/M_PI, nl);
        return (double) mMS/cAsmu;
      }
 }
@@ -795,12 +806,12 @@ double CRunDec::mMS2mRGI(double mMS, double asmu, int nl){
 double CRunDec::mRGI2mMS(double mRGI, double asmu, int nl){
      if(nl<0||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      if(nl==0){
        return (double) mRGI;
      }
-     double cAsmu= this->fSetcx(asmu/Pi, nl);
+     double cAsmu= this->fSetcx(asmu/M_PI, nl);
      return (double) mRGI*cAsmu;
 }
 
@@ -871,9 +882,9 @@ double CRunDec::fDelta(double mOS,double mq[]){
        if(x>1.||x<0.){
          cout<<"\\Delta "<<x<<" IS CALLED; THE FUNCTION IS NOT IMPELEMENTED "<<
                "FOR ARGUMENTS OUTSIDE THE INTERVAL [0,1]."<<endl;
-         RETURN
+         return 0;
        }
-       erg+= Pi*Pi*x/8. - 0.597*x*x + 0.230*x*x*x;
+       erg+= M_PI*M_PI*x/8. - 0.597*x*x + 0.230*x*x*x;
      }
      return erg;
 }
@@ -881,15 +892,15 @@ double CRunDec::fDelta(double mOS,double mq[]){
 double CRunDec::fZmInvM(double nl){
      double erg;
      erg=(8481925./93312. +
-       (137.*nl)/216. + (652841.*Pi*Pi)/38880. - (nl*Pi*Pi)/27. -
-       (695.*Pi*Pi*Pi*Pi)/7776. - (575.*Pi*Pi*log(2))/162. -
-       (22.*Pi*Pi*log(2)*log(2))/81. -
+       (137.*nl)/216. + (652841.*M_PI*M_PI)/38880. - (nl*M_PI*M_PI)/27. -
+       (695.*M_PI*M_PI*M_PI*M_PI)/7776. - (575.*M_PI*M_PI*log(2))/162. -
+       (22.*M_PI*M_PI*log(2)*log(2))/81. -
        (55.*log(2)*log(2)*log(2)*log(2))/162. - (220.*A4)/27. -
-       nl*nl*(-2353./23328. - (13.*Pi*Pi)/324. - (7.*Zeta3)/54.) +
+       nl*nl*(-2353./23328. - (13.*M_PI*M_PI)/324. - (7.*Zeta3)/54.) +
        (58.*Zeta3)/27. -
-       (1439.*Pi*Pi*Zeta3)/432. - nl*(246643./23328. + (967.*Pi*Pi)/648. -
-       (61.*Pi*Pi*Pi*Pi)/1944. + (11.*Pi*Pi*log(2))/81. -
-       (2.*Pi*Pi*log(2)*log(2))/81. -
+       (1439.*M_PI*M_PI*Zeta3)/432. - nl*(246643./23328. + (967.*M_PI*M_PI)/648. -
+       (61.*M_PI*M_PI*M_PI*M_PI)/1944. + (11.*M_PI*M_PI*log(2))/81. -
+       (2.*M_PI*M_PI*log(2)*log(2))/81. -
        log(2)*log(2)*log(2)*log(2)/81. - (8.*A4)/27. +
        (241.*Zeta3)/72.) +
        (1975.*Zeta5)/216.);
@@ -901,15 +912,15 @@ double CRunDec::fZmInvM(double nl){
 double CRunDec::mMS2mOS(double MS, double mq[], double asmu,double mu,int nl){
      if(nl<0||nl>3){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double sum[4];
      sum[0]=(double) 1.;
-     sum[1]=asmu*(this ->fOsFromMs1(mu, MS))/Pi;
+     sum[1]=asmu*(this ->fOsFromMs1(mu, MS))/M_PI;
      sum[2]=asmu*asmu*((this-> fOsFromMs2(mu, MS, Nf-1))
-           +4.*(this->fDelta(MS,mq))/3.)/(Pi*Pi);
+           +4.*(this->fDelta(MS,mq))/3.)/(M_PI*M_PI);
      sum[3]=asmu*asmu*asmu*(this-> fOsFromMs3(mu, MS,Nf-1)+
-           this->fZmInvM(Nf-1))/(Pi*Pi*Pi);
+           this->fZmInvM(Nf-1))/(M_PI*M_PI*M_PI);
      double erg=0.0;
      if(nl==0){
        erg=1;
@@ -942,15 +953,15 @@ double CRunDec::fMumFromOs2(void){
 double CRunDec::fMumFromOs3(void){
      double erg;
      erg= (double) -7172965./93312. -
-         (293.*(Nf-1))/216. - (618281.*Pi*Pi)/38880. - ((Nf-1)*Pi*Pi)/9. +
-     (695.*Pi*Pi*Pi*Pi)/7776. + (623.*Pi*Pi*log(2))/162. +
-     (22.*Pi*Pi*log(2)*log(2))/81. +
+         (293.*(Nf-1))/216. - (618281.*M_PI*M_PI)/38880. - ((Nf-1)*M_PI*M_PI)/9. +
+     (695.*M_PI*M_PI*M_PI*M_PI)/7776. + (623.*M_PI*M_PI*log(2))/162. +
+     (22.*M_PI*M_PI*log(2)*log(2))/81. +
      (55.*log(2)*log(2)*log(2)*log(2))/162. + (220.*A4)/27. +
-     (Nf-1)*(Nf-1)*(-2353./23328. - (13.*Pi*Pi)/324. - (7.*Zeta3)/54.) -
+     (Nf-1)*(Nf-1)*(-2353./23328. - (13.*M_PI*M_PI)/324. - (7.*Zeta3)/54.) -
      (70.*Zeta3)/27. +
-     (1439.*Pi*Pi*Zeta3)/432. + (Nf-1)*(246643./23328. + (967.*Pi*Pi)/648. -
-     (61.*Pi*Pi*Pi*Pi)/1944. + (11.*Pi*Pi*log(2))/81. -
-     (2*Pi*Pi*log(2)*log(2))/81. -
+     (1439.*M_PI*M_PI*Zeta3)/432. + (Nf-1)*(246643./23328. + (967.*M_PI*M_PI)/648. -
+     (61.*M_PI*M_PI*M_PI*M_PI)/1944. + (11.*M_PI*M_PI*log(2))/81. -
+     (2*M_PI*M_PI*log(2)*log(2))/81. -
      log(2)*log(2)*log(2)*log(2)/81. - (8.*A4)/27. + (241.*Zeta3)/72.) -
      (1975.*Zeta5)/216.;
      return erg;
@@ -961,13 +972,13 @@ double CRunDec::fMumFromOs3(void){
 double CRunDec::mOS2mSI(double mOS, double mq[], double asM, int nl){
      if(nl<0||nl>3){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double sum[4];
      sum[0]=(double) 1.;
-     sum[1]=asM*(this ->fMumFromOs1())/Pi;
-     sum[2]=asM*asM*(this-> fMumFromOs2()-4.*fDelta(mOS,mq)/3.)/(Pi*Pi);
-     sum[3]=asM*asM*asM*(this-> fMumFromOs3())/(Pi*Pi*Pi);
+     sum[1]=asM*(this ->fMumFromOs1())/M_PI;
+     sum[2]=asM*asM*(this-> fMumFromOs2()-4.*fDelta(mOS,mq)/3.)/(M_PI*M_PI);
+     sum[3]=asM*asM*asM*(this-> fMumFromOs3())/(M_PI*M_PI*M_PI);
      double erg=0.0;
      if(nl==0){
        erg=1;
@@ -1032,9 +1043,9 @@ double CRunDec::fRiFromMs(double alpha, double nl){
 double CRunDec::mMS2mRI(double mMS, double asmu, int nl){
      if(nl<0||nl>3){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
-     return (double) mMS*(this->fRiFromMs((asmu/Pi), nl));
+     return (double) mMS*(this->fRiFromMs((asmu/M_PI), nl));
 }
 
 // Coefficients needed for the transformation of mOS to mMSit
@@ -1042,11 +1053,11 @@ double CRunDec::fHelpmOS2mMSit(double MS, double mOS, double mq[], double asmu,
                                 double mu,int nl){
      double sum[4];
      sum[0]=(double) 1.;
-     sum[1]=asmu*(this ->fOsFromMs1(mu, MS))/Pi;
+     sum[1]=asmu*(this ->fOsFromMs1(mu, MS))/M_PI;
      sum[2]=asmu*asmu*((this-> fOsFromMs2(mu, MS, Nf-1))
-           +4.*(this->fDelta(mOS,mq))/3.)/(Pi*Pi);
+           +4.*(this->fDelta(mOS,mq))/3.)/(M_PI*M_PI);
      sum[3]=asmu*asmu*asmu*(this-> fOsFromMs3(mu, MS,Nf-1)+
-           +this->fZmInvM(Nf-1))/(Pi*Pi*Pi);
+           +this->fZmInvM(Nf-1))/(M_PI*M_PI*M_PI);
      double erg=0.0;
      if(nl==0){
        erg=1;
@@ -1065,7 +1076,7 @@ double CRunDec::mOS2mMSit(double mOS, double mq[], double asmu, double mu,
                            int nl){
      if(nl<0||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      double epsilonX= 1e-8;
      double x0=mOS-0.1*mOS;
@@ -1074,7 +1085,7 @@ double CRunDec::mOS2mMSit(double mOS, double mq[], double asmu, double mu,
      double f1= (x1*(this->fHelpmOS2mMSit(x1,mOS, mq, asmu, mu, nl))-mOS);
      if(f0*f1>0){
        cout<<"WARNING: No root can be calculatet!"<<endl;
-       RETURN
+       return 0;
      }
      double xTest;
      double fTest;
@@ -1090,17 +1101,17 @@ double CRunDec::mOS2mMSit(double mOS, double mq[], double asmu, double mu,
 }
 
 // Function: double CRunDec::mMS2mRGImod(double mMS, double asmu, int nl)
-// See 'mMS2mRGI' but 'Alphas/Pi -> AlphaS*2*Beta0/Pi'
+// See 'mMS2mRGI' but 'Alphas/M_PI -> AlphaS*2*Beta0/M_PI'
 double CRunDec::mMS2mRGImod(double mMS, double asmu, int nl){
      if(nl<0||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
      if(nl==0){
        return (double) mMS;
      }
      double bet0= 11./4. - Nf/6.;
-     double cAsmu= this->fSetcx((2*bet0*asmu)/Pi, nl);
+     double cAsmu= this->fSetcx((2*bet0*asmu)/M_PI, nl);
      return (double) mMS/cAsmu;
 }
 
@@ -1155,9 +1166,9 @@ double CRunDec::fas5to6os(double A,double mass,double mu,double nlq,double nl){
 double CRunDec::DecAsDownOS(double als, double massth, double muth, int nl){
        if(nl<1||nl>5){
          cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl <<" LOOPS"<<endl;
-         RETURN
+         return 0;
        }
-       double erg=(this->fas5to6os(als/Pi, massth, muth, Nf,nl));
+       double erg=(this->fas5to6os(als/M_PI, massth, muth, Nf,nl));
        return als*erg;
 }
 
@@ -1210,9 +1221,9 @@ double CRunDec::fas6to5os(double A,double mass,double mu,double nlq,double nl){
 double CRunDec::DecAsUpOS(double als, double massth, double muth, int nl){
      if(nl<1||nl>5){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl <<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
-     double erg=(this->fas6to5os(als/Pi, massth, muth, Nf,nl));
+     double erg=(this->fas6to5os(als/M_PI, massth, muth, Nf,nl));
      return als*erg;
 }
 
@@ -1243,9 +1254,9 @@ double CRunDec::DecMqUpOS(double mq, double als, double massth, double muth,
                            int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
-     double erg=(this->fmq6to5os(als/Pi, massth, muth, Nf,nl));
+     double erg=(this->fmq6to5os(als/M_PI, massth, muth, Nf,nl));
      return mq*erg;
 }
 
@@ -1276,9 +1287,9 @@ double CRunDec::DecMqDownOS(double mq, double als, double massth, double muth,
                            int nl){
      if(nl<1||nl>4){
        cout<<"PROCEDURE IS NOT IMPLEMENTED FOR "<< nl<<" LOOPS"<<endl;
-       RETURN
+       return 0;
      }
-     double erg=(this->fmq5to6os(als/Pi, massth, muth, Nf,nl));
+     double erg=(this->fmq5to6os(als/M_PI, massth, muth, Nf,nl));
      return mq*erg;
 }
 
@@ -1316,7 +1327,7 @@ double CRunDec::AlL2AlH(double asl,double mu1,TriplenfMmu decpar[],double mu2,
      for(int i=3-n+2;i<=3;i++){
        if(decpar[i].nf-decpar[i-1].nf!=1){
          cout<<"WARNING: THERE IS A GAP IN NUMBER OF FLAVOURS. EXIT."<<endl;
-         RETURN
+         return 0;
        }
      }
      // KR: Remove unused variables
@@ -1372,7 +1383,7 @@ double CRunDec::AlH2AlL(double ash,double mu1,TriplenfMmu decpar[],double mu2,
      for(int i=1;i<=n-1;i++){
        if(decpar[i].nf-decpar[i-1].nf!=-1){
          cout<<"WARNING: THERE IS A GAP IN NUMBER OF FLAVOURS. EXIT.";
-         RETURN
+         return 0;
        }
      }
      double erg1,erg2;
@@ -1427,7 +1438,7 @@ double CRunDec::mL2mH(double mql,double asl,double mu1,TriplenfMmu decpar[],
      for(int i=3-n+2;i<=3;i++){
        if(decpar[i].nf-decpar[i-1].nf!=1){
          cout<<"WARNING: THERE IS A GAP IN NUMBER OF FLAVOURS. EXIT.";
-         RETURN
+         return 0;
        }
      }
 
@@ -1487,7 +1498,7 @@ double CRunDec::mH2mL(double mqh,double ash,double mu1,TriplenfMmu decpar[],
      for(int i=1;i<=n-1;i++){
        if(decpar[i].nf-decpar[i-1].nf!=-1){
          cout<<"WARNING: THERE IS A GAP IN NUMBER OF FLAVOURS. EXIT.";
-         RETURN
+         return 0;
        }
      }
      double erg1,erg2,erg3,erg4,erg5,erg6;

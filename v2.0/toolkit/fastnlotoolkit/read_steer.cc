@@ -170,7 +170,7 @@ int read_steer::readstrm(ifstream& strm,unsigned int lstart, unsigned int lend, 
    return rlines; // return nlines including comments
 }
 
-int read_steer::read_stdin(string filename) {
+int read_steer::read_stdin(const string& filename) {
    //If the steering has alread been read -> do nothing
    ffile.open(filename.c_str());
    if (!ffile) {
@@ -183,7 +183,7 @@ int read_steer::read_stdin(string filename) {
 };
 
 
-vector<bool> read_steer::getbf(string label) {
+vector<bool> read_steer::getbf(const string& label) {
    vector<string> sf = ffields[label];
    vector<bool> ret(sf.size());
    for (unsigned int i = 0 ; i<sf.size() ; i++)
@@ -191,7 +191,7 @@ vector<bool> read_steer::getbf(string label) {
    return ret;
 }
 
-vector<int> read_steer::getif(string label) {
+vector<int> read_steer::getif(const string& label) {
    vector<int> ret;
    vector<string> sf = ffields[label];
    for (unsigned int i = 0 ; i<sf.size() ; i++) {
@@ -204,7 +204,7 @@ vector<int> read_steer::getif(string label) {
    return ret;
 }
 
-vector<double> read_steer::getdf(string label) {
+vector<double> read_steer::getdf(const string& label) {
    vector<double> ret;
    vector<string> sf = ffields[label];
    for (unsigned int i = 0 ; i<sf.size() ; i++) {
@@ -217,14 +217,14 @@ vector<double> read_steer::getdf(string label) {
    return ret;
 }
 
-vector<string> read_steer::getsf(string label) {
+vector<string> read_steer::getsf(const string& label) {
    vector<string> ret = ffields[label];
    if (ret.empty())
       cout << oW<<"Label '"<<  label <<"' was not found in list or has no values."<< endl;
    return ret;
 }
 
-vector<string> read_steer::getstcol(string label,string col) {
+vector<string> read_steer::getstcol(const string& label,const string& col) {
    // get column of a table with header 'col' as string values
    vector<string> ret;
    vector<string> head = getsthead(label);
@@ -242,7 +242,7 @@ vector<string> read_steer::getstcol(string label,string col) {
 }
 
 
-vector<bool> read_steer::getbtcol(string label,string col) {
+vector<bool> read_steer::getbtcol(const string& label,const string& col) {
    // get column of a table with header 'col' as string values
    vector<string> scol = getstcol(label,col);
    vector<bool> ret(scol.size());
@@ -252,7 +252,7 @@ vector<bool> read_steer::getbtcol(string label,string col) {
 }
 
 
-vector<int> read_steer::getitcol(string label,string col) {
+vector<int> read_steer::getitcol(const string& label,const string& col) {
    // get column of a table with header 'col' as string values
    vector<int> ret;
    vector<string> scol = getstcol(label,col);
@@ -266,7 +266,7 @@ vector<int> read_steer::getitcol(string label,string col) {
    return ret;
 }
 
-vector<double> read_steer::getdtcol(string label,string col) {
+vector<double> read_steer::getdtcol(const string& label,const string& col) {
    // get column of a table with header 'col' as string values
    vector<double> ret;
    vector<string> scol = getstcol(label,col);
@@ -280,7 +280,7 @@ vector<double> read_steer::getdtcol(string label,string col) {
    return ret;
 }
 
-vector<string> read_steer::getsthead(string label) {
+vector<string> read_steer::getsthead(const string& label) {
    // get table header
    vector<string> ret = ftableheaders[label];
    if (ret.empty())
@@ -288,7 +288,7 @@ vector<string> read_steer::getsthead(string label) {
    return ret;
 }
 
-vector<vector<string> > read_steer::getst(string label) {
+vector<vector<string> > read_steer::getst(const string& label) {
    // get table values as strings
    vector<vector<string> > ret = ftables[label];
    if (ret.empty() && ftableheaders[label].empty())
@@ -298,7 +298,7 @@ vector<vector<string> > read_steer::getst(string label) {
    return ret;
 }
 
-vector<vector<double> > read_steer::getdt(string label) {
+vector<vector<double> > read_steer::getdt(const string& label) {
    // get table values as doubles
    vector<vector<double> > ret;
    vector<vector<string> > sf = getst(label);
@@ -315,7 +315,7 @@ vector<vector<double> > read_steer::getdt(string label) {
 }
 
 
-vector<vector<int> > read_steer::getit(string label) {
+vector<vector<int> > read_steer::getit(const string& label) {
    // get table values as integers
    vector<vector<int> > ret;
    vector<vector<string> > sf = getst(label);
@@ -332,21 +332,21 @@ vector<vector<int> > read_steer::getit(string label) {
 }
 
 
-string read_steer::gets(string label) {
+string read_steer::gets(const string& label) {
    string ret = fstrings[label];
    if (ret=="")
       cout << oW<<"Label '"<<  label <<"' was not found in list or has an empty value."<< endl;
    return ret;
 }
 
-double read_steer::getd(string label) {
+double read_steer::getd(const string& label) {
    string val = gets(label);
    if (!CheckNumber(val.c_str()))
       cout<<oW<<"Value of label='"<<label<<"' does not seem to be a numeric number. value="<<val<<endl;
    return atof(val.c_str());
 }
 
-int read_steer::geti(string label) {
+int read_steer::geti(const string& label) {
    string val = gets(label);
    bool isnan = CheckInt(val.c_str());
    if (!isnan)
@@ -354,11 +354,11 @@ int read_steer::geti(string label) {
    return atoi(val.c_str());
 }
 
-bool read_steer::getb(string label) {
+bool read_steer::getb(const string& label) {
    return StringToBool(gets(label),label);
 }
 
-bool read_steer::StringToBool(const string sval, const string label) const {
+bool read_steer::StringToBool(const string& sval, const string& label) const {
    if (sval!="0" && sval!="1" && sval!="true" && sval!="false" && sval!="") {
       if (label=="")
          cout<<oW<<"Expecting value '0','1','true', 'false' or no value for boolean values.  value='"<<sval<<"'. Using 'true'."<<endl;
@@ -373,33 +373,33 @@ bool read_steer::StringToBool(const string sval, const string label) const {
 }
 
 void read_steer::AddLabel(const string& key, const string& value) {
-   if (fstrings.count(key)>0)
+   if (fstrings.count(key)>0) 
       cout<<" # read_steer. Replacing label '"<<key<<"' with value '"<<value<<"'."<<endl;
    fstrings[key]      = value;
 }
 
 
 void read_steer::AddArray(const string& key, const vector<string>& values) {
-   if (ffields.count(key)>0)
+   if (ffields.count(key)>0) 
       cout<<" # read_steer. Replacing label '"<<key<<"' with an array of size '"<<values.size()<<"'."<<endl;
    ffields[key]      = values;
 }
 
 
 void read_steer::AddTable(const string& key, const vector<string>& header, const vector<vector<string> >& values) {
-   if (ftables.count(key)>0 ||  ftableheaders.count(key)>0 )
+   if (ftables.count(key)>0 ||  ftableheaders.count(key)>0 )  
       cout<<" # read_steer. Replacing label '"<<key<<"' with a table of '"<<values.size()<<"' columns."<<endl;
    ftableheaders[key]      = header;
    ftables[key] = values;
 }
 
 
-bool read_steer::CheckNumber(const string& str) const {
+bool read_steer::CheckNumber(const string& str) {
    return str.find_first_of("-+1234567890")==0;
 }
 
 
-bool read_steer::CheckInt(const string& str) const {
+bool read_steer::CheckInt(const string& str) {
    return str.find_first_of(".eE")==string::npos && CheckNumber(str);
 }
 
@@ -629,7 +629,7 @@ int read_steer::ReplaceVariables(string& str) {
 }
 
 
-string read_steer::ParseEnclosedString(const string str) const {
+string read_steer::ParseEnclosedString(const string& str) const {
    vector<size_t> occ;
    for (size_t found = str.find_first_of('"'); found!=string::npos; found = str.find_first_of('"',found+1))
       occ.push_back(found+1);
@@ -680,12 +680,12 @@ bool read_steer::EnclosedStringToOneEntity(string& str) const {
 }
 
 
-bool read_steer::ParseFindString(const string str, const string tag) const {
+bool read_steer::ParseFindString(const string& str, const string& tag) const {
    //return strncmp(str,tag.c_str(),tag.size())==0;
    return (str.find(tag)==0);
 }
 
-int read_steer::separatetag(string& vallhs, string& valrhs, const string sep) {
+int read_steer::separatetag(string& vallhs, string& valrhs, const string& sep) {
    // separate a string, according to separation string sep;
    // input:  vallhs, sep
    // output: vallhs, valrhs
@@ -743,4 +743,34 @@ bool read_steer::parsecommandline(int argc,char** argv) {
       read_steer::Steering(fID)->AddLabel((*ii).first, val);
    }
    return gotfile;
+}
+
+
+vector<string> read_steer::GetAvailableLabels() const {
+   std::vector<std::string> ret(fstrings.size());
+   std::map<std::string,std::string> map = fstrings;
+   unsigned int i=0;
+   for (std::map<std::string,std::string>::iterator it=map.begin(); it!=map.end(); ++it)
+      ret[i++] = it->first;
+   return ret;
+}
+
+
+vector<string> read_steer::GetAvailableArrrays() const {
+   std::vector<std::string> ret(fstrings.size());
+   std::map<std::string,std::vector<std::string> > map = ffields;
+   unsigned int i=0;
+   for (std::map<std::string,std::vector<std::string> >::iterator it=map.begin(); it!=map.end(); ++it)
+      ret[i++] = it->first;
+   return ret;
+}
+
+
+vector<string> read_steer::GetAvailableTables() const {
+   std::vector<std::string> ret(fstrings.size());
+   std::map<std::string,std::vector<std::vector<std::string> > > map = ftables;
+   unsigned int i=0;
+   for (std::map<std::string,std::vector<std::vector<std::string> > > ::iterator it=map.begin(); it!=map.end(); ++it)
+      ret[i++] = it->first;
+   return ret;
 }
