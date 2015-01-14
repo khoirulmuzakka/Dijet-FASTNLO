@@ -552,7 +552,7 @@ public:
       return read_steer::Steering(steerID)->getstcol(label,column); }
    // check existence of value
    static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
-      std::cout << "label = " << label << ", instances = " << read_steer::instances->count(steerID) << ", exist = " << read_steer::Steering(steerID)->exist(label) << std::endl;
+      //      std::cout << "label = " << label << ", instances = " << read_steer::instances->count(steerID) << ", exist = " << read_steer::Steering(steerID)->exist(label) << std::endl;
       if ( read_steer::instances->count(steerID) == 0 ) return false;
       return read_steer::Steering(steerID)->exist(label);}
    // add values

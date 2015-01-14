@@ -73,10 +73,12 @@ class fastNLOTable : public fastNLOBase {
    std::vector < std::pair < double, double > > GetDim1BinBoundaries(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
    std::vector < std::pair < double, double > > GetDim2BinBoundaries(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
 
-   double GetLoBin(int bin, int dimension) const {return Bin[bin][dimension].first;}            // Get lower bin boundary
-   std::vector < double > GetLoBin(int dimension) const;
-   double GetUpBin(int bin, int dimension) const {return Bin[bin][dimension].second;}           // Get upper bin boundary
-   std::vector < double > GetUpBin(int dimension) const;
+   std::vector < double > GetLoBin(unsigned int iDim) const;                                    // Get lower bin boundaries in dim. iDim for all obs. bins
+   double GetLoBin(int bin, unsigned int iDim) const {return Bin[bin][iDim].first;}             // Get lower bin boundary in dim. iDim for one obs. bin
+   double GetLoBinMin(unsigned int iDim) const;                                                 // Get lowest bin boundary in dim. iDim of all obs. bins
+   std::vector < double > GetUpBin(unsigned int iDim) const;                                    // Get upper bin boundaries in dim. iDim for all obs. bins
+   double GetUpBin(int bin, unsigned int iDim) const {return Bin[bin][iDim].second;}            // Get upper bin boundary in dim. iDim for one obs. bin
+   double GetUpBinMax(unsigned int iDim) const;                                                 // Get uppermost bin boundary in dim. iDim of all obs. bins
 
    vector < double > GetBinSize() const {return BinSize;};                                      // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
    double GetBinSize(int bin) const {return BinSize[bin];};                                     // Get Binsize = BinSizeDim1 < * BinSizeDim2 >

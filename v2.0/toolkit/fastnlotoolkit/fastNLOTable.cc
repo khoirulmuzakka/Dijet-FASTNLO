@@ -855,22 +855,66 @@ vector < pair < double, double > > fastNLOTable::GetDim2BinBoundaries(unsigned i
 
 
 // ___________________________________________________________________________________________________
-vector < double > fastNLOTable::GetLoBin( int dimension) const {
-   //! Get lower bin edge of all observable bins for dimension 'dimension'
+vector < double > fastNLOTable::GetLoBin(unsigned int iDim) const {
+   if ( ! (iDim < NDim) ) {
+      error["GetLoBin"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      exit(1);
+   }
+   //! Get lower bin edge of all observable bins for dimension 'iDim'
    vector < double > LoBin;
-   for (size_t i = 0; i < Bin.size(); ++i)
-      LoBin.push_back(Bin[i][dimension].first);
+   for (size_t i = 0; i < Bin.size(); ++i) {
+      LoBin.push_back(Bin[i][iDim].first);
+   }
    return LoBin;
 }
 
 
 // ___________________________________________________________________________________________________
-vector < double > fastNLOTable::GetUpBin( int dimension) const {
-   //! Get upper bin edge of all observable bins for dimension 'dimension'
+double fastNLOTable::GetLoBinMin(unsigned int iDim) const {
+   if ( ! (iDim < NDim) ) {
+      error["GetLoBinMin"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      exit(1);
+   }
+   //! Get lowest bin edge of all observable bins for dimension 'iDim'
+   double LoBinMin = DBL_MAX;
+   for (size_t i = 0; i < Bin.size(); ++i) {
+      debug["GetLoBinMin"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].first = " << Bin[i][iDim].first << ", LoBinMin = " << LoBinMin << endl;
+      LoBinMin = ( (Bin[i][iDim].first < LoBinMin) ? Bin[i][iDim].first : LoBinMin );
+   }
+   debug["GetLoBinMin"]<<"Minimum found for dimension " << iDim << " is: " << LoBinMin << endl;
+   return LoBinMin;
+}
+
+
+// ___________________________________________________________________________________________________
+vector < double > fastNLOTable::GetUpBin(unsigned int iDim) const {
+   if ( ! (iDim < NDim) ) {
+      error["GetUpBin"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      exit(1);
+   }
+   //! Get upper bin edge of all observable bins for dimension 'iDim'
    vector < double > UpBin;
-   for (size_t i = 0; i < Bin.size(); ++i)
-      UpBin.push_back(Bin[i][dimension].second);
+   for (size_t i = 0; i < Bin.size(); ++i) {
+      UpBin.push_back(Bin[i][iDim].second);
+   }
    return UpBin;
+}
+
+
+// ___________________________________________________________________________________________________
+double fastNLOTable::GetUpBinMax(unsigned int iDim) const {
+   if ( ! (iDim < NDim) ) {
+      error["GetUpBinMax"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      exit(1);
+   }
+   //! Get uppermost bin edge of all observable bins for dimension 'iDim'
+   double UpBinMax = -DBL_MAX;
+   for (size_t i = 0; i < Bin.size(); ++i) {
+      debug["GetUpBinMax"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].second = " << Bin[i][iDim].second << ", UpBinMax = " << UpBinMax << endl;
+      UpBinMax = ( (Bin[i][iDim].second > UpBinMax) ? Bin[i][iDim].second : UpBinMax );
+   }
+   debug["GetUpBinMax"]<<"Maximum found for dimension " << iDim << " is: " << UpBinMax << endl;
+   return UpBinMax;
 }
 
 

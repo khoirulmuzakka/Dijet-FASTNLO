@@ -373,21 +373,21 @@ bool read_steer::StringToBool(const string sval, const string label) const {
 }
 
 void read_steer::AddLabel(const string& key, const string& value) {
-   if (fstrings.count(key)>0) 
+   if (fstrings.count(key)>0)
       cout<<" # read_steer. Replacing label '"<<key<<"' with value '"<<value<<"'."<<endl;
    fstrings[key]      = value;
 }
 
 
 void read_steer::AddArray(const string& key, const vector<string>& values) {
-   if (ffields.count(key)>0) 
+   if (ffields.count(key)>0)
       cout<<" # read_steer. Replacing label '"<<key<<"' with an array of size '"<<values.size()<<"'."<<endl;
    ffields[key]      = values;
 }
 
 
 void read_steer::AddTable(const string& key, const vector<string>& header, const vector<vector<string> >& values) {
-   if (ftables.count(key)>0 ||  ftableheaders.count(key)>0 )  
+   if (ftables.count(key)>0 ||  ftableheaders.count(key)>0 )
       cout<<" # read_steer. Replacing label '"<<key<<"' with a table of '"<<values.size()<<"' columns."<<endl;
    ftableheaders[key]      = header;
    ftables[key] = values;
