@@ -1187,7 +1187,7 @@ int fastNLOTable::GetODim0Bin(double obs0) const {
          error["fastNLOTable::GetODim0Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
-         if ( Bin[i][0].first < obs0 && obs0 <= Bin[i][0].second ) {
+         if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second ) {
             iDim0Bin = GetIDim0Bin(i);
             break;
          }
@@ -1208,8 +1208,8 @@ int fastNLOTable::GetODim1Bin(double obs0, double obs1) const {
          error["fastNLOTable::GetODim1Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
-         if ( Bin[i][0].first < obs0 && obs0 <= Bin[i][0].second &&
-              Bin[i][1].first < obs1 && obs1 <= Bin[i][1].second ) {
+         if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second &&
+              Bin[i][1].first <= obs1 && obs1 < Bin[i][1].second ) {
             iDim1Bin = GetIDim1Bin(i);
             break;
          }
@@ -1230,9 +1230,9 @@ int fastNLOTable::GetODim2Bin(double obs0, double obs1, double obs2) const {
          error["fastNLOTable::GetODim2Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
-         if ( Bin[i][0].first < obs0 && obs0 <= Bin[i][0].second &&
-              Bin[i][1].first < obs1 && obs1 <= Bin[i][1].second &&
-              Bin[i][2].first < obs2 && obs2 <= Bin[i][2].second ) {
+         if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second &&
+              Bin[i][1].first <= obs1 && obs1 < Bin[i][1].second &&
+              Bin[i][2].first <= obs2 && obs2 < Bin[i][2].second ) {
             iDim2Bin = GetIDim2Bin(i);
             break;
          }
@@ -1343,7 +1343,7 @@ int fastNLOTable::GetObsBinNumber( const vector<double>& vobs ) const {
          if ( IDiffBin[j] == 1 ) { // Point-wise differential
             lmatch = lmatch && ( fabs(Bin[i][j].first - vobs[j]) < DBL_MIN );
          } else {                  // Non- or bin-wise differential
-            lmatch = lmatch && ( Bin[i][j].first < vobs[j] && vobs[j] <= Bin[i][j].second );
+            lmatch = lmatch && ( Bin[i][j].first <= vobs[j] && vobs[j] < Bin[i][j].second );
          }
       }
       if ( lmatch ) {return i;}
