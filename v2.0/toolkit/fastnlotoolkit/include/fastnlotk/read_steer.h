@@ -409,7 +409,7 @@
 #define PRINTALL() read_steer::printall()
 
 // check if key exists
-#define EXIST(X) read_steer::exist(#X)
+#define EXIST(X) read_steer::getexist(#X)
 #define EXIST_NS(X,NS) read_steer::getexist(#X,NS)
 
 class read_steer {
