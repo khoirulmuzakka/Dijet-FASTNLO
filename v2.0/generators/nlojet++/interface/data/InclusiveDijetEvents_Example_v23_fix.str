@@ -15,14 +15,14 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2342b_v23_fix
+ScenarioName fnl2412c_v23_fix
 ScenarioDescription {
-    "d2sigma-jet_dpT_dy_[pb_GeV]"
+    "d2sigma-dijet_dMjj_dy_max_[pb_GeV]"
     "CMS_Collaboration"
-    "Inclusive_Jet_pT"
-    "anti-kT_R=0.5"
-    "CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107, 132001 (2011)."
-    "RIVET_ID=CMS_2011_S9086218/D01-x01-y01,SPIRES_ID=9086218,INSPIRE_RECORD=902309"
+    "Dijet_Mass"
+    "anti-kT_R=0.7"
+    "CMS-PAPER-QCD-10-025, arXiv:1104.1693, Phys. Lett. B700, 187 (2011)."
+    "SPIRES_ID=9029460,INSPIRE_RECORD=895742"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -30,24 +30,24 @@ ScenarioDescription {
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
 PublicationUnits                12               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
-ScaleDescriptionScale1          "pT_jet_[GeV]"   # Specify scale name and unit
+ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # Specify scale name and unit
 ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
 # -------------------------------------------------------------------- #
-JetAlgo                           2              # fastjet jet algorithm
+JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-Rjet                            0.5              # Jet size parameter: Required for all jets
+Rjet                            0.7              # Jet size parameter: Required for all jets
 #OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
-ptjmin                          18.              # Minimal jet pT
+ptjmin                          30.              # Minimal jet pT
 # Use either rapidity or pseudorapidity but not both! If both are set, only rapidity cuts are applied.
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           3.0              # Maximal jet rapidity
 #etajmin                         0.0              # Minimal jet pseudorapidity
 #etajmax                         3.0              # Maximal jet pseudorapidity
-#Njetmin                         1                # Minimal number of jets required to be in preselected phase space
+Njetmin                         2                # Minimal number of jets required to be in preselected phase space
 #                                                # (Normally one, i.e. single-jet inclusive)
 
 # -------------------------------------------------------------------- #
@@ -61,8 +61,8 @@ yjmax                           3.0              # Maximal jet rapidity
 # -------------------------------------------------------------------- #
 DifferentialDimension             2
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimension (from outer to inner "loop")
-   "|y|"
-   "pT_[GeV]"
+   "|y_max|"
+   "Mjj_[GeV]"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
    2  2                                          #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
@@ -93,12 +93,11 @@ BinSizeFactor                    2.              # Possibility to provide additi
 # Example for DoubleDifferentialBinning:
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  846. 1684.
-    0.5        1.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  790. 1684.
-    1.0        1.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686. 1410.
-    1.5        2.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  1032.
-    2.0        2.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  737.
-    2.5        3.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  468.
+    0.0        0.5         156.  176.  197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659.
+    0.5        1.0         197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
+    1.0        1.5         386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
+    1.5        2.0         565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
+    2.0        2.5         649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
 }}
 
 # Example for TripleDifferentialBinning:
@@ -141,7 +140,7 @@ PDF2                            2212        # PDF of 2nd hadron (following PDG c
 GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
-OutputFilename          InclusiveJets.tab   # Filename of fastNLO output table
+OutputFilename   InclusiveDijetEvents.tab   # Filename of fastNLO output table
 OutputPrecision                 8           # Number of decimal digits to store in output table, def.=8.
 FlexibleScaleTable              false       # Create table fully flexible in mu_f (larger size), true, or
                                             # table with fixed number of mu_f scale factors, def.=false.
