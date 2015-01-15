@@ -2560,14 +2560,14 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::TestParameterInSteering(const string& label) {
+bool fastNLOCreate::TestParameterInSteering(const string& label) const {
    //! Get flag if parameter exists in steering card
    return read_steer::getexist(label, fSteerfile);
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, bool& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, bool& val) const {
    //! Get boolean value from steering with label 'label'.
    //! Alternatively, also BOOL_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2582,14 +2582,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, bool& val) {
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getbool(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getbool(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, int& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, int& val) const {
    //! Get integer value from steering with label 'label'.
    //! Alternatively, also INT_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2604,14 +2605,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, int& val) {
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getint(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getint(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, double& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, double& val) const {
    //! Get boolean value from steering with label 'label'.
    //! Alternatively, also DOUBLE_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2626,14 +2628,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, double& val) {
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getdouble(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getdouble(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, string& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, string& val) const {
    //! Get string value from steering with label 'label'.
    //! Alternatively, also STRING_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2648,14 +2651,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, string& val) {
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getstring(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getstring(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, vector<int>& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<int>& val) const {
    //! Get integer vector from steering with label 'label'.
    //! Alternatively, also INT_ARR(`label`) could be used if read_steer.h is included
    //!
@@ -2665,14 +2669,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<int>& val) {
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getintarray(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getintarray(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, vector<double>& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<double>& val) const {
    //! Get vector of doubles from steering with label 'label'.
    //! Alternatively, also DOUBLE_ARR_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2687,14 +2692,16 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<double>& val) 
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getdoublearray(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getdoublearray(label,fSteerfile);
+   return exist;
+
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, vector<string>& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<string>& val) const {
    //! Get vector of strings from steering with label 'label'.
    //! Alternatively, also STRING_ARR_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2709,14 +2716,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<string>& val) 
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getstringarray(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getstringarray(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<int > >& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<int > >& val) const {
    //! Get vector of vectors of ints from steering with label 'label'.
    //! Alternatively, also INT_TAB_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2731,14 +2739,15 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<int > >
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getinttable(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getinttable(label,fSteerfile);
+   return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<double > >& val) {
+bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<double > >& val) const {
    //! Get vector of vector of doubles from steering with label 'label'.
    //! Alternatively, also DOUBLE_TAB_NS(`label`) could be used if read_steer.h is included
    //!
@@ -2753,7 +2762,8 @@ bool fastNLOCreate::GetParameterFromSteering(string label, vector<vector<double 
    //!
    //! Function returns 'false' if label was not found in steering file
 
-   string temp = read_steer::getstring(label,fSteerfile);
-   val = read_steer::getdoubletable(label,fSteerfile);
-   return !temp.empty();
+   bool exist = read_steer::getexist(label,fSteerfile);
+   if ( exist )
+      val = read_steer::getdoubletable(label,fSteerfile);
+   return exist;
 }

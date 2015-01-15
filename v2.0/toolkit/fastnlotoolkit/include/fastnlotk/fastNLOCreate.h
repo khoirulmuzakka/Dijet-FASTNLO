@@ -76,16 +76,16 @@ public:
       return (fastNLOCoeffAddBase*)GetCoeffTable(0);
    }                                            //!< Getter for the one (and only) coefficient table
 
-   bool TestParameterInSteering(const string& label);                                           //!< Test on existence of user-defined parameter name in steering card.
-   bool GetParameterFromSteering(string label, bool& val);                                      //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, int& val);                                       //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, double& val);                                    //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, string& val);                                    //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, vector<int>& val);                               //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, vector<double>& val);                            //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, vector<string>& val);                            //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, vector<vector<int > >& val);                     //!< Get user-defined parameter from steering file.
-   bool GetParameterFromSteering(string label, vector<vector<double > >& val);                  //!< Get user-defined parameter from steering file.
+   bool TestParameterInSteering(const string& label) const;                                           //!< Test on existence of user-defined parameter name in steering card.
+   bool GetParameterFromSteering(const string& label, bool& val) const;                                      //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, int& val) const;                                       //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, double& val) const;                                    //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, string& val) const;                                    //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, vector<int>& val) const;                               //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, vector<double>& val) const;                            //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, vector<string>& val) const;                            //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, vector<vector<int > >& val) const;                     //!< Get user-defined parameter from steering file.
+   bool GetParameterFromSteering(const string& label, vector<vector<double > >& val) const;                  //!< Get user-defined parameter from steering file.
 
    void AdjustWarmupValues();                                                                   //!< Round warmup values to more likely values.
    void PrintAllSteeringValues() const { PRINTALL();};                                          //!< Print all steering values obtained from steering files (of all fastNLOCreate instances);
