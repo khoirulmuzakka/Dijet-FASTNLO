@@ -30,15 +30,24 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), PDFSet(NULL) , PDF(NULL), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
    info["fastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
+
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = NULL;
+   PDF = NULL; 
+   #endif
 }
 
 
 //______________________________________________________________________________
 
 
-fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fastNLOReader(name), PDFSet(NULL) , PDF(NULL), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fastNLOReader(name), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = NULL;
+   PDF = NULL; 
+   #endif
    SetLHAPDFFilename(LHAPDFFile);
    SetLHAPDFMember(PDFMember);
    // Call additional initialization. Not necessary for LHAPDF.
