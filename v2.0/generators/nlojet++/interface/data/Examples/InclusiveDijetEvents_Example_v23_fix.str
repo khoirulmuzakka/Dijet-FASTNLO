@@ -59,6 +59,7 @@ Njetmin                         2                # Minimal number of jets requir
 #     2 : read in 'DoubleDifferentialBinning'
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
+ILOord                            2
 DifferentialDimension             2
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimension (from outer to inner "loop")
    "|y_max|"
@@ -137,7 +138,7 @@ PDF2                            2212        # PDF of 2nd hadron (following PDG c
 #   General fastNLO settings
 #
 # ==================================================================== #
-GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
+GlobalVerbosity                 DEBUG     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
 OutputFilename   InclusiveDijetEvents.tab   # Filename of fastNLO output table
@@ -148,7 +149,7 @@ ScaleVariationFactors {                     # Factorization scale variations (on
  0.5 1.0 2.0                                # List of scale factors must include factor '1'
 }                                           # Scale factors will be ordered according to fastNLO convention: (1, min, ... , max)
 ReadBinningFromSteering         true        # Specify if binning is read from this file. MUST be true for now!
->>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
+#>>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
 
 # ==================================================================== #
 #

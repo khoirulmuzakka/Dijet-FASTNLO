@@ -1,28 +1,23 @@
 //
-// fastNLO v2.2 creator code for inclusive dijet events
+// fastNLO v2.2 creator code for inclusive Njet event scenarios
 //
-// ============== fastNLO user: ===================================
-// To create your own scenario, it is recommended to take
-// this code, make a copy and edit the relevant changes.
+// ============== fastNLO user: ========================================
+// To create your own scenario, it is recommended to take this
+// example code, make a copy, and implement the relevant changes.
 // Important:
-// Edit only those lines which are labeled as "fastNLO user"
-// and refer to the documentation ("fastNLO creator code in
-// NLOJet++") for a detailed explanation of the parameters
-// and variables.
-// If a code fragment is not explicitely labeled as "fastNLO user",
-// it is likely that a modification will interfere with
-// the fastNLO routines.
-// Please keep the order of all statements in inittable
-// in order to guarantee properly working code.
+// Edit only those parts which are clearly indicated as modifiable
+// "fastNLO user" code. If a code fragment is not explicitely
+// labeled as "fastNLO user", it is likely that a modification will
+// interfere with the fastNLO routines.
 //
 // This file contains the following routines:
 //   struct fNLOSelector   (-> user edits)
 //   struct fNLOSorter     (-> user edits)
-//   UserHHC::userfunc     (-> user edits)
+//   UserHHC::phys_output  (called once at the start   -> user edits)
+//   UserHHC::userfunc     (called once for each event -> user edits)
 //   inputfunc             (don't touch)
 //   psinput               (don't touch)
 //   userfunc              (don't touch)
-//   UserHHC::phys_output  (don't touch)
 //   InitfNLO              (don't touch)
 //   UserHHC::initfunc     (don't touch)
 //   UserHHC::end_of_event (don't touch)
@@ -35,9 +30,10 @@
 //  - the jet observables to compute
 //  - the scale definition
 //
-// ================================================================
+// =====================================================================
 
 //------ DON'T TOUCH THIS PART! ------
+#include <cfloat>
 #include <iostream>
 #include <map>
 #include <bits/hhc-phasespace.h>
@@ -48,13 +44,16 @@
 using namespace nlo;
 using namespace std;
 
-// ---- fastNLO ----
+//----- fastNLO -----
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOEvent.h"
 
 //----- declaration of the user defined functions -----
+// --- fastNLO v2.2: interface to NLOJet++: read steering file, set LO of selected process
 void inputfunc(unsigned int&, unsigned int&, unsigned int&);
+// --- fastNLO v2.2: interface to NLOJet++: set cms energy and phase space generator
 void psinput(phasespace_hhc *, double&);
+// --- fastNLO v2.2: interface to NLOJet++: user class
 user_base_hhc * userfunc();
 
 //----- array of the symbols symbols -----
@@ -80,27 +79,41 @@ extern "C"{
 //------ END OF THE DO-NOT-TOUCH-PART ------
 
 //------ USER DEFINED PART STARTS HERE ------
-#include <algorithm>
+//#include <algorithm>
 
-// --- fastNLO user: include the header file for the jet algorithm
-#include "fnlo_int_nlojet/fj-jets.h"
-
-// --- fastNLO v2.2 ---
+// --- fastNLO v2.2: include header file of interface to NLOJet++
 #include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
+// --- fastNLO user: include header file for the jet algorithm
+#include "fnlo_int_nlojet/fj-jets.h"
+
+// --- fastNLO v2.2: define global pointer to fastNLO steering file
 fastNLOCreate *ftable = NULL;
+
+// --- fastNLO v2.2: get some info (order, name) from NLOjet++ command line arguments
 void InitfNLO(const std::basic_string<char>& fname);
 
-class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc>
-{
+// --- fastNLO v2.2: define user class to be used with NLOJet++
+class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc> {
 public:
-   // --- init and user function
-   void initfunc(unsigned int);
-   void userfunc(const event_hhc&, const amplitude_hhc&);
-   virtual void end_of_event();
-   // 'nsave' is initialized by NLOJet++ with 10000 or to the command line number given via --save-after
-   // in fastNLO this number is logarithmically increased by factors of 10 up to nwritemax = 10M
+   // --- fastNLO user: evaluate steering file and define physics output (called once before first event)
    virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
+   // --- fastNLO v2.2: initialize event counter and storage limit (called once)
+   void initfunc(unsigned int);
+   // --- fastNLO user: analyze parton event (called once for each event)
+   void userfunc(const event_hhc&, const amplitude_hhc&);
+   // --- fastNLO v2.2: count events and store table (called after each event)
+   virtual void end_of_event();
+   // 'nsave' defines after how many events the accumulated results are stored into a table file.
+   // The tablefile name is given by 'name-hhc-[born|nlo]-[2jet|3jet].tab', where
+   // - 'name' is specified via the '-n name' option of NLOJet++
+   // - 'born' or 'nlo'  are set according to the '-cborn' resp. '-cnlo' options of NLOJet++
+   // - '2jet' or '3jet' are set according to the 'ILOord' steering parameter.
+   // Existing files with the same name are overwritten.
+   // 'nsave' is initialized with 10000 or, if specified, to the number given via
+   // the command line option '--save-after=nsave'. In fastNLO this number is logarithmically
+   // increased after each table storage by factors of 10 up to nwritemax = 10M such that
+   // at the latest after each 10M events the accumulated results are written on disk.
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
@@ -110,11 +123,44 @@ private:
    bounded_vector<lorentzvector<double> > pj;
 
    // --- fastNLO definitions (not for user)
-   double nevents;           // No. of events calculated so far
-   unsigned long nwrite;     // Actual no. of events after which to write out the table
-   unsigned long nwritemax;  // Maximal no. of events after which to write out the table
+   double nevents;            // No. of events calculated so far
+   unsigned long nwrite;      // Actual no. of events after which to write out the table
+   unsigned long nwritemax;   // Maximal no. of events after which to write out the table
 
-   bool lFlexibleScaleTable; // default
+   // --- fastNLO steering
+   bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
+   int NDim;                  // Dimensionality of distributions
+   vector<string> DimLabel;   // Dimension labels
+   // enum to switch between implemented observables for first dimension
+   enum Obs0 { YMAX, YSTAR };
+   // enum to switch between implemented observables for second dimension
+   enum Obs1 { MJJGEV, MJJTEV };
+   // enum to switch between implemented observables for third dimension (maximum implemented)
+   enum Obs2 { };
+   Obs0 obs0def;
+   Obs1 obs1def;
+   Obs2 obs2def;
+   vector<string> ScaleLabel; // Scale labels
+   // enum to switch between implemented scale definitions (Njet > 1!)
+   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR };
+   Scales mu1def;
+   Scales mu2def;
+   int jetalgo;               // Define fastjet jet algorithm
+   double jetsize;            // Define jet size R
+   double overlapthreshold;   // Define overlap threshold (for some jet algorithms)
+   double ptjmin;             // Minimal jet pT (should be >= minimum of 1 GeV specified in interface to fastjet)
+   double yetajmin;           // Minimal jet (pseudo-)rapidity
+   double yetajmax;           // Maximal jet (pseudo-)rapidity
+   bool lpseudo;              // Switch to use either jet rapidity y or jet eta
+   int Njetmin;               // Minimal number of jets in phase space
+   double ptj1min;            // Minimal jet pT for leading jet (default is ptjmin)
+   double ptj2min;            // Minimal jet pT for second leading jet (default is ptjmin)
+   double obs0min;            // Minimum in observable in 1st dimension (default derived from binning)
+   double obs0max;            // Maximum in observable in 1st dimension (default derived from binning)
+   double obs1min;            // Minimum in observable in 2nd dimension (default derived from binning)
+   double obs1max;            // Maximum in observable in 2nd dimension (default derived from binning)
+   double obs2min;            // Minimum in observable in 3rd dimension (default derived from binning)
+   double obs2max;            // Maximum in observable in 3rd dimension (default derived from binning)
 };
 
 // --- fastNLO user: modify the jet selection in UserHHC::userfunc (default = cutting in |y| min, |y| max and pt min)
@@ -138,52 +184,52 @@ struct fNLOSorter {
 // --- fastNLO user: check and get steering parameters once and store into static vars
 static std::map < std::string, bool > SteeringPars;
 
-void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
-   say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+// --- fastNLO user: class UserHHC: evaluate steering file and define physics output (called once before first event)
+void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned long __save, bool __txt) {
+
+   //------ DON'T TOUCH THIS PART! ------
+   //   cout << " # INIT:  [UserHHC::phys_output] ---------- UserHHC::phys_output called ----------" << endl;
+   say::debug["UserHHC::phys_output"] << "---------- UserHHC::phys_output called ----------" << endl;
+   say::debug["UserHHC::phys_output"] << "Before: __save = " << __save << ", nwrite = " << nwrite << endl;
+   nwrite = __save;
+   InitfNLO(__file_name);
+   //------ END OF THE DO-NOT-TOUCH-PART ------
 
    // --- fastNLO user:
-   //     Here is your playground where you compute your observable
-   //     and the bin number ("obsbin"), which gets passed to
-   //     fastNLO's table filling code.
-   //     Usually, pT and E are in GeV, but this may be changed.
-   //     ATTENTION: Scales must always be in GeV!
+   //     Here is your playground where you can evaluate the steering file settings.
+   //     ATTENTION: Some settings are mandatory for the correct functioning!
 
-   // --- fastNLO user: check and get steering parameters once and store into static vars
-   //   static std::map < std::string, bool > SteeringPars;
-
-   // // get general steering parameters needed here from steering file
-   // SteeringPars["FlexibleScaleTable"] = ftable->TestParameterInSteering("FlexibleScaleTable");
-   // //   static bool lFlexibleScaleTable = false; // default
-   // lFlexibleScaleTable = false; // default
-   // if ( SteeringPars["FlexibleScaleTable"] ) {
-   //    ftable->GetParameterFromSteering("FlexibleScaleTable",lFlexibleScaleTable);
-   // }
+   // get general steering parameters needed here from steering file
+   say::debug["UserHHC::phys_output"] << "Evaluating steering parameters ..." << endl;
+   // fixed- or flexible-scale table
+   SteeringPars["FlexibleScaleTable"] = ftable->TestParameterInSteering("FlexibleScaleTable");
+   lFlexibleScaleTable = false; // default
+   if ( SteeringPars["FlexibleScaleTable"] ) {
+      ftable->GetParameterFromSteering("FlexibleScaleTable",lFlexibleScaleTable);
+   }
+   // dimensionality
    SteeringPars["DifferentialDimension"] = ftable->TestParameterInSteering("DifferentialDimension");
-   static int NDim; // no default
    if ( SteeringPars["DifferentialDimension"] ) {
       ftable->GetParameterFromSteering("DifferentialDimension",NDim);
    } else {
       say::error["InclusiveNjetEvents"] << "Dimensioning of binning not set, aborted!" << endl;
       exit(1);
    }
+   if ( NDim < 1 || 3 < NDim ) {
+      say::error["InclusiveNjetEvents"] << "Only 1- to 3-dimensional binning implemented, aborted!" << endl;
+      say::error["InclusiveNjetEvents"] << "Please implement the requested " << NDim << "-dimensional binning." << endl;
+      exit(1);
+   }
    // dimension labels
    SteeringPars["DimensionLabels"] = ftable->TestParameterInSteering("DimensionLabels");
-   vector<string> DimLabel; // no default
    DimLabel.resize(NDim);
    if ( SteeringPars["DimensionLabels"] ) {
-      //      cout << "Before Fetching" << endl;
       ftable->GetParameterFromSteering("DimensionLabels",DimLabel);
-      //      cout << "After Fetching" << endl;
-      //      cout << "DimLabel[0] = " << DimLabel[0] << ", DimLabel[1] = " << DimLabel[1] << endl;
    } else {
       say::error["InclusiveNjetEvents"] << "Dimension labels not set, aborted!" << endl;
       exit(1);
    }
-   // dimension labels define the observables
-   enum Obs0 { YMAX, YSTAR };
-   enum Obs1 { MJJGEV, MJJTEV };
-   Obs0 obs0def;
-   Obs1 obs1def;
+   // define the observables according to the dimension labels
    if ( DimLabel[0] == "|y_max|" ) {
       obs0def = YMAX;
    } else if ( DimLabel[0] == "y_star" ) {
@@ -194,19 +240,29 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
       exit(1);
    }
-   if ( DimLabel[1] == "Mjj_[GeV]" ) {
-      obs1def = MJJGEV;
-   } else if ( DimLabel[1] == "Mjj_[TeV]" ) {
-      obs1def = MJJTEV;
-   } else {
-      say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
-      say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-      exit(1);
+   if ( NDim > 1 ) {
+      if ( DimLabel[1] == "Mjj_[GeV]" ) {
+         obs1def = MJJGEV;
+      } else if ( DimLabel[1] == "Mjj_[TeV]" ) {
+         obs1def = MJJTEV;
+      } else {
+         say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
+         say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
+         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         exit(1);
+      }
+   }
+   if ( NDim > 2 ) {
+      if ( DimLabel[2] == "???" ) {
+      } else {
+         say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
+         say::error["InclusiveNjetEvents"] << "DimLabel[2] = " << DimLabel[2] << endl;
+         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         exit(1);
+      }
    }
    // scale descriptions
    SteeringPars["ScaleDescriptionScale1"] = ftable->TestParameterInSteering("ScaleDescriptionScale1");
-   vector<string> ScaleLabel; // no default
    ScaleLabel.resize(2);
    if ( SteeringPars["ScaleDescriptionScale1"] ) {
       ftable->GetParameterFromSteering("ScaleDescriptionScale1",ScaleLabel[0]);
@@ -215,6 +271,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       exit(1);
    }
    SteeringPars["ScaleDescriptionScale2"] = ftable->TestParameterInSteering("ScaleDescriptionScale2");
+   ScaleLabel[1] = "pT_max_[GeV]"; // default
    if ( SteeringPars["ScaleDescriptionScale2"] ) {
       ftable->GetParameterFromSteering("ScaleDescriptionScale2",ScaleLabel[1]);
    } else {
@@ -222,9 +279,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       say::warn["InclusiveNjetEvents"] << "No description of scale 2, flexible-scale tables not possible!" << endl;
    }
    // scale descriptions define the scales
-   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR };
-   Scales mu1def;
-   Scales mu2def = PTMAX;
    if ( ScaleLabel[0] == "pT_max_[GeV]" ) {
       mu1def = PTMAX;
    } else if ( ScaleLabel[0] == "<pT_1,2>_[GeV]" ) {
@@ -262,7 +316,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // fastjet clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
    // fastjet cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
    SteeringPars["JetAlgo"] = ftable->TestParameterInSteering("JetAlgo");
-   static int jetalgo;
    if ( SteeringPars["JetAlgo"] ) {
       ftable->GetParameterFromSteering("JetAlgo",jetalgo);
       if ( jetalgo < 0 || (2 < jetalgo && jetalgo < 10) || 12 < jetalgo ) {
@@ -274,7 +327,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       exit(1);
    }
    SteeringPars["Rjet"] = ftable->TestParameterInSteering("Rjet");
-   static double jetsize;
    if ( SteeringPars["Rjet"] ) {
       ftable->GetParameterFromSteering("Rjet",jetsize);
    } else {
@@ -282,7 +334,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       exit(1);
    }
    SteeringPars["OvThr"] = ftable->TestParameterInSteering("OvThr");
-   static double overlapthreshold = 0.5;
+   overlapthreshold = 0.5; // default
    if ( SteeringPars["OvThr"] ) {
       ftable->GetParameterFromSteering("OvThr",overlapthreshold);
    } else if ( jetalgo > 9 ) {
@@ -292,7 +344,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // --- fastNLO user: declare and initialize overall jet phase space cuts via steering file
    // overall lowest pT for jets to be considered
    SteeringPars["ptjmin"] = ftable->TestParameterInSteering("ptjmin");
-   static double ptjmin;
    if ( SteeringPars["ptjmin"] ) {
       ftable->GetParameterFromSteering("ptjmin",ptjmin);
    } else {
@@ -303,7 +354,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // overall smallest |(pseudo-)rapidity| for jets to be considered, use either y or eta but not both
    SteeringPars["yjmin"]   = ftable->TestParameterInSteering("yjmin");
    SteeringPars["etajmin"] = ftable->TestParameterInSteering("etajmin");
-   static double yetajmin;
    if ( SteeringPars["yjmin"] && !SteeringPars["etajmin"] ) {
       ftable->GetParameterFromSteering("yjmin",yetajmin);
    } else if ( !SteeringPars["yjmin"] && SteeringPars["etajmin"] ) {
@@ -315,7 +365,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // overall largest |(pseudo-)rapidity| for jets to be considered, use either y or eta but not both
    SteeringPars["yjmax"]   = ftable->TestParameterInSteering("yjmax");
    SteeringPars["etajmax"] = ftable->TestParameterInSteering("etajmax");
-   static double yetajmax;
    if ( SteeringPars["yjmax"] && !SteeringPars["etajmax"] ) {
       ftable->GetParameterFromSteering("yjmax",yetajmax);
    } else if ( !SteeringPars["yjmax"] && SteeringPars["etajmax"] ) {
@@ -325,7 +374,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       exit(1);
    }
    // define logical for decision on cuts in (pseudo-)rapidity, no mixing allowed here
-   static bool lpseudo;
    if ( SteeringPars["yjmin"] && SteeringPars["yjmax"] ) {
       lpseudo = false;
    } else if ( SteeringPars["etajmin"] && SteeringPars["etajmax"] ) {
@@ -342,53 +390,65 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
    // minimal number of jets required to be within preselected jet phase space (for dijets this must be two!)
    SteeringPars["Njetmin"] = ftable->TestParameterInSteering("Njetmin");
-   static int Njetmin = 2;
+   Njetmin = 2;
    if ( SteeringPars["Njetmin"] ) {
       ftable->GetParameterFromSteering("Njetmin",Njetmin);
    }
    if ( Njetmin < 2 ) {
-      say::error["InclusiveNjetEvents"] << "This is a dijet scenario. At least two jets must be required, aborted!" << endl;
+      say::error["InclusiveNjetEvents"] << "This is a 2+-jet scenario. At least two jets must be present, aborted!" << endl;
       say::error["InclusiveNjetEvents"] << "Please correct the Njetmin requirement. Njetmin = " << Njetmin << endl;
       exit(1);
    }
 
-   // --- fastNLO user: declare and initialize dijet phase space cuts and definitions via steering file
-   // overall minimum for observable one, e.g. maximal absolute rapidity |y_max|
-   SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
-   static double obs0min = ftable->GetLoBinMin(0); // by default derived from binning in obs0
-   if ( SteeringPars["obs0min"] ) {
-      ftable->GetParameterFromSteering("obs0min",obs0min);
-   }
-   // overall maximum for observable one, e.g. maximal absolute rapidity |y_max|
-   SteeringPars["obs0max"] = ftable->TestParameterInSteering("obs0max");
-   static double obs0max = ftable->GetUpBinMax(0); // by default derived from binning in obs0
-   if ( SteeringPars["obs0max"] ) {
-      ftable->GetParameterFromSteering("obs0max",obs0max);
-   }
-   // overall minimum for observable two, e.g. dijet mass mjj
-   SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
-   static double obs1min = ftable->GetLoBinMin(1); // by default derived from binning in obs1
-   if ( SteeringPars["obs1min"] ) {
-      ftable->GetParameterFromSteering("obs1min",obs1min);
-   }
-   // overall maximum for observable two, e.g. dijet mass mjj
-   SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
-   static double obs1max = ftable->GetUpBinMax(1); // by default derived from binning in obs1
-   if ( SteeringPars["obs1max"] ) {
-      ftable->GetParameterFromSteering("obs1max",obs1max);
-   }
+   // --- fastNLO user: declare and initialize Njet phase space cuts and definitions via steering file
    // extra minimal pT requirement for leading jet
    SteeringPars["ptj1min"] = ftable->TestParameterInSteering("ptj1min");
-   static double ptj1min = ptjmin; // default is overall jet pT cut
+   ptj1min = ptjmin; // default is overall jet pT cut
    if ( SteeringPars["ptj1min"] ) {
       ftable->GetParameterFromSteering("ptj1min",ptj1min);
    }
    // extra minimal pT requirement for 2nd leading jet
    SteeringPars["ptj2min"] = ftable->TestParameterInSteering("ptj2min");
-   static double ptj2min = ptjmin; // default is overall jet pT cut
+   ptj2min = ptjmin; // default is overall jet pT cut
    if ( SteeringPars["ptj2min"] ) {
       ftable->GetParameterFromSteering("ptj2min",ptj2min);
    }
+   // overall minimum for observable one, e.g. maximal absolute rapidity |y_max|
+   SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
+   obs0min = ftable->GetLoBinMin(0); // by default derived from binning in obs0
+   if ( SteeringPars["obs0min"] ) {
+      ftable->GetParameterFromSteering("obs0min",obs0min);
+   }
+   // overall maximum for observable one, e.g. maximal absolute rapidity |y_max|
+   SteeringPars["obs0max"] = ftable->TestParameterInSteering("obs0max");
+   obs0max = ftable->GetUpBinMax(0); // by default derived from binning in obs0
+   if ( SteeringPars["obs0max"] ) {
+      ftable->GetParameterFromSteering("obs0max",obs0max);
+   }
+   // overall minimum for observable two, e.g. dijet mass mjj
+   SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
+   obs1min = ftable->GetLoBinMin(1); // by default derived from binning in obs1
+   if ( SteeringPars["obs1min"] ) {
+      ftable->GetParameterFromSteering("obs1min",obs1min);
+   }
+   // overall maximum for observable two, e.g. dijet mass mjj
+   SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
+   obs1max = ftable->GetUpBinMax(1); // by default derived from binning in obs1
+   if ( SteeringPars["obs1max"] ) {
+      ftable->GetParameterFromSteering("obs1max",obs1max);
+   }
+}
+
+// --- fastNLO v2.2: class UserHHC: analyze parton event (called once for each event)
+void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
+   say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+
+   // --- fastNLO user:
+   //     Here is your playground where you compute your observables and
+   //     scales for each jet or event.
+   //     The bin number ("obsbin") gets passed to fastNLO's table filling code.
+   //     Usually, pT and E are in GeV, but this may be changed.
+   //     ATTENTION: Scales must always be in GeV!
 
    // apply the jet algorithm to partonic 4-vector array p of NLOJet++
    pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
@@ -447,9 +507,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // ---- fastNLO v2.2
-   // Analyze inclusive dijet event
+   // Analyze inclusive Njet event
 
-   // --- calculate first requested observable
+   // --- calculate observable of 1st dimension
    // rapidities of two leading jets
    double y1 = pj[1].rapidity();
    double y2 = pj[2].rapidity();
@@ -471,26 +531,40 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       exit(1);
    }
 
-   // --- calculate second requested observable
+   // --- calculate observable of 2nd dimension
    // dijet mass
    lorentzvector<double> pj12 = pj[1] + pj[2];
    double mjj = pj12.mag();
+   double obs1 = DBL_MAX;
    if (mjj < 0.) {say::warn["InclusiveNjetEvents"] << "Negative mass encountered: " << mjj << endl;}
-   double obs1;
-   switch(obs1def) {
-   case MJJGEV :
-      // dijet mass in GeV
-      obs1 = mjj;
-      break;
-   case MJJTEV :
-      // dijet mass in TeV
-      obs1 = mjj/1000.;
-      break;
-   default :
-      say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
-      say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-      exit(1);
+   if ( NDim > 1 ) {
+      switch(obs1def) {
+      case MJJGEV :
+         // dijet mass in GeV
+         obs1 = mjj;
+         break;
+      case MJJTEV :
+         // dijet mass in TeV
+         obs1 = mjj/1000.;
+         break;
+      default :
+         say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
+         say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
+         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         exit(1);
+      }
+   }
+
+   // --- calculate observable of 3rd dimension
+   double obs2 = DBL_MAX;
+   if ( NDim > 2 ) {
+      switch(obs2def) {
+      default :
+         say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
+         say::error["InclusiveNjetEvents"] << "DimLabel[2] = " << DimLabel[2] << endl;
+         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         exit(1);
+      }
    }
 
    // average pTs of leading jets
@@ -498,13 +572,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
    double pT123 = (pj[1].perp() + pj[2].perp() + pj[3].perp()) / 3.0;
 
-   // --- Further dijet phase space cuts?
-   if ( obs0min <= obs0 && obs0 < obs0max &&
-        obs1min <= obs1 && obs1 < obs1max &&
-        ptj1min <= pT1  && ptj2min <= pj[2].perp() ) {
+   // --- Further Njet phase space cuts?
+   if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
+        obs0min <= obs0 && obs0 < obs0max &&
+        (NDim < 2 || (obs1min <= obs1 && obs1 < obs1max)) &&
+        (NDim < 3 || (obs2min <= obs2 && obs2 < obs2max)) ) {
 
       // --- set the renormalization and factorization scales
-      // --- calculate first requested scale
+      // --- calculate 1st requested scale
       double mu1;
       switch(mu1def) {
       case PTMAX :
@@ -534,7 +609,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          exit(1);
       }
 
-      // --- calculate second requested scale
+      // --- calculate 2nd requested scale
       double mu2 = pT1; // default second choice (only for flexible tables)
       if ( lFlexibleScaleTable ) {
          switch(mu2def) {
@@ -579,18 +654,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       // scenario specific quantites
       fnloScenario scen;
       if ( NDim == 1 ) {        // 1D binning
-         // scen.SetObservableDimI( obs0  , 0 );
-         say::error["InclusiveNjetEvents"] << "So far only 2D binning implemented here, aborted!" << endl;
-         exit(1);
+         scen.SetObservableDimI( obs0, 0 );
       } else if ( NDim == 2 ) { // 2D binning
          scen.SetObservableDimI( obs0, 0 );
          scen.SetObservableDimI( obs1, 1 );
       } else if ( NDim == 3 ) { // 3D binning
-         // scen.SetObservableDimI( obs0, 0 );
-         // scen.SetObservableDimI( obs1, 1 );
-         // scen.SetObservableDimI( obs2, 2 );
-         say::error["InclusiveNjetEvents"] << "So far only 2D binning implemented here, aborted!" << endl;
-         exit(1);
+         scen.SetObservableDimI( obs0, 0 );
+         scen.SetObservableDimI( obs1, 1 );
+         scen.SetObservableDimI( obs2, 2 );
       } else {
          say::error["InclusiveNjetEvents"] << "More than 3D binning not implemented for inclusive jets, aborted!" << endl;
          say::error["InclusiveNjetEvents"] << "DifferentialDimension NDim = " << NDim << endl;
@@ -611,6 +682,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
 
 //------ DON'T TOUCH THIS PART! ------
 
+// --- fastNLO v2.2: interface to NLOJet++: read steering file, set LO of selected process
 void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
    // This is the very first routine called from NLOJet++!
    // It seems that it gets called three times.
@@ -656,8 +728,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
    nd = 3U;
 }
 
+// --- fastNLO v2.2: interface to NLOJet++: set cms energy and phase space generator
 void psinput(phasespace_hhc *ps, double& s) {
-   //   cout << " # INFO:  [psinput] ---------- psinput called ----------" << endl;
+   //   cout << " # INIT:  [psinput] ---------- psinput called ----------" << endl;
    say::debug["psinput"] << "---------- psinput called ----------" << endl;
 
    // --- set the center-of-mass energy squared as read from steering file
@@ -669,28 +742,13 @@ void psinput(phasespace_hhc *ps, double& s) {
    ps = 0;
 }
 
+// --- fastNLO v2.2: interface to NLOJet++: user class
 user_base_hhc * userfunc() {
-   //   cout << " # INFO:  [userfunc] ---------- userfunc called ----------" << endl;
    say::debug["userfunc"] << "---------- userfunc called ----------" << endl;
    return new UserHHC;
 }
 
-void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned long __save, bool __txt) {
-   //   cout << " # INFO:  [UserHHC::phys_output] ---------- UserHHC::phys_output called ----------" << endl;
-   say::debug["UserHHC::phys_output"] << "---------- UserHHC::phys_output called ----------" << endl;
-   say::debug["UserHHC::phys_output"] << "Before: __save = " << __save << ", nwrite = " << nwrite << endl;
-   nwrite = __save;
-   InitfNLO(__file_name);
-
-   // get general steering parameters needed here from steering file
-   SteeringPars["FlexibleScaleTable"] = ftable->TestParameterInSteering("FlexibleScaleTable");
-   lFlexibleScaleTable = false; // default
-   if ( SteeringPars["FlexibleScaleTable"] ) {
-      ftable->GetParameterFromSteering("FlexibleScaleTable",lFlexibleScaleTable);
-   }
-
-}
-
+// --- fastNLO v2.2: get some info (order, name) from NLOjet++ command line arguments
 void InitfNLO(const std::basic_string<char>& __file_name) {
    say::debug["InitfNLO"] << "---------- InitfNLO called ----------" << endl;
    // --- obtain relevant variables from NLOJet++ command line arguments
@@ -702,18 +760,17 @@ void InitfNLO(const std::basic_string<char>& __file_name) {
    ftable->SetFilename(tabFilename);
 }
 
+// --- fastNLO v2.2: class UserHHC: initialize event counter and storage limit (called once)
 void UserHHC::initfunc(unsigned int) {
-   //   cout << " # INFO:  [UserHHC::initfunc] ---------- UserHHC::initfunc called ----------" << endl;
    say::debug["UserHHC::initfunc"] << "---------- UserHHC::initfunc called ----------" << endl;
-   // --- Initialize event counters
-   nevents = 0;
-   // Set some defaults
+   nevents   = 0;
    nwritemax = 10000000;
 }
 
+// --- fastNLO v2.2: class UserHHC: count events and store table (called after each event)
 void UserHHC::end_of_event() {
-   //   cout << " # INFO:  [UserHHC::end_of_event] ---------- UserHHC::end_of_event called ----------" << endl;
    say::debug["UserHHC::end_of_event"] << "---------- UserHHC::end_of_event called ----------" << endl;
+   // --- count events
    nevents += 1;
    // --- store table
    say::debug["UserHHC::end_of_event"] << " nevents = " << nevents << ", nwrite = " << nwrite << endl;

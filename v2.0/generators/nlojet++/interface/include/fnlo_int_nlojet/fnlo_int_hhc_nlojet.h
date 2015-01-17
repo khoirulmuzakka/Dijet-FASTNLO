@@ -4,6 +4,8 @@
 //! Collection of useful functions for the fastNLO interface
 //! to NLOJET++.
 //!
+// KR: Drop differentiation in 2jet and 3jet ProcConsts.
+//     Default is 2jet, set differences for 3jet via steering!
 
 #include <cstdio>
 #include <algorithm> //c++98
@@ -31,52 +33,33 @@ namespace UsefulNlojetTools {
 
 
    //_______________________________________________________________________
-   fastNLO::ProcessConstants ProcConsts_HHC_2Jet() {
+   fastNLO::ProcessConstants ProcConsts_HHC() {
       fastNLO::ProcessConstants ProcConsts;
-      ProcConsts.Name = "pp -> 2jet";
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),");
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003).");
+      ProcConsts.Name = "pp -> jets";
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88 (2002) 122003,");
+      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D 68 (2003) 094002.");
+      // Default: 2-jet observable, i.e. LO power of alpha_S is 2; set to 3 in steering for 3-jet observables!
       ProcConsts.LeadingOrder = 2;
+      // Default: 12 ,i.e. pb; if published differently set in steering explicitly.
+      //          Note: Internally, NLOJet++ always uses pb.
       ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
-      ProcConsts.NSubProcessesLO = 6;
-      ProcConsts.NSubProcessesNLO = 7;
+      ProcConsts.NSubProcessesLO   = 6;
+      ProcConsts.NSubProcessesNLO  = 7;
       ProcConsts.NSubProcessesNNLO = 7;
-      ProcConsts.IPDFdef1 = 3;
-      ProcConsts.IPDFdef2 = 1;
-      ProcConsts.IPDFdef3LO = 1;
-      ProcConsts.IPDFdef3NLO = 2;
+      ProcConsts.IPDFdef1     = 3;
+      ProcConsts.IPDFdef2     = 1;
+      ProcConsts.IPDFdef3LO   = 1;
+      ProcConsts.IPDFdef3NLO  = 2;
       ProcConsts.IPDFdef3NNLO = 2;
-      // Test full-matrix storage
+      // Default: Half-matrix storage
+      ProcConsts.NPDFDim = 1;
+      // To test full-matrix storage uncomment the following line or set in steering explicitly!
       //      ProcConsts.NPDFDim = 2;
-      // Half-matrix storage
-      ProcConsts.NPDFDim = 1;
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
-      return ProcConsts;
-   }
-
-
-   //_______________________________________________________________________
-   fastNLO::ProcessConstants ProcConsts_HHC_3Jet() {
-      fastNLO::ProcessConstants ProcConsts;
-      ProcConsts.Name = "pp -> 3jet";
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002)");
-      ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D68, 094002 (2003)");
-      ProcConsts.LeadingOrder = 3;
-      ProcConsts.UnitsOfCoefficients = 12;
-      ProcConsts.NPDF = 2;
-      ProcConsts.NSubProcessesLO = 6;
-      ProcConsts.NSubProcessesNLO = 7;
-      ProcConsts.NSubProcessesNNLO = 7;
-      ProcConsts.IPDFdef1 = 3;
-      ProcConsts.IPDFdef2 = 1;
-      ProcConsts.IPDFdef3LO = 1;
-      ProcConsts.IPDFdef3NLO = 2;
-      ProcConsts.IPDFdef3NNLO = 2;
-      ProcConsts.NPDFDim = 1;
-      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
-      ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
+      //
+      //
       return ProcConsts;
    }
 
