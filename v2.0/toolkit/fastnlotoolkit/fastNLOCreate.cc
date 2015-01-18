@@ -53,13 +53,16 @@ fastNLOCreate::fastNLOCreate() {
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) {
-   //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    ResetHeader();
    ReadSteering(steerfile);
 
-   fGenConsts = GenConsts;
+   fGenConsts  = GenConsts;
    fProcConsts = ProcConsts;
+
+   // KR: Add this line also to this constructor so that settings in steering, if they exist,
+   //     take precedence over previously set default settings.
+   ReadGenAndProcConstsFromSteering();
 
    Instantiate();
 }
@@ -67,7 +70,6 @@ fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenCo
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(string steerfile) {
-   //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    ResetHeader();
    ReadSteering(steerfile);
@@ -88,38 +90,42 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    debug["ReadGenAndProcConstsFromSteering"]<<endl;
 
    // Generator constants
-   vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
-   fGenConsts.Name = CodeDescr[0];
-   if (CodeDescr.size() > 1) {
-      fGenConsts.References.resize(CodeDescr.size()-1);
-      for (unsigned int i = 0 ; i< fGenConsts.References.size() ; i++)
-         fGenConsts.References [i] = CodeDescr[i+1];
+   if (EXIST_NS(CodeDescription,fSteerfile)) {
+      vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
+      fGenConsts.Name = CodeDescr[0];
+      if (CodeDescr.size() > 1) {
+         fGenConsts.References.resize(CodeDescr.size()-1);
+         for (unsigned int i = 0 ; i< fGenConsts.References.size() ; i++)
+            fGenConsts.References [i] = CodeDescr[i+1];
+      }
    }
 
    // Process constants
-   fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
-   fProcConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
-   fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
-   fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
-   fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
-   fProcConsts.NSubProcessesNNLO = INT_NS(NSubProcessesNNLO,fSteerfile);
-   fProcConsts.IPDFdef1 = INT_NS(IPDFdef1,fSteerfile);
-   fProcConsts.IPDFdef2 = INT_NS(IPDFdef2,fSteerfile);
-   fProcConsts.IPDFdef3LO = INT_NS(IPDFdef3LO,fSteerfile);
-   fProcConsts.IPDFdef3NLO = INT_NS(IPDFdef3NLO,fSteerfile);
-   fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
-   if ( fProcConsts.IPDFdef2==0 ) {
+   if (EXIST_NS(LeadingOrder,fSteerfile))        fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
+   if (EXIST_NS(UnitsOfCoefficients,fSteerfile)) fProcConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
+   if (EXIST_NS(NPDF,fSteerfile))                fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
+   if (EXIST_NS(NSubProcessesLO,fSteerfile))     fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
+   if (EXIST_NS(NSubProcessesNLO,fSteerfile))    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
+   if (EXIST_NS(NSubProcessesNNLO,fSteerfile))   fProcConsts.NSubProcessesNNLO = INT_NS(NSubProcessesNNLO,fSteerfile);
+   if (EXIST_NS(IPDFdef1,fSteerfile))            fProcConsts.IPDFdef1 = INT_NS(IPDFdef1,fSteerfile);
+   if (EXIST_NS(IPDFdef2,fSteerfile))            fProcConsts.IPDFdef2 = INT_NS(IPDFdef2,fSteerfile);
+   if (EXIST_NS(IPDFdef3LO,fSteerfile))          fProcConsts.IPDFdef3LO = INT_NS(IPDFdef3LO,fSteerfile);
+   if (EXIST_NS(IPDFdef3NLO,fSteerfile))         fProcConsts.IPDFdef3NLO = INT_NS(IPDFdef3NLO,fSteerfile);
+   if (EXIST_NS(IPDFdef3NNLO,fSteerfile))        fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
+
+   if ( fProcConsts.IPDFdef2 == 0 ) {
       fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
       fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
       if ( fProcConsts.IPDFdef3NNLO > 0 )
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
    }
-   fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
+
+   if (EXIST_NS(NPDFDim,fSteerfile))             fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
 
    // read asymmetric processes if half-matrix notation is requested
-   if ( fProcConsts.NPDFDim==1 ) {
-      if ( fProcConsts.NPDF==2 && fProcConsts.IPDFdef1==3 && ( fProcConsts.IPDFdef2==121 || fProcConsts.IPDFdef2==169 ) ) {
-         const int np =  fProcConsts.IPDFdef2==121 ? 11:13;
+   if ( fProcConsts.NPDFDim == 1 ) {
+      if ( fProcConsts.NPDF == 2 && fProcConsts.IPDFdef1 == 3 && ( fProcConsts.IPDFdef2 == 121 || fProcConsts.IPDFdef2 == 169 ) ) {
+         const int np = fProcConsts.IPDFdef2==121 ? 11:13;
          int p1 = 0;
          int p2 = 0;
          for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
@@ -133,16 +139,20 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
                p1++;
             }
          }
-      }
-      else if (fProcConsts.NPDF == 2 ) {
-         vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
-         for (unsigned int i = 0 ; i<asym.size() ; i++) {
-            if (asym[i].size()!=2) error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
-            fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+      } else if ( fProcConsts.NPDF == 2 ) {
+         if (EXIST_NS(AsymmetricProcesses,fSteerfile)) {
+            fProcConsts.AsymmetricProcesses.clear();
+            vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
+            for (unsigned int i = 0 ; i<asym.size() ; i++) {
+               if ( asym[i].size() != 2 ) {
+                  error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
+                  exit(1);
+               }
+               fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+            }
          }
       }
    }
-
 }
 
 
@@ -214,9 +224,6 @@ void fastNLOCreate::ReadSteering(string steerfile) {
    SetOutputPrecision(INT_NS(OutputPrecision,fSteerfile));
 
    //if ( !fIsFlexibleScale )  ReadScaleFactors() ; // is called only when setting order of calculation
-
-   //    //KR: Added possibility to store and read start of new rapidity bin in nobs
-   //    //vector <int> RapIndex; ?
 }
 
 
