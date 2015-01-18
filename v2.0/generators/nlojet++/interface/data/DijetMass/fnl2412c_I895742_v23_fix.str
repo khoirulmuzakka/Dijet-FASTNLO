@@ -57,7 +57,7 @@ ptj1min                        60.               # Minimal jet pT for leading je
 #     2 : read in 'DoubleDifferentialBinning'
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
-ILOord                            2              # Number of jets for the LO process
+LeadingOrder                      2              # Number of jets for the LO process
 DifferentialDimension             2              # Dimensionality of binning
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
    "|y_max|"                                     # This defines the observables to be calculated!

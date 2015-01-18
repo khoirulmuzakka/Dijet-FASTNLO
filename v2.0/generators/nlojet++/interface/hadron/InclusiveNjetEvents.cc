@@ -108,7 +108,7 @@ public:
    // The tablefile name is given by 'name-hhc-[born|nlo]-[2jet|3jet].tab', where
    // - 'name' is specified via the '-n name' option of NLOJet++
    // - 'born' or 'nlo'  are set according to the '-cborn' resp. '-cnlo' options of NLOJet++
-   // - '2jet' or '3jet' are set according to the 'ILOord' steering parameter.
+   // - '2jet' or '3jet' are set according to the 'LeadingOrder' steering parameter.
    // Existing files with the same name are overwritten.
    // 'nsave' is initialized with 10000 or, if specified, to the number given via
    // the command line option '--save-after=nsave'. In fastNLO this number is logarithmically
@@ -694,14 +694,14 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       // --- read in steering and create fastNLO table accordingly
       // --- ftable is a global constant
       ftable = new fastNLOCreate("InclusiveNjetEvents.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
-      if ( ftable->TestParameterInSteering("ILOord") ) {
-         ftable->GetParameterFromSteering("ILOord",ILOord);
+      if ( ftable->TestParameterInSteering("LeadingOrder") ) {
+         ftable->GetParameterFromSteering("LeadingOrder",ILOord);
       } else {
          say::error["InclusiveNjetEvents"] << "LO of process not defined, aborted!" << endl;
          exit(1);
       }
-      ftable->SetLoOrder(ILOord);
-      cout << " # INIT:  [inputfunc] ---------- ILOord = " << ILOord << "       ----------" << endl;
+      //      ftable->SetLoOrder(ILOord); // Not necessary when set via LeadingOrder in steering file
+      cout << " # INIT:  [inputfunc] ---------- LeadingOrder = " << ILOord << "       ----------" << endl;
    }
 
    // The following line is printed ONLY, when DEBUG print out has been requested by the steering.
