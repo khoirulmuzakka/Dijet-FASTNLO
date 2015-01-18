@@ -35,7 +35,7 @@ namespace UsefulNlojetTools {
    //_______________________________________________________________________
    fastNLO::ProcessConstants ProcConsts_HHC() {
       fastNLO::ProcessConstants ProcConsts;
-      ProcConsts.Name = "pp -> jets";
+      ProcConsts.Name = "";
       ProcConsts.References.push_back("Z. Nagy, Phys. Rev. Lett. 88 (2002) 122003,");
       ProcConsts.References.push_back("Z. Nagy, Phys. Rev. D 68 (2003) 094002.");
       // Default: 2-jet observable, i.e. LO power of alpha_S is 2; set to 3 in steering for 3-jet observables!

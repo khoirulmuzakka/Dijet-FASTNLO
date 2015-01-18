@@ -700,6 +700,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
          say::error["InclusiveNjetEvents"] << "LO of process not defined, aborted!" << endl;
          exit(1);
       }
+      ftable->SetLoOrder(ILOord);
       cout << " # INIT:  [inputfunc] ---------- ILOord = " << ILOord << "       ----------" << endl;
    }
 
