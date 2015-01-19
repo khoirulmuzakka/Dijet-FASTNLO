@@ -1397,6 +1397,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
                      int xmaxbin = nxup[x1].first;
                      int xminbin = nxlo[x2].first;
                      int proc = events[is][p]._p;
+		     if ( fEvent._x2 > fEvent._x1 ) proc = fSymProc[proc];           // exchange asymmetric process
                      HalfMatrixCheck(xminbin,xmaxbin,proc);
                      int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 //                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
@@ -1545,7 +1546,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
          int xminbin = nxlo[x1].first;
          int xmaxbin = nxup[x2].first;
-         HalfMatrixCheck(xminbin,xmaxbin,p);
+	 HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
