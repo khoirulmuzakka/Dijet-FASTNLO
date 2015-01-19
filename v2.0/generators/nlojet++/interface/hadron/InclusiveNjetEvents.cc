@@ -131,15 +131,11 @@ private:
    bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
    int NDim;                  // Dimensionality of distributions
    vector<string> DimLabel;   // Dimension labels
-   // enum to switch between implemented observables for first dimension
-   enum Obs0 { YMAX, YSTAR };
-   // enum to switch between implemented observables for second dimension
-   enum Obs1 { MJJGEV, MJJTEV };
-   // enum to switch between implemented observables for third dimension (maximum implemented)
-   enum Obs2 { };
-   Obs0 obs0def;
-   Obs1 obs1def;
-   Obs2 obs2def;
+   // enum to switch between implemented observables
+   enum Obs { MJJGEV, MJJTEV, YMAX, YSTAR, CHIJJ, PT12 };
+   Obs obs0def;
+   Obs obs1def;
+   Obs obs2def;
    vector<string> ScaleLabel; // Scale labels
    // enum to switch between implemented scale definitions (Njet > 1!)
    enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR };
@@ -154,7 +150,9 @@ private:
    bool lpseudo;              // Switch to use either jet rapidity y or jet eta
    int Njetmin;               // Minimal number of jets in phase space
    double ptj1min;            // Minimal jet pT for leading jet (default is ptjmin)
-   double ptj2min;            // Minimal jet pT for second leading jet (default is ptjmin)
+   double ptj2min;            // Minimal jet pT for 2nd leading jet (default is ptjmin)
+   double ptj3min;            // Minimal jet pT for 3rd leading jet (default is ptjmin)
+   double ycjjmax;            // Maximal jet rapidity for leading two jets
    double obs0min;            // Minimum in observable in 1st dimension (default derived from binning)
    double obs0max;            // Maximum in observable in 1st dimension (default derived from binning)
    double obs1min;            // Minimum in observable in 2nd dimension (default derived from binning)
@@ -234,6 +232,10 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       obs0def = YMAX;
    } else if ( DimLabel[0] == "y_star" ) {
       obs0def = YSTAR;
+   } else if ( DimLabel[0] == "Mjj_[GeV]" ) {
+      obs0def = MJJGEV;
+   } else if ( DimLabel[0] == "<pT_1,2>_[GeV]" ) {
+      obs0def = PT12;
    } else {
       say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
       say::error["InclusiveNjetEvents"] << "DimLabel[0] = " << DimLabel[0] << endl;
@@ -245,6 +247,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          obs1def = MJJGEV;
       } else if ( DimLabel[1] == "Mjj_[TeV]" ) {
          obs1def = MJJTEV;
+      } else if ( DimLabel[1] == "Chi" ) {
+         obs1def = CHIJJ;
       } else {
          say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
          say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
@@ -413,29 +417,58 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["ptj2min"] ) {
       ftable->GetParameterFromSteering("ptj2min",ptj2min);
    }
-   // overall minimum for observable one, e.g. maximal absolute rapidity |y_max|
+   // extra minimal pT requirement for 3rd leading jet
+   SteeringPars["ptj3min"] = ftable->TestParameterInSteering("ptj3min");
+   ptj3min = ptjmin; // default is overall jet pT cut
+   if ( SteeringPars["ptj3min"] ) {
+      ftable->GetParameterFromSteering("ptj3min",ptj3min);
+   }
+   // maximal jet rapidity for leading two jets
+   SteeringPars["ycjjmax"] = ftable->TestParameterInSteering("ycjjmax");
+   ycjjmax = DBL_MAX; // default is no limitation
+   if ( SteeringPars["ycjjmax"] ) {
+      ftable->GetParameterFromSteering("ycjjmax",ycjjmax);
+   }
+   // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
    SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
    obs0min = ftable->GetLoBinMin(0); // by default derived from binning in obs0
    if ( SteeringPars["obs0min"] ) {
       ftable->GetParameterFromSteering("obs0min",obs0min);
    }
-   // overall maximum for observable one, e.g. maximal absolute rapidity |y_max|
    SteeringPars["obs0max"] = ftable->TestParameterInSteering("obs0max");
    obs0max = ftable->GetUpBinMax(0); // by default derived from binning in obs0
    if ( SteeringPars["obs0max"] ) {
       ftable->GetParameterFromSteering("obs0max",obs0max);
    }
-   // overall minimum for observable two, e.g. dijet mass mjj
-   SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
-   obs1min = ftable->GetLoBinMin(1); // by default derived from binning in obs1
-   if ( SteeringPars["obs1min"] ) {
-      ftable->GetParameterFromSteering("obs1min",obs1min);
+   // overall minimum & maximum for 2nd observable, e.g. dijet mass mjj
+   obs1min = -DBL_MAX;
+   obs1max = +DBL_MAX;
+   if (NDim > 1) {
+      SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
+      obs1min = ftable->GetLoBinMin(1); // by default derived from binning in obs1
+      if ( SteeringPars["obs1min"] ) {
+         ftable->GetParameterFromSteering("obs1min",obs1min);
+      }
+      SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
+      obs1max = ftable->GetUpBinMax(1); // by default derived from binning in obs1
+      if ( SteeringPars["obs1max"] ) {
+         ftable->GetParameterFromSteering("obs1max",obs1max);
+      }
    }
-   // overall maximum for observable two, e.g. dijet mass mjj
-   SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
-   obs1max = ftable->GetUpBinMax(1); // by default derived from binning in obs1
-   if ( SteeringPars["obs1max"] ) {
-      ftable->GetParameterFromSteering("obs1max",obs1max);
+   // overall minimum & maximum for 3rd observable
+   obs2min = -DBL_MAX;
+   obs2max = +DBL_MAX;
+   if (NDim > 2) {
+      SteeringPars["obs2min"] = ftable->TestParameterInSteering("obs2min");
+      obs2min = ftable->GetLoBinMin(2); // by default derived from binning in obs2
+      if ( SteeringPars["obs2min"] ) {
+         ftable->GetParameterFromSteering("obs2min",obs2min);
+      }
+      SteeringPars["obs2max"] = ftable->TestParameterInSteering("obs2max");
+      obs2max = ftable->GetUpBinMax(2); // by default derived from binning in obs2
+      if ( SteeringPars["obs2max"] ) {
+         ftable->GetParameterFromSteering("obs2max",obs2max);
+      }
    }
 }
 
@@ -509,20 +542,47 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // ---- fastNLO v2.2
    // Analyze inclusive Njet event
 
-   // --- calculate observable of 1st dimension
-   // rapidities of two leading jets
+   // derive some event quantities
+   // derivations from rapidities of two leading jets
    double y1 = pj[1].rapidity();
    double y2 = pj[2].rapidity();
-   double ystar = abs(y1-y2)/2.;
+   double yjjmax = max(abs(y1),abs(y2));
+   double ystar  = abs(y1-y2)/2.;
+   // dijet mass
+   lorentzvector<double> pj12 = pj[1] + pj[2];
+   double mjj = pj12.mag();
+   // average pTs of leading jets
+   double pT1   = (pj[1].perp()) / 1.0;
+   double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
+   // pT of 3rd central jet (i.e. inside ycjjmax)
+   double pT3c = 0.;
+   if ( njet > 2 ) {
+      if ( abs(pj[3].rapidity()) < ycjjmax ) {
+         pT3c = pj[3].perp();
+      } else if ( njet > 3 && abs(pj[4].rapidity()) < ycjjmax ) {
+         pT3c = pj[4].perp();
+      }
+   }
+   double pT123 = (pT1 + pj[2].perp() + pT3c) / 3.0;
+
+   // --- calculate observable of 1st dimension
    double obs0;
    switch(obs0def) {
    case YMAX :
       // maximal rapidity
-      obs0 = max(abs(y1),abs(y2));
+      obs0 = yjjmax;
       break;
    case YSTAR :
       // rapidity separation half
       obs0 = ystar;
+      break;
+   case MJJGEV :
+      // dijet mass
+      obs0 = mjj;
+      break;
+   case PT12 :
+      // average pT of two leading jets
+      obs0 = pT12;
       break;
    default :
       say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
@@ -532,9 +592,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // --- calculate observable of 2nd dimension
-   // dijet mass
-   lorentzvector<double> pj12 = pj[1] + pj[2];
-   double mjj = pj12.mag();
    double obs1 = DBL_MAX;
    if (mjj < 0.) {say::warn["InclusiveNjetEvents"] << "Negative mass encountered: " << mjj << endl;}
    if ( NDim > 1 ) {
@@ -546,6 +603,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       case MJJTEV :
          // dijet mass in TeV
          obs1 = mjj/1000.;
+         break;
+      case CHIJJ :
+         // dijet chi
+         obs1 = exp(abs(y1-y2));
          break;
       default :
          say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
@@ -567,13 +628,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       }
    }
 
-   // average pTs of leading jets
-   double pT1   = (pj[1].perp()) / 1.0;
-   double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
-   double pT123 = (pj[1].perp() + pj[2].perp() + pj[3].perp()) / 3.0;
-
    // --- Further Njet phase space cuts?
    if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
+        yjjmax < ycjjmax &&
+        (njet < 3 || ptj3min <= pT3c) &&
         obs0min <= obs0 && obs0 < obs0max &&
         (NDim < 2 || (obs1min <= obs1 && obs1 < obs1max)) &&
         (NDim < 3 || (obs2min <= obs2 && obs2 < obs2max)) ) {
@@ -701,7 +759,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
          exit(1);
       }
       //      ftable->SetLoOrder(ILOord); // Not necessary when set via LeadingOrder in steering file
-      cout << " # INIT:  [inputfunc] ---------- LeadingOrder = " << ILOord << "       ----------" << endl;
+      cout << " # INIT:  [inputfunc] ---------- LeadingOrder = " << ILOord << " ----------" << endl;
    }
 
    // The following line is printed ONLY, when DEBUG print out has been requested by the steering.
