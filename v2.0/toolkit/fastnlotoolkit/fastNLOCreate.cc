@@ -1971,18 +1971,18 @@ void fastNLOCreate::InitWarmupArrays() {
    fWMu2Rnd.resize(GetNObsBin());
    fWxRnd.resize(GetNObsBin());
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      fWMu1[i].first     =  10e10;
-      fWMu1[i].second    = -10e10;
-      fWMu2[i].first     =  10e10;
-      fWMu2[i].second    = -10e10;
-      fWx[i].first       =  10e10;
-      fWx[i].second      = -10e10;
-      fWMu1Rnd[i].first  =  10e10;
-      fWMu1Rnd[i].second = -10e10;
-      fWMu2Rnd[i].first  =  10e10;
-      fWMu2Rnd[i].second = -10e10;
-      fWxRnd[i].first    =  10e10;
-      fWxRnd[i].second   = -10e10;
+      fWMu1[i].first     =  DBL_MAX;
+      fWMu1[i].second    = -DBL_MAX;
+      fWMu2[i].first     =  DBL_MAX;
+      fWMu2[i].second    = -DBL_MAX;
+      fWx[i].first       =  DBL_MAX;
+      fWx[i].second      = -DBL_MAX;
+      fWMu1Rnd[i].first  =  DBL_MAX;
+      fWMu1Rnd[i].second = -DBL_MAX;
+      fWMu2Rnd[i].first  =  DBL_MAX;
+      fWMu2Rnd[i].second = -DBL_MAX;
+      fWxRnd[i].first    =  DBL_MAX;
+      fWxRnd[i].second   = -DBL_MAX;
    }
 }
 

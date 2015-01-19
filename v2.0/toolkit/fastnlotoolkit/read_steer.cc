@@ -445,7 +445,11 @@ bool read_steer::ParseString(string line) {
          ifstream incstrm;
          incstrm.open(incfile.c_str());
          if (!incstrm) {
-            cerr << oE << " Could not open file ('" << incfile << "') from include  statement (" << str_inc << ")." << endl;
+            if ( incfile == "fastNLO-warmup.txt" ) {
+               cout << oI << " Could not include specified warmup file " << incfile << ", default warm-up file will be tried!" << endl;
+            } else {
+               cerr << oE << " Could not open include file ('" << incfile << "') from include  statement (" << str_inc << ")." << endl;
+            }
             return EXIT_FAILURE;
          }
          readstrm(incstrm,is,ie,true);
