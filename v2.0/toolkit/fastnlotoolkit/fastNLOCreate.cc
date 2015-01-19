@@ -1397,8 +1397,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
                      int xmaxbin = nxup[x1].first;
                      int xminbin = nxlo[x2].first;
                      int proc = events[is][p]._p;
-		     if ( fEvent._x2 > fEvent._x1 ) proc = fSymProc[proc];           // exchange asymmetric process
-                     HalfMatrixCheck(xminbin,xmaxbin,proc);
+                     HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
                      int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 //                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
 //                   double& sti = stm1[ixHM][proc];
@@ -1519,7 +1518,6 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    debug["FillContributionFixHHC"]<<endl;
 
    if (fEvent._w == 0) return;   // nothing todo.
-   int p = fEvent._p;
 
    // do interpolation
    double xmin = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::min(fEvent._x1,fEvent._x2) : fEvent._x1;
@@ -1544,9 +1542,11 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    double wgt = fEvent._w / BinSize[ObsBin];
    for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
+	 int p = fEvent._p;
          int xminbin = nxlo[x1].first;
          int xmaxbin = nxup[x2].first;
-	 HalfMatrixCheck(xminbin,xmaxbin,p);
+	 HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
+	 //HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
@@ -1588,13 +1588,14 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
 
    // fill grid
-   int p = fEvent._p;
    if (CheckWeightIsNan()) return;
    for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
          int xmaxbin = nxup[x1].first;
          int xminbin = nxlo[x2].first;
-         HalfMatrixCheck(xminbin,xmaxbin,p);
+	 int p = fEvent._p;
+	 HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
+         //HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
@@ -1710,12 +1711,13 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
 
 
 // ___________________________________________________________________________________________________
-inline void fastNLOCreate::HalfMatrixCheck(int& xminbin, int& xmaxbin, int& subproc) const {
+inline void fastNLOCreate::HalfMatrixCheck(double x1, double x2, int& xminbin, int& xmaxbin, int& subproc) const {
    //! check if half-matrix notation
    //! if half-matrix notation, and xmin-node is larger than xmax-node
    //! exchange suprocesses according to fSymProc and adjust x-nodes.
    //!
-   if (GetTheCoeffTable()->GetNPDFDim() == 1) {   // half-matrix notation (otherwise nothing todo)
+   if (GetTheCoeffTable()->GetNPDFDim() == 1 ) {   // half-matrix notation (otherwise nothing todo)
+      if ( x2>x1 ) subproc = fSymProc[subproc]; // to into correct half-matrix
       if (xminbin > xmaxbin) {
          //          if ( (int)fSymProc.size() != GetTheCoeffTable()->GetNSubproc() )
          //             error["HalfMatrixCheck"]<<"Necessary array with symmetric processes for half-matrix notation not initialized."<<endl;

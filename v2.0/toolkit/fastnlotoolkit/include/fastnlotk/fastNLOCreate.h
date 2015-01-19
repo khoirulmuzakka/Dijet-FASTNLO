@@ -148,7 +148,7 @@ protected:
    fastNLO::ProcessConstants fProcConsts;                                                       //!< Process specific constants
 
    bool CheckWeightIsNan();                                                                     //!< Check if weight is reasonable.
-   inline void HalfMatrixCheck(int& xmin, int& xmax, int& subproc) const;                       //!< check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
+   inline void HalfMatrixCheck(double x1, double x2, int& xmin, int& xmax, int& subproc) const;                       //!< check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
    vector<int> fSymProc;                                                                        //!< necessary for half-matrix notation
    vector<double> fScaleFac;                                                                    //!< Scale factors. Needed for fixed-scale tables
 
