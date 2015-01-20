@@ -885,6 +885,14 @@ c            ENDIF
                   NX = NX+1
                   CALL FX9999PL(IPDFDEF(IC,1),IPDFDEF(IC,2),
      >                 IPDFDEF(IC,3),K,L,XPDF1,XPDF2,H)
+*---  The 2-dim. x1, x2 bins are mapped onto ix like this:
+*---  [1,1] --> [1]
+*---  [2,1] --> [2]
+*---  [2,2] --> [3]
+*---  [3,1] --> [4]
+*---  etc.
+*---  x mapping test printout
+*---                  WRITE(*,*)"x1, x2 storage order: k, l = ", k, l
                   DO M=1,NSUBPROC(IC)
                      PDF(I,J,NX,M) = H(M)
                   ENDDO         ! m subproc
