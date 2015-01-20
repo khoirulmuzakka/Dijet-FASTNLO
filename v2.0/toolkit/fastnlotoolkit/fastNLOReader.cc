@@ -455,6 +455,13 @@ using namespace say;
 //______________________________________________________________________________
 fastNLOReader::fastNLOReader(): fastNLOTable() {
    SetClassName("fastNLOReader");
+   fUnits               = fastNLO::kPublicationUnits;
+   fMuRFunc             = fastNLO::kScale1;
+   fMuFFunc             = fastNLO::kScale1;
+   fPDFSuccess          = false;
+   fAlphasCached        = 0.;
+   fPDFCached           = 0.;
+   fUseHoppet            = false;
 }
 
 
