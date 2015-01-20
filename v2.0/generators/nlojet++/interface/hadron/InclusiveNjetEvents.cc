@@ -1,5 +1,5 @@
 //
-// fastNLO v2.2 creator code for inclusive Njet event scenarios
+// fastNLO v2.2 creator code for inclusive N-jet event scenarios
 //
 // ============== fastNLO user: ========================================
 // To create your own scenario, it is recommended to take this
@@ -131,16 +131,16 @@ private:
    bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
    int NDim;                  // Dimensionality of distributions
    vector<string> DimLabel;   // Dimension labels
-   // enum to switch between implemented observables
-   enum Obs { MJJGEV, MJJTEV, YMAX, YSTAR, CHIJJ, PT12 };
-   Obs obs0def;
-   Obs obs1def;
-   Obs obs2def;
+   // enum to switch between implemented observables (max. of 3 simultaneously)
+   enum Obs { YMAX, YSTAR, MJJGEV, MJJTEV, PT12GEV, CHIJJ };
+   Obs obsdef[3];
+   double obs[3];
    vector<string> ScaleLabel; // Scale labels
-   // enum to switch between implemented scale definitions (Njet > 1!)
+   // enum to switch between implemented scale definitions (max. of 2 simultaneously)
+   // (Njet > 1!)
    enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR };
-   Scales mu1def;
-   Scales mu2def;
+   Scales mudef[2];
+   double mu[2];
    int jetalgo;               // Define fastjet jet algorithm
    double jetsize;            // Define jet size R
    double overlapthreshold;   // Define overlap threshold (for some jet algorithms)
@@ -153,12 +153,8 @@ private:
    double ptj2min;            // Minimal jet pT for 2nd leading jet (default is ptjmin)
    double ptj3min;            // Minimal jet pT for 3rd leading jet (default is ptjmin)
    double ycjjmax;            // Maximal jet rapidity for leading two jets
-   double obs0min;            // Minimum in observable in 1st dimension (default derived from binning)
-   double obs0max;            // Maximum in observable in 1st dimension (default derived from binning)
-   double obs1min;            // Minimum in observable in 2nd dimension (default derived from binning)
-   double obs1max;            // Maximum in observable in 2nd dimension (default derived from binning)
-   double obs2min;            // Minimum in observable in 3rd dimension (default derived from binning)
-   double obs2max;            // Maximum in observable in 3rd dimension (default derived from binning)
+   double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
+   double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
 };
 
 // --- fastNLO user: modify the jet selection in UserHHC::userfunc (default = cutting in |y| min, |y| max and pt min)
@@ -210,12 +206,12 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["DifferentialDimension"] ) {
       ftable->GetParameterFromSteering("DifferentialDimension",NDim);
    } else {
-      say::error["InclusiveNjetEvents"] << "Dimensioning of binning not set, aborted!" << endl;
+      say::error["ScenarioCode"] << "Dimensioning of binning not set, aborted!" << endl;
       exit(1);
    }
    if ( NDim < 1 || 3 < NDim ) {
-      say::error["InclusiveNjetEvents"] << "Only 1- to 3-dimensional binning implemented, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "Please implement the requested " << NDim << "-dimensional binning." << endl;
+      say::error["ScenarioCode"] << "Only 1- to 3-dimensional binning implemented, aborted!" << endl;
+      say::error["ScenarioCode"] << "Please implement the requested " << NDim << "-dimensional binning." << endl;
       exit(1);
    }
    // dimension labels
@@ -224,44 +220,27 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["DimensionLabels"] ) {
       ftable->GetParameterFromSteering("DimensionLabels",DimLabel);
    } else {
-      say::error["InclusiveNjetEvents"] << "Dimension labels not set, aborted!" << endl;
+      say::error["ScenarioCode"] << "Dimension labels not set, aborted!" << endl;
       exit(1);
    }
    // define the observables according to the dimension labels
-   if ( DimLabel[0] == "|y_max|" ) {
-      obs0def = YMAX;
-   } else if ( DimLabel[0] == "y_star" ) {
-      obs0def = YSTAR;
-   } else if ( DimLabel[0] == "Mjj_[GeV]" ) {
-      obs0def = MJJGEV;
-   } else if ( DimLabel[0] == "<pT_1,2>_[GeV]" ) {
-      obs0def = PT12;
-   } else {
-      say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "DimLabel[0] = " << DimLabel[0] << endl;
-      say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-      exit(1);
-   }
-   if ( NDim > 1 ) {
-      if ( DimLabel[1] == "Mjj_[GeV]" ) {
-         obs1def = MJJGEV;
-      } else if ( DimLabel[1] == "Mjj_[TeV]" ) {
-         obs1def = MJJTEV;
-      } else if ( DimLabel[1] == "Chi" ) {
-         obs1def = CHIJJ;
+   for ( int i = 0; i<NDim; i++ ) {
+      if ( DimLabel[i]        == "|y_max|" ) {
+         obsdef[i] = YMAX;
+      } else if ( DimLabel[i] == "y_star" ) {
+         obsdef[i] = YSTAR;
+      } else if ( DimLabel[i] == "Mjj_[GeV]" ) {
+         obsdef[i] = MJJGEV;
+      } else if ( DimLabel[i] == "Mjj_[TeV]" ) {
+         obsdef[i] = MJJTEV;
+      } else if ( DimLabel[i] == "<pT_1,2>_[GeV]" ) {
+         obsdef[i] = PT12GEV;
+      } else if ( DimLabel[i] == "Chi" ) {
+         obsdef[i] = CHIJJ;
       } else {
-         say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
-         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-         exit(1);
-      }
-   }
-   if ( NDim > 2 ) {
-      if ( DimLabel[2] == "???" ) {
-      } else {
-         say::error["InclusiveNjetEvents"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "DimLabel[2] = " << DimLabel[2] << endl;
-         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         say::error["ScenarioCode"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
+         say::error["ScenarioCode"] << "DimLabel[" << i << "] = " << DimLabel[i] << endl;
+         say::error["ScenarioCode"] << "Please complement this scenario to include the requested observable." << endl;
          exit(1);
       }
    }
@@ -271,7 +250,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["ScaleDescriptionScale1"] ) {
       ftable->GetParameterFromSteering("ScaleDescriptionScale1",ScaleLabel[0]);
    } else {
-      say::error["InclusiveNjetEvents"] << "No description of scale 1, aborted!" << endl;
+      say::error["ScenarioCode"] << "No description of scale 1, aborted!" << endl;
       exit(1);
    }
    SteeringPars["ScaleDescriptionScale2"] = ftable->TestParameterInSteering("ScaleDescriptionScale2");
@@ -280,38 +259,26 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       ftable->GetParameterFromSteering("ScaleDescriptionScale2",ScaleLabel[1]);
    } else {
       ScaleLabel[1] = "-";
-      say::warn["InclusiveNjetEvents"] << "No description of scale 2, flexible-scale tables not possible!" << endl;
+      say::warn["ScenarioCode"] << "No description of scale 2, flexible-scale tables not possible!" << endl;
    }
    // scale descriptions define the scales
-   if ( ScaleLabel[0] == "pT_max_[GeV]" ) {
-      mu1def = PTMAX;
-   } else if ( ScaleLabel[0] == "<pT_1,2>_[GeV]" ) {
-      mu1def = PT12AVE;
-   } else if ( ScaleLabel[0] == "<pT_1,2,3>_[GeV]" ) {
-      mu1def = PT123AVE;
-   } else if ( ScaleLabel[0] == "Mjj/2_[GeV]" ) {
-      mu1def = MJJHALF;
-   } else if ( ScaleLabel[0] == "pT_max*exp(0.3*y_star)_[GeV]" ) {
-      mu1def = PTMAXEXPYSTAR;
-   } else {
-      say::error["InclusiveNjetEvents"] << "Unknown scale no. 1, i.e. scale description, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "ScaleLabel[0] = " << ScaleLabel[0] << endl;
-      say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested scale." << endl;
-      exit(1);
-   }
-   if ( ScaleLabel[1] == "pT_max_[GeV]" ) {
-      mu2def = PTMAX;
-   } else if ( ScaleLabel[1] == "<pT_1,2>_[GeV]" ) {
-      mu2def = PT12AVE;
-   } else if ( ScaleLabel[1] == "<pT_1,2,3>_[GeV]" ) {
-      mu2def = PT123AVE;
-   } else if ( ScaleLabel[1] == "Mjj/2_[GeV]" ) {
-      mu2def = MJJHALF;
-   } else if ( ScaleLabel[1] == "pT_max*exp(0.3*y_star)_[GeV]" ) {
-      mu2def = PTMAXEXPYSTAR;
-   } else {
-      say::warn["InclusiveNjetEvents"] << "Unknown scale no. 2, i.e. scale description!" << endl;
-      say::warn["InclusiveNjetEvents"] << "ScaleLabel[1] = " << ScaleLabel[1] << endl;
+   for ( unsigned int i = 0; i < 2; i++ ) {
+      if ( ScaleLabel[i] == "pT_max_[GeV]" ) {
+         mudef[i] = PTMAX;
+      } else if ( ScaleLabel[i] == "<pT_1,2>_[GeV]" ) {
+         mudef[i] = PT12AVE;
+      } else if ( ScaleLabel[i] == "<pT_1,2,3>_[GeV]" ) {
+         mudef[i] = PT123AVE;
+      } else if ( ScaleLabel[i] == "Mjj/2_[GeV]" ) {
+         mudef[i] = MJJHALF;
+      } else if ( ScaleLabel[i] == "pT_max*exp(0.3*y_star)_[GeV]" ) {
+         mudef[i] = PTMAXEXPYSTAR;
+      } else {
+         say::error["ScenarioCode"] << "Unknown scale, i.e. scale description, aborted!" << endl;
+         say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
+         say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
+         exit(1);
+      }
    }
 
    // definition of jet algorithm and jet phase space limits (no defaults)
@@ -323,18 +290,18 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["JetAlgo"] ) {
       ftable->GetParameterFromSteering("JetAlgo",jetalgo);
       if ( jetalgo < 0 || (2 < jetalgo && jetalgo < 10) || 12 < jetalgo ) {
-         say::error["InclusiveNjetEvents"] << "Unknown jet algorithm " << jetalgo << ", aborted!" << endl;
+         say::error["ScenarioCode"] << "Unknown jet algorithm " << jetalgo << ", aborted!" << endl;
          exit(1);
       }
    } else {
-      say::error["InclusiveNjetEvents"] << "No jet algorithm selected, aborted!" << endl;
+      say::error["ScenarioCode"] << "No jet algorithm selected, aborted!" << endl;
       exit(1);
    }
    SteeringPars["Rjet"] = ftable->TestParameterInSteering("Rjet");
    if ( SteeringPars["Rjet"] ) {
       ftable->GetParameterFromSteering("Rjet",jetsize);
    } else {
-      say::error["InclusiveNjetEvents"] << "Jet size R not defined, aborted!" << endl;
+      say::error["ScenarioCode"] << "Jet size R not defined, aborted!" << endl;
       exit(1);
    }
    SteeringPars["OvThr"] = ftable->TestParameterInSteering("OvThr");
@@ -342,7 +309,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["OvThr"] ) {
       ftable->GetParameterFromSteering("OvThr",overlapthreshold);
    } else if ( jetalgo > 9 ) {
-      say::error["InclusiveNjetEvents"] << "Overlap threshold not defined for jet algorithm " << jetalgo << ", aborted!" << endl;
+      say::error["ScenarioCode"] << "Overlap threshold not defined for jet algorithm " << jetalgo << ", aborted!" << endl;
       exit(1);
    }
    // --- fastNLO user: declare and initialize overall jet phase space cuts via steering file
@@ -351,7 +318,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["ptjmin"] ) {
       ftable->GetParameterFromSteering("ptjmin",ptjmin);
    } else {
-      say::error["InclusiveNjetEvents"] << "Minimal jet pT (ptjmin) not defined, aborted!" << endl;
+      say::error["ScenarioCode"] << "Minimal jet pT (ptjmin) not defined, aborted!" << endl;
       exit(1);
    }
    // overall highest pT for jets not implemented, since uncritical with respect to CPU time consumption
@@ -363,7 +330,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    } else if ( !SteeringPars["yjmin"] && SteeringPars["etajmin"] ) {
       ftable->GetParameterFromSteering("etajmin",yetajmin);
    } else {
-      say::error["InclusiveNjetEvents"] << "Minimal jet (pseudo)rapidity (yjmin or etajmin) not uniquely defined, aborted!" << endl;
+      say::error["ScenarioCode"] << "Minimal jet (pseudo)rapidity (yjmin or etajmin) not uniquely defined, aborted!" << endl;
       exit(1);
    }
    // overall largest |(pseudo-)rapidity| for jets to be considered, use either y or eta but not both
@@ -374,7 +341,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    } else if ( !SteeringPars["yjmax"] && SteeringPars["etajmax"] ) {
       ftable->GetParameterFromSteering("etajmax",yetajmax);
    } else {
-      say::error["InclusiveNjetEvents"] << "Maximal jet (pseudo)rapidity (yjmax or etajmax) not uniquely defined, aborted!" << endl;
+      say::error["ScenarioCode"] << "Maximal jet (pseudo)rapidity (yjmax or etajmax) not uniquely defined, aborted!" << endl;
       exit(1);
    }
    // define logical for decision on cuts in (pseudo-)rapidity, no mixing allowed here
@@ -383,13 +350,13 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    } else if ( SteeringPars["etajmin"] && SteeringPars["etajmax"] ) {
       lpseudo = true;
    } else {
-      say::error["InclusiveNjetEvents"] << "Phase space cuts mixed in (pseudo-)rapidity, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "Booleans for cut selections are" <<
+      say::error["ScenarioCode"] << "Phase space cuts mixed in (pseudo-)rapidity, aborted!" << endl;
+      say::error["ScenarioCode"] << "Booleans for cut selections are" <<
          " yjmin "    << SteeringPars["yjmin"] <<
          ", yjmax "   << SteeringPars["yjmax"] <<
          ", etajmin " << SteeringPars["etajmin"] <<
          ", etajmax " << SteeringPars["etajmax"] << endl;
-      say::error["InclusiveNjetEvents"] << "If you really want to mix, the code needs to be adapted." << endl;
+      say::error["ScenarioCode"] << "If you really want to mix, the code needs to be adapted." << endl;
       exit(1);
    }
    // minimal number of jets required to be within preselected jet phase space (for dijets this must be two!)
@@ -399,8 +366,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       ftable->GetParameterFromSteering("Njetmin",Njetmin);
    }
    if ( Njetmin < 2 ) {
-      say::error["InclusiveNjetEvents"] << "This is a 2+-jet scenario. At least two jets must be present, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "Please correct the Njetmin requirement. Njetmin = " << Njetmin << endl;
+      say::error["ScenarioCode"] << "This is a 2+-jet scenario. At least two jets must be present, aborted!" << endl;
+      say::error["ScenarioCode"] << "Please correct the Njetmin requirement. Njetmin = " << Njetmin << endl;
       exit(1);
    }
 
@@ -431,43 +398,43 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    }
    // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
    SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
-   obs0min = ftable->GetLoBinMin(0); // by default derived from binning in obs0
+   obsmin[0] = ftable->GetLoBinMin(0); // by default derived from binning in obs0
    if ( SteeringPars["obs0min"] ) {
-      ftable->GetParameterFromSteering("obs0min",obs0min);
+      ftable->GetParameterFromSteering("obs0min",obsmin[0]);
    }
    SteeringPars["obs0max"] = ftable->TestParameterInSteering("obs0max");
-   obs0max = ftable->GetUpBinMax(0); // by default derived from binning in obs0
+   obsmax[0] = ftable->GetUpBinMax(0); // by default derived from binning in obs0
    if ( SteeringPars["obs0max"] ) {
-      ftable->GetParameterFromSteering("obs0max",obs0max);
+      ftable->GetParameterFromSteering("obs0max",obsmax[0]);
    }
    // overall minimum & maximum for 2nd observable, e.g. dijet mass mjj
-   obs1min = -DBL_MAX;
-   obs1max = +DBL_MAX;
+   obsmin[1] = -DBL_MAX;
+   obsmax[1] = +DBL_MAX;
    if (NDim > 1) {
       SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
-      obs1min = ftable->GetLoBinMin(1); // by default derived from binning in obs1
+      obsmin[1] = ftable->GetLoBinMin(1); // by default derived from binning in obs1
       if ( SteeringPars["obs1min"] ) {
-         ftable->GetParameterFromSteering("obs1min",obs1min);
+         ftable->GetParameterFromSteering("obs1min",obsmin[1]);
       }
       SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
-      obs1max = ftable->GetUpBinMax(1); // by default derived from binning in obs1
+      obsmax[1] = ftable->GetUpBinMax(1); // by default derived from binning in obs1
       if ( SteeringPars["obs1max"] ) {
-         ftable->GetParameterFromSteering("obs1max",obs1max);
+         ftable->GetParameterFromSteering("obs1max",obsmax[1]);
       }
    }
    // overall minimum & maximum for 3rd observable
-   obs2min = -DBL_MAX;
-   obs2max = +DBL_MAX;
+   obsmin[2] = -DBL_MAX;
+   obsmax[2] = +DBL_MAX;
    if (NDim > 2) {
       SteeringPars["obs2min"] = ftable->TestParameterInSteering("obs2min");
-      obs2min = ftable->GetLoBinMin(2); // by default derived from binning in obs2
+      obsmin[2] = ftable->GetLoBinMin(2); // by default derived from binning in obs2
       if ( SteeringPars["obs2min"] ) {
-         ftable->GetParameterFromSteering("obs2min",obs2min);
+         ftable->GetParameterFromSteering("obs2min",obsmin[2]);
       }
       SteeringPars["obs2max"] = ftable->TestParameterInSteering("obs2max");
-      obs2max = ftable->GetUpBinMax(2); // by default derived from binning in obs2
+      obsmax[2] = ftable->GetUpBinMax(2); // by default derived from binning in obs2
       if ( SteeringPars["obs2max"] ) {
-         ftable->GetParameterFromSteering("obs2max",obs2max);
+         ftable->GetParameterFromSteering("obs2max",obsmax[2]);
       }
    }
 }
@@ -494,10 +461,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    //            in fj-jets.cc needs to be changed.
    // There should never be more than four jets in NLOJet++
    if (nj < 1) {
-      say::info["InclusiveNjetEvents"] << "This event from NLOJet++ has no jets with pT > 1 GeV. Skipped!" << endl;
+      say::info["ScenarioCode"] << "This event from NLOJet++ has no jets with pT > 1 GeV. Skipped!" << endl;
       return;
    } else if (nj > 4) {
-      say::error["InclusiveNjetEvents"] << "This event from NLOJet++ has more than four jets, which should never happen. Aborted!" << endl;
+      say::error["ScenarioCode"] << "This event from NLOJet++ has more than four jets, which should never happen. Aborted!" << endl;
       exit(1);
    }
 
@@ -507,7 +474,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["InclusiveNjetEvents"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -525,17 +492,17 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
 
    // --- give some debug output after selection and sorting
    if ( say::debug.GetSpeak() ) {
-      say::debug["InclusiveNjetEvents"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+      say::debug["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
       if ( ! lpseudo ) {
-         say::debug["InclusiveNjetEvents"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       } else {
-         say::debug["InclusiveNjetEvents"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       }
       for (unsigned int i=1; i<=njet; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["InclusiveNjetEvents"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -551,6 +518,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // dijet mass
    lorentzvector<double> pj12 = pj[1] + pj[2];
    double mjj = pj12.mag();
+   if (mjj < 0.) {say::warn["ScenarioCode"] << "Negative mass encountered: " << mjj << endl;}
    // average pTs of leading jets
    double pT1   = (pj[1].perp()) / 1.0;
    double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
@@ -565,65 +533,37 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
    double pT123 = (pT1 + pj[2].perp() + pT3c) / 3.0;
 
-   // --- calculate observable of 1st dimension
-   double obs0;
-   switch(obs0def) {
-   case YMAX :
-      // maximal rapidity
-      obs0 = yjjmax;
-      break;
-   case YSTAR :
-      // rapidity separation half
-      obs0 = ystar;
-      break;
-   case MJJGEV :
-      // dijet mass
-      obs0 = mjj;
-      break;
-   case PT12 :
-      // average pT of two leading jets
-      obs0 = pT12;
-      break;
-   default :
-      say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
-      say::error["InclusiveNjetEvents"] << "DimLabel[0] = " << DimLabel[0] << endl;
-      say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-      exit(1);
-   }
-
-   // --- calculate observable of 2nd dimension
-   double obs1 = DBL_MAX;
-   if (mjj < 0.) {say::warn["InclusiveNjetEvents"] << "Negative mass encountered: " << mjj << endl;}
-   if ( NDim > 1 ) {
-      switch(obs1def) {
+   // --- calculate observable of nth dimension
+   for ( int i = 0; i<NDim; i++ ) {
+      switch(obsdef[i]) {
+      case YMAX :
+         // maximal rapidity
+         obs[i] = yjjmax;
+         break;
+      case YSTAR :
+         // rapidity separation half
+         obs[i] = ystar;
+         break;
       case MJJGEV :
-         // dijet mass in GeV
-         obs1 = mjj;
+         // dijet mass
+         obs[i] = mjj;
          break;
       case MJJTEV :
          // dijet mass in TeV
-         obs1 = mjj/1000.;
+         obs[i] = mjj/1000.;
+         break;
+      case PT12GEV :
+         // average pT of two leading jets
+         obs[i] = pT12;
          break;
       case CHIJJ :
          // dijet chi
-         obs1 = exp(abs(y1-y2));
+         obs[i] = exp(abs(y1-y2));
          break;
       default :
-         say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "DimLabel[1] = " << DimLabel[1] << endl;
-         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
-         exit(1);
-      }
-   }
-
-   // --- calculate observable of 3rd dimension
-   double obs2 = DBL_MAX;
-   if ( NDim > 2 ) {
-      switch(obs2def) {
-      default :
-         say::error["InclusiveNjetEvents"] << "Observable not yet implemented, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "DimLabel[2] = " << DimLabel[2] << endl;
-         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested observable." << endl;
+         say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
+         say::error["ScenarioCode"] << "DimLabel[" << i << "0] = " << DimLabel[i] << endl;
+         say::error["ScenarioCode"] << "Please complement this scenario to include the requested observable." << endl;
          exit(1);
       }
    }
@@ -632,69 +572,39 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
         yjjmax < ycjjmax &&
         (njet < 3 || ptj3min <= pT3c) &&
-        obs0min <= obs0 && obs0 < obs0max &&
-        (NDim < 2 || (obs1min <= obs1 && obs1 < obs1max)) &&
-        (NDim < 3 || (obs2min <= obs2 && obs2 < obs2max)) ) {
+        obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
+        (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
+        (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
 
       // --- set the renormalization and factorization scales
-      // --- calculate 1st requested scale
-      double mu1;
-      switch(mu1def) {
-      case PTMAX :
-         // maximal jet pT
-         mu1 = pT1;
-         break;
-      case PT12AVE :
-         // average pT of leading two jets
-         mu1 = pT12;
-         break;
-      case PT123AVE :
-         // average pT of leading three jets
-         mu1 = pT123;
-         break;
-      case MJJHALF :
-         // half of dijet mass (must be in GeV!)
-         mu1 = mjj/2.;
-         break;
-      case PTMAXEXPYSTAR :
-         // ATLAS definition
-         mu1 = pT1 * exp(0.3*ystar);
-         break;
-      default :
-         say::error["InclusiveNjetEvents"] << "Scale not yet implemented, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "ScaleLabel[0] = " << ScaleLabel[0] << endl;
-         say::error["InclusiveNjetEvents"] << "Please complement this scenario to include the requested scale." << endl;
-         exit(1);
-      }
-
-      // --- calculate 2nd requested scale
-      double mu2 = pT1; // default second choice (only for flexible tables)
-      if ( lFlexibleScaleTable ) {
-         switch(mu2def) {
+      // --- calculate the requested scales
+      for ( unsigned int i = 0; i < 2; i++ ) {
+         switch(mudef[i]) {
          case PTMAX :
             // maximal jet pT
-            mu2 = pT1;
+            mu[i] = pT1;
             break;
          case PT12AVE :
             // average pT of leading two jets
-            mu2 = pT12;
+            mu[i] = pT12;
             break;
          case PT123AVE :
             // average pT of leading three jets
-            mu2 = pT123;
+            mu[i] = pT123;
             break;
          case MJJHALF :
             // half of dijet mass (must be in GeV!)
-            mu2 = mjj/2.;
+            mu[i] = mjj/2.;
             break;
          case PTMAXEXPYSTAR :
             // ATLAS definition
-            mu2 = pT1 * exp(0.3*ystar);
+            mu[i] = pT1 * exp(0.3*ystar);
             break;
          default :
-            say::warn["InclusiveNjetEvents"] << "Scale not yet implemented, aborted!" << endl;
-            say::warn["InclusiveNjetEvents"] << "ScaleLabel[1] = " << ScaleLabel[1] << endl;
-            say::warn["InclusiveNjetEvents"] << "Please complement this scenario to include the requested scale." << endl;
+            say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
+            say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
+            say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
+            exit(1);
          }
       }
       static vector<double> scalevars;
@@ -706,29 +616,22 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       if (lFlexibleScaleTable) {
          contribsflex = UsefulNlojetTools::GetFlexibleScaleNlojetContribHHC(p,amp);
       } else {
-         contribsfix  = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu1,scalevars);
+         contribsfix  = UsefulNlojetTools::GetFixedScaleNlojetContribHHC(p,amp,mu[0],scalevars);
       }
 
-      // scenario specific quantites
+      // set and fill scenario specific quantites
       fnloScenario scen;
-      if ( NDim == 1 ) {        // 1D binning
-         scen.SetObservableDimI( obs0, 0 );
-      } else if ( NDim == 2 ) { // 2D binning
-         scen.SetObservableDimI( obs0, 0 );
-         scen.SetObservableDimI( obs1, 1 );
-      } else if ( NDim == 3 ) { // 3D binning
-         scen.SetObservableDimI( obs0, 0 );
-         scen.SetObservableDimI( obs1, 1 );
-         scen.SetObservableDimI( obs2, 2 );
-      } else {
-         say::error["InclusiveNjetEvents"] << "More than 3D binning not implemented for inclusive jets, aborted!" << endl;
-         say::error["InclusiveNjetEvents"] << "DifferentialDimension NDim = " << NDim << endl;
-         exit(1);
+      if ( NDim < 1 || NDim > 3 ) {
+         say::error["ScenarioCode"] << "Less than 1D(?!) or more than 3D binning not implemented here, aborted!" << endl;
+         say::error["ScenarioCode"] << "DifferentialDimension NDim = " << NDim << endl;
       }
-      scen.SetObsScale1( mu1 );   // must be consistent with 'mu' from contribs
+      for ( int i = 0; i<NDim; i++ ) {
+         scen.SetObservableDimI( obs[i], i );
+      }
 
+      scen.SetObsScale1( mu[0] );   // must be consistent with 'mu' from contribs
       if (lFlexibleScaleTable) {
-         scen.SetObsScale2( mu2 );
+         scen.SetObsScale2( mu[1] );
          ftable->FillAllSubprocesses(contribsflex,scen);
       } else {
          ftable->FillAllSubprocesses(contribsfix,scen);
@@ -755,7 +658,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       if ( ftable->TestParameterInSteering("LeadingOrder") ) {
          ftable->GetParameterFromSteering("LeadingOrder",ILOord);
       } else {
-         say::error["InclusiveNjetEvents"] << "LO of process not defined, aborted!" << endl;
+         say::error["ScenarioCode"] << "LO of process not defined, aborted!" << endl;
          exit(1);
       }
       //      ftable->SetLoOrder(ILOord); // Not necessary when set via LeadingOrder in steering file
@@ -778,7 +681,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       nj = 3U;
       break;
    default :
-      say::error["InclusiveNjetEvents"] << "Unknown LO of process defined, aborted!" << endl;
+      say::error["ScenarioCode"] << "Unknown LO of process defined, aborted!" << endl;
       exit(1);
    }
 

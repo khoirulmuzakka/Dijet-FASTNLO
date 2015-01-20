@@ -12,7 +12,7 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Data files to be distributed
 #
-fnlo_steering_files = fnl2412c_I895742_v23_fix.str fnl2412e_I1208923_v23_fix.str
+fnlo_steering_files = fnl2622f_I1090423_v23_fix.str
 pkgdata_DATA = $(fnlo_steering_files)
 EXTRA_DIST =   $(fnlo_steering_files)
 

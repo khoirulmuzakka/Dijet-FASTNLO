@@ -272,7 +272,9 @@ AC_CONFIG_FILES([Makefile
                  interface/data/Makefile
                  interface/data/Examples/Makefile
                  interface/data/InclusiveJets/Makefile
+                 interface/data/InclusiveNJetEvents/Makefile
                  interface/data/DijetMass/Makefile
+                 interface/data/DijetAngular/Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
                  interface/include/fnlo_int_nlojet/Makefile

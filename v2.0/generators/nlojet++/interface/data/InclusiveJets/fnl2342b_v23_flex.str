@@ -42,6 +42,8 @@ yjmax                           3.0              # Maximal jet rapidity
 #etajmin                         0.0              # Minimal jet pseudorapidity
 #etajmax                         3.0              # Maximal jet pseudorapidity
 
+npdfdim
+
 # -------------------------------------------------------------------- #
 #   Observable dimensioning and normalization
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -15,14 +15,14 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2412c_I895742_v23_fix
+ScenarioName fnl2622f_I1090423_v23_fix
 ScenarioDescription {
-    "d2sigma-dijet_dMjj_dy_max_[pb_GeV]"
+    "d2sigma-dijet_dChi_dMjj_[pb_GeV]"
     "CMS_Collaboration"
-    "Dijet_Mass"
-    "anti-kT_R=0.7"
-    "CMS-PAPER-QCD-10-025, arXiv:1104.1693, Phys. Lett. B 700 (2011) 187."
-    "SPIRES_ID=9029460,INSPIRE_RECORD=895742"
+    "Dijet_Chi"
+    "anti-kT_R=0.5"
+    "CMS-PAPER-EXO-11-017, arXiv:1202.5535, JHEP 05 (2012) 055."
+    "RIVET_ID=CMS_2012_I1090423/D01-x01-y01,SPIRES_ID=9389105,INSPIRE_RECORD=1090423"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -37,12 +37,11 @@ PublicationUnits               12                # Unit of data cross sections (
 JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-Rjet                            0.7              # Jet size parameter: Required for all jets
-ptjmin                         30.               # Minimal jet pT (minimum set in fastjet: 1 GeV)
+Rjet                            0.5              # Jet size parameter: Required for all jets
+ptjmin                          1.               # Minimal jet pT (minimum set in fastjet: 1 GeV)
 yjmin                           0.0              # Minimal jet rapidity
-yjmax                           3.0              # Maximal jet rapidity
+yjmax                           5.0              # Maximal jet rapidity
 Njetmin                         2                # Minimal number of jets required to be in preselected phase space
-ptj1min                        60.               # Minimal jet pT for leading jet
 
 # -------------------------------------------------------------------- #
 #   Observable definition, dimensioning, and normalization
@@ -56,8 +55,8 @@ ptj1min                        60.               # Minimal jet pT for leading je
 LeadingOrder                      2              # Number of jets for the LO process
 DifferentialDimension             2              # Dimensionality of binning
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
-   "|y_max|"                                     # This defines the observables to be calculated!
-   "Mjj_[GeV]"
+   "Mjj_[GeV]"                                   # This defines the observables to be calculated!
+   "Chi"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
    2  2                                          #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
@@ -85,11 +84,15 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 # -------------------------------------------------------------------- #
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5         156.  176.  197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659.
-    0.5        1.0         197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
-    1.0        1.5         386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
-    1.5        2.0         565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
-    2.0        2.5         649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
+  400.       600.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+  600.       800.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+  800.      1000.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 1000.      1200.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 1200.      1500.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 1500.      1900.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 1900.      2400.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 2400.      3000.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
+ 3000.      4000.          1.  2.  3.  4.  5.  6.  7.  8.  9.  10.  12.  14.  16.
 }}
 
 # ==================================================================== #

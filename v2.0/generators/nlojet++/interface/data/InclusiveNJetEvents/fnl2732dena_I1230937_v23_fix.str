@@ -15,21 +15,21 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2412c_I895742_v23_fix
+ScenarioName fnl2732dena_I1230937_v23_fix
 ScenarioDescription {
-    "d2sigma-dijet_dMjj_dy_max_[pb_GeV]"
+    "dsigma-jet2+_d<pT_1,2>_[pb_GeV]"
     "CMS_Collaboration"
-    "Dijet_Mass"
+    "Inclusive_Dijet_pT"
     "anti-kT_R=0.7"
-    "CMS-PAPER-QCD-10-025, arXiv:1104.1693, Phys. Lett. B 700 (2011) 187."
-    "SPIRES_ID=9029460,INSPIRE_RECORD=895742"
+    "CMS-PAPER-QCD-11-003, arXiv:1304.7498, Eur. Phys. J. C 73 (2013) 2604."
+    "INSPIRE_RECORD=1230937"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
     "If you use this table, please cite:"
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
-PublicationUnits               12                # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
+PublicationUnits                12               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
@@ -38,11 +38,11 @@ JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.7              # Jet size parameter: Required for all jets
-ptjmin                         30.               # Minimal jet pT (minimum set in fastjet: 1 GeV)
+ptjmin                        150.               # Minimal jet pT
 yjmin                           0.0              # Minimal jet rapidity
-yjmax                           3.0              # Maximal jet rapidity
+yjmax                           5.0              # Maximal jet rapidity
 Njetmin                         2                # Minimal number of jets required to be in preselected phase space
-ptj1min                        60.               # Minimal jet pT for leading jet
+ycjmax                          2.5              # Maximal rapidity for leading two jets
 
 # -------------------------------------------------------------------- #
 #   Observable definition, dimensioning, and normalization
@@ -54,25 +54,23 @@ ptj1min                        60.               # Minimal jet pT for leading je
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
 LeadingOrder                      2              # Number of jets for the LO process
-DifferentialDimension             2              # Dimensionality of binning
-DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
-   "|y_max|"                                     # This defines the observables to be calculated!
-   "Mjj_[GeV]"
+DifferentialDimension             1
+DimensionLabels {                                # Labels (symbol and unit) for the measurement dimension (from outer to inner "loop")
+   "<pT_1,2>_[GeV]"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
-   2  2                                          #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
+   2                                             #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
 }                                                #                                                     but NO division (normalization) by bin width
                                                  #   1 : the cross section is point-wise differential, i.e. only one point is given
                                                  #   2 : the cross section is bin-wise differential,   i.e. there are two bin borders
                                                  #                                                     and division by bin width
 CalculateBinSize               true              # Calculate bin width from lower and upper bin boundaries
-BinSizeFactor                    2.              # Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|
+BinSizeFactor                    1.              # Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|
 #BinSize { x1 x2 x3 ... }                        # If 'CalculateBinSize' is 'false' provide table with bin widths 'by hand' for normalization
                                                  #
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
-                                                 #
-ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # Specify scale name and unit
 ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
@@ -83,14 +81,9 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
-DoubleDifferentialBinning {{
-  1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5         156.  176.  197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659.
-    0.5        1.0         197.  220.  244.  270.  296.  325.  354.  386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
-    1.0        1.5         386.  419.  453.  489.  526.  565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019.
-    1.5        2.0         565.  606.  649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
-    2.0        2.5         649.  693.  740.  788.  838.  890.  944. 1000. 1118. 1246. 1383. 1530. 1687. 1856. 2037. 2332. 2659. 3019. 3854.
-}}
+SingleDifferentialBinning {
+  150.  175.  200.  225.  250.  275.  300.  330.  360.  390.  420.  450.  480.  510.  540.  570.  600.  640.  680.  720.  760.  800.  850.  900.  950. 1000. 1060. 1120. 1180. 1250. 1320. 1390. 1460. 1530. 1600. 1680. 1760. 1840. 1920. 2000.
+}
 
 # ==================================================================== #
 #

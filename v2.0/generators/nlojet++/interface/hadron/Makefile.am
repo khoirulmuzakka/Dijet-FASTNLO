@@ -22,8 +22,7 @@ pkglib_LTLIBRARIES =
 # Require fastjet
 #
 if HAVE_FASTJET
-#   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNjetEvents.la
-   pkglib_LTLIBRARIES += libInclusiveNjetEvents.la
+   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNjetEvents.la
 endif
 
 #
