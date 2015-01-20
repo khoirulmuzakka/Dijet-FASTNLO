@@ -38,7 +38,7 @@ JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.7              # Jet size parameter: Required for all jets
-ptjmin                         30.               # Minimal jet pT (minimum set in fastjet: 1 GeV)
+ptjmin                         30.               # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           3.0              # Maximal jet rapidity
 Njetmin                         2                # Minimal number of jets required to be in preselected phase space
