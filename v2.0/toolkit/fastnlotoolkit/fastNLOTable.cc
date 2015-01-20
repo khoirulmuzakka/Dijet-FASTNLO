@@ -10,7 +10,7 @@ using namespace std;
 
 // ___________________________________________________________________________________________________
 //fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
-fastNLOTable::fastNLOTable(){
+fastNLOTable::fastNLOTable() : fastNLOBase() {
    SetClassName("fastNLOTable");
 }
 

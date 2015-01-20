@@ -453,7 +453,7 @@ using namespace fastNLO;
 using namespace say;
 
 //______________________________________________________________________________
-fastNLOReader::fastNLOReader(): fastNLOTable() {
+fastNLOReader::fastNLOReader() : fastNLOTable() {
    SetClassName("fastNLOReader");
    fUnits               = fastNLO::kPublicationUnits;
    fMuRFunc             = fastNLO::kScale1;
