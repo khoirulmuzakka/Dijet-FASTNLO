@@ -1371,8 +1371,8 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
 
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       // do interpolation
-      double xmin = std::min(fEvent._x1,fEvent._x2);
-      double xmax = std::max(fEvent._x1,fEvent._x2);
+      double xmin = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::min(fEvent._x1,fEvent._x2) : fEvent._x1;
+      double xmax = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::max(fEvent._x1,fEvent._x2) : fEvent._x2;
       vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
       vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
 
@@ -1392,18 +1392,28 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
             v2d& stm1 = st[is][nmu[m1].first];
             for (unsigned int p = 0 ; p<events[is].size() ; p++) {
                double wgt = events[is][p]._w * nmu[m1].second / BinSize[ObsBin];
-               for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
-                  for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
-                     int xmaxbin = nxup[x1].first;
-                     int xminbin = nxlo[x2].first;
-                     int proc = events[is][p]._p;
-                     HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
-                     int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
-//                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
-//                   double& sti = stm1[ixHM][proc];
-//                   sti = ww;  // this assignment is time consuming ?!
-                     stm1[ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
-//                   c->SigmaTilde[ObsBin][is][nmu[m1].first][ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
+// .......................................................................................
+	       for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
+		  for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
+		     int p = fEvent._p;
+		     int xminbin = nxlo[x1].first;
+		     int xmaxbin = nxup[x2].first;
+		     int proc = events[is][p]._p;
+		     HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
+		     int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+                     stm1[ixHM][proc] += nxlo[x1].second * nxup[x2].second * wgt;//nmu[m1].second * wp[p];
+//                for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
+//                   for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
+//                      int xmaxbin = nxup[x1].first;
+//                      int xminbin = nxlo[x2].first;
+//                      int proc = events[is][p]._p;
+//                      HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
+//                      int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+// //                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
+// //                   double& sti = stm1[ixHM][proc];
+// //                   sti = ww;  // this assignment is time consuming ?!
+//                      stm1[ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
+// //                   c->SigmaTilde[ObsBin][is][nmu[m1].first][ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
                   }
                }
             }
