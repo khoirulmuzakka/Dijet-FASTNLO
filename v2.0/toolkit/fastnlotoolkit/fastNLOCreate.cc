@@ -1395,7 +1395,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
 // .......................................................................................
 	       for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
 		  for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
-		     int p = fEvent._p;
+		     //int p = fEvent._p;
 		     int xminbin = nxlo[x1].first;
 		     int xmaxbin = nxup[x2].first;
 		     int proc = events[is][p]._p;
