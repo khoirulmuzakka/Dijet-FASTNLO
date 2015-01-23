@@ -85,7 +85,7 @@ extern "C"{
 #include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 // --- fastNLO user: include header file for the jet algorithm
-#include "fnlo_int_nlojet/fj-jets.h"
+#include "fnlo_int_nlojet/fastjet-jets.h"
 
 // --- fastNLO v2.2: define global pointer to fastNLO steering file
 fastNLOCreate *ftable = NULL;
@@ -117,7 +117,7 @@ public:
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
-   fj_jets jetclusfj;
+   fastjet_jets jetclusfj;
 
    // --- define the jet structure
    bounded_vector<lorentzvector<double> > pj;
@@ -392,6 +392,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          ftable->GetParameterFromSteering("obs2max",obsmax[2]);
       }
    }
+   jetclusfj.setup(static_cast<fastjet_jets::JetAlgorithm>(jetalgo), jetsize, overlapthreshold);
 }
 
 // --- fastNLO v2.2: class UserHHC: analyze parton event (called once for each event)
@@ -406,7 +407,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    //     ATTENTION: Scales must always be in GeV!
 
    // apply the jet algorithm to partonic 4-vector array p of NLOJet++
-   pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
+   pj = jetclusfj(p);
    unsigned int nj = pj.upper();
 
    // --- check on minimal and maximal no. of jets
