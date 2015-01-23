@@ -184,12 +184,13 @@ namespace UsefulNlojetTools {
       }
       wt *= coef;
 
-      if(x2>x1){
-         // swap subprocesses 6,7
-         swap(wt[5],wt[6]);
-         for ( int kk = 0 ; kk<7 ; kk ++ )
-            swap(weights[kk][5],weights[kk][6]);
-      }
+      // KR, 23.01.2015: This has been moved to the Toolkit part and will disappear here
+      //      if(x2>x1){
+      // swap subprocesses 6,7
+      //         swap(wt[5],wt[6]);
+      //         for ( int kk = 0 ; kk<7 ; kk ++ )
+      //            swap(weights[kk][5],weights[kk][6]);
+      //      }
 
       for(unsigned int p=0 ; p<nSubproc ; p++){
          // decompose nlojet-event
@@ -262,10 +263,13 @@ namespace UsefulNlojetTools {
       }
       wt *= coef;
 
-      if(x2>x1){
-         // swap subprocesses 6,7
-         swap(wt[5],wt[6]);
-      }
+      // KR, 23.01.2015: This has been moved to the Toolkit part and will disappear here
+      //      if(x2>x1){
+      // swap subprocesses 6,7
+      //         swap(wt[5],wt[6]);
+      //      }
+
+      // KR, 23.01.2015: This is part of the NLOJet++ process definitions (for fixed-scale tables) and remains in the interface
       if (nSubproc==6 ) {
          wt[5] = (wt[5]+wt[6])/2;
          wt[6] = wt[5];
