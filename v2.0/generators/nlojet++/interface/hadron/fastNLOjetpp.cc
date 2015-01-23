@@ -2,7 +2,7 @@
 #include "fastnlotk/fastNLOCreate.h"
 #include <iostream>
 
-namespace fastNLO {
+namespace UsefulNlojetTools {
   unsigned int GetOrderOfRun(const std::basic_string<char>& __file_name);
 }
 
@@ -151,12 +151,10 @@ void FastNLOUserHHC::phys_output(const std::basic_string<char>& fname, unsigned 
 
    say::debug["InitfNLO"] << "---------- InitfNLO called ----------" << endl;
    // --- obtain relevant variables from NLOJet++ command line arguments
-   FastNLOUserHHC::instance->ftable->SetOrderOfAlphasOfCalculation(UsefulNlojetTools::GetOrderOfRun(__file_name));
+   FastNLOUserHHC::instance->ftable->SetOrderOfAlphasOfCalculation(UsefulNlojetTools::GetOrderOfRun(fname));
 
    // --- set fastNLO filename according to NLOJet++ command line arguments
-   string tabFilename = __file_name.c_str();
-   tabFilename += ".tab";
-   FastNLOUserHHC::instance->ftable->SetFilename(tabFilename);
+   FastNLOUserHHC::instance->ftable->SetFilename(fname + ".tab");
 
    read_steering();
 };

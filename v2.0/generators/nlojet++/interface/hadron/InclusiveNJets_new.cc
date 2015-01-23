@@ -56,9 +56,6 @@ using namespace std;
 // --- fastNLO user: include header file for the jet algorithm
 #include "fnlo_int_nlojet/fastjet-jets.h"
 
-// --- fastNLO v2.2: get some info (order, name) from NLOjet++ command line arguments
-void InitfNLO(const std::basic_string<char>& fname);
-
 // --- fastNLO v2.2: define user class to be used with NLOJet++
 class UserHHC : public FastNLOUserHHC {
 public:

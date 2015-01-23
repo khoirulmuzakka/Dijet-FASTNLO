@@ -24,4 +24,8 @@ private:
    double nevents;            // No. of events calculated so far
    unsigned long nwrite;      // Actual no. of events after which to write out the table
    unsigned long nwritemax;   // Maximal no. of events after which to write out the table
+
+protected:
+   // --- fastNLO v2.2: init nloJet++
+   virtual void initfunc(unsigned int);
 };

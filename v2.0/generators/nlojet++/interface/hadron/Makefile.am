@@ -22,7 +22,7 @@ pkglib_LTLIBRARIES =
 # Require fastjet
 #
 if HAVE_FASTJET
-   pkglib_LTLIBRARIES += libInclusiveNJets.la
+   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNJetsNew.la
 # libInclusiveNjetEvents.la
 endif
 
@@ -31,9 +31,10 @@ endif
 #
 # All source files which go into the targets (and have to be distributed)
 # Common sources
-AM_SOURCES = fastNLOjetpp.cc
+AM_SOURCES =
 # Individual sources
-libInclusiveNJets_la_SOURCES       = InclusiveNJets.cc       $(AM_SOURCES)
+libInclusiveNJets_la_SOURCES        = InclusiveNJets.cc       $(AM_SOURCES)
+libInclusiveNJetsNew_la_SOURCES     = InclusiveNJets_new.cc   $(AM_SOURCES) fastNLOjetpp.cc
 #libInclusiveNjetEvents_la_SOURCES  = InclusiveNjetEvents.cc  $(AM_SOURCES)
 # libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
 
