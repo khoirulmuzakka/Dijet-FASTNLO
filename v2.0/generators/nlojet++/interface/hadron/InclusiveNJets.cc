@@ -343,16 +343,11 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       say::error["ScenarioCode"] << "If you really want to mix, the code needs to be adapted." << endl;
       exit(1);
    }
-   // minimal number of jets required to be within preselected jet phase space (for dijets this must be two!)
+   // minimal number of jets required to be within preselected jet phase space (for inclusive jets this must be one!)
    SteeringPars["Njetmin"] = ftable->TestParameterInSteering("Njetmin");
-   Njetmin = 2;
+   Njetmin = 1;
    if ( SteeringPars["Njetmin"] ) {
       ftable->GetParameterFromSteering("Njetmin",Njetmin);
-   }
-   if ( Njetmin < 2 ) {
-      say::error["ScenarioCode"] << "This is a 2+-jet scenario. At least two jets must be present, aborted!" << endl;
-      say::error["ScenarioCode"] << "Please correct the Njetmin requirement. Njetmin = " << Njetmin << endl;
-      exit(1);
    }
 
    // --- fastNLO user: declare and initialize Njet phase space cuts and definitions via steering file
@@ -421,7 +416,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    //            in fj-jets.cc needs to be changed.
    // There should never be more than four jets in NLOJet++
    if (nj < 1) {
-      say::info["ScenarioCode"] << "This event from NLOJet++ has no jets with pT > 1 GeV. Skipped!" << endl;
+      say::debug["ScenarioCode"] << "This event from NLOJet++ has no jets with pT > 1 GeV. Skipped!" << endl;
       return;
    } else if (nj > 4) {
       say::error["ScenarioCode"] << "This event from NLOJet++ has more than four jets, which should never happen. Aborted!" << endl;
@@ -429,12 +424,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // --- give some debug output before selection and sorting
-   if ( say::debug.GetSpeak() ) {
+   if ( say::info.GetSpeak() ) {
       for (unsigned int i=1; i<=nj; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::info["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -451,24 +446,24 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
    // --- give some debug output after selection and sorting
-   if ( say::debug.GetSpeak() ) {
-      say::debug["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+   if ( say::info.GetSpeak() ) {
+      say::info["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
       if ( ! lpseudo ) {
-         say::debug["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::info["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       } else {
-         say::debug["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::info["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       }
       for (unsigned int i=1; i<=njet; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::debug["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::info["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
    // ---- fastNLO v2.2
    // Analyze inclusive jets in jet loop
-   // set one possible scale choice (Attention: Only corrected if jets sorted descending in pT)
+   // set one possible scale choice (Attention: Only correct if jets sorted descending in pT)
    double ptmax = pj[1].perp();
    for (unsigned int k = 1; k <= njet; k++) {
 
