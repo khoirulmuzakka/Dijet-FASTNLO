@@ -17,19 +17,19 @@
 # -------------------------------------------------------------------- #
 ScenarioName fnl2412c_I895742_v23_fix
 ScenarioDescription {
-    "d2sigma-dijet_dMjj_dy_max_[pb_GeV]"
+    "d2sigma-dijet_dMjj_dy_max_[fb_GeV]"
     "CMS_Collaboration"
     "Dijet_Mass"
     "anti-kT_R=0.7"
     "CMS-PAPER-QCD-10-025, arXiv:1104.1693, Phys. Lett. B 700 (2011) 187."
-    "SPIRES_ID=9029460,INSPIRE_RECORD=895742"
+    "RIVET_ID=CMS_2011_I895742/D01-x01-y01,SPIRES_ID=9029460,INSPIRE_RECORD=895742"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
     "If you use this table, please cite:"
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
-PublicationUnits               12                # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
+PublicationUnits               15                # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
