@@ -42,7 +42,7 @@ ptjmin                        150.               # Minimal jet pT
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           5.0              # Maximal jet rapidity
 Njetmin                         3                # Minimal number of jets required to be in preselected phase space
-ycjmax                          2.5              # Maximal rapidity for leading two jets
+ycjjmax                         2.5              # Maximal rapidity for leading two jets
 ptj3min                       150.               # Minimal jet pT for 3rd leading central jet
 
 # -------------------------------------------------------------------- #
