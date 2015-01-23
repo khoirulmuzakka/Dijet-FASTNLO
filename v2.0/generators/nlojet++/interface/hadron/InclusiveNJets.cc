@@ -45,75 +45,27 @@ using namespace nlo;
 using namespace std;
 
 //----- fastNLO -----
-#include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOEvent.h"
-
-//----- declaration of the user defined functions -----
-// --- fastNLO v2.2: interface to NLOJet++: read steering file, set LO of selected process
-void inputfunc(unsigned int&, unsigned int&, unsigned int&);
-// --- fastNLO v2.2: interface to NLOJet++: set cms energy and phase space generator
-void psinput(phasespace_hhc *, double&);
-// --- fastNLO v2.2: interface to NLOJet++: user class
-user_base_hhc * userfunc();
-
-//----- array of the symbols symbols -----
-extern "C"{
-   struct {
-      const char *name;
-      void *address;
-   } user_defined_functions[] =
-      {
-         //   process index: hhc for hadron-hadron --> jets
-         {"procindex", (void *) "hhc"},
-         //   input function
-         {"inputfunc", (void *) inputfunc},
-         //   phase space input function
-         {"psinput", (void *) psinput},
-         //   user defined functions
-         {"userfunc",  (void *) userfunc},
-         //  end of the list
-         {0, 0}
-      };
-}
-
-//------ END OF THE DO-NOT-TOUCH-PART ------
+#include "fastnlotk/fastNLOCreate.h"
+// --- fastNLO v2.2: include header file of interface to NLOJet++
+#include "fastNLOjetpp.h"
+#include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 //------ USER DEFINED PART STARTS HERE ------
-//#include <algorithm>
-
-// --- fastNLO v2.2: include header file of interface to NLOJet++
-#include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 // --- fastNLO user: include header file for the jet algorithm
 #include "fnlo_int_nlojet/fastjet-jets.h"
-
-// --- fastNLO v2.2: define global pointer to fastNLO steering file
-fastNLOCreate *ftable = NULL;
 
 // --- fastNLO v2.2: get some info (order, name) from NLOjet++ command line arguments
 void InitfNLO(const std::basic_string<char>& fname);
 
 // --- fastNLO v2.2: define user class to be used with NLOJet++
-class UserHHC : public basic_user_set<user0d_hhc, user1h_hhc, user2h_hhc> {
+class UserHHC : public FastNLOUserHHC {
 public:
    // --- fastNLO user: evaluate steering file and define physics output (called once before first event)
-   virtual void phys_output(const std::basic_string<char>& fname, unsigned long nsave = 10000UL, bool txt = false);
-   // --- fastNLO v2.2: initialize event counter and storage limit (called once)
-   void initfunc(unsigned int);
+   virtual void read_steering();
    // --- fastNLO user: analyze parton event (called once for each event)
-   void userfunc(const event_hhc&, const amplitude_hhc&);
-   // --- fastNLO v2.2: count events and store table (called after each event)
-   virtual void end_of_event();
-   // 'nsave' defines after how many events the accumulated results are stored into a table file.
-   // The tablefile name is given by 'name-hhc-[born|nlo]-[2jet|3jet].tab', where
-   // - 'name' is specified via the '-n name' option of NLOJet++
-   // - 'born' or 'nlo'  are set according to the '-cborn' resp. '-cnlo' options of NLOJet++
-   // - '2jet' or '3jet' are set according to the 'LeadingOrder' steering parameter.
-   // Existing files with the same name are overwritten.
-   // 'nsave' is initialized with 10000 or, if specified, to the number given via
-   // the command line option '--save-after=nsave'. In fastNLO this number is logarithmically
-   // increased after each table storage by factors of 10 up to nwritemax = 10M such that
-   // at the latest after each 10M events the accumulated results are written on disk.
+   virtual void userfunc(const event_hhc&, const amplitude_hhc&);
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
@@ -121,11 +73,6 @@ private:
 
    // --- define the jet structure
    bounded_vector<lorentzvector<double> > pj;
-
-   // --- fastNLO definitions (not for user)
-   double nevents;            // No. of events calculated so far
-   unsigned long nwrite;      // Actual no. of events after which to write out the table
-   unsigned long nwritemax;   // Maximal no. of events after which to write out the table
 
    // --- fastNLO steering
    bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
@@ -166,6 +113,8 @@ struct fNLOSelector {
    };
 };
 
+FastNLOUserHHC *FastNLOUserHHC::instance = new UserHHC;
+
 // --- fastNLO user: modify the jet sorting in UserHHC::userfunc (default = descending in jet pt)
 struct fNLOSorter {
    bool operator() (const lorentzvector<double> &a, const lorentzvector<double> &b) {return (a.perp() > b.perp());};
@@ -175,16 +124,7 @@ struct fNLOSorter {
 static std::map < std::string, bool > SteeringPars;
 
 // --- fastNLO user: class UserHHC: evaluate steering file and define physics output (called once before first event)
-void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned long __save, bool __txt) {
-
-   //------ DON'T TOUCH THIS PART! ------
-   //   cout << " # INIT:  [UserHHC::phys_output] ---------- UserHHC::phys_output called ----------" << endl;
-   say::debug["UserHHC::phys_output"] << "---------- UserHHC::phys_output called ----------" << endl;
-   say::debug["UserHHC::phys_output"] << "Before: __save = " << __save << ", nwrite = " << nwrite << endl;
-   nwrite = __save;
-   InitfNLO(__file_name);
-   //------ END OF THE DO-NOT-TOUCH-PART ------
-
+void UserHHC::read_steering() {
    // --- fastNLO user:
    //     Here is your playground where you can evaluate the steering file settings.
    //     ATTENTION: Some settings are mandatory for the correct functioning!
@@ -554,114 +494,6 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          } else {
             ftable->FillAllSubprocesses(contribsfix,scen);
          }
-      }
-   }
-}
-
-
-
-//------ DON'T TOUCH THIS PART! ------
-
-// --- fastNLO v2.2: interface to NLOJet++: read steering file, set LO of selected process
-void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
-   // This is the very first routine called from NLOJet++!
-   // It seems that it gets called three times.
-   static int ILOord; // no default
-   if (!ftable) {
-      // The following lines should be printed ONCE. Steering parameters have not yet been read.
-      cout << " # INIT:  [inputfunc] ---------- inputfunc called ----------" << endl;
-      cout << " # INIT:  [inputfunc] ---------- initializing ... ----------" << endl;
-      // --- read in steering and create fastNLO table accordingly
-      // --- ftable is a global constant
-      ftable = new fastNLOCreate("InclusiveNJets.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
-      if ( ftable->TestParameterInSteering("LeadingOrder") ) {
-         ftable->GetParameterFromSteering("LeadingOrder",ILOord);
-      } else {
-         say::error["ScenarioCode"] << "LO of process not defined, aborted!" << endl;
-         exit(1);
-      }
-      //      ftable->SetLoOrder(ILOord); // Not necessary when set via LeadingOrder in steering file
-      cout << " # INIT:  [inputfunc] ---------- LeadingOrder = " << ILOord << " ----------" << endl;
-   }
-
-   // The following line is printed ONLY, when DEBUG print out has been requested by the steering.
-   say::debug["inputfunc"] << "---------- inputfunc called ----------" << endl;
-
-   // Set the number of jets for the LO process according to the steering,
-   // e.g. 2 for hh inclusive jets, 3 for hh 3-jet mass
-   // nj = 1U; // only useful for DIS
-   switch(ILOord) {
-   case 2 :
-      // hh inclusive jets, hh dijets
-      nj = 2U;
-      break;
-   case 3 :
-      // hh 3-jets
-      nj = 3U;
-      break;
-   default :
-      say::error["ScenarioCode"] << "Unknown LO of process defined, aborted!" << endl;
-      exit(1);
-   }
-
-   // Set the number of the (massless!) up and down type flavours (usually, you won´t change that)
-   nu = 2U;
-   nd = 3U;
-}
-
-// --- fastNLO v2.2: interface to NLOJet++: set cms energy and phase space generator
-void psinput(phasespace_hhc *ps, double& s) {
-   //   cout << " # INIT:  [psinput] ---------- psinput called ----------" << endl;
-   say::debug["psinput"] << "---------- psinput called ----------" << endl;
-
-   // --- set the center-of-mass energy squared as read from steering file
-   s = pow(ftable->GetEcms(),2);
-   say::debug["psinput"] << "cms energy read from steering: sqrt(s) = " << ftable->GetEcms() << endl;
-
-   // --- in principle alternative phase space generators can be used
-   // --- we support only the default for now
-   ps = 0;
-}
-
-// --- fastNLO v2.2: interface to NLOJet++: user class
-user_base_hhc * userfunc() {
-   say::debug["userfunc"] << "---------- userfunc called ----------" << endl;
-   return new UserHHC;
-}
-
-// --- fastNLO v2.2: get some info (order, name) from NLOjet++ command line arguments
-void InitfNLO(const std::basic_string<char>& __file_name) {
-   say::debug["InitfNLO"] << "---------- InitfNLO called ----------" << endl;
-   // --- obtain relevant variables from NLOJet++ command line arguments
-   ftable->SetOrderOfAlphasOfCalculation(UsefulNlojetTools::GetOrderOfRun(__file_name));
-
-   // --- set fastNLO filename according to NLOJet++ command line arguments
-   string tabFilename = __file_name.c_str();
-   tabFilename += ".tab";
-   ftable->SetFilename(tabFilename);
-}
-
-// --- fastNLO v2.2: class UserHHC: initialize event counter and storage limit (called once)
-void UserHHC::initfunc(unsigned int) {
-   say::debug["UserHHC::initfunc"] << "---------- UserHHC::initfunc called ----------" << endl;
-   nevents   = 0;
-   nwritemax = 10000000;
-}
-
-// --- fastNLO v2.2: class UserHHC: count events and store table (called after each event)
-void UserHHC::end_of_event() {
-   say::debug["UserHHC::end_of_event"] << "---------- UserHHC::end_of_event called ----------" << endl;
-   // --- count events
-   nevents += 1;
-   // --- store table
-   say::debug["UserHHC::end_of_event"] << " nevents = " << nevents << ", nwrite = " << nwrite << endl;
-   if (( (unsigned long)nevents % nwrite)==0){
-      ftable->SetNumberOfEvents(nevents);
-      ftable->WriteTable();
-      if ( nwrite < nwritemax ) {
-         nwrite *= 10;
-      } else {
-         nwrite = nwritemax;
       }
    }
 }
