@@ -1582,8 +1582,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
    // do interpolation
    //cout<<"try to interpol. ObsBin="<<ObsBin<<" ,x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", mu1="<<Scenario._m1<<", mu2="<<Scenario._m2<<endl;
-   double xmin = std::min(fEvent._x1,fEvent._x2);
-   double xmax = std::max(fEvent._x1,fEvent._x2);
+   double xmin = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::min(fEvent._x1,fEvent._x2) : fEvent._x1;
+   double xmax = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::max(fEvent._x1,fEvent._x2) : fEvent._x2;
    vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
    vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
    vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
@@ -1599,10 +1599,10 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
    // fill grid
    if (CheckWeightIsNan()) return;
-   for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
-      for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
-         int xmaxbin = nxup[x1].first;
-         int xminbin = nxlo[x2].first;
+   for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
+      for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
+         int xminbin = nxlo[x1].first;
+         int xmaxbin = nxup[x2].first;
 	 int p = fEvent._p;
 	 HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
          //HalfMatrixCheck(xminbin,xmaxbin,p);
@@ -1610,7 +1610,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
          for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
             for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-               double wfnlo = nxup[x1].second * nxlo[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+               double wfnlo = nxlo[x1].second * nxup[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                if (std::isnan(wfnlo)) {
                   error[""]<<"wfnlo is a nan."<<endl;
                   fKernX1[ObsBin]->PrintGrid();

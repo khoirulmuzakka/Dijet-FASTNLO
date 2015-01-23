@@ -2006,7 +2006,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
 
-         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+	 //*         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   // determine all pdfs of hadron1
@@ -2019,16 +2019,17 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   int x2bin = 0;
                   for (int x=0; x<nxmax; x++) {
                      // CalcPDFLinearCombination calculats Anti-proton from proton
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
-                     x1bin++;
-                     if (x1bin>x2bin) {
-                        x1bin = 0;
-                        x2bin++;
-                     }
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
+		     x2bin++;
+		     if (x2bin>x1bin) {
+			x2bin = 0;
+			x1bin++;
+		     }
                   }
                }
             }
-         }
+	    //*         }
+	 /*
          else if (fMuFFunc == kScale2) {   // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                // determine all pdfs of hadron1
@@ -2041,12 +2042,12 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   int x1bin = 0;
                   int x2bin = 0;
                   for (int x=0; x<nxmax; x++) {
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
-                     x1bin++;
-                     if (x1bin>x2bin) {
-                        x1bin = 0;
-                        x2bin++;
-                     }
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
+		     x2bin++;
+		     if (x2bin>x1bin) {
+			x2bin = 0;
+			x1bin++;
+		     }
                   }
                }
             }
@@ -2063,16 +2064,17 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   int x1bin = 0;
                   int x2bin = 0;
                   for (int x=0; x<nxmax; x++) {
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x2bin],xfx[x1bin], IsPPBar);
-                     x1bin++;
-                     if (x1bin>x2bin) {
-                        x1bin = 0;
-                        x2bin++;
-                     }
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
+		     x2bin++;
+		     if (x2bin>x1bin) {
+			x2bin = 0;
+			x1bin++;
+		     }
                   }
                }
             }
          }
+	 */
       }
    }
 
@@ -2086,7 +2088,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
          int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
          xfx1.resize(nxbins1);
          xfx2.resize(nxbins2);
-         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+	 //*         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   // determine all pdfs of hadron1
@@ -2108,7 +2110,8 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   }
                }
             }
-         }
+	    //*         }
+	 /*
          else if (fMuFFunc == kScale2) {   // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
@@ -2153,6 +2156,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                }
             }
          }
+	 */
       }
    }
 
