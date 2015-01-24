@@ -44,7 +44,8 @@ namespace UsefulNlojetTools {
       //          Note: Internally, NLOJet++ always uses pb.
       ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
-      ProcConsts.NSubProcessesLO   = 6;
+      // TODO: Default: 6 at LO for 2-jet observable; set to 7 for 3-jet observable
+      ProcConsts.NSubProcessesLO   = 7;
       ProcConsts.NSubProcessesNLO  = 7;
       ProcConsts.NSubProcessesNNLO = 7;
       ProcConsts.IPDFdef1     = 3;
@@ -217,17 +218,24 @@ namespace UsefulNlojetTools {
       return ev;
    }
 
+
+   // KR: Is it possible to get NSubproc from the Toolkit instead?
+   //     This would allow to read the setting as defined in the steering in
+   //     contrast to this duplication ...
+   //     In addition, it had set the # of subprocesses for LO 3-jet to 6 which is presumably wrong!
+   //     ==> fixed now.
    //_______________________________________________________________________
    unsigned int GetNSubproc() {
-      static int nSubproc = -1;
-      if ( nSubproc == -1 ) {
-         // Order should have already been initialized --> redemand with empty string
-         // If order not yet determined --> stop with error message in GetOrderOfRun
-         int nord = GetOrderOfRun("");
-         int loord = GetLoOrder() ;
-         if ( nord == loord ) nSubproc = 6 ;
-         else nSubproc = 7;
-      }
+      static int nSubproc = 7;
+      // static int nSubproc = -1;
+      // if ( nSubproc == -1 ) {
+      //    // Order should have already been initialized --> redemand with empty string
+      //    // If order not yet determined --> stop with error message in GetOrderOfRun
+      //    int nord  = GetOrderOfRun("");
+      //    int loord = GetLoOrder();
+      //    if ( loord == 2 && nord == loord ) nSubproc = 6 ;
+      //    else nSubproc = 7;
+      // }
       return nSubproc;
    }
 
@@ -236,6 +244,7 @@ namespace UsefulNlojetTools {
    vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp, double mu ){
       const int nSubproc = GetNSubproc() ;
       const double Mu2 = mu*mu;
+      //      cout << "AAAAA nSubproc = " << nSubproc << endl;
 
       // make events
       vector<fnloEvent> ev(nSubproc);
