@@ -302,6 +302,7 @@
 //         ADD_NS("age",76,"MyMom")
 //      which adds the value 76 for the label 'age' to the namespace 'MyMom'.
 //
+//      Further methos for appending single elements to arrays or tables also exist.
 //
 //     Printing
 //     ------------------------------
@@ -344,6 +345,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <set>
 //update to unordered_map in C++11 in gcc4.7
 #include <vector>
 #include <sstream>
@@ -366,6 +368,7 @@
 #define INT_COL(X,Y) read_steer::getintcolumn(#X,#Y)
 #define DOUBLE_COL(X,Y) read_steer::getdoublecolumn(#X,#Y)
 #define STRING_COL(X,Y) read_steer::getstringcolumn(#X,#Y)
+#define TABLEHEADER(X) read_steer::gettableheader(#X)
 
 #define INT_TAB(X) read_steer::getinttable(#X)
 #define DOUBLE_TAB(X) read_steer::getdoubletable(#X)
@@ -395,6 +398,7 @@
 #define INT_COL_NS(X,Y,NS) read_steer::getintcolumn(#X,#Y,NS)
 #define DOUBLE_COL_NS(X,Y,NS) read_steer::getdoublecolumn(#X,#Y,NS)
 #define STRING_COL_NS(X,Y,NS) read_steer::getstringcolumn(#X,#Y,NS)
+#define TABLEHEADER_NS(X,NS) read_steer::gettableheader(#X,NS)
 
 #define INT_TAB_NS(X,NS) read_steer::getinttable(#X,NS)
 #define DOUBLE_TAB_NS(X,NS) read_steer::getdoubletable(#X,NS)
@@ -455,6 +459,10 @@ public:
    template <typename T> void AddArray ( const std::string& key, const std::vector<T>& values);
    void AddTable(const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<std::string> >& values);
    template <typename T> void AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values);
+   void AppendToArray(const std::string& key, const std::string& entry);
+   template <typename T> void AppendToArray ( const std::string& key, const T& entry);
+   void AppendToTable(const std::string& key, const std::vector<std::string>& entry);
+   template <typename T> void AppendToTable ( const std::string& key, const std::vector<T>& entry);
    // controls
    void inits(std::string filename);
    int initnmspc(std::ifstream& strm, std::string filename);
@@ -463,9 +471,9 @@ public:
       read_steer::Steering(steerID)->initnmspc(strm,filename); }
 
    // get labels
-   std::vector<std::string> GetAvailableLabels() const;
-   std::vector<std::string> GetAvailableArrrays() const;
-   std::vector<std::string> GetAvailableTables() const;
+   std::set<std::string> GetAvailableLabels() const;
+   std::set<std::string> GetAvailableArrrays() const;
+   std::set<std::string> GetAvailableTables() const;
 
    static bool CheckNumber(const std::string& str);
    static bool CheckInt(const std::string& str);
@@ -569,6 +577,12 @@ public:
    template <typename T>
    static void addtable(const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values,std::string steerID=read_steer::stdID) {
       read_steer::Steering(steerID)->AddTable(key,header,values); }
+   template <typename T>
+   static void appendtoarray(const std::string& key, const T& entry, std::string steerID=read_steer::stdID) {
+      read_steer::Steering(steerID)->AppendToArray(key,entry); }
+   template <typename T>
+   static void appendtotable(const std::string& key, const std::vector<T>& entry, std::string steerID=read_steer::stdID) {
+      read_steer::Steering(steerID)->AppendToTable(key,entry); }
 
    static void printall();                                              // print values of all files
    static void print(std::string steerID=read_steer::stdID);                         // print values
@@ -608,6 +622,25 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
       }
    }   
    AddTable(key,header,str);
+}
+
+template <typename T> 
+void read_steer::AppendToArray ( const std::string& key, const T& entry ) {
+   std::stringstream ss;
+   ss << entry;
+   std::string str=ss.str();
+   AppendToArray(key,entry);
+}
+
+template <typename T> 
+void read_steer::AppendToTable ( const std::string& key, const std::vector<T>& entry ) {
+   std::vector<std::string > str(entry.size());
+   for ( unsigned int j = 0 ; j<entry.size() ; j++ ) {
+      std::stringstream ss;
+      ss << entry[j];
+      str[j]=ss.str();
+   }
+   AppendToTable(key,entry);
 }
 
 #endif

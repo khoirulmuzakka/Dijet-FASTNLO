@@ -394,6 +394,26 @@ void read_steer::AddTable(const string& key, const vector<string>& header, const
 }
 
 
+void read_steer::AppendToArray(const std::string& key, const std::string& entry) {
+   // append one element to an array
+   if (ffields.count(key)==0 )
+      cout<<" # read_steer. Could not find array '"<<key<<"' yet. Ingoring call please use ::AddArray() instead."<<endl;
+   else 
+      ffields[key].push_back(entry);   
+}
+
+
+void read_steer::AppendToTable(const std::string& key, const std::vector<std::string>& entry){
+   // append one element to a table
+   if (ftableheaders.count(key)==0 )
+      cout<<" # read_steer. Could not find table '"<<key<<"' yet. Ingoring call please use ::AddTable() instead."<<endl;
+   else {
+      //cout<<" # read_steer. Append row with "<<entry.size()<<" entries to table '"<<key<<"'."<<endl;
+      ftables[key].push_back(entry);
+   }
+}
+
+
 bool read_steer::CheckNumber(const string& str) {
    return str.find_first_of("-+1234567890")==0;
 }
@@ -750,31 +770,28 @@ bool read_steer::parsecommandline(int argc,char** argv) {
 }
 
 
-vector<string> read_steer::GetAvailableLabels() const {
-   std::vector<std::string> ret(fstrings.size());
+set<string> read_steer::GetAvailableLabels() const {
+   std::set<std::string> ret;
    std::map<std::string,std::string> map = fstrings;
-   unsigned int i=0;
    for (std::map<std::string,std::string>::iterator it=map.begin(); it!=map.end(); ++it)
-      ret[i++] = it->first;
+      ret.insert(it->first);
    return ret;
 }
 
 
-vector<string> read_steer::GetAvailableArrrays() const {
-   std::vector<std::string> ret(fstrings.size());
+set<string> read_steer::GetAvailableArrrays() const {
+   std::set<std::string> ret;
    std::map<std::string,std::vector<std::string> > map = ffields;
-   unsigned int i=0;
    for (std::map<std::string,std::vector<std::string> >::iterator it=map.begin(); it!=map.end(); ++it)
-      ret[i++] = it->first;
+      ret.insert(it->first);
    return ret;
 }
 
 
-vector<string> read_steer::GetAvailableTables() const {
-   std::vector<std::string> ret(fstrings.size());
+set<string> read_steer::GetAvailableTables() const {
+   std::set<std::string> ret;
    std::map<std::string,std::vector<std::vector<std::string> > > map = ftables;
-   unsigned int i=0;
    for (std::map<std::string,std::vector<std::vector<std::string> > > ::iterator it=map.begin(); it!=map.end(); ++it)
-      ret[i++] = it->first;
+      ret.insert(it->first);
    return ret;
 }
