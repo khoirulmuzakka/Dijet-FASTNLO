@@ -275,6 +275,7 @@ AC_CONFIG_FILES([Makefile
                  interface/data/InclusiveNJetEvents/Makefile
                  interface/data/DijetMass/Makefile
                  interface/data/DijetAngular/Makefile
+                 interface/data/RivetAdditions/Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
                  interface/include/fnlo_int_nlojet/Makefile

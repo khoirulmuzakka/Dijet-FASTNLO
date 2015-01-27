@@ -1,9 +1,10 @@
 #                                               -*- Automake -*-
 # -----------------------------------------------------------------------------
 #
-# K. Rabbertz, 17.01.2015
+# K. Rabbertz, 27.01.2015
 #
-# NLOJet++ interface to fastNLO toolkit
+# Additions to provide fastNLO vs. data comparisons even though
+# Rivet analysis not available
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
@@ -12,9 +13,11 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Data files to be distributed
 #
-fnlo_steering_files = fnl2412c_I895742_v23_fix.str fnl2412c_I895742_v23_flex.str fnl2412e_I1208923_v23_fix.str
-pkgdata_DATA = $(fnlo_steering_files)
-EXTRA_DIST =   $(fnlo_steering_files)
+fnlorivetdir = $(datadir)/fastnlo_rivet_additions
+rivet_analysis_files = ATLAS_2013_I1228693.info ATLAS_2013_I1228693.plot ATLAS_2013_I1228693.yoda \
+	CMS_2011_I895742.info CMS_2011_I895742.plot CMS_2011_I895742.yoda
+fnlorivet_DATA = $(rivet_analysis_files)
+EXTRA_DIST     = $(rivet_analysis_files)
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

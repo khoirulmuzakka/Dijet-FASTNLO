@@ -1,0 +1,45 @@
+Name: ATLAS_2013_I1228693
+Year: 2013
+Summary: Measurement of the inclusive jet cross section in pp collisions at sqrt(s) = 2.76 TeV and comparison to the inclusive jet cross section at sqrt(s) = 7 TeV using the ATLAS detector
+Experiment: ATLAS
+Collider:   LHC 2.76 TeV
+InspireID:  1228693
+Status:     UNVALIDATED
+Authors:
+ - Klaus Rabbertz <klaus.rabbertz@cern.ch>
+References:
+ - EPJC (2013) 73 2509
+RunInfo:
+  pp QCD jet production with a minimum jet pT of 20 GeV at 2.76 TeV.
+NumEvents:  10000000
+Beams:    [p+, p+]
+Energies: [2760]
+PtCuts:   [20]
+Description:
+This paper reports the measurement of inclusive jet cross sections in proton-proton collisions at a
+centre-of-mass energy of 2.76 TeV using a data sample of integrated luminosity of 0.20 pb-1 collected in 2011.
+Jets are identified using the anti-kt algorithm with two radius parameters (0.4 and 0.6). The cross sections are
+presented as a function of the jet transverse momentum and rapidity covering jets from 20-430 GeV in transverse momentum
+and |rapidity| < 4.4. The data are also compared with previous ATLAS 7 TeV cross sections as functions of PT and XT.
+The main tables below show the results correlated and uncorrelated systematic errors individually combined, as presented
+in the plots in the paper. The first table below gives access to the complete tables with the various sources of
+systematic error individually presented. Correlations over the rapidity bins and to the 7 TeV data are shown in table 1
+of the paper and repeated below.
+NeedCrossSection: yes
+BibKey: Aad:2010wv
+BibTeX: '@ARTICLE{Aad:2013lpa,
+  author = {Aad, Georges and others},
+  title = {Measurement of the inclusive jet cross section in $pp$ collisions at $\sqrt{s}$=2.76 {TeV} and comparison to the inclusive jet cross section at $\sqrt{s}$=7 {TeV} using the {ATLAS} detector},
+  journal = {Eur. Phys. J. C},
+  year = {2013},
+  volume = {73},
+  pages = {2509},
+  archiveprefix = {arXiv},
+  collaboration = {ATLAS},
+  doi = {10.1140/epjc/s10052-013-2509-4},
+  eprint = {1304.4739},
+  primaryclass = {hep-ex},
+  reportnumber = {CERN-PH-EP-2013-036},
+  slaccitation = {%%CITATION = ARXIV:1304.4739;%%}
+}
+'

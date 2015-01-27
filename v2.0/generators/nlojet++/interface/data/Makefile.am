@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular
+SUBDIRS = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular RivetAdditions
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

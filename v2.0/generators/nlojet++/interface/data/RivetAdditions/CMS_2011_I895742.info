@@ -1,0 +1,39 @@
+Name: CMS_2011_I895742
+Year: 2011
+Summary: Measurement of the differential dijet production cross section in proton-proton collisions at √s=7 TeV
+Experiment: CMS
+Collider:   LHC 7.0 TeV
+InspireID:  895742
+Status:     UNVALIDATED
+Authors:
+ - Klaus Rabbertz <klaus.rabbertz@cern.ch>
+References:
+ - Phys. Lett. B 700 (2011) 187.
+RunInfo:
+  pp QCD dijet production with a minimum jet pT of 30 GeV at 7 TeV.
+NumEvents:  10000000
+Beams:    [p+, p+]
+Energies: [7000]
+PtCuts:   [30]
+Description:
+A measurement of the double-differential inclusive dijet production cross section in proton-proton collisions
+at sqrt(s)=7 TeV is presented as a function of the dijet invariant mass and jet rapidity. The data correspond
+to an integrated luminosity of 36 inverse picobarns, recorded with the CMS detector at the LHC. The measurement
+covers the dijet mass range 0.2 TeV to 3.5 TeV and jet rapidities up to |y|=2.5. It is found to be in
+good agreement with next-to-leading-order QCD predictions.
+NeedCrossSection: yes
+BibKey: Chatrchyan:2011qta
+BibTeX: '@ARTICLE{Chatrchyan:2011qta,
+  author = {Chatrchyan, Serguei and others},
+  title = {Measurement of the differential dijet production cross section in proton-proton collisions at $\sqrt{s}=7$ {TeV}},
+  journal = {Phys. Lett. B},
+  year = {2011},
+  volume = {700},
+  pages = {187},
+  archiveprefix = {arXiv},
+  collaboration = {CMS},
+  doi = {10.1016/j.physletb.2011.05.027},
+  eprint = {1104.1693},
+  primaryclass = {hep-ex},
+  slaccitation = {%%CITATION = ARXIV:1104.1693;%%}
+}'
