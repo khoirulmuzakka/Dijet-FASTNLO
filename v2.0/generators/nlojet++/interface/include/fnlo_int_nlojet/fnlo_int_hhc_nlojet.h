@@ -44,7 +44,17 @@ namespace UsefulNlojetTools {
       //          Note: Internally, NLOJet++ always uses pb.
       ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
-      // TODO: Default: 6 at LO for 2-jet observable; set to 7 for 3-jet observable
+      // KR: Merging q(qbar)g and gq(qbar) subprocesses 5 and 6 into one is
+      //     ONLY correct at the statistical limit of large numbers of such events!
+      //     Effectively, one generated event is reinterpreted as half of a q(qbar)g and half
+      //     of a gq(qbar) event such that direct comparisons with reference calculations
+      //     are NOT possible any more event-by-event, but only statistically with large numbers.
+      //     On the other hand, the gain in table size is only of the order of -15%.
+      //     ==> Therefore:
+      //     New default: NSubProcessesLO always 7!
+      //     Old default: NSubProcessesLO = 6 at LO for 2-jet observable, 7 otherwise
+      // Attention: GetNSubproc(), see below, has to changed accordingly!
+      // TODO: Search for more elegant solution here ...
       ProcConsts.NSubProcessesLO   = 7;
       ProcConsts.NSubProcessesNLO  = 7;
       ProcConsts.NSubProcessesNNLO = 7;
@@ -55,7 +65,7 @@ namespace UsefulNlojetTools {
       ProcConsts.IPDFdef3NNLO = 2;
       // Default: Half-matrix storage
       ProcConsts.NPDFDim = 1;
-      // To test full-matrix storage uncomment the following line or set in steering explicitly!
+      // To test full-matrix storage uncomment the following line or set NPDFDim in steering explicitly!
       //      ProcConsts.NPDFDim = 2;
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(5,6));
       ProcConsts.AsymmetricProcesses.push_back(std::make_pair(6,5));
@@ -222,8 +232,10 @@ namespace UsefulNlojetTools {
    // KR: Is it possible to get NSubproc from the Toolkit instead?
    //     This would allow to read the setting as defined in the steering in
    //     contrast to this duplication ...
-   //     In addition, it had set the # of subprocesses for LO 3-jet to 6 which is presumably wrong!
-   //     ==> fixed now.
+   //     In addition, this method had set the # of subprocesses for LO 3-jet to 6
+   //     which was never tried before ...
+   //     ==> Fixed back to 7 now.
+   //     New default: NSubProcesses always 7!
    //_______________________________________________________________________
    unsigned int GetNSubproc() {
       static int nSubproc = 7;
