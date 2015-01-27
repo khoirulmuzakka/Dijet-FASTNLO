@@ -85,7 +85,7 @@ extern "C"{
 #include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 // --- fastNLO user: include header file for the jet algorithm
-#include "fnlo_int_nlojet/fj-jets.h"
+#include "fnlo_int_nlojet/fastjet-jets.h"
 
 // --- fastNLO v2.2: define global pointer to fastNLO steering file
 fastNLOCreate *ftable = NULL;
@@ -117,7 +117,7 @@ public:
 
 private:
    // --- fastNLO user: define the jet algorithm (for the choice of included header file above)
-   fj_jets jetclusfj;
+   fastjet_jets jetclusfj;
 
    // --- define the jet structure
    bounded_vector<lorentzvector<double> > pj;
@@ -437,6 +437,7 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          ftable->GetParameterFromSteering("obs2max",obsmax[2]);
       }
    }
+   jetclusfj.setup(static_cast<fastjet_jets::JetAlgorithm>(jetalgo), jetsize, overlapthreshold);
 }
 
 // --- fastNLO v2.2: class UserHHC: analyze parton event (called once for each event)
@@ -451,7 +452,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    //     ATTENTION: Scales must always be in GeV!
 
    // apply the jet algorithm to partonic 4-vector array p of NLOJet++
-   pj = jetclusfj(p,jetalgo,jetsize,overlapthreshold);
+   pj = jetclusfj(p);
    unsigned int nj = pj.upper();
 
    // --- check on minimal and maximal no. of jets
@@ -562,7 +563,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          break;
       default :
          say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
-         say::error["ScenarioCode"] << "DimLabel[" << i << "0] = " << DimLabel[i] << endl;
+         say::error["ScenarioCode"] << "DimLabel[" << i << "] = " << DimLabel[i] << endl;
          say::error["ScenarioCode"] << "Please complement this scenario to include the requested observable." << endl;
          exit(1);
       }
@@ -654,7 +655,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       cout << " # INIT:  [inputfunc] ---------- initializing ... ----------" << endl;
       // --- read in steering and create fastNLO table accordingly
       // --- ftable is a global constant
-      ftable = new fastNLOCreate("InclusiveNjetEvents.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
+      ftable = new fastNLOCreate("InclusiveNJetEvents.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
       if ( ftable->TestParameterInSteering("LeadingOrder") ) {
          ftable->GetParameterFromSteering("LeadingOrder",ILOord);
       } else {
