@@ -23,7 +23,7 @@ using namespace std;
 
 map<string,read_steer*>* read_steer::instances = NULL;
 //const string& read_steer::stdID = *(new string("SingleFileMode"));
-const string read_steer::stdID = "SingleFileMode";
+string read_steer::stdID = "SingleFileMode";
 
 read_steer::read_steer() :
    str_sep(" \t")     , str_cmt("#"),

@@ -418,8 +418,8 @@
 
 class read_steer {
 
-public:
-   static const std::string stdID;
+private:
+   static std::string stdID;
 
 public:
    ~read_steer() {;};
@@ -448,7 +448,7 @@ public:
    std::vector<double> getdtcol(const std::string& label,const std::string& col);
    std::vector<std::string> getstcol(const std::string& label,const std::string& col);
 
-   // check if key exists                                                                                                                                                            
+   // check if key exists
    bool exist(const std::string& label) {
       bool ret = ( fstrings.count(label) > 0 || ffields.count(label) > 0 || ftables.count(label) > 0 );
       return ret;}
@@ -477,6 +477,9 @@ public:
 
    static bool CheckNumber(const std::string& str);
    static bool CheckInt(const std::string& str);
+
+   static const std::string& GetDefaultNamespace(){ return stdID;}
+   static void SetDefaultNamespace(const std::string& nspc){ stdID = nspc;}
 
 private:
    read_steer();
