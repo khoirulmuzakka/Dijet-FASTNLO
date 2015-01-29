@@ -169,21 +169,10 @@ namespace UsefulNlojetTools {
          ev[p].SetX2( x2 );
       }
 
+      static const double coef = 389385730.;
       // weights
       double weights[7][7]; // weights[amp_i][proc]
       for ( int kk = 0 ; kk<7 ; kk ++ )  for ( unsigned int p = 0 ; p<nSubproc ; p ++ ) weights[kk][p] = 0;
-
-      // access perturbative coefficients
-      nlo::amplitude_hhc::contrib_type itype = amp.contrib();
-      nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,dummyMu2,2,3); // 1/x1/x2
-      static const double coef = 389385730.;
-
-      for ( int kk = 0 ; kk<7 ; kk ++ ) {
-         for ( unsigned int fid = 0 ; fid<nSubproc ; fid ++ ) {
-            int nid = FastnloIdToNlojetIdHHC(fid);
-            weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
-         }
-      }
 
       // todo: calculate wt and wtorg from 'weights'
       nlo::weight_hhc wtorg = amp(dummypdf,dummyMu2,dummyMu2, 1.);
@@ -195,13 +184,16 @@ namespace UsefulNlojetTools {
       }
       wt *= coef;
 
-      // KR, 23.01.2015: This has been moved to the Toolkit part and will disappear here
-      //      if(x2>x1){
-      // swap subprocesses 6,7
-      //         swap(wt[5],wt[6]);
-      //         for ( int kk = 0 ; kk<7 ; kk ++ )
-      //            swap(weights[kk][5],weights[kk][6]);
-      //      }
+      // access perturbative coefficients
+      nlo::amplitude_hhc::contrib_type itype = amp.contrib();
+      nlo::weight_hhc cPDF = dummypdf.pdf(x1,x2,dummyMu2,2,3); // 1/x1/x2
+
+      for ( int kk = 0 ; kk<7 ; kk ++ ) {
+         for ( unsigned int fid = 0 ; fid<nSubproc ; fid ++ ) {
+            int nid = FastnloIdToNlojetIdHHC(fid);
+            weights[kk][fid] = amp._M_fini.amp[kk][nid]*coef*cPDF[nid];
+         }
+      }
 
       for(unsigned int p=0 ; p<nSubproc ; p++){
          // decompose nlojet-event
@@ -256,7 +248,6 @@ namespace UsefulNlojetTools {
    vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc& p , const amplitude_hhc& amp, double mu ){
       const int nSubproc = GetNSubproc() ;
       const double Mu2 = mu*mu;
-      //      cout << "AAAAA nSubproc = " << nSubproc << endl;
 
       // make events
       vector<fnloEvent> ev(nSubproc);
