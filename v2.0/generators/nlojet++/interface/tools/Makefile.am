@@ -18,7 +18,7 @@ pkglib_LTLIBRARIES = libnlojetpptools.la
 #
 # All source files which go into the targets (and have to be distributed)
 # Common sources
-AM_SOURCES =
+#AM_SOURCES =
 # Individual sources
 libnlojetpptools_la_SOURCES = pdf-hhc-dummy.cc fnlo_int_hhc_nlojet.cc
 
@@ -33,7 +33,9 @@ libnlojetpptools_la_SOURCES = pdf-hhc-dummy.cc fnlo_int_hhc_nlojet.cc
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 # All targets
-AM_CXXFLAGS = -g -O2 -Wall -I${NLOJETINCLUDEPATH} `${FNLOTOOLKITBINPATH}/fnlo-tk-config --cppflags` -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
+AM_CXXFLAGS = -g -O2 -Wall
+AM_CXXFLAGS += -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
+AM_CXXFLAGS += -I${NLOJETINCLUDEPATH} `${FNLOTOOLKITBINPATH}/fnlo-tk-config --cppflags`
 # Debug flags
 # AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall -I${NLOJETINCLUDEPATH} `${FNLOTOOLKITBINPATH}/fnlo-tk-config --cppflags` -I$(srcdir)/../include -I$(top_builddir)/../include -I$(top_srcdir)/../include
 
