@@ -279,6 +279,7 @@ AC_CONFIG_FILES([Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
                  interface/include/fnlo_int_nlojet/Makefile
+                 interface/tools/Makefile
                  interface/jetalgos/Makefile
                 ])
 

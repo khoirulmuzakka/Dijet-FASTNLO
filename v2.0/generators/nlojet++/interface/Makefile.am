@@ -9,7 +9,7 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 # Nothing to do here, just go to subdirectories
-SUBDIRS = data include jetalgos hadron
+SUBDIRS = data include tools jetalgos hadron
 #
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

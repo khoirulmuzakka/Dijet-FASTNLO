@@ -22,7 +22,7 @@ pkglib_LTLIBRARIES =
 # Require fastjet
 #
 if HAVE_FASTJET
-   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNJetEvents.la
+   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNJetEvents.la libInclusiveNJetsNew.la
 endif
 
 #
@@ -33,7 +33,7 @@ endif
 AM_SOURCES =
 # Individual sources
 libInclusiveNJets_la_SOURCES       = InclusiveNJets.cc       $(AM_SOURCES)
-#libInclusiveNJetsNew_la_SOURCES     = InclusiveNJets_new.cc   $(AM_SOURCES) fastNLOjetpp.cc
+libInclusiveNJetsNew_la_SOURCES    = InclusiveNJets_new.cc   $(AM_SOURCES) fastNLOjetpp.cc
 libInclusiveNJetEvents_la_SOURCES  = InclusiveNJetEvents.cc  $(AM_SOURCES)
 # libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
 
@@ -66,7 +66,9 @@ endif
 # top_builddir for distcheck; top_srcdir for direct linking before install; pkglibdir for after install
 #
 # All targets
-AM_LDFLAGS = -L${top_builddir}/interface/jetalgos/.libs -L${top_srcdir}/interface/jetalgos -L$(pkglibdir) -ljetalgos `${FNLOTOOLKITBINPATH}/fnlo-tk-config --ldflags`
+AM_LDFLAGS = -L${top_builddir}/interface/jetalgos/.libs -L${top_srcdir}/interface/jetalgos -ljetalgos
+AM_LDFLAGS += -L${top_builddir}/interface/tools/.libs -L${top_srcdir}/interface/tools -lnlojetpptools
+AM_LDFLAGS += -L$(pkglibdir) `${FNLOTOOLKITBINPATH}/fnlo-tk-config --ldflags`
 if HAVE_FASTJETCONFIG
    AM_LDFLAGS += `${FASTJETBINPATH}/fastjet-config --libs --plugins`
 else

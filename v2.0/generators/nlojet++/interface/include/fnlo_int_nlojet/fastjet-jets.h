@@ -6,41 +6,41 @@
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/PseudoJet.hh"
 
-using namespace std;
-using namespace nlo;
-
 class fastjet_jets {
 
-   //   private types
-   typedef lorentzvector<double> _Lv;
+  //   private types
+  typedef nlo::lorentzvector<double> _Lv;
 
- public:
-   enum JetAlgorithm
-   {
-     // fastjet base algorithms
-     KT = fastjet::kt_algorithm,
-     CA = fastjet::cambridge_algorithm,
-     antiKT = fastjet::antikt_algorithm,
-     // jet algorithms included via plugins
-     SISCone = 10, CDFMidPointCone = 11, D0RunIICone = 12
-   };
+public:
+  enum JetAlgorithm {
+    // fastjet base algorithms
+    KT = fastjet::kt_algorithm,
+    CA = fastjet::cambridge_algorithm,
+    antiKT = fastjet::antikt_algorithm,
+    // jet algorithms included via plugins
+    SISCone = 10,
+    CDFMidPointCone = 11,
+    D0RunIICone = 12
+  };
 
-   fastjet_jets();
-   fastjet_jets(const JetAlgorithm jetalgo, const double jetsize, const double overlapthreshold);
-   ~fastjet_jets();
-   //   do the clustering and return with the momenta of the jets
-   const bounded_vector<_Lv>& operator()(const event_hhc&);
-   void setup(const JetAlgorithm jetalgo, const double jetsize, const double overlapthreshold);
+  fastjet_jets();
+  fastjet_jets(const JetAlgorithm jetalgo, const double jetsize,
+               const double overlapthreshold);
+  ~fastjet_jets();
+  //   do the clustering and return with the momenta of the jets
+  const nlo::bounded_vector<_Lv> &operator()(const nlo::event_hhc &);
+  void setup(const JetAlgorithm jetalgo, const double jetsize,
+             const double overlapthreshold);
 
- private:
-   //   private data members
-   bounded_vector<_Lv> _M_pj;
-   void reset();
+private:
+  //   private data members
+  nlo::bounded_vector<_Lv> _M_pj;
+  void reset();
 
-   fastjet::JetDefinition* jet_def;
-   fastjet::JetDefinition::Plugin* plugin;
-   vector<fastjet::PseudoJet> input_objects;
-   vector<fastjet::PseudoJet> output_jets;
+  fastjet::JetDefinition *jet_def;
+  fastjet::JetDefinition::Plugin *plugin;
+  std::vector<fastjet::PseudoJet> input_objects;
+  std::vector<fastjet::PseudoJet> output_jets;
 };
 
 #endif

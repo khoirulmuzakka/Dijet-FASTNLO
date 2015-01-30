@@ -4,21 +4,19 @@
 #include <bits/hhc-event.h>
 #include <bits/hep-bounded_vector.h>
 
-using namespace std;
-using namespace nlo;
-
 class fj_jets {
 
-   //   private types
-   typedef lorentzvector<double> _Lv;
+  //   private types
+  typedef nlo::lorentzvector<double> _Lv;
 
- public:
-   //   do the clustering and return with the momenta of the jets
-   const bounded_vector<_Lv>& operator()(const event_hhc&, int, double, double);
+public:
+  //   do the clustering and return with the momenta of the jets
+  const nlo::bounded_vector<_Lv> &operator()(const nlo::event_hhc &, int,
+                                             double, double);
 
- private:
-   //   private data members
-   bounded_vector<_Lv> _M_pj;
+private:
+  //   private data members
+  nlo::bounded_vector<_Lv> _M_pj;
 };
 
 #endif

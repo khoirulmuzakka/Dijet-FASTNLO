@@ -1,33 +1,26 @@
 #ifndef __cone_e_h__
 #define __cone_e_h__ 1
 
-
 #include <bits/hhc-event.h>
 #include <bits/hep-bounded_vector.h>
 
-using namespace std;
-using namespace nlo;
-
-
-class cone_e
-{
+class cone_e {
   //   private types
-  typedef lorentzvector<double> _Lv;
+  typedef nlo::lorentzvector<double> _Lv;
 
- public:
+public:
   //   do the clustering and return with the momenta of the jets
-  const bounded_vector<_Lv>& operator()(const event_hhc&, double);
+  const nlo::bounded_vector<_Lv> &operator()(const nlo::event_hhc &, double);
 
- private:
+private:
   //   private data members
-  bounded_vector<_Lv> _M_p;
-  bounded_vector<_Lv> _M_pj;
-  bounded_vector<_Lv> _M_ax;
+  nlo::bounded_vector<_Lv> _M_p;
+  nlo::bounded_vector<_Lv> _M_pj;
+  nlo::bounded_vector<_Lv> _M_ax;
 
   //   private members
   double _M_pair(int, int, double);
-  void _M_merge(int i, int j) { _M_p[i] += _M_p[j];}
+  void _M_merge(int i, int j) { _M_p[i] += _M_p[j]; }
 };
-
 
 #endif
