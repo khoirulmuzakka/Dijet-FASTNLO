@@ -46,6 +46,7 @@ public:
 
    // ---- Do the cross section calculation ---- //
    void CalcCrossSection();
+   double RescaleCrossSectionUnits(double binsize, int xunits);                         // Rescale according to kAbsoluteUnits and Ipublunits settings
 
    // ---- Getters for results---- //
    vector < double > GetCrossSection();

@@ -1040,47 +1040,20 @@ void fastNLOReader::CalcReferenceCrossSection() {
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
                int xUnits = c->GetIXsectUnits();
-               double unit = 1.;
-               if (fUnits == kAbsoluteUnits) {
-                  // For kAbsoluteUnits remove division by BinSize
-                  unit = BinSize[i];
-               } else {
-                  // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-                  if ( xUnits != Ipublunits ) {
-                     unit = unit / pow(10.,xUnits-Ipublunits);
-                  }
-               }
+               double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
                XSectionRef[i] +=  c->GetSigmaTilde(i,0,0,0,l) * unit / c->GetNevt(i,l) ; // no scalevariations in LO tables
             }
             for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
                int xUnits = c->GetIXsectUnits();
-               double unit = 1.;
-               if (fUnits == kAbsoluteUnits) {
-                  // For kAbsoluteUnits remove division by BinSize
-                  unit = BinSize[i];
-               } else {
-                  // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-                  if ( xUnits != Ipublunits ) {
-                     unit = unit / pow(10.,xUnits-Ipublunits);
-                  }
-               }
+               double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
                XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
             }
             if ( Coeff_NNLO_Ref ) {
                for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
                   fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
                   int xUnits = c->GetIXsectUnits();
-                  double unit = 1.;
-                  if (fUnits == kAbsoluteUnits) {
-                     // For kAbsoluteUnits remove division by BinSize
-                     unit = BinSize[i];
-                  } else {
-                     // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-                     if ( xUnits != Ipublunits ) {
-                        unit = unit / pow(10.,xUnits-Ipublunits);
-                     }
-                  }
+                  double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
                   XSectionRef[i] +=  c->GetSigmaTilde(i,fScalevar,0,0,l) * unit / c->GetNevt(i,l);
                }
             }
@@ -1093,16 +1066,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
       for (unsigned int i=0; i<NObsBin; i++) {
          fastNLOCoeffAddFlex* cLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kLeading];
          int xUnits = cLO->GetIXsectUnits();
-         double unit = 1.;
-         if (fUnits == kAbsoluteUnits) {
-            // For kAbsoluteUnits remove division by BinSize
-            unit = BinSize[i];
-         } else {
-            // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-            if ( xUnits != Ipublunits ) {
-               unit = unit / pow(10.,xUnits-Ipublunits);
-            }
-         }
+         double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cLO->GetNSubproc(); n++) {
             XSectionRefMixed[i]             += cLO->SigmaRefMixed[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit / cLO->GetNevt(i,n);
@@ -1110,16 +1074,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          }
          fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
          xUnits = cNLO->GetIXsectUnits();
-         unit = 1.;
-         if (fUnits == kAbsoluteUnits) {
-            // For kAbsoluteUnits remove division by BinSize
-            unit = BinSize[i];
-         } else {
-            // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-            if ( xUnits != Ipublunits ) {
-               unit = unit / pow(10.,xUnits-Ipublunits);
-            }
-         }
+         unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cNLO->GetNSubproc(); n++) {
             XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
@@ -1290,16 +1245,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    const double L     = log(scalefac);
    const double beta0 = (11.*3.-2.*5)/3.;
    for (unsigned int i=0; i<NObsBin; i++) {
-      double unit = 1.;
-      if (fUnits == kAbsoluteUnits) {
-         // For kAbsoluteUnits remove division by BinSize
-         unit = BinSize[i];
-      } else {
-         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-         if ( xUnits != Ipublunits ) {
-            unit = unit / pow(10.,xUnits-Ipublunits);
-         }
-      }
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = cLO->GetNxmax(i);
       for (int j=0; j<cLO->GetTotalScalenodes(); j++) {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
@@ -1331,16 +1277,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
    const double n     = cLO->GetNpow();
    debug["CalcAposterioriScaleVariationMuF"] << "Npow=" << n <<endl;
    for (unsigned int i=0; i<NObsBin; i++) {
-      double unit = 1.;
-      if (fUnits == kAbsoluteUnits) {
-         // For kAbsoluteUnits remove division by BinSize
-         unit = BinSize[i];
-      } else {
-         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-         if ( xUnits != Ipublunits ) {
-            unit = unit / pow(10.,xUnits-Ipublunits);
-         }
-      }
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = cLO->GetNxmax(i);
       for (int j=0; j<cLO->GetTotalScalenodes(); j++) {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
@@ -1356,6 +1293,8 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
       }
    }
 }
+
+
 //______________________________________________________________________________
 void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    //!
@@ -1372,16 +1311,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
    debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
    for (unsigned int i=0; i<NObsBin; i++) {
-      double unit = 1.;
-      if (fUnits == kAbsoluteUnits) {
-         // For kAbsoluteUnits remove division by BinSize
-         unit = BinSize[i];
-      } else {
-         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-         if ( xUnits != Ipublunits ) {
-            unit = unit / pow(10.,xUnits-Ipublunits);
-         }
-      }
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = c->GetNxmax(i);
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
          for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
@@ -1439,16 +1369,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
    debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
    for (unsigned int i=0; i<NObsBin; i++) {
-      double unit = 1.;
-      if (fUnits == kAbsoluteUnits) {
-         // For kAbsoluteUnits remove division by BinSize
-         unit = BinSize[i];
-      } else {
-         // For kPublicationUnits rescale SigmaTilde to Ipublunits if necessary
-         if ( xUnits != Ipublunits ) {
-            unit = unit / pow(10.,xUnits-Ipublunits);
-         }
-      }
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = c->GetNxmax(i);
       for (int j=0; j<c->GetTotalScalenodes(); j++) {
          double scalefac = fScaleFacMuR/c->GetScaleFactor(scaleVar);
@@ -2915,4 +2836,23 @@ void fastNLOReader::RunFastNLODemo() {
          PrintCrossSectionsDefault(kthc);
       }
    }
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
+   //!
+   //! This method rescales the stored cross section units according to
+   //! the chosen Ipublunits and settings for [kAbsoluteUnits | kPublicationUNits].
+   //!
+   double unit = 1.;
+   // For kAbsoluteUnits remove division by BinSize
+   if (fUnits == kAbsoluteUnits) {
+      unit *= binsize;
+   }
+   // Rescale SigmaTilde to Ipublunits (accounts for potentially different settings in XSectUnits)
+   if ( xunits != Ipublunits ) {
+      unit /= pow(10.,xunits-Ipublunits);
+   }
+   return unit;
 }
