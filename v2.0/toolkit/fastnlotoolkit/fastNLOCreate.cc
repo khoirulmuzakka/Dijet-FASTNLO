@@ -1319,16 +1319,18 @@ int fastNLOCreate::GetBin() {
    const int idiff = GetNumDiffBin();
    // -------------------------------
    // check cache and return if available
-   if (idiff == 1) {
-      if (fLastScen._o[0] == fScenario._o[0]) return fObsBin;
-   } else if (idiff == 2) {
-      if (fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1])  return fObsBin;
-   } else if (idiff == 3) {
-      if (fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] && fLastScen._o[2] == fScenario._o[2])  return fObsBin;
-   } else {
-      error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
+   // KR: Bug fix from Enrico to avoid returning unitialized fObsBin for very first call
+   if ((int)fLastScen._o.size() == idiff) {
+      if (idiff == 1) {
+         if (fLastScen._o[0] == fScenario._o[0]) return fObsBin;
+      } else if (idiff == 2) {
+         if (fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1])  return fObsBin;
+      } else if (idiff == 3) {
+         if (fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] && fLastScen._o[2] == fScenario._o[2])  return fObsBin;
+      } else {
+         error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
+      }
    }
-
 
    // -------------------------------
    // calc bin number and keep Observables
