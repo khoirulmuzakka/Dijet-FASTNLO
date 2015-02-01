@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # fastNLO grid submission archiver
 # Version:
-# 
+#
 # created by K. Rabbertz: 10.12.2007
 # last modified:
 #
@@ -85,25 +85,25 @@ if ( $vers == 1 ) {
     chomp $nloexe;
 
     my $cmd = "tar cfz $arcname --exclude .svn ".
-	"@gcclibs @njlibs @fjlibs @fjplugs @fnlibs1 @fnlibs2 $nloexe";
+        "@gcclibs @njlibs @fjlibs @fjplugs @fnlibs1 @fnlibs2 $nloexe";
     if ( -d "lib64" ) {
-	my @libs64 = `find lib64 -follow -name \*.so\*`;
-	chomp @libs64;
-	$cmd .= " @libs64";
+        my @libs64 = `find lib64 -follow -name \*.so\*`;
+        chomp @libs64;
+        $cmd .= " @libs64";
     }
     if ( $pdf eq "CTEQ" ) {
-	my @ctqlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name ctq61.00.tbl`;
-	chomp @ctqlnk;
-	my @ctqtbl = `find fastNLO*/trunk/v1.4/author1c/common -name ctq61.00.tbl`;
-	chomp @ctqtbl;
-	my @comlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name common`;
-	chomp @comlnk;
-	$cmd .= " @ctqlnk @ctqtbl @comlnk";
-#	$cmd .= " fastNLO/trunk/v1.4/author1c/common/".
-#	    " fastNLO/trunk/v1.4/author1c/hadron/common".
-#	    " fastNLO/trunk/v1.4/author1c/hadron/ctq61.00.tbl";
+        my @ctqlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name ctq61.00.tbl`;
+        chomp @ctqlnk;
+        my @ctqtbl = `find fastNLO*/trunk/v1.4/author1c/common -name ctq61.00.tbl`;
+        chomp @ctqtbl;
+        my @comlnk = `find fastNLO*/trunk/v1.4/author1c/hadron -name common`;
+        chomp @comlnk;
+        $cmd .= " @ctqlnk @ctqtbl @comlnk";
+#       $cmd .= " fastNLO/trunk/v1.4/author1c/common/".
+#           " fastNLO/trunk/v1.4/author1c/hadron/common".
+#           " fastNLO/trunk/v1.4/author1c/hadron/ctq61.00.tbl";
     } elsif ( $pdf eq "LHAPDF" ) {
-	$cmd .= " lhapdf/lib";
+        $cmd .= " lhapdf/lib";
     }
     my $ret = system("$cmd");
     if ( $ret ) {die "fastprep.pl: ERROR! Could not create archive $arcname: $ret\n";}
@@ -134,36 +134,43 @@ if ( $vers == 1 ) {
 #    print "fastprep.pl: Adding system lib(s) @sodeps if not yet done.\n";
 # Find all libs and links corresponding to the detected sodeps ...
 #    foreach my $sodep ( @sodeps ) {
-#	my $dir = `dirname $sodep`;
-#	chomp $dir;
-#	print "dir $dir\n";
-#	my $lib = `basename $sodep`;
-#	chomp $lib;
-#	print "lib $lib\n";
-#	my @parts = split(/\./,$lib);
-#	print "parts @parts\n";
-#	my @addlibs = `find $dir -maxdepth 1 -name $parts[0].so\*`;
-#	print "addlibs @addlibs\n";
-#	chomp @addlibs;
-#	foreach my $copy ( @addlibs ) {
-#	    my $lib = `basename $copy`;
-#	    chomp $lib;
-#	    if (! -e "lib/$lib" ) {
-#		my $cmd = "cp $copy lib";
-#		my $ret = system("$cmd");
-#		if ( $ret ) {print "fastprep.pl: Warning! ".
-#				 "Copying system lib $copy failed.\n"}
-#	    }
-#	}
+#       my $dir = `dirname $sodep`;
+#       chomp $dir;
+#       print "dir $dir\n";
+#       my $lib = `basename $sodep`;
+#       chomp $lib;
+#       print "lib $lib\n";
+#       my @parts = split(/\./,$lib);
+#       print "parts @parts\n";
+#       my @addlibs = `find $dir -maxdepth 1 -name $parts[0].so\*`;
+#       print "addlibs @addlibs\n";
+#       chomp @addlibs;
+#       foreach my $copy ( @addlibs ) {
+#           my $lib = `basename $copy`;
+#           chomp $lib;
+#           if (! -e "lib/$lib" ) {
+#               my $cmd = "cp $copy lib";
+#               my $ret = system("$cmd");
+#               if ( $ret ) {print "fastprep.pl: Warning! ".
+#                                "Copying system lib $copy failed.\n"}
+#           }
+#       }
 #    }
 
     my @solibs  = `find lib -follow -name \*.so\*`;
     chomp @solibs;
     my @lalibs  = `find lib -follow -name \*.la\*`;
     chomp @lalibs;
-    
-    my $cmd = "tar cfz $arcname ".
-	"@solibs @lalibs bin/nlojet++";
+
+# Exclude root libs to save space
+    my @libs;
+    foreach my $lib ( @lalibs, @solibs ) {
+        if (! ($lib =~ m/root/ )) {
+            push @libs, $lib;
+        }
+    }
+
+    my $cmd = "tar cfz $arcname @libs bin/nlojet++";
     my $ret = system("$cmd");
     if ( $ret ) {die "fastprep.pl: ERROR! Could not create archive $arcname: $ret\n";}
 }
