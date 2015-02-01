@@ -12,7 +12,9 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Data files to be distributed
 #
-fnlo_steering_files = fnl2732numa_I1230937_v23_fix.str fnl2732dena_I1230937_v23_fix.str
+# TBD Doesn't work for distribution for unknown reason in distcheck
+#fnlo_steering_files = fnl2732numa_I1230937_v23_fix.str fnl2732dena_I1230937_v23_fix.str
+fnlo_steering_files =
 pkgdata_DATA = $(fnlo_steering_files)
 EXTRA_DIST =   $(fnlo_steering_files)
 
