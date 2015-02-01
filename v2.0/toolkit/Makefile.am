@@ -26,6 +26,7 @@ dist-hook:
 
 # Installation of DOXYGEN documentation
 # TBD: Docu is always remade! Check tag file mechanism.
+# TBD: Remove doxygen directory @ maintainer-clean.
 if HAVE_DOXYGEN
 if DX_COND_doc
 include aminclude.am
