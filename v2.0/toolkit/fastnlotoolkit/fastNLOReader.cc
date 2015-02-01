@@ -930,7 +930,7 @@ vector < double > fastNLOReader::GetScaleFactors() const {
 string fastNLOReader::GetScaleDescription(const ESMOrder eOrder, int iScale) const {
    //! Get label of scale iScale for order eOrder of the fixed order calculation.
    fastNLOCoeffAddBase* coeff = NULL;
-   if (eOrder < BBlocksSMCalc[kFixedOrder].size())
+   if (eOrder < (int)BBlocksSMCalc[kFixedOrder].size())
       coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
    else {
       error["GetScaleDescription"]<<"Requested contribution not found." << endl;
@@ -943,7 +943,7 @@ string fastNLOReader::GetScaleDescription(const ESMOrder eOrder, int iScale) con
 double fastNLOReader::GetNevt(const ESMOrder eOrder) const {
    //! Get label of scale iScale for order eOrder of the fixed order calculation.
    fastNLOCoeffAddBase* coeff = NULL;
-   if (eOrder < BBlocksSMCalc[kFixedOrder].size())
+   if (eOrder < (int)BBlocksSMCalc[kFixedOrder].size())
       coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
    else {
       error["GetScaleDescription"]<<"Requested contribution not found." << endl;
