@@ -61,7 +61,7 @@ public:
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}                    //!< The number of subprocesses (channels)
    const vector<double>& GetScaleVariations() const { return fScaleFac; }                       //!< Get list of scale variations
 
-   void WriteTable(string filename);                                                            //!< Write fastNLO table to file <filename>
+   void WriteTable(string filename);                                                            //!< Write fastNLO table to file filename
    void WriteTable();                                                                           //!< Write fastNLO table to disk.
    void WriteWarmupTable();                                                                     //!< Write the warmup table to disk.
    void MultiplyCoefficientsByBinSize();                                                        //!< Multiply all coefficients by bin size
