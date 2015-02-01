@@ -26,14 +26,13 @@ dist-hook:
 
 # Installation of DOXYGEN documentation
 # TBD: Docu is always remade! Check tag file mechanism.
-# TBD: Remove doxygen directory @ maintainer-clean.
 if HAVE_DOXYGEN
 if DX_COND_doc
 include aminclude.am
 EXTRA_DIST += aminclude.am doxygen.cfg
 all-local-doxygen: doxygen-doc
 	touch all-local-doxygen
-#.PHONY: all-local-doxygen
+.PHONY: all-local-doxygen
 all-local: all-local-doxygen
 MOSTLYCLEANFILES = $(DX_CLEANFILES) all-local-doxygen
 
