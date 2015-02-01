@@ -71,9 +71,11 @@ while ( my $in = <KILLIN> ) {
     $sfil =~ s/tab$/log/;
     $tfil =~ s/tab$/log/;
     $cmd2 = "mv $sfil $tfil";
-    print "Executing log file mv command: $cmd2\n";
-    $ret = system("$cmd2");
-    if ( $ret ) {die "fastmv.pl: Re-/moving command failed: $ret, aborted!\n";}
+    if (-f $sfil) {
+        print "Executing log file mv command: $cmd2\n";
+        $ret = system("$cmd2");
+        if ( $ret ) {die "fastmv.pl: Re-/moving command failed: $ret, aborted!\n";}
+    }
 }
 
 print "fastmv.pl: Finished.\n";
