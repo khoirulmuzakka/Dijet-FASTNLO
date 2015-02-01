@@ -1,4 +1,4 @@
-#include "fastNLOjetpp.h"
+#include "fnlo_int_nlojet/fastNLOjetpp.h"
 #include "fastnlotk/fastNLOCreate.h"
 #include <iostream>
 

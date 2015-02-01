@@ -47,8 +47,8 @@ using namespace std;
 //----- fastNLO -----
 #include "fastnlotk/fastNLOEvent.h"
 #include "fastnlotk/fastNLOCreate.h"
-// --- fastNLO v2.2: include header file of interface to NLOJet++
-#include "fastNLOjetpp.h"
+// --- fastNLO v2.2: include header files of interface to NLOJet++
+#include "fnlo_int_nlojet/fastNLOjetpp.h"
 #include "fnlo_int_nlojet/fnlo_int_hhc_nlojet.h"
 
 //------ USER DEFINED PART STARTS HERE ------
