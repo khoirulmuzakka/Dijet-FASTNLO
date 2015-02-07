@@ -267,5 +267,8 @@ int fastNLOLHAPDF::GetNFlavor() const {
 }
 
 double fastNLOLHAPDF::GetAlphasMz() const {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   return PDF->alphasQ(91.1876);
+   #endif
    return LHAPDF::alphasPDF(91.1876);
 }
