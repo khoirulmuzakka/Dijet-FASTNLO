@@ -15,7 +15,7 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2452_I1082936_v23_fix_ptmax
+ScenarioName fnl2452_I1082936_v23_fix
 ScenarioDescription {
     "d2sigma-dijet_dm12_dy*_[pb_TeV]"
     "ATLAS_Collaboration"
