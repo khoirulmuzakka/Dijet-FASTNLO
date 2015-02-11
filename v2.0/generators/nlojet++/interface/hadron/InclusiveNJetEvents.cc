@@ -138,7 +138,7 @@ private:
    vector<string> ScaleLabel; // Scale labels
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
    // (Njet > 1!)
-   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR };
+   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR, EXPYSTAR };
    Scales mudef[2];
    double mu[2];
    int jetalgo;               // Define fastjet jet algorithm
@@ -273,6 +273,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          mudef[i] = MJJHALF;
       } else if ( ScaleLabel[i] == "pT_max*exp(0.3*y_star)_[GeV]" ) {
          mudef[i] = PTMAXEXPYSTAR;
+      } else if ( ScaleLabel[i] == "exp(0.3*y_star)" ) {
+         mudef[i] = EXPYSTAR;
       } else {
          say::error["ScenarioCode"] << "Unknown scale, i.e. scale description, aborted!" << endl;
          say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
@@ -600,6 +602,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          case PTMAXEXPYSTAR :
             // ATLAS definition
             mu[i] = pT1 * exp(0.3*ystar);
+            break;
+         case EXPYSTAR :
+            // ATLAS definition, this works only as second scale choice!
+            mu[i] = exp(0.3*ystar);
             break;
          default :
             say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
