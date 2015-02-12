@@ -1,7 +1,7 @@
 #                                               -*- Automake -*-
 # -----------------------------------------------------------------------------
 #
-# K. Rabbertz, 17.01.2015
+# K. Rabbertz, 12.02.2015
 #
 # NLOJet++ interface to fastNLO toolkit
 #
@@ -11,6 +11,43 @@ AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
 SUBDIRS = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular RivetAdditions
+
+# Install all data files from gzipped tar archive to avoid limits in command line length!
+FIRST   = RivetAdditions
+MYDIRS  = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular
+ARCHIVE = Steering
+TAR     = $(ARCHIVE).tar
+TARGZ   = $(TAR).gz
+# and distribute ...
+pkgdata_DATA = $(TARGZ)
+EXTRA_DIST = $(TARGZ)
+
+# Create archive
+$(TARGZ):
+	tar cf $(TAR) $(FIRST)/*.info $(FIRST)/*.plot $(FIRST)/*.yoda; \
+	for i in $(MYDIRS); do \
+		echo $$i; \
+		tar rf $(TAR) $$i/*.str; \
+	done; \
+	gzip $(TAR)
+
+# Install archive hook
+install-data-hook:
+	mv $(TARGZ) $(DESTDIR)$(pkgdatadir); \
+	cd $(DESTDIR)$(pkgdatadir); \
+	tar xfz $(TARGZ); \
+	rm -f $(TARGZ);
+
+# Uninstall archive hook
+uninstall-local:
+	cd $(DESTDIR)$(pkgdatadir); \
+	for i in $(FIRST) $(MYDIRS); do \
+		rm -f $$i/*.info $$i/*.plot $$i/*.yoda $$i/*.str; \
+		rmdir $$i; \
+	done
+
+# Built by make --> delete with make clean
+MOSTLYCLEANFILES = $(TARGZ)
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

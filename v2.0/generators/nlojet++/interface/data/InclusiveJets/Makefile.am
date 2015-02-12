@@ -9,13 +9,6 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
-#
-# Data files to be distributed
-#
-fnlo_steering_files = fnl2342b_I902309_v23_fix.str fnl2342b_I902309_v23_flex.str
-pkgdata_DATA = $(fnlo_steering_files)
-EXTRA_DIST =   $(fnlo_steering_files)
-
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
