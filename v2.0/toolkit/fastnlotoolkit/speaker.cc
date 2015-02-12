@@ -63,18 +63,18 @@ const speaker& speaker::operator=(const speaker& other)
    return *this;
 }
 
-std::ostream& speaker::operator()(std::string fct) const {
+std::ostream& speaker::operator()(const std::string& fct) const {
    if (fquiet) return *weg;
    //       *this<<"In "<<fct<<". ";
    if (errs && fe2cerr) return std::cerr<<fct;
    else return std::cout<<fct;
 }
 
-std::ostream& speaker::operator>> (std::string arg) const {
+std::ostream& speaker::operator>> (const std::string& arg) const {
    return print(arg);
 }
 
-std::ostream& speaker::print(std::string mes) const {
+std::ostream& speaker::print(const std::string& mes) const {
    if (fquiet) return *weg;
    else {
       if (errs&&fe2cerr) return std::cerr<<mes;
@@ -82,13 +82,13 @@ std::ostream& speaker::print(std::string mes) const {
    }
 }
 
-std::ostream& speaker::operator[](std::string fct) const {
+std::ostream& speaker::operator[](const std::string& fct) const {
    if (fquiet) return *weg;
    if (!cn.empty()) return *this<<"["<<cn<<"::"<<fct<<"] ";
    else return *this<<"["<<fct<<"] ";
 }
 
-const speaker& speaker::prefix(std::string fct) const {
+const speaker& speaker::prefix(const std::string& fct) const {
    if (!fquiet) {
       if (errs&&fe2cerr) std::cerr<<fct;
       else std::cout<<fct;
@@ -109,9 +109,9 @@ int speaker::SetGlobalVerbosity(say::Verbosity volume) {
 
 \
 PrimalScream::PrimalScream(std::string classname) { //,std::string prefix=""){
-   debug = speaker(" # DEBUG:   ",say::DEBUG);
-   man   = speaker(" # MANUAL:  ",say::MANUAL);
-   info  = speaker(" # INFO:    ",say::INFO);
+   debug = speaker(" # DEBUG.   ",say::DEBUG);
+   man   = speaker(" # MANUAL.  ",say::MANUAL);
+   info  = speaker(" # INFO.    ",say::INFO);
    warn  = speaker(" # WARNING! ",say::WARNING);
    error = speaker(" # ERROR!   ",say::ERROR,true);
    shout = speaker(" # ",say::ERROR,false);
@@ -140,11 +140,11 @@ void PrimalScream::SetVerbosity(say::Verbosity volume) {
 }
 
 namespace say {
-speaker debug(" # DEBUG: ",say::DEBUG);
-speaker man(" # ",say::MANUAL);
-speaker info(" # INFO: ",say::INFO);
-speaker warn(" # WARNING! ",say::WARNING);
-speaker error(" # ERROR! ",say::ERROR,true);
+speaker debug(" # DEBUG.   ",say::DEBUG);
+speaker man  (" # ",say::MANUAL);
+speaker info (" # INFO.    ",say::INFO);
+speaker warn (" # WARNING! ",say::WARNING);
+speaker error(" # ERROR!   ",say::ERROR,true);
 speaker shout(" # ",say::ERROR,false);
 //debug["namespace say"]<<"speakers initialized."<<std::endl;
 int SetGlobalVerbosity(Verbosity verbosity) {

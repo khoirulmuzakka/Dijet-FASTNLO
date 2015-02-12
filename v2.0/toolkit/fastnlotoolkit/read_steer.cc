@@ -32,7 +32,7 @@ read_steer::read_steer() :
    str_nmspcbeg("{{{"), str_nmspcend("}}}"),
    //   str_inc("#include:"), fParseIncMode(0),
    str_inc(">>"), fParseIncMode(0),
-   oW(" # WARNING! [read_steer] "), oI(" # INFO: [read_steer] "), oE(" # ERROR! [read_steer] ") {
+   oW(" # WARNING! [read_steer] "), oI(" # INFO.    [read_steer] "), oE(" # ERROR!   [read_steer] ") {
 }
 
 read_steer* read_steer::Steering(string steerID) {
@@ -40,7 +40,7 @@ read_steer* read_steer::Steering(string steerID) {
    // get singleton class
    if (!(*instances)[steerID]) { //new instance
       if (steerID.compare(read_steer::stdID)!=0)
-         cout << " # INFO: [read_steer] " << "Initializing new read_steer namespace with steerID = '" << steerID << "'." << endl;
+         cout << " # INFO.    [read_steer] " << "Initializing new read_steer namespace with steerID = '" << steerID << "'." << endl;
       (*instances)[steerID] = new read_steer();
    }
    return (read_steer*)((*instances)[steerID]);

@@ -19,14 +19,14 @@ public:
    ~speaker();
    //speaker(const speaker& spk) : weg(0) {;};
    const speaker& operator= (const speaker& other);
-   std::ostream& operator[](std::string fct) const ;
-   const speaker& operator+ (std::string fct) const {
+   std::ostream& operator[](const std::string& fct) const ;
+   const speaker& operator+ (const std::string& fct) const {
       return this->prefix(fct);
    }
-   const speaker& prefix(std::string fct) const ;
-   std::ostream& operator()(std::string fct) const ;
+   const speaker& prefix(const std::string& fct) const ;
+   std::ostream& operator()(const std::string& fct) const ;
 
-   template<typename T> std::ostream& operator<< (T arg) const {
+   template<typename T> std::ostream& operator<< (const T& arg) const {
       if (fquiet) return *weg;
       else {
          if (errs && fe2cerr) return std::cerr<<pref<<arg;
@@ -34,9 +34,9 @@ public:
       }
    }
 #ifndef SWIG
-   std::ostream& operator>> (std::string arg) const ;
+   std::ostream& operator>> (const std::string& arg) const ;
 #endif
-   std::ostream& print(std::string mes) const ;
+   std::ostream& print(const std::string& mes) const ;
    void DoSpeak(bool loud) {
       fquiet=!loud;
    };

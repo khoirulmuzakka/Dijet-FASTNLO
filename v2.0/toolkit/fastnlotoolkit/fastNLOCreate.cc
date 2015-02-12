@@ -1653,7 +1653,6 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
    }
 
    //cout<<" * wSumW = "<<wsum<<endl;
-
 }
 
 
