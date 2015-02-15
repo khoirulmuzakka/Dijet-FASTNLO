@@ -15,7 +15,7 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2412e_I1208923_v23_fix
+ScenarioName fnl2412e_I1208923_v23_flex
 ScenarioDescription {
     "d2sigma-dijet_dMjj_dy_max_[pb_GeV]"
     "CMS_Collaboration"
@@ -123,7 +123,7 @@ GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
 OutputFilename   InclusiveNJetEvents.tab    # Filename of fastNLO output table
 OutputPrecision                 8           # Number of decimal digits to store in output table, def.=8.
-FlexibleScaleTable              false       # Create table fully flexible in mu_f (larger size), true, or
+FlexibleScaleTable              true        # Create table fully flexible in mu_f (larger size), true, or
                                             # table with fixed number of mu_f scale factors, def.=false.
 ScaleVariationFactors {                     # Factorization scale variations (only needed for fixed-scale tables)
  0.5 1.0 2.0                                # List of scale factors must include factor '1'
