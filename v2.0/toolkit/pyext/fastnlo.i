@@ -1,6 +1,6 @@
 %module fastnlo
-%include "std_string.i"
-%include "std_vector.i"
+%include <std_string.i>
+%include <std_vector.i>
 %include <std_pair.i>
 
 namespace std {
@@ -26,6 +26,7 @@ namespace std {
 %}
 %include "../fastnlotoolkit/include/fastnlotk/speaker.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOPDFLinearCombinations.h"
+%include "../fastnlotoolkit/include/fastnlotk/fastNLOConstants.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOBase.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOTable.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"

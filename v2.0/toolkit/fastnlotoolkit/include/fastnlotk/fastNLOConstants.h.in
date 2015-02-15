@@ -112,7 +112,10 @@ namespace fastNLO {
    const std::string _fNSDep[6] = {"v2.0","v2.0","v2.0","v2.1","v2.2","v2.2"};
 
 
+
    // ---- Some shapes for nice output ---- //
+   //
+#ifndef SWIG
    const std::string _CSEP40("########################################");
    const std::string _DSEP40("========================================");
    const std::string _SSEP40("----------------------------------------");
@@ -131,7 +134,7 @@ namespace fastNLO {
    const std::string _CSEPLC = _CSEPSC + _CSEPS ;
    const std::string _DSEPLC = _DSEPSC + _DSEPS ;
    const std::string _SSEPLC = _SSEPSC + _SSEPS ;
-
+#endif
 }
 
 #endif
