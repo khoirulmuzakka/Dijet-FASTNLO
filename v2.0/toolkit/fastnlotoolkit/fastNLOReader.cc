@@ -1874,7 +1874,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                }
 
             }
-	    // full matrix notation
+            // full matrix notation
             for (int k=0; k<nxmax; k++) {
                int x1bin = k % c->GetNxtot1(i);
                int x2bin = k / c->GetNxtot1(i);
@@ -1926,7 +1926,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
          int nxmax = c->GetNxmax(i);
          int nxbins1 = c->GetNxtot1(i); // number of columns in half matrix
          xfx.resize(nxbins1);
-	 if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   // determine all pdfs of hadron1
@@ -1940,16 +1940,16 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   for (int x=0; x<nxmax; x++) {
                      // CalcPDFLinearCombination calculats Anti-proton from proton
                      c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
-		     x2bin++;
-		     if (x2bin>x1bin) {
-			x2bin = 0;
-			x1bin++;
-		     }
+                     x2bin++;
+                     if (x2bin>x1bin) {
+                        x2bin = 0;
+                        x1bin++;
+                     }
                   }
                }
             }
-	 }
-	 else if (fMuFFunc == kScale2) {   // speed up
+         }
+         else if (fMuFFunc == kScale2) {   // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                // determine all pdfs of hadron1
                for (int k=0; k<nxbins1; k++) {
@@ -1962,11 +1962,11 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   int x2bin = 0;
                   for (int x=0; x<nxmax; x++) {
                      c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
-		     x2bin++;
-		     if (x2bin>x1bin) {
-			x2bin = 0;
-			x1bin++;
-		     }
+                     x2bin++;
+                     if (x2bin>x1bin) {
+                        x2bin = 0;
+                        x1bin++;
+                     }
                   }
                }
             }
@@ -1984,11 +1984,11 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   int x2bin = 0;
                   for (int x=0; x<nxmax; x++) {
                      c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,xfx[x1bin],xfx[x2bin], IsPPBar);
-		     x2bin++;
-		     if (x2bin>x1bin) {
-			x2bin = 0;
-			x1bin++;
-		     }
+                     x2bin++;
+                     if (x2bin>x1bin) {
+                        x2bin = 0;
+                        x1bin++;
+                     }
                   }
                }
             }
@@ -2006,7 +2006,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
          int nxbins2 = c->GetNxtot2(i); // number of xnodes ( == nxmax / Nxtot1[i] )
          xfx1.resize(nxbins1);
          xfx2.resize(nxbins2);
-	 if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
+         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2)  {   // that't the standard case!
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   // determine all pdfs of hadron1
@@ -2028,8 +2028,8 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   }
                }
             }
-	 }
-	 else if (fMuFFunc == kScale2) {   // speed up
+         }
+         else if (fMuFFunc == kScale2) {   // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
                // determine all pdfs of hadron1
@@ -2135,8 +2135,9 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
 
 
    // ---- cross check ---- //
-   if (func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4
-       || func == kLinearMean || func == kLinearSum  ||  func == kScaleMax|| func == kScaleMin) {
+   if (func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 ||
+       func == kLinearMean || func == kLinearSum  ||  func == kScaleMax || func == kScaleMin ||
+       func == kProd || func == kExpProd2 ) {
 
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
@@ -2374,6 +2375,9 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
       case kScaleMin:
          sprintf(fname,"min(%s^2,%s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
          break;
+      case kProd:
+         sprintf(fname,"(%s*%s)^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
       case kExpProd2:
          sprintf(fname,"(%s*exp(0.3*%s)^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
          break;
@@ -2410,8 +2414,9 @@ double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, 
    else if (Func == fastNLO::kLinearSum)         mu      = FuncLinearSum(scale1,scale2);
    else if (Func == fastNLO::kScaleMax)          mu      = FuncMax(scale1,scale2);
    else if (Func == fastNLO::kScaleMin)          mu      = FuncMin(scale1,scale2);
+   else if (Func == fastNLO::kProd)              mu      = FuncProd(scale1,scale2);
    else if (Func == fastNLO::kExpProd2)          mu      = FuncExpProd2(scale1,scale2);
-   else if (Func == fastNLO::kExtern)           mu      = (kMuX==kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
+   else if (Func == fastNLO::kExtern)            mu      = (kMuX==kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
    else error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
 
    return scalefac * mu;
@@ -2459,6 +2464,12 @@ double fastNLOReader::FuncMax(double scale1 , double scale2) {
 double fastNLOReader::FuncMin(double scale1 , double scale2) {
    if (scale1 < scale2) return scale1;
    else return scale2;
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::FuncProd(double scale1 , double scale2) {
+   return (scale1 * scale2);
 }
 
 

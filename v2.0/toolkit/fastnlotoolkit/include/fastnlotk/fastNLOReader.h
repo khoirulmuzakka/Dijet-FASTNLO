@@ -115,6 +115,7 @@ protected:
    double FuncLinearSum(double scale1 , double scale2) ;
    double FuncMax(double scale1 , double scale2) ;
    double FuncMin(double scale1 , double scale2) ;
+   double FuncProd(double scale1 , double scale2) ;
    double FuncExpProd2(double scale1 , double scale2) ;
 
    void CalcCrossSectionv21(fastNLOCoeffAddFlex* B , bool IsLO = false);

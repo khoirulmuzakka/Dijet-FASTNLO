@@ -73,8 +73,9 @@ namespace fastNLO {
       kLinearSum                = 6,    // e.g. mu^2 = (( Q + pt ))^2
       kScaleMax                 = 7,    // e.g. mu^2 = max( Q^2, pt^2)
       kScaleMin                 = 8,    // e.g. mu^2 = min( Q^2, pt^2)
-      kExpProd2                 = 9,    // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
-      kExtern                   = 10    // define an external function for your scale
+      kProd                     = 9,    // e.g. mu^2 = (scale1 * scale2) ^2
+      kExpProd2                 = 10,   // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
+      kExtern                   = 11    // define an external function for your scale
    };
 
    enum ESMCalculation {
