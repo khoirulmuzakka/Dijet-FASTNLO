@@ -96,9 +96,6 @@ fastNLO::ProcessConstants ProcConsts_HHC() {
 }
 
 //_______________________________________________________________________
-pdf_hhc_dummy dummypdf;
-
-//_______________________________________________________________________
 unsigned int GetNj() {
   // get order of leading-order
   // inputfunc should be defined in header of nlojet-module beforehand.
@@ -192,7 +189,7 @@ vector<fnloEvent> GetFlexibleScaleNlojetContribHHC(const event_hhc &p,
                                                    const amplitude_hhc &amp) {
   static const unsigned int nSubproc = 7; // nlojet must have 7 subprocesses.
   static const double dummyMu2 = 91. * 91.;
-
+  static pdf_hhc_dummy dummypdf;
   // make events
   vector<fnloEvent> ev(nSubproc);
 
@@ -285,7 +282,7 @@ vector<fnloEvent> GetFixedScaleNlojetContribHHC(const event_hhc &p,
                                                 double mu) {
   const int nSubproc = GetNSubproc();
   const double Mu2 = mu * mu;
-
+  static pdf_hhc_dummy dummypdf;
   // make events
   vector<fnloEvent> ev(nSubproc);
 
