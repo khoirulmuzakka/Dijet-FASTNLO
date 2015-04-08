@@ -16,7 +16,6 @@ AUTOMAKE_OPTIONS = gnu
 #
 # Without fastjet
 #
-# pkglib_LTLIBRARIES = libfnl5350eta0v22conee.la
 pkglib_LTLIBRARIES =
 #
 # Require fastjet
@@ -35,7 +34,6 @@ AM_SOURCES =
 libInclusiveNJets_la_SOURCES       = InclusiveNJets.cc       $(AM_SOURCES)
 libInclusiveNJetsNew_la_SOURCES    = InclusiveNJets_new.cc   $(AM_SOURCES) fastNLOjetpp.cc
 libInclusiveNJetEvents_la_SOURCES  = InclusiveNJetEvents.cc  $(AM_SOURCES)
-# libfnl5350eta0v22conee_la_SOURCES = fnl5350eta0v22conee.cc $(AM_SOURCES)
 
 #
 # Preprocessor flags
