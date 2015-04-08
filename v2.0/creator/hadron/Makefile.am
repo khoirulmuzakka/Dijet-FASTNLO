@@ -14,7 +14,7 @@ lib_LTLIBRARIES = libfnt1001midp.la
 #
 if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2222b.la
-#   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
+   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
 #   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
 #   lib_LTLIBRARIES = libfnl3412fy0.la libfnl3412fy1.la libfnl3412fy2.la libfnl3412fy3.la libfnl3412fy4.la
    lib_LTLIBRARIES += libfnl2352.la
@@ -31,13 +31,8 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
 # v21
-#   lib_LTLIBRARIES += libfnl5002ptavystar.la libfnl5002pt12.la
-# compare to v22
    lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
    lib_LTLIBRARIES += libfnl4350a.la libfnl5350eta0.la libfnl5350eta1.la libfnl5350eta2.la libfnl5350eta3.la libfnl5350eta4.la
-# v22
-   lib_LTLIBRARIES += libfnl2352v22.la libfnl2352v20andv22.la
-   lib_LTLIBRARIES += libfnl5350eta0v22.la
 endif
 
 #
@@ -63,8 +58,8 @@ libfnt1001midp_la_SOURCES      = fnt1001midp.cc      $(AM_SOURCES)
 #libfnl1001d0r207_la_SOURCES    = fnl1001d0r207.cc    $(AM_SOURCES)
 #libfnt2012_la_SOURCES          = fnt2012.cc          $(AM_SOURCES)
 #libfnl2222b_la_SOURCES         = fnl2222b.cc         $(AM_SOURCES)
-#libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
-#libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
+libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
+libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
 libfnl2352_la_SOURCES          = fnl2352.cc          $(AM_SOURCES)
 #libfnl2452_la_SOURCES          = fnl2452.cc          $(AM_SOURCES)
 #libfnl2412c_la_SOURCES         = fnl2412c.cc         $(AM_SOURCES)
@@ -144,9 +139,6 @@ libfnl3622h_la_SOURCES         = fnl3622h.cc         $(AM_SOURCES)
 #libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 #libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
 # v21
-#libfnl5002pt12_la_SOURCES      = fnl5002pt12.cc      $(AM_SOURCES)
-#libfnl5002ptavystar_la_SOURCES = fnl5002ptavystar.cc $(AM_SOURCES)
-# compare to v22
 libfnl2380ak0507y0_la_SOURCES  = fnl2380ak0507y0.cc  $(AM_SOURCES)
 libfnl2380ak0507y1_la_SOURCES  = fnl2380ak0507y1.cc  $(AM_SOURCES)
 libfnl2380ak0507y2_la_SOURCES  = fnl2380ak0507y2.cc  $(AM_SOURCES)
@@ -159,10 +151,6 @@ libfnl5350eta1_la_SOURCES      = fnl5350eta1.cc      $(AM_SOURCES)
 libfnl5350eta2_la_SOURCES      = fnl5350eta2.cc      $(AM_SOURCES)
 libfnl5350eta3_la_SOURCES      = fnl5350eta3.cc      $(AM_SOURCES)
 libfnl5350eta4_la_SOURCES      = fnl5350eta4.cc      $(AM_SOURCES)
-# v22
-libfnl2352v22_la_SOURCES       = fnl2352v22.cc       $(AM_SOURCES)
-libfnl2352v20andv22_la_SOURCES = fnl2352v20andv22.cc $(AM_SOURCES)
-libfnl5350eta0v22_la_SOURCES   = fnl5350eta0v22.cc   $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
@@ -206,12 +194,6 @@ if HAVE_FASTJET
    AM_LDFLAGS += -L${FASTJETLIBPATH} -lfastjet -lSISConePlugin -lsiscone -lsiscone_spherical -lCDFConesPlugin -lPxConePlugin -lD0RunIIConePlugin -lNestedDefsPlugin -lTrackJetPlugin -lATLASConePlugin -lCMSIterativeConePlugin -lEECambridgePlugin -lJadePlugin
 endif
 endif
-
-#v22 force
-#libfnl5002pt12_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-libfnl2352v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-libfnl2352v20andv22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
-libfnl5350eta0v22_la_LDFLAGS = ${AM_LDFLAGS} -lfastnlotoolkit
 
 # Example of individual specification of LDFLAGS
 #libfnl1001_la_LDFLAGS = -L${top_builddir}/common/.libs -L${top_srcdir}/common -L$(pkglibdir) -lfastnlo -L${LHPDFLIBPATH} -llhpdf_cteq6
