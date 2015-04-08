@@ -153,6 +153,8 @@ private:
    double ptj2min;            // Minimal jet pT for 2nd leading jet (default is ptjmin)
    double ptj3min;            // Minimal jet pT for 3rd leading jet (default is ptjmin)
    double ycjjmax;            // Maximal jet rapidity for leading two jets
+   double yboostmax;          // Maximal y_boost = 0.5 * |y1 + y2|
+   double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2|
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
 };
@@ -398,6 +400,18 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["ycjjmax"] ) {
       ftable->GetParameterFromSteering("ycjjmax",ycjjmax);
    }
+   // maximal y_boost
+   SteeringPars["yboostmax"] = ftable->TestParameterInSteering("yboostmax");
+   yboostmax = DBL_MAX; // default is no limitation
+   if ( SteeringPars["yboostmax"] ) {
+      ftable->GetParameterFromSteering("yboostmax",yboostmax);
+   }
+   // maximal y_star
+   SteeringPars["ystarmax"] = ftable->TestParameterInSteering("ystarmax");
+   ystarmax = DBL_MAX; // default is no limitation
+   if ( SteeringPars["ystarmax"] ) {
+      ftable->GetParameterFromSteering("ystarmax",ystarmax);
+   }
    // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
    SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
    obsmin[0] = ftable->GetLoBinMin(0); // by default derived from binning in obs0
@@ -517,6 +531,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    double y1 = pj[1].rapidity();
    double y2 = pj[2].rapidity();
    double yjjmax = max(abs(y1),abs(y2));
+   double yboost = abs(y1+y2)/2.;
    double ystar  = abs(y1-y2)/2.;
    // dijet mass
    lorentzvector<double> pj12 = pj[1] + pj[2];
@@ -574,8 +589,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // --- Further Njet phase space cuts?
    if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
         yjjmax < ycjjmax &&
+        yboost < yboostmax && ystar < ystarmax &&
         (njet < 3 || ptj3min <= pT3c) &&
-        obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
+        (obsmin[0] <= obs[0] && obs[0] < obsmax[0]) &&
         (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
         (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
 
