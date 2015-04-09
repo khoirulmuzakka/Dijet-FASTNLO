@@ -22,7 +22,7 @@ ScenarioDescription {
     "Dijet_Mass"
     "anti-kT_R=0.6"
     "ATLAS-STDM-2011-02, arXiv:1112.6297, Phys. Rev. D 86 (2012) 014022."
-    "RIVET_ID=ATLAS_2012_I1082936/d04-x01-Y01,SPIRES_ID=9320911,INSPIRE_RECORD=1082936"
+    "RIVET_ID=ATLAS_2012_I1082936/d02-x01-Y01,SPIRES_ID=9320911,INSPIRE_RECORD=1082936"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -72,7 +72,7 @@ BinSizeFactor                    1.              # Possibility to provide additi
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
                                                  #
-ScaleDescriptionScale1          "pT_max_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "exp(0.3*y_star)"# Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #

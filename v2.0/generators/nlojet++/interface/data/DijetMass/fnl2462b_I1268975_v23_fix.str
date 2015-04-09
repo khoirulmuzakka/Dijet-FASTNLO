@@ -15,14 +15,14 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2452_I1082936_v23_fix_ptmaxexpystar
+ScenarioName fnl2462b_I1268975_v23_fix
 ScenarioDescription {
     "d2sigma-dijet_dm12_dy*_[pb_TeV]"
     "ATLAS_Collaboration"
     "Dijet_Mass"
-    "anti-kT_R=0.6"
-    "ATLAS-STDM-2011-02, arXiv:1112.6297, Phys. Rev. D 86 (2012) 014022."
-    "RIVET_ID=ATLAS_2012_I1082936/d02-x01-Y01,SPIRES_ID=9320911,INSPIRE_RECORD=1082936"
+    "anti-kT_R=0.4"
+    "ATLAS-STDM-2012-03, arXiv:1312.3524, JHEP 05 (2014) 059."
+    "RIVET_ID=ATLAS_2014_I1268975/d01-x01-Y01,INSPIRE_RECORD=1268975"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -38,11 +38,11 @@ JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.6              # Jet size parameter: Required for all jets
-ptjmin                         20.               # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
+ptjmin                         50.               # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
 yjmin                           0.0              # Minimal jet rapidity
-yjmax                           4.4              # Maximal jet rapidity
+yjmax                           3.0              # Maximal jet rapidity
 Njetmin                         2                # Minimal number of jets required to be in preselected phase space
-ptj1min                        30.               # Minimal jet pT for leading jet
+ptj1min                       100.               # Minimal jet pT for leading jet
 
 # -------------------------------------------------------------------- #
 #   Observable definition, dimensioning, and normalization
@@ -72,7 +72,7 @@ BinSizeFactor                    1.              # Possibility to provide additi
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
                                                  #
-ScaleDescriptionScale1          "pT_max*exp(0.3*y_star)_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "exp(0.3*y_star)"# Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
@@ -85,15 +85,12 @@ ScaleDescriptionScale2          "exp(0.3*y_star)"# Specify 2nd scale name and un
 # -------------------------------------------------------------------- #
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.5         0.07  0.11  0.16  0.21  0.26  0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.94  2.78
-    0.5        1.0         0.11  0.16  0.21  0.26  0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  2.12  3.31
-    1.0        1.5         0.16  0.21  0.26  0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.55  3.61
-    1.5        2.0         0.26  0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.78  3.93
-    2.0        2.5         0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  3.04  4.27
-    2.5        3.0         0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  3.31  4.64
-    3.0        3.5         1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  3.04  3.61  5.04
-    3.5        4.0         1.76  1.94  2.12  2.33  2.55  2.78  3.04  3.31  3.93  5.47
-    4.0        4.4         2.55  3.04  4.27
+    0.0        0.5         0.26  0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  4.27
+    0.5        1.0         0.31  0.37  0.44  0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  3.04  4.27
+    1.0        1.5         0.51  0.59  0.67  0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  3.04  3.31  4.64
+    1.5        2.0         0.76  0.85  0.95  1.06  1.18  1.31  1.45  1.60  1.76  1.94  2.12  2.33  2.55  2.78  3.04  3.31  3.61  4.64
+    2.0        2.5         1.31  1.45  1.60  1.76  2.12  2.55  3.04  3.61  5.04
+    2.5        3.0         2.12  2.55  3.04  3.93  5.04
 }}
 
 # ==================================================================== #

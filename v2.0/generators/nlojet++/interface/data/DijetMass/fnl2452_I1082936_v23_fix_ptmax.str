@@ -15,7 +15,7 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2452_I1082936_v23_fix_ptmaxexpystar
+ScenarioName fnl2452_I1082936_v23_fix_ptmax
 ScenarioDescription {
     "d2sigma-dijet_dm12_dy*_[pb_TeV]"
     "ATLAS_Collaboration"
@@ -72,7 +72,7 @@ BinSizeFactor                    1.              # Possibility to provide additi
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
                                                  #
-ScaleDescriptionScale1          "pT_max*exp(0.3*y_star)_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+ScaleDescriptionScale1          "pT_max_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "exp(0.3*y_star)"# Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
