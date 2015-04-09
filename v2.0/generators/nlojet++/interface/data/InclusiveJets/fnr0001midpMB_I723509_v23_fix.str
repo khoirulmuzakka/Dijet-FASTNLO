@@ -15,14 +15,14 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnt2009midp_v23_fix
+ScenarioName fnr0001midpMB_I723509_v23_fix
 ScenarioDescription {
-    "d2sigma-jet_dpT_dy_[pb_GeV]"
-    "D0_Collaboration"
+    "d2sigma-jet_dpT_deta_[pb_GeV]"
+    "STAR_Collaboration"
     "Inclusive_Jet_pT"
-    "MP_R=0.7,OvThr=0.5"
-    "FERMILAB-PUB-08-034-E, arXiv:0802.2400, Phys. Rev. Lett. 101, 062001 (2008)."
-    "RIVET_ID=D0_2008_S7662670/D01-x01-y01,SPIRES_ID=7662670,INSPIRE_RECORD=779574"
+    "MP_R=0.4,OvThr=0.5"
+    "arXiv:hep-ex/0608030, Phys. Rev. Lett. 97 (2006) 252001."
+    "RIVET_ID=STAR_2006_S6870392/D01-x01-y01,SPIRES_ID=6870392,INSPIRE_RECORD=723509"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -30,25 +30,21 @@ ScenarioDescription {
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
 PublicationUnits                12               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
-ScaleDescriptionScale1          "pT_jet_[GeV]"   # Specify scale name and unit
-ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
 # -------------------------------------------------------------------- #
-JetAlgo                          12              # fastjet jet algorithm
+JetAlgo                          11              # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
-Rjet                            0.7              # Jet size parameter: Required for all jets
+Rjet                            0.4              # Jet size parameter: Required for all jets
 OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
-ptjmin                         50.               # Minimal jet pT
-yjmin                           0.0              # Minimal jet rapidity
-yjmax                           2.4              # Maximal jet rapidity
-#etajmin                         0.2              # Minimal jet pseudorapidity
-#etajmax                         0.8              # Maximal jet pseudorapidity
+ptjmin                          5.0              # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
+etajmin                         0.2              # Minimal jet pseudorapidity
+etajmax                         0.8              # Maximal jet pseudorapidity
 
 # -------------------------------------------------------------------- #
-#   Observable dimensioning and normalization
+#   Observable definition, dimensioning, and normalization
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #   Specify, how many differential dimensions are measured.
 #   Number must be consistent with DimensionLabels and DimensionIsDifferential, see below
@@ -56,9 +52,10 @@ yjmax                           2.4              # Maximal jet rapidity
 #     2 : read in 'DoubleDifferentialBinning'
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
-DifferentialDimension             2
-DimensionLabels {                                # Labels (symbol and unit) for the measurement dimension (from outer to inner "loop")
-   "|y|"
+LeadingOrder                      2              # Number of jets for the LO process
+DifferentialDimension             2              # Dimensionality of binning
+DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
+   "|eta|"                                       # This defines the observables to be calculated!
    "pT_[GeV]"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
@@ -68,11 +65,14 @@ DimensionIsDifferential {                        # Specify for each dimension wh
                                                  #   2 : the cross section is bin-wise differential,   i.e. there are two bin borders
                                                  #                                                     and division by bin width
 CalculateBinSize               true              # Calculate bin width from lower and upper bin boundaries
-BinSizeFactor                    2.              # Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|
+BinSizeFactor                   12.566           # Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|; here it is 2 x 2Pi
 #BinSize { x1 x2 x3 ... }                        # If 'CalculateBinSize' is 'false' provide table with bin widths 'by hand' for normalization
                                                  #
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
+                                                 #
+ScaleDescriptionScale1          "pT_jet_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
 #   Observable binning
@@ -82,15 +82,9 @@ BinSizeFactor                    2.              # Possibility to provide additi
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
-# DoubleDifferentialBinning:
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    0.0        0.4          50.  60.  70.  80.  90.  100.  110.  120.  130.  145.  160.  180.  200.  220.  240.  265.  295.  325.  360.  400.  445.  490.  540.  665.
-    0.4        0.8          50.  60.  70.  80.  90.  100.  110.  120.  130.  145.  160.  180.  200.  220.  240.  265.  295.  325.  360.  400.  445.  495.  635.
-    0.8        1.2          50.  60.  70.  80.  90.  100.  110.  125.  140.  155.  170.  190.  210.  230.  250.  270.  300.  335.  375.  415.  520.
-    1.2        1.6          50.  60.  70.  80.  90.  100.  110.  125.  140.  155.  170.  190.  215.  240.  265.  290.  325.  415.
-    1.6        2.0          50.  60.  70.  80.  90.  100.  110.  125.  140.  160.  175.  190.  210.  235.  260.  320.
-    2.0        2.4          50.  60.  70.  80.  90.  100.  110.  120.  130.  145.  160.  175.  200.  230.
+    0.2        0.8           5.0  6.2  7.6  9.3  11.4  14.1
 }}
 
 # ==================================================================== #
@@ -99,7 +93,7 @@ DoubleDifferentialBinning {{
 #   dependent settings
 #
 # ==================================================================== #
-CenterOfMassEnergy              1960.       # Center-of-mass energy in GeV.
+CenterOfMassEnergy               200.       # Center-of-mass energy in GeV.
 # Some examples from the past:   200.       # RHIC
 #                               1800.       # TeV Run I
 #                               1960.       # TeV Run II
@@ -112,7 +106,7 @@ CenterOfMassEnergy              1960.       # Center-of-mass energy in GeV.
 #                              13000.       # LHC Next Run ? (2015)
 #                              14000.       # LHC Design Run
 PDF1                            2212        # PDF of 1st hadron (following PDG convention).
-PDF2                           -2212        # PDF of 2nd hadron (following PDG convention).
+PDF2                            2212        # PDF of 2nd hadron (following PDG convention).
 
 # ==================================================================== #
 #
@@ -122,7 +116,7 @@ PDF2                           -2212        # PDF of 2nd hadron (following PDG c
 GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
-OutputFilename          InclusiveJets.tab   # Filename of fastNLO output table
+OutputFilename          InclusiveNJets.tab  # Filename of fastNLO output table
 OutputPrecision                 8           # Number of decimal digits to store in output table, def.=8.
 FlexibleScaleTable              false       # Create table fully flexible in mu_f (larger size), true, or
                                             # table with fixed number of mu_f scale factors, def.=false.
@@ -130,7 +124,7 @@ ScaleVariationFactors {                     # Factorization scale variations (on
  0.5 1.0 2.0                                # List of scale factors must include factor '1'
 }                                           # Scale factors will be ordered according to fastNLO convention: (1, min, ... , max)
 ReadBinningFromSteering         true        # Specify if binning is read from this file. MUST be true for now!
->>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
+#>>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
 
 # ==================================================================== #
 #
