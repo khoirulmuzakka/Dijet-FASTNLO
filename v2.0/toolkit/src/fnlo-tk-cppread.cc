@@ -969,15 +969,15 @@ int main(int argc, char** argv) {
       string headdim0 = " IODimO ";
       string headdim1 = " IODimM ";
       string headdim2 = " IODimI ";
-      string headscl  = fnlo->GetScaleDescription(kLeading);
+      // Scales and descriptions should be equal for all orders ...
+      // In case of flex-scale tables only the first defined scale is looked at here
+      string headscl  = fnlo->GetScaleDescription(kLeading,0);
       string header2  = " LO cross section";
       if (inlo>-1) {
          header2 += "   NLO cross section";
-         headscl  = fnlo->GetScaleDescription(kNextToLeading);
       }
       if (innlo>-1) {
          header2 += "  NNLO cross section";
-         headscl  = fnlo->GetScaleDescription(kNextToNextToLeading);
       }
       if (inlo>-1) {
          header2 += "   KNLO";
@@ -1117,7 +1117,7 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else {
-         snprintf(buffer, sizeof(buffer), "Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
+         snprintf(buffer, sizeof(buffer), "Print out optimized for up to three dimensions. No output for %1.i dimensions.\n",NDim);
          warn["fnlo-read"] << buffer << endl;
       }
    }

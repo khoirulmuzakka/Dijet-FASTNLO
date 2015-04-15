@@ -714,12 +714,9 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
                                                    << "NScaleDim = " << NScaleDim <<endl;
                exit(1);
             }
+            // Not useful for flex-scale tables
             //            printf(" #   Scale dimensions: %1i\n",NScaleDim);
             for (int i=0; i<NScaleDim; i++) {
-               //               unsigned int NFlexScales = cFlex->ScaleDescript[i].size();
-               //               for (unsigned int j=0; j<NFlexScales; j++) {
-               //                  printf(" #   Scale description for flexible scale %1i:          %s\n",j+1,cFlex->ScaleDescript[i][j].data());
-               //               }
                printf(" #   Scale description for flexible scale %1i:          %s\n",1,cFlex->ScaleDescript[i][0].data());
                printf(" #     Number of scale nodes in first observable bin:      %2i\n",cFlex->GetNScaleNode1(0));
                printf(" #     Number of scale nodes in last  observable bin:      %2i\n",cFlex->GetNScaleNode1(NObsBin-1));
