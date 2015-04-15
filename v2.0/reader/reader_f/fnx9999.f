@@ -883,8 +883,9 @@ c            ENDIF
                IF (NPDFDIM(IC).EQ.2) NX2LIMIT = NXTOT(IC,2,I) ! 2-d full matrix
                DO L=1,NX2LIMIT
                   NX = NX+1
-                  CALL FX9999PL(IPDFDEF(IC,1),IPDFDEF(IC,2),
-     >                 IPDFDEF(IC,3),K,L,XPDF1,XPDF2,H)
+Comment:                   CALL FX9999PL(IPDFDEF(IC,1),IPDFDEF(IC,2),
+Comment:      >                 IPDFDEF(IC,3),K,L,XPDF1,XPDF2,H)
+                  CALL FX9999PL(IC,K,L,XPDF1,XPDF2,H)
 *---  The 2-dim. x1, x2 bins are mapped onto ix like this:
 *---  [1,1] --> [1]
 *---  [2,1] --> [2]
@@ -905,7 +906,7 @@ c            ENDIF
       END
 ***********************************************************************
 
-      SUBROUTINE FX9999PL(ICF1,ICF2,ICF3,I,J,XPDF1,XPDF2,H)
+      SUBROUTINE FX9999PL(IC,I,J,XPDF1,XPDF2,H)
 ***********************************************************************
 *
 *     Compute PDF linear combinations - for different sets of
@@ -917,7 +918,7 @@ c            ENDIF
 *
 *     Input:
 *     ------
-*     IREACT             Flag for reaction (1:DIS, 2:pp, 3:ppbar)
+*     IC                 Contribution pointer
 *     I                  x-index of first hadron
 *     J                  x-index of second hadron (if pp, ppbar)
 *     XPDF1(NXMAX,-6:6)  PDF array for all x-bins
@@ -933,13 +934,19 @@ c            ENDIF
 ***********************************************************************
       IMPLICIT NONE
       INCLUDE 'fnx9999.inc'
-      INTEGER ICF1,ICF2,ICF3, I,J,K
+      INTEGER IC,ICF1,ICF2,ICF3,NSPR, I,J,K
       DOUBLE PRECISION XPDF1(MXNXTOT,-6:6),XPDF2(MXNXTOT,-6:6), H(10),
      >     G1, G2,              ! gluon densities from both hadrons
      >     SUMQ1, SUMQ2,        ! sum of quark densities
      >     SUMQB1, SUMQB2,      ! sum of anti-quark densities
      >     Q1(6), Q2(6), QB1(6), QB2(6), ! arrays of 6 (anti-)quark densities
      >     S,A                  ! products S,A
+
+*---  Get process flags and number of subprocesses from contribution pointer
+      ICF1 = IPDFDEF(IC,1)
+      ICF2 = IPDFDEF(IC,2)
+      ICF3 = IPDFDEF(IC,3)
+      NSPR = NSUBPROC(IC)
 
 *---  DIS: Inclusive and jets, gammaP direct. TBD
       IF (ICF1.EQ.2 .AND. (ICF2.EQ.0 .OR. ICF2.EQ.1)) THEN
@@ -1011,7 +1018,7 @@ C---  ENDDO
          H(5) = SUMQ1*SUMQB2 + SUMQB1*SUMQ2 - A
          H(6) = (SUMQ1+SUMQB1)*G2
          H(7) = G1*(SUMQ2+SUMQB2)
-         IF (ICF3.EQ.1) H(6) = H(6)+H(7) ! Case: 6 subprocesses
+         IF (ICF3.EQ.1.AND.NSPR.EQ.6) H(6) = H(6)+H(7) ! Case: 6 subprocesses
 
 *---  gammaP: direct, jets
       ELSEIF (ICF1.EQ.2 .AND. ICF2.EQ.2) THEN

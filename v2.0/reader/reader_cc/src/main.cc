@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
    const string CSEPL = "####################################################################################################################################################################\n";
 
    //---  Parse commmand line
+   char buffer[1024];
    // Don't miss help output, default is INFO
    SetGlobalVerbosity(MANUAL);
    shout>>"\n";
@@ -707,38 +708,45 @@ int main(int argc, char** argv) {
    // Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
-      printf("fnlo-read: ERROR! LO not found, nothing to be done!\n");
+      say::error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
       exit(1);
    } else {
-      //      printf("fnlo-read: The LO contribution has Id: %i\n",ilo);
+      say::info["fnlo-read"] << "The LO contribution has Id: " << ilo << endl;
    }
    // Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
-   // if (inlo < 0) {
-   //    printf("fnlo-read: No NLO contribution found!\n");
-   // } else {
-   //    printf("fnlo-read: The NLO contribution has Id: %i\n",inlo);
-   // }
+   if (inlo < 0) {
+      say::info["fnlo-read"] << "No NLO contribution found!" << endl;
+   } else {
+      say::info["fnlo-read"] << "The NLO contribution has Id: " << inlo << endl;
+   }
+   // Check on existence of NNLO (Id = -1 if not existing)
+   int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
+   if (innlo < 0) {
+      say::info["fnlo-read"] << "No NNLO contribution found!" << endl;
+   } else {
+      say::info["fnlo-read"] << "The NNLO contribution has Id: " << innlo << endl;
+   }
    // Check on existence of threshold corrections
    int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
-   // if ( ithc1 < 0 ) {
-   //    printf("fnlo-read: 1-loop threshold corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: 1-loop threshold corrections have Id: %i\n",ithc1);
-   // }
-   // if ( ithc2 < 0 ){
-   //    printf("fnlo-read: 2-loop threshold corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: 2-loop threshold corrections have Id: %i\n",ithc2);
-   // }
+   if (ithc1 < 0) {
+      say::info["fnlo-read"] << "1-loop threshold corrections not found!" << endl;
+   } else {
+      say::info["fnlo-read"] << "1-loop threshold corrections have Id: " << ithc1 << endl;
+   }
+   if (ithc2 < 0) {
+      say::info["fnlo-read"] << "2-loop threshold corrections not found!" << endl;
+   } else {
+      say::info["fnlo-read"] << "2-loop threshold corrections have Id: " << ithc2 << endl;
+   }
    // Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
-   // if ( inpc1 < 0 ){
-   //    printf("fnlo-read: Non-perturbative corrections not found!\n");
-   // } else {
-   //    printf("fnlo-read: Non-perturbative corrections have Id: %i\n",inpc1);
-   // }
+   if (inpc1 < 0) {
+      say::info["fnlo-read"] << "Non-perturbative corrections not found!" << endl;
+   } else {
+      say::info["fnlo-read"] << "Non-perturbative corrections have Id: " << inpc1 << endl;
+   }
 
    // Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
@@ -777,6 +785,8 @@ int main(int argc, char** argv) {
       vector < double > xslo;
       vector < double > xsnlo;
       vector < double > kfac;
+      vector < double > xsnnlo;
+      vector < double > kfac2;
       vector < double > xsthc1;
       vector < double > kthc1;
       vector < double > xsthc2;
@@ -800,12 +810,26 @@ int main(int argc, char** argv) {
          fnlo->SetMuRFunctionalForm(kScale1);
          //      fnlo->SetMuFFunctionalForm(kScale2);
          //      fnlo->SetMuRFunctionalForm(kScale2);
+         warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
+                           << "from only the first scale of this flexible-scale table." << endl
+                           << "                        Please check how this table was filled!" << endl;
       }
 
       // Calculate cross section
       fnlo->CalcCrossSection();
 
-      // Get LO & NLO results
+      // Get LO & NLO & NNLO results
+      if (!(innlo  < 0)) {
+         xsnnlo = fnlo->GetCrossSection();
+         kfac2  = fnlo->GetKFactors();
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, false);
+         if (!SetOn) {
+            error["fnlo-read"] << "Couldn´t switch off NNLO, this is strange!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
+            exit(1);
+         }
+         fnlo->CalcCrossSection();
+      }
       xsnlo = fnlo->GetCrossSection();
       kfac  = fnlo->GetKFactors();
       // Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
@@ -906,19 +930,34 @@ int main(int argc, char** argv) {
       cout << SSEP << endl;
 
       // Get table constants relevant for print out
-      int NDim = fnlo->GetNDiffBin();
+      const int NDim = fnlo->GetNDiffBin();
       unsigned int NDimBins[NDim];
       vector < string > DimLabel = fnlo->GetDimensionLabel();
+      //      const int NObsBin = fnlo->GetNObsBins();
       vector < vector < double > > LoBin = fnlo->GetLowBinEdge();
       vector < vector < double > > UpBin = fnlo->GetUpBinEdge();
       vector < double > BinSize = fnlo->GetBinSize();
 
       // Print
-      string header0 = "  IObs  Bin Size IODimO ";
-      string header1 = " IODimI ";
-      string header2 = " LO cross section";
+      string header0  = " #IObs  Bin Size";
+      string headdim0 = " IODimO ";
+      string headdim1 = " IODimM ";
+      string headdim2 = " IODimI ";
+      // Scales and descriptions should be equal for all orders ...
+      // In case of flex-scale tables only the first defined scale is looked at here
+      string headscl  = fnlo->GetScaleDescription(0);
+      string header2  = " LO cross section";
       if (inlo>-1) {
-         header2 += "   NLO cross section   KNLO";
+         header2 += "   NLO cross section";
+      }
+      if (innlo>-1) {
+         header2 += "  NNLO cross section";
+      }
+      if (inlo>-1) {
+         header2 += "   KNLO";
+      }
+      if (innlo>-1) {
+         header2 += "      KNNLO";
       }
       if (ithc2>-1 && lthcvar) {
          header2 += "      KTHC2";
@@ -932,9 +971,11 @@ int main(int argc, char** argv) {
       if (inpc1>-1) {
          header2 += "     KNPC1";
       }
+
       if (NDim == 1) {
-         printf("%s [ %-17s ]  <%-12.12s> %s\n",
-                header0.c_str(),DimLabel[0].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ]  <%-12.12s> %s",
+                  header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headscl.c_str(),header2.c_str());
+         cout << buffer << endl;
          cout << SSEP << endl;
          NDimBins[0] = 0;
          for (unsigned int i=0; i<xslo.size(); i++) {
@@ -955,6 +996,10 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+            } else if (ilo > -1 && inlo > -1 && innlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#18.11E  %#9.5F %#9.5F",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscl[i],xslo[i],xsnlo[i],xsnnlo[i],kfac[i],kfac2[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
@@ -974,8 +1019,9 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else if (NDim == 2) {
-         printf("%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s\n",
-                header0.c_str(),DimLabel[1].c_str(),header1.c_str(),DimLabel[0].c_str(),fnlo->GetScaleDescription(0).c_str(),header2.c_str());
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+                  header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim2.c_str(),DimLabel[1].c_str(),headscl.c_str(),header2.c_str());
+         cout << buffer << endl;
          cout << SSEP << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             for (int j=0; j<NDim; j++) {
@@ -989,45 +1035,69 @@ int main(int argc, char** argv) {
             }
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
             } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],xsnlo[i],kfac[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
             } else if (ilo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#9.5F",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i],kthc1[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],kthc1[i]);
             } else if (ilo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
-                      i+1,BinSize[i],NDimBins[1],LoBin[i][1],UpBin[i][1],
-                      NDimBins[0],LoBin[i][0],UpBin[i][0],qscl[i],xslo[i]);
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i]);
             } else {
                printf("fnlo-read: Nothing to report!\n");
                continue;
             }
             printf("\n");
          }
+      } else if (NDim == 3) {
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+                  header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim1.c_str(),DimLabel[1].c_str(),
+                  headdim2.c_str(),DimLabel[2].c_str(),headscl.c_str(),header2.c_str());
+         cout << buffer << endl;
+         cout << SSEP << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qscl[i],xslo[i],xsnlo[i],kfac[i]);
+            } else {
+               printf("fnlo-read: Nothing to report!\n");
+               continue;
+            }
+            printf("\n");
+                 }
       } else {
-         printf("fnlo-read: WARNING! Print out optimized for up to two dimensions. No output for %1.i dimensions.\n",NDim);
+         snprintf(buffer, sizeof(buffer), "Print out optimized for up to three dimensions. No output for %1.i dimensions.\n",NDim);
+         warn["fnlo-read"] << buffer << endl;
       }
    }
 
    // Print data if available, checks on availability internally
-   fnlo->PrintCrossSectionsData();
+   //   fnlo->PrintCrossSectionsData();
 
    return 0;
 }

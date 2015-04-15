@@ -13,17 +13,17 @@
       INCLUDE 'fnx9999.inc'
       INCLUDE 'strings.inc'
       CHARACTER*2  CH2TMP
-      CHARACTER*14 CHTMP3
+*---      CHARACTER*14 CHTMP3
 *---      CHARACTER*16 CHTMP1
 *---      CHARACTER*18 CHTMP2
-      CHARACTER*21 CHTMP1,CHTMP2
-      CHARACTER*255 FILENAME,PDFSET,CHRES,CHFRM
+      CHARACTER*21 CHTMP1,CHTMP2,CHTMP3
+      CHARACTER*255 FILENAME,PDFSET,CHFRM,CHTIT,CHOUT,CHTMP
       INTEGER I, J, IS, IPRINT, NDIMBINS(MXDIM), NBLANK
       INTEGER NSCDM, NSCLS
       INTEGER MXSCALECOMB
       PARAMETER (MXSCALECOMB=2*MXSCALEVAR)
       LOGICAL LTHC,LTHC1SEP,LTHC2SEP,LNPC1SEP
-      DOUBLE PRECISION ALPS,FNALPHAS,SCALER,SCALEF
+      DOUBLE PRECISION ALPS,FNALPHAS,SCALER,SCALEF,XTMP
       DOUBLE PRECISION XMURS(MXSCALECOMB),XMUFS(MXSCALECOMB)
       DATA IPRINT/1/
 *---  Define series of scale factor settings to test. Last and 8th entry
@@ -355,66 +355,66 @@ C---  CALL SETLHAPARM('SILENT')
          WRITE(*,'(2(A,F10.3))')" The scale factors xmur, "//
      >        "xmuf chosen here are: ",SCALER,", ",SCALEF
          WRITE(*,'(A)')LSEPL
-         CHTMP1 = DIMLABEL(2)
-         CHTMP1 = "[ "//CHTMP1(1:MAX(17,LEN_TRIM(CHTMP1)))//" ]"
-         CHTMP2 = DIMLABEL(1)
-         CHTMP2 = "[ "//CHTMP2(1:MAX(17,LEN_TRIM(CHTMP2)))//" ]"
-         CHRES  = ""
-         CHFRM  =
-     >   "(1P,X,I5,X,G10.4,(X,I5,X,2(2X,G10.4)),(X,I5,2(2X,G10.4)),0P"
-         IF (LCONTR(ILO)) THEN
-            CHTMP3  = SCALEDESCRIPT(ILO,1,1)
-            CHTMP3  = "<"//CHTMP3(1:12)//">"
-            CHRES = CHRES(1:LEN_TRIM(CHRES))//
-     >           CHTMP3//"  "
-            CHRES = CHRES(1:LEN_TRIM(CHRES))//
-     >           "  LO cross section"
-            CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >           ",1P,(X,G10.4),4X,(X,E18.11),0P"
-            IF (LCONTR(ITHC1L).AND.LTHC) THEN
-               CHRES =
-     >              CHRES(1:LEN_TRIM(CHRES))//
-     >              "    KTHC1"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >              ",(X,F9.5)"
-            ENDIF
-            IF (LCONTR(INLO)) THEN
-               CHRES = CHRES(1:LEN_TRIM(CHRES))/
-     >              /"   NLO cross section"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >              ",1P,(X,E18.11),0P"
-               CHRES = CHRES(1:LEN_TRIM(CHRES))//
-     >              "   KNLO"
-               CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >              ",(X,F9.5)"
-               CH2TMP = "  "
-               NBLANK = 2
-               IF (LCONTR(ITHC2L).AND.LTHC) THEN
-                  CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//
-     >                 CH2TMP(1:NBLANK)//"    KTHC2"
-                  NBLANK = 1
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >                 ",(X,F9.5)"
-               ENDIF
-               IF (LCONTR(INPC1)) THEN
-                  CHRES =
-     >                 CHRES(1:LEN_TRIM(CHRES))//
-     >                 CH2TMP(1:NBLANK)//"    KNPC1"
-                  CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//
-     >                 ",(X,F9.5)"
-               ENDIF
-            ENDIF
+*---  Compose header line
+         CHTMP = DIMLABEL(1)
+         CHTMP = "[ "//CHTMP(1:MAX(17,LEN_TRIM(CHTMP)))//" ]"
+         CHTIT = "  IObs  Bin Size "//
+     >        "IODimO  "//CHTMP//"  "
+         IF (NDIM.EQ.2) THEN
+            CHTMP = DIMLABEL(2)
+            CHTMP = "[ "//CHTMP(1:MAX(17,LEN_TRIM(CHTMP)))//" ]"
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           "  IODimI  "//
+     >           CHTMP//"  "
+         ELSE IF (NDIM.EQ.3) THEN
+            CHTMP = DIMLABEL(2)
+            CHTMP = "[ "//CHTMP(1:MAX(17,LEN_TRIM(CHTMP)))//" ]"
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           "  IODimM  "//
+     >           CHTMP//"  "
+            CHTMP = DIMLABEL(3)
+            CHTMP = "[ "//CHTMP(1:MAX(17,LEN_TRIM(CHTMP)))//" ]"
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           "  IODimI  "//
+     >           CHTMP//"  "
          ENDIF
-         CHFRM = CHFRM(1:LEN_TRIM(CHFRM))//",X)"
+         IF (LCONTR(ILO)) THEN
+            CHTMP = SCALEDESCRIPT(ILO,1,1)
+            CHTMP = "  <"//CHTMP(1:12)//">"
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           CHTMP//"  "
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           "  LO cross section"
+         ENDIF
+         IF (LCONTR(INLO)) THEN
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))/
+     >           /"   NLO cross section"
+            CHTIT = CHTIT(1:LEN_TRIM(CHTIT))//
+     >           "   KNLO"
+            CH2TMP = "  "
+            NBLANK = 2
+         ENDIF
+         IF (LCONTR(INLO).AND.LCONTR(ITHC2L).AND.LTHC) THEN
+            CHTIT =
+     >           CHTIT(1:LEN_TRIM(CHTIT))//
+     >           CH2TMP(1:NBLANK)//"    KTHC2"
+            NBLANK = 1
+         ELSE IF (LCONTR(ILO).AND.LCONTR(ITHC1L).AND.LTHC) THEN
+            CHTIT =
+     >           CHTIT(1:LEN_TRIM(CHTIT))//
+     >           CH2TMP(1:NBLANK)//"    KTHC1"
+            NBLANK = 1
+         ENDIF
+         IF (LCONTR(INPC1)) THEN
+            CHTIT =
+     >           CHTIT(1:LEN_TRIM(CHTIT))//
+     >           CH2TMP(1:NBLANK)//"    KNPC1"
+         ENDIF
 
-         WRITE(*,'(A)')"  IObs  Bin Size "//
-     >        "IODimO  "//
-     >        CHTMP1//"  "//
-     >        "IODimI  "//
-     >        CHTMP2//"  "//CHRES(1:LEN_TRIM(CHRES))
+         WRITE(*,'(A)')CHTIT(1:LEN_TRIM(CHTIT))
          WRITE(*,'(A)')LSEPL
 
+*--- Loop over observable bins
          DO I=1,NOBSBIN
             DO J=1,NDIM
                IF (I.EQ.1) THEN
@@ -426,58 +426,71 @@ C---  CALL SETLHAPARM('SILENT')
                ENDIF
             ENDDO
 
-            IF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC2L).AND.LTHC
-     >           .AND.LCONTR(INPC1)) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-ckr     >              XSCLNPC1(I),
-     >              XSCLNLO(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I),KNPC1(I)
-            ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC2L)
-     >              .AND.LTHC) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-ckr     >              XSCLTHC2(I),
-     >              XSCLNLO(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KTHC2(I)
-            ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(INPC1)) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-ckr     >              XSCLNPC1(I),
-     >              XSCLNLO(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KNPC1(I)
-            ELSEIF (LCONTR(ILO).AND.LCONTR(INLO).AND.LCONTR(ITHC1L)
-     >              .AND.LTHC) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-     >              XSCLNLO(I),
-     >              XSLO(I),XSNLO(I),KFAC(I),KTHC1(I)
-            ELSEIF (LCONTR(ILO).AND.LCONTR(INLO)) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-     >              XSCLNLO(I),
-     >              XSLO(I),XSNLO(I),KFAC(I)
-            ELSEIF (LCONTR(ILO).AND.LCONTR(ITHC1L).AND.LTHC) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-     >              XSCLLO(I),
-     >              XSLO(I),KTHC1(I)
-            ELSEIF (LCONTR(ILO)) THEN
-               WRITE(*,CHFRM)I,BINSIZE(I),
-     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2),
-     >              NDIMBINS(1),LOBIN(I,1),UPBIN(I,1),
-     >              XSCLLO(I),
-     >              XSLO(I)
-            ELSE
-               WRITE(*,*)
-     >              "fnlo-read: Nothing to report!"
+*---  Compose output line for each observable bin
+            WRITE(CHOUT,'(1P,I5,X,G10.4,(X,I5,X,2(2X,G10.4)),0P)')
+     >           I,BINSIZE(I),
+     >           NDIMBINS(1),LOBIN(I,1),UPBIN(I,1)
+            IF (NDIM.GT.1) THEN
+               WRITE(CHTMP,'(1P,5X,I5,2(2X,G10.4),0P)')
+     >              NDIMBINS(2),LOBIN(I,2),UPBIN(I,2)
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
             ENDIF
+            IF (NDIM.GT.2) THEN
+               WRITE(CHTMP,'(1P,5X,I5,2(2X,G10.4),0P)')
+     >              NDIMBINS(3),LOBIN(I,3),UPBIN(I,3)
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ENDIF
+            IF (LCONTR(INLO)) THEN
+               XTMP = XSCLNLO(I)
+            ELSE
+               XTMP = XSCLLO(I)
+            ENDIF
+            WRITE(CHTMP,'(1P,(5X,G10.4),0P)')
+     >           XTMP
+            CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >           CHTMP(1:LEN_TRIM(CHOUT))
+            IF (LCONTR(ILO)) THEN
+               XTMP = XSLO(I)
+               WRITE(CHTMP,'(1P,(9X,E18.11),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ENDIF
+            IF (LCONTR(INLO)) THEN
+               XTMP = XSNLO(I)
+               WRITE(CHTMP,'(1P,(X,E18.11),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+               XTMP = KFAC(I)
+               WRITE(CHTMP,'(0P,(X,F9.5),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ENDIF
+            IF (LCONTR(INLO).AND.LCONTR(ITHC2L).AND.LTHC) THEN
+               XTMP = KTHC2(I)
+               WRITE(CHTMP,'(0P,(X,F9.5),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ELSE IF (LCONTR(ILO).AND.LCONTR(ITHC1L).AND.LTHC) THEN
+               XTMP = KTHC1(I)
+               WRITE(CHTMP,'(0P,(X,F9.5),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ENDIF
+            IF ((LCONTR(ILO).OR.LCONTR(INLO)).AND.LCONTR(INPC1)) THEN
+               XTMP = KNPC1(I)
+               WRITE(CHTMP,'(0P,(X,F9.5),0P)')
+     >              XTMP
+               CHOUT = CHOUT(1:LEN_TRIM(CHOUT))//
+     >              CHTMP(1:LEN_TRIM(CHOUT))
+            ENDIF
+            WRITE(*,*)CHOUT(1:LEN_TRIM(CHOUT))
          ENDDO
       ENDDO
 

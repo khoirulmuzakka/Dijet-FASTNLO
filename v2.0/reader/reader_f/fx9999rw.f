@@ -168,18 +168,18 @@
          STOP
       ENDIF
       CALL FNIOINT(CRW,NUNIT, NDIM,LPRINT,"  A2  NDim")
-      DO I=1,NDIM
+      DO I=NDIM,1,-1
          WRITE(CH1TMP,'(I1)'),I
          CHTMP = "  A2    DimLabel("//CH1TMP//")"
          CALL FNIOCHAR(CRW,NUNIT, DIMLABEL(I),LPRINT,CHTMP)
       ENDDO
-      DO I=1,NDIM
+      DO I=NDIM,1,-1
          WRITE(CH1TMP,'(I1)'),I
          CHTMP = "  A2    IDiffBin("//CH1TMP//")"
          CALL FNIOINT(CRW,NUNIT, IDIFFBIN(I),LPRINT,CHTMP)
       ENDDO
       DO I=1,NOBSBIN
-         DO J=1,NDIM
+         DO J=NDIM,1,-1
             WRITE(CH3TMP,'(I3)'),I
             WRITE(CH1TMP,'(I1)'),J
             CHTMP = "  A2      LoBin("//
@@ -445,9 +445,9 @@ C---  WRITE(*,'(A,G10.4)')"ABSLOC: ",DCorLo(i,j)*DyVal(i)/100.D0
          ELSEIF (IPDFDEF(IC,1).EQ.3) THEN ! --- hh/hhbar
             IF (IPDFDEF(IC,2).EQ.1) THEN
                IF (IPDFDEF(IC,3).EQ.1) THEN
-                  IF (NSUBPROC(IC).NE.6) THEN
+                  IF (.NOT.(NSUBPROC(IC).EQ.6.OR.NSUBPROC(IC).EQ.7))THEN
                      WRITE(*,*)"FX9999RW: ERROR! IPDFdef(3)=1 "//
-     >                    "requires 6 subprocesses for hh. Stopped."
+     >                   "requires 6 or 7 subprocesses for hh. Stopped."
                      STOP
                   ENDIF
                ELSEIF (IPDFDEF(IC,3).EQ.2) THEN

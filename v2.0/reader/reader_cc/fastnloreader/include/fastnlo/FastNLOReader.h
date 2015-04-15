@@ -210,6 +210,14 @@ public:
       return BBlocksSMCalc[0][0]->NScaleDep >= 3;   // Get, if this table is a 'flexible scale' table or not.
    }
 
+   unsigned int GetIDim0Bin(unsigned int iobs) const;   // Bin number in first dimension for given ObsBin
+   unsigned int GetIDim1Bin(unsigned int iobs) const;   // Bin number in second dimension for given ObsBin
+   unsigned int GetIDim2Bin(unsigned int iobs) const;   // Bin number in third dimension for given ObsBin
+
+
+
+
+
 
    // ---- Print outs ---- //
    void PrintTableInfo(const int iprint = 0) const;

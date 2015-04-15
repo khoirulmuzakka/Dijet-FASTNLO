@@ -21,7 +21,7 @@
       WRITE(*,*)"#"
       WRITE(*,*)LSEPS
       WRITE(*,*)"#"
-      WRITE(*,*)"# Copyright © 2011,2012,2013 "//FNLO//" Collaboration"
+      WRITE(*,*)"# Copyright © @YEARS@ "//FNLO//" Collaboration"
       WRITE(*,*)"# @AUTHORSv2@"
       WRITE(*,*)"#"
       WRITE(*,*)"# This program is free software: "//

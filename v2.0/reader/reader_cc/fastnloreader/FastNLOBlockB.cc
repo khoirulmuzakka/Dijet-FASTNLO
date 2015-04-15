@@ -284,7 +284,7 @@ void FastNLOBlockB::ReadBlockB(istream *table) {
             *table >> Nscalevar[i];
             *table >> Nscalenode[i];
          }
-         printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+         //         printf("  *  FastNLOBlockB::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
 
          ScaleFac.resize(NScaleDim);
          for (int i=0; i<NScaleDim; i++) {
@@ -363,7 +363,11 @@ void FastNLOBlockB::Print(const int ic, const int iprint) {
       for (unsigned int i=0; i<CtrbDescript.size(); i++) {
          printf(" #   %s\n",CtrbDescript[i].data());
       }
-      printf(" #   No. of events: %16llu\n",Nevt);
+      if (fItabversion < 22000) {
+         printf(" #   No. of events: %16llu\n",Nevt);
+      } else {
+         printf(" #   No. of events: %#17.0F\n",Devt);
+      }
       printf(" #   provided by:\n");
       for (unsigned int i=0; i<CodeDescript.size(); i++) {
          printf(" #   %s\n",CodeDescript[i].data());
@@ -380,6 +384,22 @@ void FastNLOBlockB::Print(const int ic, const int iprint) {
                printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,ScaleFac[i][k]);
             }
             printf(" #     Number of scale nodes for dimension %1i:      %1i\n",i+1,Nscalenode[i]);
+         }
+      } else {
+         if (! (NScaleDim == 1)) {
+            say::error["FastNLOBlockB::Print"] << "Flex-scale tables must have scale dimensions of one, aborting! "
+                                          << "NScaleDim = " << NScaleDim <<endl;
+            exit(1);
+         }
+         // Not useful for flex-scale tables
+         //         printf(" #   Scale dimensions: %1i\n",NScaleDim);
+         for (int i=0; i<NScaleDim; i++) {
+            printf(" #   Scale description for flexible scale %1i:          %s\n",1,ScaleDescript[i][0].data());
+            printf(" #     Number of scale nodes in first observable bin:      %2zu\n",ScaleNodeScale1[0].size());
+            printf(" #     Number of scale nodes in last  observable bin:      %2zu\n",ScaleNodeScale1[fNObsBins-1].size());
+            printf(" #   Scale description for flexible scale %1i:          %s\n",2,ScaleDescript[i][1].data());
+            printf(" #     Number of scale nodes in first observable bin:      %2zu\n",ScaleNodeScale2[0].size());
+            printf(" #     Number of scale nodes in last  observable bin:      %2zu\n",ScaleNodeScale2[fNObsBins-1].size());
          }
       }
    } else {

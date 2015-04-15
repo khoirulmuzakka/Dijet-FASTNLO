@@ -15,19 +15,6 @@
 //       arXiv:1109.1310                                                //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
-#include "FastNLOReaderVersion.cc"
-#ifndef FNLO_VERSION
-#define FNLO_VERSION    "2.1.0"
-#define FNLO_SVNREV     "XXXX"
-#define FNLO_AUTHORS    "D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"
-#define FNLO_WEBPAGE    "http://projects.hepforge.org/fastnlo"
-#define FNLO_AUTHORSv14 "T. Kluge, K. Rabbertz, M. Wobisch"
-#define FNLO_QUOTEv14   "hep-ph/0609285"
-#define FNLO_AUTHORSv2  "D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"
-#define FNLO_QUOTEv2    "arXiv:1109.1310"
-#endif
-
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -35,6 +22,7 @@
 #include <iostream>
 #include <vector>
 #include "fastnlo/FastNLOReader.h"
+#include "FastNLOReaderVersion.cc"
 
 using namespace std;
 
@@ -89,39 +77,37 @@ FastNLOReader::~FastNLOReader(void) {
 
 
 //______________________________________________________________________________
-
-
-
 void FastNLOReader::PrintWelcomeMessage() {
    //---  Initialization for nice printing
    const string CSEPS = " ##################################################################################\n";
    const string LSEPS = " #---------------------------------------------------------------------------------\n";
 
    char fnlo[100];
-   //sprintf(fnlo,"27[0;31mfast27[0;34mNLO\033[0m",27,0,31,27,0,34);
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
-   char package_version[100]    = FNLO_VERSION;
-   char svnrev[100]             = FNLO_SVNREV;
-   char authors[500]            = FNLO_AUTHORS;
-   char webpage[500]    = FNLO_WEBPAGE;
-   char authorsv14[200] = FNLO_AUTHORSv14;
-   char quotev14[200]   = FNLO_QUOTEv14;
-   char authorsv2[200]  = FNLO_AUTHORS;
-   char quotev2[200]    = FNLO_QUOTEv2;
+   char subproject[100]      = FNLO_SUBPROJECT;
+   char package_version[100] = FNLO_VERSION;
+   char svnrev[100]          = FNLO_SVNREV;
+   char authors[500]         = FNLO_AUTHORS;
+   char webpage[500]         = FNLO_WEBPAGE;
+   char authorsv14[200]      = FNLO_AUTHORSv14;
+   char quotev14[200]        = FNLO_QUOTEv14;
+   char authorsv2[200]       = FNLO_AUTHORSv2;
+   char quotev2[200]         = FNLO_QUOTEv2;
+   char years[100]           = FNLO_YEARS;
 
    shout>>"\n";
    shout>>""<<CSEPS;
    shout<<"\n";
-   shout<<" "<<fnlo<<"_reader"<<endl;
-   shout<<" Version "<<package_version<<"_"<<svnrev<<endl;
-   shout<<"\n";
+   shout<< fnlo << "_" << subproject << endl;
+   shout<< "Version " << package_version << "_" << svnrev << endl;
+   shout<< "" << endl;
    shout<<" C++ program to read fastNLO v2 tables and"<<endl;
    shout<<" derive QCD cross sections using PDFs, e.g. from LHAPDF"<<endl;
    shout<<"\n";
    shout>>""<<LSEPS;
    shout<<"\n";
-   shout<<" Copyright © 2011,2012,2013,2014 "<<fnlo<<" Collaboration"<<endl;
-   shout<<" "<<authors<<endl;
+   shout << "Copyright © " << years << " " << fnlo << " Collaboration" << endl;
+   shout << authors << endl;
    shout<<"\n";
    shout>>" # This program is free software: you can redistribute it and/or modify"<<endl;
    shout>>" # it under the terms of the GNU General Public License as published by"<<endl;
@@ -147,7 +133,6 @@ void FastNLOReader::PrintWelcomeMessage() {
    shout<<"\n";
    shout>>""<<CSEPS;
    WelcomeOnce = true;
-
 }
 
 
@@ -1018,14 +1003,14 @@ void FastNLOReader::ReadBlockA2(istream *table) {
    *table >> NDim;
    DimLabel.resize(NDim);
    table->getline(buffer,256);
-   for (int i=0; i<NDim; i++) {
+   for(int i=NDim-1;i>=0;i--){
       table->getline(buffer,256);
       DimLabel[i] = buffer;
       StripWhitespace(&DimLabel[i]);
    }
 
    IDiffBin.resize(NDim);
-   for (int i=0; i<NDim; i++) {
+   for(int i=NDim-1;i>=0;i--){
       *table >>  IDiffBin[i];
    }
    LoBin.resize(NObsBin);
@@ -1036,7 +1021,7 @@ void FastNLOReader::ReadBlockA2(istream *table) {
    for (int i=0; i<NObsBin; i++) {
       LoBin[i].resize(NDim);
       UpBin[i].resize(NDim);
-      for (int j=0; j<NDim; j++) {
+      for(int j=NDim-1;j>=0;j--){
          *table >>  LoBin[i][j] ;
          if (IDiffBin[j]==0 || IDiffBin[j]==2) {
             *table >>  UpBin[i][j];
@@ -2771,3 +2756,128 @@ int FastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) co
 }
 
 //______________________________________________________________________________
+
+
+
+// ___________________________________________________________________________________________________
+unsigned int FastNLOReader::GetIDim0Bin(unsigned int iObsBin) const {
+   //! Returns bin number in first dimension
+   //! Valid for up to triple differential binnings
+   //  There always must be at least one bin!
+   if ( LoBin.size() == 0 || LoBin[0].size() == 0 ) {
+      error["FastNLOReader::GetIDim0Bin"] << "No observable bins defined, aborted!" << endl;
+      exit(1);
+   }
+   if ( (int)iObsBin >= NObsBin ) {
+      error["FastNLOReader::GetIDim0Bin"] << "Observable bin out of range, aborted!" << endl;
+      exit(1);
+   }
+   unsigned int i0bin = 0;
+   double lo0bin = LoBin[0][0];
+   for ( unsigned int iobs = 0; iobs<LoBin.size(); iobs++ ) {
+      if ( lo0bin < LoBin[iobs][0] ) {
+         lo0bin = LoBin[iobs][0];
+         i0bin++;
+      }
+      if ( iobs == iObsBin ) {
+         return i0bin;
+      }
+   }
+   error["FastNLOReader::GetIDim0Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   exit(1);
+}
+
+
+
+// ___________________________________________________________________________________________________
+unsigned int FastNLOReader::GetIDim1Bin(unsigned int iObsBin) const {
+   //! Returns bin number in second dimension
+   //! Valid for up to triple differential binnings
+   //  1d binning --> error exit
+   const int idiff = GetNDiffBin();
+   if ( idiff < 2 ) {
+      error["FastNLOReader::GetIDim1Bin"] << "No second dimension available, aborted!" << endl;
+      exit(1);
+   }
+   //  Otherwise there always must be at least one bin!
+   if ( LoBin.size() == 0 || LoBin[0].size() == 0 ) {
+      error["FastNLOReader::GetIDim1Bin"] << "No observable bins defined, aborted!" << endl;
+      exit(1);
+   }
+   if ( (int)iObsBin >= NObsBin ) {
+      error["FastNLOReader::GetIDim1Bin"] << "Observable bin out of range, aborted!" << endl;
+      exit(1);
+   }
+   unsigned int i0bin = 0;
+   unsigned int i1bin = 0;
+   double lo0bin = LoBin[0][0];
+   double lo1bin = LoBin[0][1];
+   for ( unsigned int iobs = 0; iobs<LoBin.size(); iobs++ ) {
+      if ( lo0bin < LoBin[iobs][0] ) {
+         lo0bin = LoBin[iobs][0];
+         lo1bin = LoBin[iobs][1];
+         i0bin++;
+         i1bin = 0;
+      } else if ( lo1bin < LoBin[iobs][1] ) {
+         lo1bin = LoBin[iobs][1];
+         i1bin++;
+      }
+      if ( iobs == iObsBin ) {
+         return i1bin;
+      }
+   }
+   error["FastNLOReader::GetIDim1Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   exit(1);
+}
+
+
+
+// ___________________________________________________________________________________________________
+unsigned int FastNLOReader::GetIDim2Bin(unsigned int iObsBin) const {
+   //! Returns bin number in third dimension
+   //! Valid for up to triple differential binnings
+   //  1d, 2d binning --> error exit
+   const int idiff = GetNDiffBin();
+   if ( idiff < 3 ) {
+      error["FastNLOReader::GetIDim2Bin"] << "No third dimension available, aborted!" << endl;
+      exit(1);
+   }
+   //  Otherwise there always must be at least one bin!
+   if ( LoBin.size() == 0 || LoBin[0].size() == 0 ) {
+      error["FastNLOReader::GetIDim2Bin"] << "No observable bins defined, aborted!" << endl;
+      exit(1);
+   }
+   if ( (int)iObsBin >= NObsBin ) {
+      error["FastNLOReader::GetIDim2Bin"] << "Observable bin out of range, aborted!" << endl;
+      exit(1);
+   }
+   unsigned int i0bin = 0;
+   unsigned int i1bin = 0;
+   unsigned int i2bin = 0;
+   double lo0bin = LoBin[0][0];
+   double lo1bin = LoBin[0][1];
+   double lo2bin = LoBin[0][2];
+   for ( unsigned int iobs = 0; iobs<LoBin.size(); iobs++ ) {
+      if ( lo0bin < LoBin[iobs][0] ) {
+         lo0bin = LoBin[iobs][0];
+         lo1bin = LoBin[iobs][1];
+         lo2bin = LoBin[iobs][2];
+         i0bin++;
+         i1bin = 0;
+         i2bin = 0;
+      } else if ( lo1bin < LoBin[iobs][1] ) {
+         lo1bin = LoBin[iobs][1];
+         lo2bin = LoBin[iobs][2];
+         i1bin++;
+         i2bin = 0;
+      } else if ( lo2bin < LoBin[iobs][2] ) {
+         lo2bin = LoBin[iobs][2];
+         i2bin++;
+      }
+      if ( iobs == iObsBin ) {
+         return i2bin;
+      }
+   }
+   error["FastNLOReader::GetIDim2Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   exit(1);
+}
