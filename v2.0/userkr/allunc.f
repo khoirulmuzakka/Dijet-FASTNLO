@@ -707,22 +707,22 @@ ctmp         IF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.2)LTHC2L = .TRUE.
 
 *---  Determine dimensional subdivisions (NDIM=1,2 only!)
 ckr      IF (NDIM.GT.2) THEN
-      j = NDim0Bins()
-      if (ndim.gt.1) then
-         do i=1,j
-            k = NDim1Bins(i)
-            if (ndim.gt.2) then
-               do ii=1,k
-                  l = NDim2Bins(i,ii)
-                  write(*,*)"NDim0Bins,NDim1Bins,NDim2Bins",j,k,l
-               enddo
-            else
-               write(*,*)"NDim0Bins,NDim1Bins",j,k
-            endif
-         enddo
-      else
-         write(*,*)"NDim0Bins",j
-      endif
+Comment:       j = NDim0Bins()
+Comment:       if (ndim.gt.1) then
+Comment:          do i=1,j
+Comment:             k = NDim1Bins(i)
+Comment:             if (ndim.gt.2) then
+Comment:                do ii=1,k
+Comment:                   l = NDim2Bins(i,ii)
+Comment:                   write(*,*)"NDim0Bins,NDim1Bins,NDim2Bins",j,k,l
+Comment:                enddo
+Comment:             else
+Comment:                write(*,*)"NDim0Bins,NDim1Bins",j,k
+Comment:             endif
+Comment:          enddo
+Comment:       else
+Comment:          write(*,*)"NDim0Bins",j
+Comment:       endif
 
 Comment:          DO I=1,NOBSBIN
 Comment:             j = IDim0Bin(i)
@@ -755,16 +755,16 @@ ckr      ENDIF
       NDIVCOUNTER(NBINCOUNTER(2)) = NTMP
       NBINCOUNTER(1) = NBINCOUNTER(1) + NTMP
       IBIN = 0
-      write(*,*)"NBINCOUNTER(1)",NBINCOUNTER(1)
-      write(*,*)"NBINCOUNTER(2),NDim0Bins()",NBINCOUNTER(2),NDim0Bins()
+c      write(*,*)"NBINCOUNTER(1)",NBINCOUNTER(1)
+c      write(*,*)"NBINCOUNTER(2),NDim0Bins()",NBINCOUNTER(2),NDim0Bins()
       DO J=1,NBINCOUNTER(2)
-         write(*,*)"J,NDIVCOUNTER(J),NDim1Bins(J)",
-     >        J,NDIVCOUNTER(J),NDim1Bins(J)
+c         write(*,*)"J,NDIVCOUNTER(J),NDim1Bins(J)",
+c     >        J,NDIVCOUNTER(J),NDim1Bins(J)
          DO I=1,NDIVCOUNTER(J)
             IBIN = IBIN + 1
             IOBSPOINTER(I,J) = IBIN
-            write(*,*)"I,J,IBIN,IOBSPOINTER",I,J,
-     >           IBIN,IOBSPOINTER(I,J)
+c            write(*,*)"I,J,IBIN,IOBSPOINTER",I,J,
+c     >           IBIN,IOBSPOINTER(I,J)
          ENDDO
       ENDDO
 
