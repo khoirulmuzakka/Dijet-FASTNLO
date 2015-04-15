@@ -69,7 +69,7 @@
 *
 ***********************************************************************
       IMPLICIT NONE
-      DOUBLE PRECISION XMUR, XMUF
+      DOUBLE PRECISION XMUR, XMUF, UNITFACTOR
       INCLUDE 'fnx9999.inc'
       INTEGER IPOINT, I,J,K, IXSECTUNIT
 
@@ -125,8 +125,15 @@
             ENDIF
          ENDDO
 
+*---  Determine unit factor to rescale cross sections to publication units
+         UNITFACTOR = 1.D0
+         IF (IXSECTUNIT.NE.IPUBLUNITS) THEN
+            UNITFACTOR = 1.D0/(10.D0**DBLE(IXSECTUNIT-IPUBLUNITS))
+         ENDIF
+
 *---  Add results in output array, skip unselected or non-existing
 *---  ones in result numbering
+
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
                IPOINT = ICONTRPOINTER(I)
@@ -135,6 +142,8 @@
 C---  DO K=1,1 ! Test - only gg
 C---  DO K=2,2 ! Test - only g (DIS)
 C---  DO K=2,5 ! Test - only qq
+                     RESULT(J,K,I) = RESULT(J,K,I) * UNITFACTOR
+                     RESMUR(J,K,I) = RESMUR(J,K,I) * UNITFACTOR
                      XSECT(J)  = XSECT(J)  + RESULT(J,K,I)
                      XSCALE(J) = XSCALE(J) + RESMUR(J,K,I)
                   ENDDO
@@ -152,13 +161,6 @@ C---  DO K=2,5 ! Test - only qq
          IF (ICONTRSELECTOR(I).EQ.1.AND.ICONTRPOINTER(I).NE.-1) THEN
             DO J=1,NOBSBIN
                XSECT(J) = XSECT(J) * MFACT(1,J)
-            ENDDO
-         ENDIF
-
-*---  Rescale cross section to publication units
-         IF (IXSECTUNIT.NE.IPUBLUNITS) THEN
-            DO J=1,NOBSBIN
-               XSECT(J) = XSECT(J)/(10.D0**DBLE(IXSECTUNIT-IPUBLUNITS))
             ENDDO
          ENDIF
 

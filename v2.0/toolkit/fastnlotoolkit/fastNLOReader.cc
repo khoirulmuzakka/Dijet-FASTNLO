@@ -1243,6 +1243,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    int xUnits = cLO->GetIXsectUnits();
    const double n     = cLO->GetNpow();
    const double L     = log(scalefac);
+   //TBD: 5 must be replaced by Nf here!
    const double beta0 = (11.*3.-2.*5)/3.;
    for (unsigned int i=0; i<NObsBin; i++) {
       double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
