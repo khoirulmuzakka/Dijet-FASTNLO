@@ -21,7 +21,8 @@ endif
 
 # All source files which go into the main target (and have to be distributed)
 allunc_SOURCES = main.f allunc.f fnx9999.f fn-interface.f alphas-grv.f alphas-grv-fnlo14.f alphst.f \
-	pyalps.f fx9999rw.f fnio.f uncert.f fnset.f fnx9999.inc strings.inc uncert.inc v14unc.inc
+	pyalps.f fx9999rw.f fnio.f uncert.f uncert2.f fnset.f fnx9999.inc strings.inc uncert.inc v14unc.inc \
+	v22tools.f
 
 # FORTRAN compiler flags to be used for the main target
 # top_srcdir for direct compilation before install; pkgincludedir for after install
@@ -35,27 +36,26 @@ AM_FFLAGS= -O -fno-automatic -ffixed-line-length-132 -mcmodel=medium
 # Libraries to be linked to the main target
 # Require lhapdf and cernlib, use lhapdf-config and cernlib command if possible
 allunc_LDFLAGS =
-#if HAVE_LHAPDFCONFIG
-#allunc_LDFLAGS += -Wl,--static `${LHAPDFBINPATH}/lhapdf-config --ldflags`
-#else
+if HAVE_LHAPDFCONFIG
+allunc_LDFLAGS += -Wl,--static `${LHAPDFBINPATH}/lhapdf-config --ldflags`
+else
 #allunc_LDFLAGS  += -L$(LHAPDFLIBPATH) -Wl,-static -lLHAPDF
 allunc_LDFLAGS  += -L/home/rabbertz/tmp/2005/lib -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
 #allunc_LDFLAGS  += -L/usr/lib/x86_64-linux-gnu -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
 allunc_LDFLAGS  += -L$(LHAPDFLIBPATH)  -lLHAPDF
 #allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lkernlib -lpawlib -lpacklib -Wl,-Bdynamic
-#allunc_LDFLAGS  += -L$(CERNLIBLIBPATH) `${CERNLIBCMD} -G Motif pawlib`
-#endif
+endif
 # To avoid 32-64-bit compatibility problems 64-bit systems require static linking of at least kernlib
 # (Tried to use "--as-needed" option instead of "--static" but didn't work as intended.)
 #if HAVE_64BIT
 #allunc_LDFLAGS += $(CERNLIBLIBPATH)/libmathlib.a $(CERNLIBLIBPATH)/libpacklib.a $(CERNLIBLIBPATH)/libkernlib.a
 #else
-#if HAVE_CERNLIBCONFIG
-#allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,--static `${CERNLIBCMD} mathlib packlib kernlib`
-#else
-#allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lpacklib -lkernlib -Wl,-Bdynamic
+if HAVE_CERNLIBCONFIG
+allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,--static `${CERNLIBCMD} mathlib packlib kernlib`
+else
+allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,-static -lmathlib -lpacklib -lkernlib -Wl,-Bdynamic
 #allunc_LDFLAGS += -L$(CERNLIBLIBPATH) -Wl,-static libmathlib.a libpacklib.a libkernlib.a -Wl,-Bdynamic
-#endif
+endif
 #endif
 
 

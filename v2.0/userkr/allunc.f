@@ -43,7 +43,9 @@
       DOUBLE PRECISION WTXUTMP(MXOBSBIN,MXSUBPROC+1,NMAXORD+1)
 
 *---  Arrays for crosscheck on PDF uncertainties
-      INTEGER K
+      INTEGER K,L,ii
+      INTEGER IDim0Bin,IDim1Bin,IDim2Bin
+      INTEGER NDim0Bins,NDim1Bins,NDim2Bins
       DOUBLE PRECISION XS0(2*MXOBSBIN),DXU(2*MXOBSBIN),DXL(2*MXOBSBIN)
       DOUBLE PRECISION DXU2(2*MXOBSBIN),DXL2(2*MXOBSBIN)
       DOUBLE PRECISION DXS0U,DXS0L,DELTA1,DELTA2,DELTA3
@@ -693,8 +695,8 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       DO I=1,NCONTRIB
          IF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.1)LLO    = .TRUE.
          IF (ICONTRFLAG1(I).EQ.1.AND.ICONTRFLAG2(I).EQ.2)LNLO   = .TRUE.
-         IF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.1)LTHC1L = .TRUE.
-         IF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.2)LTHC2L = .TRUE.
+ctmp         IF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.1)LTHC1L = .TRUE.
+ctmp         IF (ICONTRFLAG1(I).EQ.2.AND.ICONTRFLAG2(I).EQ.2)LTHC2L = .TRUE.
          IF (ICONTRFLAG1(I).EQ.4.AND.ICONTRFLAG2(I).EQ.1.AND.
      >        IADDMULTFLAG(I).EQ.1)
      >        LNPC1 = .TRUE.
@@ -704,11 +706,34 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       ENDDO
 
 *---  Determine dimensional subdivisions (NDIM=1,2 only!)
-      IF (NDIM.GT.2) THEN
-         WRITE(*,*)"ALLUNC: ERROR! Cannot deal yet with "//
-     >        "more than 2 dimensions. NDIM = ",NDIM
-         STOP
-      ENDIF
+ckr      IF (NDIM.GT.2) THEN
+      j = NDim0Bins()
+      if (ndim.gt.1) then
+         do i=1,j
+            k = NDim1Bins(i)
+            if (ndim.gt.2) then
+               do ii=1,k
+                  l = NDim2Bins(i,ii)
+                  write(*,*)"NDim0Bins,NDim1Bins,NDim2Bins",j,k,l
+               enddo
+            else
+               write(*,*)"NDim0Bins,NDim1Bins",j,k
+            endif
+         enddo
+      else
+         write(*,*)"NDim0Bins",j
+      endif
+
+Comment:          DO I=1,NOBSBIN
+Comment:             j = IDim0Bin(i)
+Comment:             k = IDim1Bin(i)
+Comment:             l = IDim2Bin(i)
+Comment:             write(*,*)"iobsbin,IDim0Bin,IDim1Bin,IDim2Bin",i,j,k,l
+Comment:          enddo
+Comment:          WRITE(*,*)"ALLUNC: ERROR! Cannot deal yet with "//
+Comment:      >        "more than 2 dimensions. NDIM = ",NDIM
+ckr         STOP
+ckr      ENDIF
       DO I=1,NOBSBIN
 *---  Very first bin; initialize
          IF (I.EQ.1) THEN
@@ -716,8 +741,8 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
             NBINCOUNTER(1) = 0
             NBINCOUNTER(2) = 1
 *---  Bin of 2nd dimension identical
-         ELSEIF ((LOBIN(I-1,2).EQ.LOBIN(I,2)).AND.
-     >           (UPBIN(I-1,2).EQ.UPBIN(I,2))) THEN
+         ELSEIF ((LOBIN(I-1,1).EQ.LOBIN(I,1)).AND.
+     >           (UPBIN(I-1,1).EQ.UPBIN(I,1))) THEN
             NTMP = NTMP + 1
 *---  Bin of 2nd dimension changed
          ELSE
@@ -730,22 +755,29 @@ ckr      LSER  = .NOT.LONE.AND.MYPDF.LT.10.AND..NOT.LSTAT.AND..NOT.LALG
       NDIVCOUNTER(NBINCOUNTER(2)) = NTMP
       NBINCOUNTER(1) = NBINCOUNTER(1) + NTMP
       IBIN = 0
+      write(*,*)"NBINCOUNTER(1)",NBINCOUNTER(1)
+      write(*,*)"NBINCOUNTER(2),NDim0Bins()",NBINCOUNTER(2),NDim0Bins()
       DO J=1,NBINCOUNTER(2)
+         write(*,*)"J,NDIVCOUNTER(J),NDim1Bins(J)",
+     >        J,NDIVCOUNTER(J),NDim1Bins(J)
          DO I=1,NDIVCOUNTER(J)
             IBIN = IBIN + 1
             IOBSPOINTER(I,J) = IBIN
+            write(*,*)"I,J,IBIN,IOBSPOINTER",I,J,
+     >           IBIN,IOBSPOINTER(I,J)
          ENDDO
       ENDDO
 
 *---  Define v14 variables
-      NRAPIDITY = NBINCOUNTER(2)
+ckr      NRAPIDITY = NBINCOUNTER(2)
+      NRAPIDITY = NDim0Bins()
       DO I=1,NRAPIDITY
          NPT(I) = NDIVCOUNTER(I)
          DO J=1,NPT(I)
-            PTBIN(I,J) = LOBIN(IOBSPOINTER(J,I),1)
+            PTBIN(I,J) = LOBIN(IOBSPOINTER(J,I),2)
          ENDDO
          PTBIN(I,NPT(I)+1) = UPBIN(IOBSPOINTER(NPT(I),I),1)
-         RAPBIN(I) = LOBIN(IOBSPOINTER(1,I),2)
+         RAPBIN(I) = LOBIN(IOBSPOINTER(1,I),1)
       ENDDO
       RAPBIN(NRAPIDITY+1) = UPBIN(IOBSPOINTER(1,NRAPIDITY),2)
 
@@ -840,8 +872,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
       ENDDO
 
 *---  Book histograms
-      CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
-     >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
+Comment:       CALL PDFHIST(1,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
+Comment:      >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
       WRITE(*,'(A,I4,A)')" ALLUNC: The observable has",NOBSBIN," bins."
       WRITE(*,'(A,I2,A)')" ALLUNC: The  LO is subdivided into ",
      >     NSUBPROC(1)," subprocesses and"
@@ -944,7 +976,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             IF (IDEBUG.GT.0)
      >           WRITE(*,*)"DEBUG1: AAA ALLUNC STEP = ",
      >           ISTEP
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
             IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -956,7 +988,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                IF (IDEBUG.GT.0)
      >              WRITE(*,*)"DEBUG1: BBB ALLUNC STEP = ",
      >              ISTEP
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) THEN
                   CALL FX9999IN(FILENAME)
@@ -968,8 +1000,8 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             IF (IDEBUG.GT.0)
      >           WRITE(*,*)"DEBUG1: CCC ALLUNC STEP = ",
      >           ISTEP
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Initialize arrays for crosscheck on PDF uncertainties, part 2 (normalized)
             IF (LNRM) THEN
@@ -1012,7 +1044,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: DD1A ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
                         IF (LTAB) THEN
@@ -1023,7 +1055,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: EE1A ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                         IF (LTAB) THEN
                            CALL FX9999IN(FILENAME)
@@ -1033,7 +1065,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: FF1A ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                      ENDIF
 
@@ -1054,7 +1086,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                      ENDIF
 
                      IPHASE = 2
-                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                     CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 
                      CALL INITPDF(J+1)
                      CALL FX9999IN(FILENAME)
@@ -1089,7 +1121,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: DD1B ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
                         IF (LTAB) THEN
@@ -1101,7 +1133,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: EE1B ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                         IF (LTAB) THEN
                            CALL FX9999IN(FILENAME)
@@ -1112,7 +1144,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: FF1B ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                      ENDIF
 
@@ -1155,7 +1187,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                      ELSEIF (MOD(IETYPE,10).EQ.3) THEN
                         IPHASE = 5
                      ENDIF
-                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                     CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                   ENDDO
 
 *--- Separate treatment of each PDF member for deviations
@@ -1206,7 +1238,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: DD2 ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
 *--- Load normalization table with potentially different binning!
                         IF (LTAB) THEN
@@ -1218,7 +1250,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: EE2 ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                         IF (LTAB) THEN
                            CALL FX9999IN(FILENAME)
@@ -1229,7 +1261,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         IF (IDEBUG.GT.0)
      >                       WRITE(*,*)"DEBUG1: FF2 ALLUNC STEP = ",
      >                       ISTEP
-                        CALL CENRES(ISTEP,LRAT,LNRM,
+                        CALL CENRES2(ISTEP,LRAT,LNRM,
      >                       SCENARIO(1:LEN_TRIM(SCENARIO)))
                      ENDIF
 
@@ -1270,7 +1302,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
                         ENDIF
                      ENDIF
 
-                     CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                     CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                   ENDDO
                ELSE
                   WRITE(*,*)"ALLUNC: ERROR! Undefined PDF error "//
@@ -1280,7 +1312,7 @@ ckr 900     FORMAT(1P,I5,3(3X,E21.14))
             ENDIF
 
             IPHASE = 9
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Symmetrize uncertainties as required for AB(K)M
             IF (MOD(IETYPE,10).EQ.5) THEN
@@ -1379,7 +1411,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                CALL FX9999IN(FILENAME)
                CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                ISTEP = 0
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -1389,7 +1421,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 1
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) THEN
                      CALL FX9999IN(FILENAME)
@@ -1398,10 +1430,10 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                   ENDIF
                ENDIF
                ISTEP = 2
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 6
 
 *--- HERAPDF1.0 & 1.5: Do loop runs from 1 - 8 (NPDFMOD) for this part
@@ -1412,7 +1444,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                 XSUNCOR,XSCOR)
                   IF (LNRM) THEN
                      ISTEP = 3
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB) THEN
                         CALL FX9999IN(FILENAMN)
@@ -1420,7 +1452,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                       XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 4
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB) THEN
                         CALL FX9999IN(FILENAME)
@@ -1428,14 +1460,14 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                       XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 5
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
-                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                  CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
 
                IPHASE = 9
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Add quadratically to previously backed-up result
                IBIN = 0
@@ -1473,7 +1505,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,
      >              XSUNCOR,XSCOR)
                ISTEP = 0
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LNRM) THEN
 *--- Load normalization table with potentially different binning!
@@ -1483,7 +1515,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 1
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) THEN
                      CALL FX9999IN(FILENAME)
@@ -1492,10 +1524,10 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
                   ENDIF
                ENDIF
                ISTEP = 2
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
                IPHASE = 6
 
 *--- HERAPDF1.0:               Do loop runs from 9 - 13 for this part (NPDFMOD+1,NPDFPAR)
@@ -1508,7 +1540,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                 XSUNCOR,XSCOR)
                   IF (LNRM) THEN
                      ISTEP = 3
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB) THEN
                         CALL FX9999IN(FILENAMN)
@@ -1516,7 +1548,7 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                       XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 4
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                      IF (LTAB) THEN
                         CALL FX9999IN(FILENAME)
@@ -1524,14 +1556,14 @@ Comment:      >                          WTDXL2(IBIN,ISUB,IORD)
      >                       XSUNCOR,XSCOR)
                      ENDIF
                      ISTEP = 5
-                     CALL CENRES(ISTEP,LRAT,LNRM,
+                     CALL CENRES2(ISTEP,LRAT,LNRM,
      >                    SCENARIO(1:LEN_TRIM(SCENARIO)))
                   ENDIF
-                  CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+                  CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
                ENDDO
 
                IPHASE = 9
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *--- Add quadratically to previously backed-up result
                IBIN = 0
@@ -1628,9 +1660,9 @@ c - Debug: Output should be identical in single PDF set case!
             ENDDO
 
 c - Fill histograms
-            CALL PDFFILL(NRAP,0,-1,I,MYRESN)
-            CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
-            CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
+Comment:             CALL PDFFILL(NRAP,0,-1,I,MYRESN)
+Comment:             CALL PDFFILL(NRAP,1,-1,I,WTDXL2)
+Comment:             CALL PDFFILL(NRAP,2,-1,I,WTDXU2)
          ENDDO                     ! Loop over scales
       ENDIF
 *---  End of PDF uncertainties
@@ -1687,8 +1719,8 @@ ckr            IWEIGHT = 0
 c - This is the normal table to fill the default values
             CALL FX9999IN(FILENAME)
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 6
 
 c - Loop over files
@@ -1722,17 +1754,24 @@ c - NLO
      >                 //NO//".tab"
                   OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
                   IF (ISTAT.NE.0) THEN
+                     FILENAMES = FILEBASE(1:LEN_TRIM(FILEBASE))//
+     >                    "2jet_v22_"
+     >                    //NO//".tab"
+                     OPEN(2,STATUS='OLD',FILE=FILENAMES,IOSTAT=ISTAT)
+                     IF (ISTAT.NE.0) THEN
 C---  WRITE(*,*)"Filename for order",IORD,":",FILENAMES
                      NFAIL = NFAIL + 1
                      IF (NFAIL.LT.2) THEN
                         WRITE(*,*)"ALLUNC: WARNING! Table file "//
-     >                       "not found, skipped ! IOSTAT = ",ISTAT
+     >                       "not found, skipped ! Filename = ",
+     >                       FILENAMES," IOSTAT = ",ISTAT
                      ENDIF
 ckr While using f90 DO-ENDDO ... one could also use the EXIT statement
 ckr instead of GOTO. However, EXIT leaves the loop!
 ckr To continue the loop use CYCLE instead!
                      GOTO 20
 ckr            CYCLE
+                  ENDIF
                   ENDIF
                ENDIF
                CLOSE(2)
@@ -1749,7 +1788,7 @@ ckr            CYCLE
 c - These are the stat. tables to get the deviations
                CALL FX9999IN(FILENAMES)
                CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ITAB,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,ITAB,LRAT,LNRM)
  20            CONTINUE
             ENDDO
 
@@ -1761,7 +1800,7 @@ c - These are the stat. tables to get the deviations
      >           "################################"
 
             IPHASE = 9
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Special statistics output
             WRITE(*,*)"========================================"//
@@ -1904,8 +1943,8 @@ c - Give some standard output, fill histograms
                ENDDO
             ENDDO
 c - Fill histograms
-            CALL PDFFILL(NRAP,3,IORD,ISCL,WTDXMN)
-            CALL PDFFILL(NRAP,4,IORD,ISCL,WTDXUL)
+Comment:             CALL PDFFILL(NRAP,3,IORD,ISCL,WTDXMN)
+Comment:             CALL PDFFILL(NRAP,4,IORD,ISCL,WTDXUL)
 
          ENDDO
       ENDIF
@@ -1990,19 +2029,19 @@ Comment:             ASMZPDF = ALPHASPDF(ZMASS)
 Comment: cnew
 Comment:             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 0
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LNRM) THEN
 Comment: ckr Load normalization table with potentially different binning!
 Comment:                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:                ISTEP = 1
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ENDIF
 Comment:             ISTEP = 2
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:
-Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:             CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:             IPHASE = 6
 Comment:
 Comment:             CALL INITPDF(IPDF-IPDFUD)
@@ -2013,18 +2052,18 @@ Comment: cnew
 Comment:             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             IF (LNRM) THEN
 Comment:                ISTEP = 3
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:                ISTEP = 4
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:                ISTEP = 5
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             ENDIF
-Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+Comment:             CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:
 Comment:             CALL INITPDF(IPDF+IPDFUD)
 Comment: cnew
@@ -2034,21 +2073,21 @@ Comment: cnew
 Comment:             CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             IF (LNRM) THEN
 Comment:                ISTEP = 3
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:                IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:                ISTEP = 4
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:                IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:                ISTEP = 5
-Comment:                CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:                CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             ENDIF
-Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+Comment:             CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:
 Comment:             IPHASE = 9
-Comment:             CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:             CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:
 Comment: c - Give some standard output, fill histograms
 Comment:             WRITE(*,*)"ALLUNC: Uncertainties from"//
@@ -2086,18 +2125,18 @@ Comment:          ASMZVAL   = ALPHASPDF(ZMASS)
 Comment:
 Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          ISTEP = 0
-Comment:          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:          CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:          IF (LNRM) THEN
 Comment: ckr Load normalization table with potentially different binning!
 Comment:             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 1
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          ENDIF
 Comment:          ISTEP = 2
-Comment:          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:          CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:          IPHASE = 6
 Comment:
 Comment: cnew         ASMZVAL = ASMZVAL - DBLE(IPDFUD)/1000.
@@ -2105,18 +2144,18 @@ Comment:          ASMZVAL = ASMZVAL + ASDN
 Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          IF (LNRM) THEN
 Comment:             ISTEP = 3
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 4
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 5
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:          ENDIF
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:
 Comment: ckr Add twice to correct previous subtraction!
 Comment: cnew         ASMZVAL = ASMZVAL + DBLE(2*IPDFUD)/1000.
@@ -2124,21 +2163,21 @@ Comment:          ASMZVAL = ASMZVAL - ASDN + ASUP
 Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          IF (LNRM) THEN
 Comment:             ISTEP = 3
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LTAB) CALL FX9999CC(FILENAMN,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 4
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:             IF (LTAB) CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:             ISTEP = 5
-Comment:             CALL CENRES(ISTEP,LRAT,LNRM,
+Comment:             CALL CENRES2(ISTEP,LRAT,LNRM,
 Comment:      >           SCENARIO(1:LEN_TRIM(SCENARIO)))
 Comment:          ENDIF
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,J,LRAT,LNRM)
 Comment:
 Comment:          IPHASE = 9
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:
 Comment:          ASMODE  = ASMODETMP
 Comment:          ASMZVAL = ASMZTMP
@@ -2201,7 +2240,7 @@ c - 2-point scheme
             CALL FX9999IN(FILENAME)
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
             ISTEP = 0
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                IF (LTAB) THEN
@@ -2209,7 +2248,7 @@ ckr Load normalization table with potentially different binning!
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                ENDIF
                ISTEP = 1
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) THEN
                   CALL FX9999IN(FILENAME)
@@ -2217,9 +2256,9 @@ ckr Load normalization table with potentially different binning!
                ENDIF
             ENDIF
             ISTEP = 2
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 6
 
             DO I=2,3
@@ -2230,7 +2269,7 @@ ckr Load normalization table with potentially different binning!
                CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                IF (LNRM) THEN
                   ISTEP = 3
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
                   IF (LTAB) THEN
@@ -2239,7 +2278,7 @@ ckr Load normalization table with potentially different binning!
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 4
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) THEN
                      CALL FX9999IN(FILENAME)
@@ -2247,13 +2286,13 @@ ckr Load normalization table with potentially different binning!
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 5
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                ENDIF
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
             ENDDO
             IPHASE = 9
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 *---  Give some standard output, fill histograms
             WRITE(*,*)"========================================"//
@@ -2278,19 +2317,20 @@ ckr Load normalization table with potentially different binning!
             ISCL   = ISCLPT(1)
             ISUB   = 0
             IBIN   = 0
-            DO IRAP=1,NRAP
-               DO IPT=1,NPT(IRAP)
-                  IBIN = IBIN+1
+cnew            DO IRAP=1,NRAP
+cnew               DO IPT=1,NPT(IRAP)
+cnew                  IBIN = IBIN+1
+            DO IBIN=1,NOBSBIN
                   WRITE(*,900) IBIN,MYRESN(IBIN,NSBPRC+1,NORD+1),
      >                 WTDXLM(IBIN,NSBPRC+1,NORD+1),
      >                 WTDXUM(IBIN,NSBPRC+1,NORD+1)
-               ENDDO
+cnew               ENDDO
             ENDDO
 
 *---  Central scale
             ISCL = ISCLPT(1)
-            CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
-            CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
+Comment:             CALL PDFFILL(NRAP,6,-1,ISCL,WTDXLM)
+Comment:             CALL PDFFILL(NRAP,7,-1,ISCL,WTDXUM)
          ENDIF
 
 c - 6-point scheme, only if possible, e.g. not in case of threshold corrections
@@ -2310,7 +2350,7 @@ c - 6-point scheme, only if possible, e.g. not in case of threshold corrections
             CALL FX9999IN(FILENAME)
             CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
             ISTEP = 0
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
             IF (LNRM) THEN
 ckr Load normalization table with potentially different binning!
                IF (LTAB) THEN
@@ -2318,7 +2358,7 @@ ckr Load normalization table with potentially different binning!
                   CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                ENDIF
                ISTEP = 1
-               CALL CENRES(ISTEP,LRAT,LNRM,
+               CALL CENRES2(ISTEP,LRAT,LNRM,
      >              SCENARIO(1:LEN_TRIM(SCENARIO)))
                IF (LTAB) THEN
                   CALL FX9999IN(FILENAME)
@@ -2326,9 +2366,9 @@ ckr Load normalization table with potentially different binning!
                ENDIF
             ENDIF
             ISTEP = 2
-            CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+            CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
 
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
             IPHASE = 6
 
             DO I=2,7
@@ -2339,7 +2379,7 @@ ckr Load normalization table with potentially different binning!
                CALL FX9999CC(XMUR,XMUF,XSNLO,XSCLNLO,XSUNCOR,XSCOR)
                IF (LNRM) THEN
                   ISTEP = 3
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
 ckr Load normalization table with potentially different binning!
                   IF (LTAB) THEN
@@ -2348,7 +2388,7 @@ ckr Load normalization table with potentially different binning!
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 4
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                   IF (LTAB) THEN
                      CALL FX9999IN(FILENAME)
@@ -2356,13 +2396,13 @@ ckr Load normalization table with potentially different binning!
      >                    XSUNCOR,XSCOR)
                   ENDIF
                   ISTEP = 5
-                  CALL CENRES(ISTEP,LRAT,LNRM,
+                  CALL CENRES2(ISTEP,LRAT,LNRM,
      >                 SCENARIO(1:LEN_TRIM(SCENARIO)))
                ENDIF
-               CALL UNCERT(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
+               CALL UNCERT2(IPHASE,IMODE,IWEIGHT,ISCL,LRAT,LNRM)
             ENDDO
             IPHASE = 9
-            CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+            CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 
 c - Give some standard output, fill histograms
             WRITE(*,*)"========================================"//
@@ -2395,8 +2435,8 @@ c - Give some standard output, fill histograms
      >                 WTDXUM(IBIN,NSBPRC+1,NORD+1)
                ENDDO
             ENDDO
-            CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
-            CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
+Comment:             CALL PDFFILL(NRAP,8,-1,ISCL,WTDXLM)
+Comment:             CALL PDFFILL(NRAP,9,-1,ISCL,WTDXUM)
          ENDIF
       ENDIF
 *---  End of scale uncertainties
@@ -2454,8 +2494,8 @@ Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          IPHASE  = 1
 Comment:          IMODE   = 4
 Comment:          IWEIGHT = 0
-Comment:          CALL CENRES(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:          CALL CENRES2(ISTEP,LRAT,LNRM,SCENARIO(1:LEN_TRIM(SCENARIO)))
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:
 Comment: c - Normal result
 Comment:          ISCL = 3
@@ -2463,9 +2503,9 @@ Comment:          XMUR = MURSCALE(ISCL)
 Comment:          XMUF = MUFSCALE(ISCL)
 Comment:          CALL FX9999CC(FILENAME,XMUR,XMUF,0,XSNLO,XSCLNLO)
 Comment:          IPHASE = 6
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:          IPHASE = 9
-Comment:          CALL UNCERT(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
+Comment:          CALL UNCERT2(IPHASE,IMODE,IWEIGHT,0,LRAT,LNRM)
 Comment:
 Comment: c - Give some standard output, fill histograms
 Comment:          WRITE(*,*)"========================================"//
@@ -2495,8 +2535,8 @@ Comment:       ENDIF
 
 
 c - Close hbook file
-      CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
-     >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
+Comment:       CALL PDFHIST(2,HISTFILE,LONE,LPDF,LSTAT,LALG,LSER,MYPDF,
+Comment:      >     LRAT.OR.LNRM,LSCL,ISCLPT(1))
 
       RETURN
       END
