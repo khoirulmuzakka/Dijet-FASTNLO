@@ -168,6 +168,7 @@ print "\nfnlo-add-tables.pl: ${merger}: $date\n";
 if ( $opt_s ) {
     print "\nfnlo-add-tables.pl: Statistics mode\n";
     my $scmd2 = $cmd;
+    print "\nfnlo-add-tables.pl: Creating LO statistics tables ...\n";
     foreach my $lotab ( @lotabs ) {
         my $scmd1 = $cmd;
         $scmd1 .= " $lodir/$lotab $nlodir/$nlotabs[0]";
@@ -178,8 +179,17 @@ if ( $opt_s ) {
         if ( $debug ) {print "fnlo-add-tables.pl: Running command $scmd1\n";}
         system("$scmd1 >> ${scen}_addst.log");
     }
+    my $losum = $lotabs[0];
+    $losum =~ s/\d\d\d\d\.tab/sum\.tab/;
+    $scmd2 .= " $losum";
+    $scmd2 =~ s/\.${tabext}$/\.tab/;
+    print "\nfnlo-add-tables.pl: Creating temporary LO sum table $losum ...\n";
+    if ( $debug ) {print "fnlo-add-tables.pl: Running command $scmd2\n";}
+    system("$scmd2 >> ${scen}_addst.log");
+    print "\nfnlo-add-tables.pl: Creating NLO statistics tables ...\n";
     foreach my $nlotab ( @nlotabs ) {
-        my $scmd1 = $scmd2;
+        my $scmd1 = $cmd;
+        $scmd1 .= " $losum";
         $scmd1 .= " $nlodir/$nlotab";
         $scmd1 .= " $nlotab";
         $scmd1 =~ s/\.${tabext}$/\.tab/;
@@ -187,6 +197,9 @@ if ( $opt_s ) {
         if ( $debug ) {print "fnlo-add-tables.pl: Running command $scmd1\n";}
         system("$scmd1 >> ${scen}_addst.log");
     }
+    $losum =~ s/\.${tabext}$/\.tab/;
+    print "\nfnlo-add-tables.pl: Removing temporary LO sum table $losum ...\n";
+    unlink $losum;
 # Normal mode: All LO with all NLO/NNLO tables
 } else {
     my $scmd1 = $cmd;
