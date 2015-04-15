@@ -142,6 +142,9 @@ public:
    int GetNxmax(int i);
    int GetTotalScalevars();
    int GetTotalScalenodes();
+   int GetIXsectUnits() {
+      return IXsectUnits;
+   }
 
    void ResizeTable(vector<double >* v, int dim0);
    void ResizeTable(vector<vector<double > >*  v, int dim0 , int dim1);

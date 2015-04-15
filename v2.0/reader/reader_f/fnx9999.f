@@ -71,7 +71,7 @@
       IMPLICIT NONE
       DOUBLE PRECISION XMUR, XMUF
       INCLUDE 'fnx9999.inc'
-      INTEGER IPOINT, I,J,K
+      INTEGER IPOINT, I,J,K, IXSECTUNIT
 
 *---  Reset output arrays
       DO I=1,MXOBSBIN
@@ -102,11 +102,21 @@
      >     ICONTRSELECTOR(ITHC2L).EQ.1) THEN
 
 *---  Loop over logical contributions
+         IXSECTUNIT = -99999
          DO I=ILO,ITHC2L
             IF (ICONTRSELECTOR(I).EQ.1) THEN
                IF (ICONTRPOINTER(I).EQ.-1) THEN
                   WRITE(*,*)"FX9999CC: ERROR! Contribution selected "//
      >                 "for output not defined, aborted. I = ",I
+                  STOP
+               ENDIF
+               IF (IXSECTUNIT.EQ.-99999) THEN
+                  IXSECTUNIT = IXSECTUNITS(I)
+               ELSE IF (IXSECTUNIT.NE.IXSECTUNITS(I)) THEN
+                  WRITE(*,*)"FX9999CC: ERROR! Differing x section "//
+     >                 "units between selected contributions, aborted."
+                  WRITE(*,*)"FX9999CC: ICTRB, IXSECTUNITS(), "//
+     >                 "IXSECTUNIT = ",I,IXSECTUNITS(I),IXSECTUNIT
                   STOP
                ENDIF
 
@@ -144,6 +154,14 @@ C---  DO K=2,5 ! Test - only qq
                XSECT(J) = XSECT(J) * MFACT(1,J)
             ENDDO
          ENDIF
+
+*---  Rescale cross section to publication units
+         IF (IXSECTUNIT.NE.IPUBLUNITS) THEN
+            DO J=1,NOBSBIN
+               XSECT(J) = XSECT(J)/(10.D0**DBLE(IXSECTUNIT-IPUBLUNITS))
+            ENDDO
+         ENDIF
+
 *---  ... fill mult. correction and uncertainties into output arrays
 *---  (Only works with one correction of this type for now)
       ELSEIF (ICONTRSELECTOR(INPC1).EQ.1.AND.

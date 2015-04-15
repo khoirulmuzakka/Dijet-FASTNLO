@@ -1765,11 +1765,18 @@ void FastNLOReader::CalcReferenceCrossSection() {
    if (BlockB_LO_Ref && BlockB_NLO_Ref) {
 
       for (int i=0; i<NObsBin; i++) {
-         double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
          for (int l=0; l<BlockB_LO_Ref->NSubproc; l++) {
+            FastNLOBlockB* B = (FastNLOBlockB*)BlockB_LO_Ref;
+            int xUnits = B->GetIXsectUnits();
+            debug["CalcReferenceCrossSection"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+            double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
             XSectionRef[i] +=  BlockB_LO_Ref->SigmaTilde[i][0][0][0][l] * unit; // no scalevariations in LO tables
          }
          for (int l=0; l<BlockB_NLO_Ref->NSubproc; l++) {
+            FastNLOBlockB* B = (FastNLOBlockB*)BlockB_NLO_Ref;
+            int xUnits = B->GetIXsectUnits();
+            debug["CalcReferenceCrossSection"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+            double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
             XSectionRef[i] +=  BlockB_NLO_Ref->SigmaTilde[i][fScalevar][0][0][l] * unit;
          }
       }
@@ -1778,12 +1785,19 @@ void FastNLOReader::CalcReferenceCrossSection() {
 
    if (GetIsFlexibleScaleTable()) {
       for (int i=0; i<NObsBin; i++) {
-         double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+         FastNLOBlockB* B_LO = (FastNLOBlockB*)BBlocksSMCalc[kFixedOrder][kLeading];
+         int xUnits = B_LO->GetIXsectUnits();
+         debug["CalcReferenceCrossSection"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+         double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<BBlocksSMCalc[0][1]->NSubproc; n++) {
             XSectionRefMixed[i]             += BBlocksSMCalc[0][0] ->SigmaRefMixed[i][n] * unit;
             XSectionRef_s1[i]               += BBlocksSMCalc[0][0] ->SigmaRef_s1[i][n] * unit;
             XSectionRef_s2[i]               += BBlocksSMCalc[0][0] ->SigmaRef_s2[i][n] * unit;
          }
+         FastNLOBlockB* B_NLO = (FastNLOBlockB*)BBlocksSMCalc[kFixedOrder][kNextToLeading];
+         xUnits = B_NLO->GetIXsectUnits();
+         debug["CalcReferenceCrossSection"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+         unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<BBlocksSMCalc[0][1]->NSubproc; n++) {
             XSectionRefMixed[i]             += BBlocksSMCalc[0][1]->SigmaRefMixed[i][n] * unit;
             XSectionRef_s1[i]               += BBlocksSMCalc[0][1]->SigmaRef_s1[i][n] * unit;
@@ -1941,13 +1955,14 @@ void FastNLOReader::CalcAposterioriScaleVariation() {
    debug["CalcAposterioriScaleVariation"]<<"scalefac="<<scalefac<<endl;
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;
+   int xUnits = B_LO()->GetIXsectUnits();
    const double n     = B_LO()->Npow;
    const double L     = std::log(scalefac);
    //TBD: 5 must be replaced by Nf here!
    const double beta0 = (11.*3.-2.*5)/3.;
    for (int i=0; i<NObsBin; i++) {
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = B_LO()->GetNxmax(i);
-      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
       for (int j=0; j<B_LO()->GetTotalScalenodes(); j++) {
          double asnp1 = pow(B_LO()->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
@@ -1975,11 +1990,17 @@ void FastNLOReader::CalcCrossSectionv21(FastNLOBlockB* B , bool IsLO) {
 
    vector<double>* XS = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS = IsLO ? &QScale_LO : &QScale;
+   // KR: Having different IXsectUnits in different contributions only works when
+   //     everything always scaled to Ipublunits (unique per table)
+   // Get x section units of each contribution
+   int xUnits = B->GetIXsectUnits();
+   debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+
    B->fact.resize(NObsBin);
    for (int i=0; i<NObsBin; i++) {
       B->fact[i]=0;
       int nxmax = B->GetNxmax(i);
-      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       for (unsigned int jS1=0; jS1<B->ScaleNodeScale1[i].size(); jS1++) {
          for (unsigned int kS2=0; kS2<B->ScaleNodeScale2[i].size(); kS2++) {
             double Q2   = B->ScaleNodeScale1[i][jS1]*B->ScaleNodeScale1[i][jS1];
@@ -2024,11 +2045,17 @@ void FastNLOReader::CalcCrossSectionv20(FastNLOBlockB* B , bool IsLO) {
    int scaleVar          = B->Npow == ILOord ? 0 : fScalevar;
    vector<double>* XS    = IsLO ? &XSection_LO : &XSection;
    vector<double>* QS    = IsLO ? &QScale_LO : &QScale;
+   // KR: Having different IXsectUnits in different contributions only works when
+   //     everything always scaled to Ipublunits (unique per table)
+   // Get x section units of each contribution
+   int xUnits = B->GetIXsectUnits();
+   debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
+
    B->fact.resize(NObsBin);
    for (int i=0; i<NObsBin; i++) {
       B->fact[i] = 0;
       int nxmax = B->GetNxmax(i);
-      double unit = fUnits==kAbsoluteUnits ? BinSize[i] : 1.;
+      double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       for (int j=0; j<B->GetTotalScalenodes(); j++) {
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<B->NSubproc; l++) {
@@ -2880,4 +2907,23 @@ unsigned int FastNLOReader::GetIDim2Bin(unsigned int iObsBin) const {
    }
    error["FastNLOReader::GetIDim2Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
+}
+
+
+//______________________________________________________________________________
+double FastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
+   //!
+   //! This method rescales the stored cross section units according to
+   //! the chosen Ipublunits and settings for [kAbsoluteUnits | kPublicationUNits].
+   //!
+   double unit = 1.;
+   // For kAbsoluteUnits remove division by BinSize
+   if (fUnits == kAbsoluteUnits) {
+      unit *= binsize;
+   }
+   // Rescale SigmaTilde to Ipublunits (accounts for potentially different settings in XSectUnits)
+   if ( xunits != Ipublunits ) {
+      unit /= pow(10.,xunits-Ipublunits);
+   }
+   return unit;
 }
