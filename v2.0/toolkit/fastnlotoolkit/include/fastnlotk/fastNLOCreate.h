@@ -17,9 +17,7 @@
 #include "fastNLOCoeffAddBase.h"
 #include "fastNLOGeneratorConstants.h"
 
-
 using namespace std;
-
 
 class fastNLOCreate : public fastNLOTable {
    //!
@@ -162,7 +160,7 @@ protected:
    // arrays for warmup
    void UpdateWarmupArrays();
    void InitWarmupArrays();
-   void OutWarmup(ostream& = std::cout);
+   void OutWarmup(ostream& = cout);
    string GetWarmupHeader(int iScale, string minmax);
    vector<pair<double,double> > fWMu1;                                                          //!< array of warmup-up values
    vector<pair<double,double> > fWMu2;                                                          //!< array of warmup-values
@@ -173,8 +171,8 @@ protected:
 
    struct fnloStats {
       //! structre to keep track of statisics. Just for fun and information.
-      std::time_t _time;
-      fnloStats() : _nProc(0), _nEvPS(0), _nEv(0)  { _time = std::time(0);}
+      time_t _time;
+      fnloStats() : _nProc(0), _nEvPS(0), _nEv(0)  { _time = time(0);}
       long long int _nProc, _nEvPS;
       double _nEv;
       void PrintStats() const {
@@ -183,18 +181,18 @@ protected:
          time -= hour*3600L;
          min  = time/60L;
          time -= min*60L;
-         std::cout<<std::endl;
-         std::cout<<" ------------- fastNLOstats -------------"<<std::endl;
-         std::cout<<"  Time elapsed:                 "
+         cout<<endl;
+         cout<<" ------------- fastNLOstats -------------"<<endl;
+         cout<<"  Time elapsed:                 "
                   << (hour < 10 ? "0" : "")   << hour
                   << (min < 10 ? ":0" : ":")  << min
-                  << (time < 10 ? ":0" : ":") << time << std::endl;
-         if (_nEv!=0)   std::cout << "  Total event weight (NEvt):    " << _nEv   << std::endl;
-         if (_nEvPS!=0) std::cout << "  Contributions in phase space: " << _nEvPS << std::endl;
-         if (_nProc!=0) std::cout << "  Number of calls:      " << _nProc << std::endl;
-         std::cout << " ----------------------------------------" << std::endl;
-         std::cout<<std::endl;
-         std::cout.flush();
+                  << (time < 10 ? ":0" : ":") << time << endl;
+         if (_nEv!=0)   cout << "  Total event weight (NEvt):    " << _nEv   << endl;
+         if (_nEvPS!=0) cout << "  Contributions in phase space: " << _nEvPS << endl;
+         if (_nProc!=0) cout << "  Number of calls:      " << _nProc << endl;
+         cout << " ----------------------------------------" << endl;
+         cout<<endl;
+         cout.flush();
       }
    } fStats;
 

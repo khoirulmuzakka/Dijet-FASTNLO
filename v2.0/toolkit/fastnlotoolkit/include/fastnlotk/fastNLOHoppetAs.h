@@ -37,14 +37,16 @@
 #include "fastNLOHoppet.h"
 //#include "hoppet_v1.h"
 
+using namespace std;
+
 class fastNLOHoppetAs : public fastNLOHoppet {
 
    public:
-      fastNLOHoppetAs(std::string name);
-      fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet);
+      fastNLOHoppetAs(string name);
+      fastNLOHoppetAs(string name, string LHAPDFFile, int PDFSet);
       // ---- Alphas vars ---- //
    protected:
-      virtual std::vector<double> GetXFX(double xp, double muf) const ;
+      virtual vector<double> GetXFX(double xp, double muf) const ;
 
 };
 
