@@ -7,6 +7,7 @@
 ///     D. Britzger, K. Rabbertz
 ///
 ///********************************************************************
+
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -24,21 +25,19 @@
 #include "fastnlotk/fastNLOAlphas.h"
 #include "fastnlotk/fastNLOCRunDec.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
-//#include "fastnlotk/fastNLOUser.h"
-//#include "fastnlotk/fastNLODiffUser.h"
 #include "fastnlotk/fastNLOQCDNUMAS.h"
 #include "fastnlotk/fastNLOHoppetAs.h"
 
-/// Function prototype for flexible-scale function
+//! Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
 
 //__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {
 
-   // namespaces
+   //! namespaces
    using namespace std;
-   using namespace say;          // namespace for 'speaker.h'-verbosity levels
-   using namespace fastNLO;      // namespace for fastNLO constants
+   using namespace say;          //! namespace for 'speaker.h'-verbosity levels
+   using namespace fastNLO;      //! namespace for fastNLO constants
 
    //---  Parse commmand line
    char buffer[1024];
@@ -46,7 +45,7 @@ int main(int argc, char** argv) {
    cout << _CSEPSC << endl;
    shout["fnlo-read"] << "Program Steering"<<endl;
    cout << _SSEPSC << endl;
-   // --- fastNLO table
+   //! --- fastNLO table
    string tablename = "table.tab";
    if (argc <= 1) {
       warn ["fnlo-read"] << "No table name given," << endl;
@@ -567,13 +566,13 @@ int main(int argc, char** argv) {
    // Select verbosity level
    SetGlobalVerbosity(WARNING);
 
-   // Instead of instantiating a class via e.g.
-   //   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
-   // and accessing member functions via fnlo.memberfunction()
-   // we create a pointer to the yet unfilled fnlo table using the FastNLOLHAPDF class.
-   // (The other classes inherit the interface structure from FastNLOLHAPDF!)
-   // As a difference to previous examples we now have to dereference the pointer via
-   //   fnlo->memberfunction()!
+   //! Instead of instantiating a class via e.g.
+   //!   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
+   //! and accessing member functions via fnlo.memberfunction()
+   //! we create a pointer to the yet unfilled fnlo table using the FastNLOLHAPDF class.
+   //! (The other classes inherit the interface structure from FastNLOLHAPDF!)
+   //! As a difference to previous examples we now have to dereference the pointer via
+   //!   fnlo->memberfunction()!
    //
    fastNLOLHAPDF* fnlo = NULL;
    if (AsEvolCode == "GRV") {
@@ -583,7 +582,7 @@ int main(int argc, char** argv) {
    } else if (AsEvolCode == "RUNDEC") {
       fnlo = new fastNLOCRunDec(tablename);
    } else if (AsEvolCode == "QCDNUM") {
-      // ONLY if compiled --with-qcdnum support!
+      //! ONLY if compiled --with-qcdnum support!
       debug["fnlo-read"] << "The FNLO_QCDNUM precompiler constant is: " << FNLO_QCDNUM << endl;
       if ( FNLO_QCDNUM[0] != '\0' ) {
          fnlo = new fastNLOQCDNUMAS(tablename);
@@ -594,7 +593,7 @@ int main(int argc, char** argv) {
          exit(1);
       }
    } else if (AsEvolCode == "HOPPET") {
-      // ONLY if compiled --with-hoppet support!
+      //! ONLY if compiled --with-hoppet support!
       debug["fnlo-read"] << "The FNLO_HOPPET precompiler constant is: " << FNLO_HOPPET << endl;
       if ( FNLO_HOPPET[0] != '\0' ) {
          fnlo = new fastNLOHoppetAs(tablename);
@@ -611,12 +610,12 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   // Print some fastNLO table info
+   //! Print some fastNLO table info
    // TODO: Add print out of scale info, in particular for flex-scale tables
    fnlo->PrintTableInfo();
    fnlo->PrintFastNLOTableConstants(0);
 
-   // Define the PDF set and member
+   //! Define the PDF set and member
    fnlo->SetLHAPDFFilename(PDFFile);
    fnlo->SetLHAPDFMember(0);
 
@@ -646,33 +645,33 @@ int main(int argc, char** argv) {
    //    the parameters below this effects ONLY the alpha_s evolution, if
    //    allowed by the corresponding code. For LHAPDF this has no effect.
 
-   // The number of loops used for the alpha_s evolution; the LO is nloop = 1, i.e
-   // this number corresponds to LHAPDF: getOrderAlphaS + 1
-   // Order n PDFs usually should be accompanied by an alpha_s evolution of the same order.
-   // int nloop = fnlo->GetNLoop();
-   // cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
-   fnlo->SetNLoop(2);// NLO
+   //! The number of loops used for the alpha_s evolution; the LO is nloop = 1, i.e
+   //! this number corresponds to LHAPDF: getOrderAlphaS + 1
+   //! Order n PDFs usually should be accompanied by an alpha_s evolution of the same order.
+   //! int nloop = fnlo->GetNLoop();
+   //! cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
+   fnlo->SetNLoop(2);//! NLO
 
-   // int nflavor = fnlo->GetNFlavor();
-   // cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
-   fnlo->SetNFlavor(5);// CTEQ
-   //   fnlo->SetNFlavor(0);// NNPDF
+   //! int nflavor = fnlo->GetNFlavor();
+   //! cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
+   fnlo->SetNFlavor(5);//! CTEQ
+   //!   fnlo->SetNFlavor(0);//! NNPDF
 
-   // Unfortunately, LHAPDF5 has no function to access M_Z!
-   //   double Mz = 91.174;  // ABM11
-   //   double Mz = 91.188;  // CTEQ
-   //   double Mz = 91.187;  // HERAPDF
-   double Mz = 91.1876; // MSTW, PDG 2012-2014
-   //   double Mz = 91.2;    // NNPDF
+   //! Unfortunately, LHAPDF5 has no function to access M_Z!
+   //!   double Mz = 91.174;  //! ABM11
+   //!   double Mz = 91.188;  //! CTEQ
+   //!   double Mz = 91.187;  //! HERAPDF
+   double Mz = 91.1876; //! MSTW, PDG 2012-2014
+   //!   double Mz = 91.2;    //! NNPDF
    fnlo->SetMz(Mz);
 
-   // Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
-   // double asmz = fnlo->GetAlphasMz(Mz);
-   // cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
-   fnlo->SetAlphasMz(0.1184);// PDG 2013
-   //   fnlo->SetAlphasMz(0.1185);// PDG 2014
-   //   fnlo->SetAlphasMz(0.1180);// CT10-NLO
-   //   fnlo->SetAlphasMz(0.1190);// NNPDF21-NLO
+   //! Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
+   //! double asmz = fnlo->GetAlphasMz(Mz);
+   //! cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
+   fnlo->SetAlphasMz(0.1184);//! PDG 2013
+   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2014
+   //!   fnlo->SetAlphasMz(0.1180);//! CT10-NLO
+   //!   fnlo->SetAlphasMz(0.1190);//! NNPDF21-NLO
 
    // Read quark masses
    // for (int iq=1;iq<7;iq++) {
@@ -682,36 +681,36 @@ int main(int argc, char** argv) {
    //   double mt = fnlo->GetQMass(6);
    //   fnlo->SetQMass(6,mt);
 
-   // Calculate cross sections
+   //! Calculate cross sections
    fnlo->InitEvolveAlphas();
    fnlo->CalcCrossSection();
-   // Uncomment this to actually print out the result
-   //   fnlo->PrintCrossSectionsDefault();
+   //! Uncomment this to actually print out the result
+   //!   fnlo->PrintCrossSectionsDefault();
    //
-   // Example code to print out data points (if available)
-   //   fnlo->PrintCrossSectionsData();
+   //! Example code to print out data points (if available)
+   //!   fnlo->PrintCrossSectionsData();
    //
-   // Example code to print out alpha_s(Q) values
-   // for (int iq = 10; iq < 2010; iq = iq + 10) {
-   //    double mu = iq;
-   //    double as = fnlo->CalcAlphas(mu);
-   //    printf("%#18.11E %#18.11E\n",mu,as);
-   // }
+   //! Example code to print out alpha_s(Q) values
+   //! for (int iq = 10; iq < 2010; iq = iq + 10) {
+   //!    double mu = iq;
+   //!    double as = fnlo->CalcAlphas(mu);
+   //!    printf("%#18.11E %#18.11E\n",mu,as);
+   //! }
    // ************************************************************************************************
 
 
-   // 15.
-   // ---- Example to do some cross section analysis ---- //
-   // Some initialization
+   //! 15.
+   //! ---- Example to do some cross section analysis ---- //
+   //! Some initialization
    cout << endl;
    cout << _CSEPLC << endl;
    shout["fnlo-read"] << "Calculate my cross sections" << endl;
    cout << _CSEPLC << endl;
 
-   // Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
-   // fastNLOAlphas fnlo( tablename , PDFFile , 0 );
+   //! Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
+   //! fastNLOAlphas fnlo( tablename , PDFFile , 0 );
 
-   // Check on existence of LO (Id = -1 if not existing)
+   //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
       error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
@@ -719,21 +718,21 @@ int main(int argc, char** argv) {
    } else {
       info["fnlo-read"] << "The LO contribution has Id: " << ilo << endl;
    }
-   // Check on existence of NLO (Id = -1 if not existing)
+   //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
       info["fnlo-read"] << "No NLO contribution found!" << endl;
    } else {
       info["fnlo-read"] << "The NLO contribution has Id: " << inlo << endl;
    }
-   // Check on existence of NNLO (Id = -1 if not existing)
+   //! Check on existence of NNLO (Id = -1 if not existing)
    int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
    if (innlo < 0) {
       info["fnlo-read"] << "No NNLO contribution found!" << endl;
    } else {
       info["fnlo-read"] << "The NNLO contribution has Id: " << innlo << endl;
    }
-   // Check on existence of threshold corrections
+   //! Check on existence of threshold corrections
    int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
    if (ithc1 < 0) {
@@ -746,7 +745,7 @@ int main(int argc, char** argv) {
    } else {
       info["fnlo-read"] << "2-loop threshold corrections have Id: " << ithc2 << endl;
    }
-   // Check on existence of non-perturbative corrections from LO MC
+   //! Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    if (inpc1 < 0) {
       info["fnlo-read"] << "Non-perturbative corrections not found!" << endl;
@@ -754,10 +753,10 @@ int main(int argc, char** argv) {
       info["fnlo-read"] << "Non-perturbative corrections have Id: " << inpc1 << endl;
    }
 
-   // Run over all pre-defined scale settings xmur, xmuf
+   //! Run over all pre-defined scale settings xmur, xmuf
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
 
-      // Switch on LO & NLO & NNLO, switch off anything else
+      //! Switch on LO & NLO & NNLO, switch off anything else
       if (!(ilo   < 0)) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
@@ -792,7 +791,7 @@ int main(int argc, char** argv) {
          fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, false);
       }
 
-      // Define result vectors
+      //! Define result vectors
       bool lscvar = false;
       bool lthcvar = false;
       vector < double > qscl;
@@ -812,7 +811,7 @@ int main(int argc, char** argv) {
       vector < double > xsewk1;
       vector < double > kewk1;
 
-      // Set MuR and MuF scale factors for pQCD cross sections and test availability
+      //! Set MuR and MuF scale factors for pQCD cross sections and test availability
       lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
       if (!lscvar) {
          warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
@@ -830,10 +829,10 @@ int main(int argc, char** argv) {
                            << "                        Please check how this table was filled!" << endl;
       }
 
-      // Calculate cross section
+      //! Calculate cross section
       fnlo->CalcCrossSection();
 
-      // Get LO & NLO & NNLO results
+      //! Get LO & NLO & NNLO results
       if (!(innlo  < 0)) {
          xsnnlo = fnlo->GetCrossSection();
          kfac2  = fnlo->GetKFactors();
@@ -847,7 +846,7 @@ int main(int argc, char** argv) {
       }
       xsnlo = fnlo->GetCrossSection();
       kfac  = fnlo->GetKFactors();
-      // Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
+      //! Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
       int irelord = 1;
       qscl  = fnlo->GetQScales(irelord);
       xslo  = xsnlo;
@@ -859,14 +858,14 @@ int main(int argc, char** argv) {
          }
       }
 
-      // Get threshold corrections
+      //! Get threshold corrections
       if ( !(inlo < 0 || ithc2 < 0) ) {
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
             warn["fnlo-read"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
          }
 
-         // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
+         //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
             warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
@@ -891,7 +890,7 @@ int main(int argc, char** argv) {
             warn["fnlo-read"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
          }
 
-         // Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
+         //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
             warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
@@ -910,7 +909,7 @@ int main(int argc, char** argv) {
             }
          }
       }
-      // Get non-perturbative corrections
+      //! Get non-perturbative corrections
       if ( !(inpc1 < 0) ) {
          if ( !(inlo < 0) ) {
             bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
@@ -940,14 +939,14 @@ int main(int argc, char** argv) {
          }
       }
 
-      // Start print out
+      //! Start print out
       cout  << _DSEPLC << endl;
       shout << "My Cross Sections" << endl;
       snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       shout << buffer << endl;
       cout  << _SSEPLC << endl;
 
-      // Get table constants relevant for print out
+      //! Get table constants relevant for print out
       const int NDim = fnlo->GetNumDiffBin();
       unsigned int NDimBins[NDim];
       vector < string > DimLabel = fnlo->GetDimLabels();
@@ -958,19 +957,19 @@ int main(int argc, char** argv) {
          LoBin[i].resize(2);
          UpBin[i].resize(2);
          for (int j=0; j<NDim; j++) {
-            LoBin[i][j]= fnlo->GetLoBin(i,j);
-            UpBin[i][j]= fnlo->GetUpBin(i,j);
+            LoBin[i][j]= fnlo->GetObsBinLoBound(i,j);
+            UpBin[i][j]= fnlo->GetObsBinUpBound(i,j);
          }
       }
       vector < double > BinSize = fnlo->GetBinSize();
 
-      // Print
+      //! Print
       string header0  = " #IObs  Bin Size";
       string headdim0 = " IODimO ";
       string headdim1 = " IODimM ";
       string headdim2 = " IODimI ";
-      // Scales and descriptions should be equal for all orders ...
-      // In case of flex-scale tables only the first defined scale is looked at here
+      //! Scales and descriptions should be equal for all orders ...
+      //! In case of flex-scale tables only the first defined scale is looked at here
       string headscl  = fnlo->GetScaleDescription(kLeading,0);
       string header2  = " LO cross section";
       if (inlo>-1) {
@@ -1122,8 +1121,8 @@ int main(int argc, char** argv) {
       }
    }
 
-   // Print data if available, checks on availability internally
-   //   fnlo->PrintCrossSectionsData();
+   //! Print data if available, checks on availability internally
+   //!   fnlo->PrintCrossSectionsData();
 
    return 0;
 }
