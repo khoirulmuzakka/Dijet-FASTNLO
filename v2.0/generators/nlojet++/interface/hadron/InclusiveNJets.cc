@@ -132,7 +132,7 @@ private:
    int NDim;                  // Dimensionality of distributions
    vector<string> DimLabel;   // Dimension labels
    // enum to switch between implemented observables (max. of 3 simultaneously)
-   enum Obs { PTJETGEV, YJET, PHIJET };
+   enum Obs { PTJETGEV, YJET, ETAJET, PHIJET };
    Obs obsdef[3];
    double obs[3];
    vector<string> ScaleLabel; // Scale labels
@@ -223,6 +223,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    for ( int i = 0; i<NDim; i++ ) {
       if ( DimLabel[i]        == "|y|" ) {
          obsdef[i] = YJET;
+      } else if ( DimLabel[i] == "|eta|" ) {
+         obsdef[i] = ETAJET;
       } else if ( DimLabel[i] == "pT_[GeV]" ) {
          obsdef[i] = PTJETGEV;
       } else if ( DimLabel[i] == "phi" ) {
@@ -469,29 +471,33 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    for (unsigned int k = 1; k <= njet; k++) {
 
       // derive some jet quantities
-      double pt = pj[k].perp();
-      double yeta;
-      if ( ! lpseudo ) {
-         yeta = abs(pj[k].rapidity());
-      } else {
-         yeta = abs(pj[k].prapidity());
-      }
-      double phi = atan2(pj[k].Y(), pj[k].X());
+      //      double pt = pj[k].perp();
+      // double yeta;
+      // if ( ! lpseudo ) {
+      //    yeta = abs(pj[k].rapidity());
+      // } else {
+      //    yeta = abs(pj[k].prapidity());
+      // }
+      // double phi = atan2(pj[k].Y(), pj[k].X());
 
       // --- calculate observable of nth dimension
       for ( int i = 0; i<NDim; i++ ) {
          switch(obsdef[i]) {
          case PTJETGEV :
             // jet pT
-            obs[i] = pt;
+            obs[i] = pj[k].perp();
             break;
          case YJET :
             // jet rapidity
-            obs[i] = yeta;
+            obs[i] = abs(pj[k].rapidity());
+            break;
+         case ETAJET :
+            // jet pseudorapidity
+            obs[i] = abs(pj[k].prapidity());
             break;
          case PHIJET :
             // jet azimuthal angle
-            obs[i] = phi;
+            obs[i] = atan2(pj[k].Y(), pj[k].X());
             break;
          default :
             say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
@@ -516,7 +522,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
                break;
             case PTJET :
                // jet pT
-               mu[i] = pt;
+               mu[i] = pj[k].perp();
                break;
             default :
                say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
