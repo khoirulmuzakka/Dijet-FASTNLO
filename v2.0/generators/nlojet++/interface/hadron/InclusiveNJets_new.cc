@@ -297,12 +297,12 @@ void UserHHC::read_steering()
     // --- fastNLO user: declare and initialize Njet phase space cuts and definitions via steering file
     // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
     SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
-    obsmin[0] = ftable->GetLoBinMin(0); // by default derived from binning in obs0
+    obsmin[0] = ftable->GetObsBinsLoBoundsMin(0); // by default derived from binning in obs0
     if (SteeringPars["obs0min"]) {
         ftable->GetParameterFromSteering("obs0min", obsmin[0]);
     }
     SteeringPars["obs0max"] = ftable->TestParameterInSteering("obs0max");
-    obsmax[0] = ftable->GetUpBinMax(0); // by default derived from binning in obs0
+    obsmax[0] = ftable->GetObsBinsUpBoundsMax(0); // by default derived from binning in obs0
     if (SteeringPars["obs0max"]) {
         ftable->GetParameterFromSteering("obs0max", obsmax[0]);
     }
@@ -311,12 +311,12 @@ void UserHHC::read_steering()
     obsmax[1] = +DBL_MAX;
     if (NDim > 1) {
         SteeringPars["obs1min"] = ftable->TestParameterInSteering("obs1min");
-        obsmin[1] = ftable->GetLoBinMin(1); // by default derived from binning in obs1
+        obsmin[1] = ftable->GetObsBinsLoBoundsMin(1); // by default derived from binning in obs1
         if (SteeringPars["obs1min"]) {
             ftable->GetParameterFromSteering("obs1min", obsmin[1]);
         }
         SteeringPars["obs1max"] = ftable->TestParameterInSteering("obs1max");
-        obsmax[1] = ftable->GetUpBinMax(1); // by default derived from binning in obs1
+        obsmax[1] = ftable->GetObsBinsUpBoundsMax(1); // by default derived from binning in obs1
         if (SteeringPars["obs1max"]) {
             ftable->GetParameterFromSteering("obs1max", obsmax[1]);
         }
@@ -326,12 +326,12 @@ void UserHHC::read_steering()
     obsmax[2] = +DBL_MAX;
     if (NDim > 2) {
         SteeringPars["obs2min"] = ftable->TestParameterInSteering("obs2min");
-        obsmin[2] = ftable->GetLoBinMin(2); // by default derived from binning in obs2
+        obsmin[2] = ftable->GetObsBinsLoBoundsMin(2); // by default derived from binning in obs2
         if (SteeringPars["obs2min"]) {
             ftable->GetParameterFromSteering("obs2min", obsmin[2]);
         }
         SteeringPars["obs2max"] = ftable->TestParameterInSteering("obs2max");
-        obsmax[2] = ftable->GetUpBinMax(2); // by default derived from binning in obs2
+        obsmax[2] = ftable->GetObsBinsUpBoundsMax(2); // by default derived from binning in obs2
         if (SteeringPars["obs2max"]) {
             ftable->GetParameterFromSteering("obs2max", obsmax[2]);
         }
