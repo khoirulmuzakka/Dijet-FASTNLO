@@ -4,7 +4,7 @@
 #include "fastNLOTable.h"
 #include "fastNLOPDFLinearCombinations.h"
 
-using namespace std;
+ using namespace std;
 
 class fastNLOReader : public fastNLOTable , public fastNLOPDFLinearCombinations {
    //
@@ -50,6 +50,7 @@ public:
 
    // ---- Getters for results---- //
    vector < double > GetCrossSection();
+   vector < pair <double, double> > GetScaleUncertainty( unsigned int npoint );
    vector < vector < double > > GetCrossSection2Dim();
    vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
@@ -64,7 +65,7 @@ public:
    double GetScaleFactorMuR() const { return fScaleFacMuR; };
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };
-   std::string GetScaleDescription(const ESMOrder eOrder, int iScale=0) const;
+   string GetScaleDescription(const ESMOrder eOrder, int iScale=0) const;
    double GetNevt(const ESMOrder eOrder) const;
 
    int GetNScaleVariations() const;                                                     //!< Get number of available scale variations

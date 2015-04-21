@@ -543,8 +543,6 @@ void fastNLOReader::OrderCoefficients() {
       // data
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
          debug["OrderCoefficients"]<<"Found data table."<<endl;
-         if ( GetDataTable() )
-            warn["OrderCoefficients"]<<"Already one data table present. Only one data table is allowed. Ignoring second data table."<<endl;
       }
       // additive contributions
       else if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
@@ -1197,7 +1195,7 @@ void fastNLOReader::CalcCrossSection() {
             if ( fastNLOCoeffMult::CheckCoeffConstants( BBlocksSMCalc[j][i] , true ) ) {
                fastNLOCoeffMult* cMult = (fastNLOCoeffMult*) BBlocksSMCalc[j][i];
                if ( cMult->GetIContrFlag1() == 4 && cMult->GetIContrFlag2() == 1) {
-                  debug["CalcCrossSection"]<<"Adding multiplicative non-perturbative correction."<<endl;
+                  debug["CalcCrossSection"]<<"Multiplying with non-perturbative correction."<<endl;
                   for (unsigned int iB=0; iB<NObsBin; iB++) {
                      XSection[iB] *= cMult->GetMultFactor(iB);
                      //            XSection_LO[iB]     *= BBlocksSMCalc[j][i]->fact[iB];
@@ -1428,6 +1426,8 @@ void fastNLOReader::FillAlphasCache() {
                   FillAlphasCacheInBlockBv21((fastNLOCoeffAddFlex*)c);
                else if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) )
                   FillAlphasCacheInBlockBv20((fastNLOCoeffAddFix*)c);
+               else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) )
+                  info["FillAlphasCache"]<<"Nothing to be done for multiplicative contribution."<<endl;
                else {
                   error["FillAlphasCache"]<<"Could not identify contribution. Printing."<<endl;
                   c->Print();
@@ -1639,23 +1639,33 @@ void fastNLOReader::FillPDFCache(double chksum) {
             // Check that this contribution type j and no. i should actually be used
             // Otherwise deactivation of e.g. threshold corr. is not respected here
             if (bUseSMCalc[j][i] ) {
-               // linear: DIS-case
-               // ---- DIS ---- //
-               fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[j][i];
-               if (c->GetIPDFdef1() == 2) {
-                  if (c->GetNPDFDim() == 0) {
-                     if (!GetIsFlexibleScaleTable(c))
-                        FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
-                     else
-                        FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+               fastNLOCoeffBase* c = BBlocksSMCalc[j][i];
+               if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+                  fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[j][i];
+                  // linear: DIS-case
+                  // ---- DIS ---- //
+                  if (c->GetIPDFdef1() == 2) {
+                     if (c->GetNPDFDim() == 0) {
+                        if (!GetIsFlexibleScaleTable(c))
+                           FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
+                        else
+                           FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+                     }
+                  }
+                  // ---- pp ---- //
+                  else if (c->GetIPDFdef1() == 3) {
+                     if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
+                     else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
+                  } else {
+                     error["FillPDFCache"]<<"IPDFdef of tables must be 1 or 2.\n";
                   }
                }
-               // ---- pp ---- //
-               else if (c->GetIPDFdef1() == 3) {
-                  if (!GetIsFlexibleScaleTable(c)) FillBlockBPDFLCsHHCv20((fastNLOCoeffAddFix*)c);
-                  else FillBlockBPDFLCsHHCv21((fastNLOCoeffAddFlex*)c);
-               } else {
-                  error["FillPDFCache"]<<"IPDFdef of tables must be 1 or 2.\n";
+               else if ( fastNLOCoeffMult::CheckCoeffConstants(c,true) ) {
+                  info["FillPDFCache"]<<"Nothing to be done for multiplicative contribution."<<endl;
+               }
+               else {
+                  error["FillPDFCache"]<<"Could not identify contribution. Printing."<<endl;
+                  c->Print();
                }
             }
          }
@@ -2558,18 +2568,18 @@ void fastNLOReader::PrintCrossSections() const {
       printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |\n",GetDimLabel(1).c_str(),unit[Ipublunits].c_str());
       printf(" #  --------------------------------------------------------------------\n");
       for (unsigned int i=0; i<xs.size(); i++) {
-         if (GetLoBin(i,0) != lobindim2) {
-            printf(" #                  ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,0),GetUpBin(i,0),GetDimLabel(0).c_str());
-            lobindim2 = GetLoBin(i,0);
+         if (GetObsBinLoBound(i,0) != lobindim2) {
+            printf(" #                  ---->  from %9.3f to %9.3f in %s  <----\n",GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),GetDimLabel(0).c_str());
+            lobindim2 = GetObsBinLoBound(i,0);
          }
-         printf(" #   %4.0f   | %9.3f - %9.3f       % 9.4e           % 5.2f      |\n",i*1.,GetLoBin(i,1),GetUpBin(i,1),xs[i],kFactor[i]);
+         printf(" #   %4.0f   | %9.3f - %9.3f       % 9.4e           % 5.2f      |\n",i*1.,GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),xs[i],kFactor[i]);
       }
    }
 
    else {
       printf("   ---  %5s  ---        - Bin -       -- XS-FNLO --  \n",GetDimLabel(NDim-1).c_str());
       for (unsigned int i=0; i<xs.size(); i++) {
-         printf("  %9.3f - %9.3f   %3.0f         % 9.4e\n",GetLoBin(i,NDim-1),GetUpBin(i,NDim-1),i*1.,xs[i]);
+         printf("  %9.3f - %9.3f   %3.0f         % 9.4e\n",GetObsBinLoBound(i,NDim-1),GetObsBinUpBound(i,NDim-1),i*1.,xs[i]);
       }
    }
    printf(" #  --------------------------------------------------------------------\n");
@@ -2640,12 +2650,12 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
       printf(" #  - Bin - |   ---  %5s  ---        -- XS-FNLO %s -- k-factor -- |  -- XS-ref (NLOJET++) --    Diff [%%]\n",GetDimLabel(NDim-1).c_str(),unit[Ipublunits].c_str());
       printf(" #  -----------------------------------------------------------------------------------------------------------\n");
       for (unsigned int i=0; i<xs.size(); i++) {
-         if (GetLoBin(i,0) != lobindim2) {
-            printf(" #                    ---->  from %9.3f to %9.3f in %s  <----\n",GetLoBin(i,0),GetUpBin(i,0),GetDimLabel(0).c_str());
-            lobindim2 = GetLoBin(i,0);
+         if (GetObsBinLoBound(i,0) != lobindim2) {
+            printf(" #                    ---->  from %9.3f to %9.3f in %s  <----\n",GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),GetDimLabel(0).c_str());
+            lobindim2 = GetObsBinLoBound(i,0);
          }
          printf(" #   %4.0f   | %9.3f - %9.3f      % 9.4e           % 5.3f      |     % 9.4e            % 5.4f\n",
-                i*1.,GetLoBin(i,1),GetUpBin(i,1),xs[i],kFactor[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
+                i*1.,GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),xs[i],kFactor[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
       }
    }
 
@@ -2653,7 +2663,7 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
       printf("FastNLOReader::PrintCrossSections( ). Info. Single differential printing of cross sections not yet nicely implemented.\n");
       printf("   ---  %s  ---        - Bin -    -- XS-FNLO  --       -- XS-ref (NLOJET++) --    Diff [%%]\n",GetDimLabel(NDim-1).c_str());
       for (unsigned int i=0; i<xs.size(); i++) {
-         printf("  %9.3f - %9.3f   %3.0f         % 9.4e           % 9.4e          % 5.4f\n",GetLoBin(i,NDim-1),GetUpBin(i,NDim-1),i*1.,xs[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
+         printf("  %9.3f - %9.3f   %3.0f         % 9.4e           % 9.4e          % 5.4f\n",GetObsBinLoBound(i,NDim-1),GetObsBinUpBound(i,NDim-1),i*1.,xs[i],xsref[i],(xs[i]-xsref[i])/xsref[i]*100.);
       }
    }
    printf(" #  ------------------------------------------------------------------------------------------------------------\n");
@@ -2697,19 +2707,19 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
          NDimBins[0] = 1;
          if (ithc2<0 && inpc1<0) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),
                    XSection_LO[i],XSection[i],kFactor[i]);
          } else if (inpc1<0 && ithc2 != -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),
                    XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
          } else if (inpc1>-1 && ithc2 == -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),
                    XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
          } else {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,0),GetUpBin(i,0),
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),
                    XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
          }
          printf("\n");
@@ -2731,25 +2741,25 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
       for (unsigned int i=0; i<NObsBin; i++) {
          for (unsigned int j=0; j<NDim; j++) {
             if (i==0)                                  NDimBins[j] = 1;
-            else if (GetLoBin(i-1,j) < GetLoBin(i,j))       NDimBins[j]++;
-            else if (GetLoBin(i,j) < GetLoBin(i-1,j))       NDimBins[j] = 1;
+            else if (GetObsBinLoBound(i-1,j) < GetObsBinLoBound(i,j))       NDimBins[j]++;
+            else if (GetObsBinLoBound(i,j) < GetObsBinLoBound(i-1,j))       NDimBins[j] = 1;
          }
          if (ithc2<0 && inpc1<0) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
-                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i]);
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),
+                   NDimBins[1],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),XSection_LO[i],XSection[i],kFactor[i]);
          } else if (inpc1<0 && ithc2 != -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
-                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),
+                   NDimBins[1],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i]);
          } else if (inpc1>-1 && ithc2 == -1) {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
-                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),
+                   NDimBins[1],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),XSection_LO[i],XSection[i],kFactor[i],knpc[i]);
          } else {
             printf(" %5.i % -#10.4g %5.i % -#10.4g % -#10.4g %5.i  %-#8.2E  %-#8.2E %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
-                   i+1,BinSize[i],NDimBins[0],GetLoBin(i,1),GetUpBin(i,1),
-                   NDimBins[1],GetLoBin(i,0),GetUpBin(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
+                   i+1,BinSize[i],NDimBins[0],GetObsBinLoBound(i,1),GetObsBinUpBound(i,1),
+                   NDimBins[1],GetObsBinLoBound(i,0),GetObsBinUpBound(i,0),XSection_LO[i],XSection[i],kFactor[i],kthc[i],knpc[i]);
          }
          printf("\n");
       }
@@ -2862,4 +2872,62 @@ double fastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
       unit /= pow(10.,xunits-Ipublunits);
    }
    return unit;
+}
+
+
+//______________________________________________________________________________
+vector < pair <double, double> > fastNLOReader::GetScaleUncertainty(unsigned int npoint) {
+   // Get 2- or 6-point scale uncertainty
+   const double xmurs[7] = {1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0};
+   const double xmufs[7] = {1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0};
+
+   unsigned int NObsBin = GetNObsBin();
+   vector < double > xs;
+   vector < pair < double, double> > dxs;
+   pair < double, double > dtmp;
+   dtmp.first  = 0.;
+   dtmp.second = 0.;
+
+   debug["GetScaleUncertainty"]<<"npoint = "<<npoint<<endl;
+   if ( npoint == 0 ) {
+      info["GetScaleUncertainty"]<<"Only default scale selected, uncertainties will be zero."<<endl;
+   } else if ( npoint == 2 ) {
+      info["GetScaleUncertainty"]<<"Symmetric 2-point scale variations selected,"<<endl;
+   } else if ( npoint == 6 ) {
+      info["GetScaleUncertainty"]<<"Asymmetric 6-point scale variations selected,"<<endl;
+   } else {
+      error["GetScaleUncertainty"]<<"ERROR! No usual scale variation scheme selected, exiting."<<endl;
+      error["GetScaleUncertainty"]<<"npoint = "<<npoint<<endl;
+      exit(1);
+   }
+
+   for ( unsigned int iscl = 0; iscl <= npoint; iscl++ ) {
+      SetScaleFactorsMuRMuF(xmurs[iscl],xmufs[iscl]);
+      CalcCrossSection();
+      for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
+         if ( iscl == 0 ) {
+            xs.push_back(XSection[iobs]);
+            dxs.push_back(dtmp);
+         } else {
+            dxs[iobs].first  = max(dxs[iobs].first, XSection[iobs]-xs[iobs]);
+            dxs[iobs].second = min(dxs[iobs].second,XSection[iobs]-xs[iobs]);
+         }
+      }
+   }
+
+   for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
+      if ( abs(xs[iobs]) > DBL_MIN ) {
+         dxs[iobs].first  = dxs[iobs].first  / xs[iobs];
+         dxs[iobs].second = dxs[iobs].second / xs[iobs];
+      } else {
+         dxs[iobs].first  = 0.;
+         dxs[iobs].second = 0.;
+      }
+   }
+
+   warn["GetScaleUncertainty"]<<"Setting scale factors back to defaults of one."<<endl;
+   warn["GetScaleUncertainty"]<<"Re-calculate cross sections for desired central setting, if not yet done."<<endl;
+   SetScaleFactorsMuRMuF(xmurs[0],xmufs[0]);
+
+   return dxs;
 }
