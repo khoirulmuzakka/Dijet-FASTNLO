@@ -1097,12 +1097,13 @@ bool fastNLOCreate::CheckWarmupConsistency() {
             exit(1);
          }
       }
-      //check bin width
+      // check bin width
       double bwwrm = 0;
       if (NDim == 1) bwwrm = wrmbin[i][i0+2];
       else if (NDim == 2) bwwrm = wrmbin[i][i0+4];
       else if (NDim == 3) bwwrm = wrmbin[i][i0+6];
-      if (fabs(BinSize[i] - bwwrm) > 1.e-6) {
+      // check relative precision
+      if ( std::abs(BinSize[i]) > DBL_MIN && std::abs(1. - BinSize[i]/bwwrm) > 1.e-6) {
          warn["CheckWarmupConsistency"]
                <<"Table of warmup values seems to be incompatible with steering file.\n"
                <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
