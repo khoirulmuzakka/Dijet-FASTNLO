@@ -16,11 +16,11 @@ Beams:    [p+, p+]
 Energies: [7000]
 PtCuts:   [30]
 Description:
-A measurement of the double-differential inclusive dijet production cross section in proton-proton collisions
-at sqrt(s)=7 TeV is presented as a function of the dijet invariant mass and jet rapidity. The data correspond
-to an integrated luminosity of 36 inverse picobarns, recorded with the CMS detector at the LHC. The measurement
-covers the dijet mass range 0.2 TeV to 3.5 TeV and jet rapidities up to |y|=2.5. It is found to be in
-good agreement with next-to-leading-order QCD predictions.
+  'A measurement of the double-differential inclusive dijet production cross section in proton-proton collisions
+  at sqrt(s)=7 TeV is presented as a function of the dijet invariant mass and jet rapidity. The data correspond
+  to an integrated luminosity of 36 inverse picobarns, recorded with the CMS detector at the LHC. The measurement
+  covers the dijet mass range 0.2 TeV to 3.5 TeV and jet rapidities up to |y|=2.5. It is found to be in
+  good agreement with next-to-leading-order QCD predictions.'
 NeedCrossSection: yes
 BibKey: Chatrchyan:2011qta
 BibTeX: '@ARTICLE{Chatrchyan:2011qta,

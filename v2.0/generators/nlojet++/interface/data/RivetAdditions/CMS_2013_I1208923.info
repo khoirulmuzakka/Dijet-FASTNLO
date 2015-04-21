@@ -16,12 +16,12 @@ Beams:    [p+, p+]
 Energies: [7000]
 PtCuts:   [30]
 Description:
-Measurements of the differential cross sections for inclusive jet and dijet production in proton-proton collisions
-at a centre-of-mass energy of 7 TeV. Using a data sample of integrated luminosity of 5 fb-1, inclusive jet PT
-cross sections up to a PT of 2 TeV in five intervals of |rapidity| from 0 to 2.5 are presented as well as
-the invariant mass distributions of dijets up to a mass of 5 TeV in the 5 intervals of |rapidity|. Jets are
-reconstructed using the anti-kt algorithm with distance parameter R=0.7. The cross sections are fully corrected
-for detector effects.
+  'Measurements of the differential cross sections for inclusive jet and dijet production in proton-proton collisions
+  at a centre-of-mass energy of 7 TeV. Using a data sample of integrated luminosity of 5 fb-1, inclusive jet PT
+  cross sections up to a PT of 2 TeV in five intervals of |rapidity| from 0 to 2.5 are presented as well as
+  the invariant mass distributions of dijets up to a mass of 5 TeV in the 5 intervals of |rapidity|. Jets are
+  reconstructed using the anti-kt algorithm with distance parameter R=0.7. The cross sections are fully corrected
+  for detector effects.'
 NeedCrossSection: yes
 BibKey: Chatrchyan:2012bja
 BibTeX: '@ARTICLE{Chatrchyan:2012bja,
