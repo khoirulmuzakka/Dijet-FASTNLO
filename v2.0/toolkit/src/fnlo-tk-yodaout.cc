@@ -7,35 +7,32 @@
 ///     K. Rabbertz, G. Sieber, S. Tyros
 ///
 ///********************************************************************
+
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <stdlib.h>
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
-#include <YODA/Histo1D.h>
-#include <YODA/HistoBin1D.h>
-#include <YODA/WriterYODA.h>
+#include "YODA/Scatter2D.h"
+#include "YODA/WriterYODA.h"
 
-/// Function prototype for flexible-scale function
-double Function_Mu(double s1, double s2);
 
 //__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {
 
-   // namespaces
+   //! --- namespaces
    using namespace std;
-   using namespace say;          // namespace for 'speaker.h'-verbosity levels
-   using namespace fastNLO;      // namespace for fastNLO constants
+   using namespace say;       //! namespace for 'speaker.h'-verbosity levels
+   using namespace fastNLO;   //! namespace for fastNLO constants
 
-   // ---  Parse commmand line
+   //! --- Parse commmand line
    cout << _CSEPSC << endl;
    shout["fnlo-tk-yodaout"] << "Program Steering" << endl;
    cout << _SSEPSC << endl;
-   // --- fastNLO table
+   //! --- fastNLO table and usage info
    string tablename;
    if (argc <= 1) {
       error["fnlo-tk-yodaout"] << "No table name given!" << endl;
@@ -51,7 +48,8 @@ int main(int argc, char** argv) {
          shout << "PDF set, def. = CT10nlo.LHgrid" << endl;
          shout << "   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd." << endl;
          shout << "   For LHAPDF6: Drop filename extensions and give PDF directory instead." << endl;
-         shout << "Values of MuR,MuF scale factors to investigate, if possible, def. = 1.0,1.0" << endl;
+         shout << "Uncertainty to show, def. = 6P (asymmetric 6-point scale factor variation)" << endl;
+         shout << "   Only alternative for now: 2P (symmetric 2-point scale factor variation)" << endl;
          shout << "" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          shout << "" << endl;
@@ -61,7 +59,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-yodaout"] << "Evaluating table: "  <<  tablename << endl;
       }
    }
-   // --- PDF set
+   //! --- PDF choice
    string PDFFile = "CT10nlo.LHgrid";
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
@@ -73,32 +71,69 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-yodaout"] << "Using PDF set   : " << PDFFile << endl;
    }
-   // --- (MuR,MuF) scale factors
-   double xmur = 1.0;
-   double xmuf = 1.0;
+   //! --- Uncertainty choice
+   unsigned int npoint = 6;
    string chtmp;
    if (argc > 3) {
       chtmp = (const char*) argv[3];
    }
    if (argc <= 3 || chtmp == "_") {
-      warn ["fnlo-tk-yodaout"] << "No request given for scale factors," << endl;
-      shout["fnlo-tk-yodaout"] << "investigating default factors of MuR,MuF = 1.0,1.0" << endl;
+      info["fnlo-tk-yodaout"] << "No request given for uncertainty," << endl;
+      info["fnlo-tk-yodaout"] << "investigating default scale uncertainty." << endl;
+      chtmp = "6P";
    } else {
-      xmur = (double)::atof(chtmp.substr( 0, chtmp.find(",") ).c_str());
-      xmuf = (double)::atof(chtmp.substr( chtmp.find(",")+1, chtmp.size()-chtmp.find(",")-1 ).c_str());
-      shout["fnlo-tk-yodaout"] << "Using scale factors of MuR,MuF = " << xmur << "," << xmuf << endl;
+      if ( chtmp == "6P" ) {
+         shout["fnlo-tk-yodaout"] << "Showing default 6-point scale uncertainty." << endl;
+      } else if ( chtmp == "2P" ) {
+         npoint = 2;
+         shout["fnlo-tk-yodaout"] << "Showing symmetric 2-point scale uncertainty." << endl;
+      } else {
+         error["fnlo-tk-yodaout"] << "Illegal choice of uncertainty, " << chtmp << ", aborted!" << endl;
+         exit(1);
+      }
    }
    cout << _CSEPSC << endl;
 
-   // --- fastNLO initialisation, read table
-   fastNLOLHAPDF fnlo(tablename,PDFFile,0);                                     // Initialise a fastNLO instance with interface to LHAPDF.
-   fnlo.PrintTableInfo();                                                       // Print some table information
-   if ( xmur != 1.0 || xmuf != 1.0 ){ fnlo.SetScaleFactorsMuRMuF(xmur,xmuf);}   // Set the desired scale factors (1.0 is default)
-   fnlo.CalcCrossSection();                                                     // Calculate the cross section
-   //fnlo.PrintCrossSections();                                                 // Print cross section to screen
+   //! --- fastNLO initialisation, read & evaluate table
+   //! Select verbosity level
+   SetGlobalVerbosity(WARNING);
+   //! Initialise a fastNLO instance with interface to LHAPDF
+   //! Note: This also initializes the cross section to the LO/NLO one!
+   fastNLOLHAPDF fnlo(tablename,PDFFile,0);
+   //! Print essential table information
+   fnlo.PrintTableInfo();
+   //! Check on existence of non-perturbative corrections from LO MC
+   int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
+   if (inpc1 > -1) {
+      info["fnlo-read"] << "Found non-perturbative correction factors. Switch on." << endl;
+      bool SetOn = fnlo.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+      if (!SetOn) {
+         error["fnlo-tk-yodaout"] << "NPC1 not found, nothing to be done!" << endl;
+         error["fnlo-tk-yodaout"] << "This should have been caught before!" << endl;
+         exit(1);
+      }
+   }
 
-   // --- Get RivetID and running number in histogram name by spotting the capital letter in "RIVETID=" in the fnlo table
-   size_t capital_pos = 0;                                                      // RivetId capital letter where the histogram counter runs
+   //! --- Determine dimensioning of observable bins in table
+   const int NDim = fnlo.GetNumDiffBin();
+   if (NDim < 1 || NDim > 2) {
+      error["fnlo-tk-yodaout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
+      error["fnlo-tk-yodaout"] << "Only up to two dimensions currently possible with YODA/Rivet, aborted!" << endl;
+      exit(1);
+   }
+
+   //! --- Get all required info from table
+   //! Get binning
+   vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
+   //! Re-calculate cross sections to potentially include the above-selected non-perturbative factors
+   fnlo.CalcCrossSection();
+   //! Get cross sections
+   vector < double > xs = fnlo.GetCrossSection();
+   //! Get scale uncertainties (only for additive perturbative contributions)
+   vector < pair < double, double > > dxs  = fnlo.GetScaleUncertainty(npoint);
+
+   //! --- Get RivetID and running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
+   size_t capital_pos = 0;
    string RivetId = fnlo.GetRivetId();
    if (RivetId.empty()) {
       error["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, aborted!" << endl;
@@ -116,67 +151,86 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   // --- Naming the file with PDF and scaling factors
+   //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
+   string TabName = tablename.substr(0, tablename.size() - 4);
    string PDFName = PDFFile.substr(0, PDFFile.size() - 7);
-   stringstream Xmur, Xmuf;
-   Xmur << xmur;
-   Xmuf << xmuf;
-   string FileName = PDFName + "_" + Xmur.str() + "_" + Xmuf.str();
+   string FileName = "NLO_" + PDFName + "_" + chtmp;
+   string LineName = "NLO-" + PDFName + "_" + "dscale";
 
-   // --- Histogram creation and storage
-   YODA::Writer & writer = YODA::WriterYODA::create();                          // Create the writer for the yoda file
-   std::vector< YODA::AnalysisObject * > ao;                                    // Vector of pointers to each of multiple histograms
-
-   // --- Determine binning/dimensioning of observable bins in table
-   const int NDim = fnlo.GetNumDiffBin();
-   int NDimBins[NDim];
+   //! --- YODA analysis object creation and storage
+   YODA::Writer & writer = YODA::WriterYODA::create();                          //! Create the writer for the yoda file
+   vector< YODA::AnalysisObject * > aos;                                   //! Vector of pointers to each of multiple analysis objects
    size_t offset = atoi(RivetId.substr(capital_pos +1, 2).c_str());
 
-   // --- 1D
+   //! --- Initialize dimension bin and continuous observable bin counter
+   unsigned int NDimBins[NDim];
+   NDimBins[0] = fnlo.GetNDim0Bins();
+   unsigned int iobs = 0;
+   //! Vector of 2D scatter plots
+   vector<YODA::Scatter2D> plots;
+
+   //! --- 1D
    if (NDim == 1) {
-      std::vector<YODA::HistoBin1D> bins;                                          // Vector for 1D histogram binning
-      stringstream histno;                                                                              // To make i+1 from int
-      histno << offset+(NDim-1);                                                                        // to a string for the naming
-      RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());        // Next histogram name
-      NDimBins[0] = fnlo.GetNDim0Bins();
-      for (int k = 0; k<NDimBins[0]; k++) {
-         bins.push_back(YODA::HistoBin1D( fnlo.GetDim0BinBoundaries()[k].first , fnlo.GetDim0BinBoundaries()[k].second ) ); // Insert bin into the vector
+      //! Vectors to fill 2D scatter plot
+      vector < double > x;
+      vector < double > y;
+      vector < double > exminus;
+      vector < double > explus;
+      vector < double > eyminus;
+      vector < double > eyplus;
+      //! Loop over bins in outer (1st) dimension
+      for (unsigned int k =0 ; k<NDimBins[0] ; k++) {
+         x.push_back((bins[iobs].second + bins[iobs].first)/2.0);
+         explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+         exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+         y.push_back(xs[iobs]);
+         eyplus.push_back( xs[iobs]*dxs[iobs].first);
+         eyminus.push_back(xs[iobs]*abs(dxs[iobs].second));
+         iobs++;
       }
-      YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, FileName);                          // Create histogram pointer
-      for (int k =0 ; k<NDimBins[0] ; k++) {                                                            // Fill in the histogram (* bin size factor as we fill area)
-         hist->fill( (fnlo.GetDim0BinBoundaries()[k].first + fnlo.GetDim0BinBoundaries()[k].second)/2.0 ,
-                     fnlo.GetCrossSection()[k]*(fnlo.GetDim0BinBoundaries()[k].second - fnlo.GetDim0BinBoundaries()[k].first) );
-         //                     fnlo.GetCrossSection()[k]*fnlo.GetBinSize(k) );
-      }
-      ao.push_back(hist);                                                                                               // insert the histogram pointer into the vector
-   } else if (NDim == 2) {
-      unsigned int iobs = 0;
-      for (size_t i=0; i < fnlo.GetNDim0Bins(); i++) {                                               // For all bins in outer (first) dimension
-         std::vector<YODA::HistoBin1D> bins;                                                        // Vector for 1D histogram binning
-         stringstream histno;                                                                       // To make i+1 from int
-         histno << offset+i;                                                                        // to a string for the naming
-         RivetId.replace( capital_pos +3 - histno.str().size(), histno.str().size(), histno.str()); // Next histogram name
-         NDimBins[1] = fnlo.GetNDim1Bins(i);
-         for (int k = 0; k<NDimBins[1]; k++) {                                                      // Starting from the first bin in outer (first) dimension
-            bins.push_back(YODA::HistoBin1D( fnlo.GetDim1BinBoundaries(i)[k].first , fnlo.GetDim1BinBoundaries(i)[k].second ) ); // Insert bin into the vector
-         }
-         // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
-         YODA::Histo1D * hist = new YODA::Histo1D(bins, "/" + RivetId, FileName);                              // Create histogram pointer
-         for (int k = 0; k<NDimBins[1]; k++) {                                                      // Fill in the histogram (* bin size factor as we fill area)
+      stringstream plotno;                                                                         // To make i+1 from int
+      plotno << offset;                                                                            // to a string for the naming
+      RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
+      // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
+      YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
+      // Insert the plot pointer into the vector of analysis object pointers
+      aos.push_back(plot);
+   }
+   //! --- 2D
+   else if (NDim == 2) {
+      //! Loop over bins in outer (1st) dimension
+      for (unsigned int j=0; j<NDimBins[0]; j++) {
+         //! Vectors to fill 2D scatter plot
+         vector < double > x;
+         vector < double > y;
+         vector < double > exminus;
+         vector < double > explus;
+         vector < double > eyminus;
+         vector < double > eyplus;
+         //! Loop over bins in inner (2nd) dimension
+         NDimBins[1] = fnlo.GetNDim1Bins(j);
+         for (unsigned int k = 0; k<NDimBins[1]; k++) {
+            x.push_back((bins[iobs].second + bins[iobs].first)/2.0);
+            explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+            exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+            y.push_back(xs[iobs]);
+            eyplus.push_back( xs[iobs]*dxs[iobs].first);
+            eyminus.push_back(xs[iobs]*abs(dxs[iobs].second));
             iobs++;
-            hist->fill( (fnlo.GetDim1BinBoundaries(i)[k].first + fnlo.GetDim1BinBoundaries(i)[k].second)/2.0 ,
-                        fnlo.GetCrossSection2Dim()[i][k]*(fnlo.GetDim1BinBoundaries(i)[k].second - fnlo.GetDim1BinBoundaries(i)[k].first) );
-            //                        fnlo.GetCrossSection2Dim()[i][k]*fnlo.GetBinSize(iobs) );
          }
-         ao.push_back(hist);                                                                        // Insert the histogram pointer into the vector
+         stringstream plotno;                                                                         // To make i+1 from int
+         plotno << offset+j;                                                                          // to a string for the naming
+         RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
+         // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
+         YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
+         // Insert the plot pointer into the vector of analysis object pointers
+         aos.push_back(plot);
       }
-   } else {
-      error["fnlo-tk-yodaout"] << "More than 2 dimensions easily possible in table, but not yet implemented here, aborted!" << endl;
-      exit(1);
    }
 
-   // --- Output
-   writer.write( FileName + ".yoda", ao );                                                          // Save histograms into the yoda file
+   //! --- Output
+   //! Save histograms into the yoda file
+   writer.write( FileName + ".yoda", aos );
    cout << endl;
    cout << _CSEPSC << endl;
    shout << "" << endl;
