@@ -2,21 +2,19 @@
 // DESY, 08.08.2013
 #ifndef __fastNLOTable__
 #define __fastNLOTable__
-
-#include <math.h>
-#include <string>
+#include <cmath>
 #include <fstream>
-#include <vector>
+#include <string>
 #include <utility>
+#include <vector>
 
-#include "fastNLOConstants.h"
 #include "fastNLOBase.h"
 #include "fastNLOCoeffBase.h"
-
-#include "fastNLOCoeffData.h"
-#include "fastNLOCoeffMult.h"
 #include "fastNLOCoeffAddFix.h"
 #include "fastNLOCoeffAddFlex.h"
+#include "fastNLOCoeffData.h"
+#include "fastNLOCoeffMult.h"
+#include "fastNLOConstants.h"
 
 using namespace std;
 
@@ -28,61 +26,79 @@ class fastNLOTable : public fastNLOBase {
    ~fastNLOTable();
    fastNLOTable(const fastNLOTable&);
 
-   virtual void Print() const;
-   void PrintScenario() const;
-   void PrintFastNLOTableConstants(const int iprint = 0) const;                                 //  Print (technical) constants of fastNLO table (use iprint) for level of details.
-   void PrintTableInfo(const int iprint = 0) const;                                             //  Print basic info about fastNLO table and its contributions
-
    virtual void ReadTable();
    virtual void WriteTable();
    virtual void WriteTable(string filename);
    bool IsCompatible(const fastNLOTable& other) const;
 
-   std::string GetRivetId() const;
+   // ___________________________________________________________________________________________________
+   // Getters for binning structure
+   // ___________________________________________________________________________________________________
+   // Getters for linear array of "ObsBin"'s running from 0->(NObsBin-1))
+   // Returns no. of observable bins
+   unsigned int GetNObsBin() const {return NObsBin;}
+   // Return lower bin bound for obs. bin iObs in dim. iDim
+   double GetObsBinLoBound(unsigned int iObs, unsigned int iDim) const;
+   // Return upper bin bound for obs. bin iObs in dim. iDim
+   double GetObsBinUpBound(unsigned int iObs, unsigned int iDim) const;
+   // Return vector of lower bin bounds in dim. iDim for all obs. bins
+   vector < double > GetObsBinsLoBounds(unsigned int iDim) const;
+   // Return vector of upper bin bounds in dim. iDim for all obs. bins
+   vector < double > GetObsBinsUpBounds(unsigned int iDim) const;
+   // Return minimum value of all lower bin bounds for dim. iDim
+   double GetObsBinsLoBoundsMin(unsigned int iDim) const;
+   // Return maximum value of all upper bin bounds for dim. iDim
+   double GetObsBinsUpBoundsMax(unsigned int iDim) const;
+   // Return vector of pairs with lower and upper bin bounds in dim. iDim for all obs. bins
+   vector < pair < double, double > > GetObsBinsBounds(unsigned int iDim) const;
+   // Return observable bin no. for vector of values obs0=var0,obs1=var1,...; -1 if outside range
+   int GetObsBinNumber(const vector < double >& vobs) const ;
+   // Return observable bin no. for obs0=var0 in 1D binning; -1 if outside range
+   int GetObsBinNumber(double var0) const ;
+   // Return observable bin no. for obs0=var0,obs1=var1 in 2D binning; -1 if outside range
+   int GetObsBinNumber(double var0, double var1) const ;
+   // Return observable bin no. for obs0=var0,obs1=var1,obs2=var2 in 3D binning; -1 if outside range
+   int GetObsBinNumber(double var0, double var1, double var2) const ;
 
-   // getters for 'ObsBin': ObsBin runs from 0-NObsBin
-   unsigned int GetNObsBin() const {return NObsBin;}                                                     // Number of observable bins
-   std::vector < std::pair < double, double > > GetObsBinBoundaries(int iObsBin) const { return Bin[iObsBin];}    // Get binning for a given ObsBin
-
-   // getters for dimension specific bins, here called Dim<I>Bins
-   unsigned int GetIDim0Bin(unsigned int iobs) const;                                           // Bin number in first dimension for given ObsBin
-   unsigned int GetNDim0Bins() const;                                                           // Bin number +1 in first dimension for last ObsBin
-                                                                                                // ==> Number of bins in first dimension
-   unsigned int GetIDim1Bin(unsigned int iobs) const;                                           // Bin number in second dimension for given ObsBin
-   unsigned int GetNDim1Bins(unsigned int iDim0Bin) const;                                      // Number of bins in second dimension for given bin in first dimension
-   unsigned int GetIDim2Bin(unsigned int iobs) const;                                           // Bin number in third dimension for given ObsBin
-   unsigned int GetNDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;               // Number of bins in third dimension for a second and f
-
-   unsigned int GetIDimBin(unsigned int iobs, unsigned int iDim) const;                         // Bin number in third dimension for given ObsBin
-
+   // Getters for multidimensional binning, here called Dim<I>Bins
+   // Return vector of pairs with unique bin bounds of 1st dim.
+   vector < pair < double, double > > GetDim0BinBounds() const;
+   // Return vector of pairs with unique bin bounds of 2nd dim. for 'iDim0Bin' of 1st dim.
+   vector < pair < double, double > > GetDim1BinBounds(unsigned int iDim0Bin) const;
+   // Return vector of pairs with unique bin bounds of 3rd dim. for 'iDim0Bin' and 'iDim1Bin' of 1st two dim.
+   vector < pair < double, double > > GetDim2BinBounds(unsigned int iDim0Bin, unsigned int iDim1Bin) const;
+   // Return vector of pairs with lower and upper bin bounds for all dimensions for a given obs. bin
+   vector < pair < double, double > > GetObsBinDimBounds(unsigned int iObs) const;
+   // Return pair with lower and upper bin bounds for given obs. bin and dim. iDim
+   pair < double, double > GetObsBinDimBounds(unsigned int iObs, unsigned int iDim) const;
+   // Return bin no. in 1st dim. for obs. bin iObs
+   unsigned int GetIDim0Bin(unsigned int iObs) const;
+   // Return bin no. in 2nd dim. for obs. bin iObs
+   unsigned int GetIDim1Bin(unsigned int iObs) const;
+   // Return bin no. in 3rd dim. for obs. bin iObs
+   unsigned int GetIDim2Bin(unsigned int iObs) const;
+   // Return no. of bins in 1st dimension
+   unsigned int GetNDim0Bins() const;
+   // Return no. of bins in 2nd dimension for given bin in 1st dim.
+   unsigned int GetNDim1Bins(unsigned int iDim0Bin) const;
+   // Return no. of bins in 3rd dimension for given bins in 1st and 2nd dim.
+   unsigned int GetNDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const;
+   // Return bin no. in 1st dim. for obs0=var0; -1 if outside range
    int GetODim0Bin(double var0) const;
+   // Return bin no. in 2nd dim. for obs0=var0,obs1=var1; -1 if outside range
    int GetODim1Bin(double var0, double var1) const;
+   // Return bin no. in 3rd dim. for obs0=var0,obs1=var1,obs2=var2; -1 if outside range
    int GetODim2Bin(double var0, double var1, double var2) const;
-   std::vector < std::pair < double, double > > GetBinBoundaries(int iDim0Bin, int iDim1Bin = -1, int iDim2Bin = -1);
+   // DO NOT USE! DOES NOT WORK YET!
+   unsigned int GetIDimBin(unsigned int iObs, unsigned int iDim) const;
+   vector < pair < double, double > > GetBinBoundaries(int iDim0Bin, int iDim1Bin = -1, int iDim2Bin = -1);
 
-   int GetObsBinNumber( const vector < double >& vobs ) const ;                                 // Calculate observable bin number (iObsBin)
-   int GetObsBinNumber( double obs0 ) const ;
-   int GetObsBinNumber( double obs0, double obs1 ) const ;
-   int GetObsBinNumber( double obs0, double obs1, double obs2 ) const ;
 
-   std::pair < double, double > GetObsDimBin(unsigned int iobs, unsigned int iDim) const        // Get binning for given observable and dimension
-   {return Bin[iobs][iDim];}
-   std::vector < std::pair < double, double > > GetDimBinBoundaries(unsigned int iDim) const;            // Get all bins for given dimension
-
-   std::vector < std::pair < double, double > > GetDim0BinBoundaries() const;                            // Get binning of 1st dimension
-   std::vector < std::pair < double, double > > GetDim1BinBoundaries(unsigned int iDim0Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
-   std::vector < std::pair < double, double > > GetDim2BinBoundaries(unsigned int iDim0Bin, unsigned int iDim1Bin) const;        // Get binning of 2nd dimension for bin iDim0Bin in 1st dimension
-
-   std::vector < double > GetLoBin(unsigned int iDim) const;                                    // Get lower bin boundaries in dim. iDim for all obs. bins
-   double GetLoBin(int bin, unsigned int iDim) const {return Bin[bin][iDim].first;}             // Get lower bin boundary in dim. iDim for one obs. bin
-   double GetLoBinMin(unsigned int iDim) const;                                                 // Get lowest bin boundary in dim. iDim of all obs. bins
-   std::vector < double > GetUpBin(unsigned int iDim) const;                                    // Get upper bin boundaries in dim. iDim for all obs. bins
-   double GetUpBin(int bin, unsigned int iDim) const {return Bin[bin][iDim].second;}            // Get upper bin boundary in dim. iDim for one obs. bin
-   double GetUpBinMax(unsigned int iDim) const;                                                 // Get uppermost bin boundary in dim. iDim of all obs. bins
-
+   // ___________________________________________________________________________________________________
+   // Some other info getters
+   // ___________________________________________________________________________________________________
    vector < double > GetBinSize() const {return BinSize;};                                      // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
    double GetBinSize(int bin) const {return BinSize[bin];};                                     // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
-
    void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Single-differential, double-differential, etc...)
    unsigned int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Single-differential, double-differential, etc...)
 
@@ -104,12 +120,23 @@ class fastNLOTable : public fastNLOBase {
    bool IsNorm() const { return INormFlag == 0 ? false : true;}
    string GetDenomTable() const {return DenomTable;}
 
-   fastNLOCoeffBase* GetCoeffTable(int no) const;
-   fastNLOCoeffData* GetDataTable() const;                                                      //!< returns pointer to data table if available, else returns NULL pointer
-   fastNLOCoeffAddBase* GetReferenceTable(ESMOrder eOrder) const;                               //!< returns pointer to reference table if available, else returns NULL pointer
+   string GetRivetId() const;
 
-   // useful functions
 
+   // ___________________________________________________________________________________________________
+   // Info print out functionality
+   // ___________________________________________________________________________________________________
+   //  Print basic info about fastNLO table and its contributions
+   void PrintTableInfo(const int iprint = 0) const;
+   //  Print (technical) constants of fastNLO table (use iprint) for level of details.
+   void PrintFastNLOTableConstants(const int iprint = 0) const;
+   void PrintScenario() const;
+   virtual void Print() const;
+
+
+   // ___________________________________________________________________________________________________
+   // Other useful functions
+   // ___________________________________________________________________________________________________
    // handle coefficient tables
    //int WriteCoeffTable(int no);
    //int WriteCoeffTable(int no,ofstream* outstream );
@@ -118,6 +145,9 @@ class fastNLOTable : public fastNLOBase {
    //int CreateCoeffBase(int no);
    int CreateCoeffTable(int no,fastNLOCoeffBase *newcoeff);
    void AddTable(const fastNLOTable& rhs);
+   fastNLOCoeffBase* GetCoeffTable(int no) const;
+   fastNLOCoeffData* GetDataTable() const;                                                      //!< returns pointer to data table if available, else returns NULL pointer
+   fastNLOCoeffAddBase* GetReferenceTable(ESMOrder eOrder) const;                               //!< returns pointer to reference table if available, else returns NULL pointer
 
 
 private:
