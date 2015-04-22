@@ -57,7 +57,7 @@ my $vers   = $opt_v;
 #
 if ($vers != 2.3) {die "fnlo-add-warmup.pl: Error! Unsupported warmup file version: $vers\n"};
 my $outfile = "${scen}_warmup.txt";
-my $wdir    = "${scen}wrm";
+my $wdir    = "${scen}_wrm";
 if ( $opt_w ) {$wdir = $opt_w;}
 my $wrmglob = "${scen}*.txt";
 
@@ -194,6 +194,9 @@ if ( -d "$wdir" ) {
     }
     close OUTFILE;
     close INFILE;
+    my $ret = system("mv $outfile $sdir");
+    if ( $ret ) {print "fnlo-add-warmup.pl: Couldn't move warmup summary file into ".
+		     "work directory $sdir: $ret. Please look for file in $wdir.\n";}
     chdir $sdir;
 }
 

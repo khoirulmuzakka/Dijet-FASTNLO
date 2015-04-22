@@ -41,14 +41,14 @@ print "######################################\n\n";
 #
 our ( $opt_b, $opt_d, $opt_e, $opt_g, $opt_h, $opt_j,
       $opt_n, $opt_o, $opt_r, $opt_t, $opt_v, $opt_w, $opt_x ) =
-    ( "LOCAL", "", "0", "guc", "", "0001",
+    ( "GC", "", "0", "guc", "", "0001",
       "2jet", "LO", "", "", "2.3", "", "" );
 getopts('b:de:g:hj:n:o:rt:v:wx:') or die "fnlo-run-nlojet.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfnlo-run-nlojet.pl\n";
     print "Usage: fnlo-run-nlojet.pl [switches/options] ([ScenarioType_ScenarioName])\n";
-    print "  -b batch        Batch system used: LOCAL (def.),\n";
-    print "                  GC (grid-control), GRID or PBS\n";
+    print "  -b batch        Batch system used: GC (def.),\n";
+    print "                  GC (grid-control), LOCAL, GRID, or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -g prot         Grid storage protocol to use: guc (def.), srm\n";
@@ -67,12 +67,15 @@ if ( $opt_h ) {
     print "\n";
     print "Example:\n";
     print "Run NLOJet++ scenario (to run scenario in reference mode use option -r):\n";
-    print "   ./fnlo-run-nlojet.pl [-b LOCAL|GRID|batch] [-e max-events] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 2.3] InclusiveJets_fnl2342b_v23_fix\n\n";
+    print "   ./fnlo-run-nlojet.pl [-b GC|LOCAL|GRID|PBS] [-e max-events] [-t ./{scen}{ref}_{jobnr}|tdir] [-v 2.3] InclusiveJets_Example_v23_fix\n\n";
     exit;
 }
 
 unless ( $opt_b eq "LOCAL" || $opt_b eq "GC" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fnlo-run-nlojet.pl: Error! Illegal batch system: $opt_b, aborted.\n";
+}
+unless ( $opt_b eq "GC" ) {
+    die "fnlo-run-nlojet.pl: Error! Batch system other than GC (grid-control) not updated: $opt_b, aborted.\n";
 }
 unless ( $opt_e =~ m/\d+/ && $opt_e !~ m/\D+/ ) {
     die "fnlo-run-nlojet.pl: Error! Illegal maximal event number: $opt_e, aborted.\n";
@@ -140,7 +143,7 @@ if ( @ARGV > 0 ) {
     $scentype = $parts[0];
     $scenname = $parts[1];
 }
-print "fnlo-run-nlojet.pl: Running scenario $scenname of type $scentype.\n";
+print "fnlo-run-nlojet.pl: Running scenario ${scenname} of type ${scentype}.\n";
 my $tdir = "${scenname}${ref}_${jobnr}";
 if ( $opt_t ) {
     $tdir  = $opt_t;
@@ -171,6 +174,15 @@ print "fnlo-run-nlojet.pl: NLOJet++ table name $tabnam\n";
 # Directories
 my $rundir = getcwd();
 chomp $rundir;
+
+#
+# Copy scenario steering file (${scenname}.str) to generic name for scenario type (${scentype}.str)  
+#
+print "fnlo-run-nlojet.pl: Copy scenario steering ${scenname}.str to ".
+    "generic name for scenario type ${scentype}.str\n";
+my $ret = system("cp -p ${scenname}.str ${scentype}.str");
+if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy scenario steering ${scenname}.str to ".
+		 "generic scenario steering name ${scentype}.str: $ret, aborted!\n";}
 
 #
 # Print system info (some parts in debug mode only; df commands can get stuck ...)
@@ -270,6 +282,10 @@ print "\nfnlo-run-nlojet.pl: Running fastNLO version $vers scenario on batch sys
 if ( $batch ne "LOCAL" ) {
 
 # Fetching and unpacking of fastNLO binary archive
+    my $date = `date +%d%m%Y_%H%M%S`;
+    chomp $date;
+    print "\nfnlo-run-nlojet.pl: Get/unpack fastNLO binary package: BINGET0_$date\n";
+
     my $file = "fastNLO-bin-v${vers}.tgz";
     if ( ! -f $file ) {
         if ( $batch eq "GC" ) {
@@ -285,6 +301,10 @@ if ( $batch ne "LOCAL" ) {
     } else {
         die "fnlo-run-nlojet.pl: ERROR! Could not find binary tgz of fastNLO $file, aborted!\n";
     }
+
+    $date = `date +%d%m%Y_%H%M%S`;
+    chomp $date;
+    print "\nfnlo-run-nlojet.pl: Unpacked fastNLO binary package: BINGET1_$date\n";
 }
 
 my $scendir = "$rundir";
@@ -307,146 +327,120 @@ if ( $vers eq "2.3" ) {
 } else {
     die "fnlo-run-nlojet.pl: ERROR! Unsupported fastNLO version $vers requested, aborted!\n";
 }
-# Do not try to maximize CPU time yet, too unstable
-if ( $batch eq "MAX" ) {
-# Fork NLO calculation
-    print "fnlo-run-nlojet.pl: Forking command ((time $cmd) 2>&1)& in background\n";
-    system("((time $cmd) 2>&1)&");
-} else {
+
 # Run NLO calculation
+$date = `date +%d%m%Y_%H%M%S`;
+chomp $date;
+print "\nfnlo-run-nlojet.pl: Starting calculation: FASTCAL0_$date\n";
+print "\nfnlo-run-nlojet.pl: Running command (time $cmd) 2>&1 in foreground\n";
+$ret = system("(time $cmd) 2>&1");
+if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
+$date = `date +%d%m%Y_%H%M%S`;
+chomp $date;
+print "\nfnlo-run-nlojet.pl: Calculation finished: FASTCAL1_$date\n";
+
+# Copy/rename results for grid storage
+print "\nfnlo-run-nlojet.pl: The final working directory's content is:\n";
+$ret = system("ls -laR");
+if ( $ret ) {print "fnlo-run-nlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
+my $spath = "${scendir}/${tdir}";
+my $sfile  = "";
+if ( $wrm eq "wrm" ) {
+    my @sfiles = glob("${scentype}_${scenname}*.txt");
+    $sfile = $sfiles[0];
+} else {
+    $sfile  = "${tabnam}";
+}
+if (! $sfile) {
+    die "fnlo-run-nlojet.pl: ERROR! Couldn't determine source file name for grid storage, aborted!\n";
+}
+print "\nfnlo-run-nlojet.pl: Source file name $sfile\n";
+my $tpath = "fastNLO_tables_v${vers}/${scentype}_${scenname}";
+if ( $tpath ) {
+    $tpath =~ s/\/\.\//\//g;
+} else {
+    $tpath = "";
+}
+print "fnlo-run-nlojet.pl: SE target path $tpath\n";
+my $tfile  = "";
+if ( $wrm eq "wrm" ) {
+    $tfile  = "${sfile}";
+} else {
+    $tfile   = "${scentype}_${sfile}";
+}
+$tfile  =~ s/_0001//;
+$tfile  =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
+print "fnlo-run-nlojet.pl: Target file name $tfile\n";
+
+if ( $batch ne "LOCAL" ) {
+# Rename for grid storage via GC
+    if ( $batch eq "GC" ) {
+	print "fnlo-run-nlojet.pl: Info: Batch mode $batch: Grid storage done by grid-control.\n";
+	my $spathdir = `dirname $spath`;
+	if ( ! -f "$rundir/$tfile" ) {
+	    print "fnlo-run-nlojet.pl: Copy table to current directory for storage.\n";
+	    my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
+			     "current directory $rundir: $ret, aborted!\n";}
+	}
+	chdir $rundir or die "fnlo-run-nlojet.pl: ERROR! Couldn't cd to $rundir, aborted!\n";
+	$tfile =~ s/\.${tabext}//;
+	print "fnlo-run-nlojet.pl: Copy log files to correct file names for storage.\n\n";
+	if ( -f "job.stderr" && ! -z "job.stderr" ) {
+	    my $ret = system("cp -p job.stderr ${tfile}.err");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stderr ".
+			     "to ${tfile}.err: $ret, aborted!\n";}
+	}
+	if ( -f "job.stdout" && ! -z "job.stdout" ) {
+	    $ret = system("cp -p job.stdout ${tfile}.log");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stdout ".
+			     "to ${tfile}.log: $ret, aborted!\n";}
+	}
+	$ret = system("pwd");
+	if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't print cwd!\n";}
+	$ret = system("ls -la");
+	if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't list cwd!\n";}
+# Do grid storage by ourselves (unused since quite some time, beware)
+    } elsif ( $batch eq "GRID" ) {
+	grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
+	if ( -f "job.stderr" ) {
+	    my $ret = system("cp -p job.stderr ${tfile}.err");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
+			     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+	}
+	if ( -f "job.stdout" ) {
+	    $ret = system("cp -p job.stdout ${tfile}.log");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
+			     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+	}
+	grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
+	grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
+# PBS (unused since quite some time, beware)
+    } else {
+	my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
+	if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
+			 "current directory $rundir: $ret, aborted!\n";}
+	if ( -f "job.stderr" ) {
+	    my $ret = system("cp -p job.stderr ${tfile}.err");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
+			     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+	}
+	if ( -f "job.stdout" ) {
+	    $ret = system("cp -p job.stdout ${tfile}.log");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
+			     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+	}
+    }
     my $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
-    print "fnlo-run-nlojet.pl: Starting calculation: FASTCAL0_$date\n";
-    print "fnlo-run-nlojet.pl: Running command (time $cmd) 2>&1 in foreground\n";
-    my $ret = system("(time $cmd) 2>&1");
-    if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
-    $date = `date +%d%m%Y_%H%M%S`;
-    chomp $date;
-    print "\nfnlo-run-nlojet.pl: Calculation finished: FASTCAL1_$date\n";
-    print "fnlo-run-nlojet.pl: The final working directory's content is:\n";
-    $ret = system("ls -laR");
-    if ( $ret ) {print "fnlo-run-nlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
-# Copy warmup file or table to grid storage
-    if ( $batch ne "LOCAL" ) {
-        my $spath = "${scendir}/${tdir}";
-        my $sfile = "";
-        if ( $wrm eq "wrm" ) {
-            my @sfiles = glob("${scentype}_${scenname}*.txt");
-            $sfile = $sfiles[0];
-        } else {
-            $sfile = "${tabnam}";
-        }
-        my $tpath = "fastNLO_tables_v${vers}/${scentype}_${scenname}";
-        if ( $tpath ) {
-            $tpath =~ s/\/\.\//\//g;
-        } else {
-            $tpath = "";
-        }
-# Change job numbering according to grid-control
-        print "fnlo-run-nlojet.pl: Source file name $sfile\n";
-        my $tfile  = "${scentype}_${sfile}";
-        $tfile =~ s/_0001//;
-        $tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
-        print "fnlo-run-nlojet.pl: Target file name $tfile\n";
-# GC does not support my file rename scheme with leading zeros in job numbers
-        if ( $batch eq "GC" ) {
-            print "fnlo-run-nlojet.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
-            my $spathdir = `dirname $spath`;
-            if ( ! -f "$rundir/$tfile" ) {
-                print "                  Copy table to current directory for storage.\n";
-                my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
-                if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
-                                 "current directory $rundir: $ret, aborted!\n";}
-            }
-        } elsif ( $batch eq "GRID" ) {
-            grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
-        } else {
-            my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
-            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
-                             "current directory $rundir: $ret, aborted!\n";}
-        }
-        unless ( $batch eq "GC" ) {
-            my $date = `date +%d%m%Y_%H%M%S`;
-            chomp $date;
-            print "fnlo-run-nlojet.pl: Table stored: TABSAV1_$date\n";
-        }
-    }
-    $date = `date +%d%m%Y_%H%M%S`;
-    chomp $date;
-    print "\n###############################\n";
-    print "# fnlo-run-nlojet.pl: fastNLO finished: FASTRUN1_$date\n";
-    print "###############################\n\n";
-#        close STDERR;
-#        close STDOUT;
-# Copy log files to grid storage, but rename first to go with the job
-# If size = 0, as should be normal for job.stderr, do NOT rename => no grid storage.
-    if ( $batch ne "LOCAL" ) {
-        my $tpath = "fastNLO_tables_v${vers}/${scentype}_${scenname}";
-        if ( $tpath ) {
-            $tpath =~ s/\/\.\//\//g;
-        } else {
-            $tpath = "";
-        }
-        my $tfile = "${scenname}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
-        if ( $batch eq "GC" ) {
-            $tfile = "${scenname}${ref}-hhc-$runmode{$order}[0]-${njet}";
-        }
-        chdir $rundir or die "fnlo-run-nlojet.pl: ERROR! Couldn't cd to $rundir, aborted!\n";
-#            if ( -z "job.stderr" ) {
-#                my $ret = system("rm -f job.stderr");
-#                if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't remove empty file job.stderr: ".
-#                                 "$ret, aborted!\n";}
-#            }
-#            if ( -z "job.stdout" ) {
-#                my $ret = system("rm -f job.stdout");
-#                if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't remove empty file job.stdout: ".
-#                                 "$ret, aborted!\n";}
-#            }
-# GC does not support my file rename scheme with leading zeros in job numbers
-        if ( $batch eq "GC" ) {
-# GC will copy renamed files to SE
-            print "fnlo-run-nlojet.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
-            print "                  Move log files to correct file names for storage.\n\n";
-            if ( -f "job.stderr" && ! -z "job.stderr" ) {
-                my $ret = system("cp -p job.stderr ${tfile}.err");
-                if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stderr ".
-                                 "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-            }
-            if ( -f "job.stdout" && ! -z "job.stdout" ) {
-                $ret = system("cp -p job.stdout ${tfile}.log");
-                if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stdout ".
-                                 "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-            }
-            $ret = system("pwd");
-            if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't print cwd!\n";}
-            $ret = system("ls -la");
-            if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't list cwd!\n";}
-        } elsif ( $batch eq "GRID" ) {
-            grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
-            grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
-        } else {
-# For PBS with grid-control log files are in $rundir as job.stdout and .stderr
-# ... only copy
-            if ( -f "job.stderr" ) {
-                my $ret = system("cp -p job.stderr ${tfile}.err");
-                if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
-                                 "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-            }
-            if ( -f "job.stdout" ) {
-                $ret = system("cp -p job.stdout ${tfile}.log");
-                if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
-                                 "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-            }
-        }
-        unless ( $batch eq "GC" ) {
-            my $date = `date +%d%m%Y_%H%M%S`;
-            chomp $date;
-            print "fnlo-run-nlojet.pl: Log files stored: LOGSAV1_$date\n";
-        }
-    }
-    exit 0;
+    print "\nfnlo-run-nlojet.pl: Results stored: TABSAV1_$date\n";
 }
 
+$date = `date +%d%m%Y_%H%M%S`;
+chomp $date;
+print "\n###############################\n";
+print "# fnlo-run-nlojet.pl: fastNLO finished: FASTRUN1_$date\n";
+print "###############################\n\n";
 exit 0;
 
 
