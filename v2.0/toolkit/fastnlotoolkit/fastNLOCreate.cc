@@ -3,27 +3,27 @@
 // ___________________________________________________________________________________________________
 //! The fastNLOCreate class
 /*!
-   This class can generate/fill one single contribution for a fastNLO table.
-   It supports fixed scale and flexible-scale tables.
-   fastNLOCreate inherits from fastNLOTable, but is only able to hold one
-   coefficient table as member.
-   fastNLOCreate no enables to fill this coefficient talbe, i.e.  to add further
-   contributions, e.g. from a MC generator.
+  This class can generate/fill one single contribution for a fastNLO table.
+  It supports fixed scale and flexible-scale tables.
+  fastNLOCreate inherits from fastNLOTable, but is only able to hold one
+  coefficient table as member.
+  fastNLOCreate no enables to fill this coefficient talbe, i.e.  to add further
+  contributions, e.g. from a MC generator.
 
-   fastNLOCreate works only with a steering file. Example steering files
-   are provided together with this class.
-   The steering specifies, which kind of process are stored and also
-   the binning is read in.
+  fastNLOCreate works only with a steering file. Example steering files
+  are provided together with this class.
+  The steering specifies, which kind of process are stored and also
+  the binning is read in.
 
-   fastNLOCreate also handles the warmup runs. If no warmup table is found
-   it automatically runs in warmup mode. If warmup values are available, it
-   runs in 'production' mode.
+  fastNLOCreate also handles the warmup runs. If no warmup table is found
+  it automatically runs in warmup mode. If warmup values are available, it
+  runs in 'production' mode.
 
-   In order ot obtain a full fastNLO table, i.e. a table with LO and NLO contributions,
-   several contributions have to be merged, using the fnlo-merge (or fnlo-tk-merge)
-   tools.
+  In order ot obtain a full fastNLO table, i.e. a table with LO and NLO contributions,
+  several contributions have to be merged, using the fnlo-merge (or fnlo-tk-merge)
+  tools.
 
-   For example applications, please contact the authors.
+  For example applications, please contact the authors.
 
 */
 // ___________________________________________________________________________________________________
@@ -33,17 +33,15 @@
 #include <string>
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOTools.h"
-#include "fastnlotk/read_steer.h"
-
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOInterpolCatmullRom.h"
 #include "fastnlotk/fastNLOInterpolLagrange.h"
 #include "fastnlotk/fastNLOInterpolLinear.h"
 #include "fastnlotk/fastNLOInterpolOneNode.h"
+#include "fastnlotk/read_steer.h"
 
 using namespace std;
-
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate() {
@@ -914,16 +912,16 @@ void fastNLOCreate::SetBinningND(vector<vector<double> > bgrid, unsigned int ndi
    //          }
    //       }
    //    }
-      // double LowerBoundary = GetBinBoundaries(i)[0].first;
-      // double UpperBoundary = GetBinBoundaries(i)[0].second;
-      // cout << "iobs = " << i << ", low = " << LowerBoundary << ", upp = " << UpperBoundary << endl;
-      // int i1 = GetIDim0Bin(i);
-      // int i2 = GetIDimBin(i,0);
-      // int i3 = GetIDim1Bin(i);
-      // int i4 = GetIDimBin(i,1);
-      // int i5 = GetIDim2Bin(i);
-      // int i6 = GetIDimBin(i,2);
-      // cout << "i1, i2 = " << i1 << ", " << i2 << ", i3, i4 = " << i3 << ", " << i4 << ", i5, i6 = " << i5 << ", " << i6 << endl;
+   // double LowerBoundary = GetBinBoundaries(i)[0].first;
+   // double UpperBoundary = GetBinBoundaries(i)[0].second;
+   // cout << "iobs = " << i << ", low = " << LowerBoundary << ", upp = " << UpperBoundary << endl;
+   // int i1 = GetIDim0Bin(i);
+   // int i2 = GetIDimBin(i,0);
+   // int i3 = GetIDim1Bin(i);
+   // int i4 = GetIDimBin(i,1);
+   // int i5 = GetIDim2Bin(i);
+   // int i6 = GetIDimBin(i,2);
+   // cout << "i1, i2 = " << i1 << ", " << i2 << ", i3, i4 = " << i3 << ", " << i4 << ", i5, i6 = " << i5 << ", " << i6 << endl;
    //   }
 
    info["SetBinningND"] << "Set binning successfully for " << NObsBin << " bins in " << NDim << " dimensions." << endl;
@@ -1020,19 +1018,19 @@ bool fastNLOCreate::CheckWarmupConsistency() {
 
    if (warmup.size() != NObsBin) {
       error["CheckWarmupConsistency"]
-            <<"Table of warmup values is not compatible with steering file.\n"
-            <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<".\n"
-            <<wrmuphelp
-            <<"Exiting."<<endl;
+         <<"Table of warmup values is not compatible with steering file.\n"
+         <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<".\n"
+         <<wrmuphelp
+         <<"Exiting."<<endl;
       ret = false;
       exit(1);
    }
    if (INT_NS(Warmup.DifferentialDimension,fSteerfile) != (int)NDim) {
       error["CheckWarmupConsistency"]
-            <<"Table of warmup values is not compatible with steering file.\n"
-            <<"Found different number of dimensions. NDim="<<NDim<<", Warmup.DifferentialDimension="<<INT_NS(Warmup.DifferentialDimension,fSteerfile)<<".\n"
-            <<wrmuphelp
-            <<"Exiting."<<endl;
+         <<"Table of warmup values is not compatible with steering file.\n"
+         <<"Found different number of dimensions. NDim="<<NDim<<", Warmup.DifferentialDimension="<<INT_NS(Warmup.DifferentialDimension,fSteerfile)<<".\n"
+         <<wrmuphelp
+         <<"Exiting."<<endl;
       ret = false;
       exit(1);
    }
@@ -1055,17 +1053,17 @@ bool fastNLOCreate::CheckWarmupConsistency() {
 
    if (INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[0] != IDiffBin[0]) {
       warn["CheckWarmupConsistency"]
-            <<"Table of warmup values seems to be incompatible with steering file.\n"
-            <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[0]<<"'"
-            <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[0]<<"'. Exiting."<<endl;
+         <<"Table of warmup values seems to be incompatible with steering file.\n"
+         <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[0]<<"'"
+         <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[0]<<"'. Exiting."<<endl;
       ret = false;
       exit(1);
    }
    if (NDim > 1 && INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1] != IDiffBin[1]) {
       warn["CheckWarmupConsistency"]
-            <<"Table of warmup values seems to be incompatible with steering file.\n"
-            <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
-            <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1]<<"'. Exiting."<<endl;
+         <<"Table of warmup values seems to be incompatible with steering file.\n"
+         <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
+         <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1]<<"'. Exiting."<<endl;
       ret = false;
       exit(1);
    }
@@ -1076,40 +1074,52 @@ bool fastNLOCreate::CheckWarmupConsistency() {
       if (NDim == 1) {
          if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]) {
             error["CheckWrmbinConsistency"]
-                  <<"Table of warmup values seems to be incompatible with steering file.\n"
-                  <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
-                  <<",], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"].\n"
-                  <<wrmuphelp
-                  <<"Exiting."<<endl;
+               <<"Table of warmup values seems to be incompatible with steering file.\n"
+               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
+               <<",], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"].\n"
+               <<wrmuphelp
+               <<"Exiting."<<endl;
             ret = false;
             exit(1);
          }
       } else if (NDim == 2) {
          if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
-               || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]) {
+             || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]) {
             error["CheckWarmupConsistency"]
-                  <<"Table of warmup values seems to be incompatible with steering file.\n"
-                  <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
-                  <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"].\n"
-                  <<wrmuphelp
-                  <<"Exiting."<<endl;
+               <<"Table of warmup values seems to be incompatible with steering file.\n"
+               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
+               <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"].\n"
+               <<wrmuphelp
+               <<"Exiting."<<endl;
+            ret = false;
+            exit(1);
+         }
+      } else if (NDim == 3) {
+         if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
+             || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]
+             || Bin[i][2].first != wrmbin[i][i0+4] || Bin[i][2].second != wrmbin[i][i0+5]) {
+            error["CheckWarmupConsistency"]
+               <<"Table of warmup values seems to be incompatible with steering file.\n"
+               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
+               <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"] ["<<wrmbin[i][i0+4]<<","<<wrmbin[i][i0+5]<<"].\n"
+               <<wrmuphelp
+               <<"Exiting."<<endl;
             ret = false;
             exit(1);
          }
       }
-      // check bin width
+      // KR: Check bin width only roughly
       double bwwrm = 0;
       if (NDim == 1) bwwrm = wrmbin[i][i0+2];
       else if (NDim == 2) bwwrm = wrmbin[i][i0+4];
       else if (NDim == 3) bwwrm = wrmbin[i][i0+6];
-      // check relative precision
-      if ( std::abs(BinSize[i]) > DBL_MIN && std::abs(1. - BinSize[i]/bwwrm) > 1.e-6) {
+      if ( fabs(BinSize[i]) > DBL_MIN && (1 - BinSize[i]/bwwrm) > 1.e-4) {
          warn["CheckWarmupConsistency"]
-               <<"Table of warmup values seems to be incompatible with steering file.\n"
-               <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
-               <<", warmup: "<<bwwrm<<".\n"
-               <<wrmuphelp
-               <<"Please check consistency!"<<endl<<endl;
+            <<"Table of warmup values seems to be incompatible with steering file.\n"
+            <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
+            <<", warmup: "<<bwwrm<<".\n"
+            <<wrmuphelp
+            <<"Please check consistency!"<<endl<<endl;
          ret = false;
       }
    }
@@ -1395,28 +1405,28 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
             v2d& stm1 = st[is][nmu[m1].first];
             for (unsigned int p = 0 ; p<events[is].size() ; p++) {
                double wgt = events[is][p]._w * nmu[m1].second / BinSize[ObsBin];
-// .......................................................................................
-	       for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
-		  for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
-		     //int p = fEvent._p;
-		     int xminbin = nxlo[x1].first;
-		     int xmaxbin = nxup[x2].first;
-		     int proc = events[is][p]._p;
-		     HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
-		     int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+               // .......................................................................................
+               for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
+                  for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
+                     //int p = fEvent._p;
+                     int xminbin = nxlo[x1].first;
+                     int xmaxbin = nxup[x2].first;
+                     int proc = events[is][p]._p;
+                     HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
+                     int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
                      stm1[ixHM][proc] += nxlo[x1].second * nxup[x2].second * wgt;//nmu[m1].second * wp[p];
-//                for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
-//                   for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
-//                      int xmaxbin = nxup[x1].first;
-//                      int xminbin = nxlo[x2].first;
-//                      int proc = events[is][p]._p;
-//                      HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
-//                      int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
-// //                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
-// //                   double& sti = stm1[ixHM][proc];
-// //                   sti = ww;  // this assignment is time consuming ?!
-//                      stm1[ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
-// //                   c->SigmaTilde[ObsBin][is][nmu[m1].first][ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
+                     //                for (unsigned int x1 = 0 ; x1<nxup.size() ; x1++) {
+                     //                   for (unsigned int x2 = 0 ; x2<nxlo.size() ; x2++) {
+                     //                      int xmaxbin = nxup[x1].first;
+                     //                      int xminbin = nxlo[x2].first;
+                     //                      int proc = events[is][p]._p;
+                     //                      HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,proc);
+                     //                      int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+                     // //                   double ww = nxup[x1].second * nxlo[x2].second * wgt + stm1[ixHM][proc];
+                     // //                   double& sti = stm1[ixHM][proc];
+                     // //                   sti = ww;  // this assignment is time consuming ?!
+                     //                      stm1[ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
+                     // //                   c->SigmaTilde[ObsBin][is][nmu[m1].first][ixHM][proc] += nxup[x1].second * nxlo[x2].second * wgt;//nmu[m1].second * wp[p];
                   }
                }
             }
@@ -1484,10 +1494,10 @@ void fastNLOCreate::FillContribution(int scalevar) {
 
    const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    // hier
-//    cout<<"Fill! ObsBin="<<ObsBin<<", w="<<fEvent._w<<", x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", o0="<<fScenario._o[0]<<endl;
-//    static double wsum = 0;
-//    wsum+= fEvent._w; //hier
-//    cout<<" * wSum = "<<wsum<<endl;
+   //    cout<<"Fill! ObsBin="<<ObsBin<<", w="<<fEvent._w<<", x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", o0="<<fScenario._o[0]<<endl;
+   //    static double wsum = 0;
+   //    wsum+= fEvent._w; //hier
+   //    cout<<" * wSum = "<<wsum<<endl;
 
    if (ObsBin < 0) return;
    if (ObsBin >= (int)GetNObsBin()) return;
@@ -1555,11 +1565,11 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    double wgt = fEvent._w / BinSize[ObsBin];
    for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
-	 int p = fEvent._p;
+         int p = fEvent._p;
          int xminbin = nxlo[x1].first;
          int xmaxbin = nxup[x2].first;
-	 HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
-	 //HalfMatrixCheck(xminbin,xmaxbin,p);
+         HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
+         //HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
@@ -1606,8 +1616,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
          int xminbin = nxlo[x1].first;
          int xmaxbin = nxup[x2].first;
-	 int p = fEvent._p;
-	 HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
+         int p = fEvent._p;
+         HalfMatrixCheck(fEvent._x1,fEvent._x2,xminbin,xmaxbin,p);
          //HalfMatrixCheck(xminbin,xmaxbin,p);
          int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
@@ -1804,12 +1814,12 @@ int fastNLOCreate::GetNxmax(const vector<double>* xGrid1, const vector<double>* 
 
 // ___________________________________________________________________________________________________
 inline void fastNLOCreate::ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid) const {
-//    double pdfwgtmax = PDFwgt(xmax);
-//    for( int i1 = 0; i1 < 4; i1++) {
-//       if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
-//          cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
-//       }
-//    }
+   //    double pdfwgtmax = PDFwgt(xmax);
+   //    for( int i1 = 0; i1 < 4; i1++) {
+   //       if ((nxmaxf-1+i1) >= 0 && (nxmaxf-1+i1) < Nxtot1[ObsBin] ) {
+   //          cefmax[i1] *= pdfwgtmax/PDFwgt(XNode1[ObsBin][nxmaxf-1+i1]);
+   //       }
+   //    }
    double wgtx = CalcPDFReweight(x);
    for (unsigned int in = 0; in < nodes.size(); in++) {
       double wgtn = CalcPDFReweight(grid->at(nodes[in].first));
@@ -1889,7 +1899,7 @@ void fastNLOCreate::MultiplyCoefficientsByBinSize() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::DivideCoefficientsByBinSize() {
-//! Divide all coefficients by binsize
+   //! Divide all coefficients by binsize
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (unsigned int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
@@ -1936,7 +1946,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
-//! Divide all coefficients by binsize
+   //! Divide all coefficients by binsize
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       c->MultiplyCoefficientsByConstant(coef);
@@ -2066,8 +2076,8 @@ void fastNLOCreate::PrintWarmupValues() {
 void fastNLOCreate::OutWarmup(ostream& strm) {
    if (fWxRnd.empty()) {
       warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
-//       warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
-//       InitWarmupArrays();
+      //       warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
+      //       InitWarmupArrays();
       error["OutWarmup"]<<" Do not write out unreasonable warmup table. Exiting."<<endl;
       exit(1);
    }
@@ -2156,14 +2166,15 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
    strm<<buf<<endl;
 
    // table values
+   // KR: increase precision, otherwise binsize factors with e.g. Pi or bin borders in multiples of Pi lead to warnings!
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      sprintf(buf,"    %4d ",i); // obsbin
+      sprintf(buf,"    %4d    ",i); // obsbin
       strm<<buf;
       for (unsigned int idim = 0 ; idim<NDim ; idim++) {
-         sprintf(buf,"  %12.3f  %12.3f",Bin[i][idim].first , Bin[i][idim].second);
+         sprintf(buf,"  % -#12.6g  % -#12.6g",Bin[i][idim].first , Bin[i][idim].second);
          strm<<buf;
       }
-      sprintf(buf,"  %12.3f",BinSize[i]);
+      sprintf(buf,"  % -#12.6g",BinSize[i]);
       strm<<buf<<endl;
    }
    strm<<"}}"<<endl;
@@ -2363,9 +2374,9 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
       double frac= (nbinlo[idim]+nbinup[idim])/(2.*(int)GetNObsBin());
       if (frac>minallbins) {   // round all bins
          info["CheckWarmupValuesIdenticalWithBinGrid"]
-               <<"Found that "<<frac*100<<"% of the warmup values are close (<"<<bclose*100.<<"%) to a bin boundary in '"
-               << DimLabel[idim]<<"' (Dim "<<idim<<").\n"
-               <<"Using these bin boundaries as warm-up values."<<endl;
+            <<"Found that "<<frac*100<<"% of the warmup values are close (<"<<bclose*100.<<"%) to a bin boundary in '"
+            << DimLabel[idim]<<"' (Dim "<<idim<<").\n"
+            <<"Using these bin boundaries as warm-up values."<<endl;
          for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
             wrmmu[i].first = Bin[i][idim].first;
             wrmmu[i].second = Bin[i][idim].second;
