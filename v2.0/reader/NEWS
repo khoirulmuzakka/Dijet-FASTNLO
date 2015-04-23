@@ -1,3 +1,13 @@
+Release Notes for fastNLO_reader version 2.1.0, revision 2064:
+==============================================================
+
+- Compatibility update for changes in fastNLO_toolkit:
+  - Up to 3-dimensional binnings are supported
+  - 7 subprocesses for LO hh->jets as used in toolkit is supported
+  - Internally used cross section units are rescaled to published units
+
+
+
 Release Notes for fastNLO_reader version 2.1.0, revision 1689:
 ==============================================================
 
