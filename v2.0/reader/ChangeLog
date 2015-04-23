@@ -1,4 +1,4 @@
-2015-04-23  New release of the fastNLO_reader package version 2.1.0, revision 2064:
+2015-04-23  New release of the fastNLO_reader package version 2.1.0, revision 2066:
             =======================================================================
             - Compatibility update for changes in fastNLO_toolkit:
               - Up to 3-dimensional binnings are supported
