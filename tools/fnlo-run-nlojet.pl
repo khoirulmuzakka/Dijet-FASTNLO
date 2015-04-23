@@ -166,10 +166,14 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
     $runmode{NLO}[1]  = "$nmax";
 }
 
-# NLOJet++ table name
-my $tabext = "tab";
-my $tabnam = "${scenname}${ref}${wrm}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${tabext}";
-print "fnlo-run-nlojet.pl: NLOJet++ table name $tabnam\n";
+# NLOJet++ product name
+my $prdext = "tab";
+my $prdnam = "${scenname}${ref}${wrm}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${prdext}";
+if ( $wrm eq "wrm" ) {
+    $prdext = "txt";
+    $prdnam = "${scentype}_${scenname}_warmup.${prdext}";
+}
+print "fnlo-run-nlojet.pl: NLOJet++ product name $prdnam\n";
 
 # Directories
 my $rundir = getcwd();
@@ -344,47 +348,39 @@ print "\nfnlo-run-nlojet.pl: The final working directory's content is:\n";
 $ret = system("ls -laR");
 if ( $ret ) {print "fnlo-run-nlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
 my $spath = "${scendir}/${tdir}";
-my $sfile  = "";
-if ( $wrm eq "wrm" ) {
-    my @sfiles = glob("${scentype}_${scenname}*.txt");
-    $sfile = $sfiles[0];
-} else {
-    $sfile  = "${tabnam}";
-}
-if (! $sfile) {
-    die "fnlo-run-nlojet.pl: ERROR! Couldn't determine source file name for grid storage, aborted!\n";
-}
-print "\nfnlo-run-nlojet.pl: Source file name $sfile\n";
+print "\nfnlo-run-nlojet.pl: Source path: $spath\n";
+my $sfile = "${prdnam}";
+print "fnlo-run-nlojet.pl: Source file: $sfile\n";
 my $tpath = "fastNLO_tables_v${vers}/${scentype}_${scenname}";
-if ( $tpath ) {
-    $tpath =~ s/\/\.\//\//g;
-} else {
-    $tpath = "";
-}
-print "fnlo-run-nlojet.pl: SE target path $tpath\n";
-my $tfile  = "";
-if ( $wrm eq "wrm" ) {
-    $tfile  = "${sfile}";
-} else {
-    $tfile   = "${scentype}_${sfile}";
-}
-$tfile  =~ s/_0001//;
-$tfile  =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
-print "fnlo-run-nlojet.pl: Target file name $tfile\n";
+$tpath =~ s/\/\.\//\//g;
+print "fnlo-run-nlojet.pl: Target path: $tpath\n";
+my $tfile = "${sfile}";
+# Eliminate default job number and attach the GC one
+$tfile =~ s/_0001//;
+$tfile =~ s/\.${prdext}/_${gjobnr}\.${prdext}/;
+print "fnlo-run-nlojet.pl: Target file: $tfile\n";
 
 if ( $batch ne "LOCAL" ) {
-# Rename for grid storage via GC
+# Copy/rename for grid storage via GC
     if ( $batch eq "GC" ) {
 	print "fnlo-run-nlojet.pl: Info: Batch mode $batch: Grid storage done by grid-control.\n";
 	my $spathdir = `dirname $spath`;
-	if ( ! -f "$rundir/$tfile" ) {
-	    print "fnlo-run-nlojet.pl: Copy table to current directory for storage.\n";
-	    my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
+	if ( ! -f "$rundir/$sfile" ) {
+	    print "fnlo-run-nlojet.pl: Copy product to current directory for storage.\n";
+	    my $ret = system("cp -p $spath/$sfile $rundir/$sfile");
+	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy product into ".
 			     "current directory $rundir: $ret, aborted!\n";}
 	}
 	chdir $rundir or die "fnlo-run-nlojet.pl: ERROR! Couldn't cd to $rundir, aborted!\n";
-	$tfile =~ s/\.${tabext}//;
+
+	print "fnlo-run-nlojet.pl: Rename product to expected file name for storage.\n";
+	my $ret = system("mv -f $sfile $tfile");
+	if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't rename product ${sfile} into ".
+			 "${tfile}: $ret, aborted!\n";}
+
+# Also rename related log and err files in cwd for grid storage, if file size larger than zero
+# Remove product extension to rename log/err files
+	$tfile =~ s/\.${prdext}//;
 	print "fnlo-run-nlojet.pl: Copy log files to correct file names for storage.\n\n";
 	if ( -f "job.stderr" && ! -z "job.stderr" ) {
 	    my $ret = system("cp -p job.stderr ${tfile}.err");
