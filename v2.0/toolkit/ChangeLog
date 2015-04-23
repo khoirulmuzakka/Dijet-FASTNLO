@@ -1,9 +1,369 @@
+2015-04-23  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2067
+            ================================================================================
+
+2015-04-23  rabbertz
+
+    * fastNLOCreate.cc: Elevate printout level for warmup
+
+2015-04-22  rabbertz
+
+    * fastNLOCreate.cc: Workaround warmup binsize consistency check
+
+2015-04-21  rabbertz
+
+    * fastNLOCreate.cc: Fix problem checking absolute precision of warmup vs.
+      steering
+
+    * fnlo-tk-yodaout.cc: Reworked fnlo-tk-yodaout to use 2DScatter and not
+      1DHIsto from YODA, allows to store scale uncetainties
+
+    * fnlo-tk-append.cc, fnlo-tk-cppread.cc, fnlo-tk-example.cc,
+      fnlo-tk-merge.cc: Cleanup and changes mostly for doxygen
+
+    * fastNLOTable.cc, fastNLOTable.h: Heavily reworked and rearranged bin
+      getter setup
+
+    * fastNLOReader.cc, fastNLOReader.h: Fixed PDF a_s caching problem, ignore
+      mult. corrections; added GetScaleUncertainty; adapted to updated bin get
+      methods
+
+    * HoppetInterface.h, fastNLOCoeffBase.h, fastNLOCreate.h, fastNLOHoppetAs.h,
+      fastNLOUserBlock.h: Some cleanup on the way
+
+2015-04-15  rabbertz
+
+    * fastNLOReader.cc, fnx9999.f: Compatibility update for both readers:
+      Rescale to publication units if different from internal units
+
+    * fastNLOTable.cc, fastNLOTable.h, fnlo-tk-cppread.cc: Some trivial textual
+      corrections in toolkit
+
+2015-02-20  rabbertz
+
+    * fastNLOConstants.h.in, fastNLOReader.cc, fastNLOReader.h: Add product of
+      scales as one function
+
+2015-02-15  rabbertz
+
+    * fnlo-tk-yodaout.cc: Remove forgotten debug lines
+
+2015-02-15  sieber
+
+    * fastNLOConstants.h.in, fastnlo.i: add fastNLOConstants to pyext
+
+2015-02-12  DanielBritzger
+
+    * fastNLOCreate.cc, read_steer.cc, speaker.cc, speaker.h: small adjustments
+      to the print-out
+
+2015-02-07  DanielBritzger
+
+    * fastNLOLHAPDF.cc: LHAPDF6 patch. More work needed to adjust all methods
+      also for LHAPDF6
+
+2015-02-06  DanielBritzger
+
+    * fastNLOReader.cc: re-activate faster flexible-scale code
+
+2015-02-01  rabbertz
+
+    * Makefile.am: Some adaptations for doxygen
+
+    * Makefile.am, doxygen: Some adaptations for doxygen
+
+    * Makefile.am, doxygen.cfg, fastNLOCreate.h: Some adaptations for doxygen
+
+    * fastNLOReader.cc: Eliminate two warnings
+
+2015-01-30  rabbertz
+
+    * fastNLOCreate.cc: Include Enrico´s bugfix
+
+    * fastNLOReader.cc, fastNLOReader.h: Fix cross section rescaling in reader
+      and remove code multiplication
+
+2015-01-27  rabbertz
+
+    * fastNLOPDFLinearCombinations.cc: Add some comment lines add typical
+      debugging intercept
+
+2015-01-27  DanielBritzger
+
+    * read_steer.cc, read_steer.h: New feature for read_steer: set default
+      namespace name.
+
+2015-01-26  DanielBritzger
+
+    * read_steer.cc, read_steer.h: update read_steer with some functionality
+
+2015-01-23  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOReader.cc: test flex-scale fixes
+
+2015-01-21  DanielBritzger
+
+    * fastNLOCreate.cc: fix
+
+    * fastNLOCreate.cc: xmin->x1 fix also in 'fasterCode'
+
+2015-01-20  DanielBritzger
+
+    * fastNLOReader.cc, fastNLOTable.cc: proper inheritance of default
+      constructors
+
+    * fastNLOReader.cc: init member also in (protected) default constructor.
+
+2015-01-19  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOCreate.h: temporary test of half matrix
+
+    * fastNLOCreate.cc: temporary test of half matrix
+
+2015-01-19  rabbertz
+
+    * fastNLOCreate.cc, read_steer.cc: small corrections in toolkit
+
+2015-01-18  rabbertz
+
+    * read_steer.cc: Unify some read_steer messages
+
+    * fastNLOCreate.cc, fastNLOGeneratorConstants.h, read_steer.cc: Finalized
+      1st version of new setup for event cross sections; toolkit adaptations
+
+2015-01-15  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOCreate.h: fix GetParameterFromSteering
+
+    * fastNLOLHAPDF.cc: bugfix for LHAPDF5
+
+2015-01-14  DanielBritzger
+
+    * CRunDec.cc, CRunDec.h, fastNLOLHAPDF.cc, read_steer.cc, read_steer.h: some
+      updates to LHAPDF-interface. New options for read_steer.
+
+    * read_steer.h: bugfix
+
+2015-01-14  rabbertz
+
+    * fastNLOTable.cc: Fix inverted histo interval logic bug, introduced by me
+      and reported by Enrico
+
+    * fastNLOTable.cc, fastNLOTable.h, read_steer.cc, read_steer.h: Create dijet
+      example for toolkit with NLOJet++
+
+2015-01-13  sieber
+
+    * CRunDec.h: change defines to static variables as Fred sugggested
+
+2015-01-08  rabbertz
+
+    * read_steer.h: Test on vector in steering fix
+
+2014-12-22  DanielBritzger
+
+    * read_steer.cc, read_steer.h: add keys to steering
+
+2014-12-22  rabbertz
+
+    * ax_python_devel.m4: Add for now sometimes erroneous m4 macro
+
+    * fnlo-tk-yodaout.cc: Adapt yodaout to method names renamed by Daniel
+
+    * Makefile.am, configure.ac: Fix some docu/doxygen probs
+
+2014-12-19  DanielBritzger
+
+    * fastNLOTable.cc, fastNLOTable.h: rename some bin-getters
+
+    * fastNLOCreate.cc: rever overwritten changes
+
+2014-12-18  rabbertz
+
+    * fnlo-paper.pdf: Clean up
+
+    * Makefile.am, configure.ac, fnlo-paper.pdf: Abandon slc5 stuff and
+      reactivate Doxygen support
+
+    * fastNLOTable.cc: Update for 3d output
+
+    * fnlo-tk-cppread.cc: Update for 3d output
+
+2014-12-18  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOInterpolBase.cc, fastNLOReader.cc: bugfix for
+      ambigously defined isnan in c++0x
+
+2014-12-17  rabbertz
+
+    * fastNLOCreate.cc, fastNLOTable.cc, fastNLOTable.h, fnlo-tk-cppread.cc:
+      Remove debug output: table creation with 3d works
+
+    * Makefile.am, configure.ac, doxygen.cfg, fastNLOCreate.cc,
+      fastNLODiffReader.cc, fastNLOReader.cc, fastNLOTable.cc, fastNLOTable.h,
+      fnlo-paper.pdf, fnlo-paper.tex, fnlo-tk-cppread.cc, speaker.h: More work
+      on triple-diff
+
+2014-12-15  rabbertz
+
+    * fastNLOTable.cc, fastNLOTable.h, fnlo-tk-yodaout.cc: Further work and
+      tests on binning stuff
+
+    * fastNLOCreate.cc, fastNLOReader.cc, fastNLOTable.cc, fastNLOTable.h,
+      fnlo-tk-yodaout.cc: Further work and tests on binning stuff
+
+2014-12-13  rabbertz
+
+    * read_steer.cc: Remove unhelpful confusing error messages from read_steer
+
+    * fastNLOCreate.cc, fastNLOTable.cc, fastNLOTable.h: Testing and improving
+      setup for GetBinBoundaries
+
+2014-12-10  DanielBritzger
+
+    * fastNLOTable.cc, fastNLOTable.h: new gettes for binning. not tested. only
+      partially implemented.
+
+2014-12-10  rabbertz
+
+    * fastNLOCreate.cc: Activate new n-dim. binning code; GetBinNumber for 3d
+      needed ...
+
+2014-12-10  DanielBritzger
+
+    * read_steer.h: bugfix getexist
+
+2014-12-09  rabbertz
+
+    * fastNLOCreate.cc, fastNLOCreate.h: Test Daniels read steer name check
+
+    * fastNLOReader.cc: trivial
+
+2014-12-06  rabbertz
+
+    * fastNLOReader.cc: Fix double inversion of x1bin, x2bin naming
+
+2014-12-05  DanielBritzger
+
+    * fastNLOReader.cc: bugfix full-matrix notation calcpdflinearcombination
+
+    * fastNLOReader.cc: bugfix full-matrix notation calcpdflinearcombination
+
+2014-12-04  DanielBritzger
+
+    * fastNLOCreate.cc: x-mess cleanup part 1 (create)
+
+2014-12-04  rabbertz
+
+    * fastNLOTable.cc: Comments
+
+    * fastNLOCreate.cc: ND binning
+
+2014-12-04  DanielBritzger
+
+    * fastNLOTable.h: draft for bin-getters
+
+    * fastNLOTable.h: draft for bin-getters
+
+2014-11-24  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fnlo-paper.pdf, fnlo-paper.tex:
+      Schleife read_steer::GetExist() durch fastNLOCreate
+
+2014-11-20  rabbertz
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOTable.cc, fastNLOTable.h: Save
+      work from laptop ...; recharge failing
+
+2014-11-18  DanielBritzger
+
+    * read_steer.h: Getters for existence of steering values
+
+    * fastNLOLHAPDF.cc, fastNLOLHAPDF.h: fix get alpha_s(MZ) from LHAPDF
+
+    * fastNLODiffH12006FitB.h: diffractive things
+
+    * speaker.cc, speaker.h: bugfix speaker reported by D. Maitre
+
+2014-11-17  rabbertz
+
+    * Alphas.cc, fastNLOBase.cc, fastNLOConstants.h.in, fastNLOCreate.cc,
+      fastNLOReader.cc, fastNLOTable.cc, fastNLOTable.h, fnlo-tk-cppread.cc,
+      fnlo-tk-yodaout.cc, speaker.cc: Fixed 2-dim/1-dim problem in yodaout; some
+      unifying in printouts
+
+2014-11-11  rabbertz
+
+    * Makefile.am, configure.ac, fnlo-tk-config.in: Add fnlo-tk-config script
+      like in fastjet, lhapdf, rivet, ...
+
+2014-10-29  DanielBritzger
+
+    * fastNLOReader.cc: bugfix calcpdfchecksum
+
+2014-10-08  DanielBritzger
+
+    * fastNLOCreate.cc: reduce warmup-x a bit
+
+2014-10-01  DanielBritzger
+
+    * fnlo-paper.pdf, fnlo-paper.tex: paper and manual first structure
+
+2014-09-03  rabbertz
+
+    * fastNLOReader.cc: Put scaling for kPublicationUnits also into
+      CalcReferenceCrossSection and ScaleVariations
+
+    * fastNLOBase.h, fastNLOReader.cc: tk reader: Rescale potentially different
+      IXSectionUnits to Ipublunits, if kPublicationUnits are requested
+
+2014-09-02  styros
+
+    * fnlo-tk-yodaout.cc: Made it pretty
+
+2014-09-01  styros
+
+    * fnlo-tk-yodaout.cc: fastnlo off naming
+
+2014-08-29  sieber
+
+    * fnlo-tk-yodaout.cc: reindented source code, added some error messages and
+      offset counting
+
+2014-08-29  rabbertz
+
+    * fnlo-tk-yodaout.cc: Fix initialization bug
+
+2014-08-29  styros
+
+    * fnlo-tk-yodaout.cc: Finalised, more readable and with comments
+
+2014-08-13  styros
+
+    * fnlo-tk-yodaout.cc: "Changed File naming to include PDF and scaling
+      factors"
+
+2014-07-30  styros
+
+    * fnlo-tk-yodaout.cc: including scale factors
+
+2014-07-25  styros
+
+    * fnlo-tk-yodaout.cc: Adapted to new RivetId naming
+
+2014-07-25  rabbertz
+
+    * : Edit ChangeLog
+
 2014-07-24  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1871
             ================================================================================
 
 2014-07-24  rabbertz
 
+    * Makefile.am, NEWS, README, configure.ac: Update Release file for new
+      prerelease; fix CPPFLAGS vs. CXXFLAGS problem for HOPPET support
+
     * fastNLOInterpolBase.h: Remove meaningless type qualifier on return type
+      (found by icc compiler)
 
 2014-07-24  sieber
 

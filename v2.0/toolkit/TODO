@@ -1,11 +1,10 @@
+-----------------------------------------------------------------------
+TODO list for fastNLO_toolkit (orderd by priority)
+-----------------------------------------------------------------------
 
-Toolkit todo (orderd by priority):
------------------------------------------------------
- - reader testen fuer NNLO
- - Ensure NNLO compatibility of reader
+ - Creator for Referenztabellen
  - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
  - Write documentation (e.g. twiki)
- - Creator for Referenztabellen
  - converter aktualisieren ??
  - Benutzbarkeit gewaehrleisten, wenn binning- und bin-suche im generator gemacht werden (ist teils implementiert bspw 'fnloEvent::_iOB')
  - fastNLOCreate fuer mehrere Tabellen - also (bspw.) mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
@@ -22,8 +21,12 @@ Toolkit todo (orderd by priority):
  - punktweise-differentielle gemischt mit bin-integrierten doppelt-differentiellen tabllen
 
 
-Toolkit done
-------------------------------------------------------
+
+=======================================================================
+DONE
+=======================================================================
+ - reader testen fuer NNLO
+ - Ensure NNLO compatibility of reader
  - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
  - implement DIS flexible-scale
  - Write out constants of warmup-run into warmup-file

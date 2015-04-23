@@ -1,3 +1,350 @@
+2015-04-23  Prerelease of fastNLO interface to NLOJet++, package version 2.3.1pre, revision 2067
+            ====================================================================================
+
+2015-04-21  rabbertz
+
+    * InclusiveNJets.cc: Implement prapidity for incl. jets
+
+    * DijetMass_Example_v23_fix.str: Finalize dijet mass example str
+
+    * InclusiveNJetEvents.cc, InclusiveNJets.cc, InclusiveNJets_new.cc:
+      Adaptations to modified toolkit methods
+
+    * DijetMass_Example_v23_fix.str, InclusiveDijetEvents_Example_v23_fix.str,
+      InclusiveJets_Example_v23_fix.str, Makefile.am: Update example steers;
+      delimit tarball content
+
+    * CMS_2011_I895742.info, CMS_2011_I895742.plot, CMS_2013_I1208923.info,
+      CMS_2013_I1208923.plot: Adaptations in my Rivet files
+
+2015-04-09  rabbertz
+
+    * fnl2452_I1082936_v23_fix.str, fnl2452_I1082936_v23_fix_pt12ave.str,
+      fnl2452_I1082936_v23_fix_ptmax.str,
+      fnl2452_I1082936_v23_fix_ptmaxexpystar.str, fnl2452_I1082936_v23_flex.str,
+      fnl2452_I1082936_v23_flex_ptmaxexpystar.str,
+      fnl2452b_I1268975_v23_fix.str, fnl2452b_I1268975_v23_fix_ptmax.str,
+      fnl2452b_I1268975_v23_fix_ptmaxexpystar.str,
+      fnl2452b_I1268975_v23_flex_ptmaxexpystar.str,
+      fnl2462_I1082936_v23_fix.str, fnl2462_I1082936_v23_flex_ptmaxexpystar.str,
+      fnl2462b_I1268975_v23_fix.str,
+      fnl2462b_I1268975_v23_flex_ptmaxexpystar.str: Clean up and add ATLAS dijet
+      mass 2014
+
+    * ATLAS_2013_I1228693.yoda: Add RIVET style data for missing ATLAS analysis
+
+    * fnl2332e_I1298810_v23_fix.str, fnl2332e_v23_fix.str,
+      fnl2342e_I1298810_v23_fix.str, fnl2342e_v23_fix.str,
+      fnl2352_I1082936_v23_fix.str, fnl2352_v23_fix.str,
+      fnl2352b_I1325553_v23_fix.str, fnl2352b_v23_fix.str,
+      fnl2362_I1082936_v23_fix.str, fnl2362_v23_fix.str,
+      fnl2362b_I1325553_v23_fix.str, fnl2362b_v23_fix.str,
+      fnl4352_I1228693_v23_fix.str, fnl4352_v23_fix.str,
+      fnl4362_I1228693_v23_fix.str, fnl4362_v23_fix.str,
+      fnr0001midpHT_I723509_v23_fix.str, fnr0001midpHT_v23_fix.str,
+      fnr0001midpMB_I723509_v23_fix.str, fnr0001midpMB_v23_fix.str,
+      fnt2004_I743342_v23_fix.str, fnt2004_v23_fix.str,
+      fnt2007midp_I790693_v23_fix.str, fnt2007midp_v23_fix.str,
+      fnt2009midp_I779574_v23_fix.str, fnt2009midp_v23_fix.str: Upgrade to final
+      v23 steering and add missing RIVET_IDs
+
+2015-04-08  rabbertz
+
+    * InclusiveNJetEvents.cc, fnl2622f_I1090423_v23_fix.str,
+      fnl2622f_I1090423_v23_flex.str: Implement and add Dijet Angular
+
+    * Makefile.am, fnl2342bv22.cc, fnl2352v22.cc, fnl2380ak57v22.cc,
+      fnl5002pt12.cc, fnl5350eta0v22.cc, fnl5350eta0v22conee.cc: Clean up
+
+    * fnlo_int_hhc_nlojet.cc, pdf-hhc-dummy.cc: Fix indentation; check
+
+2015-03-26  sieber
+
+    * fnlo_int_hhc_nlojet.cc: constructor of global variable was not called when
+      using from different compilation unit (gcc 4.8.1)
+
+2015-02-15  rabbertz
+
+    * CMS_2011_I895742.plot, CMS_2011_I895742.yoda, CMS_2013_I1208923.info,
+      CMS_2013_I1208923.plot, CMS_2013_I1208923.yoda: CMS dijet mass 2011 & 2013
+      Rivet
+
+    * fnl2412c_I895742_v23_fix.str, fnl2412c_I895742_v23_flex.str: CMS dijet
+      mass 2011 correction for 2nd scale
+
+    * fnl2412e_I1208923_v23_fix.str, fnl2412e_I1208923_v23_flex.str: CMS dijet
+      mass 2013
+
+2015-02-12  rabbertz
+
+    * Makefile.am: Avoid command line length limits; data install via install
+      hook for tgz
+
+2015-02-11  rabbertz
+
+    * Makefile.am, fnl2452_I1082936_v23_fix.str,
+      fnl2452_I1082936_v23_fix_ptmax.str, fnl5002pt12.str: Small scenario
+      correction
+
+    * Makefile.am, fnl2452_I1082936_v23_fix_pt12ave.str,
+      fnl2452_I1082936_v23_fix_ptmax.str,
+      fnl2452_I1082936_v23_fix_ptmaxexpystar.str, fnl2452_I1082936_v23_flex.str:
+      Add ATLAS dijet mass scenario for production
+
+    * InclusiveNJetEvents.cc: Addition to scale choices
+
+    * fnl2412c_I895742_v23_fix.str, fnl2412c_I895742_v23_flex.str: make
+      outputfilename consistent
+
+2015-02-01  rabbertz
+
+    * Makefile.am: This Makefile.am doesn't work yet for unknown reason
+
+    * InclusiveNJets_new.cc, Makefile.am, fastNLOjetpp.cc, fastNLOjetpp.h: Move
+      header file to usual place; was not distributed otherwise
+
+2015-01-30  DanielBritzger
+
+    * pdf-hhc-dummy.cc: adjust isnan
+
+2015-01-30  stober
+
+    * Makefile.am: changed order of include directories
+
+2015-01-30  DanielBritzger
+
+    * pdf-hhc-dummy.cc: remove redundant for loop
+
+2015-01-30  stober
+
+    * InclusiveNJets_new.cc, Makefile.am, cone-e.cc, cone-e.h, cone-et.cc,
+      cone-et.h, configure.ac, fastNLOjetpp.cc, fastNLOjetpp.h, fastjet-jets.cc,
+      fastjet-jets.h, fj-jets.cc, fj-jets.h, fnlo_int_hhc_nlojet.cc,
+      fnlo_int_hhc_nlojet.h, kt-e.cc, kt-e.h, pdf-hhc-dummy.cc, pdf-hhc-dummy.h,
+      tools: moved implementation code from header files to
+      libnlojetpptoolsmoved "using namespace ..." from header files to
+      appropriate cc filesboth these changes will remove "multiple definition"
+      risksand removes the constraint of having to include headers ina
+      particular order.
+
+2015-01-30  rabbertz
+
+    * DijetAngular, DijetMass, Examples, InclusiveJets, InclusiveNJetEvents,
+      RivetAdditions, dev: Fix some svn ignores
+
+2015-01-29  DanielBritzger
+
+    * fnlo_int_hhc_nlojet.h: bugfix
+
+2015-01-27  rabbertz
+
+    * ATLAS_2013_I1228693.info, ATLAS_2013_I1228693.plot,
+      ATLAS_2013_I1228693.yoda, CMS_2011_I895742.info, CMS_2011_I895742.plot,
+      CMS_2011_I895742.yoda, Makefile.am, RivetAdditions, configure.ac,
+      fnl2342b_I902309_v23_flex.str, fnl2342b_v23_flex.str,
+      fnl2412c_I895742_v23_flex.str: Add test scenarios, also for flex
+
+    * InclusiveNJetEvents.cc, InclusiveNjetEvents.cc, Makefile.am: Update
+      InclusiveNJetEvents to same level as InclusiveNJets using Fred´s fastjet
+      setup
+
+    * Makefile.am: Comment out InclusiveNJets_new.cc; doesn´t compile in
+      current configuration
+
+    * fnlo_int_hhc_nlojet.h: NEW DEFAULT: Always use 7 subprocesses, also for
+      2-jet LO
+
+2015-01-24  rabbertz
+
+    * fnlo_int_hhc_nlojet.h: set 7 LO subprocesses
+
+2015-01-23  stober
+
+    * InclusiveNJets_new.cc, Makefile.am, fastNLOjetpp.cc, fastNLOjetpp.h: fixed
+      small issues from refactoring
+
+2015-01-23  rabbertz
+
+    * fnlo_int_hhc_nlojet.h: Remove superfluous x2>x1 differentiation in
+      interface
+
+2015-01-23  stober
+
+    * InclusiveNJets.cc, InclusiveNJets_new.cc:
+
+    * InclusiveNJets.cc, Makefile.am: example
+
+    * fastNLOjetpp.cc, fastNLOjetpp.h:
+
+    * InclusiveNJets.cc: use new fastjet interface
+
+2015-01-23  rabbertz
+
+    * fnl2732dena_I1230937_v23_fix.str, fnl2732numa_I1230937_v23_fix.str:
+      steerparm correction
+
+    * fnl2412c_I895742_v23_fix.str: complement fnl2412c with guessed Rivet ID,
+      correct publunits setting according to HepData
+
+    * InclusiveNJets.cc, InclusiveNjetEvents.cc: Correct njetmin setting to 1 in
+      InclusiveNJets; adapt some say debug & info settings
+
+2015-01-22  stober
+
+    * Makefile.am, fastjet-jets.cc, fastjet-jets.h: improved flexibility of
+      fastjet interface
+
+2015-01-20  rabbertz
+
+    * fnl2342b_I902309_v23_fix.str, fnl2342b_v23_fix.str,
+      fnl2412c_I895742_v23_fix.str: Two model steerings
+
+    * DijetAngular, InclusiveNJetEvents, InclusiveNJets.cc,
+      InclusiveNjetEvents.cc, Makefile.am, configure.ac, fnl2342b_v23_flex.str,
+      fnl2412c_I895742_v23_fix.str, fnl2412e_I1208923_v23_fix.str,
+      fnl2622f_I1090423_v23_fix.str, fnl2732dena_I1230937_v23_fix.str,
+      fnl2732numa_I1230937_v23_fix.str: Unified njets and njetevents scenarios
+
+2015-01-19  rabbertz
+
+    * InclusiveNjetEvents.cc: further work on inclusive event scenario
+
+2015-01-18  rabbertz
+
+    * InclusiveNjetEvents.cc, fnl2412c_I895742_v23_fix.str: New setup:
+      Corrections
+
+    * InclusiveNjetEvents.cc, fnlo_int_hhc_nlojet.h: New setup: Corrections
+
+2015-01-17  rabbertz
+
+    * DijetMass, Examples, InclusiveDijetEvents_Example_v23_fix.str,
+      InclusiveJets, InclusiveJets.cc, InclusiveJets_Example_v23_fix.str,
+      InclusiveNJets.cc, InclusiveNjetEvents.cc, Makefile.am, configure.ac, dev,
+      fnl2332e_v23_fix.str, fnl2342b_v23_fix.str, fnl2342b_v23_flex.str,
+      fnl2342e_v23_fix.str, fnl2352_v23_fix.str, fnl2352b_v23_fix.str,
+      fnl2362_v23_fix.str, fnl2362b_v23_fix.str, fnl2380ak57v22.str,
+      fnl2412c_I895742_v23_fix.str, fnl4350b_v23_fix.str, fnl4352_v23_fix.str,
+      fnl4362_v23_fix.str, fnl5002pt12.str, fnl5350c_v23_fix.str,
+      fnl5350eta0v22.str, fnlo_int_hhc_nlojet.h, fnr0001midpHT_v23_fix.str,
+      fnr0001midpMB_v23_fix.str, fnt2004_v23_fix.str, fnt2007midp_v23_fix.str,
+      fnt2009midp_v23_fix.str: Finalized 1st version of new setup for event
+      cross sections
+
+2015-01-16  rabbertz
+
+    * InclusiveDijetEvents.cc, InclusiveNjetEvents.cc: Testing
+
+2015-01-14  rabbertz
+
+    * InclusiveDijetEvents.cc, InclusiveDijetEvents_Example_v23_fix.str,
+      InclusiveJets.cc, InclusiveJets_Example_v23_fix.str, Makefile.am: Create
+      dijet example for toolkit with NLOJet++
+
+2015-01-05  rabbertz
+
+    * InclusiveJets_Example_v23_fix.str, fnl2332e_v23_fix.str,
+      fnl2342b_v23_fix.str, fnl2342e_v23_fix.str: CMS 2011 R 0.5 und 0.7
+      Szenarios
+
+2015-01-02  rabbertz
+
+    * fnl4352_v23_fix.str, fnl4362_v23_fix.str: ATLAS incl jets 2.76 TeV
+
+2014-12-29  rabbertz
+
+    * fnl2352b_v23_fix.str, fnl2362b_v23_fix.str: ATLAS 2011 inclusive jets
+
+    * fnl2352_v23_fix.str, fnl2352v22.str, fnl2362_v23_fix.str: ATLAS 2010
+      inclusive jets
+
+2014-12-23  rabbertz
+
+    * fnt2004_v23_fix.str, fnt2009midp_v23_fix.str: Und noch zwei Tevatron Run
+      II scenarios
+
+    * fnt2007midp_v23_fix.str: Tevatron scenario fnt2007midp_v23_fix ready
+
+    * fnt2007midp_v23_fix.str: Start adding old Tevatron scenarios for
+      recalculation
+
+2014-12-11  rabbertz
+
+    * InclusiveJets.cc: Avoid one more memory leak
+
+2014-12-10  rabbertz
+
+    * InclusiveJets.cc: Scale table write out timing logarithmically from
+      starting value 10k resp. --save-after option of NLOJet++ up to max. value
+      of 10M
+
+    * InclusiveJets.cc: Updated InclusiveJets scenario working with new tests on
+      steering parameters
+
+2014-12-09  rabbertz
+
+    * InclusiveJets.cc, fnl2342b_v23_fix.str, fnlo_int_hhc_nlojet.h: Test
+      Daniels read steer name check
+
+2014-12-09  DanielBritzger
+
+    * InclusiveJets.cc: potential bugfix if no jets are found
+
+2014-11-20  rabbertz
+
+    * InclusiveJets.cc, Makefile.am, configure.ac: Save work from laptop ...;
+      recharge failing
+
+2014-11-20  stober
+
+    * fj-jets.cc: fix memory leak in fastjet helper
+
+2014-11-11  rabbertz
+
+    * Makefile.am, configure.ac: Use new fnlo-tk-config in NLOJet++ interface
+
+2014-09-30  rabbertz
+
+    * InclusiveJets.cc: Verbosity set in steering file
+
+2014-09-29  rabbertz
+
+    * InclusiveJets.cc, Makefile.am, fj-ak.cc, fj-ak.h, fj-cdfmp.cc, fj-cdfmp.h,
+      fj-d0r2.cc, fj-d0r2.h, fj-kt.cc, fj-kt.h, fj-sc.cc, fj-sc.h: Remove
+      various old fastjet algorithm files; fj-jets is steerable
+
+    * InclusiveJets.cc, Makefile.am, fj-jets.cc: Updates for use in PDF school
+
+    * fj-jets.cc: Updates for use in PDF school
+
+    * InclusiveJets.cc, Makefile.am, fnl2342b_v23_fix.str: Updates for use in
+      PDF school
+
+2014-09-10  rabbertz
+
+    * InclusiveJets.cc, Makefile.am, fj-ak.cc, fj-ak.h, fj-cdfmp.cc, fj-cdfmp.h,
+      fj-d0r2.cc, fj-d0r2.h, fj-jets.cc, fj-jets.h, fj-kt.cc, fj-kt.h, fj-sc.cc,
+      fj-sc.h, fnr0001midpHT_v23_fix.str, fnr0001midpMB_v23_fix.str: Implement
+      use of various fastjet algos; add old STAR 200 GeV scenario
+
+2014-08-01  rabbertz
+
+    * fnl4350b_v23_fix.str, fnl5350c_v23_fix.str: More tests for v23
+
+2014-07-31  rabbertz
+
+    * fnl2342b_v23_fix.str, fnl2342b_v23_flex.str, fnl4352_v23_fix.str: Update
+      steering files to final version no. v23; add ATLAS scenario 2.76
+
+    * Makefile.am: Update steering files to final version no. v23
+
+    * fnl2342b_v22_fix.str, fnl2342b_v22_flex.str, fnl2342b_v23_fix.str,
+      fnl2342b_v23_flex.str: Update steering files to final version no. v23
+
+2014-07-17  rabbertz
+
+    * NEWS, README: Update README etc.
+
 2014-07-17  First public prerelease of the fastNLO interface to NLOJet++, package version 2.3.1pre, revision 1855
             =====================================================================================================
 
