@@ -1,6 +1,0 @@
-ToDo List for FastNLOReader
----------------------------
-
- - Copy correct usage of relative cross section units from Ipublunits at the
-   beginning of BlockA2 and IXsectUnits at the beginning of each BlockB
-   from Toolkit and add to Fortran code as well
