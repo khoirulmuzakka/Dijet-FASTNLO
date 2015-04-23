@@ -963,7 +963,7 @@ void fastNLOCreate::GetWarmupValues() {
    info>> (_SSEP40+_SSEP40+_SSEP40) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
-   info["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
+   warn["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
 }
 
 
