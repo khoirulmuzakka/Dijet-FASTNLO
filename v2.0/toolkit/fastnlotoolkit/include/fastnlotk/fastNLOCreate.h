@@ -34,7 +34,7 @@ class fastNLOCreate : public fastNLOTable {
    //!
 
 public:
-   fastNLOCreate(string steerfile);
+   fastNLOCreate(string steerfile, string warmupfile = "", bool shouldReadSteeringFile = true);
    fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts);
    ~fastNLOCreate();
 
@@ -69,6 +69,8 @@ public:
 
    void PrintWarmupValues();                                                                    //!< Print the warmup values to the screen
    string GetWarmupTableFilename();                                                             //!< Get the filename, which is used for storage of the warmup-table.
+   void SetWarmupTableFilename(string);                                                         //!< Set the filename, which is used for storage of the warmup-table (otherwise a default is used)
+   bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
 
    fastNLOCoeffAddBase* GetTheCoeffTable() const {
       return (fastNLOCoeffAddBase*)GetCoeffTable(0);
@@ -103,7 +105,7 @@ protected:
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                            //!< fill flexible scale contribution in pp/ppbar
    void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                            //!< fill flexible scale contribution in DIS
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                //!< fill fixed scale table in pp/ppbar
-   void ReadSteering(string steerfile);                                                         //!< read steering file
+   void ReadSteering(string steerfile, bool shouldReadSteeringFile = true);                     //!< read steering file
    void ReadGenAndProcConstsFromSteering();
    void ReadBinning();
    ///
@@ -134,6 +136,7 @@ protected:
    int GetBin();                                                                                //!< get bin number from 'scenario' observables
    inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;           //!< get x-index in case of two hadrons.
    int GetNxmax(const vector<double>* xGrid1, const vector<double>* xGrid2);                    //!< get maximum x-index
+   string fWarmupFilename;                                                                      //!< File name of the warmup table
    bool fIsWarmup;                                                                              //!< is it a warmup run?
    int  fIOrd;                                                                                  //!< order of alpha_s of run
    bool fIsFlexibleScale;                                                                       //!< is it a flexible scale table?

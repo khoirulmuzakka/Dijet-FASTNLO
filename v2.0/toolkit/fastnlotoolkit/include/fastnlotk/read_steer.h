@@ -416,6 +416,11 @@
 #define EXIST(X) read_steer::getexist(#X)
 #define EXIST_NS(X,NS) read_steer::getexist(#X,NS)
 
+// check if array or array element exists
+#define EXISTARRAY_NS(X,NS) read_steer::getarrayexist(#X, NS)
+#define CONTAINKEYARRAY_NS(X,A,NS) read_steer::getarraycontainkey(#X, #A, NS)
+#define PUSHBACKARRAY_NS(X,A,NS) read_steer::arraypushback_steer(X, #A, NS)
+
 class read_steer {
 
 private:
@@ -452,6 +457,18 @@ public:
    bool exist(const std::string& label) {
       bool ret = ( fstrings.count(label) > 0 || ffields.count(label) > 0 || ftables.count(label) > 0 );
       return ret;}
+   bool arrayexist(const std::string& label) {
+      return ffields.count(label) > 0;}
+   bool arraycontainkey(const std::string& key, const std::string& label) {
+      if (ffields.count(label) == 0) return false;
+      for (size_t i = 0; i < ffields[label].size(); ++i) {
+        if (ffields[label][i].find(key+"=") == std::string::npos) {
+          return true;
+        }
+      }
+      return false;}
+   void arraypushback(const std::string& value, const std::string& label) {
+    ffields[label].push_back(value);}
    // setter
    void AddLabel(const std::string& key, const std::string& value);
    template <typename T> void AddLabel ( const std::string& key, T value);
@@ -570,6 +587,15 @@ public:
    static bool getexist(const std::string& label, std::string steerID=read_steer::stdID ){
       if ( read_steer::instances->count(steerID) == 0 ) return false;
       return read_steer::Steering(steerID)->exist(label);}
+   static bool getarrayexist(const std::string& label, std::string steerID=read_steer::stdID ){
+      if ( read_steer::instances->count(steerID) == 0 ) return false;
+      return read_steer::Steering(steerID)->arrayexist(label);}
+   static bool getarraycontainkey(const std::string& key, const std::string& label, std::string steerID=read_steer::stdID ){
+      if ( read_steer::instances->count(steerID) == 0 ) return false;
+      return read_steer::Steering(steerID)->arraycontainkey(key, label);}
+   static void arraypushback_steer(const std::string& value, const std::string& label, std::string steerID=read_steer::stdID ){
+      if ( read_steer::instances->count(steerID) == 0 ) return;
+      read_steer::Steering(steerID)->arraypushback(value, label);}
    // add values
    template <typename T>
    static void addvalue(const std::string& key,const T& val,std::string steerID=read_steer::stdID) {

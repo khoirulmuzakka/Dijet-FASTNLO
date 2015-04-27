@@ -67,12 +67,17 @@ fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenCo
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(string steerfile) {
+fastNLOCreate::fastNLOCreate(string steerfile, string warmupfile, bool shouldReadSteeringFile) {
+   //speaker::SetGlobalVerbosity(say::DEBUG);
    SetClassName("fastNLOCreate");
    ResetHeader();
-   ReadSteering(steerfile);
+   ReadSteering(steerfile, shouldReadSteeringFile);
 
    ReadGenAndProcConstsFromSteering();
+
+   if (!warmupfile.empty()) {
+      SetWarmupTableFilename(warmupfile);
+   }
 
    Instantiate();
 }
@@ -193,13 +198,15 @@ fastNLOCreate::~fastNLOCreate() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::ReadSteering(string steerfile) {
+void fastNLOCreate::ReadSteering(string steerfile, bool shouldReadSteeringFile) {
    //! read in steering file
    //! The filename of the steering file
    //! is used as the 'namespace' of labels in read_steer
    debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
    fSteerfile =  steerfile;
-   READ_NS(steerfile,steerfile);
+   if (shouldReadSteeringFile) {
+      READ_NS(steerfile,steerfile);
+   }
 
    SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
    if (info.GetSpeak())
@@ -2199,17 +2206,28 @@ string fastNLOCreate::GetWarmupHeader(int iScale, string minmax) {
 
 // ___________________________________________________________________________________________________
 string fastNLOCreate::GetWarmupTableFilename() {
-   string ret = fSteerfile;
-   size_t pos = ret.find(".str");
-   if (pos != std::string::npos) ret.erase(pos,4);
-   pos = ret.find(".steer");
-   if (pos != std::string::npos) ret.erase(pos,6);
-   ret += "_";
-   ret += GetScenName();
-   ret += "_warmup.txt";
-   return ret;
+   if (!fWarmupFilename.empty()) {
+      return fWarmupFilename;
+   } else {
+      // If we do not have a warmup filename yet, we generate a generic one
+      string ret = fSteerfile;
+      size_t pos = ret.find(".str");
+      if (pos != std::string::npos) ret.erase(pos,4);
+      pos = ret.find(".steer");
+      if (pos != std::string::npos) ret.erase(pos,6);
+      ret += "_";
+      ret += GetScenName();
+      ret += "_warmup.txt";
+      SetWarmupTableFilename(ret);
+      return ret;
+   }
 }
 
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetWarmupTableFilename(string filename) {
+   fWarmupFilename = filename;
+}
 
 
 // ___________________________________________________________________________________________________
