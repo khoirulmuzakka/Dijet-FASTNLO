@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
    //! --- fastNLO table
    string tablename =  (const char*) argv[1];
    //---  PDF set
-   string PDFFile = "CT10nnlo.LHgrid";
+   string PDFFile = "CT10nlo.LHgrid";
    if (argc > 2)    PDFFile = (const char*) argv[2];
 
    //--- give some output
