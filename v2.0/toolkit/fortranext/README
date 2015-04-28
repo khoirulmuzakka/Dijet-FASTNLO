@@ -1,0 +1,8 @@
+Basic example for a bi-directional interface between:
+
+  * C++ fastNLO toolkit
+and
+  * Fortran analysis / PDF fitting code
+
+The fastNLO toolkit calculates PDF / alpha_s using Fortran code.
+And the fortran code evaluates a fastNLO table using the toolkit.
