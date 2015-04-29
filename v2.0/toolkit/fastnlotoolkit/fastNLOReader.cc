@@ -2875,8 +2875,9 @@ double fastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
 }
 
 
+
 //______________________________________________________________________________
-vector < pair <double, double> > fastNLOReader::GetScaleUncertainty(unsigned int npoint) {
+vector < pair < double, pair <double, double> > > fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc) {
    // Get 2- or 6-point scale uncertainty
    const double xmurs[7] = {1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0};
    const double xmufs[7] = {1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0};
@@ -2884,9 +2885,14 @@ vector < pair <double, double> > fastNLOReader::GetScaleUncertainty(unsigned int
    unsigned int NObsBin = GetNObsBin();
    vector < double > xs;
    vector < pair < double, double> > dxs;
-   pair < double, double > dtmp;
-   dtmp.first  = 0.;
-   dtmp.second = 0.;
+   vector < pair < double, pair <double, double> > > xsdxs;
+
+   unsigned int npoint = 0;
+   if ( eScaleUnc == kSymmetricTwoPoint ) {
+      npoint = 2;
+   } else if ( eScaleUnc == kAsymmetricSixPoint ) {
+      npoint = 6;
+   }
 
    debug["GetScaleUncertainty"]<<"npoint = "<<npoint<<endl;
    if ( npoint == 0 ) {
@@ -2907,7 +2913,7 @@ vector < pair <double, double> > fastNLOReader::GetScaleUncertainty(unsigned int
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          if ( iscl == 0 ) {
             xs.push_back(XSection[iobs]);
-            dxs.push_back(dtmp);
+            dxs.push_back(make_pair(0.,0.));
          } else {
             dxs[iobs].first  = max(dxs[iobs].first, XSection[iobs]-xs[iobs]);
             dxs[iobs].second = min(dxs[iobs].second,XSection[iobs]-xs[iobs]);
@@ -2923,11 +2929,12 @@ vector < pair <double, double> > fastNLOReader::GetScaleUncertainty(unsigned int
          dxs[iobs].first  = 0.;
          dxs[iobs].second = 0.;
       }
+      xsdxs.push_back(make_pair(xs[iobs],dxs[iobs]));
    }
 
    warn["GetScaleUncertainty"]<<"Setting scale factors back to defaults of one."<<endl;
-   warn["GetScaleUncertainty"]<<"Re-calculate cross sections for desired central setting, if not yet done."<<endl;
+   warn["GetScaleUncertainty"]<<"Central cross sections have to be re-calculated, if not stored previously."<<endl;
    SetScaleFactorsMuRMuF(xmurs[0],xmufs[0]);
 
-   return dxs;
+   return xsdxs;
 }

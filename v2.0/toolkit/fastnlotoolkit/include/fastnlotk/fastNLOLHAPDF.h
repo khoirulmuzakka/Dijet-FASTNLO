@@ -51,6 +51,8 @@ public:
    int GetNLoop() const;
    int GetNFlavor() const;
    double GetAlphasMz() const;
+   //! Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
+   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
 
 protected:
    // inherited functions

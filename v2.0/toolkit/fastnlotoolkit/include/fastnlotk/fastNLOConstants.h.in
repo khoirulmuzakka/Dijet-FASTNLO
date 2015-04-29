@@ -26,8 +26,9 @@
 #define FNLO_QCDNUM     "@QCDNUM@"
 
 // KR: Replace by precompiler defines
-const double TWOPI = 6.28318530717958647692528;
+const double TWOPI    =  6.28318530717958647692528;
 const double TWOPISQR = 39.47841760435743447533796;
+const double TOCL90   =  1.64485362695147271486385; // SQRT(2.D0)*InvERF(0.9D0)
 //#define TWOPI (2.*M_PI)
 //#define TWOPISQR (4.*M_PI*M_PI)
 // PDG values 2012/2013
@@ -97,6 +98,22 @@ namespace fastNLO {
       kPublicationUnits         = 1     // calculate the cross section in units as given in the according publication
    };
 
+   enum EScaleUncertaintyStyle {
+      kScaleNone                = 0,    // no scale uncertainty, only central scale (mu_r,mu_f) = (1,1) evaluated
+      kSymmetricTwoPoint        = 1,    // symmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2)
+      kAsymmetricSixPoint       = 2     // asymmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2) plus
+                                        // (1/2,1), (1,1/2), (1,2), (2,1)
+   };
+
+   enum EPDFUncertaintyStyle {
+      kPDFNone                  = 0,    // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!)
+      kHessianSymmetric         = 1,    // symmetric Hessian PDF uncertainties (ABM)
+      kHessianAsymmetric        = 2,    // asymmetric Hessian PDF uncertainties
+      kHessianAsymmetricMax     = 3,    // asymmetric Hessian PDF uncertainties with pairwise max deviations per eigenvector (CTEQ,MRST|MSTW)
+      kHessianCTEQCL68          = 4,    // like kHessianAsymmetricMax, but with uncertainties rescaled to CL68
+      kMCSampling               = 5,    // statistical sampling PDF uncertainties (and central value) (NNPDF)
+      kHeraPDF10                = 6     // HERAPDF 1.0 uncertainties
+   };
 
    // ---- some names for nice output ---- //
    const std::string _ContrName[20] = {

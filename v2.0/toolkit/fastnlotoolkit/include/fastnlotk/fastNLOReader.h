@@ -49,12 +49,13 @@ public:
    double RescaleCrossSectionUnits(double binsize, int xunits);                         // Rescale according to kAbsoluteUnits and Ipublunits settings
 
    // ---- Getters for results---- //
-   vector < double > GetCrossSection();
-   vector < pair <double, double> > GetScaleUncertainty( unsigned int npoint );
-   vector < vector < double > > GetCrossSection2Dim();
+   vector < double > GetCrossSection();                                                 //! Return vector with all cross section values
+   //! Return vector of pairs with all cross section values first and pairs of scale uncertainties second
+   vector < pair < double, pair <double, double> > > GetScaleUncertainty( const EScaleUncertaintyStyle eScaleUnc );
    vector < double > GetReferenceCrossSection();
    vector < double > GetKFactors();
    vector < double > GetQScales(int irelord);                                           //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
+   vector < vector < double > > GetCrossSection2Dim();
 
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
