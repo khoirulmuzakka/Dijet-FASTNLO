@@ -358,6 +358,10 @@ my $tfile = "${sfile}";
 # Eliminate default job number and attach the GC one
 $tfile =~ s/_0001//;
 $tfile =~ s/\.${prdext}/_${gjobnr}\.${prdext}/;
+# Prepend scenario type missing from table product
+if ( $wrm ne "wrm" ) {
+    $tfile = ${scentype}."_".${tfile}
+}
 print "fnlo-run-nlojet.pl: Target file: $tfile\n";
 
 if ( $batch ne "LOCAL" ) {
