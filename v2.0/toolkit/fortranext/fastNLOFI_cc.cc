@@ -45,7 +45,6 @@ protected:
    // Call external function to get PDF values
    virtual vector<double> GetXFX(double x, double muf) const {
       vector <double> xfx(13);
-      std::cout << muf << std::endl;
       for (int f = -6; f < 7; ++f)
          fastnlo_getxfx_(&(xfx[f + 6]), &x, &muf, &f);
       return xfx;
@@ -61,9 +60,17 @@ protected:
 
 std::map<int, fastNLOExtern*> fastNLO_context;
 
-void v2f(vector<double> v, double *result) {
+fastNLOExtern *fastnlo_get(int *ctx) {
+   if (fastNLO_context.find(*ctx) != fastNLO_context.end())
+      return fastNLO_context[*ctx];
+   std::cerr << "Invalid fastNLO instance! " << *ctx << std::endl;
+   return 0;
+}
+
+void v2f(vector<double> v, double *result, int *result_size) {
    for (size_t i = 0; i < v.size(); ++i) // memcpy could be dangerous?
       result[i] = v[i];
+   *result_size = v.size();
 }
 
 // C++ Functions that get consumed by Fortran
@@ -77,28 +84,38 @@ extern "C" {
    }
 
    void fastnlo_destroy_(int *ctx) {
-      fastNLOExtern *reader = fastNLO_context[*ctx];
+      fastNLOExtern *reader = fastnlo_get(ctx);
       delete reader;
       fastNLO_context.erase(*ctx);
    }
 
    void fastnlo_setscalefactorsmurmuf_(int *ctx, double *muR, double *muF) {
-      fastNLO_context[*ctx]->SetScaleFactorsMuRMuF(*muR, *muF);
+      fastnlo_get(ctx)->SetScaleFactorsMuRMuF(*muR, *muF);
    }
 
-   void fastnlo_getcrosssection_(int *ctx, double *result) {
-      v2f(fastNLO_context[*ctx]->GetCrossSection(), result);
+   void fastnlo_getcrosssection_(int *ctx, double *result, int *result_size) {
+      v2f(fastnlo_get(ctx)->GetCrossSection(), result, result_size);
    }
 
-   void fastnlo_getreferencecrosssection_(int *ctx, double *result) {
-      v2f(fastNLO_context[*ctx]->GetReferenceCrossSection(), result);
+   void fastnlo_getreferencecrosssection_(int *ctx, double *result, int *result_size) {
+      v2f(fastnlo_get(ctx)->GetReferenceCrossSection(), result, result_size);
    }
 
-   void fastnlo_getkfactors_(int *ctx, double *result) {
-      v2f(fastNLO_context[*ctx]->GetKFactors(), result);
+   void fastnlo_getkfactors_(int *ctx, double *result, int *result_size) {
+      v2f(fastnlo_get(ctx)->GetKFactors(), result, result_size);
    }
 
-   void fastnlo_getqscales_(int *ctx, int *irelord, double *result) {
-      v2f(fastNLO_context[*ctx]->GetQScales(*irelord), result);
+   void fastnlo_getqscales_(int *ctx, int *irelord, double *result, int *result_size) {
+      v2f(fastnlo_get(ctx)->GetQScales(*irelord), result, result_size);
+   }
+
+   void fastnlo_getobsbindimbounds_(int *ctx, int *bin, double *result, int *result_size) {
+      fastNLOExtern *reader = fastnlo_get(ctx);
+      vector<pair<double, double > > binInfo = reader->GetObsBinDimBounds(*bin);
+      for (size_t i = 0, j = 0; i < reader->GetNumDiffBin(); ++i) {
+         result[j++] = binInfo[i].first;
+         result[j++] = binInfo[i].second;
+      }
+      *result_size = reader->GetNumDiffBin();
    }
 }

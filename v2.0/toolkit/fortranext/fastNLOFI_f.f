@@ -23,25 +23,30 @@
 
       PROGRAM main
          INTEGER CTX
-         INTEGER BINS
+         INTEGER IDX, BINS, DIMS
          REAL*8 XS(1024)
+         REAL*8 BININFO(4)
          CHARACTER*32 TABLE
          REAL*8 MUR, MUF
          TABLE = 'fnl2912bm3_stripped.tab'//CHAR(0)
 
          call fastnlo_create(CTX, TABLE)
-         call fastnlo_getcrosssection(CTX, XS)
-         do i = 1,10
-            write(*,*) i,"->",XS(i)
+         write(*,*) CTX
+         call fastnlo_getcrosssection(CTX, XS, BINS)
+         write(*,*) CTX, BINS
+         do IDX = 1,BINS
+           call fastnlo_getobsbindimbounds(CTX, IDX - 1, BININFO, DIMS)
+           write(*,*) BININFO,"->",XS(IDX)
          enddo
 
          MUR = 2E0
          MUF = 2E0
          call fastnlo_setscalefactorsmurmuf(CTX, MUR, MUF)
-         call fastnlo_getcrosssection(CTX, XS)
-         do i = 1,10
-            write(*,*) i,"->",XS(i)
+         call fastnlo_getcrosssection(CTX, XS, BINS)
+         do IDX = 1,BINS
+            write(*,*) IDX,"->",XS(IDX)
          enddo
+
          call fastnlo_destroy(CTX)
 
       END PROGRAM
