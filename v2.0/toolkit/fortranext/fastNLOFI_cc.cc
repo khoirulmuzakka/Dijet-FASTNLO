@@ -91,6 +91,7 @@ extern "C" {
 
    void fastnlo_setscalefactorsmurmuf_(int *ctx, double *muR, double *muF) {
       fastnlo_get(ctx)->SetScaleFactorsMuRMuF(*muR, *muF);
+      fastnlo_get(ctx)->CalcCrossSection();
    }
 
    void fastnlo_getcrosssection_(int *ctx, double *result, int *result_size) {
