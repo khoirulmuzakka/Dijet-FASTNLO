@@ -287,34 +287,34 @@ vector < pair < double, pair <double, double> > > fastNLOLHAPDF::GetPDFUncertain
    vector < pair < double, double > > dxseig;
 
    // Check input
-   debug["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
+   logger.debug["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
    if ( ePDFUnc == kPDFNone ) {
-      info["GetPDFUncertainty"]<<"No PDF uncertainty, only averaged cross section result evaluated (correct for NNPDF, wrong otherwise!)."<<endl;
+      logger.info["GetPDFUncertainty"]<<"No PDF uncertainty, only averaged cross section result evaluated (correct for NNPDF, wrong otherwise!)."<<endl;
    } else if ( ePDFUnc == kHessianSymmetric ) {
-      info["GetPDFUncertainty"]<<"Calculating symmetric Hessian PDF uncertainties."<<endl;
+      logger.info["GetPDFUncertainty"]<<"Calculating symmetric Hessian PDF uncertainties."<<endl;
    } else if ( ePDFUnc == kHessianAsymmetric ) {
-      info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties."<<endl;
+      logger.info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties."<<endl;
    } else if ( ePDFUnc == kHessianAsymmetricMax ) {
-      info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties considering maximal pairwise deviations per eigenvector."<<endl;
+      logger.info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties considering maximal pairwise deviations per eigenvector."<<endl;
    } else if ( ePDFUnc == kHessianCTEQCL68 ) {
-      info["GetPDFUncertainty"]<<"Calculating pairwise asymmetric Hessian PDF uncertainties rescaled to CL68 (for CTEQ PDFs)."<<endl;
+      logger.info["GetPDFUncertainty"]<<"Calculating pairwise asymmetric Hessian PDF uncertainties rescaled to CL68 (for CTEQ PDFs)."<<endl;
    } else if ( ePDFUnc == kMCSampling ) {
-      info["GetPDFUncertainty"]<<"Calculating statistical sampling PDF uncertainties."<<endl;
+      logger.info["GetPDFUncertainty"]<<"Calculating statistical sampling PDF uncertainties."<<endl;
    } else {
-      error["GetPDFUncertainty"]<<"ERROR! Selected PDF uncertainty style not yet implemented, exiting."<<endl;
-      error["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
+      logger.error["GetPDFUncertainty"]<<"ERROR! Selected PDF uncertainty style not yet implemented, exiting."<<endl;
+      logger.error["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
       exit(1);
    }
    unsigned int nEig = nMem/2;
-   info["GetPDFUncertainty"]<<"Info: Number of highest PDF set member nMem = " << nMem << endl;
-   info["GetPDFUncertainty"]<<"Info: Guessed number of eigen vectors nMem/2 = " << nEig << endl;
+   logger.info["GetPDFUncertainty"]<<"Info: Number of highest PDF set member nMem = " << nMem << endl;
+   logger.info["GetPDFUncertainty"]<<"Info: Guessed number of eigen vectors nMem/2 = " << nEig << endl;
    if ( nMem < 2 ) {
-      error["GetPDFUncertainty"]<<"ERROR! This PDF set has only one or two members: nMem = " << nMem << endl;
-      error["GetPDFUncertainty"]<<"PDF uncertainty calculation impossible, aborted!" << endl;
+      logger.error["GetPDFUncertainty"]<<"ERROR! This PDF set has only one or two members: nMem = " << nMem << endl;
+      logger.error["GetPDFUncertainty"]<<"PDF uncertainty calculation impossible, aborted!" << endl;
       exit(1);
    } else if ( nMem%2 == 1 && (ePDFUnc == kHessianAsymmetric || ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68) ) {
-      error["GetPDFUncertainty"]<<"ERROR! Odd number of PDF members found: nMem = " << nMem << endl;
-      error["GetPDFUncertainty"]<<"This cannot work with selected asymmetric Hessian uncertainties, aborted!" << endl;
+      logger.error["GetPDFUncertainty"]<<"ERROR! Odd number of PDF members found: nMem = " << nMem << endl;
+      logger.error["GetPDFUncertainty"]<<"This cannot work with selected asymmetric Hessian uncertainties, aborted!" << endl;
       exit(1);
    }
 
@@ -403,8 +403,8 @@ vector < pair < double, pair <double, double> > > fastNLOLHAPDF::GetPDFUncertain
       }
       // HERAPDF not yet implemented
       else {
-         error["GetPDFUncertainty"]<<"ERROR! Selected PDF uncertainty style not yet implemented, exiting."<<endl;
-         error["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
+         logger.error["GetPDFUncertainty"]<<"ERROR! Selected PDF uncertainty style not yet implemented, exiting."<<endl;
+         logger.error["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
          exit(1);
       }
       // Give back +- relative uncertainties
@@ -418,8 +418,8 @@ vector < pair < double, pair <double, double> > > fastNLOLHAPDF::GetPDFUncertain
       xsdxs.push_back(make_pair(xs[iobs],dxs[iobs]));
    }
 
-   warn["GetPDFUncertainty"]<<"Setting PDF member back to default of zero."<<endl;
-   warn["GetPDFUncertainty"]<<"Central cross sections have to be re-calculated, if not stored previously."<<endl;
+   logger.warn["GetPDFUncertainty"]<<"Setting PDF member back to default of zero."<<endl;
+   logger.warn["GetPDFUncertainty"]<<"Central cross sections have to be re-calculated, if not stored previously."<<endl;
    SetLHAPDFMember(0);
 
    return xsdxs;
