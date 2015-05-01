@@ -11,7 +11,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
 #if HAVE_PDFLATEX
-SUBDIRS = paper
+#SUBDIRS = paper
 #endif
 # What about HAVE_LATEXDVIPDFM ? TBD
 
