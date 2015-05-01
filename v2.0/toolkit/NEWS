@@ -1,4 +1,4 @@
-Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2067:
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2087:
 =================================================================================================
 Major work went into this prelease:
 - This prerelease is meant to work with the next release of MCgrid (> v1.2) and Sherpa
@@ -8,6 +8,8 @@ Major work went into this prelease:
   in Data/MC comparisons via Rivet. Foreseen to be used in MCplots.
 - Up to triple differential observable binnings are supported, numerous
   Getter functions are provided.
+- Functionality to derive scale and PDF uncertainties has been added and is used
+  in fnlo-tk-yodaout
 - fnlo-tk-config executable is provided for easier compiling/linking.
 - A first version of Doxygen documentation is included.
 - Method added to derive scale uncertainties.

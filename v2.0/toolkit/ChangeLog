@@ -1,7 +1,24 @@
-2015-04-23  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2067
+2015-05-01  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2087
             ================================================================================
 
+2015-04-29  rabbertz
+
+    * fastNLOConstants.h.in, fastNLOLHAPDF.cc, fastNLOLHAPDF.h,
+      fastNLOReader.cc, fastNLOReader.h, fnlo-tk-yodaout.cc: Add functionality
+      for PDF uncertainties in yoda-out
+
+2015-04-28  rabbertz
+
+    * fnlo-tk-example.cc: Use same default PDF in all src files
+
+2015-04-27  stober
+
+    * fastNLOCreate.cc, fastNLOCreate.h, read_steer.h: adding missing interfaces
+      for MCgrid
+
 2015-04-23  rabbertz
+
+    * NEWS, TODO, ToDo_Toolkit.txt, configure.ac: Prepare toolkit prerelease
 
     * fastNLOCreate.cc: Elevate printout level for warmup
 
