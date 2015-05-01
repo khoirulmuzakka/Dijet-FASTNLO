@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class fastNLOBase : public PrimalScream {
+class fastNLOBase {
 
 public:
    fastNLOBase();
@@ -89,6 +89,7 @@ protected:
    int NuserFloat;
    int Imachine;
 
+   PrimalScream logger;
    static bool fWelcomeOnce;
 
 };

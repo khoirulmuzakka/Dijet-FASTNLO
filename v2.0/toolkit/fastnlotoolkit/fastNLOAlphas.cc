@@ -58,12 +58,12 @@ void fastNLOAlphas::SetNFlavor(int nflavor) {
    if (nflavor == 0) {
       Alphas::SetFlavorMatchingOn(true);
       Alphas::SetNf(6);
-      warn["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
-      warn["SetNFlavor"]<<"You chose a variable Nf with Nfmax=6, i.e. results for Nf other than 5 presumably are wrong!\n";
+      logger.warn["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
+      logger.warn["SetNFlavor"]<<"You chose a variable Nf with Nfmax=6, i.e. results for Nf other than 5 presumably are wrong!\n";
    } else if (nflavor == 5) {
       Alphas::SetNf(nflavor);
    } else {
-      error["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
+      logger.error["SetNFlavor"]<<"GRV evolution of alpha_s is implemented for Nf=5 only.\n";
       exit(1);
    }
 }
@@ -73,7 +73,7 @@ void fastNLOAlphas::SetNLoop(int nloop) {
 }
 
 void fastNLOAlphas::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
-   debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
+   logger.debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the alpha_s value at M_Z
    //
@@ -102,14 +102,14 @@ double fastNLOAlphas::EvolveAlphas(double Q) const {
 
 
 void fastNLOAlphas::SetGRVtoPDG2012_2loop() {
-   info["SetGrVtoPDF2012"]<<"Resetting to GRV Alphas::Alphas evolution."<<endl;
+   logger.info["SetGrVtoPDF2012"]<<"Resetting to GRV Alphas::Alphas evolution."<<endl;
    Alphas::SetMz(91.1876); // PDG 2012
    Alphas::SetNf(5);
    Alphas::SetNLoop(2);
    Alphas::SetFlavorMatchingOn(false);
-   if (info.GetSpeak()) {
-      info<<"Calling Alphas::PrintInfo()."<<endl;
-      info<<"Alpha_s(Mz) value is taken from fastNLOAlphas, instead of Alphas::Alphas."<<endl;
+   if (logger.info.GetSpeak()) {
+      logger.info<<"Calling Alphas::PrintInfo()."<<endl;
+      logger.info<<"Alpha_s(Mz) value is taken from fastNLOAlphas, instead of Alphas::Alphas."<<endl;
       Alphas::PrintInfo();
    }
 }

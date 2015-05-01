@@ -110,7 +110,7 @@ void fastNLOCRunDec::SetQMass(int pdgid, double qmass) {
 }
 
 void fastNLOCRunDec::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
-   debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
+   logger.debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    //
    //  Set the alpha_s value at M_Z
    //

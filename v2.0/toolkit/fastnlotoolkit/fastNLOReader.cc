@@ -454,7 +454,7 @@ using namespace say;
 
 //______________________________________________________________________________
 fastNLOReader::fastNLOReader() : fastNLOTable() {
-   SetClassName("fastNLOReader");
+   logger.SetClassName("fastNLOReader");
    fUnits               = fastNLO::kPublicationUnits;
    fMuRFunc             = fastNLO::kScale1;
    fMuFFunc             = fastNLO::kScale1;
@@ -469,7 +469,7 @@ fastNLOReader::fastNLOReader() : fastNLOTable() {
 
 fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
    //SetGlobalVerbosity(DEBUG); // Temporary for debugging
-   SetClassName("fastNLOReader");
+   logger.SetClassName("fastNLOReader");
    debug["fastNLOReader"]<<"New fastNLOReader reading filename="<<filename<<endl;
    //fCoeffData           = NULL;
    //    Coeff_LO_Ref         = NULL;
@@ -1233,8 +1233,8 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    int scaleVar          = cNLO->GetNpow() == ILOord ? 0 : fScalevar;
    double scalefac       = fScaleFacMuR / cNLO->GetScaleFactor(scaleVar);
 
-   debug["CalcAposterioriScaleVariationMuR"]<<"scalefac="<<scalefac<<endl;
-   if ( GetIsFlexibleScaleTable() ) { error["CalcAposterioriScaleVariationMuR"]<<"This function is applicable only to non-flexible scale tables."<<endl; exit(1);}
+   logger.debug["CalcAposterioriScaleVariationMuR"]<<"scalefac="<<scalefac<<endl;
+   if ( GetIsFlexibleScaleTable() ) { logger.error["CalcAposterioriScaleVariationMuR"]<<"This function is applicable only to non-flexible scale tables."<<endl; exit(1);}
    fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;

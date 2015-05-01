@@ -32,7 +32,7 @@ using namespace std;
 
 
 fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
-   info["fastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
+   logger.info["fastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
 
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    PDFSet = NULL;
@@ -104,7 +104,7 @@ bool fastNLOLHAPDF::InitPDF() {
    // we always reinitialized the set PDF-set.
 
    if (fLHAPDFFilename == "") {
-      warn["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
+      logger.warn["InitPDF"]<<"Empty LHAPDF filename! Please define a PDF set here!\n";
       return false;
    }
 
@@ -120,11 +120,11 @@ bool fastNLOLHAPDF::InitPDF() {
    //cout << "PDF set name " << fLHAPDFFilename << endl;
    if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
       // need to reset LHAPDF.
-      debug["InitPDF"]<<"Need to reset lhapdf. fchksum="<<fchksum<<"\tCalcChecksum(1.)="<<CalcChecksum(1.)<<endl;
+      logger.debug["InitPDF"]<<"Need to reset lhapdf. fchksum="<<fchksum<<"\tCalcChecksum(1.)="<<CalcChecksum(1.)<<endl;
       LHAPDF::initPDFSet(fLHAPDFFilename);
       fnPDFs = LHAPDF::numberPDF()+1; // LHAPDF counts 0-44 and returns, 44 which must be 45
       if (fnPDFs < fiPDFMember+1) {
-         error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
+         logger.error["InitPDF"]<<"There are only "<<fnPDFs<<" pdf sets within this LHAPDF file. You were looking for set number "<<fiPDFMember<<std::endl;
          return false;
       }
       LHAPDF::initPDF(fiPDFMember);
@@ -187,11 +187,11 @@ void fastNLOLHAPDF::SetLHAPDFMember(int set) {
    #else
    fiPDFMember = set;
    if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember
-      debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
+      logger.debug["SetLHAPDFMember"]<<"Changing only pdfmember!"<<endl;
       LHAPDF::initPDF(fiPDFMember);
       fchksum = CalcChecksum(1.);
    } else  {
-      debug["SetLHAPDFMember"]<<"Demanding full re-initalization of PDF."<<endl;
+      logger.debug["SetLHAPDFMember"]<<"Demanding full re-initalization of PDF."<<endl;
       fchksum = 0;
    }
    //InitPDF();
@@ -228,23 +228,23 @@ void fastNLOLHAPDF::PrintPDFInformation() const {
 }
 
 void fastNLOLHAPDF::SetMz(double Mz) {
-   warn["SetMz"]<<"WARNING! The Z mass cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+   logger.warn["SetMz"]<<"WARNING! The Z mass cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
 void fastNLOLHAPDF::SetQMass(int pdgid, double mq) {
-   warn["SetQMass"]<<"WARNING! The quark masses cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+   logger.warn["SetQMass"]<<"WARNING! The quark masses cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
 void fastNLOLHAPDF::SetNFlavor(int nflavor) {
-   warn["SetNFlavor"]<<"WARNING! The no. of active flavors cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+   logger.warn["SetNFlavor"]<<"WARNING! The no. of active flavors cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
 void fastNLOLHAPDF::SetNLoop(int nloop) {
-   warn["SetNLoop"]<<"WARNING! The no. of loops cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+   logger.warn["SetNLoop"]<<"WARNING! The no. of loops cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
 void fastNLOLHAPDF::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
-   warn["SetAlphasMz"]<<"WARNING! alpha_s(M_Z) cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
+   logger.warn["SetAlphasMz"]<<"WARNING! alpha_s(M_Z) cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
 void fastNLOLHAPDF::InitEvolveAlphas() {
@@ -253,7 +253,7 @@ void fastNLOLHAPDF::InitEvolveAlphas() {
 
 double fastNLOLHAPDF::GetQMass(int pdgid) const {
    if (pdgid < 1 || pdgid > 6 ) {
-      error["GetQMass"]<<"PDG code out of quark range 1-6! Aborted\n";
+      logger.error["GetQMass"]<<"PDG code out of quark range 1-6! Aborted\n";
       exit(1);
    }
    return LHAPDF::getQMass(pdgid);

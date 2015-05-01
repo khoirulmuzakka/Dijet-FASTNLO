@@ -97,15 +97,14 @@ public:
    PrimalScream(std::string classname);//,std::string prefix="");
    void SetClassName(const std::string classname );
    void SetVerbosity(say::Verbosity volume);
-private:
-   std::string ___cn;
-protected:
    speaker debug;
    speaker man;
    speaker info;
    speaker warn;
    speaker error;
    speaker shout;
+private:
+   std::string ___cn;
 };
 
 #endif //SPEAKER_H_

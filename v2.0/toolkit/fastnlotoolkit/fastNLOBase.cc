@@ -15,26 +15,26 @@ bool fastNLOBase::fWelcomeOnce = false;
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase() : PrimalScream("fastNLOBase") ,  fPrecision(8) {
+fastNLOBase::fastNLOBase() : fPrecision(8), logger("fastNLOBase") {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 
 //______________________________________________________________________________
-fastNLOBase::fastNLOBase(string name) : PrimalScream("fastNLOBase") , ffilename(name), fPrecision(8)  {
+fastNLOBase::fastNLOBase(string name) : ffilename(name), fPrecision(8), logger("fastNLOBase") {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 
 //______________________________________________________________________________
 fastNLOBase::fastNLOBase(const fastNLOBase& other) :
-   PrimalScream("fastNLOBase"),
    ffilename(other.ffilename), fPrecision(other.fPrecision),
    Itabversion(other.Itabversion), ScenName(other.ScenName),
    Ncontrib(other.Ncontrib), Nmult(other.Nmult),
    Ndata(other.Ndata), NuserString(other.NuserString),
    NuserInt(other.NuserInt), NuserFloat(other.NuserFloat),
-   Imachine(other.Imachine) {
+   Imachine(other.Imachine),
+   logger("fastNLOBase") {
    //! copy constructor
 }
 
@@ -49,7 +49,7 @@ ifstream* fastNLOBase::OpenFileRead() {
    //! Open file-stream for reading table
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
-      error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
+      logger.error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
       exit(1);
    }
    ifstream* strm = new ifstream(ffilename.c_str(),ios::in);
@@ -81,7 +81,7 @@ void fastNLOBase::ReadTable() {
 void fastNLOBase::ReadHeader(istream& table) {
    table.peek();
    if (table.eof()) {
-      error["ReadHeader"]<<"Cannot read from stream."<<endl;
+      logger.error["ReadHeader"]<<"Cannot read from stream."<<endl;
    }
 
    fastNLOTools::ReadMagicNo(table);
@@ -155,11 +155,11 @@ ofstream* fastNLOBase::OpenFileWrite() {
    //! open ofstream for writing tables
    //! do overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0) {
-      info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
+      logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
    ofstream* stream = new ofstream(ffilename.c_str(),ios::out);
    if (!stream->good()) {
-      error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
+      logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);
    }
    stream->precision(fPrecision);
@@ -180,15 +180,15 @@ void fastNLOBase::CloseFileWrite(ofstream& table) {
 //______________________________________________________________________________
 bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
    if (Itabversion!= other.GetItabversion()) {
-      warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
+      logger.warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
       return false;
    }
    if (Ndata + other.GetNdata() > 1) {
-      warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
+      logger.warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
       return false;
    }
    if (ScenName!= other.GetScenName()) {
-      warn["IsCompatibleHeader"]<<"Differing names of scenarios: "<<ScenName.c_str()<<" and "<<other.ScenName.c_str()<<endl;
+      logger.warn["IsCompatibleHeader"]<<"Differing names of scenarios: "<<ScenName.c_str()<<" and "<<other.ScenName.c_str()<<endl;
       // continue...
    }
    return true;
@@ -217,7 +217,7 @@ void fastNLOBase::SetContributionHeader() {
 
 //______________________________________________________________________________
 void fastNLOBase::ResetHeader() {
-   debug["ResetHeader"]<<endl;
+   logger.debug["ResetHeader"]<<endl;
    SetNcontrib(0);
    SetNmult(0);
    SetNdata(0);
@@ -269,6 +269,7 @@ void fastNLOBase::PrintWelcomeMessage() {
 
    cout  << endl;
    cout  << fastNLO::_CSEPSC << endl;
+   speaker &shout = logger.shout;
    shout << "" << endl;
    shout << fnlo << "_" << subproject << endl;
    shout << "Version " << package_version << "_" << svnrev << endl;

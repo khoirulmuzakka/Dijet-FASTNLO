@@ -11,13 +11,13 @@ using namespace std;
 // ___________________________________________________________________________________________________
 //fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
 fastNLOTable::fastNLOTable() : fastNLOBase() {
-   SetClassName("fastNLOTable");
+   logger.SetClassName("fastNLOTable");
 }
 
 
 // ___________________________________________________________________________________________________
 fastNLOTable::fastNLOTable(string name) : fastNLOBase(name) {
-   SetClassName("fastNLOTable");
+   logger.SetClassName("fastNLOTable");
    ReadTable();
 }
 
@@ -39,7 +39,7 @@ fastNLOTable::fastNLOTable(const fastNLOTable& tab)
     IDivUpPointer(tab.IDivUpPointer)
 {
    //! Copy constructor
-   SetClassName("fastNLOTable");
+   logger.SetClassName("fastNLOTable");
    for (size_t i = 0; i < tab.fCoeff.size(); ++i) {
       fCoeff[i] = tab.fCoeff[i]->Clone();
    }
@@ -91,31 +91,31 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
    // identify coeff-table:
    bool quiet = true;
    if ( fastNLOCoeffData::CheckCoeffConstants(&cB,quiet) ) {
-      debug["ReadRestOfCoeffTable"]<<"Found data table. Now reading in."<<endl;
+      logger.debug["ReadRestOfCoeffTable"]<<"Found data table. Now reading in."<<endl;
       fastNLOCoeffData* cN = new fastNLOCoeffData(cB);
       cN->ReadRest(table);
       return cN;
    }
    else if ( fastNLOCoeffMult::CheckCoeffConstants(&cB,quiet) ) {
-      debug["ReadRestOfCoeffTable"]<<"Found multiplicative contribution. Now reading in."<<endl;
+      logger.debug["ReadRestOfCoeffTable"]<<"Found multiplicative contribution. Now reading in."<<endl;
       fastNLOCoeffMult* cN = new fastNLOCoeffMult(cB);
       cN->ReadRest(table);
       return cN;
    }
    else if ( fastNLOCoeffAddFix::CheckCoeffConstants(&cB,quiet) ) {
-      debug["ReadRestOfCoeffTable"]<<"Found additive fixed order contribution (v2.0). Now reading in."<<endl;
+      logger.debug["ReadRestOfCoeffTable"]<<"Found additive fixed order contribution (v2.0). Now reading in."<<endl;
       fastNLOCoeffAddFix* cN = new fastNLOCoeffAddFix(cB);
       cN->ReadRest(table);
       return cN;
    }
    else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&cB,quiet) ) {
-      debug["ReadRestOfCoeffTable"]<<"Found additive flexible scale contribution. Now reading in."<<endl;
+      logger.debug["ReadRestOfCoeffTable"]<<"Found additive flexible scale contribution. Now reading in."<<endl;
       fastNLOCoeffAddFlex* cN = new fastNLOCoeffAddFlex(cB,ILOord);
       cN->ReadRest(table);
       return cN;
    }
    else {
-      error["ReadRestOfCoeffTable"]<<"Could not identify coefficient table. Print and exiting... "<<endl;
+      logger.error["ReadRestOfCoeffTable"]<<"Could not identify coefficient table. Print and exiting... "<<endl;
       cB.Print();
       exit(1);
    }
@@ -126,12 +126,12 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteTable() {
    //! Write fastNLO table to file 'ffilename' (member)
-   info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
+   logger.info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
    ofstream* table = OpenFileWrite();
    WriteHeader(*table);
    WriteScenario(*table);
    for(int i=0;i<GetNcontrib();i++){
-      debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
+      logger.debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
       GetCoeffTable(i)->Write(*table);
    }
    CloseFileWrite(*table);
@@ -152,7 +152,7 @@ void fastNLOTable::WriteTable(string filename) {
 void fastNLOTable::ReadScenario(istream& table){
    table.peek();
    if (table.eof()){
-      warn["ReadScenario"]<<"Cannot read from file."<<endl;
+      logger.warn["ReadScenario"]<<"Cannot read from file."<<endl;
    }
 
    fastNLOTools::ReadMagicNo(table);
@@ -268,68 +268,68 @@ bool fastNLOTable::IsCompatible(const fastNLOTable& other) const {
    if ( !IsCompatibleHeader(other) ) return false;
    bool potentialcompatible = true;
    if(Ipublunits != other.Ipublunits){
-      warn["IsCompatible"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
+      logger.warn["IsCompatible"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
       return false;
    }
    if(ScDescript != other.ScDescript){
-      warn["IsCompatible"]<<"Differing scale description found."<<endl;
+      logger.warn["IsCompatible"]<<"Differing scale description found."<<endl;
       potentialcompatible = false;
    }
    if(!cmp(Ecms,other.Ecms)){
-      warn["IsCompatible"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
+      logger.warn["IsCompatible"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
       return false;
    }
    if(ILOord != other.ILOord){
-      warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
+      logger.warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
       return false;
    }
    if(NObsBin != other.NObsBin){
-      warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other.NObsBin<<endl;
+      logger.warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other.NObsBin<<endl;
       return false;
    }
    if(NDim != other.NDim){
-      warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
+      logger.warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
       return false;
    }
    if(DimLabel != other.DimLabel){
-      warn["IsCompatible"]<<"Differing label of observables found."<<endl;
+      logger.warn["IsCompatible"]<<"Differing label of observables found."<<endl;
       potentialcompatible = false;
    }
    if(IDiffBin != other.IDiffBin){
-      warn["IsCompatible"]<<"Differing IDiffBin found."<<endl;
+      logger.warn["IsCompatible"]<<"Differing IDiffBin found."<<endl;
       return false;
    }
    if(!cmp(Bin,other.Bin)){
-      warn["IsCompatible"]<<"Differing Bin boundaries found."<<endl;
+      logger.warn["IsCompatible"]<<"Differing Bin boundaries found."<<endl;
       return false;
    }
    if(!cmp(BinSize,other.BinSize)){
-      warn["IsCompatible"]<<"Differing bin sizes found."<<endl;
+      logger.warn["IsCompatible"]<<"Differing bin sizes found."<<endl;
       return false;
    }
    if(INormFlag != other.INormFlag){
-      warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
+      logger.warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
       return false;
    }
    if(INormFlag>1){
       if(DenomTable != other.DenomTable){
-         warn["IsCompatible"]<<"Differing DenomTable found."<<endl;
+         logger.warn["IsCompatible"]<<"Differing DenomTable found."<<endl;
          return false;
       }
    }
    if(INormFlag>0){
       for(unsigned int i=0;i<NObsBin;i++){
          if(IDivLoPointer[i] != other.IDivLoPointer[i]){
-            warn["IsCompatible"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
+            logger.warn["IsCompatible"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
             return false;
          }
          if(IDivUpPointer[i] != other.IDivUpPointer[i]){
-            warn["IsCompatible"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
+            logger.warn["IsCompatible"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
             return false;
          }
       }
    }
-   if ( !potentialcompatible ) warn["IsCompatible"]<<"Some labels have differing values, but relevant variables seem to be compatible. Continuing."<<endl;
+   if ( !potentialcompatible ) logger.warn["IsCompatible"]<<"Some labels have differing values, but relevant variables seem to be compatible. Continuing."<<endl;
    return true;
 
 }
@@ -342,7 +342,7 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
    // or increase statistics of fixed-order calc.
    //
    if ( !IsCompatible(other) ) {
-      warn["AddTable"]<<"Table not compatible with this table. Ignoring command."<<endl;
+      logger.warn["AddTable"]<<"Table not compatible with this table. Ignoring command."<<endl;
       return;
    }
 
@@ -361,9 +361,9 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
             fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
             if ( lhs->IsCompatible(*cadd) ) { // found compatible table
                if ( wasAdded )
-                  error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
+                  logger.error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
                else {
-                  debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
+                  logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
                   if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
                      lhs->Add(*cadd);
                   else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
@@ -381,7 +381,7 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
       // couldn't find a corresponding contribution.
       // add this contribution as new contrib.
       if ( !wasAdded ) {
-         info["AddTable"]<<"Adding new contribution to table."<<endl;
+         logger.info["AddTable"]<<"Adding new contribution to table."<<endl;
          fastNLOCoeffBase* add = other.GetCoeffTable(ic);
          if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
             add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
@@ -485,16 +485,16 @@ void fastNLOTable::SetDimLabel( string label, unsigned int iDim , bool IsDiff ){
 
    // check validity of call
    if ( NDim < iDim ) {
-      error["SetDimLabel"]<<"Sorry, you have only initialized "<<NDim<<" dimensions, but you want to label a dimension with number "<<iDim<<endl;
+      logger.error["SetDimLabel"]<<"Sorry, you have only initialized "<<NDim<<" dimensions, but you want to label a dimension with number "<<iDim<<endl;
       exit(1);
    }
    if ( iDim < 1) {
-      error["SetDimLabel"]<<"The dimension must be a natural number. iDim="<<iDim<<endl;
+      logger.error["SetDimLabel"]<<"The dimension must be a natural number. iDim="<<iDim<<endl;
       exit(1);
    }
 
    if ( DimLabel.size() != NDim ){
-      error["SetDimLabel"]<<"You have to call SetNumDiffBin with a reasonable number before."<<endl;
+      logger.error["SetDimLabel"]<<"You have to call SetNumDiffBin with a reasonable number before."<<endl;
       exit(1);
    }
 
@@ -507,7 +507,7 @@ void fastNLOTable::SetDimLabel( string label, unsigned int iDim , bool IsDiff ){
 //fastNLOCoefficients* fastNLOTable::GetCoeffTable(int no) const {
 fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
    if ( no >= (int)fCoeff.size() ){
-      warn["GetCoeffTable"]<<"There is no contribution with number "<<no<<" but only "<<fCoeff.size()<<". Returning null pointer."<<endl;
+      logger.warn["GetCoeffTable"]<<"There is no contribution with number "<<no<<" but only "<<fCoeff.size()<<". Returning null pointer."<<endl;
       return NULL;
    }
    else
@@ -555,11 +555,11 @@ fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(ESMOrder eOrder) const {
 // Return lower bin bound for obs. bin iObs in dim. iDim
 double fastNLOTable::GetObsBinLoBound(unsigned int iObs, unsigned int iDim) const {
    if ( ! (iObs < NObsBin) ) {
-      error["GetObsBinLoBound"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetObsBinLoBound"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinLoBound"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinLoBound"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    return Bin[iObs][iDim].first;
@@ -570,11 +570,11 @@ double fastNLOTable::GetObsBinLoBound(unsigned int iObs, unsigned int iDim) cons
 // Return upper bin bound for obs. bin iObs in dim. iDim
 double fastNLOTable::GetObsBinUpBound(unsigned int iObs, unsigned int iDim) const {
    if ( ! (iObs < NObsBin) ) {
-      error["GetObsBinUpBound"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetObsBinUpBound"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinUpBound"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinUpBound"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    return Bin[iObs][iDim].second;
@@ -585,7 +585,7 @@ double fastNLOTable::GetObsBinUpBound(unsigned int iObs, unsigned int iDim) cons
 // Return vector of lower bin bounds in dim. iDim for all obs. bins
 vector < double > fastNLOTable::GetObsBinsLoBounds(unsigned int iDim) const {
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinsLoBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinsLoBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    // Get lower bin edge of all observable bins for dimension 'iDim'
@@ -601,7 +601,7 @@ vector < double > fastNLOTable::GetObsBinsLoBounds(unsigned int iDim) const {
 // Return vector of upper bin bounds in dim. iDim for all obs. bins
 vector < double > fastNLOTable::GetObsBinsUpBounds(unsigned int iDim) const {
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinsUpBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinsUpBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    // Get upper bin edge of all observable bins for dimension 'iDim'
@@ -617,16 +617,16 @@ vector < double > fastNLOTable::GetObsBinsUpBounds(unsigned int iDim) const {
 // Return minimum value of all lower bin bounds for dim. iDim
 double fastNLOTable::GetObsBinsLoBoundsMin(unsigned int iDim) const {
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinsLoBoundsMin"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinsLoBoundsMin"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    //! Get lowest bin edge of all observable bins for dimension 'iDim'
    double LoBinMin = DBL_MAX;
    for (size_t i = 0; i < Bin.size(); ++i) {
-      debug["GetObsBinsLoBoundsMin"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].first = " << Bin[i][iDim].first << ", LoBinMin = " << LoBinMin << endl;
+      logger.debug["GetObsBinsLoBoundsMin"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].first = " << Bin[i][iDim].first << ", LoBinMin = " << LoBinMin << endl;
       LoBinMin = ( (Bin[i][iDim].first < LoBinMin) ? Bin[i][iDim].first : LoBinMin );
    }
-   debug["GetObsBinsLoBoundsMin"]<<"Minimum found for dimension " << iDim << " is: " << LoBinMin << endl;
+   logger.debug["GetObsBinsLoBoundsMin"]<<"Minimum found for dimension " << iDim << " is: " << LoBinMin << endl;
    return LoBinMin;
 }
 
@@ -635,16 +635,16 @@ double fastNLOTable::GetObsBinsLoBoundsMin(unsigned int iDim) const {
 // Return maximum value of all upper bin bounds for dim. iDim
 double fastNLOTable::GetObsBinsUpBoundsMax(unsigned int iDim) const {
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinsUpBoundsMax"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinsUpBoundsMax"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    //! Get uppermost bin edge of all observable bins for dimension 'iDim'
    double UpBinMax = -DBL_MAX;
    for (size_t i = 0; i < Bin.size(); ++i) {
-      debug["GetObsBinsUpBoundsMax"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].second = " << Bin[i][iDim].second << ", UpBinMax = " << UpBinMax << endl;
+      logger.debug["GetObsBinsUpBoundsMax"]<<"iDim = " << iDim << ", i = " << i << ", Bin[i][iDim].second = " << Bin[i][iDim].second << ", UpBinMax = " << UpBinMax << endl;
       UpBinMax = ( (Bin[i][iDim].second > UpBinMax) ? Bin[i][iDim].second : UpBinMax );
    }
-   debug["GetObsBinsUpBoundsMax"]<<"Maximum found for dimension " << iDim << " is: " << UpBinMax << endl;
+   logger.debug["GetObsBinsUpBoundsMax"]<<"Maximum found for dimension " << iDim << " is: " << UpBinMax << endl;
    return UpBinMax;
 }
 
@@ -653,7 +653,7 @@ double fastNLOTable::GetObsBinsUpBoundsMax(unsigned int iDim) const {
 // Return vector of pairs with lower and upper bin bounds in dim. iDim for all obs. bins
 vector < pair < double, double > > fastNLOTable::GetObsBinsBounds(unsigned int iDim) const {
    if ( ! (iDim < NDim) ) {
-      error["GetObsBinsBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinsBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    // Get bin edges of all observable bins for dimension 'iDim'
@@ -680,7 +680,7 @@ vector < pair < double, double > > fastNLOTable::GetDim0BinBounds() const {
 vector < pair < double, double > > fastNLOTable::GetDim1BinBounds(unsigned int iDim0Bin) const {
    vector< pair<double, double > > Bins;
    if ( NDim < 2 ) {
-      error["fastNLOTable::GetDim1BinBounds"] << "No second dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetDim1BinBounds"] << "No second dimension available, aborted!" << endl;
       exit(1);
    }
    pair< double, double> bin0 = GetDim0BinBounds()[iDim0Bin];
@@ -700,7 +700,7 @@ vector < pair < double, double > > fastNLOTable::GetDim1BinBounds(unsigned int i
 vector < pair < double, double > > fastNLOTable::GetDim2BinBounds(unsigned int iDim0Bin, unsigned int iDim1Bin) const {
    vector< pair<double, double > > Bins;
    if ( NDim < 3 ) {
-      error["fastNLOTable::GetDim2BinBounds"] << "No third dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetDim2BinBounds"] << "No third dimension available, aborted!" << endl;
       exit(1);
    }
    pair< double, double> bin0 = GetDim0BinBounds()[iDim0Bin];
@@ -720,7 +720,7 @@ vector < pair < double, double > > fastNLOTable::GetDim2BinBounds(unsigned int i
 // Return vector of pairs with lower and upper bin bounds for all dimensions for a given obs. bin
 vector < pair < double, double > > fastNLOTable::GetObsBinDimBounds(unsigned int iObs) const {
    if ( ! ( iObs < NObsBin ) ) {
-      error["GetObsBinDimBounds"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetObsBinDimBounds"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    // // Get bin edges of all dimensions for observable bin 'iObs'
@@ -737,11 +737,11 @@ vector < pair < double, double > > fastNLOTable::GetObsBinDimBounds(unsigned int
 // Return pair with lower and upper bin bounds for given obs. bin and dim. iDim
 pair < double, double > fastNLOTable::GetObsBinDimBounds(unsigned int iObs, unsigned int iDim) const {
    if ( ! ( iObs < NObsBin ) ) {
-      error["GetObsBinDimBounds"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetObsBinDimBounds"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    if ( ! ( iDim < NDim ) ) {
-      error["GetObsBinDimBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
+      logger.error["GetObsBinDimBounds"]<<"Dimension iDim " << iDim << " out of range, NDim = " << NDim << ", aborted!" << endl;
       exit(1);
    }
    return Bin[iObs][iDim];
@@ -755,11 +755,11 @@ unsigned int fastNLOTable::GetIDim0Bin(unsigned int iObs) const {
    //! Valid for up to triple differential binnings
    //  There always must be at least one bin!
    if ( Bin.size() == 0 || Bin[0].size() == 0 ) {
-      error["fastNLOTable::GetIDim0Bin"] << "No observable bins defined, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim0Bin"] << "No observable bins defined, aborted!" << endl;
       exit(1);
    }
    if ( ! (iObs < NObsBin) ) {
-      error["GetIDim0Bin"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetIDim0Bin"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    unsigned int i0bin = 0;
@@ -773,7 +773,7 @@ unsigned int fastNLOTable::GetIDim0Bin(unsigned int iObs) const {
          return i0bin;
       }
    }
-   error["fastNLOTable::GetIDim0Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetIDim0Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -783,18 +783,18 @@ unsigned int fastNLOTable::GetIDim0Bin(unsigned int iObs) const {
 unsigned int fastNLOTable::GetIDim1Bin(unsigned int iObs) const {
    //! Returns bin number in second dimension
    //! Valid for up to triple differential binnings
-   //  1d binning --> error exit
+   //  1d binning --> logger.error exit
    if ( NDim < 2 ) {
-      error["fastNLOTable::GetIDim1Bin"] << "No second dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim1Bin"] << "No second dimension available, aborted!" << endl;
       exit(1);
    }
    //  Otherwise there always must be at least one bin!
    if ( Bin.size() == 0 || Bin[0].size() == 0 ) {
-      error["fastNLOTable::GetIDim1Bin"] << "No observable bins defined, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim1Bin"] << "No observable bins defined, aborted!" << endl;
       exit(1);
    }
    if ( ! (iObs < NObsBin) ) {
-      error["GetIDim1Bin"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
+      logger.error["GetIDim1Bin"]<<"Observable bin iObs " << iObs << " out of range, NObsBin = " << NObsBin << ", aborted!" << endl;
       exit(1);
    }
    unsigned int i0bin = 0;
@@ -815,7 +815,7 @@ unsigned int fastNLOTable::GetIDim1Bin(unsigned int iObs) const {
          return i1bin;
       }
    }
-   error["fastNLOTable::GetIDim1Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetIDim1Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -825,18 +825,18 @@ unsigned int fastNLOTable::GetIDim1Bin(unsigned int iObs) const {
 unsigned int fastNLOTable::GetIDim2Bin(unsigned int iObs) const {
    //! Returns bin number in third dimension
    //! Valid for up to triple differential binnings
-   //  1d, 2d binning --> error exit
+   //  1d, 2d binning --> logger.error exit
    if ( NDim < 3 ) {
-      error["fastNLOTable::GetIDim2Bin"] << "No third dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim2Bin"] << "No third dimension available, aborted!" << endl;
       exit(1);
    }
    //  Otherwise there always must be at least one bin!
    if ( Bin.size() == 0 || Bin[0].size() == 0 ) {
-      error["fastNLOTable::GetIDim2Bin"] << "No observable bins defined, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim2Bin"] << "No observable bins defined, aborted!" << endl;
       exit(1);
    }
    if ( iObs >= NObsBin ) {
-      error["fastNLOTable::GetIDim2Bin"] << "Observable bin out of range, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDim2Bin"] << "Observable bin out of range, aborted!" << endl;
       exit(1);
    }
    unsigned int i0bin = 0;
@@ -866,7 +866,7 @@ unsigned int fastNLOTable::GetIDim2Bin(unsigned int iObs) const {
          return i2bin;
       }
    }
-   error["fastNLOTable::GetIDim2Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetIDim2Bin"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -886,9 +886,9 @@ unsigned int fastNLOTable::GetNDim0Bins() const {
 unsigned int fastNLOTable::GetNDim1Bins(unsigned int iDim0Bin) const {
    //! Returns number of bins in second dimension for iDim0Bin in first dimension
    //! Valid for up to triple differential binnings
-   //  1d binning --> error exit
+   //  1d binning --> logger.error exit
    if ( NDim < 2 ) {
-      error["fastNLOTable::GetNDim1Bins"] << "No second dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetNDim1Bins"] << "No second dimension available, aborted!" << endl;
       exit(1);
    }
    for ( unsigned int i = 0; i<Bin.size(); i++ ) {
@@ -898,7 +898,7 @@ unsigned int fastNLOTable::GetNDim1Bins(unsigned int iDim0Bin) const {
          return GetIDim1Bin(i) +1;
       }
    }
-   error["fastNLOTable::GetNDim1Bins"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetNDim1Bins"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -908,9 +908,9 @@ unsigned int fastNLOTable::GetNDim1Bins(unsigned int iDim0Bin) const {
 unsigned int fastNLOTable::GetNDim2Bins(unsigned int iDim0Bin, unsigned int iDim1Bin) const {
    //! Returns number of bins in third dimension for iDim0Bin in first and iDim1Bin in second dimension
    //! Valid for up to triple differential binnings
-   //  1d, 2d binning --> error exit
+   //  1d, 2d binning --> logger.error exit
    if ( NDim < 3 ) {
-      error["fastNLOTable::GetNDim2Bins"] << "No third dimension available, aborted!" << endl;
+      logger.error["fastNLOTable::GetNDim2Bins"] << "No third dimension available, aborted!" << endl;
       exit(1);
    }
    for ( unsigned int i = 0; i<Bin.size(); i++ ) {
@@ -922,7 +922,7 @@ unsigned int fastNLOTable::GetNDim2Bins(unsigned int iDim0Bin, unsigned int iDim
          return GetIDim2Bin(i) +1;
       }
    }
-   error["fastNLOTable::GetNDim2Bins"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetNDim2Bins"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -933,7 +933,7 @@ int fastNLOTable::GetODim0Bin(double obs0) const {
    int iDim0Bin = -1;
    for ( unsigned int i=0; i<NObsBin; i++ ) {
       if ( IDiffBin[0] == 1 ) {
-         error["fastNLOTable::GetODim0Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
+         logger.error["fastNLOTable::GetODim0Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
          if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second ) {
@@ -952,7 +952,7 @@ int fastNLOTable::GetODim1Bin(double obs0, double obs1) const {
    int iDim1Bin = -1;
    for ( unsigned int i=0; i<NObsBin; i++ ) {
       if ( IDiffBin[0] == 1 ) {
-         error["fastNLOTable::GetODim1Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
+         logger.error["fastNLOTable::GetODim1Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
          if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second &&
@@ -972,7 +972,7 @@ int fastNLOTable::GetODim2Bin(double obs0, double obs1, double obs2) const {
    int iDim2Bin = -1;
    for ( unsigned int i=0; i<NObsBin; i++ ) {
       if ( IDiffBin[0] == 1 ) {
-         error["fastNLOTable::GetODim2Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
+         logger.error["fastNLOTable::GetODim2Bin"] << "Point-wise differential not yet implemented, aborted!" << endl;
          exit(1);
       } else {
          if ( Bin[i][0].first <= obs0 && obs0 < Bin[i][0].second &&
@@ -994,12 +994,12 @@ int fastNLOTable::GetObsBinNumber( const vector<double>& vobs ) const {
    //! (assumes none or exactly one matching bin!)
    //! Returns -1 if outside range
    if ( vobs.size() != NDim ) {
-      error["GetObsBinNumber"] << "Number of observable values not equal dimensionality of the binning, aborted" << endl;
-      error["GetObsBinNumber"] << "NDim = " << NDim << ", vobs.size() = " << vobs.size() << endl;
+      logger.error["GetObsBinNumber"] << "Number of observable values not equal dimensionality of the binning, aborted" << endl;
+      logger.error["GetObsBinNumber"] << "NDim = " << NDim << ", vobs.size() = " << vobs.size() << endl;
       exit(1);
    }
    if ( ! (NDim < 4) ) {
-      error["fastNLOTable::GetObsBinNumber"] << "More than 3-dimensional binning not yet implemented, aborted!" << endl;
+      logger.error["fastNLOTable::GetObsBinNumber"] << "More than 3-dimensional binning not yet implemented, aborted!" << endl;
       exit(1);
    }
 
@@ -1133,7 +1133,7 @@ void fastNLOTable::PrintScenario() const {
 
 //______________________________________________________________________________
 void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
-   //if ( debug.GetSpeak() ) iprint=10000;
+   //if ( logger.debug.GetSpeak() ) iprint=10000;
    //
    // Define different levels of detail for printing out table content
    // The minimum (iprint = 0) just gives basic scenario information
@@ -1156,10 +1156,10 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    cout  << endl;
    cout  << _CSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Information on fastNLO scenario: %s",ScenName.data());
-   shout << buffer << endl;
+   logger.shout << buffer << endl;
    cout  << _SSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Description:");
-   shout << buffer << endl;
+   logger.shout << buffer << endl;
    for (unsigned int i=0; i<ScDescript.size(); i++) {
       printf(" #   %s\n",ScDescript[i].data());
    }
@@ -1209,7 +1209,7 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
             fastNLOCoeffAddFlex* cFlex = (fastNLOCoeffAddFlex*)c;
             int NScaleDim = cFlex->GetNScaleDim();
             if (! (NScaleDim == 1)) {
-               error["PrintFastNLOTableConstants"] << "Flex-scale tables must have scale dimensions of one, aborting! "
+               logger.error["PrintFastNLOTableConstants"] << "Flex-scale tables must have scale dimensions of one, aborting! "
                                                    << "NScaleDim = " << NScaleDim <<endl;
                exit(1);
             }
@@ -1233,14 +1233,14 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    if (iprint > 0) {
       Print();
    }
-   shout << "" << endl;
+   logger.shout << "" << endl;
    cout  << _CSEPSC << endl;
 }
 
 
 //______________________________________________________________________________
 void fastNLOTable::PrintTableInfo(const int iprint) const {
-   debug["PrintTableInfo"] << "Printing flag iprint = " << iprint << endl;
+   logger.debug["PrintTableInfo"] << "Printing flag iprint = " << iprint << endl;
    //
    //  Print basic info about fastNLO table and its contributions
    //   - iprint: iprint > 0: print also contribution descriptions
@@ -1249,10 +1249,10 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
    char buffer[1024];
    cout  << endl;
    cout  << _CSEPSC << endl;
-   shout << "Overview on contribution types and numbers contained in table:" << endl;
+   logger.shout << "Overview on contribution types and numbers contained in table:" << endl;
    cout  << _SSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Number of contributions: %2i", Ncontrib);
-   shout << buffer << endl;
+   logger.shout << buffer << endl;
 
    int iccount[21] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
    int ictype = 0;
@@ -1268,13 +1268,13 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
       }
       // KR: How can I access ContrId from here ???
       iccount[ictype]++;
-      shout << "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
+      logger.shout << "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
             << ", order: " << c->GetContributionDescription()[0]
             << ", by: " << c->GetCodeDescription()[0] << endl;
       if (iprint > 0) {
          for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {
             snprintf(buffer, sizeof(buffer), "\t\t%s",c->GetCodeDescription()[k].c_str());
-            shout << buffer << endl;
+            logger.shout << buffer << endl;
          }
       }
    }
@@ -1288,20 +1288,20 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
 // DO NOT USE! DOES NOT WORK YET!
 unsigned int fastNLOTable::GetIDimBin(unsigned int iObsBin, unsigned int iDim) const {
    //! Returns bin number in dimension iDim
-   //  iDim larger than table dimensions --> error exit
-   error["fastNLOTable::GetIDimBin"] << "DO NOT USE! DOES NOT WORK YET!" << endl;
+   //  iDim larger than table dimensions --> logger.error exit
+   logger.error["fastNLOTable::GetIDimBin"] << "DO NOT USE! DOES NOT WORK YET!" << endl;
    const unsigned int idiff = GetNumDiffBin();
    if ( ! (iDim < idiff) ) {
-      error["fastNLOTable::GetIDimBin"] << "Requested dimension iDim not available, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDimBin"] << "Requested dimension iDim not available, aborted!" << endl;
       exit(1);
    }
    //  Otherwise there always must be at least one bin!
    if ( Bin.size() == 0 || Bin[0].size() == 0 ) {
-      error["fastNLOTable::GetIDimBin"] << "No observable bins defined, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDimBin"] << "No observable bins defined, aborted!" << endl;
       exit(1);
    }
    if ( iObsBin >= NObsBin ) {
-      error["fastNLOTable::GetIDimBin"] << "Observable bin out of range, aborted!" << endl;
+      logger.error["fastNLOTable::GetIDimBin"] << "Observable bin out of range, aborted!" << endl;
       exit(1);
    }
    vector < unsigned int > ibin(NDim);
@@ -1361,7 +1361,7 @@ unsigned int fastNLOTable::GetIDimBin(unsigned int iObsBin, unsigned int iDim) c
          return ibin[iDim];
       }
    }
-   error["fastNLOTable::GetIDimBin"] << "Observable bin not found. This should never happen, aborted!" << endl;
+   logger.error["fastNLOTable::GetIDimBin"] << "Observable bin not found. This should never happen, aborted!" << endl;
    exit(1);
 }
 
@@ -1392,13 +1392,13 @@ vector < pair < double, double > > fastNLOTable::GetBinBoundaries(int iDim0Bin, 
    //! int LoYBin  = GetBinBoundaries(2)[0].first;
    //! int UpPtBin = GetBinBoundaries(2,5)[1].second;
    //! int LoYBin  = GetBinBoundaries(2,5)[0].second;
-   error["GetBinBoundaries"] << "DO NOT USE! DOES NOT WORK YET!" << endl;
+   logger.error["GetBinBoundaries"] << "DO NOT USE! DOES NOT WORK YET!" << endl;
    vector<pair<double,double> > BinRet(NDim);
    const int idiff = GetNumDiffBin();
 
    if ( idiff==1 ) {
       if ( iDim0Bin<0 || iDim0Bin >= (int)NObsBin ) {
-         warn["GetBinBoundaries"]<<"0th dimension does only have "<<NObsBin<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"0th dimension does only have "<<NObsBin<<" but bin "<<iDim0Bin<<" was requested."<<endl;
          return BinRet;
       }
       return Bin[iDim0Bin];
@@ -1408,10 +1408,10 @@ vector < pair < double, double > > fastNLOTable::GetBinBoundaries(int iDim0Bin, 
       unsigned int nDim0 = GetNDim0Bins();
       // sanity
       if ( iDim0Bin < 0 || iDim0Bin >= (int)nDim0 ) {
-         warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
       }
       if ( iDim1Bin < 0 || iDim1Bin >= (int)nDim1 ) {
-         warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
       }
       int iObs = 0;
       for ( int i0 = 0 ; i0<iDim0Bin ; i0++ ) {
@@ -1426,19 +1426,19 @@ vector < pair < double, double > > fastNLOTable::GetBinBoundaries(int iDim0Bin, 
       unsigned int nDim2 = GetNDim2Bins(iDim0Bin,iDim1Bin);
       // sanity
       if ( iDim0Bin < 0 || iDim0Bin >= (int)nDim0 ) {
-         warn["GetBinBoundaries"]<<"Dimension 0 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"Dimension 0 does only have "<<nDim0<<" but bin "<<iDim0Bin<<" was requested."<<endl;
       }
       if ( iDim1Bin < 0 || iDim1Bin >= (int)nDim1 ) {
-         warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"Dimension 1 does only have "<<nDim1<<" but bin "<<iDim1Bin<<" was requested."<<endl;
       }
       if ( iDim2Bin < 0 || iDim2Bin >= (int)nDim2 ) {
-         warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim2<<" but bin "<<iDim2Bin<<" was requested."<<endl;
+         logger.warn["GetBinBoundaries"]<<"Dimension 2 does only have "<<nDim2<<" but bin "<<iDim2Bin<<" was requested."<<endl;
       }
-      error["GetBinBoundaries"]<<"todo. Further code no yet implemented."<<endl;
+      logger.error["GetBinBoundaries"]<<"todo. Further code no yet implemented."<<endl;
 
    }
    else {
-      error["GetBinBoundaries"]<<"Higher than triple-differential binnings are not implemented."<<endl;
+      logger.error["GetBinBoundaries"]<<"Higher than triple-differential binnings are not implemented."<<endl;
    }
    return BinRet;
 
