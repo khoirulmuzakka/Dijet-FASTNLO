@@ -123,7 +123,7 @@ void fastNLOHoppet::SetLHAPDFValues() {
    //Be sure LHAPDF is initialized when reading the properties
    if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
       if ( ! InitPDF() ) {
-         error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
+         logger.error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
          exit(1);
       } else {
          FillPDFCache();

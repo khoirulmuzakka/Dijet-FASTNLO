@@ -85,7 +85,7 @@ void fastNLOQCDNUMAS::SetNLoop(int  nloop) {
    fnLoop = nloop;
 }
 void fastNLOQCDNUMAS::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
-   debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
+   logger.debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
    fAlphasMz    = AlphasMz;
    if (ReCalcCrossSection) CalcCrossSection();
 }
@@ -113,7 +113,7 @@ void fastNLOQCDNUMAS::SetLHAPDFValues() {
    //Be sure LHAPDF is initialized when reading the properties
    if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
       if ( ! InitPDF() ) {
-         error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
+         logger.error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
          exit(1);
       } else {
          FillPDFCache();
@@ -183,7 +183,7 @@ double fastNLOQCDNUMAS::EvolveAlphas(double Q) const {
    double as = asfunc_(&mu2, &nf , &ierr);
    //cout << as << "  " << mu2 << " " << nf << endl;
    if (ierr > 0)
-      error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
+      logger.error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
 }
 
