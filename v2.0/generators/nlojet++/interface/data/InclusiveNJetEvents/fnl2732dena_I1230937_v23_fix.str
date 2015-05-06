@@ -22,7 +22,7 @@ ScenarioDescription {
     "Inclusive_Dijet_pT"
     "anti-kT_R=0.7"
     "CMS-PAPER-QCD-11-003, arXiv:1304.7498, Eur. Phys. J. C 73 (2013) 2604."
-    "INSPIRE_RECORD=1230937"
+    "RIVET_ID=CMS_2013_I1230937/D01-x01-y01,INSPIRE_RECORD=1230937"
     "THEORY_LABEL=NLOJet++"
     "provided by:"
     "fastNLO_2.3.1"
@@ -38,11 +38,11 @@ JetAlgo                         2                # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.7              # Jet size parameter: Required for all jets
-ptjmin                        150.               # Minimal jet pT
+ptjmin                        150.               # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           5.0              # Maximal jet rapidity
 Njetmin                         2                # Minimal number of jets required to be in preselected phase space
-ycjjmax                         2.5              # Maximal rapidity for leading two jets
+ycjjmax                         2.5              # Maximal jet rapidity for leading two jets
 
 # -------------------------------------------------------------------- #
 #   Observable definition, dimensioning, and normalization
@@ -54,9 +54,9 @@ ycjjmax                         2.5              # Maximal rapidity for leading 
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
 LeadingOrder                      2              # Number of jets for the LO process
-DifferentialDimension             1
-DimensionLabels {                                # Labels (symbol and unit) for the measurement dimension (from outer to inner "loop")
-   "<pT_1,2>_[GeV]"
+DifferentialDimension             1              # Dimensionality of binning
+DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
+   "<pT_1,2>_[GeV]"                              # This defines the observables to be calculated!
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
    2                                             #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
@@ -70,7 +70,8 @@ BinSizeFactor                    1.              # Possibility to provide additi
                                                  #
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
-ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # Specify scale name and unit
+                                                 #
+ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
@@ -82,7 +83,7 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
 SingleDifferentialBinning {
-  150.  175.  200.  225.  250.  275.  300.  330.  360.  390.  420.  450.  480.  510.  540.  570.  600.  640.  680.  720.  760.  800.  850.  900.  950. 1000. 1060. 1120. 1180. 1250. 1320. 1390. 1460. 1530. 1600. 1680. 1760. 1840. 1920. 2000.
+  250.  275.  300.  330.  360.  390.  420.  450.  480.  510.  540.  570.  600.  640.  680.  720.  760.  800.  850.  900.  950. 1000. 1060. 1120. 1180. 1250. 1320. 1390.
 }
 
 # ==================================================================== #
@@ -114,7 +115,7 @@ PDF2                            2212        # PDF of 2nd hadron (following PDG c
 GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
-OutputFilename   InclusiveNjetEvents.tab    # Filename of fastNLO output table
+OutputFilename   InclusiveNJetEvents.tab    # Filename of fastNLO output table
 OutputPrecision                 8           # Number of decimal digits to store in output table, def.=8.
 FlexibleScaleTable              false       # Create table fully flexible in mu_f (larger size), true, or
                                             # table with fixed number of mu_f scale factors, def.=false.
