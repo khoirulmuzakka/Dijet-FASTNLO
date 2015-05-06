@@ -272,6 +272,7 @@ AC_CONFIG_FILES([Makefile
                  interface/data/Makefile
                  interface/data/Examples/Makefile
                  interface/data/InclusiveJets/Makefile
+                 interface/data/InclusiveNJetEvents/Makefile
                  interface/data/DijetMass/Makefile
                  interface/data/RivetAdditions/Makefile
                  interface/hadron/Makefile
@@ -283,4 +284,3 @@ AC_CONFIG_FILES([Makefile
 
 AC_OUTPUT
 #                 interface/data/DijetAngular/Makefile
-#                 interface/data/InclusiveNJetEvents/Makefile
