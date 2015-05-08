@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # Check on identical fastNLO tables (aka identical random seeds ...)
 # Version:
-# 
+#
 # modified by K. Rabbertz from first version of T. Kluge: 13.03.2006
 # last modified:
 #
@@ -40,7 +40,7 @@ if ( $opt_h ) {
 #
 my $glstr = shift;
 chomp $glstr;
-my @files = glob "*${glstr}*";  
+my @files = glob "*${glstr}*";
 chomp @files;
 if ( ! -d "Dubletten" ) {
     print "fastidcheck.pl: Creating subdirectory Dubletten ...\n";
@@ -48,7 +48,7 @@ if ( ! -d "Dubletten" ) {
 }
 my $vers  = $opt_v;
 my $tabext = "raw";
-if ($vers == 2) {$tabext = "tab";} 
+if ($vers == 2) {$tabext = "tab";}
 
 #
 # Diff
@@ -56,23 +56,23 @@ if ($vers == 2) {$tabext = "tab";}
 for ( my $i=0; $i < @files; $i++) {
 # File $i has not been moved already into Dubletten ...
     if ( -e $files[$i] ) {
-	print "fastidcheck.pl: Checking $files[$i] ...\n";
-	for( my $j=$i+1; $j < @files; $j++){
+        print "fastidcheck.pl: Checking $files[$i] ...\n";
+        for( my $j=$i+1; $j < @files; $j++){
 # File $j has not been moved already into Dubletten ...
-	    if ( -e $files[$j] ) {
-		if (system("diff -q $files[$i] $files[$j] > /dev/null") == 0 ) {
-		    print "fastidcheck.pl: Identical: $files[$i] and $files[$j]\n";
-		    print "fastidcheck.pl: Moving $files[$j] into Dubletten\n";
-		    my $logfil = $files[$j];
-		    $logfil =~ s/${tabext}/log/;
-#		    my $errfil = $files[$j];
-#		    $errfil =~ s/${tabext}/err/;
-		    system("mv $files[$j] Dubletten");
-		    system("mv $logfil Dubletten");
-#		    system("mv $errfil Dubletten");
-		}
-	    }
-	}
+            if ( -e $files[$j] ) {
+                if (system("diff -q $files[$i] $files[$j] > /dev/null") == 0 ) {
+                    print "fastidcheck.pl: Identical: $files[$i] and $files[$j]\n";
+                    print "fastidcheck.pl: Moving $files[$j] into Dubletten\n";
+                    my $logfil = $files[$j];
+                    $logfil =~ s/${tabext}/log/;
+#                   my $errfil = $files[$j];
+#                   $errfil =~ s/${tabext}/err/;
+                    system("mv $files[$j] Dubletten");
+                    system("mv $logfil Dubletten");
+#                   system("mv $errfil Dubletten");
+                }
+            }
+        }
     }
 }
 

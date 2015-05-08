@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # fastNLO submit script
 # Version:
-# 
+#
 # created by K. Rabbertz: 07.02.2006
 # last modified:
 #
@@ -50,8 +50,8 @@ if ( $opt_h ) {
     print "  -p pdf          CTEQ parton densities (def.) or LHAPDF\n";
     print "  -r              Reference calculation incl. pdf access\n";
     print "  -t dir          Output target directory: ".
-	"(def.= {scen}{ref}_{jobnr} with\n                  ".
-	"ref. to working directory in fastNLO installation)\n\n";
+        "(def.= {scen}{ref}_{jobnr} with\n                  ".
+        "ref. to working directory in fastNLO installation)\n\n";
     exit;
 }
 
@@ -134,7 +134,7 @@ $runmode{NLO}[1] = "10000000";
 # Create and submit files
 #
 my @infiles = ( "cernlib-2003.tar.gz", "fastNLO-rev${frev}.tar.gz", "fastrun.pl",
-		"nlojet++-2.0.1.tar.gz", "nlojet++-2.0.1-fix.tar.gz" );
+                "nlojet++-2.0.1.tar.gz", "nlojet++-2.0.1-fix.tar.gz" );
 if ( $pdf eq "LHAPDF" ) { push @infiles, "lhapdf-4.2.tar.gz"; }
 
 my %sublines;
@@ -143,7 +143,7 @@ if ( $batch eq "LCG" ) {
     $sublines{RetryCount} = "0";
     $sublines{InputSandbox} = "{";
     foreach my $file ( @infiles ) {
-	$sublines{InputSandbox} .= " \"$file\",";
+        $sublines{InputSandbox} .= " \"$file\",";
     }
     chop $sublines{InputSandbox};
     $sublines{InputSandbox} .= " }";
@@ -152,73 +152,73 @@ if ( $batch eq "LCG" ) {
     $sublines{-j} = "oe";
 #    $sublines{-W} = "stagein=";
 #    foreach my $infile ( @infiles ) {
-#	$sublines{-W} .= "${infile}\@${host}:${infile},";
+#       $sublines{-W} .= "${infile}\@${host}:${infile},";
 #    }
 }
 
 for ( my $i = 0; $i < $njobs; $i++) {
     my $table = "${scen}${ref}/${scen}${ref}-hhc-$runmode{$order}[0]-2jet";
     my @outfiles = ( "${table}_${jobnr}", "${table}.raw_${jobnr}",
-		     "${scen}${ref}_${order}.log_${jobnr}" );
+                     "${scen}${ref}_${order}.log_${jobnr}" );
     if ( $batch eq "LCG" ) {
-	$sublines{OutputSandbox} = "{";
-	foreach my $file ( @outfiles ) {
-	    $sublines{OutputSandbox} .= " \"$file\",";
-	}
-	chop $sublines{OutputSandbox};
-	$sublines{OutputSandbox} .= " }";
-	$sublines{Arguments} = "\"-f $frev -j $jobnr -o $order -p $pdf ";
-	if ( $idir ne "." ) { $sublines{Arguments} .= "-d $idir ";}
-	if ( $ref ) { $sublines{Arguments} .= "-r ";}
-	$sublines{Arguments} .= "$scen\"";
-	$sublines{StdOutput} = "\"${scen}${ref}_${order}.log_${jobnr}\"";
-	$sublines{StdError} = "\"${scen}${ref}_${order}.log_${jobnr}\"";
-	my $jdlfil = "${scen}${ref}_${order}.jdl_${jobnr}";
-	open(NEWFILE,">$jdlfil") or
-	    die "fastsub.pl: Error! Could not open $jdlfil!";
-	foreach my $key ( sort keys %sublines ) {
-	    print NEWFILE "$key = $sublines{$key};\n";
-	}
-	close NEWFILE;
-	my $cmd = "edg-job-submit -r $cequ $jdlfil >& $jdlfil.http";
-	print "fastsub.pl: Running command $cmd\n";
-	system("$cmd");
+        $sublines{OutputSandbox} = "{";
+        foreach my $file ( @outfiles ) {
+            $sublines{OutputSandbox} .= " \"$file\",";
+        }
+        chop $sublines{OutputSandbox};
+        $sublines{OutputSandbox} .= " }";
+        $sublines{Arguments} = "\"-f $frev -j $jobnr -o $order -p $pdf ";
+        if ( $idir ne "." ) { $sublines{Arguments} .= "-d $idir ";}
+        if ( $ref ) { $sublines{Arguments} .= "-r ";}
+        $sublines{Arguments} .= "$scen\"";
+        $sublines{StdOutput} = "\"${scen}${ref}_${order}.log_${jobnr}\"";
+        $sublines{StdError} = "\"${scen}${ref}_${order}.log_${jobnr}\"";
+        my $jdlfil = "${scen}${ref}_${order}.jdl_${jobnr}";
+        open(NEWFILE,">$jdlfil") or
+            die "fastsub.pl: Error! Could not open $jdlfil!";
+        foreach my $key ( sort keys %sublines ) {
+            print NEWFILE "$key = $sublines{$key};\n";
+        }
+        close NEWFILE;
+        my $cmd = "edg-job-submit -r $cequ $jdlfil >& $jdlfil.http";
+        print "fastsub.pl: Running command $cmd\n";
+        system("$cmd");
     } elsif ( $batch eq "PBS" ) {
         my $sdir = $tdir."${scen}${ref}_${jobnr}";
-	$sublines{-o} = "${sdir}/${scen}${ref}_${order}.log_${jobnr}";
-	$sublines{-N} = "jobnr_${jobnr}";
-	my $cshfil = "${scen}${ref}_${order}.csh_${jobnr}";
-	open(NEWFILE,">$cshfil") or
-	    die "fastsub.pl: Error! Could not open $cshfil!";
-	print NEWFILE "#!/bin/csh -f\n";
-	foreach my $key ( sort keys %sublines ) {
-	    print NEWFILE "#PBS $key $sublines{$key}\n";
-	}
-	print NEWFILE "mkdir $sdir\n";
-	print NEWFILE "cd $sdir\n";
-	foreach my $infile ( @infiles ) {
-	    unless ( $mode == 3 && $infile =~ m/tar/ ) {
-		print NEWFILE "cp -p \$PBS_O_WORKDIR/${infile} .\n";
-	    }
-	}
-	print NEWFILE "echo Actual directory: \`pwd\`:\n";
-	print NEWFILE "ls -la\n";
-	print NEWFILE "echo Working directory: \$PBS_O_WORKDIR\n";
-	print NEWFILE "ls -la \$PBS_O_WORKDIR\n";
-#	print NEWFILE "echo cd to working dir ...\n"; 
-	my $args = "-v -b $batch -t $sdir -f $frev -j $jobnr -m $mode -o $order -p $pdf ";
-	if ( $idir ne "." ) { $args .= "-d $idir ";}
-	if ( $nmax ) { $args .= "-e $nmax ";}
-	if ( $ref ) { $args .= "-r ";}
- 	if ( $scen ) { $args .= "$scen";}
-	print NEWFILE "echo \"Running command ./fastrun.pl $args\\n\"\n";
-	print NEWFILE "./fastrun.pl $args\n";
-	print NEWFILE "echo Done!\\n\n";
-	close NEWFILE;
-	system("chmod 755 $cshfil");
-	my $cmd = "qsub -q $cequ $cshfil";
-	print "fastsub.pl: Running command $cmd\n";
-	system("$cmd");
+        $sublines{-o} = "${sdir}/${scen}${ref}_${order}.log_${jobnr}";
+        $sublines{-N} = "jobnr_${jobnr}";
+        my $cshfil = "${scen}${ref}_${order}.csh_${jobnr}";
+        open(NEWFILE,">$cshfil") or
+            die "fastsub.pl: Error! Could not open $cshfil!";
+        print NEWFILE "#!/bin/csh -f\n";
+        foreach my $key ( sort keys %sublines ) {
+            print NEWFILE "#PBS $key $sublines{$key}\n";
+        }
+        print NEWFILE "mkdir $sdir\n";
+        print NEWFILE "cd $sdir\n";
+        foreach my $infile ( @infiles ) {
+            unless ( $mode == 3 && $infile =~ m/tar/ ) {
+                print NEWFILE "cp -p \$PBS_O_WORKDIR/${infile} .\n";
+            }
+        }
+        print NEWFILE "echo Actual directory: \`pwd\`:\n";
+        print NEWFILE "ls -la\n";
+        print NEWFILE "echo Working directory: \$PBS_O_WORKDIR\n";
+        print NEWFILE "ls -la \$PBS_O_WORKDIR\n";
+#       print NEWFILE "echo cd to working dir ...\n";
+        my $args = "-v -b $batch -t $sdir -f $frev -j $jobnr -m $mode -o $order -p $pdf ";
+        if ( $idir ne "." ) { $args .= "-d $idir ";}
+        if ( $nmax ) { $args .= "-e $nmax ";}
+        if ( $ref ) { $args .= "-r ";}
+        if ( $scen ) { $args .= "$scen";}
+        print NEWFILE "echo \"Running command ./fastrun.pl $args\\n\"\n";
+        print NEWFILE "./fastrun.pl $args\n";
+        print NEWFILE "echo Done!\\n\n";
+        close NEWFILE;
+        system("chmod 755 $cshfil");
+        my $cmd = "qsub -q $cequ $cshfil";
+        print "fastsub.pl: Running command $cmd\n";
+        system("$cmd");
     }
     $jobnr++;
 }

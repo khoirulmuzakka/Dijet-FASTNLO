@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # fastNLO run script
 # Version:
-# 
+#
 # created by K. Rabbertz: 29.01.2006
 # last modified:
 #
@@ -26,18 +26,18 @@ my $gjobnr = "";
 if ( defined $ENV{MY_JOBID} ) {
     $gjobnr = $ENV{MY_JOBID};
 #    $gjobnr++;
-    $gjobnr = substr("0000$gjobnr",-4);	    
+    $gjobnr = substr("0000$gjobnr",-4);
     open STDOUT, "| tee fastrun_${gjobnr}.log" or die
-	"fastrun.pl: ERROR! Can't tee STDOUT.\n";
+        "fastrun.pl: ERROR! Can't tee STDOUT.\n";
     open STDERR, "| tee fastrun_${gjobnr}.err" or die
-	"fastrun.pl: ERROR! Can't tee STDERR.\n";
+        "fastrun.pl: ERROR! Can't tee STDERR.\n";
 #select STDERR; $| = 1;
 #select STDOUT; $| = 1;
 }
 
 my $date = `date +%d%m%Y_%H%M%S`;
 if ( $? ) {die "fastrun.pl: Error! date command failed, timing not possible,".
-	       " aborted.\n";}
+               " aborted.\n";}
 chomp $date;
 print "\n######################################\n";
 print "# fastrun.pl: Starting run of fastNLO: FASTRUN0_$date\n";
@@ -70,8 +70,8 @@ if ( $opt_h ) {
     print "  -r              Reference calculation incl. pdf access\n";
     print "  -s dir          Archive source directory (def.=.)\n";
     print "  -t dir          Output target directory: ".
-	"(def.= {scen}{ref}_{jobnr} with\n                  ".
-	"ref. to working directory in fastNLO installation)\n";
+        "(def.= {scen}{ref}_{jobnr} with\n                  ".
+        "ref. to working directory in fastNLO installation)\n";
     print "  -v #            Choose between fastNLO version 1a, 1b and 2 (def.=1b)\n";
     print "\n";
     print "Examples:\n";
@@ -147,7 +147,7 @@ unless ( $mode == 1 || $mode == 2 ) {
     print "fastrun.pl: Attaching job number $jobnr\n";
     print "fastrun.pl: Running in order $order\n";
     if ( $ref eq "ref" ) {
-	print "fastrun.pl: Running with pdf $pdf\n";
+        print "fastrun.pl: Running with pdf $pdf\n";
     }
 }
 if ( $mode != 1 && $ref ) {
@@ -183,7 +183,7 @@ unless ( $mode == 1 || $mode == 2 ) {
 # Set signal traps to store output table at end of allocated batch time
 #
 # Optimize batch running time, does not work reliably!
-#if ( $batch eq "GRID" ) { 
+#if ( $batch eq "GRID" ) {
 #    $SIG{INT}  = \&grid_storage;
 #    $SIG{TERM} = \&grid_storage;
 #}
@@ -192,8 +192,8 @@ unless ( $mode == 1 || $mode == 2 ) {
 # Initialization
 #
 # Switches for scenario cc file
-my $refsw0 = " iref = 0"; 
-my $refsw1 = " iref = 1"; 
+my $refsw0 = " iref = 0";
+my $refsw1 = " iref = 1";
 # Makefile switches
 my $maksw0 = "-o ${scen} ";
 my $maksw1 = "-o ${scen}ref ";
@@ -231,7 +231,7 @@ my $pwdir = getcwd();
 unless ( -d "$idir/src" ) {
     my $ret = system ("mkdir -p $idir/src");
     if ( $ret ) {die "fastrun.pl: Couldn't create unpacking ".
-		     "directory $idir/src: $ret, aborted!\n";}
+                     "directory $idir/src: $ret, aborted!\n";}
 }
 chdir "$idir";
 my $aidir = getcwd();
@@ -252,16 +252,16 @@ my $gccv1 = "3.3.6";
 my $gccvers = `gcc -dumpversion`;
 if ( $? ) {
     if ( $vers eq "1a" || $vers eq "1b" ) {
-	print "fastrun.pl: Warning! System gcc command failed. ".
-	    " Will use version $gccv1 anyway.\n";
+        print "fastrun.pl: Warning! System gcc command failed. ".
+            " Will use version $gccv1 anyway.\n";
     } else {
-	if ( $mode == 0 || $mode == 1 || $mode == 2 ) {
-	    die "fastrun.pl: Error! System gcc command failed, ".
-		" aborted.\n";
-	} else {
-	    print "fastrun.pl: Warning! System gcc command failed. ".
-		" Will try to run anyway.\n";
-	}
+        if ( $mode == 0 || $mode == 1 || $mode == 2 ) {
+            die "fastrun.pl: Error! System gcc command failed, ".
+                " aborted.\n";
+        } else {
+            print "fastrun.pl: Warning! System gcc command failed. ".
+                " Will try to run anyway.\n";
+        }
     }
 }
 if ( $vers eq "1a" || $vers eq "1b" ) {
@@ -271,7 +271,7 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
 }
 my $gccapp = "gcc$gccvers";
 $gccapp =~ s/\.//g;
-print "fastrun.pl: Using gcc compiler version $gccvers\n"; 
+print "fastrun.pl: Using gcc compiler version $gccvers\n";
 
 $install{mcfm}[0]       = "mcfm-5.3";
 $install{mcfm}[1]       = "MCFM-5.3";
@@ -279,7 +279,7 @@ $install{mcfmfix}[0]    = "mcfm-5.3-fix";
 $install{mcfmfix}[1]    = "MCFM-5.3";
 $install{fastNLO}[0]    = "fastNLO-rev${frev}";
 $install{fastNLO}[1]    = "fastNLO-rev${frev}";
-if ( $vers eq "1a" || $vers eq "1b" ) { 
+if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{gcccore}[0]    = "gcc-core-$gccvers";
     $install{gcccore}[1]    = "gcc-$gccvers";
     $install{gccgpp}[0]     = "gcc-g\+\+-$gccvers";
@@ -298,14 +298,14 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
     $install{nlojetfix}[0]  = "nlojet++-2.0.1-fix";
     $install{nlojetfix}[1]  = "nlojet++-2.0.1";
 } else {
-    if ( $gccvers lt "4.0.0" ) { 
+    if ( $gccvers lt "4.0.0" ) {
 # 2006 seems to work on slc4
-	$install{cernlib}[0]    = "cernlib-2006";
-	$install{cernlib}[1]    = "cernlib-2006";
+        $install{cernlib}[0]    = "cernlib-2006";
+        $install{cernlib}[1]    = "cernlib-2006";
     } else {
 # 2003 seems to work on SuSE 11.0 & Mandriva 10
-	$install{cernlib}[0]    = "cernlib-2003";
-	$install{cernlib}[1]    = "cernlib-2003";
+        $install{cernlib}[0]    = "cernlib-2003";
+        $install{cernlib}[1]    = "cernlib-2003";
     }
     $install{root}[0]       = "root-$rv";
     $install{root}[1]       = "root";
@@ -327,37 +327,37 @@ if ( $vers eq "1a" || $vers eq "1b" ) {
 
 foreach my $comp ( keys %install ) {
     if ( $comp =~ m/gcc/ ) {
-	$install{$comp}[2] = $install{$comp}[1];
-	$install{$comp}[3] = "gcc";
+        $install{$comp}[2] = $install{$comp}[1];
+        $install{$comp}[3] = "gcc";
 #    } elsif ( $comp =~ m/cern/ ) {
-#	$install{$comp}[2] = "cernlib-2006_slc4_ia32_gcc4";
-#	$install{$comp}[3] = "cernlib-2006_slc4_ia32_gcc4-v2";
+#       $install{$comp}[2] = "cernlib-2006_slc4_ia32_gcc4";
+#       $install{$comp}[3] = "cernlib-2006_slc4_ia32_gcc4-v2";
     } elsif ( $comp =~ m/fix/ ) {
-	$install{$comp}[2] = "";
-	$install{$comp}[3] = "";
+        $install{$comp}[2] = "";
+        $install{$comp}[3] = "";
     } else {
-	$install{$comp}[2] = $install{$comp}[0]."-$gccapp";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    $install{$comp}[3] = $install{$comp}[0]."-v1";
-	} else {
-	    $install{$comp}[3] = $install{$comp}[0]."-v2";
-	}
+        $install{$comp}[2] = $install{$comp}[0]."-$gccapp";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            $install{$comp}[3] = $install{$comp}[0]."-v1";
+        } else {
+            $install{$comp}[3] = $install{$comp}[0]."-v2";
+        }
     }
     $install{$comp}[0] .=".tar.gz";
     if ( $verb & ($mode < 2) ) {
-	print "fastrun.pl: Archive name: $install{$comp}[0]\n";
-	print "fastrun.pl: Unpack dir  : $install{$comp}[1]\n";
-	print "fastrun.pl: Install dir : $install{$comp}[2]\n";
-	print "fastrun.pl: Final link  : $install{$comp}[3]\n";
+        print "fastrun.pl: Archive name: $install{$comp}[0]\n";
+        print "fastrun.pl: Unpack dir  : $install{$comp}[1]\n";
+        print "fastrun.pl: Install dir : $install{$comp}[2]\n";
+        print "fastrun.pl: Final link  : $install{$comp}[3]\n";
 
     }
     unless ( $mode == 2 || $mode == 3 ||
-	     -d "$idir/$install{$comp}[2]" ||
-	     -f "$sdir/$install{$comp}[0]" ||
-	     ( $comp eq "lhapdf" && $pdf eq "CTEQ" ) ||
-	     ( $comp eq "root" && $rv eq "none" ) ) {
-	die "fastrun.pl: Archive $install{$comp}[0] does not exist, ".
-	    "aborted!\n";
+             -d "$idir/$install{$comp}[2]" ||
+             -f "$sdir/$install{$comp}[0]" ||
+             ( $comp eq "lhapdf" && $pdf eq "CTEQ" ) ||
+             ( $comp eq "root" && $rv eq "none" ) ) {
+        die "fastrun.pl: Archive $install{$comp}[0] does not exist, ".
+            "aborted!\n";
     }
 }
 
@@ -370,55 +370,55 @@ if ( $verb ) {
     print "######################################################\n";
     my $host = `hostname`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"hostname\" command failed.\n\n";
+        print "fastrun.pl: Info: \"hostname\" command failed.\n\n";
     } else {
-	chomp $host;
-	print "fastrun.pl: The system's hostname is (hostname):\n$host\n\n"; 
+        chomp $host;
+        print "fastrun.pl: The system's hostname is (hostname):\n$host\n\n";
     }
     my $osvers = `uname -a`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"uname -a\" command failed.\n\n";
+        print "fastrun.pl: Info: \"uname -a\" command failed.\n\n";
     } else {
-	print "fastrun.pl: Your operating system is (uname -a):\n$osvers\n";
+        print "fastrun.pl: Your operating system is (uname -a):\n$osvers\n";
     }
     my $procvers = `cat /proc/version`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"cat /proc/version\" command failed.\n\n";
+        print "fastrun.pl: Info: \"cat /proc/version\" command failed.\n\n";
     } else {
-	print "fastrun.pl: Your linux version is (/proc/version):\n$procvers\n";
+        print "fastrun.pl: Your linux version is (/proc/version):\n$procvers\n";
     }
     my $freemem = `free`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"free\" command failed.\n\n";
+        print "fastrun.pl: Info: \"free\" command failed.\n\n";
     } else {
-	print "fastrun.pl: The available memory is:\n$freemem\n";
+        print "fastrun.pl: The available memory is:\n$freemem\n";
     }
     my $cpumod = `cat /proc/cpuinfo | grep \"model name\"`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"cat /proc/cpuinfo\" command failed.\n\n";
+        print "fastrun.pl: Info: \"cat /proc/cpuinfo\" command failed.\n\n";
     } else {
-	my $cpufrq = `cat /proc/cpuinfo | grep \"cpu MHz\"`;
-	print "fastrun.pl: The processor type is:\n${cpumod}at\n${cpufrq}\n";
+        my $cpufrq = `cat /proc/cpuinfo | grep \"cpu MHz\"`;
+        print "fastrun.pl: The processor type is:\n${cpumod}at\n${cpufrq}\n";
     }
     my $freedisk = `df -h`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"df -h\" command failed.\n\n";
+        print "fastrun.pl: Info: \"df -h\" command failed.\n\n";
     } else {
-	print "fastrun.pl: The available disk space is:\n$freedisk\n";
+        print "fastrun.pl: The available disk space is:\n$freedisk\n";
     }
     my $freenode = `df -hi`;
     if ( $? ) {
-	print "fastrun.pl: Info: \"df -hi\" command failed.\n\n";
+        print "fastrun.pl: Info: \"df -hi\" command failed.\n\n";
     } else {
-	print "fastrun.pl: The available inode space is:\n$freenode\n";
+        print "fastrun.pl: The available inode space is:\n$freenode\n";
     }
     my $cwd = getcwd();
     if ( $? ) {
-	print "fastrun.pl: Info: \"getcwd()\" command failed.\n\n";
+        print "fastrun.pl: Info: \"getcwd()\" command failed.\n\n";
     } else {
-	print "fastrun.pl: The current working directory is:\n$cwd\n\n";
-	print "fastrun.pl: The current working directorys content is:\n";
-	system("ls -la");
+        print "fastrun.pl: The current working directory is:\n$cwd\n\n";
+        print "fastrun.pl: The current working directorys content is:\n";
+        system("ls -la");
     }
 #print "fastrun.pl: Installation environment:\n";
 #system("printenv");
@@ -432,13 +432,13 @@ if ( $verb ) {
 #
 if ( $mode == 0 || $mode == 1 ) {
     print "\nfastrun.pl: Setting fastNLO and gcc environment as ".
-	"required by this installation of fastNLO version $vers!\n";
+        "required by this installation of fastNLO version $vers!\n";
     print "fastrun.pl: Check fastNLO.(c)sh for reference and ".
-	"later \"source\"ing.\n";
+        "later \"source\"ing.\n";
     open (FILE,">> fastNLO.csh");
     print FILE "#\n";
     print FILE "# fastrun.pl: Setting fastNLO and gcc environment as ".
-	"required by this installation of fastNLO version $vers!\n";
+        "required by this installation of fastNLO version $vers!\n";
     print FILE "#\n";
 
 
@@ -448,88 +448,88 @@ if ( $mode == 0 || $mode == 1 ) {
 #
     if ( $vers eq "1a" || $vers eq "1b" ) {
 # Standard environment to use system compiler still
-	print FILE "# Add GCC 3.6.6 environment\n";
-	unless ( -e "$idir/$install{gcccore}[2]" ) {
-	    $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[0]: $date\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    if ( -l "$idir/$install{gcccore}[3]" ) {system("rm -f $idir/$install{gcccore}[3]");}
-	    system("ln -s $install{gcccore}[2] $idir/$install{gcccore}[3]");
-	    chdir "$idir/$install{gcccore}[3]";
-	    my $cmd = "./configure ".
-		"--prefix=$aidir/gcc ".
-		"--bindir=$aidir/bin ".
-		"--libdir=$aidir/lib ".
-		"--with-gxx-include-dir=$aidir/include";
-	    print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
-# Bugfix gcc	
-	    $ENV{SHELL} = "/bin/sh";
-	    $ret = system("$cmd");
-	    if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
-#	my @acmd = split(" ",$cmd);
-#	system(@acmd);
-	    $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-	    if ( $ENV{LD_LIBRARY_PATH} ) {
-		$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
-		    "$ENV{LD_LIBRARY_PATH}";
-	    } else {
-		$ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
-	    }
-	    $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
-	    chdir "..";
-	    print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
-	    $ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    chdir "$idir/gcc";
-	    system("make clean");
-	    print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
+        print FILE "# Add GCC 3.6.6 environment\n";
+        unless ( -e "$idir/$install{gcccore}[2]" ) {
+            $date = `date +%d%m%Y_%H%M%S`;
+            chomp $date;
+            print "\nfastrun.pl: Unpacking gcc-core sources in $install{gcccore}[0]: $date\n";
+            my $ret = system("tar xz -C $idir -f $sdir/$install{gcccore}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gcccore}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            if ( -l "$idir/$install{gcccore}[3]" ) {system("rm -f $idir/$install{gcccore}[3]");}
+            system("ln -s $install{gcccore}[2] $idir/$install{gcccore}[3]");
+            chdir "$idir/$install{gcccore}[3]";
+            my $cmd = "./configure ".
+                "--prefix=$aidir/gcc ".
+                "--bindir=$aidir/bin ".
+                "--libdir=$aidir/lib ".
+                "--with-gxx-include-dir=$aidir/include";
+            print "fastrun.pl: Configuring gcc for first compile (system compiler): $cmd ...\n";
+# Bugfix gcc
+            $ENV{SHELL} = "/bin/sh";
+            $ret = system("$cmd");
+            if ( $ret ) {die "fastrun.pl: 1st configure step of gcc failed: $ret, aborted!\n";}
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: 1st make step of gcc failed: $ret, aborted!\n";}
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: 1st install step of gcc failed: $ret, aborted!\n";}
+#       my @acmd = split(" ",$cmd);
+#       system(@acmd);
+            $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+            if ( $ENV{LD_LIBRARY_PATH} ) {
+                $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+                    "$ENV{LD_LIBRARY_PATH}";
+            } else {
+                $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+            }
+            $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
+            chdir "..";
+            print "fastrun.pl: Unpacking gcc-g++ and gcc-g77 sources in $install{gcccore}[1]: $date\n";
+            $ret = system("tar xz -C $idir -f $sdir/$install{gccgpp}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccgpp}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            $ret = system("tar xz -C $idir -f $sdir/$install{gccg77}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{gccg77}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            chdir "$idir/gcc";
+            system("make clean");
+            print "fastrun.pl: Configuring gcc for recompile (incl. gcc): $cmd ...\n";
 # In case a different "system's" compiler was chosen via CC, CXX and FC environment variables
             if ( $ENV{CC} ) {
-		print "fastrun.pl: Changing system's CC compiler $ENV{CC} to $aidir/bin/gcc\n";
-	    }
-	    $ENV{CC}  = "$aidir/bin/gcc";
+                print "fastrun.pl: Changing system's CC compiler $ENV{CC} to $aidir/bin/gcc\n";
+            }
+            $ENV{CC}  = "$aidir/bin/gcc";
             if ( $ENV{CXX} ) {
-		print "fastrun.pl: Changing system's CXX compiler $ENV{CXX} to $aidir/bin/g++\n";
-	    }
-	    $ENV{CXX}  = "$aidir/bin/g++";
+                print "fastrun.pl: Changing system's CXX compiler $ENV{CXX} to $aidir/bin/g++\n";
+            }
+            $ENV{CXX}  = "$aidir/bin/g++";
             if ( $ENV{FC} ) {
-		print "fastrun.pl: Changing system's FC compiler $ENV{FC} to $aidir/bin/g77\n";
-	    }
-	    $ENV{FC}  = "$aidir/bin/g77";
-	    $ret = system("$cmd");
-	    if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
-	    chdir "$aidir";
-	}
+                print "fastrun.pl: Changing system's FC compiler $ENV{FC} to $aidir/bin/g77\n";
+            }
+            $ENV{FC}  = "$aidir/bin/g77";
+            $ret = system("$cmd");
+            if ( $ret ) {die "fastrun.pl: 2nd configure step of gcc failed: $ret, aborted!\n";}
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: 2nd make step of gcc failed: $ret, aborted\n";}
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: 2nd install step of gcc failed: $ret, aborted\n";}
+            chdir "$aidir";
+        }
 # Switch to proper gcc-3.3.6 compiler if not already done
-	$ENV{SHELL} = "/bin/sh";
-	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
-	if ( $ENV{LD_LIBRARY_PATH} ) {
-	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
-		"$ENV{LD_LIBRARY_PATH}";
-	} else {
-	    $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
-	}
-	print FILE "setenv GCC_EXEC_PREFIX $aidir/lib/gcc-lib/\n";
-	print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
-	print FILE "#\n";
-	$ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
-	$ENV{CXXFLAGS} = "-O3 -I .";
-    }	
+        $ENV{SHELL} = "/bin/sh";
+        $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+        if ( $ENV{LD_LIBRARY_PATH} ) {
+            $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64:".
+                "$ENV{LD_LIBRARY_PATH}";
+        } else {
+            $ENV{LD_LIBRARY_PATH} = "$aidir/lib:$aidir/lib64";
+        }
+        print FILE "setenv GCC_EXEC_PREFIX $aidir/lib/gcc-lib/\n";
+        print FILE "setenv CXXFLAGS \"-O3 -I .\"\n";
+        print FILE "#\n";
+        $ENV{GCC_EXEC_PREFIX} = "$aidir/lib/gcc-lib/";
+        $ENV{CXXFLAGS} = "-O3 -I .";
+    }
 
 
 
@@ -538,97 +538,97 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 #    unless ( -e "$idir/src/$install{cernlib}[2]" ) {
     unless ( (($vers eq "1a" || $vers eq "1b") && $ENV{CERNLIB}) ||
-	     ($vers eq "2" && $ENV{CERN_ROOT} ) ) {
+             ($vers eq "2" && $ENV{CERN_ROOT} ) ) {
         $date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	chdir "$aidir/src";
-	print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
-	my $ret =system("tar xz -f $sdir/$install{cernlib}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[0] ".
-			 "in $aidir/src failed: $ret, aborted!\n";}
-	$ret = system("mv $install{cernlib}[1] $install{cernlib}[2]");
-	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{cernlib}[1] to ".
-			 "$install{cernlib}[2]: $ret, aborted!\n";}
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    unless ( -d "$aidir/$install{cernlib}[2]" ) {
-		my $ret = system("mv $install{cernlib}[2] $aidir");
-		if ( $ret ) {die "fastrun.pl: Couldn't move cernlib ".
-				 "directory to $aidir: $ret, aborted!\n";}
-	    }
-#	    if ( -l "$aidir/$install{cernlib}[3]" ) {system("rm -f $aidir/$install{cernlib}[3]");}
-#	    chdir $aidir;
-#	    system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
-	} else {
-	    unless ( -d "$aidir/lib" ) {
-		my $ret = system ("mkdir -p $aidir/lib");
-		if ( $ret ) {die "fastrun.pl: Couldn't create lib ".
-				 "directory $aidir/lib: $ret, aborted!\n";}
-	    }
-	    $ret = system("cp -p $install{cernlib}[2]/\* $aidir/lib");
-	    if ( $ret ) {die "fastrun.pl: Couldn't copy CERNlibs into ".
-			     "directory $aidir/lib: $ret, aborted!\n";}
-	}
-	print FILE "# Add CERNLIB environment\n";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    print FILE "setenv CERNLIB $aidir/$install{cernlib}[2]\n";
-	    $ENV{CERNLIB}  = "$aidir/$install{cernlib}[2]"; 
-	} else {
-	    print FILE "setenv CERN_ROOT $aidir\n";
-	    print FILE "setenv CERNLIBPATH $aidir/lib\n";
-	    print FILE "setenv CERNLIBS \"-L\$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib\"\n";
-	    $ENV{CERN_ROOT}   = "$aidir";
-	    $ENV{CERNLIBPATH} = "$aidir/lib";
-	    $ENV{CERNLIBS}    = "-L$ENV{CERN_ROOT}/lib -lmathlib -lkernlib -lpacklib";
-	}
-	print FILE "#\n";
+        chomp $date;
+        chdir "$aidir/src";
+        print "\nfastrun.pl: Unpacking CERN libraries in $install{cernlib}[1]: $date\n";
+        my $ret =system("tar xz -f $sdir/$install{cernlib}[0]");
+        if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{cernlib}[0] ".
+                         "in $aidir/src failed: $ret, aborted!\n";}
+        $ret = system("mv $install{cernlib}[1] $install{cernlib}[2]");
+        if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                         "$install{cernlib}[1] to ".
+                         "$install{cernlib}[2]: $ret, aborted!\n";}
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            unless ( -d "$aidir/$install{cernlib}[2]" ) {
+                my $ret = system("mv $install{cernlib}[2] $aidir");
+                if ( $ret ) {die "fastrun.pl: Couldn't move cernlib ".
+                                 "directory to $aidir: $ret, aborted!\n";}
+            }
+#           if ( -l "$aidir/$install{cernlib}[3]" ) {system("rm -f $aidir/$install{cernlib}[3]");}
+#           chdir $aidir;
+#           system("ln -s $install{cernlib}[2] $idir/$install{cernlib}[3]");
+        } else {
+            unless ( -d "$aidir/lib" ) {
+                my $ret = system ("mkdir -p $aidir/lib");
+                if ( $ret ) {die "fastrun.pl: Couldn't create lib ".
+                                 "directory $aidir/lib: $ret, aborted!\n";}
+            }
+            $ret = system("cp -p $install{cernlib}[2]/\* $aidir/lib");
+            if ( $ret ) {die "fastrun.pl: Couldn't copy CERNlibs into ".
+                             "directory $aidir/lib: $ret, aborted!\n";}
+        }
+        print FILE "# Add CERNLIB environment\n";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            print FILE "setenv CERNLIB $aidir/$install{cernlib}[2]\n";
+            $ENV{CERNLIB}  = "$aidir/$install{cernlib}[2]";
+        } else {
+            print FILE "setenv CERN_ROOT $aidir\n";
+            print FILE "setenv CERNLIBPATH $aidir/lib\n";
+            print FILE "setenv CERNLIBS \"-L\$CERN_ROOT/lib -lmathlib -lkernlib -lpacklib\"\n";
+            $ENV{CERN_ROOT}   = "$aidir";
+            $ENV{CERNLIBPATH} = "$aidir/lib";
+            $ENV{CERNLIBS}    = "-L$ENV{CERN_ROOT}/lib -lmathlib -lkernlib -lpacklib";
+        }
+        print FILE "#\n";
     }
     chdir "$pwdir";
 # ROOT
     if ( $vers eq "2" ) {
-#	unless ( -e "$aidir/src/$install{root}[2]" ) {
-	unless ( $ENV{ROOTSYS} || $rv eq "none") {
-	    $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    chdir "$aidir/src";
-	    print "\nfastrun.pl: Installing ROOT from $install{root}[0]: $date\n";
-	    if ($verb) {print "fastrun.pl: Unpacking directory is $aidir/src\n";}
-	    print "\nfastrun.pl: Unpacking $install{root}[0] ...\n";
-	    my $ret = system("tar xz -f $sdir/$install{root}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
-			     "$sdir/$install{root}[0] ".
-			     "into $aidir/src failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{root}[1] $install{root}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{root}[1] to ".
-			     "$install{root}[2]: $ret, aborted!\n";}
-#	    if ( -l "$idir/$install{root}[3]" ) {system("rm -f $idir/$install{root}[3]");}
-#	    system("ln -s $install{root}[2] $idir/$install{root}[3]");
-	    chdir "$install{root}[2]";
-	    print "\nfastrun.pl: Configuring ROOT ...\n";
-	    my $cmd = "./configure --enable-roofit --prefix=$aidir --etcdir=$aidir/etc --with-cxx=\"gcc -Wall\"\n";
-	    if ( $verb ) {print "$cmd"};
-	    $ret = system("./configure --enable-roofit --prefix=$aidir --etcdir=$aidir/etc --with-cxx=\"gcc -Wall\"");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making ROOT ...\n";
-# No multithreaded make for ROOT :-( 
-#	    $ret = system("make -j2");
-	    $ret = system("make");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for ROOT ...\n";
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make install step, aborted!\n";}
-	    print FILE "# Add ROOT environment\n";
-	    print FILE "setenv ROOTSYS $aidir\n";
-	    print FILE "setenv ROOTBINPATH $aidir/bin\n";
-	    print FILE "setenv ROOTLIBPATH $aidir/lib/root\n";
-	    print FILE "setenv ROOTINCLUDEPATH $aidir/include/root\n";
-	    print FILE "#\n";
-	    $ENV{ROOTSYS}         = "$aidir";
-	    $ENV{ROOTBINPATH}     = "$aidir/bin";
-	    $ENV{ROOTLIBPATH}     = "$aidir/lib/root";
-	    $ENV{ROOTINCLUDEPATH} = "$aidir/include/root";
-	}
+#       unless ( -e "$aidir/src/$install{root}[2]" ) {
+        unless ( $ENV{ROOTSYS} || $rv eq "none") {
+            $date = `date +%d%m%Y_%H%M%S`;
+            chomp $date;
+            chdir "$aidir/src";
+            print "\nfastrun.pl: Installing ROOT from $install{root}[0]: $date\n";
+            if ($verb) {print "fastrun.pl: Unpacking directory is $aidir/src\n";}
+            print "\nfastrun.pl: Unpacking $install{root}[0] ...\n";
+            my $ret = system("tar xz -f $sdir/$install{root}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
+                             "$sdir/$install{root}[0] ".
+                             "into $aidir/src failed: $ret, aborted!\n";}
+            $ret = system("mv $install{root}[1] $install{root}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{root}[1] to ".
+                             "$install{root}[2]: $ret, aborted!\n";}
+#           if ( -l "$idir/$install{root}[3]" ) {system("rm -f $idir/$install{root}[3]");}
+#           system("ln -s $install{root}[2] $idir/$install{root}[3]");
+            chdir "$install{root}[2]";
+            print "\nfastrun.pl: Configuring ROOT ...\n";
+            my $cmd = "./configure --enable-roofit --prefix=$aidir --etcdir=$aidir/etc --with-cxx=\"gcc -Wall\"\n";
+            if ( $verb ) {print "$cmd"};
+            $ret = system("./configure --enable-roofit --prefix=$aidir --etcdir=$aidir/etc --with-cxx=\"gcc -Wall\"");
+            if ( $ret ) {die "fastrun.pl: Error $ret in ROOT configure step, aborted!\n";}
+            print "\nfastrun.pl: Making ROOT ...\n";
+# No multithreaded make for ROOT :-(
+#           $ret = system("make -j2");
+            $ret = system("make");
+            if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for ROOT ...\n";
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: Error $ret in ROOT make install step, aborted!\n";}
+            print FILE "# Add ROOT environment\n";
+            print FILE "setenv ROOTSYS $aidir\n";
+            print FILE "setenv ROOTBINPATH $aidir/bin\n";
+            print FILE "setenv ROOTLIBPATH $aidir/lib/root\n";
+            print FILE "setenv ROOTINCLUDEPATH $aidir/include/root\n";
+            print FILE "#\n";
+            $ENV{ROOTSYS}         = "$aidir";
+            $ENV{ROOTBINPATH}     = "$aidir/bin";
+            $ENV{ROOTLIBPATH}     = "$aidir/lib/root";
+            $ENV{ROOTINCLUDEPATH} = "$aidir/include/root";
+        }
     }
     chdir "$pwdir";
 #exit 1;
@@ -639,85 +639,85 @@ if ( $mode == 0 || $mode == 1 ) {
 # 2) Install lhapdf
 #
 #    unless ( -e "$idir/$install{lhapdf}[2]" ||
-#	     ( ($vers eq "1a" || $vers eq "1b") && $pdf eq "CTEQ") ||
-#	     ( $vers eq "2" && -e "$idir/src/$install{lhapdf}[2]" ) ) {
+#            ( ($vers eq "1a" || $vers eq "1b") && $pdf eq "CTEQ") ||
+#            ( $vers eq "2" && -e "$idir/src/$install{lhapdf}[2]" ) ) {
     unless ( $ENV{LHAPDF} || $pdf eq "CTEQ") {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[0]: $date\n";
-	print FILE "# Add LHAPDF environment\n";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{lhapdf}[1] $idir/$install{lhapdf}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{lhapdf}[1] to ".
-			     "$idir/$install{lhapdf}[2]: $ret, aborted!\n";}
-#	    if ( -l "$idir/$install{lhapdf}[3]" ) {system("rm -f $idir/$install{lhapdf}[3]");}
-#	    system("ln -s $install{lhapdf}[2] $idir/$install{lhapdf}[3]");
-	    chdir "$idir/$install{lhapdf}[2]";
-	    print "\nfastrun.pl: Configuring lhapdf ...\n";
-#	     system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing lhapdf from $install{lhapdf}[0]: $date\n";
+        print FILE "# Add LHAPDF environment\n";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
+            my $ret = system("tar xz -C $idir -f $sdir/$install{lhapdf}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdf}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            $ret = system("mv $install{lhapdf}[1] $idir/$install{lhapdf}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{lhapdf}[1] to ".
+                             "$idir/$install{lhapdf}[2]: $ret, aborted!\n";}
+#           if ( -l "$idir/$install{lhapdf}[3]" ) {system("rm -f $idir/$install{lhapdf}[3]");}
+#           system("ln -s $install{lhapdf}[2] $idir/$install{lhapdf}[3]");
+            chdir "$idir/$install{lhapdf}[2]";
+            print "\nfastrun.pl: Configuring lhapdf ...\n";
+#            system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 # Avoid Python Murks in LHAPDF >= 5.4.0
-	    $ret = system("./configure --prefix=`pwd` --disable-pyext");
-#	     $ret = system("./configure --prefix=`pwd`");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making lhapdf ...\n";
+            $ret = system("./configure --prefix=`pwd` --disable-pyext");
+#            $ret = system("./configure --prefix=`pwd`");
+            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
+            print "\nfastrun.pl: Making lhapdf ...\n";
 # At least until LHAPDF 5.3.1 a race condition spoils multithreaded make!
-	    $ret = system("make");
+            $ret = system("make");
 # Works now, maybe not
-#	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for lhapdf ...\n";
-	    $ret = system("make install");
+#           $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for lhapdf ...\n";
+            $ret = system("make install");
 # In addition, there is a double lhapdf-config creation => ignore this error
-#	     if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
-	    if ( $ret ) {print "fastrun.pl: Error $ret in LHAPDF make install step ignored!\n";}
-	    print FILE "setenv LHAPDF  $aidir/$install{lhapdf}[2]/lib\n";
-	    $ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
-	} else {
-	    chdir "$aidir/src";
-	    print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
-	    my $ret = system("tar xz -f $sdir/$install{lhapdf}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
-			     "$sdir/$install{lhapdf}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    print "\nfastrun.pl: Unpacking fix for $install{lhapdf}[0] ...\n";
-	    $ret = system("tar xz -f $sdir/$install{lhapdffix}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdffix}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{lhapdf}[1] $install{lhapdf}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{lhapdf}[1] to ".
-			     "$install{lhapdf}[2]: $ret, aborted!\n";}
-	    chdir "$install{lhapdf}[2]";
-	    print "\nfastrun.pl: Configuring lhapdf ...\n";
-#	     system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+#            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
+            if ( $ret ) {print "fastrun.pl: Error $ret in LHAPDF make install step ignored!\n";}
+            print FILE "setenv LHAPDF  $aidir/$install{lhapdf}[2]/lib\n";
+            $ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+        } else {
+            chdir "$aidir/src";
+            print "\nfastrun.pl: Unpacking $install{lhapdf}[0] ...\n";
+            my $ret = system("tar xz -f $sdir/$install{lhapdf}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive ".
+                             "$sdir/$install{lhapdf}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            print "\nfastrun.pl: Unpacking fix for $install{lhapdf}[0] ...\n";
+            $ret = system("tar xz -f $sdir/$install{lhapdffix}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhapdffix}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            $ret = system("mv $install{lhapdf}[1] $install{lhapdf}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{lhapdf}[1] to ".
+                             "$install{lhapdf}[2]: $ret, aborted!\n";}
+            chdir "$install{lhapdf}[2]";
+            print "\nfastrun.pl: Configuring lhapdf ...\n";
+#            system("./configure --prefix=`pwd` --exec-prefix=$aidir");
 # Avoid Python Murks in LHAPDF >= 5.4.0
-	    $ret = system("./configure --prefix=$aidir --disable-pyext");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making lhapdf ...\n";
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for lhapdf ...\n";
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
-	    print FILE "setenv LHAPDF $aidir\n";
-	    print FILE "setenv LHAPDFBINPATH $aidir/bin\n";
-	    print FILE "setenv LHAPDFLIBPATH $aidir/lib\n";
-	    print FILE "setenv LHAPDFINCLUDEPATH $aidir/include/LHAPDF\n";
-	    $ENV{LHAPDF}            = "$aidir";
-	    $ENV{LHAPDFBINPATH}     = "$aidir/bin";
-	    $ENV{LHAPDFLIBPATH}     = "$aidir/lib";
-	    $ENV{LHAPDFINCLUDEPATH} = "$aidir/include/LHAPDF";
-	    $ret = `$aidir/bin/lhapdf-config --pdfsets-path`;
-	    chomp $ret;
-	    print FILE "setenv LHAPDFSETPATH $ret\n";
-	    $ENV{LHAPDFSETPATH} = "$ret";
-	}
-	print FILE "#\n";
+            $ret = system("./configure --prefix=$aidir --disable-pyext");
+            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF configure step, aborted!\n";}
+            print "\nfastrun.pl: Making lhapdf ...\n";
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for lhapdf ...\n";
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: Error $ret in LHAPDF make install step, aborted!\n";}
+            print FILE "setenv LHAPDF $aidir\n";
+            print FILE "setenv LHAPDFBINPATH $aidir/bin\n";
+            print FILE "setenv LHAPDFLIBPATH $aidir/lib\n";
+            print FILE "setenv LHAPDFINCLUDEPATH $aidir/include/LHAPDF\n";
+            $ENV{LHAPDF}            = "$aidir";
+            $ENV{LHAPDFBINPATH}     = "$aidir/bin";
+            $ENV{LHAPDFLIBPATH}     = "$aidir/lib";
+            $ENV{LHAPDFINCLUDEPATH} = "$aidir/include/LHAPDF";
+            $ret = `$aidir/bin/lhapdf-config --pdfsets-path`;
+            chomp $ret;
+            print FILE "setenv LHAPDFSETPATH $ret\n";
+            $ENV{LHAPDFSETPATH} = "$ret";
+        }
+        print FILE "#\n";
     }
     chdir "$pwdir";
 #exit 2;
@@ -728,76 +728,76 @@ if ( $mode == 0 || $mode == 1 ) {
 # 3) Install fastjet
 #
 #    unless ( -e "$idir/$install{fastjet}[2]" ||
-#	     ( $vers eq "2" && -e "$idir/src/$install{fastjet}[2]" ) ) {
+#            ( $vers eq "2" && -e "$idir/src/$install{fastjet}[2]" ) ) {
     unless ( $ENV{FASTJET} ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing fastjet from $install{fastjet}[0]: $date\n";
-	print FILE "# Add FASTJET environment\n";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{fastjet}[1] $idir/$install{fastjet}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{fastjet}[1] to ".
-			     "$idir/$install{fastjet}[2]: $ret, aborted!\n";}
-#	    if ( -l "$idir/$install{fastjet}[3]" ) {system("rm -f $idir/$install{fastjet}[3]");}
-#	    system("ln -s $install{fastjet}[2] $idir/$install{fastjet}[3]");
-	    chdir "$idir/$install{fastjet}[2]";
-	    print "\nfastrun.pl: Configuring fastjet ...\n";
-	    $ret = system("./configure --enable-shared --prefix=`pwd` --bindir=$aidir/bin");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making fastjet ...\n";
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for fastjet ...\n";
-	    $ret = system("make install");
-	    if ( $ret ) {print "fastrun.pl: Error $ret in fastjet make install step ignored!\n";}
-	    print "\nfastrun.pl: Checking fastjet ...\n";
-	    $ret = system("make check");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
-	    print FILE "setenv FASTJET $aidir/$install{fastjet}[2]\n";
-	    $ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
-	} else {
-	    chdir "$aidir/src";
-	    print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
-	    my $ret = system("tar xz -f $sdir/$install{fastjet}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{fastjet}[1] $install{fastjet}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{fastjet}[1] to ".
-			     "$install{fastjet}[2]: $ret, aborted!\n";}
-	    chdir "$install{fastjet}[2]";
-	    print "\nfastrun.pl: Configuring fastjet ...\n";
-	    $ret = system("./configure --enable-shared --prefix=$aidir --bindir=$aidir/bin");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making fastjet ...\n";
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for fastjet ...\n";
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make install step, aborted!\n";}
-	    print "\nfastrun.pl: Checking fastjet ...\n";
-	    $ret = system("make check");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
-	    print FILE "setenv FASTJET $aidir\n";
-	    print FILE "setenv FASTJETBINPATH $aidir/bin\n";
-	    print FILE "setenv FASTJETLIBPATH $aidir/lib\n";
-	    print FILE "setenv FASTJETINCLUDEPATH $aidir/include/fastjet\n";
-	    $ENV{FASTJET}            = "$aidir";
-	    $ENV{FASTJETBINPATH}     = "$aidir/bin";
-	    $ENV{FASTJETLIBPATH}     = "$aidir/lib";
-	    $ENV{FASTJETINCLUDEPATH} = "$aidir/include/fastjet";
-	    $ret = `$aidir/bin/fastjet-config --libs`;
-	    chomp $ret;
-	    print FILE "setenv FASTJETLIBS \"$ret\"";
-	    print FILE "\n";
-	    $ENV{FASTJETLIBS} = "$ret";
-	}
-	print FILE "#\n";
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing fastjet from $install{fastjet}[0]: $date\n";
+        print FILE "# Add FASTJET environment\n";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
+            my $ret = system("tar xz -C $idir -f $sdir/$install{fastjet}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            $ret = system("mv $install{fastjet}[1] $idir/$install{fastjet}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{fastjet}[1] to ".
+                             "$idir/$install{fastjet}[2]: $ret, aborted!\n";}
+#           if ( -l "$idir/$install{fastjet}[3]" ) {system("rm -f $idir/$install{fastjet}[3]");}
+#           system("ln -s $install{fastjet}[2] $idir/$install{fastjet}[3]");
+            chdir "$idir/$install{fastjet}[2]";
+            print "\nfastrun.pl: Configuring fastjet ...\n";
+            $ret = system("./configure --enable-shared --prefix=`pwd` --bindir=$aidir/bin");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
+            print "\nfastrun.pl: Making fastjet ...\n";
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for fastjet ...\n";
+            $ret = system("make install");
+            if ( $ret ) {print "fastrun.pl: Error $ret in fastjet make install step ignored!\n";}
+            print "\nfastrun.pl: Checking fastjet ...\n";
+            $ret = system("make check");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
+            print FILE "setenv FASTJET $aidir/$install{fastjet}[2]\n";
+            $ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
+        } else {
+            chdir "$aidir/src";
+            print "\nfastrun.pl: Unpacking $install{fastjet}[0] ...\n";
+            my $ret = system("tar xz -f $sdir/$install{fastjet}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastjet}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            $ret = system("mv $install{fastjet}[1] $install{fastjet}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{fastjet}[1] to ".
+                             "$install{fastjet}[2]: $ret, aborted!\n";}
+            chdir "$install{fastjet}[2]";
+            print "\nfastrun.pl: Configuring fastjet ...\n";
+            $ret = system("./configure --enable-shared --prefix=$aidir --bindir=$aidir/bin");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet configure step, aborted!\n";}
+            print "\nfastrun.pl: Making fastjet ...\n";
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for fastjet ...\n";
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet make install step, aborted!\n";}
+            print "\nfastrun.pl: Checking fastjet ...\n";
+            $ret = system("make check");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastjet check step, aborted!\n";}
+            print FILE "setenv FASTJET $aidir\n";
+            print FILE "setenv FASTJETBINPATH $aidir/bin\n";
+            print FILE "setenv FASTJETLIBPATH $aidir/lib\n";
+            print FILE "setenv FASTJETINCLUDEPATH $aidir/include/fastjet\n";
+            $ENV{FASTJET}            = "$aidir";
+            $ENV{FASTJETBINPATH}     = "$aidir/bin";
+            $ENV{FASTJETLIBPATH}     = "$aidir/lib";
+            $ENV{FASTJETINCLUDEPATH} = "$aidir/include/fastjet";
+            $ret = `$aidir/bin/fastjet-config --libs`;
+            chomp $ret;
+            print FILE "setenv FASTJETLIBS \"$ret\"";
+            print FILE "\n";
+            $ENV{FASTJETLIBS} = "$ret";
+        }
+        print FILE "#\n";
     }
     chdir "$pwdir";
 #exit 3;
@@ -808,79 +808,79 @@ if ( $mode == 0 || $mode == 1 ) {
 # 4) Install Nlojet++
 #
 #    unless ( -e "$idir/$install{nlojet}[2]" ||
-#	     ( $vers eq "2" && -e "$idir/src/$install{nlojet}[2]" ) ) {
+#            ( $vers eq "2" && -e "$idir/src/$install{nlojet}[2]" ) ) {
     unless ( $ENV{NLOJET} ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[0]: $date\n";
-	print FILE "# Add NLOJET environment\n";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
-	    $ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{nlojet}[1] $idir/$install{nlojet}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{nlojet}[1] to ".
-			     "$idir/$install{nlojet}[2]: $ret, aborted!\n";}
-#	    if ( -l "$idir/$install{nlojet}[3]" ) {system("rm -f $idir/$install{nlojet}[3]");}
-#	    system("ln -s $install{nlojet}[2] $idir/$install{nlojet}[3]");
-	    
-	    print "0: $install{nlojet}[0]\n";
-	    print "1: $install{nlojet}[1]\n";
-	    print "2: $install{nlojet}[2]\n";
-	    
-	    chdir "$idir/$install{nlojet}[2]";
-	    print "\nfastrun.pl: Configuring Nlojet++ ...\n";
-#	system("./configure --prefix=`pwd` --exec-prefix=$aidir");
-	    $ret = system("./configure --prefix=`pwd`");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making Nlojet++ ...\n";
-	    $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for Nlojet++ ...\n";
-	    $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
-	    print FILE "setenv NLOJET  $aidir/$install{nlojet}[2]\n";
-	    $ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
-	} else {
-	    chdir "$aidir/src";
-	    print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
-	    my $ret = system("tar xz -f $sdir/$install{nlojet}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
-	    $ret = system("tar xz -f $sdir/$install{nlojetfix}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{nlojet}[1] $install{nlojet}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{nlojet}[1] to ".
-			     "$install{nlojet}[2]: $ret, aborted!\n";}
-	    chdir "$install{nlojet}[2]";
-	    print "\nfastrun.pl: Configuring Nlojet++ ...\n";
-	    $ret = system("./configure --prefix=$aidir");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
-	    print "\nfastrun.pl: Making Nlojet++ ...\n";
-	    $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
-	    print "\nfastrun.pl: Make install for Nlojet++ ...\n";
-	    $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
-	    print FILE "setenv NLOJET $aidir\n";
-	    print FILE "setenv NLOJETBINPATH $aidir/bin\n";
-	    print FILE "setenv NLOJETLIBPATH $aidir/lib\n";
-	    print FILE "setenv NLOJETINCLUDEPATH $aidir/include/nlo++\n";
-	    $ENV{NLOJET}            = "$aidir";
-	    $ENV{NLOJETBINPATH}     = "$aidir/bin";
-	    $ENV{NLOJETLIBPATH}     = "$aidir/lib";
-	    $ENV{NLOJETINCLUDEPATH} = "$aidir/include/nlo++";
-	}
-	print FILE "#\n";
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing Nlojet++ from $install{nlojet}[0]: $date\n";
+        print FILE "# Add NLOJET environment\n";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
+            my $ret = system("tar xz -C $idir -f $sdir/$install{nlojet}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+            $ret = system("tar xzv -C $idir -f $sdir/$install{nlojetfix}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            $ret = system("mv $install{nlojet}[1] $idir/$install{nlojet}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{nlojet}[1] to ".
+                             "$idir/$install{nlojet}[2]: $ret, aborted!\n";}
+#           if ( -l "$idir/$install{nlojet}[3]" ) {system("rm -f $idir/$install{nlojet}[3]");}
+#           system("ln -s $install{nlojet}[2] $idir/$install{nlojet}[3]");
+
+            print "0: $install{nlojet}[0]\n";
+            print "1: $install{nlojet}[1]\n";
+            print "2: $install{nlojet}[2]\n";
+
+            chdir "$idir/$install{nlojet}[2]";
+            print "\nfastrun.pl: Configuring Nlojet++ ...\n";
+#       system("./configure --prefix=`pwd` --exec-prefix=$aidir");
+            $ret = system("./configure --prefix=`pwd`");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
+            print "\nfastrun.pl: Making Nlojet++ ...\n";
+            $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for Nlojet++ ...\n";
+            $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
+            print FILE "setenv NLOJET  $aidir/$install{nlojet}[2]\n";
+            $ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
+        } else {
+            chdir "$aidir/src";
+            print "\nfastrun.pl: Unpacking $install{nlojet}[0] ...\n";
+            my $ret = system("tar xz -f $sdir/$install{nlojet}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojet}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            print "\nfastrun.pl: Unpacking fix for $install{nlojet}[0] ...\n";
+            $ret = system("tar xz -f $sdir/$install{nlojetfix}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{nlojetfix}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            $ret = system("mv $install{nlojet}[1] $install{nlojet}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{nlojet}[1] to ".
+                             "$install{nlojet}[2]: $ret, aborted!\n";}
+            chdir "$install{nlojet}[2]";
+            print "\nfastrun.pl: Configuring Nlojet++ ...\n";
+            $ret = system("./configure --prefix=$aidir");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ configure step, aborted!\n";}
+            print "\nfastrun.pl: Making Nlojet++ ...\n";
+            $ret = system("make -j2 CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make step, aborted!\n";}
+            print "\nfastrun.pl: Make install for Nlojet++ ...\n";
+            $ret = system("make install CFLAGS=\"-O3 -Wall\" CXXFLAGS=\"-O3 -Wall\"");
+            if ( $ret ) {die "fastrun.pl: Error $ret in NLOJET++ make install step, aborted!\n";}
+            print FILE "setenv NLOJET $aidir\n";
+            print FILE "setenv NLOJETBINPATH $aidir/bin\n";
+            print FILE "setenv NLOJETLIBPATH $aidir/lib\n";
+            print FILE "setenv NLOJETINCLUDEPATH $aidir/include/nlo++\n";
+            $ENV{NLOJET}            = "$aidir";
+            $ENV{NLOJETBINPATH}     = "$aidir/bin";
+            $ENV{NLOJETLIBPATH}     = "$aidir/lib";
+            $ENV{NLOJETINCLUDEPATH} = "$aidir/include/nlo++";
+        }
+        print FILE "#\n";
     }
     chdir "$pwdir";
 #exit 4;
@@ -891,41 +891,41 @@ if ( $mode == 0 || $mode == 1 ) {
 # 4b) Install lhpdf for Nlojet++, only for version 2
 #
     if ( $vers eq "2" && ! $ENV{LHPDF} ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing lhpdf from $install{lhpdf}[0]: $date\n";
-	chdir "$aidir/src";
-	print "\nfastrun.pl: Unpacking $install{lhpdf}[0] ...\n";
-	my $ret = system("tar xz -f $sdir/$install{lhpdf}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdf}[0] ".
-			 "in $aidir/src failed: $ret, aborted!\n";}
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing lhpdf from $install{lhpdf}[0]: $date\n";
+        chdir "$aidir/src";
+        print "\nfastrun.pl: Unpacking $install{lhpdf}[0] ...\n";
+        my $ret = system("tar xz -f $sdir/$install{lhpdf}[0]");
+        if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdf}[0] ".
+                         "in $aidir/src failed: $ret, aborted!\n";}
 
-	print "\nfastrun.pl: Unpacking fix for $install{lhpdf}[0] ...\n";
-	$ret = system("tar xz -f $sdir/$install{lhpdffix}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdffix}[0] ".
-			 "in $aidir/src failed: $ret, aborted!\n";}
-	$ret = system("mv $install{lhpdf}[1] $install{lhpdf}[2]");
-	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{lhpdf}[1] to ".
-			 "$install{lhpdf}[2]: $ret, aborted!\n";}
-	chdir "$install{lhpdf}[2]";
-	print "\nfastrun.pl: Configuring lhpdf ...\n";
-	$ret = system("./configure --prefix=$aidir");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf configure step, aborted!\n";}
-	print "\nfastrun.pl: Making lhpdf ...\n";
-	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make step, aborted!\n";}
-	print "\nfastrun.pl: Make install for lhpdf ...\n";
-	$ret = system("make install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make install step, aborted!\n";}
-	print FILE "# Add LHPDF environment\n";
-	print FILE "setenv LHPDF $aidir\n";
-	print FILE "setenv LHPDFLIBPATH $aidir/lib\n";
-	print FILE "setenv LHPDFINCLUDEPATH $aidir/include/lhpdf\n";
-	print FILE "#\n";
-	$ENV{LHPDF}            = "$aidir";
-	$ENV{LHPDFLIBPATH}     = "$aidir/lib";
-	$ENV{LHPDFINCLUDEPATH} = "$aidir/include/lhpdf";
+        print "\nfastrun.pl: Unpacking fix for $install{lhpdf}[0] ...\n";
+        $ret = system("tar xz -f $sdir/$install{lhpdffix}[0]");
+        if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{lhpdffix}[0] ".
+                         "in $aidir/src failed: $ret, aborted!\n";}
+        $ret = system("mv $install{lhpdf}[1] $install{lhpdf}[2]");
+        if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                         "$install{lhpdf}[1] to ".
+                         "$install{lhpdf}[2]: $ret, aborted!\n";}
+        chdir "$install{lhpdf}[2]";
+        print "\nfastrun.pl: Configuring lhpdf ...\n";
+        $ret = system("./configure --prefix=$aidir");
+        if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf configure step, aborted!\n";}
+        print "\nfastrun.pl: Making lhpdf ...\n";
+        $ret = system("make -j2");
+        if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make step, aborted!\n";}
+        print "\nfastrun.pl: Make install for lhpdf ...\n";
+        $ret = system("make install");
+        if ( $ret ) {die "fastrun.pl: Error $ret in lhpdf make install step, aborted!\n";}
+        print FILE "# Add LHPDF environment\n";
+        print FILE "setenv LHPDF $aidir\n";
+        print FILE "setenv LHPDFLIBPATH $aidir/lib\n";
+        print FILE "setenv LHPDFINCLUDEPATH $aidir/include/lhpdf\n";
+        print FILE "#\n";
+        $ENV{LHPDF}            = "$aidir";
+        $ENV{LHPDFLIBPATH}     = "$aidir/lib";
+        $ENV{LHPDFINCLUDEPATH} = "$aidir/include/lhpdf";
     }
     chdir "$pwdir";
 #exit 4;
@@ -935,39 +935,39 @@ if ( $mode == 0 || $mode == 1 ) {
 #
 # 5) Install mcfm
 #
-# CERNLIB var already needed for mcfm    
+# CERNLIB var already needed for mcfm
     if ( $vers eq 3 ) {
     print "\nfastrun.pl: Setting environment variable CERNLIB for mcfm to:\n";
     my $cwdir = getcwd();
-    $ENV{CERNLIB} = "$ENV{CERN_ROOT}/lib"; 
+    $ENV{CERNLIB} = "$ENV{CERN_ROOT}/lib";
     print "\nfastrun.pl: $ENV{CERNLIB}\n";
     unless ( -e "$idir/$install{mcfm}[2]" ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing mcfm from $install{mcfm}[0]: $date\n";
-	print "\nfastrun.pl: Unpacking $install{mcfm}[0] ...\n";
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing mcfm from $install{mcfm}[0]: $date\n";
+        print "\nfastrun.pl: Unpacking $install{mcfm}[0] ...\n";
 # Old mcfm version 5
-#	system ("mkdir $idir/$install{mcfm}[0]");
-#	my $ret = system("tar xz -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfm}[1]");
-	my $ret = system("tar xz -C $idir -f $sdir/$install{mcfm}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfm}[0] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	print "\nfastrun.pl: Unpacking fix for $install{mcfm}[0] ...\n";
-	$ret = system("tar xzv -C $idir -f $sdir/$install{mcfmfix}[0]");
-	if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfmfix}[0] ".
-			 "in $idir failed: $ret, aborted!\n";}
-	$ret = system("mv $install{mcfm}[1] $idir/$install{mcfm}[2]");
-	if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			 "$install{mcfm}[1] to ".
-			 "$idir/$install{mcfm}[2]: $ret, aborted!\n";}
-#	if ( -l "$idir/$install{mcfm}[3]" ) {system("rm -f $idir/$install{mcfm}[3]");}
-#	system("ln -s $install{mcfm}[2] $idir/$install{mcfm}[3]");
-	chdir "$idir/$install{mcfm}[2]";
-	print "\nfastrun.pl: Configuring mcfm ...\n";
-	$ret = system("./Install");
-	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
-	$ret = system("make -j2");
-	if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
+#       system ("mkdir $idir/$install{mcfm}[0]");
+#       my $ret = system("tar xz -C $idir/$install{mcfm}[0] -f $sdir/$install{mcfm}[1]");
+        my $ret = system("tar xz -C $idir -f $sdir/$install{mcfm}[0]");
+        if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfm}[0] ".
+                         "in $idir failed: $ret, aborted!\n";}
+        print "\nfastrun.pl: Unpacking fix for $install{mcfm}[0] ...\n";
+        $ret = system("tar xzv -C $idir -f $sdir/$install{mcfmfix}[0]");
+        if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{mcfmfix}[0] ".
+                         "in $idir failed: $ret, aborted!\n";}
+        $ret = system("mv $install{mcfm}[1] $idir/$install{mcfm}[2]");
+        if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                         "$install{mcfm}[1] to ".
+                         "$idir/$install{mcfm}[2]: $ret, aborted!\n";}
+#       if ( -l "$idir/$install{mcfm}[3]" ) {system("rm -f $idir/$install{mcfm}[3]");}
+#       system("ln -s $install{mcfm}[2] $idir/$install{mcfm}[3]");
+        chdir "$idir/$install{mcfm}[2]";
+        print "\nfastrun.pl: Configuring mcfm ...\n";
+        $ret = system("./Install");
+        if ( $ret ) {die "fastrun.pl: Error $ret in mcfm install script, aborted!\n";}
+        $ret = system("make -j2");
+        if ( $ret ) {die "fastrun.pl: Error $ret in mcfm make step, aborted!\n";}
         chdir "..";
     }
     }
@@ -979,62 +979,62 @@ if ( $mode == 0 || $mode == 1 ) {
 # 6) Install fastNLO
 #
 #    unless ( -e "$idir/$install{fastNLO}[2]" ||
-#	     ( $vers eq "2" && -e "$idir/src/$install{fastNLO}[2]" ) ) {
+#            ( $vers eq "2" && -e "$idir/src/$install{fastNLO}[2]" ) ) {
     unless ( $ENV{FASTNLO} ) {
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[0]: $date\n";
-	print FILE "# Add FASTNLO environment\n";
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
-	    my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
-			     "in $idir failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{fastNLO}[1] $idir/$install{fastNLO}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{fastNLO}[1] to ".
-			     "$idir/$install{fastNLO}[2]: $ret, aborted!\n";}
-#	    if ( -l "$idir/$install{fastNLO}[3]" ) {system("rm -f $idir/$install{fastNLO}[3]");}
-#	    system("ln -s $install{fastNLO}[2] $idir/$install{fastNLO}[3]");
-	    print FILE "setenv FASTNLO $aidir/$install{fastNLO}[2]\n";
-	    $ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
-	} else {
-	    chdir "$aidir/src";
-	    print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
-	    my $ret = system("tar xz -f $sdir/$install{fastNLO}[0]");
-	    if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
-			     "in $aidir/src failed: $ret, aborted!\n";}
-	    $ret = system("mv $install{fastNLO}[1] $install{fastNLO}[2]");
-	    if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
-			     "$install{fastNLO}[1] to ".
-			     "$install{fastNLO}[2]: $ret, aborted!\n";}
-	    chdir "$install{fastNLO}[2]/trunk/v2.0";
-	    $ret = system("autoreconf --install");
-	    if ( $ret ) {die "fastrun.pl: autoreconf of fastNLO V2 failed: ".
-			     "$ret, aborted!\n";}
-	    $ret = system("./configure --prefix=$aidir");
-	    if ( $ret ) {die "fastrun.pl: configure of fastNLO V2 failed: ".
-			     "$ret, aborted!\n";}
-	    $ret = system("make -j2");
-	    if ( $ret ) {die "fastrun.pl: make -j2 of fastNLO V2 failed: ".
-			     "$ret, aborted!\n";}
-	    $ret = system("make install");
-	    if ( $ret ) {die "fastrun.pl: make install of fastNLO V2 failed: ".
-			     "$ret, aborted!\n";}
-	    print FILE "setenv FASTNLO $aidir\n";
-	    print FILE "setenv FASTNLOBINPATH $aidir/bin\n";
-	    print FILE "setenv FASTNLOLIBPATH $aidir/lib/fastnlo\n";
-	    print FILE "setenv FASTNLOSRCPATH $aidir/src/$install{fastNLO}[2]\n";
-	    $ENV{FASTNLO}            = "$aidir";
-	    $ENV{FASTNLOBINPATH}     = "$aidir/bin";
-	    $ENV{FASTNLOLIBPATH}     = "$aidir/lib/fastnlo";
-	    $ENV{FASTNLOSRCPATH}     = "$aidir/src/$install{fastNLO}[2]";
-	}
-	print FILE "#\n";
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Installation of fastNLO and all required ".
-	    "components finished: $date\n";
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installing fastNLO from $install{fastNLO}[0]: $date\n";
+        print FILE "# Add FASTNLO environment\n";
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
+            my $ret = system("tar xz -C $idir -f $sdir/$install{fastNLO}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
+                             "in $idir failed: $ret, aborted!\n";}
+            $ret = system("mv $install{fastNLO}[1] $idir/$install{fastNLO}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{fastNLO}[1] to ".
+                             "$idir/$install{fastNLO}[2]: $ret, aborted!\n";}
+#           if ( -l "$idir/$install{fastNLO}[3]" ) {system("rm -f $idir/$install{fastNLO}[3]");}
+#           system("ln -s $install{fastNLO}[2] $idir/$install{fastNLO}[3]");
+            print FILE "setenv FASTNLO $aidir/$install{fastNLO}[2]\n";
+            $ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
+        } else {
+            chdir "$aidir/src";
+            print "\nfastrun.pl: Unpacking $install{fastNLO}[0] ...\n";
+            my $ret = system("tar xz -f $sdir/$install{fastNLO}[0]");
+            if ( $ret ) {die "fastrun.pl: Unpacking of archive $sdir/$install{fastNLO}[0] ".
+                             "in $aidir/src failed: $ret, aborted!\n";}
+            $ret = system("mv $install{fastNLO}[1] $install{fastNLO}[2]");
+            if ( $ret ) {die "fastrun.pl: Couldn't move unpacking dir ".
+                             "$install{fastNLO}[1] to ".
+                             "$install{fastNLO}[2]: $ret, aborted!\n";}
+            chdir "$install{fastNLO}[2]/trunk/v2.0";
+            $ret = system("autoreconf --install");
+            if ( $ret ) {die "fastrun.pl: autoreconf of fastNLO V2 failed: ".
+                             "$ret, aborted!\n";}
+            $ret = system("./configure --prefix=$aidir");
+            if ( $ret ) {die "fastrun.pl: configure of fastNLO V2 failed: ".
+                             "$ret, aborted!\n";}
+            $ret = system("make -j2");
+            if ( $ret ) {die "fastrun.pl: make -j2 of fastNLO V2 failed: ".
+                             "$ret, aborted!\n";}
+            $ret = system("make install");
+            if ( $ret ) {die "fastrun.pl: make install of fastNLO V2 failed: ".
+                             "$ret, aborted!\n";}
+            print FILE "setenv FASTNLO $aidir\n";
+            print FILE "setenv FASTNLOBINPATH $aidir/bin\n";
+            print FILE "setenv FASTNLOLIBPATH $aidir/lib/fastnlo\n";
+            print FILE "setenv FASTNLOSRCPATH $aidir/src/$install{fastNLO}[2]\n";
+            $ENV{FASTNLO}            = "$aidir";
+            $ENV{FASTNLOBINPATH}     = "$aidir/bin";
+            $ENV{FASTNLOLIBPATH}     = "$aidir/lib/fastnlo";
+            $ENV{FASTNLOSRCPATH}     = "$aidir/src/$install{fastNLO}[2]";
+        }
+        print FILE "#\n";
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Installation of fastNLO and all required ".
+            "components finished: $date\n";
     }
 }
 #exit 6;
@@ -1050,94 +1050,94 @@ if ( $mode == 0 || $mode == 1 ) {
 if ( $vers eq "1a" || $vers eq "1b" ) {
     if ( $mode == 2 || $mode == 3 ) {
 # For old v1 installation (1a)
-	if ( $vers eq "1a" ) {
-	    $ENV{FASTJET}  = "$aidir/fastjet";
-	    $ENV{NLOJET}   = "$aidir/nlojet";
-	    $ENV{LHAPDF}   = "$aidir/lhapdf/lib";
-	    $ENV{FASTNLO}  = "$aidir/fastNLO";
+        if ( $vers eq "1a" ) {
+            $ENV{FASTJET}  = "$aidir/fastjet";
+            $ENV{NLOJET}   = "$aidir/nlojet";
+            $ENV{LHAPDF}   = "$aidir/lhapdf/lib";
+            $ENV{FASTNLO}  = "$aidir/fastNLO";
 # For new v1 installation (1b)
-	} elsif ( $vers eq "1b" ) {
-	    $ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
-	    $ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
-	    $ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
-	    $ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
-	}
+        } elsif ( $vers eq "1b" ) {
+            $ENV{FASTJET}  = "$aidir/$install{fastjet}[2]";
+            $ENV{NLOJET}   = "$aidir/$install{nlojet}[2]";
+            $ENV{LHAPDF}   = "$aidir/$install{lhapdf}[2]/lib";
+            $ENV{FASTNLO}  = "$aidir/$install{fastNLO}[2]";
+        }
     }
     if ( $ENV{PATH} ) {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin:\${PATH}\n";}
-	$ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
-	    "$ENV{NLOJET}/bin:$ENV{PATH}";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
+                "$ENV{NLOJET}/bin:\${PATH}\n";}
+        $ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
+            "$ENV{NLOJET}/bin:$ENV{PATH}";
     } else {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
-		"$ENV{NLOJET}/bin\n";}
-	$ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
-	    "$ENV{NLOJET}/bin";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv PATH $aidir/bin:$ENV{FASTJET}:".
+                "$ENV{NLOJET}/bin\n";}
+        $ENV{PATH} = "$aidir/bin:$ENV{FASTJET}:".
+            "$ENV{NLOJET}/bin";
     }
     if ( $ENV{LD_LIBRARY_PATH} ) {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";}
-	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
-	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	    "$ENV{NLOJET}/lib:".
-	    "$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
+                "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+                "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+                "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+                "$ENV{NLOJET}/lib:".
+                "$ENV{LHAPDF}:\${LD_LIBRARY_PATH}\n";}
+        $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
+            "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+            "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+            "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+            "$ENV{NLOJET}/lib:".
+            "$ENV{LHAPDF}:$ENV{LD_LIBRARY_PATH}";
     } else {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
-		"$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-		"$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-		"$ENV{FASTJET}/plugins/CDFCones/.libs:".
-		"$ENV{NLOJET}/lib:".
-		"$ENV{LHAPDF}\n";}
-	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
-	    "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
-	    "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
-	    "$ENV{FASTJET}/plugins/CDFCones/.libs:".
-	    "$ENV{NLOJET}/lib:".
-	    "$ENV{LHAPDF}";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib64:".
+                "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+                "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+                "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+                "$ENV{NLOJET}/lib:".
+                "$ENV{LHAPDF}\n";}
+        $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib64:".
+            "$ENV{FASTJET}/lib:$ENV{FASTJET}/plugins/SISCone/.libs:".
+            "$ENV{FASTJET}/plugins/SISCone/siscone/siscone/.libs:".
+            "$ENV{FASTJET}/plugins/CDFCones/.libs:".
+            "$ENV{NLOJET}/lib:".
+            "$ENV{LHAPDF}";
     }
 } else {
     if ( $mode == 2 || $mode == 3 ) {
-	$ENV{FASTJET} = "$aidir";
-	$ENV{NLOJET}  = "$aidir";
-	$ENV{LHAPDF}  = "$aidir";
+        $ENV{FASTJET} = "$aidir";
+        $ENV{NLOJET}  = "$aidir";
+        $ENV{LHAPDF}  = "$aidir";
     }
     if ( $ENV{PATH} ) {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv PATH $aidir/bin:\${PATH}\n";}
-	$ENV{PATH} = "$aidir/bin:$ENV{PATH}";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv PATH $aidir/bin:\${PATH}\n";}
+        $ENV{PATH} = "$aidir/bin:$ENV{PATH}";
     } else {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv PATH $aidir/bin\n";}
-	$ENV{PATH} = "$aidir/bin";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv PATH $aidir/bin\n";}
+        $ENV{PATH} = "$aidir/bin";
     }
     if ( $ENV{LD_LIBRARY_PATH} ) {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
-		"$aidir/lib64:\${LD_LIBRARY_PATH}\n";}
-	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64:".
-	    "$ENV{LD_LIBRARY_PATH}";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
+                "$aidir/lib64:\${LD_LIBRARY_PATH}\n";}
+        $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64:".
+            "$ENV{LD_LIBRARY_PATH}";
     } else {
-	if ( $mode == 0 || $mode == 1 ) {
-	    print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
-		"$aidir/lib64\n";}
-	$ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64";
+        if ( $mode == 0 || $mode == 1 ) {
+            print FILE "setenv LD_LIBRARY_PATH $aidir/lib:$aidir/lib/fastnlo:".
+                "$aidir/lib64\n";}
+        $ENV{LD_LIBRARY_PATH} ="$aidir/lib:$aidir/lib/fastnlo:$aidir/lib64";
     }
 }
 if ( $mode == 0 || $mode == 1 ) {close (FILE);}
 #exit 7;
 
 
-    
+
 #
 # 7) Make fastNLO scenario
 #
@@ -1148,130 +1148,130 @@ if ( $mode == 0 || $mode == 2 ) {
     print "\nfastrun.pl: Making fastNLO scenario for version $vers: $date\n";
 
     if ( $vers eq "1a" || $vers eq "1b" ) {
-	chdir $idir;
+        chdir $idir;
 # Structure change in fastNLO following change in revision 212!
-	if ( $frev < 212 ) { 
-	    $scendir = "$ENV{FASTNLO}/author1c/hadron";
-	} else {
-	    $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
-	}
-	chdir "$scendir" or die
-	    "fastrun.pl: Could not cd to dir $scendir!\n";
-	
+        if ( $frev < 212 ) {
+            $scendir = "$ENV{FASTNLO}/author1c/hadron";
+        } else {
+            $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+        }
+        chdir "$scendir" or die
+            "fastrun.pl: Could not cd to dir $scendir!\n";
+
 # Adapting scenario cc file for ref or noref calculation
-	my $scenfil = "${scen}.cc";
-	my $scenlib = "${scen}${ref}.la";
-	my $deb = `pwd`;
-	chomp $deb;
-	if ( $verb ) {
-	    print "fastrun.pl: DEBUG! Current directory to run NLOJET++: $deb\n";
-	    print "fastrun.pl: DEBUG! ls -la:\n\n";
-	    system("ls -la");
-	    print "\nfastrun.pl: DEBUG! Check on scenario library: $scenlib\n";
-	}
-	if ( -f $scenlib ) {
-	    print "\nfastrun.pl: Scenario already compiled, make step skipped!\n";
-	} else {
-	    print "\nfastrun.pl: Checking scenario file $scenfil in $scendir for ".
-		"reference setting: $ref ...\n";
-	    my $oldfil = "$scendir/$scenfil";
-	    my $test = "";
-	    if ( $ref ) {
-		my $cmd = "grep \"$refsw1\" $oldfil";
-		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-		$test = `$cmd`; 
-	    } else {
-		my $cmd = "grep \"$refsw0\" $oldfil";
-		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-		$test = `$cmd`; 
-	    }
-	    if ( $test ) {
-		print "\nfastrun.pl: Scenario file $scenfil already adapted, skipped!\n";
-	    } else {
-		print "\nfastrun.pl: Adapting scenario file $scenfil in $scendir for ".
-		    "reference setting: $ref ...\n";
-		open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
-		my $newfil = $oldfil.".new";
-		open(NEWFILE,">$newfil");
-		while ( my $in = <OLDFILE> ) {	
-		    my $out = $in;
-		    if ( $ref ) {
-			$out =~ s/$refsw0/$refsw1/;
-		    } else {
-			$out =~ s/$refsw1/$refsw0/;
-		    }
-		    print NEWFILE $out; 
-		}
-		close(OLDFILE);
-		close(NEWFILE);
-		system("mv -f $oldfil ${oldfil}.old");
-		system("mv -f $newfil $oldfil");
-	    }
-	    
+        my $scenfil = "${scen}.cc";
+        my $scenlib = "${scen}${ref}.la";
+        my $deb = `pwd`;
+        chomp $deb;
+        if ( $verb ) {
+            print "fastrun.pl: DEBUG! Current directory to run NLOJET++: $deb\n";
+            print "fastrun.pl: DEBUG! ls -la:\n\n";
+            system("ls -la");
+            print "\nfastrun.pl: DEBUG! Check on scenario library: $scenlib\n";
+        }
+        if ( -f $scenlib ) {
+            print "\nfastrun.pl: Scenario already compiled, make step skipped!\n";
+        } else {
+            print "\nfastrun.pl: Checking scenario file $scenfil in $scendir for ".
+                "reference setting: $ref ...\n";
+            my $oldfil = "$scendir/$scenfil";
+            my $test = "";
+            if ( $ref ) {
+                my $cmd = "grep \"$refsw1\" $oldfil";
+                if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+                $test = `$cmd`;
+            } else {
+                my $cmd = "grep \"$refsw0\" $oldfil";
+                if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+                $test = `$cmd`;
+            }
+            if ( $test ) {
+                print "\nfastrun.pl: Scenario file $scenfil already adapted, skipped!\n";
+            } else {
+                print "\nfastrun.pl: Adapting scenario file $scenfil in $scendir for ".
+                    "reference setting: $ref ...\n";
+                open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
+                my $newfil = $oldfil.".new";
+                open(NEWFILE,">$newfil");
+                while ( my $in = <OLDFILE> ) {
+                    my $out = $in;
+                    if ( $ref ) {
+                        $out =~ s/$refsw0/$refsw1/;
+                    } else {
+                        $out =~ s/$refsw1/$refsw0/;
+                    }
+                    print NEWFILE $out;
+                }
+                close(OLDFILE);
+                close(NEWFILE);
+                system("mv -f $oldfil ${oldfil}.old");
+                system("mv -f $newfil $oldfil");
+            }
+
 # Adapting scenario Makefile for ref or noref calculation
-	    $scenfil = "Makefile";
-	    $oldfil  = "$scendir/$scenfil";
-	    $test = "";
-	    if ( $ref ) {
-		my $cmd = "grep \"\\$maksw1\" $oldfil";
-		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-		$test = `$cmd`; 
-	    } else {
-		my $cmd = "grep \"\\$maksw0\" $oldfil";
-		if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
-		$test = `$cmd`; 
-	    }
-	    if ( $test ) {
-		print "\nfastrun.pl: $scenfil already adapted, skipped!\n";
-	    } else {
-		print "\nfastrun.pl: Adapting Makefile in $scendir for ".
-		    "reference setting: $ref ...\n";
-		open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
-		my $newfil = $oldfil.".new";
-		open(NEWFILE,">$newfil");
-		while ( my $in = <OLDFILE> ) {	
-		    my $out = $in;
-		    if ( $ref ) {
-			$out =~ s/$maksw0/$maksw1/;
-		    } else {
-			$out =~ s/$maksw1/$maksw0/;
-		    }
-		    print NEWFILE $out; 
-		}
-		close(OLDFILE);
-		close(NEWFILE);
-		system("mv -f $oldfil ${oldfil}.old");
-		system("mv -f $newfil $oldfil");
-	    }
-	    $date = `date +%d%m%Y_%H%M%S`;
-	    chomp $date;
-	    print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
-	    my $ret = system("make -j2 nlofast-add");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
-	    print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
-	    chdir $scendir;
-	    $ret = system("make -j2 $scen");
-	    if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
-	}
+            $scenfil = "Makefile";
+            $oldfil  = "$scendir/$scenfil";
+            $test = "";
+            if ( $ref ) {
+                my $cmd = "grep \"\\$maksw1\" $oldfil";
+                if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+                $test = `$cmd`;
+            } else {
+                my $cmd = "grep \"\\$maksw0\" $oldfil";
+                if ( $verb ) {print "fastrun.pl: DEBUG! Running command $cmd\n";}
+                $test = `$cmd`;
+            }
+            if ( $test ) {
+                print "\nfastrun.pl: $scenfil already adapted, skipped!\n";
+            } else {
+                print "\nfastrun.pl: Adapting Makefile in $scendir for ".
+                    "reference setting: $ref ...\n";
+                open(OLDFILE,"<$oldfil") or die "fastrun.pl: Error! Could not open $oldfil!\n";
+                my $newfil = $oldfil.".new";
+                open(NEWFILE,">$newfil");
+                while ( my $in = <OLDFILE> ) {
+                    my $out = $in;
+                    if ( $ref ) {
+                        $out =~ s/$maksw0/$maksw1/;
+                    } else {
+                        $out =~ s/$maksw1/$maksw0/;
+                    }
+                    print NEWFILE $out;
+                }
+                close(OLDFILE);
+                close(NEWFILE);
+                system("mv -f $oldfil ${oldfil}.old");
+                system("mv -f $newfil $oldfil");
+            }
+            $date = `date +%d%m%Y_%H%M%S`;
+            chomp $date;
+            print "\nfastrun.pl: Making nlofast-add for fastNLO: $date\n";
+            my $ret = system("make -j2 nlofast-add");
+            if ( $ret ) {die "fastrun.pl: Error $ret in nlofast-add make step, aborted!\n";}
+            print "\nfastrun.pl: Making scenario $scen of fastNLO: $date\n";
+            chdir $scendir;
+            $ret = system("make -j2 $scen");
+            if ( $ret ) {die "fastrun.pl: Error $ret in fastNLO make step, aborted!\n";}
+        }
     } else {
-#	print "\nfastrun.pl: (Re-)making scenario $scen of fastNLO: $date\n";
-	print "\nfastrun.pl: (Re-)making scenarios of fastNLO: $date\n";
-	chdir "$ENV{FASTNLOSRCPATH}/trunk/v2.0";
-#	my $ret = system("make -j2 lib${scen}.la");
-	my $ret = system("make -j2");
-#	if ( $ret ) {die "fastrun.pl: (re-)make -j2 lib${scen}.la ".
-	if ( $ret ) {die "fastrun.pl: (re-)make -j2 ".
-			 "of fastNLO V2 failed: $ret, aborted!\n";}
-#	$ret = system("make install lib${scen}.la");
-	$ret = system("make install");
-#	if ( $ret ) {die "fastrun.pl: (re-)make install lib${scen}.la ".
-	if ( $ret ) {die "fastrun.pl: (re-)make install ".
-			 "of fastNLO V2 failed: $ret, aborted!\n";}
+#       print "\nfastrun.pl: (Re-)making scenario $scen of fastNLO: $date\n";
+        print "\nfastrun.pl: (Re-)making scenarios of fastNLO: $date\n";
+        chdir "$ENV{FASTNLOSRCPATH}/trunk/v2.0";
+#       my $ret = system("make -j2 lib${scen}.la");
+        my $ret = system("make -j2");
+#       if ( $ret ) {die "fastrun.pl: (re-)make -j2 lib${scen}.la ".
+        if ( $ret ) {die "fastrun.pl: (re-)make -j2 ".
+                         "of fastNLO V2 failed: $ret, aborted!\n";}
+#       $ret = system("make install lib${scen}.la");
+        $ret = system("make install");
+#       if ( $ret ) {die "fastrun.pl: (re-)make install lib${scen}.la ".
+        if ( $ret ) {die "fastrun.pl: (re-)make install ".
+                         "of fastNLO V2 failed: $ret, aborted!\n";}
     }
 }
 
 
-    
+
 #
 # 8) Run fastNLO
 #
@@ -1279,279 +1279,279 @@ if ( $mode == 0 || $mode == 3 ) {
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Running fastNLO version $vers scenario on batch system $batch: $date\n";
-    
+
 # Run without complete installation by source
 # In case of non-local running need to unpack binary fastNLO distribution
     if ( $mode == 3 && $batch ne "LOCAL" ) {
 # Set minimal environment with respect to current working directory
-#	my $cwd = `pwd`;
-#	chomp $cwd;
-#	if ( $vers eq "1a" || $vers eq "1b" ) {
-#	    $ENV{NLOJET} = "$cwd/nlojet";
-#	    $ENV{FASTNLO} = "$cwd/fastNLO";
-#	} else {
-#	    $ENV{NLOJET}  = $cwd;
-#	    $ENV{FASTNLO} = $cwd;
-#	    if ( 
-#	    $ENV{LD_LIBRARY_PATH} = 
-#	}
+#       my $cwd = `pwd`;
+#       chomp $cwd;
+#       if ( $vers eq "1a" || $vers eq "1b" ) {
+#           $ENV{NLOJET} = "$cwd/nlojet";
+#           $ENV{FASTNLO} = "$cwd/fastNLO";
+#       } else {
+#           $ENV{NLOJET}  = $cwd;
+#           $ENV{FASTNLO} = $cwd;
+#           if (
+#           $ENV{LD_LIBRARY_PATH} =
+#       }
 
 # Fetching and unpacking of fastNLO binary archive, use version incl. CTEQ PDFs for reference
-	my $file = "fastNLO-bin";
-#	if ( $ref ) {
-	if ( $vers eq "1a" || $vers eq "1b" ) {
-	    $file .= "-${pdf}";
-#	}
-	} else {
-	    $file .= "-v${vers}";
-	}
+        my $file = "fastNLO-bin";
+#       if ( $ref ) {
+        if ( $vers eq "1a" || $vers eq "1b" ) {
+            $file .= "-${pdf}";
+#       }
+        } else {
+            $file .= "-v${vers}";
+        }
 
-	$file .= ".tgz";
-	
-	if ( ! -f $file ) {
-	    if ( $batch eq "GC" ) {
-		die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file working dir, aborted!\nCheck your grid storage options for grid-control!\n";
-	    } elsif ( $batch eq "GRID" ) {
-		grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
-	    } elsif ( $batch eq "PBS" ) {
-		die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file in PBS working dir, aborted!\n";
-	    }
-	}
-	if ( -f $file ) {
-	    system ("tar xfz $file");
-	} else {
-	    die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file, aborted!\n";
-	}
+        $file .= ".tgz";
+
+        if ( ! -f $file ) {
+            if ( $batch eq "GC" ) {
+                die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file working dir, aborted!\nCheck your grid storage options for grid-control!\n";
+            } elsif ( $batch eq "GRID" ) {
+                grid_storage("FETCH","fastNLO_archives",$file,".",$file,$prot);
+            } elsif ( $batch eq "PBS" ) {
+                die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file in PBS working dir, aborted!\n";
+            }
+        }
+        if ( -f $file ) {
+            system ("tar xfz $file");
+        } else {
+            die "fastrun.pl: ERROR! Could not find binary tgz of fastNLO $file, aborted!\n";
+        }
     }
 
 # Structure change in fastNLO following change in revision 212!
-    if ( ($vers eq "1a" || $vers eq "1b") && $frev < 212 ) { 
-	$scendir = "$ENV{FASTNLO}/author1c/hadron";
+    if ( ($vers eq "1a" || $vers eq "1b") && $frev < 212 ) {
+        $scendir = "$ENV{FASTNLO}/author1c/hadron";
     } elsif ( $vers eq "1a" || $vers eq "1b" ) {
-	$scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
+        $scendir = "$ENV{FASTNLO}/trunk/v1.4/author1c/hadron";
     } else {
-	$scendir = "$aidir";
+        $scendir = "$aidir";
     }
 
     system("pwd");
     system("ls -la");
 
     chdir "$scendir" or die
-	"fastrun.pl: ERROR! Could not cd to dir $scendir!\n";
-    
+        "fastrun.pl: ERROR! Could not cd to dir $scendir!\n";
+
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     print "\nfastrun.pl: Running fastNLO: $date\n";
     my $cmd;
     if ( $vers eq "1a" || $vers eq "1b" ) {
-	$cmd = "$ENV{NLOJET}/bin/nlojet++ -P dipole ".
-	    "--save-after $runmode{$order}[1] ".
-	    "-c$runmode{$order}[0] ".
-	    "-d $tdir ".
-	    "-n ${scen}${ref}_${jobnr} ".
-	    "-u ${scen}${ref}.la ";
-	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+        $cmd = "$ENV{NLOJET}/bin/nlojet++ -P dipole ".
+            "--save-after $runmode{$order}[1] ".
+            "-c$runmode{$order}[0] ".
+            "-d $tdir ".
+            "-n ${scen}${ref}_${jobnr} ".
+            "-u ${scen}${ref}.la ";
+        if ( $nmax ) { $cmd .= "--max-event $nmax"; }
     } else {
-	$cmd = "$ENV{NLOJET}/bin/nlojet++ --calculate ".
-	    "--save-after $runmode{$order}[1] ".
-	    "-c$runmode{$order}[0] ".
-	    "-d $tdir ".
-	    "-n ${scen}${ref}_${jobnr} ".
-	    "-u lib/lib${scen}.la ";
-	if ( $nmax ) { $cmd .= "--max-event $nmax"; }
+        $cmd = "$ENV{NLOJET}/bin/nlojet++ --calculate ".
+            "--save-after $runmode{$order}[1] ".
+            "-c$runmode{$order}[0] ".
+            "-d $tdir ".
+            "-n ${scen}${ref}_${jobnr} ".
+            "-u lib/lib${scen}.la ";
+        if ( $nmax ) { $cmd .= "--max-event $nmax"; }
     }
 # Do not try to maximize CPU time yet, too unstable
     if ( $batch eq "MAX" ) {
 # Fork NLO calculation
-	print "fastrun.pl: Forking command ((time $cmd) 2>&1)& in background\n";
-	system("((time $cmd) 2>&1)&");
+        print "fastrun.pl: Forking command ((time $cmd) 2>&1)& in background\n";
+        system("((time $cmd) 2>&1)&");
     } else {
 # Run NLO calculation
-	my $date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "fastrun.pl: Starting calculation: FASTCAL0_$date\n";
-	print "fastrun.pl: Running command (time $cmd) 2>&1 in foreground\n";
-	my $ret = system("(time $cmd) 2>&1");
-	if ( $ret ) {die "fastrun.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\nfastrun.pl: Calculation finished: FASTCAL1_$date\n";
+        my $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "fastrun.pl: Starting calculation: FASTCAL0_$date\n";
+        print "fastrun.pl: Running command (time $cmd) 2>&1 in foreground\n";
+        my $ret = system("(time $cmd) 2>&1");
+        if ( $ret ) {die "fastrun.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\nfastrun.pl: Calculation finished: FASTCAL1_$date\n";
 # Copy table to grid storage
-	if ( $batch ne "LOCAL" ) {
-	    my $spath = "${scendir}/${tdir}";
-	    my $sfile = "${tabnam}";
+        if ( $batch ne "LOCAL" ) {
+            my $spath = "${scendir}/${tdir}";
+            my $sfile = "${tabnam}";
 # Remove ref from table path
-#	    my $tpath = "fastNLO_tables/${scen}${ref}";
-	    my $tpath = "fastNLO_tables/${scen}";
-	    if ( $tpath ) {
-		$tpath =~ s/\/\.\//\//g;
-	    } else {
-		$tpath = "";
-	    }
+#           my $tpath = "fastNLO_tables/${scen}${ref}";
+            my $tpath = "fastNLO_tables/${scen}";
+            if ( $tpath ) {
+                $tpath =~ s/\/\.\//\//g;
+            } else {
+                $tpath = "";
+            }
 # Change job numbering according to grid-control
-	    my $tfile  = $sfile;
-	    $tfile =~ s/_0001//;
-	    if ( $batch eq "GC" ) {
-		$tfile =~ s/\.${tabext}/\.${tabext}/;
-	    } else {
-		$tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
-	    }
+            my $tfile  = $sfile;
+            $tfile =~ s/_0001//;
+            if ( $batch eq "GC" ) {
+                $tfile =~ s/\.${tabext}/\.${tabext}/;
+            } else {
+                $tfile =~ s/\.${tabext}/_${gjobnr}\.${tabext}/;
+            }
 # GC does not support my file rename scheme with leading zeros in job numbers
-	    if ( $batch eq "GC" ) {
-		print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
-		print "                  Copy table to current directory for storage.\n";
-		my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
-		if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
-				 "current directory $aidir: $ret, aborted!\n";}
-	    } elsif ( $batch eq "GRID" ) {
-		grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
-	    } else {
-		my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
-		if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
-				 "current directory $aidir: $ret, aborted!\n";}
-	    }
-	    unless ( $batch eq "GC" ) {
-		my $date = `date +%d%m%Y_%H%M%S`;
-		chomp $date;
-		print "fastrun.pl: Table stored: TABSAV1_$date\n";
-	    }
-	}
-	$date = `date +%d%m%Y_%H%M%S`;
-	chomp $date;
-	print "\n###############################\n";
-	print "# fastrun.pl: fastNLO finished: FASTRUN1_$date\n";
-	print "###############################\n\n";
-#	close STDERR;
-#	close STDOUT;
+            if ( $batch eq "GC" ) {
+                print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
+                print "                  Copy table to current directory for storage.\n";
+                my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
+                if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
+                                 "current directory $aidir: $ret, aborted!\n";}
+            } elsif ( $batch eq "GRID" ) {
+                grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
+            } else {
+                my $ret = system("cp -p $spath/$sfile $pwdir/$tfile");
+                if ( $ret ) {die "fastrun.pl: Couldn't copy table into ".
+                                 "current directory $aidir: $ret, aborted!\n";}
+            }
+            unless ( $batch eq "GC" ) {
+                my $date = `date +%d%m%Y_%H%M%S`;
+                chomp $date;
+                print "fastrun.pl: Table stored: TABSAV1_$date\n";
+            }
+        }
+        $date = `date +%d%m%Y_%H%M%S`;
+        chomp $date;
+        print "\n###############################\n";
+        print "# fastrun.pl: fastNLO finished: FASTRUN1_$date\n";
+        print "###############################\n\n";
+#       close STDERR;
+#       close STDOUT;
 # Copy log files to grid storage, but rename first to go with the job
 # If size = 0, as should be normal for job.stderr, do NOT rename => no grid storage.
-	if ( $batch ne "LOCAL" ) {
-#	    my $tpath = "fastNLO_tables/${scen}${ref}";
-	    my $tpath = "fastNLO_tables/${scen}";
-	    if ( $tpath ) {
-		$tpath =~ s/\/\.\//\//g;
-	    } else {
-		$tpath = "";
-	    }
-	    my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
-	    if ( $batch eq "GC" ) {
-		$tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}";
-	    }
-	    chdir $pwdir or die "fastrun.pl: ERROR! Couldn't cd to $pwdir, aborted!\n";
-#	    if ( -z "job.stderr" ) {
-#		my $ret = system("rm -f job.stderr");
-#		if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stderr: ".
-#				 "$ret, aborted!\n";}
-#	    }
-#	    if ( -z "job.stdout" ) {
-#		my $ret = system("rm -f job.stdout");
-#		if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stdout: ".
-#				 "$ret, aborted!\n";}
-#	    }
+        if ( $batch ne "LOCAL" ) {
+#           my $tpath = "fastNLO_tables/${scen}${ref}";
+            my $tpath = "fastNLO_tables/${scen}";
+            if ( $tpath ) {
+                $tpath =~ s/\/\.\//\//g;
+            } else {
+                $tpath = "";
+            }
+            my $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}_${gjobnr}";
+            if ( $batch eq "GC" ) {
+                $tfile = "${scen}${ref}-hhc-$runmode{$order}[0]-${njet}";
+            }
+            chdir $pwdir or die "fastrun.pl: ERROR! Couldn't cd to $pwdir, aborted!\n";
+#           if ( -z "job.stderr" ) {
+#               my $ret = system("rm -f job.stderr");
+#               if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stderr: ".
+#                                "$ret, aborted!\n";}
+#           }
+#           if ( -z "job.stdout" ) {
+#               my $ret = system("rm -f job.stdout");
+#               if ( $ret ) {die "fastrun.pl: ERROR! Couldn't remove empty file job.stdout: ".
+#                                "$ret, aborted!\n";}
+#           }
 # GC does not support my file rename scheme with leading zeros in job numbers
-	    if ( $batch eq "GC" ) {
-# GC will copy renamed files to SE 
-		print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
-		print "                  Move log files to correct file names for storage.\n\n";
-		if ( -f "job.stderr" && ! -z "job.stderr" ) {
-		    my $ret = system("cp -p job.stderr ${tfile}.err");
-		    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stderr ".
-				     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-		}
-		if ( -f "job.stdout" && ! -z "job.stdout" ) {
-		    $ret = system("cp -p job.stdout ${tfile}.log");
-		    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stdout ".
-				     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-		}
-		$ret = system("pwd");
-		if ( $ret ) {print "fastrun.pl: WARNING! Couldn't print cwd!\n";}
-		$ret = system("ls -la");
-		if ( $ret ) {print "fastrun.pl: WARNING! Couldn't list cwd!\n";}
-	    } elsif ( $batch eq "GRID" ) {
-		grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
-		grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
-	    } else {
+            if ( $batch eq "GC" ) {
+# GC will copy renamed files to SE
+                print "fastrun.pl: INFO: Batch mode $batch: Grid storage done by grid-control.\n";
+                print "                  Move log files to correct file names for storage.\n\n";
+                if ( -f "job.stderr" && ! -z "job.stderr" ) {
+                    my $ret = system("cp -p job.stderr ${tfile}.err");
+                    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stderr ".
+                                     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+                }
+                if ( -f "job.stdout" && ! -z "job.stdout" ) {
+                    $ret = system("cp -p job.stdout ${tfile}.log");
+                    if ( $ret ) {die "fastrun.pl: ERROR! Couldn't copy job.stdout ".
+                                     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+                }
+                $ret = system("pwd");
+                if ( $ret ) {print "fastrun.pl: WARNING! Couldn't print cwd!\n";}
+                $ret = system("ls -la");
+                if ( $ret ) {print "fastrun.pl: WARNING! Couldn't list cwd!\n";}
+            } elsif ( $batch eq "GRID" ) {
+                grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
+                grid_storage("LOGSAV","$aidir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
+            } else {
 # For PBS with grid-control log files are in $pwdir as job.stdout and .stderr
 # ... only copy
-		if ( -f "job.stderr" ) {
-		    my $ret = system("cp -p job.stderr ${tfile}.err");
-		    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stderr ".
-				     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-		}
-		if ( -f "job.stdout" ) {
-		    $ret = system("cp -p job.stdout ${tfile}.log");
-		    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stdout ".
-				     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-		}
-	    }
-	    unless ( $batch eq "GC" ) {
-		my $date = `date +%d%m%Y_%H%M%S`;
-		chomp $date;
-		print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
-	    }
-	}
-	exit 0;
+                if ( -f "job.stderr" ) {
+                    my $ret = system("cp -p job.stderr ${tfile}.err");
+                    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stderr ".
+                                     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+                }
+                if ( -f "job.stdout" ) {
+                    $ret = system("cp -p job.stdout ${tfile}.log");
+                    if ( $ret ) {die "fastrun.pl: Couldn't copy job.stdout ".
+                                     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+                }
+            }
+            unless ( $batch eq "GC" ) {
+                my $date = `date +%d%m%Y_%H%M%S`;
+                chomp $date;
+                print "fastrun.pl: Log files stored: LOGSAV1_$date\n";
+            }
+        }
+        exit 0;
     }
 # Check on process before entering loop
     my $user  = `id -un`;
     chomp $user;
-    my $fpid  = `/bin/ps -o pid,args --no-headers | grep \"nlojet++\" | grep \"${jobnr}\" | grep -v \"grep\"`; 
+    my $fpid  = `/bin/ps -o pid,args --no-headers | grep \"nlojet++\" | grep \"${jobnr}\" | grep -v \"grep\"`;
     chomp $fpid;
     if ( $verb ) {
-	print "fastrun.pl: DEBUG! user $user\n";
-	print "fastrun.pl: DEBUG! fpid1 $fpid\n";
+        print "fastrun.pl: DEBUG! user $user\n";
+        print "fastrun.pl: DEBUG! fpid1 $fpid\n";
     }
     my @tmp = split(" ",$fpid);
     $fpid = $tmp[0];
     my $keep = 0;
     if ( $fpid ) {
-	if ( $verb ) {print "fastrun.pl: DEBUG! fpid2 $fpid\n";}
+        if ( $verb ) {print "fastrun.pl: DEBUG! fpid2 $fpid\n";}
     } else {
-	if ( $verb ) {
-	    print "fastrun.pl: DEBUG! fpid2 not yet there (race condidtion)?\n";
-	    print "fastrun.pl: DEBUG! Setting fpid anyway to enter while loop.\n";
-	}
-	$keep = 1;
+        if ( $verb ) {
+            print "fastrun.pl: DEBUG! fpid2 not yet there (race condidtion)?\n";
+            print "fastrun.pl: DEBUG! Setting fpid anyway to enter while loop.\n";
+        }
+        $keep = 1;
     }
 
     while ( 1 ) {
 #    while ( $fpid || $keep ) {
-	if ( $batch eq "GRID" ) {
-	    sleep 1000;
-	    $date = `date +%d%m%Y_%H%M%S`;
-	    print "\nfastrun.pl: Saving table: $date\n";
-	    chomp $date;
-	    grid_storage("SAVE");
-	} else {
-	    sleep 500;
-	    if ( $keep ) {
-		$keep  = 0;
-		$fpid  = `/bin/ps -o pid,args --no-headers | grep \"nlojet++\" | grep \"${jobnr}\" | grep -v \"grep\"`; 
-		chomp $fpid;
-		my @tmp = split(" ",$fpid);
-		$fpid = $tmp[0];
-	    }
-	    if ( $fpid ) {
-		my $fptest = `/bin/ps --no-headers -p $fpid`;
-		chomp $fptest;
-		if ( $fptest ) {
-		    if ( $verb ) {
-			print "fastrun.pl: DEBUG! fpid3  $fpid\n";
-			print "fastrun.pl: DEBUG! fptest $fptest\n";
-		    }
-		} else {
-		    $fpid = 0;
-		    $date = `date +%d%m%Y_%H%M%S`;
-		    chomp $date;
-		    print "\nfastrun.pl: fastNLO finished: $date\n";
-		}
-	    } else {
-		$date = `date +%d%m%Y_%H%M%S`;
-		chomp $date;
-		print "\nfastrun.pl: fastNLO finished: $date\n";
-	    }
-	}
-    } 
+        if ( $batch eq "GRID" ) {
+            sleep 1000;
+            $date = `date +%d%m%Y_%H%M%S`;
+            print "\nfastrun.pl: Saving table: $date\n";
+            chomp $date;
+            grid_storage("SAVE");
+        } else {
+            sleep 500;
+            if ( $keep ) {
+                $keep  = 0;
+                $fpid  = `/bin/ps -o pid,args --no-headers | grep \"nlojet++\" | grep \"${jobnr}\" | grep -v \"grep\"`;
+                chomp $fpid;
+                my @tmp = split(" ",$fpid);
+                $fpid = $tmp[0];
+            }
+            if ( $fpid ) {
+                my $fptest = `/bin/ps --no-headers -p $fpid`;
+                chomp $fptest;
+                if ( $fptest ) {
+                    if ( $verb ) {
+                        print "fastrun.pl: DEBUG! fpid3  $fpid\n";
+                        print "fastrun.pl: DEBUG! fptest $fptest\n";
+                    }
+                } else {
+                    $fpid = 0;
+                    $date = `date +%d%m%Y_%H%M%S`;
+                    chomp $date;
+                    print "\nfastrun.pl: fastNLO finished: $date\n";
+                }
+            } else {
+                $date = `date +%d%m%Y_%H%M%S`;
+                chomp $date;
+                print "\nfastrun.pl: fastNLO finished: $date\n";
+            }
+        }
+    }
 }
 
 exit 0;
@@ -1585,7 +1585,7 @@ sub grid_storage {
 # KITEKP via globus-url-copy
     my $gucname = "ic-kit-lcgse.rz.uni-karlsruhe.de";
     my $gucpath = "/wlcg/data/users/cms/rabbertz/";
-    
+
 # Aachen T2 via srm
 #    my $srmname = "dcache-se-cms.desy.de:8443/srm/managerv2?SFN=";
     my $srmname = "grid-srm.physik.rwth-aachen.de:8443";
@@ -1595,131 +1595,131 @@ sub grid_storage {
 #    my $srmname = "dcache-se-cms.desy.de:8443/srm/managerv2?SFN=";
 #    my $srmname = "dcache-se-cms.desy.de:8443";
 #    my $srmpath = "/pnfs/desy.de/cms/tier2/store/user/krabbert/";
-    
+
     my $gucopt = "-cd";
     if ($protocol eq "guc") {
 # Check globus-url-copy version
-	my $gcmd = "globus-url-copy -version 2>&1";
-	my $ret = `$gcmd`;
-	chomp $ret;
-	my @tmp = split(" ",$ret); 
-	my $guccmd = $tmp[0];
-	my $gucver = $tmp[1];
-	unless ( $gucver =~ m/\d*\.\d*/ ) {
-	    print "fastrun.pl: ERROR! ".
-		"globus-url-copy not found: $ret!\n";}
-	print "fastrun.pl: Found command $guccmd version $gucver\n";
-	$gucopt = "-cd";
-	if ( $gucver <= 2.9 ) {
-	    print "fastrun.pl: WARNING! Version of globus-url-copy ".
-		"too old: $gucver. Cannot create directories on the fly!\n";
-	    $gucopt = "";
-	}
+        my $gcmd = "globus-url-copy -version 2>&1";
+        my $ret = `$gcmd`;
+        chomp $ret;
+        my @tmp = split(" ",$ret);
+        my $guccmd = $tmp[0];
+        my $gucver = $tmp[1];
+        unless ( $gucver =~ m/\d*\.\d*/ ) {
+            print "fastrun.pl: ERROR! ".
+                "globus-url-copy not found: $ret!\n";}
+        print "fastrun.pl: Found command $guccmd version $gucver\n";
+        $gucopt = "-cd";
+        if ( $gucver <= 2.9 ) {
+            print "fastrun.pl: WARNING! Version of globus-url-copy ".
+                "too old: $gucver. Cannot create directories on the fly!\n";
+            $gucopt = "";
+        }
     } else {
 # Check srmcp version
-	my $gcmd = "srmcp -version 2>&1 | grep -i version";
-	my $ret = `$gcmd`;
-	chomp $ret;
-	my @tmp = split(" ",$ret); 
-	my $srmver = $tmp[$#tmp];
-	chomp $srmver;
-	print "fastrun.pl: Found srmcp command version $srmver\n";
+        my $gcmd = "srmcp -version 2>&1 | grep -i version";
+        my $ret = `$gcmd`;
+        chomp $ret;
+        my @tmp = split(" ",$ret);
+        my $srmver = $tmp[$#tmp];
+        chomp $srmver;
+        print "fastrun.pl: Found srmcp command version $srmver\n";
     }
 
     my $sename = $gucname;
     my $sepath = $gucpath;
     if ($protocol eq "srm" ) {
-	$sename = $srmname;
-	$sepath = $srmpath;
+        $sename = $srmname;
+        $sepath = $srmpath;
     }
-    
+
     my $source = "${spath}/${sfile}";
     my $target = "${sepath}${tpath}/${tfile}";
 
     if ( $signam eq "FETCH" ) {
-	$source = "${sepath}${spath}/${sfile}";
-	$target = "${tpath}/${tfile}";
+        $source = "${sepath}${spath}/${sfile}";
+        $target = "${tpath}/${tfile}";
     }
     $source =~ s/\/\.\//\//g;
     $target =~ s/\/\.\//\//g;
 
     print "fastrun.pl: Source: $source\n";
     print "fastrun.pl: Target: $target\n";
-    
+
     my $gjobnr = "";
     if ( defined $ENV{MY_JOBID} ) {
-	$gjobnr = $ENV{MY_JOBID};
+        $gjobnr = $ENV{MY_JOBID};
 #        $gjobnr++;
-	$gjobnr = substr("0000$gjobnr",-4);	    
+        $gjobnr = substr("0000$gjobnr",-4);
     }
-    
+
     $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;
     if ( $signam eq "TABSAV" || $signam eq "LOGSAV" ) {
-	print "\nfastrun.pl: Received signal $signam: ${signam}0_$date\n";
-	print "fastrun.pl: Saving source $source to\n";
-	print "fastrun.pl: target $target for\n";
-	print "fastrun.pl: fastNLO job no. $jobnr and\n";
-	print "fastrun.pl: grid-control job no. $gjobnr\n";
-	print "fastrun.pl: Trying to find source $source ...\n";
-	system("pwd");
-	system("ls -la $spath");
-	unless ( -f "$source" ) {
-	    die "fastrun.pl: ERROR! Could not find source $source\n";
-	}		
+        print "\nfastrun.pl: Received signal $signam: ${signam}0_$date\n";
+        print "fastrun.pl: Saving source $source to\n";
+        print "fastrun.pl: target $target for\n";
+        print "fastrun.pl: fastNLO job no. $jobnr and\n";
+        print "fastrun.pl: grid-control job no. $gjobnr\n";
+        print "fastrun.pl: Trying to find source $source ...\n";
+        system("pwd");
+        system("ls -la $spath");
+        unless ( -f "$source" ) {
+            die "fastrun.pl: ERROR! Could not find source $source\n";
+        }
 # Create target directory if necessary
 # Deprecated due to grid chaos! What does work? srm? edg/glite-gridftp-mkdir?
-#		my $gcmd = "edg-gridftp-mkdir ".
-#		    "gsiftp://${sename}/${sepath}".
-#		    "fastNLO_tables/${tabdir}";
-#		print "Command $gcmd\n";
-#		my $ret = system("$gcmd");
-#		if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
+#               my $gcmd = "edg-gridftp-mkdir ".
+#                   "gsiftp://${sename}/${sepath}".
+#                   "fastNLO_tables/${tabdir}";
+#               print "Command $gcmd\n";
+#               my $ret = system("$gcmd");
+#               if ( $ret ) {print "fastrun.pl: WARNING! Creation of grid storage directory failed: $ret!\n";}
 # Create target directory directly with globus-url-copy if possible
 # Don't bother to copy empty error files ...
-	if ( -z "$source" ) {
-	    print "fastrun.pl: WARNING! Skipping storage of empty file $source\n";
-	} else {
-	    if ($protocol eq "guc") {
-		my $gcmd = "globus-url-copy $gucopt ".
-		    "file://${source} ".
-		    "gsiftp://${sename}/${target}";
-		print "Command $gcmd\n";
-		my $ret = system("$gcmd");
-		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
-				 "source $source to target $target failed: $ret!\n";}
-	    } else {
-		$ENV{SRM_PATH} = "";
-		my $gcmd = "srmcp ".
-		    "file:////${source} ".
-		    "srm://${sename}/${target}";
-		print "Command $gcmd\n";
-		my $ret = system("$gcmd");
-		if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
-				 "source $source to target $target failed: $ret!\n";}
-	    }
-	}
+        if ( -z "$source" ) {
+            print "fastrun.pl: WARNING! Skipping storage of empty file $source\n";
+        } else {
+            if ($protocol eq "guc") {
+                my $gcmd = "globus-url-copy $gucopt ".
+                    "file://${source} ".
+                    "gsiftp://${sename}/${target}";
+                print "Command $gcmd\n";
+                my $ret = system("$gcmd");
+                if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+                                 "source $source to target $target failed: $ret!\n";}
+            } else {
+                $ENV{SRM_PATH} = "";
+                my $gcmd = "srmcp ".
+                    "file:////${source} ".
+                    "srm://${sename}/${target}";
+                print "Command $gcmd\n";
+                my $ret = system("$gcmd");
+                if ( $ret ) {die "fastrun.pl: ERROR! Grid storage of ".
+                                 "source $source to target $target failed: $ret!\n";}
+            }
+        }
     } elsif ( $signam eq "FETCH" ) {
-	print "fastrun.pl: Fetching binary fastNLO archive $sfile from\n";
-	print "fastrun.pl: SE $sename in path $sepath\n";
-	print "fastrun.pl: Trying to fetch binary fastNLO archive $source on\n";
-	print "fastrun.pl: SE $sename in path $sepath\n";
-	my $gcmd = "globus-url-copy ".
-	    "gsiftp://${sename}/${source} ". 
-	    "file://`pwd`/${target}";
-	if ($protocol eq "srm") {
-	    $ENV{SRM_PATH} = "";
-	    $gcmd = "srmcp -streams_num=1 ".
-		"srm://${sename}/${source} ". 
-		"file:///`pwd`/${target}";
-	}
-	print "Command $gcmd\n";
-	system("$gcmd");
-	system("pwd");
-	system("ls -la");
+        print "fastrun.pl: Fetching binary fastNLO archive $sfile from\n";
+        print "fastrun.pl: SE $sename in path $sepath\n";
+        print "fastrun.pl: Trying to fetch binary fastNLO archive $source on\n";
+        print "fastrun.pl: SE $sename in path $sepath\n";
+        my $gcmd = "globus-url-copy ".
+            "gsiftp://${sename}/${source} ".
+            "file://`pwd`/${target}";
+        if ($protocol eq "srm") {
+            $ENV{SRM_PATH} = "";
+            $gcmd = "srmcp -streams_num=1 ".
+                "srm://${sename}/${source} ".
+                "file:///`pwd`/${target}";
+        }
+        print "Command $gcmd\n";
+        system("$gcmd");
+        system("pwd");
+        system("ls -la");
     } else {
-	die "fastrun.pl: ERROR! Caught unsupported signal $signam, aborted!\n";
+        die "fastrun.pl: ERROR! Caught unsupported signal $signam, aborted!\n";
     }
-    
+
     return 0;
 }

@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # CIDIJET grid submission archiver
 # Version:
-# 
+#
 # created by K. Rabbertz: 08.03.2011
 # last modified:
 #
