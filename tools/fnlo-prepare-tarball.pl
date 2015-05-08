@@ -66,7 +66,7 @@ chomp @lalibs;
 my @libs;
 foreach my $lib ( @lalibs, @solibs ) {
     if (! ($lib =~ m/root/ )) {
-	push @libs, $lib;
+        push @libs, $lib;
     }
 }
 

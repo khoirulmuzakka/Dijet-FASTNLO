@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # Clean up fastNLO table files with respect to duplicates or inf or NaN entries
 # Version:
-# 
+#
 # created by K. Rabbertz: 10.10.2006
 # adapted by K. Rabbertz from fastidclean.pl: 23.04.2015
 #
@@ -41,7 +41,7 @@ if ( $opt_h ) {
     exit;
 }
 my $dir = "";
-if ( $opt_d ne "." ) {$dir = $opt_d;} 
+if ( $opt_d ne "." ) {$dir = $opt_d;}
 my $id  = $opt_i;
 my $nan = $opt_n;
 unless ( $id || $nan ) {
@@ -73,24 +73,24 @@ my $cwd = `pwd`;
 chomp $cwd;
 foreach my $subdir (@subdirs) {
     unless (chdir $subdir) {
-	print "fnlo-clean-tables.pl: Warning! Could not cd to subdirectory $subdir, skipped.\n";
-	next;
+        print "fnlo-clean-tables.pl: Warning! Could not cd to subdirectory $subdir, skipped.\n";
+        next;
     }
 # Clean "nan" and "inf"
     foreach my $glob (@globs) {
-	if ( $nan ) {
-	    print "\nfnlo-clean-tables.pl: Calling fnlo-check-infnan.pl for filename glob $glob in directory $subdir ...\n";
-	    my $ret = system("fnlo-check-infnan.pl -v $vers $glob");
-	    if ( $ret ) {die "fnlo-clean-tables.pl: fnlo-check-infnan.pl failed: $ret, aborted!\n";}
-	}
+        if ( $nan ) {
+            print "\nfnlo-clean-tables.pl: Calling fnlo-check-infnan.pl for filename glob $glob in directory $subdir ...\n";
+            my $ret = system("fnlo-check-infnan.pl -v $vers $glob");
+            if ( $ret ) {die "fnlo-clean-tables.pl: fnlo-check-infnan.pl failed: $ret, aborted!\n";}
+        }
     }
 # Clean duplicates
     foreach my $glob (@globs) {
-	if ( $id ) {
-	    print "\nfnlo-clean-tables.pl: Calling fnlo-check-duplicates.pl for filename glob $glob in directory $subdir ...\n";
-	    my $ret = system("fnlo-check-duplicates.pl -v $vers $glob");
-	    if ( $ret ) {die "fnlo-clean-tables.pl: fnlo-check-duplicates.pl failed: $ret, aborted!\n";}
-	}
+        if ( $id ) {
+            print "\nfnlo-clean-tables.pl: Calling fnlo-check-duplicates.pl for filename glob $glob in directory $subdir ...\n";
+            my $ret = system("fnlo-check-duplicates.pl -v $vers $glob");
+            if ( $ret ) {die "fnlo-clean-tables.pl: fnlo-check-duplicates.pl failed: $ret, aborted!\n";}
+        }
     }
     chdir $cwd;
 }

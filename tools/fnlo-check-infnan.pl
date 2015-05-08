@@ -1,9 +1,9 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # Check on fastNLO tables contaminated by 'inf' or 'NaN' entries
 # Version:
-# 
-# created by K. Rabbertz: 10.10.2006 
+#
+# created by K. Rabbertz: 10.10.2006
 # adapted by K. Rabbertz from fastidclean.pl: 23.04.2015
 #
 #-----------------------------------------------------------------------
@@ -51,7 +51,7 @@ unless ( @ARGV == 1 ) {
 my $glstr = shift;
 chomp $glstr;
 print "fnlo-check-infnan.pl: Checking for file glob $glstr ...\n";
-my @files = glob "*${glstr}*";  
+my @files = glob "*${glstr}*";
 chomp @files;
 if ( ! -d "Problems" ) {
     print "fnlo-check-infnan.pl: Creating subdirectory Problems ...\n";
@@ -68,35 +68,35 @@ foreach my $file (@files) {
     system($cmd);
     my $ret = $? >> 8;
     if ( ! $ret ) {
-	print "fnlo-check-infnan.pl: WARNING! Found nan in file $file\n";
-	$hasinfnan = 1;
+        print "fnlo-check-infnan.pl: WARNING! Found nan in file $file\n";
+        $hasinfnan = 1;
     } else {
-	my $cmd = "grep -i -l \"inf\" $file";
-	system($cmd);
-	my $ret = $? >> 8;
-	if ( ! $ret ) {
-	    print "fnlo-check-infnan.pl: WARNING! Found inf in file $file\n";
-	    $hasinfnan = 1;
-	}
+        my $cmd = "grep -i -l \"inf\" $file";
+        system($cmd);
+        my $ret = $? >> 8;
+        if ( ! $ret ) {
+            print "fnlo-check-infnan.pl: WARNING! Found inf in file $file\n";
+            $hasinfnan = 1;
+        }
     }
     if ( $hasinfnan ) {
-	my $logfil = $file;
-	$logfil =~ s/\.tab/\.log/;
-	my $errfil = $file;
-	$errfil =~ s/\.tab/\.err/;
-	my $ret = system("mv $file Problems");
-	if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $file into ".
-			 "Problems: $ret, aborted!\n";}
-	if (-f $logfil) {
-	    my $ret = system("mv $logfil Problems");
-	    if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $logfil into ".
-			     "Problems: $ret, aborted!\n";}
-	}
-	if (-f $errfil) {
-	    my $ret = system("mv $errfil Problems");
-	    if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $errfil into ".
-			     "Problems: $ret, aborted!\n";}
-	}
+        my $logfil = $file;
+        $logfil =~ s/\.tab/\.log/;
+        my $errfil = $file;
+        $errfil =~ s/\.tab/\.err/;
+        my $ret = system("mv $file Problems");
+        if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $file into ".
+                         "Problems: $ret, aborted!\n";}
+        if (-f $logfil) {
+            my $ret = system("mv $logfil Problems");
+            if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $logfil into ".
+                             "Problems: $ret, aborted!\n";}
+        }
+        if (-f $errfil) {
+            my $ret = system("mv $errfil Problems");
+            if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $errfil into ".
+                             "Problems: $ret, aborted!\n";}
+        }
     }
 }
 

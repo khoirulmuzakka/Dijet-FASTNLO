@@ -180,13 +180,13 @@ my $rundir = getcwd();
 chomp $rundir;
 
 #
-# Copy scenario steering file (${scenname}.str) to generic name for scenario type (${scentype}.str)  
+# Copy scenario steering file (${scenname}.str) to generic name for scenario type (${scentype}.str)
 #
 print "fnlo-run-nlojet.pl: Copy scenario steering ${scenname}.str to ".
     "generic name for scenario type ${scentype}.str\n";
 my $ret = system("cp -p ${scenname}.str ${scentype}.str");
 if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy scenario steering ${scenname}.str to ".
-		 "generic scenario steering name ${scentype}.str: $ret, aborted!\n";}
+                 "generic scenario steering name ${scentype}.str: $ret, aborted!\n";}
 
 #
 # Print system info (some parts in debug mode only; df commands can get stuck ...)
@@ -367,69 +367,69 @@ print "fnlo-run-nlojet.pl: Target file: $tfile\n";
 if ( $batch ne "LOCAL" ) {
 # Copy/rename for grid storage via GC
     if ( $batch eq "GC" ) {
-	print "fnlo-run-nlojet.pl: Info: Batch mode $batch: Grid storage done by grid-control.\n";
-	my $spathdir = `dirname $spath`;
-	if ( ! -f "$rundir/$sfile" ) {
-	    print "fnlo-run-nlojet.pl: Copy product to current directory for storage.\n";
-	    my $ret = system("cp -p $spath/$sfile $rundir/$sfile");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy product into ".
-			     "current directory $rundir: $ret, aborted!\n";}
-	}
-	chdir $rundir or die "fnlo-run-nlojet.pl: ERROR! Couldn't cd to $rundir, aborted!\n";
+        print "fnlo-run-nlojet.pl: Info: Batch mode $batch: Grid storage done by grid-control.\n";
+        my $spathdir = `dirname $spath`;
+        if ( ! -f "$rundir/$sfile" ) {
+            print "fnlo-run-nlojet.pl: Copy product to current directory for storage.\n";
+            my $ret = system("cp -p $spath/$sfile $rundir/$sfile");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy product into ".
+                             "current directory $rundir: $ret, aborted!\n";}
+        }
+        chdir $rundir or die "fnlo-run-nlojet.pl: ERROR! Couldn't cd to $rundir, aborted!\n";
 
-	print "fnlo-run-nlojet.pl: Rename product to expected file name for storage.\n";
-	my $ret = system("mv -f $sfile $tfile");
-	if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't rename product ${sfile} into ".
-			 "${tfile}: $ret, aborted!\n";}
+        print "fnlo-run-nlojet.pl: Rename product to expected file name for storage.\n";
+        my $ret = system("mv -f $sfile $tfile");
+        if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't rename product ${sfile} into ".
+                         "${tfile}: $ret, aborted!\n";}
 
 # Also rename related log and err files in cwd for grid storage, if file size larger than zero
 # Remove product extension to rename log/err files
-	$tfile =~ s/\.${prdext}//;
-	print "fnlo-run-nlojet.pl: Copy log files to correct file names for storage.\n\n";
-	if ( -f "job.stderr" && ! -z "job.stderr" ) {
-	    my $ret = system("cp -p job.stderr ${tfile}.err");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stderr ".
-			     "to ${tfile}.err: $ret, aborted!\n";}
-	}
-	if ( -f "job.stdout" && ! -z "job.stdout" ) {
-	    $ret = system("cp -p job.stdout ${tfile}.log");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stdout ".
-			     "to ${tfile}.log: $ret, aborted!\n";}
-	}
-	$ret = system("pwd");
-	if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't print cwd!\n";}
-	$ret = system("ls -la");
-	if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't list cwd!\n";}
+        $tfile =~ s/\.${prdext}//;
+        print "fnlo-run-nlojet.pl: Copy log files to correct file names for storage.\n\n";
+        if ( -f "job.stderr" && ! -z "job.stderr" ) {
+            my $ret = system("cp -p job.stderr ${tfile}.err");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stderr ".
+                             "to ${tfile}.err: $ret, aborted!\n";}
+        }
+        if ( -f "job.stdout" && ! -z "job.stdout" ) {
+            $ret = system("cp -p job.stdout ${tfile}.log");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: ERROR! Couldn't copy job.stdout ".
+                             "to ${tfile}.log: $ret, aborted!\n";}
+        }
+        $ret = system("pwd");
+        if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't print cwd!\n";}
+        $ret = system("ls -la");
+        if ( $ret ) {print "fnlo-run-nlojet.pl: WARNING! Couldn't list cwd!\n";}
 # Do grid storage by ourselves (unused since quite some time, beware)
     } elsif ( $batch eq "GRID" ) {
-	grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
-	if ( -f "job.stderr" ) {
-	    my $ret = system("cp -p job.stderr ${tfile}.err");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
-			     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-	}
-	if ( -f "job.stdout" ) {
-	    $ret = system("cp -p job.stdout ${tfile}.log");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
-			     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-	}
-	grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
-	grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
+        grid_storage("TABSAV","$spath","$sfile","$tpath","$tfile",$prot);
+        if ( -f "job.stderr" ) {
+            my $ret = system("cp -p job.stderr ${tfile}.err");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
+                             "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+        }
+        if ( -f "job.stdout" ) {
+            $ret = system("cp -p job.stdout ${tfile}.log");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
+                             "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+        }
+        grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.err","$tpath","${tfile}.err",$prot);
+        grid_storage("LOGSAV","$rundir","fastrun_${gjobnr}.log","$tpath","${tfile}.log",$prot);
 # PBS (unused since quite some time, beware)
     } else {
-	my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
-	if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
-			 "current directory $rundir: $ret, aborted!\n";}
-	if ( -f "job.stderr" ) {
-	    my $ret = system("cp -p job.stderr ${tfile}.err");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
-			     "fastrun_${gjobnr}.err: $ret, aborted!\n";}
-	}
-	if ( -f "job.stdout" ) {
-	    $ret = system("cp -p job.stdout ${tfile}.log");
-	    if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
-			     "fastrun_${gjobnr}.log: $ret, aborted!\n";}
-	}
+        my $ret = system("cp -p $spath/$sfile $rundir/$tfile");
+        if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy table into ".
+                         "current directory $rundir: $ret, aborted!\n";}
+        if ( -f "job.stderr" ) {
+            my $ret = system("cp -p job.stderr ${tfile}.err");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stderr ".
+                             "fastrun_${gjobnr}.err: $ret, aborted!\n";}
+        }
+        if ( -f "job.stdout" ) {
+            $ret = system("cp -p job.stdout ${tfile}.log");
+            if ( $ret ) {die "fnlo-run-nlojet.pl: Couldn't copy job.stdout ".
+                             "fastrun_${gjobnr}.log: $ret, aborted!\n";}
+        }
     }
     my $date = `date +%d%m%Y_%H%M%S`;
     chomp $date;

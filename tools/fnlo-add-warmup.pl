@@ -196,7 +196,7 @@ if ( -d "$wdir" ) {
     close INFILE;
     my $ret = system("mv $outfile $sdir");
     if ( $ret ) {print "fnlo-add-warmup.pl: Couldn't move warmup summary file into ".
-		     "work directory $sdir: $ret. Please look for file in $wdir.\n";}
+                     "work directory $sdir: $ret. Please look for file in $wdir.\n";}
     chdir $sdir;
 }
 
