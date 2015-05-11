@@ -1020,7 +1020,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    vector<vector<double> > wrmbin =  DOUBLE_TAB_NS(Warmup.Binning,fSteerfile);
    bool ret = true;
 
-   const string wrmuphelp = "Please remove warmup-file in order to calculate a new warmup-file which is compatible to your steering,\nor alternatively use 'ReadBinningFromSteering=false', then all binning-related information is taken from the warmup file.\n";
+   const string wrmuphelp = "Please check your warmup-file for compatibility with your steering.\nTo calculate a new warmup-file compatible to your steering, remove the old one.\nAlternatively use 'IgnoreWarmupBinningCheck=true' to ignore precision-related binning differences or\nuse 'ReadBinningFromSteering=false' to read all binning-related information from the warmup file.\n";
 
    if (warmup.size() != NObsBin) {
       logger.error["CheckWarmupConsistency"]
@@ -1068,65 +1068,79 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    if (NDim > 1 && INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1] != IDiffBin[1]) {
       logger.warn["CheckWarmupConsistency"]
          <<"Table of warmup values seems to be incompatible with steering file.\n"
-         <<"Found different diff-label for dimension 0  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
-         <<", but Warmup.DimensionIsDifferential[0]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1]<<"'. Exiting."<<endl;
+         <<"Found different diff-label for dimension 1  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[1]<<"'"
+         <<", but Warmup.DimensionIsDifferential[1]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[1]<<"'. Exiting."<<endl;
+      ret = false;
+      exit(1);
+   }
+   if (NDim > 2 && INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[2] != IDiffBin[2]) {
+      logger.warn["CheckWarmupConsistency"]
+         <<"Table of warmup values seems to be incompatible with steering file.\n"
+         <<"Found different diff-label for dimension 2  (IDiffBin). DimensionIsDifferential='"<<IDiffBin[2]<<"'"
+         <<", but Warmup.DimensionIsDifferential[2]='"<<DOUBLE_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile)[2]<<"'. Exiting."<<endl;
       ret = false;
       exit(1);
    }
 
-   // check binning in detail
-   for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
-      if (NDim == 1) {
-         if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]) {
-            logger.error["CheckWrmbinConsistency"]
-               <<"Table of warmup values seems to be incompatible with steering file.\n"
-               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
-               <<",], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"].\n"
-               <<wrmuphelp
-               <<"Exiting."<<endl;
-            ret = false;
-            exit(1);
+   // check binning in detail; ignore when IgnoreWarmupBinningCheck is true to avoid precision problems with bin borders of e.g. Pi
+   if ( BOOL_NS(IgnoreWarmupBinningCheck,fSteerfile) ) {
+      logger.warn["CheckWarmupConsistency"]
+         <<"Ignoring crosscheck of binning in steering versus warmup values.\n"
+         <<"Please make sure you are using the right combination."<<endl;
+   } else {
+      for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
+         const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
+         if (NDim == 1) {
+            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]) {
+               logger.error["CheckWrmbinConsistency"]
+                  <<"Table of warmup values seems to be incompatible with steering file.\n"
+                  <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
+                  <<",], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"].\n"
+                  <<wrmuphelp
+                  <<"Exiting."<<endl;
+               ret = false;
+               exit(1);
+            }
+         } else if (NDim == 2) {
+            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
+                || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]) {
+               logger.error["CheckWarmupConsistency"]
+                  <<"Table of warmup values seems to be incompatible with steering file.\n"
+                  <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
+                  <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"].\n"
+                  <<wrmuphelp
+                  <<"Exiting."<<endl;
+               ret = false;
+               exit(1);
+            }
+         } else if (NDim == 3) {
+            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
+                || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]
+                || Bin[i][2].first != wrmbin[i][i0+4] || Bin[i][2].second != wrmbin[i][i0+5]) {
+               logger.error["CheckWarmupConsistency"]
+                  <<"Table of warmup values seems to be incompatible with steering file.\n"
+                  <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
+                  <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"] ["<<wrmbin[i][i0+4]<<","<<wrmbin[i][i0+5]<<"].\n"
+                  <<wrmuphelp
+                  <<"Exiting."<<endl;
+               ret = false;
+               exit(1);
+            }
          }
-      } else if (NDim == 2) {
-         if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
-             || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]) {
-            logger.error["CheckWarmupConsistency"]
+         // KR: Check bin width only roughly
+         double bwwrm = 0;
+         if (NDim == 1) bwwrm = wrmbin[i][i0+2];
+         else if (NDim == 2) bwwrm = wrmbin[i][i0+4];
+         else if (NDim == 3) bwwrm = wrmbin[i][i0+6];
+         if ( fabs(BinSize[i]) > DBL_MIN && (1 - BinSize[i]/bwwrm) > 1.e-4) {
+            logger.warn["CheckWarmupConsistency"]
                <<"Table of warmup values seems to be incompatible with steering file.\n"
-               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
-               <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"].\n"
+               <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
+               <<", warmup: "<<bwwrm<<".\n"
                <<wrmuphelp
-               <<"Exiting."<<endl;
+               <<"Please check consistency!"<<endl<<endl;
             ret = false;
-            exit(1);
          }
-      } else if (NDim == 3) {
-         if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
-             || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]
-             || Bin[i][2].first != wrmbin[i][i0+4] || Bin[i][2].second != wrmbin[i][i0+5]) {
-            logger.error["CheckWarmupConsistency"]
-               <<"Table of warmup values seems to be incompatible with steering file.\n"
-               <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
-               <<"], warmup: ["<<wrmbin[i][i0]<<","<<wrmbin[i][i0+1]<<"] ["<<wrmbin[i][i0+2]<<","<<wrmbin[i][i0+3]<<"] ["<<wrmbin[i][i0+4]<<","<<wrmbin[i][i0+5]<<"].\n"
-               <<wrmuphelp
-               <<"Exiting."<<endl;
-            ret = false;
-            exit(1);
-         }
-      }
-      // KR: Check bin width only roughly
-      double bwwrm = 0;
-      if (NDim == 1) bwwrm = wrmbin[i][i0+2];
-      else if (NDim == 2) bwwrm = wrmbin[i][i0+4];
-      else if (NDim == 3) bwwrm = wrmbin[i][i0+6];
-      if ( fabs(BinSize[i]) > DBL_MIN && (1 - BinSize[i]/bwwrm) > 1.e-4) {
-         logger.warn["CheckWarmupConsistency"]
-            <<"Table of warmup values seems to be incompatible with steering file.\n"
-            <<"Found different bin size for bin "<<i<<". Steering: "<<BinSize[i]
-            <<", warmup: "<<bwwrm<<".\n"
-            <<wrmuphelp
-            <<"Please check consistency!"<<endl<<endl;
-         ret = false;
       }
    }
    return ret;
