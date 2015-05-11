@@ -457,8 +457,9 @@ AC_CONFIG_FILES([Makefile
 	creator/Makefile
 	doc/arXiv_1109.1310/Makefile
 	doc/Makefile
-	processor/Makefile
-	processor/modifier/Makefile
 ])
+
+#	processor/Makefile
+#	processor/modifier/Makefile
 
 AC_OUTPUT
