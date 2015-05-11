@@ -1,15 +1,15 @@
       SUBROUTINE FNLOCONVERT
 ************************************************************************
-*     
+*
 *     fastNLO_converter:
 *     Convert fastNLO tables from v1.4 to v2.0
-*     
+*
 *     M. Wobisch, K. Rabbertz
 *
 *     Contains:
 *     CV14RD   reads  v1.4 tables
 *     CV20WRT  writes v2.0 tables
-*     
+*
 ************************************************************************
       Implicit None
       Include 'strings.inc'
@@ -49,8 +49,13 @@
             WRITE(*,*)'#    2: NLO contribution only'
             WRITE(*,*)'#    3: THC contribution only'
             WRITE(*,*)'#    9: Complete table'
-            WRITE(*,*)'# Bin width factor, def. = 1'
-            WRITE(*,*)'#       Set to 2 for |eta| or |y| bins'
+            WRITE(*,*)'# Bin widths were not stored in v1.4 tables!'
+            WRITE(*,*)'# ==> calculate bin widths from 2-dim. binning!'
+            WRITE(*,*)'# Set additional bin width factor, def. = 1'
+            WRITE(*,*)'#   0.: Ignore all binning, bin widths = 1.'
+            WRITE(*,*)'#  -1.: Ignore bin widths of 1st dim. (y)'
+            WRITE(*,*)'#  -2.: Ignore bin widths of 2nd dim. (pT)'
+            WRITE(*,*)'#   2.: Multiply by 2,e.g. for |eta| or |y| bins'
             WRITE(*,*)'# Cross section units, def. = read from table'
             WRITE(*,*)'#'
             WRITE(*,*)'# Use "_" to skip changing a default argument.'
@@ -174,26 +179,26 @@
 *
 *     M. Wobisch, K. Rabbertz
 *     Read ASCII table of perturbative coefficients from v1.4
-*     
+*
 *     Input: FILENAME  name of table
-*     
+*
 ************************************************************************
       IMPLICIT NONE
       CHARACTER*(*) FILENAME
       CHARACTER*64 CHTMP
       INTEGER IFIRST, IFILE, I,J,K,L,M,N, NBIN,NX
       INCLUDE 'fnlo-convert.inc'
-      
+
       DATA IFIRST/0/
       SAVE IFIRST
-      
+
       OPEN(2,STATUS='OLD',FILE=FILENAME,IOSTAT=IFILE)
       IF (IFILE .ne. 0) THEN
          Write(*,*)'# CV14RD: ERROR! Table file not found, '//
      >        'IOSTAT = ',IFILE
          STOP
       ENDIF
-      
+
 *---  Table start
       Read(2,*) i
       if (i.ne.iseparator) goto 999
@@ -302,7 +307,7 @@
       Do i=1,NSCALEVAR
          Read(2,*) MUFSCALE(i)
       Enddo
-      
+
       Read(2,*) i
       if (i.ne.iseparator) goto 999
 *---------------------------------------
@@ -335,14 +340,14 @@
 
       Return
  999  Continue
-      
-      Close (2) 
+
+      Close (2)
       Write(*,*) ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
       Write(*,*) "> CV14RD: ERROR in table format!"
       Write(*,*) ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
       Stop
       Return
-      
+
       End
 
 
@@ -352,7 +357,7 @@
 *
 *     M. Wobisch, K. Rabbertz
 *     Write ASCII table in v2.0 format
-*     
+*
 *     Input: FILENAME  name of table
 *     Input: SCENNAME  name of scenario
 *     Input: ICONT     part of table to write
@@ -363,7 +368,7 @@
 *                   9: Complete table'
 *     Input: DBWID     factor for bin width calculation
 *     Input: ISECT     Correct cross section units to ISECT
-*     
+*
 ************************************************************************
       Implicit None
       Integer ICONT
@@ -429,7 +434,7 @@
          NSubpr = 7             ! deal with this later order-by-order
       endif
       If (ireaction.eq.2) NPDFPDG(2) = NPDFPDG(1) ! pp
-      
+
       NFragFunc = 0
       NScales = 2
       NScaleDim = 1
@@ -459,7 +464,7 @@
       Write(2,'(I2)')  IXSECTUNITS ! -> Ipublunits
 *---  Compose five line scenario description out of available
 *---  information and order as in v2.0
-      Write(2,'(I2)')  5        ! NScDescript 
+      Write(2,'(I2)')  5        ! NScDescript
 *---  Observable
       CHTMP = NAMELABEL(1)
       Write(2,'(A)') CHTMP(1:LEN_TRIM(CHTMP)) ! ScDescript(1)
@@ -507,13 +512,21 @@
             Enddo
          Enddo
       Enddo
-      
+
       Write(*,*)'# CV20WRT: Bin width is computed using '//
      >     'a factor of:', DBWID
       Do i1=1,Nrapidity
          Do i2=1,NPT(i1)
-            binsize = (PTBIN(i1,i2+1)-PTBIN(i1,i2)) *
-     >           (RAPBIN(i1+1)-RAPBIN(i1)) * DBWID
+            If (DBWID.EQ.0d0) then
+               binsize = 1d0
+            elseif (DBWID.EQ.-1d0) then
+               binsize = (PTBIN(i1,i2+1)-PTBIN(i1,i2))
+            elseif (DBWID.EQ.-2d0) then
+               binsize = (RAPBIN(i1+1)-RAPBIN(i1))
+            else
+               binsize = (PTBIN(i1,i2+1)-PTBIN(i1,i2)) *
+     >              (RAPBIN(i1+1)-RAPBIN(i1)) * DBWID
+            endif
             Write(2,'(G24.17)')binsize
          Enddo
       Enddo
@@ -652,12 +665,12 @@
                   XNode = xlimit(i1,i2)
                   if (ixscheme.eq.2) then
                      hxlim = - sqrt(-log10(xnode))
-                     hx = hxlim *(1d0 - dble(j-1)/dble(Nxtot)) 
+                     hx = hxlim *(1d0 - dble(j-1)/dble(Nxtot))
                      XNode = 10**(-(hx*hx))
                   elseif (ixscheme.eq.1) then
                      hxlim = log10(xnode)
                      hx = hxlim *(1d0 - dble(j-1)/dble(Nxtot))
-                     XNode = 10**(hx) 
+                     XNode = 10**(hx)
                   endif
                   xarray(i,j) = XNode ! --- use later for PDF unweighting
                   Write(2,'(G24.17)') XNode
@@ -672,15 +685,15 @@
          Enddo
          Do i=1,Nscaledim
             Write(2,'(I2)') 1        ! NScaleDescript(i) <- one descriptive string
-            Write(2,'(A)') SCALELABEL(1:LEN_TRIM(SCALELABEL))          
+            Write(2,'(A)') SCALELABEL(1:LEN_TRIM(SCALELABEL))
          Enddo
-         
+
          If (IScaleDep.eq.0) then
             nscvar = 1
          Else
             nscvar = NscaleVar
          endif
-         
+
          Do i=1,NscaleDim
             Write(2,'(I2)') nscvar   ! NscaleVar
             Write(2,'(I2)') NscaleBin ! NscaleBin
@@ -690,11 +703,11 @@
                Write(2,'(G24.17)') 1d0   ! Scalefac(i)(j)
             else
                Do j=1,nscvar
-                  Write(2,'(G24.17)') MURSCALE(j) ! Scalefac(i)(j)               
+                  Write(2,'(G24.17)') MURSCALE(j) ! Scalefac(i)(j)
                Enddo
             endif
          Enddo
-         
+
          i = 0
          Do i1=1,Nrapidity
             Do i2=1,NPT(i1)
@@ -714,7 +727,7 @@
             Enddo
          Enddo
 
-*---  undo PDF reweighting -> compute factors 
+*---  undo PDF reweighting -> compute factors
          i = 0
          Do i1=1,Nrapidity
             Do i2=1,NPT(i1)
@@ -750,7 +763,7 @@
 
 
 *---  Diagonalize Bernstein scale interpolation in v1.4
-*---  Also convert the simpler linear interpolation with 2 scale bins 
+*---  Also convert the simpler linear interpolation with 2 scale bins
          If (ITabversion.eq.14000 .and. NScaleBin.ge.2) Then
             i = 0
             Do i1=1,Nrapidity
@@ -767,7 +780,7 @@
                               Else
                                  nscaddr = 1+k+(n-2)*nscalevar
                               Endif
-                              
+
                               If (NScaleBin.eq.2) Then ! 2 Scalebins as in Dijet Mass
 ckr Something to do here? Converted dijet mass tables of this type exhibit discrepancies!!!
                               ElseIf (NScaleBin.eq.3) Then ! 3 Bernstein Scalebins
@@ -776,13 +789,13 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
                                  Bnst(1) = array(i,m,n1,nscaddr,1)
                                  Bnst(2) = array(i,m,n1,nscaddr,2)
                                  Bnst(3) = array(i,m,n1,nscaddr,3)
-                                 array(i,m,n1,nscaddr,1) = 
+                                 array(i,m,n1,nscaddr,1) =
      +                                1d0*Bnst(1) - Bnfactor*(1.-t1)**2
-     >                                *Bnst(2)             
-                                 array(i,m,n1,nscaddr,2) = 
+     >                                *Bnst(2)
+                                 array(i,m,n1,nscaddr,2) =
      +                                + Bnfactor            *Bnst(2)
-     >                                
-                                 array(i,m,n1,nscaddr,3) = 
+     >
+                                 array(i,m,n1,nscaddr,3) =
      +                                - Bnfactor*(t1)**2    *Bnst(2)+
      >                                1d0*Bnst(3)
 
@@ -796,8 +809,8 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
                                  Bnst(2) = array(i,m,n1,nscaddr,2)
                                  Bnst(3) = array(i,m,n1,nscaddr,3)
                                  Bnst(4) = array(i,m,n1,nscaddr,4)
-                                 
-                                 array(i,m,n1,nscaddr,1) = 
+
+                                 array(i,m,n1,nscaddr,1) =
      &                                1d0*Bnst(1)+
      &                                Bnfactor* (-3.*(1.-t2)*(t2)**2*(1.
      >                                -t1)**3+ 3.*(1.-t1)*(t1)**2*(1.
@@ -806,24 +819,24 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
      >                                *(1.-t2)**2*(t2)* *(1.-t1)**3)
      >                                *Bnst(3)
 
-                                 array(i,m,n1,nscaddr,2) = 
+                                 array(i,m,n1,nscaddr,2) =
      &                                Bnfactor*(3.*(1.-t2)*(t2)**2)
      >                                *Bnst(2)+Bnfactor*(- 3.*(1.-t2)**2
      >                                *(t2)) *Bnst(3)
 
-                                 array(i,m,n1,nscaddr,3) = 
+                                 array(i,m,n1,nscaddr,3) =
      &                                Bnfactor*(-3.*(1.-t1)*(t1)**2)
      >                                *Bnst(2) +Bnfactor*(3.*(1.-t1)**2
      >                                *(t1)) *Bnst(3)
 
-                                 array(i,m,n1,nscaddr,4) = 
+                                 array(i,m,n1,nscaddr,4) =
      &                                Bnfactor* (-3.*(1.-t2)*(t2)**2
      >                                *(t1)**3+ 3.*(1.-t1)*(t1)**2*(t2)
      >                                **3)  *Bnst(2) +Bnfactor* (-3.*(1.
      >                                -t1)**2*(t1)*(t2)**3+ 3.*(1.-t2)
      >                                **2*(t2)*(t1)**3)  *Bnst(3) +1d0
      >                                *Bnst(4)
-                                 
+
                               Else
                                  Write(*,*) "# CV20WRT: ERROR! "//
      >                                "Not implemented: NScaleBin = ",
@@ -832,7 +845,7 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
                               Endif
                            Enddo
                         Enddo
-                     Enddo                     
+                     Enddo
                   Enddo
                Enddo
             Enddo
@@ -903,7 +916,7 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
      >                                ,l)).ne.1d0)Write(*,*)i,array(i,m
      >                                ,n1-1,nscaddr,l)/array(i,m,n1,
      >                                nscaddr,l),k,l,m,nscaddr,n
-                                 
+
                               endif ! ---- DIS or pp/ppbar?
                            Enddo
                         Enddo
@@ -915,7 +928,7 @@ ckr Something to do here? Converted dijet mass tables of this type exhibit discr
          Write(2,'(I10)') Iseparator ! ------------------- Block B ------
       Enddo
       Write(2,'(I10)') Iseparator ! --------- Add. check for EOF --
-      
+
  999  continue
       close(unit=2)
 

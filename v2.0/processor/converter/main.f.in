@@ -26,5 +26,5 @@
       WRITE(*,*)CSEPS
 
       CALL FNLOCONVERT
-      
+
       END
