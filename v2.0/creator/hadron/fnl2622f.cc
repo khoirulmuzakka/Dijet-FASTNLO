@@ -247,7 +247,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp)
       // highest (pseudo-)rapidity for central jets to be considered
       const double yjcmax = 2.5;
       // minimal dijet mass for events to be considered
-      const double mjjmin = A2->LoBin[0][0];
+      const double mjjmin = A2->LoBin[0][1];
       // maximal allowed y_boost = 0.5 * |y1 + y2|
       const double yboostmax = 1.11;
       // maximal allowed y_star = 0.5 * |y1 - y2|
