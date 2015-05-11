@@ -1,7 +1,11 @@
 Release Notes for fastNLO_converter version 2.1.0:
 ==================================================
 
-- First internal release of the fastNLO_converter package
+2015-05-11  Release of the fastNLO_converter package version 2.1.0, revision 2107
+            =====================================================================
 
-- Content:
-  Fortran code to read fastNLO v1.4 tables and convert them to fastNLO v2.0
+2012-02-06  Rearrange code to have autocompleted main program printing out version info etc.
+            ================================================================================
+
+2011-11-26  Release of first test version of fastNLO_converter version 2.1.0
+            ================================================================

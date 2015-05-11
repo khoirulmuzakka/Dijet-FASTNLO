@@ -28,7 +28,7 @@ bin_PROGRAMS = fnlo-convert
 fnlo_convert_SOURCES = main.f fnlo-convert.f fnlo-convert.inc strings.inc
 
 # FORTRAN compiler flags to be used for the main target
-AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132
+AM_FFLAGS = -O -fno-automatic -ffixed-line-length-132 -I $(srcdir)
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
