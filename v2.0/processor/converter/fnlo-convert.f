@@ -40,7 +40,7 @@
          IF (INFILE(1:LEN_TRIM(INFILE)).EQ."-h") THEN
             WRITE(*,*)'#'
             WRITE(*,*)'# Usage: ./fnlo-convert [arguments]'
-            WRITE(*,*)'# Table input file, def. = intable.tab'
+            WRITE(*,*)'# Table input file,  def. = intable.tab'
             WRITE(*,*)'# Table output file, def. = outtable.tab'
             WRITE(*,*)'# Scenarioname, def. = fnx9999'
             WRITE(*,*)'# Table part to write, def. = 9 (all)'

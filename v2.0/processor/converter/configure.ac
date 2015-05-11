@@ -3,7 +3,7 @@
 #
 # K. Rabbertz, 26.11.2011
 #
-# Create separate distribution and installation package for fastNLO_converter 
+# Create separate distribution and installation package for fastNLO_converter
 #
 # -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
@@ -66,7 +66,7 @@ AC_MSG_NOTICE([*******************************************************])
 AC_MSG_NOTICE([No particular checks required for fastNLO_converter ...])
 AC_MSG_NOTICE([*******************************************************])
 
-# Add subversion revision number, recipe from Autotools by J. Calcote 
+# Add subversion revision number, recipe from Autotools by J. Calcote
 SVNREV=`svnversion $srcdir | sed 's/:.*//'`
 which svnversion > /dev/null; \
 if [[ $? -ne 0 ] || [ "x$SVNREV" = "xexported" ]];
@@ -76,11 +76,14 @@ fi
 AC_SUBST(SVNREV)
 
 # Define project substitution variables (to be replaced e.g. in config files below)
+AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
 AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
-AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, G. Sieber, F. Stober, M. Wobisch"])
+AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
 AC_SUBST([QUOTEv14],["hep-ph/0609285"])
 AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
+AC_SUBST([SUBPROJECT],["reader"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
+AC_SUBST([YEARS],["2005-`date +%Y`"])
 
 # Output
 AC_CONFIG_FILES([Makefile

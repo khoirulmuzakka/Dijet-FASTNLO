@@ -6,8 +6,7 @@ Installation of distribution package:
 Via autotools setup, in unpacking directory of *.tar.gz file:
 
 ./configure --prefix=your_local_directory
-make
-make install
+make -j ncores install
 
 
 Requirements:
@@ -29,23 +28,34 @@ fastNLO v1.4 Tables may contain the following contributions
 - threshold corrections
   (only for inclusive jets)
 
-Usage: ./fnlo-convert [arguments]
-Table input file, def. = intable.tab
-Table output file, def. = outtable.tab
-Scenarioname, def. = fnx9999
-Table part to write, def. = 9 (all)
-   0: Table header only
-   1: LO contribution only
-   2: NLO contribution only
-   3: THC contribution only
-   9: Complete table
-Bin width factor, def. = 1
-      Set to 2 for |eta| or |y| bins
-Cross section units, def. = read from table
 
-Use "_" to skip changing a default argument.
+Usage:
+------
+ # Usage: ./fnlo-convert [arguments]
+ # Table input file,  def. = intable.tab
+ # Table output file, def. = outtable.tab
+ # Scenarioname, def. = fnx9999
+ # Table part to write, def. = 9 (all)
+ #    0: Table header only
+ #    1: LO contribution only
+ #    2: NLO contribution only
+ #    3: THC contribution only
+ #    9: Complete table
+ # Bin widths were not stored in v1.4 tables!
+ # ==> calculate bin widths from 2-dim. binning!
+ # Set additional bin width factor, def. = 1
+ #   0.: Ignore all binning, bin widths = 1.
+ #  -1.: Ignore bin widths of 1st dim. (y)
+ #  -2.: Ignore bin widths of 2nd dim. (pT)
+ #   2.: Multiply by 2,e.g. for |eta| or |y| bins
+ # Cross section units, def. = read from table
+ #
+ # Use "_" to skip changing a default argument.
 
-Some issues with tables converted from v1.4 to v2.0:
+
+Remarks:
+--------
+Some issues with table conversions from v1.4 to v2.0:
 
 1. Conversion does not work for reference tables
 2. Standard nlofast-add'er by default ALWAYS writes:
@@ -53,16 +63,26 @@ Some issues with tables converted from v1.4 to v2.0:
      Check the scenario code for correctness and eventually
      replace the value using the command line argument!
    - Writes leading/trailing blanks and zeros
-3. Potentially treat the table once with tablefix.pl to
+3. Potentially treat the table once with fnlo-convert-fix.pl to
    trim leading and trailing space.
 4. Bug in conversion of dijet mass tables? Check!!!
+
+
+Usage of fnlo-convert-fix.pl:
+-----------------------------
+fnlo-convert-fix.pl
+Usage: fnlo-convert-fix.pl table file
+  -h              Print this text
+  -n              Name of cleaned table (def.="oldname".new)
+  -r              Replace old table by new one
+                  No further options available
 
 
 For maintainers only: Preparation of distribution package:
 ----------------------------------------------------------
 autoreconf --install
 ./configure --prefix=your_install_directory
-make dist
+make distcheck
 
 Note: configure only terminates properly if mandatory requirements
 are fulfilled even if this configuration is not foreseen to be installed!

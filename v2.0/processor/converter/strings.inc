@@ -1,7 +1,7 @@
 *     --- force emacs to fortran mode -*-fortran-*-
-*     
+*
 *---  Define character strings for print out
-*     
+*
       Character*41  CSEP0,DSEP0,LSEP0,SSEP0
       Parameter(CSEP0='#########################################')
       Parameter(DSEP0='#========================================')
@@ -34,9 +34,9 @@
      >     '*****************************************'//
      >     '*****************************************')
 
-*     
+*
 *---  Define character strings used in fastNLO v1.4
-*     
+*
       CHARACTER*17 CIREACTION(4)
       CHARACTER*17 CIPROC(4)
       CHARACTER*28 CIALGO(6)
@@ -44,7 +44,7 @@
       CHARACTER*12 CJETRES2(6)
       CHARACTER*64 CNLOJET(3)
       CHARACTER*64 CTHRCOR(3)
-      
+
       DATA CIREACTION/"electron-proton","proton-proton",
      >     "proton-antiproton","photon-proton"/
       DATA CIPROC/"inclusive jets","dijets","three-jets",
@@ -52,7 +52,7 @@
       DATA CIALGO/"kT","MP","MP_RSEP","SISCone","anti-kT","C/A"/
       DATA CJETRES1/"R","R","R","R","R","R"/
       DATA CJETRES2/"n/a","f_overlap","Rsep","f_overlap","n/a","n/a"/
-      
+
       DATA CNLOJET/
      >     "NLOJet++_2.0.1",
      >     "Z. Nagy, Phys. Rev. Lett. 88, 122003 (2002),",
