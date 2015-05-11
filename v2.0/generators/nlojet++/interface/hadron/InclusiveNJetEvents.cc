@@ -132,13 +132,13 @@ private:
    int NDim;                  // Dimensionality of distributions
    vector<string> DimLabel;   // Dimension labels
    // enum to switch between implemented observables (max. of 3 simultaneously)
-   enum Obs { YMAX, YSTAR, MJJGEV, MJJTEV, PT12GEV, CHIJJ };
+   enum Obs { YMAX, YSTAR, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
    Obs obsdef[3];
    double obs[3];
    vector<string> ScaleLabel; // Scale labels
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
    // (Njet > 1!)
-   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR, EXPYSTAR };
+   enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR, EXPYSTAR, HTHALF };
    Scales mudef[2];
    double mu[2];
    int jetalgo;               // Define fastjet jet algorithm
@@ -152,7 +152,8 @@ private:
    double ptj1min;            // Minimal jet pT for leading jet (default is ptjmin)
    double ptj2min;            // Minimal jet pT for 2nd leading jet (default is ptjmin)
    double ptj3min;            // Minimal jet pT for 3rd leading jet (default is ptjmin)
-   double ycjjmax;            // Maximal jet rapidity for leading two jets
+   double ycjjmax;            // Maximal jet rapidity for leading two jets and further central jets
+   int Ncjetmin;              // Minimal number of central jets
    double yboostmax;          // Maximal y_boost = 0.5 * |y1 + y2|
    double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2|
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
@@ -239,6 +240,12 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          obsdef[i] = PT12GEV;
       } else if ( DimLabel[i] == "Chi" ) {
          obsdef[i] = CHIJJ;
+      } else if ( DimLabel[i] == "HT/2_[GeV]" ) {
+         obsdef[i] = HTHALFGEV;
+      } else if ( DimLabel[i] == "pT_max_[GeV]" ) {
+         obsdef[i] = PTMAXGEV;
+      } else if ( DimLabel[i] == "DeltaPhi_1,2" ) {
+         obsdef[i] = DPHI12;
       } else {
          say::error["ScenarioCode"] << "Unknown observable, i.e. dimension label, aborted!" << endl;
          say::error["ScenarioCode"] << "DimLabel[" << i << "] = " << DimLabel[i] << endl;
@@ -277,6 +284,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          mudef[i] = PTMAXEXPYSTAR;
       } else if ( ScaleLabel[i] == "exp(0.3*y_star)" ) {
          mudef[i] = EXPYSTAR;
+      } else if ( ScaleLabel[i] == "HT/2_[GeV]" ) {
+         mudef[i] = HTHALF;
       } else {
          say::error["ScenarioCode"] << "Unknown scale, i.e. scale description, aborted!" << endl;
          say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
@@ -394,11 +403,17 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["ptj3min"] ) {
       ftable->GetParameterFromSteering("ptj3min",ptj3min);
    }
-   // maximal jet rapidity for leading two jets
+   // maximal jet rapidity for leading two jets and further central jets
    SteeringPars["ycjjmax"] = ftable->TestParameterInSteering("ycjjmax");
    ycjjmax = DBL_MAX; // default is no limitation
    if ( SteeringPars["ycjjmax"] ) {
       ftable->GetParameterFromSteering("ycjjmax",ycjjmax);
+   }
+   // minimal number of central jets
+   SteeringPars["Ncjetmin"] = ftable->TestParameterInSteering("Ncjetmin");
+   Ncjetmin = 0; // default is no limitation
+   if ( SteeringPars["Ncjetmin"] ) {
+      ftable->GetParameterFromSteering("Ncjetmin",Ncjetmin);
    }
    // maximal y_boost
    SteeringPars["yboostmax"] = ftable->TestParameterInSteering("yboostmax");
@@ -540,14 +555,16 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // average pTs of leading jets
    double pT1   = (pj[1].perp()) / 1.0;
    double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
-   // pT of 3rd central jet (i.e. inside ycjjmax)
+   // no. of central jets and pT of 3rd central jet (i.e. inside ycjjmax)
+   int Ncjet   = 0;
    double pT3c = 0.;
-   if ( njet > 2 ) {
-      if ( abs(pj[3].rapidity()) < ycjjmax ) {
-         pT3c = pj[3].perp();
-      } else if ( njet > 3 && abs(pj[4].rapidity()) < ycjjmax ) {
-         pT3c = pj[4].perp();
+   double HT2  = 0.;
+   for (unsigned int k = 1; k <= njet; k++) {
+      if ( abs(pj[k].rapidity()) < ycjjmax ) {
+         Ncjet++;
+         HT2 += pj[k].perp()/2.;
       }
+      if ( Ncjet == 3 ) {pT3c = pj[k].perp();}
    }
    double pT123 = (pT1 + pj[2].perp() + pT3c) / 3.0;
 
@@ -578,6 +595,24 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          // dijet chi
          obs[i] = exp(abs(y1-y2));
          break;
+      case HTHALFGEV :
+         // half of jet pT sum
+         obs[i] = HT2;
+         break;
+      case PTMAXGEV :
+         // leading jet pT
+         obs[i] = pT1;
+         break;
+      case DPHI12 :
+         // azimuthal angular separation between leading two jets
+         {
+            double ph1   = pj[1].phi();
+            double ph2   = pj[2].phi();
+            double delph = abs(ph1 - ph2);
+            if (delph > TWOPI/2.) delph = TWOPI - delph;
+            obs[i] = delph;
+         }
+         break;
       default :
          say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
          say::error["ScenarioCode"] << "DimLabel[" << i << "] = " << DimLabel[i] << endl;
@@ -586,14 +621,28 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       }
    }
 
+   // --- give some debug output before further selection
+   if ( say::info.GetSpeak() ) {
+      say::info["ScenarioCode"]  << "----------------------------------------------------" << endl;
+      say::info["ScenarioCode"]  << "Final selection cuts: ycjjmax, mjjmin, yboostmax, ystarmax: " << ycjjmax << ", " << obsmin[0] << ", " << yboostmax << ", " << ystarmax << endl;
+      say::info["ScenarioCode"]  << "Final selection obs.: maxyjj, mjj, sumyjj/2., difyjj/2.: " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+   }
+
    // --- Further Njet phase space cuts?
    if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
-        yjjmax < ycjjmax &&
+        yjjmax < ycjjmax && Ncjetmin <= Ncjet &&
         yboost < yboostmax && ystar < ystarmax &&
         (njet < 3 || ptj3min <= pT3c) &&
         (obsmin[0] <= obs[0] && obs[0] < obsmax[0]) &&
         (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
         (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
+
+      // --- event accepted
+      if ( say::info.GetSpeak() ) {
+         say::info["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+         say::info["ScenarioCode"]  << "Event/jet accepted!" << endl;
+         say::info["ScenarioCode"]  << "==================== End of event ====================" << endl;
+      }
 
       // --- set the renormalization and factorization scales
       // --- calculate the requested scales
@@ -622,6 +671,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          case EXPYSTAR :
             // ATLAS definition, this works only as second scale choice!
             mu[i] = exp(0.3*ystar);
+            break;
+         case HTHALF :
+            // half of jet pT sum (must be in GeV!)
+            mu[i] = HT2;
             break;
          default :
             say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
