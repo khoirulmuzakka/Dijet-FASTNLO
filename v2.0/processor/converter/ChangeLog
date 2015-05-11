@@ -1,7 +1,10 @@
-2015-05-11  Release of the fastNLO_converter package version 2.1.0, revision 2105
+2015-05-11  Release of the fastNLO_converter package version 2.1.0, revision 2106
             =====================================================================
 
 2015-05-11  rabbertz
+
+    * README, configure.ac, fnlo-convert.f, fnlo-convert.inc, main.f.in,
+      strings.inc: On the occasion ... prepare release of converter
 
     * Makefile.am, fnlo-convert-fix.pl, fnlo-convert.f, main.f.in, tablefix.pl:
       Add more options how to derive bin widths from v14 to v2
@@ -51,8 +54,8 @@
 
     * Makefile.am, configure.ac: v2: Some improvements in installation setup
 
-06.02.2012:
-Rearrange code to have autocompleted main program printing out version info etc.
+2012-02-06  Rearrange code to have autocompleted main program printing out version info etc.
+            ================================================================================
 
 2012-02-06  rabbertz
 
@@ -80,8 +83,8 @@ Rearrange code to have autocompleted main program printing out version info etc.
       fastnlo-fig3.pdf, figs, psfig.sty: Fix subproject distribution problem
       with SVNREV; add doc distribution of arXiv article
 
-26.11.2011:
-First test version of fastNLO_converter version 2.1.0
+2011-11-26  Release of first test version of fastNLO_converter version 2.1.0
+            ================================================================
 
 2011-11-26  rabbertz
 
