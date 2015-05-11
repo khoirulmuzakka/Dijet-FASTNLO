@@ -7,17 +7,18 @@ AUTOMAKE_OPTIONS = gnu
 #
 # No fastjet, have at least for starter
 #
-lib_LTLIBRARIES = libfnt1001midp.la
+lib_LTLIBRARIES =
+#   lib_LTLIBRARIES = libfnt1001midp.la
 #   lib_LTLIBRARIES = libfnt1001midp.la libfnt2009midp.la libfnt2012test.la libfnt2013norm.la libfnt2014norm.la libfnl1001.la
 #
 # Require fastjet
 #
 if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2222b.la
-   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
+#   lib_LTLIBRARIES += libfnl2342b.la libfnl2342bptmax.la
 #   lib_LTLIBRARIES += libfnl2412c.la libfnl2412e.la libfnl3412e.la libfnl2422.la
 #   lib_LTLIBRARIES = libfnl3412fy0.la libfnl3412fy1.la libfnl3412fy2.la libfnl3412fy3.la libfnl3412fy4.la
-   lib_LTLIBRARIES += libfnl2352.la
+#   lib_LTLIBRARIES += libfnl2352.la
 #   lib_LTLIBRARIES += libfnl2452.la libfnl2822num.la libfnl2822den.la libfnl1001ak07.la libfnl1001sc07.la libfnl1001d0r207.la libfnt2012.la
    lib_LTLIBRARIES += libfnl2622f.la libfnl3622g.la libfnl3622h.la
 #   lib_LTLIBRARIES += libfnl2332y0.la libfnl2332y1.la libfnl2332y2.la libfnl2332y3.la libfnl2332y4.la libfnl2332y5.la libfnl2332y6.la libfnl2332d.la libfnl2332dptmax.la libfnl2332dnf6.la
@@ -31,8 +32,8 @@ if HAVE_FASTJET
 #   lib_LTLIBRARIES += libfnl2370.la libfnl2380.la libfnl2380ak05.la libfnl2380ak07.la
 #   lib_LTLIBRARIES = libfnl2950m3.la
 # v21
-   lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
-   lib_LTLIBRARIES += libfnl4350a.la libfnl5350eta0.la libfnl5350eta1.la libfnl5350eta2.la libfnl5350eta3.la libfnl5350eta4.la
+#   lib_LTLIBRARIES += libfnl2380ak0507y0.la libfnl2380ak0507y1.la libfnl2380ak0507y2.la libfnl2380ak0507y3.la libfnl2380ak0507y4.la libfnl2380ak0507y5.la
+#   lib_LTLIBRARIES += libfnl4350a.la libfnl5350eta0.la libfnl5350eta1.la libfnl5350eta2.la libfnl5350eta3.la libfnl5350eta4.la
 endif
 
 #
@@ -45,7 +46,7 @@ endif
 AM_SOURCES = pdf-cteq6.h pdf-hhc-dummy.h
 # cteq6.h is included from lhpdf installation which is different from original
 # Individual sources
-libfnt1001midp_la_SOURCES      = fnt1001midp.cc      $(AM_SOURCES)
+#libfnt1001midp_la_SOURCES      = fnt1001midp.cc      $(AM_SOURCES)
 #libfnt2009midp_la_SOURCES      = fnt2009midp.cc      $(AM_SOURCES)
 #libfnt2012test_la_SOURCES      = fnt2012test.cc      $(AM_SOURCES)
 #libfnt2013norm_la_SOURCES      = fnt2013norm.cc      $(AM_SOURCES)
@@ -58,9 +59,9 @@ libfnt1001midp_la_SOURCES      = fnt1001midp.cc      $(AM_SOURCES)
 #libfnl1001d0r207_la_SOURCES    = fnl1001d0r207.cc    $(AM_SOURCES)
 #libfnt2012_la_SOURCES          = fnt2012.cc          $(AM_SOURCES)
 #libfnl2222b_la_SOURCES         = fnl2222b.cc         $(AM_SOURCES)
-libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
-libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
-libfnl2352_la_SOURCES          = fnl2352.cc          $(AM_SOURCES)
+#libfnl2342b_la_SOURCES         = fnl2342b.cc         $(AM_SOURCES)
+#libfnl2342bptmax_la_SOURCES    = fnl2342bptmax.cc    $(AM_SOURCES)
+#libfnl2352_la_SOURCES          = fnl2352.cc          $(AM_SOURCES)
 #libfnl2452_la_SOURCES          = fnl2452.cc          $(AM_SOURCES)
 #libfnl2412c_la_SOURCES         = fnl2412c.cc         $(AM_SOURCES)
 #libfnl2412e_la_SOURCES         = fnl2412e.cc         $(AM_SOURCES)
@@ -139,18 +140,18 @@ libfnl3622h_la_SOURCES         = fnl3622h.cc         $(AM_SOURCES)
 #libfnl2912by1ptavm3_la_SOURCES = fnl2912by1ptavm3.cc $(AM_SOURCES)
 #libfnl2912hy1ptavm3_la_SOURCES = fnl2912hy1ptavm3.cc $(AM_SOURCES)
 # v21
-libfnl2380ak0507y0_la_SOURCES  = fnl2380ak0507y0.cc  $(AM_SOURCES)
-libfnl2380ak0507y1_la_SOURCES  = fnl2380ak0507y1.cc  $(AM_SOURCES)
-libfnl2380ak0507y2_la_SOURCES  = fnl2380ak0507y2.cc  $(AM_SOURCES)
-libfnl2380ak0507y3_la_SOURCES  = fnl2380ak0507y3.cc  $(AM_SOURCES)
-libfnl2380ak0507y4_la_SOURCES  = fnl2380ak0507y4.cc  $(AM_SOURCES)
-libfnl2380ak0507y5_la_SOURCES  = fnl2380ak0507y5.cc  $(AM_SOURCES)
-libfnl4350a_la_SOURCES         = fnl4350a.cc         $(AM_SOURCES)
-libfnl5350eta0_la_SOURCES      = fnl5350eta0.cc      $(AM_SOURCES)
-libfnl5350eta1_la_SOURCES      = fnl5350eta1.cc      $(AM_SOURCES)
-libfnl5350eta2_la_SOURCES      = fnl5350eta2.cc      $(AM_SOURCES)
-libfnl5350eta3_la_SOURCES      = fnl5350eta3.cc      $(AM_SOURCES)
-libfnl5350eta4_la_SOURCES      = fnl5350eta4.cc      $(AM_SOURCES)
+#libfnl2380ak0507y0_la_SOURCES  = fnl2380ak0507y0.cc  $(AM_SOURCES)
+#libfnl2380ak0507y1_la_SOURCES  = fnl2380ak0507y1.cc  $(AM_SOURCES)
+#libfnl2380ak0507y2_la_SOURCES  = fnl2380ak0507y2.cc  $(AM_SOURCES)
+#libfnl2380ak0507y3_la_SOURCES  = fnl2380ak0507y3.cc  $(AM_SOURCES)
+#libfnl2380ak0507y4_la_SOURCES  = fnl2380ak0507y4.cc  $(AM_SOURCES)
+#libfnl2380ak0507y5_la_SOURCES  = fnl2380ak0507y5.cc  $(AM_SOURCES)
+#libfnl4350a_la_SOURCES         = fnl4350a.cc         $(AM_SOURCES)
+#libfnl5350eta0_la_SOURCES      = fnl5350eta0.cc      $(AM_SOURCES)
+#libfnl5350eta1_la_SOURCES      = fnl5350eta1.cc      $(AM_SOURCES)
+#libfnl5350eta2_la_SOURCES      = fnl5350eta2.cc      $(AM_SOURCES)
+#libfnl5350eta3_la_SOURCES      = fnl5350eta3.cc      $(AM_SOURCES)
+#libfnl5350eta4_la_SOURCES      = fnl5350eta4.cc      $(AM_SOURCES)
 
 # Example how to add a jet algo interface locally in this directory
 # Should only be done temporarily
