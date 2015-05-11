@@ -124,6 +124,8 @@ ScaleVariationFactors {                     # Factorization scale variations (on
  0.5 1.0 2.0                                # List of scale factors must include factor '1'
 }                                           # Scale factors will be ordered according to fastNLO convention: (1, min, ... , max)
 ReadBinningFromSteering         true        # Specify if binning is read from this file. MUST be true for now!
+IgnoreWarmupBinningCheck        false       # Ignore crosscheck of binning between steering and warmup
+                                            # Avoids problems with precision of bin borders e.g. in the case of Pi
 #>>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
 
 # ==================================================================== #

@@ -15,8 +15,7 @@ SUBDIRS = Examples InclusiveJets DijetMass RivetAdditions
 
 # Install all data files from gzipped tar archive to avoid limits in command line length!
 FIRST   = RivetAdditions
-#MYDIRS  = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular
-MYDIRS  = Examples InclusiveJets InclusiveNJetEvents DijetMass
+MYDIRS  = Examples InclusiveJets DijetMass DijetAngular AzimuthalDecorrelation InclusiveNJetEvents
 ARCHIVE = Steering
 TAR     = $(ARCHIVE).tar
 TARGZ   = $(TAR).gz

@@ -50,7 +50,8 @@ Njetmin                         2                # Minimal number of jets requir
 ptj1min                       100.               # Minimal jet pT for leading jet
 #ptj2min                        50.               # Minimal jet pT for 2nd leading jet
 #ptj3min                        50.               # Minimal jet pT for 3rd leading jet
-#ycjjmax                         3.0              # Maximal jet rapidity for leading two jets
+#ycjjmax                         3.0              # Maximal jet rapidity for leading two jets and further central jets
+#Ncjetmin                        3                # Minimal number of central jets
 #yboostmax                       3.0              # Maximal y_boost = 0.5 * |y1 + y2|
 #ystarmax                        3.0              # Maximal y_star  = 0.5 * |y1 - y2|
 #obs0min                         x.y              #
@@ -74,7 +75,7 @@ DifferentialDimension             2              # Dimensionality of binning
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
    "y_star"                                      # This defines the observables to be calculated!
    "Mjj_[TeV]"                                   # Implemented observables are: "|y_max|", "y_star", "Mjj_[GeV]", "Mjj_[TeV]", "<pT_1,2>_[GeV]",
-                                                 #   "Chi"
+                                                 #   "Chi", "HT/2_[GeV]", "pT_max_[GeV]", "DeltaPhi_1,2"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
    2  2                                          #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
@@ -92,7 +93,7 @@ BinSizeFactor                    1.              # Possibility to provide additi
 ScaleDescriptionScale1          "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "exp(0.3*y_star)"# Specify 2nd scale name and unit (ONLY for flexible-scale tables)
                                                  # Implemented scales are: "pT_max_[GeV]", "<pT_1,2>_[GeV]", "<pT_1,2,3>_[GeV]", "Mjj/2_[GeV]",
-                                                 #   "pT_max*exp(0.3*y_star)_[GeV]", "exp(0.3*y_star)"
+                                                 #   "pT_max*exp(0.3*y_star)_[GeV]", "exp(0.3*y_star)", "HT/2_[GeV]"
 
 # -------------------------------------------------------------------- #
 #   Observable binning
@@ -166,6 +167,8 @@ ScaleVariationFactors {                     # Factorization scale variations (on
  0.5 1.0 2.0                                # List of scale factors must include factor '1'
 }                                           # Scale factors will be ordered according to fastNLO convention: (1, min, ... , max)
 ReadBinningFromSteering         true        # Specify if binning is read from this file. MUST be true for now!
+IgnoreWarmupBinningCheck        false       # Ignore crosscheck of binning between steering and warmup
+                                            # Avoids problems with precision of bin borders e.g. in the case of Pi
 #>>fastNLO-warmup.txt                        # Specify alternative filename to read warm-up results from, def.=SteerFileBasename_${ScenarioName}_warmup.txt
 
 # ==================================================================== #
