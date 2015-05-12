@@ -473,7 +473,10 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
 
 // --- fastNLO v2.2: class UserHHC: analyze parton event (called once for each event)
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
-   say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+   if ( say::debug.GetSpeak() ) {
+      say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+      say::debug["ScenarioCode"]  << "==================== Start of event ====================" << endl;
+   }
 
    // --- fastNLO user:
    //     Here is your playground where you compute your observables and
@@ -501,12 +504,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // --- give some debug output before selection and sorting
-   if ( say::info.GetSpeak() ) {
+   if ( say::debug.GetSpeak() ) {
       for (unsigned int i=1; i<=nj; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::info["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -523,18 +526,18 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
    // --- give some debug output after selection and sorting
-   if ( say::info.GetSpeak() ) {
-      say::info["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+   if ( say::debug.GetSpeak() ) {
+      say::debug["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
       if ( ! lpseudo ) {
-         say::info["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       } else {
-         say::info["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       }
       for (unsigned int i=1; i<=njet; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::info["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -622,10 +625,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // --- give some debug output before further selection
-   if ( say::info.GetSpeak() ) {
-      say::info["ScenarioCode"]  << "----------------------------------------------------" << endl;
-      say::info["ScenarioCode"]  << "Final selection cuts: ycjjmax, mjjmin, yboostmax, ystarmax: " << ycjjmax << ", " << obsmin[0] << ", " << yboostmax << ", " << ystarmax << endl;
-      say::info["ScenarioCode"]  << "Final selection obs.: maxyjj, mjj, sumyjj/2., difyjj/2.: " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+   if ( say::debug.GetSpeak() ) {
+      say::debug["ScenarioCode"]  << "----------------------------------------------------" << endl;
+      say::debug["ScenarioCode"]  << "Final selection cuts: ycjjmax, mjjmin, yboostmax, ystarmax: " << ycjjmax << ", " << obsmin[0] << ", " << yboostmax << ", " << ystarmax << endl;
+      say::debug["ScenarioCode"]  << "Final selection obs.: maxyjj, mjj, sumyjj/2., difyjj/2.: " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
    }
 
    // --- Further Njet phase space cuts?
@@ -638,10 +641,10 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
         (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
 
       // --- event accepted
-      if ( say::info.GetSpeak() ) {
-         say::info["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
-         say::info["ScenarioCode"]  << "Event/jet accepted!" << endl;
-         say::info["ScenarioCode"]  << "==================== End of event ====================" << endl;
+      if ( say::debug.GetSpeak() ) {
+         say::debug["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+         say::debug["ScenarioCode"]  << "Event/jet accepted!" << endl;
+         say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
       }
 
       // --- set the renormalization and factorization scales
@@ -653,9 +656,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             mu[i] = pT1;
             break;
          case PT12AVE :
-            // average pT of leading two jets
-            mu[i] = pT12;
-            break;
+	    // average pT of leading two jets
+	    mu[i] = pT12;
+	    break;
          case PT123AVE :
             // average pT of leading three jets
             mu[i] = pT123;
@@ -711,6 +714,13 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          ftable->FillAllSubprocesses(contribsflex,scen);
       } else {
          ftable->FillAllSubprocesses(contribsfix,scen);
+      }
+   } else {
+      // --- event rejected
+      if ( say::debug.GetSpeak() ) {
+         say::debug["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+         say::debug["ScenarioCode"]  << "Event/jet rejected!" << endl;
+         say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
       }
    }
 }
