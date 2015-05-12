@@ -128,27 +128,26 @@ private:
    unsigned long nwritemax;   // Maximal no. of events after which to write out the table
 
    // --- fastNLO steering
-   bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
-   int NDim;                  // Dimensionality of distributions
-   vector<string> DimLabel;   // Dimension labels
+   bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table (default is fixed-scale)
+   int NDim;                  // Dimensionality of distributions (no default, must be defined)
+   vector<string> DimLabel;   // Dimension labels (no default, must be defined)
    // enum to switch between implemented observables (max. of 3 simultaneously)
    enum Obs { PTJETGEV, YJET, ETAJET, PHIJET };
    Obs obsdef[3];
    double obs[3];
-   vector<string> ScaleLabel; // Scale labels
+   vector<string> ScaleLabel; // Scale labels (Scale1: no default, must be defined; Scale2: default is "pT_max_[GeV]")
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
-   // (Njet > 1!)
    enum Scales { PTMAX, PTJET };
    Scales mudef[2];
    double mu[2];
-   int jetalgo;               // Define fastjet jet algorithm
-   double jetsize;            // Define jet size R
-   double overlapthreshold;   // Define overlap threshold (for some jet algorithms)
-   double ptjmin;             // Minimal jet pT (should be >= minimum of 1 GeV specified in interface to fastjet)
-   double yetajmin;           // Minimal jet (pseudo-)rapidity
-   double yetajmax;           // Maximal jet (pseudo-)rapidity
+   int jetalgo;               // Define fastjet jet algorithm (no default, must be defined)
+   double jetsize;            // Define jet size R (no default, must be defined)
+   double overlapthreshold;   // Define overlap threshold (default is 0.5)
+   double ptjmin;             // Minimal jet pT (no default, must be defined; should be >= minimum of 1 GeV specified in interface to fastjet)
+   double yetajmin;           // Minimal jet (pseudo-)rapidity (no default, must be defined)
+   double yetajmax;           // Maximal jet (pseudo-)rapidity (no default, must be defined)
    bool lpseudo;              // Switch to use either jet rapidity y or jet eta
-   int Njetmin;               // Minimal number of jets in phase space
+   int Njetmin;               // Minimal number of jets in phase space (default is 1)
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
 };
@@ -351,6 +350,11 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["Njetmin"] ) {
       ftable->GetParameterFromSteering("Njetmin",Njetmin);
    }
+   if ( Njetmin < 1 ) {
+      say::error["ScenarioCode"] << "This is a 1+-jet scenario. At least one jet must be present, aborted!" << endl;
+      say::error["ScenarioCode"] << "Please correct the Njetmin requirement. Njetmin = " << Njetmin << endl;
+      exit(1);
+   }
 
    // --- fastNLO user: declare and initialize Njet phase space cuts and definitions via steering file
    // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
@@ -399,7 +403,10 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
 
 // --- fastNLO v2.2: class UserHHC: analyze parton event (called once for each event)
 void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
-   say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+   if ( say::debug.GetSpeak() ) {
+      say::debug["UserHHC::userfunc"] << "---------- UserHHC::userfunc called ----------" << endl;
+      say::debug["ScenarioCode"]  << "==================== Start of event ====================" << endl;
+   }
 
    // --- fastNLO user:
    //     Here is your playground where you compute your observables and
@@ -427,12 +434,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // --- give some debug output before selection and sorting
-   if ( say::info.GetSpeak() ) {
+   if ( say::debug.GetSpeak() ) {
       for (unsigned int i=1; i<=nj; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::info["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "before cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -449,18 +456,18 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    std::sort(pj.begin(), pj.begin() + njet, SortJets);
 
    // --- give some debug output after selection and sorting
-   if ( say::info.GetSpeak() ) {
-      say::info["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
+   if ( say::debug.GetSpeak() ) {
+      say::debug["ScenarioCode"] << "# jets before and after phase space cuts: nj, njet = " << nj << ", " << njet << endl;
       if ( ! lpseudo ) {
-         say::info["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: yjmin, yjmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       } else {
-         say::info["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
+         say::debug["ScenarioCode"] << "phase space cuts: etajmin, etajmax, ptjmin: " << yetajmin << ", " << yetajmax << ", " << ptjmin << endl;
       }
       for (unsigned int i=1; i<=njet; i++) {
          double pti  = pj[i].perp();
          double yi   = pj[i].rapidity();
          double etai = pj[i].prapidity();
-         say::info["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
+         say::debug["ScenarioCode"] << "after cuts: jet # i, pt, y, eta: " << i << ", " << pti << ", " << yi << ", " << etai << endl;
       }
    }
 
@@ -507,10 +514,24 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          }
       }
 
+      // --- give some debug output before final selection
+      if ( say::debug.GetSpeak() ) {
+         say::debug["ScenarioCode"]  << "---------------- Before final selection ----------------" << endl;
+         for ( int i = 0; i<NDim; i++ ) {
+            say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs[i] << ", obsmax = " << obsmax[i] << endl;
+         }
+      }
+
       // --- Further Njet phase space cuts?
       if ( obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
            (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
            (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
+
+         // --- jet accepted
+         if ( say::debug.GetSpeak() ) {
+            say::debug["ScenarioCode"]  << "----------------- Event/jet accepted! ------------------" << endl;
+            say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
+         }
 
          // --- set the renormalization and factorization scales
          // --- calculate the requested scales
@@ -559,6 +580,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             ftable->FillAllSubprocesses(contribsflex,scen);
          } else {
             ftable->FillAllSubprocesses(contribsfix,scen);
+         }
+      } else {
+         // --- jet rejected
+         if ( say::debug.GetSpeak() ) {
+            say::debug["ScenarioCode"]  << "----------------- Event/jet rejected! ------------------" << endl;
+            say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
          }
       }
    }
