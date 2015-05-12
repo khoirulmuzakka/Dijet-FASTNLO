@@ -128,34 +128,34 @@ private:
    unsigned long nwritemax;   // Maximal no. of events after which to write out the table
 
    // --- fastNLO steering
-   bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table
-   int NDim;                  // Dimensionality of distributions
-   vector<string> DimLabel;   // Dimension labels
+   bool lFlexibleScaleTable;  // Fill fixed- or flexible-scale table (default is fixed-scale)
+   int NDim;                  // Dimensionality of distributions (no default, must be defined)
+   vector<string> DimLabel;   // Dimension labels (no default, must be defined)
    // enum to switch between implemented observables (max. of 3 simultaneously)
    enum Obs { YMAX, YSTAR, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
    Obs obsdef[3];
    double obs[3];
-   vector<string> ScaleLabel; // Scale labels
+   vector<string> ScaleLabel; // Scale labels (Scale1: no default, must be defined; Scale2: default is "pT_max_[GeV]")
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
    // (Njet > 1!)
    enum Scales { PTMAX, PT12AVE, PT123AVE, MJJHALF, PTMAXEXPYSTAR, EXPYSTAR, HTHALF };
    Scales mudef[2];
    double mu[2];
-   int jetalgo;               // Define fastjet jet algorithm
-   double jetsize;            // Define jet size R
-   double overlapthreshold;   // Define overlap threshold (for some jet algorithms)
-   double ptjmin;             // Minimal jet pT (should be >= minimum of 1 GeV specified in interface to fastjet)
-   double yetajmin;           // Minimal jet (pseudo-)rapidity
-   double yetajmax;           // Maximal jet (pseudo-)rapidity
+   int jetalgo;               // Define fastjet jet algorithm (no default, must be defined)
+   double jetsize;            // Define jet size R (no default, must be defined)
+   double overlapthreshold;   // Define overlap threshold (default is 0.5)
+   double ptjmin;             // Minimal jet pT (no default, must be defined; should be >= minimum of 1 GeV specified in interface to fastjet)
+   double yetajmin;           // Minimal jet (pseudo-)rapidity (no default, must be defined)
+   double yetajmax;           // Maximal jet (pseudo-)rapidity (no default, must be defined)
    bool lpseudo;              // Switch to use either jet rapidity y or jet eta
-   int Njetmin;               // Minimal number of jets in phase space
+   int Njetmin;               // Minimal number of jets in phase space (default is 2)
    double ptj1min;            // Minimal jet pT for leading jet (default is ptjmin)
    double ptj2min;            // Minimal jet pT for 2nd leading jet (default is ptjmin)
    double ptj3min;            // Minimal jet pT for 3rd leading jet (default is ptjmin)
-   double ycjjmax;            // Maximal jet rapidity for leading two jets and further central jets
-   int Ncjetmin;              // Minimal number of central jets
-   double yboostmax;          // Maximal y_boost = 0.5 * |y1 + y2|
-   double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2|
+   double ycjjmax;            // Maximal jet rapidity for leading two jets and further central jets (default is no limitation, i.e. DBL_MAX)
+   int Ncjetmin;              // Minimal number of central jets (default is no limitation, i.e. zero)
+   double yboostmax;          // Maximal y_boost = 0.5 * |y1 + y2| (default is no limitation, i.e. DBL_MAX)
+   double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2| (default is no limitation, i.e. DBL_MAX)
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
 };
@@ -555,21 +555,24 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    lorentzvector<double> pj12 = pj[1] + pj[2];
    double mjj = pj12.mag();
    if (mjj < 0.) {say::warn["ScenarioCode"] << "Negative mass encountered: " << mjj << endl;}
-   // average pTs of leading jets
+   // average pTs of leading jets anywhere in preselected phase space
    double pT1   = (pj[1].perp()) / 1.0;
    double pT12  = (pj[1].perp() + pj[2].perp()) / 2.0;
-   // no. of central jets and pT of 3rd central jet (i.e. inside ycjjmax)
+   double pT123 = pT12;
+   if ( njet > 2 ) {
+      pT123 = (pj[1].perp() + pj[2].perp() + pj[3].perp()) / 3.0;
+   }
+   // no. of central jets, pT of third central jet, and HT of central jets (i.e. inside ycjjmax)
    int Ncjet   = 0;
-   double pT3c = 0.;
+   //   double pT3c = 0;
    double HT2  = 0.;
    for (unsigned int k = 1; k <= njet; k++) {
       if ( abs(pj[k].rapidity()) < ycjjmax ) {
          Ncjet++;
          HT2 += pj[k].perp()/2.;
       }
-      if ( Ncjet == 3 ) {pT3c = pj[k].perp();}
+      //      if ( Ncjet == 3 ) {pT3c = pj[k].perp();}
    }
-   double pT123 = (pT1 + pj[2].perp() + pT3c) / 3.0;
 
    // --- calculate observable of nth dimension
    for ( int i = 0; i<NDim; i++ ) {
@@ -624,26 +627,32 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       }
    }
 
-   // --- give some debug output before further selection
+   // --- give some debug output before final selection
    if ( say::debug.GetSpeak() ) {
-      say::debug["ScenarioCode"]  << "----------------------------------------------------" << endl;
-      say::debug["ScenarioCode"]  << "Final selection cuts: ycjjmax, mjjmin, yboostmax, ystarmax: " << ycjjmax << ", " << obsmin[0] << ", " << yboostmax << ", " << ystarmax << endl;
-      say::debug["ScenarioCode"]  << "Final selection obs.: maxyjj, mjj, sumyjj/2., difyjj/2.: " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
+      say::debug["ScenarioCode"]  << "---------------- Before final selection ----------------" << endl;
+      for ( int i = 0; i<NDim; i++ ) {
+         say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs[i] << ", obsmax = " << obsmax[i] << endl;
+      }
+      say::debug["ScenarioCode"]  << "pT min cuts: ptj1min = " << ptj1min << ", pT1 = " << pT1 << ", ptj2min = " << ptj2min << ", pT2 = " << pj[2].perp() << endl;
+      say::debug["ScenarioCode"]  << "y central cuts: yjjmax = " << yjjmax << ", ycjjmax = " << ycjjmax << ", Ncjetmin = " << Ncjetmin << ", Ncjet = " << Ncjet << endl;
+      say::debug["ScenarioCode"]  << "y further cuts: yboost = " << yboost << ", yboostmax = " << yboostmax << ", ystar = " << ystar << ", ystarmax = " << ystarmax << endl;
+      if ( njet > 2 ) {
+         say::debug["ScenarioCode"]  << "3rd jet cuts: ptj3min = " << ptj3min << ", pT3 = " << pj[3].perp() << endl;
+      }
    }
 
    // --- Further Njet phase space cuts?
    if ( ptj1min <= pT1  && ptj2min <= pj[2].perp() &&
         yjjmax < ycjjmax && Ncjetmin <= Ncjet &&
         yboost < yboostmax && ystar < ystarmax &&
-        (njet < 3 || ptj3min <= pT3c) &&
+        (njet < 3 || ptj3min <= pj[3].perp()) &&
         (obsmin[0] <= obs[0] && obs[0] < obsmax[0]) &&
         (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
         (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
 
       // --- event accepted
       if ( say::debug.GetSpeak() ) {
-         say::debug["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
-         say::debug["ScenarioCode"]  << "Event/jet accepted!" << endl;
+         say::debug["ScenarioCode"]  << "----------------- Event/jet accepted! ------------------" << endl;
          say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
       }
 
@@ -656,9 +665,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             mu[i] = pT1;
             break;
          case PT12AVE :
-	    // average pT of leading two jets
-	    mu[i] = pT12;
-	    break;
+            // average pT of leading two jets
+            mu[i] = pT12;
+            break;
          case PT123AVE :
             // average pT of leading three jets
             mu[i] = pT123;
@@ -718,8 +727,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    } else {
       // --- event rejected
       if ( say::debug.GetSpeak() ) {
-         say::debug["ScenarioCode"]  << "nj, njet, maxyjj, mjj, sumyjj/2., difyjj/2.: " << nj << ", " << njet << ", " << yjjmax << ", " << obs[0] << ", " << yboost << ", " << ystar << endl;
-         say::debug["ScenarioCode"]  << "Event/jet rejected!" << endl;
+         say::debug["ScenarioCode"]  << "----------------- Event/jet rejected! ------------------" << endl;
          say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
       }
    }
