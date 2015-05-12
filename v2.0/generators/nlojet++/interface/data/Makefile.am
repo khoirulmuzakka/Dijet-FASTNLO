@@ -10,8 +10,8 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-#SUBDIRS = Examples InclusiveJets InclusiveNJetEvents DijetMass DijetAngular RivetAdditions
-SUBDIRS = Examples InclusiveJets DijetMass RivetAdditions
+SUBDIRS = Examples InclusiveJets DijetMass DijetAngular AzimuthalDecorrelation InclusiveNJetEvents RivetAdditions
+#SUBDIRS = Examples InclusiveJets DijetMass RivetAdditions
 
 # Install all data files from gzipped tar archive to avoid limits in command line length!
 FIRST   = RivetAdditions
