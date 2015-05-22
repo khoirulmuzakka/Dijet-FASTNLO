@@ -132,7 +132,7 @@ private:
    int NDim;                  // Dimensionality of distributions (no default, must be defined)
    vector<string> DimLabel;   // Dimension labels (no default, must be defined)
    // enum to switch between implemented observables (max. of 3 simultaneously)
-   enum Obs { YMAX, YSTAR, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
+   enum Obs { YMAX, YSTAR, Y1ABSRAP, Y2SIGN, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
    Obs obsdef[3];
    double obs[3];
    vector<string> ScaleLabel; // Scale labels (Scale1: no default, must be defined; Scale2: default is "pT_max_[GeV]")
@@ -177,6 +177,11 @@ struct fNLOSelector {
 struct fNLOSorter {
    bool operator() (const lorentzvector<double> &a, const lorentzvector<double> &b) {return (a.perp() > b.perp());};
 };
+
+// sign function returning -1, 0, 1
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 // --- fastNLO user: check and get steering parameters once and store into static vars
 static std::map < std::string, bool > SteeringPars;
@@ -232,6 +237,10 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
          obsdef[i] = YMAX;
       } else if ( DimLabel[i] == "y_star" ) {
          obsdef[i] = YSTAR;
+      } else if ( DimLabel[i] == "|y_1|" ) {
+         obsdef[i] = Y1ABSRAP;
+      } else if ( DimLabel[i] == "y_2s" ) {
+         obsdef[i] = Y2SIGN;
       } else if ( DimLabel[i] == "Mjj_[GeV]" ) {
          obsdef[i] = MJJGEV;
       } else if ( DimLabel[i] == "Mjj_[TeV]" ) {
@@ -584,6 +593,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       case YSTAR :
          // rapidity separation half
          obs[i] = ystar;
+         break;
+      case Y1ABSRAP :
+         // rapidity separation half
+         obs[i] = std::abs(y1);
+         break;
+      case Y2SIGN :
+         // rapidity separation half
+         obs[i] = y2 * sgn(y1) ;
          break;
       case MJJGEV :
          // dijet mass
