@@ -370,22 +370,30 @@ AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
 if test "x$DOXYGEN" = "x"; then
    AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
 else
-   AC_MSG_NOTICE([Creating code documentation using doxygen.])
-   AC_MSG_NOTICE([******************************************])
-   DX_DOT_FEATURE(ON)
-   AC_CHECK_PROGS(DOT, dot, dot)
-   if test "x$DOT" = "x"; then
-      AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
-      DX_DOT_FEATURE(OFF)
+   DOXYVMIN="1.5"
+   DOXYVERS=`doxygen --version`
+   DOXYVORD=`echo -e "$DOXYVERS\n$DOXYVMIN" | sort -t"." -g | head -n1` 
+   if test "x$DOXYVORD" = "x$DOXYVMIN"; then 
+      AC_MSG_NOTICE([Creating code documentation using doxygen version $DOXYVERS.])
+      AC_MSG_NOTICE([******************************************])
+      DX_DOT_FEATURE(ON)
+      AC_CHECK_PROGS(DOT, dot, dot)
+      if test "x$DOT" = "x"; then
+         AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
+         DX_DOT_FEATURE(OFF)
+      fi
+      DX_HTML_FEATURE(ON)
+      DX_CHM_FEATURE(OFF)
+      DX_CHI_FEATURE(OFF)
+      DX_MAN_FEATURE(OFF)
+      DX_RTF_FEATURE(OFF)
+      DX_XML_FEATURE(OFF)
+      DX_PDF_FEATURE(ON)
+      DX_PS_FEATURE(OFF)
+   else
+      AC_MSG_WARN([Doxygen version $DOXYVERS too old. Continue without doxygen documentation.])
+      DOXYGEN=""
    fi
-   DX_HTML_FEATURE(ON)
-   DX_CHM_FEATURE(OFF)
-   DX_CHI_FEATURE(OFF)
-   DX_MAN_FEATURE(OFF)
-   DX_RTF_FEATURE(OFF)
-   DX_XML_FEATURE(OFF)
-   DX_PDF_FEATURE(ON)
-   DX_PS_FEATURE(OFF)
 fi
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
 
@@ -465,6 +473,30 @@ AC_SUBST(SVNREV)
 # Initialize Doxygen doc
 if test "x$DOXYGEN" != "x"; then
    DX_INIT_DOXYGEN($PROJECT, doxygen.cfg, doc/doxygen)
+# or set missing conditionals to false
+else
+   DX_COND_doc_TRUE=
+   DX_COND_doc_FALSE='#'
+   DX_COND_dot_TRUE=
+   DX_COND_dot_FALSE='#'
+   DX_COND_man_TRUE=
+   DX_COND_man_FALSE='#'
+   DX_COND_rtf_TRUE=
+   DX_COND_rtf_FALSE='#'
+   DX_COND_html_TRUE=
+   DX_COND_html_FALSE='#'
+   DX_COND_chm_TRUE=
+   DX_COND_chm_FALSE='#'
+   DX_COND_chi_TRUE=
+   DX_COND_chi_FALSE='#'
+   DX_COND_xml_TRUE=
+   DX_COND_xml_FALSE='#'
+   DX_COND_latex_TRUE=
+   DX_COND_latex_FALSE='#'
+   DX_COND_ps_TRUE=
+   DX_COND_ps_FALSE='#'
+   DX_COND_pdf_TRUE=
+   DX_COND_pdf_FALSE='#'
 fi
 
 # Define project substitution variables (to be replaced e.g. in config files below)
