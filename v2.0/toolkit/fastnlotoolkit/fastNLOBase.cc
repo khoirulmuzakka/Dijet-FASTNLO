@@ -84,7 +84,11 @@ void fastNLOBase::ReadHeader(istream& table) {
       logger.error["ReadHeader"]<<"Cannot read from stream."<<endl;
    }
 
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      logger.error["ReadHeader"]<<"Did not find initial magic number, aborting!"<<endl;
+      logger.error["ReadHeader"]<<"Please check compatibility of tables and program version!"<<endl;
+      exit(1);
+   }
    table >> Itabversion;
    table >> ScenName;
    table >> Ncontrib;
@@ -115,7 +119,11 @@ void fastNLOBase::ReadHeader(istream& table) {
    }
    table >> NuserFloat;
    table >> Imachine;
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      logger.error["ReadHeader"]<<"Did not find final magic number, aborting!"<<endl;
+      logger.error["ReadHeader"]<<"Please check compatibility of tables and program version!"<<endl;
+      exit(1);
+   }
    fastNLOTools::PutBackMagicNo(table);
 }
 

@@ -1,56 +1,86 @@
 ///********************************************************************
 ///
-///     fnlo-merge
+///     fnlo-tk-merge
 ///     Program to merge several fastNLO files with different or
 ///     identical contributions into one table.
 ///
 ///********************************************************************
 // DB, 13.11.13, (re)write fnlo-merge for the toolkit
+// KR, 01.06.15, adapt command line treatment to our standard
 
 #include <cstdlib>
-#include <vector>
 #include <iostream>
+#include <vector>
 #include <unistd.h>
-#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOTable.h"
+#include "fastnlotk/speaker.h"
 
-using namespace std;
-using namespace say;
 
-int main(int argc, char** argv)
-{
+//__________________________________________________________________________________________________________________________________
+int main(int argc, char** argv) {
    //! ----------------------------------------------------------------------//
    //! Program to merge fastNLO tables.
    //! Input can be LO, NLO or other contributions (non-pert., data, etc)
    //! for the identical scenario.
    //! ----------------------------------------------------------------------//
 
-   //! check parameters
-   if (argc < 3) {
-      error["fnlo-merge"]<<"Usage: fnlo-merge file1.txt [filex.txt]+ result.txt"<<endl;
-      return 1;
+   //! --- namespaces
+   using namespace std;
+   using namespace say;       //! namespace for 'speaker.h'-verbosity levels
+   using namespace fastNLO;   //! namespace for fastNLO constants
+
+   //! --- Parse commmand line
+   cout << _CSEPSC << endl;
+   shout["fnlo-tk-merge"] << "Program Steering" << endl;
+   cout << _SSEPSC << endl;
+   //! --- Usage info
+   string tablename;
+   if (argc <= 1) {
+      error["fnlo-tk-merge"] << "No table names given, but need at least three!" << endl;
+      shout["fnlo-tk-merge"] << "For an explanation of command line arguments type:" << endl;
+      shout["fnlo-tk-merge"] << "./fnlo-tk-merge -h" << endl;
+      exit(1);
+   } else {
+      tablename = (const char*) argv[1];
+      if (tablename == "-h") {
+         shout << "" << endl;
+         shout << "Usage: ./fnlo-tk-merge [arguments]" << endl;
+         shout << "List of blank-separated table input files, at least two," << endl;
+         shout << "   plus output file for merged table." << endl;
+         shout << "" << endl;
+         cout  << _CSEPSC << endl;
+         return 0;
+      }
    }
 
-   //! check if output file already exists
+   //! --- Check no. of file names
+   if (argc <= 3) {
+      error["fnlo-tk-merge"] << "Not enough table names given, need at least three!" << endl;
+      exit(1);
+   }
+   //! --- Check if output file already exists
    int nFiles = argc - 1;
    if (access(argv[nFiles], R_OK) == 0) {
-      error["fnlo-merge"]<<"Error: Output file " << argv[nFiles] << " already exists!" << endl;
+      error["fnlo-tk-merge"]<<"Output file " << argv[nFiles] << " exists already!" << endl;
+      shout["fnlo-tk-merge"]<<"Please remove it first." << endl;
       return 1;
    }
 
-   //! init output table
+   //! --- Initialize output table
    fastNLOTable* resultTable = NULL;
 
-   //! loop over arguments and check existence of files
+   //! --- Loop over argument list and check existence of files
    int nValidTables = 0;
    for (int idxFile=0; idxFile<nFiles-1; idxFile++) {
       string path = argv[idxFile+1];
-      //! File there?
+      //! --- File there?
       if (access(path.c_str(), R_OK) != 0) {
-         warn["fnlo-merge"]<<"Unable to access file. Skipping "<<path<<endl;
+         warn["fnlo-tk-merge"]<<"Unable to access file, skipping "<<path<<endl;
       }
-      else { //ok, file exists
-         //! reading table
+      //! --- OK, file exists
+      else {
+         //! --- Reading table
+         info["fnlo-tk-merge"]<<"Reading table "<<path<<endl;
          fastNLOTable tab(path);
          // Todo: check validity of table, here!
          {
@@ -62,7 +92,7 @@ int main(int argc, char** argv)
                if ( tab.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
                   fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)tab.GetCoeffTable(ic);
                   if ( cadd->GetNevt(0,0) == 1 ) {
-                     error["fnlo-merge"]<<"Contribution #"<<ic<<" in table "<<path<<endl;
+                     error["fnlo-tk-merge"]<<"Contribution #"<<ic<<" in table "<<path<<endl;
                      error>>"     cannot be merged, because no valid number-of-events information"<<endl;
                      error>>"     is available: Nevt=1."<<endl;
                      error>>"     Please use program fnlo-tk-append instead."<<endl;
@@ -75,31 +105,33 @@ int main(int argc, char** argv)
          if ( !resultTable ) {
             resultTable = new fastNLOTable(tab);
             nValidTables++;
-            //! Hint to use fnlo-merge correctly.
-            info>>"\n";
-            info["fnlo-merge"]<<"\n";
-            info>>"     The user has to ensure, that merged input tables are statistically independent."<<endl;
-            info>>"     This is not checked by the program."<<endl;
-            info>>"\n";
+            //! Hint to use fnlo-tk-merge correctly.
+            warn["fnlo-tk-merge"]<<"The user has to ensure, that merged input tables are statistically independent."<<endl;
+            warn["fnlo-tk-merge"]<<"This is not checked by the program!"<<endl;
          }
-         else { //! adding table to result table
+         //! adding table to result table
+         else {
             //! check if 'scenario' is compatible
             if ( !resultTable->IsCompatible(tab) )
-               warn["fnlo-merge"]<<"Table '"<<path<<"' is not compatible with initial table '"<<resultTable->GetFilename()<<"'. Skipping table."<<endl;
-            else { //! adding tables
+               warn["fnlo-tk-merge"]<<"Table '"<<path<<"' is not compatible with initial table '"<<resultTable->GetFilename()<<"'. Skipping table."<<endl;
+            //! adding tables
+            else {
                resultTable->AddTable(tab);
                nValidTables++;
             }
          }
       }
    }
-   info["fnlo-merge"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
-   if (nValidTables < 1) exit(1);
+   info["fnlo-tk-merge"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
+   if (nValidTables < 2) {
+      error["fnlo-tk-merge"]<<"Found less than two valid tables, no merging possible!"<<endl;
+      exit(1);
+   }
 
    //! Write result
    string outfile = argv[nFiles];
    resultTable->SetFilename(outfile);
-   info["fnlo-merge"]<<"Write merged results to file "<<resultTable->GetFilename()<<"."<<endl;
+   info["fnlo-tk-merge"]<<"Write merged results to file "<<resultTable->GetFilename()<<"."<<endl;
    resultTable->WriteTable();
    return 0;
 }

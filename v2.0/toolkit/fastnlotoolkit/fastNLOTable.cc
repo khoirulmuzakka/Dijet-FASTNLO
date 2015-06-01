@@ -155,7 +155,11 @@ void fastNLOTable::ReadScenario(istream& table){
       logger.warn["ReadScenario"]<<"Cannot read from file."<<endl;
    }
 
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      logger.error["ReadScenario"]<<"Did not find initial magic number, aborting!"<<endl;
+      logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
+      exit(1);
+   }
 
    table >> Ipublunits;
    int  NScDescript = 0;
@@ -216,7 +220,11 @@ void fastNLOTable::ReadScenario(istream& table){
       }
    }
 
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
+      logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
+      exit(1);
+   }
    fastNLOTools::PutBackMagicNo(table);
 }
 

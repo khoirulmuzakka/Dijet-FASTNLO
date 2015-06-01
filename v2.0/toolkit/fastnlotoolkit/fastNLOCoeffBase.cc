@@ -44,7 +44,11 @@ void fastNLOCoeffBase::ReadBase(istream& table){
       error["ReadBase"]<<"Cannot read from file."<<endl;
    }
 
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      say::error["ReadBase"]<<"Did not find initial magic number, aborting!"<<endl;
+      say::error["ReadBase"]<<"Please check compatibility of tables and program version!"<<endl;
+      exit(1);
+   }
 
    table >> IXsectUnits;
    table >> IDataFlag;
@@ -77,8 +81,12 @@ void fastNLOCoeffBase::ReadBase(istream& table){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::EndReadCoeff(istream& table){
-   //debug["EndReadCoeff"]<<endl;
-   fastNLOTools::ReadMagicNo(table);
+   if (!fastNLOTools::ReadMagicNo(table)) {
+      say::error["ReadBase"]<<"Did not find final magic number, aborting!"<<endl;
+      say::error["ReadBase"]<<"Please check compatibility of tables and program version!"<<endl;
+      say::error["ReadBase"]<<"This might also be provoked by lines with unexpected non-numeric content like 'inf' or 'nan'!"<<endl;
+      exit(1);
+   }
    fastNLOTools::PutBackMagicNo(table);
 }
 
