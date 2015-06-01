@@ -29,6 +29,9 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
    //! --- Parse commmand line
    cout << _CSEPSC << endl;
    shout["fnlo-tk-merge"] << "Program Steering" << endl;
