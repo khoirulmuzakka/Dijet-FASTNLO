@@ -71,7 +71,7 @@ fastNLOCreate::fastNLOCreate(string steerfile, string warmupfile, bool shouldRea
    //speaker::SetGlobalVerbosity(say::DEBUG);
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
-   ReadSteering(steerfile, shouldReadSteeringFile);
+   ReadSteering(steerfile, warmupfile, shouldReadSteeringFile);
 
    ReadGenAndProcConstsFromSteering();
 
@@ -198,14 +198,18 @@ fastNLOCreate::~fastNLOCreate() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::ReadSteering(string steerfile, bool shouldReadSteeringFile) {
+void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
    //! read in steering file
    //! The filename of the steering file
    //! is used as the 'namespace' of labels in read_steer
+   //! if there is no steeringNameSpace given explicitly
    logger.debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
-   fSteerfile =  steerfile;
+   if (steeringNameSpace.empty()) {
+      steeringNameSpace = steerfile;
+   }
+   fSteerfile =  steeringNameSpace;
    if (shouldReadSteeringFile) {
-      READ_NS(steerfile,steerfile);
+      READ_NS(steerfile,fSteerfile);
    }
 
    SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
@@ -1787,32 +1791,35 @@ bool fastNLOCreate::CheckWeightIsFinite() {
    //! check if weights are finite
    if (! std::isfinite(fEvent._w)) {
       if (std::isnan(fEvent._w)) {
-         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'nan'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'nan'!"<<endl;
       } else if (std::isinf(fEvent._w)) {
-         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'inf'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'inf'!"<<endl;
       } else {
-         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is non-finite!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"(Scale-independent) weight is non-finite!"<<endl;
       }
+      logger.warn["CheckWeightIsFinite"]<<"Contribution is skipped!"<<endl;
       return false;
    }
    if (! std::isfinite(fEvent._wf)) {
       if (std::isnan(fEvent._wf)) {
-         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'nan'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'nan'!"<<endl;
       } else if (std::isinf(fEvent._wf)) {
-         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'inf'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'inf'!"<<endl;
       } else {
-         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is non-finite!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Factorization scale dependent weight is non-finite!"<<endl;
       }
+      logger.warn["CheckWeightIsFinite"]<<"Contribution is skipped!"<<endl;
       return false;
    }
    if (! std::isfinite(fEvent._wr)) {
       if (std::isnan(fEvent._wr)) {
-         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'nan'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'nan'!"<<endl;
       } else if (std::isinf(fEvent._wr)) {
-         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'inf'!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'inf'!"<<endl;
       } else {
-         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is non-finite!"<<endl;
+         logger.warn["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is non-finite!"<<endl;
       }
+      logger.warn["CheckWeightIsFinite"]<<"Contribution is skipped!"<<endl;
       return false;
    }
    return true;

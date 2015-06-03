@@ -101,11 +101,12 @@ protected:
 
    inline void ApplyPDFWeight(vector<pair<int,double> >& nodes, const double x, const vector<double>* grid) const;
    inline double CalcPDFReweight(double x) const;
-   void FillContribution(int scalevar = 0);                                                     //!< fill contribution into table
-   void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                            //!< fill flexible scale contribution in pp/ppbar
-   void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                            //!< fill flexible scale contribution in DIS
-   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                //!< fill fixed scale table in pp/ppbar
-   void ReadSteering(string steerfile, bool shouldReadSteeringFile = true);                     //!< read steering file
+   void FillContribution(int scalevar = 0);                                                                 //!< fill contribution into table
+   void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in pp/ppbar
+   void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in DIS
+   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale table in pp/ppbar
+   void ReadSteering(string steerfile, string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
+
    void ReadGenAndProcConstsFromSteering();
    void ReadBinning();
    ///
