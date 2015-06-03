@@ -307,7 +307,21 @@ namespace UsefulNlojetTools {
       // - rearrange subprocesses
       for (int fid = 0; fid < 7; fid++) {
          int nid = FastnloIdToNlojetIdHHC(fid);
+         // KR: Check on isnan|isinf now also for 'faster' fill code in toolkit
+         //     Commented out here.
+         //         if (std::isfinite(wtorg[nid])) {
          wt[fid] = wtorg[nid];
+         // } else {
+         //    //            wt[fid] = 0.;
+         //    wt[fid] = wtorg[nid];
+         //    if (std::isnan(wtorg[nid])) {
+         //       say::error["GetFixedScaleNlojetContribHHC"]<<"Weight wtorg for nid = " << nid << " is 'nan'!"<<endl;
+         //    } else if (std::isinf(wtorg[nid])) {
+         //       say::error["GetFixedScaleNlojetContribHHC"]<<"Weight wtorg for nid = " << nid << " is 'inf'!"<<endl;
+         //    } else {
+         //       say::error["GetFixedScaleNlojetContribHHC"]<<"Weight wtorg for nid = " << nid << " is non-finite!"<<endl;
+         //    }
+         // }
       }
       wt *= coef;
 
