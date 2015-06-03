@@ -1394,7 +1394,8 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       fEvent = events[0][0];
       fScenario = scen;
 
-      //if ( fEvent._w == 0 ) return; // nothing todo.
+      // KR: Also check for nan or inf in the faster code!!!
+      if (!CheckWeightIsFinite()) return;
 
       const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
       if (ObsBin < 0) return;
@@ -1581,7 +1582,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 
 
    // fill grid
-   if (CheckWeightIsNan()) return;
+   if (!CheckWeightIsFinite()) return;
    double wgt = fEvent._w / BinSize[ObsBin];
    for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
@@ -1594,6 +1595,11 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
 
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
             double w = wgt * nxlo[x1].second * nxup[x2].second * nmu[m1].second ;
+            if (! std::isfinite(w)) {
+               logger.error["FillContributionFixHHC"]<<"Weight w is not finite, w = " << w << "!"<<endl;
+               logger.error["FillContributionFixHHC"]<<"This should have been captured before, aborting ..."<<endl;
+               exit(1);
+            }
             //              cout<<"   Fill * : i="<<ObsBin<<" svar="<<scalevar<<" imu="<<m1<<" ix="<<ixHM<<", im1="<<nmu[m1].first<<", p="<<p<<", w="<<nxup[x1].second * nxlo[x2].second * nmu[m1].second / BinSize[ObsBin]
             //          <<",\tfEvent._w="<<fEvent._w<<",\twx="<<nxup[x1].second * nxlo[x2].second<<",\tws="<<nmu[m1].second<<endl;
             c->SigmaTilde[ObsBin][scalevar][nmu[m1].first][ixHM][p] += w;
@@ -1631,7 +1637,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
 
    // fill grid
-   if (CheckWeightIsNan()) return;
+   if (!CheckWeightIsFinite()) return;
    for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
          int xminbin = nxlo[x1].first;
@@ -1644,8 +1650,9 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
          for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
             for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
                double wfnlo = nxlo[x1].second * nxup[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-               if (std::isnan(wfnlo)) {
-                  logger.error[""]<<"wfnlo is a nan."<<endl;
+               if (! std::isfinite(wfnlo)) {
+                  logger.error["FillContributionFlexHHC"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
+                  logger.error["FillContributionFlexHHC"]<<"This should have been captured before, aborting ..."<<endl;
                   fKernX1[ObsBin]->PrintGrid();
                   fKernX2[ObsBin]->PrintGrid();
                   fKernMu1[ObsBin]->PrintGrid();
@@ -1713,7 +1720,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    }
 
    // fill grid
-   if (CheckWeightIsNan()) return;
+   if (!CheckWeightIsFinite()) return;
    for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
       int p = fEvent._p;
       int xIdx = nx[ix].first;
@@ -1723,8 +1730,9 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
       for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
          for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
             double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-            if (std::isnan(wfnlo)) {
-               logger.error[""]<<"wfnlo is a nan."<<endl;
+            if (! std::isfinite(wfnlo)) {
+               logger.error["FillContributionFlexDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
+               logger.error["FillContributionFlexDIS"]<<"This should have been captured before, aborting ..."<<endl;
                fKernX1[ObsBin]->PrintGrid();
                fKernMu1[ObsBin]->PrintGrid();
                fKernMu2[ObsBin]->PrintGrid();
@@ -1775,21 +1783,39 @@ inline void fastNLOCreate::HalfMatrixCheck(double x1, double x2, int& xminbin, i
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::CheckWeightIsNan() {
-   //! check if weights contain isnan
-   if (std::isnan(fEvent._w)) {
-      logger.error["CheckWeightIsNan"]<<"(Scale-independent) weight is 'nan'"<<endl;
-      return true;
+bool fastNLOCreate::CheckWeightIsFinite() {
+   //! check if weights are finite
+   if (! std::isfinite(fEvent._w)) {
+      if (std::isnan(fEvent._w)) {
+         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'nan'!"<<endl;
+      } else if (std::isinf(fEvent._w)) {
+         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is 'inf'!"<<endl;
+      } else {
+         logger.error["CheckWeightIsFinite"]<<"(Scale-independent) weight is non-finite!"<<endl;
+      }
+      return false;
    }
-   if (std::isnan(fEvent._wf)) {
-      logger.error["CheckWeightIsNan"]<<"Factorization scale dependent weight is 'nan'"<<endl;
-      return true;
+   if (! std::isfinite(fEvent._wf)) {
+      if (std::isnan(fEvent._wf)) {
+         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'nan'!"<<endl;
+      } else if (std::isinf(fEvent._wf)) {
+         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is 'inf'!"<<endl;
+      } else {
+         logger.error["CheckWeightIsFinite"]<<"Factorization scale dependent weight is non-finite!"<<endl;
+      }
+      return false;
    }
-   if (std::isnan(fEvent._wr)) {
-      logger.error["CheckWeightIsNan"]<<"Renormalization scale dependent weight is 'nan'"<<endl;
-      return true;
+   if (! std::isfinite(fEvent._wr)) {
+      if (std::isnan(fEvent._wr)) {
+         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'nan'!"<<endl;
+      } else if (std::isinf(fEvent._wr)) {
+         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is 'inf'!"<<endl;
+      } else {
+         logger.error["CheckWeightIsFinite"]<<"Renormalization scale dependent weight is non-finite!"<<endl;
+      }
+      return false;
    }
-   return false;
+   return true;
 }
 
 
