@@ -15,7 +15,7 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName fnl2342b_mu2_v23_fix
+ScenarioName InclusiveJets_Example_v23_fix
 ScenarioDescription {
     "d2sigma-jet_dpT_dy_[pb_GeV]"
     "CMS_Collaboration"
@@ -29,18 +29,31 @@ ScenarioDescription {
     "If you use this table, please cite:"
     "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
 }
-PublicationUnits               12                # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
+PublicationUnits                12               # Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
 
 # -------------------------------------------------------------------- #
 #   Global scenario settings
 # -------------------------------------------------------------------- #
-JetAlgo                         2                # fastjet jet algorithm
+JetAlgo                           2              # fastjet jet algorithm
 #                                                # clustering jet algos: 0 = kT, 1 = CA, 2 = anti-kT
 #                                                # cone jet algos: 10 = SISCone, 11 = CDFMidPointCone, 12 = D0RunIICone
 Rjet                            0.5              # Jet size parameter: Required for all jets
+#OvThr                           0.5              # Overlap threshold:  Required for cone jets (Normally 10: 0.75; 11,12: 0.50)
+#                                                # Overall jet phase space
 ptjmin                         18.               # Minimal jet pT (minimum set in interface to fastjet: 1 GeV)
 yjmin                           0.0              # Minimal jet rapidity
 yjmax                           3.0              # Maximal jet rapidity
+# Use either rapidity or pseudorapidity but not both! If both are set, only rapidity cuts are applied.
+#etajmin                         0.0              # Minimal jet pseudorapidity
+#etajmax                         3.0              # Maximal jet pseudorapidity
+#Njetmin                         1                # Minimal number of jets required to be in preselected phase space
+#                                                 # (Normally one, i.e. single-jet inclusive)
+#obs0min                         x.y              #
+#obs0max                         x.y              # By default these values are derived from the binning in these
+#obs1min                         x.y              # observables and are set automatically. If required the min/max
+#obs1max                         x.y              # values for each of the maximally three observables can be set
+#obs2min                         x.y              # by hand.
+#obs2max                         x.y              #
 
 # -------------------------------------------------------------------- #
 #   Observable definition, dimensioning, and normalization
@@ -55,7 +68,7 @@ LeadingOrder                      2              # Number of jets for the LO pro
 DifferentialDimension             2              # Dimensionality of binning
 DimensionLabels {                                # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
    "|y|"                                         # This defines the observables to be calculated!
-   "pT_[GeV]"
+   "pT_[GeV]"                                    # Implemented observables are: "|y|", "pT_[GeV]", "phi"
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
    2  2                                          #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
@@ -72,6 +85,7 @@ BinSizeFactor                    2.              # Possibility to provide additi
                                                  #
 ScaleDescriptionScale1          "pT_jet_[GeV]"   # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
 ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
+                                                 # Implemented scales are: "pT_jet_[GeV]", "pT_max_[GeV]"
 
 # -------------------------------------------------------------------- #
 #   Observable binning
@@ -81,6 +95,12 @@ ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and un
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
+# Example for SingleDifferentialBinning:
+#SingleDifferentialBinning {
+# 7. 11. 18. 30. 50. 100.
+#}
+
+# Example for DoubleDifferentialBinning:
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
     0.0        0.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  468.  507.  548.  592.  638.  686.  737.  846. 1684.
@@ -90,6 +110,17 @@ DoubleDifferentialBinning {{
     2.0        2.5          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  330.  362.  395.  430.  737.
     2.5        3.0          18.   21.   24.   28.   32.   37.   43.   49.   56.   64.   74.   84.   97.  114.  133.  153.  174.  196.  220.  245.  272.  300.  468.
 }}
+
+# Example for TripleDifferentialBinning:
+#TripleDifferentialBinning {{
+#  1stDimLo  1stDimUp    2ndDimLo  2ndDimUp   "----- Array of bin-grid for 3rd dimension -----"
+#    100.      150.       -1.0       0.0       7. 11. 18. 30. 50.
+#    150.      200.       -1.0       0.0       7. 11. 18. 30. 50.
+#    200.      400.        0.0       1.5       7. 11. 18. 30. 50.
+#    400.      700.        0.0       1.5       7. 11. 18. 30. 50.
+#    700.     5000.        1.5       2.5       7. 11. 18. 30. 50.
+#   5000.    15000.        1.5       2.5       7. 11. 18. 30. 50.
+#}}
 
 # ==================================================================== #
 #
@@ -144,11 +175,11 @@ CheckScaleLimitsAgainstBins     true        # Set limits for scale nodes to bin 
 # -------------------------------------------------------------------- #
 #   Choose fastNLO interpolation kernels and distance measures
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#   Currently implemented interpolation kernels
-#     Catmull
-#     Lagrange
-#     OneNode
-#     Linear
+#   Currently implemented interpolation kernels   Min. no. of Nodes
+#     OneNode                                           1
+#     Linear                                            2
+#     Catmull                                           4
+#     Lagrange                                          4
 #
 #   Currently implemented distance measures
 #     linear
@@ -163,7 +194,7 @@ X_NoOfNodesPerMagnitude         false
 
 Mu1_Kernel                      Lagrange
 Mu1_DistanceMeasure             "loglog025"
-Mu1_NNodes                      4
+Mu1_NNodes                      6
 
 Mu2_Kernel                      Lagrange     # Scale2 not used for fixed-scale tables
 Mu2_DistanceMeasure             "loglog025"
