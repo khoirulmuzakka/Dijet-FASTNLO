@@ -22,6 +22,7 @@ if HAVE_YODA
 endif
 endif
 
+
 #
 # Sources
 #
@@ -39,6 +40,11 @@ fnlo_tk_append_SOURCES  = fnlo-tk-append.cc
 # Preprocessor flags
 #
 my_include_dirs = -I${srcdir}/../fastnlotoolkit/include -I${top_builddir}/fastnlotoolkit/include -I${top_srcdir}/fastnlotoolkit/include
+
+if HAVE_LHAPDF
+   my_include_dirs += -I${LHAPDFINCLUDEPATH}
+endif
+
 fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir}
 fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir}
 fnlo_tk_yodaout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)

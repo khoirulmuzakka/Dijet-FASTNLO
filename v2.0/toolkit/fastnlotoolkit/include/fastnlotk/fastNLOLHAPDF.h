@@ -20,7 +20,7 @@
 #define FASTNLOLHAPDF
 
 #include "fastNLOReader.h"
-
+#include <LHAPDF/LHAPDF.h>
 using namespace std;
 
 
