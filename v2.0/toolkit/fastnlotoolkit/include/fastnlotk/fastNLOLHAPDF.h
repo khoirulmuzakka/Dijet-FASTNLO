@@ -29,6 +29,7 @@ class fastNLOLHAPDF : public fastNLOReader {
 private:
 public:
    fastNLOLHAPDF(string name);
+   ~fastNLOLHAPDF();
    fastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
 
    // Initializer. Necessary for some alternative evolutions.
