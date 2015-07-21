@@ -1,4 +1,16 @@
 %module fastnlo
+
+%{
+/**
+ * This is a workaround for a minor swig bug when building on gcc 4.6.1 and above.
+ * Prior to gcc 4.6.1 the STL headers like vector, string, etc. used to 
+ * automatically pull in the cstddef header but starting with gcc 4.6.1 they no
+ * longer do. This leads to swig generated a file that does not compile so we
+ * explicitly include cstddef so the swig generated file will compile.
+ */
+#include <cstddef>
+%}
+
 %include <std_string.i>
 %include <std_vector.i>
 %include <std_pair.i>
@@ -8,6 +20,7 @@ namespace std {
    %template(vectors) vector<string>;
    %template(vectord) vector<double>;
    %template(vectord2) vector<vector<double> >;
+   %template(vectord3) vector<vector<vector<double> > >;
    %template() pair<double,double>;
    %template(pairvector) vector<pair<double,double> >;
 };
