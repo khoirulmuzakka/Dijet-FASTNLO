@@ -20,7 +20,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <LHAPDF/LHAPDF.h>
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 
@@ -39,7 +38,15 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), fnPDFs(0) , fiP
    PDF = NULL;
    #endif
 }
+//______________________________________________________________________________
 
+
+fastNLOLHAPDF::~fastNLOLHAPDF() {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   delete PDFSet;
+   delete PDF;
+   #endif
+}
 
 //______________________________________________________________________________
 
