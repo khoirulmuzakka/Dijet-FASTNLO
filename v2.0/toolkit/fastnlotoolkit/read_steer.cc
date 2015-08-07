@@ -231,9 +231,16 @@ vector<string> read_steer::getstcol(const string& label,const string& col) {
    vector<vector<string> > tab = getst(label);
    for (vector<string>::size_type i = 0; i != head.size(); i++) {
       if (col.compare(head[i])==0) {
+	 bool IsErr = false;
          for (vector<string>::size_type j = 0; j != tab.size(); j++) {
-            ret.push_back(tab[j][i]);
+	    if ( i >= tab[j].size() ) {
+	       cout << oW << "Row "<<j<<" has too little columns ("<<tab[j].size()<<"). Column '"<<col<<"' cannot be read correctly."<<endl;
+	       IsErr = true;
+	    }
+            else 
+	       ret.push_back(tab[j][i]);
          }
+	 if ( IsErr )  ret.resize(tab.size(),"read_steer::warning");
          return ret;
       }
    }
