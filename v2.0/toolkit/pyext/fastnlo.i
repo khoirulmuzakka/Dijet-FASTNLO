@@ -20,7 +20,6 @@ namespace std {
    %template(vectors) vector<string>;
    %template(vectord) vector<double>;
    %template(vectord2) vector<vector<double> >;
-   %template(vectord3) vector<vector<vector<double> > >;
    %template() pair<double,double>;
    %template(pairvector) vector<pair<double,double> >;
 };
