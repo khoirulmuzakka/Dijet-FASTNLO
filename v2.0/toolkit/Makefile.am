@@ -32,7 +32,7 @@ if DX_COND_doc
 include aminclude.am
 EXTRA_DIST += aminclude.am doxygen.cfg
 all-local-doxygen: doxygen-doc
-	touch all-local-doxygen
+	touch doc/doxygen/fastnlo_toolkit.tag
 .PHONY: all-local-doxygen
 all-local: all-local-doxygen
 MOSTLYCLEANFILES = $(DX_CLEANFILES) all-local-doxygen
