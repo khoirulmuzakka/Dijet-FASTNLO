@@ -73,12 +73,18 @@ make install
 #    The libraries are then expected to be in /path/to/your/installation/lib and
 #    include files in /path/to/your/installation/include
 
-
-# 2. There is work in progress to provide output in YODA format for comparisons to data
-#    using Rivet analyses and rivet-mkhtml
+# 2. Output can be provided in YODA format for comparisons to data using
+#    Rivet analyses and rivet-mkhtml
 --with-yoda
 
-# 3. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
+# 3. Output can also be filled into ROOT histograms. A commented out example for this is
+#    provided in the fnlo-tk-example executable. For correct compile and link options
+#    the fastNLO_toolkit has to be configured with ROOT support like
+--with-root
+#    or
+--with-root=/path/to/your/root/installation
+
+# 4. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
 #    If you have PYTHON and SWIG installed, the PYTHON extension can be enabled via
 --enable-pyext
 
@@ -90,6 +96,7 @@ fnlo-tk-example tablename PDF.LHgrid
 # or
 fnlo-tk-cppread tablename PDF.LHgrid
 # for some sample cross-section print-out.
+# In case of LHAPDF6 usage, the PDF sets have to be specified without extension.
 # For more details see also the description in fastnlotoolkit/fastNLOReader.cc
 
 

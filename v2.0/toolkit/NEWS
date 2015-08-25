@@ -1,3 +1,17 @@
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2143:
+=================================================================================================
+Only some little issues have been fixed and improvements incorporated into this prerelease:
+- Interface part to MCgrid v2.0 finalized.
+- Option "IgnoreWarmupBinningCheck" added, avoids warmup binning check if set to true
+  (useful for bin borders in pi etc.).
+- An example to fill ROOT histograms from within fastNLO is provided (with input from Giannis Flouris)
+- Rebuild problem in Doxygen documentation is fixed.
+- Improved problem catch for ill-formatted tables.
+- Added some more safety measures with respect to inf or nan entries.
+- Improved logging handling.
+
+
+
 Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2087:
 =================================================================================================
 Major work went into this prelease:

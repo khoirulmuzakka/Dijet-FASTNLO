@@ -1,3 +1,95 @@
+2015-08-25  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2143
+            ================================================================================
+
+2015-08-25  rabbertz
+
+    * Makefile_root.am: Forgotten removal
+
+    * Makefile.am: Fix docu rebuild problem
+
+    * fnlo-tk-example.cc: Finalize root example
+
+    * Makefile.am, configure.ac, fastNLOConstants.h.in, fnlo-tk-cppread.cc,
+      fnlo-tk-example.cc, fnlo-tk-example_root.cc: Integrate ROOT histo fill
+      example
+
+2015-08-12  sieber
+
+    * fastnlo.i: remove 3d vector wrapping again.
+
+2015-08-07  DanielBritzger
+
+    * read_steer.cc: catch some problems in ill-defined tables.
+
+2015-07-21  sieber
+
+    * fastNLOLHAPDF.h: forgot to commit declaration for destructor.
+
+    * fastNLOLHAPDF.cc: add destructor.
+
+    * Makefile.am, fastNLOLHAPDF.h: include LHAPDF also in fastNLOLHAPDF,
+      otherwise the DEFINES only work arbitrarily.
+
+    * fastnlo.i: include cstddef at correct position, currently it was included
+      too late.
+
+2015-06-04  rabbertz
+
+    * Makefile_root.am, fnlo-tk-example_root.cc: Add not yet tested example with
+      root usage
+
+2015-06-03  rabbertz
+
+    * fastNLOCreate.cc, fastNLOCreate.h: Change error to warning when skipping
+      nan/inf; include steering namespace mod. from Enrico for mcgrid
+
+    * fastNLOCreate.cc, fastNLOCreate.h: Replace checkweightisnan by not
+      checkweightisfinite; activate check also for FASTER fixhhc filling code
+
+2015-06-01  rabbertz
+
+    * fnlo-tk-merge.cc: Toolkit: Add some more safety measures and errors for
+      inf or nan when merging tables
+
+    * fastNLOBase.cc, fastNLOCoeffBase.cc, fastNLOTable.cc, fastNLOTools.cc,
+      fnlo-tk-merge.cc: Toolkit: Add some more safety measures and errors for
+      inf or nan when merging tables
+
+2015-05-30  rabbertz
+
+    * configure.ac: Require minimal doxygen version
+
+2015-05-11  rabbertz
+
+    * fastNLOCreate.cc: Add option to avoid warmup binning check; useful for bin
+      borders in pi etc
+
+2015-05-05  stober
+
+    * fastNLOHoppet.cc, fastNLOQCDNUMAS.cc: logging fixes
+
+2015-05-01  stober
+
+    * fastNLOLHAPDF.cc:
+
+    * fastNLOAlphas.cc, fastNLOBase.cc, fastNLOBase.h, fastNLOCRunDec.cc,
+      fastNLOCreate.cc, fastNLODiffReader.cc, fastNLOLHAPDF.cc,
+      fastNLOReader.cc, fastNLOTable.cc, speaker.h: logging is now done using
+      composition instead of inheritance
+
+2015-05-01  rabbertz
+
+    * NEWS: Tag prerelease version
+
+    * Makefile.am, configure.ac: Remove empty docu
+
+2015-04-30  stober
+
+    * fastNLOFI_cc.cc: always recalculate cross section after mur muf changes
+
+    * fastNLOFI_cc.cc, fastNLOFI_f.f: Added interface to
+      getobsbindimboundsRemoved some debug output
+
 2015-05-01  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2087
             ================================================================================
 
