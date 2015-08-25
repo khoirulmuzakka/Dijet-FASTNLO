@@ -361,6 +361,66 @@ else
 fi
 AM_CONDITIONAL(HAVE_YODA, test "x$YODAPREFIX" != "x")
 
+# ROOT
+AC_SUBST([TMPNAM],["ROOT"])
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether $TMPNAM support is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_WITH([root],
+        [AS_HELP_STRING([--with-root],
+        [Specify location of $TMPNAM installation. This takes precedence over
+        a ROOTSYS environment variable, the prefix path or other methods.
+        Please note: $TMPNAM can optionally be used in $PACKAGE_NAME!])],
+        [if test "x$withval" != "xyes" -a "x$withval" != "xno"; then
+            AC_SUBST([ROOTSYS],[$withval])
+            AC_MSG_NOTICE([Using given path $ROOTSYS as location of $TMPNAM installation.])
+        fi],
+        [with_root="no"])
+
+if test "x$with_root" != "xno"; then
+   if test "x$ROOTSYS" = "x"; then
+      AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
+      AC_PATH_PROG([ROOTBIN],[root-config],[],[$prefix/bin])
+      if test "x$ROOTBIN" = "x"; then
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+         AC_PATH_PROG([ROOTBIN],[root-config])
+         if test "x$ROOTBIN" = "x"; then
+            AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+         fi
+      fi
+   else
+      AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
+      if test "x$ROOTBIN" = "x"; then
+         AC_MSG_ERROR([root-config not found in given path to $TMPNAM! Configuration aborted!])
+      fi
+   fi
+   AC_MSG_NOTICE([******************************************])
+   if test "x$ROOTBIN" != "x"; then
+      AC_MSG_NOTICE([$TMPNAM settings:])
+      AC_SUBST([ROOTPREFIX],  [`$ROOTBIN --prefix`])
+      AC_SUBST([ROOTBINPATH], [`$ROOTBIN --bindir`])
+      AC_SUBST([ROOTLIBPATH], [`$ROOTBIN --libdir`])
+      AC_SUBST([ROOTINCLUDEPATH],[`$ROOTBIN --incdir`])
+      AC_SUBST([ROOTCPPFLAGS], [`$ROOTBIN --cflags`])
+      AC_SUBST([ROOTCXXFLAGS], [`$ROOTBIN --libs`])
+      AC_SUBST([ROOTLDFLAGS], [`$ROOTBIN --ldflags`])
+      AC_MSG_RESULT([Using $ROOTPREFIX for the $TMPNAM installation path])
+      AC_MSG_RESULT([Using $ROOTBINPATH for the binaries])
+      AC_MSG_RESULT([Using $ROOTLIBPATH for the library])
+      AC_MSG_RESULT([Using $ROOTINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $ROOTCPPFLAGS for the precompiler flags])
+      AC_MSG_RESULT([Using $ROOTCXXFLAGS for the compiler flags])
+      AC_MSG_RESULT([Using $ROOTLDFLAGS for the linker flags])
+   else
+      AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+   fi
+else
+   AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
+   AC_MSG_NOTICE([******************************************])
+fi
+AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTPREFIX" != "x")
+
 # Create code documentation
 # Check on DOXYGEN
 AC_MSG_NOTICE([******************************************])
@@ -372,8 +432,8 @@ if test "x$DOXYGEN" = "x"; then
 else
    DOXYVMIN="1.5"
    DOXYVERS=`doxygen --version`
-   DOXYVORD=`echo -e "$DOXYVERS\n$DOXYVMIN" | sort -t"." -g | head -n1` 
-   if test "x$DOXYVORD" = "x$DOXYVMIN"; then 
+   DOXYVORD=`echo -e "$DOXYVERS\n$DOXYVMIN" | sort -t"." -g | head -n1`
+   if test "x$DOXYVORD" = "x$DOXYVMIN"; then
       AC_MSG_NOTICE([Creating code documentation using doxygen version $DOXYVERS.])
       AC_MSG_NOTICE([******************************************])
       DX_DOT_FEATURE(ON)

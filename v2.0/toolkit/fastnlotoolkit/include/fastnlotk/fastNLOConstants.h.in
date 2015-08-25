@@ -24,6 +24,7 @@
 // "unresolved symbol" errors are avoided.
 #define FNLO_HOPPET     "@HOPPET@"
 #define FNLO_QCDNUM     "@QCDNUM@"
+#define FNLO_ROOT       "@ROOT@"
 
 // KR: Replace by precompiler defines
 const double TWOPI    =  6.28318530717958647692528;

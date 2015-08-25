@@ -14,38 +14,56 @@
 #include <vector>
 #include "fastnlotk/fastNLOLHAPDF.h"
 
+//! Includes for filling ROOT histograms
+//! Usable only when configured with '--with-root=/path/to/root' option
+#include "TFile.h"
+#include "TString.h"
+#include "TH1D.h"
+//! End of ROOT part
+
+//! Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
 
 //______________________________________________________________________________________________________________
 int main(int argc, char** argv) {
-   //! usage: fastNLO <fastNLO-table.tab> [<LHAPDFfile>]
+   //! Usage: fastNLO <fastNLO-table.tab> [LHAPDFfile]
    using namespace std;
    using namespace fastNLO;      //! namespace for fastNLO constants
 
    //! ---  Parse commmand line
-   if (argc <= 1) {
-      cout<<" Program fnlo-tk-example"<<endl;
-      cout<<"   usage:"<<endl;
-      cout<<"   fastNLO <fastNLO-table.tab> [<LHAPDF-file>]"<<endl;
-      return 0;
-   }
-   //! --- fastNLO table
-   string tablename =  (const char*) argv[1];
-   //---  PDF set
+   string tablename;
    string PDFFile = "CT10nlo.LHgrid";
-   if (argc > 2)    PDFFile = (const char*) argv[2];
+   cout << endl;
+   cout << _CSEPSC << endl;
+   cout << " # [fnlo-tk-example] Program Example"<<endl;
+   cout << " #" << endl;
+   if (argc <= 1) {
+      cout << " # Usage: ./fnlo-tk-example <fastNLO-table.tab> [LHAPDF-file]"<<endl;
+      cout << " #" << endl;
+      cout << " #        <> mandatory; [] optional, def. = " << PDFFile <<endl;
+      cout << " #        With LHAPDF6 use PDF name without extension."<<endl;
+      cout << " #" << endl;
+      cout << _CSEPSC << endl;
+      return 0;
+   } else {
+      cout << _CSEPSC << endl;
+      //! --- fastNLO table
+      tablename = (const char*) argv[1];
+      //! --- PDF set
+      if (argc > 2) PDFFile = (const char*) argv[2];
+   }
 
-   //--- give some output
-   cout<<" fnlo-tk-example: Evaluating table: " << tablename << endl;
-   cout<<" fnlo-tk-example: Using PDF set   : " << PDFFile << endl;
+   //! --- Give some output
+   cout<<" # [fnlo-tk-example] Evaluating table: " << tablename << endl;
+   cout<<" # [fnlo-tk-example] Using PDF set   : " << PDFFile << endl;
 
+   //! --- This is your playgroud to use fastNLO
+   //!     Calculate cross setions and/or test some options
+   //!     For some explanation and function calls, please see
+   //!     the other code examples in './src/' and
+   //!     the Doxygen documentation.
 
-   //! --- this is your playgroud to use fastNLO
-   //!  Calculate cross setions and/or test some options
-   //!  For a documentation and function calls, please see
-   //!    './src/fnlo-cppread.cc'
-
-   //--- example calculation
+   //! --- Example calculation
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);     //! initialize a fastNLO instance with interface to LHAPDF.
    fnlo.PrintTableInfo();                       //! print some valuable information
    //fnlo.PrintFastNLOTableConstants();         //! print even more information
@@ -56,14 +74,59 @@ int main(int argc, char** argv) {
    fnlo.CalcCrossSection();                     //! Calculate the cross section
    fnlo.PrintCrossSections();                   //! Print cross section to screen
 
+   vector<double> xs = fnlo.GetCrossSection();  //! Access cross sections for later usage
 
-   vector<double> cs = fnlo.GetCrossSection();  //! Access cross sections for later usage
+   //! Finish?
+   //   return 0;
 
-   //! finish:
+
+   //! --- Example calculation of cross section including relative uncertainty
+   EScaleUncertaintyStyle eScaleUnc = kAsymmetricSixPoint;
+   //   EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
+   vector < pair < double, pair < double, double > > > xsdxs;
+   vector < pair < double, double > > dxs;
+   xsdxs = fnlo.GetScaleUncertainty(eScaleUnc);
+   //   xsdxs = fnlo.GetPDFUncertainty(ePDFUnc);
+
+   cout << _CSEPSC << endl;
+   cout << " # Relative Scale Uncertainties (6P)" << endl;
+   cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
+   cout << _SSEPSC << endl;
+   for ( unsigned int iobs=0;iobs<xsdxs.size();iobs++ ) {
+      if ( xsdxs.size() ) {
+         xs[iobs] = xsdxs[iobs].first;
+         dxs.push_back(xsdxs[iobs].second);
+         printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,xs[iobs],dxs[iobs].second,dxs[iobs].first);
+      } else {
+         dxs.push_back(make_pair(0.,0.));
+      }
+   }
+
+   //! Finish?
+   //   return 0;
+
+
+   //! --- Example filling of ROOT histogram with previously calculated cross section and uncertainty
+   //! Usable only when configured with '--with-root=/path/to/root' option
+   TString out_file_name = "./fnlo_out.root";
+   TFile *file_out = new TFile(out_file_name,"NEW");
+   TH1D *histo1 = new TH1D("cross_section","cross_section",(int)xs.size()+1,fnlo.GetObsBinLoBound(0,0),fnlo.GetObsBinUpBound(xs.size()-1,0));
+   for( unsigned int iobs=0;iobs<xs.size();iobs++ ){
+     histo1->SetBinContent(iobs+1,xs[iobs]);
+     // Symmetrize uncertainty since ROOT does not support histograms with asymmetric errors
+     histo1->SetBinError(iobs+1,sqrt(dxs[iobs].first*dxs[iobs].first + dxs[iobs].second*dxs[iobs].second)*xs[iobs]/2);
+   }
+
+   file_out->cd();
+   file_out->Write();
+   file_out->Close();
+   //! End of ROOT part
+
+   //! Finish?
    return 0;
 
 
-   //! example code how to loop over all PDF eigenvectors
+   //! Example code how to loop over all PDF eigenvectors
    cout<<"\n fnlo-tk-example: Now we want to loop over the eigenvectors of "<<PDFFile<<"."<<endl<<endl;
    fnlo.SetLHAPDFFilename(PDFFile); //! we use again the 'nominal' PDF-file
    int nEig = fnlo.GetNPDFMembers(); //! How many eigenvectors are there?
@@ -77,10 +140,10 @@ int main(int argc, char** argv) {
       vector<double> cs = fnlo.GetCrossSection(); //! get cross setions for further usage (i.e. printing to file)
    }
 
-   //! finish
+   //! Finish
    return 0;
 
-   //! example to use different scale factors
+   //! Example to use different scale factors
    cout<<"\n fnlo-tk-example: Now we use a scale factor of 2."<<endl;
    fnlo.SetScaleFactorsMuRMuF(2.0,2.0);
    fnlo.CalcCrossSection();
@@ -98,7 +161,7 @@ int main(int argc, char** argv) {
    fnlo.CalcCrossSection();
    fnlo.PrintCrossSections();
 
-   //! finish
+   //! Finish
    return 0;
 
 }

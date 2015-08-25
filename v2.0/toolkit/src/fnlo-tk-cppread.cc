@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //---  Parse commmand line
+   //! ---  Parse commmand line
    char buffer[1024];
    cout << endl;
    cout << _CSEPSC << endl;
@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
          shout << "" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          shout << "" << endl;
+         cout  << _CSEPSC << endl;
          return 0;
       } else if (tablename == "_") {
          tablename = "table.tab";
