@@ -16,9 +16,9 @@
 
 //! Includes for filling ROOT histograms
 //! Usable only when configured with '--with-root=/path/to/root' option
-#include "TFile.h"
-#include "TString.h"
-#include "TH1D.h"
+// #include "TFile.h"
+// #include "TString.h"
+// #include "TH1D.h"
 //! End of ROOT part
 
 //! Function prototype for flexible-scale function
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
    vector<double> xs = fnlo.GetCrossSection();  //! Access cross sections for later usage
 
    //! Finish?
-   //   return 0;
+   return 0;
 
 
    //! --- Example calculation of cross section including relative uncertainty
@@ -103,27 +103,29 @@ int main(int argc, char** argv) {
    }
 
    //! Finish?
-   //   return 0;
+   return 0;
 
 
    //! --- Example filling of ROOT histogram with previously calculated cross section and uncertainty
    //! Usable only when configured with '--with-root=/path/to/root' option
-   TString out_file_name = "./fnlo_out.root";
-   TFile *file_out = new TFile(out_file_name,"NEW");
-   TH1D *histo1 = new TH1D("cross_section","cross_section",(int)xs.size()+1,fnlo.GetObsBinLoBound(0,0),fnlo.GetObsBinUpBound(xs.size()-1,0));
-   for( unsigned int iobs=0;iobs<xs.size();iobs++ ){
-     histo1->SetBinContent(iobs+1,xs[iobs]);
-     // Symmetrize uncertainty since ROOT does not support histograms with asymmetric errors
-     histo1->SetBinError(iobs+1,sqrt(dxs[iobs].first*dxs[iobs].first + dxs[iobs].second*dxs[iobs].second)*xs[iobs]/2);
-   }
+   // TString out_file_name = "./fnlo_out.root";
+   // TFile *file_out = new TFile(out_file_name,"NEW");
+   // TH1D *histo1 = new TH1D("Cross Section Bins","fastNLO",(int)xs.size()+1,0.5,xs.size()+0.5);
+   // histo1->GetXaxis()->SetTitle("Bin Number");
+   // histo1->GetYaxis()->SetTitle("Cross Section");
+   // for( unsigned int iobs=0;iobs<xs.size();iobs++ ){
+   //   histo1->SetBinContent(iobs+1,xs[iobs]);
+   //   // Symmetrize uncertainty since ROOT does not support histograms with asymmetric errors
+   //   histo1->SetBinError(iobs+1,sqrt(dxs[iobs].first*dxs[iobs].first + dxs[iobs].second*dxs[iobs].second)*xs[iobs]/2);
+   // }
 
-   file_out->cd();
-   file_out->Write();
-   file_out->Close();
+   // file_out->cd();
+   // file_out->Write();
+   // file_out->Close();
    //! End of ROOT part
 
    //! Finish?
-   return 0;
+   // return 0;
 
 
    //! Example code how to loop over all PDF eigenvectors
