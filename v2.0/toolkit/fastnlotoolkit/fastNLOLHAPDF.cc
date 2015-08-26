@@ -282,6 +282,112 @@ double fastNLOLHAPDF::GetAlphasMz() const {
 }
 
 
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+//______________________________________________________________________________
+vector<LHAPDF::PDFUncertainty>  fastNLOLHAPDF::GetPDFUncertaintyLHAPDF(double cl, bool alternative) {
+   //! Calculate PDF uncertainty on cross sections 
+   //! from PDFs.
+   //! Formulae fro PDF uncertainties are taken from LHAPDF
+   //! Function returns struct with all values.
+   //!   PDFUncertainty.central [new central value]
+   //!   PDFUncertainty.errplus
+   //!   PDFUncertainty.errminus
+   //!   PDFUncertainty.errsymm
+   //!   PDFUncertainty.scale   [scalefactor]
+   //! More documentation. See docu of LHAPDF::PDFSet::uncertainty()
+   //!
+   //! 'cl' is used to rescale uncertainties to a particular confidence level
+   //!
+   //! If the PDF set is given in the form of replicas, then optional argument                                                                       
+   //! 'alternative' equal to true (default: false) will construct a confidence                                                                     
+   //! interval from the probability distribution of replicas, with the central                                                                      
+   //! value given by the median.                                                       
+
+   vector<LHAPDF::PDFUncertainty> PDFUnc;
+   const unsigned int nMem = GetNPDFMembers();
+   const unsigned int nObsBins = GetNObsBin();
+
+   int iMem0 = fiPDFMember;
+   vector<vector<double> > CSs(nObsBins); // [bin][iMem]
+   for ( unsigned int iObs = 0 ; iObs<nObsBins ; iObs++ ) CSs[iObs].resize(nMem);
+   for ( unsigned int iMem = 0 ; iMem<nMem ; iMem++ ) {
+      SetLHAPDFMember(iMem);
+      CalcCrossSection();
+      vector<double> xs = GetCrossSection();
+      for ( unsigned int iObs = 0 ; iObs<nObsBins ; iObs++ ) CSs[iObs][iMem] = xs[iObs];
+   }
+   for ( unsigned int iObs = 0 ; iObs<nObsBins ; iObs++ ) {
+      PDFUnc.push_back(PDFSet->uncertainty(CSs[iObs],cl,alternative));
+   }
+   SetLHAPDFMember(iMem0);
+   CalcCrossSection();
+   return PDFUnc;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintyMinus(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const{
+   //!get vector<double> for PDF-minus uncertainty
+   //! uncertainties are 'positive'!
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].errminus;
+   return ret;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintyPlus(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const {
+   //!get vector<double> for PDF-plus uncertainty
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].errplus;
+   return ret;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintyRelMinus(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const{
+   //!get vector<double> for PDF-minus uncertainty
+   //! uncertainties are 'negative'!
+   //! Relative uncertainties are calcuated with 'median' cross section in case of MC uncertainties
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].errminus*-1 / PDFUnc[iObs].central;
+   return ret;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintyRelPlus(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const {
+   //!get vector<double> for PDF-plus uncertainty
+   //! Relative uncertainties are calcuated with 'median' cross section in case of MC uncertainties
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].errplus / PDFUnc[iObs].central;
+   return ret;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintyCentral(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const {
+   //!get vector<double> for new central value
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].central;
+   return ret;
+}
+
+
+//______________________________________________________________________________
+vector<double>  fastNLOLHAPDF::CalcPDFUncertaintySymm(const vector<LHAPDF::PDFUncertainty>& PDFUnc) const {
+   //!get vector<double> for symmetrized PDF uncertainty
+   vector<double> ret(GetNObsBin());
+   for ( unsigned int iObs = 0 ; iObs<GetNObsBin() ; iObs++ )
+      ret[iObs] = PDFUnc[iObs].errsymm;
+   return ret;
+}
+#endif
 
 //______________________________________________________________________________
 vector < pair < double, pair <double, double> > > fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc) {

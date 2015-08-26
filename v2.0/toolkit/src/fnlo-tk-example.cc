@@ -81,16 +81,16 @@ int main(int argc, char** argv) {
    vector<double> xs = fnlo.GetCrossSection();  //! Access cross sections for later usage
 
    //! Finish?
-   return 0;
+   //return 0;
 
 
    //! --- Example calculation of cross section including relative uncertainty
    EScaleUncertaintyStyle eScaleUnc = kAsymmetricSixPoint;
-   //   EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
+   //EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
    vector < pair < double, pair < double, double > > > xsdxs;
    vector < pair < double, double > > dxs;
    xsdxs = fnlo.GetScaleUncertainty(eScaleUnc);
-   //   xsdxs = fnlo.GetPDFUncertainty(ePDFUnc);
+   //xsdxs = fnlo.GetPDFUncertainty(ePDFUnc);
 
    cout << _CSEPSC << endl;
    cout << " # Relative Scale Uncertainties (6P)" << endl;
@@ -108,6 +108,34 @@ int main(int argc, char** argv) {
 
    //! Finish?
    return 0;
+   
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   //! --- Example calculation of cross section including PDF  uncertainty
+   //!     This example takes the error formlae from LHAPDF
+   vector<LHAPDF::PDFUncertainty> PDFUnc = fnlo.GetPDFUncertaintyLHAPDF();
+   vector<double> errup = fnlo.CalcPDFUncertaintyRelPlus(PDFUnc);
+   vector<double> errdn = fnlo.CalcPDFUncertaintyRelMinus(PDFUnc);
+   vector<double> errupabs = fnlo.CalcPDFUncertaintyPlus(PDFUnc);
+   vector<double> errdnabs = fnlo.CalcPDFUncertaintyMinus(PDFUnc);
+   vector<double> central = fnlo.CalcPDFUncertaintyCentral(PDFUnc);
+
+   cout << _CSEPSC << endl;
+   cout << " # Relative and Absolute PDF Uncertainties (6P)" << endl;
+   cout << " # bin      cross section      lower rel. uncertainty   upper rel. uncertainty   lower abs. uncertainty   upper abs. uncertainty" << endl;
+   cout << _SSEPSC << endl;
+   for ( unsigned int iobs=0;iobs<xsdxs.size();iobs++ ) {
+      if ( xsdxs.size() ) {
+         xs[iobs] = xsdxs[iobs].first;
+         dxs.push_back(xsdxs[iobs].second);
+         printf("%5.i      %#18.11E      %#18.11E      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,central[iobs],errdn[iobs],errup[iobs],errdnabs[iobs],errupabs[iobs]);
+      } else {
+         dxs.push_back(make_pair(0.,0.));
+      }
+   }
+
+   //! Finish?
+   return 0;
+#endif
 
 
    //! --- Example filling of ROOT histogram with previously calculated cross section and uncertainty
