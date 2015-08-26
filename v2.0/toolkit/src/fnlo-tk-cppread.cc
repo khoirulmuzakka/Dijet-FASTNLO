@@ -84,7 +84,11 @@ int main(int argc, char** argv) {
       PDFFile = (const char*) argv[2];
    }
    if (argc <= 2 || PDFFile == "_") {
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+      PDFFile = "CT10nlo";
+#else
       PDFFile = "CT10nlo.LHgrid";
+#endif
       warn ["fnlo-read"] << "No PDF set given," << endl;
       shout["fnlo-read"] <<" taking CT10nlo.LHgrid instead!" << endl;
    } else {

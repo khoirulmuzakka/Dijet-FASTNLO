@@ -32,7 +32,11 @@ int main(int argc, char** argv) {
 
    //! ---  Parse commmand line
    string tablename;
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   string PDFFile = "CT10nlo";
+   #else
    string PDFFile = "CT10nlo.LHgrid";
+   #endif
    cout << endl;
    cout << _CSEPSC << endl;
    cout << " # [fnlo-tk-example] Program Example"<<endl;
