@@ -305,8 +305,9 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
             logger.error["ReadPartonCombinations"]<<"Parton flavor is larger than 6. There is nothing beyond the top-quark. Exiting."<<endl;
             exit(1);
          }
-         if (  b1[iPart1+6]  ) logger.warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
-         if (  b2[iPart2+6]  ) logger.warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+         // KR: Switch off warning. Using the same flavour of a parton in multiple combinations is no problem.
+         // if (  b1[iPart1+6]  ) logger.warn["ReadPartonCombinations"]<<"Parton "<<iPart1<<" of hadron 1 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
+         // if (  b2[iPart2+6]  ) logger.warn["ReadPartonCombinations"]<<"Parton "<<iPart2<<" of hadron 2 is used multiple times in PartonCombinations"<<sord[ord]<<"."<<endl;
 
          b1[iPart1+6] = true;
          b2[iPart2+6] = true;
