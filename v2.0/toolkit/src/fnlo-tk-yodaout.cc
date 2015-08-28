@@ -46,9 +46,13 @@ int main(int argc, char** argv) {
          shout << "" << endl;
          shout << "Usage: ./fnlo-tk-yodaout [arguments]" << endl;
          shout << "Table input file, mandatory, e.g. fnl2342b.tab" << endl;
-         shout << "PDF set, def. = CT10nlo.LHgrid" << endl;
-         shout << "   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd." << endl;
-         shout << "   For LHAPDF6: Drop filename extensions and give PDF directory instead." << endl;
+         shout << "PDF set, def. = CT10nlo" << endl;
+         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         shout << "   If the PDF set still is not found, then:" << endl;
+         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         shout << "   - Specify the PDF set including the absolute path." << endl;
+         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          shout << "Uncertainty to show, def. = none" << endl;
          shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
          shout << "                 2P (symmetric 2-point scale factor variation)" << endl;
@@ -68,14 +72,18 @@ int main(int argc, char** argv) {
       }
    }
    //! --- PDF choice
-   string PDFFile = "CT10nlo.LHgrid";
+   string PDFFile = "X";
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
    }
    if (argc <= 2 || PDFFile == "_") {
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+      PDFFile = "CT10nlo";
+#else
       PDFFile = "CT10nlo.LHgrid";
+#endif
       warn ["fnlo-tk-yodaout"] << "No PDF set given," << endl;
-      shout["fnlo-tk-yodaout"] << "taking CT10nlo.LHgrid instead!" << endl;
+      shout["fnlo-tk-yodaout"] << "taking CT10nlo instead!" << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Using PDF set   : " << PDFFile << endl;
    }
@@ -187,23 +195,26 @@ int main(int argc, char** argv) {
       cout << _SSEPSC << endl;
    }
 
-   //! --- Get RivetID and running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
+   //! --- Get RivetID
+   //!     For 2-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
    size_t capital_pos = 0;
    string RivetId = fnlo.GetRivetId();
    if (RivetId.empty()) {
       error["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, aborted!" << endl;
       exit(1);
    }
-   for (size_t i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++) {
-      if (isupper(fnlo.GetRivetId()[i])) {                                      // Find capital letter
-         RivetId[i] = tolower(RivetId[i]);                                      // and lower it
-         capital_pos = i;
-         break;
+   if ( NDim == 2 ) {
+      for (size_t i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++) {
+         if (isupper(fnlo.GetRivetId()[i])) {                                      // Find capital letter
+            RivetId[i] = tolower(RivetId[i]);                                      // and lower it
+            capital_pos = i;
+            break;
+         }
       }
-   }
-   if (capital_pos == 0) {
-      error["fnlo-tk-yodaout"] << "Rivet ID found in fastNLO table does not indicate the histogram counter, aborted." << endl;
-      exit(1);
+      if (capital_pos == 0) {
+         error["fnlo-tk-yodaout"] << "Rivet ID found in fastNLO table does not indicate the 2-dim. histogram counter, aborted." << endl;
+         exit(1);
+      }
    }
 
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice

@@ -58,9 +58,13 @@ int main(int argc, char** argv) {
          shout << "" << endl;
          shout << "Usage: ./fnlo-tk-cppread [arguments]" << endl;
          shout << "Table input file, def. = table.tab" << endl;
-         shout << "PDF set, def. = CT10nlo.LHgrid" << endl;
-         shout << "   For LHAPDF5: Give full path(s), if the PDF file is not in the cwd." << endl;
-         shout << "   For LHAPDF6: Drop filename extensions and give PDF directory instead." << endl;
+         shout << "PDF set, def. = CT10nlo" << endl;
+         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         shout << "   If the PDF set still is not found, then:" << endl;
+         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         shout << "   - Specify the PDF set including the absolute path." << endl;
+         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          shout << "Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
          shout << "Name of desired alpha_s evolution code, def. = GRV." << endl;
          shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
@@ -90,7 +94,7 @@ int main(int argc, char** argv) {
       PDFFile = "CT10nlo.LHgrid";
 #endif
       warn ["fnlo-read"] << "No PDF set given," << endl;
-      shout["fnlo-read"] <<" taking CT10nlo.LHgrid instead!" << endl;
+      shout["fnlo-read"] <<" taking CT10nlo instead!" << endl;
    } else {
       shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
    }
