@@ -110,10 +110,18 @@ if test "x$with_lhapdf" != "xno"; then
    if test "x$LHAPDFBIN" != "x"; then
       AC_MSG_NOTICE([$TMPNAM settings:])
       AC_SUBST([LHAPDFPREFIX],  [`$LHAPDFBIN --prefix`])
-      AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
+      AC_SUBST([LHAPDFVERSION], [`$LHAPDFBIN --version`])
+      LHAPDFVMIN="6"
+      LHAPDFVORD=`echo -e "$LHAPDFVERSION\n$LHAPDFVMIN" | sort -t"." -g | head -n1`
+      if test "x$LHAPDFVORD" = "x$LHAPDFVMIN"; then
+         AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --datadir`])
+      else
+         AC_SUBST([LHAPDFSETPATH], [`$LHAPDFBIN --pdfsets-path`])
+      fi
       AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
       AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
       AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
+      AC_MSG_RESULT([Using $TMPNAM version $LHAPDFVERSION])
       AC_MSG_RESULT([Using $LHAPDFPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
       AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
