@@ -94,11 +94,11 @@ int main(int argc, char** argv) {
             for ( int ic=0 ; ic<nc; ic++ ) {
                if ( tab.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
                   fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)tab.GetCoeffTable(ic);
-                  if ( cadd->GetNevt(0,0) == 1 ) {
+                  if ( cadd->GetNevt(0,0) == -1 ) {
                      error["fnlo-tk-merge"]<<"Contribution #"<<ic<<" in table "<<path<<endl;
                      error>>"     cannot be merged, because no valid number-of-events information"<<endl;
-                     error>>"     is available: Nevt=1."<<endl;
-                     error>>"     Please use program fnlo-tk-append instead."<<endl;
+                     error>>"     is available: Nevt = " << cadd->GetNevt(0,0)<<endl;
+                     //                     error>>"     Please use program fnlo-tk-append instead."<<endl;
                      error>>"     Exiting."<<endl;
                      exit(1);
                   }
