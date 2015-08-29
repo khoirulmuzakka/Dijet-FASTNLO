@@ -30,30 +30,33 @@ int main(int argc, char** argv) {
 
    //! --- Parse commmand line
    char buffer[1024];
+   cout << endl;
    cout << _CSEPSC << endl;
-   shout["fnlo-tk-yodaout"] << "Program Steering" << endl;
+   shout["fnlo-tk-yodaout"] << "fastNLO YODA Writer" << endl;
    cout << _SSEPSC << endl;
    //! --- fastNLO table and usage info
    string tablename;
    if (argc <= 1) {
-      error["fnlo-tk-yodaout"] << "No table name given!" << endl;
+      error["fnlo-tk-yodaout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-yodaout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
+      cout << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
          shout << "" << endl;
-         shout << "Usage: ./fnlo-tk-yodaout [arguments]" << endl;
-         shout << "Table input file, mandatory, e.g. fnl2342b.tab" << endl;
-         shout << "PDF set, def. = CT10nlo" << endl;
+         shout << "Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
+         shout << "       Arguments: <> mandatory; [] optional." << endl;
+         shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
+         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
          shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          shout << "   - Specify the PDF set including the absolute path." << endl;
          shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "Uncertainty to show, def. = none" << endl;
+         shout << "[uncertainty]: Uncertainty to show, def. = none" << endl;
          shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
          shout << "                 2P (symmetric 2-point scale factor variation)" << endl;
          shout << "                 6P (asymmetric 6-point scale factor variation)" << endl;
@@ -62,6 +65,9 @@ int main(int argc, char** argv) {
          shout << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
          shout << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
          shout << "                 MC (MC sampling PDF uncertainty --> NNPDF PDFs)" << endl;
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+         shout << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
+#endif
          shout << "" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          shout << "" << endl;
@@ -82,8 +88,7 @@ int main(int argc, char** argv) {
 #else
       PDFFile = "CT10nlo.LHgrid";
 #endif
-      warn ["fnlo-tk-yodaout"] << "No PDF set given," << endl;
-      shout["fnlo-tk-yodaout"] << "taking CT10nlo instead!" << endl;
+      shout["fnlo-tk-yodaout"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Using PDF set   : " << PDFFile << endl;
    }
@@ -95,7 +100,7 @@ int main(int argc, char** argv) {
       chunc = (const char*) argv[3];
    }
    if (argc <= 3 || chunc == "_") {
-      info["fnlo-tk-yodaout"] << "No request given for uncertainty, none evaluated." << endl;
+      shout["fnlo-tk-yodaout"] << "No request given for uncertainty, none evaluated." << endl;
    } else {
       if ( chunc == "NN" ) {
          shout["fnlo-tk-yodaout"] << "No uncertainty, but correct MC sampling average value as needed for NNPDF." << endl;
@@ -120,6 +125,11 @@ int main(int argc, char** argv) {
       } else if ( chunc == "MC" ) {
          ePDFUnc = kMCSampling;
          shout["fnlo-tk-yodaout"] << "Showing MC sampling PDF uncertainty (--> NNPDF PDFs)." << endl;
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+      } else if ( chunc == "L6" ) {
+         ePDFUnc = kLHAPDF6;
+         shout["fnlo-tk-yodaout"] << "Showing LHAPDF6 PDF uncertainty (--> LHAPDF6 PDFs)." << endl;
+#endif
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of uncertainty, " << chunc << ", aborted!" << endl;
          exit(1);
@@ -163,16 +173,30 @@ int main(int argc, char** argv) {
    //! Get cross sections
    vector < double > xs = fnlo.GetCrossSection();
    //! If required get uncertainties (only for additive perturbative contributions)
-   vector < pair < double, pair < double, double > > > xsdxs;
-   vector < pair < double, double > > dxs;
+   fastNLOReader::XsUncertainty XsUnc;
+   string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
-      xsdxs = fnlo.GetScaleUncertainty(eScaleUnc);
+      XsUnc = fnlo.GetScaleUncertainty(eScaleUnc);
       snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
+      LineName += "_dxscl";
+// #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+//    } else if ( chunc != "L6" ) {
+//       vector<LHAPDF::PDFUncertainty> L6PDFUnc = fnlo.GetPDFUncertaintyLHAPDF();
+//       xs = fnlo.CalcPDFUncertaintyCentral(L6PDFUnc);
+//       vector<double> errdn = fnlo.CalcPDFUncertaintyRelMinus(L6PDFUnc);
+//       vector<double> errup = fnlo.CalcPDFUncertaintyRelPlus(L6PDFUnc);
+//       for ( unsigned int iobs=0;iobs<xs.size();iobs++ ) {
+//          xsdxs.push_back(make_pair(xs[iobs],make_pair(errdn[iobs],errup[iobs])));
+//       }
+//       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
+// #endif
    } else if ( chunc != "none" ) {
-      xsdxs = fnlo.GetPDFUncertainty(ePDFUnc);
+      XsUnc = fnlo.GetPDFUncertainty(ePDFUnc);
       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
+      LineName += "_dxpdf";
    }
-   if ( xsdxs.size() ) {
+
+   if ( XsUnc.xs.size() ) {
       cout << _CSEPSC << endl;
       cout << " # fnlo-tk-yodaout: Evaluating uncertainties" << endl;
       cout << _CSEPSC << endl;
@@ -182,16 +206,20 @@ int main(int argc, char** argv) {
       cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
       cout << _SSEPSC << endl;
    }
+   vector < double > dxsu;
+   vector < double > dxsl;
    for ( unsigned int iobs=0;iobs<xs.size();iobs++ ) {
-      if ( xsdxs.size() ) {
-         xs[iobs] = xsdxs[iobs].first;
-         dxs.push_back(xsdxs[iobs].second);
-         printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,xs[iobs],dxs[iobs].second,dxs[iobs].first);
+      if ( XsUnc.xs.size() ) {
+         printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,XsUnc.xs[iobs],XsUnc.dxsl[iobs],XsUnc.dxsu[iobs]);
+         xs[iobs] = XsUnc.xs[iobs];
+         dxsu.push_back(XsUnc.xs[iobs]*XsUnc.dxsu[iobs]);
+         dxsl.push_back(XsUnc.xs[iobs]*XsUnc.dxsl[iobs]);
       } else {
-         dxs.push_back(make_pair(0.,0.));
+         dxsu.push_back(0);
+         dxsl.push_back(0);
       }
    }
-   if ( xsdxs.size() ) {
+   if ( XsUnc.xs.size() ) {
       cout << _SSEPSC << endl;
    }
 
@@ -218,10 +246,10 @@ int main(int argc, char** argv) {
    }
 
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
-   string TabName = tablename.substr(0, tablename.size() - 4);
-   string PDFName = PDFFile.substr(0, PDFFile.size() - 7);
+   //   string TabName = tablename.substr(0, tablename.size() - 4);
+   string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
    string FileName = "NLO_" + PDFName + "_" + chunc;
-   string LineName = "NLO-" + PDFName + "_" + "dscale";
+   LineName = "NLO_" + PDFName + LineName;
 
    //! --- YODA analysis object creation and storage
    YODA::Writer & writer = YODA::WriterYODA::create();                          //! Create the writer for the yoda file
@@ -250,8 +278,8 @@ int main(int argc, char** argv) {
          explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
          exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
          y.push_back(xs[iobs]);
-         eyplus.push_back( xs[iobs]*dxs[iobs].first);
-         eyminus.push_back(xs[iobs]*abs(dxs[iobs].second));
+         eyplus.push_back(dxsu[iobs]);
+         eyminus.push_back(abs(dxsl[iobs]));
          iobs++;
       }
       stringstream plotno;                                                                         // To make i+1 from int
@@ -280,8 +308,8 @@ int main(int argc, char** argv) {
             explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
             exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
             y.push_back(xs[iobs]);
-            eyplus.push_back( xs[iobs]*dxs[iobs].first);
-            eyminus.push_back(xs[iobs]*abs(dxs[iobs].second));
+            eyplus.push_back(dxsu[iobs]);
+            eyminus.push_back(abs(dxsl[iobs]));
             iobs++;
          }
          stringstream plotno;                                                                         // To make i+1 from int

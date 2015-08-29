@@ -2875,18 +2875,14 @@ double fastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
 }
 
 
-
 //______________________________________________________________________________
-vector < pair < double, pair <double, double> > > fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc) {
+fastNLOReader::XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc) {
    // Get 2- or 6-point scale uncertainty
    const double xmurs[7] = {1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0};
    const double xmufs[7] = {1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0};
+   fastNLOReader::XsUncertainty XsUnc;
 
    unsigned int NObsBin = GetNObsBin();
-   vector < double > xs;
-   vector < pair < double, double> > dxs;
-   vector < pair < double, pair <double, double> > > xsdxs;
-
    unsigned int npoint = 0;
    if ( eScaleUnc == kSymmetricTwoPoint ) {
       npoint = 2;
@@ -2907,34 +2903,36 @@ vector < pair < double, pair <double, double> > > fastNLOReader::GetScaleUncerta
       exit(1);
    }
 
+   //! Cross section and absolute uncertainties
    for ( unsigned int iscl = 0; iscl <= npoint; iscl++ ) {
       SetScaleFactorsMuRMuF(xmurs[iscl],xmufs[iscl]);
       CalcCrossSection();
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          if ( iscl == 0 ) {
-            xs.push_back(XSection[iobs]);
-            dxs.push_back(make_pair(0.,0.));
+            XsUnc.xs.push_back(XSection[iobs]);
+            XsUnc.dxsu.push_back(0);
+            XsUnc.dxsl.push_back(0);
          } else {
-            dxs[iobs].first  = max(dxs[iobs].first, XSection[iobs]-xs[iobs]);
-            dxs[iobs].second = min(dxs[iobs].second,XSection[iobs]-xs[iobs]);
+            XsUnc.dxsu[iobs] = max(XsUnc.dxsu[iobs],XSection[iobs]-XsUnc.xs[iobs]);
+            XsUnc.dxsl[iobs] = min(XsUnc.dxsl[iobs],XSection[iobs]-XsUnc.xs[iobs]);
          }
       }
    }
 
+   //! Divide by cross section != 0 to give relative uncertainties
    for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-      if ( abs(xs[iobs]) > DBL_MIN ) {
-         dxs[iobs].first  = dxs[iobs].first  / xs[iobs];
-         dxs[iobs].second = dxs[iobs].second / xs[iobs];
+      if ( abs(XsUnc.xs[iobs]) > DBL_MIN ) {
+         XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] / XsUnc.xs[iobs];
+         XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] / XsUnc.xs[iobs];
       } else {
-         dxs[iobs].first  = 0.;
-         dxs[iobs].second = 0.;
+         XsUnc.dxsu[iobs] = 0.;
+         XsUnc.dxsl[iobs] = 0.;
       }
-      xsdxs.push_back(make_pair(xs[iobs],dxs[iobs]));
+      logger.debug["GetScaleUncertainty"]<<"iobs = " << iobs << "dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
    }
 
-   warn["GetScaleUncertainty"]<<"Setting scale factors back to defaults of one."<<endl;
-   warn["GetScaleUncertainty"]<<"Central cross sections have to be re-calculated, if not stored previously."<<endl;
+   logger.info["GetScaleUncertainty"]<<"Setting scale factors back to default of unity."<<endl;
    SetScaleFactorsMuRMuF(xmurs[0],xmufs[0]);
 
-   return xsdxs;
+   return XsUnc;
 }

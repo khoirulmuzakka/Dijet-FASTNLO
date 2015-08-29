@@ -43,30 +43,32 @@ int main(int argc, char** argv) {
    char buffer[1024];
    cout << endl;
    cout << _CSEPSC << endl;
-   shout["fnlo-read"] << "Program Steering"<<endl;
+   shout["fnlo-read"] << "fastNLO Reader"<<endl;
    cout << _SSEPSC << endl;
-   //! --- fastNLO table
-   string tablename = "table.tab";
+   //! --- fastNLO table and usage info
+   string tablename;
    if (argc <= 1) {
-      warn ["fnlo-read"] << "No table name given," << endl;
-      shout["fnlo-read"] << "taking the default table.tab instead!" << endl;
-      shout["fnlo-read"] << "  For an explanation of command line arguments type:" << endl;
-      shout["fnlo-read"] << "  ./fnlo-tk-cppread -h" << endl;
+      error["fnlo-read"] << "No fastNLO table specified!" << endl;
+      shout["fnlo-read"] << "For an explanation of command line arguments type:" << endl;
+      shout["fnlo-read"] << "./fnlo-tk-cppread -h" << endl;
+      cout << _CSEPSC << endl;
+      exit(1);
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
          shout << "" << endl;
-         shout << "Usage: ./fnlo-tk-cppread [arguments]" << endl;
-         shout << "Table input file, def. = table.tab" << endl;
-         shout << "PDF set, def. = CT10nlo" << endl;
+         shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode]" << endl;
+         shout << "       Arguments: <> mandatory; [] optional." << endl;
+         shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
+         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
          shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          shout << "   - Specify the PDF set including the absolute path." << endl;
          shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
-         shout << "Name of desired alpha_s evolution code, def. = GRV." << endl;
+         shout << "[#scalecombs]: Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
+         shout << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          shout << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
          shout << "" << endl;
@@ -74,10 +76,6 @@ int main(int argc, char** argv) {
          shout << "" << endl;
          cout  << _CSEPSC << endl;
          return 0;
-      } else if (tablename == "_") {
-         tablename = "table.tab";
-         warn ["fnlo-read"] << "No table name given," << endl;
-         shout["fnlo-read"] << " taking the default table.tab instead!" << endl;
       } else {
          shout["fnlo-read"] << "Evaluating table: " << tablename << endl;
       }
@@ -90,11 +88,12 @@ int main(int argc, char** argv) {
    if (argc <= 2 || PDFFile == "_") {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
       PDFFile = "CT10nlo";
+      // Suppress LHAPDF6 output at each member change
+      LHAPDF::setVerbosity(0);
 #else
       PDFFile = "CT10nlo.LHgrid";
 #endif
-      warn ["fnlo-read"] << "No PDF set given," << endl;
-      shout["fnlo-read"] <<" taking CT10nlo instead!" << endl;
+      shout["fnlo-read"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
    } else {
       shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
    }

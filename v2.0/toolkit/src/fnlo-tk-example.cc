@@ -32,11 +32,13 @@ int main(int argc, char** argv) {
 
    //! ---  Parse commmand line
    string tablename;
-   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    string PDFFile = "CT10nlo";
-   #else
+   // Suppress LHAPDF6 output at each member change
+   LHAPDF::setVerbosity(0);
+#else
    string PDFFile = "CT10nlo.LHgrid";
-   #endif
+#endif
    cout << endl;
    cout << _CSEPSC << endl;
    cout << " # [fnlo-tk-example] Program Example"<<endl;
@@ -85,53 +87,66 @@ int main(int argc, char** argv) {
 
 
    //! --- Example calculation of cross section including relative uncertainty
+   //!
+   //! Enumerators for type of scale and PDF uncertainty
+   //! Choices for scale uncertainty are:
+   //!   kScaleNone           : no scale uncertainty, only central scale (mu_r,mu_f) = (1,1) evaluated
+   //!   kSymmetricTwoPoint   : symmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2)
+   //!   kAsymmetricSixPoint  : asymmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2) plus
+   //!                          (1/2,1), (1,1/2), (1,2), (2,1)
+   //! Choices for PDF uncertainty are:
+   //!   kPDFNone             : No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!)
+   //!   kLHAPDF6             : LHAPDF6 uncertainties (recommended if LHAPDF6 is available)
+   //!                          Uses standard formula for NNPDF with symmetric uncertainties around mean.
+   //!                          For alternative see specific calls below and the LHAPDF6 documentation.
+   //!   kHessianSymmetric    : symmetric Hessian PDF uncertainties (ABM)
+   //!   kHessianAsymmetric   : asymmetric Hessian PDF uncertainties
+   //!   kHessianAsymmetricMax: asymmetric Hessian PDF uncertainties with pairwise max deviations per eigenvector (CTEQ,MRST|MSTW)
+   //!   kHessianCTEQCL68     : like kHessianAsymmetricMax, but with uncertainties rescaled to CL68
+   //!   kMCSampling          : statistical sampling PDF uncertainties and central value defined as mean (NNPDF)
+   //!   kHeraPDF10           : HERAPDF 1.0 uncertainties (NOT implemented yet, neither here nor in LHAPDF6!)
+
    EScaleUncertaintyStyle eScaleUnc = kAsymmetricSixPoint;
-   //EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
-   vector < pair < double, pair < double, double > > > xsdxs;
-   vector < pair < double, double > > dxs;
-   xsdxs = fnlo.GetScaleUncertainty(eScaleUnc);
-   //xsdxs = fnlo.GetPDFUncertainty(ePDFUnc);
+   //   EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
+   // Return values are three vectors xs, dxsu, dxsl in struct XsUnc
+   fastNLOReader::XsUncertainty XsUnc;
+   XsUnc = fnlo.GetScaleUncertainty(eScaleUnc);
+   //   XsUnc  = fnlo.GetPDFUncertainty(ePDFUnc);
 
    cout << _CSEPSC << endl;
    cout << " # Relative Scale Uncertainties (6P)" << endl;
    cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
    cout << _SSEPSC << endl;
-   for ( unsigned int iobs=0;iobs<xsdxs.size();iobs++ ) {
-      if ( xsdxs.size() ) {
-         xs[iobs] = xsdxs[iobs].first;
-         dxs.push_back(xsdxs[iobs].second);
-         printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,xs[iobs],dxs[iobs].second,dxs[iobs].first);
-      } else {
-         dxs.push_back(make_pair(0.,0.));
-      }
+   for ( unsigned int iobs=0;iobs<XsUnc.xs.size();iobs++ ) {
+      printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,XsUnc.xs[iobs],XsUnc.dxsl[iobs],XsUnc.dxsu[iobs]);
    }
+   cout << _CSEPSC << endl;
 
    //! Finish?
    return 0;
-   
+
+
+   //! --- Example calculation of cross section including PDF uncertainty using LHAPDF6 specifically
+   //!
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   //! --- Example calculation of cross section including PDF  uncertainty
-   //!     This example takes the error formlae from LHAPDF
    vector<LHAPDF::PDFUncertainty> PDFUnc = fnlo.GetPDFUncertaintyLHAPDF();
-   vector<double> errup = fnlo.CalcPDFUncertaintyRelPlus(PDFUnc);
-   vector<double> errdn = fnlo.CalcPDFUncertaintyRelMinus(PDFUnc);
+   //! Using the following call the CL can be changed and the alternativ asymmetric NNPDF uncertainty
+   //! around the median as implemented in LHAPDF6 can be switched on.
+   //   vector<LHAPDF::PDFUncertainty> PDFUnc = fnlo.GetPDFUncertaintyLHAPDF(100*erf(1/sqrt(2)),true);
+   vector<double> errup    = fnlo.CalcPDFUncertaintyRelPlus(PDFUnc);
+   vector<double> errdn    = fnlo.CalcPDFUncertaintyRelMinus(PDFUnc);
    vector<double> errupabs = fnlo.CalcPDFUncertaintyPlus(PDFUnc);
    vector<double> errdnabs = fnlo.CalcPDFUncertaintyMinus(PDFUnc);
-   vector<double> central = fnlo.CalcPDFUncertaintyCentral(PDFUnc);
+   vector<double> central  = fnlo.CalcPDFUncertaintyCentral(PDFUnc);
 
    cout << _CSEPSC << endl;
-   cout << " # Relative and Absolute PDF Uncertainties (6P)" << endl;
+   cout << " # Relative and Absolute PDF Uncertainties via LHAPDF6" << endl;
    cout << " # bin      cross section      lower rel. uncertainty   upper rel. uncertainty   lower abs. uncertainty   upper abs. uncertainty" << endl;
    cout << _SSEPSC << endl;
-   for ( unsigned int iobs=0;iobs<xsdxs.size();iobs++ ) {
-      if ( xsdxs.size() ) {
-         xs[iobs] = xsdxs[iobs].first;
-         dxs.push_back(xsdxs[iobs].second);
-         printf("%5.i      %#18.11E      %#18.11E      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,central[iobs],errdn[iobs],errup[iobs],errdnabs[iobs],errupabs[iobs]);
-      } else {
-         dxs.push_back(make_pair(0.,0.));
-      }
+   for ( unsigned int iobs=0;iobs<central.size();iobs++ ) {
+      printf("%5.i      %#18.11E      %#18.11E      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,central[iobs],errdn[iobs],errup[iobs],errdnabs[iobs],errupabs[iobs]);
    }
+   cout << _CSEPSC << endl;
 
    //! Finish?
    return 0;

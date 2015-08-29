@@ -108,12 +108,13 @@ namespace fastNLO {
 
    enum EPDFUncertaintyStyle {
       kPDFNone                  = 0,    // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!)
-      kHessianSymmetric         = 1,    // symmetric Hessian PDF uncertainties (ABM)
-      kHessianAsymmetric        = 2,    // asymmetric Hessian PDF uncertainties
-      kHessianAsymmetricMax     = 3,    // asymmetric Hessian PDF uncertainties with pairwise max deviations per eigenvector (CTEQ,MRST|MSTW)
-      kHessianCTEQCL68          = 4,    // like kHessianAsymmetricMax, but with uncertainties rescaled to CL68
-      kMCSampling               = 5,    // statistical sampling PDF uncertainties (and central value) (NNPDF)
-      kHeraPDF10                = 6     // HERAPDF 1.0 uncertainties
+      kLHAPDF6                  = 1,    // LHAPDF6 uncertainties (recommended if LHAPDF6 is available)
+      kHessianSymmetric         = 2,    // symmetric Hessian PDF uncertainties (ABM)
+      kHessianAsymmetric        = 3,    // asymmetric Hessian PDF uncertainties
+      kHessianAsymmetricMax     = 4,    // asymmetric Hessian PDF uncertainties with pairwise max deviations per eigenvector (CTEQ,MRST|MSTW)
+      kHessianCTEQCL68          = 5,    // like kHessianAsymmetricMax, but with uncertainties rescaled to CL68
+      kMCSampling               = 6,    // statistical sampling PDF uncertainties (and central value) (NNPDF)
+      kHeraPDF10                = 7     // HERAPDF 1.0 uncertainties
    };
 
    // ---- some names for nice output ---- //

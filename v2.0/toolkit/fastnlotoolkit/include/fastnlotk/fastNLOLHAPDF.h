@@ -53,10 +53,12 @@ public:
    int GetNLoop() const;
    int GetNFlavor() const;
    double GetAlphasMz() const;
-   //! Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
-   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
+   //! Return struct with vectors containing the cross section values and the selected scale uncertainty
+   XsUncertainty GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
+   // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
+   //   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   vector<LHAPDF::PDFUncertainty>  GetPDFUncertaintyLHAPDF(double cl=100*erf(1/sqrt(2)), bool alternative=false); //!< return PDF uncertainty. Formulae taken from LHAPDF
+   vector<LHAPDF::PDFUncertainty>  GetPDFUncertaintyLHAPDF(double cl=100*erf(1/sqrt(2)), bool alternative=false); //!< return PDF uncertainty, formulae taken from LHAPDF6
    vector<double> CalcPDFUncertaintyMinus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-minus uncertainty. Uncertainties are POSITIVE!
    vector<double> CalcPDFUncertaintyPlus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-up uncertainty
    vector<double> CalcPDFUncertaintyRelMinus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for relative PDF-minus uncertainty. Uncertainties are NEGATIVE!
