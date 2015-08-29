@@ -34,8 +34,6 @@ int main(int argc, char** argv) {
    string tablename;
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    string PDFFile = "CT10nlo";
-   // Suppress LHAPDF6 output at each member change
-   LHAPDF::setVerbosity(0);
 #else
    string PDFFile = "CT10nlo.LHgrid";
 #endif

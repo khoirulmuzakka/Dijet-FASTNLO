@@ -284,7 +284,7 @@ int main(int argc, char** argv) {
       }
       stringstream plotno;                                                                         // To make i+1 from int
       plotno << offset;                                                                            // to a string for the naming
-      RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
+      //      RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
       // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
       YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
       // Insert the plot pointer into the vector of analysis object pointers

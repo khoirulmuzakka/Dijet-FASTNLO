@@ -88,8 +88,6 @@ int main(int argc, char** argv) {
    if (argc <= 2 || PDFFile == "_") {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
       PDFFile = "CT10nlo";
-      // Suppress LHAPDF6 output at each member change
-      LHAPDF::setVerbosity(0);
 #else
       PDFFile = "CT10nlo.LHgrid";
 #endif
