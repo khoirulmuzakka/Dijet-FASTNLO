@@ -1213,6 +1213,11 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
                }
                printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cFix->GetNScaleNode());
             }
+            printf(" #   PDF dimensions: %1i\n",cFix->GetNPDF());
+            printf(" #     Number of x1 nodes range from %2i to %2i\n",cFix->GetNxtot1(0),cFix->GetNxtot1(NObsBin-1));
+            if (cFix->GetNPDF() > 1) {
+               printf(" #     Number of x2 nodes range from %2i to %2i\n",cFix->GetNxtot2(0),cFix->GetNxtot2(NObsBin-1));
+            }
          } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) ) {
             fastNLOCoeffAddFlex* cFlex = (fastNLOCoeffAddFlex*)c;
             int NScaleDim = cFlex->GetNScaleDim();
