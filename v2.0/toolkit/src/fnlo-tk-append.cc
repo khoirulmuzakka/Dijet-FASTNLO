@@ -99,7 +99,9 @@ int main(int argc, char** argv)
          for ( int ic=0 ; ic<nc2; ic++ ) {
             if ( resultTable->GetCoeffTable(ic)->GetIAddMultFlag()==0) {
                fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(ic);
-               cadd->SetNevt(-1);
+	       //TODO: KR: Note, the -1 indicator is not active in fnlo-tk-append.
+	       //          It again writes "1" for the moment to avoid complications.
+               cadd->SetNevt(1);
             }
          }
       }

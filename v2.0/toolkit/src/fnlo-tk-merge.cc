@@ -87,9 +87,11 @@ int main(int argc, char** argv) {
          fastNLOTable tab(path);
          // Todo: check validity of table, here!
          {
-            //! Check if one additive contribution has number of events == 1
-            //! this indicates, that this contributions cannot be merged because
-            //! number of event information got lost
+	    //! Check, whether an additive contribution has number of events == -1.
+            //! This indicates, that this contribution cannot be merged anymore,
+            //! because the number of event normalization information got lost.
+	    //TODO: KR: Note, the -1 indicator is not active in fnlo-tk-append.
+            //          It again writes "1" for the moment to avoid complications.
             const int nc = tab.GetNcontrib() + tab.GetNdata();
             for ( int ic=0 ; ic<nc; ic++ ) {
                if ( tab.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
