@@ -31,6 +31,7 @@ namespace std {
 %{
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOTable.h"
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"
+typedef fastNLOReader::XsUncertainty XsUncertainty;
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h"
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOAlphas.h"
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOCRunDec.h"
