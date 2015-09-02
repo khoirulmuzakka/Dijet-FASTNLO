@@ -753,7 +753,7 @@ bool read_steer::parsecommandline(int argc,char** argv) {
          //cout << " found cmd line tag. label=" << lab << "\tvalue=" << val << endl;
          if (lab=="steerfile") {
             string fID = stdID;
-            int pos = separatetag(val,fID,":");
+            int pos = separatetag(val,fID,"->");
             //cout << "strfile. "  << "val=" << val << "\tfID=" << fID << endl;
             if (pos>=0)  cout << " # read_steer. Info. Reading new steerfile '" << val << "'." << endl;;
             readfile(val,fID);
@@ -768,10 +768,17 @@ bool read_steer::parsecommandline(int argc,char** argv) {
    // else create new StdID namespace with cmd-line arguments
    if (instances==NULL) read_steer::Steering(stdID);
    for (map<string, string>::const_iterator ii=cmdvals.begin(); ii!=cmdvals.end(); ++ii) {
+      //! use like key=value:namespace
+      //string val = (*ii).second;
+      //string fID = stdID;
+      //separatetag(val, fID ,":");
+      //! use like namespace:key=value
       string val = (*ii).second;
       string fID = stdID;
-      separatetag(val, fID ,":");
-      read_steer::Steering(fID)->AddLabel((*ii).first, val);
+      string key = (*ii).first;
+      separatetag(key, fID ,"::");
+      if ( fID!=stdID )swap(key,fID);
+      read_steer::Steering(fID)->AddLabel(key, val);
    }
    return gotfile;
 }

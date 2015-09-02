@@ -248,7 +248,7 @@
 //            PARSE(arc,argv);
 //     Where argc and argv are the command line parameters as specified in main(argc,argv).
 //     Specify a value when executing the program (e.g. Run) over the command line like:
-//            >$ Run label1=value1 WelcomeMessage="Hello World" Name=Einstein:Names steerfile=file.str steerfile=file2.str:Names
+//            >$ Run label1=value1 WelcomeMessage="Hello World" Names::Name=Einstein steerfile=file.str steerfile=file2.str->Names
 //
 //     This example will initialize the labels in the standard namespace
 //            label1               value1
