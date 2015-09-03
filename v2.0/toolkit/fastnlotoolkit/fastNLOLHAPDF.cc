@@ -444,6 +444,10 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
       SetLHAPDFMember(0);
       CalcCrossSection();
       xs0 = GetCrossSection();
+      // Use xs0 as assumed mean and add up shifted means ,(xsi - xs0), and
+      // shifted means squared, (xsi - xs0)^2. Shifting permits numerically
+      // more precise variance calculations.
+      //
       // Initialize cross section xs, uncertainties dxs, and temporary vector dxseig to zero
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          XsUnc.xs.push_back(0);
@@ -453,44 +457,46 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
          dxseigl.push_back(0);
       }
 
-      // Pairwise loop over other PDF set members, sum up weights and shifted weights squared ((weights-xs0)^2)
-      // Shifted weights allow more precise variance calculation
+      // Pairwise loop over other PDF set members 1 to nMem
       for ( unsigned int ieig = 1; ieig <= nEig; ieig++ ) {
          SetLHAPDFMember(2*ieig-1);
          CalcCrossSection();
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            XsUnc.xs[iobs] = XsUnc.xs[iobs] + XSection[iobs];
-            dxseigu[iobs] = max(0.,XSection[iobs]-xs0[iobs]);
-            dxseigl[iobs] = min(0.,XSection[iobs]-xs0[iobs]);
+            double diff     = XSection[iobs]-xs0[iobs];
+            XsUnc.xs[iobs] += diff;
+            dxseigu[iobs]   = max(0.,diff);
+            dxseigl[iobs]   = min(0.,diff);
          }
          SetLHAPDFMember(2*ieig);
          CalcCrossSection();
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            XsUnc.xs[iobs] = XsUnc.xs[iobs] + XSection[iobs];
+            double diff     = XSection[iobs]-xs0[iobs];
+            XsUnc.xs[iobs] += diff;
             // Take only maximal one in case of one-sided deviations for one eigenvector
             if ( ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68 ) {
-               dxseigu[iobs] = pow(max(dxseigu[iobs],XSection[iobs]-xs0[iobs]),2.);
-               dxseigl[iobs] = pow(min(dxseigl[iobs],XSection[iobs]-xs0[iobs]),2.);
+               dxseigu[iobs] = pow(max(dxseigu[iobs],diff),2.);
+               dxseigl[iobs] = pow(min(dxseigl[iobs],diff),2.);
             }
             // Add up both even in case of one-sided deviations for one eigenvector
             else {
-               dxseigu[iobs] = pow(dxseigu[iobs],2.) + pow(max(0.,XSection[iobs]-xs0[iobs]),2.);
-               dxseigl[iobs] = pow(dxseigl[iobs],2.) + pow(min(0.,XSection[iobs]-xs0[iobs]),2.);
+               dxseigu[iobs] = pow(dxseigu[iobs],2.) + pow(max(0.,diff),2.);
+               dxseigl[iobs] = pow(dxseigl[iobs],2.) + pow(min(0.,diff),2.);
             }
             // Fill into dxs
-            XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] + dxseigu[iobs];
-            XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] + dxseigl[iobs];
+            XsUnc.dxsu[iobs] += dxseigu[iobs];
+            XsUnc.dxsl[iobs] += dxseigl[iobs];
          }
       }
 
-      // Evaluate last PDF set member in case of odd numbers (not possible with asymmetric Hessian!)
+      // Evaluate potential last, odd PDF set member (not possible with asymmetric Hessian!)
       if ( nMem%2 == 1 ) {
          SetLHAPDFMember(nMem);
          CalcCrossSection();
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            XsUnc.xs[iobs] = XsUnc.xs[iobs] + XSection[iobs];
-            XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] + pow(max(0.,XSection[iobs]-xs0[iobs]),2.);
-            XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] + pow(min(0.,XSection[iobs]-xs0[iobs]),2.);
+            double diff       = XSection[iobs]-xs0[iobs];
+            XsUnc.xs[iobs]   += diff;
+            XsUnc.dxsu[iobs] += pow(max(0.,diff),2.);
+            XsUnc.dxsl[iobs] += pow(min(0.,diff),2.);
          }
       }
 
@@ -498,7 +504,8 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!).
          if ( ePDFUnc == kPDFNone ) {
-            XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem;
+            // Undo shift on mean
+            XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];
             XsUnc.dxsu[iobs] = 0.;
             XsUnc.dxsl[iobs] = 0.;
          }
@@ -520,9 +527,11 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
          }
          // Central value xs0 is replaced by sampling average; uncertainty is sqrt of sampling variance
          else if ( ePDFUnc == kMCSampling ) {
-            XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem;
-            XsUnc.dxsu[iobs] = +sqrt((nMem/(nMem-1)) * ( (XsUnc.dxsu[iobs]+XsUnc.dxsl[iobs])/nMem -
-                                                         pow(XsUnc.xs[iobs],2.) - pow(xs0[iobs],2.) + 2.*XsUnc.xs[iobs]*xs0[iobs] ));
+            double sumw  = XsUnc.xs[iobs];
+            double sumw2 = XsUnc.dxsl[iobs]+XsUnc.dxsu[iobs];
+            // Undo shift on mean
+            XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];
+            XsUnc.dxsu[iobs] = +sqrt( (sumw2 - pow(sumw,2)/nMem) / (nMem-1) );
             XsUnc.dxsl[iobs] = -XsUnc.dxsu[iobs];
          }
          // HERAPDF not yet implemented
@@ -544,8 +553,8 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
    } else {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
       // Default is no alternative for NNPDF replica uncertainties
-      //      vector<LHAPDF::PDFUncertainty> L6PDFUnc = GetPDFUncertaintyLHAPDF(100*erf(1/sqrt(2)),true);
-      vector<LHAPDF::PDFUncertainty> L6PDFUnc = GetPDFUncertaintyLHAPDF();
+      vector<LHAPDF::PDFUncertainty> L6PDFUnc = GetPDFUncertaintyLHAPDF(100*erf(1/sqrt(2)),false);
+      //      vector<LHAPDF::PDFUncertainty> L6PDFUnc = GetPDFUncertaintyLHAPDF();
       XsUnc.xs   = CalcPDFUncertaintyCentral(L6PDFUnc);
       XsUnc.dxsu = CalcPDFUncertaintyRelPlus(L6PDFUnc);
       XsUnc.dxsl = CalcPDFUncertaintyRelMinus(L6PDFUnc);
