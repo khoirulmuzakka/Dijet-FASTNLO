@@ -474,13 +474,13 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
             XsUnc.xs[iobs] += diff;
             // Take only maximal one in case of one-sided deviations for one eigenvector
             if ( ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68 ) {
-               dxseigu[iobs] = pow(max(dxseigu[iobs],diff),2.);
-               dxseigl[iobs] = pow(min(dxseigl[iobs],diff),2.);
+               dxseigu[iobs] = pow(max(dxseigu[iobs],diff),2);
+               dxseigl[iobs] = pow(min(dxseigl[iobs],diff),2);
             }
             // Add up both even in case of one-sided deviations for one eigenvector
             else {
-               dxseigu[iobs] = pow(dxseigu[iobs],2.) + pow(max(0.,diff),2.);
-               dxseigl[iobs] = pow(dxseigl[iobs],2.) + pow(min(0.,diff),2.);
+               dxseigu[iobs] = pow(dxseigu[iobs],2) + pow(max(0.,diff),2);
+               dxseigl[iobs] = pow(dxseigl[iobs],2) + pow(min(0.,diff),2);
             }
             // Fill into dxs
             XsUnc.dxsu[iobs] += dxseigu[iobs];
@@ -495,8 +495,8 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
             double diff       = XSection[iobs]-xs0[iobs];
             XsUnc.xs[iobs]   += diff;
-            XsUnc.dxsu[iobs] += pow(max(0.,diff),2.);
-            XsUnc.dxsl[iobs] += pow(min(0.,diff),2.);
+            XsUnc.dxsu[iobs] += pow(max(0.,diff),2);
+            XsUnc.dxsl[iobs] += pow(min(0.,diff),2);
          }
       }
 
