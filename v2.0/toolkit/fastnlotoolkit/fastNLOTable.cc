@@ -1214,8 +1214,19 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
                printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cFix->GetNScaleNode());
             }
             printf(" #   PDF dimensions: %1i\n",cFix->GetNPDF());
+            int fPDFDim = cFix->GetNPDFDim();
+            if ( fPDFDim == 0 ) {
+               printf(" #     x-interpolation storage format: Linear\n");
+            } else if ( fPDFDim == 1 ) {
+               printf(" #     x-interpolation storage format: Half-Matrix\n");
+            } else if ( fPDFDim == 2 ) {
+               printf(" #     x-interpolation storage format: Full-Matrix\n");
+            } else {
+               logger.error["PrintFastNLOTableConstants"] << "Unknown interpolation storage structure, aborting! "
+                                                          << " NPDFDim = " << fPDFDim << endl;
+            }
             printf(" #     Number of x1 nodes range from %2i to %2i\n",cFix->GetNxtot1(0),cFix->GetNxtot1(NObsBin-1));
-            if (cFix->GetNPDF() > 1) {
+            if (fPDFDim == 2) {
                printf(" #     Number of x2 nodes range from %2i to %2i\n",cFix->GetNxtot2(0),cFix->GetNxtot2(NObsBin-1));
             }
          } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) ) {
