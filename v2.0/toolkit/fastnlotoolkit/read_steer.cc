@@ -742,19 +742,37 @@ int read_steer::cmdlinetag(const char* arg, string& label, string& value) {
 }
 
 
+bool read_steer::parsecommandline(vector<string> argv) {
+   vector<char*> argc;//(argv.size(), new char[400]);
+   // C++11
+   // for ( unsigned int i = 0 ; i<argv.size() ; i++ )
+   //    argc.push_back((char*)&argv[0]); // C++11 
+   //  return ret = parsecommandline(argc.size(),&argc[0]);
+
+   for ( unsigned int i = 0 ; i<argv.size() ; i++ ){
+      cout<<"input: "<<argv[i]<<endl;
+      argc.push_back(new char[argv[i].size()+1]);
+      std::copy(argv[i].begin(), argv[i].end(), argc[i]);
+      argc[i][argv[i].size()] = '\0';
+    }
+   bool ret = parsecommandline(argc.size(),&argc[0]);
+   for ( unsigned int i=0 ; i<argc.size() ;i ++ ) delete[] argc[i];
+   return ret;
+}
+
 bool read_steer::parsecommandline(int argc,char** argv) {
    bool gotfile = false;
    map<string,string> cmdvals;
    for (int i=0; i<argc; i++) {
       string val, lab;
-      //cout << "i=" << i << "\targv[i]=" << argv[i] << endl;
+      cout << "i=" << i << "\targv[i]=" << argv[i] << endl;
       int suc=cmdlinetag(argv[i],lab,val);
       if (suc>0) {
-         //cout << " found cmd line tag. label=" << lab << "\tvalue=" << val << endl;
+	 cout << " found cmd line tag. label=" << lab << "\tvalue=" << val << endl;
          if (lab=="steerfile") {
             string fID = stdID;
             int pos = separatetag(val,fID,"->");
-            //cout << "strfile. "  << "val=" << val << "\tfID=" << fID << endl;
+            cout << "strfile. "  << "val=" << val << "\tfID=" << fID << endl;
             if (pos>=0)  cout << " # read_steer. Info. Reading new steerfile '" << val << "'." << endl;;
             readfile(val,fID);
             gotfile=true;

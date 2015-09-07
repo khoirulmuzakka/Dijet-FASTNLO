@@ -97,16 +97,16 @@ class fastNLOTable : public fastNLOBase {
    // ___________________________________________________________________________________________________
    // Some other info getters
    // ___________________________________________________________________________________________________
-   vector < double > GetBinSize() const {return BinSize;};                                      // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
-   double GetBinSize(int bin) const {return BinSize[bin];};                                     // Get Binsize = BinSizeDim1 < * BinSizeDim2 >
-   void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  // Set dimension of calculation. (Single-differential, double-differential, etc...)
-   unsigned int GetNumDiffBin() const { return NDim; }                                                   // Get dimension of calculation. (Single-differential, double-differential, etc...)
+   vector < double > GetBinSize() const {return BinSize;};                                      //!< Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+   double GetBinSize(int bin) const {return BinSize[bin];};                                     //!< Get Binsize = BinSizeDim1 < * BinSizeDim2 >
+   void SetNumDiffBin(int iDiff ) { NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}  //!< Set dimension of calculation. (Single-differential, double-differential, etc...)
+   unsigned int GetNumDiffBin() const { return NDim; }                                                   //!< Get dimension of calculation. (Single-differential, double-differential, etc...)
 
-   int GetIDiffBin(int bin) const { return IDiffBin[bin]; }                                     // Get if dimension is 'truly differential' or bin-integrated (divided by bin-width or not)
+   int GetIDiffBin(int bin) const { return IDiffBin[bin]; }                                     //!< Get if dimension is 'truly differential' or bin-integrated (divided by bin-width or not)
 
    void SetDimLabel( string label, unsigned int iDim , bool IsDiff = true );
-   string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};                              // Get label (name) of observable in dimension iDim
-   vector<string > GetDimLabels() const {return DimLabel;};                                     // Get label (name) of all observables
+   string GetDimLabel( int iDim  ) const {return DimLabel[iDim];};                              //!< Get label (name) of observable in dimension iDim
+   vector<string > GetDimLabels() const {return DimLabel;};                                     //!< Get label (name) of all observables
 
    void SetIpublunits(int unit){Ipublunits = unit;}
    int GetIpublunits() const {return Ipublunits;}

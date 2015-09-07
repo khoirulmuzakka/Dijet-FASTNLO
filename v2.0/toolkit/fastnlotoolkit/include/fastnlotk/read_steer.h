@@ -244,8 +244,10 @@
 //     via the command line of the program.
 //     To read in values over the command line, one has to call
 //            read_steer::parsecommandline(argc,argv);
+//            read_steer::parsecommandline(vector<string> v);
 //        or
 //            PARSE(arc,argv);
+//            PARSEV(v);
 //     Where argc and argv are the command line parameters as specified in main(argc,argv).
 //     Specify a value when executing the program (e.g. Run) over the command line like:
 //            >$ Run label1=value1 WelcomeMessage="Hello World" Names::Name=Einstein steerfile=file.str steerfile=file2.str->Names
@@ -410,6 +412,7 @@
 
 // shortcuts for parsing command line and printing
 #define PARSE(X,Y) read_steer::parsecommandline(X,Y)
+#define PARSEV(X) read_steer::parsecommandline(X)
 #define PRINTALL() read_steer::printall()
 
 // check if key exists
@@ -616,7 +619,7 @@ public:
    static void printall();                                              // print values of all files
    static void print(std::string steerID=read_steer::stdID);                         // print values
    static bool parsecommandline(int argc,char** argv);
-
+   static bool parsecommandline(std::vector<std::string> argv);
 
 };
 
