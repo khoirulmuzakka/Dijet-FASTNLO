@@ -372,13 +372,22 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
                   logger.error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table."<<endl;
                else {
                   logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
-                  if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) )
-                     lhs->Add(*cadd);
-                  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) )
-                     lhs->Add(*cadd);
+                  if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) ) {
+		     if ( !(lhs->IsCompatible(*cadd)) )
+			logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+		     lhs->Add(*cadd);
+		  }
+                  else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) ) {
+		     if ( !(lhs->IsCompatible(*cadd)) )
+			logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+		     lhs->Add(*cadd);
+		  }
                   wasAdded = true;
                }
             }
+	    // else {
+	    //    logger.warn["AddTable"]<<"Incompatible tables found!"<<endl;
+	    // }
          }
       }
       else {
