@@ -497,6 +497,7 @@ public:
 
    static bool CheckNumber(const std::string& str);
    static bool CheckInt(const std::string& str);
+   static int separatetag(std::string& vallhs, std::string& valrhs, const std::string& sep);
 
    static const std::string& GetDefaultNamespace(){ return stdID;}
    static void SetDefaultNamespace(const std::string& nspc){ stdID = nspc;}
@@ -515,7 +516,6 @@ private:
    int ReplaceVariables(std::string& value);
    bool StringToBool(const std::string& str, const std::string& label="") const;
    static int cmdlinetag(const char* arg, std::string& label, std::string& value);
-   static int separatetag(std::string& vallhs, std::string& valrhs, const std::string& sep);
 
    std::map<std::string,std::string> fstrings;
    std::map<std::string,std::vector<std::string> > ffields;
