@@ -1,7 +1,92 @@
+2015-09-10  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2163
+            ================================================================================
+
+2015-09-10  rabbertz
+
+    * fnlo-tk-yodaout.cc: Make yodaout fit for LO & NNLO output
+
+2015-09-09  DanielBritzger
+
+    * fastNLOCoeffBase.cc, read_steer.h: missing commits
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFix.h,
+      fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h, fastNLOTable.cc: Check more
+      carefully compatibility of tables for merging and adding. Print warning if
+      something goes wrong, but continueing.
+
+2015-09-07  DanielBritzger
+
+    * fastNLOTable.h, read_steer.cc, read_steer.h: update for read_steer
+
+2015-09-04  rabbertz
+
+    * fastNLOCoeffAddBase.h, fastNLOTable.cc: Fix issue with x-node info
+      printout
+
+2015-09-03  rabbertz
+
+    * fastNLOLHAPDF.cc: Small fixes
+
+    * fastNLOLHAPDF.cc: Fix issue with NNPDF uncertainty
+
+2015-09-02  DanielBritzger
+
+    * read_steer.cc, read_steer.h: Update for read_steer when parsing the
+      command line
+
+2015-08-31  sieber
+
+    * fastnlo.i: try to circumvent the nested struct problem in pyext with the
+      stone-age version of swig installed on slc6.
+
+2015-08-31  rabbertz
+
+    * fnlo-tk-append.cc, fnlo-tk-merge.cc: Note, the -1 indicator is not active
+      in fnlo-tk-append. It again writes 1 for the moment to avoid
+      complications.
+
+2015-08-30  rabbertz
+
+    * fastNLOTable.cc: Add printout of no. of x nodes
+
+2015-08-29  rabbertz
+
+    * fnlo-tk-append.cc, fnlo-tk-merge.cc: Change Daniels no-merge indicator
+      from Nevt 1 to -1; Nevt filling in mcgrid currently only correct when
+      using 1 ...
+
+    * fnlo-tk-cppread.cc, fnlo-tk-example.cc, fnlo-tk-yodaout.cc: Fix remaining
+      issues in example, cppread, and yodaout
+
+    * configure.ac, fastNLOConstants.h.in, fastNLOLHAPDF.cc, fastNLOLHAPDF.h,
+      fastNLOReader.cc, fastNLOReader.h, fnlo-tk-cppread.cc, fnlo-tk-example.cc,
+      fnlo-tk-yodaout.cc: Simplify return object of uncertainties to struct of 3
+      vectors; propagate changes into executables; fix RivetID issue in yodaout;
+      unify commands
+
+2015-08-28  rabbertz
+
+    * configure.ac: Fix issue with LHAPDF6 in configure.ac
+
+    * fnlo-tk-cppread.cc, fnlo-tk-yodaout.cc: Adapt printout for LHAPDF5/6;
+      apply same trick from Daniel to yodaout; accept unchanged Rivet_ID without
+      capital letter for 1-dim distro
+
+    * fastNLOCreate.cc: Switch of unnecessary warning in parton combinations
+
+2015-08-26  DanielBritzger
+
+    * fastNLOLHAPDF.cc, fastNLOLHAPDF.h, fnlo-tk-example.cc: Simple getter for
+      PDF uncertainties from LHAPDF
+
+    * fnlo-tk-cppread.cc, fnlo-tk-example.cc: adapt example programs for LHAPDF6
+
 2015-08-25  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2143
             ================================================================================
 
 2015-08-25  rabbertz
+
+    * NEWS, README: Edited ChangeLog, NEWS, README for new prerelease
 
     * Makefile_root.am: Forgotten removal
 

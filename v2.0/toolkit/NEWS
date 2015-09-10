@@ -1,3 +1,14 @@
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2163:
+=================================================================================================
+Some little issues fixed and:
+- PDF uncertainties calculable via fastNLO code or via LHAPDF6 (both not for HERAPDF).
+  A struct with 3 vectors is returned giving x section and rel. lower and upper uncertainty.
+- fnlo-tk-yodaout acquired an additional option for the fixed-order to be used, def. is NLO.
+- Standard table info printout now also prints no. of x nodes.
+- Improvements in table checking when merging/appending.
+
+
+
 Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2143:
 =================================================================================================
 Only some little issues have been fixed and improvements incorporated into this prerelease:
