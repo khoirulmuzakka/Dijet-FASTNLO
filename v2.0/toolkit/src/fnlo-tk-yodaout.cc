@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
          shout << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
+         shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
+         shout << "   Alternatives: LO, NNLO (if available)" << endl;
          shout << "" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          shout << "" << endl;
@@ -135,6 +137,29 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+   //! --- Fixed-order choice
+   ESMOrder eOrder = kNextToLeading;
+   string chord = "NLO";
+   if (argc > 4) {
+      chord = (const char*) argv[4];
+   }
+   if (argc <= 4 || chord == "_") {
+      shout["fnlo-tk-yodaout"] << "No request given for fixed-order precision, using NLO." << endl;
+   } else {
+      if ( chord == "LO" ) {
+         eOrder = kLeading;
+         shout["fnlo-tk-yodaout"] << "Deriving LO cross sections for comparison." << endl;
+      } else if ( chord == "NLO" ) {
+         eOrder = kNextToLeading;
+         shout["fnlo-tk-yodaout"] << "Deriving NLO cross sections for comparison." << endl;
+      } else if ( chord == "NNLO" ) {
+         eOrder = kNextToNextToLeading;
+         shout["fnlo-tk-yodaout"] << "Deriving NNLO cross sections for comparison." << endl;
+      } else {
+         error["fnlo-tk-yodaout"] << "Illegal choice of fixed-order precision, " << chord << ", aborted!" << endl;
+         exit(1);
+      }
+   }
    cout << _CSEPSC << endl;
 
    //! --- fastNLO initialisation, read & evaluate table
@@ -145,6 +170,48 @@ int main(int argc, char** argv) {
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);
    //! Print essential table information
    fnlo.PrintTableInfo();
+
+   //! Check on existence of LO (Id = -1 if not existing)
+   int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
+   if (ilo < 0) {
+      error["fnlo-tk-yodaout"] << "LO not found, aborted!" << endl;
+      exit(1);
+   } else {
+      info["fnlo-tk-yodaout"] << "The LO contribution has Id: " << ilo << endl;
+      fnlo.SetContributionON(kFixedOrder, ilo, true);
+   }
+   //! Check on existence of NLO (Id = -1 if not existing)
+   int inlo  = fnlo.ContrId(kFixedOrder, kNextToLeading);
+   if (inlo < 0) {
+      info["fnlo-tk-yodaout"] << "No NLO contribution found!" << endl;
+      if ( eOrder >= kNextToLeading ) {
+         error["fnlo-tk-yodaout"] << "Requested NLO not found, aborted!" << endl;
+         exit(1);
+      }
+   } else {
+      info["fnlo-tk-yodaout"] << "The NLO contribution has Id: " << inlo << endl;
+      if ( eOrder >= kNextToLeading ) {
+         fnlo.SetContributionON(kFixedOrder, inlo, true);
+      } else {
+         fnlo.SetContributionON(kFixedOrder, inlo, false);
+      }
+   }
+   //! Check on existence of NNLO (Id = -1 if not existing)
+   int innlo = fnlo.ContrId(kFixedOrder, kNextToNextToLeading);
+   if (innlo < 0) {
+      info["fnlo-tk-yodaout"] << "No NNLO contribution found!" << endl;
+      if ( eOrder >= kNextToNextToLeading ) {
+         error["fnlo-tk-yodaout"] << "Requested NNLO not found, aborted!" << endl;
+         exit(1);
+      }
+   } else {
+      info["fnlo-tk-yodaout"] << "The NNLO contribution has Id: " << innlo << endl;
+      if ( eOrder >= kNextToNextToLeading ) {
+         fnlo.SetContributionON(kFixedOrder, innlo, true);
+      } else {
+         fnlo.SetContributionON(kFixedOrder, innlo, false);
+      }
+   }
    // //! Check on existence of non-perturbative corrections from LO MC
    // int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
    // if (inpc1 > -1) {
@@ -179,17 +246,6 @@ int main(int argc, char** argv) {
       XsUnc = fnlo.GetScaleUncertainty(eScaleUnc);
       snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
       LineName += "_dxscl";
-// #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-//    } else if ( chunc != "L6" ) {
-//       vector<LHAPDF::PDFUncertainty> L6PDFUnc = fnlo.GetPDFUncertaintyLHAPDF();
-//       xs = fnlo.CalcPDFUncertaintyCentral(L6PDFUnc);
-//       vector<double> errdn = fnlo.CalcPDFUncertaintyRelMinus(L6PDFUnc);
-//       vector<double> errup = fnlo.CalcPDFUncertaintyRelPlus(L6PDFUnc);
-//       for ( unsigned int iobs=0;iobs<xs.size();iobs++ ) {
-//          xsdxs.push_back(make_pair(xs[iobs],make_pair(errdn[iobs],errup[iobs])));
-//       }
-//       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
-// #endif
    } else if ( chunc != "none" ) {
       XsUnc = fnlo.GetPDFUncertainty(ePDFUnc);
       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
@@ -248,8 +304,8 @@ int main(int argc, char** argv) {
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
    //   string TabName = tablename.substr(0, tablename.size() - 4);
    string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
-   string FileName = "NLO_" + PDFName + "_" + chunc;
-   LineName = "NLO_" + PDFName + LineName;
+   string FileName = chord + "_" + PDFName + "_" + chunc;
+   LineName = chord + "_" + PDFName + LineName;
 
    //! --- YODA analysis object creation and storage
    YODA::Writer & writer = YODA::WriterYODA::create();                          //! Create the writer for the yoda file
