@@ -235,6 +235,20 @@ int main(int argc, char** argv) {
    //! --- Get all required info from table
    //! Get binning
    vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
+
+   //! For flex-scale tables:
+   //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
+   //! Default choice is the first scale via enum 'kScale1'
+   if (fnlo.GetIsFlexibleScaleTable()) {
+      fnlo.SetMuFFunctionalForm(kScale1);
+      fnlo.SetMuRFunctionalForm(kScale1);
+      //      fnlo.SetMuFFunctionalForm(kProd);
+      //      fnlo.SetMuRFunctionalForm(kProd);
+      warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
+                        << "from only the first scale of this flexible-scale table." << endl
+                        << "                        Please check how this table was filled!" << endl;
+   }
+
    //! Re-calculate cross sections to potentially include the above-selected non-perturbative factors
    fnlo.CalcCrossSection();
    //! Get cross sections

@@ -504,7 +504,7 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!).
          if ( ePDFUnc == kPDFNone ) {
-            // Undo shift on mean
+            // Undo shift of mean
             XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];
             XsUnc.dxsu[iobs] = 0.;
             XsUnc.dxsl[iobs] = 0.;
@@ -529,7 +529,7 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
          else if ( ePDFUnc == kMCSampling ) {
             double sumw  = XsUnc.xs[iobs];
             double sumw2 = XsUnc.dxsl[iobs]+XsUnc.dxsu[iobs];
-            // Undo shift on mean
+            // Undo shift of mean
             XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];
             XsUnc.dxsu[iobs] = +sqrt( (sumw2 - pow(sumw,2)/nMem) / (nMem-1) );
             XsUnc.dxsl[iobs] = -XsUnc.dxsu[iobs];
