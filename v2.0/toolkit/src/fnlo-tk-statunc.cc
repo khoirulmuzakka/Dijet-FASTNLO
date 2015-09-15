@@ -174,6 +174,7 @@ int main(int argc, char** argv) {
                dxs.push_back(0);
             }
          }
+         if ( nfound == 1 || nfound % 10 == 0 ) {cout << " # Analyzing table " << tablename << " ..." << endl;}
          //! Check on existence of LO (Id = -1 if not existing)
          int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
          if (ilo < 0) {
@@ -224,9 +225,11 @@ int main(int argc, char** argv) {
             fnlo.SetMuRFunctionalForm(kScale1);
             //      fnlo.SetMuFFunctionalForm(kProd);
             //      fnlo.SetMuRFunctionalForm(kProd);
-            warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
-                              << "from only the first scale of this flexible-scale table." << endl
-                              << "                        Please check how this table was filled!" << endl;
+            if ( nfound == 1 ) {
+               warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived from " << endl;
+               cout << " #                      only the first scale of this flexible-scale table." << endl;
+               cout << " #                      Please check how this table was filled!" << endl;
+            }
          }
 
          //! Re-calculate cross sections for selected fixed order
