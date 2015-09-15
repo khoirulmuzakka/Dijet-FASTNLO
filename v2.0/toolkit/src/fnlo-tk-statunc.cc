@@ -8,6 +8,7 @@
 ///
 ///********************************************************************
 
+#include <cfloat>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
