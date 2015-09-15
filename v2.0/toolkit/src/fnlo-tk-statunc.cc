@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
                dxs.push_back(0);
             }
          }
-         if ( nfound == 1 || nfound % 10 == 0 ) {cout << " # Analyzing table " << tablename << " ..." << endl;}
+         if ( nfound == 1 || (nfound-1) % 10 == 0 ) {cout << " # Analyzing table " << tablename << " ..." << endl;}
          //! Check on existence of LO (Id = -1 if not existing)
          int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
          if (ilo < 0) {
