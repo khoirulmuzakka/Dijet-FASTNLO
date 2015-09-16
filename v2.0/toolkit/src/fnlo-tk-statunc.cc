@@ -298,7 +298,8 @@ int main(int argc, char** argv) {
             char *cwd = getcwd( buffer, 1024 );
             char buftmp[5];
             snprintf(buftmp, sizeof(buftmp), "%04d", itab);
-            string tablename = cwd + "/" + tablebase + "_" + buftmp + ".tab";
+            // Stringify first object so everything is +-concatenated to a string and not a char ...
+            string tablename = string(cwd) + "/" + tablebase + "_" + buftmp + ".tab";
             ofstream outfile;
             outfile.open(killfile.c_str(),ios::app);
             outfile << tablename << endl;
