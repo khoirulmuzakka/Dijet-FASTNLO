@@ -126,11 +126,11 @@ int main(int argc, char** argv) {
    //! Set default PDF
    string PDFFile = "X";
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   PDFFile = "CT10nlo";
-   //   PDFFile = "cteq66";
+   //   PDFFile = "CT10nlo";
+   PDFFile = "cteq66";
 #else
-   PDFFile = "CT10nlo.LHgrid";
-   //   PDFFile = "cteq66.LHgrid";
+   //   PDFFile = "CT10nlo.LHgrid";
+   PDFFile = "cteq66.LHgrid";
 #endif
 
    //! --- Loop over selected table sample
@@ -298,11 +298,12 @@ int main(int argc, char** argv) {
             char *cwd = getcwd( buffer, 1024 );
             char buftmp[5];
             snprintf(buftmp, sizeof(buftmp), "%04d", itab);
-            string tablename = cwd + tablebase + "_" + buftmp + ".tab";
+            string tablename = cwd + "/" + tablebase + "_" + buftmp + ".tab";
             ofstream outfile;
             outfile.open(killfile.c_str(),ios::app);
             outfile << tablename << endl;
             outfile.close();
+            break; // --> Next table. Need to remove same table only once ...
          }
       }
    }
