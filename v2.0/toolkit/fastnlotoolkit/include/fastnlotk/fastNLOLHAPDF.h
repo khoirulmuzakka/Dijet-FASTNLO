@@ -56,6 +56,7 @@ public:
    double GetAlphasMz() const;
    //! Return struct with vectors containing the cross section values and the selected scale uncertainty
    XsUncertainty GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc);
+   std::vector<std::vector<double> > GetPDFUncertaintyVec(fastNLO::EPDFUncertaintyStyle);
    // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
    //   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
