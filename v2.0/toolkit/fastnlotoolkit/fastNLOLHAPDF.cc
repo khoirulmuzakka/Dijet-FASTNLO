@@ -566,3 +566,14 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
 
    return XsUnc;
 }
+
+
+std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const EPDFUncertaintyStyle ePDFUnc) {
+   XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
+   std::vector<std::vector<double> > xsUncVec;
+   xsUncVec.resize(3);
+   xsUncVec[0] = xsUnc.xs; 
+   xsUncVec[1] = xsUnc.dxsu; 
+   xsUncVec[2] = xsUnc.dxsl; 
+   return xsUncVec;
+}

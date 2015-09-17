@@ -8,7 +8,7 @@ longdesc = """This is a simple SWIG wrapper on C++ fastNLO Reader interface."""
 import os
 wrapsrc = '@srcdir@/fastnlo_wrap.cc'
 incdir_src = os.path.abspath('@top_srcdir@/include')
-incdir_build = os.path.abspath('@top_builddir@/include')
+incdir_build = os.path.abspath('@top_builddir@/fastnlotoolkit/include')
 libdir = os.path.abspath('@top_builddir@/fastnlotoolkit')
 
 incdir_lhapdf = '@LHAPDFINCLUDEPATH@'
