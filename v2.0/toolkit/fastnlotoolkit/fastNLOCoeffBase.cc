@@ -94,7 +94,7 @@ void fastNLOCoeffBase::EndReadCoeff(istream& table){
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::Write(ostream& table) {
    say::debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
-   table << tablemagicno << endl;
+   table << fastNLO::tablemagicno << endl;
    table << IXsectUnits << endl;
    table << IDataFlag << endl;
    table << IAddMultFlag << endl;

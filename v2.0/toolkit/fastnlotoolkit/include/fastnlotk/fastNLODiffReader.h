@@ -21,13 +21,12 @@
 #include <vector>
 #include "fastnlotk/fastNLOReader.h"
 
-using namespace std;
 
 class fastNLODiffReader : public fastNLOReader {
 
 public:
 
-   fastNLODiffReader(string filename);
+   fastNLODiffReader(std::string filename);
    virtual ~fastNLODiffReader(void) {};
 
    void SetXPomSlicing(int nStep, double* xpom, double* dxpom);
@@ -45,11 +44,11 @@ public:
       return fzmax;
    };
 
-   vector < double > GetCrossSection();
+   std::vector < double > GetCrossSection();
    void CalcCrossSection();
-   vector < double > GetDiffCrossSection();
+   std::vector < double > GetDiffCrossSection();
    void FillPDFCache(bool ReCalcCrossSection = false);
-   vector < double > GetReferenceCrossSection();
+   std::vector < double > GetReferenceCrossSection();
 
    // ---- Print outs must be overwritten ---- //
    void PrintCrossSectionsWithReference();
@@ -61,14 +60,14 @@ protected:
    double fzmin;
    double fzmax;
 
-   vector < double > fxPoms;
-   vector < double > fdxPoms;
+   std::vector < double > fxPoms;
+   std::vector < double > fdxPoms;
 
    // inherited functions
    virtual double EvolveAlphas(double Q) const = 0;
    virtual bool InitPDF() = 0;
-   vector<double> GetXFX(double xp, double muf) const;
-   virtual vector<double> GetDiffXFX(double xpom, double zpom, double muf) const = 0;
+   std::vector<double> GetXFX(double xp, double muf) const;
+   virtual std::vector<double> GetDiffXFX(double xpom, double zpom, double muf) const = 0;
 
 };
 

@@ -28,7 +28,7 @@
 #include "fastnlotk/fastNLODiffUser.h"
 
 
-fastNLODiffUser::fastNLODiffUser(string filename) : fastNLODiffReader(filename) {
+fastNLODiffUser::fastNLODiffUser(std::string filename) : fastNLODiffReader(filename) {
 }
 
 
@@ -59,14 +59,14 @@ bool fastNLODiffUser::InitPDF() {
 
 
 
-vector<double> fastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf) const {
+std::vector<double> fastNLODiffUser::GetDiffXFX(double xpom, double zpom, double muf) const {
    //
    //  GetDiffXFX is used to get the parton array from the
    //  pdf-interface. It should return a vector of 13
    //  parton flavors from tbar to t at a certain
    //  xpom, zpom and factorisation scale.
    //
-   vector < double > xfx(13);
+   std::vector < double > xfx(13);
    // fastNLO user:
    //   include some function here to fill the parton density array
    //   xfx[0]=tbar, xfx[6]=gluon, xfx[12]=t

@@ -21,7 +21,6 @@
 #include <vector>
 #include "fastnlotk/fastNLODiffReader.h"
 
-using namespace std;
 
 class fastNLODiffH12006FitB : public fastNLODiffReader {
 

@@ -4,7 +4,6 @@
 #include "fastNLOCoeffBase.h"
 #include "fastNLOConstants.h"
 
-using namespace std;
 
 class fastNLOCoeffData : public fastNLOCoeffBase {
 
@@ -15,28 +14,28 @@ public:
    fastNLOCoeffData(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffData(){;};
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
-   virtual void Read(istream& table);
-   virtual void Write(ostream& table);
+   virtual void Read(std::istream& table);
+   virtual void Write(std::ostream& table);
    virtual void Print() const;
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
 
 protected:
    fastNLOCoeffData();
-   void ReadCoeffData(istream& table);
-   void ReadRest(istream& table);
+   void ReadCoeffData(std::istream& table);
+   void ReadRest(std::istream& table);
 
    int Nuncorrel;
-   vector<string > UncDescr;
+   std::vector<std::string > UncDescr;
    int Ncorrel;
-   vector<string > CorDescr;
-   vector<double > Xcenter;
-   vector<double > Value;
-   v2d UncorLo;
-   v2d UncorHi;
-   v2d CorrLo;
-   v2d CorrHi;
+   std::vector<std::string > CorDescr;
+   std::vector<double > Xcenter;
+   std::vector<double > Value;
+   fastNLO::v2d UncorLo;
+   fastNLO::v2d UncorHi;
+   fastNLO::v2d CorrLo;
+   fastNLO::v2d CorrHi;
    int NErrMatrix;
-   v2d matrixelement;
+   fastNLO::v2d matrixelement;
 
 };
 

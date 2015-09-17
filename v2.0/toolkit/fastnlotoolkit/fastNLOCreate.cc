@@ -954,7 +954,7 @@ void fastNLOCreate::GetWarmupValues() {
    std::cout.setstate(std::ios::failbit) ; // no cout in the following
    std::cerr.setstate(std::ios::failbit) ; // no cout in the following
    logger.info >>"\n";
-   logger.info >> (_SSEP40+_SSEP40+_SSEP40) << endl;
+   logger.info >> (fastNLO::_SSEP40+fastNLO::_SSEP40+fastNLO::_SSEP40) << endl;
    logger.info["GetWarmupValues"]<<"Trying to get warmup values. Please ignore following messages from parser."<<endl;
    // try to get warmup values
    vector<vector<double> > warmup = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
@@ -971,7 +971,7 @@ void fastNLOCreate::GetWarmupValues() {
    }
 
    // inform user about success
-   logger.info >> (_SSEP40+_SSEP40+_SSEP40) << endl;
+   logger.info >> (fastNLO::_SSEP40+fastNLO::_SSEP40+fastNLO::_SSEP40) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
    logger.warn["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
@@ -1423,12 +1423,12 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       }
 
 
-      v4d& st = c->SigmaTilde[ObsBin];
+      fastNLO::v4d& st = c->SigmaTilde[ObsBin];
       for (unsigned int is = 0 ; is<events.size() ; is++) {
          double mu = fScenario._m1 * fScaleFac[is];
          const vector<pair<int,double> >& nmu  = fKernMuS[ObsBin][is]->GetNodeValues(mu);
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
-            v2d& stm1 = st[is][nmu[m1].first];
+            fastNLO::v2d& stm1 = st[is][nmu[m1].first];
             for (unsigned int p = 0 ; p<events[is].size() ; p++) {
                double wgt = events[is][p]._w * nmu[m1].second / BinSize[ObsBin];
                // .......................................................................................

@@ -23,16 +23,15 @@
 #include "fastNLOConstants.h"
 #include <LHAPDF/LHAPDF.h>
 #include <cmath>
-using namespace std;
 
 
 class fastNLOLHAPDF : public fastNLOReader {
 
 private:
 public:
-   fastNLOLHAPDF(string name);
+   fastNLOLHAPDF(std::string name);
    ~fastNLOLHAPDF();
-   fastNLOLHAPDF(string name, string LHAPDFfile, int PDFSet = 0);
+   fastNLOLHAPDF(std::string name, std::string LHAPDFfile, int PDFSet = 0);
 
    // Initializer. Necessary for some alternative evolutions.
    virtual void InitEvolveAlphas();
@@ -43,7 +42,7 @@ public:
    virtual void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
    virtual void SetQMass(int pdgid, double mq);
    // Setters
-   void SetLHAPDFFilename(string filename);
+   void SetLHAPDFFilename(std::string filename);
    void SetLHAPDFMember(int set);
    // Getters
    int GetIPDFMember() const;
@@ -60,23 +59,23 @@ public:
    // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
    //   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   vector<LHAPDF::PDFUncertainty>  GetPDFUncertaintyLHAPDF(double cl=100*erf(1/sqrt(2)), bool alternative=false); //!< return PDF uncertainty, formulae taken from LHAPDF6
-   vector<double> CalcPDFUncertaintyMinus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-minus uncertainty. Uncertainties are POSITIVE!
-   vector<double> CalcPDFUncertaintyPlus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-up uncertainty
-   vector<double> CalcPDFUncertaintyRelMinus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for relative PDF-minus uncertainty. Uncertainties are NEGATIVE!
-   vector<double> CalcPDFUncertaintyRelPlus(const vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for relative PDF-up uncertainty
-   vector<double> CalcPDFUncertaintySymm(const vector<LHAPDF::PDFUncertainty>& ) const; //!< get vector<double> for symmetrized PDF uncertainty
-   vector<double> CalcPDFUncertaintyCentral(const vector<LHAPDF::PDFUncertainty>& ) const; //!< get vector<double> for 'new' central value
+   std::vector<LHAPDF::PDFUncertainty>  GetPDFUncertaintyLHAPDF(double cl=100*erf(1/sqrt(2)), bool alternative=false); //!< return PDF uncertainty, formulae taken from LHAPDF6
+   std::vector<double> CalcPDFUncertaintyMinus(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-minus uncertainty. Uncertainties are POSITIVE!
+   std::vector<double> CalcPDFUncertaintyPlus(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for PDF-up uncertainty
+   std::vector<double> CalcPDFUncertaintyRelMinus(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for relative PDF-minus uncertainty. Uncertainties are NEGATIVE!
+   std::vector<double> CalcPDFUncertaintyRelPlus(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!<get vector<double> for relative PDF-up uncertainty
+   std::vector<double> CalcPDFUncertaintySymm(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!< get vector<double> for symmetrized PDF uncertainty
+   std::vector<double> CalcPDFUncertaintyCentral(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!< get vector<double> for 'new' central value
 #endif
 
 protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
    virtual bool InitPDF();
-   vector<double> GetXFX(double xp, double muf) const ;
+   std::vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
-   string fLHAPDFFilename;
+   std::string fLHAPDFFilename;
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    LHAPDF::PDFSet* PDFSet;
    LHAPDF::PDF* PDF;

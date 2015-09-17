@@ -30,6 +30,7 @@
 #define FASTNLOALPHAS
 
 //#include "fastNLOReader.h"
+#include <string>
 //#include <iostream>
 //#include <cstdio>
 //#include <cstdlib>
@@ -38,13 +39,12 @@
 #include "fastNLOLHAPDF.h"
 //#include "Alphas.h"
 
-using namespace std;
 
 class fastNLOAlphas : public fastNLOLHAPDF {
 
 public:
-   fastNLOAlphas(string name);
-   fastNLOAlphas(string name, string LHAPDFFile, int PDFSet);
+   fastNLOAlphas(std::string name);
+   fastNLOAlphas(std::string name, std::string LHAPDFFile, int PDFSet);
 
    // ---- Alphas vars ---- //
    // Setters

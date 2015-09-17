@@ -35,7 +35,7 @@ class fastNLODiffUser : public fastNLODiffReader {
 
 public:
 
-   fastNLODiffUser(string filename);
+   fastNLODiffUser(std::string filename);
    ~fastNLODiffUser(void) {;};
 
 protected:
@@ -43,7 +43,7 @@ protected:
    // inherited functions
    double EvolveAlphas(double Q) const ;
    bool InitPDF();
-   vector<double> GetDiffXFX(double xpom, double zpom, double muf) const ;
+   std::vector<double> GetDiffXFX(double xpom, double zpom, double muf) const ;
 
 };
 

@@ -5,7 +5,6 @@
 #include "fastNLOCoeffBase.h"
 #include "fastNLOConstants.h"
 
-using namespace std;
 
 class fastNLOCoeffAddBase : public fastNLOCoeffBase {
 
@@ -18,8 +17,8 @@ public:
    virtual ~fastNLOCoeffAddBase() {;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   void Read(istream& table);
-   virtual void Write(ostream& table);
+   void Read(std::istream& table);
+   virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
@@ -29,7 +28,7 @@ public:
    double GetNevt() const { return Nevt; }
    double GetNevt(int NObsBin, int NSubproc) const {
       if (Nevt > 0) return Nevt;
-      else {cout<<"Todo. Preparation for v2.3."<<endl; return Nevt;}
+      else {std::cout<<"Todo. Preparation for v2.3."<< std::endl; return Nevt;}
    }
    void SetNevt(double nevt) { Nevt = nevt;}                                    //!< Set number of events
    int GetNxmax(int Obsbin) const ;
@@ -45,9 +44,9 @@ public:
    int GetNpow() const {return Npow;}
    int GetNScales() const {return NScales;}
    int GetNScaleDim() const {return NScaleDim;}
-   //vector<string > GetScaleDescript(int iScale=0) const { return ScaleDescript[iScale]; };
-   string GetScaleDescription(int iScale=0) const { return ScaleDescript[0][iScale]; };         // getter for scale description of scale iScale
-   vector<vector<string > > GetScaleDescr() const { return ScaleDescript; }
+   //std::vector<std::string > GetScaleDescript(int iScale=0) const { return ScaleDescript[iScale]; };
+   std::string GetScaleDescription(int iScale=0) const { return ScaleDescript[0][iScale]; };         // getter for scale description of scale iScale
+   std::vector<std::vector<std::string > > GetScaleDescr() const { return ScaleDescript; }
    int GetNxtot1(int iBin) const { return XNode1[iBin].size(); }
    int GetNxtot2(int iBin) const { return XNode2.size() > 0 ? XNode2[iBin].size() : -1; }
 
@@ -57,38 +56,38 @@ public:
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;
 
-   const vector<vector<pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
+   const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
 protected:
    fastNLOCoeffAddBase();
-   void ReadCoeffAddBase(istream& table);
+   void ReadCoeffAddBase(std::istream& table);
    int GetScaledimfromvar(int scalevar) const;
 
    int IRef;
    int IScaleDep;
    double Nevt;
    int Npow;
-   vector < int > NPDFPDG;
+   std::vector < int > NPDFPDG;
    int NPDFDim;
-   vector < int > NFFPDG;
+   std::vector < int > NFFPDG;
    int NFFDim;
    int NSubproc;
    int IPDFdef1;
    int IPDFdef2;
    int IPDFdef3;
-   vector<vector<pair<int,int> > > fPDFCoeff;                                                   //! fPDFCoeff[iSubProc][iPartonPair][pair]
+   std::vector<std::vector<std::pair<int,int> > > fPDFCoeff;                                                   //! fPDFCoeff[iSubProc][iPartonPair][pair]
    // Missing: linear PDF combinations for IPDFdef1=0
-   vector < double > Hxlim1;
-   v2d XNode1;
-   vector < double > Hxlim2;
-   v2d XNode2;
-   vector < int > Nztot;
-   vector < double > Hzlim;
-   v2d ZNode;
+   std::vector < double > Hxlim1;
+   fastNLO::v2d XNode1;
+   std::vector < double > Hxlim2;
+   fastNLO::v2d XNode2;
+   std::vector < int > Nztot;
+   std::vector < double > Hzlim;
+   fastNLO::v2d ZNode;
    int NScales;
    int NScaleDim;
-   vector < int > Iscale;                                                                       // not used
-   vector < vector < string > > ScaleDescript;
+   std::vector < int > Iscale;                                                                       // not used
+   std::vector < std::vector < std::string > > ScaleDescript;
 
 };
 

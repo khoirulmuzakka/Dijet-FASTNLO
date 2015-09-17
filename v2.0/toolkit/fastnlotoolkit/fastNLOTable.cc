@@ -231,7 +231,7 @@ void fastNLOTable::ReadScenario(istream& table){
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteScenario(ostream& table){
-   table << tablemagicno << endl;
+   table << fastNLO::tablemagicno << endl;
    table << Ipublunits << endl;
    int NScDescript =  ScDescript.size();
    table << NScDescript << endl;
@@ -545,7 +545,7 @@ fastNLOCoeffData* fastNLOTable::GetDataTable() const {
 
 
 // ___________________________________________________________________________________________________
-fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(ESMOrder eOrder) const {
+fastNLOCoeffAddBase* fastNLOTable::GetReferenceTable(fastNLO::ESMOrder eOrder) const {
    for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
       fastNLOCoeffBase* c = GetCoeffTable(i);
       if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
@@ -1171,10 +1171,10 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    //
    char buffer[1024];
    cout  << endl;
-   cout  << _CSEPSC << endl;
+   cout  << fastNLO::_CSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Information on fastNLO scenario: %s",ScenName.data());
    logger.shout << buffer << endl;
-   cout  << _SSEPSC << endl;
+   cout  << fastNLO::_SSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Description:");
    logger.shout << buffer << endl;
    for (unsigned int i=0; i<ScDescript.size(); i++) {
@@ -1267,7 +1267,7 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
       Print();
    }
    logger.shout << "" << endl;
-   cout  << _CSEPSC << endl;
+   cout  << fastNLO::_CSEPSC << endl;
 }
 
 
@@ -1281,9 +1281,9 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
 
    char buffer[1024];
    cout  << endl;
-   cout  << _CSEPSC << endl;
+   cout  << fastNLO::_CSEPSC << endl;
    logger.shout << "Overview on contribution types and numbers contained in table:" << endl;
-   cout  << _SSEPSC << endl;
+   cout  << fastNLO::_SSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Number of contributions: %2i", Ncontrib);
    logger.shout << buffer << endl;
 
@@ -1311,7 +1311,7 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
          }
       }
    }
-   cout << _CSEPSC << endl;
+   cout << fastNLO::_CSEPSC << endl;
 
 }
 

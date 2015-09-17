@@ -37,7 +37,6 @@
 #include "fastNLOHoppet.h"
 //#include "hoppet_v1.h"
 
-using namespace std;
 
 class fastNLOHoppetAs : public fastNLOHoppet {
 

@@ -390,7 +390,7 @@ vector<double>  fastNLOLHAPDF::CalcPDFUncertaintySymm(const vector<LHAPDF::PDFUn
 #endif
 
 //______________________________________________________________________________
-fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc) {
+fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
    fastNLOReader::XsUncertainty XsUnc;
    unsigned int NObsBin = GetNObsBin();
    unsigned int nMem = GetNPDFMaxMember();
@@ -400,24 +400,24 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
 
    // Check input
    logger.debug["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
-   if ( ePDFUnc == kPDFNone ) {
+   if ( ePDFUnc == fastNLO::kPDFNone ) {
       logger.info["GetPDFUncertainty"]<<"No PDF uncertainty, only averaged cross section result evaluated (correct for NNPDF, wrong otherwise!)."<<endl;
-   } else if ( ePDFUnc == kHessianSymmetric ) {
+   } else if ( ePDFUnc == fastNLO::kHessianSymmetric ) {
       logger.info["GetPDFUncertainty"]<<"Calculating symmetric Hessian PDF uncertainties."<<endl;
-   } else if ( ePDFUnc == kHessianAsymmetric ) {
+   } else if ( ePDFUnc == fastNLO::kHessianAsymmetric ) {
       logger.info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties."<<endl;
-   } else if ( ePDFUnc == kHessianAsymmetricMax ) {
+   } else if ( ePDFUnc == fastNLO::kHessianAsymmetricMax ) {
       logger.info["GetPDFUncertainty"]<<"Calculating asymmetric Hessian PDF uncertainties considering maximal pairwise deviations per eigenvector."<<endl;
-   } else if ( ePDFUnc == kHessianCTEQCL68 ) {
+   } else if ( ePDFUnc == fastNLO::kHessianCTEQCL68 ) {
       logger.info["GetPDFUncertainty"]<<"Calculating pairwise asymmetric Hessian PDF uncertainties rescaled to CL68 (for CTEQ PDFs)."<<endl;
-   } else if ( ePDFUnc == kMCSampling ) {
+   } else if ( ePDFUnc == fastNLO::kMCSampling ) {
       logger.info["GetPDFUncertainty"]<<"Calculating statistical sampling PDF uncertainties."<<endl;
-   } else if ( ePDFUnc == kHeraPDF10 ) {
+   } else if ( ePDFUnc == fastNLO::kHeraPDF10 ) {
       logger.error["GetPDFUncertainty"]<<"ERROR! HERAPDF1.0 uncertainty style not yet implemented, exiting."<<endl;
       logger.error["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
       exit(1);
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   } else if ( ePDFUnc == kLHAPDF6 ) {
+   } else if ( ePDFUnc == fastNLO::kLHAPDF6 ) {
       logger.info["GetPDFUncertainty"]<<"Calculating LHAPDF6 PDF uncertainties."<<endl;
 #endif
    } else {
@@ -432,13 +432,13 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
       logger.error["GetPDFUncertainty"]<<"ERROR! This PDF set has only one or two members: nMem = " << nMem << endl;
       logger.error["GetPDFUncertainty"]<<"PDF uncertainty calculation impossible, aborted!" << endl;
       exit(1);
-   } else if ( nMem%2 == 1 && (ePDFUnc == kHessianAsymmetric || ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68) ) {
+   } else if ( nMem%2 == 1 && (ePDFUnc == fastNLO::kHessianAsymmetric || ePDFUnc == fastNLO::kHessianAsymmetricMax || ePDFUnc == fastNLO::kHessianCTEQCL68) ) {
       logger.error["GetPDFUncertainty"]<<"ERROR! Odd number of PDF members found: nMem = " << nMem << endl;
       logger.error["GetPDFUncertainty"]<<"This cannot work with selected asymmetric Hessian uncertainties, aborted!" << endl;
       exit(1);
    }
 
-   if ( ePDFUnc != kLHAPDF6 ) {
+   if ( ePDFUnc != fastNLO::kLHAPDF6 ) {
 
       // Evaluate central/zeroth PDF set member
       SetLHAPDFMember(0);
@@ -473,7 +473,7 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
             double diff     = XSection[iobs]-xs0[iobs];
             XsUnc.xs[iobs] += diff;
             // Take only maximal one in case of one-sided deviations for one eigenvector
-            if ( ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68 ) {
+            if ( ePDFUnc == fastNLO::kHessianAsymmetricMax || ePDFUnc == fastNLO::kHessianCTEQCL68 ) {
                dxseigu[iobs] = pow(max(dxseigu[iobs],diff),2);
                dxseigl[iobs] = pow(min(dxseigl[iobs],diff),2);
             }
@@ -503,30 +503,30 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
       // Derive chosen relative uncertainties
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
          // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!).
-         if ( ePDFUnc == kPDFNone ) {
+         if ( ePDFUnc == fastNLO::kPDFNone ) {
             // Undo shift of mean
             XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];
             XsUnc.dxsu[iobs] = 0.;
             XsUnc.dxsl[iobs] = 0.;
          }
          // Uncertainty is +- sqrt (sum of all summed squared deviations)
-         else if ( ePDFUnc == kHessianSymmetric ) {
+         else if ( ePDFUnc == fastNLO::kHessianSymmetric ) {
             XsUnc.xs[iobs]   = xs0[iobs];
             XsUnc.dxsu[iobs] = +sqrt(XsUnc.dxsu[iobs] + XsUnc.dxsl[iobs]);
             XsUnc.dxsl[iobs] = -XsUnc.dxsu[iobs];
          }
          // Uncertainty is sqrt (separately summed upper and lower squared deviations)
-         else if ( ePDFUnc == kHessianAsymmetric || ePDFUnc == kHessianAsymmetricMax || ePDFUnc == kHessianCTEQCL68 ) {
+         else if ( ePDFUnc == fastNLO::kHessianAsymmetric || ePDFUnc == fastNLO::kHessianAsymmetricMax || ePDFUnc == fastNLO::kHessianCTEQCL68 ) {
             XsUnc.xs[iobs]   = xs0[iobs];
             XsUnc.dxsu[iobs] = +sqrt(XsUnc.dxsu[iobs]);
             XsUnc.dxsl[iobs] = -sqrt(XsUnc.dxsl[iobs]);
-            if ( ePDFUnc == kHessianCTEQCL68 ) {
+            if ( ePDFUnc == fastNLO::kHessianCTEQCL68 ) {
                XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs]/TOCL90;
                XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs]/TOCL90;
             }
          }
          // Central value xs0 is replaced by sampling average; uncertainty is sqrt of sampling variance
-         else if ( ePDFUnc == kMCSampling ) {
+         else if ( ePDFUnc == fastNLO::kMCSampling ) {
             double sumw  = XsUnc.xs[iobs];
             double sumw2 = XsUnc.dxsl[iobs]+XsUnc.dxsu[iobs];
             // Undo shift of mean
@@ -568,7 +568,7 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const EPDFUncertai
 }
 
 
-std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const EPDFUncertaintyStyle ePDFUnc) {
+std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
    fastNLOReader::XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);

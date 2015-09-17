@@ -4,7 +4,6 @@
 #include "fastNLOCoeffAddBase.h"
 #include "fastNLOConstants.h"
 
-using namespace std;
 
 class fastNLOCoeffAddFix : public fastNLOCoeffAddBase {
 
@@ -17,9 +16,9 @@ public:
    virtual ~fastNLOCoeffAddFix(){;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   virtual void Read(istream&table);
-   void ReadRest(istream& table);
-   virtual void Write(ostream& table);
+   virtual void Read(std::istream&table);
+   void ReadRest(std::istream& table);
+   virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print() const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
@@ -30,10 +29,10 @@ public:
    int GetTotalScalenodes() const ;
    int GetNScaleNode() const { return GetTotalScalenodes(); }
    int GetNScalevar() const { return Nscalevar[0];}
-   v1d GetAvailableScaleFactors() const { return ScaleFac[0]; }
+   fastNLO::v1d GetAvailableScaleFactors() const { return ScaleFac[0]; }
    double GetScaleFactor(int iVar) const {
       if ( iVar >= (int)ScaleFac[0].size() )
-         this->error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<<endl;
+         this->error["GetScaleFactor"]<<"Scalevariation no. "<<iVar<<" not available. There are only "<<GetNScalevar()<<" available in this table."<< std::endl;
       return ScaleFac[0][iVar];
    }
 
@@ -47,19 +46,19 @@ public:
 
 protected:
    fastNLOCoeffAddFix();
-   void ReadCoeffAddFix(istream& table);
+   void ReadCoeffAddFix(std::istream& table);
 
-   vector < int > Nscalevar;
-   //vector < int > Nscalenode;
-   v2d ScaleFac;
-   v4d ScaleNode;
-   v5d SigmaTilde; // units are (p)barn * Nevt / BinSize
+   std::vector < int > Nscalevar;
+   //std::vector < int > Nscalenode;
+   fastNLO::v2d ScaleFac;
+   fastNLO::v4d ScaleNode;
+   fastNLO::v5d SigmaTilde; // units are (p)barn * Nevt / BinSize
 
 public:
-   v2d AlphasTwoPi_v20;
-   v4d PdfLc;
-   v4d PdfSplLc1;
-   v4d PdfSplLc2;
+   fastNLO::v2d AlphasTwoPi_v20;
+   fastNLO::v4d PdfLc;
+   fastNLO::v4d PdfSplLc1;
+   fastNLO::v4d PdfSplLc2;
 };
 
 #endif

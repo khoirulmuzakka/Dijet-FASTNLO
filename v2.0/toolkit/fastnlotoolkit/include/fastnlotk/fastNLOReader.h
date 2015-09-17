@@ -4,7 +4,6 @@
 #include "fastNLOTable.h"
 #include "fastNLOPDFLinearCombinations.h"
 
- using namespace std;
 
 class fastNLOReader : public fastNLOTable , public fastNLOPDFLinearCombinations {
    //
@@ -14,10 +13,10 @@ class fastNLOReader : public fastNLOTable , public fastNLOPDFLinearCombinations 
 public:
    typedef double(*mu_func)(double,double);
 
-   fastNLOReader(string filename);
+   fastNLOReader(std::string filename);
    fastNLOReader(const fastNLOReader&);
    virtual ~fastNLOReader();
-   void SetFilename(string filename) ;
+   void SetFilename(std::string filename) ;
    void InitScalevariation();
    void SetUnits(fastNLO::EUnits Unit);
    bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  //!< Set contribution On/Off. Look for Id of this contribution during initialization.
@@ -39,7 +38,7 @@ public:
    void UseHoppetScaleVariations(bool);
    // ---- Pdf interface ---- //
    void FillPDFCache(double chksum=0.);                                                 //!< Prepare for recalculation of cross section with 'new'/updated pdf.
-   virtual vector<double> GetXFX(double x, double muf) const = 0;
+   virtual std::vector<double> GetXFX(double x, double muf) const = 0;
 
    // ---- alphas cache ---- //
    void FillAlphasCache();                                                              //!< prepare for recalculation of cross section with new alpha_s value.
@@ -50,22 +49,22 @@ public:
 
    // ---- Getters for results---- //
    struct XsUncertainty {                                                               //! Struct for returning vectors with cross section and relative uncertainty
-      vector < double > xs;
-      vector < double > dxsl;
-      vector < double > dxsu;
+      std::vector < double > xs;
+      std::vector < double > dxsl;
+      std::vector < double > dxsu;
    };
 
-   vector < double > GetCrossSection();                                                 //! Return vector with all cross section values
+   std::vector < double > GetCrossSection();                                                 //! Return vector with all cross section values
 
    //! Return struct with vectors containing the cross section values and the selected scale uncertainty
-   XsUncertainty GetScaleUncertainty( const EScaleUncertaintyStyle eScaleUnc );
+   XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
    // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of scale uncertainties second
    //   vector < pair < double, pair <double, double> > > GetScaleUncertainty( const EScaleUncertaintyStyle eScaleUnc );
 
-   vector < double > GetReferenceCrossSection();
-   vector < double > GetKFactors();
-   vector < double > GetQScales(int irelord);                                           //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
-   vector < vector < double > > GetCrossSection2Dim();
+   std::vector < double > GetReferenceCrossSection();
+   std::vector < double > GetKFactors();
+   std::vector < double > GetQScales(int irelord);                                           //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
+   std::vector < std::vector < double > > GetCrossSection2Dim();
 
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
@@ -76,17 +75,17 @@ public:
    double GetScaleFactorMuR() const { return fScaleFacMuR; };
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };
-   string GetScaleDescription(const ESMOrder eOrder, int iScale=0) const;
-   double GetNevt(const ESMOrder eOrder) const;
+   std::string GetScaleDescription(const fastNLO::ESMOrder eOrder, int iScale=0) const;
+   double GetNevt(const fastNLO::ESMOrder eOrder) const;
 
    int GetNScaleVariations() const;                                                     //!< Get number of available scale variations
-   vector < double > GetScaleFactors() const;                                           //!< Get list of available scale factors
+   std::vector < double > GetScaleFactors() const;                                           //!< Get list of available scale factors
 
    // ---- Print outs ---- //
    void PrintTableInfo(const int iprint = 0) const;                                     //!<  Print basic info about fastNLO table and its contributions
    void PrintFastNLOTableConstants(const int iprint = 2) const;                         //!<  Print (technical) constants of fastNLO table (use iprint) for level of details.
    void PrintCrossSections() const;                                                     //!<  Print cross sections (optimized for double-differential tables)
-   void PrintCrossSectionsDefault(vector<double> kthc = vector<double>()) const;        //!<  Print cross sections in the same format as in the fortran version.
+   void PrintCrossSectionsDefault(std::vector<double> kthc = std::vector<double>()) const;        //!<  Print cross sections in the same format as in the fortran version.
    void PrintCrossSectionsWithReference();
    //void PrintCrossSectionsData() const;                                                 //!<  Print data table. (if available)
 
@@ -100,9 +99,9 @@ protected:
    fastNLOReader();
    void OrderCoefficients() ;
    //void ReadTable();
-   void StripWhitespace(string* s);
+   void StripWhitespace(std::string* s);
 
-   void PrintScaleSettings(fastNLO::EMuX kMuX=kMuR);
+   void PrintScaleSettings(fastNLO::EMuX kMuX=fastNLO::kMuR);
    void FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B);
    void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* B);
@@ -153,13 +152,13 @@ protected:
    bool SetScaleVariation(int scalevar);                       //!< Choose the MuF scale variation table
 
    // ---- human readable strings ---- //
-   //static const string fContrName[20];
-   //static const string fOrdName[4][4];
-   //static const string fNSDep[6];
+   //static const std::string fContrName[20];
+   //static const std::string fOrdName[4][4];
+   //static const std::string fNSDep[6];
 
 
 protected:
-   string ffilename;
+   std::string ffilename;
    int fScalevar;
    double fScaleFacMuR;
    double fScaleFacMuF;
@@ -171,27 +170,27 @@ protected:
    double fAlphasCached;
    mu_func Fct_MuR;                                                                     //!< Function, if you define your functional form for your scale external
    mu_func Fct_MuF;                                                                     //!< Function, if you define your functional form for your scale external
-   vector < vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
+   std::vector < std::vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
 
    bool fUseHoppet;
 
    // ---- pointers to coefftables in fCoeff ---- //
-   //    vector< vector < fastNLOCoeffAddBase* > > fCoAdd;
-   //    vector< vector < fastNLOCoeffMult* > > fCoMult;
-   vector < vector < fastNLOCoeffBase* > > BBlocksSMCalc;                               //!< BlockB's for SM corrections
+   //    std::vector< std::vector < fastNLOCoeffAddBase* > > fCoAdd;
+   //    std::vector< std::vector < fastNLOCoeffMult* > > fCoMult;
+   std::vector < std::vector < fastNLOCoeffBase* > > BBlocksSMCalc;                               //!< BlockB's for SM corrections
 
    // ---- Cross sections ---- //
-   vector < double > XSection_LO;
-   vector < double > XSection;
-   vector < double > kFactor;
-   vector < double > QScale_LO;
-   vector < double > QScale;
+   std::vector < double > XSection_LO;
+   std::vector < double > XSection;
+   std::vector < double > kFactor;
+   std::vector < double > QScale_LO;
+   std::vector < double > QScale;
 
    // ----  reference tables ---- //
-   vector < double > XSectionRef;
-   vector < double > XSectionRefMixed;
-   vector < double > XSectionRef_s1;
-   vector < double > XSectionRef_s2;
+   std::vector < double > XSectionRef;
+   std::vector < double > XSectionRefMixed;
+   std::vector < double > XSectionRef_s1;
+   std::vector < double > XSectionRef_s2;
 
 };
 #endif

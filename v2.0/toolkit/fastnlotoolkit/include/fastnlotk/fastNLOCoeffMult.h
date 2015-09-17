@@ -4,7 +4,6 @@
 #include "fastNLOCoeffBase.h"
 #include "fastNLOConstants.h"
 
-using namespace std;
 
 class fastNLOCoeffMult : public fastNLOCoeffBase {
 
@@ -18,32 +17,32 @@ public:
    virtual ~fastNLOCoeffMult(){;};
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   virtual void Read(istream& table);
-   virtual void Write(ostream& table);
+   virtual void Read(std::istream& table);
+   virtual void Write(std::ostream& table);
    virtual void Print() const;
 
    double GetMultFactor(int iObs) const { return fact[iObs]; }
-   vector<double > GetMultFactor() const { return fact; }
-   vector<string> GetUncDescription() const { return UncDescr; }
-   vector<string> GetCorDescription() const { return CorDescr; }
-   v2d GetUncorLo() const { return UncorHi; };
-   v2d GetUncorHi() const { return UncorLo; };
-   v2d GetCorrLo()  const { return CorrLo; };
-   v2d GetCorrHi()  const { return CorrHi; };
+   std::vector<double > GetMultFactor() const { return fact; }
+   std::vector<std::string> GetUncDescription() const { return UncDescr; }
+   std::vector<std::string> GetCorDescription() const { return CorDescr; }
+   fastNLO::v2d GetUncorLo() const { return UncorHi; };
+   fastNLO::v2d GetUncorHi() const { return UncorLo; };
+   fastNLO::v2d GetCorrLo()  const { return CorrLo; };
+   fastNLO::v2d GetCorrHi()  const { return CorrHi; };
 
 protected:
-   void ReadCoeffMult(istream& table);
-   void ReadRest(istream& table);
+   void ReadCoeffMult(std::istream& table);
+   void ReadRest(std::istream& table);
 
    int Nuncorrel;
-   vector < string > UncDescr;
+   std::vector < std::string > UncDescr;
    int Ncorrel;
-   vector < string > CorDescr;
-   v2d UncorLo;
-   v2d UncorHi;
-   v2d CorrLo;
-   v2d CorrHi;
-   v1d fact;
+   std::vector < std::string > CorDescr;
+   fastNLO::v2d UncorLo;
+   fastNLO::v2d UncorHi;
+   fastNLO::v2d CorrLo;
+   fastNLO::v2d CorrHi;
+   fastNLO::v1d fact;
 
 };
 

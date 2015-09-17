@@ -11,8 +11,6 @@
 #include "fastNLOConstants.h"
 #include "speaker.h"
 
-using namespace std;
-using namespace fastNLO;
 
 class fastNLOCoeffBase : public PrimalScream {
 
@@ -24,8 +22,8 @@ public:
    //fastNLOCoeffBase(const fastNLOCoeffBase& coeff);                           //! Use compiler-default
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
 
-   virtual void Read(istream& table);
-   virtual void Write(ostream& table);
+   virtual void Read(std::istream& table);
+   virtual void Write(std::ostream& table);
    //void Add(fastNLOCoeffBase* other);
    virtual void Print() const;
 
@@ -53,9 +51,9 @@ public:
 
    bool GetIsFlexibleScale() const { return (NScaleDep>=3) && (IAddMultFlag==0); }
 
-   vector<string > GetContributionDescription() const { return CtrbDescript; }
-   void SetContributionDescription(vector<string > descr ) { CtrbDescript = descr; };           //! Set contribution description
-   vector<string > GetCodeDescription() const { return CodeDescript; }
+   std::vector<std::string > GetContributionDescription() const { return CtrbDescript; }
+   void SetContributionDescription(std::vector<std::string > descr ) { CtrbDescript = descr; };           //! Set contribution description
+   std::vector<std::string > GetCodeDescription() const { return CodeDescript; }
 
 
    bool IsLO() const {return IContrFlag1==1 && IContrFlag2==1;}
@@ -68,8 +66,8 @@ public:
 
 protected:
    fastNLOCoeffBase();
-   void ReadBase(istream& table);
-   void EndReadCoeff(istream& table);
+   void ReadBase(std::istream& table);
+   void EndReadCoeff(std::istream& table);
 
    int fNObsBins; // obtained from Scenario
 
@@ -79,8 +77,8 @@ protected:
    int IContrFlag1;
    int IContrFlag2;
    int NScaleDep;
-   vector < string > CtrbDescript;
-   vector < string > CodeDescript;
+   std::vector < std::string > CtrbDescript;
+   std::vector < std::string > CodeDescript;
 
 };
 

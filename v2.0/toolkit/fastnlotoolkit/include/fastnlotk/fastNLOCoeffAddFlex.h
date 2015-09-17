@@ -4,8 +4,6 @@
 #include "fastNLOCoeffAddBase.h"
 #include "fastNLOConstants.h"
 
-using namespace std;
-using namespace fastNLO;
 
 class fastNLOCoeffAddFlex : public fastNLOCoeffAddBase {
 
@@ -19,9 +17,9 @@ public:
    virtual ~fastNLOCoeffAddFlex(){;}
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
-   virtual void Read(istream& table);
-   void ReadRest(istream& table);
-   virtual void Write(ostream& table);
+   virtual void Read(std::istream& table);
+   void ReadRest(std::istream& table);
+   virtual void Write(std::ostream& table);
    virtual void Print() const;
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
@@ -37,30 +35,30 @@ public:
 protected:
 
    fastNLOCoeffAddFlex();
-   void ReadCoeffAddFlex(istream& table);
+   void ReadCoeffAddFlex(std::istream& table);
 
    int fILOord;   // obtained from Scenario
 
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
-   v5d SigmaTildeMuIndep; // units are (p)barn * Nevt / BinSize
-   v5d SigmaTildeMuFDep;
-   v5d SigmaTildeMuRDep;
-   v5d SigmaTildeMuRRDep;
-   v5d SigmaTildeMuFFDep;
-   v5d SigmaTildeMuRFDep;
+   fastNLO::v5d SigmaTildeMuIndep; // units are (p)barn * Nevt / BinSize
+   fastNLO::v5d SigmaTildeMuFDep;
+   fastNLO::v5d SigmaTildeMuRDep;
+   fastNLO::v5d SigmaTildeMuRRDep;
+   fastNLO::v5d SigmaTildeMuFFDep;
+   fastNLO::v5d SigmaTildeMuRFDep;
    // SigmaRef [NObsBins] [nsubproc]
-   v2d SigmaRefMixed;  // units are (p)barn * Nevt / BinSize
-   v2d SigmaRef_s1;
-   v2d SigmaRef_s2;
+   fastNLO::v2d SigmaRefMixed;  // units are (p)barn * Nevt / BinSize
+   fastNLO::v2d SigmaRef_s1;
+   fastNLO::v2d SigmaRef_s2;
    //int NscalenodeScale1;
    //int NscalenodeScale2;
    // ScaleNodeXY [ObsBin] [NscalenodeScaleX]
-   v2d ScaleNode1;
-   v2d ScaleNode2;
+   fastNLO::v2d ScaleNode1;
+   fastNLO::v2d ScaleNode2;
 
 public:
-   v3d AlphasTwoPi;
-   v5d PdfLcMuVar;
+   fastNLO::v3d AlphasTwoPi;
+   fastNLO::v5d PdfLcMuVar;
 
 };
 

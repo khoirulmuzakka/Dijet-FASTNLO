@@ -37,7 +37,6 @@
 #include "fastNLOLHAPDF.h"
 
 
-using namespace std;
 
 extern "C" {
    double asfunc_(double* r2, int* nf  , int* ierr);

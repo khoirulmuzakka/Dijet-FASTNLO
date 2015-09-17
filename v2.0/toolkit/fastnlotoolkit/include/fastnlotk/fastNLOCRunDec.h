@@ -38,13 +38,12 @@
 #include "fastNLOLHAPDF.h"
 #include "CRunDec.h"
 
-using namespace std;
 
 class fastNLOCRunDec : public fastNLOLHAPDF {
 
     public:
-        fastNLOCRunDec(string name);
-        fastNLOCRunDec(string name, string LHAPDFFile, int PDFSet);
+        fastNLOCRunDec(std::string name);
+        fastNLOCRunDec(std::string name, std::string LHAPDFFile, int PDFSet);
         // ---- Alphas vars ---- //
         // Setters
         void SetMz(double Mz);

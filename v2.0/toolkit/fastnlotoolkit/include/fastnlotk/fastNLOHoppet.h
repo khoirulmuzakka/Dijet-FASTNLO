@@ -37,7 +37,6 @@
 #include "fastNLOLHAPDF.h"
 //#include "hoppet_v1.h"
 
-using namespace std;
 
 
 class fastNLOHoppet : public fastNLOLHAPDF {

@@ -17,7 +17,6 @@
 #include <utility>
 #include "fastNLOInterpolBase.h"
 
-using namespace std;
 
 class fastNLOInterpolLagrange : public fastNLOInterpolBase {
    
@@ -27,7 +26,7 @@ public:
    ~fastNLOInterpolLagrange(void);
    
    //   vector<pair<int,double> > CalcNodeValues(double val);
-   void CalcNodeValues(vector<pair<int,double> >& nodes, double val);
+   void CalcNodeValues(std::vector<std::pair<int,double> >& nodes, double val);
 
 protected:
 

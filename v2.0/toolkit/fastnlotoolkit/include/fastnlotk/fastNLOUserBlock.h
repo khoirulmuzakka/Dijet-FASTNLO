@@ -7,7 +7,6 @@
 #include <string>
 #include "speaker.h"
 
-using namespace std;
 
 class fastNLOUserBlock : public PrimalScream {
 

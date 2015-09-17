@@ -2,18 +2,17 @@
 #define __fastNLOBase__
 
 #include <fstream>
-#include <iostream>
+#include <ostream>
 #include <istream>
 #include <string>
 #include "speaker.h"
 
-using namespace std;
 
 class fastNLOBase {
 
 public:
    fastNLOBase();
-   fastNLOBase(string name);
+   fastNLOBase(std::string name);
    fastNLOBase(const fastNLOBase&);
    virtual ~fastNLOBase();
 
@@ -29,14 +28,14 @@ public:
    bool IsCompatibleHeader(const fastNLOBase& other) const;             //!< Compare header with header of another table
 
    // getter/setters
-   string GetFilename() const {return ffilename;}
-   void   SetFilename(string name){ffilename=name;}
+   std::string GetFilename() const {return ffilename;}
+   void   SetFilename(std::string name){ffilename=name;}
 
    int  GetItabversion() const {return Itabversion;}
    void SetItabversion(int version){Itabversion = version;}
 
-   string GetScenName() const {return ScenName;}
-   void   SetScenName(string name){ScenName = name;}
+   std::string GetScenName() const {return ScenName;}
+   void   SetScenName(std::string name){ScenName = name;}
 
    int  GetNmult() const {return Nmult;}
    void SetNmult(int n){Nmult = n;}
@@ -65,22 +64,22 @@ public:
 
 protected:
    void PrintWelcomeMessage();                                          //!< Say hello to fastNLO user
-   ofstream* OpenFileWrite();                                           //!< open ofstream for writing tables to ffilename
-   ifstream* OpenFileRead();                                            //!< open ifstream for reading table
-   //ofstream *OpenFileRewrite();
-   void WriteHeader(ostream& table);                                    //!< write (or cout) hader using ostream
-   void ReadHeader(istream& table);                                     //!< read header of table (BlockA1)
-   void CloseFileWrite(ofstream& table);
-   void CloseFileRead(ifstream& table);
+   std::ofstream* OpenFileWrite();                                           //!< open std::ofstream for writing tables to ffilename
+   std::ifstream* OpenFileRead();                                            //!< open std::ifstream for reading table
+   //std::ofstream *OpenFileRewrite();
+   void WriteHeader(std::ostream& table);                                    //!< write (or cout) hader using std::ostream
+   void ReadHeader(std::istream& table);                                     //!< read header of table (BlockA1)
+   void CloseFileWrite(std::ofstream& table);
+   void CloseFileRead(std::ifstream& table);
    //void CloseStream();
 
-   string ffilename;
-   //ifstream *ifilestream;
-   //ofstream *ofilestream;
+   std::string ffilename;
+   //std::ifstream *ifilestream;
+   //std::ofstream *ofilestream;
    int fPrecision;
    // header
    int Itabversion;
-   string ScenName;
+   std::string ScenName;
    int Ncontrib;
    int Nmult;
    int Ndata;
