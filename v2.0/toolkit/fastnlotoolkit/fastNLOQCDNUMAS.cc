@@ -27,12 +27,7 @@
 
 
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <string.h>
 #include <LHAPDF/LHAPDF.h>
-//#include "fastnlotk/fastNLOReader.h"
-//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOQCDNUMAS.h"
 
@@ -41,11 +36,11 @@ using namespace std;
 //______________________________________________________________________________
 //
 //
-fastNLOQCDNUMAS::fastNLOQCDNUMAS(string name) : fastNLOLHAPDF(name) {
+fastNLOQCDNUMAS::fastNLOQCDNUMAS(std::string name) : fastNLOLHAPDF(name) {
    //Set some meaningful initial values
    SetPDGValues();
 };
-fastNLOQCDNUMAS::fastNLOQCDNUMAS(string name, string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
+fastNLOQCDNUMAS::fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
    //Set some meaningful initial values
    SetPDGValues();
 };

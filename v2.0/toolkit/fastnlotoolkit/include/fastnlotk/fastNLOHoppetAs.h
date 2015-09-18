@@ -41,11 +41,11 @@
 class fastNLOHoppetAs : public fastNLOHoppet {
 
    public:
-      fastNLOHoppetAs(string name);
-      fastNLOHoppetAs(string name, string LHAPDFFile, int PDFSet);
+      fastNLOHoppetAs(std::string name);
+      fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet);
       // ---- Alphas vars ---- //
    protected:
-      virtual vector<double> GetXFX(double xp, double muf) const ;
+      virtual std::vector<double> GetXFX(double xp, double muf) const ;
 
 };
 

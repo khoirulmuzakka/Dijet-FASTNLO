@@ -41,7 +41,7 @@ using namespace std;
 //______________________________________________________________________________
 //
 //
-fastNLOHoppet::fastNLOHoppet(string name) : fastNLOLHAPDF(name) {
+fastNLOHoppet::fastNLOHoppet(std::string name) : fastNLOLHAPDF(name) {
    //Set some meaningful initial values
    SetPDGValues();
    // KR: Note: LHAPDF values cannot be taken here, since the class instantiation may
@@ -49,7 +49,7 @@ fastNLOHoppet::fastNLOHoppet(string name) : fastNLOLHAPDF(name) {
    //   SetLHAPDFValues();
 };
 
-fastNLOHoppet::fastNLOHoppet(string name, string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet) {
+fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet) {
    //Set some meaningful initial values
    SetPDGValues();
    // KR: For consistency with usage above.
@@ -152,7 +152,7 @@ double fastNLOHoppet::EvolveAlphas(double Q ) const {
    return HoppetInterface::EvolveAlphas(Q);
 }
 
-vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {
+std::vector<double> fastNLOHoppet::GetXFX(double xp, double muf) const {
    //
    //  GetXFX is used to get the parton array from the
    //  pre-defined pdf-interface.

@@ -42,8 +42,8 @@
 class fastNLOHoppet : public fastNLOLHAPDF {
 
    public:
-      fastNLOHoppet(string name);
-      fastNLOHoppet(string name, string LHAPDFFile, int PDFSet);
+      fastNLOHoppet(std::string name);
+      fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSet);
       // ---- Alphas vars ---- //
       // Setters
       void SetMz(double Mz);
@@ -68,7 +68,7 @@ class fastNLOHoppet : public fastNLOLHAPDF {
       // inherited functions
       virtual double EvolveAlphas(double Q) const ;
       //bool InitPDF();
-      virtual vector<double> GetXFX(double xp, double muf) const ;
+      virtual std::vector<double> GetXFX(double xp, double muf) const ;
       // ---- Alphas vars ---- //
 };
 

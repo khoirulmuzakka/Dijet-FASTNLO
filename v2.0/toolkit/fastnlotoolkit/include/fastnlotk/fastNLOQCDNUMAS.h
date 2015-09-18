@@ -27,13 +27,6 @@
 #ifndef FASTNLOQCDNUMAS
 #define FASTNLOQCDNUMAS
 
-//#include "fastNLOReader.h"
-//#include <iostream>
-//#include <cstdio>
-//#include <cstdlib>
-//#include <string.h>
-//#include <LHAPDF/LHAPDF.h>
-//#include "speaker.h"
 #include "fastNLOLHAPDF.h"
 
 
@@ -51,8 +44,8 @@ extern "C" {
 class fastNLOQCDNUMAS : public fastNLOLHAPDF {
 
 public:
-   fastNLOQCDNUMAS(string name);
-   fastNLOQCDNUMAS(string name, string LHAPDFFile, int PDFSet);
+   fastNLOQCDNUMAS(std::string name);
+   fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFSet);
    //inherited
    void CalcCrossSection();
 
