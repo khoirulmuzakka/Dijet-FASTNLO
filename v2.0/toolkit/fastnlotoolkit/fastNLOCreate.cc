@@ -53,14 +53,19 @@ fastNLOCreate::fastNLOCreate() {
 fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) {
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
-   ReadSteering(steerfile);
 
+   //! Set constants from arguments
    fGenConsts  = GenConsts;
    fProcConsts = ProcConsts;
 
-   // KR: Add this line also to this constructor so that settings in steering, if they exist,
-   //     take precedence over previously set default settings.
+   //! Steering file settings take precedence over settings in code
+   ReadSteering(steerfile);
    ReadGenAndProcConstsFromSteering();
+
+   bool check = CheckProcConsts();
+   if (!check) {
+      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   }
 
    Instantiate();
 }
@@ -68,18 +73,138 @@ fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenCo
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(string steerfile, string warmupfile, bool shouldReadSteeringFile) {
-   //speaker::SetGlobalVerbosity(say::DEBUG);
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
-   ReadSteering(steerfile, warmupfile, shouldReadSteeringFile);
 
+   //! Set constants from defaults
+   fGenConsts  = SetGenConstsDefaults();
+   fProcConsts = SetProcConstsDefaults();
+
+   //! Steering file settings take precedence over defaults
+   ReadSteering(steerfile, warmupfile, shouldReadSteeringFile);
    ReadGenAndProcConstsFromSteering();
 
    if (!warmupfile.empty()) {
       SetWarmupTableFilename(warmupfile);
    }
 
+   bool check = CheckProcConsts();
+   if (!check) {
+      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   }
+
    Instantiate();
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLO::GeneratorConstants fastNLOCreate::SetGenConstsDefaults() {
+   //! Set default values for generator constants
+   fastNLO::GeneratorConstants GenConsts;
+   GenConsts.Name = "Theory";
+
+   return GenConsts;
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLO::ProcessConstants fastNLOCreate::SetProcConstsDefaults() {
+   //! Set default values for process constants
+   fastNLO::ProcessConstants ProcConsts;
+
+   ProcConsts.LeadingOrder        = -1;   //! Order in alpha_s of leading order process
+   ProcConsts.UnitsOfCoefficients = -1;   //! X section units of coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
+   ProcConsts.NPDF                = -1;   //! No. of PDFs involved
+   ProcConsts.NSubProcessesLO     = -1;   //! No. of LO   subprocesses
+   ProcConsts.NSubProcessesNLO    = -1;   //! No. of NLO  subprocesses
+   ProcConsts.NSubProcessesNNLO   = -1;   //! No. of NNLO subprocesses
+   ProcConsts.IPDFdef1            = -1;   //! Flag 1 to define PDF linear combinations of partonic subprocesses (e.g. hh --> jets: 3)
+   ProcConsts.IPDFdef2            = -1;   //! Flag 2 to define PDF linear combinations (dep. on IPDFdef1; for 3 e.g. 1 for jet specific LCs, 121 for generic 11x11 matrix)
+   ProcConsts.IPDFdef3LO          = -1;   //! Flag 3 to define PDF LCs at   LO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 6 subprocesses, ignored for IPDFdef2==121)
+   ProcConsts.IPDFdef3NLO         = -1;   //! Flag 3 to define PDF LCs at  NLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
+   ProcConsts.IPDFdef3NNLO        = -1;   //! Flag 3 to define PDF LCs at NNLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
+   ProcConsts.NPDFDim             = -1;   //! Define internal storage mode for PDF LCs (dep. on NPDF; e.g. for 1: 0 for linear, for 2: 1 for half- or 2 for full-matrix)
+      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffLO;   //! PDF Linear combinations for   LO calculation (used only if IPDFdef2==0)
+      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffNLO;  //! PDF Linear combinations for  NLO calculation (used only if IPDFdef2==0)
+      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
+      // std::vector<std::pair<int,int> > AsymmetricProcesses;        //! Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax (only if NPDFDim==1)
+      // std::string Name;                      //!< More precise description for specific contribution (e.g. LO, pp -> 2 jets; also can add 'run-mode' and further details)
+      // std::vector<std::string> References;   //!< References for process (also other plain text lines can be included here)
+      // std::vector<std::string > GetProcessDescription() {
+      //    //! Get 'ContrDescription' usable for fastNLO table
+      //    unsigned int iadd = 0;
+      //    if ( Name != "" ) iadd=1;
+      //    std::vector<std::string > ProcDescr(References.size()+iadd);
+      //    if ( iadd != 0 ) ProcDescr[0] = Name;
+      //    for ( unsigned int i = 0 ; i<References.size() ; i++ )
+      //       ProcDescr[i+iadd] = References[i];
+      //    return ProcDescr;
+      // }
+
+   return ProcConsts;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::CheckProcConsts() {
+   //! Check that reasonable values different from the defaults have been set
+
+   bool checkok = true;
+   if (fProcConsts.LeadingOrder < 0) {
+      logger.warn["CheckProcConsts"]<<"Order in alpha_s of leading order process not properly set: "<<fProcConsts.LeadingOrder<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.UnitsOfCoefficients < 0) {
+      logger.warn["CheckProcConsts"]<<"Power of X section units of coefficients not properly set: "<<fProcConsts.UnitsOfCoefficients<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.NPDF < 1) {
+      logger.warn["CheckProcConsts"]<<"No. of PDFs not properly set: "<<fProcConsts.NPDF<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.NSubProcessesLO < 1) {
+      logger.warn["CheckProcConsts"]<<"No. of LO subprocesses not properly set: "<<fProcConsts.NSubProcessesLO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.NSubProcessesNLO < 1) {
+      logger.warn["CheckProcConsts"]<<"No. of NLO subprocesses not properly set: "<<fProcConsts.NSubProcessesNLO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.NSubProcessesNNLO < 1) {
+      logger.warn["CheckProcConsts"]<<"No. of NNLO subprocesses not properly set: "<<fProcConsts.NSubProcessesNNLO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.IPDFdef1 < 0) {
+      logger.warn["CheckProcConsts"]<<"Flag 1 to define PDF linear combination not properly set: "<<fProcConsts.IPDFdef1<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.IPDFdef2 < 0) {
+      logger.warn["CheckProcConsts"]<<"Flag 2 to define PDF linear combination not properly set: "<<fProcConsts.IPDFdef2<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.IPDFdef3LO < 0) {
+      logger.warn["CheckProcConsts"]<<"Flag 3 LO to define PDF linear combination not properly set: "<<fProcConsts.IPDFdef3LO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.IPDFdef3NLO < 0) {
+      logger.warn["CheckProcConsts"]<<"Flag 3 NLO to define PDF linear combination not properly set: "<<fProcConsts.IPDFdef3NLO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.IPDFdef3NNLO < 0) {
+      logger.warn["CheckProcConsts"]<<"Flag 3 NNLO to define PDF linear combination not properly set: "<<fProcConsts.IPDFdef3NNLO<<endl;
+      checkok = false;
+   }
+   if (fProcConsts.NPDFDim < 0) {
+      logger.warn["CheckProcConsts"]<<"Internal storage mode for PDF LCs not properly set: "<<fProcConsts.NPDFDim<<endl;
+      checkok = false;
+   }
+   //    std::vector<std::vector<std::pair<int,int> > > PDFCoeffLO; //! PDF Linear combinations for LO calculation (used only if IPDFdef2==0)
+   //    std::vector<std::vector<std::pair<int,int> > > PDFCoeffNLO; //! PDF Linear combinations for NLO calculation (used only if IPDFdef2==0)
+   //    std::vector<std::vector<std::pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
+   //    std::vector<std::pair<int,int> > AsymmetricProcesses; //!< (if NPDFDim=1) Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax
+    //         std::vector<std::string > ProcDescr(References.size()+iadd);
+
+   return checkok;
 }
 
 
@@ -322,23 +447,25 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
          exit(1);
       }
    }
+   // check if all partons are used
+   // gluons and quarks up to b, bbar must be present --> error
    for ( int p = 1 ; p<12 ; p++ ) {
-      // check if all partons are used
       if ( !b1[p] ) {
-         logger.error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+         logger.error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+         exit(1);
       }
       if ( !b2[p] ) {
-         logger.error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl; exit(1);
+         logger.error["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+         exit(1);
       }
    }
-   // check if all partons are used
+   // t, tbar might be absent --> info
    int p = 0;
-   if ( !b1[p] )       logger.warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
-   if ( !b2[p] )       logger.warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;
+   if ( !b1[p] ) logger.info["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<"."<<endl;
+   if ( !b2[p] ) logger.info["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<"."<<endl;
    p = 12;
-   if ( !b1[p] )       logger.warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;;
-   if ( !b2[p] )       logger.warn["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<". Exiting."<<endl;;
-
+   if ( !b1[p] ) logger.info["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 1 is not used in PartonCombinations"<<sord[ord]<<"."<<endl;;
+   if ( !b2[p] ) logger.info["ReadPartonCombinations"]<<"Parton "<<p-6<<" of hadron 2 is not used in PartonCombinations"<<sord[ord]<<"."<<endl;;
 
    return PDFCoeff;
 }
@@ -1090,8 +1217,8 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    // check binning in detail; ignore when IgnoreWarmupBinningCheck is true to avoid precision problems with bin borders of e.g. Pi
    if ( BOOL_NS(IgnoreWarmupBinningCheck,fSteerfile) ) {
       logger.warn["CheckWarmupConsistency"]
-         <<"Ignoring crosscheck of binning in steering versus warmup values.\n"
-         <<"Please make sure you are using the right combination."<<endl;
+         <<"Ignoring crosscheck of binning in steering versus warmup values. "
+         <<"Please make sure that your warmup file matches the steering of this run."<<endl;
    } else {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
@@ -2082,6 +2209,11 @@ void fastNLOCreate::WriteTable() {
    } else {
       if (ffilename == "") {
          logger.error["WriteTable"]<<"No filename given."<<endl;
+         exit(1);
+      }
+      bool check = CheckProcConsts();
+      if (!check) {
+         logger.error["fastNLOCreate"]<<"Process constants not properly set! Please check warning messages and complement your steering."<<endl;
          exit(1);
       }
       // Number of events must be counted correctly.

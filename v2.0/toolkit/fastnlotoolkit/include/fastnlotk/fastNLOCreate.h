@@ -46,6 +46,9 @@ public:
    void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
+   fastNLO::GeneratorConstants SetGenConstsDefaults();                                          //! set defaults for generator constants
+   fastNLO::ProcessConstants SetProcConstsDefaults();                                           //! set defaults for process constants
+   bool CheckProcConsts();                                                                      //! check process constants to be different from defaults
    // SetBinGrid()
    // todo: SetBinGrid. However, if BinGrid is set, then this is necessarliy a warmup run -> one also has to store the bin grid in warmup table (todo).
    //       furthermore all vectors have to be 'resized'
