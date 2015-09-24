@@ -55,7 +55,7 @@
 //        static bool    sex = BOOL(female);
 //
 //     Labels are case sensitive.
-//  
+//
 //     Check existence of label using:
 //         bool IsPresent = EXIST(name);
 //         bool IsPresent = read_steer::exist("name");
@@ -543,6 +543,7 @@ private:
    const std::string oW;
    const std::string oI;
    const std::string oE;
+   static const int fVerbosity = 2;
 
 public:
    // static member function
@@ -624,25 +625,25 @@ public:
 };
 
 
-template <typename T> 
+template <typename T>
 void read_steer::AddLabel ( const std::string& key, T val) {
    std::stringstream ss;
    ss << val;
    AddLabel(key,ss.str());
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AddArray ( const std::string& key, const std::vector<T>& val) {
    std::vector<std::string> str(val.size());
    for ( unsigned int i = 0 ; i<val.size() ; i++ ) {
       std::stringstream ss;
       ss << val[i];
-      str[i] = ss.str();      
+      str[i] = ss.str();
    }
    AddArray(key,str);
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AddTable ( const std::string& key, const std::vector<std::string>& header, const std::vector<std::vector<T> >& values) {
    std::vector<std::vector<std::string> > str(values.size());
    for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
@@ -652,11 +653,11 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
 	 ss << values[i][j];
 	 str[i][j]=ss.str();
       }
-   }   
+   }
    AddTable(key,header,str);
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AppendToArray ( const std::string& key, const T& entry ) {
    std::stringstream ss;
    ss << entry;
@@ -664,7 +665,7 @@ void read_steer::AppendToArray ( const std::string& key, const T& entry ) {
    AppendToArray(key,entry);
 }
 
-template <typename T> 
+template <typename T>
 void read_steer::AppendToTable ( const std::string& key, const std::vector<T>& entry ) {
    std::vector<std::string > str(entry.size());
    for ( unsigned int j = 0 ; j<entry.size() ; j++ ) {
