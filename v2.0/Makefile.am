@@ -21,7 +21,7 @@ distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 #
-SUBDIRS = common creator doc
+SUBDIRS = common creator doc processor
 # Decouple the 'reader' and 'processor' subprojects ?
 # reader processor userkr
 #

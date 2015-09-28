@@ -73,18 +73,18 @@ AC_MSG_NOTICE([Looking for NLOJet++ installation ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([nlojet],
-	[AS_HELP_STRING([--with-nlojet],
-	[Specify location of NLOJet++ installation. This takes precedence over
-	an NLOJET environment variable, the prefix path or other methods.
-	Please note: fastNLO CANNOT be used without NLOJet++!])],
-	[if test "x$withval" = "xno"; then
-	AC_MSG_ERROR([fastNLO CANNOT be used without NLOJet++! Configuration aborted!])
-	fi
-	if test "x$withval" != "xyes"; then
-	AC_SUBST([NLOJET],[$withval])
-	AC_MSG_NOTICE([Using given path $NLOJET as location of NLOJet++ installation.])
-	fi],
-	[])
+        [AS_HELP_STRING([--with-nlojet],
+        [Specify location of NLOJet++ installation. This takes precedence over
+        an NLOJET environment variable, the prefix path or other methods.
+        Please note: fastNLO CANNOT be used without NLOJet++!])],
+        [if test "x$withval" = "xno"; then
+        AC_MSG_ERROR([fastNLO CANNOT be used without NLOJet++! Configuration aborted!])
+        fi
+        if test "x$withval" != "xyes"; then
+        AC_SUBST([NLOJET],[$withval])
+        AC_MSG_NOTICE([Using given path $NLOJET as location of NLOJet++ installation.])
+        fi],
+        [])
 
 if test "x$NLOJET" = "x"; then
    AC_MSG_NOTICE([No NLOJet++ installation path set. Try to find NLOJet++ in prefix path ...])
@@ -119,19 +119,19 @@ AC_MSG_NOTICE([Attention! These are the PDFs coming with NLOJET++ version 4.1.x!
 AC_MSG_NOTICE([Do not confuse with LHAPDF!])
 
 AC_ARG_WITH([cteq-pdf],
-	[AS_HELP_STRING([--with-cteq-pdf],
-	[Specify location of CTEQ-PDF installation. This takes precedence over
-	a ZNPDF environment variable, the prefix path or other methods.
-	Please note: fastNLO currently CANNOT be used without CTEQ-PDF
-    	which is required by NLOJet++!])],
-	[if test "x$withval" = "xno"; then
-	AC_MSG_ERROR([fastNLO CANNOT be used without CTEQ-PDF! Configuration aborted!])
-	fi
-	if test "x$withval" != "xyes"; then
-	AC_SUBST([ZNPDF],[$withval])
-	AC_MSG_NOTICE([Using given path $ZNPDF as location of CTEQ-PDF installation.])
-	fi],
-	[])
+        [AS_HELP_STRING([--with-cteq-pdf],
+        [Specify location of CTEQ-PDF installation. This takes precedence over
+        a ZNPDF environment variable, the prefix path or other methods.
+        Please note: fastNLO currently CANNOT be used without CTEQ-PDF
+        which is required by NLOJet++!])],
+        [if test "x$withval" = "xno"; then
+        AC_MSG_ERROR([fastNLO CANNOT be used without CTEQ-PDF! Configuration aborted!])
+        fi
+        if test "x$withval" != "xyes"; then
+        AC_SUBST([ZNPDF],[$withval])
+        AC_MSG_NOTICE([Using given path $ZNPDF as location of CTEQ-PDF installation.])
+        fi],
+        [])
 
 if test "x$ZNPDF" = "x"; then
    AC_MSG_NOTICE([No ZNPDF installation path set. Try to find CTEQ-PDF in prefix path ...])
@@ -171,19 +171,19 @@ AC_MSG_NOTICE([Attention! These are the PDFs coming with NLOJET++ version 4.0.x!
 AC_MSG_NOTICE([Do not confuse with LHAPDF!])
 
 AC_ARG_WITH([lhpdf],
-	[AS_HELP_STRING([--with-lhpdf],
-	[Specify location of LHPDF installation. This takes precedence over
-	an LHPDF environment variable, the prefix path or other methods.
-	Please note: fastNLO currently CANNOT be used without LHPDF
-    	which is required by NLOJet++!])],
-	[if test "x$withval" = "xno"; then
-	AC_MSG_ERROR([fastNLO CANNOT be used without LHPDF! Configuration aborted!])
-	fi
-	if test "x$withval" != "xyes"; then
-	AC_SUBST([LHPDF],[$withval])
-	AC_MSG_NOTICE([Using given path $LHPDF as location of LHPDF installation.])
-	fi],
-	[])
+        [AS_HELP_STRING([--with-lhpdf],
+        [Specify location of LHPDF installation. This takes precedence over
+        an LHPDF environment variable, the prefix path or other methods.
+        Please note: fastNLO currently CANNOT be used without LHPDF
+        which is required by NLOJet++!])],
+        [if test "x$withval" = "xno"; then
+        AC_MSG_ERROR([fastNLO CANNOT be used without LHPDF! Configuration aborted!])
+        fi
+        if test "x$withval" != "xyes"; then
+        AC_SUBST([LHPDF],[$withval])
+        AC_MSG_NOTICE([Using given path $LHPDF as location of LHPDF installation.])
+        fi],
+        [])
 
 if test "x$LHPDF" = "x"; then
    AC_MSG_NOTICE([No LHPDF installation path set. Try to find LHPDF in prefix path ...])
@@ -221,18 +221,18 @@ AC_MSG_NOTICE([Looking for LHAPDF installation ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([lhapdf],
-	[AS_HELP_STRING([--with-lhapdf],
-	[Specify location of LHAPDF installation. This takes precedence over
-	an LHAPDF environment variable, the prefix path or other methods.
-	Please note: LHAPDF is mandatory in order to use fastNLO!])],
-	[if test "x$withval" = "xno"; then
-	    AC_MSG_ERROR([fastNLO CANNOT be used without LHAPDF! Configuration aborted!])
-	 fi
+        [AS_HELP_STRING([--with-lhapdf],
+        [Specify location of LHAPDF installation. This takes precedence over
+        an LHAPDF environment variable, the prefix path or other methods.
+        Please note: LHAPDF is mandatory in order to use fastNLO!])],
+        [if test "x$withval" = "xno"; then
+            AC_MSG_ERROR([fastNLO CANNOT be used without LHAPDF! Configuration aborted!])
+         fi
          if test "x$withval" != "xyes"; then
                AC_SUBST([LHAPDF],[$withval])
-	       AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
-	 fi],
-	[])
+               AC_MSG_NOTICE([Using given path $LHAPDF as location of LHAPDF installation.])
+         fi],
+        [])
 
 if test "x$withval" != "xno"; then
    if test "x$LHAPDF" = "x"; then
@@ -280,18 +280,18 @@ AC_MSG_NOTICE([Looking for fastjet installation ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([fastjet],
-	[AS_HELP_STRING([--with-fastjet],
-	 [Specify location of FASTJET installation. This takes precedence over
-	  a FASTJET environment variable, the prefix path or other methods.])],
-	[if test "x$withval" = "xno"; then
-	    AC_MSG_NOTICE([Building fastNLO without FASTJET!])
-	 else
-     	    if test "x$withval" != "xyes"; then
-	       AC_SUBST([FASTJET],[$withval])
-	       AC_MSG_NOTICE([Using given path $FASTJET as location of FASTJET installation.])
-	    fi
-	 fi],
-	[])
+        [AS_HELP_STRING([--with-fastjet],
+         [Specify location of FASTJET installation. This takes precedence over
+          a FASTJET environment variable, the prefix path or other methods.])],
+        [if test "x$withval" = "xno"; then
+            AC_MSG_NOTICE([Building fastNLO without FASTJET!])
+         else
+            if test "x$withval" != "xyes"; then
+               AC_SUBST([FASTJET],[$withval])
+               AC_MSG_NOTICE([Using given path $FASTJET as location of FASTJET installation.])
+            fi
+         fi],
+        [])
 
 if test "x$withval" != "xno"; then
    if test "x$FASTJET" = "x"; then
@@ -358,16 +358,16 @@ AC_MSG_NOTICE([Checking whether ROOT support is requested ...])
 AC_MSG_NOTICE([******************************************])
 
 AC_ARG_WITH([root],
-	[AS_HELP_STRING([--with-root],
-	 [Specify location of ROOT installation. By default fastNLO is built
-	  without ROOT support.])],
-	[if test "x$withval" = "xno"; then
-	    AC_MSG_NOTICE([Building fastNLO without ROOT support!])
-	 else
-     	    if test "x$withval" != "xyes"; then
-	       AC_SUBST([ROOTSYS],[$withval])
-	       AC_MSG_NOTICE([Using given path $ROOTSYS as location of ROOT installation.])
-	       AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
+        [AS_HELP_STRING([--with-root],
+         [Specify location of ROOT installation. By default fastNLO is built
+          without ROOT support.])],
+        [if test "x$withval" = "xno"; then
+            AC_MSG_NOTICE([Building fastNLO without ROOT support!])
+         else
+            if test "x$withval" != "xyes"; then
+               AC_SUBST([ROOTSYS],[$withval])
+               AC_MSG_NOTICE([Using given path $ROOTSYS as location of ROOT installation.])
+               AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
                if test "x$ROOTBIN" = "x"; then
                   AC_MSG_ERROR([ROOT binaries not found in $ROOTSYS/bin! Configuration aborted!])
                fi
@@ -376,11 +376,11 @@ AC_ARG_WITH([root],
                   AC_MSG_ERROR([ROOTSYS variable set and/or root-config found, but no rootcint!
                                 ROOT support not possible, configuration aborted!])
                fi
-	    else
+            else
                AC_MSG_ERROR(["yes" is not a valid ROOTSYS path! Configuration aborted!])
-	    fi
-	 fi],
-	[])
+            fi
+         fi],
+        [])
 
 if test "x$ROOTBIN" != "x"; then
    AC_SUBST([ROOTPREFIX],  [`$ROOTBIN --prefix`])
@@ -451,15 +451,15 @@ AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 
 # Output (not listed as subproject in AC_CONFIG_SUBDIRS above)
 AC_CONFIG_FILES([Makefile
-	common/Makefile
-	creator/ep/Makefile
-	creator/hadron/Makefile
-	creator/Makefile
-	doc/arXiv_1109.1310/Makefile
-	doc/Makefile
+        common/Makefile
+        creator/ep/Makefile
+        creator/hadron/Makefile
+        creator/Makefile
+        doc/arXiv_1109.1310/Makefile
+        doc/Makefile
+        processor/Makefile
+        processor/modifier/Makefile
 ])
 
-#	processor/Makefile
-#	processor/modifier/Makefile
 
 AC_OUTPUT
