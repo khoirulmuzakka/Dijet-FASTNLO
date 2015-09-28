@@ -47,10 +47,17 @@ int main(int argc, char** argv) {
       tablebase = (const char*) argv[1];
       if (tablebase == "-h") {
          shout << "" << endl;
-         shout << "Usage: ./fnlo-tk-statunc <fastNLOsample> [order] [nmin] [nmax]" << endl;
+         shout << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
          shout << "                 that will be complemented by '_nnnn.tab'" << endl;
+         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         shout << "   If the PDF set still is not found, then:" << endl;
+         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         shout << "   - Specify the PDF set including the absolute path." << endl;
+         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          shout << "   Alternatives: LO, NNLO (if available)" << endl;
          shout << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
@@ -64,13 +71,28 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-statunc"] << "Evaluating table sample: "  <<  tablebase << endl;
       }
    }
+   //---  PDF set
+   string PDFFile = "X";
+   if (argc > 2) {
+      PDFFile = (const char*) argv[2];
+   }
+   if (argc <= 2 || PDFFile == "_") {
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+      PDFFile = "CT10nlo";
+#else
+      PDFFile = "CT10nlo.LHgrid";
+#endif
+      shout["fnlo-read"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
+   } else {
+      shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
+   }
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
    string chord = "NLO";
-   if (argc > 2) {
-      chord = (const char*) argv[2];
+   if (argc > 3) {
+      chord = (const char*) argv[3];
    }
-   if (argc <= 2 || chord == "_") {
+   if (argc <= 3 || chord == "_") {
       shout["fnlo-tk-statunc"] << "No request given for fixed-order precision, using NLO." << endl;
    } else {
       if ( chord == "LO" ) {
@@ -89,10 +111,10 @@ int main(int argc, char** argv) {
    }
    //! --- Start counter
    string chmin = "0000";
-   if (argc > 3) {
-      chmin = (const char*) argv[3];
+   if (argc > 4) {
+      chmin = (const char*) argv[4];
    }
-   if (argc <= 3 || chmin == "_") {
+   if (argc <= 4 || chmin == "_") {
       chmin = "0000";
       shout["fnlo-tk-statunc"] << "No request given for minimal counter number, using default of: " << chmin << endl;
    }
@@ -103,10 +125,10 @@ int main(int argc, char** argv) {
    }
    //! --- End counter
    string chmax = "1000";
-   if (argc > 4) {
+   if (argc > 5) {
       chmax = (const char*) argv[4];
    }
-   if (argc <= 4 || chmax == "_") {
+   if (argc <= 5 || chmax == "_") {
       chmax = "1000";
       shout["fnlo-tk-statunc"] << "No request given for maximal counter number, using default of: " << chmax << endl;
    }
@@ -123,15 +145,6 @@ int main(int argc, char** argv) {
    //! --- fastNLO initialisation
    //! Select verbosity level
    SetGlobalVerbosity(WARNING);
-   //! Set default PDF
-   string PDFFile = "X";
-#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   //   PDFFile = "CT10nlo";
-   PDFFile = "cteq66";
-#else
-   //   PDFFile = "CT10nlo.LHgrid";
-   PDFFile = "cteq66.LHgrid";
-#endif
 
    //! --- Loop over selected table sample
    //! Initialise fastNLO instances with interface to LHAPDF
