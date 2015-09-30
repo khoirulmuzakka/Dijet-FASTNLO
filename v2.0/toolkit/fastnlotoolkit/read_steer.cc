@@ -24,6 +24,7 @@ using namespace std;
 map<string,read_steer*>* read_steer::instances = NULL;
 //const string& read_steer::stdID = *(new string("SingleFileMode"));
 string read_steer::stdID = "SingleFileMode";
+int read_steer::fVerbosity = 2;
 
 read_steer::read_steer() :
    str_sep(" \t")     , str_cmt("#"),
@@ -39,9 +40,12 @@ read_steer* read_steer::Steering(string steerID) {
    if (instances==NULL) instances = new std::map<string,read_steer*>();
    // get singleton class
    if (!(*instances)[steerID]) { //new instance
-      if (steerID.compare(read_steer::stdID)!=0)
-         if (fVerbosity > 2) {cout << " # INFO.    [read_steer] " << "Initializing new read_steer namespace with steerID = '" << steerID << "'." << endl;}
-      (*instances)[steerID] = new read_steer();
+      if (steerID.compare(read_steer::stdID)!=0) {
+         (*instances)[steerID] = new read_steer();
+         if (fVerbosity > 2) {
+            cout << " # INFO.    [read_steer] " << "Initialized new read_steer namespace with steerID = '" << steerID << "'." << endl;
+         }
+      }
    }
    return (read_steer*)((*instances)[steerID]);
 }
@@ -628,7 +632,7 @@ bool read_steer::ParseString(string line) {
          if (fVerbosity > 2) {cout  <<  oI << "Label '" <<   label  << "' already set identically. Keeping value '" << fstrings[label] << "'." <<  endl;}
       } else {
          // Inform that new value overwrites previously set one
-         if (fVerbosity > 1) {cout  <<  oI << "Label '" <<   label  << "' already found. Replacing previous value '" << fstrings[label] << "' by new one '" << value << "'." <<  endl;}
+         if (fVerbosity > 2) {cout  <<  oI << "Label '" <<   label  << "' already found. Replacing previous value '" << fstrings[label] << "' by new one '" << value << "'." <<  endl;}
          ReplaceVariables(value);
          fstrings[label] = value;
       }

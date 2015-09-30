@@ -543,13 +543,20 @@ private:
    const std::string oW;
    const std::string oI;
    const std::string oE;
-   static const int fVerbosity = 2;
 
 public:
+   static int fVerbosity;
    // static member function
    static void readfile(std::string filename,std::string steerID=read_steer::stdID) {     // set the steer-filename
       read_steer::Steering(steerID)->inits(filename); }
+   // setters
+   // verbosity
+   static void setVerbosity(int iVerbosity) {
+      read_steer::fVerbosity = iVerbosity; }
    // getters
+   // verbosity
+   static int getVerbosity() {
+      return read_steer::fVerbosity; }
    // values
    static bool getbool(std::string label,std::string steerID=read_steer::stdID) {
       return read_steer::Steering(steerID)->getb(label); }
