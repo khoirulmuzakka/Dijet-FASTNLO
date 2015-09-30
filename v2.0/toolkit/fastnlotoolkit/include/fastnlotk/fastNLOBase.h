@@ -17,8 +17,8 @@ public:
    virtual ~fastNLOBase();
 
    // i/o
-   virtual void ReadTable();                                                    //!< read table
-   virtual void WriteTable();                                                   //!< write full table to disk
+   virtual void ReadTable();                                            //!< read table
+   virtual void WriteTable();                                           //!< write full table to disk
    virtual void Print() const;
    // header
    void PrintHeader() const;                                            //!< Print header variables (BlockA1) to screen
@@ -63,12 +63,12 @@ public:
 
 
 protected:
-   void PrintWelcomeMessage();                                          //!< Say hello to fastNLO user
-   std::ofstream* OpenFileWrite();                                           //!< open std::ofstream for writing tables to ffilename
-   std::ifstream* OpenFileRead();                                            //!< open std::ifstream for reading table
+   void PrintWelcomeMessage();                     //!< Say hello to fastNLO user
+   std::ofstream* OpenFileWrite();                 //!< open std::ofstream for writing tables to ffilename
+   std::ifstream* OpenFileRead();                  //!< open std::ifstream for reading table
    //std::ofstream *OpenFileRewrite();
-   void WriteHeader(std::ostream& table);                                    //!< write (or cout) hader using std::ostream
-   void ReadHeader(std::istream& table);                                     //!< read header of table (BlockA1)
+   void WriteHeader(std::ostream& table);          //!< write (or cout) hader using std::ostream
+   void ReadHeader(std::istream& table);           //!< read header of table (BlockA1)
    void CloseFileWrite(std::ofstream& table);
    void CloseFileRead(std::ifstream& table);
    //void CloseStream();
