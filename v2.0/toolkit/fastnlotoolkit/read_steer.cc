@@ -40,8 +40,8 @@ read_steer* read_steer::Steering(string steerID) {
    if (instances==NULL) instances = new std::map<string,read_steer*>();
    // get singleton class
    if (!(*instances)[steerID]) { //new instance
+      (*instances)[steerID] = new read_steer();
       if (steerID.compare(read_steer::stdID)!=0) {
-         (*instances)[steerID] = new read_steer();
          if (fVerbosity > 2) {
             cout << " # INFO.    [read_steer] " << "Initialized new read_steer namespace with steerID = '" << steerID << "'." << endl;
          }
