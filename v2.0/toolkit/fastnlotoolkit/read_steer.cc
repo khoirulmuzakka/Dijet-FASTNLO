@@ -621,7 +621,13 @@ bool read_steer::ParseString(string line) {
    // }
    //
 
-   // CKR: Change philosophy: Last set value (e.g. from steering) overwrites previously set one (e.g. default)
+   // Philosophy of priorities when using read_steer:
+   //    1. Parameters set in command line have highest priority and are not overwritten
+   //    2. Then first read steering file, previously set parameters are kept --> warn user
+   //    3. Only now set additional parameters that have not been defined yet (Check with EXIST() resp. EXIST_NS())
+   //       If parameters are discovered that, for the purpose at hand, have been chosen inappropriately by the user , then either
+   //       - exit with error message or
+   //       - set to correct value and warn user
    if (!fParseFieldMode && fParseTableMode==0) {
       if (fstrings[label] == "") {
          // Set previously empty value
@@ -631,10 +637,11 @@ bool read_steer::ParseString(string line) {
          // Inform that old and new values are identical
          if (fVerbosity > 2) {cout  <<  oI << "Label '" <<   label  << "' already set identically. Keeping value '" << fstrings[label] << "'." <<  endl;}
       } else {
-         // Inform that new value overwrites previously set one
-         if (fVerbosity > 2) {cout  <<  oI << "Label '" <<   label  << "' already found. Replacing previous value '" << fstrings[label] << "' by new one '" << value << "'." <<  endl;}
-         ReplaceVariables(value);
-         fstrings[label] = value;
+         // Inform that new value read from steering file is ignored and warn user
+         if (fVerbosity > 1) {cout  <<  oW << "Label '" <<   label  << "' already found. Keeping previous value of '" << fstrings[label] << "' and IGNORE this one '" << value << "'" << endl;}
+         // Do not overwrite existing value
+         //         ReplaceVariables(value);
+         //         fstrings[label] = value;
       }
    }
    return true;
