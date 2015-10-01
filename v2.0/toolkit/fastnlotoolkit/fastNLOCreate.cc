@@ -1101,7 +1101,11 @@ void fastNLOCreate::GetWarmupValues() {
    logger.info >> (fastNLO::_SSEP40+fastNLO::_SSEP40+fastNLO::_SSEP40) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
-   logger.warn["GetWarmupValues"]<<"This will be a "<<(fIsWarmup?"warmup":"production")<<" run."<<endl;
+   if ( fIsWarmup ) {
+      logger.warn["GetWarmupValues"]<<"This will be a warmup run."<<endl;
+   } else {
+      logger.info["GetWarmupValues"]<<"This will be a production run."<<endl;
+   }
 }
 
 
