@@ -46,11 +46,11 @@ int main(int argc, char** argv) {
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Usage: ./fnlo-tk-merge [arguments]" << endl;
          shout << "List of blank-separated table input files, at least two," << endl;
          shout << "   plus output file for merged table." << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       }

@@ -1266,7 +1266,7 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    if (iprint > 0) {
       Print();
    }
-   logger.shout << "" << endl;
+   cout << " #" << endl;
    cout  << fastNLO::_CSEPSC << endl;
 }
 

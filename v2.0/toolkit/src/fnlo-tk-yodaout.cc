@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
@@ -70,9 +70,9 @@ int main(int argc, char** argv) {
 #endif
          shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          shout << "   Alternatives: LO, NNLO (if available)" << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       } else {
@@ -397,8 +397,8 @@ int main(int argc, char** argv) {
    writer.write( FileName + ".yoda", aos );
    cout << endl;
    cout << _CSEPSC << endl;
-   shout << "" << endl;
+   cout << " #" << endl;
    shout << FileName + ".yoda was successfully produced" << endl;
-   shout << "" << endl;
+   cout << " #" << endl;
    cout << _CSEPSC << endl << endl;
 }

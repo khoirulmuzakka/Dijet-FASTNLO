@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
    } else {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
@@ -71,9 +71,9 @@ int main(int argc, char** argv) {
          shout << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          shout << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       } else {
@@ -818,6 +818,8 @@ int main(int argc, char** argv) {
       vector < double > kewk1;
 
       //! Set MuR and MuF scale factors for pQCD cross sections and test availability
+      //! Activate Hoppet for unusal variations
+      //      fnlo->UseHoppetScaleVariations(true);
       lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
       if (!lscvar) {
          warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("

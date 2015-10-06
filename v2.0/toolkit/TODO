@@ -3,6 +3,10 @@ TODO list for fastNLO_toolkit (orderd by priority)
 -----------------------------------------------------------------------
 
  - Creator for Referenztabellen
+ - Modifier & Concatenator for tables/bins
+ - Streamline usage of logger.messagelevel, shout|cout, error|warn|silent etc. in speaker
+
+ - KR: Check, which points are actually done ...
  - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
  - Write documentation (e.g. twiki)
  - converter aktualisieren ??

@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
    } else {
       tablebase = (const char*) argv[1];
       if (tablebase == "-h") {
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
@@ -62,9 +62,9 @@ int main(int argc, char** argv) {
          shout << "   Alternatives: LO, NNLO (if available)" << endl;
          shout << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
          shout << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
-         shout << "" << endl;
+         cout << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       } else {
@@ -468,8 +468,8 @@ int main(int argc, char** argv) {
    writer.write( FileName + ".yoda", aos );
    cout << endl;
    cout << _CSEPSC << endl;
-   shout << "" << endl;
+   cout << " #" << endl;
    shout << FileName + ".yoda was successfully produced" << endl;
-   shout << "" << endl;
+   cout << " #" << endl;
    cout << _CSEPSC << endl << endl;
 }
