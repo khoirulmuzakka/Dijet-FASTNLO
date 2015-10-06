@@ -1,0 +1,95 @@
+(run){
+  # Set analysis type to run, default is "0", i.e. none!
+  ANALYSIS Rivet;
+  # Set no. of events or override via cmdline option -e events
+  EVENTS 1000000;
+  # Enforce pure parton-level events without shower, MPI, fragmentation, or beam remnants and primordial kT
+  SHOWER_GENERATOR=None
+  FRAGMENTATION=Off
+  MI_HANDLER=None
+  BEAM_REMNANTS=0;
+
+  # Make sure that the top is not considered for the Sherpa a_s running,
+  # because usually the PDF provided a_s running does not know about the top.
+  MASS[6] = 1e20;
+
+  # Define variable for QCD NLO parts to calculate: B: Born, V: Virtual, I: Integrated Subtraction, RS: Real Correction
+  NLOPART:=BVIRS;
+  # Define variable for loop calculation provider
+  LOOPGEN:=BlackHat;
+  # Define variables for scale factors of squared(!) factorization, renormalization, and resummation scale
+  FSF:=1.; RSF:=1.; QSF:=1.;
+
+  # Define variable for the jet algorithm
+  JETALGO:=antikt;
+  # Define variable for the jet size R
+  RJET:=0.6;
+  # Define variable for minimum jet pT
+  MINPT:=20.;
+  # Define variable for minimum leading jet pT
+  MINPTMAX:=30.;
+}(run);
+
+(isr){
+  # Use Sherpa's internal PDF library
+  # PDF_LIBRARY=CT10Sherpa;
+  # PDF_SET=ct10;
+  # Or get better results using the LHAPDF interface of Sherpa
+  # (if configured with --enable-lhapdf=/path/to/lhapdf)
+  PDF_LIBRARY=LHAPDFSherpa;
+  PDF_SET=CT10nlo;
+}(isr);
+
+(beam){
+  # LHC collider setup
+  BEAM_1 2212; BEAM_ENERGY_1 3500;
+  BEAM_2 2212; BEAM_ENERGY_2 3500;
+}(beam);
+
+(me){
+  # ME generation setup
+  ME_SIGNAL_GENERATOR Comix, Internal;
+  EVENT_GENERATION_MODE Weighted;
+  # Set the scale squared(!) to be used for the factorization, renormalization, and resummation scale.
+  # The scale factors defined above can be applied here.
+  # Set scales from jets reconstructed with fastjet: A:algo,PT:pT_jet_min,R:jet_size_R,M:autoscale
+  #    M:0 requires to set all three scales^2 within {}{}{}
+  SCALES FASTJET[A:JETALGO,PT:MINPT,R:RJET,M:0]{FSF*PPerp2(p[2])*exp(0.3*abs(DY(p[2],p[3])))}{RSF*PPerp2(p[2])*exp(0.3*abs(DY(p[2],p[3])))}{QSF*0.25*PPerp2(p[3])};
+}(me);
+
+(processes){
+  # Set process via incoming and outgoing object types
+  # 93 corresponds to "jets" and means all quarks considered massless and gluons
+  Process 93 93 -> 93 93;
+  # Do a fixed-order calculation only
+  NLO_QCD_Mode Fixed_Order;
+  # Set the QCD NLO parts to calculate
+  NLO_QCD_Part NLOPART;
+  # Set the loop calculation provider
+  Loop_Generator LOOPGEN;
+  # Set the orders to be considered for a process, first number is QCD, second number for EW
+  # An "*" means multiple orders as far as possible
+  Order (*,0);
+  End process;
+}(processes);
+
+(selector){
+  # Selection on jets reconstructed with fastjet: <algo>  <n_jet_min>  <pT_jet_min>  <ET_jet_min>  <jet_size_R>
+  FastjetSelector PPerp(p[2])>30.  antikt  2  MINPT  0.0  RJET;
+}(selector);
+
+(analysis){
+  # Set Rivet analysis
+  BEGIN_RIVET {
+    -a MCgrid_ATLAS_2012_I1082936;
+    IGNOREBEAMS 1;
+    USE_HEPMC_SHORT 1;
+    USE_HEPMC_EXTENDED_WEIGHTS 1;
+  } END_RIVET;
+}(analysis);
+
+(integration){
+  # Set integration precision to be used
+  ERROR 0.3;
+  Finish_Optimization=On;
+}(integration);

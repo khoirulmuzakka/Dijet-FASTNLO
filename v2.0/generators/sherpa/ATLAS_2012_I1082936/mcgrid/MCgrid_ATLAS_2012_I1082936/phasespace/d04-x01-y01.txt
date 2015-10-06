@@ -1,0 +1,71 @@
+# --- Use emacs in sh mode -*-sh-*- #
+# This is a automatically generated file by fastNLO and holds the values of the warmup run. 
+# The values are valid for the scenario d04-x01-y01
+# and if calculated with the steerfile: mcgrid/MCgrid_ATLAS_2012_I1082936/phasespace/d04-x01-y01.txt
+# but only if no serious changes have been performed since its creation.
+# 
+# Delete this file, if you want fastNLO to calculate a new one.
+# 
+# This file has been calculated using 7656582 contributions.
+#   ( Mind: contributions != events. And contributions are not necessarily in phase space region.
+# Please check by eye for reasonability of the values.
+ 
+Warmup.OrderInAlphasOfWarmupRunWas	2
+Warmup.CheckScaleLimitsAgainstBins	true
+Warmup.ScaleDescriptionScale1     	"pT_max*exp(0.3*y_star)_[GeV]"
+Warmup.DifferentialDimension      	1
+Warmup.DimensionLabels {
+  "Mjj_[TeV]"  
+} 
+Warmup.DimensionIsDifferential {
+  "2"  
+} 
+
+Warmup.Values {{
+   ObsBin       x_min      x_max  pT_max*exp(0.3*y_star)_[GeV]_min  pT_max*exp(0.3*y_star)_[GeV]_max
+      0      9.65e-05   1.00e+00             34.67            151.46
+      1      1.98e-04   1.00e+00             54.38            270.01
+      2      4.08e-04   1.00e+00             79.83            152.94
+      3      7.21e-04   9.99e-01            104.26            190.00
+      4      1.10e-03   1.00e+00            129.42            224.54
+      5      1.56e-03   9.99e-01            154.76            267.78
+      6      2.31e-03   9.99e-01            185.03            317.53
+      7      3.27e-03   9.99e-01            219.97            367.73
+      8      4.11e-03   1.00e+00            252.79            421.75
+      9      5.57e-03   9.99e-01            292.72            472.07
+     10      7.31e-03   1.00e+00            334.58            538.00
+     11      9.64e-03   1.00e+00            378.71            615.94
+     12      1.17e-02   1.00e+00            426.73            663.79
+     13      1.46e-02   9.99e-01            475.54            747.26
+     14      2.16e-02   1.00e+00            532.37            852.57
+     15      2.40e-02   1.00e+00            590.00            913.28
+     16      3.11e-02   1.00e+00            657.33           1028.87
+     17      3.35e-02   9.98e-01            725.68           1132.16
+     18      4.79e-02   1.00e+00            805.17           1400.00
+     19      7.47e-02   1.00e+00            970.00           1941.45
+}}
+
+
+Warmup.Binning {{
+    ObsBin  Mjj_[TeV]_Lo  Mjj_[TeV]_Up       BinSize
+       0       0.0700000     0.110000      0.0400000  
+       1       0.110000      0.160000      0.0500000  
+       2       0.160000      0.210000      0.0500000  
+       3       0.210000      0.260000      0.0500000  
+       4       0.260000      0.310000      0.0500000  
+       5       0.310000      0.370000      0.0600000  
+       6       0.370000      0.440000      0.0700000  
+       7       0.440000      0.510000      0.0700000  
+       8       0.510000      0.590000      0.0800000  
+       9       0.590000      0.670000      0.0800000  
+      10       0.670000      0.760000      0.0900000  
+      11       0.760000      0.850000      0.0900000  
+      12       0.850000      0.950000      0.100000   
+      13       0.950000      1.06000       0.110000   
+      14       1.06000       1.18000       0.120000   
+      15       1.18000       1.31000       0.130000   
+      16       1.31000       1.45000       0.140000   
+      17       1.45000       1.60000       0.150000   
+      18       1.60000       1.94000       0.340000   
+      19       1.94000       2.78000       0.840000   
+}}
