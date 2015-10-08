@@ -27,7 +27,7 @@ void HoppetInterface::InitHoppet(fastNLOReader& lfnlo) {
    say::info["InitHoppet"] << "Using variable-flavour number scheme with the the given masses."
                           << " M_Top is set to 10000000000.0 GeV, so effectively nf_max = 5." <<  std::endl;
    // Carry out evolution
-   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &evolvepdf_, 2.00001);
+   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &HoppetInterface::LHAsub, 2.00001);
    // Fills the HOPPET PDF represenation using PDF provided by LHAPDF.
    //hoppetAssign(&evolvepdf_);
 }
