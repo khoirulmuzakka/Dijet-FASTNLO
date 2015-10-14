@@ -2531,10 +2531,14 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    const double minallbins = 0.7;
 
    vector<int > nbinlo(NDim);
-   vector<int > nbinup(NDim);;
+   vector<int > nbinup(NDim);
    for (int idim = int(NDim)-1 ; idim>=0 ; idim--) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          if ( Bin[i][idim].first != 0 ) {
+            if (wrmmu.size() <= i) {
+                logger.error["CheckWarmupValuesIdenticalWithBinGrid"]
+                << "Warmup values contains only " << wrmmu.size() << " bins" << endl;
+            }
             double diff = wrmmu[i].first/Bin[i][idim].first - 1.;
             // lo-bin
             if ( diff < bclose  && diff >= 0.)
