@@ -2936,3 +2936,13 @@ fastNLOReader::XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUnce
 
    return XsUnc;
 }
+
+std::vector< std::vector<double> > fastNLOReader::GetScaleUncertaintyVec(const EScaleUncertaintyStyle eScaleUnc) {
+   fastNLOReader::XsUncertainty xsUnc = fastNLOReader::GetScaleUncertainty(eScaleUnc);
+   std::vector<std::vector<double> > xsUncVec;
+   xsUncVec.resize(3);
+   xsUncVec[0] = xsUnc.xs;
+   xsUncVec[1] = xsUnc.dxsu;
+   xsUncVec[2] = xsUnc.dxsl;
+   return xsUncVec;
+}

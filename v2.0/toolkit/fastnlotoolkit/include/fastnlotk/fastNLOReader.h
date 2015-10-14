@@ -58,6 +58,7 @@ public:
 
    //! Return struct with vectors containing the cross section values and the selected scale uncertainty
    XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
+   std::vector< std::vector<double> > GetScaleUncertaintyVec( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
    // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of scale uncertainties second
    //   vector < pair < double, pair <double, double> > > GetScaleUncertainty( const EScaleUncertaintyStyle eScaleUnc );
 
