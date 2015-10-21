@@ -14,6 +14,7 @@ public:
    typedef double(*mu_func)(double,double);
 
    fastNLOReader(std::string filename);
+   fastNLOReader(const fastNLOTable&);
    fastNLOReader(const fastNLOReader&);
    virtual ~fastNLOReader();
    void SetFilename(std::string filename) ;

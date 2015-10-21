@@ -38,6 +38,18 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name) : fastNLOReader(name), fnPDFs(0) , fiP
    PDF = NULL;
    #endif
 }
+
+//______________________________________________________________________________
+
+
+fastNLOLHAPDF::fastNLOLHAPDF(const fastNLOTable& table) : fastNLOReader(table), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+   logger.info["fastNLOLHAPDF"]<<"Please initialize a PDF file using SetLHAPDFFilename( PDFFile ) and a PDF set using SetLHAPDFMember(int PDFMember)"<<std::endl;
+
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = NULL;
+   PDF = NULL;
+   #endif
+}
 //______________________________________________________________________________
 
 
@@ -63,6 +75,23 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fa
    // Everything set. Do cross sections calculation.
    CalcCrossSection();
 }
+
+//______________________________________________________________________________
+
+
+fastNLOLHAPDF::fastNLOLHAPDF(const fastNLOTable& table, string LHAPDFFile, int PDFMember) : fastNLOReader(table), fnPDFs(0) , fiPDFMember(0) , fchksum(0.) {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   PDFSet = NULL;
+   PDF = NULL;
+   #endif
+   SetLHAPDFFilename(LHAPDFFile);
+   SetLHAPDFMember(PDFMember);
+   // Call additional initialization. Not necessary for LHAPDF.
+   InitEvolveAlphas();
+   // Everything set. Do cross sections calculation.
+   CalcCrossSection();
+}
+//______________________________________________________________________________
 
    // Getters
    int fastNLOLHAPDF::GetIPDFMember() const {

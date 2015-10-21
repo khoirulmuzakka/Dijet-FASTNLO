@@ -30,8 +30,10 @@ class fastNLOLHAPDF : public fastNLOReader {
 private:
 public:
    fastNLOLHAPDF(std::string name);
+   fastNLOLHAPDF(const fastNLOTable&);
    ~fastNLOLHAPDF();
    fastNLOLHAPDF(std::string name, std::string LHAPDFfile, int PDFSet = 0);
+   fastNLOLHAPDF(const fastNLOTable&, std::string LHAPDFfile, int PDFSet = 0);
 
    // Initializer. Necessary for some alternative evolutions.
    virtual void InitEvolveAlphas();

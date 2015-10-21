@@ -484,7 +484,23 @@ fastNLOReader::fastNLOReader(string filename) : fastNLOTable(filename) {
    SetFilename(filename);
 }
 
+//______________________________________________________________________________
 
+fastNLOReader::fastNLOReader(const fastNLOTable& table) : fastNLOTable(table) {
+   //SetGlobalVerbosity(DEBUG); // Temporary for debugging
+   logger.SetClassName("fastNLOReader");
+   //fCoeffData           = NULL;
+   //    Coeff_LO_Ref         = NULL;
+   //    Coeff_NLO_Ref        = NULL;
+   fUnits               = fastNLO::kPublicationUnits;
+   fMuRFunc             = fastNLO::kScale1;
+   fMuFFunc             = fastNLO::kScale1;
+   fPDFSuccess          = false;
+   fAlphasCached        = 0.;
+   fPDFCached           = 0.;
+   fUseHoppet            = false;
+   SetFilename("null");
+}
 //______________________________________________________________________________
 fastNLOReader::~fastNLOReader(void) {
 }
