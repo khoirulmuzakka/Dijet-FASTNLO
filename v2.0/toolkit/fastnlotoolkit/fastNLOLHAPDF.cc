@@ -418,8 +418,16 @@ vector<double>  fastNLOLHAPDF::CalcPDFUncertaintySymm(const vector<LHAPDF::PDFUn
 }
 #endif
 
+
 //______________________________________________________________________________
 fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
+   fastNLOReader::XsUncertainty XsUnc = GetPDFUncertainty(ePDFUnc, false);
+   return XsUnc;
+}
+
+
+//______________________________________________________________________________
+fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc, bool lNorm) {
    fastNLOReader::XsUncertainty XsUnc;
    unsigned int NObsBin = GetNObsBin();
    unsigned int nMem = GetNPDFMaxMember();
@@ -447,7 +455,11 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPD
       exit(1);
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    } else if ( ePDFUnc == fastNLO::kLHAPDF6 ) {
-      logger.info["GetPDFUncertainty"]<<"Calculating LHAPDF6 PDF uncertainties."<<endl;
+      if ( lNorm ) {
+         logger.error["GetPDFUncertainty"]<<"Normalization option does not work with LHAPDF6 PDF uncertainties, aborted!"<<endl;
+      } else {
+         logger.info["GetPDFUncertainty"]<<"Calculating LHAPDF6 PDF uncertainties."<<endl;
+      }
 #endif
    } else {
       logger.error["GetPDFUncertainty"]<<"ERROR! Selected PDF uncertainty style not yet implemented, exiting."<<endl;
@@ -469,10 +481,11 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPD
 
    if ( ePDFUnc != fastNLO::kLHAPDF6 ) {
 
+      vector < double > MyXSection;
       // Evaluate central/zeroth PDF set member
       SetLHAPDFMember(0);
       CalcCrossSection();
-      xs0 = GetCrossSection();
+      xs0 = GetCrossSection(lNorm);
       // Use xs0 as assumed mean and add up shifted means ,(xsi - xs0), and
       // shifted means squared, (xsi - xs0)^2. Shifting permits numerically
       // more precise variance calculations.
@@ -490,16 +503,18 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPD
       for ( unsigned int ieig = 1; ieig <= nEig; ieig++ ) {
          SetLHAPDFMember(2*ieig-1);
          CalcCrossSection();
+         MyXSection = GetCrossSection(lNorm);
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            double diff     = XSection[iobs]-xs0[iobs];
+            double diff     = MyXSection[iobs]-xs0[iobs];
             XsUnc.xs[iobs] += diff;
             dxseigu[iobs]   = max(0.,diff);
             dxseigl[iobs]   = min(0.,diff);
          }
          SetLHAPDFMember(2*ieig);
          CalcCrossSection();
+         MyXSection = GetCrossSection(lNorm);
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            double diff     = XSection[iobs]-xs0[iobs];
+            double diff     = MyXSection[iobs]-xs0[iobs];
             XsUnc.xs[iobs] += diff;
             // Take only maximal one in case of one-sided deviations for one eigenvector
             if ( ePDFUnc == fastNLO::kHessianAsymmetricMax || ePDFUnc == fastNLO::kHessianCTEQCL68 ) {
@@ -521,8 +536,9 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPD
       if ( nMem%2 == 1 ) {
          SetLHAPDFMember(nMem);
          CalcCrossSection();
+         MyXSection = GetCrossSection(lNorm);
          for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-            double diff       = XSection[iobs]-xs0[iobs];
+            double diff       = MyXSection[iobs]-xs0[iobs];
             XsUnc.xs[iobs]   += diff;
             XsUnc.dxsu[iobs] += pow(max(0.,diff),2);
             XsUnc.dxsl[iobs] += pow(min(0.,diff),2);
@@ -601,8 +617,8 @@ std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const fas
    fastNLOReader::XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);
-   xsUncVec[0] = xsUnc.xs; 
-   xsUncVec[1] = xsUnc.dxsu; 
-   xsUncVec[2] = xsUnc.dxsl; 
+   xsUncVec[0] = xsUnc.xs;
+   xsUncVec[1] = xsUnc.dxsu;
+   xsUncVec[2] = xsUnc.dxsl;
    return xsUncVec;
 }

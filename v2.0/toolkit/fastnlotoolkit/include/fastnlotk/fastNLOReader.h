@@ -20,13 +20,19 @@ public:
    void SetFilename(std::string filename) ;
    void InitScalevariation();
    void SetUnits(fastNLO::EUnits Unit);
-   bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);  //!< Set contribution On/Off. Look for Id of this contribution during initialization.
+   /// Set contribution Id On/Off. Check for Id of a particular contribution with ContrId(...) or use ActivateContribution(...).
+   bool SetContributionON(fastNLO::ESMCalculation eCalc , unsigned int Id , bool SetOn = true);
+   /// Activate first found contribution of type eCalc and order eOrd
+   bool ActivateContribution(fastNLO::ESMCalculation eCalc , fastNLO::ESMOrder eOrd , bool SetOn = true);
+   /// Find Id in table of contribution of type eCalc and order eOrd
    int ContrId(const fastNLO::ESMCalculation eCalc, const fastNLO::ESMOrder eOrder) const;
-   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const { //! Get, if this table is a 'flexible scale' table or not.
+   /// Switch on LO and NLO contributions, deactivate other contributions.
+   void SetCoefficientUsageDefault();
+   /// Get, if this table is a 'flexible-scale' table or not.
+   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const {
       if ( ctest ) return  ctest->GetNScaleDep() >= 3;
       else return B_LO()->GetIsFlexibleScale();
    }
-   void SetCoefficientUsageDefault();                                                   //!< Switch on LO and NLO contributions, deactivate other contributions.
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       //!< Set the functional form of Mu_R
@@ -37,36 +43,40 @@ public:
    void SetExternalFuncForMuF(mu_func);                                                 //!< Set external function for scale calculation (optional)
 
    void UseHoppetScaleVariations(bool);
+
    // ---- Pdf interface ---- //
-   void FillPDFCache(double chksum=0.);                                                 //!< Prepare for recalculation of cross section with 'new'/updated pdf.
+   void FillPDFCache(double chksum=0., bool lForce=false);                              //!< Prepare for recalculation of cross section with 'new'/updated pdf.
    virtual std::vector<double> GetXFX(double x, double muf) const = 0;
 
    // ---- alphas cache ---- //
-   void FillAlphasCache();                                                              //!< prepare for recalculation of cross section with new alpha_s value.
+   void FillAlphasCache(bool lForce=false);                                             //!< prepare for recalculation of cross section with new alpha_s value.
 
    // ---- Do the cross section calculation ---- //
    void CalcCrossSection();
    double RescaleCrossSectionUnits(double binsize, int xunits);                         // Rescale according to kAbsoluteUnits and Ipublunits settings
 
    // ---- Getters for results---- //
-   struct XsUncertainty {                                                               //! Struct for returning vectors with cross section and relative uncertainty
+   struct XsUncertainty {                                   //! Struct for returning vectors with cross section and relative uncertainty
       std::vector < double > xs;
       std::vector < double > dxsl;
       std::vector < double > dxsu;
    };
 
-   std::vector < double > GetCrossSection();                                                 //! Return vector with all cross section values
+   std::vector < double > GetCrossSection();                //! Return vector with all cross section values
+   std::vector < double > GetCrossSection(bool lNorm);      //! Return vector with all cross section values, normalize on request
+   std::vector < double > GetNormCrossSection();            //! Return vector with all normalized cross section values
+
+   std::vector < double > GetReferenceCrossSection();
+   std::vector < double > GetKFactors();  ///< DEPRECATED
+   std::vector < double > GetQScales();   //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
+   std::vector < std::vector < double > > GetCrossSection2Dim();
+
 
    //! Return struct with vectors containing the cross section values and the selected scale uncertainty
    XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
+   XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc, bool lNorm );
+   //! Function for use with pyext (TODO: Clean this up)
    std::vector< std::vector<double> > GetScaleUncertaintyVec( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
-   // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of scale uncertainties second
-   //   vector < pair < double, pair <double, double> > > GetScaleUncertainty( const EScaleUncertaintyStyle eScaleUnc );
-
-   std::vector < double > GetReferenceCrossSection();
-   std::vector < double > GetKFactors();
-   std::vector < double > GetQScales(int irelord);                                           //!< Order (power of alpha_s) rel. to LO: 0 --> LO, 1 --> NLO
-   std::vector < std::vector < double > > GetCrossSection2Dim();
 
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
@@ -87,11 +97,12 @@ public:
    void PrintTableInfo(const int iprint = 0) const;                                     //!<  Print basic info about fastNLO table and its contributions
    void PrintFastNLOTableConstants(const int iprint = 2) const;                         //!<  Print (technical) constants of fastNLO table (use iprint) for level of details.
    void PrintCrossSections() const;                                                     //!<  Print cross sections (optimized for double-differential tables)
-   void PrintCrossSectionsDefault(std::vector<double> kthc = std::vector<double>()) const;        //!<  Print cross sections in the same format as in the fortran version.
    void PrintCrossSectionsWithReference();
    //void PrintCrossSectionsData() const;                                                 //!<  Print data table. (if available)
 
-   void RunFastNLODemo();                                                               //!<  Run an example of fastNLO for educational purposes, i.e. calculate and print cross sections for several scale variations
+   void PrintCrossSectionsDefault(std::vector<double> kthc = std::vector<double>()) const; ///< DEPRECATED
+   void RunFastNLODemo(); ///< DEPRECATED
+
    // ---- Test virtual functions for reasonable values. ---- //
    bool TestXFX();                                                                      //!< Test if XFX reasonable values
    bool TestAlphas();                                                                   //!< Test if EvolvaAlphas returns a reasonable value

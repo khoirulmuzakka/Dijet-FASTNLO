@@ -20,7 +20,7 @@ fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) : PrimalScream("fastNLOCoeffBase
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
-   //! Use has to take care to delete this object later
+   //! User has to take care to delete this object later
    return new fastNLOCoeffBase(*this);
 }
 
@@ -147,8 +147,8 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
          // continue;
       }
       else {
-	 warn["IsCompatible"]<<"Incompatible NScaleDep found!()"<<endl;
-	 return false;
+         warn["IsCompatible"]<<"Incompatible NScaleDep found!()"<<endl;
+         return false;
       }
    }
    debug["IsCompatible"]<<"Both tables are compatible"<<endl;

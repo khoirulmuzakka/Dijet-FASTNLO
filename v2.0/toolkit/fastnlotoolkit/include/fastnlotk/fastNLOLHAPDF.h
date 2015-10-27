@@ -56,7 +56,8 @@ public:
    int GetNFlavor() const;
    double GetAlphasMz() const;
    //! Return struct with vectors containing the cross section values and the selected scale uncertainty
-   XsUncertainty GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc);
+   XsUncertainty GetPDFUncertainty( const fastNLO::EPDFUncertaintyStyle ePDFUnc );
+   XsUncertainty GetPDFUncertainty( const fastNLO::EPDFUncertaintyStyle ePDFUnc, bool lNorm );
    std::vector<std::vector<double> > GetPDFUncertaintyVec(fastNLO::EPDFUncertaintyStyle);
    // Deprecated: Replaced by struct as return object: Return vector of pairs with all cross section values first and pairs of PDF uncertainties second
    //   vector < pair < double, pair <double, double> > > GetPDFUncertainty(const EPDFUncertaintyStyle ePDFUnc);
