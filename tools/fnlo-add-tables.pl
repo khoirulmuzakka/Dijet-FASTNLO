@@ -40,10 +40,11 @@ if ( $opt_h ) {
     print "  -d              Verbose output\n";
     print "  -h              Print this text\n";
     print "  -l dir          Directory for LO tables, (def.=scenario)\n";
-    print "  -n dir          Directory for NLO/NNLO tables, (def.=scenario)\n";
+    print "  -n dir          Directory for NLO/NNLO or combined tables, (def.=scenario)\n";
     print "  -s              Produce tables for statistical evaluation,\n".
         "                  i.e. combinations of each LO with 1 NLO table and\n".
-        "                  all LO with each NLO table\n";
+        "                  all LO with each NLO table\n".
+        "                  Do not use with combined tables.\n";
     print "  -v #            Choose between fastNLO version 2.3 or ? (def.=2.3)\n\n";
     exit;
 }
@@ -66,10 +67,12 @@ if ( $opt_l ) {$lodir = $opt_l;}
 my $nlodir   = "${scen}";
 if ( $opt_n ) {$nlodir = $opt_n;}
 my $nnlodir  = $nlodir;
+my $alldir   = $nlodir;
 my $tabext = "tab";
 my $loglob   = "${scen}*born*.${tabext}*";
 my $nloglob  = "${scen}*nlo*.${tabext}*";
 my $nnloglob = "${scen}*thrcor*.${tabext}*";
+my $allglob  = "${scen}*_d??-x??-y??_*.${tabext}*";
 
 # Directory
 my $sdir = getcwd();
@@ -110,7 +113,7 @@ unless ( @lotabs ) {
     @lotabs = glob $loglob;
 }
 unless ( @lotabs ) {
-    die "fnlo-add-tables.pl: ERROR! No LO table found, aborted!\n";
+    print "fnlo-add-tables.pl: WARNING! No LO table found!\n";
 }
 my $ntab = scalar @lotabs;
 print "fnlo-add-tables.pl: $ntab LO tables found.\n";
@@ -131,7 +134,7 @@ unless ( @nlotabs ) {
     @nlotabs = glob $nloglob;
 }
 unless ( @nlotabs ) {
-    die "fnlo-add-tables.pl: ERROR! No NLO table found, aborted!\n";
+    print "fnlo-add-tables.pl: WARNING! No NLO table found!\n";
 }
 $ntab = scalar @nlotabs;
 print "fnlo-add-tables.pl: $ntab NLO tables found.\n";
@@ -159,13 +162,39 @@ print "fnlo-add-tables.pl: $ntab NNLO tables found.\n";
 if ( $debug ) {print "fnlo-add-tables.pl: DEBUG! nnlotabs @nnlotabs\n";}
 
 #
+# Find combined tables
+#
+my @alltabs;
+if ( -d "$alldir" ) {
+    chdir $alldir;
+    @alltabs = glob $allglob;
+    chdir $sdir;
+}
+unless ( @alltabs ) {
+    print "fnlo-add-tables.pl: No combined table found in $alldir, now looking in $sdir ...\n";
+    $alldir  = ".";
+    @alltabs = glob $allglob;
+}
+unless ( @alltabs ) {
+    print "fnlo-add-tables.pl: WARNING! No combined table found!\n";
+}
+$ntab = scalar @alltabs;
+print "fnlo-add-tables.pl: $ntab combined tables found.\n";
+if ( $debug ) {print "fnlo-add-tables.pl: DEBUG! alltabs @alltabs\n";}
+
+unless ( @lotabs || @alltabs ) {
+    die "fnlo-add-tables.pl: ERROR! Neither LO nor combined table found!\n";
+}
+
+#
 # fnlo-tk-merge
 #
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\nfnlo-add-tables.pl: ${merger}: $date\n";
 # Statistics mode: Each LO with first NLO table & all LO with each NLO table
-if ( $opt_s ) {
+#                  Not necessary for combined tables.
+if ( $opt_s && ! @alltabs ) {
     print "\nfnlo-add-tables.pl: Statistics mode\n";
     my $scmd2 = $cmd;
     print "\nfnlo-add-tables.pl: Creating LO statistics tables ...\n";
