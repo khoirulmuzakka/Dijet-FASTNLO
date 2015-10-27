@@ -2355,7 +2355,6 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       if ( (lknlo || lkthc) && !fUseHoppet ) {
          const int ns = GetNScaleVariations();
          logger.debug["SetScaleFactorsMuRMuF"]<<"Found "<<ns<<" scale variations for contributions switched ON."<<endl;
-         cout << "AAA" << endl;
          fastNLOCoeffAddFix* cNLO = (fastNLOCoeffAddFix*)B_NLO();
          if ( !cNLO ) {cout << "Aetcshibaetcsh!" << endl;}
          int sfnlo = -1;
@@ -2367,7 +2366,6 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
                }
             }
          }
-         cout << "BBB" << endl;
          int sfthc = -1;
          if (lkthc) {
             for (int is = 0 ; is<ns ; is++) {
@@ -2377,7 +2375,6 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
                }
             }
          }
-         cout << "CCC" << endl;
          if (lknlo && sfnlo == -1) {
             logger.warn["SetScaleFactorsMuRMuF"]<<"Could not find NLO table with given mu_f scale factor of "<<xmuf<<", nothing changed!"<<endl;
             logger.warn["SetScaleFactorsMuRMuF"]
