@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
       tablename = (const char*) argv[1];
       if (tablename == "-h") {
          cout << " #" << endl;
-         shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode]" << endl;
+         shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
          shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
@@ -71,6 +71,8 @@ int main(int argc, char** argv) {
          shout << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          shout << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
+         shout << "[norm]: Normalize if applicable, def. = no." << endl;
+         shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
          cout << " #" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          cout << " #" << endl;
@@ -128,14 +130,26 @@ int main(int argc, char** argv) {
       AsEvolCode = (const char*) argv[4];
    }
    if (argc <= 4 || AsEvolCode == "_") {
+      AsEvolCode = "GRV";
       shout["fnlo-read"] << "No request given for alpha_s evolution code," << endl;
       shout << "            using GRV default." << endl;
    } else {
       shout["fnlo-read"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
    }
 
-   //---  Too many arguments
+   //--- Normalization
+   string chnorm = "no";
    if (argc > 5) {
+      chnorm = (const char*) argv[5];
+   }
+   if (argc <= 5 || chnorm == "_") {
+      shout["fnlo-read"] << "Preparing unnormalized cross sections," << endl;
+   } else {
+      shout["fnlo-read"] << "Normalizing cross sections. " << endl;
+   }
+
+   //---  Too many arguments
+   if (argc > 6) {
       error["fnlo-read"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -438,16 +452,6 @@ int main(int argc, char** argv) {
    //           vector < double > xs = fnlo.GetCrossSection();
    //           double* cs = &xs[0];
    //
-   //     Further you can access the "k-factor", which is calculated with all
-   //     'contributions' that are switched on (e.g. non-perturbative corrections)
-   //     against the LO fixed-order contribution.
-   //     Remark:
-   //          - the proverbial k-factor is NLO vs. LO
-   //          - 1-loop threshold corrections are vs. LO
-   //          - 2-loop threshold corrections are vs. NLO
-   //          - non-perturbative corrections usually are vs. NLO
-   //
-   //           vector < double > kFactors = fnlo.GetKFactors();
 
 
    // 11.
@@ -455,9 +459,6 @@ int main(int argc, char** argv) {
    // --- fastNLO user: For an easy overview of your cross section calculation
    //     you might use the following print methods:
    //             fnlo.PrintCrossSections();
-   //
-   //     Or print it like the Fortran reader code:
-   //             fnlo.PrintCrossSectionsDefault();
 
 
    // 12.
@@ -690,8 +691,6 @@ int main(int argc, char** argv) {
    //! Calculate cross sections
    fnlo->InitEvolveAlphas();
    fnlo->CalcCrossSection();
-   //! Uncomment this to actually print out the result
-   //!   fnlo->PrintCrossSectionsDefault();
    //
    //! Example code to print out data points (if available)
    //!   fnlo->PrintCrossSectionsData();
@@ -715,6 +714,9 @@ int main(int argc, char** argv) {
 
    //! Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
    //! fastNLOAlphas fnlo( tablename , PDFFile , 0 );
+
+   //! Ask for no. of observable bins
+   const int NObsBin = fnlo->GetNObsBin();
 
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
@@ -763,7 +765,7 @@ int main(int argc, char** argv) {
    for (unsigned int iscls=0; iscls<nscls; iscls++) {
 
       //! Switch on LO & NLO & NNLO, switch off anything else
-      if (!(ilo   < 0)) {
+      if ( ilo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
             error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
@@ -771,7 +773,7 @@ int main(int argc, char** argv) {
             exit(1);
          }
       }
-      if (!(inlo  < 0)) {
+      if ( inlo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
          if (!SetOn) {
             error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
@@ -779,7 +781,7 @@ int main(int argc, char** argv) {
             exit(1);
          }
       }
-      if (!(innlo  < 0)) {
+      if ( innlo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, true);
          if (!SetOn) {
             error["fnlo-read"] << "NNLO not found, nothing to be done!" << endl;
@@ -787,35 +789,54 @@ int main(int argc, char** argv) {
             exit(1);
          }
       }
-      if (!(ithc1 < 0)) {
+      if ( ithc1 > -1 ) {
          fnlo->SetContributionON(kThresholdCorrection, ithc1, false);
       }
-      if (!(ithc2 < 0)) {
+      if ( ithc2 > -1 ) {
          fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
       }
-      if (!(inpc1 < 0)) {
+      if ( inpc1 > -1 ) {
          fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, false);
       }
 
-      //! Define result vectors
-      bool lscvar = false;
+      /// Define result vectors
+
+      /// Possible scale variations
+      bool lscvar  = false;
       bool lthcvar = false;
-      vector < double > qscl;
+
+      /// Fixed-order
       vector < double > xslo;
       vector < double > xsnlo;
-      vector < double > kfac;
       vector < double > xsnnlo;
-      vector < double > kfac2;
+      vector < double > qsclo;
+      vector < double > qscnlo;
+      vector < double > qscnnlo;
+
+      /// Additional contributions if available
       vector < double > xsthc1;
-      vector < double > kthc1;
       vector < double > xsthc2;
-      vector < double > kthc2;
-      vector < double > xsnpc1;
-      vector < double > knpc1;
-      vector < double > xsnpc2;
-      vector < double > knpc2;
       vector < double > xsewk1;
-      vector < double > kewk1;
+      vector < double > xsnpc1;
+      vector < double > xsnpc2;
+
+      /// Ratio vectors
+      vector < double > kfac1(NObsBin);
+      vector < double > kfac2(NObsBin);
+      vector < double > kthc1(NObsBin);
+      vector < double > kthc2(NObsBin);
+      vector < double > knpc1(NObsBin);
+      vector < double > knpc2(NObsBin);
+      vector < double > kewk1(NObsBin);
+      for (int i=0; i<NObsBin; i++) {
+         kfac1[i] = 0.;
+         kfac2[i] = 0.;
+         kthc1[i] = 0.;
+         kthc2[i] = 0.;
+         knpc1[i] = 0.;
+         knpc2[i] = 0.;
+         kewk1[i] = 0.;
+      }
 
       //! Set MuR and MuF scale factors for pQCD cross sections and test availability
       //! Activate Hoppet for unusal variations
@@ -840,10 +861,22 @@ int main(int argc, char** argv) {
       //! Calculate cross section
       fnlo->CalcCrossSection();
 
-      //! Get LO & NLO & NNLO results
-      if (!(innlo  < 0)) {
-         xsnnlo = fnlo->GetCrossSection();
-         kfac2  = fnlo->GetKFactors();
+      //! Normalize?
+      bool lNorm = false;
+      if ( chnorm == "yes" || chnorm == "norm" ) {
+         if ( fnlo->IsNorm() ) {
+            lNorm = true;
+         } else {
+            error["fnlo-read"] << "Normalization requested but not defined for this table, aborted!" << endl;
+            exit(1);
+         }
+      }
+
+      /// Get LO & NLO & NNLO results
+      if ( ilo > -1 || inlo > -1 || innlo > -1 ) {info["fnlo-read"] << "Get fixed-order results ..." << endl;}
+      if ( innlo > -1 ) {
+         xsnnlo  = fnlo->GetCrossSection(lNorm);
+         qscnnlo = fnlo->GetQScales();
          bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, false);
          if (!SetOn) {
             error["fnlo-read"] << "Couldn´t switch off NNLO, this is strange!" << endl;
@@ -852,22 +885,43 @@ int main(int argc, char** argv) {
          }
          fnlo->CalcCrossSection();
       }
-      xsnlo = fnlo->GetCrossSection();
-      kfac  = fnlo->GetKFactors();
-      //! Set order for Q scale determination, rel. to LO: 0 --> LO, 1 --> NLO
-      int irelord = 1;
-      qscl  = fnlo->GetQScales(irelord);
-      xslo  = xsnlo;
-      for (unsigned int i=0; i<xslo.size(); i++) {
-         if (abs(kfac[i]) > DBL_MIN) {
-            xslo[i] = xslo[i]/kfac[i];
-         } else {
-            xslo[i] = -1.;
+      if ( inlo > -1 ) {
+         xsnlo  = fnlo->GetCrossSection(lNorm);
+         qscnlo = fnlo->GetQScales();
+         bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, false);
+         if (!SetOn) {
+            error["fnlo-read"] << "Couldn´t switch off NLO, this is strange!" << endl;
+            error["fnlo-read"] << "This should have been caught before!" << endl;
+            exit(1);
+         }
+         fnlo->CalcCrossSection();
+      }
+      if ( ilo > -1 ) {
+         xslo  = fnlo->GetCrossSection(lNorm);
+         qsclo = fnlo->GetQScales();
+      }
+
+      /// Calculate fixed-order K factors
+      if ( ilo > -1 && inlo > -1 ) {
+         info["fnlo-read"] << "Calculate fixed-order K factors ..." << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            if (abs(xslo[i]) > DBL_MIN) {
+               kfac1[i] = xsnlo[i]/xslo[i];
+            } else {
+               kfac1[i] = -1.;
+            }
+            if ( innlo > -1 && abs(xsnlo[i]) > DBL_MIN) {
+               kfac2[i] = xsnnlo[i]/xsnlo[i];
+            } else {
+               kfac2[i] = -1.;
+            }
          }
       }
 
-      //! Get threshold corrections
-      if ( !(inlo < 0 || ithc2 < 0) ) {
+      /// Get threshold corrections
+      if ( ithc1 > -1 || ithc2 > -1 ) {info["fnlo-read"] << "Get threshold corrections ..." << endl;}
+      if ( ilo > -1 && inlo > -1 && ithc2 > -1 ) {
+         fnlo->SetContributionON(kFixedOrder, inlo, true);
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
             warn["fnlo-read"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
@@ -881,18 +935,10 @@ int main(int argc, char** argv) {
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
          } else {
             fnlo->CalcCrossSection();
-            xsthc2 = fnlo->GetCrossSection();
-            kthc2  = fnlo->GetKFactors();
-            for (unsigned int i=0; i<xsnlo.size(); i++) {
-               if (abs(xsnlo[i]) > DBL_MIN) {
-                  kthc2[i] = xsthc2[i]/xsnlo[i];
-               } else {
-                  kthc2[i] = -1.;
-               }
-            }
+            xsthc2 = fnlo->GetCrossSection(lNorm);
          }
-      } else if ( !(ilo < 0 || ithc1 < 0)) {
-         if ( !(inlo < 0) ) fnlo->SetContributionON(kFixedOrder, inlo, false);
+      } else if ( ilo > -1 && ithc1 > -1 ) {
+         if ( inlo > -1 ) fnlo->SetContributionON(kFixedOrder, inlo, false);
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc1, true);
          if (!SetOn) {
             warn["fnlo-read"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
@@ -906,20 +952,36 @@ int main(int argc, char** argv) {
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
          } else {
             fnlo->CalcCrossSection();
-            xsthc1 = fnlo->GetCrossSection();
-            kthc1  = fnlo->GetKFactors();
-            for (unsigned int i=0; i<xslo.size(); i++) {
-               if (abs(xslo[i]) > DBL_MIN) {
-                  kthc1[i] = xsthc1[i]/xslo[i];
-               } else {
-                  kthc1[i] = -1.;
-               }
+            xsthc1 = fnlo->GetCrossSection(lNorm);
+         }
+      }
+
+      /// Calculate threshold correction K factors
+      if ( ilo > -1 && ithc1 > -1 && lthcvar ) {
+         info["fnlo-read"] << "Calculate threshold correction K factors ..." << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            if (abs(xslo[i]) > DBL_MIN) {
+               kthc1[i] = xsthc1[i]/xslo[i];
+            } else {
+               kthc1[i] = -1.;
             }
          }
       }
-      //! Get non-perturbative corrections
-      if ( !(inpc1 < 0) ) {
-         if ( !(inlo < 0) ) {
+      if ( ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
+         info["fnlo-read"] << "Calculate threshold correction K factors ..." << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            if (abs(xsnlo[i]) > DBL_MIN) {
+               kthc2[i] = xsthc2[i]/xsnlo[i];
+            } else {
+               kthc2[i] = -1.;
+            }
+         }
+      }
+
+      /// Get non-perturbative corrections
+      if ( inpc1 > -1 ) {
+         info["fnlo-read"] << "Get non-perturbative corrections ..." << endl;
+         if ( inlo > -1 ) {
             bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
             if (!SetOn) {
                error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
@@ -927,8 +989,8 @@ int main(int argc, char** argv) {
                exit(1);
             }
          }
-         if ( !(ithc1 < 0) ) fnlo->SetContributionON(kThresholdCorrection, ithc1, false);
-         if ( !(ithc2 < 0) ) fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
+         if ( ithc1 > -1 ) fnlo->SetContributionON(kThresholdCorrection, ithc1, false);
+         if ( ithc2 > -1 ) fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
          bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
          if (!SetOn) {
             error["fnlo-read"] << "NPC1 not found, nothing to be done!" << endl;
@@ -936,11 +998,15 @@ int main(int argc, char** argv) {
             exit(1);
          }
          fnlo->CalcCrossSection();
-         xsnpc1 = fnlo->GetCrossSection();
-         knpc1  = fnlo->GetKFactors();
-         for (unsigned int i=0; i<kfac.size(); i++) {
-            if (abs(kfac[i]) > DBL_MIN) {
-               knpc1[i] = knpc1[i]/kfac[i];
+         xsnpc1 = fnlo->GetCrossSection(lNorm);
+      }
+
+      /// Calculate non-perturbative factors
+      if ( ilo > -1 && inlo > -1 && inpc1 > -1 ) {
+         info["fnlo-read"] << "Calculate non-perturbative factors ..." << endl;
+         for (unsigned int i=0; i<xslo.size(); i++) {
+            if (abs(xsnlo[i]) > DBL_MIN) {
+               knpc1[i] = xsnpc1[i]/xsnlo[i];
             } else {
                knpc1[i] = -1.;
             }
@@ -958,7 +1024,6 @@ int main(int argc, char** argv) {
       const int NDim = fnlo->GetNumDiffBin();
       unsigned int NDimBins[NDim];
       vector < string > DimLabel = fnlo->GetDimLabels();
-      const int NObsBin = fnlo->GetNObsBin();
       vector < vector < double > > LoBin(NObsBin);
       vector < vector < double > > UpBin(NObsBin);
       for (int i=0; i<NObsBin; i++) {
@@ -1016,35 +1081,35 @@ int main(int argc, char** argv) {
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i]);
             } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc1[i]);
             } else if (ilo > -1 && inlo > -1 && innlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#18.11E  %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],xsnnlo[i],kfac[i],kfac2[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],xsnnlo[i],kfac1[i],kfac2[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i]);
             } else if (ilo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i],kthc1[i]);
+                      qsclo[i],xslo[i],kthc1[i]);
             } else if (ilo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      qscl[i],xslo[i]);
+                      qsclo[i],xslo[i]);
             } else {
                printf("fnlo-read: Nothing to report!\n");
                continue;
@@ -1069,31 +1134,31 @@ int main(int argc, char** argv) {
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i]);
             } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],knpc1[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xslo[i],xsnlo[i],kfac1[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i],kthc1[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc1[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],xsnlo[i],kfac[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xslo[i],xsnlo[i],kfac1[i]);
             } else if (ilo > -1 && ithc1 > -1 && lthcvar) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#9.5F",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i],kthc1[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qsclo[i],xslo[i],kthc1[i]);
             } else if (ilo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
-                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscl[i],xslo[i]);
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qsclo[i],xslo[i]);
             } else {
                printf("fnlo-read: Nothing to report!\n");
                continue;
@@ -1111,12 +1176,12 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
                       fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i],kthc2[i],knpc1[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
                       fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
-                      qscl[i],xslo[i],xsnlo[i],kfac[i]);
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i]);
             } else {
                printf("fnlo-read: Nothing to report!\n");
                continue;

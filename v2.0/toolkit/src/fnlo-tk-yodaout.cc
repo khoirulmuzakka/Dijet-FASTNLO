@@ -70,6 +70,8 @@ int main(int argc, char** argv) {
 #endif
          shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          shout << "   Alternatives: LO, NNLO (if available)" << endl;
+         shout << "[norm]: Normalize if applicable, def. = no." << endl;
+         shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
          cout << " #" << endl;
          shout << "Use \"_\" to skip changing a default argument." << endl;
          cout << " #" << endl;
@@ -160,6 +162,21 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+   //! --- Normalization
+   string chnorm = "no";
+   if (argc > 5) {
+      chnorm = (const char*) argv[5];
+   }
+   if (argc <= 5 || chnorm == "_") {
+      shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections," << endl;
+   } else {
+      shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
+   }
+   //! ---  Too many arguments
+   if (argc > 6) {
+      error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
+      exit(1);
+   }
    cout << _CSEPSC << endl;
 
    //! --- fastNLO initialisation, read & evaluate table
@@ -224,6 +241,17 @@ int main(int argc, char** argv) {
    //    }
    // }
 
+   //! Normalize?
+   bool lNorm = false;
+   if ( chnorm == "yes" || chnorm == "norm" ) {
+      if ( fnlo.IsNorm() ) {
+         lNorm = true;
+      } else {
+         error["fnlo-read"] << "Normalization requested but not defined for this table, aborted!" << endl;
+         exit(1);
+      }
+   }
+
    //! --- Determine dimensioning of observable bins in table
    const int NDim = fnlo.GetNumDiffBin();
    if (NDim < 1 || NDim > 2) {
@@ -252,16 +280,16 @@ int main(int argc, char** argv) {
    //! Re-calculate cross sections to potentially include the above-selected non-perturbative factors
    fnlo.CalcCrossSection();
    //! Get cross sections
-   vector < double > xs = fnlo.GetCrossSection();
+   vector < double > xs = fnlo.GetCrossSection(lNorm);
    //! If required get uncertainties (only for additive perturbative contributions)
    fastNLOReader::XsUncertainty XsUnc;
    string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
-      XsUnc = fnlo.GetScaleUncertainty(eScaleUnc);
+      XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
       snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
       LineName += "_dxscl";
    } else if ( chunc != "none" ) {
-      XsUnc = fnlo.GetPDFUncertainty(ePDFUnc);
+      XsUnc = fnlo.GetPDFUncertainty(ePDFUnc, lNorm);
       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
       LineName += "_dxpdf";
    }
@@ -295,16 +323,25 @@ int main(int argc, char** argv) {
 
    //! --- Get RivetID
    //!     For 2-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
-   size_t capital_pos = 0;
+   //!     For inverted order, the Id starts with "-" after "/".
+   size_t capital_pos  = 0;
+   int    invert_order = 1;
    string RivetId = fnlo.GetRivetId();
    if (RivetId.empty()) {
-      error["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, aborted!" << endl;
-      exit(1);
+      warn["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, no YODA formatted output possible, exiting!" << endl;
+      exit(0);
    }
    if ( NDim == 2 ) {
-      for (size_t i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++) {
-         if (isupper(fnlo.GetRivetId()[i])) {                                      // Find capital letter
-            RivetId[i] = tolower(RivetId[i]);                                      // and lower it
+      size_t i0 = RivetId.find("/");
+      /// Check for inversion of histogram order
+      if ( RivetId.substr(i0,2) == "/-" ) {
+         invert_order = -1;
+         RivetId.erase(i0+1,1);
+      }
+      for (size_t i = i0; i < RivetId.size(); i++) {
+         /// Identify capital letter in "d01-x01-y01" type strings, memorize position and lower it
+         if (isupper(RivetId[i])) {
+            RivetId[i] = tolower(RivetId[i]);
             capital_pos = i;
             break;
          }
@@ -324,7 +361,7 @@ int main(int argc, char** argv) {
    //! --- YODA analysis object creation and storage
    YODA::Writer & writer = YODA::WriterYODA::create();                          //! Create the writer for the yoda file
    vector< YODA::AnalysisObject * > aos;                                   //! Vector of pointers to each of multiple analysis objects
-   size_t offset = atoi(RivetId.substr(capital_pos +1, 2).c_str());
+   size_t counter = atoi(RivetId.substr(capital_pos +1, 2).c_str());
 
    //! --- Initialize dimension bin and continuous observable bin counter
    unsigned int NDimBins[NDim];
@@ -352,12 +389,9 @@ int main(int argc, char** argv) {
          eyminus.push_back(abs(dxsl[iobs]));
          iobs++;
       }
-      stringstream plotno;                                                                         // To make i+1 from int
-      plotno << offset;                                                                            // to a string for the naming
-      //      RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
-      // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
+      /// Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
       YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
-      // Insert the plot pointer into the vector of analysis object pointers
+      /// Insert the plot pointer into the vector of analysis object pointers
       aos.push_back(plot);
    }
    //! --- 2D
@@ -382,12 +416,21 @@ int main(int argc, char** argv) {
             eyminus.push_back(abs(dxsl[iobs]));
             iobs++;
          }
-         stringstream plotno;                                                                         // To make i+1 from int
-         plotno << offset+j;                                                                          // to a string for the naming
-         RivetId.replace( capital_pos +3 - plotno.str().size(), plotno.str().size(), plotno.str());   // Next plot name
-         // Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
+         /// Derive histogram counter
+         size_t ihist = (invert_order > 0) ? (counter + j) : (counter - j);
+         if ( ihist == 0 || ihist > 99 ) {
+            error["fnlo-tk-yodaout"] << "Rivet histogram counter out of range, aborted!" << endl;
+            error["fnlo-tk-yodaout"] << "ihist = " << ihist << endl;
+            exit(1);
+         }
+         /// Convert size_t into string for naming
+         stringstream histno;
+         histno << ihist;
+         /// Replace counter part in RivetId by histno
+         RivetId.replace(capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());
+         /// Pointer in order not to be deleted after we exit the loop, so we can then save the plots into the yoda file
          YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
-         // Insert the plot pointer into the vector of analysis object pointers
+         /// Insert the plot pointer into the vector of analysis object pointers
          aos.push_back(plot);
       }
    }
