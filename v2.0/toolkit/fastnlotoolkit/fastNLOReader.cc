@@ -437,7 +437,6 @@
 #include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/fastNLOTools.h"
-#include "fastnlotk/read_steer.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 #ifdef FNLO_HOPPET

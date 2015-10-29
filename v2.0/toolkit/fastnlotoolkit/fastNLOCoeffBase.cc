@@ -4,7 +4,6 @@
 
 #include "fastnlotk/fastNLOCoeffBase.h"
 #include "fastnlotk/fastNLOTools.h"
-#include "fastnlotk/fastNLOGeneratorConstants.h"
 
 using namespace std;
 
