@@ -34,6 +34,8 @@ int main(int argc, char** argv) {
 
    //! --- Parse commmand line
    char buffer[1024];
+   char titlel[1024];
+   char titleu[1024];
    cout << endl;
    cout << _CSEPSC << endl;
    shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
@@ -179,13 +181,13 @@ int main(int argc, char** argv) {
    cout << _CSEPSC << endl;
 
    //! --- Prepare loop over PDF sets
-   const int nsets = 3;
+   const int nsets = 4;
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   string StandardPDFSets[nsets] = {"CT14nlo", "MMHT2014nlo68cl", "NNPDF30_nlo_as_0118"};
+   string StandardPDFSets[nsets] = {"CT14nlo", "MMHT2014nlo68cl", "NNPDF30_nlo_as_0118", "PDF4LHC15_nlo_mc"};
 #else
-   string StandardPDFSets[nsets] = {"CT10nlo.LHgrid", "MSTW2008nlo68cl.LHgrid", "NNPDF21_100.LHgrid"};
+   string StandardPDFSets[nsets] = {"CT10nlo.LHgrid", "MSTW2008nlo68cl.LHgrid", "NNPDF21_100.LHgrid", "NNPDF10_100.lHpdf"};
 #endif
-   EPDFUncertaintyStyle ePDFUncs[nsets] = {kHessianCTEQCL68, kHessianAsymmetricMax, kMCSampling};
+   EPDFUncertaintyStyle ePDFUncs[nsets] = {kHessianCTEQCL68, kHessianAsymmetricMax, kMCSampling, kMCSampling};
 
    vector < string > PDFFiles;
    vector < EPDFUncertaintyStyle > PDFUncStyles;
@@ -279,7 +281,7 @@ int main(int argc, char** argv) {
 
    //! --- Get all required info from table
    //! Determine number and dimensioning of observable bins in table
-   unsigned int NObsBin = fnlo.GetNObsBin();
+   //   unsigned int NObsBin = fnlo.GetNObsBin();
    const int NDim = fnlo.GetNumDiffBin();
    if (NDim < 1 || NDim > 2) {
       error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
@@ -348,18 +350,24 @@ int main(int argc, char** argv) {
             if ( iUnc==0 ) {
                XsUnc = fnlo.GetPDFUncertainty(PDFUncStyles[iPDF], lNorm);
                snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
+               snprintf(titlel, sizeof(titlel), "-dsigma_%s/sigma",PDFFiles[iPDF].c_str());
+               snprintf(titleu, sizeof(titleu), "+dsigma_%s/sigma",PDFFiles[iPDF].c_str());
             }
             //! 2P scale uncertainties
             else if ( iUnc==1 ) {
                eScaleUnc = kSymmetricTwoPoint;
                XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 2P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
+               snprintf(titlel, sizeof(titlel), "-dsigma_2P/sigma");
+               snprintf(titleu, sizeof(titleu), "+dsigma_2P/sigma");
             }
             //! 6P scale uncertainties
             else if ( iUnc==2 ) {
                eScaleUnc = kAsymmetricSixPoint;
                XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 6P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
+               snprintf(titlel, sizeof(titlel), "-dsigma_6P/sigma");
+               snprintf(titleu, sizeof(titleu), "+dsigma_6P/sigma");
             }
 
             //! Print out of results
@@ -473,7 +481,7 @@ int main(int argc, char** argv) {
                histo[j+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
                histo[j+iUnc]->SetContent(dylow);
                histo[j+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-               histo[j+iUnc]->GetYaxis()->SetTitle(("-dsigma_"+PDFFiles[iPDF]+"/sigma").c_str());
+               histo[j+iUnc]->GetYaxis()->SetTitle(titlel);
                nHist++;
 
                // Upper uncertainty
@@ -483,7 +491,7 @@ int main(int argc, char** argv) {
                histo[j+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
                histo[j+iUnc]->SetContent(dyupp);
                histo[j+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-               histo[j+iUnc]->GetYaxis()->SetTitle(("+dsigma_"+PDFFiles[iPDF]+"/sigma").c_str());
+               histo[j+iUnc]->GetYaxis()->SetTitle(titleu);
                nHist++;
             }
          }
