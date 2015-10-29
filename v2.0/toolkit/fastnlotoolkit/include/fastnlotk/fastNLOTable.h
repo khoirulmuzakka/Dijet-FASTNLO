@@ -140,6 +140,8 @@ class fastNLOTable : public fastNLOBase {
    int GetLoOrder() const {return ILOord;}
    /// Get Rivet ID of analysis
    std::string GetRivetId() const;
+   /// Get cross section from analysis description
+   std::string GetXSDescr() const;
 
    /// ___________________________________________________________________________________________________
    /// Some setters (really needed here?)

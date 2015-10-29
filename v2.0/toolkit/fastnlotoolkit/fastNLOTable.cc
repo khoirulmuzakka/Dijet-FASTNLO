@@ -373,21 +373,21 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
                else {
                   logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
                   if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) ) {
-		     if ( !(lhs->IsCompatible(*cadd)) )
-			logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-		     lhs->Add(*cadd);
-		  }
+                     if ( !(lhs->IsCompatible(*cadd)) )
+                        logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+                     lhs->Add(*cadd);
+                  }
                   else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) ) {
-		     if ( !(lhs->IsCompatible(*cadd)) )
-			logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-		     lhs->Add(*cadd);
-		  }
+                     if ( !(lhs->IsCompatible(*cadd)) )
+                        logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+                     lhs->Add(*cadd);
+                  }
                   wasAdded = true;
                }
             }
-	    // else {
-	    //    logger.warn["AddTable"]<<"Incompatible tables found!"<<endl;
-	    // }
+            // else {
+            //    logger.warn["AddTable"]<<"Incompatible tables found!"<<endl;
+            // }
          }
       }
       else {
@@ -1091,6 +1091,17 @@ string fastNLOTable::GetRivetId() const {
    }
    return found;
 }
+
+string fastNLOTable::GetXSDescr() const {
+   string identifier("sigma");
+   for (size_t i=0; i < ScDescript.size(); ++i) {
+      if (ScDescript[i].find(identifier) != string::npos){
+         return ScDescript[i];
+      }
+   }
+   return "Undefined";
+}
+
 
 
 // ___________________________________________________________________________________________________

@@ -21,6 +21,9 @@ if HAVE_YODA
    bin_PROGRAMS += fnlo-tk-yodaout
    bin_PROGRAMS += fnlo-tk-statunc
 endif
+if HAVE_ROOT
+   bin_PROGRAMS += fnlo-tk-rootout
+endif
 endif
 
 #
@@ -34,6 +37,7 @@ fnlo_tk_cppread_SOURCES = fnlo-tk-cppread.cc
 fnlo_tk_example_SOURCES = fnlo-tk-example.cc
 fnlo_tk_yodaout_SOURCES = fnlo-tk-yodaout.cc
 fnlo_tk_statunc_SOURCES = fnlo-tk-statunc.cc
+fnlo_tk_rootout_SOURCES = fnlo-tk-rootout.cc
 fnlo_tk_merge_SOURCES   = fnlo-tk-merge.cc
 fnlo_tk_append_SOURCES  = fnlo-tk-append.cc
 fnlo_tk_modify_SOURCES  = fnlo-tk-modify.cc
@@ -54,6 +58,7 @@ if HAVE_ROOT
 endif
 fnlo_tk_yodaout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
 fnlo_tk_statunc_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
+fnlo_tk_rootout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 fnlo_tk_merge_CPPFLAGS   = $(my_include_dirs) -I${includedir}
 fnlo_tk_append_CPPFLAGS  = $(my_include_dirs) -I${includedir}
 fnlo_tk_modify_CPPFLAGS  = $(my_include_dirs) -I${includedir}
@@ -68,6 +73,7 @@ if HAVE_ROOT
 endif
 fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall
 fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS)
 fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall
 fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall
 fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall
@@ -86,6 +92,7 @@ if HAVE_ROOT
 endif
 fnlo_tk_yodaout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODALDFLAGS)
 fnlo_tk_statunc_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODALDFLAGS)
+fnlo_tk_rootout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(ROOTLDFLAGS)
 fnlo_tk_merge_LDFLAGS   = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_append_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_modify_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
