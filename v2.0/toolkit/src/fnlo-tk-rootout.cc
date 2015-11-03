@@ -55,17 +55,15 @@ int main(int argc, char** argv) {
          shout << "Usage: ./fnlo-tk-rootout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = series of CT14nlo, MMHT2014nlo68cl, NNPDF30_nlo_as_0118" << endl;
+         shout << "[PDF]: PDF set, def. = series of CT14nlo, MMHT2014nlo68cl, NNPDF30_nlo_as_0118, PDF4LHC15_nlo_mc" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
          shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          shout << "   - Specify the PDF set including the absolute path." << endl;
          shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "[uncertainty]: Uncertainty to show, def. = none" << endl;
+         shout << "[PDF uncertainty]: Uncertainty to show, def. = none" << endl;
          shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
-         shout << "                 2P (symmetric 2-point scale factor variation)" << endl;
-         shout << "                 6P (asymmetric 6-point scale factor variation)" << endl;
          shout << "                 HS (symmetric Hessian PDF uncertainty --> ABM PDFs)" << endl;
          shout << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
          shout << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
@@ -74,8 +72,8 @@ int main(int argc, char** argv) {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
          shout << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
-         shout << "[order]: Fixed-order precision to use, def. = LO & NLO" << endl;
-         shout << "   Alternatives: LO, NNLO (if available)" << endl;
+         shout << "[order]: Fixed-order precision to use, def. = series up to highest fixed-order available" << endl;
+         shout << "   Alternatives: LO, NLO, NNLO (if available)" << endl;
          shout << "[norm]: Normalize if applicable, def. = no." << endl;
          shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
          cout << " #" << endl;
@@ -88,11 +86,12 @@ int main(int argc, char** argv) {
       }
    }
    //! --- PDF choice
-   string PDFFile = "X";
+   string PDFFile;
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
    }
    if (argc <= 2 || PDFFile == "_") {
+      PDFFile = "X";
       shout["fnlo-tk-rootout"] << "No PDF set given, taking standard series of PDF sets instead!" << endl;
    } else {
       shout["fnlo-tk-rootout"] << "Using PDF set   : " << PDFFile << endl;
@@ -100,21 +99,16 @@ int main(int argc, char** argv) {
    //! --- Uncertainty choice
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
-   string chunc = "none";
+   string chunc;
    if (argc > 3) {
       chunc = (const char*) argv[3];
    }
    if (argc <= 3 || chunc == "_") {
-      shout["fnlo-tk-rootout"] << "No request given for uncertainty, none evaluated." << endl;
+      chunc = "none";
+      shout["fnlo-tk-rootout"] << "No request given for PDF uncertainty, none evaluated." << endl;
    } else {
       if ( chunc == "NN" ) {
-         shout["fnlo-tk-rootout"] << "No uncertainty, but correct MC sampling average value as needed for NNPDF." << endl;
-      } else if ( chunc == "2P" ) {
-         eScaleUnc = kSymmetricTwoPoint;
-         shout["fnlo-tk-rootout"] << "Showing uncertainty from symmetric 2-point scale factor variation." << endl;
-      } else if ( chunc == "6P" ) {
-         eScaleUnc = kAsymmetricSixPoint;
-         shout["fnlo-tk-rootout"] << "Showing uncertainty from asymmetric 6-point scale factor variation." << endl;
+         shout["fnlo-tk-rootout"] << "No PDF uncertainty, but correct MC sampling average value as needed for NNPDF." << endl;
       } else if ( chunc == "HS" ) {
          ePDFUnc = kHessianSymmetric;
          shout["fnlo-tk-rootout"] << "Showing symmetric Hessian PDF uncertainty (--> ABM PDFs)." << endl;
@@ -141,13 +135,14 @@ int main(int argc, char** argv) {
       }
    }
    //! --- Fixed-order choice
-   ESMOrder eOrder = kNextToLeading;
-   string chord = "NLO";
+   ESMOrder eOrder = kLeading;
+   string chord;
    if (argc > 4) {
       chord = (const char*) argv[4];
    }
    if (argc <= 4 || chord == "_") {
-      shout["fnlo-tk-rootout"] << "No request given for fixed-order precision, using NLO." << endl;
+      chord = "ALL";
+      shout["fnlo-tk-rootout"] << "No request given for fixed-order precision, using default series of orders." << endl;
    } else {
       if ( chord == "LO" ) {
          eOrder = kLeading;
@@ -164,11 +159,12 @@ int main(int argc, char** argv) {
       }
    }
    //! --- Normalization
-   string chnorm = "no";
+   string chnorm;
    if (argc > 5) {
       chnorm = (const char*) argv[5];
    }
    if (argc <= 5 || chnorm == "_") {
+      chnorm = "no";
       shout["fnlo-tk-rootout"] << "Preparing unnormalized cross sections," << endl;
    } else {
       shout["fnlo-tk-rootout"] << "Normalizing cross sections. " << endl;
@@ -221,7 +217,7 @@ int main(int argc, char** argv) {
       info["fnlo-tk-rootout"] << "The LO contribution has Id: " << ilo << endl;
       fnlo.SetContributionON(kFixedOrder, ilo, true);
    }
-   unsigned int nOrder = 0;
+   unsigned int nOrder = 1;
    //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo.ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
@@ -237,7 +233,7 @@ int main(int argc, char** argv) {
       } else {
          fnlo.SetContributionON(kFixedOrder, inlo, false);
       }
-      nOrder = 1;
+      nOrder = 2;
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
    int innlo = fnlo.ContrId(kFixedOrder, kNextToNextToLeading);
@@ -254,7 +250,7 @@ int main(int argc, char** argv) {
       } else {
          fnlo.SetContributionON(kFixedOrder, innlo, false);
       }
-      nOrder = 2;
+      nOrder = 3;
    }
    // //! Check on existence of non-perturbative corrections from LO MC
    // int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
@@ -307,6 +303,9 @@ int main(int argc, char** argv) {
 
    //! --- Create ROOT file
    string BaseName     = tablename.substr(0, max(0,(int)tablename.size() -4));
+   if ( PDFFile != "X" )    BaseName = BaseName + "_" + PDFFile;
+   if ( chunc   != "none" ) BaseName = BaseName + "_" + chunc;
+   if ( chnorm  != "no" )   BaseName = BaseName + "_norm";
    string RootFileName = BaseName + ".root";
    TFile *rootfile = new TFile(RootFileName.c_str(),"NEW");
    //  Initialize histogram counter
@@ -319,8 +318,18 @@ int main(int argc, char** argv) {
       //! Initialize table with requested PDF set
       fastNLOLHAPDF fnlo(table,PDFFiles[iPDF],0);
 
-      //! Do multiple fixed-order levels
-      for (unsigned int iOrder = 0; iOrder <= nOrder; iOrder++) {
+      //! Do multiple fixed-order levels unless desired differently
+      unsigned int iOrdMin = 0;
+      unsigned int iOrdMax = nOrder;
+      if ( chord == "ALL" ) {
+         iOrdMin = 0;
+         // Full result is stored already in iOrder=0
+         iOrdMax = nOrder-1;
+      } else if ( chord != "ALL" ) {
+         iOrdMin = (unsigned int)eOrder+1;
+         iOrdMax = min((unsigned int)eOrder+1,nOrder);
+      }
+      for (unsigned int iOrder = iOrdMin; iOrder <= iOrdMax; iOrder++) {
 
          //! Starting default: All fixed-order levels on
          if (iOrder == 0 ) {
@@ -328,12 +337,16 @@ int main(int argc, char** argv) {
             if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, false);
             if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, false);
          } else if (iOrder == 2) {
+            if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, false);
+            if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, true);
+         } else if (iOrder == 3) {
+            if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, true);
             if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, true);
          } else {
             error["fnlo-tk-rootout"] << "Orders beyond " << nOrder << " are not implemented yet, aborted!" << endl;
             exit(1);
          }
-         string sOrder = _OrdName[kFixedOrder][nOrder];
+         string sOrder = _OrdName[kFixedOrder][nOrder-1];
          if (iOrder > 0) sOrder = _OrdName[kFixedOrder][iOrder-1];
 
          //! Re-calculate cross sections for new settings
@@ -348,7 +361,10 @@ int main(int argc, char** argv) {
 
             //! PDF first
             if ( iUnc==0 ) {
+               // Back up zeroth member result when no proper uncertainty choice was made (only approx. correct for NNPDF)
+               vector < double > xstmp = fnlo.GetCrossSection(lNorm);
                XsUnc = fnlo.GetPDFUncertainty(PDFUncStyles[iPDF], lNorm);
+               if ( PDFUncStyles[iPDF] == kPDFNone ) XsUnc.xs = xstmp;
                snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
                snprintf(titlel, sizeof(titlel), "-dsigma_%s/sigma",PDFFiles[iPDF].c_str());
                snprintf(titleu, sizeof(titleu), "+dsigma_%s/sigma",PDFFiles[iPDF].c_str());
