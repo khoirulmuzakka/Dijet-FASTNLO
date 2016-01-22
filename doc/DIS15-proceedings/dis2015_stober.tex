@@ -34,7 +34,7 @@ Using multi-dimensional interpolation techniques, coefficient tables are
 produced that allow to quickly evaluate the cross section for
 different PDFs, values of $\alpha_s$ and scale choices.
 
-These proceedings focuses on recent developments of the fastNLO framework, in
+These proceedings focus on recent developments of the fastNLO framework, in
 particular on the increased flexibility with respect to scale variations
 and the new generators that are already interfaced.
 As an example, the flexibility of fastNLO is shown using a measurement
@@ -50,7 +50,7 @@ to refine the fitting procedure.}
 
 \section{Introduction}
 
-Very accurate theoretical predictions are crucial for modern
+Accurate theoretical predictions are crucial for modern
 precision measurements in high energy physics.
 However, such theory calculations of observables at higher orders
 of perturbative QCD can be very challenging and often take a very long
@@ -69,21 +69,21 @@ calculations for a large set of different parameters. Typical examples for such 
 \item For the estimation of the effect of missing higher orders in theory
   predictions, the calculations are conventionally repeated for different
   choices of the renormalization and/or factorization scale. For processes
-  involving multiple scales it is often necessary to also
+  involving multiple scales it is often necessary to
   investigate these scale variations as a function of different observables of
-  the processes.
+  the process.
 \item The determination of theory parameters from measurements, like
-  the value of the strong coupling constant or constraining PDFs,
+  the value of the strong coupling constant or PDF parameterizations,
   requires the evaluation of theory predictions for different values
-  of these parameters.
+  of the respective parameters.
   The fit procedure for PDFs involves the recalculation
   of theory predictions for a large number of different observables due to
   the parameter changes in the underlying PDFs in each step of the fitting procedure.
 \end{itemize}
 
 In particular for observables like Drell-Yan and jet cross sections at
-hadron-hadron colliders, the evaluation of these variations using only
-the next-to-leading order (NLO) or next-to-next-to-leading order (NNLO)
+hadron-hadron colliders, the evaluation of these variations using
+NLO or NNLO
 code can quickly become impractical.
 fastNLO~\cite{Britzger:2012bs,Wobisch:2011ij,Kluge:2006xs} was developed
 to substantially reduce the amount of processing power that is needed to
@@ -103,17 +103,17 @@ $\alpha_s$ and scale choices.
 Perturbative QCD predictions for observables in hadron-induced
 processes depend on the strong coupling constant $\alpha_s$ and on the
 PDFs of the hadron(s). Any cross section in lepton-hadron or
-hadron-hadron collisions can expressed in terms of the
+hadron-hadron collisions can be expressed in terms of the
 strong coupling constant to the power of $n$, $\alpha_s^n$, the
 perturbative coefficients $c_{i,n}$ for the partonic subprocess $i$,
 and the corresponding linear combination of PDFs from the one or two
 hadrons $f_i$, which is a function of the fractional hadron momenta
 $x_1$, $x_2$ carried by the respective partons.
 The equation describing hadron-hadron cross sections with subprocess $i=(a,b)$
-for the interaction of parton $a$, $b$ in particular is given by:
+for the interaction of parton $a$, $b$ is given by:
 \begin{equation}\label{eq:CrossSection}
   \sigma_{pp\rightarrow\mathrm{X}}(\mu_r,\mu_f) =
-  \sum\limits_{a,b,n}\int\limits_0^1dx_1\int\limits_0^1dx_2
+  \sum\limits_{a,b,n}\int\limits dx_1\int\limits dx_2
     \alpha_s^n(\mu_r) c_{(a,b),n} f_{1,a}(x_1,\mu_f) f_{2,b}(x_2,\mu_f)
 \end{equation}
 
@@ -129,7 +129,7 @@ The PDFs $f_p(x_p)$ in equation~\ref{eq:CrossSection} can then be replaced
 by $f_p \simeq \sum_k f_p(x_k) E_k(x)$ and moved in front of the integral.
 The remaining integration over $x$ to compute the cross section is
 turned into a sum over the $n$ perturbative orders, $i$ parton flavors,
-and all the $x$-nodes.
+and all $x$-nodes.
 
 The perturbative coefficients $c_{i,n}$ can be further decomposed to describe
 the dependence on the renormalization and factorization scales $\mu_r, \mu_f$
@@ -143,13 +143,13 @@ $c_{i,n}^rr$,$c_{i,n}^rf$,$c_{i,n}^ff$:
 For the determination of the renormalization scale variations, fastNLO allows
 to either use the RGE in conjunction with the leading-order matrix element,
 or directly store the scale-independent weights from equation \ref{eq:ScaleIndependentWeights}.
-Variations of the factorization scale can be done by either storing the
+Variations of the factorization scale can be done by storing the
 coefficients for a fixed set of factorization scales, by using the LO DGLAP
-splitting functions from HOPPET~\cite{Salam:2008qg}, or by simply storing
-the scale-independent weights as above.
+splitting functions from HOPPET~\cite{Salam:2008qg}, or by storing
+the scale-independent weights as indicated above.
 
 The perturbative coefficients only need to be calculated once with
-very high statistical precision, with the weights describing these
+high statistical precision, with the weights describing these
 coefficients being stored in an interpolation table.
 These tables can be enriched with additional additive or multiplicative
 contributions to the cross sections.
@@ -158,24 +158,24 @@ contributions to the cross sections.
  \centering
   \includegraphics[width=0.49\textwidth]{05_correlation_g_0_1}
   \caption{Correlations between the gluon PDF and the three-jet production cross section
-  as a function of x and the scale of the process\cite{CMS:2014mna}.}
+  as a function of x and the scale of the process~\cite{CMS:2014mna}.}
   \label{Fig:correlations}
 \end{wrapfigure}
 
-It is also possible to include measurements and (un-)correlated uncertainties in a single table.
+It is also possible to include measurements with uncertainties in a single table.
 When processing these tables, the summation of weights can be adapted
-to different PDFs, values of $\alpha_s$ or scale choices. This allows to quickly perform
-all needed variations in a fraction of the time needed to do the full
+to different PDFs, values of $\alpha_s$, or scale choices. This allows to quickly perform
+all required variations in a fraction of the time needed to do the full
 calculation.
 
 An example for an application of these techniques is shown in figure~\ref{Fig:correlations},
 which presents the correlation between the gluon PDF and the three-jet production
 cross section in proton-proton collision events.
 In order to calculate these correlations, three-jet production cross sections
-were evaluated for all of the 100 PDF replicas of the NNPDF 2.1~\cite{Ball:2011uy}
+were evaluated for the 100 replicas of the NNPDF 2.1~\cite{Ball:2011uy}
 PDF set within seconds. Since fastNLO provides information about the average
 scale that is used in each observable bin, the correlation
-between the cross section and the gluon PDF could be shown as a function
+between the cross section and the gluon PDF can be shown as a function
 of x and the scale of the process.
 
 \newpage
@@ -192,10 +192,10 @@ of x and the scale of the process.
   \label{Fig:interface}
 \end{wrapfigure}
 
-While fastNLO was already directly interfaced to some important (N)NLO generators
+While fastNLO was already directly interfaced to (N)NLO generators
 like \texttt{NLOJet++}~\cite{Nagy:1998bb,Nagy:2001xb,Nagy:2003tz} or DiffTop~\cite{Guzzi:2014wia},
 the recently developed interface to \texttt{MCgrid}~\cite{DelDebbio:2013kxa}
-enables access to Monte Carlo generators like \texttt{Sherpa}\cite{Gleisberg:2008ta}
+enables access to Monte Carlo generators like \texttt{Sherpa}~\cite{Gleisberg:2008ta}
 and the analysis code contained in \texttt{RIVET}~\cite{Buckley:2010ar}.
 
 The new fastNLO toolkit has a clean interface to implement interfaces
@@ -204,8 +204,8 @@ It also provides users with simple to use interfaces in C++, Fortran
 and Python to read tables and calculate cross sections using existing
 PDFs and $\alpha_s$ evolution codes as provided by
 \texttt{LHAPDF 5/6}~\cite{Buckley:2014ana,Bourilkov:2006cj} for example.
-For advanced users it is also possible to provide own PDFs and
-$\alpha_s$ evolution codes in C++ or Fortran that can be used in the table evaluation.
+For advanced users it is possible to introduce their own PDFs and
+$\alpha_s$ evolution codes in C++ or Fortran to be used in the table evaluation.
 
 \section{fastNLO in action - using the example of $\alpha_s$ fits}
 
@@ -214,14 +214,14 @@ $\alpha_s$ evolution codes in C++ or Fortran that can be used in the table evalu
   \includegraphics[width=0.49\textwidth]{chi2cmp}
   \caption{Comparison between the commonly used $\alpha_s$ fit method (green)
   and the refined method (red). The $\chi^2$ is calculated from the measurement
-  of the three-jet production cross section\cite{CMS:2014mna} and theory predictions (\texttt{NLOJet++} with MRST2008 PDF\cite{Martin:2009iq}).
+  of the three-jet production cross section~\cite{CMS:2014mna} and theory predictions (\texttt{NLOJet++} with MRST2008 PDF~\cite{Martin:2009iq}).
   }
   \label{Fig:chi2}
 \end{wrapfigure}
 The flexibility of fastNLO with respect to the $\alpha_s$ evolution
 that is employed during the table evaluation allows to refine the
 fit procedure for $\alpha_s(M_\mathrm{Z})$ as it is used by
-experiments\cite{Affolder:2001hn,Chatrchyan:2013txa}
+experiments~\cite{Affolder:2001hn,Chatrchyan:2013txa}
 .%with observables that are sensitive to $\alpha_s$.
 
 Since global PDF fits are only provided for a limited set of
@@ -232,16 +232,16 @@ The fit result is then derived from a parametrisation (usually
 a simple second order polynomial) of the $\chi^2$ curve.
 
 The refined method replaces the
-$\alpha_s$ evolution code in fastNLO that is provided by \texttt{LHAPDF} with
-another $\alpha_s$ evolution code\cite{GRV} that allows to freely
+$\alpha_s$ evolution code in fastNLO that is provided by \texttt{LHAPDF} by
+an alternative one~\cite{GRV} that allows to freely
 choose the value of $\alpha_s(M_\mathrm{Z})$. This allows to calculate
 arbitrary values of $\chi^2(\alpha_s(M_\mathrm{Z}))$ without resorting
 to parametrisations and enables the application of common
 minimization libraries to derive the central fit result and the
 uncertainties.
 As shown in figure~\ref{Fig:chi2}, the refined method directly provides
-a straightforward description of the uncertainties without any ambiguities
-introduced by choosing some parametrisation.
+a description of the uncertainties without any ambiguities
+introduced by choosing a parametrisation.
 
 
 \bibliographystyle{lucas_unsrt}
