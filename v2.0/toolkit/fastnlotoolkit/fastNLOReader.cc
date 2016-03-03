@@ -1685,7 +1685,7 @@ bool fastNLOReader::TestAlphas() {
 //______________________________________________________________________________
 bool fastNLOReader::TestXFX() {
    vector<double> pdftest = GetXFX(1.e-2,10);
-   if (pdftest.size() != 13) {
+   if (pdftest.size() <= 13) {
       logger.error["TestXFX"]<<"The pdf array must have the size of 13 flavors.\n";
       return false;
    }
