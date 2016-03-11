@@ -97,7 +97,7 @@ if HAVE_HOPPET
 endif
 # With QCDNUM
 if HAVE_QCDNUM
-   libfastnlotoolkit_la_LDFLAGS  += -lgfortran -L${QCDNUMLIBPATH} ${QCDNUMLIBS}
+   libfastnlotoolkit_la_LDFLAGS  += -lgfortran ${QCDNUMLDFLAGS}
 endif
 
 # Files that are required to build the project but that can be

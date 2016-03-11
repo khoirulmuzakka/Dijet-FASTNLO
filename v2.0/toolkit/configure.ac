@@ -220,35 +220,39 @@ AC_ARG_WITH([qcdnum],
 if test "x$with_qcdnum" != "xno"; then
    if test "x$QCDNUM" = "x"; then
       AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
-      AC_CHECK_FILE([$prefix/lib/libqcdnum.a],
-      [preqcdnum="$ac_cv_file_$prefix/lib/libqcdnum.a"],
-      [preqcdnum=""])
-      if test "x$preqcdnum" = "x"; then
-         AC_MSG_NOTICE([No $TMPNAM library found in prefix path. Try to link with systems $TMPNAM ...])
-         AC_CHECK_LIB([qcdnum],[libqcdnum_a-qcdnum],
-         [sysqcdnum=$ac_cv_lib_libqcdnum_a-qcdnum],
-         [sysqcdnum=""])
-         if test "x$sysqcdnum" = "x"; then
-            AC_MSG_ERROR([No $TMPNAM library found. Please install $TMPNAM first. Configuration aborted!])
-         else
-            AC_SUBST([QCDNUMLIBPATH], [`dirname $sysqcdnum`])
+      AC_PATH_PROG([QCDNUMBIN],[qcdnum-config],[],[$prefix/bin])
+      if test "x$QCDNUMBIN" = "x"; then
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+         AC_PATH_PROG([QCDNUMBIN],[qcdnum-config])
+         if test "x$QCDNUMBIN" = "x"; then
+            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
          fi
-      else
-         AC_SUBST([QCDNUMLIBPATH], [`dirname $preqcdnum`])
       fi
-      AC_SUBST([QCDNUM], [`dirname $QCDNUMLIBPATH`])
    else
-      AC_CHECK_FILE([$QCDNUM/lib/libqcdnum.a],
-      [],
-      [AC_MSG_ERROR([$TMPNAM library not found at given path $QCDNUM/lib. Please install $TMPNAM first. Configuration aborted!])])
+      AC_PATH_PROG([QCDNUMBIN],[qcdnum-config],[],[$QCDNUM/bin])
+      if test "x$QCDNUMBIN" = "x"; then
+         AC_MSG_ERROR([qcdnum-config not found in given path to $TMPNAM! Configuration aborted!])
+      fi
    fi
-   AC_SUBST([QCDNUMPREFIX], "$QCDNUM")
-   AC_SUBST([QCDNUMLIBPATH], "$QCDNUMPREFIX/lib")
-   AC_SUBST([QCDNUMLIBS], ["-lzmstf -lhqstf -lqcdnum -lmbutil"])
    AC_MSG_NOTICE([******************************************])
-   AC_MSG_NOTICE([$TMPNAM settings:])
-   AC_MSG_RESULT([Using $QCDNUMPREFIX for the $TMPNAM installation path])
-   AC_MSG_RESULT([Using $QCDNUMLIBPATH for the libraries])
+   if test "x$QCDNUMBIN" != "x"; then
+      AC_MSG_NOTICE([$TMPNAM settings:])
+      AC_SUBST([QCDNUM],        [`$QCDNUMBIN --prefix`])
+      AC_SUBST([QCDNUMPREFIX],  [`$QCDNUMBIN --prefix`])
+      AC_SUBST([QCDNUMVERSION], [`$QCDNUMBIN --version`])
+      AC_SUBST([QCDNUMBINPATH], ["$QCDNUMPREFIX/bin"])
+      AC_SUBST([QCDNUMLIBPATH], [`$QCDNUMBIN --libdir`])
+      AC_SUBST([QCDNUMINCLUDEPATH],["$QCDNUMPREFIX/include"])
+      AC_SUBST([QCDNUMLDFLAGS], [`$QCDNUMBIN --ldflags`])
+      AC_MSG_RESULT([Using $TMPNAM version $QCDNUMVERSION])
+      AC_MSG_RESULT([Using $QCDNUMPREFIX for the $TMPNAM installation path])
+      AC_MSG_RESULT([Using $QCDNUMBINPATH for the binaries])
+      AC_MSG_RESULT([Using $QCDNUMLIBPATH for the libraries])
+      AC_MSG_RESULT([Using $QCDNUMINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $QCDNUMLDFLAGS for the linker flags])
+   else
+      AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+   fi
 else
    AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
    AC_MSG_NOTICE([******************************************])
