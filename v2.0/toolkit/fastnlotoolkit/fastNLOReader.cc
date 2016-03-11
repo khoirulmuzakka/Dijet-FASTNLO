@@ -439,6 +439,7 @@
 #include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
+//#include "fastnlotk/fastNLOLHAPDF.h"
 #ifdef FNLO_HOPPET
 #include "fastnlotk/HoppetInterface.h"
 #endif
@@ -986,6 +987,15 @@ vector < double > fastNLOReader::GetNormCrossSection() {
    }
    if (XSection.empty()) CalcCrossSection();
    vector < double > XSectionNorm = XSection;
+
+   // // Second table to be loaded?
+   // if ( INormFlag < 0 ) {
+   //    string denomtable  = GetDenomTable();
+   //    fastNLOTable table = fastNLOTable(denomtable);
+   //    table.PrintTableInfo();
+   //    fastNLOLHAPDF denom(table,GetLHAPDFFilename(),0);
+   // }
+
    unsigned int nDim = GetNumDiffBin();
    // iDim ranges from 0 to nDim-1
    unsigned int iDim = abs(INormFlag)-1;
@@ -1685,8 +1695,8 @@ bool fastNLOReader::TestAlphas() {
 //______________________________________________________________________________
 bool fastNLOReader::TestXFX() {
    vector<double> pdftest = GetXFX(1.e-2,10);
-   if (pdftest.size() <= 13) {
-      logger.error["TestXFX"]<<"The pdf array must have the size of 13 flavors.\n";
+   if ( pdftest.size() != 13 && pdftest.size() != 14) {
+      logger.error["TestXFX"]<<"The pdf array must have either 13 flavours or 13+1 for an additional photon entry that is not yet used in fastNLO!" << endl << "   Here, the pdf array's size is: " << pdftest.size() << endl;
       return false;
    }
    // if ( pdftest[6] == 0. )printf("fastNLOReader. Warning. There seems to be no gluon in the pdf.\n");

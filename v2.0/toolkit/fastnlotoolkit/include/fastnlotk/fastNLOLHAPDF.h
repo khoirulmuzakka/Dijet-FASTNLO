@@ -47,6 +47,7 @@ public:
    void SetLHAPDFFilename(std::string filename);
    void SetLHAPDFMember(int set);
    // Getters
+   std::string GetLHAPDFFilename() const {return fLHAPDFFilename;}
    int GetIPDFMember() const;
    int GetNPDFMembers() const;
    int GetNPDFMaxMember() const;
