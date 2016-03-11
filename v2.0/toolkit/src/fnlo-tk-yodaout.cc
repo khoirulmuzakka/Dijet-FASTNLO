@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
          shout << "Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         shout << "[PDF]: PDF set, def. = CT14nlo" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
