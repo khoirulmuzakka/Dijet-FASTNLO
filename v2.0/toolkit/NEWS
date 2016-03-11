@@ -1,3 +1,16 @@
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2212:
+=================================================================================================
+Some little issues fixed and:
+- Add producer for ROOT files with xsections & uncertainties.
+- Added executable fnlo-tk-statunc to derive statistical uncertainty from
+  sample of calculations with equal weight.
+- Installation adapted to new autotools-enabled QCDNUM versions.
+  Old-style QCDNUM versions not supported anymore.
+- Some adaptations for use in newer xFitter version.
+- Some adaptations for use with mcgrid 2.0.
+
+
+
 Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2163:
 =================================================================================================
 Some little issues fixed and:

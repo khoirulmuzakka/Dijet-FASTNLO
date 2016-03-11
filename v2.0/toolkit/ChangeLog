@@ -1,7 +1,157 @@
+2016-03-11  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2212
+            ================================================================================
+
+2016-03-11  rabbertz
+
+    * fnlo-tk-cppread.cc, fnlo-tk-statunc.cc, fnlo-tk-yodaout.cc: Change def.
+      PDF from CT10nlo to CT14nlo
+
+    * fastNLOLHAPDF.h, fastNLOReader.cc: Fix pdf array size issue; allowed now
+      either 13 or 14; used only 13
+
+    * Makefile.am, configure.ac: Adapt toolkit to autotools-enabled QCDNUM; old
+      QCDNUM libs not supported anymore
+
+2016-03-03  DanielBritzger
+
+    * fastNLOReader.cc: adjust warning/error message for photon PDF.
+
+2015-11-03  rabbertz
+
+    * fnlo-tk-rootout.cc: Little issues fixed with ROOT histo producer
+
+2015-10-29  rabbertz
+
+    * fnlo-tk-rootout.cc: Some improved labelling
+
+    * Makefile.am, fastNLOTable.cc, fastNLOTable.h, fnlo-tk-rootout.cc: Add
+      producer for ROOT files with xsections & uncertainties
+
+2015-10-29  DanielBritzger
+
+    * fastNLOCoeffBase.cc, fastNLOReader.cc: remove unneeded includes
+
+2015-10-27  rabbertz
+
+    * fastNLOReader.cc: Remove leftover debug couts
+
+    * fnlo-tk-cppread.cc, fnlo-tk-yodaout.cc: Adapt eval. codes to optional
+      normalization and changes for k factors
+
+    * fastNLOCoeffAddFix.cc, fastNLOCoeffBase.cc, fastNLOLHAPDF.cc,
+      fastNLOLHAPDF.h, fastNLOReader.cc, fastNLOReader.h, fastNLOTable.cc,
+      fastNLOTable.h: Implement normalization for same table; add lnorm arg to
+      xs and uncertainty calc; deprecate kFactors and XSection_LO
+
+2015-10-21  sieber
+
+    * fastNLOLHAPDF.cc, fastNLOLHAPDF.h, fastNLOReader.cc, fastNLOReader.h: add
+      constructors to calculate crosssections from fastNLOTable instances
+      without needingto writeout tables to files.
+
+2015-10-14  dhaitz
+
+    * fastNLOCreate.cc: fastNLOCreate.cc: added warning
+
+    * fastNLOReader.cc, fastNLOReader.h: fastNLOReader: add
+      GetScaleUncertaintyVec function, needed for python usage (like
+      GetPDFUncertaintyVec)
+
+2015-10-08  sieber
+
+    * HoppetInterface.cc: possible fix for lhapdf <--> hoppet issue.
+
+2015-10-06  rabbertz
+
+    * TODO, fastNLOBase.cc, fastNLOTable.cc, fnlo-tk-cppread.cc,
+      fnlo-tk-merge.cc, fnlo-tk-statunc.cc, fnlo-tk-yodaout.cc: Some output
+      unifications
+
+2015-10-01  rabbertz
+
+    * fastNLOCreate.cc: Small change in info/warnings
+
+    * read_steer.cc: Revert back overwriting from steering
+
+2015-09-30  rabbertz
+
+    * read_steer.cc: Fix inversion of {} with if statement
+
+    * read_steer.cc, read_steer.h: read_steer changes for use with mcgrid
+
+    * Makefile.am, fnlo-tk-modify.cc:
+
+    * fastNLOBase.h: Kill superfluous whitespace
+
+2015-09-28  rabbertz
+
+    * fnlo-tk-statunc.cc: Add PDF choice to stat. uncertainty
+
+2015-09-24  rabbertz
+
+    * read_steer.cc, read_steer.h: Reduced verbosity of read_steer, changed
+      philosophy so new values overwrite previous ones
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOGeneratorConstants.h: Added
+      checks on properly set process constants
+
+2015-09-18  sieber
+
+    * fastNLOHoppet.cc, fastNLOHoppet.h, fastNLOHoppetAs.cc, fastNLOHoppetAs.h,
+      fastNLOQCDNUMAS.cc, fastNLOQCDNUMAS.h: fix namespaces in hoppet and
+      qcdnum.
+
+2015-09-17  sieber
+
+    * fastNLOAlphas.h, fastNLOBase.h, fastNLOCRunDec.h, fastNLOCoeffAddBase.h,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.h, fastNLOCoeffBase.cc,
+      fastNLOCoeffBase.h, fastNLOCoeffData.h, fastNLOCoeffMult.h,
+      fastNLOCoefficients.h, fastNLOCreate.cc, fastNLOCreate.h,
+      fastNLODiffH12006FitB.h, fastNLODiffReader.h, fastNLODiffUser.cc,
+      fastNLODiffUser.h, fastNLOHoppet.h, fastNLOHoppetAs.h,
+      fastNLOInterpolBase.h, fastNLOInterpolCatmullRom.h,
+      fastNLOInterpolLagrange.h, fastNLOInterpolLinear.h,
+      fastNLOInterpolOneNode.h, fastNLOLHAPDF.cc, fastNLOLHAPDF.h,
+      fastNLOPDFLinearCombinations.h, fastNLOQCDNUMAS.h, fastNLOReader.h,
+      fastNLOTable.cc, fastNLOTable.h, fastNLOTools.h, fastNLOUserBlock.h:
+      removed all using namespaces ... from headers and set the std::/fastNLO::
+      explicitly.
+
+    * fastNLOLHAPDF.cc, fastNLOLHAPDF.h: adapt includes
+
+    * fastNLOLHAPDF.cc, setup.py.in: swig is stronger than my :(
+
+2015-09-16  sieber
+
+    * fastNLOLHAPDF.h: use correct namespace.
+
+2015-09-16  rabbertz
+
+    * fnlo-tk-statunc.cc: Fix char concatenation issue
+
+    * fnlo-tk-statunc.cc: Add / to paths; break loop to avoid multiple
+      occurrences of same table
+
+2015-09-15  rabbertz
+
+    * fnlo-tk-statunc.cc: Work on print out
+
+    * fnlo-tk-statunc.cc: Work on print out
+
+    * fnlo-tk-statunc.cc: Add forgotten include
+
+    * Makefile.am, fnlo-tk-statunc.cc: Add executable to derive stat.
+      uncertainty from sample of calculations with equal weight
+
+    * fastNLOLHAPDF.cc, fnlo-tk-merge.cc, fnlo-tk-yodaout.cc: Some trivial
+      changes
+
 2015-09-10  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2163
             ================================================================================
 
 2015-09-10  rabbertz
+
+    * NEWS: Edited ChangeLog & NEWS for new prerelease
 
     * fnlo-tk-yodaout.cc: Make yodaout fit for LO & NNLO output
 
