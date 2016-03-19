@@ -72,7 +72,7 @@ fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenCo
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(string steerfile, string warmupfile, bool shouldReadSteeringFile) {
+fastNLOCreate::fastNLOCreate(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
 
@@ -81,11 +81,14 @@ fastNLOCreate::fastNLOCreate(string steerfile, string warmupfile, bool shouldRea
    fProcConsts = SetProcConstsDefaults();
 
    //! Steering file settings take precedence over defaults
-   ReadSteering(steerfile, warmupfile, shouldReadSteeringFile);
+   ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
    ReadGenAndProcConstsFromSteering();
 
-   if (!warmupfile.empty()) {
-      SetWarmupTableFilename(warmupfile);
+   if (EXIST_NS(WarmUpFilename,fSteerfile)) {
+      SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
+   } else {
+      string fWarmUpFile = steeringNameSpace + ".txt";
+      SetWarmupTableFilename(fWarmUpFile);
    }
 
    bool check = CheckProcConsts();
@@ -242,8 +245,10 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    if (EXIST_NS(IPDFdef3NNLO,fSteerfile))        fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
 
    if ( fProcConsts.IPDFdef2 == 0 ) {
-      fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
-      fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
+      if ( fProcConsts.IPDFdef3LO > 0 )
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
+      if ( fProcConsts.IPDFdef3NLO > 0 )
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
       if ( fProcConsts.IPDFdef3NNLO > 0 )
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
    }
@@ -1441,7 +1446,7 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
    c->ScaleDescript.resize(NScales);
 
    if (fIsFlexibleScale) {
-      c->NScaleDep              = 3; // temporaily. Until known if generator runs in LO, NLO or NNLO.
+      c->NScaleDep              = 3; // temporarily. Until known if generator runs in LO, NLO or NNLO.
       c->ScaleDescript[0].resize(2);
       if (BOOL_NS(ReadBinningFromSteering,fSteerfile)) {
          c->ScaleDescript[0][0] = STRING_NS(ScaleDescriptionScale1,fSteerfile);
@@ -2335,7 +2340,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-         sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2f  %16.2f",
+         sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2g  %16.2g",
                  i,fWxRnd[i].first*RoundXDown, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
          strm<<buf<<endl;
       }
