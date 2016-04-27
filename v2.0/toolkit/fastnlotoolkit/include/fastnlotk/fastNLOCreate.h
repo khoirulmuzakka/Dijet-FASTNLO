@@ -63,6 +63,7 @@ public:
 
    void WriteTable(std::string filename);                                                            //!< Write fastNLO table to file filename
    void WriteTable();                                                                           //!< Write fastNLO table to disk.
+   void WriteTable(double nEvents) {SetNumberOfEvents(nEvents); WriteTable();};                 //!< Write fastNLO table to disk and set number of events.
    void WriteWarmupTable();                                                                     //!< Write the warmup table to disk.
    void MultiplyCoefficientsByBinSize();                                                        //!< Multiply all coefficients by bin size
    void DivideCoefficientsByBinSize();                                                          //!< Divide all coefficients by bin size
