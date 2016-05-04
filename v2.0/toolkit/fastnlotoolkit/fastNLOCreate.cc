@@ -79,13 +79,16 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, 
+fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorConstants& GenConsts, 
 			     const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts) {
    //! Constructor of fastNLOCreate
    //!
    //! Pass all needed steering paramters through 
    //! GeneratorConstants, ProcessConstants and ScenarioConstants
    //! (see GeneratorConstants.h file for details)
+   //!
+   //! warmupfile: filename to be written out or read in for production run, if already existent
+   //! 
    //! No steering file is read in, but a 'steering namespace' has
    //! to be specified
    //!
@@ -111,6 +114,11 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts,
       if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
    }
+
+
+   // --- set warmup file
+   fSteerfile = warmupfile;
+   fWarmupFilename = warmupfile;
 
    Instantiate();
 

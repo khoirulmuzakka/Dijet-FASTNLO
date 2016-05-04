@@ -35,7 +35,7 @@ class fastNLOCreate : public fastNLOTable {
 public:
    fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
    fastNLOCreate(const std::string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts);
-   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, 
+   fastNLOCreate(const std::string& warmupfile, const fastNLO::GeneratorConstants& GenConsts, 
 		 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
    ~fastNLOCreate();
 
