@@ -217,9 +217,9 @@ namespace fastNLO {
 	 OrderInAlphasOfWarmupRunWas=-1;
 	 //    ObsBin      x_min      x_max    173.3GeV_min    173.3GeV_max           y_min           y_max
 	 headerValues.clear();
-	 headerValues.push_back("ObsBin");
-	 headerValues.push_back("x_min");
-	 headerValues.push_back("x_max");
+	 // headerValues.push_back("ObsBin");
+	 // headerValues.push_back("x_min");
+	 // headerValues.push_back("x_max");
       };
 
       WarmupConstants() {

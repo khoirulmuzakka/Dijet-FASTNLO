@@ -1465,11 +1465,11 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    //! check if number of bins is consistent
 
    vector<vector<double> > warmup =  fWarmupConsts.Values;//DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
-   vector<vector<double> > wrmbin =  fWarmupConsts.Binning;//DOUBLE_TAB_NS(Warmup.Binning,fSteerfile);
    bool ret = true;
 
    const string wrmuphelp = "Please check your warmup-file for compatibility with your steering.\nTo calculate a new warmup-file compatible to your steering, remove the old one.\nAlternatively use 'IgnoreWarmupBinningCheck=true' to ignore precision-related binning differences or\nuse 'ReadBinningFromSteering=false' to read all binning-related information from the warmup file.\n";
 
+   // --- check warmup values
    if (warmup.size() != NObsBin) {
       logger.error["CheckWarmupConsistency"]
          <<"Table of warmup values is not compatible with steering file.\n"
@@ -1530,13 +1530,15 @@ bool fastNLOCreate::CheckWarmupConsistency() {
       exit(1);
    }
 
+   // --- check warmup binning
+   const vector<vector<double> >& wrmbin =  fWarmupConsts.Binning;//DOUBLE_TAB_NS(Warmup.Binning,fSteerfile);
    // check binning in detail; ignore when IgnoreWarmupBinningCheck is true to avoid precision problems with bin borders of e.g. Pi
    if ( EXIST_NS(IgnoreWarmupBinningCheck,fSteerfile) && BOOL_NS(IgnoreWarmupBinningCheck,fSteerfile) ) {
       logger.warn["CheckWarmupConsistency"]
          <<"Ignoring crosscheck of binning in steering versus warmup values. "
          <<"Please make sure that your warmup file matches the steering of this run."<<endl;
    } 
-   else {
+   else if ( !wrmbin.empty() ) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
          if (NDim == 1) {
@@ -1548,7 +1550,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
                   <<wrmuphelp
                   <<"Exiting."<<endl;
                ret = false;
-               exit(1);
+               //exit(1);
             }
          } else if (NDim == 2) {
             if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
@@ -1560,7 +1562,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
                   <<wrmuphelp
                   <<"Exiting."<<endl;
                ret = false;
-               exit(1);
+               //exit(1);
             }
          } else if (NDim == 3) {
             if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
@@ -1573,7 +1575,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
                   <<wrmuphelp
                   <<"Exiting."<<endl;
                ret = false;
-               exit(1);
+               //exit(1);
             }
          }
          // KR: Check bin width only roughly
@@ -1591,6 +1593,10 @@ bool fastNLOCreate::CheckWarmupConsistency() {
             ret = false;
          }
       }
+   }
+   else {
+      logger.warn["CheckWarmupConsistency"]
+	 <<"Warmup values do not contain information about the binning. Cannot check the consistency."<<endl;
    }
    return ret;
 }
