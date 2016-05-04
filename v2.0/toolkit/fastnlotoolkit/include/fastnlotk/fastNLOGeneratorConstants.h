@@ -207,8 +207,8 @@ namespace fastNLO {
 	 DimensionLabels = scenario.DimensionLabels;
 	 DimensionIsDifferential = scenario.DimensionIsDifferential;
 
-	 std::cout<<"Todo. WarmupConstants!"<<std::endl;
-	 exit(4);
+	 std::cout<<"Warning [WarmupConstants]. Binning has not be taken over from ScenarioConstants (not implemented.)"<<std::endl;
+	 //exit(4);
 	 // Binning = ;
 	 // Values = ;
 	 // headerValues = ;
