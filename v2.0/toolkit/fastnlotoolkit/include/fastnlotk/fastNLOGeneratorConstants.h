@@ -222,7 +222,6 @@ namespace fastNLO {
 	 headerValues.push_back("x_max");
       };
 
-   protected:
       WarmupConstants() {
 	 Init();
       }
