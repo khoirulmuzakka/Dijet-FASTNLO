@@ -33,8 +33,10 @@ class fastNLOCreate : public fastNLOTable {
    //!
 
 public:
-   fastNLOCreate(std::string steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
-   fastNLOCreate(std::string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts);
+   fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
+   fastNLOCreate(const std::string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts);
+   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, 
+		 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
    ~fastNLOCreate();
 
    fnloEvent fEvent;                                                                            //!< Structure, which holds all relevant variables related to event observables
@@ -46,9 +48,9 @@ public:
    void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
-   fastNLO::GeneratorConstants SetGenConstsDefaults();                                          //! set defaults for generator constants
-   fastNLO::ProcessConstants SetProcConstsDefaults();                                           //! set defaults for process constants
-   bool CheckProcConsts();                                                                      //! check process constants to be different from defaults
+   void SetGenConstsDefaults();                                                                 //!< set defaults for generator constants
+   void SetProcConstsDefaults();                                                                //!< set defaults for process constants
+   bool CheckProcConsts();                                                                      //!< check process constants to be different from defaults
    // SetBinGrid()
    // todo: SetBinGrid. However, if BinGrid is set, then this is necessarliy a warmup run -> one also has to store the bin grid in warmup table (todo).
    //       furthermore all vectors have to be 'resized'
@@ -111,7 +113,10 @@ protected:
    void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
 
    void ReadGenAndProcConstsFromSteering();
+   void ReadScenarioConstsFromSteering(); //!< Read steering values into fScenConsts
    void ReadBinning();
+   void ReadBinningFromScenarioConsts();
+   void ReadBinSize();
    ///
    void SetBinning1D(std::vector<double> bgrid, std::string label, unsigned int idiff);
    void SetBinning1D(std::vector<double> bgrid, std::string label, unsigned int idiff, double norm);
@@ -135,7 +140,7 @@ protected:
    int CheckWarmupValuesIdenticalWithBinGrid(std::vector<std::pair<double,double> >& wrmmu);              //!< Check if warmup values are possibly identical with bin grid
    void RoundValues(std::vector<std::pair<double,double> >& wrmmu , int nth);                              //!< Round values to closes value by at most 1%
    int GetNthRelevantDigit(double val, int n);
-   std::vector<std::vector<std::pair<int,int> > > ReadPartonCombinations(int ord);                             //!< Read PDFCoeff from steering
+   std::vector<std::vector<std::pair<int,int> > > ReadPartonCombinations(int ord, const std::vector<std::vector<int> >& PartonCombinations);                             //!< Read PDFCoeff from steering
 
    int GetBin();                                                                                //!< get bin number from 'scenario' observables
    inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;           //!< get x-index in case of two hadrons.
@@ -151,6 +156,8 @@ protected:
 
    fastNLO::GeneratorConstants fGenConsts;                                                      //!< Generator specific constants
    fastNLO::ProcessConstants fProcConsts;                                                       //!< Process specific constants
+   fastNLO::ScenarioConstants fScenConsts;                                                       //!< Scenario specific constants
+   //fastNLO::WarmupConstants fWarmConsts;                                                       //!< Warmup specific constants
 
    bool CheckWeightIsFinite();                                                                  //!< Check if weight is reasonable.
    inline void HalfMatrixCheck(double x1, double x2, int& xmin, int& xmax, int& subproc) const;                       //!< check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.

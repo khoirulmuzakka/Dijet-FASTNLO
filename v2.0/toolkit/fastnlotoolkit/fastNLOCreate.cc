@@ -50,7 +50,14 @@ fastNLOCreate::fastNLOCreate() {
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenConsts, fastNLO::ProcessConstants ProcConsts) {
+fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts) {
+   //! Constructor of fastNLOCreate
+   //!
+   //! Pass steering paramters through 
+   //! GeneratorConstants, ProcessConstants and the steering file
+   //! (see GeneratorConstants.h file for details)
+   //! 
+   //!
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
 
@@ -72,13 +79,60 @@ fastNLOCreate::fastNLOCreate(string steerfile, fastNLO::GeneratorConstants GenCo
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
+fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, 
+			     const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts) {
+   //! Constructor of fastNLOCreate
+   //!
+   //! Pass all needed steering paramters through 
+   //! GeneratorConstants, ProcessConstants and ScenarioConstants
+   //! (see GeneratorConstants.h file for details)
+   //! No steering file is read in, but a 'steering namespace' has
+   //! to be specified
+   //!
+
+   logger.SetClassName("fastNLOCreate");
+   ResetHeader();
+
+   //! Set constants from arguments
+   fGenConsts  = GenConsts;
+   fProcConsts = ProcConsts;
+   if ( !CheckProcConsts() ) {
+      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
+      exit(1);
+   }
+   fScenConsts = ScenConsts;
+
+   // --- check and transform parton combinations 
+   if ( fProcConsts.IPDFdef2 == 0 ) {
+      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
+      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
+      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+   }
+
+   Instantiate();
+
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
+   //! 
+   //! Constructor for fastNLOCreate
+   //! 
+   //! steerfile:                Steering file containing all required flags
+   //! steeringNameSpace:        Alternative read_steer namespace to be used (optional)
+   //! shouldReadSteeringFile:   Force to NOT read the steering file (e.g. the file has already been read in)  (optional).
+   //! 
+
    logger.SetClassName("fastNLOCreate");
    ResetHeader();
 
    //! Set constants from defaults
-   fGenConsts  = SetGenConstsDefaults();
-   fProcConsts = SetProcConstsDefaults();
+   SetGenConstsDefaults();
+   SetProcConstsDefaults();
 
    //! Steering file settings take precedence over defaults
    ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
@@ -101,50 +155,27 @@ fastNLOCreate::fastNLOCreate(string steerfile, string steeringNameSpace, bool sh
 
 
 // ___________________________________________________________________________________________________
-fastNLO::GeneratorConstants fastNLOCreate::SetGenConstsDefaults() {
+void fastNLOCreate::SetGenConstsDefaults() {
    //! Set default values for generator constants
-   fastNLO::GeneratorConstants GenConsts;
-   GenConsts.Name = "Theory";
-
-   return GenConsts;
+   fGenConsts.Name = "Theory";
+   fGenConsts.UnitsOfCoefficients = 12;   //!< X section units of coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
 }
 
 
 // ___________________________________________________________________________________________________
-fastNLO::ProcessConstants fastNLOCreate::SetProcConstsDefaults() {
+void fastNLOCreate::SetProcConstsDefaults() {
    //! Set default values for process constants
-   fastNLO::ProcessConstants ProcConsts;
-
-   ProcConsts.LeadingOrder        = -1;   //! Order in alpha_s of leading order process
-   ProcConsts.UnitsOfCoefficients = -1;   //! X section units of coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
-   ProcConsts.NPDF                = -1;   //! No. of PDFs involved
-   ProcConsts.NSubProcessesLO     = -1;   //! No. of LO   subprocesses
-   ProcConsts.NSubProcessesNLO    = -1;   //! No. of NLO  subprocesses
-   ProcConsts.NSubProcessesNNLO   = -1;   //! No. of NNLO subprocesses
-   ProcConsts.IPDFdef1            = -1;   //! Flag 1 to define PDF linear combinations of partonic subprocesses (e.g. hh --> jets: 3)
-   ProcConsts.IPDFdef2            = -1;   //! Flag 2 to define PDF linear combinations (dep. on IPDFdef1; for 3 e.g. 1 for jet specific LCs, 121 for generic 11x11 matrix)
-   ProcConsts.IPDFdef3LO          = -1;   //! Flag 3 to define PDF LCs at   LO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 6 subprocesses, ignored for IPDFdef2==121)
-   ProcConsts.IPDFdef3NLO         = -1;   //! Flag 3 to define PDF LCs at  NLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
-   ProcConsts.IPDFdef3NNLO        = -1;   //! Flag 3 to define PDF LCs at NNLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
-   ProcConsts.NPDFDim             = -1;   //! Define internal storage mode for PDF LCs (dep. on NPDF; e.g. for 1: 0 for linear, for 2: 1 for half- or 2 for full-matrix)
-      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffLO;   //! PDF Linear combinations for   LO calculation (used only if IPDFdef2==0)
-      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffNLO;  //! PDF Linear combinations for  NLO calculation (used only if IPDFdef2==0)
-      // std::vector<std::vector<std::pair<int,int> > > PDFCoeffNNLO; //! PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
-      // std::vector<std::pair<int,int> > AsymmetricProcesses;        //! Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax (only if NPDFDim==1)
-      // std::string Name;                      //!< More precise description for specific contribution (e.g. LO, pp -> 2 jets; also can add 'run-mode' and further details)
-      // std::vector<std::string> References;   //!< References for process (also other plain text lines can be included here)
-      // std::vector<std::string > GetProcessDescription() {
-      //    //! Get 'ContrDescription' usable for fastNLO table
-      //    unsigned int iadd = 0;
-      //    if ( Name != "" ) iadd=1;
-      //    std::vector<std::string > ProcDescr(References.size()+iadd);
-      //    if ( iadd != 0 ) ProcDescr[0] = Name;
-      //    for ( unsigned int i = 0 ; i<References.size() ; i++ )
-      //       ProcDescr[i+iadd] = References[i];
-      //    return ProcDescr;
-      // }
-
-   return ProcConsts;
+   fProcConsts.LeadingOrder        = -1;   //!< Order in alpha_s of leading order process
+   fProcConsts.NPDF                = -1;   //!< No. of PDFs involved
+   fProcConsts.NSubProcessesLO     = -1;   //!< No. of LO   subprocesses
+   fProcConsts.NSubProcessesNLO    = -1;   //!< No. of NLO  subprocesses
+   fProcConsts.NSubProcessesNNLO   = -1;   //!< No. of NNLO subprocesses
+   fProcConsts.IPDFdef1            = -1;   //!< Flag 1 to define PDF linear combinations of partonic subprocesses (e.g. hh --> jets: 3)
+   fProcConsts.IPDFdef2            = -1;   //!< Flag 2 to define PDF linear combinations (dep. on IPDFdef1; for 3 e.g. 1 for jet specific LCs, 121 for generic 11x11 matrix)
+   fProcConsts.IPDFdef3LO          = -1;   //!< Flag 3 to define PDF LCs at   LO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 6 subprocesses, ignored for IPDFdef2==121)
+   fProcConsts.IPDFdef3NLO         = -1;   //!< Flag 3 to define PDF LCs at  NLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
+   fProcConsts.IPDFdef3NNLO        = -1;   //!< Flag 3 to define PDF LCs at NNLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
+   fProcConsts.NPDFDim             = -1;   //!< Define internal storage mode for PDF LCs (dep. on NPDF; e.g. for 1: 0 for linear, for 2: 1 for half- or 2 for full-matrix)
 }
 
 
@@ -157,8 +188,8 @@ bool fastNLOCreate::CheckProcConsts() {
       logger.warn["CheckProcConsts"]<<"Order in alpha_s of leading order process not properly set: "<<fProcConsts.LeadingOrder<<endl;
       checkok = false;
    }
-   if (fProcConsts.UnitsOfCoefficients < 0) {
-      logger.warn["CheckProcConsts"]<<"Power of X section units of coefficients not properly set: "<<fProcConsts.UnitsOfCoefficients<<endl;
+   if (fGenConsts.UnitsOfCoefficients < 0) {
+      logger.warn["CheckProcConsts"]<<"Power of X section units of coefficients not properly set: "<<fGenConsts.UnitsOfCoefficients<<endl;
       checkok = false;
    }
    if (fProcConsts.NPDF < 1) {
@@ -230,10 +261,10 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
             fGenConsts.References [i] = CodeDescr[i+1];
       }
    }
+   if (EXIST_NS(UnitsOfCoefficients,fSteerfile)) fGenConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
 
    // Process constants
    if (EXIST_NS(LeadingOrder,fSteerfile))        fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
-   if (EXIST_NS(UnitsOfCoefficients,fSteerfile)) fProcConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
    if (EXIST_NS(NPDF,fSteerfile))                fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
    if (EXIST_NS(NSubProcessesLO,fSteerfile))     fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
    if (EXIST_NS(NSubProcessesNLO,fSteerfile))    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
@@ -246,11 +277,11 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 
    if ( fProcConsts.IPDFdef2 == 0 ) {
       if ( fProcConsts.IPDFdef3LO > 0 )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0);
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,INT_TAB_NS(PartonCombinationsLO,fSteerfile));
       if ( fProcConsts.IPDFdef3NLO > 0 )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1);
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,INT_TAB_NS(PartonCombinationsNLO,fSteerfile));
       if ( fProcConsts.IPDFdef3NNLO > 0 )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2);
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,INT_TAB_NS(PartonCombinationsNNLO,fSteerfile));
    }
 
    if (EXIST_NS(NPDFDim,fSteerfile))             fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
@@ -291,6 +322,9 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::Instantiate() {
+   //! Instantiate all internal members
+   //! and prepare for filling
+
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
    GetWarmupValues();
@@ -298,12 +332,35 @@ void fastNLOCreate::Instantiate() {
    ILOord = fProcConsts.LeadingOrder;
    fIOrd = ILOord; // initialize with LO
 
-   // init bin grid
-   if (fIsWarmup) ReadBinning();                      // if warmup, then always read binning from steering.
-   else if (BOOL_NS(ReadBinningFromSteering,fSteerfile)) {
-      ReadBinning();
+   // -------------------------
+   // header
+   SetScenName(fScenConsts.ScenarioName);
+   SetItabversion(22000);
+
+   // ---- scenario specific flags
+   Ipublunits   = fScenConsts.PublicationUnits;
+   ScDescript   = fScenConsts.ScenarioDescription;
+
+   Ecms         = fScenConsts.CenterOfMassEnergy;   // is often superseeded by generator-specific code.
+   INormFlag    = 0;
+   SetFilename(fScenConsts.OutputFilename);
+
+   fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
+   fApplyPDFReweight = fScenConsts.ApplyPDFReweighting;
+   SetOutputPrecision(fScenConsts.OutputPrecision);
+
+   //if ( !fIsFlexibleScale )  ReadScaleFactors() ; // is called only when setting order of calculation
+
+
+   // ---- init bin grid
+   if ( fIsWarmup )  ReadBinningFromScenarioConsts();
+   else if ( fScenConsts.ReadBinningFromSteering ) {
+      ReadBinningFromScenarioConsts();
       CheckWarmupConsistency();
-   } else {UseBinGridFromWarmup();}
+   }
+   else {
+      UseBinGridFromWarmup(); 
+   }
 
    // now create one coefficient tasble.
    InitCoeffTable();
@@ -331,59 +388,120 @@ fastNLOCreate::~fastNLOCreate() {
 void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
    //! read in steering file
    //! The filename of the steering file
-   //! is used as the 'namespace' of labels in read_steer
+   //! is used as the 'namespace' of keys in read_steer
    //! if there is no steeringNameSpace given explicitly
+
    logger.debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
    if (steeringNameSpace.empty()) {
       steeringNameSpace = steerfile;
    }
    fSteerfile =  steeringNameSpace;
-   if (shouldReadSteeringFile) {
-      READ_NS(steerfile,fSteerfile);
+   if ( shouldReadSteeringFile ) {
+      READ_NS(steerfile,fSteerfile); 
    }
 
-   SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
+   if (EXIST_NS(GlobalVerbosity,fSteerfile) )
+      SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
+   else SetGlobalVerbosity("WARNING");
    if (logger.info.GetSpeak())
       PRINTALL();
 
-   // header
-   SetScenName(STRING_NS(ScenarioName,fSteerfile));
-   SetItabversion(22000);
+   // ---- set/read scenario constants (fScenConsts)
+   fScenConsts.PublicationUnits = INT_NS(PublicationUnits,fSteerfile);
+   fScenConsts.ScenarioName = STRING_NS(ScenarioName,fSteerfile);
+   fScenConsts.ScenarioDescription = STRING_ARR_NS(ScenarioDescription,fSteerfile);
+   fScenConsts.CenterOfMassEnergy = DOUBLE_NS(CenterOfMassEnergy,fSteerfile); 
+   fScenConsts.OutputFilename = STRING_NS(OutputFilename,fSteerfile);
+   fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
+   fScenConsts.ApplyPDFReweighting =  BOOL_NS(ApplyPDFReweighting,fSteerfile);
+   fScenConsts.OutputPrecision = INT_NS(OutputPrecision,fSteerfile);
+   fScenConsts.ReadBinningFromSteering = BOOL_NS(ReadBinningFromSteering,fSteerfile); 
 
-   // scenario specific things
-   Ipublunits   = INT_NS(PublicationUnits,fSteerfile);
-   ScDescript   = STRING_ARR_NS(ScenarioDescription,fSteerfile);
-   Ecms         = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);   // is often superseeded by generator-specific code.
-   INormFlag    = 0;
-   fIOrd        = 0;// has to be set by generator
-   SetFilename(STRING_NS(OutputFilename,fSteerfile));
+   // --- (pre-)set flexible scale flag
+   fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
 
-   fIsFlexibleScale = BOOL_NS(FlexibleScaleTable,fSteerfile);
-   fApplyPDFReweight = BOOL_NS(ApplyPDFReweighting,fSteerfile);
-   SetOutputPrecision(INT_NS(OutputPrecision,fSteerfile));
+   // ---- set/read further scenario constants (fScenConsts)
+   if ( fScenConsts.ReadBinningFromSteering ) { 
+      // read values from 'main steering'
+      fScenConsts.DifferentialDimension = INT_NS(DifferentialDimension,fSteerfile);
+      NDim = fScenConsts.DifferentialDimension;
+      fScenConsts.DimensionIsDifferential = INT_ARR_NS(DimensionIsDifferential,fSteerfile);;
+      fScenConsts.DimensionLabels = STRING_ARR_NS(DimensionLabels,fSteerfile);
+      fScenConsts.ScaleDescriptionScale1 = STRING_NS(ScaleDescriptionScale1,fSteerfile);
+      if (!fIsFlexibleScale) 
+	 fScenConsts.ScaleDescriptionScale2 = STRING_NS(ScaleDescriptionScale2,fSteerfile); 
 
-   //if ( !fIsFlexibleScale )  ReadScaleFactors() ; // is called only when setting order of calculation
+      if ( NDim==1 ) fScenConsts.SingleDifferentialBinning = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
+      else if ( NDim==2 ) fScenConsts.DoubleDifferentialBinning = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
+      else if ( NDim==3 ) fScenConsts.TripleDifferentialBinning = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
+
+      fScenConsts.CalculateBinSize = BOOL_NS(CalculateBinSize,fSteerfile);
+      fScenConsts.BinSizeFactor = DOUBLE_NS(BinSizeFactor,fSteerfile);
+      if ( !fScenConsts.CalculateBinSize ) 
+	 fScenConsts.BinSize = DOUBLE_ARR_NS(BinSize,fSteerfile); 
+
+      //ReadBinSize();
+   }
+   else {
+      // warmup file not yet read in
+      // read in needed flags in GetWarmupValues()
+
+      // fScenConsts.DifferentialDimension = INT_NS(Warmup.DifferentialDimension,fSteerfile);
+      // fScenConsts.DimensionIsDifferential = INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile);
+      // fScenConsts.DimensionLabels = STRING_ARR_NS(Warmup.DimensionLabels,fSteerfile);
+      // fScenConsts.ScaleDescriptionScale1 = STRING_NS(Warmup.ScaleDescriptionScale1,fSteerfile);
+      // if (!fIsFlexibleScale) 
+      // 	 fScenConsts.ScaleDescriptionScale2 = STRING_NS(Warmup.ScaleDescriptionScale2,fSteerfile); 
+
+      fScenConsts.CalculateBinSize = false;
+      
+      // NDim = fScenConsts.DifferentialDimension;
+      // if ( NDim==1 ) fScenConsts.SingleDifferentialBinning = ;
+      // else if ( NDim==2 ) fScenConsts.DoubleDifferentialBinning = ;
+      // else if ( NDim==3 ) fScenConsts.TripleDifferentialBinning = ;
+   }
+
+   fScenConsts.CheckScaleLimitsAgainstBins = BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile);
+   fScenConsts.X_Kernel = STRING_NS(X_Kernel,fSteerfile);
+   fScenConsts.X_DistanceMeasure = STRING_NS(X_DistanceMeasure,fSteerfile);
+   fScenConsts.X_NNodes = INT_NS(X_NNodes,fSteerfile);
+   fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
+
+   fScenConsts.Mu1_Kernel = STRING_NS(Mu1_Kernel,fSteerfile);
+   fScenConsts.Mu1_DistanceMeasure = STRING_NS(Mu1_DistanceMeasure,fSteerfile);
+   fScenConsts.Mu1_NNodes = INT_NS(Mu1_NNodes,fSteerfile);
+   if ( fIsFlexibleScale ) {
+      fScenConsts.Mu2_Kernel = STRING_NS(Mu2_Kernel,fSteerfile);
+      fScenConsts.Mu2_DistanceMeasure = STRING_NS(Mu2_DistanceMeasure,fSteerfile);
+      fScenConsts.Mu2_NNodes = INT_NS(Mu2_NNodes,fSteerfile);
+   }
+
+  
+   if ( fProcConsts.NPDF > 0 ) fScenConsts.PDF1 = INT_NS(PDF1,fSteerfile); 
+   if ( fProcConsts.NPDF > 1 ) fScenConsts.PDF2 = INT_NS(PDF2,fSteerfile); 
+
+   fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile); 
+
 }
 
 
 // ___________________________________________________________________________________________________
-vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
+vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord, const vector<vector<int> >& PartonCombinations) {
    //! Read PDF linear combinations from steering file
    //! and convert to internal format
 
 
-   vector<vector<int> > PartonCombinations;
-   if ( ord==0 )      {
-      PartonCombinations = INT_TAB_NS(PartonCombinationsLO,fSteerfile);
+   //vector<vector<int> > PartonCombinations;
+   if ( ord==0 ) {
+      //PartonCombinations = INT_TAB_NS(PartonCombinationsLO,fSteerfile);
       if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesLO ) {
          logger.error["ReadPartonCombinations"]<<"Number of parton combinations for LO processes must be identical to number of subprocesses. NSubProcessesLO="
                                         <<fProcConsts.NSubProcessesLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
-         cout<<"PartonCombinations.size()="<<PartonCombinations.size()<<",  fProcConsts.NSubProcessesLO="<<fProcConsts.NSubProcessesLO<<endl;
          exit(1);
       }
    }
    else if ( ord==1 ) {
-      PartonCombinations = INT_TAB_NS(PartonCombinationsNLO,fSteerfile);
+      //PartonCombinations = INT_TAB_NS(PartonCombinationsNLO,fSteerfile);
       if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesNLO ) {
          logger.error["ReadPartonCombinations"]<<"Number of parton combinations for NLO processes must be identical to number of subprocesses.  NSubProcessesNLO="
                                         <<fProcConsts.NSubProcessesNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
@@ -391,7 +509,7 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord) {
       }
    }
    else if ( ord==2 ) {
-      PartonCombinations = INT_TAB_NS(PartonCombinationsNNLO,fSteerfile);
+      //PartonCombinations = INT_TAB_NS(PartonCombinationsNNLO,fSteerfile);
       if ( (int)PartonCombinations.size() != fProcConsts.NSubProcessesNNLO ) {
          logger.error["ReadPartonCombinations"]<<"Number of parton combinations for NNLO processes must be identical to number of subprocesses.  NSubProcessesNNLO="
                                         <<fProcConsts.NSubProcessesNNLO<<", # parton combinations="<<PartonCombinations.size()<<". Exiting." <<endl;
@@ -501,7 +619,7 @@ void fastNLOCreate::ReadScaleFactors() {
    //! and init member fScaleFac
 
    if (fIsFlexibleScale) {logger.warn["ReadScaleFactors"]<<"This function is only reasonable for fixed-scale tables!"<<endl;}
-   vector<double> svar = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
+   vector<double> svar = fScenConsts.ScaleVariationFactors;// DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
    fScaleFac.resize(svar.size());
    if (svar.empty()) {
       // 'ScaleVariationFactors' not found -> using default
@@ -584,7 +702,78 @@ int fastNLOCreate::CreateCoeffTable() {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::ReadBinningFromScenarioConsts() {
+   //! read in binning from ScenConsts
+   
+   // --- sanity checks
+   if ( fScenConsts.DifferentialDimension<=0 || fScenConsts.DifferentialDimension>3  ) {
+      logger.error["ReadBinningFromScenarioConsts"]<<"fScenConsts seem not be be set!"<<endl;
+      exit(1);
+   }
+   else {
+      NDim     = fScenConsts.DifferentialDimension;
+      if ( NDim==1 && fScenConsts.SingleDifferentialBinning.empty() ) {
+	 logger.error["ReadBinningFromScenarioConsts"]<<" NDim=1 requires also a 1D binning, but fScenConsts.SingleDifferentialBinning is empty."<<endl;
+	 exit(1);
+      }
+      if ( NDim==2 && fScenConsts.DoubleDifferentialBinning.empty() ) {
+	 logger.error["ReadBinningFromScenarioConsts"]<<" NDim=2 requires also a 1D binning, but fScenConsts.DoubleDifferentialBinning is empty."<<endl;
+	 exit(1);
+      }
+      if ( NDim==2 && fScenConsts.DoubleDifferentialBinning[0].empty() ) {
+	 logger.error["ReadBinningFromScenarioConsts"]<<" NDim=2 requires also a 1D binning, but fScenConsts.DoubleDifferentialBinning[0] is empty."<<endl;
+	 exit(1);
+      }
+      if ( NDim==3 && fScenConsts.TripleDifferentialBinning.empty() ) {
+	 logger.error["ReadBinningFromScenarioConsts"]<<" NDim=3 requires also a 1D binning, but fScenConsts.TripleDifferentialBinning is empty."<<endl;
+	 exit(1);
+      }
+   }
+
+   NDim     = fScenConsts.DifferentialDimension;
+   DimLabel = fScenConsts.DimensionLabels;
+   IDiffBin = fScenConsts.DimensionIsDifferential;
+   DimLabel.resize(NDim); //safety
+   IDiffBin.resize(NDim);
+
+   // ---- check IDiffBin
+   bool AllDiff = true;
+   bool AllBinInt = true;
+   for (unsigned int i = 0 ; i<IDiffBin.size() ; i++) {
+      AllDiff = AllDiff && (IDiffBin[i] == 1);
+      AllBinInt = AllBinInt && (IDiffBin[i] != 1);
+   }
+   if (!AllDiff && !AllBinInt) {
+      logger.error["ReadBinningFromScenarioConsts"]<<"All dimensions must be consistently either bin-integrated, or truly differential dimensions. Exiting."<<endl;
+      exit(1);
+   }  
+
+   // ---- read bin grid
+   if (NDim == 1) 
+      SetBinningND(fScenConsts.SingleDifferentialBinning, NDim, IDiffBin);
+   else if (NDim==2) 
+      SetBinningND(fScenConsts.DoubleDifferentialBinning, NDim, IDiffBin);
+   else if (NDim==3) {
+      logger.error["ReadBinningFromScenarioConsts"]<<"The code for reading of "<<NDim<<"-dimensional binnings from ScenarioConstants is not implemented."<<endl;
+      vector<vector<double> > in = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile); //backward compatibility! not compatible with constructor(genConst,procConst,ScenConst)
+      SetBinningND(in, NDim, IDiffBin);
+      //exit(3);
+   }
+ 
+   // ---- Bin width
+   ReadBinSize();
+
+   logger.info["ReadBinningFromScenarioConsts"]<<"Read in successfully "<<NDim<<"-dimensional bin grid with "<<NObsBin<<" bins."<<endl;
+
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::ReadBinning() {
+
+   logger.warn["ReadBinning"]<<"This function is deprecated and should not be called. Exiting."<<endl; 
+   exit(23);
+
    // optimize read-in of bin grids
    // ToDo. Check sanity of bin-grid
 
@@ -603,6 +792,7 @@ void fastNLOCreate::ReadBinning() {
    DimLabel.resize(NDim); //safety
    IDiffBin.resize(NDim);
 
+   // ---- check IDiffBin
    bool AllDiff = true;
    bool AllBinInt = true;
    for (unsigned int i = 0 ; i<IDiffBin.size() ; i++) {
@@ -613,24 +803,26 @@ void fastNLOCreate::ReadBinning() {
       logger.error["ReadBinning"]<<"All dimensions must be consistently either bin-integrated, or truly differential dimensions. Exiting."<<endl;
       exit(1);
    }
+   if (AllDiff && NDim == 3) { 
+      logger.error["ReadBinning"]<<"Fully differential and triple-differential binning not yet implemented. exiting"<<endl; 
+      exit(1);
+   }
 
-   if (AllDiff && NDim == 3) { logger.error["ReadBinning"]<<"Fully differential and triple-differential binning not yet implemented. exiting"<<endl; exit(1);}
-
-   // read single-differential bin grid
+   // ---- read single-differential bin grid
    if (NDim == 1) {
       vector<double> bgrid = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
       //      SetBinning1D(bgrid, DimLabel[0], IDiffBin[0]);
       SetBinningND(bgrid, NDim, IDiffBin);
    }
 
-   // read double-differential bin grid
+   // ---- read double-differential bin grid
    else if (NDim==2) {
       vector<vector<double> > in = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
       // New binning code
       SetBinningND(in, NDim, IDiffBin);
    }
 
-   // read in triple-differential binning
+   // ---- read in triple-differential binning
    else if (NDim==3) {
       logger.warn["ReadBinning"]<<"The code for reading of "<<NDim<<"-dimensional binnings was not fully tested. Please verify the code and remove this statement."<<endl;
       vector<vector<double> > in = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
@@ -641,11 +833,22 @@ void fastNLOCreate::ReadBinning() {
       exit(1);
    }
 
+   // ---- Bin width
+   ReadBinSize();
+
+   logger.info["ReadBinning"]<<"Read in successfully "<<NDim<<"-dimensional bin grid with "<<NObsBin<<" bins."<<endl;
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::ReadBinSize(){
+   //! initialize BinSize
+   //! either from steering or from fScenConsts
 
    // ---------------------------------
-   //       Bin width
+   //       Bin size
    // ---------------------------------
-   if (BOOL_NS(CalculateBinSize,fSteerfile)) {
+   if ( fScenConsts.CalculateBinSize ) {
       BinSize.resize(NObsBin);
       bool idi = false;
       for (unsigned int i = 0 ; i<NObsBin ; i++) {
@@ -662,21 +865,21 @@ void fastNLOCreate::ReadBinning() {
             }
          }
          // divide by binsizefactor, but only if at least one dimension is differential
-         if (idi) BinSize[i] *= DOUBLE_NS(BinSizeFactor,fSteerfile);
+         if (idi) BinSize[i] *= fScenConsts.BinSizeFactor;
       }
       if (!idi) logger.debug["ReadBinning"]<<"BinSizeFactor is not being used, since no observable is calculated differential."<<endl;
-   } else {
+   } 
+   else {
       // read in bin width
-      logger.warn["ReadBinning"]<<"Reading of bindwidth only poorly  implemented! Improve it and remove this message."<<endl;
-      if (DOUBLE_ARR_NS(BinSize,fSteerfile).size()!=NObsBin) logger.warn["ReadBinning"]<<"Number of bins of 'BinSize' not consistent with bin grid."<<endl;
-      BinSize=DOUBLE_ARR_NS(BinSize,fSteerfile);
+      logger.warn["ReadBinning"]<<"Reading of 'BinSize' only poorly  implemented! Improve it and remove this message."<<endl;
+      BinSize = fScenConsts.BinSize;//DOUBLE_ARR_NS(BinSize,fSteerfile);
+      if ( BinSize.size()!=NObsBin ) logger.warn["ReadBinning"]<<"Number of bins of 'BinSize' not consistent with bin grid."<<endl;
       BinSize.resize(NObsBin);
       for (unsigned int i = 0 ; i<NObsBin ; i++) {
-         if (BinSize[i]==0) BinSize[i] = 1.0;
+	 if (BinSize[i]==0) BinSize[i] = 1.0;
       }
    }
 
-   logger.info["ReadBinning"]<<"Read in successfully "<<NDim<<"-dimensional bin grid with "<<NObsBin<<" bins."<<endl;
 }
 
 ///////////////////////////////////////////////
@@ -1102,15 +1305,27 @@ void fastNLOCreate::GetWarmupValues() {
          logger.info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
    }
 
+   // --- read in remaining scenario constants if requested
+   if ( fIsWarmup && !fScenConsts.ReadBinningFromSteering ) {
+      logger.error["Instantiate"]<<"This is a warmup run. Thus, the binning must be read from the steering or ScenarioConstants. Please use ReadBinningFromSteering=true"<<endl;
+      exit(1);
+   }
+   else if ( !fIsWarmup && !fScenConsts.ReadBinningFromSteering ) {
+      fScenConsts.DifferentialDimension = INT_NS(Warmup.DifferentialDimension,fSteerfile);
+      fScenConsts.DimensionIsDifferential = INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile);
+      fScenConsts.DimensionLabels = STRING_ARR_NS(Warmup.DimensionLabels,fSteerfile);
+      fScenConsts.ScaleDescriptionScale1 = STRING_NS(Warmup.ScaleDescriptionScale1,fSteerfile);
+      if (!fIsFlexibleScale) 
+	 fScenConsts.ScaleDescriptionScale2 = STRING_NS(Warmup.ScaleDescriptionScale2,fSteerfile); 
+   }
+
    // inform user about success
    logger.info >> (fastNLO::_SSEP40+fastNLO::_SSEP40+fastNLO::_SSEP40) << endl;
    std::cout.clear() ; // recover cout to screen
    std::cerr.clear() ; // recover cout to screen
-   if ( fIsWarmup ) {
-      logger.warn["GetWarmupValues"]<<"This will be a warmup run."<<endl;
-   } else {
-      logger.info["GetWarmupValues"]<<"This will be a production run."<<endl;
-   }
+
+   if ( fIsWarmup ) logger.warn["GetWarmupValues"]<<"This will be a warmup run."<<endl;
+   else             logger.info["GetWarmupValues"]<<"This will be a production run."<<endl;
 }
 
 
@@ -1121,14 +1336,14 @@ void fastNLOCreate::UseBinGridFromWarmup() {
    //! with values stored in the warmup file.
    vector<vector<double> > warmup =  DOUBLE_TAB_NS(Warmup.Binning,fSteerfile);
    NObsBin      = warmup.size();
-   NDim         = INT_NS(Warmup.DifferentialDimension,fSteerfile);
+   NDim         = fScenConsts.DifferentialDimension;
    if (warmup[0].size() != (7+2*NDim) && warmup[0].size() != (5+2*NDim)) {
       logger.error["UseBinGridFromWarmup"]<<"This warmup table has an unknown size of columns. Expecting "<<(7+2*NDim)<<" for flexible-scale, or "<<(5+2*NDim)<<" for fixed-scale tables. Exiting."<<endl;
       exit(1);
    }
    fIsFlexibleScale = (warmup[0].size() == (7+2*NDim));
-   IDiffBin     = INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile);
-   DimLabel     = STRING_ARR_NS(Warmup.DimensionLabels,fSteerfile);
+   IDiffBin     = fScenConsts.DimensionIsDifferential;
+   DimLabel     = fScenConsts.DimensionLabels;
 
    // make binning
    const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
@@ -1425,12 +1640,12 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
    for (unsigned int i = 0 ; i<fProcConsts.GetProcessDescription().size() ; i++) {
       c->CodeDescript.push_back(fProcConsts.GetProcessDescription()[i]);
    }
-   c->SetIXsectUnits(fProcConsts.UnitsOfCoefficients);
+   c->SetIXsectUnits(fGenConsts.UnitsOfCoefficients);
 
    // (some) process constants
    c->NPDFPDG.resize(fProcConsts.NPDF);
-   if (c->NPDFPDG.size() >0) c->NPDFPDG[0] = INT_NS(PDF1,fSteerfile);   // from steering
-   if (c->NPDFPDG.size() >1) c->NPDFPDG[1] = INT_NS(PDF2,fSteerfile);   // from steering
+   if (c->NPDFPDG.size() >0) c->NPDFPDG[0] = fScenConsts.PDF1;   // from steering
+   if (c->NPDFPDG.size() >1) c->NPDFPDG[1] = fScenConsts.PDF2;   // from steering
    c->NPDFDim           = fProcConsts.NPDFDim;
    c->IPDFdef1          = fProcConsts.IPDFdef1;
    c->IPDFdef2          = fProcConsts.IPDFdef2;
@@ -1448,13 +1663,8 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
    if (fIsFlexibleScale) {
       c->NScaleDep              = 3; // temporarily. Until known if generator runs in LO, NLO or NNLO.
       c->ScaleDescript[0].resize(2);
-      if (BOOL_NS(ReadBinningFromSteering,fSteerfile)) {
-         c->ScaleDescript[0][0] = STRING_NS(ScaleDescriptionScale1,fSteerfile);
-         c->ScaleDescript[0][1] = STRING_NS(ScaleDescriptionScale2,fSteerfile);
-      } else {
-         c->ScaleDescript[0][0] = STRING_NS(Warmup.ScaleDescriptionScale1,fSteerfile);
-         c->ScaleDescript[0][1] = STRING_NS(Warmup.ScaleDescriptionScale2,fSteerfile);
-      }
+      c->ScaleDescript[0][0] = fScenConsts.ScaleDescriptionScale1;
+      c->ScaleDescript[0][1] = fScenConsts.ScaleDescriptionScale2;
    } else {
       // ---- those numbers are partly ambigously defined in v2.1 ---- //
       // proper code would be, but needs also adjustment in reading, writing and getter functions!
@@ -1473,10 +1683,7 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
       //     always MuR, MuF!
       c->ScaleDescript.resize(NScaleDim);
       c->ScaleDescript[0].resize(NScaleDim);
-      if (BOOL_NS(ReadBinningFromSteering,fSteerfile))
-         c->ScaleDescript[0][0] = STRING_NS(ScaleDescriptionScale1,fSteerfile);
-      else
-         c->ScaleDescript[0][0] = STRING_NS(Warmup.ScaleDescriptionScale1,fSteerfile);
+      c->ScaleDescript[0][0] = fScenConsts.ScaleDescriptionScale1;
       c->SetNScaleDep(0);               // This is a fixed-scale table
    }
 }
@@ -2207,10 +2414,15 @@ void fastNLOCreate::WriteTable() {
    //if ( GetTheCoeffTable()->GetNevt(0,0) <= 0 ) {
    if (GetTheCoeffTable()->Nevt <= 0) {
       logger.warn["WriteTable"]<<"Number of events seems to be not filled. Please use SetNumberOfEvents(int) before writing table."<<endl;
+      exit(1);
    }
    fStats.PrintStats();
    if (fIsWarmup) {
       logger.info["WriteTable"]<<"Writing warmup table instead of coefficient table."<<endl;
+      if ( fWx.empty() ) {
+	 logger.error["WriteTable"]<<"Warmup values seem not to be initialized correctly. Maybe forgot to call 'Fill()'?"<<endl;
+	 exit(1);
+      }
       // round warmup values and try to guess bin boundaries
       AdjustWarmupValues();
       // write table to disk
@@ -2292,7 +2504,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 
    // write variables of warmup run
    strm<<"Warmup.OrderInAlphasOfWarmupRunWas\t"<<  fIOrd <<endl;
-   strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<<(BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile)?"true":"false")<<endl;
+   //strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<<(BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile)?"true":"false")<<endl;
+   strm<<"Warmup.CheckScaleLimitsAgainstBins\t"<< (fScenConsts.CheckScaleLimitsAgainstBins ?"true":"false")<<endl;
    strm<<"Warmup.ScaleDescriptionScale1     \t\""<< GetTheCoeffTable()->ScaleDescript[0][0]<<"\""<<endl;
    if (fIsFlexibleScale)
       strm<<"Warmup.ScaleDescriptionScale2     \t\""<< GetTheCoeffTable()->ScaleDescript[0][1]<<"\"" <<endl;
@@ -2703,7 +2916,6 @@ void  fastNLOCreate::InitInterpolationKernels() {
          fKernMuS[i].resize(fScaleFac.size());
       }
    }
-   // todo. clean up memory
    vector<double> wrmX = DOUBLE_COL_NS(Warmup.Values,x_min,fSteerfile);
    vector<double> wrmMu1Up, wrmMu1Dn;
    wrmMu1Dn = read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"),fSteerfile);
@@ -2724,26 +2936,29 @@ void  fastNLOCreate::InitInterpolationKernels() {
 
    int npdf = GetTheCoeffTable()->GetNPDF();
 
+   if ( fScenConsts.X_Kernel.empty() ){
+      logger.error["InitInterpolationKernels"]<<"X_Kernel not found in fScenarioConstants."<<endl; exit(1);
+   }
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
       logger.debug["InitInterpolationKernels"]<<"Make x grid for obsbin="<<i<<endl;
-      fKernX1[i] = MakeInterpolationKernels(STRING_NS(X_Kernel,fSteerfile),wrmX[i],1); // use 1 as upper x-value
+      fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
       if (npdf == 2)
-         fKernX2[i] = MakeInterpolationKernels(STRING_NS(X_Kernel,fSteerfile),wrmX[i],1);
+         fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
 
       // Create x grids with X_NNodes+1 nodes up to x_max = 1.
       // The additional last node will be removed again below.
-      int nxtot = INT_NS(X_NNodes,fSteerfile) + 1;
-      if (BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile)) {
-         fKernX1[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)),nxtot);
+      int nxtot = fScenConsts.X_NNodes + 1;
+      if ( fScenConsts.X_NoOfNodesPerMagnitude ) {
+         fKernX1[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2)
-            fKernX2[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)),nxtot);
+            fKernX2[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
       } else {
-         fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)),nxtot);
+         fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2)
-            fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(STRING_NS(X_DistanceMeasure,fSteerfile)),nxtot);
+            fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
       }
 
       // Remove last node at x = 1; is multiplied by PDFs equalling zero anyway.
@@ -2754,24 +2969,25 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init scale1-interpolation kernels
       // ------------------------------------------------
-      int nqtot1 = INT_NS(Mu1_NNodes,fSteerfile);
+      int nqtot1 = fScenConsts.Mu1_NNodes;
       if (fIsFlexibleScale) {
          logger.debug["InitInterpolationKernels"]<<"Make Mu1 grid for obsbin="<<i<<endl;
-         fKernMu1[i] = MakeInterpolationKernels(STRING_NS(Mu1_Kernel,fSteerfile),wrmMu1Dn[i],wrmMu1Up[i]);
-         fKernMu1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(STRING_NS(Mu1_DistanceMeasure,fSteerfile)),nqtot1);
+         fKernMu1[i] = MakeInterpolationKernels(fScenConsts.Mu1_Kernel,wrmMu1Dn[i],wrmMu1Up[i]);
+         fKernMu1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.Mu1_DistanceMeasure),nqtot1);
          // ------------------------------------------------
          // init scale2-interpolation kernels
          // ------------------------------------------------
-         int nqtot2 = INT_NS(Mu2_NNodes,fSteerfile);
+         int nqtot2 = fScenConsts.Mu2_NNodes;
          logger.debug["InitInterpolationKernels"]<<"Make Mu2 grid for obsbin="<<i<<endl;
-         fKernMu2[i] = MakeInterpolationKernels(STRING_NS(Mu2_Kernel,fSteerfile),wrmMu2Dn[i],wrmMu2Up[i]);
-         fKernMu2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(STRING_NS(Mu2_DistanceMeasure,fSteerfile)),nqtot2);
-      } else {
+         fKernMu2[i] = MakeInterpolationKernels(fScenConsts.Mu2_Kernel,wrmMu2Dn[i],wrmMu2Up[i]);
+         fKernMu2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.Mu2_DistanceMeasure),nqtot2);
+      } 
+      else {
          for (unsigned int k = 0 ; k<fScaleFac.size() ; k++) {
             double muDn = fScaleFac[k]*wrmMu1Dn[i];
             double muUp = fScaleFac[k]*wrmMu1Up[i];
-            fKernMuS[i][k] = MakeInterpolationKernels(STRING_NS(Mu1_Kernel,fSteerfile),muDn,muUp);
-            fKernMuS[i][k]->MakeGrids(fastNLOInterpolBase::TranslateGridType(STRING_NS(Mu1_DistanceMeasure,fSteerfile)),nqtot1);
+            fKernMuS[i][k] = MakeInterpolationKernels(fScenConsts.Mu1_Kernel,muDn,muUp);
+            fKernMuS[i][k]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.Mu1_DistanceMeasure),nqtot1);
          }
       }
    }
@@ -2803,19 +3019,19 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::TestParameterInSteering(const string& label) const {
+bool fastNLOCreate::TestParameterInSteering(const string& key) const {
    //! Get flag if parameter exists in steering card
-   return read_steer::getexist(label, fSteerfile);
+   return read_steer::getexist(key, fSteerfile);
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, bool& val) const {
-   //! Get boolean value from steering with label 'label'.
-   //! Alternatively, also BOOL_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, bool& val) const {
+   //! Get boolean value from steering with key 'key'.
+   //! Alternatively, also BOOL_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, one should not
+   //! during access of the steering keys, one should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2823,22 +3039,22 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, bool& val) con
    //! static bool gotval = GetParameterFromSteering("MjjCut",IsCMS);
    //! if (!gotval) cout<<"Error! Could not find boolean parameter MjjCut in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getbool(label,fSteerfile);
+      val = read_steer::getbool(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, int& val) const {
-   //! Get integer value from steering with label 'label'.
-   //! Alternatively, also INT_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, int& val) const {
+   //! Get integer value from steering with key 'key'.
+   //! Alternatively, also INT_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2846,22 +3062,22 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, int& val) cons
    //! static bool gotval = GetParameterFromSteering("nJetMin",nJetMin);
    //! if (!gotval) cout<<"Error! Could not find integer parameter nJetMin in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getint(label,fSteerfile);
+      val = read_steer::getint(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, double& val) const {
-   //! Get boolean value from steering with label 'label'.
-   //! Alternatively, also DOUBLE_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, double& val) const {
+   //! Get boolean value from steering with key 'key'.
+   //! Alternatively, also DOUBLE_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2869,22 +3085,22 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, double& val) c
    //! static bool gotval = GetParameterFromSteering("MjjCut",MjjCut);
    //! if (!gotval) cout<<"Error! Could not find parameter MjjCut in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getdouble(label,fSteerfile);
+      val = read_steer::getdouble(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, string& val) const {
-   //! Get string value from steering with label 'label'.
-   //! Alternatively, also STRING_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, string& val) const {
+   //! Get string value from steering with key 'key'.
+   //! Alternatively, also STRING_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2892,40 +3108,40 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, string& val) c
    //! static bool gotval = GetParameterFromSteering("MyText",text);
    //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getstring(label,fSteerfile);
+      val = read_steer::getstring(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<int>& val) const {
-   //! Get integer vector from steering with label 'label'.
-   //! Alternatively, also INT_ARR(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, vector<int>& val) const {
+   //! Get integer vector from steering with key 'key'.
+   //! Alternatively, also INT_ARR(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getintarray(label,fSteerfile);
+      val = read_steer::getintarray(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<double>& val) const {
-   //! Get vector of doubles from steering with label 'label'.
-   //! Alternatively, also DOUBLE_ARR_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, vector<double>& val) const {
+   //! Get vector of doubles from steering with key 'key'.
+   //! Alternatively, also DOUBLE_ARR_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2933,23 +3149,23 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<double>
    //! static bool gotval = GetParameterFromSteering("FlexiCuts",FlexiCuts);
    //! if (!gotval) cout<<"Error! Could not find vector FlexiCuts in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getdoublearray(label,fSteerfile);
+      val = read_steer::getdoublearray(key,fSteerfile);
    return exist;
 
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<string>& val) const {
-   //! Get vector of strings from steering with label 'label'.
-   //! Alternatively, also STRING_ARR_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, vector<string>& val) const {
+   //! Get vector of strings from steering with key 'key'.
+   //! Alternatively, also STRING_ARR_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2957,22 +3173,22 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<string>
    //! static bool gotval = GetParameterFromSteering("MyText",text);
    //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getstringarray(label,fSteerfile);
+      val = read_steer::getstringarray(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<int > >& val) const {
-   //! Get vector of vectors of ints from steering with label 'label'.
-   //! Alternatively, also INT_TAB_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, vector<vector<int > >& val) const {
+   //! Get vector of vectors of ints from steering with key 'key'.
+   //! Alternatively, also INT_TAB_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -2980,22 +3196,22 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<
    //! static bool gotval = GetParameterFromSteering("MyText",text);
    //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getinttable(label,fSteerfile);
+      val = read_steer::getinttable(key,fSteerfile);
    return exist;
 }
 
 
 // ___________________________________________________________________________________________________
-bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<double > >& val) const {
-   //! Get vector of vector of doubles from steering with label 'label'.
-   //! Alternatively, also DOUBLE_TAB_NS(`label`) could be used if read_steer.h is included
+bool fastNLOCreate::GetParameterFromSteering(const string& key, vector<vector<double > >& val) const {
+   //! Get vector of vector of doubles from steering with key 'key'.
+   //! Alternatively, also DOUBLE_TAB_NS(`key`) could be used if read_steer.h is included
    //!
    //! Since a string (or a hash-map-access) has to be performed
-   //! during access of the steering labels, you  should not
+   //! during access of the steering keys, you  should not
    //! call this function too frequently.
    //!
    //! Use for istance:
@@ -3003,10 +3219,10 @@ bool fastNLOCreate::GetParameterFromSteering(const string& label, vector<vector<
    //! static bool gotval = GetParameterFromSteering("MyText",text);
    //! if (!gotval) cout<<"Error! Could not find parameter MyText in steering file."<<endl;
    //!
-   //! Function returns 'false' if label was not found in steering file
+   //! Function returns 'false' if key was not found in steering file
 
-   bool exist = read_steer::getexist(label,fSteerfile);
+   bool exist = read_steer::getexist(key,fSteerfile);
    if ( exist )
-      val = read_steer::getdoubletable(label,fSteerfile);
+      val = read_steer::getdoubletable(key,fSteerfile);
    return exist;
 }
