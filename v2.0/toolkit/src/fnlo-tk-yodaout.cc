@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
          shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
          shout << "                 2P (symmetric 2-point scale factor variation)" << endl;
          shout << "                 6P (asymmetric 6-point scale factor variation)" << endl;
-         shout << "                 HS (symmetric Hessian PDF uncertainty --> ABM PDFs)" << endl;
+         shout << "                 HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)" << endl;
          shout << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
          shout << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
          shout << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-yodaout"] << "Showing uncertainty from asymmetric 6-point scale factor variation." << endl;
       } else if ( chunc == "HS" ) {
          ePDFUnc = kHessianSymmetric;
-         shout["fnlo-tk-yodaout"] << "Showing symmetric Hessian PDF uncertainty (--> ABM PDFs)." << endl;
+         shout["fnlo-tk-yodaout"] << "Showing symmetric Hessian PDF uncertainty (--> ABM, (G)JR PDFs)." << endl;
       } else if ( chunc == "HA" ) {
          ePDFUnc = kHessianAsymmetric;
          shout["fnlo-tk-yodaout"] << "Showing asymmetric Hessian PDF uncertainty." << endl;

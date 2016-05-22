@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
    //!   kLHAPDF6             : LHAPDF6 uncertainties (recommended if LHAPDF6 is available)
    //!                          Uses standard formula for NNPDF with symmetric uncertainties around mean.
    //!                          For alternative see specific calls below and the LHAPDF6 documentation.
-   //!   kHessianSymmetric    : symmetric Hessian PDF uncertainties (ABM)
+   //!   kHessianSymmetric    : symmetric Hessian PDF uncertainties (ABM, (G)JR)
    //!   kHessianAsymmetric   : asymmetric Hessian PDF uncertainties
    //!   kHessianAsymmetricMax: asymmetric Hessian PDF uncertainties with pairwise max deviations per eigenvector (CTEQ,MRST|MSTW)
    //!   kHessianCTEQCL68     : like kHessianAsymmetricMax, but with uncertainties rescaled to CL68
