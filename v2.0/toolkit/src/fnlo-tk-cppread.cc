@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
          shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm]" << endl;
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = CT14nlo" << endl;
+         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
@@ -308,7 +308,7 @@ int main(int argc, char** argv) {
    // --- fastNLO user:
    //     The alpha_s evolution is provided by the code of the chosen
    //     interface, e.g. GRV alpha_s for the fnlo instance here.
-   //     The value of alpha_s(M_Z) can be changed from its default PDG 2014 value
+   //     The value of alpha_s(M_Z) can be changed from its default PDG 2015 value
    //     like this:
    //
    //            fnlo.SetAlphasMz(0.1179);
@@ -668,15 +668,17 @@ int main(int argc, char** argv) {
    //!   double Mz = 91.174;  //! ABM11
    //!   double Mz = 91.188;  //! CTEQ
    //!   double Mz = 91.187;  //! HERAPDF
-   double Mz = 91.1876; //! MSTW, PDG 2012-2014
+   double Mz = 91.1876; //! MSTW, PDG 2012-2015
    //!   double Mz = 91.2;    //! NNPDF
    fnlo->SetMz(Mz);
 
    //! Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
    //! double asmz = fnlo->GetAlphasMz(Mz);
    //! cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
-   fnlo->SetAlphasMz(0.1184);//! PDG 2013
-   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2014
+   //!   fnlo->SetAlphasMz(0.1184);//! PDG 2012 +- 0.0007
+   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2013 +- 0.0006
+   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2014 +- 0.0006
+   fnlo->SetAlphasMz(0.1181);//! PDG 2015 +- 0.0013
    //!   fnlo->SetAlphasMz(0.1180);//! CT10-NLO
    //!   fnlo->SetAlphasMz(0.1190);//! NNPDF21-NLO
 

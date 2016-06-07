@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
          shout << "       Arguments: <> mandatory; [] optional." << endl;
          shout << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
          shout << "                 that will be complemented by '_nnnn.tab'" << endl;
-         shout << "[PDF]: PDF set, def. = CT14nlo" << endl;
+         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
          shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
          shout << "   If the PDF set still is not found, then:" << endl;
