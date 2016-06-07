@@ -677,8 +677,8 @@ int main(int argc, char** argv) {
    //! cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
    //!   fnlo->SetAlphasMz(0.1184);//! PDG 2012 +- 0.0007
    //!   fnlo->SetAlphasMz(0.1185);//! PDG 2013 +- 0.0006
-   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2014 +- 0.0006
-   fnlo->SetAlphasMz(0.1181);//! PDG 2015 +- 0.0013
+   fnlo->SetAlphasMz(0.1185);//! PDG 2014 +- 0.0006
+   //!   fnlo->SetAlphasMz(0.1181);//! PDG 2015 +- 0.0013
    //!   fnlo->SetAlphasMz(0.1180);//! CT10-NLO
    //!   fnlo->SetAlphasMz(0.1190);//! NNPDF21-NLO
 
