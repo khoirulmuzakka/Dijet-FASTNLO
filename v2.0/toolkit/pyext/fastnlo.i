@@ -45,5 +45,6 @@ typedef fastNLOReader::XsUncertainty XsUncertainty;
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOAlphas.h"
+%include "../fastnlotoolkit/include/fastnlotk/fastNLOCRunDec.h"
 %include "../fastnlotoolkit/include/fastnlotk/CRunDec.h"
 %include "../fastnlotoolkit/include/fastnlotk/Alphas.h"
