@@ -28,6 +28,17 @@ namespace std {
 %ignore *operator>>;
 %rename("PrintMessage") speaker::print;
 
+
+/* Suppress SWIG warning */
+#pragma SWIG nowarn=SWIGWARN_PARSE_NESTED_CLASS
+/* Redefine nested class in global scope in order for SWIG to generate */
+/* a proxy class. Only SWIG parses this definition. */
+struct XsUncertainty {                                   //! Struct for returning vectors with cross section and relative uncertainty
+   std::vector < double > xs;
+   std::vector < double > dxsl;
+   std::vector < double > dxsu;
+};
+
 %{
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOTable.h"
 #include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"
