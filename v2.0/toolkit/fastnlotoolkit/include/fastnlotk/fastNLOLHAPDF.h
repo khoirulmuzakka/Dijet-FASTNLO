@@ -74,9 +74,9 @@ public:
 
 protected:
    // inherited functions
-   double EvolveAlphas(double Q) const ;
+   virtual double EvolveAlphas(double Q) const ;
    virtual bool InitPDF();
-   std::vector<double> GetXFX(double xp, double muf) const ;
+   virtual std::vector<double> GetXFX(double xp, double muf) const ;
 
    // ---- LHAPDF vars ---- //
    std::string fLHAPDFFilename;
