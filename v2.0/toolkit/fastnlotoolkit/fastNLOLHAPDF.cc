@@ -221,6 +221,7 @@ void fastNLOLHAPDF::SetLHAPDFMember(int set) {
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    if ( PDF ) delete PDF;
    PDF = PDFSet->mkPDF(set);
+   fiPDFMember=set; 
    #else
    fiPDFMember = set;
    if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember

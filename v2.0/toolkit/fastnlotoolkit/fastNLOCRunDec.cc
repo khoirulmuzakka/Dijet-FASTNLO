@@ -87,10 +87,25 @@ void fastNLOCRunDec::SetPDGValues() {
 
 void fastNLOCRunDec::SetLHAPDFValues() {
    FillPDFCache();
-   fAlphasMz = LHAPDF::alphasPDF(fMz);
-   fnLoop = LHAPDF::getOrderAlphaS() + 1;
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   fAlphasMz = PDF->alphasQ(fMz);
+   fnLoop = PDF->info().get_entry_as<int>("OrderQCD", -1) + 1;
+   QMass[0] = PDF->info().get_entry_as<double>("MDown");
+   QMass[1] = PDF->info().get_entry_as<double>("MUp");
+   QMass[2] = PDF->info().get_entry_as<double>("MStrange");
+   QMass[3] = PDF->info().get_entry_as<double>("MCharm");
+   QMass[4] = PDF->info().get_entry_as<double>("MBottom");
+   QMass[5] = PDF->info().get_entry_as<double>("MTop");
+#else
+   fAlphasMz = LHAPDF::alphasPDF(fiPDFMember,fMz);
+   fnLoop = LHAPDF::getOrderAlphaS(fiPDFMember) + 1;
    for (int i = 0; i < 6; i++)
-      QMass[i] = LHAPDF::getQMass(i+1);
+      QMass[i] = LHAPDF::getQMass(fiPDFMember,i+1);
+   // fAlphasMz = LHAPDF::alphasPDF(fMz);
+   // fnLoop = LHAPDF::getOrderAlphaS() + 1;
+   // for (int i = 0; i < 6; i++)
+   //    QMass[i] = LHAPDF::getQMass(i+1);
+#endif 
 }
 
 void fastNLOCRunDec::SetMz(double Mz) {
