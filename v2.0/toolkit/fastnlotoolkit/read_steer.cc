@@ -162,6 +162,7 @@ int read_steer::readstrm(ifstream& strm,unsigned int lstart, unsigned int lend, 
    fParseIncMode++;
    unsigned int nlines=0;
    unsigned int rlines=0;
+   if (incfile &&  fParseTableMode>2 ) fParseTableMode--; // correct counting of table rows
    while (std::getline(strm, lineread)) {
       nlines++;
       if (nlines < lstart) continue;
@@ -421,7 +422,7 @@ void read_steer::AppendToArray(const std::string& key, const std::string& entry)
 
 
 void read_steer::AppendToTable(const std::string& key, const std::vector<std::string>& entry){
-   // append one element to a table
+   //! append one element to a table
    if (ftableheaders.count(key)==0 )
       cout<<" # read_steer. Could not find table '"<<key<<"' yet. Ingoring call please use ::AddTable() instead."<<endl;
    else {
@@ -432,17 +433,22 @@ void read_steer::AppendToTable(const std::string& key, const std::vector<std::st
 
 
 bool read_steer::CheckNumber(const string& str) {
+   //! check if str is a float number
    return str.find_first_of("-+1234567890")==0;
 }
 
 
 bool read_steer::CheckInt(const string& str) {
+   //! check if str is an integer number
    return str.find_first_of(".eE")==string::npos && CheckNumber(str);
 }
 
 
 
 bool read_steer::ParseString(string line) {
+   //! Parse the actual string into member variables
+
+   //cout<<"ParseString: "<<line<<endl;
    // target variables
    string label;
    string value;
@@ -648,9 +654,9 @@ bool read_steer::ParseString(string line) {
 }
 
 int read_steer::ReplaceVariables(string& str) {
-   // replace all occurences of ${<sth>} by
-   // the stringvalue of the label <sth>
-   // return the number of replaced variables
+   //! replace all occurences of ${<sth>} by
+   //! the stringvalue of the label <sth>
+   //! return the number of replaced variables
 
    // remove all '$' which could come from enclosed statements in tablemode.
 
