@@ -162,7 +162,6 @@ int read_steer::readstrm(ifstream& strm,unsigned int lstart, unsigned int lend, 
    fParseIncMode++;
    unsigned int nlines=0;
    unsigned int rlines=0;
-   if (incfile &&  fParseTableMode>2 ) fParseTableMode--; // correct counting of table rows
    while (std::getline(strm, lineread)) {
       nlines++;
       if (nlines < lstart) continue;
@@ -171,6 +170,7 @@ int read_steer::readstrm(ifstream& strm,unsigned int lstart, unsigned int lend, 
       bool goon = ParseString(lineread);
       if (!goon) break;
    }
+   if (incfile &&  fParseTableMode>2 ) fParseTableMode--; // correct counting of table rows
    fParseIncMode--;
    return rlines; // return nlines including comments
 }
