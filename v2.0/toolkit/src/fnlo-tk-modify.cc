@@ -17,8 +17,8 @@
 #include <vector>
 #include <iostream>
 
+#include "fastnlotk/fastNLOBase.h"
 #include "fastnlotk/fastNLOTable.h"
-//#include "fnloBlockB.h"
 #include "fastnlotk/read_steer.h"
 
 using namespace std;
@@ -50,40 +50,37 @@ int main(int argc, char** argv)
    fastNLOTable table(CHAR(InTable));
    table.ReadTable();
 
-   table.PrintHeader();
+   if ( BOOL(PrintInputA1) )  table.PrintHeader();
+   if ( BOOL(PrintInputA2) )  table.PrintScenario();
 
-   //   if ( BOOL(PrintInputA1) )  table.ReadHeader()->Print();
-   //   if ( BOOL(PrintInputA2) )  table.ReadScenario()->Print();
-
-
-   // // Block A1
-   // if ( BOOL(Itabversion) ) {
-   //    cout<<"Modifying table version: from "<<table.Itabversion<<" to " << INT(Itabversion)<<endl;
-   //    //      table.Itabversion = INT(Itabversion);
-   // }
-   // if ( BOOL(ScenName) ) {
-   //    cout<<"Modifying table version: from "<<table.GetBlockA1()->GetScenName()<<" to " << STRING(ScenName)<<endl;
-   //    table.GetBlockA1()->SetScenName(STRING(ScenName));
-   // }
-   // // Block A2
-   // if ( BOOL(Ipublunits) ) {
-   //    cout<<"Modifying table version: from '"<<table.GetBlockA2()->GetIpublunits()<<"' to '" << INT(Ipublunits)<<"'."<<endl;
-   //    table.GetBlockA2()->SetIpublunits(INT(Ipublunits));
-   // }
+   // Block A1
+   if ( BOOL(Itabversion) ) {
+      cout<<"Modifying table version: from "<<table.GetItabversion()<<" to " << INT(Itabversion)<<endl;
+      table.SetItabversion(INT(Itabversion));
+   }
+   if ( BOOL(ScenName) ) {
+      cout<<"Modifying scenario name: from "<<table.GetScenName()<<" to " << STRING(ScenName)<<endl;
+      table.SetScenName(STRING(ScenName));
+   }
+   // Block A2
+   if ( BOOL(Ipublunits) ) {
+      cout<<"Modifying publunits: from '"<<table.GetIpublunits()<<"' to '" << INT(Ipublunits)<<"'."<<endl;
+      table.SetIpublunits(INT(Ipublunits));
+   }
 
    // if ( !STRING_ARR(ScDescript).empty() ){
    //    cout<<"Modifying Scenario Description. ";
    //    if ( BOOL(AttachScDescription) ){
    //       cout<<"Attaching "<<STRING_ARR(ScDescript).size()<<" lines to the scenario description"<< endl;
    //       for ( unsigned int i = 0 ; i< STRING_ARR(ScDescript).size() ; i++ ){
-   //          table.GetBlockA2()->ScDescript.push_back(STRING_ARR(ScDescript)[i]);
+   //          table.ScDescript.push_back(STRING_ARR(ScDescript)[i]);
    //       }
-   //       table.GetBlockA2()->NScDescript = (int)table.GetBlockA2()->ScDescript.size();
+   //       //         table.NScDescript = (int)table.GetBlockA2()->ScDescript.size();
    //    }
    //    else {
    //       cout<<"Setting new scenario description with "<<STRING_ARR(ScDescript).size()<<" lines."<<endl;
-   //       table.GetBlockA2()->ScDescript  = STRING_ARR(ScDescript);
-   //       table.GetBlockA2()->NScDescript = (int)STRING_ARR(ScDescript).size();
+   //       table.ScDescript  = STRING_ARR(ScDescript);
+   //       table.NScDescript = (int)STRING_ARR(ScDescript).size();
    //    }
    // }
 
@@ -225,19 +222,16 @@ int main(int argc, char** argv)
    //    }
    // }
 
-   // if ( BOOL(PrintOutputA1) )  table.GetBlockA1()->Print();
-   // if ( BOOL(PrintOutputA2) )  table.GetBlockA2()->Print();
+   if ( BOOL(PrintOutputA1) ) table.PrintHeader();
+   if ( BOOL(PrintOutputA2) ) table.PrintScenario();
 
    // writing modified table
-   // table.SetFilename(CHAR(OutTable));
-   // table.OpenFileWrite();
-   // table.WriteHeader();
-   // table.WriteScenario();
-   // for ( unsigned int idx = 0; idx<table.GetBlockA1()->GetNcontrib() ; idx++ )  table.WriteBlockB(idx);
-   // table.CloseFileWrite();
+   table.SetFilename(CHAR(OutTable));
+   table.WriteTable();
 
    // goodbye
-   cout<<"Wrote modified table to "<<STRING(OutTable)<<endl;
+   cout<<"End of Test "<<STRING(OutTable)<<endl;
+   //   cout<<"Wrote modified table to "<<STRING(OutTable)<<endl;
 
    return 0;
 }
