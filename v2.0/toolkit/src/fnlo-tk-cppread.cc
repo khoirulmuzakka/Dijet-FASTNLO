@@ -282,7 +282,7 @@ int main(int argc, char** argv) {
    // ---- Table information ---- //
    // --- fastNLO user: For a comprehensive insight into the fastNLO variables
    //     you can use:
-   //             fnlo.PrintFastNLOTableConstants(0);
+   //             fnlo.Print(0);
    //
 
 
@@ -362,7 +362,7 @@ int main(int argc, char** argv) {
    //       - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
    //     plus one must know the 'Id' of this contribution, which can be printed e.g.
    //     by calling
-   //        fnlo.PrintTableInfo();
+   //        fnlo.PrintContributionSummary(0);
    //
    //     To switch a contribution on/off please use:
    //            bool SetOn = fnlo.SetContributionON( contrib, Id, on/off )
@@ -619,8 +619,8 @@ int main(int argc, char** argv) {
 
    //! Print some fastNLO table info
    // TODO: Add print out of scale info, in particular for flex-scale tables
-   fnlo->PrintTableInfo();
-   fnlo->PrintFastNLOTableConstants(0);
+   fnlo->PrintContributionSummary(0);
+   fnlo->Print(0);
 
    //! Define the PDF set and member
    fnlo->SetLHAPDFFilename(PDFFile);
@@ -693,9 +693,6 @@ int main(int argc, char** argv) {
    //! Calculate cross sections
    fnlo->InitEvolveAlphas();
    fnlo->CalcCrossSection();
-   //
-   //! Example code to print out data points (if available)
-   //!   fnlo->PrintCrossSectionsData();
    //
    //! Example code to print out alpha_s(Q) values
    //! for (int iq = 10; iq < 2010; iq = iq + 10) {
@@ -1195,9 +1192,6 @@ int main(int argc, char** argv) {
          warn["fnlo-read"] << buffer << endl;
       }
    }
-
-   //! Print data if available, checks on availability internally
-   //!   fnlo->PrintCrossSectionsData();
 
    return 0;
 }

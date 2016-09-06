@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
    //! Note: This also initializes the cross section to the LO/NLO one!
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);
    //! Print essential table information
-   fnlo.PrintTableInfo();
+   fnlo.PrintContributionSummary(0);
 
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo.ContrId(kFixedOrder, kLeading);

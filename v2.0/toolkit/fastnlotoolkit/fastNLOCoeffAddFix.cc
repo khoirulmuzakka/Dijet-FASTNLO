@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cmath>
 
-#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFix.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/speaker.h"
 
 using namespace std;
@@ -279,20 +279,44 @@ void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double coef) {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::Print() const {
-   fastNLOCoeffAddBase::Print();
-   printf(" **************** FastNLO Table: fastNLOCoeffAddFix ****************\n");
-   for(int i=0;i<NScaleDim;i++){
-      printf(" B    - Nscalenode[%d]              %d\n",i,GetNScaleNode());
-      printf(" B    - Nscalevar[%d]               %d\n",i,Nscalevar[i]);
-      for(int j=0;j<Nscalevar[i];j++){
-         printf(" B    -  - ScaleFac[%d][%d]          %6.4f\n",i,j,ScaleFac[i][j]);
+void fastNLOCoeffAddFix::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      fastNLOCoeffAddBase::Print(iprint);
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffAddFix " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffAddFix " << fastNLO::_CSEP20 << endl;
+   }
+   for (int i=0; i<NScaleDim; i++) {
+      printf(" # No. of scale variations (Nscalevar) %d\n",GetNScalevar());
+      fastNLOTools::PrintVector(GetAvailableScaleFactors(),"Scale factors (ScaleFac[0][])","#");
+      printf(" # No. of scale nodes (Nscalenode)     %d\n",GetNScaleNode());
+   }
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      char buffer[1024];
+      for (int i=0; i<fNObsBins; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==fNObsBins-1) {
+            printf(" #   Observable bin no. %d\n",i+1);
+            snprintf(buffer, sizeof(buffer), "Scale nodes (ScaleNode[%d][0][0][])",i);
+            fastNLOTools::PrintVector(GetScaleNodes(i,0),buffer,"#  ");
+         }
       }
    }
-   printf(" B   No printing of ScaleNode implemented yet.\n");
-   printf(" B   No printing of SigmaTilde implemented yet.\n");
-   printf(" *******************************************************\n");
+   if ( abs(iprint) > 1 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
+      printf(" #   Printing of SigmaTilde not yet implemented.\n");
+   }
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
+   ScaleNode.erase(ScaleNode.begin()+iObsIdx);
+   SigmaTilde.erase(SigmaTilde.begin()+iObsIdx);
+   fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}

@@ -40,8 +40,6 @@ class fastNLOTable : public fastNLOBase {
 
    /// Getters for linear array of observable bins "ObsBin" running from 0->(NObsBin-1)
 
-   /// Returns no. of observable bins
-   unsigned int GetNObsBin() const {return NObsBin;}
    /// Return lower bin bound for obs. bin iObs in dim. iDim
    double GetObsBinLoBound(unsigned int iObs, unsigned int iDim) const;
    /// Return upper bin bound for obs. bin iObs in dim. iDim
@@ -105,8 +103,6 @@ class fastNLOTable : public fastNLOBase {
 
    /// Get if dimension is 'truly differential' or bin-integrated (divided by bin width or not)
    int GetIDiffBin(int bin) const {return IDiffBin[bin];}
-   /// Get BinSize vector  = BinSizeDim1 < * BinSizeDim2 >
-   std::vector < double > GetBinSize() const {return BinSize;};
    /// Get BinSize for bin = BinSizeDim1 < * BinSizeDim2 >
    double GetBinSize(int bin) const {return BinSize[bin];};
    /// Get vector of dimensions labels
@@ -129,40 +125,63 @@ class fastNLOTable : public fastNLOBase {
    std::string GetDenomTable() const {return DenomTable;}
 
    /// ___________________________________________________________________________________________________
-   /// Some other info getters
+   /// Some info getters & setters for table modifications
    /// ___________________________________________________________________________________________________
 
-   /// Get cross section units of published results (pb = 12, fb = 15, ...)
+   /// get/set scenario description
+   std::vector <std::string> GetScDescr() const;
+   void SetScDescr(std::vector <std::string> ScDescr);
+
+   /// get/set cross section units of published results (pb = 12, fb = 15, ...)
    int GetIpublunits() const {return Ipublunits;}
-   /// Get center-of-mass energy in units of GeV
+   void SetIpublunits(int unit){Ipublunits = unit;}
+
+   /// get/set center-of-mass energy in units of GeV
    double GetEcms() const {return Ecms;}
-   /// Get power of alpha_s for LO process
+   void SetEcms(double E) {Ecms = E;}
+
+   /// get/set power of alpha_s for LO process
    int GetLoOrder() const {return ILOord;}
+   void SetLoOrder(int LOOrd);
+
+   /// get/set no. of observable bins
+   unsigned int GetNObsBin() const {return NObsBin;}
+   void SetNObsBin(int NObs);
+
+   /// get/set Bin vector
+   std::vector < std::vector <std::pair<double,double> > > GetBins() const {return Bin;};
+   void SetBins(std::vector < std::vector <std::pair<double,double> > >);
+
+   /// get/set BinSize vector
+   std::vector < double > GetBinSize() const {return BinSize;};
+   void SetBinSize(std::vector < double >);
+
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to NObsBin
+   void EraseBinFromTable(unsigned int iObsIdx);
+   template<typename T> void EraseBin(std::vector<T>& v, unsigned int idx);
+
+   /// ???
    /// Get Rivet ID of analysis
    std::string GetRivetId() const;
    /// Get cross section from analysis description
    std::string GetXSDescr() const;
-
-   /// ___________________________________________________________________________________________________
-   /// Some setters (really needed here?)
-   /// ___________________________________________________________________________________________________
-
-   void SetIpublunits(int unit){Ipublunits = unit;}
-   void SetEcms(double E) {Ecms = E;}
-   void SetLoOrder(int LOOrd);
    void SetDimLabel(std::string label, unsigned int iDim, bool IsDiff = true);
    void SetNumDiffBin(int iDiff) {NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}
+
+
 
    /// ___________________________________________________________________________________________________
    /// Info print out functionality
    /// ___________________________________________________________________________________________________
 
    ///  Print basic info about fastNLO table and its contributions
-   void PrintTableInfo(const int iprint = 0) const;
+   void PrintTableInfo(const int iprint = 0) const; // DEPRECATED, use PrintContributionSummary instead
+   void PrintContributionSummary(int iprint) const;
    ///  Print (technical) constants of fastNLO table (use iprint) for level of details.
-   void PrintFastNLOTableConstants(const int iprint = 0) const;
-   void PrintScenario() const;
-   virtual void Print() const;
+   void PrintFastNLOTableConstants(const int iprint = 0) const;  // DEPRECATED, use PrintContributionSummary instead
+   void PrintScenario(int iprint) const;
+   virtual void Print(int iprint) const;
 
    /// ___________________________________________________________________________________________________
    /// Other useful functions

@@ -47,13 +47,13 @@ namespace fastNLOTools {
    int WriteVector( const std::vector<std::string >& v, std::ostream& table , double nevts=1 );
    int WriteVector( const std::vector<int >& v, std::ostream& table , double nevts=1 ) ;
    int WriteVector( const std::vector<unsigned long long >& v, std::ostream& table , double nevts=1 );
-   
+
    template<typename T> int WriteFlexibleVector( const std::vector<T>& v, std::ostream& table, int nProcLast = 0, double nevts=1 );
    int WriteFlexibleVector( const std::vector<double >& v, std::ostream& table, int nProcLast = 0 , double nevts=1 );
    int WriteFlexibleVector( const std::vector<std::string >& v, std::ostream& table, int nProcLast = 0 , double nevts=1 );
    int WriteFlexibleVector( const std::vector<int >& v, std::ostream& table, int nProcLast = 0 , double nevts=1 );
    int WriteFlexibleVector( const std::vector<unsigned long long >& v, std::ostream& table, int nProcLast = 0 , double nevts=1 );
-   
+
    //! - adding std::vectors
    template<typename T> void AddVectors( std::vector<T>& vSum, const std::vector<T>& vAdd, double w1 = 1, double w2 = 1 );
    template<typename T> void _DoAddVectors( std::vector<T>& vSum, const std::vector<T>& vAdd, double w1 = 1, double w2 = 1 );
@@ -68,8 +68,8 @@ namespace fastNLOTools {
    template<typename T> void PrintVector( const std::vector<T>& v, std::string name, std::string prefix="");
 
    //! - useful i/o
-   bool ReadMagicNo(std::istream& table);					//!< Read and check magic number from table.	
-   void PutBackMagicNo(std::istream& table);					//!< Reset magic number, such that it can be recognized by other reading routines
+   bool ReadMagicNo(std::istream& table);                                       //!< Read and check magic number from table.
+   void PutBackMagicNo(std::istream& table);                                    //!< Reset magic number, such that it can be recognized by other reading routines
 
 };
 
@@ -113,7 +113,7 @@ void fastNLOTools::ResizeFlexibleVector(std::vector<T>& v, const std::vector<T>&
 
 
 //________________________________________________________________________________________________________________
-// Clearing 
+// Clearing
 template<typename T>
 void fastNLOTools::ClearVector(std::vector<std::vector<T > >& v) {
    for (unsigned int i = 0 ; i<v.size() ; i++) {
@@ -131,7 +131,7 @@ void fastNLOTools::ClearVector(std::vector<T >& v) {
 
 //________________________________________________________________________________________________________________
 // Check if std::vector is empty
-template<typename T> 
+template<typename T>
 bool fastNLOTools::IsEmptyVector(const std::vector<std::vector<T > >& v){
    //! check if std::vector is 'empty', or if sum of all elements is 0.
    if ( v.empty() ) return true;
@@ -141,7 +141,7 @@ bool fastNLOTools::IsEmptyVector(const std::vector<std::vector<T > >& v){
    return true;
 }
 
-template<typename T> 
+template<typename T>
 bool fastNLOTools::IsEmptyVector(const std::vector<T>& v){
    //! check if std::vector is 'empty', or if sum of all elements is 0.
    if ( v.empty() ) return true;
@@ -220,7 +220,7 @@ void fastNLOTools::_DoAddVectors( std::vector<T>& vSum, const std::vector<T>& vA
       <<vSum.size()<<", s2="<<vAdd.size()<<std::endl;
       return;
    }
-   if ( w1==1. && w2==1. ) 
+   if ( w1==1. && w2==1. )
       for ( unsigned int i = 0 ; i<vSum.size() ; i++ )
          vSum[i] += vAdd[i];
    else
@@ -230,9 +230,9 @@ void fastNLOTools::_DoAddVectors( std::vector<T>& vSum, const std::vector<T>& vA
 
 template<typename T>
 void fastNLOTools::PrintVector( const std::vector<T>& v, std::string name, std::string prefix){
-   std::cout<<" "<<prefix<<"   "<<name<<std::endl;
+   std::cout<<" "<<prefix<<" "<<name<<std::endl;
    for(unsigned int i=0;i<v.size();i++){
-      std::cout<<" "<<prefix<<"     "<<i<<"\t"<<v[i]<<std::endl;
+      std::cout<<" "<<prefix<<"   "<<i<<"\t"<<v[i]<<std::endl;
    }
 }
 

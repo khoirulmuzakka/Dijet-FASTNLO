@@ -20,16 +20,22 @@ public:
    virtual void Read(std::istream& table);
    void ReadRest(std::istream& table);
    virtual void Write(std::ostream& table);
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
    virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
 
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to fNObsBins
+   void EraseBin(unsigned int iObsIdx);
+
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };
    double GetScaleNode1(int iObsBin, int iNode) const { return ScaleNode1[iObsBin][iNode]; };
    double GetScaleNode2(int iObsBin, int iNode) const { return ScaleNode2[iObsBin][iNode]; };
+   std::vector < double > GetScaleNodes1(int iObsBin) const { return ScaleNode1[iObsBin]; };
+   std::vector < double > GetScaleNodes2(int iObsBin) const { return ScaleNode2[iObsBin]; };
    bool IsCompatible(const fastNLOCoeffAddFlex& other) const;                   //!< check for compatibilty for adding/merging of two tables
 
 protected:

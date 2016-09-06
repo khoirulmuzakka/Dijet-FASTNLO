@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffBase.h"
+#include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
@@ -172,22 +173,35 @@ void fastNLOCoeffBase::SetCoeffAddDefaults(){
 };
 
 //________________________________________________________________________________________________________________ //
-
-
-void fastNLOCoeffBase::Print() const {
-  printf("\n **************** FastNLO Table: CoeffBase ****************\n");
-  printf(" B   Scenario::GetNObsBin()        %d\n",fNObsBins);
-  printf(" B   IXsectUnits                   %d\n",IXsectUnits);
-  printf(" B   IDataFlag                     %d\n",IDataFlag);
-  printf(" B   IAddMultFlag                  %d\n",IAddMultFlag);
-  printf(" B   IContrFlag1                   %d\n",IContrFlag1);
-  printf(" B   IContrFlag2                   %d\n",IContrFlag2);
-  printf(" B   NScaleDep                     %d\n",NScaleDep);
-  fastNLOTools::PrintVector(CtrbDescript,"CtrbDescript","B");
-  fastNLOTools::PrintVector(CodeDescript,"CodeDescript","B");
-  printf(" *******************************************************\n");
-
+void fastNLOCoeffBase::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffBase " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffBase " << fastNLO::_CSEP20 << endl;
+   }
+   fastNLOTools::PrintVector(CtrbDescript,"Contribution description (CtrbDescript)","#");
+   fastNLOTools::PrintVector(CodeDescript,"Code description (CodeDescript)","#");
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      printf(" #   IXsectUnits                       %d\n",IXsectUnits);
+      printf(" #   IDataFlag                         %d\n",IDataFlag);
+      printf(" #   IAddMultFlag                      %d\n",IAddMultFlag);
+      printf(" #   IContrFlag1                       %d\n",IContrFlag1);
+      printf(" #   IContrFlag2                       %d\n",IContrFlag2);
+      printf(" #   NScaleDep                         %d\n",NScaleDep);
+   }
+   if ( iprint < 0 ) {
+      cout << fastNLO::_CSEPSC << endl;
+   } else {
+      //      cout << fastNLO::_DSEPSC << endl;
+   }
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffBase::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffBase::EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
+   SetNObsBin(GetNObsBin()-1);
+}

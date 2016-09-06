@@ -69,8 +69,8 @@ int main(int argc, char** argv) {
 
    //! --- Example calculation
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);     //! initialize a fastNLO instance with interface to LHAPDF.
-   fnlo.PrintTableInfo();                       //! print some valuable information
-   //fnlo.PrintFastNLOTableConstants();         //! print even more information
+   fnlo.PrintContributionSummary(0);             //! print some valuable information
+   //fnlo.Print();                              //! print even more information
    //fnlo.SetUnits(kAbsoluteUnits);             //! Use units as specified in the publication or in barns.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,0,false); //! switch contributions on/off. By default LO and NLO.
    //fnlo.SetContributionON(fastNLO::kFixedOrder,1,true);

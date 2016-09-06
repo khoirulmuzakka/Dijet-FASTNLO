@@ -25,7 +25,11 @@ public:
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    //void Add(fastNLOCoeffBase* other);
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
+
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to fNObsBins
+   virtual void EraseBin(unsigned int iObsIdx);
 
    void SetCoeffAddDefaults();
 
@@ -48,6 +52,7 @@ public:
    void SetIXsectUnits(int n){IXsectUnits = n;}
 
    int GetNObsBin() const { return fNObsBins;}
+   void SetNObsBin(unsigned int nObs) { fNObsBins = nObs;}
 
    bool GetIsFlexibleScale() const { return (NScaleDep>=3) && (IAddMultFlag==0); }
 

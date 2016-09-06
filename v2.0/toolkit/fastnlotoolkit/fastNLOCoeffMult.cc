@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffMult.h"
+#include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -141,14 +143,55 @@ void fastNLOCoeffMult::Write(ostream& table) {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffMult::Print() const {
-  printf(" **************** FastNLO Table: CoeffMult ****************\n");
-  fastNLOCoeffBase::Print();
-  if(IAddMultFlag==1){
-    printf(" B   fastNLOCoeffMult::Print(). Printing of multiplicative factors not yet implemented (IAddMultFlag==1).\n");
-  }
-  printf(" *******************************************************\n");
+void fastNLOCoeffMult::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      fastNLOCoeffBase::Print(iprint);
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffMult " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffMult " << fastNLO::_CSEP20 << endl;
+   }
+   double minfact = *min_element(fact.begin(),fact.end());
+   double maxfact = *max_element(fact.begin(),fact.end());
+   printf(" # Minimal correction factor (fact[])  %f\n",minfact);
+   printf(" # Maximal correction factor (fact[])  %f\n",maxfact);
+   printf(" # No. of uncorr. unc. (Nuncorrel)     %d\n",Nuncorrel);
+   if (Nuncorrel > 0) {fastNLOTools::PrintVector(UncDescr,"Uncorr. uncertainties (UncDescr)","#");}
+   printf(" # No. of corr. unc. (Ncorrel)         %d\n",Ncorrel);
+   if (Ncorrel > 0) {fastNLOTools::PrintVector(CorDescr,"Corr. uncertainties (CorDescr)","#");}
+   if ( abs(iprint) > 1 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
+      fastNLOTools::PrintVector(fact,"Correction factors (fact)","#    ");
+   }
+   if ( abs(iprint) > 2 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 2) " << fastNLO::_SSEP20 << endl;
+      for (int i=0; i<fNObsBins; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==fNObsBins-1) {
+            printf(" #       Observable bin no. %d\n",i+1);
+            if (Nuncorrel > 0) {
+               fastNLOTools::PrintVector(UncorLo[i],"Lower uncorr. uncertainties (UncorLo)","#      ");
+               fastNLOTools::PrintVector(UncorHi[i],"Upper uncorr. uncertainties (UncorHi)","#      ");
+            }
+            if (Ncorrel > 0) {
+               fastNLOTools::PrintVector(CorrLo[i],"Lower corr. uncertainties (CorrLo)","#      ");
+               fastNLOTools::PrintVector(CorrHi[i],"Upper corr. uncertainties (CorrHi)","#      ");
+            }
+         }
+      }
+   }
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffMult::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffMult::EraseBin"]<<"Erasing table entries in CoeffMult for bin index " << iObsIdx << endl;
+   fact.erase(fact.begin()+iObsIdx);
+   UncorLo.erase(UncorLo.begin()+iObsIdx);
+   UncorHi.erase(UncorHi.begin()+iObsIdx);
+   CorrLo.erase(CorrLo.begin()+iObsIdx);
+   CorrHi.erase(CorrHi.begin()+iObsIdx);
+   fastNLOCoeffBase::EraseBin(iObsIdx);
+}

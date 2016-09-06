@@ -94,12 +94,16 @@ public:
    std::vector < double > GetScaleFactors() const;                                           //!< Get list of available scale factors
 
    // ---- Print outs ---- //
-   void PrintTableInfo(const int iprint = 0) const;                                     //!<  Print basic info about fastNLO table and its contributions
-   void PrintFastNLOTableConstants(const int iprint = 2) const;                         //!<  Print (technical) constants of fastNLO table (use iprint) for level of details.
-   void PrintCrossSections() const;                                                     //!<  Print cross sections (optimized for double-differential tables)
+   ///  Print basic info about fastNLO table and its contributions
+   void Print(int iprint) const;
+   void PrintContributionSummary(int iprint) const;
+   void PrintCrossSections() const; //!<  Print cross sections (optimized for double-differential tables)
    void PrintCrossSectionsWithReference();
-   //void PrintCrossSectionsData() const;                                                 //!<  Print data table. (if available)
 
+   // DEPRECATED
+   void PrintTableInfo(const int iprint = 0) const; // DEPRECATED, use PrintContributionSummary instead
+   void PrintFastNLOTableConstants(const int iprint = 2) const; // DEPRECATED, use Print instead
+   void PrintCrossSectionsData() const; ///< DEPRECATED
    void PrintCrossSectionsDefault(std::vector<double> kthc = std::vector<double>()) const; ///< DEPRECATED
    void RunFastNLODemo(); ///< DEPRECATED
 

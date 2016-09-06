@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
          //! and do some initialization
          if ( nfound == 1 ) {
             firsttable = tablename;
-            fnlo.PrintTableInfo();
+            fnlo.PrintContributionSummary(0);
             xs0 = fnlo.GetCrossSection();
             for (unsigned int i=0; i<xs0.size(); i++) {
                iTabMin.push_back(-1);

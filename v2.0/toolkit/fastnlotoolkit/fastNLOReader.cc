@@ -128,7 +128,7 @@
     ---- Table information ---- //
     --- fastNLO user: For a comprehensive insight into the fastNLO variables
         you can use:
-                fnlo.PrintFastNLOTableConstants(0);
+                fnlo.Print(0);
 
 
 
@@ -207,7 +207,7 @@
           - kNonPerturbativeCorrections  -> Non-perturbative corrections|Hadronisation corrections
         plus one must know the 'Id' of this contribution, which can be printed e.g.
         by calling
-           fnlo.PrintTableInfo();
+           fnlo.PrintContributionSummary();
 
         To switch a contribution on/off please use:
                bool SetOn = fnlo.SetContributionON( contrib, Id, on/off )
@@ -629,7 +629,7 @@ void fastNLOReader::OrderCoefficients() {
    }
 
    //int iprint = 2;
-   //PrintFastNLOTableConstants(iprint);
+   //Print(iprint);
 }
 
 
@@ -827,7 +827,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
    //!  - Use SetOn=false, to switch a contribution off
    //!
    //! Each contribution is identified by an ESMCalculation and by a universal Id.
-   //! For all available contributions in your table, call PrintTableInfo().
+   //! For all available contributions in your table, call PrintContributionSummary().
    //!
    //! The LO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=0);
    //! The NLO contribution can be e.g. addressed by (eCalc=fastNLO::kFixedOrder, Id=1);
@@ -992,7 +992,7 @@ vector < double > fastNLOReader::GetNormCrossSection() {
    // if ( INormFlag < 0 ) {
    //    string denomtable  = GetDenomTable();
    //    fastNLOTable table = fastNLOTable(denomtable);
-   //    table.PrintTableInfo();
+   //    table.PrintContributionSummary();
    //    fastNLOLHAPDF denom(table,GetLHAPDFFilename(),0);
    // }
 
@@ -1296,7 +1296,7 @@ void fastNLOReader::CalcCrossSection() {
                   }
                } else {
                   logger.error["CalcCrossSection"]<<"Found unknown multiplicative correction. Printing coeff table and exiting..."<<endl;
-                  cMult->Print();
+                  cMult->Print(-1);
                   exit(1);
                }
             }
@@ -1542,7 +1542,7 @@ void fastNLOReader::FillAlphasCache(bool lForce) {
                   logger.info["FillAlphasCache"]<<"Nothing to be done for multiplicative contribution."<<endl;
                else {
                   logger.error["FillAlphasCache"]<<"Could not identify contribution. Printing."<<endl;
-                  c->Print();
+                  c->Print(-1);
                }
             }
          }
@@ -1780,7 +1780,7 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
                }
                else {
                   logger.error["FillPDFCache"]<<"Could not identify contribution. Printing."<<endl;
-                  c->Print();
+                  c->Print(-1);
                }
             }
          }
@@ -1833,7 +1833,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
 
    if (c->PdfLcMuVar.empty()) {
       logger.error<< "PdfLcMuVar is empty in CoeffTable. Printing and exiting."<<endl;
-      c->Print();
+      c->Print(-1);
       exit(1);
    }
 
@@ -2634,18 +2634,33 @@ int fastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) co
 //______________________________________________________________________________
 
 
-
-//______________________________________________________________________________
+//_DEPRECATED___________________________________________________________________
 void fastNLOReader::PrintTableInfo(const int iprint) const {
-   //! this function is inherited from fastNLOTable.
-   fastNLOTable::PrintTableInfo(iprint);
+   logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
+   logger.error["PrintTableInfo"]<<"Please use PrintContributionSummary instead."<<endl;
+   exit(1);
+}
+
+
+//_DEPRECATED___________________________________________________________________
+void fastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
+   logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
+   logger.error["PrintTableInfo"]<<"Please use Print instead."<<endl;
+   exit(1);
 }
 
 
 //______________________________________________________________________________
-void fastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
+void fastNLOReader::PrintContributionSummary(int iprint) const {
    //! this function is inherited from fastNLOTable.
-   this->fastNLOTable::PrintFastNLOTableConstants(iprint);
+   fastNLOTable::PrintContributionSummary(iprint);
+}
+
+
+//______________________________________________________________________________
+void fastNLOReader::Print(int iprint) const {
+   //! this function is inherited from fastNLOTable.
+   fastNLOTable::Print(iprint);
 }
 
 
@@ -2784,6 +2799,15 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
       }
    }
    printf(" #  ------------------------------------------------------------------------------------------------------------\n");
+}
+
+
+//_DEPRECATED___________________________________________________________________
+void fastNLOReader::PrintCrossSectionsData() const {
+   logger.error["PrintCrossSectionsData"]<<"This function is deprecated, aborted!"<<endl;
+   logger.error["PrintCrossSectionsData"]<<"Please check fnlo-tk-cppread.cc for default print out."<<endl;
+   exit(1);
+   return;
 }
 
 

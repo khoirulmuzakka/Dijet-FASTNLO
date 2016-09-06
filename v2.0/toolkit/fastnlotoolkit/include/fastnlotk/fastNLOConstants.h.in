@@ -136,12 +136,18 @@ namespace fastNLO {
    // ---- Some shapes for nice output ---- //
    //
 #ifndef SWIG
-   const std::string _CSEP40("########################################");
-   const std::string _DSEP40("========================================");
-   const std::string _SSEP40("----------------------------------------");
-   const std::string _CSEP40C(" ##########################################");
-   const std::string _DSEP40C(" #=========================================");
-   const std::string _SSEP40C(" #-----------------------------------------");
+   const std::string _CSEP20("####################");
+   const std::string _DSEP20("====================");
+   const std::string _SSEP20("--------------------");
+   const std::string _CSEP20C(" ######################");
+   const std::string _DSEP20C(" #=====================");
+   const std::string _SSEP20C(" #---------------------");
+   const std::string _CSEP40  = _CSEP20  + _CSEP20;
+   const std::string _DSEP40  = _DSEP20  + _DSEP20;
+   const std::string _SSEP40  = _SSEP20  + _SSEP20;
+   const std::string _CSEP40C = _CSEP20C + _CSEP20;
+   const std::string _DSEP40C = _DSEP20C + _DSEP20;
+   const std::string _SSEP40C = _SSEP20C + _SSEP20;
    const std::string _CSEPS  = _CSEP40  + _CSEP40;
    const std::string _DSEPS  = _DSEP40  + _DSEP40;
    const std::string _SSEPS  = _SSEP40  + _SSEP40;

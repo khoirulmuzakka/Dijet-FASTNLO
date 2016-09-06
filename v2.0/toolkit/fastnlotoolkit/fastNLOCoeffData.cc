@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "fastnlotk/fastNLOCoeffData.h"
+#include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
 using namespace fastNLO;
@@ -13,7 +14,7 @@ bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    if ( c->GetIDataFlag() == 1 ) return true;
    else {
       if ( !quiet )
-	 say::error["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
+         say::error["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
       return false;
    }
 }
@@ -91,14 +92,14 @@ void fastNLOCoeffData::ReadCoeffData(istream& table){
       UncorLo[i].resize(Nuncorrel);
       UncorHi[i].resize(Nuncorrel);
       for(int j=0;j<Nuncorrel;j++){
-	 table >> UncorLo[i][j];
-	 table >> UncorHi[i][j];
+         table >> UncorLo[i][j];
+         table >> UncorHi[i][j];
       }
       CorrLo[i].resize(Ncorrel);
       CorrHi[i].resize(Ncorrel);
       for(int j=0;j<Ncorrel;j++){
-	 table >> CorrLo[i][j];
-	 table >> CorrHi[i][j];
+         table >> CorrLo[i][j];
+         table >> CorrHi[i][j];
       }
    }
    table >> NErrMatrix;
@@ -106,7 +107,7 @@ void fastNLOCoeffData::ReadCoeffData(istream& table){
    for(int i=0;i<NErrMatrix;i++){
       matrixelement[i].resize((int)pow((double)fNObsBins,2));
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
-	 table >> matrixelement[i][j];
+         table >> matrixelement[i][j];
       }
    }
 }
@@ -130,33 +131,71 @@ void fastNLOCoeffData::Write(ostream& table) {
       table << Xcenter[i] << endl;
       table << Value[i] << endl;
       for(int j=0;j<Nuncorrel;j++){
-	 table << UncorLo[i][j] << endl;
-	 table << UncorHi[i][j] << endl;
+         table << UncorLo[i][j] << endl;
+         table << UncorHi[i][j] << endl;
       }
       for(int j=0;j<Ncorrel;j++){
-	 table << CorrLo[i][j] << endl;
-	 table << CorrHi[i][j] << endl;
+         table << CorrLo[i][j] << endl;
+         table << CorrHi[i][j] << endl;
       }
    }
    table << NErrMatrix << endl;
    for(int i=0;i<NErrMatrix;i++){
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
-	 table << matrixelement[i][j] << endl;
+         table << matrixelement[i][j] << endl;
       }
    }
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffData::Print() const {
-   fastNLOCoeffBase::Print();
-   printf("\n **************** FastNLO Table: CoeffData ****************\n\n");
-   printf(" B   Nuncorrel                     %d\n",Nuncorrel);
-   printf(" B   Ncorrel                       %d\n",Ncorrel);
-   printf(" B   NErrMatrix                    %d\n",NErrMatrix);
-   printf(" B   fastNLOCoeffData::Print(). some more output could be printed here (IDataFlag==1).\n");
-   printf("\n *******************************************************\n\n");
+void fastNLOCoeffData::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      fastNLOCoeffBase::Print(iprint);
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffData " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffData " << fastNLO::_CSEP20 << endl;
+   }
+   printf(" # No. of uncorr. unc. (Nuncorrel)     %d\n",Nuncorrel);
+   if (Nuncorrel > 0) {fastNLOTools::PrintVector(UncDescr,"Uncorr. uncertainties (UncDescr)","#");}
+   printf(" # No. of corr. unc. (Ncorrel)         %d\n",Ncorrel);
+   if (Ncorrel > 0) {fastNLOTools::PrintVector(CorDescr,"Corr. uncertainties (CorDescr)","#");}
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      fastNLOTools::PrintVector(Xcenter,"Data bin centers (Xcenter)","#  ");
+      fastNLOTools::PrintVector(Value,"Data values (Value)","#  ");
+   }
+   if ( abs(iprint) > 1 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
+      for (int i=0; i<fNObsBins; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==fNObsBins-1) {
+            printf(" #     Observable bin no. %d\n",i+1);
+            if (Nuncorrel > 0) {
+               fastNLOTools::PrintVector(UncorLo[i],"Lower uncorr. uncertainties (UncorLo)","#    ");
+               fastNLOTools::PrintVector(UncorHi[i],"Upper uncorr. uncertainties (UncorHi)","#    ");
+            }
+            if (Ncorrel > 0) {
+               fastNLOTools::PrintVector(CorrLo[i],"Lower corr. uncertainties (CorrLo)","#    ");
+               fastNLOTools::PrintVector(CorrHi[i],"Upper corr. uncertainties (CorrHi)","#    ");
+            }
+         }
+      }
+   }
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffData::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffData::EraseBin"]<<"Erasing table entries in CoeffData for bin index " << iObsIdx << endl;
+   Xcenter.erase(Xcenter.begin()+iObsIdx);
+   Value.erase(Value.begin()+iObsIdx);
+   UncorLo.erase(UncorLo.begin()+iObsIdx);
+   UncorHi.erase(UncorHi.begin()+iObsIdx);
+   CorrLo.erase(CorrLo.begin()+iObsIdx);
+   CorrHi.erase(CorrHi.begin()+iObsIdx);
+   fastNLOCoeffBase::EraseBin(iObsIdx);
+}

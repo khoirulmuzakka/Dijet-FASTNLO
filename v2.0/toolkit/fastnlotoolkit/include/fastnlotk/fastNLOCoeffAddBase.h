@@ -20,9 +20,13 @@ public:
    void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
+
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to fNObsBins
+   virtual void EraseBin(unsigned int iObsIdx);
 
    int GetIRef() const {return IRef;}
    double GetNevt() const { return Nevt; }
@@ -52,6 +56,9 @@ public:
 
    double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; }
    double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; }
+
+   std::vector < double > GetXNodes1(int iObsBin) const { return XNode1[iObsBin]; }
+   std::vector < double > GetXNodes2(int iObsBin) const { return XNode2[iObsBin]; }
 
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;

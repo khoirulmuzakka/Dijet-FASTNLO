@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
    SetGlobalVerbosity(WARNING);
    fastNLOTable table = fastNLOTable(tablename);
    //! Print essential table information
-   table.PrintTableInfo();
+   table.PrintContributionSummary(0);
 
    //! Initialise a fastNLO reader instance with interface to LHAPDF
    //! Note: This also initializes the cross section to the LO/NLO one!

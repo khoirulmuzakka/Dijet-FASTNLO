@@ -336,20 +336,20 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
    // check x-nodes briefly
    for ( int i = 0 ; i< fNObsBins ;i++ ){
       if ( GetNxmax(i) != other.GetNxmax(i) ){
-	 say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
+         return false;
       }
       if ( GetNxtot1(i) != other.GetNxtot1(i) ){
-	 say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
+         return false;
       }
       if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
-	 say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
+         return false;
       }
       if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
-	 say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
+         return false;
       }
    }
    // succesful!
@@ -404,54 +404,84 @@ int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::Print() const {
-   fastNLOCoeffBase::Print();
-   printf(" **************** FastNLO Table: fastNLOCoeffAddBase ****************\n");
-   printf(" B   IRef                          %d\n",IRef);
-   printf(" B   NScaleDep                     %d\n",NScaleDep);
-   printf(" B   IScaleDep                     %d\n",IScaleDep);
-   printf(" B   Nevt                          %f\n",Nevt);
-   printf(" B   Npow                          %d\n",Npow);
-   printf(" B   NPDF                          %lu\n",NPDFPDG.size());
-   for(unsigned int i=0;i<NPDFPDG.size();i++){
-      printf(" B    - NPDFPDG[%d]                 %d\n",i,NPDFPDG[i]);
+void fastNLOCoeffAddBase::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      fastNLOCoeffBase::Print(iprint);
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffAddBase " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffAddBase " << fastNLO::_CSEP20 << endl;
    }
-   printf(" B   NPDFDim                       %d\n",NPDFDim);
-   printf(" B   NFragFunc                     %lu\n",NFFPDG.size());
-   for(unsigned int i=0;i<NFFPDG.size();i++){
-      printf(" B    - NFFPDG[%d]               %d\n",i,NFFPDG[i]);
+   printf(" # No. of events (Nevt)                %f\n",Nevt);
+   printf(" # Abs. order in a_s (Npow)            %d\n",Npow);
+   printf(" # No. of hadrons involved (NPDF)      %lu\n",NPDFPDG.size());
+   fastNLOTools::PrintVector(NPDFPDG,"Type(s) of hadrons (NPDFPDG)","#");
+
+   printf(" # PDF storage format (NPDFDim)        %d\n",NPDFDim);
+   if ( NPDFDim == 0 ) {
+      printf(" #   --> x-interpolation storage format: Linear\n");
+   } else if ( NPDFDim == 1 ) {
+      printf(" #   --> x-interpolation storage format: Half-Matrix\n");
+   } else if ( NPDFDim == 2 ) {
+      printf(" #   --> x-interpolation storage format: Full-Matrix\n");
+   } else {
+      error["fastNLOCoeffAddBase::Print"] << "Unknown interpolation storage structure, aborting! "
+                                          << " NPDFDim = " << NPDFDim << endl;
    }
-   printf(" B   NFFDim                        %d\n",NFFDim);
-   printf(" B   NSubproc                      %d\n",NSubproc);
-   printf(" B   IPDFdef1                      %d\n",IPDFdef1);
-   printf(" B   IPDFdef2                      %d\n",IPDFdef2);
-   printf(" B   IPDFdef3                      %d\n",IPDFdef3);
-   printf(" B   Nxtot1[0-%d]             ",fNObsBins);
-   for(int i=0;i<fNObsBins;i++){
-      printf("%lu ,",XNode1[i].size());
-   }
-   printf("\n");
-   //     for(int i=0;i<fNObsBins;i++){
-   //       printf(" B    XNode1[%d]             ",i);
-   //       for(int j=0;j<Nxtot1[i];j++){
-   //   printf(" B   %8.4f ,",XNode1[i][j]);
-   //       }
-   //       printf(" B   \n");
-   //     }
-   printf(" B   if (NPDFDim==2), you could print xnodes2 here. (NPDFDim = %d)\n",NPDFDim);
-   printf(" B   if (NFragFunc>0), you could print xnodes2 here. (NFragFunc = %lu)\n",NFFPDG.size());
-   printf(" B   NScales                       %lu\n",Iscale.size());
-   for(unsigned int i=0;i<Iscale.size();i++){
-      printf(" B    - Iscale[%d]                  %d\n",i,Iscale[i]);
-   }
-   printf(" B   NScaleDim                     %d\n",NScaleDim);
-   for(int i=0;i<NScaleDim;i++){
-      for(unsigned int j=0;j<ScaleDescript[i].size();j++){
-         printf(" B    -  - ScaleDescript[%d][%d]     %s\n",i,j,ScaleDescript[i][j].data());
+
+   for (int i=0; i<fNObsBins; i++) {
+      // Print only for first and last observable bin
+      if (i==0 || i==fNObsBins-1) {
+         printf(" # Observable bin no. %d\n",i+1);
+         printf(" #   No. of X1 nodes (XNode1[i].size())          %d\n",(int)GetXNodes1(i).size());
       }
    }
-   printf(" *******************************************************\n");
+   printf(" # No. of scales involved (NScales)    %lu\n",Iscale.size());
+   for(int i=0;i<NScaleDim;i++){
+      fastNLOTools::PrintVector(ScaleDescript[i],"Scale descriptions (ScaleDescript)","#");
+   }
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      if ( NScales > 0 ) {fastNLOTools::PrintVector(Iscale,"Iscale (Unused, always 0) (Iscale)","#  ");}
+      printf(" #   IRef                              %d\n",IRef);
+      printf(" #   IScaleDep (Unused, always 0)      %d\n",IScaleDep);
+      printf(" #   NFragFunc                         %lu\n",NFFPDG.size());
+      if ( NFFPDG.size() > 0 ) {fastNLOTools::PrintVector(NFFPDG,"Type(s) of hadrons (NFFPDG)","#");}
+      printf(" #   NFFDim                            %d\n",NFFDim);
+      printf(" #   NScaleDim                         %d\n",NScaleDim);
+      printf(" #   NSubproc                          %d\n",NSubproc);
+      printf(" #   IPDFdef1                          %d\n",IPDFdef1);
+      printf(" #   IPDFdef2                          %d\n",IPDFdef2);
+      printf(" #   IPDFdef3                          %d\n",IPDFdef3);
+      char buffer[1024];
+      for (int i=0; i<fNObsBins; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==fNObsBins-1) {
+            printf(" #   Observable bin no. %d\n",i+1);
+            snprintf(buffer, sizeof(buffer), "X1 nodes (XNode1[%d][])",i);
+            fastNLOTools::PrintVector(GetXNodes1(i),buffer,"#    ");
+            if ( NPDFDim == 2 ) {
+               snprintf(buffer, sizeof(buffer), "X2 nodes (XNode2[%d][])",i);
+               fastNLOTools::PrintVector(GetXNodes2(i),buffer,"#    ");
+            }
+         }
+      }
+   }
+   if ( iprint < 0 ) {
+      cout << fastNLO::_CSEPSC << endl;
+   } else {
+      //      cout << fastNLO::_DSEPSC << endl;
+   }
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffAddBase::EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
+   XNode1.erase(XNode1.begin()+iObsIdx);
+   if ( NPDFDim==2 ) {
+      XNode2.erase(XNode2.begin()+iObsIdx);
+   }
+   fastNLOCoeffBase::EraseBin(iObsIdx);
+}

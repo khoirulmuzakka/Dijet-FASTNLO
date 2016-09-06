@@ -19,9 +19,9 @@ public:
    // i/o
    virtual void ReadTable();                                            //!< read table
    virtual void WriteTable();                                           //!< write full table to disk
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
    // header
-   void PrintHeader() const;                                            //!< Print header variables (BlockA1) to screen
+   void PrintHeader(int iprint) const;                                  //!< Print header variables (BlockA1) to screen
    void SetHeaderDefaults();                                            //!< Set some default values
    void ResetHeader();                                                  //!< Reset variables to default values
    void SetContributionHeader();                                        //
@@ -60,6 +60,7 @@ public:
 
    int  GetOutputPrecision() const {return fPrecision;}
    void SetOutputPrecision(int precision) {fPrecision = precision;}
+
 
 
 protected:

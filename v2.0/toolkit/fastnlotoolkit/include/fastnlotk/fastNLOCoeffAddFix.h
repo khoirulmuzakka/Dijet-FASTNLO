@@ -20,10 +20,14 @@ public:
    void ReadRest(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
    virtual void Clear();                                                        //!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients();                                        //!< Set number of events to 1 and normalize coefficients accordingly.
    virtual void MultiplyCoefficientsByConstant(double coef);                    //!< Multiply all coefficients by constant coef
+
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to fNObsBins
+   void EraseBin(unsigned int iObsIdx);
 
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;
@@ -37,7 +41,8 @@ public:
    }
 
    double GetSigmaTilde(int iObs, int iSvar, int ix, int is, int iN ) const { return SigmaTilde[iObs][iSvar][ix][is][iN];}
-   double GetScaleNode(int iObs, int iSvar, int iNode ) const { return ScaleNode[iObs][0][iSvar][iNode];}
+   double GetScaleNode(int iObs, int iSvar, int iNode ) const { return ScaleNode[iObs][0][iSvar][iNode]; }
+   std::vector < double > GetScaleNodes(int iObs, int iSvar) const { return ScaleNode[iObs][0][iSvar]; }
 
    void ResizePdfLC();
    void ResizePdfSplLC();

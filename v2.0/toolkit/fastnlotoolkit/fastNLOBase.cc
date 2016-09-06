@@ -237,25 +237,32 @@ void fastNLOBase::ResetHeader() {
 
 
 //______________________________________________________________________________
-void fastNLOBase::Print() const {
-   PrintHeader();
+void fastNLOBase::Print(int iprint) const {
+   PrintHeader(iprint);
 }
 
 
 //______________________________________________________________________________
-void fastNLOBase::PrintHeader() const {
-   printf("\n **************** FastNLO Table Header ******************\n\n");
-   printf("   tablemagicno                  %d\n",fastNLO::tablemagicno);
-   printf("   Itabversion                   %d\n",Itabversion);
-   printf("   ScenName                      %s\n",ScenName.data());
-   printf("   Ncontrib                      %d\n",Ncontrib);
-   printf("   Nmult                         %d\n",Nmult);
-   printf("   Ndata                         %d\n",Ndata);
-   printf("   NuserString                   %d\n",NuserString);
-   printf("   NuserInt                      %d\n",NuserInt);
-   printf("   NuserFloat                    %d\n",NuserFloat);
-   printf("   Imachine                      %d\n",Imachine);
-   printf("\n ********************************************************\n\n");
+void fastNLOBase::PrintHeader(int iprint) const {
+   if ( !(iprint < 0) ) {
+      cout << fastNLO::_DSEP20C << " fastNLO Table: Header " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: Header " << fastNLO::_CSEP20 << endl;
+   }
+   printf(" # Table version (Itabversion)         %d\n",Itabversion);
+   printf(" # Scenario name (ScenName)            %s\n",ScenName.data());
+   printf(" # Theory contributions (Ncontrib)     %d\n",Ncontrib);
+   printf(" # Data contribution 0/1 (Ndata)       %d\n",Ndata);
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      printf(" #   Separator (tablemagicno)            %d\n",fastNLO::tablemagicno);
+      printf(" #   Unused (Nmult)                      %d\n",Nmult);
+      printf(" #   Unused (NuserString)                %d\n",NuserString);
+      printf(" #   Unused (NuserInt)                   %d\n",NuserInt);
+      printf(" #   Unused (NuserFloat)                 %d\n",NuserFloat);
+      printf(" #   Unused (Imachine)                   %d\n",Imachine);
+   }
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 

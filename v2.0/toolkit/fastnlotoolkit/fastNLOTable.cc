@@ -73,7 +73,7 @@ void fastNLOTable::ReadTable(){
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadCoeffTables(istream& table){
    int nblocks = GetNcontrib()+GetNdata();
-   for(int i=0;i<nblocks;i++){
+   for (int i=0; i<nblocks; i++) {
       fastNLOCoeffBase cTemp(NObsBin);
       cTemp.ReadBase(table);
       fastNLOCoeffBase* cN = ReadRestOfCoeffTable(cTemp, table);
@@ -95,28 +95,24 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
       fastNLOCoeffData* cN = new fastNLOCoeffData(cB);
       cN->ReadRest(table);
       return cN;
-   }
-   else if ( fastNLOCoeffMult::CheckCoeffConstants(&cB,quiet) ) {
+   } else if ( fastNLOCoeffMult::CheckCoeffConstants(&cB,quiet) ) {
       logger.debug["ReadRestOfCoeffTable"]<<"Found multiplicative contribution. Now reading in."<<endl;
       fastNLOCoeffMult* cN = new fastNLOCoeffMult(cB);
       cN->ReadRest(table);
       return cN;
-   }
-   else if ( fastNLOCoeffAddFix::CheckCoeffConstants(&cB,quiet) ) {
+   } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(&cB,quiet) ) {
       logger.debug["ReadRestOfCoeffTable"]<<"Found additive fixed order contribution (v2.0). Now reading in."<<endl;
       fastNLOCoeffAddFix* cN = new fastNLOCoeffAddFix(cB);
       cN->ReadRest(table);
       return cN;
-   }
-   else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&cB,quiet) ) {
+   } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(&cB,quiet) ) {
       logger.debug["ReadRestOfCoeffTable"]<<"Found additive flexible scale contribution. Now reading in."<<endl;
       fastNLOCoeffAddFlex* cN = new fastNLOCoeffAddFlex(cB,ILOord);
       cN->ReadRest(table);
       return cN;
-   }
-   else {
-      logger.error["ReadRestOfCoeffTable"]<<"Could not identify coefficient table. Print and exiting... "<<endl;
-      cB.Print();
+   } else {
+      logger.error["ReadRestOfCoeffTable"]<<"Could not identify coefficient table. Print and exiting ... "<<endl;
+      cB.Print(5);
       exit(1);
    }
    return NULL;
@@ -130,7 +126,7 @@ void fastNLOTable::WriteTable() {
    ofstream* table = OpenFileWrite();
    WriteHeader(*table);
    WriteScenario(*table);
-   for(int i=0;i<GetNcontrib();i++){
+   for(int i=0;i<GetNcontrib()+GetNdata();i++){
       logger.debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
       GetCoeffTable(i)->Write(*table);
    }
@@ -162,12 +158,12 @@ void fastNLOTable::ReadScenario(istream& table){
    }
 
    table >> Ipublunits;
-   int  NScDescript = 0;
+   size_t NScDescript = 0;
    table >> NScDescript;
    ScDescript.resize(NScDescript);
    char buffer[257];
    table.getline(buffer,256);
-   for(int i=0;i<NScDescript;i++){
+   for(size_t i=0;i<NScDescript;i++){
       table.getline(buffer,256);
       ScDescript[i] = buffer;
       //      StripWhitespace(ScDescript[i]);
@@ -233,9 +229,9 @@ void fastNLOTable::ReadScenario(istream& table){
 void fastNLOTable::WriteScenario(ostream& table){
    table << fastNLO::tablemagicno << endl;
    table << Ipublunits << endl;
-   int NScDescript =  ScDescript.size();
+   size_t NScDescript = ScDescript.size();
    table << NScDescript << endl;
-   for(int i=0;i<NScDescript;i++){
+   for(size_t i=0;i<NScDescript;i++){
       table << ScDescript[i] << endl;
    }
    table << Ecms << endl;
@@ -411,28 +407,18 @@ void fastNLOTable::AddTable(const fastNLOTable& other){
          else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) )
             add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
          CreateCoeffTable(fCoeff.size(),add);
-         ///     Ndata++, and ncontrib++, n
       }
    }
 }
 
 
-// // ___________________________________________________________________________________________________
-// int fastNLOTable::CreateCoeffBase(int no){
-//    //fastNLOCoefficients* blockb = new fastNLOCoefficients(NObsBin,ILOord);
-//    fastNLOCoeffBase* blockb = new fastNLOCoeffBase(NObsBin);
-//    return CreateCoeffTable(no,blockb);
-// }
-
-
 // ___________________________________________________________________________________________________
-//int fastNLOTable::CreateCoeffTable(int no,fastNLOCoefficients *newblockb){
 int fastNLOTable::CreateCoeffTable(int no,fastNLOCoeffBase *newblockb){
    if((no+1)>(int)fCoeff.size())
       fCoeff.resize(no+1);
    fCoeff[no] = newblockb;
    //Ncontrib++; // member of fastNLOBase
-   Ncontrib = fCoeff.size();
+   //   Ncontrib = fCoeff.size();
    return 0;
 }
 
@@ -478,9 +464,6 @@ bool fastNLOTable::cmp(const vector<vector<pair<double,double> > >& x1, const ve
 // ___________________________________________________________________________________________________
 void fastNLOTable::SetLoOrder(int LOOrd){
    ILOord = LOOrd;
-   //    for(unsigned int i = 0; i<fCoeff.size() ;i++ ){
-   //       fCoeff[i]->fILOord = LOOrd; // fCoeff should not need this member!
-   //    }
 }
 
 
@@ -521,7 +504,6 @@ void fastNLOTable::SetDimLabel( string label, unsigned int iDim , bool IsDiff ){
 
 
 // ___________________________________________________________________________________________________
-//fastNLOCoefficients* fastNLOTable::GetCoeffTable(int no) const {
 fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
    if ( no >= (int)fCoeff.size() ){
       logger.warn["GetCoeffTable"]<<"There is no contribution with number "<<no<<" but only "<<fCoeff.size()<<". Returning null pointer."<<endl;
@@ -534,7 +516,7 @@ fastNLOCoeffBase* fastNLOTable::GetCoeffTable(int no) const {
 
 // ___________________________________________________________________________________________________
 fastNLOCoeffData* fastNLOTable::GetDataTable() const {
-   for (unsigned int i= 0; i<fCoeff.size() ; i++ ){
+   for (unsigned int i= 0; i<fCoeff.size() ; i++ ) {
       fastNLOCoeffBase* c = GetCoeffTable(i);
       if ( fastNLOCoeffData::CheckCoeffConstants(c,true) ) {
          return (fastNLOCoeffData*)c;
@@ -1075,7 +1057,7 @@ int fastNLOTable::GetObsBinNumber( double obs0, double obs1, double obs2 ) const
 
 
 // ___________________________________________________________________________________________________
-// Some other info getters
+// Some other info getters/setters
 // ___________________________________________________________________________________________________
 string fastNLOTable::GetRivetId() const {
    string identifier("RIVET_ID");
@@ -1102,6 +1084,30 @@ string fastNLOTable::GetXSDescr() const {
    return "Undefined";
 }
 
+vector <string> fastNLOTable::GetScDescr() const {
+   return ScDescript;
+}
+
+void fastNLOTable::SetScDescr(std::vector <std::string> ScDescr) {
+   size_t NScDescript = ScDescr.size();
+   fastNLOTable::ScDescript.resize(NScDescript);
+   for (size_t i=0; i < NScDescript; ++i) {
+      fastNLOTable::ScDescript[i] = ScDescr[i];
+   }
+}
+
+void fastNLOTable::SetNObsBin(int NObs) {
+   fastNLOTable::NObsBin = NObs;
+}
+
+void fastNLOTable::SetBinSize(std::vector < double > NewBinSize) {
+   size_t NewSize = NewBinSize.size();
+   fastNLOTable::BinSize.resize(NewSize);
+   for (size_t i=0; i < NewSize; ++i) {
+      fastNLOTable::BinSize[i] = NewBinSize[i];
+   }
+}
+
 
 
 // ___________________________________________________________________________________________________
@@ -1110,59 +1116,7 @@ string fastNLOTable::GetXSDescr() const {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::Print() const {
-   fastNLOBase::Print();
-   PrintScenario();
-}
-
-
-// ___________________________________________________________________________________________________
-void fastNLOTable::PrintScenario() const {
-   printf("\n **************** FastNLO Table: Scenario ****************\n\n");
-   printf("    Ipublunits                    %d\n",Ipublunits);
-   for(unsigned int i=0;i<ScDescript.size();i++){
-      printf("    ScDescript[%d]                 %s\n",i,ScDescript[i].data());
-   }
-   printf("    Ecms                          %7.4f\n",Ecms);
-   printf("    ILOord                        %d\n",ILOord);
-   printf("    NDim                          %d\n",NDim);
-   for(unsigned int i=0;i<NDim;i++){
-      printf("     - DimLabel[%d]                %s\n",i,DimLabel[i].data());
-   }
-   for(unsigned int i=0;i<NDim;i++){
-      printf("     - IDiffBin[%d]               %d\n",i,IDiffBin[i]);
-   }
-   printf("    NObsBin                       %d\n",NObsBin);
-   for(unsigned int i=0;i<NObsBin;i++){
-      for(unsigned int j=0;j<NDim;j++){
-         printf("     -  - LoBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].first);
-         if(IDiffBin[j]==2)
-            printf("     -  - UpBin[%d][%d]             %7.4f\n", i,j,Bin[i][j].second);
-      }
-   }
-   for(unsigned int i=0;i<NObsBin;i++){
-      printf("     - BinSize[%d]                %7.4f\n", i,BinSize[i]);
-   }
-   printf("    INormFlag                     %d\n",INormFlag);
-
-   if(INormFlag<0){
-      printf("    DenomTable                    %s\n",DenomTable.data());
-   }
-   if(INormFlag!=0){
-      for(unsigned int i=0;i<NObsBin;i++){
-         printf("     - IDivLoPointer[%d]               %d\n",i,IDivLoPointer[i]);
-         printf("     - IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
-      }
-   }
-   printf("\n ********************************************************\n\n");
-
-}
-
-
-//______________________________________________________________________________
-void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
-   //if ( logger.debug.GetSpeak() ) iprint=10000;
-   //
+void fastNLOTable::Print(int iprint) const {
    // Define different levels of detail for printing out table content
    // The minimum (iprint = 0) just gives basic scenario information
    // including the employed code with references. The additional levels
@@ -1178,127 +1132,122 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    //          5: Also print sigma tilde of Block B (not implemented yet)
 
    //
-   // Print basic scenario information (always)
+   // Print table header
+   char buffer[1024];
+   cout  << endl;
+   cout  << fastNLO::_CSEPSC << endl;
+   snprintf(buffer, sizeof(buffer), "Information on table header");
+   logger.shout << buffer << endl;
+   cout  << fastNLO::_SSEPSC << endl;
+   fastNLOBase::Print(iprint);
+
    //
+   // Print scenario information
+   PrintScenario(iprint);
+
+   //
+   // Loop over available contributions
+   for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
+      fastNLOCoeffBase* c = fCoeff[j];
+      char buffer[1024];
+      cout  << endl;
+      cout  << fastNLO::_CSEPSC << endl;
+      snprintf(buffer, sizeof(buffer), "Information on table contribution no. %d: %s",j,c->CtrbDescript[0].data());
+      logger.shout << buffer << endl;
+      cout  << fastNLO::_SSEPSC << endl;
+      // Print information for each contribution
+      c->Print(iprint);
+   }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOTable::PrintScenario(int iprint) const {
+   //
+   //  Print scenario information for table
+   //  iprint: iprint > 0: Print more info ...
+   //
+   logger.debug["PrintScenario"] << "Printing info on scenario: " << ScenName.data() << endl;
    char buffer[1024];
    cout  << endl;
    cout  << fastNLO::_CSEPSC << endl;
    snprintf(buffer, sizeof(buffer), "Information on fastNLO scenario: %s",ScenName.data());
    logger.shout << buffer << endl;
    cout  << fastNLO::_SSEPSC << endl;
-   snprintf(buffer, sizeof(buffer), "Description:");
-   logger.shout << buffer << endl;
-   for (unsigned int i=0; i<ScDescript.size(); i++) {
-      printf(" #   %s\n",ScDescript[i].data());
+   if ( !(iprint < 0) ) {
+      cout << fastNLO::_DSEP20C << " fastNLO Table: Scenario " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: Scenario " << fastNLO::_CSEP20 << endl;
    }
+   fastNLOTools::PrintVector(ScDescript,"Scenario description (ScDescript)","#");
    printf(" #\n");
-   printf(" # Centre-of-mass energy Ecms: % -#10.4g GeV\n",Ecms);
+   printf(" # Publ. x section (10^-Ipublunits b)  %d\n",Ipublunits);
+   printf(" # Centre-of-mass energy (Ecms/GeV)    %5.0f\n",Ecms);
+   printf(" # Power in a_s of LO process (ILOord) %d\n",ILOord);
+   printf(" # No. of observable bins (NObsBin)    %d\n",NObsBin);
+   printf(" # Dim. of observable binning (NDim)   %d\n",NDim);
    printf(" #\n");
-   printf(" # Tot. no. of observable bins: %3i in %1i dimensions:\n",NObsBin,NDim);
+   fastNLOTools::PrintVector(DimLabel,"Dimension labels (DimLabel)","#");
+   fastNLOTools::PrintVector(IDiffBin,"Differential dimension (IDiffBin)","#");
    printf(" #\n");
-   printf(" # No. of contributions: %1i\n",Ncontrib);
-
-   //
-   // Print basic contribution information (always)
-   //
-   for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-      fastNLOCoeffBase* c = fCoeff[j];
-      if ( iprint == 0 ) {
-         printf(" # Contribution %1i:\n",j+1);
-         for (unsigned int i=0; i<c->CtrbDescript.size(); i++) {
-            printf(" #   %s\n",c->CtrbDescript[i].data());
-         }
-         if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
-            fastNLOCoeffAddBase* cA = (fastNLOCoeffAddBase*)c;
-            double nevt = cA->GetNevt();
-            printf(" #   No. of events: %#17.0F\n",nevt);
-         }
-         printf(" #   provided by:\n");
-         for (unsigned int i=0; i<c->CodeDescript.size(); i++) {
-            printf(" #   %s\n",c->CodeDescript[i].data());
-         }
-
-         if ( fastNLOCoeffAddFix::CheckCoeffConstants(c,true) ) {
-            fastNLOCoeffAddFix* cFix = (fastNLOCoeffAddFix*)c;
-            int NScaleDim = cFix->GetNScaleDim();
-            printf(" #   Scale dimensions: %1i\n",NScaleDim);
-            for (int i=0; i<NScaleDim; i++) {
-               for (unsigned int j=0; j<cFix->ScaleDescript[i].size(); j++) {
-                  printf(" #     Scale description for dimension %1i:          %s\n",i+1,cFix->ScaleDescript[i][j].data());
+   if ( abs(iprint) > 1 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
+      for (unsigned int i=0; i<NObsBin; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==NObsBin-1) {
+            for (unsigned int j=0; j<NDim; j++) {
+               printf(" #   LoBin[%d][%d]                        %7.4f\n", i,j,Bin[i][j].first);
+               if ( IDiffBin[j]==2 ) {
+                  printf(" #   UpBin[%d][%d]                       %7.4f\n", i,j,Bin[i][j].second);
                }
-               printf(" #     Number of scale variations for dimension %1i: %1i\n",NScaleDim,cFix->GetNScalevar());
-               printf(" #     Available scale settings for dimension %1i:\n",NScaleDim);
-               for (int k=0; k<cFix->GetNScalevar(); k++) { // fastNLOReader has method: 'GetNScaleVariations()', which returns nr of scale variations for all active tables!
-                  printf(" #       Scale factor number %1i:                   % #10.4f\n",k+1,cFix->GetScaleFactor(k));
-               }
-               printf(" #     Number of scale nodes for dimension %1i:      %1i\n",NScaleDim,cFix->GetNScaleNode());
             }
-            printf(" #   PDF dimensions: %1i\n",cFix->GetNPDF());
-            int fPDFDim = cFix->GetNPDFDim();
-            if ( fPDFDim == 0 ) {
-               printf(" #     x-interpolation storage format: Linear\n");
-            } else if ( fPDFDim == 1 ) {
-               printf(" #     x-interpolation storage format: Half-Matrix\n");
-            } else if ( fPDFDim == 2 ) {
-               printf(" #     x-interpolation storage format: Full-Matrix\n");
-            } else {
-               logger.error["PrintFastNLOTableConstants"] << "Unknown interpolation storage structure, aborting! "
-                                                          << " NPDFDim = " << fPDFDim << endl;
-            }
-            printf(" #     Number of x1 nodes range from %2i to %2i\n",cFix->GetNxtot1(0),cFix->GetNxtot1(NObsBin-1));
-            if (fPDFDim == 2) {
-               printf(" #     Number of x2 nodes range from %2i to %2i\n",cFix->GetNxtot2(0),cFix->GetNxtot2(NObsBin-1));
-            }
-         } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(c,true) ) {
-            fastNLOCoeffAddFlex* cFlex = (fastNLOCoeffAddFlex*)c;
-            int NScaleDim = cFlex->GetNScaleDim();
-            if (! (NScaleDim == 1)) {
-               logger.error["PrintFastNLOTableConstants"] << "Flex-scale tables must have scale dimensions of one, aborting! "
-                                                   << "NScaleDim = " << NScaleDim <<endl;
-               exit(1);
-            }
-            // Not useful for flex-scale tables
-            //            printf(" #   Scale dimensions: %1i\n",NScaleDim);
-            for (int i=0; i<NScaleDim; i++) {
-               printf(" #   Scale description for flexible scale %1i:          %s\n",1,cFlex->ScaleDescript[i][0].data());
-               printf(" #     Number of scale nodes in first observable bin:      %2i\n",cFlex->GetNScaleNode1(0));
-               printf(" #     Number of scale nodes in last  observable bin:      %2i\n",cFlex->GetNScaleNode1(NObsBin-1));
-               printf(" #   Scale description for flexible scale %1i:          %s\n",2,cFlex->ScaleDescript[i][1].data());
-               printf(" #     Number of scale nodes in first observable bin:      %2i\n",cFlex->GetNScaleNode2(0));
-               printf(" #     Number of scale nodes in last  observable bin:      %2i\n",cFlex->GetNScaleNode2(NObsBin-1));
-            }
-         } else {
-            // Anything else to write for multiplicative or data contributions?
          }
-      } else {
-         fCoeff[j]->Print();
+      }
+      for (unsigned int i=0; i<NObsBin; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==NObsBin-1) {
+            printf(" #   BinSize[%d]                       %7.4f\n", i,BinSize[i]);
+         }
       }
    }
-   if (iprint > 0) {
-      Print();
+   if( INormFlag != 0 ) {
+      printf(" #\n");
+      printf(" # Normalization flag (INormFlag)      %d\n",INormFlag);
+      if ( INormFlag<0 ) {
+         printf(" # Normalization table (DenomTable)    %s\n",DenomTable.data());
+      }
+      if ( abs(iprint) > 1 ) {
+         cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
+         for (unsigned int i=0; i<NObsBin; i++) {
+            // Print only for first and last observable bin
+            if (i==0 || i==NObsBin-1) {
+               printf(" #  IDivLoPointer[%d]               %d\n",i,IDivLoPointer[i]);
+               printf(" #  IDivUpPointer[%d]               %d\n",i,IDivUpPointer[i]);
+            }
+         }
+      }
    }
-   cout << " #" << endl;
-   cout  << fastNLO::_CSEPSC << endl;
+   printf(" # No. of contributions in this table: %d\n",(int)fCoeff.size());
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 
 //______________________________________________________________________________
-void fastNLOTable::PrintTableInfo(const int iprint) const {
-   logger.debug["PrintTableInfo"] << "Printing flag iprint = " << iprint << endl;
+void fastNLOTable::PrintContributionSummary(int iprint) const {
    //
-   //  Print basic info about fastNLO table and its contributions
-   //   - iprint: iprint > 0: print also contribution descriptions
+   //  Print summary of contributions available in table
+   //  iprint: iprint > 0: Print full descriptions (all lines) for each contribution
    //
-
+   logger.debug["PrintContributionSummary"] << "Printing flag iprint = " << iprint << endl;
    char buffer[1024];
    cout  << endl;
    cout  << fastNLO::_CSEPSC << endl;
-   logger.shout << "Overview on contribution types and numbers contained in table:" << endl;
+   logger.shout << "Overview on contribution types and numbers contained in table: " << ffilename << endl;
    cout  << fastNLO::_SSEPSC << endl;
-   snprintf(buffer, sizeof(buffer), "Number of contributions: %2i", Ncontrib);
+   snprintf(buffer, sizeof(buffer), "Total number of contributions: %2i", Ncontrib+Ndata);
    logger.shout << buffer << endl;
 
-   int iccount[21] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+   int iccount[21] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    int ictype = 0;
    string coeffname;
    for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
@@ -1310,20 +1259,65 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
          ictype = fCoeff[j]->GetIContrFlag1()-1;
          coeffname = fastNLO::_ContrName[ictype];
       }
-      // KR: How can I access ContrId from here ???
       iccount[ictype]++;
-      logger.shout << "  No.: " << j+1 << ", type: " << coeffname <<", Id: " << iccount[ictype]
-            << ", order: " << c->GetContributionDescription()[0]
-            << ", by: " << c->GetCodeDescription()[0] << endl;
+      snprintf(buffer, sizeof(buffer), "  No.: %d, type: %-30.30s, Id: %d, order: %-20.20s, by: %s",
+               j+1,
+               coeffname.c_str(),
+               iccount[ictype]-1,
+               c->GetContributionDescription()[0].c_str(),
+               c->GetCodeDescription()[0].c_str());
+      logger.shout << buffer << endl;
+
       if (iprint > 0) {
          for (unsigned int k = 0 ; k<c->GetCodeDescription().size(); k++) {
-            snprintf(buffer, sizeof(buffer), "\t\t%s",c->GetCodeDescription()[k].c_str());
+            snprintf(buffer, sizeof(buffer), "          %s",c->GetCodeDescription()[k].c_str());
             logger.shout << buffer << endl;
          }
       }
    }
+   int nc = 0;
+   for ( int icnt=0; icnt<21; icnt++ ) {
+      nc += iccount[icnt];
+   }
+   if ( iccount[2]+iccount[3] != GetNmult() ) {
+      logger.warn["PrintContributionSummary"] << "Multiplicative contribution not correctly advertised in table header." << endl;
+      logger.warn["PrintContributionSummary"] << "Nmult = " << GetNmult() <<
+         " should equal " << iccount[2]+iccount[3] << " instead. Continue anyway, since not actually used." << endl;
+   }
+   if ( iccount[20] > 1 ) {
+      logger.error["PrintContributionSummary"] << "Maximally one data contribution allowed per table," << endl;
+      logger.error["PrintContributionSummary"] << "but found " << iccount[20] << "! Aborted!" << endl;
+      exit(1);
+   }
+   if ( iccount[20] != GetNdata() ) {
+      if ( nc == GetNcontrib()+GetNdata() ) {
+         logger.warn["PrintContributionSummary"] << "Data contribution not correctly advertised in table header." << endl;
+         logger.warn["PrintContributionSummary"] << "Ncontrib = " << GetNcontrib() << " and Ndata = " << GetNdata() <<
+            " should equal " << nc-1 << " and " << iccount[20] << " instead. Continue anyway, since only sum is actually used." << endl;
+      } else {
+         logger.error["PrintContributionSummary"] << "Inconsistent number of contributions found!" << endl;
+         logger.error["PrintContributionSummary"] << "Ncontrib = " << GetNcontrib() << " and Ndata = " << GetNdata() <<
+            " should be " << nc-1 << " and " << iccount[20] << " instead. Aborted!" << endl;
+         exit(1);
+      }
+   }
    cout << fastNLO::_CSEPSC << endl;
+}
 
+
+//_DEPRECATED___________________________________________________________________
+void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
+   logger.error["PrintFastNLOTableConstants"]<<"This function is deprecated, aborted!"<<endl;
+   logger.error["PrintFastNLOTableConstants"]<<"Please use Print instead."<<endl;
+   exit(1);
+}
+
+
+//_DEPRECATED___________________________________________________________________
+void fastNLOTable::PrintTableInfo(const int iprint) const {
+   logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
+   logger.error["PrintTableInfo"]<<"Please use PrintContributionSummary instead."<<endl;
+   exit(1);
 }
 
 
@@ -1487,3 +1481,74 @@ void fastNLOTable::PrintTableInfo(const int iprint) const {
 //    return BinRet;
 //
 // }
+
+
+// Erase observable bin; iObsIdx is the C++ array index to be removed and
+// not the observable bin no. running from 1 to NObsBin
+template<typename T> void fastNLOTable::EraseBin(vector<T>& v, unsigned int idx) {
+   if ( v.empty() ) {
+      logger.warn["fastNLOTable::EraseBin"]<<"Empty vector, nothing to erase!" << endl;
+   } else if ( idx < v.size() ) {
+      logger.info["fastNLOTable::EraseBin"]<<"Erasing vector index no. " << idx << endl;
+      v.erase(v.begin()+idx);
+   } else {
+      logger.error["fastNLOTable::EraseBin"]<<"Bin no. larger than vector size, aborted!" << endl;
+      exit(1);
+   }
+}
+
+void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
+   logger.info["fastNLOTable::EraseBinFromTable"]<<"Erasing from table the observable index no. " << iObsIdx << endl;
+   // Changes to table header block A2
+   EraseBin(fastNLOTable::Bin,iObsIdx);
+   EraseBin(fastNLOTable::BinSize,iObsIdx);
+   if ( fastNLOTable::INormFlag != 0 ) {
+      EraseBin(fastNLOTable::IDivLoPointer,iObsIdx);
+      EraseBin(fastNLOTable::IDivUpPointer,iObsIdx);
+   }
+   // Changes to table contributions block B
+   for ( int ic = 0; ic<GetNcontrib()+GetNdata(); ic++ ) {
+      logger.info["fastNLOTable::EraseBinFromTable"]<<"Erasing the observable index no. " << iObsIdx << " from contribution no. " << ic << endl;
+      fastNLOCoeffAddBase* ctmp = (fastNLOCoeffAddBase*)fCoeff[ic];
+
+      // Identify type of coeff-table
+      bool quiet = true;
+      if ( fastNLOCoeffData::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.info["EraseBinFromTable"]<<"Found data contribution. Now erasing index no. " << iObsIdx << endl;
+         fastNLOCoeffData* cdata = (fastNLOCoeffData*)fCoeff[ic];
+         cdata->EraseBin(iObsIdx);
+      } else if ( fastNLOCoeffMult::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.info["EraseBinFromTable"]<<"Found multiplicative contribution. Now erasing index no. " << iObsIdx << endl;
+         fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
+         cmult->EraseBin(iObsIdx);
+      } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.info["EraseBinFromTable"]<<"Found additive fix-table contribution. Now erasing index no. " << iObsIdx << endl;
+         fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
+         cfix->EraseBin(iObsIdx);
+      } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.info["EraseBinFromTable"]<<"Found additive flex-table contribution. Now erasing index no. " << iObsIdx << endl;
+         fastNLOCoeffAddFlex* cflex = (fastNLOCoeffAddFlex*)fCoeff[ic];
+         cflex->EraseBin(iObsIdx);
+      } else {
+         logger.error["EraseBinFromTable"]<<"Could not identify contribution. Print and abort!" << endl;
+         ctmp->Print(-1);
+         exit(1);
+      }
+   }
+   // Reduce no. of observable bins
+   SetNObsBin(GetNObsBin()-1);
+}
+
+   //          EraseBin(table.GetBlockB(idx)->Nztot,b,nobs);
+   //          EraseBin(table.GetBlockB(idx)->ZNode,b,nobs);
+   //          EraseBin(table.GetBlockB(idx)->Xsection,b,nobs);
+
+   //          EraseBin(table.GetBlockB(idx)->PdfLc,b,nobs);
+
+   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode,b,nobs);
+   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode1,b,nobs);
+   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode2,b,nobs);
+
+   //          EraseBin(table.GetBlockB(idx)->SigmaRefMixed,b,nobs);
+   //          EraseBin(table.GetBlockB(idx)->SigmaRef_s1,b,nobs);
+   //          EraseBin(table.GetBlockB(idx)->SigmaRef_s2,b,nobs);

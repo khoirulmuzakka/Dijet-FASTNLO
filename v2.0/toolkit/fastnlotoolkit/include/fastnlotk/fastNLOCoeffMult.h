@@ -19,7 +19,7 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
-   virtual void Print() const;
+   virtual void Print(int iprint) const;
 
    double GetMultFactor(int iObs) const { return fact[iObs]; }
    std::vector<double > GetMultFactor() const { return fact; }
@@ -29,6 +29,10 @@ public:
    fastNLO::v2d GetUncorHi() const { return UncorLo; };
    fastNLO::v2d GetCorrLo()  const { return CorrLo; };
    fastNLO::v2d GetCorrHi()  const { return CorrHi; };
+
+   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // not the observable bin no. running from 1 to fNObsBins
+   virtual void EraseBin(unsigned int iObsIdx);
 
 protected:
    void ReadCoeffMult(std::istream& table);

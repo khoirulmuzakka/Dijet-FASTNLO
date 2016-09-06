@@ -145,7 +145,7 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
       }
       else if ( Npow==fILOord+2 ) {
          debug["Write"]<<" * Increase NScaleDep from 3 to 6 because NNLO!"<<endl;
-          NScaleDep=7;
+         NScaleDep=7;
       }
    }
    fastNLOCoeffAddBase::Write(table);
@@ -175,25 +175,25 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
    nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s2        , table , NSubproc, Nevt);
 
    /*
-   nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
 
-   //if ( NScaleDep==3 || Npow!=fScen->ILOord || NScaleDep==5) {
-   if ( NScaleDep==3 || NScaleDep>=5) {
-      //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;
-      nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-      nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-      if ( NScaleDep>=6) {
-         nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-         nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-         nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
-      }
-   }
-   if ( SigmaRefMixed.empty() ) fastNLOCoeffBase::ResizeTable(&SigmaRefMixed,fNObsBins,NSubproc);
-   if ( SigmaRef_s1.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s1,fNObsBins,NSubproc);
-   if ( SigmaRef_s2.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s2,fNObsBins,NSubproc);
-   nn3 += WriteFlexibleTable( &SigmaRefMixed    , table , (bool)(option & DividebyNevt) , Nevt , true );
-   nn3 += WriteFlexibleTable( &SigmaRef_s1      , table , (bool)(option & DividebyNevt) , Nevt , true );
-   nn3 += WriteFlexibleTable( &SigmaRef_s2      , table , (bool)(option & DividebyNevt) , Nevt , true );
+     //if ( NScaleDep==3 || Npow!=fScen->ILOord || NScaleDep==5) {
+     if ( NScaleDep==3 || NScaleDep>=5) {
+     //cout<<"Write NLO FlexTable. NScaleDep="<<NScaleDep<<"\tNpow="<<Npow<<"\tfScen->ILOord="<<fScen->ILOord<<endl;
+     nn3 += WriteFlexibleTable( &SigmaTildeMuFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaTildeMuRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+     if ( NScaleDep>=6) {
+     nn3 += WriteFlexibleTable( &SigmaTildeMuRRDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaTildeMuFFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaTildeMuRFDep , table , (bool)(option & DividebyNevt) , Nevt , true );
+     }
+     }
+     if ( SigmaRefMixed.empty() ) fastNLOCoeffBase::ResizeTable(&SigmaRefMixed,fNObsBins,NSubproc);
+     if ( SigmaRef_s1.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s1,fNObsBins,NSubproc);
+     if ( SigmaRef_s2.empty() )   fastNLOCoeffBase::ResizeTable(&SigmaRef_s2,fNObsBins,NSubproc);
+     nn3 += WriteFlexibleTable( &SigmaRefMixed    , table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaRef_s1      , table , (bool)(option & DividebyNevt) , Nevt , true );
+     nn3 += WriteFlexibleTable( &SigmaRef_s2      , table , (bool)(option & DividebyNevt) , Nevt , true );
    */
    //printf("  *  fastNLOCoeffAddFlex::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
    debug["Write"]<<"Wrote "<<nn3<<" lines of v2.1 Tables."<<endl;
@@ -249,30 +249,30 @@ void fastNLOCoeffAddFlex::Clear() {
    fastNLOTools::ClearVector(SigmaRef_s2);
 }
 
-//________________________________________________________________________________________________________________ // 
+//________________________________________________________________________________________________________________ //
 bool  fastNLOCoeffAddFlex::IsCompatible(const fastNLOCoeffAddFlex& other) const {
-   //! Check for compatibility for merging/adding of two contributions 
+   //! Check for compatibility for merging/adding of two contributions
    if ( ! ((fastNLOCoeffAddBase*)this)->IsCompatible(other)) return false;
-   for ( int i=0 ; i<fNObsBins ; i++ ){ 
+   for ( int i=0 ; i<fNObsBins ; i++ ){
       if ( GetNScaleNode1(i) != other.GetNScaleNode1(i) ) {
-	 say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible number of scale nodes found."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible number of scale nodes found."<<endl;
+         return false;
       }
       if ( GetNScaleNode2(i) != other.GetNScaleNode2(i) ) {
-	 say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible number of scale nodes found."<<endl;
-	 return false;
+         say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible number of scale nodes found."<<endl;
+         return false;
       }
       for ( unsigned int is1 = 0 ; is1<GetNScaleNode1(i) ; is1++ ) {
-	 if ( GetScaleNode1(i,is1) != other.GetScaleNode1(i,is1) ) {
-	    say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible scale1 node found."<<endl;
-	    return false;
-	 }
+         if ( GetScaleNode1(i,is1) != other.GetScaleNode1(i,is1) ) {
+            say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible scale1 node found."<<endl;
+            return false;
+         }
       }
       for ( unsigned int is2 = 0 ; is2<GetNScaleNode2(i) ; is2++ ) {
-	 if ( GetScaleNode2(i,is2) != other.GetScaleNode2(i,is2) ) {
-	    say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible scale2 node found."<<endl;
-	    return false;
-	 }
+         if ( GetScaleNode2(i,is2) != other.GetScaleNode2(i,is2) ) {
+            say::warn["fastNLOCoeffAddFlex::IsCompatible"]<<"Incompatible scale2 node found."<<endl;
+            return false;
+         }
       }
    }
    return true;
@@ -321,13 +321,47 @@ void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
 }
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Print() const {
-   fastNLOCoeffAddBase::Print();
-   printf(" **************** FastNLO Table: fastNLOCoeffAddFlex ****************\n");
-   printf(" B   NscalenodeScale1              %lu\n",ScaleNode1[0].size());
-   printf(" B   NscalenodeScale2              %lu\n",ScaleNode2[0].size());
-   printf(" *******************************************************\n");
+void fastNLOCoeffAddFlex::Print(int iprint) const {
+   if ( !(iprint < 0) ) {
+      fastNLOCoeffAddBase::Print(iprint);
+      cout << fastNLO::_DSEP20C << " fastNLO Table: CoeffAddFlex " << fastNLO::_DSEP20 << endl;
+   } else {
+      cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffAddFlex " << fastNLO::_CSEP20 << endl;
+   }
+   printf(" # No. of scale1 nodes (Nscalenode1)   %d\n",(int)ScaleNode1[0].size());
+   printf(" # No. of scale2 nodes (Nscalenode2)   %d\n",(int)ScaleNode2[0].size());
+   if ( abs(iprint) > 0 ) {
+      cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
+      char buffer[1024];
+      for (int i=0; i<fNObsBins; i++) {
+         // Print only for first and last observable bin
+         if (i==0 || i==fNObsBins-1) {
+            printf(" #   Observable bin no. %d\n",i+1);
+            snprintf(buffer, sizeof(buffer), "Scale nodes 1 (ScaleNode1[%d][])",i);
+            fastNLOTools::PrintVector(GetScaleNodes1(i),buffer,"#  ");
+            if ( ScaleNode2.size() != 0 ) {
+               snprintf(buffer, sizeof(buffer), "Scale nodes 2 (ScaleNode2[%d][])",i);
+               fastNLOTools::PrintVector(GetScaleNodes2(i),buffer,"#  ");
+            }
+         }
+      }
+   }
+   cout << fastNLO::_CSEPSC << endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
+
+// Erase observable bin
+void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
+   info["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
+   ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);
+   if ( ScaleNode2.size() != 0 ) {ScaleNode2.erase(ScaleNode2.begin()+iObsIdx);}
+   SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);
+   SigmaTildeMuFDep.erase(SigmaTildeMuFDep.begin()+iObsIdx);
+   SigmaTildeMuRDep.erase(SigmaTildeMuRDep.begin()+iObsIdx);
+   SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);
+   SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);
+   SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);
+   fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}

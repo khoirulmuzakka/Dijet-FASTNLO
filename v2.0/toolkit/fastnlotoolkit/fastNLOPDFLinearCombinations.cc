@@ -68,7 +68,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCOneHadron(const fastNLOCo
    else {
       //error["CalcPDFLCDIS"]<<"Could not identify process. Printing and exiting"<<endl;
       say::error<<"Error. Could not identify process. Printing and exiting"<<endl;
-      c->Print();
+      c->Print(-1);
       exit(1);
       return vector<double >();
    }
@@ -117,7 +117,7 @@ vector<double > fastNLOPDFLinearCombinations::CalcPDFLCTwoHadrons(const fastNLOC
       say::error<<"PDFFlag1="<<c->GetIPDFdef1()<<endl;
       say::error<<"PDFFlag2="<<c->GetIPDFdef2()<<endl;
       say::error<<"PDFFlag3="<<c->GetIPDFdef3()<<endl;
-      c->Print();
+      c->Print(-1);
       exit(1);
       return vector<double >();
    }
