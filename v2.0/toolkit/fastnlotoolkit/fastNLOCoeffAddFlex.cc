@@ -355,13 +355,13 @@ void fastNLOCoeffAddFlex::Print(int iprint) const {
 // Erase observable bin
 void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
    info["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
-   ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);
+   if ( ScaleNode1.size() != 0 ) {ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);}
    if ( ScaleNode2.size() != 0 ) {ScaleNode2.erase(ScaleNode2.begin()+iObsIdx);}
-   SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);
-   SigmaTildeMuFDep.erase(SigmaTildeMuFDep.begin()+iObsIdx);
-   SigmaTildeMuRDep.erase(SigmaTildeMuRDep.begin()+iObsIdx);
-   SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);
-   SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);
-   SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);
+   if ( SigmaTildeMuIndep.size() != 0 ) {SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);}
+   if ( SigmaTildeMuFDep.size()  != 0 ) {SigmaTildeMuFDep.erase(SigmaTildeMuFDep.begin()+iObsIdx);}
+   if ( SigmaTildeMuRDep.size()  != 0 ) {SigmaTildeMuRDep.erase(SigmaTildeMuRDep.begin()+iObsIdx);}
+   if ( SigmaTildeMuRRDep.size() != 0 ) {SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);}
+   if ( SigmaTildeMuFFDep.size() != 0 ) {SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);}
+   if ( SigmaTildeMuRFDep.size() != 0 ) {SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);}
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
 }
