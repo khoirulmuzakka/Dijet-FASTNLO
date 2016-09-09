@@ -1108,6 +1108,14 @@ void fastNLOTable::SetBinSize(std::vector < double > NewBinSize) {
    }
 }
 
+void fastNLOTable::SetBins(std::vector < std::vector <std::pair<double,double> > > NewBins) {
+   size_t NewSize = NewBins.size();
+   fastNLOTable::Bin.resize(NewSize);
+   for (size_t i=0; i < NewSize; ++i) {
+      fastNLOTable::Bin[i] = NewBins[i];
+   }
+}
+
 
 
 // ___________________________________________________________________________________________________
