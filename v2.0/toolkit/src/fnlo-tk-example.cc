@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
    EScaleUncertaintyStyle eScaleUnc = kAsymmetricSixPoint;
    //   EPDFUncertaintyStyle   ePDFUnc   = kHessianCTEQCL68;
    // Return values are three vectors xs, dxsu, dxsl in struct XsUnc
-   fastNLOReader::XsUncertainty XsUnc;
+   XsUncertainty XsUnc;
    XsUnc = fnlo.GetScaleUncertainty(eScaleUnc);
    //   XsUnc  = fnlo.GetPDFUncertainty(ePDFUnc);
 
