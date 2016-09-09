@@ -71,6 +71,8 @@ public:
    std::vector < double > GetCrossSection();                //!< Return vector with all cross section values
    std::vector < double > GetCrossSection(bool lNorm);      //!< Return vector with all cross section values, normalize on request
    std::vector < double > GetNormCrossSection();            //!< Return vector with all normalized cross section values
+   std::vector < std::map< double, double > > GetCrossSection_vs_x1(); //! Cross section vs. x1 ( XSection_vsX1[bin][<x,xs>] )
+   std::vector < std::map< double, double > > GetCrossSection_vs_x2(); //! Cross section vs. x2 ( XSection_vsX1[bin][<x,xs>] )
 
    std::vector < double > GetReferenceCrossSection();
    std::vector < double > GetKFactors();  ///< DEPRECATED
@@ -211,6 +213,8 @@ protected:
    std::vector < double > kFactor;
    std::vector < double > QScale_LO;
    std::vector < double > QScale;
+   std::vector < std::map< double, double > > fXSection_vsX1; //! Cross section vs. x ( XSection_vsX1[bin][<x,xs>] )
+   std::vector < std::map< double, double > > fXSection_vsX2;
 
    // ----  reference tables ---- //
    std::vector < double > XSectionRef;

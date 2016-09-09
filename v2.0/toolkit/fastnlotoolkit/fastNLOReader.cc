@@ -978,6 +978,20 @@ vector < double > fastNLOReader::GetCrossSection(bool lNorm) {
 }
 
 //______________________________________________________________________________
+std::vector < std::map< double, double > > fastNLOReader::GetCrossSection_vs_x1() {
+   // Get fast calculated cross section
+   if (XSection.empty()) CalcCrossSection();
+   return fXSection_vsX1;
+}
+
+//______________________________________________________________________________
+std::vector < std::map< double, double > > fastNLOReader::GetCrossSection_vs_x2() {
+   // Get fast calculated cross section
+   if (XSection.empty()) CalcCrossSection();
+   return fXSection_vsX2;
+}
+
+//______________________________________________________________________________
 vector < double > fastNLOReader::GetNormCrossSection() {
    // Check whether normalization is defined
    if ( INormFlag == 0 ) {
@@ -1214,6 +1228,7 @@ void fastNLOReader::CalcCrossSection() {
    //!
    //!  xs = { sum(all active pert. add. contr.) + sum(all other active add. contr.) } * prod(all active multipl. contr.)
    //!
+
    logger.debug["CalcCrossSection"]<<endl;
 
    // XSection_LO.clear();
@@ -1225,6 +1240,10 @@ void fastNLOReader::CalcCrossSection() {
 
    XSection.clear();
    XSection.resize(NObsBin);
+   fXSection_vsX1.clear();
+   fXSection_vsX2.clear();
+   fXSection_vsX1.resize(NObsBin);
+   fXSection_vsX2.resize(NObsBin);
    QScale.clear();
    QScale.resize(NObsBin);
 
@@ -1350,6 +1369,8 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
                double mur  = fScaleFacMuR * cLO->GetScaleNode(i,0,j);
                XS->at(i) +=  xsci;
                QS->at(i) +=  xsci*mur;
+	       fXSection_vsX1[i][cLO->GetX1(i,k)] += xsci;
+	       //fXSection_vsX2[i][cLO->GetXNode2(i,k)] += xsci;
             }
          }
       }
@@ -1382,6 +1403,8 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
                double xsci = asnp1 * n * log(scalefac) * clo;
                //double xsci = asnp1 * n * log(scalefac) * clo;
                XS->at(i) -= xsci;
+	       fXSection_vsX1[i][cLO->GetX1(i,k)] -= xsci;
+	       //fXSection_vsX2[i][cLO->GetXNode2(i,k)] -= xsci;
             }
          }
       }
@@ -1440,6 +1463,11 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   }
                   XS->at(i)   += xsci;
                   QS->at(i)   += xsci*mur;
+		  // cross section as 'functions' of x
+		  //double x1 = c->GetXNode1(i,x);
+		  //double x2 = c->GetXNode2(i,x);
+		  fXSection_vsX1[i][c->GetX1(i,x)] += xsci;
+		  //fXSection_vsX2[i][x2] += xsci;
                }
             }
          }
@@ -1490,6 +1518,10 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
 	       double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
                QS->at(i)      +=  xsci*mur;
+	       //ouble x1 = c->GetXNode1(i,k);
+	       //double x2 = c->GetXNode2(i,k);
+	       fXSection_vsX1[i][c->GetX1(i,k)] += xsci;
+	       //fXSection_vsX2[i][x2] += xsci;
             }
          }
       }

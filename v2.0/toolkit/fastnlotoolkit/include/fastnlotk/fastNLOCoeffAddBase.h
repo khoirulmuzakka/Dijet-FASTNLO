@@ -56,6 +56,8 @@ public:
 
    double GetXNode1(int iObsBin, int iNode) const { return XNode1[iObsBin][iNode]; }
    double GetXNode2(int iObsBin, int iNode) const { return XNode2[iObsBin][iNode]; }
+   double GetX1(int iObsBin, int iXnode) const; //! return x value of pdf1 for x-node 1
+   double GetX2(int iObsBin, int iXnode) const; //! return x value of pdf1 for x-node 1
 
    std::vector < double > GetXNodes1(int iObsBin) const { return XNode1[iObsBin]; }
    std::vector < double > GetXNodes2(int iObsBin) const { return XNode2[iObsBin]; }
