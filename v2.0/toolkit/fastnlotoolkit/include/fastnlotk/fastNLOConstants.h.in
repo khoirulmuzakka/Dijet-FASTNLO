@@ -77,7 +77,8 @@ namespace fastNLO {
       kScaleMin                 = 8,    // e.g. mu^2 = min( Q^2, pt^2)
       kProd                     = 9,    // e.g. mu^2 = (scale1 * scale2) ^2
       kExpProd2                 = 10,   // e.g. mu^2 = (scale1 * exp(0.3 * scale2)) ^2
-      kExtern                   = 11    // define an external function for your scale
+      kExtern                   = 11,   // define an external function for your scale
+      kConst                    = 12    // e.g. mu^2 = c, while c is a constant and could be for instance the top-mass
    };
 
    enum ESMCalculation {

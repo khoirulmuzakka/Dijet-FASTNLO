@@ -4,11 +4,22 @@
 #include "fastNLOTable.h"
 #include "fastNLOPDFLinearCombinations.h"
 
+// ---- Getters for results---- //
+struct XsUncertainty {                                   
+   //! Struct for returning vectors with cross section and relative uncertainty
+   // keep definition of this class outside of fastNLOReader, beacause of python wrapper
+   std::vector < double > xs;
+   std::vector < double > dxsl;
+   std::vector < double > dxsu;
+};
+
 
 class fastNLOReader : public fastNLOTable , public fastNLOPDFLinearCombinations {
-   //
-   // fastNLOReader.
-   //
+   //!
+   //! fastNLOReader.
+   //! Abstract base class for evaluation of fastNLO tables.
+   //! Instantiatians must implement functions for PDF and alpha_s access.
+   //!
 
 public:
    typedef double(*mu_func)(double,double);
@@ -41,6 +52,8 @@ public:
    bool SetScaleFactorsMuRMuF(double xmur, double xmuf);                                //!< Set scale factors for MuR and MuF
    void SetExternalFuncForMuR(mu_func);                                                 //!< Set external function for scale calculation (optional)
    void SetExternalFuncForMuF(mu_func);                                                 //!< Set external function for scale calculation (optional)
+   void SetExternalConstantForMuR(double MuR);                                          //!< Set value for mu_r if mu_r is chosen to be a constant value (i.e. m_t, or m_Z)  
+   void SetExternalConstantForMuF(double MuF);                                          //!< Set value for mu_f if mu_f is chosen to be a constant value (i.e. m_t, or m_Z)
 
    void UseHoppetScaleVariations(bool);
 
@@ -55,16 +68,9 @@ public:
    void CalcCrossSection();
    double RescaleCrossSectionUnits(double binsize, int xunits);                         // Rescale according to kAbsoluteUnits and Ipublunits settings
 
-   // ---- Getters for results---- //
-   struct XsUncertainty {                                   //! Struct for returning vectors with cross section and relative uncertainty
-      std::vector < double > xs;
-      std::vector < double > dxsl;
-      std::vector < double > dxsu;
-   };
-
-   std::vector < double > GetCrossSection();                //! Return vector with all cross section values
-   std::vector < double > GetCrossSection(bool lNorm);      //! Return vector with all cross section values, normalize on request
-   std::vector < double > GetNormCrossSection();            //! Return vector with all normalized cross section values
+   std::vector < double > GetCrossSection();                //!< Return vector with all cross section values
+   std::vector < double > GetCrossSection(bool lNorm);      //!< Return vector with all cross section values, normalize on request
+   std::vector < double > GetNormCrossSection();            //!< Return vector with all normalized cross section values
 
    std::vector < double > GetReferenceCrossSection();
    std::vector < double > GetKFactors();  ///< DEPRECATED
@@ -84,6 +90,9 @@ public:
    fastNLO::EUnits GetUnits() const { return fUnits; };
    mu_func GetExternalFuncForMuR() { return Fct_MuR; };
    mu_func GetExternalFuncForMuF() { return Fct_MuF; };
+   double fConst_MuR; //!< Constant _value_ for the renormalization scale. Used only for flexible-scale tables and if requested.
+   double fConst_MuF; //!< Constant _value_ for the factorization scale. Used only for flexible-scale tables and if requested.
+
    double GetScaleFactorMuR() const { return fScaleFacMuR; };
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };

@@ -2240,6 +2240,25 @@ void fastNLOReader::SetExternalFuncForMuF(double(*Func)(double,double)) {
    logger.info<<"Scale1 = 91.1876, Scale2 = 1        ->  mu = func(91.1876,1)       = "<<(*Fct_MuF)(91.1876,1)<<endl;
 }
 
+//______________________________________________________________________________
+void fastNLOReader::SetExternalConstantForMuR(double MuR){
+   //! Set value for mu_r if mu_r is chosen to be constant
+   //! EScaleFunctionalForm == kConst
+   fConst_MuR = MuR;
+   logger.info << "Using constant value " << fConst_MuR << " for MuR" << endl;
+   SetFunctionalForm(kConst, kMuR);
+}
+
+
+//______________________________________________________________________________
+void fastNLOReader::SetExternalConstantForMuF(double MuF){
+   //! Set value for mu_r if mu_r is chosen to be constant
+   //! EScaleFunctionalForm == kConst
+   fConst_MuF = MuF;
+   logger.info << "Using constant value " << fConst_MuF << " for MuF" << endl;
+   SetFunctionalForm(kConst, kMuF);
+}
+
 
 //______________________________________________________________________________
 void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX MuX) {
@@ -2542,6 +2561,7 @@ double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, 
    else if (Func == fastNLO::kProd)              mu      = FuncProd(scale1,scale2);
    else if (Func == fastNLO::kExpProd2)          mu      = FuncExpProd2(scale1,scale2);
    else if (Func == fastNLO::kExtern)            mu      = (kMuX==kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
+   else if (Func == fastNLO::kConst)             mu      = (kMuX==kMuR) ? fConst_MuR : fConst_MuF;
    else logger.error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
 
    return scalefac * mu;
@@ -2849,18 +2869,18 @@ double fastNLOReader::RescaleCrossSectionUnits(double binsize, int xunits) {
 
 
 //______________________________________________________________________________
-fastNLOReader::XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc) {
-   fastNLOReader::XsUncertainty XsUnc = GetScaleUncertainty(eScaleUnc, false);
+XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc) {
+   XsUncertainty XsUnc = GetScaleUncertainty(eScaleUnc, false);
    return XsUnc;
 }
 
 
 //______________________________________________________________________________
-   fastNLOReader::XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc, bool lNorm) {
+XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eScaleUnc, bool lNorm) {
    // Get 2- or 6-point scale uncertainty
    const double xmurs[7] = {1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0};
    const double xmufs[7] = {1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0};
-   fastNLOReader::XsUncertainty XsUnc;
+   XsUncertainty XsUnc;
 
    unsigned int NObsBin = GetNObsBin();
    unsigned int npoint = 0;
@@ -2920,7 +2940,7 @@ fastNLOReader::XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUnce
 }
 
 std::vector< std::vector<double> > fastNLOReader::GetScaleUncertaintyVec(const EScaleUncertaintyStyle eScaleUnc) {
-   fastNLOReader::XsUncertainty xsUnc = fastNLOReader::GetScaleUncertainty(eScaleUnc);
+   XsUncertainty xsUnc = fastNLOReader::GetScaleUncertainty(eScaleUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);
    xsUncVec[0] = xsUnc.xs;
