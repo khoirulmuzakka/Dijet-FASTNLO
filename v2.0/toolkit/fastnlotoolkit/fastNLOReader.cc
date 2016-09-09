@@ -1486,8 +1486,8 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c , bool IsLO) {
          double scalefac = fScaleFacMuR/c->GetScaleFactor(scaleVar);
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
          for (int k=0; k<nxmax; k++) {
-            for (int l=0; l<c->GetNSubproc(); l++) {
-               double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
+	    for (int l=0; l<c->GetNSubproc(); l++) {
+	       double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
                QS->at(i)      +=  xsci*mur;
             }
@@ -2287,18 +2287,18 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
       int nnode = cNLO->GetNScaleNode2(0);
-      if (nnode <= 3) {
-         logger.error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
-         SetFunctionalForm(kScale1,MuX);
+      if (nnode < 1 ) {
+	 logger.error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
+	 SetFunctionalForm(kScale1,MuX);
       }
-      for (unsigned int i=0; i<NObsBin; i++) {
-         nnode = cNLO->GetNScaleNode2(i);
-         if (nnode < 4) {
-            logger.warn<<"Scale2 has only very little nodes (n="<<nnode<<") in bin "<<i<<".\n";
-         }
-      }
+      // for (unsigned int i=0; i<NObsBin; i++) {
+      //    nnode = cNLO->GetNScaleNode2(i);
+      //    if (nnode < 4) {
+      //       logger.warn<<"Scale2 has only very little nodes (n="<<nnode<<") in bin "<<i<<".\n";
+      //    }
+      // }
    }
-   //PrintScaleSettings(MuX);//not yet ported to v2.2
+   PrintScaleSettings(MuX);//not yet ported to v2.2
 }
 
 

@@ -421,15 +421,15 @@ vector<double>  fastNLOLHAPDF::CalcPDFUncertaintySymm(const vector<LHAPDF::PDFUn
 
 
 //______________________________________________________________________________
-fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
-   fastNLOReader::XsUncertainty XsUnc = GetPDFUncertainty(ePDFUnc, false);
+XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
+   XsUncertainty XsUnc = GetPDFUncertainty(ePDFUnc, false);
    return XsUnc;
 }
 
 
 //______________________________________________________________________________
-fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc, bool lNorm) {
-   fastNLOReader::XsUncertainty XsUnc;
+XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintyStyle ePDFUnc, bool lNorm) {
+   XsUncertainty XsUnc;
    unsigned int NObsBin = GetNObsBin();
    unsigned int nMem = GetNPDFMaxMember();
    vector < double > xs0;
@@ -615,7 +615,7 @@ fastNLOReader::XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPD
 
 
 std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
-   fastNLOReader::XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
+   XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);
    xsUncVec[0] = xsUnc.xs;

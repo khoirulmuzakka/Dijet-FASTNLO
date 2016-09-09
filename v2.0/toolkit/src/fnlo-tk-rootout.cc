@@ -357,7 +357,7 @@ int main(int argc, char** argv) {
          for (unsigned int iUnc = 0; iUnc<3; iUnc++) {
 
             //! Get cross section & uncertainties (only for additive perturbative contributions)
-            fastNLOReader::XsUncertainty XsUnc;
+            XsUncertainty XsUnc;
 
             //! PDF first
             if ( iUnc==0 ) {
