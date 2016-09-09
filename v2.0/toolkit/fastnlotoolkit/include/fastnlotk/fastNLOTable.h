@@ -150,7 +150,7 @@ class fastNLOTable : public fastNLOBase {
 
    /// get/set Bin vector
    std::vector < std::vector <std::pair<double,double> > > GetBins() const {return Bin;};
-   void SetBins(std::vector < std::vector <std::pair<double,double> > >);
+   // void SetBins(std::vector < std::vector <std::pair<double,double> > >);
 
    /// get/set BinSize vector
    std::vector < double > GetBinSize() const {return BinSize;};
