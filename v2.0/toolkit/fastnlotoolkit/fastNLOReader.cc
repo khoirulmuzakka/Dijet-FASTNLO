@@ -980,6 +980,8 @@ vector < double > fastNLOReader::GetCrossSection(bool lNorm) {
 //______________________________________________________________________________
 std::vector < std::map< double, double > > fastNLOReader::GetCrossSection_vs_x1() {
    // Get fast calculated cross section
+   logger.warn<<"Function 'GetCrossSection_vs_x1' does _NOT_ return dSigma/dx but only the cross section contribution at the different x-nodes."<<endl;
+   logger.warn<<"In order to obtain dSigma/dx, the retured values must be divided by the step-size of the interpolation."<<endl;
    if (XSection.empty()) CalcCrossSection();
    return fXSection_vsX1;
 }
@@ -987,6 +989,8 @@ std::vector < std::map< double, double > > fastNLOReader::GetCrossSection_vs_x1(
 //______________________________________________________________________________
 std::vector < std::map< double, double > > fastNLOReader::GetCrossSection_vs_x2() {
    // Get fast calculated cross section
+   logger.warn<<"Function 'GetCrossSection_vs_x1' does _NOT_ return dSigma/dx but only the cross section contribution at the different x-nodes."<<endl;
+   logger.warn<<"In order to obtain dSigma/dx, the retured values must be divided by the step-size of the interpolation."<<endl;
    if (XSection.empty()) CalcCrossSection();
    return fXSection_vsX2;
 }
