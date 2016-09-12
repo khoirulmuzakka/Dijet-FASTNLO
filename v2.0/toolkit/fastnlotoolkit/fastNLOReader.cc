@@ -2307,8 +2307,13 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
    }
 
    // ---- setting scale ---- //
-   if (MuX == kMuR) fMuRFunc = func;
-   else fMuFFunc = func;
+   if (MuX == kMuR) {
+      fMuRFunc = func;
+      // Alphas Cache needs to be recalculated.
+      fAlphasCached = 0.;
+   }
+   else 
+      fMuFFunc = func;
 
 
    // ---- cross check ---- //
@@ -2320,8 +2325,8 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
       int nnode = cNLO->GetNScaleNode2(0);
       if (nnode < 1 ) {
-	 logger.error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
-	 SetFunctionalForm(kScale1,MuX);
+         logger.error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
+         SetFunctionalForm(kScale1,MuX);
       }
       // for (unsigned int i=0; i<NObsBin; i++) {
       //    nnode = cNLO->GetNScaleNode2(i);
