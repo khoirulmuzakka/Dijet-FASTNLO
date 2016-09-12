@@ -72,8 +72,6 @@ fastNLOLHAPDF::fastNLOLHAPDF(string name, string LHAPDFFile, int PDFMember) : fa
    SetLHAPDFMember(PDFMember);
    // Call additional initialization. Not necessary for LHAPDF.
    InitEvolveAlphas();
-   // Everything set. Do cross sections calculation.
-   CalcCrossSection();
 }
 
 //______________________________________________________________________________
