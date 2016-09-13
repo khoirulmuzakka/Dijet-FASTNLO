@@ -407,7 +407,7 @@ int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
 double fastNLOCoeffAddBase::GetX1(int iObsBin, int iXnode) const {
    // return x-value of PDF1 at node iXnode
    switch (NPDFDim) {
-   case 1: 
+   case 0: 
       return GetXNode1(iObsBin,iXnode);
    case 1: 
       //
