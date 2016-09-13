@@ -282,7 +282,7 @@ int main(int argc, char** argv) {
    //! Get cross sections
    vector < double > xs = fnlo.GetCrossSection(lNorm);
    //! If required get uncertainties (only for additive perturbative contributions)
-   fastNLOReader::XsUncertainty XsUnc;
+   XsUncertainty XsUnc;
    string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
       XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
