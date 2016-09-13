@@ -407,16 +407,18 @@ int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
 double fastNLOCoeffAddBase::GetX1(int iObsBin, int iXnode) const {
    // return x-value of PDF1 at node iXnode
    switch (NPDFDim) {
-   case 0: 
+   case 1: 
       return GetXNode1(iObsBin,iXnode);
    case 1: 
-      cout<<"GetX1 not implemented for half-matrix notation!"<<endl;
-      return 0;
+      //
+      // cout<<"GetX1 not implemented for half-matrix notation!"<<endl;
+      //
+      return 1;
    case 2: 
       return GetXNode1(iObsBin, iXnode % GetNxtot1(iObsBin) );
-   default: ;
+   default: return 1;
    }
-   return 0;
+   return 1;
 }
 
 //________________________________________________________________________________________________________________ //
@@ -424,15 +426,17 @@ double fastNLOCoeffAddBase::GetX2(int iObsBin, int iXnode) const {
    // return x-value of PDF1 at node iXnode
    switch (NPDFDim) {
    case 0: 
-      return 0;
+      return 1;
    case 1: 
-      cout<<"GetX2 not implemented for half-matrix notation!"<<endl;
-      return 0;
+      //
+      //cout<<"GetX2 not implemented for half-matrix notation!"<<endl;
+      //
+      return 1;
    case 2: 
       return GetXNode2(iObsBin, iXnode / GetNxtot1(iObsBin) );
-   default: ;
+   default: return 1;
    }
-   return 0;
+   return 1;
 }
 
 
