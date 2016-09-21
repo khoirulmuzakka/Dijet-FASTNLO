@@ -51,15 +51,14 @@ read_steer* read_steer::Steering(string steerID) {
 }
 
 
-void read_steer::inits(string filename) {
-   //    if ( ffilename != "" )
-   //       cout << oW << "Filename already set (old=" << ffilename << ", new=" << filename << "). Is the used steerID unique?" << endl;
+int read_steer::inits(string filename) {
    if (filename == "")
       if (fVerbosity > 1) {cout << oW << "No filename specified." << endl;}
    if (ffilename !="") ffilename+=", ";
    ffilename += filename;
    fcurrentfilename = filename;
-   read_stdin(fcurrentfilename);
+   // also report return code
+   return read_stdin(fcurrentfilename);
 }
 
 
@@ -172,14 +171,15 @@ int read_steer::readstrm(ifstream& strm,unsigned int lstart, unsigned int lend, 
    }
    if (incfile &&  fParseTableMode>2 ) fParseTableMode--; // correct counting of table rows
    fParseIncMode--;
-   return rlines; // return nlines including comments
+   //   return rlines; // return nlines including comments
+   return EXIT_SUCCESS; // return nlines including comments
 }
 
 int read_steer::read_stdin(const string& filename) {
    //If the steering has alread been read -> do nothing
    ffile.open(filename.c_str());
    if (!ffile) {
-      if (fVerbosity > 0) {cerr << oE << " Could not open file ('" << filename << "')." << endl;}
+      if (fVerbosity > 0) {cerr << oE << " Could not open steering file ('" << filename << "')." << endl;}
       return EXIT_FAILURE;
    }
    int n = readstrm(ffile);
@@ -801,17 +801,28 @@ bool read_steer::parsecommandline(int argc,char** argv) {
    map<string,string> cmdvals;
    for (int i=0; i<argc; i++) {
       string val, lab;
-      cout << "i=" << i << "\targv[i]=" << argv[i] << endl;
+      if (fVerbosity > 2) {
+         cout << " # INFO.    [read_steer] " << "Parsing cmdline: i = " << i << "\targv[i] = " << argv[i] << endl;
+      }
       int suc=cmdlinetag(argv[i],lab,val);
       if (suc>0) {
-         cout << " found cmd line tag. label=" << lab << "\tvalue=" << val << endl;
+         if (fVerbosity > 2) {
+            cout << " # INFO.    [read_steer] " << "Found cmdline tag. label = " << lab << "\tvalue = " << val << endl;
+         }
          if (lab=="steerfile") {
             string fID = stdID;
             int pos = separatetag(val,fID,"->");
-            cout << "strfile. "  << "val=" << val << "\tfID=" << fID << endl;
-            if (pos>=0)  cout << " # read_steer. Info. Reading new steerfile '" << val << "'." << endl;;
-            readfile(val,fID);
-            gotfile=true;
+            if (fVerbosity > 2) {
+               cout << " # INFO.    [read_steer] " << "Found steerfile name. val = " << val << "\tfID = " << fID << endl;
+            }
+            if (pos>=0 && fVerbosity > 2) cout << " # INFO.    [read_steer] Reading new steerfile '" << val << "'." << endl;
+            // check return code instead of assuming gotfile to be ok; exit on error
+            int retcode = readfile(val,fID);
+            if ( retcode == 0 ) {
+               gotfile=true;
+            } else {
+               exit(retcode);
+            }
          } else {
             cmdvals[lab] = val;
          }

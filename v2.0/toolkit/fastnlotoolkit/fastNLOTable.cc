@@ -1547,16 +1547,57 @@ void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
    SetNObsBin(GetNObsBin()-1);
 }
 
-   //          EraseBin(table.GetBlockB(idx)->Nztot,b,nobs);
-   //          EraseBin(table.GetBlockB(idx)->ZNode,b,nobs);
-   //          EraseBin(table.GetBlockB(idx)->Xsection,b,nobs);
 
-   //          EraseBin(table.GetBlockB(idx)->PdfLc,b,nobs);
 
-   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode,b,nobs);
-   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode1,b,nobs);
-   //          //      EraseBin(table.GetBlockB(idx)->HScaleNode2,b,nobs);
+// Multiply observable bin; iObsIdx is the C++ array index to be multiplied and
+// not the observable bin no. running from 1 to NObsBin
+template<typename T> void fastNLOTable::MultiplyBin(vector<T>& v, unsigned int idx, double fact) {
+   if ( v.empty() ) {
+      logger.warn["fastNLOTable::MultiplyBin"]<<"Empty vector, nothing to multiply!" << endl;
+   } else if ( idx < v.size() ) {
+      logger.info["fastNLOTable::MultiplyBin"]<<"Multiplying vector index no. " << idx << endl;
+      v[idx] *= fact;
+   } else {
+      logger.error["fastNLOTable::MultiplyBin"]<<"Bin no. larger than vector size, aborted!" << endl;
+      exit(1);
+   }
+}
 
-   //          EraseBin(table.GetBlockB(idx)->SigmaRefMixed,b,nobs);
-   //          EraseBin(table.GetBlockB(idx)->SigmaRef_s1,b,nobs);
-   //          EraseBin(table.GetBlockB(idx)->SigmaRef_s2,b,nobs);
+void fastNLOTable::MultiplyBinSize(unsigned int iObsIdx, double fact) {
+   logger.debug["fastNLOTable::MultiplyBinSize"]<<"Multiplying the bin size of the observable index no. " << iObsIdx << " by " << fact << endl;
+   MultiplyBin(fastNLOTable::BinSize,iObsIdx,fact);
+}
+
+void fastNLOTable::MultiplyBinInTable(unsigned int iObsIdx, double fact) {
+   logger.debug["fastNLOTable::MultiplyBinInTable"]<<"Multiplying the observable index no. " << iObsIdx << endl;
+   // Changes to table header block A2
+   // Changes to table contributions block B
+   for ( int ic = 0; ic<GetNcontrib()+GetNdata(); ic++ ) {
+      logger.debug["fastNLOTable::MultiplyBinInTable"]<<"Multiplying the observable index no. " << iObsIdx << " from contribution no. " << ic << endl;
+      fastNLOCoeffAddBase* ctmp = (fastNLOCoeffAddBase*)fCoeff[ic];
+
+      // Identify type of coeff-table
+      bool quiet = true;
+      if ( fastNLOCoeffData::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.debug["MultiplyBinInTable"]<<"Found data contribution. Skipped! Index no. " << iObsIdx << endl;
+         // fastNLOCoeffData* cdata = (fastNLOCoeffData*)fCoeff[ic];
+         // cdata->MultiplyBin(iObsIdx,fact);
+      } else if ( fastNLOCoeffMult::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.debug["MultiplyBinInTable"]<<"Found multiplicative contribution. Skipped! Index no. " << iObsIdx << endl;
+         // fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
+         // cmult->MultiplyBin(iObsIdx,fact);
+      } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.debug["MultiplyBinInTable"]<<"Found additive fix-table contribution. Now multiplying index no. " << iObsIdx << endl;
+         fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
+         cfix->MultiplyBin(iObsIdx,fact);
+      } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.debug["MultiplyBinInTable"]<<"Found additive flex-table contribution. Now multiplying index no. " << iObsIdx << endl;
+         fastNLOCoeffAddFlex* cflex = (fastNLOCoeffAddFlex*)fCoeff[ic];
+         cflex->MultiplyBin(iObsIdx,fact);
+      } else {
+         logger.error["MultiplyBinInTable"]<<"Could not identify contribution. Print and abort!" << endl;
+         ctmp->Print(-1);
+         exit(1);
+      }
+   }
+}

@@ -205,3 +205,8 @@ void fastNLOCoeffBase::EraseBin(unsigned int iObsIdx) {
    info["fastNLOCoeffBase::EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
    SetNObsBin(GetNObsBin()-1);
 }
+
+// Multiply observable bin
+void fastNLOCoeffBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
+   info["fastNLOCoeffBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffBase." << endl;
+}

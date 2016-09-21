@@ -484,7 +484,8 @@ public:
    void AppendToTable(const std::string& key, const std::vector<std::string>& entry);
    template <typename T> void AppendToTable ( const std::string& key, const std::vector<T>& entry);
    // controls
-   void inits(std::string filename);
+   // report return code instead of void function
+   int inits(std::string filename);
    int initnmspc(std::ifstream& strm, std::string filename);
    void prt();
    static void initnamespace(std::ifstream& strm,std::string filename, std::string steerID=read_steer::stdID) {        // set the steer-filename
@@ -545,12 +546,12 @@ private:
    const std::string oE;
 
 public:
-   static int fVerbosity;
-   // static member function
-   static void readfile(std::string filename,std::string steerID=read_steer::stdID) {     // set the steer-filename
-      read_steer::Steering(steerID)->inits(filename); }
+   // static member function; report return code instead of void function
+   static int readfile(std::string filename,std::string steerID=read_steer::stdID) {     // set the steer-filename
+      return read_steer::Steering(steerID)->inits(filename); }
    // setters
    // verbosity
+   static int fVerbosity;
    static void setVerbosity(int iVerbosity) {
       read_steer::fVerbosity = iVerbosity; }
    // getters

@@ -161,6 +161,12 @@ class fastNLOTable : public fastNLOBase {
    void EraseBinFromTable(unsigned int iObsIdx);
    template<typename T> void EraseBin(std::vector<T>& v, unsigned int idx);
 
+   // Multiply observable bin; iObsIdx is the C++ array index to be multiplied and
+   // not the observable bin no. running from 1 to NObsBin
+   void MultiplyBinInTable(unsigned int iObsIdx, double fact);
+   void MultiplyBinSize(unsigned int iObsIdx, double fact);
+   template<typename T> void MultiplyBin(std::vector<T>& v, unsigned int idx, double fact);
+
    /// ???
    /// Get Rivet ID of analysis
    std::string GetRivetId() const;

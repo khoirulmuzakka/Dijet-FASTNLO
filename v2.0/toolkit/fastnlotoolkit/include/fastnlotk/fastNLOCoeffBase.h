@@ -27,9 +27,10 @@ public:
    //void Add(fastNLOCoeffBase* other);
    virtual void Print(int iprint) const;
 
-   // Erase observable bin; iObsIdx is the C++ array index to be removed and
+   // Erase or multiply observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
    virtual void EraseBin(unsigned int iObsIdx);
+   virtual void MultiplyBin(unsigned int iObsIdx, double fact);
 
    void SetCoeffAddDefaults();
 

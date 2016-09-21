@@ -589,6 +589,8 @@ AC_SUBST([YEARS],["2005-`date +%Y`"])
 
 # Output
 AC_CONFIG_FILES([Makefile
+                 data/Makefile
+                 data/Modify/Makefile
                  doc/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile

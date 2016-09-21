@@ -278,6 +278,7 @@ bool  fastNLOCoeffAddFlex::IsCompatible(const fastNLOCoeffAddFlex& other) const 
    return true;
 }
 
+
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::NormalizeCoefficients(){
    //!< Set number of events to 1 and normalize coefficients accordingly.
@@ -289,36 +290,12 @@ void fastNLOCoeffAddFlex::NormalizeCoefficients(){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double coef) {
-   const bool WithMuR = !SigmaTildeMuFDep.empty();
-   const bool WithMuRR = !SigmaTildeMuRRDep.empty();
-   const bool WithMuFF = !SigmaTildeMuFFDep.empty();
+void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double fact) {
    for (unsigned int i=0; i<SigmaTildeMuIndep.size(); i++) {
-      int nxmax = GetNxmax(i);
-      for (unsigned int jS1=0; jS1<GetNScaleNode1(i); jS1++) {
-         for (unsigned int kS2=0; kS2<GetNScaleNode2(i); kS2++) {
-            for (int x=0; x<nxmax; x++) {
-               for (int n=0; n<GetNSubproc(); n++) {
-                  SigmaTildeMuIndep[i][x][jS1][kS2][n] *= coef;
-                  //if ( GetNScaleDep() >= 5 ) {
-                  if (WithMuR) {
-                     SigmaTildeMuFDep [i][x][jS1][kS2][n] *= coef;
-                     SigmaTildeMuRDep [i][x][jS1][kS2][n] *= coef;
-                     //if ( GetNScaleDep() >= 6 ) {
-                     if (WithMuRR) {
-                        SigmaTildeMuRRDep [i][x][jS1][kS2][n] *= coef;
-                     }
-                     if (WithMuFF) {
-                        SigmaTildeMuFFDep [i][x][jS1][kS2][n] *= coef;
-                        SigmaTildeMuRFDep [i][x][jS1][kS2][n] *= coef;
-                     }
-                  }
-               }
-            }
-         }
-      }
+      MultiplyBin(i,fact);
    }
 }
+
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Print(int iprint) const {
@@ -354,7 +331,7 @@ void fastNLOCoeffAddFlex::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
-   info["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
+   debug["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
    if ( ScaleNode1.size() != 0 ) {ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);}
    if ( ScaleNode2.size() != 0 ) {ScaleNode2.erase(ScaleNode2.begin()+iObsIdx);}
    if ( SigmaTildeMuIndep.size() != 0 ) {SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);}
@@ -364,4 +341,30 @@ void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
    if ( SigmaTildeMuFFDep.size() != 0 ) {SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);}
    if ( SigmaTildeMuRFDep.size() != 0 ) {SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);}
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}
+
+// Multiply observable bin
+void fastNLOCoeffAddFlex::MultiplyBin(unsigned int iObsIdx, double fact) {
+   debug["fastNLOCoeffAddFlex::MultiplyBin"]<<"Multiplying table entries in CoeffAddFlex for bin index " << iObsIdx << " by factor " << fact << endl;
+   const bool WithMuR  = !SigmaTildeMuRDep.empty();
+   const bool WithMuF  = !SigmaTildeMuFDep.empty();
+   const bool WithMuRR = !SigmaTildeMuRRDep.empty();
+   const bool WithMuFF = !SigmaTildeMuFFDep.empty();
+   const bool WithMuRF = !SigmaTildeMuRFDep.empty();
+   int nxmax = GetNxmax(iObsIdx);
+   for (unsigned int jS1=0; jS1<GetNScaleNode1(iObsIdx); jS1++) {
+      for (unsigned int kS2=0; kS2<GetNScaleNode2(iObsIdx); kS2++) {
+         for (int x=0; x<nxmax; x++) {
+            for (int n=0; n<GetNSubproc(); n++) {
+               SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if (WithMuR)  {SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;}
+               if (WithMuF)  {SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;}
+               if (WithMuRR) {SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;}
+               if (WithMuFF) {SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;}
+               if (WithMuRF) {SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;}
+            }
+         }
+      }
+   }
+   fastNLOCoeffAddBase::MultiplyBin(iObsIdx, fact);
 }

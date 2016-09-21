@@ -407,14 +407,14 @@ int fastNLOCoeffAddBase::GetXIndex(int Obsbin,int x1bin,int x2bin) const {
 double fastNLOCoeffAddBase::GetX1(int iObsBin, int iXnode) const {
    // return x-value of PDF1 at node iXnode
    switch (NPDFDim) {
-   case 0: 
+   case 0:
       return GetXNode1(iObsBin,iXnode);
-   case 1: 
+   case 1:
       //
       // cout<<"GetX1 not implemented for half-matrix notation!"<<endl;
       //
       return 1;
-   case 2: 
+   case 2:
       return GetXNode1(iObsBin, iXnode % GetNxtot1(iObsBin) );
    default: return 1;
    }
@@ -425,14 +425,14 @@ double fastNLOCoeffAddBase::GetX1(int iObsBin, int iXnode) const {
 double fastNLOCoeffAddBase::GetX2(int iObsBin, int iXnode) const {
    // return x-value of PDF1 at node iXnode
    switch (NPDFDim) {
-   case 0: 
+   case 0:
       return 1;
-   case 1: 
+   case 1:
       //
       //cout<<"GetX2 not implemented for half-matrix notation!"<<endl;
       //
       return 1;
-   case 2: 
+   case 2:
       return GetXNode2(iObsBin, iXnode / GetNxtot1(iObsBin) );
    default: return 1;
    }
@@ -515,10 +515,15 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
-   info["fastNLOCoeffAddBase::EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
+   debug["fastNLOCoeffAddBase::EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
    XNode1.erase(XNode1.begin()+iObsIdx);
    if ( NPDFDim==2 ) {
       XNode2.erase(XNode2.begin()+iObsIdx);
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
+}
+
+// Multiply observable bin
+void fastNLOCoeffAddBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
+   debug["fastNLOCoeffAddBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffAddBase." << endl;
 }

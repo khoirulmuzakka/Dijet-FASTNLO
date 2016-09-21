@@ -263,17 +263,9 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double coef) {
+void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double fact) {
    for (unsigned int i=0; i<SigmaTilde.size(); i++) {
-      for (unsigned int s=0 ; s<SigmaTilde[i].size() ; s++) {
-         for (unsigned int x=0 ; x<SigmaTilde[i][s].size() ; x++) {
-            for (unsigned int l=0 ; l<SigmaTilde[i][s][x].size() ; l++) {
-               for (unsigned int m=0 ; m<SigmaTilde[i][s][x][m].size() ; m++) {
-                  SigmaTilde[i][s][x][l][m] *= coef;
-               }
-            }
-         }
-      }
+      MultiplyBin(i,fact);
    }
 }
 
@@ -315,8 +307,23 @@ void fastNLOCoeffAddFix::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
-   info["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
+   debug["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
    ScaleNode.erase(ScaleNode.begin()+iObsIdx);
    SigmaTilde.erase(SigmaTilde.begin()+iObsIdx);
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}
+
+// Multiply observable bin
+void fastNLOCoeffAddFix::MultiplyBin(unsigned int iObsIdx, double fact) {
+   debug["fastNLOCoeffAddFix::MultiplyBin"]<<"Multiplying table entries in CoeffAddFix for bin index " << iObsIdx << " by factor " << fact << endl;
+   for (unsigned int s=0 ; s<SigmaTilde[iObsIdx].size() ; s++) {
+      for (unsigned int x=0 ; x<SigmaTilde[iObsIdx][s].size() ; x++) {
+         for (unsigned int l=0 ; l<SigmaTilde[iObsIdx][s][x].size() ; l++) {
+            for (unsigned int m=0 ; m<SigmaTilde[iObsIdx][s][x][m].size() ; m++) {
+               SigmaTilde[iObsIdx][s][x][l][m] *= fact;
+            }
+         }
+      }
+   }
+   fastNLOCoeffAddBase::MultiplyBin(iObsIdx, fact);
 }
