@@ -370,8 +370,8 @@ int main(int argc, char** argv) {
    size_t capital_pos = 0;
    string RivetId = fnlo.GetRivetId();
    if (RivetId.empty()) {
-      error["fnlo-tk-statunc"] << "No Rivet ID found in fastNLO Table, aborted!" << endl;
-      exit(1);
+      warn["fnlo-tk-statunc"] << "No Rivet ID found in fastNLO Table, stopping here without YODA output!" << endl;
+      exit(0);
    }
    if ( NDim == 2 ) {
       for (size_t i = fnlo.GetRivetId().find("/"); i < fnlo.GetRivetId().size(); i++) {
