@@ -108,11 +108,12 @@ int main(int argc, char** argv) {
             }
          }
          if ( !resultTable ) {
-            resultTable = new fastNLOTable(tab);
-            nValidTables++;
-            //! Hint to use fnlo-tk-merge correctly.
-            warn["fnlo-tk-merge"]<<"The user has to ensure, that merged input tables are statistically independent."<<endl;
-            warn["fnlo-tk-merge"]<<"This is not checked by the program!"<<endl;
+	   resultTable = new fastNLOTable(tab);
+	   nValidTables++;
+	   //! Hint to use fnlo-tk-merge correctly.
+	   warn["fnlo-tk-merge"]<<"The user has to ensure, that input tables are statistically independent and" << endl;
+	   warn["fnlo-tk-merge"]<<"of equal weight for each combined contribution."<<endl;
+	   warn["fnlo-tk-merge"]<<"This is not checked by the program!"<<endl;
          }
          //! adding table to result table
          else {
