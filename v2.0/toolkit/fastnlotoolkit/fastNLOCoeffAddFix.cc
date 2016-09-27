@@ -191,6 +191,17 @@ void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other){
 
 
 //________________________________________________________________________________________________________________ //
+// void fastNLOCoeffAddFix::Cat(const fastNLOCoeffAddFix& other){
+//    //! Concatenate bins of another coefficient table to this table
+//    const fastNLOCoeffAddFix& othfix = (const fastNLOCoeffAddFix&)other;
+//    for ( int iObs=0; iObs<othfix.GetNObsBin(); iObs++ ) {
+//       CatBin(othfix,iObs);
+//    }
+// }
+
+
+
+//________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::GetTotalScalevars() const {
    //! Get nuber of scale-variations
    int totalscalevars=1;
@@ -239,6 +250,26 @@ bool  fastNLOCoeffAddFix::IsCompatible(const fastNLOCoeffAddFix& other) const {
             return false;
          }
       }
+   }
+   return true;
+}
+
+
+//________________________________________________________________________________________________________________ //
+bool  fastNLOCoeffAddFix::IsCatenableContribution(const fastNLOCoeffAddFix& other) const {
+   //! Check for compatibility of catenating observable bins
+   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenableContribution(other)) return false;
+   if ( GetNScaleNode() != other.GetNScaleNode() ) {
+      say::warn["IsCatenableContribution"]<<"Incompatible number of scale nodes found."<<endl;
+      return false;
+   }
+   if ( GetNScalevar() != other.GetNScalevar() ) {
+      say::warn["IsCatenableContribution"]<<"Incompatible number of scale variations found."<<endl;
+      return false;
+   }
+   if ( GetAvailableScaleFactors()[GetNScalevar()-1] != other.GetAvailableScaleFactors()[GetNScalevar()-1] ) {
+      say::warn["IsCatenableContribution"]<<"Incompatible scale variations found."<<endl;
+      return false;
    }
    return true;
 }
@@ -311,6 +342,21 @@ void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
    ScaleNode.erase(ScaleNode.begin()+iObsIdx);
    SigmaTilde.erase(SigmaTilde.begin()+iObsIdx);
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}
+
+// Catenate observable bin
+void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx) {
+   debug["fastNLOCoeffAddFix::CatBin"]<<"Catenating observable bin in CoeffAddFix corresponding to bin index " << iObsIdx << endl;
+   if ( ScaleNode.size() == 0 ) {
+      say::error["CatBin"]<<"Scale node size cannot be zero for a fix-scale table. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = ScaleNode.size();
+   ScaleNode.resize(nold+1);
+   ScaleNode[nold] = other.ScaleNode[iObsIdx];
+   SigmaTilde.resize(nold+1);
+   SigmaTilde[nold] = other.SigmaTilde[iObsIdx];
+   fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
 
 // Multiply observable bin

@@ -30,6 +30,9 @@ class fastNLOTable : public fastNLOBase {
    virtual void WriteTable();
    virtual void WriteTable(std::string filename);
    bool IsCompatible(const fastNLOTable& other) const;
+   bool IsCompatibleScenario(const fastNLOTable& other) const;
+   bool IsCatenable(const fastNLOTable& other) const;
+   bool IsCatenableScenario(const fastNLOTable& other) const;
 
    /// _____________________________________________________________________________________________
    /// Getters for binning structure
@@ -167,6 +170,9 @@ class fastNLOTable : public fastNLOBase {
    void MultiplyBinSize(unsigned int iObsIdx, double fact);
    template<typename T> void MultiplyBin(std::vector<T>& v, unsigned int idx, double fact);
 
+   void CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx);
+   void CatBin(const fastNLOTable& other, unsigned int iObsIdx);
+
    /// ???
    /// Get Rivet ID of analysis
    std::string GetRivetId() const;
@@ -175,6 +181,7 @@ class fastNLOTable : public fastNLOBase {
    void SetDimLabel(std::string label, unsigned int iDim, bool IsDiff = true);
    void SetNumDiffBin(int iDiff) {NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}
 
+   void Cat(const fastNLOCoeffBase& other);
 
 
    /// ___________________________________________________________________________________________________
@@ -201,6 +208,7 @@ class fastNLOTable : public fastNLOBase {
    //int CreateCoeffBase(int no);
    int CreateCoeffTable(int no,fastNLOCoeffBase *newcoeff);
    void AddTable(const fastNLOTable& rhs);
+   void CatenateTable(const fastNLOTable& other);
    fastNLOCoeffBase* GetCoeffTable(int no) const;
    /// Returns pointer to data table if available, else returns NULL pointer
    fastNLOCoeffData* GetDataTable() const;

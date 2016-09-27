@@ -14,7 +14,7 @@ bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    if ( c->GetIDataFlag() == 1 ) return true;
    else {
       if ( !quiet )
-         say::error["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
+         say::info["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
       return false;
    }
 }
@@ -187,6 +187,17 @@ void fastNLOCoeffData::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
+// void fastNLOCoeffData::Cat(const fastNLOCoeffData& other){
+//    //! Concatenate bins of another coefficient table to this table
+//    const fastNLOCoeffData& cother = (const fastNLOCoeffData&)other;
+//    for ( int iObs=0; iObs<cother.GetNObsBin(); iObs++ ) {
+//       CatBin(cother,iObs);
+//    }
+// }
+
+
+
+//________________________________________________________________________________________________________________ //
 
 // Erase observable bin
 void fastNLOCoeffData::EraseBin(unsigned int iObsIdx) {
@@ -198,4 +209,47 @@ void fastNLOCoeffData::EraseBin(unsigned int iObsIdx) {
    CorrLo.erase(CorrLo.begin()+iObsIdx);
    CorrHi.erase(CorrHi.begin()+iObsIdx);
    fastNLOCoeffBase::EraseBin(iObsIdx);
+}
+
+// Catenate observable bin
+void fastNLOCoeffData::CatBin(const fastNLOCoeffData& other, unsigned int iObsIdx) {
+   debug["fastNLOCoeffData::CatBin"]<<"Catenating observable bin in CoeffData corresponding to bin index " << iObsIdx << endl;
+   if ( Xcenter.size() == 0 ) {
+      say::error["CatBin"]<<"Xcenter size cannot be zero for a data table. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = Xcenter.size();
+   Xcenter.resize(nold+1);
+   Xcenter[nold] = other.Xcenter[iObsIdx];
+   Value.resize(nold+1);
+   Value[nold] = other.Value[iObsIdx];
+   UncorLo.resize(nold+1);
+   UncorLo[nold] = other.UncorLo[iObsIdx];
+   UncorHi.resize(nold+1);
+   UncorHi[nold] = other.UncorHi[iObsIdx];
+   CorrLo.resize(nold+1);
+   CorrLo[nold] = other.CorrLo[iObsIdx];
+   CorrHi.resize(nold+1);
+   CorrHi[nold] = other.CorrHi[iObsIdx];
+   fastNLOCoeffBase::CatBin(other, iObsIdx);
+}
+
+//________________________________________________________________________________________________________________ //
+bool fastNLOCoeffData::IsCatenableContribution(const fastNLOCoeffData& other) const {
+   //! Check for compatibility of catenating observable bins
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) return false;
+   if( Nuncorrel != other.GetNuncorrel() ){
+      debug["IsCatenableContribution"]<<"Nuncorrel != other.GetNuncorrel()"<<endl;
+      return false;
+   }
+   if( Ncorrel != other.GetNcorrel() ){
+      debug["IsCatenableContribution"]<<"Ncorrel != other.GetNcorrel()"<<endl;
+      return false;
+   }
+   if( NErrMatrix != other.GetNErrMatrix() ){
+      debug["IsCatenableContribution"]<<"NErrMatrix != other.GetNErrMatrix()"<<endl;
+      return false;
+   }
+   info["IsCatenableContribution"]<<"Both data contributions are catenable"<<endl;
+   return true;
 }

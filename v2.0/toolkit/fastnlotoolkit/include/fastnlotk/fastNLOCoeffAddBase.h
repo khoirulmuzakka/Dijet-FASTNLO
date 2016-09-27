@@ -20,6 +20,7 @@ public:
    void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
+   //   virtual void Cat(const fastNLOCoeffAddBase& other);
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins
@@ -33,6 +34,8 @@ public:
    virtual void MultiplyBin(unsigned int iObsIdx, double fact);
    // Erase observable bin from table
    virtual void EraseBin(unsigned int iObsIdx);
+   // Catenate observable to table
+   virtual void CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx);
 
    int GetIRef() const {return IRef;}
    double GetNevt() const { return Nevt; }
@@ -70,6 +73,7 @@ public:
 
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;
+   bool IsCatenableContribution(const fastNLOCoeffAddBase& other) const;
 
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 

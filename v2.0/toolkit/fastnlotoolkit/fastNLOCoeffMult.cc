@@ -184,6 +184,15 @@ void fastNLOCoeffMult::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
+// void fastNLOCoeffMult::Cat(const fastNLOCoeffMult& other){
+//    //! Concatenate bins of another coefficient table to this table
+//    const fastNLOCoeffMult& cother = (const fastNLOCoeffMult&)other;
+//    for ( int iObs=0; iObs<cother.GetNObsBin(); iObs++ ) {
+//       CatBin(cother,iObs);
+//    }
+// }
+
+
 
 // Erase observable bin
 void fastNLOCoeffMult::EraseBin(unsigned int iObsIdx) {
@@ -194,4 +203,41 @@ void fastNLOCoeffMult::EraseBin(unsigned int iObsIdx) {
    CorrLo.erase(CorrLo.begin()+iObsIdx);
    CorrHi.erase(CorrHi.begin()+iObsIdx);
    fastNLOCoeffBase::EraseBin(iObsIdx);
+}
+
+// Catenate observable bin
+void fastNLOCoeffMult::CatBin(const fastNLOCoeffMult& other, unsigned int iObsIdx) {
+   debug["fastNLOCoeffMult::CatBin"]<<"Catenating observable bin in CoeffMult corresponding to bin index " << iObsIdx << endl;
+   if ( fact.size() == 0 ) {
+      say::error["CatBin"]<<"fact size cannot be zero for a multiplicative table. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = fact.size();
+   fact.resize(nold+1);
+   fact[nold] = other.fact[iObsIdx];
+   UncorLo.resize(nold+1);
+   UncorLo[nold] = other.UncorLo[iObsIdx];
+   UncorHi.resize(nold+1);
+   UncorHi[nold] = other.UncorHi[iObsIdx];
+   CorrLo.resize(nold+1);
+   CorrLo[nold] = other.CorrLo[iObsIdx];
+   CorrHi.resize(nold+1);
+   CorrHi[nold] = other.CorrHi[iObsIdx];
+   fastNLOCoeffBase::CatBin(other, iObsIdx);
+}
+
+//________________________________________________________________________________________________________________ //
+bool fastNLOCoeffMult::IsCatenableContribution(const fastNLOCoeffMult& other) const {
+   //! Check for compatibility of catenating observable bins
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) return false;
+   if( Nuncorrel != other.GetNuncorrel() ){
+      debug["IsCatenableContribution"]<<"Nuncorrel != other.GetNuncorrel()"<<endl;
+      return false;
+   }
+   if( Ncorrel != other.GetNcorrel() ){
+      debug["IsCatenableContribution"]<<"Ncorrel != other.GetNcorrel()"<<endl;
+      return false;
+   }
+   info["IsCatenableContribution"]<<"Both multiplicable contributions are catenable"<<endl;
+   return true;
 }

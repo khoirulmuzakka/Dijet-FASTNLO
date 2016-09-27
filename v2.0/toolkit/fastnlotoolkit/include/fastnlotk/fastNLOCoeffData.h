@@ -17,11 +17,23 @@ public:
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;
+   //   virtual void Cat(const fastNLOCoeffData& other);
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
 
    // Erase observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
    virtual void EraseBin(unsigned int iObsIdx);
+   // Catenate observable to table
+   virtual void CatBin(const fastNLOCoeffData& other, unsigned int iObsIdx);
+   bool IsCatenableContribution(const fastNLOCoeffData& other) const;
+
+   // getter/setter
+   int  GetNuncorrel() const {return Nuncorrel;}
+   void SetNuncorrel(int n){Nuncorrel = n;}
+   int  GetNcorrel() const {return Ncorrel;}
+   void SetNcorrel(int n){Ncorrel = n;}
+   int  GetNErrMatrix() const {return NErrMatrix;}
+   void SetNErrMatrix(int n){NErrMatrix = n;}
 
 protected:
    fastNLOCoeffData();

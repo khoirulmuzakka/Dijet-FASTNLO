@@ -15,7 +15,7 @@ AUTOMAKE_OPTIONS = gnu
 # The C++ fastnlo toolkit utility and example programs
 #
 if HAVE_LHAPDF
-   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append fnlo-tk-modify
+   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append fnlo-tk-modify fnlo-tk-cat
    bin_SCRIPTS  = fnlo-tk-config
 if HAVE_YODA
    bin_PROGRAMS += fnlo-tk-yodaout
@@ -41,6 +41,7 @@ fnlo_tk_rootout_SOURCES = fnlo-tk-rootout.cc
 fnlo_tk_merge_SOURCES   = fnlo-tk-merge.cc
 fnlo_tk_append_SOURCES  = fnlo-tk-append.cc
 fnlo_tk_modify_SOURCES  = fnlo-tk-modify.cc
+fnlo_tk_cat_SOURCES   = fnlo-tk-cat.cc
 
 #
 # Preprocessor flags
@@ -62,6 +63,7 @@ fnlo_tk_rootout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 fnlo_tk_merge_CPPFLAGS   = $(my_include_dirs) -I${includedir}
 fnlo_tk_append_CPPFLAGS  = $(my_include_dirs) -I${includedir}
 fnlo_tk_modify_CPPFLAGS  = $(my_include_dirs) -I${includedir}
+fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
 
 #
 # C++ compiler flags
@@ -77,6 +79,7 @@ fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS)
 fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall
 fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall
 fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall
+fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall
 # Debug flags
 #fnlo_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 
@@ -96,6 +99,7 @@ fnlo_tk_rootout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(ROOTL
 fnlo_tk_merge_LDFLAGS   = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_append_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_modify_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_cat_LDFLAGS     = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

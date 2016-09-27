@@ -24,13 +24,18 @@ public:
 
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
-   //void Add(fastNLOCoeffBase* other);
    virtual void Print(int iprint) const;
+   //   virtual void Add(const fastNLOCoeffBase& other);
+   void Cat(const fastNLOCoeffBase& other);
 
    // Erase or multiply observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
    virtual void EraseBin(unsigned int iObsIdx);
    virtual void MultiplyBin(unsigned int iObsIdx, double fact);
+   // Catenate observable to table
+   virtual void CatBin(const fastNLOCoeffBase& other, unsigned int iObsIdx);
+
+   bool IsCatenableContribution(const fastNLOCoeffBase& other) const;
 
    void SetCoeffAddDefaults();
 
@@ -61,13 +66,11 @@ public:
    void SetContributionDescription(std::vector<std::string > descr ) { CtrbDescript = descr; };           //! Set contribution description
    std::vector<std::string > GetCodeDescription() const { return CodeDescript; }
 
-
    bool IsLO() const {return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO() const {return IContrFlag1==1 && IContrFlag2==2;}
    bool IsNNLO() const {return IContrFlag1==1 && IContrFlag2==3;}
-
    bool IsCompatible(const fastNLOCoeffBase& other) const;
-   //bool operator==(const fastNLOCoeffBase& other) const { return IsCompatible(other); }
+
 
 
 protected:

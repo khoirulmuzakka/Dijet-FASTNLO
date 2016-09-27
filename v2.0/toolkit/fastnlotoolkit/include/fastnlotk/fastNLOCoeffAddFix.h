@@ -20,6 +20,7 @@ public:
    void ReadRest(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
+   //   virtual void Cat(const fastNLOCoeffAddFix& other);
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins
@@ -35,6 +36,8 @@ public:
    virtual void MultiplyBin(unsigned int iObsIdx, double fact);
    // Erase observable bin from table
    virtual void EraseBin(unsigned int iObsIdx);
+   // Catenate observable to table
+   virtual void CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx);
 
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;
@@ -55,6 +58,7 @@ public:
    void ResizePdfSplLC();
    void ResizeSigmaTilde();
    bool IsCompatible(const fastNLOCoeffAddFix& other) const;                   //!< Check for compatibility of two contributions for merging/adding
+   bool IsCatenableContribution(const fastNLOCoeffAddFix& other) const;        //!< Check for compatibility of two contributions for merging/adding
 
 protected:
    fastNLOCoeffAddFix();

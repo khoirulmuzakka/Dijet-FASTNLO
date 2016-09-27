@@ -234,6 +234,16 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
 }
 
 
+// //________________________________________________________________________________________________________________ //
+// void fastNLOCoeffAddFlex::Cat(const fastNLOCoeffAddFlex& other){
+//    //! Concatenate bins of another coefficient table to this table
+//    const fastNLOCoeffAddFlex& othfix = (const fastNLOCoeffAddFlex&)other;
+//    for ( int iObs=0; iObs<othfix.GetNObsBin(); iObs++ ) {
+//       CatBin(othfix,iObs);
+//    }
+// }
+
+
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Clear() {
    //! Set all elements of sigma tilde to zero
@@ -248,6 +258,7 @@ void fastNLOCoeffAddFlex::Clear() {
    fastNLOTools::ClearVector(SigmaRef_s1);
    fastNLOTools::ClearVector(SigmaRef_s2);
 }
+
 
 //________________________________________________________________________________________________________________ //
 bool  fastNLOCoeffAddFlex::IsCompatible(const fastNLOCoeffAddFlex& other) const {
@@ -276,6 +287,15 @@ bool  fastNLOCoeffAddFlex::IsCompatible(const fastNLOCoeffAddFlex& other) const 
       }
    }
    return true;
+}
+
+
+//________________________________________________________________________________________________________________ //
+bool  fastNLOCoeffAddFlex::IsCatenableContribution(const fastNLOCoeffAddFlex& other) const {
+   //! Check for compatibility of catenating observable bins
+   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenableContribution(other)) return false;
+   // TODO: More checks
+  return true;
 }
 
 
@@ -341,6 +361,47 @@ void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
    if ( SigmaTildeMuFFDep.size() != 0 ) {SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);}
    if ( SigmaTildeMuRFDep.size() != 0 ) {SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);}
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
+}
+
+// Catenate observable bin
+void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx) {
+   debug["fastNLOCoeffAddFlex::CatBin"]<<"Catenating observable bin in CoeffAddFlex corresponding to bin index " << iObsIdx << endl;
+   if ( ScaleNode1.size() == 0 ) {
+      say::error["CatBin"]<<"Scale node1 size cannot be zero for a flexible-scale table. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = ScaleNode1.size();
+   ScaleNode1.resize(nold+1);
+   ScaleNode1[nold] = other.ScaleNode1[iObsIdx];
+   if ( ScaleNode2.size() != 0 ) {
+      ScaleNode2.resize(nold+1);
+      ScaleNode2[nold] = other.ScaleNode2[iObsIdx];
+   }
+   if ( SigmaTildeMuIndep.size() != 0 ) {
+      SigmaTildeMuIndep.resize(nold+1);
+      SigmaTildeMuIndep[nold] = other.SigmaTildeMuIndep[iObsIdx];
+   }
+   if ( SigmaTildeMuFDep.size() != 0 ) {
+      SigmaTildeMuFDep.resize(nold+1);
+      SigmaTildeMuFDep[nold] = other.SigmaTildeMuFDep[iObsIdx];
+   }
+   if ( SigmaTildeMuRDep.size() != 0 ) {
+      SigmaTildeMuRDep.resize(nold+1);
+      SigmaTildeMuRDep[nold] = other.SigmaTildeMuRDep[iObsIdx];
+   }
+   if ( SigmaTildeMuRRDep.size() != 0 ) {
+      SigmaTildeMuRRDep.resize(nold+1);
+      SigmaTildeMuRRDep[nold] = other.SigmaTildeMuRRDep[iObsIdx];
+   }
+   if ( SigmaTildeMuFFDep.size() != 0 ) {
+      SigmaTildeMuFFDep.resize(nold+1);
+      SigmaTildeMuFFDep[nold] = other.SigmaTildeMuFFDep[iObsIdx];
+   }
+   if ( SigmaTildeMuRFDep.size() != 0 ) {
+      SigmaTildeMuRFDep.resize(nold+1);
+      SigmaTildeMuRFDep[nold] = other.SigmaTildeMuRFDep[iObsIdx];
+   }
+   fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
 
 // Multiply observable bin

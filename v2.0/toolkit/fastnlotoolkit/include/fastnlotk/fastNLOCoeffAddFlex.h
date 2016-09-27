@@ -22,6 +22,7 @@ public:
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;
    virtual void Add(const fastNLOCoeffAddBase& other);
+   //   virtual void Cat(const fastNLOCoeffAddFlex& other);
 
    // Manipulate coefficient bins
    // Clear all coefficients and event counters
@@ -36,6 +37,8 @@ public:
    virtual void MultiplyBin(unsigned int iObsIdx, double fact);
    // Erase observable bin from table
    virtual void EraseBin(unsigned int iObsIdx);
+   // Catenate observable to table
+   virtual void CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx);
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };
@@ -44,6 +47,7 @@ public:
    std::vector < double > GetScaleNodes1(int iObsBin) const { return ScaleNode1[iObsBin]; };
    std::vector < double > GetScaleNodes2(int iObsBin) const { return ScaleNode2[iObsBin]; };
    bool IsCompatible(const fastNLOCoeffAddFlex& other) const;                   //!< check for compatibilty for adding/merging of two tables
+   bool IsCatenableContribution(const fastNLOCoeffAddFlex& other) const;        //!< Check for compatibility of two contributions for merging/adding
 
 protected:
 

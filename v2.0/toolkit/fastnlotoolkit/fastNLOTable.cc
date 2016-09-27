@@ -124,7 +124,9 @@ void fastNLOTable::WriteTable() {
    //! Write fastNLO table to file 'ffilename' (member)
    logger.info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
    ofstream* table = OpenFileWrite();
+   logger.debug["WriteTable"]<<"Writing table header to file ..."<<endl;
    WriteHeader(*table);
+   logger.debug["WriteTable"]<<"Writing scenario to file ..."<<endl;
    WriteScenario(*table);
    for(int i=0;i<GetNcontrib()+GetNdata();i++){
       logger.debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
@@ -236,6 +238,7 @@ void fastNLOTable::WriteScenario(ostream& table){
    }
    table << Ecms << endl;
    table << ILOord << endl;
+   logger.debug["WriteScenario"]<<"Writing NObsBin to be "<<NObsBin<<endl;
    table << NObsBin << endl;
    table << NDim << endl;
    for(int i=NDim-1;i>=0;i--){
@@ -244,6 +247,7 @@ void fastNLOTable::WriteScenario(ostream& table){
    for(int i=NDim-1;i>=0;i--){
       table << IDiffBin[i] << endl;
    }
+   logger.debug["WriteScenario"]<<"Bin border size is "<<Bin.size()<<endl;
    for(unsigned int i=0;i<NObsBin;i++){
       for(int j=NDim-1;j>=0;j--){
          table <<  Bin[i][j].first  << endl;
@@ -270,72 +274,200 @@ void fastNLOTable::WriteScenario(ostream& table){
 // ___________________________________________________________________________________________________
 bool fastNLOTable::IsCompatible(const fastNLOTable& other) const {
    if ( !IsCompatibleHeader(other) ) return false;
+   if ( !IsCompatibleScenario(other) ) return false;
+   logger.info["IsCompatible"]<<"Tables seem to be compatible for merging/appending. Continuing."<<endl;
+   return true;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOTable::IsCompatibleScenario(const fastNLOTable& other) const {
    bool potentialcompatible = true;
    if(Ipublunits != other.Ipublunits){
-      logger.warn["IsCompatible"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
       return false;
    }
    if(ScDescript != other.ScDescript){
-      logger.warn["IsCompatible"]<<"Differing scale description found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing scale description found."<<endl;
       potentialcompatible = false;
    }
    if(!cmp(Ecms,other.Ecms)){
-      logger.warn["IsCompatible"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
       return false;
    }
    if(ILOord != other.ILOord){
-      logger.warn["IsCompatible"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
       return false;
    }
    if(NObsBin != other.NObsBin){
-      logger.warn["IsCompatible"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other.NObsBin<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing NObsBin found: "<<NObsBin<<" and "<<other.NObsBin<<endl;
       return false;
    }
    if(NDim != other.NDim){
-      logger.warn["IsCompatible"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
       return false;
    }
    if(DimLabel != other.DimLabel){
-      logger.warn["IsCompatible"]<<"Differing label of observables found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing label of observables found."<<endl;
       potentialcompatible = false;
    }
    if(IDiffBin != other.IDiffBin){
-      logger.warn["IsCompatible"]<<"Differing IDiffBin found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing IDiffBin found."<<endl;
       return false;
    }
    if(!cmp(Bin,other.Bin)){
-      logger.warn["IsCompatible"]<<"Differing Bin boundaries found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing Bin boundaries found."<<endl;
       return false;
    }
    if(!cmp(BinSize,other.BinSize)){
-      logger.warn["IsCompatible"]<<"Differing bin sizes found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing bin sizes found."<<endl;
       return false;
    }
    if(INormFlag != other.INormFlag){
-      logger.warn["IsCompatible"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
       return false;
    }
    if(INormFlag<0){
       if(DenomTable != other.DenomTable){
-         logger.warn["IsCompatible"]<<"Differing DenomTable found."<<endl;
+         logger.warn["IsCompatibleScenario"]<<"Differing DenomTable found."<<endl;
          return false;
       }
    }
    if(INormFlag!=0){
       for(unsigned int i=0;i<NObsBin;i++){
          if(IDivLoPointer[i] != other.IDivLoPointer[i]){
-            logger.warn["IsCompatible"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
+            logger.warn["IsCompatibleScenario"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
             return false;
          }
          if(IDivUpPointer[i] != other.IDivUpPointer[i]){
-            logger.warn["IsCompatible"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
+            logger.warn["IsCompatibleScenario"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
             return false;
          }
       }
    }
-   if ( !potentialcompatible ) logger.warn["IsCompatible"]<<"Some labels have differing values, but relevant variables seem to be compatible. Continuing."<<endl;
+   if ( !potentialcompatible ) logger.warn["IsCompatibleScenario"]<<"Some labels have differing values, but relevant variables seem to be compatible. Continuing."<<endl;
    return true;
+}
 
+
+// ___________________________________________________________________________________________________
+bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
+   if ( !IsCatenableHeader(other) ) return false;
+   if ( !IsCatenableScenario(other) ) return false;
+
+   const bool quiet = true;
+   const int nc = other.GetNcontrib() + other.GetNdata();
+   // loop over all contributions from 'other'-table to check catenability
+   int matches[nc];
+   for ( int ic=0 ; ic<nc; ic++ ) {
+      matches[ic] = 0;
+      // check against all contributions from 'this'-table to check catenability
+      for (unsigned int j = 0; j<fCoeff.size() ; j++) {
+         fastNLOCoeffBase* cthis  = (fastNLOCoeffBase*)fCoeff[j];
+         fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
+         // data?
+         if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
+            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
+            if ( cthis->IsCatenableContribution(*cother) ) {
+               matches[ic]++;
+               continue;
+            }
+         }
+         // multiplicative?
+         else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
+            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
+            if ( cthis->IsCatenableContribution(*cother) ) {
+               matches[ic]++;
+               continue;
+            }
+         }
+         // additive?
+         else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
+            //            fastNLOCoeffAddBase* cthis  = (fastNLOCoeffAddBase*)fCoeff[j];
+            //            fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
+            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
+            if ( cthis->IsCatenableContribution(*cother) ) {
+               matches[ic]++;
+               continue;
+            }
+         } else {
+            logger.error["IsCatenable"] << "Unknown contribution found. Aborted!" <<endl;
+            exit(1);
+         }
+      }
+   }
+
+   // check match count; all numbers must be unity
+   bool catenable = true;
+   for ( int ic=0 ; ic<nc; ic++ ) {
+      if ( matches[ic] != 1 ) {
+         catenable = false;
+         logger.warn["IsCatenable"] << "Table contributions do not match, Catenation of observable bins not possible!" <<endl;
+         break;
+      }
+   }
+   if ( catenable ) {
+      logger.info["IsCatenable"]<<"Table contributions seem to be compatible for catenating observable bins. Continuing."<<endl;
+   }
+   return catenable;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
+   bool potentialcatenable = true;
+   if(Ipublunits != other.Ipublunits){
+      logger.warn["IsCatenableScenario"]<<"Differing cross section units found: "<<Ipublunits<<" and "<<other.Ipublunits<<endl;
+      return false;
+   }
+   if(ScDescript != other.ScDescript){
+      logger.warn["IsCatenableScenario"]<<"Differing scale description found."<<endl;
+      potentialcatenable = false;
+   }
+   if(!cmp(Ecms,other.Ecms)){
+      logger.warn["IsCatenableScenario"]<<"Differing center-of-mass energy found: "<<Ecms<<" and "<<other.Ecms<<endl;
+      return false;
+   }
+   if(ILOord != other.ILOord){
+      logger.warn["IsCatenableScenario"]<<"Differing ILOord found: "<<ILOord<<" and "<<other.GetLoOrder()<<endl;
+      return false;
+   }
+   if(NDim != other.NDim){
+      logger.warn["IsCatenableScenario"]<<"Differing NDim found: "<<NDim<<" and "<<other.NDim<<endl;
+      return false;
+   }
+   if(DimLabel != other.DimLabel){
+      logger.warn["IsCatenableScenario"]<<"Differing label of observables found."<<endl;
+      potentialcatenable = false;
+   }
+   if(IDiffBin != other.IDiffBin){
+      logger.warn["IsCatenableScenario"]<<"Differing IDiffBin found."<<endl;
+      return false;
+   }
+   if(INormFlag != other.INormFlag){
+      logger.warn["IsCatenableScenario"]<<"Differing INormFlag found: "<<INormFlag<<" and "<<other.INormFlag<<endl;
+      return false;
+   }
+   if(INormFlag<0){
+      if(DenomTable != other.DenomTable){
+         logger.warn["IsCatenableScenario"]<<"Differing DenomTable found."<<endl;
+         return false;
+      }
+   }
+   if(INormFlag!=0){
+      for(unsigned int i=0;i<NObsBin;i++){
+         if(IDivLoPointer[i] != other.IDivLoPointer[i]){
+            logger.warn["IsCatenableScenario"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
+            return false;
+         }
+         if(IDivUpPointer[i] != other.IDivUpPointer[i]){
+            logger.warn["IsCatenableScenario"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
+            return false;
+         }
+      }
+   }
+   if ( !potentialcatenable ) logger.warn["IsCatenableScenario"]<<"Some labels have differing values, but relevant variables seem to be catenable. Continuing."<<endl;
+   return true;
 }
 
 
@@ -343,7 +475,7 @@ bool fastNLOTable::IsCompatible(const fastNLOTable& other) const {
 void fastNLOTable::AddTable(const fastNLOTable& other) {
   // Add another table to this table.
   // Either increase statistics of existing fixed-order contribution or
-  // add further contributions (or both, if many tables are merged) 
+  // add further contributions (or both, if many tables are merged)
   //
   if ( !IsCompatible(other) ) {
     logger.error["AddTable"]<<"Tried to add/merge incompatible tables. Aborted!"<<endl;
@@ -362,26 +494,26 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
 
       // find compatible contribution to increase statistics, or add new contribution
       for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-	fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
-	if ( lhs->IsCompatible(*cadd) ) { // found compatible contribution
-	  if ( wasAdded ) {
-	    logger.error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table. Aborted!"<<endl;
-	    exit(1);
-	  } else {
-	    logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
-	    if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) ) {
-	      if ( !(lhs->IsCompatible(*cadd)) )
-		logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-	      lhs->Add(*cadd);
-	    }
-	    else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) ) {
-	      if ( !(lhs->IsCompatible(*cadd)) )
-		logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-	      lhs->Add(*cadd);
-	    }
-	    wasAdded = true;
-	  }
-	}
+        fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
+        if ( lhs->IsCompatible(*cadd) ) { // found compatible contribution
+          if ( wasAdded ) {
+            logger.error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table. Aborted!"<<endl;
+            exit(1);
+          } else {
+            logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
+            if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) ) {
+              if ( !(lhs->IsCompatible(*cadd)) )
+                logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+              lhs->Add(*cadd);
+            }
+            else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) ) {
+              if ( !(lhs->IsCompatible(*cadd)) )
+                logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
+              lhs->Add(*cadd);
+            }
+            wasAdded = true;
+          }
+        }
       }
     } else {
       // check if this data or 'mult' contribution already exists (which should not happen)
@@ -394,15 +526,15 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
       logger.info["AddTable"]<<"Adding new contribution to table."<<endl;
       fastNLOCoeffBase* add = other.GetCoeffTable(ic);
       if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
-	add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
-	Ndata++;
+        add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
+        Ndata++;
       }
       else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) )
-	add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
+        add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
       else if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) )
-	add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
+        add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
       else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) )
-	add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
+        add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
       CreateCoeffTable(fCoeff.size(),add);
     }
   }
@@ -410,10 +542,28 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOTable::CatenateTable(const fastNLOTable& other) {
+   // Catenate another table to this table.
+   // All contributions must be identically defined.
+   //
+   if ( !IsCatenable(other) ) {
+      logger.error["CatenateTable"]<<"Tried to catenate incompatible tables. Aborted!"<<endl;
+      exit(1);
+   }
+
+   cout << "AAA this nobsbin = " << NObsBin << ", other nobsbin = " << other.GetNObsBin() << ", coeff size = " << fCoeff.size() << endl;
+   for ( unsigned int iObs=0; iObs<other.GetNObsBin(); iObs++ ) {
+      this->CatBinToTable(other,iObs);
+   }
+   cout << "BBB this nobsbin = " << NObsBin << ", other nobsbin = " << other.GetNObsBin() << ", coeff size = " << fCoeff.size() << endl;
+}
+
+
+// ___________________________________________________________________________________________________
 int fastNLOTable::CreateCoeffTable(int no, fastNLOCoeffBase *newblockb) {
   if( (no+1) > (int)fCoeff.size() ) {fCoeff.resize(no+1);}
   fCoeff[no] = newblockb;
-  // Adapt Ncontrib, which is set each time a table is read, to the current value of the table in memory 
+  // Adapt Ncontrib, which is set each time a table is read, to the current value of the table in memory
   Ncontrib = fCoeff.size();
   return 0;
 }
@@ -1595,5 +1745,92 @@ void fastNLOTable::MultiplyBinInTable(unsigned int iObsIdx, double fact) {
          ctmp->Print(-1);
          exit(1);
       }
+   }
+}
+
+void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx) {
+   logger.info["fastNLOTable::CatBinToTable"]<<"Catenating the observable bin index no. " << iObsIdx << " from other table to this." << endl;
+   // Changes to table header block A2
+   CatBin(other,iObsIdx);
+   // Changes to table contributions block B
+   // Loop over all contributions from 'other'-table
+   for ( int ic=0; ic<other.GetNcontrib()+other.GetNdata(); ic++ ) {
+      logger.info["fastNLOTable::CatBinToTable"]<<"Catenating the observable index no. " << iObsIdx << " from contribution no. " << ic << endl;
+      // Find matching contribution from 'this'-table
+      for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
+         bool quiet = true;
+         //         fastNLOCoeffBase* cthis  = (fastNLOCoeffBase*)fCoeff[jc];
+         fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
+         // Identify type of other coeff table
+         // Additive fixed-order?
+         if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
+            if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFix* clhs = (fastNLOCoeffAddFix*)fCoeff[jc];
+               fastNLOCoeffAddFix* crhs = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
+               if ( clhs->IsCatenableContribution(*crhs) ) {
+                  logger.info["CatBinToTable"]<<"Found fix-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
+                  clhs->CatBin(*crhs,iObsIdx);
+                  continue;
+               }
+            }
+            else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFlex* clhs = (fastNLOCoeffAddFlex*)fCoeff[jc];
+               fastNLOCoeffAddFlex* crhs = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
+               if ( clhs->IsCatenableContribution(*crhs) ) {
+                  logger.info["CatBinToTable"]<<"Found flex-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
+                  clhs->CatBin(*crhs,iObsIdx);
+                  continue;
+               }
+            }
+         }
+         // Multiplicative?
+         else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffMult* clhs = (fastNLOCoeffMult*)fCoeff[jc];
+            fastNLOCoeffMult* crhs = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
+            if ( clhs->IsCatenableContribution(*crhs) ) {
+               logger.info["CatBinToTable"]<<"Found multiplicative contribution. Now catenating index no. " << iObsIdx << endl;
+               clhs->CatBin(*crhs,iObsIdx);
+               continue;
+            }
+         }
+         // Data?
+         else if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffData* clhs = (fastNLOCoeffData*)fCoeff[jc];
+            fastNLOCoeffData* crhs = (fastNLOCoeffData*)other.GetCoeffTable(ic);
+            if ( clhs->IsCatenableContribution(*crhs) ) {
+               logger.info["CatBinToTable"]<<"Found data contribution. Now catenating index no. " << iObsIdx << endl;
+               clhs->CatBin(*crhs,iObsIdx);
+               continue;
+            }
+         }
+         // Unknown
+         else {
+            logger.error["CatBinToTable"]<<"Could not identify contribution. Print and abort!" << endl;
+            cother->Print(-1);
+            exit(1);
+         }
+      }
+   }
+   // Increase no. of observable bins
+   SetNObsBin(GetNObsBin()+1);
+}
+
+// Catenate observable bin
+void fastNLOTable::CatBin(const fastNLOTable& other, unsigned int iObsIdx) {
+   logger.debug["fastNLOTable::CatBin"]<<"Catenating observable bin in scenario header corresponding to bin index " << iObsIdx << endl;
+   if ( Bin.size() == 0 ) {
+      say::error["CatBin"]<<"Bin size cannot be zero for a fastNLO table. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = Bin.size();
+   Bin.resize(nold+1);
+   Bin[nold] = other.Bin[iObsIdx];
+   BinSize.resize(nold+1);
+   BinSize[nold] = other.BinSize[iObsIdx];
+   if ( fastNLOTable::INormFlag != 0 ) {
+      IDivLoPointer.resize(nold+1);
+      IDivLoPointer[nold] = other.IDivLoPointer[iObsIdx];
+      IDivUpPointer.resize(nold+1);
+      IDivUpPointer[nold] = other.IDivUpPointer[iObsIdx];
    }
 }

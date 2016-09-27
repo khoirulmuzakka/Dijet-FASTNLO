@@ -204,6 +204,28 @@ bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
 
 
 //______________________________________________________________________________
+bool fastNLOBase::IsCatenableHeader(const fastNLOBase& other) const {
+   if (Itabversion!= other.GetItabversion()) {
+      logger.warn["IsCatenableHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      return false;
+   }
+   if (Ncontrib != other.GetNcontrib()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of contributions: "<<Ncontrib<<" and "<<other.GetNcontrib()<<endl;
+      return false;
+   }
+   if (Nmult != other.GetNmult()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of multiplicative contributions: "<<Nmult<<" and "<<other.GetNmult()<<endl;
+      return false;
+   }
+   if (Ndata != other.GetNdata()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of data contributions: "<<Ndata<<" and "<<other.GetNdata()<<endl;
+      return false;
+   }
+   return true;
+}
+
+
+//______________________________________________________________________________
 void fastNLOBase::SetHeaderDefaults() {
    // TableMagicNo and ITabVersion are defined as constant in fastNLOConstants.h
    SetScenName("tns2000");

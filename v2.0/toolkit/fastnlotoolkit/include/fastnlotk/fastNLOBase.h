@@ -26,6 +26,7 @@ public:
    void ResetHeader();                                                  //!< Reset variables to default values
    void SetContributionHeader();                                        //
    bool IsCompatibleHeader(const fastNLOBase& other) const;             //!< Compare header with header of another table
+   bool IsCatenableHeader(const fastNLOBase& other) const;              //!< Compare header with header of another table
 
    // getter/setters
    std::string GetFilename() const {return ffilename;}

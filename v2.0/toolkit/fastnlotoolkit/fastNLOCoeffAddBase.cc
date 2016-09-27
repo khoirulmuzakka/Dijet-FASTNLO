@@ -358,6 +358,57 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
 
 
 //________________________________________________________________________________________________________________ //
+bool fastNLOCoeffAddBase::IsCatenableContribution(const fastNLOCoeffAddBase& other) const {
+   // check CoeffBase variables
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) {
+      say::debug["fastNLOCoeffAddBase::IsCatenableContribution"]<<"fastNLOCoeffBase not compatible."<<endl;
+      return false;
+   }
+   if ( IRef != other.GetIRef() ) {
+      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of IRef detected."<<endl;
+      return false;
+   }
+   if ( IScaleDep != other.GetIScaleDep() ) {
+      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of IScaleDep detected."<<endl;
+      return false;
+   }
+   if ( Npow != other.GetNpow() ) {
+      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of NPow detected."<<endl;
+      return false;
+   }
+   if ( GetNPDF() != other.GetNPDF() ) {
+      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of NPDF detected."<<endl;
+      return false;
+   }
+   if ( NSubproc != other.GetNSubproc() ) {
+      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different numbers for NSubproc detected."<<endl;
+      return false;
+   }
+   // check x-nodes briefly
+   // for ( int i = 0 ; i< fNObsBins ;i++ ){
+   //    if ( GetNxmax(i) != other.GetNxmax(i) ){
+   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of x-nodes detected."<<endl;
+   //       return false;
+   //    }
+   //    if ( GetNxtot1(i) != other.GetNxtot1(i) ){
+   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of x-nodes detected."<<endl;
+   //       return false;
+   //    }
+   //    if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
+   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different values for x-nodes detected."<<endl;
+   //       return false;
+   //    }
+   //    if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
+   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different values for x-nodes detected."<<endl;
+   //       return false;
+   //    }
+   // }
+   // succesful!
+   return true;
+}
+
+
+//________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::Clear() {
    //! Clear all coefficients and event counts
    Nevt = 0;
@@ -521,6 +572,23 @@ void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
       XNode2.erase(XNode2.begin()+iObsIdx);
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
+}
+
+// Catenate observable bin
+void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx) {
+   debug["fastNLOCoeffAddBase::CatBin"]<<"Catenating observable bin in CoeffAddBase corresponding to bin index " << iObsIdx << endl;
+   if ( XNode1.size() == 0 ) {
+      say::error["CatBin"]<<"X node1 size cannot be zero for a fixed-order contribution. Aborted!" << endl;
+      exit(1);
+   }
+   unsigned int nold = XNode1.size();
+   XNode1.resize(nold+1);
+   XNode1[nold] = other.XNode1[iObsIdx];
+   if ( NPDFDim==2 ) {
+      XNode2.resize(nold+1);
+      XNode2[nold] = other.XNode2[iObsIdx];
+   }
+   fastNLOCoeffBase::CatBin(other, iObsIdx);
 }
 
 // Multiply observable bin

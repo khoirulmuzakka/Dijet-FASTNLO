@@ -1,6 +1,6 @@
 ///********************************************************************
 ///
-///     fastNLO_toolkit: FNLOMODIFY
+///     fastNLO_toolkit: fnlo-tk-modify
 ///     Program to modify fastNLO v2 tables
 ///
 ///     The desired changes are set up in a steering file.
@@ -9,7 +9,9 @@
 ///     be passed via the command line using the tag 'steerfile=',
 ///     e.g. fnlo-tk-modify steerfile=AnotherFileName.str
 ///
-///     See the provided default steering file 'SteerModify.str' for more details.
+///     See the provided default steering file 'SteerModify.str' for more details,
+///     or type:
+///     ./fnlo-tk-modify -h
 ///
 ///     D. Britzger, K. Rabbertz
 ///
@@ -31,6 +33,24 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   cout << _CSEPSC << endl;
+   info["fnlo-tk-modify"] << "Program to modify fastNLO v2 tables" << endl;
+   cout << _SSEPSC << endl;
+   info["fnlo-tk-modify"] << "The desired changes are set up in a steering file." << endl;
+   info["fnlo-tk-modify"] << "By default the steering file is named 'SteerModify.str'." << endl;
+   info["fnlo-tk-modify"] << "If another steering filename should be used, this filename can" << endl;
+   info["fnlo-tk-modify"] << "be passed via the command line using the tag 'steerfile='," << endl;
+   info["fnlo-tk-modify"] << "e.g. fnlo-tk-modify steerfile=AnotherFileName.str" << endl;
+   info["fnlo-tk-modify"] << endl;
+   info["fnlo-tk-modify"] << "See the provided default steering file 'SteerModify.str' for more details," << endl;
+   info["fnlo-tk-modify"] << "or type:" << endl;
+   info["fnlo-tk-modify"] << "./fnlo-tk-modify -h" << endl;
+   cout << _CSEPSC << endl;
+
    //! ---  Parse commmand line
    cout << endl;
    cout << _CSEPSC << endl;
@@ -51,6 +71,7 @@ int main(int argc, char** argv) {
       }
    } else {
       steername = (const char*) argv[1];
+      //! --- Usage info
       if (steername == "-h") {
          cout << " #" << endl;
          shout << "Usage: ./fnlo-tk-modify [steerfile=SteerFile.str] <InTable=fastNLOtableIn.tab> <OutTable=fastNLOtableOut.tab> [OptArg=option]" << endl;
