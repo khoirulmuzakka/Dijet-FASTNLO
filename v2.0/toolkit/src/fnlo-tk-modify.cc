@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
       steername = (const char*) argv[1];
       //! --- Usage info
       if (steername == "-h") {
-         cout << " #" << endl;
+         cout  << " #" << endl;
          shout << "Usage: ./fnlo-tk-modify [steerfile=SteerFile.str] <InTable=fastNLOtableIn.tab> <OutTable=fastNLOtableOut.tab> [OptArg=option]" << endl;
          shout << "       Specification: <> mandatory; [] optional." << endl;
          shout << "       All desired table modifications like" << endl;
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
          shout << "<OutTable=fastNLOtableOut.tab>: Table output filename, if not specified in steering file" << endl;
          shout << "       For more steering options please check the default steering file delivered" << endl;
          shout << "       by the fastNLO Tolkit (usually in $prefix/share/fastnlo_toolkit/steerfiles)." << endl;
-         cout << " #" << endl;
+         cout  << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       } else {

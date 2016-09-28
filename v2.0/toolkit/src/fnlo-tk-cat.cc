@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
    using namespace fastNLO;      //! namespace for fastNLO constants
 
    //! --- Set verbosity level
+   //ckr  SetGlobalVerbosity(INFO);
    SetGlobalVerbosity(DEBUG);
 
    //! --- Print program purpose
@@ -53,7 +54,7 @@ int main(int argc, char** argv) {
       tablename = (const char*) argv[1];
       //! --- Usage info
       if (tablename == "-h") {
-         cout << " #" << endl;
+         cout  << " #" << endl;
          shout << "Usage: ./fnlo-tk-cat <InTable_1.tab> <InTable_2.tab> [InTable_n.tab] <OutTable.tab>" << endl;
          shout << "       Specification: <> mandatory; [] optional." << endl;
          shout << "       List of blank-separated table files, at least three!" << endl;
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
          shout << "<InTable_1.tab>:   First table input file, to which observable bins are catenated" << endl;
          shout << "<InTable_2.tab>:   Second table input file, from which observable bins are catenated" << endl;
          shout << "<OutTable.tab>:    Output filename, to which the table with catenated observable bins is written" << endl;
-         cout << " #" << endl;
+         cout  << " #" << endl;
          cout  << _CSEPSC << endl;
          return 0;
       }
@@ -97,13 +98,13 @@ int main(int argc, char** argv) {
       else {
          //! --- Reading table
          info["fnlo-tk-cat"]<<"Reading table '" << path << "'" << endl;
+         cout << _CSEPSC << endl;
          fastNLOTable tab(path);
 
          //! --- Initialising result with first read table
          if ( !resultTable ) {
             info["fnlo-tk-cat"]<<"Initialising result table '" << outfile << "'" << endl;
             resultTable = new fastNLOTable(tab);
-            cout << "First result table NObsbin = " << resultTable->GetNObsBin() << endl;
             nValidTables++;
             //! Hint to use fnlo-tk-cat correctly
             info["fnlo-tk-cat"]<<"Numerous technical checks for compatibility are performed."<<endl;
@@ -118,9 +119,7 @@ int main(int argc, char** argv) {
                warn["fnlo-tk-cat"]<<"Table '" << path << "' is not catenable with initial table '" << resultTable->GetFilename() << "', skipped!" << endl;
             //! catenating tables
             else {
-               cout << "AAA Following result table NObsbin = " << resultTable->GetNObsBin() << endl;
                resultTable->CatenateTable(tab);
-               cout << "BBB Following result table NObsbin = " << resultTable->GetNObsBin() << endl;
                nValidTables++;
             }
          }
@@ -128,13 +127,12 @@ int main(int argc, char** argv) {
    }
    info["fnlo-tk-cat"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
    if (nValidTables < 2) {
-      error["fnlo-tk-cat"]<<"Found less than two valid tables, no catenating possible!"<<endl;
+      error["fnlo-tk-cat"]<<"Found less than two valid tables, no catenating possible. Aborted!"<<endl;
       exit(1);
    }
 
    //! Write result
    cout << "New NObsbin = " << resultTable->GetNObsBin() << endl;
-
 
    resultTable->SetFilename(outfile);
    info["fnlo-tk-cat"]<<"Write catenated results to file '" << resultTable->GetFilename() << "'"<<endl;

@@ -288,7 +288,7 @@ bool fastNLOTable::IsCompatibleScenario(const fastNLOTable& other) const {
       return false;
    }
    if(ScDescript != other.ScDescript){
-      logger.warn["IsCompatibleScenario"]<<"Differing scale description found."<<endl;
+      logger.warn["IsCompatibleScenario"]<<"Differing scenario description found."<<endl;
       potentialcompatible = false;
    }
    if(!cmp(Ecms,other.Ecms)){
@@ -421,7 +421,7 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
       return false;
    }
    if(ScDescript != other.ScDescript){
-      logger.warn["IsCatenableScenario"]<<"Differing scale description found."<<endl;
+      logger.warn["IsCatenableScenario"]<<"Differing scenario description found. Only the first one is kept."<<endl;
       potentialcatenable = false;
    }
    if(!cmp(Ecms,other.Ecms)){
