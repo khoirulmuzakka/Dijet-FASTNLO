@@ -237,7 +237,7 @@ protected:
    int Ipublunits;
    std::vector <std::string> ScDescript;
 
-   // CKR: Changed to unsigned int
+   // Unsigned int
    unsigned int NObsBin;
    unsigned int NDim;
 

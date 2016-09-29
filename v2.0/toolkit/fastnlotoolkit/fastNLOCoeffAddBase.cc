@@ -566,9 +566,13 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
 // Erase observable bin
 void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
    debug["fastNLOCoeffAddBase::EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
-   XNode1.erase(XNode1.begin()+iObsIdx);
+   if ( XNode1.size() == 0 ) {
+      say::error["EraseBin"]<<"All additive contribution bins deleted already. Aborted!" << endl;
+      exit(1);
+   }
+   if ( XNode1.size() != 0 ) XNode1.erase(XNode1.begin()+iObsIdx);
    if ( NPDFDim==2 ) {
-      XNode2.erase(XNode2.begin()+iObsIdx);
+      if ( XNode2.size() != 0 ) XNode2.erase(XNode2.begin()+iObsIdx);
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
 }
@@ -577,15 +581,19 @@ void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
 void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx) {
    debug["fastNLOCoeffAddBase::CatBin"]<<"Catenating observable bin in CoeffAddBase corresponding to bin index " << iObsIdx << endl;
    if ( XNode1.size() == 0 ) {
-      say::error["CatBin"]<<"X node1 size cannot be zero for a fixed-order contribution. Aborted!" << endl;
+      say::error["CatBin"]<<"Initial additive table is empty. Aborted!" << endl;
       exit(1);
    }
    unsigned int nold = XNode1.size();
-   XNode1.resize(nold+1);
-   XNode1[nold] = other.XNode1[iObsIdx];
+   if ( XNode1.size() != 0 ) {
+      XNode1.resize(nold+1);
+      XNode1[nold] = other.XNode1[iObsIdx];
+   }
    if ( NPDFDim==2 ) {
-      XNode2.resize(nold+1);
-      XNode2[nold] = other.XNode2[iObsIdx];
+      if ( XNode2.size() != 0 ) {
+         XNode2.resize(nold+1);
+         XNode2[nold] = other.XNode2[iObsIdx];
+      }
    }
    fastNLOCoeffBase::CatBin(other, iObsIdx);
 }

@@ -22,6 +22,7 @@ public:
    // Erase observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
    virtual void EraseBin(unsigned int iObsIdx);
+   virtual void MultiplyBin(unsigned int iObsIdx, double fact);
    // Catenate observable to table
    virtual void CatBin(const fastNLOCoeffData& other, unsigned int iObsIdx);
    bool IsCatenable(const fastNLOCoeffData& other) const;

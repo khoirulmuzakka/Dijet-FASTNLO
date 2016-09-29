@@ -190,37 +190,60 @@ void fastNLOCoeffData::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffData::EraseBin(unsigned int iObsIdx) {
-   info["fastNLOCoeffData::EraseBin"]<<"Erasing table entries in CoeffData for bin index " << iObsIdx << endl;
-   Xcenter.erase(Xcenter.begin()+iObsIdx);
-   Value.erase(Value.begin()+iObsIdx);
-   UncorLo.erase(UncorLo.begin()+iObsIdx);
-   UncorHi.erase(UncorHi.begin()+iObsIdx);
-   CorrLo.erase(CorrLo.begin()+iObsIdx);
-   CorrHi.erase(CorrHi.begin()+iObsIdx);
+   debug["fastNLOCoeffData::EraseBin"]<<"Erasing table entries in CoeffData for bin index " << iObsIdx << endl;
+   if ( Value.size() == 0 ) {
+      say::error["EraseBin"]<<"All data bins deleted already. Aborted!" << endl;
+      exit(1);
+   }
+   if ( Xcenter.size() != 0 ) Xcenter.erase(Xcenter.begin()+iObsIdx);
+   if ( Value.size() != 0 ) Value.erase(Value.begin()+iObsIdx);
+   if ( UncorLo.size() != 0 ) UncorLo.erase(UncorLo.begin()+iObsIdx);
+   if ( UncorHi.size() != 0 ) UncorHi.erase(UncorHi.begin()+iObsIdx);
+   if ( CorrLo.size() != 0 ) CorrLo.erase(CorrLo.begin()+iObsIdx);
+   if ( CorrHi.size() != 0 ) CorrHi.erase(CorrHi.begin()+iObsIdx);
    fastNLOCoeffBase::EraseBin(iObsIdx);
 }
 
 // Catenate observable bin
 void fastNLOCoeffData::CatBin(const fastNLOCoeffData& other, unsigned int iObsIdx) {
    debug["fastNLOCoeffData::CatBin"]<<"Catenating observable bin in CoeffData corresponding to bin index " << iObsIdx << endl;
-   if ( Xcenter.size() == 0 ) {
-      say::error["CatBin"]<<"Xcenter size cannot be zero for a data table. Aborted!" << endl;
+   if ( Value.size() == 0 ) {
+      say::error["CatBin"]<<"Initial data table is empty. Aborted!" << endl;
       exit(1);
    }
-   unsigned int nold = Xcenter.size();
-   Xcenter.resize(nold+1);
-   Xcenter[nold] = other.Xcenter[iObsIdx];
-   Value.resize(nold+1);
-   Value[nold] = other.Value[iObsIdx];
-   UncorLo.resize(nold+1);
-   UncorLo[nold] = other.UncorLo[iObsIdx];
-   UncorHi.resize(nold+1);
-   UncorHi[nold] = other.UncorHi[iObsIdx];
-   CorrLo.resize(nold+1);
-   CorrLo[nold] = other.CorrLo[iObsIdx];
-   CorrHi.resize(nold+1);
-   CorrHi[nold] = other.CorrHi[iObsIdx];
+   unsigned int nold = Value.size();
+   if ( Xcenter.size() != 0 ) {
+      Xcenter.resize(nold+1);
+      Xcenter[nold] = other.Xcenter[iObsIdx];
+   }
+   if ( Value.size() != 0 ) {
+      Value.resize(nold+1);
+      Value[nold] = other.Value[iObsIdx];
+   }
+   if ( UncorLo.size() != 0 ) {
+      UncorLo.resize(nold+1);
+      UncorLo[nold] = other.UncorLo[iObsIdx];
+   }
+   if ( UncorHi.size() != 0 ) {
+      UncorHi.resize(nold+1);
+      UncorHi[nold] = other.UncorHi[iObsIdx];
+   }
+   if ( CorrLo.size() != 0 ) {
+      CorrLo.resize(nold+1);
+      CorrLo[nold] = other.CorrLo[iObsIdx];
+   }
+   if ( CorrHi.size() != 0 ) {
+      CorrHi.resize(nold+1);
+      CorrHi[nold] = other.CorrHi[iObsIdx];
+   }
    fastNLOCoeffBase::CatBin(other, iObsIdx);
+}
+
+// Multiply observable bin
+void fastNLOCoeffData::MultiplyBin(unsigned int iObsIdx, double fact) {
+   debug["fastNLOCoeffData::MultiplyBin"]<<"Multiplying table entries in CoeffData for bin index " << iObsIdx << " by factor " << fact << endl;
+   Value[iObsIdx] *= fact;
+   fastNLOCoeffBase::MultiplyBin(iObsIdx, fact);
 }
 
 //________________________________________________________________________________________________________________ //

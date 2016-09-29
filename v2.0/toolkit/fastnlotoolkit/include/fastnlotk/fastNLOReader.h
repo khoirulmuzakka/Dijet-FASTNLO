@@ -5,7 +5,7 @@
 #include "fastNLOPDFLinearCombinations.h"
 
 // ---- Getters for results---- //
-struct XsUncertainty {                                   
+struct XsUncertainty {
    //! Struct for returning vectors with cross section and relative uncertainty
    // keep definition of this class outside of fastNLOReader, beacause of python wrapper
    std::vector < double > xs;
@@ -52,7 +52,7 @@ public:
    bool SetScaleFactorsMuRMuF(double xmur, double xmuf);                                //!< Set scale factors for MuR and MuF
    void SetExternalFuncForMuR(mu_func);                                                 //!< Set external function for scale calculation (optional)
    void SetExternalFuncForMuF(mu_func);                                                 //!< Set external function for scale calculation (optional)
-   void SetExternalConstantForMuR(double MuR);                                          //!< Set value for mu_r if mu_r is chosen to be a constant value (i.e. m_t, or m_Z)  
+   void SetExternalConstantForMuR(double MuR);                                          //!< Set value for mu_r if mu_r is chosen to be a constant value (i.e. m_t, or m_Z)
    void SetExternalConstantForMuF(double MuF);                                          //!< Set value for mu_f if mu_f is chosen to be a constant value (i.e. m_t, or m_Z)
 
    void UseHoppetScaleVariations(bool);

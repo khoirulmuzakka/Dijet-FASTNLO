@@ -236,17 +236,17 @@ void fastNLOCoeffBase::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffBase::EraseBin(unsigned int iObsIdx) {
-   info["fastNLOCoeffBase::EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
+   debug["fastNLOCoeffBase::EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
    SetNObsBin(GetNObsBin()-1);
 }
 
 // Catenate observable bin
 void fastNLOCoeffBase::CatBin(const fastNLOCoeffBase& other, unsigned int iObsIdx) {
-   info["fastNLOCoeffBase::CatBin"]<<"Catenating observable bin in CoeffBase corresponding to bin index " << iObsIdx << endl;
+   debug["fastNLOCoeffBase::CatBin"]<<"Catenating observable bin in CoeffBase corresponding to bin index " << iObsIdx << endl;
    SetNObsBin(GetNObsBin()+1);
 }
 
 // Multiply observable bin
 void fastNLOCoeffBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
-   info["fastNLOCoeffBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffBase." << endl;
+   debug["fastNLOCoeffBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffBase." << endl;
 }

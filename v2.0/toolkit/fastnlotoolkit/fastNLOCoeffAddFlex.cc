@@ -343,14 +343,18 @@ void fastNLOCoeffAddFlex::Print(int iprint) const {
 // Erase observable bin
 void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
    debug["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
-   if ( ScaleNode1.size() != 0 ) {ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);}
-   if ( ScaleNode2.size() != 0 ) {ScaleNode2.erase(ScaleNode2.begin()+iObsIdx);}
-   if ( SigmaTildeMuIndep.size() != 0 ) {SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);}
-   if ( SigmaTildeMuFDep.size()  != 0 ) {SigmaTildeMuFDep.erase(SigmaTildeMuFDep.begin()+iObsIdx);}
-   if ( SigmaTildeMuRDep.size()  != 0 ) {SigmaTildeMuRDep.erase(SigmaTildeMuRDep.begin()+iObsIdx);}
-   if ( SigmaTildeMuRRDep.size() != 0 ) {SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);}
-   if ( SigmaTildeMuFFDep.size() != 0 ) {SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);}
-   if ( SigmaTildeMuRFDep.size() != 0 ) {SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);}
+   if ( ScaleNode1.size() == 0 ) {
+      say::error["EraseBin"]<<"All bins deleted already. Aborted!" << endl;
+      exit(1);
+   }
+   if ( ScaleNode1.size() != 0 ) ScaleNode1.erase(ScaleNode1.begin()+iObsIdx);
+   if ( ScaleNode2.size() != 0 ) ScaleNode2.erase(ScaleNode2.begin()+iObsIdx);
+   if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep.erase(SigmaTildeMuIndep.begin()+iObsIdx);
+   if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep.erase(SigmaTildeMuFDep.begin()+iObsIdx);
+   if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep.erase(SigmaTildeMuRDep.begin()+iObsIdx);
+   if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);
+   if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);
+   if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);
    fastNLOCoeffAddBase::EraseBin(iObsIdx);
 }
 
@@ -358,12 +362,14 @@ void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
 void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx) {
    debug["fastNLOCoeffAddFlex::CatBin"]<<"Catenating observable bin in CoeffAddFlex corresponding to bin index " << iObsIdx << endl;
    if ( ScaleNode1.size() == 0 ) {
-      say::error["CatBin"]<<"Scale node1 size cannot be zero for a flexible-scale table. Aborted!" << endl;
+      say::error["CatBin"]<<"Initial flex-scale table is empty. Aborted!" << endl;
       exit(1);
    }
    unsigned int nold = ScaleNode1.size();
-   ScaleNode1.resize(nold+1);
-   ScaleNode1[nold] = other.ScaleNode1[iObsIdx];
+   if ( ScaleNode1.size() != 0 ) {
+      ScaleNode1.resize(nold+1);
+      ScaleNode1[nold] = other.ScaleNode1[iObsIdx];
+   }
    if ( ScaleNode2.size() != 0 ) {
       ScaleNode2.resize(nold+1);
       ScaleNode2[nold] = other.ScaleNode2[iObsIdx];
@@ -398,22 +404,17 @@ void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int 
 // Multiply observable bin
 void fastNLOCoeffAddFlex::MultiplyBin(unsigned int iObsIdx, double fact) {
    debug["fastNLOCoeffAddFlex::MultiplyBin"]<<"Multiplying table entries in CoeffAddFlex for bin index " << iObsIdx << " by factor " << fact << endl;
-   const bool WithMuR  = !SigmaTildeMuRDep.empty();
-   const bool WithMuF  = !SigmaTildeMuFDep.empty();
-   const bool WithMuRR = !SigmaTildeMuRRDep.empty();
-   const bool WithMuFF = !SigmaTildeMuFFDep.empty();
-   const bool WithMuRF = !SigmaTildeMuRFDep.empty();
    int nxmax = GetNxmax(iObsIdx);
    for (unsigned int jS1=0; jS1<GetNScaleNode1(iObsIdx); jS1++) {
       for (unsigned int kS2=0; kS2<GetNScaleNode2(iObsIdx); kS2++) {
          for (int x=0; x<nxmax; x++) {
             for (int n=0; n<GetNSubproc(); n++) {
-               SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
-               if (WithMuR)  {SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;}
-               if (WithMuF)  {SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;}
-               if (WithMuRR) {SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;}
-               if (WithMuFF) {SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;}
-               if (WithMuRF) {SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;}
+               if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+               if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+               if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;
             }
          }
       }

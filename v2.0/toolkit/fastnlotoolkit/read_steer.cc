@@ -457,8 +457,6 @@ bool read_steer::ParseString(string line) {
    const string orgl=line;
 
    // parsing statements enclosed in '"'
-   // CKR: Put fParseTableMode>0 in brackets since negation otherwise acts on
-   //      fParseTableMode variable (warning from clang compiler)!
    if (!(fParseTableMode>0) && !fParseFieldMode)
       value = ParseEnclosedString(line.c_str()); // old
    else
@@ -503,10 +501,6 @@ bool read_steer::ParseString(string line) {
       if (fParseTableMode>0) {
          if (ParseFindString(pch,str_tabend)) {
             fParseTableMode = 0;
-            // CKR: The following check doesn't make sense. Usually, one has only ONE label for the innermost dimension
-            //      like "----- Array of bin-grid ..." ==> message appears always.
-            //            if (!ftablevalues.empty() && !ffieldvalues.empty() && ffieldvalues.size() != ftablevalues[0].size())
-            //               cout <<  oI << "Expected a 'table' with " << ffieldvalues.size() << " columns for label '" << ffieldlabel << "', but found a differing number of entries in at least one row." << endl;
             ftableheaders[ffieldlabel] = ffieldvalues;
             ftables[ffieldlabel]     = ftablevalues;
             ffieldvalues.clear();
@@ -616,16 +610,6 @@ bool read_steer::ParseString(string line) {
       if (fParseTableMode>2 && pch==NULL) return true;
       fParseTableMode++;
    }
-   // if (fParseTableMode>2) {   // check number of columns in table
-   //    if (ftablevalues.size() > 1)
-   //       // CKR: The following check doesn't make sense, since it´s perfectly fine to
-   //       //      have a different number of bins per defining line in steering.
-   //       if (ftablevalues.back().size() != ftablevalues[0].size())
-   //          cout  << oI << "Table ('" << ffieldlabel << "'): row " << ftablevalues.size()
-   //                << " has a different number of columns (n=" <<  ftablevalues.back().size()
-   //                << ") than first row (n=" << ftablevalues[0].size() << ")." << endl;
-   // }
-   //
 
    // Philosophy of priorities when using read_steer:
    //    1. Parameters set in command line have highest priority and are not overwritten

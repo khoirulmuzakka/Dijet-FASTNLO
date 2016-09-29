@@ -470,71 +470,118 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::AddTable(const fastNLOTable& other) {
-  // Add another table to this table.
-  // Either increase statistics of existing fixed-order contribution or
-  // add further contributions (or both, if many tables are merged)
-  //
-  if ( !IsCompatible(other) ) {
-    logger.error["AddTable"]<<"Tried to add/merge incompatible tables. Aborted!"<<endl;
-    exit(1);
-  }
+   // Add another table to this table.
+   // Either increase statistics of existing fixed-order contribution or
+   // add further contributions (or both, if many tables are merged)
+   //
+   if ( !IsCompatible(other) ) {
+      logger.error["AddTable"]<<"Tried to add/merge incompatible tables. Aborted!"<<endl;
+      exit(1);
+   }
 
-  // loop over all contributions from 'other'-table
-  const bool quiet = true;
-  const int nc = other.GetNcontrib() + other.GetNdata();
-  for ( int ic=0 ; ic<nc; ic++ ) {
-    bool wasAdded = false;
-
-    // is additive?
-    if ( other.GetCoeffTable(ic)->GetIAddMultFlag()==0) {
-      fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
-
-      // find compatible contribution to increase statistics, or add new contribution
-      for (unsigned int j = 0 ; j<fCoeff.size() ; j++) {
-        fastNLOCoeffAddBase* lhs = (fastNLOCoeffAddBase*)fCoeff[j];
-        if ( lhs->IsCompatible(*cadd) ) { // found compatible contribution
-          if ( wasAdded ) {
-            logger.error["AddTable"]<<"This contribution was already added. It seems that there is one contribution twice in the table. Aborted!"<<endl;
+   // These are counters for the newly read other table ...,
+   const int ntot = other.GetNcontrib() + other.GetNdata();
+   // but we need also to bookkeep this for the current table!
+   int newnc = fCoeff.size();
+   int newnd = 0;
+   bool quiet = true;
+   for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
+      fastNLOCoeffBase* cthis = (fastNLOCoeffBase*)fCoeff[jc];
+      if ( fastNLOCoeffData::CheckCoeffConstants(cthis,quiet) ) {
+         newnc--;
+         newnd++;
+      }
+   }
+   // Loop over all contributions from 'other'-table
+   for ( int ic=0; ic<ntot; ic++ ) {
+      logger.info["fastNLOTable::AddTable"]<<"Adding contribution no. " << ic << endl;
+      bool wasAdded = false;
+      // Find matching contribution from 'this'-table
+      for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
+         fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
+         // Identify type of other coeff table
+         // Additive fixed-order?
+         if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
+            if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFix* clhs = (fastNLOCoeffAddFix*)fCoeff[jc];
+               fastNLOCoeffAddFix* crhs = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
+               if ( clhs->IsCompatible(*crhs) ) {
+                  logger.info["AddTable"]<<"Found matching fix-scale additive contribution." << endl;
+                  logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<jc<<endl;
+                  clhs->Add(*crhs);
+                  wasAdded = true;
+               }
+            }
+            else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFlex* clhs = (fastNLOCoeffAddFlex*)fCoeff[jc];
+               fastNLOCoeffAddFlex* crhs = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
+               if ( clhs->IsCompatible(*crhs) ) {
+                  logger.info["AddTable"]<<"Found matching flex-scale additive contribution." << endl;
+                  logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<jc<<endl;
+                  clhs->Add(*crhs);
+                  wasAdded = true;
+               }
+            }
+         }
+         // Multiplicative?
+         else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffMult* clhs = (fastNLOCoeffMult*)fCoeff[jc];
+            fastNLOCoeffMult* crhs = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
+            if ( clhs->IsCompatible(*crhs) ) {
+               logger.error["AddTable"]<<"Found matching multiplicative contribution. This is not allowed. Aborted!" << endl;
+               wasAdded = true;
+               exit(1);
+            }
+         }
+         // Data?
+         else if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffData* clhs = (fastNLOCoeffData*)fCoeff[jc];
+            fastNLOCoeffData* crhs = (fastNLOCoeffData*)other.GetCoeffTable(ic);
+            if ( clhs->IsCompatible(*crhs) ) {
+               logger.error["AddTable"]<<"Found matching data contribution. This is not allowed. Aborted!" << endl;
+               wasAdded = true;
+               exit(1);
+            }
+         }
+         // Unknown
+         else {
+            logger.error["AddTable"]<<"Could not identify contribution. Print and abort!" << endl;
+            cother->Print(-1);
             exit(1);
-          } else {
-            logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<j<<endl;
-            if ( fastNLOCoeffAddFlex::CheckCoeffConstants(lhs,quiet) ) {
-              if ( !(lhs->IsCompatible(*cadd)) )
-                logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-              lhs->Add(*cadd);
-            }
-            else if ( fastNLOCoeffAddFix::CheckCoeffConstants(lhs,quiet) ) {
-              if ( !(lhs->IsCompatible(*cadd)) )
-                logger.warn["AddTable"]<<"Incompatible contributions found. Please check result carefully!"<<endl;
-              lhs->Add(*cadd);
-            }
-            wasAdded = true;
-          }
-        }
+         }
       }
-    } else {
-      // check if this data or 'mult' contribution already exists (which should not happen)
-      cout<<"todo. Check if data table already exists!."<<endl;
-    }
-
-    // couldn't find a corresponding contribution.
-    // add this contribution as new contrib.
-    if ( !wasAdded ) {
-      logger.info["AddTable"]<<"Adding new contribution to table."<<endl;
-      fastNLOCoeffBase* add = other.GetCoeffTable(ic);
-      if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
-        add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
-        Ndata++;
+      // Couldn't find a corresponding contribution,
+      // so add this contribution as new.
+      if ( !wasAdded ) {
+         logger.info["AddTable"]<<"Adding new contribution to table."<<endl;
+         fastNLOCoeffBase* add = other.GetCoeffTable(ic);
+         if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
+            // Adjust new theory contribution counter
+            newnc++;
+         } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
+            newnc++;
+         } else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
+            newnc++;
+         } else if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
+            // Adjust new data counter
+            newnd++;
+         }
+         CreateCoeffTable(fCoeff.size(),add);
       }
-      else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) )
-        add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
-      else if ( fastNLOCoeffAddFix::CheckCoeffConstants(add,quiet) )
-        add = new fastNLOCoeffAddFix((fastNLOCoeffAddFix&)*add);
-      else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(add,quiet) )
-        add = new fastNLOCoeffAddFlex((fastNLOCoeffAddFlex&)*add);
-      CreateCoeffTable(fCoeff.size(),add);
-    }
-  }
+   }
+   // Check # of coefficients
+   if ( (int)fCoeff.size() != newnc + newnd ) {
+      logger.error["AddTable"]<<"Sorry, I'm confused about the no. of contributions. Aborted!" << endl;
+      logger.error["AddTable"]<<"newnc = " << newnc << ", newnd = " << newnd << ", fCoeff.size() = " << fCoeff.size() << endl;
+      exit(1);
+   }
+   // Set nc and nd for current table to be written out eventually
+   SetNcontrib(newnc);
+   SetNdata(newnd);
 }
 
 
@@ -555,11 +602,17 @@ void fastNLOTable::CatenateTable(const fastNLOTable& other) {
 
 // ___________________________________________________________________________________________________
 int fastNLOTable::CreateCoeffTable(int no, fastNLOCoeffBase *newblockb) {
-  if( (no+1) > (int)fCoeff.size() ) {fCoeff.resize(no+1);}
-  fCoeff[no] = newblockb;
-  // Adapt Ncontrib, which is set each time a table is read, to the current value of the table in memory
-  Ncontrib = fCoeff.size();
-  return 0;
+   // Attention: Proper adaptation of Ncontrib and Ndata, which are set each time a table is read,
+   // to the current value of the table in memory must be done in the calling routine!
+   logger.debug["CreateCoeffTable"]<<"Old: Ncontrib = " << GetNcontrib() << ", Ndata = " << GetNdata() << ", fCoeff.size() = " << fCoeff.size() << endl;
+   logger.debug["CreateCoeffTable"]<<"Creating coefficient table no. " << no << ", actual fCoeff.size() is: " << fCoeff.size() << endl;
+   if ( (no+1) > (int)fCoeff.size() ) {
+      fCoeff.resize(no+1);
+      logger.debug["CreateCoeffTable"]<<"Creating new coefficient table no. " << no << endl;
+   }
+   fCoeff[no] = newblockb;
+
+   return 0;
 }
 
 
@@ -1375,7 +1428,7 @@ void fastNLOTable::PrintScenario(int iprint) const {
          }
       }
    }
-   printf(" # No. of contributions in this table: %d\n",(int)fCoeff.size());
+   printf(" # Total no. of contributions (theory + optional data) in this table: %d\n",(int)fCoeff.size());
    cout << fastNLO::_CSEPSC << endl;
 }
 
@@ -1655,6 +1708,7 @@ void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
       EraseBin(fastNLOTable::IDivUpPointer,iObsIdx);
    }
    // Changes to table contributions block B
+   cout << "Ncontrib = " << GetNcontrib() << ", Ndata = " << GetNdata() << endl;
    for ( int ic = 0; ic<GetNcontrib()+GetNdata(); ic++ ) {
       logger.info["fastNLOTable::EraseBinFromTable"]<<"Erasing the observable index no. " << iObsIdx << " from contribution no. " << ic << endl;
       fastNLOCoeffAddBase* ctmp = (fastNLOCoeffAddBase*)fCoeff[ic];
@@ -1720,12 +1774,12 @@ void fastNLOTable::MultiplyBinInTable(unsigned int iObsIdx, double fact) {
       bool quiet = true;
       if ( fastNLOCoeffData::CheckCoeffConstants(ctmp,quiet) ) {
          logger.debug["MultiplyBinInTable"]<<"Found data contribution. Skipped! Index no. " << iObsIdx << endl;
-         // fastNLOCoeffData* cdata = (fastNLOCoeffData*)fCoeff[ic];
-         // cdata->MultiplyBin(iObsIdx,fact);
+         fastNLOCoeffData* cdata = (fastNLOCoeffData*)fCoeff[ic];
+         cdata->MultiplyBin(iObsIdx,fact);
       } else if ( fastNLOCoeffMult::CheckCoeffConstants(ctmp,quiet) ) {
          logger.debug["MultiplyBinInTable"]<<"Found multiplicative contribution. Skipped! Index no. " << iObsIdx << endl;
-         // fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
-         // cmult->MultiplyBin(iObsIdx,fact);
+         fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
+         cmult->MultiplyBin(iObsIdx,fact);
       } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
          logger.debug["MultiplyBinInTable"]<<"Found additive fix-table contribution. Now multiplying index no. " << iObsIdx << endl;
          fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
