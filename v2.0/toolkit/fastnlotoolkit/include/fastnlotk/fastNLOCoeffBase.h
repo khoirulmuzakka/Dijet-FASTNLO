@@ -25,8 +25,6 @@ public:
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;
-   //   virtual void Add(const fastNLOCoeffBase& other);
-   void Cat(const fastNLOCoeffBase& other);
 
    // Erase or multiply observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
@@ -35,7 +33,7 @@ public:
    // Catenate observable to table
    virtual void CatBin(const fastNLOCoeffBase& other, unsigned int iObsIdx);
 
-   bool IsCatenableContribution(const fastNLOCoeffBase& other) const;
+   bool IsCatenable(const fastNLOCoeffBase& other) const;
 
    void SetCoeffAddDefaults();
 

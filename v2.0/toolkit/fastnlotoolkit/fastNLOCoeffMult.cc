@@ -184,16 +184,6 @@ void fastNLOCoeffMult::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
-// void fastNLOCoeffMult::Cat(const fastNLOCoeffMult& other){
-//    //! Concatenate bins of another coefficient table to this table
-//    const fastNLOCoeffMult& cother = (const fastNLOCoeffMult&)other;
-//    for ( int iObs=0; iObs<cother.GetNObsBin(); iObs++ ) {
-//       CatBin(cother,iObs);
-//    }
-// }
-
-
-
 // Erase observable bin
 void fastNLOCoeffMult::EraseBin(unsigned int iObsIdx) {
    info["fastNLOCoeffMult::EraseBin"]<<"Erasing table entries in CoeffMult for bin index " << iObsIdx << endl;
@@ -227,17 +217,17 @@ void fastNLOCoeffMult::CatBin(const fastNLOCoeffMult& other, unsigned int iObsId
 }
 
 //________________________________________________________________________________________________________________ //
-bool fastNLOCoeffMult::IsCatenableContribution(const fastNLOCoeffMult& other) const {
+bool fastNLOCoeffMult::IsCatenable(const fastNLOCoeffMult& other) const {
    //! Check for compatibility of catenating observable bins
-   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) return false;
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenable(other)) return false;
    if( Nuncorrel != other.GetNuncorrel() ){
-      debug["IsCatenableContribution"]<<"Nuncorrel != other.GetNuncorrel()"<<endl;
+      debug["IsCatenable"]<<"Nuncorrel != other.GetNuncorrel(). Skipped."<<endl;
       return false;
    }
    if( Ncorrel != other.GetNcorrel() ){
-      debug["IsCatenableContribution"]<<"Ncorrel != other.GetNcorrel()"<<endl;
+      debug["IsCatenable"]<<"Ncorrel != other.GetNcorrel(). Skipped."<<endl;
       return false;
    }
-   info["IsCatenableContribution"]<<"Both multiplicable contributions are catenable"<<endl;
+   info["IsCatenable"]<<"Multiplicable contributions are catenable"<<endl;
    return true;
 }

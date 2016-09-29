@@ -187,17 +187,6 @@ void fastNLOCoeffData::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
-// void fastNLOCoeffData::Cat(const fastNLOCoeffData& other){
-//    //! Concatenate bins of another coefficient table to this table
-//    const fastNLOCoeffData& cother = (const fastNLOCoeffData&)other;
-//    for ( int iObs=0; iObs<cother.GetNObsBin(); iObs++ ) {
-//       CatBin(cother,iObs);
-//    }
-// }
-
-
-
-//________________________________________________________________________________________________________________ //
 
 // Erase observable bin
 void fastNLOCoeffData::EraseBin(unsigned int iObsIdx) {
@@ -235,21 +224,21 @@ void fastNLOCoeffData::CatBin(const fastNLOCoeffData& other, unsigned int iObsId
 }
 
 //________________________________________________________________________________________________________________ //
-bool fastNLOCoeffData::IsCatenableContribution(const fastNLOCoeffData& other) const {
+bool fastNLOCoeffData::IsCatenable(const fastNLOCoeffData& other) const {
    //! Check for compatibility of catenating observable bins
-   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) return false;
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenable(other)) return false;
    if( Nuncorrel != other.GetNuncorrel() ){
-      debug["IsCatenableContribution"]<<"Nuncorrel != other.GetNuncorrel()"<<endl;
+      debug["IsCatenable"]<<"Nuncorrel != other.GetNuncorrel(). Skipped."<<endl;
       return false;
    }
    if( Ncorrel != other.GetNcorrel() ){
-      debug["IsCatenableContribution"]<<"Ncorrel != other.GetNcorrel()"<<endl;
+      debug["IsCatenable"]<<"Ncorrel != other.GetNcorrel(). Skipped."<<endl;
       return false;
    }
    if( NErrMatrix != other.GetNErrMatrix() ){
-      debug["IsCatenableContribution"]<<"NErrMatrix != other.GetNErrMatrix()"<<endl;
+      debug["IsCatenable"]<<"NErrMatrix != other.GetNErrMatrix(). Skipped."<<endl;
       return false;
    }
-   info["IsCatenableContribution"]<<"Both data contributions are catenable"<<endl;
+   info["IsCatenable"]<<"Data contributions are catenable"<<endl;
    return true;
 }

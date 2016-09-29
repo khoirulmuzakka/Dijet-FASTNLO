@@ -161,32 +161,32 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
 
 
 //________________________________________________________________________________________________________________ //
-bool fastNLOCoeffBase::IsCatenableContribution(const fastNLOCoeffBase& other) const {
+bool fastNLOCoeffBase::IsCatenable(const fastNLOCoeffBase& other) const {
    if( IXsectUnits != other.GetIXsectUnits() ){
-      warn["IsCatenableContribution"]<<"IXsectUnits != other.GetIXsectUnits()"<<endl;
+      debug["IsCatenable"]<<"IXsectUnits != other.GetIXsectUnits(). Skipped."<<endl;
       return false;
    }
    if( IDataFlag != other.GetIDataFlag() ){
-      debug["IsCatenableContribution"]<<"IDataFlag != other.GetIDataFlag()"<<endl;
+      debug["IsCatenable"]<<"IDataFlag != other.GetIDataFlag(). Skipped."<<endl;
       return false;
    }
    if( IAddMultFlag != other.GetIAddMultFlag() ){
-      debug["IsCatenableContribution"]<<"IAddMultFlag != other.GetIAddMultFlag()"<<endl;
+      debug["IsCatenable"]<<"IAddMultFlag != other.GetIAddMultFlag(). Skipped."<<endl;
       return false;
    }
    if( IContrFlag1 != other.GetIContrFlag1() ){
-      debug["IsCatenableContribution"]<<"IContrFlag1 != other.GetIContrFlag1()"<<endl;
+      debug["IsCatenable"]<<"IContrFlag1 != other.GetIContrFlag1(). Skipped."<<endl;
       return false;
    }
    if( IContrFlag2 != other.GetIContrFlag2() ){
-      debug["IsCatenableContribution"]<<"IContrFlag2 != other.GetIContrFlag2()"<<endl;
+      debug["IsCatenable"]<<"IContrFlag2 != other.GetIContrFlag2(). Skipped."<<endl;
       return false;
    }
    if( NScaleDep != other.GetNScaleDep() ){
-      debug["IsCatenableContribution"]<<"NScaleDep != other.GetNScaleDep()"<<endl;
+      debug["IsCatenable"]<<"NScaleDep != other.GetNScaleDep(). Skipped."<<endl;
       return false;
    }
-   debug["IsCatenableContribution"]<<"Both tables are catenable"<<endl;
+   info["IsCatenable"]<<"Contributions are catenable"<<endl;
    // check descripts here ?!
    //bool potentialcompatible = true;
    //vector < string > CtrbDescript;
@@ -243,9 +243,7 @@ void fastNLOCoeffBase::EraseBin(unsigned int iObsIdx) {
 // Catenate observable bin
 void fastNLOCoeffBase::CatBin(const fastNLOCoeffBase& other, unsigned int iObsIdx) {
    info["fastNLOCoeffBase::CatBin"]<<"Catenating observable bin in CoeffBase corresponding to bin index " << iObsIdx << endl;
-   debug["fastNLOCoeffBase::CatBin"]<<"AAA fNObsBins, GetNObsbin, other.GetNObsBin = " << fNObsBins << ", " << GetNObsBin() << ", " << other.GetNObsBin() << endl;
    SetNObsBin(GetNObsBin()+1);
-   debug["fastNLOCoeffBase::CatBin"]<<"BBB fNObsBins, GetNObsbin, other.GetNObsBin = " << fNObsBins << ", " << GetNObsBin() << ", " << other.GetNObsBin() << endl;
 }
 
 // Multiply observable bin

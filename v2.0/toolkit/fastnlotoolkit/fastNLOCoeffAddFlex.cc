@@ -234,16 +234,6 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other){
 }
 
 
-// //________________________________________________________________________________________________________________ //
-// void fastNLOCoeffAddFlex::Cat(const fastNLOCoeffAddFlex& other){
-//    //! Concatenate bins of another coefficient table to this table
-//    const fastNLOCoeffAddFlex& othfix = (const fastNLOCoeffAddFlex&)other;
-//    for ( int iObs=0; iObs<othfix.GetNObsBin(); iObs++ ) {
-//       CatBin(othfix,iObs);
-//    }
-// }
-
-
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Clear() {
    //! Set all elements of sigma tilde to zero
@@ -291,11 +281,12 @@ bool  fastNLOCoeffAddFlex::IsCompatible(const fastNLOCoeffAddFlex& other) const 
 
 
 //________________________________________________________________________________________________________________ //
-bool  fastNLOCoeffAddFlex::IsCatenableContribution(const fastNLOCoeffAddFlex& other) const {
+bool  fastNLOCoeffAddFlex::IsCatenable(const fastNLOCoeffAddFlex& other) const {
    //! Check for compatibility of catenating observable bins
-   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenableContribution(other)) return false;
+   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenable(other)) return false;
    // TODO: More checks
-  return true;
+   info["IsCatenable"]<<"Flex-scale contributions are catenable"<<endl;
+   return true;
 }
 
 

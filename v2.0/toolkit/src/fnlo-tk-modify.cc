@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
    using namespace fastNLO;      //! namespace for fastNLO constants
 
    //! --- Set verbosity level
-   SetGlobalVerbosity(INFO);
+   SetGlobalVerbosity(DEBUG);
 
    //! --- Print program purpose
    cout << _CSEPSC << endl;

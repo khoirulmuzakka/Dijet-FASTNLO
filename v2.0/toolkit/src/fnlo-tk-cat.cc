@@ -27,8 +27,7 @@ int main(int argc, char** argv) {
    using namespace fastNLO;      //! namespace for fastNLO constants
 
    //! --- Set verbosity level
-   //ckr  SetGlobalVerbosity(INFO);
-   SetGlobalVerbosity(DEBUG);
+   SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
    cout << _CSEPSC << endl;
@@ -132,8 +131,6 @@ int main(int argc, char** argv) {
    }
 
    //! Write result
-   cout << "New NObsbin = " << resultTable->GetNObsBin() << endl;
-
    resultTable->SetFilename(outfile);
    info["fnlo-tk-cat"]<<"Write catenated results to file '" << resultTable->GetFilename() << "'"<<endl;
    resultTable->WriteTable();

@@ -367,16 +367,14 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
          fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
          // data?
          if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
-            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
-            if ( cthis->IsCatenableContribution(*cother) ) {
+            if ( cthis->IsCatenable(*cother) ) {
                matches[ic]++;
                continue;
             }
          }
          // multiplicative?
          else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
-            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
-            if ( cthis->IsCatenableContribution(*cother) ) {
+            if ( cthis->IsCatenable(*cother) ) {
                matches[ic]++;
                continue;
             }
@@ -385,8 +383,7 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
          else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
             //            fastNLOCoeffAddBase* cthis  = (fastNLOCoeffAddBase*)fCoeff[j];
             //            fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
-            cout << "ic = " << ic << ", j = " << j << ", IsCatenable = " << cthis->IsCatenableContribution(*cother) << endl;
-            if ( cthis->IsCatenableContribution(*cother) ) {
+            if ( cthis->IsCatenable(*cother) ) {
                matches[ic]++;
                continue;
             }
@@ -550,12 +547,9 @@ void fastNLOTable::CatenateTable(const fastNLOTable& other) {
       logger.error["CatenateTable"]<<"Tried to catenate incompatible tables. Aborted!"<<endl;
       exit(1);
    }
-
-   cout << "AAA this nobsbin = " << NObsBin << ", other nobsbin = " << other.GetNObsBin() << ", coeff size = " << fCoeff.size() << endl;
    for ( unsigned int iObs=0; iObs<other.GetNObsBin(); iObs++ ) {
       this->CatBinToTable(other,iObs);
    }
-   cout << "BBB this nobsbin = " << NObsBin << ", other nobsbin = " << other.GetNObsBin() << ", coeff size = " << fCoeff.size() << endl;
 }
 
 
@@ -1767,7 +1761,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
             if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
                fastNLOCoeffAddFix* clhs = (fastNLOCoeffAddFix*)fCoeff[jc];
                fastNLOCoeffAddFix* crhs = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
-               if ( clhs->IsCatenableContribution(*crhs) ) {
+               if ( clhs->IsCatenable(*crhs) ) {
                   logger.info["CatBinToTable"]<<"Found fix-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
                   clhs->CatBin(*crhs,iObsIdx);
                   continue;
@@ -1776,7 +1770,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
             else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
                fastNLOCoeffAddFlex* clhs = (fastNLOCoeffAddFlex*)fCoeff[jc];
                fastNLOCoeffAddFlex* crhs = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
-               if ( clhs->IsCatenableContribution(*crhs) ) {
+               if ( clhs->IsCatenable(*crhs) ) {
                   logger.info["CatBinToTable"]<<"Found flex-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
                   clhs->CatBin(*crhs,iObsIdx);
                   continue;
@@ -1787,7 +1781,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
          else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
             fastNLOCoeffMult* clhs = (fastNLOCoeffMult*)fCoeff[jc];
             fastNLOCoeffMult* crhs = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
-            if ( clhs->IsCatenableContribution(*crhs) ) {
+            if ( clhs->IsCatenable(*crhs) ) {
                logger.info["CatBinToTable"]<<"Found multiplicative contribution. Now catenating index no. " << iObsIdx << endl;
                clhs->CatBin(*crhs,iObsIdx);
                continue;
@@ -1797,7 +1791,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
          else if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
             fastNLOCoeffData* clhs = (fastNLOCoeffData*)fCoeff[jc];
             fastNLOCoeffData* crhs = (fastNLOCoeffData*)other.GetCoeffTable(ic);
-            if ( clhs->IsCatenableContribution(*crhs) ) {
+            if ( clhs->IsCatenable(*crhs) ) {
                logger.info["CatBinToTable"]<<"Found data contribution. Now catenating index no. " << iObsIdx << endl;
                clhs->CatBin(*crhs,iObsIdx);
                continue;

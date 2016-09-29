@@ -20,7 +20,6 @@ public:
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;
-   //   virtual void Cat(const fastNLOCoeffMult& other);
 
    double GetMultFactor(int iObs) const { return fact[iObs]; }
    std::vector<double > GetMultFactor() const { return fact; }
@@ -34,7 +33,7 @@ public:
    // Erase observable bin; iObsIdx is the C++ array index to be removed and
    // not the observable bin no. running from 1 to fNObsBins
    virtual void EraseBin(unsigned int iObsIdx);
-   bool IsCatenableContribution(const fastNLOCoeffMult& other) const;
+   bool IsCatenable(const fastNLOCoeffMult& other) const;
    // Catenate observable to table
    virtual void CatBin(const fastNLOCoeffMult& other, unsigned int iObsIdx);
 

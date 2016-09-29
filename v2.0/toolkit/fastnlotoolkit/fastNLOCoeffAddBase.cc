@@ -92,7 +92,6 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    table >> IPDFdef1;
    table >> IPDFdef2;
    table >> IPDFdef3;
-   //printf("  *  fastNLOCoeffAddBase::Read(). IRef : %d, IScaleDep: %d, Nevt: %d, Npow: %d, NPDF: %d, NPDFDim: %d\n", IRef ,IScaleDep  ,Nevt  , Npow ,NPDF , NPDFDim  );
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
       if ( IPDFdef3 != NSubproc ){
@@ -358,52 +357,52 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
 
 
 //________________________________________________________________________________________________________________ //
-bool fastNLOCoeffAddBase::IsCatenableContribution(const fastNLOCoeffAddBase& other) const {
+bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
    // check CoeffBase variables
-   if ( ! ((fastNLOCoeffBase*)this)->IsCatenableContribution(other)) {
-      say::debug["fastNLOCoeffAddBase::IsCatenableContribution"]<<"fastNLOCoeffBase not compatible."<<endl;
+   if ( ! ((fastNLOCoeffBase*)this)->IsCatenable(other)) {
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"fastNLOCoeffBase not compatible. Skipped."<<endl;
       return false;
    }
    if ( IRef != other.GetIRef() ) {
-      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of IRef detected."<<endl;
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of IRef detected. Skipped."<<endl;
       return false;
    }
    if ( IScaleDep != other.GetIScaleDep() ) {
-      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of IScaleDep detected."<<endl;
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of IScaleDep detected. Skipped."<<endl;
       return false;
    }
    if ( Npow != other.GetNpow() ) {
-      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of NPow detected."<<endl;
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of NPow detected. Skipped."<<endl;
       return false;
    }
    if ( GetNPDF() != other.GetNPDF() ) {
-      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of NPDF detected."<<endl;
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of NPDF detected. Skipped."<<endl;
       return false;
    }
    if ( NSubproc != other.GetNSubproc() ) {
-      say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different numbers for NSubproc detected."<<endl;
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different numbers for NSubproc detected. Skipped."<<endl;
       return false;
    }
    // check x-nodes briefly
    // for ( int i = 0 ; i< fNObsBins ;i++ ){
    //    if ( GetNxmax(i) != other.GetNxmax(i) ){
-   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of x-nodes detected."<<endl;
+   //       say::debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetNxtot1(i) != other.GetNxtot1(i) ){
-   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different number of x-nodes detected."<<endl;
+   //       say::debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
-   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different values for x-nodes detected."<<endl;
+   //       say::debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different values for x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
-   //       say::warn["fastNLOCoeffAddBase::IsCatenableContribution"]<<"Different values for x-nodes detected."<<endl;
+   //       say::debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different values for x-nodes detected."<<endl;
    //       return false;
    //    }
    // }
-   // succesful!
+   info["IsCatenable"]<<"Additional contributions are catenable"<<endl;
    return true;
 }
 

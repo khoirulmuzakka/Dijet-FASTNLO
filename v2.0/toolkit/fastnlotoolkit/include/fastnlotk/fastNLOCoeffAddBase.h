@@ -20,7 +20,6 @@ public:
    void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Add(const fastNLOCoeffAddBase& other);
-   //   virtual void Cat(const fastNLOCoeffAddBase& other);
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins
@@ -73,7 +72,7 @@ public:
 
    bool IsReference() const {return IRef>0;};
    bool IsCompatible(const fastNLOCoeffAddBase& other) const;
-   bool IsCatenableContribution(const fastNLOCoeffAddBase& other) const;
+   bool IsCatenable(const fastNLOCoeffAddBase& other) const;
 
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 

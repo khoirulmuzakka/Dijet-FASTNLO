@@ -189,18 +189,6 @@ void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other){
 }
 
 
-
-//________________________________________________________________________________________________________________ //
-// void fastNLOCoeffAddFix::Cat(const fastNLOCoeffAddFix& other){
-//    //! Concatenate bins of another coefficient table to this table
-//    const fastNLOCoeffAddFix& othfix = (const fastNLOCoeffAddFix&)other;
-//    for ( int iObs=0; iObs<othfix.GetNObsBin(); iObs++ ) {
-//       CatBin(othfix,iObs);
-//    }
-// }
-
-
-
 //________________________________________________________________________________________________________________ //
 int fastNLOCoeffAddFix::GetTotalScalevars() const {
    //! Get nuber of scale-variations
@@ -256,21 +244,22 @@ bool  fastNLOCoeffAddFix::IsCompatible(const fastNLOCoeffAddFix& other) const {
 
 
 //________________________________________________________________________________________________________________ //
-bool  fastNLOCoeffAddFix::IsCatenableContribution(const fastNLOCoeffAddFix& other) const {
+bool  fastNLOCoeffAddFix::IsCatenable(const fastNLOCoeffAddFix& other) const {
    //! Check for compatibility of catenating observable bins
-   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenableContribution(other)) return false;
+   if ( ! ((fastNLOCoeffAddBase*)this)->IsCatenable(other)) return false;
    if ( GetNScaleNode() != other.GetNScaleNode() ) {
-      say::warn["IsCatenableContribution"]<<"Incompatible number of scale nodes found."<<endl;
+      debug["IsCatenable"]<<"Incompatible number of scale nodes found. Skipped."<<endl;
       return false;
    }
    if ( GetNScalevar() != other.GetNScalevar() ) {
-      say::warn["IsCatenableContribution"]<<"Incompatible number of scale variations found."<<endl;
+      debug["IsCatenable"]<<"Incompatible number of scale variations found. Skipped."<<endl;
       return false;
    }
    if ( GetAvailableScaleFactors()[GetNScalevar()-1] != other.GetAvailableScaleFactors()[GetNScalevar()-1] ) {
-      say::warn["IsCatenableContribution"]<<"Incompatible scale variations found."<<endl;
+      debug["IsCatenable"]<<"Incompatible scale variations found. Skipped."<<endl;
       return false;
    }
+   info["IsCatenable"]<<"Fix-scale contributions are catenable"<<endl;
    return true;
 }
 
