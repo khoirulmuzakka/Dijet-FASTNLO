@@ -106,8 +106,13 @@ int main(int argc, char** argv) {
             resultTable = new fastNLOTable(tab);
             nValidTables++;
             //! Hint to use fnlo-tk-cat correctly
-            info["fnlo-tk-cat"]<<"Numerous technical checks for compatibility are performed."<<endl;
-            info["fnlo-tk-cat"]<<"However, it is the user's responsibility to ensure that the same observable definition" << endl;
+            info["fnlo-tk-cat"]<<"Several technical checks for compatibility are performed. In particular,"<<endl;
+            info["fnlo-tk-cat"]<<"the number of contributing events to an additive contribution is checked."<<endl;
+            info["fnlo-tk-cat"]<<"If differing event numbers are found between such contributions,"<<endl;
+            info["fnlo-tk-cat"]<<"the observable bins can still be catenated, but the statistical information is lost."<<endl;
+            info["fnlo-tk-cat"]<<"In that case, the catenated tables cannot be improved anymore statistically by merging in more events."<<endl;
+            info["fnlo-tk-cat"]<<"This must be performed beforehand."<<endl;
+            info["fnlo-tk-cat"]<<"In addition, it is the user's responsibility to ensure that the SAME observable definition" << endl;
             info["fnlo-tk-cat"]<<"was used to produce the various observable bins to catenate."<<endl;
             info["fnlo-tk-cat"]<<"This cannot be checked by the program!"<<endl;
          }
@@ -118,6 +123,45 @@ int main(int argc, char** argv) {
                warn["fnlo-tk-cat"]<<"Table '" << path << "' is not catenable with initial table '" << resultTable->GetFilename() << "', skipped!" << endl;
             //! catenating tables
             else {
+               bool normalise = false;
+               // Loop over all contributions from 'new'-table
+               for ( int ic=0; ic<tab.GetNcontrib()+tab.GetNdata(); ic++ ) {
+                  // Find matching contribution from 'result'-table
+                  for ( int jc=0; jc<resultTable->GetNcontrib()+resultTable->GetNdata(); jc++) {
+                     bool quiet = true;
+                     fastNLOCoeffBase* cnew = (fastNLOCoeffBase*)tab.GetCoeffTable(ic);
+                     // Identify type of new coeff table
+                     // Only additive ones have event numbers
+                     // Additive?
+                     if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) {
+                        fastNLOCoeffAddBase* clhs = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(jc);
+                        fastNLOCoeffAddBase* crhs = (fastNLOCoeffAddBase*)tab.GetCoeffTable(ic);
+                        if ( clhs->IsCatenable(*crhs) ) {
+                           if ( clhs->GetNevt() != crhs->GetNevt() ) {
+                              warn["fnlo-tk-cat"]<<"Contributions with differing event numbers found between initial and catenated table: Nevt0 = "<< clhs->GetNevt() << ", Nevt = " << crhs->GetNevt() <<endl;
+                              warn["fnlo-tk-cat"]<<"Contributions must be renormalised losing statistical information." << endl;
+                              warn["fnlo-tk-cat"]<<"Resulting tables can NOT be merged with others to increase event numbers. This must be done beforehand!"<<endl;
+                              if ( clhs->GetNevt() != 1. ) {
+                                 clhs->NormalizeCoefficients();
+                                 normalise = true;
+                              }
+                              crhs->NormalizeCoefficients();
+                           }
+                        }
+                     }
+                  }
+               }
+               if ( normalise ) {
+                  for ( int jc=0; jc<resultTable->GetNcontrib()+resultTable->GetNdata(); jc++) {
+                     bool quiet = true;
+                     fastNLOCoeffBase* cres = (fastNLOCoeffBase*)resultTable->GetCoeffTable(jc);
+                     // Additive?
+                     if ( fastNLOCoeffAddBase::CheckCoeffConstants(cres,quiet) ) {
+                        fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(jc);
+                        cadd->SetNevt(1);
+                     }
+                  }
+               }
                resultTable->CatenateTable(tab);
                nValidTables++;
             }
