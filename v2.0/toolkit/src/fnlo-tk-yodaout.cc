@@ -1,7 +1,7 @@
 ///********************************************************************
 ///
-///     fastNLO_reader: FNLOYODAOUT
-///     Program to read fastNLO v2 tables and write out
+///     fastNLO_toolkit: fnlo-tk-yodaout
+///     Program to read fastNLO tables and write out
 ///     QCD cross sections in YODA format for use with Rivet
 ///
 ///     K. Rabbertz, G. Sieber, S. Tyros
@@ -28,54 +28,75 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-yodaout"] << "Program to read fastNLO tables and write out" << endl;
+   info["fnlo-tk-yodaout"] << "QCD cross sections in YODA format for use with Rivet" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
+   info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
+   yell << _CSEPSC << endl;
+
    //! --- Parse commmand line
    char buffer[1024];
-   cout << endl;
-   cout << _CSEPSC << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
    shout["fnlo-tk-yodaout"] << "fastNLO YODA Writer" << endl;
-   cout << _SSEPSC << endl;
-   //! --- fastNLO table and usage info
+   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
       error["fnlo-tk-yodaout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-yodaout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
-      cout << _CSEPSC << endl;
+      yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      //! --- Usage info
       if (tablename == "-h") {
-         cout << " #" << endl;
-         shout << "Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
-         shout << "       Arguments: <> mandatory; [] optional." << endl;
-         shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
-         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
-         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
-         shout << "   If the PDF set still is not found, then:" << endl;
-         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
-         shout << "   - Specify the PDF set including the absolute path." << endl;
-         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "[uncertainty]: Uncertainty to show, def. = none" << endl;
-         shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
-         shout << "                 2P (symmetric 2-point scale factor variation)" << endl;
-         shout << "                 6P (asymmetric 6-point scale factor variation)" << endl;
-         shout << "                 HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)" << endl;
-         shout << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
-         shout << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
-         shout << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
-         shout << "                 MC (MC sampling PDF uncertainty --> NNPDF PDFs)" << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-yodaout"] << "This program evaluates a fastNLO table and" << endl;
+         info["fnlo-tk-yodaout"] << "prints out cross sections with either scale or" << endl;
+         info["fnlo-tk-yodaout"] << "PDF uncertainties in YODA format for use with Rivet." << endl;
+         info["fnlo-tk-yodaout"] << "For this to work, the scenario description must contain" << endl;
+         info["fnlo-tk-yodaout"] << "the Rivet ID in the form 'RIVET_ID=EXP_YYYY_INSPIREID/Dii-xjj-ykk'," << endl;
+         info["fnlo-tk-yodaout"] << "where 'ii', 'jj', and 'kk' indicate the first histogram covered by" << endl;
+         info["fnlo-tk-yodaout"] << "this table and the capital letter indicates the plot counter to increase." << endl;
+         info["fnlo-tk-yodaout"] << "In case the Rivet ID is missing, it can be added e.g. by using 'fnlo-tk-modify'." << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
+         man << "       Arguments: <> mandatory; [] optional." << endl;
+         man << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
+         man << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         man << "   If the PDF set still is not found, then:" << endl;
+         man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         man << "   - Specify the PDF set including the absolute path." << endl;
+         man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
+         man << "[uncertainty]: Uncertainty to show, def. = none" << endl;
+         man << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
+         man << "                 2P (symmetric 2-point scale factor variation)" << endl;
+         man << "                 6P (asymmetric 6-point scale factor variation)" << endl;
+         man << "                 HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)" << endl;
+         man << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
+         man << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
+         man << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
+         man << "                 MC (MC sampling PDF uncertainty --> NNPDF PDFs)" << endl;
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-         shout << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
+         man << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
-         shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
-         shout << "   Alternatives: LO, NNLO (if available)" << endl;
-         shout << "[norm]: Normalize if applicable, def. = no." << endl;
-         shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
-         cout << " #" << endl;
-         shout << "Use \"_\" to skip changing a default argument." << endl;
-         cout << " #" << endl;
-         cout  << _CSEPSC << endl;
+         man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
+         man << "   Alternatives: LO, NNLO (if available)" << endl;
+         man << "[norm]: Normalize if applicable, def. = no." << endl;
+         man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         yell << " #" << endl;
+         man << "Use \"_\" to skip changing a default argument." << endl;
+         yell << " #" << endl;
+         yell << _CSEPSC << endl;
          return 0;
       } else {
          shout["fnlo-tk-yodaout"] << "Evaluating table: "  <<  tablename << endl;
@@ -177,11 +198,9 @@ int main(int argc, char** argv) {
       error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
-   cout << _CSEPSC << endl;
+   yell << _CSEPSC << endl;
 
    //! --- fastNLO initialisation, read & evaluate table
-   //! Select verbosity level
-   SetGlobalVerbosity(WARNING);
    //! Initialise a fastNLO instance with interface to LHAPDF
    //! Note: This also initializes the cross section to the LO/NLO one!
    fastNLOLHAPDF fnlo(tablename,PDFFile,0);
@@ -295,14 +314,14 @@ int main(int argc, char** argv) {
    }
 
    if ( XsUnc.xs.size() ) {
-      cout << _CSEPSC << endl;
-      cout << " # fnlo-tk-yodaout: Evaluating uncertainties" << endl;
-      cout << _CSEPSC << endl;
-      cout << _DSEPSC << endl;
-      cout <<  buffer << endl;
-      cout << _SSEPSC << endl;
-      cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
-      cout << _SSEPSC << endl;
+      yell << _CSEPSC << endl;
+      shout << "fnlo-tk-yodaout: Evaluating uncertainties" << endl;
+      yell << _CSEPSC << endl;
+      yell << _DSEPSC << endl;
+      yell <<  buffer << endl;
+      yell << _SSEPSC << endl;
+      shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
+      yell << _SSEPSC << endl;
    }
    vector < double > dxsu;
    vector < double > dxsl;
@@ -318,7 +337,7 @@ int main(int argc, char** argv) {
       }
    }
    if ( XsUnc.xs.size() ) {
-      cout << _SSEPSC << endl;
+      yell << _SSEPSC << endl;
    }
 
    //! --- Get RivetID
@@ -438,10 +457,10 @@ int main(int argc, char** argv) {
    //! --- Output
    //! Save histograms into the yoda file
    writer.write( FileName + ".yoda", aos );
-   cout << endl;
-   cout << _CSEPSC << endl;
-   cout << " #" << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   yell << " #" << endl;
    shout << FileName + ".yoda was successfully produced" << endl;
-   cout << " #" << endl;
-   cout << _CSEPSC << endl << endl;
+   yell << " #" << endl;
+   yell << _CSEPSC << endl << endl;
 }
