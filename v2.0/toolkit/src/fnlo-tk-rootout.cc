@@ -1,7 +1,7 @@
 ///********************************************************************
 ///
-///     fastNLO_reader: FNLOROOTOUT
-///     Program to read fastNLO v2 tables and write out
+///     fastNLO_toolkit: fnlo-tk-rootout
+///     Program to read fastNLO tables and write out
 ///     QCD cross sections into ROOT histograms
 ///
 ///     K. Rabbertz
@@ -32,54 +32,72 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-rootout"] << "Program to read fastNLO tables and write out" << endl;
+   info["fnlo-tk-rootout"] << "QCD cross sections into ROOT histograms" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-rootout"] << "For more explanations type:" << endl;
+   info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
+   yell << _CSEPSC << endl;
+
    //! --- Parse commmand line
    char buffer[1024];
    char titlel[1024];
    char titleu[1024];
-   cout << endl;
-   cout << _CSEPSC << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
    shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
-   cout << _SSEPSC << endl;
-   //! --- fastNLO table and usage info
+   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
       error["fnlo-tk-rootout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-rootout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
-      cout << _CSEPSC << endl;
+      yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      //! --- Usage info
       if (tablename == "-h") {
-         cout << " #" << endl;
-         shout << "Usage: ./fnlo-tk-rootout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
-         shout << "       Arguments: <> mandatory; [] optional." << endl;
-         shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = series of CT14nlo, MMHT2014nlo68cl, NNPDF30_nlo_as_0118, PDF4LHC15_nlo_mc" << endl;
-         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
-         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
-         shout << "   If the PDF set still is not found, then:" << endl;
-         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
-         shout << "   - Specify the PDF set including the absolute path." << endl;
-         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "[PDF uncertainty]: Uncertainty to show, def. = none" << endl;
-         shout << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
-         shout << "                 HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)" << endl;
-         shout << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
-         shout << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
-         shout << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
-         shout << "                 MC (MC sampling PDF uncertainty --> NNPDF PDFs)" << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-rootout"] << "This program evaluates a fastNLO table and" << endl;
+         info["fnlo-tk-rootout"] << "writes histograms with cross sections and scale or" << endl;
+         info["fnlo-tk-rootout"] << "PDF uncertainties into ROOT." << endl;
+         info["fnlo-tk-rootout"] << "" << endl;
+         info["fnlo-tk-rootout"] << "TODO: Provide more info on histogram numbering/labelling ..." << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-rootout <fastNLOtable.tab> [PDF] [uncertainty]" << endl;
+         man << "       Arguments: <> mandatory; [] optional." << endl;
+         man << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
+         man << "[PDF]: PDF set, def. = series of CT14nlo, MMHT2014nlo68cl, NNPDF30_nlo_as_0118, PDF4LHC15_nlo_mc" << endl;
+         man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         man << "   If the PDF set still is not found, then:" << endl;
+         man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         man << "   - Specify the PDF set including the absolute path." << endl;
+         man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
+         man << "[PDF uncertainty]: Uncertainty to show, def. = none" << endl;
+         man << "   Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)" << endl;
+         man << "                 HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)" << endl;
+         man << "                 HA (asymmetric Hessian PDF uncertainty)" << endl;
+         man << "                 HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)" << endl;
+         man << "                 HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)" << endl;
+         man << "                 MC (MC sampling PDF uncertainty --> NNPDF PDFs)" << endl;
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-         shout << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
+         man << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
-         shout << "[order]: Fixed-order precision to use, def. = series up to highest fixed-order available" << endl;
-         shout << "   Alternatives: LO, NLO, NNLO (if available)" << endl;
-         shout << "[norm]: Normalize if applicable, def. = no." << endl;
-         shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
-         cout << " #" << endl;
-         shout << "Use \"_\" to skip changing a default argument." << endl;
-         cout << " #" << endl;
-         cout  << _CSEPSC << endl;
+         man << "[order]: Fixed-order precision to use, def. = series up to highest fixed-order available" << endl;
+         man << "   Alternatives: LO, NLO, NNLO (if available)" << endl;
+         man << "[norm]: Normalize if applicable, def. = no." << endl;
+         man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         yell << " #" << endl;
+         man << "Use \"_\" to skip changing a default argument." << endl;
+         yell << " #" << endl;
+         yell << _CSEPSC << endl;
          return 0;
       } else {
          shout["fnlo-tk-rootout"] << "Evaluating table: "  <<  tablename << endl;
@@ -174,7 +192,7 @@ int main(int argc, char** argv) {
       error["fnlo-tk-rootout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
-   cout << _CSEPSC << endl;
+   yell << _CSEPSC << endl;
 
    //! --- Prepare loop over PDF sets
    const int nsets = 4;
@@ -198,8 +216,6 @@ int main(int argc, char** argv) {
    }
 
    //! --- fastNLO initialisation, attach table
-   //! Select verbosity level
-   SetGlobalVerbosity(WARNING);
    fastNLOTable table = fastNLOTable(tablename);
    //! Print essential table information
    table.PrintContributionSummary(0);
@@ -388,18 +404,18 @@ int main(int argc, char** argv) {
 
             //! Print out of results
             if ( XsUnc.xs.size() ) {
-               cout << _CSEPSC << endl;
-               cout << " # fnlo-tk-rootout: Evaluating uncertainties" << endl;
-               cout << _CSEPSC << endl;
-               cout << _DSEPSC << endl;
-               cout <<  buffer << endl;
-               cout << _SSEPSC << endl;
-               cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
-               cout << _SSEPSC << endl;
+               yell << _CSEPSC << endl;
+               shout << "fnlo-tk-rootout: Evaluating uncertainties" << endl;
+               yell << _CSEPSC << endl;
+               yell << _DSEPSC << endl;
+               yell <<  buffer << endl;
+               yell << _SSEPSC << endl;
+               shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
+               yell << _SSEPSC << endl;
                for ( unsigned int iobs=0;iobs<XsUnc.xs.size();iobs++ ) {
                   printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,XsUnc.xs[iobs],XsUnc.dxsl[iobs],XsUnc.dxsu[iobs]);
                }
-               cout << _SSEPSC << endl;
+               yell << _SSEPSC << endl;
             }
 
             //! --- Initialize dimension bin and continuous observable bin counter
@@ -519,10 +535,10 @@ int main(int argc, char** argv) {
    rootfile->cd();
    rootfile->Write();
    rootfile->Close();
-   cout << endl;
-   cout << _CSEPSC << endl;
-   cout << " #" << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   yell << " #" << endl;
    shout << RootFileName + " with " << nHist << " histograms was successfully produced" << endl;
-   cout << " #" << endl;
-   cout << _CSEPSC << endl << endl;
+   yell << " #" << endl;
+   yell << _CSEPSC << endl << endl;
 }
