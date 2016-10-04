@@ -1,17 +1,11 @@
 ///********************************************************************
 ///
 ///     fastNLO_toolkit: fnlo-tk-modify
-///     Program to modify fastNLO v2 tables
+///     Tool to manipulate a fastNLO table
 ///
-///     The desired changes are set up in a steering file.
-///     By default the steering file is named 'SteerModify.str'.
-///     If another steering filename should be used, this filename can
-///     be passed via the command line using the tag 'steerfile=',
-///     e.g. fnlo-tk-modify steerfile=AnotherFileName.str
-///
-///     See the provided default steering file 'SteerModify.str' for more details,
-///     or type:
+///     For more explanations type:
 ///     ./fnlo-tk-modify -h
+///     and consult the provided default steering file 'SteerModify.str'.
 ///
 ///     D. Britzger, K. Rabbertz
 ///
@@ -34,28 +28,22 @@ int main(int argc, char** argv) {
    using namespace fastNLO;      //! namespace for fastNLO constants
 
    //! --- Set verbosity level
-   SetGlobalVerbosity(DEBUG);
+   SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
-   cout << _CSEPSC << endl;
-   info["fnlo-tk-modify"] << "Program to modify fastNLO v2 tables" << endl;
-   cout << _SSEPSC << endl;
-   info["fnlo-tk-modify"] << "The desired changes are set up in a steering file." << endl;
-   info["fnlo-tk-modify"] << "By default the steering file is named 'SteerModify.str'." << endl;
-   info["fnlo-tk-modify"] << "If another steering filename should be used, this filename can" << endl;
-   info["fnlo-tk-modify"] << "be passed via the command line using the tag 'steerfile='," << endl;
-   info["fnlo-tk-modify"] << "e.g. fnlo-tk-modify steerfile=AnotherFileName.str" << endl;
-   info["fnlo-tk-modify"] << endl;
-   info["fnlo-tk-modify"] << "See the provided default steering file 'SteerModify.str' for more details," << endl;
-   info["fnlo-tk-modify"] << "or type:" << endl;
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-modify"] << "Tool to manipulate a fastNLO table" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-modify"] << "For more explanations type:" << endl;
    info["fnlo-tk-modify"] << "./fnlo-tk-modify -h" << endl;
-   cout << _CSEPSC << endl;
+   info["fnlo-tk-modify"] << "and consult the provided default steering file 'SteerModify.str'." << endl;
+   yell << _CSEPSC << endl;
 
    //! ---  Parse commmand line
-   cout << endl;
-   cout << _CSEPSC << endl;
-   shout["fnlo-tk-modify"] << "fastNLO Toolkit"<<endl;
-   cout << _SSEPSC << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   shout["fnlo-tk-modify"] << "fastNLO Table Manipulator"<<endl;
+   yell << _SSEPSC << endl;
    //! Test for default steering file "SteerModify.str"
    string steername = "SteerModify.str";
    if (argc <= 1) {
@@ -66,36 +54,49 @@ int main(int argc, char** argv) {
          error["fnlo-tk-modify"] << "nor default steering file 'SteerModify.str' found. Aborted!" << endl;
          shout["fnlo-tk-modify"] << "For more explanations type:" << endl;
          shout["fnlo-tk-modify"] << "./fnlo-tk-modify -h" << endl;
-         cout << _CSEPSC << endl;
+         yell << _CSEPSC << endl;
          exit(1);
       }
    } else {
       steername = (const char*) argv[1];
       //! --- Usage info
       if (steername == "-h") {
-         cout  << " #" << endl;
-         shout << "Usage: ./fnlo-tk-modify [steerfile=SteerFile.str] <InTable=fastNLOtableIn.tab> <OutTable=fastNLOtableOut.tab> [OptArg=option]" << endl;
-         shout << "       Specification: <> mandatory; [] optional." << endl;
-         shout << "       All desired table modifications like" << endl;
-         shout << "       - changing the scenario name" << endl;
-         shout << "       - changing or complementing the scenario description" << endl;
-         shout << "       - adapting the cross section output units" << endl;
-         shout << "       - correcting the power of the LO process" << endl;
-         shout << "       - correcting the cms energy" << endl;
-         shout << "       - cutting out unused bins or" << endl;
-         shout << "       - multiplying bins by a set of factors" << endl;
-         shout << "       are assumed to be controlled via steering parameters " << endl;
-         shout << "       similar to the ones that may be used in table creation." << endl;
-         shout << "       By default it is expected that at least the mandatory ones are" << endl;
-         shout << "       specified in the steering file 'SteerModify.str' or" << endl;
-         shout << "       are given via command line arguments:" << endl;
-         shout << "[steerfile=SteerFile.str]:      Alternative steering filename" << endl;
-         shout << "<InTable=fastNLOtableIn.tab>:   Table input filename, if not specified in steering file" << endl;
-         shout << "<OutTable=fastNLOtableOut.tab>: Table output filename, if not specified in steering file" << endl;
-         shout << "       For more steering options please check the default steering file delivered" << endl;
-         shout << "       by the fastNLO Tolkit (usually in $prefix/share/fastnlo_toolkit/steerfiles)." << endl;
-         cout  << " #" << endl;
-         cout  << _CSEPSC << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-modify"] << "The purpose of this tool is to allow the user to perform a number of" << endl;
+         info["fnlo-tk-modify"] << "modifications on a fastNLO table, e.g. the adaptation of the scenario description." << endl;
+         info["fnlo-tk-modify"] << "Most importantly, superfluous observable bins can be removed or additional factors" << endl;
+         info["fnlo-tk-modify"] << "can be applied to each bin." << endl;
+         info["fnlo-tk-modify"] << "It is assumed that the desired changes are set up in a steering file." << endl;
+         info["fnlo-tk-modify"] << "By default the steering file is named 'SteerModify.str'." << endl;
+         info["fnlo-tk-modify"] << "A template for such a file is contained in the release and" << endl;
+         info["fnlo-tk-modify"] << "usually should have been installed under share/fastnlo_toolkit/Modify/." << endl;
+         info["fnlo-tk-modify"] << "If another steering filename should be used, this filename can" << endl;
+         info["fnlo-tk-modify"] << "be passed via the command line using the tag 'steerfile='," << endl;
+         info["fnlo-tk-modify"] << "e.g. fnlo-tk-modify steerfile=AnotherFileName.str" << endl;
+         info["fnlo-tk-modify"] << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-modify [steerfile=SteerFile.str] <InTable=fastNLOtableIn.tab> <OutTable=fastNLOtableOut.tab> [OptArg=option]" << endl;
+         man << "       Specification: <> mandatory; [] optional." << endl;
+         man << "       All desired table modifications like" << endl;
+         man << "       - changing the scenario name" << endl;
+         man << "       - changing or complementing the scenario description" << endl;
+         man << "       - adapting the cross section output units" << endl;
+         man << "       - correcting the power of the LO process" << endl;
+         man << "       - correcting the cms energy" << endl;
+         man << "       - cutting out unused bins or" << endl;
+         man << "       - multiplying bins by a set of factors" << endl;
+         man << "       are assumed to be controlled via steering parameters " << endl;
+         man << "       similar to the ones that may be used in table creation." << endl;
+         man << "       By default it is expected that at least the mandatory ones are" << endl;
+         man << "       specified in the steering file 'SteerModify.str' or" << endl;
+         man << "       are given via command line arguments:" << endl;
+         man << "[steerfile=SteerFile.str]:      Alternative steering filename" << endl;
+         man << "<InTable=fastNLOtableIn.tab>:   Table input filename, if not specified in steering file" << endl;
+         man << "<OutTable=fastNLOtableOut.tab>: Table output filename, if not specified in steering file" << endl;
+         man << "       For more steering options please check the default steering file delivered" << endl;
+         man << "       by the fastNLO Tolkit (usually in $prefix/share/fastnlo_toolkit/steerfiles)." << endl;
+         yell << " #" << endl;
+         yell  << _CSEPSC << endl;
          return 0;
       } else {
          shout["fnlo-tk-modify"] << "Parsing requested modifications ..." << endl;
@@ -107,7 +108,6 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-modify"] << "Mandatory parameters not specified in command line," << endl;
          shout["fnlo-tk-modify"] << "trying to read from default steering file 'SteerModify.str'" << endl;
          int retcode = READ("SteerModify.str");
-         cout << "retcode = " << retcode << endl;
          if ( retcode != 0 ) {
             error["fnlo-tk-modify"] << "Reading of mandatory parameters from default steering file 'SteerModify.str' unsuccessful. Aborted!" << endl;
             exit(retcode);
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
       size_t NScSize = ScDescr.size();
       info["fnlo-tk-modify"]<<"Modifying existing scenario description:" << endl;
       for ( size_t i = 0; i < NScSize; i++ ) {
-         cout << "Line no. " << i << ": " << ScDescr[i] << endl;
+         shout << "Line no. " << i << ": " << ScDescr[i] << endl;
       }
       if ( BOOL(AttachScDescription) ){
          info["fnlo-tk-modify"]<<"Attaching lines:" << endl;
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
          ScDescr.resize(NewNScSize);
          for ( size_t i = NScSize; i < NewNScSize; i++ ) {
             ScDescr[i] = STRING_ARR(ScDescript)[i-NScSize];
-            cout << "Line no. " << i << ": " << ScDescr[i] << endl;
+            shout << "Line no. " << i << ": " << ScDescr[i] << endl;
          }
       } else {
          info["fnlo-tk-modify"]<<"Replacing lines with:" << endl;
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
          ScDescr.resize(NewNScSize);
          for ( size_t i = 0; i < NewNScSize; i++ ) {
             ScDescr[i] = STRING_ARR(ScDescript)[i];
-            cout << "Line no. " << i << ": " << ScDescr[i] << endl;
+            shout << "Line no. " << i << ": " << ScDescr[i] << endl;
          }
       }
       table.SetScDescr(ScDescr);
