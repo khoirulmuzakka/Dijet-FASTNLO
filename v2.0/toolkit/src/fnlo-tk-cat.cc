@@ -1,7 +1,7 @@
 ///********************************************************************
 ///
 ///     fastNLO_toolkit: fnlo-tk-cat
-///     Program to catenate observable bins of compatible fastNLO v2 tables
+///     Tool to catenate observable bins of fastNLO tables
 ///
 ///     For more explanations type:
 ///     ./fnlo-tk-cat -h
@@ -30,39 +30,52 @@ int main(int argc, char** argv) {
    SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
-   cout << _CSEPSC << endl;
-   info["fnlo-tk-cat"] << "Program to catenate observable bins of compatible fastNLO v2 tables" << endl;
-   cout << _SSEPSC << endl;
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-cat"] << "Tool to catenate observable bins of fastNLO tables" << endl;
+   yell << _SSEPSC << endl;
    info["fnlo-tk-cat"] << "For more explanations type:" << endl;
    info["fnlo-tk-cat"] << "./fnlo-tk-cat -h" << endl;
-   cout << _CSEPSC << endl;
+   yell << _CSEPSC << endl;
 
    //! --- Parse commmand line
-   cout << endl;
-   cout << _CSEPSC << endl;
-   shout["fnlo-tk-cat"] << "fastNLO Toolkit"<<endl;
-   cout << _SSEPSC << endl;
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   shout["fnlo-tk-cat"] << "fastNLO Table Bin Concatenator"<<endl;
+   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
       error["fnlo-tk-cat"] << "No table names given, but need at least three!" << endl;
       shout["fnlo-tk-cat"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-cat"] << "./fnlo-tk-cat -h" << endl;
-      cout << _CSEPSC << endl;
+      yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
       //! --- Usage info
       if (tablename == "-h") {
-         cout  << " #" << endl;
-         shout << "Usage: ./fnlo-tk-cat <InTable_1.tab> <InTable_2.tab> [InTable_n.tab] <OutTable.tab>" << endl;
-         shout << "       Specification: <> mandatory; [] optional." << endl;
-         shout << "       List of blank-separated table files, at least three!" << endl;
-         shout << "       Mandatory are:" << endl;
-         shout << "<InTable_1.tab>:   First table input file, to which observable bins are catenated" << endl;
-         shout << "<InTable_2.tab>:   Second table input file, from which observable bins are catenated" << endl;
-         shout << "<OutTable.tab>:    Output filename, to which the table with catenated observable bins is written" << endl;
-         cout  << " #" << endl;
-         cout  << _CSEPSC << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-cat"] << "The purpose of this tool is the catenation of observable bins for" << endl;
+         info["fnlo-tk-cat"] << "the SAME observable definition, where e.g. for computational optimisation purposes" << endl;
+         info["fnlo-tk-cat"] << "disjoint sets of phase space bins have been calculated separately." << endl;
+         info["fnlo-tk-cat"] << "This cannot be fully checked by the program and is the user's responsibility!"<<endl;
+         info["fnlo-tk-cat"] << "Furthermore, it is assumed that statistically independent tables for the SAME bins" << endl;
+         info["fnlo-tk-cat"] << "have been combined beforehand using 'fnlo-tk-merge', because" << endl;
+         info["fnlo-tk-cat"] << "in case of differing event numbers between corresponding additive contributions,"<<endl;
+         info["fnlo-tk-cat"] << "the observable bins can still be catenated. The statistical information required"<<endl;
+         info["fnlo-tk-cat"] << "for further merging, however, is lost i.e. set to 1, since it is stored contribution- and"<<endl;
+         info["fnlo-tk-cat"] << "not bin-wise." << endl;
+         info["fnlo-tk-cat"] << "Some technical checks for compatibility are performed. In particular,"<<endl;
+         info["fnlo-tk-cat"] << "each table to be catenated MUST have the same number and type of contributions."<<endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-cat <InTable_1.tab> <InTable_2.tab> [InTable_n.tab] <OutTable.tab>" << endl;
+         man << "       Specification: <> mandatory; [] optional." << endl;
+         man << "       List of blank-separated table files, at least three!" << endl;
+         man << "       Mandatory are:" << endl;
+         man << "<InTable_1.tab>:   First table input file, to which observable bins are catenated" << endl;
+         man << "<InTable_2.tab>:   Second table input file, from which observable bins are catenated" << endl;
+         man << "<OutTable.tab>:    Output filename, to which the table with catenated observable bins is written" << endl;
+         yell << " #" << endl;
+         yell << _CSEPSC << endl;
          return 0;
       }
    }
@@ -97,28 +110,19 @@ int main(int argc, char** argv) {
       else {
          //! --- Reading table
          info["fnlo-tk-cat"]<<"Reading table '" << path << "'" << endl;
-         cout << _CSEPSC << endl;
+         yell << _CSEPSC << endl;
          fastNLOTable tab(path);
 
          //! --- Initialising result with first read table
+         //! --- If necessary, normalisation is done later on
          if ( !resultTable ) {
             info["fnlo-tk-cat"]<<"Initialising result table '" << outfile << "'" << endl;
             resultTable = new fastNLOTable(tab);
             nValidTables++;
-            //! Hint to use fnlo-tk-cat correctly
-            info["fnlo-tk-cat"]<<"Several technical checks for compatibility are performed. In particular,"<<endl;
-            info["fnlo-tk-cat"]<<"the number of contributing events to an additive contribution is checked."<<endl;
-            info["fnlo-tk-cat"]<<"If differing event numbers are found between such contributions,"<<endl;
-            info["fnlo-tk-cat"]<<"the observable bins can still be catenated, but the statistical information is lost."<<endl;
-            info["fnlo-tk-cat"]<<"In that case, the catenated tables cannot be improved anymore statistically by merging in more events."<<endl;
-            info["fnlo-tk-cat"]<<"This must be performed beforehand."<<endl;
-            info["fnlo-tk-cat"]<<"In addition, it is the user's responsibility to ensure that the SAME observable definition" << endl;
-            info["fnlo-tk-cat"]<<"was used to produce the various observable bins to catenate."<<endl;
-            info["fnlo-tk-cat"]<<"This cannot be checked by the program!"<<endl;
          }
          //! --- Catenating further tables to result table
          else {
-            //! check if 'scenario' is compatible
+            //! check if 'scenario' is catenable
             if ( !(resultTable->IsCatenable(tab)) )
                warn["fnlo-tk-cat"]<<"Table '" << path << "' is not catenable with initial table '" << resultTable->GetFilename() << "', skipped!" << endl;
             //! catenating tables
