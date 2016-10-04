@@ -1,8 +1,11 @@
 ///********************************************************************
 ///
-///     fastNLO_reader: FNLOSTATUNC
-///     Program to read a sample of fastNLO v2 tables and write out
+///     fastNLO_reader: fnlo-tk-statunc
+///     Program to read a sample of fastNLO tables and write out
 ///     averaged QCD cross sections with statistical uncertainties
+///
+///     For more explanations type:
+///     ./fnlo-tk-statunc -h
 ///
 ///     K. Rabbertz
 ///
@@ -29,43 +32,65 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-statunc"] << "Program to read a sample of fastNLO tables and write out" << endl;
+   info["fnlo-tk-statunc"] << "averaged QCD cross sections with statistical uncertainties" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-statunc"] << "For more explanations type:" << endl;
+   info["fnlo-tk-statunc"] << "./fnlo-tk-statunc -h" << endl;
+   yell << _CSEPSC << endl;
+
    //! --- Parse commmand line
    char buffer[1024]; // TODO: Use PATH_MAX instead?
-   cout << endl;
-   cout << _CSEPSC << endl;
-   shout["fnlo-tk-statunc"] << "fastNLO Statistical Uncertainty Evaluation" << endl;
-   cout << _SSEPSC << endl;
-   //! --- fastNLO table and usage info
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   shout["fnlo-tk-statunc"] << "fastNLO Statistical Table Sample Evaluator"<<endl;
+   yell << _SSEPSC << endl;
    string tablebase;
    if (argc <= 1) {
       error["fnlo-tk-statunc"] << "No fastNLO sample specified!" << endl;
       shout["fnlo-tk-statunc"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-statunc"] << "./fnlo-tk-statunc -h" << endl;
-      cout << _CSEPSC << endl;
+      yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablebase = (const char*) argv[1];
+      //! --- Usage info
       if (tablebase == "-h") {
-         cout << " #" << endl;
-         shout << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
-         shout << "       Arguments: <> mandatory; [] optional." << endl;
-         shout << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
-         shout << "                 that will be complemented by '_nnnn.tab'" << endl;
-         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
-         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
-         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
-         shout << "   If the PDF set still is not found, then:" << endl;
-         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
-         shout << "   - Specify the PDF set including the absolute path." << endl;
-         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "[order]: Fixed-order precision to use, def. = NLO" << endl;
-         shout << "   Alternatives: LO, NNLO (if available)" << endl;
-         shout << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
-         shout << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
-         cout << " #" << endl;
-         shout << "Use \"_\" to skip changing a default argument." << endl;
-         cout << " #" << endl;
-         cout  << _CSEPSC << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-statunc"] << "This program evaluates a sample of equivalent, but" << endl;
+         info["fnlo-tk-statunc"] << "statistically independent fastNLO tables and" << endl;
+         info["fnlo-tk-statunc"] << "provides their averaged cross sections together with" << endl;
+         info["fnlo-tk-statunc"] << "statistical uncertainties." << endl;
+         info["fnlo-tk-statunc"] << "In addition, some statistical sample characteristics are" << endl;
+         info["fnlo-tk-statunc"] << "printed for each observable bin. The tables files with the" << endl;
+         info["fnlo-tk-statunc"] << "largest downwards and upwards fluctuations from the average are indicated." << endl;
+         info["fnlo-tk-statunc"] << "All files with any deviation larger than 10 sigma are listed" << endl;
+         info["fnlo-tk-statunc"] << "in an extra kill file for removal by the user." << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
+         man << "       Arguments: <> mandatory; [] optional." << endl;
+         man << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
+         man << "                 that will be complemented by '_nnnn.tab'" << endl;
+         man << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         man << "   If the PDF set still is not found, then:" << endl;
+         man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         man << "   - Specify the PDF set including the absolute path." << endl;
+         man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
+         man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
+         man << "   Alternatives: LO, NNLO (if available)" << endl;
+         man << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
+         man << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
+         yell << " #" << endl;
+         man << "Use \"_\" to skip changing a default argument." << endl;
+         yell << " #" << endl;
+         yell << _CSEPSC << endl;
          return 0;
       } else {
          shout["fnlo-tk-statunc"] << "Evaluating table sample: "  <<  tablebase << endl;
@@ -140,11 +165,7 @@ int main(int argc, char** argv) {
       error["fnlo-tk-statunc"] << "Maximal counter number smaller than minimal one, nmin = " << nmin << ", nmax = " << nmax << ", aborted!" << endl;
       exit(1);
    }
-   cout << _CSEPSC << endl;
-
-   //! --- fastNLO initialisation
-   //! Select verbosity level
-   SetGlobalVerbosity(WARNING);
+   yell << _CSEPSC << endl;
 
    //! --- Loop over selected table sample
    //! Initialise fastNLO instances with interface to LHAPDF
@@ -187,7 +208,7 @@ int main(int argc, char** argv) {
                dxs.push_back(0);
             }
          }
-         if ( nfound == 1 || (nfound-1) % 10 == 0 ) {cout << " # Analyzing table " << tablename << " ..." << endl;}
+         if ( nfound == 1 || (nfound-1) % 10 == 0 ) {shout << "Analyzing table " << tablename << " ..." << endl;}
          //! Check on existence of LO (Id = -1 if not existing)
          int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
          if (ilo < 0) {
@@ -240,8 +261,8 @@ int main(int argc, char** argv) {
             //      fnlo.SetMuRFunctionalForm(kProd);
             if ( nfound == 1 ) {
                warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived from " << endl;
-               cout << " #                      only the first scale of this flexible-scale table." << endl;
-               cout << " #                      Please check how this table was filled!" << endl;
+               shout << "                     only the first scale of this flexible-scale table." << endl;
+               shout << "                     Please check how this table was filled!" << endl;
             }
          }
 
@@ -274,16 +295,16 @@ int main(int argc, char** argv) {
    }
 
    //! Write out statistical fluctuation info
-   cout << _CSEPSC << endl;
-   cout << " # Special info on statistical fluctuations:" << endl;
-   cout << _SSEPSC << endl;
+   yell << _CSEPSC << endl;
+   shout << "Special info on statistical fluctuations:" << endl;
+   yell << _SSEPSC << endl;
    printf(" # No. of filenames skipped:  %5i\n", nfail);
    printf(" # No. of filenames analyzed: %5i\n", nfound);
-   cout << _CSEPSC << endl;
+   yell << _CSEPSC << endl;
 
-   cout << " =========" << _DSEPS << _DSEP40 << endl;
+   yell << " =========" << _DSEPS << _DSEP40 << endl;
    printf(" #IBIN #IMIN #IMAX         <s>           s_min           s_max       ds/<s>/%% ds_min/<s>/%% ds_max/<s>/%%     ds_min/ds    ds_max/ds\n");
-   cout << " ---------" << _SSEPS << _SSEP40 << endl;
+   yell << " ---------" << _SSEPS << _SSEP40 << endl;
    for (unsigned int i=0; i<xs0.size(); i++) {
       double sumw  = xs[i];
       double sumw2 = dxs[i];
@@ -323,11 +344,11 @@ int main(int argc, char** argv) {
    }
 
    // //! Write out cross sections with statistical uncertainty
-   // cout << " " << _DSEPS << endl;
-   // cout << " Statistical uncertainties of the " << chord << " cross section for the primary scale choice.\n";
-   // cout << " " << _SSEPS << endl;
-   // cout << "  bin       cross section           rel. average error of the mean\n";
-   // cout << " " << _SSEPS << endl;
+   // yell << " " << _DSEPS << endl;
+   // yell << " Statistical uncertainties of the " << chord << " cross section for the primary scale choice.\n";
+   // yell << " " << _SSEPS << endl;
+   // yell << "  bin       cross section           rel. average error of the mean\n";
+   // yell << " " << _SSEPS << endl;
    // for (unsigned int i=0; i<xs0.size(); i++) {
    //    printf("%5i      %18.11e      %18.11e\n",i+1,xs[i],dxs[i]/xs[i]);
    // }
@@ -347,14 +368,14 @@ int main(int argc, char** argv) {
    //! Get binning
    vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
 
-   cout << _CSEPSC << endl;
-   cout << " # fnlo-tk-statunc: Evaluating uncertainties" << endl;
-   cout << _CSEPSC << endl;
-   cout << _DSEPSC << endl;
-   cout << " # Relative Statistical Uncertainties" << endl;
-   cout << _SSEPSC << endl;
-   cout << " # bin      cross section           lower uncertainty       upper uncertainty" << endl;
-   cout << _SSEPSC << endl;
+   yell  << _CSEPSC << endl;
+   shout << "fnlo-tk-statunc: Evaluating uncertainties" << endl;
+   yell  << _CSEPSC << endl;
+   yell  << _DSEPSC << endl;
+   shout << "Relative Statistical Uncertainties" << endl;
+   yell  << _SSEPSC << endl;
+   shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
+   yell  << _SSEPSC << endl;
 
    vector < double > dxsu;
    vector < double > dxsl;
@@ -363,7 +384,7 @@ int main(int argc, char** argv) {
       dxsu.push_back(dxs[iobs]);
       dxsl.push_back(dxs[iobs]);
    }
-   cout << _SSEPSC << endl;
+   yell << _SSEPSC << endl;
 
    //! --- Get RivetID
    //!     For 2-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
@@ -466,10 +487,10 @@ int main(int argc, char** argv) {
    //! --- Output
    //! Save histograms into the yoda file
    writer.write( FileName + ".yoda", aos );
-   cout << endl;
-   cout << _CSEPSC << endl;
-   cout << " #" << endl;
+   yell  << "" << endl;
+   yell  << _CSEPSC << endl;
+   yell << " #" << endl;
    shout << FileName + ".yoda was successfully produced" << endl;
-   cout << " #" << endl;
-   cout << _CSEPSC << endl << endl;
+   yell << " #" << endl;
+   yell  << _CSEPSC << endl << endl;
 }
