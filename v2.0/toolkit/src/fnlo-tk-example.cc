@@ -1,8 +1,10 @@
 ///********************************************************************
 ///
-///     fnlo-tk-example
-///     This is your playgroud to calculate cross sections
+///     fastNLO_toolkit: fnlo-tk-example
+///     Example program for the user to test cross-section calculations
 ///     with fastNLO.
+///
+///     D. Britzger, K. Rabbertz
 ///
 ///********************************************************************
 
@@ -26,40 +28,76 @@ double Function_Mu(double s1, double s2);
 
 //______________________________________________________________________________________________________________
 int main(int argc, char** argv) {
-   //! Usage: fastNLO <fastNLO-table.tab> [LHAPDFfile]
+
+   //! --- namespaces
    using namespace std;
-   using namespace fastNLO;      //! namespace for fastNLO constants
+   using namespace say;       //! namespace for 'speaker.h'-verbosity levels
+   using namespace fastNLO;   //! namespace for fastNLO constants
+
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-example"] << "Example program for the user to test cross-section calculations" << endl;
+   info["fnlo-tk-example"] << "with fastNLO" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-example"] << "For more explanations type:" << endl;
+   info["fnlo-tk-example"] << "./fnlo-tk-example -h" << endl;
+   info["fnlo-tk-example"] << "and consult the provided source code 'fnlo-tk-example.cc'." << endl;
+   yell << _CSEPSC << endl;
 
    //! ---  Parse commmand line
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   shout["fnlo-tk-example"] << "fastNLO Example Evaluation" << endl;
+   yell << _SSEPSC << endl;
    string tablename;
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    string PDFFile = "CT10nlo";
 #else
    string PDFFile = "CT10nlo.LHgrid";
 #endif
-   cout << endl;
-   cout << _CSEPSC << endl;
-   cout << " # [fnlo-tk-example] Program Example"<<endl;
-   cout << " #" << endl;
    if (argc <= 1) {
-      cout << " # Usage: ./fnlo-tk-example <fastNLO-table.tab> [LHAPDF-file]"<<endl;
-      cout << " #" << endl;
-      cout << " #        <> mandatory; [] optional, def. = " << PDFFile <<endl;
-      cout << " #        With LHAPDF6 use PDF name without extension."<<endl;
-      cout << " #" << endl;
-      cout << _CSEPSC << endl;
-      return 0;
+      error["fnlo-tk-example"] << "No fastNLO table specified!" << endl;
+      shout["fnlo-tk-example"] << "For an explanation of command line arguments type:" << endl;
+      shout["fnlo-tk-example"] << "./fnlo-tk-example -h" << endl;
+      yell << _CSEPSC << endl;
+      exit(1);
    } else {
-      cout << _CSEPSC << endl;
       //! --- fastNLO table
       tablename = (const char*) argv[1];
-      //! --- PDF set
-      if (argc > 2) PDFFile = (const char*) argv[2];
+      //! --- Usage info
+      if (tablename == "-h") {
+         yell << " #" << endl;
+         info["fnlo-tk-example"] << "This is an example program to evaluate a fastNLO table" << endl;
+         info["fnlo-tk-example"] << "that a user can check and adapt to his liking" << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-example <fastNLOtable.tab> [PDF]" << endl;
+         man << "       Arguments: <> mandatory; [] optional." << endl;
+         man << "<fastNLOtable.tab>: Table input file fnl2342b.tab" << endl;
+         man << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         man << "   If the PDF set still is not found, then:" << endl;
+         man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         man << "   - Specify the PDF set including the absolute path." << endl;
+         man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
+         yell << " #" << endl;
+         yell << _CSEPSC << endl;
+         return 0;
+      } else {
+         shout["fnlo-tk-example"] << "Evaluating table: "  <<  tablename << endl;
+      }
+   }
+   //! --- PDF choice
+   if (argc > 2) {
+      PDFFile = (const char*) argv[2];
    }
 
    //! --- Give some output
-   cout<<" # [fnlo-tk-example] Evaluating table: " << tablename << endl;
-   cout<<" # [fnlo-tk-example] Using PDF set   : " << PDFFile << endl;
+   shout["fnlo-tk-example"] << "Evaluating table: " << tablename << endl;
+   shout["fnlo-tk-example"] << "Using PDF set   : " << PDFFile << endl;
 
    //! --- This is your playgroud to use fastNLO
    //!     Calculate cross setions and/or test some options
