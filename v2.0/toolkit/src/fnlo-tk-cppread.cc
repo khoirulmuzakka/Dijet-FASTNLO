@@ -1,8 +1,11 @@
 ///********************************************************************
 ///
-///     fastNLO_reader: FNLOCPPREAD
-///     Program to read fastNLO v2 tables and derive
+///     fastNLO_toolkit: fnlo-tk-cppread
+///     Program to read fastNLO tables and derive
 ///     QCD cross sections using PDFs e.g. from LHAPDF
+///
+///     For more explanations type:
+///     ./fnlo-tk-cppread -h
 ///
 ///     D. Britzger, K. Rabbertz
 ///
@@ -39,47 +42,63 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
+   //! --- Set verbosity level
+   SetGlobalVerbosity(INFO);
+
+   //! --- Print program purpose
+   yell << _CSEPSC << endl;
+   info["fnlo-tk-cppread"] << "Program to read fastNLO tables and derive" << endl;
+   info["fnlo-tk-cppread"] << "QCD cross sections using PDFs e.g. from LHAPDF" << endl;
+   yell << _SSEPSC << endl;
+   info["fnlo-tk-cppread"] << "For more explanations type:" << endl;
+   info["fnlo-tk-cppread"] << "./fnlo-tk-cppread -h" << endl;
+   yell << _CSEPSC << endl;
+
    //! ---  Parse commmand line
    char buffer[1024];
-   cout << endl;
-   cout << _CSEPSC << endl;
-   shout["fnlo-read"] << "fastNLO Reader"<<endl;
-   cout << _SSEPSC << endl;
-   //! --- fastNLO table and usage info
+   yell << "" << endl;
+   yell << _CSEPSC << endl;
+   shout["fnlo-tk-cppread"] << "fastNLO Cross-Section Calculator"<<endl;
+   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
-      error["fnlo-read"] << "No fastNLO table specified!" << endl;
-      shout["fnlo-read"] << "For an explanation of command line arguments type:" << endl;
-      shout["fnlo-read"] << "./fnlo-tk-cppread -h" << endl;
-      cout << _CSEPSC << endl;
+      error["fnlo-tk-cppread"] << "No fastNLO table specified!" << endl;
+      shout["fnlo-tk-cppread"] << "For more explanations type:" << endl;
+      shout["fnlo-tk-cppread"] << "./fnlo-tk-cppread -h" << endl;
+      yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      //! --- Usage info
       if (tablename == "-h") {
-         cout << " #" << endl;
-         shout << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm]" << endl;
-         shout << "       Arguments: <> mandatory; [] optional." << endl;
-         shout << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
-         shout << "[PDF]: PDF set, def. = CT10nlo" << endl;
-         shout << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
-         shout << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
-         shout << "   If the PDF set still is not found, then:" << endl;
-         shout << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
-         shout << "   - Specify the PDF set including the absolute path." << endl;
-         shout << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         shout << "[#scalecombs]: Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
-         shout << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
-         shout << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
-         shout << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
-         shout << "[norm]: Normalize if applicable, def. = no." << endl;
-         shout << "   Alternatives: \"yes\" or \"norm\"" << endl;
-         cout << " #" << endl;
-         shout << "Use \"_\" to skip changing a default argument." << endl;
-         cout << " #" << endl;
-         cout  << _CSEPSC << endl;
+         yell << " #" << endl;
+         info["fnlo-tk-cppread"] << "This program evaluates a fastNLO table for a set of specified options and" << endl;
+         info["fnlo-tk-cppread"] << "prints out a table with detailed binning and cross-section information" << endl;
+         info["fnlo-tk-cppread"] << "for each observable bin." << endl;
+         man << "" << endl;
+         man << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm]" << endl;
+         man << "       Specification: <> mandatory; [] optional." << endl;
+         man << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
+         man << "[PDF]: PDF set, def. = CT10nlo" << endl;
+         man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
+         man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
+         man << "   If the PDF set still is not found, then:" << endl;
+         man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
+         man << "   - Specify the PDF set including the absolute path." << endl;
+         man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
+         man << "[#scalecombs]: Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
+         man << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
+         man << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
+         man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
+         man << "[norm]: Normalize if applicable, def. = no." << endl;
+         man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         yell << " #" << endl;
+         man << "Use \"_\" to skip changing a default argument." << endl;
+         yell << " #" << endl;
+         yell  << _CSEPSC << endl;
          return 0;
       } else {
-         shout["fnlo-read"] << "Evaluating table: " << tablename << endl;
+         shout["fnlo-tk-cppread"] << "Evaluating table: " << tablename << endl;
       }
    }
    //---  PDF set
@@ -93,9 +112,9 @@ int main(int argc, char** argv) {
 #else
       PDFFile = "CT10nlo.LHgrid";
 #endif
-      shout["fnlo-read"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
+      shout["fnlo-tk-cppread"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
    } else {
-      shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
+      shout["fnlo-tk-cppread"] << "Using PDF set   : " << PDFFile << endl;
    }
    //--- Number of scale settings
    unsigned int nscls = 1;
@@ -107,20 +126,20 @@ int main(int argc, char** argv) {
       ch2tmp = (const char*) argv[3];
    }
    if (argc <= 3 || ch2tmp == "_") {
-      shout["fnlo-read"] << "No request given for number of scale settings," << endl;
+      shout["fnlo-tk-cppread"] << "No request given for number of scale settings," << endl;
       shout << "            investigating primary scale only." << endl;
    } else {
       nscls = atoi(argv[3]);
       if (nscls < 1) {
          snprintf(buffer, sizeof(buffer), "No scale setting or even less??? Aborting! nscls = %i",nscls);
-         error["fnlo-read"] << buffer << endl;
+         error["fnlo-tk-cppread"] << buffer << endl;
          exit(1);
       } else if (nscls > nsclmax) {
          snprintf(buffer, sizeof(buffer), "Too many scale settings requested, aborting! nscls = %i\n",nscls);
-         error["fnlo-read"] << buffer << endl;
+         error["fnlo-tk-cppread"] << buffer << endl;
          exit(1);
       } else {
-         shout["fnlo-read"] << "If possible, will try to do " << nscls << " scale setting(s)." << endl;
+         shout["fnlo-tk-cppread"] << "If possible, will try to do " << nscls << " scale setting(s)." << endl;
       }
    }
 
@@ -131,10 +150,10 @@ int main(int argc, char** argv) {
    }
    if (argc <= 4 || AsEvolCode == "_") {
       AsEvolCode = "GRV";
-      shout["fnlo-read"] << "No request given for alpha_s evolution code," << endl;
+      shout["fnlo-tk-cppread"] << "No request given for alpha_s evolution code," << endl;
       shout << "            using GRV default." << endl;
    } else {
-      shout["fnlo-read"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
+      shout["fnlo-tk-cppread"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
    }
 
    //--- Normalization
@@ -143,17 +162,17 @@ int main(int argc, char** argv) {
       chnorm = (const char*) argv[5];
    }
    if (argc <= 5 || chnorm == "_") {
-      shout["fnlo-read"] << "Preparing unnormalized cross sections," << endl;
+      shout["fnlo-tk-cppread"] << "Preparing unnormalized cross sections," << endl;
    } else {
-      shout["fnlo-read"] << "Normalizing cross sections. " << endl;
+      shout["fnlo-tk-cppread"] << "Normalizing cross sections. " << endl;
    }
 
    //---  Too many arguments
    if (argc > 6) {
-      error["fnlo-read"] << "Too many arguments, aborting!" << endl;
+      error["fnlo-tk-cppread"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
-   cout << _CSEPSC << endl;
+   yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
 
@@ -569,10 +588,6 @@ int main(int argc, char** argv) {
 
    // 14.
    // ---- Example of a cross section calculation with some nice standardized output
-
-   // Select verbosity level
-   SetGlobalVerbosity(WARNING);
-
    //! Instead of instantiating a class via e.g.
    //!   FastNLOAlphas fnlo(tablename, PDFFile, PDFMember);
    //! and accessing member functions via fnlo.memberfunction()
@@ -590,28 +605,28 @@ int main(int argc, char** argv) {
       fnlo = new fastNLOCRunDec(tablename);
    } else if (AsEvolCode == "QCDNUM") {
       //! ONLY if compiled --with-qcdnum support!
-      debug["fnlo-read"] << "The FNLO_QCDNUM precompiler constant is: " << FNLO_QCDNUM << endl;
+      debug["fnlo-tk-cppread"] << "The FNLO_QCDNUM precompiler constant is: " << FNLO_QCDNUM << endl;
       if ( FNLO_QCDNUM[0] != '\0' ) {
          fnlo = new fastNLOQCDNUMAS(tablename);
       } else {
-         printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+         printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
          printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
          printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
          exit(1);
       }
    } else if (AsEvolCode == "HOPPET") {
       //! ONLY if compiled --with-hoppet support!
-      debug["fnlo-read"] << "The FNLO_HOPPET precompiler constant is: " << FNLO_HOPPET << endl;
+      debug["fnlo-tk-cppread"] << "The FNLO_HOPPET precompiler constant is: " << FNLO_HOPPET << endl;
       if ( FNLO_HOPPET[0] != '\0' ) {
          fnlo = new fastNLOHoppetAs(tablename);
       } else {
-         printf("fnlo-read: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+         printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
          printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
          printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
          exit(1);
       }
    } else {
-      printf("fnlo-read: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
+      printf("fnlo-tk-cppread: ERROR! Unknown alpha_s evolution code %s!\n",AsEvolCode.c_str());
       printf("           If you compiled with optional QCDNUM or HOPPET support, please\n");
       printf("           do not forget to comment in the marked lines in main.cc!\n");
       exit(1);
@@ -706,10 +721,10 @@ int main(int argc, char** argv) {
    //! 15.
    //! ---- Example to do some cross section analysis ---- //
    //! Some initialization
-   cout << endl;
-   cout << _CSEPLC << endl;
-   shout["fnlo-read"] << "Calculate my cross sections" << endl;
-   cout << _CSEPLC << endl;
+   yell << "" << endl;
+   yell << _CSEPLC << endl;
+   shout["fnlo-tk-cppread"] << "Calculate my cross sections" << endl;
+   yell << _CSEPLC << endl;
 
    //! Instance fastNLO (For this example we assume fnlo was instantiated already above ...)
    //! fastNLOAlphas fnlo( tablename , PDFFile , 0 );
@@ -720,44 +735,44 @@ int main(int argc, char** argv) {
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
-      error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
+      error["fnlo-tk-cppread"] << "LO not found, nothing to be done!" << endl;
       exit(1);
    } else {
-      info["fnlo-read"] << "The LO contribution has Id: " << ilo << endl;
+      info["fnlo-tk-cppread"] << "The LO contribution has Id: " << ilo << endl;
    }
    //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
-      info["fnlo-read"] << "No NLO contribution found!" << endl;
+      info["fnlo-tk-cppread"] << "No NLO contribution found!" << endl;
    } else {
-      info["fnlo-read"] << "The NLO contribution has Id: " << inlo << endl;
+      info["fnlo-tk-cppread"] << "The NLO contribution has Id: " << inlo << endl;
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
    int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
    if (innlo < 0) {
-      info["fnlo-read"] << "No NNLO contribution found!" << endl;
+      info["fnlo-tk-cppread"] << "No NNLO contribution found!" << endl;
    } else {
-      info["fnlo-read"] << "The NNLO contribution has Id: " << innlo << endl;
+      info["fnlo-tk-cppread"] << "The NNLO contribution has Id: " << innlo << endl;
    }
    //! Check on existence of threshold corrections
    int ithc1 = fnlo->ContrId(kThresholdCorrection, kLeading);
    int ithc2 = fnlo->ContrId(kThresholdCorrection, kNextToLeading);
    if (ithc1 < 0) {
-      info["fnlo-read"] << "1-loop threshold corrections not found!" << endl;
+      info["fnlo-tk-cppread"] << "1-loop threshold corrections not found!" << endl;
    } else {
-      info["fnlo-read"] << "1-loop threshold corrections have Id: " << ithc1 << endl;
+      info["fnlo-tk-cppread"] << "1-loop threshold corrections have Id: " << ithc1 << endl;
    }
    if (ithc2 < 0) {
-      info["fnlo-read"] << "2-loop threshold corrections not found!" << endl;
+      info["fnlo-tk-cppread"] << "2-loop threshold corrections not found!" << endl;
    } else {
-      info["fnlo-read"] << "2-loop threshold corrections have Id: " << ithc2 << endl;
+      info["fnlo-tk-cppread"] << "2-loop threshold corrections have Id: " << ithc2 << endl;
    }
    //! Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    if (inpc1 < 0) {
-      info["fnlo-read"] << "Non-perturbative corrections not found!" << endl;
+      info["fnlo-tk-cppread"] << "Non-perturbative corrections not found!" << endl;
    } else {
-      info["fnlo-read"] << "Non-perturbative corrections have Id: " << inpc1 << endl;
+      info["fnlo-tk-cppread"] << "Non-perturbative corrections have Id: " << inpc1 << endl;
    }
 
    //! Run over all pre-defined scale settings xmur, xmuf
@@ -767,24 +782,24 @@ int main(int argc, char** argv) {
       if ( ilo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, ilo, true);
          if (!SetOn) {
-            error["fnlo-read"] << "LO not found, nothing to be done!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "LO not found, nothing to be done!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
       }
       if ( inlo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
          if (!SetOn) {
-            error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "NLO not found, nothing to be done!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
       }
       if ( innlo > -1 ) {
          bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, true);
          if (!SetOn) {
-            error["fnlo-read"] << "NNLO not found, nothing to be done!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "NNLO not found, nothing to be done!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
       }
@@ -842,7 +857,7 @@ int main(int argc, char** argv) {
       //      fnlo->UseHoppetScaleVariations(true);
       lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
       if (!lscvar) {
-         warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+         warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
                            << fnlo->GetScaleFactorMuR() << ","
                            << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
          continue;
@@ -852,7 +867,7 @@ int main(int argc, char** argv) {
          fnlo->SetMuRFunctionalForm(kScale1);
          //      fnlo->SetMuFFunctionalForm(kScale2);
          //      fnlo->SetMuRFunctionalForm(kScale2);
-         warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
+         warn["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
                            << "from only the first scale of this flexible-scale table." << endl
                            << "                        Please check how this table was filled!" << endl;
       }
@@ -866,20 +881,20 @@ int main(int argc, char** argv) {
          if ( fnlo->IsNorm() ) {
             lNorm = true;
          } else {
-            error["fnlo-read"] << "Normalization requested but not defined for this table, aborted!" << endl;
+            error["fnlo-tk-cppread"] << "Normalization requested but not defined for this table, aborted!" << endl;
             exit(1);
          }
       }
 
       /// Get LO & NLO & NNLO results
-      if ( ilo > -1 || inlo > -1 || innlo > -1 ) {info["fnlo-read"] << "Get fixed-order results ..." << endl;}
+      if ( ilo > -1 || inlo > -1 || innlo > -1 ) {info["fnlo-tk-cppread"] << "Get fixed-order results ..." << endl;}
       if ( innlo > -1 ) {
          xsnnlo  = fnlo->GetCrossSection(lNorm);
          qscnnlo = fnlo->GetQScales();
          bool SetOn = fnlo->SetContributionON(kFixedOrder, innlo, false);
          if (!SetOn) {
-            error["fnlo-read"] << "Couldn´t switch off NNLO, this is strange!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "Couldn´t switch off NNLO, this is strange!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
          fnlo->CalcCrossSection();
@@ -889,8 +904,8 @@ int main(int argc, char** argv) {
          qscnlo = fnlo->GetQScales();
          bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, false);
          if (!SetOn) {
-            error["fnlo-read"] << "Couldn´t switch off NLO, this is strange!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "Couldn´t switch off NLO, this is strange!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
          fnlo->CalcCrossSection();
@@ -902,7 +917,7 @@ int main(int argc, char** argv) {
 
       /// Calculate fixed-order K factors
       if ( ilo > -1 && inlo > -1 ) {
-         info["fnlo-read"] << "Calculate fixed-order K factors ..." << endl;
+         info["fnlo-tk-cppread"] << "Calculate fixed-order K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             if (abs(xslo[i]) > DBL_MIN) {
                kfac1[i] = xsnlo[i]/xslo[i];
@@ -918,18 +933,18 @@ int main(int argc, char** argv) {
       }
 
       /// Get threshold corrections
-      if ( ithc1 > -1 || ithc2 > -1 ) {info["fnlo-read"] << "Get threshold corrections ..." << endl;}
+      if ( ithc1 > -1 || ithc2 > -1 ) {info["fnlo-tk-cppread"] << "Get threshold corrections ..." << endl;}
       if ( ilo > -1 && inlo > -1 && ithc2 > -1 ) {
          fnlo->SetContributionON(kFixedOrder, inlo, true);
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc2, true);
          if (!SetOn) {
-            warn["fnlo-read"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
+            warn["fnlo-tk-cppread"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
          }
 
          //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+            warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
                               << fnlo->GetScaleFactorMuR() << ","
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
          } else {
@@ -940,13 +955,13 @@ int main(int argc, char** argv) {
          if ( inlo > -1 ) fnlo->SetContributionON(kFixedOrder, inlo, false);
          bool SetOn = fnlo->SetContributionON(kThresholdCorrection, ithc1, true);
          if (!SetOn) {
-            warn["fnlo-read"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
+            warn["fnlo-tk-cppread"] << "1-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
          }
 
          //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
          lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
          if (!lthcvar) {
-            warn["fnlo-read"] << "The selected scale variation (xmur, xmuf) = ("
+            warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
                               << fnlo->GetScaleFactorMuR() << ","
                               << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
          } else {
@@ -957,7 +972,7 @@ int main(int argc, char** argv) {
 
       /// Calculate threshold correction K factors
       if ( ilo > -1 && ithc1 > -1 && lthcvar ) {
-         info["fnlo-read"] << "Calculate threshold correction K factors ..." << endl;
+         info["fnlo-tk-cppread"] << "Calculate threshold correction K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             if (abs(xslo[i]) > DBL_MIN) {
                kthc1[i] = xsthc1[i]/xslo[i];
@@ -967,7 +982,7 @@ int main(int argc, char** argv) {
          }
       }
       if ( ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
-         info["fnlo-read"] << "Calculate threshold correction K factors ..." << endl;
+         info["fnlo-tk-cppread"] << "Calculate threshold correction K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             if (abs(xsnlo[i]) > DBL_MIN) {
                kthc2[i] = xsthc2[i]/xsnlo[i];
@@ -979,12 +994,12 @@ int main(int argc, char** argv) {
 
       /// Get non-perturbative corrections
       if ( inpc1 > -1 ) {
-         info["fnlo-read"] << "Get non-perturbative corrections ..." << endl;
+         info["fnlo-tk-cppread"] << "Get non-perturbative corrections ..." << endl;
          if ( inlo > -1 ) {
             bool SetOn = fnlo->SetContributionON(kFixedOrder, inlo, true);
             if (!SetOn) {
-               error["fnlo-read"] << "NLO not found, nothing to be done!" << endl;
-               error["fnlo-read"] << "This should have been caught before!" << endl;
+               error["fnlo-tk-cppread"] << "NLO not found, nothing to be done!" << endl;
+               error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
                exit(1);
             }
          }
@@ -992,8 +1007,8 @@ int main(int argc, char** argv) {
          if ( ithc2 > -1 ) fnlo->SetContributionON(kThresholdCorrection, ithc2, false);
          bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
          if (!SetOn) {
-            error["fnlo-read"] << "NPC1 not found, nothing to be done!" << endl;
-            error["fnlo-read"] << "This should have been caught before!" << endl;
+            error["fnlo-tk-cppread"] << "NPC1 not found, nothing to be done!" << endl;
+            error["fnlo-tk-cppread"] << "This should have been caught before!" << endl;
             exit(1);
          }
          fnlo->CalcCrossSection();
@@ -1002,7 +1017,7 @@ int main(int argc, char** argv) {
 
       /// Calculate non-perturbative factors
       if ( ilo > -1 && inlo > -1 && inpc1 > -1 ) {
-         info["fnlo-read"] << "Calculate non-perturbative factors ..." << endl;
+         info["fnlo-tk-cppread"] << "Calculate non-perturbative factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             if (abs(xsnlo[i]) > DBL_MIN) {
                knpc1[i] = xsnpc1[i]/xsnlo[i];
@@ -1013,11 +1028,11 @@ int main(int argc, char** argv) {
       }
 
       //! Start print out
-      cout  << _DSEPLC << endl;
+      yell  << _DSEPLC << endl;
       shout << "My Cross Sections" << endl;
       snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       shout << buffer << endl;
-      cout  << _SSEPLC << endl;
+      yell  << _SSEPLC << endl;
 
       //! Get table constants relevant for print out
       const int NDim = fnlo->GetNumDiffBin();
@@ -1072,8 +1087,8 @@ int main(int argc, char** argv) {
       if (NDim == 1) {
          snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ]  <%-12.12s> %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headscl.c_str(),header2.c_str());
-         cout << buffer << endl;
-         cout << _SSEPLC << endl;
+         yell << buffer << endl;
+         yell << _SSEPLC << endl;
          NDimBins[0] = 0;
          for (unsigned int i=0; i<xslo.size(); i++) {
             NDimBins[0]++;
@@ -1110,7 +1125,7 @@ int main(int argc, char** argv) {
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qsclo[i],xslo[i]);
             } else {
-               printf("fnlo-read: Nothing to report!\n");
+               printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
             }
             printf("\n");
@@ -1118,8 +1133,8 @@ int main(int argc, char** argv) {
       } else if (NDim == 2) {
          snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim2.c_str(),DimLabel[1].c_str(),headscl.c_str(),header2.c_str());
-         cout << buffer << endl;
-         cout << _SSEPLC << endl;
+         yell << buffer << endl;
+         yell << _SSEPLC << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             for (int j=0; j<NDim; j++) {
                if (i==0) {
@@ -1159,7 +1174,7 @@ int main(int argc, char** argv) {
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       NDimBins[1],LoBin[i][1],UpBin[i][1],qsclo[i],xslo[i]);
             } else {
-               printf("fnlo-read: Nothing to report!\n");
+               printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
             }
             printf("\n");
@@ -1168,8 +1183,8 @@ int main(int argc, char** argv) {
          snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim1.c_str(),DimLabel[1].c_str(),
                   headdim2.c_str(),DimLabel[2].c_str(),headscl.c_str(),header2.c_str());
-         cout << buffer << endl;
-         cout << _SSEPLC << endl;
+         yell << buffer << endl;
+         yell << _SSEPLC << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
@@ -1182,14 +1197,14 @@ int main(int argc, char** argv) {
                       fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
                       qscnlo[i],xslo[i],xsnlo[i],kfac1[i]);
             } else {
-               printf("fnlo-read: Nothing to report!\n");
+               printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
             }
             printf("\n");
          }
       } else {
          snprintf(buffer, sizeof(buffer), "Print out optimized for up to three dimensions. No output for %1.i dimensions.\n",NDim);
-         warn["fnlo-read"] << buffer << endl;
+         warn["fnlo-tk-cppread"] << buffer << endl;
       }
    }
 
