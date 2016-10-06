@@ -160,7 +160,6 @@ protected:
    int fObsBin;                                                                                 //!< ObsBin from 'last' 'Fill()'-call
    fnloScenario fLastScen;                                                                      //!< keep information of scenario from last 'Fill()'-call
 
-   bool fIsRef;                                                                                 //!< Is reference table or not
    fastNLOReader* fReader;                                                                      //!< PDF and alpha_s interface for reference tables
 
    fastNLO::GeneratorConstants fGenConsts;                                                      //!< Generator specific constants

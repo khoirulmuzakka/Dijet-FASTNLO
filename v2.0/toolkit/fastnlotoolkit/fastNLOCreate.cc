@@ -386,7 +386,6 @@ void fastNLOCreate::Instantiate() {
    //! and prepare for filling
 
    // init member variables
-   fIsRef = false;
    fReader = NULL;
 
    // Try to get warm-up values.
@@ -1948,7 +1947,7 @@ void fastNLOCreate::Fill(int scalevar) {
    fStats._nProc++; //keep statistics
 
    if (fIsWarmup && scalevar==0) UpdateWarmupArrays();
-   else if ( fIsRef ) FillRefContribution(scalevar);
+   else if ( GetTheCoeffTable()->GetIRef() ) FillRefContribution(scalevar);
    else FillContribution(scalevar);
 
    fEvent.ResetButX();
@@ -3219,7 +3218,7 @@ fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
    //!
    //! Function returns the input pointer without changes.
    //!
-   fIsRef = true;
+   GetTheCoeffTable()->SetIRef();
    fReader = fnloread;
    return fReader;
 }

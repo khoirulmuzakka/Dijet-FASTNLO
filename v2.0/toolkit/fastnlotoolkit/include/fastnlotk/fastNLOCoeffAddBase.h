@@ -37,6 +37,7 @@ public:
    virtual void CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx);
 
    int GetIRef() const {return IRef;}
+   void SetIRef() {IRef=1;}
    double GetNevt() const { return Nevt; }
    double GetNevt(int NObsBin, int NSubproc) const {
       if (Nevt > 0) return Nevt;
