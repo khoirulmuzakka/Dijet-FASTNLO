@@ -385,6 +385,10 @@ void fastNLOCreate::Instantiate() {
    //! Instantiate all internal members
    //! and prepare for filling
 
+   // init member variables
+   fIsRef = false;
+   fReader = NULL;
+
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
    GetWarmupValues();
@@ -1944,6 +1948,7 @@ void fastNLOCreate::Fill(int scalevar) {
    fStats._nProc++; //keep statistics
 
    if (fIsWarmup && scalevar==0) UpdateWarmupArrays();
+   else if ( fIsRef ) FillRefContribution(scalevar);
    else FillContribution(scalevar);
 
    fEvent.ResetButX();
@@ -2147,7 +2152,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    //! read information from 'Event' and 'Scenario'
    //! do the interpolation
    //! and fill into the tables.
-   logger.debug["FillContributionFlexHHC"]<<endl;
+   logger.debug["FillContributionFlexDIS"]<<endl;
 
    if (fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0) return;   // nothing todo.
 
@@ -2204,6 +2209,51 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
          }
       }
    }
+}
+
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillRefContribution(int scalevar) {
+   //! This is a reference table.
+   //! Fill contribution as it would be a cross section
+   
+   // ObsBin
+   const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
+   double wgt = fEvent._w / BinSize[ObsBin];
+   int p = fEvent._p;
+   // todo....
+   if (! std::isfinite(wgt)) {
+      logger.error["FillContributionFixHHC"]<<"Weight w is not finite, w = " << wgt << "!"<<endl;
+      logger.error["FillContributionFixHHC"]<<"This should have been captured before, aborting ..."<<endl;
+      exit(1);
+      }
+   
+   // fill reference table
+   if ( fReader==NULL ){
+      // weights are assumed to multiplied by PDF and alpha_s already
+      // nothing to do
+   }
+   else {
+      // weights are assumed to be in the same format as for 'default' fastNLO tables
+      // and will be multiplied by PDF and alpha_s values
+      double mur = fScenario._m1; //??;
+      double muf = fScenario._m1; //??;
+      double as    =  fReader->EvolveAlphas(mur);
+      int x1 = fEvent._x1;
+      int x2 = fEvent._x2;
+      vector<double> xfx1 =  fReader->GetXFX(x1, muf);
+      vector<double> xfx2 =  fReader->GetXFX(x2, muf);
+      bool IsPPBar = false;// todo!
+      vector<double> pdflc = fReader->CalcPDFLinearCombination(GetTheCoeffTable(),xfx1,xfx2, IsPPBar);
+      wgt *= as * pdflc[p]; // is this right?
+   }
+
+   if ( fIsFlexibleScale ) 
+      ((fastNLOCoeffAddFlex*)GetTheCoeffTable())->SigmaTildeMuIndep[ObsBin][0][0][0][p]  += wgt;
+   else 
+      ((fastNLOCoeffAddFix*)GetTheCoeffTable())->SigmaTilde[ObsBin][scalevar][0][0][p] += wgt;
+
 }
 
 
@@ -3156,6 +3206,24 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
    }
    return NULL; // default return
 }
+
+
+// ___________________________________________________________________________________________________
+fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
+   //! set this table/contribution to become a reference contribution 
+   //! If fnloread is set to NULL, the weights are assumed to be already
+   //! multiplied by PDF and alpha_s values.
+   //! If fnloread is provided, then it is assumed that the weights have
+   //! the same units and format as for the filling of  default tables and
+   //! those need to be multiplied by PDF and alpha_s values.
+   //!
+   //! Function returns the input pointer without changes.
+   //!
+   fIsRef = true;
+   fReader = fnloread;
+   return fReader;
+}
+
 
 
 // ___________________________________________________________________________________________________

@@ -72,11 +72,12 @@ public:
    std::vector<double> CalcPDFUncertaintyCentral(const std::vector<LHAPDF::PDFUncertainty>& ) const; //!< get vector<double> for 'new' central value
 #endif
 
-protected:
    // inherited functions
    virtual double EvolveAlphas(double Q) const ;
    virtual bool InitPDF();
    virtual std::vector<double> GetXFX(double xp, double muf) const ;
+
+protected:
 
    // ---- LHAPDF vars ---- //
    std::string fLHAPDFFilename;

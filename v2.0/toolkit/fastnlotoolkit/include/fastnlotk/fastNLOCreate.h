@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <ctime>
+#include "fastNLOReader.h" // for reference tables
 #include "fastNLOTable.h"
 #include "fastNLOEvent.h"
 #include "read_steer.h"
@@ -49,6 +50,8 @@ public:
    void SetEvent(const fnloEvent ev) {fEvent = ev;}                                             //!< set the member fEvent, which will be used when calling Fill()
    void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
+
+   fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread);                                 //!< set this table/contribution to become a reference contribution
 
    void SetGenConstsDefaults();                                                                 //!< set defaults for generator constants
    void SetProcConstsDefaults();                                                                //!< set defaults for process constants
@@ -112,6 +115,7 @@ protected:
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in pp/ppbar
    void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in DIS
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale table in pp/ppbar
+   void FillRefContribution(int scalevar = 0);                                                              //!< fill contribution if this is a reference table
    void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
 
    void ReadGenAndProcConstsFromSteering();
@@ -155,6 +159,9 @@ protected:
    std::string fSteerfile;                                                                           //!< filename of steering file.
    int fObsBin;                                                                                 //!< ObsBin from 'last' 'Fill()'-call
    fnloScenario fLastScen;                                                                      //!< keep information of scenario from last 'Fill()'-call
+
+   bool fIsRef;                                                                                 //!< Is reference table or not
+   fastNLOReader* fReader;                                                                      //!< PDF and alpha_s interface for reference tables
 
    fastNLO::GeneratorConstants fGenConsts;                                                      //!< Generator specific constants
    fastNLO::ProcessConstants fProcConsts;                                                       //!< Process specific constants

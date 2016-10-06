@@ -61,6 +61,10 @@ public:
    void FillPDFCache(double chksum=0., bool lForce=false);                              //!< Prepare for recalculation of cross section with 'new'/updated pdf.
    virtual std::vector<double> GetXFX(double x, double muf) const = 0;
 
+   // virtual functions for the user interface
+   virtual bool InitPDF() = 0;
+   virtual double EvolveAlphas(double Q) const = 0;
+
    // ---- alphas cache ---- //
    void FillAlphasCache(bool lForce=false);                                             //!< prepare for recalculation of cross section with new alpha_s value.
 
@@ -171,10 +175,6 @@ protected:
       if (BBlocksSMCalc[fastNLO::kThresholdCorrection].empty()) return NULL;
       else return BBlocksSMCalc[fastNLO::kThresholdCorrection][n];
    };
-
-   // virtual functions for the user interface
-   virtual bool InitPDF() = 0;
-   virtual double EvolveAlphas(double Q) const = 0;
 
    // ---- setters for scale variation in v2.0 tables  ---- //
    bool SetScaleVariation(int scalevar);                       //!< Choose the MuF scale variation table
