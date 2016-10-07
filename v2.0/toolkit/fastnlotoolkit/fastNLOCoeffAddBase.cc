@@ -402,7 +402,7 @@ bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
    //       return false;
    //    }
    // }
-   info["IsCatenable"]<<"Additional contributions are catenable"<<endl;
+   info["IsCatenable"]<<"Base parameters of additive contribution allow catenation"<<endl;
    return true;
 }
 

@@ -186,7 +186,7 @@ bool fastNLOCoeffBase::IsCatenable(const fastNLOCoeffBase& other) const {
       debug["IsCatenable"]<<"NScaleDep != other.GetNScaleDep(). Skipped."<<endl;
       return false;
    }
-   info["IsCatenable"]<<"Contributions are catenable"<<endl;
+   info["IsCatenable"]<<"Base parameters of contribution allow catenation"<<endl;
    // check descripts here ?!
    //bool potentialcompatible = true;
    //vector < string > CtrbDescript;

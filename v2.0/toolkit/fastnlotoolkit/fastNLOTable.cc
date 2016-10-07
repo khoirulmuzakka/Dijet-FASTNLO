@@ -363,51 +363,44 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
       matches[ic] = 0;
       // check against all contributions from 'this'-table to check catenability
       for (unsigned int j = 0; j<fCoeff.size() ; j++) {
-         fastNLOCoeffBase* cthis  = (fastNLOCoeffBase*)fCoeff[j];
          fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
-         if ( cthis->IsCatenable(*cother) ) {
-            // data?
-            if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
-               fastNLOCoeffData* cdatthis  = (fastNLOCoeffData*)fCoeff[j];
-               fastNLOCoeffData* cdatother = (fastNLOCoeffData*)other.GetCoeffTable(ic);
-               if ( cdatthis->IsCatenable(*cdatother) ) {
+         // data?
+         if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffData* cdatthis  = (fastNLOCoeffData*)fCoeff[j];
+            fastNLOCoeffData* cdatother = (fastNLOCoeffData*)other.GetCoeffTable(ic);
+            if ( cdatthis->IsCatenable(*cdatother) ) {
+               matches[ic]++;
+               continue;
+            }
+         }
+         // multiplicative?
+         else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffMult* cmultthis  = (fastNLOCoeffMult*)fCoeff[j];
+            fastNLOCoeffMult* cmultother = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
+            if ( cmultthis->IsCatenable(*cmultother) ) {
+               matches[ic]++;
+               continue;
+            }
+         }
+         // additive?
+         else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
+            if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFix* cfixthis  = (fastNLOCoeffAddFix*)fCoeff[j];
+               fastNLOCoeffAddFix* cfixother = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
+               if ( cfixthis->IsCatenable(*cfixother) ) {
                   matches[ic]++;
                   continue;
                }
-            }
-            // multiplicative?
-            else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
-               fastNLOCoeffMult* cmultthis  = (fastNLOCoeffMult*)fCoeff[j];
-               fastNLOCoeffMult* cmultother = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
-               if ( cmultthis->IsCatenable(*cmultother) ) {
+            } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddFlex* cflexthis  = (fastNLOCoeffAddFlex*)fCoeff[j];
+               fastNLOCoeffAddFlex* cflexother = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
+               if ( cflexthis->IsCatenable(*cflexother) ) {
                   matches[ic]++;
                   continue;
-               }
-            }
-            // additive?
-            else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
-               fastNLOCoeffAddBase* caddthis  = (fastNLOCoeffAddBase*)fCoeff[j];
-               fastNLOCoeffAddBase* caddother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
-               if ( caddthis->IsCatenable(*caddother) ) {
-                  if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
-                     fastNLOCoeffAddFix* cfixthis  = (fastNLOCoeffAddFix*)fCoeff[j];
-                     fastNLOCoeffAddFix* cfixother = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
-                     if ( cfixthis->IsCatenable(*cfixother) ) {
-                        matches[ic]++;
-                        continue;
-                     }
-                  } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
-                     fastNLOCoeffAddFlex* cflexthis  = (fastNLOCoeffAddFlex*)fCoeff[j];
-                     fastNLOCoeffAddFlex* cflexother = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
-                     if ( cflexthis->IsCatenable(*cflexother) ) {
-                        matches[ic]++;
-                        continue;
-                     }
-                  }
                }
             }
          } else {
-            logger.error["IsCatenable"] << "Unmatched contribution found. Aborted!" <<endl;
+            logger.error["IsCatenable"] << "Unknown contribution found. Aborted!" <<endl;
             exit(1);
          }
       }
