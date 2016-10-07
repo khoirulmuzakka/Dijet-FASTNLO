@@ -365,30 +365,49 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
       for (unsigned int j = 0; j<fCoeff.size() ; j++) {
          fastNLOCoeffBase* cthis  = (fastNLOCoeffBase*)fCoeff[j];
          fastNLOCoeffBase* cother = (fastNLOCoeffBase*)other.GetCoeffTable(ic);
-         // data?
-         if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
-            if ( cthis->IsCatenable(*cother) ) {
-               matches[ic]++;
-               continue;
+         if ( cthis->IsCatenable(*cother) ) {
+            // data?
+            if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffData* cdatthis  = (fastNLOCoeffData*)fCoeff[j];
+               fastNLOCoeffData* cdatother = (fastNLOCoeffData*)other.GetCoeffTable(ic);
+               if ( cdatthis->IsCatenable(*cdatother) ) {
+                  matches[ic]++;
+                  continue;
+               }
             }
-         }
-         // multiplicative?
-         else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
-            if ( cthis->IsCatenable(*cother) ) {
-               matches[ic]++;
-               continue;
+            // multiplicative?
+            else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffMult* cmultthis  = (fastNLOCoeffMult*)fCoeff[j];
+               fastNLOCoeffMult* cmultother = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
+               if ( cmultthis->IsCatenable(*cmultother) ) {
+                  matches[ic]++;
+                  continue;
+               }
             }
-         }
-         // additive?
-         else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
-            //            fastNLOCoeffAddBase* cthis  = (fastNLOCoeffAddBase*)fCoeff[j];
-            //            fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
-            if ( cthis->IsCatenable(*cother) ) {
-               matches[ic]++;
-               continue;
+            // additive?
+            else if ( fastNLOCoeffAddBase::CheckCoeffConstants(cother,quiet) ) {
+               fastNLOCoeffAddBase* caddthis  = (fastNLOCoeffAddBase*)fCoeff[j];
+               fastNLOCoeffAddBase* caddother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic);
+               if ( caddthis->IsCatenable(*caddother) ) {
+                  if ( fastNLOCoeffAddFix::CheckCoeffConstants(cother,quiet) ) {
+                     fastNLOCoeffAddFix* cfixthis  = (fastNLOCoeffAddFix*)fCoeff[j];
+                     fastNLOCoeffAddFix* cfixother = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
+                     if ( cfixthis->IsCatenable(*cfixother) ) {
+                        matches[ic]++;
+                        continue;
+                     }
+                  } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cother,quiet) ) {
+                     fastNLOCoeffAddFlex* cflexthis  = (fastNLOCoeffAddFlex*)fCoeff[j];
+                     fastNLOCoeffAddFlex* cflexother = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
+                     if ( cflexthis->IsCatenable(*cflexother) ) {
+                        matches[ic]++;
+                        continue;
+                     }
+                  }
+               }
             }
          } else {
-            logger.error["IsCatenable"] << "Unknown contribution found. Aborted!" <<endl;
+            logger.error["IsCatenable"] << "Unmatched contribution found. Aborted!" <<endl;
             exit(1);
          }
       }
@@ -399,7 +418,7 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
    for ( int ic=0 ; ic<nc; ic++ ) {
       if ( matches[ic] != 1 ) {
          catenable = false;
-         logger.warn["IsCatenable"] << "Table contributions do not match, Catenation of observable bins not possible!" <<endl;
+         logger.warn["IsCatenable"] << "Table contributions do not match. Catenation of observable bins not possible!" <<endl;
          break;
       }
    }

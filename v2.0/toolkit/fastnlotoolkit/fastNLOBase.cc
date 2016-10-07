@@ -205,9 +205,12 @@ bool fastNLOBase::IsCompatibleHeader(const fastNLOBase& other) const {
 
 //______________________________________________________________________________
 bool fastNLOBase::IsCatenableHeader(const fastNLOBase& other) const {
-   if (Itabversion!= other.GetItabversion()) {
-      logger.warn["IsCatenableHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+   if ( trunc(Itabversion/10000) != trunc(other.GetItabversion()/10000)) {
+      logger.error["IsCatenableHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
       return false;
+   } else if ( Itabversion != other.GetItabversion() ) {
+      logger.warn["IsCatenableHeader"]<<"Differing sub-versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      logger.warn["IsCatenableHeader"]<<"Please check your result carefully!"<<endl;
    }
    if (Ncontrib != other.GetNcontrib()) {
       logger.warn["IsCatenableHeader"]<<"Differing number of contributions: "<<Ncontrib<<" and "<<other.GetNcontrib()<<endl;
