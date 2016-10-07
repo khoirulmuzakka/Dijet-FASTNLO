@@ -51,7 +51,7 @@ public:
    void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
-   fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread);                                 //!< set this table/contribution to become a reference contribution
+   fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread = NULL);                          //!< set this table/contribution to become a reference contribution
 
    void SetGenConstsDefaults();                                                                 //!< set defaults for generator constants
    void SetProcConstsDefaults();                                                                //!< set defaults for process constants

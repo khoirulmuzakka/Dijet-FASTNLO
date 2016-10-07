@@ -2216,6 +2216,8 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
 void fastNLOCreate::FillRefContribution(int scalevar) {
    //! This is a reference table.
    //! Fill contribution as it would be a cross section
+
+   if ( GetTheCoeffTable()->GetIRef()== 0 ) return; // error. this is not a ref-table
    
    // ObsBin
    const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
@@ -2238,7 +2240,7 @@ void fastNLOCreate::FillRefContribution(int scalevar) {
       // and will be multiplied by PDF and alpha_s values
       double mur = fScenario._m1; //??;
       double muf = fScenario._m1; //??;
-      double as    =  fReader->EvolveAlphas(mur);
+      double as  = fReader->EvolveAlphas(mur);
       int x1 = fEvent._x1;
       int x2 = fEvent._x2;
       vector<double> xfx1 =  fReader->GetXFX(x1, muf);
@@ -3088,24 +3090,35 @@ void  fastNLOCreate::InitInterpolationKernels() {
    }
    */
 
-   vector<double> wrmX = GetColumnFromTable(fWarmupConsts.Values, 1) ;// DOUBLE_COL_NS(Warmup.Values,x_min,fSteerfile);
+   vector<double> wrmX;
    vector<double> wrmMu1Up, wrmMu1Dn;
-   wrmMu1Dn = GetColumnFromTable(fWarmupConsts.Values, 3) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"),fSteerfile);
-   wrmMu1Up = GetColumnFromTable(fWarmupConsts.Values, 4) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"max"),fSteerfile);
-   if (wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin()) {
-      logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl;
-      exit(1);
-   }
    vector<double> wrmMu2Up, wrmMu2Dn;
-   if (fIsFlexibleScale) {
-      wrmMu2Dn = GetColumnFromTable(fWarmupConsts.Values, 5) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"),fSteerfile);
-      wrmMu2Up = GetColumnFromTable(fWarmupConsts.Values, 6) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"),fSteerfile);
-      if (wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin()) {
-         logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl;
-         exit(1);
+   if ( GetTheCoeffTable()->GetIRef() == 0 ) {
+      wrmX = GetColumnFromTable(fWarmupConsts.Values, 1) ;// DOUBLE_COL_NS(Warmup.Values,x_min,fSteerfile);
+      wrmMu1Dn = GetColumnFromTable(fWarmupConsts.Values, 3) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"),fSteerfile);
+      wrmMu1Up = GetColumnFromTable(fWarmupConsts.Values, 4) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"max"),fSteerfile);
+      if (wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin()) {
+	 logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl;
+	 exit(1);
+      }
+      if (fIsFlexibleScale) {
+	 wrmMu2Dn = GetColumnFromTable(fWarmupConsts.Values, 5) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"),fSteerfile);
+	 wrmMu2Up = GetColumnFromTable(fWarmupConsts.Values, 6) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"),fSteerfile);
+	 if (wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin()) {
+	    logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl;
+	    exit(1);
+	 }
       }
    }
-
+   else {
+      wrmX.resize(GetNObsBin(),0);
+      wrmMu1Dn.resize(GetNObsBin(),0);
+      wrmMu1Up.resize(GetNObsBin(),1);
+      if (fIsFlexibleScale) {
+	 wrmMu2Dn.resize(GetNObsBin(),0);
+	 wrmMu2Up.resize(GetNObsBin(),1);
+      }
+   }
 
    int npdf = GetTheCoeffTable()->GetNPDF();
 
@@ -3220,6 +3233,23 @@ fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
    //!
    GetTheCoeffTable()->SetIRef();
    fReader = fnloread;
+
+   // --- set 'fReader' if needed
+   // if ( fReader ) { // todo, do we need to call something here?
+   //    fReader->InitPDF();//
+   // }
+
+   // --- adjust the Coeff-table
+   fScenConsts.X_NNodes = 1 -1; // because we are using +1 later
+   fScenConsts.X_NoOfNodesPerMagnitude = false;
+   fScenConsts.Mu1_NNodes = 1;
+   fScenConsts.Mu2_NNodes = 1;
+   fScenConsts.X_Kernel   = "OneNode";
+   fScenConsts.Mu1_Kernel = "OneNode";
+   fScenConsts.Mu2_Kernel = "OneNode";
+   InitInterpolationKernels(); // resize all members 
+
+   // return the reader
    return fReader;
 }
 
