@@ -181,7 +181,7 @@ class fastNLOTable : public fastNLOBase {
    void SetDimLabel(std::string label, unsigned int iDim, bool IsDiff = true);
    void SetNumDiffBin(int iDiff) {NDim=iDiff; DimLabel.resize(NDim); IDiffBin.resize(NDim);}
 
-   void Cat(const fastNLOCoeffBase& other);
+   //void Cat(const fastNLOCoeffBase& other);
 
 
    /// ___________________________________________________________________________________________________
