@@ -43,6 +43,7 @@ namespace UsefulNlojetTools {
    fastNLO::GeneratorConstants GenConsts() {
       fastNLO::GeneratorConstants GenConsts;
       GenConsts.Name = "NLOJet++_4.1.3";
+      GenConsts.UnitsOfCoefficients = 12;
       return GenConsts;
    }
 
@@ -58,7 +59,6 @@ namespace UsefulNlojetTools {
       ProcConsts.LeadingOrder = 2;
       // Default: 12 ,i.e. pb; if published differently set in steering explicitly.
       //          Note: Internally, NLOJet++ always uses pb.
-      ProcConsts.UnitsOfCoefficients = 12;
       ProcConsts.NPDF = 2;
       // KR: Merging q(qbar)g and gq(qbar) subprocesses 5 and 6 into one is
       //     ONLY correct at the statistical limit of large numbers of such events!

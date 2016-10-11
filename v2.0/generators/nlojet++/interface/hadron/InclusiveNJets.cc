@@ -601,6 +601,9 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
    // It seems that it gets called three times.
    static int ILOord; // no default
    if (!ftable) {
+      // Switch on debug output even before steering is initialised
+      // Normally this should be commented out!
+      //      speaker::SetGlobalVerbosity(say::DEBUG);
       // The following lines should be printed ONCE. Steering parameters have not yet been read.
       cout << " # INIT:  [inputfunc] ---------- inputfunc called ----------" << endl;
       cout << " # INIT:  [inputfunc] ---------- initializing ... ----------" << endl;
