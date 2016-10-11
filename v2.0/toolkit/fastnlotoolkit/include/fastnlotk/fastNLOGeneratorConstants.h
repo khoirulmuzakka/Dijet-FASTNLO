@@ -1,6 +1,7 @@
 #ifndef __fnlogeneratorconstants__
 #define __fnlogeneratorconstants__
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -72,7 +73,7 @@ namespace fastNLO {
       //! fastNLO Scenario constants
       //! Steering parameters for a fastNLO scenario.
       //! Contains mostly the binning and description of the specific scenario
-      
+
       std::string ScenarioName; //!< Name of the scenario
       std::vector<std::string> ScenarioDescription; //!< Description of the scenario
       int PublicationUnits; //!< Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
@@ -85,12 +86,12 @@ namespace fastNLO {
       bool CalculateBinSize; //!< Calculate bin width from lower and upper bin boundaries
       double BinSizeFactor; //!< Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|
       std::vector<double> BinSize; //!< If 'CalculateBinSize' is 'false' provide table with bin widths 'by hand' for normalization. If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0', and set 'CalculateBinSize' 'true' for each dimension.
-                                                 
+
       std::string ScaleDescriptionScale1; //!< "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale should always be in units of [GeV]!)
       std::string ScaleDescriptionScale2; //!< "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
       std::vector<double> SingleDifferentialBinning; //!< Observable binning Use either 'SingleDifferentialBinning' or 'DoubleDifferentialBinning' or 'TripleDifferentialBinning' in accordance with 'DifferentialDimension' above
-      std::vector<std::vector<double> > DoubleDifferentialBinning; //!< Observable binning 
+      std::vector<std::vector<double> > DoubleDifferentialBinning; //!< Observable binning
       std::vector<std::vector<double> > TripleDifferentialBinning; //!< Observable binning
 
       double CenterOfMassEnergy; //!< Center-of-mass energy in GeV. LHC Next Run II: 13000
@@ -104,24 +105,24 @@ namespace fastNLO {
 
       bool ReadBinningFromSteering;//!< Specify if binning is read from fScenConst or from warmup
 
-      
+
       bool ApplyPDFReweighting;//!<  Apply reweighting of pdfs for an optimized interpolation, def.=true.
       bool CheckScaleLimitsAgainstBins;//!< For warmup-run! Set limits for scale nodes to bin borders, if possible
       /**# -------------------------------------------------------------------- #
-	 #   Choose fastNLO interpolation kernels and distance measures
-	 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	 #   Currently implemented interpolation kernels
-	 #     Catmull
-	 #     Lagrange
-	 #     OneNode
-	 #     Linear
-	 #
-	 #   Currently implemented distance measures
-	 #     linear
-	 #     loglog025        eq. to (log(log(4*x)))
-	 #     log10
-	 #     sqrtlog10        eq. to sqrt(log_10(x))
-	 # -------------------------------------------------------------------- #
+         #   Choose fastNLO interpolation kernels and distance measures
+         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+         #   Currently implemented interpolation kernels
+         #     Catmull
+         #     Lagrange
+         #     OneNode
+         #     Linear
+         #
+         #   Currently implemented distance measures
+         #     linear
+         #     loglog025        eq. to (log(log(4*x)))
+         #     log10
+         #     sqrtlog10        eq. to sqrt(log_10(x))
+         # -------------------------------------------------------------------- #
       */
       std::string X_Kernel;//!< Lagrange
       std::string X_DistanceMeasure;//!<   "sqrtlog10"
@@ -137,42 +138,42 @@ namespace fastNLO {
       int Mu2_NNodes;//!< 6
 
       ScenarioConstants() {
-	 SetDefaults();
+         SetDefaults();
       }
       void SetDefaults() {
-	 PublicationUnits=12;
-	 ScenarioName="ScenarioName_not_set";
-	 ScenarioDescription.clear();
-	 BinSizeFactor=1.;
-	 CalculateBinSize=true;
-	 DifferentialDimension=0; //! a safe initialisation
-	 DimensionIsDifferential.clear();
-	 DimensionIsDifferential.push_back(2);
-	 DimensionIsDifferential.push_back(2);
-	 DimensionIsDifferential.push_back(2);
-	 PDF1=2212;
-	 PDF2=2212;
-	 OutputPrecision=8;
-	 FlexibleScaleTable=false;
-	 ScaleVariationFactors.clear();
-	 ScaleVariationFactors.push_back(0.5);
-	 ScaleVariationFactors.push_back(1);
-	 ScaleVariationFactors.push_back(2);
-	 ReadBinningFromSteering=true;
-	 ApplyPDFReweighting=true;
-	 CheckScaleLimitsAgainstBins=true;
-	 X_Kernel="Lagrange";//!<                        Lagrange
-	 X_DistanceMeasure="sqrtlog10";
-	 X_NNodes=15;
-	 X_NoOfNodesPerMagnitude = false;
-	 
-	 Mu1_Kernel="Lagrange";
-	 Mu1_DistanceMeasure="loglog025";
-	 Mu1_NNodes=6;
-	    
-	 Mu2_Kernel="Lagrange"; //Scale2 not used for fixed-scale tables
-	 Mu2_DistanceMeasure="loglog025";
-	 Mu2_NNodes=6;                                    
+         PublicationUnits=12;
+         ScenarioName="Undefined";
+         ScenarioDescription.clear();
+         BinSizeFactor=1.;
+         CalculateBinSize=true;
+         DifferentialDimension=0; //! a safe initialisation
+         DimensionIsDifferential.clear();
+         DimensionIsDifferential.push_back(2);
+         DimensionIsDifferential.push_back(2);
+         DimensionIsDifferential.push_back(2);
+         PDF1=2212;
+         PDF2=2212;
+         OutputPrecision=8;
+         FlexibleScaleTable=false;
+         ScaleVariationFactors.clear();
+         ScaleVariationFactors.push_back(0.5);
+         ScaleVariationFactors.push_back(1);
+         ScaleVariationFactors.push_back(2);
+         ReadBinningFromSteering=true;
+         ApplyPDFReweighting=true;
+         CheckScaleLimitsAgainstBins=true;
+         X_Kernel="Lagrange";//!<                        Lagrange
+         X_DistanceMeasure="sqrtlog10";
+         X_NNodes=15;
+         X_NoOfNodesPerMagnitude = false;
+
+         Mu1_Kernel="Lagrange";
+         Mu1_DistanceMeasure="loglog025";
+         Mu1_NNodes=6;
+
+         Mu2_Kernel="Lagrange"; //Scale2 not used for fixed-scale tables
+         Mu2_DistanceMeasure="loglog025";
+         Mu2_NNodes=6;
       }
 
 
@@ -199,31 +200,31 @@ namespace fastNLO {
       std::vector<std::vector<double> > Binning;//!<
    public:
       WarmupConstants(const ScenarioConstants& scenario) {
-	 Init();
-	 ScaleDescriptionScale1 = scenario.ScaleDescriptionScale1;
-	 ScaleDescriptionScale2 = scenario.ScaleDescriptionScale2;
-	 CheckScaleLimitsAgainstBins = scenario.CheckScaleLimitsAgainstBins;
-	 DifferentialDimension = scenario.DifferentialDimension;
-	 DimensionLabels = scenario.DimensionLabels;
-	 DimensionIsDifferential = scenario.DimensionIsDifferential;
+         Init();
+         ScaleDescriptionScale1 = scenario.ScaleDescriptionScale1;
+         ScaleDescriptionScale2 = scenario.ScaleDescriptionScale2;
+         CheckScaleLimitsAgainstBins = scenario.CheckScaleLimitsAgainstBins;
+         DifferentialDimension = scenario.DifferentialDimension;
+         DimensionLabels = scenario.DimensionLabels;
+         DimensionIsDifferential = scenario.DimensionIsDifferential;
 
-	 std::cout<<"Warning [WarmupConstants]. Binning has not be taken over from ScenarioConstants (not implemented.)"<<std::endl;
-	 //exit(4);
-	 // Binning = ;
-	 // Values = ;
-	 // headerValues = ;
+         std::cout<<"Warning [WarmupConstants]. Binning has not be taken over from ScenarioConstants (not implemented.)"<<std::endl;
+         //exit(4);
+         // Binning = ;
+         // Values = ;
+         // headerValues = ;
       }
       void Init(){
-	 OrderInAlphasOfWarmupRunWas=-1;
-	 //    ObsBin      x_min      x_max    173.3GeV_min    173.3GeV_max           y_min           y_max
-	 headerValues.clear();
-	 // headerValues.push_back("ObsBin");
-	 // headerValues.push_back("x_min");
-	 // headerValues.push_back("x_max");
+         OrderInAlphasOfWarmupRunWas=-1;
+         //    ObsBin      x_min      x_max    173.3GeV_min    173.3GeV_max           y_min           y_max
+         headerValues.clear();
+         // headerValues.push_back("ObsBin");
+         // headerValues.push_back("x_min");
+         // headerValues.push_back("x_max");
       };
 
       WarmupConstants() {
-	 Init();
+         Init();
       }
 
    };

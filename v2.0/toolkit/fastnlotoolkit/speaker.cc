@@ -10,7 +10,12 @@ using namespace std;
 
 std::map<unsigned long,speaker*>* speaker::list = NULL;
 std::ostream* speaker::weg = NULL;
+// Set default logging level to start with; should be INFO.
+// Use DEBUG only for debugging code executed before
+// SetGlobalVerbosity(say::Verbosity volume)
+// can be called from within the program.
 say::Verbosity speaker::fverb = say::INFO;
+//say::Verbosity speaker::fverb = say::DEBUG;
 unsigned long speaker::ct = 0;
 bool speaker::fe2cerr = true;
 

@@ -22,7 +22,7 @@
 class fastNLOCreate : public fastNLOTable {
    //!
    //! fastNLOCreate. A class for creating a fastNLO Table which contains
-   //! exaclty one table of coefficients.
+   //! exactly one table of coefficients.
    //!
    //! Member variables are initialized by reading in
    //! a steering file.
@@ -30,16 +30,16 @@ class fastNLOCreate : public fastNLOTable {
    //! Following information has to be obtained from the generator and is NOT obtained from steering:
    //!   - Order in alpha_s of leading-order process
    //!   - Center of mass energy
-   //!   - Order of calculation (LO=0, NLO=1,NNLO=2)
+   //!   - Order of calculation (LO=0, NLO=1, NNLO=2)
    //!
 
 public:
    fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
    fastNLOCreate(const std::string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts);
-   fastNLOCreate(const std::string& warmupfile, const fastNLO::GeneratorConstants& GenConsts, 
-		 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
-   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts, 
-		 const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmConsts);
+   fastNLOCreate(const std::string& warmupfile, const fastNLO::GeneratorConstants& GenConsts,
+                 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
+   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                 const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmConsts);
    ~fastNLOCreate();
 
    fnloEvent fEvent;                                                                            //!< Structure, which holds all relevant variables related to event observables
@@ -57,7 +57,7 @@ public:
    void SetProcConstsDefaults();                                                                //!< set defaults for process constants
    bool CheckProcConsts();                                                                      //!< check process constants to be different from defaults
    // SetBinGrid()
-   // todo: SetBinGrid. However, if BinGrid is set, then this is necessarliy a warmup run -> one also has to store the bin grid in warmup table (todo).
+   // todo: SetBinGrid. However, if BinGrid is set, then this is necessarily a warmup run -> one also has to store the bin grid in warmup table (todo).
    //       furthermore all vectors have to be 'resized'
    //void SetBinGrid(std::vector < std::vector <std::pair<double,double> > > BinGrid, std::vector <int> IDiffBin, std::vector <std::string> DimLabel, std::vector <double> BinSize = std::vector <double>() );
 
@@ -165,7 +165,7 @@ protected:
    fastNLO::GeneratorConstants fGenConsts;                                                      //!< Generator specific constants
    fastNLO::ProcessConstants fProcConsts;                                                       //!< Process specific constants
    fastNLO::ScenarioConstants fScenConsts;                                                      //!< Scenario specific constants
-   fastNLO::WarmupConstants fWarmupConsts;                                                        //!< Warmup specific constants
+   fastNLO::WarmupConstants fWarmupConsts;                                                      //!< Warmup specific constants
 
    bool CheckWeightIsFinite();                                                                  //!< Check if weight is reasonable.
    inline void HalfMatrixCheck(double x1, double x2, int& xmin, int& xmax, int& subproc) const;                       //!< check x-values in case of half-matrix notation (pp,ppbar), and exchange if necessary.
@@ -191,8 +191,8 @@ protected:
    std::vector<std::pair<double,double> > fWMu1Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWMu2Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
-   
-   
+
+
    struct fnloStats {
       //! structre to keep track of statisics. Just for fun and information.
       time_t _time;

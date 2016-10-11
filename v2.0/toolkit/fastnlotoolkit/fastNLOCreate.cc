@@ -53,12 +53,16 @@ fastNLOCreate::fastNLOCreate() {
 fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts) {
    //! Constructor of fastNLOCreate
    //!
-   //! Pass steering paramters through
+   //! Pass steering parameters through
    //! GeneratorConstants, ProcessConstants and the steering file
    //! (see GeneratorConstants.h file for details)
    //!
    //!
+
    logger.SetClassName("fastNLOCreate");
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
+
+   //! Initialise
    ResetHeader();
 
    //! Set constants from arguments
@@ -66,6 +70,7 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
    fProcConsts = ProcConsts;
 
    //! Steering file settings take precedence over settings in code
+   //! The WarmupFilename is set from steering
    ReadSteering(steerfile);
    ReadGenAndProcConstsFromSteering();
 
@@ -74,6 +79,7 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
       logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
    }
 
+   logger.debug["fastNLOCreate"]<<"Instantiate from GenConsts, ProcConsts, and steering file"<<endl;
    Instantiate();
 }
 
@@ -93,6 +99,10 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
    //!
 
    logger.SetClassName("fastNLOCreate");
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and warmup file"<<endl;
+   logger.debug["fastNLOCreate"]<<"The warmup filename set from function call is: " << warmupfile << endl;
+
+   //! Initialise
    ResetHeader();
 
    //! Set constants from arguments
@@ -104,7 +114,7 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
       exit(1);
    }
 
-   // --- set warmup file
+   //! The WarmupFilename is set from argument
    fSteerfile = warmupfile;
    fWarmupFilename = warmupfile;
 
@@ -118,8 +128,8 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
    }
 
+   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and warmup file"<<endl;
    Instantiate();
-
 }
 
 
@@ -136,6 +146,9 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    //!
 
    logger.SetClassName("fastNLOCreate");
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
+
+   //! Initialise
    ResetHeader();
 
    //! Set constants from arguments
@@ -148,9 +161,10 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
       exit(1);
    }
 
-   // --- set warmup file
+   //! No WarmupFile required, a pseudo-WarmupFilename is defined here
    fSteerfile = "NoSteeringFileMode";//warmupfile;
    fWarmupFilename = fSteerfile;
+   logger.debug["fastNLOCreate"]<<"Warmup set from code; the pseudo(!)-warmup filename is: " << fWarmupFilename << endl;
 
    // --- check and transform parton combinations
    if ( fProcConsts.IPDFdef2 == 0 ) {
@@ -162,8 +176,8 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
    }
 
+   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
    Instantiate();
-
 }
 
 
@@ -178,6 +192,9 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
    //!
 
    logger.SetClassName("fastNLOCreate");
+   logger.debug["fastNLOCreate"]<<"Create table from steering file"<<endl;
+
+   //! Initialise
    ResetHeader();
 
    //! Set constants from defaults
@@ -185,21 +202,26 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
    SetProcConstsDefaults();
 
    //! Steering file settings take precedence over defaults
+   //! The WarmupFilename is set from steering
    ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
    ReadGenAndProcConstsFromSteering();
 
-   if (EXIST_NS(WarmUpFilename,fSteerfile)) {
-      SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
-   } else {
-      string fWarmUpFile = steeringNameSpace + ".txt";
-      SetWarmupTableFilename(fWarmUpFile);
-   }
+   // KR: Moved to ReadSteering ...
+   // if (EXIST_NS(WarmUpFilename,fSteerfile)) {
+   //    SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
+   //    logger.debug["fastNLOCreate"]<<"The warmup filename set in steering file is: " << STRING_NS(WarmUpFilename,fSteerfile) << endl;
+   // } else {
+   //    string fWarmUpFile = steeringNameSpace + ".txt";
+   //    SetWarmupTableFilename(fWarmUpFile);
+   //    logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering name space is: " << fWarmUpFile << endl;
+   // }
 
    bool check = CheckProcConsts();
    if (!check) {
       logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
    }
 
+   logger.debug["fastNLOCreate"]<<"Instantiate table from steering file"<<endl;
    Instantiate();
 }
 
@@ -384,6 +406,7 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
 void fastNLOCreate::Instantiate() {
    //! Instantiate all internal members
    //! and prepare for filling
+   logger.debug["Instantiate"]<<"Instantiate all internal members and prepare for filling " << endl;
 
    // init member variables
    fReader = NULL;
@@ -466,9 +489,24 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       READ_NS(steerfile,fSteerfile);
    }
 
+   //! Set verbosity from steering or to default WARNING
    if (EXIST_NS(GlobalVerbosity,fSteerfile) )
       SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
    else SetGlobalVerbosity("WARNING");
+
+   //! Remove extension from steerfile
+   string sbase = steerfile.substr(0, steerfile.find_last_of("."));
+
+   //! Set WarmupFilename from steering
+   if (EXIST_NS(WarmUpFilename,fSteerfile)) {
+      SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
+      logger.debug["fastNLOCreate"]<<"The warmup filename set in steering file is: " << STRING_NS(WarmUpFilename,fSteerfile) << endl;
+   } else {
+      string fWarmUpFile = sbase + "_" + STRING_NS(ScenarioName,fSteerfile) + "_warmup.txt";
+      SetWarmupTableFilename(fWarmUpFile);
+      logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
+   }
+
    if (logger.info.GetSpeak())
       PRINTALL();
 
@@ -2218,7 +2256,7 @@ void fastNLOCreate::FillRefContribution(int scalevar) {
    //! Fill contribution as it would be a cross section
 
    if ( GetTheCoeffTable()->GetIRef()== 0 ) return; // error. this is not a ref-table
-   
+
    // ObsBin
    const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    double wgt = fEvent._w / BinSize[ObsBin];
@@ -2229,7 +2267,7 @@ void fastNLOCreate::FillRefContribution(int scalevar) {
       logger.error["FillContributionFixHHC"]<<"This should have been captured before, aborting ..."<<endl;
       exit(1);
       }
-   
+
    // fill reference table
    if ( fReader==NULL ){
       // weights are assumed to multiplied by PDF and alpha_s already
@@ -2250,9 +2288,9 @@ void fastNLOCreate::FillRefContribution(int scalevar) {
       wgt *= as * pdflc[p]; // is this right?
    }
 
-   if ( fIsFlexibleScale ) 
+   if ( fIsFlexibleScale )
       ((fastNLOCoeffAddFlex*)GetTheCoeffTable())->SigmaTildeMuIndep[ObsBin][0][0][0][p]  += wgt;
-   else 
+   else
       ((fastNLOCoeffAddFix*)GetTheCoeffTable())->SigmaTilde[ObsBin][scalevar][0][0][p] += wgt;
 
 }
@@ -2758,6 +2796,7 @@ string fastNLOCreate::GetWarmupHeader(int iScale, string minmax) {
 // ___________________________________________________________________________________________________
 string fastNLOCreate::GetWarmupTableFilename() {
    if (!fWarmupFilename.empty()) {
+      logger.debug["GetWarmupTableFilename"]<< "Preset name is: " << fWarmupFilename << endl;
       return fWarmupFilename;
    } else {
       // If we do not have a warmup filename yet, we generate a generic one
@@ -2768,8 +2807,10 @@ string fastNLOCreate::GetWarmupTableFilename() {
       if (pos != std::string::npos) ret.erase(pos,6);
       ret += "_";
       ret += GetScenName();
+      logger.debug["GetWarmupTableFilename"]<< "Scenario name = " << GetScenName() << " bins" << endl;
       ret += "_warmup.txt";
       SetWarmupTableFilename(ret);
+      logger.debug["GetWarmupTableFilename"]<<"The warmup filename is: " << ret << endl;
       return ret;
    }
 }
@@ -3222,7 +3263,7 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 // ___________________________________________________________________________________________________
 fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
-   //! set this table/contribution to become a reference contribution 
+   //! set this table/contribution to become a reference contribution
    //! If fnloread is set to NULL, the weights are assumed to be already
    //! multiplied by PDF and alpha_s values.
    //! If fnloread is provided, then it is assumed that the weights have
@@ -3247,7 +3288,7 @@ fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
    fScenConsts.X_Kernel   = "OneNode";
    fScenConsts.Mu1_Kernel = "OneNode";
    fScenConsts.Mu2_Kernel = "OneNode";
-   InitInterpolationKernels(); // resize all members 
+   InitInterpolationKernels(); // resize all members
 
    // return the reader
    return fReader;
