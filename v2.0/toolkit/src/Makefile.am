@@ -15,11 +15,12 @@ AUTOMAKE_OPTIONS = gnu
 # The C++ fastnlo toolkit utility and example programs
 #
 if HAVE_LHAPDF
-   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append fnlo-tk-modify fnlo-tk-cat
+   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append fnlo-tk-modify fnlo-tk-cat fnlo-tk-statunc
    bin_SCRIPTS  = fnlo-tk-config
 if HAVE_YODA
    bin_PROGRAMS += fnlo-tk-yodaout
-   bin_PROGRAMS += fnlo-tk-statunc
+# YODA features in fnlo-tk-statunc are now conditionally compiled
+#   bin_PROGRAMS += fnlo-tk-statunc
 endif
 if HAVE_ROOT
    bin_PROGRAMS += fnlo-tk-rootout

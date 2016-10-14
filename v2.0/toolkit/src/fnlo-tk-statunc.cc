@@ -11,6 +11,7 @@
 ///
 ///********************************************************************
 
+#include <config.h>
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -20,9 +21,10 @@
 #include <vector>
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
+#ifdef WITH_YODA
 #include "YODA/Scatter2D.h"
 #include "YODA/WriterYODA.h"
-
+#endif
 
 //__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {
@@ -71,6 +73,9 @@ int main(int argc, char** argv) {
          info["fnlo-tk-statunc"] << "largest downwards and upwards fluctuations from the average are indicated." << endl;
          info["fnlo-tk-statunc"] << "All files with any deviation larger than 10 sigma are listed" << endl;
          info["fnlo-tk-statunc"] << "in an extra kill file for removal by the user." << endl;
+         info["fnlo-tk-statunc"] << "If optional YODA support is configured and proper RIVET_ID's are" << endl;
+         info["fnlo-tk-statunc"] << "available in the fastNLO tables, the result is additionally provided" << endl;
+         info["fnlo-tk-statunc"] << "in YODA format." << endl;
          man << "" << endl;
          man << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
          man << "       Arguments: <> mandatory; [] optional." << endl;
@@ -107,9 +112,9 @@ int main(int argc, char** argv) {
 #else
       PDFFile = "CT10nlo.LHgrid";
 #endif
-      shout["fnlo-read"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
+      shout["fnlo-tk-statunc"] << "No PDF set given, taking " << PDFFile << " instead!" << endl;
    } else {
-      shout["fnlo-read"] << "Using PDF set   : " << PDFFile << endl;
+      shout["fnlo-tk-statunc"] << "Using PDF set   : " << PDFFile << endl;
    }
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
@@ -166,6 +171,9 @@ int main(int argc, char** argv) {
       exit(1);
    }
    yell << _CSEPSC << endl;
+
+   //! --- Reset verbosity level to warning only from here on
+   SetGlobalVerbosity(WARNING);
 
    //! --- Loop over selected table sample
    //! Initialise fastNLO instances with interface to LHAPDF
@@ -260,7 +268,7 @@ int main(int argc, char** argv) {
             //      fnlo.SetMuFFunctionalForm(kProd);
             //      fnlo.SetMuRFunctionalForm(kProd);
             if ( nfound == 1 ) {
-               warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived from " << endl;
+               warn["fnlo-tk-statunc"] << "The average scale reported in this example as mu1 is derived from " << endl;
                shout << "                     only the first scale of this flexible-scale table." << endl;
                shout << "                     Please check how this table was filled!" << endl;
             }
@@ -353,7 +361,7 @@ int main(int argc, char** argv) {
    //    printf("%5i      %18.11e      %18.11e\n",i+1,xs[i],dxs[i]/xs[i]);
    // }
 
-   //! Since YODA is linked, write out cross sections with statistical uncertainty in YODA format as well
+   //! If YODA is linked, write out cross sections with statistical uncertainty in YODA format as well
    fastNLOLHAPDF fnlo(firsttable,PDFFile,0);
 
    //! --- Determine dimensioning of observable bins in table
@@ -386,6 +394,10 @@ int main(int argc, char** argv) {
    }
    yell << _SSEPSC << endl;
 
+   //! Without YODA we can stop here
+#ifndef WITH_YODA
+   return 0;
+#else
    //! --- Get RivetID
    //!     For 2-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
    size_t capital_pos = 0;
@@ -493,4 +505,5 @@ int main(int argc, char** argv) {
    shout << FileName + ".yoda was successfully produced" << endl;
    yell << " #" << endl;
    yell  << _CSEPSC << endl << endl;
+#endif
 }

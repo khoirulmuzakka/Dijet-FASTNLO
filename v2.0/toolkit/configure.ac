@@ -19,6 +19,8 @@ AM_INIT_AUTOMAKE([1.9 -Wall])
 #LT_PREREQ([1.5])
 #LT_INIT([dlopen])
 #
+# AC_DEFINE preprocessor definitions are written to config.h
+# which must be included first into all respective source files
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -353,6 +355,7 @@ if test "x$with_yoda" != "xno"; then
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$YODABIN" != "x"; then
+      AC_DEFINE([WITH_YODA],[1],[Enable conditional compilation with YODA])
       AC_MSG_NOTICE([$TMPNAM settings:])
       AC_SUBST([YODAPREFIX],  [`$YODABIN --prefix`])
       AC_SUBST([YODAVERSION], [`$YODABIN --version`])
