@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
    if (argc > 5) {
       chnorm = (const char*) argv[5];
    }
-   if (argc <= 5 || chnorm == "_") {
+   if (argc <= 5 || chnorm == "_" || chnorm == "no") {
       shout["fnlo-tk-cppread"] << "Preparing unnormalized cross sections," << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Normalizing cross sections. " << endl;
@@ -175,6 +175,8 @@ int main(int argc, char** argv) {
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
+   //! --- Reset verbosity level to warning only from here on
+   SetGlobalVerbosity(WARNING);
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!

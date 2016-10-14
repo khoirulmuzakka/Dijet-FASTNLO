@@ -463,18 +463,6 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
          return false;
       }
    }
-   if(INormFlag!=0){
-      for(unsigned int i=0;i<NObsBin;i++){
-         if(IDivLoPointer[i] != other.IDivLoPointer[i]){
-            logger.warn["IsCatenableScenario"]<<"Differing IDivLoPointer["<<i<<"] found"<<endl;
-            return false;
-         }
-         if(IDivUpPointer[i] != other.IDivUpPointer[i]){
-            logger.warn["IsCatenableScenario"]<<"Differing IDivUpPointer["<<i<<"] found."<<endl;
-            return false;
-         }
-      }
-   }
    if ( !potentialcatenable ) logger.warn["IsCatenableScenario"]<<"Some labels have differing values, but relevant variables seem to be catenable. Continuing."<<endl;
    return true;
 }
@@ -602,12 +590,15 @@ void fastNLOTable::CatenateTable(const fastNLOTable& other) {
    // Catenate another table to this table.
    // All contributions must be identically defined.
    //
+   static unsigned int table_count = 0;
    if ( !IsCatenable(other) ) {
       logger.error["CatenateTable"]<<"Tried to catenate incompatible tables. Aborted!"<<endl;
       exit(1);
+   } else {
+      table_count++;
    }
    for ( unsigned int iObs=0; iObs<other.GetNObsBin(); iObs++ ) {
-      this->CatBinToTable(other,iObs);
+      this->CatBinToTable(other,iObs,table_count);
    }
 }
 
@@ -1424,7 +1415,6 @@ void fastNLOTable::PrintScenario(int iprint) const {
       }
    }
    if( INormFlag != 0 ) {
-      printf(" #\n");
       printf(" # Normalization flag (INormFlag)      %d\n",INormFlag);
       if ( INormFlag<0 ) {
          printf(" # Normalization table (DenomTable)    %s\n",DenomTable.data());
@@ -1439,6 +1429,7 @@ void fastNLOTable::PrintScenario(int iprint) const {
             }
          }
       }
+      printf(" #\n");
    }
    printf(" # Total no. of contributions (theory + optional data) in this table: %d\n",(int)fCoeff.size());
    cout << fastNLO::_CSEPSC << endl;
@@ -1808,10 +1799,10 @@ void fastNLOTable::MultiplyBinInTable(unsigned int iObsIdx, double fact) {
    }
 }
 
-void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx) {
+void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx, unsigned int table_count) {
    logger.info["fastNLOTable::CatBinToTable"]<<"Catenating the observable bin index no. " << iObsIdx << " from other table to this." << endl;
    // Changes to table header block A2
-   CatBin(other,iObsIdx);
+   CatBin(other,iObsIdx,table_count);
    // Changes to table contributions block B
    // Loop over all contributions from 'other'-table
    for ( int ic=0; ic<other.GetNcontrib()+other.GetNdata(); ic++ ) {
@@ -1876,21 +1867,32 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
 }
 
 // Catenate observable bin
-void fastNLOTable::CatBin(const fastNLOTable& other, unsigned int iObsIdx) {
+void fastNLOTable::CatBin(const fastNLOTable& other, unsigned int iObsIdx, unsigned int table_count) {
    logger.debug["fastNLOTable::CatBin"]<<"Catenating observable bin in scenario header corresponding to bin index " << iObsIdx << endl;
    if ( Bin.size() == 0 ) {
       say::error["CatBin"]<<"Bin size cannot be zero for a fastNLO table. Aborted!" << endl;
       exit(1);
    }
+   static unsigned int noff = 0;
+   static unsigned int ntab = 0;
    unsigned int nold = Bin.size();
+   if ( ntab != table_count ) {
+      ntab = table_count;
+      noff = nold;
+   }
    Bin.resize(nold+1);
    Bin[nold] = other.Bin[iObsIdx];
    BinSize.resize(nold+1);
    BinSize[nold] = other.BinSize[iObsIdx];
    if ( fastNLOTable::INormFlag != 0 ) {
       IDivLoPointer.resize(nold+1);
-      IDivLoPointer[nold] = other.IDivLoPointer[iObsIdx];
       IDivUpPointer.resize(nold+1);
-      IDivUpPointer[nold] = other.IDivUpPointer[iObsIdx];
+      if ( fastNLOTable::INormFlag == 2 ) {
+         IDivLoPointer[nold] = noff + other.IDivLoPointer[iObsIdx];
+         IDivUpPointer[nold] = noff + other.IDivUpPointer[iObsIdx];
+      } else {
+         say::error["CatBin"]<<"Table catenation not yet implemented for INormFlag = " << fastNLOTable::INormFlag << ". Aborted!" << endl;
+         exit(1);
+      }
    }
 }

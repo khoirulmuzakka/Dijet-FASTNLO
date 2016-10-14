@@ -171,6 +171,7 @@ int main(int argc, char** argv) {
       exit(1);
    }
    yell << _CSEPSC << endl;
+   //---  End of parsing arguments
 
    //! --- Reset verbosity level to warning only from here on
    SetGlobalVerbosity(WARNING);

@@ -170,8 +170,8 @@ class fastNLOTable : public fastNLOBase {
    void MultiplyBinSize(unsigned int iObsIdx, double fact);
    template<typename T> void MultiplyBin(std::vector<T>& v, unsigned int idx, double fact);
 
-   void CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx);
-   void CatBin(const fastNLOTable& other, unsigned int iObsIdx);
+   void CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx, unsigned int table_count);
+   void CatBin(const fastNLOTable& other, unsigned int iObsIdx, unsigned int table_count);
 
    /// ???
    /// Get Rivet ID of analysis
