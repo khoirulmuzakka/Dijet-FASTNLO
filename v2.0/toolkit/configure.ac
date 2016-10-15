@@ -416,6 +416,7 @@ if test "x$with_root" != "xno"; then
    fi
    AC_MSG_NOTICE([******************************************])
    if test "x$ROOTBIN" != "x"; then
+      AC_DEFINE([WITH_ROOT],[1],[Enable conditional compilation with ROOT])
       AC_MSG_NOTICE([$TMPNAM settings:])
       AC_SUBST([ROOTPREFIX],  [`$ROOTBIN --prefix`])
       AC_SUBST([ROOTVERSION], [`$ROOTBIN --version`])
