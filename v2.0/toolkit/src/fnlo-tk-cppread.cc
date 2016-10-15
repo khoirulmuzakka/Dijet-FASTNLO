@@ -86,7 +86,8 @@ int main(int argc, char** argv) {
          man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          man << "   - Specify the PDF set including the absolute path." << endl;
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         man << "[#scalecombs]: Number of mu_r, mu_f scale settings to investigate, if possible, def. = 1, max. = 7" << endl;
+         man << "[#vars]: Number of mu_r, mu_f scale variations to investigate, if possible, def. = 1, max. = 7" << endl;
+         man << "   If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1)" << endl;
          man << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          man << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-cppread"] << "Evaluating table: " << tablename << endl;
       }
    }
-   //---  PDF set
+   //--- PDF set
    string PDFFile = "X";
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
@@ -116,9 +117,9 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-cppread"] << "Using PDF set   : " << PDFFile << endl;
    }
-   //--- Number of scale settings
-   unsigned int nscls = 1;
-   const unsigned int nsclmax = 7;
+   //--- PDF or scale variations
+   int nvars = 1;
+   const int nvarmax = 7;
    const double xmur[] = { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
    const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
    string ch2tmp = "X";
@@ -126,20 +127,24 @@ int main(int argc, char** argv) {
       ch2tmp = (const char*) argv[3];
    }
    if (argc <= 3 || ch2tmp == "_") {
-      shout["fnlo-tk-cppread"] << "No request given for number of scale settings," << endl;
+      shout["fnlo-tk-cppread"] << "No request given for PDF or scale variations," << endl;
       shout << "            investigating primary scale only." << endl;
    } else {
-      nscls = atoi(argv[3]);
-      if (nscls < 1) {
-         snprintf(buffer, sizeof(buffer), "No scale setting or even less??? Aborting! nscls = %i",nscls);
+      nvars = atoi(argv[3]);
+      if (nvars < 0) {
+         snprintf(buffer, sizeof(buffer), "Negative no. of PDF or scale variations??? Aborting! nvars = %i",nvars);
          error["fnlo-tk-cppread"] << buffer << endl;
          exit(1);
-      } else if (nscls > nsclmax) {
-         snprintf(buffer, sizeof(buffer), "Too many scale settings requested, aborting! nscls = %i\n",nscls);
+      } else if (nvars > nvarmax) {
+         snprintf(buffer, sizeof(buffer), "Too many scale settings requested, aborting! nvars = %i\n",nvars);
          error["fnlo-tk-cppread"] << buffer << endl;
          exit(1);
       } else {
-         shout["fnlo-tk-cppread"] << "If possible, will try to do " << nscls << " scale setting(s)." << endl;
+         if ( nvars > 0 ) {
+            shout["fnlo-tk-cppread"] << "If possible, will try to do " << nvars << " scale variations." << endl;
+         } else {
+            shout["fnlo-tk-cppread"] << "If possible, will try to do all PDF members." << endl;
+         }
       }
    }
 
@@ -778,7 +783,13 @@ int main(int argc, char** argv) {
    }
 
    //! Run over all pre-defined scale settings xmur, xmuf
-   for (unsigned int iscls=0; iscls<nscls; iscls++) {
+   bool sclvar = true;
+   //! Run over all PDF members instead
+   if ( nvars == 0 ) {
+      sclvar = false;
+      nvars  = fnlo->GetNPDFMembers();
+   }
+   for (int ivar=0; ivar<nvars; ivar++) {
 
       //! Switch on LO & NLO & NNLO, switch off anything else
       if ( ilo > -1 ) {
@@ -854,14 +865,26 @@ int main(int argc, char** argv) {
          kewk1[i] = 0.;
       }
 
+      //! Set scale
+      double mur = xmur[0];
+      double muf = xmuf[0];
+      if ( sclvar ) {
+         mur = xmur[ivar];
+         muf = xmuf[ivar];
+      }
+      //! Or specify the PDF member
+      else {
+         fnlo->SetLHAPDFMember(ivar);
+      }
+
       //! Set MuR and MuF scale factors for pQCD cross sections and test availability
       //! Activate Hoppet for unusal variations
       //      fnlo->UseHoppetScaleVariations(true);
-      lscvar = fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]);
+      lscvar = fnlo->SetScaleFactorsMuRMuF(mur, muf);
       if (!lscvar) {
          warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
-                           << fnlo->GetScaleFactorMuR() << ","
-                           << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
+                                 << fnlo->GetScaleFactorMuR() << ","
+                                 << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
          continue;
       }
       if (fnlo->GetIsFlexibleScaleTable()) {
@@ -870,8 +893,8 @@ int main(int argc, char** argv) {
          //      fnlo->SetMuFFunctionalForm(kScale2);
          //      fnlo->SetMuRFunctionalForm(kScale2);
          warn["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                           << "from only the first scale of this flexible-scale table." << endl
-                           << "                        Please check how this table was filled!" << endl;
+                                 << "from only the first scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
       }
 
       //! Calculate cross section
@@ -942,13 +965,12 @@ int main(int argc, char** argv) {
          if (!SetOn) {
             warn["fnlo-tk-cppread"] << "2-loop threshold corrections could not be switched on, skip threshold correction factors!" << endl;
          }
-
          //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
-         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(mur, muf) : SetOn;
          if (!lthcvar) {
             warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
-                              << fnlo->GetScaleFactorMuR() << ","
-                              << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
+                                    << fnlo->GetScaleFactorMuR() << ","
+                                    << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skip threshold correction factors!" << endl;
          } else {
             fnlo->CalcCrossSection();
             xsthc2 = fnlo->GetCrossSection(lNorm);
@@ -961,7 +983,7 @@ int main(int argc, char** argv) {
          }
 
          //! Set MuR and MuF scale factors for pQCD + THC cross sections and test availability
-         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(xmur[iscls], xmuf[iscls]) : SetOn;
+         lthcvar = SetOn ? fnlo->SetScaleFactorsMuRMuF(mur, muf) : SetOn;
          if (!lthcvar) {
             warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
                               << fnlo->GetScaleFactorMuR() << ","
@@ -1032,7 +1054,12 @@ int main(int argc, char** argv) {
       //! Start print out
       yell  << _DSEPLC << endl;
       shout << "My Cross Sections" << endl;
-      snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+      if ( sclvar ) {
+         snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+      }
+      else {
+         snprintf(buffer, sizeof(buffer), "The PDF member chosen here is: %i",ivar);
+      }
       shout << buffer << endl;
       yell  << _SSEPLC << endl;
 
