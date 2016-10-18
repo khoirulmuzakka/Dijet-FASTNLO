@@ -479,9 +479,12 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    //! is used as the 'namespace' of keys in read_steer
    //! if there is no steeringNameSpace given explicitly
 
+   //! Remove extension from steerfile to define default steering namespace
+   string steerbase = steerfile.substr(0, steerfile.find_last_of("."));
+
    logger.debug["ReadSteering"]<<"Steerfile = "<<steerfile<<endl;
    if (steeringNameSpace.empty()) {
-      steeringNameSpace = steerfile;
+      steeringNameSpace = steerbase;
    }
    fSteerfile =  steeringNameSpace;
    if ( shouldReadSteeringFile ) {
@@ -493,15 +496,12 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
    else SetGlobalVerbosity("WARNING");
 
-   //! Remove extension from steerfile
-   string sbase = steerfile.substr(0, steerfile.find_last_of("."));
-
    //! Set WarmupFilename from steering
    if (EXIST_NS(WarmUpFilename,fSteerfile)) {
       SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
       logger.debug["fastNLOCreate"]<<"The warmup filename set in steering file is: " << STRING_NS(WarmUpFilename,fSteerfile) << endl;
    } else {
-      string fWarmUpFile = sbase + "_" + STRING_NS(ScenarioName,fSteerfile) + "_warmup.txt";
+      string fWarmUpFile = STRING_NS(ScenarioName,fSteerfile) + "_" + steeringNameSpace + "_warmup.txt";
       SetWarmupTableFilename(fWarmUpFile);
       logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
    }
@@ -2003,7 +2003,7 @@ void fastNLOCreate::FillContribution(int scalevar) {
 
    const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    // hier
-   //    cout<<"Fill! ObsBin="<<ObsBin<<", w="<<fEvent._w<<", x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", o0="<<fScenario._o[0]<<endl;
+   //    cout<<"Fill ObsBin="<<ObsBin<<", w="<<fEvent._w<<", x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", o0="<<fScenario._o[0]<<endl;
    //    static double wsum = 0;
    //    wsum+= fEvent._w; //hier
    //    cout<<" * wSum = "<<wsum<<endl;
@@ -2016,9 +2016,10 @@ void fastNLOCreate::FillContribution(int scalevar) {
 
    int p = fEvent._p;
    if ( p<0 || p > c->GetNSubproc() ) {
-      logger.error["FillContributionFixHHC"]<<"Unknown process id p="<<p<<endl;
+      logger.error["FillContributionFixHHC"]<<"Unknown process Id p = "<<p<<endl;
       exit(1);
    }
+   logger.debug["FillContributionFixHHC"]<<"The process Id is p = "<<p<<endl;
 
    // ---- DIS ---- //
    if (c->GetNPDF() == 1 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true)) {
@@ -2636,7 +2637,7 @@ void fastNLOCreate::WriteTable() {
 // ___________________________________________________________________________________________________
 void fastNLOCreate::WriteTable(string filename) {
    SetFilename(filename);
-   WriteTable();
+   fastNLOTable::WriteTable();
 }
 
 

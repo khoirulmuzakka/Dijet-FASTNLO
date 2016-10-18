@@ -122,7 +122,7 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteTable() {
    //! Write fastNLO table to file 'ffilename' (member)
-   logger.info["WriteTable"]<<"Writing fastNLO table to file: "<<ffilename<<endl;
+   logger.info["WriteTable"]<<"Writing fastNLO table with " << GetNcontrib() << " theory contributions to file: " << ffilename << endl;
    ofstream* table = OpenFileWrite();
    logger.debug["WriteTable"]<<"Writing table header to file ..."<<endl;
    WriteHeader(*table);
