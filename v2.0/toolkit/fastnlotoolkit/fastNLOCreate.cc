@@ -348,15 +348,14 @@ void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
    if (EXIST_NS(IPDFdef3NNLO,fSteerfile))        fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
 
    if ( fProcConsts.IPDFdef2 == 0 ) {
-      if ( fProcConsts.IPDFdef3LO > 0 )
+      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.IPDFdef3LO != (int)fProcConsts.PDFCoeffLO.size()  )
          fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,INT_TAB_NS(PartonCombinationsLO,fSteerfile));
-      if ( fProcConsts.IPDFdef3NLO > 0 )
+      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.IPDFdef3NLO != (int)fProcConsts.PDFCoeffNLO.size() )
          fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,INT_TAB_NS(PartonCombinationsNLO,fSteerfile));
-      if ( fProcConsts.IPDFdef3NNLO > 0 )
+      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.IPDFdef3NNLO != (int)fProcConsts.PDFCoeffNNLO.size() )
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,INT_TAB_NS(PartonCombinationsNNLO,fSteerfile));
-   }
-   // --- check and transform parton combinations
-   if ( fProcConsts.IPDFdef2 == 0 ) {
+      // check again
+      // --- check and transform parton combinations
       if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
          fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
       if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
