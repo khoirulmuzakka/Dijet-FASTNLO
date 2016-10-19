@@ -36,10 +36,9 @@ fastNLOTable::~fastNLOTable(){
 fastNLOTable::fastNLOTable(const fastNLOTable& other)
    : ffilename(other.ffilename), fPrecision(other.fPrecision),
      Itabversion(other.Itabversion), ScenName(other.ScenName),
-     Ncontrib(other.Ncontrib), Nmult(other.Nmult),
-     Ndata(other.Ndata), NuserString(other.NuserString),
-     NuserInt(other.NuserInt), NuserFloat(other.NuserFloat),
-     Imachine(other.Imachine),
+     //Ncontrib(other.Ncontrib), 
+     //Nmult(other.Nmult),
+     //Ndata(other.Ndata), 
      logger("fastNLOTable"), 
     fCoeff(other.fCoeff.size()),
     Ecms(other.Ecms), ILOord(other.ILOord), Ipublunits(other.Ipublunits),
@@ -72,13 +71,13 @@ void fastNLOTable::ReadTable(){
    ifstream* strm = OpenFileRead();
    // read header
    logger.debug["ReadTabl"]<<"Reading header."<<endl;   
-   ReadHeader(*strm);
+   int nCoeff = ReadHeader(*strm);
    // read scenario
    logger.debug["ReadTabl"]<<"Reading scenario."<<endl;   
    ReadScenario(*strm);
    // read b-blocks
    logger.debug["ReadTabl"]<<"Reading coeff tables."<<endl;   
-   ReadCoeffTables(*strm);
+   ReadCoeffTables(*strm, nCoeff);
    // close stream
    logger.debug["ReadTabl"]<<"Reading done closing files."<<endl;   
    CloseFileRead(*strm);
@@ -86,7 +85,11 @@ void fastNLOTable::ReadTable(){
 
 
 //______________________________________________________________________________
-void fastNLOTable::ReadHeader(istream& table) {
+int fastNLOTable::ReadHeader(istream& table) {
+   //!<
+   //!< Read table header (formely named BlockA1 and BlockA2)
+   //!< return number of contributions to follow
+   //!<
    table.peek();
    if (table.eof()) {
       logger.error["ReadHeader"]<<"Cannot read from stream."<<endl;
@@ -105,16 +108,16 @@ void fastNLOTable::ReadHeader(istream& table) {
       logger.warn["ReadHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
    }
    // check if ScenName contains spaces
+   int unused, Ncontrib,Ndata;
    table >> Ncontrib;
-   table >> Nmult;
+   table >> unused; //Nmult;
    table >> Ndata;
-   table >> NuserString;
-   if ( NuserString>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserString="<<NuserString<<"). This is not usual."<<endl;
-   table >> NuserInt;
-   if ( NuserInt>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserInt="<<NuserInt<<"). This is not usual."<<endl;
-   for (int i = 0 ; i<NuserInt ; i++) {
-      int IUserLines;
-      table >> IUserLines;
+   table >> unused; //NuserString;
+   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserString="<<unused<<"). This is not usual."<<endl;
+   table >> unused; //NuserInt;
+   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserInt="<<unused<<"). This is not usual."<<endl;
+   for (int i = 0 ; i<unused ; i++) {
+      table >> unused; //IUserLines;
       // future code if 'user-blocks' are used ...
       // int NUserFlag;
       // string NUserBlockDescr;
@@ -128,14 +131,13 @@ void fastNLOTable::ReadHeader(istream& table) {
       //    }
       // }
       // ...sofar skip reading
-      for (int i = 0 ; i<NuserInt ; i++) {
-         double devnull;
-         table >> devnull;
+      for (int i = 0 ; i<unused ; i++) {
+         table >> unused;//devnull;
       }
    }
-   table >> NuserFloat;
-   if ( NuserInt>0) logger.warn["ReadHeader"]<<"Reading 'userFloat' (NuserInt="<<NuserFloat<<"). This is not usual."<<endl;
-   table >> Imachine;
+   table >> unused;//NuserFloat;
+   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userFloat' (NuserInt="<<unused<<"). This is not usual."<<endl;
+   table >> unused;//Imachine;
    if (!fastNLOTools::ReadMagicNo(table)) {
       Print(1);
       logger.error["ReadHeader"]<<"Did not find final magic number, aborting!"<<endl;
@@ -143,13 +145,14 @@ void fastNLOTable::ReadHeader(istream& table) {
       exit(1);
    }
    fastNLOTools::PutBackMagicNo(table);
+   return Ncontrib+Ndata;
 }
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::ReadCoeffTables(istream& table){
-   int nblocks = GetNcontrib()+GetNdata();
-   for (int i=0; i<nblocks; i++) {
+void fastNLOTable::ReadCoeffTables(istream& table, int nCoeff){
+   //!< read nCoeff Coefficient tables (additive, multiplicative and data)
+   for (int i=0; i<nCoeff; i++) {
       fastNLOCoeffBase cTemp(NObsBin);
       cTemp.ReadBase(table);
       fastNLOCoeffBase* cN = ReadRestOfCoeffTable(cTemp, table);
@@ -236,13 +239,16 @@ void fastNLOTable::WriteHeader(ostream& table) {
       logger.warn["WriteHeader"]<<"Write ScenarioName: "<<ScenName<<endl;
    }
    table << ScenName << endl;
-   table << Ncontrib << endl;
-   table << Nmult << endl;
-   table << Ndata << endl;
-   table << NuserString << endl;
-   table << NuserInt << endl;
-   table << NuserFloat << endl;
-   table << Imachine << endl;
+   // table << Ncontrib << endl;
+   // table << Nmult << endl;
+   // table << Ndata << endl;
+   table << GetNcontrib() << endl;
+   table << GetNmult() << endl;
+   table << GetNdata() << endl;
+   table << 0 << endl; //NUserString
+   table << 0 << endl; //NuserInt
+   table << 0 << endl; //NuserFloat
+   table << 0 << endl; //Imachine
 }
 
 
@@ -680,8 +686,8 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
       exit(1);
    }
    // Set nc and nd for current table to be written out eventually
-   SetNcontrib(newnc);
-   SetNdata(newnd);
+   // SetNcontrib(newnc);
+   // SetNdata(newnd);
 }
 
 
@@ -714,7 +720,7 @@ int fastNLOTable::CreateCoeffTable(int no, fastNLOCoeffBase *newblockb) {
       logger.debug["CreateCoeffTable"]<<"Creating new coefficient table no. " << no << endl;
    }
    fCoeff[no] = newblockb;
-   Ncontrib = fCoeff.size();
+   //Ncontrib = fCoeff.size();
    return 0;
 }
 
@@ -791,6 +797,33 @@ void fastNLOTable::SetDimLabel( string label, unsigned int iDim , bool IsDiff ){
 
    DimLabel[iDim] = label;
    IDiffBin[iDim] = IsDiff ? 2 : 0 ;
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNmult() const {
+   int ret = 0;
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+      if ( (fCoeff[i]->GetIDataFlag()==0) && (fCoeff[i]->GetIAddMultFlag()==1) ) ret++;
+   return ret;
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNcontrib() const {
+   int ret = 0;
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+      if ( (fCoeff[i]->GetIDataFlag()==0) /*&& (fCoeff[i]->GetIAddMultFlag()==0)*/ ) ret++;
+   return ret;
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNdata() const {
+   int ret = 0;
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+      if ( (fCoeff[i]->GetIDataFlag()==1) && (fCoeff[i]->GetIAddMultFlag()==0) ) ret++;
+   return ret;
 }
 
 
@@ -1543,7 +1576,7 @@ void fastNLOTable::PrintContributionSummary(int iprint) const {
    cout  << fastNLO::_CSEPSC << endl;
    logger.shout << "Overview on contribution types and numbers contained in table: " << ffilename << endl;
    cout  << fastNLO::_SSEPSC << endl;
-   snprintf(buffer, sizeof(buffer), "Total number of contributions: %2i", Ncontrib+Ndata);
+   snprintf(buffer, sizeof(buffer), "Total number of contributions: %2i", (int)fCoeff.size());
    logger.shout << buffer << endl;
 
    int iccount[21] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -2050,7 +2083,7 @@ bool fastNLOTable::IsCompatibleHeader(const fastNLOTable& other) const {
       logger.warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
       return false;
    }
-   if (Ndata + other.GetNdata() > 1) {
+   if (GetNdata() + other.GetNdata() > 1) {
       logger.warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
       return false;
    }
@@ -2071,54 +2104,20 @@ bool fastNLOTable::IsCatenableHeader(const fastNLOTable& other) const {
       logger.warn["IsCatenableHeader"]<<"Differing sub-versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
       logger.warn["IsCatenableHeader"]<<"Please check your result carefully!"<<endl;
    }
-   if (Ncontrib != other.GetNcontrib()) {
-      logger.warn["IsCatenableHeader"]<<"Differing number of contributions: "<<Ncontrib<<" and "<<other.GetNcontrib()<<endl;
+   if (GetNcontrib() != other.GetNcontrib()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of contributions: "<<GetNcontrib()<<" and "<<other.GetNcontrib()<<endl;
       return false;
    }
-   if (Nmult != other.GetNmult()) {
-      logger.warn["IsCatenableHeader"]<<"Differing number of multiplicative contributions: "<<Nmult<<" and "<<other.GetNmult()<<endl;
+   if (GetNmult() != other.GetNmult()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of multiplicative contributions: "<<GetNmult()<<" and "<<other.GetNmult()<<endl;
       return false;
    }
-   if (Ndata != other.GetNdata()) {
-      logger.warn["IsCatenableHeader"]<<"Differing number of data contributions: "<<Ndata<<" and "<<other.GetNdata()<<endl;
+   if (GetNdata() != other.GetNdata()) {
+      logger.warn["IsCatenableHeader"]<<"Differing number of data contributions: "<<GetNdata()<<" and "<<other.GetNdata()<<endl;
       return false;
    }
    return true;
 }
-
-
-//______________________________________________________________________________
-void fastNLOTable::SetHeaderDefaults() {
-   // TableMagicNo and ITabVersion are defined as constant in fastNLOConstants.h
-   SetScenName("tns2000");
-   SetContributionHeader();
-}
-
-
-//______________________________________________________________________________
-void fastNLOTable::SetContributionHeader() {
-   SetNcontrib(1);
-   SetNmult(0);
-   SetNdata(0);
-   SetNuserString(0);
-   SetNuserInt(0);
-   SetNuserFloat(0);
-   SetImachine(0);
-}
-
-
-//______________________________________________________________________________
-void fastNLOTable::ResetHeader() {
-   logger.debug["ResetHeader"]<<endl;
-   SetNcontrib(0);
-   SetNmult(0);
-   SetNdata(0);
-   SetNuserString(0);
-   SetNuserInt(0);
-   SetNuserFloat(0);
-   SetImachine(0);
-}
-
 
 //______________________________________________________________________________
 void fastNLOTable::PrintHeader(int iprint) const {
@@ -2129,16 +2128,12 @@ void fastNLOTable::PrintHeader(int iprint) const {
    }
    printf(" # Table version (Itabversion)         %d\n",Itabversion);
    printf(" # Scenario name (ScenName)            %s\n",ScenName.data());
-   printf(" # Theory contributions (Ncontrib)     %d\n",Ncontrib);
-   printf(" # Data contribution 0/1 (Ndata)       %d\n",Ndata);
+   printf(" # Theory contributions (Ncontrib)     %d\n",GetNcontrib());
+   printf(" # Data contribution 0/1 (Ndata)       %d\n",GetNdata());
    if ( abs(iprint) > 0 ) {
       cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
       printf(" #   Separator (tablemagicno)            %d\n",fastNLO::tablemagicno);
-      printf(" #   Unused (Nmult)                      %d\n",Nmult);
-      printf(" #   Unused (NuserString)                %d\n",NuserString);
-      printf(" #   Unused (NuserInt)                   %d\n",NuserInt);
-      printf(" #   Unused (NuserFloat)                 %d\n",NuserFloat);
-      printf(" #   Unused (Imachine)                   %d\n",Imachine);
+      printf(" #   Unused (Nmult)                      %d\n",GetNmult());
    }
    cout << fastNLO::_CSEPSC << endl;
 }

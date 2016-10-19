@@ -62,9 +62,6 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
 
-   //! Initialise
-   ResetHeader();
-
    //! Set constants from arguments
    fGenConsts  = GenConsts;
    fProcConsts = ProcConsts;
@@ -101,9 +98,6 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and warmup file"<<endl;
    logger.debug["fastNLOCreate"]<<"The warmup filename set from function call is: " << warmupfile << endl;
-
-   //! Initialise
-   ResetHeader();
 
    //! Set constants from arguments
    fGenConsts  = GenConsts;
@@ -148,9 +142,6 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
 
-   //! Initialise
-   ResetHeader();
-
    //! Set constants from arguments
    fGenConsts  = GenConsts;
    fScenConsts = ScenConsts;
@@ -193,9 +184,6 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
 
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from steering file"<<endl;
-
-   //! Initialise
-   ResetHeader();
 
    //! Set constants from defaults
    SetGenConstsDefaults();
