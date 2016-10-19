@@ -614,26 +614,21 @@ int fastNLOTable::CreateCoeffTable(int no, fastNLOCoeffBase *newblockb) {
       logger.debug["CreateCoeffTable"]<<"Creating new coefficient table no. " << no << endl;
    }
    fCoeff[no] = newblockb;
-
+   Ncontrib = fCoeff.size();
    return 0;
 }
 
 
 // ___________________________________________________________________________________________________
 bool fastNLOTable::cmp(const double x1, const double x2) const {
-   double norm;
-   if (x1>0.){
-      norm = x1;
-   }else{
-      norm = 1.; // If x1 is 0, do not try to calculate relative deviation, use absolute
-   }
+   double norm = (x1>0.) ? x1 : 1.; // If x1 is 0, do not try to calculate relative deviation, use absolute
    return((fabs(x1-x2)/norm)<1e-7);
 }
 
 bool fastNLOTable::cmp(const vector<double>& x1,const vector<double>& x2) const {
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
-      result = result & cmp (x1[i],x2[i]);
+      result &= cmp (x1[i],x2[i]);
    }
    return result;
 }
@@ -641,7 +636,7 @@ bool fastNLOTable::cmp(const vector<double>& x1,const vector<double>& x2) const 
 bool fastNLOTable::cmp(const vector<vector<double> >& x1, const vector<vector<double> >& x2) const {
    bool result = true;
    for(unsigned int i = 0; i<x1.size() ;i++ ){
-      result = result & cmp (x1[i],x2[i]);
+      result &=  cmp (x1[i],x2[i]);
    }
    return result;
 }
