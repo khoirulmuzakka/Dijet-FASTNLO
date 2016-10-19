@@ -14,7 +14,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include "fastnlotk/fastNLOBase.h"
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/read_steer.h"
 #include "fastnlotk/speaker.h"

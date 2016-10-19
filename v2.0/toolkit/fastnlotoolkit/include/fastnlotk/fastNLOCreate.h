@@ -48,7 +48,7 @@ public:
    void SetOrderOfAlphasOfCalculation(unsigned int ord);                                        //!< set absolute order of alpha_s
    void SetScenario(const fnloScenario scen) {fScenario = scen;}                                //!< set the member fScenario, which will be used when calling Fill()
    void SetEvent(const fnloEvent ev) {fEvent = ev;}                                             //!< set the member fEvent, which will be used when calling Fill()
-   void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
+   inline void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
    fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread = NULL);                          //!< set this table/contribution to become a reference contribution
@@ -70,7 +70,7 @@ public:
 
    void WriteTable(std::string filename);                                                            //!< Write fastNLO table to file filename
    void WriteTable();                                                                           //!< Write fastNLO table to disk.
-   void WriteTable(double nEvents) {SetNumberOfEvents(nEvents); WriteTable();};                 //!< Write fastNLO table to disk and set number of events.
+   inline void WriteTable(double nEvents) {SetNumberOfEvents(nEvents); WriteTable();};                 //!< Write fastNLO table to disk and set number of events.
    void WriteWarmupTable();                                                                     //!< Write the warmup table to disk.
    void MultiplyCoefficientsByBinSize();                                                        //!< Multiply all coefficients by bin size
    void DivideCoefficientsByBinSize();                                                          //!< Divide all coefficients by bin size
@@ -80,9 +80,9 @@ public:
    void PrintWarmupValues();                                                                    //!< Print the warmup values to the screen
    std::string GetWarmupTableFilename();                                                             //!< Get the filename, which is used for storage of the warmup-table.
    void SetWarmupTableFilename(std::string);                                                         //!< Set the filename, which is used for storage of the warmup-table (otherwise a default is used)
-   bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
+   inline bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
 
-   fastNLOCoeffAddBase* GetTheCoeffTable() const {
+   inline fastNLOCoeffAddBase* GetTheCoeffTable() const {
       return (fastNLOCoeffAddBase*)GetCoeffTable(0);
    }                                            //!< Getter for the one (and only) coefficient table
 
