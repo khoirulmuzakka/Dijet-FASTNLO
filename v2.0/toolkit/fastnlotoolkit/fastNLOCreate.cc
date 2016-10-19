@@ -254,6 +254,7 @@ void fastNLOCreate::SetProcConstsDefaults() {
 // ___________________________________________________________________________________________________
 bool fastNLOCreate::CheckProcConsts() {
    //! Check that reasonable values different from the defaults have been set
+   logger.debug["CheckProcConsts"]<<"Checking ProcConsts: "<<endl;
 
    bool checkok = true;
    if (fProcConsts.LeadingOrder < 0) {
@@ -505,6 +506,7 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       SetWarmupTableFilename(fWarmUpFile);
       logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
    }
+
 
    if (logger.info.GetSpeak())
       PRINTALL();
@@ -1397,7 +1399,7 @@ void fastNLOCreate::GetWarmupValues() {
    else {
       //! Try to get warmup values from steering
       std::cout.setstate(std::ios::failbit) ; // no cout in the following
-      std::cerr.setstate(std::ios::failbit) ; // no cout in the following
+      // std::cerr.setstate(std::ios::failbit) ; // no cout in the following
       logger.info >>"\n";
       logger.info >> (fastNLO::_SSEP40+fastNLO::_SSEP40+fastNLO::_SSEP40) << endl;
       logger.info["GetWarmupValues"]<<"Trying to get warmup values. Please ignore following messages from parser."<<endl;
@@ -2559,7 +2561,7 @@ void fastNLOCreate::UpdateWarmupArrays() {
          fWx[ObsBin].first      = std::min(fEvent._x1,fWx[ObsBin].first) ;
          fWx[ObsBin].second     = std::max(fEvent._x1,fWx[ObsBin].second) ;
       } else
-         logger.error["UpdateWarmupArrays"]<<"nothing reasonable implemented yet."<<endl;
+         logger.error["UpdateWarmupArrays"]<<"nothing reasonable implemented yet: IPDFdef1="<<GetTheCoeffTable()->IPDFdef1<<endl;
       if (fIsFlexibleScale) {
          fWMu2[ObsBin].first    = std::min(fScenario._m2,fWMu2[ObsBin].first) ;
          fWMu2[ObsBin].second   = std::max(fScenario._m2,fWMu2[ObsBin].second) ;
