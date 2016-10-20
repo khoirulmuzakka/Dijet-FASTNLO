@@ -2018,7 +2018,7 @@ void fastNLOCreate::FillContribution(int scalevar) {
       //{logger.error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1); }
    } else if (c->GetNPDF() == 1 && fastNLOCoeffAddFix::CheckCoeffConstants(c,true)) {
       // todo
-      {logger.error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1); }
+      {logger.error["FillContribution"]<<"Don't know how to fill this table (DIS: fix-scale tables!). Exiting."<<endl; exit(1); }
    }
    // ---- pp/ppbar ---- //
    else if (c->GetNPDF() == 2 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true))

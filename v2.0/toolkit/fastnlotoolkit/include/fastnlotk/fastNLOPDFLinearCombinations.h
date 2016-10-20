@@ -21,6 +21,7 @@ private:
    std::vector<double > CalcPDFLCOneHadron(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1 ) const;
 
    std::vector<double> CalcPDFDIS(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1) const;
+   std::vector<double> CalcPDFDISFromTable(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1) const ; // DIS. PDFLiCos are stored in table
    std::vector<double> CalcPDFHHCFromTable(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1 , const std::vector<double>& pdfx2) const ; // hh collisions. PDFLiCos are stored in table
    std::vector<double> CalcPDFHHC(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1 , const std::vector<double>& pdfx2) const ; // jets in hh
    std::vector<double> CalcDefaultPDFLiCos(const fastNLOCoeffAddBase* c, const std::vector<double>& pdfx1 , const std::vector<double>& pdfx2) const ; // jets in hh

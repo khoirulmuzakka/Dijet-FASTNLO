@@ -16,12 +16,14 @@ bool fastNLOTable::fWelcomeOnce = false;
 // ___________________________________________________________________________________________________
 //fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
 fastNLOTable::fastNLOTable() : fPrecision(8), logger("fastNLOTable") {
+   if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
 
 // ___________________________________________________________________________________________________
 fastNLOTable::fastNLOTable(string name)  : ffilename(name), fPrecision(8), logger("fastNLOTable")  {
    //logger.SetClassName("fastNLOTable");
+   if (!fWelcomeOnce) PrintWelcomeMessage();
    ReadTable();
 }
 

@@ -111,7 +111,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
                   table >> PDF1Flavor;
                   table >> PDF2Flavor;
                }
-               else if ( IPDFdef1>=3 ) {
+               else if ( IPDFdef1==2 ) {
                   table >> PDF1Flavor;
                   PDF2Flavor = PDF1Flavor;
                }
@@ -221,6 +221,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    table << IPDFdef3 << endl;
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
+      cout<<"Writing PDF coefficients into table."<<endl;
       if ( IPDFdef3 != NSubproc ){
          error["Write"]<<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<IPDFdef3<<", NSubproc="<<NSubproc<<"). Exiting."<<endl;
          exit(1);
@@ -234,7 +235,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
                table << fPDFCoeff[k][n].first << endl;
                table << fPDFCoeff[k][n].second << endl;
             }
-            else if ( IPDFdef1>=3 ) {
+            else if ( IPDFdef1==2 ) {
                table << fPDFCoeff[k][n].first << endl;
             }
          }
