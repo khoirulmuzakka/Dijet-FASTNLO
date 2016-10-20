@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = Modify
+SUBDIRS = check Modify
 
 # Install all data files from gzipped tar archive to avoid limits in command line length!
 FIRST   = Modify
