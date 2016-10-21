@@ -596,7 +596,6 @@ AC_CONFIG_FILES([Makefile
                  data/Makefile
                  data/check/Makefile
                  data/modify/Makefile
-                 data/check/Makefile
                  data/Modify/Makefile
                  doc/Makefile
                  fastnlotoolkit/Makefile
