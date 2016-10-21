@@ -10,7 +10,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 # Subdirectories
-SUBDIRS = data doc fastnlotoolkit scripts src pyext
+SUBDIRS = data doc fastnlotoolkit src pyext check
 
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
@@ -24,7 +24,8 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
 # Installation of DOXYGEN documentation
-# TBD: Docu is always remade! Check tag file mechanism.
+# Docu is not remade anymore at each occasion!
+# To be sure to have the actual one, do a 'make clean' first
 # TBD: Remove doxygen directory @ maintainer-clean.
 if HAVE_DOXYGEN
 if DX_COND_doc
@@ -32,6 +33,7 @@ include aminclude.am
 EXTRA_DIST += aminclude.am doxygen.cfg
 all-local-doxygen: doxygen-doc
 	touch doc/doxygen/fastnlo_toolkit.tag
+	touch doc/doxygen/fastnlo_toolkit.pdf
 .PHONY: all-local-doxygen
 all-local: all-local-doxygen
 MOSTLYCLEANFILES = $(DX_CLEANFILES) all-local-doxygen

@@ -108,11 +108,3 @@ fnlo_tk_cat_LDFLAGS     = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 # Use "make maintainer-clean" (on a build machine) before svn commits,
 # but not for distribution
 MAINTAINERCLEANFILES = Makefile.in
-
-
-check_SCRIPTS = fnlo-tk-cpptest.pl
-TESTS = $(check_SCRIPTS)
-fnlo-tk-cpptest.pl:
-	cp ../scripts/fnlo-tk-cpptest.pl .
-	./fnlo-tk-cpptest.pl
-CLEANFILES = fnlo-tk-cpptest.pl

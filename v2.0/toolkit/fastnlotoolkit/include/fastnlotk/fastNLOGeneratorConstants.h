@@ -105,7 +105,7 @@ namespace fastNLO {
 
       bool ReadBinningFromSteering;//!< Specify if binning is read from fScenConst or from warmup
 
-
+      bool IgnoreWarmupBinningCheck;//!< Don't check warmup binning to avoid too many floating precision issues
       bool ApplyPDFReweighting;//!<  Apply reweighting of pdfs for an optimized interpolation, def.=true.
       bool CheckScaleLimitsAgainstBins;//!< For warmup-run! Set limits for scale nodes to bin borders, if possible
       /**# -------------------------------------------------------------------- #

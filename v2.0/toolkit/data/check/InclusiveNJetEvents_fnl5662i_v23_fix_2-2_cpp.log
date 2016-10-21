@@ -1,0 +1,202 @@
+ ##################################################################################
+ # INFO.    [fnlo-tk-cppread] Program to read fastNLO tables and derive
+ # INFO.    [fnlo-tk-cppread] QCD cross sections using PDFs e.g. from LHAPDF
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-cppread] For more explanations type:
+ # INFO.    [fnlo-tk-cppread] ./fnlo-tk-cppread -h
+ ##################################################################################
+
+ ##################################################################################
+ # [fnlo-tk-cppread] fastNLO Cross-Section Calculator
+ #---------------------------------------------------------------------------------
+ # [fnlo-tk-cppread] Evaluating table: InclusiveNJetEvents_fnl5662i_v23_fix_2-2.tab
+ # [fnlo-tk-cppread] No PDF set given, taking CT10nlo instead!
+ # [fnlo-tk-cppread] No request given for PDF or scale variations,
+ #             investigating primary scale only.
+ # [fnlo-tk-cppread] No request given for alpha_s evolution code,
+ #             using GRV default.
+ # [fnlo-tk-cppread] Preparing unnormalized cross sections,
+ ##################################################################################
+
+ ##################################################################################
+ #
+ # [0;31mfast[0;34mNLO[0m_toolkit
+ # Version 2.3.1pre_2279
+ #
+ # C++ program and toolkit to read and create fastNLO v2 tables and
+ # derive QCD cross sections using PDFs, e.g. from LHAPDF
+ #
+ #---------------------------------------------------------------------------------
+ #
+ # Copyright © 2005-2016 [0;31mfast[0;34mNLO[0m Collaboration
+ # D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation, either version 3 of the License, or
+ # (at your option) any later version.
+ #
+ # This program is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ # GNU General Public License for more details.
+ #
+ # You should have received a copy of the GNU General Public License
+ # along with this program. If not, see <http://www.gnu.org/licenses/>.
+ #
+ #---------------------------------------------------------------------------------
+ #
+ # The projects web page can be found at:
+ #   http://projects.hepforge.org/fastnlo
+ #
+ # If you use this code, please cite:
+ #   T. Kluge, K. Rabbertz, M. Wobisch, hep-ph/0609285
+ #   D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310
+ #
+ ##################################################################################
+
+ ##################################################################################
+ # Overview on contribution types and numbers contained in table: InclusiveNJetEvents_fnl5662i_v23_fix_2-2.tab
+ #---------------------------------------------------------------------------------
+ # Total number of contributions:  2
+ #   No.: 1, type: Fixed order calculation       , Id: 0, order: LO                  , by: NLOJet++_4.1.3
+ #   No.: 2, type: Fixed order calculation       , Id: 1, order: NLO                 , by: NLOJet++_4.1.3
+ ##################################################################################
+
+ ##################################################################################
+ # Information on table header
+ #---------------------------------------------------------------------------------
+ #===================== fastNLO Table: Header ====================
+ # Table version (Itabversion)         22000
+ # Scenario name (ScenName)            fnl5662i_v23_fix
+ # Theory contributions (Ncontrib)     2
+ # Data contribution 0/1 (Ndata)       0
+ ##################################################################################
+
+ ##################################################################################
+ # Information on fastNLO scenario: fnl5662i_v23_fix
+ #---------------------------------------------------------------------------------
+ #===================== fastNLO Table: Scenario ====================
+ # Scenario description (ScDescript)
+ #   0	d2sigma-dijet_dChi_dMjj_[pb_GeV]
+ #   1	CMS_Collaboration
+ #   2	Dijet_Chi
+ #   3	anti-kT_R=0.4
+ #   4	THEORY_LABEL=NLOJet++
+ #   5	provided by:
+ #   6	fastNLO_2.3.1
+ #   7	If you use this table, please cite:
+ #   8	  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310
+ #
+ # Publ. x section (10^-Ipublunits b)  12
+ # Centre-of-mass energy (Ecms/GeV)    13000
+ # Power in a_s of LO process (ILOord) 2
+ # No. of observable bins (NObsBin)    4
+ # Dim. of observable binning (NDim)   2
+ #
+ # Dimension labels (DimLabel)
+ #   0	Mjj_[GeV]
+ #   1	Chi
+ # Differential dimension (IDiffBin)
+ #   0	2
+ #   1	2
+ #
+ # Total no. of contributions (theory + optional data) in this table: 2
+ ##################################################################################
+
+ ##################################################################################
+ # Information on table contribution no. 0: LO
+ #---------------------------------------------------------------------------------
+ #===================== fastNLO Table: CoeffBase ====================
+ # Contribution description (CtrbDescript)
+ #   0	LO
+ # Code description (CodeDescript)
+ #   0	NLOJet++_4.1.3
+ #   1	Z. Nagy, Phys. Rev. Lett. 88 (2002) 122003,
+ #   2	Z. Nagy, Phys. Rev. D 68 (2003) 094002.
+ #===================== fastNLO Table: CoeffAddBase ====================
+ # No. of events (Nevt)                30000000000.000000
+ # Abs. order in a_s (Npow)            2
+ # No. of hadrons involved (NPDF)      2
+ # Type(s) of hadrons (NPDFPDG)
+ #   0	2212
+ #   1	2212
+ # PDF storage format (NPDFDim)        1
+ #   --> x-interpolation storage format: Half-Matrix
+ # Observable bin no. 1
+ #   No. of X1 nodes (XNode1[i].size())          15
+ # Observable bin no. 4
+ #   No. of X1 nodes (XNode1[i].size())          15
+ # No. of scales involved (NScales)    2
+ # Scale descriptions (ScaleDescript)
+ #   0	<pT_1,2>_[GeV]
+ #===================== fastNLO Table: CoeffAddFix ====================
+ # No. of scale variations (Nscalevar) 1
+ # Scale factors (ScaleFac[0][])
+ #   0	1
+ # No. of scale nodes (Nscalenode)     6
+ ##################################################################################
+
+ ##################################################################################
+ # Information on table contribution no. 1: NLO
+ #---------------------------------------------------------------------------------
+ #===================== fastNLO Table: CoeffBase ====================
+ # Contribution description (CtrbDescript)
+ #   0	NLO
+ # Code description (CodeDescript)
+ #   0	NLOJet++_4.1.3
+ #   1	Z. Nagy, Phys. Rev. Lett. 88 (2002) 122003,
+ #   2	Z. Nagy, Phys. Rev. D 68 (2003) 094002.
+ #===================== fastNLO Table: CoeffAddBase ====================
+ # No. of events (Nevt)                32300000000.000000
+ # Abs. order in a_s (Npow)            3
+ # No. of hadrons involved (NPDF)      2
+ # Type(s) of hadrons (NPDFPDG)
+ #   0	2212
+ #   1	2212
+ # PDF storage format (NPDFDim)        1
+ #   --> x-interpolation storage format: Half-Matrix
+ # Observable bin no. 1
+ #   No. of X1 nodes (XNode1[i].size())          15
+ # Observable bin no. 4
+ #   No. of X1 nodes (XNode1[i].size())          15
+ # No. of scales involved (NScales)    2
+ # Scale descriptions (ScaleDescript)
+ #   0	<pT_1,2>_[GeV]
+ #===================== fastNLO Table: CoeffAddFix ====================
+ # No. of scale variations (Nscalevar) 3
+ # Scale factors (ScaleFac[0][])
+ #   0	1
+ #   1	0.5
+ #   2	2
+ # No. of scale nodes (Nscalenode)     6
+ ##################################################################################
+LHAPDF 6.1.6 loading /home/rabbertz/local/share/LHAPDF/CT10nlo/CT10nlo_0000.dat
+CT10nlo PDF set, member #0, version 4; LHAPDF ID = 11000
+LHAPDF 6.1.6 loading /home/rabbertz/local/share/LHAPDF/CT10nlo/CT10nlo_0000.dat
+CT10nlo PDF set, member #0, version 4; LHAPDF ID = 11000
+
+ ##################################################################################
+ # [ALPHAS-GRV] First call:
+ ##################################################################################
+ # [ALPHAS-GRV] PI              =  3.141592653589793
+ # [ALPHAS-GRV] M_Z/GeV         = 91.187600
+ # [ALPHAS-GRV] a_s(M_Z)        =  0.118400
+ # [ALPHAS-GRV] a_s loop        =  2
+ # [ALPHAS-GRV] flavor-matching =    F
+ # [ALPHAS-GRV] nf (M_Z)        =  5
+ ##################################################################################
+
+ ##################################################################################################################################################################
+ # [fnlo-tk-cppread] Calculate my cross sections
+ ##################################################################################################################################################################
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      1.000,      1.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ Mjj_[GeV]         ]  IODimI  [ Chi               ]  <<pT_1,2>_[Ge>  LO cross section   NLO cross section   KNLO
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  500.0         1   1900.       2400.          1   1.000       2.000      1025.          7.68766693193E-03  7.47026878708E-03   0.97172
+     2  500.0         1   1900.       2400.          2   2.000       3.000      947.4          6.56130688437E-03  6.23741560204E-03   0.95064
+     3  600.0         2   2400.       3000.          1   1.000       2.000      1286.          1.53835086039E-03  1.52414516739E-03   0.99077
+     4  600.0         2   2400.       3000.          2   2.000       3.000      1189.          1.32592654622E-03  1.27794419106E-03   0.96381

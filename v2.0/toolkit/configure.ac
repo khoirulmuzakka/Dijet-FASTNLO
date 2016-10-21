@@ -595,6 +595,8 @@ AC_SUBST([YEARS],["2005-`date +%Y`"])
 AC_CONFIG_FILES([Makefile
                  data/Makefile
                  data/check/Makefile
+                 data/modify/Makefile
+                 data/check/Makefile
                  data/Modify/Makefile
                  doc/Makefile
                  fastnlotoolkit/Makefile
@@ -603,7 +605,7 @@ AC_CONFIG_FILES([Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
                  pyext/Makefile
                  pyext/setup.py
-                 scripts/Makefile
+                 check/Makefile
                  src/Makefile
                  src/fnlo-tk-config
                 ])
