@@ -1,0 +1,97 @@
+ ##################################################################################################################################################################
+ # [fnlo-tk-cppread] Calculate my cross sections
+ ##################################################################################################################################################################
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      1.000,      1.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO      KTHC2     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      19.34          1.57424823765E+07  1.66133036344E+07   1.05532   1.39677   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      22.37          8.41757435537E+06  8.89303402062E+06   1.05648   1.36135   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      19.32          1.52853894360E+07  1.62912651864E+07   1.06581   1.41083   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      22.35          8.15894117390E+06  8.65472736080E+06   1.06077   1.38662   1.32000
+ # WARNING! [fastNLOReader::SetContributionON] Scale variation 2 of contribution Threshold corrections , Id = 0, is > number of available scale variations 1! Ignoring call.
+ # WARNING! [fnlo-tk-cppread] 2-loop threshold corrections could not be switched on, skip threshold correction factors!
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (0.5,0.5) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      0.500,      0.500
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      9.671          1.72047349753E+07  1.73794982349E+07   1.01016   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      11.18          9.41039666538E+06  9.23031445454E+06   0.98086   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      9.659          1.67765724392E+07  1.70148036740E+07   1.01420   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      11.17          9.15645061364E+06  8.99046247068E+06   0.98187   1.32000
+ # WARNING! [fastNLOReader::SetContributionON] Scale variation 1 of contribution Threshold corrections , Id = 0, is > number of available scale variations 1! Ignoring call.
+ # WARNING! [fnlo-tk-cppread] 2-loop threshold corrections could not be switched on, skip threshold correction factors!
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (2,2) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      2.000,      2.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      38.68          1.40617397906E+07  1.63053459096E+07   1.15955   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      44.73          7.40311808151E+06  8.69886942249E+06   1.17503   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      38.65          1.36119691186E+07  1.59654817674E+07   1.17290   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      44.70          7.15565536205E+06  8.44898061095E+06   1.18074   1.32000
+ # WARNING! [fastNLOReader::SetScaleFactorsMuRMuF] Threshold corrections do not allow different scale factors for MuR and MuF, nothing changed!
+ # WARNING! [fastNLOReader::SetScaleFactorsMuRMuF] The method returns 'false', please check the return code and act appropriately.
+ # USAGE.   Please do only symmetric scale variations, i.e. xmur = xmuf, with threshold corrections switched on
+ # USAGE.   or deactivate threshold corrections first using
+ # USAGE.   FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (0.5,1) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      0.500,      1.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      9.673          2.12907388214E+07  1.61573857705E+07   0.75889   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      11.19          1.12726139618E+07  8.68057044390E+06   0.77006   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      9.658          2.06725652934E+07  1.59431262522E+07   0.77122   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      11.18          1.09262913005E+07  8.46871256484E+06   0.77508   1.32000
+ # WARNING! [fastNLOReader::SetContributionON] Scale variation 2 of contribution Threshold corrections , Id = 0, is > number of available scale variations 1! Ignoring call.
+ # WARNING! [fnlo-tk-cppread] 2-loop threshold corrections could not be switched on, skip threshold correction factors!
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (1,0.5) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      1.000,      0.500
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      19.34          1.27216695886E+07  1.61731150314E+07   1.27130   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      22.37          7.02714471875E+06  8.70384216231E+06   1.23860   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      19.33          1.24050602993E+07  1.58123493534E+07   1.27467   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      22.35          6.83749201974E+06  8.47449295313E+06   1.23942   1.32000
+ # WARNING! [fastNLOReader::SetContributionON] Scale variation 1 of contribution Threshold corrections , Id = 0, is > number of available scale variations 1! Ignoring call.
+ # WARNING! [fnlo-tk-cppread] 2-loop threshold corrections could not be switched on, skip threshold correction factors!
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (1,2) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      1.000,      2.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      19.34          1.82413900186E+07  1.67651909977E+07   0.91907   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      22.37          9.53372256506E+06  8.99448558798E+06   0.94344   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      19.32          1.76579390269E+07  1.64988177177E+07   0.93436   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      22.35          9.21506118483E+06  8.75395478560E+06   0.94996   1.32000
+ # WARNING! [fastNLOReader::SetScaleFactorsMuRMuF] Threshold corrections do not allow different scale factors for MuR and MuF, nothing changed!
+ # WARNING! [fastNLOReader::SetScaleFactorsMuRMuF] The method returns 'false', please check the return code and act appropriately.
+ # USAGE.   Please do only symmetric scale variations, i.e. xmur = xmuf, with threshold corrections switched on
+ # USAGE.   or deactivate threshold corrections first using
+ # USAGE.   FastNLOReader::SetContributionON(kTresholdCorrections,Id,false).
+ # WARNING! [fnlo-tk-cppread] The selected scale variation (xmur, xmuf) = (2,1) is not possible with this table, skip threshold correction factors!
+ #=================================================================================================================================================================
+ # My Cross Sections
+ # The scale factors xmur, xmuf chosen here are:      2.000,      1.000
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ #IObs  Bin Size IODimO  [ |y|               ]  IODimI  [ pT_[GeV]          ]  <pT_jet_[GeV]>  LO cross section   NLO cross section   KNLO     KNPC1
+ #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+     1  3.000         1   0.000       0.5000         1   18.00       21.00      38.68          1.21356027776E+07  1.55231458736E+07   1.27914   1.40000
+     2  3.000         1   0.000       0.5000         2   21.00       24.00      44.73          6.53647635352E+06  8.33153818980E+06   1.27462   1.38000
+     3  3.000         2   0.5000      1.000          1   18.00       21.00      38.65          1.17832309703E+07  1.51800890249E+07   1.28828   1.40000
+     4  3.000         2   0.5000      1.000          2   21.00       24.00      44.71          6.33562652843E+06  8.09920896550E+06   1.27836   1.32000
