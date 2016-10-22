@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
       dxs[i] = +sqrt( var / nfound );
       dxstmp3.push_back((xsMin[i]-xs[i])/sqrt(var)*fac);
       dxstmp4.push_back((xsMax[i]-xs[i])/sqrt(var)*fac);
-      printf("%6i%6i%6i%16.5e%16.5e%16.5e%10.3f   %10.3f   %10.3f   %10.3f   %10.3f   \n",
+      printf("%6i%6i%6i%16.5e%16.5e%16.5e%10.3f   %10.3f   %10.3f   %10.3f   %10.3f\n",
              i+1,iTabMin[i],iTabMax[i],xs[i],xsMin[i],xsMax[i],dxs[i]/xs[i]*100,
              (xsMin[i]/xs[i]-1)*100,(xsMax[i]/xs[i]-1)*100,dxstmp3[i],dxstmp4[i]);
    }
@@ -505,6 +505,6 @@ int main(int argc, char** argv) {
    yell << " #" << endl;
    shout << FileName + ".yoda was successfully produced" << endl;
    yell << " #" << endl;
-   yell  << _CSEPSC << endl << endl;
+   yell  << _CSEPSC << endl;
 #endif
 }
