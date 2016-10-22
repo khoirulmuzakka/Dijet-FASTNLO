@@ -19,7 +19,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 
 check_SCRIPTS = fnlo-tk-cpptest.pl fnlo-tk-cppnormtest.pl fnlo-tk-cppscalestest.pl fnlo-tk-cattest.pl \
-	fnlo-tk-erasetest.pl fnlo-tk-erasetest2.pl
+	fnlo-tk-erasetest.pl fnlo-tk-erasetest2.pl fnlo-tk-mergetest.pl fnlo-tk-stattest.pl
 TESTS = $(check_SCRIPTS)
 fnlo-tk-cpptest.pl:
 	./fnlo-tk-cpptest.pl
@@ -33,5 +33,9 @@ fnlo-tk-erasetest.pl:
 	./fnlo-tk-erasetest.pl
 fnlo-tk-erasetest2.pl:
 	./fnlo-tk-erasetest2.pl
+fnlo-tk-mergetest.pl:
+	./fnlo-tk-mergetest.pl
+fnlo-tk-stattest.pl:
+	./fnlo-tk-stattest.pl
 
-CLEANFILES = *.log *.tab
+CLEANFILES = *.log *.tab *.yoda
