@@ -1,0 +1,16 @@
+# ------------------------
+#   Input and output
+# ------------------------
+InTable    fnl1014_I902309_2-2.tab
+OutTable   erasetest2.tab
+
+# ------------------------------------
+#   Remove Bins
+#     Specify bin numbers to be removed
+#     within curly brackets.
+#     First bin is bin 1.
+#     Please use increasing bin numbering ##
+# ------------------------------------
+RemoveBins {   #  An increasing bin numbering must be used! ##
+   1   2
+}
