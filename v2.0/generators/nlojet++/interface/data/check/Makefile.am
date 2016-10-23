@@ -1,16 +1,14 @@
 #                                               -*- Automake -*-
 # -----------------------------------------------------------------------------
 #
-# K. Rabbertz, 15.05.2014
+# K. Rabbertz, 20.10.2016
 #
-# NLOJet++ interface to fastNLO toolkit
+# fastNLO_toolkit
 #
 # -----------------------------------------------------------------------------
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
-# Nothing to do here, just go to subdirectories
-SUBDIRS = data include tools jetalgos hadron check
-#
+
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"

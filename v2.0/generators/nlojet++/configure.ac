@@ -269,6 +269,7 @@ AC_SUBST([YEARS],["2011-`date +%Y`"])
 # Output
 AC_CONFIG_FILES([Makefile
                  interface/Makefile
+                 interface/check/Makefile
                  interface/data/Makefile
                  interface/data/Examples/Makefile
                  interface/data/InclusiveJets/Makefile
@@ -277,6 +278,7 @@ AC_CONFIG_FILES([Makefile
                  interface/data/AzimuthalDecorrelation/Makefile
                  interface/data/InclusiveNJetEvents/Makefile
                  interface/data/RivetAdditions/Makefile
+                 interface/data/check/Makefile
                  interface/hadron/Makefile
                  interface/include/Makefile
                  interface/include/fnlo_int_nlojet/Makefile
