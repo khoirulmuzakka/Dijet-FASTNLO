@@ -16,8 +16,8 @@ AUTOMAKE_OPTIONS = gnu
 # but not for distribution
 MAINTAINERCLEANFILES = Makefile.in
 
-check_SCRIPTS = fnlo-nj-wrmtest.pl fnlo-nj-lotest.pl fnlo-nj-nlotest.pl
-TESTS = $(check_SCRIPTS)
+dist_check_SCRIPTS = fnlo-nj-wrmtest.pl fnlo-nj-lotest.pl fnlo-nj-nlotest.pl
+TESTS = $(dist_check_SCRIPTS)
 fnlo-nj-wrmtest.pl:
 	./fnlo-nj-wrmtest.pl
 fnlo-nj-lotest.pl:

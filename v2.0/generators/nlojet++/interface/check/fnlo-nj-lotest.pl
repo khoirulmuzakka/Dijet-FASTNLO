@@ -42,13 +42,13 @@ print "Executing command: $cmd\n";
 my $libdir = `fnlo-tk-config --libdir`;
 if ( $ret ) {die "fnlo-nj-lotest: Determining lib dir failed: $ret, aborted!\n";}
 chomp $libdir;
-my $cmd = "cp -f ../data/check/${tabw} .";
+$cmd = "cp -f ../data/check/${tabw} .";
 print "Executing command: $cmd\n";
-my $ret = system("$cmd");
+$ret = system("$cmd");
 if ( $ret ) {die "fnlo-nj-lotest: Copying test warmup ${tabw} failed: $ret, aborted!\n";}
-my $cmd = "cp -f ../data/check/${tabgz} .";
+$cmd = "cp -f ../data/check/${tabgz} .";
 print "Executing command: $cmd\n";
-my $ret = system("$cmd");
+$ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-lotest: Copying LO table ${tabgz} failed: $ret, aborted!\n";}
 $cmd = "gunzip ${tabgz}";
 print "Executing command: $cmd\n";
