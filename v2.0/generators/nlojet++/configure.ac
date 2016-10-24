@@ -286,4 +286,8 @@ AC_CONFIG_FILES([Makefile
                  interface/jetalgos/Makefile
                 ])
 
+AC_CONFIG_FILES([interface/check/fnlo-nj-wrmtest.pl],[chmod +x interface/check/fnlo-nj-wrmtest.pl])
+AC_CONFIG_FILES([interface/check/fnlo-nj-lotest.pl],[chmod +x interface/check/fnlo-nj-lotest.pl])
+AC_CONFIG_FILES([interface/check/fnlo-nj-nlotest.pl],[chmod +x interface/check/fnlo-nj-nlotest.pl])
+
 AC_OUTPUT

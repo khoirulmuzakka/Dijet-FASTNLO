@@ -13,6 +13,9 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
 # Remove potentially left-over temporary files
 my $tabb  = "fnr0001midpHT_I723509_v23_fix";
 my $steer = ${tabb}.".str";
@@ -29,10 +32,10 @@ if ( -e "output/${tabn}" ) {system("rm -f output/${tabn}");}
 
 # Prepare test setup
 # Copy defaults from data/check storage
-my $cmd = "cp -f ../data/check/${steer} .";
+my $cmd = "cp -f ${src}/../data/check/steer.str ${steer}";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
-if ( $ret ) {die "fnlo-nj-nlotest: Copying test steering ${steer} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-nj-nlotest: Copying test steering steer.str failed: $ret, aborted!\n";}
 $cmd = "ln -s ${steer} InclusiveNJets.str";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
@@ -42,14 +45,14 @@ print "Executing command: $cmd\n";
 my $libdir = `fnlo-tk-config --libdir`;
 if ( $ret ) {die "fnlo-nj-nlotest: Determining lib dir failed: $ret, aborted!\n";}
 chomp $libdir;
-$cmd = "cp -f ../data/check/${tabw} .";
+$cmd = "cp -f ${src}/../data/check/warmup.txt ${tabw}";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
-if ( $ret ) {die "fnlo-nj-nlotest: Copying test warmup ${tabw} failed: $ret, aborted!\n";}
-$cmd = "cp -f ../data/check/${tabgz} .";
+if ( $ret ) {die "fnlo-nj-nlotest: Copying test warmup.txt failed: $ret, aborted!\n";}
+$cmd = "cp -f ${src}/../data/check/nlo.tab.gz ${tabgz}";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-nlotest: Copying NLO table ${tabgz} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-nlotest: Copying NLO table nlo.tab.gz failed: $ret, aborted!\n";}
 $cmd = "gunzip ${tabgz}";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
