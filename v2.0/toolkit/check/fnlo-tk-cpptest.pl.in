@@ -13,6 +13,9 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
 # Remove potentially left-over temporary files
 my $tab   = "fnl1014_I902309_2-2";
 my $tabfl = ${tab}.".tab";
@@ -25,7 +28,7 @@ foreach my $file ( "cpptest.log", "cppdiff.log", "${tabfl}", "${tabgz}" ) {
 
 # Prepare test setup
 # Copy gzipped default tables from data/check storage
-my $cmd = "cp -f ../data/check/${tabgz} .";
+my $cmd = "cp -f ${src}/../data/check/${tabgz} .";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cpptest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
@@ -41,7 +44,7 @@ $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cpptest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}
 
 # Determine difference to default evaluation output
-$cmd = "diff ../data/check/${tab}_cpp.log cpptest.log > cppdiff.log";
+$cmd = "diff ${src}/../data/check/${tab}_cpp.log cpptest.log > cppdiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cpptest: Result comparison with 'diff' failed: $ret, aborted!\n";}

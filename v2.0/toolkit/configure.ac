@@ -593,6 +593,7 @@ AC_SUBST([YEARS],["2005-`date +%Y`"])
 
 # Output
 AC_CONFIG_FILES([Makefile
+                 check/Makefile
                  data/Makefile
                  data/check/Makefile
                  data/modify/Makefile
@@ -603,10 +604,18 @@ AC_CONFIG_FILES([Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
                  pyext/Makefile
                  pyext/setup.py
-                 check/Makefile
                  src/Makefile
                  src/fnlo-tk-config
                 ])
+
+AC_CONFIG_FILES([check/fnlo-tk-cattest.pl],[chmod +x check/fnlo-tk-cattest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-cppnormtest.pl],[chmod +x check/fnlo-tk-cppnormtest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-cppscalestest.pl],[chmod +x check/fnlo-tk-cppscalestest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-cpptest.pl],[chmod +x check/fnlo-tk-cpptest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-erasetest.pl],[chmod +x check/fnlo-tk-erasetest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-erasetest2.pl],[chmod +x check/fnlo-tk-erasetest2.pl])
+AC_CONFIG_FILES([check/fnlo-tk-mergetest.pl],[chmod +x check/fnlo-tk-mergetest.pl])
+AC_CONFIG_FILES([check/fnlo-tk-stattest.pl],[chmod +x check/fnlo-tk-stattest.pl])
 
 AC_OUTPUT
 

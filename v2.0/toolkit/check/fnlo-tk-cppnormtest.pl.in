@@ -13,8 +13,12 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
 # Remove potentially left-over temporary files
 my $tab   = "InclusiveNJetEvents_fnl5662i_v23_fix_norm_1-12";
+my $tabd  = "NJetEvents_norm_1-12.tab.gz";
 my $tabfl = ${tab}.".tab";
 my $tabgz = ${tabfl}.".gz";
 foreach my $file ( "cppnormtest.log", "cppnormdiff.log", "${tabfl}", "${tabgz}" ) {
@@ -25,10 +29,10 @@ foreach my $file ( "cppnormtest.log", "cppnormdiff.log", "${tabfl}", "${tabgz}" 
 
 # Prepare test setup
 # Copy gzipped default tables from data/check storage
-my $cmd = "cp -f ../data/check/${tabgz} .";
+my $cmd = "cp -f ${src}/../data/check/${tabd} ${tabgz}";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-cppnormtest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-cppnormtest: Copying test table ${tabd} failed: $ret, aborted!\n";}
 $cmd = "gunzip ${tabgz}";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
@@ -41,7 +45,7 @@ $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppnormtest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}
 
 # Determine difference to default evaluation output
-$cmd = "diff ../data/check/${tab}_cppnorm.log cppnormtest.log > cppnormdiff.log";
+$cmd = "diff ${src}/../data/check/NJetEvents_norm_1-12_cppnorm.log cppnormtest.log > cppnormdiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppnormtest: Result comparison with 'diff' failed: $ret, aborted!\n";}

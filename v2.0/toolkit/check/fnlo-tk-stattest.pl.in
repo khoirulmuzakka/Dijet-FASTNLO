@@ -13,10 +13,14 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
 # Remove potentially left-over temporary files
 my $tabl = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat";
 my $tabn = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat";
 my @tabs = ("InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0000", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0001", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0002", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0100", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0101", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0102" );
+my @tabd = ("NJets_born-2jet_stat_0000.tab.gz", "NJets_born-2jet_stat_0001.tab.gz", "NJets_born-2jet_stat_0002.tab.gz", "NJets_nlo-2jet_stat_0100.tab.gz", "NJets_nlo-2jet_stat_0101.tab.gz", "NJets_nlo-2jet_stat_0102.tab.gz");
 my @tabfls;
 my @tabgzs;
 foreach my $tab ( @tabs ) {
@@ -31,15 +35,15 @@ foreach my $file ( "statlotest.log", "statnlotest.log", "statlodiff.log", "statn
 
 # Prepare test setup
 # Copy gzipped default tables from data/check storage
-foreach my $tabgz ( @tabgzs ) {
-    my $cmd = "cp -f ../data/check/${tabgz} .";
+for ( my $i=0; $i <= $#tabd ; $i++ ) {
+    my $cmd = "cp -f ${src}/../data/check/$tabd[$i] $tabgzs[$i]";
     print "Executing command: $cmd\n";
     my $ret = system("$cmd");
-    if ( $ret ) {die "fnlo-tk-stattest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
-    $cmd = "gunzip ${tabgz}";
+    if ( $ret ) {die "fnlo-tk-stattest: Copying test table $tabd[$i] failed: $ret, aborted!\n";}
+    $cmd = "gunzip $tabgzs[$i]";
     print "Executing command: $cmd\n";
     $ret = system("$cmd");
-    if ( $ret ) {die "fnlo-tk-stattest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
+    if ( $ret ) {die "fnlo-tk-stattest: Ungzipping test table $tabgzs[$i] failed: $ret, aborted!\n";}
 }
 
 # Statistical evaluation
@@ -47,17 +51,17 @@ my $cmd = "fnlo-tk-statunc $tabl | tail -42 > statlotest.log";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Statistical evaluation of LO test tables ${tabl} failed: $ret, aborted!\n";}
-my $cmd = "fnlo-tk-statunc $tabn | tail -42 > statnlotest.log";
+$cmd = "fnlo-tk-statunc $tabn | tail -42 > statnlotest.log";
 print "Executing command: $cmd\n";
-my $ret = system("$cmd");
+$ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Statistical evaluation of NLO test tables ${tabn} failed: $ret, aborted!\n";}
 
 # Determine difference to default statistical uncertainties
-$cmd = "diff ../data/check/${tabl}.log statlotest.log > statlodiff.log";
+$cmd = "diff ${src}/../data/check/NJets_born-2jet_stat.log statlotest.log > statlodiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Result comparison with LO 'diff' failed: $ret, aborted!\n";}
-$cmd = "diff ../data/check/${tabn}.log statnlotest.log > statnlodiff.log";
+$cmd = "diff ${src}/../data/check/NJets_nlo-2jet_stat.log statnlotest.log > statnlodiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Result comparison with NLO 'diff' failed: $ret, aborted!\n";}

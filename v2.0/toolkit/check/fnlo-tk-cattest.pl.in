@@ -13,8 +13,12 @@ use Getopt::Std;
 use strict;
 use warnings;
 
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
 # Remove potentially left-over temporary files
 my @tabs = ("InclusiveNJetEvents_fnl5662i_v23_fix_2-2", "InclusiveNJetEvents_fnl5662i_v23_fix_0-0-2", "InclusiveNJetEvents_fnl5662i_v23_fix_2-2-2");
+my @tabd = ("NJetEvents_2-2.tab.gz", "NJetEvents_0-0-2.tab.gz", "NJetEvents_2-2-2.tab.gz");
 my @tabfls;
 my @tabgzs;
 foreach my $tab ( @tabs ) {
@@ -29,15 +33,15 @@ foreach my $file ( "cattest.tab", "catdiff.log", @tabfls, @tabgzs ) {
 
 # Prepare test setup
 # Copy gzipped default tables from data/check storage
-foreach my $tabgz ( @tabgzs ) {
-    my $cmd = "cp -f ../data/check/${tabgz} .";
+for ( my $i=0; $i <= $#tabd ; $i++ ) {
+    my $cmd = "cp -f ${src}/../data/check/$tabd[$i] $tabgzs[$i]";
     print "Executing command: $cmd\n";
     my $ret = system("$cmd");
-    if ( $ret ) {die "fnlo-tk-cattest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
-    $cmd = "gunzip ${tabgz}";
+    if ( $ret ) {die "fnlo-tk-cattest: Copying test table $tabd[$i] failed: $ret, aborted!\n";}
+    $cmd = "gunzip $tabgzs[$i]";
     print "Executing command: $cmd\n";
     $ret = system("$cmd");
-    if ( $ret ) {die "fnlo-tk-cattest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
+    if ( $ret ) {die "fnlo-tk-cattest: Ungzipping test table $tabgzs[$i] failed: $ret, aborted!\n";}
 }
 
 # Catenate
