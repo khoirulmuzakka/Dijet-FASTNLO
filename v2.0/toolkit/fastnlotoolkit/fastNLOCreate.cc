@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <string>
+#include <unistd.h>
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
@@ -1399,11 +1400,17 @@ void fastNLOCreate::GetWarmupValues() {
       // try again, with hard-coded convention:
       if (fIsWarmup) {
          logger.debug["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
-         READ_NS(GetWarmupTableFilename(),fSteerfile);    // put the warmup-values into same read_steer 'namespace'
-         fWarmupConsts.Values = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
-         fIsWarmup = fWarmupConsts.Values.empty();
-         if (!fIsWarmup)
-            logger.info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
+	 if ( access(GetWarmupTableFilename().c_str(), R_OK) != 0  ) {
+	    logger.debug["GetWarmupValues"]<<"Warmup file does not exist: "<<GetWarmupTableFilename()<<endl;
+	    fIsWarmup=true;
+	 }
+	 else {
+	    READ_NS(GetWarmupTableFilename(),fSteerfile);    // put the warmup-values into same read_steer 'namespace'
+	    fWarmupConsts.Values = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
+	    fIsWarmup = fWarmupConsts.Values.empty();
+	    if (!fIsWarmup)
+	       logger.info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
+	 }
       }
 
       // --- read other warmup paramters
@@ -1571,8 +1578,9 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    else if ( !wrmbin.empty() ) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
+	 const double EPS = 1.e-8;
          if (NDim == 1) {
-            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]) {
+            if ( fabs(Bin[i][0].first- wrmbin[i][i0])>EPS || fabs(Bin[i][0].second - wrmbin[i][i0+1]) > EPS) {
                logger.error["CheckWrmbinConsistency"]
                   <<"Table of warmup values seems to be incompatible with steering file.\n"
                   <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second
@@ -1583,8 +1591,8 @@ bool fastNLOCreate::CheckWarmupConsistency() {
                //exit(1);
             }
          } else if (NDim == 2) {
-            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
-                || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]) {
+            if (fabs(Bin[i][0].first - wrmbin[i][i0]) > EPS || fabs(Bin[i][0].second - wrmbin[i][i0+1]) > EPS
+                || fabs(Bin[i][1].first - wrmbin[i][i0+2]) > EPS || fabs(Bin[i][1].second - wrmbin[i][i0+3]) > EPS ) {
                logger.error["CheckWarmupConsistency"]
                   <<"Table of warmup values seems to be incompatible with steering file.\n"
                   <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
@@ -1595,9 +1603,9 @@ bool fastNLOCreate::CheckWarmupConsistency() {
                //exit(1);
             }
          } else if (NDim == 3) {
-            if (Bin[i][0].first != wrmbin[i][i0] || Bin[i][0].second != wrmbin[i][i0+1]
-                || Bin[i][1].first != wrmbin[i][i0+2] || Bin[i][1].second != wrmbin[i][i0+3]
-                || Bin[i][2].first != wrmbin[i][i0+4] || Bin[i][2].second != wrmbin[i][i0+5]) {
+            if (fabs(Bin[i][0].first - wrmbin[i][i0]) > EPS || fabs(Bin[i][0].second - wrmbin[i][i0+1]) > EPS
+                || fabs(Bin[i][1].first - wrmbin[i][i0+2]) > EPS || fabs(Bin[i][1].second - wrmbin[i][i0+3]) > EPS
+                || fabs(Bin[i][2].first - wrmbin[i][i0+4]) > EPS || fabs(Bin[i][2].second - wrmbin[i][i0+5]) > EPS) {
                logger.error["CheckWarmupConsistency"]
                   <<"Table of warmup values seems to be incompatible with steering file.\n"
                   <<"Found different binning for bin "<<i<<", steering: ["<<Bin[i][0].first<<","<<Bin[i][0].second<<",] ["<<Bin[i][1].first<<","<<Bin[i][1].second
