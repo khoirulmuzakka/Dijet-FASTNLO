@@ -2707,7 +2707,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 
    // write readable table
    char buf[4000];
-   static const double RoundXDown = 0.96; // to avoid rounding warning messages and have some 'x' in spare.
+   //static const double RoundXDown = 0.96; // to avoid rounding warning messages and have some 'x' in spare.
    strm<<"Warmup.Values {{"<<endl;
    if (fIsFlexibleScale) {
       // table header
@@ -2722,8 +2722,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-         sprintf(buf,"   %4d    %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f",
-                 i,fWxRnd[i].first*RoundXDown,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+         sprintf(buf,"   %4d    %9.1e  %9.2e  %14.1f  %14.1f  %14.2f  %14.2f",
+                 i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
          strm<<buf<<endl;
       }
    } else {
@@ -2739,8 +2739,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-         sprintf(buf,"   %4d     %9.2e  %9.2e  %16.2g  %16.2g",
-                 i,fWxRnd[i].first*RoundXDown, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+         sprintf(buf,"   %4d     %9.1e  %9.2e  %16.1g  %16.1g",
+                 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
          strm<<buf<<endl;
       }
    }
@@ -2855,7 +2855,7 @@ void fastNLOCreate::AdjustWarmupValues() {
       fWMu1Rnd[i].second = fWMu1[i].second;
    }
    if (ident1 == -1) {
-      RoundValues(fWMu1Rnd,3);
+      RoundValues(fWMu1Rnd,1); // digit here should be identical to output in outwarmup
    }
    if (fIsFlexibleScale) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
@@ -2863,19 +2863,28 @@ void fastNLOCreate::AdjustWarmupValues() {
          fWMu2Rnd[i].second = fWMu2[i].second;
       }
       if (ident2 == -1) {
-         RoundValues(fWMu2Rnd,3);
+         RoundValues(fWMu2Rnd,2); // digit here should be identical to output in outwarmup
       }
    }
 
    // ---------------------------------------
    // 3. 'round' lower x-values down
-   const double xdown = 0.20;
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       fWxRnd[i].first  = fWx[i].first;
       fWxRnd[i].second = fWx[i].second;
    }
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      fWxRnd[i].first *= (1.-xdown);
+      //fWxRnd[i].first *= (1.-xdown);
+      if ( fWxRnd[i].first >= 0.8 ) fWxRnd[i].first = 1.e-4;  // not filled!
+      else if ( fWxRnd[i].first >= 0.09 ) fWxRnd[i].first = 0.09;  // minimum high-x
+      double lx = log10(fWxRnd[i].first);
+      int ex   = lx-1;
+      double mant = fWxRnd[i].first/pow(10,ex);
+      int imant = mant*10; // brute force rounding down
+      imant -= 2;// safety margin
+      if ( imant%2==1 ) imant-=1; // only 0.0, 0.2, 0.4...
+      fWxRnd[i].first = imant*pow(10,ex-1);//imant-1
+      //printf("          \t%8.3e   %8.3e  %8.1e\n",fWx[i].first,fWxRnd[i].first,fWxRnd[i].first);
    }
 
 }
@@ -2888,6 +2897,12 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
    //! digit is a 9 (0)
    //! lower values are only rounded down,
    //! upper values are only rounded up
+
+   for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
+      wrmmu[i].first  -= pow(10,-1.*nthdigit)*5;
+      wrmmu[i].second += pow(10,-1.*nthdigit)*5;
+   }
+   /*
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       int nthlo = nthdigit;
       int nthup = nthdigit;
@@ -2908,6 +2923,7 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
          wrmmu[i].second = (double)wrmrnd / pow(10.,-ord+nthup-1);
       }
    }
+      */
 }
 
 
