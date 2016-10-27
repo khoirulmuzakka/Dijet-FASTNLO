@@ -1643,7 +1643,6 @@ void fastNLOTable::PrintContributionSummary(int iprint) const {
 void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
    logger.error["PrintFastNLOTableConstants"]<<"This function is deprecated, aborted!"<<endl;
    logger.error["PrintFastNLOTableConstants"]<<"Please use Print instead."<<endl;
-   exit(1);
 }
 
 
@@ -1651,7 +1650,6 @@ void fastNLOTable::PrintFastNLOTableConstants(const int iprint) const {
 void fastNLOTable::PrintTableInfo(const int iprint) const {
    logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
    logger.error["PrintTableInfo"]<<"Please use PrintContributionSummary instead."<<endl;
-   exit(1);
 }
 
 

@@ -2707,6 +2707,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 
    // write readable table
    char buf[4000];
+   char buf2[4000];
+   char buf3[4000];
    //static const double RoundXDown = 0.96; // to avoid rounding warning messages and have some 'x' in spare.
    strm<<"Warmup.Values {{"<<endl;
    if (fIsFlexibleScale) {
@@ -2722,9 +2724,22 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-         sprintf(buf,"   %4d    %9.1e  %9.2e  %14.1f  %14.1f  %14.2f  %14.2f",
-                 i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-         strm<<buf<<endl;
+
+	 // sprintf(buf,"   %4d    %9.1e  %9.2e  %14.1f  %14.1f  %14.8e  %14.8e",
+	 // 	    i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+	 sprintf(buf,"   %4d    %9.1e  %9.2e",	 i, fWxRnd[i].first, fWxRnd[i].second );
+
+	 if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu2Rnd[i].second-1) > 1.e-3)  // if scales are identical, then write exactly those values
+	    sprintf(buf2,"  %14.1f  %14.1f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+	 else 
+	    sprintf(buf2,"  %14.8f  %14.8f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+
+	 if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu2Rnd[i].second-1) > 1.e-3) 
+	    sprintf(buf3,"  %14.1f  %14.1f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+	 else 
+	    sprintf(buf3,"  %14.8f  %14.8f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+
+         strm<<buf<<buf2<<buf3<<endl;
       }
    } else {
       // is ScaleDescript available?
@@ -2739,9 +2754,15 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-         sprintf(buf,"   %4d     %9.1e  %9.2e  %16.1g  %16.1g",
-                 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
-         strm<<buf<<endl;
+	 // sprintf(buf,"   %4d     %9.1e  %9.2e  %16.1g  %16.1g",
+	 // 	 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+	  sprintf(buf,"   %4d     %9.1e  %9.2e", i,fWxRnd[i].first, fWxRnd[i].second);
+
+	  if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu1Rnd[i].second-1) > 1.e-3) 
+	     sprintf(buf2,"  %16.2g  %16.2g", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+	  else 
+	     sprintf(buf2,"  %16.8f  %16.8f", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+	  strm<<buf<<buf2<<endl;
       }
    }
    strm<<"}}"<<endl;
@@ -2899,8 +2920,13 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
    //! upper values are only rounded up
 
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      wrmmu[i].first  -= pow(10,-1.*nthdigit)*5;
-      wrmmu[i].second += pow(10,-1.*nthdigit)*5;
+      if ( wrmmu[i].second!=0 && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) {
+	 // round only, if the values are different!
+	 // otherwise it is a 'fixed' scale and we have to 
+	 // store exactly that values
+	 wrmmu[i].first  -= pow(10,-1.*nthdigit)*5;
+	 wrmmu[i].second += pow(10,-1.*nthdigit)*5;
+      }
    }
    /*
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
