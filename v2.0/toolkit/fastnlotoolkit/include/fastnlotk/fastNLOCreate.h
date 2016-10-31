@@ -115,6 +115,7 @@ protected:
    void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in pp/ppbar
    void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in DIS
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale table in pp/ppbar
+   void FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale contribution in DIS
    void FillRefContribution(int scalevar = 0);                                                              //!< fill contribution if this is a reference table
    void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
 

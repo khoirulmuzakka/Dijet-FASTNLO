@@ -1449,7 +1449,6 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   double pdflc          = c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
                   double fac  = as * pdflc * unit;
-                  //double fac  = as * unit;
 		  double xsci = c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if ( c->GetNScaleDep() >= 5 ) {
                      xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
@@ -2698,17 +2697,15 @@ int fastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) co
 
 //_DEPRECATED___________________________________________________________________
 void fastNLOReader::PrintTableInfo(const int iprint) const {
-   logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
-   logger.error["PrintTableInfo"]<<"Please use PrintContributionSummary instead."<<endl;
-   exit(1);
+   logger.warn["PrintTableInfo"]<<"This function is deprecated!"<<endl;
+   logger.warn["PrintTableInfo"]<<"Please use PrintContributionSummary instead."<<endl;
 }
 
 
 //_DEPRECATED___________________________________________________________________
 void fastNLOReader::PrintFastNLOTableConstants(const int iprint) const {
-   logger.error["PrintTableInfo"]<<"This function is deprecated, aborted!"<<endl;
-   logger.error["PrintTableInfo"]<<"Please use Print instead."<<endl;
-   exit(1);
+   logger.warn["PrintTableInfo"]<<"This function is deprecated!"<<endl;
+   logger.warn["PrintTableInfo"]<<"Please use Print instead."<<endl;
 }
 
 
@@ -2866,17 +2863,16 @@ void fastNLOReader::PrintCrossSectionsWithReference() {
 
 //_DEPRECATED___________________________________________________________________
 void fastNLOReader::PrintCrossSectionsData() const {
-   logger.error["PrintCrossSectionsData"]<<"This function is deprecated, aborted!"<<endl;
-   logger.error["PrintCrossSectionsData"]<<"Please check fnlo-tk-cppread.cc for default print out."<<endl;
-   exit(1);
+   logger.warn["PrintCrossSectionsData"]<<"This function is deprecated!"<<endl;
+   logger.warn["PrintCrossSectionsData"]<<"Please check fnlo-tk-cppread.cc for default print out."<<endl;
    return;
 }
 
 
 //_DEPRECATED___________________________________________________________________
 void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const {
-   logger.error["PrintCrossSectionsDefault"]<<"This function is deprecated, aborted!"<<endl;
-   logger.error["PrintCrossSectionsDefault"]<<"Please check fnlo-tk-cppread.cc for default print out."<<endl;
+   logger.warn["PrintCrossSectionsDefault"]<<"This function is deprecated!"<<endl;
+   logger.warn["PrintCrossSectionsDefault"]<<"Please check fnlo-tk-cppread.cc for default print out."<<endl;
    exit(1);
    return;
 }
@@ -2884,9 +2880,8 @@ void fastNLOReader::PrintCrossSectionsDefault(const vector <double> kthc) const 
 
 //_DEPRECATED___________________________________________________________________
 void fastNLOReader::RunFastNLODemo() {
-   logger.error["RunFastNLODemo"]<<"This function is deprecated, aborted!"<<endl;
-   logger.error["RunFastNLODemo"]<<"Please check fnlo-tk-examples.cc for examples."<<endl;
-   exit(1);
+   logger.warn["RunFastNLODemo"]<<"This function is deprecated!"<<endl;
+   logger.warn["RunFastNLODemo"]<<"Please check fnlo-tk-examples.cc for examples."<<endl;
    return;
 }
 

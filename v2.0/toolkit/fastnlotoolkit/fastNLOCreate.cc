@@ -2017,7 +2017,7 @@ void fastNLOCreate::FillContribution(int scalevar) {
       logger.error["FillContributionFixHHC"]<<"Unknown process Id p = "<<p<<endl;
       exit(1);
    }
-   logger.debug["FillContributionFixHHC"]<<"The process Id is p = "<<p<<endl;
+   //logger.debug["FillContributionFixHHC"]<<"The process Id is p = "<<p<<endl;
 
    // ---- DIS ---- //
    if (c->GetNPDF() == 1 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true)) {
@@ -2026,7 +2026,8 @@ void fastNLOCreate::FillContribution(int scalevar) {
       //{logger.error["FillContribution"]<<"Don't know how to fill this table. Exiting."<<endl; exit(1); }
    } else if (c->GetNPDF() == 1 && fastNLOCoeffAddFix::CheckCoeffConstants(c,true)) {
       // todo
-      {logger.error["FillContribution"]<<"Don't know how to fill this table (DIS: fix-scale tables!). Exiting."<<endl; exit(1); }
+      FillContributionFixDIS((fastNLOCoeffAddFix*)GetTheCoeffTable(),  ObsBin, scalevar);
+      //{logger.error["FillContribution"]<<"Don't know how to fill this table (DIS: fix-scale tables!). Exiting."<<endl; exit(1); }
    }
    // ---- pp/ppbar ---- //
    else if (c->GetNPDF() == 2 && fastNLOCoeffAddFlex::CheckCoeffConstants(c,true))
@@ -2046,7 +2047,7 @@ void fastNLOCreate::FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, in
    //! read informatio from 'Event' and 'Scenario'
    //! do the interpolation
    //! and fill into the tables.
-   logger.debug["FillContributionFixHHC"]<<endl;
+   //logger.debug["FillContributionFixHHC"]<<endl;
 
    if (fEvent._w == 0) return;   // nothing todo.
 
@@ -2102,7 +2103,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
    //! read informatio from 'Event' and 'Scenario'
    //! do the interpolation
    //! and fill into the tables.
-   logger.debug["FillContributionFlexHHC"]<<endl;
+   //logger.debug["FillContributionFlexHHC"]<<endl;
 
    if (fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0 && fEvent._wrr==0 && fEvent._wff==0 && fEvent._wrf==0) return;   // nothing todo.
 
@@ -2187,7 +2188,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    //! read information from 'Event' and 'Scenario'
    //! do the interpolation
    //! and fill into the tables.
-   logger.debug["FillContributionFlexDIS"]<<endl;
+   //logger.debug["FillContributionFlexDIS"]<<endl;
 
    if (fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0) return;   // nothing todo.
 
@@ -2241,7 +2242,68 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
                //                 cout<<"   Fill R : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
                c->SigmaTildeMuRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
             }
+	    if (fEvent._wrr != 0) {
+	       c->SigmaTildeMuRRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
+	    }
+	    if (fEvent._wff != 0) {
+	       c->SigmaTildeMuFFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
+	    }
+	    if (fEvent._wrf != 0) {
+	       c->SigmaTildeMuRFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
+	    }
          }
+      }
+   }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, int scalevar) {
+   //! read information from 'Event' and 'Scenario'
+   //! do the interpolation
+   //! and fill into the tables.
+   //logger.debug["FillContributionFixDIS"]<<endl;
+
+   if (fEvent._w == 0 ) return;   // nothing todo.
+
+   // do interpolation
+   //cout<<"try to interpol. ObsBin="<<ObsBin<<" ,x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", mu1="<<fScenario._m1<<endl;
+
+   // todo, just: 'x'
+   double x = fEvent._x1;
+   vector<pair<int,double> > nx = fKernX1[ObsBin]->GetNodeValues(x);
+   vector<pair<int,double> > nmu1 = fKernMuS[ObsBin][scalevar]->GetNodeValues(fScenario._m1);
+
+
+   if (fApplyPDFReweight) {
+      fKernX1[ObsBin]->CheckX(x);
+      ApplyPDFWeight(nx,x,fKernX1[ObsBin]->GetGridPtr());
+   }
+
+   // fill grid
+   if (!CheckWeightIsFinite()) return;
+   for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
+      int p = fEvent._p;
+      int xIdx = nx[ix].first;
+      //HalfMatrixCheck(xminbin,xmaxbin,p);
+      //int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
+
+      for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+	 double wfnlo = nx[ix].second * nmu1[m1].second  / BinSize[ObsBin];
+	 if (! std::isfinite(wfnlo)) {
+	    logger.error["FillContributionFixDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
+	    logger.error["FillContributionFixDIS"]<<"This should have been captured before, aborting ..."<<endl;
+	    fKernX1[ObsBin]->PrintGrid();
+	    fKernMu1[ObsBin]->PrintGrid();
+	    cout<<"ix1="<<ix<<", im1="<<m1<<endl;
+	    cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
+	    cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
+	    exit(1);
+	 }
+	 if (fEvent._w  != 0) {
+	    //cout<<"   Fill * : ix="<<xIdx<<", im1="<<nmu1[m1].first<<", im2="<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+	    c->SigmaTilde[ObsBin][scalevar][nmu1[m1].first][xIdx][p]  += fEvent._w  * wfnlo;
+	 }
       }
    }
 }
