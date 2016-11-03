@@ -400,6 +400,10 @@ void fastNLOCreate::Instantiate() {
    // init member variables
    fReader = NULL;
 
+   fWarmupXMargin = 4;
+   fWarmupNDigitMu1 = 1; //1 by purpose
+   fWarmupNDigitMu2 = 2; //2 by purpose
+
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
    GetWarmupValues();
@@ -2265,6 +2269,11 @@ void fastNLOCreate::FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, in
    //logger.debug["FillContributionFixDIS"]<<endl;
 
    if (fEvent._w == 0 ) return;   // nothing todo.
+   if ( scalevar >= (int)fScaleFac.size() ){
+      logger.error["FillContributionFixDIS"]<<"Error! Scale variation scalevar="<<scalevar<<" requested"
+					    <<", but only "<<fScaleFac.size()<<" variations are initialized. Exiting."<<endl;
+      exit(3);
+   }
 
    // do interpolation
    //cout<<"try to interpol. ObsBin="<<ObsBin<<" ,x1="<<fEvent._x1<<", x2="<<fEvent._x2<<", mu1="<<fScenario._m1<<endl;
@@ -2791,17 +2800,21 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	 // 	    i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
 	 sprintf(buf,"   %4d    %9.1e  %9.2e",	 i, fWxRnd[i].first, fWxRnd[i].second );
 
-	 if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu2Rnd[i].second-1) > 1.e-3)  // if scales are identical, then write exactly those values
-	    sprintf(buf2,"  %14.1f  %14.1f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
-	 else 
-	    sprintf(buf2,"  %14.8f  %14.8f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+	 if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3) 
+	    sprintf(buf2,"  %14.2g  %14.2g",fWMu1Rnd[i].first,fWMu1Rnd[i].second);
+	 else  // if scales are identical, then write exactly those values
+	    sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
 
-	 if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu2Rnd[i].second-1) > 1.e-3) 
-	    sprintf(buf3,"  %14.1f  %14.1f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+	 if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3) 
+	    sprintf(buf3,"  %14.2g  %14.2g",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
 	 else 
-	    sprintf(buf3,"  %14.8f  %14.8f",fWMu1Rnd[i].first,fWMu2Rnd[i].second);
+	    sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].second);
+
+	 // printf("%e     %e     %e      %e\n",fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+	 // printf(" xx %e     %e     %e      %e\n",fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
 
          strm<<buf<<buf2<<buf3<<endl;
+
       }
    } else {
       // is ScaleDescript available?
@@ -2820,10 +2833,10 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	 // 	 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
 	  sprintf(buf,"   %4d     %9.1e  %9.2e", i,fWxRnd[i].first, fWxRnd[i].second);
 
-	  if  ( fWMu1Rnd[i].second!=0 && fabs(fWMu1Rnd[i].first/fWMu1Rnd[i].second-1) > 1.e-3) 
+	  if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3) 
 	     sprintf(buf2,"  %16.2g  %16.2g", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
 	  else 
-	     sprintf(buf2,"  %16.8f  %16.8f", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+	     sprintf(buf2,"  %16.8f  %16.8f", fWMu1[i].first, fWMu1[i].second);
 	  strm<<buf<<buf2<<endl;
       }
    }
@@ -2937,16 +2950,16 @@ void fastNLOCreate::AdjustWarmupValues() {
       fWMu1Rnd[i].first  = fWMu1[i].first;
       fWMu1Rnd[i].second = fWMu1[i].second;
    }
-   if (ident1 == -1) {
-      RoundValues(fWMu1Rnd,1); // digit here should be identical to output in outwarmup
+   if (ident1 == -1 ) {
+      RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
    }
    if (fIsFlexibleScale) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          fWMu2Rnd[i].first  = fWMu2[i].first;
          fWMu2Rnd[i].second = fWMu2[i].second;
       }
-      if (ident2 == -1) {
-         RoundValues(fWMu2Rnd,2); // digit here should be identical to output in outwarmup
+      if (ident2 == -1 ) {
+         RoundValues(fWMu2Rnd,fWarmupNDigitMu2); // digit here should be identical to output in outwarmup
       }
    }
 
@@ -2964,7 +2977,7 @@ void fastNLOCreate::AdjustWarmupValues() {
       int ex   = lx-1;
       double mant = fWxRnd[i].first/pow(10,ex);
       int imant = mant*10; // brute force rounding down
-      imant -= 2;// safety margin
+      imant -= fWarmupXMargin;// safety margin
       if ( imant%2==1 ) imant-=1; // only 0.0, 0.2, 0.4...
       fWxRnd[i].first = imant*pow(10,ex-1);//imant-1
       //printf("          \t%8.3e   %8.3e  %8.1e\n",fWx[i].first,fWxRnd[i].first,fWxRnd[i].first);
@@ -2986,8 +2999,8 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
 	 // round only, if the values are different!
 	 // otherwise it is a 'fixed' scale and we have to 
 	 // store exactly that values
-	 wrmmu[i].first  -= pow(10,-1.*nthdigit)*5;
-	 wrmmu[i].second += pow(10,-1.*nthdigit)*5;
+	 wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
+	 wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
       }
    }
    /*

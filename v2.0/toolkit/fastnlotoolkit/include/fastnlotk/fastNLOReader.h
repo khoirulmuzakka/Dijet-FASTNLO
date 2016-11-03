@@ -40,7 +40,7 @@ public:
    /// Switch on LO and NLO contributions, deactivate other contributions.
    void SetCoefficientUsageDefault();
    /// Get, if this table is a 'flexible-scale' table or not.
-   bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const {
+   inline bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const {
       if ( ctest ) return  ctest->GetNScaleDep() >= 3;
       else return B_LO()->GetIsFlexibleScale();
    }

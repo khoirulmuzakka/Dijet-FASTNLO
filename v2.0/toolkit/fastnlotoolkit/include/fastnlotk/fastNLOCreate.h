@@ -81,6 +81,10 @@ public:
    std::string GetWarmupTableFilename();                                                             //!< Get the filename, which is used for storage of the warmup-table.
    void SetWarmupTableFilename(std::string);                                                         //!< Set the filename, which is used for storage of the warmup-table (otherwise a default is used)
    inline bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
+   inline bool GetIsFlexibleScale() const { return fIsFlexibleScale; }                          //!< Get if flexible-scale table is requested
+   void SetWarmupXSafetyMargin(int margin = 4) { fWarmupXMargin = margin;}                          //!< Set margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
+   void SetWarmupNDigitMu1(int rnd = 1) { fWarmupNDigitMu1 = rnd;}                              //!< Round warmup values for scale 1
+   void SetWarmupNDigitMu2(int rnd = 2) { fWarmupNDigitMu2 = rnd;}                              //!< Round warmup values for scale 2
 
    inline fastNLOCoeffAddBase* GetTheCoeffTable() const {
       return (fastNLOCoeffAddBase*)GetCoeffTable(0);
@@ -154,6 +158,9 @@ protected:
    int GetNxmax(const std::vector<double>* xGrid1, const std::vector<double>* xGrid2);                    //!< get maximum x-index
    std::string fWarmupFilename;                                                                      //!< File name of the warmup table
    bool fIsWarmup;                                                                              //!< is it a warmup run?
+   int fWarmupXMargin;                                                                          //!< margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
+   int fWarmupNDigitMu1;                                                                          //!< Digits of warmup values for scale 1
+   int fWarmupNDigitMu2;                                                                          //!< Digits of warmup values for scale 2
    int  fIOrd;                                                                                  //!< order of alpha_s of run
    bool fIsFlexibleScale;                                                                       //!< is it a flexible scale table?
    bool fApplyPDFReweight;                                                                      //!< shall the PDF reweight be applied.
@@ -207,15 +214,15 @@ protected:
          min  = time/60L;
          time -= min*60L;
          std::cout<<std::endl;;
-         std::cout<<" ------------- fastNLOstats -------------"<<std::endl;;
-         std::cout<<"  Time elapsed:                 "
+         std::cout<<" ------------------- fastNLOstats ------------------"<<std::endl;;
+         std::cout<<"   Time elapsed:                 "
                   << (hour < 10 ? "0" : "")   << hour
                   << (min < 10 ? ":0" : ":")  << min
                   << (time < 10 ? ":0" : ":") << time << std::endl;;
-         if (_nEv!=0)   std::cout << "  Total event weight (NEvt):    " << _nEv   << std::endl;;
-         if (_nEvPS!=0) std::cout << "  Contributions in phase space: " << _nEvPS << std::endl;;
-         if (_nProc!=0) std::cout << "  Number of calls:      " << _nProc << std::endl;;
-         std::cout << " ----------------------------------------" << std::endl;;
+         if (_nEv!=0)   std::cout << "   Total event weight (NEvt):     " << _nEv   << std::endl;;
+         if (_nEvPS!=0) std::cout << "   Contributions in phase space:  " << _nEvPS << std::endl;;
+         if (_nProc!=0) std::cout << "   Number of calls:                " << _nProc << std::endl;;
+         std::cout << " -------------------------------------------------" << std::endl;;
          std::cout<<std::endl;;
          std::cout.flush();
       }
