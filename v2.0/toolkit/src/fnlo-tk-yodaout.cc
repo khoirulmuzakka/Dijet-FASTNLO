@@ -93,6 +93,8 @@ int main(int argc, char** argv) {
          man << "   Alternatives: LO, NNLO (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
+         man << "   Alternatives: \"yes\" or \"np\"" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -193,8 +195,18 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
    }
-   //! ---  Too many arguments
+   //! --- Nonperturbative correction
+   string chnp = "no";
    if (argc > 6) {
+      chnp = (const char*) argv[6];
+   }
+   if (argc <= 6 || chnp == "_") {
+      shout["fnlo-tk-yodaout"] << "Do not apply nonperturbative corrections." << endl;
+   } else {
+      shout["fnlo-tk-yodaout"] << "Apply nonperturbative corrections if available." << endl;
+   }
+   //! ---  Too many arguments
+   if (argc > 7) {
       error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -248,17 +260,17 @@ int main(int argc, char** argv) {
          fnlo.SetContributionON(kFixedOrder, innlo, false);
       }
    }
-   // //! Check on existence of non-perturbative corrections from LO MC
-   // int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
-   // if (inpc1 > -1) {
-   //    info["fnlo-read"] << "Found non-perturbative correction factors. Switch on." << endl;
-   //    bool SetOn = fnlo.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
-   //    if (!SetOn) {
-   //       error["fnlo-tk-yodaout"] << "NPC1 not found, nothing to be done!" << endl;
-   //       error["fnlo-tk-yodaout"] << "This should have been caught before!" << endl;
-   //       exit(1);
-   //    }
-   // }
+   //! Check on existence of non-perturbative corrections from LO MC
+   int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
+   if (inpc1 > -1 && (chnp == "yes" || chnp == "np" ) ) {
+      info["fnlo-tk-yodaout"] << "Found non-perturbative correction factors. Switch on." << endl;
+      bool SetOn = fnlo.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+      if (!SetOn) {
+         error["fnlo-tk-yodaout"] << "NPC1 not found, nothing to be done!" << endl;
+         error["fnlo-tk-yodaout"] << "This should have been caught before!" << endl;
+         exit(1);
+      }
+   }
 
    //! Normalize?
    bool lNorm = false;
@@ -374,7 +386,12 @@ int main(int argc, char** argv) {
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
    //   string TabName = tablename.substr(0, tablename.size() - 4);
    string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
-   string FileName = chord + "_" + PDFName + "_" + chunc;
+   //   string FileName = chord + "_" + PDFName + "_" + chunc + "_" + chnorm + "_" + chnp;
+   string FileName = PDFName;
+   if ( chord  != "_" ) {FileName = chord + "_" + PDFName;}
+   if ( chunc  != "_" ) {FileName += "_" + chunc;}
+   if ( chnorm != "_" ) {FileName += "_" + chnorm;}
+   if ( chnp   != "_" ) {FileName += "_" + chnp;}
    LineName = chord + "_" + PDFName + LineName;
 
    //! --- YODA analysis object creation and storage
