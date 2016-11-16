@@ -37,8 +37,8 @@ print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppscalestest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
 
-# Evaluate, keep only last 97 lines with numerical results
-$cmd = "fnlo-tk-cppread ${tabfl} _ 7 | tail -97 > cppscalestest.log";
+# Evaluate, keep only result lines
+$cmd = "../src/fnlo-tk-cppread ${tabfl} _ 7 | grep \"Calculate my cross sections\" -B1 -A95 > cppscalestest.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppscalestest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}

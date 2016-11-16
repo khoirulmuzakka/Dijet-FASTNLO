@@ -45,7 +45,7 @@ for ( my $i=0; $i <= $#tabd ; $i++ ) {
 }
 
 # Catenate
-my $cmd = "fnlo-tk-cat $tabfls[0] $tabfls[1] cattest.tab";
+my $cmd = "../src/fnlo-tk-cat $tabfls[0] $tabfls[1] cattest.tab";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cattest: Catenating test tables $tabfls[0] and $tabfls[1] failed: $ret, aborted!\n";}
