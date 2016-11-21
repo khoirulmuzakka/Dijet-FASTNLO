@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
    yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
-      error["fnlo-tk-append"] << "No table names given, but need at least three!" << endl;
+      error["fnlo-tk-append"] << "No table names given, but need at least two!" << endl;
       shout["fnlo-tk-append"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-append"] << "./fnlo-tk-append -h" << endl;
       yell << _CSEPSC << endl;
@@ -69,13 +69,14 @@ int main(int argc, char** argv) {
          info["fnlo-tk-append"] << "lead to a loss of the statistical information required for further merging." << endl;
          info["fnlo-tk-append"] << "Event numbers, which are stored contribution- and not bin-wise, are set to 1."<<endl;
          man << "" << endl;
-         man << "Usage: ./fnlo-tk-append <InTable_1.tab> <InTable_2.tab> [InTable_n.tab] <OutTable.tab>" << endl;
+         man << "Usage: ./fnlo-tk-append <InTable_1.tab> [InTable_2.tab] [InTable_n.tab] <OutTable.tab>" << endl;
          man << "       Specification: <> mandatory; [] optional." << endl;
-         man << "       List of blank-separated table files, at least three!" << endl;
+         man << "       List of blank-separated table files, at least two!" << endl;
          man << "       Mandatory are:" << endl;
-         man << "<InTable_1.tab>:   First table input file, to which observable bins are catenated" << endl;
-         man << "<InTable_2.tab>:   Second table input file, from which observable bins are catenated" << endl;
-         man << "<OutTable.tab>:    Output filename, to which the table with catenated observable bins is written" << endl;
+         man << "<InTable_1.tab>:   First table input file, to which observable bins are catenated." << endl;
+         man << "[InTable_2.tab]:   Second table input file, from which observable bins are catenated." << endl;
+	 man << "                   If second table is not given, then first table is only 'normalised'."<<endl;
+         man << "<OutTable.tab>:    Output filename, to which the table with catenated observable bins is written." << endl;
          yell << " #" << endl;
          yell << _CSEPSC << endl;
          return 0;
@@ -83,8 +84,8 @@ int main(int argc, char** argv) {
    }
 
    //! --- Check no. of file names
-   if (argc <= 3) {
-      error["fnlo-tk-append"] << "Not enough table names given, need at least three!" << endl;
+   if (argc <= 2) {
+      error["fnlo-tk-append"] << "Not enough table names given, need at least two!" << endl;
       exit(1);
    }
 
@@ -158,10 +159,11 @@ int main(int argc, char** argv) {
       }
    }
    info["fnlo-tk-append"]<<"Found "<<nValidTables<<" table file(s)."<<endl;
-   if (nValidTables < 2) exit(1);
+   if (nValidTables < 1) exit(1);
 
    //! Write result
    resultTable->SetFilename(outfile);
+   //resultTable->SetOutputPrecision(10);
    info["fnlo-tk-append"]<<"Write added results to file "<<resultTable->GetFilename()<<endl;
    resultTable->WriteTable();
    return 0;
