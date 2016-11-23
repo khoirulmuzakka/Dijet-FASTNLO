@@ -59,9 +59,10 @@ AX_CHECK_ZLIB()
 
 # Checks for header files.
 
-# Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, compiler characteristics and functionalities.
 AC_HEADER_STDBOOL
 AC_C_INLINE
+AX_CXX_COMPILE_STDCXX_11
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
