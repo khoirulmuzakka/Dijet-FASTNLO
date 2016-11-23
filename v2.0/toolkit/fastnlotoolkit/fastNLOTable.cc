@@ -38,10 +38,10 @@ fastNLOTable::~fastNLOTable(){
 fastNLOTable::fastNLOTable(const fastNLOTable& other)
    : ffilename(other.ffilename), fPrecision(other.fPrecision),
      Itabversion(other.Itabversion), ScenName(other.ScenName),
-     //Ncontrib(other.Ncontrib), 
+     //Ncontrib(other.Ncontrib),
      //Nmult(other.Nmult),
-     //Ndata(other.Ndata), 
-     logger("fastNLOTable"), 
+     //Ndata(other.Ndata),
+     logger("fastNLOTable"),
     fCoeff(other.fCoeff.size()),
     Ecms(other.Ecms), ILOord(other.ILOord), Ipublunits(other.Ipublunits),
     ScDescript(other.ScDescript), NObsBin(other.NObsBin), NDim(other.NDim),
@@ -72,16 +72,16 @@ void fastNLOTable::ReadTable(){
    //! Read file
    zstr::ifstream* strm = OpenFileRead();
    // read header
-   logger.debug["ReadTabl"]<<"Reading header."<<endl;   
+   logger.debug["ReadTabl"]<<"Reading header."<<endl;
    int nCoeff = ReadHeader(*strm);
    // read scenario
-   logger.debug["ReadTabl"]<<"Reading scenario."<<endl;   
+   logger.debug["ReadTabl"]<<"Reading scenario."<<endl;
    ReadScenario(*strm);
    // read b-blocks
-   logger.debug["ReadTabl"]<<"Reading coeff tables."<<endl;   
+   logger.debug["ReadTabl"]<<"Reading coeff tables."<<endl;
    ReadCoeffTables(*strm, nCoeff);
    // close stream
-   logger.debug["ReadTabl"]<<"Reading done closing files."<<endl;   
+   logger.debug["ReadTabl"]<<"Reading done closing files."<<endl;
    CloseFileRead(*strm);
 }
 
@@ -214,7 +214,7 @@ void fastNLOTable::WriteTable() {
    //!< the previously defined ffilename on disk.
    //!< Write fastNLO table to file 'ffilename' (member)
    logger.info["WriteTable"]<<"Writing fastNLO table with " << GetNcontrib() << " theory contributions to file: " << ffilename << endl;
-   ofstream* table = OpenFileWrite();
+   zstr::ofstream* table = OpenFileWrite();
    logger.debug["WriteTable"]<<"Writing table header to file ..."<<endl;
    WriteHeader(*table);
    logger.debug["WriteTable"]<<"Writing scenario to file ..."<<endl;
@@ -812,7 +812,7 @@ void fastNLOTable::SetDimLabel( string label, unsigned int iDim , bool IsDiff ){
 // ___________________________________________________________________________________________________
 int fastNLOTable::GetNmult() const {
    int ret = 0;
-   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ )
       if ( (fCoeff[i]->GetIDataFlag()==0) && (fCoeff[i]->GetIAddMultFlag()==1) ) ret++;
    return ret;
 }
@@ -821,7 +821,7 @@ int fastNLOTable::GetNmult() const {
 // ___________________________________________________________________________________________________
 int fastNLOTable::GetNcontrib() const {
    int ret = 0;
-   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ )
       if ( (fCoeff[i]->GetIDataFlag()==0) /*&& (fCoeff[i]->GetIAddMultFlag()==0)*/ ) ret++;
    return ret;
 }
@@ -830,7 +830,7 @@ int fastNLOTable::GetNcontrib() const {
 // ___________________________________________________________________________________________________
 int fastNLOTable::GetNdata() const {
    int ret = 0;
-   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ ) 
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ )
       if ( (fCoeff[i]->GetIDataFlag()==1) && (fCoeff[i]->GetIAddMultFlag()==0) ) ret++;
    return ret;
 }
@@ -2058,13 +2058,13 @@ void fastNLOTable::CloseFileRead(zstr::ifstream& strm) {
 
 
 //______________________________________________________________________________
-ofstream* fastNLOTable::OpenFileWrite() {
-   //! open ofstream for writing tables
+zstr::ofstream* fastNLOTable::OpenFileWrite() {
+   //! open zstr::ofstream for writing tables
    //! do overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0) {
       logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
-   ofstream* stream = new ofstream(ffilename.c_str(),ios::out);
+   zstr::ofstream* stream = new zstr::ofstream(ffilename.c_str(),ios::out);
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);
@@ -2075,7 +2075,7 @@ ofstream* fastNLOTable::OpenFileWrite() {
 
 
 //______________________________________________________________________________
-void fastNLOTable::CloseFileWrite(ofstream& table) {
+void fastNLOTable::CloseFileWrite(zstr::ofstream& table) {
    //! close stream and delete object;
    table << fastNLO::tablemagicno << endl;
    table << fastNLO::tablemagicno << endl;

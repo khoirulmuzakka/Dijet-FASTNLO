@@ -249,12 +249,12 @@ private:
 protected:
    // --- functions previously included in fastNLOBase
    void PrintWelcomeMessage();                     //!< Say hello to fastNLO user
-   std::ofstream* OpenFileWrite();                 //!< open std::ofstream for writing tables to ffilename
+   zstr::ofstream* OpenFileWrite();                 //!< open std::ofstream for writing tables to ffilename
    zstr::ifstream* OpenFileRead();                  //!< open std::ifstream for reading table
    //std::ofstream *OpenFileRewrite();
    void WriteHeader(std::ostream& table);          //!< write (or cout) hader using std::ostream
    int ReadHeader(std::istream& table);           //!< read header of table (BlockA1)
-   void CloseFileWrite(std::ofstream& table);
+   void CloseFileWrite(zstr::ofstream& table);
    void CloseFileRead(zstr::ifstream& table);
    //void CloseStream();
 

@@ -100,6 +100,7 @@ namespace fastNLO {
 
       std::string OutputFilename;//!< Filename of fastNLO output table
       int OutputPrecision;//!< Number of decimal digits to store in output table (def.=8).
+      bool OutputCompression;//!< If zlib available, gzip output table.
       bool FlexibleScaleTable;//!< Create table fully flexible in mu_f (larger size, and requires scale independent weights during creation), true, or table with fixed number of mu_f scale factors, def.=false.
       std::vector<double> ScaleVariationFactors; //!< Factorization scale variations (only needed for fixed-scale tables), List of scale factors must include factor '1', Scale factors will be ordered according to fastNLO convention: (1, min, ... , max). Defaults: {0.5, 1, 2}
 
@@ -153,6 +154,11 @@ namespace fastNLO {
          DimensionIsDifferential.push_back(2);
          PDF1=2212;
          PDF2=2212;
+#ifdef HAVE_LIBZ
+         OutputCompression=true;
+#else
+         OutputCompression=false;
+#endif /* HAVE_LIBZ */
          OutputPrecision=8;
          FlexibleScaleTable=false;
          ScaleVariationFactors.clear();

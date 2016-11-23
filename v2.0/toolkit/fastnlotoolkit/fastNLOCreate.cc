@@ -425,7 +425,10 @@ void fastNLOCreate::Instantiate() {
 
    Ecms         = fScenConsts.CenterOfMassEnergy;   // is often superseeded by generator-specific code.
    INormFlag    = 0;
-   SetFilename(fScenConsts.OutputFilename);
+
+   string filename = fScenConsts.OutputFilename;
+   //   if ( fScenConsts.OutputCompression ) filename += ".gz";
+   SetFilename(filename);
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
    fApplyPDFReweight = fScenConsts.ApplyPDFReweighting;
@@ -510,6 +513,7 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    fScenConsts.ScenarioDescription = STRING_ARR_NS(ScenarioDescription,fSteerfile);
    fScenConsts.CenterOfMassEnergy = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);
    fScenConsts.OutputFilename = STRING_NS(OutputFilename,fSteerfile);
+   fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
    fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
    fScenConsts.ApplyPDFReweighting =  BOOL_NS(ApplyPDFReweighting,fSteerfile);
    fScenConsts.OutputPrecision = INT_NS(OutputPrecision,fSteerfile);
@@ -2800,14 +2804,14 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	 // 	    i,fWxRnd[i].first,fWxRnd[i].second,fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
 	 sprintf(buf,"   %4d    %9.1e  %9.2e",	 i, fWxRnd[i].first, fWxRnd[i].second );
 
-	 if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3) 
+	 if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3)
 	    sprintf(buf2,"  %14.2g  %14.2g",fWMu1Rnd[i].first,fWMu1Rnd[i].second);
 	 else  // if scales are identical, then write exactly those values
 	    sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
 
-	 if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3) 
+	 if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3)
 	    sprintf(buf3,"  %14.2g  %14.2g",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-	 else 
+	 else
 	    sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].second);
 
 	 // printf("%e     %e     %e      %e\n",fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
@@ -2833,9 +2837,9 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	 // 	 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
 	  sprintf(buf,"   %4d     %9.1e  %9.2e", i,fWxRnd[i].first, fWxRnd[i].second);
 
-	  if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3) 
+	  if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3)
 	     sprintf(buf2,"  %16.2g  %16.2g", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
-	  else 
+	  else
 	     sprintf(buf2,"  %16.8f  %16.8f", fWMu1[i].first, fWMu1[i].second);
 	  strm<<buf<<buf2<<endl;
       }
@@ -2997,7 +3001,7 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       if ( wrmmu[i].second!=0 && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) {
 	 // round only, if the values are different!
-	 // otherwise it is a 'fixed' scale and we have to 
+	 // otherwise it is a 'fixed' scale and we have to
 	 // store exactly that values
 	 wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
 	 wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
