@@ -70,7 +70,7 @@ void fastNLOTable::DeleteAllCoeffTable(){
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadTable(){
    //! Read file
-   ifstream* strm = OpenFileRead();
+   zstr::ifstream* strm = OpenFileRead();
    // read header
    logger.debug["ReadTabl"]<<"Reading header."<<endl;   
    int nCoeff = ReadHeader(*strm);
@@ -2030,22 +2030,22 @@ void fastNLOTable::CatBin(const fastNLOTable& other, unsigned int iObsIdx, unsig
 //
 
 //______________________________________________________________________________
-ifstream* fastNLOTable::OpenFileRead() {
+zstr::ifstream* fastNLOTable::OpenFileRead() {
    //! Open file-stream for reading table
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
       logger.error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
       exit(1);
    }
-   ifstream* strm = new ifstream(ffilename.c_str(),ios::in);
+   zstr::ifstream* strm = new zstr::ifstream(ffilename.c_str(),ios::in);
    return strm;
 }
 
 
 //______________________________________________________________________________
-void fastNLOTable::CloseFileRead(ifstream& strm) {
+void fastNLOTable::CloseFileRead(zstr::ifstream& strm) {
    //! Close file-stream
-   strm.close();
+   // strm.close();
    delete &strm;
 }
 

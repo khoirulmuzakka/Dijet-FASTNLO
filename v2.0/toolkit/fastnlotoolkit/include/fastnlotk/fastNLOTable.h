@@ -14,6 +14,7 @@
 #include "fastNLOCoeffData.h"
 #include "fastNLOCoeffMult.h"
 #include "fastNLOConstants.h"
+#include "zstr.hpp"
 
 
 
@@ -249,12 +250,12 @@ protected:
    // --- functions previously included in fastNLOBase
    void PrintWelcomeMessage();                     //!< Say hello to fastNLO user
    std::ofstream* OpenFileWrite();                 //!< open std::ofstream for writing tables to ffilename
-   std::ifstream* OpenFileRead();                  //!< open std::ifstream for reading table
+   zstr::ifstream* OpenFileRead();                  //!< open std::ifstream for reading table
    //std::ofstream *OpenFileRewrite();
    void WriteHeader(std::ostream& table);          //!< write (or cout) hader using std::ostream
    int ReadHeader(std::istream& table);           //!< read header of table (BlockA1)
    void CloseFileWrite(std::ofstream& table);
-   void CloseFileRead(std::ifstream& table);
+   void CloseFileRead(zstr::ifstream& table);
    //void CloseStream();
 
    std::string ffilename;
