@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "config.h"
 
 #ifndef FNLO_NAME
 #define FNLO_NAME       "@PACKAGE_NAME@"

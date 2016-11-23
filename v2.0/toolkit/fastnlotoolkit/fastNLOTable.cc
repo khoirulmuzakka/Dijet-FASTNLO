@@ -2079,7 +2079,7 @@ void fastNLOTable::CloseFileWrite(zstr::ofstream& table) {
    //! close stream and delete object;
    table << fastNLO::tablemagicno << endl;
    table << fastNLO::tablemagicno << endl;
-   table.close();
+   // table.close();
    delete &table;
 }
 
