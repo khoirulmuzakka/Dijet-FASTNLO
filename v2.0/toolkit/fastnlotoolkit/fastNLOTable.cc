@@ -98,7 +98,7 @@ int fastNLOTable::ReadHeader(istream& table) {
    }
 
    if (!fastNLOTools::ReadMagicNo(table)) {
-#ifndef HAVE_ZLIB
+#ifndef HAVE_LIBZ
       // check if filename ends with .gz
       std::string ending = ".gz";
       if (ffilename.length() >= ending.length() and ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
