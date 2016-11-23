@@ -8,7 +8,7 @@
 ///
 ///********************************************************************
 
-#include <config.h>
+#include "config.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>

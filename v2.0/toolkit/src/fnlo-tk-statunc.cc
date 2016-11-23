@@ -11,7 +11,7 @@
 ///
 ///********************************************************************
 
-#include <config.h>
+#include "config.h"
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>

@@ -427,7 +427,7 @@ void fastNLOCreate::Instantiate() {
    INormFlag    = 0;
 
    string filename = fScenConsts.OutputFilename;
-   //   if ( fScenConsts.OutputCompression ) filename += ".gz";
+   if ( fScenConsts.OutputCompression ) filename += ".gz";
    SetFilename(filename);
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
