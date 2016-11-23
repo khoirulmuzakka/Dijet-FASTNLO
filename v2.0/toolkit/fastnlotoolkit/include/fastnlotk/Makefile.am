@@ -20,7 +20,8 @@ fastnloinclude_HEADERS = fastNLOCoeffAddBase.h fastNLOCoeffAddFix.h fastNLOCoeff
 	fastNLOAlphas.h fastNLOLHAPDF.h fastNLOPDFLinearCombinations.h fastNLOTools.h \
 	fastNLODiffReader.h fastNLODiffUser.h \
 	fastNLOReader.h fastNLOTable.h read_steer.h speaker.h Alphas.h CRunDec.h fastNLOCRunDec.h fastNLOQCDNUMAS.h \
-	fastNLOHoppetAs.h fastNLOHoppet.h HoppetInterface.h
+	fastNLOHoppetAs.h fastNLOHoppet.h HoppetInterface.h \
+	zstr.hpp
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
