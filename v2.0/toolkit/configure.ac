@@ -55,6 +55,7 @@ AC_CHECK_LIB([LHAPDF], [alphas])
 #AC_CHECK_LIB([fastnlotoolkit], [libfastnlotoolkit_la-FastNLOBlockB])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
+AX_CHECK_ZLIB()
 
 # Checks for header files.
 
