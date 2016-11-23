@@ -2722,7 +2722,7 @@ void fastNLOCreate::WriteWarmupTable() {
    SetFilename(warmupfile);
 
    // open stream;
-   zstr::ofstream* table = OpenFileWrite();
+   std::ostream* table = OpenFileWrite();
    // write to disk
    OutWarmup(*table);
    // close file

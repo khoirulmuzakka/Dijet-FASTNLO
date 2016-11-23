@@ -214,8 +214,17 @@ void fastNLOTable::WriteTable() {
    //!< WriteTable(). writes the full FastNLO table to
    //!< the previously defined ffilename on disk.
    //!< Write fastNLO table to file 'ffilename' (member)
+   std::string extension = ".gz";
+   bool compress = false;
+   if ((ffilename.length() >= extension.length()) and 
+         (ffilename.compare(ffilename.length() - extension.length(), extension.length(), extension) == 0)) 
+   {
+      logger.info["WriteTable"]<<"Filename ends with .gz, therefore enable compression." << endl;
+      compress = true; 
+   }
+
    logger.info["WriteTable"]<<"Writing fastNLO table with " << GetNcontrib() << " theory contributions to file: " << ffilename << endl;
-   zstr::ofstream* table = OpenFileWrite();
+   std::ostream* table = OpenFileWrite(compress);
    logger.debug["WriteTable"]<<"Writing table header to file ..."<<endl;
    WriteHeader(*table);
    logger.debug["WriteTable"]<<"Writing scenario to file ..."<<endl;
@@ -2059,13 +2068,18 @@ void fastNLOTable::CloseFileRead(zstr::ifstream& strm) {
 
 
 //______________________________________________________________________________
-zstr::ofstream* fastNLOTable::OpenFileWrite() {
-   //! open zstr::ofstream for writing tables
+std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
+   //! open ostream for writing tables
    //! do overwrite existing table
    if (access(ffilename.c_str(), F_OK) == 0) {
       logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
-   zstr::ofstream* stream = new zstr::ofstream(ffilename.c_str(),ios::out);
+   std::ostream* stream = nullptr;
+   if (compress) {
+      stream = new zstr::ofstream(ffilename.c_str(),ios::out);
+   } else {
+      stream = new std::ofstream(ffilename.c_str(),ios::out);
+   }
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);
@@ -2076,7 +2090,7 @@ zstr::ofstream* fastNLOTable::OpenFileWrite() {
 
 
 //______________________________________________________________________________
-void fastNLOTable::CloseFileWrite(zstr::ofstream& table) {
+void fastNLOTable::CloseFileWrite(std::ostream& table) {
    //! close stream and delete object;
    table << fastNLO::tablemagicno << endl;
    table << fastNLO::tablemagicno << endl;
