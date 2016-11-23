@@ -98,6 +98,13 @@ int fastNLOTable::ReadHeader(istream& table) {
    }
 
    if (!fastNLOTools::ReadMagicNo(table)) {
+#ifndef HAVE_ZLIB
+      // check if filename ends with .gz
+      std::string ending = ".gz";
+      if (ffilename.length() >= ending.length() and ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
+         logger.error["ReadScenario"]<<"Input file has a .gz file extension but zlib support is not enabled!"<<endl;
+      }
+#endif
       logger.error["ReadHeader"]<<"Did not find initial magic number, aborting!"<<endl;
       logger.error["ReadHeader"]<<"Please check compatibility of tables and program version!"<<endl;
       exit(1);
