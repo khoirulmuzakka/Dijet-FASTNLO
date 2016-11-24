@@ -128,7 +128,7 @@ namespace fastNLO {
       std::string X_Kernel;//!< Lagrange
       std::string X_DistanceMeasure;//!<   "sqrtlog10"
       int X_NNodes;//!<    15
-      bool X_NoOfNodesPerMagnitude;//!< false
+      std::string X_NNodeCounting;//!< "NodesMax","NodesPerBin","NodesPerMagnitude"
 
       std::string Mu1_Kernel;//!<  Lagrange
       std::string Mu1_DistanceMeasure;//!< "loglog025"
@@ -171,7 +171,7 @@ namespace fastNLO {
          X_Kernel="Lagrange";//!<                        Lagrange
          X_DistanceMeasure="sqrtlog10";
          X_NNodes=15;
-         X_NoOfNodesPerMagnitude = false;
+	 X_NNodeCounting = "NodesPerBin";
 
          Mu1_Kernel="Lagrange";
          Mu1_DistanceMeasure="loglog025";

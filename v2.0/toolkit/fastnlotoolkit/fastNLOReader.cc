@@ -614,7 +614,9 @@ void fastNLOReader::OrderCoefficients() {
    if (Coeff_LO)  {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_LO);
    } else {
-      error["OrderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
+      warn["OrderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
+      warn["OrderCoefficients"]<<"Currently in testing phase: In case you need predictions without LO contribution, uncomment the 'exit' statement below and recompile the code."<<endl;
+      warn["OrderCoefficients"]<<"Not all features will be available in this case, but a straight calculation should be possible. Use with care!"<<endl;
       exit(1);
    }
    if (Coeff_NLO) {

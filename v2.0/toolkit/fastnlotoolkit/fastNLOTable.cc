@@ -102,7 +102,7 @@ int fastNLOTable::ReadHeader(istream& table) {
 #ifndef HAVE_LIBZ
       // check if filename ends with .gz
       std::string ending = ".gz";
-      if (ffilename.length() >= ending.length() and ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
+      if (ffilename.length() >= ending.length() && ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
          logger.error["ReadScenario"]<<"Input file has a .gz file extension but zlib support is not enabled!"<<endl;
       }
 #endif
@@ -2074,7 +2074,7 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
    if (access(ffilename.c_str(), F_OK) == 0) {
       logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
-   std::ostream* stream = nullptr;
+   std::ostream* stream = NULL;
    if (compress) {
       stream = new zstr::ofstream(ffilename.c_str(),ios::out);
    } else {

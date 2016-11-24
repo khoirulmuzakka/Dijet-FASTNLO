@@ -35,6 +35,8 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
    else if ( in == "loglog025" ) return fastNLOGrid::kLogLog025;
    else if ( in == "log10" ) return fastNLOGrid::kLog10;
    else if ( in == "sqrtlog10" ) return fastNLOGrid::kSqrtLog10;
+   else if ( in == "loglog" ) return fastNLOGrid::kLogLog;
+   else if ( in == "4thrtlog10" ) return fastNLOGrid::k4thrtLog10;
    else {
       cout<<"fastNLOInterpolBase::TranslateGridTyp. Error. Cannot identify distance measure. in="<<in<<endl;
       exit(1);
@@ -205,6 +207,14 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
       lo = Function_sqrtlog10(min);
       hi = Function_sqrtlog10(max);
       break;
+   case fastNLOGrid::kLogLog:
+      lo = Function_loglog(min);
+      hi = Function_loglog(max);
+      break;
+   case fastNLOGrid::k4thrtLog10:
+      lo = Function_4thrtlog10(min);
+      hi = Function_4thrtlog10(max);
+      break;
    default:
       error["MakeGrid"]<<"Unknown grid type."<<endl;
    }
@@ -248,6 +258,12 @@ vector<double> fastNLOInterpolBase::MakeGridFromHGrid(vector<double> hg){
    case fastNLOGrid::kSqrtLog10:
       grid = HGrid_sqrtlog10_inv(hg);
       break;
+   case fastNLOGrid::kLogLog:
+      grid = HGrid_loglog_inv(hg);
+      break;
+   case fastNLOGrid::k4thrtLog10:
+      grid = HGrid_4thrtlog10_inv(hg);
+      break;
    default:
       error["MakeGridFromHGrid"]<<"Unknown grid type."<<endl;
    }
@@ -262,6 +278,13 @@ vector<double> fastNLOInterpolBase::HGrid_loglog025_inv(vector<double> grid){
    }
    return ret;
 }
+vector<double> fastNLOInterpolBase::HGrid_loglog_inv(vector<double> grid){
+   vector<double> ret = grid;
+   for (unsigned int i=0 ; i<grid.size(); i++ ) {
+      ret[i] = Function_loglog_inv(grid[i]);
+   }
+   return ret;
+}
 vector<double> fastNLOInterpolBase::HGrid_log10_inv(vector<double> grid){
    vector<double> ret = grid;
    for (unsigned int i=0 ; i<grid.size(); i++ )
@@ -272,6 +295,13 @@ vector<double> fastNLOInterpolBase::HGrid_sqrtlog10_inv(vector<double> grid){
    vector<double> ret = grid;
    for (unsigned int i=0 ; i<grid.size(); i++ )
       ret[i] = Function_sqrtlog10_inv(grid[i]);
+   return ret;
+}
+vector<double> fastNLOInterpolBase::HGrid_4thrtlog10_inv(vector<double> grid){
+   vector<double> ret = grid;
+   for (unsigned int i=0 ; i<grid.size(); i++ ) {
+      ret[i] = Function_4thrtlog10_inv(grid[i]);
+   }
    return ret;
 }
 
@@ -331,6 +361,12 @@ double fastNLOInterpolBase::GetHx(double x ){
       break;
    case fastNLOGrid::kSqrtLog10:
       return  Function_sqrtlog10(x);
+      break;
+   case fastNLOGrid::kLogLog:
+      return Function_loglog(x);
+      break;
+   case fastNLOGrid::k4thrtLog10:
+      return Function_4thrtlog10(x);
       break;
    default:
       error["GetHx"]<<"Unknown H-function measure."<<endl;

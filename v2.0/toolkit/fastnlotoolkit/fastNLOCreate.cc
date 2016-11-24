@@ -567,7 +567,12 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    fScenConsts.X_Kernel = STRING_NS(X_Kernel,fSteerfile);
    fScenConsts.X_DistanceMeasure = STRING_NS(X_DistanceMeasure,fSteerfile);
    fScenConsts.X_NNodes = INT_NS(X_NNodes,fSteerfile);
-   fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
+   fScenConsts.X_NNodeCounting="NodesPerBin";
+   if ( EXIST_NS(X_NodeCounting,fSteerfile) )
+	fScenConsts.X_NNodeCounting = STRING_NS(X_NodeCounting,fSteerfile);
+   if ( EXIST_NS(X_NoOfNodesPerMagnitude,fSteerfile) )
+	logger.warn[""]<<"Key 'X_NoOfNodesPerMagnitude' found. This is no longer supported and ignored. Please use steering key 'X_NNodeCounting' instead."<<endl;
+	//fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
 
    fScenConsts.Mu1_Kernel = STRING_NS(Mu1_Kernel,fSteerfile);
    fScenConsts.Mu1_DistanceMeasure = STRING_NS(Mu1_DistanceMeasure,fSteerfile);
@@ -1989,7 +1994,10 @@ void fastNLOCreate::Fill(int scalevar) {
    //GetTheCoeffTable()->Nevt++; // todo: counting of events must be properly implemented
    fStats._nProc++; //keep statistics
 
-   if (fIsWarmup && scalevar==0) UpdateWarmupArrays();
+   if (fIsWarmup) {
+      if (scalevar==0) UpdateWarmupArrays();
+      // else skip event
+   } 
    else if ( GetTheCoeffTable()->GetIRef() ) FillRefContribution(scalevar);
    else FillContribution(scalevar);
 
@@ -3290,21 +3298,54 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // init x-interpolation kernels
       // ------------------------------------------------
       logger.debug["InitInterpolationKernels"]<<"Make x grid for obsbin="<<i<<endl;
-      fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
-      if (npdf == 2)
-         fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
 
       // Create x grids with X_NNodes+1 nodes up to x_max = 1.
       // The additional last node will be removed again below.
       int nxtot = fScenConsts.X_NNodes + 1;
-      if ( fScenConsts.X_NoOfNodesPerMagnitude ) {
+      if ( fScenConsts.X_NNodeCounting == "NodesPerMagnitude" ) { // "NodesMax","NodesPerBin","NodesPerMagnitude"
+	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-         if (npdf == 2)
+         if (npdf == 2) {
+	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
             fKernX2[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-      } else {
+	 }
+      } 
+      else if (fScenConsts.X_NNodeCounting == "NodesPerBin" ) { // 
+	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-         if (npdf == 2)
+         if (npdf == 2) {
+	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
             fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
+	 }
+      }
+      else if (fScenConsts.X_NNodeCounting == "NodesMax" ) { // 
+	 // generate grid for maximum x-range
+	 double xmin = 1;
+	 for ( unsigned int xi=0 ; xi<wrmX.size() ; xi++ ) xmin = min(xmin,wrmX[xi]);
+	 fastNLOInterpolBase* kernmin = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
+         kernmin->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
+	 // find xmin
+	 const vector<double>& xg = kernmin->GetGrid();
+	 int nxbin = nxtot;
+	 for ( unsigned xi = 0 ; xi<xg.size() ; xi++ ) {
+	    //cout<<"iBin="<<i<<"\txi="<<xi<<"\txg[xi]="<<xg[xi]<<"\twrmX[i]="<<wrmX[i]<<"\tnxbin="<<nxbin<<"\tnxtot="<<nxtot<<endl;
+	    if ( xg[xi] > wrmX[i] ) break;
+	    nxbin--;
+	    xmin = xg[xi];
+	 }
+	 logger.info["InitInterpolationKernels"]<<"Using x-grid in bin "<<i<<": x-min="<<xmin<<"\tx-warmup="<<wrmX[i]<<"\tnxbin="<<nxbin<<endl;
+	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
+         fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxbin);
+         if (npdf == 2) {
+	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1);
+            fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxbin);
+	 }
+	 delete kernmin;	 
+      }
+      else {
+	 // error
+	 logger.error["InitInterpolationKernels"]<<"Cannot understand node counting: "<<fScenConsts.X_NNodeCounting<<"."<<endl;
+	 logger.error["InitInterpolationKernels"]<<"Supported options are: 'NodesPerMagnitude', 'NodesPerBin' and 'NodesMax'."<<endl;
       }
 
       // Remove last node at x = 1; is multiplied by PDFs equalling zero anyway.
@@ -3401,7 +3442,8 @@ fastNLOReader* fastNLOCreate::SetIsReferenceTable(fastNLOReader* fnloread) {
 
    // --- adjust the Coeff-table
    fScenConsts.X_NNodes = 1 -1; // because we are using +1 later
-   fScenConsts.X_NoOfNodesPerMagnitude = false;
+   //fScenConsts.X_NoOfNodesPerMagnitude = false;
+   fScenConsts.X_NNodeCounting = "NodesPerBin";
    fScenConsts.Mu1_NNodes = 1;
    fScenConsts.Mu2_NNodes = 1;
    fScenConsts.X_Kernel   = "OneNode";

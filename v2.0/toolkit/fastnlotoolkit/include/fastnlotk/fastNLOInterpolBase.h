@@ -16,7 +16,9 @@ namespace fastNLOGrid {
       kLinear           = 0,            // linear grid
       kLogLog025        = 1,            // loglog grid
       kLog10            = 2,            // log10 grid
-      kSqrtLog10        = 3             // sqrt(logarithmic) grid
+      kSqrtLog10        = 3,            // sqrt(logarithmic) grid
+      kLogLog           = 4,            // loglog grid (not applicable to x)
+      k4thrtLog10       = 5,            // log(x)^(1/4) (4th root)
    };
 }
 
@@ -36,9 +38,9 @@ public:
    void RemoveLastNode();
 
    void PrintGrid();
-   std::vector<double> GetGrid() const { return fgrid;}
+   const std::vector<double>& GetGrid() const { return fgrid;}
    const std::vector<double>* GetGridPtr() const { return &fgrid;}
-   std::vector<double> GetHGrid() const { return fHgrid;}
+   const std::vector<double>& GetHGrid() const { return fHgrid;}
    double GetDelta(double);
    bool CheckX(double&);
 
@@ -57,26 +59,36 @@ protected:
 
    int FindLargestPossibleNode(double);
 
-   double Function_loglog025( double mu ){
+   inline double Function_loglog025( double mu ){
       // function H(mu) = log(log( mu / 0.25 ))
       return log(log(mu/0.25));}
-   double Function_loglog025_inv( double mu ){
+   inline double Function_loglog025_inv( double mu ){
       // inverse of function H(mu) = log(log( mu / 0.25 ))
       return 0.25*exp(exp(mu));}
-   double Function_x( double mu ){
+   inline double Function_loglog( double mu ){
+      // function H(mu) = log(log( mu ))
+      return log(log(mu));}
+   inline double Function_loglog_inv( double mu ){
+      // inverse of function H(mu) = log(log( mu ))
+      return exp(exp(mu));}
+   inline double Function_x( double mu ){
       // function H(mu) = x
       return mu;}
-   double Function_x_inv( double mu ){
+   inline double Function_x_inv( double mu ){
       // inverse of function H(mu) = x;
       return mu;}
-   double Function_log10( double x ){return log10(x);}
-   double Function_log10_inv( double x ){return pow(10,x);}
-   double Function_sqrtlog10( double x ){return -sqrt(-log10(x));}
-   double Function_sqrtlog10_inv( double x ){return pow(10,-pow(x,2));}
+   inline double Function_log10( double x ){return log10(x);}
+   inline double Function_log10_inv( double x ){return pow(10,x);}
+   inline double Function_sqrtlog10( double x ){return -sqrt(-log10(x));}
+   inline double Function_sqrtlog10_inv( double x ){return pow(10,-pow(x,2));}
+   inline double Function_4thrtlog10( double mu ){return -pow(-log10(mu),0.25);}
+   inline double Function_4thrtlog10_inv( double mu ){return pow(10,-pow(mu,4));}
 
    std::vector<double> HGrid_loglog025_inv(std::vector<double> grid);
+   std::vector<double> HGrid_loglog_inv(std::vector<double> grid);
    std::vector<double> HGrid_log10_inv(std::vector<double> grid);
    std::vector<double> HGrid_sqrtlog10_inv(std::vector<double> grid);
+   std::vector<double> HGrid_4thrtlog10_inv(std::vector<double> grid);
    int GetNMod() const {return fnmod;}
    double GetHx(double);
 
