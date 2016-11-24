@@ -36,6 +36,7 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
    else if ( in == "log10" ) return fastNLOGrid::kLog10;
    else if ( in == "sqrtlog10" ) return fastNLOGrid::kSqrtLog10;
    else if ( in == "loglog" ) return fastNLOGrid::kLogLog;
+   else if ( in == "3rdrtlog10" ) return fastNLOGrid::k3rdrtLog10;
    else if ( in == "4thrtlog10" ) return fastNLOGrid::k4thrtLog10;
    else {
       cout<<"fastNLOInterpolBase::TranslateGridTyp. Error. Cannot identify distance measure. in="<<in<<endl;
@@ -211,6 +212,10 @@ void fastNLOInterpolBase::MakeGrids(double min, double max, int nNodes){
       lo = Function_loglog(min);
       hi = Function_loglog(max);
       break;
+   case fastNLOGrid::k3rdrtLog10:
+      lo = Function_3rdrtlog10(min);
+      hi = Function_3rdrtlog10(max);
+      break;
    case fastNLOGrid::k4thrtLog10:
       lo = Function_4thrtlog10(min);
       hi = Function_4thrtlog10(max);
@@ -261,6 +266,9 @@ vector<double> fastNLOInterpolBase::MakeGridFromHGrid(vector<double> hg){
    case fastNLOGrid::kLogLog:
       grid = HGrid_loglog_inv(hg);
       break;
+   case fastNLOGrid::k3rdrtLog10:
+      grid = HGrid_3rdrtlog10_inv(hg);
+      break;
    case fastNLOGrid::k4thrtLog10:
       grid = HGrid_4thrtlog10_inv(hg);
       break;
@@ -295,6 +303,13 @@ vector<double> fastNLOInterpolBase::HGrid_sqrtlog10_inv(vector<double> grid){
    vector<double> ret = grid;
    for (unsigned int i=0 ; i<grid.size(); i++ )
       ret[i] = Function_sqrtlog10_inv(grid[i]);
+   return ret;
+}
+vector<double> fastNLOInterpolBase::HGrid_3rdrtlog10_inv(vector<double> grid){
+   vector<double> ret = grid;
+   for (unsigned int i=0 ; i<grid.size(); i++ ) {
+      ret[i] = Function_3rdrtlog10_inv(grid[i]);
+   }
    return ret;
 }
 vector<double> fastNLOInterpolBase::HGrid_4thrtlog10_inv(vector<double> grid){
@@ -364,6 +379,9 @@ double fastNLOInterpolBase::GetHx(double x ){
       break;
    case fastNLOGrid::kLogLog:
       return Function_loglog(x);
+      break;
+   case fastNLOGrid::k3rdrtLog10:
+      return Function_3rdrtlog10(x);
       break;
    case fastNLOGrid::k4thrtLog10:
       return Function_4thrtlog10(x);

@@ -18,7 +18,8 @@ namespace fastNLOGrid {
       kLog10            = 2,            // log10 grid
       kSqrtLog10        = 3,            // sqrt(logarithmic) grid
       kLogLog           = 4,            // loglog grid (not applicable to x)
-      k4thrtLog10       = 5,            // log(x)^(1/4) (4th root)
+      k3rdrtLog10       = 5,            // log(x)^(1/3) (3rd root)
+      k4thrtLog10       = 6             // log(x)^(1/4) (4th root)
    };
 }
 
@@ -81,6 +82,8 @@ protected:
    inline double Function_log10_inv( double x ){return pow(10,x);}
    inline double Function_sqrtlog10( double x ){return -sqrt(-log10(x));}
    inline double Function_sqrtlog10_inv( double x ){return pow(10,-pow(x,2));}
+   inline double Function_3rdrtlog10( double mu ){return -pow(-log10(mu),1./3.);}
+   inline double Function_3rdrtlog10_inv( double mu ){return pow(10,-pow(mu,3));}
    inline double Function_4thrtlog10( double mu ){return -pow(-log10(mu),0.25);}
    inline double Function_4thrtlog10_inv( double mu ){return pow(10,-pow(mu,4));}
 
@@ -89,6 +92,7 @@ protected:
    std::vector<double> HGrid_log10_inv(std::vector<double> grid);
    std::vector<double> HGrid_sqrtlog10_inv(std::vector<double> grid);
    std::vector<double> HGrid_4thrtlog10_inv(std::vector<double> grid);
+   std::vector<double> HGrid_3rdrtlog10_inv(std::vector<double> grid);
    int GetNMod() const {return fnmod;}
    double GetHx(double);
 
