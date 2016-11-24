@@ -82,9 +82,9 @@ protected:
    inline double Function_log10_inv( double x ){return pow(10,x);}
    inline double Function_sqrtlog10( double x ){return -sqrt(-log10(x));}
    inline double Function_sqrtlog10_inv( double x ){return pow(10,-pow(x,2));}
-   inline double Function_3rdrtlog10( double mu ){return -pow(-log10(mu),1./3.);}
-   inline double Function_3rdrtlog10_inv( double mu ){return pow(10,-pow(mu,3));}
-   inline double Function_4thrtlog10( double mu ){return -pow(-log10(mu),0.25);}
+   inline double Function_3rdrtlog10( double mu ){return -pow(fabs(log10(mu)),1./3.);}
+   inline double Function_3rdrtlog10_inv( double mu ){return pow(10,-pow(fabs(mu),3));}
+   inline double Function_4thrtlog10( double mu ){return -pow(fabs(log10(mu)),0.25);}
    inline double Function_4thrtlog10_inv( double mu ){return pow(10,-pow(mu,4));}
 
    std::vector<double> HGrid_loglog025_inv(std::vector<double> grid);
