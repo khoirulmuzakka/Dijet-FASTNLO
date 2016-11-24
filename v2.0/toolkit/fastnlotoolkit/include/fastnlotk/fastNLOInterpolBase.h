@@ -14,12 +14,12 @@
 namespace fastNLOGrid {
    enum GridType {
       kLinear           = 0,            // linear grid
-      kLogLog025        = 1,            // loglog grid
-      kLog10            = 2,            // log10 grid
-      kSqrtLog10        = 3,            // sqrt(logarithmic) grid
-      kLogLog           = 4,            // loglog grid (not applicable to x)
-      k3rdrtLog10       = 5,            // log(x)^(1/3) (3rd root)
-      k4thrtLog10       = 6             // log(x)^(1/4) (4th root)
+      kLog10            = 1,            // log10 grid
+      kLogLog025        = 2,            // loglog grid (only valid for mu-grids)
+      kLogLog           = 3,            // loglog grid (only valid for mu-grids)
+      kSqrtLog10        = 4,            // sqrt(logarithmic) grid  (only valid for x-grids)
+      k3rdrtLog10       = 5,            // log(x)^(1/3) (3rd root) (only valid for x-grids)
+      k4thrtLog10       = 6             // log(x)^(1/4) (4th root) (only valid for x-grids)
    };
 }
 
