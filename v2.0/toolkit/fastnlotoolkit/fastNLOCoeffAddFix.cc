@@ -12,7 +12,7 @@ using namespace fastNLO;
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) 
    : fastNLOCoeffAddBase(NObsBin), Nscalevar(), ScaleFac(), ScaleNode(), SigmaTilde(),
-     AlphasTwoPi_v20(), PdfLC(), PdfSplLc1(), PdfSplLc2() {
+     AlphasTwoPi_v20(), PdfLc(), PdfSplLc1(), PdfSplLc2() {
    SetClassName("fastNLOCoeffAddFix");
 }
 
@@ -40,9 +40,9 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffBase* fastNLOCoeffAddFix::Clone() const {
+fastNLOCoeffAddFix* fastNLOCoeffAddFix::Clone() const {
    //! Use has to take care to delete this object later
-   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddFix(*this));
+   return new fastNLOCoeffAddFix(*this);
 }
 
 

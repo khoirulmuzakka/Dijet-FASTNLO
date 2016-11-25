@@ -44,9 +44,9 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
 }
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffBase* fastNLOCoeffAddBase::Clone() const {
+fastNLOCoeffAddBase* fastNLOCoeffAddBase::Clone() const {
    //! Use has to take care to delete this object later
-   return static_cast<fastNLOCoeffBase*>(new fastNLOCoeffAddBase(*this));
+   return new fastNLOCoeffAddBase(*this);
 }
 
 

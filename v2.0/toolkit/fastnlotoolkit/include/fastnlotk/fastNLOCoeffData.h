@@ -14,7 +14,7 @@ public:
    fastNLOCoeffData(int NObsBin);
    fastNLOCoeffData(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffData(){;};
-   virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
+   virtual fastNLOCoeffData* Clone() const;                                     //!< returns 'new' copy of this instance.
    virtual void Read(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;

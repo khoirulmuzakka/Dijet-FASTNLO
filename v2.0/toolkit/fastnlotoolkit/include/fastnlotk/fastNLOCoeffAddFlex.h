@@ -16,7 +16,7 @@ public:
    fastNLOCoeffAddFlex(int NObsBin, int iLOord);
    fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord);
    virtual ~fastNLOCoeffAddFlex(){;}
-   virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
+   virtual fastNLOCoeffAddFlex* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
    virtual void Read(std::istream& table);
    void ReadRest(std::istream& table);

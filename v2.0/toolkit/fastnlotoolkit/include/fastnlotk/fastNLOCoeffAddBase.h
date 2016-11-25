@@ -15,8 +15,8 @@ public:
    fastNLOCoeffAddBase() = delete;
    fastNLOCoeffAddBase(int NObsBin);
    fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
-   virtual ~fastNLOCoeffAddBase() {;}
-   virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
+   virtual ~fastNLOCoeffAddBase() {}
+   virtual fastNLOCoeffAddBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    void Read(std::istream& table);
    virtual void Write(std::ostream& table);
