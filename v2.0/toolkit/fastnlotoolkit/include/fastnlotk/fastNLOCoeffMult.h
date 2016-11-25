@@ -11,7 +11,7 @@ class fastNLOCoeffMult : public fastNLOCoeffBase {
    friend class fastNLOCreate;
 
 public:
-   fastNLOCoeffMult();
+   fastNLOCoeffMult() = delete;
    fastNLOCoeffMult(int NObsBin);
    fastNLOCoeffMult(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffMult(){;};

@@ -33,12 +33,6 @@ bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffMult::fastNLOCoeffMult(){
-   SetClassName("fastNLOCoeffMult");
-}
-
-
-//________________________________________________________________________________________________________________ //
 fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin) : fastNLOCoeffBase(NObsBin){
    SetClassName("fastNLOCoeffMult");
    fNObsBins = NObsBin;

@@ -19,13 +19,6 @@ bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    }
 }
 
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffData::fastNLOCoeffData(){
-   SetClassName("fastNLOCoeffData");
-}
-
-
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffData::fastNLOCoeffData(int NObsBin) : fastNLOCoeffBase(NObsBin) {
    SetClassName("fastNLOCoeffData");

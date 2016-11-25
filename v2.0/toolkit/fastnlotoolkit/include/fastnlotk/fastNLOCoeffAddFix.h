@@ -11,6 +11,7 @@ class fastNLOCoeffAddFix : public fastNLOCoeffAddBase {
    friend class fastNLOCreate;
 
 public:
+   fastNLOCoeffAddFix() = delete;
    fastNLOCoeffAddFix(int NObsBin);
    fastNLOCoeffAddFix(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffAddFix(){;}
@@ -60,7 +61,6 @@ public:
    bool IsCatenable(const fastNLOCoeffAddFix& other) const;        //!< Check for compatibility of two contributions for merging/adding
 
 protected:
-   fastNLOCoeffAddFix();
    void ReadCoeffAddFix(std::istream& table);
 
    std::vector < int > Nscalevar;

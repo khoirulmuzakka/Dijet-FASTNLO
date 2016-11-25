@@ -12,6 +12,7 @@ class fastNLOCoeffAddBase : public fastNLOCoeffBase {
    friend class fastNLOCreate;
 
 public:
+   fastNLOCoeffAddBase() = delete;
    fastNLOCoeffAddBase(int NObsBin);
    fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
    virtual ~fastNLOCoeffAddBase() {;}
@@ -78,7 +79,6 @@ public:
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
 protected:
-   fastNLOCoeffAddBase();
    void ReadCoeffAddBase(std::istream& table);
    int GetScaledimfromvar(int scalevar) const;
 

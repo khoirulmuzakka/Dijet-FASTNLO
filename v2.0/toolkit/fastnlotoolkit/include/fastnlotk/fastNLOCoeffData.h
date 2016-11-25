@@ -10,6 +10,7 @@ class fastNLOCoeffData : public fastNLOCoeffBase {
    friend class fastNLOTable;
 
 public:
+   fastNLOCoeffData() = delete;
    fastNLOCoeffData(int NObsBin);
    fastNLOCoeffData(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffData(){;};
@@ -36,7 +37,6 @@ public:
    void SetNErrMatrix(int n){NErrMatrix = n;}
 
 protected:
-   fastNLOCoeffData();
    void ReadCoeffData(std::istream& table);
    void ReadRest(std::istream& table);
 

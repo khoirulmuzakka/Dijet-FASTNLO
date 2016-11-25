@@ -29,12 +29,6 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
    }
 }
 
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddBase::fastNLOCoeffAddBase(){
-}
-
-
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin) : fastNLOCoeffBase(NObsBin) {
    NScaleDep = 0;

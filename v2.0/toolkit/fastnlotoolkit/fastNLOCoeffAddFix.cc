@@ -26,12 +26,6 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFix::fastNLOCoeffAddFix(){
-   SetClassName("fastNLOCoeffAddFix");
-}
-
-
-//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) : fastNLOCoeffAddBase(NObsBin) {
    SetClassName("fastNLOCoeffAddFix");
 }

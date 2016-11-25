@@ -23,12 +23,6 @@ bool fastNLOCoeffAddFlex::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(){
-   SetClassName("fastNLOCoeffAddFlex");
-}
-
-
-//________________________________________________________________________________________________________________ //
 fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(int NObsBin, int iLOord) : fastNLOCoeffAddBase(NObsBin){
    SetClassName("fastNLOCoeffAddFlex");
    fILOord = iLOord; // only necessary for fixing NScaleDep 3 -> 4,5

@@ -10,14 +10,10 @@ using namespace std;
 using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffBase::fastNLOCoeffBase() : PrimalScream("fastNLOCoeffBase"){
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) : PrimalScream("fastNLOCoeffBase") {
-   fNObsBins = NObsBin;
-}
+fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) 
+   : PrimalScream("fastNLOCoeffBase"), fNObsBins(NObsBin), IXsectUnits(),
+     IDataFlag(), IAddMultFlag(), IContrFlag1(), IContrFlag2(), NScaleDep(),
+     CtrbDescript(), CodeDescript() {}
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {

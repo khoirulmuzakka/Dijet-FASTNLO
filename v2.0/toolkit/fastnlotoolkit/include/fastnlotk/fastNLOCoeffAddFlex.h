@@ -12,6 +12,7 @@ class fastNLOCoeffAddFlex : public fastNLOCoeffAddBase {
    friend class fastNLOCreate;
 
 public:
+   fastNLOCoeffAddFlex() = delete;
    fastNLOCoeffAddFlex(int NObsBin, int iLOord);
    fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord);
    virtual ~fastNLOCoeffAddFlex(){;}
@@ -50,7 +51,6 @@ public:
 
 protected:
 
-   fastNLOCoeffAddFlex();
    void ReadCoeffAddFlex(std::istream& table);
 
    int fILOord;   // obtained from Scenario
