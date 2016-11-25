@@ -9,6 +9,20 @@ using namespace std;
 using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin) 
+   : fastNLOCoeffBase(NObsBin), IRef(), IScaleDep(), Nevt(), Npow(), NPDFPDG(),
+     NPDFDim(), NFFPDG(), NFFDim(), NSubproc(), IPDFdef1(), IPDFdef2(), IPDFdef3(),
+     fPDFCoeff(), Hxlim1(), XNode1(), Hxlim2(), XNode2(), Nztot(), Hzlim(), ZNode(),
+     NScales(), NScaleDim(), Iscale(), ScaleDescript() {
+}
+
+
+//________________________________________________________________________________________________________________ //
+fastNLOCoeffAddBase::fastNLOCoeffAddBase(const fastNLOCoeffBase& base ) : fastNLOCoeffBase(base) {
+}
+
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
    if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==0 ) {
       // Additive contribution
@@ -28,17 +42,6 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
       exit(1);
    }
 }
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin) : fastNLOCoeffBase(NObsBin) {
-   NScaleDep = 0;
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddBase::fastNLOCoeffAddBase(const fastNLOCoeffBase& base ) : fastNLOCoeffBase(base) {
-}
-
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase* fastNLOCoeffAddBase::Clone() const {
