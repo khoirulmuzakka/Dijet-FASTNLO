@@ -6,7 +6,8 @@
 #include <set>
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOTools.h"
-
+// zlib wrapper library
+#include "fastnlotk/zstr.hpp"
 
 using namespace std;
 
@@ -71,7 +72,7 @@ void fastNLOTable::DeleteAllCoeffTable(){
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadTable(){
    //! Read file
-   zstr::ifstream* strm = OpenFileRead();
+   std::istream* strm = OpenFileRead();
    // read header
    logger.debug["ReadTabl"]<<"Reading header."<<endl;
    int nCoeff = ReadHeader(*strm);
@@ -249,7 +250,7 @@ void fastNLOTable::WriteTable(string filename) {
 
 
 //______________________________________________________________________________
-void fastNLOTable::WriteHeader(ostream& table) {
+void fastNLOTable::WriteHeader(std::ostream& table) {
    table << fastNLO::tablemagicno << endl;
    table << Itabversion << endl;
    if ( ScenName.find(" ")!=string::npos )  {
@@ -353,7 +354,7 @@ void fastNLOTable::ReadScenario(istream& table){
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::WriteScenario(ostream& table){
+void fastNLOTable::WriteScenario(std::ostream& table){
    table << fastNLO::tablemagicno << endl;
    table << Ipublunits << endl;
    size_t NScDescript = ScDescript.size();
@@ -2047,20 +2048,20 @@ void fastNLOTable::CatBin(const fastNLOTable& other, unsigned int iObsIdx, unsig
 //
 
 //______________________________________________________________________________
-zstr::ifstream* fastNLOTable::OpenFileRead() {
+std::istream* fastNLOTable::OpenFileRead() {
    //! Open file-stream for reading table
    // does file exist?
    if (access(ffilename.c_str(), R_OK) != 0) {
       logger.error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
       exit(1);
    }
-   zstr::ifstream* strm = new zstr::ifstream(ffilename.c_str(),ios::in);
+   std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in));
    return strm;
 }
 
 
 //______________________________________________________________________________
-void fastNLOTable::CloseFileRead(zstr::ifstream& strm) {
+void fastNLOTable::CloseFileRead(std::istream& strm) {
    //! Close file-stream
    // strm.close();
    delete &strm;
@@ -2074,12 +2075,11 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
    if (access(ffilename.c_str(), F_OK) == 0) {
       logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
-   std::ostream* stream = NULL;
-   if (compress) {
-      stream = new zstr::ofstream(ffilename.c_str(),ios::out);
-   } else {
-      stream = new std::ofstream(ffilename.c_str(),ios::out);
-   }
+   std::ostream* stream =
+        (compress
+         ? (ostream*)(new zstr::ofstream(ffilename))
+         : (ostream*)(new std::ofstream(ffilename)));
+
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);
