@@ -11,6 +11,20 @@ using namespace fastNLO;
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin) 
+   : fastNLOCoeffBase(NObsBin), Nuncorrel(), UncDescr(), Ncorrel(), CorDescr(),
+     UncorLo(), UncorHi(), CorrLo(), CorrHi(), fact() {
+   SetClassName("fastNLOCoeffMult");
+}
+
+
+//________________________________________________________________________________________________________________ //
+fastNLOCoeffMult::fastNLOCoeffMult(const fastNLOCoeffBase& base) : fastNLOCoeffBase(base) {
+   SetClassName("fastNLOCoeffMult");
+}
+
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet)  {
    if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==0 ) {
       // Additive contribution
@@ -29,19 +43,6 @@ bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
          << ", IDataFlag ="   << c->GetIDataFlag() <<endl;
       exit(1);
    }
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin) : fastNLOCoeffBase(NObsBin){
-   SetClassName("fastNLOCoeffMult");
-   fNObsBins = NObsBin;
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffMult::fastNLOCoeffMult(const fastNLOCoeffBase& base) : fastNLOCoeffBase(base) {
-   SetClassName("fastNLOCoeffMult");
 }
 
 

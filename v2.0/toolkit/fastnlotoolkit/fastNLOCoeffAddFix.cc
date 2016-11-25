@@ -9,6 +9,20 @@
 using namespace std;
 using namespace fastNLO;
 
+//________________________________________________________________________________________________________________ //
+fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) 
+   : fastNLOCoeffAddBase(NObsBin), Nscalevar(), ScaleFac(), ScaleNode(), SigmaTilde(),
+     AlphasTwoPi_v20(), PdfLC(), PdfSplLc1(), PdfSplLc2() {
+   SetClassName("fastNLOCoeffAddFix");
+}
+
+
+//________________________________________________________________________________________________________________ //
+fastNLOCoeffAddFix::fastNLOCoeffAddFix(const fastNLOCoeffBase& base) : fastNLOCoeffAddBase(base) {
+   SetClassName("fastNLOCoeffAddFix");
+}
+
+
 
 //________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
@@ -22,18 +36,6 @@ bool fastNLOCoeffAddFix::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qui
       return false;
    }
    else return false;
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) : fastNLOCoeffAddBase(NObsBin) {
-   SetClassName("fastNLOCoeffAddFix");
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFix::fastNLOCoeffAddFix(const fastNLOCoeffBase& base) : fastNLOCoeffAddBase(base) {
-   SetClassName("fastNLOCoeffAddFix");
 }
 
 

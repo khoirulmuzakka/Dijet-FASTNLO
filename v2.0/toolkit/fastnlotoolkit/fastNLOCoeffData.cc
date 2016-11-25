@@ -10,17 +10,9 @@ using namespace fastNLO;
 
 
 //________________________________________________________________________________________________________________ //
-bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
-   if ( c->GetIDataFlag() == 1 ) return true;
-   else {
-      if ( !quiet )
-         say::info["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
-      return false;
-   }
-}
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffData::fastNLOCoeffData(int NObsBin) : fastNLOCoeffBase(NObsBin) {
+fastNLOCoeffData::fastNLOCoeffData(int NObsBin) 
+   : fastNLOCoeffBase(NObsBin), Nuncorrel(), UncDescr(), Ncorrel(), CorDescr(), Xcenter(), Value(),
+     UncorLo(), UncorHi(), CorrLo(), CorrHi(), NErrMatrix(), matrixelement() {
    SetClassName("fastNLOCoeffData");
 }
 
@@ -28,6 +20,17 @@ fastNLOCoeffData::fastNLOCoeffData(int NObsBin) : fastNLOCoeffBase(NObsBin) {
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffData::fastNLOCoeffData(const fastNLOCoeffBase& base) : fastNLOCoeffBase(base) {
    SetClassName("fastNLOCoeffData");
+}
+
+
+//________________________________________________________________________________________________________________ //
+bool fastNLOCoeffData::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet) {
+   if ( c->GetIDataFlag() == 1 ) return true;
+   else {
+      if ( !quiet )
+         say::info["fastNLOCoeffData::CheckCoeffConstants"]<<"This is not a data table! IDataFlag="<<c->GetIDataFlag()<<", but must be 1."<<endl;
+      return false;
+   }
 }
 
 

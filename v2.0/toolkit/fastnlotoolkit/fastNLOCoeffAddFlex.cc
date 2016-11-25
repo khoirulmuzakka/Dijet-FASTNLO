@@ -9,6 +9,22 @@ using namespace std;
 
 
 //________________________________________________________________________________________________________________ //
+fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(int NObsBin, int iLOord) 
+   : fastNLOCoeffAddBase(NObsBin), fILOord(iLOord), SigmaTildeMuIndep(), SigmaTildeMuFDep(),
+     SigmaTildeMuRDep(), SigmaTildeMuRRDep(), SigmaTildeMuFFDep(), SigmaTildeMuRFDep(), 
+     SigmaRefMixed(), SigmaRef_s1(), SigmaRef_s2(), ScaleNode1(), ScaleNode2(), AlphasTwoPi(), PdfLcMuVar() {
+   SetClassName("fastNLOCoeffAddFlex");
+}
+
+
+//________________________________________________________________________________________________________________ //
+fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord ) : fastNLOCoeffAddBase(base)  {
+   SetClassName("fastNLOCoeffAddFlex");
+   fILOord = iLOord;
+}
+
+
+//________________________________________________________________________________________________________________ //
 bool fastNLOCoeffAddFlex::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet ) {
    bool ret = fastNLOCoeffAddBase::CheckCoeffConstants(c,quiet);
    if ( ret &&  c->GetNScaleDep() >= 3) return true;
@@ -19,20 +35,6 @@ bool fastNLOCoeffAddFlex::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
       return false;
    }
    else return false;
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(int NObsBin, int iLOord) : fastNLOCoeffAddBase(NObsBin){
-   SetClassName("fastNLOCoeffAddFlex");
-   fILOord = iLOord; // only necessary for fixing NScaleDep 3 -> 4,5
-}
-
-
-//________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(const fastNLOCoeffBase& base , int iLOord ) : fastNLOCoeffAddBase(base)  {
-   SetClassName("fastNLOCoeffAddFlex");
-   fILOord = iLOord;
 }
 
 
