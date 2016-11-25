@@ -19,7 +19,8 @@ class fastNLOCoeffBase : public PrimalScream {
 public:
    fastNLOCoeffBase() = delete;
    fastNLOCoeffBase(int NObsBin);                                               //! Use this constructor
-   virtual ~fastNLOCoeffBase(){;};                                              //! destructor
+   // deletes instance of derived classes through pointer to base class
+   virtual ~fastNLOCoeffBase(){};                                              //! destructor
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
 
    virtual void Read(std::istream& table);
