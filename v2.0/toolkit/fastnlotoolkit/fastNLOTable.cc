@@ -10,6 +10,7 @@
 #include "fastnlotk/zstr.hpp"
 
 using namespace std;
+using namespace fastNLO;
 
 // ___________________________________________________________________________________________________
 bool fastNLOTable::fWelcomeOnce = false;
@@ -251,24 +252,24 @@ void fastNLOTable::WriteTable(string filename) {
 
 //______________________________________________________________________________
 void fastNLOTable::WriteHeader(std::ostream& table) {
-   table << fastNLO::tablemagicno << endl;
-   table << Itabversion << endl;
+   table << fastNLO::tablemagicno << sep;
+   table << Itabversion << sep;
    if ( ScenName.find(" ")!=string::npos )  {
       logger.warn["WriteHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
       ScenName = ScenName.substr(0,ScenName.find(" "));
       logger.warn["WriteHeader"]<<"Write ScenarioName: "<<ScenName<<endl;
    }
-   table << ScenName << endl;
-   // table << Ncontrib << endl;
-   // table << Nmult << endl;
-   // table << Ndata << endl;
-   table << GetNcontrib() << endl;
-   table << GetNmult() << endl;
-   table << GetNdata() << endl;
-   table << 0 << endl; //NUserString
-   table << 0 << endl; //NuserInt
-   table << 0 << endl; //NuserFloat
-   table << 0 << endl; //Imachine
+   table << ScenName << sep;
+   // table << Ncontrib << sep;
+   // table << Nmult << sep;
+   // table << Ndata << sep;
+   table << GetNcontrib() << sep;
+   table << GetNmult() << sep;
+   table << GetNdata() << sep;
+   table << 0 << sep; //NUserString
+   table << 0 << sep; //NuserInt
+   table << 0 << sep; //NuserFloat
+   table << 0 << sep; //Imachine
 }
 
 
@@ -355,43 +356,43 @@ void fastNLOTable::ReadScenario(istream& table){
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteScenario(std::ostream& table){
-   table << fastNLO::tablemagicno << endl;
-   table << Ipublunits << endl;
+   table << fastNLO::tablemagicno << sep;
+   table << Ipublunits << sep;
    size_t NScDescript = ScDescript.size();
-   table << NScDescript << endl;
+   table << NScDescript << sep;
    for(size_t i=0;i<NScDescript;i++){
-      table << ScDescript[i] << endl;
+      table << ScDescript[i] << sep;
    }
-   table << Ecms << endl;
-   table << ILOord << endl;
+   table << Ecms << sep;
+   table << ILOord << sep;
    logger.debug["WriteScenario"]<<"Writing NObsBin to be "<<NObsBin<<endl;
-   table << NObsBin << endl;
-   table << NDim << endl;
+   table << NObsBin << sep;
+   table << NDim << sep;
    for(int i=NDim-1;i>=0;i--){
-      table << DimLabel[i] << endl;
+      table << DimLabel[i] << sep;
    }
    for(int i=NDim-1;i>=0;i--){
-      table << IDiffBin[i] << endl;
+      table << IDiffBin[i] << sep;
    }
    logger.debug["WriteScenario"]<<"Bin border size is "<<Bin.size()<<endl;
    for(unsigned int i=0;i<NObsBin;i++){
       for(int j=NDim-1;j>=0;j--){
-         table <<  Bin[i][j].first  << endl;
-         if(IDiffBin[j]==0 || IDiffBin[j]==2) table <<  Bin[i][j].second  << endl;
+         table <<  Bin[i][j].first  << sep;
+         if(IDiffBin[j]==0 || IDiffBin[j]==2) table <<  Bin[i][j].second  << sep;
       }
    }
    for(unsigned int i=0;i<NObsBin;i++){
-     table << BinSize[i]  << endl;
+     table << BinSize[i]  << sep;
    }
 
-   table << INormFlag << endl;
+   table << INormFlag << sep;
    if( INormFlag < 0 ){
-      table << DenomTable << endl;
+      table << DenomTable << sep;
    }
    if( INormFlag != 0 ){
       for(unsigned int i=0;i<NObsBin;i++){
-         table << IDivLoPointer[i] << endl;
-         table << IDivUpPointer[i] << endl;
+         table << IDivLoPointer[i] << sep;
+         table << IDivUpPointer[i] << sep;
       }
    }
 }
@@ -2092,8 +2093,8 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
 //______________________________________________________________________________
 void fastNLOTable::CloseFileWrite(std::ostream& table) {
    //! close stream and delete object;
-   table << fastNLO::tablemagicno << endl;
-   table << fastNLO::tablemagicno << endl;
+   table << fastNLO::tablemagicno << sep;
+   table << fastNLO::tablemagicno << sep;
    // table.close();
    delete &table;
 }

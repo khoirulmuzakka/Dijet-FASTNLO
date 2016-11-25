@@ -167,14 +167,14 @@ template<typename T>
 int fastNLOTools::_Write1DVectorByN( const std::vector<T>& v, std::ostream& table , double nevts) {
    if( nevts == 0) return -1000;
    for(unsigned int i0=0;i0<v.size();i0++)
-      table << v[i0] / nevts << std::endl;
+      table << v[i0] / nevts << fastNLO::sep;
    return v.size();
 }
 
 template<typename T>
 int fastNLOTools::_Write1DVector( const std::vector<T>& v, std::ostream& table ) {
    for(unsigned int i0=0;i0<v.size();i0++)
-      table << v[i0] << std::endl;
+      table << v[i0] << fastNLO::sep;
    return v.size();
 }
 
@@ -186,7 +186,7 @@ int fastNLOTools::WriteFlexibleVector( const std::vector<T>& v, std::ostream& ta
       return -1000;
    }
    int nn = 1;
-   table << v.size() << std::endl;
+   table << v.size() << fastNLO::sep;
    for(unsigned int i0=0;i0<v.size();i0++){
       nn += WriteFlexibleVector( v[i0] , table , nProcLast , nevts );
    }

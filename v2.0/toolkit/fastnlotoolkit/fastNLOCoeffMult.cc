@@ -120,23 +120,23 @@ void fastNLOCoeffMult::ReadCoeffMult(istream& table){
 void fastNLOCoeffMult::Write(ostream& table) {
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
-   table << Nuncorrel << endl;
+   table << Nuncorrel << sep;
    for(int i=0;i<Nuncorrel;i++){
-      table << UncDescr[i]  << endl;
+      table << UncDescr[i]  << sep;
    }
-   table << Ncorrel << endl;
+   table << Ncorrel << sep;
    for(int i=0;i<Ncorrel;i++){
-      table << CorDescr[i]  << endl;
+      table << CorDescr[i]  << sep;
    }
    for(int i=0;i<fNObsBins;i++){
-      table << fact[i] << endl;
+      table << fact[i] << sep;
       for(int j=0;j<Nuncorrel;j++){
-         table << UncorLo[i][j] << endl;
-         table << UncorHi[i][j] << endl;
+         table << UncorLo[i][j] << sep;
+         table << UncorHi[i][j] << sep;
       }
       for(int j=0;j<Ncorrel;j++){
-         table << CorrLo[i][j] << endl;
-         table << CorrHi[i][j] << endl;
+         table << CorrLo[i][j] << sep;
+         table << CorrHi[i][j] << sep;
       }
    }
 }

@@ -56,6 +56,8 @@ namespace fastNLO {
    // ---- constants ---- //
    const int tabversion   = 20000;
    const int tablemagicno = 1234567890;
+   // separating character between entries in table
+   const char sep[] = "\n";
    //   const double TWOPI = 6.28318530717958647692528;
 
 

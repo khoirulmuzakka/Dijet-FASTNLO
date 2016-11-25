@@ -7,6 +7,7 @@
 #include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
+using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
 fastNLOCoeffBase::fastNLOCoeffBase() : PrimalScream("fastNLOCoeffBase"){
@@ -94,22 +95,22 @@ void fastNLOCoeffBase::EndReadCoeff(istream& table){
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::Write(ostream& table) {
    say::debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
-   table << fastNLO::tablemagicno << endl;
-   table << IXsectUnits << endl;
-   table << IDataFlag << endl;
-   table << IAddMultFlag << endl;
-   table << IContrFlag1 << endl;
-   table << IContrFlag2 << endl;
-   table << NScaleDep << endl;
-   table << CtrbDescript.size() << endl;
+   table << fastNLO::tablemagicno << sep;
+   table << IXsectUnits << sep;
+   table << IDataFlag << sep;
+   table << IAddMultFlag << sep;
+   table << IContrFlag1 << sep;
+   table << IContrFlag2 << sep;
+   table << NScaleDep << sep;
+   table << CtrbDescript.size() << sep;
    //printf("  *  fastNLOCoeffBase::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
    for(unsigned int i=0;i<CtrbDescript.size();i++){
-      table << CtrbDescript[i] << endl;
+      table << CtrbDescript[i] << sep;
    }
-   table << CodeDescript.size() << endl;
+   table << CodeDescript.size() << sep;
    for(unsigned int i=0;i<CodeDescript.size();i++){
-      table << CodeDescript[i] << endl;
+      table << CodeDescript[i] << sep;
    }
 }
 

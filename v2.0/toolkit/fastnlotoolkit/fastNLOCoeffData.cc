@@ -119,30 +119,30 @@ void fastNLOCoeffData::Write(ostream& table) {
    CheckCoeffConstants(this);
 
    //if(IDataFlag==1){
-   table << Nuncorrel << endl;
+   table << Nuncorrel << sep;
    for(int i=0;i<Nuncorrel;i++){
-      table << UncDescr[i] << endl;
+      table << UncDescr[i] << sep;
    }
-   table << Ncorrel << endl;
+   table << Ncorrel << sep;
    for(int i=0;i<Ncorrel;i++){
-      table << CorDescr[i]  << endl;
+      table << CorDescr[i]  << sep;
    }
    for(int i=0;i<fNObsBins;i++){
-      table << Xcenter[i] << endl;
-      table << Value[i] << endl;
+      table << Xcenter[i] << sep;
+      table << Value[i] << sep;
       for(int j=0;j<Nuncorrel;j++){
-         table << UncorLo[i][j] << endl;
-         table << UncorHi[i][j] << endl;
+         table << UncorLo[i][j] << sep;
+         table << UncorHi[i][j] << sep;
       }
       for(int j=0;j<Ncorrel;j++){
-         table << CorrLo[i][j] << endl;
-         table << CorrHi[i][j] << endl;
+         table << CorrLo[i][j] << sep;
+         table << CorrHi[i][j] << sep;
       }
    }
-   table << NErrMatrix << endl;
+   table << NErrMatrix << sep;
    for(int i=0;i<NErrMatrix;i++){
       for(int j=0;j<(int)pow((double)fNObsBins,2);j++){
-         table << matrixelement[i][j] << endl;
+         table << matrixelement[i][j] << sep;
       }
    }
 }

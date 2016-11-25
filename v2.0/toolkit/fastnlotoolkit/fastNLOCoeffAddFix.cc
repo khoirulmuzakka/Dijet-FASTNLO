@@ -7,6 +7,7 @@
 #include "fastnlotk/speaker.h"
 
 using namespace std;
+using namespace fastNLO;
 
 
 //________________________________________________________________________________________________________________ //
@@ -165,8 +166,8 @@ void fastNLOCoeffAddFix::Write(ostream& table){
    fastNLOCoeffAddBase::Write(table);
 
    for(int i=0;i<NScaleDim;i++){
-      table << Nscalevar[i] << endl;
-      table << GetNScaleNode() << endl;
+      table << Nscalevar[i] << sep;
+      table << GetNScaleNode() << sep;
    }
    fastNLOTools::WriteVector( ScaleFac , table );
    int nsn = fastNLOTools::WriteVector( ScaleNode , table );

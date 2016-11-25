@@ -198,27 +198,27 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    debug["Write"]<<"Calling fastNLOCoeffBase::Write()"<<endl;
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
-   table << IRef << endl;
-   table << IScaleDep << endl;
-   table << Nevt << endl;
-   table << Npow << endl;
-   table << NPDFPDG.size() << endl;
+   table << IRef << sep;
+   table << IScaleDep << sep;
+   table << Nevt << sep;
+   table << Npow << sep;
+   table << NPDFPDG.size() << sep;
    for(unsigned int i=0;i<NPDFPDG.size();i++){
-      table <<  NPDFPDG[i] << endl;
+      table <<  NPDFPDG[i] << sep;
    }
-   table << NPDFDim << endl;
+   table << NPDFDim << sep;
    int NFragFunc = NFFPDG.size();
-   table << NFragFunc << endl;
+   table << NFragFunc << sep;
    if(NFragFunc>0){
       for(int i=0;i<NFragFunc;i++){
-         table <<  NFFPDG[i] << endl;
+         table <<  NFFPDG[i] << sep;
       }
    }
-   table << NFFDim << endl;
-   table << NSubproc << endl;
-   table << IPDFdef1 << endl;
-   table << IPDFdef2 << endl;
-   table << IPDFdef3 << endl;
+   table << NFFDim << sep;
+   table << NSubproc << sep;
+   table << IPDFdef1 << sep;
+   table << IPDFdef2 << sep;
+   table << IPDFdef3 << sep;
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
       cout<<"Writing PDF coefficients into table."<<endl;
@@ -227,16 +227,16 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
          exit(1);
       }
       int IPDFCoeffFormat = 0 ; // this is format style 0
-      table <<  IPDFCoeffFormat << endl;
+      table <<  IPDFCoeffFormat << sep;
       for(int k=0;k<NSubproc;k++){
-         table << fPDFCoeff[k].size() <<endl; // NPartonParis
+         table << fPDFCoeff[k].size() <<sep; // NPartonParis
          for( unsigned int n=0;n<fPDFCoeff[k].size();n++){
             if ( IPDFdef1>=3 ) {
-               table << fPDFCoeff[k][n].first << endl;
-               table << fPDFCoeff[k][n].second << endl;
+               table << fPDFCoeff[k][n].first << sep;
+               table << fPDFCoeff[k][n].second << sep;
             }
             else if ( IPDFdef1==2 ) {
-               table << fPDFCoeff[k][n].first << endl;
+               table << fPDFCoeff[k][n].first << sep;
             }
          }
       }
@@ -253,37 +253,37 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
       }
    }
    for(int i=0;i<fNObsBins;i++){
-      table << XNode1[i].size() << endl;
+      table << XNode1[i].size() << sep;
       for(unsigned int j=0;j<XNode1[i].size();j++){
-         table << XNode1[i][j] << endl;
+         table << XNode1[i][j] << sep;
       }
    }
    if(NPDFDim==2){
       for(int i=0;i<fNObsBins;i++){
-         table << XNode2[i].size() << endl;
+         table << XNode2[i].size() << sep;
          for(unsigned int j=0;j<XNode2[i].size();j++){
-            table << XNode2[i][j] << endl;
+            table << XNode2[i][j] << sep;
          }
       }
    }
    if(NFragFunc>0){
       for(int i=0;i<fNObsBins;i++){
-         table << Nztot[i] << endl;
+         table << Nztot[i] << sep;
          for(int j=0;j<Nztot[i];j++){
-            table << ZNode[i][j] << endl;
+            table << ZNode[i][j] << sep;
          }
       }
    }
    int NScales = Iscale.size();
-   table << NScales << endl;
-   table << NScaleDim << endl;
+   table << NScales << sep;
+   table << NScaleDim << sep;
    for(int i=0;i<NScales;i++){
-      table << Iscale[i] << endl;
+      table << Iscale[i] << sep;
    }
    for(int i=0;i<NScaleDim;i++){
-      table << ScaleDescript[i].size() << endl;
+      table << ScaleDescript[i].size() << sep;
       for(unsigned int j=0;j<ScaleDescript[i].size();j++){
-         table << ScaleDescript[i][j] << endl;
+         table << ScaleDescript[i][j] << sep;
       }
    }
 }

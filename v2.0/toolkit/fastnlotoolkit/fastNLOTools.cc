@@ -211,7 +211,7 @@ namespace fastNLOTools {
          return -1000;
       }
       if ( nProcLast == 0 )
-         table << v.size() << endl;
+         table << v.size() << sep;
       if ( nProcLast != 0 && nProcLast != (int)v.size() )
          warn["fastNLOTools::WriteFlexibleVector(double)"]
             <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -229,7 +229,7 @@ namespace fastNLOTools {
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(string)"]
          <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
       if ( nProcLast == 0 )
-         table << v.size() << endl;
+         table << v.size() << sep;
       if ( nProcLast != 0 && nProcLast != (int)v.size() )
          warn["fastNLOTools::WriteFlexibleVector(string)"]
             <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -246,7 +246,7 @@ namespace fastNLOTools {
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(unsigned long long)"]
          <<"String variable cannot be divided by integer number! Ignoring nevts="<<nevts<<endl;
       if ( nProcLast == 0 )
-         table << v.size() << endl;
+         table << v.size() << sep;
       if ( nProcLast != 0 && nProcLast != (int)v.size() )
          warn["fastNLOTools::WriteFlexibleVector(string)"]
             <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
@@ -263,7 +263,7 @@ namespace fastNLOTools {
       if ( nevts!= 1 ) warn["fastNLOTools::WriteFlexibleVector(int)"]
          <<"Refusing dividing integer numbers by each other! Ignoring nevts="<<nevts<<endl;
       if ( nProcLast == 0 )
-         table << v.size() << endl;
+         table << v.size() << sep;
       if ( nProcLast != 0 && nProcLast != (int)v.size() )
          warn["fastNLOTools::WriteFlexibleVector(int)"]
             <<"Dimension of this vector is not compatible with its size (i.e. nProclast ="<<nProcLast<<", v.size()="<<v.size()<<endl;
