@@ -17,8 +17,11 @@ bool fastNLOTable::fWelcomeOnce = false;
 
 
 // ___________________________________________________________________________________________________
-//fastNLOTable::fastNLOTable() : PrimalScream("fastNLOTable") {
-fastNLOTable::fastNLOTable() : fPrecision(8), logger("fastNLOTable") {
+fastNLOTable::fastNLOTable() 
+   : ffilename(""), fPrecision(8), Itabversion(), ScenName(),
+     logger("fastNLOTable"), fCoeff(), Ecms(), ILOord(), Ipublunits(),
+     ScDescript(), NObsBin(), NDim(), DimLabel(), IDiffBin(), Bin(),
+     BinSize(), INormFlag(), DenomTable(), IDivLoPointer(), IDivUpPointer() {
    if (!fWelcomeOnce) PrintWelcomeMessage();
 }
 
@@ -41,17 +44,14 @@ fastNLOTable::~fastNLOTable(){
 fastNLOTable::fastNLOTable(const fastNLOTable& other)
    : ffilename(other.ffilename), fPrecision(other.fPrecision),
      Itabversion(other.Itabversion), ScenName(other.ScenName),
-     //Ncontrib(other.Ncontrib),
-     //Nmult(other.Nmult),
-     //Ndata(other.Ndata),
      logger("fastNLOTable"),
-    fCoeff(other.fCoeff.size()),
-    Ecms(other.Ecms), ILOord(other.ILOord), Ipublunits(other.Ipublunits),
-    ScDescript(other.ScDescript), NObsBin(other.NObsBin), NDim(other.NDim),
-    DimLabel(other.DimLabel), IDiffBin(other.IDiffBin), Bin(other.Bin),
-    BinSize(other.BinSize), INormFlag(other.INormFlag),
-    DenomTable(other.DenomTable), IDivLoPointer(other.IDivLoPointer),
-    IDivUpPointer(other.IDivUpPointer)
+     fCoeff(other.fCoeff.size()),
+     Ecms(other.Ecms), ILOord(other.ILOord), Ipublunits(other.Ipublunits),
+     ScDescript(other.ScDescript), NObsBin(other.NObsBin), NDim(other.NDim),
+     DimLabel(other.DimLabel), IDiffBin(other.IDiffBin), Bin(other.Bin),
+     BinSize(other.BinSize), INormFlag(other.INormFlag),
+     DenomTable(other.DenomTable), IDivLoPointer(other.IDivLoPointer),
+     IDivUpPointer(other.IDivUpPointer)
 {
    //! Copy constructor
    logger.SetClassName("fastNLOTable");
