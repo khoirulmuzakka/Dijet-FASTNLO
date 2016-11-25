@@ -14,7 +14,7 @@ class fastNLOCoeffAddBase : public fastNLOCoeffBase {
 public:
    fastNLOCoeffAddBase() = delete;
    fastNLOCoeffAddBase(int NObsBin);
-   fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
+   explicit fastNLOCoeffAddBase(const fastNLOCoeffBase& base);
    virtual ~fastNLOCoeffAddBase() {}
    virtual fastNLOCoeffAddBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);

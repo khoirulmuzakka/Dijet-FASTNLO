@@ -13,7 +13,7 @@ class fastNLOCoeffMult : public fastNLOCoeffBase {
 public:
    fastNLOCoeffMult() = delete;
    fastNLOCoeffMult(int NObsBin);
-   fastNLOCoeffMult(const fastNLOCoeffBase&);
+   explicit fastNLOCoeffMult(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffMult(){;};
    virtual fastNLOCoeffMult* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);

@@ -12,7 +12,7 @@ class fastNLOCoeffData : public fastNLOCoeffBase {
 public:
    fastNLOCoeffData() = delete;
    fastNLOCoeffData(int NObsBin);
-   fastNLOCoeffData(const fastNLOCoeffBase&);
+   explicit fastNLOCoeffData(const fastNLOCoeffBase&);
    virtual ~fastNLOCoeffData(){;};
    virtual fastNLOCoeffData* Clone() const;                                     //!< returns 'new' copy of this instance.
    virtual void Read(std::istream& table);
