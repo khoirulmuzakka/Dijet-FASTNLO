@@ -11,6 +11,8 @@
 AC_PREREQ([2.62])
 # Define subproject fastNLO_toolkit
 AC_INIT([fastNLO_toolkit], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+#Suppress verbose output when compiling (use make V=99 for verbose output)
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version of 1.9, switch on warnings
