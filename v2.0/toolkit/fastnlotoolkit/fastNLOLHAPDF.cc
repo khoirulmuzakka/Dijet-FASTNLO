@@ -219,7 +219,7 @@ void fastNLOLHAPDF::SetLHAPDFMember(int set) {
    #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
    if ( PDF ) delete PDF;
    PDF = PDFSet->mkPDF(set);
-   fiPDFMember=set; 
+   fiPDFMember=set;
    #else
    fiPDFMember = set;
    if (fchksum == CalcChecksum(1.)) {  // nothin has changed? we set only the pdfmember
@@ -592,7 +592,7 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
             XsUnc.dxsu[iobs] = 0.;
             XsUnc.dxsl[iobs] = 0.;
          }
-         logger.debug["GetPDFUncertainty"]<<"iobs = " << iobs << "dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
+         logger.debug["GetPDFUncertainty"]<<"iobs = " << iobs << ", dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
       }
    } else {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
@@ -614,6 +614,80 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
 
 std::vector< std::vector<double> > fastNLOLHAPDF::GetPDFUncertaintyVec(const fastNLO::EPDFUncertaintyStyle ePDFUnc) {
    XsUncertainty xsUnc = GetPDFUncertainty(ePDFUnc);
+   std::vector<std::vector<double> > xsUncVec;
+   xsUncVec.resize(3);
+   xsUncVec[0] = xsUnc.xs;
+   xsUncVec[1] = xsUnc.dxsu;
+   xsUncVec[2] = xsUnc.dxsl;
+   return xsUncVec;
+}
+
+
+//______________________________________________________________________________
+XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle eAsUnc) {
+   XsUncertainty XsUnc = GetAsUncertainty(eAsUnc, false);
+   return XsUnc;
+}
+
+
+//______________________________________________________________________________
+XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle eAsUnc, bool lNorm) {
+   // Get a_s(M_Z) uncertainty
+   const double asmz[3] = {0.1181, 0.1171, 0.1191};
+   double asmz0 = GetAlphasMz();
+   XsUncertainty XsUnc;
+
+   unsigned int NObsBin = GetNObsBin();
+
+   logger.info["GetAsUncertainty"]<<"Current a_s(M_Z) = a_s("<<PDG_MZ<<") = "<<asmz0<<endl;
+   logger.debug["GetAsUncertainty"]<<"a_s(M_Z) = "<<asmz[0]<<" + "<<asmz[2]-asmz[0]<<" - "<<asmz[0]-asmz[1]<<endl;
+   if ( eAsUnc == fastNLO::kAsNone ) {
+      logger.info["GetAsUncertainty"]<<"Only default value selected, uncertainties will be zero."<<endl;
+   } else if ( eAsUnc == fastNLO::kAsGRV ) {
+      logger.info["GetAsUncertainty"]<<"GRV evolution used for a_s(M_Z) uncertainty."<<endl;
+   } else {
+      logger.error["GetAsUncertainty"]<<"ERROR! Unknown a_s(M_Z) uncertainty type selected, exiting."<<endl;
+      logger.error["GetAsUncertainty"]<<"type = "<<eAsUnc<<endl;
+      exit(1);
+   }
+
+   vector < double > MyXSection;
+   //! Cross section and absolute uncertainties
+   for ( unsigned int ias = 0; ias < 3; ias++ ) {
+      SetAlphasMz(asmz[ias]);
+      CalcCrossSection();
+      MyXSection = GetCrossSection(lNorm);
+      for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
+         if ( ias == 0 ) {
+            XsUnc.xs.push_back(MyXSection[iobs]);
+            XsUnc.dxsu.push_back(0);
+            XsUnc.dxsl.push_back(0);
+         } else {
+            XsUnc.dxsu[iobs] = max(XsUnc.dxsu[iobs],MyXSection[iobs]-XsUnc.xs[iobs]);
+            XsUnc.dxsl[iobs] = min(XsUnc.dxsl[iobs],MyXSection[iobs]-XsUnc.xs[iobs]);
+         }
+      }
+   }
+
+   //! Divide by cross section != 0 to give relative uncertainties
+   for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
+      if ( abs(XsUnc.xs[iobs]) > DBL_MIN ) {
+         XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] / XsUnc.xs[iobs];
+         XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] / XsUnc.xs[iobs];
+      } else {
+         XsUnc.dxsu[iobs] = 0.;
+         XsUnc.dxsl[iobs] = 0.;
+      }
+      logger.debug["GetAsUncertainty"]<<"iobs = " << iobs << ", dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
+   }
+   logger.info["GetAsUncertainty"]<<"Setting a_s(M_Z) back to initial value of "<<asmz0<<endl;
+   SetAlphasMz(asmz0);
+
+   return XsUnc;
+}
+
+std::vector< std::vector<double> > fastNLOLHAPDF::GetAsUncertaintyVec(const fastNLO::EAsUncertaintyStyle eAsUnc) {
+   XsUncertainty xsUnc = fastNLOLHAPDF::GetAsUncertainty(eAsUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);
    xsUncVec[0] = xsUnc.xs;

@@ -120,6 +120,11 @@ namespace fastNLO {
       kHeraPDF10                = 7     // HERAPDF 1.0 uncertainties
    };
 
+   enum EAsUncertaintyStyle {
+      kAsNone                   = 0,    // no a_s uncertainty
+      kAsGRV                    = 1,    // a_s(M_Z) uncertainty with GRV evolution
+   };
+
    // ---- some names for nice output ---- //
    const std::string _ContrName[20] = {
       "Fixed order calculation", "Threshold corrections", "Electroweak corrections", "Non-perturbative corrections",

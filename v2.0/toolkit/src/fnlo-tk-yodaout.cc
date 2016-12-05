@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "fastnlotk/fastNLOAlphas.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
 #include "YODA/Scatter2D.h"
@@ -89,6 +90,7 @@ int main(int argc, char** argv) {
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
          man << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
+         man << "                 AS (a_s(M_Z) variation uncertainty with GRV evolution)" << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          man << "   Alternatives: LO, NNLO (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
@@ -122,6 +124,7 @@ int main(int argc, char** argv) {
    //! --- Uncertainty choice
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
+   EAsUncertaintyStyle    eAsUnc    = kAsNone;
    string chunc = "none";
    if (argc > 3) {
       chunc = (const char*) argv[3];
@@ -157,6 +160,9 @@ int main(int argc, char** argv) {
          ePDFUnc = kLHAPDF6;
          shout["fnlo-tk-yodaout"] << "Showing LHAPDF6 PDF uncertainty (--> LHAPDF6 PDFs)." << endl;
 #endif
+      } else if ( chunc == "AS" ) {
+         eAsUnc = kAsGRV;
+         shout["fnlo-tk-yodaout"] << "Showing a_s(M_Z) uncertainty with GRV evolution." << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of uncertainty, " << chunc << ", aborted!" << endl;
          exit(1);
@@ -215,21 +221,27 @@ int main(int argc, char** argv) {
    //! --- fastNLO initialisation, read & evaluate table
    //! Initialise a fastNLO instance with interface to LHAPDF
    //! Note: This also initializes the cross section to the LO/NLO one!
-   fastNLOLHAPDF fnlo(tablename,PDFFile,0);
+   fastNLOLHAPDF* fnlo = NULL;
+   if ( chunc != "AS" ) {
+      fnlo = new fastNLOLHAPDF(tablename,PDFFile,0);
+   } else {
+      fnlo = new fastNLOAlphas(tablename,PDFFile,0);
+   }
+
    //! Print essential table information
-   fnlo.PrintContributionSummary(0);
+   fnlo->PrintContributionSummary(0);
 
    //! Check on existence of LO (Id = -1 if not existing)
-   int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
+   int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
       error["fnlo-tk-yodaout"] << "LO not found, aborted!" << endl;
       exit(1);
    } else {
       info["fnlo-tk-yodaout"] << "The LO contribution has Id: " << ilo << endl;
-      fnlo.SetContributionON(kFixedOrder, ilo, true);
+      fnlo->SetContributionON(kFixedOrder, ilo, true);
    }
    //! Check on existence of NLO (Id = -1 if not existing)
-   int inlo  = fnlo.ContrId(kFixedOrder, kNextToLeading);
+   int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
       info["fnlo-tk-yodaout"] << "No NLO contribution found!" << endl;
       if ( eOrder >= kNextToLeading ) {
@@ -239,13 +251,13 @@ int main(int argc, char** argv) {
    } else {
       info["fnlo-tk-yodaout"] << "The NLO contribution has Id: " << inlo << endl;
       if ( eOrder >= kNextToLeading ) {
-         fnlo.SetContributionON(kFixedOrder, inlo, true);
+         fnlo->SetContributionON(kFixedOrder, inlo, true);
       } else {
-         fnlo.SetContributionON(kFixedOrder, inlo, false);
+         fnlo->SetContributionON(kFixedOrder, inlo, false);
       }
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
-   int innlo = fnlo.ContrId(kFixedOrder, kNextToNextToLeading);
+   int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
    if (innlo < 0) {
       info["fnlo-tk-yodaout"] << "No NNLO contribution found!" << endl;
       if ( eOrder >= kNextToNextToLeading ) {
@@ -255,16 +267,16 @@ int main(int argc, char** argv) {
    } else {
       info["fnlo-tk-yodaout"] << "The NNLO contribution has Id: " << innlo << endl;
       if ( eOrder >= kNextToNextToLeading ) {
-         fnlo.SetContributionON(kFixedOrder, innlo, true);
+         fnlo->SetContributionON(kFixedOrder, innlo, true);
       } else {
-         fnlo.SetContributionON(kFixedOrder, innlo, false);
+         fnlo->SetContributionON(kFixedOrder, innlo, false);
       }
    }
    //! Check on existence of non-perturbative corrections from LO MC
-   int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
+   int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    if (inpc1 > -1 && (chnp == "yes" || chnp == "np" ) ) {
       info["fnlo-tk-yodaout"] << "Found non-perturbative correction factors. Switch on." << endl;
-      bool SetOn = fnlo.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+      bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
       if (!SetOn) {
          error["fnlo-tk-yodaout"] << "NPC1 not found, nothing to be done!" << endl;
          error["fnlo-tk-yodaout"] << "This should have been caught before!" << endl;
@@ -275,7 +287,7 @@ int main(int argc, char** argv) {
    //! Normalize?
    bool lNorm = false;
    if ( chnorm == "yes" || chnorm == "norm" ) {
-      if ( fnlo.IsNorm() ) {
+      if ( fnlo->IsNorm() ) {
          lNorm = true;
       } else {
          error["fnlo-read"] << "Normalization requested but not defined for this table, aborted!" << endl;
@@ -284,7 +296,7 @@ int main(int argc, char** argv) {
    }
 
    //! --- Determine dimensioning of observable bins in table
-   const int NDim = fnlo.GetNumDiffBin();
+   const int NDim = fnlo->GetNumDiffBin();
    if (NDim < 1 || NDim > 2) {
       error["fnlo-tk-yodaout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
       error["fnlo-tk-yodaout"] << "Only up to two dimensions currently possible with YODA/Rivet, aborted!" << endl;
@@ -293,34 +305,38 @@ int main(int argc, char** argv) {
 
    //! --- Get all required info from table
    //! Get binning
-   vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
+   vector < pair < double, double > > bins = fnlo->GetObsBinsBounds(NDim-1);
 
    //! For flex-scale tables:
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
-   if (fnlo.GetIsFlexibleScaleTable()) {
-      fnlo.SetMuFFunctionalForm(kScale1);
-      fnlo.SetMuRFunctionalForm(kScale1);
-      //      fnlo.SetMuFFunctionalForm(kProd);
-      //      fnlo.SetMuRFunctionalForm(kProd);
+   if (fnlo->GetIsFlexibleScaleTable()) {
+      fnlo->SetMuFFunctionalForm(kScale1);
+      fnlo->SetMuRFunctionalForm(kScale1);
+      //      fnlo->SetMuFFunctionalForm(kProd);
+      //      fnlo->SetMuRFunctionalForm(kProd);
       warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
                         << "from only the first scale of this flexible-scale table." << endl
                         << "                        Please check how this table was filled!" << endl;
    }
 
    //! Re-calculate cross sections to potentially include the above-selected non-perturbative factors
-   fnlo.CalcCrossSection();
+   fnlo->CalcCrossSection();
    //! Get cross sections
-   vector < double > xs = fnlo.GetCrossSection(lNorm);
+   vector < double > xs = fnlo->GetCrossSection(lNorm);
    //! If required get uncertainties (only for additive perturbative contributions)
    XsUncertainty XsUnc;
    string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
-      XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
+      XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
       snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
       LineName += "_dxscl";
+   } else if ( chunc == "AS" ) {
+      XsUnc = fnlo->GetAsUncertainty(eAsUnc, lNorm);
+      snprintf(buffer, sizeof(buffer), " # Relative a_s(M_Z) Uncertainties (%s)",chunc.c_str());
+      LineName += "_dxa_s";
    } else if ( chunc != "none" ) {
-      XsUnc = fnlo.GetPDFUncertainty(ePDFUnc, lNorm);
+      XsUnc = fnlo->GetPDFUncertainty(ePDFUnc, lNorm);
       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
       LineName += "_dxpdf";
    }
@@ -357,7 +373,7 @@ int main(int argc, char** argv) {
    //!     For inverted order, the Id starts with "-" after "/".
    size_t capital_pos  = 0;
    int    invert_order = 1;
-   string RivetId = fnlo.GetRivetId();
+   string RivetId = fnlo->GetRivetId();
    if (RivetId.empty()) {
       warn["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, no YODA formatted output possible, exiting!" << endl;
       exit(0);
@@ -401,7 +417,7 @@ int main(int argc, char** argv) {
 
    //! --- Initialize dimension bin and continuous observable bin counter
    unsigned int NDimBins[NDim];
-   NDimBins[0] = fnlo.GetNDim0Bins();
+   NDimBins[0] = fnlo->GetNDim0Bins();
    unsigned int iobs = 0;
    //! Vector of 2D scatter plots
    vector<YODA::Scatter2D> plots;
@@ -442,7 +458,7 @@ int main(int argc, char** argv) {
          vector < double > eyminus;
          vector < double > eyplus;
          //! Loop over bins in inner (2nd) dimension
-         NDimBins[1] = fnlo.GetNDim1Bins(j);
+         NDimBins[1] = fnlo->GetNDim1Bins(j);
          for (unsigned int k = 0; k<NDimBins[1]; k++) {
             x.push_back((bins[iobs].second + bins[iobs].first)/2.0);
             explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
