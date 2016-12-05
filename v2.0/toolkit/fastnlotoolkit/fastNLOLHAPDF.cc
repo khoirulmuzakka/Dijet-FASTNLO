@@ -632,15 +632,15 @@ XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle
 
 //______________________________________________________________________________
 XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle eAsUnc, bool lNorm) {
-   // Get a_s(M_Z) uncertainty
-   const double asmz[3] = {0.1181, 0.1171, 0.1191};
-   double asmz0 = GetAlphasMz();
+   // Get a_s(M_Z) uncertainty, da_s(M_Z) as of PDG2016
+   const double dasmz[2] = {-0.0011, 0.0011};
+   double asmz = GetAlphasMz();
    XsUncertainty XsUnc;
 
    unsigned int NObsBin = GetNObsBin();
 
-   logger.info["GetAsUncertainty"]<<"Current a_s(M_Z) = a_s("<<PDG_MZ<<") = "<<asmz0<<endl;
-   logger.debug["GetAsUncertainty"]<<"a_s(M_Z) = "<<asmz[0]<<" + "<<asmz[2]-asmz[0]<<" - "<<asmz[0]-asmz[1]<<endl;
+   logger.info["GetAsUncertainty"]<<"Current a_s(M_Z) = a_s("<<PDG_MZ<<") = "<<asmz<<endl;
+   logger.info["GetAsUncertainty"]<<"da_s(M_Z) = + "<<dasmz[1]<<" - "<<-dasmz[0]<<endl;
    if ( eAsUnc == fastNLO::kAsNone ) {
       logger.info["GetAsUncertainty"]<<"Only default value selected, uncertainties will be zero."<<endl;
    } else if ( eAsUnc == fastNLO::kAsGRV ) {
@@ -651,10 +651,14 @@ XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle
       exit(1);
    }
 
+   vector < double > MyAsMz;
+   MyAsMz.push_back(asmz);
+   MyAsMz.push_back(asmz+dasmz[0]);
+   MyAsMz.push_back(asmz+dasmz[1]);
    vector < double > MyXSection;
    //! Cross section and absolute uncertainties
-   for ( unsigned int ias = 0; ias < 3; ias++ ) {
-      SetAlphasMz(asmz[ias]);
+   for ( unsigned int ias = 0; ias < MyAsMz.size(); ias++ ) {
+      SetAlphasMz(MyAsMz[ias]);
       CalcCrossSection();
       MyXSection = GetCrossSection(lNorm);
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
@@ -680,8 +684,8 @@ XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle
       }
       logger.debug["GetAsUncertainty"]<<"iobs = " << iobs << ", dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
    }
-   logger.info["GetAsUncertainty"]<<"Setting a_s(M_Z) back to initial value of "<<asmz0<<endl;
-   SetAlphasMz(asmz0);
+   logger.info["GetAsUncertainty"]<<"Setting a_s(M_Z) back to initial value of "<<asmz<<endl;
+   SetAlphasMz(asmz);
 
    return XsUnc;
 }
