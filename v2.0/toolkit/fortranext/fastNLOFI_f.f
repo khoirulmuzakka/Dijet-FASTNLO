@@ -26,9 +26,10 @@
          INTEGER IDX, BINS, DIMS
          REAL*8 XS(1024)
          REAL*8 BININFO(4)
-         CHARACTER*32 TABLE
+         CHARACTER*65 TABLE
          REAL*8 MUR, MUF
-         TABLE = 'fnl2912bm3_stripped.tab'//CHAR(0)
+         TABLE = "../data/check/InclusiveNJets_fnr0001midpHT_I723509"//
+     _        "_v23_fix.tab.gz"//CHAR(0)
 
          call fastnlo_create(CTX, TABLE)
          write(*,*) CTX
@@ -36,16 +37,16 @@
          write(*,*) CTX, BINS
          do IDX = 1,BINS
            call fastnlo_getobsbindimbounds(CTX, IDX - 1, BININFO, DIMS)
-           write(*,*) BININFO,"->",XS(IDX)
+           write(*,*) IDX,BININFO,"->",XS(IDX)
          enddo
 
-         MUR = 2E0
-         MUF = 2E0
-         call fastnlo_setscalefactorsmurmuf(CTX, MUR, MUF)
-         call fastnlo_getcrosssection(CTX, XS, BINS)
-         do IDX = 1,BINS
-            write(*,*) IDX,"->",XS(IDX)
-         enddo
+Comment:          MUR = 2E0
+Comment:          MUF = 2E0
+Comment:          call fastnlo_setscalefactorsmurmuf(CTX, MUR, MUF)
+Comment:          call fastnlo_getcrosssection(CTX, XS, BINS)
+Comment:          do IDX = 1,BINS
+Comment:             write(*,*) IDX,BININFO,"->",XS(IDX)
+Comment:          enddo
 
          call fastnlo_destroy(CTX)
 

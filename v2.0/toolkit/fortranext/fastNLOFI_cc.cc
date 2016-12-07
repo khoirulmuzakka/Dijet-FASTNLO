@@ -21,7 +21,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "fastNLOReader.h"
+#include "fastnlotk/fastNLOReader.h"
 
 using namespace std;
 
@@ -98,16 +98,8 @@ extern "C" {
       v2f(fastnlo_get(ctx)->GetCrossSection(), result, result_size);
    }
 
-   void fastnlo_getreferencecrosssection_(int *ctx, double *result, int *result_size) {
-      v2f(fastnlo_get(ctx)->GetReferenceCrossSection(), result, result_size);
-   }
-
-   void fastnlo_getkfactors_(int *ctx, double *result, int *result_size) {
-      v2f(fastnlo_get(ctx)->GetKFactors(), result, result_size);
-   }
-
    void fastnlo_getqscales_(int *ctx, int *irelord, double *result, int *result_size) {
-      v2f(fastnlo_get(ctx)->GetQScales(*irelord), result, result_size);
+      v2f(fastnlo_get(ctx)->GetQScales(), result, result_size);
    }
 
    void fastnlo_getobsbindimbounds_(int *ctx, int *bin, double *result, int *result_size) {
