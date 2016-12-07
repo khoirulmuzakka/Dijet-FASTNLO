@@ -47,11 +47,11 @@ for ( my $i=0; $i <= $#tabd ; $i++ ) {
 }
 
 # Statistical evaluation
-my $cmd = "../src/fnlo-tk-statunc $tabl | grep \"Special info\" -B1 -A40 > statlotest.log";
+my $cmd = "../src/fnlo-tk-statunc $tabl | grep \"Special info\" -B1 -A34 > statlotest.log";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Statistical evaluation of LO test tables ${tabl} failed: $ret, aborted!\n";}
-$cmd = "../src/fnlo-tk-statunc $tabn | grep \"Special info\" -B1 -A40 > statnlotest.log";
+$cmd = "../src/fnlo-tk-statunc $tabn | grep \"Special info\" -B1 -A34 > statnlotest.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-stattest: Statistical evaluation of NLO test tables ${tabn} failed: $ret, aborted!\n";}
