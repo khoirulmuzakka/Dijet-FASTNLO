@@ -18,7 +18,7 @@ NJets_born-2jet_stat.log NJets_born-2jet_stat_0000.tab.gz NJets_born-2jet_stat_0
 NJets_nlo-2jet_0100.tab.gz NJets_nlo-2jet_0101.tab.gz NJets_nlo-2jet_0102.tab.gz \
 NJets_nlo-2jet_stat.log NJets_nlo-2jet_stat_0100.tab.gz NJets_nlo-2jet_stat_0101.tab.gz NJets_nlo-2jet_stat_0102.tab.gz \
 SteerModify_EraseBins.str SteerModify_EraseBins2.str fnl1014_I902309_2-2.tab.gz fnl1014_I902309_2-2_cpp.log \
-fnl1014_I902309_2-2_cppscales.log fnl1014_I902309_2.tab.gz
+fnl1014_I902309_2-2_cppscales.log fnl1014_I902309_2.tab.gz zipappdiff.log
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
