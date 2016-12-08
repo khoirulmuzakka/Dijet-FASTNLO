@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unistd.h>
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
 #ifdef WITH_YODA
