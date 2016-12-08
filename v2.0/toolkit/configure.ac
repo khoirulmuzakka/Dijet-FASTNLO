@@ -16,7 +16,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version of 1.9, switch on warnings
-AM_INIT_AUTOMAKE([1.9 -Wall])
+AM_INIT_AUTOMAKE([1.9 -Wall -Wno-override])
 # Require minimal libtool version of 1.5
 #LT_PREREQ([1.5])
 #LT_INIT([dlopen])
@@ -57,7 +57,11 @@ AC_CHECK_LIB([LHAPDF], [alphas])
 #AC_CHECK_LIB([fastnlotoolkit], [libfastnlotoolkit_la-FastNLOBlockB])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
+# Check twice, first to define ZLIBTEST, and second to perform default action and AC_DEFINE HAVE_LIBZ
+AX_CHECK_ZLIB([ZLIBTEST=true], ZLIBTEST="")
 AX_CHECK_ZLIB()
+AC_MSG_NOTICE([ZLIBTEST is set to $ZLIBTEST])
+AM_CONDITIONAL(HAVE_LIBZ, test "x$ZLIBTEST" != "x")
 
 # Checks for header files.
 
@@ -620,7 +624,12 @@ AC_CONFIG_FILES([check/fnlo-tk-cpptest.pl],[chmod +x check/fnlo-tk-cpptest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-erasetest.pl],[chmod +x check/fnlo-tk-erasetest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-erasetest2.pl],[chmod +x check/fnlo-tk-erasetest2.pl])
 AC_CONFIG_FILES([check/fnlo-tk-mergetest.pl],[chmod +x check/fnlo-tk-mergetest.pl])
-AC_CONFIG_FILES([check/fnlo-tk-stattest.pl],[chmod +x check/fnlo-tk-stattest.pl])
+if test "x$ZLIBTEST" != "x"; then
+   AC_CONFIG_FILES([check/fnlo-tk-stattest.pl],[chmod +x check/fnlo-tk-stattest.pl])
+   AC_CONFIG_FILES([check/fnlo-tk-zipapp.pl],[chmod +x check/fnlo-tk-zipapp.pl])
+fi
+
+AC_CONFIG_FILES([check/fnlo-tk-ziptest.pl],[chmod +x check/fnlo-tk-ziptest.pl])
 
 AC_OUTPUT
 

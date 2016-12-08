@@ -1,0 +1,20 @@
+12c12
+<  # [fnlo-tk-cppread] Evaluating table: fnl1014_I902309_2.tab.gz
+---
+>  # [fnlo-tk-cppread] Evaluating table: zipapp.tab.gz
+59c59
+<  # Overview on contribution types and numbers contained in table: fnl1014_I902309_2.tab.gz
+---
+>  # Overview on contribution types and numbers contained in table: zipapp.tab.gz
+123c123
+<  # No. of events (Nevt)                30000000000.000000
+---
+>  # No. of events (Nevt)                1.000000
+156c156
+<  # No. of events (Nevt)                32300000000.000000
+---
+>  # No. of events (Nevt)                1.000000
+193c193
+<  # No. of events (Nevt)                270336000.000000
+---
+>  # No. of events (Nevt)                1.000000
