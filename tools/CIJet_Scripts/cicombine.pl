@@ -13,7 +13,7 @@ use strict;
 use warnings;
 
 my $ncount = 0;
-my @massbins = ("MassBin-3600-4200","MassBin-4200-4800","MassBin-4800-5400","MassBin-5400-6000");
+my @massbins = ("MassBin-3600-4200","MassBin-4200-4800","MassBin-4800-5400","MassBin-5400-6000","MassBin-6000-6600","MassBin-6600-13000");
 my @chibins = ("ChiBin-01-02","ChiBin-02-03","ChiBin-03-04","ChiBin-04-05","ChiBin-05-06","ChiBin-06-07",
                "ChiBin-07-08","ChiBin-08-09","ChiBin-09-10","ChiBin-10-12","ChiBin-12-14","ChiBin-14-16");
 
