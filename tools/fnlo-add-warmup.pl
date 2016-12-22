@@ -34,10 +34,10 @@ our ( $opt_d, $opt_h, $opt_v, $opt_w ) = ( "", "", "2.3", "" );
 getopts('dhv:w:') or die "fnlo-add-warmup.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "fnlo-add-warmup.pl\n";
-    print "Usage: fnlo-add-warmup.pl [switches/options] scenario\n";
+    print "Usage: fnlo-add-warmup.pl [switches/options] scenario (2.4: observable)\n";
     print "  -d              Verbose output\n";
     print "  -h              Print this text\n";
-    print "  -v #            Choose between fastNLO version 2.3 or ? (def.=2.3)\n";
+    print "  -v #            Choose between fastNLO version 2.3 or 2.4 (def.=2.3)\n";
     print "  -w dir          Directory for warmup tables, (def.=scenario)\n\n";
     exit;
 }
@@ -45,21 +45,29 @@ if ( $opt_h ) {
 #
 # Parse arguments
 #
-unless ( @ARGV == 1 ) {
-    die "fnlo-add-warmup.pl: Error! Need one scenario name!\n";
+unless ( @ARGV == 1 || ($opt_v == 2.4 && @ARGV == 2) ) {
+    die "fnlo-add-warmup.pl: Error! Need one scenario specification!\n";
 }
 my $scen   = shift;
+my $obs    = "";
 my $debug  = $opt_d;
 my $vers   = $opt_v;
+if ( $vers == 2.4 ) {
+    $obs = shift;
+}
 
 #
 # Initialization
 #
-if ($vers != 2.3) {die "fnlo-add-warmup.pl: Error! Unsupported warmup file version: $vers\n"};
+if (($vers != 2.3) && ($vers != 2.4)) {die "fnlo-add-warmup.pl: Error! Unsupported warmup file version: $vers\n"};
 my $outfile = "${scen}_warmup.txt";
 my $wdir    = "${scen}_wrm";
 if ( $opt_w ) {$wdir = $opt_w;}
-my $wrmglob = "${scen}*.txt";
+my $wrmglob = "${scen}*${obs}*.txt";
+if ( $vers == 2.4 ) {
+    $outfile = "${scen}_${obs}_warmup.wrm";
+    $wrmglob = "${scen}*${obs}*.wrm";
+}
 
 # Directory
 my $sdir = getcwd();
@@ -102,6 +110,9 @@ if ( -d "$wdir" ) {
 # Loop over all files determining min and max values, count contributions
 #
     foreach my $file ( @files ) {
+# Do not reuse already presummed files named "warmup" for v2.4
+	if ( $vers == 2.4 && $file =~ m/warmup/ ) {next;}
+        print "fnlo-add-warmup.pl: Opening file: $file\n";
         open(INFILE,"< $file") or die "fnlo-add-warmup.pl: Error! Could not open $file!\n";
         my $ient = 0;
         if ( $debug ) {print "fnlo-add-warmup.pl: Analyzing file no.: $ifil\n";}
@@ -128,7 +139,9 @@ if ( -d "$wdir" ) {
                 } elsif ( $cols == 5 || $cols == 7 ) {
                     if (!$nscl) {$nscl = 1};
                     $iobs[$ient] = $tmps[0];
-                    $xmin[$ient] = defined $xmin[$ient] ? min($xmin[$ient],$tmps[1]) : min(1.0,$tmps[1]);
+		    if ($tmps[1] > 1.e-6) {
+			$xmin[$ient] = defined $xmin[$ient] ? min($xmin[$ient],$tmps[1]) : min(1.0,$tmps[1]);
+		    }
                     $xmax[$ient] = defined $xmax[$ient] ? max($xmax[$ient],$tmps[2]) : max(0.0,$tmps[2]);
                     $pmin[$ient] = defined $pmin[$ient] ? min($pmin[$ient],$tmps[3]) : min(+1e10,$tmps[3]);
                     $pmax[$ient] = defined $pmax[$ient] ? max($pmax[$ient],$tmps[4]) : max(-1e10,$tmps[4]);
@@ -194,10 +207,10 @@ if ( -d "$wdir" ) {
     }
     close OUTFILE;
     close INFILE;
-    my $ret = system("mv $outfile $sdir");
-    if ( $ret ) {print "fnlo-add-warmup.pl: Couldn't move warmup summary file into ".
-                     "work directory $sdir: $ret. Please look for file in $wdir.\n";}
-    chdir $sdir;
+#    my $ret = system("mv $outfile $sdir");
+#    if ( $ret ) {print "fnlo-add-warmup.pl: Couldn't move warmup summary file into ".
+#                     "work directory $sdir: $ret. Please look for file in $wdir.\n";}
+#    chdir $sdir;
 }
 
 $date = `date +%d%m%Y_%H%M%S`;
