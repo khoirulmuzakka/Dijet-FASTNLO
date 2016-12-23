@@ -65,7 +65,7 @@ my $wdir    = "${scen}_wrm";
 if ( $opt_w ) {$wdir = $opt_w;}
 my $wrmglob = "${scen}*${obs}*.txt";
 if ( $vers == 2.4 ) {
-    $outfile = "${scen}_${obs}_warmup.wrm";
+    $outfile = "${scen}-${obs}.wrm";
     $wrmglob = "${scen}*${obs}*.wrm";
 }
 
@@ -111,7 +111,7 @@ if ( -d "$wdir" ) {
 #
     foreach my $file ( @files ) {
 # Do not reuse already presummed files named "warmup" for v2.4
-	if ( $vers == 2.4 && $file =~ m/warmup/ ) {next;}
+        if ( $vers == 2.4 && $file =~ m/warmup/ ) {next;}
         print "fnlo-add-warmup.pl: Opening file: $file\n";
         open(INFILE,"< $file") or die "fnlo-add-warmup.pl: Error! Could not open $file!\n";
         my $ient = 0;
@@ -139,9 +139,9 @@ if ( -d "$wdir" ) {
                 } elsif ( $cols == 5 || $cols == 7 ) {
                     if (!$nscl) {$nscl = 1};
                     $iobs[$ient] = $tmps[0];
-		    if ($tmps[1] > 1.e-6) {
-			$xmin[$ient] = defined $xmin[$ient] ? min($xmin[$ient],$tmps[1]) : min(1.0,$tmps[1]);
-		    }
+                    if ($tmps[1] > 1.e-6) {
+                        $xmin[$ient] = defined $xmin[$ient] ? min($xmin[$ient],$tmps[1]) : min(1.0,$tmps[1]);
+                    }
                     $xmax[$ient] = defined $xmax[$ient] ? max($xmax[$ient],$tmps[2]) : max(0.0,$tmps[2]);
                     $pmin[$ient] = defined $pmin[$ient] ? min($pmin[$ient],$tmps[3]) : min(+1e10,$tmps[3]);
                     $pmax[$ient] = defined $pmax[$ient] ? max($pmax[$ient],$tmps[4]) : max(-1e10,$tmps[4]);
@@ -192,10 +192,10 @@ if ( -d "$wdir" ) {
             $wrm1++;
         } elsif ( $wrm1 && !($in =~ "}")) {
             if ($nscl == 1) {
-                printf(OUTFILE "   %4d     %9.2e  %9.2e  %16.2f  %16.2f\n",
+                printf(OUTFILE "   %4d     %9.2e  %9.2e  %16.4f  %16.4f\n",
                        $iobs[$ient],$xmin[$ient],$xmax[$ient],$pmin[$ient],$pmax[$ient]);
             } elsif ($nscl == 2) {
-                printf(OUTFILE "   %4d    %9.2e  %9.2e  %14.2f  %14.2f  %14.3f  %14.3f\n",
+                printf(OUTFILE "   %4d    %9.2e  %9.2e  %16.4f  %16.4f  %16.4f  %16.4f\n",
                        $iobs[$ient],$xmin[$ient],$xmax[$ient],$pmin[$ient],$pmax[$ient],$qmin[$ient],$qmax[$ient]);
             }
             $ient++;
