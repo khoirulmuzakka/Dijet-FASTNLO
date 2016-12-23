@@ -1,0 +1,2 @@
+Add and check new steering after OutputFilename:
+OutputCompression               true        # Write gzipped output table
