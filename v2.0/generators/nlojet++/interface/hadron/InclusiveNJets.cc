@@ -674,6 +674,19 @@ void InitfNLO(const std::basic_string<char>& __file_name) {
    // --- set fastNLO filename according to NLOJet++ command line arguments
    string tabFilename = __file_name.c_str();
    tabFilename += ".tab";
+
+#ifdef HAVE_ZLIB
+   bool lgzip = true;
+#else
+   bool lgzip = false;
+#endif
+
+   if ( SteeringPars["OutputCompression"] ) {
+      ftable->GetParameterFromSteering("OutputCompression",lgzip);
+   }
+   //   string filename = fScenConsts.OutputFilename;
+   //   if ( lgzip ) tabFilename += ".gz";
+   tabFilename += ".gz";
    ftable->SetFilename(tabFilename);
 }
 
