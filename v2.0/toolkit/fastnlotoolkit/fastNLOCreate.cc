@@ -400,6 +400,7 @@ void fastNLOCreate::Instantiate() {
    // init member variables
    fReader = NULL;
 
+   fCacheMax = 0; // currently not working!
    fWarmupXMargin = 4;
    fWarmupNDigitMu1 = 1; //1 by purpose
    fWarmupNDigitMu2 = 2; //2 by purpose
@@ -1985,6 +1986,50 @@ void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::FillWeightCache(int scalevar) {
+   //! fill event into cache
+   if ( scalevar!= 0 ) {
+      cout<<"Error! caching not implemented for scalevar tables."<<endl;
+      exit(3); // also 'FlushCache has to be changed!'
+   }
+   //for ( auto& iEv : fWeightCache ) {
+   for ( unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++ ){
+      if (     fWeightCache[iev].first._o[0] == fScenario._o[0] 
+	       &&  fWeightCache[iev].second._p   == fEvent._p 
+	       &&  fWeightCache[iev].first._m1   == fScenario._m1
+	       &&  fWeightCache[iev].first._m2   == fScenario._m2
+	       &&  fWeightCache[iev].second._x1  == fEvent._x1
+	       &&  fWeightCache[iev].second._x2  == fEvent._x2 ) {
+	 fWeightCache[iev].second._w  += fEvent._w;
+	 fWeightCache[iev].second._wf += fEvent._wf;
+	 fWeightCache[iev].second._wr += fEvent._wr;
+	 fWeightCache[iev].second._wrr += fEvent._wrr;
+	 fWeightCache[iev].second._wff += fEvent._wff;
+	 fWeightCache[iev].second._wrf += fEvent._wrf;
+	 return;
+      }
+   }
+   fWeightCache.push_back(make_pair(fScenario,fEvent));
+}
+
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::FlushCache() {
+   // fill all events into from cache into table
+   //for ( const auto& iev : fWeightCache ) {
+   for ( unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++ ){
+      fScenario = fWeightCache[iev].first;
+      fEvent = fWeightCache[iev].second;
+      FillContribution(0); // todo! not working if scalevar is != 0
+   }
+   fWeightCache.clear();
+   fWeightCache.reserve(fCacheMax);
+}
+
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::Fill(int scalevar) {
    //!
    //! Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
@@ -1999,8 +2044,21 @@ void fastNLOCreate::Fill(int scalevar) {
       // else skip event
    } 
    else if ( GetTheCoeffTable()->GetIRef() ) FillRefContribution(scalevar);
-   else FillContribution(scalevar);
-
+   else {
+      if ( fIsFlexibleScale ) {
+	 if ( fCacheMax > 1 ) {
+	    FillWeightCache(scalevar);
+	    if ( (int)fWeightCache.size() >= fCacheMax )
+	       FlushCache();
+	 } 
+	 else {
+	    FillContribution(scalevar);
+	 }
+      }
+      else {
+	 FillContribution(scalevar);
+      }
+   }
    fEvent.ResetButX();
 }
 
@@ -2205,7 +2263,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    //! do the interpolation
    //! and fill into the tables.
    //logger.debug["FillContributionFlexDIS"]<<endl;
-
+   
    if (fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0) return;   // nothing todo.
 
    // do interpolation
@@ -2234,18 +2292,18 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
       for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
          for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
             double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-            if (! std::isfinite(wfnlo)) {
-               logger.error["FillContributionFlexDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
-               logger.error["FillContributionFlexDIS"]<<"This should have been captured before, aborting ..."<<endl;
-               fKernX1[ObsBin]->PrintGrid();
-               fKernMu1[ObsBin]->PrintGrid();
-               fKernMu2[ObsBin]->PrintGrid();
-               cout<<"ix1="<<ix<<", im1="<<m1<<", im2="<<mu2<<endl;
-               cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
-               cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
-               cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
-               exit(1);
-            }
+            // if (! std::isfinite(wfnlo)) {
+            //    logger.error["FillContributionFlexDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
+            //    logger.error["FillContributionFlexDIS"]<<"This should have been captured before, aborting ..."<<endl;
+            //    fKernX1[ObsBin]->PrintGrid();
+            //    fKernMu1[ObsBin]->PrintGrid();
+            //    fKernMu2[ObsBin]->PrintGrid();
+            //    cout<<"ix1="<<ix<<", im1="<<m1<<", im2="<<mu2<<endl;
+            //    cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
+            //    cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
+            //    cout<<"m2="<<nmu2[mu2].second<<", m2="<<mu2<<", mu2val="<<fScenario._m2<<endl;
+            //    exit(1);
+            // }
             if (fEvent._w  != 0) {
                //                 cout<<"   Fill * : ix="<<ixHM<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
                c->SigmaTildeMuIndep[ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
@@ -2680,7 +2738,10 @@ void fastNLOCreate::InitWarmupArrays() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::WriteTable() {
+   //! Write fastNLO file to disk
    //if ( GetTheCoeffTable()->GetNevt(0,0) <= 0 ) {
+   // flush cache with remaining events
+   if ( fWeightCache.size() )  FlushCache();
    if (GetTheCoeffTable()->Nevt <= 0) {
       logger.warn["WriteTable"]<<"Number of events seems to be not filled. Please use SetNumberOfEvents(int) before writing table."<<endl;
       exit(1);

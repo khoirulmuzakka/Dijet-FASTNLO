@@ -11,7 +11,7 @@ class fnloScenario {
    friend class fastNLOCreate;
 
  public:
- fnloScenario() : _iOB(-1){;}
+   fnloScenario() : _m1(0),_m2(0), _iOB(-1) {;}
    ~fnloScenario() {;};
 
    inline void SetObservableDimI(double o, int iDim) {_o[iDim]=o;}                                     //!< Set observable of dimension iDim (e.g. in case of multidimensional measurements)
@@ -50,6 +50,9 @@ public:
       _x1=0,_x2=0;
    }
    // event specific quantites, which are required for every 'Fill()' step.
+   inline const double& X1() const {return _x1;}                                                                //!< get x-value of first hadron
+   inline const double& X2() const {return _x2;}                                                                //!< get x-value of second hadron
+   inline const int& p() const {return _p;}                                                                //!< get x-value of second hadron
    inline void SetX(double x) {_x1=x;}                                                                 //!< set x-value of first hadron (if e.g. DIS)
    inline void SetX1(double x) {_x1=x;}                                                                //!< setx-value of first hadron
    inline void SetX2(double x) {_x2=x;}                                                                //!< set x-value of second hadron

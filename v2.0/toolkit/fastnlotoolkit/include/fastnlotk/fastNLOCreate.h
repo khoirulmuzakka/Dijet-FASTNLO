@@ -108,6 +108,9 @@ public:
    void PrintStats() const { fStats.PrintStats();}                                              //!< Print statistics
    void SetGlobalVerbosity(std::string sverb);                                                       //!< Set GlobalVerbosity using std::string variable
 
+   void SetCacheSize(int MaxCache) {fCacheMax = MaxCache;}                                      //!< Set maximum number of events in cache. Set to 0 to deactivate caching
+   int GetCacheSize() const { return fCacheMax; }                                               //!< Get max cache size
+
 protected:
    fastNLOCreate();                                                                             //!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
    void Instantiate();
@@ -199,6 +202,11 @@ protected:
    std::vector<std::pair<double,double> > fWMu1Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWMu2Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
+
+   int fCacheMax;// = 30;                                                                                  //!< maximum number of entries in weight cahce
+   std::vector<std::pair<fnloScenario,fnloEvent> > fWeightCache;                                          //!< cache for fill-weights
+   void FillWeightCache(int scalevar);                                                                    //!< Fill weight into cache, merge weights for identical phase space points
+   void FlushCache();                                                                                     //!< Fill weights from cache into table
 
 
    struct fnloStats {

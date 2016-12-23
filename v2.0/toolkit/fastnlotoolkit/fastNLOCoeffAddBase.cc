@@ -333,21 +333,21 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
    // check x-nodes briefly
    for ( int i = 0 ; i< fNObsBins ;i++ ){
       if ( GetNxmax(i) != other.GetNxmax(i) ){
-         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
+         say::error["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxmax(i)<<" <-> "<<other.GetNxmax(i)<<endl;
          return false;
       }
       if ( GetNxtot1(i) != other.GetNxtot1(i) ){
-         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected."<<endl;
+         say::error["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxtot1(i)<<" <-> "<<other.GetNxtot1(i)<<endl;
          return false;
       }
       if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
-         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
+         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected. Lowest x-node: "<<GetXNode1(i,0)<<" <-> "<<other.GetXNode1(i,0)<<endl;
          return false;
       }
-      if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
-         say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
-         return false;
-      }
+      // if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
+      //    say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
+      //    return false;
+      // }
    }
    // succesful!
    return true;
