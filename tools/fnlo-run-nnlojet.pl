@@ -22,9 +22,9 @@ my $gjobnr = "";
 if ( defined $ENV{MY_JOBID} ) {
     $gjobnr = $ENV{MY_JOBID};
     $gjobnr = substr("0000$gjobnr",-4);
-    open STDOUT, "| tee fnlo-run-nlojet_${gjobnr}.log" or die
+    open STDOUT, "| tee fnlo-run-nnlojet_${gjobnr}.log" or die
         "fnlo-run-nnlojet.pl: ERROR! Can't tee STDOUT.\n";
-    open STDERR, "| tee fnlo-run-nlojet_${gjobnr}.err" or die
+    open STDERR, "| tee fnlo-run-nnlojet_${gjobnr}.err" or die
         "fnlo-run-nnlojet.pl: ERROR! Can't tee STDERR.\n";
 }
 
@@ -189,10 +189,20 @@ $ret = system("ls -laR");
 if ( $ret ) {print "fnlo-run-nnlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
 my $defnam = "ZJ-LO-";
 #my @files = glob("${scentype}*.dat ${scentype}*.log ${scentype}*.run *.root *.tab *.wrm");
-my @files = glob("${scentype}*.log *.root *.tab *.wrm");
+my @files;
+if ( ${scenmode} =~ m/warm/ ) {
+    @files = glob("${scentype}*.log *.root *.wrm");
+} elsif ( ${scenmode} =~ m/prod/ ) {
+    @files = glob("${scentype}*.log *.root *.tab *.tab.gz");
+}
 foreach my $file ( @files ) {
     (my $name, my $dir, my $ext) = fileparse($file,'\.[^\.]*$');
     $ext =~ s/^\.//;
+# fastNLO special tar.gz
+    if ( $ext =~ m/^gz$/ && $name =~ m/\.tab$/ ) {
+	$ext = "tab.gz";
+	$name =~ s/\.tab$//; 
+    }
     my $newname = "${name}_${gjobnr}.${ext}";
     $newname =~ s/^zj-//;
 # APPLgrid special
