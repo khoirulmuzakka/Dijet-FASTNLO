@@ -5,6 +5,19 @@
 #include "fastNLOCoeffBase.h"
 #include "fastNLOConstants.h"
 
+namespace fastNLO { 
+   struct WgtStat {
+      double WgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
+      unsigned long long WgtNumEv = 0; //!< number of entries
+      double WgtSumW2 = 0; //!< Sum of all weight**2
+      double SigSumW2 = 0; //!< Sum of all sigma**2 (i.e. (wgt*alpha*pdf)**2 )
+      double SigSum = 0; //!< Sum of all sigma (i.e. (wgt*alpha*pdf)**2 )
+      fastNLO::v2d WgtObsSumW2; //!< sumw2[proc][obs]
+      fastNLO::v2d SigObsSumW2; //!< sumw2[proc][obs]
+      fastNLO::v2d SigObsSum;   //!< sum[proc][obs]
+      std::vector < std::vector < unsigned long long > > WgtObsNumEv; //!< Nentries[proc][obs]
+   };
+}
 
 class fastNLOCoeffAddBase : public fastNLOCoeffBase {
 
@@ -78,6 +91,8 @@ public:
 
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
+   const fastNLO::WgtStat& GetWgtStat() const { return fWgt;} //!< Get weight and event counts
+
 protected:
    void ReadCoeffAddBase(std::istream& table);
    int GetScaledimfromvar(int scalevar) const;
@@ -108,15 +123,16 @@ protected:
    std::vector < int > Iscale;                                                                       // not used
    std::vector < std::vector < std::string > > ScaleDescript;
    
-   double fWgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
-   unsigned long long fWgtNumEv = 0; //!< number of entries
-   double fWgtSumW2 = 0; //!< Sum of all weight**2
-   double fSigSumW2 = 0; //!< Sum of all sigma**2 (i.e. (wgt*alpha*pdf)**2 )
-   double fSigSum = 0; //!< Sum of all sigma (i.e. (wgt*alpha*pdf)**2 )
-   fastNLO::v2d fWgtObsSumW2; //!< sumw2[proc][obs]
-   fastNLO::v2d fSigObsSumW2; //!< sumw2[proc][obs]
-   fastNLO::v2d fSigObsSum;   //!< sum[proc][obs]
-   std::vector < std::vector < unsigned long long > > fWgtObsNumEv; //!< Nentries[proc][obs]
+   fastNLO::WgtStat fWgt; //!< event and weight counts
+   // double fWgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
+   // unsigned long long fWgtNumEv = 0; //!< number of entries
+   // double fWgtSumW2 = 0; //!< Sum of all weight**2
+   // double fSigSumW2 = 0; //!< Sum of all sigma**2 (i.e. (wgt*alpha*pdf)**2 )
+   // double fSigSum = 0; //!< Sum of all sigma (i.e. (wgt*alpha*pdf)**2 )
+   // fastNLO::v2d fWgtObsSumW2; //!< sumw2[proc][obs]
+   // fastNLO::v2d fSigObsSumW2; //!< sumw2[proc][obs]
+   // fastNLO::v2d fSigObsSum;   //!< sum[proc][obs]
+   // std::vector < std::vector < unsigned long long > > fWgtObsNumEv; //!< Nentries[proc][obs]
    
 
 };

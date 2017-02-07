@@ -50,7 +50,7 @@ public:
    void SetEvent(const fnloEvent ev) {fEvent = ev;}                                             //!< set the member fEvent, which will be used when calling Fill()
    inline void SetNumberOfEvents(double n) {
       GetTheCoeffTable()->Nevt = n;
-      GetTheCoeffTable()->fWgtNevt = n; 
+      GetTheCoeffTable()->fWgt.WgtNevt = n; 
       fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 

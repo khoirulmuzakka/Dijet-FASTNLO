@@ -1744,12 +1744,12 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
    //const int nSFInitial = fScaleFac.size();
 
    // --- init statistics 
-   fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgtObsSumW2, GetNSubprocesses(), GetNObsBin());
-   fastNLOTools::ResizeVector(GetTheCoeffTable()->fSigObsSumW2, GetNSubprocesses(), GetNObsBin());
-   fastNLOTools::ResizeVector(GetTheCoeffTable()->fSigObsSum  , GetNSubprocesses(), GetNObsBin());
-   GetTheCoeffTable()->fWgtObsNumEv.resize(GetNSubprocesses());
+   fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.WgtObsSumW2, GetNSubprocesses(), GetNObsBin());
+   fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.SigObsSumW2, GetNSubprocesses(), GetNObsBin());
+   fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.SigObsSum  , GetNSubprocesses(), GetNObsBin());
+   GetTheCoeffTable()->fWgt.WgtObsNumEv.resize(GetNSubprocesses());
    for ( int i =0 ; i<GetNSubprocesses() ; i++ ) {
-      GetTheCoeffTable()->fWgtObsNumEv[i].resize(GetNObsBin());
+      GetTheCoeffTable()->fWgt.WgtObsNumEv[i].resize(GetNObsBin());
    }
    //fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgtObsNumEv, GetNSubprocesses(), GetNObsBin());
 
@@ -2074,8 +2074,8 @@ void fastNLOCreate::Fill(int scalevar) {
       int p = fEvent._p;
       // --- event counts
       fStats._nEvPS++;
-      c->fWgtObsNumEv[p][ObsBin]++;
-      c->fWgtNumEv++;
+      c->fWgt.WgtObsNumEv[p][ObsBin]++;
+      c->fWgt.WgtNumEv++;
       // --- w**2 counts
       double w2 = fEvent._w;
       if ( fIsFlexibleScale ) { // estimate a weight.
@@ -2089,12 +2089,12 @@ void fastNLOCreate::Fill(int scalevar) {
       }
       w2 *= w2;
       // c->fWgtNevt ; //set externally by generator
-      c->fWgtSumW2 += w2;
-      c->fWgtObsSumW2[p][ObsBin] += w2;
-      c->fSigObsSum  [p][ObsBin] += fEvent._sig;
-      c->fSigObsSumW2[p][ObsBin] += fEvent._sig*fEvent._sig;
-      c->fSigSum   += fEvent._sig;
-      c->fSigSumW2 += fEvent._sig*fEvent._sig;
+      c->fWgt.WgtSumW2 += w2;
+      c->fWgt.WgtObsSumW2[p][ObsBin] += w2;
+      c->fWgt.SigObsSum  [p][ObsBin] += fEvent._sig;
+      c->fWgt.SigObsSumW2[p][ObsBin] += fEvent._sig*fEvent._sig;
+      c->fWgt.SigSum   += fEvent._sig;
+      c->fWgt.SigSumW2 += fEvent._sig*fEvent._sig;
    }
 
    // sanity
@@ -2987,7 +2987,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
    strm<<"# "<<endl;
    strm<<"# This file has been calculated using: "<<endl;
    strm<<"#      "<<GetTheCoeffTable()->Nevt<<" contributions."<<endl;
-   strm<<"#      "<<GetTheCoeffTable()->fWgtNumEv<<" entries."<<endl;
+   strm<<"#      "<<GetTheCoeffTable()->fWgt.WgtNumEv<<" entries."<<endl;
    strm<<"#   ( Mind: contributions != events. And contributions are not necessarily in phase space region."<<endl;
    strm<<"# Please check by eye for reasonability of the values."<<endl;
    strm<<"# Number of events per bin are listed below."<<endl;
@@ -3021,7 +3021,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 				    <<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-	 nEvBin += GetTheCoeffTable()->fWgtObsNumEv[ip][i];
+	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
       }
       if ( nEvBin == 0 ) {
 	 logger.error["OutWarmup"]<<"No events were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
@@ -3214,7 +3214,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 
       int nEvBin = 0;
       for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ ) 
-	 nEvBin += GetTheCoeffTable()->fWgtObsNumEv[ip][i];
+	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
 
       sprintf(buf,"    %4d    ",i); // obsbin
       strm<<buf;
@@ -3308,7 +3308,7 @@ void fastNLOCreate::AdjustWarmupValues() {
       // more safety margins
       int nEvBin = 0;
       for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ ) 
-	 nEvBin += GetTheCoeffTable()->fWgtObsNumEv[ip][i];
+	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
       imant -= fWarmupXMargin;// safety margin
       if ( nEvBin < 100 ) imant-=4; // more safety
       else if ( nEvBin < 1000 ) imant-=2; // more safety
