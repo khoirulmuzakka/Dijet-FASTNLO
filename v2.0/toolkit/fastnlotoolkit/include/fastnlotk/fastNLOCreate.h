@@ -48,7 +48,10 @@ public:
    void SetOrderOfAlphasOfCalculation(unsigned int ord);                                        //!< set absolute order of alpha_s
    void SetScenario(const fnloScenario scen) {fScenario = scen;}                                //!< set the member fScenario, which will be used when calling Fill()
    void SetEvent(const fnloEvent ev) {fEvent = ev;}                                             //!< set the member fEvent, which will be used when calling Fill()
-   inline void SetNumberOfEvents(double n) {GetTheCoeffTable()->Nevt = n; fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
+   inline void SetNumberOfEvents(double n) {
+      GetTheCoeffTable()->Nevt = n;
+      GetTheCoeffTable()->fWgtNevt = n; 
+      fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
    fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread = NULL);                          //!< set this table/contribution to become a reference contribution

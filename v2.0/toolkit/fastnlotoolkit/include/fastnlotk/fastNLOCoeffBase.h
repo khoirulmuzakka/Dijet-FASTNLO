@@ -84,6 +84,7 @@ protected:
    int IContrFlag1;
    int IContrFlag2;
    int NScaleDep;
+   int fVersionRead = 23000;
    std::vector < std::string > CtrbDescript;
    std::vector < std::string > CodeDescript;
 

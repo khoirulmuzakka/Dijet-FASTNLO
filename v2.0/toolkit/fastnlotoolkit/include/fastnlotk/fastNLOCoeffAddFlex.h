@@ -54,6 +54,7 @@ protected:
    void ReadCoeffAddFlex(std::istream& table);
 
    int fILOord;   // obtained from Scenario
+   int fSTildeDISFormat = 1; // format of sigma-tilde coefficients (0: log(mu2/q2), 1: log(mu2))
 
    // SigmaTilde [NObsBins] ['n' x-nodes] [n s1-Nodes] [n s2-Nodes] [nsubproc]
    fastNLO::v5d SigmaTildeMuIndep; // units are (p)barn * Nevt / BinSize

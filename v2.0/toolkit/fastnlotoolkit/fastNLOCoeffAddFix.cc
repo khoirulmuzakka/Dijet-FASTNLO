@@ -65,15 +65,14 @@ void fastNLOCoeffAddFix::ReadRest(istream& table){
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
    CheckCoeffConstants(this);
-
    Nscalevar.resize(NScaleDim);
    vector<int> Nscalenode(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
       table >> Nscalevar[i];
       table >> Nscalenode[i];
    }
-   //    printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
-   //    fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+   // printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
+   // 	  fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
    ScaleFac.resize(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
       ScaleFac[i].resize(Nscalevar[i]);
@@ -81,9 +80,9 @@ void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
          table >> ScaleFac[i][j];
       }
    }
-   //printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
-   //fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
-   fastNLOTools::ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] ); // should work, since NScaleDim==1, but is not yet tested for 100%
+   // printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
+   // 	  fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
+   fastNLOTools::ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] );
    int nsn = fastNLOTools::ReadVector( ScaleNode , table );
    debug["fastNLOCoeffAddFix::Read()"]<<"Read "<<nsn<<" lines of ScaleNode."<<endl;
 

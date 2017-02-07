@@ -79,6 +79,8 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
    // ------------------------------ //
    int nn3 = 0;
 
+   if ( fWgtSumW2==0 ) fSTildeDISFormat=0;
+
    nn3 += fastNLOTools::ReadFlexibleVector  ( ScaleNode1 , table );
    nn3 += fastNLOTools::ReadFlexibleVector  ( ScaleNode2 , table );
    //NscalenodeScale1 = ScaleNode1[0].size();

@@ -13,7 +13,9 @@ fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin)
    : fastNLOCoeffBase(NObsBin), IRef(), IScaleDep(), Nevt(), Npow(), NPDFPDG(),
      NPDFDim(), NFFPDG(), NFFDim(), NSubproc(), IPDFdef1(), IPDFdef2(), IPDFdef3(),
      fPDFCoeff(), Hxlim1(), XNode1(), Hxlim2(), XNode2(), Nztot(), Hzlim(), ZNode(),
-     NScales(), NScaleDim(), Iscale(), ScaleDescript() {
+     NScales(), NScaleDim(), Iscale(), ScaleDescript(),
+     fWgtNevt(0), fWgtNumEv(0), fWgtSumW2(0), fSigSumW2(0), fSigSum(0) {
+
 }
 
 
@@ -63,9 +65,38 @@ void fastNLOCoeffAddBase::Read(istream& table){
 void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    CheckCoeffConstants(this);
    char buffer[5257];
+   string stest;
+   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase"
+   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
    table >> IRef;
    table >> IScaleDep;
-   table >> Nevt;
+   if ( fVersionRead >= 24000 ) {
+      table >> Nevt;
+      table >> fWgtNevt;
+      table >> fWgtNumEv;
+      table >> fWgtSumW2;
+      table >> fSigSumW2;
+      table >> fSigSum;
+      fastNLOTools::ReadFlexibleVector ( fWgtObsSumW2, table );
+      fastNLOTools::ReadFlexibleVector ( fSigObsSumW2, table );
+      fastNLOTools::ReadFlexibleVector ( fSigObsSum, table );
+      fastNLOTools::ReadFlexibleVector ( fWgtObsNumEv, table );
+   }      
+   else {
+      table >> Nevt;
+      if ( Nevt <= 0 ) { // v2300
+	 table >> Nevt;
+	 table >> fWgtNevt;
+	 table >> fWgtNumEv;
+	 table >> fWgtSumW2;
+	 table >> fSigSumW2;
+	 table >> fSigSum;
+	 fastNLOTools::ReadFlexibleVector ( fWgtObsSumW2, table );
+	 fastNLOTools::ReadFlexibleVector ( fSigObsSumW2, table );
+	 fastNLOTools::ReadFlexibleVector ( fSigObsSum, table );
+	 fastNLOTools::ReadFlexibleVector ( fWgtObsNumEv, table );
+      }
+   }
    table >> Npow;
    int NPDF;
    table >> NPDF;
@@ -128,7 +159,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
          }else{
             if(NPDF==2){
             }
-         }
+        }
       }
    }
    //Nxtot1.resize(fNObsBins);
@@ -184,9 +215,11 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       for(int j=0;j<NscaleDescript;j++){
          table.getline(buffer,256);
          ScaleDescript[i][j] = buffer;
-         //            StripWhitespace(ScaleDescript[i][j]);
+      //            StripWhitespace(ScaleDescript[i][j]);
       }
    }
+   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
+   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }
 
 
@@ -195,9 +228,37 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    debug["Write"]<<"Calling fastNLOCoeffBase::Write()"<<endl;
    fastNLOCoeffBase::Write(table);
    CheckCoeffConstants(this);
+   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_CoeffAddBase" << sep;
+   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
    table << IRef << sep;
    table << IScaleDep << sep;
-   table << Nevt << sep;
+   //table << Nevt << sep;
+   if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 ) { // detailed storage of weights
+      table << -1 << sep; // -1: read the values below
+      table << Nevt << sep;
+      table << fWgtNevt << sep;
+      table << fWgtNumEv << sep;
+      table << fWgtSumW2 << sep;
+      table << fSigSumW2 << sep;
+      table << fSigSum << sep;
+      fastNLOTools::WriteFlexibleVector ( fWgtObsSumW2, table );
+      fastNLOTools::WriteFlexibleVector ( fSigObsSumW2, table );
+      fastNLOTools::WriteFlexibleVector ( fSigObsSum, table );
+      fastNLOTools::WriteFlexibleVector ( fWgtObsNumEv, table );
+   }
+   if ( fastNLO::tabversion==24000 ) { // detailed storage of weights
+      table << Nevt << sep;
+      table << fWgtNevt << sep;
+      table << fWgtNumEv << sep;
+      table << fWgtSumW2 << sep;
+      table << fSigSumW2 << sep;
+      table << fSigSum << sep;
+      fastNLOTools::WriteFlexibleVector ( fWgtObsSumW2, table );
+      fastNLOTools::WriteFlexibleVector ( fSigObsSumW2, table );
+      fastNLOTools::WriteFlexibleVector ( fSigObsSum, table );
+      fastNLOTools::WriteFlexibleVector ( fWgtObsNumEv, table );
+   }
+
    table << Npow << sep;
    table << NPDFPDG.size() << sep;
    for(unsigned int i=0;i<NPDFPDG.size();i++){
@@ -283,6 +344,9 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
          table << ScaleDescript[i][j] << sep;
       }
    }
+   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+
 }
 
 
@@ -291,6 +355,15 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other){
    //    double w1 = (double)Nevt / (Nevt+other.Nevt);
    //    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
    Nevt += other.Nevt;
+   fWgtNevt += other.fWgtNevt;
+   fWgtNumEv += other.fWgtNumEv;
+   fWgtSumW2 += other.fWgtSumW2;
+   fSigSumW2 += other.fSigSumW2;
+   fSigSum += other.fSigSum;
+   fastNLOTools::AddVectors( fWgtObsSumW2, other.fWgtObsSumW2 );
+   fastNLOTools::AddVectors( fSigObsSumW2, other.fSigObsSumW2 );
+   fastNLOTools::AddVectors( fSigObsSum, other.fSigObsSum );
+   fastNLOTools::AddVectors( fWgtObsNumEv, other.fWgtObsNumEv );
 }
 
 
@@ -304,6 +377,12 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
    if ( IRef != other.GetIRef() ) {
       //warn["IsCompatible"]<<""<<endl;
       say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of IRef detected."<<endl;
+      return false;
+   }
+   if ( Nevt * other.Nevt < 0 ) {
+      // skip, if the two tables store the event weights in different formats
+      // If this is needed, simple solutions are thinkable
+      say::warn["fastNLOCoeffAddBase::IsCompatible"]<<"Tables use different format for normalisation."<<endl;
       return false;
    }
    if ( IScaleDep != other.GetIScaleDep() ) {
@@ -361,6 +440,12 @@ bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
       debug["fastNLOCoeffAddBase::IsCatenable"]<<"fastNLOCoeffBase not compatible. Skipped."<<endl;
       return false;
    }
+   if ( Nevt * other.Nevt < 0 ) {
+      // skip, if the two tables store the event weights in different formats
+      // If this is needed, simple solutions are thinkable
+      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Tables use different format for table normalisation. Skipped."<<endl;
+      return false;
+   }
    if ( IRef != other.GetIRef() ) {
       debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of IRef detected. Skipped."<<endl;
       return false;
@@ -409,12 +494,22 @@ bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
 void fastNLOCoeffAddBase::Clear() {
    //! Clear all coefficients and event counts
    Nevt = 0;
+   fWgtNevt = 0;
+   fWgtNumEv = 0;
+   fWgtSumW2 = 0;
+   fSigSumW2 = 0;
+   fSigSum   = 0;
+   fastNLOTools::ClearVector(fWgtObsSumW2);
+   fastNLOTools::ClearVector(fSigObsSumW2);
+   fastNLOTools::ClearVector(fSigObsSum);
+   fastNLOTools::ClearVector(fWgtObsNumEv);
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::NormalizeCoefficients() {
    Nevt = 1;
+   // Don't touch other weights.
 }
 
 
@@ -497,6 +592,15 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
       cout << endl << fastNLO::_CSEP20C << " fastNLO Table: CoeffAddBase " << fastNLO::_CSEP20 << endl;
    }
    printf(" # No. of events (Nevt)                %f\n",Nevt);
+   if ( fWgtNevt!= 0 || fWgtSumW2!= 0 ) {
+      printf(" # Weight of table [=Nevt] (fWgtNevt)  %f\n",fWgtNevt);
+      printf(" # No. of filled events (WgtNumEv)     %llu\n",fWgtNumEv);
+      printf(" # Sum of weights squared (WgtSumW2)   %f\n",fWgtSumW2);
+      printf(" # Sum of sigma squared (SigSumW2)     %f\n",fSigSumW2);
+      printf(" # Sum of sigma (SigSum)               %f\n",fSigSum);
+      printf(" # Sigma / Nevt (SigSum/WgtNevt)       %f\n",fSigSum/fWgtNevt);
+   }
+
    printf(" # Abs. order in a_s (Npow)            %d\n",Npow);
    printf(" # No. of hadrons involved (NPDF)      %lu\n",NPDFPDG.size());
    fastNLOTools::PrintVector(NPDFPDG,"Type(s) of hadrons (NPDFPDG)","#");
@@ -569,8 +673,11 @@ void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
       exit(1);
    }
    if ( XNode1.size() != 0 ) XNode1.erase(XNode1.begin()+iObsIdx);
-   if ( NPDFDim==2 ) {
-      if ( XNode2.size() != 0 ) XNode2.erase(XNode2.begin()+iObsIdx);
+   if ( NPDFDim==2 && XNode2.size() != 0 ) XNode2.erase(XNode2.begin()+iObsIdx);
+   for ( unsigned int ip = 0 ; ip<fWgtObsSumW2.size() ; ip++ ) {
+      fWgtObsSumW2[ip].erase(fWgtObsSumW2[ip].begin()+iObsIdx);
+      fSigObsSumW2[ip].erase(fSigObsSumW2[ip].begin()+iObsIdx);
+      fWgtObsNumEv[ip].erase(fWgtObsNumEv[ip].begin()+iObsIdx);
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
 }
@@ -582,16 +689,19 @@ void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int 
       say::error["CatBin"]<<"Initial additive table is empty. Aborted!" << endl;
       exit(1);
    }
-   unsigned int nold = XNode1.size();
+   //unsigned int nold = XNode1.size();
    if ( XNode1.size() != 0 ) {
-      XNode1.resize(nold+1);
-      XNode1[nold] = other.XNode1[iObsIdx];
+      XNode1.push_back(other.XNode1[iObsIdx]);
+      // XNode1.resize(nold+1);
+      // XNode1[nold] = other.XNode1[iObsIdx];
    }
-   if ( NPDFDim==2 ) {
-      if ( XNode2.size() != 0 ) {
-         XNode2.resize(nold+1);
-         XNode2[nold] = other.XNode2[iObsIdx];
-      }
+   if ( NPDFDim==2 &&  XNode2.size() != 0 ) {
+      XNode2.push_back(other.XNode2[iObsIdx]);
+   }
+   for ( unsigned int ip = 0 ; ip<fWgtObsSumW2.size() ; ip++ ) {
+      fWgtObsSumW2[ip].push_back(other.fWgtObsSumW2[ip][iObsIdx]);
+      fSigObsSumW2[ip].push_back(other.fSigObsSumW2[ip][iObsIdx]);
+      fWgtObsNumEv[ip].push_back(other.fWgtObsNumEv[ip][iObsIdx]);
    }
    fastNLOCoeffBase::CatBin(other, iObsIdx);
 }

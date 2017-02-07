@@ -34,7 +34,7 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 # Preprocessor flags
 #
 # All targets
-AM_CPPFLAGS =
+AM_CPPFLAGS = -std=c++11 -lstdc++
 # Individual targets
 libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 #
@@ -55,7 +55,7 @@ libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
 # All targets
-AM_CXXFLAGS = -g -O2 -Wall -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
+AM_CXXFLAGS = -g -O2 -Wall  -Wdeprecated-declarations -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
 # Debug flags
 # AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall  -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
 # Individual targets

@@ -75,16 +75,16 @@ void fastNLOTable::ReadTable(){
    //! Read file
    std::istream* strm = OpenFileRead();
    // read header
-   logger.debug["ReadTabl"]<<"Reading header."<<endl;
+   logger.debug["ReadTable"]<<"Reading header."<<endl;
    int nCoeff = ReadHeader(*strm);
    // read scenario
-   logger.debug["ReadTabl"]<<"Reading scenario."<<endl;
+   logger.debug["ReadTable"]<<"Reading scenario."<<endl;
    ReadScenario(*strm);
    // read b-blocks
-   logger.debug["ReadTabl"]<<"Reading coeff tables."<<endl;
+   logger.debug["ReadTable"]<<"Reading coeff tables."<<endl;
    ReadCoeffTables(*strm, nCoeff);
    // close stream
-   logger.debug["ReadTabl"]<<"Reading done closing files."<<endl;
+   logger.debug["ReadTable"]<<"Reading done closing files."<<endl;
    CloseFileRead(*strm);
 }
 
@@ -105,7 +105,7 @@ int fastNLOTable::ReadHeader(istream& table) {
       // check if filename ends with .gz
       std::string ending = ".gz";
       if (ffilename.length() >= ending.length() && ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
-         logger.error["ReadScenario"]<<"Input file has a .gz file extension but zlib support is not enabled!"<<endl;
+         logger.error["ReadHeader"]<<"Input file has a .gz file extension but zlib support is not enabled!"<<endl;
       }
 #endif
       logger.error["ReadHeader"]<<"Did not find initial magic number, aborting!"<<endl;
@@ -113,49 +113,25 @@ int fastNLOTable::ReadHeader(istream& table) {
       exit(1);
    }
    table >> Itabversion;
-   table >> ScenName;
+   fastNLOTools::CheckVersion(Itabversion);
    std::string test;
-   std::getline(table,test);
+   if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Header
+   table >> ScenName;
    if ( test != "" )  {
       logger.warn["ReadHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
    }
    // check if ScenName contains spaces
-   int unused, Ncontrib,Ndata;
+   int Ncontrib,Ndata;
    table >> Ncontrib;
-   table >> unused; //Nmult;
+   fastNLOTools::ReadUnused(table); // Nmult
    table >> Ndata;
-   table >> unused; //NuserString;
-   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserString="<<unused<<"). This is not usual."<<endl;
-   table >> unused; //NuserInt;
-   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userInt' (NuserInt="<<unused<<"). This is not usual."<<endl;
-   for (int i = 0 ; i<unused ; i++) {
-      table >> unused; //IUserLines;
-      // future code if 'user-blocks' are used ...
-      // int NUserFlag;
-      // string NUserBlockDescr;
-      // table >> NUserFlag;
-      // table >> NUserBlockDescr;;
-      // if ( known-user-block ) { read-known-userblock... }
-      // else { // skip meaningful reading
-      //    for ( int i = 2 ; i<NuserInt ; i++ ) {
-      //       double devnull;
-      //       table >> devnull;
-      //    }
-      // }
-      // ...sofar skip reading
-      for (int i = 0 ; i<unused ; i++) {
-         table >> unused;//devnull;
-      }
-   }
-   table >> unused;//NuserFloat;
-   if ( unused>0) logger.warn["ReadHeader"]<<"Reading 'userFloat' (NuserInt="<<unused<<"). This is not usual."<<endl;
-   table >> unused;//Imachine;
-   if (!fastNLOTools::ReadMagicNo(table)) {
-      Print(1);
-      logger.error["ReadHeader"]<<"Did not find final magic number, aborting!"<<endl;
-      logger.error["ReadHeader"]<<"Please check compatibility of tables and program version!"<<endl;
-      exit(1);
-   }
+   cout<<"Ndata="<<Ndata<<"\tNcontrib="<<Ncontrib<<endl;
+   fastNLOTools::ReadUnused(table); // NuserString
+   fastNLOTools::ReadUnused(table); // NuserInt
+   //fastNLOTools::ReadUnused(table); // IUserLines
+   fastNLOTools::ReadUnused(table); // NuserFloat
+   fastNLOTools::ReadUnused(table); // Imachine
+   fastNLOTools::ReadMagicNo(table);
    fastNLOTools::PutBackMagicNo(table);
    return Ncontrib+Ndata;
 }
@@ -253,7 +229,9 @@ void fastNLOTable::WriteTable(string filename) {
 //______________________________________________________________________________
 void fastNLOTable::WriteHeader(std::ostream& table) {
    table << fastNLO::tablemagicno << sep;
-   table << Itabversion << sep;
+   //table << Itabversion << sep;
+   table << fastNLO::tabversion << sep;
+   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_Header" <<sep;
    if ( ScenName.find(" ")!=string::npos )  {
       logger.warn["WriteHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
       ScenName = ScenName.substr(0,ScenName.find(" "));
@@ -275,44 +253,42 @@ void fastNLOTable::WriteHeader(std::ostream& table) {
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadScenario(istream& table){
-   table.peek();
-   if (table.eof()){
-      logger.warn["ReadScenario"]<<"Cannot read from file."<<endl;
-   }
 
-   if (!fastNLOTools::ReadMagicNo(table)) {
-      logger.error["ReadScenario"]<<"Did not find initial magic number, aborting!"<<endl;
-      logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
-      exit(1);
-   }
-
+   //table.peek();
+   fastNLOTools::ReadMagicNo(table);
+   std::string test;
+   if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Scenario
    table >> Ipublunits;
-   size_t NScDescript = 0;
-   table >> NScDescript;
-   ScDescript.resize(NScDescript);
-   char buffer[257];
-   table.getline(buffer,256);
-   for(size_t i=0;i<NScDescript;i++){
-      table.getline(buffer,256);
-      ScDescript[i] = buffer;
-      //      StripWhitespace(ScDescript[i]);
-   }
+   fastNLOTools::ReadFlexibleVector(ScDescript,table);
+   // size_t NScDescript = 0;
+   // table >> NScDescript;
+   // ScDescript.resize(NScDescript);
+   // char buffer[257];
+   // table.getline(buffer,256);
+   // for(size_t i=0;i<NScDescript;i++){
+   //    table.getline(buffer,256);
+   //    ScDescript[i] = buffer;
+   //    //      StripWhitespace(ScDescript[i]);
+   // }
 
    table >> Ecms;
    table >> ILOord;
    table >> NObsBin;
-   table >> NDim;
-   DimLabel.resize(NDim);
-   table.getline(buffer,256);
-   for(int i=NDim-1;i>=0;i--){
-      table.getline(buffer,256);
-      DimLabel[i] = buffer;
-   }
-
-   IDiffBin.resize(NDim);
-   for(int i=NDim-1;i>=0;i--){
-      table >>  IDiffBin[i];
-   }
+   cout<<"Ecms: "<<Ecms<<"\tILoord="<<ILOord<<"\tNObsBin="<<NObsBin<<endl;
+   NDim = fastNLOTools::ReadFlexibleVector(DimLabel,table) -1 ;
+   cout<<"NDim="<<NDim<<endl;
+   // table >> NDim;
+   // DimLabel.resize(NDim);
+   // table.getline(buffer,256);
+   // for(int i=NDim-1;i>=0;i--){
+   //    table.getline(buffer,256);
+   //    DimLabel[i] = buffer;
+   // }
+   fastNLOTools::ReadFlexibleVector(IDiffBin,table,NDim);
+   // IDiffBin.resize(NDim);
+   // for(int i=NDim-1;i>=0;i--){
+   //    table >>  IDiffBin[i];
+   // }
    Bin.resize(NObsBin);
    for(unsigned int i=0;i<NObsBin;i++){
       Bin[i].resize(NDim);
@@ -326,16 +302,16 @@ void fastNLOTable::ReadScenario(istream& table){
          }
       }
    }
-
-   BinSize.resize(NObsBin);
-   for(unsigned int i=0;i<NObsBin;i++){
-      table >> BinSize[i];
-   }
+   cout<<"ok"<<endl;
+   fastNLOTools::ReadFlexibleVector(BinSize,table,NObsBin);
+   // BinSize.resize(NObsBin);
+   // for(unsigned int i=0;i<NObsBin;i++){
+   //    table >> BinSize[i];
+   // }
 
    table >> INormFlag;
-   if( INormFlag < 0 ){
-      table >> DenomTable;
-   }
+   cout<<"INormFlag="<<INormFlag<<endl;
+   if( INormFlag < 0 ) table >> DenomTable;
    if( INormFlag != 0 ){
       IDivLoPointer.resize(NObsBin);
       IDivUpPointer.resize(NObsBin);
@@ -344,12 +320,16 @@ void fastNLOTable::ReadScenario(istream& table){
          table >> IDivUpPointer[i];
       }
    }
+   cout<<"okokok"<<endl;
+   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
+   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
 
-   if (!fastNLOTools::ReadMagicNo(table)) {
-      logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
-      logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
-      exit(1);
-   }
+   fastNLOTools::ReadMagicNo(table);
+   // if (!fastNLOTools::ReadMagicNo(table)) {
+   //    logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
+   //    logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
+   //    exit(1);
+   // }
    fastNLOTools::PutBackMagicNo(table);
 }
 
@@ -357,6 +337,7 @@ void fastNLOTable::ReadScenario(istream& table){
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteScenario(std::ostream& table){
    table << fastNLO::tablemagicno << sep;
+   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_Scenario" <<sep;
    table << Ipublunits << sep;
    size_t NScDescript = ScDescript.size();
    table << NScDescript << sep;
@@ -395,6 +376,8 @@ void fastNLOTable::WriteScenario(std::ostream& table){
          table << IDivUpPointer[i] << sep;
       }
    }
+   if ( fastNLO::tabversion >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
+   if ( fastNLO::tabversion >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
 }
 
 

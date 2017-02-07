@@ -35,17 +35,15 @@ void fastNLOCoeffBase::Read(istream& table){
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::ReadBase(istream& table){
    debug["ReadBase"]<<endl;
-   table.peek();
-   if (table.eof()){
-      //printf("fastNLOCoeffBase::Read: Cannot read from file.\n");
-      error["ReadBase"]<<"Cannot read from file."<<endl;
-   }
-
-   if (!fastNLOTools::ReadMagicNo(table)) {
-      say::error["ReadBase"]<<"Did not find initial magic number, aborting!"<<endl;
-      say::error["ReadBase"]<<"Please check compatibility of tables and program version!"<<endl;
-      exit(1);
-   }
+   //table.peek();
+   
+   table >> fVersionRead;
+   if ( fVersionRead == fastNLO::tablemagicno )
+      fVersionRead = 22000 ;
+   //fastNLOTools::ReadMagicNo(table);
+   std::string stest;
+   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase" 
+   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 
    table >> IXsectUnits;
    table >> IDataFlag;
@@ -53,37 +51,41 @@ void fastNLOCoeffBase::ReadBase(istream& table){
    table >> IContrFlag1;
    table >> IContrFlag2;
    table >> NScaleDep;
-   int NContrDescr;
-   table >> NContrDescr;
-   //   printf("  *  fastNLOCoeffBase::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
-   CtrbDescript.resize(NContrDescr);
-   char buffer[5257];
-   table.getline(buffer,5256);
-   for(int i=0;i<NContrDescr;i++){
-      table.getline(buffer,256);
-      CtrbDescript[i] = buffer;
-      //      StripWhitespace(CtrbDescript[i]);
-   }
-   int NCodeDescr;
-   table >> NCodeDescr;
-   CodeDescript.resize(NCodeDescr);
-   table.getline(buffer,256);
-   for(int i=0;i<NCodeDescr;i++){
-      table.getline(buffer,256);
-      CodeDescript[i] = buffer;
-      //      StripWhitespace(CodeDescript[i]);
-   }
+   fastNLOTools::ReadFlexibleVector(CtrbDescript,table);
+   fastNLOTools::ReadFlexibleVector(CodeDescript,table);
+   //printf("  *  fastNLOCoeffBase::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
+   // int NContrDescr;
+   // table >> NContrDescr;
+   // CtrbDescript.resize(NContrDescr);
+   // char buffer[5257];
+   // table.getline(buffer,5256);
+   // for(int i=0;i<NContrDescr;i++){
+   //    table.getline(buffer,256);
+   //    CtrbDescript[i] = buffer;
+   //    //      StripWhitespace(CtrbDescript[i]);
+   // }
+   // int NCodeDescr;
+   // table >> NCodeDescr;
+   // CodeDescript.resize(NCodeDescr);
+   // table.getline(buffer,256);
+   // for(int i=0;i<NCodeDescr;i++){
+   //    table.getline(buffer,256);
+   //    CodeDescript[i] = buffer;
+   //    //      StripWhitespace(CodeDescript[i]);
+   // }
+   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::EndReadCoeff(istream& table){
-   if (!fastNLOTools::ReadMagicNo(table)) {
-      say::error["ReadBase"]<<"Did not find final magic number, aborting!"<<endl;
-      say::error["ReadBase"]<<"Please check compatibility of tables and program version!"<<endl;
-      say::error["ReadBase"]<<"This might also be provoked by lines with unexpected non-numeric content like 'inf' or 'nan'!"<<endl;
-      exit(1);
-   }
+   fastNLOTools::ReadMagicNo(table);
+   // if (!fastNLOTools::ReadMagicNo(table)) {
+   //    say::error["ReadBase"]<<"Did not find final magic number, aborting!"<<endl;
+   //    say::error["ReadBase"]<<"Please check compatibility of tables and program version!"<<endl;
+   //    say::error["ReadBase"]<<"This might also be provoked by lines with unexpected non-numeric content like 'inf' or 'nan'!"<<endl;
+   //    exit(1);
+   // }
    fastNLOTools::PutBackMagicNo(table);
 }
 
@@ -92,22 +94,28 @@ void fastNLOCoeffBase::EndReadCoeff(istream& table){
 void fastNLOCoeffBase::Write(ostream& table) {
    say::debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
    table << fastNLO::tablemagicno << sep;
+   if ( fastNLO::tabversion>=24000 ) table<<fastNLO::tabversion<<sep;
+   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_CoeffAddBase" << sep;                                                                           
+   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
    table << IXsectUnits << sep;
    table << IDataFlag << sep;
    table << IAddMultFlag << sep;
    table << IContrFlag1 << sep;
    table << IContrFlag2 << sep;
    table << NScaleDep << sep;
-   table << CtrbDescript.size() << sep;
    //printf("  *  fastNLOCoeffBase::Write().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d, NScaleDep: %d\n",
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
-   for(unsigned int i=0;i<CtrbDescript.size();i++){
-      table << CtrbDescript[i] << sep;
-   }
-   table << CodeDescript.size() << sep;
-   for(unsigned int i=0;i<CodeDescript.size();i++){
-      table << CodeDescript[i] << sep;
-   }
+   fastNLOTools::WriteFlexibleVector(CtrbDescript,table);
+   fastNLOTools::WriteFlexibleVector(CodeDescript,table);
+   // table << CtrbDescript.size() << sep;
+   // for(unsigned int i=0;i<CtrbDescript.size();i++){
+   //    table << CtrbDescript[i] << sep;
+   // }
+   // table << CodeDescript.size() << sep;
+   // for(unsigned int i=0;i<CodeDescript.size();i++){
+   //    table << CodeDescript[i] << sep;
+   // }
+   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unuse
 }
 
 

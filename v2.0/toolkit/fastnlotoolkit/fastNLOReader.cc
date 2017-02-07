@@ -6,7 +6,7 @@
 //______________________________________________________________________________
 /**
     --- fastNLO user: Hello!
-        If you use fastNLO for the first time, please read through the
+        When using fastNLO for the first time, please read through the
         documentation and comments carefully in order to calculate
         a reasonable cross section.
         All comments that start with '--- fastNLO user:' are intended as a
@@ -617,7 +617,7 @@ void fastNLOReader::OrderCoefficients() {
       warn["OrderCoefficients"]<<"Could not find any LO Calculation. Exiting!"<<endl;
       warn["OrderCoefficients"]<<"Currently in testing phase: In case you need predictions without LO contribution, uncomment the 'exit' statement below and recompile the code."<<endl;
       warn["OrderCoefficients"]<<"Not all features will be available in this case, but a straight calculation should be possible. Use with care!"<<endl;
-      exit(1);
+      //exit(1);
    }
    if (Coeff_NLO) {
       BBlocksSMCalc[kFixedOrder].push_back(Coeff_NLO);
@@ -1443,8 +1443,8 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
             double Q2           = pow(c->GetScaleNode1(i,jS1),2);
             double mur          = CalcMu(kMuR , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuR);
             double muf          = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-            double mur2         = pow(mur,2);
-            double muf2         = pow(muf,2);
+            double mur2         = mur*mur;
+            double muf2         = muf*muf;
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
                   double as             = c->AlphasTwoPi[i][jS1][kS2];
@@ -1455,7 +1455,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c , bool IsLO) {
                   if ( c->GetNScaleDep() >= 5 ) {
                      xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
                      xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
-                     if ( c->GetIPDFdef1() == 2 ) {   // DIS tables use log(mu/Q2) instead of log(mu) (but only for ln(mur), ln(muf))
+                     if ( c->GetIPDFdef1() == 2 && c->fSTildeDISFormat==0 ) {   // DIS tables use log(mu/Q2) instead of log(mu) (but only for ln(mur), ln(muf))
                         xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                         xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                      }

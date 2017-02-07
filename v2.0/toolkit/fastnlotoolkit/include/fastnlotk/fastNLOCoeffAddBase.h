@@ -82,18 +82,18 @@ protected:
    void ReadCoeffAddBase(std::istream& table);
    int GetScaledimfromvar(int scalevar) const;
 
-   int IRef;
-   int IScaleDep;
-   double Nevt;
-   int Npow;
+   int IRef = 0;
+   int IScaleDep = 0;
+   double Nevt = 0;
+   int Npow = 0;
    std::vector < int > NPDFPDG;
-   int NPDFDim;
+   int NPDFDim = 0;
    std::vector < int > NFFPDG;
-   int NFFDim;
-   int NSubproc;
-   int IPDFdef1;
-   int IPDFdef2;
-   int IPDFdef3;
+   int NFFDim = 0;
+   int NSubproc = 0;
+   int IPDFdef1 = 0;
+   int IPDFdef2 = 0;
+   int IPDFdef3 = 0;
    std::vector<std::vector<std::pair<int,int> > > fPDFCoeff;                                                   //! fPDFCoeff[iSubProc][iPartonPair][pair]
    // Missing: linear PDF combinations for IPDFdef1=0
    std::vector < double > Hxlim1;
@@ -103,10 +103,21 @@ protected:
    std::vector < int > Nztot;
    std::vector < double > Hzlim;
    fastNLO::v2d ZNode;
-   int NScales;
-   int NScaleDim;
+   int NScales = 0;
+   int NScaleDim = 0;
    std::vector < int > Iscale;                                                                       // not used
    std::vector < std::vector < std::string > > ScaleDescript;
+   
+   double fWgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
+   unsigned long long fWgtNumEv = 0; //!< number of entries
+   double fWgtSumW2 = 0; //!< Sum of all weight**2
+   double fSigSumW2 = 0; //!< Sum of all sigma**2 (i.e. (wgt*alpha*pdf)**2 )
+   double fSigSum = 0; //!< Sum of all sigma (i.e. (wgt*alpha*pdf)**2 )
+   fastNLO::v2d fWgtObsSumW2; //!< sumw2[proc][obs]
+   fastNLO::v2d fSigObsSumW2; //!< sumw2[proc][obs]
+   fastNLO::v2d fSigObsSum;   //!< sum[proc][obs]
+   std::vector < std::vector < unsigned long long > > fWgtObsNumEv; //!< Nentries[proc][obs]
+   
 
 };
 

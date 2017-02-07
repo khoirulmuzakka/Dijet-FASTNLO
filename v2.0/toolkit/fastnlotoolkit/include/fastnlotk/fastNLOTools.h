@@ -14,11 +14,16 @@ namespace fastNLOTools {
    int ReadVector( std::vector<double>& v, std::istream& table , double nevts = 1);
 
    template<typename T>  int ReadFlexibleVector(std::vector<T>& v, std::istream& table, int nProcLast=0 , double nevts = 1);
+   int ReadFlexibleVector( std::vector<std::string >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
    int ReadFlexibleVector( std::vector<double >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
+   int ReadFlexibleVector( std::vector<int >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
+   int ReadFlexibleVector( std::vector<unsigned long long >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
+   int ReadUnused( std::istream& table );
 
    //! - Resizing tools
    template<typename T> void ResizeFlexibleVector(std::vector<T>& v, const std::vector<T>& nom);
    void ResizeFlexibleVector( std::vector<double >& v, const std::vector<double >& nom);
+   void ResizeFlexibleVector( std::vector<unsigned long long >& v, const std::vector<double >& nom);
 
    //! - Clearing tools
    template<typename T> void ClearVector(std::vector<std::vector<T > >& v);
@@ -68,6 +73,8 @@ namespace fastNLOTools {
    template<typename T> void PrintVector( const std::vector<T>& v, std::string name, std::string prefix="");
 
    //! - useful i/o
+   bool CheckVersion(int version); //!< check version and exit if failed.
+   //bool CheckVersion(const std::string& version) {return CheckVersion((int)std::stoi(version));} ; //!< check version and exit if failed.
    bool ReadMagicNo(std::istream& table);                                       //!< Read and check magic number from table.
    void PutBackMagicNo(std::istream& table);                                    //!< Reset magic number, such that it can be recognized by other reading routines
 

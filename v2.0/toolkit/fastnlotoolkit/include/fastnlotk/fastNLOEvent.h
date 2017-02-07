@@ -42,6 +42,7 @@ public:
    ~fnloEvent(){;}
    inline void ResetButX(){
       _w=0,_wf=0,_wr=0,_wrr=0,_wff=0,_wrf=0;
+      _sig=0; // sigma
       _p=-1;
       _n=-1;
    }
@@ -60,6 +61,8 @@ public:
    inline void SetEventCounter(long long int n){_n=n;}                                                 //!< Set event counter
    //! if not a flexible-scale table
    inline void SetWeight(double w) {_w=w;}                                                             //!< weights must be mutliplied with dummypdf (1/x)
+   inline void SetSigma(double s) {_sig=s;}                                                              //!< weight to calculate cross section (i.e. already multiplied by PDF,alpha_s).
+   inline void AddSigma(double s) {_sig+=s;}                                                             //!< sigma
    //! flexible scale table:
    inline void SetWeight_MuIndependent(double w) {_w=w;}                                               //!< weights must be mutliplied with dummypdf (1/x)
    inline void SetWeight_log_mur(double w) {_wr=w;}                                                    //!< set weight w, which will contribute with log_e(mur^2)*w
@@ -75,6 +78,7 @@ public:
    inline void AddWeight_log_murf(double w) {_wrf+=w;}                                                 //!< set weight w, which will contribute with log_e(mur^2)*log_e(muf^2)*w
 private:
    double _x1, _x2;                                                                             //!< an event has always identical x1 and x2;
+   double _sig;                                                                                   //!< Sigma, i.e. weight including PDF & alpha_s
    double _w, _wf, _wr, _wrr, _wff, _wrf;                                                       //!< weights
    int _p;                                                                                      //!< processId/channel. Must be consistent with PDF linear combination
    long long int _n;                                                                            //!< event count
