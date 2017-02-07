@@ -245,7 +245,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
       fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
       fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
    }
-   if ( fastNLO::tabversion==24000 ) { // detailed storage of weights
+   else if ( fastNLO::tabversion>=24000 ) { // detailed storage of weights
       table << Nevt << sep;
       table << fWgt.WgtNevt << sep;
       table << fWgt.WgtNumEv << sep;
@@ -257,7 +257,9 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
       fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
       fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
    }
-
+   else {
+      table << Nevt << sep;
+   }
    table << Npow << sep;
    table << NPDFPDG.size() << sep;
    for(unsigned int i=0;i<NPDFPDG.size();i++){
