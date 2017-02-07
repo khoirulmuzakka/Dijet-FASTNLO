@@ -125,7 +125,6 @@ int fastNLOTable::ReadHeader(istream& table) {
    table >> Ncontrib;
    fastNLOTools::ReadUnused(table); // Nmult
    table >> Ndata;
-   cout<<"Ndata="<<Ndata<<"\tNcontrib="<<Ncontrib<<endl;
    fastNLOTools::ReadUnused(table); // NuserString
    fastNLOTools::ReadUnused(table); // NuserInt
    //fastNLOTools::ReadUnused(table); // IUserLines
@@ -274,9 +273,7 @@ void fastNLOTable::ReadScenario(istream& table){
    table >> Ecms;
    table >> ILOord;
    table >> NObsBin;
-   cout<<"Ecms: "<<Ecms<<"\tILoord="<<ILOord<<"\tNObsBin="<<NObsBin<<endl;
    NDim = fastNLOTools::ReadFlexibleVector(DimLabel,table) -1 ;
-   cout<<"NDim="<<NDim<<endl;
    // table >> NDim;
    // DimLabel.resize(NDim);
    // table.getline(buffer,256);
@@ -302,7 +299,6 @@ void fastNLOTable::ReadScenario(istream& table){
          }
       }
    }
-   cout<<"ok"<<endl;
    fastNLOTools::ReadFlexibleVector(BinSize,table,NObsBin);
    // BinSize.resize(NObsBin);
    // for(unsigned int i=0;i<NObsBin;i++){
@@ -310,7 +306,6 @@ void fastNLOTable::ReadScenario(istream& table){
    // }
 
    table >> INormFlag;
-   cout<<"INormFlag="<<INormFlag<<endl;
    if( INormFlag < 0 ) table >> DenomTable;
    if( INormFlag != 0 ){
       IDivLoPointer.resize(NObsBin);
@@ -320,7 +315,6 @@ void fastNLOTable::ReadScenario(istream& table){
          table >> IDivUpPointer[i];
       }
    }
-   cout<<"okokok"<<endl;
    if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
    if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
 
