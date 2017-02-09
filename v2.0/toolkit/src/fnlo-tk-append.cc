@@ -153,8 +153,9 @@ int main(int argc, char** argv) {
             // Additive?
             if ( fastNLOCoeffAddBase::CheckCoeffConstants(cres,quiet) ) {
                fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(jc);
+	       cadd->AccessWgtStat().Erase();//! All weights are now invalid!
                cadd->SetNevt(1);
-            }
+	    }
          }
       }
    }

@@ -508,8 +508,8 @@ void fastNLOCoeffAddBase::Clear() {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::NormalizeCoefficients() {
-   Nevt = 1;
+void fastNLOCoeffAddBase::NormalizeCoefficients(double wgt) {
+   Nevt = wgt;
    // Don't touch other weights.
 }
 
@@ -705,9 +705,4 @@ void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int 
       fWgt.WgtObsNumEv[ip].push_back(other.fWgt.WgtObsNumEv[ip][iObsIdx]);
    }
    fastNLOCoeffBase::CatBin(other, iObsIdx);
-}
-
-// Multiply observable bin
-void fastNLOCoeffAddBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
-   debug["fastNLOCoeffAddBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffAddBase." << endl;
 }

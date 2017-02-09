@@ -289,22 +289,73 @@ bool  fastNLOCoeffAddFlex::IsCatenable(const fastNLOCoeffAddFlex& other) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::NormalizeCoefficients(){
-   //!< Set number of events to 1 and normalize coefficients accordingly.
-   //! This means, that the information about the
-   //! number of events is essentially lost
-   MultiplyCoefficientsByConstant(1./Nevt);
-   Nevt = 1;
+void fastNLOCoeffAddFlex::NormalizeCoefficients(double wgt){
+   //!< Set number of events to wgt (default=1) and normalize coefficients accordingly.
+   if ( wgt==Nevt ) return;
+   MultiplyCoefficientsByConstant(wgt/Nevt);
+   fastNLOCoeffAddBase::NormalizeCoefficients(wgt); // Nevt=wgt
+}
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin){
+   //!< Change cross sections!!!
+   //!< Warning! This function is only sensible if called by 'MergeTable'!
+   if ( int(wgtProcBin.size()) != GetNSubproc() ) {//NObs
+      error["NormalizeCoefficients"]<<"Dimension of weights (iObs) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; exit(4);
+   }
+
+   for ( int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
+      if ( int(wgtProcBin[iProc].size()) != GetNObsBin() ) {//
+	 error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; exit(4);
+      }
+      for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
+	 MultiplyBinProc(iObs, iProc, wgtProcBin[iProc][iObs]/Nevt);
+      }
+   }
+   //fastNLOCoeffAddBase::NormalizeCoefficients(wgtProcBin);
+   //Nevt = 1;
+   // MultiplyCoefficientsByConstant(wgt/Nevt);
+   // Nevt = 0;
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::MultiplyCoefficientsByConstant(double fact) {
-   for (unsigned int i=0; i<SigmaTildeMuIndep.size(); i++) {
+   for (unsigned int i=0; i<SigmaTildeMuIndep.size(); i++) { // NObsBin
       MultiplyBin(i,fact);
    }
 }
 
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::MultiplyBin(unsigned int iObsIdx, double fact) {
+   //! Multiply observable bin
+   for (int n=0; n<GetNSubproc(); n++) {
+      MultiplyBinProc(iObsIdx,n,fact);
+   }
+}
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFlex::MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact) {
+   //! Multiply observable bin
+   debug["fastNLOCoeffAddFlex::MultiplyBinProc"]<<"Multiplying table entries in CoeffAddFlex for bin index " 
+						<< iObsIdx << " and proc index "<<iProc<<" by factor " << fact << endl;
+   int nxmax = GetNxmax(iObsIdx);
+   for (unsigned int jS1=0; jS1<GetNScaleNode1(iObsIdx); jS1++) {
+      for (unsigned int kS2=0; kS2<GetNScaleNode2(iObsIdx); kS2++) {
+         for (int x=0; x<nxmax; x++) {
+            int n=iProc;
+	    if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
+	    if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+	    if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+	    if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;
+	    if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;
+	    if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;
+         }
+      }
+   }
+   fastNLOCoeffAddBase::MultiplyBinProc(iObsIdx, iProc, fact);
+}
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::Print(int iprint) const {
@@ -399,23 +450,3 @@ void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int 
    fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
 
-// Multiply observable bin
-void fastNLOCoeffAddFlex::MultiplyBin(unsigned int iObsIdx, double fact) {
-   debug["fastNLOCoeffAddFlex::MultiplyBin"]<<"Multiplying table entries in CoeffAddFlex for bin index " << iObsIdx << " by factor " << fact << endl;
-   int nxmax = GetNxmax(iObsIdx);
-   for (unsigned int jS1=0; jS1<GetNScaleNode1(iObsIdx); jS1++) {
-      for (unsigned int kS2=0; kS2<GetNScaleNode2(iObsIdx); kS2++) {
-         for (int x=0; x<nxmax; x++) {
-            for (int n=0; n<GetNSubproc(); n++) {
-               if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
-               if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;
-               if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;
-               if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;
-               if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;
-               if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;
-            }
-         }
-      }
-   }
-   fastNLOCoeffAddBase::MultiplyBin(iObsIdx, fact);
-}

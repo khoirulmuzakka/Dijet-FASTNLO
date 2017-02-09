@@ -78,7 +78,8 @@ public:
    void MultiplyCoefficientsByBinSize();                                                        //!< Multiply all coefficients by bin size
    void DivideCoefficientsByBinSize();                                                          //!< Divide all coefficients by bin size
    void MultiplyCoefficientsByConstant(double c);                                               //!< Multiply all coefficients with a constant factor c
-   void NormalizeCoefficients();                                                                //!< Set number of events to 1 and adjust coefficients accordingly
+   void NormalizeCoefficients(double wgt=1);                                                    //!< Set number of events to wgt and adjust coefficients accordingly
+   void NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin);             //!< Set number of events to wgt (with wgt differently for each subproc. and bin) resulting Nevt will become 1
 
    void PrintWarmupValues();                                                                    //!< Print the warmup values to the screen
    std::string GetWarmupTableFilename();                                                             //!< Get the filename, which is used for storage of the warmup-table.

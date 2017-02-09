@@ -15,7 +15,7 @@ AUTOMAKE_OPTIONS = gnu
 # The C++ fastnlo toolkit utility and example programs
 #
 if HAVE_LHAPDF
-   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-append fnlo-tk-modify fnlo-tk-cat fnlo-tk-statunc
+   bin_PROGRAMS = fnlo-tk-cppread fnlo-tk-example fnlo-tk-merge fnlo-tk-merge2 fnlo-tk-append fnlo-tk-modify fnlo-tk-cat fnlo-tk-statunc
    bin_SCRIPTS  = fnlo-tk-config
 if HAVE_YODA
    bin_PROGRAMS += fnlo-tk-yodaout
@@ -40,6 +40,7 @@ fnlo_tk_yodaout_SOURCES = fnlo-tk-yodaout.cc
 fnlo_tk_statunc_SOURCES = fnlo-tk-statunc.cc
 fnlo_tk_rootout_SOURCES = fnlo-tk-rootout.cc
 fnlo_tk_merge_SOURCES   = fnlo-tk-merge.cc
+fnlo_tk_merge2_SOURCES  = fnlo-tk-merge2.cc
 fnlo_tk_append_SOURCES  = fnlo-tk-append.cc
 fnlo_tk_modify_SOURCES  = fnlo-tk-modify.cc
 fnlo_tk_cat_SOURCES   = fnlo-tk-cat.cc
@@ -54,7 +55,7 @@ if HAVE_LHAPDF
 endif
 
 fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir}
-fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir}
+fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 if HAVE_ROOT
    fnlo_tk_example_CPPFLAGS += $(ROOTCPPFLAGS)
 endif
@@ -62,6 +63,7 @@ fnlo_tk_yodaout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
 fnlo_tk_statunc_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
 fnlo_tk_rootout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 fnlo_tk_merge_CPPFLAGS   = $(my_include_dirs) -I${includedir}
+fnlo_tk_merge2_CPPFLAGS  = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 fnlo_tk_append_CPPFLAGS  = $(my_include_dirs) -I${includedir}
 fnlo_tk_modify_CPPFLAGS  = $(my_include_dirs) -I${includedir}
 fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
@@ -69,18 +71,19 @@ fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
 #
 # C++ compiler flags
 #
-fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_example_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall 
+fnlo_tk_example_CXXFLAGS = -g -O2 -Wall -Wno-deprecated-declarations -std=gnu++11
 if HAVE_ROOT
    fnlo_tk_example_CXXFLAGS += $(ROOTCXXFLAGS)
 endif
-fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS)
-fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall
-fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall
-fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall
-fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall
+fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall 
+fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall 
+fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS) -Wdeprecated-declarations
+fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall 
+fnlo_tk_merge2_CXXFLAGS  = -g -O2 -Wall -std=gnu++11 $(ROOTCXXFLAGS)
+fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall 
+fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall 
+fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall 
 # Debug flags
 #fnlo_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 
@@ -98,6 +101,7 @@ fnlo_tk_yodaout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODAL
 fnlo_tk_statunc_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODALDFLAGS)
 fnlo_tk_rootout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(ROOTLDFLAGS)
 fnlo_tk_merge_LDFLAGS   = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_merge2_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(ROOTLDFLAGS)
 fnlo_tk_append_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_modify_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 fnlo_tk_cat_LDFLAGS     = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit

@@ -16,6 +16,38 @@ namespace fastNLO {
       fastNLO::v2d SigObsSumW2; //!< sumw2[proc][obs]
       fastNLO::v2d SigObsSum;   //!< sum[proc][obs]
       std::vector < std::vector < unsigned long long > > WgtObsNumEv; //!< Nentries[proc][obs]
+      
+      void Erase() {
+	 WgtNevt=0;
+	 WgtNumEv=0;
+	 WgtSumW2=0;
+	 SigSumW2=0;
+	 SigSum=0;
+	 for ( auto& i : WgtObsSumW2 ) for ( auto& j : i ) j=0;
+	 for ( auto& i : SigObsSumW2 ) for ( auto& j : i ) j=0;
+	 for ( auto& i : SigObsSum   ) for ( auto& j : i ) j=0;
+	 for ( auto& i : WgtObsNumEv ) for ( auto& j : i ) j=0;
+      };
+
+      void Add(const WgtStat& other) {
+	 this->WgtNevt  += other.WgtNevt;
+	 this->WgtNumEv += other.WgtNumEv;
+	 this->WgtSumW2 += other.WgtSumW2;
+	 this->SigSumW2 += other.SigSumW2;
+	 this->SigSum   += other.SigSum;
+	 if ( this->WgtObsNumEv.size() != other.WgtObsNumEv.size() ) exit(8);
+	 for ( unsigned int i = 0 ; i<WgtObsNumEv.size() ; i++ ) {
+	    if ( this->WgtObsNumEv[i].size() != other.WgtObsNumEv[i].size() ) exit(8);
+	    for ( unsigned int j = 0 ; j<WgtObsNumEv[i].size() ; j++ ) {
+	       this->WgtObsSumW2[i][j] += other.WgtObsSumW2[i][j];
+	       this->SigObsSumW2[i][j] += other.SigObsSumW2[i][j];
+	       this->SigObsSum[i][j]   += other.SigObsSum[i][j];
+	       this->WgtObsNumEv[i][j] += other.WgtObsNumEv[i][j];
+	    }
+	 }
+      };
+      WgtStat& operator+=(const WgtStat& other) { this->Add(other); return *this;}
+
    };
 }
 
@@ -37,23 +69,20 @@ public:
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins
-   // Clear all coefficients and event counters
-   virtual void Clear();
-   // Set number of events to unity and normalize coefficients accordingly
-   virtual void NormalizeCoefficients();
-   // In the following, iObsIdx is the C++ array index of the concerned bin and
-   // not the observable bin no. running from 1 to fNObsBins!
-   // Multiply coefficients of one observable bin a factor
-   virtual void MultiplyBin(unsigned int iObsIdx, double fact);
-   // Erase observable bin from table
-   virtual void EraseBin(unsigned int iObsIdx);
-   // Catenate observable to table
-   virtual void CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx);
+   virtual void Clear();//!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients(double wgt=1); //!< Set number of events to unity and normalize coefficients accordingly
+   virtual void NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin) {};
+   virtual void MultiplyCoefficientsByConstant(double fact) {};//!< Multiply all coefficients of all bins by a constant factor
+   virtual void MultiplyBin(unsigned int iObsIdx, double fact) {};  //!< Multiply coefficients of one observable bin a factor
+   virtual void MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact) {}; //!< Multiply coefficients of one observable bin a factor (idx starting from 0)
+   virtual void EraseBin(unsigned int iObsIdx);//!< Erase observable bin from table
+   virtual void CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx); //!< Catenate observable to table
 
    int GetIRef() const {return IRef;}
    void SetIRef(int iref=1) {IRef=iref;}
    double GetNevt() const { return Nevt; }
    double GetNevt(int NObsBin, int NSubproc) const {
+      //return fWgt.WgtObsSumW2[NSubproc][NObsBin];
       if (Nevt > 0) return Nevt;
       else {std::cout<<"Todo. Preparation for v2.3."<< std::endl; return Nevt;}
    }
@@ -92,6 +121,7 @@ public:
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
    const fastNLO::WgtStat& GetWgtStat() const { return fWgt;} //!< Get weight and event counts
+   fastNLO::WgtStat& AccessWgtStat() { return fWgt;} //!< Get weight and event counts
 
 protected:
    void ReadCoeffAddBase(std::istream& table);

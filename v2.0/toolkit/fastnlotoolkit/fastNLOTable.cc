@@ -573,6 +573,101 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
+   //!< Merge another table with the current one.
+   //!< Use the option moption in order to specify the weighting procedure.
+   //!<    + Default option uses 'normalisation' constant Nevt (usually called 'merge')
+   //!<    + Other weighting options are available.
+   //!<    + Weighting which consider weights for individual bins and subprocesses can be chosen.
+   //!<    + Tables can be 'appended', i.e. the sum of the cross sections is calculated.
+
+   // --- sanity and shortcuts
+   if ( moption==kMedian || moption==kMean) {
+      logger.error["MergeTable"]<<"Options 'median' and 'mean' are not available when mergeing (only) two tables. Please use program fnlo-tk-merge2."<<endl; exit(1);
+   }
+   if ( moption == kUnweighted || moption == kAppend )
+      logger.info["AppendTable"]<<"Adding (appending) another table. Resulting table will have weight 1 if option 'append' or 'unweighted' is used."<<endl;
+   if ( moption == kUnweighted ) 
+      logger.warn["AppendTable"]<<"Option 'unweighted' requested. Do you probably want to use the number of entries instead (option = kNumEvent)? Continueing."<<endl;
+   if ( moption == kMerge ) { 
+      AddTable(other); 
+      return; 
+   };
+
+   //loop over all coefficients in this, and other table....
+   // and normalize the coefficients of 'this' table to the ones of the other.
+   set<unsigned int> apctr;
+   for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
+      if ( fastNLOCoeffAddBase::CheckCoeffConstants(fCoeff[jc],true) ) {
+	 fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)fCoeff[jc];
+	 // ---- find corresponding 'other' contributions
+	 const int ntot = other.GetNcontrib() + other.GetNdata(); 
+	 for ( int ic=0; ic<ntot; ic++ ) {
+	    fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic); // too optimistic typecast
+	    if ( fastNLOCoeffAddBase::CheckCoeffConstants((fastNLOCoeffBase*)cother,true) ) {
+	       if ( cadd->IsCompatible(*cother) ) {
+		  logger.info["AppendTable"]<<"Found compatible contributions."<<endl;
+		  //--- two options: total weight, or separate weights for each bin-proc
+		  if ( moption == kMerge || 
+		       moption == kUnweighted ||
+		       moption == kAppend ||
+		       moption == kNumEvent ||
+		       moption == kSumW2 ||
+		       moption == kSumSig2 ) { // a single (total) weight
+		     double TabWgt = cother->GetNevt(); // moption = kUnweighted, kAppend (wgtother)
+		     // new weight of this table must be: n2/w2*w1 (with n=Nevt, w=NewWeight)
+		     if      ( moption == kMerge    ) TabWgt  = cadd->GetNevt(); // kMerge unses default weight Nevt
+		     else if ( moption == kNumEvent ) TabWgt *= double(cadd->GetWgtStat().WgtNumEv)/double(cother->GetWgtStat().WgtNumEv);
+		     else if ( moption == kSumW2    ) TabWgt *= cadd->GetWgtStat().WgtSumW2/cother->GetWgtStat().WgtSumW2;
+		     else if ( moption == kSumSig2  ) TabWgt *= cadd->GetWgtStat().SigSumW2/cother->GetWgtStat().SigSumW2;
+		     if ( moption != kMerge ) // if needed
+			cadd->NormalizeCoefficients(TabWgt); // normalize THIS table to the other.
+		     apctr.insert(jc);
+		  }
+		  else if ( moption == kNumEventBinProc ||
+			    moption == kSumW2BinProc ||
+			    moption == kSumSig2BinProc ) { // individual weight for each bin-proc
+		     v2d BinProcWgt = cadd->GetWgtStat().WgtObsSumW2;
+		     for ( unsigned int i = 0 ; i<BinProcWgt.size() ; i++ ) {
+			for ( unsigned int j = 0 ; j<BinProcWgt[i].size() ; j++ ) {
+			   double WgtOther = cother->GetNevt(); 
+			   if      ( moption == kNumEventBinProc ) WgtOther *= double(cadd->GetWgtStat().WgtObsNumEv[i][j]) / double(cother->GetWgtStat().WgtObsNumEv[i][j]);
+			   else if ( moption == kSumW2BinProc    ) WgtOther *= cadd->GetWgtStat().WgtObsSumW2[i][j] / cother->GetWgtStat().WgtObsSumW2[i][j];
+			   else if ( moption == kSumSig2BinProc  ) WgtOther *= cadd->GetWgtStat().SigObsSumW2[i][j] / cother->GetWgtStat().SigObsSumW2[i][j];
+			   BinProcWgt[i][j] = WgtOther;
+			}
+		     }
+		     cadd->NormalizeCoefficients(BinProcWgt); // normalize THIS table to the other.
+		     apctr.insert(jc);
+		  }
+		  else {
+		     logger.error["AppendTable"]<<"Unrecognized option. exiting."<<endl; exit(5);
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+   // --- 'merge' & run more checks
+   this->AddTable(other);
+   // ---- divide literally Nevt by 2
+   //      and 'reset event weights', if needed.
+   int norm = 0;
+   if ( moption == kAppend ) norm = 2;
+   if ( moption == kUnweighted ) norm = 1;
+   if ( norm != 0 ) {
+      for ( auto jc : apctr ) {
+	 fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)fCoeff[jc];
+	 cadd->SetNevt(cadd->GetNevt()/ norm); 
+	 cadd->NormalizeCoefficients(1.); // 
+	 cadd->AccessWgtStat().Erase();//! All weights are now invalid!
+	 cadd->SetNevt(1);
+      }
+   }
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOTable::AddTable(const fastNLOTable& other) {
    // Add another table to this table.
    // Either increase statistics of existing fixed-order contribution or
@@ -626,6 +721,8 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
                   wasAdded = true;
                }
             }
+	    // add weights (these are solely additive, without weighting!)
+	    ((fastNLOCoeffAddBase*)fCoeff[jc])->AccessWgtStat().Add( ((fastNLOCoeffAddBase*)other.GetCoeffTable(ic))->GetWgtStat() );
          }
          // Multiplicative?
          else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {

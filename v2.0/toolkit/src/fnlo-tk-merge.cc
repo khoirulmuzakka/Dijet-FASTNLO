@@ -124,10 +124,11 @@ int main(int argc, char** argv) {
             if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) {
                fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)tab.GetCoeffTable(ic);
                if ( cadd->GetNevt() == 1 ) {
-                  error["fnlo-tk-merge"]<<"Contribution #" << ic << " in table " << path << endl;
-                  error["fnlo-tk-merge"]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
-                  error["fnlo-tk-merge"]<<"Nevt = " << cadd->GetNevt() << endl;
-                  exit(1);
+                  warn["fnlo-tk-merge"]<<"Contribution #" << ic << " in table " << path << " has event number '1', which is usually invalid."<<endl;
+                  // error["fnlo-tk-merge"]<<"Contribution #" << ic << " in table " << path << endl;
+                  // error["fnlo-tk-merge"]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
+                  // error["fnlo-tk-merge"]<<"Nevt = " << cadd->GetNevt() << endl;
+                  //exit(1);
                }
             }
          }

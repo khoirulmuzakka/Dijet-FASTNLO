@@ -25,20 +25,14 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
 
    // Manipulate coefficient bins
-   // Clear all coefficients and event counters
-   virtual void Clear();
-   // Set number of events to unity and normalize coefficients accordingly
-   virtual void NormalizeCoefficients();
-   // Multiply all coefficients of all bins by a constant factor
-   virtual void MultiplyCoefficientsByConstant(double fact);
-   // In the following, iObsIdx is the C++ array index of the concerned bin and
-   // not the observable bin no. running from 1 to fNObsBins!
-   // Multiply coefficients of one observable bin a factor
-   virtual void MultiplyBin(unsigned int iObsIdx, double fact);
-   // Erase observable bin from table
-   virtual void EraseBin(unsigned int iObsIdx);
-   // Catenate observable to table
-   virtual void CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx);
+   virtual void Clear(); //!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients(double wgt=1); //!< Set number of events to given wgt and re-normalize coefficients accordingly
+   virtual void NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin);
+   virtual void MultiplyCoefficientsByConstant(double fact); //!< Multiply all coefficients of all bins by a constant factor
+   virtual void MultiplyBin(unsigned int iObsIdx, double fact); //!< Multiply coefficients of one bin a factor (iObsIdx starting with index 0)
+   virtual void MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact); //!< Multiply coefficients of one bin and subprocess a factor
+   virtual void EraseBin(unsigned int iObsIdx); //!< Erase observable bin from table
+   virtual void CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx); //!< Catenate observable to table
 
    unsigned int GetNScaleNode1(int iObsBin) const { return ScaleNode1[iObsBin].size(); };
    unsigned int GetNScaleNode2(int iObsBin) const { return ScaleNode2[iObsBin].size(); };

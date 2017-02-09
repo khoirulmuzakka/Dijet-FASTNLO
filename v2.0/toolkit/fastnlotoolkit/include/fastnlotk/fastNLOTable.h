@@ -221,6 +221,18 @@ class fastNLOTable {
    /// ___________________________________________________________________________________________________
    /// Other useful functions
    /// ___________________________________________________________________________________________________
+   enum EMerge {  //!< mergeing options.
+      kMerge, //!< Calculate weighted average (default. Nevt usually set externally by generator code).
+      kAppend, //!< Append! Do not merge, but add two tables together (fully unweighted) (1+1=2).
+      kUnweighted, //!< Calculated unweighted average (usually better: take kNumEvent).
+      kNumEvent, kNumEventBinProc, //!< Calculate weighted average, using w = num entries
+      kSumW2,    kSumW2BinProc, //!< Calculate weighted average , using w = sum(weight**2)
+      kSumSig2,  kSumSig2BinProc, //!< Calculate weighted average, using w = sum(sig**2) [sig ~ wgt*as*pdf]
+      kMedian, kMean, //!< build median or median value of many tables (option not applicable to member function, because many tables are needed as input).
+      kUndefined //!< Error
+   };
+   void MergeTable(const fastNLOTable& rhs, EMerge option=kMerge ); //!< 'merge' 
+   void AddTable(const fastNLOTable& rhs); //!< 'merge'
 
    /// Handle coefficient tables
    //int WriteCoeffTable(int no);
@@ -229,7 +241,6 @@ class fastNLOTable {
    void DeleteAllCoeffTable();
    //int CreateCoeffBase(int no);
    int CreateCoeffTable(int no,fastNLOCoeffBase *newcoeff);
-   void AddTable(const fastNLOTable& rhs);
    void CatenateTable(const fastNLOTable& other);
    fastNLOCoeffBase* GetCoeffTable(int no) const;
    /// Returns pointer to data table if available, else returns NULL pointer

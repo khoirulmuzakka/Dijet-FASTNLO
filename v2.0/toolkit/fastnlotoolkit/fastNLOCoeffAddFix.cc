@@ -269,20 +269,63 @@ void fastNLOCoeffAddFix::Clear() {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::NormalizeCoefficients(){
-   //!< Set number of events to 1 and normalize coefficients accordingly.
+void fastNLOCoeffAddFix::NormalizeCoefficients(double wgt){
+   //!< Set number of events to wgt (default=1) and normalize coefficients accordingly.
    //! This means, that the information about the
    //! number of events is essentially lost
-   MultiplyCoefficientsByConstant(1./Nevt);
-   Nevt = 1;
+   if ( wgt == Nevt ) return;
+   MultiplyCoefficientsByConstant(wgt/Nevt);
+   fastNLOCoeffAddBase::NormalizeCoefficients(wgt); //Nevt = wgt;
 }
 
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin){
+   //!< Set number of events to wgtProcBin for each subprocess and bin
+   //!< and normalize coefficients accordingly.
+   if ( wgtProcBin.size() != GetNSubproc() ) {//NObs                                                                                                   
+      error["NormalizeCoefficients"]<<"Dimension of weights (iObs) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
+      exit(4);
+   }
+
+   for ( unsigned int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
+      if ( wgtProcBin[iProc].size() != GetNObsBin() ) { 
+         error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
+	 exit(4);
+      }
+      for ( unsigned int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
+         MultiplyBinProc(iObs, iProc, wgtProcBin[iProc][iObs]/Nevt);
+      }
+   }
+   fastNLOCoeffAddBase::NormalizeCoefficients(wgtProcBin);
+   //Nevt = 1;
+}
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double fact) {
    for (unsigned int i=0; i<SigmaTilde.size(); i++) {
       MultiplyBin(i,fact);
    }
+}
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::MultiplyBin(unsigned int iObsIdx, double fact) {
+   //! Multiply observable bin
+   for (int m=0 ; m<GetNSubproc() ; m++) 
+      MultiplyBinProc(iObsIdx,m,fact);
+}
+
+//________________________________________________________________________________________________________________ //
+void fastNLOCoeffAddFix::MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact) {
+   //! Multiply observable bin for a single subprocess
+   debug["fastNLOCoeffAddFix::MultiplyBin"]<<"Multiplying table entries in CoeffAddFix for bin index " << iObsIdx << " by factor " << fact << endl;
+   for (unsigned int s=0 ; s<SigmaTilde[iObsIdx].size() ; s++) {
+      for (unsigned int x=0 ; x<SigmaTilde[iObsIdx][s].size() ; x++) {
+         for (unsigned int l=0 ; l<SigmaTilde[iObsIdx][s][x].size() ; l++) {
+	    SigmaTilde[iObsIdx][s][x][l][iProc] *= fact;
+	 }
+      }
+   }
+   fastNLOCoeffAddBase::MultiplyBinProc(iObsIdx, iProc, fact);
 }
 
 
@@ -320,9 +363,8 @@ void fastNLOCoeffAddFix::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
-
-// Erase observable bin
-void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
+void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) { 
+   //! Erase observable bin
    debug["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
    if ( ScaleNode.size() == 0 ) {
       say::error["EraseBin"]<<"All fix-scale bins deleted already. Aborted!" << endl;
@@ -352,17 +394,3 @@ void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iO
    fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
 
-// Multiply observable bin
-void fastNLOCoeffAddFix::MultiplyBin(unsigned int iObsIdx, double fact) {
-   debug["fastNLOCoeffAddFix::MultiplyBin"]<<"Multiplying table entries in CoeffAddFix for bin index " << iObsIdx << " by factor " << fact << endl;
-   for (unsigned int s=0 ; s<SigmaTilde[iObsIdx].size() ; s++) {
-      for (unsigned int x=0 ; x<SigmaTilde[iObsIdx][s].size() ; x++) {
-         for (unsigned int l=0 ; l<SigmaTilde[iObsIdx][s][x].size() ; l++) {
-            for (unsigned int m=0 ; m<SigmaTilde[iObsIdx][s][x][m].size() ; m++) {
-               SigmaTilde[iObsIdx][s][x][l][m] *= fact;
-            }
-         }
-      }
-   }
-   fastNLOCoeffAddBase::MultiplyBin(iObsIdx, fact);
-}

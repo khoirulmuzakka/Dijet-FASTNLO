@@ -2711,17 +2711,25 @@ inline double fastNLOCreate::CalcPDFReweight(double x) const {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::NormalizeCoefficients() {
-   //! Set number of events to 1 and weight coefficients in sigmatilde
+void fastNLOCreate::NormalizeCoefficients(double wgt) {
+   //! Set number of events to wgt (default=1) and weight coefficients in sigmatilde
    //! accordingly
    //! This means, that the information about the
-   //! number of events is essentially lost
+   //! number of events is essentially lost (now remained stored in fWgt)
    if ( fWeightCache.size() )  FlushCache();
-   GetTheCoeffTable()->NormalizeCoefficients();
-   fStats._nEv=1;
+   GetTheCoeffTable()->NormalizeCoefficients(wgt);
+   fStats._nEv=wgt;
    //    double nev = GetTheCoeffTable()->GetNevt(0,0);
    //    MultiplyCoefficientsByConstant(1./nev);
    //    SetNumberOfEvents(1.);
+}
+// ___________________________________________________________________________________________________
+void fastNLOCreate::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin) {
+   //! Set number of events to wgtProcBin[iProc][iBin] 
+   //! sigmatilde is weighted accordingly.
+   if ( fWeightCache.size() )  FlushCache();
+   GetTheCoeffTable()->NormalizeCoefficients(wgtProcBin);
+   fStats._nEv=-1;
 }
 
 

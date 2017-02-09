@@ -23,17 +23,13 @@ public:
    virtual void Add(const fastNLOCoeffAddBase& other);
    virtual void Print(int iprint) const;
 
-   // Manipulate coefficient bins
-   // Clear all coefficients and event counters
-   virtual void Clear();
-   // Set number of events to unity and normalize coefficients accordingly
-   virtual void NormalizeCoefficients();
-   // Multiply all coefficients of all bins by a constant factor
-   virtual void MultiplyCoefficientsByConstant(double fact);
-   // In the following, iObsIdx is the C++ array index of the concerned bin and
-   // not the observable bin no. running from 1 to fNObsBins!
-   // Multiply coefficients of one observable bin a factor
-   virtual void MultiplyBin(unsigned int iObsIdx, double fact);
+   // Manipulate coefficient bins   
+   virtual void Clear();//!< Clear all coefficients and event counters
+   virtual void NormalizeCoefficients(double wgt=1);//!<a Set number of events to wgt and re-normalize coefficients accordingly
+   virtual void NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin);
+   virtual void MultiplyCoefficientsByConstant(double fact);//!< Multiply all coefficients of all bins by a constant factor
+   virtual void MultiplyBin(unsigned int iObsIdx, double fact); //!< Multiply coefficients of one bin a factor
+   virtual void MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact); //!< Multiply coefficients of one bin and subprocess by a factor
    // Erase observable bin from table
    virtual void EraseBin(unsigned int iObsIdx);
    // Catenate observable to table
