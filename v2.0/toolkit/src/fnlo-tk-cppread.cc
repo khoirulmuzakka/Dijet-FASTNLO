@@ -690,7 +690,7 @@ int main(int argc, char** argv) {
    //!   double Mz = 91.174;  //! ABM11
    //!   double Mz = 91.188;  //! CTEQ
    //!   double Mz = 91.187;  //! HERAPDF
-   double Mz = 91.1876; //! MSTW, PDG 2012-2015
+   const double Mz = 91.1876; //! MSTW, PDG 2012-2015
    //!   double Mz = 91.2;    //! NNPDF
    fnlo->SetMz(Mz);
 
@@ -719,9 +719,60 @@ int main(int argc, char** argv) {
    //! Example code to print out alpha_s(Q) values
    //! for (int iq = 10; iq < 2010; iq = iq + 10) {
    //!    double mu = iq;
-   //!    double as = fnlo->CalcAlphas(mu);
+   //!    double as = fnlo->EvolveAlphas(mu);
    //!    printf("%#18.11E %#18.11E\n",mu,as);
    //! }
+   // ATLAS TEEC point
+   // const double asmzatlas   = 0.1173;
+   // const double dasmzatlasu = 0.0066;
+   // const double dasmzatlasl = 0.0028;
+   // const double qatlas = 305;
+   // fnlo->SetAlphasMz(asmzatlas);
+   // fnlo->InitEvolveAlphas();
+   // double asq0 = fnlo->EvolveAlphas(qatlas);
+   // fnlo->SetAlphasMz(asmzatlas+dasmzatlasu);
+   // fnlo->InitEvolveAlphas();
+   // double dasq0u = fnlo->EvolveAlphas(qatlas) - asq0;
+   // fnlo->SetAlphasMz(asmzatlas-dasmzatlasl);
+   // fnlo->InitEvolveAlphas();
+   // double dasq0l = asq0 - fnlo->EvolveAlphas(qatlas);
+   // printf("%4.0F   %#10.6F   %#10.6F   %#10.6F\n", qatlas, asq0, dasq0u, dasq0l);
+   // CMS R3/2 8 TeV points and evolution
+   // const int nq = 5;
+   // const double qmean[]  = { Mz, 340, 476, 685, 1114 };
+   // const double asmz[]   = { 0.1150, 0.1157, 0.1153, 0.1134, 0.1147 };
+   // const double dasmzu[] = { 0.0055, 0.0060, 0.0062, 0.0059, 0.0074 };
+   // const double dasmzl[] = { 0.0023, 0.0030, 0.0025, 0.0028, 0.0040 };
+   // double asq[nq];
+   // double dasqu[nq];
+   // double dasql[nq];
+
+   // for (int iq=1; iq<nq; iq++) {
+   //    fnlo->SetAlphasMz(asmz[iq]);
+   //    fnlo->InitEvolveAlphas();
+   //    asq[iq] = fnlo->EvolveAlphas(qmean[iq]);
+   //    fnlo->SetAlphasMz(asmz[iq]+dasmzu[iq]);
+   //    fnlo->InitEvolveAlphas();
+   //    dasqu[iq] = fnlo->EvolveAlphas(qmean[iq]) - asq[iq];
+   //    fnlo->SetAlphasMz(asmz[iq]-dasmzl[iq]);
+   //    fnlo->InitEvolveAlphas();
+   //    dasql[iq] = asq[iq] - fnlo->EvolveAlphas(qmean[iq]);
+   //    printf("%4.0F   %#10.6F   %#10.6F   %#10.6F\n", qmean[iq], asq[iq], dasqu[iq], dasql[iq]);
+   // }
+
+   // for (int iq=5; iq<2001; iq++) {
+   //    fnlo->SetAlphasMz(asmz[0]);
+   //    fnlo->InitEvolveAlphas();
+   //    double asq0 = fnlo->EvolveAlphas((double)iq);
+   //    fnlo->SetAlphasMz(asmz[0]+dasmzu[0]);
+   //    fnlo->InitEvolveAlphas();
+   //    double dasq0u = fnlo->EvolveAlphas((double)iq) - asq0;
+   //    fnlo->SetAlphasMz(asmz[0]-dasmzl[0]);
+   //    fnlo->InitEvolveAlphas();
+   //    double dasq0l = asq0 - fnlo->EvolveAlphas((double)iq);
+   //    printf("%4.i   %#10.6F   %#10.6F   %#10.6F\n", iq, asq0, dasq0u, dasq0l);
+   // }
+
    // ************************************************************************************************
 
 
