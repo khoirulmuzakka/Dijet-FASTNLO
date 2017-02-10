@@ -42,6 +42,9 @@ public:
    std::vector < double > GetScaleNodes2(int iObsBin) const { return ScaleNode2[iObsBin]; };
    bool IsCompatible(const fastNLOCoeffAddFlex& other) const;                   //!< check for compatibilty for adding/merging of two tables
    bool IsCatenable(const fastNLOCoeffAddFlex& other) const;        //!< Check for compatibility of two contributions for merging/adding
+   std::vector<fastNLO::v5d*> AccessSigmaTildes() { 
+      return {&SigmaTildeMuIndep,&SigmaTildeMuFDep,&SigmaTildeMuRDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
+   };//!< Get access to sigma tilde
 
 protected:
 

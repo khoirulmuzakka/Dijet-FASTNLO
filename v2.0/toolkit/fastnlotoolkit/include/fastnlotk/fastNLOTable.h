@@ -232,6 +232,7 @@ class fastNLOTable {
       kUndefined //!< Error
    };
    void MergeTable(const fastNLOTable& rhs, EMerge option=kMerge ); //!< 'merge' 
+   void MergeTables(const std::vector<fastNLOTable*>& tables, EMerge option=kMerge ); //!< 'merge' (also supports 'median' and 'mean')
    void AddTable(const fastNLOTable& rhs); //!< 'merge'
 
    /// Handle coefficient tables

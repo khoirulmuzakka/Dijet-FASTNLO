@@ -7,6 +7,7 @@
 
 class fastNLOCoeffAddFix : public fastNLOCoeffAddBase {
 
+   friend class fastNLOTable;
    friend class fastNLOReader;
    friend class fastNLOCreate;
 

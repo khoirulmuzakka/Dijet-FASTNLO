@@ -573,6 +573,152 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, EMerge moption) {
+   //!< Merge all other tables with the current one.
+   //!< Warning: data or multiplicative contributions might get lost
+   //!< Warning: Function may require lots of memory, because all contributions are kept in memory.
+   if ( moption != kMean && moption != kMedian ) {
+      for ( auto iTab :  other ) this->MergeTable(*iTab,moption);
+   }
+   else {
+      if ( other.size() < 30 ) 
+	 logger.warn["MergeTables"]<<"Result may has a large spread, since only "<<other.size()+1<<" tables are merged."<<endl;
+
+      set<fastNLOCoeffBase*> ConsideredContrib;
+      // loop over contributions.
+      for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
+	 if ( fastNLOCoeffAddBase::CheckCoeffConstants(fCoeff[jc],true) ) {
+	    fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)fCoeff[jc];
+	    //set<fastNLOCoeffAddBase*> others;
+	    vector<fastNLOCoeffAddBase*> others;
+	    // ---- find corresponding 'other' contributions
+	    for ( unsigned int ioth = 0 ; ioth<other.size() ; ioth++ ) {
+	       const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata(); 
+	       for ( int ic=0; ic<ntot; ic++ ) {
+		  fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other[ioth]->GetCoeffTable(ic); // too optimistic typecast
+		  if ( fastNLOCoeffAddBase::CheckCoeffConstants((fastNLOCoeffBase*)cother,true) ) {
+		     if ( cadd->IsCompatible(*cother) ) {
+			//logger.info["MergeTables"]<<"Found compatible contributions"<<endl;
+			others.push_back(cother); //insert()
+			ConsideredContrib.insert(cother);
+		     }
+		  }
+	       }
+	    }
+	    logger.info["MergeTables"]<<"Found "<<others.size()<<" compatible contributions."<<endl;
+	    
+	    // loop over all compatible contributions and 
+	    vector<double > nAll{cadd->GetNevt()};
+	    for ( auto othctr : others ) nAll.push_back( othctr->GetNevt());
+
+	    if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cadd,true) ) {//flexible
+	       fastNLOCoeffAddFlex* ctrb = (fastNLOCoeffAddFlex*)cadd;
+	       vector<fastNLO::v5d*> s0 = ctrb->AccessSigmaTildes();
+	       vector<vector<fastNLO::v5d*> > sAll{s0};
+	       for ( auto othctr : others ) {
+		  sAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->AccessSigmaTildes());
+		  //nAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->GetNevt());
+	       }
+	       int cMax = s0.size();
+	       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
+		  if ( s0[ii]->size()==0 ) cMax--;
+	       }
+	       vector<double > vals(sAll.size()); // allocate only once
+
+	       for (unsigned int iobs=0 ; iobs<ctrb->SigmaTildeMuIndep.size() ; iobs++) {
+		  for (unsigned int jS1=0; jS1<ctrb->GetNScaleNode1(iobs); jS1++) {
+		     for (unsigned int kS2=0; kS2<ctrb->GetNScaleNode2(iobs); kS2++) {
+			for (int x=0; x<ctrb-> GetNxmax(iobs); x++) {
+			   for (int n=0; n<ctrb->GetNSubproc(); n++) {
+
+			      for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
+				 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+				    vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+				 }
+				 
+
+				 if ( moption == kMean  ) {
+				    double mean = 0;
+				    for ( auto ii : vals ) mean+=ii;
+				    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
+				    //double rms = 0;
+				    // for ( auto ii : vals ) rms+=ii*ii;
+				    // rms = sqrt(rms/sAll.size());
+				    
+				 }
+				 else if ( moption == kMedian ) {
+				    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+				    double median = vals[vals.size()/2];
+				    if ( vals.size()%2 == 0 ) {
+				       median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				    }
+				    // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
+				    // 	   im,     mean*nAll[0],    rms*nAll[0],
+				    // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
+				    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0];
+				 }
+			      }
+			   }
+			}
+		     }
+		  }
+	       }
+	    }
+	    else { // fixed scale
+	       fastNLOCoeffAddFix* ctrb = (fastNLOCoeffAddFix*)cadd;
+	       for (unsigned int iobs=0 ; iobs<ctrb->SigmaTilde.size() ; iobs++) {
+		  for (unsigned int s=0 ; s<ctrb->SigmaTilde[iobs].size() ; s++) {
+		     for (unsigned int x=0 ; x<ctrb->SigmaTilde[iobs][s].size() ; x++) {
+			for (unsigned int l=0 ; l<ctrb->SigmaTilde[iobs][s][x].size() ; l++) {
+			   for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
+			      double mean = ctrb->SigmaTilde[iobs][s][x][l][p] ;
+			      //double rms = mean*mean;x
+			      vector<double> vals{mean};
+			      vals.reserve(others.size()+1);
+			      for ( auto othctr : others ) {
+				 double vv = ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p];
+				 mean += vv ;
+				 //rms += vv*vv;
+				 vals.push_back(vv);
+			      }
+			      mean /= (others.size()+1);
+			      //rms = sqrt(rms/others.size()+1);
+			      std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+			      double median = vals[vals.size()/2];
+			      if ( moption == kMean  )
+				 ctrb->SigmaTilde[iobs][s][x][l][p] = mean;
+			      if ( moption == kMedian ) 
+				 ctrb->SigmaTilde[iobs][s][x][l][p] = median;
+			   }
+			}
+		     }
+		  }
+	       }
+	    }
+	    // add number of events together
+	    double nTot = 0;
+	    for ( auto ii : nAll ) nTot+=ii;
+	    cadd->NormalizeCoefficients(nTot);
+	    for ( auto othctr : others ) cadd->AccessWgtStat().Add(othctr->GetWgtStat());
+	 }
+      }
+      // check for further contributions, which have not been considered!
+      for ( unsigned int ioth = 0 ; ioth<other.size() ; ioth++ ) {
+	 const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata(); 
+	 for ( int ic=0; ic<ntot; ic++ ) {
+	    if ( ConsideredContrib.count(other[ioth]->GetCoeffTable(ic)) == 0 ){
+	       logger.error["MergeTables"]<<"Some contribution is not considered and thus gets lost!"<<endl;
+	       logger.error["MergeTables"]<<"All input tables to the function fastNLOTable::MergeTables() must be already present in the current fastNLOTable instance."<<endl;
+	       exit(3);
+	    }
+	 }
+      }
+      logger.info["MergeTables"]<<(moption == kMean ? "Mean" : "Median")<<" out of "<< other.size()+1<<" tables calculated successfully."<<endl;
+   }
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
    //!< Merge another table with the current one.
    //!< Use the option moption in order to specify the weighting procedure.
@@ -606,7 +752,7 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
 	    fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other.GetCoeffTable(ic); // too optimistic typecast
 	    if ( fastNLOCoeffAddBase::CheckCoeffConstants((fastNLOCoeffBase*)cother,true) ) {
 	       if ( cadd->IsCompatible(*cother) ) {
-		  logger.info["AppendTable"]<<"Found compatible contributions."<<endl;
+		  logger.info["MergeTable"]<<"Found compatible contributions."<<endl;
 		  //--- two options: total weight, or separate weights for each bin-proc
 		  if ( moption == kMerge || 
 		       moption == kUnweighted ||

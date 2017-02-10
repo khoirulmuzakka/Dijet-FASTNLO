@@ -26,12 +26,45 @@
 #include "fastnlotk/speaker.h"
 
 std::map<std::string,std::string> _validoptions{
-   {"-f","force.  Force to (overwrite) output table."},
-   {"-h","help.   Print this message."},
-   {"-p","Plot.   -p filename.ps. Plot some statistics of all input files. Option must be followed by filename."},
-   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
-   {"-w","Weight.  -w <option>. Calculate (un)weighted average. Options: GenWgt (default), unweighted, append, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."}
+   {"-f","force     Force to (overwrite) output table."},
+   {"-h","help      Print this message."},
+   {"-o","output    -o <output>. Specify output file name (the last argument is then considered to be an input table)."},
+//   {"-p","Plot.   -p <filename>. Plot some statistics of all input files. Option must be followed by filename."},
+//   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
+   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, append, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
+   {"-pre","pre-avg -pre <n> <option>. 2 step mergeing: Build pre-averaged of n tables using weighting procedure <option>."},
 };
+
+
+std::map<std::string,fastNLOTable::EMerge> _wgtoptions {
+   {"GenWgt",fastNLOTable::kMerge },
+   {"append",fastNLOTable::kAppend },
+   {"unweighted",fastNLOTable::kUnweighted },
+   {"median",fastNLOTable::kMedian },
+   {"mean",fastNLOTable::kMean },
+   {"NumEvt",fastNLOTable::kNumEvent },
+   {"SumW2",fastNLOTable::kSumW2 },
+   {"SumSig2",fastNLOTable::kSumSig2 },
+   {"NumEvtBinProc",fastNLOTable::kNumEventBinProc },
+   {"SumW2BinProc",fastNLOTable::kSumW2BinProc },
+   {"SumSig2BinProc",fastNLOTable::kSumSig2BinProc },
+//   {"",fastNLOTable::kUndefined}
+};
+
+   //    fastNLOTable::EMerge moption = fastNLOTable::kUndefined;
+   // if      ( wgtoption=="GenWgt" ) moption = fastNLOTable::kMerge ;
+   // else if ( wgtoption=="append" ) moption = fastNLOTable::kAppend ;
+   // else if ( wgtoption=="unweighted" ) moption = fastNLOTable::kUnweighted ;
+   // else if ( wgtoption=="median" ) moption = fastNLOTable::kMedian ;
+   // else if ( wgtoption=="mean" ) moption = fastNLOTable::kMean ;
+   // else if ( wgtoption=="NumEvt" ) moption = fastNLOTable::kNumEvent ;
+   // else if ( wgtoption=="SumW2" ) moption = fastNLOTable::kSumW2 ;
+   // else if ( wgtoption=="SumSig2" ) moption = fastNLOTable::kSumSig2 ;
+   // else if ( wgtoption=="NumEvtBinProc" ) moption = fastNLOTable::kNumEventBinProc ;
+   // else if ( wgtoption=="SumW2BinProc" ) moption = fastNLOTable::kSumW2BinProc ;
+   // else if ( wgtoption=="SumSig2BinProc" ) moption = fastNLOTable::kSumSig2BinProc ;
+   // else moption = fastNLOTable::kUndefined;
+
 
 //__________________________________________________________________________________________________________________________________
 void PrintHelpMessage() {
@@ -167,67 +200,50 @@ int main(int argc, char** argv) {
    SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
-   yell << _CSEPSC << endl;
    info["fnlo-tk-merge2"] << "Tool to merge fastNLO tables with different contributions or" << endl;
    info["fnlo-tk-merge2"] << "to combine identical statistically independent contributions" << endl;
-   yell << _SSEPSC << endl;
    info["fnlo-tk-merge2"] << "For more explanations type:" << endl;
-   info["fnlo-tk-merge2"] << "./fnlo-tk-merge2 -h" << endl;
-   yell << _CSEPSC << endl;
+   info["fnlo-tk-merge2"] << "  $  fnlo-tk-merge2 -h" << endl<<endl;
 
    //! --- Parse commmand line
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-merge2"] << "fastNLO Table Merger"<<endl;
-   yell << _SSEPSC << endl;
    if (argc <= 1) {
       error["fnlo-tk-merge2"] << "No arguments given, but need at least two!" << endl;
-      shout["fnlo-tk-merge2"] << "For an explanation of command line arguments use option -h" << endl;
-      PrintHelpMessage();
-      exit(1);
+      PrintHelpMessage();   exit(1);
    }
-   // } else {
-   //    tablename = (const char*) argv[1];
-   //    //! --- Usage info
-   //    if (tablename == "-h") {
-   //       yell << " #" << endl;
-   //       info["fnlo-tk-merge2"] << "The purpose of this tool is to merge fastNLO tables with different contributions or" << endl;
-   //       info["fnlo-tk-merge2"] << "to combine identical statistically independent additive contributions to improve" << endl;
-   //       info["fnlo-tk-merge2"] << "the statistical precision." << endl;
-   //       info["fnlo-tk-merge2"] << "The statistical information of each additive contribution is checked." << endl;
-   //       info["fnlo-tk-merge2"] << "An event number of unity indicates that this contribution" << endl;
-   //       info["fnlo-tk-merge2"] << "has been combined from multiple contributions losing the" << endl;
-   //       info["fnlo-tk-merge2"] << "the event normalisation information that is stored contribution-" << endl;
-   //       info["fnlo-tk-merge2"] << "and not bin-wise. Further merging of such tables is not possible." << endl;
-   //       yell << " #" << endl;
-   //       yell << _CSEPSC << endl;
-   //       return 0;
-   //    }
-   // }
-
    set<string> setfiles;
    vector<string> files;
    set<string> options;
    string outfile = argv[argc-1];
    string wgtoption = "GenWgt";
    string plotfile = "fnlo-tk-merge2.ps";
-   
-   for (int iarg=1; iarg<argc-1; iarg++) {
+   int pre = 0;
+   string preoptin = "NumEvtBinProc"; // NumEvt
+
+   int narg = argc-1;
+   for (int iarg=1; iarg<narg; iarg++) {
       string sarg = argv[iarg];
       if ( sarg.find(".tab") != string::npos ) {
 	 if (access(sarg.c_str(), R_OK) != 0) //! --- File there?
 	    warn["fnlo-tk-merge2"]<<"Unable to access file '" << sarg << "', skipped!" << endl;
 	 else { // keep it
-	    if ( setfiles.count(sarg) ) 
+	    if ( setfiles.count(sarg) ) {
 	       warn["fnlo-tk-merge2"]<<"File '"<<sarg<<"' already added once (but duplication is allowed)."<<endl;
+	    }
 	    files.push_back(sarg);
 	    setfiles.insert(sarg);
 	 }
       }
       else if ( sarg.find("-") == 0 ) {
+	 if ( options.count(sarg) ) {error["fnlo-tk-merge2"]<<"Duplicate option "<<sarg<<" recognized. Exiting."<<endl;exit(1); }
 	 options.insert(sarg);
 	 if ( sarg == "-p" ) plotfile=argv[++iarg];
 	 if ( sarg == "-w" ) wgtoption=argv[++iarg];
+	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
+	 if ( sarg == "-pre" ) { 
+	    pre=atoi(argv[++iarg]); 
+	    if ( _wgtoptions.count(argv[iarg+1]) ) preoptin=argv[++iarg]; 
+	    else info["fnlo-tk-merge2"]<<"Using pre-average weighting default: "<<preoptin<<endl;
+	 }
 	 if ( _validoptions.count(sarg) == 0 ) { 
 	    error["fnlo-tk-merge2"]<<"Invalid option '"<<sarg<<"'."<<endl<<endl;;
 	    PrintHelpMessage();
@@ -263,46 +279,33 @@ int main(int argc, char** argv) {
    }
    // i/o done
    // --------------------------------------------------------------------------------------- //
-
+   
    info["fnlo-tk-merge2"]<<"Using weighting option: "<<wgtoption<<"."<<endl;
-   fastNLOTable::EMerge moption = fastNLOTable::kUndefined;
-   if      ( wgtoption=="GenWgt" ) moption = fastNLOTable::kMerge ;
-   else if ( wgtoption=="append" ) moption = fastNLOTable::kAppend ;
-   else if ( wgtoption=="unweighted" ) moption = fastNLOTable::kUnweighted ;
-   else if ( wgtoption=="median" ) moption = fastNLOTable::kMedian ;
-   else if ( wgtoption=="mean" ) moption = fastNLOTable::kMean ;
-   else if ( wgtoption=="NumEvt" ) moption = fastNLOTable::kNumEvent ;
-   else if ( wgtoption=="SumW2" ) moption = fastNLOTable::kSumW2 ;
-   else if ( wgtoption=="SumSig2" ) moption = fastNLOTable::kSumSig2 ;
-   else if ( wgtoption=="NumEvtBinProc" ) moption = fastNLOTable::kNumEventBinProc ;
-   else if ( wgtoption=="SumW2BinProc" ) moption = fastNLOTable::kSumW2BinProc ;
-   else if ( wgtoption=="SumSig2BinProc" ) moption = fastNLOTable::kSumSig2BinProc ;
-   else moption = fastNLOTable::kUndefined;
 
-   if ( moption==fastNLOTable::kUndefined ) {
+   if ( _wgtoptions.count(wgtoption)==0 ) {
       error["fnlo-tk-merge2"]<<"Cannot recognize merge option: "<<wgtoption<<endl;
       exit(1);
    }
-   if ( moption==fastNLOTable::kMedian || moption == fastNLOTable::kMean ) {
-      error["fnlo-tk-merge2"]<<"Option median or median not yet implemented."<<endl;
-      exit(1);
-   }
+   fastNLOTable::EMerge moption = _wgtoptions[wgtoption];
+   fastNLOTable::EMerge prewgt  = _wgtoptions[preoptin];// alrady checked
+
+
 
    // --------------------------------------------------------------------------------------- //
    // --- calculate statistics for mergeing/normalisations
    // --------------------------------------------------------------------------------------- //
+   // DB: Currently nothing is happening in the following code block
+   //     Updates for option '-1' are needed as well...
    map<string,fastNLOTable*> alltables;
    map<string,unsigned int> lookup;
-   // all variables
    vector<fastNLO::WgtStat > allWgtStat(files.size());
-   
    for ( auto path : files ) {
       info["fnlo-tk-merge"]<<"Reading table '" << path << "'" << endl;
       fastNLOTable* tab = new fastNLOTable(path);
 
       if ( tab->GetItabversion() < 23000 ) {
-	 warn["fnlo-tk-merge2"]<<"This program is only compatible with fastNLO table versions > v2.3,000."<<endl;
-	 warn["fnlo-tk-merge2"]<<"Please use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
+	 warn["fnlo-tk-merge2"]<<"This program is maybe only compatible with fastNLO table versions > v2.3,000."<<endl;
+	 warn["fnlo-tk-merge2"]<<"Consider to use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
 	 //exit(2);
       }
 
@@ -346,10 +349,39 @@ int main(int argc, char** argv) {
       }
    }
    
-   // --- calculate weight
+   // --------------------------------------------------------------------------------------- //
+   // --- calculate statistics
    if ( options.count("-p") ) {
       vector<vector<vector<double> > > ProcBinWgt = CalculateWeight(allWgtStat,wgtoption);
    }
+
+   
+   // --------------------------------------------------------------------------------------- //
+   // --- calculating pre-averages if requested.
+   if ( pre > 1 ) {
+      fastNLOTable* keeptab = NULL;
+      vector<fastNLOTable*> addtab;
+      vector<string> remainingfiles;
+      for ( auto path : files ) {
+	 fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
+	 if ( keeptab == NULL ) {
+	    remainingfiles.push_back(path);
+	    keeptab = tab;
+	    continue;
+	 }
+	 else {
+	    addtab.push_back(tab);
+	    alltables.erase(path);
+	 }
+	 if ( int(addtab.size()) == pre-1 || files.back() == path) { // merge
+	    keeptab->MergeTables(addtab,prewgt);
+	    addtab.clear();
+	    keeptab = NULL;
+	 }
+      }
+      files=remainingfiles;
+   }
+
    // --------------------------------------------------------------------------------------- //
    //! --- Initialize output table
    fastNLOTable* resultTable = NULL;
@@ -358,12 +390,13 @@ int main(int argc, char** argv) {
    //! --- Loop input files and merge them
    // --------------------------------------------------------------------------------------- //
    int nValidTables = 0;
+   vector<fastNLOTable*> allvec;
    for ( auto path : files ) {
-      fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
-      if ( tab==NULL ) {
+      if ( alltables.count(path)==0 && pre<=1 ) {
 	 warn["fnlo-tk-merge2"]<<"Skipping table "<<path<<", because it was not found in list of valid tables."<<endl;
 	 continue;
       }
+      fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
 
       // --- Initialising result with first read table
       if ( resultTable==NULL ) {
@@ -375,10 +408,19 @@ int main(int argc, char** argv) {
       }
 
       // --- Adding further tables to result table
-      resultTable->MergeTable(*tab, moption);
+      if ( moption==fastNLOTable::kMedian || moption == fastNLOTable::kMean )  
+	 allvec.push_back(tab); // prepare for mergeing
+      else 
+	 resultTable->MergeTable(*tab, moption); // merge
       nValidTables++;
    }
 
+   // merge, if not yet done so
+   if ( moption == fastNLOTable::kMedian || moption == fastNLOTable::kMean ) {
+      resultTable->MergeTables(allvec,moption);
+   }
+
+   
    info["fnlo-tk-merge2"]<<"Merged "<<nValidTables<<" table file(s)."<<endl;
    if (nValidTables == 0 ) {
       error["fnlo-tk-merge"]<<"Found less than two valid tables, no output possible!"<<endl;
