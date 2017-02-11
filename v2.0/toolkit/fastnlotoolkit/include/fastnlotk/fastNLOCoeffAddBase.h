@@ -29,7 +29,7 @@ namespace fastNLO {
 	 for ( auto& i : WgtObsNumEv ) for ( auto& j : i ) j=0;
       };
 
-      void Add(const WgtStat& other) {
+      void Add(const WgtStat& other ) {
 	 this->WgtNevt  += other.WgtNevt;
 	 this->WgtNumEv += other.WgtNumEv;
 	 this->WgtSumW2 += other.WgtSumW2;
@@ -65,7 +65,7 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    void Read(std::istream& table);
    virtual void Write(std::ostream& table);
-   virtual void Add(const fastNLOCoeffAddBase& other);
+   virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption=fastNLO::kMerge);
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins
@@ -122,6 +122,7 @@ public:
 
    const fastNLO::WgtStat& GetWgtStat() const { return fWgt;} //!< Get weight and event counts
    fastNLO::WgtStat& AccessWgtStat() { return fWgt;} //!< Get weight and event counts
+   double GetMergeWeight(fastNLO::EMerge moption, int proc, int bin) const ; //!< Get merge weight for a given bin and subprocess
 
 protected:
    void ReadCoeffAddBase(std::istream& table);

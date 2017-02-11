@@ -172,7 +172,7 @@ void fastNLOCoeffAddFix::Write(ostream& table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other){
+void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption){
    //! Add another coefficient table to this table
    bool ok = CheckCoeffConstants(this);
    if ( !ok ) {
@@ -180,8 +180,38 @@ void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other){
       return;
    }
    const fastNLOCoeffAddFix& othfix = (const fastNLOCoeffAddFix&)other;
-   Nevt += othfix.Nevt;
-   fastNLOTools::AddVectors( SigmaTilde , othfix.SigmaTilde);
+   if ( moption==fastNLO::kMerge )  fastNLOTools::AddVectors( SigmaTilde , othfix.SigmaTilde);
+   else {
+      for( int i=0 ; i<fNObsBins ; i++ ){
+	 int nxmax = GetNxmax(i);
+	 for( int k=0 ; k<GetTotalScalevars() ; k++ ){
+	    for( int l=0 ; l<GetTotalScalenodes() ; l++ ){
+	       for( int m=0 ; m<nxmax ; m++ ){
+		  for( int n=0 ; n<NSubproc ; n++ ){
+		     double w1  = this->GetMergeWeight(moption,n,i);
+		     double w2  = other.GetMergeWeight(moption,n,i);
+		     double& s1 = this->SigmaTilde[i][k][l][m][n];
+		     double s2  = othfix.SigmaTilde[i][k][l][m][n];
+		     if ( s1!=0 || s2!=0 ) {
+			if ( w1==0 || w2==0 ) {
+			   error["fastNLOCoeffAddFix"]<<"Mergeing weight is 0, but sigma tilde is non-zero. Cannot proceed!"<<endl;
+			   exit(3);
+			}
+			s1 = ( w1*s1/Nevt + w2*s2/other.GetNevt() ) / (w1 + w2 ) * ( Nevt + other.GetNevt() ) ;
+		     }
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+   //Nevt += othfix.Nevt;
+   fastNLOCoeffAddBase::Add(other,moption);
+   if ( moption==fastNLO::kAppend || moption==fastNLO::kUnweighted ) {
+      NormalizeCoefficients(1);
+      Nevt = 1;
+      fWgt.WgtNevt = 0;
+   }
 }
 
 
@@ -282,17 +312,17 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(double wgt){
 void fastNLOCoeffAddFix::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin){
    //!< Set number of events to wgtProcBin for each subprocess and bin
    //!< and normalize coefficients accordingly.
-   if ( wgtProcBin.size() != GetNSubproc() ) {//NObs                                                                                                   
+   if ( int(wgtProcBin.size()) != GetNSubproc() ) {//NObs  
       error["NormalizeCoefficients"]<<"Dimension of weights (iObs) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
       exit(4);
    }
 
-   for ( unsigned int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
+   for ( int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
       if ( wgtProcBin[iProc].size() != GetNObsBin() ) { 
          error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
 	 exit(4);
       }
-      for ( unsigned int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
+      for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
          MultiplyBinProc(iObs, iProc, wgtProcBin[iProc][iObs]/Nevt);
       }
    }

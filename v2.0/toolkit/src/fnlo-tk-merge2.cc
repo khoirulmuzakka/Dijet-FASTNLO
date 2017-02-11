@@ -36,34 +36,34 @@ std::map<std::string,std::string> _validoptions{
 };
 
 
-std::map<std::string,fastNLOTable::EMerge> _wgtoptions {
-   {"GenWgt",fastNLOTable::kMerge },
-   {"append",fastNLOTable::kAppend },
-   {"unweighted",fastNLOTable::kUnweighted },
-   {"median",fastNLOTable::kMedian },
-   {"mean",fastNLOTable::kMean },
-   {"NumEvt",fastNLOTable::kNumEvent },
-   {"SumW2",fastNLOTable::kSumW2 },
-   {"SumSig2",fastNLOTable::kSumSig2 },
-   {"NumEvtBinProc",fastNLOTable::kNumEventBinProc },
-   {"SumW2BinProc",fastNLOTable::kSumW2BinProc },
-   {"SumSig2BinProc",fastNLOTable::kSumSig2BinProc },
-//   {"",fastNLOTable::kUndefined}
+std::map<std::string,fastNLO::EMerge> _wgtoptions {
+   {"GenWgt",fastNLO::kMerge },
+   {"append",fastNLO::kAppend },
+   {"unweighted",fastNLO::kUnweighted },
+   {"median",fastNLO::kMedian },
+   {"mean",fastNLO::kMean },
+   {"NumEvt",fastNLO::kNumEvent },
+   {"SumW2",fastNLO::kSumW2 },
+   {"SumSig2",fastNLO::kSumSig2 },
+   {"NumEvtBinProc",fastNLO::kNumEventBinProc },
+   {"SumW2BinProc",fastNLO::kSumW2BinProc },
+   {"SumSig2BinProc",fastNLO::kSumSig2BinProc },
+//   {"",fastNLO::kUndefined}
 };
 
-   //    fastNLOTable::EMerge moption = fastNLOTable::kUndefined;
-   // if      ( wgtoption=="GenWgt" ) moption = fastNLOTable::kMerge ;
-   // else if ( wgtoption=="append" ) moption = fastNLOTable::kAppend ;
-   // else if ( wgtoption=="unweighted" ) moption = fastNLOTable::kUnweighted ;
-   // else if ( wgtoption=="median" ) moption = fastNLOTable::kMedian ;
-   // else if ( wgtoption=="mean" ) moption = fastNLOTable::kMean ;
-   // else if ( wgtoption=="NumEvt" ) moption = fastNLOTable::kNumEvent ;
-   // else if ( wgtoption=="SumW2" ) moption = fastNLOTable::kSumW2 ;
-   // else if ( wgtoption=="SumSig2" ) moption = fastNLOTable::kSumSig2 ;
-   // else if ( wgtoption=="NumEvtBinProc" ) moption = fastNLOTable::kNumEventBinProc ;
-   // else if ( wgtoption=="SumW2BinProc" ) moption = fastNLOTable::kSumW2BinProc ;
-   // else if ( wgtoption=="SumSig2BinProc" ) moption = fastNLOTable::kSumSig2BinProc ;
-   // else moption = fastNLOTable::kUndefined;
+   //    fastNLOTable::EMerge moption = fastNLO::kUndefined;
+   // if      ( wgtoption=="GenWgt" ) moption = fastNLO::kMerge ;
+   // else if ( wgtoption=="append" ) moption = fastNLO::kAppend ;
+   // else if ( wgtoption=="unweighted" ) moption = fastNLO::kUnweighted ;
+   // else if ( wgtoption=="median" ) moption = fastNLO::kMedian ;
+   // else if ( wgtoption=="mean" ) moption = fastNLO::kMean ;
+   // else if ( wgtoption=="NumEvt" ) moption = fastNLO::kNumEvent ;
+   // else if ( wgtoption=="SumW2" ) moption = fastNLO::kSumW2 ;
+   // else if ( wgtoption=="SumSig2" ) moption = fastNLO::kSumSig2 ;
+   // else if ( wgtoption=="NumEvtBinProc" ) moption = fastNLO::kNumEventBinProc ;
+   // else if ( wgtoption=="SumW2BinProc" ) moption = fastNLO::kSumW2BinProc ;
+   // else if ( wgtoption=="SumSig2BinProc" ) moption = fastNLO::kSumSig2BinProc ;
+   // else moption = fastNLO::kUndefined;
 
 
 //__________________________________________________________________________________________________________________________________
@@ -286,8 +286,8 @@ int main(int argc, char** argv) {
       error["fnlo-tk-merge2"]<<"Cannot recognize merge option: "<<wgtoption<<endl;
       exit(1);
    }
-   fastNLOTable::EMerge moption = _wgtoptions[wgtoption];
-   fastNLOTable::EMerge prewgt  = _wgtoptions[preoptin];// alrady checked
+   fastNLO::EMerge moption = _wgtoptions[wgtoption];
+   fastNLO::EMerge prewgt  = _wgtoptions[preoptin];// alrady checked
 
 
 
@@ -408,7 +408,7 @@ int main(int argc, char** argv) {
       }
 
       // --- Adding further tables to result table
-      if ( moption==fastNLOTable::kMedian || moption == fastNLOTable::kMean )  
+      if ( moption==fastNLO::kMedian || moption == fastNLO::kMean )  
 	 allvec.push_back(tab); // prepare for mergeing
       else 
 	 resultTable->MergeTable(*tab, moption); // merge
@@ -416,7 +416,7 @@ int main(int argc, char** argv) {
    }
 
    // merge, if not yet done so
-   if ( moption == fastNLOTable::kMedian || moption == fastNLOTable::kMean ) {
+   if ( moption == fastNLO::kMedian || moption == fastNLO::kMean ) {
       resultTable->MergeTables(allvec,moption);
    }
 

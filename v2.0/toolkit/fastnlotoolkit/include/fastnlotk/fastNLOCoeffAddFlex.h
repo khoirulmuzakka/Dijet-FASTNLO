@@ -22,7 +22,7 @@ public:
    void ReadRest(std::istream& table);
    virtual void Write(std::ostream& table);
    virtual void Print(int iprint) const;
-   virtual void Add(const fastNLOCoeffAddBase& other);
+   virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption = fastNLO::kMerge);
 
    // Manipulate coefficient bins
    virtual void Clear(); //!< Clear all coefficients and event counters
@@ -42,7 +42,10 @@ public:
    std::vector < double > GetScaleNodes2(int iObsBin) const { return ScaleNode2[iObsBin]; };
    bool IsCompatible(const fastNLOCoeffAddFlex& other) const;                   //!< check for compatibilty for adding/merging of two tables
    bool IsCatenable(const fastNLOCoeffAddFlex& other) const;        //!< Check for compatibility of two contributions for merging/adding
-   std::vector<fastNLO::v5d*> AccessSigmaTildes() { 
+   std::vector<fastNLO::v5d*>  AccessSigmaTildes() { 
+      return {&SigmaTildeMuIndep,&SigmaTildeMuFDep,&SigmaTildeMuRDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
+   };//!< Get access to sigma tilde
+   std::vector<const fastNLO::v5d*> GetSigmaTildes() const { 
       return {&SigmaTildeMuIndep,&SigmaTildeMuFDep,&SigmaTildeMuRDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
    };//!< Get access to sigma tilde
 

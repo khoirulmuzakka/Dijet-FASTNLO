@@ -573,13 +573,16 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, EMerge moption) {
+void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO::EMerge moption) {
    //!< Merge all other tables with the current one.
    //!< Warning: data or multiplicative contributions might get lost
    //!< Warning: Function may require lots of memory, because all contributions are kept in memory.
+
+   // --- all (other) options
    if ( moption != kMean && moption != kMedian ) {
       for ( auto iTab :  other ) this->MergeTable(*iTab,moption);
    }
+   // --- mean or median
    else {
       if ( other.size() < 30 ) 
 	 logger.warn["MergeTables"]<<"Result may has a large spread, since only "<<other.size()+1<<" tables are merged."<<endl;
@@ -719,7 +722,7 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, EMerge m
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
+void fastNLOTable::MergeTable(const fastNLOTable& other, fastNLO::EMerge moption) {
    //!< Merge another table with the current one.
    //!< Use the option moption in order to specify the weighting procedure.
    //!<    + Default option uses 'normalisation' constant Nevt (usually called 'merge')
@@ -734,11 +737,16 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
    if ( moption == kUnweighted || moption == kAppend )
       logger.info["AppendTable"]<<"Adding (appending) another table. Resulting table will have weight 1 if option 'append' or 'unweighted' is used."<<endl;
    if ( moption == kUnweighted ) 
-      logger.warn["AppendTable"]<<"Option 'unweighted' requested. Do you probably want to use the number of entries instead (option = kNumEvent)? Continueing."<<endl;
+      logger.warn["AppendTable"]<<"Option 'unweighted' requested. Do you probably want to use the number of entries instead (option = kNumEvent)? Continuing."<<endl;
    if ( moption == kMerge ) { 
-      AddTable(other); 
-      return; 
-   };
+      AddTable(other,moption); 
+      return ;
+   }
+   else {
+      AddTable(other,moption); 
+      return ;
+   }
+/*
 
    //loop over all coefficients in this, and other table....
    // and normalize the coefficients of 'this' table to the ones of the other.
@@ -766,8 +774,12 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
 		     else if ( moption == kNumEvent ) TabWgt *= double(cadd->GetWgtStat().WgtNumEv)/double(cother->GetWgtStat().WgtNumEv);
 		     else if ( moption == kSumW2    ) TabWgt *= cadd->GetWgtStat().WgtSumW2/cother->GetWgtStat().WgtSumW2;
 		     else if ( moption == kSumSig2  ) TabWgt *= cadd->GetWgtStat().SigSumW2/cother->GetWgtStat().SigSumW2;
-		     if ( moption != kMerge ) // if needed
-			cadd->NormalizeCoefficients(TabWgt); // normalize THIS table to the other.
+		     if ( moption != kMerge ) { // if needed
+			if ( !isfinite(TabWgt) || TabWgt==0 )
+			   logger.error["MergeTable"]<<"Cannot merge table, because requested weights are zero or ill-defined (nan)."<<endl;
+			else 
+			   cadd->NormalizeCoefficients(TabWgt); // normalize THIS table to the other.
+		     }
 		     apctr.insert(jc);
 		  }
 		  else if ( moption == kNumEventBinProc ||
@@ -780,6 +792,7 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
 			   if      ( moption == kNumEventBinProc ) WgtOther *= double(cadd->GetWgtStat().WgtObsNumEv[i][j]) / double(cother->GetWgtStat().WgtObsNumEv[i][j]);
 			   else if ( moption == kSumW2BinProc    ) WgtOther *= cadd->GetWgtStat().WgtObsSumW2[i][j] / cother->GetWgtStat().WgtObsSumW2[i][j];
 			   else if ( moption == kSumSig2BinProc  ) WgtOther *= cadd->GetWgtStat().SigObsSumW2[i][j] / cother->GetWgtStat().SigObsSumW2[i][j];
+			   if ( !isfinite(WgtOther) )   WgtOther=0;
 			   BinProcWgt[i][j] = WgtOther;
 			}
 		     }
@@ -795,7 +808,7 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
       }
    }
    // --- 'merge' & run more checks
-   this->AddTable(other);
+   this->AddTable(other,moption);
    // ---- divide literally Nevt by 2
    //      and 'reset event weights', if needed.
    int norm = 0;
@@ -810,11 +823,12 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, EMerge moption) {
 	 cadd->SetNevt(1);
       }
    }
+   */
 }
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::AddTable(const fastNLOTable& other) {
+void fastNLOTable::AddTable(const fastNLOTable& other, fastNLO::EMerge moption) {
    // Add another table to this table.
    // Either increase statistics of existing fixed-order contribution or
    // add further contributions (or both, if many tables are merged)
@@ -853,7 +867,7 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
                if ( clhs->IsCompatible(*crhs) ) {
                   logger.info["AddTable"]<<"Found matching fix-scale additive contribution." << endl;
                   logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<jc<<endl;
-                  clhs->Add(*crhs);
+                  clhs->Add(*crhs,moption);
                   wasAdded = true;
                }
             }
@@ -863,7 +877,7 @@ void fastNLOTable::AddTable(const fastNLOTable& other) {
                if ( clhs->IsCompatible(*crhs) ) {
                   logger.info["AddTable"]<<"Found matching flex-scale additive contribution." << endl;
                   logger.debug["AddTable"]<<"Summing contribution "<<ic<<" to fCoeff #"<<jc<<endl;
-                  clhs->Add(*crhs);
+                  clhs->Add(*crhs,moption);
                   wasAdded = true;
                }
             }

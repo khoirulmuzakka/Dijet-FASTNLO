@@ -221,19 +221,9 @@ class fastNLOTable {
    /// ___________________________________________________________________________________________________
    /// Other useful functions
    /// ___________________________________________________________________________________________________
-   enum EMerge {  //!< mergeing options.
-      kMerge, //!< Calculate weighted average (default. Nevt usually set externally by generator code).
-      kAppend, //!< Append! Do not merge, but add two tables together (fully unweighted) (1+1=2).
-      kUnweighted, //!< Calculated unweighted average (usually better: take kNumEvent).
-      kNumEvent, kNumEventBinProc, //!< Calculate weighted average, using w = num entries
-      kSumW2,    kSumW2BinProc, //!< Calculate weighted average , using w = sum(weight**2)
-      kSumSig2,  kSumSig2BinProc, //!< Calculate weighted average, using w = sum(sig**2) [sig ~ wgt*as*pdf]
-      kMedian, kMean, //!< build median or median value of many tables (option not applicable to member function, because many tables are needed as input).
-      kUndefined //!< Error
-   };
-   void MergeTable(const fastNLOTable& rhs, EMerge option=kMerge ); //!< 'merge' 
-   void MergeTables(const std::vector<fastNLOTable*>& tables, EMerge option=kMerge ); //!< 'merge' (also supports 'median' and 'mean')
-   void AddTable(const fastNLOTable& rhs); //!< 'merge'
+   void MergeTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge ); //!< 'merge' 
+   void MergeTables(const std::vector<fastNLOTable*>& tables, fastNLO::EMerge option=fastNLO::kMerge ); //!< 'merge' (also supports 'median' and 'mean')
+   void AddTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge); //!< 'merge'
 
    /// Handle coefficient tables
    //int WriteCoeffTable(int no);

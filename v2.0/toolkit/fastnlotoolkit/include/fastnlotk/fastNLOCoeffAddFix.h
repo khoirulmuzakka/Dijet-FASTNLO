@@ -21,7 +21,7 @@ public:
    virtual void Read(std::istream&table);
    void ReadRest(std::istream& table);
    virtual void Write(std::ostream& table);
-   virtual void Add(const fastNLOCoeffAddBase& other);
+   virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption = fastNLO::kMerge);
    virtual void Print(int iprint) const;
 
    // Manipulate coefficient bins   
