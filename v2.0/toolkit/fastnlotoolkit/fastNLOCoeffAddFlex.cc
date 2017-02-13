@@ -269,10 +269,14 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    fastNLOCoeffAddBase::Add(other,moption);
 
    //Nevt += othflex.Nevt;
-   if ( moption==fastNLO::kAppend || moption==fastNLO::kUnweighted ) {
-      NormalizeCoefficients(1);
+   if ( moption==fastNLO::kAppend ) {
+      NormalizeCoefficients(2);
       Nevt = 1;
-      if ( moption==fastNLO::kAppend ) fWgt.WgtNevt = 1;
+      fWgt.WgtNevt = 1;
+
+   } 
+   else if ( moption==fastNLO::kUnweighted ) {
+      NormalizeCoefficients(1);
    }
 }
 

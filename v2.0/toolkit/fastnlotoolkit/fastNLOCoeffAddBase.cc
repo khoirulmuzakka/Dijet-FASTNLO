@@ -389,7 +389,7 @@ double fastNLOCoeffAddBase::GetMergeWeight(fastNLO::EMerge moption, int proc, in
    //!< Get a bin and subprocess dependent weight for merging puprposes.
    if      ( moption == kMerge    )   return fWgt.WgtNevt; // Nevt
    else if ( moption == kUnweighted ) return fWgt.NumTable;
-   else if ( moption == kAppend )     return 0.5;
+   else if ( moption == kAppend )     return 1;
    else if ( moption == kNumEvent )   return double(fWgt.WgtNumEv);
    else if ( moption == kSumW2    )   return fWgt.WgtSumW2;
    else if ( moption == kSumSig2  )   return fWgt.SigSumW2;
