@@ -265,13 +265,14 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       fastNLOTools::AddVectors( SigmaRef_s1 , othflex.SigmaRef_s1 );
       fastNLOTools::AddVectors( SigmaRef_s2 , othflex.SigmaRef_s2 );
    }
-   
+
    fastNLOCoeffAddBase::Add(other,moption);
+
    //Nevt += othflex.Nevt;
    if ( moption==fastNLO::kAppend || moption==fastNLO::kUnweighted ) {
       NormalizeCoefficients(1);
       Nevt = 1;
-      fWgt.WgtNevt = 1;
+      if ( moption==fastNLO::kAppend ) fWgt.WgtNevt = 1;
    }
 }
 

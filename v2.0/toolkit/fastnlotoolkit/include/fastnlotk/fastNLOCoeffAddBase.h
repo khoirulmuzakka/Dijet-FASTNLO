@@ -8,6 +8,7 @@
 namespace fastNLO { 
    struct WgtStat {
       double WgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
+      int NumTable = 1; //!< Number of tables merged into this table
       unsigned long long WgtNumEv = 0; //!< number of entries
       double WgtSumW2 = 0; //!< Sum of all weight**2
       double SigSumW2 = 0; //!< Sum of all sigma**2 (i.e. (wgt*alpha*pdf)**2 )

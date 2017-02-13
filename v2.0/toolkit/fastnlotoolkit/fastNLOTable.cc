@@ -699,10 +699,13 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 	       }
 	    }
 	    // add number of events together
+	    for ( auto othctr : others ) {
+	       cadd->AccessWgtStat().Add(othctr->GetWgtStat());
+	    }
+	    cadd->Nevt = nAll[0];
 	    double nTot = 0;
 	    for ( auto ii : nAll ) nTot+=ii;
 	    cadd->NormalizeCoefficients(nTot);
-	    for ( auto othctr : others ) cadd->AccessWgtStat().Add(othctr->GetWgtStat());
 	 }
       }
       // check for further contributions, which have not been considered!
@@ -881,8 +884,8 @@ void fastNLOTable::AddTable(const fastNLOTable& other, fastNLO::EMerge moption) 
                   wasAdded = true;
                }
             }
-	    // add weights (these are solely additive, without weighting!)
-	    ((fastNLOCoeffAddBase*)fCoeff[jc])->AccessWgtStat().Add( ((fastNLOCoeffAddBase*)other.GetCoeffTable(ic))->GetWgtStat() );
+	    // all weights are additive, and already been aded by fastNLOCoeffBase::Add();
+	    // ((fastNLOCoeffAddBase*)fCoeff[jc])->AccessWgtStat().Add( ((fastNLOCoeffAddBase*)other.GetCoeffTable(ic))->GetWgtStat() );
          }
          // Multiplicative?
          else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {

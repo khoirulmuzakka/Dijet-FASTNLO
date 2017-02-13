@@ -72,6 +72,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    if ( fVersionRead >= 24000 ) {
       table >> Nevt;
       table >> fWgt.WgtNevt;
+      table >> fWgt.NumTable;
       table >> fWgt.WgtNumEv;
       table >> fWgt.WgtSumW2;
       table >> fWgt.SigSumW2;
@@ -83,9 +84,11 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    }      
    else {
       table >> Nevt;
+      double readNevt = Nevt;
       if ( Nevt <= 0 ) { // v2300
 	 table >> Nevt;
 	 table >> fWgt.WgtNevt;
+	 if ( readNevt<=-2 ) table >> fWgt.NumTable;
 	 table >> fWgt.WgtNumEv;
 	 table >> fWgt.WgtSumW2;
 	 table >> fWgt.SigSumW2;
@@ -232,10 +235,12 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    table << IRef << sep;
    table << IScaleDep << sep;
    //table << Nevt << sep;
-   if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 ) { // detailed storage of weights
-      table << -1 << sep; // -1: read the values below
+   if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 || fastNLO::tabversion==23600 ) { // detailed storage of weights
+      if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 ) table << -1 << sep; // -1: read the values below
+      else table << -2 << sep; // -1: read the values below
       table << Nevt << sep;
       table << fWgt.WgtNevt << sep;
+      if ( fastNLO::tabversion>=23600 ) table << fWgt.NumTable << sep;
       table << fWgt.WgtNumEv << sep;
       table << fWgt.WgtSumW2 << sep;
       table << fWgt.SigSumW2 << sep;
@@ -248,6 +253,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
    else if ( fastNLO::tabversion>=24000 ) { // detailed storage of weights
       table << Nevt << sep;
       table << fWgt.WgtNevt << sep;
+      table << fWgt.NumTable << sep;
       table << fWgt.WgtNumEv << sep;
       table << fWgt.WgtSumW2 << sep;
       table << fWgt.SigSumW2 << sep;
@@ -355,8 +361,8 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
 void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption){
    //    double w1 = (double)Nevt / (Nevt+other.Nevt);
    //    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
-   if ( moption != fastNLO::kAppend ) {
-      if ( Nevt==1 || other.GetNevt()==1 ) {
+   if ( Nevt==1 || other.GetNevt()==1 ) {
+      if ( moption != fastNLO::kAppend && moption != fastNLO::kUnweighted ) {
          error["Add"]<<"Table has weight 1, which is invalid for mergeing purposes."<<endl;
          error["Add"]<<"Possibly, the table is a result from a previous 'append' or 'unweighted' mergeing."<<endl;
          exit(4);
@@ -365,6 +371,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
 
    Nevt += other.Nevt;
    fWgt.WgtNevt  += other.fWgt.WgtNevt;
+   fWgt.NumTable += other.fWgt.NumTable;
    fWgt.WgtNumEv += other.fWgt.WgtNumEv;
    fWgt.WgtSumW2 += other.fWgt.WgtSumW2;
    fWgt.SigSumW2 += other.fWgt.SigSumW2;
@@ -381,7 +388,7 @@ double fastNLOCoeffAddBase::GetMergeWeight(fastNLO::EMerge moption, int proc, in
 
    //!< Get a bin and subprocess dependent weight for merging puprposes.
    if      ( moption == kMerge    )   return fWgt.WgtNevt; // Nevt
-   else if ( moption == kUnweighted ) return 1.;
+   else if ( moption == kUnweighted ) return fWgt.NumTable;
    else if ( moption == kAppend )     return 0.5;
    else if ( moption == kNumEvent )   return double(fWgt.WgtNumEv);
    else if ( moption == kSumW2    )   return fWgt.WgtSumW2;
@@ -523,6 +530,7 @@ void fastNLOCoeffAddBase::Clear() {
    //! Clear all coefficients and event counts
    Nevt = 0;
    fWgt.WgtNevt = 0;
+   fWgt.NumTable = 1;
    fWgt.WgtNumEv = 0;
    fWgt.WgtSumW2 = 0;
    fWgt.SigSumW2 = 0;
@@ -622,6 +630,7 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
    printf(" # No. of events (Nevt)                %f\n",Nevt);
    if ( fWgt.WgtNevt!= 0 || fWgt.WgtSumW2!= 0 ) {
       printf(" # Weight of table [=Nevt] (fWgtNevt)  %f\n",fWgt.WgtNevt);
+      printf(" # Number of tables merged together    %d\n",fWgt.NumTable);
       printf(" # No. of filled events (WgtNumEv)     %llu\n",fWgt.WgtNumEv);
       printf(" # Sum of weights squared (WgtSumW2)   %f\n",fWgt.WgtSumW2);
       printf(" # Sum of sigma squared (SigSumW2)     %f\n",fWgt.SigSumW2);
