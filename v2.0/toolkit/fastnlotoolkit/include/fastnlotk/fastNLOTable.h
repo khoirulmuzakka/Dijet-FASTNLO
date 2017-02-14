@@ -22,7 +22,7 @@ class fastNLOTable {
  public:
    fastNLOTable();
    fastNLOTable(std::string filename);
-   ~fastNLOTable();
+   virtual ~fastNLOTable();
    fastNLOTable(const fastNLOTable&);
 
    virtual void ReadTable();

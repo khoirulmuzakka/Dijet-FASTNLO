@@ -20,6 +20,7 @@
 #include <set>
 #include <map>
 #include <utility>
+#include <memory>
 #include <unistd.h>
 #include "fastnlotk/fastNLOCoeffAddBase.h"
 #include "fastnlotk/fastNLOTable.h"
@@ -103,11 +104,12 @@ int main(int argc, char** argv) {
    //! --- Print program purpose
    info[_progname] << "Tool to merge fastNLO tables with different contributions or" << endl;
    info[_progname] << "to combine identical statistically independent contributions" << endl;
-   info[_progname] << "For more explanations type:" << endl;
-   info[_progname] << "  $  fnlo-tk-merge2 -h" << endl<<endl;
 
+   // --------------------------------------------------------------------------------------- //
    //! --- Parse commmand line
    if (argc <= 1) {
+      info[_progname] << "For more explanations type:" << endl;
+      info[_progname] << "  $  fnlo-tk-merge2 -h" << endl<<endl;
       error[_progname] << "No arguments given, but need at least two!" << endl;
       PrintHelpMessage();   exit(1);
    }
@@ -198,62 +200,60 @@ int main(int argc, char** argv) {
    // DB: Currently nothing is happening in the following code block
    //     Updates for option '-1' are needed as well...
    //map<string,fastNLOTable*> alltables;
-   vector<fastNLOTable*> alltables;
    //vector<fastNLOTable*,string> allpaths;
    //map<string,unsigned int> lookup;
    //vector<fastNLO::WgtStat > allWgtStat(files.size());
-   for ( auto path : files ) {
-      info[_progname]<<"Reading table '" << path << "'" << endl;
-      fastNLOTable* tab = new fastNLOTable(path);
+   /*
+   if ( options.count("-1") == 0 ) { // read in all files now!
+      for ( auto path : files ) {
+	 info[_progname]<<"Reading table '" << path << "'" << endl;
+	 fastNLOTable* tab = new fastNLOTable(path);
 
-      if ( tab->GetItabversion() < 23000 ) {
-	 warn[_progname]<<"This program is maybe only compatible with fastNLO table versions > v2.3,000."<<endl;
-	 warn[_progname]<<"Consider to use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
-	 //exit(2);
-      }
-
-      //alltables[path] = tab;
-      alltables.push_back(tab);
-      //allpaths[tab] = path;
-      // int tabid = alltables.size()-1;
-      // lookup[path] = tabid;
-      
-      //! --- Check statistical information of additive contributions
-      if ( options.count("-p") ) {
-	 int nc = tab->GetNcontrib() + tab->GetNdata();
-	 if ( nc != 1 ) {
-	    warn[_progname]<<"Program fnlo-tk-merge2 currently can only handle fastNLO tables with exactly one contributions. Please use program fnlo-tk-merge fnlo-tk-append."<<endl;
+	 if ( tab->GetItabversion() < 23000 ) {
+	    warn[_progname]<<"This program is maybe only compatible with fastNLO table versions > v2.3,000."<<endl;
+	    warn[_progname]<<"Consider to use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
 	    //exit(2);
 	 }
-	 for ( int ic=0 ; ic<nc; ic++ ) {
-	    bool quiet = true;
-	    fastNLOCoeffBase* cnew = (fastNLOCoeffBase*)tab->GetCoeffTable(ic);
-	    // Identify type of new coeff table, only additive ones have event numbers
-	    if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) { // additive?
-	       fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)cnew;
-	       if ( cadd->GetNevt() == 1 ) {
-		  warn[_progname]<<"Contribution #" << ic << " in table " << path << " has event number '1', which is usually invalid."<<endl;
-		  // error[_progname]<<"Contribution #" << ic << " in table " << path << endl;
-		  // error[_progname]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
-		  // error[_progname]<<"Nevt = " << cadd->GetNevt() << endl;
-		  //exit(1);
-	       }
-	       //
-	       //allWgtStat[tabid] = cadd->GetWgtStat();
+
+	 //alltables[path] = tab;
+	 alltables.push_back(tab);
+	 //allpaths[tab] = path;
+	 // int tabid = alltables.size()-1;
+	 // lookup[path] = tabid;
+      
+	 //! --- Check statistical information of additive contributions
+	 if ( options.count("-p") ) {
+	    int nc = tab->GetNcontrib() + tab->GetNdata();
+	    if ( nc != 1 ) {
+	       warn[_progname]<<"Program fnlo-tk-merge2 currently can only handle fastNLO tables with exactly one contributions. Please use program fnlo-tk-merge fnlo-tk-append."<<endl;
+	       //exit(2);
 	    }
-	    else {
-	       error[_progname]<<"Program fnlo-tk-merge2 can only deal with additive contributions. Exiting"<<endl;
-	       exit(2);
+	    for ( int ic=0 ; ic<nc; ic++ ) {
+	       bool quiet = true;
+	       fastNLOCoeffBase* cnew = (fastNLOCoeffBase*)tab->GetCoeffTable(ic);
+	       // Identify type of new coeff table, only additive ones have event numbers
+	       if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) { // additive?
+		  fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)cnew;
+		  if ( cadd->GetNevt() == 1 ) {
+		     warn[_progname]<<"Contribution #" << ic << " in table " << path << " has event number '1', which is usually invalid."<<endl;
+		     // error[_progname]<<"Contribution #" << ic << " in table " << path << endl;
+		     // error[_progname]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
+		     // error[_progname]<<"Nevt = " << cadd->GetNevt() << endl;
+		     //exit(1);
+		  }
+		  //
+		  //allWgtStat[tabid] = cadd->GetWgtStat();
+	       }
+	       else {
+		  error[_progname]<<"Program fnlo-tk-merge2 can only deal with additive contributions. Exiting"<<endl;
+		  exit(2);
+	       }
 	    }
 	 }
-	 if ( options.count("-1") ) { 
-	    error<<"Option -1 not yet fully implemented and tested."<<endl;
-	    //delete tab; 
-	    //alltables.erase(path); 
-	 } 
       }
-   }
-   
+   }   
+   */
+
    // --------------------------------------------------------------------------------------- //
    // --- calculate statistics
    // if ( options.count("-p") ) {
@@ -263,65 +263,64 @@ int main(int argc, char** argv) {
    
    // --------------------------------------------------------------------------------------- //
    // --- calculating pre-averages if requested.
+   vector<fastNLOTable*> alltables;
    if ( pre > 1 ) {
       fastNLOTable* keeptab = NULL;
       vector<fastNLOTable*> addtab;
-      vector<fastNLOTable*> remainingtabs;
-      for ( auto tab : alltables ) {
+      //for ( auto tab : alltables ) {
+      for ( const string& path : files ) {
 	 //fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
+	 fastNLOTable* tab = new fastNLOTable(path);
 	 if ( keeptab == NULL ) {
-	    remainingtabs.push_back(tab);
+	    alltables.push_back(tab);
 	    keeptab = tab;
 	    continue;
 	 }
 	 else {
 	    addtab.push_back(tab);
-	    //alltables.erase(path);
 	 }
-	 if ( int(addtab.size()) == pre-1 || alltables.back() == tab) { // merge
+	 if ( int(addtab.size()) == pre-1 /*|| files.back() == path*/ ) { // merge
 	    keeptab->MergeTables(addtab,prewgt);
+	    for ( fastNLOTable* t : addtab ) delete t;
 	    addtab.clear();
 	    keeptab = NULL;
 	 }
       }
-      alltables=remainingtabs;
+      if ( addtab.size() ) {
+	 keeptab->MergeTables(addtab,prewgt);
+	 for ( fastNLOTable* t : addtab ) delete t;
+      }
    }
 
    // --------------------------------------------------------------------------------------- //
-   //! --- Initialize output table
+   // --- Loop input files and merge them
+   // --------------------------------------------------------------------------------------- //
    fastNLOTable* resultTable = NULL;
-
-   // --------------------------------------------------------------------------------------- //
-   //! --- Loop input files and merge them
-   // --------------------------------------------------------------------------------------- //
-   int nValidTables = 0;
-   vector<fastNLOTable*> allvec;
-   for ( auto tab : alltables ) {
-      // --- Initialising result with first read table
-      if ( resultTable==NULL ) {
-	 info[_progname]<<"Initializing result table '" << outfile << "'" << endl;
-	 //resultTable = new fastNLOTable(*tab);
-	 resultTable = tab;
-	 nValidTables++;
-	 continue;
-      }
-      else {
-	 allvec.push_back(tab); // prepare for mergeing
-	 // // --- Adding further tables to result table
-	 // if ( moption==fastNLO::kMedian || moption == fastNLO::kMean )  
-	 //    allvec.push_back(tab); // prepare for mergeing
-	 // else 
-	 //    resultTable->MergeTable(*tab, moption); // merge
-	 nValidTables++;
+   int nValidTables = 1;
+   if ( alltables.empty() ) {
+      for ( const string& path : files ) {
+	 if ( resultTable==NULL ) 
+	    resultTable = new fastNLOTable(path);
+	 else {
+	    if ( moption == fastNLO::kMedian || moption == fastNLO::kMean ) 
+	       alltables.push_back(new fastNLOTable(path));
+	    else 
+	       resultTable->MergeTable(fastNLOTable(path), moption); // merge
+	    nValidTables++;
+	 }
       }
    }
+   else {
+      nValidTables = alltables.size();
+      resultTable = alltables.back();
+      alltables.pop_back();
+   }
+   resultTable->MergeTables(alltables,moption);
 
-   // ---- merge, if not yet done so
-   // if ( moption == fastNLO::kMedian || moption == fastNLO::kMean ) {
-      resultTable->MergeTables(allvec,moption);
-   // }
 
-   
+   // --------------------------------------------------------------------------------------- //
+   // --- Some concluding remarks
+   // --------------------------------------------------------------------------------------- //
    info[_progname]<<"Merged "<<nValidTables<<" table file(s)."<<endl;
    if (nValidTables == 0 ) {
       error[_progname]<<"Found less than two valid tables, no output possible!"<<endl;
