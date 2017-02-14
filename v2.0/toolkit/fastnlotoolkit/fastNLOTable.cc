@@ -734,12 +734,12 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, fastNLO::EMerge moption
    //!<    + Tables can be 'appended', i.e. the sum of the cross sections is calculated.
 
    // --- sanity and info messages
-   if ( moption==kMedian || moption==kMean) {
+   if ( moption==fastNLO::kMedian || moption==fastNLO::kMean) {
       logger.error["MergeTable"]<<"Options 'median' and 'mean' are not available when mergeing (only) two tables. Please use program fnlo-tk-merge2."<<endl; exit(1);
    }
-   if ( moption == kUnweighted || moption == kAdd )
+   if ( moption == fastNLO::kUnweighted || moption == fastNLO::kAdd )
       logger.info["AppendTable"]<<"Adding (appending) another table. Resulting table will have weight 1 if option 'append' or 'unweighted' is used."<<endl;
-   if ( moption == kUnweighted ) 
+   if ( moption == fastNLO::kUnweighted ) 
       logger.warn["AppendTable"]<<"Option 'unweighted' requested. Do you probably want to use the number of entries instead (option = kNumEvent)? Continuing."<<endl;
 
    // --- just call AddTable
