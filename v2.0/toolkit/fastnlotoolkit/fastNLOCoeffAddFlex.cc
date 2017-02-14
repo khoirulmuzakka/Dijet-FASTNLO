@@ -268,7 +268,15 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       vector<const fastNLO::v5d*> st2 = othflex.GetSigmaTildes();
       int cMax = st1.size();
       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
-	 if ( st1[ii]->size()==0 ) cMax--;
+	 if ( st1[ii]->size()==0 && st2[ii]->size()==0) cMax--;
+	 if ( st1[ii]->size() != st2[ii]->size() ) {
+            warn["Add"]<<"Scale dependent weights are not identically initialized..."<<endl;
+            //exit(1);
+	    if ( st1[ii]->size() == 0 ) {
+	       error["Add"]<<"...and calling table has less entries. Please try to call with opposite order of input arguments."<<endl;
+	       exit(1);
+	    }
+         }
       }
       for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
 	 for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
@@ -280,7 +288,7 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
 			double w1  = this->GetMergeWeight(moption,n,iObs);
 			double w2  = other.GetMergeWeight(moption,n,iObs);
 			double& s1 = (*st1[im])[iObs][x][jS1][kS2][n];
-			double s2  = (*st2[im])[iObs][x][jS1][kS2][n];
+			double s2  = st2[im]->size() ? (*st2[im])[iObs][x][jS1][kS2][n] : 0;
 			if ( s1!=0 || s2!=0 ) {
 			   if ( w1==0 || w2==0 ) {
 			      error["fastNLOCoeffAddFix"]<<"Mergeing weight is 0, but sigma tilde is non-zero. Cannot proceed!"<<endl;
