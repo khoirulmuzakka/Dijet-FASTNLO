@@ -363,7 +363,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    //    double w1 = (double)Nevt / (Nevt+other.Nevt);
    //    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
    if ( Nevt==1 || other.GetNevt()==1 ) {
-      if ( moption != fastNLO::kAdd && moption != fastNLO::kUnweighted ) {
+      if ( moption != fastNLO::kAdd && moption != fastNLO::kUnweighted && moption != fastNLO::kAttach ) {
          error["Add"]<<"Table has weight 1, which is invalid for mergeing purposes."<<endl;
          error["Add"]<<"Possibly, the table is a result from a previous 'append' or 'unweighted' mergeing."<<endl;
          exit(4);
@@ -373,7 +373,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    
    if ( moption==fastNLO::kAttach ) {
       //Nevt = Nevt;// stays!
-      fWgt.WgtNevt  += 1;
+      fWgt.WgtNevt  = 1;
       fWgt.NumTable += other.fWgt.NumTable;
       fWgt.WgtNumEv += other.fWgt.WgtNumEv;
       fWgt.WgtSumW2 += other.fWgt.WgtSumW2;
@@ -434,38 +434,36 @@ double fastNLOCoeffAddBase::GetMergeWeight(fastNLO::EMerge moption, int proc, in
 bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
    // chek CoeffBase variables
    if ( ! ((fastNLOCoeffBase*)this)->IsCompatible(other)) {
-      debug["fastNLOCoeffAddBase::IsCompatible"]<<"fastNLOCoeffBase not compatible."<<endl;
+      debug["IsCompatible"]<<"fastNLOCoeffBase not compatible."<<endl;
       return false;
    }
    if ( IRef != other.GetIRef() ) {
       //warn["IsCompatible"]<<""<<endl;
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of IRef detected."<<endl;
+      warn["IsCompatible"]<<"Different number of IRef detected."<<endl;
       return false;
    }
    if ( Nevt * other.Nevt < 0 ) {
       // skip, if the two tables store the event weights in different formats
       // If this is needed, simple solutions are thinkable
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Tables use different format for normalisation."<<endl;
+      warn["IsCompatible"]<<"Tables use different format for normalisation."<<endl;
       return false;
    }
    if ( IScaleDep != other.GetIScaleDep() ) {
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of IScaleDep detected."<<endl;
+      warn["IsCompatible"]<<"Different number of IScaleDep detected."<<endl;
       return false;
    }
    if ( Npow != other.GetNpow() ) {
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of NPow detected."<<endl;
-      //warn["IsCompatible"]<<""<<endl;
+      warn["IsCompatible"]<<"Different number of NPow detected."<<endl;
       return false;
    }
    if ( GetNPDF() != other.GetNPDF() ) {
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of NPDF detected."<<endl;
-      //warn["IsCompatible"]<<""<<endl;
+      warn["IsCompatible"]<<"Different number of NPDF detected."<<endl;
       return false;
    }
    if ( NSubproc != other.GetNSubproc() ) {
-      warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different numbers for NSubproc detected."<<endl;
-      //warn["IsCompatible"]<<""<<endl;
-      return false;
+      warn["IsCompatible"]<<"Different numbers for NSubproc detected."<<endl;
+      //return false;
+      warn["IsCompatible"]<<"Continuing! (experimental: This is needed for kAttach, but may causes bugs otherwise. Please report!)"<<endl;
    }
    // check x-nodes briefly
    if ( fNObsBins != other.GetNObsBin() ){
@@ -475,19 +473,19 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
    // check x-nodes briefly
    for ( int i = 0 ; i< fNObsBins ;i++ ){
       if ( GetNxmax(i) != other.GetNxmax(i) ){
-         error["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxmax(i)<<" <-> "<<other.GetNxmax(i)<<endl;
+         error["IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxmax(i)<<" <-> "<<other.GetNxmax(i)<<endl;
          return false;
       }
       if ( GetNxtot1(i) != other.GetNxtot1(i) ){
-         error["fastNLOCoeffAddBase::IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxtot1(i)<<" <-> "<<other.GetNxtot1(i)<<endl;
+         error["IsCompatible"]<<"Different number of x-nodes detected: "<<GetNxtot1(i)<<" <-> "<<other.GetNxtot1(i)<<endl;
          return false;
       }
       if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
-         warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected. Lowest x-node: "<<GetXNode1(i,0)<<" <-> "<<other.GetXNode1(i,0)<<endl;
+         warn["IsCompatible"]<<"Different values for x-nodes detected. Lowest x-node: "<<GetXNode1(i,0)<<" <-> "<<other.GetXNode1(i,0)<<endl;
          return false;
       }
       // if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
-      //    warn["fastNLOCoeffAddBase::IsCompatible"]<<"Different values for x-nodes detected."<<endl;
+      //    warn["IsCompatible"]<<"Different values for x-nodes detected."<<endl;
       //    return false;
       // }
    }
@@ -500,51 +498,51 @@ bool fastNLOCoeffAddBase::IsCompatible(const fastNLOCoeffAddBase& other) const {
 bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
    // check CoeffBase variables
    if ( ! ((fastNLOCoeffBase*)this)->IsCatenable(other)) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"fastNLOCoeffBase not compatible. Skipped."<<endl;
+      debug["IsCatenable"]<<"fastNLOCoeffBase not compatible. Skipped."<<endl;
       return false;
    }
    if ( Nevt * other.Nevt < 0 ) {
       // skip, if the two tables store the event weights in different formats
       // If this is needed, simple solutions are thinkable
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Tables use different format for table normalisation. Skipped."<<endl;
+      debug["IsCatenable"]<<"Tables use different format for table normalisation. Skipped."<<endl;
       return false;
    }
    if ( IRef != other.GetIRef() ) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of IRef detected. Skipped."<<endl;
+      debug["IsCatenable"]<<"Different number of IRef detected. Skipped."<<endl;
       return false;
    }
    if ( IScaleDep != other.GetIScaleDep() ) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of IScaleDep detected. Skipped."<<endl;
+      debug["IsCatenable"]<<"Different number of IScaleDep detected. Skipped."<<endl;
       return false;
    }
    if ( Npow != other.GetNpow() ) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of NPow detected. Skipped."<<endl;
+      debug["IsCatenable"]<<"Different number of NPow detected. Skipped."<<endl;
       return false;
    }
    if ( GetNPDF() != other.GetNPDF() ) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of NPDF detected. Skipped."<<endl;
+      debug["IsCatenable"]<<"Different number of NPDF detected. Skipped."<<endl;
       return false;
    }
    if ( NSubproc != other.GetNSubproc() ) {
-      debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different numbers for NSubproc detected. Skipped."<<endl;
+      debug["IsCatenable"]<<"Different numbers for NSubproc detected. Skipped."<<endl;
       return false;
    }
    // check x-nodes briefly
    // for ( int i = 0 ; i< fNObsBins ;i++ ){
    //    if ( GetNxmax(i) != other.GetNxmax(i) ){
-   //       debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of x-nodes detected."<<endl;
+   //       debug["IsCatenable"]<<"Different number of x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetNxtot1(i) != other.GetNxtot1(i) ){
-   //       debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different number of x-nodes detected."<<endl;
+   //       debug["IsCatenable"]<<"Different number of x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetXNode1(i,0) != other.GetXNode1(i,0) ){
-   //       debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different values for x-nodes detected."<<endl;
+   //       debug["IsCatenable"]<<"Different values for x-nodes detected."<<endl;
    //       return false;
    //    }
    //    if ( GetXNode1(i,1) != other.GetXNode1(i,1) ){
-   //       debug["fastNLOCoeffAddBase::IsCatenable"]<<"Different values for x-nodes detected."<<endl;
+   //       debug["IsCatenable"]<<"Different values for x-nodes detected."<<endl;
    //       return false;
    //    }
    // }
@@ -678,7 +676,7 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
    } else if ( NPDFDim == 2 ) {
       printf(" #   --> x-interpolation storage format: Full-Matrix\n");
    } else {
-      error["fastNLOCoeffAddBase::Print"] << "Unknown interpolation storage structure, aborting! "
+      error["Print"] << "Unknown interpolation storage structure, aborting! "
                                           << " NPDFDim = " << NPDFDim << endl;
    }
 
@@ -732,7 +730,7 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
-   debug["fastNLOCoeffAddBase::EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
+   debug["EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
    if ( XNode1.size() == 0 ) {
       error["EraseBin"]<<"All additive contribution bins deleted already. Aborted!" << endl;
       exit(1);
@@ -749,7 +747,7 @@ void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
 
 // Catenate observable bin
 void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx) {
-   debug["fastNLOCoeffAddBase::CatBin"]<<"Catenating observable bin in CoeffAddBase corresponding to bin index " << iObsIdx << endl;
+   debug["CatBin"]<<"Catenating observable bin in CoeffAddBase corresponding to bin index " << iObsIdx << endl;
    if ( XNode1.size() == 0 ) {
       error["CatBin"]<<"Initial additive table is empty. Aborted!" << endl;
       exit(1);
