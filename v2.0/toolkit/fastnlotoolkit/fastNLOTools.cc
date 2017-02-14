@@ -31,6 +31,7 @@ namespace fastNLOTools {
       //! from table (v2.0 format).
       for( unsigned int i=0 ; i<v.size() ; i++){
 	 table >> v[i];
+	 v[i] *= nevts;
 	 if ( !isfinite(v[i]) ) {
             error["ReadVector"]<<"Non-finite number read from table, aborted! value = " << v[i] << endl;
             error["ReadVector"]<<"Please check the table content." << endl;
