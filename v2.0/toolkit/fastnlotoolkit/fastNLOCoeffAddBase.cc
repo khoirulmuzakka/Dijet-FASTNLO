@@ -362,24 +362,51 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    //    double w1 = (double)Nevt / (Nevt+other.Nevt);
    //    double w2 = (double)other.Nevt / (Nevt+other.Nevt);
    if ( Nevt==1 || other.GetNevt()==1 ) {
-      if ( moption != fastNLO::kAppend && moption != fastNLO::kUnweighted ) {
+      if ( moption != fastNLO::kAdd && moption != fastNLO::kUnweighted ) {
          error["Add"]<<"Table has weight 1, which is invalid for mergeing purposes."<<endl;
          error["Add"]<<"Possibly, the table is a result from a previous 'append' or 'unweighted' mergeing."<<endl;
          exit(4);
       }
    }
 
-   Nevt += other.Nevt;
-   fWgt.WgtNevt  += other.fWgt.WgtNevt;
-   fWgt.NumTable += other.fWgt.NumTable;
-   fWgt.WgtNumEv += other.fWgt.WgtNumEv;
-   fWgt.WgtSumW2 += other.fWgt.WgtSumW2;
-   fWgt.SigSumW2 += other.fWgt.SigSumW2;
-   fWgt.SigSum   += other.fWgt.SigSum;
-   fastNLOTools::AddVectors( fWgt.WgtObsSumW2, other.fWgt.WgtObsSumW2 );
-   fastNLOTools::AddVectors( fWgt.SigObsSumW2, other.fWgt.SigObsSumW2 );
-   fastNLOTools::AddVectors( fWgt.SigObsSum,   other.fWgt.SigObsSum );
-   fastNLOTools::AddVectors( fWgt.WgtObsNumEv, other.fWgt.WgtObsNumEv );
+   
+   if ( moption==fastNLO::kAttach ) {
+      //Nevt = Nevt;// stays!
+      fWgt.WgtNevt  += 1;
+      fWgt.NumTable += other.fWgt.NumTable;
+      fWgt.WgtNumEv += other.fWgt.WgtNumEv;
+      fWgt.WgtSumW2 += other.fWgt.WgtSumW2;
+      fWgt.SigSumW2 += other.fWgt.SigSumW2;
+      fWgt.SigSum   += other.fWgt.SigSum;
+      for ( unsigned int iAddProc = 0 ; iAddProc<other.fWgt.WgtObsSumW2.size() ; iAddProc++ ) {
+	 fWgt.WgtObsSumW2.push_back(other.fWgt.WgtObsSumW2[iAddProc]);
+	 fWgt.SigObsSumW2.push_back(other.fWgt.SigObsSumW2[iAddProc]);
+	 fWgt.SigObsSum.push_back(other.fWgt.SigObsSum[iAddProc]);
+	 fWgt.WgtObsNumEv.push_back(other.fWgt.WgtObsNumEv[iAddProc]);
+      }
+      if ( other.GetPDFCoeff().size() ==0  || this->GetPDFCoeff().size()==0 ) {
+	 error["Add"]<<"Mergeing option 'kAttach' requires that PDF coefficients are stored in table.!"<<endl;
+      }
+      for ( unsigned int iAddProc = 0 ; iAddProc<other.GetPDFCoeff().size() ;iAddProc++ ) {
+	 fPDFCoeff.push_back(other.GetPDFCoeff()[iAddProc]);
+      }
+      NSubproc += other.GetNSubproc();
+      IPDFdef3 += other.GetIPDFdef3();
+   }
+   else {
+      Nevt += other.Nevt;
+      fWgt.WgtNevt  += other.fWgt.WgtNevt;
+      fWgt.NumTable += other.fWgt.NumTable;
+      fWgt.WgtNumEv += other.fWgt.WgtNumEv;
+      fWgt.WgtSumW2 += other.fWgt.WgtSumW2;
+      fWgt.SigSumW2 += other.fWgt.SigSumW2;
+      fWgt.SigSum   += other.fWgt.SigSum;
+      fastNLOTools::AddVectors( fWgt.WgtObsSumW2, other.fWgt.WgtObsSumW2 );
+      fastNLOTools::AddVectors( fWgt.SigObsSumW2, other.fWgt.SigObsSumW2 );
+      fastNLOTools::AddVectors( fWgt.SigObsSum,   other.fWgt.SigObsSum );
+      fastNLOTools::AddVectors( fWgt.WgtObsNumEv, other.fWgt.WgtObsNumEv );
+   }
+   
 }
 
 
@@ -389,7 +416,7 @@ double fastNLOCoeffAddBase::GetMergeWeight(fastNLO::EMerge moption, int proc, in
    //!< Get a bin and subprocess dependent weight for merging puprposes.
    if      ( moption == kMerge    )   return fWgt.WgtNevt; // Nevt
    else if ( moption == kUnweighted ) return fWgt.NumTable;
-   else if ( moption == kAppend )     return 1;
+   else if ( moption == kAdd )     return 1;
    else if ( moption == kNumEvent )   return double(fWgt.WgtNumEv);
    else if ( moption == kSumW2    )   return fWgt.WgtSumW2;
    else if ( moption == kSumSig2  )   return fWgt.SigSumW2;

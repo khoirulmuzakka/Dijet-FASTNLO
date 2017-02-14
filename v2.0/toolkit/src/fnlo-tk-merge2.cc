@@ -33,14 +33,16 @@ std::map<std::string,std::string> _validoptions{
    {"-o","output    -o <output>. Specify output file name (the last argument is then considered to be an input table)."},
 //   {"-p","Plot.   -p <filename>. Plot some statistics of all input files. Option must be followed by filename."},
 //   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
-   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, append, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
+   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, add (append), attach, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
    {"-pre","pre-avg -pre <n> <option>. 2 step mergeing: Build pre-averaged of n tables using weighting procedure <option>."},
 };
 
 
 std::map<std::string,fastNLO::EMerge> _wgtoptions {
    {"GenWgt",fastNLO::kMerge },
-   {"append",fastNLO::kAppend },
+   {"add",fastNLO::kAdd },
+   {"append",fastNLO::kAdd }, // deprecated
+   {"attach",fastNLO::kAttach }, // deprecated
    {"unweighted",fastNLO::kUnweighted },
    {"median",fastNLO::kMedian },
    {"mean",fastNLO::kMean },
@@ -85,109 +87,6 @@ void PrintHelpMessage() {
       man << "  "<<iop.first<<"\t\t"<<iop.second<<endl;
    }
    man << " " <<endl;
-}
-
-//__________________________________________________________________________________________________________________________________
-std::vector<std::vector<std::vector<double> > > CalculateWeight(const std::vector<fastNLO::WgtStat >& allWgtStat, const std::string& wgtoption) {
-   using namespace std;
-   using namespace say;
-   if ( allWgtStat.empty() ) exit(3);
-
-   //! calculate weight for weighted average.
-   unsigned int nTab  = allWgtStat.size();
-   unsigned int nProc = allWgtStat[0].WgtObsNumEv.size();
-   unsigned int nBin  = allWgtStat[0].WgtObsNumEv[0].size();
-   
-   vector<vector<vector<double> > > ret(nTab);
-   for ( unsigned int iTab = 0 ; iTab<nTab ; iTab++ ) { // loop over all input tables.
-      ret[iTab].resize(nProc); // proc
-      for ( unsigned int iProc = 0 ; iProc < nProc ; iProc++ ) { // proc
-	 ret[iTab][iProc].resize(nBin); // proc
-      }
-   }
-   // struct fastNLO::WgtStat
-   // vector<double> allWgtNevt;
-   // vector<unsigned long long> allWgtNumEv;
-   // vector<double> allWgtSumW2; 
-   // vector<double> allSigSumW2; 
-   // vector<double> allSigSum; 
-   // vector<fastNLO::v2d> allWgtObsSumW2;
-   // vector<fastNLO::v2d> allSigObsSumW2;
-   // vector<fastNLO::v2d> allSigObsSum;  
-   // vector<std::vector < std::vector < unsigned long long > > > allWgtObsNumEv; 
-
-   if ( wgtoption=="median" ) return ret;
-
-   const double wgt00 = -1000;
-   vector<vector<double> > WgtPerProc(nTab);
-   vector<vector<double> > WgtPerBin(nTab);
-   for ( unsigned int iTab = 0 ; iTab<nTab ; iTab++ ) { // loop over all input tables.
-      double wgt=wgt00;
-      // --- one weight for an entire table
-      if ( wgtoption.find("tot") != string::npos ) {
-	 if ( wgtoption.find("NumEvt")  != string::npos )      wgt = allWgtStat[iTab].WgtNumEv;
-	 else if ( wgtoption.find("SumW2")   != string::npos ) wgt = allWgtStat[iTab].WgtSumW2;
-	 else if ( wgtoption.find("SumSig2") != string::npos ) wgt = allWgtStat[iTab].SigSumW2;      
-      }
-      else if ( wgtoption == "GenWgt" ) wgt = allWgtStat[iTab].WgtNevt;
-      else if ( wgtoption == "unweighted" ) wgt = 1;
-      else if ( wgtoption == "append" ) wgt = -1;
-      if ( wgt == 0 ) {
-	 error["CalculateWeight"]<<"The requested weight '"<<wgtoption<<"' is zero and thus not available in the table."<<endl;
-	 exit(3);
-      }
-      else if ( wgt != wgt00 ) {
-	 for ( unsigned int iProc = 0 ; iProc < nProc ; iProc++ ) { // proc
-	    for ( unsigned int iBin = 0 ; iBin < nBin ; iBin++ ) { // ObsBin
-	       ret[iTab][iProc][iBin]  = wgt;
-	    }
-	 }
-	 return ret; // done !
-      }
-      // --- different weights for a single table
-      else {
-	 WgtPerProc[iTab].resize(nProc);
-	 WgtPerBin [iTab].resize(nBin);
-	 for ( unsigned int iProc = 0 ; iProc < nProc ; iProc++ ) { // proc
-	    for ( unsigned int iBin = 0 ; iBin < nBin ; iBin++ ) { // ObsBin
-	       if      ( wgtoption.find("NumEvt")  != string::npos ) wgt = allWgtStat[iTab].WgtObsNumEv[iProc][iBin] ;
-	       else if ( wgtoption.find("SumW2")   != string::npos ) wgt = allWgtStat[iTab].WgtObsSumW2[iProc][iBin] ;
-	       else if ( wgtoption.find("SumSig2") != string::npos ) wgt = allWgtStat[iTab].SigObsSumW2[iProc][iBin] ;
-	       else {
-		  say::error["CalculateWeight"]<<"Unrecognized 'weight' option: "<<wgtoption<<endl; exit(2); 
-	       }
-	       if ( wgt == 0 ) {
-		  error["CalculateWeight"]<<"The requested weight '"<<wgtoption<<"' is zero for proc="<<iProc<<" and bin="<<iBin<<" and thus not available in the table."<<endl;
-		  exit(3);
-	       }
-	       ret       [iTab][iProc][iBin]   = wgt;
-	       WgtPerProc[iTab][iProc]        += wgt;
-	       WgtPerBin [iTab][iBin]         += wgt;
-	    }
-	 }
-	 if ( wgtoption.find("BinProc") ) return ret; // done!
-	 else if ( wgtoption.find("Bin") != string::npos ) {
-	    for ( unsigned int iProc = 0 ; iProc < nProc ; iProc++ ) { // proc
-	       for ( unsigned int iBin = 0 ; iBin < nBin ; iBin++ ) { // ObsBin
-		  ret  [iTab][iProc][iBin] = WgtPerBin[iTab][iBin];// 
-	       }
-	    }
-	 }
-	 else if ( wgtoption.find("Proc") != string::npos ) {
-	    for ( unsigned int iProc = 0 ; iProc < nProc ; iProc++ ) { // proc
-	       for ( unsigned int iBin = 0 ; iBin < nBin ; iBin++ ) { // ObsBin
-		  ret  [iTab][iProc][iBin] = WgtPerProc[iTab][iProc];// 
-	       }
-	    }
-	 }
-	 else {
-	    error["CalculateWeight"]<<"Unrecognized weight option: "<<wgtoption<<endl;
-	    exit(3);
-	 }
-	 return ret;
-      }
-   }
-   return ret;
 }
 
 //__________________________________________________________________________________________________________________________________

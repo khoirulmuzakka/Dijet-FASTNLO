@@ -181,6 +181,22 @@ void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge m
    }
    const fastNLOCoeffAddFix& othfix = (const fastNLOCoeffAddFix&)other;
    if ( moption==fastNLO::kMerge )  fastNLOTools::AddVectors( SigmaTilde , othfix.SigmaTilde);
+   else if ( moption==fastNLO::kAttach ) {
+      for( int i=0 ; i<fNObsBins ; i++ ){
+	 int nxmax = GetNxmax(i);
+	 for( int k=0 ; k<GetTotalScalevars() ; k++ ){
+	    for( int l=0 ; l<GetTotalScalenodes() ; l++ ){
+	       for( int m=0 ; m<nxmax ; m++ ){
+		  for( int n=0 ; n<other.GetNSubproc() ; n++ ){ // attach all other subprocesses
+		     double s2  = othfix.SigmaTilde[i][k][l][m][n];
+		     s2 *= this->Nevt/other.GetNevt();
+		     this->SigmaTilde[i][k][l][m].push_back(s2);
+		  }
+	       }
+	    }
+	 }
+      }
+   }
    else {
       for( int i=0 ; i<fNObsBins ; i++ ){
 	 int nxmax = GetNxmax(i);
@@ -207,13 +223,15 @@ void fastNLOCoeffAddFix::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge m
    }
    //Nevt += othfix.Nevt;
    fastNLOCoeffAddBase::Add(other,moption);
-   if ( moption==fastNLO::kAppend ) {
+   if ( moption==fastNLO::kAdd ) {
       NormalizeCoefficients(2);
       Nevt = 1;
       fWgt.WgtNevt = 1;
-
    }
    else if ( moption==fastNLO::kUnweighted ) {
+      NormalizeCoefficients(1);
+   }
+   else if ( moption==fastNLO::kAttach ) {
       NormalizeCoefficients(1);
    }
 }
@@ -322,7 +340,7 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(const std::vector<std::vector<dou
    }
 
    for ( int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
-      if ( wgtProcBin[iProc].size() != GetNObsBin() ) { 
+      if ( int(wgtProcBin[iProc].size()) != GetNObsBin() ) { 
          error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
 	 exit(4);
       }

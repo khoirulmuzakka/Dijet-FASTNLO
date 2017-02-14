@@ -16,6 +16,7 @@ namespace fastNLOTools {
 	 error["fastNLOTools::CheckVersion"]<<"This table version ("<<version<<") is incompatible with this fastNLO code."<<endl;
 	 error["fastNLOTools::CheckVersion"]<<"Supported table versions are:";
 	 for ( auto i : fastNLO::CompatibleVersions ) error>>" "<<i;
+	 error>>""<<endl;
 	 error["fastNLOTools::CheckVersion"]<<"Exiting."<<endl;
 	 exit(1);
 	 return false;

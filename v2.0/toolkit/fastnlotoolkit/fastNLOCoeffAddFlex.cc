@@ -165,13 +165,13 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
          nn3 += fastNLOTools::WriteFlexibleVector( SigmaTildeMuRFDep , table , NSubproc, Nevt);
       }
    }
+
    if ( SigmaRefMixed.empty() ) fastNLOTools::ResizeVector(SigmaRefMixed,fNObsBins,NSubproc);
    if ( SigmaRef_s1.empty() )   fastNLOTools::ResizeVector(SigmaRef_s1,fNObsBins,NSubproc);
    if ( SigmaRef_s2.empty() )   fastNLOTools::ResizeVector(SigmaRef_s2,fNObsBins,NSubproc);
    nn3 += fastNLOTools::WriteFlexibleVector( SigmaRefMixed      , table , NSubproc, Nevt);
    nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s1        , table , NSubproc, Nevt);
    nn3 += fastNLOTools::WriteFlexibleVector( SigmaRef_s2        , table , NSubproc, Nevt);
-
    /*
      nn3 += WriteFlexibleTable( &SigmaTildeMuIndep, table , (bool)(option & DividebyNevt) , Nevt , true );
 
@@ -230,6 +230,39 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       fastNLOTools::AddVectors( SigmaRef_s1 , othflex.SigmaRef_s1 );
       fastNLOTools::AddVectors( SigmaRef_s2 , othflex.SigmaRef_s2 );
    }
+   else if ( moption==fastNLO::kAttach ) {
+      vector<fastNLO::v5d*> st1 = this->AccessSigmaTildes();
+      vector<const fastNLO::v5d*> st2 = othflex.GetSigmaTildes();
+      int cMax = st1.size();
+      for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
+	 if ( st1[ii]->size()==0 ) cMax--;
+	 if ( st1[ii]->size() != st2[ii]->size() ) {
+	    error["Add"]<<"Scale dependent weights are not identically initialized"<<endl;
+	    exit(1);
+	 }
+      }
+      for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
+	 for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
+	    for (unsigned int kS2=0; kS2<GetNScaleNode2(iObs); kS2++) {
+	       int nxmax = GetNxmax(iObs);
+	       for (int x=0; x<nxmax; x++) {
+		  for (int n=0; n<other.GetNSubproc(); n++) {
+		     for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ... 
+			double s2  = (*st2[im])[iObs][x][jS1][kS2][n];
+			s2 *= this->Nevt/other.GetNevt();
+			(*st1[im])[iObs][x][jS1][kS2].push_back(s2);
+		     }
+		  }
+	       }
+	    }
+	 }
+	 for (int n=0; n<other.GetNSubproc(); n++) {
+	    SigmaRefMixed[iObs].push_back(othflex.SigmaRefMixed[iObs][n]);
+	    SigmaRef_s1[iObs].push_back(othflex.SigmaRef_s1[iObs][n]);
+	    SigmaRef_s2[iObs].push_back(othflex.SigmaRef_s2[iObs][n]);
+	 }      
+      }
+   }
    else {     
       vector<fastNLO::v5d*> st1 = this->AccessSigmaTildes();
       vector<const fastNLO::v5d*> st2 = othflex.GetSigmaTildes();
@@ -269,13 +302,15 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    fastNLOCoeffAddBase::Add(other,moption);
 
    //Nevt += othflex.Nevt;
-   if ( moption==fastNLO::kAppend ) {
+   if ( moption==fastNLO::kAdd ) {
       NormalizeCoefficients(2);
       Nevt = 1;
       fWgt.WgtNevt = 1;
-
    } 
    else if ( moption==fastNLO::kUnweighted ) {
+      NormalizeCoefficients(1);
+   }
+   else if ( moption==fastNLO::kAttach ) {
       NormalizeCoefficients(1);
    }
 }
