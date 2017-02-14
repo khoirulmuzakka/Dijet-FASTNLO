@@ -220,6 +220,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       //            StripWhitespace(ScaleDescript[i][j]);
       }
    }
+   
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }

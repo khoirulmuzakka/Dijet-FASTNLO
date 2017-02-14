@@ -121,9 +121,9 @@ int fastNLOTable::ReadHeader(istream& table) {
       logger.warn["ReadHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
    }
    // check if ScenName contains spaces
-   int Ncontrib,Ndata;
+   int Ncontrib,Ndata,Nmult;
    table >> Ncontrib;
-   fastNLOTools::ReadUnused(table); // Nmult
+   table >> Nmult ; // not used any longer
    table >> Ndata;
    fastNLOTools::ReadUnused(table); // NuserString
    fastNLOTools::ReadUnused(table); // NuserInt
@@ -259,10 +259,10 @@ void fastNLOTable::ReadScenario(istream& table){
    if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Scenario
    table >> Ipublunits;
    fastNLOTools::ReadFlexibleVector(ScDescript,table);
+   char buffer[257];
    // size_t NScDescript = 0;
    // table >> NScDescript;
    // ScDescript.resize(NScDescript);
-   // char buffer[257];
    // table.getline(buffer,256);
    // for(size_t i=0;i<NScDescript;i++){
    //    table.getline(buffer,256);
@@ -273,19 +273,19 @@ void fastNLOTable::ReadScenario(istream& table){
    table >> Ecms;
    table >> ILOord;
    table >> NObsBin;
-   NDim = fastNLOTools::ReadFlexibleVector(DimLabel,table) -1 ;
-   // table >> NDim;
-   // DimLabel.resize(NDim);
-   // table.getline(buffer,256);
-   // for(int i=NDim-1;i>=0;i--){
-   //    table.getline(buffer,256);
-   //    DimLabel[i] = buffer;
-   // }
-   fastNLOTools::ReadFlexibleVector(IDiffBin,table,NDim);
-   // IDiffBin.resize(NDim);
-   // for(int i=NDim-1;i>=0;i--){
-   //    table >>  IDiffBin[i];
-   // }
+   //NDim = fastNLOTools::ReadFlexibleVector(DimLabel,table) -1 ;
+   table >> NDim;
+   DimLabel.resize(NDim);
+   table.getline(buffer,256);
+   for(int i=NDim-1;i>=0;i--){
+      table.getline(buffer,256);
+      DimLabel[i] = buffer;
+   }
+   //fastNLOTools::ReadFlexibleVector(IDiffBin,table,NDim);
+   IDiffBin.resize(NDim);
+   for(int i=NDim-1;i>=0;i--){
+      table >>  IDiffBin[i];
+   }
    Bin.resize(NObsBin);
    for(unsigned int i=0;i<NObsBin;i++){
       Bin[i].resize(NDim);
