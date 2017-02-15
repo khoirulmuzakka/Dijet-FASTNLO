@@ -71,19 +71,22 @@ fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
 #
 # C++ compiler flags
 #
-fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall 
-fnlo_tk_example_CXXFLAGS = -g -O2 -Wall -Wno-deprecated-declarations -std=gnu++11
+# Recall: -std=c++11 is requested by default through configure.ac macro AX_CXX_COMPILE_STDCXX_11
+#         and works with g++, clang etc.!
+#         -std=gnu++11 is restricted to g++ only and not the best option
+fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_example_CXXFLAGS = -g -O2 -Wall -Wno-deprecated-declarations
 if HAVE_ROOT
    fnlo_tk_example_CXXFLAGS += $(ROOTCXXFLAGS)
 endif
-fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall 
-fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall 
+fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall
+fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall
 fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS) -Wdeprecated-declarations
-fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall 
-fnlo_tk_merge2_CXXFLAGS  = -g -O2 -Wall -std=gnu++11 $(ROOTCXXFLAGS)
-fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall 
-fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall 
-fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall 
+fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall
+fnlo_tk_merge2_CXXFLAGS  = -g -O2 -Wall $(ROOTCXXFLAGS)
+fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall
+fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall
+fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall
 # Debug flags
 #fnlo_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
 

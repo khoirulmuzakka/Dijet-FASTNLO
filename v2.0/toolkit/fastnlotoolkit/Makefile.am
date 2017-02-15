@@ -34,7 +34,7 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 # Preprocessor flags
 #
 # All targets, -fext-numeric-literals needed for conflict with Boost
-AM_CPPFLAGS = -std=c++11 -lstdc++ -fext-numeric-literals
+AM_CPPFLAGS = -fext-numeric-literals
 # Individual targets
 libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 #
@@ -54,6 +54,9 @@ libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 #
 # top_srcdir for direct compilation before install; pkgincludedir for after install
 #
+# Recall: -std=c++11 is requested by default through configure.ac macro AX_CXX_COMPILE_STDCXX_11
+#         and works with g++, clang etc.!
+#         -std=gnu++11 is restricted to g++ only and not the best option
 # All targets
 AM_CXXFLAGS = -g -O2 -Wall  -Wdeprecated-declarations -I$(top_srcdir)/include -I$(srcdir)/include -I$(top_builddir)/include
 # Debug flags
