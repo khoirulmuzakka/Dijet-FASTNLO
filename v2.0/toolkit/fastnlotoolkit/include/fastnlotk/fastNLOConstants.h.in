@@ -56,7 +56,8 @@ namespace fastNLO {
 
    // ---- constants ---- //
    static const std::set<int> CompatibleVersions{20000,21000,22000,23000,23500,23600,24000};
-   const int tabversion   = 23600;
+   //   const int tabversion   = 23600;
+   const int tabversion   = 22000;
    const int tablemagicno = 1234567890;
    // separating character between entries in table
    const char sep[] = "\n";
