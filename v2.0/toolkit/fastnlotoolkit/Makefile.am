@@ -34,9 +34,9 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 # Preprocessor flags
 #
 # All targets, -fext-numeric-literals needed for conflict with Boost
-#AM_CPPFLAGS = -fext-numeric-literals
+AM_CPPFLAGS = -fext-numeric-literals
 # Add temporarily ... should really not be necessary
-AM_CPPFLAGS = -fext-numeric-literals -std=c++11 -lstdc++
+# AM_CPPFLAGS = -fext-numeric-literals -std=c++11 -lstdc++
 # Individual targets
 libfastnlotoolkit_la_CPPFLAGS = $(AM_CPPFLAGS)
 #
