@@ -68,6 +68,7 @@ AM_CONDITIONAL(HAVE_LIBZ, test "x$ZLIBTEST" != "x")
 # Checks for typedefs, structures, compiler characteristics and functionalities.
 AC_HEADER_STDBOOL
 AC_C_INLINE
+# For gcc, full C++11 functionality has been supported since version 4.8.1
 AX_CXX_COMPILE_STDCXX_11
 
 # Checks for library functions.
