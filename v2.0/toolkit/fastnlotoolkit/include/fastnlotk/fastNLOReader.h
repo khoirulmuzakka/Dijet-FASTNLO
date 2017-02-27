@@ -42,7 +42,10 @@ public:
    /// Get, if this table is a 'flexible-scale' table or not.
    inline bool GetIsFlexibleScaleTable(fastNLOCoeffAddBase* ctest=NULL) const {
       if ( ctest ) return  ctest->GetNScaleDep() >= 3;
-      else return B_LO()->GetIsFlexibleScale();
+      else if ( B_LO() ) return B_LO()->GetIsFlexibleScale();
+      else if ( B_NLO() ) return B_NLO()->GetIsFlexibleScale();
+      else if ( B_NNLO() ) return B_NNLO()->GetIsFlexibleScale();
+      else return false;
    }
 
    // ---- setters for scales of MuVar tables ---- //
@@ -161,15 +164,17 @@ protected:
    double FuncProd(double scale1 , double scale2) ;
    double FuncExpProd2(double scale1 , double scale2) ;
 
-   void CalcCrossSectionv21(fastNLOCoeffAddFlex* B , bool IsLO = false);
-   void CalcCrossSectionv20(fastNLOCoeffAddFix*  B , bool IsLO = false);
+   void CalcCrossSectionv20(fastNLOCoeffAddFix*  B);
+   void CalcCrossSectionv21(fastNLOCoeffAddFlex* B);
 
-   fastNLOCoeffAddBase* B_NLO() const {
-      if ( BBlocksSMCalc[fastNLO::kFixedOrder].size() < 2 ) return NULL;
-      else return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];
-   };
    fastNLOCoeffAddBase* B_LO() const {
       return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kLeading];
+   };
+   fastNLOCoeffAddBase* B_NLO() const {
+      return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];
+   };
+   fastNLOCoeffAddBase* B_NNLO() const {
+      return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToNextToLeading];
    };
    fastNLOCoeffBase* B_ThC(int n=0) {
       if (BBlocksSMCalc[fastNLO::kThresholdCorrection].empty()) return NULL;

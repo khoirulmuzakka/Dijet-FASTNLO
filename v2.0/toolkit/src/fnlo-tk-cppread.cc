@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
    //---  End of parsing arguments
 
    //! --- Reset verbosity level to warning only from here on
-   SetGlobalVerbosity(WARNING);
+   SetGlobalVerbosity(DEBUG);
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!
@@ -793,8 +793,7 @@ int main(int argc, char** argv) {
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
-      error["fnlo-tk-cppread"] << "LO not found, nothing to be done!" << endl;
-      exit(1);
+      warn["fnlo-tk-cppread"] << "LO not found, output is still experimental!" << endl;
    } else {
       info["fnlo-tk-cppread"] << "The LO contribution has Id: " << ilo << endl;
    }
@@ -1137,18 +1136,32 @@ int main(int argc, char** argv) {
       string headdim2 = " IODimI ";
       //! Scales and descriptions should be equal for all orders ...
       //! In case of flex-scale tables only the first defined scale is looked at here
-      string headscl  = fnlo->GetScaleDescription(kLeading,0);
-      string header2  = " LO cross section";
+      string headscl = "";
+      string header2 = "";
+      if (ilo>-1) {
+         headscl += fnlo->GetScaleDescription(kLeading,0);
+         header2 += " LO cross section";
+      }
       if (inlo>-1) {
-         header2 += "   NLO cross section";
+         if (headscl == "") headscl += fnlo->GetScaleDescription(kNextToLeading,0);
+         if (ilo>-1) {
+            header2 += "   NLO cross section";
+         } else {
+            header2 += " NLO contribution ";
+         }
       }
       if (innlo>-1) {
-         header2 += "  NNLO cross section";
+         if (headscl == "") headscl += fnlo->GetScaleDescription(kNextToNextToLeading,0);
+         if (ilo>-1 && inlo>-1) {
+            header2 += "  NNLO cross section";
+         } else {
+            header2 += " NNLO contribution ";
+         }
       }
-      if (inlo>-1) {
+      if (ilo>-1 && inlo>-1) {
          header2 += "   KNLO";
       }
-      if (innlo>-1) {
+      if (ilo>-1 && inlo>-1 && innlo>-1) {
          header2 += "      KNNLO";
       }
       if (ithc2>-1 && lthcvar) {
@@ -1164,13 +1177,16 @@ int main(int argc, char** argv) {
          header2 += "     KNPC1";
       }
 
+      //      cout << "ilo = " << ilo << ", inlo = " << inlo << ", innlo = " << innlo << endl;
+
       if (NDim == 1) {
          snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ]  <%-12.12s> %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
          yell << _SSEPLC << endl;
          NDimBins[0] = 0;
-         for (unsigned int i=0; i<xslo.size(); i++) {
+
+         for (int i=0; i<NObsBin; i++) {
             NDimBins[0]++;
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
@@ -1204,6 +1220,14 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       qsclo[i],xslo[i]);
+            } else if (ilo == -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscnlo[i],xsnlo[i]);
+            } else if (ilo == -1 && innlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      qscnnlo[i],xsnnlo[i]);
             } else {
                printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
