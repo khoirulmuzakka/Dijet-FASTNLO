@@ -1177,8 +1177,6 @@ int main(int argc, char** argv) {
          header2 += "     KNPC1";
       }
 
-      //      cout << "ilo = " << ilo << ", inlo = " << inlo << ", innlo = " << innlo << endl;
-
       if (NDim == 1) {
          snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ]  <%-12.12s> %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headscl.c_str(),header2.c_str());
@@ -1277,6 +1275,14 @@ int main(int argc, char** argv) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
                       i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
                       NDimBins[1],LoBin[i][1],UpBin[i][1],qsclo[i],xslo[i]);
+            } else if (ilo == -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnlo[i],xsnlo[i]);
+            } else if (ilo == -1 && innlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],NDimBins[0],LoBin[i][0],UpBin[i][0],
+                      NDimBins[1],LoBin[i][1],UpBin[i][1],qscnnlo[i],xsnnlo[i]);
             } else {
                printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
@@ -1300,6 +1306,21 @@ int main(int argc, char** argv) {
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
                       fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
                       qscnlo[i],xslo[i],xsnlo[i],kfac1[i]);
+            } else if (ilo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qsclo[i],xslo[i]);
+            } else if (ilo == -1 && inlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qscnlo[i],xsnlo[i]);
+            } else if (ilo == -1 && innlo > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qscnnlo[i],xsnnlo[i]);
             } else {
                printf("fnlo-tk-cppread: Nothing to report!\n");
                continue;
