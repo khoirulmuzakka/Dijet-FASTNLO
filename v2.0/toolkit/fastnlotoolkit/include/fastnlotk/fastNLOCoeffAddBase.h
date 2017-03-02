@@ -20,6 +20,7 @@ namespace fastNLO {
       
       void Erase() {
 	 WgtNevt=0;
+	 NumTable=1;
 	 WgtNumEv=0;
 	 WgtSumW2=0;
 	 SigSumW2=0;
@@ -32,6 +33,7 @@ namespace fastNLO {
 
       void Add(const WgtStat& other ) {
 	 this->WgtNevt  += other.WgtNevt;
+	 this->NumTable += other.NumTable;
 	 this->WgtNumEv += other.WgtNumEv;
 	 this->WgtSumW2 += other.WgtSumW2;
 	 this->SigSumW2 += other.SigSumW2;
