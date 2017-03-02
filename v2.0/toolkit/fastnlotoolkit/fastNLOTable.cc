@@ -100,18 +100,7 @@ int fastNLOTable::ReadHeader(istream& table) {
       logger.error["ReadHeader"]<<"Cannot read from stream."<<endl;
    }
 
-   if (!fastNLOTools::ReadMagicNo(table)) {
-#ifndef HAVE_LIBZ
-      // check if filename ends with .gz
-      std::string ending = ".gz";
-      if (ffilename.length() >= ending.length() && ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
-         logger.error["ReadHeader"]<<"Input file has a .gz file extension but zlib support is not enabled!"<<endl;
-      }
-#endif
-      logger.error["ReadHeader"]<<"Did not find initial magic number, aborting!"<<endl;
-      logger.error["ReadHeader"]<<"Please check compatibility of tables and program version!"<<endl;
-      exit(1);
-   }
+   fastNLOTools::ReadMagicNo(table);
    table >> Itabversion;
    fastNLOTools::CheckVersion(Itabversion);
    std::string test;
@@ -252,7 +241,6 @@ void fastNLOTable::WriteHeader(std::ostream& table) {
 
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadScenario(istream& table){
-
    //table.peek();
    fastNLOTools::ReadMagicNo(table);
    std::string test;
@@ -317,7 +305,6 @@ void fastNLOTable::ReadScenario(istream& table){
    }
    if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
    if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
-
    fastNLOTools::ReadMagicNo(table);
    // if (!fastNLOTools::ReadMagicNo(table)) {
    //    logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
@@ -669,29 +656,32 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 	    }
 	    else { // fixed scale
 	       fastNLOCoeffAddFix* ctrb = (fastNLOCoeffAddFix*)cadd;
+	       vector<double> vals(nAll.size());
 	       for (unsigned int iobs=0 ; iobs<ctrb->SigmaTilde.size() ; iobs++) {
 		  for (unsigned int s=0 ; s<ctrb->SigmaTilde[iobs].size() ; s++) {
 		     for (unsigned int x=0 ; x<ctrb->SigmaTilde[iobs][s].size() ; x++) {
 			for (unsigned int l=0 ; l<ctrb->SigmaTilde[iobs][s][x].size() ; l++) {
 			   for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
-			      double mean = ctrb->SigmaTilde[iobs][s][x][l][p] ;
-			      //double rms = mean*mean;x
-			      vector<double> vals{mean};
-			      vals.reserve(others.size()+1);
-			      for ( auto othctr : others ) {
-				 double vv = ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p];
-				 mean += vv ;
-				 //rms += vv*vv;
-				 vals.push_back(vv);
+
+			      if ( moption == kMean  ) {
+				 double mean = ctrb->SigmaTilde[iobs][s][x][l][p] ;
+				 for ( auto othctr : others ) {
+				    mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p];
+				 }
+				 ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
 			      }
-			      mean /= (others.size()+1);
-			      //rms = sqrt(rms/others.size()+1);
-			      std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-			      double median = vals[vals.size()/2];
-			      if ( moption == kMean  )
-				 ctrb->SigmaTilde[iobs][s][x][l][p] = mean;
-			      if ( moption == kMedian ) 
-				 ctrb->SigmaTilde[iobs][s][x][l][p] = median;
+			      else if ( moption == kMedian ) {
+				 vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / nAll[0];
+				 for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
+				    vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / nAll[is+1];
+				 }
+				 double median = vals[vals.size()/2];
+				 if ( vals.size()%2 == 0 ) {
+				    median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				 }
+				 ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
+			      }
+
 			   }
 			}
 		     }
@@ -2211,7 +2201,18 @@ std::istream* fastNLOTable::OpenFileRead() {
       logger.error["OpenFileRead"]<<"File does not exist! Was looking for: "<<ffilename<<". Exiting."<<endl;
       exit(1);
    }
+
+   // check if filename ends with .gz
+#ifndef HAVE_LIBZ
+   const std::string ending = ".gz";
+   if (ffilename.length() >= ending.length() && ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
+      logger.error["ReadHeader"]<<"Input file has a .gz file extension but zlib support is not enabled! Please unzip file first."<<endl;
+      exit(1);
+   }
+#endif
+
    std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in));
+   if ( strm ) logger.info["OpenFileRead"]<<"Opened file "<<ffilename<<" successfully."<<endl;
    return strm;
 }
 
@@ -2259,7 +2260,8 @@ void fastNLOTable::CloseFileWrite(std::ostream& table) {
 bool fastNLOTable::IsCompatibleHeader(const fastNLOTable& other) const {
    if (Itabversion!= other.GetItabversion()) {
       logger.warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
-      return false;
+      if ( Itabversion+other.GetItabversion() == 23500+23600 ) {}
+      else return false;
    }
    if (GetNdata() + other.GetNdata() > 1) {
       logger.warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
