@@ -664,17 +664,18 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 			   for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
 
 			      if ( moption == kMean  ) {
-				 double mean = ctrb->SigmaTilde[iobs][s][x][l][p] ;
+				 double mean = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
 				 for ( auto othctr : others ) {
-				    mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p];
+				    mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
 				 }
 				 ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
 			      }
 			      else if ( moption == kMedian ) {
-				 vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / nAll[0];
+				 vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / ctrb->GetNevt();
 				 for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
-				    vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / nAll[is+1];
+				    vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / others[is]->GetNevt();
 				 }
+				 std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
 				 double median = vals[vals.size()/2];
 				 if ( vals.size()%2 == 0 ) {
 				    median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
