@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
    //---  End of parsing arguments
 
    //! --- Reset verbosity level to warning only from here on
-   SetGlobalVerbosity(DEBUG);
+   SetGlobalVerbosity(WARNING);
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!
