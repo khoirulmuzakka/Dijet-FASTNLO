@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
          man << "   - Specify the PDF set including the absolute path." << endl;
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
-         man << "   Alternatives: LO, NNLO (if available)" << endl;
+         man << "   Alternatives: LO, NNLO, NLO-ONLY, NNLO-ONLY (if available)" << endl;
          man << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
          man << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
          yell << " #" << endl;
@@ -120,6 +120,7 @@ int main(int argc, char** argv) {
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
    string chord = "NLO";
+   bool lexclusive = false;
    if (argc > 3) {
       chord = (const char*) argv[3];
    }
@@ -135,6 +136,14 @@ int main(int argc, char** argv) {
       } else if ( chord == "NNLO" ) {
          eOrder = kNextToNextToLeading;
          shout["fnlo-tk-statunc"] << "Deriving NNLO cross sections for comparison." << endl;
+      } else if ( chord == "NLO-ONLY" ) {
+         eOrder = kNextToLeading;
+         lexclusive = true;
+         shout["fnlo-tk-statunc"] << "Deriving NLO contributions for comparison." << endl;
+      } else if ( chord == "NNLO-ONLY" ) {
+         eOrder = kNextToNextToLeading;
+         lexclusive = true;
+         shout["fnlo-tk-statunc"] << "Deriving NNLO contributions for comparison." << endl;
       } else {
          error["fnlo-tk-statunc"] << "Illegal choice of fixed-order precision, " << chord << ", aborted!" << endl;
          exit(1);
@@ -199,7 +208,10 @@ int main(int argc, char** argv) {
    for ( int itab=nmin; itab<=nmax; itab++) {
       char buftmp[5];
       snprintf(buftmp, sizeof(buftmp), "%04d", itab);
+      // Try table
       string tablename = tablebase + "_" + buftmp + ".tab";
+      // Try gzipped table, if not found
+      if ( ! access(tablename.c_str(), R_OK) == 0 ) tablename += ".gz";
       if ( access(tablename.c_str(), R_OK) == 0 ) {
          nfound++;
          fastNLOLHAPDF fnlo(tablename,PDFFile,0);
@@ -221,24 +233,30 @@ int main(int argc, char** argv) {
          if ( nfound == 1 || (nfound-1) % 10 == 0 ) {shout << "Analyzing table " << tablename << " ..." << endl;}
          //! Check on existence of LO (Id = -1 if not existing)
          int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
-         if (ilo < 0) {
+         if (ilo < 0 && ! lexclusive ) {
             error["fnlo-tk-statunc"] << "LO not found, aborted!" << endl;
             exit(1);
+         } else if (ilo < 0) {
+            info["fnlo-tk-statunc"] << "No LO contribution found!" << endl;
          } else {
             if ( nfound == 1 ) {info["fnlo-tk-statunc"] << "The LO contribution has Id: " << ilo << endl;}
-            fnlo.SetContributionON(kFixedOrder, ilo, true);
+            if (! lexclusive) {
+               fnlo.SetContributionON(kFixedOrder, ilo, true);
+            } else {
+               fnlo.SetContributionON(kFixedOrder, ilo, false);
+            }
          }
          //! Check on existence of NLO (Id = -1 if not existing)
          int inlo  = fnlo.ContrId(kFixedOrder, kNextToLeading);
          if (inlo < 0) {
             info["fnlo-tk-statunc"] << "No NLO contribution found!" << endl;
-            if ( eOrder >= kNextToLeading ) {
+            if ( eOrder == kNextToLeading || (eOrder > kNextToLeading && ! lexclusive) ) {
                error["fnlo-tk-statunc"] << "Requested NLO not found, aborted!" << endl;
                exit(1);
             }
          } else {
-            if ( nfound == 1 ) {info["fnlo-tk-statunc"] << "The NLO contribution has Id: " << inlo << endl;}
-            if ( eOrder >= kNextToLeading ) {
+            if ( nfound == 1 ) info["fnlo-tk-statunc"] << "The NLO contribution has Id: " << inlo << endl;
+            if ( eOrder == kNextToLeading || (eOrder > kNextToLeading && ! lexclusive)) {
                fnlo.SetContributionON(kFixedOrder, inlo, true);
             } else {
                fnlo.SetContributionON(kFixedOrder, inlo, false);
@@ -247,14 +265,14 @@ int main(int argc, char** argv) {
          //! Check on existence of NNLO (Id = -1 if not existing)
          int innlo = fnlo.ContrId(kFixedOrder, kNextToNextToLeading);
          if (innlo < 0) {
-            if ( nfound == 1 ) {info["fnlo-tk-statunc"] << "No NNLO contribution found!" << endl;}
-            if ( eOrder >= kNextToNextToLeading ) {
+            if ( nfound == 1 ) info["fnlo-tk-statunc"] << "No NNLO contribution found!" << endl;
+            if ( eOrder == kNextToNextToLeading || (eOrder > kNextToNextToLeading && ! lexclusive)) {
                error["fnlo-tk-statunc"] << "Requested NNLO not found, aborted!" << endl;
                exit(1);
             }
          } else {
-            info["fnlo-tk-statunc"] << "The NNLO contribution has Id: " << innlo << endl;
-            if ( eOrder >= kNextToNextToLeading ) {
+            if ( nfound == 1 ) info["fnlo-tk-statunc"] << "The NNLO contribution has Id: " << innlo << endl;
+            if ( eOrder == kNextToNextToLeading || (eOrder > kNextToNextToLeading && ! lexclusive)) {
                fnlo.SetContributionON(kFixedOrder, innlo, true);
             } else {
                fnlo.SetContributionON(kFixedOrder, innlo, false);
