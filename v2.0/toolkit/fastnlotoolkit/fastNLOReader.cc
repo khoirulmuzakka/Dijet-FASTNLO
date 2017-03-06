@@ -1748,7 +1748,9 @@ bool fastNLOReader::TestAlphas() {
 
 //______________________________________________________________________________
 bool fastNLOReader::TestXFX() {
-   vector<double> pdftest = GetXFX(1.e-2,10);
+   const double xtest  = 1.e-2;
+   const double mutest = 10;
+   vector<double> pdftest = GetXFX(xtest,mutest);
    if ( pdftest.size() != 13 && pdftest.size() != 14) {
       logger.error["TestXFX"]<<"The pdf array must have either 13 flavours or 13+1 for an additional photon entry that is not yet used in fastNLO!" << endl << "   Here, the pdf array's size is: " << pdftest.size() << endl;
       return false;
@@ -1759,7 +1761,7 @@ bool fastNLOReader::TestXFX() {
    // if ( sum== 0. ) printf("fastNLOReader. Error. All 13 pdf probabilities are 0. There might be sth. wrong in the pdf interface. Please check FastNLOUser::GetXFX().\n");
    for (int i = 0 ; i<13 ; i++) {
       if (pdftest[i] > 1.e10 || (pdftest[i] < 1.e-10 && pdftest[i] > 1.e-15)) {
-         logger.warn["TestXFX"]<<"The pdf probability of the "<<i<<"'s flavor seeems to be unreasonably large/small (pdf="<<pdftest[i]<<").\\n";
+         logger.warn["TestXFX"]<<"The pdf probability of the "<<i<<"'s flavor seeems to be unreasonably large/small (pdf="<<pdftest[i]<<") at x="<<xtest<<", mu="<<mutest<<".\n";
       }
    }
    return true;
@@ -1818,8 +1820,12 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
                      if (c->GetNPDFDim() == 0) {
                         if (!GetIsFlexibleScaleTable(c))
                            FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
-                        else
-                           FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+                        else {
+			   // DIS specific hack, as we do not intend to include data or mult. contributions
+			   FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c,(fastNLOCoeffAddFlex*)BBlocksSMCalc[0][0]);
+			   //otherwise, please simply use:
+			   //FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+			}
                      }
                   }
                   // ---- pp ---- //
@@ -1883,7 +1889,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
 
 
 //______________________________________________________________________________
-void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
+void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffAddFlex* c0) {
    //! Fill member variables in fastNLOCoeffAddFlex with PDFCache
    logger.debug["FillBlockBPDFLCsDISv21"]<<endl;//<<"CoeffTable = "<<endl;
 
@@ -1891,6 +1897,32 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
       logger.error<< "PdfLcMuVar is empty in CoeffTable. Printing and exiting."<<endl;
       c->Print(-1);
       exit(1);
+   }
+
+   // we take the PDF coefficients from the first contributions if compatible
+   // this avoids repetive access to LHAPDF
+   static const bool SpeedUp = true;
+   bool IsCompatible = false;
+   if ( SpeedUp ){
+      if ( c0 != NULL && c0 != c ) {
+	 IsCompatible = true;
+	 for (unsigned int i=0; i<NObsBin; i++) {
+	    IsCompatible &= ( c->GetNScaleNode1(i) == c0->GetNScaleNode1(i) ) ;
+	    IsCompatible &= ( c->GetNScaleNode2(i) == c0->GetNScaleNode2(i) ) ;
+	    IsCompatible &= ( c->GetNxmax(i) == c0->GetNxmax(i) ) ;
+	 }
+	 int i=0; // just the first obsbin
+	 for (int x=0; x<c->GetNxmax(i); x++) 
+	    IsCompatible &= ( c->GetXNode1(i,x) == c0->GetXNode1(i,x) );
+	 for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++)
+	    IsCompatible &=  c->GetScaleNode1(i,jS1) ==  c0->GetScaleNode1(i,jS1);
+	 for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+	    IsCompatible &=  c->GetScaleNode2(i,kS2) ==  c0->GetScaleNode2(i,kS2);
+	 }
+      }
+      if ( c==c0 && c->PdfXfx.empty()) 
+	 fastNLOTools::ResizeFlexibleVector(c->PdfXfx,c->PdfLcMuVar);
+         //c->PdfXfx = c->PdfLcMuVar; // resize
    }
 
    for (unsigned int i=0; i<NObsBin; i++) {
@@ -1902,7 +1934,20 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c) {
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-                  c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+
+		  if ( SpeedUp ) {
+		     if ( c == c0 ) 
+			c->PdfXfx[i][x][jS1][kS2] = GetXFX(xp,muf);
+		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,c0->PdfXfx[i][x][jS1][kS2]);
+		  }
+		  else {
+		     // this is the default code !
+		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+		  }
+
+		  // if ( i==1 && x==1 && jS1==1 && kS2==1 ) {
+		  //    cout<<"muf="<<muf<<"\tpdf="<<c->PdfLcMuVar[i][x][jS1][kS2][0]<<"\tc="<<c<<endl;
+		  // }
                   //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
                }
             }
@@ -2343,7 +2388,7 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
    // ---- cross check ---- //
    if (func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 ||
        func == kLinearMean || func == kLinearSum  ||  func == kScaleMax || func == kScaleMin ||
-       func == kProd || func == kExpProd2 ) {
+       func == kProd || func == kExpProd2 || func == kS2plusS1half || func == kS2plusS1fourth || func == kPow4Sum || func == kWgtAvg ) {
 
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
       if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
@@ -2606,6 +2651,20 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
       case kQuadraticSumOver4:
          sprintf(fname,"(%s^2 + %s^2)/4",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
          break;
+      case kS2plusS1half:
+         sprintf(fname,"(%s^2 + 2*%s^2)/2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kS2plusS1fourth:
+         sprintf(fname,"%s^2/4 + %s^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kPow4Sum:
+         sprintf(fname,"sqrt(%s^4 + %s^4)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
+      case kWgtAvg:
+         sprintf(fname,"(%s^4 + %s^4)/ (%s^2 + %s^2) ",
+		 B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str(),
+		 B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         break;
       case kLinearMean:
          sprintf(fname,"((%s+%s)/2)^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
          break;
@@ -2653,6 +2712,10 @@ double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, 
    else if (Func == fastNLO::kQuadraticSum)      mu      = FuncMixedOver1(scale1,scale2);
    else if (Func == fastNLO::kQuadraticMean)     mu      = FuncMixedOver2(scale1,scale2);
    else if (Func == fastNLO::kQuadraticSumOver4) mu      = FuncMixedOver4(scale1,scale2);
+   else if (Func == fastNLO::kS2plusS1half)      mu      = FuncMixed2s2Ov2(scale1,scale2);
+   else if (Func == fastNLO::kS2plusS1fourth)    mu      = FuncMixed2s2Ov4(scale1,scale2);
+   else if (Func == fastNLO::kPow4Sum)           mu      = FuncPow4Sum(scale1,scale2);
+   else if (Func == fastNLO::kWgtAvg)            mu      = FuncWgtAvg(scale1,scale2);
    else if (Func == fastNLO::kLinearMean)        mu      = FuncLinearMean(scale1,scale2);
    else if (Func == fastNLO::kLinearSum)         mu      = FuncLinearSum(scale1,scale2);
    else if (Func == fastNLO::kScaleMax)          mu      = FuncMax(scale1,scale2);
@@ -2661,7 +2724,10 @@ double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, 
    else if (Func == fastNLO::kExpProd2)          mu      = FuncExpProd2(scale1,scale2);
    else if (Func == fastNLO::kExtern)            mu      = (kMuX==kMuR) ? (*Fct_MuR)(scale1,scale2) : (*Fct_MuF)(scale1,scale2);
    else if (Func == fastNLO::kConst)             mu      = (kMuX==kMuR) ? fConst_MuR : fConst_MuF;
-   else logger.error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
+   else {
+      logger.error["CalcMu"]<<"Could not identify functional form for scales calculation.\n";
+      exit(4);
+   }
 
    return scalefac * mu;
 }
@@ -2669,19 +2735,43 @@ double fastNLOReader::CalcMu(fastNLO::EMuX kMuX , double scale1, double scale2, 
 
 //______________________________________________________________________________
 double fastNLOReader::FuncMixedOver1(double scale1 , double scale2) {
-   return (sqrt((pow(scale1,2) + pow(scale2,2))  / 1.));
+   return (sqrt((scale1*scale1 + scale2*scale2)  / 1.));
 }
 
 
 //______________________________________________________________________________
 double fastNLOReader::FuncMixedOver2(double scale1 , double scale2) {
-   return (sqrt((pow(scale1,2) + pow(scale2,2))  / 2.));
+   return (sqrt((scale1*scale1 + scale2*scale2)  / 2.));
 }
 
 
 //______________________________________________________________________________
 double fastNLOReader::FuncMixedOver4(double scale1 , double scale2) {
-   return (sqrt((pow(scale1,2) + pow(scale2,2))  / 4.));
+   return (sqrt((scale1*scale1 + scale2*scale2)  / 4.));
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::FuncMixed2s2Ov2(double scale1 , double scale2) {
+   return (sqrt((scale1*scale1 + 2*scale2*scale2)  / 2.));
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::FuncMixed2s2Ov4(double scale1 , double scale2) {
+   return sqrt((scale1*scale1/4. + scale2*scale2));
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::FuncPow4Sum(double scale1 , double scale2) {
+   return sqrt(sqrt( pow(scale1,4) + pow(scale2,4) ));
+}
+
+
+//______________________________________________________________________________
+double fastNLOReader::FuncWgtAvg(double scale1 , double scale2) {
+   return sqrt( ( pow(scale1,4) + pow(scale2,4) ) / (scale1*scale1 + scale2*scale2) );
 }
 
 
