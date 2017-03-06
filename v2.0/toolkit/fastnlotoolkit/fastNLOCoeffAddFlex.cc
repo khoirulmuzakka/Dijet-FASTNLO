@@ -270,11 +270,28 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
 	 if ( st1[ii]->size()==0 && st2[ii]->size()==0) cMax--;
 	 if ( st1[ii]->size() != st2[ii]->size() ) {
-            warn["Add"]<<"Scale dependent weights are not identically initialized..."<<endl;
+            warn["Add"]<<"Scale dependent weights are not identically initialized... (NScaleDep="<<NScaleDep<<", other.NScaleDep="<<other.GetNScaleDep()<<")"<<endl;
             //exit(1);
 	    if ( st1[ii]->size() == 0 ) {
-	       error["Add"]<<"...and calling table has less entries. Please try to call with opposite order of input arguments."<<endl;
-	       exit(1);
+	       /*
+	       // error["Add"]<<"...and calling table has less entries. Please try to call with opposite order of input arguments."<<endl;
+	       // exit(1);
+	       if ( ii==0 ) { error["Add"]<<"... no scale-independent contributions detected! exiting."<<endl; exit(3); }
+	       else {
+		  (*st1[ii]) = *st2[ii]; // hard copy of coefficients
+		  cMax--; // no need for second copy
+	       }
+	       info["add"]<<"Copied coefficients from other table."<<endl;
+	       */
+	       fastNLOTools::ResizeFlexibleVector(*st1[ii],*st2[ii]);
+	    }
+	    else if ( st2[ii]->size() == 0  ) {
+	       warn["Add"]<<"... 'other' table has empty coefficients (ii="<<ii<<"). Ignoring it (NScaleDep="<<NScaleDep<<", other.NScaleDep="<<other.GetNScaleDep()<<")"<<endl;
+	       cMax--;
+	    }
+	    else {
+	       error["Add"]<<"... don't know how to merge these two tables (Different number of bins detected)."<<endl;
+	       exit(2);
 	    }
          }
       }

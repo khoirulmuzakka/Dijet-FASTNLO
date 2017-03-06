@@ -43,10 +43,10 @@ public:
    bool IsCompatible(const fastNLOCoeffAddFlex& other) const;                   //!< check for compatibilty for adding/merging of two tables
    bool IsCatenable(const fastNLOCoeffAddFlex& other) const;        //!< Check for compatibility of two contributions for merging/adding
    std::vector<fastNLO::v5d*>  AccessSigmaTildes() { 
-      return {&SigmaTildeMuIndep,&SigmaTildeMuFDep,&SigmaTildeMuRDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
+      return {&SigmaTildeMuIndep,&SigmaTildeMuRDep,&SigmaTildeMuFDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
    };//!< Get access to sigma tilde
    std::vector<const fastNLO::v5d*> GetSigmaTildes() const { 
-      return {&SigmaTildeMuIndep,&SigmaTildeMuFDep,&SigmaTildeMuRDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
+      return {&SigmaTildeMuIndep,&SigmaTildeMuRDep,&SigmaTildeMuFDep,&SigmaTildeMuRRDep,&SigmaTildeMuFFDep,&SigmaTildeMuRFDep};
    };//!< Get access to sigma tilde
 
 protected:
@@ -76,6 +76,7 @@ protected:
 public:
    fastNLO::v3d AlphasTwoPi;
    fastNLO::v5d PdfLcMuVar;
+   fastNLO::v5d PdfXfx;
 
 };
 

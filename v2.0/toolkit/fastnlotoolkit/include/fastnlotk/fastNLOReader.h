@@ -71,6 +71,9 @@ public:
    // ---- alphas cache ---- //
    void FillAlphasCache(bool lForce=false);                                             //!< prepare for recalculation of cross section with new alpha_s value.
 
+   // --- cache ---- //
+   void ResetCache() { fPDFCached=0; fAlphasCached=0;}
+
    // ---- Do the cross section calculation ---- //
    void CalcCrossSection();
    double RescaleCrossSectionUnits(double binsize, int xunits);                         // Rescale according to kAbsoluteUnits and Ipublunits settings
@@ -138,7 +141,7 @@ protected:
 
    void PrintScaleSettings(fastNLO::EMuX kMuX=fastNLO::kMuR);
    void FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* B);
-   void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B);
+   void FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* B, fastNLOCoeffAddFlex* B0=NULL);
    void FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* B);
    void FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* B);
    void CalcAposterioriScaleVariationMuR();
@@ -157,6 +160,10 @@ protected:
    double FuncMixedOver1(double scale1 , double scale2) ;
    double FuncMixedOver2(double scale1 , double scale2) ;
    double FuncMixedOver4(double scale1 , double scale2) ;
+   double FuncMixed2s2Ov2(double scale1 , double scale2) ;
+   double FuncMixed2s2Ov4(double scale1 , double scale2) ;
+   double FuncPow4Sum(double scale1 , double scale2) ;
+   double FuncWgtAvg(double scale1 , double scale2) ;
    double FuncLinearMean(double scale1 , double scale2) ;
    double FuncLinearSum(double scale1 , double scale2) ;
    double FuncMax(double scale1 , double scale2) ;

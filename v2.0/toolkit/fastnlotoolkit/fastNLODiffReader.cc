@@ -168,6 +168,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
 
    vector < double > xs(NObsBin);
    vector < double > xsLO(NObsBin);
+   XSection_LO.resize(NObsBin);
    if (fxPoms.empty()) {
       logger.error["GetDiffCrossSection"]<<"No xpom slicing given."<<endl;
       return xs;
@@ -199,6 +200,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
    XSection_LO = xsLO;
 
    // k-factors
+   fastNLOReader::kFactor.resize(NObsBin);
    for (unsigned int i = 0 ; i<NObsBin ; i++) {
       fastNLOReader::kFactor[i] = fastNLOReader::XSection[i] / fastNLOReader::XSection_LO[i];
    }

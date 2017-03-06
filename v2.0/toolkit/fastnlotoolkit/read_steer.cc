@@ -770,7 +770,6 @@ bool read_steer::parsecommandline(vector<string> argv) {
    //  return ret = parsecommandline(argc.size(),&argc[0]);
 
    for ( unsigned int i = 0 ; i<argv.size() ; i++ ){
-      cout<<"input: "<<argv[i]<<endl;
       argc.push_back(new char[argv[i].size()+1]);
       std::copy(argv[i].begin(), argv[i].end(), argc[i]);
       argc[i][argv[i].size()] = '\0';
