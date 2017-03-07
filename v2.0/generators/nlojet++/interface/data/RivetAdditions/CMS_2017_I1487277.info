@@ -1,0 +1,45 @@
+Name: CMS_2017_I1487277
+Year: 2017
+Summary: <Insert short CMS_2017_I1487277 description>
+Experiment: CMS
+Collider: LHC
+InspireID: 1487277
+Status: UNVALIDATED
+Authors:
+ - Your Name <klaus.rabbertz@cern.ch>
+#References:
+# - arXiv:1609.05331
+RunInfo:
+  <Insert event types (not gen-specific), energy, any kinematic
+  efficiency cut(s) that may be needed; essentially any details needed to set
+  up a generator to reproduce the data.>
+NumEvents: NN
+NeedCrossSection: no
+#Beams: <Insert beam pair(s), e.g. [p-, p+] or [[p-, e-], [p-, e+]]>
+#Energies: <Insert list of run energies or beam energy pairs in GeV,
+#           e.g. [1960] or [[8.0, 3.5]] or [630, 1800]. Order pairs to match "Beams">
+#PtCuts: <Insert list of kinematic pT cuts in GeV, e.g. [0, 20]>
+#NeedCrossSection: True
+Description:
+  '<Insert a fairly long description, including what is measured
+  and if possible what it is useful for in terms of MC validation
+  and tuning. Use LaTeX for maths like $\pT > 50\;\GeV$.
+  Use single quotes around the block if required (see http://www.yaml.org)>'
+BibKey: Khachatryan:2016mlc
+BibTeX:
+'@article{Khachatryan:2016mlc,
+      author         = "Khachatryan, Vardan and others",
+      title          = "{Measurement and QCD analysis of double-differential
+                        inclusive jet cross-sections in pp collisions at $\sqrt{s}
+                        = $ 8 TeV and ratios to 2.76 and 7 TeV}",
+      collaboration  = "CMS",
+      journal        = "Submitted to: JHEP",
+      year           = "2016",
+      eprint         = "1609.05331",
+      archivePrefix  = "arXiv",
+      primaryClass   = "hep-ex",
+      reportNumber   = "CMS-SMP-14-001, CERN-EP-2016-196",
+      SLACcitation   = "%%CITATION = ARXIV:1609.05331;%%"
+}'
+ToDo:
+ - Implement the analysis, test it, remove this ToDo, and mark as VALIDATED :-)
