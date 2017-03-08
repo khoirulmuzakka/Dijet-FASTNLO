@@ -560,13 +560,13 @@ bool fastNLOTable::IsCatenableScenario(const fastNLOTable& other) const {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO::EMerge moption) {
+void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO::EMerge moption, double cutRMS) {
    //!< Merge all other tables with the current one.
    //!< Warning: data or multiplicative contributions might get lost
    //!< Warning: Function may require lots of memory, because all contributions are kept in memory.
 
    // --- all (other) options
-   if ( moption != kMean && moption != kMedian ) {
+   if ( moption != kMean && moption != kMedian && cutRMS==0) {
       for ( auto iTab :  other ) this->MergeTable(*iTab,moption);
    }
    // --- mean or median
@@ -625,8 +625,12 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 				 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
 				    vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
 				 }
-				 
 
+				 if ( cutRMS != 0 ) {
+				    cout<<"Not Implemented. todo."<<endl;
+				    exit(2);
+				 }
+				 
 				 if ( moption == kMean  ) {
 				    double mean = 0;
 				    for ( auto ii : vals ) mean+=ii;
@@ -634,7 +638,6 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 				    //double rms = 0;
 				    // for ( auto ii : vals ) rms+=ii*ii;
 				    // rms = sqrt(rms/sAll.size());
-				    
 				 }
 				 else if ( moption == kMedian ) {
 				    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
@@ -646,6 +649,10 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 				    // 	   im,     mean*nAll[0],    rms*nAll[0],
 				    // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
 				    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0];
+				 }
+				 else {// cutRMS !=0
+				    cout<<"Not Implemented. todo."<<endl;
+				    exit(2);
 				 }
 			      }
 			   }
@@ -662,25 +669,69 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 		     for (unsigned int x=0 ; x<ctrb->SigmaTilde[iobs][s].size() ; x++) {
 			for (unsigned int l=0 ; l<ctrb->SigmaTilde[iobs][s][x].size() ; l++) {
 			   for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
-
-			      if ( moption == kMean  ) {
-				 double mean = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+			      
+			      double mean0 = 0;
+			      double rms = 0;
+			      if ( cutRMS != 0 ) {
+				 mean0 += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+				 rms   += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt() * ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt();
 				 for ( auto othctr : others ) {
-				    mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+				    mean0 += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+				    rms += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt()*((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
 				 }
-				 ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
+				 mean0 /= nAll.size();
+				 rms = sqrt(rms/nAll.size());
 			      }
-			      else if ( moption == kMedian ) {
-				 vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / ctrb->GetNevt();
-				 for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
-				    vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / others[is]->GetNevt();
+
+			      if ( moption == kMean  ) { // mergeing option 'mean'
+				 if ( cutRMS==0 ) { // no cut on RMS
+				    double mean = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+				    for ( auto othctr : others ) 
+				       mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+				    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
 				 }
-				 std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-				 double median = vals[vals.size()/2];
-				 if ( vals.size()%2 == 0 ) {
-				    median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				 else { // no RMS cut
+				    unsigned int nn=0;
+				    double mean=0;
+				    double v = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+				    if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
+				    for ( auto othctr : others ) {
+				       v =  ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+				       if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
+				    }
+				    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nn;
+				    if ( nn!=nAll.size() ) cout<<"[CutRMS] Discarded "<<nAll.size()-nn<<" table values out of "<< nAll.size()<<" (bin="<<iobs<<", proc="<<p<<")."<<endl;
 				 }
-				 ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
+			      }
+			      else if ( moption == kMedian ) { // mergeing option 'median'
+				 if ( cutRMS==0 ) { // cut on RMS
+				    cout<<"todo fadfoo"<<endl;
+				    exit(3);
+				 }
+				 else { // no RMS cut
+				    vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / ctrb->GetNevt();
+				    for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
+				       vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / others[is]->GetNevt();
+				    }
+				    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+				    double median = vals[vals.size()/2];
+				    if ( vals.size()%2 == 0 ) {
+				       median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				    }
+				    ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
+				 }
+				 // std::sort(vals.begin(),vals.end());
+				 // int n1 = vals.size()/2;
+				 // int n2 = vals.size()/2-1;
+				 // double sortmedian = (vals[n1] + vals[n2])/2.;
+				 // if ( median != 0 || sortmedian != 0 ) {
+				 //    if ( median!=sortmedian )
+				 //    cout<<"n="<<vals.size()<<"\tn1="<<n1<<"\tn2="<<n2<<"\tsortmedian="<<sortmedian<<"\tratio:"<<median/sortmedian<<endl;
+				 // }
+			      }
+			      else {// cutRMS !=0
+				 cout<<"Not Implemented. todo."<<endl;
+				 exit(2);
 			      }
 
 			   }
