@@ -36,6 +36,7 @@ std::map<std::string,std::string> _validoptions{
 //   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
    {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, add (append), attach, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
    {"-pre","pre-avg -pre <n> <option>. 2 step mergeing: Build pre-averaged of n tables using weighting procedure <option>."},
+   {"-cutRMS","cur RMS -cutRMS <sigma>. Calculate for each node the mean and RMS of all tables and discard values greater than <sigma>*RMS during mergeing."},
 };
 
 
@@ -87,6 +88,8 @@ void PrintHelpMessage() {
    for ( auto iop : _validoptions ) {
       man << "  "<<iop.first<<"\t\t"<<iop.second<<endl;
    }
+   man << "Warning: Some mergeing options (e.g. 'median') may require lots of RAM as all numbers must be kept in memory at a time."<<endl;
+   man <<"          In these cases it may become benefitial to use an (unbiased) pre-averageing, e.g. with weighting options mean, NumEvt or NumEvtBinProc"<<endl;
    man << " " <<endl;
 }
 
@@ -121,6 +124,7 @@ int main(int argc, char** argv) {
    string plotfile = "fnlo-tk-merge2.ps";
    int pre = 0;
    string preoptin = "NumEvtBinProc"; // NumEvt
+   double cutRMS = 0;
 
    int narg = argc-1;
    for (int iarg=1; iarg<narg; iarg++) {
@@ -142,6 +146,7 @@ int main(int argc, char** argv) {
 	 if ( sarg == "-p" ) plotfile=argv[++iarg];
 	 if ( sarg == "-w" ) wgtoption=argv[++iarg];
 	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
+	 if ( sarg == "-cutRMS" ) cutRMS=atof(argv[++iarg]); 
 	 if ( sarg == "-pre" ) { 
 	    pre=atoi(argv[++iarg]); 
 	    if ( _wgtoptions.count(argv[iarg+1]) ) preoptin=argv[++iarg]; 
@@ -302,7 +307,7 @@ int main(int argc, char** argv) {
 	 if ( resultTable==NULL ) 
 	    resultTable = new fastNLOTable(path);
 	 else {
-	    if ( moption == fastNLO::kMedian || moption == fastNLO::kMean ) 
+	    if ( moption == fastNLO::kMedian || moption == fastNLO::kMean || cutRMS!=0 ) 
 	       alltables.push_back(new fastNLOTable(path));
 	    else 
 	       resultTable->MergeTable(fastNLOTable(path), moption); // merge
@@ -315,7 +320,7 @@ int main(int argc, char** argv) {
       resultTable = alltables.back();
       alltables.pop_back();
    }
-   resultTable->MergeTables(alltables,moption);
+   resultTable->MergeTables(alltables,moption,cutRMS);
 
 
    // --------------------------------------------------------------------------------------- //
