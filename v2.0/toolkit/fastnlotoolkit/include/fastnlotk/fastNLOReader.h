@@ -175,7 +175,10 @@ protected:
    void CalcCrossSectionv21(fastNLOCoeffAddFlex* B);
 
    fastNLOCoeffAddBase* B_LO() const {
+      //if ( BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kLeading] !=0 ) 
       return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kLeading];
+      // else if ( B_NLO()!= NULL ) return B_NLO();
+      // else if ( B_NNLO()!= NULL ) return B_NNLO();
    };
    fastNLOCoeffAddBase* B_NLO() const {
       return (fastNLOCoeffAddBase*) BBlocksSMCalc[fastNLO::kFixedOrder][fastNLO::kNextToLeading];
@@ -186,6 +189,18 @@ protected:
    fastNLOCoeffBase* B_ThC(int n=0) {
       if (BBlocksSMCalc[fastNLO::kThresholdCorrection].empty()) return NULL;
       else return BBlocksSMCalc[fastNLO::kThresholdCorrection][n];
+   };
+   fastNLOCoeffAddBase* B_Any() const {
+      if (B_LO() != NULL ) return B_LO();
+      else if ( B_NLO()!= NULL ) return B_NLO();
+      else if ( B_NNLO()!= NULL ) return B_NNLO();
+      // else if ( B_ThC(0)!= NULL ) return B_ThC(0);
+      // else if ( B_ThC(1)!= NULL ) return B_ThC(1);
+      else {
+	 std::cerr<<"Error. Cannot get any additive contribution, but requested."<<std::endl;
+	 exit(3);
+	 return NULL;
+      }
    };
 
    // ---- setters for scale variation in v2.0 tables  ---- //

@@ -678,7 +678,6 @@ void fastNLOReader::SetCoefficientUsageDefault() {
 void fastNLOReader::InitScalevariation() {
    //! Initialize to scale factors of (MuR,MuF) = (1,1)
    logger.debug["InitScalevariation"]<<"Try to initialize scale factors MuR and MuF to (1,1)."<<endl;
-
    if (!GetIsFlexibleScaleTable()) {
       bool SetScales = SetScaleFactorsMuRMuF(1.,1.);
       if (!SetScales){
@@ -692,7 +691,7 @@ void fastNLOReader::InitScalevariation() {
       fScaleFacMuR = 1.;
       fScaleFacMuF = 1.;
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
-      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO();
+      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_Any();
 
       // ---- DIS ---- //
       if (cNLO->GetNPDF() == 1) {
@@ -809,7 +808,7 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet){
             fUseHoppet = false;
             return;
          }
-         fastNLOCoeffAddBase * c = (fastNLOCoeffAddBase*)B_LO();
+         fastNLOCoeffAddBase * c = (fastNLOCoeffAddBase*)B_Any();
          if (c->GetIPDFdef1() == 2) {
             logger.error["UseHoppetScaleVariations"] << "Hoppet scale variations not yet implemented for DIS." << std::endl;
             exit(1);
@@ -1367,6 +1366,10 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
    logger.debug["CalcAposterioriScaleVariationMuR"]<<"scalefac="<<scalefac<<endl;
    if ( GetIsFlexibleScaleTable() ) { logger.error["CalcAposterioriScaleVariationMuR"]<<"This function is applicable only to non-flexible scale tables."<<endl; exit(1);}
    fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
+   if ( cLO == NULL ) {
+      logger.error["CalcAposterioriScaleVariationMuR"]<<"No leading order calculations available. Cannot calculate scale variations."<<endl;
+      exit(3);
+   }
    vector<double>* XS    = &XSection;
    vector<double>* QS    = &QScale;
    int xUnits = cLO->GetIXsectUnits();
@@ -1404,6 +1407,10 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
    logger.debug["CalcAposterioriScaleVariationMuF"]<<"scalefac="<<scalefac<<endl;
    if ( GetIsFlexibleScaleTable() ) { logger.error["CalcAposterioriScaleVariationMuF"]<<"This function is only reasonable for non-flexible scale tables."<<endl; exit(1);}
    fastNLOCoeffAddFix* cLO  = (fastNLOCoeffAddFix*) B_LO();
+   if ( cLO == NULL ) {
+      logger.error["CalcAposterioriScaleVariationMuR"]<<"No leading order calculations available. Cannot calculate scale variations."<<endl;
+      exit(3);
+   }
    vector<double>* XS    = &XSection;
    int xUnits = cLO->GetIXsectUnits();
    const double n     = cLO->GetNpow();
@@ -1904,7 +1911,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
    static const bool SpeedUp = true;
    bool IsCompatible = false;
    if ( SpeedUp ){
-      if ( c0 != NULL && c0 != c ) {
+      if ( c0 != NULL && c0 != c && fCoeff.size()>1) {
 	 IsCompatible = true;
 	 for (unsigned int i=0; i<NObsBin; i++) {
 	    IsCompatible &= ( c->GetNScaleNode1(i) == c0->GetNScaleNode1(i) ) ;
@@ -2369,7 +2376,7 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
    //!     func:  Choose a pre-defined function
    //!     kMuX:  is it for mu_r or for mu_f ?
    //!
-
+   
    if (!GetIsFlexibleScaleTable()) {
       logger.warn<<"This is not a flexible-scale table. SetFunctionalForm cannot be used.\n";
       return;
@@ -2391,7 +2398,7 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
        func == kProd || func == kExpProd2 || func == kS2plusS1half || func == kS2plusS1fourth || func == kPow4Sum || func == kWgtAvg ) {
 
       fastNLOCoeffAddFlex* cNLO = (fastNLOCoeffAddFlex*)B_NLO();
-      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_LO(); //crash safe
+      if ( !cNLO ) cNLO = (fastNLOCoeffAddFlex*)B_Any(); //crash safe
       int nnode = cNLO->GetNScaleNode2(0);
       if (nnode < 1 ) {
          logger.error<<"There is no second scale variable available in this table. Using fastNLO::kScale1 only.\n";
@@ -2625,8 +2632,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 //______________________________________________________________________________
 void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
    if (!GetIsFlexibleScaleTable()) {
-      logger.info["PrintScaleSettings"]<<"Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_LO()->GetScaleDescription()<<endl;
-      logger.info["PrintScaleSettings"]<<"Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<B_LO()->GetScaleDescription()<<endl;
+      logger.info["PrintScaleSettings"]<<"Renormalization scale chosen to be mu_r = "<<fScaleFacMuR<<" * "<<B_Any()->GetScaleDescription()<<endl;
+      logger.info["PrintScaleSettings"]<<"Factorization scale chosen to be   mu_f = "<<fScaleFacMuF<<" * "<<B_Any()->GetScaleDescription()<<endl;
    } else {
       // ---- prepare printout ---- //
       static const string sname[2] = {"Renormalization","Factorization"};
@@ -2637,54 +2644,54 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
       char fname[100];
       switch (func) {
       case kScale1:
-         sprintf(fname,"%s^2",B_LO()->GetScaleDescription(0).c_str());
+         sprintf(fname,"%s^2",B_Any()->GetScaleDescription(0).c_str());
          break;
       case kScale2:
-         sprintf(fname,"%s^2",B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"%s^2",B_Any()->GetScaleDescription(1).c_str());
          break;
       case kQuadraticSum:
-         sprintf(fname,"(%s^2 + %s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s^2 + %s^2)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kQuadraticMean:
-         sprintf(fname,"(%s^2 + %s^2)/2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s^2 + %s^2)/2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kQuadraticSumOver4:
-         sprintf(fname,"(%s^2 + %s^2)/4",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s^2 + %s^2)/4",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kS2plusS1half:
-         sprintf(fname,"(%s^2 + 2*%s^2)/2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s^2 + 2*%s^2)/2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kS2plusS1fourth:
-         sprintf(fname,"%s^2/4 + %s^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"%s^2/4 + %s^2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kPow4Sum:
-         sprintf(fname,"sqrt(%s^4 + %s^4)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"sqrt(%s^4 + %s^4)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kWgtAvg:
          sprintf(fname,"(%s^4 + %s^4)/ (%s^2 + %s^2) ",
-		 B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str(),
-		 B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+		 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str(),
+		 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kLinearMean:
-         sprintf(fname,"((%s+%s)/2)^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"((%s+%s)/2)^2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kLinearSum:
-         sprintf(fname,"(%s+%s)^2",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s+%s)^2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kScaleMax:
-         sprintf(fname,"max(%s^2,%s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"max(%s^2,%s^2)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kScaleMin:
-         sprintf(fname,"min(%s^2,%s^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"min(%s^2,%s^2)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kProd:
-         sprintf(fname,"(%s*%s)^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s*%s)^2)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kExpProd2:
-         sprintf(fname,"(%s*exp(0.3*%s)^2)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"(%s*exp(0.3*%s)^2)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kExtern:
-         sprintf(fname,"f_ext(%s,%s)",B_LO()->GetScaleDescription(0).c_str(),B_LO()->GetScaleDescription(1).c_str());
+         sprintf(fname,"f_ext(%s,%s)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       default:
          logger.error<<"unknown scale choice.\n";
