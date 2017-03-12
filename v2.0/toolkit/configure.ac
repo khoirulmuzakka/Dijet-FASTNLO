@@ -486,7 +486,14 @@ else
       DOXYGEN=""
    fi
 fi
-AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x")
+# Additional check on epstopdf ...
+AC_CHECK_PROG(EPSTOPDF, epstopdf, epstopdf)
+if test "x$EPSTOPDF" = "x"; then
+  AC_MSG_WARN([Did not find epstopdf. Unable to create doxygen documentation, skipped! Please install epstopdf.])
+  DOXYGEN=""
+fi
+AM_CONDITIONAL(HAVE_EPSTOPDF, test "x$EPSTOPDF" != "x")
+AM_CONDITIONAL(HAVE_DOXYGEN, test "x$DOXYGEN" != "x" )
 
 # Create documentation
 # Check first on PDFLATEX ...
