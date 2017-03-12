@@ -614,6 +614,7 @@ AC_CONFIG_FILES([Makefile
                  data/check/Makefile
                  data/modify/Makefile
                  doc/Makefile
+                 doc/fig/Makefile
                  fastnlotoolkit/Makefile
                  fastnlotoolkit/include/Makefile
                  fastnlotoolkit/include/fastnlotk/Makefile
