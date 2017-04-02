@@ -136,23 +136,28 @@ if ( $? ) {
     my $ret = system("ls -laR");
     if ( $ret ) {print "fnlo-run-nnlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
 }
+print "System path is:  $ENV{PATH}\n";
+print "Linker path is:  $ENV{LD_LIBRARY_PATH}\n";
+print "NNLOJET path is: $ENV{NNLOJETBINPATH}\n";
+my $exe = `which NNLOJET`;
+print "Executable is: $exe\n";
 print "######################################################\n\n";
 
 #
-# Set system paths environment
+# Set system paths environment (set already in calling csh script, no??)
 #
-my $mybase="/cvmfs/etp.kit.edu/nnlo";
-my $gccbase="/cvmfs/cms.cern.ch/slc6_amd64_gcc481";
-if ( $ENV{PATH} ) {
-    $ENV{PATH} = "${mybase}/bin:$ENV{PATH}";
-} else {
-    $ENV{PATH} = "${mybase}/bin";
-}
-if ( $ENV{LD_LIBRARY_PATH} ) {
-    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root:$ENV{LD_LIBRARY_PATH}";
-} else {
-    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root";
-}
+#my $mybase="/cvmfs/etp.kit.edu/nnlo";
+#my $gccbase="/cvmfs/cms.cern.ch/slc6_amd64_gcc481";
+#if ( $ENV{PATH} ) {
+#    $ENV{PATH} = "${mybase}/bin:$ENV{PATH}";
+#} else {
+#    $ENV{PATH} = "${mybase}/bin";
+#}
+#if ( $ENV{LD_LIBRARY_PATH} ) {
+#    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root:$ENV{LD_LIBRARY_PATH}";
+#} else {
+#    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root";
+#}
 
 #
 # Print some location info
@@ -160,7 +165,7 @@ if ( $ENV{LD_LIBRARY_PATH} ) {
 print "\n######################################################\n";
 print "fnlo-run-nnlojet.pl: List NNLOJET process directory for debugging purposes:\n";
 print "######################################################\n";
-my $ret = system("ls -la ${mybase}/src/NNLOJET-rev3278/driver/process");
+my $ret = system("ls -la $ENV{NNLOJETBINPATH}/process");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Couldn't list NNLOJET process directory: $ret, aborted!\n";}
 
 #
@@ -175,7 +180,7 @@ print "\nfnlo-run-nnlojet.pl: Running fastNLO scenario name ${scenname}: $date\n
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\nfnlo-run-nnlojet.pl: Starting calculation: FASTCAL0_$date\n";
-my $cmd = "${mybase}/src/NNLOJET-rev3278/driver/NNLOJET -run ${scenname}.run |& tee ${scenname}.log";
+my $cmd = "$ENV{NNLOJETBINPATH}/NNLOJET -run ${scenname}.run |& tee ${scenname}.log";
 print "\nfnlo-run-nnlojet.pl: Running command (time $cmd) 2>&1 in foreground\n";
 $ret = system("(time $cmd) 2>&1");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
