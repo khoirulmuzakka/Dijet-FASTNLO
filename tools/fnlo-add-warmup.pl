@@ -30,14 +30,15 @@ print "##################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_d, $opt_h, $opt_v, $opt_w ) = ( "", "", "2.3", "" );
-getopts('dhv:w:') or die "fnlo-add-warmup.pl: Malformed option syntax!\n";
+our ( $opt_d, $opt_h, $opt_o, $opt_v, $opt_w ) = ( "", "", , "", "2.3", "" );
+getopts('dho:v:w:') or die "fnlo-add-warmup.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "fnlo-add-warmup.pl\n";
     print "Usage: fnlo-add-warmup.pl [switches/options] scenario (2.4: observable)\n";
     print "       e.g. for 2.4: scenario-observable_nnnn.wrm\n";
     print "  -d              Verbose output\n";
     print "  -h              Print this text\n";
+    print "  -o outfile      Output filename, (def.=scen_warmup.txt)\n";
     print "  -v #            Choose between fastNLO version 2.3 or 2.4 (def.=2.3)\n";
     print "  -w dir          Directory for warmup tables, (def.=scenario)\n\n";
     exit;
@@ -64,14 +65,15 @@ if ( $vers == 2.4 ) {
 #
 if (($vers != 2.3) && ($vers != 2.4)) {die "fnlo-add-warmup.pl: Error! Unsupported warmup file version: $vers\n"};
 my $outfile = "${scen}_warmup.txt";
+if ( $opt_o ) {$outfile = $opt_o;}
 my $wdir    = "${scen}_wrm";
 if ( $opt_w ) {$wdir = $opt_w;}
 
 my $wrmglob = "${scen}*${obs}*.txt";
 if ( $vers == 2.4 ) {
-# Correct filename should be taken from warmup files ... 
+# Correct filename should be taken from warmup files ...
 # This is only a reasonable default.
-    $outfile = "${scen}-${obs}.wrm";
+    if ( !$opt_o) {$outfile = "${scen}-${obs}.wrm";}
     $wrmglob = "${scen}*${obs}*.wrm";
 }
 
@@ -130,23 +132,23 @@ if ( -d "$wdir" ) {
         if ( $debug ) {print "fnlo-add-warmup.pl: Analyzing file no.: $ifil\n";}
         while ( my $in = <INFILE> ) {
             if ( $debug ) {print "fnlo-add-warmup.pl: Line to analyze is: $in";}
-	    if ( $in =~ m/steerfile\:/ ) {
+            if ( $in =~ m/steerfile\:/ ) {
                 my $tmp = $in;
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
-                $outfile = $tmps[7];
-	    } elsif ( $vers < 2.4 && $in =~ $conti ) {
+                if ( !$opt_o) {$outfile = $tmps[7];}
+            } elsif ( $vers < 2.4 && $in =~ $conti ) {
                 my $tmp = $in;
                 $tmp =~ s/^\s+//;
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
                 $contr = $contr + $tmps[7];
-	    } elsif ( $vers > 2.3 && $in =~ m/${contf}$/ ) {
+            } elsif ( $vers > 2.3 && $in =~ m/${contf}$/ ) {
                 my $tmp = $in;
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
                 $contr = $contr + $tmps[1];
-	    } elsif ( $vers > 2.3 && $in =~ m/${nentf}$/ ) {
+            } elsif ( $vers > 2.3 && $in =~ m/${nentf}$/ ) {
                 my $tmp = $in;
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
@@ -192,9 +194,9 @@ if ( -d "$wdir" ) {
                 my @tmps = split(/\s+/,$tmp);
                 my $cols = scalar @tmps;
                 if ( $vers > 2.3 && $cols == 5 ) {
-		    $ifill[$ient2] = defined $ifill[$ient2] ? $ifill[$ient2] + $tmps[4] : $tmps[4]; 
-		    $ient2++;
-		}
+                    $ifill[$ient2] = defined $ifill[$ient2] ? $ifill[$ient2] + $tmps[4] : $tmps[4];
+                    $ient2++;
+                }
             } else {
                 $wrm0 = 0;
                 $wrm1 = 0;
@@ -230,12 +232,12 @@ if ( -d "$wdir" ) {
     while ( my $in = <INFILE> ) {
         if ( $vers < 2.4 && $in =~ $conti ) {
             printf(OUTFILE "%s %7.1e %s\n",$conti,$contr,$contf);
-	} elsif ( $vers > 2.3 && $in =~ $conti ) {
-	    print OUTFILE $in;
-	} elsif ( $in =~ m/${contf}$/ ) {
-	    printf(OUTFILE "#      %d $contf\n", $contr);
-	} elsif ( $in =~ m/${nentf}$/ ) {
-	    printf(OUTFILE "#      %d $nentf\n", $nentr);
+        } elsif ( $vers > 2.3 && $in =~ $conti ) {
+            print OUTFILE $in;
+        } elsif ( $in =~ m/${contf}$/ ) {
+            printf(OUTFILE "#      %d $contf\n", $contr);
+        } elsif ( $in =~ m/${nentf}$/ ) {
+            printf(OUTFILE "#      %d $nentf\n", $nentr);
         } elsif ( $in =~ "Warmup.Values" ) {
             print OUTFILE $in;
             $wrm0++;
@@ -251,33 +253,33 @@ if ( -d "$wdir" ) {
                        $iobs[$ient],$xmin[$ient],$xmax[$ient],$pmin[$ient],$pmax[$ient],$qmin[$ient],$qmax[$ient]);
             }
             $ient++;
-	} elsif ( $in =~ "Warmup.Binning" ) {
+        } elsif ( $in =~ "Warmup.Binning" ) {
             print OUTFILE $in;
-	    $wrm2++;
-	} elsif ( $in =~ "ObsBin" && $wrm2 ) {
+            $wrm2++;
+        } elsif ( $in =~ "ObsBin" && $wrm2 ) {
             print OUTFILE $in;
-	    $wrm3++;
-	} elsif ( $wrm3 && !($in =~ "}")) {
-	    if ( $vers < 2.4 ) {
-		print OUTFILE $in;
-	    } else {
-		my $tmp = $in;
-		$tmp =~ s/^\s+//;
-		chomp $tmp;
-		my @tmps = split(/\s+/,$tmp);
-		my $cols = scalar @tmps;
-		if ( $cols == 5 ) {
-		    printf(OUTFILE "   %4d   %12.3f  %12.3f  %12.4f  %16d\n",
-			   $tmps[0],$tmps[1],$tmps[2],$tmps[3],$ifill[$ient2]);
-		}
-		$ient2++;
-	    }
-	} else {
-	    $wrm0 = 0;
-	    $wrm1 = 0;
-	    $wrm2 = 0;
-	    $wrm3 = 0;
-	    print OUTFILE $in;
+            $wrm3++;
+        } elsif ( $wrm3 && !($in =~ "}")) {
+            if ( $vers < 2.4 ) {
+                print OUTFILE $in;
+            } else {
+                my $tmp = $in;
+                $tmp =~ s/^\s+//;
+                chomp $tmp;
+                my @tmps = split(/\s+/,$tmp);
+                my $cols = scalar @tmps;
+                if ( $cols == 5 ) {
+                    printf(OUTFILE "   %4d   %12.3f  %12.3f  %12.4f  %16d\n",
+                           $tmps[0],$tmps[1],$tmps[2],$tmps[3],$ifill[$ient2]);
+                }
+                $ient2++;
+            }
+        } else {
+            $wrm0 = 0;
+            $wrm1 = 0;
+            $wrm2 = 0;
+            $wrm3 = 0;
+            print OUTFILE $in;
         }
     }
     close OUTFILE;
