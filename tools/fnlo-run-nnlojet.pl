@@ -214,7 +214,7 @@ foreach my $file ( @files ) {
     print "fnlo-run-nnlojet.pl: $file has been renamed to ${newname}\n";
 }
 
-$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz *${scenproc}*";
+$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz ${scentype}*";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Result files could not be archived to ${scenname}_${gjobnr}.tar.gz, aborted!\n";}
 # Copy to standard name as gc sandbox output file
