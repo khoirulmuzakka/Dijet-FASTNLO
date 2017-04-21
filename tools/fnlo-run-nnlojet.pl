@@ -190,7 +190,7 @@ my @files;
 if ( ${scenmode} =~ m/fastwarm/ ) {
     @files = glob("${scentype}*.log *.root *.wrm");
 } elsif ( ${scenmode} =~ m/prod/ ) {
-    @files = glob("${scentype}*.log *.root *.tab *.tab.gz");
+    @files = glob("*.dat *.err *.log *.root *.tab *.tab.gz");
 }
 foreach my $file ( @files ) {
     (my $name, my $dir, my $ext) = fileparse($file,'\.[^\.]*$');
