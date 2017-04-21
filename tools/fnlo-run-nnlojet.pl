@@ -21,7 +21,7 @@ use warnings;
 my $gjobnr = "";
 if ( defined $ENV{MY_JOBID} ) {
     $gjobnr = $ENV{MY_JOBID};
-    $gjobnr = substr("0000$gjobnr",-4);
+    $gjobnr = substr("00000$gjobnr",-5);
     open STDOUT, "| tee fnlo-run-nnlojet_${gjobnr}.log" or die
         "fnlo-run-nnlojet.pl: ERROR! Can't tee STDOUT.\n";
     open STDERR, "| tee fnlo-run-nnlojet_${gjobnr}.err" or die
@@ -63,17 +63,19 @@ if ( $opt_d ) {
 # Parse arguments
 #
 my $scentype = "def";
+my $scenproc = "def";
 my $scenord  = "def";
 my $scenmode = "def";
-unless ( @ARGV == 3 ) {
-    die "fnlo-run-nnlojet.pl: Error! Need three argument of scenario type, order, and mode!\n";
+unless ( @ARGV == 4 ) {
+    die "fnlo-run-nnlojet.pl: Error! Need four arguments of scenario name, type, order, and mode!\n";
 }
 if ( @ARGV > 0 ) {
     $scentype = shift;
+    $scenproc = shift;
     $scenord  = shift;
     $scenmode = shift;
 }
-print "fnlo-run-nnlojet.pl: The scenario type, order, and mode are ${scentype}, ${scenord}, and ${scenmode}.\n";
+print "fnlo-run-nnlojet.pl: The scenario type, proc, order, and mode are ${scentype}, ${scenproc}, ${scenord}, and ${scenmode}.\n";
 
 #
 # Print system info (some parts in debug mode only; df commands can get stuck ...)
@@ -136,28 +138,20 @@ if ( $? ) {
     my $ret = system("ls -laR");
     if ( $ret ) {print "fnlo-run-nnlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
 }
-print "System path is:  $ENV{PATH}\n";
-print "Linker path is:  $ENV{LD_LIBRARY_PATH}\n";
-print "NNLOJET path is: $ENV{NNLOJETBINPATH}\n";
+print "\n";
+print "System path is:  $ENV{PATH}\n\n";
+print "Linker path is:  $ENV{LD_LIBRARY_PATH}\n\n";
+print "NNLOJET bin path is: $ENV{NNLOJET_BIN_PATH}\n\n";
 my $exe = `which NNLOJET`;
-print "Executable is: $exe\n";
+print "NNLOJET executable is: $exe\n";
+$exe = `which lhapdf`;
+chomp $exe;
+print "LHAPDF executable is: $exe\n\n";
+print "LHAPDF data path is: $ENV{LHAPDF_DATA_PATH}\n\n";
+# my $sets  = `lhapdf list --installed`;
+# print "Installed PDF sets are:\n";
+# print "$sets\n";
 print "######################################################\n\n";
-
-#
-# Set system paths environment (set already in calling csh script, no??)
-#
-#my $mybase="/cvmfs/etp.kit.edu/nnlo";
-#my $gccbase="/cvmfs/cms.cern.ch/slc6_amd64_gcc481";
-#if ( $ENV{PATH} ) {
-#    $ENV{PATH} = "${mybase}/bin:$ENV{PATH}";
-#} else {
-#    $ENV{PATH} = "${mybase}/bin";
-#}
-#if ( $ENV{LD_LIBRARY_PATH} ) {
-#    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root:$ENV{LD_LIBRARY_PATH}";
-#} else {
-#    $ENV{LD_LIBRARY_PATH} = "${mybase}/lib:${mybase}/lib/root";
-#}
 
 #
 # Print some location info
@@ -165,7 +159,7 @@ print "######################################################\n\n";
 print "\n######################################################\n";
 print "fnlo-run-nnlojet.pl: List NNLOJET process directory for debugging purposes:\n";
 print "######################################################\n";
-my $ret = system("ls -la $ENV{NNLOJETBINPATH}/process");
+my $ret = system("ls -la $ENV{NNLOJET_BIN_PATH}/process");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Couldn't list NNLOJET process directory: $ret, aborted!\n";}
 
 #
@@ -173,14 +167,14 @@ if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Couldn't list NNLOJET process dire
 #
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
-my $scenname = "${scentype}.${scenord}-${scenmode}";
+my $scenname = "${scentype}.${scenproc}.${scenord}-${scenmode}";
 print "\nfnlo-run-nnlojet.pl: Running fastNLO scenario name ${scenname}: $date\n";
 
 # Run NLO calculation
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\nfnlo-run-nnlojet.pl: Starting calculation: FASTCAL0_$date\n";
-my $cmd = "$ENV{NNLOJETBINPATH}/NNLOJET -run ${scenname}.run |& tee ${scenname}.log";
+my $cmd = "$ENV{NNLOJET_BIN_PATH}/NNLOJET -run ${scenname}.run |& tee ${scenname}.log";
 print "\nfnlo-run-nnlojet.pl: Running command (time $cmd) 2>&1 in foreground\n";
 $ret = system("(time $cmd) 2>&1");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Error $ret in fastNLO run step, aborted!\n";}
@@ -192,10 +186,8 @@ print "\nfnlo-run-nnlojet.pl: Calculation finished: FASTCAL1_$date\n";
 print "\nfnlo-run-nnlojet.pl: The final working directory's content is:\n";
 $ret = system("ls -laR");
 if ( $ret ) {print "fnlo-run-nnlojet.pl: Couldn't list current directory: $ret, skipped!\n";}
-my $defnam = "ZJ-LO-";
-#my @files = glob("${scentype}*.dat ${scentype}*.log ${scentype}*.run *.root *.tab *.wrm");
 my @files;
-if ( ${scenmode} =~ m/warm/ ) {
+if ( ${scenmode} =~ m/fastwarm/ ) {
     @files = glob("${scentype}*.log *.root *.wrm");
 } elsif ( ${scenmode} =~ m/prod/ ) {
     @files = glob("${scentype}*.log *.root *.tab *.tab.gz");
@@ -203,6 +195,8 @@ if ( ${scenmode} =~ m/warm/ ) {
 foreach my $file ( @files ) {
     (my $name, my $dir, my $ext) = fileparse($file,'\.[^\.]*$');
     $ext =~ s/^\.//;
+# Rename jet -> 1jet or 2jet 
+    $name =~ s/^jet/${scentype}.${scenproc}/;
 # fastNLO special tar.gz
     if ( $ext =~ m/^gz$/ && $name =~ m/\.tab$/ ) {
 	$ext = "tab.gz";
@@ -211,15 +205,14 @@ foreach my $file ( @files ) {
     my $newname = "${name}_${gjobnr}.${ext}";
     $newname =~ s/^zj-//;
 # APPLgrid special
-    if ( ($ext =~ m/root/) ) {
-#&& ($name =~ m/^$defnam/) && !($scenname =~ m/$defnam/) ) { 
-	$newname =~ s/^$defnam/${scentype}\.${scenord}\./;
-    }
+#    if ( ($ext =~ m/root/) ) {
+#	$newname =~ s/^$defnam/${scentype}\.${scenord}\./;
+#   }
     rename $file, $newname;
     print "fnlo-run-nnlojet.pl: $file has been renamed to ${newname}\n";
 }
 
-$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz ZJ*";
+$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz ${scentype}.${scenproc}*";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Result files could not be archived to ${scenname}_${gjobnr}.tar.gz, aborted!\n";}
 # Copy to standard name as gc sandbox output file
