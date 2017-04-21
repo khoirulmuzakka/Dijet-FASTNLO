@@ -44,13 +44,13 @@ our ( $opt_d, $opt_h ) =
 getopts('dh') or die "fnlo-run-nnlojet.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfnlo-run-nnlojet.pl\n";
-    print "Usage: fnlo-run-nnlojet.pl [switches/options] (ScenarioType) (ScenarioOrder) (ScenarioMode)\n";
+    print "Usage: fnlo-run-nnlojet.pl [switches/options] (ScenarioType) (ScenarioProcess) (ScenarioOrder) (ScenarioMode)\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -h              Print this text\n";
     print "\n";
     print "Example:\n";
     print "Run NNLOJET scenario:\n";
-    print "   ./fnlo-run-nnlojet.pl ZJ LO fastwarmup\n\n";
+    print "   ./fnlo-run-nnlojet.pl fnl2332d 1jet LO fastprod\n\n";
     exit;
 }
 my $verb = 0;
@@ -195,24 +195,26 @@ if ( ${scenmode} =~ m/fastwarm/ ) {
 foreach my $file ( @files ) {
     (my $name, my $dir, my $ext) = fileparse($file,'\.[^\.]*$');
     $ext =~ s/^\.//;
-# Rename jet -> 1jet or 2jet 
-    $name =~ s/^jet/${scentype}.${scenproc}/;
+# Rename jet -> 1jet or 2jet
+    $name =~ s/^jet/${scenproc}/;
+# Add scentype to beginning of name
+    $name =~ s/^${scenproc}/${scentype}.${scenproc}/;
 # fastNLO special tar.gz
     if ( $ext =~ m/^gz$/ && $name =~ m/\.tab$/ ) {
-	$ext = "tab.gz";
-	$name =~ s/\.tab$//; 
+        $ext = "tab.gz";
+        $name =~ s/\.tab$//;
     }
     my $newname = "${name}_${gjobnr}.${ext}";
     $newname =~ s/^zj-//;
 # APPLgrid special
 #    if ( ($ext =~ m/root/) ) {
-#	$newname =~ s/^$defnam/${scentype}\.${scenord}\./;
+#       $newname =~ s/^$defnam/${scentype}\.${scenord}\./;
 #   }
     rename $file, $newname;
     print "fnlo-run-nnlojet.pl: $file has been renamed to ${newname}\n";
 }
 
-$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz ${scentype}.${scenproc}*";
+$cmd = "tar cfz ${scenname}_${gjobnr}.tar.gz *${scenproc}*";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-run-nnlojet.pl: ERROR! Result files could not be archived to ${scenname}_${gjobnr}.tar.gz, aborted!\n";}
 # Copy to standard name as gc sandbox output file
