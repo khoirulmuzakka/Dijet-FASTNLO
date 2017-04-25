@@ -597,7 +597,7 @@ bool read_steer::ParseString(string line) {
             cout  <<  " # read_steer. Error parsing string: "  <<  endl;
             cout  <<  "'"  <<  orgl  <<  "'" << endl;
             cout  <<  " #   Expect two values separated by 'empty spaces' or 'tabstop'." <<  endl;
-            cout  <<  " #   Add comments starting with '!' character." << endl;
+            cout  <<  " #   Add comments starting with '"<< str_cmt <<"' character." << endl;
          }
       }
    } // for parse

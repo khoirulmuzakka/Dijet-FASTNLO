@@ -41,6 +41,8 @@
 #include "fastnlotk/fastNLOInterpolLinear.h"
 #include "fastnlotk/fastNLOInterpolOneNode.h"
 #include "fastnlotk/read_steer.h"
+#include <unistd.h>
+
 
 using namespace std;
 
@@ -1415,7 +1417,10 @@ void fastNLOCreate::GetWarmupValues() {
       // try again, with hard-coded convention:
       if (fIsWarmup) {
          logger.debug["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
-	 if ( access(GetWarmupTableFilename().c_str(), R_OK) != 0  ) {
+	 bool t1 = access(GetWarmupTableFilename().c_str(), R_OK);
+	 usleep(100); // short interruption
+	 bool t2 = access(GetWarmupTableFilename().c_str(), R_OK);
+	 if ( t1 != 0  && t2 !=0 ) {
 	    logger.debug["GetWarmupValues"]<<"Warmup file does not exist: "<<GetWarmupTableFilename()<<endl;
 	    fIsWarmup=true;
 	 }

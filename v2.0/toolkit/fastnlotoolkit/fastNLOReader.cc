@@ -2693,9 +2693,11 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
       case kExtern:
          sprintf(fname,"f_ext(%s,%s)",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
+      case kConst:
+         sprintf(fname,"%f", ((MuX==kMuR) ? fConst_MuR : fConst_MuF ) );
+         break;
       default:
-         logger.error<<"unknown scale choice.\n";
-
+         logger.error<<"unknown scale choice: "<<MuX<<"\tkConst would be: "<<kConst <<endl;
       }
       logger.info["PrintScaleSettings"]<<sname[isc]<<" scale chosen to be "<<smu[isc]<<"^2 = "
           <<sfac<<"^2 * "<<fname<<endl;
