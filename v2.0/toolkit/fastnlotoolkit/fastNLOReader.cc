@@ -1829,9 +1829,10 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
                            FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
                         else {
 			   // DIS specific hack, as we do not intend to include data or mult. contributions
-			   FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c,(fastNLOCoeffAddFlex*)BBlocksSMCalc[0][0]);
-			   //otherwise, please simply use:
-			   //FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+			   if ( BBlocksSMCalc[0][0] != NULL ) 
+			      FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c,(fastNLOCoeffAddFlex*)BBlocksSMCalc[0][0]);
+			   else //otherwise, please simply use:
+			      FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
 			}
                      }
                   }
@@ -1908,7 +1909,8 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
 
    // we take the PDF coefficients from the first contributions if compatible
    // this avoids repetive access to LHAPDF
-   static const bool SpeedUp = true;
+   //   static const bool SpeedUp = false; 
+   static const bool SpeedUp = BBlocksSMCalc[0][0] != NULL; 
    bool IsCompatible = false;
    if ( SpeedUp ){
       if ( c0 != NULL && c0 != c && fCoeff.size()>1) {

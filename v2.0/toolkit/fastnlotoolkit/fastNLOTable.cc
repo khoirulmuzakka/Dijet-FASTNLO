@@ -605,9 +605,11 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 	       fastNLOCoeffAddFlex* ctrb = (fastNLOCoeffAddFlex*)cadd;
 	       vector<fastNLO::v5d*> s0 = ctrb->AccessSigmaTildes();
 	       vector<vector<fastNLO::v5d*> > sAll{s0};
+	       vector<fastNLOCoeffAddFlex* > cAll{ctrb};
 	       for ( auto othctr : others ) {
 		  sAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->AccessSigmaTildes());
 		  //nAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->GetNevt());
+		  cAll.push_back((fastNLOCoeffAddFlex*)othctr);
 	       }
 	       int cMax = s0.size();
 	       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
@@ -622,37 +624,96 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 			   for (int n=0; n<ctrb->GetNSubproc(); n++) {
 
 			      for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
-				 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
-				    vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-				 }
-
+				 vals.clear();
+				 double mean0 = 0;
+				 double rms = 0;
+				 unsigned int n0 = 0;
 				 if ( cutRMS != 0 ) {
-				    cout<<"Not Implemented. todo."<<endl;
-				    exit(2);
+				    for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+				       //vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+				       double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+				       if ( vv != 0 ) {
+					  mean0 += vv;
+					  rms   += vv*vv;
+					  n0++;
+				       }
+				    }
+				    if ( n0 != 0 ) {
+				       mean0 /= n0;
+				       rms = sqrt(rms/n0);
+				    }
 				 }
 				 
+				 // fill 'vals'
+				 //vals.reserve(sAll.size());
+				 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+				    double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+				    if ( ( cutRMS == 0 && vv != 0 ) ||
+					 ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
+				       // fill vals array again, now with cuts	
+				       vals.push_back(vv);
+				    }
+				    // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
+				    //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
+				    // }
+				 }
+				 if ( cutRMS!=0  && n0 != vals.size() ) 
+				    logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
+				 if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
+				    logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
+				    exit(1);
+				 }
+				 
+				 // assign merged values
 				 if ( moption == kMean  ) {
 				    double mean = 0;
 				    for ( auto ii : vals ) mean+=ii;
-				    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
-				    //double rms = 0;
-				    // for ( auto ii : vals ) rms+=ii*ii;
-				    // rms = sqrt(rms/sAll.size());
+				    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
+				    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
 				 }
 				 else if ( moption == kMedian ) {
-				    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-				    double median = vals[vals.size()/2];
-				    if ( vals.size()%2 == 0 ) {
-				       median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				    double median = 0;
+				    if ( vals.size() ) {
+				       std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+				       median = vals[vals.size()/2];
+				       if ( vals.size()%2 == 0 ) {
+					  median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+				       }
+				       // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
+				       // 	   im,     mean*nAll[0],    rms*nAll[0],
+				       // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
 				    }
-				    // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
-				    // 	   im,     mean*nAll[0],    rms*nAll[0],
-				    // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
-				    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0];
+				    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0]; // nAll[0] is 'new' normalisation
 				 }
 				 else {// cutRMS !=0
-				    cout<<"Not Implemented. todo."<<endl;
-				    exit(2);
+				    double wsum=0, ssum=0; //nsum=0
+				    unsigned int nn = 0;
+
+				    for ( fastNLOCoeffAddFlex* cit : cAll ) {
+				       double w2 = cit->GetMergeWeight(moption,n,iobs);
+				       double s2 = (*cit->AccessSigmaTildes()[im])[iobs][x][jS1][kS2][n]; 
+				       double n2 = cit->GetNevt();
+				       double vv = s2 / n2;
+				       //
+				       if ( (cutRMS == 0 && vv != 0 ) ||  
+					    ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ) {
+					  ssum += w2*s2/n2;
+					  wsum += w2;
+					  //nsum += n2;
+					  nn++;
+				       }
+				    }
+
+				    if ( nn != vals.size() ) {
+				       logger.error["MergeTables"]<<"'Cutflow' for median/mean not identical to other weights. Please contact developers."<<endl;
+				       cout<<"nn="<<nn<<"\tvals.size()="<<vals.size()<<"\tsAll.size()="<<sAll.size()<<endl;
+				       exit(3);
+				    }
+				    if ( wsum != 0 ) 
+				       (*s0[im])[iobs][x][jS1][kS2][n] = ssum / wsum * nAll[0];
+				    else 
+				       (*s0[im])[iobs][x][jS1][kS2][n] = 0;
+				    //s1 = ( w1*s1/n1 + w2*s2/n2 ) / (w1 + w2 ) * ( n1 + n2 ) ;
 				 }
 			      }
 			   }
@@ -690,7 +751,7 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 				       mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
 				    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
 				 }
-				 else { // no RMS cut
+				 else { // with RMS cut
 				    unsigned int nn=0;
 				    double mean=0;
 				    double v = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
@@ -720,14 +781,6 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 				    }
 				    ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
 				 }
-				 // std::sort(vals.begin(),vals.end());
-				 // int n1 = vals.size()/2;
-				 // int n2 = vals.size()/2-1;
-				 // double sortmedian = (vals[n1] + vals[n2])/2.;
-				 // if ( median != 0 || sortmedian != 0 ) {
-				 //    if ( median!=sortmedian )
-				 //    cout<<"n="<<vals.size()<<"\tn1="<<n1<<"\tn2="<<n2<<"\tsortmedian="<<sortmedian<<"\tratio:"<<median/sortmedian<<endl;
-				 // }
 			      }
 			      else {// cutRMS !=0
 				 cout<<"Not Implemented. todo."<<endl;

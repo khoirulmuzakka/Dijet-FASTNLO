@@ -34,7 +34,9 @@ std::map<std::string,std::string> _validoptions{
    {"-o","output    -o <output>. Specify output file name (the last argument is then considered to be an input table)."},
 //   {"-p","Plot.   -p <filename>. Plot some statistics of all input files. Option must be followed by filename."},
 //   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
-   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, add (append), attach, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
+   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
+   {"-attach","Do not 'merge' tables, but attach one to the other, i.e. result is the sum of all tables."},
+   {"-add",   "Do not 'merge' tables, but  add   one to the other, i.e. result is the sum of all tables (formerly called 'append')."},
    {"-pre","pre-avg -pre <n> <option>. 2 step mergeing: Build pre-averaged of n tables using weighting procedure <option>."},
    {"-cutRMS","cur RMS -cutRMS <sigma>. Calculate for each node the mean and RMS of all tables and discard values greater than <sigma>*RMS during mergeing."},
 };
@@ -147,6 +149,9 @@ int main(int argc, char** argv) {
 	 if ( sarg == "-w" ) wgtoption=argv[++iarg];
 	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
 	 if ( sarg == "-cutRMS" ) cutRMS=atof(argv[++iarg]); 
+	 if ( sarg == "-add" ) { wgtoption = "add"; }
+	 if ( sarg == "-attach" ) { wgtoption = "attach"; }
+	 if ( sarg == "-append" ) { wgtoption = "add"; }
 	 if ( sarg == "-pre" ) { 
 	    pre=atoi(argv[++iarg]); 
 	    if ( _wgtoptions.count(argv[iarg+1]) ) preoptin=argv[++iarg]; 
