@@ -20,11 +20,11 @@ public:
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    virtual void Read(std::istream&table);
    void ReadRest(std::istream& table);
-   virtual void Write(std::ostream& table);
+   virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption = fastNLO::kMerge);
    virtual void Print(int iprint) const;
 
-   // Manipulate coefficient bins   
+   // Manipulate coefficient bins
    virtual void Clear();//!< Clear all coefficients and event counters
    virtual void NormalizeCoefficients(double wgt=1);//!<a Set number of events to wgt and re-normalize coefficients accordingly
    virtual void NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin);

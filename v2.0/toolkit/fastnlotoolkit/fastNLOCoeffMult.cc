@@ -11,7 +11,7 @@ using namespace fastNLO;
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin) 
+fastNLOCoeffMult::fastNLOCoeffMult(int NObsBin)
    : fastNLOCoeffBase(NObsBin), Nuncorrel(), UncDescr(), Ncorrel(), CorDescr(),
      UncorLo(), UncorHi(), CorrLo(), CorrHi(), fact() {
    SetClassName("fastNLOCoeffMult");
@@ -112,8 +112,8 @@ void fastNLOCoeffMult::ReadCoeffMult(istream& table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffMult::Write(ostream& table) {
-   fastNLOCoeffBase::Write(table);
+void fastNLOCoeffMult::Write(ostream& table, int itabversion) {
+   fastNLOCoeffBase::Write(table,itabversion);
    CheckCoeffConstants(this);
    table << Nuncorrel << sep;
    for(int i=0;i<Nuncorrel;i++){

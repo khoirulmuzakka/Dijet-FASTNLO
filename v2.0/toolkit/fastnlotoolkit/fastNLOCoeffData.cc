@@ -10,7 +10,7 @@ using namespace fastNLO;
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffData::fastNLOCoeffData(int NObsBin) 
+fastNLOCoeffData::fastNLOCoeffData(int NObsBin)
    : fastNLOCoeffBase(NObsBin), Nuncorrel(), UncDescr(), Ncorrel(), CorDescr(), Xcenter(), Value(),
      UncorLo(), UncorHi(), CorrLo(), CorrHi(), NErrMatrix(), matrixelement() {
    SetClassName("fastNLOCoeffData");
@@ -110,8 +110,8 @@ void fastNLOCoeffData::ReadCoeffData(istream& table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffData::Write(ostream& table) {
-   fastNLOCoeffBase::Write(table);
+void fastNLOCoeffData::Write(ostream& table, int itabversion) {
+   fastNLOCoeffBase::Write(table,itabversion);
    CheckCoeffConstants(this);
 
    //if(IDataFlag==1){

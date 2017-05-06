@@ -18,7 +18,7 @@ public:
    virtual fastNLOCoeffMult* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    virtual void Read(std::istream& table);
-   virtual void Write(std::ostream& table);
+   virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Print(int iprint) const;
 
    double GetMultFactor(int iObs) const { return fact[iObs]; }

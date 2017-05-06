@@ -17,7 +17,7 @@ bool fastNLOTable::fWelcomeOnce = false;
 
 
 // ___________________________________________________________________________________________________
-fastNLOTable::fastNLOTable() 
+fastNLOTable::fastNLOTable()
    : ffilename(""), fPrecision(8), Itabversion(), ScenName(),
      logger("fastNLOTable"), fCoeff(), Ecms(), ILOord(), Ipublunits(),
      ScDescript(), NObsBin(), NDim(), DimLabel(), IDiffBin(), Bin(),
@@ -182,11 +182,11 @@ void fastNLOTable::WriteTable() {
    //!< Write fastNLO table to file 'ffilename' (member)
    std::string extension = ".gz";
    bool compress = false;
-   if ((ffilename.length() >= extension.length()) and 
-         (ffilename.compare(ffilename.length() - extension.length(), extension.length(), extension) == 0)) 
+   if ((ffilename.length() >= extension.length()) and
+         (ffilename.compare(ffilename.length() - extension.length(), extension.length(), extension) == 0))
    {
       logger.info["WriteTable"]<<"Filename ends with .gz, therefore enable compression." << endl;
-      compress = true; 
+      compress = true;
    }
 
    logger.info["WriteTable"]<<"Writing fastNLO table with " << GetNcontrib() << " theory contributions to file: " << ffilename << endl;
@@ -197,7 +197,7 @@ void fastNLOTable::WriteTable() {
    WriteScenario(*table);
    for(int i=0;i<GetNcontrib()+GetNdata();i++){
       logger.debug["WriteTable"]<<"Writing coefficient table #"<<i<<endl;
-      GetCoeffTable(i)->Write(*table);
+      GetCoeffTable(i)->Write(*table,GetItabversion());
    }
    CloseFileWrite(*table);
 }
@@ -213,29 +213,24 @@ void fastNLOTable::WriteTable(string filename) {
 }
 
 
-
 //______________________________________________________________________________
 void fastNLOTable::WriteHeader(std::ostream& table) {
    table << fastNLO::tablemagicno << sep;
-   //table << Itabversion << sep;
-   table << fastNLO::tabversion << sep;
-   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_Header" <<sep;
+   table << GetItabversion() << sep;
+   if ( GetItabversion() >= 24000 ) table << "fastNLO_Header" << sep;
    if ( ScenName.find(" ")!=string::npos )  {
       logger.warn["WriteHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
       ScenName = ScenName.substr(0,ScenName.find(" "));
       logger.warn["WriteHeader"]<<"Write ScenarioName: "<<ScenName<<endl;
    }
    table << ScenName << sep;
-   // table << Ncontrib << sep;
-   // table << Nmult << sep;
-   // table << Ndata << sep;
    table << GetNcontrib() << sep;
    table << GetNmult() << sep;
    table << GetNdata() << sep;
-   table << 0 << sep; //NUserString
-   table << 0 << sep; //NuserInt
-   table << 0 << sep; //NuserFloat
-   table << 0 << sep; //Imachine
+   table << 0 << sep; // NUserString
+   table << 0 << sep; // NuserInt
+   table << 0 << sep; // NuserFloat
+   table << 0 << sep; // Imachine
 }
 
 
@@ -303,8 +298,8 @@ void fastNLOTable::ReadScenario(istream& table){
          table >> IDivUpPointer[i];
       }
    }
-   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
-   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused 
+   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
+   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
    fastNLOTools::ReadMagicNo(table);
    // if (!fastNLOTools::ReadMagicNo(table)) {
    //    logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
@@ -318,7 +313,7 @@ void fastNLOTable::ReadScenario(istream& table){
 // ___________________________________________________________________________________________________
 void fastNLOTable::WriteScenario(std::ostream& table){
    table << fastNLO::tablemagicno << sep;
-   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_Scenario" <<sep;
+   if ( GetItabversion() >= 24000 ) table << "fastNLO_Scenario" <<sep;
    table << Ipublunits << sep;
    size_t NScDescript = ScDescript.size();
    table << NScDescript << sep;
@@ -357,8 +352,8 @@ void fastNLOTable::WriteScenario(std::ostream& table){
          table << IDivUpPointer[i] << sep;
       }
    }
-   if ( fastNLO::tabversion >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
-   if ( fastNLO::tabversion >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
+   if ( GetItabversion() >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
+   if ( GetItabversion() >= 24000 ) table << 0 << sep; // v2.4 (yet unused)
 }
 
 
@@ -571,248 +566,248 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
    }
    // --- mean or median
    else {
-      if ( other.size() < 30 ) 
-	 logger.warn["MergeTables"]<<"Result may has a large spread, since only "<<other.size()+1<<" tables are merged."<<endl;
+      if ( other.size() < 30 )
+         logger.warn["MergeTables"]<<"Result may has a large spread, since only "<<other.size()+1<<" tables are merged."<<endl;
 
       set<fastNLOCoeffBase*> ConsideredContrib;
       // loop over contributions.
       for ( unsigned int jc=0; jc<fCoeff.size(); jc++) {
-	 if ( fastNLOCoeffAddBase::CheckCoeffConstants(fCoeff[jc],true) ) {
-	    fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)fCoeff[jc];
-	    //set<fastNLOCoeffAddBase*> others;
-	    vector<fastNLOCoeffAddBase*> others;
-	    // ---- find corresponding 'other' contributions
-	    for ( unsigned int ioth = 0 ; ioth<other.size() ; ioth++ ) {
-	       const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata(); 
-	       for ( int ic=0; ic<ntot; ic++ ) {
-		  fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other[ioth]->GetCoeffTable(ic); // too optimistic typecast
-		  if ( fastNLOCoeffAddBase::CheckCoeffConstants((fastNLOCoeffBase*)cother,true) ) {
-		     if ( cadd->IsCompatible(*cother) ) {
-			//logger.info["MergeTables"]<<"Found compatible contributions"<<endl;
-			others.push_back(cother); //insert()
-			ConsideredContrib.insert(cother);
-		     }
-		  }
-	       }
-	    }
-	    logger.info["MergeTables"]<<"Found "<<others.size()<<" compatible contributions."<<endl;
-	    
-	    // loop over all compatible contributions and 
-	    vector<double > nAll{cadd->GetNevt()};
-	    for ( auto othctr : others ) nAll.push_back( othctr->GetNevt());
+         if ( fastNLOCoeffAddBase::CheckCoeffConstants(fCoeff[jc],true) ) {
+            fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)fCoeff[jc];
+            //set<fastNLOCoeffAddBase*> others;
+            vector<fastNLOCoeffAddBase*> others;
+            // ---- find corresponding 'other' contributions
+            for ( unsigned int ioth = 0 ; ioth<other.size() ; ioth++ ) {
+               const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata();
+               for ( int ic=0; ic<ntot; ic++ ) {
+                  fastNLOCoeffAddBase* cother = (fastNLOCoeffAddBase*)other[ioth]->GetCoeffTable(ic); // too optimistic typecast
+                  if ( fastNLOCoeffAddBase::CheckCoeffConstants((fastNLOCoeffBase*)cother,true) ) {
+                     if ( cadd->IsCompatible(*cother) ) {
+                        //logger.info["MergeTables"]<<"Found compatible contributions"<<endl;
+                        others.push_back(cother); //insert()
+                        ConsideredContrib.insert(cother);
+                     }
+                  }
+               }
+            }
+            logger.info["MergeTables"]<<"Found "<<others.size()<<" compatible contributions."<<endl;
 
-	    if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cadd,true) ) {//flexible
-	       fastNLOCoeffAddFlex* ctrb = (fastNLOCoeffAddFlex*)cadd;
-	       vector<fastNLO::v5d*> s0 = ctrb->AccessSigmaTildes();
-	       vector<vector<fastNLO::v5d*> > sAll{s0};
-	       vector<fastNLOCoeffAddFlex* > cAll{ctrb};
-	       for ( auto othctr : others ) {
-		  sAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->AccessSigmaTildes());
-		  //nAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->GetNevt());
-		  cAll.push_back((fastNLOCoeffAddFlex*)othctr);
-	       }
-	       int cMax = s0.size();
-	       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
-		  if ( s0[ii]->size()==0 ) cMax--;
-	       }
-	       vector<double > vals(sAll.size()); // allocate only once
+            // loop over all compatible contributions and
+            vector<double > nAll{cadd->GetNevt()};
+            for ( auto othctr : others ) nAll.push_back( othctr->GetNevt());
 
-	       for (unsigned int iobs=0 ; iobs<ctrb->SigmaTildeMuIndep.size() ; iobs++) {
-		  for (unsigned int jS1=0; jS1<ctrb->GetNScaleNode1(iobs); jS1++) {
-		     for (unsigned int kS2=0; kS2<ctrb->GetNScaleNode2(iobs); kS2++) {
-			for (int x=0; x<ctrb-> GetNxmax(iobs); x++) {
-			   for (int n=0; n<ctrb->GetNSubproc(); n++) {
+            if ( fastNLOCoeffAddFlex::CheckCoeffConstants(cadd,true) ) {//flexible
+               fastNLOCoeffAddFlex* ctrb = (fastNLOCoeffAddFlex*)cadd;
+               vector<fastNLO::v5d*> s0 = ctrb->AccessSigmaTildes();
+               vector<vector<fastNLO::v5d*> > sAll{s0};
+               vector<fastNLOCoeffAddFlex* > cAll{ctrb};
+               for ( auto othctr : others ) {
+                  sAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->AccessSigmaTildes());
+                  //nAll.push_back( ((fastNLOCoeffAddFlex*)othctr)->GetNevt());
+                  cAll.push_back((fastNLOCoeffAddFlex*)othctr);
+               }
+               int cMax = s0.size();
+               for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
+                  if ( s0[ii]->size()==0 ) cMax--;
+               }
+               vector<double > vals(sAll.size()); // allocate only once
 
-			      for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
-				 vals.clear();
-				 double mean0 = 0;
-				 double rms = 0;
-				 unsigned int n0 = 0;
-				 if ( cutRMS != 0 ) {
-				    for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
-				       //vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-				       double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-				       if ( vv != 0 ) {
-					  mean0 += vv;
-					  rms   += vv*vv;
-					  n0++;
-				       }
-				    }
-				    if ( n0 != 0 ) {
-				       mean0 /= n0;
-				       rms = sqrt(rms/n0);
-				    }
-				 }
-				 
-				 // fill 'vals'
-				 //vals.reserve(sAll.size());
-				 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
-				    double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-				    if ( ( cutRMS == 0 && vv != 0 ) ||
-					 ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
-				       // fill vals array again, now with cuts	
-				       vals.push_back(vv);
-				    }
-				    // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
-				    //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
-				    // }
-				 }
-				 if ( cutRMS!=0  && n0 != vals.size() ) 
-				    logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
-				 if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
-				    logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
-				    exit(1);
-				 }
-				 
-				 // assign merged values
-				 if ( moption == kMean  ) {
-				    double mean = 0;
-				    for ( auto ii : vals ) mean+=ii;
-				    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
-				    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
-				 }
-				 else if ( moption == kMedian ) {
-				    double median = 0;
-				    if ( vals.size() ) {
-				       std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-				       median = vals[vals.size()/2];
-				       if ( vals.size()%2 == 0 ) {
-					  median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
-				       }
-				       // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
-				       // 	   im,     mean*nAll[0],    rms*nAll[0],
-				       // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
-				    }
-				    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0]; // nAll[0] is 'new' normalisation
-				 }
-				 else {// cutRMS !=0
-				    double wsum=0, ssum=0; //nsum=0
-				    unsigned int nn = 0;
+               for (unsigned int iobs=0 ; iobs<ctrb->SigmaTildeMuIndep.size() ; iobs++) {
+                  for (unsigned int jS1=0; jS1<ctrb->GetNScaleNode1(iobs); jS1++) {
+                     for (unsigned int kS2=0; kS2<ctrb->GetNScaleNode2(iobs); kS2++) {
+                        for (int x=0; x<ctrb-> GetNxmax(iobs); x++) {
+                           for (int n=0; n<ctrb->GetNSubproc(); n++) {
 
-				    for ( fastNLOCoeffAddFlex* cit : cAll ) {
-				       double w2 = cit->GetMergeWeight(moption,n,iobs);
-				       double s2 = (*cit->AccessSigmaTildes()[im])[iobs][x][jS1][kS2][n]; 
-				       double n2 = cit->GetNevt();
-				       double vv = s2 / n2;
-				       //
-				       if ( (cutRMS == 0 && vv != 0 ) ||  
-					    ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ) {
-					  ssum += w2*s2/n2;
-					  wsum += w2;
-					  //nsum += n2;
-					  nn++;
-				       }
-				    }
+                              for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
+                                 vals.clear();
+                                 double mean0 = 0;
+                                 double rms = 0;
+                                 unsigned int n0 = 0;
+                                 if ( cutRMS != 0 ) {
+                                    for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+                                       //vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                                       double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                                       if ( vv != 0 ) {
+                                          mean0 += vv;
+                                          rms   += vv*vv;
+                                          n0++;
+                                       }
+                                    }
+                                    if ( n0 != 0 ) {
+                                       mean0 /= n0;
+                                       rms = sqrt(rms/n0);
+                                    }
+                                 }
 
-				    if ( nn != vals.size() ) {
-				       logger.error["MergeTables"]<<"'Cutflow' for median/mean not identical to other weights. Please contact developers."<<endl;
-				       cout<<"nn="<<nn<<"\tvals.size()="<<vals.size()<<"\tsAll.size()="<<sAll.size()<<endl;
-				       exit(3);
-				    }
-				    if ( wsum != 0 ) 
-				       (*s0[im])[iobs][x][jS1][kS2][n] = ssum / wsum * nAll[0];
-				    else 
-				       (*s0[im])[iobs][x][jS1][kS2][n] = 0;
-				    //s1 = ( w1*s1/n1 + w2*s2/n2 ) / (w1 + w2 ) * ( n1 + n2 ) ;
-				 }
-			      }
-			   }
-			}
-		     }
-		  }
-	       }
-	    }
-	    else { // fixed scale
-	       fastNLOCoeffAddFix* ctrb = (fastNLOCoeffAddFix*)cadd;
-	       vector<double> vals(nAll.size());
-	       for (unsigned int iobs=0 ; iobs<ctrb->SigmaTilde.size() ; iobs++) {
-		  for (unsigned int s=0 ; s<ctrb->SigmaTilde[iobs].size() ; s++) {
-		     for (unsigned int x=0 ; x<ctrb->SigmaTilde[iobs][s].size() ; x++) {
-			for (unsigned int l=0 ; l<ctrb->SigmaTilde[iobs][s][x].size() ; l++) {
-			   for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
-			      
-			      double mean0 = 0;
-			      double rms = 0;
-			      if ( cutRMS != 0 ) {
-				 mean0 += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
-				 rms   += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt() * ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt();
-				 for ( auto othctr : others ) {
-				    mean0 += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
-				    rms += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt()*((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
-				 }
-				 mean0 /= nAll.size();
-				 rms = sqrt(rms/nAll.size());
-			      }
+                                 // fill 'vals'
+                                 //vals.reserve(sAll.size());
+                                 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+                                    double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                                    if ( ( cutRMS == 0 && vv != 0 ) ||
+                                         ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
+                                       // fill vals array again, now with cuts
+                                       vals.push_back(vv);
+                                    }
+                                    // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
+                                    //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
+                                    // }
+                                 }
+                                 if ( cutRMS!=0  && n0 != vals.size() )
+                                    logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
+                                 if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
+                                    logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
+                                    exit(1);
+                                 }
 
-			      if ( moption == kMean  ) { // mergeing option 'mean'
-				 if ( cutRMS==0 ) { // no cut on RMS
-				    double mean = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
-				    for ( auto othctr : others ) 
-				       mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
-				    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
-				 }
-				 else { // with RMS cut
-				    unsigned int nn=0;
-				    double mean=0;
-				    double v = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
-				    if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
-				    for ( auto othctr : others ) {
-				       v =  ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
-				       if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
-				    }
-				    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nn;
-				    if ( nn!=nAll.size() ) cout<<"[CutRMS] Discarded "<<nAll.size()-nn<<" table values out of "<< nAll.size()<<" (bin="<<iobs<<", proc="<<p<<")."<<endl;
-				 }
-			      }
-			      else if ( moption == kMedian ) { // mergeing option 'median'
-				 if ( cutRMS==0 ) { // cut on RMS
-				    cout<<"todo fadfoo"<<endl;
-				    exit(3);
-				 }
-				 else { // no RMS cut
-				    vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / ctrb->GetNevt();
-				    for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
-				       vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / others[is]->GetNevt();
-				    }
-				    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-				    double median = vals[vals.size()/2];
-				    if ( vals.size()%2 == 0 ) {
-				       median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
-				    }
-				    ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
-				 }
-			      }
-			      else {// cutRMS !=0
-				 cout<<"Not Implemented. todo."<<endl;
-				 exit(2);
-			      }
+                                 // assign merged values
+                                 if ( moption == kMean  ) {
+                                    double mean = 0;
+                                    for ( auto ii : vals ) mean+=ii;
+                                    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
+                                    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
+                                 }
+                                 else if ( moption == kMedian ) {
+                                    double median = 0;
+                                    if ( vals.size() ) {
+                                       std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+                                       median = vals[vals.size()/2];
+                                       if ( vals.size()%2 == 0 ) {
+                                          median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+                                       }
+                                       // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
+                                       //          im,     mean*nAll[0],    rms*nAll[0],
+                                       //          (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
+                                    }
+                                    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0]; // nAll[0] is 'new' normalisation
+                                 }
+                                 else {// cutRMS !=0
+                                    double wsum=0, ssum=0; //nsum=0
+                                    unsigned int nn = 0;
 
-			   }
-			}
-		     }
-		  }
-	       }
-	    }
-	    // add number of events together
-	    for ( auto othctr : others ) {
-	       cadd->AccessWgtStat().Add(othctr->GetWgtStat());
-	    }
-	    cadd->Nevt = nAll[0];
-	    double nTot = 0;
-	    for ( auto ii : nAll ) nTot+=ii;
-	    cadd->NormalizeCoefficients(nTot);
-	 }
+                                    for ( fastNLOCoeffAddFlex* cit : cAll ) {
+                                       double w2 = cit->GetMergeWeight(moption,n,iobs);
+                                       double s2 = (*cit->AccessSigmaTildes()[im])[iobs][x][jS1][kS2][n];
+                                       double n2 = cit->GetNevt();
+                                       double vv = s2 / n2;
+                                       //
+                                       if ( (cutRMS == 0 && vv != 0 ) ||
+                                            ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ) {
+                                          ssum += w2*s2/n2;
+                                          wsum += w2;
+                                          //nsum += n2;
+                                          nn++;
+                                       }
+                                    }
+
+                                    if ( nn != vals.size() ) {
+                                       logger.error["MergeTables"]<<"'Cutflow' for median/mean not identical to other weights. Please contact developers."<<endl;
+                                       cout<<"nn="<<nn<<"\tvals.size()="<<vals.size()<<"\tsAll.size()="<<sAll.size()<<endl;
+                                       exit(3);
+                                    }
+                                    if ( wsum != 0 )
+                                       (*s0[im])[iobs][x][jS1][kS2][n] = ssum / wsum * nAll[0];
+                                    else
+                                       (*s0[im])[iobs][x][jS1][kS2][n] = 0;
+                                    //s1 = ( w1*s1/n1 + w2*s2/n2 ) / (w1 + w2 ) * ( n1 + n2 ) ;
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            else { // fixed scale
+               fastNLOCoeffAddFix* ctrb = (fastNLOCoeffAddFix*)cadd;
+               vector<double> vals(nAll.size());
+               for (unsigned int iobs=0 ; iobs<ctrb->SigmaTilde.size() ; iobs++) {
+                  for (unsigned int s=0 ; s<ctrb->SigmaTilde[iobs].size() ; s++) {
+                     for (unsigned int x=0 ; x<ctrb->SigmaTilde[iobs][s].size() ; x++) {
+                        for (unsigned int l=0 ; l<ctrb->SigmaTilde[iobs][s][x].size() ; l++) {
+                           for (unsigned int p=0 ; p<ctrb->SigmaTilde[iobs][s][x][l].size() ; p++) {
+
+                              double mean0 = 0;
+                              double rms = 0;
+                              if ( cutRMS != 0 ) {
+                                 mean0 += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+                                 rms   += ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt() * ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt();
+                                 for ( auto othctr : others ) {
+                                    mean0 += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+                                    rms += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt()*((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+                                 }
+                                 mean0 /= nAll.size();
+                                 rms = sqrt(rms/nAll.size());
+                              }
+
+                              if ( moption == kMean  ) { // mergeing option 'mean'
+                                 if ( cutRMS==0 ) { // no cut on RMS
+                                    double mean = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+                                    for ( auto othctr : others )
+                                       mean += ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+                                    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nAll.size();
+                                 }
+                                 else { // with RMS cut
+                                    unsigned int nn=0;
+                                    double mean=0;
+                                    double v = ctrb->SigmaTilde[iobs][s][x][l][p] / ctrb->GetNevt()  ;
+                                    if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
+                                    for ( auto othctr : others ) {
+                                       v =  ((fastNLOCoeffAddFix*)othctr)->SigmaTilde[iobs][s][x][l][p] / othctr->GetNevt();
+                                       if ( fabs(v-mean0) < rms*cutRMS ) {mean+=v; nn++;}
+                                    }
+                                    ctrb->SigmaTilde[iobs][s][x][l][p] = mean*nAll[0]/nn;
+                                    if ( nn!=nAll.size() ) cout<<"[CutRMS] Discarded "<<nAll.size()-nn<<" table values out of "<< nAll.size()<<" (bin="<<iobs<<", proc="<<p<<")."<<endl;
+                                 }
+                              }
+                              else if ( moption == kMedian ) { // mergeing option 'median'
+                                 if ( cutRMS==0 ) { // cut on RMS
+                                    cout<<"todo fadfoo"<<endl;
+                                    exit(3);
+                                 }
+                                 else { // no RMS cut
+                                    vals[0] = ctrb->SigmaTilde[iobs][s][x][l][p]  / ctrb->GetNevt();
+                                    for ( unsigned int is = 0 ; is < others.size() ; is++ ) {
+                                       vals[is+1] = ((fastNLOCoeffAddFix*)others[is])->SigmaTilde[iobs][s][x][l][p] / others[is]->GetNevt();
+                                    }
+                                    std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+                                    double median = vals[vals.size()/2];
+                                    if ( vals.size()%2 == 0 ) {
+                                       median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+                                    }
+                                    ctrb->SigmaTilde[iobs][s][x][l][p] = median*nAll[0];
+                                 }
+                              }
+                              else {// cutRMS !=0
+                                 cout<<"Not Implemented. todo."<<endl;
+                                 exit(2);
+                              }
+
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            // add number of events together
+            for ( auto othctr : others ) {
+               cadd->AccessWgtStat().Add(othctr->GetWgtStat());
+            }
+            cadd->Nevt = nAll[0];
+            double nTot = 0;
+            for ( auto ii : nAll ) nTot+=ii;
+            cadd->NormalizeCoefficients(nTot);
+         }
       }
       // check for further contributions, which have not been considered!
       for ( unsigned int ioth = 0 ; ioth<other.size() ; ioth++ ) {
-	 const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata(); 
-	 for ( int ic=0; ic<ntot; ic++ ) {
-	    if ( ConsideredContrib.count(other[ioth]->GetCoeffTable(ic)) == 0 ){
-	       logger.error["MergeTables"]<<"Some contribution is not considered and thus gets lost!"<<endl;
-	       logger.error["MergeTables"]<<"All input tables to the function fastNLOTable::MergeTables() must be already present in the current fastNLOTable instance."<<endl;
-	       exit(3);
-	    }
-	 }
+         const int ntot = other[ioth]->GetNcontrib() + other[ioth]->GetNdata();
+         for ( int ic=0; ic<ntot; ic++ ) {
+            if ( ConsideredContrib.count(other[ioth]->GetCoeffTable(ic)) == 0 ){
+               logger.error["MergeTables"]<<"Some contribution is not considered and thus gets lost!"<<endl;
+               logger.error["MergeTables"]<<"All input tables to the function fastNLOTable::MergeTables() must be already present in the current fastNLOTable instance."<<endl;
+               exit(3);
+            }
+         }
       }
       logger.info["MergeTables"]<<(moption == kMean ? "Mean" : "Median")<<" out of "<< other.size()+1<<" tables calculated successfully."<<endl;
    }
@@ -834,11 +829,11 @@ void fastNLOTable::MergeTable(const fastNLOTable& other, fastNLO::EMerge moption
    }
    if ( moption == fastNLO::kUnweighted || moption == fastNLO::kAdd )
       logger.info["AppendTable"]<<"Adding (appending) another table. Resulting table will have weight 1 if option 'append' or 'unweighted' is used."<<endl;
-   if ( moption == fastNLO::kUnweighted ) 
+   if ( moption == fastNLO::kUnweighted )
       logger.warn["AppendTable"]<<"Option 'unweighted' requested. Do you probably want to use the number of entries instead (option = kNumEvent)? Continuing."<<endl;
 
    // --- just call AddTable
-   AddTable(other,moption); 
+   AddTable(other,moption);
    return ;
 }
 
@@ -897,8 +892,8 @@ void fastNLOTable::AddTable(const fastNLOTable& other, fastNLO::EMerge moption) 
                   wasAdded = true;
                }
             }
-	    // all weights are additive, and already been aded by fastNLOCoeffBase::Add();
-	    // ((fastNLOCoeffAddBase*)fCoeff[jc])->AccessWgtStat().Add( ((fastNLOCoeffAddBase*)other.GetCoeffTable(ic))->GetWgtStat() );
+            // all weights are additive, and already been aded by fastNLOCoeffBase::Add();
+            // ((fastNLOCoeffAddBase*)fCoeff[jc])->AccessWgtStat().Add( ((fastNLOCoeffAddBase*)other.GetCoeffTable(ic))->GetWgtStat() );
          }
          // Multiplicative?
          else if ( fastNLOCoeffMult::CheckCoeffConstants(cother,quiet) ) {
@@ -2098,7 +2093,13 @@ template<typename T> void fastNLOTable::EraseBin(vector<T>& v, unsigned int idx)
    }
 }
 
+
 void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
+   if ( IsNorm() != 0 ) {
+      logger.error["EraseBinFromTable"]<<"Not implemented yet for normalisable tables. Aborted!" << endl;
+      exit(1);
+   }
+
    logger.info["fastNLOTable::EraseBinFromTable"]<<"Erasing from table the observable index no. " << iObsIdx << endl;
    // Changes to table header block A2
    EraseBin(fastNLOTable::Bin,iObsIdx);
@@ -2108,7 +2109,6 @@ void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
       EraseBin(fastNLOTable::IDivUpPointer,iObsIdx);
    }
    // Changes to table contributions block B
-   cout << "Ncontrib = " << GetNcontrib() << ", Ndata = " << GetNdata() << endl;
    for ( int ic = 0; ic<GetNcontrib()+GetNdata(); ic++ ) {
       logger.info["fastNLOTable::EraseBinFromTable"]<<"Erasing the observable index no. " << iObsIdx << " from contribution no. " << ic << endl;
       fastNLOCoeffAddBase* ctmp = (fastNLOCoeffAddBase*)fCoeff[ic];
@@ -2363,10 +2363,16 @@ void fastNLOTable::CloseFileWrite(std::ostream& table) {
 
 //______________________________________________________________________________
 bool fastNLOTable::IsCompatibleHeader(const fastNLOTable& other) const {
-   if (Itabversion!= other.GetItabversion()) {
-      logger.warn["IsCompatibleHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<< other.GetItabversion()<<endl;
-      if ( Itabversion+other.GetItabversion() == 23500+23600 ) {}
-      else return false;
+   if ( trunc(Itabversion/10000) != trunc(other.GetItabversion()/10000)) {
+      logger.error["IsCompatibleHeader"]<<"Differing major versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      return false;
+   } else if ( ( trunc(Itabversion/1000) <= 22 && trunc(other.GetItabversion()/1000) >= 23 ) ||
+               ( trunc(Itabversion/1000) >= 23 && trunc(other.GetItabversion()/1000) <= 22 ) ) {
+      logger.error["IsCompatibleHeader"]<<"Incompatible minor versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      return false;
+   } else if ( Itabversion != other.GetItabversion() ) {
+      logger.warn["IsCompatibleHeader"]<<"Differing sub-versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      logger.warn["IsCompatibleHeader"]<<"Please check your result carefully!"<<endl;
    }
    if (GetNdata() + other.GetNdata() > 1) {
       logger.warn["IsCompatibleHeader"]<<"Two tables containing both experimental data are incompatible"<<endl;
@@ -2383,7 +2389,11 @@ bool fastNLOTable::IsCompatibleHeader(const fastNLOTable& other) const {
 //______________________________________________________________________________
 bool fastNLOTable::IsCatenableHeader(const fastNLOTable& other) const {
    if ( trunc(Itabversion/10000) != trunc(other.GetItabversion()/10000)) {
-      logger.error["IsCatenableHeader"]<<"Differing versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      logger.error["IsCatenableHeader"]<<"Differing major versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
+      return false;
+   } else if ( ( trunc(Itabversion/1000) <= 22 && trunc(other.GetItabversion()/1000) >= 23 ) ||
+               ( trunc(Itabversion/1000) >= 23 && trunc(other.GetItabversion()/1000) <= 22 ) ) {
+      logger.error["IsCatenableHeader"]<<"Incatenable minor versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;
       return false;
    } else if ( Itabversion != other.GetItabversion() ) {
       logger.warn["IsCatenableHeader"]<<"Differing sub-versions of table format: "<<Itabversion<<" and "<<other.GetItabversion()<<endl;

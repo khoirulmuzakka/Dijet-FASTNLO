@@ -9,7 +9,7 @@ using namespace std;
 using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin) 
+fastNLOCoeffAddBase::fastNLOCoeffAddBase(int NObsBin)
    : fastNLOCoeffBase(NObsBin), IRef(), IScaleDep(), Nevt(), Npow(), NPDFPDG(),
      NPDFDim(), NFFPDG(), NFFDim(), NSubproc(), IPDFdef1(), IPDFdef2(), IPDFdef3(),
      fPDFCoeff(), Hxlim1(), XNode1(), Hxlim2(), XNode2(), Nztot(), Hzlim(), ZNode(),
@@ -81,22 +81,22 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSumW2, table );
       fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
       fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
-   }      
+   }
    else {
       table >> Nevt;
       double readNevt = Nevt;
       if ( Nevt <= 0 ) { // v2300
-	 table >> Nevt;
-	 table >> fWgt.WgtNevt;
-	 if ( readNevt<=-2 ) table >> fWgt.NumTable;
-	 table >> fWgt.WgtNumEv;
-	 table >> fWgt.WgtSumW2;
-	 table >> fWgt.SigSumW2;
-	 table >> fWgt.SigSum;
-	 fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsSumW2, table );
-	 fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSumW2, table );
-	 fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
-	 fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
+         table >> Nevt;
+         table >> fWgt.WgtNevt;
+         if ( readNevt<=-2 ) table >> fWgt.NumTable;
+         table >> fWgt.WgtNumEv;
+         table >> fWgt.WgtSumW2;
+         table >> fWgt.SigSumW2;
+         table >> fWgt.SigSum;
+         fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsSumW2, table );
+         fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSumW2, table );
+         fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
+         fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
       }
    }
    table >> Npow;
@@ -220,28 +220,28 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       //            StripWhitespace(ScaleDescript[i][j]);
       }
    }
-   
+
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::Write(ostream& table) {
+void fastNLOCoeffAddBase::Write(ostream& table, int itabversion) {
    debug["Write"]<<"Calling fastNLOCoeffBase::Write()"<<endl;
-   fastNLOCoeffBase::Write(table);
+   fastNLOCoeffBase::Write(table,itabversion);
    CheckCoeffConstants(this);
-   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_CoeffAddBase" << sep;
-   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   if ( itabversion >= 24000 ) table << "fastNLO_CoeffAddBase" << sep;
+   if ( itabversion >= 24000 ) table << 0 << sep; // v2.4, but yet unused
    table << IRef << sep;
    table << IScaleDep << sep;
-   //table << Nevt << sep;
-   if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 || fastNLO::tabversion==23600 ) { // detailed storage of weights
-      if ( fastNLO::tabversion==23000 || fastNLO::tabversion==23500 ) table << -1 << sep; // -1: read the values below
+   // table << Nevt << sep;
+   if ( itabversion==23000 || itabversion==23500 || itabversion==23600 ) { // detailed storage of weights
+      if ( itabversion==23000 || itabversion==23500 ) table << -1 << sep; // -1: read the values below
       else table << -2 << sep; // -1: read the values below
       table << Nevt << sep;
       table << fWgt.WgtNevt << sep;
-      if ( fastNLO::tabversion>=23600 ) table << fWgt.NumTable << sep;
+      if ( itabversion >= 23600 ) table << fWgt.NumTable << sep;
       table << fWgt.WgtNumEv << sep;
       table << fWgt.WgtSumW2 << sep;
       table << fWgt.SigSumW2 << sep;
@@ -251,7 +251,7 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
       fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
       fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
    }
-   else if ( fastNLO::tabversion>=24000 ) { // detailed storage of weights
+   else if ( itabversion>=24000 ) { // detailed storage of weights
       table << Nevt << sep;
       table << fWgt.WgtNevt << sep;
       table << fWgt.NumTable << sep;
@@ -352,8 +352,8 @@ void fastNLOCoeffAddBase::Write(ostream& table) {
          table << ScaleDescript[i][j] << sep;
       }
    }
-   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
-   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
 
 }
 
@@ -370,7 +370,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       }
    }
 
-   
+
    if ( moption==fastNLO::kAttach ) {
       //Nevt = Nevt;// stays!
       fWgt.WgtNevt  = 1;
@@ -380,16 +380,16 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       fWgt.SigSumW2 += other.fWgt.SigSumW2;
       fWgt.SigSum   += other.fWgt.SigSum;
       for ( unsigned int iAddProc = 0 ; iAddProc<other.fWgt.WgtObsSumW2.size() ; iAddProc++ ) {
-	 fWgt.WgtObsSumW2.push_back(other.fWgt.WgtObsSumW2[iAddProc]);
-	 fWgt.SigObsSumW2.push_back(other.fWgt.SigObsSumW2[iAddProc]);
-	 fWgt.SigObsSum.push_back(other.fWgt.SigObsSum[iAddProc]);
-	 fWgt.WgtObsNumEv.push_back(other.fWgt.WgtObsNumEv[iAddProc]);
+         fWgt.WgtObsSumW2.push_back(other.fWgt.WgtObsSumW2[iAddProc]);
+         fWgt.SigObsSumW2.push_back(other.fWgt.SigObsSumW2[iAddProc]);
+         fWgt.SigObsSum.push_back(other.fWgt.SigObsSum[iAddProc]);
+         fWgt.WgtObsNumEv.push_back(other.fWgt.WgtObsNumEv[iAddProc]);
       }
       if ( other.GetPDFCoeff().size() ==0  || this->GetPDFCoeff().size()==0 ) {
-	 error["Add"]<<"Mergeing option 'kAttach' requires that PDF coefficients are stored in table.!"<<endl;
+         error["Add"]<<"Mergeing option 'kAttach' requires that PDF coefficients are stored in table.!"<<endl;
       }
       for ( unsigned int iAddProc = 0 ; iAddProc<other.GetPDFCoeff().size() ;iAddProc++ ) {
-	 fPDFCoeff.push_back(other.GetPDFCoeff()[iAddProc]);
+         fPDFCoeff.push_back(other.GetPDFCoeff()[iAddProc]);
       }
       NSubproc += other.GetNSubproc();
       IPDFdef3 += other.GetIPDFdef3();
@@ -407,7 +407,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       fastNLOTools::AddVectors( fWgt.SigObsSum,   other.fWgt.SigObsSum );
       fastNLOTools::AddVectors( fWgt.WgtObsNumEv, other.fWgt.WgtObsNumEv );
    }
-   
+
 }
 
 

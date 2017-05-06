@@ -5,7 +5,7 @@
 #include "fastNLOCoeffBase.h"
 #include "fastNLOConstants.h"
 
-namespace fastNLO { 
+namespace fastNLO {
    struct WgtStat {
       double WgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
       int NumTable = 1; //!< Number of tables merged into this table
@@ -17,37 +17,37 @@ namespace fastNLO {
       fastNLO::v2d SigObsSumW2; //!< sumw2[proc][obs]
       fastNLO::v2d SigObsSum;   //!< sum[proc][obs]
       std::vector < std::vector < unsigned long long > > WgtObsNumEv; //!< Nentries[proc][obs]
-      
+
       void Erase() {
-	 WgtNevt=0;
-	 NumTable=1;
-	 WgtNumEv=0;
-	 WgtSumW2=0;
-	 SigSumW2=0;
-	 SigSum=0;
-	 for ( auto& i : WgtObsSumW2 ) for ( auto& j : i ) j=0;
-	 for ( auto& i : SigObsSumW2 ) for ( auto& j : i ) j=0;
-	 for ( auto& i : SigObsSum   ) for ( auto& j : i ) j=0;
-	 for ( auto& i : WgtObsNumEv ) for ( auto& j : i ) j=0;
+         WgtNevt=0;
+         NumTable=1;
+         WgtNumEv=0;
+         WgtSumW2=0;
+         SigSumW2=0;
+         SigSum=0;
+         for ( auto& i : WgtObsSumW2 ) for ( auto& j : i ) j=0;
+         for ( auto& i : SigObsSumW2 ) for ( auto& j : i ) j=0;
+         for ( auto& i : SigObsSum   ) for ( auto& j : i ) j=0;
+         for ( auto& i : WgtObsNumEv ) for ( auto& j : i ) j=0;
       };
 
       void Add(const WgtStat& other ) {
-	 this->WgtNevt  += other.WgtNevt;
-	 this->NumTable += other.NumTable;
-	 this->WgtNumEv += other.WgtNumEv;
-	 this->WgtSumW2 += other.WgtSumW2;
-	 this->SigSumW2 += other.SigSumW2;
-	 this->SigSum   += other.SigSum;
-	 if ( this->WgtObsNumEv.size() != other.WgtObsNumEv.size() ) exit(8);
-	 for ( unsigned int i = 0 ; i<WgtObsNumEv.size() ; i++ ) {
-	    if ( this->WgtObsNumEv[i].size() != other.WgtObsNumEv[i].size() ) exit(8);
-	    for ( unsigned int j = 0 ; j<WgtObsNumEv[i].size() ; j++ ) {
-	       this->WgtObsSumW2[i][j] += other.WgtObsSumW2[i][j];
-	       this->SigObsSumW2[i][j] += other.SigObsSumW2[i][j];
-	       this->SigObsSum[i][j]   += other.SigObsSum[i][j];
-	       this->WgtObsNumEv[i][j] += other.WgtObsNumEv[i][j];
-	    }
-	 }
+         this->WgtNevt  += other.WgtNevt;
+         this->NumTable += other.NumTable;
+         this->WgtNumEv += other.WgtNumEv;
+         this->WgtSumW2 += other.WgtSumW2;
+         this->SigSumW2 += other.SigSumW2;
+         this->SigSum   += other.SigSum;
+         if ( this->WgtObsNumEv.size() != other.WgtObsNumEv.size() ) exit(8);
+         for ( unsigned int i = 0 ; i<WgtObsNumEv.size() ; i++ ) {
+            if ( this->WgtObsNumEv[i].size() != other.WgtObsNumEv[i].size() ) exit(8);
+            for ( unsigned int j = 0 ; j<WgtObsNumEv[i].size() ; j++ ) {
+               this->WgtObsSumW2[i][j] += other.WgtObsSumW2[i][j];
+               this->SigObsSumW2[i][j] += other.SigObsSumW2[i][j];
+               this->SigObsSum[i][j]   += other.SigObsSum[i][j];
+               this->WgtObsNumEv[i][j] += other.WgtObsNumEv[i][j];
+            }
+         }
       };
       WgtStat& operator+=(const WgtStat& other) { this->Add(other); return *this;}
 
@@ -67,7 +67,7 @@ public:
    virtual fastNLOCoeffAddBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
    void Read(std::istream& table);
-   virtual void Write(std::ostream& table);
+   virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption=fastNLO::kMerge);
    virtual void Print(int iprint) const;
 
@@ -156,7 +156,7 @@ protected:
    int NScaleDim = 0;
    std::vector < int > Iscale;                                                                       // not used
    std::vector < std::vector < std::string > > ScaleDescript;
-   
+
    fastNLO::WgtStat fWgt; //!< event and weight counts
    // double fWgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
    // unsigned long long fWgtNumEv = 0; //!< number of entries
@@ -167,7 +167,7 @@ protected:
    // fastNLO::v2d fSigObsSumW2; //!< sumw2[proc][obs]
    // fastNLO::v2d fSigObsSum;   //!< sum[proc][obs]
    // std::vector < std::vector < unsigned long long > > fWgtObsNumEv; //!< Nentries[proc][obs]
-   
+
 
 };
 

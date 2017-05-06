@@ -10,7 +10,7 @@ using namespace std;
 using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin) 
+fastNLOCoeffAddFix::fastNLOCoeffAddFix(int NObsBin)
    : fastNLOCoeffAddBase(NObsBin), Nscalevar(), ScaleFac(), ScaleNode(), SigmaTilde(),
      AlphasTwoPi_v20(), PdfLc(), PdfSplLc1(), PdfSplLc2() {
    SetClassName("fastNLOCoeffAddFix");
@@ -155,10 +155,10 @@ void fastNLOCoeffAddFix::ResizePdfSplLC(){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::Write(ostream& table){
+void fastNLOCoeffAddFix::Write(ostream& table, int itabversion){
    //! Write coefficient table to disk (ostream)
    CheckCoeffConstants(this);
-   fastNLOCoeffAddBase::Write(table);
+   fastNLOCoeffAddBase::Write(table,itabversion);
 
    for(int i=0;i<NScaleDim;i++){
       table << Nscalevar[i] << sep;
@@ -334,14 +334,14 @@ void fastNLOCoeffAddFix::NormalizeCoefficients(double wgt){
 void fastNLOCoeffAddFix::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin){
    //!< Set number of events to wgtProcBin for each subprocess and bin
    //!< and normalize coefficients accordingly.
-   if ( int(wgtProcBin.size()) != GetNSubproc() ) {//NObs  
-      error["NormalizeCoefficients"]<<"Dimension of weights (iObs) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
+   if ( int(wgtProcBin.size()) != GetNSubproc() ) {//NObs
+      error["NormalizeCoefficients"]<<"Dimension of weights (iObs) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl;
       exit(4);
    }
 
    for ( int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
-      if ( int(wgtProcBin[iProc].size()) != GetNObsBin() ) { 
-         error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; 
+      if ( int(wgtProcBin[iProc].size()) != GetNObsBin() ) {
+         error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl;
 	 exit(4);
       }
       for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
@@ -362,7 +362,7 @@ void fastNLOCoeffAddFix::MultiplyCoefficientsByConstant(double fact) {
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFix::MultiplyBin(unsigned int iObsIdx, double fact) {
    //! Multiply observable bin
-   for (int m=0 ; m<GetNSubproc() ; m++) 
+   for (int m=0 ; m<GetNSubproc() ; m++)
       MultiplyBinProc(iObsIdx,m,fact);
 }
 
@@ -415,7 +415,7 @@ void fastNLOCoeffAddFix::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) { 
+void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
    //! Erase observable bin
    debug["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
    if ( ScaleNode.size() == 0 ) {
@@ -445,4 +445,3 @@ void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iO
    }
    fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
-

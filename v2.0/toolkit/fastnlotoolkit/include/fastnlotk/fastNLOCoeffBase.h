@@ -24,7 +24,7 @@ public:
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
 
    virtual void Read(std::istream& table);
-   virtual void Write(std::ostream& table);
+   virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Print(int iprint) const;
 
    // Erase or multiply observable bin; iObsIdx is the C++ array index to be removed and

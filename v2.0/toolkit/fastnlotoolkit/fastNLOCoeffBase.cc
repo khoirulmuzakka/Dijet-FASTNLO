@@ -10,7 +10,7 @@ using namespace std;
 using namespace fastNLO;
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin) 
+fastNLOCoeffBase::fastNLOCoeffBase(int NObsBin)
    : PrimalScream("fastNLOCoeffBase"), fNObsBins(NObsBin), IXsectUnits(),
      IDataFlag(), IAddMultFlag(), IContrFlag1(), IContrFlag2(), NScaleDep(),
      CtrbDescript(), CodeDescript() {}
@@ -36,13 +36,13 @@ void fastNLOCoeffBase::Read(istream& table){
 void fastNLOCoeffBase::ReadBase(istream& table){
    debug["ReadBase"]<<endl;
    //table.peek();
-   
+
    table >> fVersionRead;
    if ( fVersionRead == fastNLO::tablemagicno )
       fVersionRead = 22000 ;
    //fastNLOTools::ReadMagicNo(table);
    std::string stest;
-   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase" 
+   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase"
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 
    table >> IXsectUnits;
@@ -91,12 +91,12 @@ void fastNLOCoeffBase::EndReadCoeff(istream& table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffBase::Write(ostream& table) {
-   say::debug["Write"]<<"Writing fastNLOCoeffBase."<<endl;
+void fastNLOCoeffBase::Write(ostream& table, int itabversion) {
+   say::debug["Write"]<<"Writing fastNLOCoeffBase for table version " << itabversion << "." << endl;
    table << fastNLO::tablemagicno << sep;
-   if ( fastNLO::tabversion>=24000 ) table<<fastNLO::tabversion<<sep;
-   if ( fastNLO::tabversion>=24000 ) table << "fastNLO_CoeffAddBase" << sep;                                                                           
-   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   if ( itabversion >= 24000 ) table << fastNLO::tabversion << sep;
+   if ( itabversion >= 24000 ) table << "fastNLO_CoeffAddBase" << sep;
+   if ( itabversion >= 24000 ) table << 0 << sep; // v2.4, but yet unused
    table << IXsectUnits << sep;
    table << IDataFlag << sep;
    table << IAddMultFlag << sep;
@@ -107,15 +107,7 @@ void fastNLOCoeffBase::Write(ostream& table) {
    //IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep);
    fastNLOTools::WriteFlexibleVector(CtrbDescript,table);
    fastNLOTools::WriteFlexibleVector(CodeDescript,table);
-   // table << CtrbDescript.size() << sep;
-   // for(unsigned int i=0;i<CtrbDescript.size();i++){
-   //    table << CtrbDescript[i] << sep;
-   // }
-   // table << CodeDescript.size() << sep;
-   // for(unsigned int i=0;i<CodeDescript.size();i++){
-   //    table << CodeDescript[i] << sep;
-   // }
-   if ( fastNLO::tabversion>=24000 ) table << 0 << sep; // v2.4, but yet unuse
+   if ( itabversion >= 24000 ) table << 0 << sep; // v2.4, but yet unuse
 }
 
 

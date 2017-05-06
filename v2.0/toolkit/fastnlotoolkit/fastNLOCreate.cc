@@ -7,7 +7,7 @@
   It supports fixed scale and flexible-scale tables.
   fastNLOCreate inherits from fastNLOTable, but is only able to hold one
   coefficient table as member.
-  fastNLOCreate no enables to fill this coefficient talbe, i.e.  to add further
+  fastNLOCreate no enables to fill this coefficient table, i.e.  to add further
   contributions, e.g. from a MC generator.
 
   fastNLOCreate works only with a steering file. Example steering files
@@ -420,7 +420,7 @@ void fastNLOCreate::Instantiate() {
    // -------------------------
    // header
    SetScenName(fScenConsts.ScenarioName);
-   SetItabversion(22000);
+   SetItabversion(fastNLO::tabversion);
 
    // ---- scenario specific flags
    Ipublunits   = fScenConsts.PublicationUnits;
@@ -573,10 +573,10 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    fScenConsts.X_NNodes = INT_NS(X_NNodes,fSteerfile);
    fScenConsts.X_NNodeCounting="NodesPerBin";
    if ( EXIST_NS(X_NodeCounting,fSteerfile) )
-	fScenConsts.X_NNodeCounting = STRING_NS(X_NodeCounting,fSteerfile);
+        fScenConsts.X_NNodeCounting = STRING_NS(X_NodeCounting,fSteerfile);
    if ( EXIST_NS(X_NoOfNodesPerMagnitude,fSteerfile) )
-	logger.warn[""]<<"Key 'X_NoOfNodesPerMagnitude' found. This is no longer supported and ignored. Please use steering key 'X_NNodeCounting' instead."<<endl;
-	//fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
+        logger.warn[""]<<"Key 'X_NoOfNodesPerMagnitude' found. This is no longer supported and ignored. Please use steering key 'X_NNodeCounting' instead."<<endl;
+        //fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
 
    fScenConsts.Mu1_Kernel = STRING_NS(Mu1_Kernel,fSteerfile);
    fScenConsts.Mu1_DistanceMeasure = STRING_NS(Mu1_DistanceMeasure,fSteerfile);
@@ -1417,20 +1417,20 @@ void fastNLOCreate::GetWarmupValues() {
       // try again, with hard-coded convention:
       if (fIsWarmup) {
          logger.debug["GetWarmupValues"]<<"Could not get warmup table from steerfile. Now trying to read steerfile: "<<GetWarmupTableFilename()<<endl;
-	 bool t1 = access(GetWarmupTableFilename().c_str(), R_OK);
-	 usleep(100); // short interruption
-	 bool t2 = access(GetWarmupTableFilename().c_str(), R_OK);
-	 if ( t1 != 0  && t2 !=0 ) {
-	    logger.debug["GetWarmupValues"]<<"Warmup file does not exist: "<<GetWarmupTableFilename()<<endl;
-	    fIsWarmup=true;
-	 }
-	 else {
-	    READ_NS(GetWarmupTableFilename(),fSteerfile);    // put the warmup-values into same read_steer 'namespace'
-	    fWarmupConsts.Values = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
-	    fIsWarmup = fWarmupConsts.Values.empty();
-	    if (!fIsWarmup)
-	       logger.info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
-	 }
+         bool t1 = access(GetWarmupTableFilename().c_str(), R_OK);
+         usleep(100); // short interruption
+         bool t2 = access(GetWarmupTableFilename().c_str(), R_OK);
+         if ( t1 != 0  && t2 !=0 ) {
+            logger.debug["GetWarmupValues"]<<"Warmup file does not exist: "<<GetWarmupTableFilename()<<endl;
+            fIsWarmup=true;
+         }
+         else {
+            READ_NS(GetWarmupTableFilename(),fSteerfile);    // put the warmup-values into same read_steer 'namespace'
+            fWarmupConsts.Values = DOUBLE_TAB_NS(Warmup.Values,fSteerfile);
+            fIsWarmup = fWarmupConsts.Values.empty();
+            if (!fIsWarmup)
+               logger.info["GetWarmupValues"]<<"Warmup values found in file "<<GetWarmupTableFilename()<<"."<<endl;
+         }
       }
 
       // --- read other warmup paramters
@@ -1598,7 +1598,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    else if ( !wrmbin.empty() ) {
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          const int i0 = 1;//fIsFlexibleScale ? 6 : 4;
-	 const double EPS = 1.e-8;
+         const double EPS = 1.e-8;
          if (NDim == 1) {
             if ( fabs(Bin[i][0].first- wrmbin[i][i0])>EPS || fabs(Bin[i][0].second - wrmbin[i][i0+1]) > EPS) {
                logger.error["CheckWrmbinConsistency"]
@@ -1749,7 +1749,7 @@ void fastNLOCreate::SetOrderOfAlphasOfCalculation(unsigned int ord) {
    // NSubproc may have changed. We have to reinitialize the grids
    //const int nSFInitial = fScaleFac.size();
 
-   // --- init statistics 
+   // --- init statistics
    fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.WgtObsSumW2, GetNSubprocesses(), GetNObsBin());
    fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.SigObsSumW2, GetNSubprocesses(), GetNObsBin());
    fastNLOTools::ResizeVector(GetTheCoeffTable()->fWgt.SigObsSum  , GetNSubprocesses(), GetNObsBin());
@@ -2019,25 +2019,25 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       if ( fWeightCache[iev].second._x1  != fEvent._x1 )    continue;
       if ( fWeightCache[iev].second._x2  != fEvent._x2 )    continue;
 
-      if (     fWeightCache[iev].first._o[0] == fScenario._o[0] 
-   	       &&  fWeightCache[iev].second._p   == fEvent._p 
-   	       &&  fWeightCache[iev].first._m1   == fScenario._m1
-   	       &&  fWeightCache[iev].first._m2   == fScenario._m2
-   	       &&  fWeightCache[iev].second._x1  == fEvent._x1
-   	       &&  fWeightCache[iev].second._x2  == fEvent._x2 ) {
-   	 // cout<<"Found cached PS point !!"<<endl;
-   	 // cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
-   	 fWeightCache[iev].second._w  += fEvent._w;
-   	 fWeightCache[iev].second._wf += fEvent._wf;
-   	 fWeightCache[iev].second._wr += fEvent._wr;
-   	 fWeightCache[iev].second._wrr += fEvent._wrr;
-   	 fWeightCache[iev].second._wff += fEvent._wff;
-   	 fWeightCache[iev].second._wrf += fEvent._wrf;
-   	 // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
-   	 return;
+      if (     fWeightCache[iev].first._o[0] == fScenario._o[0]
+               &&  fWeightCache[iev].second._p   == fEvent._p
+               &&  fWeightCache[iev].first._m1   == fScenario._m1
+               &&  fWeightCache[iev].first._m2   == fScenario._m2
+               &&  fWeightCache[iev].second._x1  == fEvent._x1
+               &&  fWeightCache[iev].second._x2  == fEvent._x2 ) {
+         // cout<<"Found cached PS point !!"<<endl;
+         // cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
+         fWeightCache[iev].second._w  += fEvent._w;
+         fWeightCache[iev].second._wf += fEvent._wf;
+         fWeightCache[iev].second._wr += fEvent._wr;
+         fWeightCache[iev].second._wrr += fEvent._wrr;
+         fWeightCache[iev].second._wff += fEvent._wff;
+         fWeightCache[iev].second._wrf += fEvent._wrf;
+         // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
+         return;
       }
       else {
-	 cout<<"This is  a bug!"<<endl;
+         cout<<"This is  a bug!"<<endl;
       }
    }
    // cout<<"Adding new weight to cache"<<endl;
@@ -2085,13 +2085,13 @@ void fastNLOCreate::Fill(int scalevar) {
       // --- w**2 counts
       double w2 = fEvent._w;
       if ( fIsFlexibleScale ) { // estimate a weight.
-   	 double mu2 = fScenario._m1*fScenario._m1;
-   	 if ( c->GetNPDF() == 1 ) //DIS
-   	    mu2 = (fScenario._m1*fScenario._m1 + fScenario._m2*fScenario._m2 ) /2.;
-   	 double lmu = log(mu2);
-   	 w2 += lmu*fEvent._wr + lmu*fEvent._wf + lmu*lmu*fEvent._wrr + lmu*lmu*fEvent._wff + lmu*lmu*fEvent._wrf;
-   	 if ( c->GetNPDF() == 1 ) //DIS
-   	    w2 -= lmu*fEvent._wr +lmu*fEvent._wf;
+         double mu2 = fScenario._m1*fScenario._m1;
+         if ( c->GetNPDF() == 1 ) //DIS
+            mu2 = (fScenario._m1*fScenario._m1 + fScenario._m2*fScenario._m2 ) /2.;
+         double lmu = log(mu2);
+         w2 += lmu*fEvent._wr + lmu*fEvent._wf + lmu*lmu*fEvent._wrr + lmu*lmu*fEvent._wff + lmu*lmu*fEvent._wrf;
+         if ( c->GetNPDF() == 1 ) //DIS
+            w2 -= lmu*fEvent._wr +lmu*fEvent._wf;
       }
       w2 *= w2;
       // c->fWgtNevt ; //set externally by generator
@@ -2108,27 +2108,27 @@ void fastNLOCreate::Fill(int scalevar) {
       logger.error["Fill"]<<"x-value is smaller than zero: x1="<<fEvent._x1<<", x2="<<fEvent._x2<<". Skipping event."<<endl;
       fEvent._x1=1;
       fEvent._x2=1;
-      return ; 
+      return ;
    }
 
    if (fIsWarmup) {
       if (scalevar==0 && ObsBin>=0 ) UpdateWarmupArrays();
       // else skip event
-   } 
+   }
    else if ( GetTheCoeffTable()->GetIRef() ) FillRefContribution(scalevar);
    else {
       if ( fIsFlexibleScale ) {
-	 if ( fCacheMax > 1 ) {
-	    FillWeightCache(scalevar);
-	    if ( (int)fWeightCache.size() >= fCacheMax )
-	       FlushCache();
-	 } 
-	 else {
-	    FillContribution(scalevar);
-	 }
+         if ( fCacheMax > 1 ) {
+            FillWeightCache(scalevar);
+            if ( (int)fWeightCache.size() >= fCacheMax )
+               FlushCache();
+         }
+         else {
+            FillContribution(scalevar);
+         }
       }
       else {
-	 FillContribution(scalevar);
+         FillContribution(scalevar);
       }
    }
    fEvent.ResetButX();
@@ -2347,7 +2347,7 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    //! do the interpolation
    //! and fill into the tables.
    //logger.debug["FillContributionFlexDIS"]<<endl;
-   
+
    if (fEvent._w == 0 && fEvent._wf==0 && fEvent._wr==0 && fEvent._wrr==0 && fEvent._wrf==0) return;   // nothing todo.
 
    // do interpolation
@@ -2390,26 +2390,26 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
             //    exit(1);
             // }
             if (fEvent._w  != 0) {
-	       //cout<<"   Fill * : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+               //cout<<"   Fill * : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
                c->SigmaTildeMuIndep[ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
             }
             if (fEvent._wf != 0) {
-	       //cout<<"   Fill F : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
+               //cout<<"   Fill F : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wf  * wfnlo<<endl;
                c->SigmaTildeMuFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
             }
             if (fEvent._wr != 0) {
-	       //cout<<"   Fill R : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
+               //cout<<"   Fill R : ix="<<ix<<", im1="<<nmu1[m1].first<<", im2="<<nmu2[mu2].first<<", p="<<p<<", w="<<fEvent._wr  * wfnlo<<endl;
                c->SigmaTildeMuRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
             }
-	    if (fEvent._wrr != 0) {
-	       c->SigmaTildeMuRRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
-	    }
-	    if (fEvent._wff != 0) { 
-	       c->SigmaTildeMuFFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
-	    }
-	    if (fEvent._wrf != 0) {
-	       c->SigmaTildeMuRFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
-	    }
+            if (fEvent._wrr != 0) {
+               c->SigmaTildeMuRRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
+            }
+            if (fEvent._wff != 0) {
+               c->SigmaTildeMuFFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
+            }
+            if (fEvent._wrf != 0) {
+               c->SigmaTildeMuRFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
+            }
          }
       }
    }
@@ -2418,67 +2418,67 @@ void fastNLOCreate::FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin) 
    int p = fEvent._p;
    if (fEvent._w  != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                c->SigmaTildeMuIndep[ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._w  * wfnlo;
             }
-	 }
+         }
       }
    }
    if (fEvent._wf != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                c->SigmaTildeMuFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wf * wfnlo;
             }
-	 }
+         }
       }
    }
    if (fEvent._wr != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
                c->SigmaTildeMuRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wr * wfnlo;
             }
-	 }
+         }
       }
    }
    if (fEvent._wrr != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-	       c->SigmaTildeMuRRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
-	    }
-	 }
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+               c->SigmaTildeMuRRDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrr * wfnlo;
+            }
+         }
       }
    }
-   if (fEvent._wff != 0) { 
+   if (fEvent._wff != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-	       c->SigmaTildeMuFFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
-	    }
-	 }
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+               c->SigmaTildeMuFFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wff * wfnlo;
+            }
+         }
       }
    }
    if (fEvent._wrf != 0) {
       for (unsigned int ix = 0 ; ix<nx.size() ; ix++) {
-	 int xIdx = nx[ix].first;
-	 for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	    for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
-	       double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-	       c->SigmaTildeMuRFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
-	    }
+         int xIdx = nx[ix].first;
+         for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
+            for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
+               double wfnlo = nx[ix].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+               c->SigmaTildeMuRFDep [ObsBin][xIdx][nmu1[m1].first][nmu2[mu2].first][p]  += fEvent._wrf * wfnlo;
+            }
          }
       }
    }
@@ -2495,7 +2495,7 @@ void fastNLOCreate::FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, in
    if (fEvent._w == 0 ) return;   // nothing todo.
    if ( scalevar >= (int)fScaleFac.size() ){
       logger.error["FillContributionFixDIS"]<<"Error! Scale variation scalevar="<<scalevar<<" requested"
-					    <<", but only "<<fScaleFac.size()<<" variations are initialized. Exiting."<<endl;
+                                            <<", but only "<<fScaleFac.size()<<" variations are initialized. Exiting."<<endl;
       exit(3);
    }
 
@@ -2522,21 +2522,21 @@ void fastNLOCreate::FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, in
       //int ixHM = GetXIndex(ObsBin,xminbin,xmaxbin);
 
       for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
-	 double wfnlo = nx[ix].second * nmu1[m1].second  / BinSize[ObsBin];
-	 if (! std::isfinite(wfnlo)) {
-	    logger.error["FillContributionFixDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
-	    logger.error["FillContributionFixDIS"]<<"This should have been captured before, aborting ..."<<endl;
-	    fKernX1[ObsBin]->PrintGrid();
-	    fKernMu1[ObsBin]->PrintGrid();
-	    cout<<"ix1="<<ix<<", im1="<<m1<<endl;
-	    cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
-	    cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
-	    exit(1);
-	 }
-	 if (fEvent._w  != 0) {
-	    //cout<<"   Fill * : ix="<<xIdx<<", im1="<<nmu1[m1].first<<", im2="<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
-	    c->SigmaTilde[ObsBin][scalevar][nmu1[m1].first][xIdx][p]  += fEvent._w  * wfnlo;
-	 }
+         double wfnlo = nx[ix].second * nmu1[m1].second  / BinSize[ObsBin];
+         if (! std::isfinite(wfnlo)) {
+            logger.error["FillContributionFixDIS"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
+            logger.error["FillContributionFixDIS"]<<"This should have been captured before, aborting ..."<<endl;
+            fKernX1[ObsBin]->PrintGrid();
+            fKernMu1[ObsBin]->PrintGrid();
+            cout<<"ix1="<<ix<<", im1="<<m1<<endl;
+            cout<<"x1="<<nx[ix].second<<", ix="<<ix<<", xval="<<x<<endl;
+            cout<<"m1="<< nmu1[m1].second<<", m1="<<m1<<", mu1val="<<fScenario._m1<<endl;
+            exit(1);
+         }
+         if (fEvent._w  != 0) {
+            //cout<<"   Fill * : ix="<<xIdx<<", im1="<<nmu1[m1].first<<", im2="<<", p="<<p<<", w="<<fEvent._w  * wfnlo<<endl;
+            c->SigmaTilde[ObsBin][scalevar][nmu1[m1].first][xIdx][p]  += fEvent._w  * wfnlo;
+         }
       }
    }
 }
@@ -2731,7 +2731,7 @@ void fastNLOCreate::NormalizeCoefficients(double wgt) {
 }
 // ___________________________________________________________________________________________________
 void fastNLOCreate::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin) {
-   //! Set number of events to wgtProcBin[iProc][iBin] 
+   //! Set number of events to wgtProcBin[iProc][iBin]
    //! sigmatilde is weighted accordingly.
    if ( fWeightCache.size() )  FlushCache();
    GetTheCoeffTable()->NormalizeCoefficients(wgtProcBin);
@@ -3029,32 +3029,32 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       int nEvBin = 0;
       for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ ) {
-	 if (fWxRnd[i].first < 1.e-6) {
+         if (fWxRnd[i].first < 1.e-6) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i
-				    <<" seems to be unreasonably low (xmin="<<fWxRnd[i].first
-				    <<"). Taking xmin=1.e-6 instead."<<endl;
+                                    <<" seems to be unreasonably low (xmin="<<fWxRnd[i].first
+                                    <<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
+         nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
       }
       if ( nEvBin == 0 ) {
-	 logger.error["OutWarmup"]<<"No events were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
-	 fWxRnd[i].first=1.e-6;
-	 fWxRnd[i].second=1;
-	 fWMu1[i].first=1;
-	 fWMu1[i].second=5000;
-	 fWMu2[i].first=1;
-	 fWMu2[i].second=5000;
-	 logger.error["OutWarmup"]<<"Continueing and taking sensible dummy values. Do not use these for production runs !!"<<endl;
+         logger.error["OutWarmup"]<<"No events were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
+         fWxRnd[i].first=1.e-6;
+         fWxRnd[i].second=1;
+         fWMu1[i].first=1;
+         fWMu1[i].second=5000;
+         fWMu2[i].first=1;
+         fWMu2[i].second=5000;
+         logger.error["OutWarmup"]<<"Continueing and taking sensible dummy values. Do not use these for production runs !!"<<endl;
       }
       else if ( nEvBin < 10 ) {
-	 logger.warn["OutWarmup"]<<"Too little events (n="<<nEvBin<<") were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
+         logger.warn["OutWarmup"]<<"Too little events (n="<<nEvBin<<") were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
       }
       else if ( nEvBin < 100 ) {
-	 logger.warn["OutWarmup"]<<"Quite few events (n="<<nEvBin<<") were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
+         logger.warn["OutWarmup"]<<"Quite few events (n="<<nEvBin<<") were counted in bin "<<i<<". Thus no sensible warmup table can be written."<<endl;
       }
    }
-   
+
    // ---- write readable table
    char buf[4000];
    char buf2[4000];
@@ -3069,79 +3069,79 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
       strm<<buf<<endl;
       // table values
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-	 // --- write x-values
-	 sprintf(buf,"   %4d    %9.1e  %9.2e",	 i, fWxRnd[i].first, fWxRnd[i].second );
+         // --- write x-values
+         sprintf(buf,"   %4d    %9.1e  %9.2e",   i, fWxRnd[i].first, fWxRnd[i].second );
 
-	 // 1. Are warmup-values identical to bin-boundaries ?
-	 int ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
-	 int ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
+         // 1. Are warmup-values identical to bin-boundaries ?
+         int ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+         int ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
 
-	 fWMu1Rnd = fWMu1;
-	 fWMu2Rnd = fWMu2;
-	 // --- write mu1
-	 if ( ident1 != -1 ) { 
-	    // mu-value is identical with binning
-	    // -> write out many digits
-	    sprintf(buf2,"  %14.6f  %14.6f",fWMu1[i].first,fWMu1[i].second);
-	 }
-	 else if  ( fWMu1[i].second==0 || fabs(fWMu1[i].first/fWMu1[i].second-1) < 1.e-5) {
-	    // mu-value is a fixed number
-	    sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
-	 }	
-	 else { 
-	    // scale values are floating points. 
-	    // -> round them up/down a bit
-	    // extent range by 2%
-	    fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
-	    fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
-	    RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
+         fWMu1Rnd = fWMu1;
+         fWMu2Rnd = fWMu2;
+         // --- write mu1
+         if ( ident1 != -1 ) {
+            // mu-value is identical with binning
+            // -> write out many digits
+            sprintf(buf2,"  %14.6f  %14.6f",fWMu1[i].first,fWMu1[i].second);
+         }
+         else if  ( fWMu1[i].second==0 || fabs(fWMu1[i].first/fWMu1[i].second-1) < 1.e-5) {
+            // mu-value is a fixed number
+            sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
+         }
+         else {
+            // scale values are floating points.
+            // -> round them up/down a bit
+            // extent range by 2%
+            fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
+            fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
+            RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
 
-	    // if values are very close to an integer, it is likely that this is by purpose
-	    if ( fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3 ) 
-	       fWMu1Rnd[i].first = round(fWMu1[i].first);
-	    if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
-	       fWMu1Rnd[i].second = round(fWMu1[i].second);
+            // if values are very close to an integer, it is likely that this is by purpose
+            if ( fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3 )
+               fWMu1Rnd[i].first = round(fWMu1[i].first);
+            if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
+               fWMu1Rnd[i].second = round(fWMu1[i].second);
 
-	    string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
-	    sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
-	 }
+            string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
+            sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
+         }
 
-	 // --- write mu2
-	 if ( ident2 != -1 ) { 
-	    // mu-value is identical with binning
-	    // -> write out many digits
-	    sprintf(buf3,"  %14.6f  %14.6f",fWMu2[i].first,fWMu2[i].second);
-	 }
-	 else if  ( fWMu2[i].second==0 || fabs(fWMu2[i].first/fWMu2[i].second-1) < 1.e-5) {
-	    // mu-value is a fixed number
-	    sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].first);
-	 }	    
-	 else { 
-	    // scale values are floating points. 
-	    // -> round them up/down a bit
-	    fWMu2Rnd[i].first  = fWMu2[i].first - 0.06*fabs(fWMu2[i].first);
-	    fWMu2Rnd[i].second = fWMu2[i].second + 0.06*fabs(fWMu2[i].second);
-	    RoundValues(fWMu2Rnd,fWarmupNDigitMu2); // digit here should be identical to output in outwarmup
+         // --- write mu2
+         if ( ident2 != -1 ) {
+            // mu-value is identical with binning
+            // -> write out many digits
+            sprintf(buf3,"  %14.6f  %14.6f",fWMu2[i].first,fWMu2[i].second);
+         }
+         else if  ( fWMu2[i].second==0 || fabs(fWMu2[i].first/fWMu2[i].second-1) < 1.e-5) {
+            // mu-value is a fixed number
+            sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].first);
+         }
+         else {
+            // scale values are floating points.
+            // -> round them up/down a bit
+            fWMu2Rnd[i].first  = fWMu2[i].first - 0.06*fabs(fWMu2[i].first);
+            fWMu2Rnd[i].second = fWMu2[i].second + 0.06*fabs(fWMu2[i].second);
+            RoundValues(fWMu2Rnd,fWarmupNDigitMu2); // digit here should be identical to output in outwarmup
 
-	    // if values are very close to an integer, it is likely that this is by purpose
-	    if ( fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3 ) 
-	       fWMu2Rnd[i].first = round(fWMu2[i].first);
-	    if ( fWMu2[i].second >= 1 && fabs(fWMu2[i].second - round(fWMu2[i].second)) < 1e-3)
-	       fWMu2Rnd[i].second = round(fWMu2[i].second);
+            // if values are very close to an integer, it is likely that this is by purpose
+            if ( fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3 )
+               fWMu2Rnd[i].first = round(fWMu2[i].first);
+            if ( fWMu2[i].second >= 1 && fabs(fWMu2[i].second - round(fWMu2[i].second)) < 1e-3)
+               fWMu2Rnd[i].second = round(fWMu2[i].second);
 
-	    string format = "  %14."+to_string(fWarmupNDigitMu2)+"f  %14."+to_string(fWarmupNDigitMu2)+"f";
-	    sprintf(buf3,format.c_str(),fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-	 }
-	 
-	 // if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3)
-	 //    sprintf(buf3,"  %14.2g  %14.2g",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-	 // else
-	 //    sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].second);
+            string format = "  %14."+to_string(fWarmupNDigitMu2)+"f  %14."+to_string(fWarmupNDigitMu2)+"f";
+            sprintf(buf3,format.c_str(),fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+         }
 
-	 // printf(" org  %e     %e     %e      %e\n",fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
-	 // printf(" rnd  %e     %e     %e      %e\n",fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-	 // cout<<buf<<buf2<<buf3<<endl;
-	 // printf("\n");
+         // if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3)
+         //    sprintf(buf3,"  %14.2g  %14.2g",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+         // else
+         //    sprintf(buf3,"  %14.8f  %14.8f",fWMu2[i].first,fWMu2[i].second);
+
+         // printf(" org  %e     %e     %e      %e\n",fWMu1[i].first,fWMu1[i].second,fWMu2[i].first,fWMu2[i].second);
+         // printf(" rnd  %e     %e     %e      %e\n",fWMu1Rnd[i].first,fWMu1Rnd[i].second,fWMu2Rnd[i].first,fWMu2Rnd[i].second);
+         // cout<<buf<<buf2<<buf3<<endl;
+         // printf("\n");
 
          strm<<buf<<buf2<<buf3<<endl;
 
@@ -3155,7 +3155,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
       strm<<buf<<endl;
 
 
-	 // 1. Are warmup-values identical to bin-boundaries ?
+         // 1. Are warmup-values identical to bin-boundaries ?
       int ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
       fWMu1Rnd = fWMu1;
 
@@ -3166,45 +3166,45 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             logger.warn["OutWarmup"]<<"The xmin value in bin "<<i<<" seems to be unreasonably low (xmin="<<fWxRnd[i].first<<"). Taking xmin=1.e-6 instead."<<endl;
             fWxRnd[i].first=1.e-6;
          }
-	 // sprintf(buf,"   %4d     %9.1e  %9.2e  %16.1g  %16.1g",
-	 // 	 i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
-	  sprintf(buf,"   %4d     %9.1e  %9.2e", i,fWxRnd[i].first, fWxRnd[i].second);
+         // sprintf(buf,"   %4d     %9.1e  %9.2e  %16.1g  %16.1g",
+         //      i,fWxRnd[i].first, fWxRnd[i].second, fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+          sprintf(buf,"   %4d     %9.1e  %9.2e", i,fWxRnd[i].first, fWxRnd[i].second);
 
-	  // --- old code --- //
-	  // if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3)
-	  //    sprintf(buf2,"  %16.2g  %16.2g", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
-	  // else
-	  //    sprintf(buf2,"  %16.8f  %16.8f", fWMu1[i].first, fWMu1[i].second);
-	  // --- --- ---- --- //
-	  // --- write mu1
-	  if ( ident1 != -1 ) { 
-	     // mu-value is identical with binning
-	     // -> write out many digits
-	     sprintf(buf2,"  %14.6f  %14.6f",fWMu1[i].first,fWMu1[i].second);
-	  }
-	  else if  ( fWMu1[i].second==0 || fabs(fWMu1[i].first/fWMu1[i].second-1) < 1.e-5) {
-	     // mu-value is a fixed number
-	     sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
-	  }	
-	  else { 
-	     // scale values are floating points. 
-	     // -> round them up/down a bit
-	     // extent range by 2%
-	     fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
-	     fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
-	     RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
-	     
-	     // if values are very close to an integer, it is likely that this is by purpose
-	     if ( fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3 ) 
-		fWMu1Rnd[i].first = round(fWMu1[i].first);
-	     if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
-		fWMu1Rnd[i].second = round(fWMu1[i].second);
-	     
-	     string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
-	     sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
-	  }
-	  // --- write
-	  strm<<buf<<buf2<<endl;
+          // --- old code --- //
+          // if  ( fWMu1[i].second!=0 && fabs(fWMu1[i].first/fWMu1[i].second-1) > 1.e-3)
+          //    sprintf(buf2,"  %16.2g  %16.2g", fWMu1Rnd[i].first, fWMu1Rnd[i].second);
+          // else
+          //    sprintf(buf2,"  %16.8f  %16.8f", fWMu1[i].first, fWMu1[i].second);
+          // --- --- ---- --- //
+          // --- write mu1
+          if ( ident1 != -1 ) {
+             // mu-value is identical with binning
+             // -> write out many digits
+             sprintf(buf2,"  %14.6f  %14.6f",fWMu1[i].first,fWMu1[i].second);
+          }
+          else if  ( fWMu1[i].second==0 || fabs(fWMu1[i].first/fWMu1[i].second-1) < 1.e-5) {
+             // mu-value is a fixed number
+             sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
+          }
+          else {
+             // scale values are floating points.
+             // -> round them up/down a bit
+             // extent range by 2%
+             fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
+             fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
+             RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
+
+             // if values are very close to an integer, it is likely that this is by purpose
+             if ( fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3 )
+                fWMu1Rnd[i].first = round(fWMu1[i].first);
+             if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
+                fWMu1Rnd[i].second = round(fWMu1[i].second);
+
+             string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
+             sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
+          }
+          // --- write
+          strm<<buf<<buf2<<endl;
       }
       }
       strm<<"}}"<<endl;
@@ -3227,8 +3227,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
 
       int nEvBin = 0;
-      for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ ) 
-	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
+      for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ )
+         nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
 
       sprintf(buf,"    %4d    ",i); // obsbin
       strm<<buf;
@@ -3321,8 +3321,8 @@ void fastNLOCreate::AdjustWarmupValues() {
       int imant = mant*10; // floor()
       // more safety margins
       int nEvBin = 0;
-      for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ ) 
-	 nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
+      for ( int ip=0 ; ip<GetNSubprocesses() ; ip++ )
+         nEvBin += GetTheCoeffTable()->fWgt.WgtObsNumEv[ip][i];
       imant -= fWarmupXMargin;// safety margin
       if ( nEvBin < 100 ) imant-=4; // more safety
       else if ( nEvBin < 1000 ) imant-=2; // more safety
@@ -3345,11 +3345,11 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
 
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       if ( wrmmu[i].second!=0 && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) {
-	 // round only, if the values are different!
-	 // otherwise it is a 'fixed' scale and we have to
-	 // store exactly that values
-	 wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
-	 wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
+         // round only, if the values are different!
+         // otherwise it is a 'fixed' scale and we have to
+         // store exactly that values
+         wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
+         wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
       }
    }
    /*
@@ -3471,7 +3471,7 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
 void  fastNLOCreate::InitGrids() {
    logger.debug["InitGrids"]<<endl;
    if (fKernX1.empty()) logger.error["InitGrids"]<<"Interpolation kernels must be initialized before calling this function."<<endl;
-   
+
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       //       if ( (c->GetNPDF()==2 && c->GetNPDFDim() == 1) || (c->GetNPDF()==1)   ) {;} // ok!
@@ -3604,16 +3604,16 @@ void  fastNLOCreate::InitInterpolationKernels() {
       wrmMu1Dn = GetColumnFromTable(fWarmupConsts.Values, 3) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"),fSteerfile);
       wrmMu1Up = GetColumnFromTable(fWarmupConsts.Values, 4) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"max"),fSteerfile);
       if (wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin()) {
-	 logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl;
-	 exit(1);
+         logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl;
+         exit(1);
       }
       if (fIsFlexibleScale) {
-	 wrmMu2Dn = GetColumnFromTable(fWarmupConsts.Values, 5) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"),fSteerfile);
-	 wrmMu2Up = GetColumnFromTable(fWarmupConsts.Values, 6) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"),fSteerfile);
-	 if (wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin()) {
-	    logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl;
-	    exit(1);
-	 }
+         wrmMu2Dn = GetColumnFromTable(fWarmupConsts.Values, 5) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"),fSteerfile);
+         wrmMu2Up = GetColumnFromTable(fWarmupConsts.Values, 6) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"),fSteerfile);
+         if (wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin()) {
+            logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl;
+            exit(1);
+         }
       }
    }
    else {
@@ -3621,8 +3621,8 @@ void  fastNLOCreate::InitInterpolationKernels() {
       wrmMu1Dn.resize(GetNObsBin(),0);
       wrmMu1Up.resize(GetNObsBin(),1);
       if (fIsFlexibleScale) {
-	 wrmMu2Dn.resize(GetNObsBin(),0);
-	 wrmMu2Up.resize(GetNObsBin(),1);
+         wrmMu2Dn.resize(GetNObsBin(),0);
+         wrmMu2Up.resize(GetNObsBin(),1);
       }
    }
 
@@ -3641,49 +3641,49 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // The additional last node will be removed again below.
       int nxtot = fScenConsts.X_NNodes + 1;
       if ( fScenConsts.X_NNodeCounting == "NodesPerMagnitude" ) { // "NodesMax","NodesPerBin","NodesPerMagnitude"
-	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
+         fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2) {
-	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
+            fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
             fKernX2[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-	 }
-      } 
-      else if (fScenConsts.X_NNodeCounting == "NodesPerBin" ) { // 
-	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
+         }
+      }
+      else if (fScenConsts.X_NNodeCounting == "NodesPerBin" ) { //
+         fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2) {
-	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
+            fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1);
             fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-	 }
+         }
       }
-      else if (fScenConsts.X_NNodeCounting == "NodesMax" ) { // 
-	 // generate grid for maximum x-range
-	 double xmin = 1;
-	 for ( unsigned int xi=0 ; xi<wrmX.size() ; xi++ ) xmin = min(xmin,wrmX[xi]);
-	 fastNLOInterpolBase* kernmin = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
+      else if (fScenConsts.X_NNodeCounting == "NodesMax" ) { //
+         // generate grid for maximum x-range
+         double xmin = 1;
+         for ( unsigned int xi=0 ; xi<wrmX.size() ; xi++ ) xmin = min(xmin,wrmX[xi]);
+         fastNLOInterpolBase* kernmin = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
          kernmin->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
-	 // find xmin
-	 const vector<double>& xg = kernmin->GetGrid();
-	 int nxbin = nxtot;
-	 for ( unsigned xi = 0 ; xi<xg.size() ; xi++ ) {
-	    //cout<<"iBin="<<i<<"\txi="<<xi<<"\txg[xi]="<<xg[xi]<<"\twrmX[i]="<<wrmX[i]<<"\tnxbin="<<nxbin<<"\tnxtot="<<nxtot<<endl;
-	    if ( xg[xi] > wrmX[i] ) break;
-	    nxbin--;
-	    xmin = xg[xi];
-	 }
-	 logger.info["InitInterpolationKernels"]<<"Using x-grid in bin "<<i<<": x-min="<<xmin<<"\tx-warmup="<<wrmX[i]<<"\tnxbin="<<nxbin<<endl;
-	 fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
+         // find xmin
+         const vector<double>& xg = kernmin->GetGrid();
+         int nxbin = nxtot;
+         for ( unsigned xi = 0 ; xi<xg.size() ; xi++ ) {
+            //cout<<"iBin="<<i<<"\txi="<<xi<<"\txg[xi]="<<xg[xi]<<"\twrmX[i]="<<wrmX[i]<<"\tnxbin="<<nxbin<<"\tnxtot="<<nxtot<<endl;
+            if ( xg[xi] > wrmX[i] ) break;
+            nxbin--;
+            xmin = xg[xi];
+         }
+         logger.info["InitInterpolationKernels"]<<"Using x-grid in bin "<<i<<": x-min="<<xmin<<"\tx-warmup="<<wrmX[i]<<"\tnxbin="<<nxbin<<endl;
+         fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1); // use 1 as upper x-value
          fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxbin);
          if (npdf == 2) {
-	    fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1);
+            fKernX2[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,xmin,1);
             fKernX2[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxbin);
-	 }
-	 delete kernmin;	 
+         }
+         delete kernmin;
       }
       else {
-	 // error
-	 logger.error["InitInterpolationKernels"]<<"Cannot understand node counting: "<<fScenConsts.X_NNodeCounting<<"."<<endl;
-	 logger.error["InitInterpolationKernels"]<<"Supported options are: 'NodesPerMagnitude', 'NodesPerBin' and 'NodesMax'."<<endl;
+         // error
+         logger.error["InitInterpolationKernels"]<<"Cannot understand node counting: "<<fScenConsts.X_NNodeCounting<<"."<<endl;
+         logger.error["InitInterpolationKernels"]<<"Supported options are: 'NodesPerMagnitude', 'NodesPerBin' and 'NodesMax'."<<endl;
       }
 
       // Remove last node at x = 1; is multiplied by PDFs equalling zero anyway.

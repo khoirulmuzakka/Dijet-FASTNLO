@@ -9,9 +9,9 @@ using namespace std;
 
 
 //________________________________________________________________________________________________________________ //
-fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(int NObsBin, int iLOord) 
+fastNLOCoeffAddFlex::fastNLOCoeffAddFlex(int NObsBin, int iLOord)
    : fastNLOCoeffAddBase(NObsBin), fILOord(iLOord), SigmaTildeMuIndep(), SigmaTildeMuFDep(),
-     SigmaTildeMuRDep(), SigmaTildeMuRRDep(), SigmaTildeMuFFDep(), SigmaTildeMuRFDep(), 
+     SigmaTildeMuRDep(), SigmaTildeMuRRDep(), SigmaTildeMuFFDep(), SigmaTildeMuRFDep(),
      SigmaRefMixed(), SigmaRef_s1(), SigmaRef_s2(), ScaleNode1(), ScaleNode2(), AlphasTwoPi(), PdfLcMuVar() {
    SetClassName("fastNLOCoeffAddFlex");
 }
@@ -123,7 +123,7 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Write(ostream& table) {
+void fastNLOCoeffAddFlex::Write(ostream& table, int itabversion) {
    CheckCoeffConstants(this);
    // update to latest version
    if ( NScaleDep==3 ) {
@@ -146,7 +146,7 @@ void fastNLOCoeffAddFlex::Write(ostream& table) {
          NScaleDep=7;
       }
    }
-   fastNLOCoeffAddBase::Write(table);
+   fastNLOCoeffAddBase::Write(table,itabversion);
 
    int nn3 = 0;
    nn3 += fastNLOTools::WriteFlexibleVector( ScaleNode1 , table );
@@ -208,23 +208,23 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
    if ( moption==fastNLO::kMerge ) {
       fastNLOTools::AddVectors( SigmaTildeMuIndep , othflex.SigmaTildeMuIndep );
       if ( NScaleDep==3 || NScaleDep>=5 ) {
-	 fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
-	 fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
-	 if (( NScaleDep>=6 || !SigmaTildeMuRRDep.empty())  // both tables contain log^2 contributions (default case)
-	     && (othflex.NScaleDep>=6 || !othflex.SigmaTildeMuRRDep.empty()) ) {
-	    fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
-	 }
-	 else if ( NScaleDep==6 && othflex.NScaleDep==5 ) { // this tables contains log^2 contributions, but the other does not
-	    // nothing todo.
-	 }
-	 else if ( NScaleDep==5 && othflex.NScaleDep==6 ) { // this tables does not contain log^2 contributions, but the other does !
-	    SigmaTildeMuRRDep = othflex.SigmaTildeMuRRDep;
-	    NScaleDep = 6;
-	 }
-	 if ( NScaleDep>=7 || !SigmaTildeMuFFDep.empty()) {
-	    fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
-	    fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
-	 }
+         fastNLOTools::AddVectors( SigmaTildeMuFDep , othflex.SigmaTildeMuFDep );
+         fastNLOTools::AddVectors( SigmaTildeMuRDep , othflex.SigmaTildeMuRDep );
+         if (( NScaleDep>=6 || !SigmaTildeMuRRDep.empty())  // both tables contain log^2 contributions (default case)
+             && (othflex.NScaleDep>=6 || !othflex.SigmaTildeMuRRDep.empty()) ) {
+            fastNLOTools::AddVectors( SigmaTildeMuRRDep , othflex.SigmaTildeMuRRDep );
+         }
+         else if ( NScaleDep==6 && othflex.NScaleDep==5 ) { // this tables contains log^2 contributions, but the other does not
+            // nothing todo.
+         }
+         else if ( NScaleDep==5 && othflex.NScaleDep==6 ) { // this tables does not contain log^2 contributions, but the other does !
+            SigmaTildeMuRRDep = othflex.SigmaTildeMuRRDep;
+            NScaleDep = 6;
+         }
+         if ( NScaleDep>=7 || !SigmaTildeMuFFDep.empty()) {
+            fastNLOTools::AddVectors( SigmaTildeMuFFDep , othflex.SigmaTildeMuFFDep );
+            fastNLOTools::AddVectors( SigmaTildeMuRFDep , othflex.SigmaTildeMuRFDep );
+         }
       }
       fastNLOTools::AddVectors( SigmaRefMixed , othflex.SigmaRefMixed );
       fastNLOTools::AddVectors( SigmaRef_s1 , othflex.SigmaRef_s1 );
@@ -235,89 +235,89 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       vector<const fastNLO::v5d*> st2 = othflex.GetSigmaTildes();
       int cMax = st1.size();
       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
-	 if ( st1[ii]->size()==0 ) cMax--;
-	 if ( st1[ii]->size() != st2[ii]->size() ) {
-	    error["Add"]<<"Scale dependent weights are not identically initialized"<<endl;
-	    exit(1);
-	 }
+         if ( st1[ii]->size()==0 ) cMax--;
+         if ( st1[ii]->size() != st2[ii]->size() ) {
+            error["Add"]<<"Scale dependent weights are not identically initialized"<<endl;
+            exit(1);
+         }
       }
       for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
-	 for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
-	    for (unsigned int kS2=0; kS2<GetNScaleNode2(iObs); kS2++) {
-	       int nxmax = GetNxmax(iObs);
-	       for (int x=0; x<nxmax; x++) {
-		  for (int n=0; n<other.GetNSubproc(); n++) {
-		     for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ... 
-			double s2  = (*st2[im])[iObs][x][jS1][kS2][n];
-			s2 *= this->Nevt/other.GetNevt();
-			(*st1[im])[iObs][x][jS1][kS2].push_back(s2);
-		     }
-		  }
-	       }
-	    }
-	 }
-	 for (int n=0; n<other.GetNSubproc(); n++) {
-	    SigmaRefMixed[iObs].push_back(othflex.SigmaRefMixed[iObs][n]);
-	    SigmaRef_s1[iObs].push_back(othflex.SigmaRef_s1[iObs][n]);
-	    SigmaRef_s2[iObs].push_back(othflex.SigmaRef_s2[iObs][n]);
-	 }      
+         for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
+            for (unsigned int kS2=0; kS2<GetNScaleNode2(iObs); kS2++) {
+               int nxmax = GetNxmax(iObs);
+               for (int x=0; x<nxmax; x++) {
+                  for (int n=0; n<other.GetNSubproc(); n++) {
+                     for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
+                        double s2  = (*st2[im])[iObs][x][jS1][kS2][n];
+                        s2 *= this->Nevt/other.GetNevt();
+                        (*st1[im])[iObs][x][jS1][kS2].push_back(s2);
+                     }
+                  }
+               }
+            }
+         }
+         for (int n=0; n<other.GetNSubproc(); n++) {
+            SigmaRefMixed[iObs].push_back(othflex.SigmaRefMixed[iObs][n]);
+            SigmaRef_s1[iObs].push_back(othflex.SigmaRef_s1[iObs][n]);
+            SigmaRef_s2[iObs].push_back(othflex.SigmaRef_s2[iObs][n]);
+         }
       }
    }
-   else {     
+   else {
       vector<fastNLO::v5d*> st1 = this->AccessSigmaTildes();
       vector<const fastNLO::v5d*> st2 = othflex.GetSigmaTildes();
       int cMax = st1.size();
       for ( int ii = cMax-1 ; ii>= 0 ; ii-- ) {
-	 if ( st1[ii]->size()==0 && st2[ii]->size()==0) cMax--;
-	 if ( st1[ii]->size() != st2[ii]->size() ) {
+         if ( st1[ii]->size()==0 && st2[ii]->size()==0) cMax--;
+         if ( st1[ii]->size() != st2[ii]->size() ) {
             warn["Add"]<<"Scale dependent weights are not identically initialized... (NScaleDep="<<NScaleDep<<", other.NScaleDep="<<other.GetNScaleDep()<<")"<<endl;
             //exit(1);
-	    if ( st1[ii]->size() == 0 ) {
-	       /*
-	       // error["Add"]<<"...and calling table has less entries. Please try to call with opposite order of input arguments."<<endl;
-	       // exit(1);
-	       if ( ii==0 ) { error["Add"]<<"... no scale-independent contributions detected! exiting."<<endl; exit(3); }
-	       else {
-		  (*st1[ii]) = *st2[ii]; // hard copy of coefficients
-		  cMax--; // no need for second copy
-	       }
-	       info["add"]<<"Copied coefficients from other table."<<endl;
-	       */
-	       fastNLOTools::ResizeFlexibleVector(*st1[ii],*st2[ii]);
-	    }
-	    else if ( st2[ii]->size() == 0  ) {
-	       warn["Add"]<<"... 'other' table has empty coefficients (ii="<<ii<<"). Ignoring it (NScaleDep="<<NScaleDep<<", other.NScaleDep="<<other.GetNScaleDep()<<")"<<endl;
-	       cMax--;
-	    }
-	    else {
-	       error["Add"]<<"... don't know how to merge these two tables (Different number of bins detected)."<<endl;
-	       exit(2);
-	    }
+            if ( st1[ii]->size() == 0 ) {
+               /*
+               // error["Add"]<<"...and calling table has less entries. Please try to call with opposite order of input arguments."<<endl;
+               // exit(1);
+               if ( ii==0 ) { error["Add"]<<"... no scale-independent contributions detected! exiting."<<endl; exit(3); }
+               else {
+                  (*st1[ii]) = *st2[ii]; // hard copy of coefficients
+                  cMax--; // no need for second copy
+               }
+               info["add"]<<"Copied coefficients from other table."<<endl;
+               */
+               fastNLOTools::ResizeFlexibleVector(*st1[ii],*st2[ii]);
+            }
+            else if ( st2[ii]->size() == 0  ) {
+               warn["Add"]<<"... 'other' table has empty coefficients (ii="<<ii<<"). Ignoring it (NScaleDep="<<NScaleDep<<", other.NScaleDep="<<other.GetNScaleDep()<<")"<<endl;
+               cMax--;
+            }
+            else {
+               error["Add"]<<"... don't know how to merge these two tables (Different number of bins detected)."<<endl;
+               exit(2);
+            }
          }
       }
       for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
-	 for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
-	    for (unsigned int kS2=0; kS2<GetNScaleNode2(iObs); kS2++) {
-	       int nxmax = GetNxmax(iObs);
-	       for (int x=0; x<nxmax; x++) {
-		  for (int n=0; n<GetNSubproc(); n++) {
-		     for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ... 
-			double w1  = this->GetMergeWeight(moption,n,iObs);
-			double w2  = other.GetMergeWeight(moption,n,iObs);
-			double& s1 = (*st1[im])[iObs][x][jS1][kS2][n];
-			double s2  = st2[im]->size() ? (*st2[im])[iObs][x][jS1][kS2][n] : 0;
-			if ( s1!=0 || s2!=0 ) {
-			   if ( w1==0 || w2==0 ) {
-			      error["fastNLOCoeffAddFix"]<<"Mergeing weight is 0, but sigma tilde is non-zero. Cannot proceed!"<<endl;
-			      exit(3);
-			   }
-			   s1 = ( w1*s1/Nevt + w2*s2/other.GetNevt() ) / (w1 + w2 ) * ( Nevt + other.GetNevt() ) ;
-			}
-		     }
-		  }
-	       }
-	    }
-	 }      
+         for (unsigned int jS1=0; jS1<GetNScaleNode1(iObs); jS1++) {
+            for (unsigned int kS2=0; kS2<GetNScaleNode2(iObs); kS2++) {
+               int nxmax = GetNxmax(iObs);
+               for (int x=0; x<nxmax; x++) {
+                  for (int n=0; n<GetNSubproc(); n++) {
+                     for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
+                        double w1  = this->GetMergeWeight(moption,n,iObs);
+                        double w2  = other.GetMergeWeight(moption,n,iObs);
+                        double& s1 = (*st1[im])[iObs][x][jS1][kS2][n];
+                        double s2  = st2[im]->size() ? (*st2[im])[iObs][x][jS1][kS2][n] : 0;
+                        if ( s1!=0 || s2!=0 ) {
+                           if ( w1==0 || w2==0 ) {
+                              error["fastNLOCoeffAddFix"]<<"Mergeing weight is 0, but sigma tilde is non-zero. Cannot proceed!"<<endl;
+                              exit(3);
+                           }
+                           s1 = ( w1*s1/Nevt + w2*s2/other.GetNevt() ) / (w1 + w2 ) * ( Nevt + other.GetNevt() ) ;
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
       fastNLOTools::AddVectors( SigmaRefMixed , othflex.SigmaRefMixed );
       fastNLOTools::AddVectors( SigmaRef_s1 , othflex.SigmaRef_s1 );
@@ -331,7 +331,7 @@ void fastNLOCoeffAddFlex::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       NormalizeCoefficients(2);
       Nevt = 1;
       fWgt.WgtNevt = 1;
-   } 
+   }
    else if ( moption==fastNLO::kUnweighted ) {
       NormalizeCoefficients(1);
    }
@@ -415,10 +415,10 @@ void fastNLOCoeffAddFlex::NormalizeCoefficients(const std::vector<std::vector<do
 
    for ( int iProc = 0 ; iProc<GetNSubproc(); iProc++ ) {
       if ( int(wgtProcBin[iProc].size()) != GetNObsBin() ) {//
-	 error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; exit(4);
+         error["NormalizeCoefficients"]<<"Dimension of weights (iProc) incompatible with table (wgtProcBin must have dimension [iProc][iBin])."<<endl; exit(4);
       }
       for ( int iObs = 0 ; iObs<GetNObsBin(); iObs++ ) {
-	 MultiplyBinProc(iObs, iProc, wgtProcBin[iProc][iObs]/Nevt);
+         MultiplyBinProc(iObs, iProc, wgtProcBin[iProc][iObs]/Nevt);
       }
    }
    //fastNLOCoeffAddBase::NormalizeCoefficients(wgtProcBin);
@@ -447,27 +447,27 @@ void fastNLOCoeffAddFlex::MultiplyBin(unsigned int iObsIdx, double fact) {
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddFlex::MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact) {
    //! Multiply observable bin
-   debug["fastNLOCoeffAddFlex::MultiplyBinProc"]<<"Multiplying table entries in CoeffAddFlex for bin index " 
-						<< iObsIdx << " and proc index "<<iProc<<" by factor " << fact << endl;
+   debug["fastNLOCoeffAddFlex::MultiplyBinProc"]<<"Multiplying table entries in CoeffAddFlex for bin index "
+                                                << iObsIdx << " and proc index "<<iProc<<" by factor " << fact << endl;
    int nxmax = GetNxmax(iObsIdx);
    for (unsigned int jS1=0; jS1<GetNScaleNode1(iObsIdx); jS1++) {
       for (unsigned int kS2=0; kS2<GetNScaleNode2(iObsIdx); kS2++) {
          for (int x=0; x<nxmax; x++) {
             int n=iProc;
-	    if ( fact==0 && SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n]!=0 ) {
-	       // prevent to calculate unreasonable cross sections.
-	       error["MultiplyBinProc"]<<"Multiplying non-zero coefficient with weight 0. "<<endl;
-	       exit(4);
-	    }
-	    else {
-	       if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
-	       if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;
-	       if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;
-	       if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;
-	       if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;
-	       if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;
-	    }
-	 }
+            if ( fact==0 && SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n]!=0 ) {
+               // prevent to calculate unreasonable cross sections.
+               error["MultiplyBinProc"]<<"Multiplying non-zero coefficient with weight 0. "<<endl;
+               exit(4);
+            }
+            else {
+               if ( SigmaTildeMuIndep.size() != 0 ) SigmaTildeMuIndep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuRDep.size()  != 0 ) SigmaTildeMuRDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+               if ( SigmaTildeMuFDep.size()  != 0 ) SigmaTildeMuFDep[iObsIdx][x][jS1][kS2][n]  *= fact;
+               if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep[iObsIdx][x][jS1][kS2][n] *= fact;
+               if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep[iObsIdx][x][jS1][kS2][n] *= fact;
+            }
+         }
       }
    }
    fastNLOCoeffAddBase::MultiplyBinProc(iObsIdx, iProc, fact);
@@ -565,4 +565,3 @@ void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int 
    }
    fastNLOCoeffAddBase::CatBin(other, iObsIdx);
 }
-

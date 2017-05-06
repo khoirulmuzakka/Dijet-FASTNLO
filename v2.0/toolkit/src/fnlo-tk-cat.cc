@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   //! --- Initialize output table
+   //! --- Initialize pointer for output table to be created
    fastNLOTable* resultTable = NULL;
    string outfile = argv[nFiles];
 
