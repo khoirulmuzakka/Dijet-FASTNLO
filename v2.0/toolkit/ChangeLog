@@ -1,3 +1,712 @@
+2017-05-07  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2402
+            ================================================================================
+
+2017-05-06  rabbertz
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffBase.cc, fastNLOCoeffBase.h, fastNLOCoeffData.cc,
+      fastNLOCoeffData.h, fastNLOCoeffMult.cc, fastNLOCoeffMult.h,
+      fastNLOCreate.cc, fastNLOTable.cc, fnlo-tk-cat.cc: Table version for
+      write-out settable; def. 23600 or version of first read in table for mods
+
+2017-04-26  DanielBritzger
+
+    * fastNLOReader.cc, fastNLOTable.cc, fnlo-tk-merge2.cc: new option 'cutRMS'
+      implemented fully for flexible-scales
+
+2017-04-25  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOReader.cc, read_steer.cc: minor fixes
+
+2017-03-12  rabbertz
+
+    * Makefile.am, configure.ac: Add missing logo file to distro
+
+    * configure.ac: Add check on epstopdf for crappy site installations
+
+2017-03-10  DanielBritzger
+
+    * fastNLOReader.cc, fastNLOReader.h: Updates when running with only a single
+      contribution
+
+2017-03-08  DanielBritzger
+
+    * fastNLOConstants.h.in: add missin .in file
+
+    * fnlo-tk-merge2.cc: update
+
+    * Makefile.am, fastNLOConstants.h.in, fastNLOTable.cc, fastNLOTable.h:
+      update
+
+2017-03-06  DanielBritzger
+
+    * fastNLOReader.cc: more scale choices
+
+    * fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h, fastNLOCreate.cc,
+      fastNLODiffReader.cc, fastNLOReader.h, read_steer.cc: speed up reading of
+      (DIS) flexible scale tables
+
+2017-03-05  rabbertz
+
+    * fnlo-tk-statunc.cc: Update statunc for gzipped tables and for NLO/NNLO
+      only evaluation
+
+    * fnlo-tk-cppread.cc: Set back to WARNING verbosity
+
+2017-03-02  DanielBritzger
+
+    * fastNLOTable.cc: bugfix. fixed scale: mergeing median and mean
+
+    * fastNLOCoeffAddBase.h: correct counting of number of tables
+
+    * fastNLOTable.cc: bugfix for median/mean for fixed scale tables
+
+2017-03-01  rabbertz
+
+    * fnlo-tk-cppread.cc: Add single contribution output to 2- and 3-dim
+      observables
+
+2017-02-27  rabbertz
+
+    * fastNLOReader.cc, fastNLOReader.h, fnlo-tk-cppread.cc: Enable output for
+      single fixed-order contributions even without LO etc.
+
+2017-02-24  rabbertz
+
+    * configure.ac: Version no. correction
+
+    * configure.ac: Added gcc version comment
+
+    * Makefile.am, configure.ac: Update autotools requirements
+
+2017-02-15  rabbertz
+
+    * Makefile.am, fastNLOConstants.h.in: Add in std11; no idea why Daniels
+      gcc4.8 needs this
+
+    * Makefile.am: Kick out superfluous -std=gnu++11
+
+2017-02-14  DanielBritzger
+
+    * fastNLOCoeffAddFlex.cc: update
+
+    * fastNLOTable.h, fnlo-tk-merge2.cc: memory safe fnlo-tk-merge2 and
+      simplifid code structure.
+
+    * fastNLOCoeffAddBase.cc: tested version of mergeing options: kAdd, kAttach
+
+    * fastNLOCoeffAddBase.cc, fastNLOTable.cc: revert reading of table header
+
+    * fastNLOTools.cc: bugfix
+
+    * fastNLOTable.cc: add namespace
+
+2017-02-14  rabbertz
+
+    * Makefile.am: Add compile option because of C++11 conflict with Boost
+
+2017-02-14  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFlex.cc,
+      fastNLOConstants.h.in, fastNLOTable.cc, fastNLOTools.cc,
+      fnlo-tk-merge2.cc: updates for mergeing
+
+2017-02-13  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFlex.cc:
+      bugfix when appending
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFlex.cc,
+      fastNLOConstants.h.in, fastNLOTable.cc, fnlo-tk-merge2.cc: updates
+
+2017-02-11  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOConstants.h.in, fastNLOTable.cc, fastNLOTable.h, fnlo-tk-merge2.cc:
+      improved mergeing
+
+2017-02-10  DanielBritzger
+
+    * fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.h, fastNLOTable.cc,
+      fastNLOTable.h, fnlo-tk-merge2.cc: completed (first) version of
+      fnlo-tk-merge2
+
+2017-02-09  rabbertz
+
+    * fnlo-tk-cppread.cc: Add some commented a_s evolution printouts
+
+2017-02-09  DanielBritzger
+
+    * Makefile.am, fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h,
+      fastNLOCoeffAddFix.cc, fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc,
+      fastNLOCoeffAddFlex.h, fastNLOCreate.cc, fastNLOCreate.h, fastNLOTable.cc,
+      fastNLOTable.h, fnlo-tk-append.cc, fnlo-tk-merge.cc, fnlo-tk-merge2.cc:
+      new merger 'fnlo-tkmerge2' with lots of options.
+
+2017-02-07  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc: allow in principle for write-out in v2.2
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFlex.cc,
+      fastNLOCreate.cc, fastNLOCreate.h: put all wegihts into a struct.
+
+    * fastNLOConstants.h.in, fastNLOTable.cc: remove debug printouts
+
+    * fastNLOConstants.h.in: versionsing.
+
+    * Makefile.am, fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h,
+      fastNLOCoeffAddFix.cc, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffBase.cc, fastNLOCoeffBase.h, fastNLOCreate.cc,
+      fastNLOCreate.h, fastNLOEvent.h, fastNLOReader.cc, fastNLOTable.cc,
+      fastNLOTools.cc, fastNLOTools.h: updates for create, new table format,
+      version checks, warmup, etc.
+
+2016-12-23  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCreate.cc, fastNLOCreate.h, fastNLOEvent.h:
+      first test of additional caching. functional for flexible scale tables,
+      but something goes wrong for the weights.
+
+2016-12-08  rabbertz
+
+    * Makefile.am: Add missing file to distro
+
+    * m4.tar.gz: Add m4 macros for testing
+
+    * AUTHORS:
+
+2016-12-08  stober
+
+    * fnlo-tk-statunc.cc: missing include file
+
+2016-12-08  rabbertz
+
+    * Makefile.am, configure.ac, fnlo-tk-zipapp.pl.in, fnlo-tk-ziptest.pl.in,
+      zipappdiff.log: Add optional check reading gzipped tables and writing
+      appendnormalised gzipped table
+
+2016-12-07  rabbertz
+
+    * fnlo-tk-stattest.pl.in: Fix small issue with checks
+
+    * Makefile, Makefile.Fred, Makefile.am, configure.ac, fastNLOFI_cc.cc,
+      fastNLOFI_f.f: Make Fred's fortranext compile/link within toolkit
+
+2016-12-05  rabbertz
+
+    * fastNLOLHAPDF.cc: Add first version of alpha_s uncertainty functionality
+
+    * fastNLOConstants.h.in, fastNLOLHAPDF.cc, fastNLOLHAPDF.h,
+      fnlo-tk-yodaout.cc: Add first version of alpha_s uncertainty functionality
+
+2016-12-04  DanielBritzger
+
+    * configure.ac: nice output when compiling fastNLO
+
+2016-11-25  sieber
+
+    * fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffData.h, fastNLOCoeffMult.h: make specific ctor calls explicit,
+      so that compiler may not do anyimplicit conversions beforehand
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffData.cc, fastNLOCoeffData.h, fastNLOCoeffMult.cc,
+      fastNLOCoeffMult.h: switch to covariant return types for Clone methods
+
+    * fastNLOCoeffAddFix.cc, fastNLOCoeffAddFlex.cc, fastNLOCoeffData.cc,
+      fastNLOCoeffMult.cc: default construct members when calling ctor
+
+    * fastNLOCoeffAddBase.cc: fastNLOCoeffAddBase.cc: default initialize the
+      default ctor
+
+    * fastNLOCoeffBase.h: add comment for virtual destructor.
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffBase.cc, fastNLOCoeffBase.h, fastNLOCoeffData.cc,
+      fastNLOCoeffData.h, fastNLOCoeffMult.cc, fastNLOCoeffMult.h: do not create
+      a default ctor for the *Coeff classes
+
+    * fastNLOTable.cc: fastNLOTable.cc: default initialize all members in
+      fastNLOTable default ctor
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddFix.cc, fastNLOCoeffBase.cc,
+      fastNLOCoeffData.cc, fastNLOCoeffMult.cc, fastNLOCoefficients.cc,
+      fastNLOConstants.h.in, fastNLOTable.cc, fastNLOTools.cc, fastNLOTools.h:
+      add separator variable fastNLO::sep which contains the delimitingcharacter
+      between two entries in a fastNLO table. Set to "\n".
+
+    * fastNLOTable.cc, fastNLOTable.h: clean up code a bit, but writing still
+      not working as expected.
+
+2016-11-24  DanielBritzger
+
+    * fastNLOInterpolBase.h: a bit documentation
+
+    * fastNLOInterpolBase.h: fix sign issue
+
+    * fastNLOInterpolBase.cc, fastNLOInterpolBase.h: third-root of log10(x)
+
+    * fastNLOCreate.cc, fastNLOGeneratorConstants.h, fastNLOInterpolBase.cc,
+      fastNLOInterpolBase.h, fastNLOReader.cc, fastNLOTable.cc: new distance
+      measures, new option for number of x-nodes, improved warning message if no
+      LO contribution found.
+
+2016-11-23  sieber
+
+    * zstr.hpp: add the corresponding license to the zstr header code.
+
+    * fastNLOCreate.cc, fastNLOTable.cc, fastNLOTable.h: use std::ostream of
+      uncompressed file writing and zstr::ostream forcompressed output.
+
+2016-11-23  rabbertz
+
+    * fastNLOConstants.h.in, fastNLOCreate.cc, fastNLOTable.cc,
+      fnlo-tk-example.cc, fnlo-tk-statunc.cc: Deal with config.h
+
+2016-11-23  sieber
+
+    * fastNLOTable.cc: second try for correct variable name LIBZ
+
+    * fastNLOConstants.h.in, fastNLOCreate.cc, fastNLOTable.cc: actually use
+      HAVE_... variable
+
+2016-11-23  rabbertz
+
+    * fastNLOCreate.cc, fastNLOGeneratorConstants.h, fastNLOTable.cc,
+      fastNLOTable.h: Try writing gzipped tables
+
+2016-11-23  sieber
+
+    * fastNLOTable.cc: add explizit check when reading file if zlib support is
+      compiled.
+
+2016-11-23  rabbertz
+
+    * Makefile.am: Distribute header file
+
+    * configure.ac: Require compiler with C++11 support
+
+2016-11-23  sieber
+
+    * strict_fstream.hpp, zstr.hpp: adapt for no zlib found case
+
+2016-11-23  rabbertz
+
+    * configure.ac: Add zlib if available
+
+2016-11-23  sieber
+
+    * fastNLOTable.cc, fastNLOTable.h, strict_fstream.hpp, zstr.hpp: initial
+      commit with (not yet compiling) support for reading tab.gz files
+
+2016-11-22  sieber
+
+    * COPYING: replace LICENSE link with real file.
+
+2016-11-21  DanielBritzger
+
+    * fnlo-tk-append.cc: enable to use fnlo-tk-append to run with one table
+      only, e.g. if this one sold be normalised.
+
+2016-11-16  rabbertz
+
+    * InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat.log,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat.log,
+      fnlo-tk-cattest.pl.in, fnlo-tk-cppnormtest.pl.in,
+      fnlo-tk-cppscalestest.pl.in, fnlo-tk-cpptest.pl.in,
+      fnlo-tk-erasetest.pl.in, fnlo-tk-erasetest2.pl.in,
+      fnlo-tk-mergetest.pl.in, fnlo-tk-stattest.pl.in: Remove fragile tail by
+      robust grep; add internal exec path for checks
+
+2016-11-03  rabbertz
+
+    * fnlo-tk-yodaout.cc: Add optional NP factor for printout
+
+2016-11-03  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOReader.cc, fastNLOReader.h:
+      small improvements for warmup tables.
+
+2016-10-31  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOReader.cc: enable fixed scale
+      tables for DIS
+
+2016-10-27  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOTable.cc: improve writing of warmup tables if a
+      fixed scale is used.
+
+2016-10-26  DanielBritzger
+
+    * fastNLOCreate.cc: improve warmup writing
+
+2016-10-25  DanielBritzger
+
+    * fastNLOCreate.cc: minor bugfixes
+
+2016-10-24  rabbertz
+
+    * Makefile.am, NJetEvents_0-0-2.tab.gz, NJetEvents_0-0-2_cpp.log,
+      NJetEvents_2-2-2.tab.gz, NJetEvents_2-2-2_cpp.log, NJetEvents_2-2.tab.gz,
+      NJetEvents_2-2_cpp.log, NJetEvents_norm_1-12.tab.gz,
+      NJetEvents_norm_1-12_cppnorm.log, NJets.tab.gz,
+      NJets_born-2jet_0000.tab.gz, NJets_born-2jet_0001.tab.gz,
+      NJets_born-2jet_0002.tab.gz, NJets_born-2jet_stat.log,
+      NJets_born-2jet_stat_0000.tab.gz, NJets_born-2jet_stat_0001.tab.gz,
+      NJets_born-2jet_stat_0002.tab.gz, NJets_nlo-2jet_0100.tab.gz,
+      NJets_nlo-2jet_0101.tab.gz, NJets_nlo-2jet_0102.tab.gz,
+      NJets_nlo-2jet_stat.log, NJets_nlo-2jet_stat_0100.tab.gz,
+      NJets_nlo-2jet_stat_0101.tab.gz, NJets_nlo-2jet_stat_0102.tab.gz,
+      configure.ac, fnlo-tk-cattest.pl, fnlo-tk-cattest.pl.in,
+      fnlo-tk-cppnormtest.pl, fnlo-tk-cppnormtest.pl.in,
+      fnlo-tk-cppscalestest.pl, fnlo-tk-cppscalestest.pl.in, fnlo-tk-cpptest.pl,
+      fnlo-tk-cpptest.pl.in, fnlo-tk-erasetest.pl, fnlo-tk-erasetest.pl.in,
+      fnlo-tk-erasetest2.pl, fnlo-tk-erasetest2.pl.in, fnlo-tk-mergetest.pl,
+      fnlo-tk-mergetest.pl.in, fnlo-tk-stattest.pl, fnlo-tk-stattest.pl.in:
+      Finalise VPATH compatible checks for toolkit
+
+2016-10-22  rabbertz
+
+    * InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_0000.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_0001.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_0002.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat.log,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0000.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0001.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0002.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_0100.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_0101.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_0102.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat.log,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0100.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0101.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0102.tab.gz,
+      InclusiveNJets_fnr0001midpHT_I723509_v23_fix.tab.gz, Makefile.am,
+      fnlo-tk-mergetest.pl, fnlo-tk-stattest.pl: Add merge and statunc tests
+
+    * fnlo-tk-statunc.cc: Fix two empty space prints
+
+    * Makefile.am, SteerModify_EraseBins.str, SteerModify_EraseBins2.str,
+      fnl1014_I902309_2.tab.gz, fnlo-tk-erasetest.pl, fnlo-tk-erasetest2.pl: Add
+      erase bin tests
+
+    * InclusiveNJetEvents_fnl5662i_v23_fix_norm_1-12.tab.gz,
+      InclusiveNJetEvents_fnl5662i_v23_fix_norm_1-12_cppnorm.log, Makefile.am,
+      fnl1014_I902309_2-2_cppscales.log, fnlo-tk-cppnormtest.pl,
+      fnlo-tk-cppscalestest.pl: Tests 3 und 4
+
+2016-10-21  rabbertz
+
+    * configure.ac: One more fix
+
+    * configure.ac: Establish test suite with two tests
+      working in rev 2279; doxygen not alway remade anymore
+
+    * InclusiveNJetEvents_fnl5662i_v23_fix_0-0-2.tab.gz,
+      InclusiveNJetEvents_fnl5662i_v23_fix_0-0-2_cpp.log,
+      InclusiveNJetEvents_fnl5662i_v23_fix_2-2-2.tab.gz,
+      InclusiveNJetEvents_fnl5662i_v23_fix_2-2-2_cpp.log,
+      InclusiveNJetEvents_fnl5662i_v23_fix_2-2.tab.gz,
+      InclusiveNJetEvents_fnl5662i_v23_fix_2-2_cpp.log, Makefile.am, Modify,
+      check, configure.ac, fastNLOGeneratorConstants.h,
+      fnl1014_I902309_2-2_cpp.log, fnlo-tk-cattest.pl, fnlo-tk-cpptest.pl,
+      modify, scripts: Establish test suite with two tests working in rev 2279;
+      doxygen not alway remade anymore
+
+    * Establish test suite with two tests working in rev
+      2279; doxygen not alway remade anymore
+
+2016-10-20  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCreate.cc, fastNLOPDFLinearCombinations.cc,
+      fastNLOPDFLinearCombinations.h, fastNLOReader.cc, fastNLOTable.cc: updates
+      for NNLOJET
+
+2016-10-20  rabbertz
+
+    * Makefile.am, check, configure.ac, fnl1014_I902309_2-2.tab.gz,
+      fnl1014_I902309_2-2_cpp.log, fnlo-tk-cpptest.pl, scripts: Start test suite
+
+2016-10-19  DanielBritzger
+
+    * fastNLOCreate.cc, fastNLOTable.cc, fastNLOTable.h: remove Ncontrib, Ndata,
+      Nmult
+
+    * Makefile.am, fastNLOBase.cc, fastNLOBase.h, fastNLOCreate.h,
+      fastNLOTable.cc, fastNLOTable.h, fastnlo.i, fnlo-tk-modify.cc: remove
+      fastNLOBase. Now included in fastNLOTable
+
+    * fastNLOCreate.cc, fastNLOEvent.h: small updates
+
+    * fastNLOTable.cc: bugfix
+
+2016-10-18  rabbertz
+
+    * fastNLOCreate.cc, fastNLOTable.cc: Fix issue in warmupfile naming; add
+      info writeout ncontrib in write table
+
+2016-10-18  DanielBritzger
+
+    * fastNLOCreate.cc: read parton combinations from steering file only if
+      those are NOT passes by the processConstants
+
+2016-10-15  rabbertz
+
+    * fnlo-tk-cppread.cc: Add option to loop over all PDF members instead of
+      scales
+
+    * configure.ac, fnlo-tk-example.cc: Enable conditional compile w/o ROOT
+
+2016-10-14  rabbertz
+
+    * fastNLOTable.cc, fastNLOTable.h, fnlo-tk-cppread.cc, fnlo-tk-statunc.cc:
+      Enable catenation also for INormFlag=2 tables
+
+    * Makefile.am, configure.ac, fnlo-tk-statunc.cc: Make statunc available also
+      without YODA via preprocessor defines
+
+2016-10-11  rabbertz
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOGeneratorConstants.h,
+      speaker.cc: Fix issue with warmup filename when called via NLOjet++
+      interface
+
+2016-10-07  rabbertz
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffBase.cc, fastNLOTable.cc: More fixes
+      of catenability check
+
+    * fastNLOBase.cc, fastNLOTable.cc: Fix of catenability check
+
+2016-10-07  bschillinger
+
+    * fastNLOTable.h: remove function declaration which does not exist.
+
+2016-10-07  DanielBritzger
+
+    * fastNLOCoeffAddBase.h, fastNLOCreate.cc, fastNLOCreate.h: more ideas for
+      reference table
+
+2016-10-06  DanielBritzger
+
+    * fastNLOCoeffAddBase.h, fastNLOCreate.cc, fastNLOCreate.h: remove redundant
+      IsRef flag
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOLHAPDF.h, fastNLOReader.h: first
+      code for refernce tables
+
+2016-10-04  rabbertz
+
+    * fnlo-tk-statunc.cc: Common setup for all fnlo-tk- tools. Final checks to
+      be done.
+
+    * fnlo-tk-yodaout.cc: Common setup for all fnlo-tk- tools. Final checks to
+      be done.
+
+    * fnlo-tk-rootout.cc: Common setup for all fnlo-tk- tools. Final checks to
+      be done.
+
+    * fnlo-tk-modify.cc: Common setup for all fnlo-tk- tools. Final checks to be
+      done.
+
+    * fnlo-tk-merge.cc: Common setup for all fnlo-tk- tools. Final checks to be
+      done.
+
+    * fnlo-tk-example.cc: Common setup for all fnlo-tk- tools. Final checks to
+      be done.
+
+    * fnlo-tk-cppread.cc: Common setup for all fnlo-tk- tools. Final checks to
+      be done.
+
+    * fnlo-tk-cat.cc: Common setup for all fnlo-tk- tools. Final checks to be
+      done.
+
+    * fnlo-tk-append.cc: Common setup for all fnlo-tk- tools. Final checks to be
+      done.
+
+    * speaker.cc, speaker.h: Common setup for all fnlo-tk- tools. Final checks
+      to be done.
+
+2016-09-30  rabbertz
+
+    * fnlo-tk-append.cc, fnlo-tk-cat.cc: Fix Nevt normalisation problem with
+      catenated table bins
+
+2016-09-29  rabbertz
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFlex.cc,
+      fastNLOCoeffBase.cc, fastNLOCoeffData.cc, fastNLOCoeffData.h,
+      fastNLOCoeffMult.cc, fastNLOCoeffMult.h, fastNLOCreate.cc,
+      fastNLOReader.h, fastNLOTable.cc, fastNLOTable.h, read_steer.cc: Fix some
+      issues; more checks needed
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffBase.cc, fastNLOCoeffBase.h, fastNLOCoeffData.cc,
+      fastNLOCoeffData.h, fastNLOCoeffMult.cc, fastNLOCoeffMult.h,
+      fastNLOTable.cc, fnlo-tk-cat.cc, fnlo-tk-modify.cc: Some cleanup before
+      further testing
+
+2016-09-28  rabbertz
+
+    * fastNLOTable.cc, fnlo-tk-cat.cc, fnlo-tk-modify.cc: Small corrections
+
+2016-09-27  rabbertz
+
+    * Makefile.am, fastNLOBase.cc, fastNLOBase.h, fastNLOCoeffAddBase.cc,
+      fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFix.h,
+      fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h, fastNLOCoeffBase.cc,
+      fastNLOCoeffBase.h, fastNLOCoeffData.cc, fastNLOCoeffData.h,
+      fastNLOCoeffMult.cc, fastNLOCoeffMult.h, fastNLOTable.cc, fastNLOTable.h,
+      fnlo-tk-cat.cc, fnlo-tk-modify.cc: First version of table bin concatenator
+
+2016-09-23  rabbertz
+
+    * fnlo-tk-statunc.cc: Change error to warn
+
+    * fastNLOTable.cc, fnlo-tk-merge.cc: Fix bug with Ncontrib I introduced
+
+2016-09-21  rabbertz
+
+    * Makefile.am, Modify, SteerModify.str, configure.ac, data,
+      fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc,
+      fastNLOCoeffAddFix.h, fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h,
+      fastNLOCoeffBase.cc, fastNLOCoeffBase.h, fastNLOTable.cc, fastNLOTable.h,
+      fnlo-tk-modify.cc, read_steer.cc, read_steer.h:
+
+2016-09-13  rabbertz
+
+    * fnlo-tk-yodaout.cc: Transfer XsUncertainty fix to yodaout
+
+2016-09-13  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc: bugfix
+
+    * fastNLOCoeffAddBase.cc: fix repeated output of 'GetX1 not implemented'
+
+2016-09-12  sieber
+
+    * fastNLOLHAPDF.cc: do not call CalcCrossSection directly from constructor
+
+2016-09-12  DanielBritzger
+
+    * fastNLOReader.cc: add warning message for correct usage of
+      GetCrossSection_vs_x1()
+
+2016-09-12  sieber
+
+    * fastNLOReader.cc: force recalculation of alphas cache when MuR functional
+      form is set.
+
+2016-09-09  DanielBritzger
+
+    * fastNLOCoeffAddBase.cc, fastNLOCoeffAddBase.h, fastNLOReader.cc,
+      fastNLOReader.h: Get cross section as function of x(PDF). Works for DIS
+      and pp (full-matrix).
+
+2016-09-09  sieber
+
+    * fastnlo.i: fix pyext for xsunc changes. make clean neccesary.
+
+    * fnlo-tk-example.cc: fix for xs unc.
+
+2016-09-09  DanielBritzger
+
+    * fastNLOLHAPDF.cc, fastNLOReader.cc, fnlo-tk-rootout.cc: fixes for
+      XsUncertainty
+
+    * fastNLOConstants.h.in, fastNLOReader.cc, fastNLOReader.h: new option: Set
+      scale to be constant for flex-scale tables. Fix for python-interface.
+
+2016-09-09  rabbertz
+
+    * fastNLOTable.cc, fastNLOTable.h: Now SetBins is defined ...
+
+2016-09-09  sieber
+
+    * fastNLOTable.h: remove undefined member.
+
+2016-09-06  rabbertz
+
+    * fastNLOCoeffAddFlex.cc: Now should work for flex-tables as well
+
+    * fastNLOBase.cc, fastNLOBase.h, fastNLOCoeffAddBase.cc,
+      fastNLOCoeffAddBase.h, fastNLOCoeffAddFix.cc, fastNLOCoeffAddFix.h,
+      fastNLOCoeffAddFlex.cc, fastNLOCoeffAddFlex.h, fastNLOCoeffBase.cc,
+      fastNLOCoeffBase.h, fastNLOCoeffData.cc, fastNLOCoeffData.h,
+      fastNLOCoeffMult.cc, fastNLOCoeffMult.h, fastNLOConstants.h.in,
+      fastNLOPDFLinearCombinations.cc, fastNLOReader.cc, fastNLOReader.h,
+      fastNLOTable.cc, fastNLOTable.h, fastNLOTools.h, fnlo-tk-cppread.cc,
+      fnlo-tk-example.cc, fnlo-tk-modify.cc, fnlo-tk-rootout.cc,
+      fnlo-tk-statunc.cc, fnlo-tk-yodaout.cc: fnlo-tk-modify works for fix
+      tables; flex to be done; heavily improved print-out setup
+
+2016-07-18  rabbertz
+
+    * fnlo-tk-modify.cc: Reactivate fnlo-tk-modify within Toolkit; works but
+      only for trivial; needed bin cut out
+
+2016-06-20  DanielBritzger
+
+    * read_steer.cc: minor bugfix if multiple include's are forming a table
+
+    * read_steer.cc: minor bugfix if multiple include's are forming a table
+
+2016-06-17  DanielBritzger
+
+    * fastNLOCRunDec.cc, fastNLOLHAPDF.cc: bugfixed from D. Maitre
+
+2016-06-13  sieber
+
+    * fastnlo.i: redef struct for python wrapper.
+
+    * fastnlo.i: also wrap fastNLOCRunDec.
+
+    * fastNLOLHAPDF.h: make GetXFX and EvolveAlphas virtual so they can be
+      overridden.
+
+2016-06-07  rabbertz
+
+    * fnlo-tk-cppread.cc: Set as to default
+
+    * fnlo-tk-cppread.cc, fnlo-tk-statunc.cc, fnlo-tk-yodaout.cc: Some
+      consistency changes
+
+2016-05-22  rabbertz
+
+    * fnlo-tk-example.cc, fnlo-tk-rootout.cc, fnlo-tk-yodaout.cc: Comment
+      improved
+
+2016-05-04  DanielBritzger
+
+    * fastNLOGeneratorConstants.h: improve check of warmup values
+
+    * fastNLOCreate.cc, fastNLOGeneratorConstants.h: improve check of warmup
+      values
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOGeneratorConstants.h: enable to
+      pass warmup-values in constructor
+
+    * fastNLOCreate.cc, fastNLOCreate.h: modify constructor: warmup file is
+      needed for steering-less initialisation
+
+    * fastNLOCreate.cc, fastNLOCreate.h, fastNLOGeneratorConstants.h:
+      restructure fastNLOCreate constructors and add possibility to pass all
+      steering flags in constructor (besides warmup-values)
+
+2016-04-27  DanielBritzger
+
+    * fastNLOCreate.h: write table and pass event weight
+
+2016-03-19  rabbertz
+
+    * fastNLOCreate.cc: Changes for use with nnlo-bridge
+
 2016-03-11  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2212
             ================================================================================
 

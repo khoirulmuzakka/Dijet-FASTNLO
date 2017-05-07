@@ -1,3 +1,38 @@
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2402:
+=================================================================================================
+Some major new developments are included in this release:
+(Attention: compiler with C++11 support is mandatory!)
+- In preparation of grid productions for NNLO calculations, many new features have been
+  implemented with respect to fastNLO table mass production and their statistical combination.
+  In particular, these are
+  - usage of the nnlo-bridge package (to be released) for filling fastNLO or APPLgrid
+    interpolation grids from NNLOJET
+  - extension of the fastNLO table format (2.36.00, backwards compatible) to store
+    statistical weight information for many new merging options addressing
+    statistical fluctuations in NNLO grid productions
+  - steering-less initialisation possible in addition to steering files
+  - improved warmup file generation and check
+  - more options for distribution of x nodes
+- Support of transparent writing/reading of gzipped tables tab.gz to reduce significantly
+  the necessary disk space when storing large numbers of tables;
+  requires the zlib compression library to be present;
+- Includes new test suite to check installation --> 'make check'
+- Includes basic example for a bi-directional interface between
+  the C++ fastNLO toolkit and Fortran analysis / PDF fitting code (fortranext)
+- The fastNLO table evaluation part is mostly unchanged, but has been
+  complemented with more tools to manipulate tables like
+  - cutting out unused bins or multiplying bins by a set of factors (fnlo-tk-modify)
+  - concatenating separately calculated phase-space bins into one common table (fnlo-tk-cat)
+  - printing out normalised cross sections directly for tables set up with normalisation flag
+    (fnlo-tk-cppread, fnlo-tk-yodaout)
+  - printing out partial cross sections for crosschecks, e.g. NLO contribution alone,
+    or of cross section for all members of a PDF set (fnlo-tk-cppread)
+  - new merger with many new options for table combination (fnlo-tk-merge2)
+- Issue reported by D. Maitre fixed
+- Some issues in Python wrapper fixed
+
+
+
 Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2212:
 =================================================================================================
 Some little issues fixed and:
