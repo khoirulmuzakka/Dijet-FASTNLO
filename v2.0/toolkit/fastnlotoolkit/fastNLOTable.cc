@@ -662,9 +662,11 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
                                  // assign merged values
                                  if ( moption == kMean  ) {
                                     double mean = 0;
-                                    for ( auto ii : vals ) mean+=ii;
-                                    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
-                                    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
+                                    if ( vals.size() ) {
+                                       for ( auto ii : vals ) mean+=ii;
+                                       mean /= vals.size();
+                                    }
+                                    (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0];
                                  }
                                  else if ( moption == kMedian ) {
                                     double median = 0;
