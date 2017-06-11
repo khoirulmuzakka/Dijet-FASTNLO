@@ -93,6 +93,8 @@ int main(int argc, char** argv) {
          man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         man << "[flex]: Scale choice for flex-scale tables, def. = scale1." << endl;
+         man << "   Alternatives: \"scale2\"" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -172,8 +174,19 @@ int main(int argc, char** argv) {
       shout["fnlo-tk-cppread"] << "Normalizing cross sections. " << endl;
    }
 
-   //---  Too many arguments
+   //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
+   string chflex = "scale1";
    if (argc > 6) {
+      chflex = (const char*) argv[6];
+   }
+   if (argc <= 6 || chflex == "_") {
+      shout["fnlo-tk-cppread"] << "Using default scale 1." << endl;
+   } else {
+      shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
+   }
+
+   //---  Too many arguments
+   if (argc > 7) {
       error["fnlo-tk-cppread"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -938,13 +951,21 @@ int main(int argc, char** argv) {
          continue;
       }
       if (fnlo->GetIsFlexibleScaleTable()) {
-         fnlo->SetMuFFunctionalForm(kScale1);
-         fnlo->SetMuRFunctionalForm(kScale1);
-         //      fnlo->SetMuFFunctionalForm(kScale2);
-         //      fnlo->SetMuRFunctionalForm(kScale2);
-         warn["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+         if ( chflex == "scale1" ) {
+            fnlo->SetMuFFunctionalForm(kScale1);
+            fnlo->SetMuRFunctionalForm(kScale1);
+            info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
+                                    << "from only the first scale of this flexible-scale table." << endl
+                                    << "                        Please check how this table was filled!" << endl;
+         } else if ( chflex == "scale2" ) {
+            fnlo->SetMuFFunctionalForm(kScale2);
+            fnlo->SetMuRFunctionalForm(kScale2);
+            info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
+                                    << "from only the second scale of this flexible-scale table." << endl
+                                    << "                        Please check how this table was filled!" << endl;
+         } else {
+            error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+         }
       }
 
       //! Calculate cross section
