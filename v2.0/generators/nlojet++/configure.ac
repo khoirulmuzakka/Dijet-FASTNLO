@@ -8,18 +8,22 @@
 #
 # -----------------------------------------------------------------------------
 # Process this file with autoconf to produce a configure script.
-# Require minimal autoconf version of 2.59
-AC_PREREQ([2.59])
+# Require minimal autoconf version of 2.69 is from 2012
+AC_PREREQ([2.69])
 # Define subproject fastNLO_interface_nlojet
 AC_INIT([fastNLO_interface_nlojet], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+#Suppress verbose output when compiling (use make V=99 for verbose output)
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
-# Require minimal automake version of 1.9, switch on warnings
-AM_INIT_AUTOMAKE([1.9 -Wall])
-# Require minimal libtool version of 1.5
-#LT_PREREQ([1.5])
+# Require minimal automake version, 1.13 is from 2013, switch on warnings
+AM_INIT_AUTOMAKE([1.13 -Wall -Wno-override])
+# Require minimal libtool version, 2.4 is from 2011
+LT_PREREQ([2.4])
 #LT_INIT([dlopen])
 #
+# AC_DEFINE preprocessor definitions are written to config.h
+# which must be included first into all respective source files
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -54,12 +58,19 @@ AC_CHECK_LIB([LHAPDF], [alphas])
 #AC_CHECK_LIB([fastnlotoolkit], [libfastnlotoolkit_la-FastNLOBlockB])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
+# Check twice, first to define ZLIBTEST, and second to perform default action and AC_DEFINE HAVE_LIBZ
+AX_CHECK_ZLIB([ZLIBTEST=true], ZLIBTEST="")
+AX_CHECK_ZLIB()
+AC_MSG_NOTICE([ZLIBTEST is set to $ZLIBTEST])
+AM_CONDITIONAL(HAVE_LIBZ, test "x$ZLIBTEST" != "x")
 
 # Checks for header files.
 
-# Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs, structures, compiler characteristics and functionalities.
 AC_HEADER_STDBOOL
 AC_C_INLINE
+# For gcc, full C++11 functionality has been supported since version 4.8.1
+AX_CXX_COMPILE_STDCXX_11
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
