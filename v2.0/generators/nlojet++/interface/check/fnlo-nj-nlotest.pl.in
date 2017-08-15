@@ -63,6 +63,10 @@ $cmd = "nlojet++ --calculate -cnlo -n fnr0001midpHT_I723509_v23_fix -u ${libdir}
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-nj-nlotest: Producing NLO table for test scenario failed: $ret, aborted!\n";}
+$cmd = "gunzip output/${tabgz}";
+print "Executing command: $cmd\n";
+$ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-nlotest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
 
 # Determine difference to default NLO table
 $cmd = "diff ./${tabn} output/${tabn} > nlodiff.log";
