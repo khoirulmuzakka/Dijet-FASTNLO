@@ -25,7 +25,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
+#include <cstring>
 #include <iostream>
 #include <LHAPDF/LHAPDF.h>
 #include "fastnlotk/fastNLOLHAPDF.h"

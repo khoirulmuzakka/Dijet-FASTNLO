@@ -15,7 +15,8 @@ incdir_lhapdf = '@LHAPDFINCLUDEPATH@'
 libdir_lhapdf = '@LHAPDFLIBPATH@'
 libdir_fnlo = '@prefix@/lib'
 
-cxxargs = '@CXXFLAGS@'.split()
+## Add -std=gnu++11 explicitly to work around issue on Centos7
+cxxargs = '@CXXFLAGS@ -std=gnu++11'.split()
 ldargs = '@LDFLAGS@'.split()
 ext = Extension('_fastnlo',
                 [wrapsrc],
@@ -38,4 +39,3 @@ setup(name = 'fastnlo',
       description = 'A SWIG wrapper on C++ fastNLO interface.',
       long_description = longdesc,
       )
-
