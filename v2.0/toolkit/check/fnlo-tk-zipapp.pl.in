@@ -50,7 +50,7 @@ $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-zipapp: Evaluation gzipped test table zipapp.tab.gz failed: $ret, aborted!\n";}
 
 # Determine difference between the two outputs and compare to expectation
-$cmd = "diff zipcpp0.log zipcpp1.log > zipappdiff.log";
+$cmd = "diff zipcpp0.log zipcpp1.log | grep -v '^[0-9]' > zipappdiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 # Do not check this $ret here, since a difference is EXPECTED!
