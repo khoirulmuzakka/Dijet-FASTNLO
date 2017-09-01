@@ -128,13 +128,34 @@
 #    configuration options.
 #
 #==============================================================================
-#
+
+
+
+# NEW!!!!!!!!!!!!!!!!!!
+#==============================================================================
+# Check command line arguments
+#==============================================================================
+if ($#argv != 2 && $#argv != 3) then
+   echo "Usage: $0 basedir subdir [path to cvmfs software]"
+   echo "1st argument: Base dir for installations"
+   echo "2nd argument: Subdir in base dir for this installation"
+   echo "3rd optional argument: Path to newer gcc in cvmfs software distribution,"
+   echo "                       e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481"
+   exit 0
+endif
+#==============================================================================
+# Set installation location
+#==============================================================================
+set base=$1
+set local=$2
+# NNLOJET
+#set revision=3738
 #
 #==============================================================================
 # Check and set defaults for some specific environment variables
 #==============================================================================
-# Environment settings e.g. via "module load" might set a global INCLUDE variable,
-# for example to include BOOST headers! By default it does not exist.
+# Environment settings e.g. via "module load" might set a global INCLUDE variable.
+# By default it does not exist.
 setenv MYCPPFLAGS
 if ( $?INCLUDE ) then
    if ( ! $?CPPFLAGS ) then
@@ -153,7 +174,57 @@ if ( $?WITH_MPI ) then
 else
   setenv WITH_MPI
 endif
-#
+# Use CVMFS software repository, if necessary
+if ($3 != "") then
+   setenv MYCVMFS $3
+   echo "MYCVMFS is $MYCVMFS"
+else
+   unsetenv MYCVMFS
+   echo "MYCVMFS is not set"
+endif
+# Find root-config
+# Do not set ROOTBIN to crappy CVMFS ROOT installation!
+#    setenv ROOTBIN ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin
+setenv ROOTBIN
+# NNLOJET executable
+#setenv NNLOJETBINPATH ${base}/${local}/src/NNLOJET_rev${revision}/driver
+# PATH adaptation
+if ( $?PATH ) then
+#    setenv PATH ${MYCVMFS}/external/lhapdf/6.1.6/bin:${NNLOJETBINPATH}:${base}/${local}/bin:${ROOTBIN}:${PATH}
+    setenv PATH ${base}/${local}/bin:${ROOTBIN}:${PATH}
+else
+#    setenv PATH ${MYCVMFS}/external/lhapdf/6.1.6/bin:${NNLOJETBINPATH}:${base}/${local}/bin:${ROOTBIN}
+    setenv PATH ${base}/${local}/bin:${ROOTBIN}
+endif
+# Set additional (MY)CPPFLAGS for later use
+setenv MYCPPFLAGS
+if ( $?INCLUDE ) then
+   if ( $?CPPFLAGS ) then
+      setenv MYCPPFLAGS "${CPPFLAGS} -I${INCLUDE}"
+   else
+      setenv MYCPPFLAGS "-I${INCLUDE}"
+   endif
+else
+   if ( $?CPPFLAGS ) then
+      setenv MYCPPFLAGS "${CPPFLAGS}"
+   endif
+endif
+echo "MYCPPFLAGS is $MYCPPFLAGS"
+# Use modern gcc; gcc 4.4 from slc6 is too antique
+if ( $?MYCVMFS ) then
+   source ${MYCVMFS}/external/gcc/4.8.1/etc/profile.d/init.csh
+endif
+# LD_LIBRARY_PATH adaptation
+if ( $?LD_LIBRARY_PATH ) then
+#  setenv LD_LIBRARY_PATH ${MYCVMFS}/external/lhapdf/6.1.6/lib:${base}/${local}/lib:${base}/${local}/lib/root:${LD_LIBRARY_PATH}
+  setenv LD_LIBRARY_PATH ${base}/${local}/lib:${base}/${local}/lib/root:${LD_LIBRARY_PATH}
+else
+#  setenv LD_LIBRARY_PATH ${MYCVMFS}/external/lhapdf/6.1.6/lib:${base}/${local}/lib:${base}/${local}/lib/root
+  setenv LD_LIBRARY_PATH ${base}/${local}/lib:${base}/${local}/lib/root
+endif
+
+
+
 #==============================================================================
 # Mandatory and sincerely recommended packages
 #==============================================================================
@@ -161,12 +232,12 @@ endif
 # fastjet (any version >= 3 should work):
 # Use the "--enable-allplugins" options to enable use of e.g. older Tevatron jet algorithms.
 #------------------------------------------------------------------------------
-set local="local"
+#set local="local"
 set arc="fastjet-3.3.0"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --enable-shared --enable-allplugins --prefix=$HOME/${local} --bindir=$HOME/${local}/bin
+  ./configure --enable-shared --enable-allplugins --prefix=${base}/${local} --bindir=${base}/${local}/bin
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -180,7 +251,7 @@ set arc="LHAPDF-6.2.0"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local} CPPFLAGS="${MYCPPFLAGS}"
+  ./configure --prefix=${base}/${local} CPPFLAGS="${MYCPPFLAGS}"
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -203,7 +274,7 @@ if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   mv root ${arc}
   cd ${arc}
-  ./configure --prefix=$HOME/${local} --etcdir=$HOME/${local}/etc --enable-python --enable-minuit2
+  ./configure --prefix=${base}/${local} --etcdir=${base}/${local}/etc --enable-python --enable-minuit2
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -222,7 +293,7 @@ set arc="HepMC-2.06.09"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local} --with-momentum=GEV --with-length=MM
+  ./configure --prefix=${base}/${local} --with-momentum=GEV --with-length=MM
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -235,7 +306,7 @@ set arc="YODA-1.6.7"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local} --enable-root CPPFLAGS="${MYCPPFLAGS}"
+  ./configure --prefix=${base}/${local} --enable-root CPPFLAGS="${MYCPPFLAGS}"
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -248,7 +319,7 @@ set arc="Rivet-2.5.4"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local} CPPFLAGS="${MYCPPFLAGS}"
+  ./configure --prefix=${base}/${local} CPPFLAGS="${MYCPPFLAGS}"
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -266,7 +337,7 @@ set arc="hoppet-1.1.5"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local}
+  ./configure --prefix=${base}/${local}
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -285,7 +356,7 @@ set arc="qcdnum-17-01-12"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local}
+  ./configure --prefix=${base}/${local}
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -302,8 +373,8 @@ set arc="fastnlo_toolkit-2.3.1pre-2411"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-#  ./configure --prefix=$HOME/${local} --enable-pyext
-  ./configure --prefix=$HOME/${local} --with-yoda --with-hoppet --with-qcdnum --with-root --enable-pyext
+#  ./configure --prefix=${base}/${local} --enable-pyext
+  ./configure --prefix=${base}/${local} --with-yoda --with-hoppet --with-qcdnum --with-root --enable-pyext
 # options depending on previous choices: --with-yoda --with-hoppet --with-qcdnum --with-root
 # option to use python interface to library: --enable-pyext
   make -j4 install
@@ -322,7 +393,7 @@ set arc="nlojet++-4.1.3"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}-patched.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local}
+  ./configure --prefix=${base}/${local}
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -334,7 +405,7 @@ set arc="fastnlo_interface_nlojet-2.3.1pre-2411"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
-  ./configure --prefix=$HOME/${local}
+  ./configure --prefix=${base}/${local}
   make -j4 install
   cd ..
   touch ${arc}_installed
@@ -351,7 +422,7 @@ endif
 #if ( ! -e ${arc}_installed  ) then
 #  tar xzf ${arc}.tar.gz
 #  cd ${arc}
-#  ./configure --prefix=$HOME/${local} --enable-shared CXX=g++ CC=gcc FC=gfortran
+#  ./configure --prefix=${base}/${local} --enable-shared CXX=g++ CC=gcc FC=gfortran
 #  make -j4 install
 #  cd ..
 #  touch ${arc}_installed
@@ -367,7 +438,7 @@ endif
 #if ( ! -e ${arc}_installed  ) then
 #  tar xzf ${arc}.tar.gz
 #  cd ${arc}
-#  ./configure --prefix=$HOME/${local}
+#  ./configure --prefix=${base}/${local}
 ## Make without -j4 multicore, might be too heavy on some machines
 #  make install
 #  cd ..
@@ -380,7 +451,7 @@ endif
 #if ( ! -e ${arc}_installed  ) then
 #  tar xzf ${arc}.tar.gz
 #  cd ${arc}
-#  ./configure --prefix=$HOME/${local}
+#  ./configure --prefix=${base}/${local}
 #  make -j4 install
 #  cd ..
 #  touch ${arc}_installed
@@ -406,7 +477,7 @@ endif
 #if ( ! -e ${arc}_installed  ) then
 #  tar xzf ${arc}.tar.gz
 #  cd ${arc}
-#  ./configure --prefix=$HOME/${local} --with-sqlite3=install --enable-gzip --enable-lhole ${WITH_MPI} --enable-fastjet=$HOME/${local} --enable-lhapdf=$HOME/${local} --enable-hepmc2=$HOME/${local} --enable-rivet=$HOME/${local} --enable-root=$HOME/${local} --enable-blackhat=$HOME/${local} --enable-openloops=$HOME/${local}
+#  ./configure --prefix=${base}/${local} --with-sqlite3=install --enable-gzip --enable-lhole ${WITH_MPI} --enable-fastjet=${base}/${local} --enable-lhapdf=${base}/${local} --enable-hepmc2=${base}/${local} --enable-rivet=${base}/${local} --enable-root=${base}/${local} --enable-blackhat=${base}/${local} --enable-openloops=${base}/${local}
 #  make -j4 install
 #  cd ..
 #  touch ${arc}_installed
@@ -419,7 +490,7 @@ endif
 #if ( ! -e ${arc}_installed  ) then
 #  tar xzf ${arc}-fixed.tar.gz
 #  cd ${arc}
-#  ./configure --prefix=$HOME/${local}
+#  ./configure --prefix=${base}/${local}
 #  make -j4 install
 ## CXXFLAGS+=-fpermissive
 #  cd ..
@@ -428,7 +499,7 @@ endif
 #
 # For usage, make sure to set PATH, PYTHON, LHAPDF, RIVET, PKG_CONFIG_PATH, ROOT environment variables appropriately!!!
 #
-# setenv PKG_CONFIG_PATH $HOME/${local}/lib/pkgconfig
+# setenv PKG_CONFIG_PATH ${base}/${local}/lib/pkgconfig
 # source rivetanalysis.csh
 # add mcgrid example dirs
 #
@@ -440,14 +511,14 @@ endif
 # ThePEG:
 #--------
 #autoreconf -i
-#./configure --prefix=$HOME/${local} --with-fastjet=$HOME/${local} --with-hepmc=$HOME/${local} --with-lhapdf=$HOME/${local} --with-rivet=$HOME/${local}
+#./configure --prefix=${base}/${local} --with-fastjet=${base}/${local} --with-hepmc=${base}/${local} --with-lhapdf=${base}/${local} --with-rivet=${base}/${local}
 #make -j8
 #make check
 #make install
 #
 # NJet-matchbox:
 #---------------
-#./configure --prefix=$HOME/${local} --enable-5jet
+#./configure --prefix=${base}/${local} --enable-5jet
 #make -j8
 #make check
 #make install
@@ -456,8 +527,8 @@ endif
 #-------------------
 #install gengetopt from distro
 #autoreconf -i
-#./configure --prefix=$HOME/${local} --with-nlojet=$HOME/${local} --with-njet=$HOME/${local} --with-fastjet=$HOME/${local}
-#./configure --prefix=$HOME/${local} --with-fastjet=$HOME/${local} --with-madgraph=$HOME/${local}/MadGraph-matchbox --with-njet=$HOME/${local}
+#./configure --prefix=${base}/${local} --with-nlojet=${base}/${local} --with-njet=${base}/${local} --with-fastjet=${base}/${local}
+#./configure --prefix=${base}/${local} --with-fastjet=${base}/${local} --with-madgraph=${base}/${local}/MadGraph-matchbox --with-njet=${base}/${local}
 #make -j8
 #make check
 #make install
@@ -479,7 +550,7 @@ endif
 # if ( ! -e ${arc}_installed  ) then
 #   tar xzf ${arc}.tar.gz
 #   cd ${arc}
-#   ./configure --prefix=$HOME/${local} --enable-pyext --with-hoppet --with-qcdnum
+#   ./configure --prefix=${base}/${local} --enable-pyext --with-hoppet --with-qcdnum
 #   make -j4 install
 #   cd ..
 #   touch ${arc}_installed
@@ -496,7 +567,7 @@ endif
 # if ( ! -e ${arc}_installed  ) then
 #   tar xzf ${arc}.tar.gz
 #   cd ${arc}
-#   ./configure --prefix=$HOME/${local}
+#   ./configure --prefix=${base}/${local}
 #   make -j4 install
 #   cd ..
 #   touch ${arc}_installed
