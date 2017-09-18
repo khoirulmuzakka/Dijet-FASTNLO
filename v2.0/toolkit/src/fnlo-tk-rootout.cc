@@ -318,7 +318,15 @@ int main(int argc, char** argv) {
    }
 
    //! --- Create ROOT file
-   string BaseName     = tablename.substr(0, max(0,(int)tablename.size() -4));
+   string BaseName = tablename;
+   size_t ipos = BaseName.find_last_of(".gz");
+   if ( ipos != string::npos ) {
+      BaseName = BaseName.substr(0, ipos-2);
+   }
+   ipos = BaseName.find_last_of(".tab");
+   if ( ipos != string::npos ) {
+      BaseName = BaseName.substr(0, ipos-3);
+   }
    if ( PDFFile != "X" )    BaseName = BaseName + "_" + PDFFile;
    if ( chunc   != "none" ) BaseName = BaseName + "_" + chunc;
    if ( chnorm  != "no" )   BaseName = BaseName + "_norm";
