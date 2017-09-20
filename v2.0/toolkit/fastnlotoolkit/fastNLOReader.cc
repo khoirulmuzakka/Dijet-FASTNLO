@@ -1828,12 +1828,12 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
                         if (!GetIsFlexibleScaleTable(c))
                            FillBlockBPDFLCsDISv20((fastNLOCoeffAddFix*)c);
                         else {
-			   // DIS specific hack, as we do not intend to include data or mult. contributions
-			   if ( BBlocksSMCalc[0][0] != NULL ) 
-			      FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c,(fastNLOCoeffAddFlex*)BBlocksSMCalc[0][0]);
-			   else //otherwise, please simply use:
-			      FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
-			}
+                           // DIS specific hack, as we do not intend to include data or mult. contributions
+                           if ( BBlocksSMCalc[0][0] != NULL )
+                              FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c,(fastNLOCoeffAddFlex*)BBlocksSMCalc[0][0]);
+                           else //otherwise, please simply use:
+                              FillBlockBPDFLCsDISv21((fastNLOCoeffAddFlex*)c);
+                        }
                      }
                   }
                   // ---- pp ---- //
@@ -1909,28 +1909,28 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
 
    // we take the PDF coefficients from the first contributions if compatible
    // this avoids repetive access to LHAPDF
-   //   static const bool SpeedUp = false; 
-   static const bool SpeedUp = BBlocksSMCalc[0][0] != NULL; 
+   //   static const bool SpeedUp = false;
+   static const bool SpeedUp = BBlocksSMCalc[0][0] != NULL;
    bool IsCompatible = false;
    if ( SpeedUp ){
       if ( c0 != NULL && c0 != c && fCoeff.size()>1) {
-	 IsCompatible = true;
-	 for (unsigned int i=0; i<NObsBin; i++) {
-	    IsCompatible &= ( c->GetNScaleNode1(i) == c0->GetNScaleNode1(i) ) ;
-	    IsCompatible &= ( c->GetNScaleNode2(i) == c0->GetNScaleNode2(i) ) ;
-	    IsCompatible &= ( c->GetNxmax(i) == c0->GetNxmax(i) ) ;
-	 }
-	 int i=0; // just the first obsbin
-	 for (int x=0; x<c->GetNxmax(i); x++) 
-	    IsCompatible &= ( c->GetXNode1(i,x) == c0->GetXNode1(i,x) );
-	 for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++)
-	    IsCompatible &=  c->GetScaleNode1(i,jS1) ==  c0->GetScaleNode1(i,jS1);
-	 for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-	    IsCompatible &=  c->GetScaleNode2(i,kS2) ==  c0->GetScaleNode2(i,kS2);
-	 }
+         IsCompatible = true;
+         for (unsigned int i=0; i<NObsBin; i++) {
+            IsCompatible &= ( c->GetNScaleNode1(i) == c0->GetNScaleNode1(i) ) ;
+            IsCompatible &= ( c->GetNScaleNode2(i) == c0->GetNScaleNode2(i) ) ;
+            IsCompatible &= ( c->GetNxmax(i) == c0->GetNxmax(i) ) ;
+         }
+         int i=0; // just the first obsbin
+         for (int x=0; x<c->GetNxmax(i); x++)
+            IsCompatible &= ( c->GetXNode1(i,x) == c0->GetXNode1(i,x) );
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++)
+            IsCompatible &=  c->GetScaleNode1(i,jS1) ==  c0->GetScaleNode1(i,jS1);
+         for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+            IsCompatible &=  c->GetScaleNode2(i,kS2) ==  c0->GetScaleNode2(i,kS2);
+         }
       }
-      if ( c==c0 && c->PdfXfx.empty()) 
-	 fastNLOTools::ResizeFlexibleVector(c->PdfXfx,c->PdfLcMuVar);
+      if ( c==c0 && c->PdfXfx.empty())
+         fastNLOTools::ResizeFlexibleVector(c->PdfXfx,c->PdfLcMuVar);
          //c->PdfXfx = c->PdfLcMuVar; // resize
    }
 
@@ -1944,19 +1944,19 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
 
-		  if ( SpeedUp ) {
-		     if ( c == c0 ) 
-			c->PdfXfx[i][x][jS1][kS2] = GetXFX(xp,muf);
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,c0->PdfXfx[i][x][jS1][kS2]);
-		  }
-		  else {
-		     // this is the default code !
-		     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFX(xp,muf));
-		  }
+                  if ( SpeedUp ) {
+                     if ( c == c0 )
+                        c->PdfXfx[i][x][jS1][kS2] = GetXFX(xp,muf);
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,c0->PdfXfx[i][x][jS1][kS2]);
+                  }
+                  else {
+                     // this is the default code !
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+                  }
 
-		  // if ( i==1 && x==1 && jS1==1 && kS2==1 ) {
-		  //    cout<<"muf="<<muf<<"\tpdf="<<c->PdfLcMuVar[i][x][jS1][kS2][0]<<"\tc="<<c<<endl;
-		  // }
+                  // if ( i==1 && x==1 && jS1==1 && kS2==1 ) {
+                  //    cout<<"muf="<<muf<<"\tpdf="<<c->PdfLcMuVar[i][x][jS1][kS2][0]<<"\tc="<<c<<endl;
+                  // }
                   //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
                }
             }
@@ -2378,7 +2378,7 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
    //!     func:  Choose a pre-defined function
    //!     kMuX:  is it for mu_r or for mu_f ?
    //!
-   
+
    if (!GetIsFlexibleScaleTable()) {
       logger.warn<<"This is not a flexible-scale table. SetFunctionalForm cannot be used.\n";
       return;
@@ -2671,8 +2671,8 @@ void fastNLOReader::PrintScaleSettings(fastNLO::EMuX MuX) {
          break;
       case kWgtAvg:
          sprintf(fname,"(%s^4 + %s^4)/ (%s^2 + %s^2) ",
-		 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str(),
-		 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
+                 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str(),
+                 B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());
          break;
       case kLinearMean:
          sprintf(fname,"((%s+%s)/2)^2",B_Any()->GetScaleDescription(0).c_str(),B_Any()->GetScaleDescription(1).c_str());

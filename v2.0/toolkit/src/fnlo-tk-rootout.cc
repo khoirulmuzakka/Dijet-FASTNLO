@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
    if (argc > 3) {
       chunc = (const char*) argv[3];
    }
-   if (argc <= 3 || chunc == "_") {
+   if (argc <= 3 || chunc == "_" || chunc == "none" ) {
       chunc = "none";
       shout["fnlo-tk-rootout"] << "No request given for PDF uncertainty, none evaluated." << endl;
    } else {

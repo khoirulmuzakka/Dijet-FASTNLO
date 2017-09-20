@@ -437,7 +437,7 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
    // Check input
    logger.debug["GetPDFUncertainty"]<<"ePDFUnc = "<<ePDFUnc<<endl;
    if ( ePDFUnc == fastNLO::kPDFNone ) {
-      logger.info["GetPDFUncertainty"]<<"No PDF uncertainty, only averaged cross section result evaluated (correct for NNPDF, wrong otherwise!)."<<endl;
+      logger.info["GetPDFUncertainty"]<<"No PDF uncertainty, only averaged cross section result evaluated (correct for NNPDF or PDF sets with only one member, wrong otherwise!)."<<endl;
    } else if ( ePDFUnc == fastNLO::kHessianSymmetric ) {
       logger.info["GetPDFUncertainty"]<<"Calculating symmetric Hessian PDF uncertainties."<<endl;
    } else if ( ePDFUnc == fastNLO::kHessianAsymmetric ) {
@@ -468,7 +468,7 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
    unsigned int nEig = nMem/2;
    logger.info["GetPDFUncertainty"]<<"Info: Number of highest PDF set member nMem = " << nMem << endl;
    logger.info["GetPDFUncertainty"]<<"Info: Guessed number of eigen vectors nMem/2 = " << nEig << endl;
-   if ( nMem < 2 ) {
+   if ( nMem == 1 || (nMem == 0 && ePDFUnc != fastNLO::kPDFNone) ) {
       logger.error["GetPDFUncertainty"]<<"ERROR! This PDF set has only one or two members: nMem = " << nMem << endl;
       logger.error["GetPDFUncertainty"]<<"PDF uncertainty calculation impossible, aborted!" << endl;
       exit(1);
@@ -546,7 +546,7 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
 
       // Derive chosen relative uncertainties
       for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-         // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF, wrong otherwise!).
+         // No PDF uncertainty, only averaged cross section result evaluated (Correct for NNPDF or PDF sets with only one member, wrong otherwise!).
          if ( ePDFUnc == fastNLO::kPDFNone ) {
             // Undo shift of mean
             XsUnc.xs[iobs]   = XsUnc.xs[iobs]/nMem + xs0[iobs];

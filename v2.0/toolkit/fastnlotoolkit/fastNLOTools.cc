@@ -13,13 +13,13 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    bool CheckVersion(int version ){
       if ( fastNLO::CompatibleVersions.count(version) == 0 ) {
-	 error["fastNLOTools::CheckVersion"]<<"This table version ("<<version<<") is incompatible with this fastNLO code."<<endl;
-	 error["fastNLOTools::CheckVersion"]<<"Supported table versions are:";
-	 for ( auto i : fastNLO::CompatibleVersions ) error>>" "<<i;
-	 error>>""<<endl;
-	 error["fastNLOTools::CheckVersion"]<<"Exiting."<<endl;
-	 exit(1);
-	 return false;
+         error["fastNLOTools::CheckVersion"]<<"This table version ("<<version<<") is incompatible with this fastNLO code."<<endl;
+         error["fastNLOTools::CheckVersion"]<<"Supported table versions are:";
+         for ( auto i : fastNLO::CompatibleVersions ) error>>" "<<i;
+         error>>""<<endl;
+         error["fastNLOTools::CheckVersion"]<<"Exiting."<<endl;
+         exit(1);
+         return false;
       }
       return true;
    }
@@ -30,9 +30,9 @@ namespace fastNLOTools {
       //! Read values according to the size() of the given vector
       //! from table (v2.0 format).
       for( unsigned int i=0 ; i<v.size() ; i++){
-	 table >> v[i];
-	 v[i] *= nevts;
-	 if ( !isfinite(v[i]) ) {
+         table >> v[i];
+         v[i] *= nevts;
+         if ( !isfinite(v[i]) ) {
             error["ReadVector"]<<"Non-finite number read from table, aborted! value = " << v[i] << endl;
             error["ReadVector"]<<"Please check the table content." << endl;
             exit(1);
@@ -47,12 +47,12 @@ namespace fastNLOTools {
       int nLines = 0;
       table >> nLines;
       if ( nLines==fastNLO::tablemagicno ) {
-	 error["ReadUnused"]<<"Number of lines identical to magic number. Exiting."<<endl; exit(3);
+         error["ReadUnused"]<<"Number of lines identical to magic number. Exiting."<<endl; exit(3);
       }
       string sUnused;
       if ( nLines > 0 ) std::getline(table,sUnused); // discard empty space due to precendent >>
       for( int i=0 ; i<nLines ; i++)
-	 std::getline(table,sUnused);
+         std::getline(table,sUnused);
       return nLines;
    }
 
@@ -61,15 +61,15 @@ namespace fastNLOTools {
    int ReadFlexibleVector(vector<double >& v, istream& table , int nProcLast , double nevts ){
       int nn = 0;
       if ( nProcLast == 0 ) {
-         table >> nProcLast; 
-	 nn++;
+         table >> nProcLast;
+         nn++;
       }
       v.resize(nProcLast);
       for(unsigned int i0=0;i0<v.size();i0++){
-	 table >> v[i0];
-	 v[i0] *= nevts;
-	 nn++;
-	 if ( !isfinite(v[i0]) ) {
+         table >> v[i0];
+         v[i0] *= nevts;
+         nn++;
+         if ( !isfinite(v[i0]) ) {
             error["ReadFlexibleVector"]<<"Non-finite number read from table, aborted! value = " << v[i0] << endl;
             error["ReadFlexibleVector"]<<"Please check the table content." << endl;
             exit(1);
@@ -82,17 +82,17 @@ namespace fastNLOTools {
    int ReadFlexibleVector(vector<unsigned long long >& v, istream& table , int nProcLast , double nevts ){
       int nn = 0;
       if ( nProcLast == 0 ) {
-         table >> nProcLast; 
-	 nn++;
+         table >> nProcLast;
+         nn++;
       }
       v.resize(nProcLast);
       for(unsigned int i0=0;i0<v.size();i0++){
          char buffer[256];
          table >> buffer;
          double value = atof(buffer);
-	 v[i0]  = value;
-	 v[i0] *= nevts;
-	 nn++;
+         v[i0]  = value;
+         v[i0] *= nevts;
+         nn++;
       }
       return nn;
    }
@@ -104,7 +104,7 @@ namespace fastNLOTools {
       v.resize(size);
       if ( size > 0 ) std::getline(table,v[0]); // discard empty space due to precendent >>
       for( auto& i : v) {
-	 std::getline(table,i);
+         std::getline(table,i);
       }
       return v.size() + 1;
    }
@@ -115,7 +115,7 @@ namespace fastNLOTools {
       if ( size == 0 ) table >> size;
       v.resize(size);
       for( auto& i : v) {
-	 table >> i;
+         table >> i;
       }
       return v.size() + 1;
    }
@@ -350,17 +350,17 @@ namespace fastNLOTools {
    bool ReadMagicNo(istream& table) {
       //! read and crosscheck magic number
       if (table.eof()){
-	 error["ReadMagicNo"]<<"Cannot read from file. Exiting"<<endl; 
-	 exit(3);
+         error["ReadMagicNo"]<<"Cannot read from file. Exiting"<<endl;
+         exit(3);
       }
       string line;
       std::getline(table,line);
       if ( line=="" ) std::getline(table,line);  // last one was '<<'
       if( line != std::to_string(tablemagicno)){
          error["ReadMagicNo"]<<"Found '"<<line<<"' instead of "<<tablemagicno<<"."<<endl;
-	 error["ReadMagicNo"]<<"Did not find magic number, aborting!"<<endl;
-	 error["ReadMagicNo"]<<"Please check compatibility of tables and program version. Exiting."<<endl;
-	 exit(2);
+         error["ReadMagicNo"]<<"Did not find magic number, aborting!"<<endl;
+         error["ReadMagicNo"]<<"Please check compatibility of tables and program version. Exiting."<<endl;
+         exit(2);
          return false;
       };
       return true;
