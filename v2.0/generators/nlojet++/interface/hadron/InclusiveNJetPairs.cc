@@ -1,5 +1,5 @@
 //
-// fastNLO v2.2 creator code for inclusive N jets scenarios
+// fastNLO v2.2 creator code for inclusive N jet pairs scenarios
 //
 // ============== fastNLO user: ========================================
 // To create your own scenario, it is recommended to take this
