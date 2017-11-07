@@ -502,7 +502,9 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
       logger.debug["fastNLOCreate"]<<"The warmup filename set in steering file is: " << STRING_NS(WarmUpFilename,fSteerfile) << endl;
    } else {
-      string fWarmUpFile = STRING_NS(ScenarioName,fSteerfile) + "_" + steeringNameSpace + "_warmup.txt";
+      //      string fWarmUpFile = STRING_NS(ScenarioName,fSteerfile) + "_" + steeringNameSpace + "_warmup.txt";
+      // Default for NLOJet++ is like this; to be unified across generators and create methods
+      string fWarmUpFile = steeringNameSpace + "_" + STRING_NS(ScenarioName,fSteerfile) + "_warmup.txt";
       SetWarmupTableFilename(fWarmUpFile);
       logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
    }
