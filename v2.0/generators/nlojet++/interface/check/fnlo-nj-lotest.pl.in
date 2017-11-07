@@ -21,7 +21,7 @@ my $tabb  = "fnr0001midpHT_I723509_v23_fix";
 my $steer = ${tabb}.".str";
 my $tabl  = ${tabb}."-hhc-born-2jet.tab";
 my $tabgz = ${tabl}.".gz";
-my $tabw  = ${tabb}."_InclusiveNJets_warmup.txt";
+my $tabw  = "InclusiveNJets_".${tabb}."_warmup.txt";
 
 foreach my $file ( $steer, $tabw, $tabl, $tabgz, "InclusiveNJets.str", "lodiff.log" ) {
     if ( -e $file || -l $file ) {

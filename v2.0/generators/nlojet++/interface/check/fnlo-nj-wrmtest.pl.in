@@ -19,7 +19,7 @@ my $src = "@srcdir@";
 # Remove potentially left-over temporary files
 my $tabb  = "fnr0001midpHT_I723509_v23_fix";
 my $steer = ${tabb}.".str";
-my $tabw  = ${tabb}."_InclusiveNJets_warmup.txt";
+my $tabw  = "InclusiveNJets_".${tabb}."_warmup.txt";
 
 foreach my $file ( $steer, $tabw, "InclusiveNJets.str", "wrmdiff.log" ) {
     if ( -e $file || -l $file ) {
