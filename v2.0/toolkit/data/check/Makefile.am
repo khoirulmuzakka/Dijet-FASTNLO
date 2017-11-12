@@ -11,7 +11,7 @@ AUTOMAKE_OPTIONS = gnu
 
 # Distribute for checks, but do not install
 # Link filenames to avoid cmdline lengths > 99 for tar --> error in distribution
-dist_data_DATA = NJetEvents_0-0-2.tab.gz NJetEvents_0-0-2_cpp.log NJetEvents_2-2-2.tab.gz NJetEvents_2-2-2_cpp.log \
+dist_check_DATA = NJetEvents_0-0-2.tab.gz NJetEvents_0-0-2_cpp.log NJetEvents_2-2-2.tab.gz NJetEvents_2-2-2_cpp.log \
 NJetEvents_2-2.tab.gz NJetEvents_2-2_cpp.log NJetEvents_norm_1-12.tab.gz NJetEvents_norm_1-12_cppnorm.log \
 NJets.tab.gz NJets_born-2jet_0000.tab.gz NJets_born-2jet_0001.tab.gz NJets_born-2jet_0002.tab.gz \
 NJets_born-2jet_stat.log NJets_born-2jet_stat_0000.tab.gz NJets_born-2jet_stat_0001.tab.gz NJets_born-2jet_stat_0002.tab.gz \
