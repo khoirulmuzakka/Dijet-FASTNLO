@@ -47,8 +47,8 @@ getopts('b:de:g:hj:n:o:rt:v:wx:') or die "fnlo-run-nlojet.pl: Malformed option s
 if ( $opt_h ) {
     print "\nfnlo-run-nlojet.pl\n";
     print "Usage: fnlo-run-nlojet.pl [switches/options] ([ScenarioType_ScenarioName])\n";
-    print "  -b batch        Batch system used: GC (def.),\n";
-    print "                  GC (grid-control), LOCAL, GRID, or PBS\n";
+    print "  -b batch        Submission flavour used: GC (def.),\n";
+    print "                  GC (grid-control), CVMFS (GC with cvmfs software mount), LOCAL, GRID, or PBS\n";
     print "  -d debug        Switch debug/verbose mode on\n";
     print "  -e max-events   Maximal number of events (def.=0 => 4,294,967,295)\n";
     print "  -g prot         Grid storage protocol to use: guc (def.), srm\n";
@@ -71,11 +71,11 @@ if ( $opt_h ) {
     exit;
 }
 
-unless ( $opt_b eq "LOCAL" || $opt_b eq "GC" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
+unless ( $opt_b eq "LOCAL" || $opt_b eq "GC" || $opt_b eq "CVMFS" || $opt_b eq "GRID" || $opt_b eq "PBS" ) {
     die "fnlo-run-nlojet.pl: Error! Illegal batch system: $opt_b, aborted.\n";
 }
-unless ( $opt_b eq "GC" ) {
-    die "fnlo-run-nlojet.pl: Error! Batch system other than GC (grid-control) not updated: $opt_b, aborted.\n";
+unless ( $opt_b eq "GC" || $opt_b eq "CVMFS" ) {
+    die "fnlo-run-nlojet.pl: Error! Batch system other than GC or CVMFS (grid-control) not updated: $opt_b, aborted.\n";
 }
 unless ( $opt_e =~ m/\d+/ && $opt_e !~ m/\D+/ ) {
     die "fnlo-run-nlojet.pl: Error! Illegal maximal event number: $opt_e, aborted.\n";
@@ -254,25 +254,29 @@ print "######################################################\n\n";
 #
 # Set system paths environment
 #
-$ENV{FASTJET} = "$rundir";
-$ENV{LHAPDF}  = "$rundir";
-$ENV{NLOJET}  = "$rundir";
-$ENV{FASTNLO} = "$rundir";
-if ( $vers eq "2.3" ) {
-    $ENV{FASTNLOLIBADDDIR} = "$rundir/lib/fastnlo_interface_nlojet";
+if ( $batch eq "CVMFS" ) {
+    $ENV{NLOJET}  = "/cvmfs/etp.kit.edu/fnlo";
 } else {
-    die "fnlo-run-nlojet.pl: ERROR! Unsupported fastNLO version $vers requested, aborted!\n";
-}
-if ( $ENV{PATH} ) {
-    $ENV{PATH} = "$ENV{NLOJET}/bin:$ENV{PATH}";
-} else {
-    $ENV{PATH} = "$ENV{NLOJET}/bin";
-}
-if ( $ENV{LD_LIBRARY_PATH} ) {
-    $ENV{LD_LIBRARY_PATH} ="$ENV{NLOJET}/lib:$ENV{NLOJET}/lib64:$ENV{FASTNLOLIBADDDIR}:".
-        "$ENV{LD_LIBRARY_PATH}";
-} else {
-    $ENV{LD_LIBRARY_PATH} ="$ENV{NLOJET}/lib:$ENV{NLOJET}/lib64:$ENV{FASTNLOLIBADDDIR}";
+    $ENV{FASTJET} = "$rundir";
+    $ENV{LHAPDF}  = "$rundir";
+    $ENV{NLOJET}  = "$rundir";
+    $ENV{FASTNLO} = "$rundir";
+    if ( $vers eq "2.3" ) {
+	$ENV{FASTNLOLIBADDDIR} = "$rundir/lib/fastnlo_interface_nlojet";
+    } else {
+	die "fnlo-run-nlojet.pl: ERROR! Unsupported fastNLO version $vers requested, aborted!\n";
+    }
+    if ( $ENV{PATH} ) {
+	$ENV{PATH} = "$ENV{NLOJET}/bin:$ENV{PATH}";
+    } else {
+	$ENV{PATH} = "$ENV{NLOJET}/bin";
+    }
+    if ( $ENV{LD_LIBRARY_PATH} ) {
+	$ENV{LD_LIBRARY_PATH} ="$ENV{NLOJET}/lib:$ENV{NLOJET}/lib64:$ENV{FASTNLOLIBADDDIR}:".
+	    "$ENV{LD_LIBRARY_PATH}";
+    } else {
+	$ENV{LD_LIBRARY_PATH} ="$ENV{NLOJET}/lib:$ENV{NLOJET}/lib64:$ENV{FASTNLOLIBADDDIR}";
+    }
 }
 
 #
@@ -283,7 +287,7 @@ chomp $date;
 print "\nfnlo-run-nlojet.pl: Running fastNLO version $vers scenario on batch system $batch: $date\n";
 
 # In case of non-local running need to unpack binary fastNLO distribution
-if ( $batch ne "LOCAL" ) {
+unless ( $batch eq "LOCAL" || $batch eq "CVMFS" ) {
 
 # Fetching and unpacking of fastNLO binary archive
     my $date = `date +%d%m%Y_%H%M%S`;
@@ -366,7 +370,7 @@ print "fnlo-run-nlojet.pl: Target file: $tfile\n";
 
 if ( $batch ne "LOCAL" ) {
 # Copy/rename for grid storage via GC
-    if ( $batch eq "GC" ) {
+    if ( $batch eq "GC" || $batch eq "CVMFS" ) {
         print "fnlo-run-nlojet.pl: Info: Batch mode $batch: Grid storage done by grid-control.\n";
         my $spathdir = `dirname $spath`;
         if ( ! -f "$rundir/$sfile" ) {
