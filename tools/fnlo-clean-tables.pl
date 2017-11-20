@@ -63,7 +63,9 @@ unless ( @ARGV == 1 ) {
 my $scenario = shift;
 chomp $scenario;
 my @subdirs = ($scenario, $scenario."ref");
-my @globs = ("\\\*-born\\\*.tab", "\\\*-nlo\\\*.tab", "\\\*-nnlo\\\*.tab");
+my @globs = ("\\\*-born\\\*.tab\\\*", "\\\*-nlo\\\*.tab\\\*", "\\\*-nnlo\\\*.tab\\\*",
+	     "\\\*\\\.LO-\\\*.tab\\\*", "\\\*\\\.R-\\\*.tab\\\*", "\\\*\\\.V-\\\*.tab\\\*",
+	     "\\\*\\\.RRa-\\\*.tab\\\*", "\\\*\\\.RRb-\\\*.tab\\\*", "\\\*\\\.RV-\\\*.tab\\\*", "\\\*\\\.VV-\\\*.tab\\\*");
 
 #
 # Clean

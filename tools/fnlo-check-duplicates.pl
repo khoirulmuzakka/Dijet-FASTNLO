@@ -52,7 +52,7 @@ unless ( @ARGV == 1 ) {
 my $glstr = shift;
 chomp $glstr;
 print "fnlo-check-duplicates.pl: Checking for file glob $glstr ...\n";
-my @files = glob "*${glstr}*";
+my @files = glob "*${glstr}*tab*";
 chomp @files;
 if ( ! -d "Duplicates" ) {
     print "fnlo-check-duplicates.pl: Creating subdirectory Duplicates ...\n";
@@ -69,26 +69,19 @@ for ( my $i=0; $i < @files; $i++) {
         for( my $j=$i+1; $j < @files; $j++){
 # File $j has not been moved already into Duplicates ...
             if ( -e $files[$j] ) {
-                if (system("diff -q $files[$i] $files[$j] > /dev/null") == 0 ) {
+                if (system("zdiff -q $files[$i] $files[$j] > /dev/null") == 0 ) {
                     print "fnlo-check-duplicates.pl: Identical: $files[$i] and $files[$j]\n";
                     print "fnlo-check-duplicates.pl: Moving $files[$j] into Duplicates\n";
-                    my $logfil = $files[$j];
-                    $logfil =~ s/\.tab/\.log/;
-                    my $errfil = $files[$j];
-                    $errfil =~ s/\.tab/\.err/;
-                    my $ret = system("mv $files[$j] Duplicates");
-                    if ( $ret ) {die "fnlo-check-duplicates.pl: Couldn't move file $files[$j] into ".
-                                     "Duplicates: $ret, aborted!\n";}
-                    if (-f $logfil) {
-                        my $ret = system("mv $logfil Duplicates");
-                        if ( $ret ) {die "fnlo-check-duplicates.pl: Couldn't move file $logfil into ".
-                                         "Duplicates: $ret, aborted!\n";}
-                    }
-                    if (-f $errfil) {
-                        my $ret = system("mv $errfil Duplicates");
-                        if ( $ret ) {die "fnlo-check-duplicates.pl: Couldn't move file $errfil into ".
-                                         "Duplicates: $ret, aborted!\n";}
-                    }
+		    my $base = $files[$j];
+		    $base =~ s/\.gz$//;
+		    $base =~ s/\.tab$//;
+		    my @prbfiles = glob "${base}*";
+		    chomp @prbfiles;
+		    foreach my $prbfile ( @prbfiles ) {
+			my $ret = system("mv $prbfile Duplicates");
+			if ( $ret ) {die "fnlo-check-duplicates.pl: Couldn't move file $prbfile into ".
+					 "Problems: $ret, aborted!\n";}
+		    }
                 }
             }
         }

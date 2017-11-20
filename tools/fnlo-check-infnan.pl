@@ -51,7 +51,7 @@ unless ( @ARGV == 1 ) {
 my $glstr = shift;
 chomp $glstr;
 print "fnlo-check-infnan.pl: Checking for file glob $glstr ...\n";
-my @files = glob "*${glstr}*";
+my @files = glob "*${glstr}*tab*";
 chomp @files;
 if ( ! -d "Problems" ) {
     print "fnlo-check-infnan.pl: Creating subdirectory Problems ...\n";
@@ -59,19 +59,24 @@ if ( ! -d "Problems" ) {
 }
 
 #
-# Grep
+# (z)grep
 #
 foreach my $file (@files) {
     print "fnlo-check-infnan.pl: Checking file $file\n";
+    my $mygrep = "grep"; 
+    if ( $file =~ m/\.gz$/ ) {
+	$mygrep = "zgrep";
+    }
     my $hasinfnan = 0;
-    my $cmd = "grep -i -l \"nan\" $file";
+    my $cmd = "${mygrep} -i -l \"nan\" $file";
+#    print "Command: $cmd\n"; 
     system($cmd);
     my $ret = $? >> 8;
     if ( ! $ret ) {
         print "fnlo-check-infnan.pl: WARNING! Found nan in file $file\n";
         $hasinfnan = 1;
     } else {
-        my $cmd = "grep -i -l \"inf\" $file";
+        my $cmd = "${mygrep} -i -l \"inf\" $file";
         system($cmd);
         my $ret = $? >> 8;
         if ( ! $ret ) {
@@ -80,22 +85,15 @@ foreach my $file (@files) {
         }
     }
     if ( $hasinfnan ) {
-        my $logfil = $file;
-        $logfil =~ s/\.tab/\.log/;
-        my $errfil = $file;
-        $errfil =~ s/\.tab/\.err/;
-        my $ret = system("mv $file Problems");
-        if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $file into ".
-                         "Problems: $ret, aborted!\n";}
-        if (-f $logfil) {
-            my $ret = system("mv $logfil Problems");
-            if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $logfil into ".
-                             "Problems: $ret, aborted!\n";}
-        }
-        if (-f $errfil) {
-            my $ret = system("mv $errfil Problems");
-            if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $errfil into ".
-                             "Problems: $ret, aborted!\n";}
+	my $base = $file;
+	$base =~ s/\.gz$//;
+	$base =~ s/\.tab$//;
+	my @prbfiles = glob "${base}*";
+	chomp @prbfiles;
+	foreach my $prbfile ( @prbfiles ) {
+	    my $ret = system("mv $prbfile Problems");
+	    if ( $ret ) {die "fnlo-check-infnan.pl: Couldn't move file $prbfile into ".
+			     "Problems: $ret, aborted!\n";}
         }
     }
 }
