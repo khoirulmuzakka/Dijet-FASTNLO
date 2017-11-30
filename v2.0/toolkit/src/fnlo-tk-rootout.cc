@@ -331,7 +331,9 @@ int main(int argc, char** argv) {
    if ( chunc   != "none" ) BaseName = BaseName + "_" + chunc;
    if ( chnorm  != "no" )   BaseName = BaseName + "_norm";
    string RootFileName = BaseName + ".root";
-   TFile *rootfile = new TFile(RootFileName.c_str(),"NEW");
+   //! --- Existing ROOT file will be overwritten!
+   TFile *rootfile = new TFile(RootFileName.c_str(),"RECREATE");
+
    //  Initialize histogram counter
    unsigned int nHist = 0;
    const unsigned int nMult = 3;
