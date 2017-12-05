@@ -59,7 +59,7 @@ public:
    inline void SetX2(double x) {_x2=x;}                                                                //!< set x-value of second hadron
    inline void SetProcessId(int n){_p=n;}                                                              //!< set identifier of specific subprocess (0<n<NSubproc), according to the corresponding PDF linear combination
    inline void SetEventCounter(long long int n){_n=n;}                                                 //!< Set event counter
-   //! if not a flexible-scale table
+ //! if not a flexible-scale table
    inline void SetWeight(double w) {_w=w;}                                                             //!< weights must be mutliplied with dummypdf (1/x)
    inline void SetSigma(double s) {_sig=s;}                                                              //!< weight to calculate cross section (i.e. already multiplied by PDF,alpha_s).
    inline void AddSigma(double s) {_sig+=s;}                                                             //!< sigma

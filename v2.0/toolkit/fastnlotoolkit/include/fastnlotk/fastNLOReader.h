@@ -48,6 +48,9 @@ public:
       else return false;
    }
 
+   // ---- setters for specific options ---- //
+   void SetCalculateSingleSubprocessOnly(int iSub);
+
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       //!< Set the functional form of Mu_R
    void SetMuFFunctionalForm(fastNLO::EScaleFunctionalForm func);                       //!< Set the functional form of Mu_F
@@ -228,6 +231,7 @@ protected:
    std::vector < std::vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
 
    bool fUseHoppet;
+   std::vector<bool > fSubprocActive = std::vector<bool>(169,true);                                     //!< Consider subproc in calculation
 
    // ---- pointers to coefftables in fCoeff ---- //
    //    std::vector< std::vector < fastNLOCoeffAddBase* > > fCoAdd;
@@ -248,6 +252,7 @@ protected:
    std::vector < double > XSectionRefMixed;
    std::vector < double > XSectionRef_s1;
    std::vector < double > XSectionRef_s2;
+
 
 };
 #endif

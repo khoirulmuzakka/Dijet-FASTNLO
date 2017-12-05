@@ -1174,12 +1174,14 @@ void fastNLOReader::CalcReferenceCrossSection() {
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
          for (unsigned int i=0; i<NObsBin; i++) {
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
+	       if ( !fSubprocActive[l] ) continue;
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
                int xUnits = c->GetIXsectUnits();
                double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
                XSectionRef[i] +=  c->GetSigmaTilde(i,0,0,0,l) * unit / c->GetNevt(i,l) ; // no scalevariations in LO tables
             }
             for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
+	       if ( !fSubprocActive[l] ) continue;
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
                int xUnits = c->GetIXsectUnits();
                double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
@@ -1187,6 +1189,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
             }
             if ( Coeff_NNLO_Ref ) {
                for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
+		  if ( !fSubprocActive[l] ) continue;
                   fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
                   int xUnits = c->GetIXsectUnits();
                   double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
@@ -1204,6 +1207,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          int xUnits = cLO->GetIXsectUnits();
          double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cLO->GetNSubproc(); n++) {
+	    if ( !fSubprocActive[n] ) continue;
             XSectionRefMixed[i]             += cLO->SigmaRefMixed[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cLO->SigmaRef_s2[i][n] * unit / cLO->GetNevt(i,n);
@@ -1212,6 +1216,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          xUnits = cNLO->GetIXsectUnits();
          unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cNLO->GetNSubproc(); n++) {
+	    if ( !fSubprocActive[n] ) continue;
             XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit / cNLO->GetNevt(i,n);
@@ -1384,6 +1389,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
+	       if ( !fSubprocActive[l] ) continue;
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *  cLO->PdfLc[i][j][k][l] * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * clo * n * L * beta0;
                double mur  = fScaleFacMuR * cLO->GetScaleNode(i,0,j);
@@ -1422,6 +1428,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
+	       if ( !fSubprocActive[l] ) continue;
                // TODO: Not implemented correctly. Need to fix DIS case.
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *(cLO->PdfSplLc1[i][j][k][l] + cLO->PdfSplLc2[i][j][k][l]) * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * n * log(scalefac) * clo;
@@ -1459,31 +1466,34 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
       int nxmax = c->GetNxmax(i);
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
          for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-            double Q2           = pow(c->GetScaleNode1(i,jS1),2);
+            double Q2           = c->GetScaleNode1(i,jS1)*c->GetScaleNode1(i,jS1);
             double mur          = CalcMu(kMuR , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuR);
             double muf          = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
             double mur2         = mur*mur;
             double muf2         = muf*muf;
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
+		  if ( !fSubprocActive[n] ) continue;
                   double as             = c->AlphasTwoPi[i][jS1][kS2];
                   double pdflc          = c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
                   double fac  = as * pdflc * unit;
                   double xsci = c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if ( c->GetNScaleDep() >= 5 ) {
-                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(muf2) * fac / c->GetNevt(i,n);
-                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(mur2) * fac / c->GetNevt(i,n);
+		     double lf2 = log(muf2);
+		     double lr2 = log(mur2);
+                     xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * lf2 * fac / c->GetNevt(i,n);
+                     xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * lr2 * fac / c->GetNevt(i,n);
                      if ( c->GetIPDFdef1() == 2 && c->fSTildeDISFormat==0 ) {   // DIS tables use log(mu/Q2) instead of log(mu) (but only for ln(mur), ln(muf))
                         xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                         xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
                      }
                      if ( c->GetNScaleDep() >= 6 ) {
-                        xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * pow(log(mur2),2) * fac / c->GetNevt(i,n);
+                        xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * lr2*lr2 * fac / c->GetNevt(i,n);
                      }
                      if ( c->GetNScaleDep() >= 7 ) {
-                        xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * pow(log(muf2),2) * fac / c->GetNevt(i,n);
-                        xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * log(mur2) * log(muf2) * fac / c->GetNevt(i,n);
+                        xsci             += c->SigmaTildeMuFFDep [i][x][jS1][kS2][n] * lf2*lf2 * fac / c->GetNevt(i,n);
+                        xsci             += c->SigmaTildeMuRFDep [i][x][jS1][kS2][n] * lr2*lf2 * fac / c->GetNevt(i,n);
                      }
                   }
                   XS->at(i)   += xsci;
@@ -1543,6 +1553,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<c->GetNSubproc(); l++) {
+	       if ( !fSubprocActive[l] ) continue;
                double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
                QS->at(i)      +=  xsci*mur;
@@ -1566,6 +1577,33 @@ void fastNLOReader::SetUnits(EUnits Unit) {
    } else {
       // nothing todo
    }
+}
+
+
+//______________________________________________________________________________
+void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub){
+   //! Calculate only a single subprocess with id=iSub
+   //! Please inform yourself before on the ordering of the subprocesses,
+   //! and if these are ordered identically for all contributions (LO,NLO,NNLO).
+   //!
+   //!  iSub=-1 resets the calculation to all subprocesses
+   
+   fSubprocActive.resize(13*13);
+   logger.info["SetCalculateSingleSubprocessOnly"]<<endl;
+   logger.info["SetCalculateSingleSubprocessOnly"]<<"    ***  Use this function carefully ***"<<endl;
+   logger.info["SetCalculateSingleSubprocessOnly"]<<" Please inform yourself about the meaning of the subprocess id for the given file."<<endl;
+   logger.info["SetCalculateSingleSubprocessOnly"]<<" This may also change for the different contribution (LO,NLO,NNLO) of a calculation."<<endl;
+
+   if ( iSub < 0 ) {
+      logger.info["SetCalculateSingleSubprocessOnly"]<<"Activating all contributions."<<endl;
+      fSubprocActive = std::vector<bool>(169,true);
+   }   
+   else {
+      logger.info["SetCalculateSingleSubprocessOnly"]<<"Deactivating all contributions, but id="<<iSub<<endl;
+      fSubprocActive = std::vector<bool>(169,false);
+      fSubprocActive[iSub]=true;
+   }
+   
 }
 
 
