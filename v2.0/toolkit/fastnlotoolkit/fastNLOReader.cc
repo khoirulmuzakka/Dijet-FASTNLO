@@ -1580,6 +1580,47 @@ void fastNLOReader::SetUnits(EUnits Unit) {
 }
 
 
+
+//______________________________________________________________________________
+std::vector<double> fastNLOReader::GetXFXSqrtS(double x, double muf) {
+   //!< Wrapper of GetXFX, but for alternative sqrt(s)
+   if ( fSqrtSovSP==1 ) return GetXFX(x,muf);
+   if ( x*fSqrtSovSP >= 1 ) return std::vector<double>(13,0); //no unphysical x-values
+   vector<double> xfx = GetXFX(x*fSqrtSovSP,muf);
+   //for ( double& f : xfx ) f*=fSqrtSovSP;
+   return xfx;
+}
+
+
+
+//______________________________________________________________________________
+void fastNLOReader::SetNewSqrtS(double newSqrtS, double SqrtStable ){
+   //! Calculate cross section for a different sqrt(s)
+   //! Mind: When requesting a higher sqrt(s) than this table
+   //! was calculatedd for, then a (small) part of the phase space
+   //! is missing
+   //!
+   //! if SqrtStable set to 0, then sqrt is is taken from file
+   //! if newSqrtS set to 0, then center-of-mass reweighting is turned off
+   //!
+   //! Only implemented for hadron-hadron collissions, but not for DIS
+      
+   if ( B_LO()->GetIPDFdef1() == 2 )  {
+      logger.error["SetNewSqrtS"]<<"Center-of-mass reweighting not implemented for DIS."<<endl;
+      exit(3);
+   }
+   if ( SqrtStable == 0 ) SqrtStable = GetEcms();
+   if ( newSqrtS == 0 ) newSqrtS = GetEcms();
+   fSqrtSovSP = SqrtStable/newSqrtS;
+   
+   logger.info["SetNewSqrtS"]<<"Calculating cross sections at center-of-mass energy of "<<newSqrtS<<endl;
+   if ( fSqrtSovSP<1 ) 
+      logger.warn["SetNewSqrtS"]<<"Be careful! New center-of-mass energy is higher than that of the file. Some phase space is missing!"<<endl;
+      
+   
+}
+
+
 //______________________________________________________________________________
 void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub){
    //! Calculate only a single subprocess with id=iSub
@@ -1765,7 +1806,7 @@ double fastNLOReader::CalcChecksum(double mufac) {
    for (int jf = 0 ; jf<3 ; jf++) {
       double mu = mf[jf]* mufac;//(fScaleFacMuF+0.1)+fScalevar*0.1;
       for (int ix = 0 ; ix<3 ; ix++) {
-         xfx = GetXFX(x[ix],mu);
+         xfx = GetXFXSqrtS(x[ix],mu);
          for (unsigned int fl = 0 ; fl<xfx.size() ; fl++) {
             cks+=xfx[fl];
          }
@@ -1913,7 +1954,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxmax; k++) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
-               xfx = GetXFX(xp,muf);
+               xfx = GetXFXSqrtS(xp,muf);
 
                if ( FNLO_HOPPET[0] != '\0' ) {
                   if (fUseHoppet)
@@ -1984,26 +2025,26 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
 
                   if ( SpeedUp ) {
                      if ( c == c0 )
-                        c->PdfXfx[i][x][jS1][kS2] = GetXFX(xp,muf);
+                        c->PdfXfx[i][x][jS1][kS2] = GetXFXSqrtS(xp,muf);
                      c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,c0->PdfXfx[i][x][jS1][kS2]);
                   }
                   else {
                      // this is the default code !
-                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+                     c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombination(c,GetXFXSqrtS(xp,muf));
                   }
 
                   // if ( i==1 && x==1 && jS1==1 && kS2==1 ) {
                   //    cout<<"muf="<<muf<<"\tpdf="<<c->PdfLcMuVar[i][x][jS1][kS2][0]<<"\tc="<<c<<endl;
                   // }
-                  //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
+                  //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
                }
             }
          }
          else if (fMuFFunc == kScale2) { // speed up
             for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-               //vector < double > buffer = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
-               vector<double > buffer = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+               //vector < double > buffer = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
+               vector<double > buffer = CalcPDFLinearCombination(c,GetXFXSqrtS(xp,muf));
                for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                   c->PdfLcMuVar[i][x][jS1][kS2] = buffer;
                }
@@ -2012,8 +2053,8 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
          else if (fMuFFunc == kScale1) { // speed up
             for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
-               //vector < double > buffer = CalcPDFLinearCombDIS(GetXFX(xp,muf) , c->GetNSubproc() );
-               vector<double > buffer = CalcPDFLinearCombination(c,GetXFX(xp,muf));
+               //vector < double > buffer = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
+               vector<double > buffer = CalcPDFLinearCombination(c,GetXFXSqrtS(xp,muf));
                 for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                    c->PdfLcMuVar[i][x][jS1][kS2] = buffer;
                }
@@ -2067,7 +2108,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
-               xfx[k]        = GetXFX(xp,muf);
+               xfx[k]        = GetXFXSqrtS(xp,muf);
                if ( FNLO_HOPPET[0] != '\0' ) {
                   if (fUseHoppet)
                      xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
@@ -2131,7 +2172,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
-               xfx1[k]        = GetXFX(xp,muf);
+               xfx1[k]        = GetXFXSqrtS(xp,muf);
                if ( FNLO_HOPPET[0] != '\0' ) {
                   if (fUseHoppet)
                      xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
@@ -2141,7 +2182,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             // determine all pdfs of hadron2
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
-               xfx2[k]       = GetXFX(xp,muf);
+               xfx2[k]       = GetXFXSqrtS(xp,muf);
                if ( FNLO_HOPPET[0] != '\0' ) {
                   if (fUseHoppet)
                      xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
@@ -2207,7 +2248,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   for (int k=0; k<nxbins1; k++) {
                      double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
                      double xp   = c->GetXNode1(i,k);
-                     xfx[k] = GetXFX(xp,muf);
+                     xfx[k] = GetXFXSqrtS(xp,muf);
                   }
                   int x1bin = 0;
                   int x2bin = 0;
@@ -2229,7 +2270,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                for (int k=0; k<nxbins1; k++) {
                   double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
                   double xp     = c->GetXNode1(i,k);
-                  xfx[k] = GetXFX(xp,muf);
+                  xfx[k] = GetXFXSqrtS(xp,muf);
                }
                for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                   int x1bin = 0;
@@ -2251,7 +2292,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                for (int k=0; k<nxbins1; k++) {
                   double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
                   double xp     = c->GetXNode1(i,k);
-                  xfx[k] = GetXFX(xp,muf);
+                  xfx[k] = GetXFXSqrtS(xp,muf);
                }
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   int x1bin = 0;
@@ -2287,12 +2328,12 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                   double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
                   for (int k=0; k<nxbins1; k++) {
                      double xp   = c->GetXNode1(i,k);
-                     xfx1[k] = GetXFX(xp,muf);
+                     xfx1[k] = GetXFXSqrtS(xp,muf);
                   }
                   // determine all pdfs of hadron2
                   for (int k=0; k<nxbins2; k++) {
                      double xp   = c->GetXNode2(i,k);
-                     xfx2[k] = GetXFX(xp,muf);
+                     xfx2[k] = GetXFXSqrtS(xp,muf);
                   }
                   for (int x=0; x<nxmax; x++) {
                      // CalcPDFLinearCombination calculats Anti-proton from proton
@@ -2309,12 +2350,12 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                // determine all pdfs of hadron1
                for (int k=0; k<nxbins1; k++) {
                   double xp  = c->GetXNode1(i,k);
-                  xfx1[k] = GetXFX(xp,muf);
+                  xfx1[k] = GetXFXSqrtS(xp,muf);
                }
                // determine all pdfs of hadron2
                for (int k=0; k<nxbins2; k++) {
                   double xp  = c->GetXNode2(i,k);
-                  xfx2[k] = GetXFX(xp,muf);
+                  xfx2[k] = GetXFXSqrtS(xp,muf);
                }
                for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                   for (int x=0; x<nxmax; x++) {
@@ -2331,12 +2372,12 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
                double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
                for (int k=0; k<nxbins1; k++) {
                   double xp   = c->GetXNode1(i,k);
-                  xfx1[k] = GetXFX(xp,muf);
+                  xfx1[k] = GetXFXSqrtS(xp,muf);
                }
                // determine all pdfs of hadron2
                for (int k=0; k<nxbins2; k++) {
                   double xp   = c->GetXNode2(i,k);
-                  xfx2[k] = GetXFX(xp,muf);
+                  xfx2[k] = GetXFXSqrtS(xp,muf);
                }
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
                   for (int x=0; x<nxmax; x++) {

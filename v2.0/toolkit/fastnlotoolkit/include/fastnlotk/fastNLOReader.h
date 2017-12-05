@@ -50,6 +50,7 @@ public:
 
    // ---- setters for specific options ---- //
    void SetCalculateSingleSubprocessOnly(int iSub);
+   void SetNewSqrtS(double NewSqrtS, double OldSqrtS=0 );
 
    // ---- setters for scales of MuVar tables ---- //
    void SetMuRFunctionalForm(fastNLO::EScaleFunctionalForm func);                       //!< Set the functional form of Mu_R
@@ -65,6 +66,7 @@ public:
 
    // ---- Pdf interface ---- //
    void FillPDFCache(double chksum=0., bool lForce=false);                              //!< Prepare for recalculation of cross section with 'new'/updated pdf.
+   std::vector<double> GetXFXSqrtS(double x, double muf);                               //!< Interface to GetXFX, but for 'reweighted' sqrt(s)
    virtual std::vector<double> GetXFX(double x, double muf) const = 0;
 
    // virtual functions for the user interface
@@ -232,6 +234,7 @@ protected:
 
    bool fUseHoppet;
    std::vector<bool > fSubprocActive = std::vector<bool>(169,true);                                     //!< Consider subproc in calculation
+   double fSqrtSovSP = 1;  //!< Center-of-mass 'reweighting'
 
    // ---- pointers to coefftables in fCoeff ---- //
    //    std::vector< std::vector < fastNLOCoeffAddBase* > > fCoAdd;
