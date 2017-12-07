@@ -56,7 +56,7 @@ std::map<std::string,fastNLO::EMerge> _wgtoptions {
    {"NumEvtBinProc",fastNLO::kNumEventBinProc },
    {"SumW2BinProc",fastNLO::kSumW2BinProc },
    {"SumSig2BinProc",fastNLO::kSumSig2BinProc },
-   {"User",fastNLO::kSumUserBinProc }, // user weigths are stored in 'SumSig'
+   {"NNLOJET",fastNLO::kSumUserBinProc }, // user weigths are stored in 'SumSig'
 //   {"",fastNLO::kUndefined}
 };
 
@@ -154,9 +154,9 @@ int main(int argc, char** argv) {
 	 if ( sarg == "-p" ) plotfile=argv[++iarg];
 	 if ( sarg == "-w" ) { 
 	    wgtoption=argv[++iarg];
-	    if ( wgtoption == "User" ) {	       
+	    if ( wgtoption == "NNLOJET" ) {	       
 	       wgtFile=argv[++iarg];
-	       info[_progname]<<"User specified weight are read from file: "<<wgtFile<<endl;
+	       info[_progname]<<"NNLOJET specified weights are read from file: "<<wgtFile<<endl;
 	    }
 	 }
 	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
@@ -214,9 +214,9 @@ int main(int argc, char** argv) {
    fastNLO::EMerge moption = _wgtoptions[wgtoption];
    fastNLO::EMerge prewgt  = _wgtoptions[preoptin];// alrady checked
 
-   // --- option 'User'
+   // --- option 'NNLOJET'
    map<string,vector<double> > mUserWgts; // [filename] [weight-per-obsbin]
-   if ( moption==fastNLO::kSumUserBinProc) {
+   if ( moption==fastNLO::kSumUserBinProc ) {
       if ( pre > 0 ) {
 	 error[_progname]<<"User specified weights cannot be combined with option -pre."<<endl;
 	 exit(1);
@@ -410,26 +410,34 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
 
    // --- fill return map
    std::map<std::string,std::vector<double> > wgts;
-   for ( vector<string>& lit : content ) {
-      string nnfile = lit[0];
-      std::string ftag = nnfile;
+   set<string> uniquefiles;
+   for ( auto ff : files ) {
+      if ( uniquefiles.count(ff) ) {
+	 cout<<"Info. Duplicate input file detected."<<endl;
+	 continue;
+      }
+      uniquefiles.insert(ff);
+      std::string ftag = ff;
       if ( ftag.find(".dat") != string::npos) ftag.resize(ftag.find(".dat"));
       if ( ftag.find(".tab") != string::npos) ftag.resize(ftag.find(".tab"));
       if ( ftag.find("/") != string::npos) ftag=ftag.substr(ftag.find_last_of("/")+1,ftag.size());
       //cout<<"ftag="<<ftag<<endl;
-      // loop over input fastNLO files
-      for ( auto ff : files ) {
-	 if ( ff.find(ftag) != string::npos ){
+      for ( vector<string>& lit : content ) {
+	 string nnfile = lit[0];
+	 if ( nnfile.find(ftag) != string::npos ){
+	    // found wgts for input table ff
 	    if ( wgts.count(ff) ) {
-	       cout<<"ERROR. Weights already found once for input table"<<ff<<endl; 
-	       exit(3);
+	       cout<<"Warning. Weights already found for input table"
+		   <<ff<<" (was searching for '"<<ftag<<"'). Maybe duplicates for input?"<<endl; 
+	       exit(4);
 	    };
 	    for ( string cc : lit ) {
 	       if ( wgts.count(ff) == 0 ) wgts[ff]; // first entry is the filename, instantiate new vector
 	       else {
 		  double dval = strtod(cc.c_str(),NULL);
 		  if (dval==0 ) {
-		     cout<<"Warning. Weight is zero (input: "<<cc<<") file: "<<ff<<endl;
+		     cout<<"Warning. Weight is zero, using tiny number instead. (input: "
+			 <<cc<<") file: "<<ff<<endl;
 		     dval=1.e-20;
 		  }
 		  wgts[ff].push_back(dval);
@@ -437,38 +445,21 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
 	    }
 	    std::cout<<"Found "<<wgts[ff].size()<<" weights for input file: "<<ff<<std::endl;
 	    if ( wgts[ff].size() != content[0].size()-1 ) {
-	       std::cout<<"ERROR. Too little entries for file: "<<ff<<endl;
+	       std::cout<<"ERROR. Too little weights for file "<<ff<<endl;
+	       exit(3);
 	    }
 	 }
       }
+      if ( wgts.count(ff) == 0) {
+	 std::cout<<"Error. No weights for table "<<ff<<" found in wight-file "<<wgtFile<<endl;
+	 exit(3);
+      }
    }
    // --- weights for all input fastNLO files found?
-   if ( wgts.size()!= files.size() ){
+   if ( wgts.size()!= uniquefiles.size() ){
       std::cout<<"ERROR. Could not find weights for all input fastNLO files. Exiting."<<endl;
       exit(3);
    }
 
    return wgts;
-   // std::string val;
-   // while ( !is.eof() ) {
-   //    is >> val;
-   //    std::cout<<val<<std::endl;
-   //    double dval = strtod(val.c_str(),NULL);
-   //    if ( dval==0 ) { // it is not a valid double
-   // 	 for ( auto ff : files ) {
-   // 	    std::string fstump = ff;
-   // 	    fstump.resize(fstump.find(".tab"));
-   // 	    //cout<<"ff: "<<ff<<"\tval: "<<val<<"\tfstum: "<<fstump<<endl;
-   // 	    if ( val.find(fstump) != string::npos ) {
-   // 	       double wgt;
-   // 	       is >> wgt;
-   // 	       //wgts[ff]=wgt;
-   // 	       cout<<"found weight of "<<wgt<<" for file: "<<ff<<endl;
-   // 	    }
-   // 	 }
-   //    }
-   // }
-   exit(4);
-   return wgts;
-
 }
