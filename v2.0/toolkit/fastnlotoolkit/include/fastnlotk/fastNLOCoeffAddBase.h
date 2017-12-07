@@ -17,6 +17,7 @@ namespace fastNLO {
       fastNLO::v2d SigObsSumW2; //!< sumw2[proc][obs]
       fastNLO::v2d SigObsSum;   //!< sum[proc][obs]
       std::vector < std::vector < unsigned long long > > WgtObsNumEv; //!< Nentries[proc][obs]
+      //fastNLO::v2d SigObsUser;   //!< sum[proc][obs]
 
       void Erase() {
          WgtNevt=0;
@@ -29,6 +30,7 @@ namespace fastNLO {
          for ( auto& i : SigObsSumW2 ) for ( auto& j : i ) j=0;
          for ( auto& i : SigObsSum   ) for ( auto& j : i ) j=0;
          for ( auto& i : WgtObsNumEv ) for ( auto& j : i ) j=0;
+         //for ( auto& i : SigObsUser  ) for ( auto& j : i ) j=0;
       };
 
       void Add(const WgtStat& other ) {
@@ -46,12 +48,51 @@ namespace fastNLO {
                this->SigObsSumW2[i][j] += other.SigObsSumW2[i][j];
                this->SigObsSum[i][j]   += other.SigObsSum[i][j];
                this->WgtObsNumEv[i][j] += other.WgtObsNumEv[i][j];
+               //this->SigObsUser[i][j]  += other.SigObsUser[i][j];
             }
          }
       };
       WgtStat& operator+=(const WgtStat& other) { this->Add(other); return *this;}
+      
+      void SetWgtUser( const fastNLO::v2d& wgtUser ) {
+	 //! Set user weights
+	 //! wgtUser[proc][obs]
+	 if ( wgtUser.size()!=WgtObsNumEv.size() ) {
+	    std::cerr<<"Error [fastNLO::WgtStat::SetWgtUser()] Array with wrong size (wrong number of subprocesses. Must be "
+		     <<WgtObsNumEv.size()<<", but is "<< wgtUser.size()<<std::endl;
+	    exit(8);
+	 }
+	 if ( wgtUser[0].size()!=WgtObsNumEv[0].size() ) {
+	    std::cerr<<"Error [fastNLO::WgtStat::SetWgtUser()] Array with wrong size (wrong number of obs bins. Must be "
+		     <<WgtObsNumEv[0].size()<<", but is "<< wgtUser[0].size()<<std::endl;
+	    exit(8);
+	 }
+	 SigObsSum = wgtUser;
+	 //SigObsUser = wgtUser;
+      };
 
+      void SetWgtUser( double wgtUser ) {
+	 //! Set user weight valid for all entries
+	 SigSum = wgtUser;
+	 for ( auto& proc : SigObsSum ) {
+	    for ( auto& w : proc ) w=wgtUser;
+	 }
+      };
+      
+      void SetWgtUser( const std::vector<double>& wgtUserObs ) {
+	 //! Set user weights
+	 //! wgtUserObs[obs]
+	 if ( wgtUserObs.size()!=WgtObsNumEv[0].size() ) {
+	    std::cerr<<"Error [fastNLO::WgtStat::SetWgtUser()] Array with wrong size (wrong number of obs bins. Must be "
+		     <<WgtObsNumEv[0].size()<<", but is "<< wgtUserObs.size()<<std::endl;
+	    exit(8);
+	 }
+	 for ( std::vector<double>& proc : SigObsSum ) {
+	    proc = wgtUserObs;
+	 }
+      };
    };
+
 }
 
 class fastNLOCoeffAddBase : public fastNLOCoeffBase {

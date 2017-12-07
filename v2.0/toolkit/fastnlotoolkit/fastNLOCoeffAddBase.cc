@@ -382,7 +382,7 @@ void fastNLOCoeffAddBase::Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge 
       for ( unsigned int iAddProc = 0 ; iAddProc<other.fWgt.WgtObsSumW2.size() ; iAddProc++ ) {
          fWgt.WgtObsSumW2.push_back(other.fWgt.WgtObsSumW2[iAddProc]);
          fWgt.SigObsSumW2.push_back(other.fWgt.SigObsSumW2[iAddProc]);
-         fWgt.SigObsSum.push_back(other.fWgt.SigObsSum[iAddProc]);
+         fWgt.SigObsSum.  push_back(other.fWgt.SigObsSum[iAddProc]);
          fWgt.WgtObsNumEv.push_back(other.fWgt.WgtObsNumEv[iAddProc]);
       }
       if ( other.GetPDFCoeff().size() ==0  || this->GetPDFCoeff().size()==0 ) {
@@ -421,9 +421,11 @@ double fastNLOCoeffAddBase::GetMergeWeight(fastNLO::EMerge moption, int proc, in
    else if ( moption == kNumEvent )   return double(fWgt.WgtNumEv);
    else if ( moption == kSumW2    )   return fWgt.WgtSumW2;
    else if ( moption == kSumSig2  )   return fWgt.SigSumW2;
+   else if ( moption == kSumUser  )   return fWgt.SigSum;
    else if ( moption == kNumEventBinProc ) return double(fWgt.WgtObsNumEv[proc][bin]);
    else if ( moption == kSumW2BinProc    ) return fWgt.WgtObsSumW2[proc][bin];
    else if ( moption == kSumSig2BinProc  ) return fWgt.SigObsSumW2[proc][bin];
+   else if ( moption == kSumUserBinProc  ) return fWgt.SigObsSum[proc][bin];
    error["GetMergeWeight"]<<"Weighting option not recognized: "<<moption<<endl;
    exit(4);
    return 0;
@@ -740,6 +742,7 @@ void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
    for ( unsigned int ip = 0 ; ip<fWgt.WgtObsSumW2.size() ; ip++ ) {
       fWgt.WgtObsSumW2[ip].erase(fWgt.WgtObsSumW2[ip].begin()+iObsIdx);
       fWgt.SigObsSumW2[ip].erase(fWgt.SigObsSumW2[ip].begin()+iObsIdx);
+      fWgt.SigObsSum[ip].  erase(fWgt.SigObsSum  [ip].begin()+iObsIdx);
       fWgt.WgtObsNumEv[ip].erase(fWgt.WgtObsNumEv[ip].begin()+iObsIdx);
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
@@ -764,6 +767,7 @@ void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int 
    for ( unsigned int ip = 0 ; ip<fWgt.WgtObsSumW2.size() ; ip++ ) {
       fWgt.WgtObsSumW2[ip].push_back(other.fWgt.WgtObsSumW2[ip][iObsIdx]);
       fWgt.SigObsSumW2[ip].push_back(other.fWgt.SigObsSumW2[ip][iObsIdx]);
+      fWgt.SigObsSum[ip].  push_back(other.fWgt.SigObsSum  [ip][iObsIdx]);
       fWgt.WgtObsNumEv[ip].push_back(other.fWgt.WgtObsNumEv[ip][iObsIdx]);
    }
    fastNLOCoeffBase::CatBin(other, iObsIdx);

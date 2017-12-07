@@ -224,6 +224,9 @@ class fastNLOTable {
    void MergeTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge ); //!< 'merge' 
    void MergeTables(const std::vector<fastNLOTable*>& tables, fastNLO::EMerge option=fastNLO::kMerge, double cutRMS=0 ); //!< 'merge' (also supports 'median' and 'mean')
    void AddTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge); //!< 'merge'
+   void SetUserWeights(double wgt); //!< Set user weights for subsequent mergeing wgt
+   void SetUserWeights(std::vector<double> wgtsObs); //!< Set user weights for subsequent mergeing wgt[obs]
+   void SetUserWeights(std::vector<std::vector<double> > wgtsBinProc); //!< Set user weights for subsequent mergeing wgt[proc][obs]
 
    /// Handle coefficient tables
    //int WriteCoeffTable(int no);

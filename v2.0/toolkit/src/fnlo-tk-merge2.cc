@@ -34,7 +34,7 @@ std::map<std::string,std::string> _validoptions{
    {"-o","output    -o <output>. Specify output file name (the last argument is then considered to be an input table)."},
 //   {"-p","Plot.   -p <filename>. Plot some statistics of all input files. Option must be followed by filename."},
 //   {"-1","Once.   Read files only once, and then keep all in memory at the same time."},
-   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc or SumW2BinProc."},
+   {"-w","Weight    -w <option>. Calculate (un)weighted average. Option: GenWgt (default), unweighted, median, mean, NumEvt, SumW2, SumSig2, SumSig2BinProc, NumEvtBinProc, SumW2BinProc or User [file-of-weights]."},
    {"-attach","Do not 'merge' tables, but attach one to the other, i.e. result is the sum of all tables."},
    {"-add",   "Do not 'merge' tables, but  add   one to the other, i.e. result is the sum of all tables (formerly called 'append')."},
    {"-pre","pre-avg -pre <n> <option>. 2 step mergeing: Build pre-averaged of n tables using weighting procedure <option>."},
@@ -56,6 +56,7 @@ std::map<std::string,fastNLO::EMerge> _wgtoptions {
    {"NumEvtBinProc",fastNLO::kNumEventBinProc },
    {"SumW2BinProc",fastNLO::kSumW2BinProc },
    {"SumSig2BinProc",fastNLO::kSumSig2BinProc },
+   {"User",fastNLO::kSumUserBinProc }, // user weigths are stored in 'SumSig'
 //   {"",fastNLO::kUndefined}
 };
 
@@ -96,6 +97,10 @@ void PrintHelpMessage() {
 }
 
 //__________________________________________________________________________________________________________________________________
+std::map<std::string,std::vector<double> > ReadNnlojetWgtFile(std::string wgtFile,std::vector<std::string> files);
+
+
+//__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {
 
    //! --- namespaces
@@ -123,6 +128,7 @@ int main(int argc, char** argv) {
    set<string> options;
    string outfile = argv[argc-1];
    string wgtoption = "GenWgt";
+   string wgtFile;
    string plotfile = "fnlo-tk-merge2.ps";
    int pre = 0;
    string preoptin = "NumEvtBinProc"; // NumEvt
@@ -146,7 +152,13 @@ int main(int argc, char** argv) {
 	 if ( options.count(sarg) ) {error[_progname]<<"Duplicate option "<<sarg<<" recognized. Exiting."<<endl;exit(1); }
 	 options.insert(sarg);
 	 if ( sarg == "-p" ) plotfile=argv[++iarg];
-	 if ( sarg == "-w" ) wgtoption=argv[++iarg];
+	 if ( sarg == "-w" ) { 
+	    wgtoption=argv[++iarg];
+	    if ( wgtoption == "User" ) {	       
+	       wgtFile=argv[++iarg];
+	       info[_progname]<<"User specified weight are read from file: "<<wgtFile<<endl;
+	    }
+	 }
 	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
 	 if ( sarg == "-cutRMS" ) cutRMS=atof(argv[++iarg]); 
 	 if ( sarg == "-add" ) { wgtoption = "add"; }
@@ -201,6 +213,17 @@ int main(int argc, char** argv) {
    }
    fastNLO::EMerge moption = _wgtoptions[wgtoption];
    fastNLO::EMerge prewgt  = _wgtoptions[preoptin];// alrady checked
+
+   // --- option 'User'
+   map<string,vector<double> > mUserWgts; // [filename] [weight-per-obsbin]
+   if ( moption==fastNLO::kSumUserBinProc) {
+      if ( pre > 0 ) {
+	 error[_progname]<<"User specified weights cannot be combined with option -pre."<<endl;
+	 exit(1);
+      }
+      // read file
+      mUserWgts = ReadNnlojetWgtFile(wgtFile,files);
+   }
 
 
 
@@ -309,13 +332,20 @@ int main(int argc, char** argv) {
    int nValidTables = 1;
    if ( alltables.empty() ) {
       for ( const string& path : files ) {
-	 if ( resultTable==NULL ) 
+	 if ( resultTable==NULL ) {
 	    resultTable = new fastNLOTable(path);
+	    if ( moption==fastNLO::kSumUserBinProc ) 
+	       resultTable->SetUserWeights(mUserWgts[path]);
+	 }
 	 else {
 	    if ( moption == fastNLO::kMedian || moption == fastNLO::kMean || cutRMS!=0 ) 
 	       alltables.push_back(new fastNLOTable(path));
-	    else 
-	       resultTable->MergeTable(fastNLOTable(path), moption); // merge
+	    else {
+	       //resultTable->MergeTable(fastNLOTable(path), moption); // merge
+	       fastNLOTable tab(path);
+	       if ( moption==fastNLO::kSumUserBinProc ) tab.SetUserWeights(mUserWgts[path]);
+	       resultTable->MergeTable(tab, moption); // merge
+	    }
 	    nValidTables++;
 	 }
       }
@@ -344,4 +374,101 @@ int main(int argc, char** argv) {
 
    // --- fine
    return 0;
+}
+
+
+
+//__________________________________________________________________________________________________________________________________
+std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFile, std::vector<std::string> files) {
+   //!< Read ascii file with weigts from NNLOJET combination script
+   using namespace std;
+
+   // --- open wgt file
+   std::ifstream is (wgtFile.c_str());
+   if (!is) {
+      std::cout<<"[ReadNnlojetWgtFile] ERROR. Cannot open file!"<<std::endl;
+      exit(3);
+   }
+   cout<<endl;
+   cout<<" ---- Reading file with weights ---- "<<endl;
+
+   // --- read wgt file
+   std::string line;
+   std::string item;
+   vector<vector<string> > content;
+   while (getline(is, line) ) {
+      //cout<<line<<endl;
+      std::stringstream ss(line);
+      content.push_back(vector<string>());
+      while (std::getline(ss, item, ' ')) {
+	 //cout<<item<<endl;
+	 content.back().push_back(item);
+      }
+      //for ( auto pp : tokens ) cout<<pp<<endl;
+   }
+   std::cout<<"Read weights for "<<content.size()-1<< " output files and "<<content[0].size()-1<<" bins."<<endl;
+
+   // --- fill return map
+   std::map<std::string,std::vector<double> > wgts;
+   for ( vector<string>& lit : content ) {
+      string nnfile = lit[0];
+      std::string ftag = nnfile;
+      if ( ftag.find(".dat") != string::npos) ftag.resize(ftag.find(".dat"));
+      if ( ftag.find(".tab") != string::npos) ftag.resize(ftag.find(".tab"));
+      if ( ftag.find("/") != string::npos) ftag=ftag.substr(ftag.find_last_of("/")+1,ftag.size());
+      //cout<<"ftag="<<ftag<<endl;
+      // loop over input fastNLO files
+      for ( auto ff : files ) {
+	 if ( ff.find(ftag) != string::npos ){
+	    if ( wgts.count(ff) ) {
+	       cout<<"ERROR. Weights already found once for input table"<<ff<<endl; 
+	       exit(3);
+	    };
+	    for ( string cc : lit ) {
+	       if ( wgts.count(ff) == 0 ) wgts[ff]; // first entry is the filename, instantiate new vector
+	       else {
+		  double dval = strtod(cc.c_str(),NULL);
+		  if (dval==0 ) {
+		     cout<<"Warning. Weight is zero (input: "<<cc<<") file: "<<ff<<endl;
+		     dval=1.e-20;
+		  }
+		  wgts[ff].push_back(dval);
+	       }
+	    }
+	    std::cout<<"Found "<<wgts[ff].size()<<" weights for input file: "<<ff<<std::endl;
+	    if ( wgts[ff].size() != content[0].size()-1 ) {
+	       std::cout<<"ERROR. Too little entries for file: "<<ff<<endl;
+	    }
+	 }
+      }
+   }
+   // --- weights for all input fastNLO files found?
+   if ( wgts.size()!= files.size() ){
+      std::cout<<"ERROR. Could not find weights for all input fastNLO files. Exiting."<<endl;
+      exit(3);
+   }
+
+   return wgts;
+   // std::string val;
+   // while ( !is.eof() ) {
+   //    is >> val;
+   //    std::cout<<val<<std::endl;
+   //    double dval = strtod(val.c_str(),NULL);
+   //    if ( dval==0 ) { // it is not a valid double
+   // 	 for ( auto ff : files ) {
+   // 	    std::string fstump = ff;
+   // 	    fstump.resize(fstump.find(".tab"));
+   // 	    //cout<<"ff: "<<ff<<"\tval: "<<val<<"\tfstum: "<<fstump<<endl;
+   // 	    if ( val.find(fstump) != string::npos ) {
+   // 	       double wgt;
+   // 	       is >> wgt;
+   // 	       //wgts[ff]=wgt;
+   // 	       cout<<"found weight of "<<wgt<<" for file: "<<ff<<endl;
+   // 	    }
+   // 	 }
+   //    }
+   // }
+   exit(4);
+   return wgts;
+
 }
