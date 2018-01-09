@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
          man << "" << endl;
          man << "Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]" << endl;
          man << "       Arguments: <> mandatory; [] optional." << endl;
-         man << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet," << endl;
-         man << "                 that will be complemented by '_nnnn.tab'" << endl;
+         man << "<fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet_," << endl;
+         man << "                 that will be complemented by 'nnnn.tab'" << endl;
          man << "[PDF]: PDF set, def. = CT10nlo" << endl;
          man << "   For LHAPDF5: Specify set names WITH filename extension, e.g. \".LHgrid\"." << endl;
          man << "   For LHAPDF6: Specify set names WITHOUT filename extension." << endl;
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
       char buftmp[5];
       snprintf(buftmp, sizeof(buftmp), "%04d", itab);
       // Try table
-      string tablename = tablebase + "_" + buftmp + ".tab";
+      string tablename = tablebase + buftmp + ".tab";
       // Try gzipped table, if not found
       if ( ! access(tablename.c_str(), R_OK) == 0 ) tablename += ".gz";
       if ( access(tablename.c_str(), R_OK) == 0 ) {
