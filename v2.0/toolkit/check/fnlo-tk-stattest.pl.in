@@ -17,8 +17,8 @@ use warnings;
 my $src = "@srcdir@";
 
 # Remove potentially left-over temporary files
-my $tabl = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat";
-my $tabn = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat";
+my $tabl = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_";
+my $tabn = "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_";
 my @tabs = ("InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0000", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0001", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-born-2jet_stat_0002", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0100", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0101", "InclusiveNJets_fnr0001midpHT_I723509_v23_fix-hhc-nlo-2jet_stat_0102" );
 my @tabd = ("NJets_born-2jet_stat_0000.tab.gz", "NJets_born-2jet_stat_0001.tab.gz", "NJets_born-2jet_stat_0002.tab.gz", "NJets_nlo-2jet_stat_0100.tab.gz", "NJets_nlo-2jet_stat_0101.tab.gz", "NJets_nlo-2jet_stat_0102.tab.gz");
 my @tabfls;
