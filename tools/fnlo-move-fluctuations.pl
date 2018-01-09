@@ -57,6 +57,14 @@ open(KILLIN,"< $infile") or die "fnlo-move-fluctuations.pl: Could not open $infi
 while ( my $in = <KILLIN> ) {
     my $file = $in;
     chomp $file;
+    if ( ! -f $file ) {
+	$file .= ".gz";
+    }
+    if ( ! -f $file ) {
+	die "File $file not found, aborted!";
+    }
+    print "Found file $file.\n";
+
     my @parts = split("/",$file);
     my $scenname;
     foreach my $part (@parts) {
@@ -66,8 +74,10 @@ while ( my $in = <KILLIN> ) {
             $scenname = $part;
         }
     }
+    print "Derived scenario to be: $scenname\n";
     my $cmd1 = "rm -f $file";
     print "Executing rm command: $cmd1\n";
+    my $ret = 0;
     my $ret = system("$cmd1");
     if ( $ret ) {die "fnlo-move-fluctuations.pl: Re-/moving command failed: $ret, aborted!\n";}
     $file =~ s/results/tables/;
@@ -78,6 +88,7 @@ while ( my $in = <KILLIN> ) {
     $tfil =~ s/stat/$flcdir/;
     my $tdir = `dirname $tfil`;
     chomp $tdir;
+    print "tdir $tdir\n";
     if (! -d $tdir) {
         my $ret = system("mkdir $tdir");
         if ( $ret ) {die "fnlo-move-fluctuations.pl: Creating target directory $tdir failed: $ret, aborted!\n";}
@@ -86,8 +97,8 @@ while ( my $in = <KILLIN> ) {
     print "Executing table mv command: $cmd2\n";
     $ret = system("$cmd2");
     if ( $ret ) {die "fnlo-move-fluctuations.pl: Re-/moving command failed: $ret, aborted!\n";}
-    $sfil =~ s/tab$/log/;
-    $tfil =~ s/tab$/log/;
+    $sfil =~ s/\.tab\./\.log\./;
+    $tfil =~ s/\.tab\./\.log\./;
     $cmd2 = "mv $sfil $tfil";
     if (-f $sfil) {
         print "Executing log file mv command: $cmd2\n";
