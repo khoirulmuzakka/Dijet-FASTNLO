@@ -86,8 +86,9 @@ int main(int argc, char** argv) {
          man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          man << "   - Specify the PDF set including the absolute path." << endl;
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         man << "[#vars]: Number of mu_r, mu_f scale variations to investigate, if possible, def. = 1, max. = 7" << endl;
+         man << "[#vars]: Number of mu_r, mu_f scale factor variations to investigate, if possible, def. = 1, max. = 7" << endl;
          man << "   If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1)" << endl;
+         man << "   If -7 < #vars < 0  then no. of mu_r, mu_f fixed scale variations to investigate, if possible." << endl;
          man << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          man << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
@@ -122,8 +123,11 @@ int main(int argc, char** argv) {
    //--- PDF or scale variations
    int nvars = 1;
    const int nvarmax = 7;
+   const int nfixmax = 6;
    const double xmur[] = { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
    const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
+   const double fixmur[] = { 2.718281828, 4.48168907, 2.718281828, 4.48168907,   2.718281828, 12.18249396  };
+   const double fixmuf[] = { 2.718281828, 4.48168907, 4.48168907,  2.718281828, 12.18249396,   2.718281828 };
    string ch2tmp = "X";
    if (argc > 3) {
       ch2tmp = (const char*) argv[3];
@@ -133,8 +137,8 @@ int main(int argc, char** argv) {
       shout << "            investigating primary scale only." << endl;
    } else {
       nvars = atoi(argv[3]);
-      if (nvars < 0) {
-         snprintf(buffer, sizeof(buffer), "Negative no. of PDF or scale variations??? Aborting! nvars = %i",nvars);
+      if (nvars < -nfixmax) {
+         snprintf(buffer, sizeof(buffer), "PDF or scale variations undefined, aborting! nvars = %i\n",nvars);
          error["fnlo-tk-cppread"] << buffer << endl;
          exit(1);
       } else if (nvars > nvarmax) {
@@ -144,6 +148,8 @@ int main(int argc, char** argv) {
       } else {
          if ( nvars > 0 ) {
             shout["fnlo-tk-cppread"] << "If possible, will try to do " << nvars << " scale variations." << endl;
+         } else if ( nvars < 0 ) {
+            shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " fixed scale variations." << endl;
          } else {
             shout["fnlo-tk-cppread"] << "If possible, will try to do all PDF members." << endl;
          }
@@ -852,7 +858,7 @@ int main(int argc, char** argv) {
       sclvar = false;
       nvars  = fnlo->GetNPDFMembers();
    }
-   for (int ivar=0; ivar<nvars; ivar++) {
+   for (int ivar=0; ivar<abs(nvars); ivar++) {
 
       //! Switch on LO & NLO & NNLO, switch off anything else
       if ( ilo > -1 ) {
@@ -931,41 +937,55 @@ int main(int argc, char** argv) {
       //! Set scale
       double mur = xmur[0];
       double muf = xmuf[0];
-      if ( sclvar ) {
+      if ( sclvar && nvars > 0) {
          mur = xmur[ivar];
          muf = xmuf[ivar];
-      }
+      } else if ( sclvar && nvars < 0) {
+         mur = fixmur[ivar];
+         muf = fixmuf[ivar];
       //! Or specify the PDF member
-      else {
+      } else {
          fnlo->SetLHAPDFMember(ivar);
       }
 
       //! Set MuR and MuF scale factors for pQCD cross sections and test availability
       //! Activate Hoppet for unusal variations
       //      fnlo->UseHoppetScaleVariations(true);
-      lscvar = fnlo->SetScaleFactorsMuRMuF(mur, muf);
-      if (!lscvar) {
-         warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
-                                 << fnlo->GetScaleFactorMuR() << ","
-                                 << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
-         continue;
-      }
-      if (fnlo->GetIsFlexibleScaleTable()) {
-         if ( chflex == "scale1" ) {
-            fnlo->SetMuFFunctionalForm(kScale1);
-            fnlo->SetMuRFunctionalForm(kScale1);
-            info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                    << "from only the first scale of this flexible-scale table." << endl
-                                    << "                        Please check how this table was filled!" << endl;
-         } else if ( chflex == "scale2" ) {
-            fnlo->SetMuFFunctionalForm(kScale2);
-            fnlo->SetMuRFunctionalForm(kScale2);
-            info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
-                                    << "from only the second scale of this flexible-scale table." << endl
-                                    << "                        Please check how this table was filled!" << endl;
-         } else {
-            error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+      if ( nvars >= 0 ) {
+         lscvar = fnlo->SetScaleFactorsMuRMuF(mur, muf);
+         if (!lscvar) {
+            warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
+                                    << fnlo->GetScaleFactorMuR() << ","
+                                    << fnlo->GetScaleFactorMuF() << ") is not possible with this table, skipped completely!" << endl;
+            continue;
          }
+         if (fnlo->GetIsFlexibleScaleTable()) {
+            if ( chflex == "scale1" ) {
+               fnlo->SetMuFFunctionalForm(kScale1);
+               fnlo->SetMuRFunctionalForm(kScale1);
+               info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
+                                       << "from only the first scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "scale2" ) {
+               fnlo->SetMuFFunctionalForm(kScale2);
+               fnlo->SetMuRFunctionalForm(kScale2);
+               info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
+                                       << "from only the second scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else {
+               error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+            }
+         }
+      } else {
+         if (!fnlo->GetIsFlexibleScaleTable()) {
+            error["fnlo-tk-cppread"] << "The selected fixed scale setting (fixmur, fixmuf) = ("
+                                     << fixmur[ivar] << ","
+                                     << fixmuf[ivar] << ") is not possible with this table, aborted!" << endl;
+         }
+         fnlo->SetMuFFunctionalForm(kConst);
+         fnlo->SetExternalConstantForMuF(fixmuf[ivar]);
+         fnlo->SetMuRFunctionalForm(kConst);
+         fnlo->SetExternalConstantForMuR(fixmur[ivar]);
       }
 
       //! Calculate cross section
