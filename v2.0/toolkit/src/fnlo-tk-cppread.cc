@@ -982,9 +982,7 @@ int main(int argc, char** argv) {
                                      << fixmur[ivar] << ","
                                      << fixmuf[ivar] << ") is not possible with this table, aborted!" << endl;
          }
-         fnlo->SetMuFFunctionalForm(kConst);
          fnlo->SetExternalConstantForMuF(fixmuf[ivar]);
-         fnlo->SetMuRFunctionalForm(kConst);
          fnlo->SetExternalConstantForMuR(fixmur[ivar]);
       }
 
@@ -1145,8 +1143,11 @@ int main(int argc, char** argv) {
       //! Start print out
       yell  << _DSEPLC << endl;
       shout << "My Cross Sections" << endl;
-      if ( sclvar ) {
+      if ( sclvar && nvars > 0) {
          snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
+      }
+      else if ( sclvar && nvars < 0) {
+         snprintf(buffer, sizeof(buffer), "The fixed scales mur, muf chosen here are: % #10.3f, % #10.3f",fixmur[ivar],fixmuf[ivar]);
       }
       else {
          snprintf(buffer, sizeof(buffer), "The PDF member chosen here is: %i",ivar);
