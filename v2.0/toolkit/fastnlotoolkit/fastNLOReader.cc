@@ -2454,9 +2454,11 @@ void fastNLOReader::SetFunctionalForm(EScaleFunctionalForm func , fastNLO::EMuX 
       fMuRFunc = func;
       // Alphas Cache needs to be recalculated.
       fAlphasCached = 0.;
-   } else
+   } else {
       fMuFFunc = func;
-
+      // PDF Cache needs to be recalculated.
+      fPDFCached = 0.;
+   }
 
    // ---- cross check ---- //
    if (func == kScale2 || func == kQuadraticSum ||  func == kQuadraticMean || func == kQuadraticSumOver4 ||
