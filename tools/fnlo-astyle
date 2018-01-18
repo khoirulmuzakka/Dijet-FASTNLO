@@ -1,0 +1,7 @@
+#!/bin/bash
+# long form
+# astyle --style=java --indent=spaces=3 --unpad-paren --pad-header --preserve-date
+# short form
+astyle -A2 -i3 -UHZ $1
+
+
