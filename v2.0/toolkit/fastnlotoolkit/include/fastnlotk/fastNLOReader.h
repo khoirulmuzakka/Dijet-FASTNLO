@@ -49,7 +49,8 @@ public:
    }
 
    // ---- setters for specific options ---- //
-   void SetCalculateSingleSubprocessOnly(int iSub);
+   void SetCalculateSingleSubprocessOnly(int iSub);					//!< only use one subprocess for calculation
+   void SetCalculateSubprocesses( const std::vector< int >& iSub );			//!< use several but not all subprocesses in calculation
    void SetNewSqrtS(double NewSqrtS, double OldSqrtS=0 );
 
    // ---- setters for scales of MuVar tables ---- //
@@ -114,7 +115,9 @@ public:
    double GetScaleFactorMuF() const { return fScaleFacMuF; };
    int GetScaleVariation() const { return fScalevar; };
    std::string GetScaleDescription(const fastNLO::ESMOrder eOrder, int iScale=0) const;
-   double GetNevt(const fastNLO::ESMOrder eOrder) const;
+   double GetNevt(const fastNLO::ESMOrder eOrder) const;		//!< Get number of events in contribution
+   int GetNSubproc(const fastNLO::ESMOrder eOrder) const;		//!< Get number of subprocesses in this contribution
+   std::vector < std::vector < std::pair < int,int > > > GetSubprocIndices(const fastNLO::ESMOrder eOrder) const; //!< Get information on the members of each subprocess. Each member of the [iSubproc][iPartonPair] pair is a pair of PDGIds indicating the particles involved in the subprocess.
 
    int GetNScaleVariations() const;                                                     //!< Get number of available scale variations
    std::vector < double > GetScaleFactors() const;                                           //!< Get list of available scale factors

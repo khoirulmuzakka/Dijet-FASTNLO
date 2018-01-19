@@ -978,10 +978,38 @@ double fastNLOReader::GetNevt(const ESMOrder eOrder) const {
    if (eOrder < (int)BBlocksSMCalc[kFixedOrder].size())
       coeff = (fastNLOCoeffAddBase*) BBlocksSMCalc[kFixedOrder][eOrder];
    else {
-      logger.error["GetScaleDescription"]<<"Requested contribution not found." << endl;
+      logger.error["GetNevt"]<<"Requested contribution not found." << endl;
       exit(1);
    }
    return coeff->GetNevt();
+}
+
+//______________________________________________________________________________
+int fastNLOReader::GetNSubproc(const ESMOrder eOrder) const {
+   //! Returns the number of subprocess contributions in one fixed order contribution. Note
+   //! that these subprocess contributions can consist of several subprocesses merged at
+   //! creation time of the table. Information about what subprocesses are included in each
+   //! contribution can be retrieved with the GetSubprocIndices function.
+
+   if ( eOrder < (int)BBlocksSMCalc[kFixedOrder].size())
+      return ((fastNLOCoeffAddBase*)BBlocksSMCalc[kFixedOrder][eOrder])->GetNSubproc();
+   else {
+      logger.error["GetNSubproc"] << "Requested contribution not found." << endl;
+      exit(1);
+   }
+}
+
+//______________________________________________________________________________
+vector < vector < pair < int,int > > > fastNLOReader::GetSubprocIndices( const ESMOrder eOrder ) const {
+   //! This function returns a list with length GetNSubproc containing a list of pairs for each
+   //! subprocess contribution. Each pair specifies a subprocess throug two PDGIDs involed in that process.
+
+   if ( eOrder < (int)BBlocksSMCalc[kFixedOrder].size())
+      return ((fastNLOCoeffAddBase*)BBlocksSMCalc[kFixedOrder][eOrder])->GetPDFCoeff();
+   else {
+      logger.error["GetSubprocIndices"] << "Requested contribution not found." << endl;
+      exit(1);
+   }
 }
 
 //______________________________________________________________________________
@@ -1634,11 +1662,35 @@ void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub) {
    if (iSub < 0) {
       logger.info["SetCalculateSingleSubprocessOnly"]<<"Activating all contributions."<<endl;
       fSubprocActive = std::vector<bool>(169,true);
-   } else {
+   }   
+   else if ( iSub < 169 ) {
       logger.info["SetCalculateSingleSubprocessOnly"]<<"Deactivating all contributions, but id="<<iSub<<endl;
       fSubprocActive = std::vector<bool>(169,false);
       fSubprocActive[iSub]=true;
    }
+
+}
+
+//______________________________________________________________________________
+void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
+   //! Calculate crosssection with several but not all Subprocesses included.
+   //! Information on the subprocesses available in the table can be retrieved
+   //! by calls to GetNSubproc and GetSubprocIndices. Also note, that subprocesses
+   //! cannot be split into single processes that were already merged at creation time
+   //! of the table.
+   //!
+   //! Use SetCalculateSingleSubprocessOnly( iSub=-1 ) to reset the calculation to use all processes.
+
+   fSubprocActive.resize(13*13); //this could probably dropped to the number returned byGetNSubproc
+   logger.info["SetCalculateSubprocesses"]<<endl;
+   logger.info["SetCalculateSubprocesses"]<<"    ***  Use this function carefully ***"<<endl;
+   logger.info["SetCalculateSubprocesses"]<<" Please inform yourself about the meaning of the subprocess id for the given file."<<endl;
+   logger.info["SetCalculateSubprocesses"]<<" This may also change for the different contribution (LO,NLO,NNLO) of a calculation."<<endl;
+   
+   fSubprocActive = std::vector<bool>(13*13,false);
+   for ( int i = 0; i < iSub.size(); i++ )
+      if ( iSub[i] < 13*13 )
+         fSubprocActive[iSub[i]] = true;
 
 }
 

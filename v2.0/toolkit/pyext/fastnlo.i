@@ -22,6 +22,9 @@ namespace std {
    %template(vectord2) vector<vector<double> >;
    %template() pair<double,double>;
    %template(pairvector) vector<pair<double,double> >;
+   %template(pairi) pair<int,int>;
+   %template(vectorpairi) vector<pair<int,int> >;
+   %template(vector2pairi) vector<vector<pair<int,int> > >;
 };
 
 %ignore *::operator[];
