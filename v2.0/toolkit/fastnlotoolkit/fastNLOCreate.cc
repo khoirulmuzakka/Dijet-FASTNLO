@@ -197,16 +197,6 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
    ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
    ReadGenAndProcConstsFromSteering();
 
-   // KR: Moved to ReadSteering ...
-   // if (EXIST_NS(WarmUpFilename,fSteerfile)) {
-   //    SetWarmupTableFilename(STRING_NS(WarmUpFilename,fSteerfile));
-   //    logger.debug["fastNLOCreate"]<<"The warmup filename set in steering file is: " << STRING_NS(WarmUpFilename,fSteerfile) << endl;
-   // } else {
-   //    string fWarmUpFile = steeringNameSpace + ".txt";
-   //    SetWarmupTableFilename(fWarmUpFile);
-   //    logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering name space is: " << fWarmUpFile << endl;
-   // }
-
    bool check = CheckProcConsts();
    if (!check) {
       logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
@@ -504,7 +494,9 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    } else {
       //      string fWarmUpFile = STRING_NS(ScenarioName,fSteerfile) + "_" + steeringNameSpace + "_warmup.txt";
       // Default for NLOJet++ is like this; to be unified across generators and create methods
-      string fWarmUpFile = steeringNameSpace + "_" + STRING_NS(ScenarioName,fSteerfile) + "_warmup.txt";
+      // TODO: KR: Consider keeping all warmup filenames to .wrm
+      //      string fWarmUpFile = steeringNameSpace + "_" + STRING_NS(ScenarioName,fSteerfile) + "_warmup.txt";
+      string fWarmUpFile = steeringNameSpace + "_" + STRING_NS(ScenarioName,fSteerfile) + ".wrm";
       SetWarmupTableFilename(fWarmUpFile);
       logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
    }
@@ -3276,7 +3268,9 @@ string fastNLOCreate::GetWarmupTableFilename() {
       ret += "_";
       ret += GetScenName();
       logger.debug["GetWarmupTableFilename"]<< "Scenario name = " << GetScenName() << " bins" << endl;
-      ret += "_warmup.txt";
+      // TODO: KR: Consider keeping all warmup filenames to .wrm
+      //      ret += "_warmup.txt";
+      ret += ".wrm";
       SetWarmupTableFilename(ret);
       logger.debug["GetWarmupTableFilename"]<<"The warmup filename is: " << ret << endl;
       return ret;
