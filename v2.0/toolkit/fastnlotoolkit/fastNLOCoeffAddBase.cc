@@ -555,6 +555,45 @@ bool fastNLOCoeffAddBase::IsCatenable(const fastNLOCoeffAddBase& other) const {
    return true;
 }
 
+//________________________________________________________________________________________________________________
+bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on ) {
+   vector<int> s;
+   s.clear();
+   for ( unsigned int k=0; k<processes.size(); k++ ) {
+      pair<int,int> p = processes[k];
+      // search for selected process in fPDFCoeff
+      bool fff = false;
+      for ( unsigned int i = 0; i<fPDFCoeff.size(); i++ ) {
+         for ( unsigned int j = 0; j<fPDFCoeff[i].size(); j++ ) {
+	    if ( p == fPDFCoeff[i][j] ) {
+	       // found! now check if the other proesses in this subcontribution are also to be selected
+	       vector< pair<int,int> > p_list = fPDFCoeff[i];
+	       bool f = true;
+	       for ( unsigned int n = 0; n<p_list.size(); n++ ) {
+		  bool ff = false;
+		  for ( unsigned int m = 0; m<processes.size(); m++ )
+		     if ( p_list[n] == processes[m] )
+			ff = true;
+	       	  f &= ff;
+	       }	       
+	       if (!f)
+		  return false;
+	       s.push_back(i);
+	       fff = true;
+	    }
+	 }
+      }
+      if (!fff)
+	 return false;
+   }
+   // now activate the selected subcontributions and return succes (true)
+   for ( unsigned int k = 0; k<s.size(); k++ )
+      SubEnable(s[k], on);
+
+   return true;
+}
+	          
+
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::Clear() {

@@ -164,9 +164,10 @@ public:
 
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
-   bool SubIsEnabled(int index) const { return index < NSubproc && sub_enabled[index]; }
-   void SubEnable(int index) { if ( index < NSubproc ) sub_enabled[index] = true; }
-   void SubEnable(int index, bool on) { if ( index < NSubproc ) sub_enabled[index] = on; }
+   bool SubIsEnabled(int index) const { return index < NSubproc && sub_enabled[index]; }  //!< Returns true if a single subcontribution is enabled in this contribution
+   void SubEnable(int index, bool on = true) { if ( index < NSubproc ) sub_enabled[index] = on; } //!< Enables/Disables a single subcontribution
+   void SubEnableAll( bool on = true ) { sub_enabled.assign(sub_enabled.size(), on); } //!< Enables/Disables all subcontributions
+   bool SubSelect( std::vector< std::pair<int,int> > processes, bool on = true); //!< checks if the given subprocess list is compatible with the subcontribution list and enables/disables the corresponding subcontributions. Returns true on sucess and false on failure.
 
    const fastNLO::WgtStat& GetWgtStat() const { return fWgt;} //!< Get weight and event counts
    fastNLO::WgtStat& AccessWgtStat() { return fWgt;} //!< Get weight and event counts
