@@ -233,7 +233,6 @@ protected:
    double fAlphasCached;
    mu_func Fct_MuR;                                                                     //!< Function, if you define your functional form for your scale external
    mu_func Fct_MuF;                                                                     //!< Function, if you define your functional form for your scale external
-   std::vector < std::vector < bool > > bUseSMCalc;                                               //!< switch calculations ON/OFF
 
    bool fUseHoppet;
    std::vector<bool > fSubprocActive = std::vector<bool>(169,true);                                     //!< Consider subproc in calculation

@@ -509,7 +509,6 @@ fastNLOReader::fastNLOReader(const fastNLOReader& other) :
    ffilename(other.ffilename), fScalevar(other.fScalevar), fScaleFacMuR(other.fScaleFacMuR),
    fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
    fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
-   bUseSMCalc(other.bUseSMCalc),
    XSection(other.XSection), QScale(other.QScale), XSectionRef(other.XSectionRef),
    XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
    XSectionRef_s2(other.XSectionRef_s2)
@@ -658,19 +657,17 @@ void fastNLOReader::OrderCoefficients() {
 void fastNLOReader::SetCoefficientUsageDefault() {
    //! Switch on LO, NLO, and NNLO contribution.
    //! Deactivate all other contributions
-   bUseSMCalc.clear();
-   bUseSMCalc.resize(BBlocksSMCalc.size());
 
    // Switch all off
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-         bUseSMCalc[j].push_back(false);
+         if (BBlocksSMCalc[j][i]) BBlocksSMCalc[j][i]->Enable(false);
       }
    }
    // If filled, activate LO, NLO, and NNLO
-   if (BBlocksSMCalc[kFixedOrder][kLeading]) bUseSMCalc[kFixedOrder][kLeading] = true;   //LO
-   if (BBlocksSMCalc[kFixedOrder][kNextToLeading]) bUseSMCalc[kFixedOrder][kNextToLeading] = true;  //NLO
-   if (BBlocksSMCalc[kFixedOrder][kNextToNextToLeading]) bUseSMCalc[kFixedOrder][kNextToNextToLeading] = true;  //NNLO
+   if (BBlocksSMCalc[kFixedOrder][kLeading]) BBlocksSMCalc[kFixedOrder][kLeading]->Enable();   //LO
+   if (BBlocksSMCalc[kFixedOrder][kNextToLeading]) BBlocksSMCalc[kFixedOrder][kNextToLeading]->Enable();  //NLO
+   if (BBlocksSMCalc[kFixedOrder][kNextToNextToLeading]) BBlocksSMCalc[kFixedOrder][kNextToNextToLeading]->Enable();  //NNLO
 }
 
 
@@ -771,7 +768,7 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       bool lkthc = false;
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         if (bUseSMCalc[kThresholdCorrection][i]) {
+         if ( BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
          }
       }
@@ -859,7 +856,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
 
    // sanity check 1
    // existence of contribution pointer
-   if (bUseSMCalc[eCalc].size()<=Id || BBlocksSMCalc[eCalc].size() <=Id) {
+   if ( BBlocksSMCalc[eCalc].size() <=Id) {
       logger.warn["SetContributionON"]
             <<"Contribution "<<_ContrName[eCalc]<<" does not exist in this table, cannot switch it On/Off! Ignoring call."<<endl;
       return false;
@@ -874,9 +871,9 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
    }
 
    // backup original value
-   bool SetOld = bUseSMCalc[eCalc][Id];
+   bool SetOld = BBlocksSMCalc[eCalc][Id]->IsEnabled();
    // set the new value immediately, otherwise GetNScaleVariations(), which is used in FillAlphasCache, will give wrong result.
-   bUseSMCalc[eCalc][Id] = SetOn;
+   BBlocksSMCalc[eCalc][Id]->Enable(SetOn);
 
    // existence of scale variation for additive contributions (otherwise cache filling will fail!)
    fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
@@ -889,7 +886,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
          logger.warn["SetContributionON"]
                <<"Scale variation "<<scalevar<<" of contribution "<<_ContrName[eCalc]<<" , Id = "<<Id<<", is > number of available scale variations "<<scalevarmax<<"! Ignoring call."<<endl;
          // set to backed up original value
-         bUseSMCalc[eCalc][Id] = SetOld;
+         BBlocksSMCalc[eCalc][Id]->Enable(SetOld);
          return false;
       }
    }
@@ -931,9 +928,9 @@ int fastNLOReader::GetNScaleVariations() const {
          if (c) {   // No NULL pointer!
             int kType  = c->GetIContrFlag1()-1;
             int kOrder = c->GetIContrFlag2()-1;
-            logger.debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " <<bUseSMCalc[j][i]<<endl;
+            logger.debug["GetNScaleVariations"]<<"Contribution type is = "<<kType<<", contribution order is = "<<kOrder<<", contribution switch is = " << c->IsEnabled() <<endl;
             // Do not check pQCD LO or multiplicative corrections
-            if (bUseSMCalc[j][i] && !c->GetIAddMultFlag() &&
+            if (c->IsEnabled() && !c->GetIAddMultFlag() &&
                   !(kType == kFixedOrder && kOrder == kLeading)) {
                NoExtra = false;
                if (c->GetNScalevar() < (int)scalevarmax) {
@@ -1312,7 +1309,7 @@ void fastNLOReader::CalcCrossSection() {
    // Perturbative (additive) contributions
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-         if (bUseSMCalc[j][i] && BBlocksSMCalc[j][i]) {
+         if (BBlocksSMCalc[j][i] && BBlocksSMCalc[j][i]->IsEnabled()) {
             if (fastNLOCoeffAddFlex::CheckCoeffConstants(BBlocksSMCalc[j][i],true))
                CalcCrossSectionv21((fastNLOCoeffAddFlex*)BBlocksSMCalc[j][i]);
             else if (fastNLOCoeffAddFix::CheckCoeffConstants(BBlocksSMCalc[j][i],true))
@@ -1330,7 +1327,7 @@ void fastNLOReader::CalcCrossSection() {
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
          }
-         if (bUseSMCalc[kFixedOrder][i]) {
+         if (BBlocksSMCalc[kFixedOrder][i]->IsEnabled()) {
             if (kOrder == 0) {
                lklo = true;
             } else if (kOrder > 0) {
@@ -1358,7 +1355,7 @@ void fastNLOReader::CalcCrossSection() {
    // non-perturbative corrections (multiplicative corrections)
    for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
       for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
-         if (bUseSMCalc[j][i] && BBlocksSMCalc[j][i]) {
+         if ( BBlocksSMCalc[j][i] && BBlocksSMCalc[j][i]->IsEnabled()) {
             if (fastNLOCoeffMult::CheckCoeffConstants(BBlocksSMCalc[j][i] , true)) {
                fastNLOCoeffMult* cMult = (fastNLOCoeffMult*) BBlocksSMCalc[j][i];
                if (cMult->GetIContrFlag1() == 4 && cMult->GetIContrFlag2() == 1) {
@@ -1719,7 +1716,7 @@ void fastNLOReader::FillAlphasCache(bool lForce) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
             // Check that this contribution type j and no. i should actually be used
             // Otherwise deactivation of e.g. threshold corr. is not respected here
-            if (bUseSMCalc[j][i] && BBlocksSMCalc[j][i]) {
+            if ( BBlocksSMCalc[j][i] && BBlocksSMCalc[j][i]->IsEnabled() ) {
                fastNLOCoeffBase* c = BBlocksSMCalc[j][i];
                if (fastNLOCoeffAddFlex::CheckCoeffConstants(c,true))
                   FillAlphasCacheInBlockBv21((fastNLOCoeffAddFlex*)c);
@@ -1943,7 +1940,7 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
             // Check that this contribution type j and no. i should actually be used
             // Otherwise deactivation of e.g. threshold corr. is not respected here
-            if (bUseSMCalc[j][i] && BBlocksSMCalc[j][i]) {
+            if ( BBlocksSMCalc[j][i] && BBlocksSMCalc[j][i]->IsEnabled() ) {
                fastNLOCoeffBase* c = BBlocksSMCalc[j][i];
                if (fastNLOCoeffAddBase::CheckCoeffConstants(c,true)) {
                   fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[j][i];
@@ -2584,7 +2581,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
          }
-         if (bUseSMCalc[kFixedOrder][i]) {
+         if ( BBlocksSMCalc[kFixedOrder][i]->IsEnabled() ) {
             if (kOrder == 0) {
                lklo = true;
             } else if (kOrder > 0) {
@@ -2598,7 +2595,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lkthc = false;
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         if (bUseSMCalc[kThresholdCorrection][i]) {
+         if ( BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
             break;
          }
@@ -2945,7 +2942,7 @@ double fastNLOReader::FuncExpProd2(double scale1 , double scale2) {
 //______________________________________________________________________________
 int fastNLOReader::ContrId(const ESMCalculation eCalc, const ESMOrder eOrder) const {
    int Id = -1;
-   if (BBlocksSMCalc.empty() || bUseSMCalc[eCalc].empty()) {
+   if ( BBlocksSMCalc.empty() ) {
       return Id;
    }
 

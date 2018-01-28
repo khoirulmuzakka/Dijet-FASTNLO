@@ -70,7 +70,9 @@ public:
    bool IsNNLO() const {return IContrFlag1==1 && IContrFlag2==3;}
    bool IsCompatible(const fastNLOCoeffBase& other) const;
 
-
+   bool IsEnabled() const {return enabled;}
+   void Enable() {enabled = true;}
+   void Enable(bool on) {enabled = on;}
 
 protected:
    void ReadBase(std::istream& table);
@@ -88,6 +90,7 @@ protected:
    std::vector < std::string > CtrbDescript;
    std::vector < std::string > CodeDescript;
 
+   bool enabled = false;
 };
 
 
