@@ -1197,14 +1197,14 @@ void fastNLOReader::CalcReferenceCrossSection() {
       if (Coeff_LO_Ref && Coeff_NLO_Ref) {
          for (unsigned int i=0; i<NObsBin; i++) {
             for (int l=0; l<Coeff_LO_Ref->GetNSubproc(); l++) {
-               if (!fSubprocActive[l]) continue;
+               //TODO ask Klaus about this: if (!fSubprocActive[l]) continue;
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_LO_Ref;
                int xUnits = c->GetIXsectUnits();
                double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
                XSectionRef[i] +=  c->GetSigmaTilde(i,0,0,0,l) * unit / c->GetNevt(i,l) ; // no scalevariations in LO tables
             }
             for (int l=0; l<Coeff_NLO_Ref->GetNSubproc(); l++) {
-               if (!fSubprocActive[l]) continue;
+               //TODO ask Klaus about this: if (!fSubprocActive[l]) continue;
                fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NLO_Ref;
                int xUnits = c->GetIXsectUnits();
                double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
@@ -1212,7 +1212,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
             }
             if (Coeff_NNLO_Ref) {
                for (int l=0; l<Coeff_NNLO_Ref->GetNSubproc(); l++) {
-                  if (!fSubprocActive[l]) continue;
+                  //TODO ask Klaus about this: if (!fSubprocActive[l]) continue;
                   fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)Coeff_NNLO_Ref;
                   int xUnits = c->GetIXsectUnits();
                   double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
@@ -1228,7 +1228,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          int xUnits = cLO->GetIXsectUnits();
          double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cLO->GetNSubproc(); n++) {
-            if (!fSubprocActive[n]) continue;
+            //TODO if (!fSubprocActive[n]) continue;
             XSectionRefMixed[i]             += cLO->SigmaRefMixed[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cLO->SigmaRef_s1[i][n] * unit / cLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cLO->SigmaRef_s2[i][n] * unit / cLO->GetNevt(i,n);
@@ -1237,7 +1237,7 @@ void fastNLOReader::CalcReferenceCrossSection() {
          xUnits = cNLO->GetIXsectUnits();
          unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
          for (int n=0; n<cNLO->GetNSubproc(); n++) {
-            if (!fSubprocActive[n]) continue;
+            //TODO if (!fSubprocActive[n]) continue;
             XSectionRefMixed[i]             += cNLO->SigmaRefMixed[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s1[i]               += cNLO->SigmaRef_s1[i][n] * unit / cNLO->GetNevt(i,n);
             XSectionRef_s2[i]               += cNLO->SigmaRef_s2[i][n] * unit / cNLO->GetNevt(i,n);
@@ -1410,7 +1410,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuR() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
-               if (!fSubprocActive[l]) continue;
+               if ( !cLO->SubIsEnabled(l) ) continue;
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *  cLO->PdfLc[i][j][k][l] * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * clo * n * L * beta0;
                double mur  = fScaleFacMuR * cLO->GetScaleNode(i,0,j);
@@ -1449,7 +1449,7 @@ void fastNLOReader::CalcAposterioriScaleVariationMuF() {
          double asnp1 = pow(cLO->AlphasTwoPi_v20[i][j],(n+1)/n);//as^n+1
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<cLO->GetNSubproc(); l++) {
-               if (!fSubprocActive[l]) continue;
+               if (!cLO->SubIsEnabled(l)) continue;
                // TODO: Not implemented correctly. Need to fix DIS case.
                double clo  = cLO->GetSigmaTilde(i,0,j,k,l) *(cLO->PdfSplLc1[i][j][k][l] + cLO->PdfSplLc2[i][j][k][l]) * unit / cLO->GetNevt(i,l);
                double xsci = asnp1 * n * log(scalefac) * clo;
@@ -1494,7 +1494,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
             double muf2         = muf*muf;
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
-                  if (!fSubprocActive[n]) continue;
+                  if (!c->SubIsEnabled(n)) continue;
                   double as             = c->AlphasTwoPi[i][jS1][kS2];
                   double pdflc          = c->PdfLcMuVar[i][x][jS1][kS2][n];
                   if (pdflc == 0.) continue;
@@ -1574,7 +1574,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
          for (int k=0; k<nxmax; k++) {
             for (int l=0; l<c->GetNSubproc(); l++) {
-               if (!fSubprocActive[l]) continue;
+               if (!c->SubIsEnabled(l)) continue;
                double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
                XS->at(i)      +=  xsci;
                QS->at(i)      +=  xsci*mur;
@@ -1650,6 +1650,7 @@ void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub) {
    //!
    //!  iSub=-1 resets the calculation to all subprocesses
 
+   /*
    fSubprocActive.resize(13*13);
    logger.info["SetCalculateSingleSubprocessOnly"]<<endl;
    logger.info["SetCalculateSingleSubprocessOnly"]<<"    ***  Use this function carefully ***"<<endl;
@@ -1665,7 +1666,8 @@ void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub) {
       fSubprocActive = std::vector<bool>(169,false);
       fSubprocActive[iSub]=true;
    }
-
+   */
+   logger.warn["SetCalculateSingleSubprocessOnly"]<<endl<<"depreciated function, ignoring call"<<endl;
 }
 
 //______________________________________________________________________________
@@ -1678,6 +1680,7 @@ void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
    //!
    //! Use SetCalculateSingleSubprocessOnly( iSub=-1 ) to reset the calculation to use all processes.
 
+   /*
    fSubprocActive.resize(13*13); //this could probably dropped to the number returned byGetNSubproc
    logger.info["SetCalculateSubprocesses"]<<endl;
    logger.info["SetCalculateSubprocesses"]<<"    ***  Use this function carefully ***"<<endl;
@@ -1688,6 +1691,8 @@ void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
    for ( int i = 0; i < iSub.size(); i++ )
       if ( iSub[i] < 13*13 )
          fSubprocActive[iSub[i]] = true;
+   */
+   logger.warn["SetCalculateSubprocesses"]<<endl<<"depreciated function, ignoring call"<<endl;
 
 }
 

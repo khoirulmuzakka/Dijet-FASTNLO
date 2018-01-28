@@ -123,6 +123,9 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
    table >> IPDFdef2;
    table >> IPDFdef3;
 
+   sub_enabled.clear();
+   sub_enabled.resize(NSubproc, true); // enable all subprocesses by default
+
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
       if ( IPDFdef3 != NSubproc ){
          error["ReadCoeffAddBase"]<<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<IPDFdef3<<", NSubproc="<<NSubproc<<"). Exiting."<<endl;

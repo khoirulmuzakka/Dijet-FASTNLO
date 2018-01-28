@@ -164,6 +164,10 @@ public:
 
    const std::vector<std::vector<std::pair<int,int> > >& GetPDFCoeff() const { return fPDFCoeff;}
 
+   bool SubIsEnabled(int index) const { return index < NSubproc && sub_enabled[index]; }
+   void SubEnable(int index) { if ( index < NSubproc ) sub_enabled[index] = true; }
+   void SubEnable(int index, bool on) { if ( index < NSubproc ) sub_enabled[index] = on; }
+
    const fastNLO::WgtStat& GetWgtStat() const { return fWgt;} //!< Get weight and event counts
    fastNLO::WgtStat& AccessWgtStat() { return fWgt;} //!< Get weight and event counts
    double GetMergeWeight(fastNLO::EMerge moption, int proc, int bin) const ; //!< Get merge weight for a given bin and subprocess
@@ -197,6 +201,8 @@ protected:
    int NScaleDim = 0;
    std::vector < int > Iscale;                                                                       // not used
    std::vector < std::vector < std::string > > ScaleDescript;
+
+   std::vector < bool > sub_enabled;
 
    fastNLO::WgtStat fWgt; //!< event and weight counts
    // double fWgtNevt = 0; //!< 'number of events', i.e. normalisation as suggested by generator (identical to previously use 'Nevt')
