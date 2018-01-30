@@ -15,13 +15,13 @@ SUBDIRS = data doc fastnlotoolkit src pyext check fortranext
 # Provide local m4 macros in dir m4, copy also system-wide macros
 ACLOCAL_AMFLAGS = -I m4 --install
 
-# Add subversion revision number, recipe from Autotools by J. Calcote
-EXTRA_DIST = m4 SVNREV
+# Add git equivalent of subversion revision number (original svn recipe from Autotools by J. Calcote).
+EXTRA_DIST = m4 GITREV
 # This gives e.g. fastnlo-2.0.0-643M for svn revision 643 locally modified
-distdir = $(PACKAGE)-$(VERSION)-$(SVNREV)
-# Don't put .svn subdirs into distribution package
+distdir = $(PACKAGE)-$(VERSION)-$(GITREV)
+# Don't put .git subdirs into distribution package
 dist-hook:
-	rm -rf `find $(distdir) -name .svn`
+	rm -rf `find $(distdir) -name .git`
 
 # Installation of DOXYGEN documentation
 # Docu is not remade anymore at each occasion!
@@ -70,4 +70,4 @@ endif HAVE_DOXYGEN
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
 	depcomp install-sh ltmain.sh missing compile \
 	aclocal.m4 m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
-	SVNREV py-compile test-driver
+	GITREV py-compile test-driver
