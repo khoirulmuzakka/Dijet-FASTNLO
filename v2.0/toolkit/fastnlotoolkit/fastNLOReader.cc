@@ -1709,8 +1709,13 @@ void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
 
 //______________________________________________________________________________
 void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& proclist ) {
+   //! Selects subprocesses given in proclist. proclist is a vector of pairs each identifying
+   //! a single process by two PDGIDs. If the table is not compatible with the selected list,
+   //! nothing is changed and a warning is printed.
+   
    vector< pair<int,int> >* old_list = fselected_processes;
    fselected_processes = new vector< pair<int,int> >(proclist);
+   
    if ( UpdateProcesses() ) {
       delete old_list;
       return;
@@ -1724,7 +1729,54 @@ void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& pr
    
    logger.warn["SelectProcesses"]<<"could not select requested subprocesses due to incompatible table, ignoring call"<<endl;
    return;
-}           
+}
+
+
+//_____________________________________________________________________________
+void fastNLOReader::SelectProcesses( const std::string& processes ) {
+   std::vector< std::pair<int,int> > tmp;
+   if ( processes == "all" ) {
+      delete fselected_processes;
+      fselected_processes = NULL;
+      UpdateProcesses();
+   } else if ( processes == "none" ) {
+      tmp.clear();
+      SelectProcesses(tmp);
+   } else if ( processes == "gg" ) {
+      tmp = { {0,0} };
+      SelectProcesses(tmp);
+   } else if ( processes == "gq" ) {
+      tmp = { {0,-5},{0,-4},{0,-3},{0,-2},{0,-1},{0,1},{0,2},{0,3},{0,4},{0,5},
+              {-5,0},{-4,0},{-3,0},{-2,0},{-1,0},{1,0},{2,0},{3,0},{4,0},{5,0} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiqi" ) {
+      tmp = { {-5,-5},{-4,-4},{-3,-3},{-2,-2},{-1,-1},{1,1},{2,2},{3,3},{4,4},{5,5} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiai" ) {
+      tmp = { {-5,5},{-4,4},{-3,3},{-2,2},{-1,1},{1,-1},{2,-2},{3,-3},{4,-4},{5,-5} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiqj" ) {
+      tmp.clear();
+      for ( int i = 1; i<=5; i++ )
+         for ( int j = 1; j<=5; j++ )
+            if ( i != j ) {
+               tmp.push_back( {i,j} );
+               tmp.push_back( {-i,-j} );
+            }
+      SelectProcesses(tmp);
+   } else if ( processes == "qiaj" ) {
+      tmp.clear();
+      for ( int i = 1; i<=5; i++ )
+         for ( int j = 1; j<=5; j++ )
+            if ( i != j ) {
+               tmp.push_back( {i,-j} );
+               tmp.push_back( {-i,j} );
+            }
+      SelectProcesses(tmp);
+   } else {
+      logger.warn["SelectProcesses"]<<"unrecognized selection \""<<processes<<"\" ignoring call"<<endl;
+   }
+}
 
 //_____________________________________________________________________________
 bool fastNLOReader::UpdateProcesses() {
