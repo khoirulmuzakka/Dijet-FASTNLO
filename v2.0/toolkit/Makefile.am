@@ -65,7 +65,7 @@ endif HAVE_DOXYGEN
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
 # "autoreconf -i; ./configure"
-# Use "make maintainer-clean" (on a build machine) before svn commits,
+# Use "make maintainer-clean" (on a build machine) before git commits,
 # but NOT before distribution with "make dist"!
 MAINTAINERCLEANFILES = INSTALL config.h.in config.guess config.sub configure Makefile.in \
 	depcomp install-sh ltmain.sh missing compile \

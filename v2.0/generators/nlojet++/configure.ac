@@ -261,12 +261,16 @@ AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
 
 # Add subversion revision number, recipe from Autotools by J. Calcote
 # Modified on 18.12.13 to fix changed behaviour of svnversion to give "Unversioned directory" instead of "exported"
-SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
-if { ! ( svnversion ) >/dev/null 2>&1 || test "x$SVNREV" = "xexported" || test "x$SVNREV" = "xUnversioned directory"; } ;
-  then SVNREV=`cat $srcdir/SVNREV`
-  else echo $SVNREV>$srcdir/SVNREV
-fi
-AC_SUBST(SVNREV)
+#SVNREV=`( svnversion $srcdir | sed 's/:.*//' ) 2>/dev/null`
+#if { ! ( svnversion ) >/dev/null 2>&1 || test "x$SVNREV" = "xexported" || test "x$SVNREV" = "xUnversioned directory"; } ;
+#  then SVNREV=`cat $srcdir/SVNREV`
+#  else echo $SVNREV>$srcdir/SVNREV
+#fi
+#AC_SUBST(SVNREV)
+
+GITREV=`git describe`
+echo $GITREV>$srcdir/GITREV
+AC_SUBST(GITREV)
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
