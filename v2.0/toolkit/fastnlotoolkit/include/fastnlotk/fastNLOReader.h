@@ -47,6 +47,8 @@ public:
       else if ( B_NNLO() ) return B_NNLO()->GetIsFlexibleScale();
       else return false;
    }
+   void SelectProcesses( const std::vector< std::pair<int,int> >& proclist );   //!< tries to select the specified subprocesses for calculation. Prints a warning on failure.
+   void SelectProcesses( const std::string& processes );                      //!< tries to select the specified subprocesses for calculation. Prints a warning on failure.
 
    // ---- setters for specific options ---- //
    void SetCalculateSingleSubprocessOnly(int iSub);					//!< only use one subprocess for calculation
@@ -219,6 +221,7 @@ protected:
    //static const std::string fOrdName[4][4];
    //static const std::string fNSDep[6];
 
+   bool UpdateProcesses(); //!< Checks if the choosen processes in fselect_processes are compatible to all selected contributions and activate them. Returns true on success false on failure.
 
 protected:
    std::string ffilename;
@@ -235,8 +238,9 @@ protected:
    mu_func Fct_MuF;                                                                     //!< Function, if you define your functional form for your scale external
 
    bool fUseHoppet;
-   std::vector<bool > fSubprocActive = std::vector<bool>(169,true);                                     //!< Consider subproc in calculation
    double fSqrtSovSP = 1;  //!< Center-of-mass 'reweighting'
+
+   std::vector < std::pair<int,int> >* fselected_processes = NULL;   //!< selected processes. When NULL, all processes are used in the calculation
 
    // ---- pointers to coefftables in fCoeff ---- //
    //    std::vector< std::vector < fastNLOCoeffAddBase* > > fCoAdd;

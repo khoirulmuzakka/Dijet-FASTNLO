@@ -875,6 +875,17 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
    // set the new value immediately, otherwise GetNScaleVariations(), which is used in FillAlphasCache, will give wrong result.
    BBlocksSMCalc[eCalc][Id]->Enable(SetOn);
 
+   // check if selected subprocesses are compatible with the new contribution
+   if(!UpdateProcesses()) {
+      BBlocksSMCalc[eCalc][Id]->Enable(SetOld);
+      if(!UpdateProcesses()) {
+         logger.error["SetContirbutionON"]<<"Could not restore previous state. This usually means, that something really messed up"<<endl;
+         exit(1);
+      }
+      logger.warn["SetContributionON"]<<"Contribution"<<_ContrName[eCalc]<<" , ID = "<<Id<<", is not compatible with the current selected subprocesses, ignoring call."<<endl;
+      return false;
+   }
+
    // existence of scale variation for additive contributions (otherwise cache filling will fail!)
    fastNLOCoeffAddBase* c = (fastNLOCoeffAddBase*)BBlocksSMCalc[eCalc][Id];
    if (!GetIsFlexibleScaleTable(c) && !c->GetIAddMultFlag()) {
@@ -1667,7 +1678,7 @@ void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub) {
       fSubprocActive[iSub]=true;
    }
    */
-   logger.warn["SetCalculateSingleSubprocessOnly"]<<endl<<"depreciated function, ignoring call"<<endl;
+   logger.warn["SetCalculateSingleSubprocessOnly"]<<endl<<"deprecated function, ignoring call"<<endl;
 }
 
 //______________________________________________________________________________
@@ -1692,11 +1703,106 @@ void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
       if ( iSub[i] < 13*13 )
          fSubprocActive[iSub[i]] = true;
    */
-   logger.warn["SetCalculateSubprocesses"]<<endl<<"depreciated function, ignoring call"<<endl;
+   logger.warn["SetCalculateSubprocesses"]<<endl<<"deprecated function, ignoring call"<<endl;
 
 }
 
 //______________________________________________________________________________
+void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& proclist ) {
+   //! Selects subprocesses given in proclist. proclist is a vector of pairs each identifying
+   //! a single process by two PDGIDs. If the table is not compatible with the selected list,
+   //! nothing is changed and a warning is printed.
+   
+   vector< pair<int,int> >* old_list = fselected_processes;
+   fselected_processes = new vector< pair<int,int> >(proclist);
+   
+   if ( UpdateProcesses() ) {
+      delete old_list;
+      return;
+   }
+   delete fselected_processes;
+   fselected_processes = old_list;
+   if ( !UpdateProcesses() ) {
+      logger.error["SelectProcesses"]<<"could not restore previous state after fail, this means something really messed up";
+      exit(1);
+   }
+   
+   logger.warn["SelectProcesses"]<<"could not select requested subprocesses due to incompatible table, ignoring call"<<endl;
+   return;
+}
+
+
+//_____________________________________________________________________________
+void fastNLOReader::SelectProcesses( const std::string& processes ) {
+   std::vector< std::pair<int,int> > tmp;
+   if ( processes == "all" ) {
+      delete fselected_processes;
+      fselected_processes = NULL;
+      UpdateProcesses();
+   } else if ( processes == "none" ) {
+      tmp.clear();
+      SelectProcesses(tmp);
+   } else if ( processes == "gg" ) {
+      tmp = { {0,0} };
+      SelectProcesses(tmp);
+   } else if ( processes == "gq" ) {
+      tmp = { {0,-5},{0,-4},{0,-3},{0,-2},{0,-1},{0,1},{0,2},{0,3},{0,4},{0,5},
+              {-5,0},{-4,0},{-3,0},{-2,0},{-1,0},{1,0},{2,0},{3,0},{4,0},{5,0} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiqi" ) {
+      tmp = { {-5,-5},{-4,-4},{-3,-3},{-2,-2},{-1,-1},{1,1},{2,2},{3,3},{4,4},{5,5} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiai" ) {
+      tmp = { {-5,5},{-4,4},{-3,3},{-2,2},{-1,1},{1,-1},{2,-2},{3,-3},{4,-4},{5,-5} };
+      SelectProcesses(tmp);
+   } else if ( processes == "qiqj" ) {
+      tmp.clear();
+      for ( int i = 1; i<=5; i++ )
+         for ( int j = 1; j<=5; j++ )
+            if ( i != j ) {
+               tmp.push_back( {i,j} );
+               tmp.push_back( {-i,-j} );
+            }
+      SelectProcesses(tmp);
+   } else if ( processes == "qiaj" ) {
+      tmp.clear();
+      for ( int i = 1; i<=5; i++ )
+         for ( int j = 1; j<=5; j++ )
+            if ( i != j ) {
+               tmp.push_back( {i,-j} );
+               tmp.push_back( {-i,j} );
+            }
+      SelectProcesses(tmp);
+   } else {
+      logger.warn["SelectProcesses"]<<"unrecognized selection \""<<processes<<"\" ignoring call"<<endl;
+   }
+}
+
+//_____________________________________________________________________________
+bool fastNLOReader::UpdateProcesses() {
+   if ( fselected_processes ) {
+      // enable the selected processes
+      bool success = true;
+      for ( unsigned int j = 0; j<BBlocksSMCalc.size(); j++ ) {
+         for ( unsigned int i = 0; i < BBlocksSMCalc[j].size(); i++ ) {
+            fastNLOCoeffBase* c = BBlocksSMCalc[j][i];
+            // Check if the contribution is additive (and thus eventually has subprocess support)
+            if ( c && c->IsEnabled() && fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+               ((fastNLOCoeffAddBase*)c)->SubEnableAll( false );
+               success &= ((fastNLOCoeffAddBase*)c)->SubSelect( *fselected_processes, true );
+            }
+         }
+      }
+      return success;
+   } else {
+      // enable all processes
+      for ( unsigned int j = 0; j<BBlocksSMCalc.size(); j++ )
+         for ( unsigned int i = 0; i < BBlocksSMCalc[j].size(); i++ )
+            if ( BBlocksSMCalc[j][i] && BBlocksSMCalc[j][i]->IsEnabled() && fastNLOCoeffAddBase::CheckCoeffConstants(BBlocksSMCalc[j][i], true) )
+               ((fastNLOCoeffAddBase*)BBlocksSMCalc[j][i])->SubEnableAll();
+      return true;
+   }
+}
 
 //______________________________________________________________________________
 void fastNLOReader::FillAlphasCache(bool lForce) {
