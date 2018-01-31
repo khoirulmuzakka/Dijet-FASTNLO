@@ -16,7 +16,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
 AC_CONFIG_AUX_DIR([.])
 # Require minimal automake version, 1.13 is from 2013, switch on warnings
-AM_INIT_AUTOMAKE([1.13 -Wall -Wno-override])
+AM_INIT_AUTOMAKE([1.13 tar-ustar -Wall -Wno-override])
 # Require minimal libtool version, 2.4 is from 2011
 LT_PREREQ([2.4])
 #LT_INIT([dlopen])
