@@ -37,6 +37,7 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_F77([gfortran g77])
 AC_PROG_FC([gfortran g77])
+AC_CONFIG_MACRO_DIR([m4])
 #case $FC in
 #  gfortran) AC_SUBST([HAVE_GFORTRAN], [yes])
 #  g77) AC_SUBST([HAVE_G77], [yes])

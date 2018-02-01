@@ -37,12 +37,11 @@ public:
       fzmin = zmin ;
       fzmax = zmax;
    };
-   double GetZRangeMin() {
-      return fzmin;
-   };
-   double GetZRangeMax() {
-      return fzmax;
-   };
+   double GetZRangeMin() { return fzmin; };
+   double GetZRangeMax() { return fzmax; };
+   void SetPrintCrossSectionVsxIPzIP(bool print=true) {fPrintxIPzIP=print;}; //!< Print these values during integration.
+   std::vector < std::map< std::pair<double, double>, double > > GetXSection_vs_xIPzIP() { 
+      return fXSection_vs_xIPzIP;}//!< Get cross section for each zIP node and xIP slice.
 
    std::vector < double > GetCrossSection();
    void CalcCrossSection();
@@ -62,6 +61,8 @@ protected:
 
    std::vector < double > fxPoms;
    std::vector < double > fdxPoms;
+   bool fPrintxIPzIP = false;
+   std::vector < std::map< std::pair<double, double>, double > > fXSection_vs_xIPzIP; //! Cross section vs. x ( XSection_vsX1[bin][<{x,z},xs>] )
 
    // inherited functions
    virtual double EvolveAlphas(double Q) const = 0;

@@ -1637,7 +1637,7 @@ void fastNLOReader::SetNewSqrtS(double newSqrtS, double SqrtStable) {
    //!
    //! Only implemented for hadron-hadron collissions, but not for DIS
 
-   if (B_LO()->GetIPDFdef1() == 2)  {
+   if ( B_LO()  && (B_LO()->GetIPDFdef1() == 2) )  {
       logger.error["SetNewSqrtS"]<<"Center-of-mass reweighting not implemented for DIS."<<endl;
       exit(3);
    }
