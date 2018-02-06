@@ -1734,47 +1734,178 @@ void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& pr
 
 //_____________________________________________________________________________
 void fastNLOReader::SelectProcesses( const std::string& processes ) {
-   std::vector< std::pair<int,int> > tmp;
-   if ( processes == "all" ) {
+   //! Selects subprocesses given in processes. processes is a string describing the wanted subprocesses.
+   //! It should be formated like
+   //!  processes = ( [a](u|d|c|s|b) | g | q | none | all)( [a](u|d|c|s|b) | g | [(-|+)][(!|=)]q )
+   //! So it consists of two parts:
+   //!   part 1 is either
+   //!      - the optional modifier a and one of udcsbt selecting the specified (anti)quark
+   //!      - g selecting a gluon
+   //!      - q wildcard expansion for all quarks and antiquarks
+   //!      - none nothing is selected (part 2 is ignored in this case)
+   //       - all all combinatinos are selected (part 2 is ignored in this case)
+   //         note: this only selects all subprocesses contained in the table. If some subprocesses are not
+   //               contained in the table no warning is printed out.
+   //!   part 2 is either
+   //!      - the optional modifier a and one of udcsbt selecting the specified (anti)quark
+   //!      - g selecting a gluon
+   //!      - q selecting all quarks and antiquarks. There are several prefix modifiers to this wildcard:
+   //!        . - (anti) restricts selection to all antiquarks if a quark was selected in part 1
+   //!          and all quarks if a antiquark was selected in part 1
+   //!        . + (equal) restricts selection to all quarks if a quark was selected in part 1
+   //!          and all antiquarks if a antiquark was selected in part 1
+   //!        . ! (other) restricts selection to all quarks and antiquarks with different
+   //!          flavour as the one selected in part 1
+   //!        . = (same) restricts selection to all quarks and antiquarks with same flavour
+   //!          as the one selected in part 1
+   //!        note that (+|-) and (!|=) are mutually-exclusive.
+   //! there should be no space between part 1 and part 2 as spaces separate several part 1 - part 2 pairs.
+   //! If more than one such pairs are given. Each pair is parsed and the union of all selected processes is
+   //! selected.
+   //!
+   //! If the table is not compatible (or does not contain) with the selected subprocesses nothing is
+   //! changed and a warning is printed out.
+   
+   bool select_all = false;
+   std::vector< std::pair<int,int> > selection;
+   selection.clear();
+  
+   std::vector< std::string > substrings;
+   substrings.clear();
+   // split processes by delimiter ' '
+   int pos = 0, old_pos = 0;
+   do {
+      pos = processes.find(' ',old_pos);
+      substrings.push_back( processes.substr(old_pos,pos-old_pos);
+      old_pos=pos+1;
+   } while ( pos != std::npos );
+   
+   for ( int i = 0; i<substrings.size(); i++ ) {
+      if ( substrings[i].empty() )
+         continue;
+
+      // parse part 1
+      // treat select all special, as fselected_processes will be set to NULL
+      try {
+         if ( substrings[i].substr(0,3) == "all" ) {
+            select_all = true;
+            continue;
+         }
+         
+         if ( substrings[i].substr(0,4) == "none" ) {
+            continue;
+         }
+         
+         std::vector< int > part1_selection;
+         int anti = 1;
+         int n = 0;
+         if ( substrings[i].at(n) == 'a' ) {
+            anti = -1;
+            n++;
+         }
+         switch ( (char)substrings[i].at(n) ) {
+            case 'd': part1_selection.push_back( anti*1 ); break;
+            case 'u': part1_selection.push_back( anti*2 ); break;
+            case 's': part1_selection.push_back( anti*3 ); break;
+            case 'c': part1_selection.push_back( anti*4 ); break;
+            case 'b': part1_selection.push_back( anti*5 ); break;
+            case 'g': part1_selection.push_back( 0 ); break;
+            case 'q': for ( int p = -5; p <= 5; p++ ) {
+                         if ( p==0 )
+                            continue;
+                         part1_selection.push_back( anti*p );
+                      }
+                      break;
+            default : throw std::logic_error("unkown char");
+         }
+         n++;
+
+         for ( int j = 0; j<part1_selection.size(); j++ ) {
+            int parton1 = part1_selection[j];
+            //parse part 2
+            int s_flav = 0;
+            int s_anti = 0;
+            anti = 1;
+            if ( substrings[i].at(n) == 'a' ) {
+               anti = -1;
+               n++;
+            }
+            if ( substrings[i].at(n) == '+' ) {
+               s_anti = 1;
+               n++;
+            } else if ( substrings[i].at(n) == '-' ) {
+               s_anti = -1;
+               n++;
+            }
+            if ( substrings[i].at(n) == '!' ) {
+               s_flav = -1;
+               n++;
+            } else if ( substrings[i].at(n) == '=' ) {
+               s_flav = 1;
+               n++;
+            }
+            
+            switch ( (char)substrings[i].at(n) ) {
+               case 'd': selection.push_back( std::pair(parton1, anti*1) );
+                         selection.push_back( std::pair(anti*1, parton1) );
+                         break;
+               case 'u': selection.push_back( std::pair(parton1, anti*2) );
+                         selection.push_back( std::pair(anti*2, parton1) );
+                         break;
+               case 's': selection.push_back( std::pair(parton1, anti*3) );
+                         selection.push_back( std::pair(anti*3, parton1) );
+                         break;
+               case 'c': selection.push_back( std::pair(parton1, anti*4) );
+                         selection.push_back( std::pair(anti*4, parton1) );
+                         break;
+               case 'b': selection.push_back( std::pair(parton1, anti*5) );
+                         selection.push_back( std::pair(anti*5, parton1) );
+                         break;
+               case 'g': selection.push_back( std::pair(parton1, anti*0) );
+                         selection.push_back( std::pair(anti*0, parton1) );
+                         break;
+               case 'q': for ( int p = -5; p <= 5; p++ ) {
+                            if ( p == 0 )
+                               continue;
+                            if ( p*parton1*s_anti < 0 )  //(s_anti == 1 && p*parton < 0) || (s_anti == -1 && p*parton > 0)
+                               continue;
+                            if ( (s_flav == 1 && parton1*parton1 != p*p) || (s_flav == -1 && parton1*parton1 == p*p) )
+                               continue;
+                            selection.push_back( std::pair(parton1, p) );
+                            selection.push_back( std::pair(p, parton1) );
+                         }
+                         break;
+               default : throw std::logic_error("unkown char");
+            }
+         }
+      } catch ( const std::logic_error& ex ) {
+         logger.warn[SelectProcess] << "Failed to parse selection string \""<<substrings[i]<<"\", ignoring"<<endl;
+         continue;
+      }
+   }
+
+   // delete not unique processes from list
+   for ( int i = 0; i<selection.size(); i++ ) {
+      std::pair< int, int > p = selection[i];
+      for( int j = i+1; j<selection.size(); j++ ) {
+         if ( p == selection[j] ) {
+            selection.erase(j);
+            j--;
+         }
+      }
+   }
+
+   logger.debug["SelectProcess"] << "Selected processes ";
+   for ( int i = 0; i<selection.size(); i++ )
+      logger.debug["SelectProcess"] << selection[i].first << " " << selection[i].second << " , ";
+   logger.debug["SelectProcess"] << endl;
+   
+   if (select_all) {
       delete fselected_processes;
       fselected_processes = NULL;
       UpdateProcesses();
-   } else if ( processes == "none" ) {
-      tmp.clear();
-      SelectProcesses(tmp);
-   } else if ( processes == "gg" ) {
-      tmp = { {0,0} };
-      SelectProcesses(tmp);
-   } else if ( processes == "gq" ) {
-      tmp = { {0,-5},{0,-4},{0,-3},{0,-2},{0,-1},{0,1},{0,2},{0,3},{0,4},{0,5},
-              {-5,0},{-4,0},{-3,0},{-2,0},{-1,0},{1,0},{2,0},{3,0},{4,0},{5,0} };
-      SelectProcesses(tmp);
-   } else if ( processes == "qiqi" ) {
-      tmp = { {-5,-5},{-4,-4},{-3,-3},{-2,-2},{-1,-1},{1,1},{2,2},{3,3},{4,4},{5,5} };
-      SelectProcesses(tmp);
-   } else if ( processes == "qiai" ) {
-      tmp = { {-5,5},{-4,4},{-3,3},{-2,2},{-1,1},{1,-1},{2,-2},{3,-3},{4,-4},{5,-5} };
-      SelectProcesses(tmp);
-   } else if ( processes == "qiqj" ) {
-      tmp.clear();
-      for ( int i = 1; i<=5; i++ )
-         for ( int j = 1; j<=5; j++ )
-            if ( i != j ) {
-               tmp.push_back( {i,j} );
-               tmp.push_back( {-i,-j} );
-            }
-      SelectProcesses(tmp);
-   } else if ( processes == "qiaj" ) {
-      tmp.clear();
-      for ( int i = 1; i<=5; i++ )
-         for ( int j = 1; j<=5; j++ )
-            if ( i != j ) {
-               tmp.push_back( {i,-j} );
-               tmp.push_back( {-i,j} );
-            }
-      SelectProcesses(tmp);
    } else {
-      logger.warn["SelectProcesses"]<<"unrecognized selection \""<<processes<<"\" ignoring call"<<endl;
+      SelectProcesses(selection);
    }
 }
 
