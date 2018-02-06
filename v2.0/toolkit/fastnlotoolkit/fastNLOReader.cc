@@ -1776,11 +1776,11 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
    int pos = 0, old_pos = 0;
    do {
       pos = processes.find(' ',old_pos);
-      substrings.push_back( processes.substr(old_pos,pos-old_pos);
+      substrings.push_back( processes.substr(old_pos,pos-old_pos));
       old_pos=pos+1;
-   } while ( pos != std::npos );
+   } while ( pos != -1 );
    
-   for ( int i = 0; i<substrings.size(); i++ ) {
+   for ( unsigned int i = 0; i<substrings.size(); i++ ) {
       if ( substrings[i].empty() )
          continue;
 
@@ -1820,7 +1820,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
          }
          n++;
 
-         for ( int j = 0; j<part1_selection.size(); j++ ) {
+         for ( unsigned int j = 0; j<part1_selection.size(); j++ ) {
             int parton1 = part1_selection[j];
             //parse part 2
             int s_flav = 0;
@@ -1846,23 +1846,23 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
             }
             
             switch ( (char)substrings[i].at(n) ) {
-               case 'd': selection.push_back( std::pair(parton1, anti*1) );
-                         selection.push_back( std::pair(anti*1, parton1) );
+               case 'd': selection.push_back( {parton1, anti*1} );
+                         selection.push_back( {anti*1, parton1} );
                          break;
-               case 'u': selection.push_back( std::pair(parton1, anti*2) );
-                         selection.push_back( std::pair(anti*2, parton1) );
+               case 'u': selection.push_back( {parton1, anti*2} );
+                         selection.push_back( {anti*2, parton1} );
                          break;
-               case 's': selection.push_back( std::pair(parton1, anti*3) );
-                         selection.push_back( std::pair(anti*3, parton1) );
+               case 's': selection.push_back( {parton1, anti*3} );
+                         selection.push_back( {anti*3, parton1} );
                          break;
-               case 'c': selection.push_back( std::pair(parton1, anti*4) );
-                         selection.push_back( std::pair(anti*4, parton1) );
+               case 'c': selection.push_back( {parton1, anti*4} );
+                         selection.push_back( {anti*4, parton1} );
                          break;
-               case 'b': selection.push_back( std::pair(parton1, anti*5) );
-                         selection.push_back( std::pair(anti*5, parton1) );
+               case 'b': selection.push_back( {parton1, anti*5} );
+                         selection.push_back( {anti*5, parton1} );
                          break;
-               case 'g': selection.push_back( std::pair(parton1, anti*0) );
-                         selection.push_back( std::pair(anti*0, parton1) );
+               case 'g': selection.push_back( {parton1, anti*0} );
+                         selection.push_back( {anti*0, parton1} );
                          break;
                case 'q': for ( int p = -5; p <= 5; p++ ) {
                             if ( p == 0 )
@@ -1871,32 +1871,32 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
                                continue;
                             if ( (s_flav == 1 && parton1*parton1 != p*p) || (s_flav == -1 && parton1*parton1 == p*p) )
                                continue;
-                            selection.push_back( std::pair(parton1, p) );
-                            selection.push_back( std::pair(p, parton1) );
+                            selection.push_back( {parton1, p} );
+                            selection.push_back( {p, parton1} );
                          }
                          break;
                default : throw std::logic_error("unkown char");
             }
          }
       } catch ( const std::logic_error& ex ) {
-         logger.warn[SelectProcess] << "Failed to parse selection string \""<<substrings[i]<<"\", ignoring"<<endl;
+         logger.warn["SelectProcess"] << "Failed to parse selection string \""<<substrings[i]<<"\", ignoring"<<endl;
          continue;
       }
    }
 
    // delete not unique processes from list
-   for ( int i = 0; i<selection.size(); i++ ) {
+   for ( unsigned int i = 0; i<selection.size(); i++ ) {
       std::pair< int, int > p = selection[i];
-      for( int j = i+1; j<selection.size(); j++ ) {
+      for( unsigned int j = i+1; j<selection.size(); j++ ) {
          if ( p == selection[j] ) {
-            selection.erase(j);
+            selection.erase(selection.begin()+j);
             j--;
          }
       }
    }
 
    logger.debug["SelectProcess"] << "Selected processes ";
-   for ( int i = 0; i<selection.size(); i++ )
+   for ( unsigned int i = 0; i<selection.size(); i++ )
       logger.debug["SelectProcess"] << selection[i].first << " " << selection[i].second << " , ";
    logger.debug["SelectProcess"] << endl;
    
