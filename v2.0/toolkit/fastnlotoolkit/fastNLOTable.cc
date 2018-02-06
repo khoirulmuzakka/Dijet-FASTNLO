@@ -7,7 +7,9 @@
 #include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOTools.h"
 // zlib wrapper library
+#ifdef HAVE_LIBZ
 #include "fastnlotk/zstr.hpp"
+#endif
 
 using namespace std;
 using namespace fastNLO;
@@ -2397,17 +2399,20 @@ std::istream* fastNLOTable::OpenFileRead() {
    }
 
    // check if filename ends with .gz
-#ifndef HAVE_LIBZ
+#ifdef HAVE_LIBZ
+   std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in));
+   if ( strm ) logger.info["OpenFileRead"]<<"Opened file "<<ffilename<<" successfully."<<endl;
+   return strm;
+#else
    const std::string ending = ".gz";
    if (ffilename.length() >= ending.length() && ffilename.compare(ffilename.length() - ending.length(), ending.length(), ending) == 0) {
       logger.error["ReadHeader"]<<"Input file has a .gz file extension but zlib support is not enabled! Please unzip file first."<<endl;
       exit(1);
    }
+   std::istream* strm = (istream*)(new ifstream(ffilename.c_str(),ios::in));
+   return strm;
 #endif
 
-   std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in));
-   if ( strm ) logger.info["OpenFileRead"]<<"Opened file "<<ffilename<<" successfully."<<endl;
-   return strm;
 }
 
 
@@ -2426,10 +2431,14 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
    if (access(ffilename.c_str(), F_OK) == 0) {
       logger.info["OpenFileWrite"]<<"Overwriting the already existing table file: " << ffilename << endl;
    }
-   std::ostream* stream =
-        (compress
-         ? (ostream*)(new zstr::ofstream(ffilename))
-         : (ostream*)(new std::ofstream(ffilename)));
+#ifdef HAVE_LIBZ
+   std::ostream* stream = compress ?
+      (ostream*)(new zstr::ofstream(ffilename)) :
+      (ostream*)(new std::ofstream(ffilename));
+#else
+   std::ostream* stream = (ostream*)(new std::ofstream(ffilename));
+   if ( compress ) logger.info["OpenFileWrite"]<<"gz-compression requested, but compilation was performed without zlib."<<endl;
+#endif
 
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;

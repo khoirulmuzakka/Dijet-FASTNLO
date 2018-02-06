@@ -768,7 +768,7 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       bool lkthc = false;
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         if ( BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
+         if ( BBlocksSMCalc[kThresholdCorrection][i] && BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
          }
       }
@@ -794,11 +794,11 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
 
 void fastNLOReader::UseHoppetScaleVariations(bool useHoppet) {
 
-   if (FNLO_HOPPET[0] == '\0') {
+#ifndef FNLO_HOPPET
       logger.error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
             << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
       exit(1);
-   } else {
+#else 
       if (useHoppet) {
          if (GetIsFlexibleScaleTable()) {
             logger.info["UseHoppetScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can already choose all desired scale variations without Hoppet."<<endl;
@@ -819,7 +819,7 @@ void fastNLOReader::UseHoppetScaleVariations(bool useHoppet) {
          logger.info["UseHoppetScaleVariations"] << "Hoppet will NOT be used to calculate scale variations." << std::endl;
          fUseHoppet = false;
       }
-   }
+#endif
 }
 
 
@@ -871,7 +871,7 @@ bool fastNLOReader::SetContributionON(ESMCalculation eCalc , unsigned int Id , b
    }
 
    // backup original value
-   bool SetOld = BBlocksSMCalc[eCalc][Id]->IsEnabled();
+   bool SetOld = BBlocksSMCalc[eCalc][Id] && BBlocksSMCalc[eCalc][Id]->IsEnabled();
    // set the new value immediately, otherwise GetNScaleVariations(), which is used in FillAlphasCache, will give wrong result.
    BBlocksSMCalc[eCalc][Id]->Enable(SetOn);
 
@@ -1338,7 +1338,7 @@ void fastNLOReader::CalcCrossSection() {
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
          }
-         if (BBlocksSMCalc[kFixedOrder][i]->IsEnabled()) {
+         if (BBlocksSMCalc[kFixedOrder][i] && BBlocksSMCalc[kFixedOrder][i]->IsEnabled()) {
             if (kOrder == 0) {
                lklo = true;
             } else if (kOrder > 0) {
@@ -1637,7 +1637,7 @@ void fastNLOReader::SetNewSqrtS(double newSqrtS, double SqrtStable) {
    //!
    //! Only implemented for hadron-hadron collissions, but not for DIS
 
-   if (B_LO()->GetIPDFdef1() == 2)  {
+   if ( B_LO()  && (B_LO()->GetIPDFdef1() == 2) )  {
       logger.error["SetNewSqrtS"]<<"Center-of-mass reweighting not implemented for DIS."<<endl;
       exit(3);
    }
@@ -2172,12 +2172,12 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
 
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
-      if (FNLO_HOPPET[0] != '\0') {
-         if (fUseHoppet) {
-            //Also refill Hoppet cache and assign new PDF
-            HoppetInterface::InitHoppet(*this);
-         }
+#ifdef FNLO_HOPPET
+      if (fUseHoppet) {
+	 //Also refill Hoppet cache and assign new PDF
+	 HoppetInterface::InitHoppet(*this);
       }
+#endif
 
       for (unsigned int j = 0 ; j<BBlocksSMCalc.size() ; j++) {
          for (unsigned int i = 0 ; i<BBlocksSMCalc[j].size() ; i++) {
@@ -2241,10 +2241,10 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
                xfx = GetXFXSqrtS(xp,muf);
 
-               if (FNLO_HOPPET[0] != '\0') {
-                  if (fUseHoppet)
-                     xfxspl        = HoppetInterface::GetSpl(xp,muf);
-               }
+#ifdef FNLO_HOPPET
+	       if (fUseHoppet)
+		  xfxspl        = HoppetInterface::GetSpl(xp,muf);
+#endif
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx);
                if (fUseHoppet) {
                   c->PdfSplLc1[i][j][k] = CalcPDFLinearCombination(c, xfxspl);
@@ -2391,10 +2391,10 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
                xfx[k]        = GetXFXSqrtS(xp,muf);
-               if (FNLO_HOPPET[0] != '\0') {
-                  if (fUseHoppet)
-                     xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
-               }
+#ifdef FNLO_HOPPET
+	       if (fUseHoppet)
+		  xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
+#endif
             }
             int x1bin = 0;
             int x2bin = 0;
@@ -2455,21 +2455,19 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                xfx1[k]        = GetXFXSqrtS(xp,muf);
-               if (FNLO_HOPPET[0] != '\0') {
+#ifdef FNLO_HOPPET
                   if (fUseHoppet)
                      xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
-               }
-
+#endif
             }
             // determine all pdfs of hadron2
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
                xfx2[k]       = GetXFXSqrtS(xp,muf);
-               if (FNLO_HOPPET[0] != '\0') {
+#ifdef FNLO_HOPPET
                   if (fUseHoppet)
                      xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
-               }
-
+#endif
             }
             // full matrix notation
             for (int k=0; k<nxmax; k++) {
@@ -2824,7 +2822,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
          }
-         if ( BBlocksSMCalc[kFixedOrder][i]->IsEnabled() ) {
+         if ( BBlocksSMCalc[kFixedOrder][i] && BBlocksSMCalc[kFixedOrder][i]->IsEnabled() ) {
             if (kOrder == 0) {
                lklo = true;
             } else if (kOrder > 0) {
@@ -2838,7 +2836,8 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lkthc = false;
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         if ( BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
+	 cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
+         if ( BBlocksSMCalc[kThresholdCorrection][i] && BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
             break;
          }

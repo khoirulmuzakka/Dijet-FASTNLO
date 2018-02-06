@@ -434,7 +434,7 @@ void read_steer::AppendToTable(const std::string& key, const std::vector<std::st
 
 bool read_steer::CheckNumber(const string& str) {
    //! check if str is a float number
-   return str.find_first_of("-+1234567890")==0;
+   return str.find_first_of(".-+1234567890")==0;
 }
 
 
