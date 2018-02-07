@@ -23,7 +23,12 @@
 // Compilers like gcc usually drop unreachable statements
 // anyway such that unnecessary if-else-endif calls or
 // "unresolved symbol" errors are avoided.
-#define FNLO_HOPPET     "@HOPPET@"
+#define FNLO_HOPPET     @HOPPET@
+// undefine macro FNLO_HOPPET if it is empty
+#if ( 1- FNLO_HOPPET +1 == 0 ) && ( 2- FNLO_HOPPET +2 == 0 )
+  #undef FNLO_HOPPET
+#endif
+
 #define FNLO_QCDNUM     "@QCDNUM@"
 #define FNLO_ROOT       "@ROOT@"
 
