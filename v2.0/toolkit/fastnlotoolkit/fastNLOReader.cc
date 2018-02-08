@@ -1820,31 +1820,33 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
          }
          n++;
 
+         //parse part 2
+         int s_flav = 0;
+         int s_anti = 0;
+         anti = 1;
+         if ( substrings[i].at(n) == 'a' ) {
+            anti = -1;
+            n++;
+         }
+         if ( substrings[i].at(n) == '+' ) {
+            s_anti = 1;
+            n++;
+         } else if ( substrings[i].at(n) == '-' ) {
+            s_anti = -1;
+            n++;
+         }
+         if ( substrings[i].at(n) == '!' ) {
+            s_flav = -1;
+            n++;
+         } else if ( substrings[i].at(n) == '=' ) {
+            s_flav = 1;
+            n++;
+         }
+            
+         // loop over first selected partons
          for ( unsigned int j = 0; j<part1_selection.size(); j++ ) {
             int parton1 = part1_selection[j];
-            //parse part 2
-            int s_flav = 0;
-            int s_anti = 0;
-            anti = 1;
-            if ( substrings[i].at(n) == 'a' ) {
-               anti = -1;
-               n++;
-            }
-            if ( substrings[i].at(n) == '+' ) {
-               s_anti = 1;
-               n++;
-            } else if ( substrings[i].at(n) == '-' ) {
-               s_anti = -1;
-               n++;
-            }
-            if ( substrings[i].at(n) == '!' ) {
-               s_flav = -1;
-               n++;
-            } else if ( substrings[i].at(n) == '=' ) {
-               s_flav = 1;
-               n++;
-            }
-            
+
             switch ( (char)substrings[i].at(n) ) {
                case 'd': selection.push_back( {parton1, anti*1} );
                          selection.push_back( {anti*1, parton1} );
