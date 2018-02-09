@@ -762,6 +762,20 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
          }
       }
    }
+   cout << " # No. of subprocess contributions     " << fPDFCoeff.size() << endl;
+   cout << " #ISub  " << "Processes" << endl;
+   for ( unsigned int i = 0; i<fPDFCoeff.size(); i++ ) {
+      cout << " #";
+      int w = cout.width();
+      cout.width(4);
+      cout << i;
+      cout.width(w);
+      cout << ": ";
+      for ( unsigned int j = 0; j<fPDFCoeff[i].size(); j++ ) {
+         cout << "(" << fPDFCoeff[i][j].first << "," << fPDFCoeff[i][j].second << ")" << ", ";
+      }
+      cout << endl;
+   }
    if ( iprint < 0 ) {
       cout << fastNLO::_CSEPSC << endl;
    } else {
