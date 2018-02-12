@@ -5,24 +5,29 @@
 //   @author D. Britzger, K. Rabbertz
 //
 //
-//
-
+// Get preprocessor defines from autotools setup
 #include "amconfig.h"
 
+// Require fastNLO
 #ifdef HAVE_FASTNLO
 
+// System includes
+#include <cfloat>
+#include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <algorithm> //c++98
 #include <utility> //c++11
 #include <sys/stat.h> //c++98
 
-/// fastnlo headers
-#include "fastnlo_utils.h"
-//#include "fastnlotk/fastNLOCreate.h"
-
+// NNLO bridge includes
 #include "nnlo_common.h"
 #include "nnlo_utils.h"
+
+// fastNLO includes
+#include "fastnlo_utils.h"
+//#include "fastnlotk/fastNLOCreate.h"
 
 
 
@@ -208,8 +213,8 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    //   only needed for fixed-scale tables,
    //   List of scale factors must include factor '1',
    //   Scale factors will be ordered according to fastNLO convention:
-   //   (1, min, ... , max).
-   sc.ScaleVariationFactors = {1.0, 0.5, 2.0};
+   //   (1, min, ... , max). Defaults: {0.5, 1.0, 2.0}
+   sc.ScaleVariationFactors = {1.0};
 
    sc.ReadBinningFromSteering = true; // Specify if binning is read from fScenConst or from warmup
    sc.ApplyPDFReweighting  = true; //  Apply reweighting of pdfs for an optimized interpolation, def.=true.
@@ -220,10 +225,10 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    //   Choose fastNLO interpolation kernels and distance measures
    sc.X_Kernel = "Lagrange";
    sc.X_DistanceMeasure = "sqrtlog10"; //"3rdrtlog10"
-   sc.X_NNodes = 30;
+   //   sc.X_NNodes = 30; // equivalent to APPLgrid setting; too large tables
+   sc.X_NNodes = 20;
    //sc.X_NNodeCounting = "NodesMax";
    sc.X_NNodeCounting = "NodesPerBin";
-
    if ( nnlo::IsDIS() ) {
       sc.X_Kernel = "Catmull";
       sc.X_DistanceMeasure = "log10"; // we like to have many nodes at LOW-x !
@@ -232,7 +237,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
 
    sc.Mu1_Kernel = "Lagrange";
    sc.Mu1_DistanceMeasure = "loglog025";//"loglog025";
-   sc.Mu1_NNodes = 6;
+   sc.Mu1_NNodes = 7;
    if ( nnlo::IsDIS() ) {
       sc.Mu1_NNodes = 7; // This is Q2 for DIS
       sc.Mu1_DistanceMeasure = "loglog025";//"loglog025";
@@ -245,7 +250,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
 
    sc.Mu2_Kernel = "Lagrange"; //"Lagrange";//<   Lagrange     # Scale2 not used for fixed-scale tables
    sc.Mu2_DistanceMeasure = "loglog025";//"loglog025";//< "loglog025"
-   sc.Mu2_NNodes = 6;
+   sc.Mu2_NNodes = 7;
 
    return sc;
 }
@@ -253,7 +258,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
 
 
 // _____________________________________________________________________ //
-void fnloUtils::SetNNLOJETDefaultBinning(fastNLO::ScenarioConstants& sc, const int& nbins, const double& lo, const double& hi) {
+void fnloUtils::SetNNLOJETDefaultBinning(fastNLO::ScenarioConstants& sc, const int& nbins, const double& lo) {
    //!< set binning as used by NNLOJET
    sc.SingleDifferentialBinning.resize(nbins+1);
    for (int i=0; i<=nbins; i++) sc.SingleDifferentialBinning[i] = (&lo)[i];
@@ -446,11 +451,15 @@ std::string fnloUtils::GetConfigDir() {
 // _____________________________________________________________________ //
 std::string fnloUtils::GetConfigFile() {
    //!< get name of the process
-   std::string fname = nnlo::GetProcessName();
-   std::cout<<"[fnloUtils::GetConfigFile()] The process name is reported to be: "<<fname<<std::endl;
-   fname += "-" + fnloUtils::GetOrderName() + ".config";
-   fname = fnloUtils::GetConfigDir() + "/" + nnlo::GetProcessName() + "/" + fname;
-   std::cout<<"[fnloUtils::GetConfigFile()] Using config file: "<<fname<<std::endl;
+   std::string pname = nnlo::GetProcessName();
+   std::cout << "[fnloUtils::GetConfigFile()] The process name is reported to be: " << pname << std::endl;
+   if ( pname == "1jet" || pname == "2jet" ) {
+     pname = pname.substr(1,std::string::npos);
+     std::cout << "[fnloUtils::GetConfigFile()] For subprocess configuration shortening process name to: " << pname << std::endl;
+   }
+   std::string fname = pname + "-" + fnloUtils::GetOrderName() + ".config";
+   fname = fnloUtils::GetConfigDir() + "/" + pname + "/" + fname;
+   std::cout << "[fnloUtils::GetConfigFile()] Using config file: " << fname << std::endl;
    return fname;
 }
 
@@ -458,10 +467,15 @@ std::string fnloUtils::GetConfigFile() {
 
 // _____________________________________________________________________ //
 std::vector<std::string> fnloUtils::GetConfigFiles() {
-    //!< get name of the process
-    //  "ZJ-LO.config"
-   std::vector<std::string> fnames;// = fnloUtils::GetProcessName();
-   std::string pref = fnloUtils::GetConfigDir()+"/"+nnlo::GetProcessName()+"/"+ nnlo::GetProcessName();
+   //!< get name of the process
+   std::string pname = nnlo::GetProcessName();
+   std::cout << "[fnloUtils::GetConfigFiles()] The process name is reported to be: " << pname << std::endl;
+   if ( pname == "1jet" || pname == "2jet" ) {
+     pname = pname.substr(1,std::string::npos);
+     std::cout << "[fnloUtils::GetConfigFiles()]  For subprocess configuration shortening process name to: " << pname << std::endl;
+   }
+   std::vector<std::string> fnames;
+   std::string pref = fnloUtils::GetConfigDir()+"/"+pname+"/"+pname;
    if ( nnlo::GetOrder() == 0 ) {
       fnames.push_back( pref+"-LO.config");
    }
@@ -474,7 +488,7 @@ std::vector<std::string> fnloUtils::GetConfigFiles() {
       fnames.push_back( pref+"-RV.config");
       fnames.push_back( pref+"-VV.config");
    }
-   std::cout<<"[fnloUtils::GetConfigFile()]  Found order "<<nnlo::GetOrder()<<". Using config files: "<<std::endl;
+   std::cout<<"[fnloUtils::GetConfigFiles()]  Found order "<<nnlo::GetOrder()<<". Using config files: "<<std::endl;
    for ( auto f : fnames ) std::cout<<"\t"<<f<<std::endl;
    return fnames;
 }
@@ -540,163 +554,250 @@ double fnloUtils::CalculateReferenceWeight(double wgt, double x1, double x2) {
 
 
 
-std::vector<double> fnloUtils::SclIndepWgt(const double* wt, double muf, double mur){
-   //! calculate scale independent weights for fastNLO
+// _____________________________________________________________________ //
+std::vector<double> fnloUtils::SclIndepWgt(const double* wt, double muf, double mur) {
+   //! Calculate scale independent weights for fastNLO
 
+   // Do not use debug mode for mass production!
+   static const bool Debug = true;
+   static bool First = true;
+   if ( First && Debug ) {
+      First = false;
+      std::cout << "[fnloUtils::SclIndepWgt]: Running in DEBUG mode. Do not use for mass production!" << std::endl;
+   }
 
-   std::vector<double> ret{0,0,0,0,0,0};;
+   std::vector<double> ret{0,0,0,0,0,0};  // return value
+   std::vector<double> sret{0,0,0,0,0,0}; // simple sum
+   std::vector<double> oret{0,0,0,0,0,0}; // ordered sum
+   std::vector<double> kret{0,0,0,0,0,0}; // Kahan sum
+
    if ( nnlo::GetOrder()==0 ) {
-      //! LO does not has scale dependent terms
-      ret[0] = wt[0];
+      //! LO does not have scale dependent terms
+      sret[0] = wt[0];
+      oret[0] = wt[0];
+      kret[0] = wt[0];
+      ret[0]  = kret[0];
       return ret;
    }
 
-
-//                                    14          11       5       14       11       5        1          1      1    1       1      1
-// Out[4]= {{13, 4, -9, -9, 1, 1}, {-(--), -2, 2, --, 0, -(-)}, {-(--), -2, --, 2, -(-), 0}, {-, 0, 0, -(-), 0, -}, {-, 0, -(-), 0, -, 0}, {1, 1, -1, -1, 0, 0}}
-//                                    3           2        6       3        2        6        3          2      6    3       2      6
-
-   double EPS = 1.e-6;
-   //unsigned int nSclV = nnlo::GetOrder()==1  ? 3 : 6;
-   const unsigned int nSclV =  6;
+   double wamax = DBL_MAX;
+   const double EPS   = 1.e-3;  // aim for permille precision
+   const double SMALL = 1.e-12; // relative weight limit to consider some deviations > EPS negligible
+   static const unsigned int nSclVNNLO = 6;
+   const unsigned int nSclV = nSclVNNLO;
+   // Simplify in case of NLO, to be checked!!
+   // unsigned int nSclV = nnlo::GetOrder()==1  ? 3 : 6; // only NLO
 
    if ( nSclV==3 ) {
-      // -- not working, but I don't know why!
-      static const double SclInvNLO[3][3] = {{3, -2, 0},{0, 1, -1},{-1, 0, 1}}; // i+1
-      for ( unsigned int j = 0 ; j<nSclV ; j++ ){
-         for ( unsigned int i = 0 ; i<nSclV ; i++ ){
-            ret[j] += wt[i+1]*SclInvNLO[j][i];
-         }
-         //if ( fabs(ret[j]/wt[1]) < EPS ) ret[j] = 0;
-      }
-      // -- not working, but I don't know why!
+      std::cerr << "[fnloUtils::SclIndepWgt]: Do not use yet NLO with nSclV = " << nSclV << "! Aborted!" << std::endl;
+      exit(1);
+      // -- not working, to be checked!
+      // static const double SclInvNLO[3][3] = {{3, -2, 0},{0, 1, -1},{-1, 0, 1}}; // i+1
+      // for ( unsigned int j = 0 ; j<nSclV ; j++ ){
+      //    for ( unsigned int i = 0 ; i<nSclV ; i++ ){
+      //       ret[j] += wt[i+1]*SclInvNLO[j][i];
+      //    }
+      //    //if ( fabs(ret[j]/wt[1]) < EPS ) ret[j] = 0;
+      // }
+      // -- not working, to be checked!
       // const double SclInvNLO[3][3] = {{5.5,-2,-2.5},{-1.5,1,0.5},{-0.5,0,0.5}}; // i+3
       // for ( unsigned int j = 0 ; j<nSclV ; j++ ){
       //         for ( unsigned int i = 0 ; i<nSclV ; i++ ){
       //            ret[j] += wt[i+3]*SclInvNLO[j][i];
       //         }
       // }
-   }
-   else {
-      static const double SclInvNNLO[6][6] = {
-         {13,4,-9,-9,1,1},
-         {-14./3.,-2,2,5.5,0,-5./6.},
-         {-14./3.,-2,5.5,2,-5./6.,0},
-         {1./3.,0,0,-0.5,0,1./6.},
-         {1./3.,0,-0.5,0,1./6.,0},
-         {1,1,-1,-1,0,0} };
+   } else {
+      // This decomposition matrix is based on i.a. fixed scale choices of
+      // exp^1, exp^(3/2), exp^(5/2);
+      static const double SclInvNNLO[nSclVNNLO][nSclVNNLO] = {
+         {    13.,  4.,    -9.,    -9.,     1., 1.},
+         {-14./3., -2.,     2., 11./2.,     0., -5./6.},
+         {-14./3., -2., 11./2.,     2., -5./6., 0.},
+         {  1./3.,  0.,     0., -1./2.,     0., 1./6.},
+         {  1./3.,  0., -1./2.,     0.,  1./6., 0.},
+         {     1.,  1.,    -1.,    -1.,     0., 0.} };
+      double sum[nSclVNNLO] = {0., 0., 0., 0., 0., 0.};
       int nRet = ( nnlo::GetOrder()==1 ) ? 4 : nSclV;
+
+      // static unsigned int nprnt = 0;
+      // static unsigned int npmod = 1;
+      // if ( nprnt < 10 && nprnt % npmod == 0 ) {
+      //    nprnt++;
+      //    for ( int i = 0 ; i<=nRet ; i++ ){
+      //       std::cout << std::setprecision(16) << "AAA i = " << i << ", wt[i] = " << wt[i] << std::endl;
+      //    }
+      // } else if ( nprnt == 10 ) {
+      //    nprnt = 0;
+      //    npmod *= 10;
+      // }
+
+      wamax = std::abs(wt[0]);
       for ( int j = 0 ; j<nRet ; j++ ){
-         for ( unsigned int i = 0 ; i<nSclV ; i++ ){
-            ret[j] += wt[i+1]*SclInvNNLO[j][i];
+         wamax = std::max(std::abs(wt[j+1]),wamax);
+         double wasum = 0.;
+         for ( unsigned int i = 0 ; i<nSclV ; i++ ){ // DB
+            //         for ( unsigned int i = 0 ; i<nRet ; i++ ){ // KR TEST
+            sum[i]   = wt[i+1]*SclInvNNLO[j][i];
+            //            sret[j] += sum[i];
+            wasum   += std::abs(sum[i]);
          }
-         if ( fabs(ret[j]/wt[1]) < EPS ) ret[j] = 0; // remove very small weights
+         //         oret[j]  = fnloUtils::OrderedSum(sum,nSclVNNLO);
+         kret[j]  = fnloUtils::KahanSum(sum,nSclVNNLO);
+         // std::cout << "RD1 j = " << j << ", normal sum[j]  = " << sret[j] << std::endl;
+         // std::cout << "RD2 j = " << j << ", ordered sum[j] = " << oret[j] << ", o/s = " << oret[j]/sret[j] << std::endl;
+         // std::cout << "RD3 j = " << j << ", Kahan sum[j]   = " << kret[j] << ", k/s = " << kret[j]/sret[j] <<std::endl;
+         // Numerically Kahan summing is the most precise
+         ret[j] = kret[j];
+
+         if ( Debug ) {
+            // Set small weights to zero? Not necessary. Does not occur anyway for DBL_MIN ...
+            static unsigned int nzwgt = 0;
+            static unsigned int nzmss = 0;
+            static unsigned int nzmod = 1;
+            if ( ret[j] != 0. && std::abs(ret[j])/wasum < DBL_MIN ) {
+               nzwgt++;
+               if ( nzmss < 10 && nzwgt % nzmod == 0 ) {
+                  nzmss++;
+                  std::cout << "[fnloUtils::SclIndepWgt]: " << nzwgt << "th occurrence of tiny scale weight = " << ret[j] << std::endl;
+               } else if ( nzmss == 10 ) {
+                  nzmss = 0;
+                  nzmod *= 10;
+               }
+            }
+         }
       }
+
       // if ( nnlo::GetOrder()==1 ) {
       //    // ret[3]=0;
       //    ret[4]=0;// must be exact zero for fastNLO
       //    ret[5]=0;// must be exact zero for fastNLO
       // }
+
    }
 
-//nnlo
-   // std::vector<double> ret2(6);
-   // const double SclInvNNLO[6][6] = {
-   //    {13,4,-9,-9,1,1},
-   //    {-14./3.,-2,2,5.5,0,-5./6.},
-   //    {-14./3.,-2,5.5,2,-5./6.,0},
-   //    {1./3.,0,0,-0.5,0,1./6.},
-   //    {1./3.,0,-0.5,0,1./6.,0},
-   //    {1,1,-1,-1,0,0} };
-   //    for ( unsigned int j = 0 ; j<nSclV ; j++ ){
-   //    for ( unsigned int i = 0 ; i<nSclV ; i++ ){
-   //       ret2[j] += wt[i+1]*SclInvNNLO[j][i];
-   //    }
-   //    //if ( fabs(ret[j]/wt[1]) < EPS ) ret[j] = 0;
-   //    }
-
-   // double r = log(mur*mur);
-   // double f = log(muf*muf);
-   // #include "ScaleIndepWgt.C"
-
-   // double EPS = 1.e-6;
-   // for ( unsigned int j = 0 ; j<6 ; j++ ){
-   //    ret[j] = 0;
-   //    for ( unsigned int i = 0 ; i<6 ; i++ ){
-   //    ret[j] += wt[i]*SclInv[j][i];
-   //    }
-   //    if ( fabs(ret[j]/wt[0]) < EPS ) ret[j] = 0;
-   // }
-
-   const bool DoDbgTest = false;
-   if ( DoDbgTest ) {
+   // Try to reconstruct original weight wt[0] as cross check
+   if ( Debug ) {
       double r = log(mur*mur);
       double f = log(muf*muf);
-      double MyWgt0     = ret[0] + r*ret[1] + f*ret[2] + r*r*ret[3] + f*f*ret[4] + r*f*ret[5];
+      double sum[6] = { ret[0], r*ret[1], f*ret[2], r*r*ret[3], f*f*ret[4], r*f*ret[5] };
+      // double sMyWgt0 = 0.;
+      // for ( unsigned int i=0; i<nSclVNNLO; i++) {
+      //    sMyWgt0 += sum[i];
+      // }
+      // double oMyWgt0 = OrderedSum(sum,nSclVNNLO);
+      double kMyWgt0 = KahanSum(sum,nSclVNNLO);
+      // Numerically Kahan summing is the most precise
+      double MyWgt0  = kMyWgt0;
+
       //double MyWgtNLO   = ret[0] + r*ret[1] + f*ret[2];
       //double MyRefWgt = ret[0] + 2*r*ret[1] + 2*f*ret[2] + 4*r*r*ret[3] + 4*f*f*ret[4] + 4*r*f*ret[5];
-      EPS = 1.e-2;
-      if  ( fabs(MyWgt0/wt[0]-1) > EPS || !std::isfinite(MyWgt0)) {
+
+      // Count misreconstructed weights for first scale
+      static unsigned int nmwgt = 0;
+      static unsigned int nmmss = 0;
+      static unsigned int nmmod = 1;
+      if  ( std::abs(MyWgt0/wt[0]-1) > EPS || !std::isfinite(MyWgt0)) {
+         if ( std::abs(MyWgt0)/wamax > SMALL || std::abs(wt[0])/wamax > SMALL ) {
+            nmwgt++;
+            if ( nmmss < 10 && nmwgt % nmmod == 0 ) {
+               nmmss++;
+               std::cout << "[fnloUtils::SclIndepWgt]: " << nmwgt << "th occurrence of large misreconstructed weight!" << std::endl;
+               std::cout<<"[fnloUtils::SclIndepWgt]: LARGE discrepant weight! Original weight = " << wt[0] << ", reconstructed weight = " << MyWgt0 << ", deviation (per mille) = " << 1000*(std::abs(MyWgt0/wt[0])-1) << ", weight max = " << wamax << std::endl;
+               std::cout<<"[fnloUtils::SclIndepWgt]: Original weight/max = " << std::abs(wt[0])/wamax << ", reconstructed weight/max = " << std::abs(MyWgt0)/wamax << std::endl;
+            } else if ( nmmss == 10 ) {
+               nmmss = 0;
+               nmmod *= 10;
+            }
+         }
          std::cerr<<"[fnloUtils::SclIndepWgt]. Warning!"<<std::endl;
-         std::cout<<"  Cond1: "<<(fabs(MyWgt0/wt[0]-1) > 1.e-8)<<"\tvalCond1="<<fabs(MyWgt0/wt[0]-1)<<std::endl;
-         //std::cout<<"  Cond1: "<<(fabs(MyWgtNLO/wt[0]-1) > 1.e-8)<<"\tvalCond1="<<fabs(MyWgtNLO/wt[0]-1)<<std::endl;
-         std::cout<<"  muf="<<muf<<"\tmur="<<mur<<std::endl;
-         std::cout<<"  wt []";
+         std::cerr<<"[fnloUtils::SclIndepWgt]. Discrepant weight! Original weight = " << wt[0] << ", reconstructed weight = " << MyWgt0 << ", weight max = " << wamax << std::endl;
+         std::cerr<<"[fnloUtils::SclIndepWgt]. Original weight/max = " << std::abs(wt[0])/wamax << ", reconstructed weight/max = " << std::abs(MyWgt0)/wamax << std::endl;
+         std::cout<<"  muf = " << muf << ", mur = " << mur << std::endl;
+         std::cout<<"  wt [] =";
          for ( unsigned int i = 0 ; i<7 ; i++ )  std::cout<<"\t"<<wt[i];
          std::cout<<"\t\t"<<std::endl;
 
          std::cout<<"  ln(mur^2) []";
          for ( unsigned int i = 0 ; i<7 ; i++ )  std::cout<<"\t"<<log(mur2_hook(i+1));
          std::cout<<"\t\t"<<std::endl;
+
          std::cout<<"  ln(muf^2) []";
          for ( unsigned int i = 0 ; i<7 ; i++ )  std::cout<<"\t"<<log(muf2_hook(i+1));
          std::cout<<"\t\t"<<std::endl;
 
-
          std::cout<<"  ret[]";
          for ( unsigned int j = 0 ; j<6 ; j++ )std::cout<<"\t"<<ret[j];
          std::cout<<std::endl;
-         // std::cout<<"  ret2[]";
-         // for ( unsigned int j = 0 ; j<6 ; j++ )std::cout<<"\t"<<ret2[j];
-         // std::cout<<std::endl;
-
-         std::cout<<"  [TEST] Wgt0  ="<<wt[0]<<"\tMyWgt="<<MyWgt0<<"\tMy/Ref: "<<MyWgt0/wt[0]<<std::endl; //MyRefWeight!
-         printf ("\tMy0/Ref= %e  \n",MyWgt0/wt[0]);
+         std::cout<<" oret[]";
+         for ( unsigned int j = 0 ; j<6 ; j++ )std::cout<<"\t"<<oret[j];
          std::cout<<std::endl;
-         //exit(3);
+         std::cout<<" kret[]";
+         for ( unsigned int j = 0 ; j<6 ; j++ )std::cout<<"\t"<<kret[j];
+         std::cout<<std::endl;
+
+         //         exit(3);
       }
    }
+
    return ret;
+}
+
+
+// Kahan summing to improve numerical precision
+double fnloUtils::KahanSum( double in[], unsigned int insize ) {
+   double ksum = in[0];
+   double c = 0.;
+   for ( unsigned int i = 1; i<insize ; i++ ){
+      double y = in[i] - c;
+      double t = ksum + y;
+      c        = (t  - ksum)  - y;
+      ksum     = t;
+   }
+   return ksum;
+}
+
+
+// Ordered summing (in descending order here) to improve numerical precision
+double fnloUtils::OrderedSum( double in[], unsigned int insize ) {
+   double osum = 0.;
+   std::vector<double> vin;
+   for ( unsigned int i = 0 ; i<insize ; i++ ){
+      vin.push_back(in[i]);
+   }
+   auto func=[](double a, double b) { return std::abs(a) > std::abs(b); };
+   std::sort(std::begin(vin), std::end(vin), func);
+   for ( unsigned int i = 0 ; i<insize ; i++ ){
+      osum += vin[i];
+   }
+   return osum;
 }
 
 
 
 // _____________________________________________________________________ //
 void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
-   using namespace std;
    // static const int& iproc = currentprocess_.iproc;
    // int nloops = channel_.iloops[iproc-1]; /// loop order
    // int ipars  = channel_.ipars[iproc-1];  /// number of additional particles + 1
-   // cout<<"        nloops          "<<nloops<<endl;
-   // cout<<"        ipars           "<<ipars<<endl;
-   // cout<<"        ndim.norder     "<<ndimcurrent_.norder<<endl;
-   // cout<<"        inppar.njets    "<<inppar_.njets<<endl;
-   // cout<<"        order_.ieorder  "<<order_.ieorder<<endl;
-   // cout<<"        GetNPos         "<<nnlo::GetNPow()<<endl;
-   // cout<<"        GetOrder()      "<<nnlo::GetOrder()<<endl;
-   // cout<<endl;
+   // std::cout<<"        nloops          "<<nloops<< std::endl;
+   // std::cout<<"        ipars           "<<ipars<< std::endl;
+   // std::cout<<"        ndim.norder     "<<ndimcurrent_.norder<< std::endl;
+   // std::cout<<"        inppar.njets    "<<inppar_.njets<< std::endl;
+   // std::cout<<"        order_.ieorder  "<<order_.ieorder<< std::endl;
+   // std::cout<<"        GetNPos         "<<nnlo::GetNPow()<< std::endl;
+   // std::cout<<"        GetOrder()      "<<nnlo::GetOrder()<< std::endl;
+   // std::cout<< std::endl;
 
    // --- welcome
-   cout << endl;
-   cout << "[fnloUtils::InitFastNLO] fastNLO initialisation"  << endl;
+   std::cout << "[fnloUtils::InitFastNLO] fastNLO initialisation!"  << std::endl;
    if ( fnloUtils::ftable[id] != NULL )  return;
-   cout << "[fnloUtils::InitFastNLO] NNLOJET provides process: " << nnlo::GetProcessName() << endl;
+   std::cout << "[fnloUtils::InitFastNLO] NNLOJET provides process: " << nnlo::GetProcessName() << std::endl;
 
    // --- get settings of histogram [id] from NNLOJET
-   const string& gridname = fnloUtils::fInits[id].gridname;
+   const std::string& gridname = fnloUtils::fInits[id].gridname;
    const int& nbins       = fnloUtils::fInits[id].nbins;
    const double& lo       = *(fnloUtils::fInits[id].lo);
-   const double& hi       = *(fnloUtils::fInits[id].hi);
+   //const double& hi       = *(fnloUtils::fInits[id].hi);
    fnloUtils::_myfillwgt  = 0;
 
    // --- read config file with  parton combinations
@@ -713,59 +814,61 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
    // --- build scenario specific 'ScenarioConstants'
    fastNLO::ScenarioConstants sc = fnloUtils::GetNNLOJET_ScenConsts();
-   if ( gridname.find("iff") != string::npos ) {
+   if ( gridname.find("iff") != std::string::npos ) {
       sc.X_NNodes = 50;
       sc.X_DistanceMeasure = "sqrtlog10"; // we like to have increasingly many nodes at high-x
    }
-   if ( nnlo::IsDIS() && gridname.find("q2") == string::npos ) {
+   if ( nnlo::IsDIS() && gridname.find("q2") == std::string::npos ) {
       std::cout<<"[fnloUtils::InitFastNLO] IsDIS, but not differential as function of q2, using more q2 nodes, less x-nodes"<<std::endl;
       sc.Mu1_NNodes = 14; // more q2 nodes
       sc.Mu2_NNodes = 6;
-      if ( gridname.find("iff") != string::npos ) sc.X_NNodes = 42;
+      if ( gridname.find("iff") != std::string::npos ) sc.X_NNodes = 42;
    }
    if ( muf2_hook(2) == mur2_hook(2) &&  fabs(sqrt(mur2_hook(2))/exp(1)-1)<1.e-6) sc.FlexibleScaleTable = true;
    else if ( muf2_hook(1) == mur2_hook(1) ) sc.FlexibleScaleTable = false;
    else {
-      cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<<endl;
-      cout<<"                       muf2(1)="<<muf2_hook(1)<<"\tmur2(1)="<<mur2_hook(1)<<endl;
-      cout<<"                       muf2(2)="<<muf2_hook(2)<<"\tmur2(2)="<<mur2_hook(2)<<endl;
-      cout<<" Exiting."<<endl;
+      std::cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<< std::endl;
+      std::cout<<"                       muf2(1)="<<muf2_hook(1)<<"\tmur2(1)="<<mur2_hook(1)<< std::endl;
+      std::cout<<"                       muf2(2)="<<muf2_hook(2)<<"\tmur2(2)="<<mur2_hook(2)<< std::endl;
+      std::cout<<" Exiting."<< std::endl;
       exit(4);
    }
-   fnloUtils::SetNNLOJETDefaultBinning(sc, nbins, lo, hi);
+   fnloUtils::SetNNLOJETDefaultBinning(sc, nbins, lo);
    // if ( nnlo::IsDIS() ){
    //    sc.CheckScaleLimitsAgainstBins = sc.FlexibleScaleTable;
    // }
 
    // --- adapt for muf-variations
    static const double sclfac[maxscl] = {1,0.5,2.,0.505, 202,0.005,200}; // ugly convention: muf*0.5, muf*2, mur+muf * 0.5, mur+muf* 2, mur*0.5 mur*2
-   cout<<"[fnloUtils::InitFastNLO] wt  []:";
+   std::cout<<"[fnloUtils::InitFastNLO] wt  []:";
    for ( int is = 0 ; is<maxscl ; is++ ) printf("\t%5.4e",wt[is]);
-   cout<<endl;
-   cout<<"[fnloUtils::InitFastNLO] muf2[]:";
+   std::cout<< std::endl;
+   std::cout<<"[fnloUtils::InitFastNLO] muf2[]:";
    for ( int is = 0 ; is<maxscl ; is++ ) printf("\t%5.4e",muf2_hook(is+1));
-   cout<<endl;
-   cout<<"[fnloUtils::InitFastNLO] mur2[]:";
+   std::cout<< std::endl;
+   std::cout<<"[fnloUtils::InitFastNLO] mur2[]:";
    for ( int is = 0 ; is<maxscl ; is++ ) printf("\t%5.4e",mur2_hook(is+1));
-   cout<<endl;
+   std::cout<< std::endl;
 
    //if ( !getunitphase_() ) {
-      for ( int is = 1 ; is<maxscl && fabs(wt[is])> TINY; is++ )  {
-         cout<<"[fnloUtils::InitFastNLO] wt["<<is<<"]="<<wt[is]<<endl;
+   // KR: Use C++ macro constants like DBL_MIN instead
+   //      for ( int is = 1 ; is<maxscl && fabs(wt[is])> TINY; is++ )  {
+      for ( int is = 1 ; is<maxscl && fabs(wt[is]) > DBL_MIN; is++ )  {
+	//         std::cout<<"[fnloUtils::InitFastNLO] wt["<<is<<"]="<<wt[is]<< std::endl;
          sc.ScaleVariationFactors.push_back(sclfac[is]);
       }
-      cout<<"[fnloUtils::InitFastNLO] Number of scale factors found: "<<sc.ScaleVariationFactors.size()<<"\t Please respect the convention how to specify those in the run-card."<<endl;
-      cout<<"[fnloUtils::InitFastNLO] Scale variation factors: "<<sc.ScaleVariationFactors<<endl;
+      std::cout<<"[fnloUtils::InitFastNLO] Number of scale factors found: "<<sc.ScaleVariationFactors.size()<<"\t Please respect the convention how to specify those in the run-card."<< std::endl;
+      std::cout<<"[fnloUtils::InitFastNLO] Scale variation factors: "<<sc.ScaleVariationFactors<< std::endl;
 
       if ( sc.FlexibleScaleTable ) {
          // double q2 = muf2_hook(1);
          // double p2 = mur2_hook(1);
-         std::cout<<"mur: ";
-         for ( int is = 0 ; is<maxscl ; is++ ) std::cout<<"\t"<<sqrt(mur2_hook(1+is)) ;
-         std::cout<<std::endl;
-         std::cout<<"muf: ";
-         for ( int is = 0 ; is<maxscl ; is++ ) std::cout<<"\t"<<sqrt(muf2_hook(1+is)) ;
-         std::cout<<std::endl;
+         // std::cout<<"mur: ";
+         // for ( int is = 0 ; is<maxscl ; is++ ) std::cout<<"\t"<<sqrt(mur2_hook(1+is)) ;
+         // std::cout<<std::endl;
+         // std::cout<<"muf: ";
+         // for ( int is = 0 ; is<maxscl ; is++ ) std::cout<<"\t"<<sqrt(muf2_hook(1+is)) ;
+         // std::cout<<std::endl;
 
          // double muf2[7];
          // double mur2[7];
@@ -781,28 +884,28 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
          // std::cout<<fabs( muf2[6] / (q2*q2) - 1. )<<std::endl;
          // const double EPS = 1.e-10;
          // if ( fabs( muf2[1] / q2 - 1 ) > EPS || fabs( mur2[1] / q2 - 1 ) > EPS) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [1]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [1]"<< std::endl;
          //    exit(3);
          // }
          // if ( fabs( muf2[2] / p2 - 1 ) > EPS || fabs( mur2[2] / p2 - 1 ) > EPS ) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [2]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [2]"<< std::endl;
          //    exit(3);
          // }
          // if ( fabs( muf2[3] / p2 - 1 ) > EPS || fabs( mur2[3] / q2 - 1 ) > EPS) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [3]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [3]"<< std::endl;
          //    exit(3);
          // }
          // if ( fabs( muf2[4] / q2 - 1 ) > EPS || fabs( mur2[4] / (p2*p2) - 1 ) > EPS) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [4]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [4]"<< std::endl;
          //    exit(3);
          // }
          // if ( fabs( muf2[5] / (q2*q2) - 1 ) > EPS || fabs( mur2[5] / p2 - 1 ) > EPS ) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [5]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [5]"<< std::endl;
          //    exit(3);
          // }
          // // TEST
          // if ( fabs( muf2[6] / (q2*q2) - 1 ) > EPS || fabs( mur2[6] / (p2*p2) - 1 ) > EPS ) {
-         //    cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [6]"<<endl;
+         //    std::cerr<<"[nnlo::fill_fastnlo]. Error. This is a flexible scale table, but the definition of the scales does not agree with the convention [6]"<< std::endl;
          //    exit(3);
          // }
       }
@@ -814,32 +917,34 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
             double mur2  = mur2_hook(is+1);
             double muf2  = muf2_hook(is+1);
             if ( is==0 && mur2!=muf2 ) {
-               cerr<<"[nnlo::fill_fastnlo]. Error. First scale setting: muf and mur must be identical, but muf2/mur2="<<muf2/mur2<<endl;
+               std::cerr<<"[nnlo::fill_fastnlo]. Error. First scale setting: muf and mur must be identical, but muf2/mur2="<<muf2/mur2<< std::endl;
                exit(2);
             }
             // else if ( is==1 && fabs(muf2/mur2/0.25-1) > 1.e-6 ) {
-            //    cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*0.5=mur*0.5, but muf2/mur2="<<muf2/mur2<<endl;
+            //    std::cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*0.5=mur*0.5, but muf2/mur2="<<muf2/mur2<< std::endl;
             //    exit(2);
             // }
             // else if ( is==2 && fabs(muf2/mur2/4-1) > 1.e-6 ) {
-            //    cerr<<"[nnlo::fill_fastnlo]. Error. Third scale variation must be muf*2=mur*2, but muf2/mur2="<<muf2/mur2<<endl;
+            //    std::cerr<<"[nnlo::fill_fastnlo]. Error. Third scale variation must be muf*2=mur*2, but muf2/mur2="<<muf2/mur2<< std::endl;
             //    exit(2);
             // }
             if ( fabs(muf2/mur2-1) > 1.e-6 ) {
-               cerr<<"[nnlo::fill_fastnlo]. Error. Scale variation is="<<is<<" must be muf*0.5=mur*0.5, but muf2/mur2="<<muf2/mur2<<endl;
+               std::cerr<<"[nnlo::fill_fastnlo]. Error. Scale variation is="<<is<<" must be muf*0.5=mur*0.5, but muf2/mur2="<<muf2/mur2<< std::endl;
                exit(2);
             }
             if ( is==1 && fabs(mur2/mur0/0.25-1) > 1.e-6 ) {
-               cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*0.5=mur*0.5, but mur2/mur2(0)="<<mur2/mur0<<endl;
+               std::cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*0.5=mur*0.5, but mur2/mur2(0)="<<mur2/mur0<< std::endl;
                exit(2);
             }
             if ( is==2 && fabs(mur2/mur0/4.-1) > 1.e-6 ) {
-               cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*2=mur*2, but mur2/mur2(0)="<<mur2/mur0<<endl;
+               std::cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*2=mur*2, but mur2/mur2(0)="<<mur2/mur0<< std::endl;
                exit(2);
             }
          }
-         if ( fabs(wt[3])>TINY ) {
-            cerr<<"[nnlo::fill_fastnlo]. Error. fastNLO only support scale settings of [0] mur=muf; [1] muf*0.5=mur*0.5; [2] muf*2=muf*2"<<endl;
+         //         if ( fabs(wt[3])>TINY ) {
+         // KR: Use C++ macro constants like DBL_MIN instead
+         if ( fabs(wt[3])>DBL_MIN ) {
+            std::cerr<<"[nnlo::fill_fastnlo]. Error. fastNLO only support scale settings of [0] mur=muf; [1] muf*0.5=mur*0.5; [2] muf*2=muf*2"<< std::endl;
             exit(2);
          }
       }
@@ -849,64 +954,56 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
    // ---- initialize fastNLOCreate
    // --- Collect info for naming
-   string wrmfile   = gridname;
-   string tablename = gridname;
-   string runid = runid_.srunid;
-   string pname = nnlo::GetProcessName();
-   string jname = jobname_.sjobname;
+   std::string wrmfile;
+   std::string tablename;
+   std::string runid = runid_.srunid;
+   std::string pname = nnlo::GetProcessName();
+   std::string jname = jobname_.sjobname;
    jname.erase(remove(jname.begin(), jname.end(), ' '),jname.end());
-   string fname = outfile_.fname;
+   std::string fname = outfile_.fname;
    fname.erase(remove(fname.begin(), fname.end(), ' '),fname.end());
    int seed = fnloUtils::GetSeed();
-   cout << "[fnloUtils::InitFastNLO] Input gridname: " << gridname << endl;
-   cout << "[fnloUtils::InitFastNLO] Initial output filename: " << fname << endl;
-   cout << "[fnloUtils::InitFastNLO] Process name (NNLOJET): " << pname << ", job name: " << jname << endl;
-   size_t iposu = gridname.find("_");
-   size_t ipos1 = gridname.find("-");
-   size_t iposn = gridname.find_last_of("-");
-   // Daniel's naming (in case gridname contains an underscore '_')
-   if ( iposu != string::npos ) {
-      wrmfile   = pname+"."+jname+"."+tablename;
-      tablename = pname+"."+jname+"."+runid+"."+tablename+".s"+to_string(seed);
+   std::cout << "[fnloUtils::InitFastNLO] Gridname: " << gridname << std::endl;
+   std::cout << "[fnloUtils::InitFastNLO] Integration input: " << fname << std::endl;
+   std::cout << "[fnloUtils::InitFastNLO] Process name: " << pname << ", job name: " << jname << std::endl;
+   // If unitphase, i.e. grid warmup, then name warmfile individually for each subprocess for later check & merge
+   if ( getunitphase_() ) {
+     wrmfile = pname+"."+jname+"."+gridname;
    }
-   // Klaus' naming (in case gridname contains a minus '-')
-   else if ( ipos1 != string::npos ) {
-      string procname = gridname.substr(0,ipos1);
-      string histname = gridname.substr(iposn+1,string::npos);
-      cout << "[fnloUtils::InitFastNLO] Process name (gridname): " << procname << ", histogram name: " << histname << endl;
-      // If unitphase, i.e. grid warmup, then name wrmfile individually for later check & merge
-      // If NOT unitphase, i.e. production, then set wrmfile name from gridname identical for all subprocs
-      wrmfile = gridname;
-      if ( getunitphase_() ) wrmfile = pname+"."+jname+"."+histname;
-      tablename = pname+"."+jname+"."+histname;
-   }
+   // If NOT unitphase, i.e. production, then expect identical warmfile for all subprocesses
    else {
-      wrmfile   = tablename;
-      tablename = tablename;
+     wrmfile = pname+"."+gridname;
    }
-   wrmfile += ".wrm";
+   tablename = pname+"."+jname+"."+runid+"."+gridname+".s"+std::to_string(seed);
+   wrmfile  += ".wrm";
+   std::cout << "[fnloUtils::InitFastNLO] Warmup filename: " << wrmfile << std::endl;
+   std::cout << "[fnloUtils::InitFastNLO] Tablename: " << tablename << std::endl;
 
    sc.OutputFilename = tablename;
    fnloUtils::ftablename[id] = tablename;
    fnloUtils::ftable[id] = new fastNLOCreate(wrmfile,gc,pc,sc);
-   fnloUtils::fIsInclJet[id] = (gridname.find("ji") != string::npos);
-   fnloUtils::fIs820GeV[id] = (gridname.find("820") != string::npos);
-   fnloUtils::fIs137[id]    = (gridname.find("137") != string::npos);
-   //cout<<"\n\n\n ORDER OF alpha_s(): "<<pc.LeadingOrder+nnlo::GetOrder()<<"\t\t ORDER OF CALCULATION: "<<nnlo::GetOrder()<<"\n\n"<<endl;
-   cout<<"\n\n\n POWER OF alpha_s(): "<<nnlo::GetNPow()<<"\t\t ORDER OF CALCULATION: "<<nnlo::GetOrder()<<"\n\n"<<endl;
+   fnloUtils::fIsInclJet[id] = (gridname.find("ji") != std::string::npos);
+   fnloUtils::fIs820GeV[id] = (gridname.find("820") != std::string::npos);
+   fnloUtils::fIs137[id]    = (gridname.find("137") != std::string::npos);
+   std::cout << "[fnloUtils::InitFastNLO] Power of alpha_s(): " << nnlo::GetNPow() << ", order of calculation: " << nnlo::GetOrder() << std::endl;
    fnloUtils::ftable[id]->SetOrderOfAlphasOfCalculation(nnlo::GetNPow());
    fnloUtils::ftable[id]->SetCacheSize(30);
    //fnloUtils::ftable[id]->fastNLOTable::SetNcontrib(1); // to be removed later!
 
    if ( fnloUtils::ftable[id]->GetIsWarmup() && !getunitphase_() ) {
-      cerr<<"[nnlo::init_fastnlo] ERROR! No warmup-file found (hence this cannot be a production run), but the job is NOT running with UNIT_PHASE. Aborted!"<<endl;
+      std::cerr<<"[nnlo::init_fastnlo] ERROR! No warmup-file found (hence this cannot be a production run), but the job is NOT running with UNIT_PHASE. Aborted!"<< std::endl;
       exit(5);
    } else if ( !fnloUtils::ftable[id]->GetIsWarmup() && getunitphase_() ) {
-      cerr<<"[nnlo::init_fastnlo] ERROR! Warmup-file found (hence this is a production run), but the job is running WITH UNIT_PHASE. Aborted!"<<endl;
+      std::cerr<<"[nnlo::init_fastnlo] ERROR! Warmup-file found (hence this is a production run), but the job is running WITH UNIT_PHASE. Aborted!"<< std::endl;
       exit(6);
    }
 
-   cout << "[fnloUtils::InitFastNLO] fastNLO initialized. " << endl;
+   // Read fastNLO steering file???
+   //    const std::string str = config.subprocConfig.fileName;
+   //    const std::string steeringNameSpace = phasespaceFilePath();
+   //    READ_NS(str, steeringNameSpace);
+
+   std::cout << "[fnloUtils::InitFastNLO] fastNLO initialized. " << std::endl;
    return ;
 }
 
@@ -914,22 +1011,21 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
 // _____________________________________________________________________ //
 namespace fnloUtils {
-   using namespace std;
 
    // _____________________________________________________________________ //
-   fnloSuprocesses::fnloSuprocesses(const string& config){
+   fnloSuprocesses::fnloSuprocesses(const std::string& config){
       //!< constructor reading config file with subprocesses
       ReadConfigFile(config);
    }
 
    // _____________________________________________________________________ //
-   void fnloSuprocesses::ReadConfigFile(const string& config) {
+  void fnloSuprocesses::ReadConfigFile(const std::string& config) {
       fConfigFile = config;
       this->resize(1000);
       fInitialValues.resize(1000);
-      ifstream cf(config);
+      std::ifstream cf(config);
       if ( !cf.is_open() ){
-         cerr<<"[fnloSubprocesses::ReadConfigFile()] Error. Could not open file: "<<config<<endl;
+	 std::cerr<<"[fnloSubprocesses::ReadConfigFile()] Error. Could not open file: "<<config<< std::endl;
          exit(2);
       }
       int id, np, v1, v2;
@@ -939,15 +1035,15 @@ namespace fnloUtils {
          cf>>id>>np;
          if(cf.fail()) break;
          nl++;
-         //cout<<"nl: "<<nl<<"\tid="<<id<<"\tnp="<<np<<endl;
+         //cout<<"nl: "<<nl<<"\tid="<<id<<"\tnp="<<np<< std::endl;
          for ( int i = 0 ; i<np ; i++ ) {
             cf>>v1>>v2;
-            //cout<<"\t"<<v1<<"\t"<<v2<<endl;
+            //cout<<"\t"<<v1<<"\t"<<v2<< std::endl;
             fInitialValues[id].push_back(v1);
             fInitialValues[id].push_back(v2);
          }
       }
-      cout<<"[fnloSuprocesses::ReadConfigFile()] found "<<nl<<" subprocess definitions."<<endl;
+      std::cout<<"[fnloSuprocesses::ReadConfigFile()] found "<<nl<<" subprocess definitions."<< std::endl;
 
       SetUniqueValues();
    }
@@ -1005,10 +1101,10 @@ namespace fnloUtils {
       }
       std::cout<<"[fnloSuprocesses::SetUniqueValues()] found "<<fUniqueValues.size()<<" unique subprocess definitions."<<std::endl;
       std::cout<<"[fnloSuprocesses::SetUniqueValues()] Initial values from config file:"<<std::endl;
-      for ( unsigned int i = 0 ; i<fInitialValues.size() ; i++ ) if ( fInitialValues[i].size()) cout<<i<<"\t"<<fInitialValues[i] <<endl;
+      for ( unsigned int i = 0 ; i<fInitialValues.size() ; i++ ) if ( fInitialValues[i].size()) std::cout<<i<<"\t"<<fInitialValues[i] << std::endl;
       std::cout<<"[fnloSuprocesses::SetUniqueValues()] Processes definitions:"<<std::endl;
-      for ( unsigned int i = 0 ; i<fUniqueValues.size() ; i++ )  cout<<i<<"\t"<<fUniqueValues[i] <<endl<<endl;
-      cout<<"[fnloSuprocesses::SetUniqueValues()] Mapping: "<<(*this)<<endl<<endl;
+      for ( unsigned int i = 0 ; i<fUniqueValues.size() ; i++ )  std::cout<<i<<"\t"<<fUniqueValues[i] << std::endl<< std::endl;
+      std::cout<<"[fnloSuprocesses::SetUniqueValues()] Mapping: "<<(*this)<< std::endl<< std::endl;
    }
 
    // _____________________________________________________________________ //
@@ -1016,7 +1112,7 @@ namespace fnloUtils {
       auto out = fUniqueValues;
       int n = 0;
       for (auto& i : out ) i.emplace(i.begin(),n++);
-      //for ( auto& i : PartonCombinationsLO ) cout<<i<<endl;
+      //for ( auto& i : PartonCombinationsLO ) std::cout<<i<< std::endl;
       return out;
    }
 
@@ -1036,7 +1132,7 @@ namespace fnloUtils {
 //-----------------------------------------------------------------------------
 
 // _____________________________________________________________________ //
-void nnlo::init_fastnlo( const int& id, const std::string& gridname, const int& nbins, const double& lo, const double& hi ) {
+void nnlo::init_fastnlo( const int& id, const std::string& gridname, const int& nbins, const double& lo ) {
    //!<
    //!< Remember init variables for later initialization
    //!<
@@ -1048,7 +1144,7 @@ void nnlo::init_fastnlo( const int& id, const std::string& gridname, const int& 
       fnloUtils::ftablename.resize(id+1);
       fnloUtils::fInits.resize(id+1);
    }
-   fnloUtils::fInits[id] = fnloUtils::fnloInit{int(id), std::string(gridname), int(nbins), &lo, &hi };
+   fnloUtils::fInits[id] = fnloUtils::fnloInit{int(id), std::string(gridname), int(nbins), &lo };
    fnloUtils::ftable[id] = NULL;
 }
 
@@ -1078,7 +1174,19 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
    //          <<"\tas="<<as
    //          <<"\twt="<<wt[0]<<std::endl;
 
-   //  }
+   // }
+
+   static unsigned int nfills = 0;
+   static unsigned int nmess  = 0;
+   static unsigned int nfmod  = 1;
+   nfills++;
+   if ( nmess < 10 && nfills % nfmod == 0 ) {
+      nmess++;
+      std::cout << "[nnlo::fill_fastnlo]: Call no. " << nfills << " of fastnlo fill routine." << std::endl;
+   } else if ( nmess == 10 ) {
+      nmess = 0;
+      nfmod *= 10;
+   }
 
    static const int obs_id_ptj1 = nnlo::GetNLegs() >= 1 ? obs_id_hook("ptj1") : -1;
    static const int obs_id_ptj2 = nnlo::GetNLegs() >= 2 ? obs_id_hook("ptj2") : -1;
@@ -1093,17 +1201,27 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
    // Check UNIT_PHASE setting of NNLOJET
    // If yes ==> weights nonsense, only phase space counts for grid warmup
    static const bool unitphase = getunitphase_();
-   // Tiny weight and not grid warmup ==> nothing todo
-   if ( fabs(wt[0]) < TINY && !unitphase ) return;
-
-   // Check weights of other scales, not yet implemented/tested
-   // if ( fabs(wt[0])<1.e-20 && fabs(wt[1])>1.e-10 ) {
-   //    std::cout<<"Found wt[0]=0, but wt[1]!=0: ";
-   //    for ( int is = 0 ; is<maxscl ;is++ ) {//maxscl is a global var in nnlo_common.h
-   //    std::cout<<"\t"<<wt[is];
-   //    }
-   //    std::cout<<std::endl;
-   // }
+   // Check sum of all absolute(!) weights
+   double wtsum = 0.;
+   for ( int i = 0; i < 7; i++ ) {
+     wtsum += std::abs(wt[i]);
+   }
+   // Tiny weights and not grid warmup ==> nothing to do
+   static unsigned int nzwgt = 0;
+   static unsigned int nzmss = 0;
+   static unsigned int nzmod = 1;
+   // if ( fabs(wt[0]) < DBL_MIN && !unitphase ) { // WRONG!!!
+   if ( wtsum < DBL_MIN && !unitphase ) {
+      nzwgt++;
+      if ( nzmss < 10 && nzwgt % nzmod == 0 ) {
+         nzmss++;
+         std::cout << "[nnlo::fill_fastnlo]: " << nzwgt << "th occurrence of return because of tiny scale weight sum = " << wtsum << std::endl;
+      } else if ( nzmss == 10 ) {
+         nzmss = 0;
+         nzmod *= 10;
+      }
+      return;
+   }
 
    // --- Keep track on what we have calculated
    fnloUtils::RememberContribution();
@@ -1130,7 +1248,7 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
             __w2[is] *= 1./eweakz_.amzZ/eweakz_.amzZ/137./137.;
          }
          if ( fnloUtils::fIs820GeV[id] ) { //
-            __w2[is] *= 920./820.;
+            __w2[is] *= 820./920.;
          }
          nnlo::GetFillWeights(__w2[is],__x1,__x2,is);
          if ( __x1 < 0 ) std::cerr<<"fastnlo_utils. ERROR. x1 from GetFillWeights smaller than 0!! x="<<__x1<<std::endl;
@@ -1173,7 +1291,9 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
       if ( vObs.size()>=3 ) vObs[2] = obs_val_hook(obs_id_ptj3);
       if ( vObs.size()>=4 ) vObs[3] = obs_val_hook(obs_id_ptj4);
       for ( auto& iv : vObs ) {
-         if ( fabs(iv) < TINY ) iv=0;
+         // KR: Use C++ macro constants like DBL_MIN instead
+         //         if ( fabs(iv) < TINY ) iv=0;
+         if ( fabs(iv) < DBL_MIN ) iv=0;
       }
       //if ( fabs(vObs[3]) > TINY ) std::cout<<"obs4="<<vObs[3]<<std::endl;
    }
@@ -1187,7 +1307,9 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
          //std::cout<<"Filling: IsIncl="<<fnloUtils::fIsInclJet[id]<<"\tobs="<<thisobs<<"\tcontinue"<<std::endl;
          continue;
       }
-      else if ( fabs(thisobs) < TINY ) continue;
+      // KR: Use C++ macro constants like DBL_MIN instead
+      //      else if ( fabs(thisobs) < TINY ) continue;
+      else if ( fabs(thisobs) < DBL_MIN ) continue;
       if ( fnloUtils::ftable[id]->GetIsFlexibleScale() ) {
          double mf  = sqrt(muf2_hook(1));
          double mr  = sqrt(mur2_hook(1));
@@ -1254,7 +1376,9 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
             // --- ignore unfilled weights during warmup
             double fillweight = __w2[is];
             if (fnloUtils::ftable[id]->GetIsWarmup()) fillweight = 1;
-            if ( fabs(fillweight) > TINY || unitphase) {
+            // KR: Use C++ macro constants like DBL_MIN instead
+            //            if ( fabs(fillweight) > TINY || unitphase) {
+            if ( fabs(fillweight) > DBL_MIN || unitphase) {
                double mur2  = mur2_hook(is+1); // mur is defined to be always constant is=0 !
                if ( fnloUtils::fIsInclJet[id] ) {
                   mur2 = thisobs*thisobs * mur2_hook(is+1)/mur2_hook(1);
@@ -1282,26 +1406,27 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
 // _____________________________________________________________________ //
 void nnlo::fill_ref_fastnlo( const int& id, const double& obs, const double* wt ) {
    // Do nothing for the moment
-   using namespace std;
    // test weights for real radiation
    // if ( wt[0]!=0 ) std::cout<<" wt/ref="<<fnloUtils::_myfillwgt/wt[0]<<"\t\ttest wt="<<wt[0]<<"\twtfill="<<fnloUtils::_myfillwgt<<std::endl;
    // if ( wt[0]!=0 ) std::cout<<"                  "<<"\t\ttest wt="<<wt[0]<<"\twtfill="<<fnloUtils::_myfillwgt<<std::endl;
 
-   if (  fabs(wt[0])> TINY && fnloUtils::_myfillwgt!=0 && fabs(1-fnloUtils::_myfillwgt/wt[0])>1.e-5 ) {
+   // KR: Use C++ macro constants like DBL_MIN instead
+   //   if (  fabs(wt[0])> TINY && fnloUtils::_myfillwgt!=0 && fabs(1-fnloUtils::_myfillwgt/wt[0])>1.e-5 ) {
+   if (  fabs(wt[0])> DBL_MIN && fnloUtils::_myfillwgt!=0 && fabs(1-fnloUtils::_myfillwgt/wt[0])>1.e-5 ) {
       std::cout<<"ERROR !! Your fill weight is not correctly calculated!"<<std::endl;
-      cout<<"  wt/ref="<<fnloUtils::_myfillwgt/wt[0]<<"\t\ttest wt="<<wt[0]<<"\twtfill="<<fnloUtils::_myfillwgt<<std::endl;
-      cout<<"  currentprocess_.iproc:   "<<currentprocess_.iproc<<endl;
-      cout<<"  xregions_.xreg1      :   "<<xregions_.xreg1<<"\t1./xr1="<<1./xregions_.xreg1<<endl;
-      cout<<"  xregions_.xreg2      :   "<<xregions_.xreg2<<"\t1./xr1="<<1./xregions_.xreg2<<endl;
-      cout<<"  parfrac_.x1          :   "<<parfrac_.x1<<"\t1./x1="<<1./parfrac_.x1<<"\t(1-x1)="<<1-parfrac_.x1<<"\t1./(1-x1)="<<1./(1-parfrac_.x1)<<endl;
-      cout<<"  parfrac_.x2          :   "<<parfrac_.x2<<"\t1./x2="<<1./parfrac_.x2<<"\t(1-x2)="<<1-parfrac_.x2<<"\t1./(1-x2)="<<1./(1-parfrac_.x2)<<endl;
-      //cout<<"  ndim                 :   "<<ndimcurrent_.ndim<<endl;
-      cout<<"  nv                   :   "<<ndimcurrent_.nv<<endl;
-      cout<<"  iproc                :   "<<currentprocess_.iproc<<endl;
-      cout<<"  igx                  :   "<<gridix_.igx<<endl;
-      cout<<"  colflag              :   "<<colourflag_.colflag<<endl;
-      cout<<"  xcoljac              :   "<<xcoljac_.xcoljac<<"\t\t1./xcoljac="<<1./xcoljac_.xcoljac<<endl;
-      cout<<"  jacobian_.jflag      :   "<<jacobian_.jflag<<endl;
+      std::cout<<"  wt/ref="<<fnloUtils::_myfillwgt/wt[0]<<"\t\ttest wt="<<wt[0]<<"\twtfill="<<fnloUtils::_myfillwgt<<std::endl;
+      std::cout<<"  currentprocess_.iproc:   "<<currentprocess_.iproc<< std::endl;
+      std::cout<<"  xregions_.xreg1      :   "<<xregions_.xreg1<<"\t1./xr1="<<1./xregions_.xreg1<< std::endl;
+      std::cout<<"  xregions_.xreg2      :   "<<xregions_.xreg2<<"\t1./xr1="<<1./xregions_.xreg2<< std::endl;
+      std::cout<<"  parfrac_.x1          :   "<<parfrac_.x1<<"\t1./x1="<<1./parfrac_.x1<<"\t(1-x1)="<<1-parfrac_.x1<<"\t1./(1-x1)="<<1./(1-parfrac_.x1)<< std::endl;
+      std::cout<<"  parfrac_.x2          :   "<<parfrac_.x2<<"\t1./x2="<<1./parfrac_.x2<<"\t(1-x2)="<<1-parfrac_.x2<<"\t1./(1-x2)="<<1./(1-parfrac_.x2)<< std::endl;
+      //cout<<"  ndim                 :   "<<ndimcurrent_.ndim<< std::endl;
+      std::cout<<"  nv                   :   "<<ndimcurrent_.nv<< std::endl;
+      std::cout<<"  iproc                :   "<<currentprocess_.iproc<< std::endl;
+      std::cout<<"  igx                  :   "<<gridix_.igx<< std::endl;
+      std::cout<<"  colflag              :   "<<colourflag_.colflag<< std::endl;
+      std::cout<<"  xcoljac              :   "<<xcoljac_.xcoljac<<"\t\t1./xcoljac="<<1./xcoljac_.xcoljac<< std::endl;
+      std::cout<<"  jacobian_.jflag      :   "<<jacobian_.jflag<< std::endl;
 
       static int ii=0;
       if ( ii++ >50 ) {
@@ -1354,7 +1479,7 @@ void nnlo::term_fastnlo( const int& id, int nweights ) {
    if (fnloUtils::ftable[id]->GetIsWarmup())
       std::cout << "[nnlo::term()] fastNLO warmup run finished ..." << std::endl;
    else
-      std::cout << "[nnlo::term()] fastNLO run finished, writing table '" << fnloUtils::ftablename[id] << "'." << std::endl;
+      std::cout << "[nnlo::term()] fastNLO production run finished, writing table '" << fnloUtils::ftablename[id] << "'." << std::endl;
 
 //   fnloUtils::ftable[id]->WriteTable(filename); // buggy. This needs a fix!
    fnloUtils::ftable[id]->WriteTable();
