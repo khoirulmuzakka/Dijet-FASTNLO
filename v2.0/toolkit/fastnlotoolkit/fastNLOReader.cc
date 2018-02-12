@@ -430,6 +430,9 @@
 */
 //______________________________________________________________________________
 
+// This include must come first to enable conditional compilation!
+#include <config.h>
+
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -440,7 +443,7 @@
 #include "fastnlotk/fastNLOCoeffAddFix.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 //#include "fastnlotk/fastNLOLHAPDF.h"
-#ifdef FNLO_HOPPET
+#ifdef WITH_HOPPET
 #include "fastnlotk/HoppetInterface.h"
 #endif
 
@@ -794,11 +797,11 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
 
 void fastNLOReader::UseHoppetScaleVariations(bool useHoppet) {
 
-#ifndef FNLO_HOPPET
+#ifndef WITH_HOPPET
       logger.error["UseHoppetScaleVariation."] << "Hoppet support was not compiled with fastNLO. "
             << "Therefore you can't use Hoppet to calculate the scale variations." <<endl;
       exit(1);
-#else 
+#else
       if (useHoppet) {
          if (GetIsFlexibleScaleTable()) {
             logger.info["UseHoppetScaleVariations"]<<"This is a 'flexible-scale' table, therefore you can already choose all desired scale variations without Hoppet."<<endl;
@@ -1671,7 +1674,7 @@ void fastNLOReader::SetCalculateSingleSubprocessOnly(int iSub) {
    if (iSub < 0) {
       logger.info["SetCalculateSingleSubprocessOnly"]<<"Activating all contributions."<<endl;
       fSubprocActive = std::vector<bool>(169,true);
-   }   
+   }
    else if ( iSub < 169 ) {
       logger.info["SetCalculateSingleSubprocessOnly"]<<"Deactivating all contributions, but id="<<iSub<<endl;
       fSubprocActive = std::vector<bool>(169,false);
@@ -1697,7 +1700,7 @@ void fastNLOReader::SetCalculateSubprocesses( const std::vector<int>& iSub ){
    logger.info["SetCalculateSubprocesses"]<<"    ***  Use this function carefully ***"<<endl;
    logger.info["SetCalculateSubprocesses"]<<" Please inform yourself about the meaning of the subprocess id for the given file."<<endl;
    logger.info["SetCalculateSubprocesses"]<<" This may also change for the different contribution (LO,NLO,NNLO) of a calculation."<<endl;
-   
+
    fSubprocActive = std::vector<bool>(13*13,false);
    for ( int i = 0; i < iSub.size(); i++ )
       if ( iSub[i] < 13*13 )
@@ -1712,10 +1715,10 @@ void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& pr
    //! Selects subprocesses given in proclist. proclist is a vector of pairs each identifying
    //! a single process by two PDGIDs. If the table is not compatible with the selected list,
    //! nothing is changed and a warning is printed.
-   
+
    vector< pair<int,int> >* old_list = fselected_processes;
    fselected_processes = new vector< pair<int,int> >(proclist);
-   
+
    if ( UpdateProcesses() ) {
       delete old_list;
       return;
@@ -1726,7 +1729,7 @@ void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& pr
       logger.error["SelectProcesses"]<<"could not restore previous state after fail, this means something really messed up";
       exit(1);
    }
-   
+
    logger.warn["SelectProcesses"]<<"could not select requested subprocesses due to incompatible table, ignoring call"<<endl;
    return;
 }
@@ -1765,11 +1768,11 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
    //!
    //! If the table is not compatible (or does not contain) with the selected subprocesses nothing is
    //! changed and a warning is printed out.
-   
+
    bool select_all = false;
    std::vector< std::pair<int,int> > selection;
    selection.clear();
-  
+
    std::vector< std::string > substrings;
    substrings.clear();
    // split processes by delimiter ' '
@@ -1779,7 +1782,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
       substrings.push_back( processes.substr(old_pos,pos-old_pos));
       old_pos=pos+1;
    } while ( pos != -1 );
-   
+
    for ( unsigned int i = 0; i<substrings.size(); i++ ) {
       if ( substrings[i].empty() )
          continue;
@@ -1791,11 +1794,11 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
             select_all = true;
             continue;
          }
-         
+
          if ( substrings[i].substr(0,4) == "none" ) {
             continue;
          }
-         
+
          std::vector< int > part1_selection;
          int anti = 1;
          int n = 0;
@@ -1842,7 +1845,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
             s_flav = 1;
             n++;
          }
-            
+
          // loop over first selected partons
          for ( unsigned int j = 0; j<part1_selection.size(); j++ ) {
             int parton1 = part1_selection[j];
@@ -1901,7 +1904,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
    for ( unsigned int i = 0; i<selection.size(); i++ )
       logger.debug["SelectProcess"] << selection[i].first << " " << selection[i].second << " , ";
    logger.debug["SelectProcess"] << endl;
-   
+
    if (select_all) {
       delete fselected_processes;
       fselected_processes = NULL;
@@ -2174,10 +2177,10 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
 
       // check (or not) if the pdf is somehow reasonable
       TestXFX();
-#ifdef FNLO_HOPPET
+#ifdef WITH_HOPPET
       if (fUseHoppet) {
-	 //Also refill Hoppet cache and assign new PDF
-	 HoppetInterface::InitHoppet(*this);
+         //Also refill Hoppet cache and assign new PDF
+         HoppetInterface::InitHoppet(*this);
       }
 #endif
 
@@ -2243,9 +2246,9 @@ void fastNLOReader::FillBlockBPDFLCsDISv20(fastNLOCoeffAddFix* c) {
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
                xfx = GetXFXSqrtS(xp,muf);
 
-#ifdef FNLO_HOPPET
-	       if (fUseHoppet)
-		  xfxspl        = HoppetInterface::GetSpl(xp,muf);
+#ifdef WITH_HOPPET
+               if (fUseHoppet)
+                  xfxspl        = HoppetInterface::GetSpl(xp,muf);
 #endif
                c->PdfLc[i][j][k] = CalcPDFLinearCombination(c,xfx);
                if (fUseHoppet) {
@@ -2393,9 +2396,9 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
                double xp     = c->GetXNode1(i,k);
                double muf    = scalefac * c->GetScaleNode(i,scalevar,j);
                xfx[k]        = GetXFXSqrtS(xp,muf);
-#ifdef FNLO_HOPPET
-	       if (fUseHoppet)
-		  xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
+#ifdef WITH_HOPPET
+               if (fUseHoppet)
+                  xfxspl[k]        = HoppetInterface::GetSpl(xp,muf);
 #endif
             }
             int x1bin = 0;
@@ -2457,7 +2460,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins1; k++) {
                double xp     = c->GetXNode1(i,k);
                xfx1[k]        = GetXFXSqrtS(xp,muf);
-#ifdef FNLO_HOPPET
+#ifdef WITH_HOPPET
                   if (fUseHoppet)
                      xfxspl1[k]        = HoppetInterface::GetSpl(xp,muf);
 #endif
@@ -2466,7 +2469,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
             for (int k=0; k<nxbins2; k++) {
                double xp     = c->GetXNode2(i,k);
                xfx2[k]       = GetXFXSqrtS(xp,muf);
-#ifdef FNLO_HOPPET
+#ifdef WITH_HOPPET
                   if (fUseHoppet)
                      xfxspl2[k]        = HoppetInterface::GetSpl(xp,muf);
 #endif
@@ -2838,7 +2841,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lkthc = false;
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-	 cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
+         cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
          if ( BBlocksSMCalc[kThresholdCorrection][i] && BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
             break;
