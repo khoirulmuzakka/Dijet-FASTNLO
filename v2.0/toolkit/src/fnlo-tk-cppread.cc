@@ -11,6 +11,9 @@
 ///
 ///********************************************************************
 
+// This include must come first to enable conditional compilation!
+#include <config.h>
+
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
@@ -630,21 +633,18 @@ int main(int argc, char** argv) {
    } else if (AsEvolCode == "RUNDEC") {
       fnlo = new fastNLOCRunDec(tablename);
    } else if (AsEvolCode == "QCDNUM") {
+#ifdef WITH_QCDNUM
       //! ONLY if compiled --with-qcdnum support!
-      debug["fnlo-tk-cppread"] << "The FNLO_QCDNUM precompiler constant is: " << FNLO_QCDNUM << endl;
-      if ( FNLO_QCDNUM[0] != '\0' ) {
-         fnlo = new fastNLOQCDNUMAS(tablename);
-      } else {
-         printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
-         printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
-         printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
-         exit(1);
-      }
+      fnlo = new fastNLOQCDNUMAS(tablename);
+#else
+      printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
+      printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
+      printf("           Please choose another alpha_s evolution code or recompile with %s support.\n",AsEvolCode.c_str());
+      exit(1);
+#endif
    } else if (AsEvolCode == "HOPPET") {
+#ifdef WITH_HOPPET
       //! ONLY if compiled --with-hoppet support!
-      
-#ifdef FNLO_HOPPET
-      debug["fnlo-tk-cppread"] << "The FNLO_HOPPET precompiler constant is: " << FNLO_HOPPET << endl;
       fnlo = new fastNLOHoppetAs(tablename);
 #else
       printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());

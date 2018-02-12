@@ -19,18 +19,11 @@
 #define FNLO_YEARS      "@YEARS@"
 #endif
 
-// Define variables fixed by precompiler for optional parts.
-// Compilers like gcc usually drop unreachable statements
-// anyway such that unnecessary if-else-endif calls or
-// "unresolved symbol" errors are avoided.
-#define FNLO_HOPPET     @HOPPET@
-// undefine macro FNLO_HOPPET if it is empty
-#if ( 1- FNLO_HOPPET +1 == 0 ) && ( 2- FNLO_HOPPET +2 == 0 )
-  #undef FNLO_HOPPET
-#endif
-
-#define FNLO_QCDNUM     "@QCDNUM@"
-#define FNLO_ROOT       "@ROOT@"
+// Precompiler variables for conditional compilation are generated
+// and stored automatically in config.h via AC_DEFINE statements in configure.ac.
+// This config file MUST be the very first one to be included with
+// #include <config.h>
+// Do not define precompiler directives here.
 
 // KR: Replace by precompiler defines
 const double TWOPI    =  6.28318530717958647692528;

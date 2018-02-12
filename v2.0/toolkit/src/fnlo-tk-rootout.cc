@@ -8,6 +8,9 @@
 ///
 ///********************************************************************
 
+// This include must come first to enable conditional compilation!
+#include <config.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -16,13 +19,14 @@
 #include <vector>
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
+#ifdef WITH_ROOT
 //! Includes for filling ROOT histograms
 //! Usable only when configured with '--with-root=/path/to/root' option
 #include "TFile.h"
 #include "TString.h"
 #include "TH1D.h"
 //! End of ROOT part
-
+#endif
 
 //__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {

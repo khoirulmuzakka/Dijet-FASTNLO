@@ -8,6 +8,9 @@
 ///
 ///********************************************************************
 
+// This include must come first to enable conditional compilation!
+#include <config.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -17,9 +20,10 @@
 #include "fastnlotk/fastNLOAlphas.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
+#ifdef WITH_YODA
 #include "YODA/Scatter2D.h"
 #include "YODA/WriterYODA.h"
-
+#endif
 
 //__________________________________________________________________________________________________________________________________
 int main(int argc, char** argv) {
@@ -36,6 +40,7 @@ int main(int argc, char** argv) {
    yell << _CSEPSC << endl;
    info["fnlo-tk-yodaout"] << "Program to read fastNLO tables and write out" << endl;
    info["fnlo-tk-yodaout"] << "QCD cross sections in YODA format for use with Rivet" << endl;
+   info["fnlo-tk-yodaout"] << "(If compiled without YODA support only text printout is given)" << endl;
    yell << _SSEPSC << endl;
    info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
    info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
@@ -411,8 +416,10 @@ int main(int argc, char** argv) {
    LineName = chord + "_" + PDFName + LineName;
 
    //! --- YODA analysis object creation and storage
+#ifdef WITH_YODA
    YODA::Writer & writer = YODA::WriterYODA::create();                          //! Create the writer for the yoda file
    vector< YODA::AnalysisObject * > aos;                                   //! Vector of pointers to each of multiple analysis objects
+#endif
    size_t counter = atoi(RivetId.substr(capital_pos +1, 2).c_str());
 
    //! --- Initialize dimension bin and continuous observable bin counter
@@ -420,7 +427,9 @@ int main(int argc, char** argv) {
    NDimBins[0] = fnlo->GetNDim0Bins();
    unsigned int iobs = 0;
    //! Vector of 2D scatter plots
+#ifdef WITH_YODA
    vector<YODA::Scatter2D> plots;
+#endif
 
    //! --- 1D
    if (NDim == 1) {
@@ -441,10 +450,12 @@ int main(int argc, char** argv) {
          eyminus.push_back(abs(dxsl[iobs]));
          iobs++;
       }
+#ifdef WITH_YODA
       /// Pointer in order not to be deleted after we exit the loop, so we can then save them into the yoda file
       YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
       /// Insert the plot pointer into the vector of analysis object pointers
       aos.push_back(plot);
+#endif
    }
    //! --- 2D
    else if (NDim == 2) {
@@ -480,20 +491,28 @@ int main(int argc, char** argv) {
          histno << ihist;
          /// Replace counter part in RivetId by histno
          RivetId.replace(capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());
+#ifdef WITH_YODA
          /// Pointer in order not to be deleted after we exit the loop, so we can then save the plots into the yoda file
          YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
          /// Insert the plot pointer into the vector of analysis object pointers
          aos.push_back(plot);
+#endif
       }
    }
 
    //! --- Output
    //! Save histograms into the yoda file
+#ifdef WITH_YODA
    writer.write( FileName + ".yoda", aos );
+#endif
    yell << "" << endl;
    yell << _CSEPSC << endl;
    yell << " #" << endl;
+#ifdef WITH_YODA
    shout << FileName + ".yoda was successfully produced" << endl;
+#else
+   shout << "Compiled without YODA support ==> No YODA file produced!" << endl;
+#endif
    yell << " #" << endl;
    yell << _CSEPSC << endl << endl;
 }
