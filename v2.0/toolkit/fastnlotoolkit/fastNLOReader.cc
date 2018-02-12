@@ -2841,7 +2841,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lkthc = false;
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-         cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
+	 //cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
          if ( BBlocksSMCalc[kThresholdCorrection][i] && BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
             break;
