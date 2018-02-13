@@ -23,12 +23,14 @@ Makefile.in
 *.cache
 
 
-# user-specific directories
-/v1.4/user/
-/v2.0/user/
+# Das sind keine "user-specific directories" sondern entspricht der
+# usrsprünglichen fastNLO Aufteilung in Code zur Tabellenproduktion,
+# "author --> create", bzw. -auswertung, "user --> read".
+#/v1.4/user/
+#/v2.0/user/
 
-/v1.4/userkr/
-/v2.0/userkr/
+#/v1.4/userkr/
+#/v2.0/userkr/
 
 
 # autotools distribution files
