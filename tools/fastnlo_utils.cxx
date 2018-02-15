@@ -559,7 +559,7 @@ std::vector<double> fnloUtils::SclIndepWgt(const double* wt, double muf, double 
    //! Calculate scale independent weights for fastNLO
 
    // Do not use debug mode for mass production!
-   static const bool Debug = true;
+   static const bool Debug = false;
    static bool First = true;
    if ( First && Debug ) {
       First = false;

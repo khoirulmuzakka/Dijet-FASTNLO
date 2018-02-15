@@ -191,7 +191,8 @@ endif
 set withnnlojet=0
 if ( $#argv > 4 ) then
     set withnnlojet=$5
-    set revision=3738
+# Previous: set revision=3738
+    set revision=4585
 endif
 # With optional packages for grid evaluation?
 set withoptional=0
@@ -637,7 +638,8 @@ if ( $withnnlojet ) then
 # nnlo-bridge to NNLOJet:
 #------------------------------------------------------------------------------
     set arc="nnlo-bridge-0.0.36"
-    set rev="rev1683M3"
+# Previous buggy: set rev="rev1683M3"
+    set rev="rev1683M4"
     if ( ! -e ${arc}_installed  ) then
     tar xzf ${arc}-${rev}.tar.gz
     cd ${arc}
