@@ -234,7 +234,7 @@ endif
 # Number of cores to be used
 set cores=8
 if ( $#argv > 8 ) then
-    set cores=$8
+    set cores=$9
 endif
 
 # With interface to HERWIG7? Not yet implemented!
