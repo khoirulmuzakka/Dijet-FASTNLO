@@ -309,10 +309,12 @@ endif
 # setenv PATH ${ROOTBINPATH}:${PATH}
 # Just in case: NNLOJET executable
 if ( $withnnlojet ) then
-   setenv NNLOJETBINPATH ${base}/${local}/src/NNLOJET_rev${revision}/driver
-   setenv PATH ${NNLOJETBINPATH}:${PATH}
-   echo 'setenv PATH '"${NNLOJETBINPATH}:"'${PATH}' >> fnlosrc_source.csh
-   echo 'export PATH='"${NNLOJETBINPATH}:"'${PATH}' >> fnlosrc_source.sh
+   setenv NNLOJET_BIN_PATH ${base}/${local}/src/NNLOJET_rev${revision}/driver
+   setenv PATH ${NNLOJET_BIN_PATH}:${PATH}
+   echo 'setenv PATH '"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.csh
+   echo 'export PATH='"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.sh
+   echo 'setenv NNLOJET_BIN_PATH '"${NNLOJET_BIN_PATH}" >> fnlosrc_source.csh
+   echo 'export NNLOJET_BIN_PATH='"${NNLOJET_BIN_PATH}" >> fnlosrc_source.sh
 endif
 echo ""
 echo "ATTENTION: PATH environment complemented!"
@@ -406,8 +408,15 @@ if ( ! -e ${arc}_installed  ) then
   cd ..
 # Download default PDF sets
 #  ${base}/${local}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
+# In case of CMS CVMFS usage, use PDF sets from there
+  if ( $?MYCVMFS ) then
+    setenv LHAPDF_DATA_PATH ${MYCVMFS}/external/lhapdf/6.2.1/share/LHAPDF
+    echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
+    echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
+  endif
   touch ${arc}_installed
 endif
+
 #
 # OpenMPI (version 2.1.2 has been tested to work, if it was configured with --enable-mpi-cxx):
 #
