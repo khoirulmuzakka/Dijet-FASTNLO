@@ -1736,7 +1736,7 @@ void fastNLOReader::SelectProcesses( const std::vector< std::pair<int,int> >& pr
 
 
 //_____________________________________________________________________________
-void fastNLOReader::SelectProcesses( const std::string& processes ) {
+void fastNLOReader::SelectProcesses( const std::string& processes, bool symmetric ) {
    //! Selects subprocesses given in processes. processes is a string describing the wanted subprocesses.
    //! It should be formated like
    //!  processes = ( [a](u|d|c|s|b) | g | q | none | all)( [a](u|d|c|s|b) | g | [(-|+)][(!|=)]q )
@@ -1852,22 +1852,22 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
 
             switch ( (char)substrings[i].at(n) ) {
                case 'd': selection.push_back( {parton1, anti*1} );
-                         selection.push_back( {anti*1, parton1} );
+                         if (symmetric) selection.push_back( {anti*1, parton1} );
                          break;
                case 'u': selection.push_back( {parton1, anti*2} );
-                         selection.push_back( {anti*2, parton1} );
+                         if (symmetric) selection.push_back( {anti*2, parton1} );
                          break;
                case 's': selection.push_back( {parton1, anti*3} );
-                         selection.push_back( {anti*3, parton1} );
+                         if (symmetric) selection.push_back( {anti*3, parton1} );
                          break;
                case 'c': selection.push_back( {parton1, anti*4} );
-                         selection.push_back( {anti*4, parton1} );
+                         if (symmetric) selection.push_back( {anti*4, parton1} );
                          break;
                case 'b': selection.push_back( {parton1, anti*5} );
-                         selection.push_back( {anti*5, parton1} );
+                         if (symmetric) selection.push_back( {anti*5, parton1} );
                          break;
                case 'g': selection.push_back( {parton1, anti*0} );
-                         selection.push_back( {anti*0, parton1} );
+                         if (symmetric) selection.push_back( {anti*0, parton1} );
                          break;
                case 'q': for ( int p = -5; p <= 5; p++ ) {
                             if ( p == 0 )
@@ -1877,7 +1877,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes ) {
                             if ( (s_flav == 1 && parton1*parton1 != p*p) || (s_flav == -1 && parton1*parton1 == p*p) )
                                continue;
                             selection.push_back( {parton1, p} );
-                            selection.push_back( {p, parton1} );
+                            if (symmetric) selection.push_back( {p, parton1} );
                          }
                          break;
                default : throw std::logic_error("unkown char");
