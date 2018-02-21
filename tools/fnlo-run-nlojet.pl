@@ -167,7 +167,7 @@ if ( $nmax > 0 && $nmax < $runmode{NLO}[1] ) {
 }
 
 # NLOJet++ product name
-my $prdext = "tab";
+my $prdext = "tab.gz";
 my $prdnam = "${scenname}${ref}${wrm}_${jobnr}-hhc-$runmode{$order}[0]-${njet}.${prdext}";
 if ( $wrm eq "wrm" ) {
     $prdext = "txt";

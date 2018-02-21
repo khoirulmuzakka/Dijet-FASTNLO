@@ -189,7 +189,7 @@ if ( $ret ) {print "fnlo-run-nnlojet.pl: Couldn't list current directory: $ret, 
 my @files;
 if ( ${scenmode} =~ m/fastwarm/ ) {
     @files = glob("${scentype}*.log *.root *.wrm");
-} elsif ( ${scenmode} =~ m/prod/ ) {
+} elsif ( ${scenmode} =~ m/prod/ || ${scenmode} =~ m/test/ ) {
     @files = glob("*.dat *.err *.log *.root *.tab *.tab.gz");
 }
 foreach my $file ( @files ) {

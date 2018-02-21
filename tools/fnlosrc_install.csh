@@ -150,10 +150,13 @@ if ( $#argv < 2 ) then
    echo ""
    echo "#=============================================================================="
    echo "Usage: $0 basedir subdir [path to cvmfs software]"
-   echo "1st argument: Base dir for installations"
-   echo "2nd argument: Subdir in base dir for this installation"
+   echo "1st argument: Base dir for installations, absolute path to e.g. $HOME"
+   echo "2nd argument: Subdir in base dir for this installation, relative path to e.g. local"
    echo "3rd optional argument: Path to newer gcc in cvmfs software distribution,"
    echo "                       e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481"
+   echo "                       The minimally required version is gcc 4.8.1!"
+   echo "                       If set, please check also that LHAPDF can be found in:"
+   echo '                       $MYCVMFS/external/lhapdf'
    echo "                       Set to _ to skip this setting."
    echo "4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
    echo "5th optional argument: Include grid creation with NNLOJET? def.=0"
@@ -174,12 +177,16 @@ set srcdir=$cwd
 #==============================================================================
 # Define scope of installation
 #==============================================================================
-# Use CVMFS software repository for newer gcc if necessary
+# Use CVMFS software repository for newer gcc and for LHAPDF if necessary
 if ( $#argv > 2 && $3 != "_" ) then
    setenv MYCVMFS $3
+# Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
+#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
+   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #   echo "MYCVMFS is set to: $MYCVMFS"
 else
    unsetenv MYCVMFS
+   set lhapdfbasepath=${base}/${local}
 #   echo "MYCVMFS is not set"
 endif
 # With interface to Sherpa via MCGrid?
@@ -300,21 +307,36 @@ else
    echo 'setenv PATH '"${base}/${local}/bin" >> fnlosrc_source.csh
    echo 'export PATH='"${base}/${local}/bin" >> fnlosrc_source.sh
 endif
-# Uncomment to use other LHAPDF installation, e.g. from cvmfs
-# setenv PATH ${MYCVMFS}/external/lhapdf/6.1.6/bin:${PATH}
-# Because of frequent issues with preinstalled ROOT versions we will install
-# our own version below, so do not set ROOTBIN to crappy CVMFS ROOT installation!
-# Uncomment to use other ROOT installation, e.g. from cvmfs
-# setenv ROOTBINPATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin
-# setenv PATH ${ROOTBINPATH}:${PATH}
+# $PATH set from now on ...
+#
+# If $MYCVMFS is set, use the LHAPDF installation and PDF sets from CVMFS.
+if ( $?MYCVMFS ) then
+   setenv PATH ${lhapdfbasepath}/bin:${PATH}
+   echo 'setenv PATH '"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH='"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.sh
+endif
+# If $MYCVMFS is set, one could also use the ROOT installation from CVMFS, BUT
+# because of frequent issues with preinstalled ROOT versions we will either install
+# our own version below, if desired, or nothing at all, see command line options.
+# In particular for producing fastNLO grids on compute clusters ROOT is not required at all!
+# APPLgrid needs ROOT though, but is not installed currently.
+#  (Uncomment to try using ROOT installation from CVMFS)
+#if ( ($withroot > 1) && $?MYCVMFS ) then
+#   setenv ROOTBINPATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin
+#   setenv PATH ${ROOTBINPATH}:${PATH}
+#   echo 'setenv ROOTBINPATH '"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin"'' >> fnlosrc_source.csh
+#   echo 'export ROOTBINPATH='"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin"'' >> fnlosrc_source.sh
+#   echo 'setenv PATH '"${ROOTBINPATH}:"'${PATH}' >> fnlosrc_source.csh
+#   echo 'export PATH='"${ROOTBINPATH}:"'${PATH}' >> fnlosrc_source.sh
+#endif
 # Just in case: NNLOJET executable
 if ( $withnnlojet ) then
    setenv NNLOJET_BIN_PATH ${base}/${local}/src/NNLOJET_rev${revision}/driver
    setenv PATH ${NNLOJET_BIN_PATH}:${PATH}
-   echo 'setenv PATH '"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.csh
-   echo 'export PATH='"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.sh
    echo 'setenv NNLOJET_BIN_PATH '"${NNLOJET_BIN_PATH}" >> fnlosrc_source.csh
    echo 'export NNLOJET_BIN_PATH='"${NNLOJET_BIN_PATH}" >> fnlosrc_source.sh
+   echo 'setenv PATH '"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.csh
+   echo 'export PATH='"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.sh
 endif
 echo ""
 echo "ATTENTION: PATH environment complemented!"
@@ -361,16 +383,34 @@ else
   echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib" >> fnlosrc_source.csh
   echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib" >> fnlosrc_source.sh
 endif
-if ( $withroot > 1 ) then
-  setenv LD_LIBRARY_PATH ${base}/${local}/lib/root:${LD_LIBRARY_PATH}
-  echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-  echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+# $LD_LIBRARY_PATH set from now on ...
+#
+# If $MYCVMFS is set, use the LHAPDF installation and PDF sets from CVMFS.
+if ( $?MYCVMFS ) then
+  setenv LD_LIBRARY_PATH ${lhapdfbasepath}/lib:${LD_LIBRARY_PATH}
+  echo 'setenv LD_LIBRARY_PATH '"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+  echo 'export LD_LIBRARY_PATH='"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+  setenv LHAPDF_DATA_PATH ${lhapdfbasepath}/share/LHAPDF
+  echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
+  echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
 endif
-# Uncomment to use other LHAPDF installation, e.g. from cvmfs
-# setenv LD_LIBRARY_PATH ${MYCVMFS}/external/lhapdf/6.1.6/lib:${LD_LIBRARY_PATH}
-# Uncomment to use other ROOT installation, e.g. from cvmfs
-# setenv ROOTLIBPATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib
-# setenv LD_LIBRARY_PATH ${ROOTLIBPATH}:${LD_LIBRARY_PATH}
+# If $MYCVMFS is set, one could also use the ROOT installation from CVMFS, BUT
+# because of frequent issues with preinstalled ROOT versions we will either install
+# our own version below, if desired, or nothing at all, see command line options.
+# In particular for producing fastNLO grids on compute clusters ROOT is not required at all!
+# APPLgrid needs ROOT though, but is not installed currently.
+#  (Uncomment to try using ROOT installation from CVMFS)
+if ( $withroot > 1 ) then
+#  if ( $?MYCVMFS ) then
+#    setenv LD_LIBRARY_PATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:${LD_LIBRARY_PATH}
+#    echo 'setenv LD_LIBRARY_PATH '"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+#    echo 'export LD_LIBRARY_PATH='"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+#  else
+    setenv LD_LIBRARY_PATH ${base}/${local}/lib/root:${LD_LIBRARY_PATH}
+    echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+    echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+#  endif
+endif
 echo ""
 echo "ATTENTION: LD_LIBRARY_PATH environment complemented!"
 echo "   LD_LIBRARY_PATH has been set to:"
@@ -396,27 +436,28 @@ if ( ! -e ${arc}_installed  ) then
 endif
 #
 # LHAPDF (>= 6.2.0 is recommended):
-# Unfortunately, cvmfs has only 6.1.1 available up to now
-# LHAPDF v5 might still work, but support for it has been stopped!
+#
 #------------------------------------------------------------------------------
-set arc="LHAPDF-6.2.1"
-if ( ! -e ${arc}_installed  ) then
-  tar xzf ${arc}.tar.gz
-  cd ${arc}
-  ./configure --prefix=${base}/${local} CPPFLAGS="${MYCPPFLAGS}" ${pythonopt}
-  make -j${cores} install
-  cd ..
-# Download default PDF sets
-#  ${base}/${local}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
-# In case of CMS CVMFS usage, use PDF sets from there
-  if ( $?MYCVMFS ) then
-    setenv LHAPDF_DATA_PATH ${MYCVMFS}/external/lhapdf/6.2.1/share/LHAPDF
-    echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
-    echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
+if ( ! $?MYCVMFS ) then
+  set arc="LHAPDF-6.2.1"
+  if ( ! -e ${arc}_installed  ) then
+    tar xzf ${arc}.tar.gz
+    cd ${arc}
+    ./configure --prefix=${base}/${local} CPPFLAGS="${MYCPPFLAGS}" ${pythonopt}
+    make -j${cores} install
+    cd ..
+# Download default PDF sets, only possible if installed with Python support!
+    if ( $withpython ) then
+      ${base}/${local}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
+    else
+      echo ""
+      echo "ATTENTION: LHAPDF has been installed without any PDF sets!"
+      echo "           Either install with Python support or make such sets accessible by other means."
+      echo ""
+    endif
+    touch ${arc}_installed
   endif
-  touch ${arc}_installed
 endif
-
 #
 # OpenMPI (version 2.1.2 has been tested to work, if it was configured with --enable-mpi-cxx):
 #
@@ -764,7 +805,7 @@ endif
     if ( ! -e ${arc}_installed  ) then
         tar xzf ${arc}-repacked.tar.gz
         cd ${arc}
-        ./configure --prefix=${base}/${local} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base}/${local} --enable-lhapdf=${base}/${local} --enable-hepmc2=${base}/${local} --enable-rivet=${base}/${local} ${rootenablepath} --enable-openloops=${base}/${local}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}/${local}
+        ./configure --prefix=${base}/${local} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base}/${local} --enable-lhapdf=${lhapdfbasepath} --enable-hepmc2=${base}/${local} --enable-rivet=${base}/${local} ${rootenablepath} --enable-openloops=${base}/${local}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}/${local}
         make -j${cores} install
         cd ..
         touch ${arc}_installed
