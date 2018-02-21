@@ -48,7 +48,7 @@ public:
       else return false;
    }
    void SelectProcesses( const std::vector< std::pair<int,int> >& proclist );   //!< tries to select the specified subprocesses for calculation. Prints a warning on failure.
-   void SelectProcesses( const std::string& processes );                      //!< tries to select the specified subprocesses for calculation. Prints a warning on failure.
+   void SelectProcesses( const std::string& processes, bool symmetric = true );                      //!< tries to select the specified subprocesses for calculation. Prints a warning on failure.
 
    // ---- setters for specific options ---- //
    void SetCalculateSingleSubprocessOnly(int iSub);					//!< only use one subprocess for calculation

@@ -13,24 +13,21 @@ EXTRA_DIST = fastnlo.i
 
 if ENABLE_PYEXT
 
-fastnlo_wrap.cc fastnlo.py: fastnlo.i
-	swig -c++ -python -I${srcdir}/../fastnlotoolkit/include/fastnlotk -I${top_builddir}/fastnlotoolkit/include/fastnlotk -I${top_srcdir}/fastnlotoolkit/include/fastnlotk -o fastnlo_wrap.cc $<
+python_PYTHON = fastnlo.py
+pyexec_LTLIBRARIES = _fastnlo.la
 
-AM_CXXFLAGS = -Wno-long-long
+_fastnlo_la_SOURCES = fastnlo_wrap.cc
+_fastnlo_la_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_srcdir)/fastnlotoolkit/include/fastnlotk -I$(LHAPDFINCLUDEPATH)
+_fastnlo_la_LDFLAGS = -module -shared -avoid-version
+_fastnlo_la_LIBADD = $(top_srcdir)/fastnlotoolkit/libfastnlotoolkit.la
 
-all-local: fastnlo_wrap.cc
-	$(PYTHON) setup.py build
+include ./$(DEPDIR)/fastnlo_wrap.Plo
 
-install-exec-local:
-	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)
-
-uninstall-local:
-	rm -rf $(DESTDIR)$(libdir)/python*/site-packages/fastnlo*
+fastnlo_wrap.cc: fastnlo.i
+	$(SWIG) -c++ -python -I$(top_srcdir)/fastnlotoolkit/include/fastnlotk -o $@ -MD -MF $(DEPDIR)/fastnlo_wrap.Plo $<
 
 clean-local:
-	$(PYTHON) setup.py clean --all
-	@rm -f $(top_builddir)/*.pyc
-	@rm -f fastnlo_wrap.cc fastnlo.py
+	rm -f fastnlo_wrap.cc fastnlo.py $(DEPDIR)/fastnlo_wrap.Plo
 
 endif
 
