@@ -629,7 +629,6 @@ AC_CONFIG_FILES([Makefile
                  fastnlotoolkit/include/fastnlotk/fastNLOConstants.h
                  fortranext/Makefile
                  pyext/Makefile
-                 pyext/setup.py
                  src/Makefile
                  src/fnlo-tk-config
                 ])
