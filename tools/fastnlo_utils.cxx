@@ -836,11 +836,7 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
    // TODO: The scale setting interface is extremely intransparent ==> IMPROVE
    // --- adapt for muf-variations for fixed-scale tables
-   if ( sc.FlexibleScaleTable ) {
-      static const double sclfac[1] = {1.0};
-   } else {
-      static const double sclfac[maxscl] = {1,0.5,2.,0.505, 202,0.005,200}; // ugly convention: muf*0.5, muf*2, mur+muf * 0.5, mur+muf* 2, mur*0.5 mur*2
-   }
+   static const double sclfac[maxscl] = {1,0.5,2.,0.505, 202,0.005,200}; // ugly convention: muf*0.5, muf*2, mur+muf * 0.5, mur+muf* 2, mur*0.5 mur*2
    std::cout<<"[fnloUtils::InitFastNLO] wt  []:";
    for ( int is = 0 ; is<maxscl ; is++ ) printf("\t%5.4e",wt[is]);
    std::cout<< std::endl;
