@@ -221,14 +221,16 @@ if ( $#argv > 7 ) then
 endif
 # Use CVMFS software repository also for LHAPDF if requested
 # Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
-#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
+set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
 # BUT 6.1.6 still uses BOOST :-(
 set withcvmfslhapdf=0
 if ( $#argv > 8 ) then
     set withcvmfslhapdf=$9
 endif
 if ( $withcvmfslhapdf ) then
-   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
+# Needs BOOST libs, uargh.
+#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
+   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
 else
    set lhapdfbasepath=${base}/${local}
 endif
@@ -399,7 +401,7 @@ if ( $withcvmfslhapdf ) then
   setenv LD_LIBRARY_PATH ${lhapdfbasepath}/lib:${LD_LIBRARY_PATH}
   echo 'setenv LD_LIBRARY_PATH '"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
   echo 'export LD_LIBRARY_PATH='"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
-  setenv LHAPDF_DATA_PATH ${lhapdfbasepath}/share/LHAPDF
+  setenv LHAPDF_DATA_PATH ${lhapdfdatapath}/share/LHAPDF
   echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
   echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
 endif
@@ -622,7 +624,8 @@ endif
 #
 # fastNLO Toolkit:
 #------------------------------------------------------------------------------
-set arc="fastnlo_toolkit-2.3.1pre-2441"
+#set arc="fastnlo_toolkit-2.3.1pre-2441"
+set arc="fastnlo_toolkit-2.3.1pre-2450-37-g3ef1157"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
@@ -698,7 +701,7 @@ if ( $withnnlojet ) then
 #------------------------------------------------------------------------------
     set arc="nnlo-bridge-0.0.36"
 # Previous buggy: set rev="rev1683M3"
-    set rev="rev1683M4"
+    set rev="rev1683M5"
     if ( ! -e ${arc}_installed  ) then
     tar xzf ${arc}-${rev}.tar.gz
     cd ${arc}
