@@ -179,9 +179,9 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    SetProcConstsDefaults();
    logger.debug["fastNLOCreate"] << "SetScenConstsDefaults" << endl;
    SetScenConstsDefaults();
-   PrintGenConsts();
-   PrintProcConsts();
-   PrintScenConsts();
+   // PrintGenConsts();
+   // PrintProcConsts();
+   // PrintScenConsts();
 
    //! Set constants from arguments
    logger.debug["fastNLOCreate"] << "SetGenConsts from argument" << endl;
@@ -190,9 +190,9 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    fProcConsts = ProcConsts;
    logger.debug["fastNLOCreate"] << "SetScenConsts from argument" << endl;
    fScenConsts = ScenConsts;
-   PrintGenConsts();
-   PrintProcConsts();
-   PrintScenConsts();
+   // PrintGenConsts();
+   // PrintProcConsts();
+   // PrintScenConsts();
 
    //! Set filenames and steering namespace from arguments
    fWarmupFilename = warmupfile;
@@ -211,7 +211,7 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    // At last, read steering for final completions and modifications
    ReadSteeringFile(steerfile,steeringNameSpace);
    // DEBUG
-   PRINTALL();
+   // PRINTALL();
    //! Do not allow to set WarmupFilename from steering in this constructor, since explicit
    //! warmup filename is given
    if ( EXIST_NS(WarmUpFilename,steeringNameSpace) ) {

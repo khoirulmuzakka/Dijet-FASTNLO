@@ -50,17 +50,18 @@ extern "C" bool getunitphase_();
 fastNLO::GeneratorConstants  fnloUtils::GetNNLOJET_GenConsts() {
    //!< Get NNLOJET specific generator constants for this interface
    fastNLO::GeneratorConstants gc;
-   gc.Name = "NNLOJET"; //!< Name and version of generator
-   gc.References.push_back("JHEP 1607 (2016) 133 [arXiv:1605.04295]"); //!< References for generator
-   gc.References.push_back("Phys. Rev. Lett. 117, 042001 (2016) [arXiv:1606.03991]"); //!< References for generator
-   gc.UnitsOfCoefficients = 15;
+   gc.Name = "NNLOJET_rev_4585"; //!< Name and version of generator
+   gc.References.push_back("Single jet inclusive production (adapt in case of other process):"); //!< References for generator
+   gc.References.push_back("Currie, J.; Glover, E. W. N. & Pires, J., Phys. Rev. Lett., 2017, 118, 072002 [arXiv:1611.01460]"); //!< References for generator
+   gc.References.push_back("Currie, J.; Glover, E. W. N.; Gehrmann-De Ridder, A.; Gehrmann, T.; Huss, A. & Pires, J., In Proceedings 23rd Cracow Epiphany Conference, 2017, [arXiv:1704.00923]"); //!< References for generator
+   gc.References.push_back("Currie, J.; Gehrmann-De Ridder, A.; Gehrmann, T.; Glover, E. W. N.; Huss, A. & Pires, J., In Proceedings 52nd Rencontres de Moriond QCD, 2017, [arXiv:1705.08205]"); //!< References for generator
+   gc.UnitsOfCoefficients = 15; //!< fb
    return gc;
 }
 
 
 
 // _____________________________________________________________________ //
-//fastNLO::ProcessConstants  fnloUtils::GetNNLOJET_ProcConstsPP(int LOord, const std::vector<std::vector<int> >& partLiCos) {
 fastNLO::ProcessConstants fnloUtils::GetNNLOJET_ProcConstsPP() {
    //!< Get default process constants for pp processes
 
@@ -68,40 +69,33 @@ fastNLO::ProcessConstants fnloUtils::GetNNLOJET_ProcConstsPP() {
    std::vector<std::vector<int> > partLiCos = fnloUtils::sp.GetPartonCombinations();
    if ( partLiCos.empty() ) {
       std::cerr<<"[fnloUtils::GetNNLOJET_ProcConstsPP] Error. No parton combinations found. "
-               << "Please read config file into Subprocess-class: fnloUtils::sp .Exiting."<<std::endl;
+               << "Please read config file into subprocess-class: fnloUtils::sp. Aborting!"<<std::endl;
       exit(5);
    }
 
-
    fastNLO::ProcessConstants pc;
-   pc.LeadingOrder     = nnlo::GetPowLO(); // Order in alpha_s of leading order process
-   pc.NPDF             = 2; // No. of PDFs involved
-   pc.NPDFDim          = 2; // 2: full-matrix (then we don't need 'asymmetric processes
-
-   int nprocs = partLiCos.size();
-   pc.IPDFdef1         = 3; // Flag 1 to define PDF linear combinations
-   pc.IPDFdef2         = 0; // Flag 2 to define PDF linear combinations
-   pc.IPDFdef3LO       = nprocs; // No. of  subprocesses
-   pc.IPDFdef3NLO      = nprocs;
-   pc.IPDFdef3NNLO     = nprocs;
-
-   pc.NSubProcessesLO  = nprocs; //No. of LO   subprocesses
-   pc.NSubProcessesNLO = nprocs;
-   pc.NSubProcessesNNLO= nprocs;
-
-
-   // parton combinations in two different formats
-   pc.PDFCoeffLO       = VectorToPairs(partLiCos);//!< PDF Linear combinations
+   pc.LeadingOrder     = nnlo::GetPowLO(); //!< Power in alpha_s of LO process
+   pc.NPDF             = 2;                //!< No. of PDFs involved
+   int nprocs = partLiCos.size();          // TODO Why only LO?
+   pc.NSubProcessesLO  = nprocs;           //!< No. of LO   subprocesses
+   pc.NSubProcessesNLO = nprocs;           //!< No. of NLO  subprocesses
+   pc.NSubProcessesNNLO= nprocs;           //!< No. of NNLO subprocesses
+   pc.IPDFdef1         = 3;                //!< Flag 1 to define PDF linear combinations of partonic subprocesses
+   pc.IPDFdef2         = 0;                //!< Flag 2 to define PDF linear combinations of partonic subprocesses
+   pc.IPDFdef3LO       = nprocs;           //!< Flag 3 to define PDF LCs at   LO
+   pc.IPDFdef3NLO      = nprocs;           //!< Flag 3 to define PDF LCs at  NLO
+   pc.IPDFdef3NNLO     = nprocs;           //!< Flag 3 to define PDF LCs at NNLO
+   pc.NPDFDim          = 2;                //!< Internal storage mode for PDF LCs, 2: full-matrix ==> we do not need 'asymmetric processes'
+   //!< PDF Linear combinations in two different formats (used only if IPDFdef2==0)
+   pc.PDFCoeffLO       = VectorToPairs(partLiCos); //!< PDF Linear combinations
    pc.PDFCoeffNLO      = pc.PDFCoeffLO;
    pc.PDFCoeffNNLO     = pc.PDFCoeffLO;
-   pc.PDFLiCoInLO      = partLiCos; //!< PDF Linear combinations
+   pc.PDFLiCoInLO      = partLiCos;                //!< PDF Linear combinations
    pc.PDFLiCoInNLO     = pc.PDFLiCoInLO;
    pc.PDFLiCoInNNLO    = pc.PDFLiCoInLO;
-
-
-   //AsymmetricProcesses = ; // empty
-   pc.Name             = "Name of process not set and only specified in NNLOJET runcard.";
-   pc.References.push_back("Please see NNLOJET manual for more reference."); // references for processes
+   pc.AsymmetricProcesses.clear();                 //!< Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax (only if NPDFDim==1)
+   pc.Name             = nnlo::GetProcessName();   //!< Name of process as given in NNLOJET runcard
+   pc.References.push_back("Please check and modify NNLOJET references according to selected process."); // references for processes
    return pc;
 }
 
@@ -109,46 +103,44 @@ fastNLO::ProcessConstants fnloUtils::GetNNLOJET_ProcConstsPP() {
 
 // _____________________________________________________________________ //
 fastNLO::ProcessConstants fnloUtils::GetNNLOJET_ProcConstsDIS() {
-   //!< Get default process constants for pp processes
+   //!< Get default process constants for DIS processes
 
    // --- external input from NNLOJET
-   //int LOord = inppar_.njets - 1; // DIS: minus 1
-   std::cout<< "\n\n LOord = "<<nnlo::GetPowLO()<<std::endl<<std::endl;
    std::vector<std::vector<int> > partLiCos = fnloUtils::sp.GetPartonCombinations();
    if ( partLiCos.empty() ) {
       std::cerr<<"[fnloUtils::GetNNLOJET_ProcConstsDIS] Error. No parton combinations found. "
-               << "Please read config file into Subprocess-class: fnloUtils::sp .Exiting."<<std::endl;
+               << "Please read config file into subprocess-class: fnloUtils::sp. Aborting!"<<std::endl;
       exit(5);
    }
 
    fastNLO::ProcessConstants pc;
-   pc.LeadingOrder     = nnlo::GetPowLO(); // Order in alpha_s of leading order process
-   pc.NPDF             = 1; // No. of PDFs involved
-   pc.NPDFDim          = 0; // 2: full-matrix (then we don't need 'asymmetric processes
-
-   int nprocs = partLiCos.size();
+   pc.LeadingOrder     = nnlo::GetPowLO(); //!< Power in alpha_s of LO process
+   pc.NPDF             = 1;                //!< No. of PDFs involved
+   int nprocs = partLiCos.size();          // TODO Why only LO?
+   pc.NSubProcessesLO  = nprocs;           //!< No. of LO   subprocesses
+   pc.NSubProcessesNLO = nprocs;           //!< No. of NLO  subprocesses
+   pc.NSubProcessesNNLO= nprocs;           //!< No. of NNLO subprocesses
+   pc.IPDFdef1         = 2;                //!< Flag 1 to define PDF linear combinations of partonic subprocesses
+   pc.IPDFdef2         = 0;                //!< Flag 2 to define PDF linear combinations of partonic subprocesses
+   pc.IPDFdef3LO       = nprocs;           //!< Flag 3 to define PDF LCs at   LO
+   pc.IPDFdef3NLO      = nprocs;           //!< Flag 3 to define PDF LCs at  NLO
+   pc.IPDFdef3NNLO     = nprocs;           //!< Flag 3 to define PDF LCs at NNLO
+   pc.NPDFDim          = 0;                //!< Internal storage mode for PDF LCs, 2: full-matrix ==> we do not need 'asymmetric processes'
    pc.IPDFdef1         = 2; // Flag 1 to define PDF linear combinations
    pc.IPDFdef2         = 0; // Flag 2 to define PDF linear combinations
    pc.IPDFdef3LO       = nprocs; // No. of  subprocesses
    pc.IPDFdef3NLO      = nprocs;
    pc.IPDFdef3NNLO     = nprocs;
-
-   pc.NSubProcessesLO  = nprocs; //No. of LO   subprocesses
-   pc.NSubProcessesNLO = nprocs;
-   pc.NSubProcessesNNLO= nprocs;
-
-
-   // parton combinations in two different formats
-   pc.PDFCoeffLO       = VectorToPairs(partLiCos);//!< PDF Linear combinations
+   //!< PDF Linear combinations in two different formats (used only if IPDFdef2==0)
+   pc.PDFCoeffLO       = VectorToPairs(partLiCos); //!< PDF Linear combinations
    pc.PDFCoeffNLO      = pc.PDFCoeffLO;
    pc.PDFCoeffNNLO     = pc.PDFCoeffLO;
    pc.PDFLiCoInLO      = partLiCos; //!< PDF Linear combinations
    pc.PDFLiCoInNLO     = pc.PDFLiCoInLO;
    pc.PDFLiCoInNNLO    = pc.PDFLiCoInLO;
-
-   //AsymmetricProcesses = ; // empty
-   pc.Name             = "Name of process not set and only specified in NNLOJET runcard.";
-   pc.References.push_back("Please see NNLOJET manual for more reference."); // references for processes
+   pc.AsymmetricProcesses.clear();                 //!< Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax (only if NPDFDim==1)
+   pc.Name             = nnlo::GetProcessName();   //!< Name of process as given in NNLOJET runcard
+   pc.References.push_back("Please check and modify NNLOJET references according to selected process."); // references for processes
    return pc;
 }
 
@@ -156,26 +148,21 @@ fastNLO::ProcessConstants fnloUtils::GetNNLOJET_ProcConstsDIS() {
 
 // _____________________________________________________________________ //
 fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
-   //!< Get default process constants for pp processes
 
+   //!< Get default process constants for pp processes
    fastNLO::ScenarioConstants sc;
 
-   sc.ScenarioName = "fnlXYZ"; // no white spaces here!
+   sc.ScenarioName = "fnlXYZ";     // No white space here!
    sc.ScenarioDescription.clear();
-   sc.ScenarioDescription.push_back("test for nnlojet"); //< Description of the scenario
-   sc.PublicationUnits = 12; //< we are usually working in units of [pb]
-
-   // Dimensionality of binning
-   //   also decides if SingleDifferentialBinning or DoubleDifferentialBinning is used
-   //   1: single-differential,
-   //   2: double-differential;
-   sc.DifferentialDimension = 1;
+   sc.ScenarioDescription.push_back("Add here full description of observable"); //< Description of the scenario
+   sc.PublicationUnits = 12;       // LHC Rivet analyses are usually working in units of [pb]
+   sc.DifferentialDimension = 1;   // NNLOJET always provides 1d histograms
 
    // Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop"),
-   // e.g. "|y|" and "p_T [GeV]".
+   // e.g. "|y|" and "p_T_[GeV]".
    // This may also help to define the observables to be calculated in an automatized way!
    sc.DimensionLabels.clear();
-   sc.DimensionLabels.push_back("varName");
+   sc.DimensionLabels.push_back("varName_[unit]"); // Could eventually be extracted from NNLOJET runcard (grid name)
 
    // Specify:
    //  0 : the cross section is NOT differential,
@@ -189,10 +176,12 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    sc.BinSizeFactor = 1; //< Possibility to provide additional normalization factor, e.g. of 2 for bins in |y|
    //sc.BinSize = ; //< If 'CalculateBinSize' is 'false' provide table with bin widths for normalization.
 
+   // Could eventually be extracted from NNLOJET runcard (SCALES)
    sc.ScaleDescriptionScale1 = "scale1"; //< "<pT_1,2>_[GeV]" # This defines the scale to be used (Note: The 1st scale should always be in units of [GeV]!)
    sc.ScaleDescriptionScale2 = "scale2"; //< "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
-   //DB: binning remains empty here and has to be set later.
+   // Binning is read from NNLOJET in warmup run and later defined via warmup files
+   //
    // Observable binning Use either 'SingleDifferentialBinning' or
    //    'DoubleDifferentialBinning' or 'TripleDifferentialBinning' in
    //    accordance with 'DifferentialDimension' above
@@ -200,12 +189,13 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    // sc.DoubleDifferentialBinning; //< Observable binning
    // sc.TripleDifferentialBinning; //< Observable binning
 
-   sc.CenterOfMassEnergy = inputpar_.roots; //todo //< Center-of-mass energy in GeV. LHC Next Run II: 13000
+   sc.CenterOfMassEnergy = inputpar_.roots; //< Center-of-mass energy in GeV from NNLOJET.
    sc.PDF1 = 2212; //< PDF of 1st hadron (following PDG convention: proton 2212).
    sc.PDF2 = 2212; //< PDF of 2nd hadron (following PDG convention: proton 2212).
 
-   sc.OutputFilename = "test.tab";//< Filename of fastNLO output table
+   sc.OutputFilename = "test";//< Filename of fastNLO output table
    sc.OutputPrecision = 8; //< Number of decimal digits to store in output table (def.=8).
+   //   sc.OutputCompression = true; // Output compression not set here, since availability of zlib unknown
 
    // Create table fully flexible in mu_f
    //    larger size, and requires scale independent weights during creation
@@ -218,26 +208,25 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    //   Scale factors will be ordered according to fastNLO convention:
    //   (1, min, ... , max). Defaults: {0.5, 1.0, 2.0}
    sc.ScaleVariationFactors = {1.0};
-
    sc.ReadBinningFromSteering = true; // Specify if binning is read from fScenConst or from warmup
    sc.IgnoreWarmupBinningCheck = true; // Do not check once more the binning between warmup and steering
    sc.ApplyPDFReweighting  = true; // Apply reweighting of pdfs for an optimized interpolation, def.=true.
 
-   // For warmup-run! Set limits for scale nodes to bin borders, if possible
+   // For warmup run! Set limits for scale nodes to bin borders, if possible
    sc.CheckScaleLimitsAgainstBins = true;
 
-   //   Choose fastNLO interpolation kernels and distance measures
+   // Choose default fastNLO interpolation settings
+   // To be checked and eventually modified for each observable via additional steering file!
    sc.X_Kernel = "Lagrange";
    sc.X_DistanceMeasure = "sqrtlog10"; //"3rdrtlog10"
    //   sc.X_NNodes = 30; // equivalent to APPLgrid setting; too large tables
    sc.X_NNodes = 20;
-   sc.X_NNodeCounting = "NodesPerBin";
+   sc.X_NNodeCounting = "NodesPerBin"; // Corresponds to v14 & v21 standard
    if ( nnlo::IsDIS() ) {
       sc.X_Kernel = "Catmull";
       sc.X_DistanceMeasure = "log10"; // we like to have many nodes at LOW-x !
       sc.X_NNodes = 18;
    }
-
    sc.Mu1_Kernel = "Lagrange";
    sc.Mu1_DistanceMeasure = "loglog025";//"loglog025";
    sc.Mu1_NNodes = 7;
@@ -245,12 +234,10 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
       sc.Mu1_NNodes = 7; // This is Q2 for DIS
       sc.Mu1_DistanceMeasure = "loglog025";//"loglog025";
    }
-
    // Do this for a constant scale like M_Z
    // sc.Mu1_Kernel = "OneNode";
    // sc.Mu1_DistanceMeasure = "log10";//"loglog025";
    // sc.Mu1_NNodes = 1;
-
    sc.Mu2_Kernel = "Lagrange"; //"Lagrange";//<   Lagrange     # Scale2 not used for fixed-scale tables
    sc.Mu2_DistanceMeasure = "loglog025";//"loglog025";//< "loglog025"
    sc.Mu2_NNodes = 7;
@@ -817,7 +804,7 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
    // --- build scenario specific 'ScenarioConstants'
    fastNLO::ScenarioConstants sc = fnloUtils::GetNNLOJET_ScenConsts();
-   if ( gridname.find("iff") != std::string::npos ) {
+   if ( gridname.find("iff") != std::string::npos ) { // TODO: Fix this very ugly hack
      sc.X_NNodes = 50;
      sc.X_DistanceMeasure = "sqrtlog10"; // we like to have increasingly many nodes at high-x
    }
@@ -827,22 +814,33 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
      sc.Mu2_NNodes = 6;
      if ( gridname.find("iff") != std::string::npos ) sc.X_NNodes = 42;
    }
-   if ( muf2_hook(2) == mur2_hook(2) &&  fabs(sqrt(mur2_hook(2))/exp(1)-1)<1.e-6) sc.FlexibleScaleTable = true;
-   else if ( muf2_hook(1) == mur2_hook(1) ) sc.FlexibleScaleTable = false;
-   else {
-     std::cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<< std::endl;
-     std::cout<<"                       muf2(1)="<<muf2_hook(1)<<"\tmur2(1)="<<mur2_hook(1)<< std::endl;
-     std::cout<<"                       muf2(2)="<<muf2_hook(2)<<"\tmur2(2)="<<mur2_hook(2)<< std::endl;
-     std::cout<<" Exiting."<< std::endl;
-     exit(4);
+   // TODO: Fix hack to select between flexible- and fixed-scale table
+   std::cout<<"[fnloUtils::InitFastNLO] NNLOJET scale choices: muf2(1) = " << muf2_hook(1) << "\tmur2(1) = " << mur2_hook(1) << std::endl;
+   std::cout<<"[fnloUtils::InitFastNLO] NNLOJET scale choices: muf2(2) = " << muf2_hook(2) << "\tmur2(2) = " << mur2_hook(2) << std::endl;
+   if ( muf2_hook(2) == mur2_hook(2) && fabs(sqrt(mur2_hook(2))/exp(1)-1)<1.e-6) {
+      std::cout<<"[fnloUtils::InitFastNLO] Flexible-scale table chosen."<< std::endl;
+      sc.FlexibleScaleTable = true;
+   } else if ( muf2_hook(1) == mur2_hook(1) ) {
+      std::cout<<"[fnloUtils::InitFastNLO] Fixed-scale table chosen."<< std::endl;
+      sc.FlexibleScaleTable = false;
+   } else {
+      std::cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<< std::endl;
+      std::cout<<" Exiting."<< std::endl;
+      exit(4);
    }
    fnloUtils::SetNNLOJETDefaultBinning(sc, nbins, lo);
    // if ( nnlo::IsDIS() ){
    //    sc.CheckScaleLimitsAgainstBins = sc.FlexibleScaleTable;
    // }
 
-   // --- adapt for muf-variations
-   static const double sclfac[maxscl] = {1,0.5,2.,0.505, 202,0.005,200}; // ugly convention: muf*0.5, muf*2, mur+muf * 0.5, mur+muf* 2, mur*0.5 mur*2
+
+   // TODO: The scale setting interface is extremely intransparent ==> IMPROVE
+   // --- adapt for muf-variations for fixed-scale tables
+   if ( sc.FlexibleScaleTable ) {
+      static const double sclfac[1] = {1.0};
+   } else {
+      static const double sclfac[maxscl] = {1,0.5,2.,0.505, 202,0.005,200}; // ugly convention: muf*0.5, muf*2, mur+muf * 0.5, mur+muf* 2, mur*0.5 mur*2
+   }
    std::cout<<"[fnloUtils::InitFastNLO] wt  []:";
    for ( int is = 0 ; is<maxscl ; is++ ) printf("\t%5.4e",wt[is]);
    std::cout<< std::endl;
@@ -914,12 +912,16 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
       }
 
       else if ( !sc.FlexibleScaleTable ) {
+         // TODO Improve. Only 0,1,2 of NNLOJET runcard SCALES are accessed.
+         // SCALES must be defined to fulfil the following conditions!
          for ( int is = 0 ; is< 3 && is<(int)sc.ScaleVariationFactors.size() ; is++ ){
+            // mur(1) is base scale
             double mur0  = mur2_hook(1);
             //double muf0  = muf2_hook(1);
+            // This loops over 1,2,3
             double mur2  = mur2_hook(is+1);
             double muf2  = muf2_hook(is+1);
-            if ( is==0 && mur2!=muf2 ) {
+            if ( is==0 && mur2!=muf2 ) { // mur==muf for first "scale variation"
                std::cerr<<"[nnlo::fill_fastnlo]. Error. First scale setting: muf and mur must be identical, but muf2/mur2="<<muf2/mur2<< std::endl;
                exit(2);
             }
@@ -931,15 +933,15 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
             //    std::cerr<<"[nnlo::fill_fastnlo]. Error. Third scale variation must be muf*2=mur*2, but muf2/mur2="<<muf2/mur2<< std::endl;
             //    exit(2);
             // }
-            if ( fabs(muf2/mur2-1) > 1.e-6 ) {
+            if ( fabs(muf2/mur2-1) > 1.e-6 ) { // mur/muf = 1 for all "scale variations" ==> symmetric variation of muf, mur versus base scale mur(1)
                std::cerr<<"[nnlo::fill_fastnlo]. Error. Scale variation is="<<is<<" must be muf*0.5=mur*0.5, but muf2/mur2="<<muf2/mur2<< std::endl;
                exit(2);
             }
-            if ( is==1 && fabs(mur2/mur0/0.25-1) > 1.e-6 ) {
+            if ( is==1 && fabs(mur2/mur0/0.25-1) > 1.e-6 ) { // mur/mu0 = 2 && muf/mu0 = 2
                std::cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*0.5=mur*0.5, but mur2/mur2(0)="<<mur2/mur0<< std::endl;
                exit(2);
             }
-            if ( is==2 && fabs(mur2/mur0/4.-1) > 1.e-6 ) {
+            if ( is==2 && fabs(mur2/mur0/4.-1) > 1.e-6 ) { // mur/mu0 = 1/2 && muf/mu0 = 1/2
                std::cerr<<"[nnlo::fill_fastnlo]. Error. Second scale variation must be muf*2=mur*2, but mur2/mur2(0)="<<mur2/mur0<< std::endl;
                exit(2);
             }
@@ -947,7 +949,7 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
          //         if ( fabs(wt[3])>TINY ) {
          // KR: Use C++ macro constants like DBL_MIN instead
          if ( fabs(wt[3])>DBL_MIN ) {
-            std::cerr<<"[nnlo::fill_fastnlo]. Error. fastNLO only support scale settings of [0] mur=muf; [1] muf*0.5=mur*0.5; [2] muf*2=muf*2"<< std::endl;
+            std::cerr<<"[nnlo::fill_fastnlo]. Error. fastNLO only support scale settings of [0] mur=muf; [1] muf*0.5=mur*0.5; [2] muf*2=muf*2"<< std::endl; // Yes.
             exit(2);
          }
       }
@@ -1334,8 +1336,8 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
             static int id_obs_mr = fabs(mr/(int)(mr+0.5)-1) < 1.e-10 ? (int)(mr+0.5) : -1;
             if ( id_obs_mf != -1 ) mf = obs_val_hook(id_obs_mf);
             if ( id_obs_mr != -1 ) mr = obs_val_hook(id_obs_mr);
-            s1 = nnlo::IsDIS() ? mf : mr; // muf: scale1
-            s2 = nnlo::IsDIS() ? mr : mf; // mur: scale2
+            s1 = nnlo::IsDIS() ? mf : mr; // muf: scale1 (pp: scale2)
+            s2 = nnlo::IsDIS() ? mr : mf; // mur: scale2 (pp: scale1)
             if ( s1==0 || s2==0 ) {
                std::cout<<"WARNING! scale is zero (this happens if a 2-jet observable is taken as scale for a 1-jet observable): s1="<<s1<<"\ts2="<<s2<<"\tobs="<<thisobs<<"\tIsIncl="<<fnloUtils::fIsInclJet[id]<<"\tid="<<id<<"\t"<<fnloUtils::ftable[id]->GetFilename()<<std::endl;
             }
