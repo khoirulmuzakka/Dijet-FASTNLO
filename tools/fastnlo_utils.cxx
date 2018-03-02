@@ -161,6 +161,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    fastNLO::ScenarioConstants sc;
 
    sc.ScenarioName = "fnlXYZ"; // no white spaces here!
+   sc.ScenarioDescription.clear();
    sc.ScenarioDescription.push_back("test for nnlojet"); //< Description of the scenario
    sc.PublicationUnits = 12; //< we are usually working in units of [pb]
 
@@ -173,6 +174,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    // Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop"),
    // e.g. "|y|" and "p_T [GeV]".
    // This may also help to define the observables to be calculated in an automatized way!
+   sc.DimensionLabels.clear();
    sc.DimensionLabels.push_back("varName");
 
    // Specify:
@@ -180,6 +182,7 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    //      i.e. there are two bin borders (but NO division (normalization) by bin width);
    //  1 : the cross section is point-wise differential, i.e. only one point is given;
    //  2 : the cross section is bin-wise differential,   i.e. there are two bin borders and division by bin width
+   sc.DimensionIsDifferential.clear();
    sc.DimensionIsDifferential.push_back(2);
 
    sc.CalculateBinSize = true; //< Calculate bin width from lower and upper bin boundaries
@@ -217,7 +220,8 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    sc.ScaleVariationFactors = {1.0};
 
    sc.ReadBinningFromSteering = true; // Specify if binning is read from fScenConst or from warmup
-   sc.ApplyPDFReweighting  = true; //  Apply reweighting of pdfs for an optimized interpolation, def.=true.
+   sc.IgnoreWarmupBinningCheck = true; // Do not check once more the binning between warmup and steering
+   sc.ApplyPDFReweighting  = true; // Apply reweighting of pdfs for an optimized interpolation, def.=true.
 
    // For warmup-run! Set limits for scale nodes to bin borders, if possible
    sc.CheckScaleLimitsAgainstBins = true;
@@ -227,7 +231,6 @@ fastNLO::ScenarioConstants fnloUtils::GetNNLOJET_ScenConsts() {
    sc.X_DistanceMeasure = "sqrtlog10"; //"3rdrtlog10"
    //   sc.X_NNodes = 30; // equivalent to APPLgrid setting; too large tables
    sc.X_NNodes = 20;
-   //sc.X_NNodeCounting = "NodesMax";
    sc.X_NNodeCounting = "NodesPerBin";
    if ( nnlo::IsDIS() ) {
       sc.X_Kernel = "Catmull";
@@ -795,43 +798,43 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
 
    // --- get settings of histogram [id] from NNLOJET
    const std::string& gridname = fnloUtils::fInits[id].gridname;
-   const int& nbins       = fnloUtils::fInits[id].nbins;
-   const double& lo       = *(fnloUtils::fInits[id].lo);
-   //const double& hi       = *(fnloUtils::fInits[id].hi);
+   const int& nbins = fnloUtils::fInits[id].nbins;
+   const double& lo = *(fnloUtils::fInits[id].lo);
+   //const double& hi = *(fnloUtils::fInits[id].hi);
    fnloUtils::_myfillwgt  = 0;
 
    // --- read config file with  parton combinations
    if ( fnloUtils::sp.GetConfigFile().empty() )
-      fnloUtils::sp.ReadConfigFiles(fnloUtils::GetConfigFiles());
+     fnloUtils::sp.ReadConfigFiles(fnloUtils::GetConfigFiles());
 
    // --- get NNLOJET specific 'GeneratorConstants'
    fastNLO::GeneratorConstants gc = fnloUtils::GetNNLOJET_GenConsts();
 
    // --- build process specific 'ProcessConstants' (DIS or pp?)
    fastNLO::ProcessConstants pc = nnlo::IsDIS() ? //fnloUtils::GetProcess() == "DIS" ) ?
-      fnloUtils::GetNNLOJET_ProcConstsDIS() :
-      fnloUtils::GetNNLOJET_ProcConstsPP() ;
+     fnloUtils::GetNNLOJET_ProcConstsDIS() :
+     fnloUtils::GetNNLOJET_ProcConstsPP() ;
 
    // --- build scenario specific 'ScenarioConstants'
    fastNLO::ScenarioConstants sc = fnloUtils::GetNNLOJET_ScenConsts();
    if ( gridname.find("iff") != std::string::npos ) {
-      sc.X_NNodes = 50;
-      sc.X_DistanceMeasure = "sqrtlog10"; // we like to have increasingly many nodes at high-x
+     sc.X_NNodes = 50;
+     sc.X_DistanceMeasure = "sqrtlog10"; // we like to have increasingly many nodes at high-x
    }
    if ( nnlo::IsDIS() && gridname.find("q2") == std::string::npos ) {
-      std::cout<<"[fnloUtils::InitFastNLO] IsDIS, but not differential as function of q2, using more q2 nodes, less x-nodes"<<std::endl;
-      sc.Mu1_NNodes = 14; // more q2 nodes
-      sc.Mu2_NNodes = 6;
-      if ( gridname.find("iff") != std::string::npos ) sc.X_NNodes = 42;
+     std::cout<<"[fnloUtils::InitFastNLO] IsDIS, but not differential as function of q2, using more q2 nodes, less x-nodes"<<std::endl;
+     sc.Mu1_NNodes = 14; // more q2 nodes
+     sc.Mu2_NNodes = 6;
+     if ( gridname.find("iff") != std::string::npos ) sc.X_NNodes = 42;
    }
    if ( muf2_hook(2) == mur2_hook(2) &&  fabs(sqrt(mur2_hook(2))/exp(1)-1)<1.e-6) sc.FlexibleScaleTable = true;
    else if ( muf2_hook(1) == mur2_hook(1) ) sc.FlexibleScaleTable = false;
    else {
-      std::cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<< std::endl;
-      std::cout<<"                       muf2(1)="<<muf2_hook(1)<<"\tmur2(1)="<<mur2_hook(1)<< std::endl;
-      std::cout<<"                       muf2(2)="<<muf2_hook(2)<<"\tmur2(2)="<<mur2_hook(2)<< std::endl;
-      std::cout<<" Exiting."<< std::endl;
-      exit(4);
+     std::cout<<"[fnloUtils::InitFastNLO] Unrecognized scale settings. Please choose either a fixed-scale or a flexible-scale table."<< std::endl;
+     std::cout<<"                       muf2(1)="<<muf2_hook(1)<<"\tmur2(1)="<<mur2_hook(1)<< std::endl;
+     std::cout<<"                       muf2(2)="<<muf2_hook(2)<<"\tmur2(2)="<<mur2_hook(2)<< std::endl;
+     std::cout<<" Exiting."<< std::endl;
+     exit(4);
    }
    fnloUtils::SetNNLOJETDefaultBinning(sc, nbins, lo);
    // if ( nnlo::IsDIS() ){
@@ -854,7 +857,7 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
    // KR: Use C++ macro constants like DBL_MIN instead
    //      for ( int is = 1 ; is<maxscl && fabs(wt[is])> TINY; is++ )  {
       for ( int is = 1 ; is<maxscl && fabs(wt[is]) > DBL_MIN; is++ )  {
-	//         std::cout<<"[fnloUtils::InitFastNLO] wt["<<is<<"]="<<wt[is]<< std::endl;
+   //         std::cout<<"[fnloUtils::InitFastNLO] wt["<<is<<"]="<<wt[is]<< std::endl;
          sc.ScaleVariationFactors.push_back(sclfac[is]);
       }
       std::cout<<"[fnloUtils::InitFastNLO] Number of scale factors found: "<<sc.ScaleVariationFactors.size()<<"\t Please respect the convention how to specify those in the run-card."<< std::endl;
@@ -950,11 +953,10 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
       }
 //}
 
-
-
    // ---- initialize fastNLOCreate
    // --- Collect info for naming
    std::string wrmfile;
+   std::string steerfile;
    std::string tablename;
    std::string runid = runid_.srunid;
    std::string pname = nnlo::GetProcessName();
@@ -974,14 +976,19 @@ void fnloUtils::InitFastNLO( const int& id, const double* wt ) {
    else {
      wrmfile = pname+"."+gridname;
    }
+   size_t ipos = gridname.find_first_of("_");
+   std::string scenname = gridname.substr(0,ipos);
+   steerfile = pname+"."+scenname;
    tablename = pname+"."+jname+"."+runid+"."+gridname+".s"+std::to_string(seed);
-   wrmfile  += ".wrm";
+   wrmfile   += ".wrm";
+   steerfile += ".str";
    std::cout << "[fnloUtils::InitFastNLO] Warmup filename: " << wrmfile << std::endl;
+   std::cout << "[fnloUtils::InitFastNLO] Steering filename: " << steerfile << std::endl;
    std::cout << "[fnloUtils::InitFastNLO] Tablename: " << tablename << std::endl;
 
    sc.OutputFilename = tablename;
    fnloUtils::ftablename[id] = tablename;
-   fnloUtils::ftable[id] = new fastNLOCreate(wrmfile,gc,pc,sc);
+   fnloUtils::ftable[id] = new fastNLOCreate(gc,pc,sc,wrmfile,steerfile);
    fnloUtils::fIsInclJet[id] = (gridname.find("ji") != std::string::npos);
    fnloUtils::fIs820GeV[id] = (gridname.find("820") != std::string::npos);
    fnloUtils::fIs137[id]    = (gridname.find("137") != std::string::npos);
@@ -1025,7 +1032,7 @@ namespace fnloUtils {
       fInitialValues.resize(1000);
       std::ifstream cf(config);
       if ( !cf.is_open() ){
-	 std::cerr<<"[fnloSubprocesses::ReadConfigFile()] Error. Could not open file: "<<config<< std::endl;
+         std::cerr<<"[fnloSubprocesses::ReadConfigFile()] Error. Could not open file: "<<config<< std::endl;
          exit(2);
       }
       int id, np, v1, v2;
@@ -1155,7 +1162,7 @@ void nnlo::fill_fastnlo( const int& id, const double& obs, const double* wt, con
    //!<
    //!< Fill fastNLO table
    //!<
-   //say::SetGlobalVerbosity(say::INFO);
+   //   say::SetGlobalVerbosity(say::INFO);
 
    // { // --- debugging
    //    double x1 = parfrac_.x1;
