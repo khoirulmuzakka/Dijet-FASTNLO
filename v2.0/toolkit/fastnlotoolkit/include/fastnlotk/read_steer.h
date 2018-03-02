@@ -159,7 +159,7 @@
 //     Multiple steering files.
 //     ------------------------------
 //     In case multiple steering files are necessary, each steering file must
-//     be assigned a unique 'steerID' if variable names (labels)  are identically.
+//     be assigned a unique 'steerID' if variable names (labels) are identical.
 //          read_steer::readfile("file1.steer","file1")
 //          read_steer::readfile("anotherfile.steer","constants")
 //
@@ -304,7 +304,7 @@
 //         ADD_NS("age",76,"MyMom")
 //      which adds the value 76 for the label 'age' to the namespace 'MyMom'.
 //
-//      Further methos for appending single elements to arrays or tables also exist.
+//      Further methods for appending single elements to arrays or tables also exist.
 //
 //     Printing
 //     ------------------------------
@@ -657,9 +657,9 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
    for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
       str[i].resize(values[i].size());
       for ( unsigned int j = 0 ; j<values[i].size() ; j++ ) {
-	 std::stringstream ss;
-	 ss << values[i][j];
-	 str[i][j]=ss.str();
+         std::stringstream ss;
+         ss << values[i][j];
+         str[i][j]=ss.str();
       }
    }
    AddTable(key,header,str);

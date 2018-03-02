@@ -16,9 +16,9 @@ namespace fastNLO {
       //!  - references for generator
       //!  - (additional information about generator may be included in References)
       std::string Name;                      //!< Name and version of generator
-      std::vector<std::string> References;   //!< References for generator. Include additional information here (e.g. 'run-mode' or process).
-      int UnitsOfCoefficients;   //!< X section units of coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
-      //! Get 'CodeDescription' usable for fastNLO table
+      std::vector<std::string> References;   //!< References for generator. Potentially include additional information.
+      int UnitsOfCoefficients;               //!< Prefactor of x section in barns for coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
+      //! Transform these constants into 'CodeDescription' usable with fastNLO table
       std::vector<std::string > GetCodeDescription() {
          std::vector<std::string > CodeDescr(References.size()+1);
          CodeDescr[0] = Name;
@@ -150,8 +150,6 @@ namespace fastNLO {
          DifferentialDimension=0; //! a safe initialisation
          DimensionIsDifferential.clear();
          DimensionIsDifferential.push_back(2);
-         DimensionIsDifferential.push_back(2);
-         DimensionIsDifferential.push_back(2);
          PDF1=2212;
          PDF2=2212;
 #ifdef HAVE_LIBZ
@@ -171,7 +169,7 @@ namespace fastNLO {
          X_Kernel="Lagrange";//!<                        Lagrange
          X_DistanceMeasure="sqrtlog10";
          X_NNodes=15;
-	 X_NNodeCounting = "NodesPerBin";
+         X_NNodeCounting = "NodesMax";
 
          Mu1_Kernel="Lagrange";
          Mu1_DistanceMeasure="loglog025";

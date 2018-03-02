@@ -34,12 +34,24 @@ class fastNLOCreate : public fastNLOTable {
    //!
 
 public:
-   fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
-   fastNLOCreate(const std::string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts);
-   fastNLOCreate(const std::string& warmupfile, const fastNLO::GeneratorConstants& GenConsts,
-                 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
    fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
                  const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmConsts);
+   // KR: Deprecated, to be replaced by
+   fastNLOCreate(const std::string& warmupfile, const fastNLO::GeneratorConstants& GenConsts,
+                 const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts);
+   // KR: this one.
+   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                 const fastNLO::ScenarioConstants& ScenConsts, const std::string& warmupfile);
+   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                 const fastNLO::ScenarioConstants& ScenConsts, const std::string& warmupfile,
+                 const std::string& steerfile);
+   // KR: Deprecated, to be replaced by
+   fastNLOCreate(const std::string& steerfile, const fastNLO::GeneratorConstants& GenConsts,
+                 const fastNLO::ProcessConstants& ProcConsts);
+   // KR: this one.
+   fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                 const std::string& steerfile);
+   fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
    ~fastNLOCreate();
 
    fnloEvent fEvent;                                                                            //!< Structure, which holds all relevant variables related to event observables
@@ -50,15 +62,30 @@ public:
    void SetEvent(const fnloEvent ev) {fEvent = ev;}                                             //!< set the member fEvent, which will be used when calling Fill()
    inline void SetNumberOfEvents(double n) {
       GetTheCoeffTable()->Nevt = n;
-      GetTheCoeffTable()->fWgt.WgtNevt = n; 
+      GetTheCoeffTable()->fWgt.WgtNevt = n;
       fStats._nEv=n;};             //!< set number of events. This is only mandatory, before calling WriteTable().
    void SetLoOrder(int LOOrd);                                                                  //!< set order of alpha_s for leading order process.
 
    fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread = NULL);                          //!< set this table/contribution to become a reference contribution
 
+   void ReadSteeringFile(std::string steerfile, std::string steeringNameSpace = "");            //!< only read steering file, do not set anything
    void SetGenConstsDefaults();                                                                 //!< set defaults for generator constants
    void SetProcConstsDefaults();                                                                //!< set defaults for process constants
-   bool CheckProcConsts();                                                                      //!< check process constants to be different from defaults
+   void SetScenConstsDefaults();                                                                //!< set defaults for scenario constants
+   void SetWarmupConstsDefaults();                                                                //!< set defaults for warmup constants
+   void SetGenConstsFromSteering();                                                             //!< set generator constants from steering
+   void SetProcConstsFromSteering();                                                            //!< set process constants from steering
+   void SetScenConstsFromSteering();                                                            //!< set scenario constants from steering
+   void SetWarmupConstsFromSteering();                                                            //!< set warmup constants from steering
+   void PrintGenConsts();                                                                       //!< print current generator constants
+   void PrintProcConsts();                                                                      //!< print current process constants
+   void PrintScenConsts();                                                                      //!< print current scenario constants
+   void PrintWarmupConsts();                                                                      //!< print current warmup constants
+   bool CheckGenConsts();                                                                       //!< check generator constants
+   bool CheckProcConsts();                                                                      //!< check process constants
+   bool CheckScenConsts();                                                                      //!< check scenario constants
+   bool CheckWarmupConsts();                                                                      //!< check warmup constants
+
    // SetBinGrid()
    // todo: SetBinGrid. However, if BinGrid is set, then this is necessarily a warmup run -> one also has to store the bin grid in warmup table (todo).
    //       furthermore all vectors have to be 'resized'
@@ -130,8 +157,6 @@ protected:
    void FillRefContribution(int scalevar = 0);                                                              //!< fill contribution if this is a reference table
    void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
 
-   void ReadGenAndProcConstsFromSteering();
-   void ReadScenarioConstsFromSteering(); //!< Read steering values into fScenConsts
    void ReadBinning();
    void ReadBinningFromScenarioConsts();
    void ReadBinSize();
@@ -163,7 +188,6 @@ protected:
    int GetBin();                                                                                //!< get bin number from 'scenario' observables
    inline int GetXIndex(const int& Obsbin, const int& x1bin, const int& x2bin) const;           //!< get x-index in case of two hadrons.
    int GetNxmax(const std::vector<double>* xGrid1, const std::vector<double>* xGrid2);                    //!< get maximum x-index
-   std::string fWarmupFilename;                                                                      //!< File name of the warmup table
    bool fIsWarmup;                                                                              //!< is it a warmup run?
    int fWarmupXMargin;                                                                          //!< margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
    int fWarmupNDigitMu1;                                                                          //!< Digits of warmup values for scale 1
@@ -171,7 +195,9 @@ protected:
    int  fIOrd;                                                                                  //!< order of alpha_s of run
    bool fIsFlexibleScale;                                                                       //!< is it a flexible scale table?
    bool fApplyPDFReweight;                                                                      //!< shall the PDF reweight be applied.
-   std::string fSteerfile;                                                                           //!< filename of steering file.
+   std::string fWarmupFilename;                                                                 //!< File name of the warmup table
+   // TODO: fSteerfile as internally set variable is used as default steeringNameSpace at many places. This should be avoided!
+   std::string fSteerfile;                                                                      //!< filename of steering file (and default steeringNameSpace!)
    int fObsBin;                                                                                 //!< ObsBin from 'last' 'Fill()'-call
    fnloScenario fLastScen;                                                                      //!< keep information of scenario from last 'Fill()'-call
 

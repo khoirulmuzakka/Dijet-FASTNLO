@@ -150,20 +150,21 @@ if ( $#argv < 2 ) then
    echo ""
    echo "#=============================================================================="
    echo "Usage: $0 basedir subdir [path to cvmfs software]"
-   echo "1st argument: Base dir for installations, absolute path to e.g. $HOME"
-   echo "2nd argument: Subdir in base dir for this installation, relative path to e.g. local"
-   echo "3rd optional argument: Path to newer gcc in cvmfs software distribution,"
-   echo "                       e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481"
-   echo "                       The minimally required version is gcc 4.8.1!"
-   echo "                       If set, please check also that LHAPDF can be found in:"
-   echo '                       $MYCVMFS/external/lhapdf'
-   echo "                       Set to _ to skip this setting."
-   echo "4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
-   echo "5th optional argument: Include grid creation with NNLOJET? def.=0"
-   echo "6th optional argument: Include optional packages for grid evaluation? def.=0"
-   echo "7th optional argument: Include optional python extensions to packages? def.=0"
-   echo "8th optional argument: Include ROOT 5 (gcc<v5) or 6? def.=0, alt.=[5,6]"
-   echo "9th optional argument: No. of cores to be used, def.=8"
+   echo " 1st argument: Base dir for installations, absolute path to e.g. $HOME"
+   echo " 2nd argument: Subdir in base dir for this installation, relative path to e.g. local"
+   echo " 3rd optional argument: Path to newer gcc in cvmfs software distribution,"
+   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481"
+   echo "                        The minimally required version is gcc 4.8.1!"
+   echo "                        Set to _ to skip this setting."
+   echo " 4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
+   echo " 5th optional argument: Include grid creation with NNLOJET? def.=0"
+   echo " 6th optional argument: Include optional packages for grid evaluation? def.=0"
+   echo " 7th optional argument: Include optional python extensions to packages? def.=0"
+   echo " 8th optional argument: Include ROOT 5 (gcc<v5) or 6? def.=0, alt.=[5,6]"
+   echo " 9th optional argument: Include LHAPDF6 from CVMFS, def.=0"
+   echo "                        If yes, please check also that LHAPDF can be found in:"
+   echo '                        $MYCVMFS/external/lhapdf'
+   echo "10th optional argument: No. of cores to be used, def.=8"
    echo "#=============================================================================="
    echo ""
    exit 0
@@ -177,16 +178,12 @@ set srcdir=$cwd
 #==============================================================================
 # Define scope of installation
 #==============================================================================
-# Use CVMFS software repository for newer gcc and for LHAPDF if necessary
+# Use CVMFS software repository for newer gcc if necessary
 if ( $#argv > 2 && $3 != "_" ) then
    setenv MYCVMFS $3
-# Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
-#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
-   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #   echo "MYCVMFS is set to: $MYCVMFS"
 else
    unsetenv MYCVMFS
-   set lhapdfbasepath=${base}/${local}
 #   echo "MYCVMFS is not set"
 endif
 # With interface to Sherpa via MCGrid?
@@ -222,7 +219,19 @@ set withroot=0
 if ( $#argv > 7 ) then
     set withroot=$8
 endif
-
+# Use CVMFS software repository also for LHAPDF if requested
+# Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
+#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
+# BUT 6.1.6 still uses BOOST :-(
+set withcvmfslhapdf=0
+if ( $#argv > 8 ) then
+    set withcvmfslhapdf=$9
+endif
+if ( $withcvmfslhapdf ) then
+   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
+else
+   set lhapdfbasepath=${base}/${local}
+endif
 # Default is with OpenMPI if either NNLOJET or Sherpa are requested
 set withmpi=0
 set withmpiinstall=0
@@ -240,8 +249,8 @@ endif
 
 # Number of cores to be used
 set cores=8
-if ( $#argv > 8 ) then
-    set cores=$9
+if ( $#argv > 9 ) then
+    set cores=$10
 endif
 
 # With interface to HERWIG7? Not yet implemented!
@@ -309,8 +318,8 @@ else
 endif
 # $PATH set from now on ...
 #
-# If $MYCVMFS is set, use the LHAPDF installation and PDF sets from CVMFS.
-if ( $?MYCVMFS ) then
+# If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
+if ( $withcvmfslhapdf ) then
    setenv PATH ${lhapdfbasepath}/bin:${PATH}
    echo 'setenv PATH '"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.csh
    echo 'export PATH='"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.sh
@@ -385,8 +394,8 @@ else
 endif
 # $LD_LIBRARY_PATH set from now on ...
 #
-# If $MYCVMFS is set, use the LHAPDF installation and PDF sets from CVMFS.
-if ( $?MYCVMFS ) then
+# If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
+if ( $withcvmfslhapdf ) then
   setenv LD_LIBRARY_PATH ${lhapdfbasepath}/lib:${LD_LIBRARY_PATH}
   echo 'setenv LD_LIBRARY_PATH '"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
   echo 'export LD_LIBRARY_PATH='"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
@@ -438,7 +447,7 @@ endif
 # LHAPDF (>= 6.2.0 is recommended):
 #
 #------------------------------------------------------------------------------
-if ( ! $?MYCVMFS ) then
+if ( ! $withcvmfslhapdf ) then
   set arc="LHAPDF-6.2.1"
   if ( ! -e ${arc}_installed  ) then
     tar xzf ${arc}.tar.gz
