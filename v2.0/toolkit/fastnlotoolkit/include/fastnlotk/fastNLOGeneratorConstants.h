@@ -125,16 +125,16 @@ namespace fastNLO {
          #     sqrtlog10        eq. to sqrt(log_10(x))
          # -------------------------------------------------------------------- #
       */
-      std::string X_Kernel;//!< Lagrange
-      std::string X_DistanceMeasure;//!<   "sqrtlog10"
-      int X_NNodes;//!<    15
-      std::string X_NNodeCounting;//!< "NodesMax","NodesPerBin","NodesPerMagnitude"
+      std::string X_Kernel;//!< "Lagrange"
+      std::string X_DistanceMeasure;//!< "sqrtlog10"
+      int X_NNodes;//!< 15
+      std::string X_NNodeCounting;//!< "NodesPerBin" ("NodesMax", "NodesPerMagnitude")
 
-      std::string Mu1_Kernel;//!<  Lagrange
+      std::string Mu1_Kernel;//!< "Lagrange"
       std::string Mu1_DistanceMeasure;//!< "loglog025"
       int Mu1_NNodes;//!< 6
 
-      std::string Mu2_Kernel;//!<   Lagrange     # Scale2 not used for fixed-scale tables
+      std::string Mu2_Kernel;//!< "Lagrange"; Scale2 not used for fixed-scale tables
       std::string Mu2_DistanceMeasure;//!< "loglog025"
       int Mu2_NNodes;//!< 6
 
@@ -166,10 +166,10 @@ namespace fastNLO {
          ReadBinningFromSteering=true;
          ApplyPDFReweighting=true;
          CheckScaleLimitsAgainstBins=true;
-         X_Kernel="Lagrange";//!<                        Lagrange
+         X_Kernel="Lagrange";
          X_DistanceMeasure="sqrtlog10";
          X_NNodes=15;
-         X_NNodeCounting = "NodesMax";
+         X_NNodeCounting = "NodesPerBin";
 
          Mu1_Kernel="Lagrange";
          Mu1_DistanceMeasure="loglog025";
