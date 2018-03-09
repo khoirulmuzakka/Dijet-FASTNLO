@@ -575,7 +575,7 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
 		     if ( p_list[n] == processes[m] )
 			ff = true;
 	       	  f &= ff;
-	       }	       
+	       }
 	       if (!f)
 		  return false;
 	       s.push_back(i);
@@ -592,7 +592,7 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
 
    return true;
 }
-	          
+
 
 
 //________________________________________________________________________________________________________________ //

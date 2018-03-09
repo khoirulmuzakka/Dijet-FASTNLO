@@ -46,40 +46,58 @@
 
 using namespace std;
 
+
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate() {
    logger.SetClassName("fastNLOCreate");
+   //! Set constants from defaults
+   // SetGenConstsDefaults();
+   // SetProcConstsDefaults();
+   // SetScenConstsDefaults();
 }
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts) {
+fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                             const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmupConsts ) {
    //! Constructor of fastNLOCreate
    //!
-   //! Pass steering parameters through
-   //! GeneratorConstants, ProcessConstants and the steering file
+   //! Pass all needed steering paramters through
+   //! GeneratorConstants, ProcessConstants, ScenarioConstants, and WarmupConstants
    //! (see GeneratorConstants.h file for details)
    //!
+   //! No steering or warmup file is read in
    //!
 
    logger.SetClassName("fastNLOCreate");
-   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
 
    //! Set constants from arguments
    fGenConsts  = GenConsts;
+   fScenConsts = ScenConsts;
    fProcConsts = ProcConsts;
-
-   //! Steering file settings take precedence over settings in code
-   //! The WarmupFilename is set from steering
-   ReadSteering(steerfile);
-   ReadGenAndProcConstsFromSteering();
-
-   bool check = CheckProcConsts();
-   if (!check) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   fWarmupConsts = WarmupConsts;
+   if ( !CheckProcConsts() ) {
+      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
+      exit(1);
    }
 
-   logger.debug["fastNLOCreate"]<<"Instantiate from GenConsts, ProcConsts, and steering file"<<endl;
+   //! No WarmupFile required, a pseudo-WarmupFilename is defined here
+   fSteerfile = "NoSteeringFileMode"; //warmupfile;
+   fWarmupFilename = fSteerfile;
+   logger.debug["fastNLOCreate"]<<"Warmup set from code; the pseudo(!)-warmup filename is: " << fWarmupFilename << endl;
+
+   // --- check and transform parton combinations
+   if ( fProcConsts.IPDFdef2 == 0 ) {
+      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
+      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
+      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+   }
+
+   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
    Instantiate();
 }
 
@@ -87,10 +105,21 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorConstants& GenConsts,
                              const fastNLO::ProcessConstants& ProcConsts, const fastNLO::ScenarioConstants& ScenConsts) {
+
+   // KR DEPRECATED! Use next constructor with more logical ordering of arguments
+   logger.warn["fastNLOCreate"]<<"This constructor is deprecated and will be replaced by one with more logical ordering of arguments. Please replace by calling fastNLOCreate(GenConsts, ProcConsts, ScenConsts, warmupfile)."<<endl;
+
+   fastNLOCreate(GenConsts, ProcConsts, ScenConsts, warmupfile);
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                             const fastNLO::ScenarioConstants& ScenConsts, const string& warmupfile) {
    //! Constructor of fastNLOCreate
    //!
-   //! Pass all needed steering paramters through
-   //! GeneratorConstants, ProcessConstants and ScenarioConstants
+   //! Pass all needed steering parameters through
+   //! GeneratorConstants, ProcessConstants, and ScenarioConstants plus warmup file
    //! (see GeneratorConstants.h file for details)
    //!
    //! warmupfile: filename to be written out or read in for production run, if already existent
@@ -132,33 +161,80 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
-                             const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmupConsts ) {
+                             const fastNLO::ScenarioConstants& ScenConsts, const std::string& warmupfile,
+                             const std::string& steerfile) {
    //! Constructor of fastNLOCreate
    //!
-   //! Pass all needed steering paramters through
-   //! GeneratorConstants, ProcessConstants, ScenarioConstants and WarmupConstants
-   //! (see GeneratorConstants.h file for details)
+   //! Set required parameters through GeneratorConstants, ProcessConstants, and ScenarioConstants plus
+   //! warmup and steering file
    //!
-   //! No steering or warmup file is read in
-   //!
-
    logger.SetClassName("fastNLOCreate");
-   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and warmup and steering file"<<endl;
+   logger.debug["fastNLOCreate"]<<"The warmup filename set via the function call is: " << warmupfile << endl;
+   logger.debug["fastNLOCreate"]<<"The steering file superseding initialised defaults is: " << steerfile << endl;
+
+   logger.debug["fastNLOCreate"] << "SetGenConstsDefaults" << endl;
+   SetGenConstsDefaults();
+   logger.debug["fastNLOCreate"] << "SetProcConstsDefaults" << endl;
+   SetProcConstsDefaults();
+   logger.debug["fastNLOCreate"] << "SetScenConstsDefaults" << endl;
+   SetScenConstsDefaults();
+   // PrintGenConsts();
+   // PrintProcConsts();
+   // PrintScenConsts();
 
    //! Set constants from arguments
-   fGenConsts  = GenConsts;
-   fScenConsts = ScenConsts;
+   logger.debug["fastNLOCreate"] << "SetGenConsts from argument" << endl;
+   fGenConsts = GenConsts;
+   logger.debug["fastNLOCreate"] << "SetProcConsts from argument" << endl;
    fProcConsts = ProcConsts;
-   fWarmupConsts = WarmupConsts;
+   logger.debug["fastNLOCreate"] << "SetScenConsts from argument" << endl;
+   fScenConsts = ScenConsts;
+   // PrintGenConsts();
+   // PrintProcConsts();
+   // PrintScenConsts();
+
+   //! Set filenames and steering namespace from arguments
+   fWarmupFilename = warmupfile;
+   fSteerfile = warmupfile; // No mistake! Needed to have the proper namespace for warmup and steering file!
+   //! In case of multiple tables created in one job, the warmup files must be different,
+   //! but not the steering file to complement/modify settings for all tables.
+   string steeringNameSpace = fSteerfile; // Not functional in general, ony for Reads below. Should be improved.
+   // Check existence of warmup file
+   bool lwarm = access(GetWarmupTableFilename().c_str(), R_OK);
+   if ( lwarm ) {
+      logger.error["fastNLOCreate"] << "Warmup file does not exist although explicitly given: " << GetWarmupTableFilename() << endl;
+      exit(1);
+   }
+   // Read steering from warmup into namespace
+   ReadSteeringFile(fWarmupFilename,steeringNameSpace);
+   // At last, read steering for final completions and modifications
+   ReadSteeringFile(steerfile,steeringNameSpace);
+   // DEBUG
+   // PRINTALL();
+   //! Do not allow to set WarmupFilename from steering in this constructor, since explicit
+   //! warmup filename is given
+   if ( EXIST_NS(WarmUpFilename,steeringNameSpace) ) {
+      logger.error["fastNLOCreate"]<<"The explicitly given warmup filename is set to be overwritten from steering file to: " << STRING_NS(WarmUpFilename,steeringNameSpace) << endl;
+      logger.error["fastNLOCreate"]<<"This is not allowed in this constructor, aborted!" << endl;
+      exit(1);
+   }
+   //! Update constants from steering namespace
+   SetGenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetGenConsts from warmup and steering" << endl;
+   SetProcConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetProcConsts from warmup and steering" << endl;
+   SetScenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
+   PrintGenConsts();
+   PrintProcConsts();
+   PrintScenConsts();
+
+   // TODO: Add more and better checks!
    if ( !CheckProcConsts() ) {
       logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
       exit(1);
    }
-
-   //! No WarmupFile required, a pseudo-WarmupFilename is defined here
-   fSteerfile = "NoSteeringFileMode";//warmupfile;
-   fWarmupFilename = fSteerfile;
-   logger.debug["fastNLOCreate"]<<"Warmup set from code; the pseudo(!)-warmup filename is: " << fWarmupFilename << endl;
 
    // --- check and transform parton combinations
    if ( fProcConsts.IPDFdef2 == 0 ) {
@@ -170,7 +246,55 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
          fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
    }
 
-   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
+   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and warmup and steering file"<<endl;
+   Instantiate();
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts) {
+
+   // KR DEPRECATED! Use next constructor with more logical ordering of arguments
+   logger.warn["fastNLOCreate"]<<"This constructor is deprecated and will be replaced by one with more logical ordering of arguments. Please replace by calling fastNLOCreate(GenConsts, ProcConsts, steerfile)."<<endl;
+
+   fastNLOCreate(GenConsts, ProcConsts, steerfile);
+}
+
+
+// ___________________________________________________________________________________________________
+fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
+                             const string& steerfile ) {
+   //! Constructor of fastNLOCreate
+   //!
+   //! Pass steering parameters through
+   //! GeneratorConstants, ProcessConstants and the steering file
+   //! (see GeneratorConstants.h file for details)
+   //!
+   //!
+
+   logger.SetClassName("fastNLOCreate");
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
+
+   //! Set constants from arguments
+   fGenConsts  = GenConsts;
+   fProcConsts = ProcConsts;
+
+   //! Steering file settings take precedence over settings in code
+   //! The WarmupFilename is set from steering
+   ReadSteering(steerfile);
+
+   // Generator constants
+   fastNLOCreate::SetGenConstsFromSteering();
+
+   // Process constants
+   fastNLOCreate::SetProcConstsFromSteering();
+
+   bool check = CheckProcConsts();
+   if (!check) {
+      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   }
+
+   logger.debug["fastNLOCreate"]<<"Instantiate from GenConsts, ProcConsts, and steering file"<<endl;
    Instantiate();
 }
 
@@ -195,7 +319,12 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
    //! Steering file settings take precedence over defaults
    //! The WarmupFilename is set from steering
    ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
-   ReadGenAndProcConstsFromSteering();
+
+   // Generator constants
+   fastNLOCreate::SetGenConstsFromSteering();
+
+   // Process constants
+   fastNLOCreate::SetProcConstsFromSteering();
 
    bool check = CheckProcConsts();
    if (!check) {
@@ -210,25 +339,370 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::SetGenConstsDefaults() {
    //! Set default values for generator constants
-   fGenConsts.Name = "Theory";
-   fGenConsts.UnitsOfCoefficients = 12;   //!< X section units of coefficients passed to fastNLO (neg. power of 10: pb->12, fb->15)
+   logger.debug["SetGenConstsDefaults"] << endl;
+   // Generator constants
+   fGenConsts.Name = "Undefined";
+   fGenConsts.UnitsOfCoefficients = 12;   //!< Generator cross section prefactor (neg. power of 10: pb->12, fb->15)
+   fGenConsts.References.clear();
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetGenConstsFromSteering() {
+   //! Set generator constants from previously read in steering
+   logger.debug["SetGenConstsFromSteering"] << endl;
+   logger.debug["SetGenConstsFromSteering"] << "Steerfile is: " << fSteerfile << endl;
+   // Generator constants
+   if (EXIST_NS(CodeDescription,fSteerfile)) {
+      vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
+      fGenConsts.Name = CodeDescr[0];
+      if (CodeDescr.size() > 1) {
+         fGenConsts.References.resize(CodeDescr.size()-1);
+         for (unsigned int i = 0 ; i< fGenConsts.References.size() ; i++)
+            fGenConsts.References [i] = CodeDescr[i+1];
+      }
+   }
+   if (EXIST_NS(UnitsOfCoefficients,fSteerfile)) fGenConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::PrintGenConsts() {
+   //! Print current generator constants
+   logger.info["PrintGenConsts"] << "==================================================================" << endl;
+   logger.info["PrintGenConsts"] << "Printing current generator constants" << endl;
+   logger.info["PrintGenConsts"] << "------------------------------------------------------------------" << endl;
+   logger.info["PrintGenConsts"] << "Name and version of generator: " << fGenConsts.Name << endl;
+   for ( unsigned int i=0; i<fGenConsts.References.size(); i++ ) {
+      logger.info["PrintGenConsts"] << "Generator description and references, [" << i << "]: " << fGenConsts.References[i] << endl;
+   }
+   logger.info["PrintGenConsts"] << "Generator cross section prefactor (neg. power of 10: pb->12, fb->15): " << fGenConsts.UnitsOfCoefficients << endl;
+   logger.info["PrintGenConsts"] << "==================================================================" << endl;
 }
 
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::SetProcConstsDefaults() {
    //! Set default values for process constants
-   fProcConsts.LeadingOrder        = -1;   //!< Order in alpha_s of leading order process
+   logger.debug["SetProcConstsDefaults"] << endl;
+   // Process constants
+   fProcConsts.LeadingOrder        = -1;   //!< Power in alpha_s of LO process
    fProcConsts.NPDF                = -1;   //!< No. of PDFs involved
    fProcConsts.NSubProcessesLO     = -1;   //!< No. of LO   subprocesses
    fProcConsts.NSubProcessesNLO    = -1;   //!< No. of NLO  subprocesses
    fProcConsts.NSubProcessesNNLO   = -1;   //!< No. of NNLO subprocesses
-   fProcConsts.IPDFdef1            = -1;   //!< Flag 1 to define PDF linear combinations of partonic subprocesses (e.g. hh --> jets: 3)
-   fProcConsts.IPDFdef2            = -1;   //!< Flag 2 to define PDF linear combinations (dep. on IPDFdef1; for 3 e.g. 1 for jet specific LCs, 121 for generic 11x11 matrix)
-   fProcConsts.IPDFdef3LO          = -1;   //!< Flag 3 to define PDF LCs at   LO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 6 subprocesses, ignored for IPDFdef2==121)
-   fProcConsts.IPDFdef3NLO         = -1;   //!< Flag 3 to define PDF LCs at  NLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
-   fProcConsts.IPDFdef3NNLO        = -1;   //!< Flag 3 to define PDF LCs at NNLO (dep. on IPDFdef1, IPDFdef2; for 3, 1 e.g. 7 subprocesses, ignored for IPDFdef2==121)
-   fProcConsts.NPDFDim             = -1;   //!< Define internal storage mode for PDF LCs (dep. on NPDF; e.g. for 1: 0 for linear, for 2: 1 for half- or 2 for full-matrix)
+   fProcConsts.IPDFdef1            = -1;   //!< Flag 1 to define PDF linear combinations of partonic subprocesses
+   fProcConsts.IPDFdef2            = -1;   //!< Flag 2 to define PDF linear combinations of partonic subprocesses
+   fProcConsts.IPDFdef3LO          = -1;   //!< Flag 3 to define PDF LCs at   LO
+   fProcConsts.IPDFdef3NLO         = -1;   //!< Flag 3 to define PDF LCs at  NLO
+   fProcConsts.IPDFdef3NNLO        = -1;   //!< Flag 3 to define PDF LCs at NNLO
+   fProcConsts.NPDFDim             = -1;   //!< Internal storage mode for PDF LCs
+   fProcConsts.PDFCoeffLO.clear();         //!< PDF Linear combinations for   LO calculation (used only if IPDFdef2==0)
+   fProcConsts.PDFCoeffNLO.clear();        //!< PDF Linear combinations for  NLO calculation (used only if IPDFdef2==0)
+   fProcConsts.PDFCoeffNNLO.clear();       //!< PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0)
+   fProcConsts.PDFLiCoInLO.clear();        //!< PDF Linear combinations for   LO calculation (used only if IPDFdef2==0) [definition as in steering] (used if PDFCoeffLO is empty)
+   fProcConsts.PDFLiCoInNLO.clear();       //!< PDF Linear combinations for  NLO calculation (used only if IPDFdef2==0) [definition as in steering]
+   fProcConsts.PDFLiCoInNNLO.clear();      //!< PDF Linear combinations for NNLO calculation (used only if IPDFdef2==0) [definition as in steering]
+   fProcConsts.AsymmetricProcesses.clear();//!< Specify processes that need to be exchanged in half-matrix notation, when xmin>xmax (only if NPDFDim==1)
+   fProcConsts.Name = "Undefined";         //!<< More precise description for specific contribution (e.g. LO, pp -> 2 jets; also can add 'run-mode' and further details)
+   fProcConsts.References.clear();         //!<< References for process (also other plain text lines can be included here)
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetProcConstsFromSteering() {
+   //! Set process constants from previously read in steering
+   logger.debug["SetProcConstsFromSteering"] << endl;
+   logger.debug["SetProcConstsFromSteering"] << "Steerfile is: " << fSteerfile << endl;
+
+   // Process constants
+   if (EXIST_NS(LeadingOrder,fSteerfile))        fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
+   if (EXIST_NS(NPDF,fSteerfile))                fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
+   if (EXIST_NS(NSubProcessesLO,fSteerfile))     fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
+   if (EXIST_NS(NSubProcessesNLO,fSteerfile))    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
+   if (EXIST_NS(NSubProcessesNNLO,fSteerfile))   fProcConsts.NSubProcessesNNLO = INT_NS(NSubProcessesNNLO,fSteerfile);
+   if (EXIST_NS(IPDFdef1,fSteerfile))            fProcConsts.IPDFdef1 = INT_NS(IPDFdef1,fSteerfile);
+   if (EXIST_NS(IPDFdef2,fSteerfile))            fProcConsts.IPDFdef2 = INT_NS(IPDFdef2,fSteerfile);
+   if (EXIST_NS(IPDFdef3LO,fSteerfile))          fProcConsts.IPDFdef3LO = INT_NS(IPDFdef3LO,fSteerfile);
+   if (EXIST_NS(IPDFdef3NLO,fSteerfile))         fProcConsts.IPDFdef3NLO = INT_NS(IPDFdef3NLO,fSteerfile);
+   if (EXIST_NS(IPDFdef3NNLO,fSteerfile))        fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
+   if (EXIST_NS(NPDFDim,fSteerfile))             fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
+
+   // Crosscheck size of given parton combinations
+   // In case of mismatch try to read first from PartonCombinationsORDER
+   // and then from PDFLiCoInORDER
+   if ( fProcConsts.IPDFdef2 == 0 ) {
+      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.IPDFdef3LO != (int)fProcConsts.PDFCoeffLO.size()  )
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,INT_TAB_NS(PartonCombinationsLO,fSteerfile));
+      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.IPDFdef3NLO != (int)fProcConsts.PDFCoeffNLO.size() )
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,INT_TAB_NS(PartonCombinationsNLO,fSteerfile));
+      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.IPDFdef3NNLO != (int)fProcConsts.PDFCoeffNNLO.size() )
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,INT_TAB_NS(PartonCombinationsNNLO,fSteerfile));
+      // --- check and transform parton combinations
+      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
+         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
+      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
+         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
+      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
+         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+   }
+
+   // read asymmetric processes if half-matrix notation is requested
+   if ( fProcConsts.NPDFDim == 1 ) {
+      if ( fProcConsts.NPDF == 2 && fProcConsts.IPDFdef1 == 3 && ( fProcConsts.IPDFdef2 == 121 || fProcConsts.IPDFdef2 == 169 ) ) {
+         const int np = fProcConsts.IPDFdef2==121 ? 11:13;
+         int p1 = 0;
+         int p2 = 0;
+         for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
+            int pid = p1*(np)+p2;
+            int asympid = p2*(np)+p1;
+            if ( pid != asympid )  // actually not needed necessarily
+               fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
+            p2++;
+            if ( p2 == np ) {
+               p2=0;
+               p1++;
+            }
+         }
+      } else if ( fProcConsts.NPDF == 2 ) {
+         if (EXIST_NS(AsymmetricProcesses,fSteerfile)) {
+            fProcConsts.AsymmetricProcesses.clear();
+            vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
+            for (unsigned int i = 0 ; i<asym.size() ; i++) {
+               if ( asym[i].size() != 2 ) {
+                  logger.error["SetProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
+                  exit(1);
+               }
+               fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
+            }
+         }
+      }
+   }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::PrintProcConsts() {
+   //! Print current process constants
+   logger.info["PrintProcConsts"] << "==================================================================" << endl;
+   logger.info["PrintProcConsts"] << "Printing current process constants" << endl;
+   logger.info["PrintProcConsts"] << "------------------------------------------------------------------" << endl;
+   logger.info["PrintProcConsts"] << "Power in alpha_s of LO process: " << fProcConsts.LeadingOrder << endl;
+   logger.info["PrintProcConsts"] << "No. of PDFs involved: " << fProcConsts.NPDF << endl;
+   logger.info["PrintProcConsts"] << "No. of LO   subprocesses: " << fProcConsts.NSubProcessesLO << endl;
+   logger.info["PrintProcConsts"] << "No. of NLO  subprocesses: " << fProcConsts.NSubProcessesNLO << endl;
+   logger.info["PrintProcConsts"] << "No. of NNLO subprocesses: " << fProcConsts.NSubProcessesNNLO << endl;
+   logger.info["PrintProcConsts"] << "Flag 1 to define PDF linear combinations of partonic subprocesses: " << fProcConsts.IPDFdef1 << endl;
+   logger.info["PrintProcConsts"] << "Flag 2 to define PDF linear combinations of partonic subprocesses: " << fProcConsts.IPDFdef2 << endl;
+   logger.info["PrintProcConsts"] << "Flag 3 to define PDF LCs at   LO: " << fProcConsts.IPDFdef3LO << endl;
+   logger.info["PrintProcConsts"] << "Flag 3 to define PDF LCs at  NLO: " << fProcConsts.IPDFdef3NLO << endl;
+   logger.info["PrintProcConsts"] << "Flag 3 to define PDF LCs at NNLO: " << fProcConsts.IPDFdef3NNLO << endl;
+   logger.info["PrintProcConsts"] << "Internal storage mode for PDF LCs: " << fProcConsts.NPDFDim << endl;
+   for ( unsigned int i=0; i<fProcConsts.PDFCoeffLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LC LO, [" << i << "]: " << fProcConsts.PDFCoeffLO[i] << endl;
+   }
+   for ( unsigned int i=0; i<fProcConsts.PDFCoeffNLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LC NLO, [" << i << "]: " << fProcConsts.PDFCoeffNLO[i] << endl;
+   }
+   for ( unsigned int i=0; i<fProcConsts.PDFCoeffNNLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LC NNLO, [" << i << "]: " << fProcConsts.PDFCoeffNNLO[i] << endl;
+   }
+   for ( unsigned int i=0; i<fProcConsts.PDFLiCoInLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LiCo in LO, [" << i << "]: " << fProcConsts.PDFLiCoInLO[i] << endl;
+   }
+   for ( unsigned int i=0; i<fProcConsts.PDFLiCoInNLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LiCo in NLO, [" << i << "]: " << fProcConsts.PDFLiCoInNLO[i] << endl;
+   }
+   for ( unsigned int i=0; i<fProcConsts.PDFLiCoInNNLO.size(); i++ ) {
+      //      logger.info["PrintProcConsts"] << "PDF LiCo in NNLO, [" << i << "]: " << fProcConsts.PDFLiCoInNNLO[i] << endl;
+   }
+   for ( auto const& v: fProcConsts.AsymmetricProcesses ) {
+      logger.info["PrintProcConsts"] << "Asymmetric processes in half-matrix notation, (" << v.first << ", " << v.second << ")" << endl;
+   }
+   logger.info["PrintProcConsts"] << "Process name: " << fProcConsts.Name << endl;
+   for ( unsigned int i=0; i<fProcConsts.References.size(); i++ ) {
+      logger.info["PrintProcConsts"] << "Process description, [" << i << "]: " << fProcConsts.References[i] << endl;
+   }
+   logger.info["PrintProcConsts"] << "==================================================================" << endl;
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetScenConstsDefaults() {
+   //! Set default values for scenario constants
+   logger.debug["SetScenConstsDefaults"] << endl;
+   // Scenario constants
+   fScenConsts.ScenarioName = "Undefined";
+   fScenConsts.ScenarioDescription.clear();
+   fScenConsts.PublicationUnits = 12;
+   fScenConsts.DifferentialDimension = 0;
+   fScenConsts.DimensionLabels.clear();
+   fScenConsts.DimensionIsDifferential.clear();
+   fScenConsts.CalculateBinSize = true;
+   fScenConsts.BinSizeFactor = 1.;
+   fScenConsts.BinSize.clear();
+   fScenConsts.ScaleDescriptionScale1 = "Undefined";
+   fScenConsts.ScaleDescriptionScale2 = "Undefined";
+   fScenConsts.SingleDifferentialBinning.clear();
+   fScenConsts.DoubleDifferentialBinning.clear();
+   fScenConsts.TripleDifferentialBinning.clear();
+   fScenConsts.CenterOfMassEnergy = 7000.;
+   fScenConsts.PDF1 = 2212;
+   fScenConsts.PDF2 = 2212;
+   fScenConsts.OutputFilename = "table";
+   fScenConsts.OutputPrecision = 8;
+#ifdef HAVE_LIBZ
+   fScenConsts.OutputCompression = true;
+#else
+   fScenConsts.OutputCompression = false;
+#endif /* HAVE_LIBZ */
+   fScenConsts.FlexibleScaleTable = false;
+   fScenConsts.ScaleVariationFactors.clear();
+   fScenConsts.ReadBinningFromSteering = false;
+   fScenConsts.IgnoreWarmupBinningCheck = false;
+   fScenConsts.ApplyPDFReweighting = true;
+   fScenConsts.CheckScaleLimitsAgainstBins = true;
+   fScenConsts.X_Kernel = "Lagrange";
+   fScenConsts.X_DistanceMeasure = "sqrtlog10";
+   fScenConsts.X_NNodes = 15;
+   fScenConsts.X_NNodeCounting = "NodesPerBin";
+   fScenConsts.Mu1_Kernel = "Lagrange";
+   fScenConsts.Mu1_DistanceMeasure = "loglog025";
+   fScenConsts.Mu1_NNodes = 6;
+   fScenConsts.Mu2_Kernel = "Lagrange";
+   fScenConsts.Mu2_DistanceMeasure = "loglog025";
+   fScenConsts.Mu2_NNodes = 6;
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetScenConstsFromSteering() {
+   //! Set scenario constants from previously read in steering
+   logger.debug["SetScenConstsFromSteering"] << endl;
+   logger.debug["SetScenConstsFromSteering"] << "Steerfile is: " << fSteerfile << endl;
+   // Scenario constants
+   if ( EXIST_NS(ScenarioName,fSteerfile) )                fScenConsts.ScenarioName = STRING_NS(ScenarioName,fSteerfile);
+   if ( EXIST_NS(ScenarioDescription,fSteerfile) )         fScenConsts.ScenarioDescription = STRING_ARR_NS(ScenarioDescription,fSteerfile);
+   if ( EXIST_NS(PublicationUnits,fSteerfile) )            fScenConsts.PublicationUnits = INT_NS(PublicationUnits,fSteerfile);
+   if ( EXIST_NS(DifferentialDimension,fSteerfile) )       fScenConsts.DifferentialDimension = INT_NS(DifferentialDimension,fSteerfile);
+   NDim = fScenConsts.DifferentialDimension;
+   if ( EXIST_NS(DimensionLabels,fSteerfile) )             fScenConsts.DimensionLabels = STRING_ARR_NS(DimensionLabels,fSteerfile);
+   if ( EXIST_NS(DimensionIsDifferential,fSteerfile) )     fScenConsts.DimensionIsDifferential = INT_ARR_NS(DimensionIsDifferential,fSteerfile);
+   if ( EXIST_NS(CalculateBinSize,fSteerfile) )            fScenConsts.CalculateBinSize = BOOL_NS(CalculateBinSize,fSteerfile);
+   if ( EXIST_NS(BinSizeFactor,fSteerfile) )               fScenConsts.BinSizeFactor = DOUBLE_NS(BinSizeFactor,fSteerfile);
+   if ( EXIST_NS(BinSize,fSteerfile) )                     fScenConsts.BinSize = DOUBLE_ARR_NS(BinSize,fSteerfile);
+   if ( EXIST_NS(ScaleDescriptionScale1,fSteerfile) )      fScenConsts.ScaleDescriptionScale1 = STRING_NS(ScaleDescriptionScale1,fSteerfile);
+   if ( EXIST_NS(ScaleDescriptionScale2,fSteerfile) )      fScenConsts.ScaleDescriptionScale2 = STRING_NS(ScaleDescriptionScale2,fSteerfile);
+   if ( EXIST_NS(CenterOfMassEnergy,fSteerfile) )          fScenConsts.CenterOfMassEnergy = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);
+   if ( EXIST_NS(PDF1,fSteerfile) )                        fScenConsts.PDF1 = INT_NS(PDF1,fSteerfile);
+   if ( EXIST_NS(PDF2,fSteerfile) )                        fScenConsts.PDF2 = INT_NS(PDF2,fSteerfile);
+   if ( EXIST_NS(OutputFilename,fSteerfile) )              fScenConsts.OutputFilename = STRING_NS(OutputFilename,fSteerfile);
+   if ( EXIST_NS(OutputPrecision,fSteerfile) )             fScenConsts.OutputPrecision = INT_NS(OutputPrecision,fSteerfile);
+   if ( EXIST_NS(OutputCompression,fSteerfile) )           fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
+   if ( EXIST_NS(FlexibleScaleTable,fSteerfile) )          fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
+   fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
+   if ( EXIST_NS(ScaleVariationFactors,fSteerfile) )       fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
+   if ( EXIST_NS(ReadBinningFromSteering,fSteerfile) )     fScenConsts.ReadBinningFromSteering = BOOL_NS(ReadBinningFromSteering,fSteerfile);
+   if ( fScenConsts.ReadBinningFromSteering ) {
+      if ( NDim==1 && EXIST_NS(SingleDifferentialBinning,fSteerfile) )      fScenConsts.SingleDifferentialBinning = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
+      else if ( NDim==2 && EXIST_NS(DoubleDifferentialBinning,fSteerfile) ) fScenConsts.DoubleDifferentialBinning = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
+      else if ( NDim==3 && EXIST_NS(TripleDifferentialBinning,fSteerfile) ) fScenConsts.TripleDifferentialBinning = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
+   }
+   if ( EXIST_NS(IgnoreWarmupBinningCheck,fSteerfile) )    fScenConsts.IgnoreWarmupBinningCheck = BOOL_NS(IgnoreWarmupBinningCheck,fSteerfile);
+   if ( EXIST_NS(ApplyPDFReweighting,fSteerfile) )         fScenConsts.ApplyPDFReweighting =  BOOL_NS(ApplyPDFReweighting,fSteerfile);
+   if ( EXIST_NS(CheckScaleLimitsAgainstBins,fSteerfile) ) fScenConsts.CheckScaleLimitsAgainstBins = BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile);
+   if ( EXIST_NS(X_Kernel,fSteerfile) )                    fScenConsts.X_Kernel = STRING_NS(X_Kernel,fSteerfile);
+   if ( EXIST_NS(X_DistanceMeasure,fSteerfile) )           fScenConsts.X_DistanceMeasure = STRING_NS(X_DistanceMeasure,fSteerfile);
+   if ( EXIST_NS(X_NNodes,fSteerfile) )                    fScenConsts.X_NNodes = INT_NS(X_NNodes,fSteerfile);
+   if ( EXIST_NS(X_NNodeCounting,fSteerfile) )             fScenConsts.X_NNodeCounting = STRING_NS(X_NNodeCounting,fSteerfile);
+   if ( EXIST_NS(Mu1_Kernel,fSteerfile) )                  fScenConsts.Mu1_Kernel = STRING_NS(Mu1_Kernel,fSteerfile);
+   if ( EXIST_NS(Mu1_DistanceMeasure,fSteerfile) )         fScenConsts.Mu1_DistanceMeasure = STRING_NS(Mu1_DistanceMeasure,fSteerfile);
+   if ( EXIST_NS(Mu1_NNodes,fSteerfile) )                  fScenConsts.Mu1_NNodes = INT_NS(Mu1_NNodes,fSteerfile);
+   if ( EXIST_NS(Mu2_Kernel,fSteerfile) )                  fScenConsts.Mu2_Kernel = STRING_NS(Mu2_Kernel,fSteerfile);
+   if ( EXIST_NS(Mu2_DistanceMeasure,fSteerfile) )         fScenConsts.Mu2_DistanceMeasure = STRING_NS(Mu2_DistanceMeasure,fSteerfile);
+   if ( EXIST_NS(Mu2_NNodes,fSteerfile) )                  fScenConsts.Mu2_NNodes = INT_NS(Mu2_NNodes,fSteerfile);
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::PrintScenConsts() {
+   //! Print current scenario constants
+   logger.info["PrintScenConsts"] << "==================================================================" << endl;
+   logger.info["PrintScenConsts"] << "Printing current scenario constants" << endl;
+   logger.info["PrintScenConsts"] << "------------------------------------------------------------------" << endl;
+   logger.info["PrintScenConsts"] << "Scenario name: " << fScenConsts.ScenarioName << endl;
+   logger.info["PrintScenConsts"] << "Data cross section prefactor (neg. power of 10: pb->12, fb->15): " << fScenConsts.PublicationUnits << endl;
+   for ( unsigned int i=0; i<fScenConsts.ScenarioDescription.size(); i++ ) {
+      logger.info["PrintScenConsts"] << "Scenario description, [" << i << "]: " << fScenConsts.ScenarioDescription[i] << endl;
+   }
+   logger.info["PrintScenConsts"] << "Dimensionality of binning: " << fScenConsts.DifferentialDimension << endl;
+   for ( unsigned int i=0; i<fScenConsts.DimensionLabels.size(); i++ ) {
+      logger.info["PrintScenConsts"] << "Label (symbol and unit) for the measurement dimension [" << i << "]: " << fScenConsts.DimensionLabels[i] << endl;
+   }
+   for ( unsigned int i=0; i<fScenConsts.DimensionIsDifferential.size(); i++ ) {
+      logger.info["PrintScenConsts"] << "Specify for each dimension whether cross section is non-, point-wise, or bin-wise differential: [" << i << "]: " << fScenConsts.DimensionIsDifferential[i] << endl;
+   }
+   logger.info["PrintScenConsts"] << "Calculate bin width from lower and upper bin boundaries: " << fScenConsts.CalculateBinSize << endl;
+   logger.info["PrintScenConsts"] << "Additional normalization factor for all bins: " << fScenConsts.BinSizeFactor << endl;
+   for ( unsigned int i=0; i<fScenConsts.BinSize.size(); i++ ) {
+      logger.info["PrintScenConsts"] << "Additional normalization factor for bin [" << i << "]: " << fScenConsts.BinSize[i] << endl;
+   }
+   logger.info["PrintScenConsts"] << "Base scale to be used for mu_r, muf; must be in [GeV]: " << fScenConsts.ScaleDescriptionScale1 << endl;
+   logger.info["PrintScenConsts"] << "Second scale, only used in flexible-scale tables: " << fScenConsts.ScaleDescriptionScale2 << endl;
+   // Single-, double, triple-differential binnings
+   logger.info["PrintScenConsts"] << "Center-of-mass energy in [GeV]: " << fScenConsts.CenterOfMassEnergy << endl;
+   logger.info["PrintScenConsts"] << "PDF of 1st hadron: " << fScenConsts.PDF1 << endl;
+   logger.info["PrintScenConsts"] << "PDF of 2nd hadron: " << fScenConsts.PDF2 << endl;
+   logger.info["PrintScenConsts"] << "Filename of fastNLO output table: " << fScenConsts.OutputFilename << endl;
+   logger.info["PrintScenConsts"] << "If zlib available, gzip output table: " << fScenConsts.OutputCompression << endl;
+   logger.info["PrintScenConsts"] << "Number of decimal digits to store in output table: " << fScenConsts.OutputPrecision << endl;
+   logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
+   for ( unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++ ) {
+      logger.info["PrintScenConsts"] << "Factorization scale variation factor [" << i << "]: " << fScenConsts.ScaleVariationFactors[i] << endl;
+   }
+   logger.info["PrintScenConsts"] << "Specify whether binning is set from scenario or from warmup: " << fScenConsts.ReadBinningFromSteering << endl;
+   logger.info["PrintScenConsts"] << "Do not crosscheck warmup binning to avoid too many floating precision issues: " << fScenConsts.IgnoreWarmupBinningCheck << endl;
+   logger.info["PrintScenConsts"] << "Apply reweighting of PDFs for an optimized interpolation: " << fScenConsts.ApplyPDFReweighting << endl;
+   logger.info["PrintScenConsts"] << "Set limits for scale nodes to bin borders, if possible: " << fScenConsts.CheckScaleLimitsAgainstBins << endl;
+   logger.info["PrintScenConsts"] << "Interpolation kernel in x space: " << fScenConsts.X_Kernel << endl;
+   logger.info["PrintScenConsts"] << "Distance measure in x space: " << fScenConsts.X_DistanceMeasure << endl;
+   logger.info["PrintScenConsts"] << "No. of interpolation nodes in x space: " << fScenConsts.X_NNodes << endl;
+   logger.info["PrintScenConsts"] << "Distribution of node numbers in x space: " << fScenConsts.X_NNodeCounting << endl;
+   logger.info["PrintScenConsts"] << "Interpolation kernel in mu1 space: " << fScenConsts.Mu1_Kernel << endl;
+   logger.info["PrintScenConsts"] << "Distance measure in mu1 space: " << fScenConsts.Mu1_DistanceMeasure << endl;
+   logger.info["PrintScenConsts"] << "No. of interpolation nodes in mu1 space: " << fScenConsts.Mu1_NNodes << endl;
+   logger.info["PrintScenConsts"] << "Interpolation kernel in mu2 space: " << fScenConsts.Mu2_Kernel << endl;
+   logger.info["PrintScenConsts"] << "Distance measure in mu2 space: " << fScenConsts.Mu2_DistanceMeasure << endl;
+   logger.info["PrintScenConsts"] << "No. of interpolation nodes in mu2 space: " << fScenConsts.Mu2_NNodes << endl;
+   logger.info["PrintScenConsts"] << "==================================================================" << endl;
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::PrintWarmupConsts() {
+   //! Print current warmup constants
+   logger.info["PrintWarmupConsts"] << "==================================================================" << endl;
+   logger.info["PrintWarmupConsts"] << "Printing current warmup constants" << endl;
+   logger.info["PrintWarmupConsts"] << "------------------------------------------------------------------" << endl;
+   logger.info["PrintWarmupConsts"] << "Order in alpha_s of warmup run: " << fWarmupConsts.OrderInAlphasOfWarmupRunWas << endl;
+   logger.info["PrintWarmupConsts"] << "Set limits for scale nodes to bin borders, if possible: " << fWarmupConsts.CheckScaleLimitsAgainstBins << endl;
+   logger.info["PrintWarmupConsts"] << "Base scale to be used for mu_r, muf; must be in [GeV]: " << fWarmupConsts.ScaleDescriptionScale1 << endl;
+   logger.info["PrintWarmupConsts"] << "Second scale, only used in flexible-scale tables: " << fWarmupConsts.ScaleDescriptionScale2 << endl;
+   logger.info["PrintWarmupConsts"] << "Dimensionality of binning: " << fWarmupConsts.DifferentialDimension << endl;
+   for ( unsigned int i=0; i<fWarmupConsts.DimensionLabels.size(); i++ ) {
+      logger.info["PrintWarmupConsts"] << "Label (symbol and unit) for the measurement dimension [" << i << "]: " << fWarmupConsts.DimensionLabels[i] << endl;
+   }
+   for ( unsigned int i=0; i<fWarmupConsts.DimensionIsDifferential.size(); i++ ) {
+      logger.info["PrintWarmupConsts"] << "Specify for each dimension whether cross section is non-, point-wise, or bin-wise differential: [" << i << "]: " << fWarmupConsts.DimensionIsDifferential[i] << endl;
+   }
+   // TODO Incomplete
+   for (const auto & vals : fWarmupConsts.Values) {
+      for (const auto & val : vals) {
+         cout << val << endl;
+      }
+   }
+   // Single-, double, triple-differential binnings
+   logger.info["PrintWarmupConsts"] << "==================================================================" << endl;
 }
 
 
@@ -297,97 +771,11 @@ bool fastNLOCreate::CheckProcConsts() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::ReadGenAndProcConstsFromSteering() {
-   //! ReadGenAndProcConstsFromSteering()
-   //! If generator and process constants have not been set in
-   //! the constructor, then obtain these values from the steering
-   //! file.
-
-   logger.debug["ReadGenAndProcConstsFromSteering"]<<endl;
-
-   // Generator constants
-   if (EXIST_NS(CodeDescription,fSteerfile)) {
-      vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
-      fGenConsts.Name = CodeDescr[0];
-      if (CodeDescr.size() > 1) {
-         fGenConsts.References.resize(CodeDescr.size()-1);
-         for (unsigned int i = 0 ; i< fGenConsts.References.size() ; i++)
-            fGenConsts.References [i] = CodeDescr[i+1];
-      }
-   }
-   if (EXIST_NS(UnitsOfCoefficients,fSteerfile)) fGenConsts.UnitsOfCoefficients = INT_NS(UnitsOfCoefficients,fSteerfile);
-
-   // Process constants
-   if (EXIST_NS(LeadingOrder,fSteerfile))        fProcConsts.LeadingOrder = INT_NS(LeadingOrder,fSteerfile);
-   if (EXIST_NS(NPDF,fSteerfile))                fProcConsts.NPDF = INT_NS(NPDF,fSteerfile);
-   if (EXIST_NS(NSubProcessesLO,fSteerfile))     fProcConsts.NSubProcessesLO = INT_NS(NSubProcessesLO,fSteerfile);
-   if (EXIST_NS(NSubProcessesNLO,fSteerfile))    fProcConsts.NSubProcessesNLO = INT_NS(NSubProcessesNLO,fSteerfile);
-   if (EXIST_NS(NSubProcessesNNLO,fSteerfile))   fProcConsts.NSubProcessesNNLO = INT_NS(NSubProcessesNNLO,fSteerfile);
-   if (EXIST_NS(IPDFdef1,fSteerfile))            fProcConsts.IPDFdef1 = INT_NS(IPDFdef1,fSteerfile);
-   if (EXIST_NS(IPDFdef2,fSteerfile))            fProcConsts.IPDFdef2 = INT_NS(IPDFdef2,fSteerfile);
-   if (EXIST_NS(IPDFdef3LO,fSteerfile))          fProcConsts.IPDFdef3LO = INT_NS(IPDFdef3LO,fSteerfile);
-   if (EXIST_NS(IPDFdef3NLO,fSteerfile))         fProcConsts.IPDFdef3NLO = INT_NS(IPDFdef3NLO,fSteerfile);
-   if (EXIST_NS(IPDFdef3NNLO,fSteerfile))        fProcConsts.IPDFdef3NNLO = INT_NS(IPDFdef3NNLO,fSteerfile);
-
-   if ( fProcConsts.IPDFdef2 == 0 ) {
-      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.IPDFdef3LO != (int)fProcConsts.PDFCoeffLO.size()  )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,INT_TAB_NS(PartonCombinationsLO,fSteerfile));
-      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.IPDFdef3NLO != (int)fProcConsts.PDFCoeffNLO.size() )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,INT_TAB_NS(PartonCombinationsNLO,fSteerfile));
-      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.IPDFdef3NNLO != (int)fProcConsts.PDFCoeffNNLO.size() )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,INT_TAB_NS(PartonCombinationsNNLO,fSteerfile));
-      // check again
-      // --- check and transform parton combinations
-      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
-      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
-      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
-   }
-
-   if (EXIST_NS(NPDFDim,fSteerfile))             fProcConsts.NPDFDim = INT_NS(NPDFDim,fSteerfile);
-
-   // read asymmetric processes if half-matrix notation is requested
-   if ( fProcConsts.NPDFDim == 1 ) {
-      if ( fProcConsts.NPDF == 2 && fProcConsts.IPDFdef1 == 3 && ( fProcConsts.IPDFdef2 == 121 || fProcConsts.IPDFdef2 == 169 ) ) {
-         const int np = fProcConsts.IPDFdef2==121 ? 11:13;
-         int p1 = 0;
-         int p2 = 0;
-         for ( int p = 0 ; p<fProcConsts.IPDFdef2 ; p++ ) {
-            int pid = p1*(np)+p2;
-            int asympid = p2*(np)+p1;
-            if ( pid != asympid )  // actually not needed necessarily
-               fProcConsts.AsymmetricProcesses.push_back(make_pair(pid,asympid));
-            p2++;
-            if ( p2 == np ) {
-               p2=0;
-               p1++;
-            }
-         }
-      }
-      else if ( fProcConsts.NPDF == 2 ) {
-         if (EXIST_NS(AsymmetricProcesses,fSteerfile)) {
-            fProcConsts.AsymmetricProcesses.clear();
-            vector<vector<int> > asym = INT_TAB_NS(AsymmetricProcesses,fSteerfile);
-            for (unsigned int i = 0 ; i<asym.size() ; i++) {
-               if ( asym[i].size() != 2 ) {
-                  logger.error["ReadGenAndProcConstsFromSteering"]<<"Asymmetric process "<<asym[i][0]<<", must have exactly one counter process."<<endl;
-                  exit(1);
-               }
-               fProcConsts.AsymmetricProcesses.push_back(make_pair(asym[i][0],asym[i][1]));
-            }
-         }
-      }
-   }
-}
-
-
-// ___________________________________________________________________________________________________
 void fastNLOCreate::Instantiate() {
    //! Instantiate all internal members
    //! and prepare for filling
    logger.debug["Instantiate"]<<"Instantiate all internal members and prepare for filling " << endl;
+   logger.debug["Instantiate"]<<"X_NNodeCounting is set to: "<<fScenConsts.X_NNodeCounting<<endl;
 
    // init member variables
    fReader = NULL;
@@ -464,6 +852,29 @@ fastNLOCreate::~fastNLOCreate() {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::ReadSteeringFile(std::string steerfile, std::string steeringNameSpace) {
+   //! Read in steering file
+   //! The filename of the steering file is used as the 'namespace' of keys in read_steer,
+   //! if there is no steering NameSpace given explicitly.
+   //! Do not set anything here in contrast to ReadSteering!
+   logger.debug["ReadSteeringFile"] << "Steerfile = " << steerfile << endl;
+
+   //! Remove extension from steerfile to define default steering namespace
+   if ( steeringNameSpace.empty() ) {
+      steeringNameSpace = steerfile.substr(0, steerfile.find_last_of("."));
+   }
+   logger.debug["ReadSteeringFile"] << "Steering NameSpace = " << steeringNameSpace << endl;
+
+   //! Read file
+   READ_NS(steerfile,steeringNameSpace);
+
+   //! Check steering
+   //! If defined, update verbosity from steering
+   if ( EXIST_NS(GlobalVerbosity,steeringNameSpace) ) SetGlobalVerbosity(STRING_NS(GlobalVerbosity,steeringNameSpace));
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
    //! read in steering file
    //! The filename of the steering file
@@ -485,7 +896,8 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
    //! Set verbosity from steering or to default WARNING
    if (EXIST_NS(GlobalVerbosity,fSteerfile) )
       SetGlobalVerbosity(STRING_NS(GlobalVerbosity,fSteerfile));
-   else SetGlobalVerbosity("WARNING");
+   //   else SetGlobalVerbosity("WARNING");
+   else SetGlobalVerbosity("INFO");
 
    //! Set WarmupFilename from steering
    if (EXIST_NS(WarmUpFilename,fSteerfile)) {
@@ -501,92 +913,11 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       logger.debug["fastNLOCreate"]<<"The warmup filename derived from steering is: " << fWarmUpFile << endl;
    }
 
+   //   if (logger.info.GetSpeak())
+   PRINTALL();
 
-   if (logger.info.GetSpeak())
-      PRINTALL();
-
-   // ---- set/read scenario constants (fScenConsts)
-   fScenConsts.PublicationUnits = INT_NS(PublicationUnits,fSteerfile);
-   fScenConsts.ScenarioName = STRING_NS(ScenarioName,fSteerfile);
-   fScenConsts.ScenarioDescription = STRING_ARR_NS(ScenarioDescription,fSteerfile);
-   fScenConsts.CenterOfMassEnergy = DOUBLE_NS(CenterOfMassEnergy,fSteerfile);
-   fScenConsts.OutputFilename = STRING_NS(OutputFilename,fSteerfile);
-   fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
-   fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
-   fScenConsts.ApplyPDFReweighting =  BOOL_NS(ApplyPDFReweighting,fSteerfile);
-   fScenConsts.OutputPrecision = INT_NS(OutputPrecision,fSteerfile);
-   fScenConsts.ReadBinningFromSteering = BOOL_NS(ReadBinningFromSteering,fSteerfile);
-
-   // --- (pre-)set flexible scale flag
-   fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
-
-   // ---- set/read further scenario constants (fScenConsts)
-   if ( fScenConsts.ReadBinningFromSteering ) {
-      // read values from 'main steering'
-      fScenConsts.DifferentialDimension = INT_NS(DifferentialDimension,fSteerfile);
-      NDim = fScenConsts.DifferentialDimension;
-      fScenConsts.DimensionIsDifferential = INT_ARR_NS(DimensionIsDifferential,fSteerfile);;
-      fScenConsts.DimensionLabels = STRING_ARR_NS(DimensionLabels,fSteerfile);
-      fScenConsts.ScaleDescriptionScale1 = STRING_NS(ScaleDescriptionScale1,fSteerfile);
-      if (!fIsFlexibleScale)
-         fScenConsts.ScaleDescriptionScale2 = STRING_NS(ScaleDescriptionScale2,fSteerfile);
-
-      if ( NDim==1 ) fScenConsts.SingleDifferentialBinning = DOUBLE_ARR_NS(SingleDifferentialBinning,fSteerfile);
-      else if ( NDim==2 ) fScenConsts.DoubleDifferentialBinning = DOUBLE_TAB_NS(DoubleDifferentialBinning,fSteerfile);
-      else if ( NDim==3 ) fScenConsts.TripleDifferentialBinning = DOUBLE_TAB_NS(TripleDifferentialBinning,fSteerfile);
-
-      fScenConsts.CalculateBinSize = BOOL_NS(CalculateBinSize,fSteerfile);
-      fScenConsts.BinSizeFactor = DOUBLE_NS(BinSizeFactor,fSteerfile);
-      if ( !fScenConsts.CalculateBinSize )
-         fScenConsts.BinSize = DOUBLE_ARR_NS(BinSize,fSteerfile);
-
-      //ReadBinSize();
-   }
-   else {
-      // warmup file not yet read in
-      // read in needed flags in GetWarmupValues()
-
-      // fScenConsts.DifferentialDimension = INT_NS(Warmup.DifferentialDimension,fSteerfile);
-      // fScenConsts.DimensionIsDifferential = INT_ARR_NS(Warmup.DimensionIsDifferential,fSteerfile);
-      // fScenConsts.DimensionLabels = STRING_ARR_NS(Warmup.DimensionLabels,fSteerfile);
-      // fScenConsts.ScaleDescriptionScale1 = STRING_NS(Warmup.ScaleDescriptionScale1,fSteerfile);
-      // if (!fIsFlexibleScale)
-      //         fScenConsts.ScaleDescriptionScale2 = STRING_NS(Warmup.ScaleDescriptionScale2,fSteerfile);
-
-      fScenConsts.CalculateBinSize = false;
-
-      // NDim = fScenConsts.DifferentialDimension;
-      // if ( NDim==1 ) fScenConsts.SingleDifferentialBinning = ;
-      // else if ( NDim==2 ) fScenConsts.DoubleDifferentialBinning = ;
-      // else if ( NDim==3 ) fScenConsts.TripleDifferentialBinning = ;
-   }
-
-   fScenConsts.CheckScaleLimitsAgainstBins = BOOL_NS(CheckScaleLimitsAgainstBins,fSteerfile);
-   fScenConsts.X_Kernel = STRING_NS(X_Kernel,fSteerfile);
-   fScenConsts.X_DistanceMeasure = STRING_NS(X_DistanceMeasure,fSteerfile);
-   fScenConsts.X_NNodes = INT_NS(X_NNodes,fSteerfile);
-   fScenConsts.X_NNodeCounting="NodesPerBin";
-   if ( EXIST_NS(X_NodeCounting,fSteerfile) )
-        fScenConsts.X_NNodeCounting = STRING_NS(X_NodeCounting,fSteerfile);
-   if ( EXIST_NS(X_NoOfNodesPerMagnitude,fSteerfile) )
-        logger.warn[""]<<"Key 'X_NoOfNodesPerMagnitude' found. This is no longer supported and ignored. Please use steering key 'X_NNodeCounting' instead."<<endl;
-        //fScenConsts.X_NoOfNodesPerMagnitude = BOOL_NS(X_NoOfNodesPerMagnitude,fSteerfile);
-
-   fScenConsts.Mu1_Kernel = STRING_NS(Mu1_Kernel,fSteerfile);
-   fScenConsts.Mu1_DistanceMeasure = STRING_NS(Mu1_DistanceMeasure,fSteerfile);
-   fScenConsts.Mu1_NNodes = INT_NS(Mu1_NNodes,fSteerfile);
-   if ( fIsFlexibleScale ) {
-      fScenConsts.Mu2_Kernel = STRING_NS(Mu2_Kernel,fSteerfile);
-      fScenConsts.Mu2_DistanceMeasure = STRING_NS(Mu2_DistanceMeasure,fSteerfile);
-      fScenConsts.Mu2_NNodes = INT_NS(Mu2_NNodes,fSteerfile);
-   }
-
-
-   if ( fProcConsts.NPDF > 0 ) fScenConsts.PDF1 = INT_NS(PDF1,fSteerfile);
-   if ( fProcConsts.NPDF > 1 ) fScenConsts.PDF2 = INT_NS(PDF2,fSteerfile);
-
-   fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
-
+   // Scenario constants
+   fastNLOCreate::SetScenConstsFromSteering();
 }
 
 
@@ -671,7 +1002,7 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord, c
    // check if all subprocesses are filled
    for ( unsigned int k=1 ; k<PDFCoeff.size() ; k++ ) {
       if ( PDFCoeff[k].empty() ) {
-         logger.error["ReadPartonCombinations"]<<"PartonCombinations"<<sord[ord]<<" does not conatain any information about PDF for subprocess "<<k<<". Exiting."<<endl;
+         logger.error["ReadPartonCombinations"]<<"PartonCombinations"<<sord[ord]<<" does not contain any information about PDF for subprocess "<<k<<". Exiting."<<endl;
          exit(1);
       }
    }
@@ -1524,7 +1855,7 @@ bool fastNLOCreate::CheckWarmupConsistency() {
    if (warmup.size() != NObsBin) {
       logger.error["CheckWarmupConsistency"]
          <<"Table of warmup values is not compatible with steering file.\n"
-         <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<".\n"
+         <<"Different number of bins ("<<warmup.size()<<" instead of "<<NObsBin<<").\n"
          <<wrmuphelp
          <<"Exiting."<<endl;
       ret = false;
@@ -3631,12 +3962,13 @@ void  fastNLOCreate::InitInterpolationKernels() {
       // ------------------------------------------------
       // init x-interpolation kernels
       // ------------------------------------------------
-      logger.debug["InitInterpolationKernels"]<<"Make x grid for obsbin="<<i<<endl;
+      logger.debug["InitInterpolationKernels"]<<"Make x grid for obsbin = "<<i<<endl;
 
       // Create x grids with X_NNodes+1 nodes up to x_max = 1.
       // The additional last node will be removed again below.
       int nxtot = fScenConsts.X_NNodes + 1;
       if ( fScenConsts.X_NNodeCounting == "NodesPerMagnitude" ) { // "NodesMax","NodesPerBin","NodesPerMagnitude"
+         logger.debug["InitInterpolationKernels"]<<"Setting x nodes per magnitude: "<<fScenConsts.X_NNodeCounting<<endl;
          fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGridsWithNNodesPerMagnitude(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2) {
@@ -3645,6 +3977,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
          }
       }
       else if (fScenConsts.X_NNodeCounting == "NodesPerBin" ) { //
+         logger.debug["InitInterpolationKernels"]<<"Setting x nodes per range in bin: "<<fScenConsts.X_NNodeCounting<<endl;
          fKernX1[i] = MakeInterpolationKernels(fScenConsts.X_Kernel,wrmX[i],1); // use 1 as upper x-value
          fKernX1[i]->MakeGrids(fastNLOInterpolBase::TranslateGridType(fScenConsts.X_DistanceMeasure),nxtot);
          if (npdf == 2) {
@@ -3653,6 +3986,7 @@ void  fastNLOCreate::InitInterpolationKernels() {
          }
       }
       else if (fScenConsts.X_NNodeCounting == "NodesMax" ) { //
+         logger.debug["InitInterpolationKernels"]<<"Setting x nodes per range in total: "<<fScenConsts.X_NNodeCounting<<endl;
          // generate grid for maximum x-range
          double xmin = 1;
          for ( unsigned int xi=0 ; xi<wrmX.size() ; xi++ ) xmin = min(xmin,wrmX[xi]);

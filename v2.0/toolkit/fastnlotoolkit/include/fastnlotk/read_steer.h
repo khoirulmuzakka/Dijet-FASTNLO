@@ -657,9 +657,9 @@ void read_steer::AddTable ( const std::string& key, const std::vector<std::strin
    for ( unsigned int i = 0 ; i<values.size() ; i++ ) {
       str[i].resize(values[i].size());
       for ( unsigned int j = 0 ; j<values[i].size() ; j++ ) {
-	 std::stringstream ss;
-	 ss << values[i][j];
-	 str[i][j]=ss.str();
+         std::stringstream ss;
+         ss << values[i][j];
+         str[i][j]=ss.str();
       }
    }
    AddTable(key,header,str);

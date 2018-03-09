@@ -5,6 +5,7 @@ import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import matplotlib.pylab as pylab
 import numpy as np
 # from copy import deepcopy
 from matplotlib import cm
@@ -23,15 +24,22 @@ from StringIO import StringIO
 # Needs matplotlib > 1.3
 # plt.style.use('ggplot')
 # plt.style.use('presentation')
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (16, 12),
+          'axes.labelsize':  'x-large',
+          'axes.titlesize':  'x-large',
+          'xtick.labelsize': 'x-large',
+          'ytick.labelsize': 'x-large'}
+pylab.rcParams.update(params)
 
 # Default arguments
 proc = '1jet'
-jobn = 'LO-7TeV'
+jobn = 'LO-CMS7'
 kinn = 'vBa'
-obsv = 'xptj0_y1'
+obsv = 'fnl2332d_xptji_y1'
 seed = 's1234'
 fnlo = 'scls'
-nscl = 6
+nscl = 6 # central + nscl fixed scales
 # Get from cmdline argument
 print 'Number of arguments:', len(sys.argv), 'arguments.'
 print 'Argument List:', str(sys.argv)
@@ -48,7 +56,7 @@ if len(sys.argv) > 5:
 if len(sys.argv) > 6:
     fnlo = sys.argv[6]
 if len(sys.argv) > 7:
-    nscl = sys.argv[7]
+    nscl = int(sys.argv[7])
 
 # Prepare result arrays
 xl = []      # left bin border
@@ -66,8 +74,8 @@ xl.append(np.loadtxt(datfile,usecols=(0,)))
 xu.append(np.loadtxt(datfile,usecols=(2,)))
 xl = np.array(xl)
 xu = np.array(xu)
-for i in range(nscl):
-    xs_scls.append(np.loadtxt(datfile,usecols=(2*i+5,)))
+for i in range(nscl+1):
+    xs_scls.append(np.loadtxt(datfile,usecols=(2*i+3,)))
 xs_nnlo = np.array(xs_scls)/1000. # Conversion of fb to pb
 #print "xs_nnlo", xs_nnlo
 
@@ -95,19 +103,24 @@ print 'Number of observable bins: ', nobs
 #xs_fnla = np.array(xs_fnla)
 
 # Evaluate cross sections from pre-evaluated fastNLO tables
-logfile = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'.log'
-print 'Reading from fastNLO log file ', logfile
-# Skip all lines starting with "#", "C", or "L" as first non-whitespace character
-with open(logfile, 'r') as f:
-    data = re.sub(r'\s*[#CL].*', '', f.read())
-all = np.genfromtxt(StringIO(data),usecols=(6,))
-# Read the nscl*nobs values into nscl arrays of nobs entries
-for i in range(nscl):
-    a = []
-    for j in range(nobs):
-        ind = i*nobs+j
-        a.append(all[ind])
-    xs_fnll.append(a)
+log0file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'_0.log'
+log6file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'_6.log'
+for file in [log0file, log6file]:
+    print 'Reading from fastNLO log file ', file
+    # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
+    with open(file, 'r') as f:
+        data = re.sub(r'\s*[#CL].*', '', f.read())
+        all = np.genfromtxt(StringIO(data),usecols=(6,))
+        # Read the (nscl+1)*nobs values into nscl arrays of nobs entries
+        ns = nscl
+        if file==log0file:
+            ns = 1
+        for i in range(ns):
+            a = []
+            for j in range(nobs):
+                ind = i*nobs+j
+                a.append(all[ind])
+            xs_fnll.append(a)
 
 xs_fnll = np.array(xs_fnll)
 #print "xs_fnll", xs_fnll
@@ -120,36 +133,46 @@ a_fl2nn = np.divide(xs_fnll-xs_nnlo, xs_fnll+xs_nnlo, out=np.zeros_like(xs_fnll)
 
 #exit(0)
 
-for i in range(nscl):
+titwgt = 'bold'
+limfs = 'x-large'
+sclnam = ['p_T', 'mu_r = mu_f small', 'mu_r = mu_f large', 'mu_r < mu_f', 'mu_r > mu_f', 'mu_r << mu_f', 'mu_r >> mu_f']
 
-    # Closure plot
-    fig = plt.figure(figsize=(16,12))
+for i in range(nscl+1):
+
+# Closure plot
+#    fig = plt.figure(figsize=(16,12))
+    fig = plt.figure()
     ax  = fig.gca()
-    plt.title(r'Single grid: {} {} for {} at scale var {}'.format(proc, jobn, obsv, i+1), fontsize='xx-large', fontweight='bold')
+    plt.title(r'Single grid: {} {} {} for scale choice {}'.format(proc, jobn, obsv, sclnam[i]), fontweight=titwgt)
     plt.xlabel('Observable bin index', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-    plt.ylabel('Closure fastNLO vs. NNLOJET', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+#    plt.ylabel('Closure fastNLO vs. NNLOJET', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+    plt.ylabel('Closure quality', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, labelpad=20)
     plt.axhline(y=1.001, linestyle='--', linewidth=1.0, color='black')
     plt.axhline(y=0.999, linestyle='--', linewidth=1.0, color='black')
     plt.fill_between([0.0,34.0],0.999,1.001, color='black', alpha=0.1)
-    plt.text(34.6,1.00085,u'+1‰')
-    plt.text(34.7,0.99885,u'–1‰')
+    plt.text(34.6,1.00085,u'+1‰',fontsize=limfs)
+    plt.text(34.7,0.99885,u'–1‰',fontsize=limfs)
 
     dx = 1./4.
     x  = np.arange(1   , nobs+1.e-6)
     xa = np.arange(1-dx, nobs-dx+1.e-6)
     xb = np.arange(1+dx, nobs+dx+1.e-6)
 
-    asymm = plt.errorbar(x, a_fl2nn[i,], yerr=0.*x, marker='s', linestyle='none', label=r'Asymmetry (fastNLO-NNLOJET)/(fastNLO-NNLOJET) + 1', color='blue')
-    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio fastNLO/NNLOJET', color='orange')
+#    asymm = plt.errorbar(x, a_fl2nn[i,], yerr=0.*x, marker='s', linestyle='none', label=r'Asymmetry (fastNLO-NNLOJET)/(fastNLO+NNLOJET) + 1', color='blue')
+#    asymm = plt.errorbar(x, a_fl2nn[i,], yerr=0.*x, marker='s', linestyle='none', label=r'Asymmetry (APPLfast-NNLOJET)/(APPLfast+NNLOJET) + 1', color='blue')
+#    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio fastNLO/NNLOJET', color='orange')
+    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio APPLfast/NNLOJET', color='orange')
 
     plt.xlim(0.0,34.0)
     plt.ylim(0.99,1.01)
 
-    handles = [ratio,asymm]
+#    handles = [ratio,asymm]
+    handles = [ratio]
     labels  = [h.get_label() for h in handles]
 
-    legend = ax.legend(handles, labels, title=r'Closure of fastNLO vs. NNLOJET', loc='upper left', numpoints=1, handlelength=0)
-    legend.get_title().set_fontsize(20)
+    legend = ax.legend(handles, labels, loc='upper left', numpoints=1, handlelength=0)
+#    legend = ax.legend(handles, labels, title=r'Closure APPLfast vs. NNLOJET', loc='upper left', numpoints=1, handlelength=0)
+#    legend.get_title().set_fontsize(limfs)
 
     fignam = proc+'.'+jobn+'.'+obsv+'.'+'scale-no-'+str(i+1)+'.scalecheck'+'.png'
     plt.savefig(fignam)
