@@ -49,17 +49,19 @@ using namespace std;
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate() {
-   logger.SetClassName("fastNLOCreate");
-   //! Set constants from defaults
-   // SetGenConstsDefaults();
-   // SetProcConstsDefaults();
-   // SetScenConstsDefaults();
+  //!
+  //! Constructor of fastNLOCreate
+  //!
+  logger.SetClassName("fastNLOCreate");
+  //! Initialise constants from defaults
+  SetTableConstsDefaults();
 }
 
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
                              const fastNLO::ScenarioConstants& ScenConsts, const fastNLO::WarmupConstants& WarmupConsts ) {
+   //!
    //! Constructor of fastNLOCreate
    //!
    //! Pass all needed steering paramters through
@@ -77,9 +79,12 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    fScenConsts = ScenConsts;
    fProcConsts = ProcConsts;
    fWarmupConsts = WarmupConsts;
-   if ( !CheckProcConsts() ) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
-      exit(1);
+   
+   //! Do some basic checks on the table constants
+   if ( ! CheckTableConsts() ) {
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
    }
 
    //! No WarmupFile required, a pseudo-WarmupFilename is defined here
@@ -87,15 +92,9 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    fWarmupFilename = fSteerfile;
    logger.debug["fastNLOCreate"]<<"Warmup set from code; the pseudo(!)-warmup filename is: " << fWarmupFilename << endl;
 
-   // --- check and transform parton combinations
-   if ( fProcConsts.IPDFdef2 == 0 ) {
-      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
-      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
-      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
-   }
+   // Check and transform parton combinations
+   // KR TODO What for? Necessary?
+   TransformPartonCombinations();
 
    logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and WarmupConsts"<<endl;
    Instantiate();
@@ -115,44 +114,60 @@ fastNLOCreate::fastNLOCreate(const string& warmupfile, const fastNLO::GeneratorC
 
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
-                             const fastNLO::ScenarioConstants& ScenConsts, const string& warmupfile) {
+                             const fastNLO::ScenarioConstants& ScenConsts, const std::string& warmupfile) {
+   //!
    //! Constructor of fastNLOCreate
    //!
-   //! Pass all needed steering parameters through
-   //! GeneratorConstants, ProcessConstants, and ScenarioConstants plus warmup file
-   //! (see GeneratorConstants.h file for details)
-   //!
-   //! warmupfile: filename to be written out or read in for production run, if already existent
+   //! Set required parameters through GeneratorConstants, ProcessConstants, and ScenarioConstants plus
+   //! warmup file. If the warmup file doesn't exist, a warmup run is initiated.
+   //! Use the warmup filename for the steeringNameSpace.
    //!
    //! No steering file is read in
    //!
-
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and warmup file"<<endl;
    logger.debug["fastNLOCreate"]<<"The warmup filename set from function call is: " << warmupfile << endl;
 
+   //! Initialise constants from defaults
+   SetTableConstsDefaults();
+
    //! Set constants from arguments
-   fGenConsts  = GenConsts;
-   fScenConsts = ScenConsts;
+   logger.debug["fastNLOCreate"] << "SetGenConsts from argument" << endl;
+   fGenConsts = GenConsts;
+   logger.debug["fastNLOCreate"] << "SetProcConsts from argument" << endl;
    fProcConsts = ProcConsts;
-   if ( !CheckProcConsts() ) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
-      exit(1);
+   logger.debug["fastNLOCreate"] << "SetScenConsts from argument" << endl;
+   fScenConsts = ScenConsts;
+   if ( read_steer::getVerbosity() < 0 ) {
+     PrintTableConsts();
    }
 
-   //! The WarmupFilename is set from argument
-   fSteerfile = warmupfile;
+   //! Set warmup filename and steering namespace from arguments
    fWarmupFilename = warmupfile;
-
-   // --- check and transform parton combinations
-   if ( fProcConsts.IPDFdef2 == 0 ) {
-      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
-      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
-      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+   fSteerfile = warmupfile; // No mistake! Needed to have the proper namespace for warmup and steering file!
+   string steeringNameSpace = fSteerfile; // Not functional in general, only for Reads below. Should be improved.
+   // Check existence of files
+   bool lwarm  = !access(GetWarmupTableFilename().c_str(), R_OK);
+   if ( ! lwarm ) {
+     logger.info["fastNLOCreate"] << "Warmup file does not exist, so presumably this is a warmup run: " << GetWarmupTableFilename() << endl;
+   } else {
+     // Read steering from warmup, if exists, into namespace
+     ReadSteeringFile(fWarmupFilename,steeringNameSpace);
    }
+   if ( read_steer::getVerbosity() < 0 ) {
+     PrintTableConsts();
+   }
+
+   //! Do some basic checks on the table constants
+   if ( ! CheckTableConsts() ) {
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
+   }
+
+   // Check and transform parton combinations
+   // KR TODO What for? Necessary?
+   TransformPartonCombinations();
 
    logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and warmup file"<<endl;
    Instantiate();
@@ -163,25 +178,25 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
 fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
                              const fastNLO::ScenarioConstants& ScenConsts, const std::string& warmupfile,
                              const std::string& steerfile) {
+   //!
    //! Constructor of fastNLOCreate
    //!
    //! Set required parameters through GeneratorConstants, ProcessConstants, and ScenarioConstants plus
-   //! warmup and steering file
+   //! warmup and steering file. The warmup file is read first here, if it exists.
+   //! Otherwise a warmup run is initiated.
+   //! This constructor is conceived for the use case:
+   //!                                                 ONE warmup file PER table instance
+   //!                                                 ONE steering file for ALL table instances
+   //! which means that the warmup filename is used for the steeringNameSpace.
+   //! Needs to be checked in case of other use cases.
    //!
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, ScenConsts, and warmup and steering file"<<endl;
    logger.debug["fastNLOCreate"]<<"The warmup filename set via the function call is: " << warmupfile << endl;
    logger.debug["fastNLOCreate"]<<"The steering file superseding initialised defaults is: " << steerfile << endl;
 
-   logger.debug["fastNLOCreate"] << "SetGenConstsDefaults" << endl;
-   SetGenConstsDefaults();
-   logger.debug["fastNLOCreate"] << "SetProcConstsDefaults" << endl;
-   SetProcConstsDefaults();
-   logger.debug["fastNLOCreate"] << "SetScenConstsDefaults" << endl;
-   SetScenConstsDefaults();
-   // PrintGenConsts();
-   // PrintProcConsts();
-   // PrintScenConsts();
+   //! Initialise constants from defaults
+   SetTableConstsDefaults();
 
    //! Set constants from arguments
    logger.debug["fastNLOCreate"] << "SetGenConsts from argument" << endl;
@@ -190,35 +205,33 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    fProcConsts = ProcConsts;
    logger.debug["fastNLOCreate"] << "SetScenConsts from argument" << endl;
    fScenConsts = ScenConsts;
-   // PrintGenConsts();
-   // PrintProcConsts();
-   // PrintScenConsts();
+   if ( read_steer::getVerbosity() < 0 ) {
+     PrintTableConsts();
+   }
 
    //! Set filenames and steering namespace from arguments
    fWarmupFilename = warmupfile;
    fSteerfile = warmupfile; // No mistake! Needed to have the proper namespace for warmup and steering file!
    //! In case of multiple tables created in one job, the warmup files must be different,
    //! but not the steering file to complement/modify settings for all tables.
-   string steeringNameSpace = fSteerfile; // Not functional in general, ony for Reads below. Should be improved.
-   // Check existence of warmup file
-   bool lwarm = access(GetWarmupTableFilename().c_str(), R_OK);
-   if ( lwarm ) {
-      logger.error["fastNLOCreate"] << "Warmup file does not exist although explicitly given: " << GetWarmupTableFilename() << endl;
-      exit(1);
+   string steeringNameSpace = fSteerfile; // Not functional in general, only for Reads below. Should be improved.
+   // Check existence of files
+   bool lwarm  = !access(GetWarmupTableFilename().c_str(), R_OK);
+   bool lsteer = !access(steerfile.c_str(), R_OK);
+   if ( ! lwarm ) {
+     logger.info["fastNLOCreate"] << "Warmup file does not exist, so presumably this is a warmup run: " << GetWarmupTableFilename() << endl;
+   } else {
+     // Read steering from warmup, if exists, into namespace
+     ReadSteeringFile(fWarmupFilename,steeringNameSpace);
    }
-   // Read steering from warmup into namespace
-   ReadSteeringFile(fWarmupFilename,steeringNameSpace);
-   // At last, read steering for final completions and modifications
-   ReadSteeringFile(steerfile,steeringNameSpace);
+   if ( ! lsteer ) {
+     logger.info["fastNLOCreate"] << "Steering file does not exist, try to run with preset values: " << steerfile << endl;
+   } else {
+     // At last, read steering for final completions and modifications
+     ReadSteeringFile(steerfile,steeringNameSpace);
+   }
    // DEBUG
    // PRINTALL();
-   //! Do not allow to set WarmupFilename from steering in this constructor, since explicit
-   //! warmup filename is given
-   if ( EXIST_NS(WarmUpFilename,steeringNameSpace) ) {
-      logger.error["fastNLOCreate"]<<"The explicitly given warmup filename is set to be overwritten from steering file to: " << STRING_NS(WarmUpFilename,steeringNameSpace) << endl;
-      logger.error["fastNLOCreate"]<<"This is not allowed in this constructor, aborted!" << endl;
-      exit(1);
-   }
    //! Update constants from steering namespace
    SetGenConstsFromSteering();
    logger.debug["fastNLOCreate"] << "SetGenConsts from warmup and steering" << endl;
@@ -226,25 +239,20 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    logger.debug["fastNLOCreate"] << "SetProcConsts from warmup and steering" << endl;
    SetScenConstsFromSteering();
    logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
-   PrintGenConsts();
-   PrintProcConsts();
-   PrintScenConsts();
-
-   // TODO: Add more and better checks!
-   if ( !CheckProcConsts() ) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check the ProcessConstants."<<endl;
-      exit(1);
+   if ( read_steer::getVerbosity() < 0 ) {
+     PrintTableConsts();
    }
 
-   // --- check and transform parton combinations
-   if ( fProcConsts.IPDFdef2 == 0 ) {
-      if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
-         fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
-      if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
-         fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
-      if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
-         fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+   //! Do some basic checks on the table constants
+   if ( ! CheckTableConsts() ) {
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
    }
+
+   // Check and transform parton combinations
+   // KR TODO What for? Necessary?
+   TransformPartonCombinations();
 
    logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, ScenConsts, and warmup and steering file"<<endl;
    Instantiate();
@@ -264,75 +272,153 @@ fastNLOCreate::fastNLOCreate(const string& steerfile, const fastNLO::GeneratorCo
 // ___________________________________________________________________________________________________
 fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
                              const string& steerfile ) {
+   //!
    //! Constructor of fastNLOCreate
    //!
-   //! Pass steering parameters through
-   //! GeneratorConstants, ProcessConstants and the steering file
-   //! (see GeneratorConstants.h file for details)
+   //! Set required parameters through GeneratorConstants, ProcessConstants, and steering file.
+   //!
+   //! Existence of steering file is mandatory; only ScenarioConstants are set from steering.
+   //! The warmup filename is either read from steering or set via heuristic guessing.
+   //! If the warmup file doesn't exist, a warmup run is initiated.
    //!
    //!
-
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
+   logger.debug["fastNLOCreate"]<<"The steering file from function call is: " << steerfile << endl;
+
+   //! Initialise constants from defaults
+   SetTableConstsDefaults();
 
    //! Set constants from arguments
-   fGenConsts  = GenConsts;
+   logger.debug["fastNLOCreate"] << "SetGenConsts from argument" << endl;
+   fGenConsts = GenConsts;
+   logger.debug["fastNLOCreate"] << "SetProcConsts from argument" << endl;
    fProcConsts = ProcConsts;
 
-   //! Steering file settings take precedence over settings in code
-   //! The WarmupFilename is set from steering
-   ReadSteering(steerfile);
-
-   // Generator constants
-   fastNLOCreate::SetGenConstsFromSteering();
-
-   // Process constants
-   fastNLOCreate::SetProcConstsFromSteering();
-
-   bool check = CheckProcConsts();
-   if (!check) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   // TODO: Unify ReadSteering() and ReadSteerFile(); only one is necessary
+   //   Set steering filename and namespace from arguments
+   //   fSteerfile = steerfile;
+   //   string steeringNameSpace = fSteerfile; // Not functional in general, only for Reads below. Should be improved.
+   // Check existence of files
+   bool lsteer = !access(steerfile.c_str(), R_OK);
+   if ( ! lsteer ) {
+     logger.error["fastNLOCreate"] << "Steering file does not exist, aborting: " << steerfile << endl;
+     exit(1);
+   } else {
+     //! Steering file settings take precedence over settings in code
+     //! The WarmupFilename is read either from steering or
+     //! set via heuristic guessing within ReadSteering()
+     //! The steeringNameSpace is set automatically to steerfile without extension
+     ReadSteering(steerfile);
+   }
+   //! Update scenario constants from steering namespace
+   SetScenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
+   if ( read_steer::getVerbosity() < 0 ) {
+     PrintTableConsts();
    }
 
-   logger.debug["fastNLOCreate"]<<"Instantiate from GenConsts, ProcConsts, and steering file"<<endl;
+   //! Do some basic checks on the table constants
+   if ( ! CheckTableConsts() ) {
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
+   }
+
+   // Check and transform parton combinations
+   // KR TODO What for? Necessary?
+   TransformPartonCombinations();
+
+   logger.debug["fastNLOCreate"]<<"Instantiate table from GenConsts, ProcConsts, and steering file"<<endl;
    Instantiate();
 }
 
 
 // ___________________________________________________________________________________________________
-fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
+fastNLOCreate::fastNLOCreate(const string& steerfile, string steeringNameSpace) {
    //!
    //! Constructor for fastNLOCreate
    //!
-   //! steerfile:                Steering file containing all required flags
-   //! steeringNameSpace:        Alternative read_steer namespace to be used (optional)
-   //! shouldReadSteeringFile:   Force to NOT read the steering file (e.g. the file has already been read in)  (optional).
+   //! Set all required parameters through steering file.
    //!
-
+   //! Existence of steering file is mandatory.
+   //! The warmup filename is either read from steering or set via heuristic guessing.
+   //! If the warmup file doesn't exist, a warmup run is initiated.
+   //!
    logger.SetClassName("fastNLOCreate");
    logger.debug["fastNLOCreate"]<<"Create table from steering file"<<endl;
+   logger.debug["fastNLOCreate"]<<"The steering file from function call is: " << steerfile << endl;
 
-   //! Set constants from defaults
-   SetGenConstsDefaults();
-   SetProcConstsDefaults();
+   //! Initialise constants from defaults
+   SetTableConstsDefaults();
 
-   //! Steering file settings take precedence over defaults
-   //! The WarmupFilename is set from steering
-   ReadSteering(steerfile, steeringNameSpace, shouldReadSteeringFile);
-
-   // Generator constants
-   fastNLOCreate::SetGenConstsFromSteering();
-
-   // Process constants
-   fastNLOCreate::SetProcConstsFromSteering();
-
-   bool check = CheckProcConsts();
-   if (!check) {
-      logger.warn["fastNLOCreate"]<<"Process constants not properly initialized! Please check your steering."<<endl;
+   // Set steering filename and namespace from arguments
+   fSteerfile = steerfile;
+   if ( steeringNameSpace.empty() ) steeringNameSpace = fSteerfile;
+   // Check existence of files
+   bool lsteer = !access(steerfile.c_str(), R_OK);
+   if ( ! lsteer ) {
+     logger.error["fastNLOCreate"] << "Steering file does not exist, aborting: " << steerfile << endl;
+     exit(1);
+   } else {
+     //! Steering file settings take precedence over settings in code
+     //! The WarmupFilename is read either from steering or
+     //! set via heuristic guessing within ReadSteering()
+     //! The steeringNameSpace normally is set to steerfile without extension
+     ReadSteering(steerfile, steeringNameSpace);
    }
+   //! Update constants from steering namespace
+   SetGenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetGenConsts from warmup and steering" << endl;
+   SetProcConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetProcConsts from warmup and steering" << endl;
+   SetScenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
+   PrintTableConsts();
+
+   //! Do some basic checks on the table constants
+   if ( ! CheckTableConsts() ) {
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
+   }
+
+   // Check and transform parton combinations
+   // KR TODO What for? Necessary?
+   TransformPartonCombinations();
 
    logger.debug["fastNLOCreate"]<<"Instantiate table from steering file"<<endl;
    Instantiate();
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::TransformPartonCombinations() {
+  // Check and transform parton combinations
+  // KR TODO What is this piece of code for exactly? Can this be replaced/improved?
+  if ( fProcConsts.IPDFdef2 == 0 ) {
+    if ( fProcConsts.IPDFdef3LO > 0 && fProcConsts.PDFCoeffLO.empty() )
+      fProcConsts.PDFCoeffLO   = ReadPartonCombinations(0,fProcConsts.PDFLiCoInLO);
+    if ( fProcConsts.IPDFdef3NLO > 0 && fProcConsts.PDFCoeffNLO.empty()  )
+      fProcConsts.PDFCoeffNLO  = ReadPartonCombinations(1,fProcConsts.PDFLiCoInNLO);
+    if ( fProcConsts.IPDFdef3NNLO > 0 && fProcConsts.PDFCoeffNNLO.empty() )
+      fProcConsts.PDFCoeffNNLO = ReadPartonCombinations(2,fProcConsts.PDFLiCoInNNLO);
+  }
+}
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetTableConstsDefaults() {
+  //! Initialise table constants from defaults
+  logger.debug["SetTableConstsDefaults"] << "SetGenConstsDefaults" << endl;
+  SetGenConstsDefaults();
+  logger.debug["SetTableConstsDefaults"] << "SetProcConstsDefaults" << endl;
+  SetProcConstsDefaults();
+  logger.debug["SetTableConstsDefaults"] << "SetScenConstsDefaults" << endl;
+  SetScenConstsDefaults();
+  if ( read_steer::getVerbosity() < 0 ) {
+    PrintTableConsts();
+  }
 }
 
 
@@ -367,10 +453,23 @@ void fastNLOCreate::SetGenConstsFromSteering() {
 
 
 // ___________________________________________________________________________________________________
+void fastNLOCreate::PrintTableConsts() {
+  //! Print table constants
+  logger.info["PrintTableConsts"] << "==================================================================" << endl;
+  logger.info["PrintTableConsts"] << "Printing all table constants" << endl;
+  logger.info["PrintTableConsts"] << "==================================================================" << endl;
+  PrintGenConsts();
+  PrintProcConsts();
+  PrintScenConsts();
+  PrintWarmupConsts();
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::PrintGenConsts() {
-   //! Print current generator constants
+   //! Print generator constants
    logger.info["PrintGenConsts"] << "==================================================================" << endl;
-   logger.info["PrintGenConsts"] << "Printing current generator constants" << endl;
+   logger.info["PrintGenConsts"] << "Printing generator constants" << endl;
    logger.info["PrintGenConsts"] << "------------------------------------------------------------------" << endl;
    logger.info["PrintGenConsts"] << "Name and version of generator: " << fGenConsts.Name << endl;
    for ( unsigned int i=0; i<fGenConsts.References.size(); i++ ) {
@@ -483,9 +582,9 @@ void fastNLOCreate::SetProcConstsFromSteering() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::PrintProcConsts() {
-   //! Print current process constants
+   //! Print process constants
    logger.info["PrintProcConsts"] << "==================================================================" << endl;
-   logger.info["PrintProcConsts"] << "Printing current process constants" << endl;
+   logger.info["PrintProcConsts"] << "Printing process constants" << endl;
    logger.info["PrintProcConsts"] << "------------------------------------------------------------------" << endl;
    logger.info["PrintProcConsts"] << "Power in alpha_s of LO process: " << fProcConsts.LeadingOrder << endl;
    logger.info["PrintProcConsts"] << "No. of PDFs involved: " << fProcConsts.NPDF << endl;
@@ -626,9 +725,9 @@ void fastNLOCreate::SetScenConstsFromSteering() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::PrintScenConsts() {
-   //! Print current scenario constants
+   //! Print scenario constants
    logger.info["PrintScenConsts"] << "==================================================================" << endl;
-   logger.info["PrintScenConsts"] << "Printing current scenario constants" << endl;
+   logger.info["PrintScenConsts"] << "Printing scenario constants" << endl;
    logger.info["PrintScenConsts"] << "------------------------------------------------------------------" << endl;
    logger.info["PrintScenConsts"] << "Scenario name: " << fScenConsts.ScenarioName << endl;
    logger.info["PrintScenConsts"] << "Data cross section prefactor (neg. power of 10: pb->12, fb->15): " << fScenConsts.PublicationUnits << endl;
@@ -680,9 +779,9 @@ void fastNLOCreate::PrintScenConsts() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::PrintWarmupConsts() {
-   //! Print current warmup constants
+   //! Print warmup constants
    logger.info["PrintWarmupConsts"] << "==================================================================" << endl;
-   logger.info["PrintWarmupConsts"] << "Printing current warmup constants" << endl;
+   logger.info["PrintWarmupConsts"] << "Printing warmup constants" << endl;
    logger.info["PrintWarmupConsts"] << "------------------------------------------------------------------" << endl;
    logger.info["PrintWarmupConsts"] << "Order in alpha_s of warmup run: " << fWarmupConsts.OrderInAlphasOfWarmupRunWas << endl;
    logger.info["PrintWarmupConsts"] << "Set limits for scale nodes to bin borders, if possible: " << fWarmupConsts.CheckScaleLimitsAgainstBins << endl;
@@ -703,6 +802,31 @@ void fastNLOCreate::PrintWarmupConsts() {
    }
    // Single-, double, triple-differential binnings
    logger.info["PrintWarmupConsts"] << "==================================================================" << endl;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::CheckTableConsts() {
+  //! Check that a reasonable combination of values has been set for a table
+  //! TODO This is most incomplete!
+  logger.debug["CheckTableConsts"]<<"Checking all table constants"<<endl;
+  bool checkok = true;
+  if ( ! CheckGenConsts() ) return false;
+  if ( ! CheckProcConsts() ) return false;
+  if ( ! CheckScenConsts() ) return false;
+  // TODO Only for production run?
+  if ( ! CheckWarmupConsts() ) return false;
+  return checkok;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::CheckGenConsts() {
+  //! Check that reasonable generator constants have been set
+  //! TODO This is most incomplete!
+  logger.debug["CheckGenConsts"]<<"Checking generator constants"<<endl;
+  bool checkok = true;
+  return checkok;
 }
 
 
@@ -771,6 +895,26 @@ bool fastNLOCreate::CheckProcConsts() {
 
 
 // ___________________________________________________________________________________________________
+bool fastNLOCreate::CheckScenConsts() {
+  //! Check that reasonable scenario constants have been set
+  //! TODO This is most incomplete!
+  logger.debug["CheckScenConsts"]<<"Checking scenario constants"<<endl;
+  bool checkok = true;
+  return checkok;
+}
+
+
+// ___________________________________________________________________________________________________
+bool fastNLOCreate::CheckWarmupConsts() {
+  //! Check that reasonable warmup constants have been set
+  //! TODO This is most incomplete!
+  logger.debug["CheckWarmupConsts"]<<"Checking warmup constants"<<endl;
+  bool checkok = true;
+  return checkok;
+}
+
+
+// ___________________________________________________________________________________________________
 void fastNLOCreate::Instantiate() {
    //! Instantiate all internal members
    //! and prepare for filling
@@ -787,6 +931,7 @@ void fastNLOCreate::Instantiate() {
 
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
+   logger.debug["Instantiate"]<<"Try to get warmup values; otherwise initiate a warmup run." << endl;
    GetWarmupValues();
 
    // --- ScenConsts sanity test
@@ -875,7 +1020,7 @@ void fastNLOCreate::ReadSteeringFile(std::string steerfile, std::string steering
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, bool shouldReadSteeringFile) {
+void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace) {
    //! read in steering file
    //! The filename of the steering file
    //! is used as the 'namespace' of keys in read_steer
@@ -889,9 +1034,7 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
       steeringNameSpace = steerbase;
    }
    fSteerfile =  steeringNameSpace;
-   if ( shouldReadSteeringFile ) {
-      READ_NS(steerfile,fSteerfile);
-   }
+   READ_NS(steerfile,fSteerfile);
 
    //! Set verbosity from steering or to default WARNING
    if (EXIST_NS(GlobalVerbosity,fSteerfile) )
@@ -915,9 +1058,6 @@ void fastNLOCreate::ReadSteering(string steerfile, string steeringNameSpace, boo
 
    //   if (logger.info.GetSpeak())
    PRINTALL();
-
-   // Scenario constants
-   fastNLOCreate::SetScenConstsFromSteering();
 }
 
 
@@ -1726,8 +1866,7 @@ void fastNLOCreate::GetWarmupValues() {
       //! Check if warmup values already set by user
       logger.info["GetWarmupValues"]<<"Found warmup values in fWarmupConsts without reading warmup-steering file."<<endl;
       fIsWarmup=false;
-   }
-   else {
+   } else {
       //! Try to get warmup values from steering
       std::cout.setstate(std::ios::failbit) ; // no cout in the following
       // std::cerr.setstate(std::ios::failbit) ; // no cout in the following
@@ -3258,8 +3397,7 @@ void fastNLOCreate::WriteTable() {
          logger.error["WriteTable"]<<"No filename given."<<endl;
          exit(1);
       }
-      bool check = CheckProcConsts();
-      if (!check) {
+      if ( !CheckProcConsts() ) {
          logger.error["fastNLOCreate"]<<"Process constants not properly set! Please check warning messages and complement your steering."<<endl;
          exit(1);
       }

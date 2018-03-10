@@ -51,7 +51,9 @@ public:
    // KR: this one.
    fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const fastNLO::ProcessConstants& ProcConsts,
                  const std::string& steerfile);
-   fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
+   // KR: Don't see any use for shouldReadSteeringFile ==> remove it
+   //   fastNLOCreate(const std::string& steerfile, std::string warmupfile = "", bool shouldReadSteeringFile = true);
+   fastNLOCreate(const std::string& steerfile, std::string steeringNameSpace = "");
    ~fastNLOCreate();
 
    fnloEvent fEvent;                                                                            //!< Structure, which holds all relevant variables related to event observables
@@ -69,22 +71,26 @@ public:
    fastNLOReader* SetIsReferenceTable(fastNLOReader* fnloread = NULL);                          //!< set this table/contribution to become a reference contribution
 
    void ReadSteeringFile(std::string steerfile, std::string steeringNameSpace = "");            //!< only read steering file, do not set anything
+   void TransformPartonCombinations();                                                          //!< somehow transform parton combinations, why?
+   void SetTableConstsDefaults();                                                               //!< set defaults for all table constants
    void SetGenConstsDefaults();                                                                 //!< set defaults for generator constants
    void SetProcConstsDefaults();                                                                //!< set defaults for process constants
    void SetScenConstsDefaults();                                                                //!< set defaults for scenario constants
-   void SetWarmupConstsDefaults();                                                                //!< set defaults for warmup constants
+   void SetWarmupConstsDefaults();                                                              //!< set defaults for warmup constants
    void SetGenConstsFromSteering();                                                             //!< set generator constants from steering
    void SetProcConstsFromSteering();                                                            //!< set process constants from steering
    void SetScenConstsFromSteering();                                                            //!< set scenario constants from steering
-   void SetWarmupConstsFromSteering();                                                            //!< set warmup constants from steering
-   void PrintGenConsts();                                                                       //!< print current generator constants
-   void PrintProcConsts();                                                                      //!< print current process constants
-   void PrintScenConsts();                                                                      //!< print current scenario constants
-   void PrintWarmupConsts();                                                                      //!< print current warmup constants
+   void SetWarmupConstsFromSteering();                                                          //!< set warmup constants from steering
+   void PrintTableConsts();                                                                     //!< print all table constants
+   void PrintGenConsts();                                                                       //!< print generator constants
+   void PrintProcConsts();                                                                      //!< print process constants
+   void PrintScenConsts();                                                                      //!< print scenario constants
+   void PrintWarmupConsts();                                                                    //!< print warmup constants
+   bool CheckTableConsts();                                                                     //!< check all table constants
    bool CheckGenConsts();                                                                       //!< check generator constants
    bool CheckProcConsts();                                                                      //!< check process constants
    bool CheckScenConsts();                                                                      //!< check scenario constants
-   bool CheckWarmupConsts();                                                                      //!< check warmup constants
+   bool CheckWarmupConsts();                                                                    //!< check warmup constants
 
    // SetBinGrid()
    // todo: SetBinGrid. However, if BinGrid is set, then this is necessarily a warmup run -> one also has to store the bin grid in warmup table (todo).
@@ -155,7 +161,9 @@ protected:
    void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale table in pp/ppbar
    void FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale contribution in DIS
    void FillRefContribution(int scalevar = 0);                                                              //!< fill contribution if this is a reference table
-   void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
+   // KR: Don't see any use for shouldReadSteeringFile ==> remove it
+   //   void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
+   void ReadSteering(std::string steerfile, std::string steeringNameSpace = "");  //!< read steering file
 
    void ReadBinning();
    void ReadBinningFromScenarioConsts();
