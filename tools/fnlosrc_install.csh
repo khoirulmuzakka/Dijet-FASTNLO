@@ -625,7 +625,7 @@ endif
 # fastNLO Toolkit:
 #------------------------------------------------------------------------------
 #set arc="fastnlo_toolkit-2.3.1pre-2441"
-set arc="fastnlo_toolkit-2.3.1pre-2450-37-g3ef1157"
+set arc="fastnlo_toolkit-2.3.1pre-2496"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
