@@ -23,11 +23,14 @@ _fastnlo_la_LIBADD = $(top_srcdir)/fastnlotoolkit/libfastnlotoolkit.la
 
 include ./$(DEPDIR)/fastnlo_wrap.Plo
 
+#$(DEPDIR)/fastnlo_wrap.Plo: fastnlo_wrap.cc
+
 fastnlo_wrap.cc: fastnlo.i
 	$(SWIG) -c++ -python -I$(top_srcdir)/fastnlotoolkit/include/fastnlotk -o $@ -MD -MF $(DEPDIR)/fastnlo_wrap.Plo $<
 
 clean-local:
-	rm -f fastnlo_wrap.cc fastnlo.py $(DEPDIR)/fastnlo_wrap.Plo
+	rm -f fastnlo_wrap.cc fastnlo.py
+#$(DEPDIR)/fastnlo_wrap.Plo
 
 endif
 
