@@ -67,13 +67,23 @@ my $flex   = "scale2";
 foreach my $file (@files) {
     print "fnlo-run-cppread.pl: Evaluating table $file\n";
     my $logfil = $file;
-    $logfil =~ s/tab\.gz$/log/;
-    $logfil =~ s/tab$/log/;
-    my $cmd = "fnlo-tk-cppread $file $pdf $nvars $ascode $norm $flex > $logfil";
+    $logfil =~ s/\.tab\.gz$//;
+    $logfil =~ s/\.tab$//;
+    my $log1 = $logfil."_0.log";
+    my $log2 = $logfil."_6.log";
+# Run I for central scale
+    my $cmd = "fnlo-tk-cppread $file $pdf $nvars $ascode $norm $flex &> $log1";
     system($cmd);
     my $ret = $?;
     if ( ! $ret ) {
-        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
+#        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
+    }
+# Run II for scale vars
+    $cmd = "fnlo-tk-cppread $file $pdf -6 $ascode $norm &> $log2";
+    system($cmd);
+    $ret = $?;
+    if ( ! $ret ) {
+#        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
     }
 }
 
