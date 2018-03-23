@@ -1,0 +1,19 @@
+# Files to be usually ignored in projects managed with autotools
+INSTALL
+GITREV
+aclocal.m4
+compile
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+stamp-h1
+Makefile
