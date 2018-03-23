@@ -1,0 +1,5 @@
+# Ignore produced tests and test tables
+fnlo-nj-*.pl
+fnlo-nj-*.trs
+*.tab
+*.tab.gz
