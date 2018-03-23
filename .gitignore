@@ -1,11 +1,6 @@
-
-Makefile
-Makefile.in
-
-.deps
-.libs
-.obj
-
+# Files to be usually ignored everywhere in repository
+# (Created by LaTeX, emacs, autotools ...)
+# LaTeX
 *.aux
 *.dvi
 *.lof
@@ -15,39 +10,17 @@ Makefile.in
 *.blg
 *.bbl
 *.out
+# Editors (emacs)
 .*~
+*~
+.#*
+#*#
+# autotools
+*.cache
 *.o
 *.lo
 *.la
-*.m4
-*.cache
-
-
-# Das sind keine "user-specific directories" sondern entspricht der
-# usrsprünglichen fastNLO Aufteilung in Code zur Tabellenproduktion,
-# "author --> create", bzw. -auswertung, "user --> read".
-#/v1.4/user/
-#/v2.0/user/
-
-#/v1.4/userkr/
-#/v2.0/userkr/
-
-
-# autotools distribution files
-INSTALL
-SVNREV
-compile
-config.guess
-config.h
-config.h.in
-config.log
-config.status
-config.sub
-configure
-depcomp
-install-sh
-libtool
-ltmain.sh
-missing
-stamp-h1
-test-driver
+.deps
+.libs
+.obj
+Makefile.in

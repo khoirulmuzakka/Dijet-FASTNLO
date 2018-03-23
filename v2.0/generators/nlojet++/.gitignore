@@ -1,7 +1,6 @@
 # Files to be usually ignored in projects managed with autotools
 INSTALL
 GITREV
-aclocal.m4
 compile
 config.guess
 config.h
@@ -15,5 +14,16 @@ install-sh
 libtool
 ltmain.sh
 missing
+py-compile
 stamp-h1
+test-driver
 Makefile
+doc/doxygen
+# These m4 macros normally should be reinstalled from the development machine
+# using autoreconf -i
+aclocal.m4
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
