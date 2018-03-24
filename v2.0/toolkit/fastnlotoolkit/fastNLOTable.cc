@@ -651,35 +651,35 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
 			      // 	       rms = sqrt(rms/n0);
 			      // 	    }
 			      // 	 }
-				 
+
 			      // 	 // fill 'vals'
 			      // 	 //vals.reserve(sAll.size());
 			      // 	 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
 			      // 	    double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
 			      // 	    if ( ( cutRMS == 0 && vv != 0 ) ||
 			      // 		 ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
-			      // 	       // fill vals array again, now with cuts	
+			      // 	       // fill vals array again, now with cuts
 			      // 	       vals.push_back(vv);
 			      // 	    }
 			      // 	    // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
 			      // 	    //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
 			      // 	    // }
 			      // 	 }
-			      // 	 if ( cutRMS!=0  && n0 != vals.size() ) 
+			      // 	 if ( cutRMS!=0  && n0 != vals.size() )
 			      // 	    logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
 			      // 	 if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
 			      // 	    logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
 			      // 	    exit(1);
 			      // 	 }
-				 
+
 			      // 	 // assign merged values
 			      // 	 if ( moption == kMean  ) {
 			      // 	    double mean = 0;
 			      // 	    for ( auto ii : vals ) mean+=ii;
 			      // 	    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
-			      // 	    if ( mean != 0 ) 
+			      // 	    if ( mean != 0 )
 			      // 	       (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
-			      // 	    else 
+			      // 	    else
 			      // 	       (*s0[im])[iobs][x][jS1][kS2][n] = 0;
 			      // 	 }
 			      // 	 else if ( moption == kMedian ) {
@@ -2539,7 +2539,7 @@ void fastNLOTable::PrintWelcomeMessage() {
    sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
    char subproject[100]      = FNLO_SUBPROJECT;
    char package_version[100] = FNLO_VERSION;
-   char svnrev[100]          = FNLO_SVNREV;
+   char gitrev[100]          = FNLO_GITREV;
    char authors[500]         = FNLO_AUTHORS;
    char webpage[500]         = FNLO_WEBPAGE;
    char authorsv14[200]      = FNLO_AUTHORSv14;
@@ -2553,7 +2553,7 @@ void fastNLOTable::PrintWelcomeMessage() {
    speaker &shout = logger.shout;
    cout << " #" << endl;
    shout << fnlo << "_" << subproject << endl;
-   shout << "Version " << package_version << "_" << svnrev << endl;
+   shout << "Version " << package_version << "_" << gitrev << endl;
    cout << " #" << endl;
    shout << "C++ program and toolkit to read and create fastNLO v2 tables and" << endl;
    shout << "derive QCD cross sections using PDFs, e.g. from LHAPDF" << endl;

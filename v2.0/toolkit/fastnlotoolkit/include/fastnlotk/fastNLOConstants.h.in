@@ -9,7 +9,7 @@
 #define FNLO_NAME       "@PACKAGE_NAME@"
 #define FNLO_SUBPROJECT "@SUBPROJECT@"
 #define FNLO_VERSION    "@PACKAGE_VERSION@"
-#define FNLO_SVNREV     "@SVNREV@"
+#define FNLO_GITREV     "@GITREV@"
 #define FNLO_AUTHORS    "@AUTHORS@"
 #define FNLO_WEBPAGE    "@WEBPAGE@"
 #define FNLO_AUTHORSv14 "@AUTHORSv14@"

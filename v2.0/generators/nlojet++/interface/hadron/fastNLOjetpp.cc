@@ -48,8 +48,9 @@ void inputfunc(unsigned int &nj, unsigned int &nu, unsigned int &nd) {
       // --- read in steering and create fastNLO table accordingly
       // --- ftable is a global constant
       FastNLOUserHHC::instance->ftable =
-         new fastNLOCreate("InclusiveNJets.str", UsefulNlojetTools::GenConsts(),
-                           UsefulNlojetTools::ProcConsts_HHC());
+         new fastNLOCreate(UsefulNlojetTools::GenConsts(),
+                           UsefulNlojetTools::ProcConsts_HHC(),
+                           "InclusiveNJets.str");
       if (FastNLOUserHHC::instance->ftable->TestParameterInSteering(
                                                                     "LeadingOrder")) {
          FastNLOUserHHC::instance->ftable->GetParameterFromSteering("LeadingOrder",

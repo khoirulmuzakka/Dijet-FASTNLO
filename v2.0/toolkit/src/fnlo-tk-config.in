@@ -47,6 +47,6 @@ test -n "$tmp" && OUT="$OUT -L@libdir@ -lfastnlotoolkit"
 
 ## Version& revision number
 tmp=$( echo "$*" | egrep -- '--\<version\>')
-test -n "$tmp" && OUT="$OUT @PACKAGE_VERSION@_@SVNREV@"
+test -n "$tmp" && OUT="$OUT @PACKAGE_VERSION@_@GITREV@"
 
 echo $OUT
