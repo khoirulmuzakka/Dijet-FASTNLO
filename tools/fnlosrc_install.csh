@@ -851,7 +851,7 @@ endif
 #------------------------------------------------------------------------------
     set arc="mcgrid-2.0.2"
     if ( ! -e ${arc}_installed  ) then
-        tar xzf ${arc}-patched.tar.gz
+        tar xzf ${arc}-patched2.tar.gz
         cd ${arc}
         ./configure --prefix=${base}/${local}
         make -j${cores} install # CXXFLAGS=-fpermissive
