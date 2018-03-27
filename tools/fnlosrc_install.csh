@@ -224,18 +224,24 @@ if ( $#argv > 7 ) then
 endif
 # Use CVMFS software repository also for LHAPDF if requested
 # Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
-set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
-# BUT 6.1.6 still uses BOOST :-(
+set lhapdfbasepath=${base}/${local}
+set lhapdfdatapath=${base}/${local}
 set withcvmfslhapdf=0
 if ( $#argv > 8 ) then
     set withcvmfslhapdf=$9
 endif
 if ( $withcvmfslhapdf ) then
-# Needs BOOST libs, uargh.
-#   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
-   set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
-else
-   set lhapdfbasepath=${base}/${local}
+    if ( $?CVMFS ) then
+# BUT version 6.1.6 still uses BOOST, uaargh!
+#        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
+#        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
+# AND version 6.2.1 does not find its PDF sets, uaargh!
+        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
+        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
+    else
+        echo "ERROR: LHAPDF from CVMFS requested, but no CVMFS path set! Aborted."
+       exit 1
+    endif
 endif
 # Default is with OpenMPI if either NNLOJET or Sherpa are requested
 set withmpi=0
@@ -431,6 +437,12 @@ echo "   LD_LIBRARY_PATH has been set to:"
 echo "   $LD_LIBRARY_PATH"
 echo ""
 #
+# PYTHON_PATH backup
+#
+if ( $?PYTHONPATH ) then
+  setenv PYTHONPATHORIG ${PYTHONPATH}
+endif
+#
 #
 #==============================================================================
 # Mandatory and sincerely recommended packages
@@ -462,6 +474,13 @@ if ( ! $withcvmfslhapdf ) then
     cd ..
 # Download default PDF sets, only possible if installed with Python support!
     if ( $withpython ) then
+# Temporarily complement PYTHONPATH here
+      setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr [:space:] :`
+      if ( $?PYTHONPATHORIG ) then
+        setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
+      else
+        setenv PYTHONPATH ${PYTHONPATHADD}
+      endif
       ${base}/${local}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
     else
       echo ""
@@ -518,7 +537,7 @@ if ( $withroot > 1 ) then
         endif
     else
         echo "ERROR! Unknown ROOT version selected: $withroot"
-        exit(1)
+        exit 1
     endif
     if ( ! -e ${arc}_installed  ) then
         cd ${arc}
@@ -960,9 +979,9 @@ endif
 # PYTHONPATH adaptation
 #
 if ( $withpython ) then
-    setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages`
-    if ( $?PYTHONPATH ) then
-    setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATH}
+    setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr [:space:] :`
+    if ( $?PYTHONPATHORIG ) then
+    setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
     echo 'setenv PYTHONPATH '"${PYTHONPATHADD}:"'${PYTHONPATH}' >> fnlosrc_source.csh
     echo 'export PYTHONPATH='"${PYTHONPATHADD}:"'${PYTHONPATH}' >> fnlosrc_source.sh
     else
