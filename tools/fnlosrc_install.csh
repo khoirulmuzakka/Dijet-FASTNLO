@@ -231,7 +231,7 @@ if ( $#argv > 8 ) then
     set withcvmfslhapdf=$9
 endif
 if ( $withcvmfslhapdf ) then
-    if ( $?CVMFS ) then
+    if ( $?CVMFS ) then 
 # BUT version 6.1.6 still uses BOOST, uaargh!
 #        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
@@ -240,7 +240,7 @@ if ( $withcvmfslhapdf ) then
         set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
     else
         echo "ERROR: LHAPDF from CVMFS requested, but no CVMFS path set! Aborted."
-       exit 1
+	exit 1 
     endif
 endif
 # Default is with OpenMPI if either NNLOJET or Sherpa are requested
@@ -475,7 +475,7 @@ if ( ! $withcvmfslhapdf ) then
 # Download default PDF sets, only possible if installed with Python support!
     if ( $withpython ) then
 # Temporarily complement PYTHONPATH here
-      setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr [:space:] :`
+      setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr '[:space:]' ':'`
       if ( $?PYTHONPATHORIG ) then
         setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
       else
@@ -537,7 +537,7 @@ if ( $withroot > 1 ) then
         endif
     else
         echo "ERROR! Unknown ROOT version selected: $withroot"
-        exit 1
+        exit 1 
     endif
     if ( ! -e ${arc}_installed  ) then
         cd ${arc}
@@ -979,7 +979,7 @@ endif
 # PYTHONPATH adaptation
 #
 if ( $withpython ) then
-    setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr [:space:] :`
+    setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr '[:space:]' ':'`
     if ( $?PYTHONPATHORIG ) then
     setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
     echo 'setenv PYTHONPATH '"${PYTHONPATHADD}:"'${PYTHONPATH}' >> fnlosrc_source.csh
