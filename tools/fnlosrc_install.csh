@@ -183,7 +183,9 @@ if ( $#argv > 2 && $3 != "_" ) then
    setenv MYCVMFS $3
 #   echo "MYCVMFS is set to: $MYCVMFS"
 else
-   unsetenv MYCVMFS
+   if ( $?MYCVMFS ) then
+      unsetenv MYCVMFS
+   endif
 #   echo "MYCVMFS is not set"
 endif
 # With interface to Sherpa via MCGrid?
@@ -196,7 +198,8 @@ set withnnlojet=0
 if ( $#argv > 4 ) then
     set withnnlojet=$5
 # Previous: set revision=3738
-    set revision=4585
+# Used for fnl2332d:   set revision=4585
+    set revision=4708
 endif
 # With optional packages for grid evaluation?
 set withoptional=0
