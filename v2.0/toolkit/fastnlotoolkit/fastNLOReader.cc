@@ -1813,9 +1813,7 @@ void fastNLOReader::SelectProcesses( const std::string& processes, bool symmetri
             case 'c': part1_selection.push_back( anti*4 ); break;
             case 'b': part1_selection.push_back( anti*5 ); break;
             case 'g': part1_selection.push_back( 0 ); break;
-            case 'q': for ( int p = -5; p <= 5; p++ ) {
-                         if ( p==0 )
-                            continue;
+            case 'q': for ( int p = 1; p <= 5; p++ ) {
                          part1_selection.push_back( anti*p );
                       }
                       break;
@@ -1825,17 +1823,9 @@ void fastNLOReader::SelectProcesses( const std::string& processes, bool symmetri
 
          //parse part 2
          int s_flav = 0;
-         int s_anti = 0;
          anti = 1;
          if ( substrings[i].at(n) == 'a' ) {
             anti = -1;
-            n++;
-         }
-         if ( substrings[i].at(n) == '+' ) {
-            s_anti = 1;
-            n++;
-         } else if ( substrings[i].at(n) == '-' ) {
-            s_anti = -1;
             n++;
          }
          if ( substrings[i].at(n) == '!' ) {
@@ -1869,15 +1859,11 @@ void fastNLOReader::SelectProcesses( const std::string& processes, bool symmetri
                case 'g': selection.push_back( {parton1, anti*0} );
                          if (symmetric) selection.push_back( {anti*0, parton1} );
                          break;
-               case 'q': for ( int p = -5; p <= 5; p++ ) {
-                            if ( p == 0 )
-                               continue;
-                            if ( p*parton1*s_anti < 0 )  //(s_anti == 1 && p*parton < 0) || (s_anti == -1 && p*parton > 0)
-                               continue;
+               case 'q': for ( int p = 1; p <= 5; p++ ) {
                             if ( (s_flav == 1 && parton1*parton1 != p*p) || (s_flav == -1 && parton1*parton1 == p*p) )
                                continue;
-                            selection.push_back( {parton1, p} );
-                            if (symmetric) selection.push_back( {p, parton1} );
+                            selection.push_back( {parton1, anti*p} );
+                            if (symmetric) selection.push_back( {anti*p, parton1} );
                          }
                          break;
                default : throw std::logic_error("unkown char");
