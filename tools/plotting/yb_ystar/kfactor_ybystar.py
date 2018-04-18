@@ -195,6 +195,8 @@ def main():
 
 	ymin = -0.20
 	ymax = 1.20
+	xmin = 30
+	xmax = 1000
 	for i in range(0, len(args['table'])):	#go through fractions, line by line = table by table
 		bin_bounds = binbounds[i][:]
 #		print 'x',bin_bounds
@@ -214,11 +216,18 @@ def main():
 #		if (ylim[1]+0.05 > ymax):
 #			ymax = ylim[1]+0.05
 
+		#check current limits of x-axis:
+		xlim = ax0.get_xlim()
+#		if (xlim[0]-0.05 < xmin):
+#			xmin = ylim[0]-0.05
+#		if (xlim[1]+0.05 > xmax):
+#			xmax = xlim[1]+0.05
+
 
 	#settings for the whole plot
 	ax0.set_xscale('log', nonposx='clip')
-#	ax0.axis([30, 1000, ymin, ymax])
-	ax0.axis([30, 1000, ylim[0]-0.05, ylim[1]+0.05])
+#	ax0.axis([xmin, xmax, ymin, ymax])
+	ax0.axis([xlim[0], xlim[1], ylim[0]-0.05, ylim[1]+0.05]) #flexible axes
 	plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted') 
 	plt.axhline(y=0, xmin=0, xmax=1, color='k', linestyle='dotted')
 
