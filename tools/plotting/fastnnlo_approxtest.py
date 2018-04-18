@@ -1,48 +1,30 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
+#
+# Make statistical evaluation plots of ensemble of one-to-one comparisons
+# between fastNLO interpolation tables and NNLOJET original results
+#
+# Version:
+#
+# created by K. Rabbertz: 13.07.2017
+#
+#-----------------------------------------------------------------------
+#
 import glob, os, pylab, sys
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import matplotlib.pylab as pylab
 import numpy as np
 # from copy import deepcopy
 from matplotlib import cm
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
+import re
+from StringIO import StringIO
 #import warnings
 #warnings.filterwarnings("error")
-
-# Style settings
-# Location of matplotlibrc
-# print mpl.matplotlib_fname()
-# List active style settings
-# print mpl.rcParams
-# Needs matplotlib > 1.3
-# plt.style.use('ggplot')
-# plt.style.use('presentation')
-
-# Get process order/type from cmdline argument
-scen = 'fnl2332d'
-proc = '1jet'
-pord = 'LO'
-ecms = '7TeV'
-obsv = 'ptji_incl_y1'
-nmax = 99999
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
-if len(sys.argv) > 1:
-    scen = sys.argv[1]
-if len(sys.argv) > 2:
-    proc = sys.argv[2]
-if len(sys.argv) > 3:
-    pord = sys.argv[3]
-if len(sys.argv) > 4:
-    ecms = sys.argv[4]
-if len(sys.argv) > 5:
-    obsv = sys.argv[5]
-if len(sys.argv) > 6:
-    nmax = int(sys.argv[6])
 
 ################################################################################
 # Define method for histogram statistics
@@ -99,8 +81,69 @@ def hist_stats(x, weights, axis=None):
                 weighted_stddev=_wstd,
                 median=_med,
                 iqd2=_med_err)
+################################################################################
+# End of method for histogram statistics
+################################################################################
 
 ################################################################################
+# Style settings
+# Location of matplotlibrc
+# print mpl.matplotlib_fname()
+# List active style settings
+# print mpl.rcParams
+# Needs matplotlib > 1.3
+# plt.style.use('ggplot')
+# plt.style.use('presentation')
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (16, 12),
+          'axes.labelsize':  'x-large',
+          'axes.titlesize':  'x-large',
+          'xtick.labelsize': 'x-large',
+          'ytick.labelsize': 'x-large'}
+pylab.rcParams.update(params)
+
+#
+# Start
+#
+print "\n######################################################"
+print "# fastnnlo_approxtest.py: Plot statistical evaluation of fastNLO interpolation quality"
+print "######################################################\n"
+
+#
+# Default arguments
+#
+proc = '1jet'
+jobn = 'LO-CMS7'
+kinn = 'vBa'
+obsv = 'fnl2332d_xptji_y1'
+nmax = 99999
+fscl = 1
+
+#
+# Parse arguments
+#
+# TODO: Do some more elaborate argument treatment and help texts
+print 'Usage:    fastnnlo_approxtest process jobname kinvegas obsv nmax fscl'
+print 'Defaults:',proc, jobn, kinn, obsv, nmax, fscl
+print 'Number of arguments given:', len(sys.argv), 'arguments.'
+print 'Argument list:', str(sys.argv)
+if len(sys.argv) > 1:
+    proc = sys.argv[1]
+if len(sys.argv) > 2:
+    jobn = sys.argv[2]
+if len(sys.argv) > 3:
+    kinn = sys.argv[3]
+if len(sys.argv) > 4:
+    obsv = sys.argv[4]
+if len(sys.argv) > 5:
+    if sys.argv[5] != '_':
+        nmax = int(sys.argv[5])
+if len(sys.argv) > 6:
+    fscl = int(sys.argv[6])
+print 'Actual:  ',proc, jobn, kinn, obsv, nmax, fscl
+
+# Extract order/contribution from job type (substring before first '-')
+order  = jobn.split('-')[0]
 
 # Prepare result arrays
 xl = []      # left bin border
@@ -109,21 +152,30 @@ xu = []      # right bin border
 ndat = 0
 xs_nnlo = [] # NNLOJET results
 ntab = 0
-xs_fnla = [] # fastNLO results
+xs_fnlt = [] # fastNLO results
 nlog = 0
-xs_fnlb = [] # Pre-evaluated fastNLO results
+xs_fnll = [] # Pre-evaluated fastNLO results
 nlin = 0
 weights = [] # Weight factors
+seeds = []   # Seed numbers for matching
 
-# Read cross sections from NNLOJET dat files
-datfiles = glob.glob(pord+'/'+scen+'.'+proc+'.'+pord+'-'+ecms+'.*.dat')
+# Read binning and cross sections from NNLOJET dat file
+datglob  = order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*.dat'
+datfiles = glob.glob(datglob)
+if not datfiles:
+    print >> sys.stderr, 'No NNLOJET dat files matching', datglob ,'found, aborted!'
+    sys.exit(1) 
 datfiles.sort()
+ixscol = 3 + 2 * (fscl-1)
 for datfile in datfiles:
     print 'Datfile no. ', ndat, ' is ', datfile
     if ndat == 0:
         xl.append(np.loadtxt(datfile,usecols=(0,)))
         xu.append(np.loadtxt(datfile,usecols=(2,)))
-    xs_nnlo.append(np.loadtxt(datfile,usecols=(3,)))
+    xs_nnlo.append(np.loadtxt(datfile,usecols=(ixscol,)))
+    parts = datfile.split(".")
+    seed  = parts[len(parts)-2]
+    seeds.append(seed)
     ndat += 1
     if ndat == nmax:
         break
@@ -137,20 +189,25 @@ nobs = xl.size
 print 'Number of observable bins: ', nobs
 
 # Read weights per file per bin from Alex
-wgtfile = pord+'/'+pord+'.'+obsv+'.'+'APPLfast.txt'
+wgtfile = 'Combined/Final/'+order+'.'+obsv+'.'+'APPLfast.txt'
 wgtnams = np.genfromtxt(wgtfile, dtype=None, usecols=0)
 wgttmps = np.loadtxt(wgtfile, usecols=(list(range(1,nobs+1))))
 ntmp = len(wgtnams)
-match = scen+'.'+proc+'.'+pord+'-'+ecms
-for i in range(ntmp):
-    if match in wgtnams[i]:
-#        print 'MATCH'
-        weights.append(wgttmps[i])
-        nlin += 1
-        if nlin == nmax:
-            break
-#    else:
-#        print 'NO MATCH'
+# Combine to key-value tuple ( name, weights[] ) and sort according to key=name
+wgttup = zip(wgtnams,wgttmps)
+wgttup.sort(key = lambda row: (row[0]))
+# Unzip again
+allnames,allweights = zip(*wgttup)
+for name in allnames:
+    print 'Weight file line no. ', nlin, ' is for ', name 
+    if seeds[nlin] not in name:
+        print 'seeds[',nlin,'] = ', seeds[nlin],', weight file name = ', name
+        sys.exit('ERROR: Mismatch in result sort order between NNLOJET and NNLOJET weights. Aborted!')
+    else:
+        weights.append(allweights[nlin])
+    nlin += 1
+    if nlin == nmax:
+        break
 weights = np.array(weights)
 print 'Using ', nlin, 'weight lines.'
 
@@ -174,15 +231,30 @@ print 'Using ', nlin, 'weight lines.'
 #xs_fnla = np.array(xs_fnla)
 
 # Evaluate cross sections from pre-evaluated fastNLO tables
-fnlologs = glob.glob(pord+'/'+scen+'.'+proc+'.'+pord+'-'+ecms+'.???.'+obsv+'.*.log')
+if fscl == 1:
+    fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_0.log')
+else:
+    fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_6.log')
 fnlologs.sort()
 for fnlolog in fnlologs:
     print 'fastNLO file no. ', nlog, ' is ', fnlolog
-    xs_fnlb.append(np.loadtxt(fnlolog,usecols=(6,),comments=['#',' #','C','L']))
+    if not seeds[nlog] in fnlolog:
+        print 'Mismatch in result sort order between NNLOJET and fastNLO. Aborted!'
+        print 'seeds[',nlog,'] = ', seeds[nlog],', fastNLO file = ', fnlolog
+    else:
+        print 'NNLOJET and fastNLO result correctly matched. seed is ', seeds[nlog]
+    xs_tmp = np.loadtxt(fnlolog,usecols=(6,),comments=['#',' #','C','L'])
+    if fscl == 1:
+        indi = 0
+    else:
+        indi = (fscl-2)*nobs
+    indf = indi + nobs
+    xs_sub = xs_tmp[indi:indf]
+    xs_fnll.append(xs_sub)
     nlog += 1
     if nlog==nmax: break
 print 'Using ', nlog, 'pre-evaluated table files.'
-xs_fnlb = np.array(xs_fnlb)
+xs_fnll = np.array(xs_fnll)
 
 # Check on identical file numbers, either for table or log files and weight lines
 if ndat == nlog == nlin and ndat*nlog*nlin != 0:
@@ -191,53 +263,54 @@ else:
 #    sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', ntab = '+str(ntab))
     sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', nlog = '+str(nlog)+', nlin = '+str(nlin))
 
-#r_f2na = xs_fnla/xs_nnlo
-r_f2nb = xs_fnlb/xs_nnlo
-a_f2nb = (xs_fnlb - xs_nnlo)/(xs_fnlb + xs_nnlo)
+#r_f2nt = xs_fnlt/xs_nnlo
+r_f2nl = xs_fnll/xs_nnlo
+a_f2nl = (xs_fnll - xs_nnlo)/(xs_fnll + xs_nnlo)
 
 # Ratio statistics
-_ratio_stats = hist_stats(r_f2nb, weights=weights, axis=0)
-rave_f2nb = _ratio_stats['mean']
-rstd_f2nb = _ratio_stats['stddev']
-rave_f2nc = _ratio_stats['weighted_mean']
-rstd_f2nc = _ratio_stats['weighted_stddev']
-rmed_f2n  = _ratio_stats['median']
-riqd_f2n  = _ratio_stats['iqd2']
+_ratio_stats  = hist_stats(r_f2nl, weights=weights, axis=0)
+rave_f2nl    = _ratio_stats['mean']
+rstd_f2nl    = _ratio_stats['stddev']
+rwav_f2nl    = _ratio_stats['weighted_mean']
+rwst_f2nl    = _ratio_stats['weighted_stddev']
+rmed_f2nl    = _ratio_stats['median']
+riqd_f2nl    = _ratio_stats['iqd2']
 
 # Asymmetry statistics
-_asymm_stats = hist_stats(a_f2nb, weights=weights, axis=0) 
-aave_f2nb = _asymm_stats['mean']
-astd_f2nb = _asymm_stats['stddev']
-aave_f2nc = _asymm_stats['weighted_mean']
-astd_f2nc = _asymm_stats['weighted_stddev']
-amed_f2n  = _asymm_stats['median']
-aiqd_f2n  = _asymm_stats['iqd2']
+_asymm_stats = hist_stats(a_f2nl, weights=weights, axis=0)
+aave_f2nl = _asymm_stats['mean']
+astd_f2nl = _asymm_stats['stddev']
+awav_f2nl = _asymm_stats['weighted_mean']
+awst_f2nl = _asymm_stats['weighted_stddev']
+amed_f2nl = _asymm_stats['median']
+aiqd_f2nl = _asymm_stats['iqd2']
 
 # Ratio plot
+limfs = 'x-large'
 fig = plt.figure(figsize=(16,12))
 ax  = fig.gca()
-plt.title(r'Ratio: {} {} for {} at {} ({})'.format(proc, pord, obsv, ecms, scen), fontsize='x-large', fontweight='bold', loc='left')
+plt.title(r'Ratio: {} {} for {} using scale {}'.format(proc, order, obsv, fscl), fontsize='x-large', fontweight='bold', loc='left')
 plt.xlabel('Observable bin index', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
 plt.ylabel('fastNLO/NNLOJET', horizontalalignment='right', x=1.0, verticalalignment='bottom', y=1.0)
 plt.axhline(y=1.001, linestyle='--', linewidth=1.0, color='black')
 plt.axhline(y=0.999, linestyle='--', linewidth=1.0, color='black')
-plt.fill_between([-0.5,33.5],0.999,1.001, color='black', alpha=0.1)
+plt.fill_between([0.0,34.0],0.999,1.001, color='black', alpha=0.1)
 plt.text(33.6,1.00085,u'+1‰')
 plt.text(33.7,0.99885,u'–1‰')
 
 dx = 1./3.
-xa = np.arange(0+0*dx, nobs+0*dx)
-xb = np.arange(0+1*dx, nobs+1*dx)
-xc = np.arange(0+2*dx, nobs+2*dx)
+xa = np.arange(1-dx, nobs-dx+1.e-6)
+xb = np.arange(1   , nobs   +1.e-6)
+xc = np.arange(1+dx, nobs+dx+1.e-6)
 
-rmean = plt.errorbar(xa, rave_f2nb, yerr=0.*rstd_f2nb, marker='v', linestyle='none', label=r'$\mu$ $\pm$ $\Delta\mu$', color='blue')
-plt.errorbar(xa, rave_f2nb, yerr=rstd_f2nb/np.sqrt(ndat), marker='.', linestyle='none', color='blue')
+rmean = plt.errorbar(xa, rave_f2nl, yerr=0.*rstd_f2nl, marker='v', linestyle='none', label=r'$\mu$ $\pm$ $\Delta\mu$', color='blue')
+plt.errorbar(xa, rave_f2nl, yerr=rstd_f2nl/np.sqrt(ndat), marker='.', linestyle='none', color='blue')
 if nlin>0:
-    rmwgt = plt.errorbar(xb, rave_f2nc, yerr=0.*rstd_f2nc, marker='^', linestyle='none', label=r'$\mu_w$ $\pm$ $\Delta\mu_w$', color='violet')
-    plt.errorbar(xb, rave_f2nc, yerr=rstd_f2nc/np.sqrt(nlin), marker='.', linestyle='none', color='violet')
-rmedian = plt.errorbar(xc, rmed_f2n, yerr=riqd_f2n, marker='s', linestyle='none', label=r'median $\pm$ IQD/2', color='red')
+    rmwgt = plt.errorbar(xb, rwav_f2nl, yerr=0.*rwst_f2nl, marker='^', linestyle='none', label=r'$\mu_w$ $\pm$ $\Delta\mu_w$', color='violet')
+    plt.errorbar(xb, rwav_f2nl, yerr=rwst_f2nl/np.sqrt(nlin), marker='.', linestyle='none', color='violet')
+rmedian = plt.errorbar(xc, rmed_f2nl, yerr=riqd_f2nl, marker='s', linestyle='none', label=r'median $\pm$ IQD/2', color='red')
 
-plt.xlim(-0.5,33.5)
+plt.xlim(0.0,34.0)
 plt.ylim(0.99,1.01)
 if nlin>0:
     handles = [rmean,rmwgt,rmedian]
@@ -245,36 +318,38 @@ else:
     handles = [rmean,rmedian]
 labels  = [h.get_label() for h in handles]
 legend = ax.legend(handles, labels, title=r'No. of entries/bin = {}'.format(ndat), loc='upper left', numpoints=1, handlelength=0)
+legend.get_title().set_fontsize(limfs)
 
-fignam = scen+'.'+proc+'.'+pord+'-'+ecms+'.'+obsv+'_approx_ratio_'+str(ndat)+'.png'
+fignam = proc+'.'+jobn+'.'+obsv+'.'+'fscl'+str(fscl)+'.'+'approx_ratio_'+str(ndat)+'.png'
 plt.savefig(fignam)
 #plt.show()
 
 # Asymmetry plot
+limfs = 'x-large'
 fig = plt.figure(figsize=(16,12))
 ax  = fig.gca()
-plt.title(r'Asymmetry: {} {} for {} at {} ({})'.format(proc, pord, obsv, ecms, scen), fontsize='x-large', fontweight='bold', loc='left')
+plt.title(r'Asymmetry: {} {} for {} using scale {}'.format(proc, order, obsv, fscl), fontsize='x-large', fontweight='bold', loc='left')
 plt.xlabel('Observable bin index', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
 plt.ylabel('(fastNLO-NNLOJET)/(fastNLO+NNLOJET)', horizontalalignment='right', x=1.0, verticalalignment='bottom', y=1.0)
 plt.axhline(y=-0.001, linestyle='--', linewidth=1.0, color='black')
 plt.axhline(y=+0.001, linestyle='--', linewidth=1.0, color='black')
-plt.fill_between([-0.5,33.5],-0.001,0.001, color='black', alpha=0.1)
+plt.fill_between([0.0,34.0],-0.001,0.001, color='black', alpha=0.1)
 plt.text(33.6,+0.00085,u'+1‰')
 plt.text(33.7,-0.00115,u'–1‰')
 
 dx = 1./3.
-xa = np.arange(0+0*dx, nobs+0*dx)
-xb = np.arange(0+1*dx, nobs+1*dx)
-xc = np.arange(0+2*dx, nobs+2*dx)
+xa = np.arange(1-dx, nobs-dx+1.e-6)
+xb = np.arange(1   , nobs   +1.e-6)
+xc = np.arange(1+dx, nobs+dx+1.e-6)
 
-amean = plt.errorbar(xa, aave_f2nb, yerr=0.*astd_f2nb, marker='<', linestyle='none', label='$\mu$ $\pm$ $\Delta\mu$', color='orange')
-plt.errorbar(xa, aave_f2nb, yerr=astd_f2nb/np.sqrt(ndat), marker='.', linestyle='none', color='orange')
+amean = plt.errorbar(xa, aave_f2nl, yerr=0.*astd_f2nl, marker='<', linestyle='none', label='$\mu$ $\pm$ $\Delta\mu$', color='orange')
+plt.errorbar(xa, aave_f2nl, yerr=astd_f2nl/np.sqrt(ndat), marker='.', linestyle='none', color='orange')
 if nlin>0:
-    amwgt = plt.errorbar(xb, aave_f2nc, yerr=0.*astd_f2nc, marker='>', linestyle='none', label=r'$\mu_w$ $\pm$ $\Delta\mu_w$', color='brown')
-    plt.errorbar(xb, aave_f2nc, yerr=astd_f2nc/np.sqrt(ndat), marker='.', linestyle='none', color='brown')
-amedian = plt.errorbar(xc, amed_f2n, yerr=aiqd_f2n, marker='8', linestyle='none', label=r'median $\pm$ IQD/2', color='green')
+    amwgt = plt.errorbar(xb, awav_f2nl, yerr=0.*awst_f2nl, marker='>', linestyle='none', label=r'$\mu_w$ $\pm$ $\Delta\mu_w$', color='brown')
+    plt.errorbar(xb, awav_f2nl, yerr=awst_f2nl/np.sqrt(ndat), marker='.', linestyle='none', color='brown')
+amedian = plt.errorbar(xc, amed_f2nl, yerr=aiqd_f2nl, marker='8', linestyle='none', label=r'median $\pm$ IQD/2', color='green')
 
-plt.xlim(-0.5,33.5)
+plt.xlim(0.0,34.0)
 plt.ylim(-0.01,0.01)
 if nlin>0:
     handles = [amean,amwgt,amedian]
@@ -282,8 +357,9 @@ else:
     handles = [amean,amedian]
 labels  = [h.get_label() for h in handles]
 legend = ax.legend(handles, labels, title=r'No. of entries/bin = {}'.format(ndat), loc='upper left', numpoints=1, handlelength=0)
+legend.get_title().set_fontsize(limfs)
 
-fignam = scen+'.'+proc+'.'+pord+'-'+ecms+'.'+obsv+'_approx_asymm_'+str(ndat)+'.png'
+fignam = proc+'.'+jobn+'.'+obsv+'.'+'fscl'+str(fscl)+'.'+'approx_asymm_'+str(ndat)+'.png'
 plt.savefig(fignam)
 #plt.show()
 
@@ -297,17 +373,17 @@ def bin_dists(q, label, xlabel, col1, col2, indicators=False, lval=0., rval=0. )
     _range = _max - _min
     _nbins = min(int(ndat/5), 50)
     _bins = np.linspace(_min, _max, _nbins + 1)
-    
+
     fig_dist = plt.figure(figsize=(12,12))
-    
+
     _h1, _c1, _ = plt.hist(q, bins=_bins, color=col1)
     _h2, _c2, _ = plt.hist(q, weights=wgts/np.sum(wgts)*ndat, bins=_bins, color=col2)
-    
+
     plt.gcf().clf()
     plt.bar(_bins[:-1], _h1, color=col1, width=0.5*_range/_nbins)
     plt.bar(_bins[:-1]+0.5*_range/_nbins, _h2, color=col2, width=0.5*_range/_nbins)
-    
-    plt.title(r'{}: {} {} for {} at {} ({})'.format(label, proc, pord, obsv, ecms, scen), fontsize='x-large', fontweight='bold', loc='left')
+
+    plt.title(r'{}: {} {} for {}'.format(label, proc, order, obsv), fontsize='x-large', fontweight='bold', loc='left')
     plt.xlabel(xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
     plt.ylabel('Frequency', horizontalalignment='right', x=1.0, verticalalignment='bottom', y=1.0)
     raw = mpatches.Patch(color=col1, label='raw')
@@ -327,22 +403,23 @@ def bin_dists(q, label, xlabel, col1, col2, indicators=False, lval=0., rval=0. )
 
     plt.yscale('log')
     plt.ylim((0.1, None))
-    
-    fig_dist_name = "{}.{}.{}-{}.{}_approx_{:d}_{}_bin{:d}.png".format(scen, proc, pord, ecms, obsv, ndat, label, i_bin)
+
+    fig_dist_name = "{}.{}.{}.approx_{:d}_{}_bin{:d}.png".format(proc, jobn, obsv, ndat, label, i_bin)
     fig_dist.savefig(fig_dist_name)
     plt.close(fig_dist)
 
 ################################################################################
 
-for i_bin, (nnlo, fnlo, ratios, asyms, wgts) in enumerate(zip(xs_nnlo.T, xs_fnlb.T, r_f2nb.T, a_f2nb.T, weights.T)):
+exit(0)
+for i_bin, (nnlo, fnlo, ratios, asyms, wgts) in enumerate(zip(xs_nnlo.T, xs_fnll.T, r_f2nl.T, a_f2nl.T, weights.T)):
 
+    if i_bin > 0:
+        exit(2222)
     print 'NNLOJET cross sections'
     bin_dists(nnlo, 'NNLOJET', r'$\sigma$ [pb]', 'blue', 'violet')
     print 'fastNLO cross sections'
     bin_dists(fnlo, 'fastNLO', r'$\sigma$ [pb]', 'blue', 'violet')
     print 'Ratios'
-    bin_dists(ratios, 'Ratio', 'fastNLO/NNLOJET', 'blue', 'violet', True, rmed_f2n[i_bin]-10.*riqd_f2n[i_bin], rmed_f2n[i_bin]+10.*riqd_f2n[i_bin])
+    bin_dists(ratios, 'Ratio', 'fastNLO/NNLOJET', 'blue', 'violet', True, rmed_f2nl[i_bin]-10.*riqd_f2nl[i_bin], rmed_f2nl[i_bin]+10.*riqd_f2nl[i_bin])
     print 'Asymmetries'
-    bin_dists(asyms, 'Asymmetry', '(fastNLO-NNLOJET)/(fastNLO+NNLOJET)', 'blue', 'violet', True, amed_f2n[i_bin]-10.*aiqd_f2n[i_bin], amed_f2n[i_bin]+10.*aiqd_f2n[i_bin])
-#    if i_bin > 0:
-#        exit(2222)
+    bin_dists(asyms, 'Asymmetry', '(fastNLO-NNLOJET)/(fastNLO+NNLOJET)', 'blue', 'violet', True, amed_f2nl[i_bin]-10.*aiqd_f2nl[i_bin], amed_f2nl[i_bin]+10.*aiqd_f2nl[i_bin])

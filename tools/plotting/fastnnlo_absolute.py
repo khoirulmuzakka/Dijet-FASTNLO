@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
 import glob, os, pylab, sys
+import matplotlib.gridspec as gridspec
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -24,6 +25,12 @@ from StringIO import StringIO
 # Needs matplotlib > 1.3
 # plt.style.use('ggplot')
 # plt.style.use('presentation')
+
+# Optionally set font to Computer Modern to avoid common missing font errors
+#mpl.rc('font', family='serif', serif='cm10')
+#mpl.rc('text', usetex=True)
+#mpl.rcParams['text.latex.preamble'] = [r'\boldmath']
+
 params = {'legend.fontsize': 'x-large',
           'figure.figsize': (16, 12),
           'mathtext.fontset': "stix",
@@ -42,8 +49,8 @@ jobn = 'LO-CMS7'
 kinn = 'vBa'
 obsv = 'fnl2332d_xptji_y1'
 seed = ''
-nscl = 6 # central + nscl fixed scales
-ylim = 0.01
+nscl = 6  # central + nscl fixed scales
+xaxe = 'bins' # x axis with bin numbers ('bins') or physics observable
 # Get from cmdline argument
 print 'Number of arguments:', len(sys.argv), 'arguments.'
 print 'Argument List:', str(sys.argv)
@@ -58,11 +65,10 @@ if len(sys.argv) > 4:
 if len(sys.argv) > 5:
     seed = sys.argv[5]
 if len(sys.argv) > 6:
-    ctmp = sys.argv[6]
-    if ctmp != '_':
-        nscl = int(ctmp)
+    if not sys.argv[6]=='_': 
+        nscl = int(sys.argv[6])
 if len(sys.argv) > 7:
-    ylim = float(sys.argv[7])
+    xaxe = sys.argv[7]
 
 # Extract order/contribution from job type (substring before first '-')
 order  = jobn.split('-')[0]
@@ -152,10 +158,11 @@ for file in [log0file, log6file]:
             xs_fnll.append(a)
 
 xs_fnll = np.array(xs_fnll)
-#print "xs_fnll", xs_fnll
 
-r_fl2nn  = np.divide(xs_fnll, xs_nnlo, out=np.ones_like(xs_fnll), where=xs_nnlo!=0)
-a_fl2nn  = np.divide(xs_fnll-xs_nnlo, xs_fnll+xs_nnlo, out=np.zeros_like(xs_fnll), where=xs_nnlo!=0) + 1.
+# Ratio and asymmetry+1
+r_nn2nn = np.ones_like(xs_nnlo)
+r_fl2nn = np.divide(xs_fnll, xs_nnlo, out=np.ones_like(xs_fnll), where=xs_nnlo!=0)
+a_fl2nn = np.divide(xs_fnll-xs_nnlo, xs_fnll+xs_nnlo, out=np.zeros_like(xs_fnll), where=xs_nnlo!=0) + 1.
 
 # Rel. stat. uncertainty from NNLOJET
 dst_nnlo = np.divide(dxs_nnlo, xs_nnlo, out=np.ones_like(dxs_nnlo), where=xs_nnlo!=0)
@@ -166,53 +173,93 @@ da_fl2nn = np.multiply(a_fl2nn,dst_nnlo)
 titwgt = 'bold'
 limfs = 'x-large'
 sclnam = [r'$\bf p_{T,max}$', r'$\bf\mu_r = \mu_f$ small', r'$\bf\mu_r = \mu_f$ large', r'$\bf\mu_r < \mu_f$', r'$\bf\mu_r > \mu_f$', r'$\bf\mu_r \ll \mu_f$', r'$\bf\mu_r \gg \mu_f$']
-xmin = xl[0]
-xmax = xu[nobs-1]
+col1  = 'olivedrab'
+col1b = 'yellowgreen'
+col2 = 'orangered'
+col3 = 'dodgerblue'
+
+if xaxe=='bins':
+    x = xb
+    dx = 0.5*np.ones_like(x)
+    xscl = 'linear'
+    xlab = 'bin index'
+    xmin = 0
+    xmax = nobs+1
+else:
+    x = xm
+    dx = (xu-xl)/2.
+#    xscl = 'linear'
+    xscl = 'log'
+    xlab = xaxe
+    xmin = xl[0]
+    xmax = xu[nobs-1]
 
 
 for i in range(nscl+1):
 
-# Closure plot
+# Absolute predictions
     fig = plt.figure()
-    ax  = fig.gca()
+    gs  = gridspec.GridSpec(2,1,height_ratios=[3, 1],hspace=0.08)
+    ax  = plt.subplot(gs[0])
+    axr = plt.subplot(gs[1])
+
+    ax.set_xscale(xscl)
+    axr.set_xscale(xscl)
+    ax.set_yscale('log')
+    axr.set_yscale('linear')
+
+    axr.set_xlabel(xlab, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+    ax.set_ylabel(r'$\bf\left|d\sigma/dp_T\right|$ [pb/GeV]', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, labelpad=20)
+    axr.set_ylabel('Ratio', horizontalalignment='center', verticalalignment='center', labelpad=20)
+    ax.set_xticklabels([])
 
     if seed == '' or seed == '_':
-        plt.title(r'Merged grid: {} {} {} for scale choice {}'.format(proc, jobn, obsv, sclnam[i]), fontweight=titwgt, y=1.05)
+        ax.set_title(r'Merged grid: {} {} {} for scale choice {}'.format(proc, jobn, obsv, sclnam[i]), fontweight=titwgt, y=1.05)
     else:
-        plt.title(r'Single grid: {} {} {} for scale choice {}'.format(proc, jobn, obsv, sclnam[i]), fontweight=titwgt, y=1.05)
-    plt.xlabel('Observable bin index', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-#    plt.ylabel('Closure fastNLO vs. NNLOJET', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-    plt.ylabel('Closure quality', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, labelpad=30)
-    plt.axhline(y=1.001, linestyle='--', linewidth=1.0, color='black')
-    plt.axhline(y=0.999, linestyle='--', linewidth=1.0, color='black')
-    plt.fill_between([0.0,34.0],0.999,1.001, color='black', alpha=0.1)
-    if ylim>0.1:
-        plt.text(34.7,0.99900,u'±1‰',fontsize=limfs)
-    else:
-        plt.text(34.6,1.00085,u'+1‰',fontsize=limfs)
-        plt.text(34.7,0.99885,u'–1‰',fontsize=limfs)
+        ax.set_title(r'Single grid: {} {} {} for scale choice {}'.format(proc, jobn, obsv, sclnam[i]), fontweight=titwgt, y=1.05)
 
-    dx = 1./4.
-    x  = np.arange(1   , nobs+1.e-6)
-    xa = np.arange(1-dx, nobs-dx+1.e-6)
-    xb = np.arange(1+dx, nobs+dx+1.e-6)
+    axhandles = []
+# Booleans for + and - x sections
+    xmp = xs_nnlo[i]>0
+    xmn = xs_nnlo[i]<0
+    if len(x[xmp]):
+        abs1p = ax.errorbar(x[xmp], +xs_nnlo[i][xmp], xerr=dx[xmp], capsize=0, yerr=dxs_nnlo[i][xmp], marker=',', linestyle='none', label=r'NNLOJET $\bf\pm\Delta_{stat}$', color=col1)
+        axhandles.append(abs1p)
+    if len(x[xmn]):
+        abs1n = ax.errorbar(x[xmn], -xs_nnlo[i][xmn], xerr=dx[xmn], capsize=0, yerr=dxs_nnlo[i][xmn], marker=',', linestyle='none', label=r'NNLOJET', color=col1)
+#        axhandles.append(abs1n)
 
-#    asymm = plt.errorbar(x, a_fl2nn[i,], yerr=0.*x, marker='s', linestyle='none', label=r'Asymmetry (fastNLO-NNLOJET)/(fastNLO+NNLOJET) + 1', color='blue')
-    asymm = plt.errorbar(x, a_fl2nn[i,], yerr=da_fl2nn[i,], marker='s', linestyle='none', label=r'Asymmetry (APPLfast-NNLOJET)/(APPLfast+NNLOJET) + 1', color='blue')
-#    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio fastNLO/NNLOJET', color='orange')
-    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=dr_fl2nn[i,], marker='o', linestyle='none', label=r'Ratio APPLfast/NNLOJET', color='orange')
+    xmp = xs_fnll[i]>0
+    xmn = xs_fnll[i]<0
+    if len(x[xmp]):
+        abs2p = ax.errorbar(x[xmp], +xs_fnll[i][xmp], marker='d', linestyle='none', label=r'APPLfast grid ($\bf\sigma>0$)', color=col2)
+        axhandles.append(abs2p)
+    if len(x[xmn]):
+        abs2n = ax.errorbar(x[xmn], -xs_fnll[i][xmn], marker='d', linestyle='none', label=r'APPLfast grid ($\bf\sigma<0$)', color=col3, markerfacecolor=col3)
+        axhandles.append(abs2n)
 
-    plt.xlim(0.0,34.0)
-    plt.ylim(1.-ylim,1.+ylim)
+    ax.set_xlim(xmin,xmax)
+    axr.set_xlim(xmin,xmax)
+    axr.set_ylim(0.99,1.01)
+    axr.fill_between(x, 1.-abs(dst_nnlo[i]), 1.+abs(dst_nnlo[i]), edgecolor=col1, facecolor=col1b, alpha=0.5)
+    axr.axhline(1.0,color=col1)
 
-    handles = [ratio,asymm]
-#    handles = [ratio]
-    labels  = [h.get_label() for h in handles]
+    rnn = axr.errorbar(x, r_nn2nn[i], marker=',', linestyle='none', label='', color=col1)
+    rfp = axr.errorbar(x[xmp], r_fl2nn[i][xmp], marker='d', linestyle='none', label='', color=col2)
+    rfn = axr.errorbar(x[xmn], r_fl2nn[i][xmn], marker='d', linestyle='none', label='', color=col3, markerfacecolor=col3)
+    axrhandles = [ rnn, rfp, rfn ]
 
-    legend = ax.legend(handles, labels, title=r'Closure APPLfast vs. NNLOJET', loc='upper right', numpoints=1, frameon=False)
+    axlabels  = [h.get_label() for h in axhandles]
+    axrlabels  = [h.get_label() for h in axrhandles]
+
+    legend = ax.legend(axhandles, axlabels, title=r'Stat. uncertainty & grid closure', loc='upper right', numpoints=1, frameon=False)
     legend.get_title().set_fontsize(limfs)
 
-    fignam = proc+'.'+jobn+'.'+obsv+'.'+'scale-no-'+str(i+1)+'.scalecheck-'+str(ylim)+'.png'
+    if xaxe=='bins':
+        fignam = proc+'.'+jobn+'.'+obsv+'.'+'scale-no-'+str(i+1)+'.absolute-index'+'.png'
+    else:
+        fignam = proc+'.'+jobn+'.'+obsv+'.'+'scale-no-'+str(i+1)+'.absolute-obs'+'.png'
+    print 'Writing figure', fignam
     plt.savefig(fignam)
 
 #    plt.show()
