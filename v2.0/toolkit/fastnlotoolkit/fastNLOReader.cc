@@ -1835,6 +1835,10 @@ void fastNLOReader::SelectProcesses( const std::string& processes, bool symmetri
             s_flav = 1;
             n++;
          }
+         if ( substrings[i].at(n) == 'a' && anti == 1 ) {
+            anti = -1;
+            n++;
+         }
 
          // loop over first selected partons
          for ( unsigned int j = 0; j<part1_selection.size(); j++ ) {
