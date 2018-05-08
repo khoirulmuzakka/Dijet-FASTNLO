@@ -583,8 +583,9 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
 	    }
 	 }
       }
-      if (!fff)
-	 return false;
+      // uncomment to throw error on non-existing pairs
+      //if (!fff)
+      //	 return false;
    }
    // now activate the selected subcontributions and return succes (true)
    for ( unsigned int k = 0; k<s.size(); k++ )
