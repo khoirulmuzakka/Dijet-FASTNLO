@@ -58,7 +58,7 @@ def main():
 	parser.add_argument('-x', '--xaxis', default='x quantity', type=str,
 						help='Set label for x-axis. Default is \'x quantity\'.')
 	
-	parser.add_argument('-c', '--constyaxis', default=False, type=bool, nargs='?',
+	parser.add_argument('-c', '--constyaxis', default=False, const=True, type=bool, nargs='?',
 						help='Set constant limits for y-axis from -0.4 to 1.2. \n'
 						'Otherwise (per default) y-axis will be flexibly adjusted to the data.')
 	
@@ -317,7 +317,7 @@ def main():
 				#ax0.axis([bin_bounds.flatten()[0], xlim[1], ylim[0]-0.01*ylim[0], ylim[1]+0.01*ylim[1]])
 				
 				if args['constyaxis']==True:
-					ax0.axis([0, xmax, -0.40, 1.20])
+					ax0.axis([0, xmax, -0.20, 1.20])
 				elif args['constyaxis']==False:
 					ax0.set_xlim(xmin_, xmax_) ##
 					ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
@@ -404,7 +404,7 @@ def main():
 					#ax0.axis([30, 1000, -0.4, 1.2])
 					
 					if args['constyaxis']==True:
-						ax0.axis([xlim[0], xlim[1], -0.4, 1.2])
+						ax0.axis([xlim[0], xlim[1], -0.2, 1.2])
 					elif args['constyaxis']==False:
 						ax0.axis([xlim[0], xlim[1], ylim[0]+0.3*ylim[0], ylim[1]+0.1*ylim[1]])
 					
@@ -422,6 +422,7 @@ def main():
 					ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(plots_order[p,0], plots_order[p,1]), rotation=0, fontsize=24)
 					ax0.yaxis.set_label_coords(-0.16, 0.9)
 					ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(plots_order[p,0], plots_order[p,1]), transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+					ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
 
 					#plt.legend() #location parameter loc='upper right'
 
@@ -549,7 +550,7 @@ def main():
 			
 			#settings for the whole stackplot
 			if args['constyaxis']==True:
-				ax0.axis([0, xmax, -0.40, 1.20])
+				ax0.axis([0, xmax_, -0.20, 1.20])
 			elif args['constyaxis']==False:
 				ax0.set_xlim(xmin_, xmax_) ##
 				ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
@@ -587,6 +588,7 @@ def main():
 
 
 		else:
+			print "\n"
 			print "----------------------------------------------------------"
 			print "Create individual plot for each single subprocess \n"
 
@@ -631,7 +633,7 @@ def main():
 
 				ax0.set_xscale('log', nonposx='clip')
 				if args['constyaxis']==True:
-					ax0.axis([xlim[0], xlim[1], -0.4, 1.2])
+					ax0.axis([xlim[0], xlim[1], -0.2, 1.2])
 				elif args['constyaxis']==False:
 					ax0.axis([xlim[0], xlim[1], ylim[0]+0.3*ylim[0], ylim[1]+0.1*ylim[1]])
 
@@ -649,6 +651,7 @@ def main():
 				ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(sp_order, norm_order), rotation=0, fontsize=24)
 				ax0.yaxis.set_label_coords(-0.16, 0.9)
 				ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(sp_order, norm_order), transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+				ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
 
 				#plt.legend() #location parameter loc='upper right'
 
