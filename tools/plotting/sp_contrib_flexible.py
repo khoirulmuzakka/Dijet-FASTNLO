@@ -22,6 +22,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.pyplot import cm
+import sys
 
 import matplotlib.style
 matplotlib.style.use('classic')			#to produce plots that look like they used to in matplotlib 1.x 
@@ -147,6 +148,22 @@ def main():
 	else:
 		#usual plotting
 	'''
+	
+	#labeling of the x-axis
+	#get dimensionality of table:
+	ndim = fnlo.GetNumDiffBin()
+	print "\n", "Dimensions: ", ndim
+	#if (ndim > 1):
+	
+	#get labels of all the dimensions:
+	labels = fnlo.GetDimLabels()
+	print "Labels: ", labels
+	
+	#get label of first dimension:
+	xlabel = fnlo.GetDimLabel(0)
+	print "x-label: ", xlabel
+	
+	
 	
 	
 	print "\n"
@@ -359,8 +376,8 @@ def main():
 				
 				plt.title(x=0.5, y=1.06, s='%s' %(table_), fontsize=22)
 
-				ax0.set_xlabel('x quantity', fontsize=20)
-				ax0.xaxis.set_label_coords(0.9, -0.05)
+				ax0.set_xlabel('%s' %xlabel, fontsize=16, horizontalalignment='right')
+				ax0.xaxis.set_label_coords(1.0, -0.04)
 				ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(plots_order[p,0], plots_order[p,1]), rotation=0, fontsize=24)
 				ax0.yaxis.set_label_coords(-0.16, 0.9)
 
@@ -466,8 +483,8 @@ def main():
 					titlename = args['subproc'][i]
 
 					plt.title(x=0.5, y=1.01, s=titlename, fontsize=20)
-					ax0.set_xlabel('x quantity', fontsize=20)
-					ax0.xaxis.set_label_coords(0.9, -0.05)
+					ax0.set_xlabel('%s' %xlabel, fontsize=16, horizontalalignment='right')
+					ax0.xaxis.set_label_coords(1.0, -0.04)
 					ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(plots_order[p,0], plots_order[p,1]), rotation=0, fontsize=24)
 					ax0.yaxis.set_label_coords(-0.16, 0.9)
 					ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(plots_order[p,0], plots_order[p,1]), transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
@@ -625,8 +642,9 @@ def main():
 			
 			plt.title(x=0.5, y=1.06, s='%s' %(table_), fontsize=22)
 
-			ax0.set_xlabel('x quantity', fontsize=20)
-			ax0.xaxis.set_label_coords(0.9, -0.05)
+			#ax0.set_xlabel('x quantity', fontsize=20)
+			ax0.set_xlabel('%s' %xlabel, fontsize=16, horizontalalignment='right')
+			ax0.xaxis.set_label_coords(1.0, -0.04)
 			ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(sp_order, norm_order), rotation=0, fontsize=24)
 			ax0.yaxis.set_label_coords(-0.16, 0.9)
 
@@ -725,8 +743,8 @@ def main():
 				titlename = args['subproc'][i]
 
 				plt.title(x=0.5, y=1.01, s=titlename, fontsize=20)
-				ax0.set_xlabel('x quantity', fontsize=20)
-				ax0.xaxis.set_label_coords(0.9, -0.05)
+				ax0.set_xlabel('%s' %xlabel, fontsize=16, horizontalalignment='right')
+				ax0.xaxis.set_label_coords(1.0, -0.04)
 				ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(sp_order, norm_order), rotation=0, fontsize=24)
 				ax0.yaxis.set_label_coords(-0.16, 0.9)
 				ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(sp_order, norm_order), transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
