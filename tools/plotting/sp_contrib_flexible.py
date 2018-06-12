@@ -58,9 +58,14 @@ def main():
 	parser.add_argument('-x', '--xaxis', default='x quantity', type=str,
 						help='Set label for x-axis. Default is \'x quantity\'.')
 	
-	parser.add_argument('-c', '--constyaxis', default=False, const=True, type=bool, nargs='?',
-						help='Set constant limits for y-axis from -0.4 to 1.2. \n'
-						'Otherwise (per default) y-axis will be flexibly adjusted to the data.')
+	#parser.add_argument('-c', '--constyaxis', default=False, const=True, type=bool, nargs='?',
+	#					help='Set constant limits for y-axis from -0.4 to 1.2. \n'
+	#					'Otherwise (per default) y-axis will be flexibly adjusted to the data.')
+						
+	parser.add_argument('-c', '--constyaxis', default=None, type=float, nargs='*', #nargs=2
+						help='Set constant limits for y-axis by giving lower and upper limit. \n'
+						'Otherwise (per default) -c sets y-axis from -0.2 to 1.2. \n'
+						'Without -c, y-axis will be flexibly adjusted to the data.')
 	
 	
 	#flexible choice of order for the subprocess contribution (-o) and normalisation (-n)
@@ -81,6 +86,7 @@ def main():
 ################# TAKING CARE OF THE INPUT #################################
 	#parse arguments
 	args = vars(parser.parse_args())
+	namesp = parser.parse_args() #later used for checking if -c is set or not
 	
 	#table name
 	table_ = os.path.basename(args['table'])
@@ -141,6 +147,7 @@ def main():
 	else:
 		#usual plotting
 	'''
+	
 	
 	print "\n"
 	#check whether all 5 plots are needed or just one certain --> evaluate accordingly
@@ -303,7 +310,6 @@ def main():
 				print 'ylim:', ylim, '\n'
 			
 				xmin_ = xlim[0]
-				print 'xmin', xmin_
 				xmax_ = xlim[1]
 				#ymin = ylim[0]
 				#ymax = ylim[1]
@@ -312,17 +318,41 @@ def main():
 				
 				#settings for the whole stackplot
 				ax0.set_xscale('log', nonposx='clip')
-				#ax0.axis([30, 1000, -0.20, 1.20])
-				#ax0.axis([bin_bounds.flatten()[0], xlim[1], ylim[0]-0.005, ylim[1]+0.005]) #flexible axes
-				#ax0.axis([bin_bounds.flatten()[0], xlim[1], ylim[0]-0.01*ylim[0], ylim[1]+0.01*ylim[1]])
-				
+
+
+				'''
 				if args['constyaxis']==True:
 					ax0.axis([0, xmax, -0.20, 1.20])
 				elif args['constyaxis']==False:
 					ax0.set_xlim(xmin_, xmax_) ##
 					ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
+				'''
 
-				##ax0.axis([0, xmax, -0.20, 1.20]) #for test with fixed y-axis
+				#print "namesp", namesp, "\n"
+
+				if (args['constyaxis'] is not None):	#take limits that user has chosen
+					if (len(args['constyaxis'])==2):
+						ylow = args['constyaxis'][0]
+						yhigh = args['constyaxis'][1]
+						if ylow < yhigh:
+							ax0.axis([0, xmax_, ylow, yhigh])
+						else:
+							print " # ERROR! when trying to set y-limits."
+							print "Check choice of y-limits. First value should be lower than second."
+							print "Syntax: -c <lower ylimit> <higher ylimit>."
+							break
+					elif (len(args['constyaxis'])==0):	#set constant y-axis
+						ax0.axis([0, xmax_, -0.20, 1.20])
+					else:
+						print " # ERROR! when trying to set y-limits."
+						print "Something went wrong. Check input after -c."
+						print "Possible: no value, two values or don't use -c at all for flexible axis. \n"
+						break
+				elif (args['constyaxis'] is None):	#use flexible y-axis
+					ax0.set_xlim(xmin_, xmax_) ##
+					ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
+
+
 				ax0.autoscale(enable=True, axis='x', tight=True)
 				plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted') #dotted line at xs_sub/xs=1=100%
 				plt.axhline(y=0, xmin=0, xmax=1, color='k', linestyle='-')		#line at xs_sub/xs_tot=0
@@ -387,9 +417,6 @@ def main():
 					#plot the fractions
 					y0 = np.zeros([len(bin_bounds)])
 
-					#ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(fractions_oneplot[i]), 
-					#			facecolor=c, alpha=0.4)
-				
 					ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(pos_contr[p,i]), 
 								facecolor=c, alpha=0.4)
 					ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(neg_contr[p,i]), 
@@ -401,13 +428,35 @@ def main():
 					
 					
 					ax0.set_xscale('log', nonposx='clip')
-					#ax0.axis([30, 1000, -0.4, 1.2])
+
+					xmin_ = xlim[0]
+					xmax_ = xlim[1]
+					ymin_ = ylim[0]+0.3*ylim[0]
+					ymax_ = ylim[1]+0.1*ylim[1]
 					
-					if args['constyaxis']==True:
-						ax0.axis([xlim[0], xlim[1], -0.2, 1.2])
-					elif args['constyaxis']==False:
-						ax0.axis([xlim[0], xlim[1], ylim[0]+0.3*ylim[0], ylim[1]+0.1*ylim[1]])
+					if (args['constyaxis'] is not None):	#take limits that user has chosen
+						if (len(args['constyaxis'])==2):
+							ylow = args['constyaxis'][0]
+							yhigh = args['constyaxis'][1]
+							if ylow < yhigh:
+								ax0.axis([0, xmax_, ylow, yhigh])
+							else:
+								print " # ERROR! when trying to set y-limits."
+								print "Check choice of y-limits. First value should be lower than second."
+								print "Syntax: -c <lower ylimit> <higher ylimit>."
+								break
+						elif (len(args['constyaxis'])==0):	#set constant y-axis
+							ax0.axis([0, xmax_, -0.20, 1.20])
+						else:
+							print " # ERROR! when trying to set y-limits."
+							print "Something went wrong. Check input after -c."
+							print "Possible: no value, two values or don't use -c at all for flexible axis. \n"
+							break
+					elif (args['constyaxis'] is None):	#use flexible y-axis
+						ax0.set_xlim(xmin_, xmax_) ##
+						ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
 					
+
 					#ax0.axis([bin_bounds.flatten()[0], xlim[1], ylim[0]-0.1*ylim[0], ylim[1]+0.1*ylim[1]]) #leave y-limits fixed for better comparison between the subprocess-plots
 					ax0.autoscale(enable=True, axis='x', tight=True)
 					plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted')
@@ -421,8 +470,8 @@ def main():
 					ax0.xaxis.set_label_coords(0.9, -0.05)
 					ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(plots_order[p,0], plots_order[p,1]), rotation=0, fontsize=24)
 					ax0.yaxis.set_label_coords(-0.16, 0.9)
-					ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(plots_order[p,0], plots_order[p,1]), transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
-					ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+					ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(plots_order[p,0], plots_order[p,1]), transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+					ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
 
 					#plt.legend() #location parameter loc='upper right'
 
@@ -533,33 +582,44 @@ def main():
 								label=args['subproc'][i], alpha=0.4))
 				ax0.add_patch(patches[i])
 			
-			#get limits for axes:
-			xlim = ax0.get_xlim()
-			ylim = ax0.get_ylim()
+				#get limits for axes:
+				xlim = ax0.get_xlim()
+				ylim = ax0.get_ylim()
 		
-			print 'xlim:', xlim
-			print 'ylim:', ylim, '\n'
+				print 'xlim:', xlim
+				print 'ylim:', ylim, '\n'
 		
-			xmin_ = xlim[0]
-			print 'xmin', xmin_
-			xmax_ = xlim[1]
-			#ymin = ylim[0]
-			#ymax = ylim[1]
-			ymin_ = np.amin(y0_neg)+0.3*np.amin(y0_neg)
-			ymax_ = np.amax(y0_pos)+0.1*np.amax(y0_pos)
-			
-			#settings for the whole stackplot
-			if args['constyaxis']==True:
-				ax0.axis([0, xmax_, -0.20, 1.20])
-			elif args['constyaxis']==False:
-				ax0.set_xlim(xmin_, xmax_) ##
-				ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
-			
-			#ax0.axis([30, 1000, -0.20, 1.20])
-			ax0.set_xscale('log', nonposx='clip')
-			ax0.autoscale(enable=True, axis='x', tight=True)
+				xmin_ = xlim[0]
+				xmax_ = xlim[1]
+				ymin_ = np.amin(y0_neg)+0.3*np.amin(y0_neg)
+				ymax_ = np.amax(y0_pos)+0.1*np.amax(y0_pos)
 
-			##ax0.axis([0, xmax_, -0.20, 1.20]) #for test with fixed y-axis
+
+				if (args['constyaxis'] is not None):	#take limits that user has chosen
+					if (len(args['constyaxis'])==2):
+						ylow = args['constyaxis'][0]
+						yhigh = args['constyaxis'][1]
+						if ylow < yhigh:
+							ax0.axis([0, xmax_, ylow, yhigh])
+						else:
+							print " # ERROR! when trying to set y-limits."
+							print "Check choice of y-limits. First value should be lower than second."
+							print "Syntax: -c <lower ylimit> <higher ylimit>."
+							break
+					elif (len(args['constyaxis'])==0):	#set constant y-axis
+						ax0.axis([0, xmax_, -0.20, 1.20])
+					else:
+						print " # ERROR! when trying to set y-limits."
+						print "Something went wrong. Check input after -c."
+						print "Possible: no value, two values or don't use -c at all for flexible axis. \n"
+						break
+				elif (args['constyaxis'] is None):	#use flexible y-axis
+					ax0.set_xlim(xmin_, xmax_) ##
+					ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
+
+				ax0.set_xscale('log', nonposx='clip')
+				ax0.autoscale(enable=True, axis='x', tight=True)
+
 			plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted') #dotted line at xs_sub/xs=1=100%
 			plt.axhline(y=0, xmin=0, xmax=1, color='k', linestyle='-')		#line at xs_sub/xs_tot=0
 			
@@ -618,10 +678,7 @@ def main():
 
 				#plot the fractions
 				y0 = np.zeros([len(bin_bounds)])
-				
-				#ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(fractions_oneplot[i]), 
-				#			facecolor=c, alpha=0.4)
-				
+
 				ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(pos_contr[i]), 
 							facecolor=c, alpha=0.4)
 				ax0.fill_between(bin_bounds.flatten(), steppify_bin(y0), steppify_bin(neg_contr[i]), 
@@ -632,13 +689,35 @@ def main():
 				ylim = ax0.get_ylim()
 
 				ax0.set_xscale('log', nonposx='clip')
-				if args['constyaxis']==True:
-					ax0.axis([xlim[0], xlim[1], -0.2, 1.2])
-				elif args['constyaxis']==False:
-					ax0.axis([xlim[0], xlim[1], ylim[0]+0.3*ylim[0], ylim[1]+0.1*ylim[1]])
+
+				xmin_ = xlim[0]
+				xmax_ = xlim[1]
+				ymin_ = ylim[0]+0.3*ylim[0]
+				ymax_ = ylim[1]+0.1*ylim[1]
+
+				if (args['constyaxis'] is not None):	#take limits that user has chosen
+					if (len(args['constyaxis'])==2):
+						ylow = args['constyaxis'][0]
+						yhigh = args['constyaxis'][1]
+						if ylow < yhigh:
+							ax0.axis([0, xmax_, ylow, yhigh])
+						else:
+							print " # ERROR! when trying to set y-limits."
+							print "Check choice of y-limits. First value should be lower than second."
+							print "Syntax: -c <lower ylimit> <higher ylimit>."
+							break
+					elif (len(args['constyaxis'])==0):	#set constant y-axis
+						ax0.axis([0, xmax_, -0.20, 1.20])
+					else:
+						print " # ERROR! when trying to set y-limits."
+						print "Something went wrong. Check input after -c."
+						print "Possible: no value, two values or don't use -c at all for flexible axis. \n"
+						break
+				elif (args['constyaxis'] is None):	#use flexible y-axis
+					ax0.set_xlim(xmin_, xmax_) ##
+					ax0.set_ylim(ymin_, ymax_) ##set axis limit according to data
 
 				ax0.autoscale(enable=True, axis='x', tight=True)
-				#ax0.axis([bin_bounds.flatten()[0], xlim[1], ylim[0]-0.1*ylim[0], ylim[1]+0.1*ylim[1]]) #leave y-limits fixed for better comparison between the subprocess-plots
 				plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted')
 				plt.axhline(y=0, xmin=0, xmax=1, color='k', linestyle='-')
 
@@ -650,8 +729,8 @@ def main():
 				ax0.xaxis.set_label_coords(0.9, -0.05)
 				ax0.set_ylabel(r'$\frac{\mathrm{XS_{sp, %s}}}{\mathrm{XS_{tot, %s}}}$' %(sp_order, norm_order), rotation=0, fontsize=24)
 				ax0.yaxis.set_label_coords(-0.16, 0.9)
-				ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(sp_order, norm_order), transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
-				ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+				ax0.text(0.96, 0.03, args['pdfset']+', %s to %s' %(sp_order, norm_order), transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
+				ax0.text(0.96, 0.08, '%s' %table_, transform=ax0.transAxes, alpha=0.6, fontsize=14, verticalalignment='bottom', horizontalalignment='right')
 
 				#plt.legend() #location parameter loc='upper right'
 
