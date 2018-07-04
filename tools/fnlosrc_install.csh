@@ -169,30 +169,37 @@ if ( $#argv < 2 ) then
    echo ""
    exit 0
 endif
+
 #==============================================================================
 # Set installation location
 #==============================================================================
+echo "#=============================================================================="
+echo "# Installation settings:"
+echo "#=============================================================================="
 set base=$1
 set local=$2
 set srcdir=$cwd
+set tab = "`printf '\t'`"
+echo "Installation location: $tab $1/$2"
 #==============================================================================
 # Define scope of installation
 #==============================================================================
 # Use CVMFS software repository for newer gcc if necessary
 if ( $#argv > 2 && $3 != "_" ) then
    setenv MYCVMFS $3
-#   echo "MYCVMFS is set to: $MYCVMFS"
+   echo "MYCVMFS is set to: $tab $MYCVMFS"
 else
    if ( $?MYCVMFS ) then
       unsetenv MYCVMFS
    endif
-#   echo "MYCVMFS is not set"
+   echo "MYCVMFS is not defined"
 endif
 # With interface to Sherpa via MCGrid?
 set withsherpa=0
 if ( $#argv > 3 ) then
     set withsherpa=$4
 endif
+echo "Sherpa usage: $tab$tab $withsherpa"
 # With interface to NNLOJET? Attention! NNLOJET is not yet publically available!
 set withnnlojet=0
 if ( $#argv > 4 ) then
@@ -201,11 +208,13 @@ if ( $#argv > 4 ) then
 # Used for fnl2332d:   set revision=4585
     set revision=4708
 endif
+echo "NNLOJET usage: $tab$tab $withnnlojet"
 # With optional packages for grid evaluation?
 set withoptional=0
 if ( $#argv > 5 ) then
     set withoptional=$6
 endif
+echo "Optional packages: $tab $withoptional"
 # With optional Python extensions? On some systems compile errors occur!
 # Note: Python is quite useful for evaluating or preparing results, but
 #       not required for mass production on compute clusters.
@@ -214,6 +223,7 @@ set withpython=0
 if ( $#argv > 6 ) then
     set withpython=$7
 endif
+echo "Python support: $tab $withpython"
 # Install optional ROOT extensions? On some systems compile errors occur!
 # Note: ROOT is quite useful for evaluating or preparing results, but
 #       not required for mass production on compute clusters.
@@ -222,6 +232,7 @@ set withroot=0
 if ( $#argv > 7 ) then
     set withroot=$8
 endif
+echo "ROOT support: $tab$tab $withroot"
 # Use CVMFS software repository also for LHAPDF if requested
 # Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
 set lhapdfbasepath=${base}/${local}
@@ -231,7 +242,7 @@ if ( $#argv > 8 ) then
     set withcvmfslhapdf=$9
 endif
 if ( $withcvmfslhapdf ) then
-    if ( $?CVMFS ) then 
+    if ( $?CVMFS ) then
 # BUT version 6.1.6 still uses BOOST, uaargh!
 #        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
@@ -240,9 +251,10 @@ if ( $withcvmfslhapdf ) then
         set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
     else
         echo "ERROR: LHAPDF from CVMFS requested, but no CVMFS path set! Aborted."
-	exit 1 
+        exit 1
     endif
 endif
+echo "LHAPDF from CVMFS: $tab $withcvmfslhapdf"
 # Default is with OpenMPI if either NNLOJET or Sherpa are requested
 set withmpi=0
 set withmpiinstall=0
@@ -263,12 +275,14 @@ set cores=8
 if ( $#argv > 9 ) then
     set cores=$10
 endif
+echo "No. of cores: $tab$tab $cores"
 
 # With interface to HERWIG7? Not yet implemented!
 set withherwig=0
 #==============================================================================
 # Check and set defaults for some specific environment variables
 #==============================================================================
+echo ""
 echo "#=============================================================================="
 echo "# Preparing installation:"
 echo "#=============================================================================="
@@ -537,7 +551,7 @@ if ( $withroot > 1 ) then
         endif
     else
         echo "ERROR! Unknown ROOT version selected: $withroot"
-        exit 1 
+        exit 1
     endif
     if ( ! -e ${arc}_installed  ) then
         cd ${arc}
