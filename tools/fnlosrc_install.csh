@@ -588,6 +588,7 @@ endif
 # Python is enabled by default. If Python with ROOT interfacing is desired, use "--enable-root".
 #------------------------------------------------------------------------------
 set arc="YODA-1.6.7"
+# set arc="YODA-1.7.0" # Installation looks ok
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
@@ -601,8 +602,10 @@ endif
 # Python is enabled by default.
 #------------------------------------------------------------------------------
 set arc="Rivet-2.5.4"
+# set arc="Rivet-2.6.0"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
+#  tar xzf ${arc}-patched.tar.gz # 2.6.0 needs patch for nonunicode chars in two analysis.cc files
   cd ${arc}
   ./configure --prefix=${base}/${local} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
   make -j${cores} install
