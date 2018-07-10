@@ -849,11 +849,11 @@ endif
 # For use of MPI with Sherpa corresponding system packages are required (MPICH, OpenMPI).
 # (Repacked version required for compatibility with C++11 standard enforcement.)
 #------------------------------------------------------------------------------
-#    set arc="SHERPA-MC-2.2.4"
-    set arc="SHERPA-MC-2.2.5"
+    set arc="SHERPA-MC-2.2.4"
+#    set arc="SHERPA-MC-2.2.5" # Does not work, not even after repacking
     if ( ! -e ${arc}_installed  ) then
-#        tar xzf ${arc}-repacked.tar.gz
-        tar xzf ${arc}.tar.gz
+        tar xzf ${arc}-repacked.tar.gz
+#        tar xzf ${arc}.tar.gz
         cd ${arc}
         ./configure --prefix=${base}/${local} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base}/${local} --enable-lhapdf=${lhapdfbasepath} --enable-hepmc2=${base}/${local} --enable-rivet=${base}/${local} ${rootenablepath} --enable-openloops=${base}/${local}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}/${local}
         make -j${cores} install
