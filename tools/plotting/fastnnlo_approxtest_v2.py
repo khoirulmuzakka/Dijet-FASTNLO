@@ -38,9 +38,8 @@ parser.add_argument('-w','--weightfile', default='weight.txt', required=True, na
 #parser.add_argument('-l', '--logfile', default='file.log', required=True, nargs='?',
 #                    help='.log files, need one *0.log and one *6.log')
 parser.add_argument('-f','--fscl', default=1, required=True, nargs='?', type=int,
-                    help='1: fixed scale.  \n'
-                            '0: flexible scale.') ### Has to be changed!!! Only allow: 1 to 7
-
+                    help='Possible choices: int from fscl=1 to fscl=7.')
+                    
 parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
                     help='Customise the first part of the output filename.'
                             'Default: Same structure as datfile name.')
@@ -297,6 +296,8 @@ allnames,allweights = zip(*wgttup)
 print 'datfile names in weightfile: \n', np.array(allnames), '\n'
 
 #################################################
+#the following for-loop can be removed
+#was just there to find the best possibility to access the correct wgtfile entries
 for dfile in datfiles:
     dirna = os.path.dirname(dfile)
     basena = os.path.basename(dfile)
@@ -379,12 +380,17 @@ if fscl == 1:
     fnlologs = np.array(log_list)
     print 'fnlologs: \n', fnlologs, '\n'
     
-else:
+#else:
+elif fscl in range(1, 8, 1): # fscl restricted to values from 1 (see above) to 7.
     #fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_6.log')
     for dfile in datfiles:
         log_list.append(dfile[:-(len(ext)+1)]+'_6.log')
     fnlologs = np.array(log_list)
     print 'fnlologs: \n', fnlologs, '\n'
+    
+else:
+    sys.exit("Choice of fscl does not make sense. Aborted!")
+    #Shall we really cancel it or just set fscl to 1 then?
 
 fnlologs.sort()
 for fnlolog in fnlologs:
@@ -474,8 +480,8 @@ if nlin>0:
 rmedian = plt.errorbar(xc, rmed_f2nl, yerr=riqd_f2nl, marker='s', linestyle='none', label=r'median $\pm$ IQD/2', color='red')
 
 plt.xlim(0.0,34.0)
-#plt.ylim(0.99,1.01)
-plt.ylim(-50, 12000) #to display points for fscl=0 (log6file)
+plt.ylim(0.99,1.01)
+#plt.ylim(-50, 12000) #to display points for fscl=0 (log6file), was just a test
 if nlin>0:
     handles = [rmean,rmwgt,rmedian]
 else:
@@ -517,8 +523,8 @@ if nlin>0:
 amedian = plt.errorbar(xc, amed_f2nl, yerr=aiqd_f2nl, marker='8', linestyle='none', label=r'median $\pm$ IQD/2', color='green')
 
 plt.xlim(0.0,34.0)
-#plt.ylim(-0.01,0.01)
-plt.ylim(-1.02, 1.02) ## to display points for fscl=0 (log6file)
+plt.ylim(-0.01,0.01)
+#plt.ylim(-1.02, 1.02) ## to display points for fscl=0 (log6file), just a test
 if nlin>0:
     handles = [amean,amwgt,amedian]
 else:
