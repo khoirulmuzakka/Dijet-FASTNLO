@@ -89,9 +89,11 @@ int main(int argc, char** argv) {
          man << "   - Check, whether the LHAPDF environment variable is set correctly." << endl;
          man << "   - Specify the PDF set including the absolute path." << endl;
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
-         man << "[#vars]: Number of mu_r, mu_f scale factor variations to investigate, if possible, def. = 1, max. = 7" << endl;
-         man << "   If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1)" << endl;
-         man << "   If -7 < #vars < 0  then no. of mu_r, mu_f fixed scale variations to investigate, if possible." << endl;
+         man << "[#vars]: Number of mu_r, mu_f scale variations to investigate, if possible, def. = 1." << endl;
+         man << "   If #vars == 1 then only the central scale with scale factors of (1,1) is investigated." << endl;
+         man << "   If  1 < #vars < 8  then no. of additional mu_r, mu_f scale factor variations to investigate, if possible." << endl;
+         man << "   If -7 < #vars < 0  then no. of additional mu_r, mu_f fixed scale variations to investigate, if possible." << endl;
+         man << "   If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1)." << endl;
          man << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          man << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
          man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
@@ -127,10 +129,10 @@ int main(int argc, char** argv) {
    int nvars = 1;
    const int nvarmax = 7;
    const int nfixmax = 6;
-   const double xmur[] = { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
-   const double xmuf[] = { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
-   const double fixmur[] = { 2.718281828459045, 4.481689070338065, 2.718281828459045, 4.481689070338065, 2.718281828459045, 12.18249396070347 };
-   const double fixmuf[] = { 2.718281828459045, 4.481689070338065, 4.481689070338065, 2.718281828459045, 12.18249396070347, 2.718281828459045 };
+   const double xmur[] =   { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
+   const double xmuf[] =   { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
+   const double fixmur[] = { 1.0, 2.718281828459045, 4.481689070338065, 2.718281828459045, 4.481689070338065, 2.718281828459045, 12.18249396070347 };
+   const double fixmuf[] = { 1.0, 2.718281828459045, 4.481689070338065, 4.481689070338065, 2.718281828459045, 12.18249396070347, 2.718281828459045 };
    string ch2tmp = "X";
    if (argc > 3) {
       ch2tmp = (const char*) argv[3];
@@ -150,9 +152,9 @@ int main(int argc, char** argv) {
          exit(1);
       } else {
          if ( nvars > 0 ) {
-            shout["fnlo-tk-cppread"] << "If possible, will try to do " << nvars << " scale variations." << endl;
+            shout["fnlo-tk-cppread"] << "If possible, will try to do " << nvars << " scale factor variations." << endl;
          } else if ( nvars < 0 ) {
-            shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " fixed scale variations." << endl;
+            shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " additional fixed scale variations." << endl;
          } else {
             shout["fnlo-tk-cppread"] << "If possible, will try to do all PDF members." << endl;
          }
@@ -854,12 +856,16 @@ int main(int argc, char** argv) {
 
    //! Run over all pre-defined scale settings xmur, xmuf
    bool sclvar = true;
+   bool sclfix = false;
    //! Run over all PDF members instead
    if ( nvars == 0 ) {
       sclvar = false;
       nvars  = fnlo->GetNPDFMembers();
+   } else if ( nvars < 0 ) {
+      sclfix = true;
+      nvars  = std::abs(nvars)+1;
    }
-   for (int ivar=0; ivar<abs(nvars); ivar++) {
+   for (int ivar=0; ivar<nvars; ivar++) {
 
       //! Switch on LO & NLO & NNLO, switch off anything else
       if ( ilo > -1 ) {
@@ -938,21 +944,23 @@ int main(int argc, char** argv) {
       //! Set scale
       double mur = xmur[0];
       double muf = xmuf[0];
-      if ( sclvar && nvars > 0) {
-         mur = xmur[ivar];
-         muf = xmuf[ivar];
-      } else if ( sclvar && nvars < 0) {
-         mur = fixmur[ivar];
-         muf = fixmuf[ivar];
-      //! Or specify the PDF member
-      } else {
+      //! Specify the PDF member; keep default scale factors
+      if ( !sclvar ) {
          fnlo->SetLHAPDFMember(ivar);
+      } else if ( ivar > 0 ) { //! Default scale factors for ivar==0
+         if ( sclfix ) {
+            mur = fixmur[ivar];
+            muf = fixmuf[ivar];
+         } else {
+            mur = xmur[ivar];
+            muf = xmuf[ivar];
+         }
       }
 
       //! Set MuR and MuF scale factors for pQCD cross sections and test availability
       //! Activate Hoppet for unusal variations
       //      fnlo->UseHoppetScaleVariations(true);
-      if ( nvars >= 0 ) {
+      if ( ivar==0 || !sclvar || !sclfix ) {
          lscvar = fnlo->SetScaleFactorsMuRMuF(mur, muf);
          if (!lscvar) {
             warn["fnlo-tk-cppread"] << "The selected scale variation (xmur, xmuf) = ("
@@ -1144,14 +1152,20 @@ int main(int argc, char** argv) {
       //! Start print out
       yell  << _DSEPLC << endl;
       shout << "My Cross Sections" << endl;
-      if ( sclvar && nvars > 0) {
+      //! PDF members
+      if ( !sclvar ) {
+         snprintf(buffer, sizeof(buffer), "The PDF member chosen here is: %i",ivar);
+      }
+      //! Scale factor variations
+      else if ( ivar == 0 || !sclfix ) {
          snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       }
-      else if ( sclvar && nvars < 0) {
+      //! Fixed scale variations
+      else if ( sclfix) {
          snprintf(buffer, sizeof(buffer), "The fixed scales mur, muf chosen here are: % #10.3f, % #10.3f",fixmur[ivar],fixmuf[ivar]);
       }
+      //! Undefined
       else {
-         snprintf(buffer, sizeof(buffer), "The PDF member chosen here is: %i",ivar);
       }
       shout << buffer << endl;
       yell  << _SSEPLC << endl;

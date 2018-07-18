@@ -103,6 +103,7 @@ public:
    void FillAllSubprocesses(const std::vector<std::vector<fnloEvent> >& events, const fnloScenario& scen);        //!< Fill a list of subprocesses for various scale-variations into a fixed-scale table
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}                    //!< The number of subprocesses (channels)
    const std::vector<double>& GetScaleVariations() const { return fScaleFac; }                       //!< Get list of scale variations
+   const int GetScaleVarMax() const { return fScaleFac.size(); }                                //!< Get no. of scale variations
 
    void WriteTable(std::string filename);                                                            //!< Write fastNLO table to file filename
    void WriteTable();                                                                           //!< Write fastNLO table to disk.
@@ -119,6 +120,7 @@ public:
    void SetWarmupTableFilename(std::string);                                                         //!< Set the filename, which is used for storage of the warmup-table (otherwise a default is used)
    inline bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
    inline bool GetIsFlexibleScale() const { return fIsFlexibleScale; }                          //!< Get if flexible-scale table is requested
+   inline bool GetIsInclusiveJets() const { return fIsInclusiveJets; }                          //!< Get if inclusive jet table is requested
    void SetWarmupXSafetyMargin(int margin = 4) { fWarmupXMargin = margin;}                          //!< Set margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
    void SetWarmupNDigitMu1(int rnd = 1) { fWarmupNDigitMu1 = rnd;}                              //!< Round warmup values for scale 1
    void SetWarmupNDigitMu2(int rnd = 2) { fWarmupNDigitMu2 = rnd;}                              //!< Round warmup values for scale 2
@@ -202,6 +204,7 @@ protected:
    int fWarmupNDigitMu2;                                                                          //!< Digits of warmup values for scale 2
    int  fIOrd;                                                                                  //!< order of alpha_s of run
    bool fIsFlexibleScale;                                                                       //!< is it a flexible scale table?
+   bool fIsInclusiveJets;                                                                       //!< is it an inclusive jets table?
    bool fApplyPDFReweight;                                                                      //!< shall the PDF reweight be applied.
    std::string fWarmupFilename;                                                                 //!< File name of the warmup table
    // TODO: fSteerfile as internally set variable is used as default steeringNameSpace at many places. This should be avoided!

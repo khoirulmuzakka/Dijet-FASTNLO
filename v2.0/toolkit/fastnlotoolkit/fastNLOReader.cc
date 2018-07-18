@@ -2804,34 +2804,42 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
    // Check whether xmur and xmuf are positive and at least larger than 1.E-6
    if (xmur < 1.E-6 || xmuf < 1.E-6) {
-      logger.error<<"Selected scale factors too small ( < 1.E-6 )! Ignoring call."<<endl;
+      logger.error["SetScaleFactorsMuRMuF"]<<"Selected scale factors too small ( < 1.E-6 )! Ignoring call."<<endl;
       return false;
    }
 
-   // Check whether pQCD LO contributions or beyond exist and are activated
-   bool lklo = false;
-   bool lkho = false;
+   // Check which pQCD contributions exist and are activated
+   bool lOrder[] = { false, false, false }; // The maximum ESMorder is kNextToNextToLeading = 2
+   const int lOrdMax = 2;
    if (!BBlocksSMCalc[kFixedOrder].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kFixedOrder].size() ; i++) {
          int kOrder = -1;
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
+	    if ( kOrder > lOrdMax ) {
+	       logger.error["SetScaleFactorsMuRMuF"]<<"Order beyond NNLO found! Not yet implemented. Aborted."<<endl;
+	       exit(1);
+	    }
          }
          if ( BBlocksSMCalc[kFixedOrder][i] && BBlocksSMCalc[kFixedOrder][i]->IsEnabled() ) {
-            if (kOrder == 0) {
-               lklo = true;
-            } else if (kOrder > 0) {
-               lkho = true;
-            }
+	    lOrder[kOrder] = true;
+            // if (kOrder == 0) {
+            //    lklo = true;
+            // } else if (kOrder > 0) {
+            //    lkho = true;
+            // }
          }
       }
    }
+   bool lklo = lOrder[0];
+   bool lkho = lOrder[1] || lOrder[2];
+   bool lllo = (lklo && !lkho) || (lklo && lkho && !lOrder[2]) || (lklo && lOrder[1] && lOrder[2]);
 
    // Check whether threshold corrections exist and are activated
    bool lkthc = false;
    if (!BBlocksSMCalc[kThresholdCorrection].empty()) {
       for (unsigned int i = 0 ; i <BBlocksSMCalc[kThresholdCorrection].size() ; i++) {
-	 //cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
+         //cout<<"i="<<i<<"\tkThresholdCorrection="<<kThresholdCorrection<<endl;
          if ( BBlocksSMCalc[kThresholdCorrection][i] && BBlocksSMCalc[kThresholdCorrection][i]->IsEnabled() ) {
             lkthc = true;
             break;
@@ -2839,14 +2847,20 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       }
    }
 
-   // For fixed-order contributions scale factor variations are not possible without LO
-   if (!lklo && lkho && (fabs(xmur-1.) > DBL_MIN || fabs(xmuf-1.) > DBL_MIN)) {
+   // For fixed-order results mur scale factor variations are possible only with all lower orders included
+   // If not, only the prestored muf scale factors are possible with whatever mur scale factors were used at filling time
+   if (!lllo && (fabs(xmur-xmuf) > DBL_MIN)) {
       logger.warn["SetScaleFactorsMuRMuF"]
-            <<"Without LO, scale factors different from unity for MuR and MuF are not allowed, nothing changed!\n";
+            <<"Changing the MuR scale factor different from MuF is not possible when lower orders are missing, nothing changed!\n";
       logger.warn["SetScaleFactorsMuRMuF"]
             <<"The method returns 'false', please check the return code and act appropriately.\n";
-      logger.man<<"Please do scale variations only, if all fixed-order contributions are present and switched on.\n";
+      logger.man<<"Please do MuR scale factors variations only, if all fixed-order contributions are present and switched on.\n";
       return false;
+   }
+   if (!lllo && (fabs(xmuf-1.) > DBL_MIN)) {
+      logger.info["SetScaleFactorsMuRMuF"]
+            <<"Changing the MuF scale factor from unity is possible only for the prestored values. To be checked!\n";
+      logger.man<<"Please do MuF scale variations only, if either prestored values or HOPPET are available.\n";
    }
 
    // For threshold corrections xmur != xmuf is not allowed
@@ -2908,7 +2922,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
             }
          }
          if (lkho && sfho == -1) {
-            logger.warn["SetScaleFactorsMuRMuF"]<<"Could not find NLO table with given mu_f scale factor of "<<xmuf<<", nothing changed!"<<endl;
+            logger.warn["SetScaleFactorsMuRMuF"]<<"Could not find HO table with given mu_f scale factor of "<<xmuf<<", nothing changed!"<<endl;
             logger.warn["SetScaleFactorsMuRMuF"]
                   <<"The method returns 'false', please check the return code and act appropriately.\n";
             return false;
@@ -2920,7 +2934,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
             return false;
          }
          if (lkthc && lkho && sfho != sfthc) {
-            logger.warn["SetScaleFactorsMuRMuF"]<<"Order of scale variation tables different in NLO and ThC tables, "<<sfho<<" != "<<sfthc<<" !"<<endl;
+            logger.warn["SetScaleFactorsMuRMuF"]<<"Order of scale variation tables different in HO and ThC tables, "<<sfho<<" != "<<sfthc<<" !"<<endl;
             logger.warn["SetScaleFactorsMuRMuF"]<<"This is currently not supported, nothing changed!"<<endl;
             logger.warn["SetScaleFactorsMuRMuF"]
                   <<"The method returns 'false', please check the return code and act appropriately.\n";
@@ -2935,7 +2949,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          if (lkho) {
             bSetScales = SetScaleVariation(sfho);
             if (!bSetScales) {
-               logger.error["SetScaleFactorsMuRMuF"]<<"NLO scale variation table "<<sfho<<" could not be selected, stopped!"<<endl;
+               logger.error["SetScaleFactorsMuRMuF"]<<"HO scale variation table "<<sfho<<" could not be selected, stopped!"<<endl;
                exit(1);
             }
          }

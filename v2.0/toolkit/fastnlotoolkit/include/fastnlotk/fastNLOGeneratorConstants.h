@@ -78,6 +78,7 @@ namespace fastNLO {
       std::vector<std::string> ScenarioDescription; //!< Description of the scenario
       int PublicationUnits; //!< Unit of data cross sections (negative power of 10, e.g. 12->pb, 15->fb)
 
+      bool InclusiveJets; //!< (def.=false) Flag to store one entry per jet, not just one per event; not stored in table; only used with NNLOJET so far
 
       int DifferentialDimension; //!< Dimensionality of binning (1: single-differential, 2: double-differential; also decides if SingleDifferentialBinning or DoubleDifferentialBinning is used)
       std::vector<std::string> DimensionLabels; //!< Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop"), e.g. "|y|" and "p_T [GeV]". This may also help to define the observables to be calculated in an automatized way!
@@ -143,6 +144,7 @@ namespace fastNLO {
       }
       void SetDefaults() {
          PublicationUnits=12;
+	 InclusiveJets=false;
          ScenarioName="Undefined";
          ScenarioDescription.clear();
          BinSizeFactor=1.;
