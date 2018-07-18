@@ -42,7 +42,7 @@ jobn = 'LO-CMS7'
 kinn = 'vBa'
 obsv = 'fnl2332d_xptji_y1'
 seed = ''
-nscl = 6 # central + nscl fixed scales
+nscl = 1 # no. of scale settings to investigate (central + scale factor or fixed scale variations)
 ylim = 0.01
 # Get from cmdline argument
 print 'Number of arguments:', len(sys.argv), 'arguments.'
@@ -96,7 +96,7 @@ xm = xs_all[:,1]
 xu = xs_all[:,2]
 xs_nnlo  = []
 dxs_nnlo = []
-for i in range(nscl+1):
+for i in range(nscl):
     xs_nnlo.append(xs_all[:,2*i+3]/1000) # Conversion of fb to pb
     dxs_nnlo.append(xs_all[:,2*i+4]/1000)
 
@@ -126,25 +126,19 @@ xb = np.arange(1, nobs+1.e-6)
 
 # Evaluate cross sections from pre-evaluated fastNLO tables
 if kinn == '_':
-    log0file = proc+'.'+jobn+'.'+obsv+'_0.log'
-    log6file = proc+'.'+jobn+'.'+obsv+'_6.log'
+    logfile = proc+'.'+jobn+'.'+obsv+'.log'
 elif seed == '' or seed == '_':
-    log0file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'_0.log'
-    log6file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'_6.log'
+    logfile = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.log'
 else:
-    log0file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'_0.log'
-    log6file = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'_6.log'
-for file in [log0file, log6file]:
+    logfile = proc+'.'+jobn+'.'+kinn+'.'+obsv+'.'+seed+'.log'
+for file in [logfile]:
     print 'Reading from fastNLO log file ', file
     # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
     with open(file, 'r') as f:
         data = re.sub(r'\s*[#CL].*', '', f.read())
         all = np.genfromtxt(StringIO(data),usecols=(ordcol,))
-        # Read the (nscl+1)*nobs values into nscl arrays of nobs entries
-        ns = nscl
-        if file==log0file:
-            ns = 1
-        for i in range(ns):
+        # Read the nscl*nobs values into nscl arrays of nobs entries
+        for i in range(nscl):
             a = []
             for j in range(nobs):
                 ind = i*nobs+j
@@ -170,7 +164,7 @@ xmin = xl[0]
 xmax = xu[nobs-1]
 
 
-for i in range(nscl+1):
+for i in range(nscl):
 
 # Closure plot
     fig = plt.figure()
@@ -202,7 +196,7 @@ for i in range(nscl+1):
 #    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio fastNLO/NNLOJET', color='orange')
     ratio = plt.errorbar(x, r_fl2nn[i,], yerr=dr_fl2nn[i,], marker='o', linestyle='none', label=r'Ratio APPLfast/NNLOJET', color='orange')
 
-    plt.xlim(0.0,34.0)
+    plt.xlim(0.0,nobs+1)
     plt.ylim(1.-ylim,1.+ylim)
 
     handles = [ratio,asymm]

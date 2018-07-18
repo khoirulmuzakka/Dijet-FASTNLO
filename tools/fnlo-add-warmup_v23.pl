@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-# fastNLO warmup table addition script
+# fastNLO warmup file addition script
 #
 # Version:
 #
@@ -24,7 +24,7 @@ use warnings;
 my $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
 print "\n##################################################\n";
-print "# fnlo-add-warmup.pl: Starting warmup table addition for fastNLO: WARMADD_$date\n";
+print "# fnlo-add-warmup.pl: Starting warmup file addition for fastNLO: WARMADD_$date\n";
 print "##################################################\n\n";
 
 #
@@ -34,83 +34,72 @@ our ( $opt_d, $opt_h, $opt_o, $opt_v, $opt_w ) = ( "", "", , "", "2.3", "" );
 getopts('dho:v:w:') or die "fnlo-add-warmup.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "fnlo-add-warmup.pl\n";
-    print "Usage: fnlo-add-warmup.pl [switches/options] scenario (2.4: observable)\n";
-    print "       e.g. for 2.4: scenario-observable_nnnn.wrm\n";
+    print "Usage: fnlo-add-warmup.pl [switches/options] glob (selects all files matching glob)\n";
+    print "       Choose glob to match e.g. files for all orders but only one table type,\n";
+    print "       e.g. for 2.4 the NNLOJET gridname: ZJtriple_yb0_ystar0_ptz\n";
     print "  -d              Verbose output\n";
     print "  -h              Print this text\n";
-    print "  -o outfile      Output filename, (def.=scen_warmup.txt)\n";
+    print "  -o outfile      Output filename, (def.=glob_warmup.txt|wrm)\n";
     print "  -v #            Choose between fastNLO version 2.3 or 2.4 (def.=2.3)\n";
-    print "  -w dir          Directory for warmup tables, (def.=scenario)\n\n";
+    print "  -w dir          Directory for warmup files, (def.=.)\n\n";
     exit;
 }
 
 #
 # Parse arguments
 #
-if ( $opt_v < 2.4 && @ARGV != 1 ) {
-    die "fnlo-add-warmup.pl: Error! Need exactly one scenario specification for version < 2.4!\n";
-} elsif ( $opt_v > 2.3 && @ARGV != 2 ) {
-    die "fnlo-add-warmup.pl: Error! Need warmup file specification in two parts for version > 2.3!\n";
+if ( @ARGV != 1 ) {
+    die "fnlo-add-warmup.pl: Error! Need exactly one filename glob!\n";
 }
-my $scen   = shift;
-my $obs    = "";
+my $glob   = shift;
 my $debug  = $opt_d;
 my $vers   = $opt_v;
-if ( $vers == 2.4 ) {
-    $obs = shift;
-}
 
 #
 # Initialization
 #
 if (($vers != 2.3) && ($vers != 2.4)) {die "fnlo-add-warmup.pl: Error! Unsupported warmup file version: $vers\n"};
-my $outfile = "${scen}_warmup.txt";
+my $outfile = "${glob}_warmup.txt";
+if ( $vers == 2.4 ) {$outfile = "${glob}_warmup.wrm";}
 if ( $opt_o ) {$outfile = $opt_o;}
-my $wdir    = "${scen}_wrm";
+my $wdir    = ".";
 if ( $opt_w ) {$wdir = $opt_w;}
 
-my $wrmglob = "${scen}*${obs}*.txt";
+my $wrmglob = "*${glob}*.txt";
 if ( $vers == 2.4 ) {
-# Correct filename should be taken from warmup files ...
-# This is only a reasonable default.
-    if ( !$opt_o) {$outfile = "${scen}-${obs}.wrm";}
-    $wrmglob = "${scen}*${obs}*.wrm";
+    $wrmglob = "*${glob}*.wrm";
 }
 
 # Directory
 my $sdir = getcwd();
 
 #
-# Analyze warmup tables
+# Analyze warmup files
 #
-print "\nfnlo-add-warmup.pl: Analyzing warmup tables\n";
+print "\nfnlo-add-warmup.pl: Analyzing warmup files\n";
 if ( -d "$wdir" ) {
     chdir $wdir;
     my @files = glob $wrmglob;
     chomp @files;
     unless ( @files ) {
-        print "fnlo-add-warmup.pl: Warning! No warm-up files found for scenario $scen,\n";
-        print "            looking for generic filename fastNLO-warmup\* instead.\n";
-        @files = glob "fastNLO-warmup*";
-        chomp @files;
-        unless ( @files ) {
-            die "fnlo-add-warmup.pl: Warning! No warm-up files found, stopped\n";
-        }
+        die "fnlo-add-warmup.pl: ERROR! No warm-up files found for filename glob $glob, aborted.\n";
     }
-    my $ifil = 0;
+    my $ifil  = 0;
     my $conti = "# This file has been calculated using";
     my $contf = "contributions.";
     my $nentf = "entries.";
     my $contr = 0;
     my $nentr = 0;
-    my $nent = 0;
-    my $nobs = 0;
-    my $stat = 0;
-    my $wrm0 = 0;
-    my $wrm1 = 0;
-    my $wrm2 = 0;
-    my $wrm3 = 0;
-    my $nscl = 0;
+    my $nent  = 0;
+    my $nobs  = 0;
+    my $nordi = "OrderInAlphas";
+    my $nord  = 0;
+    my $stat  = 0;
+    my $wrm0  = 0;
+    my $wrm1  = 0;
+    my $wrm2  = 0;
+    my $wrm3  = 0;
+    my $nscl  = 0;
     my @iobs;
     my @xmin;
     my @xmax;
@@ -123,8 +112,8 @@ if ( -d "$wdir" ) {
 # Loop over all files determining min and max values, count contributions
 #
     foreach my $file ( @files ) {
-# Do not reuse already presummed files named "warmup" for v2.4
-        if ( $vers == 2.4 && $file =~ m/warmup/ ) {next;}
+# Do not reuse already presummed files matching "warmup"
+        if ( $file =~ m/warmup/ ) {next;}
         print "fnlo-add-warmup.pl: Opening file: $file\n";
         open(INFILE,"< $file") or die "fnlo-add-warmup.pl: Error! Could not open $file!\n";
         my $ient  = 0;
@@ -136,7 +125,6 @@ if ( -d "$wdir" ) {
                 my $tmp = $in;
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
-                if ( !$opt_o) {$outfile = $tmps[7];}
             } elsif ( $vers < 2.4 && $in =~ $conti ) {
                 my $tmp = $in;
                 $tmp =~ s/^\s+//;
@@ -153,6 +141,11 @@ if ( -d "$wdir" ) {
                 chomp $tmp;
                 my @tmps = split(/\s+/,$tmp);
                 $nentr = $nentr + $tmps[1];
+            } elsif ( $in =~ m/${nordi}/ ) {
+                my $tmp = $in;
+                chomp $tmp;
+                my @tmps = split(/\s+/,$tmp);
+                $nord = max($nord,$tmps[1]);
             } elsif ( $in =~ "Warmup.Values" ) {
                 $wrm0++;
             } elsif ( $in =~ "ObsBin" && $wrm0 ) {
@@ -238,6 +231,11 @@ if ( -d "$wdir" ) {
             printf(OUTFILE "#      %d $contf\n", $contr);
         } elsif ( $in =~ m/${nentf}$/ ) {
             printf(OUTFILE "#      %d $nentf\n", $nentr);
+        } elsif ( $in =~ m/${nordi}/ ) {
+            my $tmp = $in;
+            chomp $tmp;
+            my @tmps = split(/\s+/,$tmp);
+            printf(OUTFILE "$tmps[0]   %4i           # Maximum value found in files\n", $nord);
         } elsif ( $in =~ "Warmup.Values" ) {
             print OUTFILE $in;
             $wrm0++;
@@ -292,6 +290,6 @@ if ( -d "$wdir" ) {
 
 $date = `date +%d%m%Y_%H%M%S`;
 chomp $date;
-print "\nfnlo-add-warmup.pl: Warmup table addition result file is: $outfile\n";
-print "fnlo-add-warmup.pl: Finished warmup table addition: WARMEND_$date\n";
+print "\nfnlo-add-warmup.pl: Warmup file addition result file is: $outfile\n";
+print "fnlo-add-warmup.pl: Finished warmup file addition: WARMEND_$date\n";
 exit(0);
