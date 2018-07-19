@@ -35,10 +35,9 @@ parser.add_argument('-d','--datfile', default='file.dat', required=True, nargs='
                             'only differ in seed no. will be evaluated as well.')
 parser.add_argument('-w','--weightfile', default='weight.txt', required=True, nargs='?',
                     help='.txt file containing weights.')
-#parser.add_argument('-l', '--logfile', default='file.log', required=True, nargs='?',
-#                    help='.log files, need one *0.log and one *6.log')
-parser.add_argument('-f','--fscl', default=1, required=True, nargs='?', type=int,
-                    help='Possible choices: int from fscl=1 to fscl=7.')
+parser.add_argument('-f','--fscl', default=1, nargs='?', type=int, #required=True,
+                    help='Possible choices: int from fscl=1 to fscl=7.'
+                            'Default: fscl=1.')
                     
 parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
                     help='Customise the first part of the output filename.'
@@ -48,28 +47,6 @@ parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=st
 #parse arguments
 args = vars(parser.parse_args())
 namesp = parser.parse_args()
-
-''' ###NOT needed in this script, can be removed in final version
-#take care of the input files
-#log0file = args['logfile']
-#create dictionary for order and correspoinding datfiles
-datfiles = {}
-for arg in args['datfiles']:
-    pre = arg.split('.')[0]
-    if pre in ['LO', 'NLO', 'NNLO']:
-        datfiles[pre]=arg
-    else:
-        print "Problem with datfiles."
-        sys.exit("Exit: Input ERROR.")
-
-print '\n', "datfiles: ", datfiles, '\n'
-if len(datfiles)!=3:
-    print "Check whether all required datfiles are given."
-    sys.exit("ERROR: Wrong amount of .dat files per order.")
-    #for instance if user gives two times the NLO .dat file and no NNLO
-
-'''
-
 
 
 ################################################################################
@@ -186,14 +163,10 @@ print 'arguments in datfile name: ', len(datargs)
 print "datargs: ", datargs, '\n'
 if len(datargs)==4:
     proc, jobn, obsv, ext = datargs
-    #obsv = obsv[:-2]
 elif len(datargs)==5:
     proc, jobn, kinn, obsv, ext = datargs
-    #obsv = obsv[:-2] #cut the _0 part
 elif len(datargs)==6:
     proc, jobn, kinn, obsv, seed, ext = datargs
-    #seed = seed[:-2] #cut the _0 part --> is not there in datfiles
-
 
 
 print 'proc: ', proc
@@ -203,28 +176,6 @@ print 'obsv: ', obsv
 print 'seed: ', seed
 print '\n'
 #
-
-'''
-# TODO: Do some more elaborate argument treatment and help texts
-print 'Usage:    fastnnlo_approxtest process jobname kinvegas obsv nmax fscl'
-print 'Defaults:',proc, jobn, kinn, obsv, nmax, fscl
-print 'Number of arguments given:', len(sys.argv), 'arguments.'
-print 'Argument list:', str(sys.argv)
-if len(sys.argv) > 1:
-    proc = sys.argv[1]
-if len(sys.argv) > 2:
-    jobn = sys.argv[2]
-if len(sys.argv) > 3:
-    kinn = sys.argv[3]
-if len(sys.argv) > 4:
-    obsv = sys.argv[4]
-if len(sys.argv) > 5:
-    if sys.argv[5] != '_':
-        nmax = int(sys.argv[5])
-if len(sys.argv) > 6:
-    fscl = int(sys.argv[6])
-print 'Actual:  ',proc, jobn, kinn, obsv, nmax, fscl
-'''
 
 
 # Extract order/contribution from job type (substring before first '-')
@@ -245,13 +196,8 @@ weights = [] # Weight factors
 seeds = []   # Seed numbers for matching
 
 # Read binning and cross sections from NNLOJET dat file
-datglob  = order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*.dat' #PROBLEM: this is tied to a certain structure (quite inconvenient), should be more flexible according to given data file
-print 'datglob old', datglob
-
-#datglob = datfile[:-9]+'*.dat' #or better: cut extension and seed and add '.s*.dat'
 datglob = datfile[:-(len(seed)+len(ext))]+'*.dat'
-#datglob = order+'/'+datbase[:-9]+'*.dat'
-print 'datglob new', datglob, '\n'
+#print 'datglob ', datglob, '\n'
 
 
 datfiles = glob.glob(datglob)
@@ -266,7 +212,7 @@ for datfile in datfiles:
         xl.append(np.loadtxt(datfile,usecols=(0,)))
         xu.append(np.loadtxt(datfile,usecols=(2,)))
     xs_nnlo.append(np.loadtxt(datfile,usecols=(ixscol,)))
-    print "xs_nnlo \n", xs_nnlo ## just to see what's happening
+    #print "xs_nnlo \n", xs_nnlo ## just to see what's happening
     parts = datfile.split(".")
     seed  = parts[len(parts)-2]
     seeds.append(seed)
@@ -283,8 +229,6 @@ nobs = xl.size
 print 'Number of observable bins: ', nobs, '\n'
 
 # Read weights per file per bin from Alex
-#wgtfile = 'Combined/Final/'+order+'.'+obsv+'.'+'APPLfast.txt'  #should be accessible more flexibly
-#wgtfile = args['weightfile'] #handle this already in the beginning with the other args
 wgtnams = np.genfromtxt(wgtfile, dtype=None, usecols=0)
 wgttmps = np.loadtxt(wgtfile, usecols=(list(range(1,nobs+1))))
 ntmp = len(wgtnams)
@@ -295,54 +239,19 @@ wgttup.sort(key = lambda row: (row[0]))
 allnames,allweights = zip(*wgttup)
 print 'datfile names in weightfile: \n', np.array(allnames), '\n'
 
-#################################################
-#the following for-loop can be removed
-#was just there to find the best possibility to access the correct wgtfile entries
-for dfile in datfiles:
-    dirna = os.path.dirname(dfile)
-    basena = os.path.basename(dfile)
-    newna = './'+order+'/'+basena
-    print 'dirname', dirna, ' --- basename ', basena
-    print './+order+basename', newna, '\n' #that's the way they're listed in wgtfile
+#print 'datfiles array: \n', np.array(datfiles), '\n'
 
-print 'datfiles array: \n', np.array(datfiles), '\n'
-
-####################HERE IS THE CURRENT DIFFICULTY --> IMPLEMENT NEW HANDLING OF ORDER STRUCTURE
-#make it possible to use less .dat files than entries in the weightfile
-#select the corresponding weightfile-entries
-
-###new attempt for different handling:
-#ncount = 0 #used to be handled via nlin, but now nlin has new meaning
-            #nlin refers to line number only temporarily
-            #whereas ncount counts how many lines of the weightfiles are used
 for dfile in datfiles:
     newna = './'+order+'/'+os.path.basename(dfile)
     indexlin = allnames.index(newna)
     print 'Weight file line no. ', indexlin, ' is for ' , allnames[indexlin]
     weights.append(allweights[indexlin])
-    #ncount+=1
     nlin+=1
 weights = np.array(weights)
 
-print '\n', 'Using %s weight lines.' %nlin  #%ncount
+print '\n', 'Using %s weight lines.' %nlin 
 print '\n','weights-array: \n', weights,'\n'
 
-
-
-''' ##Do we always need all the seeds?
-for name in allnames:
-    print 'Weight file line no. ', nlin, ' is for ', name 
-    if seeds[nlin] not in name:
-        print 'seeds[',nlin,'] = ', seeds[nlin],', weight file name = ', name
-        sys.exit('ERROR: Mismatch in result sort order between NNLOJET and NNLOJET weights. Aborted!')
-    else:
-        weights.append(allweights[nlin])
-    nlin += 1
-    if nlin == nmax:
-        break
-weights = np.array(weights)
-print 'Using ', nlin, 'weight lines.'
-'''
 
 # Evaluate cross sections from fastNLO tables
 # INFO=0, WARNING=1
@@ -367,30 +276,20 @@ print 'Using ', nlin, 'weight lines.'
 # assume that corresponding logfiles are located in the same directory as the datfiles
 log_list=[]
 if fscl == 1:
-    #fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_0.log')
-    
-    #fnlologsname = order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_0.log'
-    #print fnlologsname
-    #fnlologs_new = glob.glob(datfiles[0][:-3]+'_0.log')
-    #print datfiles[0][:-(len(ext)+1)]
-    #print fnlologs_new
-    
     for dfile in datfiles:
         log_list.append(dfile[:-(len(ext)+1)]+'_0.log')
     fnlologs = np.array(log_list)
     print 'fnlologs: \n', fnlologs, '\n'
-    
-#else:
+
 elif fscl in range(1, 8, 1): # fscl restricted to values from 1 (see above) to 7.
-    #fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_6.log')
     for dfile in datfiles:
         log_list.append(dfile[:-(len(ext)+1)]+'_6.log')
     fnlologs = np.array(log_list)
     print 'fnlologs: \n', fnlologs, '\n'
-    
+
 else:
     sys.exit("Choice of fscl does not make sense. Aborted!")
-    #Shall we really cancel it or just set fscl to 1 then?
+
 
 fnlologs.sort()
 for fnlolog in fnlologs:
@@ -413,23 +312,20 @@ for fnlolog in fnlologs:
 print 'Using ', nlog, 'pre-evaluated table files.'
 xs_fnll = np.array(xs_fnll)
 
-print 'xs_fnll', xs_fnll ####just to have a look at it
+#print 'xs_fnll', xs_fnll ####just to have a look at it
 
 # Check on identical file numbers, either for table or log files and weight lines
 if ndat == nlog == nlin and ndat*nlog*nlin != 0:
     print 'OK: Have equal number of dat files, fastNLO results, and weight lines: ndat = ', ndat, ', nlog = ', nlog, ', nlin = ', nlin
-#if ndat == nlog == ncount and ndat*nlog*ncount != 0:
-    #print 'OK: Have equal number of dat files, fastNLO results, and weight lines: ndat = ', ndat, ', nlog = ', nlog, ', ncount = ', ncount
 else:
 #    sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', ntab = '+str(ntab))
     sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', nlog = '+str(nlog)+', nlin = '+str(nlin))
-    #sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', nlog = '+str(nlog)+', ncount = '+str(ncount))
 #r_f2nt = xs_fnlt/xs_nnlo
 r_f2nl = xs_fnll/xs_nnlo
 a_f2nl = (xs_fnll - xs_nnlo)/(xs_fnll + xs_nnlo)
 
-print 'r_f2nl', r_f2nl ####just to have a look at it
-print 'a_f2nl', a_f2nl ####just to have a look at it
+#print 'r_f2nl', r_f2nl ####just to have a look at it
+#print 'a_f2nl', a_f2nl ####just to have a look at it
 
 # Ratio statistics
 _ratio_stats  = hist_stats(r_f2nl, weights=weights, axis=0)
@@ -440,7 +336,7 @@ rwst_f2nl    = _ratio_stats['weighted_stddev']
 rmed_f2nl    = _ratio_stats['median']
 riqd_f2nl    = _ratio_stats['iqd2']
 
-print 'rave_f2nl', rave_f2nl ####just to have a look at it
+#print 'rave_f2nl', rave_f2nl ####just to have a look at it
 
 # Asymmetry statistics
 _asymm_stats = hist_stats(a_f2nl, weights=weights, axis=0)
@@ -451,8 +347,8 @@ awst_f2nl = _asymm_stats['weighted_stddev']
 amed_f2nl = _asymm_stats['median']
 aiqd_f2nl = _asymm_stats['iqd2']
 
-print 'awav_f2nl', awav_f2nl ####just to have a look at it
-print 'aave_f2nl', aave_f2nl ####just to have a look at it
+#print 'awav_f2nl', awav_f2nl ####just to have a look at it
+#print 'aave_f2nl', aave_f2nl ####just to have a look at it
 
 # Ratio plot
 limfs = 'x-large'
