@@ -219,35 +219,37 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    bool lwarm  = !access(GetWarmupTableFilename().c_str(), R_OK);
    bool lsteer = !access(steerfile.c_str(), R_OK);
    if (! lwarm) {
-      logger.info["fastNLOCreate"] << "Warmup file does not exist, so presumably this is a warmup run: " << GetWarmupTableFilename() << endl;
+     logger.info["fastNLOCreate"] << "Warmup file does not exist, so presumably this is a warmup run: " << GetWarmupTableFilename() << endl;
    } else {
-      // Read steering from warmup, if exists, into namespace
-      ReadSteeringFile(fWarmupFilename,steeringNameSpace);
+     // Read steering from warmup, if exists, into namespace
+     ReadSteeringFile(fWarmupFilename,steeringNameSpace);
    }
    if (! lsteer) {
-      logger.info["fastNLOCreate"] << "Steering file does not exist, try to run with preset values: " << steerfile << endl;
+     logger.info["fastNLOCreate"] << "Steering file " << steerfile << " does not exist, try to run with preset values!" << endl;
    } else {
-      // At last, read steering for final completions and modifications
-      ReadSteeringFile(steerfile,steeringNameSpace);
+     // At last, read steering for final completions and modifications
+     ReadSteeringFile(steerfile,steeringNameSpace);
    }
    // DEBUG
-   // PRINTALL();
-   //! Update constants from steering namespace
-   SetGenConstsFromSteering();
-   logger.debug["fastNLOCreate"] << "SetGenConsts from warmup and steering" << endl;
-   SetProcConstsFromSteering();
-   logger.debug["fastNLOCreate"] << "SetProcConsts from warmup and steering" << endl;
-   SetScenConstsFromSteering();
-   logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
-   if (read_steer::getVerbosity() < 0) {
-      PrintTableConsts();
+   //   PRINTALL();
+   //! Update constants from steering namespace, but only if either of warmup or steering file exist!
+   if ( lwarm || lsteer ) {
+     SetGenConstsFromSteering();
+     logger.debug["fastNLOCreate"] << "SetGenConsts from warmup and steering" << endl;
+     SetProcConstsFromSteering();
+     logger.debug["fastNLOCreate"] << "SetProcConsts from warmup and steering" << endl;
+     SetScenConstsFromSteering();
+     logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
+     if (read_steer::getVerbosity() < 0) {
+       PrintTableConsts();
+     }
    }
 
    //! Do some basic checks on the table constants
    if (! CheckTableConsts()) {
-      logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
-      PrintTableConsts();
-      exit(1);
+     logger.error["fastNLOCreate"]<<"Table constants not properly initialised! Please check the table constants:"<<endl;
+     PrintTableConsts();
+     exit(1);
    }
 
    // Check and transform parton combinations
@@ -440,6 +442,7 @@ void fastNLOCreate::SetGenConstsFromSteering() {
    logger.debug["SetGenConstsFromSteering"] << "Steerfile is: " << fSteerfile << endl;
    // Generator constants
    if (EXIST_NS(CodeDescription,fSteerfile)) {
+     std::cout << "FFF" << std::endl;
       vector<string > CodeDescr = STRING_ARR_NS(CodeDescription,fSteerfile);
       fGenConsts.Name = CodeDescr[0];
       if (CodeDescr.size() > 1) {
@@ -656,6 +659,7 @@ void fastNLOCreate::SetScenConstsDefaults() {
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
    fScenConsts.FlexibleScaleTable = false;
+   fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
    fScenConsts.ReadBinningFromSteering = false;
    fScenConsts.IgnoreWarmupBinningCheck = false;
@@ -700,6 +704,8 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(OutputCompression,fSteerfile))           fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
    if (EXIST_NS(FlexibleScaleTable,fSteerfile))          fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
    fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
+   if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
+   fIsInclusiveJets = fScenConsts.InclusiveJets;
    if (EXIST_NS(ScaleVariationFactors,fSteerfile))       fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
    if (EXIST_NS(ReadBinningFromSteering,fSteerfile))     fScenConsts.ReadBinningFromSteering = BOOL_NS(ReadBinningFromSteering,fSteerfile);
    if (fScenConsts.ReadBinningFromSteering) {
@@ -756,6 +762,7 @@ void fastNLOCreate::PrintScenConsts() {
    logger.info["PrintScenConsts"] << "If zlib available, gzip output table: " << fScenConsts.OutputCompression << endl;
    logger.info["PrintScenConsts"] << "Number of decimal digits to store in output table: " << fScenConsts.OutputPrecision << endl;
    logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
+   logger.info["PrintScenConsts"] << "InclusiveJets setting for NNLOJET: " << fScenConsts.InclusiveJets << endl;
    for (unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++) {
       logger.info["PrintScenConsts"] << "Factorization scale variation factor [" << i << "]: " << fScenConsts.ScaleVariationFactors[i] << endl;
    }
@@ -958,6 +965,7 @@ void fastNLOCreate::Instantiate() {
    SetFilename(filename);
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
+   fIsInclusiveJets  = fScenConsts.InclusiveJets;
    fApplyPDFReweight = fScenConsts.ApplyPDFReweighting;
    SetOutputPrecision(fScenConsts.OutputPrecision);
 
@@ -1196,16 +1204,16 @@ void fastNLOCreate::ReadScaleFactors() {
    fScaleFac.resize(svar.size());
    if (svar.empty()) {
       // 'ScaleVariationFactors' not found -> using default
-      logger.warn["ReadScaleFactors"]<<"No list of scale-factors found in steering file. Using only scale-factor of '1'."<<endl;
+      logger.warn["ReadScaleFactors"]<<"No list of scale-factors found in steering file. Using only scale-factor of '1.0'."<<endl;
       fScaleFac.push_back(1.0);
    } else if (GetTheCoeffTable() && GetTheCoeffTable()->IsLO()) {
       // scale-factors not needed -> using default of 1.0
-      logger.info["ReadScaleFactors"]<<"This is a leading-order run. There is no MuF scale dependence in LO. Using only scale factor of 1."<<endl;
+      logger.info["ReadScaleFactors"]<<"This is a leading-order run. There is no MuF scale dependence in LO. Using only scale factor of 1.0."<<endl;
       fScaleFac.resize(1);
       fScaleFac[0] = 1.0;
    } else if (fIsWarmup) {
       // scale-factors not needed -> using default of 1.0
-      logger.info["ReadScaleFactors"]<<"This is a warmup run. Using only scale factor of 1."<<endl;
+      logger.info["ReadScaleFactors"]<<"This is a warmup run. Using only scale factor of 1.0."<<endl;
       fScaleFac.resize(1);
       fScaleFac[0] = 1.0;
    } else  {
@@ -4044,14 +4052,14 @@ void  fastNLOCreate::InitInterpolationKernels() {
       wrmMu1Dn = GetColumnFromTable(fWarmupConsts.Values, 3) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"min"),fSteerfile);
       wrmMu1Up = GetColumnFromTable(fWarmupConsts.Values, 4) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(0,"max"),fSteerfile);
       if (wrmMu1Dn.size()!=GetNObsBin() || wrmMu1Up.size()!= GetNObsBin()) {
-         logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu1. Exiting."<<endl;
+         logger.error["InitInterpolationKernels"]<<"Insufficient no. of rows for warmup values of Mu1. Exiting."<<endl;
          exit(1);
       }
       if (fIsFlexibleScale) {
          wrmMu2Dn = GetColumnFromTable(fWarmupConsts.Values, 5) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"min"),fSteerfile);
          wrmMu2Up = GetColumnFromTable(fWarmupConsts.Values, 6) ;//read_steer::getdoublecolumn("Warmup.Values",GetWarmupHeader(1,"max"),fSteerfile);
          if (wrmMu2Dn.size()!=GetNObsBin() || wrmMu2Up.size()!= GetNObsBin()) {
-            logger.error["InitInterpolationKernels"]<<"Could not read warmup values for Mu2. Exiting."<<endl;
+            logger.error["InitInterpolationKernels"]<<"Insufficient no. of rows for warmup values for Mu2. Exiting."<<endl;
             exit(1);
          }
       }
@@ -4166,6 +4174,8 @@ std::vector<double> fastNLOCreate::GetColumnFromTable(const std::vector<std::vec
    for (unsigned int i = 0 ; i<table.size(); i++) {
       if ((int)table[i].size() <= iCol) {
          logger.error["GetColumnFromTable"]<< "Table does not have enough columns in row "<<i<<". Exiting."<<endl;
+         logger.error["GetColumnFromTable"]<< "E.g., flexible-scale tables need more columns in warmup table than fixed-scale tables."<<endl;
+         logger.error["GetColumnFromTable"]<< "Please check your warmup file."<<endl;
          exit(1);
       }
       ret.push_back(table[i][iCol]);
