@@ -1,6 +1,10 @@
-# Use
+# 1. Describe actual state
 git describe
-# to list tags and
+# 2. List tags
+git tag -l
+# 3. Count commits until master since last revision tag lasttag
 git rev-list lasttag..master --count
-# to count additional commits since then and use
+# 4. Set annotated tag adding up lasttag and commit count since then
 git tag -a -m "message" lasttag+count
+# 5. Push tag to master
+git push origin lasttag+count
