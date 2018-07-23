@@ -1,0 +1,6 @@
+# Use
+git describe
+# to list tags and
+git rev-list lasttag..master --count
+# to count additional commits since then and use
+git tag -a -m "message" lasttag+count
