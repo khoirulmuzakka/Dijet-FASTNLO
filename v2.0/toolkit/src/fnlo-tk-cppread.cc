@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
          info["fnlo-tk-cppread"] << "prints out a table with detailed binning and cross-section information" << endl;
          info["fnlo-tk-cppread"] << "for each observable bin." << endl;
          man << "" << endl;
-         man << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm]" << endl;
+         man << "Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm] [flexscale]" << endl;
          man << "       Specification: <> mandatory; [] optional." << endl;
          man << "<fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab" << endl;
          man << "[PDF]: PDF set, def. = CT10nlo" << endl;
@@ -99,8 +99,11 @@ int main(int argc, char** argv) {
          man << "                     QCDNUM, or HOPPET, IF compiled with these options!" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
-         man << "[flex]: Scale choice for flex-scale tables, def. = scale1." << endl;
-         man << "   Alternatives: \"scale2\"" << endl;
+         man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
+         man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
+         man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -191,7 +194,7 @@ int main(int argc, char** argv) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
-      shout["fnlo-tk-cppread"] << "Using default scale 1." << endl;
+      shout["fnlo-tk-cppread"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
    }
@@ -977,6 +980,18 @@ int main(int argc, char** argv) {
                                        << "                        Please check how this table was filled!" << endl;
             } else if ( chflex == "scale2" ) {
                fnlo->SetMuFFunctionalForm(kScale2);
+               fnlo->SetMuRFunctionalForm(kScale2);
+               info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
+                                       << "from only the second scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "scale12" ) {
+               fnlo->SetMuFFunctionalForm(kScale2);
+               fnlo->SetMuRFunctionalForm(kScale1);
+               info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
+                                       << "from only the first scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "scale21" ) {
+               fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
                                        << "from only the second scale of this flexible-scale table." << endl

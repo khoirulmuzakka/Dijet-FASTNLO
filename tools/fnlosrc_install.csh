@@ -664,7 +664,8 @@ endif
 # fastNLO Toolkit:
 #------------------------------------------------------------------------------
 #set arc="fastnlo_toolkit-2.3.1pre-2441"
-set arc="fastnlo_toolkit-2.3.1pre-2496"
+#set arc="fastnlo_toolkit-2.3.1pre-2496"
+set arc="fastnlo_toolkit-2.3.1pre-2550"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
@@ -739,8 +740,9 @@ if ( $withnnlojet ) then
 # nnlo-bridge to NNLOJet:
 #------------------------------------------------------------------------------
     set arc="nnlo-bridge-0.0.36"
-# Previous buggy: set rev="rev1683M3"
-    set rev="rev1683M5"
+# Previous buggy:    set rev="rev1683M3"
+# Improve interface --> M7: set rev="rev1683M5"
+    set rev="rev1683M7"
     if ( ! -e ${arc}_installed  ) then
     tar xzf ${arc}-${rev}.tar.gz
     cd ${arc}
