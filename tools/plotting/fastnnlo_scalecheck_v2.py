@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
 import argparse
-import glob, os, pylab, sys
 import matplotlib as mpl
+mpl.use('Agg')
+import glob, os, pylab, sys
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -32,8 +33,8 @@ parser = argparse.ArgumentParser()
 #add arguments (one .dat and two .log files)
 parser.add_argument('-d','--datfile', default='file.dat', required=True,
                     help='.dat file for evaluation.')
-parser.add_argument('-l', '--logfiles', default='file.log', required=True, nargs=2,
-                    help='.log files, need one *0.log and one *6.log')
+parser.add_argument('-l', '--logfile', default='file.log', required=True,
+                    help='.log file, need one *.log file')
 
 parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
                     help='Customise the first part of the output filename.'
@@ -45,15 +46,9 @@ namesp = parser.parse_args()
 
 #take care of the input files
 datfile = args['datfile']
-if ('_0' in args['logfiles'][0]) and ('_6' in args['logfiles'][1]):
-    log0file = args['logfiles'][0]
-    log6file = args['logfiles'][1]
-elif ('_6' in args['logfiles'][0]) and ('_0' in args['logfiles'][1]):
-    log6file = args['logfiles'][0]
-    log0file = args['logfiles'][1]
-else:
-    print "Could not identify log0file or/and log6file. Check choice of log-files."
-    sys.exit("Exit: Input ERROR.")
+logfile = args['logfile']
+print logfile
+print type(logfile)
 
 params = {'legend.fontsize': 'x-large',
           'figure.figsize': (16, 12),
@@ -68,20 +63,19 @@ params = {'legend.fontsize': 'x-large',
 pylab.rcParams.update(params)
 
 #arguments
-log0base = os.path.basename(log0file)
-#proc = os.path.splitext(log0file)[0]
+log0base = os.path.basename(logfile)
+#proc = os.path.splitext(logfile)[0]
 log0args = log0base.split(".")
 print log0args
 
 #some default values
 seed = '' #default
-nscl = 6 # central + nscl fixed scales
+nscl = 1 # no. of scale settings to investigate (central + scale factor or fixed scale variations)
 ylim = 0.01
 
 #arguments from logfile
 if len(log0args)==5:
     proc, jobn, kinn, obsv, ext = log0args
-    obsv = obsv[:-2] #cut the _0 part
     print 'proc: ', proc
     print 'jobn: ', jobn
     print 'kinn: ', kinn
@@ -89,7 +83,6 @@ if len(log0args)==5:
     print '\n'
 elif len(log0args)==6:
     proc, jobn, kinn, obsv, seed, ext = log0args
-    seed = seed[:-2] #cut the _0 part
     print 'proc: ', proc
     print 'jobn: ', jobn
     print 'kinn: ', kinn
@@ -98,7 +91,6 @@ elif len(log0args)==6:
     print '\n'
 elif len(log0args)==4:
     proc, jobn, obsv, ext = log0args
-    obsv = obsv[:-2]
     print 'proc: ', proc
     print 'jobn: ', jobn
     print 'obsv: ', obsv
@@ -131,9 +123,6 @@ xm = xs_all[:,1]
 xu = xs_all[:,2]
 xs_nnlo  = []
 dxs_nnlo = []
-for i in range(nscl+1):
-    xs_nnlo.append(xs_all[:,2*i+3]/1000) # Conversion of fb to pb
-    dxs_nnlo.append(xs_all[:,2*i+4]/1000)
 
 # Determine no. of observable bins
 nobs = xl.size
@@ -160,25 +149,33 @@ xb = np.arange(1, nobs+1.e-6)
 #xs_fnla = np.array(xs_fnla)
 
 # Evaluate cross sections from pre-evaluated fastNLO tables
-for file in [log0file, log6file]:
+for file in [logfile]:
     print 'Reading from fastNLO log file ', file
     # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
     with open(file, 'r') as f:
         data = re.sub(r'\s*[#CL].*', '', f.read())
-        all = np.genfromtxt(StringIO(data),usecols=(ordcol,))
-        # Read the (nscl+1)*nobs values into nscl arrays of nobs entries
-        ns = nscl
-        if file==log0file:
-            ns = 1
-        for i in range(ns):
+        all_contrib = np.genfromtxt(StringIO(data), usecols=(ordcol,))
+        ##print "type of 'all_contrib'", type(all_contrib)
+        ##print "size of 'all_contrib'", np.shape(all_contrib)
+        ##print "length of all_contrib", len(all_contrib)
+        ##print "all_contrib: \n", all_contrib
+        # Calculate number of scale variations (default nscl=1, see above)
+        nscl = len(all_contrib)/nobs
+        print "nscl", nscl
+        # Read the nscl*nobs values into nscl arrays of nobs entries
+        for i in range(nscl):
             a = []
             for j in range(nobs):
                 ind = i*nobs+j
-                a.append(all[ind])
+                a.append(all_contrib[ind])
             xs_fnll.append(a)
 
+for i in range(nscl):
+    xs_nnlo.append(xs_all[:,2*i+3]/1000) # Conversion of fb to pb
+    dxs_nnlo.append(xs_all[:,2*i+4]/1000)
+
 xs_fnll = np.array(xs_fnll)
-#print "xs_fnll", xs_fnll
+##print "xs_fnll", xs_fnll
 
 r_fl2nn  = np.divide(xs_fnll, xs_nnlo, out=np.ones_like(xs_fnll), where=xs_nnlo!=0)
 a_fl2nn  = np.divide(xs_fnll-xs_nnlo, xs_fnll+xs_nnlo, out=np.zeros_like(xs_fnll), where=xs_nnlo!=0) + 1.
@@ -196,7 +193,7 @@ xmin = xl[0]
 xmax = xu[nobs-1]
 
 
-for i in range(nscl+1):
+for i in range(nscl):
 
 # Closure plot
     fig = plt.figure()
@@ -228,7 +225,7 @@ for i in range(nscl+1):
 #    ratio = plt.errorbar(x, r_fl2nn[i,], yerr=0.*x, marker='o', linestyle='none', label=r'Ratio fastNLO/NNLOJET', color='orange')
     ratio = plt.errorbar(x, r_fl2nn[i,], yerr=dr_fl2nn[i,], marker='o', linestyle='none', label=r'Ratio APPLfast/NNLOJET', color='orange')
 
-    plt.xlim(0.0,34.0)
+    plt.xlim(0.0,nobs+1)
     plt.ylim(1.-ylim,1.+ylim)
 
     handles = [ratio,asymm]
