@@ -100,13 +100,10 @@ print 'arguments in logfile name: ', len(log0args)
 print log0args
 if len(log0args)==4:
     proc, jobn, obsv, ext = log0args
-    obsv = obsv[:-2]
 elif len(log0args)==5:
     proc, jobn, kinn, obsv, ext = log0args
-    obsv = obsv[:-2] #cut the _0 part
 elif len(log0args)==6:
     proc, jobn, kinn, obsv, seed, ext = log0args
-    seed = seed[:-2] #cut the _0 part
 
 
 print 'proc: ', proc
@@ -215,12 +212,11 @@ dst_nnlo = np.divide(dxs_nnlo, xs_nnlo, out=np.ones_like(dxs_nnlo), where=xs_nnl
 dk_nlo   = np.multiply(kn_nlo,dst_nlo)
 dk_nnlo  = np.multiply(kn_nnlo,dst_nnlo)
 
-print dst_nlo
-print dst_nnlo
+##print dst_nlo
+##print dst_nnlo
 
-
-print dk_nlo
-print dk_nnlo
+##print dk_nlo
+##print dk_nnlo
 
 
 # Prepare plotting
