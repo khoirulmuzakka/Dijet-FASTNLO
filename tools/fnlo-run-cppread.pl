@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 #
-# Run fnlo-tk-cppread on all matching fastNLO tables in cwd and store log file
+# Run fnlo-tk-cppread on all matching fastNLO tables in cwd and
+# store log file for numerical crosschecks
+#
 # Version:
 #
 # created by K. Rabbertz: 10.10.2006
@@ -28,19 +30,29 @@ print "######################################################\n\n";
 #
 # Parse options
 #
-our ( $opt_h, $opt_v ) = ( "", "2.3" );
-getopts('hv:') or die "fnlo-run-cppread.pl: Malformed option syntax!\n";
+our ( $opt_a, $opt_h, $opt_n, $opt_p, $opt_s ) = ( "LHAPDF", "", 1, "CT10nlo", "scale1" );
+getopts('a:hn:p:s:') or die "fnlo-run-cppread.pl: Malformed option syntax!\n";
 if ( $opt_h ) {
     print "\nfnlo-run-cppread.pl\n";
     print "Usage: fnlo-run-cppread.pl glob (selects all files matching glob)\n";
+    print "  -a ascode       Choose alpha_s evolution code (def.=LHAPDF)\n";
+    print "                  For alternatives check output of tnlo-tk-cppread -h\n";
     print "  -h              Print this text\n";
-    print "  -v #            Choose between fastNLO versions 2.3 and ? (def.=2.3)\n\n";
+    print "  -n nvars        Choose scale variations (def.=1)\n";
+    print "  -p pdfset       Choose PDF set (def.=CT10nlo)\n";
+    print "  -s scale        Choose mur & muf scales (def.=scale1)\n";
+    print "                  For comparison of flex-scale tables to NNLOJET use:\n";
+    print "                  - DIS: scale12, DIS inclusive jets with pTjet: scale1\n";
+    print "                  - pp : scale21, pp  inclusive jets with pTjet: scale2\n\n";
     exit;
 }
-unless ( $opt_v eq "2.3" ) {
-    die "fnlo-run-cppread.pl: Error! Unsupported fastNLO $opt_v, aborted.\n";
-}
-my $vers  = $opt_v;
+my $ascode = $opt_a;
+my $nvars  = $opt_n;
+my $pdf    = $opt_p;
+my $norm   = "_";
+my $scale  = $opt_s;
+
+
 
 #
 # Parse arguments
@@ -54,12 +66,6 @@ print "fnlo-run-cppread.pl: Checking for file glob $glstr ...\n";
 my @files = glob "*${glstr}*.tab*";
 chomp @files;
 
-# tmp
-my $pdf    = "CT14nnlo";
-my $nvars  = "_";
-my $ascode = "LHAPDF";
-my $norm   = "_";
-my $flex   = "scale2";
 
 #
 # fnlo-tk-cppread
@@ -69,21 +75,16 @@ foreach my $file (@files) {
     my $logfil = $file;
     $logfil =~ s/\.tab\.gz$//;
     $logfil =~ s/\.tab$//;
-    my $log1 = $logfil."_0.log";
-    my $log2 = $logfil."_6.log";
-# Run I for central scale
-    my $cmd = "fnlo-tk-cppread $file $pdf $nvars $ascode $norm $flex &> $log1";
-    system($cmd);
-    my $ret = $?;
-    if ( ! $ret ) {
-#        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
-    }
-# Run II for scale vars
-    $cmd = "fnlo-tk-cppread $file $pdf -6 $ascode $norm &> $log2";
-    system($cmd);
-    $ret = $?;
-    if ( ! $ret ) {
-#        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
+    my $log = $logfil.".log";
+    if ( ! -f $logfil ) {
+        my $cmd = "fnlo-tk-cppread $file $pdf $nvars $ascode $norm $scale &> $log";
+        system($cmd);
+        my $ret = $?;
+        if ( ! $ret ) {
+            #        print "fnlo-run-cppread.pl: WARNING! Problem in evaluation of table $file\n";
+        }
+    } else {
+        print "fnlo-run-cppread.pl: WARNING! log file $logfil exists already, skipped!\n";
     }
 }
 
