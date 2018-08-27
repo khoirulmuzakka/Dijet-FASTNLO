@@ -57,7 +57,7 @@ datfiles = {} ###### use basename!!!
 
 for arg in args['datfiles']:
     arg0 = os.path.basename(arg)
-    pre = arg0.split('.')[0]
+    pre = arg0.split('.')[1]    #new datfile name-format with <proc>.<ord>....dat
     if pre in ['LO', 'NLO', 'NNLO']:
         pathdatfiles[pre]=arg
         datfiles[pre]=arg0
