@@ -507,7 +507,7 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values): #takes pre-cal
     if args['outputfilename'] is None:
 	fignam = proc+'.'+jobn+'.'+obsv+'.'+'fscl'+str(fscl)+'.'+'approx_ratio_'+str(ndat)+'.png'
     else:
-	fignam = args['outputfilename']+'.approx_ratio_'+str(ndat)+'.png'
+	fignam = args['outputfilename']+'.fscl'+str(fscl)+'.approx_ratio_'+str(ndat)+'.png'
     plt.savefig(fignam)
     #print "Ratio plot saved as: %s" %fignam
     #plt.show()
@@ -560,7 +560,7 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values): #takes pre-cal
     if args['outputfilename'] is None:
 	fignam = proc+'.'+jobn+'.'+obsv+'.'+'fscl'+str(fscl)+'.'+'approx_asymm_'+str(ndat)+'.png'
     else:
-	fignam = args['outputfilename']+'.approx_asymm_'+str(ndat)+'.png' #should fscl necessarily be added, too?
+	fignam = args['outputfilename']+'.fscl'+str(fscl)+'.approx_asymm_'+str(ndat)+'.png' #should fscl necessarily be added, too?
     plt.savefig(fignam)
     #print "Asymmetry plot saved as: %s" %fignam
     #plt.show()
