@@ -562,7 +562,6 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
    for ( unsigned int k=0; k<processes.size(); k++ ) {
       pair<int,int> p = processes[k];
       // search for selected process in fPDFCoeff
-      bool fff = false;
       for ( unsigned int i = 0; i<fPDFCoeff.size(); i++ ) {
          for ( unsigned int j = 0; j<fPDFCoeff[i].size(); j++ ) {
 	    if ( p == fPDFCoeff[i][j] ) {
@@ -579,7 +578,6 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
 	       if (!f)
 		  return false;
 	       s.push_back(i);
-	       fff = true;
 	    }
 	 }
       }
