@@ -3522,18 +3522,18 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
               GetWarmupHeader(1,"min").c_str(), GetWarmupHeader(1,"max").c_str());
       strm<<buf<<endl;
       // table values
+
+      // 1. Are warmup-values identical to bin-boundaries ?
+      int ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
+      int ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
+      fWMu1Rnd = fWMu1;
+      fWMu2Rnd = fWMu2;
+
+      // write all bins
       for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
          // --- write x-values
          sprintf(buf,"   %4d    %9.1e  %9.2e",   i, fWxRnd[i].first, fWxRnd[i].second);
 
-	 printf("  %14.6f  %14.6f",fWMu2[i].first,fWMu2[i].second);
-         // 1. Are warmup-values identical to bin-boundaries ?
-         int ident1 = CheckWarmupValuesIdenticalWithBinGrid(fWMu1);
-         int ident2 = CheckWarmupValuesIdenticalWithBinGrid(fWMu2);
-	 printf("  %14.6f  %14.6f\n",fWMu2[i].first,fWMu2[i].second);
-
-         fWMu1Rnd = fWMu1;
-         fWMu2Rnd = fWMu2;
          // --- write mu1
          if (ident1 > 0) {
             // mu-value is identical with binning
@@ -3546,24 +3546,24 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             // scale values are floating points.
             // -> round them up/down a bit
             // extent range by 2%
-	    if (ident1 < 0 ) 
-	      fWMu1Rnd[i].first  = fWMu1[i].first;
-	    else
-	      fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
-            fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
-            RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
-
-            // if values are very close to an integer, it is likely that this is by purpose
-            if (fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
-               fWMu1Rnd[i].first = round(fWMu1[i].first);
-            if (fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
-               fWMu1Rnd[i].second = round(fWMu1[i].second);
-
-            string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
-            sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
+	   if (ident1 < 0 ) 
+	     fWMu1Rnd[i].first  = fWMu1[i].first;
+	   else 
+	     fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
+	   
+	   fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
+	   
+	   RoundValues(fWMu1Rnd,fWarmupNDigitMu1, (ident1<0 ? 2 : 0 ) ); // digit here should be identical to output in outwarmup
+	   // if values are very close to an integer, it is likely that this is by purpose
+	   if ( ident1==0 && fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
+	     fWMu1Rnd[i].first = round(fWMu1[i].first);
+	   if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
+		fWMu1Rnd[i].second = round(fWMu1[i].second);
+	   
+	   string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
+	   sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
          }
 
-	 printf("  %14.6f  %14.6f\n",fWMu2[i].first,fWMu2[i].second);
          // --- write mu2
          if (ident2 > 0 ) {
             // mu-value is identical with binning
@@ -3580,23 +3580,18 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	      fWMu2Rnd[i].first = fWMu2[i].first; // use bin boundary
 	    else 
 	      fWMu2Rnd[i].first  = fWMu2[i].first - 0.06*fabs(fWMu2[i].first);
+	    
 	    fWMu2Rnd[i].second = fWMu2[i].second + 0.06*fabs(fWMu2[i].second);
-	    printf("c   %14.6f  %14.6f\n",fWMu2[i].first,fWMu2[i].second);
-	    printf("cr  %14.6f  %14.6f\n",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-            RoundValues(fWMu2Rnd,fWarmupNDigitMu2); // digit here should be identical to output in outwarmup
-	    printf("c   %14.6f  %14.6f\n",fWMu2[i].first,fWMu2[i].second);
-	    printf("cr  %14.6f  %14.6f\n",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-
+	    RoundValues(fWMu2Rnd,fWarmupNDigitMu2 , (ident2<0 ? 2 : 0)); // digit here should be identical to output in outwarmup
+	    
             // if values are very close to an integer, it is likely that this is by purpose
-            if (fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3)
+            if (ident2==0 && fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3)
                fWMu2Rnd[i].first = round(fWMu2[i].first);
             if (fWMu2[i].second >= 1 && fabs(fWMu2[i].second - round(fWMu2[i].second)) < 1e-3)
                fWMu2Rnd[i].second = round(fWMu2[i].second);
 
             string format = "  %14."+to_string(fWarmupNDigitMu2)+"f  %14."+to_string(fWarmupNDigitMu2)+"f";
             sprintf(buf3,format.c_str(),fWMu2Rnd[i].first,fWMu2Rnd[i].second);
-	    printf("c   %14.6f  %14.6f\n",fWMu2[i].first,fWMu2[i].second);
-	    printf("cr  %14.6f  %14.6f\n",fWMu2Rnd[i].first,fWMu2Rnd[i].second);
          }
 
          // if  ( fWMu2[i].second!=0 && fabs(fWMu2[i].first/fWMu2[i].second-1) > 1.e-3)
@@ -3806,7 +3801,7 @@ void fastNLOCreate::AdjustWarmupValues() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit) {
+void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit, int ielement) {
    //! Round warmup values up (down) if third relevant
    //! digit is a 9 (0)
    //! lower values are only rounded down,
@@ -3817,8 +3812,8 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigi
          // round only, if the values are different!
          // otherwise it is a 'fixed' scale and we have to
          // store exactly that values
-         wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
-         wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
+	if ( ielement==0 || ielement==1 ) wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
+	if ( ielement==0 || ielement==2 ) wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
       }
    }
    /*
@@ -3960,8 +3955,8 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    // 1
    if ( (nbinlo1)/(int)GetNObsBin() > minallbins )  { // yes! the warmup values should become 1
      logger.info["CheckWarmupValuesIdenticalWithBinGrid"]
-       <<"Found that "<<(nbinlo1/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are close (<"<<bclose*100.<<"%) to 1.\n"
-               <<"Using 1 as lower value warm-up values."<<endl;
+       <<"Found that "<<(nbinlo1/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are close (<"<<bclose*100.<<"%) to 1."
+               <<" Using 1 as lower value warm-up values."<<endl;
      for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
        wrmmu[i].first = 1;
      }
@@ -3970,7 +3965,7 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    // 0
    if ( (nbinlo0)/(int)GetNObsBin() > minallbins )  { // yes! the warmup values should become 1
      logger.info["CheckWarmupValuesIdenticalWithBinGrid"]
-       <<"Found that "<<(nbinlo0/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are close (<"<<bclose*100.<<"%) to 0.\n"
+       <<"Found that "<<(nbinlo0/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are close (<"<<bclose*100.<<"%) to 0."
        <<"Using 0 as lower value warm-up values."<<endl;
      for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
        wrmmu[i].first = 0;

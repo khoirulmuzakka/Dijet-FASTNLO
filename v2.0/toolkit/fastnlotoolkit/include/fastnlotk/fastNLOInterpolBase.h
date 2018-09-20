@@ -32,7 +32,6 @@ public:
    virtual ~fastNLOInterpolBase(void);
 
    const std::vector<std::pair<int,double> >& GetNodeValues(double val);
-   std::vector<std::pair<int,double> >* GetNodeValuesPtr(double val);
 
    void MakeGrids(fastNLOGrid::GridType type, int nNodes);
    void MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodes);
@@ -102,7 +101,7 @@ protected:
    int fNMinNodes;
    double fvalmin;
    double fvalmax;
-   double fLastVal;
+   double fLastVal[5] = {M_PI,M_PI,M_PI,M_PI,M_PI};
    bool fLastGridPointWasRemoved; // odd boolean to agree with original code;
    fastNLOGrid::GridType fdm; // distance measure
    std::vector<double> fgrid;

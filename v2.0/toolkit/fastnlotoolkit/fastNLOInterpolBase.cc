@@ -17,7 +17,6 @@ using namespace std;
 fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) :
    PrimalScream("fastNLOInterpol"),fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) {
    debug["fastNLOInterpolBase"]<<"New fastNLOInterpolBase instance."<<endl;
-   fLastVal = -34729.432;
    fLastGridPointWasRemoved=false;
 }
 
@@ -48,33 +47,17 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
 //______________________________________________________________________________
 
 
-
-vector<pair<int,double> >* fastNLOInterpolBase::GetNodeValuesPtr(double x){
-   cout<<"x="<<x<<",\tfLastVal="<<fLastVal<<endl;
-   if ( x==fLastVal ) return &fNodes; // nothing todo. I know the nodes already.
-   else {
-      bool InRange = CheckX(x);
-      if ( !InRange ) { // standard return, if there is no
-      //         //fRetNodes = vector<pair<int,double> > ()
-      //         //return fRetNodes;
-      }
-      fLastVal = x;
-      CalcNodeValues(fNodes,x);
-      return &fNodes;
-   }
-}
-
 const vector<pair<int,double> >& fastNLOInterpolBase::GetNodeValues(double x){
-   if ( fHgrid.empty() ) warn["GetNodeValues"]<<"There is no grid."<<endl;
-   //cout<<"GetNodeValues for (x="<<x<<"), [fLastVal="<<fLastVal<<")"<<endl;
-   if ( x==fLastVal ) return fNodes; // nothing todo. I know the nodes already.
-   bool InRange = CheckX(x);
-   if ( !InRange ) { // standard return, if there is no
+   //if ( fHgrid.empty() ) warn["GetNodeValues"]<<"There is no grid."<<endl;
+   if ( x==fLastVal[0] ) return fNodes; // nothing todo. I know the nodes already.
+   CheckX(x);
+   //bool InRange = CheckX(x);
+   //if ( !InRange ) { // standard return, if there is no
       //fRetNodes = vector<pair<int,double> > ()
       //return fRetNodes;
-   }
-   fLastVal = x;
+   //}
    CalcNodeValues(fNodes,x);
+   fLastVal[0] = x;
    return fNodes;
 }
 
@@ -336,25 +319,28 @@ bool fastNLOInterpolBase::CheckX(double& x) {
       //x = fgrid[0];
       return true;
    }
+   //printf("x=%e, %e;   fgrid=%e, %e;  ratio: %e\n",x,x-1.,fgrid[0],fgrid[0]-1,x/fgrid[0]-1);
    if ( x < fgrid[0] ) {
-      double xin = x;
+      if ( x!=fLastVal[1] && fgrid[0]/x-1>1.e-6)
+	 warn["CheckX"]<<"Value "<<x<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
+      fLastVal[1] = x; // use this to monitor whenever there was an incident
       x = fgrid[0];
-      if ( x!=fLastVal )
-         warn["CheckX"]<<"Value "<<xin<<" is smaller than smallest node (min="<<fgrid[0]<<"). Using this first node."<<endl;
    }
    else if ( x > fgrid.back() ) {
-      double xin = x;
       if ( fLastGridPointWasRemoved ) {
          if ( x > fvalmax ) {
-            x = fvalmax;
-            if ( x!=fLastVal )
-               warn["CheckX"]<<"Value "<<xin<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
+	    if ( x!=fLastVal[2] && x/fgrid.back()-1. >  1.e-6)
+	       warn["CheckX"]<<"Value "<<x<<" is larger than largest grid value (max="<<fvalmax<<"). Using this value instead."<<endl;
+	    fLastVal[2] = x; // use this to monitor whenever there was an incident
+	    x = fvalmax;
          }
       }
       else {
+         if ( fabs(x/fLastVal[3]-1)>1.e-10 && fabs(x/fLastVal[4]-1)>1.e-10 && fabs(x-fgrid.back())>1.e-6 )
+	    warn["CheckX"]<<"Value "<<x<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
+	 fLastVal[4] = fLastVal[3]; // use this to monitor whenever there was an incident
+	 fLastVal[3] = x; // use this to monitor whenever there was an incident
          x = fgrid.back();
-         if ( fabs(x-fgrid.back())>1.e-4 && x!=fLastVal)
-               warn["CheckX"]<<"Value "<<xin<<" is larger than largest node (max="<<fgrid.back()<<"). Using this first node."<<endl;
       }
    }
    else
