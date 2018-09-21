@@ -2,8 +2,8 @@
 TODO list for fastNLO_toolkit (orderd by priority)
 -----------------------------------------------------------------------
 
+ - Include stat. uncertainties into table
  - Creator for Referenztabellen
- - Modifier & Concatenator for tables/bins
  - Streamline usage of logger.messagelevel, shout|cout, error|warn|silent etc. in speaker
 
  - KR: Check, which points are actually done ...
@@ -13,11 +13,7 @@ TODO list for fastNLO_toolkit (orderd by priority)
  - Benutzbarkeit gewaehrleisten, wenn binning- und bin-suche im generator gemacht werden (ist teils implementiert bspw 'fnloEvent::_iOB')
  - fastNLOCreate fuer mehrere Tabellen - also (bspw.) mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
    oder mehrere Coeffizienten Tabellen
- - fast Warmup-run (just some events and then 'guess' PS boundaries)
- - 11x11 = 121 PDF-LiCos
- - 13x13 PDF-LiCos
  - 'automatisches' Erkennen von PDF-LiCos beim warm-up run
- - Codieren der LiCo's in Tabelle (und lesen im reader)
  - implement DIS fixed-scale (desired?)
  - 'Generator-stamps': konsistente beschreibung und zitate fuer CodeDescr[]. Bspw: fastNLO::CodeDescr::NLOJET_hhc(vector<string>& contrdescr)
  - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion' (ordentliche Klassendefinitionen??)
@@ -29,6 +25,11 @@ TODO list for fastNLO_toolkit (orderd by priority)
 =======================================================================
 DONE
 =======================================================================
+ - Modifier & Concatenator for tables/bins
+ - fast Warmup-run (just some events and then 'guess' PS boundaries)
+ - 11x11 = 121 PDF-LiCos
+ - 13x13 PDF-LiCos
+ - Codieren der LiCo's in Tabelle (und lesen im reader)
  - reader testen fuer NNLO
  - Ensure NNLO compatibility of reader
  - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables

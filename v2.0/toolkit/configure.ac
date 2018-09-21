@@ -10,7 +10,7 @@
 # Require minimal autoconf version, 2.69 is from 2012
 AC_PREREQ([2.69])
 # Define subproject fastNLO_toolkit
-AC_INIT([fastNLO_toolkit], [2.3.1pre], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO_toolkit], [2.3.1], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
 #Suppress verbose output when compiling (use make V=99 for verbose output)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
@@ -54,7 +54,7 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 AC_F77_LIBRARY_LDFLAGS
 AC_CHECK_LIB([g2c], [getenv_])
-AC_CHECK_LIB([LHAPDF], [alphas])
+#AC_CHECK_LIB([LHAPDF], [alphas])
 #AC_CHECK_LIB([fastnlotoolkit], [libfastnlotoolkit_la-FastNLOBlockB])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
@@ -69,7 +69,10 @@ AM_CONDITIONAL(HAVE_LIBZ, test "x$ZLIBTEST" != "x")
 # Checks for typedefs, structures, compiler characteristics and functionalities.
 AC_HEADER_STDBOOL
 AC_C_INLINE
-# For gcc, full C++11 functionality has been supported since version 4.8.1
+
+# Require full C++11 functionality, which has been supported by gcc since version 4.8.1
+# If the following macro is not found, you might want to install the autoconf-archive
+# package and repeat the 'autoreconf -i' step.
 AX_CXX_COMPILE_STDCXX_11
 
 # Checks for library functions.
@@ -293,39 +296,65 @@ AC_ARG_WITH([hoppet],
 if test "x$with_hoppet" != "xno"; then
    if test "x$HOPPET" = "x"; then
       AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
-      AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
-      [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
-      [prehoppet=""])
-      if test "x$prehoppet" = "x"; then
-         AC_MSG_NOTICE([No $TMPNAM library found in prefix path. Try to link with systems $TMPNAM ...])
-         AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
-         [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
-         [syshoppet=""])
-         if test "x$syshoppet" = "x"; then
-            AC_MSG_ERROR([No $TMPNAM library found. Please install $TMPNAM first. Configuration aborted!])
-         else
-            AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
+      AC_PATH_PROG([HOPPETBIN],[hoppet-config],[],[$prefix/bin])
+      if test "x$HOPPETBIN" = "x"; then
+         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+         AC_PATH_PROG([HOPPETBIN],[hoppet-config])
+         if test "x$HOPPETBIN" = "x"; then
+            AC_MSG_NOTICE([Building $PACKAGE_NAME without $TMPNAM!])
          fi
-      else
-         AC_SUBST([HOPPETLIBPATH], [`dirname $prehoppet`])
       fi
-      AC_SUBST([HOPPET], [`dirname $HOPPETLIBPATH`])
    else
-      AC_CHECK_FILE([$HOPPET/lib/libhoppet_v1.a],
-      [],
-      [AC_MSG_ERROR([$TMPNAM library not found at given path $HOPPET/lib. Please install $TMPNAM first. Configuration aborted!])])
+      AC_PATH_PROG([HOPPETBIN],[hoppet-config],[],[$HOPPET/bin])
+      if test "x$HOPPETBIN" = "x"; then
+         AC_MSG_ERROR([hoppet-config not found in given path to $TMPNAM! Configuration aborted!])
+      fi
    fi
-   AC_SUBST([HOPPETPREFIX], ["$HOPPET"])
-   AC_SUBST([HOPPETBIN], ["$HOPPETPREFIX/bin"])
-   AC_SUBST([HOPPETLDFLAGS], ["$($HOPPETBIN/hoppet-config --libs)"])
-   AC_SUBST([HOPPETCXXFLAGS], ["$($HOPPETBIN/hoppet-config --cxxflags)"])
+
+# Look for library directly; might be useful if hoppet-config is not found
+#      AC_CHECK_FILE([$prefix/lib/libhoppet_v1.a],
+#      [prehoppet="$ac_cv_file_$prefix/lib/libhoppet_v1.a"],
+#      [prehoppet=""])
+#      if test "x$prehoppet" = "x"; then
+#         AC_MSG_NOTICE([No $TMPNAM library found in prefix path. Try to link with systems $TMPNAM ...])
+#         AC_CHECK_LIB([libhoppet_v1],[hoppetstart],
+#         [syshoppet=$ac_cv_lib_libhoppet_v1_hoppetstart],
+#         [syshoppet=""])
+#         if test "x$syshoppet" = "x"; then
+#            AC_MSG_ERROR([No $TMPNAM library found. Please install $TMPNAM first. Configuration aborted!])
+#         else
+#            AC_SUBST([HOPPETLIBPATH], [`dirname $syshoppet`])
+#         fi
+#      else
+#         AC_SUBST([HOPPETLIBPATH], [`dirname $prehoppet`])
+#      fi
+#      AC_SUBST([HOPPET], [`dirname $HOPPETLIBPATH`])
+#   else
+#      AC_CHECK_FILE([$HOPPET/lib/libhoppet_v1.a],
+#      [],
+#      [AC_MSG_ERROR([$TMPNAM library not found at given path $HOPPET/lib. Please install $TMPNAM first. Configuration aborted!])])
+#   fi
+
    AC_MSG_NOTICE([******************************************])
-   AC_DEFINE([WITH_HOPPET],[1],[Enable conditional compilation with HOPPET])
-   AC_MSG_NOTICE([$TMPNAM settings:])
-   AC_MSG_RESULT([Using $HOPPETPREFIX for the $TMPNAM installation path])
-   AC_MSG_RESULT([Using $HOPPETBIN for the $TMPNAM bin path])
-   AC_MSG_RESULT([Using $HOPPETCXXFLAGS for the compilation])
-   AC_MSG_RESULT([Using $HOPPETLDFLAGS for the libraries])
+   if test "x$HOPPETBIN" != "x"; then
+      AC_DEFINE([WITH_HOPPET],[1],[Enable conditional compilation with HOPPET])
+      AC_MSG_NOTICE([$TMPNAM settings:])
+      AC_SUBST([HOPPET],        [`$HOPPETBIN --prefix`])
+      AC_SUBST([HOPPETPREFIX],  [`$HOPPETBIN --prefix`])
+      AC_SUBST([HOPPETBINPATH], ["$HOPPETPREFIX/bin"])
+      AC_SUBST([HOPPETLIBPATH], ["$HOPPETPREFIX/lib"])
+      AC_SUBST([HOPPETINCLUDEPATH],["$HOPPETPREFIX/include"])
+      AC_SUBST([HOPPETLDFLAGS], [`$HOPPETBIN --ldflags`])
+      AC_SUBST([HOPPETCXXFLAGS], [`$HOPPETBIN --cxxflags`])
+      AC_MSG_RESULT([Using $HOPPETPREFIX for the $TMPNAM installation path])
+      AC_MSG_RESULT([Using $HOPPETBINPATH for the binaries])
+      AC_MSG_RESULT([Using $HOPPETLIBPATH for the libraries])
+      AC_MSG_RESULT([Using $HOPPETINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $HOPPETCXXFLAGS for the compile flags])
+      AC_MSG_RESULT([Using $HOPPETLDFLAGS for the linker flags])
+   else
+      AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+   fi
 else
    AC_MSG_NOTICE([No $TMPNAM support requested. Continue without $TMPNAM.])
    AC_MSG_NOTICE([******************************************])
