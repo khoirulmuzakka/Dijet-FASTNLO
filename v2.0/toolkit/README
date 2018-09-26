@@ -106,13 +106,20 @@ git clone https://gitlab.ekp.kit.edu/qcd-public/fastNLO.git
 # The fastNLO toolkit resides in the subdirectory v2.0/toolkit.
 # To prepare this directory for installation the following command is needed:
 autoreconf -i
-# For this to work it is mandatory to have recent enough GNU autotools installed,
-# i.e. autoconf, automake, and libtool.
+# For this to work it is mandatory to have recent enough GNU autotools installed, i.e.
+# autoconf for auto-conf, auto-header, auto-scan;
+# automake for automake, aclocal;
+# libtool  for libtoolize
+#
 # If files related to these tools are not found in the usual system places as
 # in the case of LCG environment setups, it might be necessary to set proper
 # paths where these files can be found now, e.g.
 csh: setenv ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
 sh:  export ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
+#
+# If macros still are not found like AX_CXX_COMPILE_STDCXX11, it might help to install
+# the package autoconf-archive.
+#
 # After a successful reconfigure the configuration, make, and install steps should proceed
 # as before.
 #

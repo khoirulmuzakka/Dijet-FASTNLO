@@ -1,0 +1,5 @@
+# Create annotated tag with name given on command line.
+# A tag message must be provided via the editor.
+git tag -a $1
+# Share git tag with other users by pushing to origin.
+git push origin $1
