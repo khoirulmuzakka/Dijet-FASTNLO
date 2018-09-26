@@ -1,7 +1,6 @@
 # -*-sh-*-
-# fastNLO_toolkit version 2.1.3pre:
-# =================================
-# This is a prerelease for testing!
+# fastNLO_toolkit version 2.3.1:
+# ==============================
 # Please contact the authors for any questions or problems.
 
 
@@ -12,7 +11,7 @@
 
 # Requirements:
 # -------------
-# For installation of toolkit package: LHAPDF version 5 or 6, see also http://lhapdf.hepforge.org
+# For installation of toolkit package: LHAPDF version 6, see also http://lhapdf.hepforge.org
 # For running executable: fastNLO table, PDF set from LHAPDF, see also http://fastnlo.hepforge.org
 
 
@@ -42,8 +41,8 @@ cd fastnlo_toolkit-v.v.v-nnnn
 #    how many cores, e.g. n=2, should be used in parallel in this step:
 make -j n
 
-# 5. Not yet implemented, please skip! Run functionality test suite:
-#make check
+# 5. Run functionality test suite:
+make check
 
 # 6. Install the products into the configured target directory:
 make install
@@ -91,19 +90,31 @@ make install
 
 # Usage:
 # ------
-# Please see the executables in the folder 'src', e.g. run
-fnlo-tk-example tablename PDF.LHgrid
+# Please see the executables in the folder 'src' and run e.g.
+fnlo-tk-example -h
 # or
-fnlo-tk-cppread tablename PDF.LHgrid
-# for some sample cross-section print-out.
-# In case of LHAPDF6 usage, the PDF sets have to be specified without extension.
-# For more details see also the description in fastnlotoolkit/fastNLOReader.cc
+fnlo-tk-cppread -h
+# for some usage explanations.
+# In case of LHAPDF6, the PDF sets have to be specified without extension.
 
 
-# For developers only:
+# For developers ONLY:
 # --------------------
-# If you have the GNU autotools installed, the project gets automatically reconfigured properly
-# if you e.g. add something new to a Makefile.am to be compiled or linked.
+# Instead of a distribution tarball experienced developers can also
+# check out the latest fastNLO software directly using git:
+git clone https://gitlab.ekp.kit.edu/qcd-public/fastNLO.git
+# The fastNLO toolkit resides in the subdirectory v2.0/toolkit.
+# To prepare this directory for installation the following command is needed:
+autoreconf -i
+# For this to work it is mandatory to have recent enough GNU autotools installed,
+# i.e. autoconf, automake, and libtool.
+# If files related to these tools are not found in the usual system places as
+# in the case of LCG environment setups, it might be necessary to set proper
+# paths where these files can be found now, e.g.
+csh: setenv ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
+sh:  export ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
+# After a successful reconfigure the configuration, make, and install steps should proceed
+# as before.
 #
 # The GNU autotools also support incremental installations. If you modify something in or add something
 # to the fastNLO_toolkit that requires recompilation or relinking, the install step can be restricted
