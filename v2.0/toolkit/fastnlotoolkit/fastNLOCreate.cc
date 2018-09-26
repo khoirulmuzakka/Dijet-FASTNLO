@@ -3945,11 +3945,14 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    // ---- check if warmup values are close to 1
    int nbinlo1=0,nbinhi1=0;
    int nbinlo0=0,nbinhi0=0;
+   int neqlo=0, neqhi=0;
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-     if ( (wrmmu[i].first - 1.)  < bclose ) nbinlo1++; // no 'fabs' needed
-     if ( (1. - wrmmu[i].second) < bclose ) nbinhi1++; // no 'fabs' needed
-     if ( (wrmmu[i].first)  < bclose ) nbinlo0++; // no 'fabs' needed
-     if ( (wrmmu[i].second) < bclose ) nbinhi0++; // no 'fabs' needed
+     if ( fabs(wrmmu[i].first - 1.)  < bclose ) nbinlo1++; 
+     if ( fabs(1. - wrmmu[i].second) < bclose ) nbinhi1++; 
+     if ( fabs(wrmmu[i].first)  < bclose ) nbinlo0++; 
+     if ( fabs(wrmmu[i].second) < bclose ) nbinhi0++; 
+     if ( fabs(wrmmu[i].first  - wrmmu[0].first)  < bclose ) neqlo++; 
+     if ( fabs(wrmmu[i].second - wrmmu[0].second) < bclose ) neqhi++; 
    }
    // only lower bound!
    // 1
@@ -3971,6 +3974,16 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
        wrmmu[i].first = 0;
      }
      return (nbinlo0) * -1;
+   }
+   // all the same:
+   if ( (neqlo)/(int)GetNObsBin() > minallbins )  { // yes! the warmup values should become 1
+     logger.info["CheckWarmupValuesIdenticalWithBinGrid"]
+       <<"Found that "<<(neqlo/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are (almost) equivalent."
+       <<"Using value of first bin as lower value warm-up values."<<endl;
+     for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
+       wrmmu[i].first = wrmmu[0].first;
+     }
+     return (neqlo) * -1;
    }
 
    return 0;
