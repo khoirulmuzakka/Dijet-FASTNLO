@@ -191,7 +191,7 @@ protected:
    bool CheckWarmupConsistency();                                                               //!< Check consistency of warmup bin-grid and variables with steering values.
    void UseBinGridFromWarmup();                                                                 //!< Use bin grid as given in the warmup table
    int CheckWarmupValuesIdenticalWithBinGrid(std::vector<std::pair<double,double> >& wrmmu);              //!< Check if warmup values are possibly identical with bin grid
-   void RoundValues(std::vector<std::pair<double,double> >& wrmmu , int nth, int ielement=0);   //!< Round values to closes value by at most 1%
+   void RoundValues(std::vector<std::pair<double,double> >& wrmmu, int ibin=-1 , int nth=3);                   //!< Round values to closes value by at most 1%
    int GetNthRelevantDigit(double val, int n);
    std::vector<std::vector<std::pair<int,int> > > ReadPartonCombinations(int ord, const std::vector<std::vector<int> >& PartonCombinations);                             //!< Read PDFCoeff from steering
 
