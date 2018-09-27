@@ -189,7 +189,8 @@ def main():
 	ax0.set_xlim(xlim[0], xlim[1]) #adjust x-axis
 	#plt.xticks(xaxis_ticks, xaxis_ticks
 	ax0.autoscale(enable=True, axis='x', tight=True) #so that only xrange with data is plotted
-	matplotlib.ticker.LogLocator(base=10.0, subs='all') #to show all xticks, also the lowest
+	## The following line is only working with matplotlib version 2.0.2 or higher (just some x-axis settings, might be removed eventually)
+	##matplotlib.ticker.LogLocator(base=10.0, subs='all') #to show all xticks, also the lowest
 
 	plt.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted')
 	plt.axhline(y=0, xmin=0, xmax=1, color='k', linestyle='dotted')
