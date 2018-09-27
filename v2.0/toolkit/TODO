@@ -2,6 +2,9 @@
 TODO list for fastNLO_toolkit (orderd by priority)
 -----------------------------------------------------------------------
 
+ - Test installation with lgcenv environment
+   - Problem with zlib?
+   - Problem with HOPPET?
  - Include stat. uncertainties into table
  - Creator for Referenztabellen
  - Streamline usage of logger.messagelevel, shout|cout, error|warn|silent etc. in speaker
