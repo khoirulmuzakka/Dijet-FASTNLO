@@ -3534,7 +3534,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
          // --- write x-values
          sprintf(buf,"   %4d    %9.1e  %9.2e",   i, fWxRnd[i].first, fWxRnd[i].second);
 
-         // --- write mu1
+	 // --- write mu1
          if (ident1 > 0) {
             // mu-value is identical with binning
             // -> write out many digits
@@ -3547,13 +3547,19 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             // -> round them up/down a bit
             // extent range by 2%
 	   if (ident1 < 0 ) 
+	      fWMu1Rnd[i].first  = fWMu1[i].first;
+	   else if ( fabs(remainder(fWMu1[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
 	     fWMu1Rnd[i].first  = fWMu1[i].first;
-	   else 
-	     fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
+	   else
+	      fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
 	   
-	   fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
+
+	   fWMu1Rnd[i].second = fWMu1[i].second;
+	   if ( fabs(remainder(fWMu1[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
+	      fWMu1Rnd[i].second += 0.02*fabs(fWMu1[i].second);
 	   
-	   RoundValues(fWMu1Rnd,fWarmupNDigitMu1, (ident1<0 ? 2 : 0 ) ); // digit here should be identical to output in outwarmup
+
+	   RoundValues(fWMu1Rnd,i,fWarmupNDigitMu1 ); // digit here should be identical to output in outwarmup
 	   // if values are very close to an integer, it is likely that this is by purpose
 	   if ( ident1==0 && fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
 	     fWMu1Rnd[i].first = round(fWMu1[i].first);
@@ -3578,12 +3584,19 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             
 	    if (ident2 < 0 ) 
 	      fWMu2Rnd[i].first = fWMu2[i].first; // use bin boundary
+	    else if ( fabs(remainder(fWMu2[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
+	       fWMu2Rnd[i].first  = fWMu2[i].first;
 	    else 
-	      fWMu2Rnd[i].first  = fWMu2[i].first - 0.06*fabs(fWMu2[i].first);
+	      fWMu2Rnd[i].first  = fWMu2[i].first - 0.02*fabs(fWMu2[i].first);	   
+
+	   fWMu2Rnd[i].second = fWMu2[i].second;
+	   if ( fabs(remainder(fWMu2[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
+	      fWMu2Rnd[i].second += 0.02*fabs(fWMu2[i].second);
+
 	    
-	    fWMu2Rnd[i].second = fWMu2[i].second + 0.06*fabs(fWMu2[i].second);
-	    RoundValues(fWMu2Rnd,fWarmupNDigitMu2 , (ident2<0 ? 2 : 0)); // digit here should be identical to output in outwarmup
+	    RoundValues(fWMu2Rnd,i,fWarmupNDigitMu2 ); // digit here should be identical to output in outwarmup
 	    
+
             // if values are very close to an integer, it is likely that this is by purpose
             if (ident2==0 && fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3)
                fWMu2Rnd[i].first = round(fWMu2[i].first);
@@ -3654,7 +3667,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
 	    else
 	      fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
             fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
-            RoundValues(fWMu1Rnd,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
+            RoundValues(fWMu1Rnd,i,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
 
             // if values are very close to an integer, it is likely that this is by purpose
             if (fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
@@ -3801,19 +3814,19 @@ void fastNLOCreate::AdjustWarmupValues() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int nthdigit, int ielement) {
+void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int bini, int nthdigit ) {
    //! Round warmup values up (down) if third relevant
    //! digit is a 9 (0)
    //! lower values are only rounded down,
    //! upper values are only rounded up
 
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-      if (wrmmu[i].second!=0 && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) {
-         // round only, if the values are different!
-         // otherwise it is a 'fixed' scale and we have to
-         // store exactly that values
-	if ( ielement==0 || ielement==1 ) wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
-	if ( ielement==0 || ielement==2 ) wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
+      if ( bini!=-1 && int(i)!=bini )  continue;
+      if (wrmmu[i].second!=0 // upper bound is non-zero
+	  && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) // upper and lower bound are different
+      {
+	 if ( fabs(remainder(wrmmu[i].first,  0.1 )) >  1e-6 )  wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
+	 if ( fabs(remainder(wrmmu[i].second, 0.1 )) >  1e-6 )  wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
       }
    }
    /*
@@ -3951,8 +3964,8 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
      if ( fabs(1. - wrmmu[i].second) < bclose ) nbinhi1++; 
      if ( fabs(wrmmu[i].first)  < bclose ) nbinlo0++; 
      if ( fabs(wrmmu[i].second) < bclose ) nbinhi0++; 
-     if ( fabs(wrmmu[i].first  - wrmmu[0].first)  < bclose ) neqlo++; 
-     if ( fabs(wrmmu[i].second - wrmmu[0].second) < bclose ) neqhi++; 
+     if ( fabs(wrmmu[i].first  / wrmmu[0].first - 1.)  < bclose ) neqlo++; 
+     if ( fabs(wrmmu[i].second / wrmmu[0].second - 1.) < bclose ) neqhi++; 
    }
    // only lower bound!
    // 1
@@ -3980,8 +3993,12 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
      logger.info["CheckWarmupValuesIdenticalWithBinGrid"]
        <<"Found that "<<(neqlo/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are (almost) equivalent."
        <<"Using value of first bin as lower value warm-up values."<<endl;
+     double minlo = wrmmu[0].first;
+     for (unsigned int i = 1 ; i < GetNObsBin() ; i ++) 
+	if ( wrmmu[i].first <  minlo ) 
+	   minlo = wrmmu[i].first;
      for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-       wrmmu[i].first = wrmmu[0].first;
+	wrmmu[i].first = minlo;//wrmmu[0].first;
      }
      return (neqlo) * -1;
    }
