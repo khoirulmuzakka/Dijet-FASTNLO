@@ -205,8 +205,9 @@ set withnnlojet=0
 if ( $#argv > 4 ) then
     set withnnlojet=$5
 # Previous: set revision=3738
-# Used for fnl2332d:   set revision=4585
-    set revision=4708
+# Used for fnl2332d:       set revision=4585
+# Bug in Z+jet RV channel: set revision=4708
+    set revision=5088
 endif
 echo "NNLOJET usage: $tab$tab $withnnlojet"
 # With optional packages for grid evaluation?
@@ -369,8 +370,8 @@ if ( $withnnlojet ) then
    setenv PATH ${NNLOJET_BIN_PATH}:${PATH}
    echo 'setenv NNLOJET_BIN_PATH '"${NNLOJET_BIN_PATH}" >> fnlosrc_source.csh
    echo 'export NNLOJET_BIN_PATH='"${NNLOJET_BIN_PATH}" >> fnlosrc_source.sh
-   echo 'setenv PATH '"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.csh
-   echo 'export PATH='"${NNLOJET_BIN_PATH}:"'${PATH}'   >> fnlosrc_source.sh
+   echo 'setenv PATH ${NNLOJET_BIN_PATH}:${PATH}'       >> fnlosrc_source.csh
+   echo 'export PATH=${NNLOJET_BIN_PATH}:${PATH}'       >> fnlosrc_source.sh
 endif
 echo ""
 echo "ATTENTION: PATH environment complemented!"
@@ -665,7 +666,8 @@ endif
 #------------------------------------------------------------------------------
 #set arc="fastnlo_toolkit-2.3.1pre-2441"
 #set arc="fastnlo_toolkit-2.3.1pre-2496"
-set arc="fastnlo_toolkit-2.3.1pre-2550"
+#set arc="fastnlo_toolkit-2.3.1pre-2550"
+set arc="fastnlo_toolkit-2.3.1-2582"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
@@ -724,27 +726,30 @@ if ( $withnnlojet ) then
 # 'gfortran -print-file-name=libgfortran.a' does not work because of
 # buggy gfortran installation.
 # Anyway, a newer version from our APPLgrid colleagues will be necessary!!
-#    if ( $withroot > 1 ) then
-#        set arc="applgrid-1.4.93-rev1594M"
-#        if ( ! -e ${arc}_installed  ) then
-#            tar xzf ${arc}.tar.gz
-#            cd ${arc}
-#            ./configure --prefix=${base}/${local}
+  if ( $withroot > 1 ) then
+#    set arc="applgrid-1.4.93-rev1594M"
+    set arc="applgrid-1.5.6"
+    if ( ! -e ${arc}_installed  ) then
+      tar xzf ${arc}.tar.gz
+      cd ${arc}
+      ./configure --prefix=${base}/${local}
 # Attention: No concurrent compilation with -j here!
-#            make install
-#            cd ..
-#            touch ${arc}_installed
-#        endif
-#    endif
+      make install
+      cd ..
+      touch ${arc}_installed
+    endif
+  endif
 #
 # nnlo-bridge to NNLOJet:
 #------------------------------------------------------------------------------
-    set arc="nnlo-bridge-0.0.36"
-# Previous buggy:    set rev="rev1683M3"
-# Improve interface --> M7: set rev="rev1683M5"
-    set rev="rev1683M7"
+    set arc="nnlo-bridge-0.0.40"
+# Previous buggy:    set rev="-rev1683M3"       ; fixed in 0.0.39
+# Improve interface --> M7: set rev="-rev1683M5"; fixed in 0.0.39
+#    set rev="-rev1683M7"                       ; fixed in 0.0.39
+# M1: Two printout fixes
+    set rev="M1"
     if ( ! -e ${arc}_installed  ) then
-    tar xzf ${arc}-${rev}.tar.gz
+    tar xzf ${arc}${rev}.tar.gz
     cd ${arc}
     ./configure --prefix=${base}/${local}
     make -j${cores} install
