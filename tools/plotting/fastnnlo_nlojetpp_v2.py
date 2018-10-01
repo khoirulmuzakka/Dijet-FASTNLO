@@ -4,6 +4,7 @@ import argparse
 import fastnlo
 import glob, os, pylab, sys
 import matplotlib as mpl
+mpl.use('Agg') #
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt

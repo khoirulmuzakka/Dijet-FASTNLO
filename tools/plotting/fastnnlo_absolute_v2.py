@@ -4,6 +4,7 @@ import argparse
 import glob, os, pylab, sys
 import matplotlib.gridspec as gridspec
 import matplotlib as mpl
+mpl.use('Agg') #otherwise some matplotlib error occurs
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt

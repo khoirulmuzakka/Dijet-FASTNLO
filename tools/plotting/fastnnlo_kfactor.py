@@ -16,6 +16,7 @@ import argparse
 import numpy as np
 import os, sys
 import matplotlib as mpl
+mpl.use('Agg')
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as grispec
 from matplotlib.pyplot import cm

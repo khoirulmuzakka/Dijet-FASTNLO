@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 import argparse
 import matplotlib as mpl
-mpl.use('Agg')
+mpl.use('Agg') #otherwise some matplotlib error occurs
 import glob, os, pylab, sys
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
