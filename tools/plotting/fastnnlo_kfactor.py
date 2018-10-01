@@ -61,6 +61,7 @@ def main():
 	print 'Higher order: ', args['numerator'] #was earlier called args['order']
 	print 'Lower order: ', args['denominator'] #used to be args['normoder']
 
+	allplots = False #will be set to True in case all three plots are required (use this again when plotting)
 	if args['numerator'] is not None:
 		if (args['numerator'] in [1, 'nlo', 'NLO']):
 			high = 'NLO'
@@ -70,6 +71,8 @@ def main():
 			print 'ERROR: Invalid choice of order. Aborted.'
 			sys.exit('Higher order can be NLO (=1) or NNLO (=2).')
 		print 'Chosen highest order: %s.' %high
+	elif (args['numerator'] is None) and (args['denominator'] is not None):
+		sys.exit('Either both orders have to be specified, or none. Missing higher order.')
 	else:
 		print 'No specific order chosen.'
 	
@@ -82,6 +85,8 @@ def main():
 			print 'ERROR: Invalid choice of lower order. Aborted.'
 			sys.exit('Lower (=denominator) order can be LO (=0) or NLO (=1).')
 		print 'Chosen lower (=denominator) order: %s.' %low
+	elif (args['denominator'] is None) and (args['numerator'] is not None):
+		sys.exit('ERROR: Either both orders have to be specified, or none. Missing lower order.')
 	else:
 		print 'No specific lower order chosen.'
 
@@ -89,6 +94,7 @@ def main():
 	if (args['numerator'] is None) and (args['denominator'] is None):
 		print 'No specific orders chosen: Look at NLO/LO, NNLO/NLO and NNLO/LO.'
 		all_orders=['LO', 'NLO', 'NNLO']
+		allplots = True
 	
 	
 
@@ -116,6 +122,12 @@ def main():
 	## if we allow options -o and -n, we will need an if-condition here!
 	print 'Start table evaluation for creating three plots. \n'
 
+	nnlo_existence = fnlo.SetContributionON(fastnlo.kFixedOrder, 2, True) #true or false depending on whether nnlo exists
+	if (nnlo_existence==False):
+		print "No NNLO entry in given table. Plotting only NLO/LO."
+	elif (nnlo_existence==True):
+		print "Table contains NNLO entry."
+	
 	#cross section for all 3 orders
 	xs_list = []
 	for n in orders:
@@ -138,6 +150,27 @@ def main():
 	#kfactors: NLO/LO, NNLO/NLO, NNLO/LO
 	fractions_three = np.array(fractions_three_plots)
 	print 'k-factors (line by line): NLO/LO, NNLO/NLO, NNLO/LO: \n', fractions_three
+	
+	if (allplots==False):
+		if high=='NLO':
+			fraction_single = np.array(fractions_three[0])
+			label_single = 'NLO/LO'
+		elif (high=='NNLO') and (nnlo_existence==True):
+			if low=='NLO':
+				fraction_single = np.array(fractions_three[1])
+				label_single = 'NNLO/NLO'
+			elif low=='LO':
+				fraction_single = np.array(fractions_three[2])
+				label_single = 'NNLO/LO'
+		elif (high=='NNLO') and (nnlo_existence==False):
+			sys.exit('ERROR: NNLO chosen although table does not contain NNLO entry. Aborted!')
+		single_plot = True #To check later whether only one plot is needed
+	elif (allplots==True) and (nnlo_existence==False):
+		fraction_single = np.array(fractions_three[0])
+		label_single = 'NLO/LO'
+		single_plot = True
+	else:
+		single_plot = False
 
 
 	################ Start PLOTTING of kfactor #############################################
@@ -168,15 +201,25 @@ def main():
 	# labels
 	labels = ['NLO/LO', 'NNLO/NLO', 'NNLO/LO']
 
+	### Plot all three graphs (if NNLO exists in table and) no specific order chosen ###
 	## plot all the kfactors into one plot. can be changed to 3 plots by introducing some for-loop
-	print 'Start plotting. \n'
-	for k in range(0, 3):
-		print 'Current index in fractions array: ', k
-		#c = next(color)
-		c = colors_orders[labels[k]]
-		ax0.plot(bin_bounds.flatten(), steppify_bin(fractions_three[k]),
-			label=labels[k], color=c, alpha=1.0)
+	#if (args['numerator'] is None): #no specific order chosen
+	if single_plot==False:
+		print 'Start plotting. \n'
+		for k in range(0, 3):
+			print 'Current index in fractions array: ', k
+			#c = next(color)
+			c = colors_orders[labels[k]]
+			ax0.plot(bin_bounds.flatten(), steppify_bin(fractions_three[k]),
+				label=labels[k], color=c, alpha=1.0)
 	
+	#elif (args['numerator']) is not None:
+	else: 
+		#plot specific chosen order (or NLO/LO in case there is no NNLO)
+		print 'Start plotting of chosen kfactor. \n'
+		ax0.plot(bin_bounds.flatten(), steppify_bin(fraction_single),
+				label=label_single, color='g', alpha=1.0)
+
 	#get limits for axes:
 	xlim = ax0.get_xlim()
 	ylim = ax0.get_ylim()
