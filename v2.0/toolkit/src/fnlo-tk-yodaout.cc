@@ -353,7 +353,7 @@ int main(int argc, char** argv) {
       yell << _DSEPSC << endl;
       yell <<  buffer << endl;
       yell << _SSEPSC << endl;
-      shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
+      shout << "bin      cross_section           lower_uncertainty       upper_uncertainty" << endl;
       yell << _SSEPSC << endl;
    }
    vector < double > dxsu;

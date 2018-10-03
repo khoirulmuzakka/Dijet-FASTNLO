@@ -1202,7 +1202,7 @@ int main(int argc, char** argv) {
       vector < double > BinSize = fnlo->GetBinSize();
 
       //! Print
-      string header0  = " #IObs  Bin Size";
+      string header0  = " #IObs  BinSize ";
       string headdim0 = " IODimO ";
       string headdim1 = " IODimM ";
       string headdim2 = " IODimI ";
@@ -1212,22 +1212,22 @@ int main(int argc, char** argv) {
       string header2 = "";
       if (ilo>-1) {
          headscl += fnlo->GetScaleDescription(kLeading,0);
-         header2 += " LO cross section";
+         header2 += " LO_cross_section";
       }
       if (inlo>-1) {
          if (headscl == "") headscl += fnlo->GetScaleDescription(kNextToLeading,0);
          if (ilo>-1) {
-            header2 += "   NLO cross section";
+            header2 += "   NLO_cross_section";
          } else {
-            header2 += " NLO contribution ";
+            header2 += " NLO_contribution ";
          }
       }
       if (innlo>-1) {
          if (headscl == "") headscl += fnlo->GetScaleDescription(kNextToNextToLeading,0);
          if (ilo>-1 && inlo>-1) {
-            header2 += "  NNLO cross section";
+            header2 += "  NNLO_cross_section";
          } else {
-            header2 += " NNLO contribution ";
+            header2 += " NNLO_contribution ";
          }
       }
       if (ilo>-1 && inlo>-1) {
@@ -1246,11 +1246,11 @@ int main(int argc, char** argv) {
          }
       }
       if (inpc1>-1) {
-         header2 += "     KNPC1";
+         header2 += "      KNPC1";
       }
 
       if (NDim == 1) {
-         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ]  <%-12.12s> %s",
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17.17s ]  < %-10.10s > %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
          yell << _SSEPLC << endl;
@@ -1305,7 +1305,7 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else if (NDim == 2) {
-         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17.17s ] %s [ %-17.17s ]  < %-10.10s > %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim2.c_str(),DimLabel[1].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
          yell << _SSEPLC << endl;
@@ -1362,7 +1362,7 @@ int main(int argc, char** argv) {
             printf("\n");
          }
       } else if (NDim == 3) {
-         snprintf(buffer, sizeof(buffer), "%s%s [ %-17s ] %s [ %-17s ] %s [ %-17s ]  <%-12.12s> %s",
+         snprintf(buffer, sizeof(buffer), "%s%s [ %-17.17s ] %s [ %-17.17s ] %s [ %-17.17s ]  < %-10.10s > %s",
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim1.c_str(),DimLabel[1].c_str(),
                   headdim2.c_str(),DimLabel[2].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
