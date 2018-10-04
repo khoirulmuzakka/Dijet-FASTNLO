@@ -1230,23 +1230,39 @@ int main(int argc, char** argv) {
             header2 += " NNLO_contribution ";
          }
       }
+      bool lkfix = false;
       if (ilo>-1 && inlo>-1) {
-         header2 += "   KNLO";
+	 header2 += "   KNLO";
+	 if (innlo>-1) {
+	    header2 += "      KNNLO";
+	 }
+	 lkfix = true;
       }
-      if (ilo>-1 && inlo>-1 && innlo>-1) {
-         header2 += "      KNNLO";
-      }
-      if (ithc2>-1 && lthcvar) {
-         header2 += "      KTHC2";
-      } else if (ithc1>-1 && lthcvar) {
-         if (inlo>-1) {
-            header2 += "      KTHC1";
+      bool lkthc = false;
+      if (ithc1>-1 && lthcvar) {
+	 if (lkfix) {
+	    header2 += "      KTHC1";
          } else {
             header2 += "    KTHC1";
          }
+	 lkthc = true;
+      } else if (ithc2>-1 && lthcvar) {
+	 if (lkfix) {
+	    header2 += "      KTHC2";
+         } else {
+            header2 += "    KTHC2";
+         }
+	 lkthc = true;
       }
       if (inpc1>-1) {
-         header2 += "      KNPC1";
+	 if (lkthc) {
+	    header2 += "     KNPC1";
+         } else if (lkfix) {
+            header2 += "      KNPC1";
+         } else {
+            header2 += "    KNPC1";
+         }
+	 lkthc = true;
       }
 
       if (NDim == 1) {
