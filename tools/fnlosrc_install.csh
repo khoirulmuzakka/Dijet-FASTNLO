@@ -667,7 +667,7 @@ endif
 #set arc="fastnlo_toolkit-2.3.1pre-2441"
 #set arc="fastnlo_toolkit-2.3.1pre-2496"
 #set arc="fastnlo_toolkit-2.3.1pre-2550"
-set arc="fastnlo_toolkit-2.3.1-2582"
+set arc="fastnlo_toolkit-2.3.1-2585"
 if ( ! -e ${arc}_installed  ) then
   tar xzf ${arc}.tar.gz
   cd ${arc}
@@ -722,12 +722,7 @@ if ( $withnnlojet ) then
 # APPLgrid for use in nnlo-bridge to NNLOJET:
 #------------------------------------------------------------------------------
 # APPLgrid requires ROOT!
-# Do not install for now. On Centos 7 the APPLgrid strategy of using
-# 'gfortran -print-file-name=libgfortran.a' does not work because of
-# buggy gfortran installation.
-# Anyway, a newer version from our APPLgrid colleagues will be necessary!!
   if ( $withroot > 1 ) then
-#    set arc="applgrid-1.4.93-rev1594M"
     set arc="applgrid-1.5.6"
     if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
