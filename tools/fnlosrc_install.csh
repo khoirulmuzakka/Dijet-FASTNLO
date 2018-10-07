@@ -780,7 +780,7 @@ if ( $withnnlojet ) then
 # NNLOJET
 #------------------------------------------------------------------------------
 # Set for single-thread usage of NNLOJET
-   if ( $withmpi ) then
+   if ( $withmpi && ! $mpinnlo ) then
       setenv OMP_STACKSIZE 999999
       setenv OMP_NUM_THREADS 1
       echo 'setenv OMP_STACKSIZE 999999' >> fnlosrc_source.csh
