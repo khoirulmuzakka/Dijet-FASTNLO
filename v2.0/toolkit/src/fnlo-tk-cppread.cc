@@ -104,6 +104,16 @@ int main(int argc, char** argv) {
          man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
          man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "[Nf]: Set no. of flavours to use in alpha_s evolution, def. = 5" << endl;
+         man << "   Alternatives: 3,4,6, and 0 i.e. Nf matching at thresholds." << endl;
+         man << "   Only possible for [ascode] other than LHAPDF!" << endl;
+         man << "[NLoop]: Set no. of loops to use in alpha_s evolution, def. = 2 (NLO)" << endl;
+         man << "   Alternatives: 1,3,4." << endl;
+         man << "   Only possible for [ascode] other than LHAPDF!" << endl;
+         man << "[asMz]: Set value of alpha_s(M_Z) to use in alpha_s evolution, def. = 0.1181 (PDG 2017)" << endl;
+         man << "   Only possible for [ascode] other than LHAPDF!" << endl;
+         man << "[Mz]: Set value of M_Z at which alpha_s(M_Z) is defined in alpha_s evolution, def. = 91.1876 (PDG)" << endl;
+         man << "   Only possible for [ascode] other than LHAPDF!" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -114,6 +124,7 @@ int main(int argc, char** argv) {
       }
    }
    //--- PDF set
+   string chtmp = "X";
    string PDFFile = "X";
    if (argc > 2) {
       PDFFile = (const char*) argv[2];
@@ -136,11 +147,10 @@ int main(int argc, char** argv) {
    const double xmuf[] =   { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
    const double fixmur[] = { 1.0, 2.718281828459045, 4.481689070338065, 2.718281828459045, 4.481689070338065, 2.718281828459045, 12.18249396070347 };
    const double fixmuf[] = { 1.0, 2.718281828459045, 4.481689070338065, 4.481689070338065, 2.718281828459045, 12.18249396070347, 2.718281828459045 };
-   string ch2tmp = "X";
    if (argc > 3) {
-      ch2tmp = (const char*) argv[3];
+      chtmp = (const char*) argv[3];
    }
-   if (argc <= 3 || ch2tmp == "_") {
+   if (argc <= 3 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for PDF or scale variations," << endl;
       shout << "            investigating primary scale only." << endl;
    } else {
@@ -199,8 +209,100 @@ int main(int argc, char** argv) {
       shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
    }
 
-   //---  Too many arguments
+   //--- Set no. of flavours to use in alpha_s evolution ([ascode] other than LHAPDF only)
+   unsigned int Nf = 5;
    if (argc > 7) {
+      chtmp = (const char*) argv[7];
+   }
+   if (argc <= 7 || chtmp == "_") {
+      shout["fnlo-tk-cppread"] << "No request given for no. of flavours," << endl;
+      shout << "            using default value for LHAPDF or Nf = " << Nf << "." << endl;
+   } else {
+      Nf = atoi(argv[7]);
+      if ( AsEvolCode == "LHAPDF" ) {
+         error["fnlo-tk-cppread"] << "Modification of Nf not allowed for alpha_s evolution from LHAPDF!" << endl;
+         exit(1);
+      }
+      if ( Nf != 0 && ( Nf < 3 || Nf > 6 ) ) {
+         snprintf(buffer, sizeof(buffer), "Illegal no. of flavours, aborting! Nf = %i\n",Nf);
+         error["fnlo-tk-cppread"] << buffer << endl;
+         exit(1);
+      } else {
+         shout["fnlo-tk-cppread"] << "Using Nf = " << Nf << " as no. of flavours." << endl;
+      }
+   }
+
+   //--- Set no. of loops to use in alpha_s evolution ([ascode] other than LHAPDF only)
+   unsigned int NLoop = 2;
+   if (argc > 8) {
+      chtmp = (const char*) argv[8];
+   }
+   if (argc <= 8 || chtmp == "_") {
+      shout["fnlo-tk-cppread"] << "No request given for no. of loops," << endl;
+      shout << "            using default value for LHAPDF or NLoop = " << NLoop << "." << endl;
+   } else {
+      NLoop = atoi(argv[8]);
+      if ( AsEvolCode == "LHAPDF" ) {
+         error["fnlo-tk-cppread"] << "Modification of NLoop not allowed for alpha_s evolution from LHAPDF!" << endl;
+         exit(1);
+      }
+      if ( NLoop < 1 || NLoop > 4 ) {
+         snprintf(buffer, sizeof(buffer), "Illegal no. of loops, aborting! NLoop = %i\n",Nf);
+         error["fnlo-tk-cppread"] << buffer << endl;
+         exit(1);
+      } else {
+         shout["fnlo-tk-cppread"] << "Using NLoop = " << NLoop << " as no. of loops." << endl;
+      }
+   }
+
+   //--- Set value of alpha_s(M_Z) to use in alpha_s evolution ([ascode] other than LHAPDF only)
+   double asMz = 0.1181;// (PDG 2017)
+   if (argc > 9) {
+      chtmp = (const char*) argv[9];
+   }
+   if (argc <= 9 || chtmp == "_") {
+      shout["fnlo-tk-cppread"] << "No request given for value of alpha_s(M_Z)," << endl;
+      shout << "            using default value for LHAPDF or asMz = " << asMz << "." << endl;
+   } else {
+      asMz = atof(argv[9]);
+      if ( AsEvolCode == "LHAPDF" ) {
+         error["fnlo-tk-cppread"] << "Modification of asMz not allowed for alpha_s evolution from LHAPDF!" << endl;
+         exit(1);
+      }
+      if ( asMz < 0. || asMz > 1. ) {
+         snprintf(buffer, sizeof(buffer), "Illegal value for asMz, aborting! asMz = %f\n",asMz);
+         error["fnlo-tk-cppread"] << buffer << endl;
+         exit(1);
+      } else {
+         shout["fnlo-tk-cppread"] << "Using asMz = " << asMz << endl;
+      }
+   }
+
+   //--- Set value of M_Z, for which alpha_s(M_Z) is defined in alpha_s evolution ([ascode] other than LHAPDF only)
+   double Mz = 91.1876;// (PDG)
+   if (argc > 10) {
+      chtmp = (const char*) argv[10];
+   }
+   if (argc <= 10 || chtmp == "_") {
+      shout["fnlo-tk-cppread"] << "No request given for value of M_Z," << endl;
+      shout << "            using default value for LHAPDF or Mz = " << Mz << "." << endl;
+   } else {
+      Mz = atof(argv[10]);
+      if ( AsEvolCode == "LHAPDF" ) {
+         error["fnlo-tk-cppread"] << "Modification of Mz not allowed for alpha_s evolution from LHAPDF!" << endl;
+         exit(1);
+      }
+      if ( Mz < 50. || Mz > 150. ) {
+         snprintf(buffer, sizeof(buffer), "Illegal value for Mz, aborting! Mz = %f\n",Mz);
+         error["fnlo-tk-cppread"] << buffer << endl;
+         exit(1);
+      } else {
+         shout["fnlo-tk-cppread"] << "Using Mz = " << Mz << endl;
+      }
+   }
+
+   //---  Too many arguments
+   if (argc > 11) {
       error["fnlo-tk-cppread"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -322,7 +424,7 @@ int main(int argc, char** argv) {
    //         fnlo.SetAlphasMz(0.1179);
    //     Change values of the alpha_s evolution code through:
    //         fnlo.SetNf(5);
-   //         fnlo.SetNloop(4);
+   //         fnlo.SetNLoop(4);
    //         fnlo.SetMz(91.70);
    //
    //     (Note: CTEQ6M:   M_Z = 91.70,   alpha_s(M_Z) = 0.1179;
@@ -699,35 +801,40 @@ int main(int argc, char** argv) {
    //    the parameters below this effects ONLY the alpha_s evolution, if
    //    allowed by the corresponding code. For LHAPDF this has no effect.
 
-   //! The number of loops used for the alpha_s evolution; the LO is nloop = 1, i.e
-   //! this number corresponds to LHAPDF: getOrderAlphaS + 1
+   //! The number of flavours used in the alpha_s evolution.
+   //! int nflavor = fnlo->GetNFlavor();
+   //! cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
+   if ( AsEvolCode != "LHAPDF" ) fnlo->SetNFlavor(Nf);//! Default = 5, else from command line; does not work with LHAPDF.
+
+   //! The number of loops used in the alpha_s evolution; the LO is NLoop = 1, ...
    //! Order n PDFs usually should be accompanied by an alpha_s evolution of the same order.
    //! int nloop = fnlo->GetNLoop();
    //! cout << "Read from LHAPDF: Number of loops = " << nloop << endl;
-   fnlo->SetNLoop(2);//! NLO
-
-   //! int nflavor = fnlo->GetNFlavor();
-   //! cout << "Read from LHAPDF: Number of flavors = " << nflavor << endl;
-   fnlo->SetNFlavor(5);//! CTEQ
-   //!   fnlo->SetNFlavor(0);//! NNPDF
-
-   //! Unfortunately, LHAPDF5 has no function to access M_Z!
-   //!   double Mz = 91.174;  //! ABM11
-   //!   double Mz = 91.188;  //! CTEQ
-   //!   double Mz = 91.187;  //! HERAPDF
-   const double Mz = 91.1876; //! MSTW, PDG 2012-2015
-   //!   double Mz = 91.2;    //! NNPDF
-   fnlo->SetMz(Mz);
+   if ( AsEvolCode != "LHAPDF" ) fnlo->SetNLoop(NLoop);//! Default = 2, else from command line; does not work with LHAPDF.
 
    //! Unfortunately, LHAPDF5 neither has a function to access alphas(M_Z) directly!
    //! double asmz = fnlo->GetAlphasMz(Mz);
    //! cout << "Read from LHAPDF: alpha_s at M_Z = " << asmz << endl;
-   //!   fnlo->SetAlphasMz(0.1184);//! PDG 2012 +- 0.0007
-   //!   fnlo->SetAlphasMz(0.1185);//! PDG 2013 +- 0.0006
-   fnlo->SetAlphasMz(0.1185);//! PDG 2014 +- 0.0006
-   //!   fnlo->SetAlphasMz(0.1181);//! PDG 2015 +- 0.0013
-   //!   fnlo->SetAlphasMz(0.1180);//! CT10-NLO
-   //!   fnlo->SetAlphasMz(0.1190);//! NNPDF21-NLO
+   if ( AsEvolCode != "LHAPDF" ) {
+      fnlo->SetAlphasMz(asMz);//! Default = 0.1181 (PDG 2017), else from command line; does not work with LHAPDF.
+      //!   fnlo->SetAlphasMz(0.1184);//! PDG 2012 +- 0.0007
+      //!   fnlo->SetAlphasMz(0.1185);//! PDG 2013 +- 0.0006
+      //!   fnlo->SetAlphasMz(0.1185);//! PDG 2014 +- 0.0006
+      //!   fnlo->SetAlphasMz(0.1181);//! PDG 2015 +- 0.0013
+      //!   fnlo->SetAlphasMz(0.1181);//! PDG 2017 +- 0.0011
+      //!   fnlo->SetAlphasMz(0.1180);//! CT10-NLO
+      //!   fnlo->SetAlphasMz(0.1190);//! NNPDF21-NLO
+   }
+
+   //! Nor does LHAPDF5 has a function to access M_Z!
+   if ( AsEvolCode != "LHAPDF" ) {
+      fnlo->SetMz(Mz);//! Default = 91.1876 (PDG), else from command line; does not work with LHAPDF.
+      //!   double Mz = 91.174;  //! ABM11
+      //!   double Mz = 91.188;  //! CTEQ
+      //!   double Mz = 91.187;  //! HERAPDF
+      //!   double Mz = 91.1876; //! MSTW, PDG 2012-2015
+      //!   double Mz = 91.2;    //! NNPDF
+   }
 
    // Read quark masses
    // for (int iq=1;iq<7;iq++) {
