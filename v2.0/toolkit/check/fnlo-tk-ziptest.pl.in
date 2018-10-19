@@ -34,7 +34,7 @@ my $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-ziptest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
 
 # Evaluate gzipped table directly, keep only result lines
-$cmd = "../src/fnlo-tk-cppread ${tabgz} | grep \"Calculate my cross sections\" -B1 -A11 > ziptest.log";
+$cmd = "../src/fnlo-tk-cppread ${tabgz} CT10nlo _ GRV _ _ 5 2 0.1185 _ | grep \"Calculate my cross sections\" -B1 -A11 > ziptest.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-ziptest: Evaluating gzipped test table ${tabgz} failed: $ret, aborted!\n";}
