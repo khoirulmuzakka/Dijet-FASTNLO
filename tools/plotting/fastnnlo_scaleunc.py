@@ -8,6 +8,7 @@
 #
 #
 # Created by B.Schillinger, 09.10.2018
+# Last modified: 26.10.2018
 #
 #############################################
 
@@ -27,8 +28,13 @@ import fastnlo
 
 #function for plotting uncertainties for one single order
 def plotting_single(order_index, x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, variation_type, given_filename, scale_choice):
-	order_color={'LO':'b', 'NLO':'g', 'NNLO':'r'}
+	order_color={'LO':'g', 'NLO':'b', 'NNLO':'r'}
 	scale_name={0:'kScale1', 1:'kScale2'}
+	if variation_type=='scale uncertainty (2P)':
+		vartype='2P'
+	elif variation_type=='scale uncertainty (6P)':
+		vartype='6P'
+
 	gs = gridspec.GridSpec(3,3)
 	fig = plt.figure(figsize=(7,7))
 	ax1 = plt.subplot(gs[:-1,:])
@@ -64,17 +70,21 @@ def plotting_single(order_index, x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_
 	plt.tight_layout()
 
 	if given_filename is not None:
-		filename = '%s_scale_unc_%s' %(given_filename, order_name)
+		filename = '%s.scaleunc-%s.%s' %(given_filename, vartype, order_name)
 	else:
-		filename = 'scale_unc_%s_%s' %(tablename, order_name) # just for testing
+		filename = '%s.scaleunc-%s.%s' %(tablename, vartype, order_name) 
 	plt.savefig('%s.png' %filename)
 	print 'saved as: %s.png' %filename
 
 #function for plotting multiple orders into one figure
 def plotting_multiple(lowest_order, x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, variation_type, given_filename, scale_choice):
-	order_color={'LO':'b', 'NLO':'g', 'NNLO':'r'}
+	order_color={'LO':'g', 'NLO':'b', 'NNLO':'r'}
 	index_dict = {'LO':0, 'NLO':1, 'NNLO':2}
 	scale_name={0:'kScale1', 1:'kScale2'}
+	if variation_type=='scale uncertainty (2P)':
+		vartype='2P'
+	elif variation_type=='scale uncertainty (6P)':
+		vartype='6P'
 
 	gs = gridspec.GridSpec(3,3)
 	fig = plt.figure(figsize=(7,7))
@@ -127,9 +137,9 @@ def plotting_multiple(lowest_order, x_axis, xmin, xmax, xs_all, rel_scale_unc, a
 	fig.tight_layout()
 
 	if given_filename is not None:
-		filename = '%s_scale_unc_%s' %(given_filename, ordernames)
+		filename = '%s.scaleunc-%s.%s' %(given_filename, vartype, ordernames[1:])
 	else:
-		filename = 'scale_unc_%s%s' %(tablename, ordernames)
+		filename = '%s.scaleunc-%s.%s' %(tablename, vartype, ordernames[1:])
 
 	fig.savefig('%s.png' %filename)
 	print 'saved as: %s.png' %filename
