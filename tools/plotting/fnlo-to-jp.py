@@ -4,6 +4,7 @@ import argparse
 import fastnlo
 import glob, os, pylab, sys
 import matplotlib as mpl
+import matplotlib.gridspec as gridspec
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -14,25 +15,26 @@ import pandas as pd
 from matplotlib import cm
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
+from fnlo_parsers import FNLOYodaOutputParser
 import re
 from StringIO import StringIO
-#import warnings
-#warnings.filterwarnings("error")
 
+# Define arguments
 parser = argparse.ArgumentParser()
-
-parser.add_argument('-a','--afile', default='theory1.log', required=True,
-                    help='1st fastNLO result.')
-parser.add_argument('-b','--bfile', default='theory2.log', required=True,
-                    help='2nd fastNLO result.')
+parser.add_argument('-a','--afile', default='fastnlo', required=True,
+                    help='Base name for fastNLO interpolation result, either with log or tab.gz extension.')
+parser.add_argument('-b','--bfile', default='theory', required=True,
+                    help='Theory result, either with dat, out, or yoda extension.')
+parser.add_argument('-c', '--cname', default='', required=False, type=str,
+                    help='Base name addition for comparisons. ' 'Default: none')
 parser.add_argument('-o', '--outfiles', default='fnlo-compare', required=False, type=str,
                     help='Start of output filename for plots. ' 'Default: fnlo-compare')
 
 #parse arguments
-args = vars(parser.parse_args())
+args   = vars(parser.parse_args())
 namesp = parser.parse_args()
 
-# Style settings
+# Plot style settings
 # Location of matplotlibrc
 # print mpl.matplotlib_fname()
 # List active style settings
@@ -49,134 +51,171 @@ params = {'legend.fontsize': 'x-large',
 pylab.rcParams.update(params)
 
 # Input files
-afile = args['afile']+'.log'
-bfile = args['bfile']+'.log'
-astat = args['afile']+'.dat'
-bstat = args['bfile']+'.dat'
+afile = args['afile']
+bfile = args['bfile']
+cfile = afile
+lgtit = afile
+cname = args['cname']
+ext1 = [ 'log', 'tab.gz' ]
+ext2 = [ 'dat', 'out', 'yoda' ]
+aext = ''
+bext = ''
+cext = ''
+if cname:
+    afile += '_'+cname
+for ext in ext1:
+    tmp = afile+'.'+ext
+    if os.path.isfile(tmp):
+        afile = tmp
+        aext  = ext
+        break
+for ext in ext2:
+    tmp = cfile+'.'+ext
+    print cfile, ext, tmp
+    if os.path.isfile(tmp):
+        cfile = tmp
+        cext  = ext
+        break
+for ext in ext2:
+    tmp = bfile+'.'+ext
+    if os.path.isfile(tmp):
+        bfile = tmp
+        bext  = ext
+        break
+
+if aext:
+    print 'Reading fastNLO results from:',afile
+else:
+    print 'ERROR! No fastNLO file found for arguments -a = ', args['afile'],'-c = ',args['cname']
+    exit(1)
+if cext:
+    print 'Reading statistical uncertainties for fastNLO from ',cfile
+else:
+    print 'WARNING! No file with statistical uncertainty found for argument -a = ', args['afile']
+if bext:
+    print 'Reading theory results from:',bfile
+else:
+    print 'ERROR! No theory file found for argument -b = ', args['bfile']
+    exit(1)
 
 # Output files
 outfil = args['outfiles']
 
+# Read fastNLO log file
+if aext=='log':
+    acols = FNLOYodaOutputParser(afile)
+    atab  = acols.get_table()
+#    print atab
+
+xsa = np.array(atab["cross_section"])
+dxsalr = np.array(atab["lower_uncertainty"])
+dxsaur = np.array(atab["upper_uncertainty"])
+xsal = xsa * (1+dxsalr)
+xsau = xsa * (1+dxsaur)
+
+# Read corresponding statistical uncertainty from NNLOJET dat file
+if cext=='dat':
+    ccols = np.loadtxt(cfile,usecols=range(3,5))
+xs_dat  = np.array(ccols[:,0])
+dxs_dat = np.array(ccols[:,1])
+dxsar   = np.divide(dxs_dat, xs_dat, out=np.ones_like(dxs_dat), where=xs_dat!=0)
+dxsa    = dxsar*xsa
 
 # Read Joao's output
-dfb = pd.read_table(bfile, delim_whitespace=True)
+if bext=='out':
+    bcols = np.genfromtxt(bfile,comments='#',names=['xl','xm','xu','xs','dxs','xsl','xsu'])
+#    print bcols
 
-print dfb
-
-exit
-
-
-
-
-
-
-
-
-
-
-
-
-# Extract no. of columns from files
-print 'Reading no. of columns from 1st file ', afile
-cols = np.loadtxt(afile,comments=['#',' #','C','L'])
-nacol = cols.shape[1]
-print 'Found ',nacol,' columns'
-print 'Reading no. of columns from 2nd file ', bfile
-cols = np.loadtxt(bfile,comments=['#',' #','C','L'])
-nbcol = cols.shape[1]
-print 'Found ',nbcol,' columns'
-if nacol != nbcol:
-    print 'Different no. of columns found, aborted!'
-    exit(1)
-ncol = nacol
-
-# Read files columnwise
-if ncol == 9:
-    iobsa,bwa,id0a,xla,xua,xavea,xsa_lo,xsa_nlo,ka_nlo = np.loadtxt(afile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
-    iobsb,bwb,id0b,xlb,xub,xaveb,xsb_lo,xsb_nlo,kb_nlo = np.loadtxt(bfile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
-else:
-    print 'ncol different from 9 not yet implemented. Aborted!'
-    exit(2)
-
-# Split columns according to no. of observable evaluations
-nvala = iobsa.size
-nvalb = iobsb.size
-nobsa = max(iobsa)
-nobsb = max(iobsb)
-print 'Found ',nvala,' result lines for ',nobsa,' observable bins in file ',afile
-print 'Found ',nvalb,' result lines for ',nobsb,' observable bins in file ',bfile
-if nvala!=nvalb or nobsa!=nobsb:
-    print 'nval or nobs different between the two files to compare, aborted!'
-    exit(3)
-nobs = nobsa
-nval = nvala
-nrep = nval/nobs
-xl = np.split(xla,nrep)
-xu = np.split(xla,nrep)
-xsa_lo  = np.split(xsa_lo,nrep)
-xsb_lo  = np.split(xsb_lo,nrep)
-xsa_nlo = np.split(xsa_nlo,nrep)
-xsb_nlo = np.split(xsb_nlo,nrep)
-ka_nlo  = np.split(ka_nlo,nrep)
-kb_nlo  = np.split(kb_nlo,nrep)
-
-xsd = []
-dstd = []
-xsd.append(np.loadtxt(astat,usecols=(2,),comments=['#']))
-dstd.append(np.loadtxt(astat,usecols=(3,),comments=['#']))
-xsa = []
-dxsa = []
-xsa.append(np.loadtxt(astat,usecols=(4,),comments=['#']))
-dxsa.append(np.loadtxt(astat,usecols=(5,),comments=['#']))
-dsta = np.divide(dxsa, xsa, out=np.ones_like(dxsa), where=xsa!=0)
+xsb = bcols['xs']
+dxsb = bcols['dxs']
+xsbl = bcols['xsl']
+xsbu = bcols['xsu']
+dxsblr = (xsbl-xsb)/xsb
+dxsbur = (xsbu-xsb)/xsb
 
 # Calculate ratios
-r_ablo   = np.divide(xsa_lo, xsb_lo, out=np.ones_like(xsa_lo), where=xsb_lo!=0)
-r_abnlo  = np.divide(xsa_nlo, xsb_nlo, out=np.ones_like(xsa_nlo), where=xsb_nlo!=0)
+r_abl = np.divide(xsal, xsbl, out=np.ones_like(xsal), where=xsbl!=0)
+r_ab  = np.divide(xsa,  xsb , out=np.ones_like(xsa), where=xsb!=0)
+r_abu = np.divide(xsau, xsbu, out=np.ones_like(xsau), where=xsbu!=0)
+nobs  = r_ab.size
+dxsbr = dxsb/xsb
+dxsr_ab = np.sqrt(dxsar*dxsar + dxsbr*dxsbr)
+
+#print dxsar
+#print dxsbr
+#print dxsar/dxsbr
 
 # Plots
 titwgt = 'bold'
 limfs = 'x-large'
-for i in range(nrep):
 
 # Calculate statistical uncertainties
-    dr_ablo  = np.multiply(r_ablo[i],dsta)
-    dr_abnlo = np.multiply(r_abnlo[i],dsta)
-    r_data   = np.divide(xsd, xsb_nlo[i], out=np.ones_like(xsd), where=xsb_nlo[i]!=0)
-    dr_data  = np.multiply(r_data,dstd)
+#dr_ablo  = np.multiply(r_ablo[i],dsta)
+#dr_abnlo = np.multiply(r_abnlo[i],dsta)
+#r_data   = np.divide(xsd, xsb_nlo[i], out=np.ones_like(xsd), where=xsb_nlo[i]!=0)
+#dr_data  = np.multiply(r_data,dstd)
 
-    fig = plt.figure()
-    ax  = fig.gca()
-    plt.title(r'Ratio a over b for scale var {}'.format(i), fontweight=titwgt)
-    plt.xlabel('Observable bin index', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-    plt.ylabel('Ratio', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, labelpad=20)
-    plt.axhline(y=1.01, linestyle='--', linewidth=1.0, color='black')
-    plt.axhline(y=0.99, linestyle='--', linewidth=1.0, color='black')
-    plt.fill_between([0.0,nobs+1],0.99,1.01, color='black', alpha=0.1)
+fig = plt.figure()
+gs  = gridspec.GridSpec(2,1,height_ratios=[3, 1],hspace=0.08)
+ax  = plt.subplot(gs[0])
+axr = plt.subplot(gs[1])
+
+xaxe = 'bins' # x axis with bin numbers ('bins') or physics observable
+if xaxe=='bins':
+    xscl = 'linear'
+    xlab = 'Observable bin index'
+    xmin = 0
+    xmax = nobs+1
+else:
+    xscl = 'log'
+    xlab = xaxe
+    xmin = xl[0]
+    xmax = xu[nobs-1]
+
+ax.set_xscale(xscl)
+axr.set_xscale(xscl)
+ax.set_yscale('log')
+axr.set_yscale('linear')
+
+axr.set_xlabel(xlab, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+axr.set_ylabel('Grid/NNLOJET', horizontalalignment='center', verticalalignment='center', labelpad=20)
+ax.set_ylabel(r'$\bf d\sigma/dX$ (pb/[X])', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, labelpad=20)
+ax.set_xticklabels([])
+
+ax.set_title(r'Interpolation vs. direct calculation', fontweight=titwgt, y=1.05)
+axr.set_title(r'Ratio for {}'.format(cname), fontweight=titwgt)
+plt.axhline(y=1.01, linestyle='--', linewidth=1.0, color='black')
+plt.axhline(y=0.99, linestyle='--', linewidth=1.0, color='black')
+plt.fill_between([0.0,nobs+1],0.99,1.01, color='black', alpha=0.1)
 #    plt.text(nobs+1.5,1.0,u'$\pm$1‰',fontsize=limfs)
-    plt.text(nobs+1.5,1.0,u'$\pm$1%',fontsize=limfs)
+plt.text(nobs+1.5,1.0,u'$\pm$1%',fontsize=limfs)
 
-    dx = 1./4.
-    x  = np.arange(1   , nobs+1.e-6)
-    xa = np.arange(1-dx, nobs-dx+1.e-6)
-    xb = np.arange(1+dx, nobs+dx+1.e-6)
+dx = 1./4.
+x  = np.arange(1   , nobs+1.e-6)
+xa = np.arange(1-dx, nobs-dx+1.e-6)
+xb = np.arange(1+dx, nobs+dx+1.e-6)
 
-    # Don't show statistical uncertainties for NNLOJET grid/NNLOJET with identical events
-    rlo  = plt.errorbar(x, r_ablo[i], yerr=dr_ablo[0], marker='<', linestyle='none', label=u'LO$\,\pm\,$stat. unc.', color='blue')
-    rnlo = plt.errorbar(x, r_abnlo[i], yerr=dr_abnlo[0], marker='s', linestyle='none', label=u'NLO$\,\pm\,$stat. unc.', color='green')
-    rdat = plt.errorbar(x, r_data[0], yerr=dr_data[0]/100., marker='o', linestyle='none', label=u'data$\,\pm\,$stat. unc.', color='red')
+xcb = ax.errorbar(x, xsb, yerr=dxsb, marker='s', markersize=12, linestyle='none', fillstyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (dir.)', color='red')
+xca = ax.errorbar(x, xsa, yerr=dxsa, marker='x', markersize=12, linestyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (int.)', color='black')
+xcsc = ax.fill_between(x,xsb-1.*(xsb-xsbl),xsb+1.*(xsbu-xsb),alpha=0.5,edgecolor='#ffffff',facecolor='pink',label='scale envelope (dir.)')
 
-    plt.xlim(0.0,nobs+1)
-    plt.ylim(0.50,1.50)
+rl = axr.errorbar(xa, r_abl, yerr=dxsar*r_abl, marker='v', linestyle='none', label=u'$\sigma(\mu_\mathrm{l,6P})\,\pm\,$stat. (int.)', color='blue')
+rc = axr.errorbar(x,  r_ab,  yerr=dxsr_ab*r_ab , marker='d', linestyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (tot.)', color='green')
+ru = axr.errorbar(xb, r_abu, yerr=dxsbr*r_abu, marker='^', linestyle='none', label=u'$\sigma(\mu_\mathrm{u,6P})\,\pm\,$stat. (dir.)', color='red')
+#axr.fill_between(x,xsbl/xsb,xsbu/xsb)
 
-    handles = [rlo,rnlo,rdat]
-    labels  = [h.get_label() for h in handles]
+ax.set_xlim(0.0,nobs+1)
+axr.set_xlim(0.0,nobs+1)
+axr.set_ylim(0.90,1.10)
 
-    legend = ax.legend(handles, labels, loc='upper left', numpoints=1, handlelength=0)
-    legend = ax.legend(handles, labels, title=r'{}'.format(outfil), loc='upper left', numpoints=1, handlelength=0)
-    legend.get_title().set_fontsize(limfs)
+handles = [xcb,xcsc,xca,rl,rc,ru]
+labels  = [h.get_label() for h in handles]
 
-    fignam = outfil+'_scalevar-no-'+str(i)+'.png'
-    plt.savefig(fignam)
+#legend = ax.legend()
+legend = ax.legend(handles, labels, title=r'{}'.format(lgtit), loc='best', numpoints=1, handlelength=1.5)
+legend.get_title().set_fontsize(limfs)
+
+fignam = outfil+'.png'
+plt.savefig(fignam)
 
 exit(0)
