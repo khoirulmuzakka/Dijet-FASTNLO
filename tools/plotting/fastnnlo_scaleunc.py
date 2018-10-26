@@ -164,7 +164,8 @@ def main():
 				help='If -a is chosen, use asymmetric scale variations, default is symmetric.')
 	parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int, 
 				help='Set scales MuR and MuF by choosing 0 (kScale1) or 1 (kScale2).')
-	parser.add_argument('-f', '--filename') 
+	parser.add_argument('-f', '--filename', default=None, type=str,
+				help='Output filename (optional).') 
 
 
 	#parse arguments
