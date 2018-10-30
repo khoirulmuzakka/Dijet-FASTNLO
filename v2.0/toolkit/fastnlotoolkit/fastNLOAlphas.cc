@@ -18,7 +18,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
-//  fastNLOAlhpas
+//  fastNLOAlphas
 //  This class inherits the PDF interface from
 //  fastNLOLHAPDF, while the alpha_s evolution
 //  is superseeded by the Alphas.h class.

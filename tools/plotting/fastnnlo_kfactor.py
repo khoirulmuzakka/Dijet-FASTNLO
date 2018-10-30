@@ -28,8 +28,7 @@ import fastnlo
 def main():
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument('-t', '--table', default='table.tab', required=True, type=str,
-				help='FastNLO table that shall be evaluated.')
+	parser.add_argument('table', type=str, help='FastNLO table that shall be evaluated.') #table is always required.
 	parser.add_argument('-p', '--pdfset', default='CT14nlo',
 				help='PDFset to evaluate fastNLO table.')
 	parser.add_argument('-m', '--member', default=0, type=int,
@@ -48,8 +47,8 @@ def main():
 	args = vars(parser.parse_args())
 
 	#table name
-	tablename = os.path.basename(args['table'])
-	#tablename = os.path.splitext(tablename)[0] #to get rid of extension (.tab.gz or .tab)
+	tablename = os.path.splitext(os.path.basename(args['table']))[0]
+	tablename = os.path.splitext(tablename)[0] #to get rid of extension (.tab.gz or .tab)
 	print 'Table: ', tablename, '\n'
 
 	#pdfset name

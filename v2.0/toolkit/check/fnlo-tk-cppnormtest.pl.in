@@ -39,7 +39,7 @@ $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppnormtest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
 
 # Evaluate, keep only result lines
-$cmd = "../src/fnlo-tk-cppread ${tabfl} _ _ _ norm | grep \"Calculate my cross sections\" -B1 -A19 > cppnormtest.log";
+$cmd = "../src/fnlo-tk-cppread ${tabfl} CT10nlo _ GRV norm _ 5 2 0.1185 _ | grep \"Calculate my cross sections\" -B1 -A19 > cppnormtest.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
 if ( $ret ) {die "fnlo-tk-cppnormtest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}

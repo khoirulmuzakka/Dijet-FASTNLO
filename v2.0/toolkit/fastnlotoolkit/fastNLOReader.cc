@@ -2717,7 +2717,7 @@ void fastNLOReader::SetExternalConstantForMuF(double MuF) {
    //! EScaleFunctionalForm == kConst
    fConst_MuF = MuF;
    logger.info << "Using constant value " << fConst_MuF << " for MuF" << endl;
-   if ( MuF<=2 ) logger.warn <<"Specified value for MuR is pretty small: MuF="<<MuF<<endl;
+   if ( MuF<=2 ) logger.warn <<"Specified value for MuF is pretty small: MuF="<<MuF<<endl;
    SetFunctionalForm(kConst, kMuF);
 }
 
