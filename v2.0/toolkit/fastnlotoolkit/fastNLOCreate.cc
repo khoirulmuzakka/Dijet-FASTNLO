@@ -931,7 +931,7 @@ void fastNLOCreate::Instantiate() {
    // init member variables
    fReader = NULL;
 
-   fCacheMax = 20; // currently not working!
+   fCacheMax =   20; // implemented only for flex
    fWarmupXMargin = 4; // was 4
    fWarmupNDigitMu1 = 1; //1 by purpose
    fWarmupNDigitMu2 = 2; //2 by purpose
@@ -960,8 +960,20 @@ void fastNLOCreate::Instantiate() {
    INormFlag    = 0;
 
    string filename = fScenConsts.OutputFilename;
-   if (filename.find(".gz") != string::npos) fScenConsts.OutputCompression = true;
-   else if (fScenConsts.OutputCompression) filename += ".gz";
+   if (filename.find(".gz") != string::npos && fScenConsts.OutputCompression) 
+      logger.info["Instantiate"]<<"zlib compression enabled."<<endl;
+//#ifdef HAVE_LIBZ
+   else if (filename.find(".gz") == string::npos && fScenConsts.OutputCompression) {
+      logger.info["Instantiate"]<<"zlib compression enabled. Adding .gz to filename."<<endl;
+      filename += ".gz";
+   }
+//#endif
+   else if (filename.find(".gz") != string::npos && !fScenConsts.OutputCompression) {
+      logger.warn["Instantiate"]<<".gz format requested, but zlib compression disabled."<<endl;
+   }
+   else
+      logger.info["Instantiate"]<<"zlib compression disabled."<<endl;;
+  
    SetFilename(filename);
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
@@ -2463,7 +2475,14 @@ void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario
    Fill(scalevar);
 }
 
-
+// ___________________________________________________________________________________________________
+bool approximatelyEqual(float a, float b, float epsilon){
+   return fabs(a - b) <= ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
+bool essentiallyEqual(float a, float b, float epsilon)
+{
+   return fabs(a - b) <= ( (fabs(a) > fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::FillWeightCache(int scalevar) {
@@ -2472,35 +2491,78 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       cout<<"Error! caching not implemented for scalevar tables."<<endl;
       exit(3); // also 'FlushCache has to be changed!'
    }
-   //for ( auto& iEv : fWeightCache ) {
-   for (unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++) {
-      if (fWeightCache[iev].first._o[0] != fScenario._o[0]) continue;
-      if (fWeightCache[iev].second._p   != fEvent._p)    continue;
-      if (fWeightCache[iev].first._m1   != fScenario._m1) continue;
-      if (fWeightCache[iev].first._m2   != fScenario._m2) continue;
-      if (fWeightCache[iev].second._x1  != fEvent._x1)    continue;
-      if (fWeightCache[iev].second._x2  != fEvent._x2)    continue;
+   fScenario._iOB = GetBin(); // we can calculate the bin number right now.
+   for ( auto& cachelem : fWeightCache ) {
+      if (cachelem.second._p   != fEvent._p)       continue;
+      if ( fScenario._iOB != cachelem.first._iOB)  continue;
+      //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
 
-      if (fWeightCache[iev].first._o[0] == fScenario._o[0]
-            &&  fWeightCache[iev].second._p   == fEvent._p
-            &&  fWeightCache[iev].first._m1   == fScenario._m1
-            &&  fWeightCache[iev].first._m2   == fScenario._m2
-            &&  fWeightCache[iev].second._x1  == fEvent._x1
-            &&  fWeightCache[iev].second._x2  == fEvent._x2) {
-         // cout<<"Found cached PS point !!"<<endl;
-         // cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
-         fWeightCache[iev].second._w  += fEvent._w;
-         fWeightCache[iev].second._wf += fEvent._wf;
-         fWeightCache[iev].second._wr += fEvent._wr;
-         fWeightCache[iev].second._wrr += fEvent._wrr;
-         fWeightCache[iev].second._wff += fEvent._wff;
-         fWeightCache[iev].second._wrf += fEvent._wrf;
-         // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
-         return;
-      } else {
-         cout<<"This is  a bug!"<<endl;
-      }
+      static const double epscomp = 1.e-6;
+      if ( fabs(cachelem.second._x1  - fEvent._x1     ) >     (cachelem.second._x1 ) * epscomp  ) continue;
+      if ( fabs(cachelem.second._x2  - fEvent._x2     ) >     (cachelem.second._x2 ) * epscomp  ) continue;
+      if ( fabs(cachelem.first._m1   - fScenario._m1  ) >     (cachelem.first._m1  ) * epscomp  ) continue;
+      if ( fabs(cachelem.first._m2   - fScenario._m2  ) > fabs(cachelem.first._m2  ) * epscomp  ) continue;
+
+      // if (cachelem.first._m1   != fScenario._m1)   continue;
+      // if (cachelem.first._m2   != fScenario._m2)   continue;
+      // if (cachelem.second._x1  != fEvent._x1)      continue;
+      // if (cachelem.second._x2  != fEvent._x2)      continue;
+
+      // if (cachelem.first._m1   != fScenario._m1)   cout<<"  "<< cachelem.first._m1  << ", "<< fScenario._m1 <<endl;
+      // if (cachelem.first._m2   != fScenario._m2)   cout<<"  "<< cachelem.first._m2  << ", "<< fScenario._m2 <<endl;
+      // if (cachelem.second._x1  != fEvent._x1)      cout<<"  "<< cachelem.second._x1 << ", "<< fEvent._x1    <<endl;
+      // if (cachelem.second._x2  != fEvent._x2)      cout<<"  "<< cachelem.second._x2 << ", "<< fEvent._x2    <<endl;
+
+      // if ( cachelem.second._p   != fEvent._p )                                                  continue; // different process
+      // if (fScenario._iOB != -1 && fScenario._iOB != cachelem.first._iOB) continue; // different observable
+      // else if ( fabs(cachelem.first._o[0] - fScenario._o[0]) <= fabs(cachelem.first._o[0]) * epscomp  ) continue; // different observable
+      // if ( fabs(cachelem.second._x1  - fEvent._x1     ) <= fabs(cachelem.second._x1 ) * epscomp  ) continue;
+      // if ( fabs(cachelem.second._x2  - fEvent._x2     ) <= fabs(cachelem.second._x2 ) * epscomp  ) continue;
+      // if ( fabs(cachelem.first._m1   - fScenario._m1  ) <= fabs(cachelem.first._m1  ) * epscomp  ) continue;
+      // if ( fabs(cachelem.first._m2   - fScenario._m2  ) <= fabs(cachelem.first._m2  ) * epscomp  ) continue;
+
+      //cout<<"cache_w: "<<cachelem.second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
+      cachelem.second._w   += fEvent._w;
+      cachelem.second._wf  += fEvent._wf;
+      cachelem.second._wr  += fEvent._wr;
+      cachelem.second._wrr += fEvent._wrr;
+      cachelem.second._wff += fEvent._wff;
+      cachelem.second._wrf += fEvent._wrf;
+      // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
+      return;
+
+      // } else {
+      // 	 cout<<"This is  a bug!"<<endl;
    }
+   // for ( unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++) {
+   //    if (fWeightCache[iev].second._p   != fEvent._p)       continue;
+   //    if (fWeightCache[iev].first._o[0] != fScenario._o[0]) continue;
+   //    if (fWeightCache[iev].first._m1   != fScenario._m1)   continue;
+   //    if (fWeightCache[iev].first._m2   != fScenario._m2)   continue;
+   //    if (fWeightCache[iev].second._x1  != fEvent._x1)      continue;
+   //    if (fWeightCache[iev].second._x2  != fEvent._x2)      continue;
+
+
+   //    if (fWeightCache[iev].first._o[0] == fScenario._o[0]
+   //          &&  fWeightCache[iev].second._p   == fEvent._p
+   //          &&  fWeightCache[iev].first._m1   == fScenario._m1
+   //          &&  fWeightCache[iev].first._m2   == fScenario._m2
+   //          &&  fWeightCache[iev].second._x1  == fEvent._x1
+   //          &&  fWeightCache[iev].second._x2  == fEvent._x2) {
+   //       // cout<<"Found cached PS point !!"<<endl;
+   // 	 //cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
+   //       fWeightCache[iev].second._w  += fEvent._w;
+   //       fWeightCache[iev].second._wf += fEvent._wf;
+   //       fWeightCache[iev].second._wr += fEvent._wr;
+   //       fWeightCache[iev].second._wrr += fEvent._wrr;
+   //       fWeightCache[iev].second._wff += fEvent._wff;
+   //       fWeightCache[iev].second._wrf += fEvent._wrf;
+   //       // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
+   //       return;
+   //    } else {
+   //       cout<<"This is  a bug!"<<endl;
+   //    }
+   //}
    // cout<<"Adding new weight to cache"<<endl;
    fWeightCache.push_back(make_pair(fScenario,fEvent));
 }
@@ -2511,12 +2573,83 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
 void fastNLOCreate::FlushCache() {
    // fill all events into from cache into table
    //for ( const auto& iev : fWeightCache ) {
-   for (unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++) {
-      fScenario = fWeightCache[iev].first;
-      fEvent = fWeightCache[iev].second;
-      //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
-      FillContribution(0); // todo! not working if scalevar is != 0
+
+   const bool OrderedFill = false;
+   if ( OrderedFill ) {
+      // fScenario:
+      //    std::map<int,double> _o;
+      //    double _m1, _m2;
+      //    int _iOB;
+      // fEvent:
+      //    double _x1, _x2;
+      //    double _sig;    
+      //    double _w, _wf, _wr, _wrr, _wff, _wrf;
+      //    int _p;
+      //    long long int _n;
+      //const double epsfill = 1.e-14;
+      for ( int iwrf = 0 ; iwrf<6 ; iwrf++ ) {
+	 fEvent.Reset();
+	 for ( fScenario._iOB = 0 ; fScenario._iOB<(int)GetNObsBin() ; fScenario._iOB++ ) { // ordered fill by iobs
+	    for ( const auto& cachelem : fWeightCache ) {
+	       if ( fScenario._iOB != cachelem.first._iOB ) continue;
+	       switch (iwrf) {
+	       case 0:
+		  //if ( fabs(cachelem.second._w) < epsfill ) continue;
+		  if ( cachelem.second._w == 0 ) continue;
+		  else fEvent._w   = cachelem.second._w;
+		  break;
+	       case 1:
+		  //if ( fabs(cachelem.second._wf) < epsfill ) continue;
+		  if ( cachelem.second._wf == 0 ) continue;
+		  else fEvent._wf  = cachelem.second._wf;
+		  break;
+	       case 2:
+		  //if ( fabs(cachelem.second._wr) < epsfill ) continue;
+		  if ( cachelem.second._wr == 0 ) continue;
+		  else fEvent._wr  = cachelem.second._wr;
+		  break;
+	       case 3:
+		  //if ( fabs(cachelem.second._wrr) < epsfill ) continue;
+		  if ( cachelem.second._wrr == 0 ) continue;
+		  else fEvent._wrr = cachelem.second._wrr;
+		  break;
+	       case 4:
+		  //if ( fabs(cachelem.second._wff) < epsfill ) continue;
+		  if ( cachelem.second._wff == 0 ) continue;
+		  else fEvent._wff = cachelem.second._wff;
+		  break;
+	       case 5:
+		  //if ( fabs(cachelem.second._wrf) < epsfill ) continue;
+		  if ( cachelem.second._wrf == 0 ) continue;
+		  else fEvent._wrf = cachelem.second._wrf;
+		  break;
+	       default:
+		  cout<<"error"<<endl;
+	       }
+
+	       fScenario._m1  = cachelem.first._m1;
+	       fScenario._m2  = cachelem.first._m2;
+	       //fScenario._iOB = cachelem.first._iOB;
+	       //fEvent = cachelem.second;
+	       fEvent._x1   = cachelem.second._x1;
+	       fEvent._x2   = cachelem.second._x2;
+	       fEvent._p    = cachelem.second._p;
+	       fEvent._sig  = cachelem.second._sig;
+	       fEvent._n    = cachelem.second._n;
+	       FillContribution(0);
+	    }
+	 }
+      }
+   }      
+   else {
+      for ( const auto& cachelem : fWeightCache ) {
+	 fScenario = cachelem.first;
+	 fEvent = cachelem.second;
+	 //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
+	 FillContribution(0); // todo! not working if scalevar is != 0
+      }
    }
+
    fWeightCache.clear();
    fWeightCache.reserve(fCacheMax);
 }
@@ -2729,8 +2862,8 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
    double xmax = GetTheCoeffTable()->GetNPDFDim() == 1 ? std::max(fEvent._x1,fEvent._x2) : fEvent._x2;
    vector<pair<int,double> > nxlo = fKernX1[ObsBin]->GetNodeValues(xmin);
    vector<pair<int,double> > nxup = fKernX2[ObsBin]->GetNodeValues(xmax);
-   vector<pair<int,double> > nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
-   vector<pair<int,double> > nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
+   const vector<pair<int,double> >& nmu1 = fKernMu1[ObsBin]->GetNodeValues(fScenario._m1);
+   const vector<pair<int,double> >& nmu2 = fKernMu2[ObsBin]->GetNodeValues(fScenario._m2);
 
    if (fApplyPDFReweight) {
       fKernX1[ObsBin]->CheckX(xmin);
@@ -2741,7 +2874,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
 
 
    // fill grid
-   if (!CheckWeightIsFinite()) return;
+   //if (!CheckWeightIsFinite()) return;
    for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
       for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
          int xminbin = nxlo[x1].first;
@@ -2754,6 +2887,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
          for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
             for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
                double wfnlo = nxlo[x1].second * nxup[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
+	       if ( wfnlo == 0 ) continue; 
                if (! std::isfinite(wfnlo)) {
                   logger.error["FillContributionFlexHHC"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
                   logger.error["FillContributionFlexHHC"]<<"This should have been captured before, aborting ..."<<endl;
@@ -3379,7 +3513,9 @@ void fastNLOCreate::WriteTable() {
       logger.info["WriteTable"]<<"Writing warmup table instead of coefficient table."<<endl;
       if (fWx.empty()) {
          logger.error["WriteTable"]<<"Warmup values seem not to be initialized correctly. Maybe forgot to call 'Fill()'?"<<endl;
-         exit(1);
+         logger.error["WriteTable"]<<"Not writing warmup file and continuing..."<<endl;
+	 return ;
+         //exit(1);
       }
       // round warmup values and try to guess bin boundaries
       AdjustWarmupValues();
@@ -3443,8 +3579,8 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
       logger.warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
       //       logger.warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
       //       InitWarmupArrays();
-      logger.error["OutWarmup"]<<" Do not write out unreasonable warmup table. Exiting."<<endl;
-      exit(1);
+      logger.error["OutWarmup"]<<" Do not write out unreasonable warmup table. Continueing."<<endl;
+      return;
    }
 
    strm<<"# --- Use emacs in sh mode -*-sh-*- #"<<endl;
