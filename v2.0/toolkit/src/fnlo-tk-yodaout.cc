@@ -97,9 +97,14 @@ int main(int argc, char** argv) {
 #endif
          man << "                 AS (a_s(M_Z) variation uncertainty with GRV evolution)" << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
-         man << "   Alternatives: LO, NNLO (if available)" << endl;
+         man << "   Alternatives: LO, NLO_only, NNLO, NNLO_only (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
+         man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
+         man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
          man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"np\"" << endl;
          yell << " #" << endl;
@@ -176,6 +181,7 @@ int main(int argc, char** argv) {
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
    string chord = "NLO";
+   bool bonly = false;
    if (argc > 4) {
       chord = (const char*) argv[4];
    }
@@ -188,14 +194,22 @@ int main(int argc, char** argv) {
       } else if ( chord == "NLO" ) {
          eOrder = kNextToLeading;
          shout["fnlo-tk-yodaout"] << "Deriving NLO cross sections for comparison." << endl;
+      } else if ( chord == "NLO_only" ) {
+         eOrder = kNextToLeading;
+         bonly = true;
+         shout["fnlo-tk-yodaout"] << "Experimental: Deriving NLO contribution only for comparison." << endl;
       } else if ( chord == "NNLO" ) {
          eOrder = kNextToNextToLeading;
          shout["fnlo-tk-yodaout"] << "Deriving NNLO cross sections for comparison." << endl;
+      } else if ( chord == "NNLO_only" ) {
+         eOrder = kNextToNextToLeading;
+         shout["fnlo-tk-yodaout"] << "Experimental: Deriving NNLO contribution only for comparison." << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of fixed-order precision, " << chord << ", aborted!" << endl;
          exit(1);
       }
    }
+
    //! --- Normalization
    string chnorm = "no";
    if (argc > 5) {
@@ -206,18 +220,31 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
    }
+
+   //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
+   string chflex = "scale1";
+   if (argc > 6) {
+      chflex = (const char*) argv[6];
+   }
+   if (argc <= 6 || chflex == "_") {
+      shout["fnlo-tk-yodaout"] << "Using default mur=muf=scale 1." << endl;
+   } else {
+      shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex << endl;
+   }
+
    //! --- Nonperturbative correction
    string chnp = "no";
-   if (argc > 6) {
-      chnp = (const char*) argv[6];
+   if (argc > 7) {
+      chnp = (const char*) argv[7];
    }
-   if (argc <= 6 || chnp == "_") {
+   if (argc <= 7 || chnp == "_") {
       shout["fnlo-tk-yodaout"] << "Do not apply nonperturbative corrections." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Apply nonperturbative corrections if available." << endl;
    }
+
    //! ---  Too many arguments
-   if (argc > 7) {
+   if (argc > 8) {
       error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -239,23 +266,31 @@ int main(int argc, char** argv) {
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
-      error["fnlo-tk-yodaout"] << "LO not found, aborted!" << endl;
-      exit(1);
+      if ( bonly ) {
+         warn["fnlo-tk-yodaout"] << "LO not found, output for NLO_only or NNLO_only is experimental ...!" << endl;
+      } else {
+         error["fnlo-tk-yodaout"] << "LO not found; full cross section can not be derived, aborted!" << endl;
+         exit(1);
+      }
    } else {
       info["fnlo-tk-yodaout"] << "The LO contribution has Id: " << ilo << endl;
-      fnlo->SetContributionON(kFixedOrder, ilo, true);
+      if ( (eOrder > kLeading) & bonly ) {
+         fnlo->SetContributionON(kFixedOrder, ilo, false);
+      } else {
+         fnlo->SetContributionON(kFixedOrder, ilo, true);
+      }
    }
    //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
       info["fnlo-tk-yodaout"] << "No NLO contribution found!" << endl;
-      if ( eOrder >= kNextToLeading ) {
+      if ( eOrder == kNextToLeading || ((eOrder > kNextToLeading) & !bonly) ) {
          error["fnlo-tk-yodaout"] << "Requested NLO not found, aborted!" << endl;
          exit(1);
       }
    } else {
       info["fnlo-tk-yodaout"] << "The NLO contribution has Id: " << inlo << endl;
-      if ( eOrder >= kNextToLeading ) {
+      if ( eOrder == kNextToLeading || ((eOrder > kNextToLeading) & !bonly) ) {
          fnlo->SetContributionON(kFixedOrder, inlo, true);
       } else {
          fnlo->SetContributionON(kFixedOrder, inlo, false);
@@ -265,13 +300,13 @@ int main(int argc, char** argv) {
    int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
    if (innlo < 0) {
       info["fnlo-tk-yodaout"] << "No NNLO contribution found!" << endl;
-      if ( eOrder >= kNextToNextToLeading ) {
+      if ( eOrder == kNextToNextToLeading || ((eOrder > kNextToNextToLeading) & !bonly) ) {
          error["fnlo-tk-yodaout"] << "Requested NNLO not found, aborted!" << endl;
          exit(1);
       }
    } else {
       info["fnlo-tk-yodaout"] << "The NNLO contribution has Id: " << innlo << endl;
-      if ( eOrder >= kNextToNextToLeading ) {
+      if ( eOrder == kNextToNextToLeading || ((eOrder > kNextToNextToLeading) & !bonly) ) {
          fnlo->SetContributionON(kFixedOrder, innlo, true);
       } else {
          fnlo->SetContributionON(kFixedOrder, innlo, false);
@@ -316,13 +351,33 @@ int main(int argc, char** argv) {
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
    if (fnlo->GetIsFlexibleScaleTable()) {
-      fnlo->SetMuFFunctionalForm(kScale1);
-      fnlo->SetMuRFunctionalForm(kScale1);
-      //      fnlo->SetMuFFunctionalForm(kProd);
-      //      fnlo->SetMuRFunctionalForm(kProd);
-      warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
-                        << "from only the first scale of this flexible-scale table." << endl
-                        << "                        Please check how this table was filled!" << endl;
+      if ( chflex == "scale1" ) {
+         fnlo->SetMuFFunctionalForm(kScale1);
+         fnlo->SetMuRFunctionalForm(kScale1);
+         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
+                                 << "from only the first scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "scale2" ) {
+         fnlo->SetMuFFunctionalForm(kScale2);
+         fnlo->SetMuRFunctionalForm(kScale2);
+         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
+                                 << "from only the second scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "scale12" ) {
+         fnlo->SetMuFFunctionalForm(kScale2);
+         fnlo->SetMuRFunctionalForm(kScale1);
+         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
+                                 << "from only the first scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "scale21" ) {
+         fnlo->SetMuFFunctionalForm(kScale1);
+         fnlo->SetMuRFunctionalForm(kScale2);
+         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
+                                 << "from only the second scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else {
+         error["fnlo-tk-yodaout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+      }
    }
 
    //! Re-calculate cross sections to potentially include the above-selected non-perturbative factors
